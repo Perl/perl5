@@ -590,7 +590,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
      * sequence and process the rest, inappropriately */
 
     /* Zero length strings, if allowed, of necessity are zero */
-    if (curlen == 0) {
+    if (UNLIKELY(curlen == 0)) {
 	if (retlen) {
 	    *retlen = 0;
 	}
@@ -620,7 +620,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     }
 
     /* A continuation character can't start a valid sequence */
-    if (UTF8_IS_CONTINUATION(uv)) {
+    if (UNLIKELY(UTF8_IS_CONTINUATION(uv))) {
 	if (flags & UTF8_ALLOW_CONTINUATION) {
 	    if (retlen) {
 		*retlen = 1;
@@ -653,7 +653,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     send =  (U8*) s0 + ((expectlen <= curlen) ? expectlen : curlen);
 
     for (s = s0 + 1; s < send; s++) {
-	if (UTF8_IS_CONTINUATION(*s)) {
+	if (LIKELY(UTF8_IS_CONTINUATION(*s))) {
 #ifndef EBCDIC	/* Can't overflow in EBCDIC */
 	    if (uv & UTF_ACCUMULATION_OVERFLOW_MASK) {
 
@@ -698,7 +698,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
      * ones are present.  I don't know of any real reason to prefer one over
      * the other, except that it seems to me that multiple-byte errors trumps
      * errors from a single byte */
-    if (unexpected_non_continuation) {
+    if (UNLIKELY(unexpected_non_continuation)) {
 	if (!(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	    if (! (flags & UTF8_CHECK_ONLY)) {
 		if (curlen == 1) {
@@ -719,7 +719,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    *retlen = curlen;
 	}
     }
-    else if (curlen < expectlen) {
+    else if (UNLIKELY(curlen < expectlen)) {
 	if (! (flags & UTF8_ALLOW_SHORT)) {
 	    if (! (flags & UTF8_CHECK_ONLY)) {
 		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (%d byte%s, need %d, after start byte 0x%02x)", malformed_text, (int)curlen, curlen == 1 ? "" : "s", (int)expectlen, *s0));
@@ -749,7 +749,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    goto malformed;
 	}
     }
-    if (overflowed) {
+    if (UNLIKELY(overflowed)) {
 
 	/* If the first byte is FF, it will overflow a 32-bit word.  If the
 	 * first byte is FE, it will overflow a signed 32-bit word.  The
