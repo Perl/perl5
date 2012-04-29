@@ -742,6 +742,10 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	if ((flags & (UTF8_WARN_FE_FF|UTF8_CHECK_ONLY)) == UTF8_WARN_FE_FF
 	    && ckWARN_d(WARN_UTF8))
 	{
+	    /* This message is deliberately not of the same syntax as the other
+	     * messages for malformations, for backwards compatibility in the
+	     * unlikely event that code is relying on its precise earlier text
+	     */
 	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s Code point beginning with byte 0x%02X is not Unicode, and not portable", malformed_text, *s0));
 	    pack_warn = packWARN(WARN_UTF8);
 	}
