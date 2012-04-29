@@ -8676,7 +8676,9 @@ Perl_ck_require(pTHX_ OP *o)
 #endif
 	newop = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, kid,
-					    scalar(newUNOP(OP_RV2CV, 0,
+					    scalar(newUNOP(OP_RV2CV,
+							   OPpENTERSUB_AMPER
+								<< 8,
 							   newGVOP(OP_GV, 0,
 								   gv)))));
 	op_getmad(o,newop,'O');
