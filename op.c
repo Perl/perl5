@@ -4861,7 +4861,8 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	doop = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			       op_append_elem(OP_LIST, term,
-					   scalar(newUNOP(OP_RV2CV, 0,
+					   scalar(newUNOP(OP_RV2CV,
+							  OPpENTERSUB_AMPER<<8,
 							  newGVOP(OP_GV, 0, gv)))));
     }
     else {

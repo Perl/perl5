@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..14\n";
+print "1..15\n";
 
 my $i = 1;
 
@@ -55,3 +55,12 @@ q[	scalar(&foo,$bar);
         __LINE__();
         __PACKAGE__();
 ];
+
+{
+    local *CORE::GLOBAL::do = sub ($$){};
+    eval '
+	test_no_error($_) for split /\n\s+/,
+	q[	do(1)
+	]
+    ';
+}
