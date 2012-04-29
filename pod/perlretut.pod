@@ -1583,9 +1583,9 @@ there are no groupings, a list of matches to the whole regexp.  So if
 we wanted just the words, we could use
 
     @words = ($x =~ /(\w+)/g);  # matches,
-                                # $word[0] = 'cat'
-                                # $word[1] = 'dog'
-                                # $word[2] = 'house'
+                                # $words[0] = 'cat'
+                                # $words[1] = 'dog'
+                                # $words[2] = 'house'
 
 Closely associated with the C<//g> modifier is the C<\G> anchor.  The
 C<\G> anchor matches at the point where the previous C<//g> match left
