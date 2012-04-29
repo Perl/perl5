@@ -8160,7 +8160,7 @@ Perl_ck_glob(pTHX_ OP *o)
 		    op_append_elem(OP_LIST, o,
 				scalar(newUNOP(OP_RV2CV, 0,
 					       newGVOP(OP_GV, 0, gv)))));
-	o = newUNOP(OP_NULL, 0, ck_subr(o));
+	o = newUNOP(OP_NULL, 0, o);
 	o->op_targ = OP_GLOB; /* hint at what it used to be: eg in newWHILEOP */
 	return o;
     }
