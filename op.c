@@ -2023,6 +2023,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (type != OP_LEAVESUBLV)
 	    goto nomod;
 	break; /* op_lvalue()ing was handled by ck_return() */
+
+    case OP_COREARGS:
+	return o;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
