@@ -693,26 +693,6 @@ case "$osname" in
 esac
 
 case "$osname" in
-aix)
-	$spitshell >>$Makefile <<'!NO!SUBS!'
-PERLEXPORT		= perl.exp
-MAKEDEF_FLAGS		= --sort-fold 
-
-$(PERLEXPORT): $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) $(MAKEDEF_PREREQ)
-	$(MINIPERL) makedef.pl $(MAKEDEF_FLAGS) -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > $@
-
-!NO!SUBS!
-	;;
-os2)
-	$spitshell >>$Makefile <<'!NO!SUBS!'
-PERLEXPORT		= perl5.def
-MAKEDEF_PREREQ		= miniperl.map
-
-$(PERLEXPORT): $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) $(MAKEDEF_PREREQ)
-	$(MINIPERL) makedef.pl $(MAKEDEF_FLAGS) -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > $@
-
-!NO!SUBS!
-	;;
 cygwin)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 cygwin.c: cygwin/cygwin.c
@@ -723,6 +703,29 @@ LIBPERL_NONSHR		= libperl$(LIB_EXT)
 $(LIBPERL_NONSHR): $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
 	$(AR) rcu $(LIBPERL_NONSHR) $(obj)
+
+!NO!SUBS!
+	;;
+os2)
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+PERLEXPORT		= perl5.def
+MAKEDEF_PREREQ		= miniperl.map
+!NO!SUBS!
+	;;
+aix)
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+PERLEXPORT		= perl.exp
+MAKEDEF_FLAGS		= --sort-fold 
+!NO!SUBS!
+	;;
+esac
+
+case "$osname" in
+aix|os2)
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+
+$(PERLEXPORT): $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) $(MAKEDEF_PREREQ)
+	$(MINIPERL) makedef.pl $(MAKEDEF_FLAGS) -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > $@
 
 !NO!SUBS!
 	;;
