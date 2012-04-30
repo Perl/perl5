@@ -56,7 +56,7 @@ sub test_proto {
     like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
 
   }
-  elsif ($p eq '_') {
+  elsif ($p =~ /^_;?\z/) {
     $tests ++;
 
     eval " &CORE::$o(1,2) ";
@@ -487,6 +487,20 @@ test_proto "get$_" for qw '
   pwent pwnam pwuid servbyname servbyport servent sockname sockopt
 ';
 
+# Make sure the following tests test what we think they are testing.
+ok ! $CORE::{glob}, '*CORE::glob not autovivified yet'; $tests ++;
+{
+  # Make sure ck_glob does not respect the override when &CORE::glob is
+  # autovivified (by test_proto).
+  local *CORE::GLOBAL::glob = sub {};
+  test_proto 'glob';
+}
+$_ = "t/*.t";
+@_ = &myglob($_);
+is join($", &myglob()), "@_", '&glob without arguments';
+is join($", &myglob("t/*.t")), "@_", '&glob with an arg';
+$tests += 2;
+
 test_proto 'gmtime';
 &CORE::gmtime;
 pass '&gmtime without args does not crash'; ++$tests;
@@ -887,7 +901,7 @@ like $@, qr'^Undefined format "STDOUT" called',
       next if
        $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:ef
                   ault|ump|o)|p(?:r(?:ototype|intf?)|ackag
-                  e|os)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|lob|oto
+                  e|os)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
                   AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|en)
