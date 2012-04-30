@@ -696,16 +696,20 @@ case "$osname" in
 aix)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 PERLEXPORT		= perl.exp
+MAKEDEF_FLAGS		= --sort-fold 
 
-perl.exp: $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH)
-	$(MINIPERL) makedef.pl --sort-fold CC_FLAGS="$(OPTIMIZE)" > perl.exp
+$(PERLEXPORT): $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) $(MAKEDEF_PREREQ)
+	$(MINIPERL) makedef.pl $(MAKEDEF_FLAGS) -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > $@
 
 !NO!SUBS!
 	;;
 os2)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-perl5.def: $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
-	$(MINIPERL) makedef.pl -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
+PERLEXPORT		= perl5.def
+MAKEDEF_PREREQ		= miniperl.map
+
+$(PERLEXPORT): $(MINIPERL_EXE) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) $(MAKEDEF_PREREQ)
+	$(MINIPERL) makedef.pl $(MAKEDEF_FLAGS) -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > $@
 
 !NO!SUBS!
 	;;
