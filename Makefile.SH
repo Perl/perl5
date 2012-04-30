@@ -228,6 +228,18 @@ define|true)
 	;;
 esac
 
+case "$osname" in
+	aix)
+	: In AIX we need to change this for building Perl itself
+	: The config.sh definition is for building external
+	: extensions *after* Perl has been built and installed
+	ccdlflags_uninstalled=`echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
+	;;
+	*)
+	ccdlflags_uninstalled="$ccdlflags"
+	;;
+esac
+
 echo "Extracting $Makefile (with variable substitutions)"
 $spitshell >$Makefile <<!GROK!THIS!
 # $Makefile
@@ -269,7 +281,7 @@ man3ext = $man3ext
 # dynamic loading.
 LDDLFLAGS = $lddlflags
 SHRPLDFLAGS = $shrpldflags
-CCDLFLAGS = $ccdlflags
+CCDLFLAGS = $ccdlflags_uninstalled
 DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
@@ -682,13 +694,6 @@ esac
 
 case "$osname" in
 aix)
-	$spitshell >>$Makefile <<!GROK!THIS!
-# In AIX we need to change this for building Perl itself from
-# its earlier definition (which is for building external
-# extensions *after* Perl has been built and installed)
-CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
-
-!GROK!THIS!
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 MINIPERLEXP		= $(MINIPERL_EXE)
 
