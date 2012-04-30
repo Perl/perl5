@@ -5935,6 +5935,7 @@ PP(pp_coreargs)
 	whicharg++;
 	switch (oa & 7) {
 	case OA_SCALAR:
+	  try_defsv:
 	    if (!numargs && defgv && whicharg == minargs + 1) {
 		PERL_SI * const oldsi = PL_curstackinfo;
 		I32 const oldcxix = oldsi->si_cxix;
@@ -5982,7 +5983,8 @@ PP(pp_coreargs)
 	    }
 	    break;
 	case OA_SCALARREF:
-	  {
+	  if (!numargs) goto try_defsv;
+	  else {
 	    const bool wantscalar =
 		PL_op->op_private & OPpCOREARGS_SCALARMOD;
 	    if (!svp || !*svp || !SvROK(*svp)
@@ -6006,8 +6008,8 @@ PP(pp_coreargs)
 		       : "reference to one of [$@%*]"
 		);
 	    PUSHs(SvRV(*svp));
-	    break;
 	  }
+	  break;
 	default:
 	    DIE(aTHX_ "panic: unknown OA_*: %x", (unsigned)(oa&7));
 	}

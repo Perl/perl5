@@ -19,7 +19,7 @@ my %unsupported = map +($_=>1), qw (
  __DATA__ __END__ AUTOLOAD BEGIN UNITCHECK CORE DESTROY END INIT CHECK and
   cmp default do dump else elsif eq eval for foreach
   format ge given goto grep gt if last le local lt m map my ne next
-  no or our package pos print printf prototype q qq qr qw qx redo  require
+  no or our package print printf prototype q qq qr qw qx  redo  require
   return s say scalar sort split state study sub tr undef unless until use
   when while x xor y
 );
@@ -28,6 +28,9 @@ my %args_for = (
   dbmclose => '%1',
   delete   => '$1[2]',
   exists   => '$1[2]',
+);
+my %desc = (
+  pos => 'match position',
 );
 
 use File::Spec::Functions;
@@ -109,7 +112,8 @@ while(<$kh>) {
                )
        . "))}";
       eval $code;
-      like $@, qr/^Too many arguments for $word/,
+      my $desc = $desc{$word} || $word;
+      like $@, qr/^Too many arguments for $desc/,
           "inlined CORE::$word with too many args"
         or warn $code;
 

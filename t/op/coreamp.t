@@ -28,6 +28,7 @@ package sov {
 my %op_desc = (
  evalbytes=> 'eval "string"',
  join     => 'join or string',
+ pos      => 'match position',
  readline => '<HANDLE>',
  readpipe => 'quoted execution (``, qx)',
  reset    => 'symbol reset',
@@ -221,6 +222,23 @@ sub test_proto {
                   )of \[\Q$1\E] at /,
         "&$o with coderef arg";
     }    
+  }
+  elsif ($p eq ';\[$*]') {
+    $tests += 4;
+
+    my $desc = quotemeta op_desc($o);
+    eval " &CORE::$o(1,2) ";
+    like $@, qr/^Too many arguments for $desc at /,
+        "&$o with too many args";
+    eval " &CORE::$o([]) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be scalar reference at /,
+        "&$o with array ref arg";
+    eval " &CORE::$o(1) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be scalar reference at /,
+        "&$o with scalar arg";
+    eval " &CORE::$o(bless([], 'sov')) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be scalar reference at /,
+        "&$o with non-scalar arg w/scalar overload (which does not count)";
   }
 
   else {
@@ -578,6 +596,23 @@ is &mypack("H*", '5065726c'), 'Perl', '&pack';
 lis [&mypack("H*", '5065726c')], ['Perl'], '&pack in list context';
 
 test_proto 'pipe';
+
+test_proto 'pos';
+$tests += 4;
+$_ = "hello";
+pos = 3;
+is &mypos, 3, 'reading &pos without args';
+&mypos = 4;
+is pos, 4, 'writing to &pos without args';
+{
+  my $x = "gubai";
+  pos $x = 3;
+  is &mypos(\$x), 3, 'reading &pos without args';
+  &mypos(\$x) = 4;
+  is pos $x, 4, 'writing to &pos without args';
+}
+
+
 test_proto 'quotemeta', '$', '\$';
 
 test_proto 'rand';
@@ -894,7 +929,7 @@ like $@, qr'^Undefined format "STDOUT" called',
       next if
        $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:ef
                   ault|ump|o)|p(?:r(?:ototype|intf?)|ackag
-                  e|os)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
+                  e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
                   AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|en)

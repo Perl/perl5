@@ -2023,6 +2023,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (type != OP_LEAVESUBLV)
 	    goto nomod;
 	break; /* op_lvalue()ing was handled by ck_return() */
+
+    case OP_COREARGS:
+	return o;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
@@ -2063,8 +2066,7 @@ S_scalar_mod_type(const OP *o, I32 type)
     switch (type) {
     case OP_POS:
     case OP_SASSIGN:
-	assert(o);
-	if (o->op_type == OP_RV2GV)
+	if (o && o->op_type == OP_RV2GV)
 	    return FALSE;
 	/* FALL THROUGH */
     case OP_PREINC:
@@ -10677,14 +10679,14 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	  onearg:
 	      if (is_handle_constructor(o, 1))
 		argop->op_private |= OPpCOREARGS_DEREF1;
+	      if (scalar_mod_type(NULL, opnum))
+		argop->op_private |= OPpCOREARGS_SCALARMOD;
 	    }
 	    return o;
 	default:
 	    o = convert(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
 	    if (is_handle_constructor(o, 2))
 		argop->op_private |= OPpCOREARGS_DEREF2;
-	    if (scalar_mod_type(NULL, opnum))
-		argop->op_private |= OPpCOREARGS_SCALARMOD;
 	    if (opnum == OP_SUBSTR) {
 		o->op_private |= OPpMAYBE_LVSUB;
 		return o;
