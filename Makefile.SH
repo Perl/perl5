@@ -681,14 +681,8 @@ generate_uudmap$(OBJ_EXT): mg_raw.h
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
 
-miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
-	$(CCCMD) $(PLDLFLAGS) $*.c
-
 perlmain.c: $(MINIPERL_EXE) lib/ExtUtils/Miniperl.pm
 	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(@ARGV)' DynaLoader $(static_ext) > perlmain.c
-
-perlmain$(OBJ_EXT): perlmain.c
-	$(CCCMD) $(PLDLFLAGS) $*.c
 
 # The file ext.libs is a list of libraries that must be linked in
 # for static extensions, e.g. -lm -lgdbm, etc.  The individual
