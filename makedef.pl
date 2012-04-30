@@ -32,7 +32,6 @@
 #    perl.imp    NetWare
 #    makedef.lis VMS
 
-BEGIN { unshift @INC, "lib" }
 use Config;
 use strict;
 
