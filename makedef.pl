@@ -35,7 +35,7 @@
 use Config;
 use strict;
 
-my %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
+my %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '', PLATFORM => $^O);
 
 my %define;
 
