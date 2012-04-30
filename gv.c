@@ -466,7 +466,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_gt   : case KEY_if: case KEY_INIT: case KEY_last: case KEY_le:
     case KEY_local: case KEY_lt: case KEY_m   : case KEY_map : case KEY_my:
     case KEY_ne   : case KEY_next : case KEY_no: case KEY_or: case KEY_our:
-    case KEY_package: case KEY_pos: case KEY_print  : case KEY_printf:
+    case KEY_package: case KEY_print: case KEY_printf:
     case KEY_prototype: case KEY_q: case KEY_qq: case KEY_qr: case KEY_qw:
     case KEY_qx   : case KEY_redo : case KEY_require: case KEY_return:
     case KEY_s    : case KEY_say  : case KEY_scalar : case KEY_sort  :
@@ -542,7 +542,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	           1
 	);
 	assert(GvCV(gv) == cv);
-	if (opnum != OP_VEC && opnum != OP_SUBSTR)
+	if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS)
 	    CvLVALUE_off(cv); /* Now *that* was a neat trick. */
 	LEAVE;
 	PL_parser = oldparser;
