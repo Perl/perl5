@@ -29,6 +29,7 @@ my %op_desc = (
  evalbytes=> 'eval "string"',
  glob     => 'glob value',
  join     => 'join or string',
+ pos      => 'match position',
  readline => '<HANDLE>',
  readpipe => 'quoted execution (``, qx)',
  reset    => 'symbol reset',
@@ -579,6 +580,23 @@ is &mypack("H*", '5065726c'), 'Perl', '&pack';
 lis [&mypack("H*", '5065726c')], ['Perl'], '&pack in list context';
 
 test_proto 'pipe';
+
+test_proto 'pos';
+$tests += 4;
+$_ = "hello";
+pos = 3;
+is &mypos, 3, 'reading &pos without args';
+&mypos = 4;
+is pos, 4, 'writing to &pos without args';
+{
+  my $x = "gubai";
+  pos $x = 3;
+  is &mypos($x), 3, 'reading &pos without args';
+  &mypos($x) = 4;
+  is pos $x, 4, 'writing to &pos without args';
+}
+
+
 test_proto 'quotemeta', '$', '\$';
 
 test_proto 'rand';
@@ -895,7 +913,7 @@ like $@, qr'^Undefined format "STDOUT" called',
       next if
        $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:ef
                   ault|ump|o)|p(?:r(?:ototype|intf?)|ackag
-                  e|os)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
+                  e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
                   AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|en)
