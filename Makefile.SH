@@ -800,17 +800,21 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(PERLEXPORT)
 	case "${osname}${osvers}" in
 	next4*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
+MINIPERL_CLDFLAGS = 
+
 $(MINIPERL_EXE): $& $(mini_obj)
-	$(CC) -o $(MINIPERL_EXE) $(mini_obj) $(libs)
+	-@rm -f miniperl.xok
+	$(CC) $(MINIPERL_CLDFLAGS) -o $(MINIPERL_EXE) $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
 	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
+MINIPERL_CLDFLAGS = $(CLDFLAGS)
+
 $(MINIPERL_EXE): $& $(mini_obj)
 	-@rm -f miniperl.xok
-	$(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
-	    $(mini_obj) $(libs)
+	$(CC) $(MINIPERL_CLDFLAGS) -o $(MINIPERL_EXE) $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
