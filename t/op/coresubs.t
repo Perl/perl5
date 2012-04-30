@@ -19,7 +19,7 @@ my %unsupported = map +($_=>1), qw (
  __DATA__ __END__ AUTOLOAD BEGIN UNITCHECK CORE DESTROY END INIT CHECK and
   cmp default do dump else elsif eq eval for foreach
   format ge given goto grep gt if last le local lt m map my ne next
-  no or our package print printf prototype q qq qr qw qx  redo  require
+  no  or  our  package  print  printf  q  qq  qr  qw  qx  redo  require
   return s say scalar sort split state study sub tr undef unless until use
   when while x xor y
 );
@@ -95,7 +95,8 @@ while(<$kh>) {
       next if ($proto =~ /\@/);
       # These ops currently accept any number of args, despite their
       # prototypes, if they have any:
-      next if $word =~ /^(?:chom?p|exec|keys|each|not|read(?:lin|pip)e
+      next if $word =~ /^(?:chom?p|exec|keys|each|not
+                           |(?:prototyp|read(?:lin|pip))e
                            |reset|system|values|l?stat)|evalbytes/x;
 
       $tests ++;

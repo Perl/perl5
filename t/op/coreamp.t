@@ -29,6 +29,7 @@ my %op_desc = (
  evalbytes=> 'eval "string"',
  join     => 'join or string',
  pos      => 'match position',
+ prototype=> 'subroutine prototype',
  readline => '<HANDLE>',
  readpipe => 'quoted execution (``, qx)',
  reset    => 'symbol reset',
@@ -612,6 +613,9 @@ is pos, 4, 'writing to &pos without args';
   is pos $x, 4, 'writing to &pos without args';
 }
 
+test_proto 'prototype';
+$tests++;
+is &myprototype(\&myprototype), prototype("CORE::prototype"), '&prototype';
 
 test_proto 'quotemeta', '$', '\$';
 
@@ -928,7 +932,7 @@ like $@, qr'^Undefined format "STDOUT" called',
       my $word = $1;
       next if
        $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:ef
-                  ault|ump|o)|p(?:r(?:ototype|intf?)|ackag
+                  ault|ump|o)|p(?:rintf?|ackag
                   e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
