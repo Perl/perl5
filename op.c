@@ -10678,7 +10678,7 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	    }
 	    return o;
 	default:
-	    o = convert(opnum,0,argop);
+	    o = convert(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
 	    if (is_handle_constructor(o, 2))
 		argop->op_private |= OPpCOREARGS_DEREF2;
 	    if (scalar_mod_type(NULL, opnum))
