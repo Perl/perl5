@@ -27,7 +27,6 @@ case "$0" in
 esac
 
 linklibperl='$(LIBPERL)'
-linklibperl_nonshr=''
 shrpldflags='$(LDDLFLAGS)'
 ldlibpth=''
 DPERL_EXTERNAL_GLOB='-DPERL_EXTERNAL_GLOB'
@@ -86,7 +85,6 @@ true)
 			esac
 			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
 			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
-			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		*)
 			shrpldflags="-H512 -T512 -bhalt:4 -bM:SRE -bE:perl.exp"
@@ -98,7 +96,6 @@ true)
 			esac
 			shrpldflags="$shrpldflags $ldflags $perllibs $cryptlib"
 			linklibperl="-L $archlibexp/CORE -L `pwd | sed 's/\/UU$//'` -lperl"
-			linklibperl_nonshr='-lperl_nonshr'
 			;;
 		esac
 		;;
@@ -277,7 +274,6 @@ DLSUFFIX = .$dlext
 PLDLFLAGS = $pldlflags
 LIBPERL = $libperl
 LLIBPERL= $linklibperl
-LLIBPERL_NONSHR= $linklibperl_nonshr
 SHRPENV = $shrpenv
 
 # Static targets are ordinarily built without CCCDLFLAGS.  However,
@@ -687,45 +683,17 @@ esac
 case "$osname" in
 aix)
 	$spitshell >>$Makefile <<!GROK!THIS!
-LIBS			= $perllibs
 # In AIX we need to change this for building Perl itself from
 # its earlier definition (which is for building external
 # extensions *after* Perl has been built and installed)
 CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
 
 !GROK!THIS!
-	case "$useshrplib" in
-	define|true|[yY]*)
-		$spitshell >>$Makefile <<'!NO!SUBS!'
-
-LIBPERL_NONSHR		= libperl_nonshr$(LIB_EXT)
-MINIPERL_NONSHR		= miniperl_nonshr$(EXE_EXT)
-
-$(LIBPERL_NONSHR): $(obj)
-	$(RMS) $(LIBPERL_NONSHR)
-	$(AR) rcu $(LIBPERL_NONSHR) $(obj)
-
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)  perlmini$(OBJ_EXT)
-	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
-	    opmini$(OBJ_EXT) perlmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
-
-MINIPERLEXP		= $(MINIPERL_NONSHR)
-
-PERLEXPORT		= perl.exp
-
-!NO!SUBS!
-		
-		;;
-	*)	
-		$spitshell >>$Makefile <<'!NO!SUBS!'
+	$spitshell >>$Makefile <<'!NO!SUBS!'
 MINIPERLEXP		= $(MINIPERL_EXE)
 
 PERLEXPORT		= perl.exp
 
-!NO!SUBS!
-	;;
-	esac
-	$spitshell >>$Makefile <<'!NO!SUBS!'
 perl.exp: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH)
 	./$(MINIPERLEXP) makedef.pl --sort-fold PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" > perl.exp
 
@@ -1299,7 +1267,7 @@ _cleaner2:
 	rm -f core *perl.core t/core t/*perl.core core.* t/core.*
 	rm -f t/$(PERL_EXE) t/rantests
 	rm -rf t/tmp*
-	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
+	rm -f so_locations $(LIBPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
 	rm -f $(private)
