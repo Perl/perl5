@@ -801,7 +801,9 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(PERLEXPORT)
 	aix*|beos*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 $(MINIPERL_EXE): $& $(mini_obj)
-	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(mini_obj) $(libs)
+	-@rm -f miniperl.xok
+	$(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
+	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
