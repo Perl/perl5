@@ -4075,7 +4075,7 @@ followed by
 	# am the parent:
 	# either write TO_KID or else read FROM_KID
 	...
-	wait $child_pid;
+	waitpid $child_pid;
     } else {
 	# am the child; use STDIN/STDOUT normally
 	...
