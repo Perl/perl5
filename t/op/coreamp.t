@@ -669,12 +669,12 @@ $tests += 2;
 my $oncer = sub { "a" =~ m?a? };
 &$oncer;
 &myreset;
-ok &$oncer, '&reset with one arg';
+ok &$oncer, '&reset with no args';
 package resettest {
   $b = "c";
   $banana = "cream";
   &::myreset('b');
-  ::lis [$b,$banana],[(undef)x2], '2-arg &reset';
+  ::lis [$b,$banana],[(undef)x2], '1-arg &reset';
 }
 
 test_proto 'reverse';
