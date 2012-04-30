@@ -812,27 +812,6 @@ $(MINIPERL_EXE): $& $(mini_obj)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
-	darwin*)
-		case "$osvers" in
-		[1-6].*) ;;
-		*) case "$ldflags" in
-		    *"-flat_namespace"*) ;;
-		    *) # to allow opmini.o to override stuff in libperl.dylib
-		$spitshell >>$Makefile <<!NO!SUBS!
-NAMESPACEFLAGS = -force_flat_namespace
-!NO!SUBS!
-		       ;;
-		    esac
-		    ;;
-		esac
-		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
-	-@rm -f miniperl.xok
-	$(CC) $(CLDFLAGS) $(NAMESPACEFLAGS) -o $(MINIPERL_EXE) \
-	    $(mini_obj) $(libs)
-	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-!NO!SUBS!
-		;;
 	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 $(MINIPERL_EXE): $& $(mini_obj)
