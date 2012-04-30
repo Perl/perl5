@@ -5882,7 +5882,7 @@ PP(pp_coreargs)
 {
     dSP;
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
-    int defgv = PL_opargs[opnum] & OA_DEFGV, whicharg = 0;
+    int defgv = PL_opargs[opnum] & OA_DEFGV ||opnum==OP_GLOB, whicharg = 0;
     AV * const at_ = GvAV(PL_defgv);
     SV **svp = AvARRAY(at_);
     I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1;
