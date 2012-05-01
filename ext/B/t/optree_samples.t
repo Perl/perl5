@@ -617,14 +617,14 @@ checkOptree ( name	=> '-e use constant j => qq{junk}; print j',
 # 1  <0> enter 
 # 2  <;> nextstate(main 71 -e:1) v:>,<,%,{
 # 3  <0> pushmark s
-# 4  <$> const[PV "junk"] s*
+# 4  <$> const[PV "junk"] s*/FOLD
 # 5  <@> print vK
 # 6  <@> leave[1 ref] vKP/REFC
 EOT_EOT
 # 1  <0> enter 
 # 2  <;> nextstate(main 71 -e:1) v:>,<,%,{
 # 3  <0> pushmark s
-# 4  <$> const(PV "junk") s*
+# 4  <$> const(PV "junk") s*/FOLD
 # 5  <@> print vK
 # 6  <@> leave[1 ref] vKP/REFC
 EONT_EONT

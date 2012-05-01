@@ -635,8 +635,8 @@ $priv{$_}{16} = "TARGMY"
        "exec", "kill", "getppid", "getpgrp", "setpgrp", "getpriority",
        "setpriority", "time", "sleep");
 $priv{$_}{4} = "REVERSED" for ("enteriter", "iter");
-@{$priv{"const"}}{2,4,8,16,64} =
-    ("NOVER","SHORT","STRICT","ENTERED","BARE");
+@{$priv{"const"}}{2,4,8,16,64,128} =
+    ("NOVER","SHORT","STRICT","ENTERED","BARE","FOLD");
 $priv{"flip"}{64} = $priv{"flop"}{64} = "LINENUM";
 $priv{"list"}{64} = "GUESSED";
 $priv{"delete"}{64} = "SLICE";

@@ -3329,7 +3329,7 @@ S_fold_constants(pTHX_ register OP *o)
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
     else
-	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
+	newop = newSVOP(OP_CONST, OPpCONST_FOLDED<<8, MUTABLE_SV(sv));
     op_getmad(o,newop,'f');
     return newop;
 
@@ -4849,6 +4849,7 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
     svop->op_sv = sv;
     svop->op_next = (OP*)svop;
     svop->op_flags = (U8)flags;
+    svop->op_private = (U8)(0 | (flags >> 8));
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)svop);
     if (PL_opargs[type] & OA_TARGET)
@@ -5850,6 +5851,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	          || other->op_type == OP_TRANS)
 		/* Mark the op as being unbindable with =~ */
 		other->op_flags |= OPf_SPECIAL;
+	    else if (other->op_type == OP_CONST)
+		other->op_private |= OPpCONST_FOLDED;
 	    return other;
 	}
 	else {
@@ -6007,6 +6010,8 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	      || live->op_type == OP_TRANS || live->op_type == OP_TRANSR)
 	    /* Mark the op as being unbindable with =~ */
 	    live->op_flags |= OPf_SPECIAL;
+	else if (live->op_type == OP_CONST)
+	    live->op_private |= OPpCONST_FOLDED;
 	return live;
     }
     NewOp(1101, logop, 1, LOGOP);
