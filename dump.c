@@ -733,6 +733,7 @@ const struct flag_to_name op_const_names[] = {
     {OPpCONST_SHORTCIRCUIT, ",SHORTCIRCUIT"},
     {OPpCONST_STRICT, ",STRICT"},
     {OPpCONST_ENTERED, ",ENTERED"},
+    {OPpCONST_FOLDED, ",FOLDED"},
     {OPpCONST_BARE, ",BARE"}
 };
 
@@ -2910,6 +2911,8 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",STRICT");
 	    if (o->op_private & OPpCONST_ENTERED)
 		sv_catpv(tmpsv, ",ENTERED");
+	    if (o->op_private & OPpCONST_FOLDED)
+		sv_catpv(tmpsv, ",FOLDED");
 	}
 	else if (o->op_type == OP_FLIP) {
 	    if (o->op_private & OPpFLIP_LINENUM)
