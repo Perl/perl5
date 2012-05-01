@@ -254,7 +254,6 @@ Deprecated.  Use C<GIMME_V> instead.
 #define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
-#define OPpCONST_WARNING	128	/* Was a $^W translated to constant. */
 
 /* Private for OP_FLIP/FLOP */
 #define OPpFLIP_LINENUM		64	/* Range arg potentially a line num. */
