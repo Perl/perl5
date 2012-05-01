@@ -733,8 +733,7 @@ const struct flag_to_name op_const_names[] = {
     {OPpCONST_SHORTCIRCUIT, ",SHORTCIRCUIT"},
     {OPpCONST_STRICT, ",STRICT"},
     {OPpCONST_ENTERED, ",ENTERED"},
-    {OPpCONST_BARE, ",BARE"},
-    {OPpCONST_WARNING, ",WARNING"}
+    {OPpCONST_BARE, ",BARE"}
 };
 
 const struct flag_to_name op_sort_names[] = {
@@ -2908,8 +2907,6 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",BARE");
 	    if (o->op_private & OPpCONST_STRICT)
 		sv_catpv(tmpsv, ",STRICT");
-	    if (o->op_private & OPpCONST_WARNING)
-		sv_catpv(tmpsv, ",WARNING");
 	    if (o->op_private & OPpCONST_ENTERED)
 		sv_catpv(tmpsv, ",ENTERED");
 	}
