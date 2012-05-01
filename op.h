@@ -183,7 +183,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */
 #define OPpASSIGN_CV_TO_GV	128	/* Possible optimisation for constants. */
 
-/* Private for OP_MATCH and OP_SUBST{,CONST} */
+/* Private for OP_MATCH and OP_SUBST{,CONT} */
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
 
 /* Private for OP_TRANS */
