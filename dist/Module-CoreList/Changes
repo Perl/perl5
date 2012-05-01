@@ -1,3 +1,6 @@
+2.66 ??
+  - Add the --diff option to compare two perl core modlibs
+
 2.65 Tue Mar 20 2012
   - Update of lib/charnames
 
