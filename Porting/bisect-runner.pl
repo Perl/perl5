@@ -2040,6 +2040,11 @@ EOT
                 }
             }
         }
+    } elsif ($^O eq 'solaris') {
+        if (($major == 13 || $major == 14)
+            && extract_from_file('hints/solaris_2.sh', qr/getconfldllflags/)) {
+            apply_commit('c80bde4388070c45');
+        }
     }
 }
 
