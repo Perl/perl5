@@ -32,6 +32,7 @@ curl(1)
 Data::Entropy
 Data::Float
 Data::Types
+Date::Pcalc
 DateTime
 DB_File(3)
 DBIx::Profile
@@ -47,6 +48,7 @@ fetch(1)
 File::chdir
 File::Copy::Recursive
 File::Findgrep
+File::MMagic
 File::ShareDir
 flock(3)
 fsync(3c)
@@ -70,6 +72,8 @@ Math::Random::MT::Perl
 Math::Random::Secure
 Math::TrulyRandom
 md5sum(1)
+Module::CPANTS::Analyse
+Module::Find
 Module::Info
 Module::Starter
 MRO::Compat
@@ -84,6 +88,7 @@ perl(1)
 Perl::Unsafe::Signals
 perlbug(1)
 PerlIO::locale
+PerlIO::Util
 PerlIO::via::Base64
 PerlIO::via::StripHTML
 perllexwarn(1)
