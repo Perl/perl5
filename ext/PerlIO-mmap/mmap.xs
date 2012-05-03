@@ -294,7 +294,7 @@ PERLIO_FUNCS_DECL(PerlIO_mmap) = {
     PerlIOBuf_close,
     PerlIOMmap_flush,
     PerlIOMmap_fill,
-    PerlIOBase_eof,
+    PerlIOBuf_eof,
     PerlIOBase_error,
     PerlIOBase_clearerr,
     PerlIOBase_setlinebuf,

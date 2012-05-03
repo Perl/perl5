@@ -308,6 +308,9 @@ PERL_EXPORT_C int PerlIO_has_base(PerlIO *);
 #ifndef PerlIO_has_cntptr
 PERL_EXPORT_C int PerlIO_has_cntptr(PerlIO *);
 #endif
+#ifndef PerlIO_has_smart_eof
+PERL_EXPORT_C int PerlIO_has_smart_eof(PerlIO *);
+#endif
 #ifndef PerlIO_fast_gets
 PERL_EXPORT_C int PerlIO_fast_gets(PerlIO *);
 #endif

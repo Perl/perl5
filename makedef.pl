@@ -563,6 +563,7 @@ my @layer_syms = qw(
 		    PerlIOBuf_bufsiz
 		    PerlIOBuf_close
 		    PerlIOBuf_dup
+ 		    PerlIOBuf_eof
 		    PerlIOBuf_fill
 		    PerlIOBuf_flush
 		    PerlIOBuf_get_base
@@ -584,6 +585,7 @@ my @layer_syms = qw(
 		    PerlIO_debug
 		    PerlIO_define_layer
 		    PerlIO_find_layer
+		    PerlIO_has_smart_eof
 		    PerlIO_isutf8
 		    PerlIO_layer_fetch
 		    PerlIO_list_alloc

@@ -132,6 +132,7 @@
 #define PerlIO_get_ptr(f)		(abort(),(void *)0)
 #define PerlIO_set_cnt(f,c)		abort()
 #define PerlIO_set_ptrcnt(f,p,c)	abort()
+#define PerlIO_has_smart_eof(f)		0
 
 #endif /* USE_STDIO_PTR */
 

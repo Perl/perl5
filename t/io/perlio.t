@@ -167,10 +167,6 @@ SKIP: {
         open STDERR,  ">&OLDERR" or die "cannot dup OLDERR: $!";
     }
 
-
-    { local $TODO = 'fails well back into 5.8.x';
-
-	
       sub read_fh_and_return_final_rv {
 	my ($fh) = @_;
 	my $buf = '';
@@ -191,7 +187,6 @@ SKIP: {
 
       close ($perlio);
       close ($no_perlio);
-    }
 
     { # [perl #92258]
         open my $fh, "<", \(my $f = *f);

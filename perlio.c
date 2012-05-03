@@ -1113,6 +1113,11 @@ PerlIO_layer_fetch(pTHX_ PerlIO_list_t *av, IV n, PerlIO_funcs *def)
     return def;
 }
 
+int
+PerlIO_has_smart_eof(PerlIO* fh) {
+    return PerlIOBase(fh)->tab->kind & PERLIO_K_SMARTEOF;
+}
+
 IV
 PerlIOPop_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
@@ -4311,13 +4316,28 @@ PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
  return PerlIOBase_dup(aTHX_ f, o, param, flags);
 }
 
-
+IV
+PerlIOBuf_eof (pTHX_ PerlIO *f)
+{
+    if (!PerlIOValid(f))
+	return -1;
+    if (PerlIOBase(f)->flags & PERLIO_F_EOF)
+	return 1;
+    if (PerlIO_get_cnt(f))
+	return 0;
+    else {
+	PerlIO_fill(f);
+	if (PerlIOBase(f)->flags & PERLIO_F_EOF)
+	    return 1;
+	return PerlIO_get_cnt(f) == 0;
+    }
+}
 
 PERLIO_FUNCS_DECL(PerlIO_perlio) = {
     sizeof(PerlIO_funcs),
     "perlio",
     sizeof(PerlIOBuf),
-    PERLIO_K_BUFFERED|PERLIO_K_RAW,
+    PERLIO_K_BUFFERED|PERLIO_K_RAW|PERLIO_K_SMARTEOF,
     PerlIOBuf_pushed,
     PerlIOBuf_popped,
     PerlIOBuf_open,
@@ -4333,7 +4353,7 @@ PERLIO_FUNCS_DECL(PerlIO_perlio) = {
     PerlIOBuf_close,
     PerlIOBuf_flush,
     PerlIOBuf_fill,
-    PerlIOBase_eof,
+    PerlIOBuf_eof,
     PerlIOBase_error,
     PerlIOBase_clearerr,
     PerlIOBase_setlinebuf,
@@ -4440,7 +4460,7 @@ PERLIO_FUNCS_DECL(PerlIO_pending) = {
     sizeof(PerlIO_funcs),
     "pending",
     sizeof(PerlIOBuf),
-    PERLIO_K_BUFFERED|PERLIO_K_RAW,  /* not sure about RAW here */
+    PERLIO_K_BUFFERED|PERLIO_K_RAW|PERLIO_K_SMARTEOF,  /* not sure about RAW here */
     PerlIOPending_pushed,
     PerlIOBuf_popped,
     NULL,
@@ -4456,7 +4476,7 @@ PERLIO_FUNCS_DECL(PerlIO_pending) = {
     PerlIOPending_close,
     PerlIOPending_flush,
     PerlIOPending_fill,
-    PerlIOBase_eof,
+    PerlIOBuf_eof,
     PerlIOBase_error,
     PerlIOBase_clearerr,
     PerlIOBase_setlinebuf,
@@ -4794,7 +4814,7 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
     sizeof(PerlIO_funcs),
     "crlf",
     sizeof(PerlIOCrlf),
-    PERLIO_K_BUFFERED | PERLIO_K_CANCRLF | PERLIO_K_RAW,
+    PERLIO_K_BUFFERED | PERLIO_K_CANCRLF | PERLIO_K_RAW | PERLIO_K_SMARTEOF,
     PerlIOCrlf_pushed,
     PerlIOBuf_popped,         /* popped */
     PerlIOBuf_open,
@@ -4810,7 +4830,7 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
     PerlIOBuf_close,
     PerlIOCrlf_flush,
     PerlIOBuf_fill,
-    PerlIOBase_eof,
+    PerlIOBuf_eof,
     PerlIOBase_error,
     PerlIOBase_clearerr,
     PerlIOBase_setlinebuf,

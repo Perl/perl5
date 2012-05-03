@@ -61,6 +61,7 @@ struct _PerlIO_funcs {
 #define PERLIO_K_UTF8		0x00008000
 #define PERLIO_K_DESTRUCT	0x00010000
 #define PERLIO_K_MULTIARG	0x00020000
+#define PERLIO_K_SMARTEOF       0x00040000
 
 /*--------------------------------------------------------------------------------------*/
 struct _PerlIO {
@@ -195,6 +196,7 @@ PERL_EXPORT_C SSize_t   PerlIOBase_unread(pTHX_ PerlIO *f, const void *vbuf, Siz
 PERL_EXPORT_C Size_t    PerlIOBuf_bufsiz(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOBuf_close(pTHX_ PerlIO *f);
 PERL_EXPORT_C PerlIO *  PerlIOBuf_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
+PERL_EXPORT_C IV        PerlIOBuf_eof(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOBuf_fill(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOBuf_flush(pTHX_ PerlIO *f);
 PERL_EXPORT_C STDCHAR * PerlIOBuf_get_base(pTHX_ PerlIO *f);
