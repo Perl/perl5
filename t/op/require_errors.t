@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 3);
+plan(tests => 4);
 
 my $nonfile = tempfile();
 
@@ -30,6 +30,9 @@ eval {
 };
 
 like $@, qr/^Can't locate $nonfile\.h in \@INC \(change \.h to \.ph maybe\?\) \(did you run h2ph\?\) \(\@INC contains: @INC\) at/;
+
+eval 'require <foom>';
+like $@, qr/^<> should be quotes at /, 'require <> error';
 
 # I can't see how to test the EMFILE case
 # I can't see how to test the case of not displaying @INC in the message.
