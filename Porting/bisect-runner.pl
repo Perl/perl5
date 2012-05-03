@@ -2952,6 +2952,16 @@ index 2a6cbcd..eab2de1 100644
 EOPATCH
     }
 
+    if ($major == 7 && $^O eq 'aix' &&
+        extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
+        && !extract_from_file('makedef.pl', qr/^Perl_cxinc/)) {
+        # Need this to get List::Utils 1.03 and later to compile.
+        # 1.03 also expects to call Perl_pp_rand. Commit d3632a54487acc5f
+        # fixes this (for the unthreaded case), but it's not until 1.05,
+        # two days later, that this is fixed properly.
+        apply_commit('cbb96eed3f175499');
+    }
+
     if (($major >= 7 || $major <= 9) && $^O eq 'openbsd'
         && `uname -m` eq "sparc64\n"
         # added in 2000 by commit cb434fcc98ac25f5:
