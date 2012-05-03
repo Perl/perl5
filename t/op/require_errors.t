@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 BEGIN {
+    chdir 't';
     require './test.pl';
 }
 
