@@ -648,6 +648,13 @@ ticket|https://rt.perl.org/rt3/Ticket/Display.html?id=96212>.
 
 sfio, stdio
 
+Perl supports being built without PerlIO proper, using a sdio or sfio
+wrapper instead. A perl build like this will not support IO layers and
+thus Unicode IO, making it rather handicapped.
+
+PerlIO supports a C<stdio> layer if stdio use is desired, and similarly a
+sfio layer could be produced. 
+
 =item *
 
 Unescaped literal C<< "{" >> in regular expressions.
