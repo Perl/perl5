@@ -49,7 +49,6 @@ is( $r, "Foo.pm" );
 eval "use Foo::Bar";
 is( $r, join($dirsep, "Foo", "Bar.pm") );
 
-# use VERSION also loads feature.pm.
 {
     my @r;
     local *CORE::GLOBAL::require = sub { push @r, shift; 1; };
