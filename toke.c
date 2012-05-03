@@ -7880,17 +7880,17 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = SKIPSPACE1(s);
-	    if (isDIGIT(*s)) {
-		s = force_version(s, FALSE);
-	    }
-	    else if (*s != 'v' || !isDIGIT(s[1])
-		    || (s = force_version(s, TRUE), *s == 'v'))
-	    {
-		*PL_tokenbuf = '\0';
-		s = force_word(s,WORD,TRUE,TRUE,FALSE);
-		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
+	    if (!isDIGIT(*s)) {
+		if (isIDFIRST_lazy_if(s,UTF)) {
+		  STRLEN len;
+		  *PL_tokenbuf = '\0';
+		  scan_word(
+		    s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len
+		  );
+		  if (!keyword(PL_tokenbuf, len, 0))
 		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
                                 GV_ADD | (UTF ? SVf_UTF8 : 0));
+		}
 		else if (*s == '<')
 		    yyerror("<> should be quotes");
 	    }

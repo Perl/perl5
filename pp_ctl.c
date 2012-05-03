@@ -3827,7 +3827,7 @@ PP(pp_require)
     OP *op;
 
     sv = POPs;
-    if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
+    if (PL_op->op_private & OPpREQUIRE_VER && PL_op->op_type != OP_DOFILE){
 	sv = sv_2mortal(new_version(sv));
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    upg_version(PL_patchlevel, TRUE);

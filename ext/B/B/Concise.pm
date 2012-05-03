@@ -664,6 +664,7 @@ if ($] >= 5.009) {
 }
 $priv{$_}{128} = '+1' for qw "caller wantarray runcv";
 @{$priv{coreargs}}{1,2,64,128} = ('DREF1','DREF2','$MOD','MARK');
+$priv{require}{128} = 'VER';
 
 our %hints; # used to display each COP's op_hints values
 
