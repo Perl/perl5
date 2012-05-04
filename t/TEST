@@ -81,7 +81,12 @@ my %temp_no_core =
 # delete env vars that may influence the results
 # but allow override via *_TEST env var if wanted
 # (e.g. PERL5OPT_TEST=-d:NYTProf)
-for my $envname (qw(PERL5LIB PERLLIB PERL5OPT)) {
+my @bad_env_vars = qw(
+    PERL5LIB PERLLIB PERL5OPT
+    PERL_YAML_BACKEND PERL_JSON_BACKEND
+);
+
+for my $envname (@bad_env_vars) {
     my $override = $ENV{"${envname}_TEST"};
     if (defined $override) {
 	warn "$0: $envname=$override\n";
