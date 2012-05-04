@@ -1834,7 +1834,7 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
 	GV * const cvgv = CvGV(dbcx->blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
-	if (isGV(cvgv)) {
+	if (cvgv && isGV(cvgv)) {
 	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
 	    mPUSHs(sv);

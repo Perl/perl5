@@ -2576,18 +2576,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 	MAGIC *mg;
 
 	PL_reg_state.re_state_eval_setup_done = TRUE;
-	DEBUG_EXECUTE_r(DEBUG_s(
-	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
-			  (IV)(PL_stack_sp - PL_stack_base));
-	    ));
-	SAVESTACK_CXPOS();
-	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
-	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
-	SAVETMPS;
-	/* Apparently this is not needed, judging by wantarray. */
-	/* SAVEI8(cxstack[cxstack_ix].blk_gimme);
-	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
-
 	if (reginfo->sv) {
 	    /* Make $_ available to executed code. */
 	    if (reginfo->sv != DEFSV) {
@@ -3125,10 +3113,21 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			        false: plain (?=foo)
 				true:  used as a condition: (?(?=foo))
 			    */
-    PAD* const initial_pad = PL_comppad;
+    PAD* last_pad = NULL;
+    dMULTICALL;
+    I32 gimme = G_SCALAR;
+    CV *caller_cv = NULL;	/* who called us */
+    CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
+
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
+
+    /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
+    multicall_oldcatch = 0;
+    multicall_cv = NULL;
+    cx = NULL;
+
 
     PERL_ARGS_ASSERT_REGMATCH;
 
@@ -4244,13 +4243,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             }    
 	    {
 		/* execute the code in the {...} */
+
 		dSP;
-		SV ** const before = SP;
+		SV ** before;
 		OP * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
-		PAD *old_comppad, *new_comppad;
+		OP *nop;
 		char *saved_regeol = PL_regeol;
 		struct re_save_state saved_state;
+		CV *newcv;
 
 		/* To not corrupt the existing regex state while executing the
 		 * eval we would normally put it on the save stack, like with
@@ -4267,36 +4268,40 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		 * variable.
 		 */
 		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
+
 		PL_reg_state.re_reparsing = FALSE;
 
+		if (!caller_cv)
+		    caller_cv = find_runcv(NULL);
+
 		n = ARG(scan);
+
 		if (rexi->data->what[n] == 'r') { /* code from an external qr */
-		    /* XXX assumes pad depth is 1; this isn't necessarily
-		     * the case with recursive qr//'s */
-		    new_comppad = (PAD*)AvARRAY(CvPADLIST(
-					    ((struct regexp *)SvANY(
+		    newcv = ((struct regexp *)SvANY(
 						(REGEXP*)(rexi->data->data[n])
 					    ))->qr_anoncv
-					))[1];
-		    PL_op = (OP*)rexi->data->data[n+1];
+					;
+		    nop = (OP*)rexi->data->data[n+1];
 		}
 		else if (rexi->data->what[n] == 'l') { /* literal code */
-		    new_comppad = initial_pad; /* the pad of the current sub */
-		    PL_op = (OP*)rexi->data->data[n];
+		    newcv = caller_cv;
+		    nop = (OP*)rexi->data->data[n];
+		    assert(CvDEPTH(newcv));
 		}
 		else {
 		    /* literal with own CV */
 		    assert(rexi->data->what[n] == 'L');
-		    new_comppad =  (PAD*)AvARRAY(CvPADLIST(rex->qr_anoncv))[1];
-		    PL_op = (OP*)rexi->data->data[n];
+		    newcv = rex->qr_anoncv;
+		    nop = (OP*)rexi->data->data[n];
 		}
+
 		/* the initial nextstate you would normally execute
 		 * at the start of an eval (which would cause error
 		 * messages to come from the eval), may be optimised
 		 * away from the execution path in the regex code blocks;
 		 * so manually set PL_curcop to it initially */
 		{
-		    OP *o = cUNOPx(PL_op)->op_first;
+		    OP *o = cUNOPx(nop)->op_first;
 		    assert(o->op_type == OP_NULL);
 		    if (o->op_targ == OP_SCOPE) {
 			o = cUNOPo->op_first;
@@ -4320,21 +4325,31 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			PL_curcop = (COP*)o;
 		    }
 		}
-		PL_op = PL_op->op_next;
+		nop = nop->op_next;
 
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
-		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(PL_op)) );
-		/* wrap the call in two SAVECOMPPADs. This ensures that
-		 * when the save stack is eventually unwound, all the
-		 * accumulated SAVEt_CLEARSV's will be processed with
-		 * interspersed SAVEt_COMPPAD's to ensure that lexicals
-		 * are cleared in the right pad */
-		if (PL_comppad == new_comppad)
-		    old_comppad = new_comppad;
-		else {
-		    SAVECOMPPAD();
-		    PAD_SAVE_LOCAL(old_comppad, new_comppad);
+		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(nop)) );
+
+		/* normally if we're about to execute code from the same
+		 * CV that we used previously, we just use the existing
+		 * CX stack entry. However, its possible that in the
+		 * meantime we may have backtracked, popped from the save
+		 * stack, and undone the SAVECOMPPAD(s) associated with
+		 * PUSH_MULTICALL; in which case PL_comppad no longer
+		 * points to newcv's pad. */
+		if (newcv != last_pushed_cv || PL_comppad != last_pad)
+		{
+		    I32 depth = (newcv == caller_cv) ? 0 : 1;
+		    if (last_pushed_cv) {
+			CHANGE_MULTICALL_WITHDEPTH(newcv, depth);
+		    }
+		    else {
+			PUSH_MULTICALL_WITHDEPTH(newcv, depth);
+		    }
+		    last_pushed_cv = newcv;
 		}
+		last_pad = PL_comppad;
+
 		PL_regoffs[0].end = PL_reg_magic->mg_len = locinput - PL_bostr;
 
                 if (sv_yes_mark) {
@@ -4342,6 +4357,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                     sv_setsv(sv_mrk, sv_yes_mark);
                 }
 
+		/* we don't use MULTICALL here as we want to call the
+		 * first op of the block of interest, rather than the
+		 * first op of the sub */
+		before = SP;
+		PL_op = nop;
 		CALLRUNOPS(aTHX);			/* Scalar context. */
 		SPAGAIN;
 		if (SP == before)
@@ -4353,11 +4373,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
+		/* *** Note that at this point we don't restore
+		 * PL_comppad, (or pop the CxSUB) on the assumption it may
+		 * be used again soon. This is safe as long as nothing
+		 * in the regexp code uses the pad ! */
 		PL_op = oop;
-		if (old_comppad != PL_comppad) {
-		    SAVECOMPPAD();
-		    PAD_RESTORE_LOCAL(old_comppad);
-		}
 		PL_curcop = ocurcop;
 		PL_regeol = saved_regeol;
 		if (!logical) {
@@ -5966,6 +5986,12 @@ no_silent:
         }
         sv_setsv(sv_err, sv_commit);
         sv_setsv(sv_mrk, sv_yes_mark);
+    }
+
+
+    if (last_pushed_cv) {
+	dSP;
+	POP_MULTICALL;
     }
 
     /* clean up; in particular, free all slabs above current one */

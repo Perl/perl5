@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 427;  # Update this when adding/deleting tests.
+plan tests => 434;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -806,6 +806,51 @@ sub run_tests {
 	];
 	like($w, qr/ at \(eval \d+\) line 1/, "warning eval B");
     }
+
+    # jumbo test for:
+    # * recursion;
+    # * mixing all the different types of blocks (literal, qr/literal/,
+    #   runtime);
+    # * backtracking (the Z+ alternation ensures CURLYX and full
+    #   scope popping on backtracking)
+
+    {
+        sub recurse2 {
+            my ($depth)= @_;
+	    return unless $depth;
+            my $s1 = '3-LMN';
+            my $r1 = qr/(??{"$s1-$depth"})/;
+
+	    my $s2 = '4-PQR';
+            my $c1 = '(??{"$s2-$depth"})';
+            use re 'eval';
+	    ok(   "<12345-ABC-$depth-123-LMN-$depth-1234-PQR-$depth>"
+	        . "<12345-ABC-$depth-123-LMN-$depth-1234-PQR-$depth>"
+		=~
+		  /^<(\d|Z+)+(??{"45-ABC-$depth-"})(\d|Z+)+$r1-\d+$c1>
+		    <(\d|Z+)+(??{"45-ABC-$depth-"})(\d|Z+)+$r1-\d+$c1>$/x,
+		"recurse2($depth)");
+	    recurse2($depth-1);
+	}
+	recurse2(5);
+    }
+
+    # make sure that errors during compiling run-time code get trapped
+
+    {
+	use re 'eval';
+
+	my $code = '(?{$x=})';
+	eval { "a" =~ /^a$code/ };
+	like($@, qr/syntax error at \(eval \d+\) line \d+/, 'syntax error');
+
+	$code = '(?{BEGIN{die})';
+	eval { "a" =~ /^a$code/ };
+	like($@,
+	    qr/BEGIN failed--compilation aborted at \(eval \d+\) line \d+/,
+	    'syntax error');
+    }
+
 
 } # End of sub run_tests
 

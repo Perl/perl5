@@ -1180,6 +1180,12 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     U8 hasargs = 0		/* used by PUSHSUB */
 
 #define PUSH_MULTICALL(the_cv) \
+    PUSH_MULTICALL_WITHDEPTH(the_cv, 1);
+
+/* Like PUSH_MULTICALL, but allows you to specify the CvDEPTH increment,
+ * rather than the default of 1 (this isn't part of the public API) */
+
+#define PUSH_MULTICALL_WITHDEPTH(the_cv, depth) \
     STMT_START {							\
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
@@ -1191,7 +1197,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	PUSHSTACKi(PERLSI_SORT);					\
 	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
 	PUSHSUB(cx);							\
-	if (++CvDEPTH(cv) >= 2) {					\
+	CvDEPTH(cv) += depth;						\
+	if (CvDEPTH(cv) >= 2) {						\
 	    PERL_STACK_OVERFLOW_CHECK();				\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
 	}								\
@@ -1209,8 +1216,9 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 #define POP_MULTICALL \
     STMT_START {							\
-	if (! --CvDEPTH(multicall_cv))					\
-	    LEAVESUB(multicall_cv);					\
+	if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
+		LEAVESUB(multicall_cv);					\
+	}								\
 	POPBLOCK(cx,PL_curpm);						\
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
@@ -1218,6 +1226,31 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	SPAGAIN;							\
     } STMT_END
 
+/* Change the CV of an already-pushed MULTICALL CxSUB block.
+ * (this isn't part of the public API) */
+
+#define CHANGE_MULTICALL_WITHDEPTH(the_cv, depth) \
+    STMT_START {							\
+	CV * const _nOnclAshIngNamE_ = the_cv;				\
+	CV * const cv = _nOnclAshIngNamE_;				\
+	AV * const padlist = CvPADLIST(cv);				\
+	cx = &cxstack[cxstack_ix];					\
+	assert(cx->cx_type & CXp_MULTICALL);				\
+	if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
+		LEAVESUB(multicall_cv);					\
+	}								\
+	cx->cx_type &= ~CXp_HASARGS;					\
+	PUSHSUB(cx);							\
+	CvDEPTH(cv) += depth;						\
+	if (CvDEPTH(cv) >= 2) {						\
+	    PERL_STACK_OVERFLOW_CHECK();				\
+	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
+	}								\
+	SAVECOMPPAD();							\
+	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));			\
+	multicall_cv = cv;						\
+	multicall_cop = CvSTART(cv);					\
+    } STMT_END
 /*
  * Local variables:
  * c-indentation-style: bsd
