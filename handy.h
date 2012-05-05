@@ -778,7 +778,7 @@ EXTCONST U32 PL_charclass[];
 #   define toLOWER(c)	tolower(c)
 #   define toUPPER(c)	toupper(c)
 #else /* Not EBCDIC: ASCII-only matching */
-#   define isALNUMC(c)  isALNUMC_A(c)
+#   define isALNUMC(c)  isALNUMC_A(c)	/* Mnemonic: "C's alnum" = alpha + digit */
 #   define isALPHA(c)   isALPHA_A(c)
 #   define isBLANK(c)   isBLANK_A(c)
 #   define isCNTRL(c)   isCNTRL_A(c)
