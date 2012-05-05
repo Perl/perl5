@@ -3083,8 +3083,8 @@ Perl 5.8.1 the ordering can be different even between different runs of
 Perl for security reasons (see L<perlsec/"Algorithmic Complexity
 Attacks">).
 
-As a side effect, calling keys() resets the internal interator of the HASH or ARRAY
-(see L</each>).  In particular, calling keys() in void context resets
+As a side effect, calling keys() resets the internal iterator of the HASH or
+ARRAY (see L</each>).  In particular, calling keys() in void context resets
 the iterator with no other overhead.
 
 Here is yet another way to print your environment:
