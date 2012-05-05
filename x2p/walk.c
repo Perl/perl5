@@ -69,7 +69,7 @@ walk(int useval, int level, register int node, int *numericptr, int minprec)
 	if (namelist) {
 	    while (isALPHA(*namelist)) {
 		for (d = tokenbuf,s=namelist;
-		  isALPHA(*s) || isDIGIT(*s) || *s == '_';
+		  isWORDCHAR(*s);
 		  *d++ = *s++) ;
 		*d = '\0';
 		while (*s && !isALPHA(*s)) s++;
@@ -584,7 +584,7 @@ sub Pick {\n\
 		    *t &= 127;
 		    if (isLOWER(*t))
 			*t = toUPPER(*t);
-		    if (!isALPHA(*t) && !isDIGIT(*t))
+		    if (!isALNUMC(*t))
 			*t = '_';
 		}
 		if (!strchr(tokenbuf,'_'))
@@ -1112,7 +1112,7 @@ sub Pick {\n\
 		*t &= 127;
 		if (isLOWER(*t))
 		    *t = toUPPER(*t);
-		if (!isALPHA(*t) && !isDIGIT(*t))
+		if (!isALNUMC(*t))
 		    *t = '_';
 	    }
 	    if (!strchr(tokenbuf,'_'))
@@ -1149,7 +1149,7 @@ sub Pick {\n\
 		    *t &= 127;
 		    if (isLOWER(*t))
 			*t = toUPPER(*t);
-		    if (!isALPHA(*t) && !isDIGIT(*t))
+		    if (!isALNUMC(*t))
 			*t = '_';
 		}
 		if (!strchr(tokenbuf,'_'))
@@ -1420,7 +1420,7 @@ sub Pick {\n\
 	i = numarg;
 	if (i) {
 	    t = s = tmpstr->str_ptr;
-	    while (isALPHA(*t) || isDIGIT(*t) || *t == '$' || *t == '_')
+	    while (isWORDCHAR(*t) || *t == '$')
 		t++;
 	    i = t - s;
 	    if (i < 2)
