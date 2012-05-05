@@ -399,7 +399,7 @@ yylex(void)
 
 #define SNARFWORD \
 	d = tokenbuf; \
-	while (isALPHA(*s) || isDIGIT(*s) || *s == '_') \
+	while (isWORDCHAR(*s)) \
 	    *d++ = *s++; \
 	*d = '\0'; \
 	d = tokenbuf; \
@@ -426,7 +426,7 @@ yylex(void)
 		maxfld = tmp;
 	    XOP(FIELD);
 	}
-	for (d = s; isALPHA(*s) || isDIGIT(*s) || *s == '_'; )
+	for (d = s; isWORDCHAR(*s); )
 	    s++;
 	split_to_array = TRUE;
 	if (d != s)
