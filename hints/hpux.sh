@@ -537,7 +537,7 @@ cat >config.arch <<'EOCBU'
 # This script UU/config.arch will get 'called-back' by Configure after
 # all other configurations are done just before config.h is generated
 case "$archname:$optimize" in
-  PA*:*-g*[-+]O*|*[-+]O*-g*)
+  PA*:*-g*[-+]O*|PA*:*[-+]O*-g*)
     case "$ccflags" in
       *DD64*) ;;
       *) case "$ccversion" in
