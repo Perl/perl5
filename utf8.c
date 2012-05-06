@@ -2707,6 +2707,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
 
+    assert(p != ustrp); /* Otherwise overwrites */
+
     if (UTF8_IS_INVARIANT(*p)) {
 	if (flags & FOLD_FLAGS_LOCALE) {
 	    result = toLOWER_LC(*p);
