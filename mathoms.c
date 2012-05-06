@@ -38,6 +38,13 @@
  */
 #else
 
+/* Not all of these have prototypes elsewhere, so do this to get
+ * non-mangled names.
+ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 PERL_CALLCONV OP * Perl_ref(pTHX_ OP *o, I32 type);
 PERL_CALLCONV void Perl_sv_unref(pTHX_ SV *sv);
 PERL_CALLCONV void Perl_sv_taint(pTHX_ SV *sv);
@@ -1196,6 +1203,10 @@ Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
     return _to_utf8_upper_flags(p, ustrp, lenp, FALSE, NULL);
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* NO_MATHOMS */
 
