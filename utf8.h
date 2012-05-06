@@ -20,8 +20,9 @@
 /* For to_utf8_fold_flags, q.v. */
 #define FOLD_FLAGS_LOCALE 0x1
 #define FOLD_FLAGS_FULL   0x2
+#define FOLD_FLAGS_NOMIX_ASCII 0x4
 
-#define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, 1)
+#define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 #define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, \
 	             FOLD_FLAGS_FULL, NULL)
 #define to_utf8_lower(a,b,c) _to_utf8_lower_flags(a,b,c,0, NULL)

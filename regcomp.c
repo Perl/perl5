@@ -11249,7 +11249,8 @@ parseit:
 		U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 		STRLEN foldlen;
 		const UV f =
-                    _to_uni_fold_flags(j, foldbuf, &foldlen, allow_full_fold);
+                    _to_uni_fold_flags(j, foldbuf, &foldlen,
+                                       (allow_full_fold) ? FOLD_FLAGS_FULL : 0);
 
 		if (foldlen > (STRLEN)UNISKIP(f)) {
 

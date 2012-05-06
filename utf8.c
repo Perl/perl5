@@ -1761,20 +1761,44 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const bool flags)
 }
 
 UV
-Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const bool flags)
+Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const U8 flags)
 {
 
-    /* Not currently externally documented, and subject to change, <flags> is
-     * TRUE iff full folding is to be used */
+    /* Not currently externally documented, and subject to change
+     *  <flags> bits meanings:
+     *	    FOLD_FLAGS_FULL  iff full folding is to be used;
+     *	    FOLD_FLAGS_LOCALE iff in locale
+     *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
+     */
 
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
     if (c < 256) {
-	return _to_fold_latin1((U8) c, p, lenp, flags);
+	UV result = _to_fold_latin1((U8) c, p, lenp,
+			       cBOOL(((flags & FOLD_FLAGS_FULL)
+				   /* If ASCII-safe, don't allow full folding,
+				    * as that could include SHARP S => ss;
+				    * otherwise there is no crossing of
+				    * ascii/non-ascii in the latin1 range */
+				   && ! (flags & FOLD_FLAGS_NOMIX_ASCII))));
+	/* It is illegal for the fold to cross the 255/256 boundary under
+	 * locale; in this case return the original */
+	return (result > 256 && flags & FOLD_FLAGS_LOCALE)
+	       ? c
+	       : result;
     }
 
-    uvchr_to_utf8(p, c);
-    return CALL_FOLD_CASE(p, p, lenp, flags);
+    /* If no special needs, just use the macro */
+    if ( ! (flags & (FOLD_FLAGS_LOCALE|FOLD_FLAGS_NOMIX_ASCII))) {
+	uvchr_to_utf8(p, c);
+	return CALL_FOLD_CASE(p, p, lenp, flags & FOLD_FLAGS_FULL);
+    }
+    else {  /* Otherwise, _to_utf8_fold_flags has the intelligence to deal with
+	       the special flags. */
+	U8 utf8_c[UTF8_MAXBYTES + 1];
+	uvchr_to_utf8(utf8_c, c);
+	return _to_utf8_fold_flags(utf8_c, p, lenp, flags, NULL);
+    }
 }
 
 /* for now these all assume no locale info available for Unicode > 255; and
@@ -2695,6 +2719,8 @@ The character at C<p> is assumed by this routine to be well-formed.
  *			      POSIX, lowercase is used instead
  *      bit FOLD_FLAGS_FULL   is set iff full case folds are to be used;
  *			      otherwise simple folds
+ *      bit FOLD_FLAGS_NOMIX_ASCII is set iff folds of non-ASCII to ASCII are
+ *			      prohibited
  * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
  *		 were used in the calculation; otherwise unchanged. */
 
@@ -2706,6 +2732,9 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
+
+    /* These are mutually exclusive */
+    assert (! ((flags & FOLD_FLAGS_LOCALE) && (flags & FOLD_FLAGS_NOMIX_ASCII)));
 
     assert(p != ustrp); /* Otherwise overwrites */
 
@@ -2724,17 +2753,49 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	}
 	else {
 	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
-		                   ustrp, lenp, cBOOL(flags & FOLD_FLAGS_FULL));
+		                   ustrp, lenp,
+				   cBOOL((flags & FOLD_FLAGS_FULL
+				       /* If ASCII safe, don't allow full
+					* folding, as that could include SHARP
+					* S => ss; otherwise there is no
+					* crossing of ascii/non-ascii in the
+					* latin1 range */
+				       && ! (flags & FOLD_FLAGS_NOMIX_ASCII))));
 	}
     }
     else {  /* utf8, ord above 255 */
-	result = CALL_FOLD_CASE(p, ustrp, lenp, flags);
+	result = CALL_FOLD_CASE(p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
 
 	if ((flags & FOLD_FLAGS_LOCALE)) {
-	    result = check_locale_boundary_crossing(p, result, ustrp, lenp);
+	    return check_locale_boundary_crossing(p, result, ustrp, lenp);
 	}
+	else if (! (flags & FOLD_FLAGS_NOMIX_ASCII)) {
+	    return result;
+	}
+	else {
+	    /* This is called when changing the case of a utf8-encoded
+	     * character above the Latin1 range, and the result should not
+	     * contain an ASCII character. */
 
-	return result;
+	    UV original;    /* To store the first code point of <p> */
+
+	    /* Look at every character in the result; if any cross the
+	    * boundary, the whole thing is disallowed */
+	    U8* s = ustrp;
+	    U8* e = ustrp + *lenp;
+	    while (s < e) {
+		if (isASCII(*s)) {
+		    /* Crossed, have to return the original */
+		    original = valid_utf8_to_uvchr(p, lenp);
+		    Copy(p, ustrp, *lenp, char);
+		    return original;
+		}
+		s += UTF8SKIP(s);
+	    }
+
+	    /* Here, no characters crossed, result is ok as-is */
+	    return result;
+	}
     }
 
     /* Here, used locale rules.  Convert back to utf8 */
