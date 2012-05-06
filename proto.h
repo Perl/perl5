@@ -3158,6 +3158,14 @@ PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV void	Perl_reentrant_free(pTHX);
+PERL_CALLCONV void	Perl_reentrant_init(pTHX);
+PERL_CALLCONV void*	Perl_reentrant_retry(const char *f, ...)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_REENTRANT_RETRY	\
+	assert(f)
+
+PERL_CALLCONV void	Perl_reentrant_size(pTHX);
 /* PERL_CALLCONV OP*	Perl_ref(pTHX_ OP* o, I32 type); */
 PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *c, U32 flags);
 PERL_CALLCONV SV *	Perl_refcounted_he_fetch_pv(pTHX_ const struct refcounted_he *chain, const char *key, U32 hash, U32 flags)
@@ -7675,16 +7683,6 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_
 #define PERL_ARGS_ASSERT_PERLIO_WRITE	\
 	assert(vbuf)
 
-#endif
-#if defined(USE_REENTRANT_API)
-PERL_CALLCONV void	Perl_reentrant_free(pTHX);
-PERL_CALLCONV void	Perl_reentrant_init(pTHX);
-PERL_CALLCONV void*	Perl_reentrant_retry(const char *f, ...)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_REENTRANT_RETRY	\
-	assert(f)
-
-PERL_CALLCONV void	Perl_reentrant_size(pTHX);
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)

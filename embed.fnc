@@ -983,12 +983,12 @@ p	|void	|peep		|NULLOK OP* o
 p	|void	|rpeep		|NULLOK OP* o
 : Defined in doio.c, used only in pp_hot.c
 dopM	|PerlIO*|start_glob	|NN SV *tmpglob|NN IO *io
-#if defined(USE_REENTRANT_API)
+
 Ap	|void	|reentrant_size
 Ap	|void	|reentrant_init
 Ap	|void	|reentrant_free
 Anp	|void*	|reentrant_retry|NN const char *f|...
-#endif
+
 : "Very" special - can't use the O flag for this one:
 : (The rename from perl_atexit to Perl_call_atexit was in 864dbfa3ca8032ef)
 Ap	|void	|call_atexit	|ATEXIT_t fn|NULLOK void *ptr

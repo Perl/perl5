@@ -437,6 +437,10 @@
 #define re_compile(a,b)		Perl_re_compile(aTHX_ a,b)
 #define re_intuit_start(a,b,c,d,e,f)	Perl_re_intuit_start(aTHX_ a,b,c,d,e,f)
 #define re_intuit_string(a)	Perl_re_intuit_string(aTHX_ a)
+#define reentrant_free()	Perl_reentrant_free(aTHX)
+#define reentrant_init()	Perl_reentrant_init(aTHX)
+#define reentrant_retry		Perl_reentrant_retry
+#define reentrant_size()	Perl_reentrant_size(aTHX)
 #define reg_named_buff_all(a,b)	Perl_reg_named_buff_all(aTHX_ a,b)
 #define reg_named_buff_exists(a,b,c)	Perl_reg_named_buff_exists(aTHX_ a,b,c)
 #define reg_named_buff_fetch(a,b,c)	Perl_reg_named_buff_fetch(aTHX_ a,b,c)
@@ -844,12 +848,6 @@
 #define PerlIO_tell(a)		Perl_PerlIO_tell(aTHX_ a)
 #define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
 #define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
-#endif
-#if defined(USE_REENTRANT_API)
-#define reentrant_free()	Perl_reentrant_free(aTHX)
-#define reentrant_init()	Perl_reentrant_init(aTHX)
-#define reentrant_retry		Perl_reentrant_retry
-#define reentrant_size()	Perl_reentrant_size(aTHX)
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
