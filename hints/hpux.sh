@@ -533,6 +533,27 @@ EOF
     fi
 EOCBU
 
+cat >config.arch <<'EOCBU'
+# This script UU/config.arch will get 'called-back' by Configure after
+# all other configurations are done just before config.h is generated
+case "$archname:$optimize" in
+  PA*:*-g*[-+]O*|*[-+]O*-g*)
+    case "$ccflags" in
+      *DD64*) ;;
+      *) case "$ccversion" in
+	  # Only on PA-RISC. B3910B (aCC) is not faulty
+	  # B.11.* and A.10.* are
+	  [AB].1*)
+	      # cc: error 1414: Can't handle preprocessed file foo.i if -g and -O specified.
+	      echo "HP-UX C-ANSI-C on PA-RISC does not accept both -g and -O on preprocessed files" >&4
+	      echo "when compiling in 32bit mode. The optimizer will be disabled." >&4
+	      optimize=`echo "$optimize" | sed -e 's/[-+]O[0-9]*//' -e 's/+Onolimit//' -e 's/^ *//'`
+	      ;;
+	  esac
+      esac
+  esac
+EOCBU
+
 cat >UU/uselargefiles.cbu <<'EOCBU'
 # This script UU/uselargefiles.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use large files.
