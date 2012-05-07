@@ -5501,6 +5501,7 @@ t/uni/tr_utf8.t			See if Unicode tr/// in utf8 works
 t/uni/universal.t		See if Unicode in calls to UNIVERSAL works
 t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
+t/win32/fs.t			Test Win32 link for compatibility
 t/win32/runenv.t		Test if Win* perl honors its env variables
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
