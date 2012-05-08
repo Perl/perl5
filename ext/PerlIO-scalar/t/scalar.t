@@ -371,6 +371,6 @@ SKIP: {
   is scalar threads::async(sub { my $foo = $str; $foo })->join, "a",
     'scalars behind in-memory handles are cloned properly';
   print $fh "a";
-  is scalar async { print $fh "b"; $str }->join, "ab",
+  is scalar threads::async(sub { print $fh "b"; $str })->join, "ab",
     'printing to a cloned in-memory handle works';
 }
