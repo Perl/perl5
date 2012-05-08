@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 79;
+use Test::More tests => 81;
 
 my $fh;
 my $var = "aaa\n";
@@ -359,4 +359,18 @@ SKIP: {
     print $fh "abc";
     ok has_trailing_nul $memfile,
 	 'write appends null when growing string after seek past end';
+}
+
+# [perl #112780] Cloning of in-memory handles
+SKIP: {
+  skip "no threads", 2 if !$Config::Config{useithreads};
+  require threads;
+  my $str = '';
+  open my $fh, ">", \$str;
+  $str = 'a';
+  is scalar threads::async(sub { my $foo = $str; $foo })->join, "a",
+    'scalars behind in-memory handles are cloned properly';
+  print $fh "a";
+  is scalar async { print $fh "b"; $str }->join, "ab",
+    'printing to a cloned in-memory handle works';
 }

@@ -314,12 +314,21 @@ PerlIO *
 PerlIOScalar_dup(pTHX_ PerlIO * f, PerlIO * o, CLONE_PARAMS * param,
 		 int flags)
 {
+    /* Duplication causes the scalar layer to be pushed on to clone, caus-
+       ing the cloned scalar to be set to the empty string by
+       PerlIOScalar_pushed.  So set aside our scalar temporarily. */
+    PerlIOScalar * const os = PerlIOSelf(o, PerlIOScalar);
+    SV * const var = os->var;
+    os->var = newSVpvs("");
     if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags))) {
 	PerlIOScalar *fs = PerlIOSelf(f, PerlIOScalar);
-	PerlIOScalar *os = PerlIOSelf(o, PerlIOScalar);
-	/* var has been set by implicit push */
+	/* var has been set by implicit push, so replace it */
+	SvREFCNT_dec(fs->var);
+	fs->var = PerlIO_sv_dup(aTHX_ var, param);
 	fs->posn = os->posn;
     }
+    SvREFCNT_dec(os->var);
+    os->var = var;
     return f;
 }
 
