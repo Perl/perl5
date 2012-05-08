@@ -2925,7 +2925,37 @@ win32_link(const char *oldname, const char *newname)
     {
 	return 0;
     }
-    errno = (GetLastError() == ERROR_FILE_NOT_FOUND) ? ENOENT : EINVAL;
+    /* This isn't perfect, eg. Win32 returns ERROR_ACCESS_DENIED for
+       both permissions errors and if the source is a directory, while
+       POSIX wants EACCES and EPERM respectively.
+
+       Determined by experimentation on Windows 7 x64 SP1, since MS
+       don't document what error codes are returned.
+    */
+    switch (GetLastError()) {
+    case ERROR_BAD_NET_NAME:
+    case ERROR_BAD_NETPATH:
+    case ERROR_BAD_PATHNAME:
+    case ERROR_FILE_NOT_FOUND:
+    case ERROR_FILENAME_EXCED_RANGE:
+    case ERROR_INVALID_DRIVE:
+    case ERROR_PATH_NOT_FOUND:
+      errno = ENOENT;
+      break;
+    case ERROR_ALREADY_EXISTS:
+      errno = EEXIST;
+      break;
+    case ERROR_ACCESS_DENIED:
+      errno = EACCES;
+      break;
+    case ERROR_NOT_SAME_DEVICE:
+      errno = EXDEV;
+      break;
+    default:
+      /* ERROR_INVALID_FUNCTION - eg. on a FAT volume */
+      errno = EINVAL;
+      break;
+    }
     return -1;
 }
 

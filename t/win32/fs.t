@@ -32,7 +32,6 @@ SKIP: {
     ok(!link($tmpfile1, $tmpfile2),
        "Cannot link to existing file");
     warn $!;
-    local $TODO = "not yet implemented";
     is(0+$!, &Errno::EEXIST, "check for EEXIST");
 }
 
