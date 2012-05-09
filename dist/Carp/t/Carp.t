@@ -281,8 +281,9 @@ sub w { cluck @_ }
     }
 }
 
+SKIP:
 {
-    local $TODO = "VMS exit status semantics don't work this way" if $Is_VMS;
+    skip "IPC::Open3::open3 needs porting", 2 if $Is_VMS;
 
     # Check that croak() and confess() don't clobber $!
     runperl(
@@ -392,21 +393,26 @@ SKIP: {
 
 # UTF8-flagged strings should not cause Carp to try to load modules (even
 # implicitly via utf8_heavy.pl) after a syntax error [perl #82854].
-like(
-  runperl(
-    prog => q<
-      use utf8; use strict; use Carp;
-      BEGIN { $SIG{__DIE__} = sub { Carp::croak qq(aaaaa$_[0]) } }
-      $c
-    >,
-    stderr=>1,
-  ),
-  qr/aaaaa/,
-  'Carp can handle UTF8-flagged strings after a syntax error',
-);
+SKIP:
+{
+    skip "IPC::Open3::open3 needs porting", 1 if $Is_VMS;
+    like(
+      runperl(
+        prog => q<
+          use utf8; use strict; use Carp;
+          BEGIN { $SIG{__DIE__} = sub { Carp::croak qq(aaaaa$_[0]) } }
+          $c
+        >,
+        stderr=>1,
+      ),
+      qr/aaaaa/,
+      'Carp can handle UTF8-flagged strings after a syntax error',
+    );
+}
 
 SKIP:
 {
+    skip "IPC::Open3::open3 needs porting", 1 if $Is_VMS;
     skip("B:: always created when static", 1)
       if $Config{static_ext} =~ /\bB\b/;
     is(
@@ -430,20 +436,23 @@ $@ =~ s/\n.*//; # just check first line
 is $@, "heek at ".__FILE__." line ".(__LINE__-2).", <DATA> line 2.\n",
     'last handle line num is mentioned';
 
-like(
-  runperl(
-    prog => q<
-      open FH, q-Makefile.PL-;
-      <FH>;  # set PL_last_in_gv
-      BEGIN { *CORE::GLOBAL::die = sub { die Carp::longmess(@_) } };
-      use Carp;
-      die fumpts;
-    >,
-  ),
-  qr 'fumpts',
-  'Carp::longmess works inside CORE::GLOBAL::die',
-);
-
+SKIP:
+{
+    skip "IPC::Open3::open3 needs porting", 1 if $Is_VMS;
+    like(
+      runperl(
+        prog => q<
+          open FH, q-Makefile.PL-;
+          <FH>;  # set PL_last_in_gv
+          BEGIN { *CORE::GLOBAL::die = sub { die Carp::longmess(@_) } };
+          use Carp;
+          die fumpts;
+        >,
+      ),
+      qr 'fumpts',
+      'Carp::longmess works inside CORE::GLOBAL::die',
+    );
+}
 
 # New tests go here
 
