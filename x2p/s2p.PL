@@ -497,6 +497,7 @@ Swap the contents of the pattern space and the hold space.
 
 #--------------------------------------------------------------------------
 $ComTab{'y'}=[ 2, 'tra', \&Emit,       ''                                ]; #ok
+
 =item [2addr]B<y>B</>I<string1>B</>I<string2>B</>
 
 In the pattern space, replace all characters occurring in I<string1> by the
@@ -520,7 +521,7 @@ Prints the current line number on the standard output.
 
 #--------------------------------------------------------------------------
 $ComTab{':'}=[ 0, 'str', \&Label,      ''                                ]; #ok
- 
+
 =item [0addr]B<:> [I<label>]
 
 The command specifies the position of the I<label>. It has no other effect.
