@@ -2635,7 +2635,22 @@ EOPATCH
     if ($major == 4 && $^O eq 'linux') {
         # Whilst this is fixed properly in f0784f6a4c3e45e1 which provides the
         # Configure probe, it's easier to back out the problematic changes made
-        # in these previous commits:
+        # in these previous commits.
+
+        # In maint-5.004, the simplest addition is to "correct" the file to
+        # use the same pre-processor macros as blead had used. Whilst commit
+        # 9b599b2a63d2324d (reverted below) is described as
+        # [win32] merge change#887 from maintbranch
+        # it uses __sun__ and __svr4__ instead of the __sun and __SVR4 of the
+        # maint branch commit 6cdf74fe31f049dc
+
+        edit_file('doio.c', sub {
+                      my $code = shift;
+                      $code =~ s{defined\(__sun\) && defined\(__SVR4\)}
+                                {defined(__sun__) && defined(__svr4__)}g;
+                      return $code;
+                  });
+
         if (extract_from_file('doio.c',
                               qr!^/\* XXX REALLY need metaconfig test \*/$!)) {
             revert_commit('4682965a1447ea44', 'doio.c');
