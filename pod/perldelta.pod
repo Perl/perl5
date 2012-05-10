@@ -964,6 +964,13 @@ been moved out into the new L<PerlIO::mmap> module.
 
 =head2 Updated Modules and Pragmata
 
+This is only an overview of selected module updates.  For a complete list of
+updates, run:
+
+    $ corelist --diff 5.14.0 5.16.0
+
+You can substitute your favorite version in place of 5.14.0, too.
+
 =over 4
 
 =item *
