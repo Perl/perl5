@@ -24,6 +24,13 @@ use strict;
 
 require 't/test.pl';
 
+# It turns out that, since the default @INC will include your old 5.x libs, if
+# you have them, the Porting utils might load a library that no longer compiles
+# clean.  This actually happened, with Local::Maketext::Lexicon from a 5.10.0
+# preventing 5.16.0-RC0 from testing successfully.  This test is really only
+# needed for porters, anyway.  -- rjbs, 2012-05-10
+find_git_or_skip('all');
+
 my @maybe;
 
 open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
