@@ -3666,9 +3666,57 @@ L<PerlIO::Util> version 0.72
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.16.0 represents approximately 12 months of development since Perl
+5.14.0 and contains approximately 590,000 lines of changes across 2,500
+files from 137 authors.
 
-  perl Porting/acknowledgements.pl v5.14.0..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers.  The following people are known to
+have contributed the improvements that became Perl 5.14.1:
+
+Aaron Crane, Abhijit Menon-Sen, Abigail, Alan Haggai Alavi, Alberto
+Simões, Alexandr Ciornii, Andreas König, Andy Dougherty, Aristotle
+Pagaltzis, Bo Johansson, Bo Lindbergh, brian d foy, Brian Fraser, Brian
+Greenfield, Carl Hayter, Chas. Owens, Chia-liang Kao, Chip Salzenberg,
+Chris 'BinGOs' Williams, Christian Hansen, Christopher J. Madsen,
+chromatic, Claes Jacobsson, Claudio Ramirez, Craig A. Berry, Damian
+Conway, Daniel Kahn Gillmor, Darin McBride, Dave Rolsky, David Cantrell,
+David Golden, David Leadbeater, David Mitchell, Dee Newcum, Dennis
+Kaarsemaker, Dominic Hargreaves, Douglas Christopher Wilson, Eric Brine,
+Father Chrysostomos, Florian Ragwitz, Frederic Briere, George Greer,
+Gerard Goossen, Gisle Aas, H.Merijn Brand, Hojung Youn, Ian Goodacre,
+James E Keenan, Jan Dubois, Jerry D. Hedden, Jesse Luehrs, Jesse
+Vincent, Jilles Tjoelker, Jim Cromie, Jim Meyering, Joel Berger, Johan
+Vromans, Johannes Plunien, John Hawkinson, John P. Linderman, John
+Peacock, Joshua ben Jore, Juerd Waalboer, Karl Williamson, Karthik
+Rajagopalan, Keith Thompson, Kevin J.  Woolley, Kevin Ryde, Laurent
+Dami, Leo Lapworth, Leon Brocard, Leon Timmermans, Louis Strous, Lukas
+Mai, Marc Green, Marcel Grünauer, Mark A. Stratman, Mark Dootson, Mark
+Jason Dominus, Martin Hasch, Matthew Horsfall, Max Maischein, Michael G
+Schwern, Michael Witten, Mike Sheldrake, Moritz Lenz, Nicholas Clark,
+Niko Tyni, Nuno Carvalho, Pau Amma, Paul Evans, Paul Green, Paul
+Johnson, Perlover, Peter John Acklam, Peter Martini, Peter Scott, Phil
+Monsen, Pino Toscano, Rafael Garcia-Suarez, Rainer Tammer, Reini Urban,
+Ricardo Signes, Robin Barker, Rodolfo Carvalho, Salvador Fandiño, Sam
+Kimbrel, Samuel Thibault, Shawn M Moore, Shigeya Suzuki, Shlomi Fish,
+Sisyphus, Slaven Rezic, Spiros Denaxas, Steffen Müller, Steffen
+Schwigon, Stephen Bennett, Stephen Oberholtzer, Stevan Little, Steve
+Hay, Steve Peters, Thomas Sibley, Thorsten Glaser, Timothe Litt, Todd
+Rinaldo, Tom Christiansen, Tom Hukins, Tony Cook, Vadim Konovalov,
+Vincent Pit, Vladimir Timofeev, Walt Mankowski, Yves Orton, Zefram,
+Zsbán Ambrus, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history.  In particular, it does not
+include the names of the (very much appreciated) contributors who
+reported issues to the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core.  We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors,
+please see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
