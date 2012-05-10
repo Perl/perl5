@@ -97,6 +97,36 @@ sub removed_raw {
   return @removed;
 }
 
+sub changes_between {
+  my ($left_ver, $right_ver) = @_;
+
+  my $left  = $version{ $left_ver };
+  my $right = $version{ $right_ver };
+
+  my %uniq = (%$left, %$right);
+
+  my %changes;
+  for my $lib (keys %uniq) {
+      my $lhs = exists $left->{ $lib }
+              ? (defined $left->{ $lib } ? $left->{ $lib } : '(undef)')
+              : '(absent)';
+      my $rhs = exists $right->{ $lib }
+              ? (defined $right->{ $lib } ? $right->{ $lib } : '(undef)')
+              : '(absent)';
+
+      next if $lhs eq $rhs;
+
+      my $change = {
+        (exists $left->{$lib}  ? (left  => $left->{$lib})  : ()),
+        (exists $right->{$lib} ? (right => $right->{$lib}) : ()),
+      };
+
+      $changes{$lib} = $change;
+  }
+
+  return %changes;
+}
+
 # When things escaped.
 # NB. If you put version numbers with trailing zeroes here, you
 # should also add an alias for the numerical ($]) version; see

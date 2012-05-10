@@ -193,21 +193,23 @@ if ($Opts{diff}) {
 
     my ($old_ver, $new_ver) = @ARGV;
 
-    my $old = $Module::CoreList::version{ numify_version($old_ver) };
-    my $new = $Module::CoreList::version{ numify_version($new_ver) };
+    my $old = numify_version($old_ver);
+    my $new = numify_version($new_ver);
 
-    my %uniq = (%$old, %$new);
-    for my $lib (sort keys %uniq) {
-        my $old = exists $old->{ $lib }
-                ? (defined $old->{ $lib } ? $old->{ $lib } : '(undef)')
-                : '(absent)';
-        my $new = exists $new->{ $lib }
-                ? (defined $new->{ $lib } ? $new->{ $lib } : '(undef)')
-                : '(absent)';
+    my %diff = Module::CoreList::changes_between($old, $new);
 
-        next if $old eq $new;
+    for my $lib (sort keys %diff) {
+      my $diff = $diff{$lib};
 
-        printf "%-35s %10s %10s\n", $lib, $old, $new;
+      my $was = ! exists  $diff->{left} ? '(absent)'
+              : ! defined $diff->{left} ? '(undef)'
+              :                          $diff->{left};
+
+      my $now = ! exists  $diff->{right} ? '(absent)'
+              : ! defined $diff->{right} ? '(undef)'
+              :                          $diff->{right};
+
+        printf "%-35s %10s %10s\n", $lib, $was, $now;
     }
     exit(0);
 }
