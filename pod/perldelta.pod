@@ -3268,7 +3268,7 @@ under threading has been fixed.
 
 =item *
 
-A regression introduced in 5.13.6 has
+A regression introduced in 5.14.0 has
 been fixed.  This involved an inverted
 bracketed character class in a regular expression that consisted solely
 of a Unicode property.  That property wasn't getting inverted outside the
