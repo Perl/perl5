@@ -1072,7 +1072,7 @@ Examples of affected method calls:
 We no longer read from STDIN when the Content-Length is not set,
 preventing requests with no Content-Length from freezing in some cases.
 This is consistent with the CGI RFC 3875, and is also consistent with
-CGI::Simple. However, the old behavior may have been expected by some
+CGI::Simple.  However, the old behavior may have been expected by some
 command-line uses of CGI.pm.
 
 =item *
@@ -1081,7 +1081,7 @@ L<Compress::Zlib> has been upgraded from version 2.035 to version 2.048
 
 IO::Compress::Zip and IO::Uncompress::Unzip now have support for LZMA
 (method 14).  There is a fix for a CRC issue in IO::Compress::Unzip and
-it supports Streamed Stored context now. And fixed a Zip64 issue in
+it supports Streamed Stored context now.  And fixed a Zip64 issue in
 IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
 
 =item *
@@ -1114,7 +1114,7 @@ counterparts.
 L<ExtUtils::ParseXS> has been upgraded from version 2.2210 to 3.16.
 
 Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
-was rewritten and cleaned up. It has been made somewhat more extensible
+was rewritten and cleaned up.  It has been made somewhat more extensible
 and now finally uses strictures.
 
 The typemap logic has been moved into a separate module,
@@ -1342,7 +1342,7 @@ the regular expression engine [perl #108398].
 C<Pod::Functions> has been upgraded from version 1.04 to 1.05.
 
 F<Functions.pm> is now generated at perl build time from annotations in
-F<perlfunc.pod>. This will ensure that L<Pod::Functions> and L<perlfunc>
+F<perlfunc.pod>.  This will ensure that L<Pod::Functions> and L<perlfunc>
 remain in synchronisation.
 
 =item *
@@ -1367,12 +1367,12 @@ the CPAN for more information.
 
 L<POSIX> has been upgraded from version 1.24 to version 1.30.
 
-L<POSIX> no longer uses L<AutoLoader>. Any code which was relying on this
+L<POSIX> no longer uses L<AutoLoader>.  Any code which was relying on this
 implementation detail was buggy, and may fail as a result of this change.
 The module's Perl code has been considerably simplified, roughly halving
-the number of lines, with no change in functionality. The XS code has
+the number of lines, with no change in functionality.  The XS code has
 been refactored to reduce the size of the shared object by about 12%,
-with no change in functionality. More POSIX functions now have tests.
+with no change in functionality.  More POSIX functions now have tests.
 
 C<sigsuspend> and C<pause> now run signals handle before returning, as the
 whole point of these two functions is to wait until a signal has
@@ -1381,10 +1381,11 @@ arrived, and then return I<after> it has been triggered.  Delayed, or
 race conditions [perl #107216].
 
 C<POSIX::sleep> is now a direct call into the underlying OS C<sleep>
-function, instead of being a Perl wrapper on C<CORE::sleep>. C<POSIX::dup2>
-now returns the correct value on Win32 (I<i.e.> the file descriptor).
-C<POSIX::SigSet> C<sigsuspend> and C<sigpending> and C<POSIX::pause> now
-dispatch safe signals immediately before returning to their caller.
+function, instead of being a Perl wrapper on C<CORE::sleep>.
+C<POSIX::dup2> now returns the correct value on Win32 (I<i.e.>, the file
+descriptor).  C<POSIX::SigSet> C<sigsuspend> and C<sigpending> and
+C<POSIX::pause> now dispatch safe signals immediately before returning to
+their caller.
 
 C<POSIX::Termios::setattr> now defaults the third argument to C<TCSANOW>,
 instead of 0. On most platforms C<TCSANOW> is defined as 0, but on some
