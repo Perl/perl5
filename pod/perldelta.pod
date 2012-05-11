@@ -13,6 +13,10 @@ If you are upgrading from an earlier release such as 5.12.0, first read
 L<perl5140delta>, which describes differences between 5.12.0 and
 5.14.0.
 
+Some of the bug fixes in this release have been backported to subsequent
+releases of 5.14.x.  Those are indicated with the 5.14.x version in
+parentheses.
+
 =head1 Notice
 
 With the release of Perl 5.16.0, the 5.12.x series of releases are now out of
