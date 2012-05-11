@@ -1572,7 +1572,7 @@ never documented anywhere.  Now the perlfunc entry mentions it
 
 =item *
 
-As an accident of history, C<open $fh, "<:", ...> applies the default
+As an accident of history, C<open $fh, '<:', ...> applies the default
 layers for the platform (C<:raw> on Unix, C<:crlf> on Windows), ignoring
 whatever is declared by L<open.pm|open>.  This seems such a useful feature
 it has been documented in L<perlfunc|perlfunc/open> and L<open>.
