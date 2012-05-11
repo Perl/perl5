@@ -346,9 +346,9 @@ C<TYPEMAP> section:
 
 The XS-callable function C<is_utf8_char()>, when presented with
 malformed UTF-8 input, can read up to 12 bytes beyond the end of the
-string.  This cannot be fixed without changing its API.  It is not
-called from CPAN.  The documentation now describes how to use it
-safely.
+string.  This cannot be fixed without changing its API, and so its
+use is now deprecated.  Use C<is_utf8_char_buf()> (described just below)
+instead.
 
 =head3 Added C<is_utf8_char_buf()>
 
