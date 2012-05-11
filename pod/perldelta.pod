@@ -1044,8 +1044,6 @@ numerous deparsing bugs.
 
 L<CGI> has been upgraded from version 3.52 to 3.59.
 
-The DELETE HTTP verb is now supported.
-
 It uses the public and documented FCGI.pm API in CGI::Fast.  CGI::Fast was
 using an FCGI API that was deprecated and removed from documentation
 more than ten years ago.  Usage of this deprecated API with FCGI E<gt>=
@@ -1083,6 +1081,8 @@ preventing requests with no Content-Length from freezing in some cases.
 This is consistent with the CGI RFC 3875, and is also consistent with
 CGI::Simple.  However, the old behavior may have been expected by some
 command-line uses of CGI.pm.
+
+In addition, the DELETE HTTP verb is now supported.
 
 =item *
 
