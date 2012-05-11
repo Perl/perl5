@@ -975,7 +975,508 @@ You can substitute your favorite version in place of 5.14.0, too.
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<Archive::Extract> has been upgraded from version 0.48 to version 0.58
+
+Includes a fix for FreeBSD to only use C<unzip> if it is located in
+C</usr/local/bin>, as FreeBSD 9.0 will ship with a limited C<unzip> in
+C</usr/bin>.
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 1.76 to version 1.82.
+
+Adjustments to handle files >8gb (>0777777777777 octal) and a feature
+to return the MD5SUM of files in the archive.
+
+=item *
+
+L<base> has been upgraded from version 2.16 to version 2.18.
+
+C<base> no longer sets a module's C<$VERSION> to "-1" when a module it
+loads does not define a C<$VERSION>.  This change has been made because
+"-1" is not a valid version number under the new "lax" criteria used
+internally by C<UNIVERSAL::VERSION>.  (See L<version> for more on "lax"
+version criteria.)
+
+C<base> no longer internally skips loading modules it has already loaded
+and instead relies on C<require> to inspect C<%INC>.  This fixes a bug
+when C<base> is used with code that clear C<%INC> to force a module to
+be reloaded.
+
+=item *
+
+L<Carp> has been upgraded from version 1.20 to version 1.26.
+
+It now includes last read filehandle info and puts a dot after the file
+and line number, just like errors from C<die> [perl #106538].
+
+=item *
+
+L<charnames> has been updated from version 1.18 to version 1.30
+
+L<charnames> can now be invoked with a new option, C<:loose>,
+which is like the existing C<:full> option, but enables Unicode loose
+name matching.  Details are in L<charnames/LOOSE MATCHES>.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.03 to 1.14.  This fixes
+numerous deparsing bugs.
+
+=item *
+
+L<CGI> has been upgraded from version 3.52 to version 3.59
+
+The DELETE HTTP verb is now supported.
+
+It uses public and documented FCGI.pm API in CGI::Fast.  CGI::Fast was
+using an FCGI API that was deprecated and removed from documentation
+more than ten years ago.  Usage of this deprecated API with FCGI E<gt>=
+0.70 or FCGI E<lt>= 0.73 introduces a security issue.
+L<https://rt.cpan.org/Public/Bug/Display.html?id=68380>
+L<http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2011-2766>
+
+Things that may break your code:
+
+C<url()> was fixed to return C<PATH_INFO> when it is explicitly requested
+with either the C<path=E<gt>1> or C<path_info=E<gt>1> flag.
+
+If your code is running under mod_rewrite (or compatible) and you are
+calling C<self_url()> or you are calling C<url()> and passing
+C<path_info=E<gt>1>, These methods will actually be returning
+C<PATH_INFO> now, as you have explicitly requested, or has C<self_url()>
+has requested on your behalf.
+
+The C<PATH_INFO> has been omitted in such URLs since the issue was
+introduced in the 3.12 release in December, 2005.
+
+This bug is so old your application may have come to depend on it or
+workaround it. Check for application before upgrading to this release.
+
+Examples of affected method calls:
+
+  $q->url(-absolute => 1, -query => 1, -path_info => 1 )
+  $q->url(-path=>1)
+  $q->url(-full=>1,-path=>1)
+  $q->url(-rewrite=>1,-path=>1)
+  $q->self_url();
+
+We no longer read from STDIN when the Content-Length is not set,
+preventing requests with no Content-Length from freezing in some cases.
+This is consistent with the CGI RFC 3875, and is also consistent with
+CGI::Simple. However, the old behavior may have been expected by some
+command-line uses of CGI.pm.
+
+=item *
+
+L<Compress::Zlib> has been upgraded from version 2.035 to version 2.048
+
+IO::Compress::Zip and IO::Uncompress::Unzip now have support for LZMA
+(method 14).  There is a fix for a CRC issue in IO::Compress::Unzip and
+it supports Streamed Stored context now. And fixed a Zip64 issue in
+IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.61 to version 5.71.
+
+Added BITS mode to the addfile method and shasum.  This makes
+partial-byte inputs possible via files/STDIN and allows shasum to check
+all 8074 NIST Msg vectors, where previously special programming was
+required to do this.
+
+=item *
+
+L<Encode> has been upgraded from version 2.42 to version 2.44
+
+Missing aliases added, a deep recursion error fixed and various
+documentation updates.
+
+Addressed 'decode_xs n-byte heap-overflow' security bug in Unicode.xs
+
+=item *
+
+L<ExtUtils::CBuilder> updated from version 0.280203 to 0.280206.
+
+The new version appends CFLAGS and LDFLAGS to their Config.pm
+counterparts.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 2.2210 to 3.16.
+
+Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
+was rewritten and cleaned up. It has been made somewhat more extensible
+and now finally uses strictures.
+
+The typemap logic has been moved into a separate module,
+L<ExtUtils::Typemaps>.  See L</New Modules and Pragmata>, above.
+
+For a complete set of changes, please see the ExtUtils::ParseXS
+changelog, available on the CPAN.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.12 to version 1.17.
+
+On Windows, tilde (~) expansion now checks the C<USERPROFILE> environment
+variable, after checking C<HOME>.
+
+It has a new C<:bsd_glob> export tag, intended to replace C<:glob>.  Like
+C<:glob> it overrides C<glob> with a function that does not split the glob
+pattern into words, but, unlike C<:glob>, it iterates properly in scalar
+context, instead of returning the last file.
+
+There are other changes affecting Perl's own C<glob> operator (which uses
+File::Glob internally, except on VMS).  See L</Performance Enhancements>
+and L</Selected Bug Fixes>.
+
+=item *
+
+L<FindBin> updated from version 1.50 to 1.51.
+
+It no longer returns a wrong result if a script of the same name as the
+current one exists in the path and is executable.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.012 to version 0.017.
+
+Added support for using C<$ENV{http_proxy}> to set the default proxy host.
+
+Adds additional shorthand methods for all common HTTP verbs,
+a C<post_form()> method for POST-ing x-www-form-urlencoded data and
+a C<www_form_urlencode()> utility method.
+
+=item *
+
+L<IO> has been upgraded from version 1.25_04 to 1.25_06, and L<IO::Handle>
+from version 1.31 to 1.33.
+
+Together, these upgrades fix a problem with IO::Handle's C<getline> and
+C<getlines> methods.  When these methods are called on the special ARGV
+handle, the next file is automatically opened, as happens with the built-in
+C<E<lt>E<gt>> and C<readline> functions.  But, unlike the built-ins, these
+methods were not respecting the caller's use of the L<open> pragma and
+applying the approprate I/O layers to the newly-opened file
+[rt.cpan.org #66474].
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.70 to version 0.76
+
+Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported
+using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.09 to version 1.12.
+
+=over 4
+
+=item *
+
+Fixes a bug which prevented use of C<open3> on Windows when C<*STDIN>,
+C<*STDOUT> or C<*STDERR> had been localized.
+
+=item *
+
+Fixes a bug which prevented duplicating numeric file descriptors on Windows.
+
+=item *
+
+C<open3> with "-" for the program name works once more.  This was broken in
+version 1.06 (and hence in Perl 5.14.0) [perl #95748].
+
+=back
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.16 to version 3.21
+
+Added Language Extension codes (langext) and Language Variation codes (langvar)
+as defined in the IANA language registry.
+
+Added language codes from ISO 639-5
+
+Added language/script codes from the IANA language subtag registry
+
+Fixed an uninitialized value warning.  RT 67438
+
+Fixed the return value for the all_XXX_codes and all_XXX_names functions.  RT
+69100
+
+Reorganized modules to move Locale::MODULE to Locale::Codes::MODULE to allow
+for cleaner future additions.  The original four modules (Locale::Language,
+Locale::Currency, Locale::Country, Locale::Script) will continue to work, but
+all new sets of codes will be added in the Locale::Codes namespace.
+
+The code2XXX, XXX2code, all_XXX_codes, and all_XXX_names functions now
+support retired codes.  All codesets may be specified by a constant or
+by their name now.  Previously, they were specified only by a constant.
+
+The alias_code function exists for backward compatibility.  It has been
+replaced by rename_country_code.  The alias_code function will be
+removed some time after September, 2013.
+
+All work is now done in the central module (Locale::Codes).  Previously,
+some was still done in the wrapper modules (Locale::Codes::*).  Added
+Language Family codes (langfam) as defined in ISO 639-5.
+
+=item *
+
+L<Math::BigFloat> has been upgraded from version 1.993 to 1.997.
+
+The C<numify> method has been corrected to return a normalised Perl number
+(the result of C<0 + $thing>), instead of a string [rt.cpan.org #66732].
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.994 to 1.998.
+
+It provides a new C<bsgn> method that complements the C<babs> method.
+
+It fixes the internal C<objectify> function's handling of "foreign objects"
+so they are converted to the appropriate class (Math::BigInt or
+Math::BigFloat).
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.
+
+C<int()> on a Math::BigRat object containing -1/2 now creates a
+Math::BigInt containing 0, rather than -0.  L<Math::BigInt> does not even
+support negative zero, so the resulting object was actually malformed
+[perl #95530].
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.56 to version 1.59
+and L<Math::Trig> has been upgraded from version 1.2 to version 1.22.
+
+Fixes include: correct copy constructor usage; fix polarwise formatting with
+numeric format specifier; and more stable C<great_circle_direction> algorithm.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.51 to 2.66.
+
+The C<corelist> utility now understands the C<-r> option for displaying
+Perl release dates and the C<--diff> option to print the set of modlib
+changes between two perl distributions.
+
+=item *
+
+C<Module::Metadata> has been upgraded from version 1.000004 to 1.000009.
+
+Adds C<provides> method to generate a CPAN META provides data structure
+correctly; use of C<package_versions_from_directory> is discouraged.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.10 to version 1.12.
+
+The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
+performance under ithreads.
+
+=item *
+
+L<open> has been upgraded from version 1.08 to 1.10.
+
+It no longer turns of layers on standard handles when invoked without the
+":std" directive.  Similarly, when invoked I<with> the ":std" directive, it
+now clears layers on STDERR before applying the new ones, and not just on
+STDIN and STDOUT [perl #92728].
+
+=item *
+
+L<overload> has been upgraded from version 1.13 to version 1.18.
+
+C<overload::Overloaded> no longer calls C<can> on the class, but uses
+another means to determine whether the object has overloading.  It was
+never correct for it to call C<can>, as overloading does not respect
+AUTOLOAD.  So classes that autoload methods and implement C<can> no longer
+have to account for overloading [perl #40333].
+
+A warning is now produced for invalid arguments.  See L</New Diagnostics>.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.11 to 0.14.
+
+(This is the module that implements C<< open $fh, '>', \$scalar >>.)
+
+It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
+C<$scalar> is a copy-on-write scalar.
+
+It also fixes a hang that occurs with C<readline> or C<< <$fh> >> if a
+typeglob has been assigned to $scalar [perl #92258].
+
+It no longer assumes during C<seek> that $scalar is a string internally.
+If it didn't crash, it was close to doing so [perl #92706].  Also, the
+internal print routine no longer assumes that the position set by C<seek>
+is valid, but extends the string to that position, filling the intervening
+bytes (between the old length and the seek position) with nulls
+[perl #78980].
+
+Printing to an in-memory handle now works if the $scalar holds a reference,
+stringifying the reference before modifying it.  References used to be
+treated as empty strings.
+
+Printing to an in-memory handle no longer crashes if the $scalar happens to
+hold a number internally, but no string buffer.
+
+Printing to an in-memory handle no longer creates scalars that confuse
+the regular expression engine [perl #108398].
+
+=item *
+
+C<Pod::Functions> has been upgraded from version 1.04 to 1.05.
+
+F<Functions.pm> is now generated at perl build time from annotations in
+F<perlfunc.pod>. This will ensure that L<Pod::Functions> and L<perlfunc>
+remain in synchronisation.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.11 to 1.1502.
+
+This is an extensive rewrite of Pod::Html to use L<Pod::Simple> under
+the hood.  The output has changed significantly.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.17.
+
+It corrects the search paths on VMS [perl #90640]. (5.14.1)
+
+The B<-v> option now fetches the right section for C<$0>.
+
+This upgrade has numerous significant fixes.  Consult its changelog on
+the CPAN for more information.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.24 to version 1.30.
+
+L<POSIX> no longer uses L<AutoLoader>. Any code which was relying on this
+implementation detail was buggy, and may fail as a result of this change.
+The module's Perl code has been considerably simplified, roughly halving
+the number of lines, with no change in functionality. The XS code has
+been refactored to reduce the size of the shared object by about 12%,
+with no change in functionality. More POSIX functions now have tests.
+
+C<sigsuspend> and C<pause> now run signals handle before returning, as the
+whole point of these two functions is to wait until a signal has
+arrived, and then return I<after> it has been triggered.  Delayed, or
+"safe", signals were preventing that from happening, possibly resulting in
+race conditions [perl #107216].
+
+C<POSIX::sleep> is now a direct call into the underlying OS C<sleep>
+function, instead of being a Perl wrapper on C<CORE::sleep>. C<POSIX::dup2>
+now returns the correct value on Win32 (I<i.e.> the file descriptor).
+C<POSIX::SigSet> C<sigsuspend> and C<sigpending> and C<POSIX::pause> now
+dispatch safe signals immediately before returning to their caller.
+
+C<POSIX::Termios::setattr> now defaults the third argument to C<TCSANOW>,
+instead of 0. On most platforms C<TCSANOW> is defined as 0, but on some
+0 is not a valid parameter, which caused a call with defaults to fail.
+
+=item *
+
+L<Socket> as been upgraded from version 1.94 to 2.000
+
+It has new functions and constants for handling IPv6 sockets:
+
+    pack_ipv6_mreq
+    unpack_ipv6_mreq
+    IPV6_ADD_MEMBERSHIP
+    IPV6_DROP_MEMBERSHIP
+    IPV6_MTU
+    IPV6_MTU_DISCOVER
+    IPV6_MULTICAST_HOPS
+    IPV6_MULTICAST_IF
+    IPV6_MULTICAST_LOOP
+    IPV6_UNICAST_HOPS
+    IPV6_V6ONLY
+
+=item *
+
+L<Storable> has been upgraded from version 2.27 to version 2.34.
+
+It no longer turns copy-on-write scalars into read-only scalars when
+freezing and thawing.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.27 to version 0.29
+
+This upgrade closes many outstanding bugs.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 3.00 to version 3.01
+
+Only interpret an initial array reference as a list of colors, not any initial
+reference, allowing the colored function to work properly on objects with
+stringification defined.
+
+=item *
+
+C<Term::ReadLine> has been upgraded from version 1.07 to 1.09.
+
+Term::ReadLine now supports any event loop, including unpublished ones and
+simple L<IO::Select> loops without the need to rewrite existing code for
+any particular framework [perl #108470].
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.37 to 1.40.
+
+Destructors on shared objects used to be ignored sometimes if the objects
+were referenced only by shared data structures.  This has been mostly
+fixed, but destructors may still be ignored if the objects still exist at
+global destruction time [perl #98204].
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.73 to version 0.89
+
+Updated to CLDR 1.9.1
+
+Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru, sk, sr, sv, uk,
+zh__pinyin, zh__stroke
+
+Newly supported locales: bn, fa, ml, mr, or, pa, sa, si, si__dictionary,
+sr_Latn, sv__reformed, ta, te, th, ur, wae.
+
+Tailored compatibility ideographs as well as unified ideographs for the
+locales: ja, ko, zh__big5han, zh__gb2312han, zh__pinyin, zh__stroke.
+
+Locale/*.pl files are now searched for in @INC.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.14
+
+Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.32 to version 0.43.
+
+This adds four new functions:  C<prop_aliases()>, and
+C<prop_value_aliases()> which are used to find all the Unicode-approved
+synonyms for property names, or to convert from one name to another;
+C<prop_invlist> which returns all the code points matching a given
+Unicode binary property; and C<prop_invmap> which returns the complete
+specification of a given Unicode property.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1101 to version 0.1200
+
+Added SetStdHandle and GetStdHandle functions
 
 =back
 
