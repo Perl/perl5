@@ -859,7 +859,7 @@ property in each regular expression.  Thus, C<qr/\p{foo}abc\p{foo}/>
 would generate two hashes.  Any probes in one instance would be unknown
 to the other, and the hashes could expand separately to be quite large
 if the regular expression were used on many different widely-separated
-code points.  This can lead to running out of memory in extreme cases.
+code points.
 Now, however, there is just one hash shared by all instances of a given
 property.  This means that if C<\p{foo}> is matched against "A" in one
 regular expression in a thread, the result will be known immediately to
