@@ -1291,7 +1291,7 @@ performance under ithreads.
 
 L<open> has been upgraded from version 1.08 to 1.10.
 
-It no longer turns of layers on standard handles when invoked without the
+It no longer turns off layers on standard handles when invoked without the
 ":std" directive.  Similarly, when invoked I<with> the ":std" directive, it
 now clears layers on STDERR before applying the new ones, and not just on
 STDIN and STDOUT [perl #92728].
