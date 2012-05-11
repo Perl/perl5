@@ -983,7 +983,7 @@ You can substitute your favorite version in place of 5.14.0, too.
 
 =item *
 
-L<Archive::Extract> has been upgraded from version 0.48 to version 0.58.
+L<Archive::Extract> has been upgraded from version 0.48 to 0.58.
 
 Includes a fix for FreeBSD to only use C<unzip> if it is located in
 C</usr/local/bin>, as FreeBSD 9.0 will ship with a limited C<unzip> in
@@ -991,14 +991,14 @@ C</usr/bin>.
 
 =item *
 
-L<Archive::Tar> has been upgraded from version 1.76 to version 1.82.
+L<Archive::Tar> has been upgraded from version 1.76 to 1.82.
 
 Adjustments to handle files >8gb (>0777777777777 octal) and a feature
 to return the MD5SUM of files in the archive.
 
 =item *
 
-L<base> has been upgraded from version 2.16 to version 2.18.
+L<base> has been upgraded from version 2.16 to 2.18.
 
 C<base> no longer sets a module's C<$VERSION> to "-1" when a module it
 loads does not define a C<$VERSION>.  This change has been made because
@@ -1013,14 +1013,14 @@ be reloaded.
 
 =item *
 
-L<Carp> has been upgraded from version 1.20 to version 1.26.
+L<Carp> has been upgraded from version 1.20 to 1.26.
 
 It now includes last read filehandle info and puts a dot after the file
 and line number, just like errors from C<die> [perl #106538].
 
 =item *
 
-L<charnames> has been updated from version 1.18 to version 1.30.
+L<charnames> has been updated from version 1.18 to 1.30.
 
 L<charnames> can now be invoked with a new option, C<:loose>,
 which is like the existing C<:full> option, but enables Unicode loose
@@ -1033,7 +1033,7 @@ numerous deparsing bugs.
 
 =item *
 
-L<CGI> has been upgraded from version 3.52 to version 3.59.
+L<CGI> has been upgraded from version 3.52 to 3.59.
 
 The DELETE HTTP verb is now supported.
 
@@ -1077,7 +1077,7 @@ command-line uses of CGI.pm.
 
 =item *
 
-L<Compress::Zlib> has been upgraded from version 2.035 to version 2.048.
+L<Compress::Zlib> has been upgraded from version 2.035 to 2.048.
 
 IO::Compress::Zip and IO::Uncompress::Unzip now have support for LZMA
 (method 14).  There is a fix for a CRC issue in IO::Compress::Unzip and
@@ -1086,7 +1086,7 @@ IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
 
 =item *
 
-L<Digest::SHA> has been upgraded from version 5.61 to version 5.71.
+L<Digest::SHA> has been upgraded from version 5.61 to 5.71.
 
 Added BITS mode to the addfile method and shasum.  This makes
 partial-byte inputs possible via files/STDIN and allows shasum to check
@@ -1095,7 +1095,7 @@ required to do this.
 
 =item *
 
-L<Encode> has been upgraded from version 2.42 to version 2.44.
+L<Encode> has been upgraded from version 2.42 to 2.44.
 
 Missing aliases added, a deep recursion error fixed and various
 documentation updates.
@@ -1125,7 +1125,7 @@ changelog, available on the CPAN.
 
 =item *
 
-L<File::Glob> has been upgraded from version 1.12 to version 1.17.
+L<File::Glob> has been upgraded from version 1.12 to 1.17.
 
 On Windows, tilde (~) expansion now checks the C<USERPROFILE> environment
 variable, after checking C<HOME>.
@@ -1148,7 +1148,7 @@ current one exists in the path and is executable.
 
 =item *
 
-L<HTTP::Tiny> has been upgraded from version 0.012 to version 0.017.
+L<HTTP::Tiny> has been upgraded from version 0.012 to 0.017.
 
 Added support for using C<$ENV{http_proxy}> to set the default proxy host.
 
@@ -1171,14 +1171,14 @@ applying the approprate I/O layers to the newly-opened file
 
 =item *
 
-L<IPC::Cmd> has been upgraded from version 0.70 to version 0.76.
+L<IPC::Cmd> has been upgraded from version 0.70 to 0.76.
 
 Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported
 using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
 
 =item *
 
-L<IPC::Open3> has been upgraded from version 1.09 to version 1.12.
+L<IPC::Open3> has been upgraded from version 1.09 to 1.12.
 
 =over 4
 
@@ -1200,7 +1200,7 @@ version 1.06 (and hence in Perl 5.14.0) [perl #95748].
 
 =item *
 
-L<Locale::Codes> has been upgraded from version 3.16 to version 3.21.
+L<Locale::Codes> has been upgraded from version 3.16 to 3.21.
 
 Added Language Extension codes (langext) and Language Variation codes (langvar)
 as defined in the IANA language registry.
@@ -1250,7 +1250,7 @@ Math::BigFloat).
 
 =item *
 
-L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.
+L<Math::BigRat> has been upgraded from version 0.2602 to 0.2603.
 
 C<int()> on a Math::BigRat object containing -1/2 now creates a
 Math::BigInt containing 0, rather than -0.  L<Math::BigInt> does not even
@@ -1259,8 +1259,8 @@ support negative zero, so the resulting object was actually malformed
 
 =item *
 
-L<Math::Complex> has been upgraded from version 1.56 to version 1.59
-and L<Math::Trig> has been upgraded from version 1.2 to version 1.22.
+L<Math::Complex> has been upgraded from version 1.56 to 1.59
+and L<Math::Trig> from version 1.2 to 1.22.
 
 Fixes include: correct copy constructor usage; fix polarwise formatting with
 numeric format specifier; and more stable C<great_circle_direction> algorithm.
@@ -1282,7 +1282,7 @@ correctly; use of C<package_versions_from_directory> is discouraged.
 
 =item *
 
-L<ODBM_File> has been upgraded from version 1.10 to version 1.12.
+L<ODBM_File> has been upgraded from version 1.10 to 1.12.
 
 The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
 performance under ithreads.
@@ -1298,7 +1298,7 @@ STDIN and STDOUT [perl #92728].
 
 =item *
 
-L<overload> has been upgraded from version 1.13 to version 1.18.
+L<overload> has been upgraded from version 1.13 to 1.18.
 
 C<overload::Overloaded> no longer calls C<can> on the class, but uses
 another means to determine whether the object has overloading.  It was
@@ -1365,7 +1365,7 @@ the CPAN for more information.
 
 =item *
 
-L<POSIX> has been upgraded from version 1.24 to version 1.30.
+L<POSIX> has been upgraded from version 1.24 to 1.30.
 
 L<POSIX> no longer uses L<AutoLoader>.  Any code which was relying on this
 implementation detail was buggy, and may fail as a result of this change.
@@ -1393,7 +1393,7 @@ instead of 0. On most platforms C<TCSANOW> is defined as 0, but on some
 
 =item *
 
-L<Socket> as been upgraded from version 1.94 to 2.000
+L<Socket> has been upgraded from version 1.94 to 2.000.
 
 It has new functions and constants for handling IPv6 sockets:
 
@@ -1411,20 +1411,20 @@ It has new functions and constants for handling IPv6 sockets:
 
 =item *
 
-L<Storable> has been upgraded from version 2.27 to version 2.34.
+L<Storable> has been upgraded from version 2.27 to 2.34.
 
 It no longer turns copy-on-write scalars into read-only scalars when
 freezing and thawing.
 
 =item *
 
-L<Sys::Syslog> has been upgraded from version 0.27 to version 0.29.
+L<Sys::Syslog> has been upgraded from version 0.27 to 0.29.
 
 This upgrade closes many outstanding bugs.
 
 =item *
 
-L<Term::ANSIColor> has been upgraded from version 3.00 to version 3.01.
+L<Term::ANSIColor> has been upgraded from version 3.00 to 3.01.
 
 Only interpret an initial array reference as a list of colors, not any initial
 reference, allowing the colored function to work properly on objects with
@@ -1449,7 +1449,7 @@ global destruction time [perl #98204].
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 0.73 to version 0.89.
+L<Unicode::Collate> has been upgraded from version 0.73 to 0.89.
 
 Updated to CLDR 1.9.1
 
@@ -1466,13 +1466,13 @@ Locale/*.pl files are now searched for in @INC.
 
 =item *
 
-L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.14.
+L<Unicode::Normalize> has been upgraded from version 1.10 to 1.14.
 
 Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.32 to version 0.43.
+L<Unicode::UCD> has been upgraded from version 0.32 to 0.43.
 
 This adds four new functions:  C<prop_aliases()>, and
 C<prop_value_aliases()> which are used to find all the Unicode-approved
@@ -1483,7 +1483,7 @@ specification of a given Unicode property.
 
 =item *
 
-L<Win32API::File> has been upgraded from version 0.1101 to version 0.1200.
+L<Win32API::File> has been upgraded from version 0.1101 to 0.1200.
 
 Added SetStdHandle and GetStdHandle functions
 
