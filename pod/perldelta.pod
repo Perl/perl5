@@ -575,7 +575,11 @@ PerlIO::mmap
 
 =item *
 
-Pod::Parser, Pod::LaTeX
+Pod::LaTeX
+
+=item *
+
+Pod::Parser
 
 =item *
 
