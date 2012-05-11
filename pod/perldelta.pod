@@ -122,7 +122,7 @@ becomes longer.
 
 Since this change also allowed many bugs to be fixed (see
 L</The C<substr> operator>), and since the behaviour
-of negative offsets has never been specified, so the
+of negative offsets has never been specified, the
 change was deemed acceptable.
 
 =head3 Return value of C<tied>
