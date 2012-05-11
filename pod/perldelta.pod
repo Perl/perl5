@@ -1051,7 +1051,7 @@ with either the C<path=E<gt>1> or C<path_info=E<gt>1> flag.
 
 If your code is running under mod_rewrite (or compatible) and you are
 calling C<self_url()> or you are calling C<url()> and passing
-C<path_info=E<gt>1>, These methods will actually be returning
+C<path_info=E<gt>1>, these methods will actually be returning
 C<PATH_INFO> now, as you have explicitly requested, or has C<self_url()>
 has requested on your behalf.
 
