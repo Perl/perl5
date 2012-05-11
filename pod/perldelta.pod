@@ -762,8 +762,8 @@ outside the compilation unit.  Users can use the new C<XS_EXTERNAL(name)>
 and C<XS_INTERNAL(name)> macros to pick the desired linking behaviour.
 The ordinary C<XS(name)> declaration for XSUBs will continue to declare
 non-'static' XSUBs for compatibility, but the XS compiler,
-C<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
-C<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
+L<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
+L<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
 C<EXPORT_XSUB_SYMBOLS> keyword.  See L<perlxs> for details.
 
 =head2 Weakening read-only references
@@ -972,7 +972,7 @@ L<arybase> -- this new module implements the C<$[> variable.
 
 =item *
 
-C<PerlIO::mmap> 0.010 has been added to the Perl core.
+L<PerlIO::mmap> 0.010 has been added to the Perl core.
 
 The C<mmap> PerlIO layer is no longer implemented by perl itself, but has
 been moved out into the new L<PerlIO::mmap> module.
@@ -1284,7 +1284,7 @@ changes between two perl distributions.
 
 =item *
 
-C<Module::Metadata> has been upgraded from version 1.000004 to 1.000009.
+L<Module::Metadata> has been upgraded from version 1.000004 to 1.000009.
 
 Adds C<provides> method to generate a CPAN META provides data structure
 correctly; use of C<package_versions_from_directory> is discouraged.
@@ -1348,7 +1348,7 @@ the regular expression engine [perl #108398].
 
 =item *
 
-C<Pod::Functions> has been upgraded from version 1.04 to 1.05.
+L<Pod::Functions> has been upgraded from version 1.04 to 1.05.
 
 F<Functions.pm> is now generated at perl build time from annotations in
 F<perlfunc.pod>.  This will ensure that L<Pod::Functions> and L<perlfunc>
@@ -1441,7 +1441,7 @@ stringification defined.
 
 =item *
 
-C<Term::ReadLine> has been upgraded from version 1.07 to 1.09.
+L<Term::ReadLine> has been upgraded from version 1.07 to 1.09.
 
 Term::ReadLine now supports any event loop, including unpublished ones and
 simple L<IO::Select>, loops without the need to rewrite existing code for
