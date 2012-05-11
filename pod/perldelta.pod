@@ -1063,10 +1063,10 @@ workaround it. Check for application before upgrading to this release.
 
 Examples of affected method calls:
 
-  $q->url(-absolute => 1, -query => 1, -path_info => 1 )
-  $q->url(-path=>1)
-  $q->url(-full=>1,-path=>1)
-  $q->url(-rewrite=>1,-path=>1)
+  $q->url(-absolute => 1, -query => 1, -path_info => 1);
+  $q->url(-path=>1);
+  $q->url(-full=>1,-path=>1);
+  $q->url(-rewrite=>1,-path=>1);
   $q->self_url();
 
 We no longer read from STDIN when the Content-Length is not set,
