@@ -15,9 +15,13 @@ L<perl5140delta>, which describes differences between 5.12.0 and
 
 =head1 Notice
 
-As described in L<perlpolicy>, the release of Perl 5.16.0 marks the
-official end of support for Perl 5.12.  Users of Perl 5.12 or earlier
-should consider upgrading to a more recent release of Perl.
+With the release of Perl 5.16.0, the 5.12.x series of releases are now out of
+their support period.  There may be future 5.12.x releases, but only in the
+event of a critical security issue.  Users of Perl 5.12 or earlier should
+consider upgrading to a more recent release of Perl.
+
+This policy is described in greater detail in
+L<perlpolicy|perlpolicy/MAINTENANCE AND SUPPORT>.
 
 =head1 Core Enhancements
 
