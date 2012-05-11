@@ -284,7 +284,7 @@ letter.  That has been extended to all Unicode identifier characters.
 
 One-character non-ASCII non-punctuation variables (like C<$é>) are now
 subject to "Used only once" warnings.  They used to be exempt, as they
-was treated as punctuation variables.
+were treated as punctuation variables.
 
 Also, single-character Unicode punctuation variables (like C<$‰>) are now
 supported [perl #69032].
@@ -521,7 +521,7 @@ pointers to null.  Bug reported by Clément Lecigne.
 A hypothetical bug (probably non-exploitable in practice) due to the
 incorrect setting of the effective group ID while setting C<$(> has been
 fixed.  The bug would only have affected systems that have C<setresgid()>
-but not C<setregid()>, but no such systems are known of.
+but not C<setregid()>, but no such systems are known to exist.
 
 =head1 Deprecations
 
@@ -533,7 +533,7 @@ use the new functions in L<Unicode::UCD>.  These provide a stable API,
 and give complete information.
 
 Perl may at some point in the future change or remove the files.  The
-file most likely for applications to have used is
+file which applications were most likely to have used is
 F<lib/unicore/ToDigit.pl>.  L<Unicode::UCD/prop_invmap()> can be used to
 get at its data instead.
 
@@ -694,7 +694,7 @@ expression itself [perl #108780].
 
 Two presumably unused XS typemap entries have been removed from the
 core typemap: T_DATAUNIT and T_CALLBACK.  If you are, against all odds,
-a user of these, please see the instructions on how to regain them
+a user of these, please see the instructions on how to restore them
 in L<perlxstypemap>.
 
 =head2 Unicode 6.1 has incompatibilities with Unicode 6.0
@@ -1029,7 +1029,7 @@ L<CGI> has been upgraded from version 3.52 to version 3.59
 
 The DELETE HTTP verb is now supported.
 
-It uses public and documented FCGI.pm API in CGI::Fast.  CGI::Fast was
+It uses the public and documented FCGI.pm API in CGI::Fast.  CGI::Fast was
 using an FCGI API that was deprecated and removed from documentation
 more than ten years ago.  Usage of this deprecated API with FCGI E<gt>=
 0.70 or FCGI E<lt>= 0.73 introduces a security issue.
