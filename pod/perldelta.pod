@@ -983,7 +983,7 @@ You can substitute your favorite version in place of 5.14.0, too.
 
 =item *
 
-L<Archive::Extract> has been upgraded from version 0.48 to version 0.58
+L<Archive::Extract> has been upgraded from version 0.48 to version 0.58.
 
 Includes a fix for FreeBSD to only use C<unzip> if it is located in
 C</usr/local/bin>, as FreeBSD 9.0 will ship with a limited C<unzip> in
@@ -1020,7 +1020,7 @@ and line number, just like errors from C<die> [perl #106538].
 
 =item *
 
-L<charnames> has been updated from version 1.18 to version 1.30
+L<charnames> has been updated from version 1.18 to version 1.30.
 
 L<charnames> can now be invoked with a new option, C<:loose>,
 which is like the existing C<:full> option, but enables Unicode loose
@@ -1033,7 +1033,7 @@ numerous deparsing bugs.
 
 =item *
 
-L<CGI> has been upgraded from version 3.52 to version 3.59
+L<CGI> has been upgraded from version 3.52 to version 3.59.
 
 The DELETE HTTP verb is now supported.
 
@@ -1077,7 +1077,7 @@ command-line uses of CGI.pm.
 
 =item *
 
-L<Compress::Zlib> has been upgraded from version 2.035 to version 2.048
+L<Compress::Zlib> has been upgraded from version 2.035 to version 2.048.
 
 IO::Compress::Zip and IO::Uncompress::Unzip now have support for LZMA
 (method 14).  There is a fix for a CRC issue in IO::Compress::Unzip and
@@ -1095,7 +1095,7 @@ required to do this.
 
 =item *
 
-L<Encode> has been upgraded from version 2.42 to version 2.44
+L<Encode> has been upgraded from version 2.42 to version 2.44.
 
 Missing aliases added, a deep recursion error fixed and various
 documentation updates.
@@ -1171,7 +1171,7 @@ applying the approprate I/O layers to the newly-opened file
 
 =item *
 
-L<IPC::Cmd> has been upgraded from version 0.70 to version 0.76
+L<IPC::Cmd> has been upgraded from version 0.70 to version 0.76.
 
 Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported
 using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
@@ -1200,7 +1200,7 @@ version 1.06 (and hence in Perl 5.14.0) [perl #95748].
 
 =item *
 
-L<Locale::Codes> has been upgraded from version 3.16 to version 3.21
+L<Locale::Codes> has been upgraded from version 3.16 to version 3.21.
 
 Added Language Extension codes (langext) and Language Variation codes (langvar)
 as defined in the IANA language registry.
@@ -1418,13 +1418,13 @@ freezing and thawing.
 
 =item *
 
-L<Sys::Syslog> has been upgraded from version 0.27 to version 0.29
+L<Sys::Syslog> has been upgraded from version 0.27 to version 0.29.
 
 This upgrade closes many outstanding bugs.
 
 =item *
 
-L<Term::ANSIColor> has been upgraded from version 3.00 to version 3.01
+L<Term::ANSIColor> has been upgraded from version 3.00 to version 3.01.
 
 Only interpret an initial array reference as a list of colors, not any initial
 reference, allowing the colored function to work properly on objects with
@@ -1449,7 +1449,7 @@ global destruction time [perl #98204].
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 0.73 to version 0.89
+L<Unicode::Collate> has been upgraded from version 0.73 to version 0.89.
 
 Updated to CLDR 1.9.1
 
@@ -1466,7 +1466,7 @@ Locale/*.pl files are now searched for in @INC.
 
 =item *
 
-L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.14
+L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.14.
 
 Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
 
@@ -1483,7 +1483,7 @@ specification of a given Unicode property.
 
 =item *
 
-L<Win32API::File> has been upgraded from version 0.1101 to version 0.1200
+L<Win32API::File> has been upgraded from version 0.1101 to version 0.1200.
 
 Added SetStdHandle and GetStdHandle functions
 
