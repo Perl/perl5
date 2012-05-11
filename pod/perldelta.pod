@@ -682,6 +682,15 @@ The removal of this will allow extensions to pattern syntax, and better
 error checking of existing syntax.  See L<perlre/Quantifiers> for an
 example.
 
+=item *
+
+Revamping C<< "\Q" >> semantics in double-quotish strings when combined with other escapes
+
+There are a number of bugs and inconsistencies involving combinations
+of C<\Q> and  excapes like C<\x>, C<\L>, etc., within a C<\Q...\E> pair.
+These need to be fixed, and doing so will necessarily change current
+behavior.  The changes have not yet been settled.
+
 =back
 
 =head1 Incompatible Changes
