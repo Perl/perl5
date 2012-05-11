@@ -1383,7 +1383,7 @@ the number of lines, with no change in functionality.  The XS code has
 been refactored to reduce the size of the shared object by about 12%,
 with no change in functionality.  More POSIX functions now have tests.
 
-C<sigsuspend> and C<pause> now run signals handle before returning, as the
+C<sigsuspend> and C<pause> now run signal handlers before returning, as the
 whole point of these two functions is to wait until a signal has
 arrived, and then return I<after> it has been triggered.  Delayed, or
 "safe", signals were preventing that from happening, possibly resulting in
