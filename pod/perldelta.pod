@@ -522,7 +522,7 @@ program that accepts a flags value from an external source could expose
 itself to denial of service or arbitrary code execution attacks.  There
 are no known exploits in the wild.  The problem has been corrected by
 explicitly disabling all unsupported flags and setting unused function
-pointers to null.  Bug reported by Clément Lecigne.
+pointers to null.  Bug reported by Clément Lecigne. (5.14.2)
 
 =head2 Privileges are now set correctly when assigning to C<$(>
 
@@ -1114,6 +1114,7 @@ Missing aliases added, a deep recursion error fixed and various
 documentation updates.
 
 Addressed 'decode_xs n-byte heap-overflow' security bug in Unicode.xs
+(CVE-2011-2939). (5.14.2)
 
 =item *
 
@@ -1328,7 +1329,7 @@ L<PerlIO::scalar> has been upgraded from version 0.11 to 0.14.
 (This is the module that implements C<< open $fh, '>', \$scalar >>.)
 
 It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
-C<$scalar> is a copy-on-write scalar.
+C<$scalar> is a copy-on-write scalar. (5.14.2)
 
 It also fixes a hang that occurs with C<readline> or C<< <$fh> >> if a
 typeglob has been assigned to $scalar [perl #92258].
@@ -2199,7 +2200,7 @@ further links.
 HP-UX PA-RISC/64 now supports gcc-4.x
 
 A fix to correct the socketsize now makes the test suite pass on HP-UX
-PA-RISC for 64bitall builds.
+PA-RISC for 64bitall builds. (5.14.2)
 
 =back
 
@@ -2564,9 +2565,9 @@ It used to be possible to free the typeglob of a localised array or hash
 
 Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
 element that is a glob copy no longer causes subsequent assignment to it to
-corrupt the glob, and unlocking a hash element that holds a copy-on-write
-scalar no longer causes modifications to that scalar to modify other
-scalars that were sharing the same string buffer.
+corrupt the glob (5.14.2), and unlocking a hash element that holds a
+copy-on-write scalar no longer causes modifications to that scalar to
+modify other scalars that were sharing the same string buffer.
 
 =back
 
@@ -2666,7 +2667,7 @@ of Perl were not updated to account for them, but have now been fixed.
 
 C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
 string buffers in place (i.e., skipping the copy).  This could result in
-hashes having two elements with the same key [perl #91834].
+hashes having two elements with the same key [perl #91834]. (5.14.2)
 
 =item *
 
@@ -2678,12 +2679,12 @@ was not fixed until this release.
 
 Elements of restricted hashes (see the L<fields> pragma) containing
 copy-on-write values couldn't be deleted, nor could such hashes be cleared
-(C<%hash = ()>).
+(C<%hash = ()>). (5.14.2)
 
 =item *
 
 Localising a tied variable used to make it read-only if it contained a
-copy-on-write string.
+copy-on-write string. (5.14.2)
 
 =item *
 
@@ -3360,7 +3361,7 @@ fixed-string nodes with inconvenient contents.
 
 A panic involving the combination of the regular expression modifiers
 C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
-fixed [perl #95964].
+fixed [perl #95964]. (5.14.2)
 
 =item *
 
@@ -4017,7 +4018,7 @@ It has now been fixed.
 
 Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
 a pack template equivalent to "U0" if the input string was empty.  This has
-been fixed [perl #90160].
+been fixed [perl #90160]. (5.14.2)
 
 =item *
 
@@ -4081,7 +4082,7 @@ to force it [perl #96942].
 
 C<caller> no longer leaks memory when called from the DB package if
 C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
-was triggering this bug [perl #97010].
+was triggering this bug [perl #97010]. (5.14.2)
 
 =item *
 
