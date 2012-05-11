@@ -1435,7 +1435,7 @@ stringification defined.
 C<Term::ReadLine> has been upgraded from version 1.07 to 1.09.
 
 Term::ReadLine now supports any event loop, including unpublished ones and
-simple L<IO::Select> loops without the need to rewrite existing code for
+simple L<IO::Select>, loops without the need to rewrite existing code for
 any particular framework [perl #108470].
 
 =item *
@@ -1474,8 +1474,8 @@ Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
 
 L<Unicode::UCD> has been upgraded from version 0.32 to 0.43.
 
-This adds four new functions:  C<prop_aliases()>, and
-C<prop_value_aliases()> which are used to find all the Unicode-approved
+This adds four new functions:  C<prop_aliases()> and
+C<prop_value_aliases()>, which are used to find all the Unicode-approved
 synonyms for property names, or to convert from one name to another;
 C<prop_invlist> which returns all the code points matching a given
 Unicode binary property; and C<prop_invmap> which returns the complete
