@@ -943,10 +943,6 @@ The implementation of C<s///r> makes one fewer copy of the scalar's value.
 
 =item *
 
-C<study> is now a no-op.
-
-=item *
-
 Recursive calls to lvalue subroutines in lvalue scalar context use less
 memory.
 
@@ -3880,6 +3876,11 @@ infamous L<perlunicode/The "Unicode Bug">.  [perl #77654].
 
 Which of these code points is quoted has changed, based on Unicode's
 recommendations.  See L<perlfunc/quotemeta> for details.
+
+=item *
+
+C<study> is now a no-op, presumably fixing all outstanding bugs related to
+study causing regex matches to behave incorrectly!
 
 =item *
 
