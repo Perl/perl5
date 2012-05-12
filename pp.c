@@ -5907,7 +5907,7 @@ PP(pp_coreargs)
 	/* diag_listed_as: Too many arguments for %s */
 	Perl_croak(aTHX_
 	  "%s arguments for %s", err,
-	   opnum ? OP_DESC(PL_op->op_next) : SvPV_nolen_const(cSVOP_sv)
+	   opnum ? PL_op_desc[opnum] : SvPV_nolen_const(cSVOP_sv)
 	);
 
     /* Reset the stack pointer.  Without this, we end up returning our own
