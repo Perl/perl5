@@ -263,7 +263,7 @@ truncate ($$)
 uc (_)
 ucfirst (_)
 umask (;$)
-undef undef
+undef (;\[$@%&*])
 unless undef
 unlink (@)
 unpack ($_)

@@ -10566,7 +10566,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_or    : case KEY_print  : case KEY_printf: case KEY_qr    :
     case KEY_redo  : case KEY_require: case KEY_return: case KEY_say   :
     case KEY_select: case KEY_sort   : case KEY_split : case KEY_system:
-    case KEY_undef : case KEY_x      : case KEY_xor   :
+    case KEY_x     : case KEY_xor    :
 	if (!opnum) return NULL; nullret = TRUE; goto findopnum;
     case KEY_glob:    retsetpvs("_;", OP_GLOB);
     case KEY_keys:    retsetpvs("+", OP_KEYS);
@@ -10622,7 +10622,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	    str[n++] = '$';
 	    str[n++] = '@';
 	    str[n++] = '%';
-	    if (i == OP_LOCK) str[n++] = '&';
+	    if (i == OP_LOCK || i == OP_UNDEF) str[n++] = '&';
 	    str[n++] = '*';
 	    str[n++] = ']';
 	}
