@@ -714,6 +714,11 @@ is &myrindex("foffooo","o"),6,'&rindex with 2 args';
 
 test_proto 'rmdir';
 
+test_proto 'scalar';
+$tests += 2;
+is &myscalar(3), 3, '&scalar';
+lis [&myscalar(3)], [3], '&scalar in list cx';
+
 test_proto 'seek';
 {
     last if is_miniperl;
@@ -931,7 +936,7 @@ like $@, qr'^Undefined format "STDOUT" called',
     if (m?__END__?..${\0} and /^[-+](.*)/) {
       my $word = $1;
       next if
-       $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:ef
+       $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|ay|ub)?|d(?:ef
                   ault|ump|o)|p(?:rintf?|ackag
                   e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
