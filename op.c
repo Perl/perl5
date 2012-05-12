@@ -4611,6 +4611,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     OP *pegop = newOP(OP_NULL,0);
 #endif
     SV *use_version = NULL;
+    I32 flags = 0;
 
     PERL_ARGS_ASSERT_UTILIZE;
 
@@ -4661,6 +4662,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    use_version = ((SVOP*)idop)->op_sv;
 	else
 	    idop->op_private |= OPpCONST_NOVER;
+	flags |= OPpREQUIRE_VER<<8;
     }
     else {
 	SV *meth;
@@ -4687,7 +4689,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	NULL,
 	op_append_elem(OP_LINESEQ,
 	    op_append_elem(OP_LINESEQ,
-	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, 0, idop)),
+	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, flags, idop)),
 	        newSTATEOP(0, NULL, veop)),
 	    newSTATEOP(0, NULL, imop) ));
 
@@ -8632,9 +8634,9 @@ Perl_ck_require(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_REQUIRE;
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
-	SVOP * const kid = (SVOP*)cUNOPo->op_first;
-
-	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
+      SVOP * const kid = (SVOP*)cUNOPo->op_first;
+      if (kid->op_type == OP_CONST) {
+	if (kid->op_private & OPpCONST_BARE) {
 	    SV * const sv = kid->op_sv;
 	    U32 was_readonly = SvREADONLY(sv);
 	    char *s;
@@ -8665,9 +8667,14 @@ Perl_ck_require(pTHX_ OP *o)
 	    sv_catpvs(sv, ".pm");
 	    SvFLAGS(sv) |= was_readonly;
 	}
+	else if (!(kid->op_private & OPpCONST_FOLDED) &&
+		 (SvNIOK(kid->op_sv) || SvVOK(kid->op_sv)))
+	    o->op_private |= OPpREQUIRE_VER;
+      }
     }
 
-    if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
+    if (!(o->op_flags & OPf_SPECIAL || o->op_private & OPpREQUIRE_VER)) {
+	/* Wasn't written as CORE::require */
 	/* handle override, if any */
 	gv = gv_fetchpvs("require", GV_NOTQUAL, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {

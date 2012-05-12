@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 28;
+plan tests => 30;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -37,11 +37,15 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 require 'Foo';
 is( $r, "Foo" );
 
+undef $r;
 require 5.006;
-is( $r, "5.006" );
+is( $r, undef );
 
 require v5.6;
-ok( abs($r - 5.006) < 0.001 && $r eq "\x05\x06" );
+is( $r, undef );
+
+eval "use 5.006";
+is( $r, undef );
 
 eval "use Foo";
 is( $r, "Foo.pm" );
@@ -50,10 +54,17 @@ eval "use Foo::Bar";
 is( $r, join($dirsep, "Foo", "Bar.pm") );
 
 {
-    my @r;
-    local *CORE::GLOBAL::require = sub { push @r, shift; 1; };
-    eval "use 5.006";
-    like( " @r ", qr " 5\.006 " );
+    local $TODO = 'overrides feature does not work yet';
+    #use feature "overrides";
+    local *CORE::GLOBAL::require = sub { $r = shift; 1; };
+
+    eval q{
+	require 5.006;
+	is( $r, "5.006" );
+
+	require v5.6;
+	is( $r, "\x05\x06" );
+    }
 }
 
 {
