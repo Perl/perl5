@@ -20,7 +20,7 @@ my %unsupported = map +($_=>1), qw (
   cmp default do dump else elsif eq eval for foreach
   format ge given goto grep gt if last le local lt m map my ne next
   no  or  our  package  print  printf  q  qq  qr  qw  qx  redo  require
-  return s say scalar sort split state study sub tr undef unless until use
+  return s say sort split state  study  sub  tr  undef  unless  until  use
   when while x xor y
 );
 my %args_for = (
