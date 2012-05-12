@@ -8081,6 +8081,9 @@ Perl_ck_fun(pTHX_ OP *o)
 		scalar(kid);
 		break;
 	    case OA_SCALARREF:
+		if (type == OP_UNDEF && numargs == 1 && !(oa >> 4)
+		    && kid->op_type == OP_LIST)
+		    return too_many_arguments_pv(o,PL_op_desc[type], 0);
 		op_lvalue(scalar(kid), type);
 		break;
 	    }
@@ -10562,7 +10565,6 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_pos:     retsetpvs(";\\[$*]", OP_POS);
     case KEY_splice:
 	retsetpvs("+;$$@", OP_SPLICE);
-    case KEY_undef:   retsetpvs(";\\[$@%&*]", OP_UNDEF);
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
 	retsetpvs("", 0);
     case KEY_evalbytes:
@@ -10607,7 +10609,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	    str[n++] = '$';
 	    str[n++] = '@';
 	    str[n++] = '%';
-	    if (i == OP_LOCK) str[n++] = '&';
+	    if (i == OP_LOCK || i == OP_UNDEF) str[n++] = '&';
 	    str[n++] = '*';
 	    str[n++] = ']';
 	}
