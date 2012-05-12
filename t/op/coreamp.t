@@ -776,6 +776,8 @@ $tests ++;
 &CORE::srand;
 pass '&srand with no args does not crash';
 
+test_proto 'study';
+
 test_proto 'substr';
 $tests += 5;
 $_ = "abc";
@@ -919,7 +921,7 @@ like $@, qr'^Undefined format "STDOUT" called',
     if (m?__END__?..${\0} and /^[-+](.*)/) {
       my $word = $1;
       next if
-       $word =~ /^(?:s(?:t(?:ate|udy)|ort|ay|ub)?|d(?:ef
+       $word =~ /^(?:s(?:tate|ort|ay|ub)?|d(?:ef
                   ault|ump|o)|p(?:rintf?|ackag
                   e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
