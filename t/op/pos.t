@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 8;
+plan tests => 11;
 
 $x='banana';
 $x=~/.a/g;
@@ -47,3 +47,12 @@ $destroyed = 0;
     $x = bless({}, 'Class');
 }
 is($destroyed, 1, 'Timely scalar destruction with lvalue pos');
+
+eval 'pos @a = 1';
+like $@, qr/^Can't modify array dereference in match position at /,
+  'pos refuses @arrays';
+eval 'pos %a = 1';
+like $@, qr/^Can't modify hash dereference in match position at /,
+  'pos refuses %hashes';
+eval 'pos *a = 1';
+is eval 'pos *a', 1, 'pos *glob works';

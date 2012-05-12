@@ -2060,10 +2060,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 STATIC bool
 S_scalar_mod_type(const OP *o, I32 type)
 {
-    assert(o || type != OP_SASSIGN);
-
     switch (type) {
+    case OP_POS:
     case OP_SASSIGN:
+	assert(o);
 	if (o->op_type == OP_RV2GV)
 	    return FALSE;
 	/* FALL THROUGH */
