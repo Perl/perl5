@@ -103,7 +103,7 @@ schop		scalar chop		ck_null		stu%	S?
 chomp		chomp			ck_spair	mTs%	L
 schomp		scalar chomp		ck_null		sTu%	S?
 defined		defined operator	ck_defined	isu%	S?
-undef		undef operator		ck_lfun		s%	S?
+undef		undef operator		ck_fun		s%	R?
 study		study			ck_fun		su%	S?
 pos		match position		ck_lfun		stu%	S?
 
