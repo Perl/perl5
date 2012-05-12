@@ -320,6 +320,9 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_(LAST|REDO|NEXT|GOTO|DUMP) */
 #define OPpPV_IS_UTF8		128	/* label is in UTF8 */
 
+/* Private for OP_REQUIRE */
+#define OPpREQUIRE_VER		128	/* require 6; */
+
 struct op {
     BASEOP
 };

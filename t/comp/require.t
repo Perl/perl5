@@ -67,19 +67,16 @@ eval { require 10.0.2; };
 print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.2 required/;
 print "ok ",$i++,"\n";
 
-my $ver = 5.005_63;
-eval { require $ver; };
+eval { require 5.005_63; };
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
 
 # check inaccurate fp
-$ver = 10.2;
-eval { require $ver; };
+eval { require 10.2; };
 print "# $@\nnot " unless $@ =~ /^Perl v10\.200.0 required/;
 print "ok ",$i++,"\n";
 
-$ver = 10.000_02;
-eval { require $ver; };
+eval { require 10.000_02; };
 print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.20 required/;
 print "ok ",$i++,"\n";
 
