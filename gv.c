@@ -470,7 +470,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_q    : case KEY_qq   : case KEY_qr     : case KEY_qw    :
     case KEY_qx   : case KEY_redo : case KEY_require: case KEY_return:
     case KEY_s    : case KEY_say  : case KEY_sort   :
-    case KEY_split: case KEY_state: case KEY_study  : case KEY_sub   :
+    case KEY_state: case KEY_study: case KEY_sub    :
     case KEY_tr   : case KEY_undef: case KEY_UNITCHECK: case KEY_unless:
     case KEY_until: case KEY_use  : case KEY_when     : case KEY_while :
     case KEY_x    : case KEY_xor  : case KEY_y        :
@@ -483,7 +483,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_pop:
     case KEY_push:
     case KEY_shift:
-    case KEY_splice:
+    case KEY_splice: case KEY_split:
     case KEY_stat:
     case KEY_system:
     case KEY_truncate: case KEY_unlink:
