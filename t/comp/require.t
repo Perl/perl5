@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 53;
+my $total_tests = 54;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -57,6 +57,11 @@ print "ok ",$i++,"\n";
 eval { require v5.5.630; };
 print "# $@\nnot " if $@;
 print "ok ",$i++,"\n";
+
+sub v5 { die }
+eval { require v5; };
+print "# $@\nnot " if $@;
+print "ok ",$i++," - require v5 ignores sub named v5\n";
 
 eval { require 10.0.2; };
 print "# $@\nnot " unless $@ =~ /^Perl v10\.0\.2 required/;
