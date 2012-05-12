@@ -34,8 +34,9 @@ BEGIN {
                      hidden_ref_keys legal_ref_keys
 
                      hash_seed hv_store
+                     lock_hash_recurse unlock_hash_recurse
                     );
-    plan tests => 208 + @Exported_Funcs;
+    plan tests => 226 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
 }
 foreach my $func (@Exported_Funcs) {
@@ -155,15 +156,14 @@ is( $hash{locked}, 42,  'unlock_value' );
 {
     my %hash = (foo => 42, bar => undef);
     eval { lock_keys(%hash, qw(foo baz)); };
-    is( $@, sprintf("Hash has key 'bar' which is not in the new key ".
-                    "set at %s line %d.\n", __FILE__, __LINE__ - 2),
+    like( $@, qr/^Hash has key 'bar' which is not in the new key set/,
                     'carp test' );
 }
 
 {
     my %hash = (foo => 42, bar => 23);
     lock_hash( %hash );
-    ok( hashref_locked( { %hash } ), 'hashref_locked' );
+    ok( hashref_locked( \%hash ), 'hashref_locked' );
     ok( hash_locked( %hash ), 'hash_locked' );
 
     ok( Internals::SvREADONLY(%hash),'Was locked %hash' );
@@ -179,10 +179,23 @@ is( $hash{locked}, 42,  'unlock_value' );
     ok( !Internals::SvREADONLY($hash{bar}),'Was unlocked $hash{bar}' );
 }
 
+{
+    my %hash = (foo => 42, bar => 23);
+    ok( ! hashref_locked( { %hash } ), 'hashref_locked negated' );
+    ok( ! hash_locked( %hash ), 'hash_locked negated' );
+
+    lock_hash( %hash );
+    ok( ! hashref_unlocked( \%hash ), 'hashref_unlocked negated' );
+    ok( ! hash_unlocked( %hash ), 'hash_unlocked negated' );
+}
 
 lock_keys(%ENV);
 eval { () = $ENV{I_DONT_EXIST} };
-like( $@, qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted hash/,   'locked %ENV');
+like(
+    $@,
+    qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted hash/,
+    'locked %ENV'
+);
 
 {
     my %hash;
@@ -444,6 +457,17 @@ ok($hash_seed >= 0, "hash_seed $hash_seed");
     is("@keys","0 2 4 6 8",'lock_ref_keys_plus() @keys DDS/t');
 }
 {
+    my %hash=(0..9, 'a' => 'alpha');
+    lock_ref_keys_plus(\%hash,'a'..'f');
+    ok(Internals::SvREADONLY(%hash),'lock_ref_keys_plus args overlap');
+    my @hidden=sort(hidden_keys(%hash));
+    my @legal=sort(legal_keys(%hash));
+    my @keys=sort(keys(%hash));
+    is("@hidden","b c d e f",'lock_ref_keys_plus() @hidden overlap');
+    is("@legal","0 2 4 6 8 a b c d e f",'lock_ref_keys_plus() @legal overlap');
+    is("@keys","0 2 4 6 8 a",'lock_ref_keys_plus() @keys overlap');
+}
+{
     my %hash=(0..9);
     lock_keys_plus(%hash,'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_keys_plus args DDS/t');
@@ -453,6 +477,17 @@ ok($hash_seed >= 0, "hash_seed $hash_seed");
     is("@hidden","a b c d e f",'lock_keys_plus() @hidden DDS/t 3');
     is("@legal","0 2 4 6 8 a b c d e f",'lock_keys_plus() @legal DDS/t 3');
     is("@keys","0 2 4 6 8",'lock_keys_plus() @keys DDS/t 3');
+}
+{
+    my %hash=(0..9, 'a' => 'alpha');
+    lock_keys_plus(%hash,'a'..'f');
+    ok(Internals::SvREADONLY(%hash),'lock_keys_plus args overlap non-ref');
+    my @hidden=sort(hidden_keys(%hash));
+    my @legal=sort(legal_keys(%hash));
+    my @keys=sort(keys(%hash));
+    is("@hidden","b c d e f",'lock_keys_plus() @hidden overlap non-ref');
+    is("@legal","0 2 4 6 8 a b c d e f",'lock_keys_plus() @legal overlap non-ref');
+    is("@keys","0 2 4 6 8 a",'lock_keys_plus() @keys overlap non-ref');
 }
 
 {
@@ -472,3 +507,26 @@ ok($hash_seed >= 0, "hash_seed $hash_seed");
     is_deeply(\@ph, \@bam, "Placeholders in place");
 }
 
+{
+    my %hash = (
+        a   => 'alpha',
+        b   => [ qw( beta gamma delta ) ],
+        c   => [ 'epsilon', { zeta => 'eta' }, ],
+        d   => { theta => 'iota' },
+    );
+    lock_hash_recurse(%hash);
+    ok( hash_locked(%hash),
+        "lock_hash_recurse(): top-level hash locked" );
+    ok( hash_locked(%{$hash{d}}),
+        "lock_hash_recurse(): element which is hashref locked" );
+    ok( ! hash_locked(%{$hash{c}[1]}),
+        "lock_hash_recurse(): element which is hashref in array ref not locked" );
+
+    unlock_hash_recurse(%hash);
+    ok( hash_unlocked(%hash),
+        "unlock_hash_recurse(): top-level hash unlocked" );
+    ok( hash_unlocked(%{$hash{d}}),
+        "unlock_hash_recurse(): element which is hashref unlocked" );
+    ok( hash_unlocked(%{$hash{c}[1]}),
+        "unlock_hash_recurse(): element which is hashref in array ref not locked" );
+}
