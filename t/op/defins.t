@@ -10,7 +10,7 @@ BEGIN {
     $SIG{__WARN__} = sub { $warns++; warn $_[0] };
 }
 require 'test.pl';
-plan( tests => 19 );
+plan( tests => 23 );
 
 my $unix_mode = 1;
 
@@ -132,6 +132,7 @@ unlink($saved_filename);
 ok(!(-f $saved_filename),'work file unlinked');
 
 my %hash = (0 => 1, 1 => 2);
+my @array = 1;
 
 $seen = 0;
 while (my $name = each %hash)
@@ -154,5 +155,31 @@ while ($where{$seen} = each %hash)
   $seen++ if $where{$seen} eq '0';
  }
 cmp_ok($seen,'==',1,'seen in each hash');
+
+$seen = 0;
+undef $_;
+while (each %hash)
+ {
+  $seen++ if $_ eq '0';
+ }
+cmp_ok($seen,'==',1,'0 seen in $_ in while(each %hash)');
+
+$seen = 0;
+undef $_;
+while (each @array)
+ {
+  $seen++ if $_ eq '0';
+ }
+cmp_ok($seen,'==',1,'0 seen in $_ in while(each @array)');
+
+$seen = 0;
+undef $_;
+$_ eq '0' and $seen++ while each %hash;
+cmp_ok($seen,'==',1,'0 seen in $_ in while(each %hash) as stm mod');
+
+$seen = 0;
+undef $_;
+$_ eq '0' and $seen++ while each @array;
+cmp_ok($seen,'==',1,'0 seen in $_ in while(each @array) as stm mod');
 
 cmp_ok($warns,'==',0,'no warns at finish');
