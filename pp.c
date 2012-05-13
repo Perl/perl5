@@ -5993,17 +5993,18 @@ PP(pp_coreargs)
 	           type permits the latter. */
 	     || SvTYPE(SvRV(*svp)) > (
 	             wantscalar       ? SVt_PVLV
-	           : opnum == OP_LOCK ? SVt_PVCV
+	           : opnum == OP_LOCK || opnum == OP_UNDEF
+	                              ? SVt_PVCV
 	           :                    SVt_PVHV
 	        )
 	       )
 		DIE(aTHX_
 		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
 		 "Type of arg %d to &CORE::%s must be %s",
-		  whicharg, OP_DESC(PL_op->op_next),
+		  whicharg, PL_op_name[opnum],
 		  wantscalar
 		    ? "scalar reference"
-		    : opnum == OP_LOCK
+		    : opnum == OP_LOCK || opnum == OP_UNDEF
 		       ? "reference to one of [$@%&*]"
 		       : "reference to one of [$@%*]"
 		);
