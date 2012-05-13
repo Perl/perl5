@@ -5881,8 +5881,8 @@ PP(pp_coreargs)
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
     int defgv = PL_opargs[opnum] & OA_DEFGV, whicharg = 0;
     AV * const at_ = GvAV(PL_defgv);
-    SV **svp = AvARRAY(at_);
-    I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1;
+    SV **svp = at_ ? AvARRAY(at_) : NULL;
+    I32 minargs = 0, maxargs = 0, numargs = at_ ? AvFILLp(at_)+1 : 0;
     I32 oa = opnum ? PL_opargs[opnum] >> OASHIFT : 0;
     bool seen_question = 0;
     const char *err = NULL;
