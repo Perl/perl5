@@ -1775,7 +1775,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     switch (o->op_type) {
     case OP_UNDEF:
-	localize = 0;
 	PL_modcount++;
 	return o;
     case OP_STUB:
