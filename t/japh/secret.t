@@ -129,6 +129,12 @@ $n =(@got)= "abababab" =~ /a/g;
 is( $n, 4, '=()=' );
 is( "@got", 'a a a a', '=()=' );
 
+# goatse + split
+$n =()= @{[ split /:/, "a:a:a:a" ]};
+is( $n, 4, "=()= split" );
+$n =()= split /:/, "a:a:a:a", -1;
+is( $n, 4, "=()= split" );
+
 # flaming xwing
 @got =<DATA>=~ /(\d+) is (\w+)/;
 is( "@got", '31337 eleet', '=<>=~' );
