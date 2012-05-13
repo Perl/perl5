@@ -34,6 +34,7 @@ my %op_desc = (
  readpipe => 'quoted execution (``, qx)',
  reset    => 'symbol reset',
  ref      => 'reference-type operator',
+ undef    => 'undef operator',
 );
 sub op_desc($) {
   return $op_desc{$_[0]} || $_[0];
@@ -189,38 +190,41 @@ sub test_proto {
     like $@, qr/^Type of arg 1 to &CORE::$o must be hash reference at /,
         "&$o with non-hash arg with hash overload (which does not count)";
   }
-  elsif ($p =~ /^\\\[(\$\@%&?\*)](\$\@)?\z/) {
-    $tests += 4;
+  elsif ($p =~ /^(;)?\\\[(\$\@%&?\*)](\$\@)?\z/) {
+    $tests += 3;
 
-    unless ($2) {
+    unless ($3) {
       $tests ++;
       eval " &CORE::$o(1,2) ";
-      like $@, qr/^Too many arguments for $o at /,
+      like $@, qr/^Too many arguments for ${\op_desc($o)} at /,
         "&$o with too many args";
     }
-    eval { &{"CORE::$o"}($2 ? 1 : ()) };
-    like $@, qr/^Not enough arguments for $o at /,
+    unless ($1) {
+      $tests ++;
+      eval { &{"CORE::$o"}($3 ? 1 : ()) };
+      like $@, qr/^Not enough arguments for $o at /,
          "&$o with too few args";
-    my $more_args = $2 ? ',1' : '';
+    }
+    my $more_args = $3 ? ',1' : '';
     eval " &CORE::$o(2$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\Q$1\E] at /,
+                ) \[\Q$2\E] at /,
         "&$o with non-ref arg";
     eval " &CORE::$o(*STDOUT{IO}$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\Q$1\E] at /,
+                ) \[\Q$2\E] at /,
         "&$o with ioref arg";
     my $class = ref *DATA{IO};
     eval " &CORE::$o(bless(*DATA{IO}, 'hov')$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\Q$1\E] at /,
+                ) \[\Q$2\E] at /,
         "&$o with ioref arg with hash overload (which does not count)";
     bless *DATA{IO}, $class;
-    if (do {$1 !~ /&/}) {
+    if (do {$2 !~ /&/}) {
       $tests++;
       eval " &CORE::$o(\\&scriggle$more_args) ";
       like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one (?x:
-                  )of \[\Q$1\E] at /,
+                  )of \[\Q$2\E] at /,
         "&$o with coderef arg";
     }    
   }
@@ -875,6 +879,31 @@ test_proto 'umask';
 $tests ++;
 is &myumask, umask, '&umask with no args';
 
+test_proto 'undef';
+$tests += 11;
+is &myundef(), undef, '&undef returns undef';
+lis [&myundef()], [undef], '&undef returns undef in list cx';
+lis [&myundef(\$_)], [undef], '&undef(...) returns undef in list cx';
+is \&myundef(), \undef, '&undef returns the right undef';
+$_ = 'anserine questions';
+&myundef(\$_);
+is $_, undef, '&undef(\$_) undefines $_';
+@_ = 1..3;
+&myundef(\@_);
+is @_, 0, '&undef(\@_) undefines @_';
+%_ = 1..4;
+&myundef(\%_);
+ok !%_, '&undef(\%_) undefines %_';
+&myundef(\&utf8::valid); # nobody should be using this :-)
+ok !defined &utf8::valid, '&undef(\&foo) undefines &foo';
+@_ = \*_;
+&myundef;
+is *_{ARRAY}, undef, '&undef(\*_) undefines *_';
+(${\&myundef()}, @_) = 1..10;
+lis \@_, [2..10], 'list assignment to ${\&undef()}';
+ok !defined undef, 'list assignment to ${\&undef()} does not affect undef'; 
+undef @_;
+
 test_proto 'unpack';
 $tests += 2;
 $_ = 'abcd';
@@ -948,7 +977,7 @@ like $@, qr'^Undefined format "STDOUT" called',
        $word =~ /^(?:s(?:tate|ort|ay|ub)?|d(?:ef
                   ault|ump|o)|p(?:rintf?|ackag
                   e)|e(?:ls(?:if|e)|val|q)|g(?:[et]|iven|oto
-                  |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
+                  |rep)|u(?:n(?:less|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
                   AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|en)
                   |(?:ou?|t)r|m(?:ap|y)?|UNITCHECK|q[qrwx]?|x(?:or)?|DEST
