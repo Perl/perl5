@@ -542,7 +542,8 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	           1
 	);
 	assert(GvCV(gv) == cv);
-	if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS)
+	if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS
+	 && opnum != OP_UNDEF)
 	    CvLVALUE_off(cv); /* Now *that* was a neat trick. */
 	LEAVE;
 	PL_parser = oldparser;

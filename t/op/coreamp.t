@@ -899,9 +899,9 @@ ok !defined &utf8::valid, '&undef(\&foo) undefines &foo';
 @_ = \*_;
 &myundef;
 is *_{ARRAY}, undef, '&undef(\*_) undefines *_';
-(${\&myundef()}, @_) = 1..10;
-lis \@_, [2..10], 'list assignment to ${\&undef()}';
-ok !defined undef, 'list assignment to ${\&undef()} does not affect undef'; 
+(&myundef(), @_) = 1..10;
+lis \@_, [2..10], 'list assignment to &undef()';
+ok !defined undef, 'list assignment to &undef() does not affect undef'; 
 undef @_;
 
 test_proto 'unpack';
