@@ -656,6 +656,7 @@ static SV *hintkey_swaplabel_sv, *hintkey_labelconst_sv;
 static SV *hintkey_arrayfullexpr_sv, *hintkey_arraylistexpr_sv;
 static SV *hintkey_arraytermexpr_sv, *hintkey_arrayarithexpr_sv;
 static SV *hintkey_arrayexprflags_sv;
+static SV *hintkey_else_sv, *hintkey_elsif_sv, *hintkey_continue_sv;
 static int (*next_keyword_plugin)(pTHX_ char *, STRLEN, OP **);
 
 /* low-level parser helpers */
@@ -941,6 +942,20 @@ static OP *THX_parse_keyword_arrayexprflags(pTHX)
     return o ? newANONLIST(o) : newANONHASH(newOP(OP_STUB, 0));
 }
 
+#define parse_elsif_parens() THX_parse_elsif_parens(aTHX)
+static OP *THX_parse_elsif_parens(pTHX)
+{
+    OP *o;
+    lex_read_space(0);
+    if (lex_peek_unichar(0) != '(') croak("syntax error");
+    lex_read_unichar(0);
+    o = parse_fullexpr(0);
+    lex_read_space(0);
+    if (lex_peek_unichar(0) != ')') croak("syntax error");
+    lex_read_unichar(0);
+    return o;
+}
+
 /* plugin glue */
 
 #define keyword_active(hintkey_sv) THX_keyword_active(aTHX_ hintkey_sv)
@@ -1025,6 +1040,16 @@ static int my_keyword_plugin(pTHX_
 		    keyword_active(hintkey_arrayexprflags_sv)) {
 	*op_ptr = parse_keyword_arrayexprflags();
 	return KEYWORD_PLUGIN_EXPR;
+    } else if((  keyword_len == 4 && strnEQ(keyword_ptr, "else", 4)
+	      && keyword_active(hintkey_else_sv))
+	   || (  keyword_len == 8 && strnEQ(keyword_ptr, "continue", 8)
+	      && keyword_active(hintkey_continue_sv))) {
+	*op_ptr = newOP(OP_NULL, 0);
+	return KEYWORD_PLUGIN_STMT;
+    } else if(keyword_len == 5 && strnEQ(keyword_ptr, "elsif", 5)
+	   && keyword_active(hintkey_elsif_sv)) {
+	*op_ptr = parse_elsif_parens();
+	return KEYWORD_PLUGIN_STMT;
     } else {
 	return next_keyword_plugin(aTHX_ keyword_ptr, keyword_len, op_ptr);
     }
@@ -3173,6 +3198,9 @@ BOOT:
     hintkey_arraytermexpr_sv = newSVpvs_share("XS::APItest/arraytermexpr");
     hintkey_arrayarithexpr_sv = newSVpvs_share("XS::APItest/arrayarithexpr");
     hintkey_arrayexprflags_sv = newSVpvs_share("XS::APItest/arrayexprflags");
+    hintkey_else_sv = newSVpvs_share("XS::APItest/else");
+    hintkey_elsif_sv = newSVpvs_share("XS::APItest/elsif");
+    hintkey_continue_sv = newSVpvs_share("XS::APItest/continue");
     next_keyword_plugin = PL_keyword_plugin;
     PL_keyword_plugin = my_keyword_plugin;
 }

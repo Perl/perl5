@@ -40,7 +40,11 @@ sub import {
 	}
     }
     foreach (keys %{$exports||{}}) {
-	next unless /\A(?:rpn|calcrpn|stufftest|swaptwostmts|looprest|scopelessblock|stmtasexpr|stmtsasexpr|loopblock|blockasexpr|swaplabel|labelconst|arrayfullexpr|arraylistexpr|arraytermexpr|arrayarithexpr|arrayexprflags)\z/;
+	next unless
+	 /\A(?:rpn|calcrpn|stufftest|swaptwostmts|looprest|scopelessblock
+	      |stmtasexpr|stmtsasexpr|loopblock|blockasexpr|swaplabel
+	      |labelconst|arrayfullexpr|arraylistexpr|arraytermexpr
+	      |arrayarithexpr|arrayexprflags|els(?:e|if)|continue)\z/x;
 	$^H{"XS::APItest/$_"} = 1;
 	delete $exports->{$_};
     }
