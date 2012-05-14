@@ -33,10 +33,10 @@ my @sys_consts = check qw(
     _SC_STREAM_MAX _SC_VERSION _SC_TZNAME_MAX
 );
 
-my $tests = 2 * 3 * @path_consts +
-            2 * 3 * @path_consts_terminal +
-            2 * 3 * @path_consts_fifo +
-                3 * @sys_consts;
+my $tests = 2 * 2 * @path_consts +
+            2 * 2 * @path_consts_terminal +
+            2 * 2 * @path_consts_fifo +
+                1 * @sys_consts;
 plan $tests 
      ? (tests => $tests) 
      : (skip_all => "No tests to run on this OS")
@@ -58,17 +58,17 @@ sub _check_and_report {
     my $return_val = eval {$sub->(eval "$constant()")};
     my $errno = $!; # Grab this before anything else changes it.
     is($@, '', $description);
-    SKIP: {
-	skip "terminal constants set errno on QNX", 1
-	    if $^O eq 'nto' and $description =~ $TTY;
-	cmp_ok($errno, '==', 0, 'errno should be clear in all cases')
-	    or diag("\$!: $errno");
-    }
-    SKIP: {
-        skip "constant not implemented on $^O or no limit in effect", 1 
-            if !defined($return_val);
-        like($return_val, qr/\A(?:-?[1-9][0-9]*|0 but true)\z/,
+
+    # We can't test sysconf further without investigating the type of argument
+    # provided
+    return if $description =~ /sysconf/;
+
+    if (defined $return_val) {
+	like($return_val, qr/\A(?:-?[1-9][0-9]*|0 but true)\z/,
 	     'the returned value should be a signed integer');
+    } else {
+	cmp_ok($errno, '==', 0, 'errno should be 0 as before the call')
+	    or diag("\$!: $errno");
     }
 }
 
@@ -76,7 +76,7 @@ sub _check_and_report {
 SKIP: {
     my $fd = POSIX::open($testdir, O_RDONLY)
         or skip "could not open test directory '$testdir' ($!)",
-	  3 * @path_consts;
+	  2 * @path_consts;
 
     for my $constant (@path_consts) {
 	_check_and_report(sub { fpathconf($fd, shift) }, $constant,
@@ -93,7 +93,7 @@ for my $constant (@path_consts) {
 }
 
 SKIP: {
-    my $n = 2 * 3 * @path_consts_terminal;
+    my $n = 2 * 2 * @path_consts_terminal;
 
     -c $TTY
 	or skip("$TTY not a character file", $n);
@@ -122,11 +122,11 @@ my $fifo = "fifo$$";
 
 SKIP: {
     eval { mkfifo($fifo, 0666) }
-	or skip("could not create fifo $fifo ($!)", 2 * 3 * @path_consts_fifo);
+	or skip("could not create fifo $fifo ($!)", 2 * 2 * @path_consts_fifo);
 
   SKIP: {
       my $fd = POSIX::open($fifo, O_RDONLY | O_NONBLOCK)
-	  or skip("could not open $fifo ($!)", 3 * @path_consts_fifo);
+	  or skip("could not open $fifo ($!)", 2 * @path_consts_fifo);
 
       for my $constant (@path_consts_fifo) {
 	  _check_and_report(sub { fpathconf($fd, shift) }, $constant,
@@ -150,7 +150,7 @@ END {
 SKIP: {
     if($^O eq 'cygwin') {
         pop @sys_consts;
-        skip("No _SC_TZNAME_MAX on Cygwin", 3);
+        skip("No _SC_TZNAME_MAX on Cygwin", 1);
     }
         
 }
