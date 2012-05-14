@@ -24,7 +24,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.35";
+$VERSION = "1.34";
 
 @EXPORT_OK = qw(sockatmark);
 
@@ -349,27 +349,18 @@ sub timeout {
 sub sockdomain {
     @_ == 1 or croak 'usage: $sock->sockdomain()';
     my $sock = shift;
-    if (!defined(${*$sock}{'io_socket_domain'})) {
-	my $addr = $sock->sockname();
-	${*$sock}{'io_socket_domain'} = sockaddr_family($addr)
-	   if (defined($addr));
-    }
     ${*$sock}{'io_socket_domain'};
 }
 
 sub socktype {
     @_ == 1 or croak 'usage: $sock->socktype()';
     my $sock = shift;
-    ${*$sock}{'io_socket_type'} = $sock->sockopt(Socket::SO_TYPE)
-	if (!defined(${*$sock}{'io_socket_type'}) && defined(eval{Socket::SO_TYPE}));
     ${*$sock}{'io_socket_type'}
 }
 
 sub protocol {
     @_ == 1 or croak 'usage: $sock->protocol()';
     my($sock) = @_;
-    ${*$sock}{'io_socket_proto'} = $sock->sockopt(Socket::SO_PROTOCOL)
-	if (!defined(${*$sock}{'io_socket_proto'}) && defined(eval{Socket::SO_PROTOCOL}));
     ${*$sock}{'io_socket_proto'};
 }
 

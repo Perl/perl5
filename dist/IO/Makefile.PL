@@ -33,9 +33,6 @@ WriteMakefile(
   OBJECT       => '$(O_FILES)',
   ABSTRACT     => 'Perl core IO modules',
   AUTHOR       => 'Graham Barr <gbarr@cpan.org>',
-  PREREQ_PM    => {
-    'Test::More' => 0,
-  },
   ( $PERL_CORE
     ? ()
     : (
