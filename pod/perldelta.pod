@@ -2350,16 +2350,6 @@ string (0 is the return), and overlong UTF-8 sequences.
 
 =item *
 
-The returned code point from the function C<utf8n_to_uvuni()>
-when the input is malformed UTF-8, malformations are allowed, and
-C<utf8> warnings are off is now the Unicode REPLACEMENT CHARACTER
-whenever the malformation is such that no well-defined code point can be
-computed.  Previously the returned value was essentially garbage.  The
-only malformations that have well-defined values are a zero-length
-string (0 is the return), and overlong UTF-8 sequences.
-
-=item *
-
 Padlists are now marked C<AvREAL>; i.e., reference-counted.  They have
 always been reference-counted, but were not marked real, because F<pad.c>
 did its own clean-up, instead of using the usual clean-up code in F<sv.c>.
