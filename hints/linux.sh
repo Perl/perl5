@@ -174,7 +174,7 @@ else
 fi
 
 case "$plibpth" in
-'') plibpth=`$gcc -print-search-dirs | grep libraries |
+'') plibpth=`LANG=C LC_ALL=C $gcc -print-search-dirs | grep libraries |
 	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
     set X $plibpth # Collapse all entries on one line
     shift
