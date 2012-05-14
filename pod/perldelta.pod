@@ -4189,7 +4189,7 @@ files from 137 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers.  The following people are known to
-have contributed the improvements that became Perl 5.14.1:
+have contributed the improvements that became Perl 5.16.0:
 
 Aaron Crane, Abhijit Menon-Sen, Abigail, Alan Haggai Alavi, Alberto
 Simões, Alexandr Ciornii, Andreas König, Andy Dougherty, Aristotle
