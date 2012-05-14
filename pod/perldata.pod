@@ -355,8 +355,8 @@ C<$who::0>, and a C<$who's> variable.  The last two would be the
 $0 and the $s variables in the (presumably) non-existent package
 C<who>.
 
-In fact, an identifier within such curlies is forced to be a string,
-as is any simple identifier within a hash subscript.  Neither need
+In fact, a simple identifier within such curlies is forced to be
+a string, and likewise within a hash subscript. Neither need
 quoting.  Our earlier example, C<$days{'Feb'}> can be written as
 C<$days{Feb}> and the quotes will be assumed automatically.  But
 anything more complicated in the subscript will be interpreted as an
