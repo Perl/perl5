@@ -4156,6 +4156,11 @@ to F</usr/include/stdbool.h>
 
 =item *
 
+On Win32, a number of tests hang unless STDERR is redirected.  The cause of
+this is still under investigation.
+
+=item *
+
 The following CPAN modules have test failures with perl 5.16.  Patches have
 been submitted for all of these, so hopefully there will be new releases
 soon:
