@@ -475,6 +475,8 @@ the strings?).
  BinGOs   5.15.7        2012-Jan-20
  Max M    5.15.8        2012-Feb-20
  Abigail  5.15.9        2012-Mar-20
+ Ricardo  5.16.0-RC0    2012-May-10
+ Ricardo  5.16.0-RC1    2012-May-14
 
 =head2 SELECTED RELEASE SIZES
 
