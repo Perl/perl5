@@ -12708,19 +12708,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_reginput);
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
-		/* XXX This just has to be broken. The old save_re_context
-		   code did SAVEGENERICPV(PL_reg_start_tmp);
-		   PL_reg_start_tmp is char **.
-		   Look above to what the dup code does for
-		   SAVEt_GENERIC_PVREF
-		   It can never have worked.
-		   So this is merely a faithful copy of the exiting bug:  */
-		new_state->re_state_reg_start_tmp
-		    = (char **) pv_dup((char *)
-				      old_state->re_state_reg_start_tmp);
-		/* I assume that it only ever "worked" because no-one called
-		   (pseudo)fork while the regexp engine had re-entered itself.
-		*/
 #ifdef PERL_OLD_COPY_ON_WRITE
 		new_state->re_state_nrs
 		    = sv_dup(old_state->re_state_nrs, param);

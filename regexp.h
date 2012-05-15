@@ -50,9 +50,18 @@ struct reg_substr_data {
 #define SV_SAVED_COPY
 #endif
 
+/* offsets within a string of a particular /(.)/ capture */
+
 typedef struct regexp_paren_pair {
     I32 start;
     I32 end;
+    /* 'start_tmp' records a new opening position before the matching end
+     * has been found, so that the old start and end values are still
+     * valid, e.g.
+     *	  "abc" =~ /(.(?{print "[$1]"}))+/
+     *outputs [][a][b]
+     * This field is not part of the API.  */
+    char *start_tmp;
 } regexp_paren_pair;
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
@@ -738,8 +747,6 @@ typedef struct regmatch_slab {
 #define PL_bostr		PL_reg_state.re_state_bostr
 #define PL_reginput		PL_reg_state.re_state_reginput
 #define PL_regeol		PL_reg_state.re_state_regeol
-#define PL_reg_start_tmp	PL_reg_state.re_state_reg_start_tmp
-#define PL_reg_start_tmpl	PL_reg_state.re_state_reg_start_tmpl
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
 #define PL_reg_magic		PL_reg_state.re_state_reg_magic
 #define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
@@ -757,14 +764,12 @@ typedef struct regmatch_slab {
 
 struct re_save_state {
     U32 re_state_reg_flags;		/* from regexec.c */
-    U32 re_state_reg_start_tmpl;	/* from regexec.c */
     bool re_state_eval_setup_done;	/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
     bool re_reparsing;			/* runtime (?{}) fed back into parser */
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */
-    char **re_state_reg_start_tmp;	/* from regexec.c */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
     PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
     PMOP *re_state_reg_curpm;		/* from regexec.c */

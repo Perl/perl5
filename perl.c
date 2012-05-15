@@ -1236,9 +1236,6 @@ perl_destruct(pTHXx)
 
     Safefree(PL_origfilename);
     PL_origfilename = NULL;
-    Safefree(PL_reg_start_tmp);
-    PL_reg_start_tmp = (char**)NULL;
-    PL_reg_start_tmpl = 0;
     Safefree(PL_reg_curpm);
     Safefree(PL_reg_poscache);
     free_tied_hv_pool();

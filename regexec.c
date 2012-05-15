@@ -366,12 +366,12 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(rex->offs[p].end);
 	SSPUSHINT(rex->offs[p].start);
-	SSPUSHPTR(PL_reg_start_tmp[p]);
+	SSPUSHPTR(rex->offs[p].start_tmp);
 	SSPUSHINT(p);
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
 	  "     saving \\%"UVuf" %"IVdf"(%"IVdf")..%"IVdf"\n",
 		      (UV)p, (IV)rex->offs[p].start,
-		      (IV)(PL_reg_start_tmp[p] - PL_bostr),
+		      (IV)(rex->offs[p].start_tmp - PL_bostr),
 		      (IV)rex->offs[p].end
 	));
     }
@@ -425,7 +425,7 @@ S_regcppop(pTHX_ regexp *rex)
     for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
 	U32 paren = (U32)SSPOPINT;
-	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
+	rex->offs[paren].start_tmp = (char *) SSPOPPTR;
 	rex->offs[paren].start = SSPOPINT;
 	tmps = SSPOPINT;
 	if (paren <= rex->lastparen)
@@ -434,7 +434,7 @@ S_regcppop(pTHX_ regexp *rex)
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"UVuf" to %"IVdf"(%"IVdf")..%"IVdf"%s\n",
 			  (UV)paren, (IV)rex->offs[paren].start,
-			  (IV)(PL_reg_start_tmp[paren] - PL_bostr),
+			  (IV)(rex->offs[paren].start_tmp - PL_bostr),
 			  (IV)rex->offs[paren].end,
 			  (paren > rex->lastparen ? "(no)" : ""));
 	);
@@ -2645,13 +2645,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
     prog->lastparen = 0;
     prog->lastcloseparen = 0;
     PL_regsize = 0;
-    if (PL_reg_start_tmpl <= prog->nparens) {
-	PL_reg_start_tmpl = prog->nparens*3/2 + 3;
-        if(PL_reg_start_tmp)
-            Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
-        else
-            Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
-    }
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, prog->lastparen should take care of
@@ -4462,14 +4455,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		);		
 		startpoint = rei->program + 1;
                	ST.close_paren = 0; /* only used for GOSUB */
-               	/* borrowed from regtry */
-                if (PL_reg_start_tmpl <= re->nparens) {
-                    PL_reg_start_tmpl = re->nparens*3/2 + 3;
-                    if(PL_reg_start_tmp)
-                        Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
-                    else
-                        Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
-                }               	
 
         eval_recurse_doit: /* Share code with GOSUB below this line */                		
 		/* run the pattern returned from (??{...}) */
@@ -4552,14 +4537,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 	case OPEN:
 	    n = ARG(scan);  /* which paren pair */
-	    PL_reg_start_tmp[n] = locinput;
+	    rex->offs[n].start_tmp = locinput;
 	    if (n > PL_regsize)
 		PL_regsize = n;
             lastopen = n;
 	    break;
 	case CLOSE:
 	    n = ARG(scan);  /* which paren pair */
-	    rex->offs[n].start = PL_reg_start_tmp[n] - PL_bostr;
+	    rex->offs[n].start = rex->offs[n].start_tmp - PL_bostr;
 	    rex->offs[n].end = locinput - PL_bostr;
 	    /*if (n > PL_regsize)
 		PL_regsize = n;*/
@@ -4581,7 +4566,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                         n = ARG(cursor);
                         if ( n <= lastopen ) {
                             rex->offs[n].start
-				= PL_reg_start_tmp[n] - PL_bostr;
+					= rex->offs[n].start_tmp - PL_bostr;
                             rex->offs[n].end = locinput - PL_bostr;
                             /*if (n > PL_regsize)
                             PL_regsize = n;*/
