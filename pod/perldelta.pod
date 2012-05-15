@@ -19,8 +19,8 @@ parentheses.
 
 =head1 Notice
 
-With the release of Perl 5.16.0, the 5.12.x series of releases are now out of
-their support period.  There may be future 5.12.x releases, but only in the
+With the release of Perl 5.16.0, the 5.12.x series of releases is now out of
+its support period.  There may be future 5.12.x releases, but only in the
 event of a critical security issue.  Users of Perl 5.12 or earlier should
 consider upgrading to a more recent release of Perl.
 
