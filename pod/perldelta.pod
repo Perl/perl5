@@ -848,7 +848,7 @@ version of those values from the OS.
 This is unlikely to result in a real problem, as Perl does not attach
 special meaning to any non-ASCII character, so it is currently
 irrelevant which are quoted or not.  This change fixes bug [perl #77654] and
-bring Perl's behavior more into line with Unicode's recommendations.
+brings Perl's behavior more into line with Unicode's recommendations.
 See L<perlfunc/quotemeta>.
 
 =head1 Performance Enhancements
