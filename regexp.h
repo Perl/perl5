@@ -738,9 +738,6 @@ typedef struct regmatch_slab {
 #define PL_bostr		PL_reg_state.re_state_bostr
 #define PL_reginput		PL_reg_state.re_state_reginput
 #define PL_regeol		PL_reg_state.re_state_regeol
-#define PL_regoffs		PL_reg_state.re_state_regoffs
-#define PL_reglastparen		PL_reg_state.re_state_reglastparen
-#define PL_reglastcloseparen	PL_reg_state.re_state_reglastcloseparen
 #define PL_reg_start_tmp	PL_reg_state.re_state_reg_start_tmp
 #define PL_reg_start_tmpl	PL_reg_state.re_state_reg_start_tmpl
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
@@ -767,9 +764,6 @@ struct re_save_state {
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */
-    regexp_paren_pair *re_state_regoffs;  /* Pointer to start/end pairs */
-    U32 *re_state_reglastparen;		/* Similarly for lastparen. */
-    U32 *re_state_reglastcloseparen;	/* Similarly for lastcloseparen. */
     char **re_state_reg_start_tmp;	/* from regexec.c */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
     PMOP *re_state_reg_oldcurpm;	/* from regexec.c */

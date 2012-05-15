@@ -6697,12 +6697,16 @@ STATIC I32	S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode
 #define PERL_ARGS_ASSERT_REG_CHECK_NAMED_BUFF_MATCHED	\
 	assert(rex); assert(scan)
 
-STATIC char*	S_regcppop(pTHX_ const regexp *rex)
+STATIC char*	S_regcppop(pTHX_ regexp *rex)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REGCPPOP	\
 	assert(rex)
 
-STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
+STATIC CHECKPOINT	S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_REGCPPUSH	\
+	assert(rex)
+
 STATIC U8*	S_reghop3(U8 *s, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)

@@ -12708,15 +12708,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_reginput);
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
-		new_state->re_state_regoffs
-		    = (regexp_paren_pair*)
-			any_dup(old_state->re_state_regoffs, proto_perl);
-		new_state->re_state_reglastparen
-		    = (U32*) any_dup(old_state->re_state_reglastparen, 
-			      proto_perl);
-		new_state->re_state_reglastcloseparen
-		    = (U32*)any_dup(old_state->re_state_reglastcloseparen,
-			      proto_perl);
 		/* XXX This just has to be broken. The old save_re_context
 		   code did SAVEGENERICPV(PL_reg_start_tmp);
 		   PL_reg_start_tmp is char **.

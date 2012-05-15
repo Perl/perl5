@@ -1996,8 +1996,8 @@ ERs	|I32	|regrepeat	|NN const regexp *prog|NN const regnode *p|I32 max|int depth
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startpos
 ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p|NULLOK STRLEN *lenp\
 				|bool const do_utf8sv_is_utf8
-Es	|CHECKPOINT|regcppush	|I32 parenfloor
-Es	|char*	|regcppop	|NN const regexp *rex
+Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor
+Es	|char*	|regcppop	|NN regexp *rex
 ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim
 ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
