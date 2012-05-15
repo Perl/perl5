@@ -1403,7 +1403,7 @@ instead of 0. On most platforms C<TCSANOW> is defined to be 0, but on some
 
 =item *
 
-L<Socket> has been upgraded from version 1.94 to 2.000.
+L<Socket> has been upgraded from version 1.94 to 2.001.
 
 It has new functions and constants for handling IPv6 sockets:
 

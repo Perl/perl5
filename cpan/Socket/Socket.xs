@@ -444,13 +444,13 @@ static void xs_getaddrinfo(pTHX_ CV *cv)
 
 		hintshash = (HV*)SvRV(hints);
 
-		if((valp = hv_fetch(hintshash, "flags", 5, 0)) != NULL)
+		if((valp = hv_fetch(hintshash, "flags", 5, 0)) != NULL && SvOK(*valp))
 			hints_s.ai_flags = SvIV(*valp);
-		if((valp = hv_fetch(hintshash, "family", 6, 0)) != NULL)
+		if((valp = hv_fetch(hintshash, "family", 6, 0)) != NULL && SvOK(*valp))
 			hints_s.ai_family = SvIV(*valp);
-		if((valp = hv_fetch(hintshash, "socktype", 8, 0)) != NULL)
+		if((valp = hv_fetch(hintshash, "socktype", 8, 0)) != NULL && SvOK(*valp))
 			hints_s.ai_socktype = SvIV(*valp);
-		if((valp = hv_fetch(hintshash, "protocol", 8, 0)) != NULL)
+		if((valp = hv_fetch(hintshash, "protocol", 8, 0)) != NULL && SvOK(*valp))
 			hints_s.ai_protocol = SvIV(*valp);
 	}
 
@@ -712,7 +712,7 @@ unpack_sockaddr_un(sun_sv)
 	   getpeername and getsockname is not equal to sizeof(addr). */
 	if (sockaddrlen < sizeof(addr)) {
 	  Copy(sun_ad, &addr, sockaddrlen, char);
-	  Zero(&addr+sockaddrlen, sizeof(addr)-sockaddrlen, char);
+	  Zero(((char*)&addr) + sockaddrlen, sizeof(addr) - sockaddrlen, char);
 	} else {
 	  Copy(sun_ad, &addr, sizeof(addr), char);
 	}

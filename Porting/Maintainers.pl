@@ -1621,7 +1621,7 @@ use File::Glob qw(:case);
 
     'Socket' => {
         'MAINTAINER'   => 'pevans',
-        'DISTRIBUTION' => 'PEVANS/Socket-2.000.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Socket-2.001.tar.gz',
         'FILES'        => q[cpan/Socket],
         'UPSTREAM'     => 'cpan',
     },

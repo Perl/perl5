@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.000';
+our $VERSION = '2.001';
 
 =head1 NAME
 
@@ -286,7 +286,7 @@ code should use getnameinfo() or inet_ntop() instead for IPv6 support.
 =head2 $address = inet_pton $family, $string
 
 Takes an address family (such as C<AF_INET> or C<AF_INET6>) and a string
-giving the name of a host, or a textual representation of an IP address and
+containing a textual representation of an address in that family and
 translates that to an packed binary address structure.
 
 See also getaddrinfo() for a more powerful and flexible function to look up
