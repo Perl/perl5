@@ -6009,6 +6009,15 @@ PP(pp_coreargs)
 		       : "reference to one of [$@%*]"
 		);
 	    PUSHs(SvRV(*svp));
+	    if (opnum == OP_UNDEF && SvRV(*svp) == (SV *)PL_defgv
+	     && cxstack[cxstack_ix].cx_type & CXp_HASARGS) {
+		/* Undo @_ localisation, so that sub exit does not undo
+		   part of our undeffing. */
+		PERL_CONTEXT *cx = &cxstack[cxstack_ix];
+		POP_SAVEARRAY();
+		cx->cx_type &= ~ CXp_HASARGS;
+		assert(!AvREAL(cx->blk_sub.argarray));
+	    }
 	  }
 	  break;
 	default:
