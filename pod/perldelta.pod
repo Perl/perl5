@@ -51,7 +51,7 @@ when they come first:
 There is a new ":default" feature bundle that represents the set of
 features enabled before any version declaration or C<use feature> has
 been seen.  Version declarations below 5.10 now enable the ":default"
-feature set.  This does not actually change the behaviour of C<use
+feature set.  This does not actually change the behavior of C<use
 v5.8>, because features added to the ":default" set are those that were
 traditionally enabled by default, before they could be turned off.
 
@@ -125,7 +125,7 @@ lvalue will always extend to the end of the string, even if the string
 becomes longer.
 
 Since this change also allowed many bugs to be fixed (see
-L</The C<substr> operator>), and since the behaviour
+L</The C<substr> operator>), and since the behavior
 of negative offsets has never been specified, the
 change was deemed acceptable.
 
@@ -763,11 +763,11 @@ L<http://perldoc.perl.org/5.14.0/perlunicode.html#User-Defined-Case-Mappings-%28
 
 XSUB C functions are now 'static', that is, they are not visible from
 outside the compilation unit.  Users can use the new C<XS_EXTERNAL(name)>
-and C<XS_INTERNAL(name)> macros to pick the desired linking behaviour.
+and C<XS_INTERNAL(name)> macros to pick the desired linking behavior.
 The ordinary C<XS(name)> declaration for XSUBs will continue to declare
 non-'static' XSUBs for compatibility, but the XS compiler,
 L<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
-L<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
+L<ExtUtils::ParseXS>'s behavior can be reconfigured from XS using the
 C<EXPORT_XSUB_SYMBOLS> keyword.  See L<perlxs> for details.
 
 =head2 Weakening read-only references
@@ -893,7 +893,7 @@ is not going to copy anyway.
 
 Perl 5.12.0 sped up the destruction of objects whose classes define
 empty C<DESTROY> methods (to prevent autoloading), by simply not
-calling such empty methods.  This release takes this optimisation a
+calling such empty methods.  This release takes this optimization a
 step further, by not calling any C<DESTROY> method that begins with a
 C<return> statement.  This can be useful for destructors that are only
 used for debugging:
@@ -902,7 +902,7 @@ used for debugging:
     sub DESTROY { return unless DEBUG; ... }
 
 Constant-folding will reduce the first statement to C<return;> if DEBUG
-is set to 0, triggering this optimisation.
+is set to 0, triggering this optimization.
 
 =item *
 
@@ -1245,7 +1245,7 @@ Language Family codes (langfam) as defined in ISO 639-5.
 
 L<Math::BigFloat> has been upgraded from version 1.993 to 1.997.
 
-The C<numify> method has been corrected to return a normalised Perl number
+The C<numify> method has been corrected to return a normalized Perl number
 (the result of C<0 + $thing>), instead of a string [rt.cpan.org #66732].
 
 =item *
@@ -1624,7 +1624,7 @@ Documentation of the smartmatch operator has been reworked and moved from
 perlsyn to perlop where it belongs.
 
 It has also been corrected for the case of C<undef> on the left-hand
-side.  The list of different smart match behaviours had an item in the
+side.  The list of different smart match behaviors had an item in the
 wrong place.
 
 =item *
@@ -1950,7 +1950,7 @@ with the correct spelling in L<perldiag>.
 =item *
 
 The error messages for using C<default> and C<when> outside a
-topicalizer have been standardised to match the messages for C<continue>
+topicalizer have been standardized to match the messages for C<continue>
 and loop controls.  They now read 'Can't "default" outside a
 topicalizer' and 'Can't "when" outside a topicalizer'.  They both used
 to be 'Can't use when() outside a topicalizer' [perl #91514].
@@ -2089,7 +2089,7 @@ option, as used by some projects that include perl's header files (5.14.1).
 =item *
 
 C<USE_LOCALE{,_COLLATE,_CTYPE,_NUMERIC}> have been added the output of perl -V
-as they have affect the behaviour of the interpreter binary (albeit
+as they have affect the behavior of the interpreter binary (albeit
 in only a small area).
 
 =item *
@@ -2285,7 +2285,7 @@ the last place where the core stores data beyond C<SvLEN()>.
 =item *
 
 Simplified logic in C<Perl_sv_magic()> introduces a small change of
-behaviour for error cases involving unknown magic types.  Previously, if
+behavior for error cases involving unknown magic types.  Previously, if
 C<Perl_sv_magic()> was passed a magic type unknown to it, it would
 
 =over
@@ -2431,7 +2431,7 @@ See L<perlguts/Autoloading with XSUBs>.
 
 =item *
 
-Perl now checks whether the array (the linearised isa) returned by a MRO
+Perl now checks whether the array (the linearized isa) returned by a MRO
 plugin begins with the name of the class itself, for which the array was
 created, instead of assuming that it does.  This prevents the first element
 from being skipped during method lookup.  It also means that
@@ -2520,7 +2520,7 @@ possible to cause double-frees if the destructor freed the hash itself
 
 =item *
 
-A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
+A C<keys> optimization in Perl 5.12.0 to make it faster on empty hashes
 caused C<each> not to reset the iterator if called after the last element
 was deleted.
 
@@ -2544,7 +2544,7 @@ hash or array itself, a crash would ensue.  This is no longer the case
 
 =item *
 
-It used to be possible to free the typeglob of a localised array or hash
+It used to be possible to free the typeglob of a localized array or hash
 (e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
 
 =item *
@@ -2618,14 +2618,14 @@ C<%^H> when entering a compilation scope [perl #106282].
 =item *
 
 C<eval $string> and C<require> used not to
-localise C<%^H> during compilation if it
+localize C<%^H> during compilation if it
 was empty at the time the C<eval> call itself was compiled.  This could
 lead to scary side effects, like C<use re "/m"> enabling other flags that
 the surrounding code was trying to enable for its caller [perl #68750].
 
 =item *
 
-C<eval $string> and C<require> no longer localise hints (C<$^H> and C<%^H>)
+C<eval $string> and C<require> no longer localize hints (C<$^H> and C<%^H>)
 at run time, but only during compilation of the $string or required file.
 This makes C<BEGIN { $^H{foo}=7 }> equivalent to
 C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
@@ -2669,7 +2669,7 @@ copy-on-write values couldn't be deleted, nor could such hashes be cleared
 
 =item *
 
-Localising a tied variable used to make it read-only if it contained a
+Localizing a tied variable used to make it read-only if it contained a
 copy-on-write string. (5.14.2)
 
 =item *
@@ -2876,7 +2876,7 @@ returning C<undef> for glob references without setting the last
 stat buffer that the "_" handle uses, but only if warnings
 were turned on.  With warnings off, it was the same as 5.6.
 In other words, it was simply buggy and inconsistent.  Now the 5.6
-behaviour has been restored.
+behavior has been restored.
 
 =item *
 
@@ -2892,7 +2892,7 @@ buffer, from which file(handle) it originated, what type it was, and
 whether the last stat succeeded.
 
 There were various cases where these could get out of synch, resulting in
-inconsistent or erratic behaviour in edge cases (every mention of C<-T>
+inconsistent or erratic behavior in edge cases (every mention of C<-T>
 applies to C<-B> as well):
 
 =over
@@ -3213,7 +3213,7 @@ with "\n".  This has been fixed [perl #109206].
 Starting with 5.12.0, Perl used to get its internal bookkeeping muddled up
 after assigning C<${ qr// }> to a hash element and locking it with
 L<Hash::Util>.  This could result in double frees, crashes, or erratic
-behaviour.
+behavior.
 
 =item *
 
@@ -3340,7 +3340,7 @@ C<"f\x{FB00}" =~ /ff/i> to fail.
 
 =item *
 
-The regexp optimiser no longer crashes on debugging builds when merging
+The regexp optimizer no longer crashes on debugging builds when merging
 fixed-string nodes with inconvenient contents.
 
 =item *
@@ -3364,7 +3364,7 @@ C<< (?foo: ...) >> no longer loses passed in character set.
 
 =item *
 
-The trie optimisation used to have problems with alternations containing
+The trie optimization used to have problems with alternations containing
 an empty C<(?:)>, causing C<< "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/ >> not to
 match, whereas it should [perl #111842].
 
@@ -3451,11 +3451,11 @@ comparison routine's scope.
 
 =item *
 
-C<< sort { $a <=> $b } >>, which is optimised internally, now produces
+C<< sort { $a <=> $b } >>, which is optimized internally, now produces
 "uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
 returns C<undef> for those.  This brings it in line with
 S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
-optimised [perl #94390].
+optimized [perl #94390].
 
 =back
 
@@ -3676,7 +3676,7 @@ bitmask" warning on tied or tainted variables that are strings.
 
 =item *
 
-Localising a tied scalar that returns a typeglob no longer stops it from
+Localizing a tied scalar that returns a typeglob no longer stops it from
 being tied till the end of the scope.
 
 =item *
@@ -3894,13 +3894,13 @@ for flat scalars (i.e., not references).
 
 =item *
 
-Unrecognised switches on C<#!> line
+Unrecognized switches on C<#!> line
 
 If a switch, such as B<-x>, that cannot occur on the C<#!> line is used
 there, perl dies with "Can't emulate...".
 
 It used to produce the same message for switches that perl did not
-recognise at all, whether on the command line or the C<#!> line.
+recognize at all, whether on the command line or the C<#!> line.
 
 Now it produces the "Unrecognized switch" error message [perl #104288].
 
