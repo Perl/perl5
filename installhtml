@@ -4,7 +4,7 @@
 
 use strict;
 use Config;		# for config options in the makefile
-use File::Spec;
+use File::Spec::Functions qw(rel2abs);
 use Getopt::Long;	# for command-line parsing
 use Cwd;
 use Pod::Html 'anchorify';
@@ -362,8 +362,8 @@ sub split_on_item {
 
     print "splitting files by item.\n" if $verbose && $#splititem >= 0;
     $pwd = getcwd();
-    my $splitter = File::Spec->rel2abs("$splitpod/splitpod", $pwd);
-    my $perl = File::Spec->rel2abs($^X, $pwd);
+    my $splitter = rel2abs("$splitpod/splitpod", $pwd);
+    my $perl = rel2abs($^X, $pwd);
     foreach my $pod (@splititem) {
 	# figure out the directory to split into
 	$pod      =~ s,^([^/]*)$,/$1,;
