@@ -2949,7 +2949,11 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     GV* gv;
     HV* stash;
     SV *packsv = NULL;
-    SV * const sv = *(PL_stack_base + TOPMARK + 1);
+    SV * const sv = PL_stack_base + TOPMARK == PL_stack_sp
+	? (Perl_croak(aTHX_ "Can't call method \"%"SVf"\" without a "
+			    "package or object reference", SVfARG(meth)),
+	   (SV *)NULL)
+	: *(PL_stack_base + TOPMARK + 1);
 
     PERL_ARGS_ASSERT_METHOD_COMMON;
 

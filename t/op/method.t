@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 95);
+plan(tests => 98);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -404,3 +404,16 @@ is $kalled, 1, 'calling a class method via a magic variable';
    }
    { bless {}, "NoSub"; }
 }
+
+eval { () = 3; new {} };
+like $@,
+     qr/^Can't call method "new" without a package or object reference/,
+    'Err msg from new{} when stack contains a number';
+eval { () = "foo"; new {} };
+like $@,
+     qr/^Can't call method "new" without a package or object reference/,
+    'Err msg from new{} when stack contains a word';
+eval { () = undef; new {} };
+like $@,
+     qr/^Can't call method "new" without a package or object reference/,
+    'Err msg from new{} when stack contains undef';
