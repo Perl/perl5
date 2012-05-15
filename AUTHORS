@@ -3,9 +3,9 @@
 # (hopefully) current and preferred email addresses from the commits.
 # These people have either submitted patches or suggestions, or their bug
 # reports or comments have inspired the appropriate patches.  Corrections,
-# additions, deletions welcome; send them to perl5-porters@perl.org,
-# preferably as the output of diff(1), diff -u or diff -c between the
-# original and a corrected version of this file.
+# additions, deletions welcome; send them to perlbug@perl.org, preferably
+# as the output of diff(1), diff -u or diff -c between the original and a
+# corrected version of this file.
 #
 # The use of this database for anything else than Perl development
 # is strictly forbidden.  (Passive distribution with the Perl source
@@ -995,6 +995,7 @@ Sherm Pendley			<sherm@dot-app.org>
 Shigeya Suzuki			<shigeya@wide.ad.jp>
 Shimpei Yamashita		<shimpei@socrates.patnet.caltech.edu>
 Shinya Hayakawa			<hayakawa@livedoor.jp>
+Shirataka Kentaro		<root@ub32.org>
 Shishir Gundavaram		<shishir@ruby.ora.com>
 Shlomi Fish			<shlomif@cpan.org>
 Simon Cozens			<simon@netthink.co.uk>
