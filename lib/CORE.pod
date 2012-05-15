@@ -47,8 +47,8 @@ C<unlink>, C<unshift>, C<values>
 =head1 OVERRIDING CORE FUNCTIONS
 
 To override a Perl built-in routine with your own version, you need to
-import it at compile-time. This can be conveniently achieved with the
-C<subs> pragma. This will affect only the package in which you've imported
+import it at compile-time.  This can be conveniently achieved with the
+C<subs> pragma.  This will affect only the package in which you've imported
 the said subroutine:
 
     use subs 'chdir';
