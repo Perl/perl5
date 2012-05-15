@@ -880,7 +880,7 @@ $tests ++;
 is &myumask, umask, '&umask with no args';
 
 test_proto 'undef';
-$tests += 11;
+$tests += 12;
 is &myundef(), undef, '&undef returns undef';
 lis [&myundef()], [undef], '&undef returns undef in list cx';
 lis [&myundef(\$_)], [undef], '&undef(...) returns undef in list cx';
@@ -898,6 +898,9 @@ ok !%_, '&undef(\%_) undefines %_';
 ok !defined &utf8::valid, '&undef(\&foo) undefines &foo';
 @_ = \*_;
 &myundef;
+is *_{ARRAY}, undef, '@_=\*_, &undef undefines *_';
+@_ = \*_;
+&myundef(\*_);
 is *_{ARRAY}, undef, '&undef(\*_) undefines *_';
 (&myundef(), @_) = 1..10;
 lis \@_, [2..10], 'list assignment to &undef()';
