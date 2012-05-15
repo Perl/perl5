@@ -23,6 +23,9 @@ BEGIN {
     require './test.pl';
 }
 
+skip_all "requires compilation with PERL_IMPLICIT_SYS"
+  unless $Config{ccflags} =~/(?:\A|\s)-DPERL_IMPLICIT_SYS\b/;
+
 plan tests => $::tests;
 
 my $PERL = $ENV{PERL} || '.\perl';
