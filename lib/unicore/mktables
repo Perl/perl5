@@ -13004,7 +13004,7 @@ sub compile_perl() {
     # It is regular XID_Start plus the underscore, but all characters must be
     # Word characters as well
     my $XID_Start = property_ref('XID_Start');
-    my $perl_xid_start = $perl->add_match_table('_Perl_IDStart',
+    my $perl_xids = $perl->add_match_table('_Perl_IDStart',
                                                 Perl_Extension => 1,
                                                 Fate => $INTERNAL_ONLY,
                                                 Initialize => ord('_')
@@ -13012,7 +13012,7 @@ sub compile_perl() {
     if (defined $XID_Start
         || defined ($XID_Start = property_ref('ID_Start')))
     {
-        $perl_xid_start += $XID_Start->table('Y');
+        $perl_xids += $XID_Start->table('Y');
     }
     else {
         # For Unicode versions that don't have the property, construct our own
@@ -13020,11 +13020,11 @@ sub compile_perl() {
         # numbers (Nl), minus Pattern_Syntax and Pattern_White_Space code
         # points, plus stability extensions.  PatSyn and PatWS are not defined
         # in releases that don't have XIDS defined, so are irrelevant.
-        $perl_xid_start += $gc->table('Letter');
+        $perl_xids += $gc->table('Letter');
         my $nl = $gc->table('Letter_Number');
-        $perl_xid_start += $nl if defined $nl;
+        $perl_xids += $nl if defined $nl;
     }
-    $perl_xid_start &= $Word;
+    $perl_xids &= $Word;
 
     my $gcb = property_ref('Grapheme_Cluster_Break');
     # These are used in Unicode's definition of \X
