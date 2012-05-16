@@ -13005,10 +13005,10 @@ sub compile_perl() {
     # Word characters as well
     my $XID_Start = property_ref('XID_Start');
     my $perl_xids = $perl->add_match_table('_Perl_IDStart',
-                                                Perl_Extension => 1,
-                                                Fate => $INTERNAL_ONLY,
-                                                Initialize => ord('_')
-                                                );
+                                            Perl_Extension => 1,
+                                            Fate => $INTERNAL_ONLY,
+                                            Initialize => ord('_')
+                                            );
     if (defined $XID_Start
         || defined ($XID_Start = property_ref('ID_Start')))
     {
