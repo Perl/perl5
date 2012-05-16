@@ -12646,7 +12646,8 @@ sub compile_perl() {
 
     # Get the best available case definitions.  Early Unicode versions didn't
     # have Uppercase and Lowercase defined, so use the general category
-    # instead for them.
+    # instead for them, modified by hard-coding in the code points each is
+    # missing.
     my $Lower = $perl->add_match_table('Lower');
     my $Unicode_Lower = property_ref('Lowercase');
     if (defined $Unicode_Lower && ! $Unicode_Lower->is_empty) {
@@ -12654,8 +12655,36 @@ sub compile_perl() {
 
     }
     else {
-        $Lower->set_equivalent_to($gc->table('Lowercase_Letter'),
-                                                                Related => 1);
+        $Lower += $gc->table('Lowercase_Letter');
+
+        # There are quite a few code points in Lower, that aren't in gc=lc,
+        # and not all are in all releases.
+        foreach my $code_point (    0x00AA,
+                                    0x00BA,
+                                    0x02B0 .. 0x02B8,
+                                    0x02C0 .. 0x02C1,
+                                    0x02E0 .. 0x02E4,
+                                    0x0345,
+                                    0x037A,
+                                    0x1D2C .. 0x1D6A,
+                                    0x1D78,
+                                    0x1D9B .. 0x1DBF,
+                                    0x2071,
+                                    0x207F,
+                                    0x2090 .. 0x209C,
+                                    0x2170 .. 0x217F,
+                                    0x24D0 .. 0x24E9,
+                                    0x2C7C .. 0x2C7D,
+                                    0xA770,
+                                    0xA7F8 .. 0xA7F9,
+        ) {
+            # Don't include the code point unless it is assigned in this
+            # release
+            my $category = $gc->value_of(hex $code_point);
+            next if ! defined $category || $category eq 'Cn';
+
+            $Lower += $code_point;
+        }
     }
     $Lower->add_alias('XPosixLower');
     my $Posix_Lower = $perl->add_match_table("PosixLower",
@@ -12669,8 +12698,12 @@ sub compile_perl() {
         $Upper->set_equivalent_to($Unicode_Upper->table('Y'), Related => 1);
     }
     else {
-        $Upper->set_equivalent_to($gc->table('Uppercase_Letter'),
-                                                                Related => 1);
+
+        # Unlike Lower, there are only two ranges in Upper that aren't in
+        # gc=Lu, and all code points were assigned in all releases.
+        $Upper += $gc->table('Uppercase_Letter');
+        $Upper->add_range(0x2160, 0x216F);  # Uppercase Roman numerals
+        $Upper->add_range(0x24B6, 0x24CF);  # Circled Latin upper case letters
     }
     $Upper->add_alias('XPosixUpper');
     my $Posix_Upper = $perl->add_match_table("PosixUpper",
