@@ -13144,14 +13144,48 @@ sub compile_perl() {
     }
     else {
         # For Unicode versions that don't have the property, construct our own
-        # from first principles.  The actual definition is: Letters + letter
-        # numbers (Nl), minus Pattern_Syntax and Pattern_White_Space code
-        # points, plus stability extensions.  PatSyn and PatWS are not defined
-        # in releases that don't have XIDS defined, so are irrelevant.
-        $perl_xids += $gc->table('Letter');
-        my $nl = $gc->table('Letter_Number');
-        $perl_xids += $nl if defined $nl;
+        # from first principles.  The actual definition is:
+        #     Letters
+        #   + letter numbers (Nl)
+        #   - Pattern_Syntax
+        #   - Pattern_White_Space
+        #   + stability extensions
+        #   - NKFC modifications
+        #
+        # What we do in the code below is to include the identical code points
+        # that are in the first release that had Unicode's version of this
+        # property, essentially extrapolating backwards.  There were no
+        # stability extensions until v4.1, so none are included; likewise in
+        # no Unicode version so far do subtracting PatSyn and PatWS make any
+        # difference, so those also are ignored.
+        $perl_xids += $gc->table('Letter') + pre_3_dot_1_Nl();
+
+        # We do subtract the NFKC modifications that are in the first version
+        # that had this property.  We don't bother to test if they are in the
+        # version in question, because if they aren't, the operation is a
+        # no-op.  The NKFC modifications are discussed in
+        # http://www.unicode.org/reports/tr31/#NFKC_Modifications
+        foreach my $range ( 0x037A,
+                            0x0E33,
+                            0x0EB3,
+                            [ 0xFC5E, 0xFC63 ],
+                            [ 0xFDFA, 0xFE70 ],
+                            [ 0xFE72, 0xFE76 ],
+                            0xFE78,
+                            0xFE7A,
+                            0xFE7C,
+                            0xFE7E,
+                            [ 0xFF9E, 0xFF9F ],
+        ) {
+            if (ref $range) {
+                $perl_xids->delete_range($range->[0], $range->[1]);
+            }
+            else {
+                $perl_xids->delete_range($range, $range);
+            }
+        }
     }
+
     $perl_xids &= $Word;
 
     my $gcb = property_ref('Grapheme_Cluster_Break');
