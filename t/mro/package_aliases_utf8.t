@@ -1,6 +1,7 @@
 #!./perl
 
 BEGIN {
+    $ENV{PERL_UNICODE} = 0;
     unless (-d 'blib') {
         chdir 't' if -d 't';
         @INC = '../lib';
