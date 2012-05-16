@@ -8914,6 +8914,18 @@ sub finish_property_setup {
         Property->new('JSN', Full_Name => 'Jamo_Short_Name');
     }
 
+    # These two properties must be defined in all releases so we can generate
+    # the tables from them to make regex \X work, but suppress their output so
+    # aren't application visible prior to releases where they should be
+    if (! defined property_ref('GCB')) {
+        Property->new('GCB', Full_Name => 'Grapheme_Cluster_Break',
+                      Fate => $PLACEHOLDER);
+    }
+    if (! defined property_ref('hst')) {
+        Property->new('hst', Full_Name => 'Hangul_Syllable_Type',
+                      Fate => $PLACEHOLDER);
+    }
+
     # These are used so much, that we set globals for them.
     $gc = property_ref('General_Category');
     $block = property_ref('Block');
@@ -9233,6 +9245,34 @@ sub process_PropValueAliases {
     if (! -e 'PropValueAliases.txt') {
         $file->insert_lines(get_old_property_value_aliases());
     }
+
+    if ($v_version lt 4.0.0) {
+        $file->insert_lines(split /\n/, <<'END'
+hst; L                                ; Leading_Jamo
+hst; LV                               ; LV_Syllable
+hst; LVT                              ; LVT_Syllable
+hst; NA                               ; Not_Applicable
+hst; T                                ; Trailing_Jamo
+hst; V                                ; Vowel_Jamo
+END
+        );
+    }
+    if ($v_version lt 4.1.0) {
+        $file->insert_lines(split /\n/, <<'END'
+GCB; CN                               ; Control
+GCB; CR                               ; CR
+GCB; EX                               ; Extend
+GCB; L                                ; L
+GCB; LF                               ; LF
+GCB; LV                               ; LV
+GCB; LVT                              ; LVT
+GCB; T                                ; T
+GCB; V                                ; V
+GCB; XX                               ; Other
+END
+        );
+    }
+
 
     # Add any explicit cjk values
     $file->insert_lines(@cjk_property_values);
@@ -11906,6 +11946,103 @@ sub  filter_script_extensions_line {
     return;
 }
 
+sub generate_hst {
+
+    # Populates the Hangul Syllable Type property from first principles
+
+    my $file= shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    # These few ranges are hard-coded in.
+    $file->insert_lines(split /\n/, <<'END'
+1100..1159    ; L
+115F          ; L
+1160..11A2    ; V
+11A8..11F9    ; T
+END
+);
+
+    # The Hangul syllables in version 1 are completely different than what came
+    # after, so just ignore them there.
+    if ($v_version lt v2.0.0) {
+        my $property = property_ref($file->property);
+        push @tables_that_may_be_empty, $property->table('LV')->complete_name;
+        push @tables_that_may_be_empty, $property->table('LVT')->complete_name;
+        return;
+    }
+
+    # The algorithmically derived syllables are almost all LVT ones, so
+    # initialize the whole range with that.
+    $file->insert_lines(sprintf "%04X..%04X; LVT\n",
+                        $SBase, $SBase + $SCount -1);
+
+    # Those ones that aren't LVT are LV, and they occur at intervals of
+    # $TCount code points, starting with the first code point, at $SBase.
+    for (my $i = $SBase; $i < $SBase + $SCount; $i += $TCount) {
+        $file->insert_lines(sprintf "%04X..%04X; LV\n", $i, $i);
+    }
+
+    return;
+}
+
+sub generate_GCB {
+
+    # Populates the Grapheme Cluster Break property from first principles
+
+    my $file= shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    # All these definitions are from
+    # http://www.unicode.org/reports/tr29/tr29-3.html with confirmation
+    # from http://www.unicode.org/reports/tr29/tr29-4.html
+
+    foreach my $range ($gc->ranges) {
+
+        # Extend includes gc=Me and gc=Mn, while Control includes gc=Cc
+        # and gc=Cf
+        if ($range->value =~ / ^ M [en] $ /x) {
+            $file->insert_lines(sprintf "%04X..%04X; Extend",
+                                $range->start,  $range->end);
+        }
+        elsif ($range->value =~ / ^ C [cf] $ /x) {
+            $file->insert_lines(sprintf "%04X..%04X; Control",
+                                $range->start,  $range->end);
+        }
+    }
+    $file->insert_lines("2028; Control"); # Line Separator
+    $file->insert_lines("2029; Control"); # Paragraph Separator
+
+    $file->insert_lines("000D; CR");
+    $file->insert_lines("000A; LF");
+
+    # Also from http://www.unicode.org/reports/tr29/tr29-3.html.
+    foreach my $code_point ( qw{
+                                40000
+                                09BE 09D7 0B3E 0B57 0BBE 0BD7 0CC2 0CD5 0CD6
+                                0D3E 0D57 0DCF 0DDF FF9E FF9F 1D165 1D16E 1D16F
+                                }
+    ) {
+        my $category = $gc->value_of(hex $code_point);
+        next if ! defined $category || $category eq 'Cn'; # But not if
+                                                          # unassigned in this
+                                                          # release
+        $file->insert_lines("$code_point; Extend");
+    }
+
+    my $hst = property_ref('Hangul_Syllable_Type');
+    if ($hst->count > 0) {
+        foreach my $range ($hst->ranges) {
+            $file->insert_lines(sprintf "%04X..%04X; %s",
+                                    $range->start, $range->end, $range->value);
+        }
+    }
+    else {
+        generate_hst($file);
+    }
+
+    return;
+}
+
 sub setup_early_name_alias {
     my $file= shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -12254,23 +12391,6 @@ END
         else {
             property_ref($map)->set_proxy_for($simple->name);
         }
-    }
-
-    # GCB and hst are not in early Unicode releases; create dummy ones if
-    # they don't exist, as the core needs tables generated from them.
-    my $gcb = property_ref('Grapheme_Cluster_Break');
-    if (! defined $gcb) {
-        $gcb = Property->new('GCB', Full_Name => 'Grapheme_Cluster_Break',
-                             Status => $PLACEHOLDER,
-                             Type => $ENUM,
-                             Default_Map => 'Other');
-    }
-    my $hst = property_ref('Hangul_Syllable_Type');
-    if (!defined $hst) {
-        $hst = Property->new('hst', Full_Name => 'Hangul_Syllable_Type',
-                             Status => $PLACEHOLDER,
-                             Type => $ENUM,
-                             Default_Map => 'Not_Applicable');
     }
 
     # For each property, fill in any missing mappings, and calculate the re
@@ -13253,19 +13373,31 @@ sub compile_perl() {
 
     $perl_xidc &= $Word;
 
+    # These two tables are for the 'extended' grapheme cluster, which came in
+    # 5.1; create empty ones if not already present.  The non-extended
+    # definition differs from the extended (see
+    # http://www.unicode.org/reports/tr29/) only by these two tables, so we
+    # get the older definition automatically when they are empty.
     my $gcb = property_ref('Grapheme_Cluster_Break');
+    my $perl_prepend = $perl->add_match_table('_X_GCB_Prepend',
+                                        Perl_Extension => 1,
+                                        Fate => $INTERNAL_ONLY);
+    if (defined (my $gcb_prepend = $gcb->table('Prepend'))) {
+        $perl_prepend->set_equivalent_to($gcb_prepend, Related => 1);
+    }
+    else {
+        push @tables_that_may_be_empty, $perl_prepend->complete_name;
+    }
+
+
     # These are used in Unicode's definition of \X
     my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
                                        Fate => $INTERNAL_ONLY);
     my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
                                         Fate => $INTERNAL_ONLY);
 
-    # The 'extended' grapheme cluster came in 5.1.  The non-extended
-    # definition differs too much from the traditional Perl one to use.
-    if (defined $gcb->table('Control')) {
 
-        # Note that assumes hst is defined; it came in an earlier release than
-        # GCB.  In the line below, two negatives means: yes hangul
+        # In the line below, two negatives means: yes hangul
         $begin += ~ property_ref('Hangul_Syllable_Type')
                                                     ->table('Not_Applicable')
                + ~ ($gcb->table('Control')
@@ -13274,61 +13406,37 @@ sub compile_perl() {
         $begin->add_comment('For use in \X; matches: Hangul_Syllable | ! Control');
 
         $extend += $gcb->table('Extend');
-        my $comment = 'For use in \X; matches: Extend';
-        if (defined $gcb->table('SpacingMark')) {
-            $extend += $gcb->table('SpacingMark');
-            $comment .= ' | SpacingMark';
+        if (defined (my $sm = $gcb->table('SpacingMark'))) {
+            $extend += $sm;
         }
-        $extend->add_comment($comment);
+        $extend->add_comment('For use in \X; matches: Extend | SpacingMark');
 
-        if (!defined $gcb->table('Prepend')) {
-            my $table = $gcb->add_match_table('Prepend');
-            push @tables_that_may_be_empty, $table->complete_name;
-        }
-    }
-    else {    # Old definition, used on early releases.
-        $extend += $gc->table('Mark')
-                + 0x200C    # ZWNJ
-                + 0x200D;   # ZWJ
-        $begin += ~ $extend;
-
-        # Here we may have a release that has the regular grapheme cluster
-        # defined, or a release that doesn't have anything defined.
-        # We set things up so the Perl core degrades gracefully, possibly with
-        # placeholders that match nothing.
-
-        my $hst = property_ref('Hangul_Syllable_Type');
-
-        # On some releases, here we may not have the needed tables for the
-        # perl core, in some releases we may.
-        foreach my $name (qw{ L LV LVT T V prepend }) {
-            my $table = $gcb->table($name);
-            if (! defined $table) {
-                $table = $gcb->add_match_table($name);
-                push @tables_that_may_be_empty, $table->complete_name;
-            }
-
-            # The hst property predates the GCB one, and has identical tables
-            # for some of them, so use it if we can.
-            if ($table->is_empty && defined $hst->table($name))
-            {
-                $table += $hst->table($name);
-            }
-        }
-    }
-
-    # More GCB.  If we found some hangul syllables, populate a combined
-    # table.
+    # More GCB.  Populate a combined hangul syllables table
     my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V',
                                           Perl_Extension => 1,
                                           Fate => $INTERNAL_ONLY);
-    my $LV = $gcb->table('LV');
-    if ($LV->is_empty) {
-        push @tables_that_may_be_empty, $lv_lvt_v->complete_name;
-    } else {
-        $lv_lvt_v += $LV + $gcb->table('LVT') + $gcb->table('V');
-        $lv_lvt_v->add_comment('For use in \X; matches: hst=LV | hst=LVT | hst=V');
+    foreach my $gcb_name (qw{ L V T LV LVT }) {
+
+        # The perl internal extension's name is the gcb table name prepended
+        # with an '_X_'
+        my $perl_table = $perl->add_match_table('_X_GCB_' . $gcb_name,
+                                        Perl_Extension => 1,
+                                        Fate => $INTERNAL_ONLY,
+                                        Initialize => $gcb->table($gcb_name),
+                                        );
+        # Version 1 had mostly different Hangul syllables that were removed
+        # from later versions, so some of the tables may not apply.
+        if ($v_version lt v2.0) {
+            push @tables_that_may_be_empty, $perl_table->complete_name;
+        }
     }
+    my $perl_na = $perl->add_match_table('_X_HST_Not_Applicable',
+                                        Perl_Extension => 1,
+                                        Fate => $INTERNAL_ONLY,
+                                        Initialize => property_ref('HST')->table('NA'),
+                                        );
+        $lv_lvt_v += $gcb->table('LV') + $gcb->table('LVT') + $gcb->table('V');
+        $lv_lvt_v->add_comment('For use in \X; matches: hst=LV | hst=LVT | hst=V');
 
     # Was earlier constructed to contain both Name and Unicode_1_Name
     my @composition = ('Name', 'Unicode_1_Name');
@@ -17148,16 +17256,23 @@ my @input_file_objects = (
                                       ? \&filter_old_style_normalization_lines
                                       : undef),
                     ),
-    Input_file->new('HangulSyllableType.txt', v4.0.0,
+    Input_file->new('HangulSyllableType.txt', v0,
                     Has_Missings_Defaults => $NOT_IGNORED,
-                    Property => 'Hangul_Syllable_Type'),
+                    Property => 'Hangul_Syllable_Type',
+                    Pre_Handler => ($v_version lt v4.0.0)
+                                   ? \&generate_hst
+                                   : undef,
+                    ),
     Input_file->new("$AUXILIARY/WordBreakProperty.txt", v4.1.0,
                     Property => 'Word_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     ),
-    Input_file->new("$AUXILIARY/GraphemeBreakProperty.txt", v4.1.0,
+    Input_file->new("$AUXILIARY/GraphemeBreakProperty.txt", v0,
                     Property => 'Grapheme_Cluster_Break',
                     Has_Missings_Defaults => $NOT_IGNORED,
+                    Pre_Handler => ($v_version lt v4.1.0)
+                                   ? \&generate_GCB
+                                   : undef,
                     ),
     Input_file->new("$AUXILIARY/GCBTest.txt", v4.1.0,
                     Handler => \&process_GCB_test,
