@@ -14044,7 +14044,10 @@ sub make_re_pod_entries($) {
 
         # First, gather all the info that applies to this table as a whole.
 
-        push @zero_match_tables, $table if $count == 0;
+        push @zero_match_tables, $table if $count == 0
+                                            # Don't mention special tables
+                                            # as being zero length
+                                           && $table->fate == $ORDINARY;
 
         my $table_property = $table->property;
 
