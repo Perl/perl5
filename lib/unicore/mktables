@@ -13000,7 +13000,7 @@ sub compile_perl() {
         $CanonDCIJ = $CanonDCIJ & $Assigned;
     }
 
-    # For backward compatibility, Perl has its own definition for IDStart
+    # For backward compatibility, Perl has its own definition for IDStart.
     # It is regular XID_Start plus the underscore, but all characters must be
     # Word characters as well
     my $XID_Start = property_ref('XID_Start');
