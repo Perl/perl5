@@ -4161,6 +4161,17 @@ this is still under investigation.
 
 =item *
 
+Configuring with a recent gcc and link-time-optimization, such as
+C<Configure -Doptimize='-O2 -flto'> fails
+because the optimizer optimizes away some of Configure's tests.  A
+workaround is to omit the C<-flto> flag when running Configure, but add
+it back in while actually building, something like
+
+    sh Configure -Doptimize=-O2                                             
+    make OPTIMIZE='-O2 -flto'                                               
+
+=item *
+
 The following CPAN modules have test failures with perl 5.16.  Patches have
 been submitted for all of these, so hopefully there will be new releases
 soon:
