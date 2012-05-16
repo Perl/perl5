@@ -27,10 +27,7 @@ eval q{
     else { $seen_else = 1 }
 };
 
-{
-    local $TODO = 'if does not yet hide else from keyword plugin';
-    is $seen_else, undef, 'if swallows else with keyword plugin';
-}
+is $seen_else, undef, 'if swallows else with keyword plugin';
 
 _reset;
 eval q{
@@ -49,11 +46,8 @@ eval q{
     elsif ($seen_elsif_expr = 1) { $seen_elsif = 1 }
 };
 
-{
-    local $TODO = 'if does not yet hide elsif from keyword plugin';
-    is_deeply [$seen_elsif_expr,$seen_elsif], [undef,undef],
+is_deeply [$seen_elsif_expr,$seen_elsif], [undef,undef],
 	'if swallows elsif with keyword plugin';
-}
 
 _reset;
 eval q{
@@ -74,12 +68,9 @@ eval q{
     else { $seen_else = 1 }
 };
 
-{
-    local $TODO = 'if does not yet hide else & elsif from keyword plugin';
-    is_deeply [$seen_elsif_expr,$seen_elsif,$seen_else],
+is_deeply [$seen_elsif_expr,$seen_elsif,$seen_else],
 	      [undef,undef,undef],
 	'if swallows else and elsif with keyword plugin';
-}
 
 _reset;
 eval q{

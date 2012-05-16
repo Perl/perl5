@@ -311,6 +311,8 @@ static const char* const lex_state_names[] = {
 	    return (int)LSTOP; \
 	} while(0)
 
+#define EXPECT_STMT (PL_expect == XSTATE || PL_expect == XELSE)
+
 #ifdef DEBUGGING
 
 /* how to interpret the pl_yylval associated with the token */
@@ -4311,7 +4313,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 
     PERL_ARGS_ASSERT_TOKENIZE_USE;
 
-    if (PL_expect != XSTATE)
+    if (!EXPECT_STMT)
 	yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
 		    is_use ? "use" : "no"));
     s = SKIPSPACE1(s);
@@ -4338,7 +4340,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
+	  "ATTRTERM", "TERMBLOCK", "IFCOND", "ELSE", "TERMORDORDOR"
 	};
 #endif
 
@@ -5610,6 +5612,9 @@ Perl_yylex(pTHX)
 	OPERATOR(':');
     case '(':
 	s++;
+	if (PL_lex_brackets > 100)
+	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+	PL_lex_brackstack[PL_lex_brackets++] = PL_expect;
 	if (PL_last_lop == PL_oldoldbufptr || PL_last_uni == PL_oldoldbufptr)
 	    PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
 	else
@@ -5627,10 +5632,17 @@ Perl_yylex(pTHX)
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
 	    TOKEN(0);
 	s++;
+	if (PL_lex_brackets > 0)
+	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
 	PL_lex_allbrackets--;
 	s = SKIPSPACE1(s);
 	if (*s == '{')
+	{
+	  if (PL_expect == XIFCOND)
+	    TOKEN(')');
+	  else
 	    PREBLOCK(')');
+	}
 	TERM(')');
     case ']':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
@@ -5701,6 +5713,11 @@ Perl_yylex(pTHX)
 	case XATTRTERM:
 	case XTERMBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_allbrackets++;
+	    PL_expect = XSTATE;
+	    break;
+	case XIFCOND:
+	    PL_lex_brackstack[PL_lex_brackets++] = XELSE;
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
@@ -5946,7 +5963,7 @@ Perl_yylex(pTHX)
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "Reversed %c= operator",(int)tmp);
 	    s--;
-	    if (PL_expect == XSTATE && isALPHA(tmp) &&
+	    if (EXPECT_STMT && isALPHA(tmp) &&
 		(s == PL_linestart+1 || s[-2] == '\n') )
 		{
 		    if (PL_in_eval && !PL_rsfp && !PL_parser->filtered) {
@@ -6353,7 +6370,7 @@ Perl_yylex(pTHX)
 	    PL_expect = XSTATE;
 	    goto rightbracket;
 	}
-	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
+	if (EXPECT_STMT && s[1] == '.' && s[2] == '.') {
 	    s += 3;
 	    OPERATOR(YADAYADA);
 	}
@@ -6458,7 +6475,7 @@ Perl_yylex(pTHX)
 	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
 	    else if (!isALPHA(*start) && (PL_expect == XTERM
-			|| PL_expect == XREF || PL_expect == XSTATE
+			|| PL_expect == XREF || EXPECT_STMT
 			|| PL_expect == XTERMORDORDOR)) {
 		GV *const gv = gv_fetchpvn_flags(s, start - s,
                                                     UTF ? SVf_UTF8 : 0, SVt_PVCV);
@@ -6536,6 +6553,12 @@ Perl_yylex(pTHX)
 	    TERM(WORD);
 	}
 
+	/* Check for built-in keyword */
+	tmp = keyword(PL_tokenbuf, len, 0);
+
+	if ((tmp == KEY_elsif || tmp == KEY_else) && PL_expect == XELSE)
+	    goto reserved_word;
+
 	/* Check for plugged-in keyword */
 	{
 	    OP *o;
@@ -6563,11 +6586,8 @@ Perl_yylex(pTHX)
 	    }
 	}
 
-	/* Check for built-in keyword */
-	tmp = keyword(PL_tokenbuf, len, 0);
-
 	/* Is this a label? */
-	if (!anydelim && PL_expect == XSTATE
+	if (!anydelim && EXPECT_STMT
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
 	    s = d + 1;
 	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
@@ -7188,7 +7208,7 @@ Perl_yylex(pTHX)
 	case KEY_CHECK:
 	case KEY_INIT:
 	case KEY_END:
-	    if (PL_expect == XSTATE) {
+	    if (EXPECT_STMT) {
 		s = PL_bufptr;
 		goto really_sub;
 	    }
@@ -7352,7 +7372,8 @@ Perl_yylex(pTHX)
 
 	case KEY_elsif:
 	    pl_yylval.ival = CopLINE(PL_curcop);
-	    OPERATOR(ELSIF);
+	    PL_expect = XIFCOND;
+	    TOKEN(ELSIF);
 
 	case KEY_eq:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
@@ -7418,7 +7439,7 @@ Perl_yylex(pTHX)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
 	    s = SKIPSPACE1(s);
-	    if (PL_expect == XSTATE && isIDFIRST_lazy_if(s,UTF)) {
+	    if (EXPECT_STMT && isIDFIRST_lazy_if(s,UTF)) {
 		char *p = s;
 #ifdef PERL_MAD
 		int soff = s - SvPVX(PL_linestr); /* for skipspace realloc */
@@ -7577,7 +7598,8 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
-	    OPERATOR(IF);
+	    PL_expect = XIFCOND;
+	    TOKEN(IF);
 
 	case KEY_index:
 	    LOP(OP_INDEX,XTERM);
