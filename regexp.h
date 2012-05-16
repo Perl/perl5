@@ -61,7 +61,7 @@ typedef struct regexp_paren_pair {
      *	  "abc" =~ /(.(?{print "[$1]"}))+/
      *outputs [][a][b]
      * This field is not part of the API.  */
-    char *start_tmp;
+    I32 start_tmp;
 } regexp_paren_pair;
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
