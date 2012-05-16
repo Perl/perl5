@@ -1865,7 +1865,7 @@ F</usr/local/arm/2.95.5>:
 
 This will run the regression tests on the perl you just made.  If
 'make test' doesn't say "All tests successful" then something went
-wrong.  See the file t/README in the t subdirectory.
+wrong.
 
 Note that you can't run the tests in background if this disables
 opening of /dev/tty. You can use 'make test-notty' in that case but
@@ -1874,13 +1874,10 @@ a few tty tests will be skipped.
 =head2 What if make test doesn't work?
 
 If make test bombs out, just cd to the t directory and run ./TEST
-by hand to see if it makes any difference.  If individual tests
-bomb, you can run them by hand, e.g.,
+by hand to see if it makes any difference.
 
-	./perl -MTestInit t/op/groups.t
-
-Another way to get more detailed information about failed tests and
-individual subtests is to cd to the t directory and run
+One way to get more detailed information about failed tests and
+individual subtests is to run the harness from the t directory:
 
 	cd t ; ./perl harness <list of tests>
 
@@ -1888,11 +1885,19 @@ individual subtests is to cd to the t directory and run
 complicated constructs). If no list of tests is provided, harness
 will run all tests.
 
+If individual tests fail, you can often run them by hand (from the main
+perl directory), e.g.,
+
+	./perl -MTestInit t/op/groups.t
+
 You should also read the individual tests to see if there are any helpful
 comments that apply to your system.  You may also need to setup your
 shared library path if you get errors like:
 
 	/sbin/loader: Fatal Error: cannot map libperl.so
+
+The file t/README in the t subdirectory contains more information about
+running and modifying tests.
 
 See L</"Building a shared Perl library"> earlier in this document.
 
