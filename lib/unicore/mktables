@@ -13089,6 +13089,8 @@ sub compile_perl() {
     }
     else {
         $PosixXDigit->initialize($Xdigit & $ASCII);
+        $PosixXDigit->add_alias('AHex');
+        $PosixXDigit->add_alias('Ascii_Hex_Digit');
     }
     $PosixXDigit->add_description('[0-9A-Fa-f]');
 
