@@ -485,14 +485,13 @@ sub splitpod {
 #
 sub installdir {
     my($dir, $recurse, $podroot, $splitdirs, $ignore) = @_;
-    my(@dirlist, @podlist, @pmlist, $doindex);
 
-    @dirlist = ();	# directories to recurse on
-    @podlist = ();	# .pod files to install
-    @pmlist  = ();	# .pm files to install
+    my @dirlist; # directories to recurse on
+    my @podlist; # .pod files to install
+    my @pmlist;  # .pm files to install
 
     # should files in this directory get an index?
-    $doindex = (grep($_ eq "$podroot/$dir", @$splitdirs) ? 0 : 1);
+    my $doindex = (grep($_ eq "$podroot/$dir", @$splitdirs) ? 0 : 1);
 
     opendir(DIR, "$podroot/$dir")
 	|| die "$0: error opening directory $podroot/$dir: $!\n";
