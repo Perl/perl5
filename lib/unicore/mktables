@@ -13251,6 +13251,8 @@ sub compile_perl() {
         }
     }
 
+    $perl_xidc &= $Word;
+
     my $gcb = property_ref('Grapheme_Cluster_Break');
     # These are used in Unicode's definition of \X
     my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
