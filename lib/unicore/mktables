@@ -12556,6 +12556,29 @@ END
     return;
 }
 
+sub pre_3_dot_1_Nl () {
+
+    # Return a range list for gc=nl for Unicode versions prior to 3.1, which
+    # is when Unicode's became fully usable.  These code points were
+    # determined by inspection and experimentation.  gc=nl is important for
+    # certain Perl-extension properties that should be available in all
+    # releases.
+
+    my $Nl = Range_List->new();
+    if (defined (my $official = $gc->table('Nl'))) {
+        $Nl += $official;
+    }
+    else {
+        $Nl->add_range(0x2160, 0x2182);
+        $Nl->add_range(0x3007, 0x3007);
+        $Nl->add_range(0x3021, 0x3029);
+    }
+    $Nl->add_range(0xFE20, 0xFE23);
+    $Nl->add_range(0x16EE, 0x16F0) if $v_version ge v3.0.0; # 3.0 was when
+                                                            # these were added
+    return $Nl;
+}
+
 sub compile_perl() {
     # Create perl-defined tables.  Almost all are part of the pseudo-property
     # named 'perl' internally to this program.  Many of these are recommended
@@ -12779,15 +12802,81 @@ sub compile_perl() {
     }
     else {
 
-        # For early releases, we don't get it exactly right.  The below
-        # includes more than it should, which in 5.2 terms is: L + Nl +
-        # Other_Alphabetic.  Other_Alphabetic contains many characters from
-        # Mn and Mc.  It's better to match more than we should, than less than
-        # we should.
+        # The Alphabetic property doesn't exist for early releases, so
+        # generate it.  The actual definition, in 5.2 terms is:
+        #
+        # gc=L + gc=Nl + Other_Alphabetic
+        #
+        # Other_Alphabetic is also not defined in these early releases, but it
+        # contains one gc=So range plus most of gc=Mn and gc=Mc, so we add
+        # those last two as well, then subtract the relatively few of them that
+        # shouldn't have been added.  (The gc=So range is the circled capital
+        # Latin characters.  Early releases mistakenly didn't also include the
+        # lower-case versions of these characters, and so we don't either, to
+        # maintain consistency with those releases that first had this
+        # property.
         $Alpha->initialize($gc->table('Letter')
-                            + $gc->table('Mn')
-                            + $gc->table('Mc'));
-        $Alpha += $gc->table('Nl') if defined $gc->table('Nl');
+                           + pre_3_dot_1_Nl()
+                           + $gc->table('Mn')
+                           + $gc->table('Mc')
+                        );
+        $Alpha->add_range(0x24D0, 0x24E9);  # gc=So
+        foreach my $range (     [ 0x0300, 0x0344 ],
+                                [ 0x0346, 0x034E ],
+                                [ 0x0360, 0x0362 ],
+                                [ 0x0483, 0x0486 ],
+                                [ 0x0591, 0x05AF ],
+                                [ 0x06DF, 0x06E0 ],
+                                [ 0x06EA, 0x06EC ],
+                                [ 0x0740, 0x074A ],
+                                0x093C,
+                                0x094D,
+                                [ 0x0951, 0x0954 ],
+                                0x09BC,
+                                0x09CD,
+                                0x0A3C,
+                                0x0A4D,
+                                0x0ABC,
+                                0x0ACD,
+                                0x0B3C,
+                                0x0B4D,
+                                0x0BCD,
+                                0x0C4D,
+                                0x0CCD,
+                                0x0D4D,
+                                0x0DCA,
+                                [ 0x0E47, 0x0E4C ],
+                                0x0E4E,
+                                [ 0x0EC8, 0x0ECC ],
+                                [ 0x0F18, 0x0F19 ],
+                                0x0F35,
+                                0x0F37,
+                                0x0F39,
+                                [ 0x0F3E, 0x0F3F ],
+                                [ 0x0F82, 0x0F84 ],
+                                [ 0x0F86, 0x0F87 ],
+                                0x0FC6,
+                                0x1037,
+                                0x1039,
+                                [ 0x17C9, 0x17D3 ],
+                                [ 0x20D0, 0x20DC ],
+                                0x20E1,
+                                [ 0x302A, 0x302F ],
+                                [ 0x3099, 0x309A ],
+                                [ 0xFE20, 0xFE23 ],
+                                [ 0x1D165, 0x1D169 ],
+                                [ 0x1D16D, 0x1D172 ],
+                                [ 0x1D17B, 0x1D182 ],
+                                [ 0x1D185, 0x1D18B ],
+                                [ 0x1D1AA, 0x1D1AD ],
+        ) {
+            if (ref $range) {
+                $Alpha->delete_range($range->[0], $range->[1]);
+            }
+            else {
+                $Alpha->delete_range($range, $range);
+            }
+        }
         $Alpha->add_description('Alphabetic');
     }
     $Alpha->add_alias('XPosixAlpha');
