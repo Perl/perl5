@@ -13188,6 +13188,69 @@ sub compile_perl() {
 
     $perl_xids &= $Word;
 
+    my $perl_xidc = $perl->add_match_table('_Perl_IDCont',
+                                        Perl_Extension => 1,
+                                        Fate => $INTERNAL_ONLY);
+    my $XIDC = property_ref('XID_Continue');
+    if (defined $XIDC
+        || defined ($XIDC = property_ref('ID_Continue')))
+    {
+        $perl_xidc += $XIDC->table('Y');
+    }
+    else {
+        # Similarly, we construct our own XIDC if necessary for early Unicode
+        # versions.  The definition is:
+        #     everything in XIDS
+        #   + Gc=Mn
+        #   + Gc=Mc
+        #   + Gc=Nd
+        #   + Gc=Pc
+        #   - Pattern_Syntax
+        #   - Pattern_White_Space
+        #   + stability extensions
+        #   - NFKC modifications
+        #
+        # The same thing applies to this as with XIDS for the PatSyn, PatWS,
+        # and stability extensions.  There is a somewhat different set of NFKC
+        # mods to remove (and add in this case).  The ones below make this
+        # have identical code points as in the first release that defined it.
+        $perl_xidc += $perl_xids
+                    + $gc->table('L')
+                    + $gc->table('Mn')
+                    + $gc->table('Mc')
+                    + $gc->table('Nd')
+                    + 0x00B7
+                    ;
+        if (defined (my $pc = $gc->table('Pc'))) {
+            $perl_xidc += $pc;
+        }
+        else {  # 1.1.5 didn't have Pc, but these should have been in it
+            $perl_xidc += 0xFF3F;
+            $perl_xidc->add_range(0x203F, 0x2040);
+            $perl_xidc->add_range(0xFE33, 0xFE34);
+            $perl_xidc->add_range(0xFE4D, 0xFE4F);
+        }
+
+        # Subtract the NFKC mods
+        foreach my $range ( 0x037A,
+                            [ 0xFC5E, 0xFC63 ],
+                            [ 0xFDFA, 0xFE1F ],
+                            0xFE70,
+                            [ 0xFE72, 0xFE76 ],
+                            0xFE78,
+                            0xFE7A,
+                            0xFE7C,
+                            0xFE7E,
+        ) {
+            if (ref $range) {
+                $perl_xidc->delete_range($range->[0], $range->[1]);
+            }
+            else {
+                $perl_xidc->delete_range($range, $range);
+            }
+        }
+    }
+
     my $gcb = property_ref('Grapheme_Cluster_Break');
     # These are used in Unicode's definition of \X
     my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
