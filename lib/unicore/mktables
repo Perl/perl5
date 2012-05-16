@@ -2038,7 +2038,7 @@ sub trace { return main::trace(@_); }
     my %property;
     # name of property this file is for.  defaults to none, meaning not
     # applicable, or is otherwise determinable, for example, from each line.
-    main::set_access('property', \%property, qw{ c });
+    main::set_access('property', \%property, qw{ c r });
 
     my %optional;
     # If this is true, the file is optional.  If not present, no warning is
