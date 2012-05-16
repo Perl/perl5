@@ -2206,7 +2206,7 @@ Perl_is_utf8_X_prepend(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_PREPEND;
 
-    return is_utf8_common(p, &PL_utf8_X_prepend, "GCB=Prepend");
+    return is_utf8_common(p, &PL_utf8_X_prepend, "_X_GCB_Prepend");
 }
 
 bool
@@ -2216,7 +2216,7 @@ Perl_is_utf8_X_non_hangul(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_NON_HANGUL;
 
-    return is_utf8_common(p, &PL_utf8_X_non_hangul, "HST=Not_Applicable");
+    return is_utf8_common(p, &PL_utf8_X_non_hangul, "_X_HST_Not_Applicable");
 }
 
 bool
@@ -2226,7 +2226,7 @@ Perl_is_utf8_X_L(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_L;
 
-    return is_utf8_common(p, &PL_utf8_X_L, "GCB=L");
+    return is_utf8_common(p, &PL_utf8_X_L, "_X_GCB_L");
 }
 
 bool
@@ -2236,7 +2236,7 @@ Perl_is_utf8_X_LV(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_LV;
 
-    return is_utf8_common(p, &PL_utf8_X_LV, "GCB=LV");
+    return is_utf8_common(p, &PL_utf8_X_LV, "_X_GCB_LV");
 }
 
 bool
@@ -2246,7 +2246,7 @@ Perl_is_utf8_X_LVT(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_LVT;
 
-    return is_utf8_common(p, &PL_utf8_X_LVT, "GCB=LVT");
+    return is_utf8_common(p, &PL_utf8_X_LVT, "_X_GCB_LVT");
 }
 
 bool
@@ -2256,7 +2256,7 @@ Perl_is_utf8_X_T(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_T;
 
-    return is_utf8_common(p, &PL_utf8_X_T, "GCB=T");
+    return is_utf8_common(p, &PL_utf8_X_T, "_X_GCB_T");
 }
 
 bool
@@ -2266,7 +2266,7 @@ Perl_is_utf8_X_V(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_X_V;
 
-    return is_utf8_common(p, &PL_utf8_X_V, "GCB=V");
+    return is_utf8_common(p, &PL_utf8_X_V, "_X_GCB_V");
 }
 
 bool
