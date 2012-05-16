@@ -9113,7 +9113,6 @@ END
 
         # This first set is in the original old-style proplist.
         push @return, split /\n/, <<'END';
-Alpha     ; Alphabetic
 Bidi_C    ; Bidi_Control
 Dash      ; Dash
 Dia       ; Diacritic
@@ -9184,6 +9183,7 @@ END
     }
     if (-e 'DCoreProperties.txt') {
         push @return, split /\n/, <<'END';
+Alpha     ; Alphabetic
 IDS       ; ID_Start
 XIDC      ; XID_Continue
 XIDS      ; XID_Start
@@ -11717,26 +11717,26 @@ sub filter_blocks_lines {
         # PropList.txt has been in Unicode since version 2.0.  Until 3.1, it
         # was in a completely different syntax.  Ken Whistler of Unicode says
         # that it was something he used as an aid for his own purposes, but
-        # was never an official part of the standard.  However, comments in
-        # DAge.txt indicate that non-character code points were available in
-        # the UCD as of 3.1.  It is unclear to me (khw) how they could be
-        # there except through this file (but on the other hand, they first
-        # appeared there in 3.0.1), so maybe it was part of the UCD, and maybe
-        # not.  But the claim is that it was published as an aid to others who
-        # might want some more information than was given in the official UCD
-        # of the time.  Many of the properties in it were incorporated into
-        # the later PropList.txt, but some were not.  This program uses this
-        # early file to generate property tables that are otherwise not
-        # accessible in the early UCD's, and most were probably not really
-        # official at that time, so one could argue that it should be ignored,
-        # and you can easily modify things to skip this.  And there are bugs
-        # in this file in various versions.  (For example, the 2.1.9 version
-        # removes from Alphabetic the CJK range starting at 4E00, and they
-        # weren't added back in until 3.1.0.)  Many of this file's properties
-        # were later sanctioned, so this code generates tables for those
-        # properties that aren't otherwise in the UCD of the time but
-        # eventually did become official, and throws away the rest.  Here is a
-        # list of all the ones that are thrown away:
+        # was never an official part of the standard.  Many of the properties
+        # in it were incorporated into the later PropList.txt, but some were
+        # not.  This program uses this early file to generate property tables
+        # that are otherwise not accessible in the early UCD's.  It does this
+        # for the ones that eventually became official, and don't appear to be
+        # too different in their contents from the later official version, and
+        # throws away the rest.  It could be argued that the ones it generates
+        # were probably not really official at that time, so should be
+        # ignored.  You can easily modify things to skip all of them by
+        # changing this function to just set $_ to "", and return; and to skip
+        # certain of them by by simply removing their declarations from
+        # get_old_property_aliases().
+        #
+        # Here is a list of all the ones that are thrown away:
+        #   Alphabetic                   The definitions for this are very
+        #                                defective, so better to not mislead
+        #                                people into thinking it works.
+        #                                Instead the Perl extension of the
+        #                                same name is constructed from first
+        #                                principles.
         #   Bidi=*                       duplicates UnicodeData.txt
         #   Combining                    never made into official property;
         #                                is \P{ccc=0}
@@ -12878,6 +12878,7 @@ sub compile_perl() {
             }
         }
         $Alpha->add_description('Alphabetic');
+        $Alpha->add_alias('Alphabetic');
     }
     $Alpha->add_alias('XPosixAlpha');
     my $Posix_Alpha = $perl->add_match_table("PosixAlpha",
