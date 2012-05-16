@@ -5630,6 +5630,9 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	CLINE;
 	s++;
+	if (PL_lex_brackets > 0
+	 && PL_lex_brackstack[PL_lex_brackets-1] == XLOOPCOND)
+	    PL_lex_brackstack[PL_lex_brackets-1] = XBLOCK;
 	OPERATOR(';');
     case ')':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
@@ -7467,7 +7470,8 @@ Perl_yylex(pTHX)
 		s = SvPVX(PL_linestr) + soff;
 #endif
 	    }
-	    OPERATOR(FOR);
+	    PL_expect = XLOOPCOND;
+	    TOKEN(FOR);
 
 	case KEY_formline:
 	    LOP(OP_FORMLINE,XTERM);

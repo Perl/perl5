@@ -107,10 +107,7 @@ eval q{
     continue { $seen_continue = 1 }
 };
 
-{
-    local $TODO = 'for does not yet hide continue from keyword plugin';
-    is $seen_continue, undef, 'for swallows continue with keyword plugin';
-}
+is $seen_continue, undef, 'for swallows continue with keyword plugin';
 
 _reset;
 eval q{
@@ -129,11 +126,8 @@ eval q{
     continue { $seen_continue = 1 }
 };
 
-{
-    local $TODO = 'foreach does not yet hide continue from keyword plugin';
-    is $seen_continue, undef,
+is $seen_continue, undef,
 	'foreach swallows continue with keyword plugin';
-}
 
 _reset;
 eval q{
