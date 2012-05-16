@@ -16150,16 +16150,16 @@ sub write_all_tables() {
             }
             elsif ($count == $MAX_UNICODE_CODEPOINTS
                    && ($table == $property || $table->leader == $table)
-                   && $table->property->status != $PLACEHOLDER)
+                   && $table->property->status ne $PLACEHOLDER)
             {
                     Carp::my_carp("$table unexpectedly matches all Unicode code points.  Proceeding anyway.");
             }
 
-            if ($table->fate == $SUPPRESSED) {
+            if ($table->fate >= $SUPPRESSED) {
                 if (! $is_property) {
                     my @children = $table->children;
                     foreach my $child (@children) {
-                        if ($child->fate != $SUPPRESSED) {
+                        if ($child->fate < $SUPPRESSED) {
                             Carp::my_carp_bug("'$table' is suppressed and has a child '$child' which isn't");
                         }
                     }
