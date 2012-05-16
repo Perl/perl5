@@ -13506,7 +13506,6 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 {
     struct regexp *ret;
     struct regexp *const r = (struct regexp *)SvANY(rx);
-    register const I32 npar = r->nparens+1;
 
     PERL_ARGS_ASSERT_REG_TEMP_COPY;
 
@@ -13526,8 +13525,11 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     SvLEN_set(ret_x, 0);
     SvSTASH_set(ret_x, NULL);
     SvMAGIC_set(ret_x, NULL);
-    Newx(ret->offs, npar, regexp_paren_pair);
-    Copy(r->offs, ret->offs, npar, regexp_paren_pair);
+    if (r->offs) {
+        const I32 npar = r->nparens+1;
+        Newx(ret->offs, npar, regexp_paren_pair);
+        Copy(r->offs, ret->offs, npar, regexp_paren_pair);
+    }
     if (r->substrs) {
         Newx(ret->substrs, 1, struct reg_substr_data);
 	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
