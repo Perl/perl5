@@ -88,11 +88,8 @@ eval q{
     continue { $seen_continue = 1 }
 };
 
-{
-    local $TODO = 'while does not yet hide continue from keyword plugin';
-    is $seen_continue, undef,
+is $seen_continue, undef,
 	'while swallows continue with keyword plugin';
-}
 
 _reset;
 eval q{

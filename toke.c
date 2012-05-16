@@ -311,7 +311,8 @@ static const char* const lex_state_names[] = {
 	    return (int)LSTOP; \
 	} while(0)
 
-#define EXPECT_STMT (PL_expect == XSTATE || PL_expect == XELSE)
+#define EXPECT_STMT \
+    (PL_expect == XSTATE || PL_expect == XELSE || PL_expect == XCONT)
 
 #ifdef DEBUGGING
 
@@ -4340,7 +4341,8 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK", "IFCOND", "ELSE", "TERMORDORDOR"
+	  "ATTRTERM", "TERMBLOCK", "IFCOND", "ELSE", "LOOPCOND", "CONT",
+	  "TERMORDORDOR"
 	};
 #endif
 
@@ -5639,7 +5641,7 @@ Perl_yylex(pTHX)
 	s = SKIPSPACE1(s);
 	if (*s == '{')
 	{
-	  if (PL_expect == XIFCOND)
+	  if (PL_expect == XIFCOND || PL_expect == XLOOPCOND)
 	    TOKEN(')');
 	  else
 	    PREBLOCK(')');
@@ -5717,6 +5719,11 @@ Perl_yylex(pTHX)
 	    break;
 	case XIFCOND:
 	    PL_lex_brackstack[PL_lex_brackets++] = XELSE;
+	    PL_lex_allbrackets++;
+	    PL_expect = XSTATE;
+	    break;
+	case XLOOPCOND:
+	    PL_lex_brackstack[PL_lex_brackets++] = XCONT;
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
@@ -6557,6 +6564,9 @@ Perl_yylex(pTHX)
 
 	if ((tmp == KEY_elsif || tmp == KEY_else) && PL_expect == XELSE)
 	    goto reserved_word;
+	if (tmp == -KEY_continue && PL_expect == XCONT
+	 && *(skipspace(d)) == '{')
+	    PREBLOCK(CONTINUE);
 
 	/* Check for plugged-in keyword */
 	{
@@ -8429,7 +8439,8 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
-	    OPERATOR(WHILE);
+	    PL_expect = XLOOPCOND;
+	    TOKEN(WHILE);
 
 	case KEY_warn:
 	    PL_hints |= HINT_BLOCK_SCOPE;
