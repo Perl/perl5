@@ -5827,7 +5827,7 @@ Perl_yylex(pTHX)
 		if (PL_expect == XREF)
 		    PL_expect = XTERM;
 		else {
-		    PL_lex_brackstack[PL_lex_brackets-1] = XSTATE;
+		    PL_lex_brackstack[PL_lex_brackets-1] = XCONT;
 		    PL_expect = XSTATE;
 		}
 	    }
