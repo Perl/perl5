@@ -6,11 +6,50 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 30;
+#
+# This file tries to test builtin override using CORE::GLOBAL and
+# importation.
+#
 
-#
-# This file tries to test builtin override using CORE::GLOBAL
-#
+# Test that every keyword is overridable under the overrides feature.
+
+use File::Spec::Functions;
+use subs ();
+
+my $keywords_file = catfile(updir,'regen','keywords.pl');
+open my $kh, $keywords_file
+   or die "$0 cannot open $keywords_file: $!";
+
+my $keyword_count;
+
+while($_ = CORE::readline $kh) {
+  if (m?__END__?..${\0} and /^\+/) {
+    chomp(my $word = $');
+    next if $word =~ /^(?:require|glob|do)/; # tested separately
+    $keyword_count++;
+    my $rand = rand;
+    my $args;
+    use feature sprintf(":%vd", $^V), # need to use the latest, to make
+               'overrides';           # sure we test all keywords properly
+    local *$word = sub { $args = @_; $rand };
+    subs->import($word);
+    local $_; # to avoid strange side effects when tests fail
+    is eval qq{$word {}}, $rand, "$word under 'overrides' feature";
+    no feature 'overrides';
+    undef $args;
+    {
+      local(*STDOUT, *STDERR); # suppress print output
+      eval qq{$word {}};
+    }
+    is $args, undef, "$word outside of 'overrides' feature";
+  }
+}
+
+close $kh or die "$0 cannot close $keywords_file: $!";
+
+
+my $more_tests = 38;
+
 my $dirsep = "/";
 
 BEGIN { package Foo; *main::getlogin = sub { "kilroy"; } }
@@ -54,9 +93,10 @@ eval "use Foo::Bar";
 is( $r, join($dirsep, "Foo", "Bar.pm") );
 
 {
-    local $TODO = 'overrides feature does not work yet';
-    #use feature "overrides";
-    local *CORE::GLOBAL::require = sub { $r = shift; 1; };
+    local *CORE::GLOBAL::require = do {
+	use feature "overrides";
+	sub { $r = shift; 1; };
+    };
 
     eval q{
 	require 5.006;
@@ -64,6 +104,9 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 
 	require v5.6;
 	is( $r, "\x05\x06" );
+
+	require frimpulator;
+	is( $r, "frimpulator" );
     }
 }
 
@@ -150,3 +193,47 @@ BEGIN { *OverridenPop::pop = sub { ::is( $_[0][0], "ok" ) }; }
     };
     is $@, '';
 }
+
+# glob
+
+{
+    my $args;
+    local *CORE::GLOBAL::glob = sub { $args = @_ };
+    eval '</>';
+    is $args, 1, 'glob callback called by <...>';
+    undef $args;
+    eval 'glob "foo"';
+    is $args, 1, 'glob callback called by glob';
+    undef $args;
+    ok !eval 'glob "foo", "bar"; 1', 'glob prototype is immutable';
+    {
+	use feature 'overrides';
+	undef *CORE::GLOBAL::glob;
+	*CORE::GLOBAL::glob = sub { $args = @_ }
+    }
+    undef $args;
+    eval 'glob "foo", "bar"';
+    is $args, 2, 'glob prototype is overridable under overrides feature';
+}
+
+# do
+
+{
+    my($args, @args);
+    local *CORE::GLOBAL::do = sub { $args = @args = @_ };
+    eval 'do "foo"';
+    is $args, 1, 'do callback called by do';
+    undef $args;
+    eval 'do {}';
+    is $args, undef, 'do-BLOCK ignores callback';
+    {
+	use feature 'overrides';
+	*CORE::GLOBAL::do = sub { $args = @args = @_ }
+    }
+    undef @args;
+    eval 'do {}';
+    is ref $args[0], 'HASH',
+	'do override handles do-BLOCK (or hash) under overrides feature';
+}
+
+done_testing $more_tests+$keyword_count*2;
