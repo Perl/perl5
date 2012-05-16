@@ -1234,13 +1234,16 @@ my $ORDINARY = 0;       # The normal fate.
 my $MAP_PROXIED = 1;    # The map table for the property isn't written out,
                         # but there is a file written that can be used to
                         # reconstruct this table
-my $SUPPRESSED = 3;     # The file for this table is not written out.
-my $INTERNAL_ONLY = 4;  # The file for this table is written out, but it is
+my $INTERNAL_ONLY = 2;  # The file for this table is written out, but it is
                         # for Perl's internal use only
-my $PLACEHOLDER = 5;    # A property that is defined as a placeholder in a
-                        # Unicode version that doesn't have it, but we need it
-                        # to be defined, if empty, to have things work.
-                        # Implies no pod entry generated
+my $SUPPRESSED = 3;     # The file for this table is not written out, and as a
+                        # result, we don't bother to do many computations on
+                        # it.
+my $PLACEHOLDER = 4;    # Like $SUPPRESSED, but we go through all the
+                        # computations anyway, as the values are needed for
+                        # things to work.  This happens when we have Perl
+                        # extensions that depend on Unicode tables that
+                        # wouldn't normally be in a given Unicode version.
 
 # The format of the values of the tables:
 my $EMPTY_FORMAT = "";
