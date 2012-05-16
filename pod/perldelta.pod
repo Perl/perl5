@@ -4161,6 +4161,12 @@ this is still under investigation.
 
 =item *
 
+When building as root with a umask that prevents files from being
+other-readable, F<t/op/filetest.t> will fail.  This is a test bug, not a
+bug in perl's behavior.
+
+=item *
+
 Configuring with a recent gcc and link-time-optimization, such as
 C<Configure -Doptimize='-O2 -flto'> fails
 because the optimizer optimizes away some of Configure's tests.  A
