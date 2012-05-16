@@ -1413,7 +1413,7 @@ in combination with various other pragmas.
 
 Using caseless (C</i>) regular expression matching.
 Starting in Perl 5.14.0, regular expressions compiled within
-the scope of C<unicode_semantics> use character semantics
+the scope of C<unicode_strings> use character semantics
 even when executed or compiled into larger
 regular expressions outside the scope.
 
@@ -1423,7 +1423,7 @@ Matching any of several properties in regular expressions, namely C<\b>,
 C<\B>, C<\s>, C<\S>, C<\w>, C<\W>, and all the Posix character classes
 I<except> C<[[:ascii:]]>.
 Starting in Perl 5.14.0, regular expressions compiled within
-the scope of C<unicode_semantics> use character semantics
+the scope of C<unicode_strings> use character semantics
 even when executed or compiled into larger
 regular expressions outside the scope.
 
