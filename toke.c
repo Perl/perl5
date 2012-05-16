@@ -4354,6 +4354,10 @@ S_word_takes_any_delimeter(char *p, STRLEN len)
 	    (p[0] == 'q' && strchr("qwxr", p[1]))));
 }
 
+#define EXTEND_BRACKSTACK \
+    if (PL_lex_brackets > 100) \
+	Renew(PL_lex_brackstack, PL_lex_brackets + 10, char)
+
 /*
   yylex
 
@@ -4462,8 +4466,7 @@ Perl_yylex(pTHX)
 #endif
 	    if (next_type & (7<<24)) {
 		if (next_type & (1<<24)) {
-		    if (PL_lex_brackets > 100)
-			Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+		    EXTEND_BRACKSTACK;
 		    PL_lex_brackstack[PL_lex_brackets++] =
 			(char) ((next_type >> 16) & 0xff);
 		}
@@ -5420,8 +5423,7 @@ Perl_yylex(pTHX)
 	s++;
 	BOop(OP_BIT_XOR);
     case '[':
-	if (PL_lex_brackets > 100)
-	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+	EXTEND_BRACKSTACK;
 	PL_lex_brackstack[PL_lex_brackets++] = 0;
 	PL_lex_allbrackets++;
 	{
@@ -5612,8 +5614,7 @@ Perl_yylex(pTHX)
 	OPERATOR(':');
     case '(':
 	s++;
-	if (PL_lex_brackets > 100)
-	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+	EXTEND_BRACKSTACK;
 	PL_lex_brackstack[PL_lex_brackets++] = PL_expect;
 	if (PL_last_lop == PL_oldoldbufptr || PL_last_uni == PL_oldoldbufptr)
 	    PL_oldbufptr = PL_oldoldbufptr;		/* allow print(STDOUT 123) */
@@ -5665,9 +5666,7 @@ Perl_yylex(pTHX)
     case '{':
       leftbracket:
 	s++;
-	if (PL_lex_brackets > 100) {
-	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
-	}
+	EXTEND_BRACKSTACK;
 	switch (PL_expect) {
 	case XTERM:
 	    if (PL_lex_formbrack) {
@@ -11258,8 +11257,7 @@ static void
 S_parse_recdescent(pTHX_ int gramtype, I32 fakeeof)
 {
     SAVEI32(PL_lex_brackets);
-    if (PL_lex_brackets > 100)
-	Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
+    EXTEND_BRACKSTACK;
     PL_lex_brackstack[PL_lex_brackets++] = XFAKEEOF;
     SAVEI32(PL_lex_allbrackets);
     PL_lex_allbrackets = 0;
