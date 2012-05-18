@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5045;
+plan tests => 5046;
 
 use Scalar::Util qw(tainted);
 
@@ -2204,6 +2204,7 @@ fresh_perl_is
 sub eleventative::cos { 'eleven' }
 sub twelvetative::abs { 'twelve' }
 sub thirteentative::abs { 'thirteen' }
+sub fourteentative::abs { 'fourteen' }
 @eleventative::ISA = twelvetative::;
 {
     local our $TODO = '[perl #112708]';
@@ -2219,6 +2220,10 @@ sub thirteentative::abs { 'thirteen' }
     is cos $o, 'ten', 'method changes affect overloading';
     @eleventative::ISA = thirteentative::;
     is abs $o, 'thirteen', 'isa changes affect overloading';
+    bless $o, 'fourteentative';
+    @fourteentative::ISA = 'eleventative';
+    $TODO = '[perl #112708]';
+    is abs $o, 'fourteen', 'isa changes can turn overloading on';
 }
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
