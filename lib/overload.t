@@ -267,7 +267,7 @@ is("$aI", "xx");
 is($aI, "xx");
 is("b${aI}c", "_._.b.__.xx._.__.c._");
 
-# Here we test that both "no overloading" and
+# Here we test that both "no overload" and
 # blessing to a package update hash
 
 eval "package Oscalar; no overload '.'";
