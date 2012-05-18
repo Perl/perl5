@@ -2626,7 +2626,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   }
 
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
-      && (stash = SvSTASH(SvRV(left)))
+      && (stash = SvSTASH(SvRV(left))) && Gv_AMG(stash)
       && (mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
@@ -2749,7 +2749,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 }
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
-	       && (stash = SvSTASH(SvRV(right)))
+	       && (stash = SvSTASH(SvRV(right))) && Gv_AMG(stash)
 	       && (mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table

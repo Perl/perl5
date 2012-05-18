@@ -131,7 +131,7 @@ $b++;
 
 is(ref $b, "Oscalar");
 is($a, "087");
-is($b, "88");
+is($b, "89");
 is(ref $a, "Oscalar");
 
 package Oscalar;
@@ -142,7 +142,7 @@ $b++;
 
 is(ref $b, "Oscalar");
 is($a, "087");
-is($b, "90");
+is($b, "91");
 is(ref $a, "Oscalar");
 
 $b=$a;
@@ -267,11 +267,12 @@ is("$aI", "xx");
 is($aI, "xx");
 is("b${aI}c", "_._.b.__.xx._.__.c._");
 
-# Here we test blessing to a package updates hash
+# Here we test that both "no overloading" and
+# blessing to a package update hash
 
 eval "package Oscalar; no overload '.'";
 
-is("b${a}", "_.b.__.xx._");
+is("b${a}", "bxx");
 $x="1";
 bless \$x, Oscalar;
 is("b${a}c", "bxxc");
@@ -291,8 +292,8 @@ like($@, qr/no method found/);
 
 eval "package Oscalar; sub comple; use overload '~' => 'comple'";
 
-$na = eval { ~$a };		# Hash was not updated
-like($@, qr/no method found/);
+$na = eval { ~$a };
+is($@, '');
 
 bless \$x, Oscalar;
 
@@ -303,8 +304,8 @@ is($na, '_!_xx_!_');
 
 $na = 0;
 
-$na = eval { ~$aI };		# Hash was not updated
-like($@, qr/no method found/);
+$na = eval { ~$aI };
+like($@, '');
 
 bless \$x, OscalarI;
 
@@ -316,8 +317,8 @@ is($na, '_!_xx_!_');
 
 eval "package Oscalar; sub rshft; use overload '>>' => 'rshft'";
 
-$na = eval { $aI >> 1 };	# Hash was not updated
-like($@, qr/no method found/);
+$na = eval { $aI >> 1 };
+is($@, '');
 
 bless \$x, OscalarI;
 
@@ -2213,7 +2214,6 @@ sub thirteentative::abs { 'thirteen' }
     undef $TODO;
     is cos $o, 'eleven',
       'ovrld applies to previously-blessed obj after other obj is blessed';
-    $TODO = '[perl #112708]';
     $o = bless [], 'eleventative';
     *eleventative::cos = sub { 'ten' };
     is cos $o, 'ten', 'method changes affect overloading';
