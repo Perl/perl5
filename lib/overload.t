@@ -2201,38 +2201,6 @@ fresh_perl_is
       'Error message when sub stub is encountered';
 }
 
-sub eleventative::cos { 'eleven' }
-sub twelvetative::abs { 'twelve' }
-sub thirteentative::abs { 'thirteen' }
-sub fourteentative::abs { 'fourteen' }
-@eleventative::ISA = twelvetative::;
-{
-    my $o = bless [], 'eleventative';
-    eval 'package eleventative; use overload map +($_)x2, cos=>abs=>';
-    is cos $o, 'eleven', 'overloading applies to object blessed before';
-    bless [], 'eleventative';
-    is cos $o, 'eleven',
-      'ovrld applies to previously-blessed obj after other obj is blessed';
-    $o = bless [], 'eleventative';
-    *eleventative::cos = sub { 'ten' };
-    is cos $o, 'ten', 'method changes affect overloading';
-    @eleventative::ISA = thirteentative::;
-    is abs $o, 'thirteen', 'isa changes affect overloading';
-    bless $o, 'fourteentative';
-    @fourteentative::ISA = 'eleventative';
-    local our $TODO = '[perl #112708]';
-    is abs $o, 'fourteen', 'isa changes can turn overloading on';
-}
-
-{ # undefining the overload stash -- KEEP THIS TEST LAST
-    package ant;
-    use overload '+' => 'onion';
-    $_ = \&overload::nil;
-    undef %overload::;
-    bless[];
-    ::ok(1, 'no crash when undefining %overload::');
-}
-
 # [perl #40333]
 # overload::Overloaded should not use a ->can designed for autoloading.
 # This example attempts to be as realistic as possible.  The o class has a
@@ -2265,6 +2233,38 @@ ok !overload::Overloaded(new proxy new o),
     package main;
     my $obj = bless [], 'broken_can';
     ok(overload::Overloaded($obj));
+}
+
+sub eleventative::cos { 'eleven' }
+sub twelvetative::abs { 'twelve' }
+sub thirteentative::abs { 'thirteen' }
+sub fourteentative::abs { 'fourteen' }
+@eleventative::ISA = twelvetative::;
+{
+    my $o = bless [], 'eleventative';
+    eval 'package eleventative; use overload map +($_)x2, cos=>abs=>';
+    is cos $o, 'eleven', 'overloading applies to object blessed before';
+    bless [], 'eleventative';
+    is cos $o, 'eleven',
+      'ovrld applies to previously-blessed obj after other obj is blessed';
+    $o = bless [], 'eleventative';
+    *eleventative::cos = sub { 'ten' };
+    is cos $o, 'ten', 'method changes affect overloading';
+    @eleventative::ISA = thirteentative::;
+    is abs $o, 'thirteen', 'isa changes affect overloading';
+    bless $o, 'fourteentative';
+    @fourteentative::ISA = 'eleventative';
+    local our $TODO = '[perl #112708]';
+    is abs $o, 'fourteen', 'isa changes can turn overloading on';
+}
+
+{ # undefining the overload stash -- KEEP THIS TEST LAST
+    package ant;
+    use overload '+' => 'onion';
+    $_ = \&overload::nil;
+    undef %overload::;
+    bless[];
+    ::ok(1, 'no crash when undefining %overload::');
 }
 
 
