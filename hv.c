@@ -1858,6 +1858,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       if (!aux->xhv_name_u.xhvnameu_name && ! aux->xhv_backreferences)
 	SvFLAGS(hv) &= ~SVf_OOK;
     }
+    HvAMAGIC_off(hv);
     if (!SvOOK(hv)) {
 	Safefree(HvARRAY(hv));
 	xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */

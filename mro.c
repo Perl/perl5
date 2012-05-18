@@ -1346,6 +1346,10 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
                 hv_clear(mrometa->mro_nextmethod);
         }
     }
+
+    /* The method change may be due to *{$package . "::()"} = \&nil; in
+       overload.pm. */
+    HvAMAGIC_on(stash);
 }
 
 void

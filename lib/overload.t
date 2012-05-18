@@ -2207,12 +2207,10 @@ sub thirteentative::abs { 'thirteen' }
 sub fourteentative::abs { 'fourteen' }
 @eleventative::ISA = twelvetative::;
 {
-    local our $TODO = '[perl #112708]';
     my $o = bless [], 'eleventative';
     eval 'package eleventative; use overload map +($_)x2, cos=>abs=>';
     is cos $o, 'eleven', 'overloading applies to object blessed before';
     bless [], 'eleventative';
-    undef $TODO;
     is cos $o, 'eleven',
       'ovrld applies to previously-blessed obj after other obj is blessed';
     $o = bless [], 'eleventative';
@@ -2222,7 +2220,7 @@ sub fourteentative::abs { 'fourteen' }
     is abs $o, 'thirteen', 'isa changes affect overloading';
     bless $o, 'fourteentative';
     @fourteentative::ISA = 'eleventative';
-    $TODO = '[perl #112708]';
+    local our $TODO = '[perl #112708]';
     is abs $o, 'fourteen', 'isa changes can turn overloading on';
 }
 
