@@ -902,6 +902,11 @@ in gv.h: */
 	    && (SvFLAGS(SvSTASH(SvRV(sv))) &= ~SVf_AMAGIC))
 #endif
 
+/* To be used on the stashes themselves: */
+#define HvAMAGIC(hv)		(SvFLAGS(hv) & SVf_AMAGIC)
+#define HvAMAGIC_on(hv)		(SvFLAGS(hv) |= SVf_AMAGIC)
+#define HvAMAGIC_off(hv)	(SvFLAGS(hv) &=~ SVf_AMAGIC)
+
 /*
 =for apidoc Am|U32|SvGAMAGIC|SV* sv
 
