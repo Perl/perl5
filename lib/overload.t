@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5041;
+plan tests => 5045;
 
 use Scalar::Util qw(tainted);
 
@@ -2198,6 +2198,25 @@ fresh_perl_is
     ::like $@, qr/^Stub found while resolving method "\?{3}" overloadin(?x:
                   )g "\+" in package "JustUs" at /,
       'Error message when sub stub is encountered';
+}
+
+sub eleventative::cos { 'eleven' }
+sub twelvetative::abs { 'twelve' }
+sub thirteentative::abs { 'thirteen' }
+@eleventative::ISA = twelvetative::;
+{
+    local our $TODO = '[perl #112708]';
+    my $o = bless [], 'eleventative';
+    eval 'package eleventative; use overload map +($_)x2, cos=>abs=>';
+    is cos $o, 'eleven', 'overloading applies to object blessed before';
+    bless [], 'eleventative';
+    is cos $o, 'eleven',
+      'ovrld applies to previously-blessed obj after other obj is blessed';
+    $o = bless [], 'eleventative';
+    *eleventative::cos = sub { 'ten' };
+    is cos $o, 'ten', 'method changes affect overloading';
+    @eleventative::ISA = thirteentative::;
+    is abs $o, 'thirteen', 'isa changes affect overloading';
 }
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
