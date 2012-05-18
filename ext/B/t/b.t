@@ -277,16 +277,7 @@ is(B::opnumber("chop"), 39, "Testing opnumber with opname (chop)");
     ok( $sg < B::sub_generation, "sub_generation increments" );
 }
 
-{
-    my $ag = B::amagic_generation();
-    {
-
-        package Whatever;
-        require overload;
-        overload->import( '""' => sub {"What? You want more?!"} );
-    }
-    ok( $ag < B::amagic_generation, "amagic_generation increments" );
-}
+like( B::amagic_generation, qr/^\d+\z/, "amagic_generation" );
 
 is(B::svref_2object(sub {})->ROOT->ppaddr, 'PL_ppaddr[OP_LEAVESUB]',
    'OP->ppaddr');

@@ -31,7 +31,6 @@ sub OVERLOAD {
   $package = shift;
   my %arg = @_;
   my ($sub, $fb);
-  $ {$package . "::OVERLOAD"}{dummy}++; # Register with magic by touching.
   *{$package . "::()"} = \&nil; # Make it findable via fetchmethod.
   for (keys %arg) {
     if ($_ eq 'fallback') {
@@ -62,7 +61,6 @@ sub import {
 
 sub unimport {
   $package = (caller())[0];
-  ${$package . "::OVERLOAD"}{dummy}++; # Upgrade the table
   shift;
   for (@_) {
       delete $ {$package . "::"}{"(" . $_};
