@@ -362,6 +362,14 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 
     SSGROW(total_elems + REGCP_FRAME_ELEMS);
     
+    DEBUG_BUFFERS_r(
+	if ((int)PL_regsize > (int)parenfloor)
+	    PerlIO_printf(Perl_debug_log,
+		"rex=0x%"UVxf" offs=0x%"UVxf": saving capture indices:\n",
+		PTR2UV(rex),
+		PTR2UV(rex->offs)
+	    );
+    );
     for (p = PL_regsize; p > parenfloor; p--) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(rex->offs[p].end);
@@ -369,11 +377,11 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 	SSPUSHINT(rex->offs[p].start_tmp);
 	SSPUSHINT(p);
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
-	  "     saving \\%"UVuf" %"IVdf"(%"IVdf")..%"IVdf"\n",
-		      (UV)p,
-		      (IV)rex->offs[p].start,
-		      (IV)rex->offs[p].start_tmp,
-		      (IV)rex->offs[p].end
+	    "    \\%"UVuf": %"IVdf"(%"IVdf")..%"IVdf"\n",
+	    (UV)p,
+	    (IV)rex->offs[p].start,
+	    (IV)rex->offs[p].start_tmp,
+	    (IV)rex->offs[p].end
 	));
     }
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
@@ -423,6 +431,14 @@ S_regcppop(pTHX_ regexp *rex)
 
     i -= REGCP_OTHER_ELEMS;
     /* Now restore the parentheses context. */
+    DEBUG_BUFFERS_r(
+	if (i || rex->lastparen + 1 <= rex->nparens)
+	    PerlIO_printf(Perl_debug_log,
+		"rex=0x%"UVxf" offs=0x%"UVxf": restoring capture indices to:\n",
+		PTR2UV(rex),
+		PTR2UV(rex->offs)
+	    );
+    );
     for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
 	U32 paren = (U32)SSPOPINT;
@@ -431,23 +447,15 @@ S_regcppop(pTHX_ regexp *rex)
 	tmps = SSPOPINT;
 	if (paren <= rex->lastparen)
 	    rex->offs[paren].end = tmps;
-	DEBUG_BUFFERS_r(
-	    PerlIO_printf(Perl_debug_log,
-			  "     restoring \\%"UVuf" to %"IVdf"(%"IVdf")..%"IVdf"%s\n",
-			  (UV)paren,
-			  (IV)rex->offs[paren].start,
-			  (IV)rex->offs[paren].start_tmp,
-			  (IV)rex->offs[paren].end,
-			  (paren > rex->lastparen ? "(no)" : ""));
+	DEBUG_BUFFERS_r( PerlIO_printf(Perl_debug_log,
+	    "    \\%"UVuf": %"IVdf"(%"IVdf")..%"IVdf"%s\n",
+	    (UV)paren,
+	    (IV)rex->offs[paren].start,
+	    (IV)rex->offs[paren].start_tmp,
+	    (IV)rex->offs[paren].end,
+	    (paren > rex->lastparen ? "(skipped)" : ""));
 	);
     }
-    DEBUG_BUFFERS_r(
-	if (rex->lastparen + 1 <= rex->nparens) {
-	    PerlIO_printf(Perl_debug_log,
-			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
-			  (IV)(rex->lastparen + 1), (IV)rex->nparens);
-	}
-    );
 #if 1
     /* It would seem that the similar code in regtry()
      * already takes care of this, and in fact it is in
@@ -462,6 +470,11 @@ S_regcppop(pTHX_ regexp *rex)
 	if (i > PL_regsize)
 	    rex->offs[i].start = -1;
 	rex->offs[i].end = -1;
+	DEBUG_BUFFERS_r( PerlIO_printf(Perl_debug_log,
+	    "    \\%"UVuf": %s   ..-1 undeffing\n",
+	    (UV)i,
+	    (i > PL_regsize) ? "-1" : "  "
+	));
     }
 #endif
     return input;
@@ -2139,6 +2152,12 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
         swap = prog->offs;
         /* do we need a save destructor here for eval dies? */
         Newxz(prog->offs, (prog->nparens + 1), regexp_paren_pair);
+	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
+	    "rex=0x%"UVxf" saving  offs: orig=0x%"UVxf" new=0x%"UVxf"\n",
+	    PTR2UV(prog),
+	    PTR2UV(swap),
+	    PTR2UV(prog->offs)
+	));
     }
     if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
 	re_scream_pos_data d;
@@ -2499,6 +2518,14 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
     goto phooey;
 
 got_it:
+    DEBUG_BUFFERS_r(
+	if (swap)
+	    PerlIO_printf(Perl_debug_log,
+		"rex=0x%"UVxf" freeing offs: 0x%"UVxf"\n",
+		PTR2UV(prog),
+		PTR2UV(swap)
+	    );
+    );
     Safefree(swap);
     RX_MATCH_TAINTED_set(rx, PL_reg_flags & RF_tainted);
 
@@ -2547,6 +2574,12 @@ phooey:
 	restore_pos(aTHX_ prog);
     if (swap) {
         /* we failed :-( roll it back */
+	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
+	    "rex=0x%"UVxf" rolling back offs: freeing=0x%"UVxf" restoring=0x%"UVxf"\n",
+	    PTR2UV(prog),
+	    PTR2UV(prog->offs),
+	    PTR2UV(swap)
+	));
         Safefree(prog->offs);
         prog->offs = swap;
     }
@@ -4542,12 +4575,33 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    rex->offs[n].start_tmp = locinput - PL_bostr;
 	    if (n > PL_regsize)
 		PL_regsize = n;
+	    DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
+		"rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf" tmp; regsize=%"UVuf"\n",
+		PTR2UV(rex),
+		PTR2UV(rex->offs),
+		(UV)n,
+		(IV)rex->offs[n].start_tmp,
+		(UV)PL_regsize
+	    ));
             lastopen = n;
 	    break;
+
+/* XXX really need to log other places start/end are set too */
+#define CLOSE_CAPTURE \
+    rex->offs[n].start = rex->offs[n].start_tmp; \
+    rex->offs[n].end = locinput - PL_bostr; \
+    DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log, \
+	"rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf"..%"IVdf"\n", \
+	PTR2UV(rex), \
+	PTR2UV(rex->offs), \
+	(UV)n, \
+	(IV)rex->offs[n].start, \
+	(IV)rex->offs[n].end \
+    ))
+
 	case CLOSE:
 	    n = ARG(scan);  /* which paren pair */
-	    rex->offs[n].start = rex->offs[n].start_tmp;
-	    rex->offs[n].end = locinput - PL_bostr;
+	    CLOSE_CAPTURE;
 	    /*if (n > PL_regsize)
 		PL_regsize = n;*/
 	    if (n > rex->lastparen)
@@ -4567,9 +4621,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                     if ( OP(cursor)==CLOSE ){
                         n = ARG(cursor);
                         if ( n <= lastopen ) {
-                            rex->offs[n].start
-					= rex->offs[n].start_tmp;
-                            rex->offs[n].end = locinput - PL_bostr;
+			    CLOSE_CAPTURE;
                             /*if (n > PL_regsize)
                             PL_regsize = n;*/
                             if (n > rex->lastparen)
