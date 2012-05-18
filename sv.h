@@ -918,7 +918,7 @@ the scalar's value cannot change unless written to.
 
 #define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
 
-#define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash, FALSE))
+#define Gv_AMG(stash)           Gv_AMupdate(stash, FALSE)
 
 #define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
 				  == (SVf_ROK|SVprv_WEAKREF))
