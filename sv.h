@@ -880,19 +880,17 @@ in gv.h: */
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
 #define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
-				 SvFLAGS(SvSTASH(SvRV(sv))) & SVf_AMAGIC)
+				 HvAMAGIC(SvSTASH(SvRV(sv))))
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvAMAGIC_on(sv)	({ SV * const kloink = sv;		\
 				   assert(SvROK(kloink));		\
 				   if (SvOBJECT(SvRV(kloink)))		\
-				    SvFLAGS(SvSTASH(SvRV(kloink)))	\
-					|= SVf_AMAGIC;			\
+				    HvAMAGIC_on(SvSTASH(SvRV(kloink)));	\
 				})
 #  define SvAMAGIC_off(sv)	({ SV * const kloink = sv;		\
 				   if(SvROK(kloink)			\
 				      && SvOBJECT(SvRV(kloink)))	\
-					SvFLAGS(SvSTASH(SvRV(kloink)))	\
-					    &= ~SVf_AMAGIC;		\
+				     HvAMAGIC_off(SvSTASH(SvRV(kloink))); \
 				})
 #else
 #  define SvAMAGIC_on(sv) \
