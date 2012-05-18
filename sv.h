@@ -879,20 +879,27 @@ in gv.h: */
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
-#define SvAMAGIC(sv)		(SvROK(sv) && (SvFLAGS(SvRV(sv)) & SVf_AMAGIC))
+#define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
+				 SvFLAGS(SvSTASH(SvRV(sv))) & SVf_AMAGIC)
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvAMAGIC_on(sv)	({ SV * const kloink = sv;		\
 				   assert(SvROK(kloink));		\
-				   SvFLAGS(SvRV(kloink)) |= SVf_AMAGIC;	\
+				   if (SvOBJECT(SvRV(kloink)))		\
+				    SvFLAGS(SvSTASH(SvRV(kloink)))	\
+					|= SVf_AMAGIC;			\
 				})
 #  define SvAMAGIC_off(sv)	({ SV * const kloink = sv;		\
-				   if(SvROK(kloink))			\
-					SvFLAGS(SvRV(kloink)) &= ~SVf_AMAGIC;\
+				   if(SvROK(kloink)			\
+				      && SvOBJECT(SvRV(kloink)))	\
+					SvFLAGS(SvSTASH(SvRV(kloink)))	\
+					    &= ~SVf_AMAGIC;		\
 				})
 #else
-#  define SvAMAGIC_on(sv)	(SvFLAGS(SvRV(sv)) |= SVf_AMAGIC)
+#  define SvAMAGIC_on(sv) \
+	SvOBJECT(SvRV(sv)) && (SvFLAGS(SvSTASH(SvRV(sv))) |= SVf_AMAGIC)
 #  define SvAMAGIC_off(sv) \
-	(SvROK(sv) && (SvFLAGS(SvRV(sv)) &= ~SVf_AMAGIC))
+	(SvROK(sv) && SvOBJECT(SvRV(sv)) \
+	    && (SvFLAGS(SvSTASH(SvRV(sv))) &= ~SVf_AMAGIC))
 #endif
 
 /*

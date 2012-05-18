@@ -2210,8 +2210,10 @@ sub thirteentative::abs { 'thirteen' }
     eval 'package eleventative; use overload map +($_)x2, cos=>abs=>';
     is cos $o, 'eleven', 'overloading applies to object blessed before';
     bless [], 'eleventative';
+    undef $TODO;
     is cos $o, 'eleven',
       'ovrld applies to previously-blessed obj after other obj is blessed';
+    $TODO = '[perl #112708]';
     $o = bless [], 'eleventative';
     *eleventative::cos = sub { 'ten' };
     is cos $o, 'ten', 'method changes affect overloading';
