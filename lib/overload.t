@@ -2254,7 +2254,6 @@ sub fourteentative::abs { 'fourteen' }
     is abs $o, 'thirteen', 'isa changes affect overloading';
     bless $o, 'fourteentative';
     @fourteentative::ISA = 'eleventative';
-    local our $TODO = '[perl #112708]';
     is abs $o, 'fourteen', 'isa changes can turn overloading on';
 }
 

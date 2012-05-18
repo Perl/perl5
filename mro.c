@@ -542,6 +542,9 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     /* wipe next::method cache too */
     if(meta->mro_nextmethod) hv_clear(meta->mro_nextmethod);
 
+    /* Changes to @ISA might turn overloading on */
+    HvAMAGIC_on(stash);
+
     /* Iterate the isarev (classes that are our children),
        wiping out their linearization, method and isa caches
        and upating PL_isarev. */
