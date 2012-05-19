@@ -9518,11 +9518,6 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH_set(tmpRef, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
 
-    if (Gv_AMG(stash))
-	SvAMAGIC_on(sv);
-    else
-	(void)SvAMAGIC_off(sv);
-
     if(SvSMAGICAL(tmpRef))
         if(mg_find(tmpRef, PERL_MAGIC_ext) || mg_find(tmpRef, PERL_MAGIC_uvar))
             mg_set(tmpRef);

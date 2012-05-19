@@ -2191,7 +2191,7 @@ fresh_perl_is
 {
     package Justus;
     use overload '+' => 'justice';
-    eval {bless[]};
+    eval {"".bless[]};
     ::like $@, qr/^Can't resolve method "justice" overloading "\+" in p(?x:
                   )ackage "Justus" at /,
       'Error message when explicitly named overload method does not exist';
@@ -2200,7 +2200,7 @@ fresh_perl_is
     our @ISA = 'JustYou';
     package JustYou { use overload '+' => 'injustice'; }
     "JustUs"->${\"(+"};
-    eval {bless []};
+    eval {"".bless []};
     ::like $@, qr/^Stub found while resolving method "\?{3}" overloadin(?x:
                   )g "\+" in package "JustUs" at /,
       'Error message when sub stub is encountered';
