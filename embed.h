@@ -1129,7 +1129,6 @@
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #define magic_set(a,b)		Perl_magic_set(aTHX_ a,b)
 #define magic_set_all_env(a,b)	Perl_magic_set_all_env(aTHX_ a,b)
-#define magic_setamagic(a,b)	Perl_magic_setamagic(aTHX_ a,b)
 #define magic_setarylen(a,b)	Perl_magic_setarylen(aTHX_ a,b)
 #define magic_setdbline(a,b)	Perl_magic_setdbline(aTHX_ a,b)
 #define magic_setdefelem(a,b)	Perl_magic_setdefelem(aTHX_ a,b)

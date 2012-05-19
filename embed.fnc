@@ -752,7 +752,6 @@ p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg
 pr	|int	|magic_regdatum_set|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_set	|NN SV* sv|NN MAGIC* mg
-p	|int	|magic_setamagic|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setarylen|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_freearylen_p|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
