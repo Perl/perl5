@@ -3960,7 +3960,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
-    (void)SvAMAGIC_off(dstr);
     if ( SvVOK(dstr) )
     {
 	/* need to nuke the magic */
