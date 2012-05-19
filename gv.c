@@ -1403,18 +1403,6 @@ S_gv_magicalize_isa(pTHX_ GV *gv)
 	     NULL, 0);
 }
 
-STATIC void
-S_gv_magicalize_overload(pTHX_ GV *gv)
-{
-    HV* hv;
-
-    PERL_ARGS_ASSERT_GV_MAGICALIZE_OVERLOAD;
-
-    hv = GvHVn(gv);
-    GvMULTI_on(gv);
-    hv_magic(hv, NULL, PERL_MAGIC_overload);
-}
-
 GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
@@ -1697,7 +1685,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
     /* set up magic where warranted */
     if (stash != PL_defstash) { /* not the main stash */
-	/* We only have to check for four names here: EXPORT, ISA, OVERLOAD
+	/* We only have to check for three names here: EXPORT, ISA
 	   and VERSION. All the others apply only to the main stash or to
 	   CORE (which is checked right after this). */
 	if (len > 2) {
@@ -1710,10 +1698,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case 'I':
 		if (strEQ(name2, "SA"))
 		    gv_magicalize_isa(gv);
-		break;
-	    case 'O':
-		if (strEQ(name2, "VERLOAD"))
-		    gv_magicalize_overload(gv);
 		break;
 	    case 'V':
 		if (strEQ(name2, "ERSION"))
@@ -1760,11 +1744,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case 'I':
 		if (strEQ(name2, "SA")) {
 		    gv_magicalize_isa(gv);
-		}
-		break;
-	    case 'O':
-		if (strEQ(name2, "VERLOAD")) {
-		    gv_magicalize_overload(gv);
 		}
 		break;
 	    case 'S':

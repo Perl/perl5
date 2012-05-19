@@ -1343,7 +1343,6 @@
 #define gv_get_super_pkg(a,b,c)	S_gv_get_super_pkg(aTHX_ a,b,c)
 #define gv_init_svtype(a,b)	S_gv_init_svtype(aTHX_ a,b)
 #define gv_magicalize_isa(a)	S_gv_magicalize_isa(aTHX_ a)
-#define gv_magicalize_overload(a)	S_gv_magicalize_overload(aTHX_ a)
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
 #  endif
 #  if defined(PERL_IN_HV_C)

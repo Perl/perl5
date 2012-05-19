@@ -5550,11 +5550,6 @@ STATIC void	S_gv_magicalize_isa(pTHX_ GV *gv)
 #define PERL_ARGS_ASSERT_GV_MAGICALIZE_ISA	\
 	assert(gv)
 
-STATIC void	S_gv_magicalize_overload(pTHX_ GV *gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_MAGICALIZE_OVERLOAD	\
-	assert(gv)
-
 STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methpv, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
