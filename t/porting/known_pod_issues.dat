@@ -86,6 +86,7 @@ PadWalker
 passwd(1)
 perl(1)
 Perl::Unsafe::Signals
+Perl4::CoreLibs
 perlbug(1)
 PerlIO::locale
 PerlIO::Util

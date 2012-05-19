@@ -1516,6 +1516,19 @@ C<Devel::DProf> has been removed from the Perl core.  Prior version was
 
 C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
+=item *
+
+Several old perl4-style libraries which have been deprecated with 5.14
+are now removed:
+
+    abbrev.pl assert.pl bigfloat.pl bigint.pl bigrat.pl cacheout.pl
+    complete.pl ctime.pl dotsh.pl exceptions.pl fastcwd.pl flush.pl
+    getcwd.pl getopt.pl getopts.pl hostname.pl importenv.pl
+    lib/find{,depth}.pl look.pl newgetopt.pl open2.pl open3.pl
+    pwd.pl shellwords.pl stat.pl tainted.pl termcap.pl timelocal.pl
+
+They can be found on CPAN as L<Perl4::CoreLibs>.
+
 =back
 
 =head1 Documentation
