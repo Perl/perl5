@@ -9330,7 +9330,6 @@ Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
     new_SV(sv);
 
     SV_CHECK_THINKFIRST_COW_DROP(rv);
-    (void)SvAMAGIC_off(rv);
 
     if (SvTYPE(rv) >= SVt_PVMG) {
 	const U32 refcnt = SvREFCNT(rv);
