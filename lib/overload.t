@@ -1119,18 +1119,6 @@ like ($@, qr/zap/);
 }
 
 {
-    package Numify;
-    use overload (qw(0+ numify fallback 1));
-
-    sub new {
-	my $val = $_[1];
-	bless \$val, $_[0];
-    }
-
-    sub numify { ${$_[0]} }
-}
-
-{
     package perl31793;
     use overload cmp => sub { 0 };
     package perl31793_fb;
@@ -1149,6 +1137,18 @@ like ($@, qr/zap/);
     like(overload::StrVal($o),        qr/^perl31793=ARRAY\(0x[0-9a-f]+\)$/);
     like(overload::StrVal($of),       qr/^perl31793_fb=ARRAY\(0x[0-9a-f]+\)$/);
     like(overload::StrVal($no),       qr/^no_overload=ARRAY\(0x[0-9a-f]+\)$/);
+}
+
+{
+    package Numify;
+    use overload (qw(0+ numify fallback 1));
+
+    sub new {
+	my $val = $_[1];
+	bless \$val, $_[0];
+    }
+
+    sub numify { ${$_[0]} }
 }
 
 # These are all check that overloaded values rather than reference addresses
