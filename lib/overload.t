@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5050;
+plan tests => 5051;
 
 use Scalar::Util qw(tainted);
 
@@ -962,9 +962,14 @@ unless ($aaa) {
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' use overload "~|_|~" => sub{} ' ;
+    eval ' no overload "~|_|~" ' ;
     is($a, "");
     use warnings 'overload' ;
     $x = eval ' use overload "~|_|~" => sub{} ' ;
+    like($a, qr/^overload arg '~\|_\|~' is invalid at \(eval \d+\) line /,
+	'invalid arg warning');
+    undef $a;
+    eval ' no overload "~|_|~" ' ;
     like($a, qr/^overload arg '~\|_\|~' is invalid at \(eval \d+\) line /,
 	'invalid arg warning');
 }

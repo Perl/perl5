@@ -63,6 +63,8 @@ sub unimport {
   $package = (caller())[0];
   shift;
   for (@_) {
+      warnings::warnif("overload arg '$_' is invalid")
+        unless $ops_seen{$_};
       delete $ {$package . "::"}{"(" . $_};
   }
 }
