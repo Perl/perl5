@@ -3438,8 +3438,6 @@ test_get_vtbl()
 #ifdef USE_LOCALE_COLLATE
 	test_get_this_vtable(collxfrm);
 #endif
-	test_get_this_vtable(amagic);
-	test_get_this_vtable(amagicelem);
 	test_get_this_vtable(backref);
 	test_get_this_vtable(utf8);
 

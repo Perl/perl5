@@ -25,9 +25,9 @@ my %mg =
     (
      sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
 	     desc => 'Special scalar variable' },
-     overload => { char => 'A', vtable => 'amagic', desc => '%OVERLOAD hash' },
-     overload_elem => { char => 'a', vtable => 'amagicelem',
-			desc => '%OVERLOAD hash element' },
+     # overload, or type "A" magic, used to be here.  Hence overloaded is
+     # often called AMAGIC internally, even though it does not use "A"
+     # magic any more.
      overload_table => { char => 'c', vtable => 'ovrld',
 			 desc => 'Holds overload table (AMT) on stash' },
      bm => { char => 'B', vtable => 'regexp', value_magic => 1,
@@ -135,8 +135,6 @@ my %sig =
      'regexp' => {set => 'setregexp', alias => [qw(bm fm)]},
      'regdata' => {len => 'regdata_cnt'},
      'regdatum' => {get => 'regdatum_get', set => 'regdatum_set'},
-     'amagic' => {set => 'setamagic', free => 'setamagic'},
-     'amagicelem' => {set => 'setamagic', free => 'setamagic'},
      'backref' => {free => 'killbackrefs'},
      'ovrld' => {free => 'freeovrld'},
      'utf8' => {set => 'setutf8'},

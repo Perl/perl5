@@ -1048,67 +1048,64 @@ will be lost.
 =for mg_vtable.pl begin
 
  mg_type
- (old-style char and macro)   MGVTBL          Type of magic
- --------------------------   ------          -------------
- \0 PERL_MAGIC_sv             vtbl_sv         Special scalar variable
- #  PERL_MAGIC_arylen         vtbl_arylen     Array length ($#ary)
- %  PERL_MAGIC_rhash          (none)          extra data for restricted
-                                              hashes
- .  PERL_MAGIC_pos            vtbl_pos        pos() lvalue
- :  PERL_MAGIC_symtab         (none)          extra data for symbol
-                                              tables
- <  PERL_MAGIC_backref        vtbl_backref    for weak ref data
- @  PERL_MAGIC_arylen_p       (none)          to move arylen out of
-                                              XPVAV
- A  PERL_MAGIC_overload       vtbl_amagic     %OVERLOAD hash
- a  PERL_MAGIC_overload_elem  vtbl_amagicelem %OVERLOAD hash element
- B  PERL_MAGIC_bm             vtbl_regexp     Boyer-Moore 
-                                              (fast string search)
- c  PERL_MAGIC_overload_table vtbl_ovrld      Holds overload table 
-                                              (AMT) on stash
- D  PERL_MAGIC_regdata        vtbl_regdata    Regex match position data 
-                                              (@+ and @- vars)
- d  PERL_MAGIC_regdatum       vtbl_regdatum   Regex match position data
-                                              element
- E  PERL_MAGIC_env            vtbl_env        %ENV hash
- e  PERL_MAGIC_envelem        vtbl_envelem    %ENV hash element
- f  PERL_MAGIC_fm             vtbl_regdata    Formline 
-                                              ('compiled' format)
- G  PERL_MAGIC_study          vtbl_regexp     study()ed string
- g  PERL_MAGIC_regex_global   vtbl_mglob      m//g target
- H  PERL_MAGIC_hints          vtbl_hints      %^H hash
- h  PERL_MAGIC_hintselem      vtbl_hintselem  %^H hash element
- I  PERL_MAGIC_isa            vtbl_isa        @ISA array
- i  PERL_MAGIC_isaelem        vtbl_isaelem    @ISA array element
- k  PERL_MAGIC_nkeys          vtbl_nkeys      scalar(keys()) lvalue
- L  PERL_MAGIC_dbfile         (none)          Debugger %_<filename
- l  PERL_MAGIC_dbline         vtbl_dbline     Debugger %_<filename
-                                              element
- N  PERL_MAGIC_shared         (none)          Shared between threads
- n  PERL_MAGIC_shared_scalar  (none)          Shared between threads
- o  PERL_MAGIC_collxfrm       vtbl_collxfrm   Locale transformation
- P  PERL_MAGIC_tied           vtbl_pack       Tied array or hash
- p  PERL_MAGIC_tiedelem       vtbl_packelem   Tied array or hash element
- q  PERL_MAGIC_tiedscalar     vtbl_packelem   Tied scalar or handle
- r  PERL_MAGIC_qr             vtbl_regexp     precompiled qr// regex
- S  PERL_MAGIC_sig            (none)          %SIG hash
- s  PERL_MAGIC_sigelem        vtbl_sigelem    %SIG hash element
- t  PERL_MAGIC_taint          vtbl_taint      Taintedness
- U  PERL_MAGIC_uvar           vtbl_uvar       Available for use by
-                                              extensions
- u  PERL_MAGIC_uvar_elem      (none)          Reserved for use by
-                                              extensions
- V  PERL_MAGIC_vstring        vtbl_vstring    SV was vstring literal
- v  PERL_MAGIC_vec            vtbl_vec        vec() lvalue
- w  PERL_MAGIC_utf8           vtbl_utf8       Cached UTF-8 information
- x  PERL_MAGIC_substr         vtbl_substr     substr() lvalue
- y  PERL_MAGIC_defelem        vtbl_defelem    Shadow "foreach" iterator
-                                              variable / smart parameter
-                                              vivification
- ]  PERL_MAGIC_checkcall      vtbl_checkcall  inlining/mutation of call
-                                              to this CV
- ~  PERL_MAGIC_ext            (none)          Available for use by
-                                              extensions
+ (old-style char and macro)   MGVTBL         Type of magic
+ --------------------------   ------         -------------
+ \0 PERL_MAGIC_sv             vtbl_sv        Special scalar variable
+ #  PERL_MAGIC_arylen         vtbl_arylen    Array length ($#ary)
+ %  PERL_MAGIC_rhash          (none)         extra data for restricted
+                                             hashes
+ .  PERL_MAGIC_pos            vtbl_pos       pos() lvalue
+ :  PERL_MAGIC_symtab         (none)         extra data for symbol
+                                             tables
+ <  PERL_MAGIC_backref        vtbl_backref   for weak ref data
+ @  PERL_MAGIC_arylen_p       (none)         to move arylen out of XPVAV
+ B  PERL_MAGIC_bm             vtbl_regexp    Boyer-Moore 
+                                             (fast string search)
+ c  PERL_MAGIC_overload_table vtbl_ovrld     Holds overload table 
+                                             (AMT) on stash
+ D  PERL_MAGIC_regdata        vtbl_regdata   Regex match position data 
+                                             (@+ and @- vars)
+ d  PERL_MAGIC_regdatum       vtbl_regdatum  Regex match position data
+                                             element
+ E  PERL_MAGIC_env            vtbl_env       %ENV hash
+ e  PERL_MAGIC_envelem        vtbl_envelem   %ENV hash element
+ f  PERL_MAGIC_fm             vtbl_regdata   Formline 
+                                             ('compiled' format)
+ G  PERL_MAGIC_study          vtbl_regexp    study()ed string
+ g  PERL_MAGIC_regex_global   vtbl_mglob     m//g target
+ H  PERL_MAGIC_hints          vtbl_hints     %^H hash
+ h  PERL_MAGIC_hintselem      vtbl_hintselem %^H hash element
+ I  PERL_MAGIC_isa            vtbl_isa       @ISA array
+ i  PERL_MAGIC_isaelem        vtbl_isaelem   @ISA array element
+ k  PERL_MAGIC_nkeys          vtbl_nkeys     scalar(keys()) lvalue
+ L  PERL_MAGIC_dbfile         (none)         Debugger %_<filename
+ l  PERL_MAGIC_dbline         vtbl_dbline    Debugger %_<filename
+                                             element
+ N  PERL_MAGIC_shared         (none)         Shared between threads
+ n  PERL_MAGIC_shared_scalar  (none)         Shared between threads
+ o  PERL_MAGIC_collxfrm       vtbl_collxfrm  Locale transformation
+ P  PERL_MAGIC_tied           vtbl_pack      Tied array or hash
+ p  PERL_MAGIC_tiedelem       vtbl_packelem  Tied array or hash element
+ q  PERL_MAGIC_tiedscalar     vtbl_packelem  Tied scalar or handle
+ r  PERL_MAGIC_qr             vtbl_regexp    precompiled qr// regex
+ S  PERL_MAGIC_sig            (none)         %SIG hash
+ s  PERL_MAGIC_sigelem        vtbl_sigelem   %SIG hash element
+ t  PERL_MAGIC_taint          vtbl_taint     Taintedness
+ U  PERL_MAGIC_uvar           vtbl_uvar      Available for use by
+                                             extensions
+ u  PERL_MAGIC_uvar_elem      (none)         Reserved for use by
+                                             extensions
+ V  PERL_MAGIC_vstring        vtbl_vstring   SV was vstring literal
+ v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
+ w  PERL_MAGIC_utf8           vtbl_utf8      Cached UTF-8 information
+ x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue
+ y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
+                                             variable / smart parameter
+                                             vivification
+ ]  PERL_MAGIC_checkcall      vtbl_checkcall inlining/mutation of call
+                                             to this CV
+ ~  PERL_MAGIC_ext            (none)         Available for use by
+                                             extensions
 
 =for mg_vtable.pl end
 

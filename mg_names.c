@@ -13,8 +13,6 @@
 	{ PERL_MAGIC_symtab,         "symtab(:)" },
 	{ PERL_MAGIC_backref,        "backref(<)" },
 	{ PERL_MAGIC_arylen_p,       "arylen_p(@)" },
-	{ PERL_MAGIC_overload,       "overload(A)" },
-	{ PERL_MAGIC_overload_elem,  "overload_elem(a)" },
 	{ PERL_MAGIC_bm,             "bm(B)" },
 	{ PERL_MAGIC_overload_table, "overload_table(c)" },
 	{ PERL_MAGIC_regdata,        "regdata(D)" },
