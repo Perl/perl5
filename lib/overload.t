@@ -1151,8 +1151,8 @@ like ($@, qr/zap/);
     sub numify { ${$_[0]} }
 }
 
-# These are all check that overloaded values rather than reference addresses
-# are what is getting tested.
+# These all check that overloaded values, rather than reference addresses,
+# are what are getting tested.
 my ($two, $one, $un, $deux) = map {new Numify $_} 2, 1, 1, 2;
 my ($ein, $zwei) = (1, 2);
 
