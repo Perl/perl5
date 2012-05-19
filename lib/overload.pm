@@ -1591,16 +1591,6 @@ recognize.  Did you mistype an operator?
 
 =item *
 
-No warning is issued for invalid C<use overload> keys.
-Such errors are not always obvious:
-
-        use overload "+0" => sub { ...; },   # should be "0+"
-            "not" => sub { ...; };           # should be "!"
-
-(Bug #74098)
-
-=item *
-
 A pitfall when fallback is TRUE and Perl resorts to a built-in
 implementation of an operator is that some operators have more
 than one semantic, for example C<|>:
