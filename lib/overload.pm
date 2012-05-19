@@ -1045,10 +1045,7 @@ What follows is subject to change RSN.
 The table of methods for all operations is cached in magic for the
 symbol table hash for the package.  The cache is invalidated during
 processing of C<use overload>, C<no overload>, new function
-definitions, and changes in @ISA.  However, this invalidation remains
-unprocessed until the next C<bless>ing into the package.  Hence if you
-want to change overloading structure dynamically, you'll need an
-additional (fake) C<bless>ing to update the table.
+definitions, and changes in @ISA.
 
 (Every SVish thing has a magic queue, and magic is an entry in that
 queue.  This is how a single variable may participate in multiple
@@ -1058,24 +1055,12 @@ magic.  However, the magic which implements overloading is applied to
 the stashes, which are rarely used directly, thus should not slow down
 Perl.)
 
-If an object belongs to a package using overload, it carries a special
-flag.  Thus the only speed penalty during arithmetic operations without
-overloading is the checking of this flag.
-
-In fact, if C<use overload> is not present, there is almost no overhead
-for overloadable operations, so most programs should not suffer
-measurable performance penalties.  A considerable effort was made to
-minimize the overhead when overload is used in some package, but the
-arguments in question do not belong to packages using overload.  When
-in doubt, test your speed with C<use overload> and without it.  So far
-there have been no reports of substantial speed degradation if Perl is
-compiled with optimization turned on.
-
-There is no size penalty for data if overload is not used.  The only
-size penalty if overload is used in some package is that I<all> the
-packages acquire a magic during the next C<bless>ing into the
-package.  This magic is three-words-long for packages without
-overloading, and carries the cache table if the package is overloaded.
+If a package uses overload, it carries a special flag.  This flag is also
+set when new function are defined or @ISA is modified.  There will be a
+slight speed penalty on the very first operation thereafter that supports
+overloading, while the overload tables are updated.  If there is no
+overloading present, the flag is turned off.  Thus the only speed penalty
+thereafter is the checking of this flag.
 
 It is expected that arguments to methods that are not explicitly supposed
 to be changed are constant (but this is not enforced).
@@ -1672,8 +1657,6 @@ may be optimized to
 
 =item *
 
-Because it is used for overloading, the per-package hash
-C<%OVERLOAD> now has a special meaning in Perl.
 The symbol table is filled with names looking like line-noise.
 
 =item *
