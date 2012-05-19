@@ -2302,7 +2302,7 @@ is eval {"$a"}, overload::StrVal($a),
     use overload '+' => 'onion';
     $_ = \&overload::nil;
     undef %overload::;
-    bless[];
+    ()=0+bless[];
     ::ok(1, 'no crash when undefining %overload::');
 }
 
