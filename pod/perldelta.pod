@@ -1031,7 +1031,7 @@ and line number, just like errors from C<die> [perl #106538].
 
 L<charnames> has been updated from version 1.18 to 1.30.
 
-L<charnames> can now be invoked with a new option, C<:loose>,
+C<charnames> can now be invoked with a new option, C<:loose>,
 which is like the existing C<:full> option, but enables Unicode loose
 name matching.  Details are in L<charnames/LOOSE MATCHES>.
 
@@ -1190,23 +1190,13 @@ using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
 
 L<IPC::Open3> has been upgraded from version 1.09 to 1.12.
 
-=over 4
-
-=item *
-
 Fixes a bug which prevented use of C<open3> on Windows when C<*STDIN>,
 C<*STDOUT> or C<*STDERR> had been localized.
 
-=item *
-
 Fixes a bug which prevented duplicating numeric file descriptors on Windows.
-
-=item *
 
 C<open3> with "-" for the program name works once more.  This was broken in
 version 1.06 (and hence in Perl 5.14.0) [perl #95748].
-
-=back
 
 =item *
 
@@ -1509,12 +1499,12 @@ from CPAN instead.
 
 =item *
 
-C<Devel::DProf> has been removed from the Perl core.  Prior version was
+L<Devel::DProf> has been removed from the Perl core.  Prior version was
 20110228.00.
 
 =item *
 
-C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
+L<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
 =item *
 
@@ -2193,6 +2183,8 @@ together properly.
 Since version 1.7, Cygwin supports native UTF-8 paths.  If Perl is built
 under that environment, directory and filenames will be UTF-8 encoded.
 
+=item *
+
 Cygwin does not initialize all original Win32 environment variables.  See
 F<README.cygwin> for a discussion of the newly-added
 C<Cygwin::sync_winenv()> function [perl #110190] and for
@@ -2222,6 +2214,8 @@ PA-RISC for 64bitall builds. (5.14.2)
 Remove unnecessary includes, fix miscellaneous compiler warnings and
 close some unclosed comments on F<vms/vms.c>.
 
+=item *
+
 Remove sockadapt layer from the VMS build.
 
 =item *
@@ -2248,14 +2242,26 @@ created freely without causing the VMS linker to seize up.
 
 =head3 GNU/Hurd
 
+=over 4
+
+=item *
+
 Numerous build and test failures on GNU/Hurd have been resolved with hints
 for building DBM modules, detection of the library search path, and enabling
 of large file support.
 
+=back
+
 =head3 OpenVOS
+
+=over 4
+
+=item *
 
 Perl is now built with dynamic linking on OpenVOS, the minimum supported
 version of which is now Release 17.1.0.
+
+=back
 
 =head3 SunOS
 
