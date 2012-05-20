@@ -85,8 +85,8 @@ OS2::WinObject
 PadWalker
 passwd(1)
 perl(1)
-Perl::Unsafe::Signals
 Perl4::CoreLibs
+Perl::Unsafe::Signals
 perlbug(1)
 PerlIO::locale
 PerlIO::Util
@@ -227,7 +227,7 @@ pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Apparent broken link	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	22
-pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	273
+pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	14
 pod/perlembed.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perlfunc.pod	There is more than one target	1
 pod/perlfunc.pod	Verbatim line length including indents exceeds 79 by	167
