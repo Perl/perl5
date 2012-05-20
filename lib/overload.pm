@@ -42,7 +42,7 @@ sub OVERLOAD {
       warnings::warnif("overload arg '$_' is invalid")
         unless $ops_seen{$_};
       $sub = $arg{$_};
-      if (not ref $sub and $sub !~ /::/) {
+      if (not ref $sub) {
 	$ {$package . "::(" . $_} = $sub;
 	$sub = \&nil;
       }
