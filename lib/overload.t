@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5046;
+plan tests => 5048;
 
 use Scalar::Util qw(tainted);
 
@@ -2256,6 +2256,17 @@ sub fourteentative::abs { 'fourteen' }
     @fourteentative::ISA = 'eleventative';
     is abs $o, 'fourteen', 'isa changes can turn overloading on';
 }
+
+# no overload "fallback";
+{ package phake;
+  use overload fallback => 1, '""' => sub { 'arakas' };
+  no overload 'fallback';
+}
+$a = bless [], 'phake';
+is "$a", "arakas",
+    'no overload "fallback" does not stop overload from working';
+ok !eval { () = $a eq 'mpizeli'; 1 },
+    'no overload "fallback" resets fallback to undef on overloaded class';
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;
