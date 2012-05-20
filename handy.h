@@ -590,6 +590,12 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define isASCII_A(c)  isASCII(c)
 #define isASCII_L1(c)  isASCII(c)
 
+/* The lower 3 bits in both the ASCII and EBCDIC representations of '0' are 0,
+ * and the 8 possible permutations of those bits exactly comprise the 8 octal
+ * digits */
+#define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) eq '0')
+
+
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 /* Bits for PL_charclass[].  These use names used in l1_char_class_tab.h but
@@ -611,7 +617,6 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_IDFIRST_L1       (1<<13)
 #  define _CC_LOWER_A          (1<<14)
 #  define _CC_LOWER_L1         (1<<15)
-#  define _CC_OCTAL_A          (1<<16)
 #  define _CC_PRINT_A          (1<<17)
 #  define _CC_PRINT_L1         (1<<18)
 #  define _CC_PSXSPC_A         (1<<19)
@@ -627,11 +632,21 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_XDIGIT_A         (1<<29)
 #  define _CC_NONLATIN1_FOLD   (1<<30)
 #  define _CC_QUOTEMETA        (1U<<31)	/* 1U keeps Solaris from griping */
-/* Unused: None
+/* Unused: (1<<16)
  * If more are needed, can give up some of the above.  The first ones to go
- * would be those that require just two tests to verify, either there are two
- * code points, like BLANK_A, or occupy a single range like OCTAL_A, DIGIT_A,
- * UPPER_A, and LOWER_A.
+ * would be those that require just two tests to verify; either there are two
+ * code points, like BLANK_A, or it occupies a single range like DIGIT_A,
+ * UPPER_A, and LOWER_A.  Also consider the ones that can be replaced with two
+ * tests and an additional mask, so
+ *
+ * #define isCNTRL_A  cBOOL(FITS_IN_8_BITS(c)                             \
+ *			    && (( ! (~0x1F & NATIVE_TO_UNI(c)]))	  \
+ *				 || UNLIKELY(NATIVE_TO_UNI(c) == 0x7f)))
+ *
+ * This takes advantage of the contiguous block of these with the first one's
+ * representation having the lower order bits all zero;, except the DELETE must
+ * be tested specially.  A similar pattern can be used for for isCNTRL_L1,
+ * isPRINT_A, and isPRINT_L1
  */
 
 #  ifdef DOINIT
@@ -651,7 +666,6 @@ EXTCONST U32 PL_charclass[];
 #   define isGRAPH_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_A))
 #   define isIDFIRST_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_A))
 #   define isLOWER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_A))
-#   define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_OCTAL_A))
 #   define isPRINT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_A))
 #   define isPSXSPC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_A))
 #   define isPUNCT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_A))
@@ -664,7 +678,6 @@ EXTCONST U32 PL_charclass[];
 #   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_NONLATIN1_FOLD))
 #   define _isQUOTEMETA(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_QUOTEMETA))
 #else   /* No perl.h. */
-#   define isOCTAL_A(c)  ((c) <= '7' && (c) >= '0')
 #   ifdef EBCDIC
 #       define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
 #       define isALPHA_A(c)    (isASCII(c) && isALPHA(c))

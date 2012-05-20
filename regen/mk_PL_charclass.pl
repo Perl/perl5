@@ -38,7 +38,6 @@ my @properties = qw(
     IDFIRST_L1
     LOWER_A
     LOWER_L1
-    OCTAL_A
     PRINT_A
     PRINT_L1
     PSXSPC_A
