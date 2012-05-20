@@ -17,6 +17,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.16.0 - W.H. Auden - September 1, 1939
+
+L<Announced on 2012-05-20 by Ricardo
+Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-05/msg00728.html>
+
+  All I have is a voice                                                         
+  To undo the folded lie,                                                       
+  The romantic lie in the brain                                                 
+  Of the sensual man-in-the-street                                              
+  And the lie of Authority                                                      
+  Whose buildings grope the sky:                                                
+  There is no such thing as the State                                           
+  And no one exists alone;                                                      
+  Hunger allows no choice                                                       
+  To the citizen or the police;                                                 
+  We must love one another or die.                                              
+
+    -- W.H. Auden, September 1, 1939                                            
+
 =head2 v5.15.9 - Bob Dylan - Blowin' In The Wind
 
 L<Announced on 2012-03-20 by
