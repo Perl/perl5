@@ -42,9 +42,9 @@ One common one is the ISO 8859-1 character set.
 =head2 ISO 8859
 
 The ISO 8859-$n are a collection of character code sets from the
-International Organization for Standardization (ISO) each of which
+International Organization for Standardization (ISO), each of which
 adds characters to the ASCII set that are typically found in European
-languages many of which are based on the Roman, or Latin, alphabet.
+languages, many of which are based on the Roman, or Latin, alphabet.
 
 =head2 Latin 1 (ISO 8859-1)
 
@@ -695,7 +695,7 @@ reversed.
 
 For example, to convert ASCII/Latin1 to code page 037 take the output of the
 second numbers column from the output of recipe 2 (modified to add '\'
-characters) and use it in tr/// like so:
+characters), and use it in tr/// like so:
 
     $cp_037 =
     '\x00\x01\x02\x03\x37\x2D\x2E\x2F\x16\x05\x25\x0B\x0C\x0D\x0E\x0F' .
