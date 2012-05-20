@@ -122,6 +122,7 @@ for my $prop (qw(
                     L1PosixWord
                 PosixXDigit
                     XPosixXDigit
+                _Perl_Non_Final_Folds
     )
 ) {
 
@@ -141,6 +142,7 @@ for my $prop (qw(
     my $lookup_prop = $prop;
     $lookup_prop =~ s/^L1Posix/XPosix/ or $lookup_prop =~ s/^L1//;
     my @invlist = prop_invlist($lookup_prop);
+    die "Could not find inversion list for '$lookup_prop'" unless @invlist;
 
     if ($lookup_prop ne $prop) {
         for my $i (0 .. @invlist - 1 - 1) {
