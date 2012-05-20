@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5048;
+plan tests => 5050;
 
 use Scalar::Util qw(tainted);
 
@@ -2267,6 +2267,30 @@ is "$a", "arakas",
     'no overload "fallback" does not stop overload from working';
 ok !eval { () = $a eq 'mpizeli'; 1 },
     'no overload "fallback" resets fallback to undef on overloaded class';
+{ package ent; use overload fallback => 0, abs => sub{};
+  our@ISA = 'huorn';
+  package huorn;
+  use overload fallback => 1;
+  package ent;
+  no overload "fallback"; # disable previous declaration
+}
+$a = bless [], ent::;
+is eval {"$a"}, overload::StrVal($a),
+    'no overload undoes fallback declaration completetly'
+ or diag $@;
+
+# inherited fallback
+{
+ package pervyy;
+ our @ISA = 'vtoryy';
+ use overload "abs" =>=> sub {};
+ package vtoryy;
+ use overload fallback => 1, 'sin' =>=> sub{}
+}
+$a = bless [], pervyy::;
+is eval {"$a"}, overload::StrVal($a),
+ 'fallback is inherited by classes that have their own overloading'
+ or diag $@;
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;

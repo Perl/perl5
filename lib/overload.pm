@@ -32,11 +32,13 @@ sub OVERLOAD {
   my %arg = @_;
   my ($sub, $fb);
   $ {$package . "::OVERLOAD"}{dummy}++; # Register with magic by touching.
-  $fb = ${$package . "::()"}; # preserve old fallback value RT#68196
   *{$package . "::()"} = \&nil; # Make it findable via fetchmethod.
   for (keys %arg) {
     if ($_ eq 'fallback') {
-      $fb = $arg{$_};
+      for my $sym (*{$package . "::(fallback"}) {
+	*$sym = \&nil; # Make it findable via fetchmethod.
+	$$sym = $arg{$_};
+      }
     } else {
       warnings::warnif("overload arg '$_' is invalid")
         unless $ops_seen{$_};
@@ -49,7 +51,6 @@ sub OVERLOAD {
       *{$package . "::(" . $_} = \&{ $sub };
     }
   }
-  ${$package . "::()"} = $fb; # Make it findable too (fallback only).
 }
 
 sub import {
@@ -64,11 +65,7 @@ sub unimport {
   ${$package . "::OVERLOAD"}{dummy}++; # Upgrade the table
   shift;
   for (@_) {
-    if ($_ eq 'fallback') {
-      undef $ {$package . "::()"};
-    } else {
       delete $ {$package . "::"}{"(" . $_};
-    }
   }
 }
 
@@ -936,10 +933,10 @@ be called to implement operation C<+> for an object in package C<A>.
 
 =back
 
-Note that since the value of the C<fallback> key is not a subroutine,
-its inheritance is not governed by the above rules.  In the current
-implementation, the value of C<fallback> in the first overloaded
-ancestor is used, but this is accidental and subject to change.
+Note that in Perl version prior to 5.18 inheritance of the C<fallback> key
+was not governed by the above rules.  The value of C<fallback> in the first 
+overloaded ancestor was used.  This was fixed in 5.18 to follow the usual
+rules of inheritance.
 
 =head2 Run-time Overloading
 
@@ -1680,6 +1677,9 @@ C<%OVERLOAD> now has a special meaning in Perl.
 The symbol table is filled with names looking like line-noise.
 
 =item *
+
+This bug was fixed in Perl 5.18, but may still trip you up if you are using
+older versions:
 
 For the purpose of inheritance every overloaded package behaves as if
 C<fallback> is present (possibly undefined).  This may create
