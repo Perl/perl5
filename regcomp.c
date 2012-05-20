@@ -90,6 +90,8 @@
 #  include "charclass_invlists.h"
 #endif
 
+#define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
+
 #ifdef op
 #undef op
 #endif /* op */
@@ -3560,7 +3562,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		     * elsewhere that does compute the fold settles down, it
 		     * can be extracted out and re-used here */
 		    for (i = 0; i < 256; i++){
-			if (_HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)) {
+			if (HAS_NONLATIN1_FOLD_CLOSURE(i)) {
 			    ANYOF_BITMAP_SET(data->start_class, i);
 			}
 		    }
