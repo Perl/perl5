@@ -477,6 +477,8 @@ the strings?).
  Abigail  5.15.9        2012-Mar-20
  Ricardo  5.16.0-RC0    2012-May-10
  Ricardo  5.16.0-RC1    2012-May-14
+ Ricardo  5.16.0-RC2    2012-May-15
+ Ricardo  5.16.0        2012-May-20
 
 =head2 SELECTED RELEASE SIZES
 
