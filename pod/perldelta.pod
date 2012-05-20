@@ -116,9 +116,9 @@ their position from the end of the string, affecting code like this:
 
     my $string = "string";
     my $lvalue = \substr $string, -4, 2;
-    print $lvalue, "\n"; # prints "ri"
+    print $$lvalue, "\n"; # prints "ri"
     $string = "bailing twine";
-    print $lvalue, "\n"; # prints "wi"; used to print "il"
+    print $$lvalue, "\n"; # prints "wi"; used to print "il"
 
 The same thing happens with an omitted third argument.  The returned
 lvalue will always extend to the end of the string, even if the string
