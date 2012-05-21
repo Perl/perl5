@@ -897,6 +897,7 @@ whatever\100davidnicol.com              davidnicol\100gmail.com
 wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at
 +                                       wolfgang.laun\100thalesgroup.com
 +                                       wolfgang.laun\100gmail.com
+wolfsage\100gmail.com                   mhorsfall\100darmstadtium.(none)
 yath\100yath.de                         yath-perlbug\100yath.de
 
 jkeen@verizon.net                       jkeenan@cpan.org
