@@ -2924,10 +2924,10 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
 #define FT_RETURN_TRUE(X)		 \
     RETURNX((void)(			  \
 	PL_op->op_flags & OPf_REF	   \
-	    ? XPUSHs(			    \
+	    ? (bool)XPUSHs(		    \
 		PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (X) \
 	      )								  \
-	    : (void)(PL_op->op_private & OPpFT_STACKING || SETs(X))	  \
+	    : (PL_op->op_private & OPpFT_STACKING || SETs(X))		  \
     ))
 
 #define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)

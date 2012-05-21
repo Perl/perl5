@@ -277,9 +277,8 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 =cut
 */
 
-#define EXTEND(p,n)	STMT_START { if (PL_stack_max - p < (int)(n)) {		\
-			    sp = stack_grow(sp,p, (int) (n));		\
-			} } STMT_END
+#define EXTEND(p,n)	(void)(PL_stack_max - p < (int)(n) &&		\
+			    (sp = stack_grow(sp,p, (int) (n))))
 
 /* Same thing, but update mark register too. */
 #define MEXTEND(p,n)	STMT_START {if (PL_stack_max - p < (int)(n)) {	\
@@ -295,7 +294,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define PUSHi(i)	STMT_START { sv_setiv(TARG, (IV)(i)); PUSHTARG; } STMT_END
 #define PUSHu(u)	STMT_START { sv_setuv(TARG, (UV)(u)); PUSHTARG; } STMT_END
 
-#define XPUSHs(s)	STMT_START { EXTEND(sp,1); (*++sp = (s)); } STMT_END
+#define XPUSHs(s)	(EXTEND(sp,1), *++sp = (s))
 #define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
 #define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
 #define XPUSHn(n)	STMT_START { sv_setnv(TARG, (NV)(n)); XPUSHTARG; } STMT_END
