@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -31,6 +31,7 @@ $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.13"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.14"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
+$feature_bundle{"5.17"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 
 our $hint_shift   = 26;

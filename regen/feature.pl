@@ -50,6 +50,8 @@ my %feature_bundle = (
 		    evalbytes current_sub fc)],
     "5.16"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
+    "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
+		    evalbytes current_sub fc)],
 );
 
 
@@ -334,7 +336,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 
 FEATURES
 
