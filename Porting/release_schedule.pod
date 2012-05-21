@@ -34,17 +34,6 @@ Release schedule (with release managers):
   2012-0?-??  5.14.3          Ricardo Signes
   ????-??-??  5.14.4          ??
 
-=head2 Perl 5.12
-
-Release schedule (with release managers):
-
- 2010-04-12   5.12.0 ✓        Jesse Vincent
- 2010-05-16   5.12.1 ✓        Jesse Vincent
- 2010-09-06   5.12.2 ✓        Jesse Vincent
- 2011-01-21   5.12.3 ✓        Ricardo Signes
- 2011-06-20   5.12.4 ✓        Leon Brocard
- ????-??-??   5.12.5          ??
-
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
 This schedule lists the release engineers for at least the next
