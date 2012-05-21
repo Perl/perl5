@@ -28,10 +28,10 @@ addressed.  This typically means some time in April or May.)
 
 Release schedule (with release managers):
 
-  2011-05-14  5.16.0 ✓        Ricardo Signes
-  2011-06-??  5.16.1          Ricardo Signes
-  2011-09-14  5.16.2          ??
-  2012-0?-??  5.16.3          ??
+  2012-05-20  5.16.0 ✓        Ricardo Signes
+  2012-06-??  5.16.1          Ricardo Signes
+  2012-09-14  5.16.2          ??
+  2013-0?-??  5.16.3          ??
   ????-??-??  5.16.4          ??
 
 =head2 Perl 5.14
