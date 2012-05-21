@@ -497,7 +497,7 @@ True if this op will be the return value of an lvalue subroutine
     (                                                               \
 	(void)(phlags & SV_GMAGIC && (SvGETMAGIC(sv),0)),            \
 	isGV_with_GP(sv)                                              \
-	  ? (GV *)sv                                                   \
+	  ? (GV *)(sv)                                                \
 	  : SvROK(sv) && SvTYPE(SvRV(sv)) <= SVt_PVLV &&               \
 	    (SvGETMAGIC(SvRV(sv)), isGV_with_GP(SvRV(sv)))              \
 	     ? (GV *)SvRV(sv)                                            \

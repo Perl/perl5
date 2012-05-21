@@ -2909,7 +2909,7 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     while (OP_IS_FILETEST(next->op_type)
 	&& next->op_private & OPpFT_STACKED)
 	next = next->op_next;
-    if (PL_op->op_flags & OPf_REF) PUSHs(ret);
+    if (PL_op->op_flags & OPf_REF) XPUSHs(ret);
     else			   SETs(ret);
     PUTBACK;
     return next;
@@ -2919,15 +2919,15 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     STMT_START {				      \
 	if (PL_op->op_private & OPpFT_STACKING)	       \
 	    return S_ft_stacking_return_false(aTHX_ X);	\
-	RETURNX(PUSHs(X));				 \
+	RETURNX(PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X)); \
     } STMT_END
 #define FT_RETURN_TRUE(X)		 \
     RETURNX((void)(			  \
-	PL_op->op_private & OPpFT_STACKING \
-	    ? PL_op->op_flags & OPf_REF	    \
-		? PUSHs((SV *)cGVOP_gv)	     \
-		: 0			      \
-	    : PUSHs(X)			       \
+	PL_op->op_flags & OPf_REF	   \
+	    ? XPUSHs(			    \
+		PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (X) \
+	      )								  \
+	    : (void)(PL_op->op_private & OPpFT_STACKING || SETs(X))	  \
     ))
 
 #define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)
@@ -2961,14 +2961,8 @@ S_try_amagic_ftest(pTHX_ char chr) {
 	if (!tmpsv)
 	    return NULL;
 
-	if (PL_op->op_private & OPpFT_STACKING) {
-	    if (SvTRUE(tmpsv)) return NORMAL;
-	    return S_ft_stacking_return_false(aTHX_ tmpsv);
-	}
-
-	SPAGAIN;
-
-	RETURNX(SETs(tmpsv));
+	if (SvTRUE(tmpsv)) FT_RETURN_TRUE(tmpsv);
+	FT_RETURN_FALSE(tmpsv);
     }
     return NULL;
 }
@@ -3061,7 +3055,7 @@ PP(pp_ftrread)
 
     if (use_access) {
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
-	const char *name = POPpx;
+	const char *name = TOPpx;
 	if (effective) {
 #  ifdef PERL_EFF_ACCESS
 	    result = PERL_EFF_ACCESS(name, access_mode);
@@ -3078,15 +3072,14 @@ PP(pp_ftrread)
 #  endif
 	}
 	if (result == 0)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
+	    FT_RETURNUNDEF;
+	FT_RETURNNO;
 #endif
     }
 
     result = my_stat_flags(0);
-    SPAGAIN;
     if (result < 0)
 	FT_RETURNUNDEF;
     if (cando(stat_mode, effective, &PL_statcache))
@@ -3112,7 +3105,6 @@ PP(pp_ftis)
     tryAMAGICftest_MG(opchar);
 
     result = my_stat_flags(0);
-    SPAGAIN;
     if (result < 0)
 	FT_RETURNUNDEF;
     if (op_type == OP_FTIS)
@@ -3175,28 +3167,21 @@ PP(pp_ftrowned)
        system these days.  */
 #ifndef S_ISUID
     if(PL_op->op_type == OP_FTSUID) {
-	if ((PL_op->op_flags & OPf_REF) == 0 && !(PL_op->op_private & OPpFT_STACKING))
-	    (void) POPs;
 	FT_RETURNNO;
     }
 #endif
 #ifndef S_ISGID
     if(PL_op->op_type == OP_FTSGID) {
-	if ((PL_op->op_flags & OPf_REF) == 0 && !(PL_op->op_private & OPpFT_STACKING))
-	    (void) POPs;
 	FT_RETURNNO;
     }
 #endif
 #ifndef S_ISVTX
     if(PL_op->op_type == OP_FTSVTX) {
-	if ((PL_op->op_flags & OPf_REF) == 0 && !(PL_op->op_private & OPpFT_STACKING))
-	    (void) POPs;
 	FT_RETURNNO;
     }
 #endif
 
     result = my_stat_flags(0);
-    SPAGAIN;
     if (result < 0)
 	FT_RETURNUNDEF;
     switch (PL_op->op_type) {
@@ -3266,7 +3251,6 @@ PP(pp_ftlink)
 
     tryAMAGICftest_MG('l');
     result = my_lstat_flags(0);
-    SPAGAIN;
 
     if (result < 0)
 	FT_RETURNUNDEF;
@@ -3289,7 +3273,7 @@ PP(pp_fttty)
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else {
-      SV *tmpsv = PL_op->op_private & OPpFT_STACKING ? TOPs : POPs;
+      SV *tmpsv = TOPs;
       if (!(gv = MAYBE_DEREF_GV_nomg(tmpsv))) {
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
@@ -3332,16 +3316,13 @@ PP(pp_fttext)
     tryAMAGICftest_MG(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
     if (PL_op->op_flags & OPf_REF)
-    {
 	gv = cGVOP_gv;
-	EXTEND(SP, 1);
-    }
-    else {
-      sv = PL_op->op_private & OPpFT_STACKING ? TOPs : POPs;
-      if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
+    else if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
 	     == OPpFT_STACKED)
 	gv = PL_defgv;
-      else gv = MAYBE_DEREF_GV_nomg(sv);
+    else {
+	sv = TOPs;
+	gv = MAYBE_DEREF_GV_nomg(sv);
     }
 
     if (gv) {
