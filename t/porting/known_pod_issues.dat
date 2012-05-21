@@ -227,7 +227,7 @@ pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Apparent broken link	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	22
-pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	14
+pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	13
 pod/perlembed.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perlfunc.pod	There is more than one target	1
 pod/perlfunc.pod	Verbatim line length including indents exceeds 79 by	167
