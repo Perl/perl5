@@ -37,18 +37,15 @@ my %feature = (
 #       versions, any code below that uses %BundleRanges will have to
 #       be changed to account.
 
+# 5.odd implies the next 5.even, but an explicit 5.even can override it.
 my %feature_bundle = (
      all     => [ keys %feature ],
      default =>	[qw(array_base)],
     "5.9.5"  =>	[qw(say state switch array_base)],
     "5.10"   =>	[qw(say state switch array_base)],
     "5.11"   =>	[qw(say state switch unicode_strings array_base)],
-    "5.12"   =>	[qw(say state switch unicode_strings array_base)],
     "5.13"   =>	[qw(say state switch unicode_strings array_base)],
-    "5.14"   =>	[qw(say state switch unicode_strings array_base)],
     "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
-    "5.16"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
     "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
@@ -57,6 +54,11 @@ my %feature_bundle = (
 
 ###########################################################################
 # More data generated from the above
+
+for (keys %feature_bundle) {
+    next unless /^5\.(\d*[13579])\z/;
+    $feature_bundle{"5.".($1+1)} ||= $feature_bundle{$_};
+}
 
 my %UniqueBundles; # "say state switch" => 5.10
 my %Aliases;       #  5.12 => 5.11
