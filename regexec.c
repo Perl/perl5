@@ -333,7 +333,7 @@
 static void restore_pos(pTHX_ void *arg);
 
 #define REGCP_PAREN_ELEMS 4
-#define REGCP_OTHER_ELEMS 4
+#define REGCP_OTHER_ELEMS 3
 #define REGCP_FRAME_ELEMS 1
 /* REGCP_FRAME_ELEMS are not part of the REGCP_OTHER_ELEMS and
  * are needed for the regexp context stack bookkeeping. */
@@ -388,7 +388,6 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
     SSPUSHINT(PL_regsize);
     SSPUSHINT(rex->lastparen);
     SSPUSHINT(rex->lastcloseparen);
-    SSPUSHPTR(PL_reginput);
     SSPUSHUV(SAVEt_REGCONTEXT | elems_shifted); /* Magic cookie. */
 
     return retval;
@@ -410,12 +409,11 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 	        (IV)(cp), (IV)PL_savestack_ix));                \
     regcpblow(cp)
 
-STATIC char *
+STATIC void
 S_regcppop(pTHX_ regexp *rex)
 {
     dVAR;
     UV i;
-    char *input;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCPPOP;
@@ -424,7 +422,6 @@ S_regcppop(pTHX_ regexp *rex)
     i = SSPOPUV;
     assert((i & SAVE_MASK) == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
     i >>= SAVE_TIGHT_SHIFT; /* Parentheses elements to pop. */
-    input = (char *) SSPOPPTR;
     rex->lastcloseparen = SSPOPINT;
     rex->lastparen = SSPOPINT;
     PL_regsize = SSPOPINT;
@@ -477,7 +474,6 @@ S_regcppop(pTHX_ regexp *rex)
 	));
     }
 #endif
-    return input;
 }
 
 #define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
