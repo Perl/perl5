@@ -1818,16 +1818,16 @@ Perl_looks_like_number(pTHX_ SV *const sv)
 STATIC bool
 S_glob_2number(pTHX_ GV * const gv)
 {
-    SV *const buffer = sv_newmortal();
-
     PERL_ARGS_ASSERT_GLOB_2NUMBER;
-
-    gv_efullname3(buffer, gv, "*");
 
     /* We know that all GVs stringify to something that is not-a-number,
 	so no need to test that.  */
     if (ckWARN(WARN_NUMERIC))
+    {
+	SV *const buffer = sv_newmortal();
+	gv_efullname3(buffer, gv, "*");
 	not_a_number(buffer);
+    }
     /* We just want something true to return, so that S_sv_2iuv_common
 	can tail call us and return true.  */
     return TRUE;
