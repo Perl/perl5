@@ -429,6 +429,10 @@ non-overloaded even if the class gained overloading through C<use overload>
 or @ISA changes, and even after C<bless>.  This has been fixed
 [perl #112708].
 
+=item *
+
+Classes with overloading can now inherit fallback values.
+
 =back
 
 =head1 Known Problems
