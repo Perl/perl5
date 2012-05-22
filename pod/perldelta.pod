@@ -103,6 +103,8 @@ C<File::stat> ignores the L<filetest> pragma, and warns when used in
 combination therewith.  But it was not warning for C<-r>.  This has been
 fixed [perl #111640].
 
+C<-p> now works, and does not return false for pipes [perl #111638].
+
 =item *
 
 L<Hash::Util> has been upgraded from version 0.11 to 0.12.
