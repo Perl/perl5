@@ -4021,10 +4021,31 @@ PP(pp_fork)
 #ifdef HAS_FORK
     dVAR; dSP; dTARGET;
     Pid_t childpid;
+#if defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO)
+    sigset_t oldmask, newmask;
+#endif
 
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
+#if defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO)
+    sigfillset(&newmask);
+    sigprocmask(SIG_SETMASK, &newmask, &oldmask);
+#endif
     childpid = PerlProc_fork();
+    if (childpid == 0) {
+	int sig;
+	PL_sig_pending = 0;
+	if (PL_psig_pend)
+	    for (sig = 1; sig < SIG_SIZE; sig++)
+		PL_psig_pend[sig] = 0;
+    }
+#if defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO)
+    {
+	dSAVE_ERRNO;
+	sigprocmask(SIG_SETMASK, &oldmask, NULL);
+	RESTORE_ERRNO;
+    }
+#endif
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {

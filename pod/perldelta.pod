@@ -638,6 +638,12 @@ C<CORE::GLOBAL> override had op checking performed twice.  The checking
 is always idempotent for pure Perl code, but the double checking can
 matter when custom call checkers are involved.
 
+=item *
+
+A race condition used to exist around fork that could cause a signal sent to
+the parent to be handled by both parent and child. Signals are now blocked
+briefly around fork to prevent this from happening [perl #82580].
+
 =back
 
 =head1 Known Problems
