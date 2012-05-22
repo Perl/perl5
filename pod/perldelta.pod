@@ -371,6 +371,15 @@ regular expression engine, as with C<$1> [perl #112184].
 C<undef> on a control character glob (C<undef *^H>) no longer emits an
 erroneous warning about ambiguity [perl #112456].
 
+=item *
+
+For efficiency's sake, many operators and built-in functions return the
+same scalar each time.  Lvalue subroutines and subroutines in the CORE::
+namespace were allowing this implementation detail to leak through.
+C<print &CORE::uc("a"), &CORE::uc("b")> used to print "BB".  The same thing
+would happen with an lvalue subroutine returning the return value of C<uc>.
+Now the value is copied in such cases.
+
 =back
 
 =head1 Known Problems
