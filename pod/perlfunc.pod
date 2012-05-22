@@ -2123,11 +2123,11 @@ regardless of case.
 
 Roughly, if you ever found yourself writing this
 
-    lc($this) eq lc($that)  # Wrong!
+    lc($this) eq lc($that)    # Wrong!
         # or
-    uc($this) eq uc($that)  # Also wrong!
+    uc($this) eq uc($that)    # Also wrong!
         # or
-    $this =~ /\Q$that/i     # Right!
+    $this =~ /^\Q$that\E\z/i  # Right!
 
 Now you can write
 
