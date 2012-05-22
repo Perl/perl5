@@ -366,6 +366,11 @@ Writing to C<$^N> used to have no effect.  Now it croaks with "Modification
 of a read-only value" by default, but that can be overridden by a custom
 regular expression engine, as with C<$1> [perl #112184].
 
+=item *
+
+C<undef> on a control character glob (C<undef *^H>) no longer emits an
+erroneous warning about ambiguity [perl #112456].
+
 =back
 
 =head1 Known Problems
