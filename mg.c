@@ -1691,18 +1691,6 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
-Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
-{
-    dVAR;
-    PERL_ARGS_ASSERT_MAGIC_SETAMAGIC;
-    PERL_UNUSED_ARG(sv);
-    PERL_UNUSED_ARG(mg);
-    PL_amagic_generation++;
-
-    return 0;
-}
-
-int
 Perl_magic_getnkeys(pTHX_ SV *sv, MAGIC *mg)
 {
     HV * const hv = MUTABLE_HV(LvTARG(sv));

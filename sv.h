@@ -879,21 +879,31 @@ in gv.h: */
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
-#define SvAMAGIC(sv)		(SvROK(sv) && (SvFLAGS(SvRV(sv)) & SVf_AMAGIC))
+#define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
+				 HvAMAGIC(SvSTASH(SvRV(sv))))
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvAMAGIC_on(sv)	({ SV * const kloink = sv;		\
 				   assert(SvROK(kloink));		\
-				   SvFLAGS(SvRV(kloink)) |= SVf_AMAGIC;	\
+				   if (SvOBJECT(SvRV(kloink)))		\
+				    HvAMAGIC_on(SvSTASH(SvRV(kloink)));	\
 				})
 #  define SvAMAGIC_off(sv)	({ SV * const kloink = sv;		\
-				   if(SvROK(kloink))			\
-					SvFLAGS(SvRV(kloink)) &= ~SVf_AMAGIC;\
+				   if(SvROK(kloink)			\
+				      && SvOBJECT(SvRV(kloink)))	\
+				     HvAMAGIC_off(SvSTASH(SvRV(kloink))); \
 				})
 #else
-#  define SvAMAGIC_on(sv)	(SvFLAGS(SvRV(sv)) |= SVf_AMAGIC)
+#  define SvAMAGIC_on(sv) \
+	SvOBJECT(SvRV(sv)) && (SvFLAGS(SvSTASH(SvRV(sv))) |= SVf_AMAGIC)
 #  define SvAMAGIC_off(sv) \
-	(SvROK(sv) && (SvFLAGS(SvRV(sv)) &= ~SVf_AMAGIC))
+	(SvROK(sv) && SvOBJECT(SvRV(sv)) \
+	    && (SvFLAGS(SvSTASH(SvRV(sv))) &= ~SVf_AMAGIC))
 #endif
+
+/* To be used on the stashes themselves: */
+#define HvAMAGIC(hv)		(SvFLAGS(hv) & SVf_AMAGIC)
+#define HvAMAGIC_on(hv)		(SvFLAGS(hv) |= SVf_AMAGIC)
+#define HvAMAGIC_off(hv)	(SvFLAGS(hv) &=~ SVf_AMAGIC)
 
 /*
 =for apidoc Am|U32|SvGAMAGIC|SV* sv
@@ -911,7 +921,10 @@ the scalar's value cannot change unless written to.
 
 #define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
 
-#define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash, FALSE))
+#define Gv_AMG(stash) \
+	(HvNAME(stash) && Gv_AMupdate(stash,FALSE) \
+	    ? 1					    \
+	    : (HvAMAGIC_off(stash), 0))
 
 #define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
 				  == (SVf_ROK|SVprv_WEAKREF))

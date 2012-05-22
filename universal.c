@@ -1419,9 +1419,6 @@ Perl_boot_core_UNIVERSAL(pTHX)
 	newXS_flags(xsub->name, xsub->xsub, file, xsub->proto, 0);
     } while (++xsub < end);
 
-    /* register the overloading (type 'A') magic */
-    PL_amagic_generation++;
-
     /* Providing a Regexp::DESTROY fixes #21347. See test in t/op/ref.t  */
     {
 	CV * const cv =

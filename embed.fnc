@@ -752,7 +752,6 @@ p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg
 pr	|int	|magic_regdatum_set|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_set	|NN SV* sv|NN MAGIC* mg
-p	|int	|magic_setamagic|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setarylen|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_freearylen_p|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
@@ -1692,7 +1691,6 @@ sR	|I32	|do_trans_complex_utf8	|NN SV * const sv
 #if defined(PERL_IN_GV_C)
 s	|void	|gv_init_svtype	|NN GV *gv|const svtype sv_type
 s	|void	|gv_magicalize_isa	|NN GV *gv
-s	|void	|gv_magicalize_overload	|NN GV *gv
 s	|HV*	|gv_get_super_pkg|NN const char* name|I32 namelen|U32 flags
 s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 				|NN const char *methpv|const U32 flags

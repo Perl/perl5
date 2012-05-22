@@ -778,7 +778,8 @@ do_test('ENAMEs on a stash with no NAME',
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
     REFCNT = 3
-    FLAGS = \\(OOK,SHAREKEYS\\)
+    FLAGS = \\(OOK,SHAREKEYS\\)			# $] < 5.017
+    FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR

@@ -1129,7 +1129,6 @@
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #define magic_set(a,b)		Perl_magic_set(aTHX_ a,b)
 #define magic_set_all_env(a,b)	Perl_magic_set_all_env(aTHX_ a,b)
-#define magic_setamagic(a,b)	Perl_magic_setamagic(aTHX_ a,b)
 #define magic_setarylen(a,b)	Perl_magic_setarylen(aTHX_ a,b)
 #define magic_setdbline(a,b)	Perl_magic_setdbline(aTHX_ a,b)
 #define magic_setdefelem(a,b)	Perl_magic_setdefelem(aTHX_ a,b)
@@ -1343,7 +1342,6 @@
 #define gv_get_super_pkg(a,b,c)	S_gv_get_super_pkg(aTHX_ a,b,c)
 #define gv_init_svtype(a,b)	S_gv_init_svtype(aTHX_ a,b)
 #define gv_magicalize_isa(a)	S_gv_magicalize_isa(aTHX_ a)
-#define gv_magicalize_overload(a)	S_gv_magicalize_overload(aTHX_ a)
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
 #  endif
 #  if defined(PERL_IN_HV_C)

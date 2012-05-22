@@ -1403,18 +1403,6 @@ S_gv_magicalize_isa(pTHX_ GV *gv)
 	     NULL, 0);
 }
 
-STATIC void
-S_gv_magicalize_overload(pTHX_ GV *gv)
-{
-    HV* hv;
-
-    PERL_ARGS_ASSERT_GV_MAGICALIZE_OVERLOAD;
-
-    hv = GvHVn(gv);
-    GvMULTI_on(gv);
-    hv_magic(hv, NULL, PERL_MAGIC_overload);
-}
-
 GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
@@ -1697,7 +1685,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
     /* set up magic where warranted */
     if (stash != PL_defstash) { /* not the main stash */
-	/* We only have to check for four names here: EXPORT, ISA, OVERLOAD
+	/* We only have to check for three names here: EXPORT, ISA
 	   and VERSION. All the others apply only to the main stash or to
 	   CORE (which is checked right after this). */
 	if (len > 2) {
@@ -1710,10 +1698,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case 'I':
 		if (strEQ(name2, "SA"))
 		    gv_magicalize_isa(gv);
-		break;
-	    case 'O':
-		if (strEQ(name2, "VERLOAD"))
-		    gv_magicalize_overload(gv);
 		break;
 	    case 'V':
 		if (strEQ(name2, "ERSION"))
@@ -1760,11 +1744,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case 'I':
 		if (strEQ(name2, "SA")) {
 		    gv_magicalize_isa(gv);
-		}
-		break;
-	    case 'O':
-		if (strEQ(name2, "VERLOAD")) {
-		    gv_magicalize_overload(gv);
 		}
 		break;
 	    case 'S':
@@ -2283,24 +2262,31 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     int filled = 0, have_ovl = 0;
     int i, lim = 1;
 
-    /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
+    /* The first key in PL_AMG_names is the overloadedness indicator, which
+       allows us to skip overloading entries for non-overloaded classes. */
 
     /* Try to find via inheritance. */
     GV *gv = gv_fetchmeth_pvn(stash, PL_AMG_names[0], 2, -1, 0);
-    SV * const sv = gv ? GvSV(gv) : NULL;
     CV* cv;
 
     if (!gv)
 	lim = DESTROY_amg;		/* Skip overloading entries. */
-#ifdef PERL_DONT_CREATE_GVSV
-    else if (!sv) {
+
+    else {
+      
+      /* The "fallback" key is special-cased here, being absent from the
+	 list in PL_AMG_names. */
+
+      SV *sv;
+      gv = gv_fetchmeth_pvn(stash, "(fallback", 9, -1, 0);
+
+      if (!gv || !(sv = GvSV(gv)))
 	NOOP;   /* Equivalent to !SvTRUE and !SvOK  */
-    }
-#endif
-    else if (SvTRUE(sv))
+      else if (SvTRUE(sv))
 	amt.fallback=AMGfallYES;
-    else if (SvOK(sv))
+      else if (SvOK(sv))
 	amt.fallback=AMGfallNEVER;
+    }
 
     for (i = 1; i < lim; i++)
 	amt.table[i] = NULL;
@@ -2626,7 +2612,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   }
 
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)
-      && (stash = SvSTASH(SvRV(left)))
+      && (stash = SvSTASH(SvRV(left))) && Gv_AMG(stash)
       && (mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
@@ -2691,12 +2677,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		 */
 		SV* const newref = newSVsv(tmpRef);
 		SvOBJECT_on(newref);
-		/* As a bit of a source compatibility hack, SvAMAGIC() and
-		   friends dereference an RV, to behave the same was as when
-		   overloading was stored on the reference, not the referant.
-		   Hence we can't use SvAMAGIC_on()
-		*/
-		SvFLAGS(newref) |= SVf_AMAGIC;
+		/* No need to do SvAMAGIC_on here, as SvAMAGIC macros
+		   delegate to the stash. */
 		SvSTASH_set(newref, MUTABLE_HV(SvREFCNT_inc(SvSTASH(tmpRef))));
 		return newref;
 	     }
@@ -2753,7 +2735,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 }
 	 if (!cv) goto not_found;
     } else if (!(AMGf_noright & flags) && SvAMAGIC(right)
-	       && (stash = SvSTASH(SvRV(right)))
+	       && (stash = SvSTASH(SvRV(right))) && Gv_AMG(stash)
 	       && (mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table

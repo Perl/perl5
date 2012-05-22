@@ -2215,12 +2215,6 @@ PERL_CALLCONV int	Perl_magic_set_all_env(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_SET_ALL_ENV	\
 	assert(sv); assert(mg)
 
-PERL_CALLCONV int	Perl_magic_setamagic(pTHX_ SV* sv, MAGIC* mg)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_MAGIC_SETAMAGIC	\
-	assert(sv); assert(mg)
-
 PERL_CALLCONV int	Perl_magic_setarylen(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -5548,11 +5542,6 @@ STATIC void	S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 STATIC void	S_gv_magicalize_isa(pTHX_ GV *gv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_MAGICALIZE_ISA	\
-	assert(gv)
-
-STATIC void	S_gv_magicalize_overload(pTHX_ GV *gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_MAGICALIZE_OVERLOAD	\
 	assert(gv)
 
 STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methpv, const U32 flags)

@@ -3960,7 +3960,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
-    (void)SvAMAGIC_off(dstr);
     if ( SvVOK(dstr) )
     {
 	/* need to nuke the magic */
@@ -9331,7 +9330,6 @@ Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
     new_SV(sv);
 
     SV_CHECK_THINKFIRST_COW_DROP(rv);
-    (void)SvAMAGIC_off(rv);
 
     if (SvTYPE(rv) >= SVt_PVMG) {
 	const U32 refcnt = SvREFCNT(rv);
@@ -9517,11 +9515,6 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 	++PL_sv_objcount;
     SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH_set(tmpRef, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
-
-    if (Gv_AMG(stash))
-	SvAMAGIC_on(sv);
-    else
-	(void)SvAMAGIC_off(sv);
 
     if(SvSMAGICAL(tmpRef))
         if(mg_find(tmpRef, PERL_MAGIC_ext) || mg_find(tmpRef, PERL_MAGIC_uvar))
