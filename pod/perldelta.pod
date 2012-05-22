@@ -97,7 +97,15 @@ XXX
 
 =item *
 
-L<Hash::Util> has been upgraded from version 0.11 to version 0.12.
+L<File::stat> has been upgraded from version 1.05 to 1.06.
+
+C<File::stat> ignores the L<filetest> pragma, and warns when used in
+combination therewith.  But it was not warning for C<-r>.  This has been
+fixed [perl #111640].
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.11 to 0.12.
 
 C<hash_unlocked> and C<hashref_unlocked> now returns true if the hash is
 unlocked, instead of always returning false [perl #112126].
@@ -111,7 +119,7 @@ did not exist [perl #112126].
 
 =item *
 
-L<Storable> has been upgraded from version 2.34 to version 2.35.
+L<Storable> has been upgraded from version 2.34 to 2.35.
 
 Modifying C<$_[0]> within C<STORABLE_freeze> no longer results in crashes
 [perl #112358].
