@@ -8830,7 +8830,7 @@ Portability issues: L<perlport/wait>.
 =item waitpid PID,FLAGS
 X<waitpid>
 
-=for Pod::Functions wait for  a particular child process to die
+=for Pod::Functions wait for a particular child process to die
 
 Waits for a particular child process to terminate and returns the pid of
 the deceased process, or C<-1> if there is no such child process.  On some
