@@ -97,6 +97,20 @@ XXX
 
 =item *
 
+L<Hash::Util> has been upgraded from version 0.11 to version 0.12.
+
+C<hash_unlocked> and C<hashref_unlocked> now returns true if the hash is
+unlocked, instead of always returning false [perl #112126].
+
+C<hash_unlocked>, C<hashref_unlocked>, C<lock_hash_recurse> and
+C<unlock_hash_recurse> are now exportable [perl #112126].
+
+Two new functions, C<hash_locked> and C<hashref_locked>, have been added.
+Oddly enough, these two functions were already exported, even though they
+did not exist [perl #112126].
+
+=item *
+
 L<Storable> has been upgraded from version 2.34 to version 2.35.
 
 Modifying C<$_[0]> within C<STORABLE_freeze> no longer results in crashes
