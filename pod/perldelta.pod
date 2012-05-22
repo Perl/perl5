@@ -449,6 +449,11 @@ erroneous warnings.
 C<while(each %h)> now implies C<while(defined($_ = each %h))>, like
 C<readline> and C<readdir>.
 
+=item *
+
+Subs in the CORE:: namespace no longer crash after C<undef *_> when called
+with no argument list (C<&CORE::time> with no parentheses).
+
 =back
 
 =head1 Known Problems
