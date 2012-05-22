@@ -343,6 +343,12 @@ A call checker attached to a closure prototype via C<cv_set_call_checker>
 is now copied to closures cloned from it.  So C<cv_set_call_checker> now
 works inside an attribute handler for a closure.
 
+=item *
+
+Writing to C<$^N> used to have no effect.  Now it croaks with "Modification
+of a read-only value" by default, but that can be overridden by a custom
+regular expression engine, as with C<$1> [perl #112184].
+
 =back
 
 =head1 Known Problems
