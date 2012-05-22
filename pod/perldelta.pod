@@ -380,6 +380,12 @@ C<print &CORE::uc("a"), &CORE::uc("b")> used to print "BB".  The same thing
 would happen with an lvalue subroutine returning the return value of C<uc>.
 Now the value is copied in such cases.
 
+=item *
+
+C<method {}> syntax with an empty block or a block returning an empty list
+used to crash or use some random value left on the stack as its invocant.
+Now it produces an error.
+
 =back
 
 =head1 Known Problems
