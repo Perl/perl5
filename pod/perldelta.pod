@@ -97,7 +97,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<Storable> has been upgraded from version 2.34 to version 2.35.
+
+Modifying C<$_[0]> within C<STORABLE_freeze> no longer results in crashes
+[perl #112358].
 
 =back
 
