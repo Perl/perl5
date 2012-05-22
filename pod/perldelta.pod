@@ -335,7 +335,25 @@ be noted as well.
 
 =item *
 
-XXX
+The C<SVf_AMAGIC> flag to indicate overloading is now on the stash, not the
+object.  It is now set automatically whenever a method or @ISA changes, so
+its meaning has changed, too.  It now means "potentially overloaded".  When
+the overload table is calculated, the flag is automatically turned off if
+there is no overloading, so there should be no noticeable slowdown.
+
+The staleness of the overload tables is now checked when overload methods
+are invoked, rather than during C<bless>.
+
+"A" magic is gone.  The changes to the handling of the C<SVf_AMAGIC> flag
+eliminate the need for it.
+
+The core no longer increments C<PL_amagic_generation> (it doesn't need to).
+But an XS module can still increment it to mark all overload tables as
+stale.  (It is still not part of the API, though.)  Do not rely on this.
+It may be deleted in the next release.
+
+The fallback overload setting is now stored in its own stash entry, called
+"(fallback".
 
 =back
 
