@@ -444,6 +444,11 @@ Classes with overloading can now inherit fallback values.
 C<pos> now croaks with hash and array arguments, instead of producing
 erroneous warnings.
 
+=item *
+
+C<while(each %h)> now implies C<while(defined($_ = each %h))>, like
+C<readline> and C<readdir>.
+
 =back
 
 =head1 Known Problems
