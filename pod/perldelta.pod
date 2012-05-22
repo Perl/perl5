@@ -394,6 +394,10 @@ C<method {}> syntax with an empty block or a block returning an empty list
 used to crash or use some random value left on the stack as its invocant.
 Now it produces an error.
 
+=item *
+
+C<vec> now works with extremely large offsets (>2 GB) [perl #111730].
+
 =back
 
 =head1 Known Problems
