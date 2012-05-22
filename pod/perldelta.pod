@@ -332,6 +332,11 @@ label" error message, instead of exiting the program [perl #111794].
 C<goto "\0"> now dies with "Can't find label" instead of "goto must have
 label".
 
+=item *
+
+The C function C<hv_store> used to result in crashes when used on C<%^H>
+[perl #111000].
+
 =back
 
 =head1 Known Problems
