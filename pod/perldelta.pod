@@ -337,6 +337,12 @@ label".
 The C function C<hv_store> used to result in crashes when used on C<%^H>
 [perl #111000].
 
+=item *
+
+A call checker attached to a closure prototype via C<cv_set_call_checker>
+is now copied to closures cloned from it.  So C<cv_set_call_checker> now
+works inside an attribute handler for a closure.
+
 =back
 
 =head1 Known Problems
