@@ -418,6 +418,17 @@ Now it produces an error.
 
 C<vec> now works with extremely large offsets (>2 GB) [perl #111730].
 
+=item *
+
+Changes to overload settings now take effect immediately, as do changes to
+inheritance that affect overloading.  They used to take effect only after
+C<bless>.
+
+Objects that were created before a class had any overloading used to remain
+non-overloaded even if the class gained overloading through C<use overload>
+or @ISA changes, and even after C<bless>.  This has been fixed
+[perl #112708].
+
 =back
 
 =head1 Known Problems
