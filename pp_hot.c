@@ -1527,9 +1527,9 @@ yup:					/* Confirmed by INTUIT */
 	RX_OFFS(rx)[0].start = s - truebase;
 	RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
     }
-    /* including RX_NPARENS(rx) in the below code seems highly suspicious.
-       -dmq */
-    RX_NPARENS(rx) = RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;	/* used by @-, @+, and $^N */
+    /* match via INTUIT shouldn't have any captures. Let @-, @+, $^N know */
+    assert(!RX_NPARENS(rx));
+    RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
