@@ -708,6 +708,9 @@ while (<$propvalues>) {
     next if /^\s* $/x;    # Ignore empty and comment lines
     chomp;
 
+    # Fix typo in official input file
+    s/CCC133/CCC132/g if $version eq "6.1.0";
+
     my @fields = split /\s*;\s*/; # Fields are separated by semi-colons
     my $prop = shift @fields;   # 0th field is the property,
     my $count = 0;  # 0th field in line (after shifting off the property) is
