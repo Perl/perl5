@@ -12882,9 +12882,10 @@ END
                                 Type => $ENUM,
                                 Initialize => $age,
                                 );
+        my $q_in = "$in";
         $in->add_comment(join_lines(<<END
 THIS FILE SHOULD NOT BE USED FOR ANY PURPOSE.  The values in this file are the
-same as for $age, and not for what $in really means.  This is because anything
+same as for $age, and not for what $q_in really means.  This is because anything
 defined in a given release should have multiple values: that release and all
 higher ones.  But only one value per code point can be represented in a table
 like this.
