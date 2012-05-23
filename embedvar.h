@@ -95,7 +95,6 @@
 #define PL_XPosixSpace		(vTHX->IXPosixSpace)
 #define PL_XPosixXDigit		(vTHX->IXPosixXDigit)
 #define PL_Xpv			(vTHX->IXpv)
-#define PL_amagic_generation	(vTHX->Iamagic_generation)
 #define PL_an			(vTHX->Ian)
 #define PL_apiversion		(vTHX->Iapiversion)
 #define PL_argvgv		(vTHX->Iargvgv)

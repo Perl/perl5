@@ -533,8 +533,6 @@ PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
 /* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
 PERLVARI(I, breakable_sub_gen, U32, 0)
 
-PERLVARI(I, amagic_generation, long, 0)
-
 #ifdef USE_LOCALE_COLLATE
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */

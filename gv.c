@@ -2243,8 +2243,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   newgen = PL_sub_generation + stash_meta->pkg_gen + stash_meta->cache_gen;
   if (mg) {
       const AMT * const amtp = (AMT*)mg->mg_ptr;
-      if (amtp->was_ok_am == PL_amagic_generation
-	  && amtp->was_ok_sub == newgen) {
+      if (amtp->was_ok_sub == newgen) {
 	  return AMT_OVERLOADED(amtp) ? 1 : 0;
       }
       sv_unmagic(MUTABLE_SV(stash), PERL_MAGIC_overload_table);
@@ -2253,7 +2252,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME_get(stash)) );
 
   Zero(&amt,1,AMT);
-  amt.was_ok_am = PL_amagic_generation;
   amt.was_ok_sub = newgen;
   amt.fallback = AMGfallNO;
   amt.flags = 0;
@@ -2415,8 +2413,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     }
     assert(mg);
     amtp = (AMT*)mg->mg_ptr;
-    if ( amtp->was_ok_am != PL_amagic_generation
-	 || amtp->was_ok_sub != newgen )
+    if ( amtp->was_ok_sub != newgen )
 	goto do_update;
     if (AMT_AMAGIC(amtp)) {
 	CV * const ret = amtp->table[id];

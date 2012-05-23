@@ -4776,6 +4776,8 @@ EXTCONST char *const PL_phase_names[];
  * instead of using the newer PL_phase, which provides everything PL_dirty
  * provided, and more. */
 #  define PL_dirty (PL_phase == PERL_PHASE_DESTRUCT)
+
+#  define PL_amagic_generation PL_na
 #endif /* !PERL_CORE */
 
 END_EXTERN_C
@@ -5164,7 +5166,6 @@ struct am_table {
   U8 fallback;
   U16 spare;
   U32 was_ok_sub;
-  long was_ok_am;
   CV* table[NofAMmeth];
 };
 struct am_table_short {
@@ -5172,7 +5173,6 @@ struct am_table_short {
   U8 fallback;
   U16 spare;
   U32 was_ok_sub;
-  long was_ok_am;
 };
 typedef struct am_table AMT;
 typedef struct am_table_short AMTS;

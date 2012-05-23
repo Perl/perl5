@@ -405,6 +405,8 @@ underlying structures are freed.
 =item amagic_generation
 
 Returns the SV object corresponding to the C variable C<amagic_generation>.
+As of Perl 5.18, this is just an alias to C<PL_na>, so its value is
+meaningless.
 
 =item init_av
 

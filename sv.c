@@ -13056,8 +13056,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_hints		= proto_perl->Ihints;
 
-    PL_amagic_generation	= proto_perl->Iamagic_generation;
-
 #ifdef USE_LOCALE_COLLATE
     PL_collation_ix	= proto_perl->Icollation_ix;
     PL_collation_standard	= proto_perl->Icollation_standard;
