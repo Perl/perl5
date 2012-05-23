@@ -2670,7 +2670,9 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 	prog->subbeg = PL_bostr;
 	prog->sublen = PL_regeol - PL_bostr; /* strend may have been modified */
     }
-    DEBUG_EXECUTE_r(PL_reg_starttry = *startpos);
+#ifdef DEBUGGING
+    PL_reg_starttry = *startpos;
+#endif
     prog->offs[0].start = *startpos - PL_bostr;
     PL_reginput = *startpos;
     prog->lastparen = 0;
