@@ -31,10 +31,10 @@ sub OVERLOAD {
   $package = shift;
   my %arg = @_;
   my ($sub, $fb);
-  *{$package . "::()"} = \&nil; # Make it findable via fetchmethod.
+  *{$package . "::(("} = \&nil; # Make it findable via fetchmethod.
   for (keys %arg) {
     if ($_ eq 'fallback') {
-      for my $sym (*{$package . "::(fallback"}) {
+      for my $sym (*{$package . "::()"}) {
 	*$sym = \&nil; # Make it findable via fetchmethod.
 	$$sym = $arg{$_};
       }
@@ -62,17 +62,18 @@ sub import {
 sub unimport {
   $package = (caller())[0];
   shift;
+  *{$package . "::(("} = \&nil;
   for (@_) {
       warnings::warnif("overload arg '$_' is invalid")
         unless $ops_seen{$_};
-      delete $ {$package . "::"}{"(" . $_};
+      delete $ {$package . "::"}{$_ eq 'fallback' ? '()' : "(" .$_};
   }
 }
 
 sub Overloaded {
   my $package = shift;
   $package = ref $package if ref $package;
-  mycan ($package, '()');
+  mycan ($package, '()') || mycan ($package, '((');
 }
 
 sub ov_method {

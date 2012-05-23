@@ -2260,31 +2260,27 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     int filled = 0, have_ovl = 0;
     int i, lim = 1;
 
-    /* The first key in PL_AMG_names is the overloadedness indicator, which
-       allows us to skip overloading entries for non-overloaded classes. */
+    /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
     /* Try to find via inheritance. */
     GV *gv = gv_fetchmeth_pvn(stash, PL_AMG_names[0], 2, -1, 0);
+    SV * const sv = gv ? GvSV(gv) : NULL;
     CV* cv;
 
     if (!gv)
+    {
+      if (!gv_fetchmeth_pvn(stash, "((", 2, -1, 0))
 	lim = DESTROY_amg;		/* Skip overloading entries. */
-
-    else {
-      
-      /* The "fallback" key is special-cased here, being absent from the
-	 list in PL_AMG_names. */
-
-      SV *sv;
-      gv = gv_fetchmeth_pvn(stash, "(fallback", 9, -1, 0);
-
-      if (!gv || !(sv = GvSV(gv)))
-	NOOP;   /* Equivalent to !SvTRUE and !SvOK  */
-      else if (SvTRUE(sv))
-	amt.fallback=AMGfallYES;
-      else if (SvOK(sv))
-	amt.fallback=AMGfallNEVER;
     }
+#ifdef PERL_DONT_CREATE_GVSV
+    else if (!sv) {
+	NOOP;   /* Equivalent to !SvTRUE and !SvOK  */
+    }
+#endif
+    else if (SvTRUE(sv))
+	amt.fallback=AMGfallYES;
+    else if (SvOK(sv))
+	amt.fallback=AMGfallNEVER;
 
     for (i = 1; i < lim; i++)
 	amt.table[i] = NULL;

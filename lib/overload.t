@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5081;
+plan tests => 5082;
 
 use Scalar::Util qw(tainted);
 
@@ -2312,6 +2312,17 @@ sub food::bouillon { 0 }
 $a = bless[], mane::;
 is eval { "$a" }, 'twine', ':: in method name' or diag $@;
 is eval { !$a  },   1,      "' in method name" or diag $@;
+
+# [perl #113050] Half of CPAN assumes fallback is under "()"
+{
+  package dodo;
+  use overload '+' => sub {};
+  no strict;
+  *{"dodo::()"} = sub{};
+  ${"dodo::()"} = 1;
+}
+$a = bless [],'dodo';
+is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
 
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
