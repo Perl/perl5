@@ -361,10 +361,8 @@ are invoked, rather than during C<bless>.
 "A" magic is gone.  The changes to the handling of the C<SVf_AMAGIC> flag
 eliminate the need for it.
 
-The core no longer increments C<PL_amagic_generation> (it doesn't need to).
-But an XS module can still increment it to mark all overload tables as
-stale.  (It is still not part of the API, though.)  Do not rely on this.
-It may be deleted in the next release.
+C<PL_amagic_generation> has been removed as no longer necessary.  For XS
+modules, it is now a macro alias to C<PL_na>.
 
 The fallback overload setting is now stored in its own stash entry, called
 "(fallback".
