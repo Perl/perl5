@@ -2234,7 +2234,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 
         if (symptr->flags & FLAG_SLASH){
             if (SP - PL_stack_base - start_sp_offset <= 0)
-                Perl_croak(aTHX_ "'/' must follow a numeric type in unpack");
+		break;
             if( next_symbol(symptr) ){
               if( symptr->howlen == e_number )
 		Perl_croak(aTHX_ "Count after length/code in unpack" );
