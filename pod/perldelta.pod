@@ -364,8 +364,8 @@ eliminate the need for it.
 C<PL_amagic_generation> has been removed as no longer necessary.  For XS
 modules, it is now a macro alias to C<PL_na>.
 
-The fallback overload setting is now stored in its own stash entry, called
-"(fallback".
+The fallback overload setting is now stored in a stash entry separate from
+overloadedness itself.
 
 =back
 
