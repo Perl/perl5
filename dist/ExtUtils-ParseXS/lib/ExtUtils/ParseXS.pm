@@ -949,7 +949,9 @@ EOF
 
   print Q(<<"EOF") if ($self->{Overload});
 #    /* register the overloading (type 'A') magic */
+##if (PERL_REVISION == 5 && PERL_VERSION < 9)
 #    PL_amagic_generation++;
+##endif
 #    /* The magic for overload gets a GV* via gv_fetchmeth as */
 #    /* mentioned above, and looks in the SV* slot of it for */
 #    /* the "fallback" status. */
