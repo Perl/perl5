@@ -394,7 +394,8 @@ operator may be any of:
 
     -M  Script start time minus file modification time, in days.
     -A  Same for access time.
-    -C  Same for inode change time (Unix, may differ for other platforms)
+    -C  Same for inode change time (Unix, may differ for other
+	platforms)
 
 Example:
 
@@ -1377,9 +1378,9 @@ temporarily no longer exist.  See L<perlsub/"Localized deletion of elements
 of composite types">.
 
     %hash = (foo => 11, bar => 22, baz => 33);
-    $scalar = delete $hash{foo};             # $scalar is 11
-    $scalar = delete @hash{qw(foo bar)};     # $scalar is 22
-    @array  = delete @hash{qw(foo bar baz)}; # @array  is (undef,undef,33)
+    $scalar = delete $hash{foo};         # $scalar is 11
+    $scalar = delete @hash{qw(foo bar)}; # $scalar is 22
+    @array  = delete @hash{qw(foo baz)}; # @array  is (undef,33)
 
 The following (inefficiently) deletes all the values of %HASH and @ARRAY:
 
@@ -1494,7 +1495,8 @@ before any manipulations.  Here's an example:
 
     eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
     if (my $ev_err = $@) {
-        if (blessed($ev_err) && $ev_err->isa("Some::Module::Exception")) {
+        if (blessed($ev_err)
+            && $ev_err->isa("Some::Module::Exception")) {
             # handle Some::Module::Exception
         }
         else {
@@ -1731,7 +1733,7 @@ of the very last file only.  Examples:
             print "--------------\n";
         }
         print;
-        last if eof();      # needed if we're reading from a terminal
+        last if eof();     # needed if we're reading from a terminal
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
@@ -1883,10 +1885,10 @@ errors:
     {
        my $e;
        {
-          local $@; # protect existing $@
-          eval { test_repugnancy() };
-          # $@ =~ /nefarious/ and die $@; # Perl 5.14 and higher only
-          $@ =~ /nefarious/ and $e = $@;
+         local $@; # protect existing $@
+         eval { test_repugnancy() };
+         # $@ =~ /nefarious/ and die $@; # Perl 5.14 and higher only
+         $@ =~ /nefarious/ and $e = $@;
        }
        die $e if defined $e
     }
@@ -2282,7 +2284,8 @@ and build a new Perl.
 
 Here's a mailbox appender for BSD systems.
 
-    use Fcntl qw(:flock SEEK_END); # import LOCK_* and SEEK_END constants
+    # import LOCK_* and SEEK_END constants
+    use Fcntl qw(:flock SEEK_END);
 
     sub lock {
         my ($fh) = @_;
@@ -2794,7 +2797,8 @@ Here's an example to test whether Nagle's algorithm is enabled on a socket:
     my $packed = getsockopt($socket, $tcp, TCP_NODELAY)
         or die "getsockopt TCP_NODELAY: $!";
     my $nodelay = unpack("I", $packed);
-    print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
+    print "Nagle's algorithm is turned ",
+           $nodelay ? "off\n" : "on\n";
 
 Portability issues: L<perlport/getsockopt>.
 
@@ -3016,7 +3020,8 @@ X<ioctl>
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
-    require "sys/ioctl.ph";  # probably in $Config{archlib}/sys/ioctl.ph
+    require "sys/ioctl.ph";  # probably in
+                             # $Config{archlib}/sys/ioctl.ph
 
 to get the correct function definitions.  If F<sys/ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
@@ -3396,7 +3401,7 @@ C<$mday> is the day of the month and C<$mon> the month in
 the range C<0..11>, with 0 indicating January and 11 indicating December.
 This makes it easy to get a month name from a list:
 
-    my @abbr = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+    my @abbr = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
     print "$abbr[$mon] $mday";
     # $mon=9, $mday=18 gives "Oct 18"
 
@@ -3581,17 +3586,18 @@ encounters the missing (or unexpected) comma.  The syntax error will be
 reported close to the C<}>, but you'll need to change something near the C<{>
 such as using a unary C<+> to give Perl some help:
 
-    %hash = map {  "\L$_" => 1  } @array  # perl guesses EXPR.  wrong
-    %hash = map { +"\L$_" => 1  } @array  # perl guesses BLOCK. right
-    %hash = map { ("\L$_" => 1) } @array  # this also works
-    %hash = map {  lc($_) => 1  } @array  # as does this.
-    %hash = map +( lc($_) => 1 ), @array  # this is EXPR and works!
+    %hash = map {  "\L$_" => 1  } @array # perl guesses EXPR. wrong
+    %hash = map { +"\L$_" => 1  } @array # perl guesses BLOCK. right
+    %hash = map { ("\L$_" => 1) } @array # this also works
+    %hash = map {  lc($_) => 1  } @array # as does this.
+    %hash = map +( lc($_) => 1 ), @array # this is EXPR and works!
 
-    %hash = map  ( lc($_), 1 ),   @array  # evaluates to (1, @array)
+    %hash = map  ( lc($_), 1 ),   @array # evaluates to (1, @array)
 
 or to force an anon hash constructor use C<+{>:
 
-   @hashes = map +{ lc($_) => 1 }, @array # EXPR, so needs comma at end
+    @hashes = map +{ lc($_) => 1 }, @array # EXPR, so needs
+                                           # comma at end
 
 to get a list of anonymous hashes each with only one entry apiece.
 
@@ -3957,7 +3963,7 @@ General examples:
     # in-memory files
     open(MEMORY, ">", \$var)
         or die "Can't open memory file: $!";
-    print MEMORY "foo!\n";                   # output will appear in $var
+    print MEMORY "foo!\n";              # output will appear in $var
 
     # process argument list of files along with any includes
 
@@ -4607,14 +4613,14 @@ the I<length-item> is the string length, not the number of strings.  With
 an explicit repeat count for pack, the packed string is adjusted to that
 length.  For example:
 
- This code:                              gives this result:
+ This code:                             gives this result:
  
-  unpack("W/a", "\004Gurusamy")          ("Guru")
-  unpack("a3/A A*", "007 Bond  J ")      (" Bond", "J")
-  unpack("a3 x2 /A A*", "007: Bond, J.") ("Bond, J", ".")
+ unpack("W/a", "\004Gurusamy")          ("Guru")
+ unpack("a3/A A*", "007 Bond  J ")      (" Bond", "J")
+ unpack("a3 x2 /A A*", "007: Bond, J.") ("Bond, J", ".")
 
-  pack("n/a* w/a","hello,","world")     "\000\006hello,\005world"
-  pack("a/W2", ord("a") .. ord("z"))    "2ab"
+ pack("n/a* w/a","hello,","world")     "\000\006hello,\005world"
+ pack("a/W2", ord("a") .. ord("z"))    "2ab"
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
@@ -5641,7 +5647,8 @@ version should be used instead.
 
     require v5.6.1;     # run time version check
     require 5.6.1;      # ditto
-    require 5.006_001;  # ditto; preferred for backwards compatibility
+    require 5.006_001;  # ditto; preferred for backwards
+                          compatibility
 
 Otherwise, C<require> demands that a library file be included if it
 hasn't already been included.  The file is included via the do-FILE
@@ -5863,8 +5870,8 @@ in the opposite order.
 Used without arguments in scalar context, reverse() reverses C<$_>.
 
     $_ = "dlrow ,olleH";
-    print reverse;                              # No output, list context
-    print scalar reverse;                       # Hello, world
+    print reverse;                         # No output, list context
+    print scalar reverse;                  # Hello, world
 
 Note that reversing an array to itself (as in C<@a = reverse @a>) will
 preserve non-existent elements whenever possible, i.e., for non magical
@@ -6587,8 +6594,8 @@ Examples:
     # using a prototype allows you to use any comparison subroutine
     # as a sort subroutine (including other package's subroutines)
     package other;
-    sub backwards ($$) { $_[1] cmp $_[0]; }  # $a and $b are not set here
-    
+    sub backwards ($$) { $_[1] cmp $_[0]; }  # $a and $b are
+                                             # not set here    
     package main;
     @new = sort other::backwards @old;
     
@@ -6998,7 +7005,8 @@ use to separate the numbers:
 You can also explicitly specify the argument number to use for
 the join string using something like C<*2$v>; for example:
 
-  printf '%*4$vX %*4$vX %*4$vX', @addr[1..3], ":";   # 3 IPv6 addresses
+  printf '%*4$vX %*4$vX %*4$vX',       # 3 IPv6 addresses
+          @addr[1..3], ":";
 
 =item (minimum) width
 
@@ -7007,11 +7015,11 @@ display the given value.  You can override the width by putting
 a number here, or get the width from the next argument (with C<*>)
 or from a specified argument (e.g., with C<*2$>):
 
-  printf "<%s>", "a";       # prints "<a>"
-  printf "<%6s>", "a";      # prints "<     a>"
-  printf "<%*s>", 6, "a";   # prints "<     a>"
-  printf "<%*2$s>", "a", 6; # prints "<     a>"
-  printf "<%2s>", "long";   # prints "<long>" (does not truncate)
+ printf "<%s>", "a";       # prints "<a>"
+ printf "<%6s>", "a";      # prints "<     a>"
+ printf "<%*s>", 6, "a";   # prints "<     a>"
+ printf "<%*2$s>", "a", 6; # prints "<     a>"
+ printf "<%2s>", "long";   # prints "<long>" (does not truncate)
 
 If a field width obtained through C<*> is negative, it has the same
 effect as the C<-> flag: left-justification.
@@ -7090,7 +7098,8 @@ You cannot currently get the precision from a specified number,
 but it is intended that this will be possible in the future, for
 example using C<.*2$>:
 
-  printf "<%.*2$x>", 1, 6;   # INVALID, but in future will print "<000001>"
+  printf "<%.*2$x>", 1, 6;   # INVALID, but in future will print
+                             # "<000001>"
 
 =item size
 
@@ -7101,16 +7110,22 @@ whatever the default integer size is on your platform (usually 32 or 64
 bits), but you can override this to use instead one of the standard C types,
 as supported by the compiler used to build Perl:
 
-   hh          interpret integer as C type "char" or "unsigned char"
-	       on Perl 5.14 or later
-   h           interpret integer as C type "short" or "unsigned short"
-   j	       interpret integer as C type "intmax_t" on Perl 5.14 
-	       or later, and only with a C99 compiler (unportable)
-   l           interpret integer as C type "long" or "unsigned long"
-   q, L, or ll interpret integer as C type "long long", "unsigned long long",
-               or "quad" (typically 64-bit integers)
-   t	       interpret integer as C type "ptrdiff_t" on Perl 5.14 or later
-   z	       interpret integer as C type "size_t" on Perl 5.14 or later
+   hh          interpret integer as C type "char" or "unsigned
+	       char" on Perl 5.14 or later
+   h           interpret integer as C type "short" or
+               "unsigned short"
+   j	       interpret integer as C type "intmax_t" on Perl
+               5.14 or later, and only with a C99 compiler
+               (unportable)
+   l           interpret integer as C type "long" or
+               "unsigned long"
+   q, L, or ll interpret integer as C type "long long",
+               "unsigned long long", or "quad" (typically
+               64-bit integers)
+   t	       interpret integer as C type "ptrdiff_t" on Perl
+               5.14 or later
+   z	       interpret integer as C type "size_t" on Perl 5.14
+               or later
 
 As of 5.14, none of these raises an exception if they are not supported on
 your platform.  However, if warnings are enabled, a warning of the
@@ -7127,7 +7142,8 @@ start running the program, put something like this at its top:
 You can find out whether your Perl supports quads via L<Config>:
 
     use Config;
-    if ($Config{use64bitint} eq "define" || $Config{longsize} >= 8) {
+    if ($Config{use64bitint} eq "define"
+        || $Config{longsize} >= 8) {
         print "Nice quads!\n";
     }
 
@@ -7184,10 +7200,10 @@ value to format.
 Here are some more examples; be aware that when using an explicit
 index, the C<$> may need escaping:
 
-  printf "%2\$d %d\n",    12, 34;        # will print "34 12\n"
-  printf "%2\$d %d %d\n", 12, 34;        # will print "34 12 34\n"
-  printf "%3\$d %d %d\n", 12, 34, 56;    # will print "56 12 34\n"
-  printf "%2\$*3\$d %d\n", 12, 34, 3;    # will print " 34 12\n"
+  printf "%2\$d %d\n",    12, 34;      # will print "34 12\n"
+  printf "%2\$d %d %d\n", 12, 34;      # will print "34 12 34\n"
+  printf "%3\$d %d %d\n", 12, 34, 56;  # will print "56 12 34\n"
+  printf "%2\$*3\$d %d\n", 12, 34, 3;  # will print " 34 12\n"
 
 =back
 
@@ -8551,8 +8567,8 @@ documentation than leaving it in.)
 Note that the values are not copied, which means modifying them will
 modify the contents of the hash:
 
-    for (values %hash)      { s/foo/bar/g }   # modifies %hash values
-    for (@hash{keys %hash}) { s/foo/bar/g }   # same
+    for (values %hash)      { s/foo/bar/g }  # modifies %hash values
+    for (@hash{keys %hash}) { s/foo/bar/g }  # same
 
 Starting with Perl 5.14, C<values> can take a scalar EXPR, which must hold
 a reference to an unblessed hash or array.  The argument will be
@@ -8649,168 +8665,168 @@ If you know the exact length in bits, it can be used in place of the C<*>.
 
 Here is an example to illustrate how the bits actually fall in place:
 
-    #!/usr/bin/perl -wl
+  #!/usr/bin/perl -wl
 
-    print <<'EOT';
-                                      0         1         2         3
-                       unpack("V",$_) 01234567890123456789012345678901
-    ------------------------------------------------------------------
-    EOT
+  print <<'EOT';
+                                    0         1         2         3
+                     unpack("V",$_) 01234567890123456789012345678901
+  ------------------------------------------------------------------
+  EOT
 
-    for $w (0..3) {
-        $width = 2**$w;
-        for ($shift=0; $shift < $width; ++$shift) {
-            for ($off=0; $off < 32/$width; ++$off) {
-                $str = pack("B*", "0"x32);
-                $bits = (1<<$shift);
-                vec($str, $off, $width) = $bits;
-                $res = unpack("b*",$str);
-                $val = unpack("V", $str);
-                write;
-            }
-        }
-    }
+  for $w (0..3) {
+      $width = 2**$w;
+      for ($shift=0; $shift < $width; ++$shift) {
+          for ($off=0; $off < 32/$width; ++$off) {
+              $str = pack("B*", "0"x32);
+              $bits = (1<<$shift);
+              vec($str, $off, $width) = $bits;
+              $res = unpack("b*",$str);
+              $val = unpack("V", $str);
+              write;
+          }
+      }
+  }
 
-    format STDOUT =
-    vec($_,@#,@#) = @<< == @######### @>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-    $off, $width, $bits, $val, $res
-    .
-    __END__
+  format STDOUT =
+  vec($_,@#,@#) = @<< == @######### @>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  $off, $width, $bits, $val, $res
+  .
+  __END__
 
 Regardless of the machine architecture on which it runs, the 
 example above should print the following table:
 
-                                      0         1         2         3
-                       unpack("V",$_) 01234567890123456789012345678901
-    ------------------------------------------------------------------
-    vec($_, 0, 1) = 1   ==          1 10000000000000000000000000000000
-    vec($_, 1, 1) = 1   ==          2 01000000000000000000000000000000
-    vec($_, 2, 1) = 1   ==          4 00100000000000000000000000000000
-    vec($_, 3, 1) = 1   ==          8 00010000000000000000000000000000
-    vec($_, 4, 1) = 1   ==         16 00001000000000000000000000000000
-    vec($_, 5, 1) = 1   ==         32 00000100000000000000000000000000
-    vec($_, 6, 1) = 1   ==         64 00000010000000000000000000000000
-    vec($_, 7, 1) = 1   ==        128 00000001000000000000000000000000
-    vec($_, 8, 1) = 1   ==        256 00000000100000000000000000000000
-    vec($_, 9, 1) = 1   ==        512 00000000010000000000000000000000
-    vec($_,10, 1) = 1   ==       1024 00000000001000000000000000000000
-    vec($_,11, 1) = 1   ==       2048 00000000000100000000000000000000
-    vec($_,12, 1) = 1   ==       4096 00000000000010000000000000000000
-    vec($_,13, 1) = 1   ==       8192 00000000000001000000000000000000
-    vec($_,14, 1) = 1   ==      16384 00000000000000100000000000000000
-    vec($_,15, 1) = 1   ==      32768 00000000000000010000000000000000
-    vec($_,16, 1) = 1   ==      65536 00000000000000001000000000000000
-    vec($_,17, 1) = 1   ==     131072 00000000000000000100000000000000
-    vec($_,18, 1) = 1   ==     262144 00000000000000000010000000000000
-    vec($_,19, 1) = 1   ==     524288 00000000000000000001000000000000
-    vec($_,20, 1) = 1   ==    1048576 00000000000000000000100000000000
-    vec($_,21, 1) = 1   ==    2097152 00000000000000000000010000000000
-    vec($_,22, 1) = 1   ==    4194304 00000000000000000000001000000000
-    vec($_,23, 1) = 1   ==    8388608 00000000000000000000000100000000
-    vec($_,24, 1) = 1   ==   16777216 00000000000000000000000010000000
-    vec($_,25, 1) = 1   ==   33554432 00000000000000000000000001000000
-    vec($_,26, 1) = 1   ==   67108864 00000000000000000000000000100000
-    vec($_,27, 1) = 1   ==  134217728 00000000000000000000000000010000
-    vec($_,28, 1) = 1   ==  268435456 00000000000000000000000000001000
-    vec($_,29, 1) = 1   ==  536870912 00000000000000000000000000000100
-    vec($_,30, 1) = 1   == 1073741824 00000000000000000000000000000010
-    vec($_,31, 1) = 1   == 2147483648 00000000000000000000000000000001
-    vec($_, 0, 2) = 1   ==          1 10000000000000000000000000000000
-    vec($_, 1, 2) = 1   ==          4 00100000000000000000000000000000
-    vec($_, 2, 2) = 1   ==         16 00001000000000000000000000000000
-    vec($_, 3, 2) = 1   ==         64 00000010000000000000000000000000
-    vec($_, 4, 2) = 1   ==        256 00000000100000000000000000000000
-    vec($_, 5, 2) = 1   ==       1024 00000000001000000000000000000000
-    vec($_, 6, 2) = 1   ==       4096 00000000000010000000000000000000
-    vec($_, 7, 2) = 1   ==      16384 00000000000000100000000000000000
-    vec($_, 8, 2) = 1   ==      65536 00000000000000001000000000000000
-    vec($_, 9, 2) = 1   ==     262144 00000000000000000010000000000000
-    vec($_,10, 2) = 1   ==    1048576 00000000000000000000100000000000
-    vec($_,11, 2) = 1   ==    4194304 00000000000000000000001000000000
-    vec($_,12, 2) = 1   ==   16777216 00000000000000000000000010000000
-    vec($_,13, 2) = 1   ==   67108864 00000000000000000000000000100000
-    vec($_,14, 2) = 1   ==  268435456 00000000000000000000000000001000
-    vec($_,15, 2) = 1   == 1073741824 00000000000000000000000000000010
-    vec($_, 0, 2) = 2   ==          2 01000000000000000000000000000000
-    vec($_, 1, 2) = 2   ==          8 00010000000000000000000000000000
-    vec($_, 2, 2) = 2   ==         32 00000100000000000000000000000000
-    vec($_, 3, 2) = 2   ==        128 00000001000000000000000000000000
-    vec($_, 4, 2) = 2   ==        512 00000000010000000000000000000000
-    vec($_, 5, 2) = 2   ==       2048 00000000000100000000000000000000
-    vec($_, 6, 2) = 2   ==       8192 00000000000001000000000000000000
-    vec($_, 7, 2) = 2   ==      32768 00000000000000010000000000000000
-    vec($_, 8, 2) = 2   ==     131072 00000000000000000100000000000000
-    vec($_, 9, 2) = 2   ==     524288 00000000000000000001000000000000
-    vec($_,10, 2) = 2   ==    2097152 00000000000000000000010000000000
-    vec($_,11, 2) = 2   ==    8388608 00000000000000000000000100000000
-    vec($_,12, 2) = 2   ==   33554432 00000000000000000000000001000000
-    vec($_,13, 2) = 2   ==  134217728 00000000000000000000000000010000
-    vec($_,14, 2) = 2   ==  536870912 00000000000000000000000000000100
-    vec($_,15, 2) = 2   == 2147483648 00000000000000000000000000000001
-    vec($_, 0, 4) = 1   ==          1 10000000000000000000000000000000
-    vec($_, 1, 4) = 1   ==         16 00001000000000000000000000000000
-    vec($_, 2, 4) = 1   ==        256 00000000100000000000000000000000
-    vec($_, 3, 4) = 1   ==       4096 00000000000010000000000000000000
-    vec($_, 4, 4) = 1   ==      65536 00000000000000001000000000000000
-    vec($_, 5, 4) = 1   ==    1048576 00000000000000000000100000000000
-    vec($_, 6, 4) = 1   ==   16777216 00000000000000000000000010000000
-    vec($_, 7, 4) = 1   ==  268435456 00000000000000000000000000001000
-    vec($_, 0, 4) = 2   ==          2 01000000000000000000000000000000
-    vec($_, 1, 4) = 2   ==         32 00000100000000000000000000000000
-    vec($_, 2, 4) = 2   ==        512 00000000010000000000000000000000
-    vec($_, 3, 4) = 2   ==       8192 00000000000001000000000000000000
-    vec($_, 4, 4) = 2   ==     131072 00000000000000000100000000000000
-    vec($_, 5, 4) = 2   ==    2097152 00000000000000000000010000000000
-    vec($_, 6, 4) = 2   ==   33554432 00000000000000000000000001000000
-    vec($_, 7, 4) = 2   ==  536870912 00000000000000000000000000000100
-    vec($_, 0, 4) = 4   ==          4 00100000000000000000000000000000
-    vec($_, 1, 4) = 4   ==         64 00000010000000000000000000000000
-    vec($_, 2, 4) = 4   ==       1024 00000000001000000000000000000000
-    vec($_, 3, 4) = 4   ==      16384 00000000000000100000000000000000
-    vec($_, 4, 4) = 4   ==     262144 00000000000000000010000000000000
-    vec($_, 5, 4) = 4   ==    4194304 00000000000000000000001000000000
-    vec($_, 6, 4) = 4   ==   67108864 00000000000000000000000000100000
-    vec($_, 7, 4) = 4   == 1073741824 00000000000000000000000000000010
-    vec($_, 0, 4) = 8   ==          8 00010000000000000000000000000000
-    vec($_, 1, 4) = 8   ==        128 00000001000000000000000000000000
-    vec($_, 2, 4) = 8   ==       2048 00000000000100000000000000000000
-    vec($_, 3, 4) = 8   ==      32768 00000000000000010000000000000000
-    vec($_, 4, 4) = 8   ==     524288 00000000000000000001000000000000
-    vec($_, 5, 4) = 8   ==    8388608 00000000000000000000000100000000
-    vec($_, 6, 4) = 8   ==  134217728 00000000000000000000000000010000
-    vec($_, 7, 4) = 8   == 2147483648 00000000000000000000000000000001
-    vec($_, 0, 8) = 1   ==          1 10000000000000000000000000000000
-    vec($_, 1, 8) = 1   ==        256 00000000100000000000000000000000
-    vec($_, 2, 8) = 1   ==      65536 00000000000000001000000000000000
-    vec($_, 3, 8) = 1   ==   16777216 00000000000000000000000010000000
-    vec($_, 0, 8) = 2   ==          2 01000000000000000000000000000000
-    vec($_, 1, 8) = 2   ==        512 00000000010000000000000000000000
-    vec($_, 2, 8) = 2   ==     131072 00000000000000000100000000000000
-    vec($_, 3, 8) = 2   ==   33554432 00000000000000000000000001000000
-    vec($_, 0, 8) = 4   ==          4 00100000000000000000000000000000
-    vec($_, 1, 8) = 4   ==       1024 00000000001000000000000000000000
-    vec($_, 2, 8) = 4   ==     262144 00000000000000000010000000000000
-    vec($_, 3, 8) = 4   ==   67108864 00000000000000000000000000100000
-    vec($_, 0, 8) = 8   ==          8 00010000000000000000000000000000
-    vec($_, 1, 8) = 8   ==       2048 00000000000100000000000000000000
-    vec($_, 2, 8) = 8   ==     524288 00000000000000000001000000000000
-    vec($_, 3, 8) = 8   ==  134217728 00000000000000000000000000010000
-    vec($_, 0, 8) = 16  ==         16 00001000000000000000000000000000
-    vec($_, 1, 8) = 16  ==       4096 00000000000010000000000000000000
-    vec($_, 2, 8) = 16  ==    1048576 00000000000000000000100000000000
-    vec($_, 3, 8) = 16  ==  268435456 00000000000000000000000000001000
-    vec($_, 0, 8) = 32  ==         32 00000100000000000000000000000000
-    vec($_, 1, 8) = 32  ==       8192 00000000000001000000000000000000
-    vec($_, 2, 8) = 32  ==    2097152 00000000000000000000010000000000
-    vec($_, 3, 8) = 32  ==  536870912 00000000000000000000000000000100
-    vec($_, 0, 8) = 64  ==         64 00000010000000000000000000000000
-    vec($_, 1, 8) = 64  ==      16384 00000000000000100000000000000000
-    vec($_, 2, 8) = 64  ==    4194304 00000000000000000000001000000000
-    vec($_, 3, 8) = 64  == 1073741824 00000000000000000000000000000010
-    vec($_, 0, 8) = 128 ==        128 00000001000000000000000000000000
-    vec($_, 1, 8) = 128 ==      32768 00000000000000010000000000000000
-    vec($_, 2, 8) = 128 ==    8388608 00000000000000000000000100000000
-    vec($_, 3, 8) = 128 == 2147483648 00000000000000000000000000000001
+                                    0         1         2         3
+                     unpack("V",$_) 01234567890123456789012345678901
+  ------------------------------------------------------------------
+  vec($_, 0, 1) = 1   ==          1 10000000000000000000000000000000
+  vec($_, 1, 1) = 1   ==          2 01000000000000000000000000000000
+  vec($_, 2, 1) = 1   ==          4 00100000000000000000000000000000
+  vec($_, 3, 1) = 1   ==          8 00010000000000000000000000000000
+  vec($_, 4, 1) = 1   ==         16 00001000000000000000000000000000
+  vec($_, 5, 1) = 1   ==         32 00000100000000000000000000000000
+  vec($_, 6, 1) = 1   ==         64 00000010000000000000000000000000
+  vec($_, 7, 1) = 1   ==        128 00000001000000000000000000000000
+  vec($_, 8, 1) = 1   ==        256 00000000100000000000000000000000
+  vec($_, 9, 1) = 1   ==        512 00000000010000000000000000000000
+  vec($_,10, 1) = 1   ==       1024 00000000001000000000000000000000
+  vec($_,11, 1) = 1   ==       2048 00000000000100000000000000000000
+  vec($_,12, 1) = 1   ==       4096 00000000000010000000000000000000
+  vec($_,13, 1) = 1   ==       8192 00000000000001000000000000000000
+  vec($_,14, 1) = 1   ==      16384 00000000000000100000000000000000
+  vec($_,15, 1) = 1   ==      32768 00000000000000010000000000000000
+  vec($_,16, 1) = 1   ==      65536 00000000000000001000000000000000
+  vec($_,17, 1) = 1   ==     131072 00000000000000000100000000000000
+  vec($_,18, 1) = 1   ==     262144 00000000000000000010000000000000
+  vec($_,19, 1) = 1   ==     524288 00000000000000000001000000000000
+  vec($_,20, 1) = 1   ==    1048576 00000000000000000000100000000000
+  vec($_,21, 1) = 1   ==    2097152 00000000000000000000010000000000
+  vec($_,22, 1) = 1   ==    4194304 00000000000000000000001000000000
+  vec($_,23, 1) = 1   ==    8388608 00000000000000000000000100000000
+  vec($_,24, 1) = 1   ==   16777216 00000000000000000000000010000000
+  vec($_,25, 1) = 1   ==   33554432 00000000000000000000000001000000
+  vec($_,26, 1) = 1   ==   67108864 00000000000000000000000000100000
+  vec($_,27, 1) = 1   ==  134217728 00000000000000000000000000010000
+  vec($_,28, 1) = 1   ==  268435456 00000000000000000000000000001000
+  vec($_,29, 1) = 1   ==  536870912 00000000000000000000000000000100
+  vec($_,30, 1) = 1   == 1073741824 00000000000000000000000000000010
+  vec($_,31, 1) = 1   == 2147483648 00000000000000000000000000000001
+  vec($_, 0, 2) = 1   ==          1 10000000000000000000000000000000
+  vec($_, 1, 2) = 1   ==          4 00100000000000000000000000000000
+  vec($_, 2, 2) = 1   ==         16 00001000000000000000000000000000
+  vec($_, 3, 2) = 1   ==         64 00000010000000000000000000000000
+  vec($_, 4, 2) = 1   ==        256 00000000100000000000000000000000
+  vec($_, 5, 2) = 1   ==       1024 00000000001000000000000000000000
+  vec($_, 6, 2) = 1   ==       4096 00000000000010000000000000000000
+  vec($_, 7, 2) = 1   ==      16384 00000000000000100000000000000000
+  vec($_, 8, 2) = 1   ==      65536 00000000000000001000000000000000
+  vec($_, 9, 2) = 1   ==     262144 00000000000000000010000000000000
+  vec($_,10, 2) = 1   ==    1048576 00000000000000000000100000000000
+  vec($_,11, 2) = 1   ==    4194304 00000000000000000000001000000000
+  vec($_,12, 2) = 1   ==   16777216 00000000000000000000000010000000
+  vec($_,13, 2) = 1   ==   67108864 00000000000000000000000000100000
+  vec($_,14, 2) = 1   ==  268435456 00000000000000000000000000001000
+  vec($_,15, 2) = 1   == 1073741824 00000000000000000000000000000010
+  vec($_, 0, 2) = 2   ==          2 01000000000000000000000000000000
+  vec($_, 1, 2) = 2   ==          8 00010000000000000000000000000000
+  vec($_, 2, 2) = 2   ==         32 00000100000000000000000000000000
+  vec($_, 3, 2) = 2   ==        128 00000001000000000000000000000000
+  vec($_, 4, 2) = 2   ==        512 00000000010000000000000000000000
+  vec($_, 5, 2) = 2   ==       2048 00000000000100000000000000000000
+  vec($_, 6, 2) = 2   ==       8192 00000000000001000000000000000000
+  vec($_, 7, 2) = 2   ==      32768 00000000000000010000000000000000
+  vec($_, 8, 2) = 2   ==     131072 00000000000000000100000000000000
+  vec($_, 9, 2) = 2   ==     524288 00000000000000000001000000000000
+  vec($_,10, 2) = 2   ==    2097152 00000000000000000000010000000000
+  vec($_,11, 2) = 2   ==    8388608 00000000000000000000000100000000
+  vec($_,12, 2) = 2   ==   33554432 00000000000000000000000001000000
+  vec($_,13, 2) = 2   ==  134217728 00000000000000000000000000010000
+  vec($_,14, 2) = 2   ==  536870912 00000000000000000000000000000100
+  vec($_,15, 2) = 2   == 2147483648 00000000000000000000000000000001
+  vec($_, 0, 4) = 1   ==          1 10000000000000000000000000000000
+  vec($_, 1, 4) = 1   ==         16 00001000000000000000000000000000
+  vec($_, 2, 4) = 1   ==        256 00000000100000000000000000000000
+  vec($_, 3, 4) = 1   ==       4096 00000000000010000000000000000000
+  vec($_, 4, 4) = 1   ==      65536 00000000000000001000000000000000
+  vec($_, 5, 4) = 1   ==    1048576 00000000000000000000100000000000
+  vec($_, 6, 4) = 1   ==   16777216 00000000000000000000000010000000
+  vec($_, 7, 4) = 1   ==  268435456 00000000000000000000000000001000
+  vec($_, 0, 4) = 2   ==          2 01000000000000000000000000000000
+  vec($_, 1, 4) = 2   ==         32 00000100000000000000000000000000
+  vec($_, 2, 4) = 2   ==        512 00000000010000000000000000000000
+  vec($_, 3, 4) = 2   ==       8192 00000000000001000000000000000000
+  vec($_, 4, 4) = 2   ==     131072 00000000000000000100000000000000
+  vec($_, 5, 4) = 2   ==    2097152 00000000000000000000010000000000
+  vec($_, 6, 4) = 2   ==   33554432 00000000000000000000000001000000
+  vec($_, 7, 4) = 2   ==  536870912 00000000000000000000000000000100
+  vec($_, 0, 4) = 4   ==          4 00100000000000000000000000000000
+  vec($_, 1, 4) = 4   ==         64 00000010000000000000000000000000
+  vec($_, 2, 4) = 4   ==       1024 00000000001000000000000000000000
+  vec($_, 3, 4) = 4   ==      16384 00000000000000100000000000000000
+  vec($_, 4, 4) = 4   ==     262144 00000000000000000010000000000000
+  vec($_, 5, 4) = 4   ==    4194304 00000000000000000000001000000000
+  vec($_, 6, 4) = 4   ==   67108864 00000000000000000000000000100000
+  vec($_, 7, 4) = 4   == 1073741824 00000000000000000000000000000010
+  vec($_, 0, 4) = 8   ==          8 00010000000000000000000000000000
+  vec($_, 1, 4) = 8   ==        128 00000001000000000000000000000000
+  vec($_, 2, 4) = 8   ==       2048 00000000000100000000000000000000
+  vec($_, 3, 4) = 8   ==      32768 00000000000000010000000000000000
+  vec($_, 4, 4) = 8   ==     524288 00000000000000000001000000000000
+  vec($_, 5, 4) = 8   ==    8388608 00000000000000000000000100000000
+  vec($_, 6, 4) = 8   ==  134217728 00000000000000000000000000010000
+  vec($_, 7, 4) = 8   == 2147483648 00000000000000000000000000000001
+  vec($_, 0, 8) = 1   ==          1 10000000000000000000000000000000
+  vec($_, 1, 8) = 1   ==        256 00000000100000000000000000000000
+  vec($_, 2, 8) = 1   ==      65536 00000000000000001000000000000000
+  vec($_, 3, 8) = 1   ==   16777216 00000000000000000000000010000000
+  vec($_, 0, 8) = 2   ==          2 01000000000000000000000000000000
+  vec($_, 1, 8) = 2   ==        512 00000000010000000000000000000000
+  vec($_, 2, 8) = 2   ==     131072 00000000000000000100000000000000
+  vec($_, 3, 8) = 2   ==   33554432 00000000000000000000000001000000
+  vec($_, 0, 8) = 4   ==          4 00100000000000000000000000000000
+  vec($_, 1, 8) = 4   ==       1024 00000000001000000000000000000000
+  vec($_, 2, 8) = 4   ==     262144 00000000000000000010000000000000
+  vec($_, 3, 8) = 4   ==   67108864 00000000000000000000000000100000
+  vec($_, 0, 8) = 8   ==          8 00010000000000000000000000000000
+  vec($_, 1, 8) = 8   ==       2048 00000000000100000000000000000000
+  vec($_, 2, 8) = 8   ==     524288 00000000000000000001000000000000
+  vec($_, 3, 8) = 8   ==  134217728 00000000000000000000000000010000
+  vec($_, 0, 8) = 16  ==         16 00001000000000000000000000000000
+  vec($_, 1, 8) = 16  ==       4096 00000000000010000000000000000000
+  vec($_, 2, 8) = 16  ==    1048576 00000000000000000000100000000000
+  vec($_, 3, 8) = 16  ==  268435456 00000000000000000000000000001000
+  vec($_, 0, 8) = 32  ==         32 00000100000000000000000000000000
+  vec($_, 1, 8) = 32  ==       8192 00000000000001000000000000000000
+  vec($_, 2, 8) = 32  ==    2097152 00000000000000000000010000000000
+  vec($_, 3, 8) = 32  ==  536870912 00000000000000000000000000000100
+  vec($_, 0, 8) = 64  ==         64 00000010000000000000000000000000
+  vec($_, 1, 8) = 64  ==      16384 00000000000000100000000000000000
+  vec($_, 2, 8) = 64  ==    4194304 00000000000000000000001000000000
+  vec($_, 3, 8) = 64  == 1073741824 00000000000000000000000000000010
+  vec($_, 0, 8) = 128 ==        128 00000001000000000000000000000000
+  vec($_, 1, 8) = 128 ==      32768 00000000000000010000000000000000
+  vec($_, 2, 8) = 128 ==    8388608 00000000000000000000000100000000
+  vec($_, 3, 8) = 128 == 2147483648 00000000000000000000000000000001
 
 =item wait
 X<wait>
