@@ -332,7 +332,7 @@
 
 static void restore_pos(pTHX_ void *arg);
 
-#define REGCP_PAREN_ELEMS 4
+#define REGCP_PAREN_ELEMS 3
 #define REGCP_OTHER_ELEMS 3
 #define REGCP_FRAME_ELEMS 1
 /* REGCP_FRAME_ELEMS are not part of the REGCP_OTHER_ELEMS and
@@ -346,7 +346,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
     const int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
     const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
     const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
-    int p;
+    I32 p;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCPPUSH;
@@ -370,12 +370,11 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 		PTR2UV(rex->offs)
 	    );
     );
-    for (p = PL_regsize; p > parenfloor; p--) {
+    for (p = parenfloor+1; p <= (I32)PL_regsize;  p++) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(rex->offs[p].end);
 	SSPUSHINT(rex->offs[p].start);
 	SSPUSHINT(rex->offs[p].start_tmp);
-	SSPUSHINT(p);
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
 	    "    \\%"UVuf": %"IVdf"(%"IVdf")..%"IVdf"\n",
 	    (UV)p,
@@ -414,6 +413,7 @@ S_regcppop(pTHX_ regexp *rex)
 {
     dVAR;
     UV i;
+    U32 paren;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCPPOP;
@@ -436,9 +436,9 @@ S_regcppop(pTHX_ regexp *rex)
 		PTR2UV(rex->offs)
 	    );
     );
+    paren = PL_regsize;
     for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
-	U32 paren = (U32)SSPOPINT;
 	rex->offs[paren].start_tmp = SSPOPINT;
 	rex->offs[paren].start = SSPOPINT;
 	tmps = SSPOPINT;
@@ -452,6 +452,7 @@ S_regcppop(pTHX_ regexp *rex)
 	    (IV)rex->offs[paren].end,
 	    (paren > rex->lastparen ? "(skipped)" : ""));
 	);
+	paren--;
     }
 #if 1
     /* It would seem that the similar code in regtry()
