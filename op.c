@@ -7124,7 +7124,9 @@ CV *
 Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 {
     PERL_ARGS_ASSERT_NEWXS;
-    return newXS_flags(name, subaddr, filename, NULL, 0);
+    return newXS_len_flags(
+	name, name ? strlen(name) : 0, subaddr, filename, NULL, NULL, 0
+    );
 }
 
 #ifdef PERL_MAD
