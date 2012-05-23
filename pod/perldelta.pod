@@ -4160,6 +4160,13 @@ started [perl #37033].
 C<< die; >> with a non-reference, non-string, or magical (e.g., tainted)
 value in $@ now properly propagates that value [perl #111654].
 
+=item *
+
+Unicode 6.1 published an incorrect alias for one of the
+Canonical_Combining_Class property's values (which range between 0 and
+254).  The alias C<CCC133> should have been C<CCC132>.  Perl now
+overrides the data file furnished by Unicode to give the correct value.
+
 =back
 
 =head1 Known Problems

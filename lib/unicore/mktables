@@ -9156,6 +9156,9 @@ sub process_PropValueAliases {
     # Process each line of the file ...
     while ($file->next_line) {
 
+        # Fix typo in input file
+        s/CCC133/CCC132/g if $v_version eq v6.1.0;
+
         my ($property, @data) = split /\s*;\s*/;
 
         # The ccc property has an extra field at the beginning, which is the
