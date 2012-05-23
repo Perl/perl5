@@ -1040,6 +1040,12 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 static int store(pTHX_ stcxt_t *cxt, SV *sv);
 static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
 
+#define UNSEE()                             \
+  STMT_START {                              \
+    av_pop(cxt->aseen);                     \
+    cxt->tagnum--;                          \
+  } STMT_END
+
 /*
  * Dynamic dispatching table for SV store.
  */
@@ -4215,8 +4221,12 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	    attached = scalar_call(aTHX_ rv, attach_hook, clone, av, G_SCALAR);
 	    if (attached &&
 	        SvROK(attached) && 
-	        sv_derived_from(attached, classname))
+	        sv_derived_from(attached, classname)
+        ) {
+	        UNSEE();
+	        SEEN(SvRV(attached), 0, 0);
 	        return SvRV(attached);
+        }
 	    CROAK(("STORABLE_attach did not return a %s object", classname));
 	}
 
