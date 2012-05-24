@@ -1453,7 +1453,7 @@ easier to embed recursive patterns inside of a C<qr//> construct
 for later use:
 
     my $parens = qr/(\((?:[^()]++|(?-1))*+\))/;
-    if (/foo $parens \s+ + \s+ bar $parens/x) {
+    if (/foo $parens \s+ \+ \s+ bar $parens/x) {
        # do something here...
     }
 
