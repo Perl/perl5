@@ -2230,7 +2230,6 @@ PP(pp_subst)
 	}
 	d = s;
 	PL_curpm = pm;
-	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		rxtainted |= SUBST_TAINT_PAT;

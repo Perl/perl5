@@ -7621,8 +7621,6 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
        Swings and roundabouts.  */
     SvUPGRADE(sv, SVt_PV);
 
-    SvSCREAM_off(sv);
-
     if (append) {
 	if (PerlIO_isutf8(fp)) {
 	    if (!SvUTF8(sv)) {
