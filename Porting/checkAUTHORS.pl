@@ -802,6 +802,7 @@ rjbs\100cpan.org                        rjbs-perl-p5p\100lists.manxome.org
 +                                       perl.p5p\100rjbs.manxome.org
 rjk\100linguist.dartmouth.edu           rjk\100linguist.thayer.dartmouth.edu
 +                                       rjk-perl-p5p\100tamias.net
++                                       rjk\100tamias.net
 rjray\100redhat.com                     rjray\100uswest.com
 rmgiroux\100acm.org                     rmgiroux\100hotmail.com
 +                                       mgiroux\100bear.com
