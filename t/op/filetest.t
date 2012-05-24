@@ -89,21 +89,21 @@ like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 }
 # Make sure -l is using the previous stat buffer, and not using the previ-
 # ous op’s return value as a file name.
+# t/TEST can be a symlink under -Dmksymlinks, so use our temporary file.
 SKIP: {
  use Perl::OSType 'os_type';
  if (os_type ne 'Unix') { skip "Not Unix", 2 }
- if (-l "TEST") { skip "TEST is a symlink", 2 }
  chomp(my $ln = `which ln`);
  if ( ! -e $ln ) { skip "No ln"   , 2 }
- lstat "TEST";
- `ln -s TEST 1`;
+ lstat $ro_empty_file;
+ `ln -s $ro_empty_file 1`;
  ok ! -l -e _, 'stacked -l uses previous stat, not previous retval';
  unlink 1;
 
  # Since we already have our skip block set up, we might as well put this
  # test here, too:
  # -l always treats a non-bareword argument as a file name
- system qw "ln -s TEST", \*foo;
+ system 'ln', '-s', $ro_empty_file, \*foo;
  local $^W = 1;
  ok -l \*foo, '-l \*foo is a file name';
  unlink \*foo;
