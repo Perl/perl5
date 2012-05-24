@@ -24,8 +24,11 @@
  * ADDRCONSTEXT,NEEDCONSTEXT: initialization of data with non-constant values
  *                            (e.g. pointer fields of descriptors)
  */
-#if defined(__DECC) || defined(__DECCXX)
+#ifdef __DECC
 #  pragma message disable (ADDRCONSTEXT,NEEDCONSTEXT)
+#endif
+#ifdef __DECCXX
+#  pragma message informational (INTSIGNCHANGE,CASTQUALTYP,ASSCOMMEA,NOCTOBUTCONREFM)
 #endif
 
 /* DEC's C compilers and gcc use incompatible definitions of _to(upp|low)er() */
@@ -682,6 +685,10 @@ struct mystat
  * their prototypes are already in proto.h.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void	prime_env_iter (void);
 void	init_os_extras (void);
 int	Perl_vms_status_to_unix(int vms_status, int child_flag);
@@ -771,6 +778,11 @@ struct passwd *	Perl_my_getpwnam (pTHX_ const char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
 void	Perl_my_endpwent (pTHX);
 char *	my_getlogin (void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 
 #ifndef VMS_DO_SOCKETS
