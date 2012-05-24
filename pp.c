@@ -649,89 +649,16 @@ PP(pp_study)
 {
     dVAR; dSP; dPOPss;
     register unsigned char *s;
-    char *sfirst_raw;
     STRLEN len;
-    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_study) : NULL;
-    U8 quanta;
-    STRLEN size;
-
-    if (mg && SvSCREAM(sv))
-	RETPUSHYES;
 
     s = (unsigned char*)(SvPV(sv, len));
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
-	/* No point in studying a zero length string, and not safe to study
-	   anything that doesn't appear to be a simple scalar (and hence might
-	   change between now and when the regexp engine runs without our set
-	   magic ever running) such as a reference to an object with overloaded
-	   stringification.  Also refuse to study an FBM scalar, as this gives
-	   more flexibility in SV flag usage.  No real-world code would ever
-	   end up studying an FBM scalar, so this isn't a real pessimisation.
-	   Endemic use of I32 in Perl_screaminstr makes it hard to safely push
-	   the study length limit from I32_MAX to U32_MAX - 1.
-	*/
+	/* Historically, study was skipped in these cases. */
 	RETPUSHNO;
     }
 
     /* Make study a no-op. It's no longer useful and its existence
-       complicates matters elsewhere. This is a low-impact band-aid.
-       The relevant code will be neatly removed in a future release. */
-    RETPUSHYES;
-
-    if (len < 0xFF) {
-	quanta = 1;
-    } else if (len < 0xFFFF) {
-	quanta = 2;
-    } else
-	quanta = 4;
-
-    size = (256 + len) * quanta;
-    sfirst_raw = (char *)safemalloc(size);
-
-    if (!sfirst_raw)
-	DIE(aTHX_ "do_study: out of memory");
-
-    SvSCREAM_on(sv);
-    if (!mg)
-	mg = sv_magicext(sv, NULL, PERL_MAGIC_study, &PL_vtbl_regexp, NULL, 0);
-    mg->mg_ptr = sfirst_raw;
-    mg->mg_len = size;
-    mg->mg_private = quanta;
-
-    memset(sfirst_raw, ~0, 256 * quanta);
-
-    /* The assumption here is that most studied strings are fairly short, hence
-       the pain of the extra code is worth it, given the memory savings.
-       80 character string, 336 bytes as U8, down from 1344 as U32
-       800 character string, 2112 bytes as U16, down from 4224 as U32
-    */
-       
-    if (quanta == 1) {
-	U8 *const sfirst = (U8 *)sfirst_raw;
-	U8 *const snext = sfirst + 256;
-	while (len-- > 0) {
-	    const U8 ch = s[len];
-	    snext[len] = sfirst[ch];
-	    sfirst[ch] = len;
-	}
-    } else if (quanta == 2) {
-	U16 *const sfirst = (U16 *)sfirst_raw;
-	U16 *const snext = sfirst + 256;
-	while (len-- > 0) {
-	    const U8 ch = s[len];
-	    snext[len] = sfirst[ch];
-	    sfirst[ch] = len;
-	}
-    } else  {
-	U32 *const sfirst = (U32 *)sfirst_raw;
-	U32 *const snext = sfirst + 256;
-	while (len-- > 0) {
-	    const U8 ch = s[len];
-	    snext[len] = sfirst[ch];
-	    sfirst[ch] = len;
-	}
-    }
-
+       complicates matters elsewhere. */
     RETPUSHYES;
 }
 
