@@ -569,6 +569,8 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_RE_INTUIT_START;
+    PERL_UNUSED_ARG(flags);
+    PERL_UNUSED_ARG(data);
 
     RX_MATCH_UTF8_set(rx,utf8_target);
 
@@ -687,6 +689,8 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     {
         I32 srch_start_shift = start_shift;
         I32 srch_end_shift = end_shift;
+        U8* start_point;
+        U8* end_point;
         if (srch_start_shift < 0 && strbeg - s > srch_start_shift) {
 	    srch_end_shift -= ((strbeg - s) - srch_start_shift); 
 	    srch_start_shift = strbeg - s;
@@ -699,42 +703,6 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
             (IV)prog->check_end_shift);
     });       
         
-    if ((flags & REXEC_SCREAM) && SvSCREAM(sv)) {
-	I32 p = -1;			/* Internal iterator of scream. */
-	I32 * const pp = data ? data->scream_pos : &p;
-	const MAGIC *mg;
-	bool found = FALSE;
-
-	assert(SvMAGICAL(sv));
-	mg = mg_find(sv, PERL_MAGIC_study);
-	assert(mg);
-
-	if (mg->mg_private == 1) {
-	    found = ((U8 *)mg->mg_ptr)[BmRARE(check)] != (U8)~0;
-	} else if (mg->mg_private == 2) {
-	    found = ((U16 *)mg->mg_ptr)[BmRARE(check)] != (U16)~0;
-	} else {
-	    assert (mg->mg_private == 4);
-	    found = ((U32 *)mg->mg_ptr)[BmRARE(check)] != (U32)~0;
-	}
-
-	if (found
-	    || ( BmRARE(check) == '\n'
-		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
-		 && SvTAIL(check) ))
-	    s = screaminstr(sv, check,
-			    srch_start_shift + (s - strbeg), srch_end_shift, pp, 0);
-	else
-	    goto fail_finish;
-	/* we may be pointing at the wrong string */
-	if (s && RXp_MATCH_COPIED(prog))
-	    s = strbeg + (s - SvPVX_const(sv));
-	if (data)
-	    *data->scream_olds = s;
-    }
-    else {
-        U8* start_point;
-        U8* end_point;
         if (prog->extflags & RXf_CANY_SEEN) {
             start_point= (U8*)(s + srch_start_shift);
             end_point= (U8*)(strend - srch_end_shift);
@@ -751,7 +719,6 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 
 	s = fbm_instr( start_point, end_point,
 		      check, multiline ? FBMrf_MULTILINE : 0);
-    }
     }
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
@@ -2357,12 +2324,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	dontbother = end_shift;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
-		((flags & REXEC_SCREAM) && SvSCREAM(sv)
-		 ? (s = screaminstr(sv, must, HOP3c(s, back_min, (back_min<0 ? strbeg : strend)) - strbeg,
-				    end_shift, &scream_pos, 0))
-		 : (s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
+		(s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
 				  (unsigned char*)strend, must,
-				  multiline ? FBMrf_MULTILINE : 0))) ) {
+				  multiline ? FBMrf_MULTILINE : 0)) ) {
 	    /* we may be pointing at the wrong string */
 	    if ((flags & REXEC_SCREAM) && RXp_MATCH_COPIED(prog))
 		s = strbeg + (s - SvPVX_const(sv));
@@ -2431,24 +2395,15 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	    /* Trim the end. */
 	    char *last= NULL;
 	    SV* float_real;
+	    STRLEN len;
+	    const char *little;
 
 	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
 		utf8_target ? to_utf8_substr(prog) : to_byte_substr(prog);
 	    float_real = utf8_target ? prog->float_utf8 : prog->float_substr;
 
-	    if ((flags & REXEC_SCREAM) && SvSCREAM(sv)) {
-		last = screaminstr(sv, float_real, s - strbeg,
-				   end_shift, &scream_pos, 1); /* last one */
-		if (!last)
-		    last = scream_olds; /* Only one occurrence. */
-		/* we may be pointing at the wrong string */
-		else if (RXp_MATCH_COPIED(prog))
-		    s = strbeg + (s - SvPVX_const(sv));
-	    }
-	    else {
-		STRLEN len;
-                const char * const little = SvPV_const(float_real, len);
-		if (SvTAIL(float_real)) {
+            little = SvPV_const(float_real, len);
+	    if (SvTAIL(float_real)) {
 		    /* This means that float_real contains an artificial \n on the end
 		     * due to the presence of something like this: /foo$/
 		     * where we can match both "foo" and "foo\n" at the end of the string.
@@ -2494,13 +2449,12 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 			/* multiline match, so we have to search for a place where the full string is located */
 			goto find_last;
 		    }
-		} else {
+	    } else {
 		  find_last:
 		    if (len)
 			last = rninstr(s, strend, little, little + len);
 		    else
 			last = strend;	/* matching "$" */
-		}
 	    }
 	    if (!last) {
 		/* at one point this block contained a comment which was probably

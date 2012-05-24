@@ -1337,8 +1337,6 @@ PP(pp_match)
 	    || SvTEMP(TARG) || SvAMAGIC(TARG) || PL_sawampersand
 	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;
-    if (SvSCREAM(TARG))
-	r_flags |= REXEC_SCREAM;
 
   play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
@@ -2143,8 +2141,6 @@ PP(pp_subst)
     r_flags = (RX_NPARENS(rx) || SvTEMP(TARG) || PL_sawampersand
 	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)) )
 	       ? REXEC_COPY_STR : 0;
-    if (SvSCREAM(TARG))
-	r_flags |= REXEC_SCREAM;
 
     orig = m = s;
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
