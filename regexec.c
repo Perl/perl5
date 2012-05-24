@@ -2327,9 +2327,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 		(s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
 				  (unsigned char*)strend, must,
 				  multiline ? FBMrf_MULTILINE : 0)) ) {
-	    /* we may be pointing at the wrong string */
-	    if ((flags & REXEC_SCREAM) && RXp_MATCH_COPIED(prog))
-		s = strbeg + (s - SvPVX_const(sv));
 	    DEBUG_EXECUTE_r( did_match = 1 );
 	    if (HOPc(s, -back_max) > last1) {
 		last1 = HOPc(s, -back_min);

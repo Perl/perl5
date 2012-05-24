@@ -1357,9 +1357,6 @@ PP(pp_match)
 	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
 	     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
-	     && ((RX_EXTFLAGS(rx) & RXf_NOSCAN)
-		 || !((RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL)
-		      && (r_flags & REXEC_SCREAM)))
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
@@ -2152,10 +2149,7 @@ PP(pp_subst)
 	/* How to do it in subst? */
 /*	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && !(RX_EXTFLAGS(rx) & RXf_KEEPCOPY)
-	     && ((RX_EXTFLAGS(rx) & RXf_NOSCAN)
-		 || !((RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL)
-		      && (r_flags & REXEC_SCREAM))))
+	     && !(RX_EXTFLAGS(rx) & RXf_KEEPCOPY))
 	    goto yup;
 */
     }
