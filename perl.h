@@ -1381,13 +1381,13 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 #ifdef HAS_STRERROR
+#ifndef DONT_DECLARE_STD
 #       ifdef VMS
 	char *strerror (int,...);
 #       else
-#ifndef DONT_DECLARE_STD
 	char *strerror (int);
-#endif
 #       endif
+#endif
 #       ifndef Strerror
 #           define Strerror strerror
 #       endif
