@@ -557,11 +557,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 
     PERL_ARGS_ASSERT_FBM_COMPILE;
 
-    /* Refuse to fbm_compile a studied scalar, as this gives more flexibility in
-       SV flag usage.  No real-world code would ever end up using a studied
-       scalar as a compile-time second argument to index, so this isn't a real
-       pessimisation.  */
-    if (SvSCREAM(sv))
+    if (isGV_with_GP(sv))
 	return;
 
     if (SvVALID(sv))
