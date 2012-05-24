@@ -3385,7 +3385,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		U32 charcount = 0; /* how many input chars we have matched */
 		U32 accepted = 0; /* have we seen any accepting states? */
 
-		ST.B = next;
 		ST.jump = trie->jump;
 		ST.me = scan;
 		ST.firstpos = NULL;
@@ -3582,9 +3581,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_reginput = (char *)uc;
 	    }
 
-	    scan = (ST.jump && ST.jump[ST.nextword]) 
-			? ST.me + ST.jump[ST.nextword]
-			: ST.B;
+	    scan = ST.me + ((ST.jump && ST.jump[ST.nextword])
+			    ? ST.jump[ST.nextword]
+			    : NEXT_OFF(ST.me));
 
 	    DEBUG_EXECUTE_r({
 		PerlIO_printf( Perl_debug_log,

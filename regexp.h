@@ -630,14 +630,13 @@ typedef struct regmatch_state {
 	    CHECKPOINT cp;
 
 	    U32		accepted; /* how many accepting states left */
+	    bool	longfold;/* saw a fold with a 1->n char mapping */
 	    U16         *jump;  /* positive offsets from me */
-	    regnode	*B;	/* node following the trie */
 	    regnode	*me;	/* Which node am I - needed for jump tries*/
 	    U8		*firstpos;/* pos in string of first trie match */
 	    U32		firstchars;/* len in chars of firstpos from start */
 	    U16		nextword;/* next word to try */
 	    U16		topword; /* longest accepted word */
-	    bool	longfold;/* saw a fold with a 1->n char mapping */
 	} trie;
 
         /* special types - these members are used to store state for special
