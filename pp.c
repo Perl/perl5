@@ -413,10 +413,7 @@ PP(pp_rv2cv)
     /* (But not in defined().) */
 
     CV *cv = sv_2cv(TOPs, &stash_unused, &gv, flags);
-    if (cv) {
-	if (CvCLONE(cv))
-	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
-    }
+    if (cv) NOOP;
     else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
 	cv = MUTABLE_CV(gv);
     }    
