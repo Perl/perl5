@@ -504,7 +504,7 @@ for my $tref ( @NumTests ){
 {
     local $~ = '';
     eval { write };
-    like $@, qr/Not a format reference/, 'format reference';
+    like $@, qr/Undefined format ""/, 'format with 0-length name';
 
     $~ = "NOSUCHFORMAT";
     eval { write };

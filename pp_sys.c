@@ -1361,18 +1361,13 @@ PP(pp_enterwrite)
     else
 	fgv = gv;
 
-    if (!fgv)
-	goto not_a_format_reference;
+    assert(fgv);
 
     cv = GvFORM(fgv);
     if (!cv) {
 	tmpsv = sv_newmortal();
 	gv_efullname4(tmpsv, fgv, NULL, FALSE);
-	if (SvPOK(tmpsv) && *SvPV_nolen_const(tmpsv))
-	    DIE(aTHX_ "Undefined format \"%"SVf"\" called", SVfARG(tmpsv));
-
-	not_a_format_reference:
-	DIE(aTHX_ "Not a format reference");
+	DIE(aTHX_ "Undefined format \"%"SVf"\" called", SVfARG(tmpsv));
     }
     IoFLAGS(io) &= ~IOf_DIDTOP;
     return doform(cv,gv,PL_op->op_next);

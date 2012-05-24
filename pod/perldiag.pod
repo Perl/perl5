@@ -3186,11 +3186,6 @@ subroutine), but found a reference to something else instead.  You can
 use the ref() function to find out what kind of ref it really was.  See
 also L<perlref>.
 
-=item Not a format reference
-
-(F) I'm not sure how you managed to generate a reference to an anonymous
-format, but this indicates you did, and that it didn't exist.
-
 =item Not a GLOB reference
 
 (F) Perl was trying to evaluate a reference to a "typeglob" (that is, a
