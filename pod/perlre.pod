@@ -31,8 +31,8 @@ L<perlop/"Gory details of parsing quoted constructs">.
 X</m> X<regex, multiline> X<regexp, multiline> X<regular expression, multiline>
 
 Treat string as multiple lines.  That is, change "^" and "$" from matching
-the start or end of the string to matching the start or end of any
-line anywhere within the string.
+the start or end of line only at the left and right ends of the string to
+matching them anywhere within the string.
 
 =item s
 X</s> X<regex, single-line> X<regexp, single-line>
