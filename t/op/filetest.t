@@ -9,13 +9,13 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 48 + 27*14);
+plan(tests => 49 + 27*14);
 
-ok( -d 'op' );
-ok( -f 'TEST' );
-ok( !-f 'op' );
-ok( !-d 'TEST' );
-ok( -r 'TEST' );
+is(-d 'op', 1);
+is(-f 'TEST', 1);
+isnt(-f 'op', 1);
+isnt(-d 'TEST', 1);
+is(-r 'TEST', 1);
 
 # Make a read only file. This happens to be empty, so we also use it later.
 my $ro_empty_file = tempfile();
@@ -39,7 +39,7 @@ SKIP: {
 	++$restore_root;
     }
 
-    ok( !-w $ro_empty_file );
+    isnt(-w $ro_empty_file, 1);
 
     if ($restore_root) {
 	# If the previous assignment to $> worked, so should this:
@@ -50,31 +50,32 @@ SKIP: {
 
 # these would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
-ok( -r 'op' );
-ok( -w 'op' );
-ok( -x 'op' ); # Hohum.  Are directories -x everywhere?
+is(-r 'op', 1);
+is(-w 'op', 1);
+is(-x 'op', 1); # Hohum.  Are directories -x everywhere?
 
 is( "@{[grep -r, qw(foo io noo op zoo)]}", "io op" );
 
 # Test stackability of filetest operators
 
-ok( defined( -f -d 'TEST' ) && ! -f -d _ );
-ok( !defined( -e 'zoo' ) );
-ok( !defined( -e -d 'zoo' ) );
-ok( !defined( -f -e 'zoo' ) );
-ok( -f -e 'TEST' );
-ok( -e -f 'TEST' );
-ok( defined(-d -e 'TEST') );
-ok( defined(-e -d 'TEST') );
-ok( ! -f -d 'op' );
-ok( -x -d -x 'op' );
+is(defined( -f -d 'TEST' ), 1);
+isnt(-f -d _, 1);
+isnt(defined( -e 'zoo' ), 1);
+isnt(defined( -e -d 'zoo' ), 1);
+isnt(defined( -f -e 'zoo' ), 1);
+is(-f -e 'TEST', 1);
+is(-e -f 'TEST', 1);
+is(defined(-d -e 'TEST'), 1);
+is(defined(-e -d 'TEST'), 1);
+isnt( -f -d 'op', 1);
+is(-x -d -x 'op', 1);
 my ($size) = (stat 'TEST')[7];
 cmp_ok($size, '>', 1, 'TEST is longer than 1 byte');
 is( (-s -f 'TEST'), $size, "-s returns real size" );
-ok( -f -s 'TEST' == 1 );
+is(-f -s 'TEST', 1);
 
 # now with an empty file
-ok( -f $ro_empty_file );
+is(-f $ro_empty_file, 1);
 is( -s $ro_empty_file, 0 );
 is( -f -s $ro_empty_file, 0 );
 is( -s -f $ro_empty_file, 0 );
@@ -99,7 +100,7 @@ SKIP: {
  if ( ! -e $ln ) { skip "No ln"   , 2 }
  lstat $ro_empty_file;
  `ln -s $ro_empty_file 1`;
- ok ! -l -e _, 'stacked -l uses previous stat, not previous retval';
+ isnt(-l -e _, 1, 'stacked -l uses previous stat, not previous retval');
  unlink 1;
 
  # Since we already have our skip block set up, we might as well put this
@@ -107,16 +108,16 @@ SKIP: {
  # -l always treats a non-bareword argument as a file name
  system 'ln', '-s', $ro_empty_file, \*foo;
  local $^W = 1;
- ok -l \*foo, '-l \*foo is a file name';
+ is(-l \*foo, 1, '-l \*foo is a file name');
  unlink \*foo;
 }
 
 # test that _ is a bareword after filetest operators
 
 -f 'TEST';
-ok( -f _ );
+is(-f _, 1);
 sub _ { "this is not a file name" }
-ok( -f _ );
+is(-f _, 1);
 
 my $over;
 {
@@ -171,7 +172,8 @@ eval { require Fcntl } or $fcntl_not_available = 1;
 
 for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     $over = [];
-    ok( my $rv = eval "-$op \$ft",  "overloaded -$op succeeds" )
+    my $rv = eval "-$op \$ft";
+    isnt( $rv, undef,               "overloaded -$op succeeds" )
         or diag( $@ );
     is( $over->[0], $ftstr,         "correct object for overloaded -$op" );
     is( $over->[1], $op,            "correct op for overloaded -$op" );
@@ -190,8 +192,7 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 
     $over = 0;
     $rv = eval "-$op \$str";
-    ok( !$@,                        "-$op succeeds with string overloading" )
-        or diag( $@ );
+    is($@, "",                      "-$op succeeds with string overloading");
     is( $rv, eval "-$op 'TEST'",    "correct -$op on string overload" );
     is( $over,      $exp,           "string overload $is called for -$op" );
 
@@ -213,8 +214,7 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
     is( $rv,        "-$op",         "correct -$op on string/-X overload" );
 
     $rv = eval "-$op \$neither";
-    ok( !$@,                        "-$op succeeds with random overloading" )
-        or diag( $@ );
+    is($@, "",                      "-$op succeeds with random overloading");
     is( $rv, eval "-$op \$nstr",    "correct -$op with random overloading" );
 
     is( eval "-r -$op \$ft", "-r",      "stacked overloaded -$op" );
@@ -230,8 +230,8 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 # -l and fatal warnings
 stat "test.pl";
 eval { use warnings FATAL => io; -l cradd };
-ok !stat _,
-  'fatal warnings do not prevent -l HANDLE from setting stat status';
+isnt(stat _, 1,
+     'fatal warnings do not prevent -l HANDLE from setting stat status');
 
 # File test ops should not call get-magic on the topmost SV on the stack if
 # it belongs to another op.
@@ -278,17 +278,17 @@ SKIP: {
     open my $fh, 'test.pl';
     stat $Perl; # a binary file
     stat *$fh{IO};
-    ok -T _, '-T _ works after stat $ioref';
+    is(-T _, 1, '-T _ works after stat $ioref');
 
     # and after -r $ioref
     -r *$fh{IO};
-    ok -T _, '-T _ works after -r $ioref';
+    is(-T _, 1, '-T _ works after -r $ioref');
 
     # -T _ on closed filehandle should still reset stat info
     stat $fh;
     close $fh;
     -T _;
-    ok !stat _, '-T _ on closed filehandle resets stat info';
+    isnt(stat _, 1, '-T _ on closed filehandle resets stat info');
 
     lstat "test.pl";
     -T $fh; # closed
@@ -315,7 +315,7 @@ SKIP: {
     if (-e $rand_file_name) { skip "File $rand_file_name exists", 1 }
     stat 'test.pl';
     -T $rand_file_name;
-    ok !stat _, '-T "nonexistent" resets stat success status';
+    isnt(stat _, 1, '-T "nonexistent" resets stat success status');
 }
 
 # Unsuccessful filetests on filehandles should leave stat buffers in the
