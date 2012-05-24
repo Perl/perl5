@@ -13957,7 +13957,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	}
     }
     else {
-	CV * const cv = gv ? (CV *)gv : find_runcv(NULL);
+	CV * const cv = gv ? ((CV *)gv) : find_runcv(NULL);
 	SV *sv;
 	AV *av;
 
