@@ -593,7 +593,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* The lower 3 bits in both the ASCII and EBCDIC representations of '0' are 0,
  * and the 8 possible permutations of those bits exactly comprise the 8 octal
  * digits */
-#define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) eq '0')
+#define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) == '0')
 
 
 /* ASCII range only */
