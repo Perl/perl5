@@ -9,7 +9,6 @@ BEGIN {
     require './test.pl';
 }
 
-use Config;
 plan(tests => 47 + 27*14);
 
 ok( -d 'op' );
@@ -28,23 +27,26 @@ my $ro_file = tempfile();
 
 chmod 0555, $ro_file or die "chmod 0555, '$ro_file' failed: $!";
 
-$oldeuid = $>;		# root can read and write anything
-eval '$> = 1';		# so switch uid (may not be implemented)
-
-print "# oldeuid = $oldeuid, euid = $>\n";
-
 SKIP: {
-    if (!$Config{d_seteuid}) {
-	skip('no seteuid');
-    } 
-    else {
-	ok( !-w $ro_file );
+    my $restore_root;
+    if ($> == 0) {
+	# root can read and write anything, so switch uid (may not be
+	# implemented)
+	eval '$> = 1';
+
+	skip("Can't drop root privs to test read-only files") if $> == 0;
+	note("Dropped root privs to test read-only files. \$> == $>");
+	++$restore_root;
+    }
+
+    ok( !-w $ro_file );
+
+    if ($restore_root) {
+	# If the previous assignment to $> worked, so should this:
+	$> = 0;
+	note("Restored root privs after testing read-only files. \$> == $>");
     }
 }
-
-# Scripts are not -x everywhere so cannot test that.
-
-eval '$> = $oldeuid';	# switch uid back (may not be implemented)
 
 # these would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
