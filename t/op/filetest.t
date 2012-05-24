@@ -9,7 +9,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 47 + 27*14);
+plan(tests => 48 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -68,7 +68,9 @@ ok( defined(-d -e 'TEST') );
 ok( defined(-e -d 'TEST') );
 ok( ! -f -d 'op' );
 ok( -x -d -x 'op' );
-ok( (-s -f 'TEST' > 1), "-s returns real size" );
+my ($size) = (stat 'TEST')[7];
+cmp_ok($size, '>', 1, 'TEST is longer than 1 byte');
+is( (-s -f 'TEST'), $size, "-s returns real size" );
 ok( -f -s 'TEST' == 1 );
 
 # now with an empty file
