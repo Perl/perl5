@@ -643,8 +643,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 /*
 =for apidoc fbm_instr
 
-Returns the location of the SV in the string delimited by C<str> and
-C<strend>.  It returns C<NULL> if the string can't be found.  The C<sv>
+Returns the location of the SV in the string delimited by C<big> and
+C<bigend>.  It returns C<NULL> if the string can't be found.  The C<sv>
 does not have to be fbm_compiled, but the search will not be as fast
 then.
 
