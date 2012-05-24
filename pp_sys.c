@@ -1227,7 +1227,8 @@ void
 Perl_setdefout(pTHX_ GV *gv)
 {
     dVAR;
-    SvREFCNT_inc_simple_void(gv);
+    PERL_ARGS_ASSERT_SETDEFOUT;
+    SvREFCNT_inc_simple_void_NN(gv);
     SvREFCNT_dec(PL_defoutgv);
     PL_defoutgv = gv;
 }
