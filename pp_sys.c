@@ -1452,10 +1452,7 @@ PP(pp_leavewrite)
 	if (!cv) {
 	    SV * const sv = sv_newmortal();
 	    gv_efullname4(sv, fgv, NULL, FALSE);
-	    if (SvPOK(sv) && *SvPV_nolen_const(sv))
-		DIE(aTHX_ "Undefined top format \"%"SVf"\" called", SVfARG(sv));
-	    else
-		DIE(aTHX_ "Undefined top format called");
+	    DIE(aTHX_ "Undefined top format \"%"SVf"\" called", SVfARG(sv));
 	}
 	return doform(cv, gv, PL_op);
     }
