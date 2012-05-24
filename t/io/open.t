@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 119;
+plan tests => 120;
 
 my $Perl = which_perl();
 
@@ -278,6 +278,11 @@ SKIP: {
     open($fh3{k}, "TEST");
     gimme($fh3{k});
     like($@, qr/<\$fh3\{...}> line 1\./, "autoviv fh lexical helem");
+
+    local $/ = *F;  # used to cause an assertion failure
+    gimme($fh3{k});
+    like($@, qr/<\$fh3\{...}> chunk 2\./,
+	'<...> line 1 when $/ is set to a glob');
 }
     
 SKIP: {

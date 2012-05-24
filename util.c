@@ -1306,8 +1306,9 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	if (GvIO(PL_last_in_gv) && (SvTYPE(GvIOp(PL_last_in_gv)) == SVt_PVIO)
 		&& IoLINES(GvIOp(PL_last_in_gv)))
 	{
+	    STRLEN l;
 	    const bool line_mode = (RsSIMPLE(PL_rs) &&
-			      SvCUR(PL_rs) == 1 && *SvPVX_const(PL_rs) == '\n');
+				   *SvPV_const(PL_rs,l) == '\n' && l == 1);
 	    Perl_sv_catpvf(aTHX_ sv, ", <%"SVf"> %s %"IVdf,
 			   SVfARG(PL_last_in_gv == PL_argvgv
                                  ? &PL_sv_no
