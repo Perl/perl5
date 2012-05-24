@@ -1071,7 +1071,6 @@ will be lost.
  e  PERL_MAGIC_envelem        vtbl_envelem   %ENV hash element
  f  PERL_MAGIC_fm             vtbl_regdata   Formline 
                                              ('compiled' format)
- G  PERL_MAGIC_study          vtbl_regexp    study()ed string
  g  PERL_MAGIC_regex_global   vtbl_mglob     m//g target
  H  PERL_MAGIC_hints          vtbl_hints     %^H hash
  h  PERL_MAGIC_hintselem      vtbl_hintselem %^H hash element

@@ -2432,9 +2432,6 @@ Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
     } else if (type == PERL_MAGIC_bm) {
 	SvTAIL_off(sv);
 	SvVALID_off(sv);
-    } else if (type == PERL_MAGIC_study) {
-	if (!isGV_with_GP(sv))
-	    SvSCREAM_off(sv);
     } else {
 	assert(type == PERL_MAGIC_fm);
     }
