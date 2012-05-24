@@ -789,6 +789,11 @@ Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
     }
 }
 
+#ifdef VMS
+#include <descrip.h>
+#include <starlet.h>
+#endif
+
 int
 Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -823,8 +828,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	 if (nextchar == '\0') {
 #if defined(VMS)
 	     {
-#	          include <descrip.h>
-#	          include <starlet.h>
 		  char msg[255];
 		  $DESCRIPTOR(msgdsc,msg);
 		  sv_setnv(sv,(NV) vaxc$errno);

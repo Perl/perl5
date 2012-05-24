@@ -5727,6 +5727,10 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
   return opt;
 }
 
+#ifdef VMS
+#  include <starlet.h>
+#endif
+
 U32
 Perl_seed(pTHX)
 {
@@ -5758,7 +5762,6 @@ Perl_seed(pTHX)
 #endif
     U32 u;
 #ifdef VMS
-#  include <starlet.h>
     /* when[] = (low 32 bits, high 32 bits) of time since epoch
      * in 100-ns units, typically incremented ever 10 ms.        */
     unsigned int when[2];

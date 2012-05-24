@@ -1562,6 +1562,10 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 
 #endif /* OS2 || WIN32 */
 
+#ifdef VMS
+#include <starlet.h> /* for sys$delprc */
+#endif
+
 I32
 Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
@@ -1698,7 +1702,6 @@ nothing in the core.
 	/* kill() doesn't do process groups (job trees?) under VMS */
 	if (val < 0) val = -val;
 	if (val == SIGKILL) {
-#	    include <starlet.h>
 	    /* Use native sys$delprc() to insure that target process is
 	     * deleted; supervisor-mode images don't pay attention to
 	     * CRTL's emulation of Unix-style signals and kill()

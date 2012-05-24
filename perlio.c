@@ -70,6 +70,10 @@
 int mkstemp(char*);
 #endif
 
+#ifdef VMS
+#include <rms.h>
+#endif
+
 #define PerlIO_lockcnt(f) (((PerlIOl*)(f))->head->flags)
 
 /* Call the callback or PerlIOBase, and return failure. */
@@ -3895,7 +3899,6 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		PerlLIO_setmode(fd, O_BINARY);
 #endif
 #ifdef VMS
-#include <rms.h>
 		/* Enable line buffering with record-oriented regular files
 		 * so we don't introduce an extraneous record boundary when
 		 * the buffer fills up.

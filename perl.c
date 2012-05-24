@@ -3506,6 +3506,10 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 /* unexec() can be found in the Gnu emacs distribution */
 /* Known to work with -DUNEXEC and using unexelf.c from GNU emacs-20.2 */
 
+#ifdef VMS
+#include <lib$routines.h>
+#endif
+
 void
 Perl_my_unexec(pTHX)
 {
@@ -3524,7 +3528,6 @@ Perl_my_unexec(pTHX)
     PerlProc_exit(status);
 #else
 #  ifdef VMS
-#    include <lib$routines.h>
      lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
 #  elif defined(WIN32) || defined(__CYGWIN__)
     Perl_croak(aTHX_ "dump is not supported");
