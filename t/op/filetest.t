@@ -17,15 +17,15 @@ ok( !-f 'op' );
 ok( !-d 'TEST' );
 ok( -r 'TEST' );
 
-# Make a read only file
-my $ro_file = tempfile();
+# Make a read only file. This happens to be empty, so we also use it later.
+my $ro_empty_file = tempfile();
 
 {
-    open my $fh, '>', $ro_file or die "open $fh: $!";
+    open my $fh, '>', $ro_empty_file or die "open $fh: $!";
     close $fh or die "close $fh: $!";
 }
 
-chmod 0555, $ro_file or die "chmod 0555, '$ro_file' failed: $!";
+chmod 0555, $ro_empty_file or die "chmod 0555, '$ro_empty_file' failed: $!";
 
 SKIP: {
     my $restore_root;
@@ -39,7 +39,7 @@ SKIP: {
 	++$restore_root;
     }
 
-    ok( !-w $ro_file );
+    ok( !-w $ro_empty_file );
 
     if ($restore_root) {
 	# If the previous assignment to $> worked, so should this:
@@ -72,14 +72,10 @@ ok( (-s -f 'TEST' > 1), "-s returns real size" );
 ok( -f -s 'TEST' == 1 );
 
 # now with an empty file
-my $tempfile = tempfile();
-open my $fh, ">", $tempfile;
-close $fh;
-ok( -f $tempfile );
-is( -s $tempfile, 0 );
-is( -f -s $tempfile, 0 );
-is( -s -f $tempfile, 0 );
-unlink_all $tempfile;
+ok( -f $ro_empty_file );
+is( -s $ro_empty_file, 0 );
+is( -f -s $ro_empty_file, 0 );
+is( -s -f $ro_empty_file, 0 );
 
 # stacked -l
 eval { -l -e "TEST" };
