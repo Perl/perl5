@@ -3716,15 +3716,15 @@ void
 Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
     if (ckWARN(WARN_IO)) {
-        SV * const name
+        HEK * const name
            = gv && (isGV_with_GP(gv))
-                ? sv_2mortal(newSVhek(GvENAME_HEK((gv))))
+                ? GvENAME_HEK((gv))
                 : NULL;
 	const char * const direction = have == '>' ? "out" : "in";
 
-	if (name && SvPOK(name) && *SvPV_nolen(name))
+	if (name && *HEK_KEY(name))
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
-			"Filehandle %"SVf" opened only for %sput",
+			"Filehandle %"HEKf" opened only for %sput",
 			name, direction);
 	else
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
