@@ -174,7 +174,7 @@ static int (*decw_term_port)
 dEXT int h_errno;
 #endif
 
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
 #pragma message disable pragma
 #pragma member_alignment save
 #pragma nomember_alignment longword
@@ -200,7 +200,7 @@ struct vs_str_st {
     unsigned short pad; /* for longword struct alignment */
 };
 
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
 #pragma message restore
 #pragma member_alignment restore
 #endif
@@ -4779,13 +4779,6 @@ my_gconvert(double val, int ndig, int trail, char *buf)
   char *loc;
 
   loc = buf ? buf : __gcvtbuf;
-
-#ifndef __DECC  /* VAXCRTL gcvt uses E format for numbers < 1 */
-  if (val < 1) {
-    sprintf(loc,"%.*g",ndig,val);
-    return loc;
-  }
-#endif
 
   if (val) {
     if (!buf && ndig > DBL_DIG) ndig = DBL_DIG;
@@ -14122,7 +14115,7 @@ static int set_features
     return SS$_NORMAL;
 }
 
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
 #pragma nostandard
 #pragma extern_model save
 #pragma extern_model strict_refdef "LIB$INITIALIZ" nowrt
@@ -14152,12 +14145,12 @@ int lib$initialize(void);
 }
 #endif
 
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
 #pragma extern_model strict_refdef
 #endif
     int lib_init_ref = (int) lib$initialize;
 
-#ifdef __DECC
+#if defined(__DECC) || defined(__DECCXX)
 #pragma extern_model restore
 #pragma standard
 #endif
