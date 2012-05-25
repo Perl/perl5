@@ -148,7 +148,8 @@ Modifying C<$_[0]> within C<STORABLE_freeze> no longer results in crashes
 
 =item *
 
-XXX
+L<Version::Requirements> has been removed from the core distribution.  It is
+available under a different name: L<CPAN::Meta::Requirements>.
 
 =back
 
