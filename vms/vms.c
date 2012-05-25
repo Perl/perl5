@@ -10425,7 +10425,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   int cmdlen;
   register int isdcl;
 
-  vmscmd = (dsc$descriptor_s *)PerlMem_malloc(sizeof(struct dsc$descriptor_s));
+  vmscmd = (struct dsc$descriptor_s *)PerlMem_malloc(sizeof(struct dsc$descriptor_s));
   if (vmscmd == NULL) _ckvmssts_noperl(SS$_INSFMEM);
 
   /* vmsspec is a DCL command buffer, not just a filename */
