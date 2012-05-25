@@ -11629,23 +11629,6 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     return stmtseqop;
 }
 
-void
-Perl_munge_qwlist_to_paren_list(pTHX_ OP *qwlist)
-{
-    PERL_ARGS_ASSERT_MUNGE_QWLIST_TO_PAREN_LIST;
-    deprecate("qw(...) as parentheses");
-    force_next((4<<24)|')');
-    if (qwlist->op_type == OP_STUB) {
-	op_free(qwlist);
-    }
-    else {
-	start_force(PL_curforce);
-	NEXTVAL_NEXTTOKE.opval = qwlist;
-	force_next(THING);
-    }
-    force_next((2<<24)|'(');
-}
-
 /*
  * Local variables:
  * c-indentation-style: bsd

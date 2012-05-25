@@ -48,6 +48,19 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 qw(...) can no longer be used as parentheses
+
+C<qw> lists used to fool the parser into thinking they were always
+surrounded by parentheses.  This permitted some surprising constructions
+such as C<foreach $x qw(a b c) {...}>, which should really be written
+C<foreach $x (qw(a b c)) {...}>.  These would sometimes get the lexer into
+the wrong state, so they didn't fully work, and the similar C<foreach qw(a
+b c) {...}> that one might expect to be permitted never worked at all.
+
+This side effect of C<qw> has now been abolished.  It has been deprecated
+since Perl 5.13.11.  It is now necessary to use real parentheses
+everywhere that the grammar calls for them.
+
 =head2 C<\s> in regular expressions now matches a Vertical Tab (experimental)
 
 This is an experiment early in the development cycle to see what
