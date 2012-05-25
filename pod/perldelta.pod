@@ -1,5 +1,7 @@
 =encoding utf8
 
+=for comment complete up to commit c9e3649f13e1c1db9054c8d419ce2969309e093d
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -73,6 +75,15 @@ may well be none in a stable release.
 
 =item *
 
+Filetest ops manage the stack in a fractionally more efficient manner.
+
+=item *
+
+Globs used in a numeric context are now numerified directly in most cases,
+rather than being numerified via stringification.
+
+=item *
+
 XXX
 
 =back
@@ -109,6 +120,19 @@ L<B> has been upgraded from version 1.34 to 1.35.
 
 The C<stashlen> method of COPs has been added.   This provides access to an
 internal field added in perl 5.16 under threaded builds [perl #113034].
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.06 to 1.07.
+
+Small documentation and comment fixes.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.20 to 1.21.
+
+Individual files may now appear in list of directories to be searched
+[perl #59750].
 
 =item *
 
@@ -182,6 +206,21 @@ XXX Description of the purpose of the new file here
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+=head3 L<perldata>
+
+=over 4
+
+=item *
+
+Now explicitly documents the behaviour of hash initializer lists that
+contain duplicate keys.
+
+=item *
+
+XXX Description of the change here
+
+=back
 
 =head3 L<XXX>
 
@@ -275,6 +314,13 @@ L</Platform Support> section, instead.
 [ List changes as a =item entry ].
 
 =over 4
+
+=item *
+
+The test suite now has a section for tests that require very large amounts
+of memory.  These tests won't run by default; they can be enabled by
+setting the C<PERL_TEST_MEMORY> environment variable to the number of
+gibibytes of memory that may be safely used.
 
 =item *
 
