@@ -10399,6 +10399,7 @@ tryagain:
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
             U8 node_type;
+            bool next_is_quantifier;
 
 	    /* Is this a LATIN LOWER CASE SHARP S in an EXACTFU node?  If so,
 	     * it is folded to 'ss' even if not utf8 */
@@ -10634,6 +10635,20 @@ tryagain:
 			              && ender == LATIN_SMALL_LETTER_SHARP_S);
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
+
+                /* If the next thing is a quantifier, it applies to this
+                 * character only, which means that this character has to be in
+                 * its own node and can't just be appended to the string in an
+                 * existing node, so if there are already other characters in
+                 * the node, close the node with just them, and set up to do
+                 * this character again next time through, when it will be the
+                 * only thing in its new node */
+                if ((next_is_quantifier = (p < RExC_end && ISMULT2(p))) && len)
+		{
+                    p = oldp;
+                    goto loopdone;
+                }
+
 		if ((UTF && FOLD) || is_exactfu_sharp_s) {
 		    /* Prime the casefolded buffer.  Locale rules, which apply
 		     * only to code points < 256, aren't known until execution,
@@ -10695,10 +10710,8 @@ tryagain:
 			}
 		    }
 		}
-		if (p < RExC_end && ISMULT2(p)) { /* Back off on ?+*. */
-		    if (len)
-			p = oldp;
-		    else if (UTF || is_exactfu_sharp_s) {
+		if (next_is_quantifier) {
+		    if (UTF || is_exactfu_sharp_s) {
 			 if (FOLD) {
 			      /* Emit all the Unicode characters. */
 			      STRLEN numlen;
