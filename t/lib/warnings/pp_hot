@@ -90,6 +90,24 @@ Filehandle FH opened only for input at - line 19.
 Filehandle FOO opened only for input at - line 20.
 ########
 # pp_hot.c [pp_print]
+$SIG{__WARN__} = sub { warn $_[0] =~ s/\0/\\0/rug; };
+use warnings 'io' ;
+my $file = "./xcv" ; unlink $file ;
+open (FH, ">$file") or die $! ;
+close FH or die $! ;
+die "There is no file $file" unless -f $file ;
+open ("a\0b", "<$file") or die $! ;
+print {"a\0b"} "anc" ;
+open ("\0b", "<$file") or die $! ;
+print {"\0b"} "anc" ;
+close "a\0b" or die $! ;
+close "\0b" or die $! ;
+unlink $file ;
+EXPECT
+Filehandle a\0b opened only for input at - line 9.
+Filehandle \0b opened only for input at - line 11.
+########
+# pp_hot.c [pp_print]
 use warnings 'closed' ;
 close STDIN ;
 print STDIN "anc";

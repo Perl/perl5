@@ -3722,7 +3722,7 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
                 : NULL;
 	const char * const direction = have == '>' ? "out" : "in";
 
-	if (name && *HEK_KEY(name))
+	if (name && HEK_LEN(name))
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
 			"Filehandle %"HEKf" opened only for %sput",
 			name, direction);
