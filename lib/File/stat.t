@@ -144,7 +144,7 @@ SKIP: {
     for my $op (split //, "rwxRXW") {
 	# these should all warn with filetest access
 	my $w;
-	local $SIG{__WARN__} = sub { $w = shift };
+	local $SIG{__WARN__} = sub { $w .= shift };
 	eval "-$op \$stat";
 	like($w, qr/^File::stat ignores use filetest 'access'/,
 	     "-$op produced the right warning under use filetest 'access'");
