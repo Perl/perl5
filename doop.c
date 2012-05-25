@@ -720,7 +720,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *delim, register SV **mark, register SV *
 
     if (delimlen) {
 	for (; items > 0; items--,mark++) {
-	    sv_catsv(sv,delim);
+	    sv_catsv_nomg(sv,delim);
 	    sv_catsv(sv,*mark);
 	}
     }

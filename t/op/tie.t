@@ -1259,3 +1259,21 @@ $h{i}{j} = 'k';
 print $h{i}{j}, "\n";
 EXPECT
 k
+########
+
+# [perl #8931] FETCH for tied $" called an odd number of times.
+use strict;
+my $i = 0;
+sub A::TIESCALAR {bless [] => 'A'}
+sub A::FETCH {print ++ $i, "\n"}
+my @a = ("", "", "");
+
+tie $" => 'A';
+"@a";
+
+$i = 0;
+tie my $a => 'A';
+join $a, 1..10;
+EXPECT
+1
+1
