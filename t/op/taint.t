@@ -152,7 +152,7 @@ my $TEST = 'TEST';
 	while (my $v = $vars[0]) {
 	    local $ENV{$v} = $TAINT;
 	    last if eval { `$echo 1` };
-	    last unless $@ =~ /^Insecure \$ENV{$v}/;
+	    last unless $@ =~ /^Insecure \$ENV\{$v}/;
 	    shift @vars;
 	}
 	is("@vars", "");
@@ -163,7 +163,7 @@ my $TEST = 'TEST';
 	is(eval { `$echo 1` }, "1\n");
 	$ENV{TERM} = 'e=mc2' . $TAINT;
 	is(eval { `$echo 1` }, undef);
-	like($@, qr/^Insecure \$ENV{TERM}/);
+	like($@, qr/^Insecure \$ENV\{TERM}/);
     }
 
     my $tmp;
@@ -182,7 +182,7 @@ my $TEST = 'TEST';
 
 	local $ENV{PATH} = $tmp;
 	is(eval { `$echo 1` }, undef);
-	like($@, qr/^Insecure directory in \$ENV{PATH}/);
+	like($@, qr/^Insecure directory in \$ENV\{PATH}/);
     }
 
     SKIP: {
@@ -190,14 +190,14 @@ my $TEST = 'TEST';
 
 	$ENV{'DCL$PATH'} = $TAINT;
 	is(eval { `$echo 1` }, undef);
-	like($@, qr/^Insecure \$ENV{DCL\$PATH}/);
+	like($@, qr/^Insecure \$ENV\{DCL\$PATH}/);
 	SKIP: {
             skip q[can't find world-writeable directory to test DCL$PATH], 2
               unless $tmp;
 
 	    $ENV{'DCL$PATH'} = $tmp;
 	    is(eval { `$echo 1` }, undef);
-	    like($@, qr/^Insecure directory in \$ENV{DCL\$PATH}/);
+	    like($@, qr/^Insecure directory in \$ENV\{DCL\$PATH}/);
 	}
 	$ENV{'DCL$PATH'} = '';
     }
@@ -2112,7 +2112,7 @@ end
     ok("A" =~ /\p{$prop}/, "user-defined property: non-tainted case");
     $prop = "IsA$TAINT";
     eval { "A" =~ /\p{$prop}/};
-    like($@, qr/Insecure user-defined property \\p{main::IsA}/,
+    like($@, qr/Insecure user-defined property \\p\{main::IsA}/,
 	    "user-defined property: tainted case");
 }
 

@@ -986,7 +986,7 @@ sub run_tests {
         my $w;
         local $SIG {__WARN__} = sub {$w .= "@_"};
         eval 'q(xxWxx) =~ /[\N{WARN}]/';
-        ok $w && $w =~ /Using just the first character returned by \\N{} in character class/,
+        ok $w && $w =~ /Using just the first character returned by \\N\{} in character class/,
                  "single character in [\\N{}] warning";
 
         undef $w;
@@ -1137,6 +1137,7 @@ sub run_tests {
 
     {
         # \, breaks {3,4}
+        no warnings qw{deprecated regexp};
         ok "xaaay"    !~ /xa{3\,4}y/, '\, in a pattern';
         ok "xa{3,4}y" =~ /xa{3\,4}y/, '\, in a pattern';
 

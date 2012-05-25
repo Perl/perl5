@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -435,11 +435,11 @@ my %msg;
             }  
             my $lhs = join( '', @toks );
 	    $transfmt{$header}{pat} =
-              "    s{^$lhs}\n     {\Q$header\E}s\n\t&& return 1;\n";
+              "    s^$lhs\Q$header\Es\n\t&& return 1;\n";
             $transfmt{$header}{len} = $conlen;
 	} else {
             $transfmt{$header}{pat} =
-	      "    m{^\Q$header\E} && return 1;\n";
+	      "    m^\Q$header\E && return 1;\n";
             $transfmt{$header}{len} = length( $header );
 	} 
 

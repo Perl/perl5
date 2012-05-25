@@ -4928,6 +4928,17 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
+=item Unescaped left brace in regex is deprecated, passed through
+
+(D) You used a literal C<"{"> character in a regular expression pattern.
+You should change to use C<"\{"> instead, because a future version of
+Perl (tentatively v5.20) will consider this to be a syntax error.  If
+the pattern delimiters are also braces, any matching right brace
+(C<"}">) should also be escaped to avoid confusing the parser, for
+example,
+
+    qr{abc\{def\}ghi}
+
 =item unexec of %s into %s failed!
 
 (F) The unexec() routine failed for some reason.  See your local FSF

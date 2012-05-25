@@ -152,7 +152,7 @@ sub run_tests {
 
     {
         $_ = 'now is the {time for all} good men to come to.';
-        / {([^}]*)}/;
+        / \{([^}]*)}/;
         is($1, 'time for all', "Match braces");
     }
 

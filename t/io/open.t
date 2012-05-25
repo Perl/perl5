@@ -267,7 +267,7 @@ SKIP: {
 
     open($fh1{k}, "TEST");
     gimme($fh1{k});
-    like($@, qr/<\$fh1{...}> line 1\./, "autoviv fh package helem");
+    like($@, qr/<\$fh1\{...}> line 1\./, "autoviv fh package helem");
 
     my @fh2;
     open($fh2[0], "TEST");
@@ -277,7 +277,7 @@ SKIP: {
     my %fh3;
     open($fh3{k}, "TEST");
     gimme($fh3{k});
-    like($@, qr/<\$fh3{...}> line 1\./, "autoviv fh lexical helem");
+    like($@, qr/<\$fh3\{...}> line 1\./, "autoviv fh lexical helem");
 }
     
 SKIP: {

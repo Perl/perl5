@@ -9077,12 +9077,6 @@ tryagain:
 	vFAIL("Internal urp");
 				/* Supposed to be caught earlier. */
 	break;
-    case '{':
-	if (!regcurly(RExC_parse)) {
-	    RExC_parse++;
-	    goto defchar;
-	}
-	/* FALL THROUGH */
     case '?':
     case '+':
     case '*':
@@ -9208,9 +9202,6 @@ tryagain:
 	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
-	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNregdep(RExC_parse, "\"\\b{\" is deprecated; use \"\\b\\{\" instead");
-	    }
 	    goto finish_meta_pat;
 	case 'B':
 	    RExC_seen_zerolen++;
@@ -9235,9 +9226,6 @@ tryagain:
 	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
-	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNregdep(RExC_parse, "\"\\B{\" is deprecated; use \"\\B\\{\" instead");
-	    }
 	    goto finish_meta_pat;
 	case 's':
 	    switch (get_regex_charset(RExC_flags)) {
@@ -9744,15 +9732,22 @@ tryagain:
 			/* FALL THROUGH */
 		    default:
 			if (!SIZE_ONLY&& isALPHA(*p)) {
-			    /* Include any { following the alpha to emphasize
-			     * that it could be part of an escape at some point
-			     * in the future */
-			    int len = (*(p + 1) == '{') ? 2 : 1;
-			    ckWARN3reg(p + len, "Unrecognized escape \\%.*s passed through", len, p);
+			    ckWARN2reg(p + 1, "Unrecognized escape \\%.1s passed through", p);
 			}
 			goto normal_default;
 		    }
 		    break;
+		case '{':
+		    /* Currently we don't warn when the lbrace is at the start
+		     * of a construct.  This catches it in the middle of a
+		     * literal string, or when its the first thing after
+		     * something like "\b" */
+		    if (! SIZE_ONLY
+			&& (len || (p > RExC_start && isALPHA_A(*(p -1)))))
+		    {
+			ckWARNregdep(p + 1, "Unescaped left brace in regex is deprecated, passed through");
+		    }
+		    /*FALLTHROUGH*/
 		default:
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
