@@ -3751,7 +3751,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 
     if (ckWARN(warn_type)) {
         SV * const name
-            = gv && (isGV(gv) || isGV_with_GP(gv)) && GvENAMELEN(gv) ?
+            = gv && isGV_with_GP(gv) && GvENAMELEN(gv) ?
                                      sv_2mortal(newSVhek(GvENAME_HEK(gv))) : NULL;
 	const char * const pars =
 	    (const char *)(OP_IS_FILETEST(op) ? "" : "()");
