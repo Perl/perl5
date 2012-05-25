@@ -142,6 +142,7 @@ Unicode::Casing
 Unicode::Regex::Set
 Unicode::Semantics
 Unicode::Unihan
+Version::Requirements
 unzip(1)
 wait(2)
 waitpid(3)
