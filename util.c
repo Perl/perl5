@@ -3764,7 +3764,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 	    (const char *)
 	    (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
 	     ? "socket" : "filehandle");
-	const bool have_name = name && *SvPV_nolen(name);
+	const bool have_name = name && SvCUR(name);
 	Perl_warner(aTHX_ packWARN(warn_type),
 		   "%s%s on %s %s%s%"SVf, func, pars, vile, type,
 		    have_name ? " " : "",

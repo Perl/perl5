@@ -61,6 +61,15 @@ EXPECT
 print() on unopened filehandle abc at - line 4.
 ########
 # pp_hot.c [pp_print]
+use warnings 'unopened' ;
+$SIG{__WARN__} = sub { warn $_[0] =~ s/\0/\\0/rug; };
+print {"a\0b"} "anc";
+print {"\0b"} "anc";
+EXPECT
+print() on unopened filehandle a\0b at - line 4.
+print() on unopened filehandle \0b at - line 5.
+########
+# pp_hot.c [pp_print]
 use warnings 'io' ;
 # There is no guarantee that STDOUT is output only, or STDIN input only.
 # Certainly on some BSDs (at least FreeBSD, Darwin, BSDi) file descriptors
