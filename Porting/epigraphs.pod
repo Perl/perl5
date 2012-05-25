@@ -937,7 +937,7 @@ absorbed. Presently he said: "Say, Tom, let me whitewash a little."
 
 =head2 v5.11.2 - Michael Marshall Smith, "Only Forward"
 
-L<Announced on 2009-11-20 by |http://www.nntp.perl.org/group/perl.perl5.porters/2009/11/msg153646.html>
+L<Announced on 2009-11-20 by Léon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2009/11/msg153646.html>
 
 The streets were pretty quiet, which was nice. They're always quiet here
 at that time: you have to be wearing a black jacket to be out on the
