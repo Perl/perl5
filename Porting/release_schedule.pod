@@ -60,7 +60,7 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.17
 
-  2012-05-??  5.17.0          Ricardo Signes
+  2012-05-26  5.17.0          Zefram
   2012-06-20  5.17.1          Jesse Luehrs
   2012-07-20  5.17.2
   2012-08-20  5.17.3
