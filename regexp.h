@@ -610,6 +610,7 @@ typedef struct regmatch_state {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
+	    U32 lastcloseparen;
 	    CHECKPOINT cp;
 	    
         } branchlike;
@@ -618,6 +619,7 @@ typedef struct regmatch_state {
 	    /* the first elements must match u.branchlike */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
+	    U32 lastcloseparen;
 	    CHECKPOINT cp;
 	    
 	    regnode *next_branch; /* next branch node */
@@ -627,6 +629,7 @@ typedef struct regmatch_state {
 	    /* the first elements must match u.branchlike */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
+	    U32 lastcloseparen;
 	    CHECKPOINT cp;
 
 	    U32		accepted; /* how many accepting states left */
@@ -709,6 +712,8 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_yes_state;
 	    I32 c1, c2;		/* case fold search */
 	    CHECKPOINT cp;
+	    U32 lastparen;
+	    U32 lastcloseparen;
 	    I32 alen;		/* length of first-matched A string */
 	    I32 count;
 	    bool minmod;
@@ -719,6 +724,8 @@ typedef struct regmatch_state {
 	struct {
 	    U32 paren;
 	    CHECKPOINT cp;
+	    U32 lastparen;
+	    U32 lastcloseparen;
 	    I32 c1, c2;		/* case fold search */
 	    char *maxpos;	/* highest possible point in string to match */
 	    char *oldloc;	/* the previous locinput */

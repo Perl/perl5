@@ -1628,4 +1628,18 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /^(?i:foo||baz)bar$/	bazbar	y	<$&>	<bazbar>
 /^(?i:foo||baz)bar$/	foobar	y	<$&>	<foobar>
 
+# $^N, $+ on backtrackracking
+# BRANCH
+^(.)(?:(..)|B)[CX]	ABCDE	y	$^N-$+	A-A	-
+# TRIE
+^(.)(?:BC(.)|B)[CX]	ABCDE	y	$^N-$+	A-A	-
+# CURLYX
+^(.)(?:(.)+)*[BX]	ABCDE	y	$^N-$+	A-A	-
+# CURLYM
+^(.)(BC)*	ABCDE	y	$^N-$+	BC-BC	-
+^(.)(BC)*[BX]	ABCDE	y	$^N-$+	A-A	-
+# CURLYN
+^(.)(B)*.[DX]	ABCDE	y	$^N-$+	B-B	-
+^(.)(B)*.[CX]	ABCDE	y	$^N-$+	A-A	-
+
 # vim: softtabstop=0 noexpandtab

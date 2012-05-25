@@ -3491,6 +3491,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	        for (n = rex->lastparen; n > ST.lastparen; n--)
 		    rex->offs[n].end = -1;
 	        rex->lastparen = n;
+	        rex->lastcloseparen = ST.lastcloseparen;
 	    }
 	    if (!--ST.accepted) {
 	        DEBUG_EXECUTE_r({
@@ -3525,6 +3526,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
             if ( ST.jump) {
                 ST.lastparen = rex->lastparen;
+                ST.lastcloseparen = rex->lastcloseparen;
 	        REGCP_SET(ST.cp);
             }
 
@@ -5010,6 +5012,7 @@ NULL
 	case BRANCH:	    /*  /(...|A|...)/ */
 	    scan = NEXTOPER(scan); /* scan now points to inner node */
 	    ST.lastparen = rex->lastparen;
+	    ST.lastcloseparen = rex->lastcloseparen;
 	    ST.next_branch = next;
 	    REGCP_SET(ST.cp);
 	    PL_reginput = locinput;
@@ -5046,7 +5049,7 @@ NULL
 	    for (n = rex->lastparen; n > ST.lastparen; n--)
 		rex->offs[n].end = -1;
 	    rex->lastparen = n;
-	    /*dmq: rex->lastcloseparen = n; */
+	    rex->lastcloseparen = ST.lastcloseparen;
 	    scan = ST.next_branch;
 	    /* no more branches? */
 	    if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {
@@ -5080,13 +5083,14 @@ NULL
 	    ST.me = scan;
 	    scan = NEXTOPER(scan) + NODE_STEP_REGNODE;
 
+	    ST.lastparen      = rex->lastparen;
+	    ST.lastcloseparen = rex->lastcloseparen;
+
 	    /* if paren positive, emulate an OPEN/CLOSE around A */
 	    if (ST.me->flags) {
 		U32 paren = ST.me->flags;
 		if (paren > PL_regsize)
 		    PL_regsize = paren;
-		if (paren > rex->lastparen)
-		    rex->lastparen = paren;
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    }
 	    ST.A = scan;
@@ -5212,13 +5216,15 @@ NULL
 	    }
 
 	    if (ST.me->flags) {
-		/* mark current A as captured */
+		/* emulate CLOSE: mark current A as captured */
 		I32 paren = ST.me->flags;
 		if (ST.count) {
 		    rex->offs[paren].start
 			= HOPc(PL_reginput, -ST.alen) - PL_bostr;
 		    rex->offs[paren].end = PL_reginput - PL_bostr;
-		    /*dmq: rex->lastcloseparen = paren; */
+		    if ((U32)paren > rex->lastparen)
+			rex->lastparen = paren;
+		    rex->lastcloseparen = paren;
 		}
 		else
 		    rex->offs[paren].end = -1;
@@ -5237,6 +5243,8 @@ NULL
 
 	case CURLYM_B_fail: /* just failed to match a B */
 	    REGCP_UNWIND(ST.cp);
+	    rex->lastparen      = ST.lastparen;
+	    rex->lastcloseparen = ST.lastcloseparen;
 	    if (ST.minmod) {
 		I32 max = ARG2(ST.me);
 		if (max != REG_INFTY && ST.count == max)
@@ -5258,10 +5266,15 @@ NULL
 	if (success) { \
 	    rex->offs[paren].start = HOPc(locinput, -1) - PL_bostr; \
 	    rex->offs[paren].end = locinput - PL_bostr; \
+	    if (paren > rex->lastparen) \
+		rex->lastparen = paren; \
 	    rex->lastcloseparen = paren; \
 	} \
-	else \
+	else { \
 	    rex->offs[paren].end = -1; \
+	    rex->lastparen      = ST.lastparen; \
+	    rex->lastcloseparen = ST.lastcloseparen; \
+	} \
     }
 
 	case STAR:		/*  /A*B/ where A is width 1 */
@@ -5278,10 +5291,10 @@ NULL
 	    goto repeat;
 	case CURLYN:		/*  /(A){m,n}B/ where A is width 1 */
 	    ST.paren = scan->flags;	/* Which paren to set */
+	    ST.lastparen      = rex->lastparen;
+	    ST.lastcloseparen = rex->lastcloseparen;
 	    if (ST.paren > PL_regsize)
 		PL_regsize = ST.paren;
-	    if (ST.paren > rex->lastparen)
-		rex->lastparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
 	    if (cur_eval && cur_eval->u.eval.close_paren &&
