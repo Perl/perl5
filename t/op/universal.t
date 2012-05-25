@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 133;
+plan tests => 135;
 
 $a = {};
 bless $a, "Bob";
@@ -108,6 +108,9 @@ for ($p=0; $p < @refs; $p++) {
 };
 
 ok ! UNIVERSAL::can(23, "can");
+++${"23::foo"};
+ok UNIVERSAL::can("23", "can"), '"23" can can when the pack exists';
+ok UNIVERSAL::can(23, "can"), '23 can can when the pack exists';
 
 ok $a->can("VERSION");
 

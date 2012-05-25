@@ -356,8 +356,8 @@ XS(XS_UNIVERSAL_can)
 
     SvGETMAGIC(sv);
 
-    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
-		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
+    if (!SvOK(sv) || !(SvROK(sv) || SvNIOK(sv) || (SvPOK(sv) && SvCUR(sv))
+	|| (SvGMAGICAL(sv) && (SvNIOKp(sv) || (SvPOKp(sv) && SvCUR(sv))))))
 	XSRETURN_UNDEF;
 
     rv = &PL_sv_undef;
