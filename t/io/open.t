@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 120;
+plan tests => 121;
 
 my $Perl = which_perl();
 
@@ -233,6 +233,10 @@ like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
 
     # used to try to open a file [perl #17830]
     ok( open(my $stdin,  "<&", fileno STDIN),   'dup fileno(STDIN) into lexical fh') or _diag $!;
+
+    fileno(STDIN) =~ /(.)/;
+    ok open($stdin, "<&", $1), 'open ... "<&", $magical_fileno',
+	||  _diag $!;
 }
 
 SKIP: {
