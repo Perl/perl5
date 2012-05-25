@@ -3717,7 +3717,7 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
     if (ckWARN(WARN_IO)) {
         SV * const name
-           = gv && (isGV(gv) || isGV_with_GP(gv))
+           = gv && (isGV_with_GP(gv))
                 ? sv_2mortal(newSVhek(GvENAME_HEK((gv))))
                 : NULL;
 	const char * const direction = have == '>' ? "out" : "in";
