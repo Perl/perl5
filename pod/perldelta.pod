@@ -105,6 +105,13 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.34 to 1.35.
+
+The C<stashlen> method of COPs has been added.   This provides access to an
+internal field added in perl 5.16 under threaded builds [perl #113034].
+
+=item *
+
 L<File::stat> has been upgraded from version 1.05 to 1.06.
 
 C<File::stat> ignores the L<filetest> pragma, and warns when used in
@@ -139,6 +146,10 @@ L<Storable> has been upgraded from version 2.34 to 2.35.
 
 Modifying C<$_[0]> within C<STORABLE_freeze> no longer results in crashes
 [perl #112358].
+
+An object whose class implements C<STORABLE_attach> is now thawed only once
+when there are multiple references to it in the structure being thawed
+[perl #111918].
 
 =back
 
@@ -350,6 +361,11 @@ be noted as well.
 
 =item *
 
+The C<CV *> typemap entry now supports C<&{}> overloading and typeglobs,
+just like C<&{...}> [perl #96872].
+
+=item *
+
 The C<SVf_AMAGIC> flag to indicate overloading is now on the stash, not the
 object.  It is now set automatically whenever a method or @ISA changes, so
 its meaning has changed, too.  It now means "potentially overloaded".  When
@@ -448,6 +464,12 @@ Classes with overloading can now inherit fallback values.
 
 =item *
 
+Overloading was not respecting a fallback value of 0 if there were
+overloaded objects on both sides of an assignment operator like C<+=>
+[perl #111856].
+
+=item *
+
 C<pos> now croaks with hash and array arguments, instead of producing
 erroneous warnings.
 
@@ -467,6 +489,16 @@ Unicode 6.1 published an incorrect alias for one of the
 Canonical_Combining_Class property's values (which range between 0 and
 254).  The alias C<CCC133> should have been C<CCC132>.  Perl now
 overrides the data file furnished by Unicode to give the correct value.
+
+=item *
+
+C<unpack> no longer produces the "'/' must follow a numeric type in unpack"
+error when it is the data that are at fault [perl #60204].
+
+=item *
+
+C<join> and C<"@array"> now call FETCH only once on a tied C<$">
+[perl #8931].
 
 =back
 
