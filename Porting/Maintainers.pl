@@ -1964,14 +1964,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'Version::Requirements' => {
-        'MAINTAINER'   => 'rjbs',
-        'DISTRIBUTION' => 'RJBS/Version-Requirements-0.101022.tar.gz',
-        'FILES'        => q[cpan/Version-Requirements],
-        'EXCLUDED'     => ['t/release-pod-syntax.t'],
-        'UPSTREAM'     => 'cpan',
-    },
-
     'version' => {
         'MAINTAINER'   => 'jpeacock',
         'DISTRIBUTION' => 'JPEACOCK/version-0.97.tar.gz',
