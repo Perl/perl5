@@ -196,7 +196,8 @@ struct filescan_itmlst_2 {
 
 struct vs_str_st {
     unsigned short length;
-    char str[65536];
+    char str[VMS_MAXRSS];
+    unsigned short pad; /* for longword struct alignment */
 };
 
 #ifdef __DECC
