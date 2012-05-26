@@ -57,6 +57,7 @@ no_index:
     - dist/Tie-File
     - dist/XSLoader
     - lib/version
+    - mad
     - win32
   file:
     - autodoc.pl
