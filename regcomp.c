@@ -10710,46 +10710,6 @@ tryagain:
 			}
 		    }
 		}
-		if (next_is_quantifier) {
-		    if (UTF || is_exactfu_sharp_s) {
-			 if (FOLD) {
-			      /* Emit all the Unicode characters. */
-			      STRLEN numlen;
-			      for (foldbuf = tmpbuf;
-				   foldlen;
-				   foldlen -= numlen) {
-
-				   /* tmpbuf has been constructed by us, so we
-				    * know it is valid utf8 */
-				   ender = valid_utf8_to_uvchr(foldbuf, &numlen);
-				   if (numlen > 0) {
-					const STRLEN unilen = reguni(pRExC_state, ender, s);
-					s       += unilen;
-					len     += unilen;
-					/* In EBCDIC the numlen
-					 * and unilen can differ. */
-					foldbuf += numlen;
-					if (numlen >= foldlen)
-					     break;
-				   }
-				   else
-					break; /* "Can't happen." */
-			      }
-			 }
-			 else {
-			      const STRLEN unilen = reguni(pRExC_state, ender, s);
-			      if (unilen > 0) {
-				   s   += unilen;
-				   len += unilen;
-			      }
-			 }
-		    }
-		    else {
-			len++;
-			REGC((char)ender, s++);
-		    }
-		    break;
-		}
                 if (UTF || is_exactfu_sharp_s) {
 		     if (FOLD) {
 		          /* Emit all the Unicode characters. */
@@ -10757,6 +10717,9 @@ tryagain:
 			  for (foldbuf = tmpbuf;
 			       foldlen;
 			       foldlen -= numlen) {
+
+                               /* tmpbuf has been constructed by us, so we know
+                                * it is valid utf8 */
 			       ender = valid_utf8_to_uvchr(foldbuf, &numlen);
 			       if (numlen > 0) {
 				    const STRLEN unilen = reguni(pRExC_state, ender, s);
@@ -10766,7 +10729,7 @@ tryagain:
 				     * and unilen can differ. */
 				    foldbuf += numlen;
 				    if (numlen >= foldlen)
-					 break;
+                                        break; /* "Can't happen." */
 			       }
 			       else
 				    break;
@@ -10779,10 +10742,26 @@ tryagain:
 			       len += unilen;
 			  }
 		     }
+
+                     /* The loop increments <len> each time, as all but this
+                      * path through it add a single byte to the EXACTish node.
+                      * But this one has changed len to be the correct final
+                      * value, so subtract one to cancel out the increment that
+                      * follows */
 		     len--;
 		}
 		else {
 		    REGC((char)ender, s++);
+                }
+
+		if (next_is_quantifier) {
+
+                    /* Here, the next input is a quantifier, and to get here,
+                     * the current character is the only one in the node.
+                     * Also, here <len> doesn't include the final byte for this
+                     * character */
+                    len++;
+                    goto loopdone;
 		}
 	    }
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
