@@ -145,6 +145,18 @@ exit unless %modlist;
 # data by "Module", which is really a dist.
 my $file_to_M = files_to_modules( values %module_to_file );
 
+sub slurp_utf8($) {
+    open my $fh, "<:utf8", "$_[0]"
+	or die "can't open $_[0] for reading: $!";
+    return do { local $/; <$fh> };
+}
+
+sub parse_cpan_meta($) {
+    return Parse::CPAN::Meta->${
+	$_[0] =~ /\A\x7b/ ? \"load_json_string" : \"load_yaml_string"
+    }($_[0]);
+}
+
 my %module_to_upstream;
 my %module_to_dist;
 my %dist_to_meta_YAML;
@@ -175,13 +187,13 @@ while ( my ( $module, $file ) = each %module_to_file ) {
     my $meta_YAML_url = 'http://ftp.funet.fi/pub/CPAN/' . $meta_YAML_path;
 
     if ( -e "$cpan/$meta_YAML_path" ) {
-        $dist_to_meta_YAML{$dist} = Parse::CPAN::Meta::LoadFile( $cpan . "/" . $meta_YAML_path );
+        $dist_to_meta_YAML{$dist} = parse_cpan_meta(slurp_utf8( $cpan . "/" . $meta_YAML_path ));
     } elsif ( my $content = fetch_url($meta_YAML_url) ) {
         unless ($content) {
             warn "Failed to fetch $meta_YAML_url\n";
             next;
         }
-        eval { $dist_to_meta_YAML{$dist} = Parse::CPAN::Meta::Load($content); };
+        eval { $dist_to_meta_YAML{$dist} = parse_cpan_meta($content); };
         if ( my $err = $@ ) {
             warn "$meta_YAML_path: ".$err;
             next;
