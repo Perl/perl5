@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.17.0 - Charles Stross, "Singularity Sky"
 
-Announced on 2012-05-26 by Zefram
+L<Announced on 2012-05-26 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg187214.html>
 
 `Welcome, comrades!'  Burya opened his arms toward the soldier.
 `Yes it is true!  With help from our allies of the Festival, the iron
