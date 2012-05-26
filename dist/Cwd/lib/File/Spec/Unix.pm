@@ -353,7 +353,8 @@ If $path is relative, it is converted to absolute form using L</rel2abs()>.
 This means that it is taken to be relative to L<cwd()|Cwd>.
 
 No checks against the filesystem are made, so the result may not be correct if
-C<$base> contains symbolic links.  (Apply L<Cwd::abs_path()> beforehand if that
+C<$base> contains symbolic links.  (Apply
+L<Cwd::abs_path()|Cwd/abs_path> beforehand if that
 is a concern.)  On VMS, there is interaction with the working environment, as
 logicals and macros are expanded.
 
