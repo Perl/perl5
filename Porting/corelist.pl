@@ -238,6 +238,7 @@ foreach my $module ( sort keys %module_to_upstream ) {
     my $dist = $module_to_dist{$module};
     $bug_tracker = $dist_to_meta_YAML{$dist}->{resources}{bugtracker}
         if $dist;
+    $bug_tracker = $bug_tracker->{web} if ref($bug_tracker) eq "HASH";
 
     $bug_tracker = defined $bug_tracker ? "'$bug_tracker'" : 'undef';
 	next if $bug_tracker eq "'http://rt.perl.org/perlbug/'";
