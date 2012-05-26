@@ -764,9 +764,15 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 {
     dVAR;
     STRLEN srclen, len, uoffset, bitoffs = 0;
-    const unsigned char *s = (const unsigned char *) SvPV_const(sv, srclen);
+    const unsigned char *s = (const unsigned char *) SvPV_flags_const(sv, srclen,
+                             SV_GMAGIC | ((PL_op->op_flags & OPf_MOD || LVRET)
+                                          ? SV_UNDEF_RETURNS_NULL : 0));
     UV retnum = 0;
 
+    if (!s) {
+      s = (const unsigned char *)"";
+    }
+    
     PERL_ARGS_ASSERT_DO_VECGET;
 
     if (offset < 0)
@@ -921,7 +927,8 @@ Perl_do_vecset(pTHX_ SV *sv)
 
     if (!targ)
 	return;
-    s = (unsigned char*)SvPV_force(targ, targlen);
+    s = (unsigned char*)SvPV_force_flags(targ, targlen,
+                                         SV_GMAGIC | SV_UNDEF_RETURNS_NULL);
     if (SvUTF8(targ)) {
 	/* This is handled by the SvPOK_only below...
 	if (!Perl_sv_utf8_downgrade(aTHX_ targ, TRUE))
