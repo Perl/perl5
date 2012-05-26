@@ -17,6 +17,30 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.0 - Charles Stross, "Singularity Sky"
+
+Announced on 2012-05-26 by Zefram
+
+`Welcome, comrades!'  Burya opened his arms toward the soldier.
+`Yes it is true!  With help from our allies of the Festival, the iron
+hand of the reactionary junta is about to be overthrown for all time!
+The new economy is being born; the marginal cost of production has
+been abolished, and from now on, if any item is produced once, it can
+be replicated infinitely.  From each according to his imagination,
+to each according to his needs!  Join us or better still, bring your
+fellow soldiers and workers to join us!'
+
+There was a sharp bang from the roof of the Corn Exchange, right at the
+climax of his impromptu speech; heads turned in alarm.  Something had
+broken inside the spork factory and a stream of rainbow-hued plastic
+implements fountained toward the sky and clattered to the cobblestones
+on every side, like a harbinger of the postindustrial society to come.
+Workers and peasants alike stared in open-mouthed bewilderment at this
+astounding display of productivity, then bent to scrabble in the muck
+for the brightly colored sporks of revolution.  A volley of shots rang
+out and Burya Rubenstein raised his hands, grinning wildly, to accept
+the salute of the soldiers from the Skull Hill garrison.
+
 =head2 v5.16.0 - W.H. Auden - September 1, 1939
 
 L<Announced on 2012-05-20 by Ricardo
