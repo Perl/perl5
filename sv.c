@@ -9112,6 +9112,9 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
 		OP_DESC(PL_op));
 	s = sv_2pv_flags(sv, &len, flags &~ SV_GMAGIC);
+	if (!s) {
+	  s = (char *)"";
+	}
 	if (lp)
 	    *lp = len;
 
