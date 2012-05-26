@@ -121,6 +121,10 @@ did not exist [perl #112126].
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.66 to 2.67.
+
+=item *
+
 L<overload> has been upgraded from version 1.18 to 1.19.
 
 C<no overload> now warns for invalid arguments, just like C<use overload>.
