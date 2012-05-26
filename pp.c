@@ -432,6 +432,7 @@ PP(pp_prototype)
     GV *gv;
     SV *ret = &PL_sv_undef;
 
+    if (SvGMAGICAL(TOPs)) SETs(sv_mortalcopy(TOPs));
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {

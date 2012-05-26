@@ -1,0 +1,1 @@
+print "@ARGV\n"
