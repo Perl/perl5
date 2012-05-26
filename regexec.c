@@ -4496,7 +4496,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		ST.cp = regcppush(rex, 0);	/* Save *all* the positions. */
 		REGCP_SET(ST.lastcp);
 		
-		/* see regtry, specifically PL_reglast(?:close)?paren is a pointer! (i dont know why) :dmq */
 		re->lastparen = 0;
 		re->lastcloseparen = 0;
 
