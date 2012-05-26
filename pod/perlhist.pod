@@ -480,6 +480,8 @@ the strings?).
  Ricardo  5.16.0-RC2    2012-May-15
  Ricardo  5.16.0        2012-May-20
 
+ Zefram   5.17.0        2012-May-26     The 5.17 development track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
