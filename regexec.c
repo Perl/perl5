@@ -5438,8 +5438,6 @@ NULL
 
 	case CURLY_B_min_known_fail:
 	    /* failed to find B in a non-greedy match where c1,c2 valid */
-	    if (ST.paren && ST.count)
-		rex->offs[ST.paren].end = -1;
 
 	    PL_reginput = locinput;	/* Could be reset... */
 	    REGCP_UNWIND(ST.cp);
@@ -5516,8 +5514,6 @@ NULL
 
 	case CURLY_B_min_fail:
 	    /* failed to find B in a non-greedy match where c1,c2 invalid */
-	    if (ST.paren && ST.count)
-		rex->offs[ST.paren].end = -1;
 
 	    REGCP_UNWIND(ST.cp);
 	    /* failed -- move forward one */
@@ -5563,8 +5559,6 @@ NULL
 	    /* FALL THROUGH */
 	case CURLY_B_max_fail:
 	    /* failed to find B in a greedy match */
-	    if (ST.paren && ST.count)
-		rex->offs[ST.paren].end = -1;
 
 	    REGCP_UNWIND(ST.cp);
 	    /*  back up. */
