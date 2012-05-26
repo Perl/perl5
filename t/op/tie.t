@@ -1277,3 +1277,15 @@ join $a, 1..10;
 EXPECT
 1
 1
+########
+
+# [perl #9391] return value from 'tied' not discarded soon enough
+use warnings;
+tie @a, 'T';
+if (tied @a) {
+untie @a;
+}
+
+sub T::TIEARRAY { my $s; bless \$s => "T" }
+EXPECT
+
