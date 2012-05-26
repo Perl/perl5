@@ -100,7 +100,7 @@ sub development_time {
 
     my $development_time;
     if ( $months < 2 ) {
-        return "$weeks weeks";
+        return "$weeks @{[$weeks == 1 ? q(week) : q(weeks)]}";
     } else {
         return "$months months";
     }
