@@ -10676,29 +10676,13 @@ tryagain:
 		    }
 		}
                 if (UTF || is_exactfu_sharp_s) {
-		     if (FOLD) {
-		          /* Emit all the Unicode characters. */
-			  STRLEN numlen;
-			  for (foldbuf = tmpbuf;
-			       foldlen;
-			       foldlen -= numlen) {
-
-                               /* tmpbuf has been constructed by us, so we know
-                                * it is valid utf8 */
-			       ender = valid_utf8_to_uvchr(foldbuf, &numlen);
-			       if (numlen > 0) {
-				    const STRLEN unilen = reguni(pRExC_state, ender, s);
-				    len     += unilen;
-				    s       += unilen;
-				    /* In EBCDIC the numlen
-				     * and unilen can differ. */
-				    foldbuf += numlen;
-				    if (numlen >= foldlen)
-                                        break; /* "Can't happen." */
-			       }
-			       else
-				    break;
-			  }
+                    if (FOLD) {
+                        if (! SIZE_ONLY) {
+                            /* Emit all the Unicode characters. */
+                            Copy(tmpbuf, s, foldlen, char);
+                        }
+                        len += foldlen;
+                        s += foldlen;
 		     }
 		     else {
 			  const STRLEN unilen = reguni(pRExC_state, ender, s);
