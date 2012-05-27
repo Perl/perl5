@@ -10665,49 +10665,14 @@ tryagain:
 			    foldlen = 2;
 			}
 		    }
-		    else if (isASCII(ender)) {	/* Note: Here can't also be LOC
-						 */
-			ender = toLOWER(ender);
-			*tmpbuf = (U8) ender;
-			foldlen = 1;
-		    }
-		    else if (! ASCII_FOLD_RESTRICTED && ! LOC) {
-
-			/* Locale and /aa require more selectivity about the
-			 * fold, so are handled below.  Otherwise, here, just
-			 * use the fold */
-			ender = toFOLD_uni(ender, tmpbuf, &foldlen);
-		    }
 		    else {
-			/* Under locale rules or /aa we are not to mix,
-			 * respectively, ords < 256 or ASCII with non-.  So
-			 * reject folds that mix them, using only the
-			 * non-folded code point.  So do the fold to a
-			 * temporary, and inspect each character in it. */
-			U8 trialbuf[UTF8_MAXBYTES_CASE+1];
-			U8* s = trialbuf;
-			UV tmpender = toFOLD_uni(ender, trialbuf, &foldlen);
-			U8* e = s + foldlen;
-			bool fold_ok = TRUE;
-
-			while (s < e) {
-			    if (isASCII(*s)
-				|| (LOC && (UTF8_IS_INVARIANT(*s)
-					   || UTF8_IS_DOWNGRADEABLE_START(*s))))
-			    {
-				fold_ok = FALSE;
-				break;
-			    }
-			    s += UTF8SKIP(s);
-			}
-			if (fold_ok) {
-			    Copy(trialbuf, tmpbuf, foldlen, U8);
-			    ender = tmpender;
-			}
-			else {
-			    uvuni_to_utf8(tmpbuf, ender);
-			    foldlen = UNISKIP(ender);
-			}
+			ender = _to_uni_fold_flags(ender, tmpbuf, &foldlen,
+                                FOLD_FLAGS_FULL
+                                 | ((LOC) ?  FOLD_FLAGS_LOCALE
+                                          : (ASCII_FOLD_RESTRICTED)
+                                            ? FOLD_FLAGS_NOMIX_ASCII
+                                            : 0)
+                            );
 		    }
 		}
                 if (UTF || is_exactfu_sharp_s) {
