@@ -438,20 +438,29 @@ PP(pp_warn)
     }
     else {
 	exsv = TOPs;
+	if (SvGMAGICAL(exsv)) exsv = sv_mortalcopy(exsv);
     }
 
     if (SvROK(exsv) || (SvPV_const(exsv, len), len)) {
 	/* well-formed exception supplied */
     }
-    else if (SvROK(ERRSV)) {
-	exsv = ERRSV;
-    }
-    else if (SvPOK(ERRSV) && SvCUR(ERRSV)) {
-	exsv = sv_mortalcopy(ERRSV);
-	sv_catpvs(exsv, "\t...caught");
-    }
     else {
+      SvGETMAGIC(ERRSV);
+      if (SvROK(ERRSV)) {
+	if (SvGMAGICAL(ERRSV)) {
+	    exsv = sv_newmortal();
+	    sv_setsv_nomg(exsv, ERRSV);
+	}
+	else exsv = ERRSV;
+      }
+      else if (SvPOKp(ERRSV) && SvCUR(ERRSV)) {
+	exsv = sv_newmortal();
+	sv_setsv_nomg(exsv, ERRSV);
+	sv_catpvs(exsv, "\t...caught");
+      }
+      else {
 	exsv = newSVpvs_flags("Warning: something's wrong", SVs_TEMP);
+      }
     }
     if (SvROK(exsv) && !PL_warnhook)
 	 Perl_warn(aTHX_ "%"SVf, SVfARG(exsv));

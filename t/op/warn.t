@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 22;
+plan 28;
 
 my @warnings;
 my $wa = []; my $ea = [];
@@ -147,5 +147,43 @@ fresh_perl_like(
   { },
  'warn stringifies in the absence of $SIG{__WARN__}'
 );
+
+use Tie::Scalar;
+tie $@, "Tie::StdScalar";
+
+$@ = "foo\n";
+@warnings = ();
+warn;
+is @warnings, 1;
+like $warnings[0], qr/^foo\n\t\.\.\.caught at warn\.t /,
+    '...caught is appended to tied $@';
+
+$@ = \$_;
+@warnings = ();
+{
+  local *{ref(tied $@) . "::STORE"} = sub {};
+  undef $@;
+}
+warn;
+is @warnings, 1;
+is $warnings[0], \$_, '!SvOK tied $@ that returns ref is used';
+
+untie $@;
+
+@warnings = ();
+{
+  package o;
+  use overload '""' => sub { "" };
+}
+tie $t, Tie::StdScalar;
+$t = bless [], o;
+{
+  local *{ref(tied $t) . "::STORE"} = sub {};
+  undef $t;
+}
+warn $t;
+is @warnings, 1;
+object_ok $warnings[0], 'o',
+  'warn $tie_returning_object_that_stringifes_emptily';
 
 1;

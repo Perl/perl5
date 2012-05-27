@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 299);
+    plan (tests => 303);
 }
 
 use strict;
@@ -246,6 +246,18 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
     $var = undef;
     $dummy  =  select $var, undef, undef, 0
                             ; check_count 'select $tied_undef, ...';
+}
+
+{
+    local $SIG{__WARN__} = sub {};
+    $dummy  =  warn $var    ; check_count 'warn $tied';
+    tie $@, => 'main', 1;
+    $dummy  =  warn         ; check_count 'warn() with $@ tied (num)';
+    tie $@, => 'main', \1;
+    $dummy  =  warn         ; check_count 'warn() with $@ tied (ref)';
+    tie $@, => 'main', "foo\n";
+    $dummy  =  warn         ; check_count 'warn() with $@ tied (str)';
+    untie $@;
 }
 
 ###############################################
