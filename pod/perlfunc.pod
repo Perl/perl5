@@ -4207,7 +4207,7 @@ zero, typically at scope exit:
     }
 
 B<WARNING:> The previous example has a bug because the automatic
-close that happens when the refcount on C<handle> does not
+close that happens when the refcount on C<handle> reaches zero does not
 properly detect and report failures.  I<Always> close the handle
 yourself and inspect the return value.
 
