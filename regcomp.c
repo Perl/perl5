@@ -10396,6 +10396,7 @@ tryagain:
 	    register UV ender;
 	    register char *p;
 	    char *s;
+#define MAX_NODE_STRING_SIZE 127
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
             U8 node_type;
@@ -10429,7 +10430,7 @@ tryagain:
              * non-final, but it is possible for there not to be any in the
              * entire node. */
 	    for (len = 0, p = RExC_parse - 1;
-	         len < 127 && p < RExC_end;
+	         len < MAX_NODE_STRING_SIZE && p < RExC_end;
 	         len++)
 	    {
 		char * const oldp = p;
