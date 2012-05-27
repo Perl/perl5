@@ -1579,7 +1579,7 @@ use File::Glob qw(:case);
 
     'Scalar-List-Utils' => {
         'MAINTAINER'   => 'gbarr',
-        'DISTRIBUTION' => 'GBARR/Scalar-List-Utils-1.23.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.25.tar.gz',
 
         # Note that perl uses its own version of Makefile.PL
         'FILES'    => q[cpan/List-Util],

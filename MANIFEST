@@ -1491,10 +1491,8 @@ cpan/libnet/t/smtp.t		libnet
 cpan/libnet/t/time.t		libnet
 cpan/List-Util/Changes			Util extension
 cpan/List-Util/lib/List/Util.pm		List::Util
-cpan/List-Util/lib/List/Util/PP.pm	List::Util
 cpan/List-Util/lib/List/Util/XS.pm	List::Util
 cpan/List-Util/lib/Scalar/Util.pm	Scalar::Util
-cpan/List-Util/lib/Scalar/Util/PP.pm	Scalar::Util
 cpan/List-Util/ListUtil.xs		Util extension
 cpan/List-Util/Makefile.PL		Util extension
 cpan/List-Util/multicall.h		Util extension
@@ -1502,8 +1500,8 @@ cpan/List-Util/README			Util extension
 cpan/List-Util/t/00version.t		Scalar::Util
 cpan/List-Util/t/blessed.t		Scalar::Util
 cpan/List-Util/t/dualvar.t		Scalar::Util
-cpan/List-Util/t/expfail.t		List::Util
 cpan/List-Util/t/first.t		List::Util
+cpan/List-Util/t/getmagic-once.t
 cpan/List-Util/t/isvstring.t		Scalar::Util
 cpan/List-Util/t/lln.t			Scalar::Util
 cpan/List-Util/t/maxstr.t		List::Util
@@ -1511,23 +1509,7 @@ cpan/List-Util/t/max.t			List::Util
 cpan/List-Util/t/minstr.t		List::Util
 cpan/List-Util/t/min.t			List::Util
 cpan/List-Util/t/openhan.t		Scalar::Util
-cpan/List-Util/t/p_00version.t		Scalar::Util
-cpan/List-Util/t/p_blessed.t		Scalar::Util
-cpan/List-Util/t/p_first.t		List::Util
-cpan/List-Util/t/p_lln.t		Scalar::Util
-cpan/List-Util/t/p_maxstr.t		List::Util
-cpan/List-Util/t/p_max.t		List::Util
-cpan/List-Util/t/p_minstr.t		List::Util
-cpan/List-Util/t/p_min.t		List::Util
-cpan/List-Util/t/p_openhan.t		Scalar::Util
-cpan/List-Util/t/p_readonly.t		Scalar::Util
-cpan/List-Util/t/p_reduce.t		List::Util
-cpan/List-Util/t/p_refaddr.t		Scalar::Util
-cpan/List-Util/t/p_reftype.t		Scalar::Util
 cpan/List-Util/t/proto.t		Scalar::Util
-cpan/List-Util/t/p_shuffle.t		List::Util
-cpan/List-Util/t/p_sum.t		List::Util
-cpan/List-Util/t/p_tainted.t		Scalar::Util
 cpan/List-Util/t/readonly.t		Scalar::Util
 cpan/List-Util/t/reduce.t		List::Util
 cpan/List-Util/t/refaddr.t		Scalar::Util
@@ -1537,7 +1519,6 @@ cpan/List-Util/t/stack-corruption.t	List::Util
 cpan/List-Util/t/sum.t			List::Util
 cpan/List-Util/t/tainted.t		Scalar::Util
 cpan/List-Util/t/weak.t			Scalar::Util
-cpan/List-Util/XS.pp			List::Util
 cpan/Locale-Codes/ChangeLog			Locale::Codes
 cpan/Locale-Codes/lib/Locale/Codes/API.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Changes.pod	Locale::Codes documentation

@@ -183,6 +183,10 @@ L<Unicode::UCD> has been upgraded from version 0.43 to 0.44.
 This adds a function L<all_casefolds()|Unicode::UCD/all_casefolds()>
 that returns all the casefolds.
 
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.23 to version 1.25.
+
 =back
 
 =head2 Removed Modules and Pragmata
