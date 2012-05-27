@@ -2585,6 +2585,16 @@ phooey:
 }
 
 
+/* Set which rex is pointed to by PL_reg_state, handling ref counting.
+ * Do inc before dec, in case old and new rex are the same */
+#define SET_reg_curpm(Re2) \
+    if (PL_reg_state.re_state_eval_setup_done) {    \
+	(void)ReREFCNT_inc(Re2);		    \
+	ReREFCNT_dec(PM_GETRE(PL_reg_curpm));	    \
+	PM_SETRE((PL_reg_curpm), (Re2));	    \
+    }
+
+
 /*
  - regtry - try match at specific point
  */
@@ -2643,16 +2653,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
             }
 #endif      
         }
-#ifdef USE_ITHREADS
-	/* It seems that non-ithreads works both with and without this code.
-	   So for efficiency reasons it seems best not to have the code
-	   compiled when it is not needed.  */
-	/* This is safe against NULLs: */
-	ReREFCNT_dec(PM_GETRE(PL_reg_curpm));
-	/* PM_reg_curpm owns a reference to this regexp.  */
-	(void)ReREFCNT_inc(rx);
-#endif
-	PM_SETRE(PL_reg_curpm, rx);
+	SET_reg_curpm(rx);
 	PL_reg_oldcurpm = PL_curpm;
 	PL_curpm = PL_reg_curpm;
 	if (RXp_MATCH_COPIED(prog)) {
@@ -3070,11 +3071,6 @@ S_clear_backtrack_stack(pTHX_ void *p)
     }
 }
 
-
-#define SETREX(Re1,Re2) \
-    if (PL_reg_state.re_state_eval_setup_done) \
-	PM_SETRE((PL_reg_curpm), (Re2)); \
-    Re1 = (Re2)
 
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
@@ -4245,7 +4241,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    re_sv = rex_sv;
             re = rex;
             rei = rexi;
-            (void)ReREFCNT_inc(rex_sv);
             if (OP(scan)==GOSUB) {
                 startpoint = scan + ARG2L(scan);
                 ST.close_paren = ARG(scan);
@@ -4514,7 +4509,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		ST.prev_rex = rex_sv;
 		ST.prev_curlyx = cur_curlyx;
-		SETREX(rex_sv,re_sv);
+		rex_sv = re_sv;
+		SET_reg_curpm(rex_sv);
 		rex = re;
 		rexi = rei;
 		cur_curlyx = NULL;
@@ -4534,8 +4530,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
 	    PL_reg_flags ^= ST.toggle_reg_flags; 
-	    ReREFCNT_dec(rex_sv);
-	    SETREX(rex_sv,ST.prev_rex);
+	    rex_sv = ST.prev_rex;
+	    SET_reg_curpm(rex_sv);
 	    rex = (struct regexp *)SvANY(rex_sv);
 	    rexi = RXi_GET(rex);
 	    regcpblow(ST.cp);
@@ -4552,8 +4548,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
 	    PL_reg_flags ^= ST.toggle_reg_flags; 
-	    ReREFCNT_dec(rex_sv);
-	    SETREX(rex_sv,ST.prev_rex);
+	    rex_sv = ST.prev_rex;
+	    SET_reg_curpm(rex_sv);
 	    rex = (struct regexp *)SvANY(rex_sv);
 	    rexi = RXi_GET(rex); 
 
@@ -5579,11 +5575,11 @@ NULL
 
 		st->u.eval.prev_rex = rex_sv;		/* inner */
 		st->u.eval.cp = regcppush(rex, 0); /* Save *all* the positions. */
-		SETREX(rex_sv,cur_eval->u.eval.prev_rex);
+		rex_sv = cur_eval->u.eval.prev_rex;
+		SET_reg_curpm(rex_sv);
 		rex = (struct regexp *)SvANY(rex_sv);
 		rexi = RXi_GET(rex);
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
-		(void)ReREFCNT_inc(rex_sv);
 
 		REGCP_SET(st->u.eval.lastcp);
 		PL_reginput = locinput;
