@@ -10397,8 +10397,8 @@ tryagain:
 	    register char *p;
 	    char *s;
 #define MAX_NODE_STRING_SIZE 127
+	    char foldbuf[MAX_NODE_STRING_SIZE];
 	    STRLEN foldlen;
-	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
             U8 node_type;
             bool next_is_quantifier;
 
@@ -10409,7 +10409,10 @@ tryagain:
 	    ender = 0;
             node_type = compute_EXACTish(pRExC_state);
 	    ret = reg_node(pRExC_state, node_type);
-	    s = STRING(ret);
+
+            /* In pass1, folded, we use a temporary buffer instead of the
+             * actual node, as the node doesn't exist yet */
+	    s = (SIZE_ONLY && FOLD) ? foldbuf : STRING(ret);
 
 	    /* XXX The node can hold up to 255 bytes, yet this only goes to
              * 127.  I (khw) do not know why.  Keeping it somewhat less than
@@ -10650,7 +10653,9 @@ tryagain:
                     goto loopdone;
                 }
 
-		if ((UTF && FOLD) || is_exactfu_sharp_s) {
+		if (FOLD) {
+		    if (UTF || is_exactfu_sharp_s) {
+
 		    /* Prime the casefolded buffer.  Locale rules, which apply
 		     * only to code points < 256, aren't known until execution,
 		     * so for them, just output the original character using
@@ -10658,16 +10663,16 @@ tryagain:
                      * update join_exact() */
 		    if (LOC && ender < 256) {
 			if (UNI_IS_INVARIANT(ender)) {
-			    *tmpbuf = (U8) ender;
+			    *s = (U8) ender;
 			    foldlen = 1;
 			} else {
-			    *tmpbuf = UTF8_TWO_BYTE_HI(ender);
-			    *(tmpbuf + 1) = UTF8_TWO_BYTE_LO(ender);
+			    *s = UTF8_TWO_BYTE_HI(ender);
+			    *(s + 1) = UTF8_TWO_BYTE_LO(ender);
 			    foldlen = 2;
 			}
 		    }
 		    else {
-			ender = _to_uni_fold_flags(ender, tmpbuf, &foldlen,
+			ender = _to_uni_fold_flags(ender, (U8 *) s, &foldlen,
                                 FOLD_FLAGS_FULL
                                  | ((LOC) ?  FOLD_FLAGS_LOCALE
                                           : (ASCII_FOLD_RESTRICTED)
@@ -10675,29 +10680,28 @@ tryagain:
                                             : 0)
                             );
 		    }
+			s += foldlen;
+
+			/* The loop increments <len> each time, as all but this
+			 * path (and the one just below for UTF) through it add
+			 * a single byte to the EXACTish node.  But this one
+			 * has changed len to be the correct final value, so
+			 * subtract one to cancel out the increment that
+			 * follows */
+			len += foldlen - 1;
 		}
-                if (UTF || is_exactfu_sharp_s) {
-                    if (FOLD) {
-                        if (! SIZE_ONLY) {
-                            /* Emit all the Unicode characters. */
-                            Copy(tmpbuf, s, foldlen, char);
-                        }
-                        len += foldlen;
-                        s += foldlen;
-		     }
-		     else {
+		else {
+		    REGC((char)ender, s++);
+		}
+		}
+		else if (UTF) {
 			  const STRLEN unilen = reguni(pRExC_state, ender, s);
 			  if (unilen > 0) {
 			       s   += unilen;
 			       len += unilen;
 			  }
-		     }
 
-                     /* The loop increments <len> each time, as all but this
-                      * path through it add a single byte to the EXACTish node.
-                      * But this one has changed len to be the correct final
-                      * value, so subtract one to cancel out the increment that
-                      * follows */
+		    /* See comment just above for - 1 */
 		     len--;
 		}
 		else {
