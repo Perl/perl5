@@ -3545,6 +3545,10 @@ Signal names
 Various warnings and error messages that mention variable names or values,
 methods, etc.
 
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.23 to version 1.25.
+
 =back
 
 One side effect of these changes is that blessing into "\0" no longer
