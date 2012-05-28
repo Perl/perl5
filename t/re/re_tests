@@ -1595,6 +1595,7 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /[[:word:]]/	\x{2c1}	y	-	-
 /[[:word:]]/	\x{2c2}	n	-	-
 
-
+# [perl #113400]
+/syntax OK\s+\z/si	t/bin/good.pl syntax OK\n	y	-	-
 
 # vim: softtabstop=0 noexpandtab
