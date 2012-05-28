@@ -10656,30 +10656,30 @@ tryagain:
 		if (FOLD) {
 		    if (UTF || is_exactfu_sharp_s) {
 
-		    /* Prime the casefolded buffer.  Locale rules, which apply
-		     * only to code points < 256, aren't known until execution,
-		     * so for them, just output the original character using
-                     * utf8.  If we start to fold non-UTF patterns, be sure to
-                     * update join_exact() */
-		    if (LOC && ender < 256) {
-			if (UNI_IS_INVARIANT(ender)) {
-			    *s = (U8) ender;
-			    foldlen = 1;
-			} else {
-			    *s = UTF8_TWO_BYTE_HI(ender);
-			    *(s + 1) = UTF8_TWO_BYTE_LO(ender);
-			    foldlen = 2;
-			}
-		    }
-		    else {
-			ender = _to_uni_fold_flags(ender, (U8 *) s, &foldlen,
-                                FOLD_FLAGS_FULL
-                                 | ((LOC) ?  FOLD_FLAGS_LOCALE
-                                          : (ASCII_FOLD_RESTRICTED)
-                                            ? FOLD_FLAGS_NOMIX_ASCII
-                                            : 0)
-                            );
-		    }
+                        /* Prime the casefolded buffer.  Locale rules, which
+                         * apply only to code points < 256, aren't known until
+                         * execution, so for them, just output the original
+                         * character using utf8.  If we start to fold non-UTF
+                         * patterns, be sure to update join_exact() */
+                        if (LOC && ender < 256) {
+                            if (UNI_IS_INVARIANT(ender)) {
+                                *s = (U8) ender;
+                                foldlen = 1;
+                            } else {
+                                *s = UTF8_TWO_BYTE_HI(ender);
+                                *(s + 1) = UTF8_TWO_BYTE_LO(ender);
+                                foldlen = 2;
+                            }
+                        }
+                        else {
+                            ender = _to_uni_fold_flags(ender, (U8 *) s, &foldlen,
+                                    FOLD_FLAGS_FULL
+                                     | ((LOC) ?  FOLD_FLAGS_LOCALE
+                                              : (ASCII_FOLD_RESTRICTED)
+                                                ? FOLD_FLAGS_NOMIX_ASCII
+                                                : 0)
+                                );
+                        }
 			s += foldlen;
 
 			/* The loop increments <len> each time, as all but this
@@ -10689,20 +10689,20 @@ tryagain:
 			 * subtract one to cancel out the increment that
 			 * follows */
 			len += foldlen - 1;
-		}
-		else {
-		    REGC((char)ender, s++);
-		}
+                    }
+                    else {
+                        REGC((char)ender, s++);
+                    }
 		}
 		else if (UTF) {
-			  const STRLEN unilen = reguni(pRExC_state, ender, s);
-			  if (unilen > 0) {
-			       s   += unilen;
-			       len += unilen;
-			  }
+                    const STRLEN unilen = reguni(pRExC_state, ender, s);
+                    if (unilen > 0) {
+                       s   += unilen;
+                       len += unilen;
+                    }
 
 		    /* See comment just above for - 1 */
-		     len--;
+		    len--;
 		}
 		else {
 		    REGC((char)ender, s++);
