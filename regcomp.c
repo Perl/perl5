@@ -10402,10 +10402,6 @@ tryagain:
             U8 node_type;
             bool next_is_quantifier;
 
-	    /* Is this a LATIN LOWER CASE SHARP S in an EXACTFU node?  If so,
-	     * it is folded to 'ss' even if not utf8 */
-	    bool is_exactfu_sharp_s;
-
 	    ender = 0;
             node_type = compute_EXACTish(pRExC_state);
 	    ret = reg_node(pRExC_state, node_type);
@@ -10635,8 +10631,6 @@ tryagain:
 		    break;
 		} /* End of switch on the literal */
 
-                is_exactfu_sharp_s = (node_type == EXACTFU
-			              && ender == LATIN_SMALL_LETTER_SHARP_S);
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 
@@ -10654,7 +10648,13 @@ tryagain:
                 }
 
 		if (FOLD) {
-		    if (UTF || is_exactfu_sharp_s) {
+                    if (UTF
+                            /* See comments for join_exact() as to why we fold
+                             * this non-UTF at compile time */
+                        || (node_type == EXACTFU
+                            && ender == LATIN_SMALL_LETTER_SHARP_S))
+                    {
+
 
                         /* Prime the casefolded buffer.  Locale rules, which
                          * apply only to code points < 256, aren't known until
