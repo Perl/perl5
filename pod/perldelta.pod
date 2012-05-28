@@ -290,9 +290,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+C<link> on Win32 now attempts to set C<$!> to more appropriate values
+based on the Win32 API error code. [perl #112272]
 
 =back
 
