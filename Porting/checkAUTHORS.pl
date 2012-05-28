@@ -160,6 +160,7 @@ sub generate_known_author_map {
         "arbor\100al37al08.telecel.pt"
         ,    # reported perlbug ticket 5196 - no actual code contribution. no real name - jrv 20091006
         "oracle\100pcr8.pcr.com",    # Reported perlbug ticket 1015 - no patch - Probably Ed Eddington ed@pcr.com
+        "snaury\100gmail.com",       # Reported cpan ticket 35943, with patch for fix
         ;
 
     #
