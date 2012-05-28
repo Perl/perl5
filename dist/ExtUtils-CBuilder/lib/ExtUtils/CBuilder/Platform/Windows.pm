@@ -10,7 +10,7 @@ use ExtUtils::CBuilder::Base;
 use IO::File;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280207';
+$VERSION = '0.280208';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 =begin comment
@@ -179,8 +179,7 @@ sub link {
 
   $spec{output}    ||= File::Spec->catfile( $spec{builddir},
                                             $spec{basename}  . '.'.$cf->{dlext}   );
-  $spec{manifest}  ||= File::Spec->catfile( $spec{builddir},
-                                            $spec{basename}  . '.'.$cf->{dlext}.'.manifest');
+  $spec{manifest}  ||= $spec{output} . '.manifest';
   $spec{implib}    ||= File::Spec->catfile( $spec{builddir},
                                             $spec{basename}  . $cf->{lib_ext} );
   $spec{explib}    ||= File::Spec->catfile( $spec{builddir},
