@@ -477,6 +477,18 @@ S_regcppop(pTHX_ regexp *rex)
 #endif
 }
 
+/* restore the parens and associated vars at savestack position ix,
+ * but without popping the stack */
+
+STATIC void
+S_regcp_restore(pTHX_ regexp *rex, I32 ix)
+{
+    I32 tmpix = PL_savestack_ix;
+    PL_savestack_ix = ix;
+    regcppop(rex);
+    PL_savestack_ix = tmpix;
+}
+
 #define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
 
 /*
@@ -3138,6 +3150,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     I32 gimme = G_SCALAR;
     CV *caller_cv = NULL;	/* who called us */
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
+    CHECKPOINT runops_cp;	/* savestack position before executing EVAL */
 
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
@@ -4269,6 +4282,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		struct re_save_state saved_state;
 		CV *newcv;
 
+		/* save *all* paren positions */
+		regcppush(rex, 0);
+		REGCP_SET(runops_cp);
+
 		/* To not corrupt the existing regex state while executing the
 		 * eval we would normally put it on the save stack, like with
 		 * save_re_context. However, re-evals have a weird scoping so we
@@ -4398,6 +4415,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_regeol = saved_regeol;
 		if (!logical) {
 		    /* /(?{...})/ */
+		    /* restore all paren positions. Note that where the
+		     * return value is used, we must delay this as the
+		     * returned string to be compiled may be $1 for
+		     * example */
+		    S_regcp_restore(aTHX_ rex, runops_cp);
 		    sv_setsv(save_scalar(PL_replgv), ret);
 		    break;
 		}
@@ -4471,6 +4493,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    sv_magic(ret, MUTABLE_SV(rx), PERL_MAGIC_qr, 0, 0);
 			}
 			PL_regsize = osize;
+			/* safe to do now that any $1 etc has been
+			 * interpolated into the new pattern string and
+			 * compiled */
+			S_regcp_restore(aTHX_ rex, runops_cp);
 		    }
 		    re_sv = rx;
 		    re = (struct regexp *)SvANY(rx);
@@ -4523,6 +4549,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    }
 	    /* logical is 1,   /(?(?{...})X|Y)/ */
 	    sw = cBOOL(SvTRUE(ret));
+	    S_regcp_restore(aTHX_ rex, runops_cp);
 	    logical = 0;
 	    break;
 	}
@@ -5568,7 +5595,6 @@ NULL
 	    fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
-		I32 tmpix;
 		st->u.eval.toggle_reg_flags
 			    = cur_eval->u.eval.toggle_reg_flags;
 		PL_reg_flags ^= st->u.eval.toggle_reg_flags; 
@@ -5586,10 +5612,7 @@ NULL
 
 		/* Restore parens of the outer rex without popping the
 		 * savestack */
-		tmpix = PL_savestack_ix;
-		PL_savestack_ix = cur_eval->u.eval.lastcp;
-		regcppop(rex);
-		PL_savestack_ix = tmpix;
+		S_regcp_restore(aTHX_ rex, cur_eval->u.eval.lastcp);
 
 		st->u.eval.prev_eval = cur_eval;
 		cur_eval = cur_eval->u.eval.prev_eval;

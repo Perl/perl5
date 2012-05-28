@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 434;  # Update this when adding/deleting tests.
+plan tests => 444;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -834,6 +834,88 @@ sub run_tests {
 	}
 	recurse2(5);
     }
+
+    # nested (??{}) called from various levels of a recursive function
+
+    {
+	sub recurse3 {
+	    my ($n) = @_;
+	    return if $n > 3;
+	    ok("A$n" =~ m{^A(??{ "0123" =~ /((??{$n}))/; $1 })$},
+		"recurse3($n)");
+	    ok("A$n" !~ m{^A(??{ "0123" =~ /((??{$n}))/; "X" })$},
+		"recurse3($n) nomatch");
+	    recurse3($n+1);
+	}
+	recurse3(0);
+    }
+
+    # nested (??{}) being invoked recursively via a function
+
+    {
+	my $s = '';
+	our $recurse4;
+	my @alpha = qw(A B C D E);
+	$recurse4 = sub {
+	    my ($n) = @_;
+	    $s .= "(n=$n:";
+	    if ($n < 4) {
+		my $m = ("$alpha[$n]" . substr("0123", 0, $n+1)) =~
+		    m{^([A-Z])
+		      (??{
+			    $s .= "1=$1:";
+			    "$n-0123" =~ m{^(\d)-(((??{$recurse4->($n+1)})))};
+			    $s .= "i1=$1:<=[$2]";
+			    $3; # NB - not stringified
+		       })
+		       $
+		     }x;
+		$s .= "1a=$1:";
+		$s .= $m ? 'M' : '!M';
+	    }
+	    my $ret =  '.*?' . ($n-1);
+	    $s .= "<=[$ret])";
+	    return $ret;
+	};
+	$recurse4->(0);
+	my $exp =   '(n=0:1=A:(n=1:1=B:(n=2:1=C:(n=3:1=D:(n=4:<=[.*?3])'
+		  . 'i1=3:<=[0123]1a=D:M<=[.*?2])i1=2:<=[012]1a=C:M<=[.*?1])'
+		  . 'i1=1:<=[01]1a=B:M<=[.*?0])i1=0:<=[0]1a=A:M<=[.*?-1])';
+	is($s, $exp, 'recurse4');
+    }
+
+    # single (??{}) being invoked recursively via a function
+
+    {
+	my $s = '';
+	our $recurse5;
+	my @alpha = qw(A B C D E);
+	$recurse5 = sub {
+	    my ($n) = @_;
+	    $s .= "(n=$n:";
+	    if ($n < 4) {
+		my $m = ("$alpha[$n]" . substr("0123", 0, $n+1)) =~
+		    m{^([A-Z])
+		      ((??{
+			    $s .= "1=$1:";
+			    $recurse5->($n+1);
+		       }))
+		       $
+		     }x;
+		$s .= "1a=$1:2=$2:";
+		$s .= $m ? 'M' : '!M';
+	    }
+	    my $ret =  '.*?' . ($n-1);
+	    $s .= "<=[$ret])";
+	    return $ret;
+	};
+	$recurse5->(0);
+	my $exp =   '(n=0:1=A:(n=1:1=B:(n=2:1=C:(n=3:1=D:(n=4:<=[.*?3])'
+		  . '1a=D:2=0123:M<=[.*?2])1a=C:2=012:M<=[.*?1])'
+		  . '1a=B:2=01:M<=[.*?0])1a=A:2=0:M<=[.*?-1])';
+	is($s, $exp, 'recurse5');
+    }
+
 
     # make sure that errors during compiling run-time code get trapped
 
