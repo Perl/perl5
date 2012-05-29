@@ -237,7 +237,8 @@ scope has the given name. Name must be a literal string.
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH(c)	(SAVEPPTR(CopSTASHPV(c)), \
 				 SAVEI32(CopSTASH_len(c)))
-#  define SAVECOPSTASH_FREE(c)	SAVESHAREDPV(CopSTASHPV(c))
+#  define SAVECOPSTASH_FREE(c)	(SAVESHAREDPV(CopSTASHPV(c)), \
+	                         SAVEI32(CopSTASH_len(c)))
 #  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
 #  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
 #else
