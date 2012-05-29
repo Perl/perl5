@@ -2022,6 +2022,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if (type != OP_LEAVESUBLV)
 	    goto nomod;
 	break; /* op_lvalue()ing was handled by ck_return() */
+
+    case OP_COREARGS:
+	return o;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
@@ -2062,8 +2065,7 @@ S_scalar_mod_type(const OP *o, I32 type)
     switch (type) {
     case OP_POS:
     case OP_SASSIGN:
-	assert(o);
-	if (o->op_type == OP_RV2GV)
+	if (o && o->op_type == OP_RV2GV)
 	    return FALSE;
 	/* FALL THROUGH */
     case OP_PREINC:
@@ -8088,6 +8090,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		scalar(kid);
 		break;
 	    case OA_SCALARREF:
+		if ((type == OP_UNDEF || type == OP_POS)
+		    && numargs == 1 && !(oa >> 4)
+		    && kid->op_type == OP_LIST)
+		    return too_many_arguments_pv(o,PL_op_desc[type], 0);
 		op_lvalue(scalar(kid), type);
 		break;
 	    }
@@ -10527,7 +10533,7 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 This function assigns the prototype of the named core function to C<sv>, or
 to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
 NULL if the core function has no prototype.  C<code> is a code as returned
-by C<keyword()>.  It must be negative and unequal to -KEY_CORE.
+by C<keyword()>.  It must not be equal to 0 or -KEY_CORE.
 
 =cut
 */
@@ -10544,19 +10550,24 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 
     PERL_ARGS_ASSERT_CORE_PROTOTYPE;
 
-    assert (code < 0 && code != -KEY_CORE);
+    assert (code && code != -KEY_CORE);
 
     if (!sv) sv = sv_newmortal();
 
 #define retsetpvs(x,y) sv_setpvs(sv, x); if(opnum) *opnum=(y); return sv
 
-    switch (-code) {
+    switch (code < 0 ? -code : code) {
     case KEY_and   : case KEY_chop: case KEY_chomp:
-    case KEY_cmp   : case KEY_exec: case KEY_eq   :
-    case KEY_ge    : case KEY_gt  : case KEY_le   :
-    case KEY_lt    : case KEY_ne  : case KEY_or   :
-    case KEY_select: case KEY_system: case KEY_x  : case KEY_xor:
+    case KEY_cmp   : case KEY_defined: case KEY_delete: case KEY_exec  :
+    case KEY_exists: case KEY_eq     : case KEY_ge    : case KEY_goto  :
+    case KEY_grep  : case KEY_gt     : case KEY_last  : case KEY_le    :
+    case KEY_lt    : case KEY_map    : case KEY_ne    : case KEY_next  :
+    case KEY_or    : case KEY_print  : case KEY_printf: case KEY_qr    :
+    case KEY_redo  : case KEY_require: case KEY_return: case KEY_say   :
+    case KEY_select: case KEY_sort   : case KEY_split : case KEY_system:
+    case KEY_x     : case KEY_xor    :
 	if (!opnum) return NULL; nullret = TRUE; goto findopnum;
+    case KEY_glob:    retsetpvs("_;", OP_GLOB);
     case KEY_keys:    retsetpvs("+", OP_KEYS);
     case KEY_values:  retsetpvs("+", OP_VALUES);
     case KEY_each:    retsetpvs("+", OP_EACH);
@@ -10564,6 +10575,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_unshift: retsetpvs("+@", OP_UNSHIFT);
     case KEY_pop:     retsetpvs(";+", OP_POP);
     case KEY_shift:   retsetpvs(";+", OP_SHIFT);
+    case KEY_pos:     retsetpvs(";\\[$*]", OP_POS);
     case KEY_splice:
 	retsetpvs("+;$$@", OP_SPLICE);
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
@@ -10586,7 +10598,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	}
 	i++;
     }
-    assert(0); return NULL;    /* Should not happen... */
+    return NULL;
   found:
     defgv = PL_opargs[i] & OA_DEFGV;
     oa = PL_opargs[i] >> OASHIFT;
@@ -10610,7 +10622,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	    str[n++] = '$';
 	    str[n++] = '@';
 	    str[n++] = '%';
-	    if (i == OP_LOCK) str[n++] = '&';
+	    if (i == OP_LOCK || i == OP_UNDEF) str[n++] = '&';
 	    str[n++] = '*';
 	    str[n++] = ']';
 	}
@@ -10678,14 +10690,14 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	  onearg:
 	      if (is_handle_constructor(o, 1))
 		argop->op_private |= OPpCOREARGS_DEREF1;
+	      if (scalar_mod_type(NULL, opnum))
+		argop->op_private |= OPpCOREARGS_SCALARMOD;
 	    }
 	    return o;
 	default:
-	    o = convert(opnum,0,argop);
+	    o = convert(opnum,OPf_SPECIAL*(opnum == OP_GLOB),argop);
 	    if (is_handle_constructor(o, 2))
 		argop->op_private |= OPpCOREARGS_DEREF2;
-	    if (scalar_mod_type(NULL, opnum))
-		argop->op_private |= OPpCOREARGS_SCALARMOD;
 	    if (opnum == OP_SUBSTR) {
 		o->op_private |= OPpMAYBE_LVSUB;
 		return o;

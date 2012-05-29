@@ -440,7 +440,7 @@ PP(pp_prototype)
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (!code || code == -KEY_CORE)
 		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
-	    if (code < 0) {	/* Overridable. */
+	    {
 		SV * const sv = core_prototype(NULL, s + 6, code, NULL);
 		if (sv) ret = sv;
 	    }
@@ -5881,7 +5881,7 @@ PP(pp_coreargs)
 {
     dSP;
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
-    int defgv = PL_opargs[opnum] & OA_DEFGV, whicharg = 0;
+    int defgv = PL_opargs[opnum] & OA_DEFGV ||opnum==OP_GLOB, whicharg = 0;
     AV * const at_ = GvAV(PL_defgv);
     SV **svp = at_ ? AvARRAY(at_) : NULL;
     I32 minargs = 0, maxargs = 0, numargs = at_ ? AvFILLp(at_)+1 : 0;
@@ -5906,7 +5906,7 @@ PP(pp_coreargs)
 	/* diag_listed_as: Too many arguments for %s */
 	Perl_croak(aTHX_
 	  "%s arguments for %s", err,
-	   opnum ? OP_DESC(PL_op->op_next) : SvPV_nolen_const(cSVOP_sv)
+	   opnum ? PL_op_desc[opnum] : SvPV_nolen_const(cSVOP_sv)
 	);
 
     /* Reset the stack pointer.  Without this, we end up returning our own
@@ -5934,6 +5934,7 @@ PP(pp_coreargs)
 	whicharg++;
 	switch (oa & 7) {
 	case OA_SCALAR:
+	  try_defsv:
 	    if (!numargs && defgv && whicharg == minargs + 1) {
 		PERL_SI * const oldsi = PL_curstackinfo;
 		I32 const oldcxix = oldsi->si_cxix;
@@ -5981,7 +5982,8 @@ PP(pp_coreargs)
 	    }
 	    break;
 	case OA_SCALARREF:
-	  {
+	  if (!numargs) goto try_defsv;
+	  else {
 	    const bool wantscalar =
 		PL_op->op_private & OPpCOREARGS_SCALARMOD;
 	    if (!svp || !*svp || !SvROK(*svp)
@@ -5990,23 +5992,33 @@ PP(pp_coreargs)
 	           type permits the latter. */
 	     || SvTYPE(SvRV(*svp)) > (
 	             wantscalar       ? SVt_PVLV
-	           : opnum == OP_LOCK ? SVt_PVCV
+	           : opnum == OP_LOCK || opnum == OP_UNDEF
+	                              ? SVt_PVCV
 	           :                    SVt_PVHV
 	        )
 	       )
 		DIE(aTHX_
 		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
 		 "Type of arg %d to &CORE::%s must be %s",
-		  whicharg, OP_DESC(PL_op->op_next),
+		  whicharg, PL_op_name[opnum],
 		  wantscalar
 		    ? "scalar reference"
-		    : opnum == OP_LOCK
+		    : opnum == OP_LOCK || opnum == OP_UNDEF
 		       ? "reference to one of [$@%&*]"
 		       : "reference to one of [$@%*]"
 		);
 	    PUSHs(SvRV(*svp));
-	    break;
+	    if (opnum == OP_UNDEF && SvRV(*svp) == (SV *)PL_defgv
+	     && cxstack[cxstack_ix].cx_type & CXp_HASARGS) {
+		/* Undo @_ localisation, so that sub exit does not undo
+		   part of our undeffing. */
+		PERL_CONTEXT *cx = &cxstack[cxstack_ix];
+		POP_SAVEARRAY();
+		cx->cx_type &= ~ CXp_HASARGS;
+		assert(!AvREAL(cx->blk_sub.argarray));
+	    }
 	  }
+	  break;
 	default:
 	    DIE(aTHX_ "panic: unknown OA_*: %x", (unsigned)(oa&7));
 	}
