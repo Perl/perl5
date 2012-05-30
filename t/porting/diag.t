@@ -427,7 +427,6 @@ Perl %s required--this is only %s, stopped
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Reversed %c= operator
-Runaway prototype
 %s(%f) failed
 %sCompilation failed in regexp
 %sCompilation failed in require

@@ -1337,8 +1337,6 @@ PP(pp_match)
 	    || SvTEMP(TARG) || SvAMAGIC(TARG) || PL_sawampersand
 	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;
-    if (SvSCREAM(TARG))
-	r_flags |= REXEC_SCREAM;
 
   play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
@@ -1359,9 +1357,6 @@ PP(pp_match)
 	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
 	     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
-	     && ((RX_EXTFLAGS(rx) & RXf_NOSCAN)
-		 || !((RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL)
-		      && (r_flags & REXEC_SCREAM)))
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
@@ -2143,8 +2138,6 @@ PP(pp_subst)
     r_flags = (RX_NPARENS(rx) || SvTEMP(TARG) || PL_sawampersand
 	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)) )
 	       ? REXEC_COPY_STR : 0;
-    if (SvSCREAM(TARG))
-	r_flags |= REXEC_SCREAM;
 
     orig = m = s;
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
@@ -2156,10 +2149,7 @@ PP(pp_subst)
 	/* How to do it in subst? */
 /*	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && !(RX_EXTFLAGS(rx) & RXf_KEEPCOPY)
-	     && ((RX_EXTFLAGS(rx) & RXf_NOSCAN)
-		 || !((RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL)
-		      && (r_flags & REXEC_SCREAM))))
+	     && !(RX_EXTFLAGS(rx) & RXf_KEEPCOPY))
 	    goto yup;
 */
     }
@@ -2240,7 +2230,6 @@ PP(pp_subst)
 	}
 	d = s;
 	PL_curpm = pm;
-	SvSCREAM_off(TARG);	/* disable possible screamer */
 	if (once) {
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		rxtainted |= SUBST_TAINT_PAT;

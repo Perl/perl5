@@ -302,7 +302,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_IOK		0x00001000  /* has valid non-public integer value */
 #define SVp_NOK		0x00002000  /* has valid non-public numeric value */
 #define SVp_POK		0x00004000  /* has valid non-public pointer value */
-#define SVp_SCREAM	0x00008000  /* has been studied? */
+#define SVp_SCREAM	0x00008000  /* method name is DOES */
 #define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
 #define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
@@ -378,7 +378,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
    SVf_POK, SVp_POK also set:
    0x00004400   Normal
-   0x0000C400   Studied (SvSCREAM)
+   0x0000C400   method name for DOES (SvSCREAM)
    0x40004400   FBM compiled (SvVALID)
    0x4000C400   pad name.
 

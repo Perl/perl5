@@ -42,8 +42,6 @@ my %mg =
 		  desc => '%ENV hash element' },
      fm => { char => 'f', vtable => 'regdata', value_magic => 1,
 	     readonly_acceptable => 1, desc => "Formline ('compiled' format)" },
-     study => { char => 'G', vtable => 'regexp', value_magic => 1,
-		readonly_acceptable => 1, desc => 'study()ed string' },
      regex_global => { char => 'g', vtable => 'mglob', value_magic => 1,
 		       readonly_acceptable => 1, desc => 'm//g target' },
      hints => { char => 'H', vtable => 'hints', desc => '%^H hash' },

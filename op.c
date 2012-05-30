@@ -6578,11 +6578,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (SvTYPE(gv) != SVt_PVGV) {	/* Maybe prototype now, and had at
 					   maximum a prototype before. */
 	if (SvTYPE(gv) > SVt_NULL) {
-	    if (!SvPOK((const SV *)gv)
-		&& !(SvIOK((const SV *)gv) && SvIVX((const SV *)gv) == -1))
-	    {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
-	    }
 	    cv_ckproto_len_flags((const CV *)gv, NULL, ps, ps_len, ps_utf8);
 	}
 	if (ps) {

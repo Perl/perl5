@@ -97,7 +97,6 @@
         sub fred() ;
         sub fred($) {}
 
-    Runaway prototype		[newSUB]	TODO
     oops: oopsAV		[oopsAV]	TODO
     oops: oopsHV		[oopsHV]	TODO
     
