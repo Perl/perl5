@@ -2,7 +2,7 @@ package Locale::Codes::LangVar_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Thu Mar  1 08:07:50 EST 2012
+#    Generated on: Wed May 30 10:16:58 EDT 2012
 
 =pod
 
@@ -34,10 +34,11 @@ modify it under the same terms as Perl itself.
 
 use strict;
 use warnings;
+use utf8;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.21';
+$VERSION='3.22';
 
 $Locale::Codes::Data{'langvar'}{'id'} = '0057';
 
@@ -146,13 +147,13 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(The Njiva dialect of Resian),
       ],
    q(0033) => [
-      q(Volapük nulik),
-      q(Volapük perevidöl),
-      q(Volapük nulädik),
-      q(de Jong's Volapük),
-      q(New Volapük),
-      q(Revised Volapük),
-      q(Modern Volapük),
+      q(Volapuk nulik),
+      q(Volapuk perevidol),
+      q(Volapuk nuladik),
+      q(de Jong's Volapuk),
+      q(New Volapuk),
+      q(Revised Volapuk),
+      q(Modern Volapuk),
       ],
    q(0034) => [
       q(The Oseacco dialect of Resian),
@@ -174,10 +175,10 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(Puter idiom of Romansh),
       ],
    q(0040) => [
-      q(Volapük rigik),
-      q(Schleyer's Volapük),
-      q(Original Volapük),
-      q(Classic Volapük),
+      q(Volapuk rigik),
+      q(Schleyer's Volapuk),
+      q(Original Volapuk),
+      q(Classic Volapuk),
       ],
    q(0041) => [
       q(Resian),
@@ -269,7 +270,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0012),
       q(0),
       ],
-   q(classic volapük) => [
+   q(classic volapuk) => [
       q(0040),
       q(0),
       ],
@@ -281,7 +282,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0025),
       q(0),
       ],
-   q(de jong's volapük) => [
+   q(de jong's volapuk) => [
       q(0033),
       q(0),
       ],
@@ -325,7 +326,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0001),
       q(0),
       ],
-   q(modern volapük) => [
+   q(modern volapuk) => [
       q(0033),
       q(0),
       ],
@@ -345,7 +346,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0030),
       q(0),
       ],
-   q(new volapük) => [
+   q(new volapuk) => [
       q(0033),
       q(0),
       ],
@@ -353,7 +354,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0021),
       q(0),
       ],
-   q(original volapük) => [
+   q(original volapuk) => [
       q(0040),
       q(0),
       ],
@@ -389,7 +390,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0041),
       q(0),
       ],
-   q(revised volapük) => [
+   q(revised volapuk) => [
       q(0033),
       q(0),
       ],
@@ -401,7 +402,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0042),
       q(0),
       ],
-   q(schleyer's volapük) => [
+   q(schleyer's volapuk) => [
       q(0040),
       q(0),
       ],
@@ -505,19 +506,19 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0053),
       q(0),
       ],
-   q(volapük nulik) => [
+   q(volapuk nuladik) => [
       q(0033),
       q(0),
       ],
-   q(volapük nulädik) => [
+   q(volapuk nulik) => [
       q(0033),
       q(0),
       ],
-   q(volapük perevidöl) => [
+   q(volapuk perevidol) => [
       q(0033),
       q(0),
       ],
-   q(volapük rigik) => [
+   q(volapuk rigik) => [
       q(0040),
       q(0),
       ],

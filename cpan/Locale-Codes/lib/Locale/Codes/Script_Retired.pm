@@ -2,7 +2,7 @@ package Locale::Codes::Script_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Thu Mar  1 08:11:47 EST 2012
+#    Generated on: Wed May 30 10:22:19 EDT 2012
 
 =pod
 
@@ -34,10 +34,11 @@ modify it under the same terms as Perl itself.
 
 use strict;
 use warnings;
+use utf8;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.21';
+$VERSION='3.22';
 
 $Locale::Codes::Retired{'script'}{'num'}{'code'} = {
 };
@@ -51,8 +52,8 @@ $Locale::Codes::Retired{'script'}{'num'}{'name'} = {
 
 $Locale::Codes::Retired{'script'}{'alpha'}{'name'} = {
    q(sindhi) => [ q(Sind), q(Sindhi) ],
-   q(miao (pollard)) => [ q(Plrd), q(Miao (Pollard)) ],
    q(ol chiki (ol cemet, ol, santali)) => [ q(Olck), q(Ol Chiki (Ol Cemet, Ol, Santali)) ],
+   q(miao (pollard)) => [ q(Plrd), q(Miao (Pollard)) ],
    q(hangul (hangul, hangeul)) => [ q(Hang), q(Hangul (Hangul, Hangeul)) ],
    q(sharada, sarada) => [ q(Shrd), q(Sharada, Sarada) ],
    q(khudawadi, sindhi) => [ q(Sind), q(Khudawadi, Sindhi) ],
@@ -60,14 +61,14 @@ $Locale::Codes::Retired{'script'}{'alpha'}{'name'} = {
    q(tifinagh (berber)) => [ q(Tfng), q(Tifinagh (Berber)) ],
    q(moon (moon code, moon script, moon type)) => [ q(Moon), q(Moon (Moon code, Moon script, Moon type)) ],
    q(cuneiform, sumero-akkadian) => [ q(Xsux), q(Cuneiform, Sumero-Akkadian) ],
-   q(warang citi (varang kshiti)) => [ q(Wara), q(Warang Citi (Varang Kshiti)) ],
    q(ethiopic (geez)) => [ q(Ethi), q(Ethiopic (Geez)) ],
+   q(warang citi (varang kshiti)) => [ q(Wara), q(Warang Citi (Varang Kshiti)) ],
    q(tagalog (baybayin, alibata)) => [ q(Tglg), q(Tagalog (Baybayin, Alibata)) ],
    q(deseret (mormon)) => [ q(Dsrt), q(Deseret (Mormon)) ],
    q((alias for hiragana + katakana)) => [ q(Hrkt), q((alias for Hiragana + Katakana)) ],
    q(mandaic, mandaean) => [ q(Mand), q(Mandaic, Mandaean) ],
-   q(devanagari (nagari)) => [ q(Deva), q(Devanagari (Nagari)) ],
    q(tai tham (lanna)) => [ q(Lana), q(Tai Tham (Lanna)) ],
+   q(devanagari (nagari)) => [ q(Deva), q(Devanagari (Nagari)) ],
    q(shavian (shaw)) => [ q(Shaw), q(Shavian (Shaw)) ],
    q(indus (harappan)) => [ q(Inds), q(Indus (Harappan)) ],
    q(lisu (fraser)) => [ q(Lisu), q(Lisu (Fraser)) ],

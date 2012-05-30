@@ -244,6 +244,18 @@ Codes for identification of scripts.
 
 Codes for identification of currencies and funds.
 
+=item B<Locale::Codes::LangExt>
+
+Codes for identification of language extensions.
+
+=item B<Locale::Codes::LangVar>
+
+Codes for identification of language variations.
+
+=item B<Locale::Codes::LangFam>
+
+Codes for identification of language families.
+
 =item B<Locale::Codes::Changes>
 
 A history of changes made to this distribution.

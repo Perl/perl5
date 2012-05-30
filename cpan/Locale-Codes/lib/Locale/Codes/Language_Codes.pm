@@ -2,7 +2,7 @@ package Locale::Codes::Language_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Thu Mar  1 08:07:05 EST 2012
+#    Generated on: Wed May 30 10:16:41 EDT 2012
 
 =pod
 
@@ -34,10 +34,11 @@ modify it under the same terms as Perl itself.
 
 use strict;
 use warnings;
+use utf8;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.21';
+$VERSION='3.22';
 
 $Locale::Codes::Data{'language'}{'id'} = '7819';
 

@@ -2,7 +2,7 @@ package Locale::Codes::LangVar_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Thu Mar  1 08:11:47 EST 2012
+#    Generated on: Wed May 30 10:22:19 EDT 2012
 
 =pod
 
@@ -34,10 +34,11 @@ modify it under the same terms as Perl itself.
 
 use strict;
 use warnings;
+use utf8;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.21';
+$VERSION='3.22';
 
 $Locale::Codes::Retired{'langvar'}{'alpha'}{'code'} = {
 };

@@ -2,7 +2,7 @@ package Locale::Codes::Country_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Thu Mar  1 08:06:53 EST 2012
+#    Generated on: Wed May 30 10:13:48 EDT 2012
 
 =pod
 
@@ -34,10 +34,11 @@ modify it under the same terms as Perl itself.
 
 use strict;
 use warnings;
+use utf8;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.21';
+$VERSION='3.22';
 
 $Locale::Codes::Data{'country'}{'id'} = '0282';
 
@@ -5374,7 +5375,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          ],
       q(BO) => [
          q(0027),
-         q(2),
+         q(0),
          ],
       q(BQ) => [
          q(0278),
@@ -6058,7 +6059,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          ],
       q(SH) => [
          q(0186),
-         q(1),
+         q(0),
          ],
       q(SI) => [
          q(0203),
