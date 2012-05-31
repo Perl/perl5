@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 444;  # Update this when adding/deleting tests.
+plan tests => 446;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -931,6 +931,19 @@ sub run_tests {
 	like($@,
 	    qr/BEGIN failed--compilation aborted at \(eval \d+\) line \d+/,
 	    'syntax error');
+    }
+
+    # make sure that 'use re eval' is propagated into compiling the
+    # pattern returned by (??{})
+
+    {
+	use re 'eval';
+	my $pat = 'B(??{1})C';
+	my $A = 'A';
+	# compile-time outer code-block
+	ok("AB1CD" =~ /^A(??{$pat})D$/, "re eval propagated compile-time");
+	# run-time outer code-block
+	ok("AB1CD" =~ /^$A(??{$pat})D$/, "re eval propagated run-time");
     }
 
 

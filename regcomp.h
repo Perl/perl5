@@ -137,6 +137,7 @@
 #define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
 #define PREGf_VERBARG_SEEN	0x00000008
 #define PREGf_CUTGROUP_SEEN	0x00000010
+#define PREGf_USE_RE_EVAL	0x00000020 /* compiled with "use re 'eval'" */
 
 
 /* this is where the old regcomp.h started */

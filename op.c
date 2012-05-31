@@ -4396,7 +4396,10 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	else {
 	    /* compile-time pattern that includes literal code blocks */
 	    REGEXP* re = eng->op_comp(aTHX_ NULL, 0, expr, eng, NULL, NULL,
-					rx_flags, pm->op_pmflags);
+			rx_flags,
+			(pm->op_pmflags |
+			    ((PL_hints & HINT_RE_EVAL) ? PMf_USE_RE_EVAL : 0))
+		    );
 	    PM_SETRE(pm, re);
 	    if (pm->op_pmflags & PMf_HAS_CV) {
 		CV *cv;

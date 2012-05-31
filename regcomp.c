@@ -6359,6 +6359,8 @@ reStudy:
 	r->intflags |= PREGf_VERBARG_SEEN;
     if (RExC_seen & REG_SEEN_CUTGROUP)
 	r->intflags |= PREGf_CUTGROUP_SEEN;
+    if (pm_flags & PMf_USE_RE_EVAL)
+	r->intflags |= PREGf_USE_RE_EVAL;
     if (RExC_paren_names)
         RXp_PAREN_NAMES(r) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else

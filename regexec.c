@@ -4483,7 +4483,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    const char *const p = SvPV(ret, len);
 			    ret = newSVpvn_flags(p, len, SVs_TEMP);
 			}
-			rx = CALLREGCOMP(ret, pm_flags);
+			if (rex->intflags & PREGf_USE_RE_EVAL)
+			    pm_flags |= PMf_USE_RE_EVAL;
+
+			/* if we got here, it should be an engine which
+			 * supports compiling code blocks and stuff */
+			assert(rex->engine && rex->engine->op_comp);
+			rx = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
+				    rex->engine, NULL, NULL, 0, pm_flags);
+
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
 				 | SVs_GMG))) {
