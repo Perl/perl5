@@ -207,7 +207,7 @@ use File::Glob qw(:case);
 
     'Archive::Tar' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.82.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.86.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'EXCLUDED'     => ['Makefile.PL'],
         'UPSTREAM'     => 'cpan',
