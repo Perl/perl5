@@ -493,6 +493,18 @@ use File::Glob qw(:case);
         'UPSTREAM' => 'cpan',
     },
 
+    'CPAN::Meta::Requirements' => {
+        'MAINTAINER'   => 'dagolden',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-Requirements-2.122.tar.gz',
+        'FILES'        => q[cpan/CPAN-Meta-Requirements],
+        'EXCLUDED'     => [
+            qw(t/00-compile.t),
+            qr{^xt},
+            qr{^history},
+        ],
+        'UPSTREAM' => 'cpan',
+    },
+
     'CPAN::Meta::YAML' => {
         'MAINTAINER'   => 'dagolden',
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-YAML-0.008.tar.gz',

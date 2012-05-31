@@ -324,6 +324,14 @@ cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Requirements.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm
+cpan/CPAN-Meta-Requirements/Changes
+cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements.pm
+cpan/CPAN-Meta-Requirements/t/accepts.t
+cpan/CPAN-Meta-Requirements/t/bad_version_hook.t
+cpan/CPAN-Meta-Requirements/t/basic.t
+cpan/CPAN-Meta-Requirements/t/finalize.t
+cpan/CPAN-Meta-Requirements/t/from-hash.t
+cpan/CPAN-Meta-Requirements/t/merge.t
 cpan/CPAN-Meta/t/accepts.t
 cpan/CPAN-Meta/t/bad_version_hook.t
 cpan/CPAN-Meta/t/basic.t
