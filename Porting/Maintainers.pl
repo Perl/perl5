@@ -1350,7 +1350,7 @@ use File::Glob qw(:case);
 
     'Params::Check' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Params-Check-0.32.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Params-Check-0.36.tar.gz',
         'EXCLUDED'     => ['Params-Check-0.26.tar.gz'],
         'FILES'        => q[cpan/Params-Check],
         'UPSTREAM'     => 'cpan',
