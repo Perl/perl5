@@ -433,6 +433,7 @@ cpan/CPANPLUS-Dist-Build/t/src/noxs/Foo-Bar-0.01.tar.gz		CPANPLUS::Dist::Build t
 cpan/CPANPLUS-Dist-Build/t/src/xs/Foo-Bar-0.01.tar.gz		CPANPLUS::Dist::Build tests
 cpan/CPANPLUS/lib/CPANPLUS/Backend.pm				CPANPLUS
 cpan/CPANPLUS/lib/CPANPLUS/Backend/RV.pm			CPANPLUS
+cpan/CPANPLUS/lib/CPANPLUS/Config/HomeEnv.pm
 cpan/CPANPLUS/lib/CPANPLUS/Config.pm				CPANPLUS
 cpan/CPANPLUS/lib/CPANPLUS/Configure.pm				CPANPLUS
 cpan/CPANPLUS/lib/CPANPLUS/Configure/Setup.pm			CPANPLUS

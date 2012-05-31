@@ -610,11 +610,7 @@ sub _resolve_prereqs {
         ### 'perl' is a special case, there's no mod object for it
         if( $mod eq PERL_CORE ) {
 
-            ### run a CLI invocation to see if the perl you specified is
-            ### uptodate
-            my $ok = run( command => "$^X -M$version -e1", verbose => 0 );
-
-            unless( $ok ) {
+            unless( $cb->_vcmp( sprintf('v%vd',$^V), $version ) >= 0 ) {
                 error(loc(  "Module '%1' needs perl version '%2', but you ".
                             "only have version '%3' -- can not proceed",
                             $self->module, $version,

@@ -195,6 +195,10 @@ use constant BLIB_LIBDIR    => sub { return @_
                                         : File::Spec->catdir( BLIB->(), LIB );
                             };
 
+use constant BIN            => 'bin';
+
+use constant SCRIPT         => 'script';
+
 use constant CONFIG_USER_LIB_DIR => sub {
                                     require CPANPLUS::Internals::Utils;
                                     LIB_DIR->(

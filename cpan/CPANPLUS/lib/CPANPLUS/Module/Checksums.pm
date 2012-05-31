@@ -142,7 +142,14 @@ sub _get_checksums_file {
     my $clone = $self->clone;
     $clone->package( CHECKSUMS );
 
-    my $file = $clone->fetch( ttl => 3600, %hash ) or return;
+    # If the user specified a fetchdir, then every CHECKSUMS file will always
+    # be stored there, not in an author-specific subdir.  Thus, in this case,
+    # we need to always re-fetch the CHECKSUMS file and hence need to set the
+    # TTL to something small.
+    my $have_fetchdir =
+        $self->parent->configure_object->get_conf('fetchdir') ne '';
+    my $ttl = $have_fetchdir ? 0.001 : 3600;
+    my $file = $clone->fetch( ttl => $ttl, %hash ) or return;
 
     return $file;
 }

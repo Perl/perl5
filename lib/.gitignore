@@ -59,6 +59,7 @@
 /CPANPLUS/Backend.pm
 /CPANPLUS/Backend/RV.pm
 /CPANPLUS/Config.pm
+/CPANPLUS/Config/HomeEnv.pm
 /CPANPLUS/Configure.pm
 /CPANPLUS/Configure/Setup.pm
 /CPANPLUS/Dist.pm

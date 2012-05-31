@@ -448,11 +448,12 @@ use File::Glob qw(:case);
 
     'CPANPLUS' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/CPANPLUS-0.9121.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/CPANPLUS-0.9130.tar.gz',
         'FILES'        => q[cpan/CPANPLUS],
         'EXCLUDED'     => [
             qr{^inc/},
             qr{^t/dummy-.*\.hidden$},
+            qr{^t/dummy-(cpanplus|perl|localmirror)/},
             'bin/cpanp-boxed',
 
             # SQLite tests would be skipped in core, and

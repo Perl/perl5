@@ -166,7 +166,10 @@ Defaults to C<true>.
 =item base
 
 The directory CPANPLUS keeps all its build and state information in.
-Defaults to ~/.cpanplus.
+Defaults to ~/.cpanplus. If L<File::HomeDir> is available, that will
+be used to work out your C<HOME> directory. This may be overriden by
+setting the C<PERL5_CPANPLUS_HOME> environment variable, see
+L<CPANPLUS::Config::HomeEnv> for more details.
 
 =cut
 
@@ -281,6 +284,15 @@ etc. Defaults to 'false'.
 =cut
 
         $Conf->{'conf'}->{'force'} = 0;
+
+=item histfile
+
+A string containing the history filename of the CPANPLUS readline instance.
+
+=cut
+
+        $Conf->{'conf'}->{'histfile'} = File::Spec->catdir(
+                                        __PACKAGE__->_home_dir, DOT_CPANPLUS, 'history' );
 
 =item lib
 

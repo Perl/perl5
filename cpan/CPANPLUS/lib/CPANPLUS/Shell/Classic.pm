@@ -97,6 +97,20 @@ sub new {
             code    => \&__ask_about_test_report,
     );
 
+    if (my $histfile = $self->configure_object->get_conf( 'histfile' )) {
+        my $term = $self->term;
+        if ($term->can('AddHistory')) {
+            if (open my $fh, '<', $histfile) {
+                local $/ = "\n";
+                while (my $line = <$fh>) {
+                    chomp($line);
+                    $term->AddHistory($line);
+                }
+                close($fh);
+            }
+        }
+    }
+
     return $self;
 }
 
@@ -194,6 +208,24 @@ sub _dispatch_on_input {
 
 ### displays quit message
 sub _quit {
+    my $self = shift;
+    my $term = $self->term;
+
+    if ($term->can('GetHistory')) {
+        my @history = $term->GetHistory;
+
+        my $histfile = $self->configure_object->get_conf('histfile');
+
+        if (open my $fh, '>', $histfile) {
+            foreach my $line (@history) {
+                print {$fh} "$line\n";
+            }
+            close($fh);
+        }
+        else {
+            warn "Cannot open history file '$histfile' - $!";
+        }
+    }
 
     ### well, that's what CPAN.pm says...
     print "Lockfile removed\n";

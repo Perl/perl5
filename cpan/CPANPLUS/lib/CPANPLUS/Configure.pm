@@ -523,10 +523,12 @@ sub AUTOLOAD {
     $type .= '_'    if $private;
     $type .= $field if $field;
 
-    unless ( $conf->can($type) ) {
+    my $type_code = $conf->can($type);
+    unless ( $type_code ) {
         error( loc("Invalid method type: '%1'", $name) );
         return;
     }
+    my $type_obj = $type_code->();
 
     unless( scalar @_ ) {
         error( loc("No arguments provided!") );
@@ -539,8 +541,8 @@ sub AUTOLOAD {
             my @list = ();
 
             ### get it from the user config first
-            if( $conf->can($type) and $conf->$type->can($key) ) {
-                push @list, $conf->$type->$key;
+            if( my $code = $type_obj->can($key) ) {
+                push @list, $code->();
 
             ### XXX EU::AI compatibility hack to provide lookups like in
             ### cpanplus 0.04x; we renamed ->_get_build('base') to
@@ -562,8 +564,8 @@ sub AUTOLOAD {
 
         while( my($key,$val) = each %args ) {
 
-            if( $conf->can($type) and $conf->$type->can($key) ) {
-                $conf->$type->$key( $val );
+            if( my $code = $type_obj->can($key) ) {
+                $code->( $val );
 
             } else {
                 error( loc(q[No such key '%1' in field '%2'], $key, $type) );
@@ -579,13 +581,13 @@ sub AUTOLOAD {
 
         while( my($key,$val) = each %args ) {
 
-            if( $conf->$type->can($key) ) {
+            if( $type_obj->can($key) ) {
                 error( loc( q[Key '%1' already exists for field '%2'],
                             $key, $type));
                 return;
             } else {
-                $conf->$type->mk_accessors( $key );
-                $conf->$type->$key( $val );
+                $type_obj->mk_accessors( $key );
+                $type_obj->$key( $val );
             }
         }
         return 1;
