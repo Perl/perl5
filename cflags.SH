@@ -337,6 +337,10 @@ for file do
     cppflags=`echo $cppflags|sed 's/-Wdeclaration-after-statement/ /'`
 
     case "$cc" in
+    *clang)
+      # clang complains a lot about -Wunused-value which are not fixable
+      warn="$warn -Wno-unused-value"
+      ;;
     *g++*)
       # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
       # because of all the warnings about Perl___notused, and g++ doesn't do
