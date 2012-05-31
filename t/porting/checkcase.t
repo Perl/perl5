@@ -1,6 +1,10 @@
 #!/usr/bin/perl
-# Finds the files that have the same name, case insensitively,
-# in the current directory and its subdirectories
+# Finds the files that have the same name, case insensitively in the build tree
+
+BEGIN {
+    @INC = '..' if -f '../TestInit.pm';
+}
+use TestInit qw(T); # T is chdir to the top level
 
 use warnings;
 use strict;
@@ -12,13 +16,13 @@ my $test_count = 0;
 find(sub {
 	   my $name = $File::Find::name;
 	   # Assumes that the path separator is exactly one character.
-	   $name =~ s/^\.\..//;
+	   $name =~ s/^\..//;
 
 	   # Special exemption for Makefile, makefile
 	   return if $name =~ m!\A(?:x2p/)?[Mm]akefile\z!;
 
 	   push @{$files{lc $name}}, $name;
-	 }, '..');
+	 }, '.');
 
 foreach (sort values %files) {
     if (@$_ > 1) {
