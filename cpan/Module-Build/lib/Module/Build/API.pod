@@ -157,6 +157,24 @@ checking on binary/packaged distributions of the module.
 See the documentation for L<Module::Build::Authoring/"PREREQUISITES">
 for the details of how requirements can be specified.
 
+=item configure_requires
+
+[version 0.30]
+
+Modules listed in this section must be installed I<before> configuring
+this distribution (i.e. before running the F<Build.PL> script).
+This might be a specific minimum version of C<Module::Build> or any
+other module the F<Build.PL> needs in order to do its stuff.  Clients
+like C<CPAN.pm> or C<CPANPLUS> will be expected to pick
+C<configure_requires> out of the F<META.yml> file and install these
+items before running the C<Build.PL>.
+
+Module::Build may automatically add itself to configure_requires.
+See L</auto_configure_requires> for details.
+
+See the documentation for L<Module::Build::Authoring/"PREREQUISITES">
+for the details of how requirements can be specified.
+
 =item create_packlist
 
 [version 0.28]
@@ -834,6 +852,17 @@ SIGNATURE file to the MANIFEST (therefore, don't add it yourself).
 The default value is false.  In the future, the default may change to
 true if you have C<Module::Signature> installed on your system.
 
+=item tap_harness_args
+
+[version 0.2808_03]
+
+An optional parameter specifying parameters to be passed to TAP::Harness when
+running tests. Must be given as a hash reference of parameters; see the
+L<TAP::Harness|TAP::Harness> documentation for details. Note that specifying
+this parameter will implicitly set C<use_tap_harness> to a true value. You
+must therefore be sure to add TAP::Harness as a requirement for your module in
+L</build_requires>.
+
 =item test_files
 
 [version 0.23]
@@ -861,17 +890,6 @@ testing rather than Test::Harness. Defaults to false. If set to true, you must
 therefore be sure to add TAP::Harness as a requirement for your module in
 L</build_requires>. Implicitly set to a true value if C<tap_harness_args> is
 specified.
-
-=item tap_harness_args
-
-[version 0.2808_03]
-
-An optional parameter specifying parameters to be passed to TAP::Harness when
-running tests. Must be given as a hash reference of parameters; see the
-L<TAP::Harness|TAP::Harness> documentation for details. Note that specifying
-this parameter will implicitly set C<use_tap_harness> to a true value. You
-must therefore be sure to add TAP::Harness as a requirement for your module in
-L</build_requires>.
 
 =item xs_files
 

@@ -2,7 +2,7 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 52;
+use MBTest tests => 53;
 
 blib_load('Module::Build');
 blib_load('Module::Build::ConfigData');
@@ -296,7 +296,20 @@ is_deeply($provides,
 		      version => '1.23' }}); # XXX should be 2.34?
 like( $err, qr/already declared/, '  with conflicting versions reported' );
 
+# Missing version should not show up in provides as version "0"
 
+$dist->change_file( 'lib/Simple.pm', <<'---' );
+package Foo;
+$VERSION = undef;
+1;
+---
+$dist->regen( clean => 1 );
+$err = stderr_of( sub { $mb = new_build() } );
+$err = stderr_of( sub { $provides = $mb->find_dist_packages } );
+is_deeply($provides,
+    {'Foo' => { file => $simple_file } },
+    "undef \$VERSION is omitted from 'provides'"
+);
 
 ############################## Multiple Modules
 
