@@ -21,6 +21,17 @@ find(sub {
 	   # Special exemption for Makefile, makefile
 	   return if $name =~ m!\A(?:x2p/)?[Mm]akefile\z!;
 
+	   if ($name eq '.git') {
+	       # Don't scan the .git directory, as its contents are outside
+	       # our control. In particular, as fetch doesn't default to
+	       # --prune, # someone pushing a branch upstream with a name
+	       # which case-conflicts with a previously deleted branch will
+	       # cause action-at-a-distance failures, because locally
+	       # .git/logs/refs/remotes will contain both.
+	       ++$File::Find::prune;
+	       return;
+	   }
+
 	   push @{$files{lc $name}}, $name;
 	 }, '.');
 
