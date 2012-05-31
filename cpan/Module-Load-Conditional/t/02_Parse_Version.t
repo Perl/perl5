@@ -14,9 +14,9 @@ use_ok( $Class );
 {   for my $str ( __PACKAGE__->_succeed ) {
         my $res = $Class->$Meth( $str, $Verbose );
         ok( defined $res,       "String '$str' identified as version string" );
-        
+
         ### XXX version.pm 0.69 pure perl fails tests under 5.6.2.
-        ### XXX version.pm <= 0.69 do not have a complete overload 
+        ### XXX version.pm <= 0.69 do not have a complete overload
         ### implementation, which causes the following error:
         ### $ perl -Mversion -le'qv(1)+0'
         ### Operation "+": no method found,
@@ -32,10 +32,10 @@ use_ok( $Class );
 
         ### Quell "Argument isn't numeric in gt" warnings...
         my $bool = do { local $^W; $res > 0 };
-        
+
         ok( $bool,              "   Version is '$res'" );
         isnt( $res, '0.0',      "   Not the default value" );
-    }             
+    }
 }
 
 ### version that should fail
@@ -43,7 +43,7 @@ use_ok( $Class );
         my $res = $Class->$Meth( $str, $Verbose );
         ok( ! defined $res,     "String '$str' is not a version string" );
     }
-}    
+}
 
 
 ################################
@@ -58,7 +58,7 @@ sub _succeed {
         *VERSION = \'1.01';
         use version; $VERSION = qv('0.0.2');
         use version; $VERSION = qv('3.0.14');
-        ($VERSION) = '$Revision: 2.03 $' =~ /\s(\d+\.\d+)\s/; 
+        ($VERSION) = '$Revision: 2.03 $' =~ /\s(\d+\.\d+)\s/;
         ( $VERSION ) = sprintf "%d.%02d", q$Revision: 1.23 $ =~ m/ (\d+) \. (\d+) /gx;
         ($GD::Graph::area::VERSION) = '$Revision: 1.16.2.3 $' =~ /\s([\d.]+)/;
         ($GD::Graph::axestype::VERSION) = '$Revision: 1.44.2.14 $' =~ /\s([\d.]+)/;
