@@ -17,7 +17,7 @@ BEGIN {
                         $INSTANCES $ALLOW_NULL_ARGS
                     ];
 
-    $VERSION        = '0.76';
+    $VERSION        = '0.78';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -529,7 +529,7 @@ sub open3_run {
       #
       kill(-9, $$);
 
-      exit 1;
+      POSIX::_exit 1;
     }
 
     if ($got_sig_child) {
@@ -1046,7 +1046,7 @@ sub run_forked {
         $opts->{'child_END'}->();
       }
 
-      exit $child_exit_code;
+      POSIX::_exit $child_exit_code;
     }
 }
 
