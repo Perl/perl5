@@ -45,6 +45,5 @@ SKIP:
 	and skip "directory sync doesn't apply to MSWin32", 1;
     open my $dh, "<", "."
 	or skip "Cannot open the cwd", 1;
-    local $TODO = "[perl #64772] IO::Handle->sync fails on an O_RDONLY descriptor";
     ok($dh->sync, "sync to a read only directory handle");
 }
