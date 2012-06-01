@@ -20,6 +20,9 @@ BEGIN {
     plan (8);
 }
 
+# No, we don't want any zombies. kill 0, $ppid spots zombies :-(
+$SIG{CHLD} = 'IGNORE';
+
 sub fork_and_retrieve {
     my $which = shift;
     pipe my ($r, $w) or die "pipe: $!\n";
@@ -31,9 +34,12 @@ sub fork_and_retrieve {
 	$_ = <$r>;
 	chomp;
 	die "Garbled output '$_'"
-	    unless my ($first, $second) = /^(\d+),(\d+)\z/;
+	    unless my ($how, $first, $second) = /^([a-z]+),(\d+),(\d+)\z/;
 	cmp_ok ($first, '>=', 1, "Parent of $which grandchild");
-	cmp_ok ($second, '>=', 1, "New parent of orphaned $which grandchild");
+	my $message = "grandchild waited until '$how'";
+	cmp_ok ($second, '>=', 1, "New parent of orphaned $which grandchild")
+	    ? note ($message) : diag ($message);
+
 	SKIP: {
 	    skip("Orphan processes are not reparented on QNX", 1)
 		if $^O eq 'nto';
@@ -65,16 +71,36 @@ sub fork_and_retrieve {
 	    close $r2 or die "close: $!\n";
 	    close $w3 or die "close: $!\n";
 	    my $ppid1 = getppid();
+	    # kill 0 isn't portable:
+	    my $can_kill0 = eval {
+		kill 0, $ppid1;
+	    };
+	    my $how = $can_kill0 ? 'undead' : 'sleep';
+
 	    # Tell immediate parent to exit:
 	    close $w2 or die "close: $!\n";
 	    # Wait for it to (start to) exit:
 	    <$r3>;
 	    # Which sadly isn't enough to be sure that it has exited - often we
 	    # get switched in during its shutdown, after $w3 closes but before
-	    # it exits and we get reparented. So fudge it by waiting a bit more:
-	    sleep 2;
+	    # it exits and we get reparented.
+	    if ($can_kill0) {
+		# use kill 0 where possible. Try 10 times, then give up:
+		for (0..9) {
+		    my $got = kill 0, $ppid1;
+		    die "kill: $!" unless defined $got;
+		    if (!$got) {
+			$how = 'kill';
+			last;
+		    }
+		    sleep 1;
+		}
+	    } else {
+		# Fudge it by waiting a bit more:
+		sleep 2;
+	    }
 	    my $ppid2 = getppid();
-	    print $w "$ppid1,$ppid2\n";
+	    print $w "$how,$ppid1,$ppid2\n";
 	}
 	exit 0;
     }
