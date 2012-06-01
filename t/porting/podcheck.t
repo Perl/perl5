@@ -1258,11 +1258,11 @@ sub extract_pod {   # Extracts just the pod from a file; returns undef if file
     # look at instead of being printed
     tie *ALREADY_FH, 'Tie_Array_to_FH', \@pod;
     if (open my $in_fh, '<:bytes', $filename) {
-    my $parser = Pod::Parser->new();
-    $parser->parse_from_filehandle($in_fh, *ALREADY_FH);
-    close $in_fh;
+        my $parser = Pod::Parser->new();
+        $parser->parse_from_filehandle($in_fh, *ALREADY_FH);
+        close $in_fh;
 
-    return join "", @pod
+        return join "", @pod
     }
 
     # The file should already have been opened once to get here, so if that
