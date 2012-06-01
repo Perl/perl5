@@ -1034,6 +1034,27 @@ package My::Pod::Checker {      # Extend Pod::Checker
         delete $problems{$self->get_filename};
         return;
     }
+
+    sub parse_from_file {
+        # This overrides the super class method so that if an open fails on a
+        # transitory file, it doesn't croak.  It returns 1 if it did find the
+        # file, 0 if it didn't
+
+        my $self = shift;
+        my $filename = shift;
+        # ignores 2nd param, which is output file.  Always uses undef
+
+        if (open my $in_fh, '<:bytes', $filename) {
+            $self->SUPER::parse_from_filehandle($in_fh, undef);
+            close $in_fh;
+            return 1;
+        }
+
+        # If couldn't open file, perhaps it was transitory, and hence not an error
+        return 0 unless -e $filename;
+
+        die "Can't open '$filename': $!\n";
+    }
 }
 
 package Tie_Array_to_FH {  # So printing actually goes to an array
@@ -1467,8 +1488,12 @@ foreach my $filename (@files) {
     # We have set the name in the checker object if there is a possibility
     # that no further parsing is necessary, but otherwise do the parsing now.
     if (! $checker->name) {
+        if (! $checker->parse_from_file($filename, undef)) {
+            $checker->set_skip("$filename is transitory");
+            next FILE;
+        }
         $parsed = 1;
-        $checker->parse_from_file($filename, undef);
+
     }
 
     if ($checker->num_errors() < 0) {   # Returns negative if not a pod
@@ -1620,8 +1645,11 @@ foreach my $filename (@files) {
         {
             $checker->node($name) if $name;
         }
-        else {
-            $checker->parse_from_file($filename, undef) if ! $parsed;
+        elsif (! $parsed) {
+            if (! $checker->parse_from_file($filename, undef)) {
+                $checker->set_skip("$filename is transitory");
+                next FILE;
+            }
         }
 
         # Go through everything in the file that could be an anchor that
