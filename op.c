@@ -6994,9 +6994,7 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 
     if (stash) {
 	SAVEGENERICSV(PL_curstash);
-	SAVECOPSTASH(PL_curcop);
 	PL_curstash = (HV *)SvREFCNT_inc_simple_NN(stash);
-	CopSTASH_set(PL_curcop,stash);
     }
 
     /* file becomes the CvFILE. For an XS, it's usually static storage,
@@ -7008,10 +7006,6 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
 
-#ifdef USE_ITHREADS
-    if (stash)
-	CopSTASH_free(PL_curcop);
-#endif
     LEAVE;
 
     return cv;
