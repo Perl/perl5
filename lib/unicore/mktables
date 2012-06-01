@@ -40,7 +40,7 @@ my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 #
 # mktables -- create the runtime Perl Unicode files (lib/unicore/.../*.pl),
 # from the Unicode database files (lib/unicore/.../*.txt),  It also generates
-# a pod file and a .t file
+# a pod file and .t files, depending on option parameters.
 #
 # The structure of this file is:
 #   First these introductory comments; then
@@ -52,10 +52,10 @@ my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 #   the small actual loop to process the input files and finish up; then
 #   a __DATA__ section, for the .t tests
 #
-# This program works on all releases of Unicode through at least 6.0.  The
-# outputs have been scrutinized most intently for release 5.1.  The others
-# have been checked for somewhat more than just sanity.  It can handle all
-# existing Unicode character properties in those releases.
+# This program works on all releases of Unicode so far.  The outputs have been
+# scrutinized most intently for release 5.1.  The others have been checked for
+# somewhat more than just sanity.  It can handle all non-provisional Unicode
+# character properties in those releases.
 #
 # This program is mostly about Unicode character (or code point) properties.
 # A property describes some attribute or quality of a code point, like if it
@@ -65,8 +65,8 @@ my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 # into some corresponding value.  In the case of it being lowercase or not,
 # the mapping is either to 'Y' or 'N' (or various synonyms thereof).  Each
 # property maps each Unicode code point to a single value, called a "property
-# value".  (Hence each Unicode property is a true mathematical function with
-# exactly one value per code point.)
+# value".  (Some more recently defined properties, map a code point to a set
+# of values.)
 #
 # When using a property in a regular expression, what is desired isn't the
 # mapping of the code point to its property's value, but the reverse (or the
@@ -119,7 +119,7 @@ my $map_directory = 'To';        # Where map files go.
 # are for mappings that don't fit into the normal scheme of things.  Mappings
 # that require a hash entry to communicate with utf8.c are one example;
 # another example is mappings for charnames.pm to use which indicate a name
-# that is algorithmically determinable from its code point (and vice-versa).
+# that is algorithmically determinable from its code point (and the reverse).
 # These are used to significantly compact these tables, instead of listing
 # each one of the tens of thousands individually.
 #
@@ -131,8 +131,8 @@ my $map_directory = 'To';        # Where map files go.
 #
 # Actually, there are two types of range lists, "Range_Map" is the one
 # associated with map tables, and "Range_List" with match tables.
-# Again, this is so that methods can be defined on one and not the other so as
-# to prevent operating on them in incorrect ways.
+# Again, this is so that methods can be defined on one and not the others so
+# as to prevent operating on them in incorrect ways.
 #
 # Eventually, most tables are written out to files to be read by utf8_heavy.pl
 # in the perl core.  All tables could in theory be written, but some are
@@ -154,24 +154,29 @@ my $map_directory = 'To';        # Where map files go.
 # takes every code point and maps it to Y or N (but having ranges cuts the
 # number of entries in that table way down), and two match tables, one
 # which has a list of all the code points that map to Y, and one for all the
-# code points that map to N.  (For each of these, a third table is also
+# code points that map to N.  (For each binary property, a third table is also
 # generated for the pseudo Perl property.  It contains the identical code
-# points as the Y table, but can be written, not in the compound form, but in
-# a "single" form like \p{IsUppercase}.)  Many properties are binary, but some
-# properties have several possible values, some have many, and properties like
-# Name have a different value for every named code point.  Those will not,
-# unless the controlling lists are changed, have their match tables written
-# out.  But all the ones which can be used in regular expression \p{} and \P{}
-# constructs will.  Prior to 5.14, generally a property would have either its
-# map table or its match tables written but not both.  Again, what gets
-# written is controlled by lists which can easily be changed.  Starting in
-# 5.14, advantage was taken of this, and all the map tables needed to
-# reconstruct the Unicode db are now written out, while suppressing the
-# Unicode .txt files that contain the data.  Our tables are much more compact
-# than the .txt files, so a significant space savings was achieved.
+# points as the Y table, but can be written in regular expressions, not in the
+# compound form, but in a "single" form like \p{IsUppercase}.)  Many
+# properties are binary, but some properties have several possible values,
+# some have many, and properties like Name have a different value for every
+# named code point.  Those will not, unless the controlling lists are changed,
+# have their match tables written out.  But all the ones which can be used in
+# regular expression \p{} and \P{} constructs will.  Prior to 5.14, generally
+# a property would have either its map table or its match tables written but
+# not both.  Again, what gets written is controlled by lists which can easily
+# be changed.  Starting in 5.14, advantage was taken of this, and all the map
+# tables needed to reconstruct the Unicode db are now written out, while
+# suppressing the Unicode .txt files that contain the data.  Our tables are
+# much more compact than the .txt files, so a significant space savings was
+# achieved.  Also, tables are not written out that are trivially derivable
+# from tables that do get written.  So, there typically is no file containing
+# the code points not matched by a binary property (the table for \P{} versus
+# lowercase \p{}), since you just need to invert the True table to get the
+# False table.
 
-# Properties have a 'Type', like binary, or string, or enum depending on how
-# many match tables there are and the content of the maps.  This 'Type' is
+# Properties have a 'Type', like 'binary', or 'string', or 'enum' depending on
+# how many match tables there are and the content of the maps.  This 'Type' is
 # different than a range 'Type', so don't get confused by the two concepts
 # having the same name.
 #
@@ -182,21 +187,21 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # As stated earlier, this program will work on any release of Unicode so far.
 # Most obvious problems in earlier data have NOT been corrected except when
 # necessary to make Perl or this program work reasonably, and to keep out
-# potential security issues.  For example, no
-# folding information was given in early releases, so this program substitutes
-# lower case instead, just so that a regular expression with the /i option
-# will do something that actually gives the right results in many cases.
-# There are also a couple other corrections for version 1.1.5, commented at
-# the point they are made.  As an example of corrections that weren't made
-# (but could be) is this statement from DerivedAge.txt: "The supplementary
-# private use code points and the non-character code points were assigned in
-# version 2.0, but not specifically listed in the UCD until versions 3.0 and
-# 3.1 respectively."  (To be precise it was 3.0.1 not 3.0.0) More information
-# on Unicode version glitches is further down in these introductory comments.
+# potential security issues.  For example, no folding information was given in
+# early releases, so this program substitutes lower case instead, just so that
+# a regular expression with the /i option will do something that actually
+# gives the right results in many cases.  There are also a couple other
+# corrections for version 1.1.5, commented at the point they are made.  As an
+# example of corrections that weren't made (but could be) is this statement
+# from DerivedAge.txt: "The supplementary private use code points and the
+# non-character code points were assigned in version 2.0, but not specifically
+# listed in the UCD until versions 3.0 and 3.1 respectively."  (To be precise
+# it was 3.0.1 not 3.0.0)  More information on Unicode version glitches is
+# further down in these introductory comments.
 #
-# This program works on all non-provisional properties as of 6.0, though the
-# files for some are suppressed from apparent lack of demand for them.  You
-# can change which are output by changing lists in this program.
+# This program works on all non-provisional properties as of the current
+# Unicode release, though the files for some are suppressed for various
+# reasons.  You can change which are output by changing lists in this program.
 #
 # The old version of mktables emphasized the term "Fuzzy" to mean Unicode's
 # loose matchings rules (from Unicode TR18):
@@ -208,6 +213,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #    recognized, and that loose matching of property names be used,
 #    whereby the case distinctions, whitespace, hyphens, and underbar
 #    are ignored.
+#
 # The program still allows Fuzzy to override its determination of if loose
 # matching should be used, but it isn't currently used, as it is no longer
 # needed; the calculations it makes are good enough.
@@ -228,12 +234,13 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #           values.  That is, they list code points and say what the mapping
 #           is under the given property.  Some files give the mappings for
 #           just one property; and some for many.  This program goes through
-#           each file and populates the properties from them.  Some properties
-#           are listed in more than one file, and Unicode has set up a
-#           precedence as to which has priority if there is a conflict.  Thus
-#           the order of processing matters, and this program handles the
-#           conflict possibility by processing the overriding input files
-#           last, so that if necessary they replace earlier values.
+#           each file and populates the properties and their map tables from
+#           them.  Some properties are listed in more than one file, and
+#           Unicode has set up a precedence as to which has priority if there
+#           is a conflict.  Thus the order of processing matters, and this
+#           program handles the conflict possibility by processing the
+#           overriding input files last, so that if necessary they replace
+#           earlier values.
 #        After this is all done, the program creates the property mappings not
 #            furnished by Unicode, but derivable from what it does give.
 #        The tables of code points that match each property value in each
@@ -316,6 +323,11 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #   can't just take the intersection of two map tables, for example, as that
 #   is nonsensical.
 #
+# What about 'fate' and 'status'.  The concept of a table's fate was created
+#   late when it became clear that something more was needed.  The difference
+#   between this and 'status' is unclean, and could be improved if someone
+#   wanted to spend the effort.
+#
 # DEBUGGING
 #
 # This program is written so it will run under miniperl.  Occasionally changes
@@ -328,12 +340,12 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # local $to_trace = 1 if main::DEBUG;
 #
-# can be added to enable tracing in its lexical scope or until you insert
-# another line:
+# can be added to enable tracing in its lexical scope (plus dynamic) or until
+# you insert another line:
 #
 # local $to_trace = 0 if main::DEBUG;
 #
-# then use a line like "trace $a, @b, %c, ...;
+# To actually trace, use a line like "trace $a, @b, %c, ...;
 #
 # Some of the more complex subroutines already have trace statements in them.
 # Permanent trace statements should be like:
@@ -346,7 +358,8 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # my $debug_skip = 0;
 #
 # to 1, and every file whose object is in @input_file_objects and doesn't have
-# a, 'non_skip => 1,' in its constructor will be skipped.
+# a, 'non_skip => 1,' in its constructor will be skipped.  However, skipping
+# Jamo.txt or UnicodeData.txt will likely cause fatal errors.
 #
 # To compare the output tables, it may be useful to specify the -annotate
 # flag.  This causes the tables to expand so there is one entry for each
@@ -431,7 +444,7 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # ones.  The program should warn you if its name will clash with others on
 # restrictive file systems, like DOS.  If so, figure out a better name, and
 # add lines to the README.perl file giving that.  If the file is a character
-# property, it should be in the format that Unicode has by default
+# property, it should be in the format that Unicode has implicitly
 # standardized for such files for the more recently introduced ones.
 # If so, the Input_file constructor for @input_file_objects can just be the
 # file name and release it first appeared in.  If not, then it should be
@@ -464,9 +477,24 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #
 # Here are some observations about some of the issues in early versions:
 #
-# The number of code points in \p{alpha} halved in 2.1.9.  It turns out that
-# the reason is that the CJK block starting at 4E00 was removed from PropList,
-# and was not put back in until 3.1.0
+# Prior to version 3.0, there were 3 character decompositions.  These are not
+# handled by Unicode::Normalize, nor will it compile when presented a version
+# that has them.  However, you can trivially get it to compile by simply
+# ignoring those decompositions, by changing the croak to a carp.  At the time
+# of this writing, the line (in cpan/Unicode-Normalize/mkheader) reads
+#
+#   croak("Weird Canonical Decomposition of U+$h");
+#
+# Simply change to a carp.  It will compile, but will not know about any three
+# character decomposition.
+
+# The number of code points in \p{alpha=True} halved in 2.1.9.  It turns out
+# that the reason is that the CJK block starting at 4E00 was removed from
+# PropList, and was not put back in until 3.1.0.  The Perl extension (the
+# single property name \p{alpha}) has the correct values.  But the compound
+# form is simply not generated until 3.1, as it can be argued that prior to
+# this release, this was not an official property.  The comments for
+# filter_old_style_proplist() give more details.
 #
 # Unicode introduced the synonym Space for White_Space in 4.1.  Perl has
 # always had a \p{Space}.  In release 3.2 only, they are not synonymous.  The
@@ -475,11 +503,11 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # reclassified it correctly.
 #
 # Another change between 3.2 and 4.0 is the CCC property value ATBL.  In 3.2
-# this was erroneously a synonym for 202.  In 4.0, ATB became 202, and ATBL
-# was left with no code points, as all the ones that mapped to 202 stayed
-# mapped to 202.  Thus if your program used the numeric name for the class,
-# it would not have been affected, but if it used the mnemonic, it would have
-# been.
+# this was erroneously a synonym for 202 (it should be 200).  In 4.0, ATB
+# became 202, and ATBL was left with no code points, as all the ones that
+# mapped to 202 stayed mapped to 202.  Thus if your program used the numeric
+# name for the class, it would not have been affected, but if it used the
+# mnemonic, it would have been.
 #
 # \p{Script=Hrkt} (Katakana_Or_Hiragana) came in 4.0.1.  Before that code
 # points which eventually came to have this script property value, instead
@@ -490,6 +518,12 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # in 3.1.1, the derived file DBidiClass.txt handles this, but this program
 # tries to do the best it can for earlier releases.  It is done in
 # process_PropertyAliases()
+#
+# In version 2.1.2, the entry in UnicodeData.txt:
+#   0275;LATIN SMALL LETTER BARRED O;Ll;0;L;;;;;N;;;;019F;
+# should instead be
+#   0275;LATIN SMALL LETTER BARRED O;Ll;0;L;;;;;N;;;019F;;019F
+# Without this change, there are casing problems for this character.
 #
 ##############################################################################
 
@@ -1081,7 +1115,17 @@ my %default_mapping = (
     Word_Break => 'Other',
 );
 
-# Below are files that Unicode furnishes, but this program ignores, and why
+# Below are files that Unicode furnishes, but this program ignores, and why.
+# NormalizationCorrections.txt requires some more explanation.  It documents
+# the cumulative fixes to erroneous normalizations in earlier Unicode
+# versions.  Its main purpose is so that someone running on an earlier version
+# can use this file to override what got published in that earlier release.
+# It would be easy for mktables to read and handle this file.  But all the
+# corrections in it should already be in the other files for the release it
+# is.  To get it to actually mean something useful, someone would have to be
+# using an earlier Unicode release, and copy it to the files for that release
+# and recomplile.  So far there has been no demand to do that, so this hasn't
+# been implemented.
 my %ignored_files = (
     'CJKRadicals.txt' => 'Maps the kRSUnicode property values to corresponding code points',
     'Index.txt' => 'Alphabetical index of Unicode characters',
@@ -13463,9 +13507,8 @@ sub compile_perl() {
     # Abbreviations go after everything else, so they are saved temporarily in
     # a hash for later.
     #
-    # Controls are currently added afterwards.  This is because Perl has
-    # previously used the Unicode1 name, and so should still use that.  (Most
-    # of them will be the same anyway, in which case we don't add a duplicate)
+    # Everything else is added added afterwards, which preserves the input
+    # ordering
 
     $alias->reset_each_range;
     while (my ($range) = $alias->each_range) {
