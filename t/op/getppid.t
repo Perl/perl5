@@ -27,7 +27,7 @@ sub fork_and_retrieve {
 
     if ($pid) {
 	# parent
-	close $w;
+	close $w or die "close: $!\n";
 	$_ = <$r>;
 	chomp;
 	die "Garbled output '$_'"
@@ -46,11 +46,11 @@ sub fork_and_retrieve {
 	# child
 	# Prevent test.pl from thinking that we failed to run any tests.
 	$::NO_ENDING = 1;
-	close $r;
+	close $r or die "close: $!\n";
 
 	my $pid2 = fork; defined $pid2 or die "fork: $!\n";
 	if ($pid2) {
-	    close $w;
+	    close $w or die "close: $!\n";
 	    sleep 1;
 	}
 	else {
