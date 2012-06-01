@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -142,8 +142,8 @@ Unicode::Casing
 Unicode::Regex::Set
 Unicode::Semantics
 Unicode::Unihan
-Version::Requirements
 unzip(1)
+Version::Requirements
 wait(2)
 waitpid(3)
 wget(1)
@@ -209,7 +209,7 @@ os2/os2/os2-extattr/extattr.pm	? Should you be using F<...> or maybe L<...> inst
 os2/os2/os2-process/process.pm	Verbatim line length including indents exceeds 79 by	27
 os2/os2/os2-rexx/dll/dll.pm	Verbatim line length including indents exceeds 79 by	2
 os2/os2/os2-rexx/rexx.pm	Verbatim line length including indents exceeds 79 by	1
-pod/perl.pod	Verbatim line length including indents exceeds 79 by	9
+pod/perl.pod	Verbatim line length including indents exceeds 79 by	8
 pod/perlaix.pod	Verbatim line length including indents exceeds 79 by	11
 pod/perlapi.pod	? Should you be using L<...> instead of	85
 pod/perlapi.pod	Verbatim line length including indents exceeds 79 by	6
