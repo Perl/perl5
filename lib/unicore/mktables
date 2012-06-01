@@ -541,6 +541,10 @@ my $MAX_LINE_WIDTH = 78;
 # before normal completion.
 my $debug_skip = 0;
 
+
+# Normally these are suppressed.
+my $write_Unicode_deprecated_tables = 0;
+
 # Set to 1 to enable tracing.
 our $to_trace = 0;
 
@@ -987,6 +991,13 @@ my %why_obsolete;    # Documentation only
     foreach my $property (keys %why_deprecated) {
         next if (my $main_property = $property) !~ s/^Other_//;
         $why_deprecated{$property} =~ s/$other_properties/the $main_property property (which should be used instead)/;
+    }
+}
+
+if ($write_Unicode_deprecated_tables) {
+    foreach my $property (keys %why_suppressed) {
+        delete $why_suppressed{$property} if $property =~
+                                                    / ^ Other | Grapheme /x;
     }
 }
 
