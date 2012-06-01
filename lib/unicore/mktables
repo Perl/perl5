@@ -13521,8 +13521,7 @@ sub compile_perl() {
     # Everything else is added added afterwards, which preserves the input
     # ordering
 
-    $alias->reset_each_range;
-    while (my ($range) = $alias->each_range) {
+    foreach my $range ($alias->ranges) {
         next if $range->value eq "";
         my $code_point = $range->start;
         if ($code_point != $range->end) {
