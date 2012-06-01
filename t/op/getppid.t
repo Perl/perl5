@@ -48,15 +48,30 @@ sub fork_and_retrieve {
 	$::NO_ENDING = 1;
 	close $r or die "close: $!\n";
 
+	pipe my ($r2, $w2) or die "pipe: $!\n";
+	pipe my ($r3, $w3) or die "pipe: $!\n";
 	my $pid2 = fork; defined $pid2 or die "fork: $!\n";
 	if ($pid2) {
 	    close $w or die "close: $!\n";
-	    sleep 1;
+	    close $w2 or die "close: $!\n";
+	    close $r3 or die "close: $!\n";
+	    # Wait for our child to signal that it's read our PID:
+	    <$r2>;
+	    # Implicit close of $w3:
+	    exit 0;
 	}
 	else {
 	    # grandchild
+	    close $r2 or die "close: $!\n";
+	    close $w3 or die "close: $!\n";
 	    my $ppid1 = getppid();
-	    # Wait for immediate parent to exit
+	    # Tell immediate parent to exit:
+	    close $w2 or die "close: $!\n";
+	    # Wait for it to (start to) exit:
+	    <$r3>;
+	    # Which sadly isn't enough to be sure that it has exited - often we
+	    # get switched in during its shutdown, after $w3 closes but before
+	    # it exits and we get reparented. So fudge it by waiting a bit more:
 	    sleep 2;
 	    my $ppid2 = getppid();
 	    print $w "$ppid1,$ppid2\n";
