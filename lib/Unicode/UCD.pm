@@ -4,11 +4,8 @@ use strict;
 use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
-use Unicode::Normalize qw(getCombinClass NFD);
 
 our $VERSION = '0.44';
-
-use Storable qw(dclone);
 
 require Exporter;
 
@@ -131,6 +128,35 @@ sub openunicode {
 	    unless defined $f;
     }
     return $f;
+}
+
+sub _dclone ($) {   # Use Storable::dclone if available; otherwise emulate it.
+
+    use if defined &DynaLoader::boot_DynaLoader, Storable => qw(dclone);
+
+    return dclone(shift) if defined &dclone;
+
+    my $arg = shift;
+    my $type = ref $arg;
+    return $arg unless $type;   # No deep cloning needed for scalars
+
+    if ($type eq 'ARRAY') {
+        my @return;
+        foreach my $element (@$arg) {
+            push @return, &_dclone($element);
+        }
+        return \@return;
+    }
+    elsif ($type eq 'HASH') {
+        my %return;
+        foreach my $key (keys %$arg) {
+            $return{$key} = &_dclone($arg->{$key});
+        }
+        return \%return;
+    }
+    else {
+        croak "_dclone can't handle " . $type;
+    }
 }
 
 =head2 B<charinfo()>
@@ -316,6 +342,9 @@ sub charinfo {
     # mktables tables.
 
     use feature 'unicode_strings';
+
+    # Will fail if called under minitest
+    use if defined &DynaLoader::boot_DynaLoader, "Unicode::Normalize" => qw(getCombinClass NFD);
 
     my $arg  = shift;
     my $code = _getcode($arg);
@@ -608,7 +637,7 @@ sub charblock {
         return 'No_Block';
     }
     elsif (exists $BLOCKS{$arg}) {
-        return dclone $BLOCKS{$arg};
+        return _dclone $BLOCKS{$arg};
     }
 }
 
@@ -669,7 +698,7 @@ sub charscript {
         return $result if defined $result;
         return $utf8::SwashInfo{'ToSc'}{'missing'};
     } elsif (exists $SCRIPTS{$arg}) {
-        return dclone $SCRIPTS{$arg};
+        return _dclone $SCRIPTS{$arg};
     }
 
     return;
@@ -696,7 +725,7 @@ See also L</Blocks versus Scripts>.
 
 sub charblocks {
     _charblocks() unless %BLOCKS;
-    return dclone \%BLOCKS;
+    return _dclone \%BLOCKS;
 }
 
 =head2 B<charscripts()>
@@ -718,7 +747,7 @@ See also L</Blocks versus Scripts>.
 
 sub charscripts {
     _charscripts() unless %SCRIPTS;
-    return dclone \%SCRIPTS;
+    return _dclone \%SCRIPTS;
 }
 
 =head2 B<charinrange()>
@@ -778,7 +807,7 @@ my %GENERAL_CATEGORIES =
  );
 
 sub general_categories {
-    return dclone \%GENERAL_CATEGORIES;
+    return _dclone \%GENERAL_CATEGORIES;
 }
 
 =head2 B<general_categories()>
@@ -846,7 +875,7 @@ the bidi type name.
 =cut
 
 sub bidi_types {
-    return dclone \%BIDI_TYPES;
+    return _dclone \%BIDI_TYPES;
 }
 
 =head2 B<compexcl()>
@@ -1287,7 +1316,7 @@ sub casespec {
 
     _casespec() unless %CASESPEC;
 
-    return ref $CASESPEC{$code} ? dclone $CASESPEC{$code} : $CASESPEC{$code};
+    return ref $CASESPEC{$code} ? _dclone $CASESPEC{$code} : $CASESPEC{$code};
 }
 
 =head2 B<namedseq()>
@@ -1760,7 +1789,7 @@ sub prop_aliases ($) {
     # The full name is in element 1.
     return $list_ref->[1] unless wantarray;
 
-    return @{dclone $list_ref};
+    return @{_dclone $list_ref};
 }
 
 =pod
@@ -1899,7 +1928,7 @@ sub prop_value_aliases ($$) {
         # The full name is in element 1.
         return $list_ref->[1] unless wantarray;
 
-        return @{dclone $list_ref};
+        return @{_dclone $list_ref};
     }
 
     return $list_ref->[0] unless wantarray;
