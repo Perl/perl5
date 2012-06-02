@@ -370,11 +370,17 @@ WriteMakefile(
 # ex: set ro:
 EOM
 	    close $fh or die "Can't close Makefile.PL: $!";
+	    # As described in commit 23525070d6c0e51f:
+	    # Push the atime and mtime of generated Makefile.PLs back 4
+	    # seconds. In certain circumstances ( on virtual machines ) the
+	    # generated Makefile.PL can produce a Makefile that is older than
+	    # the Makefile.PL. Altering the atime and mtime backwards by 4
+	    # seconds seems to resolve the issue.
+	    eval {
+		my $ftime = time - 4;
+		utime $ftime, $ftime, 'Makefile.PL';
+	    };
 	}
-  eval {
-    my $ftime = time - 4;
-    utime $ftime, $ftime, 'Makefile.PL';
-  };
 	print "\nRunning Makefile.PL in $ext_dir\n";
 
 	# Presumably this can be simplified
