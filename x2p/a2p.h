@@ -13,7 +13,7 @@
 #define _INC_WIN32_PERL5	/* kludge around win32 stdio layer */
 #endif
 
-#ifdef VMS
+#ifdef __VMS
 #  include "config.h"
 #elif defined(NETWARE)
 #  include "../NetWare/config.h"
