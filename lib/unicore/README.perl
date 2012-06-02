@@ -1,15 +1,26 @@
+Perl should compile and reasonably run any version of Unicode.  That doesn't
+mean that the test suite will run without showing errors.  A few of the
+very-Unicode specific test files have been modified to account for different
+versions, but most have not.  For example, some tests use characters that
+aren't encoded in all Unicode versions; others have hard-coded the General
+Categories that were correct at the time the test was written.  Perl itself
+will not compile under Unicode releases prior to 3.0 without a simple change to
+Unicode::Normalize.  mktables contains instructions for this, as well as other
+hints for using older Unicode versions.
+
 The *.txt files were copied from
 
 	ftp://www.unicode.org/Public/UNIDATA
 
-with subdirectories 'extracted' and 'auxiliary'
+(which always points to the latest version) with subdirectories 'extracted' and
+'auxiliary'.  Older versions are located under Public with an appropriate name.
 
 The Unihan files were not included due to space considerations.  Also NOT
 included were any *.html files.  It is possible to add the Unihan files, and
 edit mktables (see instructions near its beginning) to look at them.
 
-The file 'version' should exist and be a single line with the Unicode version,
-like:
+The file named 'version' should exist and be a single line with the Unicode
+version, like:
 5.2.0
 
 To be 8.3 filesystem friendly, the names of some of the input files have been
@@ -19,9 +30,20 @@ are currently used, so may not be present, so some of the mv's can fail.  The
 
 mv PropertyValueAliases.txt PropValueAliases.txt
 mv NamedSequencesProv.txt NamedSqProv.txt
+mv NormalizationTest.txt NormTest.txt
 mv DerivedAge.txt DAge.txt
 mv DerivedCoreProperties.txt DCoreProperties.txt
 mv DerivedNormalizationProps.txt DNormalizationProps.txt
+
+# Some early releases don't have the extracted directory, and hence these files
+# should be moved to it.
+mkdir extracted
+mv DerivedBidiClass.txt DerivedBinaryProperties.txt extracted
+mv DerivedCombiningClass.txt DerivedDecompositionType.txt extracted
+mv DerivedEastAsianWidth.txt DerivedGeneralCategory.txt extracted
+mv DerivedJoiningGroup.txt DerivedJoiningType.txt extracted
+mv DerivedLineBreak.txt DerivedNumericType.txt DerivedNumericValues.txt extracted
+
 mv extracted/DerivedBidiClass.txt extracted/DBidiClass.txt
 mv extracted/DerivedBinaryProperties.txt extracted/DBinaryProperties.txt
 mv extracted/DerivedCombiningClass.txt extracted/DCombiningClass.txt
@@ -52,7 +74,7 @@ mv Unihan_Readings.txt UnihanReadings.txt
 mv Unihan_Variants.txt UnihanVariants.txt
 
 If you download everything, the names of files that are not used by mktables
-are not changed by the above, and will not work correctly as-is on 8.3
+are not changed by the above, and hence may not work correctly as-is on 8.3
 filesystems.
 
 mktables is used to generate the tables used by the rest of Perl.  It will warn
@@ -104,9 +126,6 @@ current one is
 
 mktables has many checks to warn you if there are unexpected or novel things
 that it doesn't know how to handle.
-
-perl.pod should be changed so that it gives the new name (which includes the
-Unicode release number) for perluniprops.pod
 
 Module::CoreList should be changed to include the new release
 

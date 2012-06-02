@@ -19,8 +19,6 @@ use Test::More;
 
 use Unicode::UCD 'charinfo';
 
-$/ = 7;
-
 my $charinfo;
 
 is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
@@ -373,9 +371,9 @@ is($casefold->{full}, '0073 0073', 'casefold 0xDF full');
 is($casefold->{simple}, "", 'casefold 0xDF simple');
 is($casefold->{turkic}, "", 'casefold 0xDF turkic');
 
-# Do different tests depending on if version <= 3.1, or not.
-(my $version = Unicode::UCD::UnicodeVersion) =~ /^(\d+)\.(\d+)/;
-if (defined $1 && ($1 <= 2 || $1 == 3 && defined $2 && $2 <= 1)) {
+# Do different tests depending on if version < 3.2, or not.
+my $v_unicode_version = pack "C*", split /\./, Unicode::UCD::UnicodeVersion();
+if ($v_unicode_version lt v3.2.0) {
 	$casefold = casefold(0x130);
 
 	is($casefold->{code}, '0130', 'casefold 0x130 code');
@@ -469,11 +467,13 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 
 {
     my $r1 = charscript('Latin');
-    my $n1 = @$r1;
-    is($n1, 30, "number of ranges in Latin script (Unicode 6.1.0)");
-    shift @$r1 while @$r1;
-    my $r2 = charscript('Latin');
-    is(@$r2, $n1, "modifying results should not mess up internal caches");
+    if (ok(defined $r1, "Found Latin script")) {
+        my $n1 = @$r1;
+        is($n1, 30, "number of ranges in Latin script (Unicode 6.1.0)");
+        shift @$r1 while @$r1;
+        my $r2 = charscript('Latin');
+        is(@$r2, $n1, "modifying results should not mess up internal caches");
+    }
 }
 
 {
@@ -550,6 +550,9 @@ is_deeply(\@list,
           ], "prop_aliases('perldecimaldigit') returns Perl_Decimal_Digit as both short and full names");
 
 # Get the official Unicode property name synonyms and test them.
+
+SKIP: {
+skip "PropertyAliases.txt is not in this Unicode version", 1 if $v_unicode_version lt v3.2.0;
 open my $props, "<", "../lib/unicore/PropertyAliases.txt"
                 or die "Can't open Unicode PropertyAliases.txt";
 $/ = "\n";
@@ -615,6 +618,7 @@ while (<$props>) {
         $count++;
     }
 }
+} # End of SKIP block
 
 # Now test anything we can find that wasn't covered by the tests of the
 # official properties.  We have no way of knowing if mktables omitted a Perl
@@ -701,6 +705,9 @@ is(prop_value_aliases("gc", "isC"), undef, "prop_value_aliases('gc', 'isC') retu
 # correct.
 
 my %pva_tested;   # List of things already tested.
+
+SKIP: {
+skip "PropValueAliases.txt is not in this Unicode version", 1 if $v_unicode_version lt v3.2.0;
 open my $propvalues, "<", "../lib/unicore/PropValueAliases.txt"
      or die "Can't open Unicode PropValueAliases.txt";
 while (<$propvalues>) {
@@ -709,7 +716,7 @@ while (<$propvalues>) {
     chomp;
 
     # Fix typo in official input file
-    s/CCC133/CCC132/g if $version eq "6.1.0";
+    s/CCC133/CCC132/g if $v_unicode_version eq v6.1.0;
 
     my @fields = split /\s*;\s*/; # Fields are separated by semi-colons
     my $prop = shift @fields;   # 0th field is the property,
@@ -801,6 +808,7 @@ while (<$propvalues>) {
         $count++;
     }
 }
+}   # End of SKIP block
 
 # And test as best we can, the non-official pva's that mktables generates.
 foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
@@ -1409,9 +1417,11 @@ foreach my $prop (keys %props) {
         }
         chomp $official;
 
-        # If there are any special elements, get a reference to them.
+        # Get the format for the file, and if there are any special elements,
+        # get a reference to them.
         my $swash_name = $utf8::file_to_swash_name{$base_file};
         my $specials_ref;
+        my $file_format;
         if ($swash_name) {
             $specials_ref = $utf8::SwashInfo{$swash_name}{'specials_name'};
             if ($specials_ref) {
@@ -1420,6 +1430,8 @@ foreach my $prop (keys %props) {
                 no strict 'refs';
                 $specials_ref = \%{$specials_ref};
             }
+
+            $file_format = $utf8::SwashInfo{$swash_name}{'format'};
         }
 
         # Certain of the proxy properties have to be adjusted to match the
@@ -1512,15 +1524,14 @@ foreach my $prop (keys %props) {
             # specials are superfluous.
             undef $specials_ref;
         }
-        elsif ($name eq 'bmg') {
+        elsif ($format !~ /^a/ && defined $file_format && $file_format eq 'x') {
 
-            # For this property, the file is output using hex notation for the
-            # map, with all ranges equal to length 1.  Convert from hex to
-            # decimal.
+            # For these properties the file is output using hex notation for the
+            # map.  Convert from hex to decimal.
             my @lines = split "\n", $official;
             foreach my $line (@lines) {
-                my ($code_point, $map) = split "\t\t", $line;
-                $line = $code_point . "\t\t" . hex $map;
+                my ($lower, $upper, $map) = split "\t", $line;
+                $line = "$lower\t$upper\t" . hex $map;
             }
             $official = join "\n", @lines;
         }

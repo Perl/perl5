@@ -1053,23 +1053,67 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     }
     close $fh;
 
-    # The Hangul syllable names aren't in the file above; their names
-    # are algorithmically determinable, but to avoid perpetuating any
-    # programming errors, this file contains the complete list, gathered
-    # from the web.
-    while (<DATA>) {
-        chomp;
-        next unless $_;     # Guard against empty lines getting inserted.
-        my ($code, $name) = split ";";
-        my $decimal = hex $code;
-        $names[$decimal] = $name;
-        my $block = $decimal >> $block_size_bits;
-        $algorithmic_names_count[$block] = 1;
+    use Unicode::UCD;
+    if (pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) gt v1.1.5) {
+        # The Hangul syllable names aren't in the file above; their names
+        # are algorithmically determinable, but to avoid perpetuating any
+        # programming errors, this file contains the complete list, gathered
+        # from the web.
+        while (<DATA>) {
+            chomp;
+            next unless $_;     # Guard against empty lines getting inserted.
+            my ($code, $name) = split ";";
+            my $decimal = hex $code;
+            $names[$decimal] = $name;
+            my $block = $decimal >> $block_size_bits;
+            $algorithmic_names_count[$block] = 1;
+        }
     }
 
-    open $fh, "<", "../../lib/unicore/NameAliases.txt" or
-        die "Can't open ../../lib/unicore/NameAliases.txt: $!";
-    while (<$fh>) {
+    my @name_aliases;
+    use Unicode::UCD;
+    if (ord('A') != 65
+        || pack( "C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v6.1.0)
+    {
+        open my $fh, "<", "../../lib/unicore/NameAliases.txt"
+            or die "Can't open ../../lib/unicore/NameAliases.txt: $!";
+        @name_aliases = <$fh>
+    }
+    else {
+
+        # If this Unicode version doesn't have the full .txt file, or are on
+        # an EBCDIC platform where they need to be translated, get the data
+        # from prop_invmap() (which should do the translation) and convert it
+        # to the file's format
+        use Unicode::UCD 'prop_invmap';
+        my ($invlist_ref, $invmap_ref, undef, $default)
+                                                = prop_invmap('Name_Alias');
+        for my $i (0 .. @$invlist_ref - 1) {
+
+            # Convert the aliases for code points that have just one alias to
+            # single element arrays for uniform handling below.
+            if (! ref $invmap_ref->[$i]) {
+
+                # But we test only the real aliases, not the ones which are
+                # just really placeholders.
+                next if $invmap_ref->[$i] eq $default;
+
+                $invmap_ref->[$i] = [ $invmap_ref->[$i] ];
+            }
+
+
+            # Change each alias for the code point to the form that the file
+            # has
+            foreach my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] - 1) {
+                foreach my $value (@{$invmap_ref->[$i]}) {
+                    $value =~ s/: /;/;
+                    push @name_aliases, sprintf("%04X;%s\n", $j, $value);
+                }
+            }
+        }
+    }
+
+    for (@name_aliases) {
         chomp;
         s/^\s*#.*//;
         next unless $_;
@@ -1185,21 +1229,26 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         $block = $end_block + 1;
     }
 
-    open $fh, "<", "../../lib/unicore/NamedSequences.txt" or
-        die "Can't open ../../lib/unicore/NamedSequences.txt: $!";
-    while (<$fh>) {
-        chomp;
-        s/^\s*#.*//;
-        next unless $_;
-        my ($name, $codes) = split ";";
-        my $utf8 = pack("U*", map { hex } split " ", $codes);
-        is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
-        my $loose_name = get_loose_name($name);
-        use charnames ":loose";
-        is(charnames::string_vianame($loose_name), $utf8, "Verify string_vianame(\"$loose_name\") is the proper utf8");
-        #diag("$name, $utf8");
+    if (open my $fh, "<", "../../lib/unicore/NamedSequences.txt") {
+        while (<$fh>) {
+            chomp;
+            s/^\s*#.*//;
+            next unless $_;
+            my ($name, $codes) = split ";";
+            my $utf8 = pack("U*", map { hex } split " ", $codes);
+            is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
+            my $loose_name = get_loose_name($name);
+            use charnames ":loose";
+            is(charnames::string_vianame($loose_name), $utf8, "Verify string_vianame(\"$loose_name\") is the proper utf8");
+            #diag("$name, $utf8");
+        }
+        close $fh;
     }
-    close $fh;
+    else {
+        use Unicode::UCD;
+        die "Can't open ../../lib/unicore/NamedSequences.txt: $!"
+        if pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v4.1.0;
+    }
 
 
     unless ($all_pass) {

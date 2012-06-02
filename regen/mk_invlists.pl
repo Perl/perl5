@@ -27,6 +27,10 @@ sub output_invlist ($$) {
     my $name = shift;
     my $invlist = shift;     # Reference to inversion list array
 
+    die "No inversion list for $name" unless defined $invlist
+                                             && ref $invlist eq 'ARRAY'
+                                             && @$invlist;
+
     # Output the inversion list $invlist using the name $name for it.
     # It is output in the exact internal form for inversion lists.
 
