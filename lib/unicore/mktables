@@ -2921,10 +2921,6 @@ sub trace { return main::trace(@_); }
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
-        if (! $type{$addr}) {
-            $standard_form{$addr} = main::standardize($value);
-        }
-
         return $self;
     }
 
@@ -2954,8 +2950,11 @@ sub trace { return main::trace(@_); }
     }
 
     sub standard_form {
-        # The standard form is the value itself if the standard form is
-        # undefined (that is if the value is special)
+        # Calculate the standard form only if needed, and cache the result.
+        # The standard form is the value itself if the type is special.
+        # This represents a considerable CPU and memory saving - at the time
+        # of writing there are 368676 non-special objects, but the standard
+        # form is only requested for 22047 of them - ie about 6%.
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -2963,7 +2962,10 @@ sub trace { return main::trace(@_); }
         my $addr = do { no overloading; pack 'J', $self; };
 
         return $standard_form{$addr} if defined $standard_form{$addr};
-        return $value{$addr};
+
+        my $value = $value{$addr};
+        return $value if $type{$addr};
+        return $standard_form{$addr} = main::standardize($value);
     }
 
     sub dump {
