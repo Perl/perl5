@@ -466,10 +466,15 @@ setvbuf(...)
 
 
 SysRet
-fsync(handle)
-	OutputStream handle
+fsync(arg)
+	SV * arg
+    PREINIT:
+	OutputStream handle = NULL;
     CODE:
 #ifdef HAS_FSYNC
+	handle = IoOFP(sv_2io(arg));
+	if (!handle)
+	    handle = IoIFP(sv_2io(arg));
 	if(handle)
 	    RETVAL = fsync(PerlIO_fileno(handle));
 	else {

@@ -15,16 +15,16 @@ BEGIN {
     }
 }
 
+use Test::More tests => 5;
 use IO::File;
 use IO::Seekable;
 
-print "1..4\n";
-
-$x = new_tmpfile IO::File or print "not ";
-print "ok 1\n";
+$x = new_tmpfile IO::File;
+ok($x, "new_tmpfile");
 print $x "ok 2\n";
 $x->seek(0,SEEK_SET);
-print <$x>;
+my $line = <$x>;
+is($line, "ok 2\n", "check we can write to the tempfile");
 
 $x->seek(0,SEEK_SET);
 print $x "not ok 3\n";
@@ -32,9 +32,18 @@ $p = $x->getpos;
 print $x "ok 3\n";
 $x->flush;
 $x->setpos($p);
-print scalar <$x>;
+$line = <$x>;
+is($line, "ok 3\n", "test getpos/setpos");
 
 $! = 0;
 $x->setpos(undef);
-print $! ? "ok 4 # $!\n" : "not ok 4\n";
+ok($!, "setpos(undef) makes errno non-zero");
 
+SKIP:
+{
+    $^O eq "MSWin32"
+	and skip "directory sync doesn't apply to MSWin32", 1;
+    open my $dh, "<", "."
+	or skip "Cannot open the cwd", 1;
+    ok($dh->sync, "sync to a read only directory handle");
+}
