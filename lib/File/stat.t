@@ -47,35 +47,29 @@ require File::stat;
 my $stat = File::stat::stat( $file ); # This is the OO stat.
 isa_ok($stat, 'File::stat', 'should build a stat object' );
 
-is( $stat->dev, $stat[0], "device number in position 0" );
-
-# On OS/2 (fake) ino is not constant, it is incremented each time
-SKIP: {
-	skip('inode number is not constant on OS/2', 1) if $^O eq 'os2';
-	is( $stat->ino, $stat[1], "inode number in position 1" );
+my $i = 0;
+foreach ([dev => 'device number'],
+         [ino => 'inode number'],
+         [mode => 'file mode'],
+         [nlink => 'number of links'],
+         [uid => 'owner uid'],
+         [gid => 'group id'],
+         [rdev => 'device identifier'],
+         [size => 'file size'],
+         [atime => 'last access time'],
+         [mtime => 'last modify time'],
+         [ctime => 'change time'],
+         [blksize => 'IO block size'],
+         [blocks => 'number of blocks']) {
+    my ($meth, $desc) = @$_;
+    # On OS/2 (fake) ino is not constant, it is incremented each time
+ SKIP: {
+        skip('inode number is not constant on OS/2', 1)
+            if $i == 1 && $^O eq 'os2';
+        is($stat->$meth, $stat[$i], "$desc in position $i");
+    }
+    ++$i;
 }
-
-is( $stat->mode, $stat[2], "file mode in position 2" );
-
-is( $stat->nlink, $stat[3], "number of links in position 3" );
-
-is( $stat->uid, $stat[4], "owner uid in position 4" );
-
-is( $stat->gid, $stat[5], "group id in position 5" );
-
-is( $stat->rdev, $stat[6], "device identifier in position 6" );
-
-is( $stat->size, $stat[7], "file size in position 7" );
-
-is( $stat->atime, $stat[8], "last access time in position 8" );
-
-is( $stat->mtime, $stat[9], "last modify time in position 9" );
-
-is( $stat->ctime, $stat[10], "change time in position 10" );
-
-is( $stat->blksize, $stat[11], "IO block size in position 11" );
-
-is( $stat->blocks, $stat[12], "number of blocks in position 12" );
 
 for (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
     SKIP: {
