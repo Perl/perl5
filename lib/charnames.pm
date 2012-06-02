@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.30';
+our $VERSION = '1.32';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 

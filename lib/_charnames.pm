@@ -7,7 +7,7 @@ package _charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -77,11 +77,8 @@ my %system_aliases = (
 #my %loose_system_aliases = (
 #);
 
-my %deprecated_aliases = (
-    # Use of these gives deprecated message.
-    # Unicode 6.0 co-opted this for U+1F514, so deprecate it for now.
-    'BELL'                    => pack("U", 0x07),
-);
+#my %deprecated_aliases;
+#$deprecated_aliases{'BELL'} = pack("U", 0x07) if $^V lt v5.17.0;
 
 #my %loose_deprecated_aliases = (
 #);
@@ -320,14 +317,14 @@ sub lookup_name ($$$) {
 #    elsif ($loose && exists $loose_system_aliases{$lookup_name}) {
 #      $utf8 = $loose_system_aliases{$lookup_name};
 #    }
-    if (exists $deprecated_aliases{$lookup_name}) {
-      require warnings;
-      warnings::warnif('deprecated',
-                       "Unicode character name \"$name\" is deprecated, use \""
-                       . viacode(ord $deprecated_aliases{$lookup_name})
-                       . "\" instead");
-      $utf8 = $deprecated_aliases{$lookup_name};
-    }
+#    if (exists $deprecated_aliases{$lookup_name}) {
+#      require warnings;
+#      warnings::warnif('deprecated',
+#                       "Unicode character name \"$name\" is deprecated, use \""
+#                       . viacode(ord $deprecated_aliases{$lookup_name})
+#                       . "\" instead");
+#      $utf8 = $deprecated_aliases{$lookup_name};
+#    }
     # There are currently no entries in this hash, so don't waste time looking
     # for them.  But the code is retained for the unlikely possibility that
     # some will be added in the future.

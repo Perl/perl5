@@ -295,11 +295,11 @@ is("\N{BOM}", chr(0xFEFF), 'Verify "\N{BOM}" is correct');
     my $ok = ! grep { /"HORIZONTAL TABULATION" is deprecated.*"CHARACTER TABULATION"/ } @WARN;
     ok($ok, '... and doesnt give deprecated warning');
 
-    # XXX These tests should be changed for 5.16, when we convert BELL to the
-    # Unicode version.
-    is("\N{BELL}", "\a", 'Verify "\N{BELL}" eq "\a"');
-    my $ok = grep { /"BELL" is deprecated.*"ALERT"/ } @WARN;
-    ok($ok, '... and that gives correct deprecated warning');
+    if ($^V lt v5.17.0) {
+        is("\N{BELL}", "\a", 'Verify "\N{BELL}" eq "\a"');
+        my $ok = grep { /"BELL" is deprecated.*"ALERT"/ } @WARN;
+        ok($ok, '... and that gives correct deprecated warning');
+    }
 
     no warnings 'deprecated';
 
@@ -365,7 +365,7 @@ is(charnames::viacode("U+00000000000FEED"), "ARABIC LETTER WAW ISOLATED FORM", '
     is("\N{EOT}", "\N{END OF TRANSMISSION}", 'Verify "\N{EOT}" eq "\N{END OF TRANSMISSION}"');
     is("\N{ENQ}", "\N{ENQUIRY}", 'Verify "\N{ENQ}" eq "\N{ENQUIRY}"');
     is("\N{ACK}", "\N{ACKNOWLEDGE}", 'Verify "\N{ACK}" eq "\N{ACKNOWLEDGE}"');
-    is("\N{BEL}", "\N{BELL}", 'Verify "\N{BEL}" eq "\N{BELL}"');
+    is("\N{BEL}", "\N{BELL}", 'Verify "\N{BEL}" eq "\N{BELL}"') if $^V lt v5.17.0;
     is("\N{BS}", "\N{BACKSPACE}", 'Verify "\N{BS}" eq "\N{BACKSPACE}"');
     is("\N{HT}", "\N{HORIZONTAL TABULATION}", 'Verify "\N{HT}" eq "\N{HORIZONTAL TABULATION}"');
     is("\N{LF}", "\N{LINE FEED (LF)}", 'Verify "\N{LF}" eq "\N{LINE FEED (LF)}"');
@@ -1013,14 +1013,14 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         my $decimal = hex $code;
 
         # The Unicode version 1 name is used instead of any that are
-        # marked <control>
+        # marked <control>.
         $name = $u1name if $name eq "<control>";
 
-        $name = 'ALERT' if $decimal == 7;
+        # In earlier Perls, we reject this code point's name (BELL)
+        $name = "" if $^V lt v5.17.0 && $decimal == 0x1F514;
 
-        # XXX This test should be changed for 5.16 when we convert to use
-        # Unicode's BELL
-        $name = "" if $decimal == 0x1F514;
+        # ALERT overrides BELL
+        $name = 'ALERT' if $decimal == 7;
 
         # Some don't have names, leave those array elements undefined
         next unless $name;

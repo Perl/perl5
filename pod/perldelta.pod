@@ -44,7 +44,13 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 C<\N{BELL}> now refers to U+1F514 instead of U+0007
+
+Unicode 6.0 reused the name "BELL" for a different code point than it
+traditionally had meant.  Since Perl v5.14, use of this name still
+referred to U+0007, but would raise a deprecated warning.  Now, "BELL"
+refers to U+1F514, and the name for U+0007 is "ALERT".  All the
+functions in L<charnames> have been correspondingly updated.
 
 =head1 Deprecations
 

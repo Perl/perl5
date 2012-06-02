@@ -11082,8 +11082,9 @@ END
 
     sub filter_v6_ucd {
 
-        # Unicode 6.0 co-opted the name BELL for U+1F514, but we haven't
-        # accepted that yet to allow for some deprecation cycles.
+        # Unicode 6.0 co-opted the name BELL for U+1F514, but until 5.17,
+        # it wasn't accepted, to allow for some deprecation cycles.  This
+        # function is not called after 5.16
 
         return if $_ !~ /^(?:0007|1F514|070F);/;
 
@@ -13579,6 +13580,10 @@ END
 
         # We only add in the controls.
         next if $gc->value_of($code_point) ne 'Cc';
+
+        # We reject this Unicode1 name for later Perls, as it is used for
+        # another code point
+        next if $unicode_1_value eq 'BELL' && $^V ge v5.17.0;
 
         # This won't add an exact duplicate.
         $perl_charname->add_duplicate($code_point, $unicode_1_value,
@@ -17203,7 +17208,8 @@ my @input_file_objects = (
 
                                                 # And for 5.14 Perls with 6.0,
                                                 # have to also make changes
-                                                : ($v_version ge v6.0.0)
+                                                : ($v_version ge v6.0.0
+                                                   && $^V lt v5.17.0)
                                                     ? \&filter_v6_ucd
                                                     : undef),
 
