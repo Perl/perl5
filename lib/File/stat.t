@@ -42,12 +42,10 @@ BEGIN {
 our @stat = stat $file; # This is the function stat.
 unless (@stat) { plan skip_all => "1..0 # Skip: no file $file"; exit 0 }
 
-plan tests => 19 + 24*2 + 4 + 3 + 7 + 2;
-
-use_ok( 'File::stat' );
+require File::stat;
 
 my $stat = File::stat::stat( $file ); # This is the OO stat.
-ok( ref($stat), 'should build a stat object' );
+isa_ok($stat, 'File::stat', 'should build a stat object' );
 
 is( $stat->dev, $stat[0], "device number in position 0" );
 
@@ -137,7 +135,6 @@ SKIP: {
 }
 
 {   # 111640 - File::stat bogus index check in overload
-    # 7 tests in this block
 
     use filetest "access";
     use warnings;
@@ -177,3 +174,12 @@ $stat = stat '/notafile';
 isnt( $!, '', 'should populate $!, given invalid file' );
 
 # Testing pretty much anything else is unportable.
+
+done_testing;
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
