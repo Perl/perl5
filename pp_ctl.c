@@ -3690,7 +3690,7 @@ PP(pp_require)
 	tryname = name;
 	tryrsfp = doopen_pm(sv);
     }
-    if (!tryrsfp) {
+    if (!tryrsfp && !(errno == EACCES && path_is_absolute(name))) {
 	AV * const ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -3882,9 +3882,14 @@ PP(pp_require)
 			}
 			break;
 		    }
-		    else if (errno == EMFILE)
-			/* no point in trying other paths if out of handles */
-			break;
+                    else if (errno == EMFILE || errno == EACCES) {
+                        /* no point in trying other paths if out of handles;
+                         * on the other hand, if we couldn't open one of the
+                         * files, then going on with the search could lead to
+                         * unexpected results; see perl #113422
+                         */
+                        break;
+                    }
 		  }
 		}
 	    }
@@ -3893,7 +3898,7 @@ PP(pp_require)
     sv_2mortal(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
-	    if(errno == EMFILE) {
+	    if(errno == EMFILE || errno == EACCES) {
 		/* diag_listed_as: Can't locate %s */
 		DIE(aTHX_ "Can't locate %s:   %s", name, Strerror(errno));
 	    } else {
