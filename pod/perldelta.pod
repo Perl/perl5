@@ -97,7 +97,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<IO> has been upgraded from version 1.25_06 to version 1.25_07.
+
+C<sync()> can now be called on read only file handles [perl #64772].
 
 =back
 
