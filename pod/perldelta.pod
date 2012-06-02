@@ -333,7 +333,10 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl now works as well as can be expected on all releases of Unicode so
+far.  In v5.16, it worked on Unicodes 6.0 and 6.1, but there were
+various bugs for earlier releases; the older the release the more
+problems.
 
 =back
 
