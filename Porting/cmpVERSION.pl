@@ -146,12 +146,13 @@ foreach my $pm_file (sort keys %module_diffs) {
     my $pm_version = eval {MM->parse_version($pm_file)};
     my $orig_pm_content = get_file_from_git($pm_file, $tag_to_compare);
     my $orig_pm_version = eval {MM->parse_version(\$orig_pm_content)};
+    ++$count;
     
     if ((!defined $pm_version || !defined $orig_pm_version)
 	|| ($pm_version eq 'undef' || $orig_pm_version eq 'undef') # sigh
 	|| ($pm_version ne $orig_pm_version) # good
        ) {
-        printf "ok %d - %s\n", ++$count, $pm_file if $tap;
+        print "ok $count - $pm_file\n" if $tap;
     } else {
 	if ($tap) {
 	    foreach (sort @{$module_diffs{$pm_file}}) {
@@ -159,9 +160,9 @@ foreach my $pm_file (sort keys %module_diffs) {
 	    }
 	    if (exists $skip_versions{$pm_file}
 		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
-		printf "ok %d - SKIP $pm_file version $pm_version\n", ++$count;
+		print "ok $count - SKIP $pm_file version $pm_version\n";
 	    } else {
-		printf "not ok %d - %s\n", ++$count, $pm_file;
+		print "not ok $count - $pm_file\n";
 	    }
 	} else {
 	    push @diff, @{$module_diffs{$pm_file}};
