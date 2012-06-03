@@ -4439,7 +4439,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    rx = (REGEXP*) sv;
 			} else if (SvSMAGICAL(sv)) {
 			    mg = mg_find(sv, PERL_MAGIC_qr);
-			    assert(mg);
 			}
 		    } else if (SvTYPE(ret) == SVt_REGEXP) {
 			rx = (REGEXP*) ret;

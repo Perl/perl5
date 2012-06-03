@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 446;  # Update this when adding/deleting tests.
+plan tests => 447;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -944,6 +944,15 @@ sub run_tests {
 	ok("AB1CD" =~ /^A(??{$pat})D$/, "re eval propagated compile-time");
 	# run-time outer code-block
 	ok("AB1CD" =~ /^$A(??{$pat})D$/, "re eval propagated run-time");
+    }
+
+    # returning a ref to something that had set magic but wasn't
+    # PERL_MAGIC_qr triggered a false positive assertion failure
+    # The test is not so much concerned with it not matching,
+    # as with not failing the assertion
+
+    {
+	ok("a" !~ /^(a)(??{ \$1 })/, '(??{ ref })');
     }
 
 
