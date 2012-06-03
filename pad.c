@@ -652,11 +652,6 @@ but is used for debugging.
 
 /* XXX DAPM integrate alloc(), add_name() and add_anon(),
  * or at least rationalise ??? */
-/* And flag whether the incoming name is UTF8 or 8 bit?
-   Could do this either with the +ve/-ve hack of the HV code, or expanding
-   the flag bits. Either way, this makes proper Unicode safe pad support.
-   NWC
-*/
 
 PADOFFSET
 Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
