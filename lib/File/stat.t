@@ -5,8 +5,12 @@ BEGIN {
     @INC = '../lib';
 }
 
+use strict;
+use warnings;
 use Test::More;
 use Config qw( %Config );
+
+my $file;
 
 BEGIN {
     # Check whether the build is configured with -Dmksymlinks
@@ -18,7 +22,7 @@ BEGIN {
     # with -Dmksymlinks
     # Originally we worked with ./TEST, but other test scripts read from
     # that file and modify its access time.
-    our $file = '../lib/File/stat.t';
+    $file = '../lib/File/stat.t';
     if ( $Dmksymlinks ) {
         $file = readlink $file;
         die "Can't readlink(../lib/File/stat.t): $!" if ! defined $file;
@@ -131,7 +135,6 @@ SKIP: {
 {   # 111640 - File::stat bogus index check in overload
 
     use filetest "access";
-    use warnings;
     for my $op (split //, "rwxRXW") {
 	# these should all warn with filetest access
 	my $w;
