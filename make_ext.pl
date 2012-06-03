@@ -449,8 +449,11 @@ EOS
     }
 
     if ($is_VMS) {
-	_macroify_passthrough($pass_through);
-	unshift @$pass_through, "/DESCRIPTION=$makefile";
+	_quote_args($pass_through);
+	@$pass_through = (
+			  "/DESCRIPTION=$makefile",
+			  '/MACRO=(' . join(',',@$pass_through) . ')'
+			 );
     }
 
     if (!$target or $target !~ /clean$/) {
@@ -477,12 +480,4 @@ sub _quote_args {
         }
     } @{$args}
     ;
-}
-
-sub _macroify_passthrough {
-    my $passthrough = shift;
-    _quote_args($passthrough);
-    my $macro = '/MACRO=(' . join(',',@$passthrough) . ')';
-    @$passthrough = ();
-    @$passthrough[0] = $macro;  
 }
