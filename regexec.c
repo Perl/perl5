@@ -4429,29 +4429,22 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		{
 		    /* extract RE object from returned value; compiling if
 		     * necessary */
-		    MAGIC *mg = NULL;
-		    REGEXP *rx = NULL;
 
-		    if (SvROK(ret)) {
-			SV *const sv = SvRV(ret);
-
+		    re_sv = NULL;
+		    {
+			SV *sv = ret;
+			if (SvROK(sv))
+			    sv = SvRV(sv);
 			if (SvTYPE(sv) == SVt_REGEXP) {
-			    rx = (REGEXP*) sv;
+			    re_sv = (REGEXP*) sv;
 			} else if (SvSMAGICAL(sv)) {
-			    mg = mg_find(sv, PERL_MAGIC_qr);
+			    MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
+			    if (mg)
+				re_sv = (REGEXP *) mg->mg_obj;
 			}
-		    } else if (SvTYPE(ret) == SVt_REGEXP) {
-			rx = (REGEXP*) ret;
-		    } else if (SvSMAGICAL(ret)) {
-			mg = mg_find(ret, PERL_MAGIC_qr);
 		    }
-
-		    if (mg) {
-			rx = (REGEXP *) mg->mg_obj; /*XXX:dmq*/
-			assert(rx);
-		    }
-		    if (rx) {
-			rx = reg_temp_copy(NULL, rx);
+		    if (re_sv) {
+			re_sv = reg_temp_copy(NULL, re_sv);
 		    }
 		    else {
 			U32 pm_flags = 0;
@@ -4475,7 +4468,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			/* if we got here, it should be an engine which
 			 * supports compiling code blocks and stuff */
 			assert(rex->engine && rex->engine->op_comp);
-			rx = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
+			re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
 				    rex->engine, NULL, NULL, 0, pm_flags);
 
 			if (!(SvFLAGS(ret)
@@ -4484,7 +4477,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    /* This isn't a first class regexp. Instead, it's
 			       caching a regexp onto an existing, Perl visible
 			       scalar.  */
-			    sv_magic(ret, MUTABLE_SV(rx), PERL_MAGIC_qr, 0, 0);
+			    sv_magic(ret, MUTABLE_SV(re_sv), PERL_MAGIC_qr, 0, 0);
 			}
 			PL_regsize = osize;
 			/* safe to do now that any $1 etc has been
@@ -4492,8 +4485,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			 * compiled */
 			S_regcp_restore(aTHX_ rex, runops_cp);
 		    }
-		    re_sv = rx;
-		    re = (struct regexp *)SvANY(rx);
+		    re = (struct regexp *)SvANY(re_sv);
 		}
                 RXp_MATCH_COPIED_off(re);
                 re->subbeg = rex->subbeg;
