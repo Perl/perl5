@@ -169,6 +169,12 @@ The constructor now respects overridden accessor methods [perl #29230].
 
 =item *
 
+L<DynaLoader> has been upgraded from version 1.14 to 1.15.
+
+This is due to a minor code change in the XS for the VMS implementation.
+
+=item *
+
 L<ExtUtils::CBuilder> has been upgraded from version 0.280206 to 0.280208.
 
 It no longer fails when trying to embed manifests on Windows
