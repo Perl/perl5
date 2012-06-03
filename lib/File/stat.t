@@ -75,15 +75,45 @@ foreach ([dev => 'device number'],
     ++$i;
 }
 
-for (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
-    SKIP: {
-        $^O eq "VMS" and index("rwxRWX", $_) >= 0
-            and skip "File::stat ignores VMS ACLs", 2;
+for my $op (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
+    for my $access ('', 'use filetest "access";') {
+        my ($warnings, $awarn, $vwarn, $rv);
+        my $desc = $access 
+            ? "for -$op under use filetest 'access'" : "for -$op";
+        {
+            local $SIG{__WARN__} = sub {
+                my $w = shift;
+                if ($w =~ /^File::stat ignores VMS ACLs/) {
+                    ++$vwarn;
+                } elsif ($w =~ /^File::stat ignores use filetest 'access'/) {
+                    ++$awarn;
+                } else {
+                    $warnings .= $w;
+                }
+            };
+            $rv = eval "$access; -$op \$stat";
+        }
+        is($@, '', "Overload succeeds $desc");
 
-        my $rv = eval "-$_ \$stat";
-        ok( !$@,                            "-$_ overload succeeds" )
-            or diag( $@ );
-        is( $rv, eval "-$_ \$file",         "correct -$_ overload" );
+        if ($^O eq "VMS" && $op =~ /[rwxRWX]/) {
+            is($vwarn, 1, "warning about VMS ACLs $desc");
+        } else {
+            is($rv, eval "-$op \$file", "correct overload $desc")
+                unless $access;
+            is($vwarn, undef, "no warnings about VMS ACLs $desc");
+        }
+
+        # 111640 - File::stat bogus index check in overload
+        if ($access && $op =~ /[rwxRXW]/) {
+            # these should all warn with filetest access
+            is($awarn, 1,
+               "produced the right warning $desc");
+        } else {
+            # -d and others shouldn't warn
+            is($awarn, undef, "should be no warning $desc")
+        }
+
+        is($warnings, undef, "no other warnings seen $desc");
     }
 }
 
@@ -130,27 +160,6 @@ SKIP: {
 	main::skip("OS/2: inode number is not constant on os/2", 1) if $^O eq 'os2';
 
 	main::is( "@$stat", "@$stat3", '... and must match normal stat' );
-}
-
-{   # 111640 - File::stat bogus index check in overload
-
-    use filetest "access";
-    for my $op (split //, "rwxRXW") {
-	# these should all warn with filetest access
-	my $w;
-	local $SIG{__WARN__} = sub { $w .= shift };
-	eval "-$op \$stat";
-	like($w, qr/^File::stat ignores use filetest 'access'/,
-	     "-$op produced the right warning under use filetest 'access'");
-    }
-
-    {
-	# -d and others shouldn't warn
-	my $w;
-	local $SIG{__WARN__} = sub { $w = shift };
-	eval '-d $stat';
-	is($w, undef, "Should be no warning from -d under filetest access");
-    }
 }
 
 SKIP:
