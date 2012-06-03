@@ -37,9 +37,16 @@
 
 #include <errno.h> /* See notes in perl.h about avoiding
 			extern int errno; */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern Malloc_t malloc proto((MEM_SIZE));
 extern Free_t free proto((Malloc_t));
+
+#ifdef __cplusplus
+}
+#endif
 
 /*
  * forward
