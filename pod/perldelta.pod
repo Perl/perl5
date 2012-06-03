@@ -103,6 +103,12 @@ XXX
 
 =item *
 
+L<File::DosGlob> has been upgraded from version 1.07 to 1.08.
+
+There are no visible changes, only minor internal refactorings.
+
+=item *
+
 L<IO> has been upgraded from version 1.25_06 to version 1.25_07.
 
 C<sync()> can now be called on read only file handles [perl #64772].

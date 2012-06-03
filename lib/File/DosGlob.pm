@@ -6,7 +6,7 @@
 
 package File::DosGlob;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 use strict;
 use warnings;
 
@@ -166,9 +166,7 @@ sub glob {
 	}
       }
       for ( @pat ) {
-	s/\\{/{/g;
-	s/\\}/}/g;
-	s/\\,/,/g;
+	s/\\([{},])/$1/g;
       }
       #print join ("\n", @pat). "\n";
  
