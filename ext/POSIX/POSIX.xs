@@ -373,9 +373,11 @@ typedef struct termios* POSIX__Termios;
 
 /* Possibly needed prototypes */
 #ifndef WIN32
+START_EXTERN_C
 double strtod (const char *, char **);
 long strtol (const char *, char **, int);
 unsigned long strtoul (const char *, char **, int);
+END_EXTERN_C
 #endif
 
 #ifndef HAS_DIFFTIME
