@@ -2297,6 +2297,7 @@ cpan/Test-Harness/t/aggregator.t			Test::Harness test
 cpan/Test-Harness/t/bailout.t				Test::Harness test
 cpan/Test-Harness/t/base.t				Test::Harness test
 cpan/Test-Harness/t/callbacks.t				Test::Harness test
+cpan/Test-Harness/t/compat/env.opts.t
 cpan/Test-Harness/t/compat/env.t			Test::Harness test
 cpan/Test-Harness/t/compat/failure.t			Test::Harness test
 cpan/Test-Harness/t/compat/inc-propagation.t		Test::Harness test
@@ -2341,6 +2342,7 @@ cpan/Test-Harness/t/multiplexer.t			Test::Harness test
 cpan/Test-Harness/t/nested.t				Test::Harness test
 cpan/Test-Harness/t/nofork-mux.t			Test::Harness test
 cpan/Test-Harness/t/nofork.t				Test::Harness test
+cpan/Test-Harness/t/nowarn.t
 cpan/Test-Harness/t/object.t				Test::Harness test
 cpan/Test-Harness/t/parser-config.t			Test::Harness test
 cpan/Test-Harness/t/parser-subclass.t			Test::Harness test

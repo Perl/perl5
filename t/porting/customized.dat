@@ -1,5 +1,5 @@
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 2f3f07fd889077ebd51791ad6e195d9164b4baf3
-Test::Harness cpan/Test-Harness/t/source.t 61738913dac9ba6c4504756d355c23c25c47d31e
+Test::Harness cpan/Test-Harness/t/source.t 884890970fb850874213159df263ba483bac62e9
 Test::Harness cpan/Test-Harness/t/testargs.t 79c91b2ea73f7cbfb9bae45dec4a62db74cb8dbf
 Module::Pluggable cpan/Module-Pluggable/Makefile.PL 72062c1a01ed7c62d16c55122c163b2d89f0d739
 autodie cpan/autodie/t/open.t cb493da4305f591ca0344d09e8a840a3147c5579
