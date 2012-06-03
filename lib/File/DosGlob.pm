@@ -14,7 +14,6 @@ sub doglob {
     my $cond = shift;
     my @retval = ();
     my $fix_drive_relative_paths;
-    #print "doglob: ", join('|', @_), "\n";
   OUTER:
     for my $pat (@_) {
 	my @matched = ();
@@ -38,7 +37,6 @@ sub doglob {
 	}
 	if ($pat =~ m|^(.*)([\\/])([^\\/]*)\z|s) {
 	    ($head, $sepchr, $tail) = ($1,$2,$3);
-	    #print "div: |$head|$sepchr|$tail|\n";
 	    push (@retval, $pat), next OUTER if $tail eq '';
 	    if ($head =~ /[*?]/) {
 		@globdirs = doglob('d', $head);
@@ -70,7 +68,6 @@ sub doglob {
 	$pat =~ s/\*/.*/g;
 	$pat =~ s/\?/.?/g;
 
-	#print "regex: '$pat', head: '$head'\n";
 	my $matchsub = sub { $_[0] =~ m|^$pat\z|is };
       INNER:
 	for my $e (@leaves) {
@@ -139,7 +136,6 @@ sub glob {
 		#print "Got: \n\t$start\n\t$match\n\t$end\n";
 		my $tmp = "$start$match$end";
 		while ( $tmp =~ s/^(.*?)(?<!\\)\{(?:.*(?<!\\)\,)?(.*\Q$match\E.*?)(?:(?<!\\)\,.*)?(?<!\\)\}(.*)$/$1$2$3/ ) {
-		    #print "Striped: $tmp\n";
 		    #  these expansions will be performed by the original,
 		    #  when we call REHASH.
 		}
@@ -157,7 +153,6 @@ sub glob {
 	}
 	if ( $#appendpat != -1
 		) {
-	    #print "LOOP\n";
 	    #FIXME: Max loop, no way! :")
 	    for ( @appendpat ) {
 	        push @pat, $_;
@@ -168,7 +163,6 @@ sub glob {
       for ( @pat ) {
 	s/\\([{},])/$1/g;
       }
-      #print join ("\n", @pat). "\n";
  
       $entries{$cxix} = [doglob(1,@pat)];
     }
