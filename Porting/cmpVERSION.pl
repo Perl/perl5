@@ -87,23 +87,31 @@ my $skip_dirs = qr|^t/lib|;
 sub pm_file_from_xs {
     my $xs = shift;
 
-    # First try a .pm at the same level as the .xs file, with the same basename
-    my $pm = $xs;
-    $pm =~ s/xs\z/pm/;
-    return $pm if -f $pm;
-
-    # Try for a (different) .pm at the same level, based on the directory name:
-    my ($path) = $xs =~ m!^(.*)/!;
-    my ($last) = $path =~ m!([^-/]+)\z!;
-    $pm = "$path/$last.pm";
-    return $pm if -f $pm;
-
-    # Try to work out the extension's full package, and look for a .pm in lib/
-    # based on that:
-    ($last) = $path =~ m!([^/]+)\z!;
-    $last =~ tr !-!/!;
-    $pm = "$path/lib/$last.pm";
-    return $pm if -f $pm;
+    foreach my $try (sub {
+			 # First try a .pm at the same level as the .xs file
+			 # with the same basename
+			 return shift =~ s/\.xs\z//r;
+		     },
+		     sub {
+			 # Try for a (different) .pm at the same level, based
+			 # on the directory name:
+			 my ($path) = shift =~ m!^(.*)/!;
+			 my ($last) = $path =~ m!([^-/]+)\z!;
+			 return "$path/$last";
+		     },
+		     sub {
+			 # Try to work out the extension's full package, and
+			 # look for a .pm in lib/ based on that:
+			 my ($path) = shift =~ m!^(.*)/!;
+			 my ($last) = $path =~ m!([^/]+)\z!;
+			 $last =~ tr !-!/!;
+			 return "$path/lib/$last";
+		     }) {
+	# For all cases, first look to see if the .pm file is generated.
+	my $base = $try->($xs);
+	return "${base}_pm.PL" if -f "${base}_pm.PL";
+	return "${base}.pm" if -f "${base}.pm";
+    }
 
     die "No idea which .pm file corresponds to '$xs', so aborting";
 }
@@ -122,7 +130,7 @@ foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB
     my $this_dir = $1;
     next if $this_dir =~ $skip_dirs || exists $skip{$_};
     next if exists $upstream_files{$_};
-    if (/\.pm\z/ || m|^lib/.*\.pl\z|) {
+    if (/\.pm\z/ || m|^lib/.*\.pl\z| || /_pm\.PL\z/) {
 	push @{$module_diffs{$_}}, $_;
     } elsif (/\.xs\z/ && !/\bt\b/) {
 	push @{$module_diffs{pm_file_from_xs($_)}}, $_;
