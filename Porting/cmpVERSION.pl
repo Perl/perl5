@@ -147,11 +147,12 @@ foreach my $pm_file (sort keys %module_diffs) {
     my $orig_pm_content = get_file_from_git($pm_file, $tag_to_compare);
     my $orig_pm_version = eval {MM->parse_version(\$orig_pm_content)};
     ++$count;
-    
-    if ((!defined $pm_version || !defined $orig_pm_version)
-	|| ($pm_version eq 'undef' || $orig_pm_version eq 'undef') # sigh
-	|| ($pm_version ne $orig_pm_version) # good
-       ) {
+
+    if (!defined $orig_pm_version || $orig_pm_version eq 'undef') { # sigh
+        print "ok $count - SKIP Can't pass \$VERSION in $pm_file\n" if $tap;
+    } elsif (!defined $pm_version || $pm_version eq 'undef') {
+        print "not ok $count - in $pm_file version was $orig_pm_version, now unparsable\n" if $tap;
+    } elsif ($pm_version ne $orig_pm_version) { # good
         print "ok $count - $pm_file\n" if $tap;
     } else {
 	if ($tap) {
