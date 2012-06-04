@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5059;
+plan tests => 5100;
 
 use Scalar::Util qw(tainted);
 
@@ -131,7 +131,7 @@ $b++;
 
 is(ref $b, "Oscalar");
 is($a, "087");
-is($b, "88");
+is($b, "89");
 is(ref $a, "Oscalar");
 
 package Oscalar;
@@ -142,7 +142,7 @@ $b++;
 
 is(ref $b, "Oscalar");
 is($a, "087");
-is($b, "90");
+is($b, "91");
 is(ref $a, "Oscalar");
 
 $b=$a;
@@ -202,7 +202,7 @@ is($b, "89");
 is(ref $a, "Oscalar");
 is($copies, 1);
 
-eval q[package Oscalar; use overload ('+=' => sub {$ {$_[0]} += 3*$_[1];
+eval q[package Oscalar; use overload ('+=' => sub {$ {$_[0]} += 3*"$_[1]";
 						   $_[0] } ) ];
 $c=new Oscalar;			# Cause rehash
 
@@ -267,11 +267,12 @@ is("$aI", "xx");
 is($aI, "xx");
 is("b${aI}c", "_._.b.__.xx._.__.c._");
 
-# Here we test blessing to a package updates hash
+# Here we test that both "no overload" and
+# blessing to a package update hash
 
 eval "package Oscalar; no overload '.'";
 
-is("b${a}", "_.b.__.xx._");
+is("b${a}", "bxx");
 $x="1";
 bless \$x, Oscalar;
 is("b${a}c", "bxxc");
@@ -291,8 +292,8 @@ like($@, qr/no method found/);
 
 eval "package Oscalar; sub comple; use overload '~' => 'comple'";
 
-$na = eval { ~$a };		# Hash was not updated
-like($@, qr/no method found/);
+$na = eval { ~$a };
+is($@, '');
 
 bless \$x, Oscalar;
 
@@ -303,8 +304,8 @@ is($na, '_!_xx_!_');
 
 $na = 0;
 
-$na = eval { ~$aI };		# Hash was not updated
-like($@, qr/no method found/);
+$na = eval { ~$aI };
+like($@, '');
 
 bless \$x, OscalarI;
 
@@ -316,8 +317,8 @@ is($na, '_!_xx_!_');
 
 eval "package Oscalar; sub rshft; use overload '>>' => 'rshft'";
 
-$na = eval { $aI >> 1 };	# Hash was not updated
-like($@, qr/no method found/);
+$na = eval { $aI >> 1 };
+is($@, '');
 
 bless \$x, OscalarI;
 
@@ -961,9 +962,14 @@ unless ($aaa) {
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' use overload "~|_|~" => sub{} ' ;
+    eval ' no overload "~|_|~" ' ;
     is($a, "");
     use warnings 'overload' ;
     $x = eval ' use overload "~|_|~" => sub{} ' ;
+    like($a, qr/^overload arg '~\|_\|~' is invalid at \(eval \d+\) line /,
+	'invalid arg warning');
+    undef $a;
+    eval ' no overload "~|_|~" ' ;
     like($a, qr/^overload arg '~\|_\|~' is invalid at \(eval \d+\) line /,
 	'invalid arg warning');
 }
@@ -1113,18 +1119,6 @@ like ($@, qr/zap/);
 }
 
 {
-    package Numify;
-    use overload (qw(0+ numify fallback 1));
-
-    sub new {
-	my $val = $_[1];
-	bless \$val, $_[0];
-    }
-
-    sub numify { ${$_[0]} }
-}
-
-{
     package perl31793;
     use overload cmp => sub { 0 };
     package perl31793_fb;
@@ -1145,8 +1139,20 @@ like ($@, qr/zap/);
     like(overload::StrVal($no),       qr/^no_overload=ARRAY\(0x[0-9a-f]+\)$/);
 }
 
-# These are all check that overloaded values rather than reference addresses
-# are what is getting tested.
+{
+    package Numify;
+    use overload (qw(0+ numify fallback 1));
+
+    sub new {
+	my $val = $_[1];
+	bless \$val, $_[0];
+    }
+
+    sub numify { ${$_[0]} }
+}
+
+# These all check that overloaded values, rather than reference addresses,
+# are what are getting tested.
 my ($two, $one, $un, $deux) = map {new Numify $_} 2, 1, 1, 2;
 my ($ein, $zwei) = (1, 2);
 
@@ -1857,6 +1863,9 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	    or die "open of \$iter_text gave ($!)\n";
 	$subs{'<>'} = '<$iter_fh>';
 	push @tests, [ $iter_fh, '<%s>', '(<>)', undef, [ 1, 1, 0 ], 1 ];
+	push @tests, [ $iter_fh,
+		      'local *CORE::GLOBAL::glob = sub {}; eval q|<%s>|',
+		      '(<>)', undef, [ 1, 1, 0 ], 1 ];
 
 	# eval should do tie, overload on its arg before checking taint */
 	push @tests, [ '1;', 'eval q(eval %s); $@ =~ /Insecure/',
@@ -2191,7 +2200,7 @@ fresh_perl_is
 {
     package Justus;
     use overload '+' => 'justice';
-    eval {bless[]};
+    eval {"".bless[]};
     ::like $@, qr/^Can't resolve method "justice" overloading "\+" in p(?x:
                   )ackage "Justus" at /,
       'Error message when explicitly named overload method does not exist';
@@ -2200,7 +2209,7 @@ fresh_perl_is
     our @ISA = 'JustYou';
     package JustYou { use overload '+' => 'injustice'; }
     "JustUs"->${\"(+"};
-    eval {bless []};
+    eval {"".bless []};
     ::like $@, qr/^Stub found while resolving method "\?{3}" overloadin(?x:
                   )g "\+" in package "JustUs" at /,
       'Error message when sub stub is encountered';
@@ -2245,15 +2254,6 @@ fresh_perl_is
 
 }
 
-{ # undefining the overload stash -- KEEP THIS TEST LAST
-    package ant;
-    use overload '+' => 'onion';
-    $_ = \&overload::nil;
-    undef %overload::;
-    bless[];
-    ::ok(1, 'no crash when undefining %overload::');
-}
-
 # [perl #40333]
 # overload::Overloaded should not use a ->can designed for autoloading.
 # This example attempts to be as realistic as possible.  The o class has a
@@ -2286,6 +2286,97 @@ ok !overload::Overloaded(new proxy new o),
     package main;
     my $obj = bless [], 'broken_can';
     ok(overload::Overloaded($obj));
+}
+
+sub eleventative::cos { 'eleven' }
+sub twelvetative::abs { 'twelve' }
+sub thirteentative::abs { 'thirteen' }
+sub fourteentative::abs { 'fourteen' }
+@eleventative::ISA = twelvetative::;
+{
+    my $o = bless [], 'eleventative';
+    eval 'package eleventative; use overload map +($_)x2, cos=>abs=>';
+    is cos $o, 'eleven', 'overloading applies to object blessed before';
+    bless [], 'eleventative';
+    is cos $o, 'eleven',
+      'ovrld applies to previously-blessed obj after other obj is blessed';
+    $o = bless [], 'eleventative';
+    *eleventative::cos = sub { 'ten' };
+    is cos $o, 'ten', 'method changes affect overloading';
+    @eleventative::ISA = thirteentative::;
+    is abs $o, 'thirteen', 'isa changes affect overloading';
+    bless $o, 'fourteentative';
+    @fourteentative::ISA = 'eleventative';
+    is abs $o, 'fourteen', 'isa changes can turn overloading on';
+}
+
+# no overload "fallback";
+{ package phake;
+  use overload fallback => 1, '""' => sub { 'arakas' };
+  no overload 'fallback';
+}
+$a = bless [], 'phake';
+is "$a", "arakas",
+    'no overload "fallback" does not stop overload from working';
+ok !eval { () = $a eq 'mpizeli'; 1 },
+    'no overload "fallback" resets fallback to undef on overloaded class';
+{ package ent; use overload fallback => 0, abs => sub{};
+  our@ISA = 'huorn';
+  package huorn;
+  use overload fallback => 1;
+  package ent;
+  no overload "fallback"; # disable previous declaration
+}
+$a = bless [], ent::;
+is eval {"$a"}, overload::StrVal($a),
+    'no overload undoes fallback declaration completetly'
+ or diag $@;
+
+# inherited fallback
+{
+ package pervyy;
+ our @ISA = 'vtoryy';
+ use overload "abs" =>=> sub {};
+ package vtoryy;
+ use overload fallback => 1, 'sin' =>=> sub{}
+}
+$a = bless [], pervyy::;
+is eval {"$a"}, overload::StrVal($a),
+ 'fallback is inherited by classes that have their own overloading'
+ or diag $@;
+
+# package separators in method names
+{
+ package mane;
+ use overload q\""\ => "bear::strength";
+ use overload bool  => "bear'bouillon";
+}
+@bear::ISA = 'food';
+sub food::strength { 'twine' }
+sub food::bouillon { 0 }
+$a = bless[], mane::;
+is eval { "$a" }, 'twine', ':: in method name' or diag $@;
+is eval { !$a  },   1,      "' in method name" or diag $@;
+
+# [perl #113050] Half of CPAN assumes fallback is under "()"
+{
+  package dodo;
+  use overload '+' => sub {};
+  no strict;
+  *{"dodo::()"} = sub{};
+  ${"dodo::()"} = 1;
+}
+$a = bless [],'dodo';
+is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
+
+
+{ # undefining the overload stash -- KEEP THIS TEST LAST
+    package ant;
+    use overload '+' => 'onion';
+    $_ = \&overload::nil;
+    undef %overload::;
+    ()=0+bless[];
+    ::ok(1, 'no crash when undefining %overload::');
 }
 
 
