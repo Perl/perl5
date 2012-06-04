@@ -973,6 +973,9 @@ p	|void	|package_version|NN OP* v
 : Used in toke.c and perly.y
 p	|PADOFFSET|allocmy	|NN const char *const name|const STRLEN len\
 				|const U32 flags
+#ifdef USE_ITHREADS
+p	|PADOFFSET|alloccopstash|NN HV *hv
+#endif
 : Used in perly.y
 pR	|OP*	|oopsAV		|NN OP* o
 : Used in perly.y

@@ -387,9 +387,8 @@ struct cop {
     line_t      cop_line;       /* line # of this command */
     /* label for this construct is now stored in cop_hints_hash */
 #ifdef USE_ITHREADS
-    char *	cop_stashpv;	/* package line was compiled in */
+    PADOFFSET	cop_stashoff;	/* package line was compiled in */
     char *	cop_file;	/* file name the following line # is from */
-    I32         cop_stashlen;	/* negative for UTF8 */
 #else
     HV *	cop_stash;	/* package line was compiled in */
     GV *	cop_filegv;	/* file the following line # is from */
@@ -426,41 +425,14 @@ struct cop {
 #  else
 #    define CopFILEAVx(c)	(GvAV(gv_fetchfile(CopFILE(c))))
 #  endif
-#  define CopSTASHPV(c)		((c)->cop_stashpv)
 
+#  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
+#  define CopSTASH_set(c,hv)	((c)->cop_stashoff = (hv)		\
+				    ? alloccopstash(hv)			\
+				    : 0)
 #  ifdef NETWARE
-#    define CopSTASHPV_set(c,pv,n)	((c)->cop_stashpv = \
-					   ((pv) ? savepvn(pv,n) : NULL))
-#  else
-#    define CopSTASHPV_set(c,pv,n)	((c)->cop_stashpv = (pv) \
-					    ? savesharedpvn(pv,n) : NULL)
-#  endif
-
-#  define CopSTASH_len_set(c,n)	((c)->cop_stashlen = (n))
-#  define CopSTASH_len(c)	((c)->cop_stashlen)
-
-#  define CopSTASH(c)          (CopSTASHPV(c)                                 \
-                                ? gv_stashpvn(CopSTASHPV(c),		  \
-				    CopSTASH_len(c) < 0			  \
-					? -CopSTASH_len(c)		  \
-					:  CopSTASH_len(c),		  \
-                                    GV_ADD|SVf_UTF8*(CopSTASH_len(c) < 0) \
-                                  )					  \
-                                 : NULL)
-#  define CopSTASH_set(c,hv)   (CopSTASHPV_set(c,			\
-				    (hv) ? HvNAME_get(hv) : NULL,	\
-				    (hv) ? HvNAMELEN(hv)  : 0),		\
-				CopSTASH_len_set(c,			\
-				    (hv) ? HvNAMEUTF8(hv)		\
-					    ? -HvNAMELEN(hv)		\
-					    :  HvNAMELEN(hv)		\
-					 : 0))
-#  define CopSTASH_eq(c,hv)	((hv) && stashpv_hvname_match(c,hv))
-#  ifdef NETWARE
-#    define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
 #    define CopFILE_free(c) SAVECOPFILE_FREE(c)
 #  else
-#    define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))
 #    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
 #  endif
 #else
@@ -479,14 +451,15 @@ struct cop {
 				    ? SvPVX(GvSV(CopFILEGV(c))) : NULL)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
-#  define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
-   /* cop_stash is not refcounted */
-#  define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
-#  define CopSTASH_eq(c,hv)	(CopSTASH(c) == (hv))
-#  define CopSTASH_free(c)	
 #  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
 
 #endif /* USE_ITHREADS */
+
+#define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
+   /* cop_stash is not refcounted */
+#define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
+#define CopSTASH_eq(c,hv)	(CopSTASH(c) == (hv))
+#define CopSTASH_free(c)	
 
 #define CopHINTHASH_get(c)	((COPHH*)((c)->cop_hints_hash))
 #define CopHINTHASH_set(c,h)	((c)->cop_hints_hash = (h))

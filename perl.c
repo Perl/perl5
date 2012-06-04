@@ -307,6 +307,7 @@ perl_construct(pTHXx)
        else all hell breaks loose in S_find_uninit_var().  */
     Perl_av_create_and_push(aTHX_ &PL_regex_padav, newSVpvs(""));
     PL_regex_pad = AvARRAY(PL_regex_padav);
+    Newxz(PL_stashpad, PL_stashpadmax, HV *);
 #endif
 #ifdef USE_REENTRANT_API
     Perl_reentrant_init(aTHX);
@@ -843,6 +844,7 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_regex_padav);
     PL_regex_padav = NULL;
     PL_regex_pad = NULL;
+    Safefree(PL_stashpad);
 #endif
 
     SvREFCNT_dec(MUTABLE_SV(PL_stashcache));

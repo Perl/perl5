@@ -13210,10 +13210,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     hv_ksplit(PL_strtab, HvTOTALKEYS(proto_perl->Istrtab));
     ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
 
-    /* These two PVs will be free'd special way so must set them same way op.c does */
-    PL_compiling.cop_stashpv = savesharedpv(PL_compiling.cop_stashpv);
-    ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_stashpv, PL_compiling.cop_stashpv);
-
+    /* This PV will be free'd special way so must set it same way op.c does */
     PL_compiling.cop_file    = savesharedpv(PL_compiling.cop_file);
     ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_file, PL_compiling.cop_file);
 
@@ -13270,6 +13267,15 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     */
     PL_regex_padav = av_dup_inc(proto_perl->Iregex_padav, param);
     PL_regex_pad = AvARRAY(PL_regex_padav);
+
+    PL_stashpadmax	= proto_perl->Istashpadmax;
+    PL_stashpadix	= proto_perl->Istashpadix ;
+    Newx(PL_stashpad, PL_stashpadmax, HV *);
+    {
+	PADOFFSET o = 0;
+	for (; o < PL_stashpadmax; ++o)
+	    PL_stashpad[o] = hv_dup(proto_perl->Istashpad[o], param);
+    }
 
     /* shortcuts to various I/O objects */
     PL_ofsgv            = gv_dup_inc(proto_perl->Iofsgv, param);

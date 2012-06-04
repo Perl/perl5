@@ -355,6 +355,9 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_hints_mutex
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
+		    PL_stashpad
+		    PL_stashpadix
+		    PL_stashpadmax
 		    Perl_clone_params_del
 		    Perl_clone_params_new
 		    Perl_parser_dup

@@ -7473,6 +7473,11 @@ PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f)
 
 #endif
 #if defined(USE_ITHREADS)
+PERL_CALLCONV PADOFFSET	Perl_alloccopstash(pTHX_ HV *hv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_ALLOCCOPSTASH	\
+	assert(hv)
+
 PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, const PerlInterpreter* proto_perl)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);

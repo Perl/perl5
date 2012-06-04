@@ -465,6 +465,34 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     return off;
 }
 
+#ifdef USE_ITHREADS
+PADOFFSET
+Perl_alloccopstash(pTHX_ HV *hv)
+{
+    PADOFFSET off = 0, o = 1;
+    bool found_slot = FALSE;
+
+    PERL_ARGS_ASSERT_ALLOCCOPSTASH;
+
+    if (PL_stashpad[PL_stashpadix] == hv) return PL_stashpadix;
+
+    for (; o < PL_stashpadmax; ++o) {
+	if (PL_stashpad[o] == hv) return PL_stashpadix = o;
+	if (!PL_stashpad[o] || SvTYPE(PL_stashpad[o]) != SVt_PVHV)
+	    found_slot = TRUE, off = o;
+    }
+    if (!found_slot) {
+	Renew(PL_stashpad, PL_stashpadmax + 10, HV *);
+	Zero(PL_stashpad + PL_stashpadmax, 10, HV *);
+	off = PL_stashpadmax;
+	PL_stashpadmax += 10;
+    }
+
+    PL_stashpad[PL_stashpadix = off] = hv;
+    return off;
+}
+#endif
+
 /* free the body of an op without examining its contents.
  * Always use this rather than FreeOp directly */
 
@@ -10014,8 +10042,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		       data.  */
 		    firstcop->cop_line = secondcop->cop_line;
 #ifdef USE_ITHREADS
-		    firstcop->cop_stashpv = secondcop->cop_stashpv;
-		    firstcop->cop_stashlen = secondcop->cop_stashlen;
+		    firstcop->cop_stashoff = secondcop->cop_stashoff;
 		    firstcop->cop_file = secondcop->cop_file;
 #else
 		    firstcop->cop_stash = secondcop->cop_stash;
@@ -10027,7 +10054,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		    firstcop->cop_hints_hash = secondcop->cop_hints_hash;
 
 #ifdef USE_ITHREADS
-		    secondcop->cop_stashpv = NULL;
+		    secondcop->cop_stashoff = NULL;
 		    secondcop->cop_file = NULL;
 #else
 		    secondcop->cop_stash = NULL;

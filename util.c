@@ -5698,32 +5698,8 @@ Perl_get_hash_seed(pTHX)
 bool
 Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 {
-    const char * stashpv = CopSTASHPV(c);
-    const char * name    = HvNAME_get(hv);
-    const bool utf8 = CopSTASH_len(c) < 0;
-    const I32  len  = utf8 ? -CopSTASH_len(c) : CopSTASH_len(c);
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH;
-
-    if (!stashpv || !name)
-	return stashpv == name;
-    if ( !HvNAMEUTF8(hv) != !utf8 ) {
-        if (utf8) {
-            return (bytes_cmp_utf8(
-                        (const U8*)stashpv, len,
-                        (const U8*)name, HEK_LEN(HvNAME_HEK(hv))) == 0);
-        } else {
-            return (bytes_cmp_utf8(
-                        (const U8*)name, HEK_LEN(HvNAME_HEK(hv)),
-                        (const U8*)stashpv, len) == 0);
-        }
-    }
-    else
-        return (stashpv == name
-                    || (HEK_LEN(HvNAME_HEK(hv)) == len
-			 && memEQ(stashpv, name, len)));
-    /*NOTREACHED*/
-    return FALSE;
+    return CopSTASH(c) == hv;
 }
 #endif
 

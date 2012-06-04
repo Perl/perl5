@@ -690,6 +690,9 @@ PERLVAR(I, regex_padav,   AV *)		/* All regex objects, indexed via the
 					   Entry 0 is an SV whose PV is a
 					   "packed" list of IVs listing
 					   the now-free slots in the array */
+PERLVAR(I, stashpad,    HV **)		/* for CopSTASH */
+PERLVARI(I, stashpadmax, PADOFFSET, 64)
+PERLVARI(I, stashpadix, PADOFFSET, 0)
 #endif
 
 #ifdef USE_REENTRANT_API
