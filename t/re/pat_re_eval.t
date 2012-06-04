@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 448;  # Update this when adding/deleting tests.
+plan tests => 452;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -964,6 +964,16 @@ sub run_tests {
 	local $SIG{__WARN__} = sub {  $warn .= $_[0] };
 	$u1 =~ /(??{$u2})/ or die;
 	like($warn, qr/value \$u1 in pattern match.*\n.*value at/, 'uninit');
+    }
+
+    # test that code blocks are called in scalar context
+
+    {
+	my @a = (0);
+	ok("" =~ /^(?{@a})$/, '(?{}) in scalar context');
+	is($^R, 1, '(?{}) in scalar context: $^R');
+	ok("1" =~ /^(??{@a})$/, '(??{}) in scalar context');
+	ok("foo" =~ /^(?(?{@a})foo|bar)$/, '(?(?{})|) in scalar context');
     }
 
 
