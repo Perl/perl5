@@ -772,8 +772,8 @@ sub run_tests {
 	norun("runtime code with unbalanced {} norun");
 
 	use re 'eval';
-	ok("a{" =~ '^(??{"a{"})$', "non-pattern literal code");
-	ok("a{" =~ /^${\'(??{"a{"})'}$/, "runtime code with unbalanced {}");
+	ok("a{" =~ '^a(??{"{"})$', "non-pattern literal code");
+	ok("a{" =~ /^a${\'(??{"{"})'}$/, "runtime code with unbalanced {}");
     }
 
     # make sure warnings come from the right place
