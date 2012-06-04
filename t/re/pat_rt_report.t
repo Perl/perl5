@@ -384,14 +384,7 @@ sub run_tests {
         is("@_", "a|b|c", $message);
     }
 
-    {
-        # XXX DAPM 13-Apr-06. Recursive split is still broken. It's only luck it
-        # hasn't been crashing. Disable this test until it is fixed properly.
-        # XXX also check what it returns rather than just doing ok(1,...)
-        # split /(?{ split "" })/, "abc";
-        local $::TODO = "Recursive split is still broken";
-        ok 0, 'cache_re & "(?{": it dumps core in 5.6.1 & 5.8.0';
-    }
+    is(join('-', split /(?{ split "" })/, "abc"), 'a-b-c', 'nested split');
 
     {
         $_ = "code:   'x' { '...' }\n"; study;
