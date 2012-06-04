@@ -235,13 +235,12 @@ scope has the given name. Name must be a literal string.
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
 
 #ifdef USE_ITHREADS
-#  define SAVECOPSTASH(c)	SAVEIV((c)->cop_stashoff)
 #  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
 #  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
 #  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
 #else
-#  define SAVECOPSTASH(c)	SAVESPTR(CopSTASH(c))
-#  define SAVECOPSTASH_FREE(c)	SAVECOPSTASH(c)	/* XXX not refcounted */
+#  /* XXX not refcounted */
+#  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))
 #  define SAVECOPFILE(c)	SAVESPTR(CopFILEGV(c))
 #  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
 #endif
