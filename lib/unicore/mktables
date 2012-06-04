@@ -13495,8 +13495,7 @@ sub compile_perl() {
     $lv_lvt_v += $gcb->table('LV') + $gcb->table('LVT') + $gcb->table('V');
     $lv_lvt_v->add_comment('For use in \X; matches: hst=LV | hst=LVT | hst=V');
 
-    # Was earlier constructed to contain both Name and Unicode_1_Name
-    my @composition = ('Name', 'Unicode_1_Name');
+    my @composition = ('Name', 'Unicode_1_Name', 'Name_Alias');
 
     if (@named_sequences) {
         push @composition, 'Named_Sequence';
@@ -13508,7 +13507,6 @@ sub compile_perl() {
     my $alias_sentence = "";
     my %abbreviations;
     my $alias = property_ref('Name_Alias');
-    push @composition, 'Name_Alias';
     $perl_charname->set_proxy_for('Name_Alias');
 
     # Add each entry in Name_Alias to Perl_Charnames.  Where these go with
