@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 452;  # Update this when adding/deleting tests.
+plan tests => 454;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -976,6 +976,15 @@ sub run_tests {
 	ok("foo" =~ /^(?(?{@a})foo|bar)$/, '(?(?{})|) in scalar context');
     }
 
+    # BEGIN in compiled blocks shouldn't mess with $1 et al
+
+    {
+	use re 'eval';
+	my $code1 = '(B)(??{ BEGIN { "X" =~ /X/ } $1})(C)';
+	ok("ABBCA" =~ /^(.)(??{$code1})\1$/, '(?{}) BEGIN and $1');
+	my $code2 = '(B)(??{ BEGIN { "X" =~ /X/ } $1 =~ /(.)/ ? $1 : ""})(C)';
+	ok("ABBCA" =~ /^(.)(??{$code2})\1$/, '(?{}) BEGIN and $1 mark 2');
+    }
 
 
 } # End of sub run_tests
