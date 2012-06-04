@@ -115,6 +115,13 @@ C<sync()> can now be called on read only file handles [perl #64772].
 
 =item *
 
+L<Pod::Html> has been upgraded from version 1.15_02 to 1.16.
+
+The option C<--libpods> has been re-instated. It is deprecated, and its use
+does nothing other than issue a warning that it is no longer supported.
+
+=item *
+
 L<Unicode::UCD> has been upgraded from version 0.43 to version 0.44.
 This adds a function L<all_casefolds()|Unicode::UCD/all_casefolds()>
 that returns all the casefolds.
