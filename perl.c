@@ -829,7 +829,6 @@ perl_destruct(pTHXx)
 #endif
 
 	CopFILE_free(&PL_compiling);
-	CopSTASH_free(&PL_compiling);
 
 	/* The exit() function will do everything that needs doing. */
         return STATUS_EXIT;
@@ -1026,7 +1025,6 @@ perl_destruct(pTHXx)
     cophh_free(CopHINTHASH_get(&PL_compiling));
     CopHINTHASH_set(&PL_compiling, cophh_new_empty());
     CopFILE_free(&PL_compiling);
-    CopSTASH_free(&PL_compiling);
 
     /* Prepare to destruct main symbol table.  */
 
