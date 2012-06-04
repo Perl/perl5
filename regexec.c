@@ -4404,6 +4404,40 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    PUTBACK;
 		}
 
+		/* before restoring everything, evaluate the returned
+		 * value, so that 'uninit' warnings don't use the wrong
+		 * PL_op or pad. Also need to process any magic vars (e.g.
+		 * $1 *before* parentheses are restored */
+
+		PL_op = NULL;
+
+		if (logical == 0)        /*   (?{})/   */
+		    sv_setsv(save_scalar(PL_replgv), ret); /* $^R */
+		else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
+		    sw = cBOOL(SvTRUE(ret));
+		    logical = 0;
+		}
+		else {                   /*  /(??{})  */
+		    SV *sv = ret;
+		    re_sv = NULL;
+		    if (SvROK(sv))
+			sv = SvRV(sv);
+		    if (SvTYPE(sv) == SVt_REGEXP)
+			re_sv = (REGEXP*) sv;
+		    else if (SvSMAGICAL(sv)) {
+			MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
+			if (mg)
+			    re_sv = (REGEXP *) mg->mg_obj;
+		    }
+
+		    /* force any magic, undef warnings here */
+		    if (!re_sv && !SvAMAGIC(ret)) {
+			ret = sv_mortalcopy(ret);
+			(void) SvPV_force_nolen(ret);
+		    }
+
+		}
+
 		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
 		/* *** Note that at this point we don't restore
@@ -4413,36 +4447,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_op = oop;
 		PL_curcop = ocurcop;
 		PL_regeol = saved_regeol;
-		if (!logical) {
-		    /* /(?{...})/ */
-		    /* restore all paren positions. Note that where the
-		     * return value is used, we must delay this as the
-		     * returned string to be compiled may be $1 for
-		     * example */
-		    S_regcp_restore(aTHX_ rex, runops_cp);
-		    sv_setsv(save_scalar(PL_replgv), ret);
+		S_regcp_restore(aTHX_ rex, runops_cp);
+
+		if (logical != 2)
 		    break;
-		}
 	    }
-	    if (logical == 2) { /* Postponed subexpression: /(??{...})/ */
+
+		/* only /(??{})/  from now on */
 		logical = 0;
 		{
 		    /* extract RE object from returned value; compiling if
 		     * necessary */
 
-		    re_sv = NULL;
-		    {
-			SV *sv = ret;
-			if (SvROK(sv))
-			    sv = SvRV(sv);
-			if (SvTYPE(sv) == SVt_REGEXP) {
-			    re_sv = (REGEXP*) sv;
-			} else if (SvSMAGICAL(sv)) {
-			    MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
-			    if (mg)
-				re_sv = (REGEXP *) mg->mg_obj;
-			}
-		    }
 		    if (re_sv) {
 			re_sv = reg_temp_copy(NULL, re_sv);
 		    }
@@ -4527,12 +4543,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* now continue from first node in postoned RE */
 		PUSH_YES_STATE_GOTO(EVAL_AB, startpoint);
 		/* NOTREACHED */
-	    }
-	    /* logical is 1,   /(?(?{...})X|Y)/ */
-	    sw = cBOOL(SvTRUE(ret));
-	    S_regcp_restore(aTHX_ rex, runops_cp);
-	    logical = 0;
-	    break;
 	}
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */

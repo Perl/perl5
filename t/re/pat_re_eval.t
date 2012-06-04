@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 447;  # Update this when adding/deleting tests.
+plan tests => 448;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -954,6 +954,18 @@ sub run_tests {
     {
 	ok("a" !~ /^(a)(??{ \$1 })/, '(??{ ref })');
     }
+
+    # make sure the uninit warning from returning an undef var
+    # sees the right var
+
+    {
+	my ($u1, $u2);
+	my $warn = '';
+	local $SIG{__WARN__} = sub {  $warn .= $_[0] };
+	$u1 =~ /(??{$u2})/ or die;
+	like($warn, qr/value \$u1 in pattern match.*\n.*value at/, 'uninit');
+    }
+
 
 
 } # End of sub run_tests
