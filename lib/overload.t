@@ -1208,11 +1208,8 @@ foreach my $op (qw(<=> == != < <= > >=)) {
         my $qr = bless qr/y/, "QRonly";
         ok("x" =~ $qr, "qr with qr-overload uses overload");
         ok("y" !~ $qr, "qr with qr-overload uses overload");
-	{
-	    local $::TODO = '?? fails with "qr with qr"' ;
-	    ok("x" =~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
-	    ok("y" !~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
-	}
+	ok("x" =~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
+	ok("y" !~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
         is("$qr", "".qr/y/, "qr with qr-overload stringify");
 
         my $rx = $$qr;

@@ -4406,8 +4406,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		/* before restoring everything, evaluate the returned
 		 * value, so that 'uninit' warnings don't use the wrong
-		 * PL_op or pad. Also need to process any magic vars (e.g.
-		 * $1 *before* parentheses are restored */
+		 * PL_op or pad. Also need to process any magic vars
+		 * (e.g. $1) *before* parentheses are restored */
 
 		PL_op = NULL;
 
@@ -4418,22 +4418,26 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    logical = 0;
 		}
 		else {                   /*  /(??{})  */
-		    SV *sv = ret;
 		    re_sv = NULL;
-		    if (SvROK(sv))
-			sv = SvRV(sv);
-		    if (SvTYPE(sv) == SVt_REGEXP)
-			re_sv = (REGEXP*) sv;
-		    else if (SvSMAGICAL(sv)) {
-			MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
-			if (mg)
-			    re_sv = (REGEXP *) mg->mg_obj;
-		    }
+		    /*  if its overloaded, let the regex compiler handle
+		     *  it; otherwise extract regex, or stringify  */
+		    if (!SvAMAGIC(ret)) {
+			SV *sv = ret;
+			if (SvROK(sv))
+			    sv = SvRV(sv);
+			if (SvTYPE(sv) == SVt_REGEXP)
+			    re_sv = (REGEXP*) sv;
+			else if (SvSMAGICAL(sv)) {
+			    MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
+			    if (mg)
+				re_sv = (REGEXP *) mg->mg_obj;
+			}
 
-		    /* force any magic, undef warnings here */
-		    if (!re_sv && !SvAMAGIC(ret)) {
-			ret = sv_mortalcopy(ret);
-			(void) SvPV_force_nolen(ret);
+			/* force any magic, undef warnings here */
+			if (!re_sv) {
+			    ret = sv_mortalcopy(ret);
+			    (void) SvPV_force_nolen(ret);
+			}
 		    }
 
 		}
