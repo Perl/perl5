@@ -9,7 +9,7 @@ BEGIN {
     skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
-plan 29;
+plan 30;
 
 fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
@@ -231,6 +231,12 @@ CODE
     "YZ45",
     { stderr => 1 }, '{(?{goto FOO; FOO:})}';
 }
+
+# [perl #3590]
+fresh_perl_is <<'CODE', '', { stderr => 1 }, '(?{eval{die}})';
+"$_$_$_"; my $foo; # these consume pad entries and ensure a SEGV on opd perls
+"" =~ m{(?{exit(0)})};
+CODE
 
 
 # [perl #92256]
