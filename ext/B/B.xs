@@ -1164,16 +1164,14 @@ BOOT:
 #ifdef USE_ITHREADS
         cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = PMOP_pmoffset_ix;
-# if PERL_VERSION >= 17
-#  ifdef CopSTASH_len
+# if PERL_VERSION < 17 || defined(CopSTASH_len)
         cv = newXS("B::COP::stashpv", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stashpv_ix;
         cv = newXS("B::COP::file", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_file_ix;
-#  else
+# else
         cv = newXS("B::COP::stashoff", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stashoff_ix;
-#  endif
 # endif
 #else
         cv = newXS("B::COP::stash", XS_B__OP_next, __FILE__);
