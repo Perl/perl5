@@ -295,4 +295,12 @@ foo
     can_ok $f, 'LINES';
 }
 
+my $sub1 = sub {die};
+my $cop = B::svref_2object($sub1)->ROOT->first->first;
+is $cop->stash->object_2svref, \%main::, 'COP->stash';
+is $cop->stashpv, 'main', 'COP->stashpv';
+if ($Config::Config{useithreads}) {
+    like $cop->stashoff, qr/^[1-9]\d*\z/a, 'COP->stashoff'
+}
+
 done_testing();

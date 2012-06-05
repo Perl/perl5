@@ -885,6 +885,7 @@ threadsv_names()
 
 #ifdef USE_ITHREADS
 #define COP_stashpv_ix		char_pp | offsetof(struct cop, cop_stashpv)
+#define COP_stashoff_ix	    PADOFFSETp | offsetof(struct cop, cop_stashoff)
 #define COP_file_ix		char_pp | offsetof(struct cop, cop_file)
 #else
 #define COP_stash_ix		SVp | offsetof(struct cop, cop_stash)
@@ -1163,11 +1164,16 @@ BOOT:
 #ifdef USE_ITHREADS
         cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = PMOP_pmoffset_ix;
-# if PERL_VERSION >= 17 && defined(CopSTASH_len)
+# if PERL_VERSION >= 17
+#  ifdef CopSTASH_len
         cv = newXS("B::COP::stashpv", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stashpv_ix;
         cv = newXS("B::COP::file", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_file_ix;
+#  else
+        cv = newXS("B::COP::stashoff", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = COP_stashoff_ix;
+#  endif
 # endif
 #else
         cv = newXS("B::COP::stash", XS_B__OP_next, __FILE__);
@@ -1229,9 +1235,6 @@ pv(o)
 	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
 
 #define COP_label(o)	CopLABEL(o)
-#ifdef CopSTASH_len
-#define COP_stashlen(o)	CopSTASH_len(o)
-#endif
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1254,14 +1257,6 @@ COP_stash(o)
     PPCODE:
 	PUSHs(make_sv_object(aTHX_
 			     ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o)));
-
-#ifdef CopSTASH_len
-
-U32
-COP_stashlen(o)
-	B::COP	o
-
-#endif
 
 #endif
 

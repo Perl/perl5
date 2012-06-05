@@ -1213,7 +1213,7 @@ Only when perl was compiled with ithreads.
 
 =item stashpv
 
-=item stashlen
+=item stashoff (threaded only)
 
 =item file
 
