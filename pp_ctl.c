@@ -1892,7 +1892,9 @@ PP(pp_caller)
 
     DEBUG_CX("CALLER");
     assert(CopSTASH(cx->blk_oldcop));
-    stash_hek = HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop));
+    stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
+      ? HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop))
+      : NULL;
     if (GIMME != G_ARRAY) {
         EXTEND(SP, 1);
 	if (!stash_hek)

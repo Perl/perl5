@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 85 );
+    plan( tests => 86 );
 }
 
 my @c;
@@ -249,6 +249,22 @@ eval { sub { () = caller 0; } ->(1..3) };
 ::ok tied @args, '@DB::args is still tied';
 untie @args;
 package main;
+
+# [perl #113486]
+fresh_perl_is <<'END', "ok\n", {},
+  { package foo; sub bar { main::bar() } }
+  sub bar {
+    delete $::{"foo::"};
+    my $x = \($1+2);
+    my $y = \($1+2); # this is the one that reuses the mem addr, but
+    my $z = \($1+2);  # try the others just in case
+    s/2// for $$x, $$y, $$z; # now SvOOK
+    $x = caller;
+    print "ok\n";
+};
+foo::bar
+END
+    "No crash when freed stash is reused for PV with offset hack";
 
 $::testing_caller = 1;
 
