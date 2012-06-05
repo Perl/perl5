@@ -24,6 +24,9 @@ plan tests => 113;
 
 my $Perl = which_perl();
 
+$ENV{LC_ALL}   = 'C';		# Forge English error messages.
+$ENV{LANGUAGE} = 'C';		# Ditto in GNU.
+
 $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
 $Is_Darwin  = $^O eq 'darwin';
