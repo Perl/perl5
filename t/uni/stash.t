@@ -280,11 +280,8 @@ plan( tests => 58 );
         'ref() returns the same thing when an object’s stash is detached';
         ::like "$obj", qr "^rìle=ARRAY\(0x[\da-f]+\)\z",
         'objects stringify the same way when their stashes are detached';
-        {
-            local $::TODO =  $Config{useithreads} ? "fails under threads" : undef;
-            ::is eval '__PACKAGE__', 'rìle',
+        ::is eval '__PACKAGE__', 'rìle',
             '__PACKAGE__ returns the same when the current stash is detached';
-        }
     }
     
     # Setting the name during undef %stash:: should have no effect.

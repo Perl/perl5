@@ -294,11 +294,8 @@ fresh_perl_is(
      'ref() returns the same thing when an object’s stash is detached';
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are detached';
-    {
-	local $::TODO =  $Config{useithreads} ? "fails under threads" : undef;
-	::is eval '__PACKAGE__', 'rile',
+    ::is eval '__PACKAGE__', 'rile',
 	 '__PACKAGE__ returns the same when the current stash is detached';
-    }
 }
 
 # Setting the name during undef %stash:: should have no effect.
