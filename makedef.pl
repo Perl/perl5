@@ -247,7 +247,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_pad_sv
 		    Perl_pad_setsv
 		    Perl_hv_assert
-		    PL_block_type
 		    PL_watchaddr
 		    PL_watchok
 		    PL_watch_pvx
