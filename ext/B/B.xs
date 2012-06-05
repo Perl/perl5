@@ -1167,12 +1167,12 @@ BOOT:
 # if PERL_VERSION < 17 || defined(CopSTASH_len)
         cv = newXS("B::COP::stashpv", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stashpv_ix;
-        cv = newXS("B::COP::file", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = COP_file_ix;
 # else
         cv = newXS("B::COP::stashoff", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stashoff_ix;
 # endif
+        cv = newXS("B::COP::file", XS_B__OP_next, __FILE__);
+        XSANY.any_i32 = COP_file_ix;
 #else
         cv = newXS("B::COP::stash", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stash_ix;
@@ -1256,17 +1256,37 @@ COP_stash(o)
 	PUSHs(make_sv_object(aTHX_
 			     ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o)));
 
+#else
+
+char *
+COP_file(o)
+	B::COP	o
+    CODE:
+	RETVAL = CopFILE(o);
+    OUTPUT:
+	RETVAL
+
 #endif
 
-#if !defined(USE_ITHREADS) || (PERL_VERSION > 16 && !defined(CopSTASH_len))
+#if PERL_VERSION >= 10
+
+SV *
+COP_stashpv(o)
+	B::COP	o
+    CODE:
+	RETVAL = CopSTASH(o) && SvTYPE(CopSTASH(o)) == SVt_PVHV
+	    ? newSVhek(HvNAME_HEK(CopSTASH(o)))
+	    : &PL_sv_undef;
+    OUTPUT:
+	RETVAL
+
+#else
 
 char *
 COP_stashpv(o)
 	B::COP	o
-    ALIAS:
-	file = 1
     CODE:
-	RETVAL = ix ? CopFILE(o) : CopSTASHPV(o);
+	RETVAL = CopSTASHPV(o);
     OUTPUT:
 	RETVAL
 

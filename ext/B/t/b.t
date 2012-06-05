@@ -296,11 +296,17 @@ foo
 }
 
 my $sub1 = sub {die};
+{ no warnings 'once'; no strict; *Peel:: = *{"Pe\0e\x{142}::"} }
+my $sub2 = eval 'package Peel; sub {die}';
 my $cop = B::svref_2object($sub1)->ROOT->first->first;
+my $bobby = B::svref_2object($sub2)->ROOT->first->first;
 is $cop->stash->object_2svref, \%main::, 'COP->stash';
 is $cop->stashpv, 'main', 'COP->stashpv';
+is $bobby->stashpv, "Pe\0e\x{142}", 'COP->stashpv with utf8 and nulls';
 if ($Config::Config{useithreads}) {
-    like $cop->stashoff, qr/^[1-9]\d*\z/a, 'COP->stashoff'
+    like $cop->stashoff, qr/^[1-9]\d*\z/a, 'COP->stashoff';
+    isnt $cop->stashoff, $bobby->stashoff,
+	'different COP->stashoff for different stashes';
 }
 
 done_testing();
