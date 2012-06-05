@@ -153,9 +153,9 @@ sub skip_all_without_config {
 }
 
 sub find_git_or_skip {
-    my ($found_dir, $reason);
+    my ($source_dir, $reason);
     if (-d '.git') {
-	$found_dir = 1;
+	$source_dir = '.';
     } elsif (-l 'MANIFEST' && -l 'AUTHORS') {
 	my $where = readlink 'MANIFEST';
 	die "Can't readling MANIFEST: $!" unless defined $where;
@@ -163,16 +163,20 @@ sub find_git_or_skip {
 	    unless $where =~ s!/MANIFEST\z!!;
 	if (-d "$where/.git") {
 	    # Looks like we are in a symlink tree
-	    chdir $where or die "Can't chdir '$where': $!";
-	    note("Found source tree at $where");
-	    $found_dir = 1;
+	    if (exists $ENV{GIT_DIR}) {
+		diag("Found source tree at $where, but \$ENV{GIT_DIR} is $ENV{GIT_DIR}. Not changing it");
+	    } else {
+		note("Found source tree at $where, setting \$ENV{GIT_DIR}");
+		$ENV{GIT_DIR} = "$where/.git";
+	    }
+	    $source_dir = $where;
 	}
     }
-    if ($found_dir) {
+    if ($source_dir) {
 	my $version_string = `git --version`;
 	if (defined $version_string
 	      && $version_string =~ /\Agit version (\d+\.\d+\.\d+)(.*)/) {
-	    return if eval "v$1 ge v1.5.0";
+	    return $source_dir if eval "v$1 ge v1.5.0";
 	    # If you have earlier than 1.5.0 and it works, change this test
 	    $reason = "in git checkout, but git version '$1$2' too old";
 	} else {
