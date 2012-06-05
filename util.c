@@ -5694,16 +5694,6 @@ Perl_get_hash_seed(pTHX)
      return myseed;
 }
 
-#ifdef USE_ITHREADS
-bool
-Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
-{
-    PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH;
-    return CopSTASH(c) == hv;
-}
-#endif
-
-
 #ifdef PERL_GLOBAL_STRUCT
 
 #define PERL_GLOBAL_STRUCT_INIT

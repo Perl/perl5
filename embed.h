@@ -531,7 +531,6 @@
 #define sortsv_flags(a,b,c,d)	Perl_sortsv_flags(aTHX_ a,b,c,d)
 #define stack_grow(a,b,c)	Perl_stack_grow(aTHX_ a,b,c)
 #define start_subparse(a,b)	Perl_start_subparse(aTHX_ a,b)
-#define stashpv_hvname_match(a,b)	Perl_stashpv_hvname_match(aTHX_ a,b)
 #define str_to_version(a)	Perl_str_to_version(aTHX_ a)
 #define sv_2bool_flags(a,b)	Perl_sv_2bool_flags(aTHX_ a,b)
 #define sv_2cv(a,b,c,d)		Perl_sv_2cv(aTHX_ a,b,c,d)

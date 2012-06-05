@@ -2440,8 +2440,6 @@ np	|void	|my_swabn	|NN void* ptr|int n
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|const svtype sv_type
 
-ApR	|bool	|stashpv_hvname_match|NN const COP *c|NN const HV *hv
-
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 : Used in sv.c
 p	|void	|dump_sv_child	|NN SV *sv

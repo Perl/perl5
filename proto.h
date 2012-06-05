@@ -3667,13 +3667,6 @@ PERL_CALLCONV PerlIO*	Perl_start_glob(pTHX_ SV *tmpglob, IO *io)
 	assert(tmpglob); assert(io)
 
 PERL_CALLCONV I32	Perl_start_subparse(pTHX_ I32 is_format, U32 flags);
-PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH	\
-	assert(c); assert(hv)
-
 PERL_CALLCONV NV	Perl_str_to_version(pTHX_ SV *sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
