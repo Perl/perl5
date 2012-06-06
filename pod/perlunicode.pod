@@ -28,8 +28,10 @@ C<use feature 'unicode_strings'> is specified.  (This is automatically
 selected if you use C<use 5.012> or higher.)  Failure to do this can
 trigger unexpected surprises.  See L</The "Unicode Bug"> below.
 
-This pragma doesn't affect I/O, and there are still several places
-where Unicode isn't fully supported, such as in filenames.
+This pragma doesn't affect I/O.  Nor does it change the internal
+representation of strings, only their interpretation.  There are still
+several places where Unicode isn't fully supported, such as in
+filenames.
 
 =item Input and Output Layers
 
