@@ -21535,7 +21535,7 @@ EOM
 
 val=$undef
 set try
-if eval $compile_ok; then
+if eval $compile; then
 	if $run ./try; then
 		echo "You can use sysctl with KERN_PROC_PATHNAME to find the executing program." >&4
 		val="$define"
@@ -21637,7 +21637,7 @@ EOM
 
 val=$undef
 set try
-if eval $compile_ok; then
+if eval $compile; then
 	if $run ./try; then
 		echo "You can use _NSGetExecutablePath to find the executing program." >&4
 		val="$define"
