@@ -1652,4 +1652,17 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 ^(A)((?(?{return 1})abc|xyz))$	Aabc	y	$1-$2	A-abc	-
 ^(A)((?(?{return 0})abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
 
+# pattern modifier flags should propagate into returned (??{}) pattern
+# p,d,l not tested
+
+/^(a)((??{"b"}))$/i	AB	y	$1-$2	A-B	-
+/^(A)((??{'B$'}))(\nC)$/m	AB\nC	y	$1-$2-$3	A-B-\nC	-
+/^(A)((??{'.'}))(B)$/s	A\nB	y	$1-$2-$3	A-\n-B	-
+/^(A) ((??{' .'}))(B)$/x	A B	y	$1-$2-$3	A- -B	-
+/^((??{'\d'}))$/a	\x{660}	n	-	-
+/^(??{"s"})$/i	\x{17F}	y	-	-
+/^(??{"s"})$/ia	\x{17F}	y	-	-
+/^(??{"s"})$/iaa	\x{17F}	n	-	-
+/^(??{'\w'})$/u	\x{AA}	y	-	-
+
 # vim: softtabstop=0 noexpandtab

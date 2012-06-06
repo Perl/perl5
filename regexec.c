@@ -4483,8 +4483,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			/* if we got here, it should be an engine which
 			 * supports compiling code blocks and stuff */
 			assert(rex->engine && rex->engine->op_comp);
+                        assert(!(scan->flags & ~RXf_PMf_COMPILETIME));
 			re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
-				    rex->engine, NULL, NULL, 0, pm_flags);
+				    rex->engine, NULL, NULL,
+                                    /* copy /msix etc to inner pattern */
+                                    scan->flags,
+                                    pm_flags);
 
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY

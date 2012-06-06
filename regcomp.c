@@ -8607,10 +8607,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		nextchar(pRExC_state);
 
 		if (is_logical) {
+                    regnode *eval;
 		    ret = reg_node(pRExC_state, LOGICAL);
-		    if (!SIZE_ONLY)
+                    eval = reganode(pRExC_state, EVAL, n);
+		    if (!SIZE_ONLY) {
 			ret->flags = 2;
-                    REGTAIL(pRExC_state, ret, reganode(pRExC_state, EVAL, n));
+                        /* for later propagation into (??{}) return value */
+                        eval->flags = (RExC_flags & RXf_PMf_COMPILETIME);
+                    }
+                    REGTAIL(pRExC_state, ret, eval);
                     /* deal with the length of this later - MJD */
 		    return ret;
 		}
