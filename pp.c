@@ -1024,11 +1024,7 @@ PP(pp_pow)
     /* For integer to integer power, we do the calculation by hand wherever
        we're sure it is safe; otherwise we call pow() and try to convert to
        integer afterwards. */
-    {
-	SvIV_please_nomg(svr);
-	if (SvIOK(svr)) {
-	    SvIV_please_nomg(svl);
-	    if (SvIOK(svl)) {
+    if (SvIV_please_nomg(svr) && SvIV_please_nomg(svl)) {
 		UV power;
 		bool baseuok;
 		UV baseuv;
@@ -1126,8 +1122,6 @@ PP(pp_pow)
 			RETURN;
 		    } 
 		}
-	    }
-	}
     }
   float_it:
 #endif    
@@ -1191,14 +1185,12 @@ PP(pp_multiply)
     svr = TOPs;
     svl = TOPm1s;
 #ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(svr);
-    if (SvIOK(svr)) {
+    if (SvIV_please_nomg(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
 	/* Left operand is defined, so is it IV? */
-	SvIV_please_nomg(svl);
-	if (SvIOK(svl)) {
+	if (SvIV_please_nomg(svl)) {
 	    bool auvok = SvUOK(svl);
 	    bool buvok = SvUOK(svr);
 	    const UV topmask = (~ (UV)0) << (4 * sizeof (UV));
@@ -1336,10 +1328,7 @@ PP(pp_divide)
 #endif
 
 #ifdef PERL_TRY_UV_DIVIDE
-    SvIV_please_nomg(svr);
-    if (SvIOK(svr)) {
-        SvIV_please_nomg(svl);
-        if (SvIOK(svl)) {
+    if (SvIV_please_nomg(svr) && SvIV_please_nomg(svl)) {
             bool left_non_neg = SvUOK(svl);
             bool right_non_neg = SvUOK(svr);
             UV left;
@@ -1414,8 +1403,7 @@ PP(pp_divide)
                     RETURN;
                 } /* tried integer divide but it was not an integer result */
             } /* else (PERL_ABS(result) < 1.0) or (both UVs in range for NV) */
-        } /* left wasn't SvIOK */
-    } /* right wasn't SvIOK */
+    } /* one operand wasn't SvIOK */
 #endif /* PERL_TRY_UV_DIVIDE */
     {
 	NV right = SvNV_nomg(svr);
@@ -1447,8 +1435,7 @@ PP(pp_modulo)
 	NV dleft  = 0.0;
 	SV * const svr = TOPs;
 	SV * const svl = TOPm1s;
-	SvIV_please_nomg(svr);
-        if (SvIOK(svr)) {
+        if (SvIV_please_nomg(svr)) {
             right_neg = !SvUOK(svr);
             if (!right_neg) {
                 right = SvUVX(svr);
@@ -1478,9 +1465,7 @@ PP(pp_modulo)
         /* At this point use_double is only true if right is out of range for
            a UV.  In range NV has been rounded down to nearest UV and
            use_double false.  */
-        SvIV_please_nomg(svl);
-	if (!use_double && SvIOK(svl)) {
-            if (SvIOK(svl)) {
+	if (!use_double && SvIV_please_nomg(svl)) {
                 left_neg = !SvUOK(svl);
                 if (!left_neg) {
                     left = SvUVX(svl);
@@ -1493,7 +1478,6 @@ PP(pp_modulo)
                         left = -aiv;
                     }
                 }
-            }
         }
 	else {
 	    dleft = SvNV_nomg(svl);
@@ -1708,8 +1692,7 @@ PP(pp_subtract)
 #ifdef PERL_PRESERVE_IVUV
     /* See comments in pp_add (in pp_hot.c) about Overflow, and how
        "bad things" happen if you rely on signed integers wrapping.  */
-    SvIV_please_nomg(svr);
-    if (SvIOK(svr)) {
+    if (SvIV_please_nomg(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
@@ -1723,8 +1706,7 @@ PP(pp_subtract)
 	    /* left operand is undef, treat as zero.  */
 	} else {
 	    /* Left operand is defined, so is it IV? */
-	    SvIV_please_nomg(svl);
-	    if (SvIOK(svl)) {
+	    if (SvIV_please_nomg(svl)) {
 		if ((auvok = SvUOK(svl)))
 		    auv = SvUVX(svl);
 		else {
@@ -1952,11 +1934,8 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 
     PERL_ARGS_ASSERT_DO_NCMP;
 #ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(right);
     /* Fortunately it seems NaN isn't IOK */
-    if (SvIOK(right)) {
-	SvIV_please_nomg(left);
-	if (SvIOK(left)) {
+    if (SvIV_please_nomg(right) && SvIV_please_nomg(left)) {
 	    if (!SvUOK(left)) {
 		const IV leftiv = SvIVX(left);
 		if (!SvUOK(right)) {
@@ -1992,7 +1971,6 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 		}
 	    }
 	    /* NOTREACHED */
-	}
     }
 #endif
     {

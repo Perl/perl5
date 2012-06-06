@@ -3959,6 +3959,11 @@ PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 appen
 #define PERL_ARGS_ASSERT_SV_GETS	\
 	assert(sv); assert(fp)
 
+PERL_CALLCONV bool	Perl_sv_gmagical_2iv_please(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_GMAGICAL_2IV_PLEASE	\
+	assert(sv)
+
 PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_GROW	\

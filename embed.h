@@ -1197,6 +1197,7 @@
 #define sv_clean_objs()		Perl_sv_clean_objs(aTHX)
 #define sv_del_backref(a,b)	Perl_sv_del_backref(aTHX_ a,b)
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
+#define sv_gmagical_2iv_please(a)	Perl_sv_gmagical_2iv_please(aTHX_ a)
 #define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
 #define sv_sethek(a,b)		Perl_sv_sethek(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
