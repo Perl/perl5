@@ -2199,17 +2199,6 @@ PP(pp_negate)
 		sv_setsv_nomg(TARG, sv);
 		*SvPV_force_nomg(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else if (DO_UTF8(sv)) {
-		SvIV_please_nomg(sv);
-		if (SvIOK(sv))
-		    goto oops_its_an_int;
-		if (SvNOK(sv))
-		    sv_setnv(TARG, -SvNV_nomg(sv));
-		else {
-		    sv_setpvs(TARG, "-");
-		    sv_catsv(TARG, sv);
-		}
-	    }
 	    else {
 		SvIV_please_nomg(sv);
 		if (SvIOK(sv))

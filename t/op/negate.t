@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 20;
+plan tests => 22;
 
 # Some of these will cause warnings if left on.  Here we're checking the
 # functionality, not the warnings.
@@ -40,3 +40,8 @@ $x = "dogs";
 is -$x, '-dogs', 'cached numeric value does not sabotage string negation';
 
 is(-"97656250000000000", -97656250000000000, '-bigint vs -"bigint"');
+
+$a = "%apples";
+chop($au = "%apples\x{100}");
+is(-$au, -$a, 'utf8 flag makes no difference for string negation');
+is -"\x{100}", 0, '-(non-ASCII) is equivalent to -(punct)';
