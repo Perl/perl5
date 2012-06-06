@@ -998,7 +998,7 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 }
 
 /* Like L</utf8_to_uvuni_buf>(), but should only be called when it is known that
- * there are no malformations in the input UTF-8 string C<s>.  surrogates,
+ * there are no malformations in the input UTF-8 string C<s>.  Surrogates,
  * non-character code points, and non-Unicode code points are allowed */
 
 UV
@@ -2410,7 +2410,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     }
 
     if (!len && *swashp) {
-	const UV uv2 = swash_fetch(*swashp, tmpbuf, TRUE);
+	const UV uv2 = swash_fetch(*swashp, tmpbuf, TRUE /* => is utf8 */);
 
 	 if (uv2) {
 	      /* It was "normal" (a single character mapping). */
