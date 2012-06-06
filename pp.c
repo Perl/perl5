@@ -2156,14 +2156,13 @@ PP(pp_negate)
     tryAMAGICun_MG(neg_amg, AMGf_numeric);
     {
 	SV * const sv = TOPs;
-	const int flags = SvFLAGS(sv);
 
         if( !SvNIOK( sv ) && looks_like_number( sv ) ){
            SvIV_please( sv );
         }   
 
-	if ((flags & SVf_IOK) || ((flags & (SVp_IOK | SVp_NOK)) == SVp_IOK)) {
-	    /* It's publicly an integer, or privately an integer-not-float */
+	if (SvIOK(sv) || (SvOKp(sv) == SVp_IOK)) {
+	    /* It's publicly an integer, or privately just an integer */
 	oops_its_an_int:
 	    if (SvIsUV(sv)) {
 		if (SvIVX(sv) == IV_MIN) {
@@ -2187,7 +2186,7 @@ PP(pp_negate)
 	    }
 #endif
 	}
-	if (SvNIOKp(sv))
+	if (SvNIOKp(sv) && (SvNIOK(sv) || !SvPOK(sv)))
 	    SETn(-SvNV_nomg(sv));
 	else if (SvPOKp(sv)) {
 	    STRLEN len;

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 16;
+plan tests => 18;
 
 # Some of these will cause warnings if left on.  Here we're checking the
 # functionality, not the warnings.
@@ -28,4 +28,11 @@ is(-bareword, "-bareword", "Negation of bareword treated like a string");
 is(- -bareword, "+bareword", "Negation of -bareword returns string +bareword");
 is(-" -10", 10, "Negation of a whitespace-lead numeric string");
 is(-" -10.0", 10, "Negation of a whitespace-lead decimal string");
-is(-" -10foo", 10, "Negation of a whitespace-lead sting starting with a numeric")
+is(-" -10foo", 10,
+    "Negation of a whitespace-lead sting starting with a numeric");
+
+$x = "dogs";
+()=0+$x;
+is -$x, '-dogs', 'cached numeric value does not sabotage string negation';
+
+is(-"97656250000000000", -97656250000000000, '-bigint vs -"bigint"');
