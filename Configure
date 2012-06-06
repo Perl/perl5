@@ -21936,15 +21936,16 @@ $cc -o try -Dcpp_stuff=$cpp_stuff $optimize \$ccflags $ldflags try.c $libs && $r
 EOSH
 chmod +x Cppsym.try
 $eunicefix Cppsym.try
-./Cppsym < Cppsym.know > Cppsym.true
+./Cppsym < Cppsym.know | $sort | $uniq > Cppsym.true
 : Add in any linux cpp "predefined macros":
 case "$osname::$gccversion" in
   *linux*::*.*|*gnukfreebsd*::*.*|gnu::*.*)
     tHdrH=_tmpHdr
     rm -f $tHdrH'.h' $tHdrH
     touch $tHdrH'.h'
+    # Filter out macro arguments, such as Linux's __INT8_C(c)
     if $cpp -dM $tHdrH'.h' > $tHdrH'_cppsym.h' && [ -s $tHdrH'_cppsym.h' ]; then
-       sed 's/#define[\ \  ]*//;s/[\ \     ].*$//' <$tHdrH'_cppsym.h' >$tHdrH'_cppsym.real'
+       sed -e 's/#define[\ \  ]*//;s/[\ \     ].*$//' -e 's/(.*//' <$tHdrH'_cppsym.h' >$tHdrH'_cppsym.real'
        if [ -s $tHdrH'_cppsym.real' ]; then
 	  cat $tHdrH'_cppsym.real' Cppsym.know | sort | uniq | ./Cppsym | sort | uniq > Cppsym.true
        fi
