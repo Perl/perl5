@@ -2583,12 +2583,12 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * one, and looks for problematic sequences of characters whose folds vs.
  * non-folds have sufficiently different lengths, that the optimizer would be
  * fooled into rejecting legitimate matches of them, and the trie construction
- * code can't cope with them.  The joining is only done if:
+ * code needs to handle specially.  The joining is only done if:
  * 1) there is room in the current conglomerated node to entirely contain the
  *    next one.
  * 2) they are the exact same node type
  *
- * The adjacent nodes actually may be separated by NOTHING kind nodes, and
+ * The adjacent nodes actually may be separated by NOTHING-kind nodes, and
  * these get optimized out
  *
  * If there are problematic code sequences, *min_subtract is set to the delta
@@ -2601,26 +2601,27 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *
  * This is as good a place as any to discuss the design of handling these
  * problematic sequences.  It's been wrong in Perl for a very long time.  There
- * are three code points in Unicode whose folded lengths differ so much from
- * the un-folded lengths that it causes problems for the optimizer and trie
- * construction.  Why only these are problematic, and not others where lengths
- * also differ is something I (khw) do not understand.  New versions of Unicode
- * might add more such code points.  Hopefully the logic in fold_grind.t that
- * figures out what to test (in part by verifying that each size-combination
- * gets tested) will catch any that do come along, so they can be added to the
- * special handling below.  The chances of new ones are actually rather small,
- * as most, if not all, of the world's scripts that have casefolding have
- * already been encoded by Unicode.  Also, a number of Unicode's decisions were
- * made to allow compatibility with pre-existing standards, and almost all of
- * those have already been dealt with.  These would otherwise be the most
- * likely candidates for generating further tricky sequences.  In other words,
- * Unicode by itself is unlikely to add new ones unless it is for compatibility
- * with pre-existing standards, and there aren't many of those left.
+ * are three code points currently in Unicode whose folded lengths differ so
+ * much from the un-folded lengths that it causes problems for the optimizer
+ * and trie construction.  Why only these are problematic, and not others where
+ * lengths also differ is something I (khw) do not understand.  New versions of
+ * Unicode might add more such code points.  Hopefully the logic in
+ * fold_grind.t that figures out what to test (in part by verifying that each
+ * size-combination gets tested) will catch any that do come along, so they can
+ * be added to the special handling below.  The chances of new ones are
+ * actually rather small, as most, if not all, of the world's scripts that have
+ * casefolding have already been encoded by Unicode.  Also, a number of
+ * Unicode's decisions were made to allow compatibility with pre-existing
+ * standards, and almost all of those have already been dealt with.  These
+ * would otherwise be the most likely candidates for generating further tricky
+ * sequences.  In other words, Unicode by itself is unlikely to add new ones
+ * unless it is for compatibility with pre-existing standards, and there aren't
+ * many of those left.
  *
  * The previous designs for dealing with these involved assigning a special
  * node for them.  This approach doesn't work, as evidenced by this example:
  *      "\xDFs" =~ /s\xDF/ui    # Used to fail before these patches
- * Both these fold to "sss", but if the pattern is parsed to create a node of
+ * Both these fold to "sss", but if the pattern is parsed to create a node
  * that would match just the \xDF, it won't be able to handle the case where a
  * successful match would have to cross the node's boundary.  The new approach
  * that hopefully generally solves the problem generates an EXACTFU_SS node
@@ -2635,9 +2636,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      problematic sequences.  This delta is used by the caller to adjust the
  *      min length of the match, and the delta between min and max, so that the
  *      optimizer doesn't reject these possibilities based on size constraints.
- * 2)   These sequences require special handling by the trie code, so it
- *      changes the joined node type to ops for the trie's benefit, those new
- *      ops being EXACTFU_SS and EXACTFU_TRICKYFOLD.
+ * 2)   These sequences require special handling by the trie code, so this code
+ *      changes the joined node type to special ops: EXACTFU_TRICKYFOLD and
+ *      EXACTFU_SS.
  * 3)   This is sufficient for the two Greek sequences (described below), but
  *      the one involving the Sharp s (\xDF) needs more.  The node type
  *      EXACTFU_SS is used for an EXACTFU node that contains at least one "ss"
@@ -2647,17 +2648,16 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      itself with length changes, and so can be processed faster.  regexec.c
  *      takes advantage of this.  Generally, an EXACTFish node that is in UTF-8
  *      is pre-folded by regcomp.c.  This saves effort in regex matching.
- *      However, probably mostly for historical reasons, the pre-folding isn't
- *      done for non-UTF8 patterns (and it can't be for EXACTF and EXACTFL
- *      nodes, as what they fold to isn't known until runtime.)  The fold
- *      possibilities for the non-UTF8 patterns are quite simple, except for
- *      the sharp s.  All the ones that don't involve a UTF-8 target string
- *      are members of a fold-pair, and arrays are set up for all of them
- *      that quickly find the other member of the pair.  It might actually
- *      be faster to pre-fold these, but it isn't currently done, except for
- *      the sharp s.  Code elsewhere in this file makes sure that it gets
- *      folded to 'ss', even if the pattern isn't UTF-8.  This avoids the
- *      issues described in the next item.
+ *      However, the pre-folding isn't done for non-UTF8 patterns because the
+ *      fold of the MICRO SIGN requires UTF-8.  Also what EXACTF and EXACTFL
+ *      nodes fold to isn't known until runtime.  The fold possibilities for
+ *      the non-UTF8 patterns are quite simple, except for the sharp s.  All
+ *      the ones that don't involve a UTF-8 target string are members of a
+ *      fold-pair, and arrays are set up for all of them so that the other
+ *      member of the pair can be found quickly.  Code elsewhere in this file
+ *      makes sure that in EXACTFU nodes, the sharp s gets folded to 'ss', even
+ *      if the pattern isn't UTF-8.  This avoids the issues described in the
+ *      next item.
  * 4)   A problem remains for the sharp s in EXACTF nodes.  Whether it matches
  *      'ss' or not is not knowable at compile time.  It will match iff the
  *      target string is in UTF-8, unlike the EXACTFU nodes, where it always
@@ -2734,6 +2734,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
             const unsigned int oldl = STR_LEN(scan);
             regnode * const nnext = regnext(n);
 
+            /* XXX I (khw) kind of doubt that this works on platforms where
+             * U8_MAX is above 255 because of lots of other assumptions */
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
             
@@ -2884,7 +2886,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 		      greek_sequence:
 			*min_subtract += 4;
 
-			/* This can't currently be handled by trie's, so change
+			/* This requires special handling by trie's, so change
 			 * the node type to indicate this.  If EXACTFA and
 			 * EXACTFL were ever to be handled by trie's, this
 			 * would have to be changed.  If this node has already
@@ -2920,9 +2922,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			    /* EXACTF nodes need to know that the minimum
 			     * length changed so that a sharp s in the string
 			     * can match this ss in the pattern, but they
-			     * remain EXACTF nodes, as they are not trie'able,
-			     * so don't have to invent a new node type to
-			     * exclude them from the trie code */
+                             * remain EXACTF nodes, as they won't match this
+                             * unless the target string is is UTF-8, which we
+                             * don't know until runtime */
 			    if (OP(scan) != EXACTF) {
 				OP(scan) = EXACTFU_SS;
 			    }
@@ -10717,7 +10719,9 @@ tryagain:
                     len++;
                     goto loopdone;
 		}
-	    }
+
+	    } /* End of loop through literal characters */
+
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
 	    RExC_parse = p - 1;
@@ -10735,9 +10739,9 @@ tryagain:
 		*flagp |= SIMPLE;
 
             alloc_maybe_populate_EXACT(pRExC_state, ret, len, 0);
-	}
+	} /* End of label 'defchar:' */
 	break;
-    }
+    } /* End of giant switch on input character */
 
     return(ret);
 }
