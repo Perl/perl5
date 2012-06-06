@@ -1642,4 +1642,14 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 ^(.)(B)*.[DX]	ABCDE	y	$^N-$+	B-B	-
 ^(.)(B)*.[CX]	ABCDE	y	$^N-$+	A-A	-
 
+# using 'return' in code blocks
+^(A)(?{"xyz"})B$	AB	y	$1-$^R	A-xyz	-
+^(A)(?{return "xyz"})B$	AB	y	$1-$^R	A-xyz	-
+^(A)((??{"xyz"}))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((??{return "xyz"}))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((?(?{1})abc|xyz))$	Aabc	y	$1-$2	A-abc	-
+^(A)((?(?{0})abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((?(?{return 1})abc|xyz))$	Aabc	y	$1-$2	A-abc	-
+^(A)((?(?{return 0})abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
+
 # vim: softtabstop=0 noexpandtab
