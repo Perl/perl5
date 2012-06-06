@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 454;  # Update this when adding/deleting tests.
+plan tests => 459;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -985,6 +985,26 @@ sub run_tests {
 	my $code2 = '(B)(??{ BEGIN { "X" =~ /X/ } $1 =~ /(.)/ ? $1 : ""})(C)';
 	ok("ABBCA" =~ /^(.)(??{$code2})\1$/, '(?{}) BEGIN and $1 mark 2');
     }
+
+    # check that the optimiser is applied to code blocks: see if aelem has
+    # been converted to aelemfast
+
+    {
+	my $out;
+	for my $prog (
+	    '/(?{$a[0]})/',
+	    'q() =~ qr/(?{$a[0]})/',
+	    'use re q(eval); q() =~ q{(?{$a[0]})}',
+	    'use re q(eval); $c = q{(?{$a[0]})}; /$c/',
+	    'use re q(eval); $c = q{(?{$a[0]})}; /(?{1;})$c/',
+	) {
+	    $out = runperl(switches => ["-Dt"], prog => $prog, stderr => 1);
+	    like($out, qr/aelemfast|Recompile perl with -DDEBUGGING/,
+		"optimise: '$prog'");
+	}
+    }
+
+
 
 
 } # End of sub run_tests
