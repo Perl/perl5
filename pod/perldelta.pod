@@ -103,6 +103,13 @@ XXX
 
 =item *
 
+L<ExtUtils::CBuilder> has been upgraded from version 0.280206 to 0.280208.
+
+Manifest files are now correctly embedded for those versions of VC++ which
+make use of them.
+
+=item *
+
 L<File::DosGlob> has been upgraded from version 1.07 to 1.08.
 
 There are no visible changes, only minor internal refactorings.
