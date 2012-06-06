@@ -2428,8 +2428,8 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 
     /* Here, there was no mapping defined, which means that the code point maps
      * to itself.  Return the inputs */
-        len = UTF8SKIP(p);
-        Copy(p, ustrp, len, U8);
+    len = UTF8SKIP(p);
+    Copy(p, ustrp, len, U8);
 
     if (lenp)
 	 *lenp = len;
