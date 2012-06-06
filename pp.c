@@ -2158,7 +2158,7 @@ PP(pp_negate)
 	SV * const sv = TOPs;
 
         if( !SvNIOK( sv ) && looks_like_number( sv ) ){
-           SvIV_please( sv );
+           SvIV_please_nomg( sv );
         }   
 
 	if (SvIOK(sv) || (SvOKp(sv) == SVp_IOK)) {

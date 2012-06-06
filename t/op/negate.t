@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 18;
+plan tests => 20;
 
 # Some of these will cause warnings if left on.  Here we're checking the
 # functionality, not the warnings.
@@ -19,7 +19,11 @@ is(-"10", -10, "Negation of a positive string to negative");
 is(-"10.0", -10, "Negation of a positive decimal sting to negative");
 is(-"10foo", -10, "Negation of a numeric-lead string returns negation of numeric");
 is(-"-10", 10, 'Negation of string starting with "-" returns a positive number - integer');
+"-10" =~ /(.*)/;
+is(-$1, 10, 'Negation of magical string starting with "-" - integer');
 is(-"-10.0", 10.0, 'Negation of string starting with "-" returns a positive number - decimal');
+"-10.0" =~ /(.*)/;
+is(-$1, 10.0, 'Negation of magical string starting with "-" - decimal');
 is(-"-10foo", "+10foo", 'Negation of string starting with "-" returns a string starting with "+" - non-numeric');
 is(-"xyz", "-xyz", 'Negation of a negative string adds "-" to the front');
 is(-"-xyz", "+xyz", "Negation of a negative string to positive");
