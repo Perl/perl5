@@ -7252,7 +7252,7 @@ Perl versions, it should call C<srand>; otherwise most programs won't call
 C<srand()> at all.
 
 But there are a few situations in recent Perls where programs are likely to
-want to call C<srand>.  One is for generating predictable results generally for
+want to call C<srand>.  One is for generating predictable results, generally for
 testing or debugging.  There, you use C<srand($seed)>, with the same C<$seed>
 each time.  Another case is that you may want to call C<srand()>
 after a C<fork()> to avoid child processes sharing the same seed value as the
