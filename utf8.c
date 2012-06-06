@@ -2419,16 +2419,23 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 	 }
     }
 
-    if (!len) { /* There was no mapping defined, which means that the code
-                   point maps to itself */
+    if (len) {
+        if (lenp) {
+            *lenp = len;
+        }
+        return valid_utf8_to_uvchr(ustrp, 0);
+    }
+
+    /* Here, there was no mapping defined, which means that the code point maps
+     * to itself.  Return the inputs */
         len = UTF8SKIP(p);
         Copy(p, ustrp, len, U8);
-    }
 
     if (lenp)
 	 *lenp = len;
 
-    return len ? valid_utf8_to_uvchr(ustrp, 0) : 0;
+    return uv0;
+
 }
 
 STATIC UV
