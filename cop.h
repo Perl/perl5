@@ -387,7 +387,8 @@ struct cop {
     line_t      cop_line;       /* line # of this command */
     /* label for this construct is now stored in cop_hints_hash */
 #ifdef USE_ITHREADS
-    PADOFFSET	cop_stashoff;	/* package line was compiled in */
+    PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
+				   package the line was compiled in */
     char *	cop_file;	/* file name the following line # is from */
 #else
     HV *	cop_stash;	/* package line was compiled in */
