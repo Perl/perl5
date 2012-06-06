@@ -3372,21 +3372,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                  * in which case we do some bookkeeping, otherwise we update
                                  * the end pointer. */
                                 if ( !first ) {
+                                    first = cur;
+                                    trietype = noper_trietype;
 				    if ( noper_trietype == NOTHING ) {
 #if !defined(DEBUGGING) && !defined(NOJUMPTRIE)
 					regnode * const noper_next = regnext( noper );
-					U8 noper_next_type = (noper_next && noper_next != tail) ? OP(noper_next) : 0;
+                                        U8 noper_next_type = (noper_next && noper_next!=tail) ? OP(noper_next) : 0;
 					U8 noper_next_trietype = noper_next_type ? TRIE_TYPE( noper_next_type ) :0;
 #endif
 
-					if ( noper_next_trietype ) {
-					    first = cur;
+                                        if ( noper_next_trietype )
 					    trietype = noper_next_trietype;
-					}
-				    } else {
-					first = cur;
-					trietype = noper_trietype;
-				    }
+                                    }
                                 } else {
                                     if ( trietype == NOTHING )
                                         trietype = noper_trietype;
@@ -3436,24 +3433,46 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                               "", SvPV_nolen_const( mysv ),REG_NODE_NUM(cur));
 
                         });
-                        if ( last && trietype != NOTHING ) {
-                            /* the last branch of the sequence was part of a trie,
-                             * so we have to construct it here outside of the loop
-                             */
-                            made= make_trie( pRExC_state, startbranch, first, scan, tail, count, trietype, depth+1 );
+                        if ( last ) {
+                            if ( trietype != NOTHING ) {
+                                /* the last branch of the sequence was part of a trie,
+                                 * so we have to construct it here outside of the loop
+                                 */
+                                made= make_trie( pRExC_state, startbranch, first, scan, tail, count, trietype, depth+1 );
 #ifdef TRIE_STUDY_OPT
-                            if ( ((made == MADE_EXACT_TRIE && 
-                                 startbranch == first) 
-                                 || ( first_non_open == first )) && 
-                                 depth==0 ) {
-                                flags |= SCF_TRIE_RESTUDY;
-                                if ( startbranch == first 
-                                     && scan == tail ) 
-                                {
-                                    RExC_seen &=~REG_TOP_LEVEL_BRANCHES;
+                                if ( ((made == MADE_EXACT_TRIE &&
+                                     startbranch == first)
+                                     || ( first_non_open == first )) &&
+                                     depth==0 ) {
+                                    flags |= SCF_TRIE_RESTUDY;
+                                    if ( startbranch == first
+                                         && scan == tail )
+                                    {
+                                        RExC_seen &=~REG_TOP_LEVEL_BRANCHES;
+                                    }
+                                }
+#endif
+                            } else {
+                                /* at this point we know whatever we have is a NOTHING sequence/branch
+                                 * AND if 'startbranch' is 'first' then we can turn the whole thing into a NOTHING
+                                 */
+                                if ( startbranch == first ) {
+                                    regnode *opt;
+                                    /* the entire thing is a NOTHING sequence, something like this:
+                                     * (?:|) So we can turn it into a plain NOTHING op. */
+                                    DEBUG_TRIE_COMPILE_r({
+                                        regprop(RExC_rx, mysv, cur);
+                                        PerlIO_printf( Perl_debug_log,
+                                          "%*s- %s (%d) <NOTHING BRANCH SEQUENCE>\n", (int)depth * 2 + 2,
+                                          "", SvPV_nolen_const( mysv ),REG_NODE_NUM(cur));
+
+                                    });
+                                    OP(startbranch)= NOTHING;
+                                    NEXT_OFF(startbranch)= tail - startbranch;
+                                    for ( opt= startbranch + 1; opt < tail ; opt++ )
+                                        OP(opt)= OPTIMIZED;
                                 }
                             }
-#endif
                         } /* end if ( last) */
                     } /* TRIE_MAXBUF is non zero */
                     
@@ -4378,6 +4397,32 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		 /* Lookbehind, or need to calculate parens/evals/stclass: */
 		   && (scan->flags || data || (flags & SCF_DO_STCLASS))
 		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM)) {
+            if ( OP(scan) == UNLESSM &&
+                 scan->flags == 0 &&
+                 OP(NEXTOPER(NEXTOPER(scan))) == NOTHING &&
+                 OP(regnext(NEXTOPER(NEXTOPER(scan)))) == SUCCEED
+            ) {
+                regnode *opt;
+                regnode *upto= regnext(scan);
+                DEBUG_PARSE_r({
+                    SV * const mysv_val=sv_newmortal();
+                    DEBUG_STUDYDATA("OPFAIL",data,depth);
+
+                    /*DEBUG_PARSE_MSG("opfail");*/
+                    regprop(RExC_rx, mysv_val, upto);
+                    PerlIO_printf(Perl_debug_log, "~ replace with OPFAIL pointed at %s (%"IVdf") offset %"IVdf"\n",
+                                  SvPV_nolen_const(mysv_val),
+                                  (IV)REG_NODE_NUM(upto),
+                                  (IV)(upto - scan)
+                    );
+                });
+                OP(scan) = OPFAIL;
+                NEXT_OFF(scan) = upto - scan;
+                for (opt= scan + 1; opt < upto ; opt++)
+                    OP(opt) = OPTIMIZED;
+                scan= upto;
+                continue;
+            }
             if ( !PERL_ENABLE_POSITIVE_ASSERTION_STUDY 
                 || OP(scan) == UNLESSM )
             {
@@ -4542,8 +4587,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         }
                     }
                 }
-
-
 	    }
 #endif
 	}
@@ -8412,9 +8455,24 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             }
 	    break;
 	}
+        DEBUG_PARSE_r(if (!SIZE_ONLY) {
+            SV * const mysv_val1=sv_newmortal();
+            SV * const mysv_val2=sv_newmortal();
+            DEBUG_PARSE_MSG("lsbr");
+            regprop(RExC_rx, mysv_val1, lastbr);
+            regprop(RExC_rx, mysv_val2, ender);
+            PerlIO_printf(Perl_debug_log, "~ tying lastbr %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
+                          SvPV_nolen_const(mysv_val1),
+                          (IV)REG_NODE_NUM(lastbr),
+                          SvPV_nolen_const(mysv_val2),
+                          (IV)REG_NODE_NUM(ender),
+                          (IV)(ender - lastbr)
+            );
+        });
         REGTAIL(pRExC_state, lastbr, ender);
 
 	if (have_branch && !SIZE_ONLY) {
+            char is_nothing= 1;
 	    if (depth==1)
 	        RExC_seen |= REG_TOP_LEVEL_BRANCHES;
 
@@ -8423,11 +8481,44 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		const U8 op = PL_regkind[OP(br)];
 		if (op == BRANCH) {
                     REGTAIL_STUDY(pRExC_state, NEXTOPER(br), ender);
+                    if (OP(NEXTOPER(br)) != NOTHING || regnext(NEXTOPER(br)) != ender)
+                        is_nothing= 0;
 		}
 		else if (op == BRANCHJ) {
                     REGTAIL_STUDY(pRExC_state, NEXTOPER(NEXTOPER(br)), ender);
+                    /* for now we always disable this optimisation * /
+                    if (OP(NEXTOPER(NEXTOPER(br))) != NOTHING || regnext(NEXTOPER(NEXTOPER(br))) != ender)
+                    */
+                        is_nothing= 0;
 		}
 	    }
+            if (is_nothing) {
+                br= PL_regkind[OP(ret)] != BRANCH ? regnext(ret) : ret;
+                DEBUG_PARSE_r(if (!SIZE_ONLY) {
+                    SV * const mysv_val1=sv_newmortal();
+                    SV * const mysv_val2=sv_newmortal();
+                    DEBUG_PARSE_MSG("NADA");
+                    regprop(RExC_rx, mysv_val1, ret);
+                    regprop(RExC_rx, mysv_val2, ender);
+                    PerlIO_printf(Perl_debug_log, "~ converting ret %s (%"IVdf") to ender %s (%"IVdf") offset %"IVdf"\n",
+                                  SvPV_nolen_const(mysv_val1),
+                                  (IV)REG_NODE_NUM(ret),
+                                  SvPV_nolen_const(mysv_val2),
+                                  (IV)REG_NODE_NUM(ender),
+                                  (IV)(ender - ret)
+                    );
+                });
+                OP(br)= NOTHING;
+                if (OP(ender) == TAIL) {
+                    NEXT_OFF(br)= 0;
+                    RExC_emit= br + 1;
+                } else {
+                    regnode *opt;
+                    for ( opt= br + 1; opt < ender ; opt++ )
+                        OP(opt)= OPTIMIZED;
+                    NEXT_OFF(br)= ender - br;
+                }
+            }
 	}
     }
 
