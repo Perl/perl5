@@ -110,6 +110,13 @@ make use of them.
 
 =item *
 
+L<ExtUtils::CBuilder> has been upgraded from version 0.280206 to 0.280208.
+
+It no longer fails when trying to embed manifests on Windows
+[perl #111782, #111798].
+
+=item *
+
 L<File::DosGlob> has been upgraded from version 1.07 to 1.08.
 
 There are no visible changes, only minor internal refactorings.
