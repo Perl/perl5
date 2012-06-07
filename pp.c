@@ -2157,10 +2157,6 @@ PP(pp_negate)
     {
 	SV * const sv = TOPs;
 
-        if( !SvNIOK( sv ) && looks_like_number( sv ) ){
-           SvIV_please_nomg( sv );
-        }   
-
 	if (SvIOK(sv) || (SvGMAGICAL(sv) && SvIOKp(sv))) {
 	    /* It's publicly an integer */
 	oops_its_an_int:
@@ -2195,16 +2191,14 @@ PP(pp_negate)
 		sv_setpvs(TARG, "-");
 		sv_catsv(TARG, sv);
 	    }
-	    else if (*s == '+' || *s == '-') {
+	    else if (*s == '+' || (*s == '-' && !looks_like_number(sv))) {
 		sv_setsv_nomg(TARG, sv);
 		*SvPV_force_nomg(TARG, len) = *s == '-' ? '+' : '-';
 	    }
-	    else {
-		SvIV_please_nomg(sv);
-		if (SvIOK(sv))
+	    else if (SvIV_please_nomg(sv))
 		  goto oops_its_an_int;
+	    else
 		sv_setnv(TARG, -SvNV_nomg(sv));
-	    }
 	    SETTARG;
 	}
 	else
