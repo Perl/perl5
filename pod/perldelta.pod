@@ -254,6 +254,15 @@ XXX Describe change here
 
 =back
 
+=head2 Removals of Diagnostics
+
+=over 4
+
+The "Runaway prototype" warning that occurs in bizarre cases has been
+removed as being unhelpful and inconsistent.
+
+=back
+
 =head1 Utility Changes
 
 XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
