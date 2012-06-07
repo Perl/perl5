@@ -9,10 +9,14 @@ BEGIN {
 use strict;
 use Config;
 
-my $UV_MAX = 2**( 8 * $Config{uvsize} ) - 1;
-my $UV_MIN = -2**( 8 * $Config{uvsize} );
-my $IV_MAX = 2**( 8 * $Config{ivsize} - 1 ) - 1;
-my $IV_MIN = -2**( 8 * $Config{ivsize} - 1 );
+my ( $UV_MAX, $UV_MIN, $IV_MAX, $IV_MIN );
+{
+    use integer;
+    $UV_MAX = 2**( 8 * $Config{uvsize} ) - 1;
+    $UV_MIN = -2**( 8 * $Config{uvsize} );
+    $IV_MAX = 2**( 8 * $Config{ivsize} - 1 ) - 1;
+    $IV_MIN = -2**( 8 * $Config{ivsize} - 1 );
+}
 (my $uvuformat = "%" . $Config{uvuformat}) =~ tr/"//d;
 (my $ivdformat = "%" . $Config{ivdformat}) =~ tr/"//d;
 
