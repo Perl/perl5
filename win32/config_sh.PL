@@ -48,13 +48,13 @@ while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
 FindExt::scan_ext("../cpan");
 FindExt::scan_ext("../dist");
 FindExt::scan_ext("../ext");
-FindExt::set_static_extensions(split ' ', $opt{'static_ext'});
+FindExt::set_static_extensions(split ' ', $opt{static_ext});
 
-$opt{'nonxs_ext'}        = join(' ',FindExt::nonxs_ext()) || ' ';
-$opt{'static_ext'}       = join(' ',FindExt::static_ext()) || ' ';
-$opt{'dynamic_ext'}      = join(' ',FindExt::dynamic_ext()) || ' ';
-$opt{'extensions'}       = join(' ',FindExt::extensions()) || ' ';
-$opt{'known_extensions'} = join(' ',FindExt::known_extensions()) || ' ';
+$opt{nonxs_ext}        = join(' ',FindExt::nonxs_ext()) || ' ';
+$opt{static_ext}       = join(' ',FindExt::static_ext()) || ' ';
+$opt{dynamic_ext}      = join(' ',FindExt::dynamic_ext()) || ' ';
+$opt{extensions}       = join(' ',FindExt::extensions()) || ' ';
+$opt{known_extensions} = join(' ',FindExt::known_extensions()) || ' ';
 
 my $pl_h = '../patchlevel.h';
 
@@ -79,16 +79,16 @@ if (-e $patch_file) {
     close $fh;
 }
 
-$opt{'version'} = "$opt{PERL_REVISION}.$opt{PERL_VERSION}.$opt{PERL_SUBVERSION}";
-$opt{'version_patchlevel_string'} = "version $opt{PERL_VERSION} subversion $opt{PERL_SUBVERSION}";
-$opt{'version_patchlevel_string'} .= " patch $opt{PERL_PATCHLEVEL}" if exists $opt{PERL_PATCHLEVEL};
+$opt{version} = "$opt{PERL_REVISION}.$opt{PERL_VERSION}.$opt{PERL_SUBVERSION}";
+$opt{version_patchlevel_string} = "version $opt{PERL_VERSION} subversion $opt{PERL_SUBVERSION}";
+$opt{version_patchlevel_string} .= " patch $opt{PERL_PATCHLEVEL}" if exists $opt{PERL_PATCHLEVEL};
 
 my $ver = `ver 2>nul`;
 if ($ver =~ /Version (\d+\.\d+)/) {
-    $opt{'osvers'} = $1;
+    $opt{osvers} = $1;
 }
 else {
-    $opt{'osvers'} = '4.0';
+    $opt{osvers} = '4.0';
 }
 
 if (exists $opt{cc}) {
@@ -102,10 +102,10 @@ if (exists $opt{cc}) {
     }
 }
 
-$opt{'cf_by'} = $ENV{USERNAME} unless $opt{'cf_by'};
-$opt{'cf_email'} = $opt{'cf_by'} . '@' . (gethostbyname('localhost'))[0]
-	unless $opt{'cf_email'};
-$opt{'usemymalloc'} = 'y' if $opt{'d_mymalloc'} eq 'define';
+$opt{cf_by} = $ENV{USERNAME} unless $opt{cf_by};
+$opt{cf_email} = $opt{cf_by} . '@' . (gethostbyname('localhost'))[0]
+	unless $opt{cf_email};
+$opt{usemymalloc} = 'y' if $opt{d_mymalloc} eq 'define';
 
 $opt{libpth} = mungepath($opt{libpth}) if exists $opt{libpth};
 $opt{incpath} = mungepath($opt{incpath}) if exists $opt{incpath};
