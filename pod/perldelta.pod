@@ -402,6 +402,12 @@ An optimisation involving fixed strings in regular expressions could cause
 a severe performance penalty in edge cases.  This has been fixed
 [perl #76546].
 
+=item *
+
+The "Can't find an opnumber" message that C<prototype> produces when passed
+a string like "CORE::nonexistent_keyword" is now passes UTF8 and embedded
+nulls through unchanged [perl #97478].
+
 =back
 
 =head1 Known Problems
