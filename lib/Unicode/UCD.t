@@ -19,7 +19,8 @@ use Test::More;
 
 use Unicode::UCD 'charinfo';
 
-$/ = 7;
+my $input_record_separator = 7; # Make sure Unicode::UCD isn't affected by
+$/ = $input_record_separator;   # setting this.
 
 my $charinfo;
 
@@ -557,12 +558,13 @@ SKIP: {
 skip "PropertyAliases.txt is not in this Unicode version", 1 if $v_unicode_version lt v3.2.0;
 open my $props, "<", "../lib/unicore/PropertyAliases.txt"
                 or die "Can't open Unicode PropertyAliases.txt";
-$/ = "\n";
+local $/ = "\n";
 while (<$props>) {
     s/\s*#.*//;           # Remove comments
     next if /^\s* $/x;    # Ignore empty and comment lines
 
     chomp;
+    local $/ = $input_record_separator;
     my $count = 0;  # 0th field in line is short name; 1th is long name
     my $short_name;
     my $full_name;
@@ -712,10 +714,12 @@ SKIP: {
 skip "PropValueAliases.txt is not in this Unicode version", 1 if $v_unicode_version lt v3.2.0;
 open my $propvalues, "<", "../lib/unicore/PropValueAliases.txt"
      or die "Can't open Unicode PropValueAliases.txt";
+local $/ = "\n";
 while (<$propvalues>) {
     s/\s*#.*//;           # Remove comments
     next if /^\s* $/x;    # Ignore empty and comment lines
     chomp;
+    local $/ = $input_record_separator;
 
     # Fix typo in official input file
     s/CCC133/CCC132/g if $v_unicode_version eq v6.1.0;
@@ -963,6 +967,7 @@ sub fail_with_diff ($$$$) {
 
     require File::Temp;
     my $off = File::Temp->new();
+    local $/ = "\n";
     chomp $official;
     print $off $official, "\n";
     close $off || die "Can't close official";
@@ -1047,7 +1052,9 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
 
         # Get rid of any trailing space and comments in the file.
         $official =~ s/\s*(#.*)?$//mg;
+        local $/ = "\n";
         chomp $official;
+        $/ = $input_record_separator;
 
         # If we are to test against an inverted file, it is easier to invert
         # our array than the file.
@@ -1101,7 +1108,9 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         if ($i == @tested - 1 && $tested[$i] <= 0x10FFFF) {
             $tested .= sprintf("%04X\t10FFFF\n", $tested[$i]);
         }
+        local $/ = "\n";
         chomp $tested;
+        $/ = $input_record_separator;
         if ($tested ne $official) {
             fail_with_diff($mod_table, $official, $tested, "prop_invlist");
             next;
@@ -1417,7 +1426,9 @@ foreach my $prop (keys %props) {
                 }
             }
         }
+        local $/ = "\n";
         chomp $official;
+        $/ = $input_record_separator;
 
         # Get the format for the file, and if there are any special elements,
         # get a reference to them.
@@ -1744,7 +1755,9 @@ foreach my $prop (keys %props) {
 
         # Here are done with generating what the file should look like
 
+        local $/ = "\n";
         chomp $tested_map;
+        $/ = $input_record_separator;
 
         # And compare.
         if ($tested_map ne $official) {
@@ -1814,7 +1827,9 @@ foreach my $prop (keys %props) {
                 $official =~ s/$hex_code_point \t $alias \n //x;
             }
         }
+        local $/ = "\n";
         chomp $official;
+        $/ = $input_record_separator;
 
         # Here have adjusted the file.  We also have to adjust the returned
         # inversion map by checking and deleting all the lines in it that
@@ -1902,7 +1917,9 @@ foreach my $prop (keys %props) {
 
         # Finished creating the string from the inversion map.  Can compare
         # with what the file is.
+        local $/ = "\n";
         chomp $tested_map;
+        $/ = $input_record_separator;
         if ($tested_map ne $official) {
             fail_with_diff($mod_prop, $official, $tested_map, "prop_invmap");
             next PROPERTY;
@@ -2009,4 +2026,5 @@ foreach my $prop (keys %props) {
     pass("prop_invmap('$mod_prop')");
 }
 
+ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
 done_testing();
