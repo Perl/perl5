@@ -116,6 +116,13 @@ There are no visible changes, only minor internal refactorings.
 
 =item *
 
+L<File::Spec::Unix> has been upgraded from version 3.39_02 to 3.39_03.
+
+C<abs2rel> could produce incorrect results when given two relative paths or
+the root directory twice [perl #111510].
+
+=item *
+
 L<IO> has been upgraded from version 1.25_06 to version 1.25_07.
 
 C<sync()> can now be called on read only file handles [perl #64772].
