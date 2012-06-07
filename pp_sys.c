@@ -438,20 +438,29 @@ PP(pp_warn)
     }
     else {
 	exsv = TOPs;
+	if (SvGMAGICAL(exsv)) exsv = sv_mortalcopy(exsv);
     }
 
     if (SvROK(exsv) || (SvPV_const(exsv, len), len)) {
 	/* well-formed exception supplied */
     }
-    else if (SvROK(ERRSV)) {
-	exsv = ERRSV;
-    }
-    else if (SvPOK(ERRSV) && SvCUR(ERRSV)) {
-	exsv = sv_mortalcopy(ERRSV);
-	sv_catpvs(exsv, "\t...caught");
-    }
     else {
+      SvGETMAGIC(ERRSV);
+      if (SvROK(ERRSV)) {
+	if (SvGMAGICAL(ERRSV)) {
+	    exsv = sv_newmortal();
+	    sv_setsv_nomg(exsv, ERRSV);
+	}
+	else exsv = ERRSV;
+      }
+      else if (SvPOKp(ERRSV) ? SvCUR(ERRSV) : SvNIOKp(ERRSV)) {
+	exsv = sv_newmortal();
+	sv_setsv_nomg(exsv, ERRSV);
+	sv_catpvs(exsv, "\t...caught");
+      }
+      else {
 	exsv = newSVpvs_flags("Warning: something's wrong", SVs_TEMP);
+      }
     }
     if (SvROK(exsv) && !PL_warnhook)
 	 Perl_warn(aTHX_ "%"SVf, SVfARG(exsv));
@@ -1227,7 +1236,8 @@ void
 Perl_setdefout(pTHX_ GV *gv)
 {
     dVAR;
-    SvREFCNT_inc_simple_void(gv);
+    PERL_ARGS_ASSERT_SETDEFOUT;
+    SvREFCNT_inc_simple_void_NN(gv);
     SvREFCNT_dec(PL_defoutgv);
     PL_defoutgv = gv;
 }
@@ -1360,18 +1370,13 @@ PP(pp_enterwrite)
     else
 	fgv = gv;
 
-    if (!fgv)
-	goto not_a_format_reference;
+    assert(fgv);
 
     cv = GvFORM(fgv);
     if (!cv) {
 	tmpsv = sv_newmortal();
 	gv_efullname4(tmpsv, fgv, NULL, FALSE);
-	if (SvPOK(tmpsv) && *SvPV_nolen_const(tmpsv))
-	    DIE(aTHX_ "Undefined format \"%"SVf"\" called", SVfARG(tmpsv));
-
-	not_a_format_reference:
-	DIE(aTHX_ "Not a format reference");
+	DIE(aTHX_ "Undefined format \"%"SVf"\" called", SVfARG(tmpsv));
     }
     IoFLAGS(io) &= ~IOf_DIDTOP;
     return doform(cv,gv,PL_op->op_next);
@@ -1456,10 +1461,7 @@ PP(pp_leavewrite)
 	if (!cv) {
 	    SV * const sv = sv_newmortal();
 	    gv_efullname4(sv, fgv, NULL, FALSE);
-	    if (SvPOK(sv) && *SvPV_nolen_const(sv))
-		DIE(aTHX_ "Undefined top format \"%"SVf"\" called", SVfARG(sv));
-	    else
-		DIE(aTHX_ "Undefined top format called");
+	    DIE(aTHX_ "Undefined top format \"%"SVf"\" called", SVfARG(sv));
 	}
 	return doform(cv, gv, PL_op);
     }

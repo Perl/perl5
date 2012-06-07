@@ -1306,8 +1306,9 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	if (GvIO(PL_last_in_gv) && (SvTYPE(GvIOp(PL_last_in_gv)) == SVt_PVIO)
 		&& IoLINES(GvIOp(PL_last_in_gv)))
 	{
+	    STRLEN l;
 	    const bool line_mode = (RsSIMPLE(PL_rs) &&
-			      SvCUR(PL_rs) == 1 && *SvPVX_const(PL_rs) == '\n');
+				   *SvPV_const(PL_rs,l) == '\n' && l == 1);
 	    Perl_sv_catpvf(aTHX_ sv, ", <%"SVf"> %s %"IVdf,
 			   SVfARG(PL_last_in_gv == PL_argvgv
                                  ? &PL_sv_no
@@ -3715,15 +3716,15 @@ void
 Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
     if (ckWARN(WARN_IO)) {
-        SV * const name
-           = gv && (isGV(gv) || isGV_with_GP(gv))
-                ? sv_2mortal(newSVhek(GvENAME_HEK((gv))))
+        HEK * const name
+           = gv && (isGV_with_GP(gv))
+                ? GvENAME_HEK((gv))
                 : NULL;
 	const char * const direction = have == '>' ? "out" : "in";
 
-	if (name && SvPOK(name) && *SvPV_nolen(name))
+	if (name && HEK_LEN(name))
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
-			"Filehandle %"SVf" opened only for %sput",
+			"Filehandle %"HEKf" opened only for %sput",
 			name, direction);
 	else
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
@@ -3750,7 +3751,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 
     if (ckWARN(warn_type)) {
         SV * const name
-            = gv && (isGV(gv) || isGV_with_GP(gv)) && GvENAMELEN(gv) ?
+            = gv && isGV_with_GP(gv) && GvENAMELEN(gv) ?
                                      sv_2mortal(newSVhek(GvENAME_HEK(gv))) : NULL;
 	const char * const pars =
 	    (const char *)(OP_IS_FILETEST(op) ? "" : "()");
@@ -3763,7 +3764,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 	    (const char *)
 	    (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
 	     ? "socket" : "filehandle");
-	const bool have_name = name && SvPOK(name) && *SvPV_nolen(name);
+	const bool have_name = name && SvCUR(name);
 	Perl_warner(aTHX_ packWARN(warn_type),
 		   "%s%s on %s %s%s%"SVf, func, pars, vile, type,
 		    have_name ? " " : "",

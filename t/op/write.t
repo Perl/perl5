@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -504,12 +504,49 @@ for my $tref ( @NumTests ){
 {
     local $~ = '';
     eval { write };
-    like $@, qr/Not a format reference/, 'format reference';
+    like $@, qr/Undefined format ""/, 'format with 0-length name';
+
+    $~ = "\0foo";
+    eval { write };
+    like $@, qr/Undefined format "\0foo"/,
+	'no such format beginning with null';
 
     $~ = "NOSUCHFORMAT";
     eval { write };
-    like $@, qr/Undefined format/, 'no such format';
+    like $@, qr/Undefined format "NOSUCHFORMAT"/, 'no such format';
 }
+
+select +(select(OUT21), do {
+    open(OUT21, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+
+    format OUT21 =
+@<<
+$_
+.
+
+    local $^ = '';
+    local $= = 1;
+    $_ = "aataaaaaaaaaaaaaa"; eval { write(OUT21) };
+    like $@, qr/Undefined top format ""/, 'top format with 0-length name';
+
+    $^ = "\0foo";
+    # For some reason, we have to do this twice to get the error again.
+    $_ = "aataaaaaaaaaaaaaa"; eval { write(OUT21) };
+    $_ = "aataaaaaaaaaaaaaa"; eval { write(OUT21) };
+    like $@, qr/Undefined top format "\0foo"/,
+	'no such top format beginning with null';
+
+    $^ = "NOSUCHFORMAT";
+    $_ = "aataaaaaaaaaaaaaa"; eval { write(OUT21) };
+    $_ = "aataaaaaaaaaaaaaa"; eval { write(OUT21) };
+    like $@, qr/Undefined top format "NOSUCHFORMAT"/, 'no such top format';
+
+    # reset things;
+    eval { write(OUT21) };
+    undef $^A;
+
+    close OUT21 or die "Could not close: $!";
+})[0];
 
 {
   package Count;

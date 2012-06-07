@@ -3638,7 +3638,11 @@ PERL_CALLCONV void	Perl_set_context(void *t)
 PERL_CALLCONV void	Perl_set_numeric_local(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_radix(pTHX);
 PERL_CALLCONV void	Perl_set_numeric_standard(pTHX);
-PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv);
+PERL_CALLCONV void	Perl_setdefout(pTHX_ GV* gv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SETDEFOUT	\
+	assert(gv)
+
 PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, I32 len, U32 hash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SHARE_HEK	\
@@ -3954,6 +3958,11 @@ PERL_CALLCONV char*	Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 appen
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_GETS	\
 	assert(sv); assert(fp)
+
+PERL_CALLCONV bool	Perl_sv_gmagical_2iv_please(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_GMAGICAL_2IV_PLEASE	\
+	assert(sv)
 
 PERL_CALLCONV char*	Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 			__attribute__nonnull__(pTHX_1);

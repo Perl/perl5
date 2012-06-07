@@ -505,9 +505,7 @@ PP(pp_add)
        unsigned code below is actually shorter than the old code. :-)
     */
 
-    SvIV_please_nomg(svr);
-
-    if (SvIOK(svr)) {
+    if (SvIV_please_nomg(svr)) {
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
@@ -523,8 +521,7 @@ PP(pp_add)
 	       lots of code to speed up what is probably a rarish case.  */
 	} else {
 	    /* Left operand is defined, so is it IV? */
-	    SvIV_please_nomg(svl);
-	    if (SvIOK(svl)) {
+	    if (SvIV_please_nomg(svl)) {
 		if ((auvok = SvUOK(svl)))
 		    auv = SvUVX(svl);
 		else {

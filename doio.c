@@ -320,7 +320,10 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		    }
 		    while (isSPACE(*type))
 			type++;
-		    if (num_svs && (SvIOK(*svp) || (SvPOK(*svp) && looks_like_number(*svp)))) {
+		    if (num_svs && (
+			     SvIOK(*svp)
+			  || (SvPOKp(*svp) && looks_like_number(*svp))
+		       )) {
 			fd = SvUV(*svp);
 			num_svs = 0;
 		    }

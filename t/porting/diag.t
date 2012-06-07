@@ -453,7 +453,6 @@ The telldir() function is not implemented on NetWare
 Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
-Undefined top format called
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
 Usage: CODE(0x%x)(%s)

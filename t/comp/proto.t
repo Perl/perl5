@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..179\n";
+print "1..180\n";
 
 my $i = 1;
 
@@ -409,7 +409,7 @@ print "ok ", $i++, "\n";
 print "# CORE::open => ($p)\nnot " if ($p = prototype('CORE::open')) ne '*;$@';
 print "ok ", $i++, "\n";
 
-print "# CORE:Foo => ($p), \$@ => '$@'\nnot " 
+print "# CORE::Foo => ($p), \$@ => '$@'\nnot " 
     if defined ($p = eval { prototype('CORE::Foo') or 1 }) or $@ !~ /^Can't find an opnumber/;
 print "ok ", $i++, "\n";
 
@@ -422,6 +422,12 @@ eval { prototype("CORE::\x{100}") };
 print "# CORE::\\x{100}: => ($p), \$@ => '$@'\nnot " 
     if $@ !~ /^Can't find an opnumber for "\x{100}"/;
 print "ok ", $i++, "\n";
+
+"CORE::Foo" =~ /(.*)/;
+print "# \$1 containing CORE::Foo => ($p), \$@ => '$@'\nnot " 
+    if defined ($p = eval { prototype($1) or 1 })
+    or $@ !~ /^Can't find an opnumber/;
+print "ok ", $i++, " - \$1 containing CORE::Foo\n";
 
 # correctly note too-short parameter lists that don't end with '$',
 #  a possible regression.
