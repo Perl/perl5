@@ -376,6 +376,12 @@ problems.
 C<vec> no longer produces "uninitialized" warnings in lvalue context
 [perl #9423].
 
+=item *
+
+On optimisation involving fixed strings in regular expressions could cause
+a severe performance penalty in edge cases.  This has been fixed
+[perl #76546].
+
 =back
 
 =head1 Known Problems
