@@ -3,7 +3,7 @@
  * Created : 22nd January 1996
  * Version : 2.000
  *
- *   Copyright (c) 1995-2010 Paul Marquess. All rights reserved.
+ *   Copyright (c) 1995-2012 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
  *   modify it under the same terms as Perl itself.
  *
@@ -499,7 +499,8 @@ voidpf my_zcalloc (voidpf opaque, unsigned items, unsigned size)
 
 void my_zcfree (voidpf opaque, voidpf ptr)
 {
-    return safefree(ptr);
+    safefree(ptr);
+    return; 
 }
 
 #endif
