@@ -453,7 +453,7 @@ PP(pp_warn)
 	}
 	else exsv = ERRSV;
       }
-      else if (SvPOKp(ERRSV) && SvCUR(ERRSV)) {
+      else if (SvPOKp(ERRSV) ? SvCUR(ERRSV) : SvNIOKp(ERRSV)) {
 	exsv = sv_newmortal();
 	sv_setsv_nomg(exsv, ERRSV);
 	sv_catpvs(exsv, "\t...caught");

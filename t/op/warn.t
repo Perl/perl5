@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan 28;
+plan 30;
 
 my @warnings;
 my $wa = []; my $ea = [];
@@ -185,5 +185,11 @@ warn $t;
 is @warnings, 1;
 object_ok $warnings[0], 'o',
   'warn $tie_returning_object_that_stringifes_emptily';
+
+@warnings = ();
+eval "#line 42 Cholmondeley\n \$\@ = '3'; warn";
+eval "#line 42 Cholmondeley\n \$\@ = 3; warn";
+is @warnings, 2;
+is $warnings[1], $warnings[0], 'warn treats $@=3 and $@="3" the same way';
 
 1;
