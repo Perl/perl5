@@ -370,7 +370,9 @@ be noted as well.
 
 =item *
 
-XXX
+The C<study> function was made a no-op in 5.16.  It was simply disabled via
+a C<return> statement; the code was left in place.  Now the code supporting
+what C<study> used to do has been removed.
 
 =back
 
