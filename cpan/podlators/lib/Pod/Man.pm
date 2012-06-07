@@ -1,7 +1,7 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
 #
 # Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-#     2010 Russ Allbery <rra@stanford.edu>
+#     2010, 2012 Russ Allbery <rra@stanford.edu>
 # Substantial contributions by Sean Burke <sburke@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -36,7 +36,7 @@ use Pod::Simple ();
 
 @ISA = qw(Pod::Simple);
 
-$VERSION = '2.25';
+$VERSION = '2.26';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -743,6 +743,8 @@ sub start_document {
         DEBUG and print "Document is contentless\n";
         $$self{CONTENTLESS} = 1;
         return;
+    } else {
+        delete $$self{CONTENTLESS};
     }
 
     # When UTF-8 output is set, check whether our output file handle already
@@ -753,8 +755,9 @@ sub start_document {
     if ($$self{utf8}) {
         $$self{ENCODE} = 1;
         eval {
-            my @layers = PerlIO::get_layers ($$self{output_fh});
-            if (grep { $_ eq 'utf8' } @layers) {
+            my @options = (output => 1, details => 1);
+            my $flag = (PerlIO::get_layers ($$self{output_fh}, @options))[-1];
+            if ($flag & PerlIO::F_UTF8 ()) {
                 $$self{ENCODE} = 0;
             }
         }
@@ -1106,11 +1109,17 @@ sub cmd_x {
 }
 
 # Links reduce to the text that we're given, wrapped in angle brackets if it's
-# a URL.
+# a URL.  We need to format the "to" value of the link before comparing it to
+# the text since we may escape hyphens.
 sub cmd_l {
     my ($self, $attrs, $text) = @_;
     if ($$attrs{type} eq 'url') {
-        if (not defined($$attrs{to}) or $$attrs{to} eq $text) {
+        my $to = $$attrs{to};
+        if (defined $to) {
+            my $tag = $$self{PENDING}[-1];
+            $to = $self->format_text ($$tag[1], $to);
+        }
+        if (not defined ($to) or $to eq $text) {
             return "<$text>";
         } else {
             return "$text <$$attrs{to}>";
@@ -1299,7 +1308,18 @@ sub parse_from_file {
 # parse_from_file supports.
 sub parse_from_filehandle {
     my $self = shift;
-    $self->parse_from_file (@_);
+    return $self->parse_from_file (@_);
+}
+
+# Pod::Simple's parse_file doesn't set output_fh.  Wrap the call and do so
+# ourself unless it was already set by the caller, since our documentation has
+# always said that this should work.
+sub parse_file {
+    my ($self, $in) = @_;
+    unless (defined $$self{output_fh}) {
+        $self->output_fh (\*STDOUT);
+    }
+    return $self->SUPER::parse_file ($in);
 }
 
 ##############################################################################
@@ -1321,7 +1341,7 @@ sub parse_from_filehandle {
     undef, undef, undef, undef,            undef, undef, undef, undef,
     undef, undef, undef, undef,            undef, undef, undef, undef,
 
-    "A\\*`",  "A\\*'", "A\\*^", "A\\*~",   "A\\*:", "A\\*o", "\\*(AE", "C\\*,",
+    "A\\*`",  "A\\*'", "A\\*^", "A\\*~",   "A\\*:", "A\\*o", "\\*(Ae", "C\\*,",
     "E\\*`",  "E\\*'", "E\\*^", "E\\*:",   "I\\*`", "I\\*'", "I\\*^",  "I\\*:",
 
     "\\*(D-", "N\\*~", "O\\*`", "O\\*'",   "O\\*^", "O\\*~", "O\\*:",  undef,
@@ -1382,6 +1402,8 @@ sub preamble_template {
 .    ds PI \(*p
 .    ds L" ``
 .    ds R" ''
+.    ds C`
+.    ds C'
 'br\}
 .\"
 .\" Escape single quotes in literal strings from groff's Unicode transform.
@@ -1392,18 +1414,26 @@ sub preamble_template {
 .\" titles (.TH), headers (.SH), subsections (.SS), items (.Ip), and index
 .\" entries marked with X<> in POD.  Of course, you'll have to process the
 .\" output yourself in some meaningful fashion.
-.ie \nF \{\
-.    de IX
-.    tm Index:\\$1\t\\n%\t"\\$2"
+.\"
+.\" Avoid warning from groff about undefined register 'F'.
+.de IX
 ..
-.    nr % 0
-.    rr F
-.\}
-.el \{\
-.    de IX
+.nr rF 0
+.if \n(.g .if rF .nr rF 1
+.if (\n(rF:(\n(.g==0)) \{
+.    if \nF \{
+.        de IX
+.        tm Index:\\$1\t\\n%\t"\\$2"
 ..
+.        if !\nF==2 \{
+.            nr % 0
+.            nr F 2
+.        \}
+.    \}
 .\}
+.rr rF
 ----END OF PREAMBLE----
+#'# for cperl-mode
 
     if ($accents) {
         $preamble .= <<'----END OF PREAMBLE----'
@@ -1743,8 +1773,8 @@ mine).
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+2009, 2010, 2012 Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

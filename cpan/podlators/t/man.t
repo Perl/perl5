@@ -2,7 +2,7 @@
 #
 # man.t -- Additional specialized tests for Pod::Man.
 #
-# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010
+# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 31;
+use Test::More tests => 33;
 BEGIN { use_ok ('Pod::Man') }
 
 # Test whether we can use binmode to set encoding.
@@ -30,7 +30,7 @@ isa_ok ($parser, 'Pod::Man', 'Parser object');
 my $n = 1;
 while (<DATA>) {
     next until $_ eq "###\n";
-    open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
+    open (TMP, "> tmp$$.pod") or die "Cannot create tmp$$.pod: $!\n";
 
     # We have a test in ISO 8859-1 encoding.  Make sure that nothing strange
     # happens if Perl thinks the world is Unicode.  Wrap this in eval so that
@@ -42,10 +42,10 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    open (OUT, '> out.tmp') or die "Cannot create out.tmp: $!\n";
-    $parser->parse_from_file ('tmp.pod', \*OUT);
+    open (OUT, "> out$$.tmp") or die "Cannot create out$$.tmp: $!\n";
+    $parser->parse_from_file ("tmp$$.pod", \*OUT);
     close OUT;
-    open (OUT, 'out.tmp') or die "Cannot open out.tmp: $!\n";
+    open (OUT, "out$$.tmp") or die "Cannot open out$$.tmp: $!\n";
     while (<OUT>) { last if /^\.nh/ }
     my $output;
     {
@@ -53,7 +53,7 @@ while (<DATA>) {
         $output = <OUT>;
     }
     close OUT;
-    1 while unlink ('tmp.pod', 'out.tmp');
+    1 while unlink ("tmp$$.pod", "out$$.tmp");
     my $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
@@ -527,4 +527,26 @@ Hello\
 world\ \ \ 
 .PP
 \&.
+###
+
+###
+=head1 URL LINK
+
+The newest version of this document is also available on the World Wide Web at
+L<http://pod.tst.eu/http://cvs.schmorp.de/rxvt-unicode/doc/rxvt.7.pod>.
+###
+.SH "URL LINK"
+.IX Header "URL LINK"
+The newest version of this document is also available on the World Wide Web at
+<http://pod.tst.eu/http://cvs.schmorp.de/rxvt\-unicode/doc/rxvt.7.pod>.
+###
+
+###
+=head1 RT LINK
+
+L<[perl #12345]|https://rt.cpan.org/12345>
+###
+.SH "RT LINK"
+.IX Header "RT LINK"
+[perl #12345] <https://rt.cpan.org/12345>
 ###

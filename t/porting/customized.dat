@@ -4,9 +4,9 @@ Test::Harness cpan/Test-Harness/t/testargs.t 79c91b2ea73f7cbfb9bae45dec4a62db74c
 Module::Pluggable cpan/Module-Pluggable/Makefile.PL 72062c1a01ed7c62d16c55122c163b2d89f0d739
 autodie cpan/autodie/t/open.t cb493da4305f591ca0344d09e8a840a3147c5579
 libnet cpan/libnet/Makefile.PL 5554b71464b45f5cc002e55f2464f7ff4abd05b6
-podlators cpan/podlators/scripts/pod2man.PL 8fb484dc560adb00889f504760ca0a4defa9dc40
-podlators cpan/podlators/scripts/pod2text.PL 53ccba9264368c3f9acd2a36d1d354797d2a88f6
-podlators pod/perlpodstyle.pod 4f1ba65eddc5576267954b948556e16a9686c411
+podlators cpan/podlators/scripts/pod2man.PL 1a795b8dde27bbf2181f7e601c2a4cc2f1487125
+podlators cpan/podlators/scripts/pod2text.PL beb05aafd66ce0ffd2b2ce935f5db95d2eec7ff8
+podlators pod/perlpodstyle.pod 41c1019f3b1e646561b203e651101d41e9e5c0aa
 CPANPLUS cpan/CPANPLUS/Makefile.PL 5d533f6722af6aae73204755beb8d6c008fc0d4a
 Text-Tabs+Wrap cpan/Text-Tabs/t/fill.t a960d2c4f66b7e30557b5479e0da2da1bf7a7f45
 Text-Tabs+Wrap cpan/Text-Tabs/t/tabs.t 63a67b3a319c858d7e66306b8a653de1951153dc

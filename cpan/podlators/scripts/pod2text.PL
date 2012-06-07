@@ -37,7 +37,7 @@ print OUT <<'!NO!SUBS!';
 
 # pod2text -- Convert POD data to formatted ASCII text.
 #
-# Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010
+# Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -53,6 +53,9 @@ use Pod::Text ();
 use Pod::Usage qw(pod2usage);
 
 use strict;
+
+# Clean up $0 for error reporting.
+$0 =~ s%.*/%%;
 
 # Take an initial pass through our options, looking for one of the form
 # -<number>.  We turn that into -w <number> for compatibility with the
@@ -100,10 +103,19 @@ delete @options{'color', 'termcap', 'overstrike'};
 
 # Initialize and run the formatter.
 my $parser = $formatter->new (%options);
+my $status = 0;
 do {
     my ($input, $output) = splice (@ARGV, 0, 2);
     $parser->parse_from_file ($input, $output);
+    if ($parser->{CONTENTLESS}) {
+        $status = 1;
+        warn "$0: unable to format $input\n";
+        if (defined ($output) and $output ne '-') {
+            unlink $output unless (-s $output);
+        }
+    }
 } while (@ARGV);
+exit $status;
 
 __END__
 
@@ -113,7 +125,7 @@ pod2text - Convert POD data to formatted ASCII text
 
 =for stopwords
 -aclostu --alt --stderr Allbery --overstrike overstrike --termcap --utf8
-UTF-8
+UTF-8 subclasses
 
 =head1 SYNOPSIS
 
@@ -240,6 +252,13 @@ your terminal device.
 
 =back
 
+=head1 EXIT STATUS
+
+As long as all documents processed result in some output, even if that
+output includes errata (a C<POD ERRORS> section), B<pod2text> will exit
+with status 0.  If any of the documents being processed do not result
+in an output document, B<pod2text> will exit with status 1.
+
 =head1 DIAGNOSTICS
 
 If B<pod2text> fails with errors, see L<Pod::Text> and L<Pod::Simple> for
@@ -261,6 +280,9 @@ loaded.
 
 In addition, other L<Getopt::Long> error messages may result from invalid
 command-line options.
+
+Most POD formatting errors will be reported in a C<POD ERRORS> section of
+the generated document.
 
 =head1 ENVIRONMENT
 
@@ -295,7 +317,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010 Russ Allbery
+Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012 Russ Allbery
 <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it

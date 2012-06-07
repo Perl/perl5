@@ -1,6 +1,6 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
 #
-# Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008, 2009
+# Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008, 2009, 2012
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -38,7 +38,7 @@ use Pod::Simple ();
 # We have to export pod2text for backward compatibility.
 @EXPORT = qw(pod2text);
 
-$VERSION = '3.15';
+$VERSION = '3.16';
 
 ##############################################################################
 # Initialization
@@ -279,7 +279,13 @@ sub output_code { $_[0]->output ($_[1]) }
 
 # Set up various things that have to be initialized on a per-document basis.
 sub start_document {
-    my $self = shift;
+    my ($self, $attrs) = @_;
+    if ($$attrs{contentless} && !$$self{ALWAYS_EMIT_SOMETHING}) {
+        $$self{CONTENTLESS} = 1;
+        return;
+    } else {
+        delete $$self{CONTENTLESS};
+    }
     my $margin = $$self{opt_indent} + $$self{opt_margin};
 
     # Initialize a few per-document variables.
@@ -298,8 +304,9 @@ sub start_document {
     if ($$self{opt_utf8}) {
         $$self{ENCODE} = 1;
         eval {
-            my @layers = PerlIO::get_layers ($$self{output_fh});
-            if (grep { $_ eq 'utf8' } @layers) {
+            my @options = (output => 1, details => 1);
+            my $flag = (PerlIO::get_layers ($$self{output_fh}, @options))[-1];
+            if ($flag & PerlIO::F_UTF8 ()) {
                 $$self{ENCODE} = 0;
             }
         };
@@ -679,6 +686,17 @@ sub parse_from_filehandle {
     $self->parse_from_file (@_);
 }
 
+# Pod::Simple's parse_file doesn't set output_fh.  Wrap the call and do so
+# ourself unless it was already set by the caller, since our documentation has
+# always said that this should work.
+sub parse_file {
+    my ($self, $in) = @_;
+    unless (defined $$self{output_fh}) {
+        $self->output_fh (\*STDOUT);
+    }
+    return $self->SUPER::parse_file ($in);
+}
+
 ##############################################################################
 # Module return value and documentation
 ##############################################################################
@@ -877,8 +895,8 @@ how to use Pod::Simple.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008, 2009 Russ Allbery
-<rra@stanford.edu>.
+Copyright 1999, 2000, 2001, 2002, 2004, 2006, 2008, 2009, 2012 Russ
+Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

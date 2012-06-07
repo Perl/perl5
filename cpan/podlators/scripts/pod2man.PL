@@ -37,7 +37,7 @@ print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
 #
-# Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010
+# Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -50,6 +50,9 @@ use Pod::Man ();
 use Pod::Usage qw(pod2usage);
 
 use strict;
+
+# Clean up $0 for error reporting.
+$0 =~ s%.*/%%;
 
 # Insert -- into @ARGV before any single dash argument to hide it from
 # Getopt::Long; we want to interpret it as meaning stdin.
@@ -81,14 +84,25 @@ delete $options{verbose};
 delete $options{lax};
 
 # Initialize and run the formatter, pulling a pair of input and output off at
-# a time.
+# a time.  For each file, we check whether the document was completely empty
+# and, if so, will remove the created file and exit with a non-zero exit
+# status.
 my $parser = Pod::Man->new (%options);
+my $status = 0;
 my @files;
 do {
     @files = splice (@ARGV, 0, 2);
     print "  $files[1]\n" if $verbose;
     $parser->parse_from_file (@files);
+    if ($parser->{CONTENTLESS}) {
+        $status = 1;
+        warn "$0: unable to format $files[0]\n";
+        if (defined ($files[1]) and $files[1] ne '-') {
+            unlink $files[1] unless (-s $files[1]);
+        }
+    }
 } while (@ARGV);
+exit $status;
 
 __END__
 
@@ -281,10 +295,19 @@ Print out the name of each output file as it is being generated.
 
 =back
 
+=head1 EXIT STATUS
+
+As long as all documents processed result in some output, even if that
+output includes errata (a C<POD ERRORS> section), B<pod2man> will exit
+with status 0.  If any of the documents being processed do not result
+in an output document, B<pod2man> will exit with status 1.
+
 =head1 DIAGNOSTICS
 
 If B<pod2man> fails with errors, see L<Pod::Man> and L<Pod::Simple> for
-information about what those errors might mean.
+information about what those errors might mean.  Most POD formatting
+errors will be reported in a C<POD ERRORS> section of the generated
+document.
 
 =head1 EXAMPLES
 
@@ -329,7 +352,7 @@ B<pod2man> by Larry Wall and Tom Christiansen.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010 Russ Allbery
+Copyright 1999, 2000, 2001, 2004, 2006, 2008, 2010, 2012 Russ Allbery
 <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
@@ -337,7 +360,6 @@ under the same terms as Perl itself.
 
 =cut
 !NO!SUBS!
-#'# (cperl-mode)
 
 close OUT or die "Can't close $file: $!";
 chmod 0755, $file or die "Can't reset permissions for $file: $!\n";
