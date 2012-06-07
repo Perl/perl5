@@ -51,7 +51,6 @@ eval $str;
 die "$str:$@" if $@;
 
 open(H,">$file.new") || die "Cannot open $file.new:$!";
-#binmode H;		# no CRs (which cause a spurious rebuild)
 while (<SH>)
  {
   last if /^$term$/o;
@@ -86,7 +85,6 @@ if (compare("$file.new",$file))
   chmod(0666,$file);
   unlink($file);
   rename("$file.new",$file);
-  #chmod(0444,$file);
   exit(1);
  }
 else
