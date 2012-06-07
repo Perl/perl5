@@ -2161,8 +2161,8 @@ PP(pp_negate)
            SvIV_please_nomg( sv );
         }   
 
-	if (SvIOK(sv) || (SvOKp(sv) == SVp_IOK)) {
-	    /* It's publicly an integer, or privately just an integer */
+	if (SvIOK(sv) || (SvGMAGICAL(sv) && SvIOKp(sv))) {
+	    /* It's publicly an integer */
 	oops_its_an_int:
 	    if (SvIsUV(sv)) {
 		if (SvIVX(sv) == IV_MIN) {
