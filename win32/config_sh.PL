@@ -1,4 +1,7 @@
+#!perl -w
+use strict;
 use FindExt;
+
 # take a semicolon separated path list and turn it into a quoted
 # list of paths that Text::Parsewords will grok
 sub mungepath {
@@ -18,7 +21,7 @@ sub loadopts {
     if ($ARGV[0] =~ /--cfgsh-option-file/) {
 	shift @ARGV;
 	my $optfile = shift @ARGV;
-	local (*F);
+	local (*OPTF);
 	open OPTF, $optfile or die "Can't open $optfile: $!\n";
 	my @opts;
 	chomp(my $line = <OPTF>);
@@ -136,7 +139,7 @@ if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
 }
 
 while (<>) {
-    s/~([\w_]+)~/$opt{$1}/g;
+    s/~([\w_]+)~/exists $opt{$1} ? $opt{$1} : ''/eg;
     if (/^([\w_]+)=(.*)$/) {
 	my($k,$v) = ($1,$2);
 	# this depends on cf_time being empty in the template (or we'll

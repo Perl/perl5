@@ -1,14 +1,17 @@
-#
+#!perl -w
+use strict;
+
 BEGIN { warn "Running ".__FILE__."\n" };
 BEGIN 
  {
   require "Config.pm";
   die "Config.pm:$@" if $@;
-  Config::->import;
+  Config->import;
  }
 use File::Compare qw(compare);
 use File::Copy qw(copy);
 use File::Basename qw(fileparse);
+
 my ($name, $dir) = fileparse($0);
 $name =~ s#^(.*)\.PL$#../$1.SH#;
 my %opt;
@@ -28,7 +31,7 @@ while (<SH>)
  {
   last if /^\s*sed/;
  }
-($term,$file,$pat) = /^\s*sed\s+<<(\S+)\s+>(\S+)\s+(.*)$/;
+my($term,$file,$pat) = /^\s*sed\s+<<(\S+)\s+>(\S+)\s+(.*)$/;
 
 $file =~ s/^\$(\w+)$/$opt{$1}/g;
 
@@ -106,7 +109,7 @@ sub BackTick
  my $cmd = shift;
  if ($cmd =~ /^echo\s+(.*?)\s*\|\s+sed\s+'(.*)'\s*$/)
   {
-   local ($data,$pat) = ($1,$2);
+   my($data,$pat) = ($1,$2);
    $data =~ s/\s+/ /g;
    eval "\$data =~ $pat";
    return $data;
