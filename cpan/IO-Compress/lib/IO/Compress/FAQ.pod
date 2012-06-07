@@ -180,6 +180,10 @@ In particular, if you are using Info-Zip you need to have zip version 3.x
 or better to update a Zip64 archive and unzip version 6.x to read a zip64
 archive. 
 
+=head2 Can I write more that 64K entries is a Zip files?
+
+Yes. Zip64 allows this. See previous question.
+
 =head2 Zip Resources
 
 The primary reference for zip files is the "appnote" document available at

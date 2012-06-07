@@ -5,15 +5,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.048 qw(:Status createSelfTiedObject);
-use IO::Compress::Zlib::Constants 2.048 ;
+use IO::Compress::Base::Common  2.052 qw(:Status createSelfTiedObject);
+use IO::Compress::Zlib::Constants 2.052 ;
 
-use IO::Uncompress::RawInflate  2.048 ;
+use IO::Uncompress::RawInflate  2.052 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.048';
+$VERSION = '2.052';
 $InflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::RawInflate );
@@ -564,7 +564,7 @@ The string '-' can be used as an alias for standard input.
 =item A scalar reference 
 
 If C<$input> is a scalar reference, the compressed data will be read from
-C<$$output>.
+C<$$input>.
 
 =back
 
@@ -940,7 +940,7 @@ Same as doing this
 
 =head2 Working with Net::FTP
 
-See L<IO::Uncompress::Inflate::FAQ|IO::Uncompress::Inflate::FAQ/"Compressed files and Net::FTP">
+See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head1 SEE ALSO
 

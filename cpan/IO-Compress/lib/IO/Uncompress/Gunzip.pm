@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.048 ;
+use IO::Uncompress::RawInflate 2.052 ;
 
-use Compress::Raw::Zlib 2.048 () ;
-use IO::Compress::Base::Common 2.048 qw(:Status createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.048 ;
-use IO::Compress::Zlib::Extra 2.048 ;
+use Compress::Raw::Zlib 2.052 () ;
+use IO::Compress::Base::Common 2.052 qw(:Status createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.052 ;
+use IO::Compress::Zlib::Extra 2.052 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.048';
+$VERSION = '2.052';
 
 sub new
 {
@@ -47,7 +47,7 @@ sub gunzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.048 qw(:Parse);
+    use IO::Compress::Base::Common  2.052 qw(:Parse);
     return ( 'ParseExtra' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -643,7 +643,7 @@ The string '-' can be used as an alias for standard input.
 =item A scalar reference 
 
 If C<$input> is a scalar reference, the compressed data will be read from
-C<$$output>.
+C<$$input>.
 
 =back
 
@@ -1069,7 +1069,7 @@ Same as doing this
 
 =head2 Working with Net::FTP
 
-See L<IO::Uncompress::Gunzip::FAQ|IO::Uncompress::Gunzip::FAQ/"Compressed files and Net::FTP">
+See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head1 SEE ALSO
 

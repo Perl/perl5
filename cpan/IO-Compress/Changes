@@ -1,11 +1,26 @@
 CHANGES
 -------
 
+  2.052 29 April 2012
+
+      * IO::Compress::Zip
+        Force a ZIP64 archive when it contains >= 0xFFFF entries.
+        
+      * Typos in POD
+        [RT# #76130: Gunzip Pod typo in OO section: $$output instead of $$input
+
+  2.049 18 February 2012
+
+      * IO::Compress::Zip
+        Error in t/cz-03zlib-v1.t that caused warnings with 5.15
+        [RT# 110736: warnings from cpan/IO-Compress/t/cz-03zlib-v1.t]
+
   2.048 29 January 2012
 
       * Set minimum zlib version to 1.2.0
       
-      * IO::Compress test suite fails with Compress::Raw::Zlib 2.047 and zlib < 1.2.4
+      * IO::Compress test suite fails with Compress::Raw::Zlib 2.047 
+        and zlib < 1.2.4
         [RT# 74503]
       
   2.047 28 January 2012

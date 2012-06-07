@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.048 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
-use IO::Compress::RawDeflate 2.048 ();
-use IO::Compress::Adapter::Deflate 2.048 ;
-use IO::Compress::Adapter::Identity 2.048 ;
-use IO::Compress::Zlib::Extra 2.048 ;
-use IO::Compress::Zip::Constants 2.048 ;
+use IO::Compress::Base::Common  2.052 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
+use IO::Compress::RawDeflate 2.052 ();
+use IO::Compress::Adapter::Deflate 2.052 ;
+use IO::Compress::Adapter::Identity 2.052 ;
+use IO::Compress::Zlib::Extra 2.052 ;
+use IO::Compress::Zip::Constants 2.052 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.048 (); 
+use Compress::Raw::Zlib  2.052 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.048 ; 
+           import  IO::Compress::Adapter::Bzip2 2.052 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.048 ; 
+           import  IO::Compress::Bzip2 2.052 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.048 ; 
+           import  IO::Compress::Adapter::Lzma 2.052 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.048 ; 
+           import  IO::Compress::Lzma 2.052 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.048';
+$VERSION = '2.052';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -230,9 +230,8 @@ sub mkHeader
     my $self  = shift;
     my $param = shift ;
     
-
     *$self->{ZipData}{LocalHdrOffset} = U64::clone(*$self->{ZipData}{Offset});
-
+        
     my $comment = '';
     $comment = $param->value('Comment') || '';
 
@@ -499,13 +498,17 @@ sub mkTrailer
 sub mkFinalTrailer
 {
     my $self = shift ;
-
+        
     my $comment = '';
     $comment = *$self->{ZipData}{ZipComment} ;
 
     my $cd_offset = *$self->{ZipData}{Offset}->get32bit() ; # offset to start central dir
 
     my $entries = @{ *$self->{ZipData}{CentralDir} };
+    
+    *$self->{ZipData}{AnyZip64} = 1 
+        if *$self->{ZipData}{Offset}->is64bit || $entries >= 0xFFFF ;      
+           
     my $cd = join '', @{ *$self->{ZipData}{CentralDir} };
     my $cd_len = length $cd ;
 
@@ -664,8 +667,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.048 qw(:Parse);
-    use Compress::Raw::Zlib  2.048 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.052 qw(:Parse);
+    use Compress::Raw::Zlib  2.052 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -1463,7 +1466,8 @@ The default is 1.
 =item C<< Zip64 => 0|1 >>
 
 Create a Zip64 zip file/buffer. This option is used if you want
-to store files larger than 4 Gig. 
+to store files larger than 4 Gig or store more than 64K files in a single
+zip archive.. 
 
 C<Zip64> will be automatically set, as needed, if working with the one-shot 
 interface when the input is either a filename or a scalar reference.

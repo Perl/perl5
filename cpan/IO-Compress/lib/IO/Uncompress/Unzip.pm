@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.048 ;
-use IO::Compress::Base::Common  2.048 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.048 ;
-use IO::Uncompress::Adapter::Identity 2.048 ;
-use IO::Compress::Zlib::Extra 2.048 ;
-use IO::Compress::Zip::Constants 2.048 ;
+use IO::Uncompress::RawInflate  2.052 ;
+use IO::Compress::Base::Common  2.052 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.052 ;
+use IO::Uncompress::Adapter::Identity 2.052 ;
+use IO::Compress::Zlib::Extra 2.052 ;
+use IO::Compress::Zip::Constants 2.052 ;
 
-use Compress::Raw::Zlib  2.048 () ;
+use Compress::Raw::Zlib  2.052 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.048';
+$VERSION = '2.052';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -64,7 +64,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.048 qw(:Parse);
+    use IO::Compress::Base::Common  2.052 qw(:Parse);
 
     
     return (
@@ -1403,7 +1403,7 @@ The string '-' can be used as an alias for standard input.
 =item A scalar reference 
 
 If C<$input> is a scalar reference, the compressed data will be read from
-C<$$output>.
+C<$$input>.
 
 =back
 
@@ -1769,7 +1769,7 @@ Same as doing this
 
 =head2 Working with Net::FTP
 
-See L<IO::Uncompress::Unzip::FAQ|IO::Uncompress::Unzip::FAQ/"Compressed files and Net::FTP">
+See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head2 Walking through a zip file
 

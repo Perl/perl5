@@ -6,22 +6,22 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.048 qw(createSelfTiedObject);
+use IO::Compress::Base::Common  2.052 qw(createSelfTiedObject);
 
-use IO::Uncompress::Adapter::Inflate  2.048 ();
+use IO::Uncompress::Adapter::Inflate  2.052 ();
 
 
-use IO::Uncompress::Base  2.048 ;
-use IO::Uncompress::Gunzip  2.048 ;
-use IO::Uncompress::Inflate  2.048 ;
-use IO::Uncompress::RawInflate  2.048 ;
-use IO::Uncompress::Unzip  2.048 ;
+use IO::Uncompress::Base  2.052 ;
+use IO::Uncompress::Gunzip  2.052 ;
+use IO::Uncompress::Inflate  2.052 ;
+use IO::Uncompress::RawInflate  2.052 ;
+use IO::Uncompress::Unzip  2.052 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyInflateError);
 
-$VERSION = '2.048';
+$VERSION = '2.052';
 $AnyInflateError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -48,7 +48,7 @@ sub anyinflate
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.048 qw(:Parse);
+    use IO::Compress::Base::Common  2.052 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -507,7 +507,7 @@ The string '-' can be used as an alias for standard input.
 =item A scalar reference 
 
 If C<$input> is a scalar reference, the compressed data will be read from
-C<$$output>.
+C<$$input>.
 
 =back
 
@@ -945,7 +945,7 @@ Same as doing this
 
 =head2 Working with Net::FTP
 
-See L<IO::Uncompress::AnyInflate::FAQ|IO::Uncompress::AnyInflate::FAQ/"Compressed files and Net::FTP">
+See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 =head1 SEE ALSO
 
