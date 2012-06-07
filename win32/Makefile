@@ -768,7 +768,6 @@ STATIC_EXT	= Win32CORE
 DYNALOADER	= ..\DynaLoader$(o)
 
 CFG_VARS	=					\
-		"INST_DRV=$(INST_DRV)"			\
 		"INST_TOP=$(INST_TOP)"			\
 		"INST_VER=$(INST_VER)"			\
 		"INST_ARCH=$(INST_ARCH)"		\

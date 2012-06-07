@@ -881,7 +881,6 @@ DYNALOADER	= ..\DynaLoader$(o)
 # trying to fit them all on the command line)
 #	-- BKS 10-17-1999
 CFG_VARS	=					\
-		INST_DRV=$(INST_DRV)		~	\
 		INST_TOP=$(INST_TOP)	~	\
 		INST_VER=$(INST_VER)	~	\
 		INST_ARCH=$(INST_ARCH)		~	\
