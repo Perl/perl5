@@ -1,15 +1,16 @@
-                       Term::ANSIColor version 3.01
+                       Term::ANSIColor version 3.02
               (A simple ANSI text attribute control module)
 
   Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2007, 2009,
-  2010, 2011 Russ Allbery <rra@stanford.edu> and Zenin.  This program is
-  free software; you may redistribute it and/or modify it under the same
-  terms as Perl itself.
+  2010, 2011, 2012 Russ Allbery <rra@stanford.edu> and Zenin.  This
+  program is free software; you may redistribute it and/or modify it under
+  the same terms as Perl itself.
 
-  I welcome bug reports and patches for this package at rra@stanford.edu.
-  However, please be aware that I tend to be extremely busy and to get a
-  lot of mail.  I'll save your mail and get to it as soon as I can, but
-  depending on how busy I am it may take me a couple of months.
+  I welcome bug reports and patches for this package at rra@stanford.edu
+  or via the CPAN bug tracker at <http://rt.cpan.org/>.  However, please
+  be aware that I tend to be extremely busy and to get a lot of mail.
+  I'll save your mail and get to it as soon as I can, but depending on how
+  busy I am it may take me a couple of months.
 
 BLURB
 
@@ -100,6 +101,12 @@ HOMEPAGE AND SOURCE REPOSITORY
 
       http://git.eyrie.org/?p=perl/ansicolor.git
 
+  For bug tracking, this package uses the CPAN bug tracker at:
+
+      https://rt.cpan.org/
+
+  Look for the Term-ANSIColor distribution.
+
 THANKS
 
   To Jon Lennox for looking at early versions of this module, providing
@@ -158,5 +165,11 @@ THANKS
   To Revilo Reegiles for reporting problems with the colored function and
   non-array references with stringification defined, and providing a test
   case.
+
+  To Kent Fredric for the request for italic and the report of a terminal
+  emulator that supports it.
+
+  To Simon Wistow for reporting that Term::ANSIColor was inadvertantly
+  clobbering $@ when generating constant subs.
 
   To Larry Wall, as always, for Perl.

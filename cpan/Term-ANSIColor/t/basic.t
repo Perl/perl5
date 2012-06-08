@@ -2,14 +2,14 @@
 #
 # t/basic.t -- Test suite for the Term::ANSIColor Perl module.
 #
-# Copyright 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2009, 2010
+# Copyright 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2009, 2010, 2012
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 
 use strict;
-use Test::More tests => 51;
+use Test::More tests => 54;
 
 BEGIN {
     delete $ENV{ANSI_COLORS_DISABLED};
@@ -57,6 +57,10 @@ is (color ('bright_red'), "\e[91m", 'Bright red is supported');
 is ((BRIGHT_RED "test"), "\e[91mtest\e[0m", '...and as a constant');
 is (color ('on_bright_red'), "\e[101m", '...as is on bright red');
 is ((ON_BRIGHT_RED "test"), "\e[101mtest\e[0m", '...and as a constant');
+
+# Test italic, which was added in 3.02.
+is (color ('italic'), "\e[3m", 'Italic is supported');
+is ((ITALIC 'test'), "\e[3mtest\e[0m", '...and as a constant');
 
 # Test colored with 0 and EACHLINE.
 $Term::ANSIColor::EACHLINE = "\n";
@@ -137,3 +141,11 @@ like ($@, qr/^undefined subroutine \&Term::ANSIColor::RSET called at /,
 eval { Term::ANSIColor::reset () };
 like ($@, qr/^undefined subroutine \&Term::ANSIColor::reset called at /,
       'Correct error from a lowercase attribute');
+
+# Ensure that we still get proper error reporting for unknown constants when
+# when colors are disabled.
+$ENV{ANSI_COLORS_DISABLED} = 1;
+eval { Term::ANSIColor::RSET () };
+like ($@, qr/^undefined subroutine \&Term::ANSIColor::RSET called at /,
+      'Correct error from undefined attribute with disabled colors');
+delete $ENV{ANSI_COLORS_DISABLED};

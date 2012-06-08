@@ -1,7 +1,7 @@
 # Term::ANSIColor -- Color screen output using ANSI escape sequences.
 #
 # Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-#     2011 Russ Allbery <rra@stanford.edu> and Zenin
+#     2011, 2012 Russ Allbery <rra@stanford.edu> and Zenin
 # PUSH/POP support submitted 2007 by openmethods.com voice solutions
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -17,7 +17,7 @@
 package Term::ANSIColor;
 require 5.001;
 
-$VERSION = '3.01';
+$VERSION = '3.02';
 
 use strict;
 use vars qw($AUTOLOAD $AUTOLOCAL $AUTORESET @COLORLIST @COLORSTACK $EACHLINE
@@ -28,8 +28,8 @@ use Exporter ();
 BEGIN {
     @COLORLIST = qw(
         CLEAR           RESET             BOLD            DARK
-        FAINT           UNDERLINE         UNDERSCORE      BLINK
-        REVERSE         CONCEALED
+        FAINT           ITALIC            UNDERLINE       UNDERSCORE
+        BLINK           REVERSE           CONCEALED
 
         BLACK           RED               GREEN           YELLOW
         BLUE            MAGENTA           CYAN            WHITE
@@ -59,6 +59,7 @@ BEGIN {
                'bold'           => 1,
                'dark'           => 2,
                'faint'          => 2,
+               'italic'         => 3,
                'underline'      => 4,
                'underscore'     => 4,
                'blink'          => 5,
@@ -116,12 +117,13 @@ for (reverse sort keys %ATTRIBUTES) {
 # write scripts that also work on systems without any ANSI support, like
 # Windows consoles.
 sub AUTOLOAD {
-    if (defined $ENV{ANSI_COLORS_DISABLED}) {
-        return join ('', @_);
-    }
     if ($AUTOLOAD =~ /^([\w:]*::([A-Z_]+))$/ and defined $ATTRIBUTES{lc $2}) {
+        if (defined $ENV{ANSI_COLORS_DISABLED}) {
+            return join ('', @_);
+        }
         $AUTOLOAD = $1;
         my $attr = "\e[" . $ATTRIBUTES{lc $2} . 'm';
+        my $saved = $@;
         eval qq {
             sub $AUTOLOAD {
                 if (\$AUTORESET && \@_) {
@@ -133,6 +135,8 @@ sub AUTOLOAD {
                 }
             }
         };
+        die "failed to generate constant $1" if $@;
+        $@ = $saved;
         goto &$AUTOLOAD;
     } else {
         require Carp;
@@ -284,7 +288,7 @@ Term::ANSIColor - Color screen output using ANSI escape sequences
 cyan colorize namespace runtime TMTOWTDI cmd.exe 4nt.exe command.com NT
 ESC Delvare SSH OpenSSH aixterm ECMA-048 Fraktur overlining Zenin
 reimplemented Allbery PUSHCOLOR POPCOLOR LOCALCOLOR openmethods.com
-grey ATTR
+grey ATTR urxvt mistyped
 
 =head1 SYNOPSIS
 
@@ -388,14 +392,16 @@ Term::ANSIColor 3.0.
 
 The function interface uses attribute strings to describe the colors and
 text attributes to assign to text.  The recognized non-color attributes
-are clear, reset, bold, dark, faint, underline, underscore, blink,
+are clear, reset, bold, dark, faint, italic, underline, underscore, blink,
 reverse, and concealed.  Clear and reset (reset to default attributes),
 dark and faint (dim and saturated), and underline and underscore are
 equivalent, so use whichever is the most intuitive to you.
 
 Note that not all attributes are supported by all terminal types, and some
-terminals may not support any of these sequences.  Dark and faint, blink,
-and concealed in particular are frequently not implemented.
+terminals may not support any of these sequences.  Dark and faint, italic,
+blink, and concealed in particular are frequently not implemented.
+
+Support for italic was added in Term::ANSIColor 3.02.
 
 The recognized normal foreground color attributes (colors 0 to 7) are:
 
@@ -483,8 +489,8 @@ Alternately, if you import C<:constants>, you can use the following
 constants directly:
 
   CLEAR           RESET             BOLD            DARK
-  FAINT           UNDERLINE         UNDERSCORE      BLINK
-  REVERSE         CONCEALED
+  FAINT           ITALIC            UNDERLINE       UNDERSCORE
+  BLINK           REVERSE           CONCEALED
 
   BLACK           RED               GREEN           YELLOW
   BLUE            MAGENTA           CYAN            WHITE
@@ -507,6 +513,8 @@ to
 
 (Note that the newline is kept separate to avoid confusing the terminal as
 described above since a background color is being used.)
+
+Support for C<ITALIC> was added in Term::ANSIColor 3.02.
 
 When using the constants, if you don't want to have to remember to add the
 C<, RESET> at the end of each print line, you can set
@@ -693,14 +701,19 @@ given attribute as something else instead.  Note that on an aixterm, clear
 doesn't reset colors; you have to explicitly set the colors back to what
 you want.  More entries in this table are welcome.
 
-Note that codes 3 (italic), 6 (rapid blink), and 9 (strike-through) are
-specified in ANSI X3.64 and ECMA-048 but are not commonly supported by
-most displays and emulators and therefore aren't supported by this module
-at the present time.  ECMA-048 also specifies a large number of other
-attributes, including a sequence of attributes for font changes, Fraktur
-characters, double-underlining, framing, circling, and overlining.  As
-none of these attributes are widely supported or useful, they also aren't
-currently supported by this module.
+Support for code 3 (italic) is rare and therefore not mentioned in that
+table.  It is not believed to be fully supported by any of the terminals
+listed, although it's displayed as green in the Linux console, but it is
+reportedly supported by urxvt.
+
+Note that codes 6 (rapid blink) and 9 (strike-through) are specified in
+ANSI X3.64 and ECMA-048 but are not commonly supported by most displays
+and emulators and therefore aren't supported by this module at the present
+time.  ECMA-048 also specifies a large number of other attributes,
+including a sequence of attributes for font changes, Fraktur characters,
+double-underlining, framing, circling, and overlining.  As none of these
+attributes are widely supported or useful, they also aren't currently
+supported by this module.
 
 =head1 SEE ALSO
 
@@ -724,10 +737,10 @@ Russ with input from Zenin.  Russ Allbery now maintains this module.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-2011 Russ Allbery <rra@stanford.edu> and Zenin.  This program is free
-software; you may redistribute it and/or modify it under the same terms as
-Perl itself.
+Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009,
+2010, 2011, 2012 Russ Allbery <rra@stanford.edu> and Zenin.  This program
+is free software; you may redistribute it and/or modify it under the same
+terms as Perl itself.
 
 PUSHCOLOR, POPCOLOR, and LOCALCOLOR were contributed by openmethods.com
 voice solutions.
