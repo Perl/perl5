@@ -494,6 +494,13 @@ I<previous> time is was used is no longer ignored.
 
 =item *
 
+C<warn ""> now treats C<$@> with a number in it the same way, regardless of
+whether it happened via C<$@=3> or C<$@="3">.  It used to ignore the
+former.  Now it appends "\t...caught", as it has always done with
+C<$@="3">.
+
+=item *
+
 Numeric operators on magical variables (e.g., S<C<$1 + 1>>) used to use
 floating point operations even where integer operations were more appropriate, resulting in loss of accuracy on 64-bit platforms
 [perl #109542].
