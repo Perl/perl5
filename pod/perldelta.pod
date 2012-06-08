@@ -492,6 +492,12 @@ fixes.  FETCH is only called once now on a tied argument or a tied C<$@>
 no longer ignored.  A tied C<$@> that happened to return a reference the
 I<previous> time is was used is no longer ignored.
 
+=item *
+
+Numeric operators on magical variables (e.g., S<C<$1 + 1>>) used to use
+floating point operations even where integer operations were more appropriate, resulting in loss of accuracy on 64-bit platforms
+[perl #109542].
+
 =back
 
 =head1 Known Problems
