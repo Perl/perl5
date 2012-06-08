@@ -310,7 +310,7 @@ use File::Glob qw(:case);
 
     'base' => {
         'MAINTAINER'   => 'rgarcia',
-        'DISTRIBUTION' => 'RGARCIA/base-2.15.tar.gz',
+        'DISTRIBUTION' => 'RGARCIA/base-2.18.tar.gz',
         'FILES'        => q[dist/base],
         'UPSTREAM'     => 'blead',
     },
