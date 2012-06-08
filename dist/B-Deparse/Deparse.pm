@@ -2155,10 +2155,10 @@ sub loopex {
     } elsif (class($op) eq "OP") {
 	# no-op
     } elsif (class($op) eq "UNOP") {
-	(my $kid = $self->deparse($op->first, 16)) =~ s/^\cS//;
+	(my $kid = $self->deparse($op->first, 5)) =~ s/^\cS//;
 	$name .= " $kid";
     }
-    return $self->maybe_parens($name, $cx, 16);
+    return $self->maybe_parens($name, $cx, 5);
 }
 
 sub pp_last { loopex(@_, "last") }
