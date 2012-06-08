@@ -1556,10 +1556,9 @@ sub populate_char_info ($) {
                                                     containing_range($i)->end;
         }
         elsif ($gc-> table('Control')->contains($i)) {
-            $viacode[$i] = 'Control';
+            $viacode[$i] = property_ref('Name_Alias')->value_of($i) || 'Control';
             $annotate_char_type[$i] = $CONTROL_TYPE;
             $printable[$i] = 0;
-            $end = 0x81 if $i == 0x80;  # Hard-code this one known case
         }
         elsif ($gc-> table('Unassigned')->contains($i)) {
             $annotate_char_type[$i] = $UNASSIGNED_TYPE;
