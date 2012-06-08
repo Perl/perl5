@@ -13836,10 +13836,14 @@ int Perl_vms_case_tolerant(void)
 
 /* C RTL Feature settings */
 
-static int set_features
-   (int (* init_coroutine)(int *, int *, void *),  /* Needs casts if used */
-    int (* cli_routine)(void),	/* Not documented */
-    void *image_info)		/* Not documented */
+#if defined(__DECC) || defined(__DECCXX)
+
+#ifdef __cplusplus 
+extern "C" { 
+#endif 
+ 
+extern void
+vmsperl_set_features(void)
 {
     int status;
     int s;
@@ -14106,52 +14110,38 @@ static int set_features
        else
 	 vms_posix_exit = 0;
     }
-
-
-    /* CRTL can be initialized past this point, but not before. */
-/*    DECC$CRTL_INIT(); */
-
-    return SS$_NORMAL;
 }
 
-#if defined(__DECC) || defined(__DECCXX)
-#pragma nostandard
-#pragma extern_model save
-#pragma extern_model strict_refdef "LIB$INITIALIZ" nowrt
-	const __align (LONGWORD) int spare[8] = {0};
-
-/* .psect LIB$INITIALIZE, NOPIC, USR, CON, REL, GBL, NOSHR, NOEXE, RD, NOWRT, LONG */
-#if __DECC_VER >= 60560002
-#pragma extern_model strict_refdef "LIB$INITIALIZE" nopic, con, rel, gbl, noshr, noexe, nowrt, long
-#else
-#pragma extern_model strict_refdef "LIB$INITIALIZE" nopic, con, gbl, noshr, nowrt, long
-#endif
-#endif /* __DECC */
-
-const long vms_cc_features = (const long)set_features;
-
-/*
-** Force a reference to LIB$INITIALIZE to ensure it
-** exists in the image.
-*/
-#define lib$initialize LIB$INITIALIZE
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-int lib$initialize(void);
-#ifdef __cplusplus
-}
-#endif
-
-#if defined(__DECC) || defined(__DECCXX)
-#pragma extern_model strict_refdef
-#endif
-    int lib_init_ref = (int) lib$initialize;
-
-#if defined(__DECC) || defined(__DECCXX)
-#pragma extern_model restore
-#pragma standard
+/* Use 32-bit pointers because that's what the image activator
+ * assumes for the LIB$INITIALZE psect.
+ */ 
+#if __INITIAL_POINTER_SIZE 
+#pragma pointer_size save 
+#pragma pointer_size 32 
+#endif 
+ 
+/* Create a reference to the LIB$INITIALIZE function. */ 
+extern void LIB$INITIALIZE(void); 
+extern void (*vmsperl_unused_global_1)(void) = LIB$INITIALIZE; 
+ 
+/* Create an array of pointers to the init functions in the special 
+ * LIB$INITIALIZE section. In our case, the array only has one entry.
+ */ 
+#pragma extern_model save 
+#pragma extern_model strict_refdef "LIB$INITIALIZE" gbl,noexe,nowrt,noshr,long 
+extern void (* const vmsperl_unused_global_2[])() = 
+{ 
+   vmsperl_set_features,
+}; 
+#pragma extern_model restore 
+ 
+#if __INITIAL_POINTER_SIZE 
+#pragma pointer_size restore 
+#endif 
+ 
+#ifdef __cplusplus 
+} 
 #endif
 
+#endif /* defined(__DECC) || defined(__DECCXX) */
 /*  End of vms.c */

@@ -170,6 +170,7 @@ unless ($isgcc) {
     print OPTBLD "PSECT_ATTR=\$GLOBAL_RO_VARS,PIC,NOEXE,RD,NOWRT,SHR\n";
     print OPTBLD "PSECT_ATTR=\$GLOBAL_RW_VARS,PIC,NOEXE,RD,WRT,NOSHR\n";
   }
+  print OPTBLD "PSECT_ATTR=LIB\$INITIALIZE,GBL,NOEXE,NOWRT,NOSHR,LONG\n";
 }
 print OPTBLD "case_sensitive=yes\n" if $care_about_case;
 my $count = 0;
