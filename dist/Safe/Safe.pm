@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.31_01";
+$Safe::VERSION = "2.33_01";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -140,6 +140,9 @@ my $default_share = [qw[
     &Tie::Hash::NamedCapture::SCALAR
     &Tie::Hash::NamedCapture::flags
 ])];
+if (defined $Devel::Cover::VERSION) {
+    push @$default_share, '&Devel::Cover::use_file';
+}
 
 sub new {
     my($class, $root, $mask) = @_;

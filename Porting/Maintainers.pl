@@ -1587,7 +1587,7 @@ use File::Glob qw(:case);
 
     'Safe' => {
         'MAINTAINER'   => 'rgarcia',
-        'DISTRIBUTION' => 'RGARCIA/Safe-2.30.tar.gz',
+        'DISTRIBUTION' => 'RGARCIA/Safe-2.33.tar.gz',
         'FILES'        => q[dist/Safe],
         'UPSTREAM'     => 'blead',
     },
