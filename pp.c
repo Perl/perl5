@@ -6028,7 +6028,7 @@ PP(pp_runcv)
 	oldsi->si_cxix = oldcxix;
     }
     else cv = find_runcv(NULL);
-    XPUSHs(CvUNIQUE(cv) ? &PL_sv_undef : sv_2mortal(newRV((SV *)cv)));
+    XPUSHs(CvEVAL(cv) ? &PL_sv_undef : sv_2mortal(newRV((SV *)cv)));
     RETURN;
 }
 
