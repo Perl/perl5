@@ -1222,7 +1222,7 @@ use File::Glob qw(:case);
 
     'Memoize' => {
         'MAINTAINER'   => 'mjd',
-        'DISTRIBUTION' => 'FLORA/Memoize-1.02.tar.gz',
+        'DISTRIBUTION' => 'MJD/Memoize-1.03.tgz',
         'FILES'        => q[cpan/Memoize],
         'EXCLUDED'     => ['article.html'],
         'UPSTREAM'     => 'cpan',
