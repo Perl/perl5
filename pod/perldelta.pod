@@ -433,6 +433,12 @@ Referencing a closure prototype (C<\&{$_[1]}> in an attribute handler for a
 closure) no longer results in a copy of the subroutine (or assertion
 failures on debugging builds).
 
+=item *
+
+C<eval '__PACKAGE__'> now returns the right answer on threaded builds if
+the current package has been assigned over (as in
+C<*ThisPackage:: = *ThatPackage::>) [perl #78742].
+
 =back
 
 =head1 Known Problems
