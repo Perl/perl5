@@ -1764,7 +1764,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x0001121e,	/* i_divide */
 	0x0001123e,	/* modulo */
 	0x0001121e,	/* i_modulo */
-	0x00012209,	/* repeat */
+	0x0001220b,	/* repeat */
 	0x0001123e,	/* add */
 	0x0001121e,	/* i_add */
 	0x0001123e,	/* subtract */

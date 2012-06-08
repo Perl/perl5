@@ -3010,6 +3010,8 @@ S_fold_constants(pTHX_ register OP *o)
 	if (IN_LOCALE_COMPILETIME)
 	    goto nope;
 	break;
+    case OP_REPEAT:
+	if (o->op_private & OPpREPEAT_DOLIST) goto nope;
     }
 
     if (PL_parser && PL_parser->error_count)
