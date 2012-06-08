@@ -17306,6 +17306,12 @@ my @input_file_objects = (
                     Property => 'Composition_Exclusion',
                     ),
     Input_file->new('BidiMirroring.txt', v3.0.1,
+                    Has_Missings_Defaults => ($v_version lt v6.2.0)
+                                             ? $NO_DEFAULTS
+                                             # Is <none> which doesn't mean
+                                             # anything to us, we will use the
+                                             # null string
+                                             : $IGNORED,
                     Property => 'Bidi_Mirroring_Glyph',
                     ),
     Input_file->new("NormTest.txt", v3.0.0,

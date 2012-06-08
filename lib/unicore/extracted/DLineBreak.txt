@@ -1,8 +1,8 @@
-# DerivedLineBreak-6.1.0.txt
-# Date: 2011-11-27, 05:10:24 GMT [MD]
+# DerivedLineBreak-6.2.0.txt
+# Date: 2012-06-02, 22:54:36 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2011 Unicode, Inc.
+# Copyright (c) 1991-2012 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 
@@ -23,8 +23,8 @@ E000..F8FF    ; XX # Co [6400] <private-use-E000>..<private-use-F8FF>
 F0000..FFFFD  ; XX # Co [65534] <private-use-F0000>..<private-use-FFFFD>
 100000..10FFFD; XX # Co [65534] <private-use-100000>..<private-use-10FFFD>
 
-# The above property value applies to 780870 code points not listed here.
-# Total code points: 918338
+# The above property value applies to 780869 code points not listed here.
+# Total code points: 918337
 
 # ================================================
 
@@ -347,7 +347,7 @@ FE13..FE14    ; IS # Po   [2] PRESENTATION FORM FOR VERTICAL COLON..PRESENTATION
 17DB          ; PR # Sc       KHMER CURRENCY SYMBOL RIEL
 20A0..20A6    ; PR # Sc   [7] EURO-CURRENCY SIGN..NAIRA SIGN
 20A8..20B5    ; PR # Sc  [14] RUPEE SIGN..CEDI SIGN
-20B7..20B9    ; PR # Sc   [3] SPESMILO SIGN..INDIAN RUPEE SIGN
+20B7..20BA    ; PR # Sc   [4] SPESMILO SIGN..TURKISH LIRA SIGN
 2116          ; PR # So       NUMERO SIGN
 2212..2213    ; PR # Sm   [2] MINUS SIGN..MINUS-OR-PLUS SIGN
 FE69          ; PR # Sc       SMALL DOLLAR SIGN
@@ -355,7 +355,7 @@ FF04          ; PR # Sc       FULLWIDTH DOLLAR SIGN
 FFE1          ; PR # Sc       FULLWIDTH POUND SIGN
 FFE5..FFE6    ; PR # Sc   [2] FULLWIDTH YEN SIGN..FULLWIDTH WON SIGN
 
-# Total code points: 45
+# Total code points: 46
 
 # ================================================
 
@@ -969,6 +969,7 @@ ABF0..ABF9    ; NU # Nd  [10] MEETEI MAYEK DIGIT ZERO..MEETEI MAYEK DIGIT NINE
 2E2F          ; AL # Lm       VERTICAL TILDE
 2E32          ; AL # Po       TURNED COMMA
 2E35..2E39    ; AL # Po   [5] TURNED SEMICOLON..TOP HALF SECTION SIGN
+2E3A          ; AL # Pd       TWO-EM DASH
 4DC0..4DFF    ; AL # So  [64] HEXAGRAM FOR THE CREATIVE HEAVEN..HEXAGRAM FOR BEFORE COMPLETION
 A4D0..A4F7    ; AL # Lo  [40] LISU LETTER BA..LISU LETTER OE
 A4F8..A4FD    ; AL # Lm   [6] LISU LETTER TONE MYA TI..LISU LETTER TONE MYA JEU
@@ -1228,7 +1229,6 @@ FFED..FFEE    ; AL # So   [2] HALFWIDTH BLACK SQUARE..HALFWIDTH WHITE CIRCLE
 1F0D1..1F0DF  ; AL # So  [15] PLAYING CARD ACE OF CLUBS..PLAYING CARD WHITE JOKER
 1F12E         ; AL # So       CIRCLED WZ
 1F16A..1F16B  ; AL # So   [2] RAISED MC SIGN..RAISED MD SIGN
-1F1E6..1F1FF  ; AL # So  [26] REGIONAL INDICATOR SYMBOL LETTER A..REGIONAL INDICATOR SYMBOL LETTER Z
 1F300..1F320  ; AL # So  [33] CYCLONE..SHOOTING STAR
 1F330..1F335  ; AL # So   [6] CHESTNUT..CACTUS
 1F337..1F37C  ; AL # So  [70] TULIP..BABY BOTTLE
@@ -1248,7 +1248,7 @@ FFED..FFEE    ; AL # So   [2] HALFWIDTH BLACK SQUARE..HALFWIDTH WHITE CIRCLE
 1F680..1F6C5  ; AL # So  [70] ROCKET..LEFT LUGGAGE
 1F700..1F773  ; AL # So [116] ALCHEMICAL SYMBOL FOR QUINTESSENCE..ALCHEMICAL SYMBOL FOR HALF OUNCE
 
-# Total code points: 16251
+# Total code points: 16226
 
 # ================================================
 
@@ -1359,7 +1359,7 @@ FFE2          ; ID # Sm       FULLWIDTH NOT SIGN
 FFE3          ; ID # Sk       FULLWIDTH MACRON
 FFE4          ; ID # So       FULLWIDTH BROKEN BAR
 1B000..1B001  ; ID # Lo   [2] KATAKANA LETTER ARCHAIC E..HIRAGANA LETTER ARCHAIC YE
-1F200..1F202  ; ID # So   [3] SQUARE HIRAGANA HOKA..SQUARED KATAKANA SA
+1F1E6..1F202  ; ID # So  [29] REGIONAL INDICATOR SYMBOL LETTER A..SQUARED KATAKANA SA
 1F210..1F23A  ; ID # So  [43] SQUARED CJK UNIFIED IDEOGRAPH-624B..SQUARED CJK UNIFIED IDEOGRAPH-55B6
 1F240..1F248  ; ID # So   [9] TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-672C..TORTOISE SHELL BRACKETED CJK UNIFIED IDEOGRAPH-6557
 1F250..1F251  ; ID # So   [2] CIRCLED IDEOGRAPH ADVANTAGE..CIRCLED IDEOGRAPH ACCEPT
@@ -1373,7 +1373,7 @@ FFE4          ; ID # So       FULLWIDTH BROKEN BAR
 2FA1E..2FFFD  ; ID # Cn [1504] <reserved-2FA1E>..<reserved-2FFFD>
 30000..3FFFD  ; ID # Cn [65534] <reserved-30000>..<reserved-3FFFD>
 
-# Total code points: 161793
+# Total code points: 161819
 
 # ================================================
 
@@ -1593,7 +1593,8 @@ FE19          ; IN # Po       PRESENTATION FORM FOR VERTICAL HORIZONTAL ELLIPSIS
 1CF4          ; CM # Mn       VEDIC TONE CANDRA ABOVE
 1DC0..1DE6    ; CM # Mn  [39] COMBINING DOTTED GRAVE ACCENT..COMBINING LATIN SMALL LETTER Z
 1DFC..1DFF    ; CM # Mn   [4] COMBINING DOUBLE INVERTED BREVE BELOW..COMBINING RIGHT ARROWHEAD AND DOWN ARROWHEAD BELOW
-200C..200F    ; CM # Cf   [4] ZERO WIDTH NON-JOINER..RIGHT-TO-LEFT MARK
+200C          ; CM # Cf       ZERO WIDTH NON-JOINER
+200E..200F    ; CM # Cf   [2] LEFT-TO-RIGHT MARK..RIGHT-TO-LEFT MARK
 202A..202E    ; CM # Cf   [5] LEFT-TO-RIGHT EMBEDDING..RIGHT-TO-LEFT OVERRIDE
 206A..206F    ; CM # Cf   [6] INHIBIT SYMMETRIC SWAPPING..NOMINAL DIGIT SHAPES
 20D0..20DC    ; CM # Mn  [13] COMBINING LEFT HARPOON ABOVE..COMBINING FOUR DOTS ABOVE
@@ -1703,7 +1704,7 @@ E0001         ; CM # Cf       LANGUAGE TAG
 E0020..E007F  ; CM # Cf  [96] TAG SPACE..CANCEL TAG
 E0100..E01EF  ; CM # Mn [240] VARIATION SELECTOR-17..VARIATION SELECTOR-256
 
-# Total code points: 1628
+# Total code points: 1627
 
 # ================================================
 
@@ -2090,9 +2091,9 @@ FFFD          ; AI # So       REPLACEMENT CHARACTER
 # Line_Break=Break_Both
 
 2014          ; B2 # Pd       EM DASH
-2E3A..2E3B    ; B2 # Pd   [2] TWO-EM DASH..THREE-EM DASH
+2E3B          ; B2 # Pd       THREE-EM DASH
 
-# Total code points: 3
+# Total code points: 2
 
 # ================================================
 
@@ -3024,5 +3025,13 @@ FF67..FF6F    ; CJ # Lo   [9] HALFWIDTH KATAKANA LETTER SMALL A..HALFWIDTH KATAK
 FF70          ; CJ # Lm       HALFWIDTH KATAKANA-HIRAGANA PROLONGED SOUND MARK
 
 # Total code points: 51
+
+# ================================================
+
+# Line_Break=Zero_Width_Joiner
+
+200D          ; ZJ # Cf       ZERO WIDTH JOINER
+
+# Total code points: 1
 
 # EOF

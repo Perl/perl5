@@ -1,13 +1,11 @@
-# ScriptExtensions-6.1.0.txt
-# Date: 2011-12-05, 22:51:22 GMT [MD]
+# Date: 2012-05-20, 17:41:32 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2011 Unicode, Inc.
+# Copyright (c) 1991-2012 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 # The Script_Extensions property indicates which characters are commonly used
-# with a limited number of scripts, but with more than one.
-# The property is provisional: values are expected to change over time as more information becomes available.
+# with more than one script, but with a limited number of scripts.
 # For each code point, there is one or more property values.  Each such value is a Script property value.
 # For more information, see:
 #   UAX #24: http://www.unicode.org/reports/tr24/ and
@@ -23,6 +21,40 @@
 # Property:	Script_Extensions
 
 # ================================================
+0363 ;  Latn
+0364 ;  Latn
+0365 ;  Latn
+0366 ;  Latn
+0367 ;  Latn
+0368 ;  Latn
+0369 ;  Latn
+036A ;  Latn
+036B ;  Latn
+036C ;  Latn
+036D ;  Latn
+036E ;  Latn
+036F ;  Latn
+0485 ; Latn Cyrl
+0486 ; Latn Cyrl
+0951 ; Latn Deva
+0952 ; Latn Deva
+0342 ; Grek
+0345 ; Grek
+1DC0 ; Grek
+1DC1 ; Grek
+1CE1 ; Deva
+1CF2 ; Deva
+1CF3 ;  Deva
+1CD0 ;  Deva
+1CD1 ;  Deva
+1CD2 ;  Deva
+1CD4..1CDD ;  Deva
+1CF4 ;  Deva
+1CDE ;  Deva
+1CDF ;  Deva
+1CE0 ;  Deva
+1CE2..1CE8 ;  Deva
+1CED ;  Deva
 
 # Script_Extensions=Arab Syrc
 
@@ -123,17 +155,17 @@ FF9E..FF9F    ; Hira Kana # Lm   [2] HALFWIDTH KATAKANA VOICED SOUND MARK..HALFW
 
 # ================================================
 
-# Script_Extensions=Beng Deva Guru Orya
+# Script_Extensions=Buhd Hano Tagb Tglg
 
-0964..0965    ; Beng Deva Guru Orya # Po   [2] DEVANAGARI DANDA..DEVANAGARI DOUBLE DANDA
+1735..1736    ; Buhd Hano Tagb Tglg # Po   [2] PHILIPPINE SINGLE PUNCTUATION..PHILIPPINE DOUBLE PUNCTUATION
 
 # Total code points: 2
 
 # ================================================
 
-# Script_Extensions=Buhd Hano Tagb Tglg
+# Script_Extensions=Beng Deva Guru Orya Takr
 
-1735..1736    ; Buhd Hano Tagb Tglg # Po   [2] PHILIPPINE SINGLE PUNCTUATION..PHILIPPINE DOUBLE PUNCTUATION
+0964..0965    ; Beng Deva Guru Orya Takr # Po   [2] DEVANAGARI DANDA..DEVANAGARI DOUBLE DANDA
 
 # Total code points: 2
 
