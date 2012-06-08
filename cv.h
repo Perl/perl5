@@ -123,6 +123,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvANON_on(cv)		(CvFLAGS(cv) |= CVf_ANON)
 #define CvANON_off(cv)		(CvFLAGS(cv) &= ~CVf_ANON)
 
+/* CvEVAL or CvSPECIAL */
 #define CvUNIQUE(cv)		(CvFLAGS(cv) & CVf_UNIQUE)
 #define CvUNIQUE_on(cv)		(CvFLAGS(cv) |= CVf_UNIQUE)
 #define CvUNIQUE_off(cv)	(CvFLAGS(cv) &= ~CVf_UNIQUE)
@@ -139,6 +140,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvLVALUE_on(cv)		(CvFLAGS(cv) |= CVf_LVALUE)
 #define CvLVALUE_off(cv)	(CvFLAGS(cv) &= ~CVf_LVALUE)
 
+/* eval or PL_main_cv */
 #define CvEVAL(cv)		(CvUNIQUE(cv) && !SvFAKE(cv))
 #define CvEVAL_on(cv)		(CvUNIQUE_on(cv),SvFAKE_off(cv))
 #define CvEVAL_off(cv)		CvUNIQUE_off(cv)
