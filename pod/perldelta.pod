@@ -443,6 +443,12 @@ nulls through unchanged [perl #97478].
 
 =item *
 
+C<prototype> now treats magical variables like C<$1> the same way as
+non-magical variables when checking for the CORE:: prefix, instead of
+treating them as subroutine names.
+
+=item *
+
 Under threaded perls, a run-time code block in a regular expression could
 corrupt the package name stored in the op tree, resulting in bad reads
 in C<caller>, and possibly crashes [perl #113060].
