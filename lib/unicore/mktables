@@ -6947,6 +6947,16 @@ sub trace { return main::trace(@_); }
         '&=' => sub {
                         my $self = shift;
                         my $other = shift;
+                        my $reversed = shift;
+
+                        if ($reversed) {
+                            Carp::my_carp_bug("Bad news.  Can't cope with '"
+                            . ref($other)
+                            . ' &= '
+                            . ref($self)
+                            . "'.  undef returned.");
+                            return;
+                        }
 
                         return if $self->carp_if_locked;
                         $self->_set_range_list($self->_range_list & $other);
