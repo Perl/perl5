@@ -966,6 +966,8 @@ Mail p5p to announce your new release, with a quote you prepared earlier.
 
 Use the template at Porting/release_announcement_template.txt
 
+Send a carbon copy to C<noc@metacpan.org>
+
 =head3 update epigraphs.pod
 
 Add your quote to F<Porting/epigraphs.pod> and commit it.
