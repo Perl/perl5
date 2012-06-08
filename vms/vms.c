@@ -175,7 +175,6 @@ dEXT int h_errno;
 #endif
 
 #if defined(__DECC) || defined(__DECCXX)
-#pragma message disable pragma
 #pragma member_alignment save
 #pragma nomember_alignment longword
 #pragma message save
