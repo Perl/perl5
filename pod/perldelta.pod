@@ -471,6 +471,13 @@ substitution was performed on the same scalar [perl #113486].
 C<UNIVERSAL::can> no longer treats its first argument differently
 depending on whether it is a string or number internally.
 
+=item *
+
+C<open> with "<&" for the mode checks to see whether the third argument is
+a number, in determining whether to treat it as a file descriptor or a
+handle name.  Magical variables like C<$1> were always failing the numeric
+check and being treated as handle names.
+
 =back
 
 =head1 Known Problems
