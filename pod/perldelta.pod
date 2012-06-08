@@ -498,6 +498,12 @@ Numeric operators on magical variables (e.g., S<C<$1 + 1>>) used to use
 floating point operations even where integer operations were more appropriate, resulting in loss of accuracy on 64-bit platforms
 [perl #109542].
 
+=item *
+
+Unary negation no longer treats a string as a number if the string happened
+to be used as a number some time.  So, if $x contains the string "dogs",
+C<-$x> returns "-dogs" even if C<$y=0+$x> has happened at some point.
+
 =back
 
 =head1 Known Problems
