@@ -10371,7 +10371,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_RUNCV:
 	    if (!(o->op_private & OPpOFFBYONE) && !CvCLONE(PL_compcv)) {
 		SV *sv;
-		if (CvUNIQUE(PL_compcv)) sv = &PL_sv_undef;
+		if (CvEVAL(PL_compcv)) sv = &PL_sv_undef;
 		else {
 		    sv = newRV((SV *)PL_compcv);
 		    sv_rvweaken(sv);
