@@ -385,6 +385,13 @@ The C<study> function was made a no-op in 5.16.  It was simply disabled via
 a C<return> statement; the code was left in place.  Now the code supporting
 what C<study> used to do has been removed.
 
+=item *
+
+Under threaded perls, there is no longer a separate PV allocated for every
+COP to store its package name (C<< cop->stashpv >>).  Instead, there is an
+offset (C<< cop->stashoff >>) into the new C<PL_stashpad> array, which
+holds stash pointers.
+
 =back
 
 =head1 Selected Bug Fixes
