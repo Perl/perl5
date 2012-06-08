@@ -271,6 +271,11 @@ XXX Describe change here
 The "Runaway prototype" warning that occurs in bizarre cases has been
 removed as being unhelpful and inconsistent.
 
+=item *
+
+The "Not a format reference" error has been removed, as the only case in
+which it could be triggered was a bug.
+
 =back
 
 =head1 Utility Changes
