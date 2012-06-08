@@ -307,7 +307,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
 #define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
 				       subroutine in another package. Set the
-				       CvIMPORTED_CV_ON() if it needs to be
+				       GvIMPORTED_CV_on() if it needs to be
 				       expanded to a real GV */
 /*                      0x00010000  *** FREE SLOT */
 #define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
