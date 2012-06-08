@@ -504,6 +504,11 @@ Unary negation no longer treats a string as a number if the string happened
 to be used as a number some time.  So, if $x contains the string "dogs",
 C<-$x> returns "-dogs" even if C<$y=0+$x> has happened at some point.
 
+=item *
+
+In Perl 5.14, C<-'-10'> was fixed to return "10", not "+10".  But magical
+variables (C<$1>, ties) were not fixed till now [perl #57706].
+
 =back
 
 =head1 Known Problems
