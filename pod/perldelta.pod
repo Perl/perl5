@@ -122,6 +122,12 @@ make use of them.
 
 =item *
 
+L<B> has been upgraded from version 1.35 to 1.36.
+
+C<B::COP::stashlen> has been replaced with C<B::COP::stashoff>.
+
+=item *
+
 L<ExtUtils::CBuilder> has been upgraded from version 0.280206 to 0.280208.
 
 It no longer fails when trying to embed manifests on Windows
