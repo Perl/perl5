@@ -1614,9 +1614,9 @@ use File::Glob qw(:case);
 
     'Search::Dict' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/Search-Dict-1.03.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/Search-Dict-1.07.tar.gz',
         'FILES'        => q[dist/Search-Dict],
-        'EXCLUDED'     => [qr{^t/release-.*\.t}],
+        'EXCLUDED'     => [qr{^t/release-.*\.t},qr{^README\..*}],
         'UPSTREAM'     => 'blead',
     },
 
