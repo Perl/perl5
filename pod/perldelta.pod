@@ -484,6 +484,14 @@ a number, in determining whether to treat it as a file descriptor or a
 handle name.  Magical variables like C<$1> were always failing the numeric
 check and being treated as handle names.
 
+=item *
+
+C<warn>'s handling of magical variables (C<$1>, ties) has undergone several
+fixes.  FETCH is only called once now on a tied argument or a tied C<$@>
+[perl #97480].  Tied variables returning objects that stringify as "" are
+no longer ignored.  A tied C<$@> that happened to return a reference the
+I<previous> time is was used is no longer ignored.
+
 =back
 
 =head1 Known Problems
