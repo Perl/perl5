@@ -466,6 +466,11 @@ to see a stack frame belonging to that deleted package.  C<caller> could
 crash if the stash's memory address was reused for a scalar and a
 substitution was performed on the same scalar [perl #113486].
 
+=item *
+
+C<UNIVERSAL::can> no longer treats its first argument differently
+depending on whether it is a string or number internally.
+
 =back
 
 =head1 Known Problems
