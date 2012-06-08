@@ -43,6 +43,51 @@ extern "C" {
 }
 #endif
 
+#ifndef PERL_UNUSED_VAR
+# define PERL_UNUSED_VAR(x) ((void)x)
+#endif
+
+#ifndef PERL_MAGIC_ext
+# define PERL_MAGIC_ext '~'
+#endif
+
+#ifndef Newxz
+# define Newxz(v,n,t) Newz(0,v,n,t)
+#endif
+
+#ifndef SvMAGIC_set
+# define SvMAGIC_set(sv, mg) (SvMAGIC(sv) = (mg))
+#endif
+
+#ifndef sv_magicext
+# define sv_magicext(sv, obj, type, vtbl, name, namlen) \
+    THX_sv_magicext(aTHX_ sv, obj, type, vtbl, name, namlen)
+static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
+    MGVTBL const *vtbl, char const *name, I32 namlen)
+{
+    MAGIC *mg;
+    if (obj || namlen)
+	/* exceeded intended usage of this reserve implementation */
+	return NULL;
+    Newxz(mg, 1, MAGIC);
+    mg->mg_virtual = (MGVTBL*)vtbl;
+    mg->mg_type = type;
+    mg->mg_ptr = (char *)name;
+    mg->mg_len = -1;
+    (void) SvUPGRADE(sv, SVt_PVMG);
+    mg->mg_moremagic = SvMAGIC(sv);
+    SvMAGIC_set(sv, mg);
+    SvMAGICAL_off(sv);
+    mg_magical(sv);
+    return mg;
+}
+#endif
+
+#if PERL_VERSION < 8
+# undef SvPVbyte
+# define SvPVbyte(sv, lp) (sv_utf8_downgrade((sv), 0), SvPV((sv), (lp)))
+#endif
+
 /* Perl does not guarantee that U32 is exactly 32 bits.  Some system
  * has no integral type with exactly 32 bits.  For instance, A Cray has
  * short, int and long all at 64 bits so we need to apply this macro
@@ -89,7 +134,7 @@ static void u2s(U32 u, U8* s)
                         ((U32)(*(s+3)) << 24))
 #endif
 
-/* This stucture keeps the current state of algorithm.
+/* This structure keeps the current state of algorithm.
  */
 typedef struct {
   U32 A, B, C, D;  /* current digest */
@@ -98,7 +143,7 @@ typedef struct {
   U8 buffer[128];  /* collect complete 64 byte blocks */
 } MD5_CTX;
 
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) && defined(MGf_DUP)
 STATIC int dup_md5_ctx(pTHX_ MAGIC *mg, CLONE_PARAMS *params)
 {
     MD5_CTX *new_ctx;
@@ -482,7 +527,7 @@ static SV * new_md5_ctx(pTHX_ MD5_CTX *context, const char *klass)
 #endif
 	sv_magicext(sv, NULL, PERL_MAGIC_ext, &vtbl_md5, (const char *)context, 0);
 
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) && defined(MGf_DUP)
     mg->mg_flags |= MGf_DUP;
 #endif
 
@@ -555,7 +600,7 @@ static SV* make_mortal_sv(pTHX_ const unsigned char *src, int type)
 	len = 22;
 	break;
     default:
-	croak("Bad convertion type (%d)", type);
+	croak("Bad conversion type (%d)", type);
 	break;
     }
     return sv_2mortal(newSVpv(ret,len));
