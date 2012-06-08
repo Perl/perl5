@@ -425,6 +425,12 @@ Under threaded perls, a run-time code block in a regular expression could
 corrupt the package name stored in the op tree, resulting in bad reads
 in C<caller>, and possibly crashes [perl #113060].
 
+=item *
+
+Referencing a closure prototype (C<\&{$_[1]}> in an attribute handler for a
+closure) no longer results in a copy of the subroutine (or assertion
+failures on debugging builds).
+
 =back
 
 =head1 Known Problems
