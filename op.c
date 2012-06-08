@@ -10053,7 +10053,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		    firstcop->cop_hints_hash = secondcop->cop_hints_hash;
 
 #ifdef USE_ITHREADS
-		    secondcop->cop_stashoff = NULL;
+		    secondcop->cop_stashoff = 0;
 		    secondcop->cop_file = NULL;
 #else
 		    secondcop->cop_stash = NULL;
