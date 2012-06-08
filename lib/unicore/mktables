@@ -13511,11 +13511,11 @@ sub compile_perl() {
             push @tables_that_may_be_empty, $perl_table->complete_name;
         }
     }
-    my $perl_na = $perl->add_match_table('_X_HST_Not_Applicable',
-                                        Perl_Extension => 1,
-                                        Fate => $INTERNAL_ONLY,
-                                        Initialize => property_ref('HST')->table('NA'),
-                                        );
+    $perl->add_match_table('_X_HST_Not_Applicable',
+                            Perl_Extension => 1,
+                            Fate => $INTERNAL_ONLY,
+                            Initialize => property_ref('HST')->table('NA'),
+                            );
     $lv_lvt_v += $gcb->table('LV') + $gcb->table('LVT') + $gcb->table('V');
     $lv_lvt_v->add_comment('For use in \X; matches: hst=LV | hst=LVT | hst=V');
 
