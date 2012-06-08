@@ -40,7 +40,7 @@ use constant ERROR_58_HINTS => q{Non-subroutine %s hints for %s are not supporte
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '2.10';
+our $VERSION = '2.11';
 
 our $Debug ||= 0;
 
@@ -116,6 +116,7 @@ my %TAGS = (
     ':2.08'  => [qw(:default)],
     ':2.09'  => [qw(:default)],
     ':2.10'  => [qw(:default)],
+    ':2.11'  => [qw(:default)],
 );
 
 # chmod was only introduced in 2.07
@@ -1238,7 +1239,9 @@ sub exception_class { return "autodie::exception" };
 
             {
                 local $@;   # We can't clobber $@, it's wrong!
-                eval "require $exception_class"; ## no critic
+                my $pm_file = $exception_class . ".pm";
+                $pm_file =~ s{ (?: :: | ' ) }{/}gx;
+                eval { require $pm_file };
                 $E = $@;    # Save $E despite ending our local.
             }
 
