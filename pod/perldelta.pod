@@ -446,6 +446,13 @@ C<eval '__PACKAGE__'> now returns the right answer on threaded builds if
 the current package has been assigned over (as in
 C<*ThisPackage:: = *ThatPackage::>) [perl #78742].
 
+=item *
+
+If a package is deleted by code that it calls, it is possible for C<caller>
+to see a stack frame belonging to that deleted package.  C<caller> could
+crash if the stash's memory address was reused for a scalar and a
+substitution was performed on the same scalar [perl #113486].
+
 =back
 
 =head1 Known Problems
