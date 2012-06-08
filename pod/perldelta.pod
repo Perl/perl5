@@ -258,6 +258,8 @@ XXX Describe change here
 
 =over 4
 
+=item *
+
 The "Runaway prototype" warning that occurs in bizarre cases has been
 removed as being unhelpful and inconsistent.
 
