@@ -54,7 +54,6 @@ my @CFG = (
 	   "plan9/config_sh.sample",
 	   "win32/config.gc",
 	   "win32/config.gc64",
-	   "win32/config.gc64nox",
 	   "win32/config.vc",
 	   "win32/config.vc64",
 	   "win32/config.ce",

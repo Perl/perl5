@@ -694,13 +694,8 @@ UTILS		=			\
 .IF "$(CCTYPE)" == "GCC"
 
 .IF "$(WIN64)" == "define"
-.IF "$(GCCCROSS)" == "define"
 CFGSH_TMPL	= config.gc64
 CFGH_TMPL	= config_H.gc64
-.ELSE
-CFGSH_TMPL	= config.gc64nox
-CFGH_TMPL	= config_H.gc64nox
-.ENDIF
 .ELSE
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
@@ -908,7 +903,8 @@ CFG_VARS	=					\
 		uselargefiles=$(USE_LARGE_FILES)	~	\
 		usesitecustomize=$(USE_SITECUST)	~	\
 		LINK_FLAGS=$(LINK_FLAGS)	~	\
-		optimize=$(OPTIMIZE)
+		optimize=$(OPTIMIZE)	~	\
+		ARCHPREFIX=$(ARCHPREFIX)
 
 ICWD = -I..\dist\Cwd -I..\dist\Cwd\lib
 
@@ -975,15 +971,15 @@ config.w32 : $(CFGSH_TMPL)
 # edit config.gc, then make perl using GCC in a minimal configuration (i.e.
 # with MULTI, ITHREADS, IMP_SYS, LARGE_FILES and PERLIO off), then make
 # this target to regenerate config_H.gc.
-# repeat for config.gc64 and config_H.gc64, and again for config.gc64nox and
-# config_H.gc64nox, if you have suitable build environments, otherwise hand-edit
-# them to maintain the same differences with config.gc and config_H.gc as before.
+# repeat for config.gc64 and config_H.gc64, if you have a suitable build
+# environment, otherwise hand-edit them to maintain the same differences with
+# config.gc and config_H.gc as before.
 regen_config_h:
 	$(MINIPERL) -I..\lib config_sh.PL --cfgsh-option-file $(mktmp $(CFG_VARS)) \
 	    $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-del /f $(CFGH_TMPL)
-	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL "INST_VER=$(INST_VER)"
+	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -992,7 +988,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	$(MINIPERL) -I..\lib $(ICWD) config_h.PL "INST_VER=$(INST_VER)" \
+	$(MINIPERL) -I..\lib $(ICWD) config_h.PL "ARCHPREFIX=$(ARCHPREFIX)" \
 	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
 
 ..\lib\buildcustomize.pl: $(MINIPERL) ..\write_buildcustomize.pl

@@ -69,6 +69,10 @@ while (<SH>)
    {
      $_ = "/*#define ". $1 . "_EXP \"\"\t/ **/\n";
    }
+  elsif (/^\s*#define\s+CPP(STDIN|RUN)\s+"gcc(.*)"\s*$/)
+   {
+     $_ = "#define CPP" . $1 . " \"" . $opt{ARCHPREFIX} . "gcc" . $2 . "\"\n";
+   }
   print H;
  }
 close(H);
