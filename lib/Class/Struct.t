@@ -33,11 +33,29 @@ package MyOther;
 use Class::Struct s => '$', a => '@', h => '%', c => 'aClass';
 
 #
+# test overriden accessors
+#
+package OverrideAccessor;
+use Class::Struct;
+
+struct( 'OverrideAccessor', { count => '$' } );
+
+sub count {
+  my ($self,$count) = @_;
+
+  if ( @_ >= 2 ) {
+    $self->{'OverrideAccessor::count'} = $count + 9;
+  }
+
+  return $self->{'OverrideAccessor::count'};
+}
+
+#
 # back to main...
 #
 package main;
 
-use Test::More tests => 24;
+use Test::More tests => 26;
 
 my $obj = MyObj->new;
 isa_ok $obj, 'MyObj';
@@ -100,4 +118,10 @@ is $obk->SomeElem(), 123;
 
 my $recobj = RecClass->new();
 isa_ok $recobj, 'RecClass';
+
+my $override_obj = OverrideAccessor->new( count => 3 );
+is $override_obj->count, 12;
+
+$override_obj->count( 1 );
+is $override_obj->count, 10;
 
