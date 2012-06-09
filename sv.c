@@ -12296,6 +12296,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    Perl_croak(aTHX_ "Cloning substitution context is unimplemented");
 	}
 	else {
+	    ncx->blk_oldcop = (COP*)any_dup(ncx->blk_oldcop, param->proto_perl);
 	    switch (CxTYPE(ncx)) {
 	    case CXt_SUB:
 		ncx->blk_sub.cv		= (ncx->blk_sub.olddepth == 0

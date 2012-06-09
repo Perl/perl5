@@ -3084,7 +3084,8 @@ CODE:
     PERL_SET_CONTEXT(interp_dup);
 
     /* continue after 'clone_with_stack' */
-    interp_dup->Iop = interp_dup->Iop->op_next;
+    if (interp_dup->Iop)
+	interp_dup->Iop = interp_dup->Iop->op_next;
 
     /* run with new perl */
     Perl_runops_standard(interp_dup);
