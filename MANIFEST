@@ -3972,6 +3972,7 @@ ext/XS-APItest/t/cleanup.t	test stack behaviour on unwinding
 ext/XS-APItest/t/clone-with-stack.t	test clone with CLONEf_COPY_STACKS works
 ext/XS-APItest/t/cophh.t	test COPHH API
 ext/XS-APItest/t/coplabel.t	test cop_*_label
+ext/XS-APItest/t/copstash.t	test alloccopstash
 ext/XS-APItest/t/copyhints.t	test hv_copy_hints_hv() API
 ext/XS-APItest/t/customop.t	XS::APItest: tests for custom ops
 ext/XS-APItest/t/eval-filter.t	Simple source filter/eval test

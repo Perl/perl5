@@ -803,6 +803,7 @@
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif
 #if defined(USE_ITHREADS)
+#define alloccopstash(a)	Perl_alloccopstash(aTHX_ a)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define cx_dup(a,b,c,d)		Perl_cx_dup(aTHX_ a,b,c,d)
 #define dirp_dup(a,b)		Perl_dirp_dup(aTHX_ a,b)
@@ -1742,7 +1743,6 @@
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)
 #  endif
 #  if defined(USE_ITHREADS)
-#define alloccopstash(a)	Perl_alloccopstash(aTHX_ a)
 #define mro_meta_dup(a,b)	Perl_mro_meta_dup(aTHX_ a,b)
 #define padlist_dup(a,b)	Perl_padlist_dup(aTHX_ a,b)
 #  endif

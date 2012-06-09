@@ -465,6 +465,15 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     return off;
 }
 
+/*
+=for apidoc alloccopstash
+
+Available only under threaded builds, this function allocates an entry in
+C<PL_stashpad> for the stash passed to it.
+
+=cut
+*/
+
 #ifdef USE_ITHREADS
 PADOFFSET
 Perl_alloccopstash(pTHX_ HV *hv)

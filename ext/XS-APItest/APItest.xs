@@ -3348,6 +3348,17 @@ setup_addissub()
 CODE:
     wrap_op_checker(OP_ADD, addissub_myck_add, &addissub_nxck_add);
 
+#ifdef USE_ITHREADS
+
+bool
+test_alloccopstash()
+CODE:
+    RETVAL = PL_stashpad[alloccopstash(PL_defstash)] == PL_defstash;
+OUTPUT:
+    RETVAL
+
+#endif
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
