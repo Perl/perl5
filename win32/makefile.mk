@@ -975,8 +975,6 @@ config.w32 : $(CFGSH_TMPL)
 # edit config.gc, then make perl using GCC in a minimal configuration (i.e.
 # with MULTI, ITHREADS, IMP_SYS, LARGE_FILES and PERLIO off), then make
 # this target to regenerate config_H.gc.
-# unfortunately, some further manual editing is also then required to restore all
-# the special _MSC_VER handling that is otherwise lost.
 # repeat for config.gc64 and config_H.gc64, and again for config.gc64nox and
 # config_H.gc64nox, if you have suitable build environments, otherwise hand-edit
 # them to maintain the same differences with config.gc and config_H.gc as before.

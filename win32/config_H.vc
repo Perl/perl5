@@ -912,15 +912,9 @@
  */
 #define HAS_QUAD	/**/
 #ifdef HAS_QUAD
-#   ifndef __GNUC__
-#	define Quad_t __int64	/**/
-#	define Uquad_t unsigned __int64	/**/
-#	define QUADKIND 5	/**/
-#   else
-#	define Quad_t long long	/**/
-#	define Uquad_t unsigned long long	/**/
-#	define QUADKIND 3	/**/
-#   endif
+#   define Quad_t __int64	/**/
+#   define Uquad_t unsigned __int64	/**/
+#   define QUADKIND 5	/**/
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
 #   define QUAD_IS_LONG_LONG	3
@@ -1063,9 +1057,7 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-#ifdef __GNUC__
-#   define	CASTI32		/**/
-#endif
+/*#define	CASTI32		/**/
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative
@@ -2237,11 +2229,7 @@
  *		static              (c89 compilers)
  */
 #define HAS_STATIC_INLINE				/**/
-#ifndef __GNUC__
-#  define PERL_STATIC_INLINE static __inline  	/**/
-#else
-#  define PERL_STATIC_INLINE static __inline__	/**/
-#endif
+#define PERL_STATIC_INLINE static __inline  	/**/
 
 /* EBCDIC:
  *     This symbol, if defined, indicates that this system uses
@@ -2308,15 +2296,9 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#ifndef __GNUC__
-#   define CPPSTDIN "cppstdin"
-#   define CPPMINUS ""
-#   define CPPRUN "cl -nologo -E"
-#else
-#   define CPPSTDIN "gcc -E"
-#   define CPPMINUS "-"
-#   define CPPRUN "gcc -E"
-#endif
+#define CPPSTDIN "cppstdin"
+#define CPPMINUS ""
+#define CPPRUN "cl -nologo -E"
 #define CPPLAST ""
 
 /* HAS_ACCESS:
@@ -2606,11 +2588,7 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#   ifndef __GNUC__
-#	define LONG_DOUBLESIZE 8		/**/
-#   else
-#	define LONG_DOUBLESIZE 12		/**/
-#   endif
+#   define LONG_DOUBLESIZE 8		/**/
 #endif
 
 /* HAS_LONG_LONG:
@@ -4293,13 +4271,8 @@
 #define	I32TYPE		long	/**/
 #define	U32TYPE		unsigned long	/**/
 #ifdef HAS_QUAD
-#   ifndef __GNUC__
-#	define	I64TYPE		__int64	/**/
-#	define	U64TYPE		unsigned __int64	/**/
-#   else
-#	define	I64TYPE		long long	/**/
-#	define	U64TYPE		unsigned long long	/**/
-#   endif
+#define	I64TYPE		__int64	/**/
+#define	U64TYPE		unsigned __int64	/**/
 #endif
 #define	NVTYPE		double		/**/
 #define	IVSIZE		4		/**/
