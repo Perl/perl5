@@ -199,13 +199,13 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfaq>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+L<perlfaq> has been synchronised with version 5.0150040 from C<CPAN>.
 
 =back
 
