@@ -2606,7 +2606,7 @@ means that all the elements of the map array are either rational numbers or
 the string C<"NaN">, meaning "Not a Number".  A rational number is either an
 integer, or two integers separated by a solidus (C<"/">).  The second integer
 represents the denominator of the division implied by the solidus, and is
-actually always positive, so it is guaranteed not to be 0 and to not to be
+actually always positive, so it is guaranteed not to be 0 and to not be
 signed.  When the element is a plain integer (without the
 solidus), it may need to be adjusted to get the correct value by adding the
 offset, just as other C<"a"> properties.  No adjustment is needed for
@@ -2618,7 +2618,7 @@ can use something like this:
 
  my ($invlist_ref, $invmap_ref, $format) = prop_invmap($property);
  if ($format && $format eq "ar") {
-     map { $_ = eval $_ } @$invmap_ref;
+     map { $_ = eval $_ if $_ ne 'NaN' } @$map_ref;
  }
 
 Here's some entries from the output of the property "Nv", which has format
