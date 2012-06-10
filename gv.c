@@ -370,7 +370,6 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	GvMULTI_on(gv);			/* _was_ mentioned */
     if (doproto) {			/* Replicate part of newSUB here. */
 	CV *cv;
-	ENTER;
 	if (has_constant) {
 	    /* newCONSTSUB takes ownership of the reference from us.  */
 	    cv = newCONSTSUB_flags(stash, name, len, flags, has_constant);
@@ -384,11 +383,12 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	    if (exported_constant)
 		GvIMPORTED_CV_on(gv);
 	} else {
+	    ENTER;
 	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
 	    cv = PL_compcv;
 	    GvCV_set(gv,cv);
+	    LEAVE;
 	}
-	LEAVE;
 
         mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar($) { (shift) } sub ASDF::baz($); *ASDF::baz = \&Foo::bar */
 	CvGV_set(cv, gv);
