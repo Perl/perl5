@@ -4411,6 +4411,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		PL_op = NULL;
 
+                re_sv = NULL;
 		if (logical == 0)        /*   (?{})/   */
 		    sv_setsv(save_scalar(PL_replgv), ret); /* $^R */
 		else if (logical == 1) { /*   /(?(?{...})X|Y)/    */
@@ -4418,7 +4419,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    logical = 0;
 		}
 		else {                   /*  /(??{})  */
-		    re_sv = NULL;
 		    /*  if its overloaded, let the regex compiler handle
 		     *  it; otherwise extract regex, or stringify  */
 		    if (!SvAMAGIC(ret)) {
