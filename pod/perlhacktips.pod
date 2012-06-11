@@ -967,14 +967,16 @@ C<-std1> mode on.
 
 =head1 MEMORY DEBUGGERS
 
-B<NOTE 1>: Running under memory debuggers such as Purify, valgrind, or
-Third Degree greatly slows down the execution: seconds become minutes,
+B<NOTE 1>: Running under older memory debuggers such as Purify, valgrind
+or Third Degree greatly slows down the execution: seconds become minutes,
 minutes become hours. For example as of Perl 5.8.1, the
 ext/Encode/t/Unicode.t takes extraordinarily long to complete under
 e.g. Purify, Third Degree, and valgrind. Under valgrind it takes more
 than six hours, even on a snappy computer. The said test must be doing
 something that is quite unfriendly for memory debuggers. If you don't
 feel like waiting, that you can simply kill away the perl process.
+Roughly valgrind slows down execution by factor 10, AddressSanitizer
+by factor 2.
 
 B<NOTE 2>: To minimize the number of memory leak false alarms (see
 L</PERL_DESTRUCT_LEVEL> for more information), you have to set the
@@ -1137,8 +1139,8 @@ finally report any memory problems.
 
 =head2 valgrind
 
-The excellent valgrind tool can be used to find out both memory leaks
-and illegal memory accesses. As of version 3.3.0, Valgrind only
+The valgrind tool can be used to find out both memory leaks
+and illegal heap memory accesses. As of version 3.3.0, Valgrind only
 supports Linux on x86, x86-64 and PowerPC and Darwin (OS X) on x86 and
 x86-64). The special "test.valgrind" target can be used to run the
 tests under valgrind. Found errors and memory leaks are logged in
@@ -1156,6 +1158,46 @@ of them. Some additional suppressions are defined in F<t/perl.supp>.
 To get valgrind and for more information see
 
     http://valgrind.org/
+
+=head2 AddressSanitizer
+
+AddressSanitizer is a clang extension, included in clang since v3.1.
+It checks illegal heap pointers, global pointers, stack pointers and use
+after free, and is so fast that you can easily compile your debugging
+or optimized perl with it. It does not check memory leaks though.
+AddressSanitizer is available for linux, Mac OS X and soon on Windows.
+
+You should create the perl with AddressSanitizer using:
+
+    sh Configure -Dcc=clang -Accflags=-faddress-sanitizer \
+     -Aldflags=-faddress-sanitizer -Alddlflags=-shared\ -faddress-sanitizer
+
+where these arguments mean:
+
+=over 4
+
+=item * -Dcc=clang
+
+If clang is in your path, otherwise point to the path of the installed or temp.
+clang with AddressSanitizer enabled.
+
+=item * -Accflags=-faddress-sanitizer
+
+Instrument pointer accesses with AddressSanitizer.
+
+=item * -Aldflags=-faddress-sanitizer
+
+Link with AddressSanitizer.
+
+=item * -Alddlflags=-shared\ -faddress-sanitizer
+
+With a shared libperl.so, i.e. C<-Duseshrplib> is used, you must manually add
+C<-shared>.
+
+=back
+
+See L<http://code.google.com/p/address-sanitizer/wiki/AddressSanitizer>
+
 
 =head1 PROFILING
 
