@@ -533,10 +533,10 @@ sub _loose_name ($) {
         if ($list && ! $list_is_from_mktables) {
             my $taint = substr($list,0,0); # maintain taint
 
-            # Separate the extras from the code point list, and for
-            # user-defined properties, make sure the latter are well-behaved
-            # for downstream code.
-            if ($user_defined) {
+            # Separate the extras from the code point list, and make sure
+            # user-defined properties and tr/// are well-behaved for
+            # downstream code.
+            if ($user_defined || $none) {
                 my @tmp = split(/^/m, $list);
                 my %seen;
                 no warnings;

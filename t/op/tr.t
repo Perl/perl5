@@ -1,12 +1,14 @@
 # tr.t
 
+use utf8;
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
 }
 
-plan tests => 130;
+plan tests => 131;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -513,6 +515,14 @@ SKIP: {
     skip "no encoding", 1 unless eval { require encoding; 1 };
     eval q{ use encoding "utf8"; $a ~= tr/a/b/; };
     ok 1;
+}
+
+{ # [perl #113584]
+
+    my $x = "Perlα";
+    $x =~ tr/αα/βγ/;
+    note $x;
+    is($x, "Perlβ", "Only first of multiple transliterations is used");
 }
 
 1;
