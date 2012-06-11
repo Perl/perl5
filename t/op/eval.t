@@ -437,7 +437,7 @@ is($got, "ok\n", 'eval and last');
 
 {
     no warnings;
-    eval "/ /b;";
+    eval "&& $b;";
     like($@, qr/^syntax error/, 'eval syntax error, no warnings');
 }
 
