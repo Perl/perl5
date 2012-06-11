@@ -2605,7 +2605,7 @@
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long long.
  */
-/*#define HAS_LONG_LONG		/ **/
+#define HAS_LONG_LONG		/**/
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
