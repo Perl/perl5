@@ -326,6 +326,14 @@ L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+A regression introduced in Perl v5.16.0 involving
+C<tr/I<SEARCHLIST>/I<REPLACEMENTLIST>/> has been fixed.  Only the first
+instance is supposed to be meaningful if a character appears more than
+once in C<I<SEARCHLIST>>.  Under some circumstances, the final instance
+was overriding all earlier ones.  [perl #113584]
+
 =back
 
 =head1 Known Problems
