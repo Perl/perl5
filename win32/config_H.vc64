@@ -906,7 +906,7 @@
 
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
- *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
+ *	Quad_t, and its unsigned counterpart, Uquad_t. QUADKIND will be one
  *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, QUAD_IS_INT64_T,
  *	or QUAD_IS___INT64.
  */
