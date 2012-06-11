@@ -64,6 +64,21 @@ referred to U+0007, but would raise a deprecated warning.  Now, "BELL"
 refers to U+1F514, and the name for U+0007 is "ALERT".  All the
 functions in L<charnames> have been correspondingly updated.
 
+=head2 Alphanumeric operators must now be separated from the closing
+delimter of regular expressions
+
+You may no longer write something like:
+
+ m/a/and 1
+
+Instead you must write
+
+ m/a/ and 1
+
+with whitespace separating the operator from the closing delimiter of
+the regular expression.  Not having whitespace has resulted in a
+deprecated warning since Perl v5.14.0.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

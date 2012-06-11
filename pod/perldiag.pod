@@ -135,20 +135,6 @@ string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
 the string, just write C<"-foo">.  If you meant the function call,
 write C<-foo()>.
 
-=item Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.18, it will be resolved the other way
-
-(W deprecated, ambiguous) You wrote a pattern match with substitution
-immediately followed by "le".  In Perl 5.16 and earlier, this is
-resolved as meaning to take the result of the substitution, and see if
-it is stringwise less-than-or-equal-to what follows in the expression.
-Having the "le" immediately following a pattern is deprecated behavior,
-so in Perl 5.18, this expression will be resolved as meaning to do the
-pattern match using the rules of the current locale, and evaluate the
-rhs as an expression when doing the substitution.  In 5.14, and 5.16 if
-you want the latter interpretation, you can simply write "el" instead.
-But note that the C</l> modifier should not be used explicitly anyway;
-you should use C<use locale> instead.  See L<perllocale>.
-
 =item '|' and '<' may not both be specified on command line
 
 (F) An error peculiar to VMS.  Perl does its own command line
@@ -2110,27 +2096,6 @@ spots.  This is now heavily deprecated.
 
 (F) The parser has given up trying to parse the program after 10 errors.
 Further error messages would likely be uninformative.
-
-=item Having no space between pattern and following word is deprecated
-
-(D syntax)
-
-You had a word that isn't a regex modifier immediately following
-a pattern without an intervening space.  If you are trying to use
-the C</le> flags on a substitution, use C</el> instead.  Otherwise, add
-white space between the pattern and following word to eliminate
-the warning.  As an example of the latter, the two constructs:
-
-
- $a =~ m/$foo/sand $bar
- $a =~ m/$foo/s and $bar
-
-both currently mean the same thing, but it is planned to disallow
-the first form in Perl 5.18.  And,
-
- $a =~ m/$foo/and $bar
-
-will be disallowed too.
 
 =item Hexadecimal number > 0xffffffff non-portable
 
@@ -4998,6 +4963,21 @@ subvert Perl's population of %ENV for nefarious purposes.
 =item Unknown "re" subpragma '%s' (known ones are: %s)
 
 (W) You tried to use an unknown subpragma of the "re" pragma.
+
+=item Unknown regex modifier "%s"
+
+(F) Alphanumerics immediately following the closing delimiter
+of a regular expression pattern are interpreted by Perl as modifier
+flags for the regex.  One of the ones you specified is invalid.  One way
+this can happen is if you didn't put in white space between the end of
+the regex and a following alphanumeric operator:
+
+ if ($a =~ /foo/and $bar == 3) { ... }
+
+The C<"a"> is a valid modifier flag, but the C<"n"> is not, and raises
+this error.  Likely what was meant instead was:
+
+ if ($a =~ /foo/ and $bar == 3) { ... }
 
 =item Unknown switch condition (?(%s in regex; marked by <-- HERE in m/%s/
 

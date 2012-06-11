@@ -19,7 +19,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 474;  # Update this when adding/deleting tests.
+plan tests => 436;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1066,51 +1066,6 @@ sub run_tests {
         use feature 'unicode_strings';
         ok "\xc0" =~ /\w/, 'Under unicode_strings: "\xc0" =~ /\w/';
         ok "\xc0" !~ /(?d:\w)/, 'Under unicode_strings: "\xc0" !~ /(?d:\w)/';
-    }
-
-    {
-        # Test that a regex followed by an operator and/or a statement modifier work
-        # These tests use string-eval so that it reports a clean error when it fails
-        # (without the string eval the test script might be unparseable)
-
-        # Note: these test check the behaviour that currently is valid syntax
-        # If a new regex modifier is added and a test fails then there is a backwards-compatibility issue
-        # Note-2: a new deprecate warning was added for this with commit e6897b1a5db0410e387ccbf677e89fc4a1d8c97a
-        # which indicate that this syntax will be removed in 5.16.
-        # When this happens the tests can be removed
-
-	foreach (['my $r = "a" =~ m/a/lt 2', 'm', 'lt'],
-		 ['my $r = "a" =~ m/a/le 1', 'm', 'le'],
-		 ['my $r = "a" =~ m/a/eq 1', 'm', 'eq'],
-		 ['my $r = "a" =~ m/a/ne 0', 'm', 'ne'],
-		 ['my $r = "a" =~ m/a/and 1', 'm', 'and'],
-		 ['my $r = "a" =~ m/a/unless 0', 'm', 'unless'],
-		 ['my $c = 1; my $r; $r = "a" =~ m/a/while $c--', 'm', 'while'],
-		 ['my $c = 0; my $r; $r = "a" =~ m/a/until $c++', 'm', 'until'],
-		 ['my $r; $r = "a" =~ m/a/for 1', 'm', 'for'],
-		 ['my $r; $r = "a" =~ m/a/foreach 1', 'm', 'foreach'],
-
-		 ['my $t = "a"; my $r = $t =~ s/a//lt 2', 's', 'lt'],
-		 ['my $t = "a"; my $r = $t =~ s/a//le 1', 's', 'le'],
-		 ['my $t = "a"; my $r = $t =~ s/a//ne 0', 's', 'ne'],
-		 ['my $t = "a"; my $r = $t =~ s/a//and 1', 's', 'and'],
-		 ['my $t = "a"; my $r = $t =~ s/a//unless 0', 's', 'unless'],
-
-		 ['my $c = 1; my $r; my $t = "a"; $r = $t =~ s/a//while $c--', 's', 'while'],
-		 ['my $c = 0; my $r; my $t = "a"; $r = $t =~ s/a//until $c++', 's', 'until'],
-		 ['my $r; my $t = "a"; $r = $t =~ s/a//for 1', 's', 'for'],
-		 ['my $r; my $t = "a"; $r = $t =~ s/a//for 1', 's', 'foreach'],
-		) {
-	    my $message = sprintf 'regex (%s) followed by $_->[2]',
-		$_->[1] eq 'm' ? 'm//' : 's///';
-	    my $code = "$_->[0]; 'eval_ok ' . \$r";
-	    my $result = do {
-		no warnings 'syntax';
-		eval $code;
-	    };
-	    is($@, '', $message);
-	    is($result, 'eval_ok 1', $message);
-	}
     }
 
     {

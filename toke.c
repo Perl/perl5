@@ -9014,13 +9014,15 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
      * current regex.  This routine will set it to any charset modifier found.
      * The caller shouldn't change it.  This way, another charset modifier
      * encountered in the parse can be detected as an error, as we have decided
-     * allow only one */
+     * to allow only one */
 
     const char c = **s;
 
     if (! strchr(valid_flags, c)) {
         if (isALNUM(c)) {
-	    goto deprecate;
+	    yyerror(Perl_form(aTHX_ "Unknown regexp modifier \"/%c\"", c));
+            (*s)++;
+            return TRUE;
         }
         return FALSE;
     }
@@ -9034,34 +9036,6 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
         case KEEPCOPY_PAT_MOD:    *pmfl |= RXf_PMf_KEEPCOPY; break;
         case NONDESTRUCT_PAT_MOD: *pmfl |= PMf_NONDESTRUCT; break;
 	case LOCALE_PAT_MOD:
-
-	    /* In 5.14, qr//lt is legal but deprecated; the 't' means they
-	     * can't be regex modifiers.
-	     * In 5.14, s///le is legal and ambiguous.  Try to disambiguate as
-	     * much as easily done.  s///lei, for example, has to mean regex
-	     * modifiers if it's not an error (as does any word character
-	     * following the 'e').  Otherwise, we resolve to the backwards-
-	     * compatible, but less likely 's/// le ...', i.e. as meaning
-	     * less-than-or-equal.  The reason it's not likely is that s//
-	     * returns a number for code in the field (/r returns a string, but
-	     * that wasn't added until the 5.13 series), and so '<=' should be
-	     * used for comparing, not 'le'. */
-	    if (*((*s) + 1) == 't') {
-		goto deprecate;
-	    }
-	    else if (*((*s) + 1) == 'e' && ! isALNUM(*((*s) + 2))) {
-
-		/* 'e' is valid only for substitutes, s///e.  If it is not
-		 * valid in the current context, then 'm//le' must mean the
-		 * comparison operator, so use the regular deprecation message.
-		 */
-		if (! strchr(valid_flags, 'e')) {
-		    goto deprecate;
-		}
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-		    "Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.18, it will be resolved the other way");
-		return FALSE;
-	    }
 	    if (*charset) {
 		goto multiple_charsets;
 	    }
@@ -9069,11 +9043,6 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 	    *charset = c;
 	    break;
 	case UNICODE_PAT_MOD:
-	    /* In 5.14, qr//unless and qr//until are legal but deprecated; the
-	     * 'n' means they can't be regex modifiers */
-	    if (*((*s) + 1) == 'n') {
-		goto deprecate;
-	    }
 	    if (*charset) {
 		goto multiple_charsets;
 	    }
@@ -9081,12 +9050,6 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 	    *charset = c;
 	    break;
 	case ASCII_RESTRICT_PAT_MOD:
-	    /* In 5.14, qr//and is legal but deprecated; the 'n' means they
-	     * can't be regex modifiers */
-	    if (*((*s) + 1) == 'n') {
-		goto deprecate;
-	    }
-
 	    if (! *charset) {
 		set_regex_charset(pmfl, REGEX_ASCII_RESTRICTED_CHARSET);
 	    }
@@ -9115,11 +9078,6 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 
     (*s)++;
     return TRUE;
-
-    deprecate:
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_SYNTAX),
-	    "Having no space between pattern and following word is deprecated");
-        return FALSE;
 
     multiple_charsets:
 	if (*charset != c) {
