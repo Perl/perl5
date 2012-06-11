@@ -2520,12 +2520,12 @@ CV*
 Perl_get_cvn_flags(pTHX_ const char *name, STRLEN len, I32 flags)
 {
     GV* const gv = gv_fetchpvn_flags(name, len, flags, SVt_PVCV);
-    /* XXX this is probably not what they think they're getting.
-     * It has the same effect as "sub name;", i.e. just a forward
-     * declaration! */
 
     PERL_ARGS_ASSERT_GET_CVN_FLAGS;
 
+    /* XXX this is probably not what they think they're getting.
+     * It has the same effect as "sub name;", i.e. just a forward
+     * declaration! */
     if ((flags & ~GV_NOADD_MASK) && !GvCVu(gv)) {
 	SV *const sv = newSVpvn_flags(name, len, flags & SVf_UTF8);
     	return newSUB(start_subparse(FALSE, 0),
