@@ -1057,7 +1057,7 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-/*#define	CASTI32		/**/
+/*#define	CASTI32		/ **/
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative
@@ -2599,7 +2599,7 @@
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long long.
  */
-/*#define HAS_LONG_LONG		/**/
+/*#define HAS_LONG_LONG		/ **/
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
