@@ -6864,7 +6864,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	}
     }
     if (const_sv) {
-	HV *stash;
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
@@ -6880,15 +6879,10 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		const_sv
 	    );
-	}
-	stash =
-            (CvGV(cv) && GvSTASH(CvGV(cv)))
-                ? GvSTASH(CvGV(cv))
-                : CvSTASH(cv)
-                    ? CvSTASH(cv)
-                    : PL_curstash;
-	if (HvENAME_HEK(stash))
-            mro_method_changed_in(stash); /* sub Foo::Bar () { 123 } */
+	    if (HvENAME_HEK(GvSTASH(gv)))
+		/* sub Foo::bar { (shift)+1 } */
+		mro_method_changed_in(GvSTASH(gv));
+	}				/* sub Foo::Bar () { 123 } */
 	if (PL_madskills)
 	    goto install_block;
 	op_free(block);
