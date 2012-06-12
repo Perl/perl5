@@ -1,7 +1,10 @@
 # Haiku hints file
 # $Id$
 
-prefix="/boot/common"
+case "$prefix" in
+'') prefix="/boot/common" ;;
+*) ;; # pass the user supplied value through
+esac
 
 libpth='/boot/home/config/lib /boot/common/lib /system/lib'
 usrinc='/boot/develop/headers/posix'
