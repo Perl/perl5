@@ -864,6 +864,7 @@ threadsv_names()
 #define OP_private_ix		U8p | offsetof(struct op, op_private)
 
 #define PMOP_pmflags_ix		U32p | offsetof(struct pmop, op_pmflags)
+#define PMOP_code_list_ix	OPp | offsetof(struct pmop, op_code_list)
 
 #ifdef USE_ITHREADS
 #define PMOP_pmoffset_ix	IVp | offsetof(struct pmop, op_pmoffset)
@@ -922,6 +923,7 @@ next(o)
 	B::LOOP::nextop = LOOP_nextop_ix
 	B::LOOP::lastop = LOOP_lastop_ix
 	B::PMOP::pmflags = PMOP_pmflags_ix
+	B::PMOP::code_list = PMOP_code_list_ix
 	B::SVOP::sv = SVOP_sv_ix
 	B::SVOP::gv = SVOP_gv_ix
 	B::PADOP::padix = PADOP_padix_ix
