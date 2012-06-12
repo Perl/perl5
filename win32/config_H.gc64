@@ -2298,9 +2298,9 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#define CPPSTDIN "x86_64-w64-mingw32-gcc -E"
+#define CPPSTDIN "gcc -E"
 #define CPPMINUS "-"
-#define CPPRUN "x86_64-w64-mingw32-gcc -E"
+#define CPPRUN "gcc -E"
 #define CPPLAST ""
 
 /* HAS_ACCESS:
