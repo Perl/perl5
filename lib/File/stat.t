@@ -27,14 +27,6 @@ BEGIN {
         $file = readlink $file;
         die "Can't readlink(../lib/File/stat.t): $!" if ! defined $file;
     }
-
-    our $hasst;
-    eval { my @n = stat $file };
-    $hasst = 1 unless $@ && $@ =~ /unimplemented/;
-    unless ($hasst) { plan skip_all => "no stat"; exit 0 }
-    use Config;
-    $hasst = 0 unless $Config{'i_sysstat'} eq 'define';
-    unless ($hasst) { plan skip_all => "no sys/stat.h"; exit 0 }
 }
 
 # Originally this was done in the BEGIN block, but perl is still
