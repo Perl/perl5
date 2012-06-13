@@ -11,7 +11,7 @@ use Test::More;
 use Config qw( %Config );
 use File::Temp qw( tempfile tempdir );
 
-require File::stat;
+use File::stat;
 
 my (undef, $file) = tempfile();
 
@@ -19,6 +19,7 @@ my (undef, $file) = tempfile();
     my @stat = CORE::stat $file;
     my $stat = File::stat::stat($file);
     isa_ok($stat, 'File::stat', 'should build a stat object');
+    is_deeply($stat, \@stat, '... and matches the builtin');
 
     my $i = 0;
     foreach ([dev => 'device number'],
@@ -43,6 +44,11 @@ my (undef, $file) = tempfile();
         }
         ++$i;
     }
+
+    my $stat2 = stat $file;
+    isa_ok($stat2, 'File::stat',
+           'File::stat exports stat, overriding the builtin');
+    is_deeply($stat2, $stat, '... and matches the direct call');
 }
 
 sub test_X_ops {
