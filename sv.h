@@ -494,8 +494,6 @@ struct xpvgv {
     union _xnvu xnv_u;
 };
 
-/* This structure must match XPVCV in cv.h */
-
 typedef U16 cv_flags_t;
 
 #define _XPVCV_COMMON								\
@@ -516,6 +514,8 @@ typedef U16 cv_flags_t;
 				  * compilation) in the lexically enclosing	\
 				  * sub */					\
     cv_flags_t	xcv_flags
+
+/* This structure must match XPVCV in cv.h */
 
 struct xpvfm {
     _XPV_HEAD;
