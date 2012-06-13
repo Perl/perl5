@@ -47,7 +47,6 @@ SKIP: {
 
     my $new = $listener->accept();
 
-    $TODO = "this information isn't cached for accepted sockets";
     is($new->sockdomain(), $d, 'domain match');
   SKIP: {
       skip "no Socket::SO_PROTOCOL", 1 if !defined(eval { Socket::SO_PROTOCOL });

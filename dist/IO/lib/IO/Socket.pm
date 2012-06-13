@@ -249,6 +249,8 @@ sub accept {
     $peer = accept($new,$sock)
 	or return;
 
+    ${*$new}{$_} = ${*$sock}{$_} for qw( io_socket_domain io_socket_type io_socket_proto );
+
     return wantarray ? ($new, $peer)
     	      	     : $new;
 }
