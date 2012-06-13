@@ -14,90 +14,99 @@ use File::Temp 'tempfile';
 require File::stat;
 
 my (undef, $file) = tempfile();
-my @stat = stat $file; # This is the function stat.
-my $stat = File::stat::stat( $file ); # This is the OO stat.
-isa_ok($stat, 'File::stat', 'should build a stat object' );
 
-my $i = 0;
-foreach ([dev => 'device number'],
-         [ino => 'inode number'],
-         [mode => 'file mode'],
-         [nlink => 'number of links'],
-         [uid => 'owner uid'],
-         [gid => 'group id'],
-         [rdev => 'device identifier'],
-         [size => 'file size'],
-         [atime => 'last access time'],
-         [mtime => 'last modify time'],
-         [ctime => 'change time'],
-         [blksize => 'IO block size'],
-         [blocks => 'number of blocks']) {
-    my ($meth, $desc) = @$_;
-    # On OS/2 (fake) ino is not constant, it is incremented each time
- SKIP: {
-        skip('inode number is not constant on OS/2', 1)
-            if $i == 1 && $^O eq 'os2';
-        is($stat->$meth, $stat[$i], "$desc in position $i");
-    }
-    ++$i;
-}
+{
+    my @stat = CORE::stat $file;
+    my $stat = File::stat::stat($file);
+    isa_ok($stat, 'File::stat', 'should build a stat object');
 
-for my $op (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
-    for my $access ('', 'use filetest "access";') {
-        my ($warnings, $awarn, $vwarn, $rv);
-        my $desc = $access 
-            ? "for -$op under use filetest 'access'" : "for -$op";
-        {
-            local $SIG{__WARN__} = sub {
-                my $w = shift;
-                if ($w =~ /^File::stat ignores VMS ACLs/) {
-                    ++$vwarn;
-                } elsif ($w =~ /^File::stat ignores use filetest 'access'/) {
-                    ++$awarn;
-                } else {
-                    $warnings .= $w;
-                }
-            };
-            $rv = eval "$access; -$op \$stat";
+    my $i = 0;
+    foreach ([dev => 'device number'],
+             [ino => 'inode number'],
+             [mode => 'file mode'],
+             [nlink => 'number of links'],
+             [uid => 'owner uid'],
+             [gid => 'group id'],
+             [rdev => 'device identifier'],
+             [size => 'file size'],
+             [atime => 'last access time'],
+             [mtime => 'last modify time'],
+             [ctime => 'change time'],
+             [blksize => 'IO block size'],
+             [blocks => 'number of blocks']) {
+        my ($meth, $desc) = @$_;
+        # On OS/2 (fake) ino is not constant, it is incremented each time
+    SKIP: {
+            skip('inode number is not constant on OS/2', 1)
+                if $i == 1 && $^O eq 'os2';
+            is($stat->$meth, $stat[$i], "$desc in position $i");
         }
-        is($@, '', "Overload succeeds $desc");
-
-        if ($^O eq "VMS" && $op =~ /[rwxRWX]/) {
-            is($vwarn, 1, "warning about VMS ACLs $desc");
-        } else {
-            is($rv, eval "-$op \$file", "correct overload $desc")
-                unless $access;
-            is($vwarn, undef, "no warnings about VMS ACLs $desc");
-        }
-
-        # 111640 - File::stat bogus index check in overload
-        if ($access && $op =~ /[rwxRXW]/) {
-            # these should all warn with filetest access
-            is($awarn, 1,
-               "produced the right warning $desc");
-        } else {
-            # -d and others shouldn't warn
-            is($awarn, undef, "should be no warning $desc")
-        }
-
-        is($warnings, undef, "no other warnings seen $desc");
+        ++$i;
     }
 }
+
+sub test_X_ops {
+    my ($file, $desc_tail) = @_;
+    my @stat = CORE::stat $file;
+    my $stat = File::stat::stat($file);
+    isa_ok($stat, 'File::stat', 'should build a stat object');
+
+    for my $op (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
+        for my $access ('', 'use filetest "access";') {
+            my ($warnings, $awarn, $vwarn, $rv);
+            my $desc = $access
+                ? "for -$op under use filetest 'access' $desc_tail"
+                    : "for -$op $desc_tail";
+            {
+                local $SIG{__WARN__} = sub {
+                    my $w = shift;
+                    if ($w =~ /^File::stat ignores VMS ACLs/) {
+                        ++$vwarn;
+                    } elsif ($w =~ /^File::stat ignores use filetest 'access'/) {
+                        ++$awarn;
+                    } else {
+                        $warnings .= $w;
+                    }
+                };
+                $rv = eval "$access; -$op \$stat";
+            }
+            is($@, '', "Overload succeeds $desc");
+
+            if ($^O eq "VMS" && $op =~ /[rwxRWX]/) {
+                is($vwarn, 1, "warning about VMS ACLs $desc");
+            } else {
+                is($rv, eval "-$op \$file", "correct overload $desc")
+                    unless $access;
+                is($vwarn, undef, "no warnings about VMS ACLs $desc");
+            }
+
+            # 111640 - File::stat bogus index check in overload
+            if ($access && $op =~ /[rwxRXW]/) {
+                # these should all warn with filetest access
+                is($awarn, 1,
+                   "produced the right warning $desc");
+            } else {
+                # -d and others shouldn't warn
+                is($awarn, undef, "should be no warning $desc")
+            }
+
+            is($warnings, undef, "no other warnings seen $desc");
+        }
+    }
+}
+
+test_X_ops($file, "for $file");
 
 SKIP: {
-    my $file = '../perl';
-    -e $file && -x $file or skip "$file is not present and executable", 4;
+    -e $^X && -x $^X or skip "$^X is not present and executable", 4;
     $^O eq "VMS" and skip "File::stat ignores VMS ACLs", 4;
 
-    my $stat = File::stat::stat( $file ); # This is the OO stat.
-    foreach (qw/x X/) {
-    my $rv = eval "-$_ \$stat";
-    ok( !$@,                            "-$_ overload succeeds" )
-      or diag( $@ );
-    is( $rv, eval "-$_ \$file",         "correct -$_ overload" );
-  }
+    test_X_ops($^X, "for $^X");
 }
 
+
+my $stat = File::stat::stat($file);
+isa_ok($stat, 'File::stat', 'should build a stat object');
 
 for (split //, "tTB") {
     eval "-$_ \$stat";
@@ -107,12 +116,14 @@ for (split //, "tTB") {
 SKIP: {
 	local *STAT;
 	skip("Could not open file: $!", 2) unless open(STAT, $file);
-	ok( File::stat::stat('STAT'), '... should be able to find filehandle' );
+	isa_ok(File::stat::stat('STAT'), 'File::stat',
+	       '... should be able to find filehandle');
 
 	package foo;
 	local *STAT = *main::STAT;
-	main::ok( my $stat2 = File::stat::stat('STAT'), 
-		'... and filehandle in another package' );
+	my $stat2 = File::stat::stat('STAT');
+	main::isa_ok($stat2, 'File::stat',
+		     '... and filehandle in another package');
 	close STAT;
 
 #	VOS open() updates atime; ignore this error (posix-975).
@@ -126,7 +137,7 @@ SKIP: {
 
 	main::skip("OS/2: inode number is not constant on os/2", 1) if $^O eq 'os2';
 
-	main::is( "@$stat", "@$stat3", '... and must match normal stat' );
+	main::is_deeply($stat, $stat3, '... and must match normal stat');
 }
 
 SKIP:
