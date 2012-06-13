@@ -142,10 +142,6 @@ SKIP:
     ok(-p($pstat), "check -p detects a pipe");
 }
 
-local $!;
-$stat = stat '/notafile';
-isnt( $!, '', 'should populate $!, given invalid file' );
-
 # Testing pretty much anything else is unportable.
 
 done_testing;

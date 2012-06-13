@@ -4237,6 +4237,7 @@ lib/File/Find/t/find.t		See if File::Find works
 lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
+lib/File/stat-7896.t		A test for ID 20011110.104
 lib/File/stat.pm		By-name interface to Perl's builtin stat
 lib/File/stat.t			See if File::stat works
 lib/filetest.pm			For "use filetest"
