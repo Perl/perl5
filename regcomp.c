@@ -6873,7 +6873,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
 		       (unsigned long) flags);
         }
-        /* NOT REACHED */
+        assert(0); /* NOT REACHED */
     }
     return NULL;
 }
@@ -8487,7 +8487,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     		     num = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
                 }
                 goto gen_recurse_regop;
-                /* NOT REACHED */
+                assert(0); /* NOT REACHED */
             case '+':
                 if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
                     RExC_parse++;
@@ -8557,7 +8557,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 nextchar(pRExC_state);
                 return ret;
             } /* named and numeric backreferences */
-            /* NOT REACHED */
+            assert(0); /* NOT REACHED */
 
 	    case '?':           /* (??...) */
 		is_logical = 1;
@@ -9145,7 +9145,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	}
 	else
 	    FAIL("Junk on end of regexp");	/* "Can't happen". */
-	/* NOTREACHED */
+	assert(0); /* NOTREACHED */
     }
 
     if (RExC_in_lookbehind) {

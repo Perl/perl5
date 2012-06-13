@@ -1619,7 +1619,7 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 		return 'S';
 	    default:
 		Perl_croak(aTHX_ "panic: to_upper_title_latin1 did not expect '%c' to map to '%c'", c, LATIN_SMALL_LETTER_Y_WITH_DIAERESIS);
-		/* NOTREACHED */
+		assert(0); /* NOTREACHED */
 	}
     }
 

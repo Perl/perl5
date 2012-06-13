@@ -1458,7 +1458,7 @@ Perl_die_sv(pTHX_ SV *baseex)
 {
     PERL_ARGS_ASSERT_DIE_SV;
     croak_sv(baseex);
-    /* NOTREACHED */
+    assert(0); /* NOTREACHED */
     return NULL;
 }
 
@@ -1480,7 +1480,7 @@ Perl_die_nocontext(const char* pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    /* NOTREACHED */
+    assert(0); /* NOTREACHED */
     va_end(args);
     return NULL;
 }
@@ -1492,7 +1492,7 @@ Perl_die(pTHX_ const char* pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    /* NOTREACHED */
+    assert(0); /* NOTREACHED */
     va_end(args);
     return NULL;
 }
@@ -1592,7 +1592,7 @@ Perl_croak_nocontext(const char *pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    /* NOTREACHED */
+    assert(0); /* NOTREACHED */
     va_end(args);
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
@@ -1603,7 +1603,7 @@ Perl_croak(pTHX_ const char *pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    /* NOTREACHED */
+    assert(0); /* NOTREACHED */
     va_end(args);
 }
 
@@ -6443,7 +6443,7 @@ Perl_my_dirfd(pTHX_ DIR * dir) {
     return dir->dd_fd;
 #else
     Perl_die(aTHX_ PL_no_func, "dirfd");
-   /* NOT REACHED */
+    assert(0); /* NOT REACHED */
     return 0;
 #endif 
 }
