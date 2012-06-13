@@ -97,6 +97,17 @@ sub test_X_ops {
 
 test_X_ops($file, "for $file");
 
+{
+    my $mode = 01000;
+    while ($mode) {
+        $mode >>= 1;
+        my $mode_oct = sprintf "0%03o", $mode;
+        chmod $mode, $file or die "Can't chmod $mode_oct $file: $!";
+        test_X_ops($file, "for file with mode=$mode_oct");
+    }
+    chmod 0600, $file or die "Can't restore permissions on $file to 0600";
+}
+
 SKIP: {
     -e $^X && -x $^X or skip "$^X is not present and executable", 4;
     $^O eq "VMS" and skip "File::stat ignores VMS ACLs", 4;
