@@ -23,7 +23,6 @@ ok(defined($s), 'type defined');
 
 my $new = IO::Socket::INET->new_from_fd($listener->fileno(), 'r+');
 
-local $TODO = "this information isn't cached for accepted sockets";
 is($new->sockdomain(), $d, 'domain match');
 SKIP: {
     skip "no Socket::SO_PROTOCOL", 1 if !defined(eval { Socket::SO_PROTOCOL });
