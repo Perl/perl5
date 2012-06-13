@@ -737,10 +737,10 @@ perl_destruct(pTHXx)
     /* We must account for everything.  */
 
     /* Destroy the main CV and syntax tree */
-    /* Do this now, because destroying ops can cause new SVs to be generated
-       in Perl_pad_swipe, and when running with -DDEBUG_LEAKING_SCALARS they
-       PL_curcop to point to a valid op from which the filename structure
-       member is copied.  */
+    /* Set PL_curcop now, because destroying ops can cause new SVs
+       to be generated in Perl_pad_swipe, and when running with
+      -DDEBUG_LEAKING_SCALARS they expect PL_curcop to point to a valid
+       op from which the filename structure member is copied.  */
     PL_curcop = &PL_compiling;
     if (PL_main_root) {
 	/* ensure comppad/curpad to refer to main's pad */
