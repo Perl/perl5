@@ -2827,9 +2827,6 @@ Perl_newPROG(pTHX_ OP *o)
 	else
 	    scalar(PL_eval_root);
 
-	/* don't use LINKLIST, since PL_eval_root might indirect through
-	 * a rather expensive function call and LINKLIST evaluates its
-	 * argument more than once */
 	PL_eval_start = op_linklist(PL_eval_root);
 	PL_eval_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_eval_root, 1);
