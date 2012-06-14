@@ -1650,6 +1650,41 @@ win32_ansipath(const WCHAR *widename)
 }
 
 DllExport char *
+win32_getenvironmentstrings(void)
+{
+    LPWSTR lpWStr, lpWTmp;
+    LPSTR lpStr, lpTmp;
+    DWORD env_len, wenvstrings_len = 0, aenvstrings_len = 0;
+
+    /* Get the process environment strings */
+    lpWTmp = lpWStr = (LPWSTR) GetEnvironmentStringsW();
+    for(wenvstrings_len = 1; *lpWTmp != '\0'; lpWTmp += env_len + 1) {
+        env_len = wcslen(lpWTmp);
+        /* calculate the size of the environment strings */
+        wenvstrings_len += env_len + 1;
+    }
+
+    /* Get the number of bytes required to store the UTF16 encoded string */
+    aenvstrings_len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, 
+                                          lpWStr, wenvstrings_len, NULL, 0, 0, 0);
+    lpTmp = lpStr = (char *)win32_calloc(aenvstrings_len, sizeof(char));
+    if(!lpTmp)
+        out_of_memory();
+
+    /* Convert the string from UTF-16 encoding to ACP encoding */
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, lpWStr, wenvstrings_len, lpStr, 
+                        aenvstrings_len, 0, 0);
+
+    return(lpStr);
+}
+
+DllExport void
+win32_freeenvironmentstrings(void* block)
+{
+    win32_free(block);
+}
+
+DllExport char *
 win32_getenv(const char *name)
 {
     dTHX;

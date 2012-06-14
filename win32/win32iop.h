@@ -126,6 +126,8 @@ DllExport  void		win32_rewinddir(DIR *dirp);
 DllExport  int		win32_closedir(DIR *dirp);
 DllExport  DIR*		win32_dirp_dup(DIR *const dirp, CLONE_PARAMS *const param);
 
+DllExport  char*        win32_getenvironmentstrings(void);
+DllExport  void         win32_freeenvironmentstrings(void *block);
 DllExport  char*	win32_getenv(const char *name);
 DllExport  int		win32_putenv(const char *name);
 

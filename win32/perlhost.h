@@ -2262,7 +2262,7 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
     int nLength, compVal;
 
     // get the process environment strings
-    lpAllocPtr = lpTmp = (LPSTR)GetEnvironmentStrings();
+    lpAllocPtr = lpTmp = (LPSTR)win32_getenvironmentstrings();
 
     // step over current directory stuff
     while(*lpTmp == '=')
@@ -2338,7 +2338,7 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
     }
 
     // release the process environment strings
-    FreeEnvironmentStrings(lpAllocPtr);
+    win32_freeenvironmentstrings(lpAllocPtr);
 
     return lpPtr;
 }
@@ -2375,7 +2375,7 @@ CPerlHost::Clearenv(void)
     }
 
     /* get the process environment strings */
-    lpStr = lpEnvPtr = (LPSTR)GetEnvironmentStrings();
+    lpStr = lpEnvPtr = (LPSTR)win32_getenvironmentstrings();
 
     /* step over current directory stuff */
     while(*lpStr == '=')
@@ -2394,7 +2394,7 @@ CPerlHost::Clearenv(void)
 	lpStr += strlen(lpStr) + 1;
     }
 
-    FreeEnvironmentStrings(lpEnvPtr);
+    win32_freeenvironmentstrings(lpEnvPtr);
 }
 
 
