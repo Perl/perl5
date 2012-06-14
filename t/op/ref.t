@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(228);
+plan(229);
 
 # Test glob operations.
 
@@ -119,6 +119,7 @@ is (join(':',@{$spring2{"foo"}}), "1:2:3:4");
     &$subref;
     is ($called, 1);
 }
+is ref eval {\&{""}}, "CODE", 'reference to &{""} [perl #94476]';
 
 # Test references to return values of operators (TARGs/PADTMPs)
 {
