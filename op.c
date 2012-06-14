@@ -4810,7 +4810,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     OP *imop;
     OP *veop;
 #ifdef PERL_MAD
-    OP *pegop = newOP(OP_NULL,0);
+    OP *pegop = PL_madskills ? newOP(OP_NULL,0) : NULL;
 #endif
     SV *use_version = NULL;
 
@@ -4945,11 +4945,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	PL_cop_seqmax++;
 
 #ifdef PERL_MAD
-    if (!PL_madskills) {
-	/* FIXME - don't allocate pegop if !PL_madskills */
-	op_free(pegop);
-	return NULL;
-    }
     return pegop;
 #endif
 }
