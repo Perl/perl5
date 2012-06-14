@@ -840,11 +840,18 @@ perl_destruct(pTHXx)
      * REGEXPs in the parent interpreter
      * we need to manually ReREFCNT_dec for the clones
      */
-    SvREFCNT_dec(PL_regex_padav);
-    PL_regex_padav = NULL;
-    PL_regex_pad = NULL;
+    {
+	I32 i = AvFILLp(PL_regex_padav);
+	SV **ary = AvARRAY(PL_regex_padav);
+
+	for (; i; i--) {
+	    SvREFCNT_dec(ary[i]);
+	    ary[i] = &PL_sv_undef;
+	}
+    }
     Safefree(PL_stashpad);
 #endif
+
 
     SvREFCNT_dec(MUTABLE_SV(PL_stashcache));
     PL_stashcache = NULL;
@@ -1060,6 +1067,12 @@ perl_destruct(pTHXx)
 			     (long)cxstack_ix + 1);
     }
 
+#ifdef USE_ITHREADS
+    SvREFCNT_dec(PL_regex_padav);
+    PL_regex_padav = NULL;
+    PL_regex_pad = NULL;
+#endif
+
 #ifdef PERL_IMPLICIT_CONTEXT
     /* the entries in this list are allocated via SV PVX's, so get freed
      * in sv_clean_all */
@@ -1223,9 +1236,6 @@ perl_destruct(pTHXx)
 
     Safefree(PL_origfilename);
     PL_origfilename = NULL;
-    Safefree(PL_reg_start_tmp);
-    PL_reg_start_tmp = (char**)NULL;
-    PL_reg_start_tmpl = 0;
     Safefree(PL_reg_curpm);
     Safefree(PL_reg_poscache);
     free_tied_hv_pool();
@@ -2795,6 +2805,8 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     myop.op_flags |= OP_GIMME_REVERSE(flags);
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
+    if (PL_reg_state.re_reparsing)
+	myop.op_private = OPpEVAL_COPHH;
 
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
      * before a PUSHEVAL, which corrupts the stack after a croak */

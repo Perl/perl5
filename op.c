@@ -103,6 +103,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "perl.h"
 #include "keywords.h"
 #include "feature.h"
+#include "regcomp.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
@@ -742,6 +743,9 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
+	if (!(cPMOPo->op_pmflags & PMf_CODELIST_PRIVATE))
+	    op_free(cPMOPo->op_code_list);
+	cPMOPo->op_code_list = NULL;
 	forget_pmop(cPMOPo, 1);
 	cPMOPo->op_pmreplrootu.op_pmreplroot = NULL;
         /* we use the same protection as the "SAFE" version of the PM_ macros
@@ -2670,7 +2674,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     }
     else
 	return bind_match(type, left,
-		pmruntime(newPMOP(OP_MATCH, 0), right, 0));
+		pmruntime(newPMOP(OP_MATCH, 0), right, 0, 0));
 }
 
 OP *
@@ -4240,25 +4244,29 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
  * split "pattern", which aren't. In the former case, expr will be a list
  * if the pattern contains more than one term (eg /a$b/) or if it contains
  * a replacement, ie s/// or tr///.
+ *
+ * When the pattern has been compiled within a new anon CV (for
+ * qr/(?{...})/ ), then floor indicates the savestack level just before
+ * the new sub was created
  */
 
 OP *
-Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
+Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 {
     dVAR;
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;
     OP* repl = NULL;
-    bool reglist;
+    bool is_trans = (o->op_type == OP_TRANS || o->op_type == OP_TRANSR);
+    bool is_compiletime;
+    bool has_code;
 
     PERL_ARGS_ASSERT_PMRUNTIME;
 
-    if (
-        o->op_type == OP_SUBST
-     || o->op_type == OP_TRANS || o->op_type == OP_TRANSR
-    ) {
-	/* last element in list is the replacement; pop it */
+    /* for s/// and tr///, last element in list is the replacement; pop it */
+
+    if (is_trans || o->op_type == OP_SUBST) {
 	OP* kid;
 	repl = cLISTOPx(expr)->op_last;
 	kid = cLISTOPx(expr)->op_first;
@@ -4268,60 +4276,222 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	cLISTOPx(expr)->op_last = kid;
     }
 
-    if (isreg && expr->op_type == OP_LIST &&
-	cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last)
-    {
-	/* convert single element list to element */
+    /* for TRANS, convert LIST/PUSH/CONST into CONST, and pass to pmtrans() */
+
+    if (is_trans) {
 	OP* const oe = expr;
-	expr = cLISTOPx(oe)->op_first->op_sibling;
+	assert(expr->op_type == OP_LIST);
+	assert(cLISTOPx(expr)->op_first->op_type == OP_PUSHMARK);
+	assert(cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last);
+	expr = cLISTOPx(oe)->op_last;
 	cLISTOPx(oe)->op_first->op_sibling = NULL;
 	cLISTOPx(oe)->op_last = NULL;
 	op_free(oe);
-    }
 
-    if (o->op_type == OP_TRANS || o->op_type == OP_TRANSR) {
 	return pmtrans(o, expr, repl);
     }
 
-    reglist = isreg && expr->op_type == OP_LIST;
-    if (reglist)
-	op_null(expr);
+    /* find whether we have any runtime or code elements;
+     * at the same time, temporarily set the op_next of each DO block;
+     * then when we LINKLIST, this will cause the DO blocks to be excluded
+     * from the op_next chain (and from having LINKLIST recursively
+     * applied to them). We fix up the DOs specially later */
+
+    is_compiletime = 1;
+    has_code = 0;
+    if (expr->op_type == OP_LIST) {
+	OP *o;
+	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+		has_code = 1;
+		assert(!o->op_next && o->op_sibling);
+		o->op_next = o->op_sibling;
+	    }
+	    else if (o->op_type != OP_CONST && o->op_type != OP_PUSHMARK)
+		is_compiletime = 0;
+	}
+    }
+    else if (expr->op_type != OP_CONST)
+	is_compiletime = 0;
+
+    LINKLIST(expr);
+
+    /* fix up DO blocks; treat each one as a separate little sub */
+
+    if (expr->op_type == OP_LIST) {
+	OP *o;
+	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+	    if (!(o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)))
+		continue;
+	    o->op_next = NULL; /* undo temporary hack from above */
+	    scalar(o);
+	    LINKLIST(o);
+	    if (cLISTOPo->op_first->op_type == OP_LEAVE) {
+		LISTOP *leave = cLISTOPx(cLISTOPo->op_first);
+		/* skip ENTER */
+		assert(leave->op_first->op_type == OP_ENTER);
+		assert(leave->op_first->op_sibling);
+		o->op_next = leave->op_first->op_sibling;
+		/* skip LEAVE */
+		assert(leave->op_flags & OPf_KIDS);
+		assert(leave->op_last->op_next = (OP*)leave);
+		leave->op_next = NULL; /* stop on last op */
+		op_null((OP*)leave);
+	    }
+	    else {
+		/* skip SCOPE */
+		OP *scope = cLISTOPo->op_first;
+		assert(scope->op_type == OP_SCOPE);
+		assert(scope->op_flags & OPf_KIDS);
+		scope->op_next = NULL; /* stop on last op */
+		op_null(scope);
+	    }
+	    /* have to peep the DOs individually as we've removed it from
+	     * the op_next chain */
+	    CALL_PEEP(o);
+	    if (is_compiletime)
+		/* runtime finalizes as part of finalizing whole tree */
+		finalize_optree(o);
+	}
+    }
 
     PL_hints |= HINT_BLOCK_SCOPE;
     pm = (PMOP*)o;
+    assert(floor==0 || (pm->op_pmflags & PMf_HAS_CV));
 
-    if (expr->op_type == OP_CONST) {
-	SV *pat = ((SVOP*)expr)->op_sv;
-	U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+    if (is_compiletime) {
+	U32 rx_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+	regexp_engine const *eng = current_re_engine();
 
 	if (o->op_flags & OPf_SPECIAL)
-	    pm_flags |= RXf_SPLIT;
+	    rx_flags |= RXf_SPLIT;
 
-	if (DO_UTF8(pat)) {
-	    assert (SvUTF8(pat));
-	} else if (SvUTF8(pat)) {
-	    /* Not doing UTF-8, despite what the SV says. Is this only if we're
-	       trapped in use 'bytes'?  */
-	    /* Make a copy of the octet sequence, but without the flag on, as
-	       the compiler now honours the SvUTF8 flag on pat.  */
-	    STRLEN len;
-	    const char *const p = SvPV(pat, len);
-	    pat = newSVpvn_flags(p, len, SVs_TEMP);
-	}
+	if (!has_code || !eng->op_comp) {
+	    /* compile-time simple constant pattern */
 
-	PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
+	    if ((pm->op_pmflags & PMf_HAS_CV) && !has_code) {
+		/* whoops! we guessed that a qr// had a code block, but we
+		 * were wrong (e.g. /[(?{}]/ ). Throw away the PL_compcv
+		 * that isn't required now. Note that we have to be pretty
+		 * confident that nothing used that CV's pad while the
+		 * regex was parsed */
+		assert(AvFILLp(PL_comppad) == 0); /* just @_ */
+		LEAVE_SCOPE(floor);
+		pm->op_pmflags &= ~PMf_HAS_CV;
+	    }
 
+	    PM_SETRE(pm,
+		eng->op_comp
+		    ? eng->op_comp(aTHX_ NULL, 0, expr, eng, NULL, NULL,
+					rx_flags, pm->op_pmflags)
+		    : Perl_re_op_compile(aTHX_ NULL, 0, expr, eng, NULL, NULL,
+					rx_flags, pm->op_pmflags)
+	    );
 #ifdef PERL_MAD
-	op_getmad(expr,(OP*)pm,'e');
+	    op_getmad(expr,(OP*)pm,'e');
 #else
-	op_free(expr);
+	    op_free(expr);
 #endif
+	}
+	else {
+	    /* compile-time pattern that includes literal code blocks */
+	    REGEXP* re = eng->op_comp(aTHX_ NULL, 0, expr, eng, NULL, NULL,
+			rx_flags,
+			(pm->op_pmflags |
+			    ((PL_hints & HINT_RE_EVAL) ? PMf_USE_RE_EVAL : 0))
+		    );
+	    PM_SETRE(pm, re);
+	    if (pm->op_pmflags & PMf_HAS_CV) {
+		CV *cv;
+		/* this QR op (and the anon sub we embed it in) is never
+		 * actually executed. It's just a placeholder where we can
+		 * squirrel away expr in op_code_list without the peephole
+		 * optimiser etc processing it for a second time */
+		OP *qr = newPMOP(OP_QR, 0);
+		((PMOP*)qr)->op_code_list = expr;
+
+		/* handle the implicit sub{} wrapped round the qr/(?{..})/ */
+		SvREFCNT_inc_simple_void(PL_compcv);
+		cv = newATTRSUB(floor, 0, NULL, NULL, qr);
+		((struct regexp *)SvANY(re))->qr_anoncv = cv;
+
+		/* attach the anon CV to the pad so that
+		 * pad_fixup_inner_anons() can find it */
+		(void)pad_add_anon(cv, o->op_type);
+		SvREFCNT_inc_simple_void(cv);
+	    }
+	    else {
+		pm->op_code_list = expr;
+	    }
+	}
     }
     else {
-	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL))
-	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
-			    ? OP_REGCRESET
-			    : OP_REGCMAYBE),0,expr);
+	/* runtime pattern: build chain of regcomp etc ops */
+	bool reglist;
+	PADOFFSET cv_targ = 0;
+
+	reglist = isreg && expr->op_type == OP_LIST;
+	if (reglist)
+	    op_null(expr);
+
+	if (has_code) {
+	    pm->op_code_list = expr;
+	    /* don't free op_code_list; its ops are embedded elsewhere too */
+	    pm->op_pmflags |= PMf_CODELIST_PRIVATE;
+	}
+
+	/* the OP_REGCMAYBE is a placeholder in the non-threaded case
+	 * to allow its op_next to be pointed past the regcomp and
+	 * preceding stacking ops;
+	 * OP_REGCRESET is there to reset taint before executing the
+	 * stacking ops */
+	if (pm->op_pmflags & PMf_KEEP || PL_tainting)
+	    expr = newUNOP((PL_tainting ? OP_REGCRESET : OP_REGCMAYBE),0,expr);
+
+	if (pm->op_pmflags & PMf_HAS_CV) {
+	    /* we have a runtime qr with literal code. This means
+	     * that the qr// has been wrapped in a new CV, which
+	     * means that runtime consts, vars etc will have been compiled
+	     * against a new pad. So... we need to execute those ops
+	     * within the environment of the new CV. So wrap them in a call
+	     * to a new anon sub. i.e. for
+	     *
+	     *     qr/a$b(?{...})/,
+	     *
+	     * we build an anon sub that looks like
+	     *
+	     *     sub { "a", $b, '(?{...})' }
+	     *
+	     * and call it, passing the returned list to regcomp.
+	     * Or to put it another way, the list of ops that get executed
+	     * are:
+	     *
+	     *     normal              PMf_HAS_CV
+	     *     ------              -------------------
+	     *                         pushmark (for regcomp)
+	     *                         pushmark (for entersub)
+	     *                         pushmark (for refgen)
+	     *                         anoncode
+	     *                         refgen
+	     *                         entersub
+	     *     regcreset                  regcreset
+	     *     pushmark                   pushmark
+	     *     const("a")                 const("a")
+	     *     gvsv(b)                    gvsv(b)
+	     *     const("(?{...})")          const("(?{...})")
+	     *                                leavesub
+	     *     regcomp             regcomp
+	     */
+
+	    SvREFCNT_inc_simple_void(PL_compcv);
+	    /* these lines are just an unrolled newANONATTRSUB */
+	    expr = newSVOP(OP_ANONCODE, 0,
+		    MUTABLE_SV(newATTRSUB(floor, 0, NULL, NULL, expr)));
+	    cv_targ = expr->op_targ;
+	    expr = newUNOP(OP_REFGEN, 0, expr);
+
+	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr))));
+	}
 
 	NewOp(1101, rcop, 1, LOGOP);
 	rcop->op_type = OP_REGCOMP;
@@ -4330,16 +4500,15 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	rcop->op_flags |= OPf_KIDS
 			    | ((PL_hints & HINT_RE_EVAL) ? OPf_SPECIAL : 0)
 			    | (reglist ? OPf_STACKED : 0);
-	rcop->op_private = 1;
+	rcop->op_private = 0;
 	rcop->op_other = o;
-	if (reglist)
-	    rcop->op_targ = pad_alloc(rcop->op_type, SVs_PADTMP);
+	rcop->op_targ = cv_targ;
 
 	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
 	if (PL_hints & HINT_RE_EVAL) PL_cv_has_eval = 1;
 
 	/* establish postfix order */
-	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL)) {
+	if (expr->op_type == OP_REGCRESET || expr->op_type == OP_REGCMAYBE) {
 	    LINKLIST(expr);
 	    rcop->op_next = expr;
 	    ((UNOP*)expr)->op_first->op_next = (OP*)rcop;
@@ -8986,7 +9155,7 @@ Perl_ck_split(pTHX_ OP *o)
     if (kid->op_type != OP_MATCH || kid->op_flags & OPf_STACKED) {
 	OP * const sibl = kid->op_sibling;
 	kid->op_sibling = 0;
-	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0);
+	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0, 0);
 	if (cLISTOPo->op_first == cLISTOPo->op_last)
 	    cLISTOPo->op_last = kid;
 	cLISTOPo->op_first = kid;

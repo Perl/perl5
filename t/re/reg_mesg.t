@@ -39,7 +39,7 @@ my @death =
 
  '/(?@)/' => 'Sequence (?@...) not implemented in regex; marked by {#} in m/(?@{#})/',
 
- '/(?{ 1/' => 'Sequence (?{...}) not terminated or not {}-balanced in regex; marked by {#} in m/(?{{#} 1/',
+ '/(?{ 1/' => 'Missing right curly or square bracket',
 
  '/(?(1x))/' => 'Switch condition not recognized in regex; marked by {#} in m/(?(1x{#}))/',
 

@@ -2839,7 +2839,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 			   || amagic_is_enabled(string_amg)
 			  )) {
 		    REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
-		    I32 seen_evals = 0;
 
 		    assert(re);
 			
@@ -2849,9 +2848,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);	
-
-		    if ((seen_evals = RX_SEEN_EVALS(re)))
-			PL_reginterp_cnt += seen_evals;
 
 		    if (lp)
 			*lp = RX_WRAPLEN(re);
@@ -12712,28 +12708,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_reginput);
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
-		new_state->re_state_regoffs
-		    = (regexp_paren_pair*)
-			any_dup(old_state->re_state_regoffs, proto_perl);
-		new_state->re_state_reglastparen
-		    = (U32*) any_dup(old_state->re_state_reglastparen, 
-			      proto_perl);
-		new_state->re_state_reglastcloseparen
-		    = (U32*)any_dup(old_state->re_state_reglastcloseparen,
-			      proto_perl);
-		/* XXX This just has to be broken. The old save_re_context
-		   code did SAVEGENERICPV(PL_reg_start_tmp);
-		   PL_reg_start_tmp is char **.
-		   Look above to what the dup code does for
-		   SAVEt_GENERIC_PVREF
-		   It can never have worked.
-		   So this is merely a faithful copy of the exiting bug:  */
-		new_state->re_state_reg_start_tmp
-		    = (char **) pv_dup((char *)
-				      old_state->re_state_reg_start_tmp);
-		/* I assume that it only ever "worked" because no-one called
-		   (pseudo)fork while the regexp engine had re-entered itself.
-		*/
 #ifdef PERL_OLD_COPY_ON_WRITE
 		new_state->re_state_nrs
 		    = sv_dup(old_state->re_state_nrs, param);
@@ -13025,7 +12999,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* RE engine related */
     Zero(&PL_reg_state, 1, struct re_save_state);
-    PL_reginterp_cnt	= 0;
     PL_regmatch_slab	= NULL;
 
     PL_sub_generation	= proto_perl->Isub_generation;

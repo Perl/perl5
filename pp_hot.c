@@ -1208,6 +1208,8 @@ PP(pp_qr)
     REGEXP * rx = PM_GETRE(pm);
     SV * const pkg = rx ? CALLREG_PACKAGE(rx) : NULL;
     SV * const rv = sv_newmortal();
+    CV **cvp;
+    CV *cv;
 
     SvUPGRADE(rv, SVt_IV);
     /* For a subroutine describing itself as "This is a hacky workaround" I'm
@@ -1218,6 +1220,12 @@ PP(pp_qr)
        optree.  */
     SvRV_set(rv, MUTABLE_SV(reg_temp_copy(NULL, rx)));
     SvROK_on(rv);
+
+    cvp = &( ((struct regexp*)SvANY(SvRV(rv)))->qr_anoncv);
+    if ((cv = *cvp) && CvCLONE(*cvp)) {
+	*cvp = cv_clone(cv);
+	SvREFCNT_dec(cv);
+    }
 
     if (pkg) {
 	HV *const stash = gv_stashsv(pkg, GV_ADD);
@@ -1519,9 +1527,9 @@ yup:					/* Confirmed by INTUIT */
 	RX_OFFS(rx)[0].start = s - truebase;
 	RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
     }
-    /* including RX_NPARENS(rx) in the below code seems highly suspicious.
-       -dmq */
-    RX_NPARENS(rx) = RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;	/* used by @-, @+, and $^N */
+    /* match via INTUIT shouldn't have any captures. Let @-, @+, $^N know */
+    assert(!RX_NPARENS(rx));
+    RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 

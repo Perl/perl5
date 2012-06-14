@@ -683,4 +683,23 @@ BEGIN {
   is($blonk_was_called, 1, 'RT #63540');
 }
 
+# test PL_cv_has_eval.  Any anon sub that could conceivably contain an
+# eval, should be marked as cloneable
+
+{
+
+    my @s;
+    push @s, sub {  eval '1' } for 1,2;
+    isnt($s[0], $s[1], "cloneable with eval");
+    @s = ();
+    push @s, sub { use re 'eval'; my $x; s/$x/1/; } for 1,2;
+    isnt($s[0], $s[1], "cloneable with use re eval");
+    @s = ();
+    push @s, sub { s/1/1/ee; } for 1,2;
+    isnt($s[0], $s[1], "cloneable with //ee");
+}
+
+
+
+
 done_testing();

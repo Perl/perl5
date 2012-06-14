@@ -4587,7 +4587,10 @@ sub matchop {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
 	($re, $quote) = $self->regcomp($kid, 21, $extended);
-	my $matchop = $kid->first->first;
+	my $matchop = $kid->first;
+	if ($matchop->name eq 'regcrest') {
+	    $matchop = $matchop->first;
+	}
 	if ($matchop->name =~ /^(?:match|transr?|subst)\z/
 	   && $matchop->flags & OPf_SPECIAL) {
 	    $rhs_bound_to_defsv = 1;

@@ -9,21 +9,13 @@ BEGIN {
     skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
-plan 18;
-
-# Functions for turning to-do-ness on and off (as there are so many
-# to-do tests) 
-sub on { $::TODO = "(?{}) implementation is screwy" }
-sub off { undef $::TODO }
-
+plan 30;
 
 fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
  print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })a/;
  print $x,$a,$b;
 CODE
-
-on;
 
 fresh_perl_is <<'CODE',
  for my $x("a".."c") {
@@ -43,8 +35,6 @@ CODE
  '1a82a93a104a85a96a101a 1b82b93b104b85b96b101b 1c82c93c104c85c96c101c ',
   {},
  'multiple (?{})s in loop with lexicals';
-
-off;
 
 fresh_perl_is <<'CODE', '781745', {}, 'run-time re-eval has its own scope';
  use re qw(eval);
@@ -88,32 +78,26 @@ fresh_perl_is <<'CODE', '178279371047857967101745', {},
 CODE
  'multiple (?{})s in "foo" =~ /$string/x';
 
-on;
-
 fresh_perl_is <<'CODE', '123123', {},
   for my $x(1..3) {
-   push @regexps = qr/(?{ print $x })a/;
+   push @regexps, qr/(?{ print $x })a/;
   }
  "a" =~ $_ for @regexps;
  "ba" =~ /b$_/ for @regexps;
 CODE
  'qr/(?{})/ is a closure';
 
-off;
-
 "a" =~ do { package foo; qr/(?{ $::pack = __PACKAGE__ })a/ };
 is $pack, 'foo', 'qr// inherits package';
 "a" =~ do { use re "/x"; qr/(?{ $::re = qr-- })a/ };
 is $re, '(?^x:)', 'qr// inherits pragmata';
 
-on;
-
+$::pack = '';
 "ba" =~ /b${\do { package baz; qr|(?{ $::pack = __PACKAGE__ })a| }}/;
 is $pack, 'baz', '/text$qr/ inherits package';
 "ba" =~ m+b${\do { use re "/i"; qr|(?{ $::re = qr-- })a| }}+;
 is $re, '(?^i:)', '/text$qr/ inherits pragmata';
 
-off;
 {
   use re 'eval';
   package bar;
@@ -126,38 +110,148 @@ is $pack, 'bar', '/$text/ containing (?{}) inherits package';
 }
 is $re, '(?^m:)', '/$text/ containing (?{}) inherits pragmata';
 
-on;
-
 fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{die})';
- eval { my $a=4; my $b=5; "a" =~ /(?{die})a/ }; print $a,$b"
+my $a=4; my $b=5;  eval { "a" =~ /(?{die})a/ }; print $a,$b;
 CODE
 
-SKIP: {
-    # The remaining TODO tests crash, which will display an error dialog
-    # on Windows that has to be manually dismissed.  We don't want this
-    # to happen for release builds: 5.14.x, 5.16.x etc.
-    # On UNIX, they produce ugly 'Aborted' shell output mixed in with the
-    # test harness output, so skip on all platforms.
-    skip "Don't run crashing TODO test on release build", 3
-	if $::TODO && (int($]*1000) & 1) == 0;
+fresh_perl_is <<'CODE', 'Y45', { stderr => 1 }, '(?{eval{die}})';
+my $a=4; my $b=5;
+"a" =~ /(?{eval { die; print "X" }; print "Y"; })a/; print $a,$b;
+CODE
 
-    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{last})';
-     {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
+fresh_perl_is <<'CODE',
+    my $a=4; my $b=5;
+    sub f { "a" =~ /(?{print((caller(0))[3], "\n");})a/ };
+    f();
+    print $a,$b;
 CODE
-    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{next})';
-     {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
+    "main::f\n45",
+    { stderr => 1 }, 'sub f {(?{caller})}';
+
+
+fresh_perl_is <<'CODE',
+    my $a=4; my $b=5;
+    sub f { print ((caller(0))[3], "-", (caller(1))[3], "\n") };
+    "a" =~ /(?{f()})a/;
+    print $a,$b;
 CODE
-    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{return})';
-     print sub {  my $a=4; my $b=5; "a" =~ /(?{return $a.$b})a/ }->();
+    "main::f-(unknown)\n45",
+    { stderr => 1 }, 'sub f {caller} /(?{f()})/';
+
+
+fresh_perl_is <<'CODE',
+    my $a=4; my $b=5;
+    sub f {
+	"a" =~ /(?{print "X"; return; print "Y"; })a/;
+	print "Z";
+    };
+    f();
+    print $a,$b;
 CODE
+    "XZ45",
+    { stderr => 1 }, 'sub f {(?{return})}';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5; "a" =~ /(?{last})a/; print $a,$b
+CODE
+    q{Can't "last" outside a loop block at - line 1.},
+    { stderr => 1 }, '(?{last})';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5; "a" =~ /(?{for (1..4) {last}})a/; print $a,$b
+CODE
+    '45',
+    { stderr => 1 }, '(?{for {last}})';
+
+
+fresh_perl_is <<'CODE',
+for (1) {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
+CODE
+    q{Can't "last" outside a loop block at - line 1.},
+    { stderr => 1 }, 'for (1) {(?{last})}';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5; eval { "a" =~ /(?{last})a/ }; print $a,$b
+CODE
+    '45',
+    { stderr => 1 }, 'eval {(?{last})}';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5; "a" =~ /(?{next})a/; print $a,$b
+CODE
+    q{Can't "next" outside a loop block at - line 1.},
+    { stderr => 1 }, '(?{next})';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5; "a" =~ /(?{for (1,2,3) { next} })a/; print $a,$b
+CODE
+    '45',
+    { stderr => 1 }, '(?{for {next}})';
+
+
+fresh_perl_is <<'CODE',
+for (1) {  my $a=4; my $b=5; "a" =~ /(?{next})a/ }; print $a,$b
+CODE
+    q{Can't "next" outside a loop block at - line 1.},
+    { stderr => 1 }, 'for (1) {(?{next})}';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5; eval { "a" =~ /(?{next})a/ }; print $a,$b
+CODE
+    '45',
+    { stderr => 1 }, 'eval {(?{next})}';
+
+
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5;
+"a" =~ /(?{ goto FOO; print "X"; })a/;
+print "Y";
+FOO:
+print $a,$b
+CODE
+    q{Can't "goto" out of a pseudo block at - line 2.},
+    { stderr => 1 }, '{(?{goto})}';
+
+
+{
+    local $::TODO = "goto doesn't yet work in pseduo blocks";
+fresh_perl_is <<'CODE',
+my $a=4; my $b=5;
+"a" =~ /(?{ goto FOO; print "X"; FOO: print "Y"; })a/;
+print "Z";
+FOO;
+print $a,$b
+CODE
+    "YZ45",
+    { stderr => 1 }, '{(?{goto FOO; FOO:})}';
 }
 
-fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{goto})';
-  my $a=4; my $b=5; "a" =~ /(?{goto _})a/; die; _: print $a,$b
+# [perl #3590]
+fresh_perl_is <<'CODE', '', { stderr => 1 }, '(?{eval{die}})';
+"$_$_$_"; my $foo; # these consume pad entries and ensure a SEGV on opd perls
+"" =~ m{(?{exit(0)})};
 CODE
 
-off;
 
 # [perl #92256]
 { my $y = "a"; $y =~ /a(?{ undef *_ })/ }
 pass "undef *_ in a re-eval does not cause a double free";
+
+# make sure regexp warnings are reported on the right line
+# (we don't care what warning; the 32768 limit is just one
+# that was easy to reproduce) */
+{
+    use warnings;
+    my $w;
+    local $SIG{__WARN__} = sub { $w = "@_" };
+    my $qr = qr/(??{'a'})/;
+    my $filler = 1;
+    ("a" x 40_000) =~ /^$qr(ab*)+/; my $line = __LINE__;
+    like($w, qr/recursion limit.* line $line\b/, "warning on right line");
+}

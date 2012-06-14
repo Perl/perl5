@@ -534,12 +534,12 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 '(ab)\d\1'i	ab4Ab	y	$1	ab
 foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
 a(?{})b	cabd	y	$&	ab
-a(?{)b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
-a(?{{})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
+a(?{f()+	-	c	-	Missing right curly or square bracket
+a(?{{1}+	-	c	-	Missing right curly or square bracket
 a(?{}})b	-	c	-	
-a(?{"{"})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
+a(?{"{"})b	ab	y	-	-
 a(?{"\{"})b	cabd	y	$&	ab
-a(?{"{"}})b	-	c	-	Unmatched right curly bracket
+a(?{"{"}})b	-	c	-	Sequence (?{...}) not terminated with ')'
 a(?{$::bl="\{"}).b	caxbd	y	$::bl	{
 x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^a(?#xxx){3}c	aaac	y	$&	aaac
@@ -1545,6 +1545,20 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /ff/i	\x{FB01}\x{FB00}	y	$&	\x{FB00}
 /fi/i	\x{FB01}\x{FB00}	y	$&	\x{FB01}
 /fi/i	\x{FB00}\x{FB01}	y	$&	\x{FB01}
+#
+# Make sure we don't see code blocks where there aren't, and vice-versa
+(?#( (?{1+)a	a	y	-	-
+'a# (?{1+'x	a	y	-	-
+ab[(?{1]	ab1	y	-	-
+ab[(?{1\](?{2]	ab2	y	-	-
+ab(?{"["})cd	abcd	y	-	-
+ab(??{"[x]"})cd	abxcd	y	-	-
+ab\[(??{1})c	ab[1c	y	-	-
+ab\\[(??{1;})]c	ab\\;c	y	-	-
+ab\\\[(??{1})c	ab\\[1c	y	-	-
+ab[c\](??{"]d	abcd	y	-	-
+ab[c\\](??{"[x]"})d	ab\\xd	y	-	-
+ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 
 # These test that doesn't cut-off matching too soon in the string for
 # multi-char folds
@@ -1613,5 +1627,42 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /^(?i:foo||baz)bar$/	bar	y	<$&>	<bar>
 /^(?i:foo||baz)bar$/	bazbar	y	<$&>	<bazbar>
 /^(?i:foo||baz)bar$/	foobar	y	<$&>	<foobar>
+
+# $^N, $+ on backtrackracking
+# BRANCH
+^(.)(?:(..)|B)[CX]	ABCDE	y	$^N-$+	A-A	-
+# TRIE
+^(.)(?:BC(.)|B)[CX]	ABCDE	y	$^N-$+	A-A	-
+# CURLYX
+^(.)(?:(.)+)*[BX]	ABCDE	y	$^N-$+	A-A	-
+# CURLYM
+^(.)(BC)*	ABCDE	y	$^N-$+	BC-BC	-
+^(.)(BC)*[BX]	ABCDE	y	$^N-$+	A-A	-
+# CURLYN
+^(.)(B)*.[DX]	ABCDE	y	$^N-$+	B-B	-
+^(.)(B)*.[CX]	ABCDE	y	$^N-$+	A-A	-
+
+# using 'return' in code blocks
+^(A)(?{"xyz"})B$	AB	y	$1-$^R	A-xyz	-
+^(A)(?{return "xyz"})B$	AB	y	$1-$^R	A-xyz	-
+^(A)((??{"xyz"}))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((??{return "xyz"}))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((?(?{1})abc|xyz))$	Aabc	y	$1-$2	A-abc	-
+^(A)((?(?{0})abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
+^(A)((?(?{return 1})abc|xyz))$	Aabc	y	$1-$2	A-abc	-
+^(A)((?(?{return 0})abc|xyz))$	Axyz	y	$1-$2	A-xyz	-
+
+# pattern modifier flags should propagate into returned (??{}) pattern
+# p,d,l not tested
+
+/^(a)((??{"b"}))$/i	AB	y	$1-$2	A-B	-
+/^(A)((??{'B$'}))(\nC)$/m	AB\nC	y	$1-$2-$3	A-B-\nC	-
+/^(A)((??{'.'}))(B)$/s	A\nB	y	$1-$2-$3	A-\n-B	-
+/^(A) ((??{' .'}))(B)$/x	A B	y	$1-$2-$3	A- -B	-
+/^((??{'\d'}))$/a	\x{660}	n	-	-
+/^(??{"s"})$/i	\x{17F}	y	-	-
+/^(??{"s"})$/ia	\x{17F}	y	-	-
+/^(??{"s"})$/iaa	\x{17F}	n	-	-
+/^(??{'\w'})$/u	\x{AA}	y	-	-
 
 # vim: softtabstop=0 noexpandtab

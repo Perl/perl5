@@ -85,6 +85,10 @@ get_regex_charset(const U32 flags)
  * re->extflags during compilation */
 #define RXf_PMf_COMPILETIME    (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_CHARSET|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
 
+#if RXf_PMf_COMPILETIME > 255
+#  error RXf_PMf_COMPILETIME wont fit in U8 flags field of eval node
+#endif
+
 /* These copies need to be numerical or defsubs_h.PL won't know about them. */
 #define PMf_MULTILINE    1<<0
 #define PMf_SINGLELINE   1<<1

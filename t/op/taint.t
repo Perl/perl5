@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 794;
+plan tests => 797;
 
 $| = 1;
 
@@ -1630,6 +1630,14 @@ TODO: {
     ($r = $TAINT) =~ /($TAINT)/;
     is_tainted($1);
 
+    {
+	use re 'eval'; # this shouldn't make any difference
+	($r = $TAINT) =~ /($notaint)/;
+	isnt_tainted($1);
+	($r = $TAINT) =~ /($TAINT)/;
+	is_tainted($1);
+    }
+
     #  [perl #24674]
     # accessing $^O  shoudn't taint it as a side-effect;
     # assigning tainted data to it is now an error
@@ -2203,6 +2211,15 @@ pass("no death when TARG of ref is tainted");
     die;
   };
   like($@, qr/^Test\n\t\.\.\.propagated at /, "error should be propagated");
+}
+
+# tainted run-time (?{}) should die
+
+{
+    my $code = '(?{})' . $TAINT;
+    use re 'eval';
+    eval { "a" =~ /$code/ };
+    like($@, qr/Eval-group in insecure regular expression/, "tainted (?{})");
 }
 
 # This may bomb out with the alarm signal so keep it last

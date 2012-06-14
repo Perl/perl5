@@ -50,9 +50,18 @@ struct reg_substr_data {
 #define SV_SAVED_COPY
 #endif
 
+/* offsets within a string of a particular /(.)/ capture */
+
 typedef struct regexp_paren_pair {
     I32 start;
     I32 end;
+    /* 'start_tmp' records a new opening position before the matching end
+     * has been found, so that the old start and end values are still
+     * valid, e.g.
+     *	  "abc" =~ /(.(?{print "[$1]"}))+/
+     *outputs [][a][b]
+     * This field is not part of the API.  */
+    I32 start_tmp;
 } regexp_paren_pair;
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
@@ -63,6 +72,16 @@ typedef struct regexp_paren_pair {
  * that is the intersection of a with b's complement */
 #define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 #endif
+
+/* record the position of a (?{...}) within a pattern */
+
+struct reg_code_block {
+    STRLEN start;
+    STRLEN end;
+    OP     *block;
+    REGEXP *src_regex;
+};
+
 
 /*
   The regexp/REGEXP struct, see L<perlreapi> for further documentation
@@ -108,8 +127,7 @@ typedef struct regexp_paren_pair {
 	/* Information about the match that isn't often used */		\
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
-	/* number of eval groups in the pattern - for security checks */\
-	PERL_BITFIELD32 seen_evals:28
+	CV *qr_anoncv	/* the anon sub wrapped round qr/(?{..})/ */
 
 typedef struct regexp {
 	_XPV_HEAD;
@@ -152,6 +170,10 @@ typedef struct regexp_engine {
 #ifdef USE_ITHREADS
     void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 #endif
+    REGEXP* (*op_comp) (pTHX_ SV ** const patternp, int pat_count,
+		    OP *expr, const struct regexp_engine* eng,
+		    REGEXP *VOL old_re,
+		    bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags);
 } regexp_engine;
 
 /*
@@ -477,7 +499,6 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_GOFS(prog)		(((struct regexp *)SvANY(prog))->gofs)
 #define RX_LASTPAREN(prog)	(((struct regexp *)SvANY(prog))->lastparen)
 #define RX_LASTCLOSEPAREN(prog)	(((struct regexp *)SvANY(prog))->lastcloseparen)
-#define RX_SEEN_EVALS(prog)	(((struct regexp *)SvANY(prog))->seen_evals)
 #define RX_SAVED_COPY(prog)	(((struct regexp *)SvANY(prog))->saved_copy)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
@@ -589,6 +610,7 @@ typedef struct regmatch_state {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
+	    U32 lastcloseparen;
 	    CHECKPOINT cp;
 	    
         } branchlike;
@@ -597,6 +619,7 @@ typedef struct regmatch_state {
 	    /* the first elements must match u.branchlike */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
+	    U32 lastcloseparen;
 	    CHECKPOINT cp;
 	    
 	    regnode *next_branch; /* next branch node */
@@ -606,17 +629,17 @@ typedef struct regmatch_state {
 	    /* the first elements must match u.branchlike */
 	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
+	    U32 lastcloseparen;
 	    CHECKPOINT cp;
 
 	    U32		accepted; /* how many accepting states left */
+	    bool	longfold;/* saw a fold with a 1->n char mapping */
 	    U16         *jump;  /* positive offsets from me */
-	    regnode	*B;	/* node following the trie */
 	    regnode	*me;	/* Which node am I - needed for jump tries*/
 	    U8		*firstpos;/* pos in string of first trie match */
 	    U32		firstchars;/* len in chars of firstpos from start */
 	    U16		nextword;/* next word to try */
 	    U16		topword; /* longest accepted word */
-	    bool	longfold;/* saw a fold with a 1->n char mapping */
 	} trie;
 
         /* special types - these members are used to store state for special
@@ -689,6 +712,8 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_yes_state;
 	    I32 c1, c2;		/* case fold search */
 	    CHECKPOINT cp;
+	    U32 lastparen;
+	    U32 lastcloseparen;
 	    I32 alen;		/* length of first-matched A string */
 	    I32 count;
 	    bool minmod;
@@ -699,6 +724,8 @@ typedef struct regmatch_state {
 	struct {
 	    U32 paren;
 	    CHECKPOINT cp;
+	    U32 lastparen;
+	    U32 lastcloseparen;
 	    I32 c1, c2;		/* case fold search */
 	    char *maxpos;	/* highest possible point in string to match */
 	    char *oldloc;	/* the previous locinput */
@@ -726,12 +753,6 @@ typedef struct regmatch_slab {
 #define PL_bostr		PL_reg_state.re_state_bostr
 #define PL_reginput		PL_reg_state.re_state_reginput
 #define PL_regeol		PL_reg_state.re_state_regeol
-#define PL_regoffs		PL_reg_state.re_state_regoffs
-#define PL_reglastparen		PL_reg_state.re_state_reglastparen
-#define PL_reglastcloseparen	PL_reg_state.re_state_reglastcloseparen
-#define PL_reg_start_tmp	PL_reg_state.re_state_reg_start_tmp
-#define PL_reg_start_tmpl	PL_reg_state.re_state_reg_start_tmpl
-#define PL_reg_eval_set		PL_reg_state.re_state_reg_eval_set
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
 #define PL_reg_magic		PL_reg_state.re_state_reg_magic
 #define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
@@ -749,16 +770,12 @@ typedef struct regmatch_slab {
 
 struct re_save_state {
     U32 re_state_reg_flags;		/* from regexec.c */
-    U32 re_state_reg_start_tmpl;	/* from regexec.c */
-    I32 re_state_reg_eval_set;		/* from regexec.c */
+    bool re_state_eval_setup_done;	/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
+    bool re_reparsing;			/* runtime (?{}) fed back into parser */
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */
-    regexp_paren_pair *re_state_regoffs;  /* Pointer to start/end pairs */
-    U32 *re_state_reglastparen;		/* Similarly for lastparen. */
-    U32 *re_state_reglastcloseparen;	/* Similarly for lastcloseparen. */
-    char **re_state_reg_start_tmp;	/* from regexec.c */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
     PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
     PMOP *re_state_reg_curpm;		/* from regexec.c */

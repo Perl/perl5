@@ -148,6 +148,9 @@ static const char ident_too_long[] = "Identifier too long";
 /* LEX_* are values for PL_lex_state, the state of the lexer.
  * They are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
+ *
+ * These values refer to the various states within a sublex parse,
+ * i.e. within a double quotish string
  */
 
 /* #define LEX_NOTPARSING		11 is done in perl.h. */
@@ -2349,14 +2352,10 @@ S_tokeq(pTHX_ SV *sv)
  * converting things like "\u\Lgnat" into ucfirst(lc("gnat")).  They
  * interact with PL_lex_state, and create fake ( ... ) argument lists
  * to handle functions and concatenation.
- * They assume that whoever calls them will be setting up a fake
- * join call, because each subthing puts a ',' after it.  This lets
- *   "lower \luPpEr"
- * become
- *  join($, , 'lower ', lcfirst( 'uPpEr', ) ,)
- *
- * (I'm not sure whether the spurious commas at the end of lcfirst's
- * arguments and join's arguments are created or not).
+ * For example,
+ *   "foo\lbar"
+ * is tokenised as
+ *    stringify ( const[foo] concat lcfirst ( const[bar] ) )
  */
 
 /*
@@ -2450,6 +2449,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
+    SAVEPPTR(PL_sublex_info.re_eval_start);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
@@ -2466,6 +2466,7 @@ S_sublex_push(pTHX)
 
     PL_linestr = PL_lex_stuff;
     PL_lex_stuff = NULL;
+    PL_sublex_info.re_eval_start = NULL;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -2575,8 +2576,11 @@ S_sublex_done(pTHX)
 /*
   scan_const
 
-  Extracts a pattern, double-quoted string, or transliteration.  This
-  is terrifying code.
+  Extracts the next constant part of a pattern, double-quoted string,
+  or transliteration.  This is terrifying code.
+
+  For example, in parsing the double-quoted string "ab\x63$d", it would
+  stop at the '$' and return an OP_CONST containing 'abc'.
 
   It looks at PL_lex_inwhat and PL_lex_inpat to find out whether it's
   processing a pattern (PL_lex_inpat is true), a transliteration
@@ -2584,15 +2588,22 @@ S_sublex_done(pTHX)
 
   Returns a pointer to the character scanned up to. If this is
   advanced from the start pointer supplied (i.e. if anything was
-  successfully parsed), will leave an OP for the substring scanned
+  successfully parsed), will leave an OP_CONST for the substring scanned
   in pl_yylval. Caller must intuit reason for not parsing further
   by looking at the next characters herself.
 
   In patterns:
-    backslashes:
-      constants: \N{NAME} only
-      case and quoting: \U \Q \E
-    stops on @ and $, but not for $ as tail anchor
+    expand:
+      \N{ABC}  => \N{U+41.42.43}
+
+    pass through:
+	all other \-char, including \N and \N{ apart from \N{ABC}
+
+    stops on:
+	@ and $ where it appears to be a var, but not for $ as tail anchor
+        \l \L \u \U \Q \E
+	(?{  or  (??{
+
 
   In transliterations:
     characters are VERY literal, except for - not at the start or end
@@ -2622,7 +2633,7 @@ S_sublex_done(pTHX)
   it's a tail anchor if $ is the last thing in the string, or if it's
   followed by one of "()| \r\n\t"
 
-  \1 (backreferences) are turned into $1
+  \1 (backreferences) are turned into $1 in substitutions
 
   The structure of the code is
       while (there's a character to process) {
@@ -2661,6 +2672,7 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
+    bool in_charclass = FALSE;			/* within /[...]/ */
     bool has_utf8 = FALSE;			/* Output constant is UTF8 */
     bool  this_utf8 = cBOOL(UTF);		/* Is the source string assumed
 						   to be UTF8?  But, this can
@@ -2850,33 +2862,38 @@ S_scan_const(pTHX_ char *start)
 
 	/* if we get here, we're not doing a transliteration */
 
-	/* skip for regexp comments /(?#comment)/ and code /(?{code})/,
-	   except for the last char, which will be done separately. */
+	else if (*s == '[' && PL_lex_inpat && !in_charclass) {
+	    char *s1 = s-1;
+	    int esc = 0;
+	    while (s1 >= start && *s1-- == '\\')
+		esc = !esc;
+	    if (!esc)
+		in_charclass = TRUE;
+	}
+
+	else if (*s == ']' && PL_lex_inpat &&  in_charclass) {
+	    char *s1 = s-1;
+	    int esc = 0;
+	    while (s1 >= start && *s1-- == '\\')
+		esc = !esc;
+	    if (!esc)
+		in_charclass = FALSE;
+	}
+
+	/* skip for regexp comments /(?#comment)/, except for the last
+	 * char, which will be done separately.
+	 * Stop on (?{..}) and friends */
+
 	else if (*s == '(' && PL_lex_inpat && s[1] == '?') {
 	    if (s[2] == '#') {
 		while (s+1 < send && *s != ')')
 		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
-	    else if (s[2] == '{' /* This should match regcomp.c */
-		    || (s[2] == '?' && s[3] == '{'))
+	    else if (!PL_lex_casemods && !in_charclass &&
+		     (    s[2] == '{' /* This should match regcomp.c */
+		      || (s[2] == '?' && s[3] == '{')))
 	    {
-		I32 count = 1;
-		char *regparse = s + (s[2] == '{' ? 3 : 4);
-		char c;
-
-		while (count && (c = *regparse)) {
-		    if (c == '\\' && regparse[1])
-			regparse++;
-		    else if (c == '{')
-			count++;
-		    else if (c == '}')
-			count--;
-		    regparse++;
-		}
-		if (*regparse != ')')
-		    regparse--;		/* Leave one char for continuation. */
-		while (s < regparse)
-		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
+		break;
 	    }
 	}
 
@@ -2886,6 +2903,10 @@ S_scan_const(pTHX_ char *start)
 	    while (s+1 < send && *s != '\n')
 		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	}
+
+	/* no further processing of single-quoted regex */
+	else if (PL_lex_inpat && SvIVX(PL_linestr) == '\'')
+	    goto default_action;
 
 	/* check for embedded arrays
 	   (@foo, @::foo, @'foo, @{foo}, @$foo, @+, @-)
@@ -3555,6 +3576,9 @@ S_scan_const(pTHX_ char *start)
 		typelen = 2;
 	    } else if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat) {
 		type = "s";
+		typelen = 1;
+	    } else if (PL_lex_inpat && SvIVX(PL_linestr) == '\'') {
+		type = "q";
 		typelen = 1;
 	    } else  {
 		type = "qq";
@@ -4615,7 +4639,7 @@ Perl_yylex(pTHX)
     case LEX_INTERPSTART:
 	if (PL_bufptr == PL_bufend)
 	    return REPORT(sublex_done());
-	DEBUG_T({ PerlIO_printf(Perl_debug_log,
+	DEBUG_T({ if(*PL_bufptr != '(') PerlIO_printf(Perl_debug_log,
               "### Interpolated variable\n"); });
 	PL_expect = XTERM;
 	PL_lex_dojoin = (*PL_bufptr == '@');
@@ -4636,6 +4660,18 @@ Perl_yylex(pTHX)
 	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
 	    force_next(FUNC);
 	}
+	/* Convert (?{...}) and friends to 'do {...}' */
+	if (PL_lex_inpat && *PL_bufptr == '(') {
+	    PL_sublex_info.re_eval_start = PL_bufptr;
+	    PL_bufptr += 2;
+	    if (*PL_bufptr != '{')
+		PL_bufptr++;
+	    start_force(PL_curforce);
+	    /* XXX probably need a CURMAD(something) here */
+	    PL_expect = XTERMBLOCK;
+	    force_next(DO);
+	}
+
 	if (PL_lex_starts++) {
 	    s = PL_bufptr;
 #ifdef PERL_MAD
@@ -4681,6 +4717,24 @@ Perl_yylex(pTHX)
 		Perl_croak(aTHX_ "Bad evalled substitution pattern");
 	    PL_lex_repl = NULL;
 	}
+	if (PL_sublex_info.re_eval_start) {
+	    if (*PL_bufptr != ')')
+		Perl_croak(aTHX_ "Sequence (?{...}) not terminated with ')'");
+	    PL_bufptr++;
+	    /* having compiled a (?{..}) expression, return the original
+	     * text too, as a const */
+	    start_force(PL_curforce);
+	    /* XXX probably need a CURMAD(something) here */
+	    NEXTVAL_NEXTTOKE.opval =
+		    (OP*)newSVOP(OP_CONST, 0,
+			newSVpvn(PL_sublex_info.re_eval_start,
+				PL_bufptr - PL_sublex_info.re_eval_start));
+	    force_next(THING);
+	    PL_sublex_info.re_eval_start = NULL;
+	    PL_expect = XTERM;
+	    return REPORT(',');
+	}
+
 	/* FALLTHROUGH */
     case LEX_INTERPCONCAT:
 #ifdef DEBUGGING
@@ -4691,12 +4745,10 @@ Perl_yylex(pTHX)
 	if (PL_bufptr == PL_bufend)
 	    return REPORT(sublex_done());
 
-	if (SvIVX(PL_linestr) == '\'') {
+	/* m'foo' still needs to be parsed for possible (?{...}) */
+	if (SvIVX(PL_linestr) == '\'' && !PL_lex_inpat) {
 	    SV *sv = newSVsv(PL_linestr);
-	    if (!PL_lex_inpat)
-		sv = tokeq(sv);
-	    else if ( PL_hints & HINT_NEW_RE )
-		sv = new_constant(NULL, 0, "qr", sv, sv, "q", 1);
+	    sv = tokeq(sv);
 	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
 	    s = PL_bufend;
 	}
@@ -5495,7 +5547,7 @@ Perl_yylex(pTHX)
 		}
 		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
-		    d = scan_str(d,TRUE,TRUE);
+		    d = scan_str(d,TRUE,TRUE,FALSE);
 		    if (!d) {
 			/* MUST advance bufptr here to avoid bogus
 			   "at end of line" context messages from yyerror().
@@ -6391,7 +6443,7 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	s = scan_str(s,!!PL_madskills,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6406,7 +6458,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	s = scan_str(s,!!PL_madskills,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6429,7 +6481,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '`':
-	s = scan_str(s,!!PL_madskills,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
@@ -7795,7 +7847,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_PIPE_OP,XTERM);
 
 	case KEY_q:
-	    s = scan_str(s,!!PL_madskills,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_CONST;
@@ -7806,7 +7858,7 @@ Perl_yylex(pTHX)
 
 	case KEY_qw: {
 	    OP *words = NULL;
-	    s = scan_str(s,!!PL_madskills,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    PL_expect = XOPERATOR;
@@ -7856,7 +7908,7 @@ Perl_yylex(pTHX)
 	}
 
 	case KEY_qq:
-	    s = scan_str(s,!!PL_madskills,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_STRINGIFY;
@@ -7869,7 +7921,7 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_qx:
-	    s = scan_str(s,!!PL_madskills,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    readpipe_override();
@@ -8178,7 +8230,7 @@ Perl_yylex(pTHX)
 		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
                     STRLEN tmplen;
 
-		    s = scan_str(s,!!PL_madskills,FALSE);
+		    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
 		    /* strip spaces and check for bad characters */
@@ -9100,7 +9152,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
 {
     dVAR;
     PMOP *pm;
-    char *s = scan_str(start,!!PL_madskills,FALSE);
+    char *s = scan_str(start,!!PL_madskills,FALSE, PL_reg_state.re_reparsing);
     const char * const valid_flags =
 	(const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
     char charset = '\0';    /* character set modifier */
@@ -9110,6 +9162,9 @@ S_scan_pat(pTHX_ char *start, I32 type)
 
     PERL_ARGS_ASSERT_SCAN_PAT;
 
+    /* this was only needed for the initial scan_str; set it to false
+     * so that any (?{}) code blocks etc are parsed normally */
+    PL_reg_state.re_reparsing = FALSE;
     if (!s) {
 	const char * const delimiter = skipspace(start);
 	Perl_croak(aTHX_
@@ -9145,6 +9200,25 @@ S_scan_pat(pTHX_ char *start, I32 type)
 #ifdef PERL_MAD
     modstart = s;
 #endif
+
+    /* if qr/...(?{..}).../, then need to parse the pattern within a new
+     * anon CV. False positives like qr/[(?{]/ are harmless */
+
+    if (type == OP_QR) {
+	STRLEN len;
+	char *e, *p = SvPV(PL_lex_stuff, len);
+	e = p + len;
+	for (; p < e; p++) {
+	    if (p[0] == '(' && p[1] == '?'
+		&& (p[2] == '{' || (p[2] == '?' && p[3] == '{')))
+	    {
+		pm->op_pmflags |= PMf_HAS_CV;
+		break;
+	    }
+	}
+	pm->op_pmflags |= PMf_IS_QR;
+    }
+
     while (*s && S_pmflag(aTHX_ valid_flags, &(pm->op_pmflags), &s, &charset)) {};
 #ifdef PERL_MAD
     if (PL_madskills && modstart != s) {
@@ -9181,7 +9255,7 @@ S_scan_subst(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE);
 
     if (!s)
 	Perl_croak(aTHX_ "Substitution pattern not terminated");
@@ -9199,7 +9273,7 @@ S_scan_subst(pTHX_ char *start)
 #endif
 
     first_start = PL_multi_start;
-    s = scan_str(s,!!PL_madskills,FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -9289,7 +9363,7 @@ S_scan_trans(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE);
     if (!s)
 	Perl_croak(aTHX_ "Transliteration pattern not terminated");
 
@@ -9305,7 +9379,7 @@ S_scan_trans(pTHX_ char *start)
     }
 #endif
 
-    s = scan_str(s,!!PL_madskills,FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -9697,7 +9771,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	pl_yylval.ival = OP_GLOB;
-	s = scan_str(start,!!PL_madskills,FALSE);
+	s = scan_str(start,!!PL_madskills,FALSE,FALSE);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
 	return s;
@@ -9797,6 +9871,8 @@ intro_sym:
    takes: start position in buffer
 	  keep_quoted preserve \ on the embedded delimiter(s)
 	  keep_delims preserve the delimiters around the string
+	  re_reparse  compiling a run-time /(?{})/:
+			collapse // to /,  and skip encoding src
    returns: position to continue reading from buffer
    side-effects: multi_start, multi_close, lex_repl or lex_stuff, and
    	updates the read buffer.
@@ -9837,7 +9913,7 @@ intro_sym:
 */
 
 STATIC char *
-S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
+S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
 {
     dVAR;
     SV *sv;				/* scalar value: string */
@@ -9916,7 +9992,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     }
 #endif
     for (;;) {
-	if (PL_encoding && !UTF) {
+	if (PL_encoding && !UTF && !re_reparse) {
 	    bool cont = TRUE;
 
 	    while (cont) {
@@ -9998,9 +10074,12 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    CopLINE_inc(PL_curcop);
 		/* handle quoted delimiters */
 		if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
-		    if (!keep_quoted && s[1] == term)
+		    if (!keep_quoted
+		        && (s[1] == term
+			    || (re_reparse && s[1] == '\\'))
+		    )
 			s++;
-		/* any other quotes are simply copied straight through */
+		    /* any other quotes are simply copied straight through */
 		    else
 			*to++ = *s++;
 		}
@@ -10101,7 +10180,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     /* at this point, we have successfully read the delimited string */
 
-    if (!PL_encoding || UTF) {
+    if (!PL_encoding || UTF || re_reparse) {
 #ifdef PERL_MAD
 	if (PL_madskills) {
 	    char * const tstart = SvPVX(PL_linestr) + stuffstart;
@@ -10133,7 +10212,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	}
     }
 #endif
-    if (has_utf8 || PL_encoding)
+    if (has_utf8 || (PL_encoding && !re_reparse))
 	SvUTF8_on(sv);
 
     PL_multi_end = CopLINE(PL_curcop);

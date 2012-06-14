@@ -1163,6 +1163,10 @@ Since Perl 5.9.5
 
 Only when perl was compiled with ithreads.
 
+=item code_list
+
+Since perl 5.17.1
+
 =back
 
 =head2 B::SVOP METHOD

@@ -2689,6 +2689,10 @@ As C<\c> is skipped at this step, C<@> of C<\c@> in RE is possibly
 treated as an array symbol (for example C<@foo>),
 even though the same text in C<qq//> gives interpolation of C<\c@>.
 
+Code blocks such as C<(?{BLOCK})> are handled by temporarily passing control
+back to the perl parser, in a similar way that an interpolated array
+subscript expression such as C<"foo$array[1+f("[xyz")]bar"> would be.
+
 Moreover, inside C<(?{BLOCK})>, C<(?# comment )>, and
 a C<#>-comment in a C<//x>-regular expression, no processing is
 performed whatsoever.  This is the first step at which the presence
@@ -2757,9 +2761,11 @@ rather different than the rule used for the rest of the pattern.
 The terminator of this construct is found using the same rules as
 for finding the terminator of a C<{}>-delimited construct, the only
 exception being that C<]> immediately following C<[> is treated as
-though preceded by a backslash.  Similarly, the terminator of
-C<(?{...})> is found using the same rules as for finding the
-terminator of a C<{}>-delimited construct.
+though preceded by a backslash.
+
+The terminator of runtime C<(?{...})> is found by temporarily switching
+control to the perl parser, which should stop at the point where the
+logically balancing terminating C<}> is found.
 
 It is possible to inspect both the string given to RE engine and the
 resulting finite automaton.  See the arguments C<debug>/C<debugcolor>

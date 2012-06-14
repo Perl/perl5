@@ -375,6 +375,7 @@ struct pmop {
 	HV *	op_pmstash;
 #endif
     }		op_pmstashstartu;
+    OP *	op_code_list;	/* list of (?{}) code blocks */
 };
 
 #ifdef USE_ITHREADS
@@ -433,7 +434,20 @@ struct pmop {
 /* Return substituted string instead of modifying it. */
 #define PMf_NONDESTRUCT	(1<<(PMf_BASE_SHIFT+9))
 
-#if PMf_BASE_SHIFT+9 > 31
+/* the pattern has a CV attached (currently only under qr/...(?{}).../) */
+#define PMf_HAS_CV	(1<<(PMf_BASE_SHIFT+10))
+
+/* op_code_list is private; don't free it etc. It may well point to
+ * code within another sub, with different pad etc */
+#define PMf_CODELIST_PRIVATE	(1<<(PMf_BASE_SHIFT+11))
+
+/* the PMOP is a QR (we should be able to detect that from the op type,
+ * but the regex compilation API passes just the pm flags, not the op
+ * itself */
+#define PMf_IS_QR	(1<<(PMf_BASE_SHIFT+12))
+#define PMf_USE_RE_EVAL	(1<<(PMf_BASE_SHIFT+13)) /* use re'eval' in scope */
+
+#if PMf_BASE_SHIFT+13 > 31
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 

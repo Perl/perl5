@@ -613,6 +613,15 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	Perl_dump_indent(aTHX_ level, file, "PMf_REPL = ");
 	op_dump(pm->op_pmreplrootu.op_pmreplroot);
     }
+    if (pm->op_code_list) {
+	if (pm->op_pmflags & PMf_CODELIST_PRIVATE) {
+	    Perl_dump_indent(aTHX_ level, file, "CODE_LIST =\n");
+	    do_op_dump(level, file, pm->op_code_list);
+	}
+	else
+	    Perl_dump_indent(aTHX_ level, file, "CODE_LIST = 0x%"UVxf"\n",
+				    PTR2UV(pm->op_code_list));
+    }
     if (pm->op_pmflags || (PM_GETRE(pm) && RX_CHECK_SUBSTR(PM_GETRE(pm)))) {
 	SV * const tmpsv = pm_description(pm);
 	Perl_dump_indent(aTHX_ level, file, "PMFLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
@@ -630,6 +639,9 @@ const struct flag_to_name pmflags_flags_names[] = {
     {PMf_RETAINT, ",RETAINT"},
     {PMf_EVAL, ",EVAL"},
     {PMf_NONDESTRUCT, ",NONDESTRUCT"},
+    {PMf_HAS_CV, ",HAS_CV"},
+    {PMf_CODELIST_PRIVATE, ",CODELIST_PRIVATE"},
+    {PMf_IS_QR, ",IS_QR"}
 };
 
 static SV *
@@ -2040,8 +2052,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				(UV)(r->gofs));
 	    Perl_dump_indent(aTHX_ level, file, "  PRE_PREFIX = %"UVuf"\n",
 				(UV)(r->pre_prefix));
-	    Perl_dump_indent(aTHX_ level, file, "  SEEN_EVALS = %"UVuf"\n",
-				(UV)(r->seen_evals));
 	    Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %"IVdf"\n",
 				(IV)(r->sublen));
 	    if (r->subbeg)
@@ -2062,6 +2072,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				PTR2UV(r->pprivate));
 	    Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%"UVxf"\n",
 				PTR2UV(r->offs));
+	    Perl_dump_indent(aTHX_ level, file, "  QR_ANONCV = 0x%"UVxf"\n",
+				PTR2UV(r->qr_anoncv));
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    Perl_dump_indent(aTHX_ level, file, "  SAVED_COPY = 0x%"UVxf"\n",
 				PTR2UV(r->saved_copy));

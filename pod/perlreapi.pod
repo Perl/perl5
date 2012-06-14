@@ -34,6 +34,8 @@ following format:
     #ifdef USE_ITHREADS
         void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
     #endif
+        REGEXP* (*op_comp) (...);
+
 
 When a regexp is compiled, its C<engine> field is then set to point at
 the appropriate structure, so that when it needs to be used Perl can find
@@ -462,6 +464,11 @@ modify the final structure if it really must.
 
 On unthreaded builds this field doesn't exist.
 
+=head2 op_comp
+
+This is private to the perl core and subject to change. Should be left
+null.
+
 =head1 The REGEXP structure
 
 The REGEXP struct is defined in F<regexp.h>. All regex engines must be able to
@@ -507,8 +514,8 @@ values.
                            created this object. */
 
         /* Data about the last/current match. These are modified during matching*/
-        U32 lastparen;            /* last open paren matched */
-        U32 lastcloseparen;       /* last close paren matched */
+        U32 lastparen;            /* highest close paren matched ($+) */
+        U32 lastcloseparen;       /* last close paren matched ($^N) */
         regexp_paren_pair *swap;  /* Swap copy of *offs */
         regexp_paren_pair *offs;  /* Array of offsets for (@-) and (@+) */
 

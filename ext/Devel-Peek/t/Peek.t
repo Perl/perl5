@@ -349,7 +349,6 @@ do_test('reference to regexp',
     MINLENRET = 3
     GOFS = 0
     PRE_PREFIX = 4
-    SEEN_EVALS = 0
     SUBLEN = 0
     SUBBEG = 0x0
     ENGINE = $ADDR
@@ -357,7 +356,8 @@ do_test('reference to regexp',
     PAREN_NAMES = 0x0
     SUBSTRS = $ADDR
     PPRIVATE = $ADDR
-    OFFS = $ADDR'
+    OFFS = $ADDR
+    QR_ANONCV = 0x0'
 ));
 } else {
 do_test('reference to regexp',

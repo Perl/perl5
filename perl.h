@@ -3470,6 +3470,7 @@ struct _sublex_info {
     OP *sub_op;		/* "lex_op" to use */
     char *super_bufptr;	/* PL_parser->bufptr that was */
     char *super_bufend;	/* PL_parser->bufend that was */
+    char *re_eval_start;/* start of "(?{..." text */
 };
 
 #include "parser.h"
@@ -4599,7 +4600,9 @@ EXTCONST unsigned char PL_freq[] = {	/* letter frequencies for mixed English/C *
 EXTCONST unsigned char PL_freq[];
 #endif
 
-#ifdef DEBUGGING
+/* Although only used for debugging, these constants must be available in
+ * non-debugging builds too, since they're used in ext/re/re_exec.c,
+ * which has DEBUGGING enabled always */
 #ifdef DOINIT
 EXTCONST char* const PL_block_type[] = {
 	"NULL",
@@ -4617,7 +4620,6 @@ EXTCONST char* const PL_block_type[] = {
 };
 #else
 EXTCONST char* PL_block_type[];
-#endif
 #endif
 
 /* These are all the compile time options that affect binary compatibility.

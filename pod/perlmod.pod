@@ -307,7 +307,7 @@ the main program.
 
 C<UNITCHECK> blocks are run just after the unit which defined them has
 been compiled.  The main program file and each module it loads are
-compilation units, as are string C<eval>s, code compiled using the
+compilation units, as are string C<eval>s, run-time code compiled using the
 C<(?{ })> construct in a regex, calls to C<do FILE>, C<require FILE>,
 and code after the C<-e> switch on the command line.
 

@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5082;
+plan tests => 5100;
 
 use Scalar::Util qw(tainted);
 
@@ -1206,17 +1206,23 @@ foreach my $op (qw(<=> == != < <= > >=)) {
         # doesn't look like a regex
         ok("x" =~ $x, "qr-only matches");
         ok("y" !~ $x, "qr-only doesn't match what it shouldn't");
+        ok("x" =~ /^(??{$x})$/, "qr-only with ?? matches");
+        ok("y" !~ /^(??{$x})$/, "qr-only with ?? doesn't match what it shouldn't");
         ok("xx" =~ /x$x/, "qr-only matches with concat");
         like("$x", qr/^QRonly=ARRAY/, "qr-only doesn't have string overload");
 
         my $qr = bless qr/y/, "QRonly";
         ok("x" =~ $qr, "qr with qr-overload uses overload");
         ok("y" !~ $qr, "qr with qr-overload uses overload");
+	ok("x" =~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
+	ok("y" !~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
         is("$qr", "".qr/y/, "qr with qr-overload stringify");
 
         my $rx = $$qr;
         ok("y" =~ $rx, "bare rx with qr-overload doesn't overload match");
         ok("x" !~ $rx, "bare rx with qr-overload doesn't overload match");
+        ok("y" =~ /^(??{$rx})$/, "bare rx with qr-overload with ?? doesn't overload match");
+        ok("x" !~ /^(??{$rx})$/, "bare rx with qr-overload with ?? doesn't overload match");
         is("$rx", "".qr/y/, "bare rx with qr-overload stringify");
     }
     {
@@ -2207,6 +2213,45 @@ fresh_perl_is
     ::like $@, qr/^Stub found while resolving method "\?{3}" overloadin(?x:
                   )g "\+" in package "JustUs" at /,
       'Error message when sub stub is encountered';
+}
+
+{
+    # check that the right number of stringifications
+    # and the correct un-utf8-ifying happen on regex compile
+    package utf8_match;
+    my $c;
+    use overload '""' => sub { $c++; $_[0][0] ? "^\x{100}\$" : "^A\$"; };
+    my $o = bless [0], 'utf8_match';
+
+    $o->[0] = 0;
+    $c = 0;
+    ::ok("A" =~  "^A\$",	"regex stringify utf8=0 ol=0 bytes=0");
+    ::ok("A" =~ $o,		"regex stringify utf8=0 ol=1 bytes=0");
+    ::is($c, 1,			"regex stringify utf8=0 ol=1 bytes=0 count");
+
+    $o->[0] = 1;
+    $c = 0;
+    ::ok("\x{100}" =~ "^\x{100}\$",
+				"regex stringify utf8=1 ol=0 bytes=0");
+    ::ok("\x{100}" =~ $o,	"regex stringify utf8=1 ol=1 bytes=0");
+    ::is($c, 1,			"regex stringify utf8=1 ol=1 bytes=0 count");
+
+    use bytes;
+
+    $o->[0] = 0;
+    $c = 0;
+    ::ok("A" =~  "^A\$",	"regex stringify utf8=0 ol=0 bytes=1");
+    ::ok("A" =~ $o,		"regex stringify utf8=0 ol=1 bytes=1");
+    ::is($c, 1,			"regex stringify utf8=0 ol=1 bytes=1 count");
+
+    $o->[0] = 1;
+    $c = 0;
+    ::ok("\xc4\x80" =~ "^\x{100}\$",
+				"regex stringify utf8=1 ol=0 bytes=1");
+    ::ok("\xc4\x80" =~ $o,	"regex stringify utf8=1 ol=1 bytes=1");
+    ::is($c, 1,			"regex stringify utf8=1 ol=1 bytes=1 count");
+
+
 }
 
 # [perl #40333]

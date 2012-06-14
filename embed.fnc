@@ -1024,7 +1024,7 @@ Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV 
 s	|void	|pidgone	|Pid_t pid|int status
 #endif
 : Used in perly.y
-p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg
+p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg|I32 floor
 #if defined(PERL_IN_OP_C)
 s	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif
@@ -1056,8 +1056,15 @@ Ap	|void	|regfree_internal|NN REGEXP *const rx
 #if defined(USE_ITHREADS)
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
 #endif
+EXp	|regexp_engine const *|current_re_engine
 Ap	|REGEXP*|pregcomp	|NN SV * const pattern|const U32 flags
-Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 flags
+p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
+				|int pat_count|NULLOK OP *expr \
+				|NN const regexp_engine* eng \
+				|NULLOK REGEXP *VOL old_re \
+				|NULLOK bool *is_bare_re \
+				|U32 rx_flags|U32 pm_flags
+Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 orig_rx_flags
 Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
 				|NULLOK re_scream_pos_data *data
@@ -1267,13 +1274,6 @@ Apd	|I32	|sv_cmp_locale_flags	|NULLOK SV *const sv1 \
 Amd	|char*	|sv_collxfrm	|NN SV *const sv|NN STRLEN *const nxp
 Apd	|char*	|sv_collxfrm_flags	|NN SV *const sv|NN STRLEN *const nxp|I32 const flags
 #endif
-: Frustratingly, because regcomp.c is also compiled as ext/re/re_comp.c,
-: anything it needs has to be exported. So this has to be X. I'd rather it
-: wasn't.
-Xpo	|OP*	|sv_compile_2op_is_broken|NN SV *sv|NN OP **startop \
-				|NN const char *code|NN PAD **padp
-ApD	|OP*	|sv_compile_2op	|NN SV *sv|NN OP **startop \
-				|NN const char *code|NN PAD **padp
 Apd	|int	|getcwd_sv	|NN SV* sv
 Apd	|void	|sv_dec		|NULLOK SV *const sv
 Apd	|void	|sv_dec_nomg	|NULLOK SV *const sv
@@ -1859,7 +1859,7 @@ sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 sR	|I32	|dopoptowhen	|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
-s	|bool	|doeval		|int gimme|NULLOK OP** startop \
+s	|bool	|doeval		|int gimme \
 				|NULLOK CV* outside|U32 seq|NULLOK HV* hh
 sR	|PerlIO *|check_type_and_open|NN SV *name
 #ifndef PERL_DISABLE_PMC
@@ -1996,8 +1996,8 @@ ERs	|I32	|regrepeat	|NN const regexp *prog|NN const regnode *p|I32 max|int depth
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startpos
 ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p|NULLOK STRLEN *lenp\
 				|bool const do_utf8sv_is_utf8
-Es	|CHECKPOINT|regcppush	|I32 parenfloor
-Es	|char*	|regcppop	|NN const regexp *rex
+Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor
+Es	|void	|regcppop	|NN regexp *rex
 ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim
 ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
@@ -2114,7 +2114,8 @@ s	|char*	|scan_ident	|NN char *s|NN const char *send|NN char *dest \
 				|STRLEN destlen|I32 ck_uni
 sR	|char*	|scan_inputsymbol|NN char *start
 sR	|char*	|scan_pat	|NN char *start|I32 type
-sR	|char*	|scan_str	|NN char *start|int keep_quoted|int keep_delims
+sR	|char*	|scan_str	|NN char *start|int keep_quoted \
+				|int keep_delims|int re_reparse
 sR	|char*	|scan_subst	|NN char *start
 sR	|char*	|scan_trans	|NN char *start
 s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \

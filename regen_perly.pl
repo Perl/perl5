@@ -268,7 +268,7 @@ sub make_type_tab {
     $types{$default_token} = 1;
 
     $tablines =~ /^\Qstatic const char *const yytname[] =\E\n
-	    {\n
+	    \{\n
 	    (.*?)
 	    ^};
 	    /xsm

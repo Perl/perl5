@@ -69,9 +69,6 @@ PP(pp_wantarray)
 PP(pp_regcreset)
 {
     dVAR;
-    /* XXXX Should store the old value to allow for tie/overload - and
-       restore in regcomp, where marked with XXXX. */
-    PL_reginterp_cnt = 0;
     TAINT_NOT;
     return NORMAL;
 }
@@ -81,186 +78,100 @@ PP(pp_regcomp)
     dVAR;
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
-    SV *tmpstr;
+    SV **args;
+    int nargs;
     REGEXP *re = NULL;
+    REGEXP *new_re;
+    const regexp_engine *eng;
+    bool is_bare_re;
+
+    if (PL_op->op_flags & OPf_STACKED) {
+	dMARK;
+	nargs = SP - MARK;
+	args  = ++MARK;
+    }
+    else {
+	nargs = 1;
+	args  = SP;
+    }
 
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm)) {
-	if (PL_op->op_flags & OPf_STACKED) {
-	    dMARK;
-	    SP = MARK;
-	}
-	else
-	    (void)POPs;
+	SP = args-1;
 	RETURN;
     }
 #endif
 
-#define tryAMAGICregexp(rx)			\
-    STMT_START {				\
-	SvGETMAGIC(rx);				\
-	if (SvROK(rx) && SvAMAGIC(rx)) {	\
-	    SV *sv = AMG_CALLunary(rx, regexp_amg); \
-	    if (sv) {				\
-		if (SvROK(sv))			\
-		    sv = SvRV(sv);		\
-		if (SvTYPE(sv) != SVt_REGEXP)	\
-		    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP"); \
-		rx = sv;			\
-	    }					\
-	}					\
-    } STMT_END
-	    
-
-    if (PL_op->op_flags & OPf_STACKED) {
-	/* multiple args; concatenate them */
-	dMARK; dORIGMARK;
-	tmpstr = PAD_SV(ARGTARG);
-	sv_setpvs(tmpstr, "");
-	while (++MARK <= SP) {
-	    SV *msv = *MARK;
-	    SV *sv;
-
-	    tryAMAGICregexp(msv);
-
-	    if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
-		(sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
-	    {
-	       sv_setsv(tmpstr, sv);
-	       continue;
-	    }
-
-	    if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP) {
-		msv = SvRV(msv);
-		PL_reginterp_cnt +=
-		    RX_SEEN_EVALS((REGEXP *)MUTABLE_PTR(msv));
-	    }
-
-	    sv_catsv_nomg(tmpstr, msv);
-	}
-    	SvSETMAGIC(tmpstr);
-	SP = ORIGMARK;
-    }
-    else {
-	tmpstr = POPs;
-	tryAMAGICregexp(tmpstr);
-    }
-
-#undef tryAMAGICregexp
-
-    if (SvROK(tmpstr)) {
-	SV * const sv = SvRV(tmpstr);
-	if (SvTYPE(sv) == SVt_REGEXP)
-	    re = (REGEXP*) sv;
-    }
-    else if (SvTYPE(tmpstr) == SVt_REGEXP)
-	re = (REGEXP*) tmpstr;
-
-    if (re) {
-	/* The match's LHS's get-magic might need to access this op's reg-
-	   exp (as is sometimes the case with $';  see bug 70764).  So we
-	   must call get-magic now before we replace the regexp. Hopeful-
-	   ly this hack can be replaced with the approach described at
-	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03
-	   /msg122415.html some day. */
-	if(pm->op_type == OP_MATCH) {
-	 SV *lhs;
-	 const bool was_tainted = PL_tainted;
-	 if (pm->op_flags & OPf_STACKED)
-	    lhs = TOPs;
-	 else if (pm->op_private & OPpTARGET_MY)
-	    lhs = PAD_SV(pm->op_targ);
-	 else lhs = DEFSV;
-	 SvGETMAGIC(lhs);
-	 /* Restore the previous value of PL_tainted (which may have been
-	    modified by get-magic), to avoid incorrectly setting the
-	    RXf_TAINTED flag further down. */
-	 PL_tainted = was_tainted;
-	}
-
-	re = reg_temp_copy(NULL, re);
-	ReREFCNT_dec(PM_GETRE(pm));
-	PM_SETRE(pm, re);
-    }
-    else {
-	STRLEN len = 0;
-	const char *t = SvOK(tmpstr) ? SvPV_nomg_const(tmpstr, len) : "";
-
-	re = PM_GETRE(pm);
-	assert (re != (REGEXP*) &PL_sv_undef);
-
-	/* Check against the last compiled regexp. */
-	if (!re || !RX_PRECOMP(re) || RX_PRELEN(re) != len ||
-	    memNE(RX_PRECOMP(re), t, len))
-	{
-	    const regexp_engine *eng = re ? RX_ENGINE(re) : NULL;
-            U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
-	    if (re) {
-	        ReREFCNT_dec(re);
-#ifdef USE_ITHREADS
-		PM_SETRE(pm, (REGEXP*) &PL_sv_undef);
-#else
-		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
-#endif
-	    } else if (PL_curcop->cop_hints_hash) {
-	        SV *ptr = cop_hints_fetch_pvs(PL_curcop, "regcomp", 0);
-                if (ptr && SvIOK(ptr) && SvIV(ptr))
-                    eng = INT2PTR(regexp_engine*,SvIV(ptr));
-	    }
-
-	    if (PL_op->op_flags & OPf_SPECIAL)
-		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
-
-	    if (!DO_UTF8(tmpstr) && SvUTF8(tmpstr)) {
-		/* Not doing UTF-8, despite what the SV says. Is this only if
-		   we're trapped in use 'bytes'?  */
-		/* Make a copy of the octet sequence, but without the flag on,
-		   as the compiler now honours the SvUTF8 flag on tmpstr.  */
-		STRLEN len;
-		const char *const p = SvPV(tmpstr, len);
-		tmpstr = newSVpvn_flags(p, len, SVs_TEMP);
-	    }
-	    else if (SvAMAGIC(tmpstr) || SvGMAGICAL(tmpstr)) {
-		/* make a copy to avoid extra stringifies */
-		tmpstr = newSVpvn_flags(t, len, SVs_TEMP | SvUTF8(tmpstr));
-	    }
-
-	    if (eng)
-	        PM_SETRE(pm, CALLREGCOMP_ENG(eng, tmpstr, pm_flags));
-	    else
-	        PM_SETRE(pm, CALLREGCOMP(tmpstr, pm_flags));
-
-	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
-					   inside tie/overload accessors.  */
-	}
-    }
-    
     re = PM_GETRE(pm);
+    assert (re != (REGEXP*) &PL_sv_undef);
+    eng = re ? RX_ENGINE(re) : current_re_engine();
+
+    new_re = (eng->op_comp
+		    ? eng->op_comp
+		    : &Perl_re_op_compile
+	    )(aTHX_ args, nargs, pm->op_code_list, eng, re,
+		&is_bare_re,
+		(pm->op_pmflags & RXf_PMf_COMPILETIME),
+		pm->op_pmflags |
+		    (PL_op->op_flags & OPf_SPECIAL ? PMf_USE_RE_EVAL : 0));
+    if (pm->op_pmflags & PMf_HAS_CV)
+	((struct regexp *)SvANY(new_re))->qr_anoncv
+			= (CV*) SvREFCNT_inc(PAD_SV(PL_op->op_targ));
+
+    if (is_bare_re) {
+	REGEXP *tmp;
+	/* The match's LHS's get-magic might need to access this op's regexp
+	   (e.g. $' =~ /$re/ while foo; see bug 70764).  So we must call
+	   get-magic now before we replace the regexp. Hopefully this hack can
+	   be replaced with the approach described at
+	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html
+	   some day. */
+	if (pm->op_type == OP_MATCH) {
+	    SV *lhs;
+	    const bool was_tainted = PL_tainted;
+	    if (pm->op_flags & OPf_STACKED)
+		lhs = args[-1];
+	    else if (pm->op_private & OPpTARGET_MY)
+		lhs = PAD_SV(pm->op_targ);
+	    else lhs = DEFSV;
+	    SvGETMAGIC(lhs);
+	    /* Restore the previous value of PL_tainted (which may have been
+	       modified by get-magic), to avoid incorrectly setting the
+	       RXf_TAINTED flag further down. */
+	    PL_tainted = was_tainted;
+	}
+	tmp = reg_temp_copy(NULL, new_re);
+	ReREFCNT_dec(new_re);
+	new_re = tmp;
+    }
+    if (re != new_re) {
+	ReREFCNT_dec(re);
+	PM_SETRE(pm, new_re);
+    }
 
 #ifndef INCOMPLETE_TAINTS
-    if (PL_tainting) {
-	if (PL_tainted) {
-	    SvTAINTED_on((SV*)re);
-	    RX_EXTFLAGS(re) |= RXf_TAINTED;
-	}
+    if (PL_tainting && PL_tainted) {
+	SvTAINTED_on((SV*)new_re);
+	RX_EXTFLAGS(new_re) |= RXf_TAINTED;
     }
 #endif
-
-    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm)
-	pm = PL_curpm;
-
 
 #if !defined(USE_ITHREADS)
     /* can't change the optree at runtime either */
     /* PMf_KEEP is handled differently under threads to avoid these problems */
+    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm)
+	pm = PL_curpm;
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
 	cLOGOP->op_first->op_next = PL_op->op_next;
     }
 #endif
+
+    SP = args-1;
     RETURN;
 }
+
 
 PP(pp_substcont)
 {
@@ -1923,7 +1834,7 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
 	GV * const cvgv = CvGV(dbcx->blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
-	if (isGV(cvgv)) {
+	if (cvgv && isGV(cvgv)) {
 	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
 	    mPUSHs(sv);
@@ -3318,142 +3229,6 @@ S_docatch(pTHX_ OP *o)
     return NULL;
 }
 
-/* James Bond: Do you expect me to talk?
-   Auric Goldfinger: No, Mr. Bond. I expect you to die.
-
-   This code is an ugly hack, doesn't work with lexicals in subroutines that are
-   called more than once, and is only used by regcomp.c, for (?{}) blocks.
-
-   Currently it is not used outside the core code. Best if it stays that way.
-
-   Hence it's now deprecated, and will be removed.
-*/
-OP *
-Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
-/* sv Text to convert to OP tree. */
-/* startop op_free() this to undo. */
-/* code Short string id of the caller. */
-{
-    PERL_ARGS_ASSERT_SV_COMPILE_2OP;
-    return Perl_sv_compile_2op_is_broken(aTHX_ sv, startop, code, padp);
-}
-
-/* Don't use this. It will go away without warning once the regexp engine is
-   refactored not to use it.  */
-OP *
-Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
-			      PAD **padp)
-{
-    dVAR; dSP;				/* Make POPBLOCK work. */
-    PERL_CONTEXT *cx;
-    SV **newsp;
-    I32 gimme = G_VOID;
-    I32 optype;
-    OP dummy;
-    char tbuf[TYPE_DIGITS(long) + 12 + 10];
-    char *tmpbuf = tbuf;
-    char *safestr;
-    int runtime;
-    CV* runcv = NULL;	/* initialise to avoid compiler warnings */
-    STRLEN len;
-    bool need_catch;
-
-    PERL_ARGS_ASSERT_SV_COMPILE_2OP_IS_BROKEN;
-
-    ENTER_with_name("eval");
-    lex_start(sv, NULL, LEX_START_SAME_FILTER);
-    SAVETMPS;
-    /* switch to eval mode */
-
-    if (IN_PERL_COMPILETIME) {
-	SAVECOPSTASH_FREE(&PL_compiling);
-	CopSTASH_set(&PL_compiling, PL_curstash);
-    }
-    if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
-	SV * const sv = sv_newmortal();
-	Perl_sv_setpvf(aTHX_ sv, "_<(%.10seval %lu)[%s:%"IVdf"]",
-		       code, (unsigned long)++PL_evalseq,
-		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
-	tmpbuf = SvPVX(sv);
-	len = SvCUR(sv);
-    }
-    else
-	len = my_snprintf(tmpbuf, sizeof(tbuf), "_<(%.10s_eval %lu)", code,
-			  (unsigned long)++PL_evalseq);
-    SAVECOPFILE_FREE(&PL_compiling);
-    CopFILE_set(&PL_compiling, tmpbuf+2);
-    SAVECOPLINE(&PL_compiling);
-    CopLINE_set(&PL_compiling, 1);
-    /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
-       deleting the eval's FILEGV from the stash before gv_check() runs
-       (i.e. before run-time proper). To work around the coredump that
-       ensues, we always turn GvMULTI_on for any globals that were
-       introduced within evals. See force_ident(). GSAR 96-10-12 */
-    safestr = savepvn(tmpbuf, len);
-    SAVEDELETE(PL_defstash, safestr, len);
-    SAVEHINTS();
-#ifdef OP_IN_REGISTER
-    PL_opsave = op;
-#else
-    SAVEVPTR(PL_op);
-#endif
-
-    /* we get here either during compilation, or via pp_regcomp at runtime */
-    runtime = IN_PERL_RUNTIME;
-    if (runtime)
-    {
-	runcv = find_runcv(NULL);
-
-	/* At run time, we have to fetch the hints from PL_curcop. */
-	PL_hints = PL_curcop->cop_hints;
-	if (PL_hints & HINT_LOCALIZE_HH) {
-	    /* SAVEHINTS created a new HV in PL_hintgv, which we
-	       need to GC */
-	    SvREFCNT_dec(GvHV(PL_hintgv));
-	    GvHV(PL_hintgv) =
-	     refcounted_he_chain_2hv(PL_curcop->cop_hints_hash, 0);
-	    hv_magic(GvHV(PL_hintgv), NULL, PERL_MAGIC_hints);
-	}
-	SAVECOMPILEWARNINGS();
-	PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
-	cophh_free(CopHINTHASH_get(&PL_compiling));
-	/* XXX Does this need to avoid copying a label? */
-	PL_compiling.cop_hints_hash
-	 = cophh_copy(PL_curcop->cop_hints_hash);
-    }
-
-    PL_op = &dummy;
-    PL_op->op_type = OP_ENTEREVAL;
-    PL_op->op_flags = 0;			/* Avoid uninit warning. */
-    PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
-    PUSHEVAL(cx, 0);
-    need_catch = CATCH_GET;
-    CATCH_SET(TRUE);
-
-    if (runtime)
-	(void) doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq, NULL);
-    else
-	(void) doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax, NULL);
-    CATCH_SET(need_catch);
-    POPBLOCK(cx,PL_curpm);
-    POPEVAL(cx);
-
-    (*startop)->op_type = OP_NULL;
-    (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
-    /* XXX DAPM do this properly one year */
-    *padp = MUTABLE_AV(SvREFCNT_inc_simple(PL_comppad));
-    LEAVE_with_name("eval");
-    if (IN_PERL_COMPILETIME)
-	CopHINTS_set(&PL_compiling, PL_hints);
-#ifdef OP_IN_REGISTER
-    op = PL_opsave;
-#endif
-    PERL_UNUSED_VAR(newsp);
-    PERL_UNUSED_VAR(optype);
-
-    return PL_eval_start;
-}
-
 
 /*
 =for apidoc find_runcv
@@ -3525,29 +3300,28 @@ S_try_yyparse(pTHX_ int gramtype)
 }
 
 
-/* Compile a require/do, an eval '', or a /(?{...})/.
- * In the last case, startop is non-null, and contains the address of
- * a pointer that should be set to the just-compiled code.
+/* Compile a require/do or an eval ''.
+ *
  * outside is the lexically enclosing CV (if any) that invoked us.
+ * seq     is the current COP scope value.
+ * hh      is the saved hints hash, if any.
+ *
  * Returns a bool indicating whether the compile was successful; if so,
- * PL_eval_start contains the first op of the compiled ocde; otherwise,
- * pushes undef (also croaks if startop != NULL).
- */
-
-/* This function is called from three places, sv_compile_2op, pp_require
- * and pp_entereval.  These can be distinguished as follows:
- *    sv_compile_2op - startop is non-null
- *    pp_require     - startop is null; saveop is not entereval
- *    pp_entereval   - startop is null; saveop is entereval
+ * PL_eval_start contains the first op of the compiled code; otherwise,
+ * pushes undef.
+ *
+ * This function is called from two places: pp_require and pp_entereval.
+ * These can be distinguished by whether PL_op is entereval.
  */
 
 STATIC bool
-S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
+S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 {
     dVAR; dSP;
     OP * const saveop = PL_op;
+    bool clear_hints = saveop->op_type != OP_ENTEREVAL;
     COP * const oldcurcop = PL_curcop;
-    bool in_require = (saveop && saveop->op_type == OP_REQUIRE);
+    bool in_require = (saveop->op_type == OP_REQUIRE);
     int yystatus;
     CV *evalcv;
 
@@ -3594,7 +3368,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
     PL_madskills = 0;
 #endif
 
-    if (!startop) ENTER_with_name("evalcomp");
+    ENTER_with_name("evalcomp");
     SAVESPTR(PL_compcv);
     PL_compcv = evalcv;
 
@@ -3602,52 +3376,49 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 
     PL_eval_root = NULL;
     PL_curcop = &PL_compiling;
-    if (saveop && (saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
+    if ((saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
 	PL_in_eval |= EVAL_KEEPERR;
     else
 	CLEAR_ERRSV();
 
-    if (!startop) {
-	bool clear_hints = saveop->op_type != OP_ENTEREVAL;
-	SAVEHINTS();
-	if (clear_hints) {
-	    PL_hints = 0;
-	    hv_clear(GvHV(PL_hintgv));
+    SAVEHINTS();
+    if (clear_hints) {
+	PL_hints = 0;
+	hv_clear(GvHV(PL_hintgv));
+    }
+    else {
+	PL_hints = saveop->op_private & OPpEVAL_COPHH
+		     ? oldcurcop->cop_hints : saveop->op_targ;
+	if (hh) {
+	    /* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
+	    SvREFCNT_dec(GvHV(PL_hintgv));
+	    GvHV(PL_hintgv) = hh;
 	}
-	else {
-	    PL_hints = saveop->op_private & OPpEVAL_COPHH
-			 ? oldcurcop->cop_hints : saveop->op_targ;
-	    if (hh) {
-		/* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
-		SvREFCNT_dec(GvHV(PL_hintgv));
-		GvHV(PL_hintgv) = hh;
-	    }
+    }
+    SAVECOMPILEWARNINGS();
+    if (clear_hints) {
+	if (PL_dowarn & G_WARN_ALL_ON)
+	    PL_compiling.cop_warnings = pWARN_ALL ;
+	else if (PL_dowarn & G_WARN_ALL_OFF)
+	    PL_compiling.cop_warnings = pWARN_NONE ;
+	else
+	    PL_compiling.cop_warnings = pWARN_STD ;
+    }
+    else {
+	PL_compiling.cop_warnings =
+	    DUP_WARNINGS(oldcurcop->cop_warnings);
+	cophh_free(CopHINTHASH_get(&PL_compiling));
+	if (Perl_cop_fetch_label(aTHX_ oldcurcop, NULL, NULL)) {
+	    /* The label, if present, is the first entry on the chain. So rather
+	       than writing a blank label in front of it (which involves an
+	       allocation), just use the next entry in the chain.  */
+	    PL_compiling.cop_hints_hash
+		= cophh_copy(oldcurcop->cop_hints_hash->refcounted_he_next);
+	    /* Check the assumption that this removed the label.  */
+	    assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
 	}
-	SAVECOMPILEWARNINGS();
-	if (clear_hints) {
-	    if (PL_dowarn & G_WARN_ALL_ON)
-	        PL_compiling.cop_warnings = pWARN_ALL ;
-	    else if (PL_dowarn & G_WARN_ALL_OFF)
-	        PL_compiling.cop_warnings = pWARN_NONE ;
-	    else
-	        PL_compiling.cop_warnings = pWARN_STD ;
-	}
-	else {
-	    PL_compiling.cop_warnings =
-		DUP_WARNINGS(oldcurcop->cop_warnings);
-	    cophh_free(CopHINTHASH_get(&PL_compiling));
-	    if (Perl_cop_fetch_label(aTHX_ oldcurcop, NULL, NULL)) {
-		/* The label, if present, is the first entry on the chain. So rather
-		   than writing a blank label in front of it (which involves an
-		   allocation), just use the next entry in the chain.  */
-		PL_compiling.cop_hints_hash
-		    = cophh_copy(oldcurcop->cop_hints_hash->refcounted_he_next);
-		/* Check the assumption that this removed the label.  */
-		assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
-	    }
-	    else
-		PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
-	}
+	else
+	    PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
     }
 
     CALL_BLOCK_HOOKS(bhk_eval, saveop);
@@ -3677,11 +3448,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 		PL_eval_root = NULL;
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
-	    if (!startop) {
-		POPBLOCK(cx,PL_curpm);
-		POPEVAL(cx);
-		namesv = cx->blk_eval.old_namesv;
-	    }
+	    POPBLOCK(cx,PL_curpm);
+	    POPEVAL(cx);
+	    namesv = cx->blk_eval.old_namesv;
 	    /* POPBLOCK renders LEAVE_with_name("evalcomp") unnecessary. */
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 	}
@@ -3703,16 +3472,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
                                 ? ERRSV
                                 : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
 	}
-	else if (startop) {
-	    if (yystatus != 3) {
-		POPBLOCK(cx,PL_curpm);
-		POPEVAL(cx);
-	    }
-	    Perl_croak(aTHX_ "%"SVf"Compilation failed in regexp",
-		       SVfARG(ERRSV
-                                ? ERRSV
-                                : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
-	}
 	else {
 	    if (!*(SvPVx_nolen_const(ERRSV))) {
 	        sv_setpvs(ERRSV, "Compilation error");
@@ -3722,17 +3481,16 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 	PUTBACK;
 	return FALSE;
     }
-    else if (!startop) LEAVE_with_name("evalcomp");
+    else
+	LEAVE_with_name("evalcomp");
+
     CopLINE_set(&PL_compiling, 0);
-    if (startop) {
-	*startop = PL_eval_root;
-    } else
-	SAVEFREEOP(PL_eval_root);
+    SAVEFREEOP(PL_eval_root);
 
     DEBUG_x(dump_eval());
 
     /* Register with debugger: */
-    if (PERLDB_INTER && saveop && saveop->op_type == OP_REQUIRE) {
+    if (PERLDB_INTER && saveop->op_type == OP_REQUIRE) {
 	CV * const cv = get_cvs("DB::postponed", 0);
 	if (cv) {
 	    dSP;
@@ -4212,7 +3970,7 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = NULL;
 
-    if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq, NULL))
+    if (doeval(gimme, NULL, PL_curcop->cop_seq, NULL))
 	op = DOCATCH(PL_eval_start);
     else
 	op = PL_op->op_next;
@@ -4340,7 +4098,7 @@ PP(pp_entereval)
     
     PUTBACK;
 
-    if (doeval(gimme, NULL, runcv, seq, saved_hh)) {
+    if (doeval(gimme, runcv, seq, saved_hh)) {
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_NOSUBS) {

@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.19";
+our $VERSION     = "0.20";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -284,8 +284,9 @@ other transformations.
 
 When C<use re 'eval'> is in effect, a regexp is allowed to contain
 C<(?{ ... })> zero-width assertions and C<(??{ ... })> postponed
-subexpressions, even if the regular expression contains
-variable interpolation.  That is normally disallowed, since it is a
+subexpressions that are derived from variable interpolation, rather than
+appearing literally within the regexp.  That is normally disallowed, since
+it is a
 potential security risk.  Note that this pragma is ignored when the regular
 expression is obtained from tainted data, i.e.  evaluation is always
 disallowed with tainted regular expressions.  See L<perlre/(?{ code })> 

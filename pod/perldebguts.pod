@@ -38,7 +38,6 @@ Each array C<@{"_<$filename"}> holds the lines of $filename for a
 file compiled by Perl.  The same is also true for C<eval>ed strings
 that contain subroutines, or which are currently being executed.
 The $filename for C<eval>ed strings looks like C<(eval 34)>.
-Code assertions in regexes look like C<(re_eval 19)>.
 
 Values in this array are magical in numeric context: they compare
 equal to zero only if the line is not breakable.
@@ -53,14 +52,14 @@ C<"$break_condition\0$action">.
 
 The same holds for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings
-looks like C<(eval 34)> or C<(re_eval 19)>.
+looks like C<(eval 34)>.
 
 =item *
 
 Each scalar C<${"_<$filename"}> contains C<"_<$filename">.  This is
 also the case for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed
-strings looks like C<(eval 34)> or C<(re_eval 19)>.
+strings looks like C<(eval 34)>.
 
 =item *
 
@@ -81,7 +80,7 @@ also exists.
 A hash C<%DB::sub> is maintained, whose keys are subroutine names
 and whose values have the form C<filename:startline-endline>.
 C<filename> has the form C<(eval 34)> for subroutines defined inside
-C<eval>s, or C<(re_eval 19)> for those within regex code assertions.
+C<eval>s.
 
 =item *
 

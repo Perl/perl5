@@ -349,15 +349,12 @@ sub foo { local $_ = shift; @_ = split; @_ }
 @x = foo(' x  y  z ');
 print "you die joe!\n" unless "@x" eq 'x y z';
 ########
-/(?{"{"})/	# Check it outside of eval too
+"A" =~ /(?{"{"})/	# Check it outside of eval too
 EXPECT
-Sequence (?{...}) not terminated or not {}-balanced in regex; marked by <-- HERE in m/(?{ <-- HERE "{"})/ at - line 1.
 ########
 /(?{"{"}})/	# Check it outside of eval too
 EXPECT
-Unmatched right curly bracket at (re_eval 1) line 1, at end of line
-syntax error at (re_eval 1) line 1, near ""{"}"
-Compilation failed in regexp at - line 1.
+Sequence (?{...}) not terminated with ')' at - line 1.
 ########
 BEGIN { @ARGV = qw(a b c d e) }
 BEGIN { print "argv <@ARGV>\nbegin <",shift,">\n" }

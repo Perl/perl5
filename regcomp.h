@@ -9,9 +9,6 @@
  */
 #include "regcharclass.h"
 
-typedef OP OP_4tree;			/* Will be redefined later. */
-
-
 /* Convert branch sequences to more efficient trie ops? */
 #define PERL_ENABLE_TRIE_OPTIMISATION 1
 
@@ -121,6 +118,8 @@ typedef OP OP_4tree;			/* Will be redefined later. */
                                    Used to make it easier to clone and free arbitrary
                                    data that the regops need. Often the ARG field of
                                    a regop is an index into this structure */
+	struct reg_code_block *code_blocks;/* positions of literal (?{}) */
+	int num_code_blocks;	/* size of code_blocks[] */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;
 
@@ -138,6 +137,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 #define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
 #define PREGf_VERBARG_SEEN	0x00000008
 #define PREGf_CUTGROUP_SEEN	0x00000010
+#define PREGf_USE_RE_EVAL	0x00000020 /* compiled with "use re 'eval'" */
 
 
 /* this is where the old regcomp.h started */
@@ -486,7 +486,7 @@ struct regnode_charclass_class {
 #define REG_SEEN_ZERO_LEN	0x00000001
 #define REG_SEEN_LOOKBEHIND	0x00000002
 #define REG_SEEN_GPOS		0x00000004
-#define REG_SEEN_EVAL		0x00000008
+/* spare */
 #define REG_SEEN_CANY		0x00000010
 #define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
 #define REG_SEEN_RECURSE        0x00000020
@@ -521,8 +521,9 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_reg_named_buff_iter,
         Perl_reg_qr_package,
 #if defined(USE_ITHREADS)        
-        Perl_regdupe_internal
+        Perl_regdupe_internal,
 #endif        
+        Perl_re_op_compile
 };
 #endif /* DOINIT */
 #endif /* PLUGGABLE_RE_EXTENSION */
@@ -535,9 +536,9 @@ END_EXTERN_C
  * The character describes the function of the corresponding .data item:
  *   a - AV for paren_name_list under DEBUGGING
  *   f - start-class data for regstclass optimization
- *   n - Root of op tree for (?{EVAL}) item
- *   o - Start op for (?{EVAL}) item
- *   p - Pad for (?{EVAL}) item
+ *   l - start op for literal (?{EVAL}) item
+ *   L - start op for literal (?{EVAL}) item, with separate CV (qr//)
+ *   r - pointer to an embedded code-containing qr, e.g. /ab$qr/
  *   s - swash for Unicode-style character class, and the multicharacter
  *       strings resulting from casefolding the single-character entries
  *       in the character class
