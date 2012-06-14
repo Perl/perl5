@@ -6876,10 +6876,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		const_sv
 	    );
-	    if (HvENAME_HEK(GvSTASH(gv)))
-		/* sub Foo::bar { (shift)+1 } */
-		mro_method_changed_in(GvSTASH(gv));
-	}				/* sub Foo::Bar () { 123 } */
+	}
 	if (PL_madskills)
 	    goto install_block;
 	op_free(block);
