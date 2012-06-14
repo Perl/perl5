@@ -4821,10 +4821,6 @@ was not a reference to an unblessed hash or array.
 (F) Your machine doesn't implement the umask function and you tried to
 use it to restrict permissions for yourself (EXPR & 0700).
 
-=item Unable to create sub named "%s"
-
-(F) You attempted to create or access a subroutine with an illegal name.
-
 =item Unbalanced context: %d more PUSHes than POPs
 
 (W internal) The exit code detected an internal inconsistency in how

@@ -2714,6 +2714,11 @@ PERL_CALLCONV OP*	Perl_newSTATEOP(pTHX_ I32 flags, char* label, OP* o)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV CV*	Perl_newSTUB(pTHX_ GV *gv, bool fake)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_NEWSTUB	\
+	assert(gv)
+
 /* PERL_CALLCONV CV*	Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block); */
 PERL_CALLCONV SV*	Perl_newSV(pTHX_ const STRLEN len)
 			__attribute__malloc__

@@ -9021,20 +9021,10 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	}
 	*st = GvESTASH(gv);
 	if (lref & ~GV_ADDMG && !GvCVu(gv)) {
-	    SV *tmpsv;
-	    ENTER;
-	    tmpsv = newSV(0);
-	    gv_efullname3(tmpsv, gv, NULL);
 	    /* XXX this is probably not what they think they're getting.
 	     * It has the same effect as "sub name;", i.e. just a forward
 	     * declaration! */
-	    newSUB(start_subparse(FALSE, 0),
-		   newSVOP(OP_CONST, 0, tmpsv),
-		   NULL, NULL);
-	    LEAVE;
-	    if (!GvCVu(gv))
-		Perl_croak(aTHX_ "Unable to create sub named \"%"SVf"\"",
-			   SVfARG(SvOK(sv) ? sv : &PL_sv_no));
+	    newSTUB(gv,0);
 	}
 	return GvCVu(gv);
     }

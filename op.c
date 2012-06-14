@@ -7300,6 +7300,23 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
     return cv;
 }
 
+CV *
+Perl_newSTUB(pTHX_ GV *gv, bool fake)
+{
+    register CV *cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+    PERL_ARGS_ASSERT_NEWSTUB;
+    assert(!GvCVu(gv));
+    GvCV_set(gv, cv);
+    GvCVGEN(gv) = 0;
+    if (!fake && HvENAME_HEK(GvSTASH(gv)))
+	mro_method_changed_in(GvSTASH(gv));
+    CvGV_set(cv, gv);
+    CvFILE_set_from_cop(cv, PL_curcop);
+    CvSTASH_set(cv, PL_curstash);
+    GvMULTI_on(gv);
+    return cv;
+}
+
 /*
 =for apidoc U||newXS
 

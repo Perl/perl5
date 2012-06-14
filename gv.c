@@ -368,7 +368,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     gv_name_set(gv, name, len, GV_ADD | ( flags & SVf_UTF8 ? SVf_UTF8 : 0 ));
     if (flags & GV_ADDMULTI || doproto)	/* doproto means it */
 	GvMULTI_on(gv);			/* _was_ mentioned */
-    if (doproto) {			/* Replicate part of newSUB here. */
+    if (doproto) {
 	CV *cv;
 	if (has_constant) {
 	    /* newCONSTSUB takes ownership of the reference from us.  */
@@ -382,17 +382,10 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	       from a reference to CV.  */
 	    if (exported_constant)
 		GvIMPORTED_CV_on(gv);
+	    CvSTASH_set(cv, PL_curstash); /* XXX Why is this needed? */
 	} else {
-	    ENTER;
-	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
-	    cv = PL_compcv;
-	    GvCV_set(gv,cv);
-	    LEAVE;
+	    cv = newSTUB(gv,1);
 	}
-
-	CvGV_set(cv, gv);
-	CvFILE_set_from_cop(cv, PL_curcop);
-	CvSTASH_set(cv, PL_curstash);
 	if (proto) {
 	    sv_usepvn_flags(MUTABLE_SV(cv), proto, protolen,
 			    SV_HAS_TRAILING_NUL);
