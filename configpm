@@ -808,8 +808,8 @@ if ($Common{byteorder}) {
 }
 my $fast_config = join '', map { "    $_,\n" } sort values %Common;
 
-# Sanity check needed to stop an infite loop if Config_heavy.pl fails to define
-# &launcher for some reason (eg it got truncated)
+# Sanity check needed to stop an infinite loop if Config_heavy.pl fails to
+# define &launcher for some reason (eg it got truncated)
 $config_txt .= sprintf <<'ENDOFTIE', $fast_config;
 
 sub DESTROY { }
