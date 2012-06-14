@@ -8613,7 +8613,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    if (!SIZE_ONLY) {
 			ret->flags = 2;
                         /* for later propagation into (??{}) return value */
-                        eval->flags = (RExC_flags & RXf_PMf_COMPILETIME);
+                        eval->flags = (U8) (RExC_flags & RXf_PMf_COMPILETIME);
                     }
                     REGTAIL(pRExC_state, ret, eval);
                     /* deal with the length of this later - MJD */
