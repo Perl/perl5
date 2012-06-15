@@ -723,6 +723,11 @@ L</"Virtualize operating system access">.
 Currently the %ENV entries are always byte strings.
 See L</"Virtualize operating system access">.
 
+(See RT ticket #113536 for information on Win32's handling of %ENV,
+which was fixed to work with native ANSI codepage characters in the
+environment, but still doesn't work with other characters outside of
+that codepage present in the environment.)
+
 =head2 Unicode and glob()
 
 Currently glob patterns and filenames returned from File::Glob::glob()
