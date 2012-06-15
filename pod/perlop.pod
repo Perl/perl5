@@ -1734,6 +1734,18 @@ you want the pattern to use the initial values of the variables
 regardless of whether they change or not.  (But there are saner ways
 of accomplishing this than using C</o>.)
 
+=item 3
+
+If the pattern contains embedded code, such as
+
+    use re 'eval';
+    $code = 'foo(?{ $x })';
+    /$code/
+
+then perl will recompile each time, even though the pattern string hasn't
+changed, to ensure that the current value of C<$x> is seen each time.
+Use C</o> if you want to avoid this.
+
 =back
 
 The bottom line is that using C</o> is almost never a good idea.
