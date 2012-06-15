@@ -130,6 +130,9 @@ sub struct {
     elsif( $base_type eq 'ARRAY' ){
         $out .= "    my(\$r) = [];\n";
     }
+
+    $out .= " bless \$r, \$class;\n\n";
+
     while( $idx < @decls ){
         $name = $decls[$idx];
         $type = $decls[$idx+1];
@@ -150,24 +153,24 @@ sub struct {
         if( $type eq '@' ){
             $out .= "    croak 'Initializer for $name must be array reference'\n"; 
             $out .= "        if defined(\$init{'$name'}) && ref(\$init{'$name'}) ne 'ARRAY';\n";
-            $out .= "    \$r->$elem = $init [];$cmt\n"; 
+            $out .= "    \$r->$name( $init [] );$cmt\n"; 
             $arrays{$name}++;
         }
         elsif( $type eq '%' ){
             $out .= "    croak 'Initializer for $name must be hash reference'\n";
             $out .= "        if defined(\$init{'$name'}) && ref(\$init{'$name'}) ne 'HASH';\n";
-            $out .= "    \$r->$elem = $init {};$cmt\n";
+            $out .= "    \$r->$name( $init {} );$cmt\n";
             $hashes{$name}++;
         }
         elsif ( $type eq '$') {
-            $out .= "    \$r->$elem = $init undef;$cmt\n";
+            $out .= "    \$r->$name( $init undef );$cmt\n";
         }
         elsif( $type =~ /^\w+(?:::\w+)*$/ ){
             $out .= "    if (defined(\$init{'$name'})) {\n";
            $out .= "       if (ref \$init{'$name'} eq 'HASH')\n";
-            $out .= "            { \$r->$elem = $type->new(\%{\$init{'$name'}}) } $cmt\n";
+            $out .= "            { \$r->$name( $type->new(\%{\$init{'$name'}}) ) } $cmt\n";
            $out .= "       elsif (UNIVERSAL::isa(\$init{'$name'}, '$type'))\n";
-            $out .= "            { \$r->$elem = \$init{'$name'} } $cmt\n";
+            $out .= "            { \$r->$name( \$init{'$name'} ) } $cmt\n";
             $out .= "       else { croak 'Initializer for $name must be hash or $type reference' }\n";
             $out .= "    }\n";
             $classes{$name} = $type;
@@ -178,7 +181,8 @@ sub struct {
         }
         $idx += 2;
     }
-    $out .= "    bless \$r, \$class;\n  }\n";
+
+    $out .= "\n \$r;\n}\n";
 
     # Create accessor methods.
 
