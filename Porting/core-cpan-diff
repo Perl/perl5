@@ -194,7 +194,7 @@ sub cpan_url_distribution {
     my ( $mirror_url, $distribution ) = @_;
     $distribution =~ /^([A-Z])([A-Z])/
         or die "ERROR: invalid DISTRIBUTION name (not /^[A-Z]{2}/): $distribution\n";
-    my $path = "modules/by-authors/id/$1/$1$2/$distribution";
+    my $path = "authors/id/$1/$1$2/$distribution";
     return cpan_url( $mirror_url, $path );
 }
 
