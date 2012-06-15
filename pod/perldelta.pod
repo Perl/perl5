@@ -488,7 +488,7 @@ Lexical variables are now sane as regards scope, recursion and closure
 behaviour. In particular, C</A(?{B})C/> behaves (from a closure viewpoint)
 exactly like C</A/ && do { B } && /C/>, while  C<qr/A(?{B})C/> is like
 C<sub {/A/ && do { B } && /C/}>. So this code now works how you might
-expect, creating three regexes that match 1,2, and 3:
+expect, creating three regexes that match 0, 1, and 2:
 
     for my $i (0..2) {
         push @r, qr/^(??{$i})$/;
