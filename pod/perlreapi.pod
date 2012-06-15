@@ -144,15 +144,6 @@ Additional flags:
 
 =over 4
 
-=item RXf_UTF8
-
-Set if the pattern is L<SvUTF8()|perlapi/SvUTF8>, set by Perl_pmruntime.
-
-A regex engine may want to set or disable this flag during
-compilation. The perl engine for instance may upgrade non-UTF-8
-strings to UTF-8 if the pattern includes constructs such as C<\x{...}>
-that can only match Unicode values.
-
 =item RXf_SPLIT
 
 If C<split> is invoked as C<split ' '> or with no arguments (which
