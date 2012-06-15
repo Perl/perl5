@@ -9,7 +9,7 @@ BEGIN {
     skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
-plan 30;
+plan 34;
 
 fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
@@ -254,4 +254,31 @@ pass "undef *_ in a re-eval does not cause a double free";
     my $filler = 1;
     ("a" x 40_000) =~ /^$qr(ab*)+/; my $line = __LINE__;
     like($w, qr/recursion limit.* line $line\b/, "warning on right line");
+}
+
+# on immediate exit from pattern with code blocks, make sure PL_curcop is
+# restored
+
+{
+    use re 'eval';
+
+    my $c = '(?{"1"})';
+    my $w = '';
+    my $l;
+
+    local $SIG{__WARN__} = sub { $w .= "@_" };
+    $l = __LINE__; "1" =~ /^1$c/x and warn "foo";
+    like($w, qr/foo.+line $l/, 'curcop 1');
+
+    $w = '';
+    $l = __LINE__; "4" =~ /^1$c/x or warn "foo";
+    like($w, qr/foo.+line $l/, 'curcop 2');
+
+    $c = '(??{"1"})';
+    $l = __LINE__; "1" =~ /^$c/x and warn "foo";
+    like($w, qr/foo.+line $l/, 'curcop 3');
+
+    $w = '';
+    $l = __LINE__; "4" =~ /^$c/x or warn "foo";
+    like($w, qr/foo.+line $l/, 'curcop 4');
 }

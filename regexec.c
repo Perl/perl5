@@ -4328,6 +4328,26 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    nop = (OP*)rexi->data->data[n];
 		}
 
+		/* normally if we're about to execute code from the same
+		 * CV that we used previously, we just use the existing
+		 * CX stack entry. However, its possible that in the
+		 * meantime we may have backtracked, popped from the save
+		 * stack, and undone the SAVECOMPPAD(s) associated with
+		 * PUSH_MULTICALL; in which case PL_comppad no longer
+		 * points to newcv's pad. */
+		if (newcv != last_pushed_cv || PL_comppad != last_pad)
+		{
+		    I32 depth = (newcv == caller_cv) ? 0 : 1;
+		    if (last_pushed_cv) {
+			CHANGE_MULTICALL_WITHDEPTH(newcv, depth);
+		    }
+		    else {
+			PUSH_MULTICALL_WITHDEPTH(newcv, depth);
+		    }
+		    last_pushed_cv = newcv;
+		}
+		last_pad = PL_comppad;
+
 		/* the initial nextstate you would normally execute
 		 * at the start of an eval (which would cause error
 		 * messages to come from the eval), may be optimised
@@ -4362,26 +4382,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
 		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(nop)) );
-
-		/* normally if we're about to execute code from the same
-		 * CV that we used previously, we just use the existing
-		 * CX stack entry. However, its possible that in the
-		 * meantime we may have backtracked, popped from the save
-		 * stack, and undone the SAVECOMPPAD(s) associated with
-		 * PUSH_MULTICALL; in which case PL_comppad no longer
-		 * points to newcv's pad. */
-		if (newcv != last_pushed_cv || PL_comppad != last_pad)
-		{
-		    I32 depth = (newcv == caller_cv) ? 0 : 1;
-		    if (last_pushed_cv) {
-			CHANGE_MULTICALL_WITHDEPTH(newcv, depth);
-		    }
-		    else {
-			PUSH_MULTICALL_WITHDEPTH(newcv, depth);
-		    }
-		    last_pushed_cv = newcv;
-		}
-		last_pad = PL_comppad;
 
 		rex->offs[0].end = PL_reg_magic->mg_len = locinput - PL_bostr;
 
