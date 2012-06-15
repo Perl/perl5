@@ -793,6 +793,7 @@ raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
 module@renee-baecker.de                 renee.baecker\100smart-websolutions.de
 +                                       reneeb\100reneeb-desktop.(none)
 +                                       otrs\100ubuntu.(none)
++                                       perl\100renee-baecker.de
 richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
 +                                       richard.foley\100ubsw.com
