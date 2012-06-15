@@ -1,45 +1,124 @@
 #!/usr/bin/env perl
 
-#
-# Script to help out with syncing cpan distros.
-#
-# Does the following:
-#    - Fetches the package list from CPAN. Finds the current version of
-#      the given package. [1]
-#    - Downloads the relevant tarball; unpacks the tarball;. [1]
-#    - Clean out the old directory (git clean -dfx)
-#    - Moves the old directory out of the way, moves the new directory in place.
-#    - Restores any .gitignore file.
-#    - Removes files from @IGNORE and EXCLUDED
-#    - git add any new files.
-#    - git rm any files that are gone.
-#    - Remove the +x bit on files in t/
-#    - Remove the +x bit on files that don't have in enabled in the current dir
-#    - Restore files mentioned in CUSTOMIZED
-#    - Adds new files to MANIFEST
-#    - Runs a "make" (assumes a configure has been run)
-#    - Cleans up
-#    - Runs tests for the package
-#    - Runs the porting tests
-#
-# [1]  If the --tarball option is given, then CPAN is not consulted.
-#      --tarball should be the path to the tarball; the version is extracted
-#      from the filename -- but can be overwritten by the --version option.
-#
-# TODO:  - Delete files from MANIFEST
-#        - Update Porting/Maintainers.pl
-#        - Optional, run a full test suite
-#        - Handle complicated FILES
-#
-# This is an initial version; no attempt has been made yet to make this
-# portable. It shells out instead of trying to find a Perl solution.
-# In particular, it assumes wget, git, tar, chmod, perl, make, and rm
-# to be available.
-#
-# Usage: perl Porting/sync-with-cpan <module>
-#        where <module> is the name it appears in the %Modules hash
-#        of Porting/Maintainers.pl
-#
+=head1 NAME
+
+  Porting/sync-with-cpan
+
+=head1 SYNOPSIS
+
+  perl Porting/sync-with-cpan <module>
+
+where <module> is the name it appears in the C<%Modules> hash
+of F<Porting/Maintainers.pl>
+
+=head1 DESCRIPTION
+
+Script to help out with syncing cpan distros.
+
+Does the following:
+
+=over 4
+
+=item *
+
+Fetches the package list from CPAN. Finds the current version of the given
+package. [1]
+
+=item *
+
+Downloads the relevant tarball; unpacks the tarball. [1]
+
+=item *
+
+Clean out the old directory (C<git clean -dfx>)
+
+=item *
+
+Moves the old directory out of the way, moves the new directory in place.
+
+=item *
+
+Restores any F<.gitignore> file.
+
+=item *
+
+Removes files from C<@IGNORE> and C<EXCLUDED>
+
+=item *
+
+C<git add> any new files.
+
+=item *
+
+C<git rm> any files that are gone.
+
+=item *
+
+Remove the +x bit on files in F<t/>
+
+=item *
+
+Remove the +x bit on files that don't have it enabled in the current dir
+
+=item *
+
+Restore files mentioned in C<CUSTOMIZED>
+
+=item *
+
+Adds new files to F<MANIFEST>
+
+=item *
+
+Runs a C<make> (assumes a configure has been run)
+
+=item *
+
+Cleans up
+
+=item *
+
+Runs tests for the package
+
+=item *
+
+Runs the porting tests
+
+=back
+
+[1]  If the C<--tarball> option is given, then CPAN is not consulted.
+C<--tarball> should be the path to the tarball; the version is extracted
+from the filename -- but can be overwritten by the C<--version> option.
+
+=head1 TODO
+
+=over 4
+
+=item *
+
+Delete files from F<MANIFEST>
+
+=item *
+
+Update F<Porting/Maintainers.pl>
+
+=item *
+
+Optional, run a full test suite
+
+=item *
+
+Handle complicated C<FILES>
+
+=back
+
+This is an initial version; no attempt has been made yet to make this
+portable. It shells out instead of trying to find a Perl solution.
+In particular, it assumes wget, git, tar, chmod, perl, make, and rm
+to be available.
+
+=cut
+
 
 package Maintainers;
 
