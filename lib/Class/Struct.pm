@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.63';
+$VERSION = '0.64';
 
 ## Tested on 5.002 and 5.003 without class membership tests:
 my $CHECK_CLASS_MEMBERSHIP = ($] >= 5.003_95);
