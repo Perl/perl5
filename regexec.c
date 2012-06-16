@@ -408,6 +408,13 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 	        (IV)(cp), (IV)PL_savestack_ix));                \
     regcpblow(cp)
 
+#define UNWIND_PAREN(lp, lcp)               \
+    for (n = rex->lastparen; n > lp; n--)   \
+        rex->offs[n].end = -1;              \
+    rex->lastparen = n;                     \
+    rex->lastcloseparen = lcp;
+
+
 STATIC void
 S_regcppop(pTHX_ regexp *rex)
 {
@@ -3497,10 +3504,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case TRIE_next_fail: /* we failed - try next alternative */
             if ( ST.jump) {
                 REGCP_UNWIND(ST.cp);
-	        for (n = rex->lastparen; n > ST.lastparen; n--)
-		    rex->offs[n].end = -1;
-	        rex->lastparen = n;
-	        rex->lastcloseparen = ST.lastcloseparen;
+                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
 	    }
 	    if (!--ST.accepted) {
 	        DEBUG_EXECUTE_r({
@@ -5067,10 +5071,7 @@ NULL
 	        no_final = 0;
 	    }
 	    REGCP_UNWIND(ST.cp);
-	    for (n = rex->lastparen; n > ST.lastparen; n--)
-		rex->offs[n].end = -1;
-	    rex->lastparen = n;
-	    rex->lastcloseparen = ST.lastcloseparen;
+            UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
 	    scan = ST.next_branch;
 	    /* no more branches? */
 	    if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {
@@ -5264,8 +5265,7 @@ NULL
 
 	case CURLYM_B_fail: /* just failed to match a B */
 	    REGCP_UNWIND(ST.cp);
-	    rex->lastparen      = ST.lastparen;
-	    rex->lastcloseparen = ST.lastcloseparen;
+            UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
 	    if (ST.minmod) {
 		I32 max = ARG2(ST.me);
 		if (max != REG_INFTY && ST.count == max)
@@ -5462,6 +5462,9 @@ NULL
 
 	    PL_reginput = locinput;	/* Could be reset... */
 	    REGCP_UNWIND(ST.cp);
+            if (ST.paren) {
+                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+            }
 	    /* Couldn't or didn't -- move forward. */
 	    ST.oldloc = locinput;
 	    if (utf8_target)
@@ -5537,6 +5540,9 @@ NULL
 	    /* failed to find B in a non-greedy match where c1,c2 invalid */
 
 	    REGCP_UNWIND(ST.cp);
+            if (ST.paren) {
+                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+            }
 	    /* failed -- move forward one */
 	    PL_reginput = locinput;
 	    if (regrepeat(rex, ST.A, 1, depth)) {
@@ -5582,6 +5588,9 @@ NULL
 	    /* failed to find B in a greedy match */
 
 	    REGCP_UNWIND(ST.cp);
+            if (ST.paren) {
+                UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+            }
 	    /*  back up. */
 	    if (--ST.count < ST.min)
 		sayNO;

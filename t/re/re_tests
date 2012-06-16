@@ -1665,4 +1665,10 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /^(??{"s"})$/iaa	\x{17F}	n	-	-
 /^(??{'\w'})$/u	\x{AA}	y	-	-
 
+# #113670 ensure any captures to the right are invalidated when CURLY
+# and CURLYM backtrack
+
+^(?:(X)?(\d)|(X)?(\d\d))$	X12	y	$1-$2-$3-$4	--X-12
+^(?:(XX)?(\d)|(XX)?(\d\d))$	XX12	y	$1-$2-$3-$4	--XX-12
+
 # vim: softtabstop=0 noexpandtab
