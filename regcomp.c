@@ -9694,7 +9694,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep, I32 *flagp, U32 dept
 	return (regnode *) &RExC_parse; /* Invalid regnode pointer */
     }
 
-    REQUIRE_UTF8;	/* named sequences imply Unicode semantics */
+    RExC_uni_semantics = 1; /* Unicode named chars imply Unicode semantics */
     RExC_parse += 2;	/* Skip past the 'U+' */
 
     if (valuep) {   /* In a bracketed char class */
