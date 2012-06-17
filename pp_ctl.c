@@ -3586,6 +3586,7 @@ PP(pp_require)
     SV *hook_sv = NULL;
     SV *encoding;
     OP *op;
+    int saved_errno;
 
     sv = POPs;
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
@@ -3895,12 +3896,13 @@ PP(pp_require)
 	    }
 	}
     }
+    saved_errno = errno; /* sv_2mortal can realloc things */
     sv_2mortal(namesv);
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
-	    if(errno == EMFILE || errno == EACCES) {
+	    if(saved_errno == EMFILE || saved_errno == EACCES) {
 		/* diag_listed_as: Can't locate %s */
-		DIE(aTHX_ "Can't locate %s:   %s", name, Strerror(errno));
+		DIE(aTHX_ "Can't locate %s:   %s", name, Strerror(saved_errno));
 	    } else {
 	        if (namesv) {			/* did we lookup @INC? */
 		    AV * const ar = GvAVn(PL_incgv);
