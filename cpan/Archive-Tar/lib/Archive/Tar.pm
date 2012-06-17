@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.86";
+$VERSION                = "1.88";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -874,7 +874,7 @@ sub _extract_file {
             $self->_error( qq[Could not update timestamp] );
     }
 
-    if( $CHOWN && CAN_CHOWN->() ) {
+    if( $CHOWN && CAN_CHOWN->() and not -l $full ) {
         chown $entry->uid, $entry->gid, $full or
             $self->_error( qq[Could not set uid/gid on '$full'] );
     }
