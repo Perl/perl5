@@ -131,7 +131,7 @@ no  warnings 'syntax';
 
 $| = 1;
 
-die "This does not like top level directory"
+die "This does not look like a top level directory"
      unless -d "cpan" && -d "Porting";
 
 our @IGNORABLE;
