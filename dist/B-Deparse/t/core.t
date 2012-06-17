@@ -74,7 +74,7 @@ sub CORE_test {
       $deparse->coderef2text(
          eval "no strict 'vars'; sub { () = $expr }" or die "$@in $expr"
       ),
-      qr/\bCORE::$keyword.*[);]/,
+      qr/\sCORE::$keyword.*;/,
       $name||$keyword  
 }
 

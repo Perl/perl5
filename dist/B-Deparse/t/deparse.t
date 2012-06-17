@@ -1145,13 +1145,6 @@ $_ = ($a xor not +($1 || 2) ** 2);
 () = warn() + 1;
 () = setpgrp() + 1;
 ####
-# loopexes have list prec
-() = (CORE::dump a) | 'b';
-() = (goto a) | 'b';
-() = (last a) | 'b';
-() = (next a) | 'b';
-() = (redo a) | 'b';
-####
 # [perl #63558] open local(*FH)
 open local *FH;
 pipe local *FH, local *FH;
