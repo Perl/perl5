@@ -95,6 +95,10 @@ my @death =
 
  '/[\x{X]/' => 'Missing right brace on \x{} in regex; marked by {#} in m/[\x{{#}X]/',
 
+ '/\o{1/' => 'Missing right brace on \o{ in regex; marked by {#} in m/\o{{#}1/',
+
+ '/[\o{X]/' => 'Missing right brace on \o{ in regex; marked by {#} in m/[\o{{#}X]/',
+
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown in regex; marked by {#} in m/[[:barf:]{#}]/',
 
  '/[[=barf=]]/' => 'POSIX syntax [= =] is reserved for future extensions in regex; marked by {#} in m/[[=barf=]{#}]/',
