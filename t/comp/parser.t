@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..123\n";
+print "1..125\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -68,6 +68,13 @@ like( $@, qr/^Missing right brace on \\N/,
 eval q/"\Nfoo"/;
 like( $@, qr/^Missing braces on \\N/,
     'syntax error in string with incomplete \N' );
+
+eval q/"\o{"/;
+like( $@, qr/^Missing right brace on \\o/,
+    'syntax error in string with incomplete \o' );
+eval q/"\ofoo"/;
+like( $@, qr/^Missing braces on \\o/,
+    'syntax error in string with incomplete \o' );
 
 eval "a.b.c.d.e.f;sub";
 like( $@, qr/^Illegal declaration of anonymous subroutine/,
