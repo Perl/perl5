@@ -2,7 +2,8 @@
 # run this file via a shell glob.  The full format of this file is given
 # in regexp.t
 # Prior to the implementation of autoloading of \N{}, tests that used \N{name}
-# could not go in this file, and were farmed out to other .t's.
+# could not go in this file, and were farmed out to other .t's, where they
+# remain
 #
 # pat	string	y/n/etc	expr	expected-expr	skip-reason
 __END__
