@@ -148,7 +148,7 @@ S_grok_bslash_o(pTHX_ const char *s,
 	return FALSE;
     }
 
-    *uv = NATIVE_TO_UNI(grok_oct(s, &numbers_len, &flags, NULL));
+    *uv = grok_oct(s, &numbers_len, &flags, NULL);
     /* Note that if has non-octal, will ignore everything starting with that up
      * to the '}' */
 
