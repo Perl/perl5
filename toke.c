@@ -3040,14 +3040,14 @@ S_scan_const(pTHX_ char *start)
 			continue;
 		    }
                     len = e - s;
-		    uv = NATIVE_TO_UNI(grok_hex(s, &len, &flags, NULL));
+		    uv = grok_hex(s, &len, &flags, NULL);
 		    s = e + 1;
 		}
 		else {
 		    {
 			STRLEN len = 2;
                         I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-			uv = NATIVE_TO_UNI(grok_hex(s, &len, &flags, NULL));
+			uv = grok_hex(s, &len, &flags, NULL);
 			s += len;
 		    }
 		}
