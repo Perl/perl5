@@ -6458,6 +6458,11 @@ PERL_STATIC_INLINE UV*	S_get_invlist_zero_addr(pTHX_ SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR	\
 	assert(invlist)
 
+STATIC regnode*	S_grok_bslash_N(pTHX_ struct RExC_state_t *pRExC_state, UV *valuep, I32 *flagp, U32 depth)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
+	assert(pRExC_state)
+
 PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6563,11 +6568,6 @@ STATIC regnode*	S_reg(pTHX_ struct RExC_state_t *pRExC_state, I32 paren, I32 *fl
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REG	\
 	assert(pRExC_state); assert(flagp)
-
-STATIC regnode*	S_reg_namedseq(pTHX_ struct RExC_state_t *pRExC_state, UV *valuep, I32 *flagp, U32 depth)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_REG_NAMEDSEQ	\
-	assert(pRExC_state)
 
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *pRExC_state, U8 op)
 			__attribute__nonnull__(pTHX_1);
