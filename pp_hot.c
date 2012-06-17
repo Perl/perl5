@@ -1294,7 +1294,9 @@ PP(pp_match)
         pm->op_pmflags & PMf_USED
 #endif
     ) {
+        DEBUG_r(PerlIO_printf(Perl_debug_log, "?? already matched once"));
       failure:
+
 	if (gimme == G_ARRAY)
 	    RETURN;
 	RETPUSHNO;
@@ -1308,8 +1310,10 @@ PP(pp_match)
 	rx = PM_GETRE(pm);
     }
 
-    if (RX_MINLEN(rx) > (I32)len)
+    if (RX_MINLEN(rx) > (I32)len) {
+        DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match\n"));
 	goto failure;
+    }
 
     truebase = t = s;
 
@@ -1346,8 +1350,10 @@ PP(pp_match)
   play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
 	t = s = RX_OFFS(rx)[0].end + truebase - RX_GOFS(rx);
-	if ((s + RX_MINLEN(rx)) > strend || s < truebase)
+	if ((s + RX_MINLEN(rx)) > strend || s < truebase) {
+	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Regex match can't succeed, so not even tried\n"));
 	    goto nope;
+	}
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
