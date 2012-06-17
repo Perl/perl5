@@ -376,8 +376,8 @@ number may use '_' characters to separate digits.
 
 =cut
 
-Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
-which suppresses any message for non-portable numbers that are still valid
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE>
+which suppresses any message for non-portable numbers, but which are valid
 on this platform.
  */
 
