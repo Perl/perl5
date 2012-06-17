@@ -3179,7 +3179,7 @@ need yourself.
 X<number, arbitrary precision>
 
 The standard C<Math::BigInt>, C<Math::BigRat>, and C<Math::BigFloat> modules,
-along with the C<bigint>, C<bigrat>, and C<bitfloat> pragmas, provide
+along with the C<bignum>, C<bigint>, and C<bigrat> pragmas, provide
 variable-precision arithmetic and overloaded operators, although
 they're currently pretty slow. At the cost of some space and
 considerable speed, they avoid the normal pitfalls associated with
