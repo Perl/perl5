@@ -915,7 +915,7 @@ when taint checks are enabled.
         $tainted_output_file = shift;
 
         open(F, ">$tainted_output_file")
-            or warn "Open of $untainted_output_file failed: $!\n";
+            or warn "Open of $tainted_output_file failed: $!\n";
 
 The program can be made to run by "laundering" the tainted value through
 a regular expression: the second example--which still ignores locale
