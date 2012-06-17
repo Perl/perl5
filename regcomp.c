@@ -10448,7 +10448,7 @@ tryagain:
 			ender = grok_bslash_c(*p++, UTF, SIZE_ONLY);
 			break;
 		    case '0': case '1': case '2': case '3':case '4':
-		    case '5': case '6': case '7': case '8':case '9':
+		    case '5': case '6': case '7':
 			if (*p == '0' ||
 			    (isDIGIT(p[1]) && atoi(p) >= RExC_npar))
 			{
@@ -10481,7 +10481,7 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY&& isALPHA(*p)) {
+			if (!SIZE_ONLY&& isALNUMC(*p)) {
 			    ckWARN2reg(p + 1, "Unrecognized escape \\%.1s passed through", p);
 			}
 			goto normal_default;

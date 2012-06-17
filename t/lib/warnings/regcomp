@@ -268,3 +268,17 @@ Unrecognized escape \9 in character class passed through in regex; marked by <--
 $a = qr/(?^-i:foo)/;
 EXPECT
 Sequence (?^-...) not recognized in regex; marked by <-- HERE in m/(?^- <-- HERE i:foo)/ at - line 2.
+########
+# regcomp.c [S_regatom]
+use warnings 'regexp' ;
+$a = qr/\87/;
+$a = qr/a\87/;
+$a = qr/a\97/;
+no warnings 'regexp' ;
+$a = qr/\87/;
+$a = qr/a\87/;
+$a = qr/a\97/;
+EXPECT
+Unrecognized escape \8 passed through in regex; marked by <-- HERE in m/\8 <-- HERE 7/ at - line 3.
+Unrecognized escape \8 passed through in regex; marked by <-- HERE in m/a\8 <-- HERE 7/ at - line 4.
+Unrecognized escape \9 passed through in regex; marked by <-- HERE in m/a\9 <-- HERE 7/ at - line 5.

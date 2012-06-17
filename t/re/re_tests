@@ -1474,6 +1474,12 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 [a\o{400}]	\x{100}	y	$&	\x{100}
 [a\o{1000}]	\x{200}	y	$&	\x{200}
 
+# The below were inserting a NULL
+\87	87	y	$&	87
+a\87	a87	y	$&	a87
+a\97	a97	y	$&	a97
+
+
 # The below was inserting a NULL into the character class.
 [\8\9]	\000	n	-	-
 [\8\9]	8	y	$&	8
