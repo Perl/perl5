@@ -1700,8 +1700,8 @@ Here's an example of a semaphore:
 
     $IPC_KEY = 1234;
     $id = semget($IPC_KEY, 10, 0666 | IPC_CREAT);
-    defined($id)                    || die "shmget: $!";
-    print "shm key $id\n";
+    defined($id)                    || die "semget: $!";
+    print "sem id $id\n";
 
 Put this code in a separate file to be run in more than one process.
 Call the file F<take>:
@@ -1710,7 +1710,7 @@ Call the file F<take>:
 
     $IPC_KEY = 1234;
     $id = semget($IPC_KEY, 0, 0);
-    defined($id)                    || die "shmget: $!";
+    defined($id)                    || die "semget: $!";
 
     $semnum  = 0;
     $semflag = 0;
