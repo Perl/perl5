@@ -138,7 +138,7 @@ S_grok_bslash_o(pTHX_ const char *s,
     }
 
     /* Return past the '}' no matter what is inside the braces */
-    *len = e - s + 2;	/* 2 = 1 for the o + 1 for the '}' */
+    *len = e - s + 2;	/* 2 = 1 for the 'o' + 1 for the '}' */
 
     s++;    /* Point to first digit */
 
