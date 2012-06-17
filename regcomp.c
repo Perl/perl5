@@ -9694,8 +9694,46 @@ S_reg_recode(pTHX_ const char value, SV **encp)
    sequence, we return.
 
    Note: we have to be careful with escapes, as they can be both literal
-   and special, and in the case of \10 and friends can either, depending
-   on context. Specifically there are two separate switches for handling
+   and special, and in the case of \10 and friends, context determines which.
+
+   A summary of the code structure is:
+
+   switch (first_byte) {
+	cases for each special:
+	    handle this special;
+	    break;
+	case '\\':
+	    switch (2nd byte) {
+		cases for each unambiguous special:
+		    handle this special;
+		    break;
+		cases for each ambigous special/literal:
+		    disambiguate;
+		    if (special)  handle here
+		    else goto defchar;
+		default: // unambiguously literal:
+		    goto defchar;
+	    }
+	default:  // is a literal char
+	    // FALL THROUGH
+	defchar:
+	    create EXACTish node for literal;
+	    while (more input and node isn't full) {
+		switch (input_byte) {
+		   cases for each special;
+                       make sure parse pointer is set so that the next call to
+                           regatom will see this special first
+                       goto loopdone; // EXACTish node terminated by prev. char
+		   default:
+		       append char to EXACTISH node;
+		}
+	        get next input byte;
+	    }
+        loopdone:
+   }
+   return the generated node;
+
+   Specifically there are two separate switches for handling
    escape sequences, with the one for handling literal escapes requiring
    a dummy entry for all of the special escapes that are actually handled
    by the other.
@@ -10164,6 +10202,7 @@ tryagain:
                         vFAIL("Reference to nonexistent or unclosed group");
                 }
 		if (!isg && num > 9 && num >= RExC_npar)
+                    /* Probably a character specified in octal, e.g. \35 */
 		    goto defchar;
 		else {
 		    char * const parse_start = RExC_parse - 1; /* MJD */
