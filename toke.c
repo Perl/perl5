@@ -3027,28 +3027,15 @@ S_scan_const(pTHX_ char *start)
 
 	    /* eg. \x24 indicates the hex constant 0x24 */
 	    case 'x':
-		++s;
-		if (*s == '{') {
-		    char* const e = strchr(s, '}');
-                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES |
-                      PERL_SCAN_DISALLOW_PREFIX;
+		{
 		    STRLEN len;
+		    const char* error;
 
-                    ++s;
-		    if (!e) {
-			yyerror("Missing right brace on \\x{}");
+		    bool valid = grok_bslash_x(s, &uv, &len, &error, 1);
+		    s += len;
+		    if (! valid) {
+			yyerror(error);
 			continue;
-		    }
-                    len = e - s;
-		    uv = grok_hex(s, &len, &flags, NULL);
-		    s = e + 1;
-		}
-		else {
-		    {
-			STRLEN len = 2;
-                        I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-			uv = grok_hex(s, &len, &flags, NULL);
-			s += len;
 		    }
 		}
 

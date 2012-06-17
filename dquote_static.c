@@ -164,6 +164,73 @@ S_grok_bslash_o(pTHX_ const char *s,
     return TRUE;
 }
 
+PERL_STATIC_INLINE bool
+S_grok_bslash_x(pTHX_ const char *s,
+			 UV *uv,
+			 STRLEN *len,
+			 const char** error_msg,
+			 const bool output_warning)
+{
+
+/*  Documentation to be supplied when interface nailed down finally
+ *  This returns FALSE if there is an error which the caller need not recover
+ *  from; , otherwise TRUE.  In either case the caller should look at *len
+ *  On input:
+ *	s   points to a string that begins with 'x', and the previous character
+ *	    was a backslash.
+ *	uv  points to a UV that will hold the output value, valid only if the
+ *	    return from the function is TRUE
+ *	len on success will point to the next character in the string past the
+ *		       end of this construct.
+ *	    on failure, it will point to the failure
+ *      error_msg is a pointer that will be set to an internal buffer giving an
+ *	    error message upon failure (the return is FALSE).  Untouched if
+ *	    function succeeds
+ *	output_warning says whether to output any warning messages, or suppress
+ *	    them
+ */
+    const char* e;
+    STRLEN numbers_len;
+    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
+		| PERL_SCAN_DISALLOW_PREFIX;
+
+    PERL_ARGS_ASSERT_GROK_BSLASH_X;
+
+
+    assert(*s == 'x');
+    s++;
+
+    if (*s != '{') {
+	I32 flags = PERL_SCAN_DISALLOW_PREFIX;
+	*len = 2;
+	*uv = grok_hex(s, len, &flags, NULL);
+	(*len)++;
+	return TRUE;
+    }
+
+    e = strchr(s, '}');
+    if (!e) {
+	*len = 2;	/* Move past the 'x{' */
+        /* XXX The corresponding message above for \o is just '\\o{'; other
+         * messages for other constructs include the '}', so are inconsistent.
+         */
+	*error_msg = "Missing right brace on \\x{}";
+	return FALSE;
+    }
+
+    /* Return past the '}' no matter what is inside the braces */
+    *len = e - s + 2;	/* 2 = 1 for the 'x' + 1 for the '}' */
+
+    s++;    /* Point to first digit */
+
+    numbers_len = e - s;
+    *uv = grok_hex(s, &numbers_len, &flags, NULL);
+    /* Note that if has non-hex, will ignore everything starting with that up
+     * to the '}' */
+
+    return TRUE;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

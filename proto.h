@@ -5489,6 +5489,15 @@ STATIC bool	S_grok_bslash_o(pTHX_ const char* s, UV* uv, STRLEN* len, const char
 #define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
 	assert(s); assert(uv); assert(len); assert(error_msg)
 
+PERL_STATIC_INLINE bool	S_grok_bslash_x(pTHX_ const char* s, UV* uv, STRLEN* len, const char** error_msg, const bool output_warning)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
+	assert(s); assert(uv); assert(len); assert(error_msg)
+
 PERL_STATIC_INLINE I32	S_regcurly(pTHX_ const char *s)
 			__attribute__warn_unused_result__
 			__attribute__pure__

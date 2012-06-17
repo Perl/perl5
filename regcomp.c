@@ -10434,32 +10434,33 @@ tryagain:
 			    break;
 			}
 		    case 'x':
-			if (*++p == '{') {
-			    char* const e = strchr(p, '}');
+			{
+			    STRLEN brace_len = len;
+			    UV result;
+			    const char* error_msg;
 
-			    if (!e) {
-				RExC_parse = p + 1;
-				vFAIL("Missing right brace on \\x{}");
+			    bool valid = grok_bslash_x(p,
+						       &result,
+						       &brace_len,
+						       &error_msg,
+						       1);
+			    p += brace_len;
+			    if (! valid) {
+				RExC_parse = p;	/* going to die anyway; point
+						   to exact spot of failure */
+				vFAIL(error_msg);
 			    }
 			    else {
-                                I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-                                    | PERL_SCAN_DISALLOW_PREFIX;
-                                STRLEN numlen = e - p - 1;
-				ender = grok_hex(p + 1, &numlen, &flags, NULL);
-				if (ender > 0xff)
-				    REQUIRE_UTF8;
-				p = e + 1;
+				ender = result;
 			    }
+			    if (PL_encoding && ender < 0x100) {
+				goto recode_encoding;
+			    }
+			    if (ender > 0xff) {
+				REQUIRE_UTF8;
+			    }
+			    break;
 			}
-			else {
-                            I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-			    STRLEN numlen = 2;
-			    ender = grok_hex(p, &numlen, &flags, NULL);
-			    p += numlen;
-			}
-			if (PL_encoding && ender < 0x100)
-			    goto recode_encoding;
-			break;
 		    case 'c':
 			p++;
 			ender = grok_bslash_c(*p++, UTF, SIZE_ONLY);
@@ -11542,22 +11543,18 @@ parseit:
 		}
 		break;
 	    case 'x':
-		if (*RExC_parse == '{') {
-                    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-                        | PERL_SCAN_DISALLOW_PREFIX;
-		    char * const e = strchr(RExC_parse++, '}');
-                    if (!e)
-                        vFAIL("Missing right brace on \\x{}");
-
-		    numlen = e - RExC_parse;
-		    value = grok_hex(RExC_parse, &numlen, &flags, NULL);
-		    RExC_parse = e + 1;
-		}
-		else {
-                    I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-		    numlen = 2;
-		    value = grok_hex(RExC_parse, &numlen, &flags, NULL);
+		RExC_parse--;	/* function expects to be pointed at the 'x' */
+		{
+		    const char* error_msg;
+		    bool valid = grok_bslash_x(RExC_parse,
+					       &value,
+					       &numlen,
+					       &error_msg,
+					       1);
 		    RExC_parse += numlen;
+		    if (! valid) {
+			vFAIL(error_msg);
+		    }
 		}
 		if (PL_encoding && value < 0x100)
 		    goto recode_encoding;
