@@ -10,7 +10,7 @@ BEGIN { *warnif = \&warnings::warnif }
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 my @fields;
 BEGIN { 
@@ -87,15 +87,22 @@ else {
     *cando = sub {
         my ($s, $mode, $eff) = @_;
         my $uid = $eff ? $> : $<;
-
-        # If we're root on unix and we are not testing for executable
-        # status, then all file tests are true.
-        $^O ne "VMS" and $uid == 0 and !($mode & 0111) and return 1;
-
         my ($stmode, $stuid, $stgid) = @$s[2,4,5];
 
         # This code basically assumes that the rwx bits of the mode are
         # the 0777 bits, but so does Perl_cando.
+
+        if ($uid == 0 && $^O ne "VMS") {
+            # If we're root on unix
+            # not testing for executable status => all file tests are true
+            return 1 if !($mode & 0111);
+            # testing for executable status =>
+            # for a file, any x bit will do
+            # for a directory, always true
+            return 1 if $stmode & 0111 || S_ISDIR($stmode);
+            return "";
+        }
+
         if ($stuid == $uid) {
             $stmode & $mode         and return 1;
         }
