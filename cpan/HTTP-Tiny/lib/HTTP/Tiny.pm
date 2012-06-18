@@ -3,14 +3,14 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.021'; # VERSION
+our $VERSION = '0.022'; # VERSION
 
 use Carp ();
 
 
 my @attributes;
 BEGIN {
-    @attributes = qw(agent default_headers max_redirect max_size proxy timeout SSL_options verify_SSL);
+    @attributes = qw(agent default_headers local_address max_redirect max_size proxy timeout SSL_options verify_SSL);
     no strict 'refs';
     for my $accessor ( @attributes ) {
         *{$accessor} = sub {
@@ -193,9 +193,10 @@ sub _request {
     };
 
     my $handle  = HTTP::Tiny::Handle->new(
-        timeout     => $self->{timeout},
-        SSL_options => $self->{SSL_options},
-        verify_SSL  => $self->{verify_SSL},
+        timeout         => $self->{timeout},
+        SSL_options     => $self->{SSL_options},
+        verify_SSL      => $self->{verify_SSL},
+        local_address   => $self->{local_address},
     );
 
     if ($self->{proxy}) {
@@ -426,10 +427,11 @@ sub connect {
     elsif ( $scheme ne 'http' ) {
       die(qq/Unsupported URL scheme '$scheme'\n/);
     }
-
     $self->{fh} = 'IO::Socket::INET'->new(
         PeerHost  => $host,
         PeerPort  => $port,
+        $self->{local_address} ? 
+            ( LocalAddr => $self->{local_address} ) : (),
         Proto     => 'tcp',
         Type      => SOCK_STREAM,
         Timeout   => $self->{timeout}
@@ -887,7 +889,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.021
+version 0.022
 
 =head1 SYNOPSIS
 
@@ -937,6 +939,12 @@ A user-agent string (defaults to 'HTTP::Tiny/$VERSION')
 C<default_headers>
 
 A hashref of default headers to apply to requests
+
+=item *
+
+C<local_address>
+
+The local IP address to bind to
 
 =item *
 
@@ -1155,6 +1163,7 @@ and value.
 
 =for Pod::Coverage agent
 default_headers
+local_address
 max_redirect
 max_size
 proxy
@@ -1304,6 +1313,10 @@ Only 'chunked' C<Transfer-Encoding> is supported.
 =item *
 
 There is no support for a Request-URI of '*' for the 'OPTIONS' request.
+
+=item *
+
+There is no support for IPv6 of any kind.
 
 =back
 
