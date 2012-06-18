@@ -165,7 +165,10 @@ sub run {
     ) or die "ERROR: not a CPAN mirror '$mirror_url'\n";
 
     if ($do_crosscheck) {
-        do_crosscheck( $outfh, $cache_dir, $mirror_url, $force, \@modules );
+        do_crosscheck(
+            $outfh, $cache_dir, $mirror_url,
+            $force, \@modules,  \@wanted_upstreams
+        );
     }
     else {
         do_compare(
@@ -419,7 +422,10 @@ sub distro_base {
 # Maintainers.pl
 
 sub do_crosscheck {
-    my ( $outfh, $cache_dir, $mirror_url, $force, $modules ) = @_;
+    my (
+        $outfh, $cache_dir, $mirror_url,
+        $force, $modules,   $wanted_upstreams,
+    ) = @_;
 
     my $file         = '02packages.details.txt';
     my $download_dir = $cache_dir || File::Temp::tempdir( CLEANUP => 1 );
@@ -481,6 +487,9 @@ sub do_crosscheck {
 
         my $pdist = $m->{DISTRIBUTION};
         die "ERROR: $module has no DISTRIBUTION entry\n" unless defined $pdist;
+
+        my $upstream = $m->{UPSTREAM} || 'UNKNOWN';
+        next if @$wanted_upstreams and !( $upstream ~~ $wanted_upstreams );
 
         my $cdist = $modules{$module};
         ( my $short_pdist = $pdist ) =~ s{^.*/}{};
