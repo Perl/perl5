@@ -1,7 +1,6 @@
 =encoding utf8
 
 =for todo
-4f46e52b008 Use GetEnvironmentStringsW(..) instead of GetEnvironmentStringsA(..).
 83b195e49dd1 ensure correctness if sv_2mortal modifies errno
 
 =head1 NAME
@@ -424,6 +423,13 @@ L</Modules and Pragmata> section.
 C<link> on Win32 now attempts to set C<$!> to more appropriate values
 based on the Win32 API error code. [perl #112272]
 
+Perl no longer mangles the environment block, e.g. when launching a new
+sub-process, when the environment contains non-ASCII characters. Known
+problems still remain, however, when the environment contains characters
+outside of the current ANSI codepage (e.g. see the item about Unicode in
+C<%ENV> in L<http://perl5.git.perl.org/perl.git/blob/HEAD:/Porting/todo.pod>).
+[perl #113536]
+
 =back
 
 =head1 Internal Changes
@@ -661,8 +667,8 @@ C<$@="3">.
 =item *
 
 Numeric operators on magical variables (e.g., S<C<$1 + 1>>) used to use
-floating point operations even where integer operations were more appropriate, resulting in loss of accuracy on 64-bit platforms
-[perl #109542].
+floating point operations even where integer operations were more appropriate,
+resulting in loss of accuracy on 64-bit platforms [perl #109542].
 
 =item *
 
