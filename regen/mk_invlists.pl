@@ -144,11 +144,13 @@ for my $prop (qw(
     # infinity.  For example, the Upper property doesn't include the character
     # at 255, but does include the one at 256.  We don't include the 256 one.
     my $lookup_prop = $prop;
-    $lookup_prop =~ s/^L1Posix/XPosix/ or $lookup_prop =~ s/^L1//;
-    my @invlist = prop_invlist($lookup_prop);
+    my $l1_only = ($lookup_prop =~ s/^L1Posix/XPosix/ or $lookup_prop =~ s/^L1//);
+    my $nonl1_only = 0;
+    $nonl1_only = $lookup_prop =~ s/^NonL1// unless $l1_only;
+    my @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
     die "Could not find inversion list for '$lookup_prop'" unless @invlist;
 
-    if ($lookup_prop ne $prop) {
+    if ($l1_only) {
         for my $i (0 .. @invlist - 1 - 1) {
             if ($invlist[$i] > 255) {
 
@@ -170,6 +172,24 @@ for my $prop (qw(
                 last;
             }
         }
+    }
+    elsif ($nonl1_only) {
+        my $found_nonl1 = 0;
+        for my $i (0 .. @invlist - 1 - 1) {
+            next if $invlist[$i] < 256;
+
+            # Here, we have the first element in the array that indicates an
+            # element above Latin1.  Get rid of all previous ones.
+            splice @invlist, 0, $i;
+
+            # If this one's index is not divisible by 2, it means that this
+            # element is inverting away from being in the list, which means
+            # all code points from 256 to this one are in this list.
+            unshift @invlist, 256 if $i % 2 != 0;
+            $found_nonl1 = 1;
+            last;
+        }
+        die "No non-Latin1 code points in $lookup_prop" unless $found_nonl1;
     }
 
     output_invlist($prop, \@invlist);
