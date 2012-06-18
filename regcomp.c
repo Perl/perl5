@@ -7316,8 +7316,10 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
     }
 }
 
-STATIC IV
-S_invlist_search(pTHX_ SV* const invlist, const UV cp)
+#ifndef PERL_IN_XSUB_RE
+
+IV
+Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
 {
     /* Searches the inversion list for the entry that contains the input code
      * point <cp>.  If <cp> is not in the list, -1 is returned.  Otherwise, the
@@ -7328,7 +7330,7 @@ S_invlist_search(pTHX_ SV* const invlist, const UV cp)
     IV high = invlist_len(invlist);
     const UV * const array = invlist_array(invlist);
 
-    PERL_ARGS_ASSERT_INVLIST_SEARCH;
+    PERL_ARGS_ASSERT__INVLIST_SEARCH;
 
     /* If list is empty or the code point is before the first element, return
      * failure. */
@@ -7358,8 +7360,6 @@ S_invlist_search(pTHX_ SV* const invlist, const UV cp)
     return high - 1;
 }
 
-#ifndef PERL_IN_XSUB_RE
-
 void
 Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV end, U8* swatch)
 {
@@ -7384,7 +7384,7 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
     array = invlist_array(invlist);
 
     /* Find which element it is */
-    i = invlist_search(invlist, start);
+    i = _invlist_search(invlist, start);
 
     /* We populate from <start> to <end> */
     while (current < end) {
@@ -7952,7 +7952,7 @@ S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
 {
     /* Does <invlist> contain code point <cp> as part of the set? */
 
-    IV index = invlist_search(invlist, cp);
+    IV index = _invlist_search(invlist, cp);
 
     PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP;
 

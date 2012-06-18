@@ -6365,6 +6365,12 @@ STATIC bool	S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
 #define PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP	\
 	assert(invlist)
 
+PERL_CALLCONV IV	Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__INVLIST_SEARCH	\
+	assert(invlist)
+
 STATIC SV*	S__new_invlist_C_array(pTHX_ UV* list)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6509,12 +6515,6 @@ PERL_STATIC_INLINE UV	S_invlist_max(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_MAX	\
-	assert(invlist)
-
-STATIC IV	S_invlist_search(pTHX_ SV* const invlist, const UV cp)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_INVLIST_SEARCH	\
 	assert(invlist)
 
 PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
