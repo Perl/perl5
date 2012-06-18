@@ -146,6 +146,10 @@ my $package      = "02packages.details.txt";
 my $package_url  = "http://www.cpan.org/modules/$package";
 my $package_file = "/tmp/$package";
 
+my @problematic = (
+    'podlators', # weird CUSTOMIZED section due to .PL files
+);
+
 
 GetOptions ('tarball=s'  =>  \my $tarball,
             'version=s'  =>  \my $version,
@@ -162,7 +166,7 @@ my  $info         = $Modules {$module} or die "Cannot find module $module";
 my  $distribution = $$info {DISTRIBUTION};
 
 my @files         = glob $$info {FILES};
-if (!-d $files [0]) {
+if (!-d $files [0] || grep { $_ eq $module } @problematic) {
     say "This looks like a setup $0 cannot handle (yet)";
     unless ($force) {
         say "Will not continue without a --force option";
