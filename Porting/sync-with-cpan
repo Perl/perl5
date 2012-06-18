@@ -162,7 +162,7 @@ my  $info         = $Modules {$module} or die "Cannot find module $module";
 my  $distribution = $$info {DISTRIBUTION};
 
 my @files         = glob $$info {FILES};
-if (@files != 1 || !-d $files [0] || $$info {MAP}) {
+if (!-d $files [0]) {
     say "This looks like a setup $0 cannot handle (yet)";
     unless ($force) {
         say "Will not continue without a --force option";
@@ -174,7 +174,7 @@ if (@files != 1 || !-d $files [0] || $$info {MAP}) {
 
 chdir "cpan";
 
-my  $pkg_dir      = $$info {FILES};
+my  $pkg_dir      = $files[0];
     $pkg_dir      =~ s!.*/!!;
 
 my ($old_version) = $distribution =~ /-([0-9.]+)\.tar\.gz/;
@@ -233,8 +233,57 @@ system('find', $new_dir, '-exec', 'touch', '{}', ';');
 
 say "Renaming directories";
 rename $pkg_dir => $old_dir;
-rename $new_dir => $pkg_dir;
 
+say "Creating new package directory";
+mkdir $pkg_dir;
+
+say "Populating new package directory";
+my $map = $$info {MAP};
+my @EXCLUDED_QR;
+my %EXCLUDED_QQ;
+if ($$info {EXCLUDED}) {
+    foreach my $entry (@{$$info {EXCLUDED}}) {
+        if (ref $entry) {push @EXCLUDED_QR => $entry}
+        else            {$EXCLUDED_QQ {$entry} = 1}
+    }
+}
+
+FILE: for my $file ( `find $new_dir -type f` ) {
+    chomp $file;
+    my $old_file = $file;
+    $file =~ s{^$new_dir/}{};
+
+    next if $EXCLUDED_QQ{$file};
+    for my $qr (@EXCLUDED_QR) {
+        next FILE if $file =~ $qr;
+    }
+
+    if ( $map ) {
+        for my $key ( sort { length $b <=> length $a } keys %$map ) {
+            my $val = $map->{$key};
+            last if $file =~ s/^$key/$val/;
+        }
+    }
+
+    if ( $file =~ m{^cpan/} ) {
+        $file =~ s{^cpan/}{};
+    }
+    else {
+        $file = '../' . $file;
+    }
+
+    my $prefix = '';
+    my @parts = split '/', $file;
+    pop @parts;
+    for my $part (@parts) {
+        $prefix .= '/' if $prefix;
+        $prefix .= $part;
+        mkdir $prefix unless -d $prefix;
+    }
+
+    rename $old_file => $file;
+}
+system 'rm', '-rf', $new_dir;
 
 if (-f "$old_dir/.gitignore") {
     say "Restoring .gitignore";
@@ -253,18 +302,6 @@ chomp @old_files;
 s!^[^/]+/!! for @old_files;
 my %old_files = map {$_ => 1} @old_files;
 
-#
-# Find files that can be deleted.
-#
-my @EXCLUDED_QR;
-my %EXCLUDED_QQ;
-if ($$info {EXCLUDED}) {
-    foreach my $entry (@{$$info {EXCLUDED}}) {
-        if (ref $entry) {push @EXCLUDED_QR => $entry}
-        else            {$EXCLUDED_QQ {$entry} = 1}
-    }
-}
-
 my @delete;
 my @commit;
 my @gone;
@@ -275,16 +312,6 @@ foreach my $file (@new_files) {
     if ($IGNORABLE {$file}) {
         push @delete => $file;
         next;
-    }
-    if ($EXCLUDED_QQ {$file}) {
-        push @delete => $file;
-        next;
-    }
-    foreach my $pattern (@EXCLUDED_QR) {
-        if ($file =~ /$pattern/) {
-            push @delete => $file;
-            next FILE;
-        }
     }
     push @commit => $file;
 }
