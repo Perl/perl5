@@ -201,6 +201,10 @@ unless ($tarball) {
                      or die "Cannot find $cpan_mod on CPAN\n";
     chomp $new_line;
     (undef, $new_version, my $new_path) = split ' ', $new_line;
+    if (defined $version) {
+        $new_path =~ s/-$new_version\./-$version\./;
+        $new_version = $version;
+    }
     $new_file = (split '/', $new_path) [-1];
 
     my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
