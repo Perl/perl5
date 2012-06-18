@@ -286,4 +286,16 @@ SKIP: {
   is($w, undef, 'do STRING does not propagate warning hints');
 }
 
+# RT#113730 - $@ should be cleared on IO error.
+{
+    $@ = "should not see";
+    $! = 0;
+    my $rv = do("some nonexistent file");
+    my $saved_error = $@;
+    my $saved_errno = $!;
+    ok(!$rv,          "do returns false on io errror");
+    ok(!$saved_error, "\$\@ not set on io error");
+    ok($saved_errno,  "\$! set on io error");
+}
+
 done_testing();

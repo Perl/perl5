@@ -3928,6 +3928,7 @@ PP(pp_require)
 	    DIE(aTHX_ "Can't locate %s", name);
 	}
 
+	CLEAR_ERRSV();
 	RETPUSHUNDEF;
     }
     else
