@@ -127,7 +127,6 @@ use 5.010;
 use strict;
 use warnings;
 use Getopt::Long;
-no  warnings 'syntax';
 
 $| = 1;
 
