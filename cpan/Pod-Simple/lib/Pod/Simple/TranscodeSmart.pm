@@ -9,7 +9,7 @@ use strict;
 use Pod::Simple;
 require Encode;
 use vars qw($VERSION );
-$VERSION = '3.20';
+$VERSION = '3.22';
 
 sub is_dumb  {0}
 sub is_smart {1}

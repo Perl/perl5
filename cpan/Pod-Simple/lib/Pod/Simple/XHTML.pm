@@ -45,7 +45,7 @@ declare the output character set as UTF-8 before parsing, like so:
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.20';
+$VERSION = '3.22';
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
@@ -151,7 +151,7 @@ Add additional meta tags here, or blocks of inline CSS or JavaScript
 A string containing all characters that should be encoded as HTML entities,
 specified using the regular expression character class syntax (what you find
 within brackets in regular expressions). This value will be passed as the
-second argument to the C<encode_entities> fuction of L<HTML::Entities>. IF
+second argument to the C<encode_entities> function of L<HTML::Entities>. If
 L<HTML::Entities> is not installed, then any characters other than C<&<>"'>
 will be encoded numerically.
 
@@ -251,7 +251,6 @@ sub new {
   $new->man_url_prefix('http://man.he.net/man');
   $new->html_charset('ISO-8859-1');
   $new->nix_X_codes(1);
-  $new->codes_in_verbatim(1);
   $new->{'scratch'} = '';
   $new->{'to_index'} = [];
   $new->{'output'} = [];
@@ -301,10 +300,16 @@ something like:
       my ($self, $text) = @_;
       if ($self->{'in_foo'}) {
           $self->{'scratch'} .= build_foo_html($text);
-      } else {
-          $self->{'scratch'} .= $text;
+          return;
       }
+      $self->SUPER::handle_text($text);
   }
+
+=head2 handle_code
+
+This method handles the body of text that is marked up to be code.
+You might for instance override this to plug in a syntax highlighter.
+The base implementation just escapes the text and wraps it in C<<< <code>...</code> >>>.
 
 =head2 accept_targets_as_html
 
@@ -327,14 +332,21 @@ sub accept_targets_as_html {
 }
 
 sub handle_text {
+    if ($_[0]{'in_code'}) {
+	return $_[0]->handle_code( $_[1] );
+    }
     # escape special characters in HTML (<, >, &, etc)
     $_[0]{'scratch'} .= $_[0]->__in_literal_xhtml_region
                       ? $_[1]
                       : $_[0]->encode_entities( $_[1] );
 }
 
+sub handle_code {
+    $_[0]{'scratch'} .= '<code>' . $_[0]->encode_entities( $_[1] ) . '</code>';
+}
+
 sub start_Para     { $_[0]{'scratch'} = '<p>' }
-sub start_Verbatim { $_[0]{'scratch'} = '<pre><code>' }
+sub start_Verbatim { $_[0]{'scratch'} = '<pre>'; $_[0]{'in_code'} = 1; }
 
 sub start_head1 {  $_[0]{'in_head'} = 1 }
 sub start_head2 {  $_[0]{'in_head'} = 2 }
@@ -397,7 +409,8 @@ sub end_over_text   {
 
 sub end_Para     { $_[0]{'scratch'} .= '</p>'; $_[0]->emit }
 sub end_Verbatim {
-    $_[0]{'scratch'}     .= '</code></pre>';
+    $_[0]{'scratch'} .= '</pre>';
+    delete $_[0]{'in_code'};
     $_[0]->emit;
 }
 
@@ -568,8 +581,8 @@ sub end_Document   {
 sub start_B { $_[0]{'scratch'} .= '<b>' }
 sub end_B   { $_[0]{'scratch'} .= '</b>' }
 
-sub start_C { $_[0]{'scratch'} .= '<code>' }
-sub end_C   { $_[0]{'scratch'} .= '</code>' }
+sub start_C { $_[0]{'in_code'} = 1; }
+sub end_C   { delete $_[0]{'in_code'}; }
 
 sub start_F { $_[0]{'scratch'} .= '<i>' }
 sub end_F   { $_[0]{'scratch'} .= '</i>' }

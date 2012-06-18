@@ -657,6 +657,7 @@ SKIP: for my $use_html_entities (0, 1) {
   }
   local $Pod::Simple::XHTML::HAS_HTML_ENTITIES = $use_html_entities;
   initialize($parser, $results);
+  $parser->codes_in_verbatim(1);
   $parser->parse_string_document(<<'EOPOD');
 =pod
 
@@ -666,7 +667,7 @@ SKIP: for my $use_html_entities (0, 1) {
 EOPOD
 is($results, <<"EOHTML", "Verbatim text with markup and embedded formatting");
 <pre><code>  # this header is very important &amp; dont you forget it
-  <b>my \$file = &lt;FILE&gt; || Blank!;</b>
+  </code><b><code>my \$file = &lt;FILE&gt; || Blank!;</code></b><code>
   my \$text = &quot;File is: &quot; . &lt;FILE&gt;;</code></pre>
 
 EOHTML
