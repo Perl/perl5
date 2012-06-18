@@ -1489,7 +1489,9 @@ otherwise to Unicode.
 =back
 
 B<NOTE>: Unlike C and other languages, Perl has no C<\v> escape sequence for
-the vertical tab (VT - ASCII 11), but you may use C<\ck> or C<\x0b>.  (C<\v>
+the vertical tab (VT, which is 11 in both ASCII and EBCDIC), but you may
+use C<\ck> or
+C<\x0b>.  (C<\v>
 does have meaning in regular expression patterns in Perl, see L<perlre>.)
 
 The following escape sequences are available in constructs that interpolate,
