@@ -164,8 +164,6 @@ for my $ord (0..255) {
         } elsif ($name eq 'ALNUMC') {
             # Like \w, but no underscore
             $re = qr/\p{Alnum}/;
-        } elsif ($name eq 'OCTAL') {
-            $re = qr/[0-7]/;
         } elsif ($name eq 'QUOTEMETA') {
             $re = qr/\p{_Perl_Quotemeta}/;
         } else {    # The remainder have the same name and values as Unicode
