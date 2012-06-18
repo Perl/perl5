@@ -233,7 +233,7 @@ directory to the original name.
 
 =item *
 
-Restore any F<.gitignore> file. This can be done by issueing 
+Restore any F<.gitignore> file. This can be done by issuing
 C<git checkout .gitignore> in the F<cpan/Distro> directory.
 
 =item *
