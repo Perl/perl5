@@ -268,6 +268,9 @@ FILE: for my $file ( `find $new_dir -type f` ) {
             last if $file =~ s/^$key/$val/;
         }
     }
+    else {
+        $file = $files[0] . '/' . $file;
+    }
 
     if ( $file =~ m{^cpan/} ) {
         $file =~ s{^cpan/}{};
