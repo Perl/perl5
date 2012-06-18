@@ -21,7 +21,7 @@ sub tryeq_sloppy ($$$) {
   if ($_[1] == $_[2]) {
     print "ok $_[0]\n";
   } else {
-    my $error = abs ($_[1] - $_[2]) / $_[1];
+    my $error = abs (($_[1] - $_[2]) / $_[1]);
     if ($error < 1e-9) {
       print "ok $_[0] # $_[1] is close to $_[2], \$^O eq $^O\n";
     } else {
