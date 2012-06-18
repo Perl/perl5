@@ -1,5 +1,5 @@
 #!perl -w
-use 5.012;
+use v5.15.8;
 use strict;
 use warnings;
 require 'regen/regen_lib.pl';
@@ -32,6 +32,7 @@ my @properties = qw(
     GRAPH
     IDFIRST
     LOWER
+    NON_FINAL_FOLD
     PRINT
     PSXSPC
     PUNCT
@@ -166,13 +167,19 @@ for my $ord (0..255) {
             $re = qr/\p{Alnum}/;
         } elsif ($name eq 'QUOTEMETA') {
             $re = qr/\p{_Perl_Quotemeta}/;
+        } elsif ($name eq 'NON_FINAL_FOLD') {
+            $re = qr/\p{_Perl_Non_Final_Folds}/;
         } else {    # The remainder have the same name and values as Unicode
             $re = eval "qr/\\p{$name}/";
             use Carp;
             carp $@ if ! defined $re;
         }
         #print "$ord, $name $property, $re\n";
-        if ($char =~ $re) {  # Add this property if matches
+        if ($char =~ $re  # Add this property if matches
+            || ($name eq 'NON_FINAL_FOLD'
+                # Also include chars that fold to the non-final
+                && CORE::fc($char) =~ $re))
+        {
             $bits[$ord] .= '|' if $bits[$ord];
             $bits[$ord] .= "(1U<<_CC_$property)";
         }

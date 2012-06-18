@@ -126,7 +126,7 @@ for my $prop (qw(
                     L1PosixWord
                 PosixXDigit
                     XPosixXDigit
-                _Perl_Non_Final_Folds
+                NonL1_Perl_Non_Final_Folds
     )
 ) {
 

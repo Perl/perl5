@@ -526,4 +526,56 @@ UV XPosixXDigit_invlist[] = {
 	65351
 };
 
+UV NonL1_Perl_Non_Final_Folds_invlist[] = {
+	44,	/* Number of elements */
+	0,	/* Current iteration position */
+	1064334010, /* Version and data structure type */
+	1,	/* 0 if this is the first element of the list proper;
+		   1 if the next element is the first */
+	700,
+	701,
+	776,
+	777,
+	787,
+	788,
+	834,
+	835,
+	940,
+	941,
+	942,
+	943,
+	945,
+	946,
+	951,
+	952,
+	953,
+	954,
+	961,
+	962,
+	965,
+	966,
+	969,
+	970,
+	974,
+	975,
+	1381,
+	1382,
+	1396,
+	1397,
+	1406,
+	1407,
+	7936,
+	7944,
+	7968,
+	7976,
+	8032,
+	8040,
+	8048,
+	8049,
+	8052,
+	8053,
+	8060,
+	8061
+};
+
 /* ex: set ro: */
