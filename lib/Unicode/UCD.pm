@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 
 require Exporter;
 
@@ -2127,8 +2127,12 @@ properties, and will return C<undef> if called with one of those.
 our %loose_defaults;
 our $MAX_UNICODE_CODEPOINT;
 
-sub prop_invlist ($) {
+sub prop_invlist ($;$) {
     my $prop = $_[0];
+
+    # Undocumented way to get at Perl internal properties
+    my $internal_ok = defined $_[1] && $_[1] eq '_perl_core_internal_ok';
+
     return if ! defined $prop;
 
     require "utf8_heavy.pl";
@@ -2145,7 +2149,7 @@ sub prop_invlist ($) {
               || ref $swash eq ""
               || $swash->{'BITS'} != 1
               || $swash->{'USER_DEFINED'}
-              || $prop =~ /^\s*_/;
+              || (! $internal_ok && $prop =~ /^\s*_/);
 
     if ($swash->{'EXTRAS'}) {
         carp __PACKAGE__, "::prop_invlist: swash returned for $prop unexpectedly has EXTRAS magic";
