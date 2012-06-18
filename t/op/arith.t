@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..159\n";
+print "1..167\n";
 
 sub try ($$) {
    print +($_[1] ? "ok" : "not ok"), " $_[0]\n";
@@ -284,9 +284,42 @@ tryeq_sloppy $T++, 18446744073709551616/9223372036854775808, 2;
   my $int = ($n % 1000) * 167772160;
   tryeq $T++, $int, 21307064320;
 
+  my $float2 = ($n % 1000 + 0.0) * 167772160;
+  tryeq $T++, $float2, 21307064320;
+
+  my $int2 = ($n % 1000 + 0) * 167772160;
+  tryeq $T++, $int2, 21307064320;
+
+  # zero, but in a way that ought to be able to defeat any future optimizer:
+  my $zero = $$ - $$;
+  my $int3 = ($n % 1000 + $zero) * 167772160;
+  tryeq $T++, $int3, 21307064320;
+
   my $t = time;
   my $t1000 = time() * 1000;
   try $T++, abs($t1000 -1000 * $t) <= 2000;
+}
+
+{
+  # 64 bit variants
+  my $n = 1127;
+
+  my $float = ($n % 1000) * 720575940379279360.0;
+  tryeq_sloppy $T++, $float, 9.15131444281685e+19;
+
+  my $int = ($n % 1000) * 720575940379279360;
+  tryeq_sloppy $T++, $int, 9.15131444281685e+19;
+
+  my $float2 = ($n % 1000 + 0.0) * 720575940379279360;
+  tryeq_sloppy $T++, $float2, 9.15131444281685e+19;
+
+  my $int2 = ($n % 1000 + 0) * 720575940379279360;
+  tryeq_sloppy $T++, $int2, 9.15131444281685e+19;
+
+  # zero, but in a way that ought to be able to defeat any future optimizer:
+  my $zero = $$ - $$;
+  my $int3 = ($n % 1000 + $zero) * 720575940379279360;
+  tryeq_sloppy $T++, $int3, 9.15131444281685e+19;
 }
 
 my $vms_no_ieee;
