@@ -5383,6 +5383,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    OP *o = NULL;
 	    int n = 0;
 	    bool utf8 = 0;
+            STRLEN orig_patlen = 0;
 
 	    if (pRExC_state->num_code_blocks) {
 		o = cLISTOPx(expr)->op_first;
@@ -5424,11 +5425,36 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    o = o->op_sibling;;
 		}
 
+		if ((SvAMAGIC(pat) || SvAMAGIC(msv)) &&
+			(sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
+		{
+		    sv_setsv(pat, sv);
+		    /* overloading involved: all bets are off over literal
+		     * code. Pretend we haven't seen it */
+		    pRExC_state->num_code_blocks -= n;
+		    n = 0;
+                    rx = NULL;
+
+		}
+		else  {
+                    while (SvAMAGIC(msv)
+                            && (sv = AMG_CALLunary(msv, string_amg))
+                            && sv != msv)
+                    {
+                        msv = sv;
+                        SvGETMAGIC(msv);
+                    }
+                    if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
+                        msv = SvRV(msv);
+                    orig_patlen = SvCUR(pat);
+                    sv_catsv_nomg(pat, msv);
+                    rx = msv;
+                    if (code)
+                        pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
+                }
+
 		/* extract any code blocks within any embedded qr//'s */
-		rx = msv;
-		if (SvROK(rx))
-		    rx = SvRV(rx);
-		if (SvTYPE(rx) == SVt_REGEXP
+		if (rx && SvTYPE(rx) == SVt_REGEXP
 		    && RX_ENGINE((REGEXP*)rx)->op_comp)
 		{
 
@@ -5446,7 +5472,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 			pRExC_state->num_code_blocks += ri->num_code_blocks;
 			for (i=0; i < ri->num_code_blocks; i++) {
 			    struct reg_code_block *src, *dst;
-			    STRLEN offset =  SvCUR(pat)
+			    STRLEN offset =  orig_patlen
 				+ ((struct regexp *)SvANY(rx))->pre_prefix;
 			    assert(n < pRExC_state->num_code_blocks);
 			    src = &ri->code_blocks[i];
@@ -5462,29 +5488,20 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 			}
 		    }
 		}
-
-		if ((SvAMAGIC(pat) || SvAMAGIC(msv)) &&
-			(sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
-		{
-		    sv_setsv(pat, sv);
-		    /* overloading involved: all bets are off over literal
-		     * code. Pretend we haven't seen it */
-		    pRExC_state->num_code_blocks -= n;
-		    n = 0;
-
-		}
-		else {
-		    if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
-			msv = SvRV(msv);
-		    sv_catsv_nomg(pat, msv);
-		    if (code)
-			pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
-		}
 	    }
 	    SvSETMAGIC(pat);
 	}
-	else
+	else {
+            SV *sv;
 	    pat = *patternp;
+            while (SvAMAGIC(pat)
+                    && (sv = AMG_CALLunary(pat, string_amg))
+                    && sv != pat)
+            {
+                pat = sv;
+                SvGETMAGIC(pat);
+            }
+        }
 
 	/* handle bare regex: foo =~ $re */
 	{

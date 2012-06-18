@@ -19,7 +19,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 438;  # Update this when adding/deleting tests.
+plan tests => 452;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1225,6 +1225,56 @@ EOP
 	for my $s ("\xc4\x80", "\x{100}") {
 	    ok($s =~ /^$s$/, "re-compile check is UTF8-aware");
 	}
+    }
+
+    #  #113682 more overloading and qr//
+    # when doing /foo$overloaded/, if $overloaded returns
+    # a qr/(?{})/ via qr or "" overloading, then 'use re 'eval'
+    # shouldn't be required. Via '.', it still is.
+    {
+        package Qr0;
+	use overload 'qr' => sub { qr/(??{50})/ };
+
+        package Qr1;
+	use overload '""' => sub { qr/(??{51})/ };
+
+        package Qr2;
+	use overload '.'  => sub { $_[1] . qr/(??{52})/ };
+
+        package Qr3;
+	use overload '""' => sub { qr/(??{7})/ },
+		     '.'  => sub { $_[1] . qr/(??{53})/ };
+
+        package Qr_indirect;
+	use overload '""'  => sub { $_[0][0] };
+
+	package main;
+
+	for my $i (0..3) {
+	    my $o = bless [], "Qr$i";
+	    if ((0,0,1,1)[$i]) {
+		eval { "A5$i" =~ /^A$o$/ };
+		like($@, qr/Eval-group not allowed/, "Qr$i");
+		eval { "5$i" =~ /$o/ };
+		like($@, ($i == 3 ? qr/^$/ : qr/no method found,/),
+			"Qr$i bare");
+		{
+		    use re 'eval';
+		    ok("A5$i" =~ /^A$o$/, "Qr$i - with use re eval");
+		    eval { "5$i" =~ /$o/ };
+		    like($@, ($i == 3 ? qr/^$/ : qr/no method found,/),
+			    "Qr$i bare - with use re eval");
+		}
+	    }
+	    else {
+		ok("A5$i" =~ /^A$o$/, "Qr$i");
+		ok("5$i" =~ /$o/, "Qr$i bare");
+	    }
+	}
+
+	my $o = bless [ bless [], "Qr1" ], 'Qr_indirect';
+	ok("A51" =~ /^A$o/, "Qr_indirect");
+	ok("51" =~ /$o/, "Qr_indirect bare");
     }
 
 } # End of sub run_tests
