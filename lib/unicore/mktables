@@ -11495,6 +11495,11 @@ sub filter_old_style_case_folding {
                            Fate => $INTERNAL_ONLY,
                            Description => "Code points that particpate in a multi-char fold and are not the final character of said fold",
                            );
+        $non_final_folds->add_comment(<<END
+Note that this is not a closure.  'f' is in the list, but not things that fold
+singly to 'f', namely 'F'
+END
+        );
         $all_folds = $perl->add_match_table("_Perl_Any_Folds",
                            Perl_Extension => 1,
                            Fate => $INTERNAL_ONLY,
