@@ -430,10 +430,48 @@ print "\n";
 say "Failed tests: @failed" if @failed;
 
 
-print "Now you ought to run a make; make test ...\n";
+say "Attempting to update Maintainers.pl";
+chdir '..';
 
-say "Do not forget to update Porting/Maintainers.pl before committing";
+open my $Maintainers_pl, '<', 'Porting/Maintainers.pl';
+open my $new_Maintainers_pl, '>', 'Maintainers.pl';
+
+my $found;
+my $in_mod_section;
+while (<$Maintainers_pl>) {
+    if (!$found) {
+        if ($in_mod_section) {
+            if (/DISTRIBUTION/) {
+                if (s/\Q$old_version/$version/) {
+                    $found = 1;
+                }
+            }
+
+            if (/^    }/) {
+                $in_mod_section = 0;
+            }
+        }
+
+        if (/\Q$cpan_mod/) {
+            $in_mod_section = 1;
+        }
+    }
+
+    print $new_Maintainers_pl $_;
+}
+
+if ($found) {
+    unlink 'Porting/Maintainers.pl';
+    rename 'Maintainers.pl' => 'Porting/Maintainers.pl';
+    system chmod => 'a+x', 'Porting/Maintainers.pl';
+}
+else {
+    say "Could not update Porting/Maintainers.pl.";
+    say "Make sure you update this by hand before committing.";
+}
+
 say "$o_module is now version $new_version";
+say "Now you ought to run a make; make test ...";
 
 
 __END__
