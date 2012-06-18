@@ -55,7 +55,7 @@ sub count {
 #
 package main;
 
-use Test::More tests => 26;
+use Test::More;
 
 my $obj = MyObj->new;
 isa_ok $obj, 'MyObj';
@@ -125,3 +125,36 @@ is $override_obj->count, 12;
 $override_obj->count( 1 );
 is $override_obj->count, 10;
 
+
+use Class::Struct Kapow => { z_zwap => 'Regexp', sploosh => 'MyObj' };
+
+is eval { main->new(); }, undef,
+    'No new method injected into current package';
+
+my $obj3 = Kapow->new();
+
+isa_ok $obj3, 'Kapow';
+is $obj3->z_zwap, undef, 'No z_zwap member by default';
+is $obj3->sploosh, undef, 'No sploosh member by default';
+$obj3->z_zwap(qr//);
+isa_ok $obj3->z_zwap, 'Regexp', 'Can set z_zwap member';
+$obj3->sploosh(MyObj->new(s => 'pie'));
+isa_ok $obj3->sploosh, 'MyObj',
+    'Can set sploosh member to object of correct class';
+is $obj3->sploosh->s, 'pie', 'Can set sploosh member to correct object';
+
+my $obj4 = Kapow->new( z_zwap => qr//, sploosh => MyObj->new(a => ['Good']) );
+
+isa_ok $obj4, 'Kapow';
+isa_ok $obj4->z_zwap, 'Regexp', 'Initialised z_zwap member';
+isa_ok $obj4->sploosh, 'MyObj', 'Initialised sploosh member';
+is_deeply $obj4->sploosh->a, ['Good'], 'with correct object';
+
+my $obj5 = Kapow->new( sploosh => { h => {perl => 'rules'} } );
+
+isa_ok $obj5, 'Kapow';
+is $obj5->z_zwap, undef, 'No z_zwap member by default';
+isa_ok $obj5->sploosh, 'MyObj', 'Initialised sploosh member from hash';
+is_deeply $obj5->sploosh->h, { perl => 'rules'} , 'with correct object';
+
+done_testing;
