@@ -883,7 +883,7 @@ use File::Glob qw(:case);
 
     'Filter::Util::Call' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'RURBAN/Filter-1.40.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Filter-1.44.tar.gz',
         'FILES'        => q[cpan/Filter-Util-Call
                  pod/perlfilter.pod
                 ],
