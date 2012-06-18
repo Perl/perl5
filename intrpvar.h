@@ -611,6 +611,8 @@ PERLVAR(I, XPosixXDigit, SV *)
 
 PERLVAR(I, VertSpace,   SV *)
 
+PERLVAR(I, NonL1NonFinalFold,   SV *)
+
 /* utf8 character class swashes */
 PERLVAR(I, utf8_alnum,	SV *)
 PERLVAR(I, utf8_alpha,	SV *)

@@ -873,16 +873,16 @@ sub run_tests {
     }
 
     {
-        for (120 .. 130) {
+        for (120 .. 130, 240 .. 260) {
             my $head = 'x' x $_;
             my $message = q [Don't misparse \x{...} in regexp ] .
-                             q [near 127 char EXACT limit];
+                             q [near EXACT char count limit];
             for my $tail ('\x{0061}', '\x{1234}', '\x61') {
                 eval qq{like("$head$tail", qr/$head$tail/, \$message)};
 		is($@, '', $message);
             }
             $message = q [Don't misparse \N{...} in regexp ] .
-                             q [near 127 char EXACT limit];
+                             q [near EXACT char count limit];
             for my $tail ('\N{SNOWFLAKE}') {
                 eval qq {use charnames ':full';
                          like("$head$tail", qr/$head$tail/, \$message)};
@@ -2063,6 +2063,27 @@ EOP
 
     ok "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/,
         "Check TRIE does not overwrite EXACT following NOTHING at start - RT #111842";
+
+    {
+        my $single = ":";
+        my $upper = "\x{390}";  # Fold is 3 chars.
+        my $multi = CORE::fc($upper);
+
+        my $failed = 0;
+
+        # Try forcing a node to be split, with a multi-char fold at the
+        # boundary
+        for my $repeat (1 .. 300) {
+            my $string = $single x $repeat;
+            my $lhs = $string . $upper;
+            if ($lhs !~ m/$string$multi/i) {
+                $failed = $repeat;
+                last;
+            }
+        }
+        ok(! $failed, "Matched multi-char fold across EXACTFish node boundaries; if failed, was at count $failed");
+
+    }
 
     #
     # Keep the following tests last -- they may crash perl

@@ -13370,6 +13370,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_VertSpace	= sv_dup_inc(proto_perl->IVertSpace, param);
 
+    PL_NonL1NonFinalFold = sv_dup_inc(proto_perl->INonL1NonFinalFold, param);
+
     /* utf8 character class swashes */
     PL_utf8_alnum	= sv_dup_inc(proto_perl->Iutf8_alnum, param);
     PL_utf8_alpha	= sv_dup_inc(proto_perl->Iutf8_alpha, param);

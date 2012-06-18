@@ -87,11 +87,10 @@ extern const struct regexp_engine my_reg_engine;
 #endif
 
 #include "dquote_static.c"
-#ifndef PERL_IN_XSUB_RE
-#  include "charclass_invlists.h"
-#endif
+#include "charclass_invlists.h"
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
+#define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
 #ifdef op
 #undef op
@@ -10394,15 +10393,18 @@ tryagain:
 	    RExC_parse++;
 
 	defchar: {
-	    register STRLEN len;
+	    register STRLEN len = 0;
 	    register UV ender;
 	    register char *p;
 	    char *s;
 #define MAX_NODE_STRING_SIZE 127
-	    char foldbuf[MAX_NODE_STRING_SIZE];
+	    char foldbuf[MAX_NODE_STRING_SIZE+UTF8_MAXBYTES_CASE];
+	    char *s0;
+	    U8 upper_parse = MAX_NODE_STRING_SIZE;
 	    STRLEN foldlen;
             U8 node_type;
             bool next_is_quantifier;
+            char * oldp;
 
 	    ender = 0;
             node_type = compute_EXACTish(pRExC_state);
@@ -10411,6 +10413,10 @@ tryagain:
             /* In pass1, folded, we use a temporary buffer instead of the
              * actual node, as the node doesn't exist yet */
 	    s = (SIZE_ONLY && FOLD) ? foldbuf : STRING(ret);
+
+            s0 = s;
+
+	reparse:
 
 	    /* XXX The node can hold up to 255 bytes, yet this only goes to
              * 127.  I (khw) do not know why.  Keeping it somewhat less than
@@ -10430,11 +10436,11 @@ tryagain:
              * could back off to end with only a code point that isn't such a
              * non-final, but it is possible for there not to be any in the
              * entire node. */
-	    for (len = 0, p = RExC_parse - 1;
-	         len < MAX_NODE_STRING_SIZE && p < RExC_end;
+	    for (p = RExC_parse - 1;
+	         len < upper_parse && p < RExC_end;
 	         len++)
 	    {
-		char * const oldp = p;
+		oldp = p;
 
 		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
@@ -10633,6 +10639,10 @@ tryagain:
 		    break;
 		} /* End of switch on the literal */
 
+		/* Here, have looked at the literal character and <ender>
+		 * contains its ordinal, <p> points to the character after it
+		 */
+
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
 
@@ -10693,7 +10703,7 @@ tryagain:
 			len += foldlen - 1;
                     }
                     else {
-                        REGC((char)ender, s++);
+                        *(s++) = ender;
                     }
 		}
 		else if (UTF) {
@@ -10721,6 +10731,164 @@ tryagain:
 		}
 
 	    } /* End of loop through literal characters */
+
+            /* Here we have either exhausted the input or ran out of room in
+             * the node.  (If we encountered a character that can't be in the
+             * node, transfer is made directly to <loopdone>, and so we
+             * wouldn't have fallen off the end of the loop.)  In the latter
+             * case, we artificially have to split the node into two, because
+             * we just don't have enough space to hold everything.  This
+             * creates a problem if the final character participates in a
+             * multi-character fold in the non-final position, as a match that
+             * should have occurred won't, due to the way nodes are matched,
+             * and our artificial boundary.  So back off until we find a non-
+             * problematic character -- one that isn't at the beginning or
+             * middle of such a fold.  (Either it doesn't participate in any
+             * folds, or appears only in the final position of all the folds it
+             * does participate in.)  A better solution with far fewer false
+             * positives, and that would fill the nodes more completely, would
+             * be to actually have available all the multi-character folds to
+             * test against, and to back-off only far enough to be sure that
+             * this node isn't ending with a partial one.  <upper_parse> is set
+             * further below (if we need to reparse the node) to include just
+             * up through that final non-problematic character that this code
+             * identifies, so when it is set to less than the full node, we can
+             * skip the rest of this */
+            if (FOLD && p < RExC_end && upper_parse == MAX_NODE_STRING_SIZE) {
+
+                const STRLEN full_len = len;
+
+		assert(len >= MAX_NODE_STRING_SIZE);
+
+                /* Here, <s> points to the final byte of the final character.
+                 * Look backwards through the string until find a non-
+                 * problematic character */
+
+		if (! UTF) {
+
+                    /* These two have no multi-char folds to non-UTF characters
+                     */
+                    if (ASCII_FOLD_RESTRICTED || LOC) {
+                        goto loopdone;
+                    }
+
+                    while (--s >= s0 && IS_NON_FINAL_FOLD(*s)) { }
+                    len = s - s0 + 1;
+		}
+                else {
+                    if (!  PL_NonL1NonFinalFold) {
+                        PL_NonL1NonFinalFold = _new_invlist_C_array(
+                                        NonL1_Perl_Non_Final_Folds_invlist);
+                    }
+
+                    /* Point to the first byte of the final character */
+                    s = (char *) utf8_hop((U8 *) s, -1);
+
+                    while (s >= s0) {   /* Search backwards until find
+                                           non-problematic char */
+                        if (UTF8_IS_INVARIANT(*s)) {
+
+                            /* There are no ascii characters that participate
+                             * in multi-char folds under /aa.  In EBCDIC, the
+                             * non-ascii invariants are all control characters,
+                             * so don't ever participate in any folds. */
+                            if (ASCII_FOLD_RESTRICTED
+                                || ! IS_NON_FINAL_FOLD(*s))
+                            {
+                                break;
+                            }
+                        }
+                        else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+
+                            /* No Latin1 characters participate in multi-char
+                             * folds under /l */
+                            if (LOC
+                                || ! IS_NON_FINAL_FOLD(TWO_BYTE_UTF8_TO_UNI(
+                                                                *s, *(s+1))))
+                            {
+                                break;
+                            }
+                        }
+                        else if (! _invlist_contains_cp(
+                                        PL_NonL1NonFinalFold,
+                                        valid_utf8_to_uvchr((U8 *) s, NULL)))
+                        {
+                            break;
+                        }
+
+                        /* Here, the current character is problematic in that
+                         * it does occur in the non-final position of some
+                         * fold, so try the character before it, but have to
+                         * special case the very first byte in the string, so
+                         * we don't read outside the string */
+                        s = (s == s0) ? s -1 : (char *) utf8_hop((U8 *) s, -1);
+                    } /* End of loop backwards through the string */
+
+                    /* If there were only problematic characters in the string,
+                     * <s> will point to before s0, in which case the length
+                     * should be 0, otherwise include the length of the
+                     * non-problematic character just found */
+                    len = (s < s0) ? 0 : s - s0 + UTF8SKIP(s);
+		}
+
+                /* Here, have found the final character, if any, that is
+                 * non-problematic as far as ending the node without splitting
+                 * it across a potential multi-char fold.  <len> contains the
+                 * number of bytes in the node up-to and including that
+                 * character, or is 0 if there is no such character, meaning
+                 * the whole node contains only problematic characters.  In
+                 * this case, give up and just take the node as-is.  We can't
+                 * do any better */
+                if (len == 0) {
+                    len = full_len;
+                } else {
+
+                    /* Here, the node does contain some characters that aren't
+                     * problematic.  If one such is the final character in the
+                     * node, we are done */
+                    if (len == full_len) {
+                        goto loopdone;
+                    }
+                    else if (len + ((UTF) ? UTF8SKIP(s) : 1) == full_len) {
+
+                        /* If the final character is problematic, but the
+                         * penultimate is not, back-off that last character to
+                         * later start a new node with it */
+                        p = oldp;
+                        goto loopdone;
+                    }
+
+                    /* Here, the final non-problematic character is earlier
+                     * in the input than the penultimate character.  What we do
+                     * is reparse from the beginning, going up only as far as
+                     * this final ok one, thus guaranteeing that the node ends
+                     * in an acceptable character.  The reason we reparse is
+                     * that we know how far in the character is, but we don't
+                     * know how to correlate its position with the input parse.
+                     * An alternate implementation would be to build that
+                     * correlation as we go along during the original parse,
+                     * but that would entail extra work for every node, whereas
+                     * this code gets executed only when the string is too
+                     * large for the node, and the final two characters are
+                     * problematic, an infrequent occurrence.  Yet another
+                     * possible strategy would be to save the tail of the
+                     * string, and the next time regatom is called, initialize
+                     * with that.  The problem with this is that unless you
+                     * back off one more character, you won't be guaranteed
+                     * regatom will get called again, unless regbranch,
+                     * regpiece ... are also changed.  If you do back off that
+                     * extra character, so that there is input guaranteed to
+                     * force calling regatom, you can't handle the case where
+                     * just the first character in the node is acceptable.  I
+                     * (khw) decided to try this method which doesn't have that
+                     * pitfall; if performance issues are found, we can do a
+                     * combination of the current approach plus that one */
+                    upper_parse = len;
+                    len = 0;
+                    s = s0;
+                    goto reparse;
+                }
+	    }   /* End of verifying node ends with an appropriate char */
 
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
