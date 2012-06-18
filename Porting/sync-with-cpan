@@ -449,7 +449,7 @@ while (<$Maintainers_pl>) {
     if (!$found) {
         if ($in_mod_section) {
             if (/DISTRIBUTION/) {
-                if (s/\Q$old_version/$version/) {
+                if (s/\Q$old_version/$new_version/) {
                     $found = 1;
                 }
             }
