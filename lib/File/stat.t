@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use Test::More;
 use Config qw( %Config );
-use File::Temp 'tempfile';
+use File::Temp qw( tempfile tempdir );
 
 require File::stat;
 
@@ -95,17 +95,20 @@ sub test_X_ops {
     }
 }
 
-test_X_ops($file, "for $file");
+foreach ([file => $file],
+         [dir => tempdir(CLEANUP => 1)]) {
+    my ($what, $pathname) = @$_;
+    test_X_ops($pathname, "for $what $pathname");
 
-{
     my $mode = 01000;
     while ($mode) {
         $mode >>= 1;
         my $mode_oct = sprintf "0%03o", $mode;
-        chmod $mode, $file or die "Can't chmod $mode_oct $file: $!";
-        test_X_ops($file, "for file with mode=$mode_oct");
+        chmod $mode, $pathname or die "Can't chmod $mode_oct $pathname: $!";
+        test_X_ops($pathname, "for $what with mode=$mode_oct");
     }
-    chmod 0600, $file or die "Can't restore permissions on $file to 0600";
+    chmod 0600, $pathname
+        or die "Can't restore permissions on $pathname to 0600";
 }
 
 SKIP: {
