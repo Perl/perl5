@@ -228,6 +228,8 @@ say "Unpacking $new_file";
 
 system tar => 'xfz', $new_file;
 (my $new_dir = $new_file) =~ s/\.tar\.gz//;
+# ensure 'make' will update all files
+system('find', $new_dir, '-exec', 'touch', '{}', ';');
 
 say "Renaming directories";
 rename $pkg_dir => $old_dir;
