@@ -17,7 +17,7 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #endif
 
-#if !defined(PERL_VERSION) || PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 9) || (PERL_VERSION == 10 && PERL_SUBVERSION < 1)
+#if !defined(PERL_VERSION) || PERL_VERSION < 10 || (PERL_VERSION == 10 && PERL_SUBVERSION < 1)
 #define NEED_load_module
 #define NEED_vload_module
 #define NEED_newCONSTSUB
