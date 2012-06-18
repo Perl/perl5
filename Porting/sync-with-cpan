@@ -220,7 +220,6 @@ else {
 }
 
 my  $old_dir      = "$pkg_dir-$old_version";
-my  $new_dir      = "$pkg_dir-$new_version";
 
 say "Cleaning out old directory";
 system git => 'clean', '-dfxq', $pkg_dir;
@@ -228,6 +227,7 @@ system git => 'clean', '-dfxq', $pkg_dir;
 say "Unpacking $new_file";
 
 system tar => 'xfz', $new_file;
+(my $new_dir = $new_file) =~ s/\.tar\.gz//;
 
 say "Renaming directories";
 rename $pkg_dir => $old_dir;
