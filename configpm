@@ -149,14 +149,14 @@ die "Can't automatically determine name for Config_heavy.pl from '$Config_PM'"
 my $config_txt;
 my $heavy_txt;
 
-$heavy_txt .= <<'ENDOFBEG';
+$heavy_txt .= sprintf <<'ENDOFBEG';
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
 
 package Config;
 use strict;
 use warnings;
-use vars '%Config';
+use vars '%%Config';
 
 sub bincompat_options {
     return split ' ', (Internals::V())[0];
@@ -202,11 +202,11 @@ sub _V {
 
     print "  $date\n" if defined $date;
 
-    my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %ENV;
+    my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %%ENV;
     push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $^O eq 'cygwin' and $ENV{CYGWIN};
 
     if (@env) {
-        print "  \%ENV:\n";
+        print "  \%%ENV:\n";
         print "    $_\n" foreach @env;
     }
     print "  \@INC:\n";
