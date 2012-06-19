@@ -6807,9 +6807,9 @@ In time-critical applications, it is worthwhile to avoid splitting
 into more fields than necessary.  Thus, when assigning to a list,
 if LIMIT is omitted (or zero), then LIMIT is treated as though it
 were one larger than the number of variables in the list; for the
-following, LIMIT is implicitly 4:
+following, LIMIT is implicitly 3:
 
-    ($login, $passwd, $remainder) = split(/:/);
+    ($login, $passwd) = split(/:/);
 
 Note that splitting an EXPR that evaluates to the empty string always
 produces zero fields, regardless of the LIMIT specified.
