@@ -52,12 +52,16 @@ my (undef, $file) = tempfile();
 }
 
 sub test_X_ops {
-    my ($file, $desc_tail) = @_;
+    my ($file, $desc_tail, $skip) = @_;
     my @stat = CORE::stat $file;
     my $stat = File::stat::stat($file);
     isa_ok($stat, 'File::stat', 'should build a stat object');
 
     for my $op (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
+        if ($skip && $op =~ $skip) {
+            note("Not testing -A $desc_tail");
+            next;
+        }
         for my $access ('', 'use filetest "access";') {
             my ($warnings, $awarn, $vwarn, $rv);
             my $desc = $access
@@ -121,7 +125,8 @@ SKIP: {
     -e $^X && -x $^X or skip "$^X is not present and executable", 4;
     $^O eq "VMS" and skip "File::stat ignores VMS ACLs", 4;
 
-    test_X_ops($^X, "for $^X");
+    # Other tests running in parallel mean that $^X is read, updating its atime
+    test_X_ops($^X, "for $^X", qr/A/);
 }
 
 
