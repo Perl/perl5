@@ -331,11 +331,8 @@ XXX
 =head1 Known Problems
 
 XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
+tests that had to be C<TODO>ed for the release would be noted here. Unfixed
+platform specific bugs also go here.
 
 [ List each fix as a =item entry ]
 
