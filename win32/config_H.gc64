@@ -4344,11 +4344,11 @@
  *	This symbol defines the format string used for printing a Perl NV
  *	using %g-ish floating point format.
  */
-#define	IVdf		"I64d"		/**/
-#define	UVuf		"I64u"		/**/
-#define	UVof		"I64o"		/**/
-#define	UVxf		"I64x"		/**/
-#define	UVXf		"I64X"		/**/
+#define	IVdf		"lld"		/**/
+#define	UVuf		"llu"		/**/
+#define	UVof		"llo"		/**/
+#define	UVxf		"llx"		/**/
+#define	UVXf		"llX"		/**/
 #define	NVef		"e"		/**/
 #define	NVff		"f"		/**/
 #define	NVgf		"g"		/**/
