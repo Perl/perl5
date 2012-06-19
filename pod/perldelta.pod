@@ -15,7 +15,6 @@ df826430da0d make TRIE nodes "absorb" NOTHING->EXACT sequences
 9a62b98f29d2 gv.c: Don’t ENTER/LEAVE unnecessarily
 ee1b3814fd18 gv.c: Remove mro_method_changed_in() from gv_init
 a3c74922a705 Rmv mro_method_changed_in call on stub upgraded to const
-186a5ba82d58 Don’t create pads for sub stubs
 7ad40bcb0a19 Don’t call mro_method_changed_in after newCONSTSUB
 83b195e49dd1 ensure correctness if sv_2mortal modifies errno
 
@@ -197,6 +196,11 @@ removed as being unhelpful and inconsistent.
 
 The "Not a format reference" error has been removed, as the only case in
 which it could be triggered was a bug.
+
+=item *
+
+The "Unable to create sub named %s" error has been removed for the same
+reason.
 
 =back
 
@@ -488,6 +492,12 @@ C<__SUB__> now works in special blocks (BEGIN, END, etc.).
 Thread creation on Windows could theoretically result in a crash if done
 inside a BEGIN block.  It still does not work properly, but it no longer
 crashes [perl #111610].
+
+=item *
+
+C<\&{''}> (with the empty string) now autovivifies a stub like any other
+sub name, and no longer produces the "Unable to create sub" error
+[perl #94476].
 
 =back
 
