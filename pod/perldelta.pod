@@ -36,10 +36,10 @@ here, but most should go in the L</Performance Enhancements> section.
 Several more built-in functions have been added as subroutines to the
 CORE:: namespace, namely, those non-overridable keywords that can be
 implemented without custom parsers: C<defined>, C<delete>, C<exists>,
-C<glob>, C<pos>, C<protoytpe>, C<scalar>, C<split>, C<study>, C<undef>,
+C<glob>, C<pos>, C<protoytpe>, C<scalar>, C<split>, and C<undef>.
 
 As some of these have prototypes, C<prototype('CORE::...')> has been
-changed not to make a distinction between overridable and non-overridable
+changed to not make a distinction between overridable and non-overridable
 keywords.  This is to make C<prototype('CORE::pos')> consistent with
 C<prototype(&CORE::pos)>.
 
@@ -61,8 +61,8 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head2 C</(?{})/> and C</(??{}> have been heavily reworked.
 
-The implementation of this feature has been almost completely written.
-Although its main intent is is to fix bugs, some behaviours, especially
+The implementation of this feature has been almost completely rewritten.
+Although its main intent is to fix bugs, some behaviours, especially
 related to the scope of lexical variables, will have changed.  This is
 described more fully in the L</Selected Bug Fixes> section.
 
@@ -75,7 +75,7 @@ refers to U+1F514, and the name for U+0007 is "ALERT".  All the
 functions in L<charnames> have been correspondingly updated.
 
 =head2 Alphanumeric operators must now be separated from the closing
-delimter of regular expressions
+delimiter of regular expressions
 
 You may no longer write something like:
 
@@ -203,7 +203,7 @@ C<sync()> can now be called on read-only file handles [perl #64772].
 
 L<Pod::Html> has been upgraded from version 1.15_02 to 1.16.
 
-The option C<--libpods> has been re-instated. It is deprecated, and its use
+The option C<--libpods> has been reinstated. It is deprecated, and its use
 does nothing other than issue a warning that it is no longer supported.
 
 =item *
@@ -465,7 +465,7 @@ holds stash pointers.
 
 In the pluggable regex API, the C<regexp_engine> struct has acquired a new
 field C<op_comp>, which is currently just for perl's internal use, and
-should be initialised to NULL by other regexp plugin modules.
+should be initialised to NULL by other regex plugin modules.
 
 =item *
 
@@ -532,10 +532,10 @@ expect, creating three regexes that match 0, 1, and 2:
 
 =item *
 
-The C<use re 'eval'> pragma is now  only required for code blocks defined
-at runtime; in particular in the following, the text of the $r pattern is
+The C<use re 'eval'> pragma is now only required for code blocks defined
+at runtime; in particular in the following, the text of the C<$r> pattern is
 still interpolated into the new pattern and recompiled, but the individual
-compiled code-blocks within $r are reused rather than being recompiled,
+compiled code-blocks within C<$r> are reused rather than being recompiled,
 and C<use re 'eval'> isn't needed any more:
 
     my $r = qr/abc(?{....})def/;
@@ -609,8 +609,8 @@ a severe performance penalty in edge cases.  This has been fixed
 =item *
 
 The "Can't find an opnumber" message that C<prototype> produces when passed
-a string like "CORE::nonexistent_keyword" is now passes UTF8 and embedded
-nulls through unchanged [perl #97478].
+a string like "CORE::nonexistent_keyword" now passes UTF8 and embedded
+nuls through unchanged [perl #97478].
 
 =item *
 
@@ -620,7 +620,7 @@ treating them as subroutine names.
 
 =item *
 
-Under threaded perls, a run-time code block in a regular expression could
+Under threaded perls, a runtime code block in a regular expression could
 corrupt the package name stored in the op tree, resulting in bad reads
 in C<caller>, and possibly crashes [perl #113060].
 
@@ -679,7 +679,7 @@ resulting in loss of accuracy on 64-bit platforms [perl #109542].
 =item *
 
 Unary negation no longer treats a string as a number if the string happened
-to be used as a number some time.  So, if $x contains the string "dogs",
+to be used as a number at some point.  So, if C<$x> contains the string "dogs",
 C<-$x> returns "-dogs" even if C<$y=0+$x> has happened at some point.
 
 =item *
@@ -704,7 +704,7 @@ was overriding all earlier ones.  [perl #113584]
 
 Regular expressions like C<qr/\87/> previously silently inserted a NUL
 character, thus matching as if it had been written C<qr/\00087/>.  Now it
-matchs as if it had been written as C<qr/87/>, with a message that the
+matches as if it had been written as C<qr/87/>, with a message that the
 sequence C<"\8"> is unrecognized.
 
 =item *
