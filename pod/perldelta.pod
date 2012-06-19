@@ -29,10 +29,10 @@ C<prototype(&CORE::pos)>.
 
 =head1 Incompatible Changes
 
-=head2 C</(?{})/> and C</(??{}> have been heavily reworked.
+=head2 C</(?{})/> and C</(??{})/> have been heavily reworked
 
 The implementation of this feature has been almost completely rewritten.
-Although its main intent is to fix bugs, some behaviours, especially
+Although its main intent is to fix bugs, some behaviors, especially
 related to the scope of lexical variables, will have changed.  This is
 described more fully in the L</Selected Bug Fixes> section.
 
@@ -40,7 +40,7 @@ described more fully in the L</Selected Bug Fixes> section.
 
 Unicode 6.0 reused the name "BELL" for a different code point than it
 traditionally had meant.  Since Perl v5.14, use of this name still
-referred to U+0007, but would raise a deprecated warning.  Now, "BELL"
+referred to U+0007, but would raise a deprecation warning.  Now, "BELL"
 refers to U+1F514, and the name for U+0007 is "ALERT".  All the
 functions in L<charnames> have been correspondingly updated.
 
@@ -57,7 +57,7 @@ Instead you must write
 
 with whitespace separating the operator from the closing delimiter of
 the regular expression.  Not having whitespace has resulted in a
-deprecated warning since Perl v5.14.0.
+deprecation warning since Perl v5.14.0.
 
 =head2 C<require> dies for unreadable files
 
@@ -109,12 +109,12 @@ Work around an edge case on Linux with Busybox's unzip.
 
 L<Archive::Tar> has been upgraded from version 1.82 to 1.88.
 
-ptar now supports -T option and dashless options [rt.cpan.org #75473],
-[rt.cpan.org #75475].
+ptar now supports the -T option as well as dashless options
+[rt.cpan.org #75473], [rt.cpan.org #75475].
 
 Auto-encode filenames marked as UTF-8 [rt.cpan.org #75474].
 
-Don't use tell on IO::Zlib handles [rt.cpan.org #64339].
+Don't use C<tell> on L<IO::Zlib> handles [rt.cpan.org #64339].
 
 Don't try to C<chown> on symlinks.
 
@@ -122,13 +122,9 @@ Don't try to C<chown> on symlinks.
 
 L<attributes> has been upgraded from version 0.19 to 0.20.
 
-No visible changes.
-
 =item *
 
 L<autodie> has been upgraded from version 2.10 to 2.11.
-
-No visible changes.
 
 =item *
 
@@ -136,7 +132,7 @@ L<B> has been upgraded from version 1.35 to 1.36.
 
 C<B::COP::stashlen> has been replaced with C<B::COP::stashoff>.
 
-C<B::COP::stashpv> now supports UTF8 package names and embedded NULs.
+C<B::COP::stashpv> now supports UTF-8 package names and embedded NULs.
 
 =item *
 
@@ -154,8 +150,6 @@ The constructor now respects overridden accessor methods [perl #29230].
 
 L<Compress::Raw::Bzip2> has been upgraded from version 2.048 to 2.052.
 
-No visible changes.
-
 =item *
 
 L<Compress::Raw::Zlib> has been upgraded from version 2.048 to 2.054.
@@ -169,8 +163,6 @@ Fix build failures on Irix, Solaris, and Win32, and also when building as C++
 
 L<CPAN::Meta> has been upgraded from version 2.120630 to 2.120921.
 
-Split L<CPAN::Meta::Requirements> into its own distribution.
-
 =item *
 
 L<CPAN::Meta::Requirements> has been upgraded from version 2.120630 to 2.122.
@@ -182,8 +174,6 @@ Added C<requirements_for_module> method.
 =item *
 
 L<CPAN::Meta::YAML> has been upgraded from version 0.007 to 0.008.
-
-No visible changes.
 
 =item *
 
@@ -198,13 +188,13 @@ Handle multiple C<makemakerargs> and C<makeflags> arguments better.
 Use C<File::HomeDir> when available, and provide C<PERL5_CPANPLUS_HOME> to
 override the autodetection.
 
-Always re-fetch CHECKSUMS if C<fetchdir> is set.
+Always re-fetch F<CHECKSUMS> if C<fetchdir> is set.
 
 =item *
 
 L<Digest::MD5> has been upgraded from version 2.51 to 2.52.
 
-Fix Digest::Perl::MD5 OO fallback [rt.cpan.org #66634].
+Fix C<Digest::Perl::MD5> OO fallback [rt.cpan.org #66634].
 
 =item *
 
@@ -223,13 +213,9 @@ make use of them. [perl #111782, #111798].
 
 L<File::DosGlob> has been upgraded from version 1.07 to 1.08.
 
-There are no visible changes, only minor internal refactorings.
-
 =item *
 
 L<File::Fetch> has been upgraded from version 0.32 to 0.34.
-
-No visible changes.
 
 =item *
 
@@ -241,8 +227,6 @@ the root directory twice [perl #111510].
 =item *
 
 L<Filter::Util::Call> has been upgraded from version 1.40 to 1.45.
-
-No visible changes.
 
 =item *
 
@@ -294,31 +278,21 @@ Fix use of C<requires> on perls installed to a path with spaces.
 
 L<Object::Accessor> has been upgraded from version 0.42 to 0.44.
 
-No visible changes.
-
 =item *
 
 L<Params::Check> has been upgraded from version 0.32 to 0.36.
-
-No visible changes.
 
 =item *
 
 L<Parse::CPAN::Meta> has been upgraded from version 1.4402 to 1.4404.
 
-No visible changes.
-
 =item *
 
 L<PerlIO::mmap> has been upgraded from version 0.010 to 0.011.
 
-No visible changes.
-
 =item *
 
 L<PerlIO::via::QuotedPrint> has been upgraded from version 0.06 to 0.07.
-
-No visible changes.
 
 =item *
 
@@ -327,14 +301,12 @@ L<Pod::Html> has been upgraded from version 1.15_02 to 1.16.
 The option C<--libpods> has been reinstated. It is deprecated, and its use
 does nothing other than issue a warning that it is no longer supported.
 
-Since the HTML files generated by pod2html claim to have a utf-8 charset,
-actually write the files out using utf-8 [perl #111446].
+Since the HTML files generated by pod2html claim to have a UTF-8 charset,
+actually write the files out using UTF-8 [perl #111446].
 
 =item *
 
 L<POSIX> has been upgraded from version 1.30 to 1.31.
-
-No visible changes.
 
 =item *
 
@@ -346,7 +318,9 @@ See note about C<op_comp> in the L</Internal Changes> section below.
 
 L<Safe> has been upgraded from version 2.31_01 to 2.33_01.
 
-XXX where do these dev versions come from?
+Fix interactions with C<Devel::Cover>.
+
+Don't eval code under C<no strict>.
 
 =item *
 
@@ -375,8 +349,6 @@ Use C<fc> for casefolding.
 
 L<Storable> has been upgraded from version 2.35 to 2.36.
 
-No visible changes.
-
 =item *
 
 L<Term::ANSIColor> has been upgraded from version 3.01 to 3.02.
@@ -391,14 +363,14 @@ L<Test::Harness> has been upgraded from version 3.23 to 3.25.
 
 Fix glob semantics on Win32 [rt.cpan.org #49732].
 
-Don't use Win32::GetShortPathName when calling perl [rt.cpan.org #47890].
+Don't use C<Win32::GetShortPathName> when calling perl [rt.cpan.org #47890].
 
 Ignore -T when reading shebang [rt.cpan.org #64404].
 
 Handle the case where we don't know the wait status of the test more
 gracefully.
 
-Make the test summary 'ok' line overrideable so that it can be changed to a
+Make the test summary 'ok' line overridable so that it can be changed to a
 plugin to make the output of prove idempotent.
 
 Don't run world-writable files.
@@ -422,7 +394,7 @@ that returns all the casefolds.
 
 =item *
 
-L<perlfaq> has been synchronised with version 5.0150040 from C<CPAN>.
+L<perlfaq> has been synchronized with version 5.0150040 from CPAN.
 
 =back
 
@@ -462,8 +434,6 @@ reason.
 =head1 Platform Support
 
 =head2 Platform-Specific Notes
-
-XXX note fails on win2k and vms
 
 =over 4
 
@@ -518,7 +488,7 @@ experimental.  See L<perlapi>.
 =item *
 
 The implementation of code blocks in regular expressions, such as C<(?{})>
-and C<(??{})> has been heavily reworked to eliminate a whole slew of bugs.
+and C<(??{})>, has been heavily reworked to eliminate a whole slew of bugs.
 The main user-visible changes are:
 
 =over 4
@@ -551,7 +521,7 @@ compiled once, at perl compile-time:
 =item *
 
 Lexical variables are now sane as regards scope, recursion and closure
-behaviour. In particular, C</A(?{B})C/> behaves (from a closure viewpoint)
+behavior. In particular, C</A(?{B})C/> behaves (from a closure viewpoint)
 exactly like C</A/ && do { B } && /C/>, while  C<qr/A(?{B})C/> is like
 C<sub {/A/ && do { B } && /C/}>. So this code now works how you might
 expect, creating three regexes that match 0, 1, and 2:
@@ -582,8 +552,8 @@ from the code block, not from any enclosing subroutine.
 =item *
 
 Perl normally caches the compilation of run-time patterns, and doesn't
-recompile if the pattern hasn't changed; but this is now disabled if
-required for the correct behaviour of closures; for example:
+recompile if the pattern hasn't changed, but this is now disabled if
+required for the correct behavior of closures. For example:
 
     my $code = '(??{$x})';
     for my $x (1..3) {
@@ -633,7 +603,7 @@ C<vec> no longer produces "uninitialized" warnings in lvalue context
 
 =item *
 
-An optimisation involving fixed strings in regular expressions could cause
+An optimization involving fixed strings in regular expressions could cause
 a severe performance penalty in edge cases.  This has been fixed
 [perl #76546].
 
@@ -645,7 +615,7 @@ as C<(?:)> or C<(?:|)>) could disable some optimizations. This has been fixed.
 =item *
 
 The "Can't find an opnumber" message that C<prototype> produces when passed
-a string like "CORE::nonexistent_keyword" now passes UTF8 and embedded
+a string like "CORE::nonexistent_keyword" now passes UTF-8 and embedded
 NULs through unchanged [perl #97478].
 
 =item *
@@ -686,15 +656,15 @@ depending on whether it is a string or number internally.
 
 =item *
 
-C<open> with "<&" for the mode checks to see whether the third argument is
-a number, in determining whether to treat it as a file descriptor or a
-handle name.  Magical variables like C<$1> were always failing the numeric
-check and being treated as handle names.
+C<open> with C<< <& >> for the mode checks to see whether the third argument is
+a number, in determining whether to treat it as a file descriptor or a handle
+name.  Magical variables like C<$1> were always failing the numeric check and
+being treated as handle names.
 
 =item *
 
 C<warn>'s handling of magical variables (C<$1>, ties) has undergone several
-fixes.  FETCH is only called once now on a tied argument or a tied C<$@>
+fixes.  C<FETCH> is only called once now on a tied argument or a tied C<$@>
 [perl #97480].  Tied variables returning objects that stringify as "" are
 no longer ignored.  A tied C<$@> that happened to return a reference the
 I<previous> time is was used is no longer ignored.
@@ -726,7 +696,7 @@ variables (C<$1>, ties) were not fixed till now [perl #57706].
 =item *
 
 Unary negation now treats strings consistently, regardless of the internal
-UTF8 flag.
+C<UTF8> flag.
 
 =item *
 
@@ -745,12 +715,12 @@ sequence C<"\8"> is unrecognized.
 
 =item *
 
-C<__SUB__> now works in special blocks (BEGIN, END, etc.).
+C<__SUB__> now works in special blocks (C<BEGIN>, C<END>, etc.).
 
 =item *
 
 Thread creation on Windows could theoretically result in a crash if done
-inside a BEGIN block.  It still does not work properly, but it no longer
+inside a C<BEGIN> block.  It still does not work properly, but it no longer
 crashes [perl #111610].
 
 =item *
@@ -767,7 +737,7 @@ sub name, and no longer produces the "Unable to create sub" error
 
 =item *
 
-On VMS, Module::Build still fails its test suite.
+On VMS, L<Module::Build> still fails its test suite.
 
 =item *
 
