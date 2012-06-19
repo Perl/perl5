@@ -294,6 +294,13 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item VMS
+
+All C header files from the top-level directory of the distribution are now
+installed on VMS, providing consistency with a long-standing practice on other
+platforms. Previously only a subset were installed, which broke non-core extension
+builds for extensions that depended on the missing include files.
+
 =back
 
 =head1 Internal Changes
