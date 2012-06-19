@@ -159,7 +159,7 @@ L<B> has been upgraded from version 1.35 to 1.36.
 
 C<B::COP::stashlen> has been replaced with C<B::COP::stashoff>.
 
-C<B::COP::stashpv> now supports UTF8 package names and embedded nulls.
+C<B::COP::stashpv> now supports UTF8 package names and embedded NULs.
 
 =item *
 
@@ -603,7 +603,7 @@ a severe performance penalty in edge cases.  This has been fixed
 
 The "Can't find an opnumber" message that C<prototype> produces when passed
 a string like "CORE::nonexistent_keyword" now passes UTF8 and embedded
-nuls through unchanged [perl #97478].
+NULs through unchanged [perl #97478].
 
 =item *
 
