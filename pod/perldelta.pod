@@ -1,15 +1,5 @@
 =encoding utf8
 
-=for todo
-5204593b74eb sv.c: Make sv_pvn_force_flags guard against SV_UNDEF_RETURNS_NULL.
-28333232a1c7 Don’t localise CopSTASH(&PL_compiling) in newCONSTSUB
-c947b31cf142 Do away with stashpv_hvname_match
-d0279c7ce493 Fix bad assertions in pp_ctl.c:pp_caller
-9a62b98f29d2 gv.c: Don’t ENTER/LEAVE unnecessarily
-ee1b3814fd18 gv.c: Remove mro_method_changed_in() from gv_init
-a3c74922a705 Rmv mro_method_changed_in call on stub upgraded to const
-7ad40bcb0a19 Don’t call mro_method_changed_in after newCONSTSUB
-
 =head1 NAME
 
 perldelta - what is new for perl v5.17.1
