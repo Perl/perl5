@@ -163,6 +163,21 @@ Unknown regexp modifier "/q" at - line 3, near "=~ "
 Execution of - aborted due to compilation errors.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+$a =~ m/$foo/eネq;
+$a =~ s/$foo/fool/seネq;
+
+EXPECT
+OPTION fatal
+Unknown regexp modifier "/e" at - line 4, near "=~ "
+Unknown regexp modifier "/ネ" at - line 4, near "=~ "
+Unknown regexp modifier "/q" at - line 4, near "=~ "
+Unknown regexp modifier "/ネ" at - line 5, near "=~ "
+Unknown regexp modifier "/q" at - line 5, near "=~ "
+Execution of - aborted due to compilation errors.
+########
+# toke.c
 use warnings 'syntax' ;
 s/(abc)/\1/;
 no warnings 'syntax' ;

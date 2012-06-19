@@ -9056,11 +9056,13 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
      * to allow only one */
 
     const char c = **s;
+    STRLEN charlen = UTF ? UTF8SKIP(*s) : 1;
 
-    if (! strchr(valid_flags, c)) {
-        if (isALNUM(c)) {
-	    yyerror(Perl_form(aTHX_ "Unknown regexp modifier \"/%c\"", c));
-            (*s)++;
+    if ( charlen != 1 || ! strchr(valid_flags, c) ) {
+        if (isALNUM_lazy_if(*s, UTF)) {
+            yyerror_pv(Perl_form(aTHX_ "Unknown regexp modifier \"/%.*s\"", charlen, *s),
+                       UTF ? SVf_UTF8 : 0);
+            (*s) += charlen;
             return TRUE;
         }
         return FALSE;
