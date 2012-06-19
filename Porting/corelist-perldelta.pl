@@ -13,7 +13,7 @@ use Getopt::Long;
   ./perl Porting/corelist-perldelta.pl
   
   # generate a diff between the corelist sections of two perldelta* files:
-  perl Porting/corelist-perldelta.pl --mode=check 5.17.1 5.17.2 <perl5172delta.pod
+  perl Porting/corelist-perldelta.pl --mode=check 5.017001 5.017002 <perl5172delta.pod
 
 =head1 ABOUT
 
