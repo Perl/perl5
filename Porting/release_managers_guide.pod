@@ -142,12 +142,6 @@ Make sure that search.cpan.org knows that you're allowed to upload
 perl distros. Contact Graham Barr to make sure that you're on the right
 list.
 
-=head3 metacpan.org pumpkin status
-
-Make sure that metacpan.org knows that you're allowed to upload
-perl distros. Send an email to C<noc@metacpan.org> to make sure that you're
-on the right list.
-
 =head3 rt.perl.org update access
 
 Make sure you have permission to close tickets on L<http://rt.perl.org/>
