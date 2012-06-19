@@ -886,7 +886,8 @@ parse also C and C++.
 Download the pmd-bin-X.Y.zip () from the SourceForge site, extract the
 pmd-X.Y.jar from it, and then run that on source code thusly:
 
-  java -cp pmd-X.Y.jar net.sourceforge.pmd.cpd.CPD --minimum-tokens 100 --files /some/where/src --language c > cpd.txt
+  java -cp pmd-X.Y.jar net.sourceforge.pmd.cpd.CPD \
+   --minimum-tokens 100 --files /some/where/src --language c > cpd.txt
 
 You may run into memory limits, in which case you should use the -Xmx
 option:
@@ -1170,7 +1171,8 @@ AddressSanitizer is available for linux, Mac OS X and soon on Windows.
 You should create the perl with AddressSanitizer using:
 
     sh Configure -Dcc=clang -Accflags=-faddress-sanitizer \
-     -Aldflags=-faddress-sanitizer -Alddlflags=-shared\ -faddress-sanitizer
+     -Aldflags=-faddress-sanitizer \
+     -Alddlflags=-shared\ -faddress-sanitizer
 
 where these arguments mean:
 
