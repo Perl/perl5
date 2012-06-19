@@ -5,7 +5,6 @@
 28333232a1c7 Don’t localise CopSTASH(&PL_compiling) in newCONSTSUB
 c947b31cf142 Do away with stashpv_hvname_match
 d0279c7ce493 Fix bad assertions in pp_ctl.c:pp_caller
-1db94eebfa93 Quieten B::Deparse warnings (fixes #113464).
 9a62b98f29d2 gv.c: Don’t ENTER/LEAVE unnecessarily
 ee1b3814fd18 gv.c: Remove mro_method_changed_in() from gv_init
 a3c74922a705 Rmv mro_method_changed_in call on stub upgraded to const
@@ -112,10 +111,34 @@ around the left operand.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded from version 0.280206 to 0.280208.
+L<Archive::Extract> has been upgraded from version 0.58 to 0.60.
 
-Manifest files are now correctly embedded for those versions of VC++ which
-make use of them. [perl #111782, #111798].
+Work around an edge case on Linux with Busybox's unzip.
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 1.82 to 1.88.
+
+ptar now supports -T option and dashless options [rt.cpan.org #75473],
+[rt.cpan.org #75475].
+
+Auto-encode filenames marked as UTF-8 [rt.cpan.org #75474].
+
+Don't use tell on IO::Zlib handles [rt.cpan.org #64339].
+
+Don't try to C<chown> on symlinks.
+
+=item *
+
+L<attributes> has been upgraded from version 0.19 to 0.20.
+
+No visible changes.
+
+=item *
+
+L<autodie> has been upgraded from version 2.10 to 2.11.
+
+No visible changes.
 
 =item *
 
@@ -127,9 +150,71 @@ C<B::COP::stashpv> now supports UTF8 package names and embedded NULs.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.14 to 1.15.
+
+Avoid warning when run under C<perl -w>.
+
+=item *
+
 L<Class::Struct> has been upgraded from version 0.63 to 0.64.
 
 The constructor now respects overridden accessor methods [perl #29230].
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.048 to 2.052.
+
+No visible changes.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.048 to 2.054.
+
+Upgrade bundled zlib to version 1.2.7.
+
+Fix build failures on Irix, Solaris, and Win32, and also when building as C++
+[rt.cpan.org #69985], [rt.cpan.org #77030], [rt.cpan.org #75222].
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.120630 to 2.120921.
+
+Split L<CPAN::Meta::Requirements> into its own distribution.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.120630 to 2.122.
+
+Treat undef requirements to C<from_string_hash> as 0 (with a warning).
+
+Added C<requirements_for_module> method.
+
+=item *
+
+L<CPAN::Meta::YAML> has been upgraded from version 0.007 to 0.008.
+
+No visible changes.
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9121 to 0.9130.
+
+Allow adding F<blib/script> to PATH.
+
+Save the history between invocations of the shell.
+
+Handle multiple C<makemakerargs> and C<makeflags> arguments better.
+
+Use C<File::HomeDir> when available, and provide C<PERL5_CPANPLUS_HOME> to
+override the autodetection.
+
+Always re-fetch CHECKSUMS if C<fetchdir> is set.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.51 to 2.52.
+
+Fix Digest::Perl::MD5 OO fallback [rt.cpan.org #66634].
 
 =item *
 
@@ -139,9 +224,22 @@ This is due to a minor code change in the XS for the VMS implementation.
 
 =item *
 
+L<ExtUtils::CBuilder> has been upgraded from version 0.280206 to 0.280208.
+
+Manifest files are now correctly embedded for those versions of VC++ which
+make use of them. [perl #111782, #111798].
+
+=item *
+
 L<File::DosGlob> has been upgraded from version 1.07 to 1.08.
 
 There are no visible changes, only minor internal refactorings.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.32 to 0.34.
+
+No visible changes.
 
 =item *
 
@@ -152,9 +250,85 @@ the root directory twice [perl #111510].
 
 =item *
 
+L<Filter::Util::Call> has been upgraded from version 1.40 to 1.45.
+
+No visible changes.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.017 to 0.022.
+
+Add SSL verification features [github #6], [github #9].
+
+Include the final URL in the response hashref.
+
+Add C<local_address> option.
+
+=item *
+
 L<IO> has been upgraded from version 1.25_06 to 1.25_07.
 
 C<sync()> can now be called on read-only file handles [perl #64772].
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.76 to 0.78.
+
+Use C<POSIX::_exit> instead of C<exit> in C<run_forked> [rt.cpan.org #76901].
+
+=item *
+
+L<Memoize> has been upgraded from version 1.02 to 1.03.
+
+Fix the C<MERGE> cache option.
+
+=item *
+
+L<Module::Build> has been upgraded from version 0.39_01 to 0.40.
+
+Fixed bug where modules without C<$VERSION> might have a version of '0' listed
+in 'provides' metadata, which will be rejected by PAUSE.
+
+Fixed bug in PodParser to allow numerals in module names.
+
+Fixed bug where giving arguments twice led to them becoming arrays, resulting
+in install paths like F<ARRAY(0xdeadbeef)/lib/Foo.pm>.
+
+=item *
+
+L<Module::Load::Conditional> has been upgraded from version 0.46 to 0.50.
+
+Fix use of C<requires> on perls installed to a path with spaces.
+
+=item *
+
+L<Object::Accessor> has been upgraded from version 0.42 to 0.44.
+
+No visible changes.
+
+=item *
+
+L<Params::Check> has been upgraded from version 0.32 to 0.36.
+
+No visible changes.
+
+=item *
+
+L<Parse::CPAN::Meta> has been upgraded from version 1.4402 to 1.4404.
+
+No visible changes.
+
+=item *
+
+L<PerlIO::mmap> has been upgraded from version 0.010 to 0.011.
+
+No visible changes.
+
+=item *
+
+L<PerlIO::via::QuotedPrint> has been upgraded from version 0.06 to 0.07.
+
+No visible changes.
 
 =item *
 
@@ -168,14 +342,83 @@ actually write the files out using utf-8 [perl #111446].
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.43 to 0.44.
+L<POSIX> has been upgraded from version 1.30 to 1.31.
 
-This adds a function L<all_casefolds()|Unicode::UCD/all_casefolds()>
-that returns all the casefolds.
+No visible changes.
+
+=item *
+
+L<re> has been upgraded from version 0.19 to 0.20.
+
+See note about C<op_comp> in the L</Internal Changes> section below.
+
+=item *
+
+L<Safe> has been upgraded from version 2.31_01 to 2.33_01.
+
+XXX where do these dev versions come from?
 
 =item *
 
 L<Scalar::Util> has been upgraded from version 1.23 to version 1.25.
+
+Fix an overloading issue with C<sum>.
+
+C<first> and C<reduce> now check the callback first (so C<&first(1)> is
+disallowed).
+
+Fix C<tainted> on magical values [rt.cpan.org #55763].
+
+Fix C<sum> on previously magical values [rt.cpan.org #61118].
+
+Fix reading past the end of a fixed buffer [rt.cpan.org #72700].
+
+=item *
+
+L<Search::Dict> has been upgraded from version 1.04 to 1.07.
+
+No longer require C<stat> on filehandles.
+
+Use C<fc> for casefolding.
+
+=item *
+
+L<Storable> has been upgraded from version 2.35 to 2.36.
+
+No visible changes.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 3.01 to 3.02.
+
+Add support for italics.
+
+Improve error handling.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.23 to 3.25.
+
+Fix glob semantics on Win32 [rt.cpan.org #49732].
+
+Don't use Win32::GetShortPathName when calling perl [rt.cpan.org #47890].
+
+Ignore -T when reading shebang [rt.cpan.org #64404].
+
+Handle the case where we don't know the wait status of the test more
+gracefully.
+
+Make the test summary 'ok' line overrideable so that it can be changed to a
+plugin to make the output of prove idempotent.
+
+Don't run world-writable files.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.43 to 0.44.
+
+This adds a function L<all_casefolds()|Unicode::UCD/all_casefolds()>
+that returns all the casefolds.
 
 =back
 
