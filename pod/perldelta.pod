@@ -528,6 +528,21 @@ sub name, and no longer produces the "Unable to create sub" error
 
 =back
 
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+On VMS, Module::Build still fails its test suite.
+
+=item *
+
+On Win32, several tests fail intermittently, and may hang unless STDERR is
+redirected.
+
+=back
+
 =head1 Acknowledgements
 
 XXX Generate this with:
