@@ -502,10 +502,13 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix)
 I32
 Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, register char *strend,
 	 char *strbeg, I32 minend, SV *screamer, U32 nosave)
-/* strend: pointer to null at end of string */
-/* strbeg: real beginning of string */
-/* minend: end of match must be >=minend after stringarg. */
-/* nosave: For optimizations. */
+/* stringarg: the point in the string at which to begin matching */
+/* strend:    pointer to null at end of string */
+/* strbeg:    real beginning of string */
+/* minend:    end of match must be >= minend bytes after stringarg. */
+/* screamer:  SV being matched: only used for utf8 flag, pos() etc; string
+ *            itself is accessed via the pointers above */
+/* nosave:    For optimizations. */
 {
     PERL_ARGS_ASSERT_PREGEXEC;
 
@@ -2051,13 +2054,17 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 I32
 Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *strend,
 	      char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
-/* strend: pointer to null at end of string */
-/* strbeg: real beginning of string */
-/* minend: end of match must be >=minend after stringarg. */
-/* data: May be used for some additional optimizations. 
-         Currently its only used, with a U32 cast, for transmitting 
-         the ganch offset when doing a /g match. This will change */
-/* nosave: For optimizations. */
+/* stringarg: the point in the string at which to begin matching */
+/* strend:    pointer to null at end of string */
+/* strbeg:    real beginning of string */
+/* minend:    end of match must be >= minend bytes after stringarg. */
+/* sv:        SV being matched: only used for utf8 flag, pos() etc; string
+ *            itself is accessed via the pointers above */
+/* data:      May be used for some additional optimizations.
+              Currently its only used, with a U32 cast, for transmitting
+              the ganch offset when doing a /g match. This will change */
+/* nosave:    For optimizations. */
+
 {
     dVAR;
     struct regexp *const prog = (struct regexp *)SvANY(rx);

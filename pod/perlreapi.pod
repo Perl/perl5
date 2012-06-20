@@ -209,7 +209,49 @@ faster than C<unpack>.
              I32 minend, SV* screamer,
              void* data, U32 flags);
 
-Execute a regexp.
+Execute a regexp. The arguments are
+
+=over 4
+
+=item rx
+
+The regular expression to execute.
+
+=item screamer
+
+This strangely-named arg is the SV to be matched against. Note that the
+actual char array to be matched against is supplied by the arguments
+described below; the SV is just used to determine UTF8ness, C<pos()> etc.
+
+=item strbeg
+
+Pointer to the physical start of the string.
+
+=item strend
+
+Pointer to the character following the physical end of the string (i.e.
+the \0).
+
+=item stringarg
+
+Pointer to the position in the string where matching should start; it might
+not be equal to C<strbeg> (for example in a later iteration of C</.../g>).
+
+=item minend
+
+Minimum length of string (measured in bytes from C<stringarg>) that must
+match; if the engine reaches the end of the match but hasn't reached this
+position in the string, it should fail.
+
+=item data
+
+Optimisation data; subject to change.
+
+=item flags
+
+Optimisation flags; subject to change.
+
+=back
 
 =head2 intuit
 
