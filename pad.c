@@ -1624,6 +1624,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad clone on cv=0x%"UVxf"\n", PTR2UV(cv)));
 		CvCLONE_on(cv);
+		CvHASEVAL_on(cv);
 	    }
 	}
     }
@@ -1902,7 +1903,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     OP_REFCNT_UNLOCK;
     CvSTART(cv)		= CvSTART(proto);
-    CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
+    if (CvHASEVAL(cv))
+	CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
     if (SvPOK(proto))

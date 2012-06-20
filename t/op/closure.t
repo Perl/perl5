@@ -699,7 +699,33 @@ BEGIN {
     isnt($s[0], $s[1], "cloneable with //ee");
 }
 
+# [perl #89544]
+{
+   sub trace::DESTROY {
+       push @trace::trace, "destroyed";
+   }
 
+   my $outer2 = sub {
+       my $a = bless \my $dummy, trace::;
+
+       my $outer = sub {
+	   my $b;
+	   my $inner = sub {
+	       undef $b;
+	   };
+
+	   $a;
+
+	   $inner
+       };
+
+       $outer->()
+   };
+
+   my $inner = $outer2->();
+   is "@trace::trace", "destroyed",
+      'closures only close over named variables, not entire subs';
+}
 
 
 done_testing();
