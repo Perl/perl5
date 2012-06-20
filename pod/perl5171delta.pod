@@ -678,7 +678,7 @@ C<warn>'s handling of magical variables (C<$1>, ties) has undergone several
 fixes.  C<FETCH> is only called once now on a tied argument or a tied C<$@>
 [perl #97480].  Tied variables returning objects that stringify as "" are
 no longer ignored.  A tied C<$@> that happened to return a reference the
-I<previous> time is was used is no longer ignored.
+I<previous> time it was used is no longer ignored.
 
 =item *
 
