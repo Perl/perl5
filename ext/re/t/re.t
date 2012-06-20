@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 14;
+use Test::More tests => 15;
 require_ok( 're' );
 
 # setcolor
@@ -62,6 +62,11 @@ eval"use re Debug=>'ALL'";
 my $ok='foo'=~/$reg/;
 eval"no re Debug=>'ALL'";
 ok( $ok, 'No segv!' );
+
+my $message = "Don't tread on me";
+$_ = $message;
+re->import("/aa");
+is($_, $message, "re doesn't clobber \$_");
 
 package Term::Cap;
 
