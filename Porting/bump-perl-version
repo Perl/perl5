@@ -26,6 +26,9 @@
 #     $ Porting/bump-perl-version -u < /tmp/scan
 #
 # (so line 52 of Porting/config.sh is now updated)
+#
+# The -i option can be used to combine these two steps (if you prefer to make
+# all of the changes at once and then edit the results via git).
 
 # This utility 'knows' about certain files and formats, and so can spot
 # 'hidden' version numbers, like PERL_SUBVERSION=9.
