@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.20";
+our $VERSION     = "0.21";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = ('regmust',
                     qw(is_regexp regexp_pattern
@@ -142,7 +142,7 @@ sub bits {
 	    my $reflags = $^H{reflags} || 0;
 	    my $seen_charset;
 	    while ($s =~ m/( . )/gx) {
-                $_ = $1;
+                local $_ = $1;
 		if (/[adul]/) {
                     # The 'a' may be repeated; hide this from the rest of the
                     # code by counting and getting rid of all of them, then
