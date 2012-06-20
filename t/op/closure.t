@@ -9,10 +9,10 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use Config;
-require './test.pl';
 
 my $i = 1;
 sub foo { $i = shift if @_; $i }
