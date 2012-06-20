@@ -755,9 +755,34 @@ redirected.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.17.1 represents approximately 4 weeks of development since Perl 5.17.0
+and contains approximately 37,000 lines of changes across 710 files from 35
+authors.
 
-  perl Porting/acknowledgements.pl v5.17.0..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.1:
+
+?, Andy Dougherty, Aristotle Pagaltzis, Breno G. de Oliveira, Brian Fraser,
+Chris 'BinGOs' Williams, Craig A. Berry, David Mitchell, Dominic Hargreaves,
+Evan Miller, Father Chrysostomos, Florian Ragwitz, H.Merijn Brand, Herbert
+Breunung, Hugo van der Sanden, Jesse Luehrs, Karl Williamson, Karthik
+Rajagopalan, Lukas Mai, Martin Hasch, Michael Schroeder, Nicholas Clark, Paul
+Johnson, Reini Urban, Renee Baecker, Rhesa Rozendaal, Ricardo Signes, Shlomi
+Fish, Steve Hay, Steve Peters, Sullivan Beck, Tony Cook, Volker Schatz, Yves
+Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
