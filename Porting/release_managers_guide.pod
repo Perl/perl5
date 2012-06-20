@@ -382,6 +382,8 @@ After editing, regenerate uconfig.h (this must be run on a system with a
 
     $ perl regen/uconfig_h.pl
 
+This might not cause any new changes.
+
 Test your changes:
 
     $ git clean -xdf   # careful if you don't have local files to keep!
@@ -688,9 +690,9 @@ directory, they will still identify themselves using git tags and
 commits. (Note that for an odd-numbered version, perl will install
 itself as C<perl5.x.y>). C<perl -v> will identify itself as:
 
- This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-deadbeef))
+ This is perl 5, version X, subversion Y (v5.X.Y (v5.X.Z-NNN-gdeadbeef))
 
-where 5.X.Z is the latest tag, Z the number of commits since this tag,
+where 5.X.Z is the latest tag, NNN the number of commits since this tag,
 and C<< deadbeef >> commit of that tag.
 
 Then delete the temporary installation.
