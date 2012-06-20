@@ -754,7 +754,7 @@ Here is how to query the database for the B<de> (Deutsch or German) locale.
 		n_sign_posn
 	))
 	{
-		print $property.": \"" . $lconv->{$property} . "\",\n";
+		printf qq(%s: "%s",\n), $property, $lconv->{$property};
 	}
 
 =item localtime
