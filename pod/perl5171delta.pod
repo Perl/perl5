@@ -556,8 +556,8 @@ and C<use re 'eval'> isn't needed any more:
 =item *
 
 Flow control operators no longer crash. Each code block runs in a new
-dynamic scope, so C<next> etc. will not see any enclosing loops and
-C<caller> will not see any calling subroutines. C<return> returns a value
+dynamic scope, so C<next> etc. will not see
+any enclosing loops. C<return> returns a value
 from the code block, not from any enclosing subroutine.
 
 =item *
