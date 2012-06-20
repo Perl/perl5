@@ -215,6 +215,7 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     MANIFEST
     Porting/Maintainers.pl
     Porting/acknowledgements.pl
+    Porting/corelist-perldelta.pl
     Porting/epigraphs.pod
     Porting/how_to_write_a_perldelta.pod
     Porting/release_managers_guide.pod
