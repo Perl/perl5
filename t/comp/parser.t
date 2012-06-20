@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..125\n";
+print "1..135\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -361,6 +361,28 @@ eval q{
 is($@, "", "multiline whitespace inside substitute expression");
 
 # Add new tests HERE:
+
+eval '@A =~ s/a/b/; # compilation error
+      sub tahi {}
+      sub rua;
+      sub toru ($);
+      sub wha :lvalue;
+      sub rima ($%&*$&*\$%\*&$%*&) :method;
+      sub ono :lvalue { die }
+      sub whitu (_) { die }
+      sub waru ($;) :method { die }
+      sub iwa { die }
+      BEGIN { }';
+is $::{tahi}, undef, 'empty sub decl ignored after compilation error';
+is $::{rua}, undef, 'stub decl ignored after compilation error';
+is $::{toru}, undef, 'stub+proto decl ignored after compilation error';
+is $::{wha}, undef, 'stub+attr decl ignored after compilation error';
+is $::{rima}, undef, 'stub+proto+attr ignored after compilation error';
+is $::{ono}, undef, 'sub decl with attr ignored after compilation error';
+is $::{whitu}, undef, 'sub decl w proto ignored after compilation error';
+is $::{waru}, undef, 'sub w attr+proto ignored after compilation error';
+is $::{iwa}, undef, 'non-empty sub decl ignored after compilation error';
+is *BEGIN{CODE}, undef, 'BEGIN leaves no stub after compilation error';
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}
 # This test hangs if it fails.

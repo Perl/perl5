@@ -6719,13 +6719,15 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     U32 ps_utf8 = 0;
     register CV *cv = NULL;
     SV *const_sv;
+    const bool ec = PL_parser && PL_parser->error_count;
     /* If the subroutine has no body, no attributes, and no builtin attributes
        then it's just a sub declaration, and we may be able to get away with
        storing with a placeholder scalar in the symbol table, rather than a
        full GV and CV.  If anything is present then it will take a full CV to
        store it.  */
     const I32 gv_fetch_flags
-	= (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
+	= ec ? GV_NOADD_NOINIT :
+	 (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
 	   || PL_madskills)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     STRLEN namlen = 0;
@@ -6772,6 +6774,27 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    SAVEFREEOP(proto);
 	if (attrs)
 	    SAVEFREEOP(attrs);
+    }
+
+    if (ec) {
+	op_free(block);
+	if (name && block) {
+	    const char *s = strrchr(name, ':');
+	    s = s ? s+1 : name;
+	    if (strEQ(s, "BEGIN")) {
+		const char not_safe[] =
+		    "BEGIN not safe after errors--compilation aborted";
+		if (PL_in_eval & EVAL_KEEPERR)
+		    Perl_croak(aTHX_ not_safe);
+		else {
+		    /* force display of errors found but not reported */
+		    sv_catpv(ERRSV, not_safe);
+		    Perl_croak(aTHX_ "%"SVf, SVfARG(ERRSV));
+		}
+	    }
+	}
+	cv = PL_compcv;
+	goto done;
     }
 
     if (SvTYPE(gv) != SVt_PVGV) {	/* Maybe prototype now, and had at
@@ -6949,25 +6972,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         if ( ps_utf8 ) SvUTF8_on(MUTABLE_SV(cv));
     }
 
-    if (PL_parser && PL_parser->error_count) {
-	op_free(block);
-	block = NULL;
-	if (name) {
-	    const char *s = strrchr(name, ':');
-	    s = s ? s+1 : name;
-	    if (strEQ(s, "BEGIN")) {
-		const char not_safe[] =
-		    "BEGIN not safe after errors--compilation aborted";
-		if (PL_in_eval & EVAL_KEEPERR)
-		    Perl_croak(aTHX_ not_safe);
-		else {
-		    /* force display of errors found but not reported */
-		    sv_catpv(ERRSV, not_safe);
-		    Perl_croak(aTHX_ "%"SVf, SVfARG(ERRSV));
-		}
-	    }
-	}
-    }
  install_block:
     if (!block)
 	goto attrs;
