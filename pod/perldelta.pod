@@ -270,6 +270,10 @@ in install paths like F<ARRAY(0xdeadbeef)/lib/Foo.pm>.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.67 to 2.68.
+
+=item *
+
 L<Module::Load::Conditional> has been upgraded from version 0.46 to 0.50.
 
 Fix use of C<requires> on perls installed to a path with spaces.
