@@ -457,6 +457,16 @@ L<"Building a release - advance actions"> to ensure they are all done and
 up-to-date.
 
 
+=head3 create a release branch
+
+For BLEAD-POINT releases, making a release from a release branch avoids the
+need to freeze blead during the release. This is less important for
+BLEAD-FINAL, MAINT, and RC releases, since blead will already be frozen in
+those cases. Create the branch by running
+
+  git checkout -b release-5.xx.yy
+
+
 =head3 bump version number
 
 For a BLEAD-POINT release, if you did not bump the perl version number as
@@ -976,6 +986,18 @@ Mail p5p to announce your new release, with a quote you prepared earlier.
 Use the template at Porting/release_announcement_template.txt
 
 Send a carbon copy to C<noc@metacpan.org>
+
+=head3 merge release branch back to blead
+
+If you made a release branch for this release, merge it back into master now,
+and delete it.
+
+  git checkout blead
+  git pull
+  git merge release-5.xx.yy
+  git push
+  git push origin :release-5.xx.yy
+  git branch -d release-5.xx.yy
 
 =head3 update epigraphs.pod
 
