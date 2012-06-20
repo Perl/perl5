@@ -1,6 +1,7 @@
 #!./perl
 
 BEGIN {
+    chdir 't';
     require "test.pl";
 }
 
