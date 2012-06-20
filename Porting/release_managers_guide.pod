@@ -344,10 +344,12 @@ edit the whole document.
 
 =head3 Bump the version number
 
+Do not do this yet for a BLEAD-POINT release! You will do this at the end of
+the release process.
+
 Increase the version number (e.g. from 5.12.0 to 5.12.1).
 
-For a BLEAD-POINT release, this can happen on the day of the release.  For a
-release candidate for a stable perl, this should happen a week or two
+For a release candidate for a stable perl, this should happen a week or two
 before the first release candidate to allow sufficient time for testing and
 smoking with the target version built into the perl executable. For
 subsequent release candidates and the final release, it it not necessary to
@@ -1064,11 +1066,11 @@ At this point you may want to compare the commit with a previous bump to
 see if they look similar.  See commit e3c71926d3 for an example of a
 previous version bump.
 
-=for checklist skip BLEAD-POINT MAINT RC
+=for checklist skip MAINT RC
 
 =head3 bump version
 
-I<You MUST SKIP this step for RC, BLEAD-POINT, MAINT>
+I<You MUST SKIP this step for RC and MAINT>
 
 If this was a BLEAD-FINAL release (i.e. the first release of a new maint
 series, 5.x.0 where x is even), then bump the version in the blead branch
@@ -1085,6 +1087,9 @@ Run F<regen/feature.pl> to propagate the changes to F<lib/feature.pm>.
 
 Then follow the section L<"Bump the version number"> to bump the version
 in the remaining files and test and commit.
+
+If this was a BLEAD-POINT release, then just follow the section
+L<"Bump the version number">.
 
 
 =head3 clean build and test
