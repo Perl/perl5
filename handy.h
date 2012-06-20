@@ -1,7 +1,7 @@
 /*    handy.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000,
- *    2001, 2002, 2004, 2005, 2006, 2007, 2008 by Larry Wall and others
+ *    2001, 2002, 2004, 2005, 2006, 2007, 2008, 2012 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1102,7 +1102,7 @@ destination, C<nitems> is the number of items, and C<type> is the type.
 Like C<Zero> but returns dest. Useful for encouraging compilers to tail-call
 optimise.
 
-=for apidoc Am|void|StructCopy|type src|type dest|type
+=for apidoc Am|void|StructCopy|type *src|type *dest|type
 This is an architecture-independent macro to copy one structure to another.
 
 =for apidoc Am|void|PoisonWith|void* dest|int nitems|type|U8 byte
