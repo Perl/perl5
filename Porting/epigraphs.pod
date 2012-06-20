@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.1 - Rand Miller, "Myst: The Book of Ti'ana"
+
+L<Announced on 2012-06-20 by doy|http://www.nntp.perl.org/group/perl.perl5.porters/2012/06/msg188354.html>
+
+On their return from Ko'ah, Aitrus had shown her the Book, patiently
+taking her through page after page, and showing her how such an Age was
+"made." She had seen at once the differences between this archaic form
+and the ordinary written speech of the D'ni, noting how it was not
+merely more elaborate but more specific: a language of precise yet
+subtle descriptive power. Yet seeing was one thing, believing another.
+Given all the evidence, her rational mind still fought against accepting
+it.
+
 =head2 v5.17.0 - Charles Stross, "Singularity Sky"
 
 L<Announced on 2012-05-26 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2012/05/msg187214.html>
