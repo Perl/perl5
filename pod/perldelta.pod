@@ -453,8 +453,8 @@ C<%ENV> in L<http://perl5.git.perl.org/perl.git/blob/HEAD:/Porting/todo.pod>).
 
 All C header files from the top-level directory of the distribution are now
 installed on VMS, providing consistency with a long-standing practice on other
-platforms. Previously only a subset were installed, which broke non-core extension
-builds for extensions that depended on the missing include files.
+platforms. Previously only a subset were installed, which broke non-core
+extension builds for extensions that depended on the missing include files.
 
 =back
 
