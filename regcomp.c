@@ -3379,7 +3379,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                  * the end pointer. */
                                 if ( !first ) {
                                     first = cur;
-                                    trietype = noper_trietype;
 				    if ( noper_trietype == NOTHING ) {
 #if !defined(DEBUGGING) && !defined(NOJUMPTRIE)
 					regnode * const noper_next = regnext( noper );
@@ -3387,8 +3386,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 					U8 noper_next_trietype = noper_next_type ? TRIE_TYPE( noper_next_type ) :0;
 #endif
 
-                                        if ( noper_next_trietype )
+                                        if ( noper_next_trietype ) {
 					    trietype = noper_next_trietype;
+                                        } else if (noper_next_type)  {
+                                            /* a NOTHING regop is 1 regop wide. We need at least two
+                                             * for a trie so we can't merge this in */
+                                            first = NULL;
+                                        }
+                                    } else {
+                                        trietype = noper_trietype;
                                     }
                                 } else {
                                     if ( trietype == NOTHING )
