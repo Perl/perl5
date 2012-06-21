@@ -842,7 +842,7 @@ use File::Glob qw(:case);
 
     'File::stat' => {
         'MAINTAINER' => 'p5p',
-        'FILES'      => q[lib/File/stat.{pm,t}],
+        'FILES'      => q[lib/File/stat{.pm,*.t}],
         'UPSTREAM'   => 'blead',
     },
 

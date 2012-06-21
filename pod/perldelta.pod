@@ -97,7 +97,16 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<File::stat> has been upgraded from version 1.06 to 1.07.
+
+Previously C<File::stat>'s overloaded C<-x> and C<-X> operators did not give
+the correct results for directories or executable files when running as
+root. They had been treating executable permissions for root just like for
+any other user, performing group membership tests I<etc> for files not owned
+by root. They now follow the correct Unix behaviour - for a directory they
+are always true, and for a file if any of the three execute permission bits
+are set then they report that root can execute the file. Perl's builtin
+C<-x> and C<-X> operators have always been correct.
 
 =back
 
