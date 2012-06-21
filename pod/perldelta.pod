@@ -336,6 +336,12 @@ L</Modules and Pragmata>.
 A regression introduced in v5.14.0 has been fixed, in which some calls
 to the C<re> module would clobber C<$_>.
 
+=item *
+
+C<do FILE> now always either sets or clears C<$@>, even when the file can't be
+read. This ensures that testing C<$@> first (as recommended by the
+documentation) always returns the correct result.
+
 =back
 
 =head1 Known Problems
