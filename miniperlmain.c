@@ -120,7 +120,7 @@ main(int argc, char **argv, char **env)
 
 #ifndef PERL_MICRO
     /* Unregister our signal handler before destroying my_perl */
-    for (i = 0; PL_sig_name[i]; i++) {
+    for (i = 1; PL_sig_name[i]; i++) {
 	if (rsignal_state(PL_sig_num[i]) == (Sighandler_t) PL_csighandlerp) {
 	    rsignal(PL_sig_num[i], (Sighandler_t) SIG_DFL);
 	}
