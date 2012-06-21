@@ -73,11 +73,11 @@ unless ($version) { die <<EOF; }
 Could not find a version of bison in your path. Please install bison.
 EOF
 
-unless ($version =~ /\b(1\.875[a-z]?|2\.[0134])\b/) { die <<EOF; }
+unless ($version =~ /\b(1\.875[a-z]?|2\.[01345])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
-2.0, 2.1, 2.3 or 2.4 is required.  Try installing
-    http://ftp.gnu.org/gnu/bison/bison-2.4.1.tar.gz
+2.0, 2.1, 2.3, 2.4 or 2.5 is required.  Try installing
+    http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz
 or similar.  Your bison identifies itself as:
 
 $version
@@ -114,8 +114,8 @@ unlink $tmpc_file;
 open my $tmph_fh, '<', $tmph_file or die "Can't open $tmph_file: $!\n";
 
 my $endcore_done = 0;
-# Token macros need to be generated manually on bison 2.4
-my $gather_tokens = ($version =~ /\b2\.4\b/ ? undef : 0);
+# Token macros need to be generated manually from bison 2.4 on
+my $gather_tokens = ($version =~ /\b2\.[45]\b/ ? undef : 0);
 my $tokens;
 while (<$tmph_fh>) {
     print $h_fh "#ifdef PERL_CORE\n" if $. == 1;
