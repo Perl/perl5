@@ -112,30 +112,34 @@ PP(pp_and)
 
 PP(pp_sassign)
 {
-    dVAR; dSP; dPOPTOPssrl;
+    dVAR; dSP;
+    /* sassign keeps its args in the optree traditionally backwards.
+       So we pop them differently.
+    */
+    SV *left = POPs; SV *right = TOPs;
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
 	SV * const temp = left;
 	left = right; right = temp;
     }
-    if (PL_tainting && PL_tainted && !SvTAINTED(left))
+    if (PL_tainting && PL_tainted && !SvTAINTED(right))
 	TAINT_NOT;
     if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
-	SV * const cv = SvRV(left);
+	SV * const cv = SvRV(right);
 	const U32 cv_type = SvTYPE(cv);
-	const bool is_gv = isGV_with_GP(right);
+	const bool is_gv = isGV_with_GP(left);
 	const bool got_coderef = cv_type == SVt_PVCV || cv_type == SVt_PVFM;
 
 	if (!got_coderef) {
 	    assert(SvROK(cv));
 	}
 
-	/* Can do the optimisation if right (LVALUE) is not a typeglob,
-	   left (RVALUE) is a reference to something, and we're in void
+	/* Can do the optimisation if left (LVALUE) is not a typeglob,
+	   right (RVALUE) is a reference to something, and we're in void
 	   context. */
 	if (!got_coderef && !is_gv && GIMME_V == G_VOID) {
 	    /* Is the target symbol table currently empty?  */
-	    GV * const gv = gv_fetchsv_nomg(right, GV_NOINIT, SVt_PVGV);
+	    GV * const gv = gv_fetchsv_nomg(left, GV_NOINIT, SVt_PVGV);
 	    if (SvTYPE(gv) != SVt_PVGV && !SvOK(gv)) {
 		/* Good. Create a new proxy constant subroutine in the target.
 		   The gv becomes a(nother) reference to the constant.  */
@@ -145,7 +149,7 @@ PP(pp_sassign)
 		SvPCS_IMPORTED_on(gv);
 		SvRV_set(gv, value);
 		SvREFCNT_inc_simple_void(value);
-		SETs(right);
+		SETs(left);
 		RETURN;
 	    }
 	}
@@ -153,7 +157,7 @@ PP(pp_sassign)
 	/* Need to fix things up.  */
 	if (!is_gv) {
 	    /* Need to fix GV.  */
-	    right = MUTABLE_SV(gv_fetchsv_nomg(right,GV_ADD, SVt_PVGV));
+	    left = MUTABLE_SV(gv_fetchsv_nomg(left,GV_ADD, SVt_PVGV));
 	}
 
 	if (!got_coderef) {
@@ -167,7 +171,7 @@ PP(pp_sassign)
 		   all sorts of fun as the reference to our new sub is
 		   donated to the GV that we're about to assign to.
 		*/
-		SvRV_set(left, MUTABLE_SV(newCONSTSUB(GvSTASH(right), NULL,
+		SvRV_set(right, MUTABLE_SV(newCONSTSUB(GvSTASH(left), NULL,
 						      SvRV(cv))));
 		SvREFCNT_dec(cv);
 		LEAVE_with_name("sassign_coderef");
@@ -193,20 +197,20 @@ PP(pp_sassign)
 
 		SvREFCNT_inc_void(source);
 		SvREFCNT_dec(upgraded);
-		SvRV_set(left, MUTABLE_SV(source));
+		SvRV_set(right, MUTABLE_SV(source));
 	    }
 	}
 
     }
     if (
-      SvTEMP(right) && !SvSMAGICAL(right) && SvREFCNT(right) == 1 &&
-      (!isGV_with_GP(right) || SvFAKE(right)) && ckWARN(WARN_MISC)
+      SvTEMP(left) && !SvSMAGICAL(left) && SvREFCNT(left) == 1 &&
+      (!isGV_with_GP(left) || SvFAKE(left)) && ckWARN(WARN_MISC)
     )
 	Perl_warner(aTHX_
 	    packWARN(WARN_MISC), "Useless assignment to a temporary"
 	);
-    SvSetMagicSV(right, left);
-    SETs(right);
+    SvSetMagicSV(left, right);
+    SETs(left);
     RETURN;
 }
 
