@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 81;
+use Test::More tests => 82;
 
 my $fh;
 my $var = "aaa\n";
@@ -373,4 +373,14 @@ SKIP: {
   print $fh "a";
   is scalar threads::async(sub { print $fh "b"; $str })->join, "ab",
     'printing to a cloned in-memory handle works';
+}
+
+# [perl #113764] Duping via >&= (broken by the fix for #112870)
+{
+  open FILE, '>', \my $content or die "Couldn't open scalar filehandle";
+  open my $fh, ">&=FILE" or die "Couldn't open: $!";
+  print $fh "Foo-Bar\n";
+  close $fh;
+  close FILE;
+  is $content, "Foo-Bar\n", 'duping via >&=';
 }
