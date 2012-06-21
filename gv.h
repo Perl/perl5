@@ -83,6 +83,18 @@ struct gp {
 
 Return the SV from the GV.
 
+=for apidoc Am|AV*|GvAV|GV* gv
+
+Return the AV from the GV.
+
+=for apidoc Am|HV*|GvHV|GV* gv
+
+Return the HV from the GV.
+
+=for apidoc Am|CV*|GvCV|GV* gv
+
+Return the CV from the GV.
+
 =cut
 */
 
