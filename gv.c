@@ -1655,12 +1655,23 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
 	      }
 	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
-	       if (*name == '[')
-		require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
-	       else if (*name == '&' || *name == '`' || *name == '\'') {
-		PL_sawampersand = TRUE;
-		(void)GvSVn(gv);
-	       }
+                switch (*name) {
+	        case '[':
+		    require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
+                    break;
+	        case '`':
+		    PL_sawampersand |= SAWAMPERSAND_LEFT;
+                    (void)GvSVn(gv);
+                    break;
+	        case '&':
+		    PL_sawampersand |= SAWAMPERSAND_MIDDLE;
+                    (void)GvSVn(gv);
+                    break;
+	        case '\'':
+		    PL_sawampersand |= SAWAMPERSAND_RIGHT;
+                    (void)GvSVn(gv);
+                    break;
+                }
 	      }
 	    }
 	    else if (len == 3 && sv_type == SVt_PVAV
@@ -1866,7 +1877,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		sv_type == SVt_PVCV ||
 		sv_type == SVt_PVFM ||
 		sv_type == SVt_PVIO
-		)) { PL_sawampersand = TRUE; }
+		)) { PL_sawampersand |=
+                        (*name == '`')
+                            ? SAWAMPERSAND_LEFT
+                            : (*name == '&')
+                                ? SAWAMPERSAND_MIDDLE
+                                : SAWAMPERSAND_RIGHT;
+                }
 	    goto magicalize;
 
 	case ':':		/* $: */

@@ -4854,6 +4854,12 @@ typedef enum {
 #define HINT_SORT_MERGESORT	0x00000002
 #define HINT_SORT_STABLE	0x00000100 /* sort styles (currently one) */
 
+/* flags for PL_sawampersand */
+
+#define SAWAMPERSAND_LEFT       1   /* saw $` */
+#define SAWAMPERSAND_MIDDLE     2   /* saw $& */
+#define SAWAMPERSAND_RIGHT      4   /* saw $' */
+
 /* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && (! SvPOK(sv) || SvCUR(sv)))
