@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 138;
+plan tests => 139;
 
 $a = {};
 bless $a, "Bob";
@@ -336,3 +336,5 @@ ok(Undeclared->can("can"));
 sub Undeclared::foo { }
 ok(Undeclared->can("foo"));
 ok(!Undeclared->can("something_else"));
+
+ok(Undeclared->isa("UNIVERSAL"));
