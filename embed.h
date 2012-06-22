@@ -1098,6 +1098,7 @@
 #define list(a)			Perl_list(aTHX_ a)
 #define localize(a,b)		Perl_localize(aTHX_ a,b)
 #define magic_clear_all_env(a,b)	Perl_magic_clear_all_env(aTHX_ a,b)
+#define magic_cleararylen_p(a,b)	Perl_magic_cleararylen_p(aTHX_ a,b)
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
 #define magic_clearhint(a,b)	Perl_magic_clearhint(aTHX_ a,b)
 #define magic_clearhints(a,b)	Perl_magic_clearhints(aTHX_ a,b)

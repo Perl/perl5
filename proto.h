@@ -2026,6 +2026,12 @@ PERL_CALLCONV int	Perl_magic_clear_all_env(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_CLEAR_ALL_ENV	\
 	assert(sv); assert(mg)
 
+PERL_CALLCONV int	Perl_magic_cleararylen_p(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_CLEARARYLEN_P	\
+	assert(sv); assert(mg)
+
 PERL_CALLCONV int	Perl_magic_clearenv(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

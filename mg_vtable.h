@@ -147,7 +147,7 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
 #ifdef DOINIT
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, Perl_magic_setarylen, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, Perl_magic_freearylen_p, 0, 0, 0 },
+  { 0, 0, 0, Perl_magic_cleararylen_p, Perl_magic_freearylen_p, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
   { 0, 0, 0, 0, 0, Perl_magic_copycallchecker, 0, 0 },
 #ifdef USE_LOCALE_COLLATE

@@ -2043,6 +2043,21 @@ Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
+Perl_magic_cleararylen_p(pTHX_ SV *sv, MAGIC *mg)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_MAGIC_CLEARARYLEN_P;
+    PERL_UNUSED_ARG(sv);
+
+    /* Reset the iterator when the array is cleared */
+    if (mg->mg_ptr)
+        *((IV *) mg->mg_ptr) = 0;
+
+    return 0;
+}
+
+int
 Perl_magic_freearylen_p(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;

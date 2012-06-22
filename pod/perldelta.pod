@@ -342,6 +342,16 @@ C<do FILE> now always either sets or clears C<$@>, even when the file can't be
 read. This ensures that testing C<$@> first (as recommended by the
 documentation) always returns the correct result.
 
+=item *
+
+The array iterator used for the C<each @array> construct is now correctly
+reset when C<@array> is cleared (RT #75596). This happens for example when the
+array is globally assigned to, as in C<@array = (...)>, but not when its
+B<values> are assigned to. In terms of the XS API, it means that C<av_clear()>
+will now reset the iterator.
+
+This mirrors the behaviour of the hash iterator when the hash is cleared.
+
 =back
 
 =head1 Known Problems

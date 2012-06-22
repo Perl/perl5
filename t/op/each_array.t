@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use vars qw(@array @r $k $v $c);
 
-plan tests => 57;
+plan tests => 63;
 
 @array = qw(crunch zam bloop);
 
@@ -136,4 +136,32 @@ $v = 0;
 for (; $k = each(@array) ;) {
     is ($k, $v);
     $v++;
+}
+
+# Reset the iterator when the array is cleared [RT #75596]
+{
+    my @a = 'a' .. 'c';
+    my ($i, $v) = each @a;
+    is ("$i-$v", '0-a');
+    @a = 'A' .. 'C';
+    ($i, $v) = each @a;
+    is ("$i-$v", '0-A');
+}
+
+# Check that the iterator is reset when localization ends
+{
+    @array = 'a' .. 'c';
+    my ($i, $v) = each @array;
+    is ("$i-$v", '0-a');
+    {
+        local @array = 'A' .. 'C';
+        my ($i, $v) = each @array;
+        is ("$i-$v", '0-A');
+        ($i, $v) = each @array;
+        is ("$i-$v", '1-B');
+    }
+    ($i, $v) = each @array;
+    is ("$i-$v", '1-b');
+    # Explicit reset
+    while (each @array) { }
 }
