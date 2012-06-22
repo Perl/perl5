@@ -76,6 +76,7 @@ void setegid(uid_t id);
 #endif
 
 /*
+ * Pre-magic setup and post-magic takedown.
  * Use the "DESTRUCTOR" scope cleanup to reinstate magic.
  */
 
@@ -97,6 +98,8 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 
     PERL_ARGS_ASSERT_SAVE_MAGIC;
 
+    assert(SvMAGICAL(sv));
+
     /* we shouldn't really be called here with RC==0, but it can sometimes
      * happen via mg_clear() (which also shouldn't be called when RC==0,
      * but it can happen). Handle this case gracefully(ish) by not RC++
@@ -108,7 +111,6 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 	bumped = TRUE;
     }
 
-    assert(SvMAGICAL(sv));
     /* Turning READONLY off for a copy-on-write scalar (including shared
        hash keys) is a bad idea.  */
     if (SvIsCOW(sv))
@@ -125,10 +127,6 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 
     SvMAGICAL_off(sv);
     SvREADONLY_off(sv);
-    if (!(SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK))) {
-	/* No public flags are set, so promote any private flags to public.  */
-	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
-    }
 }
 
 /*
@@ -952,21 +950,17 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
 		 * it could have been extended by warnings::register */
-		HV * const bits=get_hv("warnings::Bits", 0);
-		if (bits) {
-		    SV ** const bits_all = hv_fetchs(bits, "all", FALSE);
-		    if (bits_all)
-			sv_setsv(sv, *bits_all);
-		}
-	        else {
-		    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
-		}
+		HV * const bits = get_hv("warnings::Bits", 0);
+		SV ** const bits_all = bits ? hv_fetchs(bits, "all", FALSE) : NULL;
+		if (bits_all)
+		    sv_copypv(sv, *bits_all);
+	        else
+		    sv_setpvn(sv, WARN_ALLstring, WARNsize);
 	    }
             else {
 	        sv_setpvn(sv, (char *) (PL_compiling.cop_warnings + 1),
 			  *PL_compiling.cop_warnings);
 	    }
-	    SvPOK_only(sv);
 	}
 	break;
     case '\015': /* $^MATCH */
@@ -1078,6 +1072,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\\':
 	if (PL_ors_sv)
 	    sv_copypv(sv, PL_ors_sv);
+	else
+	    sv_setsv(sv, &PL_sv_undef);
 	break;
     case '$': /* $$ */
 	{
@@ -1106,8 +1102,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	else
 #endif
 	sv_setpv(sv, errno ? Strerror(errno) : "");
-	if (SvPOKp(sv))
-	    SvPOK_on(sv);    /* may have got removed during taint processing */
 	RESTORE_ERRNO;
 	}
 
@@ -2140,7 +2134,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	found->mg_len = -1;
 	return 0;
     }
-    len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
+    len = SvPOK_nog(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
     pos = SvIV(sv);
 
@@ -3249,31 +3243,20 @@ S_restore_magic(pTHX_ const void *p)
     if (!sv)
         return;
 
-    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
-    {
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+	SvTEMP_off(sv); /* if it's still magical, this value isn't temporary */
 #ifdef PERL_OLD_COPY_ON_WRITE
 	/* While magic was saved (and off) sv_setsv may well have seen
 	   this SV as a prime candidate for COW.  */
 	if (SvIsCOW(sv))
 	    sv_force_normal_flags(sv, 0);
 #endif
-
 	if (mgs->mgs_readonly)
 	    SvREADONLY_on(sv);
 	if (mgs->mgs_magical)
 	    SvFLAGS(sv) |= mgs->mgs_magical;
 	else
 	    mg_magical(sv);
-	if (SvGMAGICAL(sv)) {
-	    /* downgrade public flags to private,
-	       and discard any other private flags */
-
-	    const U32 pubflags = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-	    if (pubflags) {
-		SvFLAGS(sv) &= ~( pubflags | (SVp_IOK|SVp_NOK|SVp_POK) );
-		SvFLAGS(sv) |= ( pubflags << PRIVSHIFT );
-	    }
-	}
     }
 
     bumped = mgs->mgs_bumped;
@@ -3302,12 +3285,8 @@ S_restore_magic(pTHX_ const void *p)
 	       So artificially keep it alive a bit longer.
 	       We avoid turning on the TEMP flag, which can cause the SV's
 	       buffer to get stolen (and maybe other stuff). */
-	    int was_temp = SvTEMP(sv);
 	    sv_2mortal(sv);
-	    if (!was_temp) {
-		SvTEMP_off(sv);
-	    }
-	    SvOK_off(sv);
+	    SvTEMP_off(sv);
 	}
 	else
 	    SvREFCNT_dec(sv); /* undo the inc in S_save_magic() */

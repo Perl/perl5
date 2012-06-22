@@ -370,7 +370,7 @@ PP(pp_preinc)
 	PL_op->op_type == OP_PREINC || PL_op->op_type == OP_I_PREINC;
     if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
 	Perl_croak_no_modify(aTHX);
-    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+    if (!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
     {
 	SvIV_set(TOPs, SvIVX(TOPs) + (inc ? 1 : -1));
@@ -1592,6 +1592,7 @@ Perl_do_readline(pTHX)
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
+			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
 			sv_setpvs(GvSVn(PL_last_in_gv), "-");
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
@@ -2358,20 +2359,20 @@ PP(pp_subst)
 	    }
 	    m = RX_OFFS(rx)[0].start + orig;
 	    if (doutf8 && !SvUTF8(dstr))
-		sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
+		sv_catpvn_nomg_utf8_upgrade(dstr, s, m - s, nsv);
             else
-		sv_catpvn(dstr, s, m-s);
+		sv_catpvn_nomg(dstr, s, m-s);
 	    s = RX_OFFS(rx)[0].end + orig;
 	    if (clen)
-		sv_catpvn(dstr, c, clen);
+		sv_catpvn_nomg(dstr, c, clen);
 	    if (once)
 		break;
 	} while (CALLREGEXEC(rx, s, strend, orig, s == m,
 			     TARG, NULL, r_flags));
 	if (doutf8 && !DO_UTF8(TARG))
-	    sv_catpvn_utf8_upgrade(dstr, s, strend - s, nsv);
+	    sv_catpvn_nomg_utf8_upgrade(dstr, s, strend - s, nsv);
 	else
-	    sv_catpvn(dstr, s, strend - s);
+	    sv_catpvn_nomg(dstr, s, strend - s);
 
 	if (rpm->op_pmflags & PMf_NONDESTRUCT) {
 	    /* From here on down we're using the copy, and leaving the original
