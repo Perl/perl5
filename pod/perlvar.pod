@@ -196,7 +196,7 @@ would emulate POSIX semantics on Linux systems using LinuxThreads, a
 partial implementation of POSIX Threads that has since been superseded
 by the Native POSIX Thread Library (NPTL).
 
-LinuxThreads is now obsolete on Linux, and and caching C<getpid()>
+LinuxThreads is now obsolete on Linux, and caching C<getpid()>
 like this made embedding perl unnecessarily complex (since you'd have
 to manually update the value of $$), so now C<$$> and C<getppid()>
 will always return the same values as the underlying C library.

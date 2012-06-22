@@ -204,9 +204,9 @@ automatically with a C<use v5.10> (or higher) declaration in the current
 scope. In Perl v5.14 and earlier, C<continue> required the C<"switch">
 feature, like the other keywords.
 
-C<evalbytes> is only available with with the C<"evalbytes"> feature (see
+C<evalbytes> is only available with the C<"evalbytes"> feature (see
 L<feature>) or if prefixed with C<CORE::>.  C<__SUB__> is only available
-with with the C<"current_sub"> feature or if prefixed with C<CORE::>. Both
+with the C<"current_sub"> feature or if prefixed with C<CORE::>. Both
 the C<"evalbytes"> and C<"current_sub"> features are enabled automatically
 with a C<use v5.16> (or higher) declaration in the current scope.
 
