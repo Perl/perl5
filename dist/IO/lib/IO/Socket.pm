@@ -540,6 +540,12 @@ value returned.
 
 =back
 
+=head1 LIMITATIONS
+
+On some systems, for an IO::Socket object created with new_from_fd(),
+or created with accept() from such an object, the protocol(),
+sockdomain() and socktype() methods may return undef.
+
 =head1 SEE ALSO
 
 L<Socket>, L<IO::Handle>, L<IO::Socket::INET>, L<IO::Socket::UNIX>
