@@ -1162,17 +1162,18 @@ To get valgrind and for more information see
 
 =head2 AddressSanitizer
 
-AddressSanitizer is a clang extension, included in clang since v3.1.
-It checks illegal heap pointers, global pointers, stack pointers and use
-after free, and is so fast that you can easily compile your debugging
-or optimized perl with it. It does not check memory leaks though.
-AddressSanitizer is available for linux, Mac OS X and soon on Windows.
+AddressSanitizer is a clang extension, included in clang since v3.1. It
+checks illegal heap pointers, global pointers, stack pointers and use
+after free errors, and is fast enough that you can easily compile your
+debugging or optimized perl with it. It does not check memory leaks
+though. AddressSanitizer is available for linux, Mac OS X and soon on
+Windows.
 
-You should create the perl with AddressSanitizer using:
+To build perl with AddressSanitizer, your Configure invocation should
+look like:
 
-    sh Configure -Dcc=clang -Accflags=-faddress-sanitizer \
-     -Aldflags=-faddress-sanitizer \
-     -Alddlflags=-shared\ -faddress-sanitizer
+    sh Configure -des -Dcc=clang -Accflags=-faddress-sanitizer \
+     -Aldflags=-faddress-sanitizer -Alddlflags=-faddress-sanitizer
 
 where these arguments mean:
 
@@ -1180,25 +1181,29 @@ where these arguments mean:
 
 =item * -Dcc=clang
 
-If clang is in your path, otherwise point to the path of the installed or temp.
-clang with AddressSanitizer enabled.
+This should be replaced by the full path to your clang executable if it
+is not in your path.
 
 =item * -Accflags=-faddress-sanitizer
 
-Instrument pointer accesses with AddressSanitizer.
+Compile perl and extensions sources with AddressSanitizer.
 
 =item * -Aldflags=-faddress-sanitizer
 
-Link with AddressSanitizer.
+Link the perl executable with AddressSanitizer.
 
-=item * -Alddlflags=-shared\ -faddress-sanitizer
+=item * -Alddlflags=-faddress-sanitizer
 
-With a shared libperl.so, i.e. C<-Duseshrplib> is used, you must manually add
-C<-shared>.
+Link dynamic extensions with AddressSanitizer.
+
+If you also pass C<-Duseshrplib> to Configure in order to build a
+shared perl library, then you must replace this by
+C<-Alddlflags=-shared\ -faddress-sanitizer>.
 
 =back
 
-See L<http://code.google.com/p/address-sanitizer/wiki/AddressSanitizer>
+See also
+L<http://code.google.com/p/address-sanitizer/wiki/AddressSanitizer>.
 
 
 =head1 PROFILING
