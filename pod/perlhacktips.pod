@@ -1172,8 +1172,9 @@ Windows.
 To build perl with AddressSanitizer, your Configure invocation should
 look like:
 
-    sh Configure -des -Dcc=clang -Accflags=-faddress-sanitizer \
-     -Aldflags=-faddress-sanitizer -Alddlflags=-faddress-sanitizer
+    sh Configure -des -Dcc=clang \
+       -Accflags=-faddress-sanitizer -Aldflags=-faddress-sanitizer \
+       -Alddlflags=-shared\ -faddress-sanitizer
 
 where these arguments mean:
 
@@ -1192,13 +1193,12 @@ Compile perl and extensions sources with AddressSanitizer.
 
 Link the perl executable with AddressSanitizer.
 
-=item * -Alddlflags=-faddress-sanitizer
+=item * -Alddlflags=-shared\ -faddress-sanitizer
 
-Link dynamic extensions with AddressSanitizer.
-
-If you also pass C<-Duseshrplib> to Configure in order to build a
-shared perl library, then you must replace this by
-C<-Alddlflags=-shared\ -faddress-sanitizer>.
+Link dynamic extensions with AddressSanitizer. You must manually
+specify C<-shared> because using C<-Alddlflags=-shared> will prevent
+Configure from setting a default value for C<lddlflags>, which usually
+contains C<-shared> (at least on linux).
 
 =back
 
