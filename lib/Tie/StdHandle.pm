@@ -57,7 +57,7 @@ sub OPEN
  @_ == 2 ? open($_[0], $_[1]) : open($_[0], $_[1], $_[2]);
 }
 
-sub READ     { read($_[0],$_[1],$_[2]) }
+sub READ     { &CORE::read(shift, \shift, @_) }
 sub READLINE { my $fh = $_[0]; <$fh> }
 sub GETC     { getc($_[0]) }
 
