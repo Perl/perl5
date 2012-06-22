@@ -2051,8 +2051,12 @@ Perl_magic_cleararylen_p(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
 
     /* Reset the iterator when the array is cleared */
+#if IVSIZE == I32SIZE
+    *((IV *) &(mg->mg_len)) = 0;
+#else
     if (mg->mg_ptr)
         *((IV *) mg->mg_ptr) = 0;
+#endif
 
     return 0;
 }
