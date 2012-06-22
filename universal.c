@@ -369,6 +369,8 @@ XS(XS_UNIVERSAL_can)
     }
     else {
         pkg = gv_stashsv(sv, 0);
+        if (!pkg)
+            pkg = gv_stashpv("UNIVERSAL", 0);
     }
 
     if (pkg) {
