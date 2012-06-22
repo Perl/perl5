@@ -705,7 +705,7 @@ in the CLASSNAME package.  If CLASSNAME is omitted, the current package
 is used.  Because a C<bless> is often the last thing in a constructor,
 it returns the reference for convenience.  Always use the two-argument
 version if a derived class might inherit the function doing the blessing.
-SeeL<perlobj> for more about the blessing (and blessings) of objects.
+See L<perlobj> for more about the blessing (and blessings) of objects.
 
 Consider always blessing objects in CLASSNAMEs that are mixed case.
 Namespaces with all lowercase names are considered reserved for

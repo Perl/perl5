@@ -820,6 +820,7 @@ roberto\100keltia.freenix.fr            roberto\100eurocontrol.fr
 robin\100cpan.org                       robin\100kitsite.com
 roderick\100argon.org                   roderick\100gate.net
 +                                       roderick\100ibcinc.com
+root\100ub32.org                        argrath\100ub32.org
 rootbeer\100teleport.com                rootbeer\100redcat.com
 +                                       tomphoenix\100unknown
 rurban\100x-ray.at                      rurban\100cpan.org
