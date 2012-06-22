@@ -225,9 +225,9 @@ PP(pp_substcont)
 	    assert(cx->sb_strend >= s);
 	    if(cx->sb_strend > s) {
 		 if (DO_UTF8(dstr) && !SvUTF8(targ))
-		      sv_catpvn_utf8_upgrade(dstr, s, cx->sb_strend - s, nsv);
+		      sv_catpvn_nomg_utf8_upgrade(dstr, s, cx->sb_strend - s, nsv);
 		 else
-		      sv_catpvn(dstr, s, cx->sb_strend - s);
+		      sv_catpvn_nomg(dstr, s, cx->sb_strend - s);
 	    }
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		cx->sb_rxtainted |= SUBST_TAINT_PAT;
@@ -296,9 +296,9 @@ PP(pp_substcont)
     cx->sb_m = m = RX_OFFS(rx)[0].start + orig;
     if (m > s) {
 	if (DO_UTF8(dstr) && !SvUTF8(cx->sb_targ))
-	    sv_catpvn_utf8_upgrade(dstr, s, m - s, nsv);
+	    sv_catpvn_nomg_utf8_upgrade(dstr, s, m - s, nsv);
 	else
-	    sv_catpvn(dstr, s, m-s);
+	    sv_catpvn_nomg(dstr, s, m-s);
     }
     cx->sb_s = RX_OFFS(rx)[0].end + orig;
     { /* Update the pos() information. */

@@ -1630,6 +1630,8 @@ PP(pp_sysread)
     if (! SvOK(bufsv))
 	sv_setpvs(bufsv, "");
     length = SvIVx(*++MARK);
+    if (length < 0)
+	DIE(aTHX_ "Negative length");
     SETERRNO(0,0);
     if (MARK < SP)
 	offset = SvIVx(*++MARK);
@@ -1651,13 +1653,19 @@ PP(pp_sysread)
 	buffer = SvPV_force(bufsv, blen);
 	buffer_utf8 = !IN_BYTES && SvUTF8(bufsv);
     }
-    if (length < 0)
-	DIE(aTHX_ "Negative length");
-    wanted = length;
+    if (DO_UTF8(bufsv)) {
+	/* offset adjust in characters not bytes */
+        /* SV's length cache is only safe for non-magical values */
+        if (SvGMAGICAL(bufsv))
+            blen = utf8_length((const U8 *)buffer, (const U8 *)buffer + blen);
+        else
+            blen = sv_len_utf8(bufsv);
+    }
 
     charstart = TRUE;
     charskip  = 0;
     skip = 0;
+    wanted = length;
 
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
@@ -1700,10 +1708,6 @@ PP(pp_sysread)
 	RETURN;
     }
 #endif
-    if (DO_UTF8(bufsv)) {
-	/* offset adjust in characters not bytes */
-	blen = sv_len_utf8(bufsv);
-    }
     if (offset < 0) {
 	if (-offset > (SSize_t)blen)
 	    DIE(aTHX_ "Offset outside string");
@@ -2819,6 +2823,7 @@ PP(pp_stat)
             goto do_fstat_have_io; 
         }
         
+	SvTAINTED_off(PL_statname); /* previous tainting irrelevant */
 	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;

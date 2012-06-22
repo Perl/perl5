@@ -1226,6 +1226,8 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
     }
     LEAVE;
     varsv = GvSVn(vargv);
+    SvTAINTED_off(varsv); /* previous $AUTOLOAD taint is obsolete */
+    /* XXX: this process is not careful to avoid extra magic gets and sets; tied $AUTOLOAD will get noise */
     sv_setsv(varsv, packname);
     sv_catpvs(varsv, "::");
     /* Ensure SvSETMAGIC() is called if necessary. In particular, to clear

@@ -549,7 +549,7 @@ do_test('tainted value in %ENV',
         $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(GMG,SMG,RMG,pIOK,pPOK\\)
+  FLAGS = \\(GMG,SMG,RMG,IOK,POK,pIOK,pPOK\\)
   IV = 0
   NV = 0
   PV = $ADDR "0"\\\0

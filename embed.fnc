@@ -1373,6 +1373,9 @@ Apd	|void	|sv_usepvn_flags|NN SV *const sv|NULLOK char* ptr|const STRLEN len\
 Apd	|void	|sv_vcatpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
 				|NULLOK va_list *const args|NULLOK SV **const svargs|const I32 svmax \
 				|NULLOK bool *const maybe_tainted
+Apd	|void	|sv_vcatpvfn_flags|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
+				|NULLOK va_list *const args|NULLOK SV **const svargs|const I32 svmax \
+				|NULLOK bool *const maybe_tainted|const U32 flags
 Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN patlen \
 				|NULLOK va_list *const args|NULLOK SV **const svargs \
 				|const I32 svmax|NULLOK bool *const maybe_tainted
@@ -2213,7 +2216,9 @@ Apd	|void	|sv_catsv_flags	|NN SV *const dsv|NULLOK SV *const ssv|const I32 flags
 Apmd	|STRLEN	|sv_utf8_upgrade_flags|NN SV *const sv|const I32 flags
 Ap	|STRLEN	|sv_utf8_upgrade_flags_grow|NN SV *const sv|const I32 flags|STRLEN extra
 Apd	|char*	|sv_pvn_force_flags|NN SV *const sv|NULLOK STRLEN *const lp|const I32 flags
-Apd	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
+pmb	|void	|sv_copypv	|NN SV *const dsv|NN SV *const ssv
+Apmd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
+Apd	|void	|sv_copypv_flags	|NN SV *const dsv|NN SV *const ssv|const I32 flags
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 Ap	|int	|my_dirfd	|NULLOK DIR* dir

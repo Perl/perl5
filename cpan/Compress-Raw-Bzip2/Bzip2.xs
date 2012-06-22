@@ -281,9 +281,8 @@ char * string;
             croak("%s: buffer parameter is a reference to a reference", string) ;
     }
 
-    if (!SvOK(sv)) { 
-        sv = newSVpv("", 0);
-    }
+    if (!SvOK(sv))
+        sv = sv_2mortal(newSVpv("", 0));
 
     return sv ;
 }
@@ -299,6 +298,7 @@ char * string ;
 {
     dTHX;
     bool wipe = 0 ;
+    STRLEN na;
     
     SvGETMAGIC(sv);
     wipe = ! SvOK(sv) ;
@@ -323,14 +323,11 @@ char * string ;
     if (SvREADONLY(sv) && PL_curcop != &PL_compiling)
         croak("%s: buffer parameter is read-only", string);
 
-    SvUPGRADE(sv, SVt_PV);
-
+    SvUPGRADE(sv, SVt_PV) ;
     if (wipe)
-        SvCUR_set(sv, 0);
-    
-    SvOOK_off(sv);
-    SvPOK_only(sv);
-
+	sv_setpv(sv, "") ;
+    else
+        (void)SvPVbyte_force(sv, na) ;
     return sv ;
 }
 
@@ -496,9 +493,9 @@ bzdeflate (s, buf, output)
 #ifdef UTF8_AVAILABLE    
     if (DO_UTF8(buf) && !sv_utf8_downgrade(buf, 1))
          croak("Wide character in " COMPRESS_CLASS "::bzdeflate input parameter");
-#endif         
-    s->stream.next_in = (char*)SvPVbyte_nolen(buf) ;
-    s->stream.avail_in = SvCUR(buf) ;
+#endif
+    s->stream.next_in =  SvPV_nomg_nolen(buf);
+    s->stream.avail_in =  SvCUR(buf);
      
     /* and retrieve the output buffer */
     output = deRef_l(output, "deflate") ;
@@ -506,13 +503,10 @@ bzdeflate (s, buf, output)
     if (DO_UTF8(output) && !sv_utf8_downgrade(output, 1))
          croak("Wide character in " COMPRESS_CLASS "::bzdeflate output parameter");
 #endif         
-
-    if((s->flags & FLAG_APPEND_OUTPUT) != FLAG_APPEND_OUTPUT) {
+    if((s->flags & FLAG_APPEND_OUTPUT) != FLAG_APPEND_OUTPUT)
         SvCUR_set(output, 0);
-        /* sv_setpvn(output, "", 0); */
-    }
     cur_length =  SvCUR(output) ;
-    s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
+    s->stream.next_out =  SvPVX(output) +  cur_length;
     increment =  SvLEN(output) -  cur_length;
     s->stream.avail_out =  increment;
     while (s->stream.avail_in != 0) {
@@ -521,7 +515,7 @@ bzdeflate (s, buf, output)
 	    /* out of space in the output buffer so make it bigger */
             Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
-            s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length ;
+            s->stream.next_out = SvPVX(output) + cur_length ;
             increment = bufinc ;
             s->stream.avail_out = increment;
             bufinc *= 2 ;
@@ -571,12 +565,10 @@ bzclose(s, output)
     if (DO_UTF8(output) && !sv_utf8_downgrade(output, 1))
          croak("Wide character in " COMPRESS_CLASS "::bzclose input parameter");
 #endif         
-    if(! s->flags & FLAG_APPEND_OUTPUT) {
+    if(! s->flags & FLAG_APPEND_OUTPUT)
         SvCUR_set(output, 0);
-        /* sv_setpvn(output, "", 0); */
-    }
     cur_length =  SvCUR(output) ;
-    s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
+    s->stream.next_out =  SvPVX(output) +  cur_length;
     increment =  SvLEN(output) -  cur_length;
     s->stream.avail_out =  increment;
 
@@ -585,7 +577,7 @@ bzclose(s, output)
 	    /* consumed all the available output, so extend it */
             Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
-            s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length ;
+            s->stream.next_out = SvPVX(output) + cur_length ;
             increment = bufinc ;
             s->stream.avail_out = increment;
             bufinc *= 2 ;
@@ -632,12 +624,10 @@ bzflush(s, output)
     if (DO_UTF8(output) && !sv_utf8_downgrade(output, 1))
          croak("Wide character in " COMPRESS_CLASS "::bzflush input parameter");
 #endif         
-    if(! s->flags & FLAG_APPEND_OUTPUT) {
+    if(! s->flags & FLAG_APPEND_OUTPUT)
         SvCUR_set(output, 0);
-        /* sv_setpvn(output, "", 0); */
-    }
     cur_length =  SvCUR(output) ;
-    s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
+    s->stream.next_out =  SvPVX(output) + cur_length;
     increment =  SvLEN(output) -  cur_length;
     s->stream.avail_out =  increment;
 
@@ -646,7 +636,7 @@ bzflush(s, output)
 	    /* consumed all the available output, so extend it */
             Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
-            s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length ;
+            s->stream.next_out = SvPVX(output) + cur_length ;
             increment = bufinc ;
             s->stream.avail_out = increment;
             bufinc *= 2 ;
@@ -743,8 +733,8 @@ bzinflate (s, buf, output)
 #endif         
     
     /* initialise the input buffer */
-    s->stream.next_in = (char*)SvPVbyte_force(buf, stmp) ;
-    s->stream.avail_in = SvCUR(buf);
+    s->stream.next_in = SvPV_nomg_nolen(buf);
+    s->stream.avail_in = stmp = SvCUR(buf);
 	
     /* and retrieve the output buffer */
     output = deRef_l(output, "bzinflate") ;
@@ -774,7 +764,7 @@ bzinflate (s, buf, output)
         */
         if (SvLEN(output) > cur_length + 1)
         {
-            s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length;
+            s->stream.next_out = SvPVX(output) + cur_length;
             increment = SvLEN(output) -  cur_length - 1;
             s->stream.avail_out = increment;
         }
@@ -790,7 +780,7 @@ bzinflate (s, buf, output)
 	    /* out of space in the output buffer so make it bigger */
             Sv_Grow(output, SvLEN(output) + bufinc + 1) ;
             cur_length += increment ;
-            s->stream.next_out = (char*) SvPVbyte_nolen(output) + cur_length ;
+            s->stream.next_out = SvPVX(output) + cur_length ;
             increment = bufinc ;
             s->stream.avail_out = increment;
             bufinc *= 2 ;
@@ -823,21 +813,21 @@ bzinflate (s, buf, output)
 
         SvPOK_only(output);
         SvCUR_set(output, prefix_length + s->bytesInflated) ;
-	*SvEND(output) = '\0';
+	*SvEND(output) = '\0' ;
 #ifdef UTF8_AVAILABLE    
         if (out_utf8)
-            sv_utf8_upgrade(output);
+            sv_utf8_upgrade(output) ;
 #endif        
-        SvSETMAGIC(output);
+        SvSETMAGIC(output) ;
 
 	/* fix the input buffer */
 	if (s->flags & FLAG_CONSUME_INPUT) {
 	    in = s->stream.avail_in ;
 	    SvCUR_set(buf, in) ;
 	    if (in)
-	        Move(s->stream.next_in, SvPVbyte_nolen(buf), in, char) ;	
-            *SvEND(buf) = '\0';
-            SvSETMAGIC(buf);
+	        Move(s->stream.next_in, SvPVX(buf), in, char) ;	
+            *SvEND(buf) = '\0' ;
+            SvSETMAGIC(buf) ;
 	}
     }
     OUTPUT:
