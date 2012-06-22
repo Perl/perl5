@@ -2568,7 +2568,7 @@ got_it:
     if ( !(flags & REXEC_NOT_FIRST) ) {
 	RX_MATCH_COPY_FREE(rx);
 	if (flags & REXEC_COPY_STR) {
-	    const I32 i = PL_regeol - startpos + (stringarg - strbeg);
+	    const I32 i = PL_regeol - strbeg;
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    if ((SvIsCOW(sv)
 		 || (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS)) {
