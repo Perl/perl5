@@ -747,6 +747,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
+	SvTAINTED_off(GvSVn(gv)); /* previous tainting irrelevant */
 	sv_setsv(GvSVn(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
@@ -2285,9 +2286,10 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     if (optype == OP_SHMREAD) {
 	char *mbuf;
 	/* suppress warning when reading into undef var (tchrist 3/Mar/00) */
+	SvGETMAGIC(mstr);
+	SvUPGRADE(mstr, SVt_PV);
 	if (! SvOK(mstr))
 	    sv_setpvs(mstr, "");
-	SvUPGRADE(mstr, SVt_PV);
 	SvPOK_only(mstr);
 	mbuf = SvGROW(mstr, (STRLEN)msize+1);
 

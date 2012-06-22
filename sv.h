@@ -905,6 +905,25 @@ in gv.h: */
 #define HvAMAGIC_on(hv)		(SvFLAGS(hv) |= SVf_AMAGIC)
 #define HvAMAGIC_off(hv)	(SvFLAGS(hv) &=~ SVf_AMAGIC)
 
+
+#define SvPOK_nog(sv)		((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK)
+#define SvIOK_nog(sv)		((SvFLAGS(sv) & (SVf_IOK|SVs_GMG)) == SVf_IOK)
+#define SvUOK_nog(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
+#define SvNOK_nog(sv)		((SvFLAGS(sv) & (SVf_NOK|SVs_GMG)) == SVf_NOK)
+#define SvNIOK_nog(sv)		(SvNIOK(sv) && !(SvFLAGS(sv) & SVs_GMG))
+
+#define SvPOK_nogthink(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+#define SvIOK_nogthink(sv)	((SvFLAGS(sv) & (SVf_IOK|SVf_THINKFIRST|SVs_GMG)) == SVf_IOK)
+#define SvUOK_nogthink(sv)	((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVf_THINKFIRST|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
+#define SvNOK_nogthink(sv)	((SvFLAGS(sv) & (SVf_NOK|SVf_THINKFIRST|SVs_GMG)) == SVf_NOK)
+#define SvNIOK_nogthink(sv)	(SvNIOK(sv) && !(SvFLAGS(sv) & (SVf_THINKFIRST|SVs_GMG)))
+
+#define SvPOK_utf8_nog(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == (SVf_POK|SVf_UTF8))
+#define SvPOK_utf8_nogthink(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == (SVf_POK|SVf_UTF8))
+
+#define SvPOK_byte_nog(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == SVf_POK)
+#define SvPOK_byte_nogthink(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+
 /*
 =for apidoc Am|U32|SvGAMAGIC|SV* sv
 
@@ -1568,9 +1587,9 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 */
 
 /* Let us hope that bitmaps for UV and IV are the same */
-#define SvIV(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv))
-#define SvUV(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv(sv))
-#define SvNV(sv) (SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv))
+#define SvIV(sv) (SvIOK_nog(sv) ? SvIVX(sv) : sv_2iv(sv))
+#define SvUV(sv) (SvUOK_nog(sv) ? SvUVX(sv) : sv_2uv(sv))
+#define SvNV(sv) (SvNOK_nog(sv) ? SvNVX(sv) : sv_2nv(sv))
 
 #define SvIV_nomg(sv) (SvIOK(sv) ? SvIVX(sv) : sv_2iv_flags(sv, 0))
 #define SvUV_nomg(sv) (SvIOK(sv) ? SvUVX(sv) : sv_2uv_flags(sv, 0))
@@ -1578,23 +1597,23 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 
 /* ----*/
 
-#define SvPV(sv, lp) SvPV_flags(sv, lp, SV_GMAGIC)
-#define SvPV_const(sv, lp) SvPV_flags_const(sv, lp, SV_GMAGIC)
+#define SvPV(sv, lp)         SvPV_flags(sv, lp, SV_GMAGIC)
+#define SvPV_const(sv, lp)   SvPV_flags_const(sv, lp, SV_GMAGIC)
 #define SvPV_mutable(sv, lp) SvPV_flags_mutable(sv, lp, SV_GMAGIC)
 
 #define SvPV_flags(sv, lp, flags) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pv_flags(sv, &lp, flags))
 #define SvPV_flags_const(sv, lp, flags) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX_const(sv)) : \
      (const char*) sv_2pv_flags(sv, &lp, flags|SV_CONST_RETURN))
 #define SvPV_flags_const_nolen(sv, flags) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? SvPVX_const(sv) : \
      (const char*) sv_2pv_flags(sv, 0, flags|SV_CONST_RETURN))
 #define SvPV_flags_mutable(sv, lp, flags) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) : \
      sv_2pv_flags(sv, &lp, flags|SV_MUTABLE_RETURN))
 
@@ -1606,26 +1625,28 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SvPV_force_nomg_nolen(sv) SvPV_force_flags_nolen(sv, 0)
 
 #define SvPV_force_flags(sv, lp, flags) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
-    ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
+    (SvPOK_nogthink(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
+
 #define SvPV_force_flags_nolen(sv, flags) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
-    ? SvPVX(sv) : sv_pvn_force_flags(sv, 0, flags))
+    (SvPOK_nogthink(sv) \
+     ? SvPVX(sv) : sv_pvn_force_flags(sv, 0, flags))
+
 #define SvPV_force_flags_mutable(sv, lp, flags) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST)) == SVf_POK \
-    ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) \
+    (SvPOK_nogthink(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) \
      : sv_pvn_force_flags(sv, &lp, flags|SV_MUTABLE_RETURN))
 
 #define SvPV_nolen(sv) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC))
 
 #define SvPV_nomg_nolen(sv) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, 0))
 
 #define SvPV_nolen_const(sv) \
-    ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
+    (SvPOK_nog(sv) \
      ? SvPVX_const(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC|SV_CONST_RETURN))
 
 #define SvPV_nomg(sv, lp) SvPV_flags(sv, lp, 0)
@@ -1635,32 +1656,30 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 /* ----*/
 
 #define SvPVutf8(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8) \
+    (SvPOK_utf8_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
 
-#define SvPVutf8_force(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST)) == (SVf_POK|SVf_UTF8) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
-
-
 #define SvPVutf8_nolen(sv) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK|SVf_UTF8)\
+    (SvPOK_utf8_nog(sv) \
      ? SvPVX(sv) : sv_2pvutf8(sv, 0))
+
+#define SvPVutf8_force(sv, lp) \
+    (SvPOK_utf8_nogthink(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
 
 /* ----*/
 
 #define SvPVbyte(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK) \
+    (SvPOK_byte_nog(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
 
-#define SvPVbyte_force(sv, lp) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST)) == (SVf_POK) \
-     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvbyten_force(sv, &lp))
-
 #define SvPVbyte_nolen(sv) \
-    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8)) == (SVf_POK)\
+    (SvPOK_byte_nog(sv) \
      ? SvPVX(sv) : sv_2pvbyte(sv, 0))
 
+#define SvPVbyte_force(sv, lp) \
+    (SvPOK_byte_nogthink(sv) \
+     ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvbyten_force(sv, &lp))
 
     
 /* define FOOx(): idempotent versions of FOO(). If possible, use a local
@@ -1671,6 +1690,17 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SvPVx_force(sv, lp) sv_pvn_force(sv, &lp)
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
+
+#define SvTRUE(sv)        ((sv) && (SvGMAGICAL(sv) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_nomg(sv)   ((sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_common(sv,fallback) (			\
+      !SvOK(sv)						\
+	? 0						\
+    : (SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK))		\
+	? (   (SvPOK(sv) && SvPVXtrue(sv))		\
+	   || (SvIOK(sv) && SvIVX(sv) != 0)		\
+	   || (SvNOK(sv) && SvNVX(sv) != 0.0))		\
+    : (fallback))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 
@@ -1684,39 +1714,13 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #  define SvPVutf8x(sv, lp) ({SV *_sv = (sv); SvPVutf8(_sv, lp); })
 #  define SvPVbytex(sv, lp) ({SV *_sv = (sv); SvPVbyte(_sv, lp); })
 #  define SvPVbytex_nolen(sv) ({SV *_sv = (sv); SvPVbyte_nolen(_sv); })
-#  define SvTRUE(sv) (						\
-    !sv								\
-    ? 0								\
-    :    SvPOK(sv)						\
-	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
-	     nxpv &&						\
-	     (nxpv->xpv_cur > 1 ||				\
-	      (nxpv->xpv_cur && *(sv)->sv_u.svu_pv != '0')); })	\
-	     ? 1						\
-	     : 0)						\
-	:							\
-	    SvIOK(sv)						\
-	    ? SvIVX(sv) != 0					\
-	    :   SvNOK(sv)					\
-		? SvNVX(sv) != 0.0				\
-		: sv_2bool(sv) )
-#  define SvTRUE_nomg(sv) (					\
-    !sv								\
-    ? 0								\
-    :    SvPOK(sv)						\
-	?   (({XPV *nxpv = (XPV*)SvANY(sv);			\
-	     nxpv &&						\
-	     (nxpv->xpv_cur > 1 ||				\
-	      (nxpv->xpv_cur && *(sv)->sv_u.svu_pv != '0')); })	\
-	     ? 1						\
-	     : 0)						\
-	:							\
-	    SvIOK(sv)						\
-	    ? SvIVX(sv) != 0					\
-	    :   SvNOK(sv)					\
-		? SvNVX(sv) != 0.0				\
-		: sv_2bool_flags(sv,0) )
-#  define SvTRUEx(sv) ({SV *_sv = (sv); SvTRUE(_sv); })
+#  define SvTRUEx(sv)      ({SV *_sv = (sv); SvTRUE(_sv); })
+#  define SvTRUEx_nomg(sv) ({SV *_sv = (sv); SvTRUE_nomg(_sv); })
+#  define SvPVXtrue(sv)						\
+    ({XPV *nxpv;						\
+     (nxpv = (XPV*)SvANY(sv))					\
+      && (nxpv->xpv_cur > 1					\
+	  || (nxpv->xpv_cur && *(sv)->sv_u.svu_pv != '0'));})
 
 #else /* __GNUC__ */
 
@@ -1733,37 +1737,12 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #  define SvPVutf8x(sv, lp) ((PL_Sv = (sv)), SvPVutf8(PL_Sv, lp))
 #  define SvPVbytex(sv, lp) ((PL_Sv = (sv)), SvPVbyte(PL_Sv, lp))
 #  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
-#  define SvTRUE(sv) (						\
-    !sv								\
-    ? 0								\
-    :    SvPOK(sv)						\
-	?   ((PL_Xpv = (XPV*)SvANY(PL_Sv = (sv))) &&		\
-	     (PL_Xpv->xpv_cur > 1 ||				\
-	      (PL_Xpv->xpv_cur && *PL_Sv->sv_u.svu_pv != '0'))	\
-	     ? 1						\
-	     : 0)						\
-	:							\
-	    SvIOK(sv)						\
-	    ? SvIVX(sv) != 0					\
-	    :   SvNOK(sv)					\
-		? SvNVX(sv) != 0.0				\
-		: sv_2bool(sv) )
-#  define SvTRUE_nomg(sv) (					\
-    !sv								\
-    ? 0								\
-    :    SvPOK(sv)						\
-	?   ((PL_Xpv = (XPV*)SvANY(PL_Sv = (sv))) &&		\
-	     (PL_Xpv->xpv_cur > 1 ||				\
-	      (PL_Xpv->xpv_cur && *PL_Sv->sv_u.svu_pv != '0'))	\
-	     ? 1						\
-	     : 0)						\
-	:							\
-	    SvIOK(sv)						\
-	    ? SvIVX(sv) != 0					\
-	    :   SvNOK(sv)					\
-		? SvNVX(sv) != 0.0				\
-		: sv_2bool_flags(sv,0) )
-#  define SvTRUEx(sv) ((PL_Sv = (sv)), SvTRUE(PL_Sv))
+#  define SvTRUEx(sv)      ((PL_Sv = (sv)), SvTRUE(PL_Sv))
+#  define SvTRUEx_nomg(sv) ((PL_Sv = (sv)), SvTRUE_nomg(PL_Sv))
+#  define SvPVXtrue(sv)						\
+    ((PL_Xpv = (XPV*)SvANY(PL_Sv = (sv)))			\
+     && (PL_Xpv->xpv_cur > 1					\
+	 || (PL_Xpv->xpv_cur && *PL_Sv->sv_u.svu_pv != '0')))
 #endif /* __GNU__ */
 
 #define SvIsCOW(sv)	((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
@@ -1873,8 +1852,9 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
 #define sv_catsv_mg(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC|SV_SMAGIC)
 #define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
-#define sv_catpvn_mg(sv, sstr, slen) \
-	sv_catpvn_flags(sv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
+#define sv_catpvn_mg(sv, sstr, slen) sv_catpvn_flags(sv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
+#define sv_copypv(dsv, ssv) sv_copypv_flags(dsv, ssv, SV_GMAGIC)
+#define sv_copypv_nomg(dsv, ssv) sv_copypv_flags(dsv, ssv, 0)
 #define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
 #define sv_2pv_nolen(sv) sv_2pv(sv, 0)
 #define sv_2pvbyte_nolen(sv) sv_2pvbyte(sv, 0)
@@ -1890,12 +1870,13 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_cmp_locale(sv1, sv2) sv_cmp_locale_flags(sv1, sv2, SV_GMAGIC)
 #define sv_collxfrm(sv, nxp) sv_cmp_flags(sv, nxp, SV_GMAGIC)
 #define sv_2bool(sv) sv_2bool_flags(sv, SV_GMAGIC)
+#define sv_2bool_nomg(sv) sv_2bool_flags(sv, 0)
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
 	Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
 			     (littlelen), SV_GMAGIC)
 
 /* Should be named SvCatPVN_utf8_upgrade? */
-#define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\
+#define sv_catpvn_nomg_utf8_upgrade(dsv, sstr, slen, nsv)	\
 	STMT_START {					\
 	    if (!(nsv))					\
 		nsv = newSVpvn_flags(sstr, slen, SVs_TEMP);	\
@@ -1903,7 +1884,7 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 		sv_setpvn(nsv, sstr, slen);		\
 	    SvUTF8_off(nsv);				\
 	    sv_utf8_upgrade(nsv);			\
-	    sv_catsv(dsv, nsv);	\
+	    sv_catsv_nomg(dsv, nsv);			\
 	} STMT_END
 
 /*

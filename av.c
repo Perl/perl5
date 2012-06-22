@@ -965,7 +965,7 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
             mg = mg_find(sv, PERL_MAGIC_tiedelem);
             if (mg) {
                 magic_existspack(sv, mg);
-                return cBOOL(SvTRUE(sv));
+                return cBOOL(SvTRUE_nomg(sv));
             }
 
         }

@@ -273,12 +273,13 @@ EXPECT
 0
 ########
 #
-# FETCH freeing tie'd SV
+# FETCH freeing tie'd SV still works
 sub TIESCALAR { bless [] }
-sub FETCH { *a = \1; 1 }
+sub FETCH { *a = \1; 2 }
 tie $a, 'main';
 print $a;
 EXPECT
+2
 ########
 
 #  [20020716.007] - nested FETCHES
