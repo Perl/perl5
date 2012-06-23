@@ -481,7 +481,7 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 (?<!c)b	cb	n	-	-
 (?<!c)b	b	y	-	-
 (?<!c)b	b	y	$&	b
-(?<%)b	-	c	-	Sequence (?<%...) not recognized
+(?<%)b	-	c	-	Group name must start with a non-digit word character
 (?:..)*a	aba	y	$&	aba
 (?:..)*?a	aba	y	$&	a
 ^(?:b|a(?=(.)))*\1	abc	y	$&	ab
@@ -1082,8 +1082,8 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 (?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	yM	$+{m}	ew	miniperl cannot load Tie::Hash::NamedCapture
 (?P<n>foo)|(?P<n>bar)|(?P<n>baz)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 (?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
-(?P<=n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<=...) not recognized
-(?P<!n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<!...) not recognized
+(?P<=n>foo|bar|baz)	snofooewa	c	-	Group name must start with a non-digit word character
+(?P<!n>foo|bar|baz)	snofooewa	c	-	Group name must start with a non-digit word character
 (?PX<n>foo|bar|baz)	snofooewa	c	-	Sequence (?PX<...) not recognized
 /(?'n'foo|bar|baz)/	snofooewa	y	$1	foo
 /(?'n'foo|bar|baz)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
@@ -1262,14 +1262,14 @@ a*(*F)	aaaab	n	-	-
 /(?<_>foo) \k<_>/	..foo foo..	yM	$+{_}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?'_0_'foo) \k'_0_'/	..foo foo..	yM	$+{_0_}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<_0_>foo) \k<_0_>/	..foo foo..	yM	$+{_0_}	foo	miniperl cannot load Tie::Hash::NamedCapture
-/(?'0'foo) bar/	..foo bar..	c	-	Sequence (?'
-/(?<0>foo) bar/	..foo bar..	c	-	Sequence (?<
-/(?'12'foo) bar/	..foo bar..	c	-	Sequence (?'
-/(?<12>foo) bar/	..foo bar..	c	-	Sequence (?<
-/(?'1a'foo) bar/	..foo bar..	c	-	Sequence (?'
-/(?<1a>foo) bar/	..foo bar..	c	-	Sequence (?<
-/(?''foo) bar/	..foo bar..	c	-	Sequence (?''
-/(?<>foo) bar/	..foo bar..	c	-	Sequence (?<>
+/(?'0'foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?<0>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?'12'foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?<12>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?'1a'foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?<1a>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?''foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
+/(?<>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
 /foo \k'n'/	foo foo	c	-	Reference to nonexistent named group
 /foo \k<n>/	foo foo	c	-	Reference to nonexistent named group
 /foo \k'a1'/	foo foo	c	-	Reference to nonexistent named group
@@ -1278,14 +1278,14 @@ a*(*F)	aaaab	n	-	-
 /foo \k<_>/	foo foo	c	-	Reference to nonexistent named group
 /foo \k'_0_'/	foo foo	c	-	Reference to nonexistent named group
 /foo \k<_0_>/	foo foo	c	-	Reference to nonexistent named group
-/foo \k'0'/	foo foo	c	-	Sequence \\k'
-/foo \k<0>/	foo foo	c	-	Sequence \\k<
-/foo \k'12'/	foo foo	c	-	Sequence \\k'
-/foo \k<12>/	foo foo	c	-	Sequence \\k<
-/foo \k'1a'/	foo foo	c	-	Sequence \\k'
-/foo \k<1a>/	foo foo	c	-	Sequence \\k<
-/foo \k''/	foo foo	c	-	Sequence \\k'
-/foo \k<>/	foo foo	c	-	Sequence \\k<
+/foo \k'0'/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k<0>/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k'12'/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k<12>/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k'1a'/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k<1a>/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k''/	foo foo	c	-	Group name must start with a non-digit word character
+/foo \k<>/	foo foo	c	-	Group name must start with a non-digit word character
 /(?<as>as) (\w+) \k<as> (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
 
 # \g{...} with a name as the argument 

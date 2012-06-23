@@ -1158,7 +1158,7 @@ use utf8;;
 "abc" =~ qr/(?<$char>abc)/;
 EOP
             utf8::encode($prog);
-            fresh_perl_like($prog, qr!Sequence.* not recognized!, "",
+            fresh_perl_like($prog, qr!Group name must start with a non-digit word character!, "",
                         sprintf("'U+%04X not legal IDFirst'", ord($char)));
         }
     }

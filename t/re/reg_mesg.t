@@ -50,8 +50,7 @@ my @death =
  '/(?/' => 'Sequence (? incomplete in regex; marked by {#} in m/(?{#}/',
 
  '/(?;x/' => 'Sequence (?;...) not recognized in regex; marked by {#} in m/(?;{#}x/',
- '/(?<;x/' => 'Sequence (?<;...) not recognized in regex; marked by {#} in m/(?<;{#}x/',
-
+ '/(?<;x/' => 'Group name must start with a non-digit word character in regex; marked by {#} in m/(?<;{#}x/',
  '/(?\ix/' => 'Sequence (?\...) not recognized in regex; marked by {#} in m/(?\{#}ix/',
  '/(?\mx/' => 'Sequence (?\...) not recognized in regex; marked by {#} in m/(?\{#}mx/',
  '/(?\:x/' => 'Sequence (?\...) not recognized in regex; marked by {#} in m/(?\{#}:x/',

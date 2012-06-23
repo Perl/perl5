@@ -6871,8 +6871,10 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 	    do {
 		RExC_parse++;
 	    } while (isALNUM(*RExC_parse));
+    } else {
+	RExC_parse++; /* so the <- from the vFAIL is after the offending character */
+        vFAIL("Group name must start with a non-digit word character");
     }
-
     if ( flags ) {
         SV* sv_name
 	    = newSVpvn_flags(name_start, (int)(RExC_parse - name_start),

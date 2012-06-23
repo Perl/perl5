@@ -2077,6 +2077,12 @@ has since been undefined.
 (F) A ()-group started with a count.  A count is supposed to follow
 something: a template character or a ()-group.  See L<perlfunc/pack>.
 
+=item Group name must start with a non-digit word character in regex; marked by <-- HERE in m/%s/
+
+(F) Group names must follow the rules for perl identifiers, meaning
+they must start with a non-digit word character. A common cause of
+this error is using (?&0) instead of (?0). See L<perlre>.
+
 =item %s had compilation errors.
 
 (F) The final summary message when a C<perl -c> fails.
