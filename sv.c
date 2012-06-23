@@ -13443,6 +13443,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* utf8 character class swashes */
     PL_utf8_alnum	= sv_dup_inc(proto_perl->Iutf8_alnum, param);
     PL_utf8_alpha	= sv_dup_inc(proto_perl->Iutf8_alpha, param);
+    PL_utf8_blank	= sv_dup_inc(proto_perl->Iutf8_blank, param);
     PL_utf8_space	= sv_dup_inc(proto_perl->Iutf8_space, param);
     PL_utf8_graph	= sv_dup_inc(proto_perl->Iutf8_graph, param);
     PL_utf8_digit	= sv_dup_inc(proto_perl->Iutf8_digit, param);

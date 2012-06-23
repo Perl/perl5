@@ -594,6 +594,7 @@ ApPR	|bool	|is_uni_alnum	|UV c
 ApPR	|bool	|is_uni_idfirst	|UV c
 ApPR	|bool	|is_uni_alpha	|UV c
 ApPR	|bool	|is_uni_ascii	|UV c
+ApPR	|bool	|is_uni_blank	|UV c
 ApPR	|bool	|is_uni_space	|UV c
 ApPR	|bool	|is_uni_cntrl	|UV c
 ApPR	|bool	|is_uni_graph	|UV c
@@ -645,6 +646,7 @@ ApR	|bool	|is_utf8_idcont	|NN const U8 *p
 ApR	|bool	|is_utf8_xidcont	|NN const U8 *p
 ApR	|bool	|is_utf8_alpha	|NN const U8 *p
 ApR	|bool	|is_utf8_ascii	|NN const U8 *p
+ApR	|bool	|is_utf8_blank	|NN const U8 *p
 ApR	|bool	|is_utf8_space	|NN const U8 *p
 ApR	|bool	|is_utf8_perl_space	|NN const U8 *p
 ApR	|bool	|is_utf8_perl_word	|NN const U8 *p

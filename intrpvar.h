@@ -614,6 +614,7 @@ PERLVAR(I, VertSpace,   SV *)
 /* utf8 character class swashes */
 PERLVAR(I, utf8_alnum,	SV *)
 PERLVAR(I, utf8_alpha,	SV *)
+PERLVAR(I, utf8_blank,	SV *)
 PERLVAR(I, utf8_space,	SV *)
 PERLVAR(I, utf8_graph,	SV *)
 PERLVAR(I, utf8_digit,	SV *)

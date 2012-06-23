@@ -3456,3 +3456,17 @@ test_get_vtbl()
 	RETVAL = PTR2UV(get_vtbl(-1));
     OUTPUT:
 	RETVAL
+
+bool
+test_isBLANK_uni(UV ord)
+    CODE:
+        RETVAL = isBLANK_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isBLANK_utf8(char * p)
+    CODE:
+        RETVAL = isBLANK_utf8((U8 *) p);
+    OUTPUT:
+        RETVAL

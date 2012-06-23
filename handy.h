@@ -912,6 +912,7 @@ EXTCONST U32 PL_charclass[];
 /* Note that all ignore 'use bytes' */
 
 #define isALNUM_uni(c)		generic_uni(isWORDCHAR, is_uni_alnum, c)
+#define isBLANK_uni(c)		generic_uni(isBLANK, is_uni_blank, c)
 #define isIDFIRST_uni(c)        generic_uni(isIDFIRST, is_uni_idfirst, c)
 #define isALPHA_uni(c)		generic_uni(isALPHA, is_uni_alpha, c)
 #define isSPACE_uni(c)		generic_uni(isSPACE, is_uni_space, c)
@@ -932,7 +933,6 @@ EXTCONST U32 PL_charclass[];
 
 /* Posix and regular space differ only in U+000B, which is in Latin1 */
 #define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
-#define isBLANK_uni(c)		isBLANK(c) /* could be wrong */
 
 #define isALNUM_LC_uvchr(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
 #define isIDFIRST_LC_uvchr(c)	(c < 256 ? isIDFIRST_LC(c) : is_uni_idfirst_lc(c))
@@ -981,6 +981,7 @@ EXTCONST U32 PL_charclass[];
                                   : Perl__is_utf8__perl_idstart(aTHX_ p))
 #define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
+#define isBLANK_utf8(p)		generic_utf8(isBLANK, is_utf8_blank, p)
 #define isSPACE_utf8(p)		generic_utf8(isSPACE, is_utf8_space, p)
 #define isDIGIT_utf8(p)		generic_utf8(isDIGIT, is_utf8_digit, p)
 #define isUPPER_utf8(p)		generic_utf8(isUPPER, is_utf8_upper, p)
@@ -1004,11 +1005,10 @@ EXTCONST U32 PL_charclass[];
 				  ? isPSXSPC_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
                                                                      *((p)+1)))\
                                   : isSPACE_utf8(p)))
-#define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
-
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isALPHA_LC_utf8(p)	isALPHA_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isBLANK_LC_utf8(p)	isBLANK_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isSPACE_LC_utf8(p)	isSPACE_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isDIGIT_LC_utf8(p)	isDIGIT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isUPPER_LC_utf8(p)	isUPPER_LC_uvchr(valid_utf8_to_uvchr(p,  0))
@@ -1020,7 +1020,6 @@ EXTCONST U32 PL_charclass[];
 #define isPUNCT_LC_utf8(p)	isPUNCT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
-#define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */
 
 /* This conversion works both ways, strangely enough. On EBCDIC platforms,
  * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII */
