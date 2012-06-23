@@ -11279,6 +11279,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     /* List of multi-character folds that are matched by this node */
     AV* unicode_alternate  = NULL;
 #ifdef EBCDIC
+    /* In a range, counts how many 0-2 of the ends of it came from literals,
+     * not escapes.  Thus we can tell if 'A' was input vs \x{C1} */
     UV literal_endpoint = 0;
 #endif
     UV stored = 0;  /* how many chars stored in the bitmap */
@@ -11641,9 +11643,8 @@ parseit:
 		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
-
                     nonbitmap = add_cp_to_invlist(nonbitmap, '-');
-			nonbitmap = add_cp_to_invlist(nonbitmap, prevvalue);
+                    nonbitmap = add_cp_to_invlist(nonbitmap, prevvalue);
 		}
 
 		range = 0; /* this was not a true range */
@@ -11893,8 +11894,8 @@ parseit:
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
 		    }
-		    if (!SIZE_ONLY)
-                    nonbitmap = add_cp_to_invlist(nonbitmap, '-');
+                    if (!SIZE_ONLY)
+                        nonbitmap = add_cp_to_invlist(nonbitmap, '-');
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
@@ -11929,7 +11930,6 @@ parseit:
             {
                 _invlist_intersection(this_range, PL_ASCII, &this_range, );
                 _invlist_intersection(this_range, PL_Alpha, &this_range, );
-
             }
             _invlist_union(nonbitmap, this_range, &nonbitmap);
             literal_endpoint = 0;
@@ -11938,8 +11938,6 @@ parseit:
 
 	range = 0; /* this range (if it was one) is done now */
     }
-
-
 
     if (SIZE_ONLY)
         return ret;
@@ -11969,48 +11967,50 @@ parseit:
         }
         else {
 
+            /* This is a list of all the characters that participate in folds
+             * (except marks, etc in multi-char folds */
+            if (! PL_utf8_foldable) {
+                SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
+                PL_utf8_foldable = _swash_to_invlist(swash);
+                SvREFCNT_dec(swash);
+            }
 
-	/* This is a list of all the characters that participate in folds
-	    * (except marks, etc in multi-char folds */
-	if (! PL_utf8_foldable) {
-	    SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
-	    PL_utf8_foldable = _swash_to_invlist(swash);
-            SvREFCNT_dec(swash);
-	}
+            /* This is a hash that for a particular fold gives all characters
+             * that are involved in it */
+            if (! PL_utf8_foldclosures) {
 
-	/* This is a hash that for a particular fold gives all characters
-	    * that are involved in it */
-	if (! PL_utf8_foldclosures) {
+                /* If we were unable to find any folds, then we likely won't be
+                 * able to find the closures.  So just create an empty list.
+                 * Folding will effectively be restricted to the non-Unicode
+                 * rules hard-coded into Perl.  (This case happens legitimately
+                 * during compilation of Perl itself before the Unicode tables
+                 * are generated) */
+                if (invlist_len(PL_utf8_foldable) == 0) {
+                    PL_utf8_foldclosures = newHV();
+                }
+                else {
+                    /* If the folds haven't been read in, call a fold function
+                     * to force that */
+                    if (! PL_utf8_tofold) {
+                        U8 dummy[UTF8_MAXBYTES+1];
+                        STRLEN dummy_len;
 
-	    /* If we were unable to find any folds, then we likely won't be
-	     * able to find the closures.  So just create an empty list.
-	     * Folding will effectively be restricted to the non-Unicode rules
-	     * hard-coded into Perl.  (This case happens legitimately during
-	     * compilation of Perl itself before the Unicode tables are
-	     * generated) */
-	    if (invlist_len(PL_utf8_foldable) == 0) {
-		PL_utf8_foldclosures = newHV();
-	    } else {
-		/* If the folds haven't been read in, call a fold function
-		    * to force that */
-		if (! PL_utf8_tofold) {
-		    U8 dummy[UTF8_MAXBYTES+1];
-		    STRLEN dummy_len;
+                        /* This particular string is above \xff in both UTF-8
+                         * and UTFEBCDIC */
+                        to_utf8_fold((U8*) "\xC8\x80", dummy, &dummy_len);
+                        assert(PL_utf8_tofold); /* Verify that worked */
+                    }
+                    PL_utf8_foldclosures =
+                                        _swash_inversion_hash(PL_utf8_tofold);
+                }
+            }
 
-		    /* This particular string is above \xff in both UTF-8 and
-		     * UTFEBCDIC */
-		    to_utf8_fold((U8*) "\xC8\x80", dummy, &dummy_len);
-		    assert(PL_utf8_tofold); /* Verify that worked */
-		}
-		PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
-	    }
-	}
-
-	/* Only the characters in this class that participate in folds need be
-	 * checked.  Get the intersection of this class and all the possible
-	 * characters that are foldable.  This can quickly narrow down a large
-	 * class */
-	_invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
+            /* Only the characters in this class that participate in folds need
+             * be checked.  Get the intersection of this class and all the
+             * possible characters that are foldable.  This can quickly narrow
+             * down a large class */
+            _invlist_intersection(PL_utf8_foldable, nonbitmap,
+                                  &fold_intersection);
         }
 
 	/* Now look at the foldable characters in this class individually */
@@ -12176,28 +12176,28 @@ parseit:
 			/* If any of the folded characters of this are in the
 			 * Latin1 range, tell the regex engine that this can
 			 * match a non-utf8 target string.  */
-			    while (loc < e) {
+                        while (loc < e) {
 
-				/* Can't mix ascii with non- under /aa */
-				if (MORE_ASCII_RESTRICTED
-				    && (isASCII(*loc) != isASCII(j)))
-				{
-				    goto end_multi_fold;
-				}
-				if (UTF8_IS_INVARIANT(*loc)
-				    || UTF8_IS_DOWNGRADEABLE_START(*loc))
-				{
-                                    /* Can't mix above and below 256 under LOC
-                                     */
-				    if (LOC) {
-					goto end_multi_fold;
-				    }
-				    ANYOF_FLAGS(ret)
-					    |= ANYOF_NONBITMAP_NON_UTF8;
-				    break;
-				}
-				loc += UTF8SKIP(loc);
-			    }
+                            /* Can't mix ascii with non- under /aa */
+                            if (MORE_ASCII_RESTRICTED
+                                && (isASCII(*loc) != isASCII(j)))
+                            {
+                                goto end_multi_fold;
+                            }
+                            if (UTF8_IS_INVARIANT(*loc)
+                                || UTF8_IS_DOWNGRADEABLE_START(*loc))
+                            {
+                                /* Can't mix above and below 256 under LOC
+                                 */
+                                if (LOC) {
+                                    goto end_multi_fold;
+                                }
+                                ANYOF_FLAGS(ret)
+                                        |= ANYOF_NONBITMAP_NON_UTF8;
+                                break;
+                            }
+                            loc += UTF8SKIP(loc);
+                        }
 
 			add_alternate(&unicode_alternate, foldbuf, foldlen);
 		    end_multi_fold: ;
@@ -12229,16 +12229,16 @@ parseit:
 			    /* /aa doesn't allow folds between ASCII and non-;
 			     * /l doesn't allow them between above and below
 			     * 256 */
-			    if ((MORE_ASCII_RESTRICTED
-				 && (isASCII(c) != isASCII(j)))
-				    || (LOC && ((c < 256) != (j < 256))))
+			    if ((MORE_ASCII_RESTRICTED && (isASCII(c) != isASCII(j)))
+				|| (LOC && ((c < 256) != (j < 256))))
 			    {
 				continue;
 			    }
 
                             /* Folds involving non-ascii Latin1 characters
                              * under /d are added to a separate list */
-			    if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS) {
+			    if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS)
+                            {
 				nonbitmap = add_cp_to_invlist(nonbitmap, c);
                             }
                             else {
@@ -12247,7 +12247,7 @@ parseit:
 			}
 		    }
 		}
-	    }
+            }
 	}
 	SvREFCNT_dec(fold_intersection);
     }
@@ -12268,22 +12268,25 @@ parseit:
      * properties */
     if (properties) {
         if (AT_LEAST_UNI_SEMANTICS) {
-	if (nonbitmap) {
-	    _invlist_union(nonbitmap, properties, &nonbitmap);
-	    SvREFCNT_dec(properties);
-	}
-	else {
-	    nonbitmap = properties;
-	}
+            if (nonbitmap) {
+                _invlist_union(nonbitmap, properties, &nonbitmap);
+                SvREFCNT_dec(properties);
+            }
+            else {
+                nonbitmap = properties;
+            }
         }
         else {
 
             /* Under /d, we put the things that match only when the target
              * string is utf8, into a separate list */
             SV* nonascii_but_latin1_properties = NULL;
-            _invlist_intersection(properties, PL_Latin1, &nonascii_but_latin1_properties);
-            _invlist_subtract(nonascii_but_latin1_properties, PL_ASCII, &nonascii_but_latin1_properties);
-            _invlist_subtract(properties, nonascii_but_latin1_properties, &properties);
+            _invlist_intersection(properties, PL_Latin1,
+                                  &nonascii_but_latin1_properties);
+            _invlist_subtract(nonascii_but_latin1_properties, PL_ASCII,
+                              &nonascii_but_latin1_properties);
+            _invlist_subtract(properties, nonascii_but_latin1_properties,
+                              &properties);
             if (nonbitmap) {
                 _invlist_union(nonbitmap, properties, &nonbitmap);
                 SvREFCNT_dec(properties);
