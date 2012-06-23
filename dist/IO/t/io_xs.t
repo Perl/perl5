@@ -40,10 +40,12 @@ $x->setpos(undef);
 ok($!, "setpos(undef) makes errno non-zero");
 
 SKIP:
-{
-    $^O eq "MSWin32"
-	and skip "directory sync doesn't apply to MSWin32", 1;
-    open my $dh, "<", "."
-	or skip "Cannot open the cwd", 1;
-    ok($dh->sync, "sync to a read only directory handle");
+{ # [perl #64772] IO::Handle->sync fails on an O_RDONLY descriptor
+    $Config{d_fsync}
+       or skip "No fsync", 1;
+    $^O eq 'aix'
+      and skip "fsync() documented to fail on non-writable handles on AIX", 1;
+    open my $fh, "<", "t/io_xs.t"
+       or skip "Cannot open t/io_xs.t read-only: $!", 1;
+    ok($fh->sync, "sync to a read only handle");
 }
