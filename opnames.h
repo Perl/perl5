@@ -392,6 +392,7 @@ typedef enum opcode {
 } opcode;
 
 #define MAXO 374
+#define OP_FREED MAXO
 
 /* the OP_IS_* macros are optimized to a simple range check because
     all the member OPs are contiguous in regen/opcodes table.
