@@ -345,8 +345,13 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     if (slab->opslab_freed) {
 	OP **too = &slab->opslab_freed;
 	o = *too;
+	DEBUG_S(Perl_warn(aTHX_ "found free op at %p, slab %p", o, slab));
 	while (o && DIFF(OpSLOT(o), OpSLOT(o)->opslot_next) < sz) {
+	    DEBUG_S(Perl_warn(aTHX_ "Alas! too small"));
 	    o = *(too = &o->op_next);
+	    DEBUG_S(
+		if(o) Perl_warn(aTHX_ "found another free op at %p", o)
+	    );
 	}
 	if (o) {
 	    *too = o->op_next;
@@ -393,6 +398,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     slot = (OPSLOT *)((I32 **)slab2->opslab_first - sz);
     assert(slot >= &slab2->opslab_slots);
     INIT_OPSLOT;
+    DEBUG_S(Perl_warn(aTHX_ "allocating op at %p, slab %p", o, slab));
     return (void *)o;
 }
 
@@ -424,6 +430,9 @@ Perl_Slab_Free(pTHX_ void *op)
     o->op_type = OP_FREED;
     o->op_next = slab->opslab_freed;
     slab->opslab_freed = o;
+    DEBUG_S(
+	Perl_warn(aTHX_ "free op at %p, recorded in slab %p", o, slab)
+    );
     OpslabREFCNT_dec_padok(slab);
 }
 
@@ -446,6 +455,7 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
 {
     OPSLAB *slab2;
     PERL_ARGS_ASSERT_OPSLAB_FREE;
+    DEBUG_S(Perl_warn(aTHX_ "freeing slab %p", slab));
     assert(slab->opslab_refcnt == 1);
     for (; slab; slab = slab2) {
 	slab2 = slab->opslab_next;
