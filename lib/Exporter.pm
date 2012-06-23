@@ -323,14 +323,11 @@ of Exporter, released with perl 5.8.3.
 =head2 Module Version Checking
 
 The Exporter module will convert an attempt to import a number from a
-module into a call to C<< $module_name->require_version($value) >>. This can
+module into a call to C<< $module_name->VERSION($value) >>. This can
 be used to validate that the version of the module being used is
 greater than or equal to the required version.
 
-The Exporter module supplies a default C<require_version> method which
-checks the value of C<$VERSION> in the exporting module.
-
-Since the default C<require_version> method treats the C<$VERSION> number as
+Since the C<UNIVERSAL::VERSION> method treats the C<$VERSION> number as
 a simple numeric value it will regard version 1.10 as lower than
 1.9. For this reason it is strongly recommended that you use numbers
 with at least two decimal places, e.g., 1.09.
