@@ -4402,8 +4402,7 @@ S_do_delete_local(pTHX)
 	SV * const osv = POPs;
 	const bool tied = SvRMAGICAL(osv)
 			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
-	const bool can_preserve = SvCANEXISTDELETE(osv)
-				    || mg_find((const SV *)osv, PERL_MAGIC_env);
+	const bool can_preserve = SvCANEXISTDELETE(osv);
 	const U32 type = SvTYPE(osv);
 	if (type == SVt_PVHV) {			/* hash element */
 	    HV * const hv = MUTABLE_HV(osv);
@@ -4491,8 +4490,7 @@ S_do_delete_local(pTHX)
 	SV * const osv   = POPs;
 	const bool tied = SvRMAGICAL(osv)
 			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
-	const bool can_preserve = SvCANEXISTDELETE(osv)
-				    || mg_find((const SV *)osv, PERL_MAGIC_env);
+	const bool can_preserve = SvCANEXISTDELETE(osv);
 	const U32 type = SvTYPE(osv);
 	SV *sv = NULL;
 	if (type == SVt_PVHV) {
@@ -4678,7 +4676,7 @@ PP(pp_hslice)
         MAGIC *mg;
         HV *stash;
 
-	if (SvCANEXISTDELETE(hv) || mg_find((const SV *)hv, PERL_MAGIC_env))
+	if (SvCANEXISTDELETE(hv))
 	    can_preserve = TRUE;
     }
 

@@ -1792,7 +1792,7 @@ PP(pp_helem)
 	 * Try to preserve the existenceness of a tied hash
 	 * element by using EXISTS and DELETE if possible.
 	 * Fallback to FETCH and STORE otherwise. */
-	if (SvCANEXISTDELETE(hv) || mg_find((const SV *)hv, PERL_MAGIC_env))
+	if (SvCANEXISTDELETE(hv))
 	    preeminent = hv_exists_ent(hv, keysv, 0);
     }
 
