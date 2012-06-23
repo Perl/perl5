@@ -328,6 +328,10 @@ module into a call to C<< $module_name->VERSION($value) >>.  This can
 be used to validate that the version of the module being used is
 greater than or equal to the required version.
 
+For historical reasons, Exporter supplies a C<require_version> method that
+simply delegates to C<VERSION>.  Originally, before C<UNIVERSAL::VERSION>
+existed, Exporter would call C<require_version>.
+
 Since the C<UNIVERSAL::VERSION> method treats the C<$VERSION> number as
 a simple numeric value it will regard version 1.10 as lower than
 1.9.  For this reason it is strongly recommended that you use numbers
