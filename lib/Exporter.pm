@@ -521,7 +521,7 @@ use statement.
 
 =head2 What Not to Export
 
-You have been warned already in L</Selecting What To Export>
+You have been warned already in L</Selecting What to Export>
 to not export:
 
 =over 4
