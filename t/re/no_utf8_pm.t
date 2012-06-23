@@ -8,5 +8,5 @@ print "1..1\n";
 # a swash if it thought there was one.
 "\0" =~ /[\001-\xFF]/i;
 
-print "not" if exists $INC{"utf8.pm"};
+print "not " if exists $INC{"utf8.pm"};
 print "ok 1\n";
