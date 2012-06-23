@@ -352,6 +352,12 @@ will now reset the iterator.
 
 This mirrors the behaviour of the hash iterator when the hash is cleared.
 
+=item *
+
+C<< $class->can >>, C<< $class->isa >>, and C<< $class->DOES >> now return
+correct results, regardless of whether that package referred to by C<$class>
+exists [perl #47113].
+
 =back
 
 =head1 Known Problems
