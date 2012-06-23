@@ -37,6 +37,15 @@ they will both be 64 bits.
 An SV can be created and loaded with one command.  There are five types of
 values that can be loaded: an integer value (IV), an unsigned integer
 value (UV), a double (NV), a string (PV), and another scalar (SV).
+("PV" stands for "Pointer Value".  You might think that it is misnamed
+because it is described as pointing only to strings.  However, it is
+possible to have it point to other things.  For example, inversion
+lists, used in regular expression data structures, are scalars, each
+consisting of an array of UVs which are accessed through PVs.  But,
+using it for non-strings requires care, as the underlying assumption of
+much of the internals is that PVs are just for strings.  Often, for
+example, a trailing NUL is tacked on automatically.  The non-string use
+is documented only in this paragraph.)
 
 The seven routines are:
 
@@ -2633,7 +2642,7 @@ is what makes Unicode input an interesting problem.
 In general, you either have to know what you're dealing with, or you
 have to guess.  The API function C<is_utf8_string> can help; it'll tell
 you if a string contains only valid UTF-8 characters. However, it can't
-do the work for you. On a character-by-character basis, C<is_utf8_char>
+do the work for you. On a character-by-character basis, XXX C<is_utf8_char>
 will tell you whether the current character in a string is valid UTF-8. 
 
 =head2 How does UTF-8 represent Unicode characters?
