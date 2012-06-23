@@ -11256,6 +11256,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     /* code points this node matches that can't be stored in the bitmap */
     SV* nonbitmap = NULL;
 
+    /* inversion list of code points this node matches only when the target
+     * string is in UTF-8.  (Because is under /d) */
+    SV* depends_list = NULL;
+
     /* The items that are to match that aren't stored in the bitmap, but are a
      * result of things that are stored there.  This is the fold closure of
      * such a character, either because it has DEPENDS semantics and shouldn't
@@ -11638,15 +11642,8 @@ parseit:
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
 
-		    stored +=
-                         set_regclass_bit(pRExC_state, ret, '-', &l1_fold_invlist, &unicode_alternate);
-		    if (prevvalue < 256) {
-			stored +=
-                         set_regclass_bit(pRExC_state, ret, (U8) prevvalue, &l1_fold_invlist, &unicode_alternate);
-		    }
-		    else {
+                    nonbitmap = add_cp_to_invlist(nonbitmap, '-');
 			nonbitmap = add_cp_to_invlist(nonbitmap, prevvalue);
-		    }
 		}
 
 		range = 0; /* this was not a true range */
@@ -11897,8 +11894,7 @@ parseit:
 			       w, w, rangebegin);
 		    }
 		    if (!SIZE_ONLY)
-			stored +=
-                            set_regclass_bit(pRExC_state, ret, '-', &l1_fold_invlist, &unicode_alternate);
+                    nonbitmap = add_cp_to_invlist(nonbitmap, '-');
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
@@ -11913,43 +11909,30 @@ parseit:
 
 	/* now is the next time */
 	if (!SIZE_ONLY) {
-	    if (prevvalue < 256) {
-	        const IV ceilvalue = value < 256 ? value : 255;
-		IV i;
-#ifdef EBCDIC
-		/* In EBCDIC [\x89-\x91] should include
-		 * the \x8e but [i-j] should not. */
-		if (literal_endpoint == 2 &&
-		    ((isLOWER(prevvalue) && isLOWER(ceilvalue)) ||
-		     (isUPPER(prevvalue) && isUPPER(ceilvalue))))
-		{
-		    if (isLOWER(prevvalue)) {
-			for (i = prevvalue; i <= ceilvalue; i++)
-			    if (isLOWER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
-				stored +=
-                                  set_regclass_bit(pRExC_state, ret, (U8) i, &l1_fold_invlist, &unicode_alternate);
-			    }
-		    } else {
-			for (i = prevvalue; i <= ceilvalue; i++)
-			    if (isUPPER(i) && !ANYOF_BITMAP_TEST(ret,i)) {
-				stored +=
-                                  set_regclass_bit(pRExC_state, ret, (U8) i, &l1_fold_invlist, &unicode_alternate);
-			    }
-		    }
-		}
-		else
-#endif
-		      for (i = prevvalue; i <= ceilvalue; i++) {
-			stored += set_regclass_bit(pRExC_state, ret, (U8) i, &l1_fold_invlist, &unicode_alternate);
-	              }
-	  }
-	  if (value > 255) {
-	    const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
-	    const UV natvalue      = NATIVE_TO_UNI(value);
-	    nonbitmap = _add_range_to_invlist(nonbitmap, prevnatvalue, natvalue);
-	}
-#ifdef EBCDIC
-	    literal_endpoint = 0;
+#ifndef EBCDIC
+            nonbitmap = _add_range_to_invlist(nonbitmap, prevvalue, value);
+#else
+            UV* this_range = _new_invlist(1);
+            _append_range_to_invlist(this_range, prevvalue, value);
+
+            /* In EBCDIC, the ranges 'A-Z' and 'a-z' are each not contiguous.
+             * If this range was specified using something like 'i-j', we want
+             * to include only the 'i' and the 'j', and not anything in
+             * between, so exclude non-ASCII, non-alphabetics from it.
+             * However, if the range was specified with something like
+             * [\x89-\x91] or [\x89-j], all code points within it should be
+             * included.  literal_endpoint==2 means both ends of the range used
+             * a literal character, not \x{foo} */
+	    if (literal_endpoint == 2
+                && (prevvalue >= 'a' && value <= 'z')
+                    || (prevvalue >= 'A' && value <= 'Z'))
+            {
+                _invlist_intersection(this_range, PL_ASCII, &this_range, );
+                _invlist_intersection(this_range, PL_Alpha, &this_range, );
+
+            }
+            _invlist_union(nonbitmap, this_range, &nonbitmap);
+            literal_endpoint = 0;
 #endif
         }
 
@@ -11962,12 +11945,30 @@ parseit:
         return ret;
     /****** !SIZE_ONLY AFTER HERE *********/
 
-    /* If folding and there are code points above 255, we calculate all
-     * characters that could fold to or from the ones already on the list */
+    /* If folding, we calculate all characters that could fold to or from the
+     * ones already on the list */
     if (FOLD && nonbitmap) {
 	UV start, end;	/* End points of code point ranges */
 
 	SV* fold_intersection = NULL;
+
+        const UV highest_index = invlist_len(nonbitmap) - 1;
+
+        /* In the Latin1 range, the characters that can be folded-to or -from
+         * are precisely the alphabetic characters.  If the highest code point
+         * is within Latin1, we can use the compiled-in list, and not have to
+         * go out to disk.  If the last element in the array is in the
+         * inversion list set, it starts a range that goes to infinity, so the
+         * maximum of the inversion list is definitely above Latin1.
+         * Otherwise, it starts a range that isn't in the set, so the max is
+         * one less than it */
+        if (! ELEMENT_RANGE_MATCHES_INVLIST(highest_index)
+            && invlist_array(nonbitmap)[highest_index] <= 256)
+        {
+            _invlist_intersection(PL_L1PosixAlpha, nonbitmap, &fold_intersection);
+        }
+        else {
+
 
 	/* This is a list of all the characters that participate in folds
 	    * (except marks, etc in multi-char folds */
@@ -12010,21 +12011,155 @@ parseit:
 	 * characters that are foldable.  This can quickly narrow down a large
 	 * class */
 	_invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
+        }
 
 	/* Now look at the foldable characters in this class individually */
 	invlist_iterinit(fold_intersection);
 	while (invlist_iternext(fold_intersection, &start, &end)) {
 	    UV j;
 
+            /* Locale folding for Latin1 characters is deferred until runtime */
+            if (LOC && start < 256) {
+                start = 256;
+            }
+
 	    /* Look at every character in the range */
 	    for (j = start; j <= end; j++) {
 
-		/* Get its fold */
 		U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 		STRLEN foldlen;
-		const UV f =
-                    _to_uni_fold_flags(j, foldbuf, &foldlen,
-                                       (allow_full_fold) ? FOLD_FLAGS_FULL : 0);
+                UV f;
+
+                if (j < 256) {
+
+                    /* We have the latin1 folding rules hard-coded here so that
+                     * an innocent-looking character class, like /[ks]/i won't
+                     * have to go out to disk to find the possible matches.
+                     * XXX It would be better to generate these via regen, in
+                     * case a new version of the Unicode standard adds new
+                     * mappings, though that is not really likely, and may be
+                     * caught by the default: case of the switch below. */
+
+                    if (PL_fold_latin1[j] != j) {
+
+                        /* ASCII is always matched; non-ASCII is matched only
+                         * under Unicode rules */
+                        if (isASCII(j) || AT_LEAST_UNI_SEMANTICS) {
+                            nonbitmap =
+                                add_cp_to_invlist(nonbitmap, PL_fold_latin1[j]);
+                        }
+                        else {
+                            depends_list =
+                                add_cp_to_invlist(depends_list, PL_fold_latin1[j]);
+                        }
+                    }
+
+                    if (HAS_NONLATIN1_FOLD_CLOSURE(j)
+                        && (! isASCII(j) || ! MORE_ASCII_RESTRICTED))
+                    {
+                        /* Certain Latin1 characters have matches outside
+                         * Latin1, or are multi-character.  To get here, 'j' is
+                         * one of those characters.   None of these matches is
+                         * valid for ASCII characters under /aa, which is why
+                         * the 'if' just above excludes those.  The matches
+                         * fall into three categories:
+                         * 1) They are singly folded-to or -from an above 255
+                         *    character, e.g., LATIN SMALL LETTER Y WITH
+                         *    DIAERESIS and LATIN CAPITAL LETTER Y WITH
+                         *    DIAERESIS;
+                         * 2) They are part of a multi-char fold with another
+                         *    latin1 character; only LATIN SMALL LETTER
+                         *    SHARP S => "ss" fits this;
+                         * 3) They are part of a multi-char fold with a
+                         *    character outside of Latin1, such as various
+                         *    ligatures.
+                        * We aren't dealing fully with multi-char folds, except
+                        * we do deal with the pattern containing a character
+                        * that has a multi-char fold (not so much the inverse).
+                        * For types 1) and 3), the matches only happen when the
+                        * target string is utf8; that's not true for 2), and we
+                        * set a flag for it.
+                        *
+                        * The code below adds the single fold closures for 'j'
+                        * to the inversion list. */
+                        switch (j) {
+                            case 'k':
+                            case 'K':
+                                /* KELVIN SIGN */
+                                nonbitmap =
+                                    add_cp_to_invlist(nonbitmap, 0x212A);
+                                break;
+                            case 's':
+                            case 'S':
+                                /* LATIN SMALL LETTER LONG S */
+                                nonbitmap =
+                                    add_cp_to_invlist(nonbitmap, 0x017F);
+                                break;
+                            case MICRO_SIGN:
+                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                                    GREEK_SMALL_LETTER_MU);
+                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                                    GREEK_CAPITAL_LETTER_MU);
+                                break;
+                            case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
+                            case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
+                                /* ANGSTROM SIGN */
+                                nonbitmap =
+                                        add_cp_to_invlist(nonbitmap, 0x212B);
+                                break;
+                            case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
+                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                        LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
+                                break;
+                            case LATIN_SMALL_LETTER_SHARP_S:
+                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                                LATIN_CAPITAL_LETTER_SHARP_S);
+
+                                /* Under /a, /d, and /u, this can match the two
+                                 * chars "ss" */
+                                if (! MORE_ASCII_RESTRICTED) {
+                                    add_alternate(&unicode_alternate,
+                                                  (U8 *) "ss", 2);
+
+                                    /* And under /u or /a, it can match even if
+                                     * the target is not utf8 */
+                                    if (AT_LEAST_UNI_SEMANTICS) {
+                                        ANYOF_FLAGS(ret) |=
+                                                    ANYOF_NONBITMAP_NON_UTF8;
+                                    }
+                                }
+                                break;
+                            case 'F': case 'f':
+                            case 'I': case 'i':
+                            case 'L': case 'l':
+                            case 'T': case 't':
+                            case 'A': case 'a':
+                            case 'H': case 'h':
+                            case 'J': case 'j':
+                            case 'N': case 'n':
+                            case 'W': case 'w':
+                            case 'Y': case 'y':
+                                /* These all are targets of multi-character
+                                 * folds from code points that require UTF8 to
+                                 * express, so they can't match unless the
+                                 * target string is in UTF-8, so no action here
+                                 * is necessary, as regexec.c properly handles
+                                 * the general case for UTF-8 matching */
+                                break;
+                            default:
+                                /* Use deprecated warning to increase the
+                                 * chances of this being output */
+                                ckWARN2regdep(RExC_parse, "Perl folding rules are not up-to-date for 0x%"UVXf"; please use the perlbug utility to report;", j);
+                                break;
+                        }
+                    }
+                    continue;
+                }
+
+                /* Here is an above Latin1 character.  We don't have the rules
+                 * hard-coded for it.  First, get its fold */
+		f = _to_uni_fold_flags(j, foldbuf, &foldlen,
+                                    ((allow_full_fold) ? FOLD_FLAGS_FULL : 0);
 
 		if (foldlen > (STRLEN)UNISKIP(f)) {
 
@@ -12040,10 +12175,7 @@ parseit:
 
 			/* If any of the folded characters of this are in the
 			 * Latin1 range, tell the regex engine that this can
-			 * match a non-utf8 target string.  The only multi-byte
-			 * fold whose source is in the Latin1 range (U+00DF)
-			 * applies only when the target string is utf8, or
-			 * under unicode rules */
+			 * match a non-utf8 target string.  */
 			if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
 			    while (loc < e) {
 
@@ -12072,22 +12204,11 @@ parseit:
 			add_alternate(&unicode_alternate, foldbuf, foldlen);
 		    end_multi_fold: ;
 		    }
-
-		    /* This is special-cased, as it is the only letter which
-		     * has both a multi-fold and single-fold in Latin1.  All
-		     * the other chars that have single and multi-folds are
-		     * always in utf8, and the utf8 folding algorithm catches
-		     * them */
-		    if (! LOC && j == LATIN_CAPITAL_LETTER_SHARP_S) {
-			stored += set_regclass_bit(pRExC_state,
-					ret,
-					LATIN_SMALL_LETTER_SHARP_S,
-					&l1_fold_invlist, &unicode_alternate);
-		    }
 		}
-		else {
-		    /* Single character fold.  Add everything in its fold
-		     * closure to the list that this node should match */
+                else {
+                    /* Single character fold of above Latin1.  Add everything
+                     * in its fold closure to the list that this node should
+                     * match */
 		    SV** listp;
 
 		    /* The fold closures data structure is a hash with the keys
@@ -12117,20 +12238,13 @@ parseit:
 				continue;
 			    }
 
-			    if (c < 256 && AT_LEAST_UNI_SEMANTICS) {
-				stored += set_regclass_bit(pRExC_state,
-					ret,
-					(U8) c,
-					&l1_fold_invlist, &unicode_alternate);
-			    }
-				/* It may be that the code point is already in
-				 * this range or already in the bitmap, in
-				 * which case we need do nothing */
-			    else if ((c < start || c > end)
-					&& (c > 255
-					    || ! ANYOF_BITMAP_TEST(ret, c)))
-			    {
+                            /* Folds involving non-ascii Latin1 characters
+                             * under /d are added to a separate list */
+			    if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS) {
 				nonbitmap = add_cp_to_invlist(nonbitmap, c);
+                            }
+                            else {
+                                depends_list = add_cp_to_invlist(depends_list, c);
 			    }
 			}
 		    }
@@ -12155,6 +12269,7 @@ parseit:
      * The lists are kept separate up to now because we don't want to fold the
      * properties */
     if (properties) {
+        if (AT_LEAST_UNI_SEMANTICS) {
 	if (nonbitmap) {
 	    _invlist_union(nonbitmap, properties, &nonbitmap);
 	    SvREFCNT_dec(properties);
@@ -12162,17 +12277,39 @@ parseit:
 	else {
 	    nonbitmap = properties;
 	}
+        }
+        else {
+
+            /* Under /d, we put the things that match only when the target
+             * string is utf8, into a separate list */
+            SV* nonascii_but_latin1_properties = NULL;
+            _invlist_intersection(properties, PL_Latin1, &nonascii_but_latin1_properties);
+            _invlist_subtract(nonascii_but_latin1_properties, PL_ASCII, &nonascii_but_latin1_properties);
+            _invlist_subtract(properties, nonascii_but_latin1_properties, &properties);
+            if (nonbitmap) {
+                _invlist_union(nonbitmap, properties, &nonbitmap);
+                SvREFCNT_dec(properties);
+            }
+            else {
+                nonbitmap = properties;
+            }
+
+            if (depends_list) {
+                _invlist_union(depends_list, nonascii_but_latin1_properties,
+                               &depends_list);
+                SvREFCNT_dec(nonascii_but_latin1_properties);
+            }
+            else {
+                depends_list = nonascii_but_latin1_properties;
+            }
+        }
     }
 
     /* Here, <nonbitmap> contains all the code points we can determine at
-     * compile time that we haven't put into the bitmap.  Go through it, and
+     * compile time that match under all conditions.  Go through it, and
      * for things that belong in the bitmap, put them there, and delete from
      * <nonbitmap> */
     if (nonbitmap) {
-
-	/* Above-ASCII code points in /d have to stay in <nonbitmap>, as they
-	 * possibly only should match when the target string is UTF-8 */
-	UV max_cp_to_set = (DEPENDS_SEMANTICS) ? 127 : 255;
 
 	/* This gets set if we actually need to modify things */
 	bool change_invlist = FALSE;
@@ -12186,14 +12323,14 @@ parseit:
 	    int i;
 
 	    /* Quit if are above what we should change */
-	    if (start > max_cp_to_set) {
+	    if (start > 255) {
 		break;
 	    }
 
 	    change_invlist = TRUE;
 
 	    /* Set all the bits in the range, up to the max that we are doing */
-	    high = (end < max_cp_to_set) ? end : max_cp_to_set;
+	    high = (end < 255) ? end : 255;
 	    for (i = start; i <= (int) high; i++) {
 		if (! ANYOF_BITMAP_TEST(ret, i)) {
 		    ANYOF_BITMAP_SET(ret, i);
@@ -12207,17 +12344,24 @@ parseit:
         /* Done with loop; remove any code points that are in the bitmap from
          * <nonbitmap> */
 	if (change_invlist) {
-	    _invlist_subtract(nonbitmap,
-		              (DEPENDS_SEMANTICS)
-			        ? PL_ASCII
-			        : PL_Latin1,
-                              &nonbitmap);
+	    _invlist_subtract(nonbitmap, PL_Latin1, &nonbitmap);
 	}
 
 	/* If have completely emptied it, remove it completely */
 	if (invlist_len(nonbitmap) == 0) {
 	    SvREFCNT_dec(nonbitmap);
 	    nonbitmap = NULL;
+	}
+    }
+
+    /* Combine the two lists into one. */
+    if (depends_list) {
+	if (nonbitmap) {
+	    _invlist_union(nonbitmap, depends_list, &nonbitmap);
+	    SvREFCNT_dec(depends_list);
+	}
+	else {
+	    nonbitmap = depends_list;
 	}
     }
 
