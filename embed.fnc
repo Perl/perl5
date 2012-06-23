@@ -1052,8 +1052,6 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #ifdef PERL_IN_REGCOMP_C
-EMi	|U8	|set_regclass_bit|NN struct RExC_state_t* pRExC_state|NN regnode* node|const U8 value|NN SV** invlist_ptr|NN AV** alternate_ptr
-EMs	|U8	|set_regclass_bit_fold|NN struct RExC_state_t *pRExC_state|NN regnode* node|const U8 value|NN SV** invlist_ptr|NN AV** alternate_ptr
 EMs	|void	|add_alternate	|NN AV** alternate_ptr|NN U8* string|STRLEN len
 EMsR	|SV*	|_new_invlist_C_array|NN UV* list
 #endif
