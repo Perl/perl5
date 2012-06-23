@@ -264,7 +264,9 @@ where you can't directly call Exporter's
 import method.  The export_to_level
 method looks like:
 
-    MyPackage->export_to_level($where_to_export, $package, @what_to_export);
+    MyPackage->export_to_level(
+	$where_to_export, $package, @what_to_export
+    );
 
 where C<$where_to_export> is an integer telling how far up the calling stack
 to export your symbols, and C<@what_to_export> is an array telling what
@@ -435,9 +437,9 @@ A workaround for this is to call the constants once in a C<BEGIN> block:
 
    use Socket ;
 
-   foo( SO_LINGER );     ## SO_LINGER NOT optimized away; called at runtime
+   foo( SO_LINGER );  ## SO_LINGER NOT optimized away; called at runtime
    BEGIN { SO_LINGER }
-   foo( SO_LINGER );     ## SO_LINGER optimized away at compile time.
+   foo( SO_LINGER );  ## SO_LINGER optimized away at compile time.
 
 This forces the C<AUTOLOAD> for C<SO_LINGER> to take place before
 SO_LINGER is encountered later in C<My> package.
