@@ -157,7 +157,8 @@ foreach my $pm_file (sort keys %module_diffs) {
     ++$count;
 
     if (!defined $orig_pm_version || $orig_pm_version eq 'undef') { # sigh
-        print "ok $count - SKIP Can't pass \$VERSION in $pm_file\n" if $tap;
+        print "ok $count - SKIP Can't parse \$VERSION in $pm_file\n"
+          if $tap;
     } elsif (!defined $pm_version || $pm_version eq 'undef') {
         print "not ok $count - in $pm_file version was $orig_pm_version, now unparsable\n" if $tap;
     } elsif ($pm_version ne $orig_pm_version) { # good
