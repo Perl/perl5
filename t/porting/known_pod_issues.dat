@@ -322,7 +322,6 @@ lib/dbm_filter/null.pm	Verbatim line length including indents exceeds 79 by	1
 lib/dbm_filter/utf8.pm	Verbatim line length including indents exceeds 79 by	1
 lib/deprecate.pm	Verbatim line length including indents exceeds 79 by	2
 lib/english.pm	Verbatim line length including indents exceeds 79 by	1
-lib/exporter.pm	Verbatim line length including indents exceeds 79 by	2
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2
 lib/extutils/xssymset.pm	Verbatim line length including indents exceeds 79 by	1
 lib/file/basename.pm	Verbatim line length including indents exceeds 79 by	2
