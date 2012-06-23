@@ -12176,7 +12176,6 @@ parseit:
 			/* If any of the folded characters of this are in the
 			 * Latin1 range, tell the regex engine that this can
 			 * match a non-utf8 target string.  */
-			if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
 			    while (loc < e) {
 
 				/* Can't mix ascii with non- under /aa */
@@ -12199,7 +12198,6 @@ parseit:
 				}
 				loc += UTF8SKIP(loc);
 			    }
-			}
 
 			add_alternate(&unicode_alternate, foldbuf, foldlen);
 		    end_multi_fold: ;
