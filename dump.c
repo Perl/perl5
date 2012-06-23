@@ -1367,6 +1367,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_DYNFILE, "DYNFILE,"},
     {CVf_AUTOLOAD, "AUTOLOAD,"},
     {CVf_HASEVAL, "HASEVAL"},
+    {CVf_SLABBED, "SLABBED,"},
     {CVf_ISXSUB, "ISXSUB,"}
 };
 
