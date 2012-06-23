@@ -28,8 +28,9 @@
  *			the op may be safely op_free()d multiple times
  *	op_latefreed	an op_latefree op has been op_free()d
  *	op_attached	this op (sub)tree has been attached to a CV
+ *	op_savefree	on savestack via SAVEFREEOP
  *
- *	op_spare	three spare bits!
+ *	op_spare	two spare bits!
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
  *			by default, set to the number of children until
@@ -62,7 +63,8 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_latefree:1;	\
     PERL_BITFIELD16 op_latefreed:1;	\
     PERL_BITFIELD16 op_attached:1;	\
-    PERL_BITFIELD16 op_spare:3;		\
+    PERL_BITFIELD16 op_savefree:1;	\
+    PERL_BITFIELD16 op_spare:2;		\
     U8		op_flags;		\
     U8		op_private;
 #endif
