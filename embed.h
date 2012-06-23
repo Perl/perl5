@@ -794,10 +794,6 @@
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #endif
-#if defined(PL_OP_SLAB_ALLOC)
-#define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
-#define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
-#endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif
@@ -994,6 +990,8 @@
 #  endif
 #endif
 #ifdef PERL_CORE
+#define Slab_Alloc(a)		Perl_Slab_Alloc(aTHX_ a)
+#define Slab_Free(a)		Perl_Slab_Free(aTHX_ a)
 #define allocmy(a,b,c)		Perl_allocmy(aTHX_ a,b,c)
 #define amagic_is_enabled(a)	Perl_amagic_is_enabled(aTHX_ a)
 #define apply(a,b,c)		Perl_apply(aTHX_ a,b,c)
@@ -1269,6 +1267,14 @@
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #    endif
 #  endif
+#  if !defined(PL_OP_SLAB_ALLOC)
+#define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
+#  endif
+#  if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
+#define opslab_force_free(a)	Perl_opslab_force_free(aTHX_ a)
+#define opslab_free(a)		Perl_opslab_free(aTHX_ a)
+#define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
+#  endif
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
@@ -1311,9 +1317,7 @@
 #  endif
 #  if defined(PERL_DEBUG_READONLY_OPS)
 #    if defined(PERL_IN_OP_C)
-#      if defined(PL_OP_SLAB_ALLOC)
 #define Slab_to_rw(a)		S_Slab_to_rw(aTHX_ a)
-#      endif
 #    endif
 #  endif
 #  if defined(PERL_IN_AV_C)

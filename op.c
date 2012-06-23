@@ -298,6 +298,203 @@ Perl_Slab_Free(pTHX_ void *op)
 	}
     }
 }
+#else /* !defined(PL_OP_SLAB_ALLOC) */
+
+/* See the explanatory comments above struct opslab in op.h. */
+
+# ifndef PERL_SLAB_SIZE
+#  define PERL_SLAB_SIZE 64
+# endif
+
+/* rounds up to nearest pointer */
+# define SIZE_TO_PSIZE(x)	(((x) + sizeof(I32 *) - 1)/sizeof(I32 *))
+# define DIFF(o,p)		((size_t)((I32 **)(p) - (I32**)(o)))
+
+static OPSLAB *
+S_new_slab(pTHX_ size_t sz)
+{
+    OPSLAB *slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
+    slab->opslab_first = (OPSLOT *)((I32 **)slab + sz - 1);
+    return slab;
+}
+
+void *
+Perl_Slab_Alloc(pTHX_ size_t sz)
+{
+    dVAR;
+    OPSLAB *slab;
+    OPSLAB *slab2;
+    OPSLOT *slot;
+    OP *o;
+    size_t space;
+
+    if (!PL_compcv || CvROOT(PL_compcv)
+     || (CvSTART(PL_compcv) && !CvSLABBED(PL_compcv)))
+	return PerlMemShared_calloc(1, sz);
+
+    if (!CvSTART(PL_compcv)) { /* sneak it in here */
+	CvSTART(PL_compcv) =
+	    (OP *)(slab = S_new_slab(aTHX_ PERL_SLAB_SIZE));
+	CvSLABBED_on(PL_compcv);
+	slab->opslab_refcnt = 2; /* one for the CV; one for the new OP */
+    }
+    else ++(slab = (OPSLAB *)CvSTART(PL_compcv))->opslab_refcnt;
+
+    sz = SIZE_TO_PSIZE(sz) + OPSLOT_HEADER_P;
+
+    if (slab->opslab_freed) {
+	OP **too = &slab->opslab_freed;
+	o = *too;
+	while (o && DIFF(OpSLOT(o), OpSLOT(o)->opslot_next) < sz) {
+	    o = *(too = &o->op_next);
+	}
+	if (o) {
+	    *too = o->op_next;
+	    Zero(o, DIFF(o, OpSLOT(o)->opslot_next), I32 *);
+	    o->op_slabbed = 1;
+	    return (void *)o;
+	}
+    }
+
+# define INIT_OPSLOT \
+	    slot->opslot_slab = slab;			\
+	    slot->opslot_next = slab2->opslab_first;	\
+	    slab2->opslab_first = slot;			\
+	    o = &slot->opslot_op;			\
+	    o->op_slabbed = 1
+
+    /* The partially-filled slab is next in the chain. */
+    slab2 = slab->opslab_next ? slab->opslab_next : slab;
+    if ((space = DIFF(&slab2->opslab_slots, slab2->opslab_first)) < sz) {
+	/* Remaining space is too small. */
+
+	OPSLAB *newslab;
+
+	/* If we can fit a BASEOP, add it to the free chain, so as not
+	   to waste it. */
+	if (space >= SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P) {
+	    slot = &slab2->opslab_slots;
+	    INIT_OPSLOT;
+	    o->op_type = OP_FREED;
+	    o->op_next = slab->opslab_freed;
+	    slab->opslab_freed = o;
+	}
+
+	/* Create a new slab.  Make this one twice as big. */
+	slot = slab2->opslab_first;
+	while (slot->opslot_next) slot = slot->opslot_next;
+	newslab = S_new_slab(aTHX_ DIFF(slab2, slot)*2);
+	newslab->opslab_next = slab->opslab_next;
+	slab->opslab_next = slab2 = newslab;
+    }
+    assert(DIFF(&slab2->opslab_slots, slab2->opslab_first) >= sz);
+
+    /* Create a new op slot */
+    slot = (OPSLOT *)((I32 **)slab2->opslab_first - sz);
+    assert(slot >= &slab2->opslab_slots);
+    INIT_OPSLOT;
+    return (void *)o;
+}
+
+# undef INIT_OPSLOT
+
+/* This cannot possibly be right, but it was copied from the old slab
+   allocator, to which it was originally added, without explanation, in
+   commit 083fcd5. */
+# ifdef NETWARE
+#    define PerlMemShared PerlMem
+# endif
+
+void
+Perl_Slab_Free(pTHX_ void *op)
+{
+    OP * const o = (OP *)op;
+    OPSLAB *slab;
+
+    PERL_ARGS_ASSERT_SLAB_FREE;
+
+    if (!o->op_slabbed) {
+	PerlMemShared_free(op);
+	return;
+    }
+
+    slab = OpSLAB(o);
+    /* If this op is already freed, our refcount will get screwy. */
+    assert(o->op_type != OP_FREED);
+    o->op_type = OP_FREED;
+    o->op_next = slab->opslab_freed;
+    slab->opslab_freed = o;
+    OpslabREFCNT_dec_padok(slab);
+}
+
+void
+Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
+{
+    dVAR;
+    const bool havepad = !!PL_comppad;
+    PERL_ARGS_ASSERT_OPSLAB_FREE_NOPAD;
+    if (havepad) {
+	ENTER;
+	PAD_SAVE_SETNULLPAD();
+    }
+    opslab_free(slab);
+    if (havepad) LEAVE;
+}
+
+void
+Perl_opslab_free(pTHX_ OPSLAB *slab)
+{
+    OPSLAB *slab2;
+    PERL_ARGS_ASSERT_OPSLAB_FREE;
+    assert(slab->opslab_refcnt == 1);
+    for (; slab; slab = slab2) {
+	slab2 = slab->opslab_next;
+# ifdef DEBUGGING
+	slab->opslab_refcnt = ~(size_t)0;
+# endif
+	PerlMemShared_free(slab);
+    }
+}
+
+void
+Perl_opslab_force_free(pTHX_ OPSLAB *slab)
+{
+    OPSLAB *slab2;
+    OPSLOT *slot;
+# ifdef DEBUGGING
+    size_t savestack_count = 0;
+# endif
+    PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE;
+    slab2 = slab;
+    do {
+	for (slot = slab2->opslab_first;
+	     slot->opslot_next;
+	     slot = slot->opslot_next) {
+	    if (slot->opslot_op.op_type != OP_FREED
+	     && !(slot->opslot_op.op_savefree
+# ifdef DEBUGGING
+		  && ++savestack_count
+# endif
+		 )
+	    ) {
+		assert(slot->opslot_op.op_slabbed);
+		slab->opslab_refcnt++; /* op_free may free slab */
+		op_free(&slot->opslot_op);
+		if (!--slab->opslab_refcnt) goto free;
+	    }
+	}
+    } while ((slab2 = slab2->opslab_next));
+    /* > 1 because the CV still holds a reference count. */
+    if (slab->opslab_refcnt > 1) { /* still referenced by the savestack */
+# ifdef DEBUGGING
+	assert(savestack_count == slab->opslab_refcnt-1);
+# endif
+	return;
+    }
+   free:
+    opslab_free(slab);
+}
+
 #endif
 /*
  * In the following definition, the ", (OP*)0" is just to make the compiler
@@ -530,7 +727,14 @@ Perl_op_free(pTHX_ OP *o)
     dVAR;
     OPCODE type;
 
-    if (!o)
+#ifndef PL_OP_SLAB_ALLOC
+    /* Though ops may be freed twice, freeing the op after its slab is a
+       big no-no. */
+    assert(!o || !o->op_slabbed || OpSLAB(o)->opslab_refcnt != ~(size_t)0); 
+#endif
+    /* During the forced freeing of ops after compilation failure, kidops
+       may be freed before their parents. */
+    if (!o || o->op_type == OP_FREED)
 	return;
     if (o->op_latefreed) {
 	if (o->op_latefree)
@@ -2850,6 +3054,9 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_next = 0;
 	CALL_PEEP(PL_main_start);
 	finalize_optree(PL_main_root);
+#ifndef PL_OP_SLAB_ALLOC
+	cv_forget_slab(PL_compcv);
+#endif
 	PL_compcv = 0;
 
 	/* Register with debugger */
@@ -4369,6 +4576,10 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		 * confident that nothing used that CV's pad while the
 		 * regex was parsed */
 		assert(AvFILLp(PL_comppad) == 0); /* just @_ */
+#ifndef PL_OP_SLAB_ALLOC
+		/* But we know that one op is using this CV's slab. */
+		cv_forget_slab(PL_compcv);
+#endif
 		LEAVE_SCOPE(floor);
 		pm->op_pmflags &= ~PMf_HAS_CV;
 	    }
@@ -4412,6 +4623,10 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		 * pad_fixup_inner_anons() can find it */
 		(void)pad_add_anon(cv, o->op_type);
 		SvREFCNT_inc_simple_void(cv);
+
+#ifndef PL_OP_SLAB_ALLOC
+		cv_forget_slab(cv);
+#endif
 	    }
 	    else {
 		pm->op_code_list = expr;
@@ -6217,7 +6432,10 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     /* for my  $x () sets OPpLVAL_INTRO;
      * for our $x () sets OPpOUR_INTRO */
     loop->op_private = (U8)iterpflags;
-#ifdef PL_OP_SLAB_ALLOC
+#ifndef PL_OP_SLAB_ALLOC
+    if (DIFF(loop, OpSLOT(loop)->opslot_next)
+	 < SIZE_TO_PSIZE(sizeof(LOOP)))
+#endif
     {
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
@@ -6225,9 +6443,6 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	S_op_destroy(aTHX_ (OP*)loop);
 	loop = tmp;
     }
-#else
-    loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
-#endif
     loop->op_targ = padoff;
     wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
     if (madsv)
@@ -6878,6 +7093,9 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
+#ifndef PL_OP_SLAB_ALLOC
+	    cv_forget_slab(cv);
+#endif
 	    sv_setpvs(MUTABLE_SV(cv), "");  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
@@ -6908,6 +7126,8 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
 	    AV *const temp_av = CvPADLIST(cv);
 	    CV *const temp_cv = CvOUTSIDE(cv);
+	    const cv_flags_t slabbed = CvSLABBED(cv);
+	    OP * const cvstart = CvSTART(cv);
 
 	    assert(!CvWEAKOUTSIDE(cv));
 	    assert(!CvCVGV_RC(cv));
@@ -6920,6 +7140,10 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvPADLIST(cv) = CvPADLIST(PL_compcv);
 	    CvOUTSIDE(PL_compcv) = temp_cv;
 	    CvPADLIST(PL_compcv) = temp_av;
+	    CvSTART(cv) = CvSTART(PL_compcv);
+	    CvSTART(PL_compcv) = cvstart;
+	    if (slabbed) CvSLABBED_on(PL_compcv);
+	    else CvSLABBED_off(PL_compcv);
 
 	    if (CvFILE(cv) && CvDYNFILE(cv)) {
 		Safefree(CvFILE(cv));
@@ -6995,6 +7219,12 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     CvROOT(cv)->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(CvROOT(cv), 1);
+#ifndef PL_OP_SLAB_ALLOC
+    /* The cv no longer needs to hold a refcount on the slab, as CvROOT
+       itself has a refcount. */
+    CvSLABBED_off(cv);
+    OpslabREFCNT_dec_padok((OPSLAB *)CvSTART(cv));
+#endif
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
@@ -7376,6 +7606,9 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+#ifndef PL_OP_SLAB_ALLOC
+    cv_forget_slab(cv);
+#endif
 #ifdef PERL_MAD
     op_getmad(o,pegop,'n');
     op_getmad_weak(block, pegop, 'b');
