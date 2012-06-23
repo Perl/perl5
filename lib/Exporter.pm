@@ -152,7 +152,7 @@ ampersand in front of a function is optional, e.g.
 If you are only exporting function names it is recommended to omit the
 ampersand, as the implementation is faster this way.
 
-=head2 Selecting What To Export
+=head2 Selecting What to Export
 
 Do B<not> export method names!
 
@@ -212,7 +212,7 @@ but with list entries that are syntactically distinct from symbol names.
 Unless you want to use its advanced features, this is probably all you
 need to know to use Exporter.
 
-=head1 Advanced features
+=head1 Advanced Features
 
 =head2 Specialised Import Lists
 
@@ -257,7 +257,7 @@ You can say C<BEGIN { $Exporter::Verbose=1 }> to see how the
 specifications are being processed and what is actually being imported
 into modules.
 
-=head2 Exporting without using Exporter's import method
+=head2 Exporting Without Using Exporter's import Method
 
 Exporter has a special method, 'export_to_level' which is used in situations
 where you can't directly call Exporter's
@@ -305,7 +305,7 @@ the program or module that used package A.
 Note: Be careful not to modify C<@_> at all before you call export_to_level
 - or people using your package will get very unexplained results!
 
-=head2 Exporting without inheriting from Exporter
+=head2 Exporting Without Inheriting from Exporter
 
 By including Exporter in your C<@ISA> you inherit an Exporter's import() method
 but you also inherit several other helper methods which you probably don't
@@ -377,7 +377,7 @@ unchanged but will trigger a warning (with C<-w>) to avoid misspelt tags
 names being silently added to C<@EXPORT> or C<@EXPORT_OK>.  Future versions
 may make this a fatal error.
 
-=head2 Generating combined tags
+=head2 Generating Combined Tags
 
 If several symbol categories exist in C<%EXPORT_TAGS>, it's usually
 useful to create the utility ":all" to simplify "use" statements.
@@ -519,7 +519,7 @@ use statement.
    # @ISA setup is automatic
    # all assignments happen at compile time
 
-=head2 What not to Export
+=head2 What Not to Export
 
 You have been warned already in L</Selecting What To Export>
 to not export:
