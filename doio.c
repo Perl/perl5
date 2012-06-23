@@ -2384,9 +2384,12 @@ Perl_vms_start_glob
     {
 	GV * const envgv = gv_fetchpvs("ENV", 0, SVt_PVHV);
 	SV ** const home = hv_fetchs(GvHV(envgv), "HOME", 0);
+	SV ** const path = hv_fetchs(GvHV(envgv), "PATH", 0);
 	if (home && *home) SvGETMAGIC(*home);
+	if (path && *path) SvGETMAGIC(*path);
 	save_hash(gv_fetchpvs("ENV", 0, SVt_PVHV));
 	if (home && *home) SvSETMAGIC(*home);
+	if (path && *path) SvSETMAGIC(*path);
     }
     (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
 		  FALSE, O_RDONLY, 0, NULL);
