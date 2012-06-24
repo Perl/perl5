@@ -2303,7 +2303,7 @@ operations.
 
 (F) Some portion of a version initialization is too large for the
 size of integers for your architecture.  This is not a warning
-because there is no rational reason for a version to try and use a
+because there is no rational reason for a version to try and use an
 element larger than typically 2**32.  This is usually caused by
 trying to use some odd mathematical operation as a version, like
 100/9.
