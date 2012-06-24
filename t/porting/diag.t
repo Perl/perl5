@@ -50,7 +50,7 @@ while (<$func_fh>) {
 close $func_fh;
 
 my $function_re = join '|', @functions;
-my $source_msg_re = '(?<routine>\bDIE\b|$function_re)';
+my $source_msg_re = "(?<routine>\\bDIE\\b|$function_re)";
 my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \(aTHX_ \s*
@@ -392,6 +392,7 @@ Debug leaking scalars child failed%s with errno %d: %s
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
+Eval-group in insecure regular expression
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
@@ -405,6 +406,7 @@ Goto undefined subroutine &%s
 Illegal character %sin prototype for %s : %s
 internal %<num>p might conflict with future printf extensions
 invalid control request: '\%o'
+Invalid negative number (%s) in chr
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
@@ -420,6 +422,7 @@ More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
+No such class field "%s"
 Not an XSUB reference
 Operator or semicolon missing before %c%s
 Perl %s required--this is only %s, stopped
