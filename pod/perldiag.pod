@@ -1794,13 +1794,13 @@ single form when it must operate on them directly.  Either you've passed
 an invalid file specification to Perl, or you've found a case the
 conversion routines don't handle.  Drat.
 
-=item %s: Eval-group in insecure regular expression
+=item Eval-group in insecure regular expression
 
 (F) Perl detected tainted data when trying to compile a regular
 expression that contains the C<(?{ ... })> zero-width assertion, which
 is unsafe.  See L<perlre/(?{ code })>, and L<perlsec>.
 
-=item %s: Eval-group not allowed at runtime, use re 'eval'
+=item Eval-group not allowed at runtime, use re 'eval' in regex m/%s/
 
 (F) Perl tried to compile a regular expression containing the
 C<(?{ ... })> zero-width assertion at run time, as it would when the
@@ -1810,7 +1810,7 @@ C<re 'eval'> pragma or by explicitly building the pattern from an
 interpolated string at run time and using that in an eval().  See
 L<perlre/(?{ code })>.
 
-=item %s: Eval-group not allowed, use re 'eval'
+=item Eval-group not allowed, use re 'eval' in regex m/%s/
 
 (F) A regular expression contained the C<(?{ ... })> zero-width
 assertion, but that construct is only allowed when the C<use re 'eval'>
