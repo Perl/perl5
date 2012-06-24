@@ -802,6 +802,7 @@ test_proto 'sqrt', 4, 2;
 test_proto 'srand';
 $tests ++;
 &CORE::srand;
+() = &CORE::srand;
 pass '&srand with no args does not crash';
 
 test_proto 'study';

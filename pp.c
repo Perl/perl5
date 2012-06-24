@@ -2660,7 +2660,7 @@ PP(pp_srand)
     dVAR; dSP; dTARGET;
     UV anum;
 
-    if (MAXARG >= 1 && TOPs) {
+    if (MAXARG >= 1 && (TOPs || POPs)) {
         SV *top;
         char *pv;
         STRLEN len;
