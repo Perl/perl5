@@ -2301,6 +2301,8 @@ operations.
 
 =item Integer overflow in version
 
+=item Integer overflow in version %d
+
 (W overflow) Some portion of a version initialization is too large for
 the size of integers for your architecture.  This is not a warning
 because there is no rational reason for a version to try and use an

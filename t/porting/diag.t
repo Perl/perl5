@@ -403,7 +403,6 @@ glob failed (child exited with status %d%s)
 Goto undefined subroutine
 Goto undefined subroutine &%s
 Illegal character %sin prototype for %s : %s
-Integer overflow in version %d
 internal %<num>p might conflict with future printf extensions
 invalid control request: '\%o'
 Invalid range "%c-%c" in transliteration operator
