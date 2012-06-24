@@ -2289,7 +2289,7 @@ integers for your architecture.
 
 =item Integer overflow in %s number
 
-(W overflow) The hexadecimal, octal or binary number you have specified
+(S overflow) The hexadecimal, octal or binary number you have specified
 either as a literal or as an argument to hex() or oct() is too big for
 your architecture, and has been converted to a floating point number.
 On a 32-bit architecture the largest hexadecimal, octal or binary number
