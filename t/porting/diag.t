@@ -368,8 +368,6 @@ sub check_message {
 __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
-%s (%d) does not match %s (%d),
-%s (%d) smaller than %s (%d),
 '%c' allowed only after types %s in %s
 bad top format reference
 Cannot apply "%s" in non-PerlIO perl
@@ -430,7 +428,6 @@ Infinite recursion in regex
 Integer overflow in srand
 internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
-invalid control request: '\%o'
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
@@ -465,7 +462,6 @@ Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Repeated format line will never terminate (~~ and @#)
 Reversed %c= operator
 %s(%f) failed
-%sCompilation failed in regexp
 %sCompilation failed in require
 set %s %p %p %p
 %s free() ignored (RMAGIC, PERL_CORE)
@@ -474,12 +470,9 @@ SIG%s handler "%s" not defined.
 %s in %s
 Size magic not implemented
 %s number > %s non-portable
-%s object version %s does not match %s %s
 %srealloc() %signored
-%s has too many errors.
 %s in regex m/%s/
 %s on %s %s
-%s on %s %s %s
 socketpair not implemented!
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
@@ -521,12 +514,9 @@ Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
-value of node is %d in Offset macro
-Variable "%c%s" is not imported
 waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
-Wide character in print
 Within []-length '*' not allowed in %s
 Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
