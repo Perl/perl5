@@ -55,6 +55,7 @@ sub test_X_ops {
     my ($file, $desc_tail, $skip) = @_;
     my @stat = CORE::stat $file;
     my $stat = File::stat::stat($file);
+    my $lstat = File::stat::lstat($file);
     isa_ok($stat, 'File::stat', 'should build a stat object');
 
     for my $op (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
@@ -62,6 +63,7 @@ sub test_X_ops {
             note("Not testing -A $desc_tail");
             next;
         }
+        my $stat = $op eq 'l' ? $lstat : $stat;
         for my $access ('', 'use filetest "access";') {
             my ($warnings, $awarn, $vwarn, $rv);
             my $desc = $access
