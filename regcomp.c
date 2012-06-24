@@ -12108,6 +12108,37 @@ parseit:
         }
     }
 
+    /* Here, we have calculated what code points should be in the character
+     * class.
+     *
+     * Now we can see about various optimizations.  Fold calculation (which we
+     * did above) needs to take place before inversion.  Otherwise /[^k]/i
+     * would invert to include K, which under /i would match k, which it
+     * shouldn't. */
+
+    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
+     * set the FOLD flag yet, so this does optimize those.  It doesn't
+     * optimize locale.  Doing so perhaps could be done as long as there is
+     * nothing like \w in it; some thought also would have to be given to the
+     * interaction with above 0x100 chars */
+    if ((ANYOF_FLAGS(ret) & ANYOF_INVERT)
+        && ! LOC
+	&& ! depends_list
+	&& ! unicode_alternate
+	&& SvCUR(listsv) == initial_listsv_len)
+    {
+        _invlist_invert(cp_list);
+
+        /* Any swash can't be used as-is, because we've inverted things */
+        if (swash) {
+            SvREFCNT_dec(swash);
+            swash = NULL;
+        }
+
+	/* Clear the invert flag since have just done it here */
+	ANYOF_FLAGS(ret) &= ~ANYOF_INVERT;
+    }
+
     /* Here, <cp_list> contains all the code points we can determine at
      * compile time that match under all conditions.  Go through it, and
      * for things that belong in the bitmap, put them there, and delete from
@@ -12166,126 +12197,6 @@ parseit:
 	else {
 	    cp_list = depends_list;
 	}
-    }
-
-    /* Here, we have calculated what code points should be in the character
-     * class.  <cp_list> does not overlap the bitmap except possibly in the
-     * case of DEPENDS rules.
-     *
-     * Now we can see about various optimizations.  Fold calculation (which we
-     * did above) needs to take place before inversion.  Otherwise /[^k]/i
-     * would invert to include K, which under /i would match k, which it
-     * shouldn't. */
-
-    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
-     * set the FOLD flag yet, so this does optimize those.  It doesn't
-     * optimize locale.  Doing so perhaps could be done as long as there is
-     * nothing like \w in it; some thought also would have to be given to the
-     * interaction with above 0x100 chars */
-    if ((ANYOF_FLAGS(ret) & ANYOF_INVERT)
-        && ! LOC
-	&& ! unicode_alternate
-	/* In case of /d, there are some things that should match only when in
-	 * not in the bitmap, i.e., they require UTF8 to match.  These are
-	 * listed in cp_list, but if ANYOF_NONBITMAP_NON_UTF8 is set in this
-	 * case, they don't require UTF8, so can invert here */
-	&& (! cp_list
-	    || ! DEPENDS_SEMANTICS
-	    || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
-	&& SvCUR(listsv) == initial_listsv_len)
-    {
-	int i;
-	if (! cp_list) {
-	    for (i = 0; i < 256; ++i) {
-		if (ANYOF_BITMAP_TEST(ret, i)) {
-		    ANYOF_BITMAP_CLEAR(ret, i);
-		}
-		else {
-		    ANYOF_BITMAP_SET(ret, i);
-		    prevvalue = value;
-		    value = i;
-		}
-	    }
-	    /* The inversion means that everything above 255 is matched */
-	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
-	}
-	else {
-	    /* Here, also has things outside the bitmap that may overlap with
-	     * the bitmap.  We have to sync them up, so that they get inverted
-	     * in both places.  Earlier, we removed all overlaps except in the
-	     * case of /d rules, so no syncing is needed except for this case
-	     */
-	    SV *remove_list = NULL;
-
-	    if (DEPENDS_SEMANTICS) {
-		UV start, end;
-
-		/* Set the bits that correspond to the ones that aren't in the
-		 * bitmap.  Otherwise, when we invert, we'll miss these.
-		 * Earlier, we removed from the cp_list all code points
-		 * < 128, so there is no extra work here */
-		invlist_iterinit(cp_list);
-		while (invlist_iternext(cp_list, &start, &end)) {
-		    if (start > 255) {  /* The bit map goes to 255 */
-			break;
-		    }
-		    if (end > 255) {
-			end = 255;
-		    }
-		    for (i = start; i <= (int) end; ++i) {
-			ANYOF_BITMAP_SET(ret, i);
-			prevvalue = value;
-			value = i;
-		    }
-		}
-	    }
-
-	    /* Now invert both the bitmap and the cp_list.  Anything in the
-	     * bitmap has to also be removed from the non-bitmap, but again,
-	     * there should not be overlap unless is /d rules. */
-	    _invlist_invert(cp_list);
-
-	    /* Any swash can't be used as-is, because we've inverted things */
-	    if (swash) {
-		SvREFCNT_dec(swash);
-		swash = NULL;
-	    }
-
-	    for (i = 0; i < 256; ++i) {
-		if (ANYOF_BITMAP_TEST(ret, i)) {
-		    ANYOF_BITMAP_CLEAR(ret, i);
-		    if (DEPENDS_SEMANTICS) {
-			if (! remove_list) {
-			    remove_list = _new_invlist(2);
-			}
-			remove_list = add_cp_to_invlist(remove_list, i);
-		    }
-		}
-		else {
-		    ANYOF_BITMAP_SET(ret, i);
-		    prevvalue = value;
-		    value = i;
-		}
-	    }
-
-	    /* And do the removal */
-	    if (DEPENDS_SEMANTICS) {
-		if (remove_list) {
-		    _invlist_subtract(cp_list, remove_list, &cp_list);
-		    SvREFCNT_dec(remove_list);
-		}
-	    }
-	    else {
-		/* There is no overlap for non-/d, so just delete anything
-		 * below 256 */
-		_invlist_intersection(cp_list, PL_AboveLatin1, &cp_list);
-	    }
-	}
-
-	stored = 256 - stored;
-
-	/* Clear the invert flag since have just done it here */
-	ANYOF_FLAGS(ret) &= ~ANYOF_INVERT;
     }
 
     /* Folding in the bitmap is taken care of above, but not for locale (for
