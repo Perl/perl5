@@ -3111,6 +3111,7 @@ Perl_sighandler(int sig)
     U32 flags = 0;
     XPV * const tXpv = PL_Xpv;
     I32 old_ss_ix = PL_savestack_ix;
+    SV *errsv_save = NULL;
 
 
     if (!PL_psig_ptr[sig]) {
@@ -3189,10 +3190,13 @@ Perl_sighandler(int sig)
 #endif
     PUTBACK;
 
+    errsv_save = newSVsv(ERRSV);
+
     call_sv(MUTABLE_SV(cv), G_DISCARD|G_EVAL);
 
     POPSTACK;
     if (SvTRUE(ERRSV)) {
+        SvREFCNT_dec(errsv_save);
 #ifndef PERL_MICRO
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
@@ -3216,6 +3220,11 @@ Perl_sighandler(int sig)
 #endif /* !PERL_MICRO */
 	die_sv(ERRSV);
     }
+    else {
+        sv_setsv(ERRSV, errsv_save);
+        SvREFCNT_dec(errsv_save);
+    }
+
 cleanup:
     /* pop any of SAVEFREESV, SAVEDESTRUCTOR_X and "save in progress" */
     PL_savestack_ix = old_ss_ix;

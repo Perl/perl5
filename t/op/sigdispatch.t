@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 26;
+plan tests => 29;
 
 watchdog(15);
 
@@ -146,4 +146,15 @@ like $@, qr/No such hook: __DIE__\\0whoops at/;
 
     $SIG{"KILL\0"} = sub { 1 };
     like $w, qr/No such signal: SIGKILL\\0 at/, 'Arbitrary signal lookup through %SIG is clean';
+}
+
+# [perl #45173]
+{
+    my $hup_called;
+    local $SIG{HUP} = sub { $hup_called = 1 };
+    $@ = "died";
+    is($@, "died");
+    kill 'HUP', $$;
+    is($hup_called, 1);
+    is($@, "died");
 }
