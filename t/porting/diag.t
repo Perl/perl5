@@ -215,7 +215,6 @@ sub check_file {
       $listed_as_line = $.+1;
     }
     next if /^#/;
-    next if /^ +/;
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
@@ -371,12 +370,20 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
+'%c' allowed only after types %s in %s
 bad top format reference
+Cannot apply "%s" in non-PerlIO perl
+Can't %s big-endian %ss on this
+Can't call mro_isa_changed_in() on anonymous symbol table
+Can't call mro_method_changed_in() on anonymous symbol table
 Can't coerce readonly %s to string
 Can't coerce readonly %s to string in %s
+Can't find string terminator %c%s%c anywhere before EOF
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
+Can't pipe "%s": %s
+Can't spawn: %s
 Can't spawn "%s": %s
 Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
@@ -384,27 +391,45 @@ Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
 \%c better written as $%c
 Character(s) in '%c' format wrapped in %s
+chown not implemented!
+clear %s
 Code missing after '/' in pack
 Code missing after '/' in unpack
 Corrupted regexp opcode %d > %d
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
+'/' does not take a repeat count in %s
+Don't know how to get file name
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
-Eval-group in insecure regular expression
+execl not implemented!
+EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
+filter_del can only delete in reverse order (currently)
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
+fork() not implemented!
+free %s
 Free to wrong pool %p not %p
 get %s %p %p %p
+gethostent not implemented!
+getpwnam returned invalid UIC %o for user "%s"
 glob failed (can't start child: %s)
 glob failed (child exited with status %d%s)
 Goto undefined subroutine
 Goto undefined subroutine &%s
+Got signal %d
+()-group starts with a count in %s
+Illegal binary digit '%c' ignored
 Illegal character %sin prototype for %s : %s
+Illegal hexadecimal digit '%c' ignored
+Illegal octal digit '%c' ignored
+Infinite recursion in regex
+Integer overflow in srand
 internal %<num>p might conflict with future printf extensions
+Invalid argument to sv_cat_decode
 invalid control request: '\%o'
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
@@ -413,20 +438,31 @@ Invalid type '%c' in pack
 Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
+ioctlsocket not implemented!
 'j' not supported on this platform
 'J' not supported on this platform
+killpg not implemented!
+length() used on %s (did you mean "scalar(%s)"?)
+length() used on %hash (did you mean "scalar(keys %hash)"?)
+length() used on @array (did you mean "scalar(@array)"?)
+List form of pipe open not implemented
+Malformed integer in [] in %s
 Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
+No %s allowed while running setgid
+No %s allowed with (suid) fdscript
 No such class field "%s"
 Not an XSUB reference
 Operator or semicolon missing before %c%s
+Pattern subroutine nesting without pos change exceeded limit in regex
 Perl %s required--this is only %s, stopped
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
+Repeated format line will never terminate (~~ and @#)
 Reversed %c= operator
 %s(%f) failed
 %sCompilation failed in regexp
@@ -441,12 +477,21 @@ Size magic not implemented
 %s object version %s does not match %s %s
 %srealloc() %signored
 %s has too many errors.
+%s in regex m/%s/
 %s on %s %s
 %s on %s %s %s
+socketpair not implemented!
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
+sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%f U_V is 0x%x, IV_MAX is 0x%x
 SWASHNEW didn't return an HV ref
+switching effective gid is not implemented
+switching effective uid is not implemented
+System V IPC is not implemented on this machine
 -T and -B not implemented on filehandles
+Terminating on signal SIG%s(%d)
+The crypt() function is unimplemented due to excessive paranoia.
+The crypt() function is not implemented on NetWare
 The flock() function is not implemented on NetWare
 The rewinddir() function is not implemented on NetWare
 The seekdir() function is not implemented on NetWare
@@ -454,21 +499,36 @@ The telldir() function is not implemented on NetWare
 Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
+unable to find VMSPIPE.COM for i/o piping
+Unknown Unicode option value %d
+Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
 Usage: CODE(0x%x)(%s)
 Usage: %s(%s)
 Usage: %s::%s(%s)
+Usage: File::Copy::rmscopy(from,to[,date_flag])
+Usage: VMS::Filespec::candelete(spec)
+Usage: VMS::Filespec::fileify(spec)
+Usage: VMS::Filespec::pathify(spec)
+Usage: VMS::Filespec::rmsexpand(spec[,defspec])
+Usage: VMS::Filespec::unixify(spec)
+Usage: VMS::Filespec::unixpath(spec)
 Usage: VMS::Filespec::unixrealpath(spec)
+Usage: VMS::Filespec::vmsify(spec)
+Usage: VMS::Filespec::vmspath(spec)
 Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 value of node is %d in Offset macro
 Variable "%c%s" is not imported
+waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
 Wide character in print
+Within []-length '*' not allowed in %s
 Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
+'X' outside of string in %s
 'X' outside of string in unpack
