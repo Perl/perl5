@@ -2299,6 +2299,15 @@ transparently promotes all numbers to a floating point representation
 internally--subject to loss of precision errors in subsequent
 operations.
 
+=item Integer overflow in srand
+
+(S overflow) The number you have passed to srand is too big to fit
+in your architecture's integer representation.  The number has been
+replaced with the largest integer supported (0xFFFFFFFF on 32-bit
+architectures).  This means you may be getting less randomness than
+you expect, because different random seeds above the maximum will
+return the same sequence of random numbers.
+
 =item Integer overflow in version
 
 =item Integer overflow in version %d

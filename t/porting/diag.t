@@ -425,7 +425,6 @@ Illegal character %sin prototype for %s : %s
 Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
 Infinite recursion in regex
-Integer overflow in srand
 internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
 Invalid range "%c-%c" in transliteration operator
