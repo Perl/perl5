@@ -11088,12 +11088,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
      * on to the engine */
     UV has_user_defined_property = 0;
 
-    /* code points this node matches that can't be stored in the bitmap */
-    SV* nonbitmap = NULL;
-
     /* inversion list of code points this node matches only when the target
      * string is in UTF-8.  (Because is under /d) */
     SV* depends_list = NULL;
+
+    /* inversion list of code points this node matches.  For much of the
+     * function, it includes only those that match regardless of the utf8ness
+     * of the target string */
+    SV* cp_list = NULL;
 
     /* List of multi-character folds that are matched by this node */
     AV* unicode_alternate  = NULL;
@@ -11462,8 +11464,8 @@ parseit:
 		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
-                    nonbitmap = add_cp_to_invlist(nonbitmap, '-');
-                    nonbitmap = add_cp_to_invlist(nonbitmap, prevvalue);
+                    cp_list = add_cp_to_invlist(cp_list, '-');
+                    cp_list = add_cp_to_invlist(cp_list, prevvalue);
 		}
 
 		range = 0; /* this was not a true range */
@@ -11549,16 +11551,16 @@ parseit:
                         PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
 		    break;
 		case ANYOF_HORIZWS:
-		    /* For these, we use the nonbitmap, as /d doesn't make a
+		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
 		     * if these characters had folds other than themselves, as
-		     * nonbitmap is subject to folding.  It turns out that \h
+		     * cp_list is subject to folding.  It turns out that \h
 		     * is just a synonym for XPosixBlank */
-		    _invlist_union(nonbitmap, PL_XPosixBlank, &nonbitmap);
+		    _invlist_union(cp_list, PL_XPosixBlank, &cp_list);
 		    break;
 		case ANYOF_NHORIZWS:
-                    _invlist_union_complement_2nd(nonbitmap,
-                                                 PL_XPosixBlank, &nonbitmap);
+                    _invlist_union_complement_2nd(cp_list,
+                                                 PL_XPosixBlank, &cp_list);
 		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
@@ -11658,15 +11660,15 @@ parseit:
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
 		    break;
 		case ANYOF_VERTWS:
-		    /* For these, we use the nonbitmap, as /d doesn't make a
+		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
 		     * if these characters had folds other than themselves, as
-		     * nonbitmap is subject to folding */
-		    _invlist_union(nonbitmap, PL_VertSpace, &nonbitmap);
+		     * cp_list is subject to folding */
+		    _invlist_union(cp_list, PL_VertSpace, &cp_list);
 		    break;
 		case ANYOF_NVERTWS:
-                    _invlist_union_complement_2nd(nonbitmap,
-                                                    PL_VertSpace, &nonbitmap);
+                    _invlist_union_complement_2nd(cp_list,
+                                                    PL_VertSpace, &cp_list);
 		    break;
 		case ANYOF_XDIGIT:
                     DO_POSIX(ret, namedclass, properties,
@@ -11714,7 +11716,7 @@ parseit:
 			       w, w, rangebegin);
 		    }
                     if (!SIZE_ONLY)
-                        nonbitmap = add_cp_to_invlist(nonbitmap, '-');
+                        cp_list = add_cp_to_invlist(cp_list, '-');
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
@@ -11730,7 +11732,7 @@ parseit:
 	/* now is the next time */
 	if (!SIZE_ONLY) {
 #ifndef EBCDIC
-            nonbitmap = _add_range_to_invlist(nonbitmap, prevvalue, value);
+            cp_list = _add_range_to_invlist(cp_list, prevvalue, value);
 #else
             UV* this_range = _new_invlist(1);
             _append_range_to_invlist(this_range, prevvalue, value);
@@ -11750,7 +11752,7 @@ parseit:
                 _invlist_intersection(this_range, PL_ASCII, &this_range, );
                 _invlist_intersection(this_range, PL_Alpha, &this_range, );
             }
-            _invlist_union(nonbitmap, this_range, &nonbitmap);
+            _invlist_union(cp_list, this_range, &cp_list);
             literal_endpoint = 0;
 #endif
         }
@@ -11764,12 +11766,12 @@ parseit:
 
     /* If folding, we calculate all characters that could fold to or from the
      * ones already on the list */
-    if (FOLD && nonbitmap) {
+    if (FOLD && cp_list) {
 	UV start, end;	/* End points of code point ranges */
 
 	SV* fold_intersection = NULL;
 
-        const UV highest_index = invlist_len(nonbitmap) - 1;
+        const UV highest_index = invlist_len(cp_list) - 1;
 
         /* In the Latin1 range, the characters that can be folded-to or -from
          * are precisely the alphabetic characters.  If the highest code point
@@ -11780,9 +11782,9 @@ parseit:
          * Otherwise, it starts a range that isn't in the set, so the max is
          * one less than it */
         if (! ELEMENT_RANGE_MATCHES_INVLIST(highest_index)
-            && invlist_array(nonbitmap)[highest_index] <= 256)
+            && invlist_array(cp_list)[highest_index] <= 256)
         {
-            _invlist_intersection(PL_L1PosixAlpha, nonbitmap, &fold_intersection);
+            _invlist_intersection(PL_L1PosixAlpha, cp_list, &fold_intersection);
         }
         else {
 
@@ -11828,7 +11830,7 @@ parseit:
              * be checked.  Get the intersection of this class and all the
              * possible characters that are foldable.  This can quickly narrow
              * down a large class */
-            _invlist_intersection(PL_utf8_foldable, nonbitmap,
+            _invlist_intersection(PL_utf8_foldable, cp_list,
                                   &fold_intersection);
         }
 
@@ -11864,8 +11866,8 @@ parseit:
                         /* ASCII is always matched; non-ASCII is matched only
                          * under Unicode rules */
                         if (isASCII(j) || AT_LEAST_UNI_SEMANTICS) {
-                            nonbitmap =
-                                add_cp_to_invlist(nonbitmap, PL_fold_latin1[j]);
+                            cp_list =
+                                add_cp_to_invlist(cp_list, PL_fold_latin1[j]);
                         }
                         else {
                             depends_list =
@@ -11905,33 +11907,33 @@ parseit:
                             case 'k':
                             case 'K':
                                 /* KELVIN SIGN */
-                                nonbitmap =
-                                    add_cp_to_invlist(nonbitmap, 0x212A);
+                                cp_list =
+                                    add_cp_to_invlist(cp_list, 0x212A);
                                 break;
                             case 's':
                             case 'S':
                                 /* LATIN SMALL LETTER LONG S */
-                                nonbitmap =
-                                    add_cp_to_invlist(nonbitmap, 0x017F);
+                                cp_list =
+                                    add_cp_to_invlist(cp_list, 0x017F);
                                 break;
                             case MICRO_SIGN:
-                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                cp_list = add_cp_to_invlist(cp_list,
                                                     GREEK_SMALL_LETTER_MU);
-                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                cp_list = add_cp_to_invlist(cp_list,
                                                     GREEK_CAPITAL_LETTER_MU);
                                 break;
                             case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
                             case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
                                 /* ANGSTROM SIGN */
-                                nonbitmap =
-                                        add_cp_to_invlist(nonbitmap, 0x212B);
+                                cp_list =
+                                        add_cp_to_invlist(cp_list, 0x212B);
                                 break;
                             case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
-                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                cp_list = add_cp_to_invlist(cp_list,
                                         LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
                                 break;
                             case LATIN_SMALL_LETTER_SHARP_S:
-                                nonbitmap = add_cp_to_invlist(nonbitmap,
+                                cp_list = add_cp_to_invlist(cp_list,
                                                 LATIN_CAPITAL_LETTER_SHARP_S);
 
                                 /* Under /a, /d, and /u, this can match the two
@@ -12050,7 +12052,7 @@ parseit:
                              * under /d are added to a separate list */
 			    if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS)
                             {
-				nonbitmap = add_cp_to_invlist(nonbitmap, c);
+				cp_list = add_cp_to_invlist(cp_list, c);
                             }
                             else {
                                 depends_list = add_cp_to_invlist(depends_list, c);
@@ -12068,12 +12070,12 @@ parseit:
      * properties */
     if (properties) {
         if (AT_LEAST_UNI_SEMANTICS) {
-            if (nonbitmap) {
-                _invlist_union(nonbitmap, properties, &nonbitmap);
+            if (cp_list) {
+                _invlist_union(cp_list, properties, &cp_list);
                 SvREFCNT_dec(properties);
             }
             else {
-                nonbitmap = properties;
+                cp_list = properties;
             }
         }
         else {
@@ -12087,12 +12089,12 @@ parseit:
                               &nonascii_but_latin1_properties);
             _invlist_subtract(properties, nonascii_but_latin1_properties,
                               &properties);
-            if (nonbitmap) {
-                _invlist_union(nonbitmap, properties, &nonbitmap);
+            if (cp_list) {
+                _invlist_union(cp_list, properties, &cp_list);
                 SvREFCNT_dec(properties);
             }
             else {
-                nonbitmap = properties;
+                cp_list = properties;
             }
 
             if (depends_list) {
@@ -12106,20 +12108,20 @@ parseit:
         }
     }
 
-    /* Here, <nonbitmap> contains all the code points we can determine at
+    /* Here, <cp_list> contains all the code points we can determine at
      * compile time that match under all conditions.  Go through it, and
      * for things that belong in the bitmap, put them there, and delete from
-     * <nonbitmap> */
-    if (nonbitmap) {
+     * <cp_list> */
+    if (cp_list) {
 
 	/* This gets set if we actually need to modify things */
 	bool change_invlist = FALSE;
 
 	UV start, end;
 
-	/* Start looking through <nonbitmap> */
-	invlist_iterinit(nonbitmap);
-	while (invlist_iternext(nonbitmap, &start, &end)) {
+	/* Start looking through <cp_list> */
+	invlist_iterinit(cp_list);
+	while (invlist_iternext(cp_list, &start, &end)) {
 	    UV high;
 	    int i;
 
@@ -12143,31 +12145,31 @@ parseit:
 	}
 
         /* Done with loop; remove any code points that are in the bitmap from
-         * <nonbitmap> */
+         * <cp_list> */
 	if (change_invlist) {
-	    _invlist_subtract(nonbitmap, PL_Latin1, &nonbitmap);
+	    _invlist_subtract(cp_list, PL_Latin1, &cp_list);
 	}
 
 	/* If have completely emptied it, remove it completely */
-	if (invlist_len(nonbitmap) == 0) {
-	    SvREFCNT_dec(nonbitmap);
-	    nonbitmap = NULL;
+	if (invlist_len(cp_list) == 0) {
+	    SvREFCNT_dec(cp_list);
+	    cp_list = NULL;
 	}
     }
 
     /* Combine the two lists into one. */
     if (depends_list) {
-	if (nonbitmap) {
-	    _invlist_union(nonbitmap, depends_list, &nonbitmap);
+	if (cp_list) {
+	    _invlist_union(cp_list, depends_list, &cp_list);
 	    SvREFCNT_dec(depends_list);
 	}
 	else {
-	    nonbitmap = depends_list;
+	    cp_list = depends_list;
 	}
     }
 
     /* Here, we have calculated what code points should be in the character
-     * class.  <nonbitmap> does not overlap the bitmap except possibly in the
+     * class.  <cp_list> does not overlap the bitmap except possibly in the
      * case of DEPENDS rules.
      *
      * Now we can see about various optimizations.  Fold calculation (which we
@@ -12185,15 +12187,15 @@ parseit:
 	&& ! unicode_alternate
 	/* In case of /d, there are some things that should match only when in
 	 * not in the bitmap, i.e., they require UTF8 to match.  These are
-	 * listed in nonbitmap, but if ANYOF_NONBITMAP_NON_UTF8 is set in this
+	 * listed in cp_list, but if ANYOF_NONBITMAP_NON_UTF8 is set in this
 	 * case, they don't require UTF8, so can invert here */
-	&& (! nonbitmap
+	&& (! cp_list
 	    || ! DEPENDS_SEMANTICS
 	    || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
 	&& SvCUR(listsv) == initial_listsv_len)
     {
 	int i;
-	if (! nonbitmap) {
+	if (! cp_list) {
 	    for (i = 0; i < 256; ++i) {
 		if (ANYOF_BITMAP_TEST(ret, i)) {
 		    ANYOF_BITMAP_CLEAR(ret, i);
@@ -12220,10 +12222,10 @@ parseit:
 
 		/* Set the bits that correspond to the ones that aren't in the
 		 * bitmap.  Otherwise, when we invert, we'll miss these.
-		 * Earlier, we removed from the nonbitmap all code points
+		 * Earlier, we removed from the cp_list all code points
 		 * < 128, so there is no extra work here */
-		invlist_iterinit(nonbitmap);
-		while (invlist_iternext(nonbitmap, &start, &end)) {
+		invlist_iterinit(cp_list);
+		while (invlist_iternext(cp_list, &start, &end)) {
 		    if (start > 255) {  /* The bit map goes to 255 */
 			break;
 		    }
@@ -12238,10 +12240,10 @@ parseit:
 		}
 	    }
 
-	    /* Now invert both the bitmap and the nonbitmap.  Anything in the
+	    /* Now invert both the bitmap and the cp_list.  Anything in the
 	     * bitmap has to also be removed from the non-bitmap, but again,
 	     * there should not be overlap unless is /d rules. */
-	    _invlist_invert(nonbitmap);
+	    _invlist_invert(cp_list);
 
 	    /* Any swash can't be used as-is, because we've inverted things */
 	    if (swash) {
@@ -12269,14 +12271,14 @@ parseit:
 	    /* And do the removal */
 	    if (DEPENDS_SEMANTICS) {
 		if (remove_list) {
-		    _invlist_subtract(nonbitmap, remove_list, &nonbitmap);
+		    _invlist_subtract(cp_list, remove_list, &cp_list);
 		    SvREFCNT_dec(remove_list);
 		}
 	    }
 	    else {
 		/* There is no overlap for non-/d, so just delete anything
 		 * below 256 */
-		_invlist_intersection(nonbitmap, PL_AboveLatin1, &nonbitmap);
+		_invlist_intersection(cp_list, PL_AboveLatin1, &cp_list);
 	    }
 	}
 
@@ -12293,7 +12295,7 @@ parseit:
      * run-time fold flag for these */
     if (FOLD && (LOC
 		|| (DEPENDS_SEMANTICS
-		    && nonbitmap
+		    && cp_list
 		    && ! (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
 		|| unicode_alternate))
     {
@@ -12314,7 +12316,7 @@ parseit:
      * characters which only have the two folds; so things like 'fF' and 'Ii'
      * wouldn't work because they are part of the fold of 'LATIN SMALL LIGATURE
      * FI'. */
-    if (! nonbitmap
+    if (! cp_list
 	&& ! unicode_alternate
 	&& SvCUR(listsv) == initial_listsv_len
 	&& ! (ANYOF_FLAGS(ret) & (ANYOF_INVERT|ANYOF_UNICODE_ALL))
@@ -12401,7 +12403,7 @@ parseit:
 	SvREFCNT_dec(swash);
 	swash = NULL;
     }
-    if (! nonbitmap
+    if (! cp_list
 	&& SvCUR(listsv) == initial_listsv_len
 	&& ! unicode_alternate)
     {
@@ -12418,7 +12420,7 @@ parseit:
 	 *       swash is stored there now.
 	 * av[2] stores the multicharacter foldings, used later in
 	 *       regexec.c:S_reginclass().
-	 * av[3] stores the nonbitmap inversion list for use in addition or
+	 * av[3] stores the cp_list inversion list for use in addition or
 	 *       instead of av[0]; not used if av[1] isn't NULL
 	 * av[4] is set if any component of the class is from a user-defined
 	 *       property; not used if av[1] isn't NULL */
@@ -12430,12 +12432,12 @@ parseit:
 			: listsv);
 	if (swash) {
 	    av_store(av, 1, swash);
-	    SvREFCNT_dec(nonbitmap);
+	    SvREFCNT_dec(cp_list);
 	}
 	else {
 	    av_store(av, 1, NULL);
-	    if (nonbitmap) {
-		av_store(av, 3, nonbitmap);
+	    if (cp_list) {
+		av_store(av, 3, cp_list);
 		av_store(av, 4, newSVuv(has_user_defined_property));
 	    }
 	}
