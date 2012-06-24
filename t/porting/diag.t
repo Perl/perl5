@@ -406,7 +406,6 @@ Goto undefined subroutine &%s
 Illegal character %sin prototype for %s : %s
 internal %<num>p might conflict with future printf extensions
 invalid control request: '\%o'
-Invalid negative number (%s) in chr
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
