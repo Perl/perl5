@@ -10913,6 +10913,7 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
     const char *hvname;
     bool is_const = !!CvCONST(old_cv);
     SV *old_const_sv = is_const ? cv_const_sv(old_cv) : NULL;
+    GV *old_gv = CvGV(old_cv);
 
     PERL_ARGS_ASSERT_REPORT_REDEFINED_CV;
 
@@ -10927,9 +10928,9 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
     if (
 	(ckWARN(WARN_REDEFINE)
 	 && !(
-		CvGV(old_cv) && GvSTASH(CvGV(old_cv))
-	     && HvNAMELEN(GvSTASH(CvGV(old_cv))) == 7
-	     && (hvname = HvNAME(GvSTASH(CvGV(old_cv))),
+		old_gv && GvSTASH(old_gv)
+	     && HvNAMELEN(GvSTASH(old_gv)) == 7
+	     && (hvname = HvNAME(GvSTASH(old_gv)),
 		 strEQ(hvname, "autouse"))
 	     )
 	)
@@ -10937,12 +10938,18 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
 	 && ckWARN_d(WARN_REDEFINE)
 	 && (!new_const_svp || sv_cmp(old_const_sv, *new_const_svp))
 	)
-    )
+    ) {
+        SV *file = newSVhek(GvFILE_HEK(old_gv));
+        line_t line = GvLINE(old_gv);
+        SV *prev_def = sv_2mortal(newSVpvf("%"SVf" line %u", file, line));
 	Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			  is_const
-			    ? "Constant subroutine %"SVf" redefined"
-			    : "Subroutine %"SVf" redefined",
-			  name);
+			    ? "Constant subroutine %"SVf" redefined "
+			      "(previous definition at %"SVf")"
+			    : "Subroutine %"SVf" redefined "
+			      "(previous definition at %"SVf")",
+			  name, prev_def);
+    }
 }
 
 /*

@@ -30,7 +30,7 @@ SKIP: {
  skip_if_miniperl('requires XS');
   fresh_perl_like(
     'sub foo::bar{}; $mro::{get_mro}=*foo::bar; undef %foo::; require mro',
-     qr/^Subroutine mro::get_mro redefined at /,
+     qr/^Subroutine mro::get_mro redefined \(previous definition at - line 1\) at /,
     { switches => [ '-w' ] },
     q(Defining an XSUB over an existing sub with no stash under warnings),
   );

@@ -336,7 +336,7 @@ foo;
 foo;
 EXPECT
 In foo1
-Subroutine foo redefined at (eval 1) line 1.
+Subroutine foo redefined (previous definition at - line 6) at (eval 1) line 1.
 Exiting foo1
 In foo2
 ########

@@ -3,9 +3,11 @@
 use strict;
 use utf8;
 use open qw( :utf8 :std );
-use Test::More tests => 14;
+use Test::More tests => 16;
 
 use XS::APItest;
+
+my $file = __FILE__;
 
 # This test must happen outside of any warnings scope
 {
@@ -14,7 +16,7 @@ use XS::APItest;
  local $SIG{__WARN__} = sub { $w .= shift };
  sub frimple() { 78 }
  newCONSTSUB_type(\%::, "frimple", 0, 1, undef);
- like $w, qr/Constant subroutine frimple redefined at /,
+ like $w, qr/Constant subroutine frimple redefined \(previous definition at $file line 17\) at /,
    'newCONSTSUB constant redefinition warning is unaffected by $^W=0';
  undef $w;
  newCONSTSUB_type(\%::, "frimple", 0, 1, undef);
@@ -62,10 +64,18 @@ eval q{
  my $w;
  local $SIG{__WARN__} = sub { $w .= shift };
  newCONSTSUB_type(\%foo::, "\x{100}", 0, 1, undef);
- like $w, qr/Subroutine \x{100} redefined at /,
+ like $w, qr/Subroutine \x{100} redefined \(previous definition at $file line \d+\) at /,
    'newCONSTSUB redefinition warning + utf8';
+ { local $TODO = "newCONSTSUB gives nonsensical line numbers";
+ like $w, qr/Subroutine \x{100} redefined \(previous definition at $file line 63\) at /,
+   'newCONSTSUB redefinition warning + utf8';
+ }
  undef $w;
  newCONSTSUB_type(\%foo::, "\x{100}", 0, 1, 54);
- like $w, qr/Constant subroutine \x{100} redefined at /,
+ like $w, qr/Constant subroutine \x{100} redefined \(previous definition at $file line \d+\) at /,
    'newCONSTSUB constant redefinition warning + utf8';
+ { local $TODO = "newCONSTSUB gives nonsensical line numbers";
+ like $w, qr/Constant subroutine \x{100} redefined \(previous definition at $file line 66\) at /,
+   'newCONSTSUB constant redefinition warning + utf8';
+ }
 }
