@@ -2658,7 +2658,28 @@ PP(pp_rand)
 PP(pp_srand)
 {
     dVAR; dSP; dTARGET;
-    const UV anum = (MAXARG < 1 || (!TOPs && !POPs)) ? seed() : POPu;
+    UV anum;
+
+    if (MAXARG >= 1 && TOPs) {
+        SV *top;
+        char *pv;
+        STRLEN len;
+        int flags;
+
+        top = POPs;
+        pv = SvPV(top, len);
+        flags = grok_number(pv, len, &anum);
+
+        if (!(flags & IS_NUMBER_IN_UV)) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
+                             "Integer overflow in srand");
+            anum = UV_MAX;
+        }
+    }
+    else {
+        anum = seed();
+    }
+
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
     if (anum)
