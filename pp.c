@@ -3262,7 +3262,8 @@ PP(pp_chr)
 	if (IN_BYTES) {
 	    value = POPu; /* chr(-1) eq chr(0xff), etc. */
 	} else {
-	    (void) POPs; /* Ignore the argument value. */
+	    SV *top = POPs;
+	    Perl_ck_warner(aTHX_ packWARN(WARN_UTF8), "Invalid negative number (%"SVf") in chr", top);
 	    value = UNICODE_REPLACEMENT;
 	}
     } else {
