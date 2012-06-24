@@ -11978,7 +11978,12 @@ parseit:
                 /* Here is an above Latin1 character.  We don't have the rules
                  * hard-coded for it.  First, get its fold */
 		f = _to_uni_fold_flags(j, foldbuf, &foldlen,
-                                    ((allow_full_fold) ? FOLD_FLAGS_FULL : 0);
+                                    ((allow_full_fold) ? FOLD_FLAGS_FULL : 0)
+                                    | ((LOC)
+                                        ? FOLD_FLAGS_LOCALE
+                                        : (MORE_ASCII_RESTRICTED)
+                                            ? FOLD_FLAGS_NOMIX_ASCII
+                                            : 0));
 
 		if (foldlen > (STRLEN)UNISKIP(f)) {
 
@@ -11996,21 +12001,9 @@ parseit:
 			 * Latin1 range, tell the regex engine that this can
 			 * match a non-utf8 target string.  */
                         while (loc < e) {
-
-                            /* Can't mix ascii with non- under /aa */
-                            if (MORE_ASCII_RESTRICTED
-                                && (isASCII(*loc) != isASCII(j)))
-                            {
-                                goto end_multi_fold;
-                            }
                             if (UTF8_IS_INVARIANT(*loc)
                                 || UTF8_IS_DOWNGRADEABLE_START(*loc))
                             {
-                                /* Can't mix above and below 256 under LOC
-                                 */
-                                if (LOC) {
-                                    goto end_multi_fold;
-                                }
                                 ANYOF_FLAGS(ret)
                                         |= ANYOF_NONBITMAP_NON_UTF8;
                                 break;
@@ -12019,7 +12012,6 @@ parseit:
                         }
 
 			add_alternate(&unicode_alternate, foldbuf, foldlen);
-		    end_multi_fold: ;
 		    }
 		}
                 else {
