@@ -2472,11 +2472,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my_kid(kid, attrs, imopsp);
 	return o;
-    } else if (type == OP_UNDEF
-#ifdef PERL_MAD
-	       || type == OP_STUB
-#endif
-	       ) {
+    } else if (type == OP_UNDEF || type == OP_STUB) {
 	return o;
     } else if (type == OP_RV2SV ||	/* "our" declaration */
 	       type == OP_RV2AV ||

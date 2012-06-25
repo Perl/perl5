@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..36\n";
+print "1..37\n";
 
 sub foo {
     my($a, $b) = @_;
@@ -130,3 +130,8 @@ print "ok 34\n";
     $test = 42;
     goto loop if ++$count < 37;
 }
+
+# [perl #113554]
+eval "my ()";
+print "not " if $@;
+print "ok 37\n";
