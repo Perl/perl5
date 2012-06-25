@@ -186,7 +186,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+C<chr()> now warns when passed a negative value [perl #83048].
+
+=item *
+
+C<srand()> now warns when passed a value that doesn't fit in a C<UV> (since the
+value will be truncated rather than overflowing) [perl #40605].
 
 =back
 
@@ -357,6 +362,10 @@ This mirrors the behaviour of the hash iterator when the hash is cleared.
 C<< $class->can >>, C<< $class->isa >>, and C<< $class->DOES >> now return
 correct results, regardless of whether that package referred to by C<$class>
 exists [perl #47113].
+
+=item *
+
+Arriving signals no longer clear C<$@> [perl #45173].
 
 =back
 
