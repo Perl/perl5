@@ -290,7 +290,7 @@ BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 BUILDOPT	+= -DPERL_IMPLICIT_SYS
 .ENDIF
 
-.IMPORT .IGNORE : PROCESSOR_ARCHITECTURE PROCESSOR_ARCHITEW6432 WIN64
+.IMPORT .IGNORE : PROCESSOR_ARCHITECTURE PROCESSOR_ARCHITEW6432 WIN64 CCHOME
 
 PROCESSOR_ARCHITECTURE *= x86
 
@@ -1412,7 +1412,6 @@ test-prep : all utils ..\pod\perltoc.pod
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
-
 .IF "$(CCTYPE)" == "GCC"
 # If building with gcc versions 4.x.x or greater, then
 # the GCC helper DLL will also need copied to the test directory.
