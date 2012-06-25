@@ -50,13 +50,16 @@ while (<$func_fh>) {
 close $func_fh;
 
 my $function_re = join '|', @functions;
-my $source_msg_re = "(?<routine>\\bDIE\\b|$function_re)";
+my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?\b';
+my $source_msg_re =
+   "(?<routine>\\bDIE\\b|$function_re|$regcomp_fail_re)";
 my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \(aTHX_ \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
+   $regcomp_fail_re = qr/$regcomp_fail_re\([^"]*$text_re/;
 
 my %entries;
 
@@ -256,6 +259,13 @@ sub check_file {
     elsif (/$bad_version_re/) {
       ($name, $category) = ($+{'text'}, undef);
     }
+    elsif (/$regcomp_fail_re/) {
+      #  FAIL("foo") -> "foo in regex m/%s/"
+      # vFAIL("foo") -> "foo in regex; marked by <-- HERE in m/%s/"
+      ($name, $category) = ($+{'text'}, undef);
+      $name .=
+        " in regex" . ("; marked by <-- HERE in" x /vFAIL/) . " m/%s/";
+    }
     else {
       next;
     }
@@ -400,9 +410,11 @@ Debug leaking scalars child failed%s with errno %d: %s
 Don't know how to get file name
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
+Empty \%c{} in regex; marked by <-- HERE in m/%s/
 Error reading "%s": %s
 execl not implemented!
 EVAL without pos change exceeded limit in regex
+Expecting close bracket in regex; marked by <-- HERE in m/%s/
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
@@ -424,9 +436,13 @@ Illegal binary digit '%c' ignored
 Illegal character %sin prototype for %s : %s
 Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
+Illegal pattern in regex; marked by <-- HERE in m/%s/
 Infinite recursion in regex
 internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
+Invalid [::] class in regex; marked by <-- HERE in m/%s/
+Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/%s/
+Invalid [] range "%*.*s" in regex; marked by <-- HERE in m/%s/
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
@@ -437,6 +453,7 @@ Invalid type ',' in %s
 ioctlsocket not implemented!
 'j' not supported on this platform
 'J' not supported on this platform
+Junk on end of regexp in regex m/%s/
 killpg not implemented!
 length() used on %s (did you mean "scalar(%s)"?)
 length() used on %hash (did you mean "scalar(keys %hash)"?)
@@ -444,11 +461,15 @@ length() used on @array (did you mean "scalar(@array)"?)
 List form of pipe open not implemented
 Malformed integer in [] in %s
 Malformed UTF-8 character (fatal)
+Missing braces on \N{} in regex; marked by <-- HERE in m/%s/
+Missing right brace on \%c{} in regex; marked by <-- HERE in m/%s/
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
+\N in a character class must be a named character: \N{...} in regex; marked by <-- HERE in m/%s/
+\N{NAME} must be resolved by the lexer in regex; marked by <-- HERE in m/%s/
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
 No such class field "%s"
@@ -456,12 +477,27 @@ Not an XSUB reference
 Operator or semicolon missing before %c%s
 Pattern subroutine nesting without pos change exceeded limit in regex
 Perl %s required--this is only %s, stopped
+POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
+Reference to invalid group 0 in regex; marked by <-- HERE in m/%s/
+Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE in m/%s/
+Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- HERE in m/%s/
+Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
+Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
+Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
+Regexp out of space in regex m/%s/
 Repeated format line will never terminate (~~ and @#)
 Reversed %c= operator
 %s(%f) failed
 %sCompilation failed in require
+Sequence (?%c...) not implemented in regex; marked by <-- HERE in m/%s/
+Sequence (%s...) not recognized in regex; marked by <-- HERE in m/%s/
+Sequence (?#... not terminated in regex m/%s/
+Sequence %s... not terminated in regex; marked by <-- HERE in m/%s/
+Sequence (?%c... not terminated in regex; marked by <-- HERE in m/%s/
+Sequence (?(%c... not terminated in regex; marked by <-- HERE in m/%s/
+Sequence (?R) not terminated in regex m/%s/
 set %s %p %p %p
 %s free() ignored (RMAGIC, PERL_CORE)
 %s has too many errors.
@@ -493,9 +529,13 @@ Too many args on %s line of "%s"
 U0 mode on a byte string
 unable to find VMSPIPE.COM for i/o piping
 Unknown Unicode option value %d
+Unmatched ( in regex; marked by <-- HERE in m/%s/
+Unmatched ) in regex; marked by <-- HERE in m/%s/
+Unmatched [ in regex; marked by <-- HERE in m/%s/
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
+Unterminated \g... pattern in regex; marked by <-- HERE in m/%s/
 Usage: CODE(0x%x)(%s)
 Usage: %s(%s)
 Usage: %s::%s(%s)
@@ -513,6 +553,8 @@ Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
+Variable length lookbehind not implemented in regex m/%s/
+Verb pattern '%s' may not have an argument in regex; marked by <-- HERE in m/%s/
 waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
