@@ -367,6 +367,10 @@ exists [perl #47113].
 
 Arriving signals no longer clear C<$@> [perl #45173].
 
+=item *
+
+Allow C<my ()> declarations with an empty variable list [perl #113554].
+
 =back
 
 =head1 Known Problems
