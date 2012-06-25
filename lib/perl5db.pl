@@ -9016,8 +9016,9 @@ sub restart {
     # the 'require perl5db.pl;' line), and add them back on
     # to the command line to be executed.
     if ( $0 eq '-e' ) {
-        for ( 1 .. $#{'::_<-e'} ) {  # The first line is PERL5DB
-            chomp( $cl = ${'::_<-e'}[$_] );
+        my $lines = *{$main::{'_<-e'}}{ARRAY};
+        for ( 1 .. $#$lines ) {  # The first line is PERL5DB
+            chomp( $cl = $lines->[$_] );
             push @script, '-e', $cl;
         }
     } ## end if ($0 eq '-e')
