@@ -2372,6 +2372,8 @@ escape was discovered.
 
 =item Invalid hexadecimal number in \N{U+...}
 
+=item Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/%s/
+
 (F) The character constant represented by C<...> is not a valid hexadecimal
 number.  Either it is empty, or you tried to use a character other than
 0 - 9 or A - F, a - f in a hexadecimal number.
@@ -2515,7 +2517,7 @@ an anonymous subroutine, or a reference to a subroutine.
 (W overload) You tried to overload a constant type the overload package is
 unaware of.
 
-=item junk on end of regexp
+=item Junk on end of regexp in regex m/%s/
 
 (P) The regular expression parser is confused.
 
@@ -2768,6 +2770,8 @@ immediately after the switch, without intervening spaces.
 
 =item Missing braces on \N{}
 
+=item Missing braces on \N{} in regex; marked by <-- HERE in m/%s/
+
 (F) Wrong syntax of character name literal C<\N{charname}> within
 double-quotish context.  This can also happen when there is a space
 (or comment) between the C<\N> and the C<{> in a regex with the C</x> modifier.
@@ -2810,7 +2814,7 @@ can vary from one line to the next.
 (S syntax) This is an educated guess made in conjunction with the message
 "%s found where operator expected".  Often the missing operator is a comma.
 
-=item Missing right brace on %s
+=item Missing right brace on \%c{} in regex; marked by <-- HERE in m/%s/
 
 (F) Missing right brace in C<\x{...}>, C<\p{...}>, C<\P{...}>, or C<\N{...}>.
 
@@ -2937,14 +2941,14 @@ NOTE: This warning detects symbols that have been used only once so $c, @c,
 the same; if a program uses $c only once but also uses any of the others it
 will not trigger this warning.
 
-=item \N in a character class must be a named character: \N{...}
+=item \N in a character class must be a named character: \N{...} in regex; marked by <-- HERE in m/%s/
 
 (F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
 character class, for the same reason that C<.> in a character class loses
 its specialness: it matches almost everything, which is probably not
 what you want.
 
-=item \N{NAME} must be resolved by the lexer
+=item \N{NAME} must be resolved by the lexer in regex; marked by <-- HERE in m/%s/
 
 (F) When compiling a regex pattern, an unresolved named character or
 sequence was encountered.  This can happen in any of several ways that
@@ -4140,7 +4144,7 @@ to use parens.  In any case, a hash requires key/value B<pairs>.
 (W misc) You have attempted to weaken a reference that is already weak.
 Doing so has no effect.
 
-=item Reference to invalid group 0
+=item Reference to invalid group 0 in regex; marked by <-- HERE in m/%s/
 
 (F) You used C<\g0> or similar in a regular expression.  You may refer
 to capturing parentheses only with strictly positive integers
@@ -4188,7 +4192,7 @@ expression compiler gave it.
 (F syntax, regexp) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
-=item Regexp modifier "%c" may not appear after the "-"
+=item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- HERE in m/%s/
 
 (F regexp) Turning off the given modifier has the side effect of turning
 on another one.  Perl currently doesn't allow this.  Reword the regular
@@ -4201,7 +4205,7 @@ the minus), instead of the one you want to turn off.
 mutually exclusive modifiers.  Retain only the modifier that is
 supposed to be there.
 
-=item Regexp out of space
+=item Regexp out of space in regex m/%s/
 
 (P) A "can't happen" error, because safemalloc() should have caught it
 earlier.
@@ -4350,11 +4354,10 @@ causes, see L<perlre>.
 (F) The regular expression expects a mandatory argument following the escape
 sequence and this has been omitted or incorrectly written.
 
-=item Sequence (?#... not terminated in regex; marked by <-- HERE in m/%s/
+=item Sequence (?#... not terminated in regex m/%s/
 
 (F) A regular expression comment must be terminated by a closing
-parenthesis.  Embedded parentheses aren't allowed.  The <-- HERE shows in
-the regular expression about where the problem was discovered.  See
+parenthesis.  Embedded parentheses aren't allowed.  See
 L<perlre>.
 
 =item Sequence (?{...}) not terminated with ')'
@@ -5044,14 +5047,16 @@ Note that if you want to enable a warnings category registered by a
 module (e.g. C<use warnings 'File::Find'>), you must have loaded this
 module first.
 
-=item unmatched [ in regex; marked by <-- HERE in m/%s/
+=item Unmatched [ in regex; marked by <-- HERE in m/%s/
 
 (F) The brackets around a character class must match.  If you wish to
 include a closing bracket in a character class, backslash it or put it
 first.  The <-- HERE shows in the regular expression about where the
 problem was discovered.  See L<perlre>.
 
-=item unmatched ( in regex; marked by <-- HERE in m/%s/
+=item Unmatched ( in regex; marked by <-- HERE in m/%s/
+
+=item Unmatched ) in regex; marked by <-- HERE in m/%s/
 
 (F) Unbackslashed parentheses must always be balanced in regular
 expressions.  If you're a vi user, the % key is valuable for finding
@@ -5600,7 +5605,7 @@ something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
 front of your variable.
 
-=item Variable length lookbehind not implemented in m/%s/
+=item Variable length lookbehind not implemented in regex m/%s/
 
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
 known at compile time.  See L<perlre>.

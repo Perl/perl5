@@ -441,7 +441,6 @@ Infinite recursion in regex
 internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
 Invalid [::] class in regex; marked by <-- HERE in m/%s/
-Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/%s/
 Invalid [] range "%*.*s" in regex; marked by <-- HERE in m/%s/
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
@@ -461,15 +460,11 @@ length() used on @array (did you mean "scalar(@array)"?)
 List form of pipe open not implemented
 Malformed integer in [] in %s
 Malformed UTF-8 character (fatal)
-Missing braces on \N{} in regex; marked by <-- HERE in m/%s/
-Missing right brace on \%c{} in regex; marked by <-- HERE in m/%s/
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
-\N in a character class must be a named character: \N{...} in regex; marked by <-- HERE in m/%s/
-\N{NAME} must be resolved by the lexer in regex; marked by <-- HERE in m/%s/
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
 No such class field "%s"
@@ -482,18 +477,15 @@ ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Reference to invalid group 0 in regex; marked by <-- HERE in m/%s/
 Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE in m/%s/
-Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- HERE in m/%s/
 Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
 Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
 Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
-Regexp out of space in regex m/%s/
 Repeated format line will never terminate (~~ and @#)
 Reversed %c= operator
 %s(%f) failed
 %sCompilation failed in require
 Sequence (?%c...) not implemented in regex; marked by <-- HERE in m/%s/
 Sequence (%s...) not recognized in regex; marked by <-- HERE in m/%s/
-Sequence (?#... not terminated in regex m/%s/
 Sequence %s... not terminated in regex; marked by <-- HERE in m/%s/
 Sequence (?%c... not terminated in regex; marked by <-- HERE in m/%s/
 Sequence (?(%c... not terminated in regex; marked by <-- HERE in m/%s/
@@ -529,9 +521,6 @@ Too many args on %s line of "%s"
 U0 mode on a byte string
 unable to find VMSPIPE.COM for i/o piping
 Unknown Unicode option value %d
-Unmatched ( in regex; marked by <-- HERE in m/%s/
-Unmatched ) in regex; marked by <-- HERE in m/%s/
-Unmatched [ in regex; marked by <-- HERE in m/%s/
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
@@ -553,7 +542,6 @@ Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
-Variable length lookbehind not implemented in regex m/%s/
 Verb pattern '%s' may not have an argument in regex; marked by <-- HERE in m/%s/
 waitpid: process %x is not a child of process %x
 Wide character
