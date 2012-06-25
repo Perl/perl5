@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(30);
+plan(31);
 
 my $rc_filename = '.perldb';
 
@@ -806,6 +806,29 @@ package main;
         qr/<1,2,3,4,5>\n/,
         'uncalled_subroutine was called after n EXPR()',
         );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b fact',
+                'c',
+                'c',
+                'c',
+                'n',
+                'print "<$n>"',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/fact',
+        }
+    );
+
+    $wrapper->output_like(
+        qr/<3>/,
+        'b subroutine works fine',
+    );
 }
 
 END {

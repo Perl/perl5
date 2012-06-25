@@ -4280,6 +4280,7 @@ lib/perl5db/t/disable-breakpoints-2	Test script used by perl5db.t
 lib/perl5db/t/disable-breakpoints-3	Test script used by perl5db.t
 lib/perl5db/t/EnableModule.pm	Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
+lib/perl5db/t/fact		Tests for the Perl debugger
 lib/perl5db/t/filename-line-breakpoint		Tests for the Perl debugger
 lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
 lib/perl5db/t/MyModule.pm	Tests for the Perl debugger

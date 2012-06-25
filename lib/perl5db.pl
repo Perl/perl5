@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39';
+$VERSION = '1.39_01';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -4118,7 +4118,7 @@ sub cmd_b {
         $subname =~ s/\'/::/g;
 
         # Qualify it into the current package unless it's already qualified.
-        $subname = "${'package'}::" . $subname unless $subname =~ /::/;
+        $subname = "${package}::" . $subname unless $subname =~ /::/;
 
         # Add main if it starts with ::.
         $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
@@ -4565,7 +4565,7 @@ sub cmd_b_sub {
         my $s = $subname;
 
         # Put it in this package unless it's already qualified.
-        $subname = "${'package'}::" . $subname
+        $subname = "${package}::" . $subname
           unless $subname =~ /::/;
 
         # Requalify it into CORE::GLOBAL if qualifying it into this
@@ -8493,7 +8493,7 @@ sub db_complete {
     # The search pattern is current package, ::, extract the next qualifier
     # Prefix and pack are set to undef.
     my ( $itext, $search, $prefix, $pack ) =
-      ( $text, "^\Q${'package'}::\E([^:]+)\$" );
+      ( $text, "^\Q${package}::\E([^:]+)\$" );
 
 =head3 C<b postpone|compile> 
 
@@ -9326,7 +9326,7 @@ sub cmd_pre580_b {
         $subname =~ s/\'/::/g;
 
         # Qualify it into the current package unless it's already qualified.
-        $subname = "${'package'}::" . $subname
+        $subname = "${package}::" . $subname
           unless $subname =~ /::/;
 
         # Add main if it starts with ::.
