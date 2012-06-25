@@ -8566,7 +8566,8 @@ start with 'main::'. Return this list.
 
     return sort map { ( $_, db_complete( $_ . "::", "V ", 2 ) ) }
       grep !/^main::/, grep /^\Q$text/,
-      map { /^(.*)::$/ ? ( $prefix . "::$1" ) : () } keys %{ $prefix . '::' }
+      map { /^(.*)::$/ ? ( $prefix . "::$1" ) : () }
+      do { no strict 'refs'; keys %{ $prefix . '::' } }
       if ( substr $line, 0, $start ) =~ /^\|*[Vm]\s+$/
       and $text =~ /^(.*[^:])::?(\w*)$/
       and $prefix = $1;
