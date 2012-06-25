@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(31);
+plan(32);
 
 my $rc_filename = '.perldb';
 
@@ -828,6 +828,25 @@ package main;
     $wrapper->output_like(
         qr/<3>/,
         'b subroutine works fine',
+    );
+}
+
+# Test for 'M' (module list).
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'M',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/load-modules'
+        }
+    );
+
+    $wrapper->contents_like(
+        qr[Scalar/Util\.pm],
+        'M (module list) works fine',
     );
 }
 

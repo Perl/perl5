@@ -4282,6 +4282,7 @@ lib/perl5db/t/EnableModule.pm	Tests for the Perl debugger
 lib/perl5db/t/eval-line-bug	Tests for the Perl debugger
 lib/perl5db/t/fact		Tests for the Perl debugger
 lib/perl5db/t/filename-line-breakpoint		Tests for the Perl debugger
+lib/perl5db/t/load-modules	Tests for the Perl debugger
 lib/perl5db/t/lvalue-bug	Tests for the Perl debugger
 lib/perl5db/t/MyModule.pm	Tests for the Perl debugger
 lib/perl5db/t/proxy-constants	Tests for the Perl debugger
