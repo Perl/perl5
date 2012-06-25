@@ -79,7 +79,7 @@ my $severity_re = qr/ . (?: \| . )* /x; # A severity is a single char, but can
                                         # be of the form 'S|P|W'
 while (<$diagfh>) {
   if (m/^=item (.*)/) {
-    $cur_entry = $1;
+    $cur_entry = $1 =~ s/\s+\z//r;
 
     if (exists $entries{$cur_entry}) {
         TODO: {
@@ -542,7 +542,6 @@ Usage: VMS::Filespec::vmsrealpath(spec)
 Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
-Verb pattern '%s' may not have an argument in regex; marked by <-- HERE in m/%s/
 waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
