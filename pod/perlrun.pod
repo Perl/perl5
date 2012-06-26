@@ -999,7 +999,7 @@ as if they were on every Perl command line.  Only the B<-[CDIMUdmtwW]>
 switches are allowed.  When running taint checks (either because the
 program was running setuid or setgid, or because the B<-T> or B<-t>
 switch was used), this variable is ignored.  If PERL5OPT begins with
-B<- T>, tainting will be enabled and subsequent options ignored.  If
+B<-T>, tainting will be enabled and subsequent options ignored.  If
 PERL5OPT begins with B<-t>, tainting will be enabled, a writable dot
 removed from @INC, and subsequent options honored.
 
@@ -1011,7 +1011,7 @@ to use PerlIO system for IO (the default) these layers affect Perl's IO.
 
 It is conventional to start layer names with a colon (for example, C<:perlio>) to
 emphasize their similarity to variable "attributes". But the code that parses
-layer specification strings,  which is also used to decode the PERLIO
+layer specification strings, which is also used to decode the PERLIO
 environment variable, treats the colon as a separator.
 
 An unset or empty PERLIO is equivalent to the default set of layers for
@@ -1020,7 +1020,7 @@ and C<:unix:crlf> on Windows and other DOS-like systems.
 
 The list becomes the default for I<all> Perl's IO. Consequently only built-in
 layers can appear in this list, as external layers (such as C<:encoding()>) need
-IO in  order to load them!. See L<"open pragma"|open> for how to add external
+IO in order to load them!  See L<"open pragma"|open> for how to add external
 encodings as defaults.
 
 Layers it makes sense to include in the PERLIO environment
@@ -1133,7 +1133,7 @@ is run in taint mode.
 X<PERLIO_DEBUG>
 
 If set to the name of a file or device, certain operations of PerlIO
-subsystem will be logged to that file, which is opened in append mode
+subsystem will be logged to that file, which is opened in append mode.
 Typical uses are in Unix:
 
    % env PERLIO_DEBUG=/dev/tty perl script ...
