@@ -5237,6 +5237,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     char *prune_from = NULL;
     bool read_from_cache = FALSE;
     STRLEN umaxlen;
+    SV *err = NULL;
 
     PERL_ARGS_ASSERT_RUN_USER_FILTER;
 
@@ -5315,7 +5316,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    PUSHs(filter_state);
 	}
 	PUTBACK;
-	count = call_sv(filter_sub, G_SCALAR);
+	count = call_sv(filter_sub, G_SCALAR|G_EVAL);
 	SPAGAIN;
 
 	if (count > 0) {
@@ -5323,6 +5324,9 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    if (SvOK(out)) {
 		status = SvIV(out);
 	    }
+            else if (SvTRUE(ERRSV)) {
+                err = newSVsv(ERRSV);
+            }
 	}
 
 	PUTBACK;
@@ -5330,7 +5334,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	LEAVE_with_name("call_filter_sub");
     }
 
-    if(SvOK(upstream)) {
+    if(!err && SvOK(upstream)) {
 	got_p = SvPV(upstream, got_len);
 	if (umaxlen) {
 	    if (got_len > umaxlen) {
@@ -5344,7 +5348,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    }
 	}
     }
-    if (prune_from) {
+    if (!err && prune_from) {
 	/* Oh. Too long. Stuff some in our cache.  */
 	STRLEN cached_len = got_p + got_len - prune_from;
 	SV *const cache = datasv;
@@ -5373,7 +5377,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        have touched the SV upstream, so it may be undefined.  If we naively
        concatenate it then we get a warning about use of uninitialised value.
     */
-    if (upstream != buf_sv && (SvOK(upstream) || SvGMAGICAL(upstream))) {
+    if (!err && upstream != buf_sv &&
+        (SvOK(upstream) || SvGMAGICAL(upstream))) {
 	sv_catsv(buf_sv, upstream);
     }
 
@@ -5389,6 +5394,10 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	}
 	filter_del(S_run_user_filter);
     }
+
+    if (err)
+        croak_sv(err);
+
     if (status == 0 && read_from_cache) {
 	/* If we read some data from the cache (and by getting here it implies
 	   that we emptied the cache) then we aren't yet at EOF, and mustn't

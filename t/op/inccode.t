@@ -21,7 +21,7 @@ unless (is_miniperl()) {
 
 use strict;
 
-plan(tests => 49 + !is_miniperl() * (3 + 14 * $can_fork));
+plan(tests => 53 + !is_miniperl() * (3 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -225,6 +225,26 @@ ok( 1, 'returning PVBM ref doesn\'t segfault require' );
 eval 'use foo';
 ok( 1, 'returning PVBM ref doesn\'t segfault use' );
 shift @INC;
+
+# [perl #92252]
+{
+    my $die = sub { die };
+    my $data = [];
+    unshift @INC, sub { $die, $data };
+
+    my $initial_sub_refcnt = Internals::SvREFCNT($die);
+    my $initial_data_refcnt = Internals::SvREFCNT($data);
+
+    do "foo";
+    is(Internals::SvREFCNT($die), $initial_sub_refcnt, "no leaks");
+    is(Internals::SvREFCNT($data), $initial_data_refcnt, "no leaks");
+
+    do "bar";
+    is(Internals::SvREFCNT($die), $initial_sub_refcnt, "no leaks");
+    is(Internals::SvREFCNT($data), $initial_data_refcnt, "no leaks");
+
+    shift @INC;
+}
 
 exit if is_miniperl();
 
