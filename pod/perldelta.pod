@@ -182,7 +182,10 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-L<message|perldiag/"message">
+L<Group name must start with a non-digit word character in regex; marked by <-- HERE in m/%s/|perldiag/"Group name must start with a non-digit word character in regex; marked by <-- HERE in m/%s/">
+
+This error has been added for C<(?&0)>, which is invalid.  It used to
+produce an incomprehensible error message [perl #101666].
 
 =back
 
