@@ -1379,7 +1379,7 @@ PP(pp_enterwrite)
 	DIE(aTHX_ "Undefined format \"%"SVf"\" called", SVfARG(tmpsv));
     }
     IoFLAGS(io) &= ~IOf_DIDTOP;
-    return doform(cv,gv,PL_op->op_next);
+    RETURNOP(doform(cv,gv,PL_op->op_next));
 }
 
 PP(pp_leavewrite)
@@ -1393,6 +1393,12 @@ PP(pp_leavewrite)
     I32 gimme;
     register PERL_CONTEXT *cx;
     OP *retop;
+
+    /* I'm not sure why, but executing the format leaves an extra value on the
+     * stack. There's probably a better place to be handling this (probably
+     * by avoiding pushing it in the first place!) but I don't quite know
+     * where to look. -doy */
+    POPs;
 
     if (!io || !(ofp = IoOFP(io)))
         goto forget_top;
@@ -1463,7 +1469,7 @@ PP(pp_leavewrite)
 	    gv_efullname4(sv, fgv, NULL, FALSE);
 	    DIE(aTHX_ "Undefined top format \"%"SVf"\" called", SVfARG(sv));
 	}
-	return doform(cv, gv, PL_op);
+	RETURNOP(doform(cv, gv, PL_op));
     }
 
   forget_top:
@@ -1497,10 +1503,9 @@ PP(pp_leavewrite)
     }
     /* bad_ofp: */
     PL_formtarget = PL_bodytarget;
-    PUTBACK;
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(gimme);
-    return retop;
+    RETURNOP(retop);
 }
 
 PP(pp_prtf)

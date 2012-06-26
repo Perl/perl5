@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 16;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -821,6 +821,56 @@ formline $zamm;
 printf ">%s<\n", ref $zamm;
 print "$zamm->[0]\n";
 EOP
+
+# [perl #73690]
+
+select +(select(RT73690), do {
+    open(RT73690, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    format RT73690 =
+@<< @<<
+11, 22
+.
+
+    my @ret;
+    @ret = write;
+    is(scalar(@ret), 1);
+    ok($ret[0]);
+    @ret = scalar(write);
+    is(scalar(@ret), 1);
+    ok($ret[0]);
+    @ret = write(RT73690);
+    is(scalar(@ret), 1);
+    ok($ret[0]);
+    @ret = scalar(write(RT73690));
+    is(scalar(@ret), 1);
+    ok($ret[0]);
+
+    close RT73690 or die "Could not close: $!";
+})[0];
+
+select +(select(RT73690_2), do {
+    open(RT73690_2, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+    format RT73690_2 =
+@<< @<<
+return
+.
+
+    my @ret;
+    @ret = write;
+    is(scalar(@ret), 1);
+    ok(!$ret[0]);
+    @ret = scalar(write);
+    is(scalar(@ret), 1);
+    ok(!$ret[0]);
+    @ret = write(RT73690_2);
+    is(scalar(@ret), 1);
+    ok(!$ret[0]);
+    @ret = scalar(write(RT73690_2));
+    is(scalar(@ret), 1);
+    ok(!$ret[0]);
+
+    close RT73690_2 or die "Could not close: $!";
+})[0];
 
 #############################
 ## Section 4
