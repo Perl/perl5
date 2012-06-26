@@ -848,7 +848,7 @@ Perl_my_atof(pTHX_ const char* s)
     PERL_ARGS_ASSERT_MY_ATOF;
 
     if (PL_numeric_local && PL_numeric_radix_sv && IN_SOME_LOCALE_FORM) {
-        char *standard = NULL, *local = NULL;
+        const char *standard = NULL, *local = NULL;
         bool use_standard_radix;
 
         standard = strchr(s, '.');
