@@ -823,13 +823,13 @@ print "If you get here, you didn't crash\n";
 EXPECT
 If you get here, you didn't crash
 ######## [perl #112312] crash on syntax error
+# SKIP: !defined &DynaLoader::boot_DynaLoader # miniperl
 #!/usr/bin/perl
 use strict;
 use warnings;
 sub meow (&);
 my %h;
 my $k;
-
 meow {
 	my $t : need_this;
 	$t = {
@@ -843,8 +843,8 @@ syntax error at - line 12, near "used}"
 Unmatched right curly bracket at - line 14, at end of line
 Execution of - aborted due to compilation errors.
 ######## [perl #112312] crash on syntax error - another test
+# SKIP: !defined &DynaLoader::boot_DynaLoader # miniperl
 #!/usr/bin/perl
-
 use strict;
 use warnings;
 
