@@ -2113,11 +2113,11 @@ L<perlport> for more on portability concerns.
 
 (S inplace) The C<-i> option was passed on the command line, indicating
 that the script is intended to edit files inplace, but no files were
-given. This is usually a mistake, since editing STDIN inplace doesn't
-make sense, and can be confusing because it can make perl look like it
-is hanging when it is really just trying to read from STDIN.  You should
-either pass a filename to edit, or remove C<-i> from the command line.
-See L<perlrun> for more details.
+given.  This is usually a mistake, since editing STDIN inplace doesn't
+make sense, and can be confusing because it can make perl look like
+it is hanging when it is really just trying to read from STDIN.  You
+should either pass a filename to edit, or remove C<-i> from the command
+line.  See L<perlrun> for more details.
 
 =item Identifier too long
 
