@@ -1398,7 +1398,7 @@ PP(pp_leavewrite)
      * stack. There's probably a better place to be handling this (probably
      * by avoiding pushing it in the first place!) but I don't quite know
      * where to look. -doy */
-    POPs;
+    (void)POPs;
 
     if (!io || !(ofp = IoOFP(io)))
         goto forget_top;
