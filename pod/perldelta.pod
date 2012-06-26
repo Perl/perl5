@@ -108,6 +108,12 @@ are always true, and for a file if any of the three execute permission bits
 are set then they report that root can execute the file. Perl's builtin
 C<-x> and C<-X> operators have always been correct.
 
+=item *
+
+L<Tie::StdHandle> has been upgraded from version 4.2 to 4.3.
+
+C<READ> now respects the offset argument to C<read> [perl #112826].
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -176,7 +182,7 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<message|perldiag/"message">
 
 =back
 
