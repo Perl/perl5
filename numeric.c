@@ -851,6 +851,12 @@ Perl_my_atof(pTHX_ const char* s)
         const char *standard = NULL, *local = NULL;
         bool use_standard_radix;
 
+        /* Look through the string for the first thing that looks like a
+         * decimal point: either the value in the current locale or the
+         * standard fallback of '.'. The one which appears earliest in the
+         * input string is the one that we should have atof look for. Note that
+         * we have to determine this beforehand because on some systems,
+         * Perl_atof2 is just a wrapper around the system's atof. */
         standard = strchr(s, '.');
         local = strstr(s, SvPV_nolen(PL_numeric_radix_sv));
 
