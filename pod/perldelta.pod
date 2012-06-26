@@ -248,7 +248,9 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Building perl with some Windows compilers used to fail due to a problem
+with miniperl's C<glob> operator (which uses the C<perlglob> program)
+deleting the PATH environment variable [perl #113798].
 
 =back
 
