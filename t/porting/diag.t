@@ -452,7 +452,6 @@ Invalid type ',' in %s
 ioctlsocket not implemented!
 'j' not supported on this platform
 'J' not supported on this platform
-Junk on end of regexp in regex m/%s/
 killpg not implemented!
 length() used on %s (did you mean "scalar(%s)"?)
 length() used on %hash (did you mean "scalar(keys %hash)"?)
@@ -475,7 +474,6 @@ Perl %s required--this is only %s, stopped
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
-Reference to invalid group 0 in regex; marked by <-- HERE in m/%s/
 Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE in m/%s/
 Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
 Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
