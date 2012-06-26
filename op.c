@@ -3064,9 +3064,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_next = 0;
 	CALL_PEEP(PL_main_start);
 	finalize_optree(PL_main_root);
-#ifndef PL_OP_SLAB_ALLOC
 	cv_forget_slab(PL_compcv);
-#endif
 	PL_compcv = 0;
 
 	/* Register with debugger */
@@ -4586,10 +4584,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		 * confident that nothing used that CV's pad while the
 		 * regex was parsed */
 		assert(AvFILLp(PL_comppad) == 0); /* just @_ */
-#ifndef PL_OP_SLAB_ALLOC
 		/* But we know that one op is using this CV's slab. */
 		cv_forget_slab(PL_compcv);
-#endif
 		LEAVE_SCOPE(floor);
 		pm->op_pmflags &= ~PMf_HAS_CV;
 	    }
@@ -4634,9 +4630,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		(void)pad_add_anon(cv, o->op_type);
 		SvREFCNT_inc_simple_void(cv);
 
-#ifndef PL_OP_SLAB_ALLOC
 		cv_forget_slab(cv);
-#endif
 	    }
 	    else {
 		pm->op_code_list = expr;
@@ -7103,9 +7097,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
-#ifndef PL_OP_SLAB_ALLOC
 	    cv_forget_slab(cv);
-#endif
 	    sv_setpvs(MUTABLE_SV(cv), "");  /* prototype is "" */
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
@@ -7616,9 +7608,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
-#ifndef PL_OP_SLAB_ALLOC
     cv_forget_slab(cv);
-#endif
 #ifdef PERL_MAD
     op_getmad(o,pegop,'n');
     op_getmad_weak(block, pegop, 'b');
