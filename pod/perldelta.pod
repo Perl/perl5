@@ -398,6 +398,12 @@ Duplication of in-memory filehandles by opening with a "<&=" or ">&=" mode
 stopped working properly in 5.16.0.  It was causing the new handle to
 reference a different scalar variable.  This has been fixed [perl #113764].
 
+=item *
+
+C<qr//> expressions no longer crash with custom regular expression engines
+that do not set C<offs> at regular expression compilation time
+[perl #112962].
+
 =back
 
 =head1 Known Problems
