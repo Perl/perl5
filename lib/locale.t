@@ -452,7 +452,7 @@ Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW Big5 GB2312 tw.EUC
 Hrvatski Croatian:hr:hr:2
 Cymraeg Welsh:cy:cy:1 14 15
 Czech:cs:cz:2
-Dansk Danish:dk:da:1 15
+Dansk Danish:da:dk:1 15
 Nederlands Dutch:nl:be nl:1 15
 English American British:en:au ca gb ie nz us uk zw:1 15 cp850
 Esperanto:eo:eo:3
@@ -467,7 +467,7 @@ Frysk:fy:nl:1 15
 Greenlandic:kl:gl:4 6
 Hebrew:iw:il:8 hebrew8
 Hungarian:hu:hu:2
-Indonesian:in:id:1 15
+Indonesian:id:id:1 15
 Gaeilge Irish:ga:IE:1 14 15
 Italiano Italian:it:ch it:1 15
 Nihongo Japanese:ja:jp:euc eucJP jp.EUC sjis
@@ -478,7 +478,7 @@ Lithuanian:lt:lt:4 6 13
 Macedonian:mk:mk:1 15
 Maltese:mt:mt:3
 Moldovan:mo:mo:2
-Norsk Norwegian:no no\@nynorsk:no:1 15
+Norsk Norwegian:no no\@nynorsk nb nn:no:1 15
 Occitan:oc:es:1 15
 Polski Polish:pl:pl:2
 Rumanian:ro:ro:2
