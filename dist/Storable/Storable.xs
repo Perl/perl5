@@ -5106,7 +5106,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SEEN(hv, cname, 0);		/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
+	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
 
 	/*
 	 * Now get each key/value pair in turn...
@@ -5193,7 +5193,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
     SEEN(hv, cname, 0);		/* Will return if table not allocated properly */
     if (len == 0)
         return (SV *) hv;	/* No data follow if table empty */
-    hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
+    hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
 
     /*
      * Now get each key/value pair in turn...
@@ -5512,7 +5512,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	SEEN(hv, 0, 0);			/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
-	hv_ksplit(hv, len);		/* pre-extend hash to save multiple splits */
+	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
 
 	/*
 	 * Now get each key/value pair in turn...
