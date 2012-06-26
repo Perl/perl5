@@ -371,6 +371,11 @@ Arriving signals no longer clear C<$@> [perl #45173].
 
 Allow C<my ()> declarations with an empty variable list [perl #113554].
 
+=item *
+
+During parsing, subs declared after errors no longer leave stubs
+[perl #113712].
+
 =back
 
 =head1 Known Problems
