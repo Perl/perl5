@@ -387,6 +387,12 @@ subroutines, allowing variables closed over by outer subroutines to be
 freed when the outer sub is freed, even if the inner sub still exists
 [perl #89544].
 
+=item *
+
+Duplication of in-memory filehandles by opening with a "<&=" or ">&=" mode
+stopped working properly in 5.16.0.  It was causing the new handle to
+reference a different scalar variable.  This has been fixed [perl #113764].
+
 =back
 
 =head1 Known Problems
