@@ -10,6 +10,7 @@ use strict;
 use Config;
 
 plan tests => 29;
+$| = 1;
 
 watchdog(15);
 
@@ -150,11 +151,13 @@ like $@, qr/No such hook: __DIE__\\0whoops at/;
 
 # [perl #45173]
 {
-    my $hup_called;
-    local $SIG{HUP} = sub { $hup_called = 1 };
+    my $int_called;
+    local $SIG{INT} = sub { $int_called = 1; };
     $@ = "died";
     is($@, "died");
-    kill 'HUP', $$;
-    is($hup_called, 1);
+    kill 'INT', $$;
+    # this is needed to ensure signal delivery on MSWin32
+    sleep(1);
+    is($int_called, 1);
     is($@, "died");
 }
