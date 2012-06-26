@@ -376,6 +376,10 @@ Allow C<my ()> declarations with an empty variable list [perl #113554].
 During parsing, subs declared after errors no longer leave stubs
 [perl #113712].
 
+=item *
+
+C<do $file> now clears C<$@> after an I/O error [perl #113730].
+
 =back
 
 =head1 Known Problems
