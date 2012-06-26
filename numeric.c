@@ -847,17 +847,22 @@ Perl_my_atof(pTHX_ const char* s)
 
     PERL_ARGS_ASSERT_MY_ATOF;
 
-    if (PL_numeric_local && IN_SOME_LOCALE_FORM) {
-	NV y;
+    if (PL_numeric_local && PL_numeric_radix_sv && IN_SOME_LOCALE_FORM) {
+        char *standard = NULL, *local = NULL;
+        bool use_standard_radix;
 
-	/* Scan the number twice; once using locale and once without;
-	 * choose the larger result (in absolute value). */
-	Perl_atof2(s, x);
-	SET_NUMERIC_STANDARD();
-	Perl_atof2(s, y);
-	SET_NUMERIC_LOCAL();
-	if ((y < 0.0 && y < x) || (y > 0.0 && y > x))
-	    return y;
+        standard = strchr(s, '.');
+        local = strstr(s, SvPV_nolen(PL_numeric_radix_sv));
+
+        use_standard_radix = standard && (!local || standard < local);
+
+        if (use_standard_radix)
+            SET_NUMERIC_STANDARD();
+
+        Perl_atof2(s, x);
+
+        if (use_standard_radix)
+            SET_NUMERIC_LOCAL();
     }
     else
 	Perl_atof2(s, x);

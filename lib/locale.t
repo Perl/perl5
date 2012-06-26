@@ -1247,6 +1247,39 @@ foreach $Locale (@Locale) {
 	    print "# failed $locales_test_number locale '$Locale' characters @f\n"
 	}
     }
+
+    # [perl #109318]
+    {
+        my @f = ();
+        ++$locales_test_number;
+        $test_names{$locales_test_number} = 'Verify atof with locale radix and negative exponent';
+
+        my $radix = POSIX::localeconv()->{decimal_point};
+        my @nums = (
+             "3.14e+9",  "3${radix}14e+9",  "3.14e-9",  "3${radix}14e-9",
+            "-3.14e+9", "-3${radix}14e+9", "-3.14e-9", "-3${radix}14e-9",
+        );
+
+        if (! $is_utf8_locale) {
+            use locale;
+            for my $num (@nums) {
+                push @f, $num
+                    unless sprintf("%g", $num) =~ /3.+14/;
+            }
+        }
+        else {
+            use locale ':not_characters';
+            for my $num (@nums) {
+                push @f, $num
+                    unless sprintf("%g", $num) =~ /3.+14/;
+            }
+        }
+
+	tryneoalpha($Locale, $locales_test_number, @f == 0);
+	if (@f) {
+	    print "# failed $locales_test_number locale '$Locale' numbers @f\n"
+	}
+    }
 }
 
 my $final_locales_test_number = $locales_test_number;
