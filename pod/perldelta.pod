@@ -252,6 +252,17 @@ Building perl with some Windows compilers used to fail due to a problem
 with miniperl's C<glob> operator (which uses the C<perlglob> program)
 deleting the PATH environment variable [perl #113798].
 
+=item *
+
+C<delete local> no longer crashes with certain magical arrays and hashes
+[perl #112966].
+
+=item *
+
+C<local> on elements of certain magical arrays and hashes used not to
+arrange to have the element deleted on scope exit, even if the element did
+not exist before C<local>.
+
 =back
 
 =head1 Testing
