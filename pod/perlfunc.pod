@@ -3178,11 +3178,20 @@ L<perlport> for notes on the portability of this construct.
 Unlike in the shell, if SIGNAL is negative, it kills process groups instead
 of processes.  That means you usually
 want to use positive not negative signals.
-You may also use a signal name in quotes.
+
+You may also use a signal name in quotes.  A negative signal name is the
+same as a negative signal number, killing process groups instead of processes.
+For example, C<kill -KILL, $pgrp> will send C<SIGKILL> to the entire process
+group specified.
 
 The behavior of kill when a I<PROCESS> number is zero or negative depends on
 the operating system.  For example, on POSIX-conforming systems, zero will
-signal the current process group and -1 will signal all processes.
+signal the current process group, -1 will signal all processes, and any
+other negative PROCESS number will act as a negative signal number and
+kill the entire process group specified.
+
+If both the SIGNAL and the PROCESS are negative, the results are undefined.
+A warning may be produced in a future version.
 
 See L<perlipc/"Signals"> for more details.
 

@@ -1579,6 +1579,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     const char *s;
     STRLEN len;
     SV ** const oldmark = mark;
+    bool killgp = false;
 
     PERL_ARGS_ASSERT_APPLY;
 
@@ -1689,6 +1690,12 @@ nothing in the core.
 	if (mark == sp)
 	    break;
 	s = SvPVx_const(*++mark, len);
+	if (*s == '-' && isALPHA(s[1]))
+	{
+	    s++;
+	    len--;
+            killgp = true;
+	}
 	if (isALPHA(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G') {
 		s += 3;
@@ -1698,12 +1705,18 @@ nothing in the core.
                Perl_croak(aTHX_ "Unrecognized signal name \"%"SVf"\"", SVfARG(*mark));
 	}
 	else
+	{
 	    val = SvIV(*mark);
+	    if (val < 0)
+	    {
+		killgp = true;
+                val = -val;
+	    }
+	}
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 #ifdef VMS
 	/* kill() doesn't do process groups (job trees?) under VMS */
-	if (val < 0) val = -val;
 	if (val == SIGKILL) {
 	    /* Use native sys$delprc() to insure that target process is
 	     * deleted; supervisor-mode images don't pay attention to
@@ -1736,34 +1749,19 @@ nothing in the core.
 	    break;
 	}
 #endif
-	if (val < 0) {
-	    val = -val;
-	    while (++mark <= sp) {
-		I32 proc;
-		SvGETMAGIC(*mark);
-		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
-		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
-		proc = SvIV_nomg(*mark);
-		APPLY_TAINT_PROPER();
-#ifdef HAS_KILLPG
-		if (PerlProc_killpg(proc,val))	/* BSD */
-#else
-		if (PerlProc_kill(-proc,val))	/* SYSV */
-#endif
-		    tot--;
+	while (++mark <= sp) {
+	    I32 proc;
+	    SvGETMAGIC(*mark);
+	    if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
+		Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
+	    proc = SvIV_nomg(*mark);
+	    if (killgp)
+	    {
+                proc = -proc;
 	    }
-	}
-	else {
-	    while (++mark <= sp) {
-		I32 proc;
-		SvGETMAGIC(*mark);
-		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
-		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
-		proc = SvIV_nomg(*mark);
-		APPLY_TAINT_PROPER();
-		if (PerlProc_kill(proc, val))
-		    tot--;
-	    }
+	    APPLY_TAINT_PROPER();
+	    if (PerlProc_kill(proc, val))
+		tot--;
 	}
 	PERL_ASYNC_CHECK();
 	break;
