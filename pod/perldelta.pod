@@ -380,6 +380,13 @@ During parsing, subs declared after errors no longer leave stubs
 
 C<do $file> now clears C<$@> after an I/O error [perl #113730].
 
+=item *
+
+Closures containing no string evals no longer hang on to their containing
+subroutines, allowing variables closed over by outer subroutines to be
+freed when the outer sub is freed, even if the inner sub still exists
+[perl #89544].
+
 =back
 
 =head1 Known Problems
