@@ -1880,7 +1880,7 @@ Perl_cv_clone(pTHX_ CV *proto)
      * Note that in general for formats, CvOUTSIDE != find_runcv */
 
     outside = CvOUTSIDE(proto);
-    if (outside && CvCLONE(outside) && ! CvCLONED(outside))
+    if (!outside || (CvCLONE(outside) && ! CvCLONED(outside)))
 	outside = find_runcv(NULL);
     depth = CvDEPTH(outside);
     assert(depth || SvTYPE(proto) == SVt_PVFM);

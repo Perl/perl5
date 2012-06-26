@@ -727,5 +727,11 @@ BEGIN {
       'closures only close over named variables, not entire subs';
 }
 
+# [perl #113812] Closure prototypes with no CvOUTSIDE (crash caused by the
+#                fix for #89544)
+do "./op/closure_test.pl" or die $@||$!;
+is $closure_test::s2->()(), '10 cubes',
+  'cloning closure proto with no CvOUTSIDE';
+
 
 done_testing();

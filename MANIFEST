@@ -5191,6 +5191,7 @@ t/op/chdir.t			See if chdir works
 t/op/chop.t			See if chop works
 t/op/chr.t			See if chr works
 t/op/closure.t			See if closures work
+t/op/closure_test.pl		Extra file for closure.t
 t/op/cmp.t			See if the various string and numeric compare work
 t/op/concat2.t			Tests too complex for concat.t
 t/op/concat.t			See if string concatenation works
