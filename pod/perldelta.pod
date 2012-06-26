@@ -263,6 +263,10 @@ C<local> on elements of certain magical arrays and hashes used not to
 arrange to have the element deleted on scope exit, even if the element did
 not exist before C<local>.
 
+=item *
+
+C<scalar(write)> no longer returns multiple items [perl #73690].
+
 =back
 
 =head1 Testing
