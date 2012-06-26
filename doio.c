@@ -1579,7 +1579,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     const char *s;
     STRLEN len;
     SV ** const oldmark = mark;
-    bool killgp = false;
+    bool killgp = FALSE;
 
     PERL_ARGS_ASSERT_APPLY;
 
@@ -1694,7 +1694,7 @@ nothing in the core.
 	{
 	    s++;
 	    len--;
-            killgp = true;
+            killgp = TRUE;
 	}
 	if (isALPHA(*s)) {
 	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G') {
@@ -1709,7 +1709,7 @@ nothing in the core.
 	    val = SvIV(*mark);
 	    if (val < 0)
 	    {
-		killgp = true;
+		killgp = TRUE;
                 val = -val;
 	    }
 	}
