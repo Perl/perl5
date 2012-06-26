@@ -397,6 +397,9 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     /* Create a new op slot */
     slot = (OPSLOT *)((I32 **)slab2->opslab_first - sz);
     assert(slot >= &slab2->opslab_slots);
+    if (DIFF(&slab2->opslab_slots, slot)
+	 < SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P)
+	slot = &slab2->opslab_slots;
     INIT_OPSLOT;
     DEBUG_S(Perl_warn(aTHX_ "allocating op at %p, slab %p", o, slab));
     return (void *)o;
