@@ -4150,6 +4150,11 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 		 (void)sv_utf8_decode(sv);
 	}
     }
+
+    if (PL_inplace && (!PL_argvgv || AvFILL(GvAV(PL_argvgv)) == -1))
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
+                         "-i used with no filenames on the command line, "
+                         "reading from STDIN");
 }
 
 STATIC void

@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 112);
+plan(tests => 114);
 
 use Config;
 
@@ -350,6 +350,26 @@ __EOF__
     is(join(":", @bak),
        "foo yada dada:bada foo bing:king kong foo",
        "-i backup file");
+
+    my $out1 = runperl(
+        switches => ['-i.bak -p'],
+        prog     => 'exit',
+        stderr   => 1,
+        stdin    => "1\n",
+    );
+    is(
+        $out1,
+        "-i used with no filenames on the command line, reading from STDIN.\n",
+        "warning when no files given"
+    );
+    my $out2 = runperl(
+        switches => ['-i.bak -p'],
+        prog     => 'exit',
+        stderr   => 1,
+        stdin    => "1\n",
+        args     => ['file'],
+    );
+    is($out2, "", "no warning when files given");
 }
 
 # Tests for -E

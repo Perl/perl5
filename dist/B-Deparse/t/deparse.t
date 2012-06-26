@@ -104,6 +104,7 @@ my $path = join " ", map { qq["-I$_"] } @INC;
 $a = `$^X $path "-MO=Deparse" -anlwi.bak -e 1 2>&1`;
 $a =~ s/-e syntax OK\n//g;
 $a =~ s/.*possible typo.*\n//;	   # Remove warning line
+$a =~ s/.*-i used with no filenames.*\n//;	# Remove warning line
 $a =~ s{\\340\\242}{\\s} if (ord("\\") == 224); # EBCDIC, cp 1047 or 037
 $a =~ s{\\274\\242}{\\s} if (ord("\\") == 188); # $^O eq 'posix-bc'
 $b = <<'EOF';
