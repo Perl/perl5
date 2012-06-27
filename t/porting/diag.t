@@ -322,12 +322,12 @@ sub check_message {
       $ret = 1;
       if ( $entries{$key}{seen}++ ) {
         # no need to repeat entries we've tested
-      } elsif ($entries{$name}{todo}) {
+      } elsif ($entries{$key}{todo}) {
         TODO: {
           no warnings 'once';
           local $::TODO = 'in DATA';
           # There is no listing, but it is in the list of exceptions.  TODO FAIL.
-          fail($name);
+          fail($key);
           diag(
             "    Message '$name'\n    from $codefn line $. is not listed in $pod\n".
             "    (but it wasn't documented in 5.10 either, so marking it TODO)."
