@@ -451,7 +451,6 @@
 #define reg_named_buff_scalar(a,b)	Perl_reg_named_buff_scalar(aTHX_ a,b)
 #define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define regdump(a)		Perl_regdump(aTHX_ a)
-#define regdump(a)		Perl_regdump(aTHX_ a)
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
 #define reginitcolors()		Perl_reginitcolors(aTHX)

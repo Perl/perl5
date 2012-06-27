@@ -3318,11 +3318,6 @@ PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
 #define PERL_ARGS_ASSERT_REGDUMP	\
 	assert(r)
 
-PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_REGDUMP	\
-	assert(r)
-
 PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ REGEXP *const rx, char *stringarg, char *strend, char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
