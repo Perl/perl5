@@ -4425,17 +4425,21 @@ S_do_delete_local(pTHX)
     const I32 gimme = GIMME_V;
     const MAGIC *mg;
     HV *stash;
-
-    if (PL_op->op_private & OPpSLICE) {
-	dMARK; dORIGMARK;
-	SV * const osv = POPs;
-	const bool tied = SvRMAGICAL(osv)
+    const bool sliced = !!(PL_op->op_private & OPpSLICE);
+    SV *unsliced_keysv = sliced ? NULL : POPs;
+    SV * const osv = POPs;
+    register SV **mark =
+	sliced ? PL_stack_base + POPMARK : &unsliced_keysv-1;
+    dORIGMARK;
+    const bool tied = SvRMAGICAL(osv)
 			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
-	const bool can_preserve = SvCANEXISTDELETE(osv);
-	const U32 type = SvTYPE(osv);
-	if (type == SVt_PVHV) {			/* hash element */
+    const bool can_preserve = SvCANEXISTDELETE(osv);
+    const U32 type = SvTYPE(osv);
+    SV ** const end = sliced ? SP : &unsliced_keysv;
+
+    if (type == SVt_PVHV) {			/* hash element */
 	    HV * const hv = MUTABLE_HV(osv);
-	    while (++MARK <= SP) {
+	    while (++MARK <= end) {
 		SV * const keysv = *MARK;
 		SV *sv = NULL;
 		bool preeminent = TRUE;
@@ -4466,11 +4470,11 @@ S_do_delete_local(pTHX)
 		    *MARK = &PL_sv_undef;
 		}
 	    }
-	}
-	else if (type == SVt_PVAV) {                  /* array element */
+    }
+    else if (type == SVt_PVAV) {                  /* array element */
 	    if (PL_op->op_flags & OPf_SPECIAL) {
 		AV * const av = MUTABLE_AV(osv);
-		while (++MARK <= SP) {
+		while (++MARK <= end) {
 		    I32 idx = SvIV(*MARK);
 		    SV *sv = NULL;
 		    bool preeminent = TRUE;
@@ -4501,9 +4505,12 @@ S_do_delete_local(pTHX)
 		    }
 		}
 	    }
-	}
-	else
+	    else
+		DIE(aTHX_ "panic: avhv_delete no longer supported");
+    }
+    else
 	    DIE(aTHX_ "Not a HASH reference");
+    if (sliced) {
 	if (gimme == G_VOID)
 	    SP = ORIGMARK;
 	else if (gimme == G_SCALAR) {
@@ -4515,81 +4522,8 @@ S_do_delete_local(pTHX)
 	    SP = MARK;
 	}
     }
-    else {
-	SV * const keysv = POPs;
-	SV * const osv   = POPs;
-	const bool tied = SvRMAGICAL(osv)
-			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
-	const bool can_preserve = SvCANEXISTDELETE(osv);
-	const U32 type = SvTYPE(osv);
-	SV *sv = NULL;
-	if (type == SVt_PVHV) {
-	    HV * const hv = MUTABLE_HV(osv);
-	    bool preeminent = TRUE;
-	    if (can_preserve)
-		preeminent = hv_exists_ent(hv, keysv, 0);
-	    if (tied) {
-		HE *he = hv_fetch_ent(hv, keysv, 1, 0);
-		if (he)
-		    sv = HeVAL(he);
-		else
-		    preeminent = FALSE;
-	    }
-	    else {
-		sv = hv_delete_ent(hv, keysv, 0, 0);
-		SvREFCNT_inc_simple_void(sv); /* De-mortalize */
-	    }
-	    if (preeminent) {
-		if (!sv) DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
-		save_helem_flags(hv, keysv, &sv, SAVEf_KEEPOLDELEM);
-		if (tied) {
-		    SV *nsv = sv_mortalcopy(sv);
-		    mg_clear(sv);
-		    sv = nsv;
-		}
-	    }
-	    else
-		SAVEHDELETE(hv, keysv);
-	}
-	else if (type == SVt_PVAV) {
-	    if (PL_op->op_flags & OPf_SPECIAL) {
-		AV * const av = MUTABLE_AV(osv);
-		I32 idx = SvIV(keysv);
-		bool preeminent = TRUE;
-		if (can_preserve)
-		    preeminent = av_exists(av, idx);
-		if (tied) {
-		    SV **svp = av_fetch(av, idx, 1);
-		    if (svp)
-			sv = *svp;
-		    else
-			preeminent = FALSE;
-		}
-		else {
-		    sv = av_delete(av, idx, 0);
-		    SvREFCNT_inc_simple_void(sv); /* De-mortalize */
-		}
-		if (preeminent) {
-		    save_aelem_flags(av, idx, &sv, SAVEf_KEEPOLDELEM);
-		    if (tied) {
-			SV *nsv = sv_mortalcopy(sv);
-			mg_clear(sv);
-			sv = nsv;
-		    }
-		}
-		else
-		    SAVEADELETE(av, idx);
-	    }
-	    else
-		DIE(aTHX_ "panic: avhv_delete no longer supported");
-	}
-	else
-	    DIE(aTHX_ "Not a HASH reference");
-	if (!sv)
-	    sv = &PL_sv_undef;
-	if (gimme != G_VOID)
-	    PUSHs(sv);
-    }
+    else if (gimme != G_VOID)
+	PUSHs(unsliced_keysv);
 
     RETURN;
 }
