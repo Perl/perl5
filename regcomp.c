@@ -403,8 +403,12 @@ static const scan_data_t zero_scan_data =
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
-#define OOB_UNICODE		12345678
 #define OOB_NAMEDCLASS		-1
+
+/* There is no code point that is out-of-bounds, so this is problematic.  But
+ * its only current use is to initialize a variable that is always set before
+ * looked at. */
+#define OOB_UNICODE		0xDEADBEEF
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (UTF ? utf8_distance(a,b) : a - b)
