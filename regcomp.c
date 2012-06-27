@@ -11710,8 +11710,13 @@ parseit:
     }
 
     /* [\w] can be optimized into \w, but not if there is anything else in the
-     * brackets (except for an initial '^' which indictes omplementing) */
-    if (element_count == 1 && (has_special_charset_op || has_special_non_charset_op)) {
+     * brackets (except for an initial '^' which indictes omplementing).  We
+     * also can optimize the common special case /[0-9]/ into /\d/a */
+    if (element_count == 1 &&
+        (has_special_charset_op
+         || has_special_non_charset_op
+         || (prevvalue == '0' && value == '9')))
+    {
         U8 op;
         bool invert = ANYOF_FLAGS(ret) & ANYOF_INVERT;
         const char * cur_parse = RExC_parse;
@@ -11782,6 +11787,9 @@ parseit:
             if (invert) {
                 op++;
             }
+        }
+        else {  /* The remaining possibility is [0-9] */
+            op = (invert) ? NDIGITA : DIGITA;
         }
 
         /* Throw away this ANYOF regnode, and emit the calculated one, which
