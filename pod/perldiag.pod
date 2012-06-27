@@ -4870,7 +4870,7 @@ many values were temporarily localized.
 
 =item Unbalanced scopes: %d more ENTERs than LEAVEs
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many blocks were entered and left.
 
 =item Unbalanced string table refcount: (%d) for "%s"
