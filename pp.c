@@ -3259,7 +3259,8 @@ PP(pp_chr)
     SvGETMAGIC(TOPs);
     if (((SvIOKp(TOPs) && !SvIsUV(TOPs) && SvIV_nomg(TOPs) < 0)
 	 ||
-	 (SvNOKp(TOPs) && SvNV_nomg(TOPs) < 0.0))) {
+	 ((SvNOKp(TOPs) || (SvOK(TOPs) && !SvIsUV(TOPs)))
+	  && SvNV_nomg(TOPs) < 0.0))) {
 	if (IN_BYTES) {
 	    value = SvUV_nomg(TOPs); /* chr(-1) eq chr(0xff), etc. */
 	    (void)POPs;
