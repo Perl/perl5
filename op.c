@@ -417,6 +417,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 void
 Perl_Slab_Free(pTHX_ void *op)
 {
+    dVAR;
     OP * const o = (OP *)op;
     OPSLAB *slab;
 
@@ -456,6 +457,7 @@ Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
 void
 Perl_opslab_free(pTHX_ OPSLAB *slab)
 {
+    dVAR;
     OPSLAB *slab2;
     PERL_ARGS_ASSERT_OPSLAB_FREE;
     DEBUG_S(Perl_warn(aTHX_ "freeing slab %p", slab));
