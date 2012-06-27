@@ -86,7 +86,7 @@ while (<$diagfh>) {
   if (m/^=item (.*)/) {
     $cur_entry = $1 =~ s/\s+\z//r;
 
-    if (exists $entries{$cur_entry}) {
+    if (exists $entries{$cur_entry} && $entries{$cur_entry}{todo}) {
         TODO: {
             local $::TODO = "Remove the TODO entry \"$cur_entry\" from DATA as it is already in $pod near line $.";
             ok($cur_entry);
