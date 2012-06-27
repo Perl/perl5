@@ -85,13 +85,13 @@ C<tr/a-y//>, which was probably not what you would have expected.)
 
 =item Ambiguous use of %s resolved as %s
 
-(W ambiguous)(S) You said something that may not be interpreted the way
+(S ambiguous) You said something that may not be interpreted the way
 you thought.  Normally it's pretty easy to disambiguate it by supplying
 a missing quote, operator, parenthesis pair or declaration.
 
 =item Ambiguous use of %c resolved as operator %c
 
-(W ambiguous) C<%>, C<&>, and C<*> are both infix operators (modulus,
+(S ambiguous) C<%>, C<&>, and C<*> are both infix operators (modulus,
 bitwise and, and multiplication) I<and> initial special characters
 (denoting hashes, subroutines and typeglobs), and you said something
 like C<*foo * foo> that might be interpreted as either of them.  We
@@ -130,7 +130,7 @@ off warnings with C<no warnings 'ambiguous';>.
 
 =item Ambiguous use of -%s resolved as -&%s()
 
-(W ambiguous) You wrote something like C<-foo>, which might be the
+(S ambiguous) You wrote something like C<-foo>, which might be the
 string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
 the string, just write C<"-foo">.  If you meant the function call,
 write C<-foo()>.
@@ -345,9 +345,10 @@ L<perlvar/%INC>.
 
 =item Attempt to set length of freed array
 
-(W) You tried to set the length of an array which has been freed.  You
-can do this by storing a reference to the scalar representing the last index
-of an array and later assigning through that reference.  For example
+(W misc) You tried to set the length of an array which has
+been freed.  You can do this by storing a reference to the
+scalar representing the last index of an array and later
+assigning through that reference.  For example
 
     $r = do {my @a; \$#a};
     $$r = 503
@@ -1425,7 +1426,7 @@ another template code following the slash.  See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
 
-(W utf8, non_unicode) You had a code point above the Unicode maximum
+(S utf8, non_unicode) You had a code point above the Unicode maximum
 of U+10FFFF.
 
 Perl allows strings to contain a superset of Unicode code points, up
@@ -1759,8 +1760,8 @@ already been freed.
 
 =item Duplicate modifier '%c' after '%c' in %s
 
-(W) You have applied the same modifier more than once after a type
-in a pack template.  See L<perlfunc/pack>.
+(W unpack) You have applied the same modifier more than once after a
+type in a pack template.  See L<perlfunc/pack>.
 
 =item elseif should be elsif
 
@@ -2410,9 +2411,9 @@ character (U+FFFD).
 
 =item invalid option -D%c, use -D'' to see choices
 
-(F) Perl was called with invalid debugger flags.  Call perl with
-the B<-D> option with no flags to see the list of acceptable values.
-See also L<< perlrun/B<-D>I<letters> >>.
+(S debugging) Perl was called with invalid debugger flags.  Call perl
+with the B<-D> option with no flags to see the list of acceptable values.
+See also L<perlrun/B<-D>I<letters>>.
 
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
 
@@ -2618,12 +2619,12 @@ handle.  This restriction may be eased in a future release.
 
 =item Lost precision when %s %f by 1
 
-(W) The value you attempted to increment or decrement by one is too large
-for the underlying floating point representation to store accurately,
-hence the target of C<++> or C<--> is unchanged.  Perl issues this warning
-because it has already switched from integers to floating point when values
-are too large for integers, and now even floating point is insufficient.
-You may wish to switch to using L<Math::BigInt> explicitly.
+(W imprecision) The value you attempted to increment or decrement by one
+is too large for the underlying floating point representation to store
+accurately, hence the target of C<++> or C<--> is unchanged.  Perl issues this
+warning because it has already switched from integers to floating point
+when values are too large for integers, and now even floating point is
+insufficient.  You may wish to switch to using L<Math::BigInt> explicitly.
 
 =item lstat() on filehandle%s
 
@@ -3359,14 +3360,14 @@ that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
 =item Opening dirhandle %s also as a file
 
-(W io, deprecated) You used open() to associate a filehandle to
+(D io, deprecated) You used open() to associate a filehandle to
 a symbol (glob or scalar) that already holds a dirhandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
 
 =item Opening filehandle %s also as a directory
 
-(W io, deprecated) You used opendir() to associate a dirhandle to
+(D io, deprecated) You used opendir() to associate a dirhandle to
 a symbol (glob or scalar) that already holds a filehandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
@@ -3380,7 +3381,7 @@ the C<fallback> overloading key is specified to be true.  See L<overload>.
 
 =item Operation "%s" returns its argument for non-Unicode code point 0x%X
 
-(W utf8, non_unicode) You performed an operation requiring Unicode
+(S utf8, non_unicode) You performed an operation requiring Unicode
 semantics on a code point that is not in Unicode, so what it should do
 is not defined.  Perl has chosen to have it do nothing, and warn you.
 
@@ -3392,7 +3393,7 @@ C<no warnings 'non_unicode';>.
 
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
-(W utf8, surrogate) You performed an operation requiring Unicode
+(S utf8, surrogate) You performed an operation requiring Unicode
 semantics on a Unicode surrogate.  Unicode frowns upon the use of
 surrogates for anything but storing strings in UTF-16, but semantics
 are (reluctantly) defined for the surrogates, and they are to do
@@ -3810,7 +3811,7 @@ C<sh>-shell in.  See "PERL_SH_DIR" in L<perlos2>.
 
 =item PERL_SIGNALS illegal: "%s"
 
-See L<perlrun/PERL_SIGNALS> for legal values.
+(X) See L<perlrun/PERL_SIGNALS> for legal values.
 
 =item Perls since %s too modern--this is %s, stopped
 
@@ -4204,8 +4205,8 @@ of the specified modifier.  Remove the extraneous ones.
 
 =item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- HERE in m/%s/
 
-(F regexp) Turning off the given modifier has the side effect of turning
-on another one.  Perl currently doesn't allow this.  Reword the regular
+(F) Turning off the given modifier has the side effect of turning on
+another one.  Perl currently doesn't allow this.  Reword the regular
 expression to use the modifier you want to turn on (and place it before
 the minus), instead of the one you want to turn off.
 
@@ -4244,10 +4245,11 @@ really a dirhandle.  Check your control flow.
 
 =item Scalars leaked: %d
 
-(P) Something went wrong in Perl's internal bookkeeping of scalars:
-not all scalar variables were deallocated by the time Perl exited.
-What this usually indicates is a memory leak, which is of course bad,
-especially if the Perl program is intended to be long-running.
+(W internal) Something went wrong in Perl's internal bookkeeping
+of scalars: not all scalar variables were deallocated by the time
+Perl exited.  What this usually indicates is a memory leak, which
+is of course bad, especially if the Perl program is intended to be
+long-running.
 
 =item Scalar value @%s[%s] better written as $%s[%s]
 
@@ -4858,17 +4860,17 @@ use it to restrict permissions for yourself (EXPR & 0700).
 
 =item Unbalanced context: %d more PUSHes than POPs
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many execution contexts were entered and left.
 
 =item Unbalanced saves: %d more saves than restores
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many values were temporarily localized.
 
 =item Unbalanced scopes: %d more ENTERs than LEAVEs
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many blocks were entered and left.
 
 =item Unbalanced string table refcount: (%d) for "%s"
@@ -4879,7 +4881,7 @@ should have been freed, so this indicates a bug somewhere.
 
 =item Unbalanced tmps: %d more allocs than frees
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many mortal scalars were allocated and freed.
 
 =item Undefined format "%s" called
@@ -4946,7 +4948,7 @@ internal consistency check.  It encountered a malformed op tree.
 
 =item Unicode non-character U+%X is illegal for open interchange
 
-(W utf8, nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
+(S utf8, nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
 defined by the Unicode standard to be non-characters.  Those are
 legal codepoints, but are reserved for internal use; so, applications
 shouldn't attempt to exchange them.  If you know what you are doing
@@ -4954,7 +4956,7 @@ you can turn off this warning by C<no warnings 'nonchar';>.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
-(W utf8, surrogate) You had a UTF-16 surrogate in a context where they are
+(S utf8, surrogate) You had a UTF-16 surrogate in a context where they are
 not considered acceptable.  These code points, between U+D800 and
 U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
 internally allows all unsigned integer code points (up to the size limit
@@ -5552,7 +5554,7 @@ modified string is usually not particularly useful.)
 
 =item UTF-16 surrogate U+%X
 
-(W utf8, surrogate) You had a UTF-16 surrogate in a context where they are
+(S utf8, surrogate) You had a UTF-16 surrogate in a context where they are
 not considered acceptable.  These code points, between U+D800 and
 U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
 internally allows all unsigned integer code points (up to the size limit
@@ -5609,7 +5611,7 @@ executed, so its $a is not available for capture.
 
 =item Variable "%s" is not imported%s
 
-(W misc) With "use strict" in effect, you referred to a global variable
+(S misc) With "use strict" in effect, you referred to a global variable
 that you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
