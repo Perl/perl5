@@ -2411,8 +2411,8 @@ character (U+FFFD).
 
 =item invalid option -D%c, use -D'' to see choices
 
-(F) Perl was called with invalid debugger flags.  Call perl with
-the B<-D> option with no flags to see the list of acceptable values.
+(S debugging) Perl was called with invalid debugger flags.  Call perl
+with the B<-D> option with no flags to see the list of acceptable values.
 See also L<perlrun/B<-D>I<letters>>.
 
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
