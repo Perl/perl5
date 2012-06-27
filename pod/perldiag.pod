@@ -4205,8 +4205,8 @@ of the specified modifier.  Remove the extraneous ones.
 
 =item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- HERE in m/%s/
 
-(F regexp) Turning off the given modifier has the side effect of turning
-on another one.  Perl currently doesn't allow this.  Reword the regular
+(F) Turning off the given modifier has the side effect of turning on
+another one.  Perl currently doesn't allow this.  Reword the regular
 expression to use the modifier you want to turn on (and place it before
 the minus), instead of the one you want to turn off.
 
