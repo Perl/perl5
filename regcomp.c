@@ -2634,9 +2634,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      problematic sequences.  This delta is used by the caller to adjust the
  *      min length of the match, and the delta between min and max, so that the
  *      optimizer doesn't reject these possibilities based on size constraints.
- * 2)   These sequences are not currently correctly handled by the trie code
- *      either, so it changes the joined node type to ops that are not handled
- *      by trie's, those new ops being EXACTFU_SS and EXACTFU_TRICKYFOLD.
+ * 2)   These sequences require special handling by the trie code, so it
+ *      changes the joined node type to ops for the trie's benefit, those new
+ *      ops being EXACTFU_SS and EXACTFU_TRICKYFOLD.
  * 3)   This is sufficient for the two Greek sequences (described below), but
  *      the one involving the Sharp s (\xDF) needs more.  The node type
  *      EXACTFU_SS is used for an EXACTFU node that contains at least one "ss"
