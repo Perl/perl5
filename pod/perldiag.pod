@@ -1760,8 +1760,8 @@ already been freed.
 
 =item Duplicate modifier '%c' after '%c' in %s
 
-(W) You have applied the same modifier more than once after a type
-in a pack template.  See L<perlfunc/pack>.
+(W unpack) You have applied the same modifier more than once after a
+type in a pack template.  See L<perlfunc/pack>.
 
 =item elseif should be elsif
 
