@@ -1426,7 +1426,7 @@ another template code following the slash.  See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
 
-(W utf8, non_unicode) You had a code point above the Unicode maximum
+(S utf8, non_unicode) You had a code point above the Unicode maximum
 of U+10FFFF.
 
 Perl allows strings to contain a superset of Unicode code points, up
