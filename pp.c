@@ -4453,6 +4453,7 @@ S_do_delete_local(pTHX)
 		    SvREFCNT_inc_simple_void(sv); /* De-mortalize */
 		}
 		if (preeminent) {
+		    if (!sv) DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
 		    save_helem_flags(hv, keysv, &sv, SAVEf_KEEPOLDELEM);
 		    if (tied) {
 			*MARK = sv_mortalcopy(sv);
@@ -4539,6 +4540,7 @@ S_do_delete_local(pTHX)
 		SvREFCNT_inc_simple_void(sv); /* De-mortalize */
 	    }
 	    if (preeminent) {
+		if (!sv) DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
 		save_helem_flags(hv, keysv, &sv, SAVEf_KEEPOLDELEM);
 		if (tied) {
 		    SV *nsv = sv_mortalcopy(sv);

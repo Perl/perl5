@@ -258,6 +258,10 @@ sub test_precomputed_hashes {
 	  warnings; # thank you!
 	  @h{85} = 1 };
     pass 'no crash when writing to hash elem with null value via slice';
+    eval { delete local $h{86} };
+    pass 'no crash during local deletion of hash elem with null value';
+    eval { delete local @h{87,88} };
+    pass 'no crash during local deletion of hash slice with null values';
 }
 
 # [perl #111000] Bug number eleventy-one thousand:
