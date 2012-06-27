@@ -4865,7 +4865,7 @@ many execution contexts were entered and left.
 
 =item Unbalanced saves: %d more saves than restores
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many values were temporarily localized.
 
 =item Unbalanced scopes: %d more ENTERs than LEAVEs
