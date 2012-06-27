@@ -3923,9 +3923,9 @@ PP(pp_require)
 		    DIE(aTHX_
 			"Can't locate %s in @INC%s%s (@INC contains:%" SVf ")",
 			name,
-			(memEQ(name + len - 2, ".h", 3)
+			(len >= 2 && memEQ(name + len - 2, ".h", 3)
 			 ? " (change .h to .ph maybe?) (did you run h2ph?)" : ""),
-			(memEQ(name + len - 3, ".ph", 4)
+			(len >= 3 && memEQ(name + len - 3, ".ph", 4)
 			 ? " (did you run h2ph?)" : ""),
 			inc
 			);
