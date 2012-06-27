@@ -66,9 +66,11 @@ my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
 my %entries;
 
 # Get the ignores that are compiled into this file
+my $reading_categorical_exceptions;
 while (<DATA>) {
   chomp;
-  $entries{$_}{todo}=1;
+  $entries{$_}{$reading_categorical_exceptions ? 'cattodo' : 'todo'}=1;
+  /__CATEGORIES__/ and ++$reading_categorical_exceptions;
 }
 
 my $pod = "pod/perldiag.pod";
@@ -79,6 +81,7 @@ open my $diagfh, "<", $pod
 my $category_re = qr/ [a-z0-9_]+?/;      # Note: requires an initial space
 my $severity_re = qr/ . (?: \| . )* /x; # A severity is a single char, but can
                                         # be of the form 'S|P|W'
+my @same_descr;
 while (<$diagfh>) {
   if (m/^=item (.*)/) {
     $cur_entry = $1 =~ s/\s+\z//r;
@@ -102,16 +105,28 @@ while (<$diagfh>) {
     if (/^ \( ( $severity_re )
 
         # Can have multiple categories separated by commas
-        (?: ( $category_re ) (?: , $category_re)* )? \) /x)
+        ( $category_re (?: , $category_re)* )? \) /x)
     {
       $entries{$cur_entry}{severity} = $1;
-      $entries{$cur_entry}{category} = $2;
+      $entries{$cur_entry}{category} =
+        $2 && join ", ", sort split " ", $2 =~ y/,//dr;
+
+      # Record it also for other messages sharing the same description
+      @$_{qw<severity category>} =
+        @{$entries{$cur_entry}}{qw<severity category>}
+       for @same_descr;
     }
     elsif (! $entries{$cur_entry}{first_line} && $_ =~ /\S/) {
 
       # Keep track of first line of text if doesn't contain a severity, so
       # that can later examine it to determine if that is ok or not
       $entries{$cur_entry}{first_line} = $_;
+    }
+    if (/\S/) {
+      @same_descr = ();
+    }
+    else {
+      push @same_descr, $entries{$cur_entry};
     }
   }
 }
@@ -257,6 +272,9 @@ sub check_file {
     my ($name, $category);
     if (/$source_msg_call_re/) {
       ($name, $category) = ($+{'text'}, $+{'category'});
+      # Sometimes the regexp will pick up too much for the category
+      # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
+      $category && $category =~ s/\).*//s;
     }
     elsif (/$bad_version_re/) {
       ($name, $category) = ($+{'text'}, undef);
@@ -272,13 +290,15 @@ sub check_file {
       next;
     }
 
-    my $severity = {croak => [qw/P F/],
-                      die   => [qw/P F/],
-                      warn  => [qw/W D S/],
-                     }->{$+{'routine'}||'die'};
-    my @categories;
+    my $severity = !$+{routine}                 ? '[PFX]'
+                 :  $+{routine} =~ /warn.*_d\z/ ? '[DS]'
+                 :  $+{routine} =~ /warn/       ? '[WDS]'
+                 :                                '[PFX]';
+    my $categories;
     if (defined $category) {
-      @categories = map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $category;
+      $categories =
+        join ", ",
+              sort map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $category;
     }
     if ($listed_as and $listed_as_line == $. - $multiline) {
       $name = $listed_as;
@@ -309,12 +329,12 @@ sub check_file {
     # inside an #if 0 block.
     next if $name eq 'SKIPME';
 
-    check_message(standardize($name),$codefn);
+    check_message(standardize($name),$codefn,$severity,$categories);
   }
 }
 
 sub check_message {
-    my($name,$codefn,$partial) = @_;
+    my($name,$codefn,$severity,$categories,$partial) = @_;
     my $key = $name =~ y/\n/ /r;
     my $ret;
 
@@ -336,6 +356,22 @@ sub check_message {
       } else {
         # We found an actual valid entry in perldiag.pod for this error.
         pass($key);
+
+        # Now check the category and severity
+
+        # Cache our severity qr thingies
+        use 5.01;
+        state %qrs;
+        my $qr = $qrs{$severity} ||= qr/$severity/;
+
+        local $::TODO = "Severity/category not correct yet"
+          if $entries{$key}{cattodo};
+
+        like $entries{$key}{severity}, $qr,
+           "severity is one of $severity for $key";
+        is $entries{$key}{category}, $categories,
+           ($categories ? "categories are [$categories]" : "no category")
+             . " for $key";
       }
       # Later, should start checking that the severity is correct, too.
     } elsif ($partial) {
@@ -344,7 +380,8 @@ sub check_message {
       my $ok;
       if ($name =~ /\n/) {
         $ok = 1;
-        check_message($_,$codefn,1) or $ok = 0, last for split /\n/, $name;
+        check_message($_,$codefn,$severity,$categories,1) or $ok = 0, last
+          for split /\n/, $name;
       }
       if ($ok) {
         # noop
@@ -374,6 +411,9 @@ sub check_message {
 # 
 # PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in
 # pod/perldiag.pod for your new (warning|error).
+
+# Entries after __CATEGORIES__ are those that are in perldiag but fail the
+# severity/category test.
 
 # Also FIXME this test, as the first entry in TODO *is* covered by the
 # description: Malformed UTF-8 character (%s)
@@ -550,3 +590,14 @@ Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
+
+__CATEGORIES__
+Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
+Code point 0x%X is not Unicode, may not be portable
+Illegal character \%o (carriage return)
+Missing argument in %s
+Unicode non-character U+%X is illegal for open interchange
+Operation "%s" returns its argument for non-Unicode code point 0x%X
+Operation "%s" returns its argument for UTF-16 surrogate U+%X
+Unicode surrogate U+%X is illegal in UTF-8
+UTF-16 surrogate U+%X
