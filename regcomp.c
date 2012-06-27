@@ -11995,15 +11995,13 @@ parseit:
                         switch (j) {
                             case 'k':
                             case 'K':
-                                /* KELVIN SIGN */
                                 cp_list =
-                                    add_cp_to_invlist(cp_list, 0x212A);
+                                    add_cp_to_invlist(cp_list, KELVIN_SIGN);
                                 break;
                             case 's':
                             case 'S':
-                                /* LATIN SMALL LETTER LONG S */
-                                cp_list =
-                                    add_cp_to_invlist(cp_list, 0x017F);
+                                cp_list = add_cp_to_invlist(cp_list,
+                                                    LATIN_SMALL_LETTER_LONG_S);
                                 break;
                             case MICRO_SIGN:
                                 cp_list = add_cp_to_invlist(cp_list,
@@ -12013,9 +12011,8 @@ parseit:
                                 break;
                             case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
                             case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
-                                /* ANGSTROM SIGN */
                                 cp_list =
-                                        add_cp_to_invlist(cp_list, 0x212B);
+                                    add_cp_to_invlist(cp_list, ANGSTROM_SIGN);
                                 break;
                             case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
                                 cp_list = add_cp_to_invlist(cp_list,
