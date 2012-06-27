@@ -364,7 +364,7 @@ sub check_message {
         state %qrs;
         my $qr = $qrs{$severity} ||= qr/$severity/;
 
-        local $::TODO = "Severity/category not correct yet"
+        return $ret
           if $entries{$key}{cattodo};
 
         like $entries{$key}{severity}, $qr,
