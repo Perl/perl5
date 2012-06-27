@@ -76,7 +76,11 @@ for  (@folds) {
                 $lhs = $chr;
                 $rhs = "";
                 foreach my $rhs_char (@folded) {
-                    $rhs .= '[' if $charclass;
+
+                    # The colon is an unrelated character to the rest of the
+                    # class, and makes sure no optimization into an EXACTish
+                    # node occurs.
+                    $rhs .= '[:' if $charclass;
                     $rhs .=  $rhs_char;
                     $rhs .= ']' if $charclass;
                 }
