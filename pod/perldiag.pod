@@ -3811,7 +3811,7 @@ C<sh>-shell in.  See "PERL_SH_DIR" in L<perlos2>.
 
 =item PERL_SIGNALS illegal: "%s"
 
-See L<perlrun/PERL_SIGNALS> for legal values.
+(X) See L<perlrun/PERL_SIGNALS> for legal values.
 
 =item Perls since %s too modern--this is %s, stopped
 
