@@ -69,12 +69,12 @@ sub canonpath {
     # but that made tests 29, 30, 35, 46, and 213 (as of #13272) to fail
     # (Mainly because trailing "" directories didn't get stripped).
     # Why would cygwin avoid collapsing multiple slashes into one? --jhi
-    $path =~ s|/{2,}|/|g;                            # xx////xx  -> xx/xx
-    $path =~ s{(?:/\.)+(?:/|\z)}{/}g;                # xx/././xx -> xx/xx
-    $path =~ s|^\./|| unless $path eq "./";          # ./xx      -> xx
-    $path =~ s{^(?:/\.\.)+(?:/|$)}{/};               # /../../xx -> /xx
-                                                     # /..       -> /
-    $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
+    $path =~ s|/{2,}|/|g;                   # xx////xx  -> xx/xx
+    $path =~ s{(?:/\.)+(?:/|\z)}{/}g;       # xx/././xx -> xx/xx
+    $path =~ s|^\./|| unless $path eq "./"; # ./xx      -> xx
+    $path =~ s{^(?:/\.\.)+(?:/|$)}{/};      # /../../xx -> /xx
+                                            # /..       -> /
+    $path =~ s|/\z|| unless $path eq "/";   # xx/       -> xx
 
     _DOUBLE_SLASHES_SPECIAL ? ($node . $path) : $path;
 }
