@@ -9912,43 +9912,17 @@ tryagain:
 	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
 	case 'w':
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = ALNUML;
-		    break;
-		case REGEX_UNICODE_CHARSET:
-		    op = ALNUMU;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = ALNUMA;
-		    break;
-		case REGEX_DEPENDS_CHARSET:
-		    op = ALNUM;
-		    break;
-		default:
-		    goto bad_charset;
+	    op = ALNUM + get_regex_charset(RExC_flags);
+            if (op > ALNUMA) {  /* /aa is same as /a */
+                op = ALNUMA;
             }
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'W':
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = NALNUML;
-		    break;
-		case REGEX_UNICODE_CHARSET:
-		    op = NALNUMU;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = NALNUMA;
-		    break;
-		case REGEX_DEPENDS_CHARSET:
-		    op = NALNUM;
-		    break;
-		default:
-		    goto bad_charset;
+	    op = NALNUM + get_regex_charset(RExC_flags);
+            if (op > NALNUMA) { /* /aa is same as /a */
+                op = NALNUMA;
             }
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
@@ -9956,22 +9930,9 @@ tryagain:
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = BOUNDL;
-		    break;
-		case REGEX_UNICODE_CHARSET:
-		    op = BOUNDU;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = BOUNDA;
-		    break;
-		case REGEX_DEPENDS_CHARSET:
-		    op = BOUND;
-		    break;
-		default:
-		    goto bad_charset;
+	    op = BOUND + get_regex_charset(RExC_flags);
+            if (op > BOUNDA) {  /* /aa is same as /a */
+                op = BOUNDA;
             }
 	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
@@ -9980,103 +9941,45 @@ tryagain:
 	case 'B':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = NBOUNDL;
-		    break;
-		case REGEX_UNICODE_CHARSET:
-		    op = NBOUNDU;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = NBOUNDA;
-		    break;
-		case REGEX_DEPENDS_CHARSET:
-		    op = NBOUND;
-		    break;
-		default:
-		    goto bad_charset;
+	    op = NBOUND + get_regex_charset(RExC_flags);
+            if (op > NBOUNDA) { /* /aa is same as /a */
+                op = NBOUNDA;
             }
 	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 's':
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = SPACEL;
-		    break;
-		case REGEX_UNICODE_CHARSET:
-		    op = SPACEU;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = SPACEA;
-		    break;
-		case REGEX_DEPENDS_CHARSET:
-		    op = SPACE;
-		    break;
-		default:
-		    goto bad_charset;
+	    op = SPACE + get_regex_charset(RExC_flags);
+            if (op > SPACEA) {  /* /aa is same as /a */
+                op = SPACEA;
             }
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'S':
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = NSPACEL;
-		    break;
-		case REGEX_UNICODE_CHARSET:
-		    op = NSPACEU;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = NSPACEA;
-		    break;
-		case REGEX_DEPENDS_CHARSET:
-		    op = NSPACE;
-		    break;
-		default:
-		    goto bad_charset;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
-	case 'd':
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = DIGITL;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = DIGITA;
-		    break;
-		case REGEX_DEPENDS_CHARSET: /* No difference between these */
-		case REGEX_UNICODE_CHARSET:
-		    op = DIGIT;
-		    break;
-		default:
-		    goto bad_charset;
+	    op = NSPACE + get_regex_charset(RExC_flags);
+            if (op > NSPACEA) { /* /aa is same as /a */
+                op = NSPACEA;
             }
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'D':
-	    switch (get_regex_charset(RExC_flags)) {
-		case REGEX_LOCALE_CHARSET:
-		    op = NDIGITL;
-		    break;
-		case REGEX_ASCII_RESTRICTED_CHARSET:
-		case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-		    op = NDIGITA;
-		    break;
-		case REGEX_DEPENDS_CHARSET: /* No difference between these */
-		case REGEX_UNICODE_CHARSET:
-		    op = NDIGIT;
-		    break;
-		default:
-		    goto bad_charset;
+            op = NDIGIT;
+            goto join_D_and_d;
+	case 'd':
+            op = DIGIT;
+        join_D_and_d:
+            {
+                U8 offset = get_regex_charset(RExC_flags);
+                if (offset == REGEX_UNICODE_CHARSET) {
+                    offset = REGEX_DEPENDS_CHARSET;
+                }
+                else if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
+                    offset = REGEX_ASCII_RESTRICTED_CHARSET;
+                }
+                op += offset;
             }
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= HASWIDTH|SIMPLE;
@@ -10305,14 +10208,18 @@ tryagain:
 	    bool is_exactfu_sharp_s;
 
 	    ender = 0;
-            node_type = ((! FOLD) ? EXACT
-		        : (LOC)
-			  ? EXACTFL
-			  : (MORE_ASCII_RESTRICTED)
-			    ? EXACTFA
-			    : (AT_LEAST_UNI_SEMANTICS)
-			      ? EXACTFU
-			      : EXACTF);
+            if (! FOLD) {
+                node_type = EXACT;
+            }
+            else {
+                node_type = get_regex_charset(RExC_flags);
+                if (node_type >= REGEX_ASCII_RESTRICTED_CHARSET) {
+                    node_type--; /* /a is same as /u, and map /aa's offset to
+                                    what /a's would have been, so there is no
+                                    hole */
+                }
+                node_type += EXACTF;
+            }
 	    ret = reg_node(pRExC_state, node_type);
 	    s = STRING(ret);
 
@@ -10706,11 +10613,6 @@ tryagain:
     }
 
     return(ret);
-
-/* Jumped to when an unrecognized character set is encountered */
-bad_charset:
-    Perl_croak(aTHX_ "panic: Unknown regex character set encoding: %u", get_regex_charset(RExC_flags));
-    return(NULL);
 }
 
 STATIC char *
