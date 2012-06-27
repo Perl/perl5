@@ -3255,17 +3255,14 @@ PP(pp_chr)
     dVAR; dSP; dTARGET;
     char *tmps;
     UV value;
+    SV *top = POPs;
 
-    SvGETMAGIC(TOPs);
-    if (((SvIOKp(TOPs) && !SvIsUV(TOPs) && SvIV_nomg(TOPs) < 0)
+    SvGETMAGIC(top);
+    if (!IN_BYTES /* under bytes, chr(-1) eq chr(0xff), etc. */
+     && ((SvIOKp(top) && !SvIsUV(top) && SvIV_nomg(top) < 0)
 	 ||
-	 ((SvNOKp(TOPs) || (SvOK(TOPs) && !SvIsUV(TOPs)))
-	  && SvNV_nomg(TOPs) < 0.0))) {
-	if (IN_BYTES) {
-	    value = SvUV_nomg(TOPs); /* chr(-1) eq chr(0xff), etc. */
-	    (void)POPs;
-	} else {
-	    SV *top = POPs;
+	 ((SvNOKp(top) || (SvOK(top) && !SvIsUV(top)))
+	  && SvNV_nomg(top) < 0.0))) {
 	    if (ckWARN(WARN_UTF8)) {
 		if (SvGMAGICAL(top)) {
 		    SV *top2 = sv_newmortal();
@@ -3276,10 +3273,8 @@ PP(pp_chr)
 			   "Invalid negative number (%"SVf") in chr", top);
 	    }
 	    value = UNICODE_REPLACEMENT;
-	}
     } else {
-	value = SvUV_nomg(TOPs);
-	(void)POPs;
+	value = SvUV_nomg(top);
     }
 
     SvUPGRADE(TARG,SVt_PV);
