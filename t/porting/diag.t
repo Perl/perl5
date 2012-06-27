@@ -2,8 +2,10 @@
 use warnings;
 use strict;
 
-chdir 't';
-require './test.pl';
+BEGIN {
+  chdir 't';
+  require './test.pl';
+}
 
 plan('no_plan');
 
