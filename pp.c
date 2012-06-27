@@ -652,7 +652,7 @@ PP(pp_study)
     dVAR; dSP; dPOPss;
     STRLEN len;
 
-    len = SvCUR(sv);
+    (void)SvPV(sv, len);
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
 	/* Historically, study was skipped in these cases. */
 	RETPUSHNO;
