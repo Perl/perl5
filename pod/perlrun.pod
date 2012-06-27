@@ -90,7 +90,7 @@ A similar trick involves the I<env> program, if you have it.
 
 The examples above use a relative path to the perl interpreter,
 getting whatever version is first in the user's path.  If you want
-a specific version of Perl, say, perl5.005_57, you should place
+a specific version of Perl, say, perl5.14.1, you should place
 that directly in the C<#!> line's path.
 
 If the C<#!> line does not contain the word "perl" nor the word "indir"
@@ -205,12 +205,12 @@ In this documentation, C<#!/usr/bin/perl> on the first line of the program
 will stand in for whatever method works on your system.  You are
 advised to use a specific path if you care about a specific version.
 
-    #!/usr/local/bin/perl5.00554
+    #!/usr/local/bin/perl5.14
 
 or if you just want to be running at least version, place a statement
 like this at the top of your program:
 
-    use 5.005_54;
+    use 5.014;
 
 =head2 Command Switches
 X<perl, command switches> X<command switches>

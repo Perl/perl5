@@ -212,7 +212,7 @@ them in big-endian mode.  To avoid this problem in network (socket)
 connections use the C<pack> and C<unpack> formats C<n> and C<N>, the
 "network" orders.  These are guaranteed to be portable.
 
-As of perl 5.9.2, you can also use the C<E<gt>> and C<E<lt>> modifiers
+As of perl 5.10.0, you can also use the C<E<gt>> and C<E<lt>> modifiers
 to force big- or little-endian byte-order.  This is useful if you want
 to store signed integers or 64-bit integers, for example.
 
@@ -236,9 +236,9 @@ transferring or storing raw binary numbers.
 
 One can circumnavigate both these problems in two ways.  Either
 transfer and store numbers always in text format, instead of raw
-binary, or else consider using modules like Data::Dumper (included in
-the standard distribution as of Perl 5.005) and Storable (included as
-of perl 5.8).  Keeping all data as text significantly simplifies matters.
+binary, or else consider using modules like Data::Dumper and Storable
+(included as of perl 5.8).  Keeping all data as text significantly
+simplifies matters.
 
 The v-strings are portable only up to v2147483647 (0x7FFFFFFF), that's
 how far EBCDIC, or more precisely UTF-EBCDIC will go.
@@ -679,9 +679,8 @@ ISO 8859-1 bytes beyond 0x7f into your strings might cause trouble
 later.  If the bytes are native 8-bit bytes, you can use the C<bytes>
 pragma.  If the bytes are in a string (regular expression being a
 curious string), you can often also use the C<\xHH> notation instead
-of embedding the bytes as-is.  (If you want to write your code in UTF-8,
-you can use the C<utf8>.) The C<bytes> and C<utf8> pragmata are
-available since Perl 5.6.0.
+of embedding the bytes as-is.  If you want to write your code in UTF-8,
+you can use the C<utf8>.
 
 =head2 System Resources
 
@@ -777,8 +776,8 @@ Testing results: L<http://www.cpantesters.org/>
 
 =head1 PLATFORMS
 
-As of version 5.002, Perl is built with a C<$^O> variable that
-indicates the operating system it was built on.  This was implemented
+Perl is built with a C<$^O> variable that indicates the operating
+system it was built on.  This was implemented
 to help speed up code that would otherwise have to C<use Config>
 and use the value of C<$Config{osname}>.  Of course, to get more
 detailed information about the system, looking into C<%Config> is
@@ -1241,7 +1240,7 @@ systems).  On the mainframe perl currently works under the "Unix system
 services for OS/390" (formerly known as OpenEdition), VM/ESA OpenEdition, or
 the BS200 POSIX-BC system (BS2000 is supported in perl 5.6 and greater).
 See L<perlos390> for details.  Note that for OS/400 there is also a port of
-Perl 5.8.1/5.9.0 or later to the PASE which is ASCII-based (as opposed to
+Perl 5.8.1/5.10.0 or later to the PASE which is ASCII-based (as opposed to
 ILE which is EBCDIC-based), see L<perlos400>. 
 
 As of R2.5 of USS for OS/390 and Version 2.3 of VM/ESA these Unix
@@ -2038,7 +2037,7 @@ should not be held open elsewhere. (Win32)
 
 =item umask
 
-Returns undef where unavailable, as of version 5.005.
+Returns undef where unavailable.
 
 C<umask> works but the correct permissions are set only when the file
 is finally closed. (AmigaOS)

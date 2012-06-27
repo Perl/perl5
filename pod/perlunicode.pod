@@ -74,8 +74,7 @@ See L</"Byte and Character Semantics"> for more details.
 
 =head2 Byte and Character Semantics
 
-Beginning with version 5.6, Perl uses logically-wide characters to
-represent strings internally.
+Perl uses logically-wide characters to represent strings internally.
 
 Starting in Perl 5.14, Perl-level operations work with
 characters rather than bytes within the scope of a
@@ -1332,7 +1331,7 @@ results, or both, but it is not.
 
 The following are such interfaces.  Also, see L</The "Unicode Bug">.
 For all of these interfaces Perl
-currently (as of 5.8.3) simply assumes byte strings both as arguments
+currently (as of v5.16.0) simply assumes byte strings both as arguments
 and results, or UTF-8 strings if the (problematic) C<encoding> pragma has been used.
 
 One reason that Perl does not attempt to resolve the role of Unicode in
@@ -1724,7 +1723,7 @@ to work under 5.6, so you should be safe to try them out.
 
 A filehandle that should read or write UTF-8
 
-  if ($] > 5.007) {
+  if ($] > 5.008) {
     binmode $fh, ":encoding(utf8)";
   }
 
@@ -1735,10 +1734,10 @@ A scalar that is going to be passed to some extension
 Be it Compress::Zlib, Apache::Request or any extension that has no
 mention of Unicode in the manpage, you need to make sure that the
 UTF8 flag is stripped off. Note that at the time of this writing
-(October 2002) the mentioned modules are not UTF-8-aware. Please
+(January 2012) the mentioned modules are not UTF-8-aware. Please
 check the documentation to verify if this is still true.
 
-  if ($] > 5.007) {
+  if ($] > 5.008) {
     require Encode;
     $val = Encode::encode_utf8($val); # make octets
   }
@@ -1750,7 +1749,7 @@ A scalar we got back from an extension
 If you believe the scalar comes back as UTF-8, you will most likely
 want the UTF8 flag restored:
 
-  if ($] > 5.007) {
+  if ($] > 5.008) {
     require Encode;
     $val = Encode::decode_utf8($val);
   }
@@ -1759,7 +1758,7 @@ want the UTF8 flag restored:
 
 Same thing, if you are really sure it is UTF-8
 
-  if ($] > 5.007) {
+  if ($] > 5.008) {
     require Encode;
     Encode::_utf8_on($val);
   }
@@ -1772,14 +1771,14 @@ When the database contains only UTF-8, a wrapper function or method is
 a convenient way to replace all your fetchrow_array and
 fetchrow_hashref calls. A wrapper function will also make it easier to
 adapt to future enhancements in your database driver. Note that at the
-time of this writing (October 2002), the DBI has no standardized way
+time of this writing (January 2012), the DBI has no standardized way
 to deal with UTF-8 data. Please check the documentation to verify if
 that is still true.
 
   sub fetchrow {
     # $what is one of fetchrow_{array,hashref}
     my($self, $sth, $what) = @_;
-    if ($] < 5.007) {
+    if ($] < 5.008) {
       return $sth->$what;
     } else {
       require Encode;
@@ -1815,7 +1814,7 @@ Scalars that contain only ASCII and are marked as UTF-8 are sometimes
 a drag to your program. If you recognize such a situation, just remove
 the UTF8 flag:
 
-  utf8::downgrade($val) if $] > 5.007;
+  utf8::downgrade($val) if $] > 5.008;
 
 =back
 

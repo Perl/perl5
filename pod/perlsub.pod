@@ -451,7 +451,7 @@ if you want to stay compatible with releases older than 5.10.
 
 =head3 Persistent variables via state()
 
-Beginning with Perl 5.9.4, you can declare variables with the C<state>
+Beginning with Perl 5.10.0, you can declare variables with the C<state>
 keyword in place of C<my>.  For that to work, though, you must have
 enabled that feature beforehand, either by using the C<feature> pragma, or
 by using C<-E> on one-liners (see L<feature>).  Beginning with Perl 5.16,
@@ -616,7 +616,7 @@ This feature allows code like this to work :
     { local $/ = undef; $slurp = <FILE>; }
 
 Note, however, that this restricts localization of some values ; for
-example, the following statement dies, as of perl 5.9.0, with an error
+example, the following statement dies, as of perl 5.10.0, with an error
 I<Modification of a read-only value attempted>, because the $1 variable is
 magical and read-only :
 
@@ -923,8 +923,7 @@ is done on dynamics:
     } 
     # interruptibility automatically restored here
 
-But it also works on lexically declared aggregates.  Prior to 5.005,
-this operation could on occasion misbehave.
+But it also works on lexically declared aggregates.
 
 =back
 

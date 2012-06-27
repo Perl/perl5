@@ -575,7 +575,7 @@ categories above. These are:
 
 C<\C> always matches a single octet, even if the source string is encoded
 in UTF-8 format, and the character to be matched is a multi-octet character.
-C<\C> was introduced in perl 5.6.  This is very dangerous, because it violates
+This is very dangerous, because it violates
 the logical character abstraction and can cause UTF-8 sequences to become malformed.
 
 Mnemonic: oI<C>tet.

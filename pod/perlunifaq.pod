@@ -141,8 +141,8 @@ concern, and you can just C<eval> dumped data as always.
 Starting in Perl 5.14 (and partially in Perl 5.12), just put a
 C<use feature 'unicode_strings'> near the beginning of your program.
 Within its lexical scope you shouldn't have this problem.  It also is
-automatically enabled under C<use feature ':5.12'> or using C<-E> on the
-command line for Perl 5.12 or higher.
+automatically enabled under C<use feature ':5.12'> or C<use v5.12> or
+using C<-E> on the command line for Perl 5.12 or higher.
 
 The rationale for requiring this is to not break older programs that
 rely on the way things worked before Unicode came along.  Those older

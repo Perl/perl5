@@ -543,7 +543,7 @@ People frequently expect it to work like this.  So it does.
     ${$name x 2} = 3;		# Sets $foofoo
     $name->[0] = 4;		# Sets $foo[0]
     @$name = ();		# Clears @foo
-    &$name();			# Calls &foo() (as in Perl 4)
+    &$name();			# Calls &foo()
     $pack = "THAT";
     ${"${pack}::$name"} = 5;	# Sets $THAT::foo without eval
 
@@ -575,7 +575,7 @@ variables, which are all "global" to the package.
 
 =head2 Not-so-symbolic references
 
-Since Perl verion 5.001, brackets around a symbolic reference can simply
+Brackets around a symbolic reference can simply
 serve to isolate an identifier or variable name from the rest of an
 expression, just as they always have within a string.  For example,
 
@@ -583,7 +583,7 @@ expression, just as they always have within a string.  For example,
     print "${push}over";
 
 has always meant to print "pop on over", even though push is
-a reserved word.  In 5.001, this was generalized to work the same
+a reserved word.  This is generalized to work the same
 without the enclosing double quotes, so that
 
     print ${push} . "over";
@@ -592,8 +592,7 @@ and even
 
     print ${ push } . "over";
 
-will have the same effect.  (This would have been a syntax error in
-Perl 5.000, though Perl 4 allowed it in the spaceless form.)  This
+will have the same effect.  This
 construct is I<not> considered to be a symbolic reference when you're
 using strict refs:
 

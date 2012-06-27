@@ -491,7 +491,7 @@ newline within the string (except if the newline is the last character in
 the string), and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
-but this option was removed in perl 5.9.)
+but this option was removed in perl 5.10.)
 X<^> X<$> X</m>
 
 To simplify multi-line substitutions, the "." character never matches a
