@@ -61,9 +61,9 @@
 #define	EXACTF                	49	/* 0x31 Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len). */
 #define	EXACTFL               	50	/* 0x32 Match this string (not guaranteed to be folded) using /il rules (w/len). */
 #define	EXACTFU               	51	/* 0x33 Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len). */
-#define	EXACTFU_SS            	52	/* 0x34 Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len). */
-#define	EXACTFU_TRICKYFOLD    	53	/* 0x35 Match this folded UTF-8 string using /iu rules */
-#define	EXACTFA               	54	/* 0x36 Match this string (not guaranteed to be folded) using /iaa rules (w/len). */
+#define	EXACTFA               	52	/* 0x34 Match this string (not guaranteed to be folded) using /iaa rules (w/len). */
+#define	EXACTFU_SS            	53	/* 0x35 Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len). */
+#define	EXACTFU_TRICKYFOLD    	54	/* 0x36 Match this folded UTF-8 string using /iu rules */
 #define	NOTHING               	55	/* 0x37 Match empty string. */
 #define	TAIL                  	56	/* 0x38 Match empty string. Can jump here from outside. */
 #define	STAR                  	57	/* 0x39 Match this (simple) thing 0 or more times. */
@@ -222,9 +222,9 @@ EXTCONST U8 PL_regkind[] = {
 	EXACT,    	/* EXACTF                 */
 	EXACT,    	/* EXACTFL                */
 	EXACT,    	/* EXACTFU                */
+	EXACT,    	/* EXACTFA                */
 	EXACT,    	/* EXACTFU_SS             */
 	EXACT,    	/* EXACTFU_TRICKYFOLD     */
-	EXACT,    	/* EXACTFA                */
 	NOTHING,  	/* NOTHING                */
 	NOTHING,  	/* TAIL                   */
 	STAR,     	/* STAR                   */
@@ -383,9 +383,9 @@ static const U8 regarglen[] = {
 	0,                                   	/* EXACTF       */
 	0,                                   	/* EXACTFL      */
 	0,                                   	/* EXACTFU      */
+	0,                                   	/* EXACTFA      */
 	0,                                   	/* EXACTFU_SS   */
 	0,                                   	/* EXACTFU_TRICKYFOLD */
-	0,                                   	/* EXACTFA      */
 	0,                                   	/* NOTHING      */
 	0,                                   	/* TAIL         */
 	0,                                   	/* STAR         */
@@ -501,9 +501,9 @@ static const char reg_off_by_arg[] = {
 	0,	/* EXACTF       */
 	0,	/* EXACTFL      */
 	0,	/* EXACTFU      */
+	0,	/* EXACTFA      */
 	0,	/* EXACTFU_SS   */
 	0,	/* EXACTFU_TRICKYFOLD */
-	0,	/* EXACTFA      */
 	0,	/* NOTHING      */
 	0,	/* TAIL         */
 	0,	/* STAR         */
@@ -624,9 +624,9 @@ EXTCONST char * const PL_reg_name[] = {
 	"EXACTF",                	/* 0x31 */
 	"EXACTFL",               	/* 0x32 */
 	"EXACTFU",               	/* 0x33 */
-	"EXACTFU_SS",            	/* 0x34 */
-	"EXACTFU_TRICKYFOLD",    	/* 0x35 */
-	"EXACTFA",               	/* 0x36 */
+	"EXACTFA",               	/* 0x34 */
+	"EXACTFU_SS",            	/* 0x35 */
+	"EXACTFU_TRICKYFOLD",    	/* 0x36 */
 	"NOTHING",               	/* 0x37 */
 	"TAIL",                  	/* 0x38 */
 	"STAR",                  	/* 0x39 */
