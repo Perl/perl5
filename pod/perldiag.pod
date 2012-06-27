@@ -3367,7 +3367,7 @@ and is deprecated.
 
 =item Opening filehandle %s also as a directory
 
-(W io, deprecated) You used opendir() to associate a dirhandle to
+(D io, deprecated) You used opendir() to associate a dirhandle to
 a symbol (glob or scalar) that already holds a filehandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
