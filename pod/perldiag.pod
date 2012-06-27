@@ -345,9 +345,10 @@ L<perlvar/%INC>.
 
 =item Attempt to set length of freed array
 
-(W) You tried to set the length of an array which has been freed.  You
-can do this by storing a reference to the scalar representing the last index
-of an array and later assigning through that reference.  For example
+(W misc) You tried to set the length of an array which has
+been freed.  You can do this by storing a reference to the
+scalar representing the last index of an array and later
+assigning through that reference.  For example
 
     $r = do {my @a; \$#a};
     $$r = 503
