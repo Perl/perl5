@@ -3381,7 +3381,7 @@ the C<fallback> overloading key is specified to be true.  See L<overload>.
 
 =item Operation "%s" returns its argument for non-Unicode code point 0x%X
 
-(W utf8, non_unicode) You performed an operation requiring Unicode
+(S utf8, non_unicode) You performed an operation requiring Unicode
 semantics on a code point that is not in Unicode, so what it should do
 is not defined.  Perl has chosen to have it do nothing, and warn you.
 
@@ -3393,7 +3393,7 @@ C<no warnings 'non_unicode';>.
 
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
-(W utf8, surrogate) You performed an operation requiring Unicode
+(S utf8, surrogate) You performed an operation requiring Unicode
 semantics on a Unicode surrogate.  Unicode frowns upon the use of
 surrogates for anything but storing strings in UTF-16, but semantics
 are (reluctantly) defined for the surrogates, and they are to do
