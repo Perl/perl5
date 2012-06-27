@@ -480,7 +480,7 @@ Example:
     print "Text\n" if -T _;
     print "Binary\n" if -B _;
 
-As of Perl 5.9.1, as a form of purely syntactic sugar, you can stack file
+As of Perl 5.10.0, as a form of purely syntactic sugar, you can stack file
 test operators, in a way that C<-f -w -x $file> is equivalent to
 C<-x $file && -w _ && -f _>.  (This is only fancy fancy: if you use
 the return value of C<-f $file> as an argument to another filetest
@@ -1989,11 +1989,11 @@ program, passing it C<"surprise"> an argument.  The second version didn't;
 it tried to run a program named I<"echo surprise">, didn't find it, and set
 C<$?> to a non-zero value indicating failure.
 
-Beginning with v5.6.0, Perl attempts to flush all files opened for
-output before the exec, but this may not be supported on some platforms
-(see L<perlport>).  To be safe, you may need to set C<$|> ($AUTOFLUSH
-in English) or call the C<autoflush()> method of C<IO::Handle> on any
-open handles to avoid lost output.
+Perl attempts to flush all files opened for output before the exec,
+but this may not be supported on some platforms (see L<perlport>).
+To be safe, you may need to set C<$|> ($AUTOFLUSH in English) or
+call the C<autoflush()> method of C<IO::Handle> on any open handles
+to avoid lost output.
 
 Note that C<exec> will not call your C<END> blocks, nor will it invoke
 C<DESTROY> methods on your objects.
@@ -2331,7 +2331,7 @@ fork(), great care has gone into making it extremely efficient (for
 example, using copy-on-write technology on data pages), making it the
 dominant paradigm for multitasking over the last few decades.
 
-Beginning with v5.6.0, Perl attempts to flush all files opened for
+Perl attempts to flush all files opened for
 output before forking the child process, but this may not be supported
 on some platforms (see L<perlport>).  To be safe, you may need to set
 C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method of
@@ -2844,7 +2844,7 @@ each pairing of fruits and colors:
 
     @many =  glob "{apple,tomato,cherry}={green,yellow,red}";
 
-Beginning with v5.6.0, this operator is implemented using the standard
+This operator is implemented using the standard
 C<File::Glob> extension.  See L<File::Glob> for details, including
 C<bsd_glob> which does not treat whitespace as a pattern separator.
 
@@ -3935,7 +3935,7 @@ works for symmetry, but you really should consider writing something
 to the temporary file first.  You will need to seek() to do the
 reading.
 
-Since v5.8.0, Perl has built using PerlIO by default.  Unless you've
+Perl is built using PerlIO by default; Unless you've
 changed this (such as building Perl with C<Configure -Uuseperlio>), you can
 open filehandles directly to Perl scalars via:
 
@@ -4135,7 +4135,7 @@ that intentionally contain shell metacharacters, such as:
 
 See L<perlipc/"Safe Pipe Opens"> for more examples of this.
 
-Beginning with v5.6.0, Perl will attempt to flush all files opened for
+Perl will attempt to flush all files opened for
 output before any operation that may do a fork, but this may not be
 supported on some platforms (see L<perlport>).  To be safe, you may need
 to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
@@ -4730,7 +4730,7 @@ immediately below.  See also L<perlport>.
 
 =item *
 
-Starting with Perl 5.9.2, integer and floating-point formats, along with
+Starting with Perl 5.10.0, integer and floating-point formats, along with
 the C<p> and C<P> formats and C<()> groups, may all be followed by the 
 C<< > >> or C<< < >> endianness modifiers to respectively enforce big-
 or little-endian byte-order.  These modifiers are especially useful 
@@ -5407,7 +5407,7 @@ C<chdir> there, it would have been testing the wrong file.
     @dots = grep { /^\./ && -f "$some_dir/$_" } readdir($dh);
     closedir $dh;
 
-As of Perl 5.11.2 you can use a bare C<readdir> in a C<while> loop,
+As of Perl 5.12 you can use a bare C<readdir> in a C<while> loop,
 which will set C<$_> on every iteration.
 
     opendir(my $dh, $some_dir) || die;
@@ -7257,12 +7257,8 @@ of a recent vintage:
     use 5.014;	# so srand returns the seed
 
 If C<srand()> is not called explicitly, it is called implicitly without a
-parameter at the first use of the C<rand> operator.  However, this was not true
-of versions of Perl before 5.004, so if your script will run under older
-Perl versions, it should call C<srand>; otherwise most programs won't call
-C<srand()> at all.
-
-But there are a few situations in recent Perls where programs are likely to
+parameter at the first use of the C<rand> operator.
+However, there are a few situations where programs are likely to
 want to call C<srand>.  One is for generating predictable results, generally for
 testing or debugging.  There, you use C<srand($seed)>, with the same C<$seed>
 each time.  Another case is that you may want to call C<srand()>
@@ -7278,21 +7274,6 @@ Most implementations of C<srand> take an integer and will silently
 truncate decimal numbers.  This means C<srand(42)> will usually
 produce the same results as C<srand(42.1)>.  To be safe, always pass
 C<srand> an integer.
-
-In versions of Perl prior to 5.004 the default seed was just the
-current C<time>.  This isn't a particularly good seed, so many old
-programs supply their own seed value (often C<time ^ $$> or C<time ^
-($$ + ($$ << 15))>), but that isn't necessary any more.
-
-Frequently called programs (like CGI scripts) that simply use
-
-    time ^ $$
-
-for a seed can fall prey to the mathematical property that
-
-    a^b == (a+1)^(b+1)
-
-one-third of the time.  So don't do that.
 
 A typical use of the returned seed is for a test program which has too many
 combinations to test comprehensively in the time available to it each run.  It
@@ -7843,7 +7824,7 @@ platforms).  If there are no shell metacharacters in the argument,
 it is split into words and passed directly to C<execvp>, which is
 more efficient.
 
-Beginning with v5.6.0, Perl will attempt to flush all files opened for
+Perl will attempt to flush all files opened for
 output before any operation that may do a fork, but this may not be
 supported on some platforms (see L<perlport>).  To be safe, you may need
 to set C<$|> ($AUTOFLUSH in English) or call the C<autoflush()> method
@@ -8419,7 +8400,7 @@ C<use VERSION> also enables all features available in the requested
 version as defined by the C<feature> pragma, disabling any features
 not in the requested version's feature bundle.  See L<feature>.
 Similarly, if the specified Perl version is greater than or equal to
-5.11.0, strictures are enabled lexically as
+5.12.0, strictures are enabled lexically as
 with C<use strict>.  Any explicit use of
 C<use strict> or C<no strict> overrides C<use VERSION>, even if it comes
 before it.  In both cases, the F<feature.pm> and F<strict.pm> files are
@@ -8516,7 +8497,7 @@ the user running the program:
     $atime = $mtime = time;
     utime $atime, $mtime, @ARGV;
 
-Since Perl 5.7.2, if the first two elements of the list are C<undef>, 
+Since Perl 5.8.0, if the first two elements of the list are C<undef>, 
 the utime(2) syscall from your C library is called with a null second
 argument.  On most systems, this will set the file's access and
 modification times to the current time (i.e., equivalent to the example
