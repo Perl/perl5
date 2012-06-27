@@ -85,13 +85,13 @@ C<tr/a-y//>, which was probably not what you would have expected.)
 
 =item Ambiguous use of %s resolved as %s
 
-(W ambiguous)(S) You said something that may not be interpreted the way
+(S ambiguous) You said something that may not be interpreted the way
 you thought.  Normally it's pretty easy to disambiguate it by supplying
 a missing quote, operator, parenthesis pair or declaration.
 
 =item Ambiguous use of %c resolved as operator %c
 
-(W ambiguous) C<%>, C<&>, and C<*> are both infix operators (modulus,
+(S ambiguous) C<%>, C<&>, and C<*> are both infix operators (modulus,
 bitwise and, and multiplication) I<and> initial special characters
 (denoting hashes, subroutines and typeglobs), and you said something
 like C<*foo * foo> that might be interpreted as either of them.  We
@@ -130,7 +130,7 @@ off warnings with C<no warnings 'ambiguous';>.
 
 =item Ambiguous use of -%s resolved as -&%s()
 
-(W ambiguous) You wrote something like C<-foo>, which might be the
+(S ambiguous) You wrote something like C<-foo>, which might be the
 string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
 the string, just write C<"-foo">.  If you meant the function call,
 write C<-foo()>.
