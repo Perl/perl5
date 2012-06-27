@@ -5611,7 +5611,7 @@ executed, so its $a is not available for capture.
 
 =item Variable "%s" is not imported%s
 
-(W misc) With "use strict" in effect, you referred to a global variable
+(S misc) With "use strict" in effect, you referred to a global variable
 that you apparently thought was imported from another module, because
 something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
