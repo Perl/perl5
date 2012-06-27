@@ -34,9 +34,12 @@ path. On UNIX eliminates successive slashes and successive "/.".
 Note that this does *not* collapse F<x/../y> sections into F<y>.  This
 is by design.  If F</foo> on your system is a symlink to F</bar/baz>,
 then F</foo/../quux> is actually F</bar/quux>, not F</quux> as a naive
-F<../>-removal would give you.  If you want to do this kind of
-processing, you probably want C<Cwd>'s C<realpath()> function to
-actually traverse the filesystem cleaning up paths like this.
+F<../>-removal would give you.  Same goes for F</foo/bar/..> which is
+*not* collapsed to F</foo> (F</foo/bar> may be a link to F</baz/quux>,
+in which case F</foo/bar/..> is F</baz> but not F</foo>).  If you want
+to do this kind of processing, you probably want C<Cwd>'s C<realpath()>
+function to actually traverse the filesystem cleaning up paths like
+this.
 
 =cut
 

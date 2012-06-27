@@ -99,9 +99,11 @@ my @tests = (
 # rt.perl.org 27052
 [ "Unix->canonpath('a/../../b/c')",            'a/../../b/c'    ],
 [ "Unix->canonpath('/.')",                     '/'              ],
+[ "Unix->canonpath('/..')",                    '/'              ],
 [ "Unix->canonpath('/./')",                    '/'              ],
 [ "Unix->canonpath('/a/./')",                  '/a'             ],
 [ "Unix->canonpath('/a/.')",                   '/a'             ],
+[ "Unix->canonpath('/a/..')",                  '/a/..'          ],
 [ "Unix->canonpath('/../../')",                '/'              ],
 [ "Unix->canonpath('/../..')",                 '/'              ],
 
