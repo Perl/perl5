@@ -667,10 +667,13 @@ my @tests = (
 [ "Epoc->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
 [ "Epoc->canonpath('/./')",                                   '/'         ],
 [ "Epoc->canonpath('/a/./')",                                 '/a'        ],
-
-# XXX Todo, copied from Unix, but fail. Should they? 2003-07-07 Tels
-#[ "Epoc->canonpath('/a/.')",                                  '/a'        ],
-#[ "Epoc->canonpath('/.')",                                    '/'         ],
+[ "Epoc->canonpath('/a/..')",                                 '/a/..'     ],
+# Not sure if this is how it should work, but this is has worked since at
+# least 2003. We better enable these tests so we can catch a possible future
+# change of behaviour.
+[ "Epoc->canonpath('/a/.')",                                  '/a/.'      ],
+[ "Epoc->canonpath('/.')",                                    '/.'        ],
+[ "Epoc->canonpath('/..')",                                   '/..'       ],
 
 [ "Cygwin->case_tolerant()",         '1'  ],
 [ "Cygwin->catfile('a','b','c')",         'a/b/c'  ],

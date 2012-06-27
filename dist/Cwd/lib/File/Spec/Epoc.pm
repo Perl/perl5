@@ -48,11 +48,11 @@ sub canonpath {
     my ($self,$path) = @_;
     return unless defined $path;
 
-    $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
-    $path =~ s|(/\.)+/|/|g;                        # xx/././xx -> xx/xx
-    $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
-    $path =~ s|^/(\.\./)+|/|s;                     # /../../xx -> xx
-    $path =~  s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx
+    $path =~ s|/{2,}|/|g;                   # xx////xx  -> xx/xx
+    $path =~ s|(?:/\.)+/|/|g;               # xx/././xx -> xx/xx
+    $path =~ s|^\./|| unless $path eq "./"; # ./xx      -> xx
+    $path =~ s|^/(?:\.\./)+|/|;             # /../../xx -> xx
+    $path =~ s|/\z|| unless $path eq "/";   # xx/       -> xx
     return $path;
 }
 
