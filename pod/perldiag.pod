@@ -3360,7 +3360,7 @@ that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
 
 =item Opening dirhandle %s also as a file
 
-(W io, deprecated) You used open() to associate a filehandle to
+(D io, deprecated) You used open() to associate a filehandle to
 a symbol (glob or scalar) that already holds a dirhandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
