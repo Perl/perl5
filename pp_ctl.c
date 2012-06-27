@@ -3727,6 +3727,46 @@ S_require_file(pTHX_ SV *const sv)
 		DIE(aTHX_ "Attempt to reload %s aborted.\n"
 			    "Compilation failed in require", unixname);
 	}
+
+        if (PL_op->op_flags & OPf_KIDS) {
+            SVOP * const kid = (SVOP*)cUNOP->op_first;
+
+            if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
+                /* require foo (or use foo) with a bareword.
+                   Perl_load_module fakes up the identical optree, but its
+                   arguments aren't restricted by the parser to real barewords.
+                */
+                const STRLEN package_len = len - 3;
+                const char slashdot[2] = {'/', '.'};
+#ifdef DOSISH
+                const char backslashdot[2] = {'\\', '.'};
+#endif
+
+                /* Disallow *purported* barewords that map to absolute
+                   filenames, filenames relative to the current or parent
+                   directory, or (*nix) hidden filenames.  Also sanity check
+                   that the generated filename ends .pm  */
+                if (!path_searchable || len < 3 || name[0] == '.'
+                    || !memEQ(name + package_len, ".pm", 3))
+                    DIE(aTHX_ "Bareword in require maps to disallowed filename \"%"SVf"\"", sv);
+                if (memchr(name, 0, package_len)) {
+                    /* diag_listed_as: Bareword in require contains "%s" */
+                    DIE(aTHX_ "Bareword in require contains \"\\0\"");
+                }
+                if (ninstr(name, name + package_len, slashdot,
+                           slashdot + sizeof(slashdot))) {
+                    /* diag_listed_as: Bareword in require contains "%s" */
+                    DIE(aTHX_ "Bareword in require contains \"/.\"");
+                }
+#ifdef DOSISH
+                if (ninstr(name, name + package_len, backslashdot,
+                           backslashdot + sizeof(backslashdot))) {
+                    /* diag_listed_as: Bareword in require contains "%s" */
+                    DIE(aTHX_ "Bareword in require contains \"\\.\"");
+                }
+#endif
+            }
+        }
     }
 
     PERL_DTRACE_PROBE_FILE_LOADING(unixname);

@@ -10633,6 +10633,8 @@ Perl_ck_require(pTHX_ OP *o)
                 Move(s+2, s, len - 2, char);
                 end -= 2;
             }
+            if (s == end)
+                DIE(aTHX_ "Bareword in require maps to empty filename");
 
 	    for (; s < end; s++) {
 		if (*s == ':' && s[1] == ':') {

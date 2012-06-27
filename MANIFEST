@@ -3987,6 +3987,7 @@ ext/XS-APItest/t/labelconst.aux	auxiliary file for label test
 ext/XS-APItest/t/labelconst.t	test recursive descent label parsing
 ext/XS-APItest/t/labelconst_utf8.aux	auxiliary file for label test in UTF-8
 ext/XS-APItest/t/lexsub.t	Test XS registration of lexical subs
+ext/XS-APItest/t/load-module.t	test load_module()
 ext/XS-APItest/t/locale.t	test locale-related things
 ext/XS-APItest/t/loopblock.t	test recursive descent block parsing
 ext/XS-APItest/t/looprest.t	test recursive descent statement-sequence parsing
