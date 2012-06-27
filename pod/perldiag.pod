@@ -4245,10 +4245,11 @@ really a dirhandle.  Check your control flow.
 
 =item Scalars leaked: %d
 
-(P) Something went wrong in Perl's internal bookkeeping of scalars:
-not all scalar variables were deallocated by the time Perl exited.
-What this usually indicates is a memory leak, which is of course bad,
-especially if the Perl program is intended to be long-running.
+(W internal) Something went wrong in Perl's internal bookkeeping
+of scalars: not all scalar variables were deallocated by the time
+Perl exited.  What this usually indicates is a memory leak, which
+is of course bad, especially if the Perl program is intended to be
+long-running.
 
 =item Scalar value @%s[%s] better written as $%s[%s]
 
