@@ -126,9 +126,11 @@
 #else
 #   define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { \
+	bool ok; \
 	ENTER; save_re_context(); \
-	assert(CAT2(is_utf8_,class)((const U8*)str)); \
-        assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
+	ok=CAT2(is_utf8_,class)((const U8*)str); \
+        PERL_UNUSED_VAR(ok); \
+	assert(ok); assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
 #endif
 
 /* Doesn't do an assert to verify that is correct */
