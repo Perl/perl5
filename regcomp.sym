@@ -227,6 +227,9 @@ KEEPS       KEEPS,      no        ; $& begins here.
 
 #*New charclass like patterns
 LNBREAK     LNBREAK,    none      ; generic newline pattern
+
+# regcomp.c expects the node number of the complement to be one greater than
+# the non-complement
 VERTWS      VERTWS,     none 0 S  ; vertical whitespace         (Perl 6)
 NVERTWS     NVERTWS,    none 0 S  ; not vertical whitespace     (Perl 6)
 HORIZWS     HORIZWS,    none 0 S  ; horizontal whitespace       (Perl 6)
