@@ -4881,7 +4881,7 @@ should have been freed, so this indicates a bug somewhere.
 
 =item Unbalanced tmps: %d more allocs than frees
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many mortal scalars were allocated and freed.
 
 =item Undefined format "%s" called
