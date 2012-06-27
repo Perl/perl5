@@ -650,10 +650,9 @@ PP(pp_gelem)
 PP(pp_study)
 {
     dVAR; dSP; dPOPss;
-    register unsigned char *s;
     STRLEN len;
 
-    s = (unsigned char*)(SvPV(sv, len));
+    len = SvCUR(sv);
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
 	/* Historically, study was skipped in these cases. */
 	RETPUSHNO;

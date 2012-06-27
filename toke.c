@@ -9060,7 +9060,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 
     if ( charlen != 1 || ! strchr(valid_flags, c) ) {
         if (isALNUM_lazy_if(*s, UTF)) {
-            yyerror_pv(Perl_form(aTHX_ "Unknown regexp modifier \"/%.*s\"", charlen, *s),
+            yyerror_pv(Perl_form(aTHX_ "Unknown regexp modifier \"/%.*s\"", (int)charlen, *s),
                        UTF ? SVf_UTF8 : 0);
             (*s) += charlen;
             /* Pretend that it worked, so will continue processing before

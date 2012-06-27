@@ -126,10 +126,9 @@
 #else
 #   define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { \
-	bool ok; \
 	ENTER; save_re_context(); \
-	ok=CAT2(is_utf8_,class)((const U8*)str); \
-	assert(ok); assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
+	assert(CAT2(is_utf8_,class)((const U8*)str)); \
+        assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
 #endif
 
 /* Doesn't do an assert to verify that is correct */
@@ -3167,6 +3166,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     multicall_oldcatch = 0;
     multicall_cv = NULL;
     cx = NULL;
+    PERL_UNUSED_VAR(multicall_cop);
+    PERL_UNUSED_VAR(newsp);
 
 
     PERL_ARGS_ASSERT_REGMATCH;
@@ -6038,6 +6039,7 @@ no_silent:
     if (last_pushed_cv) {
 	dSP;
 	POP_MULTICALL;
+        PERL_UNUSED_VAR(SP);
     }
 
     /* clean up; in particular, free all slabs above current one */

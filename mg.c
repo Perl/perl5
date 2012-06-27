@@ -3412,6 +3412,7 @@ Perl_magic_copycallchecker(pTHX_ SV *sv, MAGIC *mg, SV *nsv,
     MAGIC *nmg;
 
     PERL_ARGS_ASSERT_MAGIC_COPYCALLCHECKER;
+    PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(name);
     PERL_UNUSED_ARG(namlen);
 
