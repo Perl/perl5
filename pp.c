@@ -3256,18 +3256,29 @@ PP(pp_chr)
     char *tmps;
     UV value;
 
-    if (((SvIOK_notUV(TOPs) && SvIV(TOPs) < 0)
+    SvGETMAGIC(TOPs);
+    if (((SvIOKp(TOPs) && !SvIsUV(TOPs) && SvIV_nomg(TOPs) < 0)
 	 ||
-	 (SvNOK(TOPs) && SvNV(TOPs) < 0.0))) {
+	 (SvNOKp(TOPs) && SvNV_nomg(TOPs) < 0.0))) {
 	if (IN_BYTES) {
-	    value = POPu; /* chr(-1) eq chr(0xff), etc. */
+	    value = SvUV_nomg(TOPs); /* chr(-1) eq chr(0xff), etc. */
+	    (void)POPs;
 	} else {
 	    SV *top = POPs;
-	    Perl_ck_warner(aTHX_ packWARN(WARN_UTF8), "Invalid negative number (%"SVf") in chr", top);
+	    if (ckWARN(WARN_UTF8)) {
+		if (SvGMAGICAL(top)) {
+		    SV *top2 = sv_newmortal();
+		    sv_setsv_nomg(top2, top);
+		    top = top2;
+		}
+		Perl_warner(aTHX_ packWARN(WARN_UTF8),
+			   "Invalid negative number (%"SVf") in chr", top);
+	    }
 	    value = UNICODE_REPLACEMENT;
 	}
     } else {
-	value = POPu;
+	value = SvUV_nomg(TOPs);
+	(void)POPs;
     }
 
     SvUPGRADE(TARG,SVt_PV);
