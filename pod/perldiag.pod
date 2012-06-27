@@ -4860,7 +4860,7 @@ use it to restrict permissions for yourself (EXPR & 0700).
 
 =item Unbalanced context: %d more PUSHes than POPs
 
-(W internal) The exit code detected an internal inconsistency in how
+(S internal) The exit code detected an internal inconsistency in how
 many execution contexts were entered and left.
 
 =item Unbalanced saves: %d more saves than restores
