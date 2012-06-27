@@ -114,6 +114,8 @@ bisect.pl - use git bisect to pinpoint changes
     .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
     # When did this test program stop working?
     .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
+    # When did this test start failing?
+    .../Porting/bisect.pl -- ./perl -Ilib t/TEST op/sort.t
     # When did this first become valid syntax?
     .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
          --expect-fail -e 'my $a := 2;'
@@ -152,10 +154,12 @@ end revisions.
 By default F<bisect.pl> will process all options, then use the rest of the
 command line as arguments to list C<system> to run a test case. By default,
 the test case should pass (exit with 0) on earlier perls, and fail (exit
-non-zero) on I<blead>. F<bisect.pl> will use F<bisect-runner.pl> to find the
-earliest stable perl version on which the test case passes, check that it
-fails on blead, and then use F<bisect-runner.pl> with C<git bisect run> to
-find the commit which caused the failure.
+non-zero) on I<blead> (note that running most of perl's test files directly
+won't do this, you'll need to run them through a harness to get the proper
+error code). F<bisect.pl> will use F<bisect-runner.pl> to find the earliest
+stable perl version on which the test case passes, check that it fails on
+blead, and then use F<bisect-runner.pl> with C<git bisect run> to find the
+commit which caused the failure.
 
 Because the test case is the complete argument to C<system>, it is easy to
 run something other than the F<perl> built, if necessary. If you need to run
