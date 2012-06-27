@@ -2590,6 +2590,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   int assign = AMGf_assign & flags;
   const int assignshift = assign ? 1 : 0;
   int use_default_op = 0;
+  int force_scalar = 0;
 #ifdef DEBUGGING
   int fl=0;
 #endif
@@ -2836,6 +2837,64 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       force_cpy = force_cpy || assign;
     }
   }
+
+  switch (method) {
+    /* in these cases, we're calling '+' or '-' as a fallback for a ++ or --
+     * operation. we need this to return a value, so that it can be assigned
+     * later on, in the postpr block (case inc_amg/dec_amg), even if the
+     * increment or decrement was itself called in void context */
+    case inc_amg:
+      if (off == add_amg)
+        force_scalar = 1;
+      break;
+    case dec_amg:
+      if (off == subtr_amg)
+        force_scalar = 1;
+      break;
+    /* in these cases, we're calling an assignment variant of an operator
+     * (+= rather than +, for instance). regardless of whether it's a
+     * fallback or not, it always has to return a value, which will be
+     * assigned to the proper variable later */
+    case add_amg:
+    case subtr_amg:
+    case mult_amg:
+    case div_amg:
+    case modulo_amg:
+    case pow_amg:
+    case lshift_amg:
+    case rshift_amg:
+    case repeat_amg:
+    case concat_amg:
+    case band_amg:
+    case bor_amg:
+    case bxor_amg:
+      if (assign)
+        force_scalar = 1;
+      break;
+    /* the copy constructor always needs to return a value */
+    case copy_amg:
+      force_scalar = 1;
+      break;
+    /* because of the way these are implemented (they don't perform the
+     * dereferencing themselves, they return a reference that perl then
+     * dereferences later), they always have to be in scalar context */
+    case to_sv_amg:
+    case to_av_amg:
+    case to_hv_amg:
+    case to_gv_amg:
+    case to_cv_amg:
+      force_scalar = 1;
+      break;
+    /* these don't have an op of their own; they're triggered by their parent
+     * op, so the context there isn't meaningful ('$a and foo()' in void
+     * context still needs to pass scalar context on to $a's bool overload) */
+    case bool__amg:
+    case numer_amg:
+    case string_amg:
+      force_scalar = 1;
+      break;
+  }
+
 #ifdef DEBUGGING
   if (!notfound) {
     DEBUG_o(Perl_deb(aTHX_
@@ -2895,12 +2954,29 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     BINOP myop;
     SV* res;
     const bool oldcatch = CATCH_GET;
+    I32 oldmark, nret;
+    int gimme = force_scalar ? G_SCALAR : GIMME_V;
 
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
     myop.op_next = NULL;
-    myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
+    myop.op_flags = OPf_STACKED;
+
+    switch (gimme) {
+        case G_VOID:
+            myop.op_flags |= OPf_WANT_VOID;
+            break;
+        case G_ARRAY:
+            if (flags & AMGf_want_list) {
+                myop.op_flags |= OPf_WANT_LIST;
+                break;
+            }
+            /* FALLTHROUGH */
+        default:
+            myop.op_flags |= OPf_WANT_SCALAR;
+            break;
+    }
 
     PUSHSTACKi(PERLSI_OVERLOAD);
     ENTER;
@@ -2921,13 +2997,37 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     }
     PUSHs(MUTABLE_SV(cv));
     PUTBACK;
+    oldmark = TOPMARK;
 
     if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))
       CALLRUNOPS(aTHX);
     LEAVE;
     SPAGAIN;
+    nret = SP - (PL_stack_base + oldmark);
 
-    res=POPs;
+    switch (gimme) {
+        case G_VOID:
+            /* returning NULL has another meaning, and we check the context
+             * at the call site too, so this can be differentiated from the
+             * scalar case */
+            res = &PL_sv_undef;
+            SP = PL_stack_base + oldmark;
+            break;
+        case G_ARRAY: {
+            if (flags & AMGf_want_list) {
+                res = sv_2mortal((SV *)newAV());
+                av_extend((AV *)res, nret);
+                while (nret--)
+                    av_store((AV *)res, nret, POPs);
+                break;
+            }
+            /* FALLTHROUGH */
+        }
+        default:
+            res = POPs;
+            break;
+    }
+
     PUTBACK;
     POPSTACK;
     CATCH_SET(oldcatch);

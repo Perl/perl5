@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5100;
+plan tests => 5184;
 
 use Scalar::Util qw(tainted);
 
@@ -2368,6 +2368,264 @@ is eval { !$a  },   1,      "' in method name" or diag $@;
 }
 $a = bless [],'dodo';
 is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
+
+# [perl #47119]
+{
+    my $context;
+
+    {
+        package Splitter;
+        use overload '<>' => \&chars;
+
+        sub new {
+            my $class = shift;
+            my ($string) = @_;
+            bless \$string, $class;
+        }
+
+        sub chars {
+            my $self = shift;
+            my @chars = split //, $$self;
+            $context = wantarray;
+            return @chars;
+        }
+    }
+
+    my $obj = Splitter->new('bar');
+
+    $context = 42; # not 1, '', or undef
+
+    my @foo = <$obj>;
+    is($context, 1, "list context (readline list)");
+    is(scalar(@foo), 3, "correct result (readline list)");
+    is($foo[0], 'b', "correct result (readline list)");
+    is($foo[1], 'a', "correct result (readline list)");
+    is($foo[2], 'r', "correct result (readline list)");
+
+    $context = 42;
+
+    my $foo = <$obj>;
+    ok(defined($context), "scalar context (readline scalar)");
+    is($context, '', "scalar context (readline scalar)");
+    is($foo, 3, "correct result (readline scalar)");
+
+    $context = 42;
+
+    <$obj>;
+    ok(!defined($context), "void context (readline void)");
+
+    $context = 42;
+
+    my @bar = <${obj}>;
+    is($context, 1, "list context (glob list)");
+    is(scalar(@bar), 3, "correct result (glob list)");
+    is($bar[0], 'b', "correct result (glob list)");
+    is($bar[1], 'a', "correct result (glob list)");
+    is($bar[2], 'r', "correct result (glob list)");
+
+    $context = 42;
+
+    my $bar = <${obj}>;
+    ok(defined($context), "scalar context (glob scalar)");
+    is($context, '', "scalar context (glob scalar)");
+    is($bar, 3, "correct result (glob scalar)");
+
+    $context = 42;
+
+    <${obj}>;
+    ok(!defined($context), "void context (glob void)");
+}
+{
+    my $context;
+
+    {
+        package StringWithContext;
+        use overload '""' => \&stringify;
+
+        sub new {
+            my $class = shift;
+            my ($string) = @_;
+            bless \$string, $class;
+        }
+
+        sub stringify {
+            my $self = shift;
+            $context = wantarray;
+            return $$self;
+        }
+    }
+
+    my $obj = StringWithContext->new('bar');
+
+    $context = 42;
+
+    my @foo = "".$obj;
+    ok(defined($context), "scalar context (stringify list)");
+    is($context, '', "scalar context (stringify list)");
+    is(scalar(@foo), 1, "correct result (stringify list)");
+    is($foo[0], 'bar', "correct result (stringify list)");
+
+    $context = 42;
+
+    my $foo = "".$obj;
+    ok(defined($context), "scalar context (stringify scalar)");
+    is($context, '', "scalar context (stringify scalar)");
+    is($foo, 'bar', "correct result (stringify scalar)");
+
+    $context = 42;
+
+    "".$obj;
+
+    is($context, '', "scalar context (stringify void)");
+}
+{
+    my ($context, $swap);
+
+    {
+        package AddWithContext;
+        use overload '+' => \&add;
+
+        sub new {
+            my $class = shift;
+            my ($num) = @_;
+            bless \$num, $class;
+        }
+
+        sub add {
+            my $self = shift;
+            my ($other, $swapped) = @_;
+            $context = wantarray;
+            $swap = $swapped;
+            return ref($self)->new($$self + $other);
+        }
+
+        sub val { ${ $_[0] } }
+    }
+
+    my $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    my @foo = $obj + 7;
+    ok(defined($context), "scalar context (add list)");
+    is($context, '', "scalar context (add list)");
+    ok(defined($swap), "not swapped (add list)");
+    is($swap, '', "not swapped (add list)");
+    is(scalar(@foo), 1, "correct result (add list)");
+    is($foo[0]->val, 13, "correct result (add list)");
+
+    $context = $swap = 42;
+
+    @foo = 7 + $obj;
+    ok(defined($context), "scalar context (add list swap)");
+    is($context, '', "scalar context (add list swap)");
+    ok(defined($swap), "swapped (add list swap)");
+    is($swap, 1, "swapped (add list swap)");
+    is(scalar(@foo), 1, "correct result (add list swap)");
+    is($foo[0]->val, 13, "correct result (add list swap)");
+
+    $context = $swap = 42;
+
+    my $foo = $obj + 7;
+    ok(defined($context), "scalar context (add scalar)");
+    is($context, '', "scalar context (add scalar)");
+    ok(defined($swap), "not swapped (add scalar)");
+    is($swap, '', "not swapped (add scalar)");
+    is($foo->val, 13, "correct result (add scalar)");
+
+    $context = $swap = 42;
+
+    my $foo = 7 + $obj;
+    ok(defined($context), "scalar context (add scalar swap)");
+    is($context, '', "scalar context (add scalar swap)");
+    ok(defined($swap), "swapped (add scalar swap)");
+    is($swap, 1, "swapped (add scalar swap)");
+    is($foo->val, 13, "correct result (add scalar swap)");
+
+    $context = $swap = 42;
+
+    $obj + 7;
+
+    ok(!defined($context), "void context (add void)");
+    ok(defined($swap), "not swapped (add void)");
+    is($swap, '', "not swapped (add void)");
+
+    $context = $swap = 42;
+
+    7 + $obj;
+
+    ok(!defined($context), "void context (add void swap)");
+    ok(defined($swap), "swapped (add void swap)");
+    is($swap, 1, "swapped (add void swap)");
+
+    $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    my @foo = $obj += 7;
+    ok(defined($context), "scalar context (add assign list)");
+    is($context, '', "scalar context (add assign list)");
+    ok(!defined($swap), "not swapped and autogenerated (add assign list)");
+    is(scalar(@foo), 1, "correct result (add assign list)");
+    is($foo[0]->val, 13, "correct result (add assign list)");
+    is($obj->val, 13, "correct result (add assign list)");
+
+    $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    my $foo = $obj += 7;
+    ok(defined($context), "scalar context (add assign scalar)");
+    is($context, '', "scalar context (add assign scalar)");
+    ok(!defined($swap), "not swapped and autogenerated (add assign scalar)");
+    is($foo->val, 13, "correct result (add assign scalar)");
+    is($obj->val, 13, "correct result (add assign scalar)");
+
+    $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    $obj += 7;
+
+    ok(defined($context), "scalar context (add assign void)");
+    is($context, '', "scalar context (add assign void)");
+    ok(!defined($swap), "not swapped and autogenerated (add assign void)");
+    is($obj->val, 13, "correct result (add assign void)");
+
+    $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    my @foo = ++$obj;
+    ok(defined($context), "scalar context (add incr list)");
+    is($context, '', "scalar context (add incr list)");
+    ok(!defined($swap), "not swapped and autogenerated (add incr list)");
+    is(scalar(@foo), 1, "correct result (add incr list)");
+    is($foo[0]->val, 7, "correct result (add incr list)");
+    is($obj->val, 7, "correct result (add incr list)");
+
+    $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    my $foo = ++$obj;
+    ok(defined($context), "scalar context (add incr scalar)");
+    is($context, '', "scalar context (add incr scalar)");
+    ok(!defined($swap), "not swapped and autogenerated (add incr scalar)");
+    is($foo->val, 7, "correct result (add incr scalar)");
+    is($obj->val, 7, "correct result (add incr scalar)");
+
+    $obj = AddWithContext->new(6);
+
+    $context = $swap = 42;
+
+    ++$obj;
+
+    ok(defined($context), "scalar context (add incr void)");
+    is($context, '', "scalar context (add incr void)");
+    ok(!defined($swap), "not swapped and autogenerated (add incr void)");
+    is($obj->val, 7, "correct result (add incr void)");
+}
 
 
 { # undefining the overload stash -- KEEP THIS TEST LAST

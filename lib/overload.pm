@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -495,9 +495,6 @@ value will be ignored.
 If C<E<lt>E<gt>> is overloaded then the same implementation is used
 for both the I<read-filehandle> syntax C<E<lt>$varE<gt>> and
 I<globbing> syntax C<E<lt>${var}E<gt>>.
-
-B<BUGS> Even in list context, the iterator is currently called only
-once and with scalar context.
 
 =item * I<File tests>
 
