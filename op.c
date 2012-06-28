@@ -10628,6 +10628,12 @@ Perl_ck_require(pTHX_ OP *o)
 	    s = SvPVX(sv);
 	    len = SvCUR(sv);
 	    end = s + len;
+            /* treat ::foo::bar as foo::bar */
+            if (len >= 2 && s[0] == ':' && s[1] == ':') {
+                Move(s+2, s, len - 2, char);
+                end -= 2;
+            }
+
 	    for (; s < end; s++) {
 		if (*s == ':' && s[1] == ':') {
 		    *s = '/';
