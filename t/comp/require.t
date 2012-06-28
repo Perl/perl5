@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 54;
+my $total_tests = 56;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -187,7 +187,11 @@ $foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval q{return require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 $foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
-       eval  {require bleah};
+       eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
+
+eval {require ::bleah};
+print "# $@\nnot " if $@;
+print "ok ",++$i," - require ::bleah; is equivalent to require bleah;\n";
 
 # Test for fix of RT #24404 : "require $scalar" may load a directory
 my $r = "threads";

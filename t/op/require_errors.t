@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 9);
+plan(tests => 10);
 
 my $nonfile = tempfile();
 
@@ -25,10 +25,13 @@ for my $file ($nonfile, ' ') {
 	"correct error message for require '$file'";
 }
 
-eval "require $nonfile";
+for my $file ($nonfile, "::$nonfile") {
+    eval "require $file";
+    $file =~ s/^:://;
 
-like $@, qr/^Can't locate $nonfile\.pm in \@INC \(\@INC contains: @INC\) at/,
-    "correct error message for require $nonfile";
+    like $@, qr/^Can't locate $file\.pm in \@INC \(\@INC contains: @INC\) at/,
+	"correct error message for require $file";
+}
 
 eval {
     require "$nonfile.ph";
