@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 16;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -832,6 +832,7 @@ select +(select(RT73690), do {
 .
 
     my @ret;
+
     @ret = write;
     is(scalar(@ret), 1);
     ok($ret[0]);
@@ -845,6 +846,61 @@ select +(select(RT73690), do {
     is(scalar(@ret), 1);
     ok($ret[0]);
 
+    @ret = ('a', write, 'z');
+    is(scalar(@ret), 3);
+    is($ret[0], 'a');
+    ok($ret[1]);
+    is($ret[2], 'z');
+    @ret = ('b', scalar(write), 'y');
+    is(scalar(@ret), 3);
+    is($ret[0], 'b');
+    ok($ret[1]);
+    is($ret[2], 'y');
+    @ret = ('c', write(RT73690), 'x');
+    is(scalar(@ret), 3);
+    is($ret[0], 'c');
+    ok($ret[1]);
+    is($ret[2], 'x');
+    @ret = ('d', scalar(write(RT73690)), 'w');
+    is(scalar(@ret), 3);
+    is($ret[0], 'd');
+    ok($ret[1]);
+    is($ret[2], 'w');
+
+    @ret = do { write; 'foo' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'foo');
+    @ret = do { scalar(write); 'bar' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'bar');
+    @ret = do { write(RT73690); 'baz' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'baz');
+    @ret = do { scalar(write(RT73690)); 'quux' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'quux');
+
+    @ret = ('a', do { write; 'foo' }, 'z');
+    is(scalar(@ret), 3);
+    is($ret[0], 'a');
+    is($ret[1], 'foo');
+    is($ret[2], 'z');
+    @ret = ('b', do { scalar(write); 'bar' }, 'y');
+    is(scalar(@ret), 3);
+    is($ret[0], 'b');
+    is($ret[1], 'bar');
+    is($ret[2], 'y');
+    @ret = ('c', do { write(RT73690); 'baz' }, 'x');
+    is(scalar(@ret), 3);
+    is($ret[0], 'c');
+    is($ret[1], 'baz');
+    is($ret[2], 'x');
+    @ret = ('d', do { scalar(write(RT73690)); 'quux' }, 'w');
+    is(scalar(@ret), 3);
+    is($ret[0], 'd');
+    is($ret[1], 'quux');
+    is($ret[2], 'w');
+
     close RT73690 or die "Could not close: $!";
 })[0];
 
@@ -856,6 +912,7 @@ return
 .
 
     my @ret;
+
     @ret = write;
     is(scalar(@ret), 1);
     ok(!$ret[0]);
@@ -868,6 +925,61 @@ return
     @ret = scalar(write(RT73690_2));
     is(scalar(@ret), 1);
     ok(!$ret[0]);
+
+    @ret = ('a', write, 'z');
+    is(scalar(@ret), 3);
+    is($ret[0], 'a');
+    ok(!$ret[1]);
+    is($ret[2], 'z');
+    @ret = ('b', scalar(write), 'y');
+    is(scalar(@ret), 3);
+    is($ret[0], 'b');
+    ok(!$ret[1]);
+    is($ret[2], 'y');
+    @ret = ('c', write(RT73690_2), 'x');
+    is(scalar(@ret), 3);
+    is($ret[0], 'c');
+    ok(!$ret[1]);
+    is($ret[2], 'x');
+    @ret = ('d', scalar(write(RT73690_2)), 'w');
+    is(scalar(@ret), 3);
+    is($ret[0], 'd');
+    ok(!$ret[1]);
+    is($ret[2], 'w');
+
+    @ret = do { write; 'foo' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'foo');
+    @ret = do { scalar(write); 'bar' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'bar');
+    @ret = do { write(RT73690_2); 'baz' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'baz');
+    @ret = do { scalar(write(RT73690_2)); 'quux' };
+    is(scalar(@ret), 1);
+    is($ret[0], 'quux');
+
+    @ret = ('a', do { write; 'foo' }, 'z');
+    is(scalar(@ret), 3);
+    is($ret[0], 'a');
+    is($ret[1], 'foo');
+    is($ret[2], 'z');
+    @ret = ('b', do { scalar(write); 'bar' }, 'y');
+    is(scalar(@ret), 3);
+    is($ret[0], 'b');
+    is($ret[1], 'bar');
+    is($ret[2], 'y');
+    @ret = ('c', do { write(RT73690_2); 'baz' }, 'x');
+    is(scalar(@ret), 3);
+    is($ret[0], 'c');
+    is($ret[1], 'baz');
+    is($ret[2], 'x');
+    @ret = ('d', do { scalar(write(RT73690_2)); 'quux' }, 'w');
+    is(scalar(@ret), 3);
+    is($ret[0], 'd');
+    is($ret[1], 'quux');
+    is($ret[2], 'w');
 
     close RT73690_2 or die "Could not close: $!";
 })[0];
