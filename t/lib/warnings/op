@@ -1243,12 +1243,16 @@ my ($x4) if 0;
 my ($x5,@x6, %x7) if 0;
 0 && my $z1;
 0 && my (%z2);
+my $z3 = 1 if 0;
+my ($z4, $z5, @z6) = (1, 2, 3, 4) if 0;
 # these shouldn't warn
 our $x if 0;
 our $x unless 0;
 if (0) { my $w1 }
 if (my $w2) { $a=1 }
 if ($a && (my $w3 = 1)) {$a = 2}
+if (0 && (my $w4)) { $w4 = 2 }
+if (0 && (my $w5 = 1)) { $w5 = 2 }
 
 EXPECT
 Deprecated use of my() in false conditional at - line 2.
@@ -1258,6 +1262,8 @@ Deprecated use of my() in false conditional at - line 5.
 Deprecated use of my() in false conditional at - line 6.
 Deprecated use of my() in false conditional at - line 7.
 Deprecated use of my() in false conditional at - line 8.
+Deprecated use of my() in false conditional at - line 9.
+Deprecated use of my() in false conditional at - line 10.
 ########
 # op.c
 $[ = 1;

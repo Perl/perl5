@@ -5626,22 +5626,31 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    return other;
 	}
 	else {
-	    /* check for C<my $x if 0>, or C<my($x,$y) if 0> */
-	    const OP *o2 = other;
-	    if ( ! (o2->op_type == OP_LIST
-		    && (( o2 = cUNOPx(o2)->op_first))
-		    && o2->op_type == OP_PUSHMARK
-		    && (( o2 = o2->op_sibling)) )
-	    )
-		o2 = other;
-	    if ((o2->op_type == OP_PADSV || o2->op_type == OP_PADAV
-			|| o2->op_type == OP_PADHV)
-		&& o2->op_private & OPpLVAL_INTRO
-		&& !(o2->op_private & OPpPAD_STATE))
-	    {
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-				 "Deprecated use of my() in false conditional");
-	    }
+	    /* check for C<my $x if 0>, or C<my($x,$y) if 0>,
+             * or C<my $x = 1 if 0>, or C<my($x,$y) = (1,2) if 0> */
+            if (flags & OPf_SPECIAL) { /* this was a postfix if, not and */
+                const OP *o1 = other, *o2;
+                if ( ! ((o1->op_type == OP_SASSIGN || o1->op_type == OP_AASSIGN)
+                        && (( o1 = cBINOPx(o1)->op_last)) )
+                )
+                    o1 = other;
+                o2 = o1;
+                if ( ! ((o2->op_type == OP_LIST
+                        || (o2->op_type == OP_NULL && o2->op_targ == OP_LIST))
+                        && (( o2 = cUNOPx(o2)->op_first))
+                        && o2->op_type == OP_PUSHMARK
+                        && (( o2 = o2->op_sibling)) )
+                )
+                    o2 = o1;
+                if ((o2->op_type == OP_PADSV || o2->op_type == OP_PADAV
+                            || o2->op_type == OP_PADHV)
+                    && o2->op_private & OPpLVAL_INTRO
+                    && !(o2->op_private & OPpPAD_STATE))
+                {
+                    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                                    "Deprecated use of my() in false conditional");
+                }
+            }
 
 	    *otherp = NULL;
 	    if (first->op_type == OP_CONST)
