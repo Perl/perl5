@@ -400,6 +400,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 			CV * const innercv = MUTABLE_CV(curpad[ix]);
 			U32 inner_rc = SvREFCNT(innercv);
 			assert(inner_rc);
+			assert(SvTYPE(innercv) != SVt_PVFM);
 			namepad[ix] = NULL;
 			SvREFCNT_dec(namesv);
 
@@ -744,12 +745,19 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     ix = pad_alloc(optype, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
-    av_store(PL_comppad, ix, (SV*)func);
+    if (SvTYPE(func) == SVt_PVCV || !CvOUTSIDE(func))
+	av_store(PL_comppad, ix, (SV*)func);
+    else {
+	SV *rv = newRV_inc((SV *)func);
+	sv_rvweaken(rv);
+	assert (SvTYPE(func) == SVt_PVFM);
+	av_store(PL_comppad, ix, rv);
+    }
     SvPADMY_on((SV*)func);
 
     /* to avoid ref loops, we never have parent + child referencing each
      * other simultaneously */
-    if (CvOUTSIDE(func)) {
+    if (CvOUTSIDE(func) && SvTYPE(func) == SVt_PVCV) {
 	assert(!CvWEAKOUTSIDE(func));
 	CvWEAKOUTSIDE_on(func);
 	SvREFCNT_dec(CvOUTSIDE(func));
@@ -2022,10 +2030,23 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	if (namesv && namesv != &PL_sv_undef
 	    && *SvPVX_const(namesv) == '&')
 	{
+	  if (SvTYPE(curpad[ix]) == SVt_PVCV) {
 	    CV * const innercv = MUTABLE_CV(curpad[ix]);
 	    assert(CvWEAKOUTSIDE(innercv));
 	    assert(CvOUTSIDE(innercv) == old_cv);
 	    CvOUTSIDE(innercv) = new_cv;
+	  }
+	  else { /* format reference */
+	    SV * const rv = curpad[ix];
+	    CV *innercv;
+	    if (!SvOK(rv)) continue;
+	    assert(SvROK(rv));
+	    assert(SvWEAKREF(rv));
+	    innercv = (CV *)SvRV(rv);
+	    assert(!CvWEAKOUTSIDE(innercv));
+	    SvREFCNT_dec(CvOUTSIDE(innercv));
+	    CvOUTSIDE(innercv) = (CV *)SvREFCNT_inc_simple_NN(new_cv);
+	  }
 	}
     }
 }
