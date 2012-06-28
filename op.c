@@ -332,7 +332,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     OPSLAB *slab2;
     OPSLOT *slot;
     OP *o;
-    size_t space;
+    size_t opsz, space;
 
     if (!PL_compcv || CvROOT(PL_compcv)
      || (CvSTART(PL_compcv) && !CvSLABBED(PL_compcv)))
@@ -346,7 +346,8 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     }
     else ++(slab = (OPSLAB *)CvSTART(PL_compcv))->opslab_refcnt;
 
-    sz = SIZE_TO_PSIZE(sz) + OPSLOT_HEADER_P;
+    opsz = SIZE_TO_PSIZE(sz);
+    sz = opsz + OPSLOT_HEADER_P;
 
     if (slab->opslab_freed) {
 	OP **too = &slab->opslab_freed;
@@ -359,7 +360,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	}
 	if (o) {
 	    *too = o->op_next;
-	    Zero(o, DIFF(o, OpSLOT(o)->opslot_next), I32 *);
+	    Zero(o, opsz, I32 *);
 	    o->op_slabbed = 1;
 	    return (void *)o;
 	}
