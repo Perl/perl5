@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(18);
+    plan(19);
 }
 
 BEGIN {
@@ -69,6 +69,12 @@ seek STDERR, 0,0;
 $warning = '';
 warn "Unicode surrogate U+C0FFEE is illegal in UTF-8";
 like $warning, qr/You had a UTF-16 surrogate/, '%X';
+
+# Test for %p
+seek STDERR, 0,0;
+$warning = '';
+warn "Slab leaked from cv fadedc0ffee";
+like $warning, qr/bookkeeping of op trees/, '%p';
 
 # Strip S<>
 seek STDERR, 0,0;
