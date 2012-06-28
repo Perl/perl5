@@ -3585,13 +3585,86 @@ S_doopen_pm(pTHX_ SV *name)
 #  define doopen_pm(name) check_type_and_open(name)
 #endif /* !PERL_DISABLE_PMC */
 
+static OP *S_require_version(pTHX_ SV **sp, SV *sv);
+static OP *S_require_file(pTHX_ SV **sp, SV *const sv);
+
 PP(pp_require)
 {
     dVAR; dSP;
+    SV *const sv = POPs;
+
+    return (PL_op->op_type != OP_DOFILE && (SvNIOKp(sv) || SvVOK(sv)))
+        ? S_require_version(aTHX_ sp, sv) : S_require_file(aTHX_ sp, sv);
+}
+
+
+static OP *
+S_require_version(pTHX_ SV **sp, SV *sv)
+{
+    dVAR;
+    sv = sv_2mortal(new_version(sv));
+    if (!sv_derived_from(PL_patchlevel, "version"))
+        upg_version(PL_patchlevel, TRUE);
+    if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
+        if ( vcmp(sv,PL_patchlevel) <= 0 )
+            DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
+                SVfARG(sv_2mortal(vnormal(sv))),
+                SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+		);
+    }
+    else {
+        if ( vcmp(sv,PL_patchlevel) > 0 ) {
+            I32 first = 0;
+            AV *lav;
+            SV * const req = SvRV(sv);
+            SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
+
+            /* get the left hand term */
+            lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
+
+            first  = SvIV(*av_fetch(lav,0,0));
+            if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
+                   || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
+                   || av_len(lav) > 1               /* FP with > 3 digits */
+                   || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
+                ) {
+                DIE(aTHX_ "Perl %"SVf" required--this is only %"SVf", stopped",
+                    SVfARG(sv_2mortal(vnormal(req))),
+                    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+		    );
+            }
+            else { /* probably 'use 5.10' or 'use 5.8' */
+                SV *hintsv;
+                I32 second = 0;
+
+                if (av_len(lav)>=1) 
+                    second = SvIV(*av_fetch(lav,1,0));
+
+                second /= second >= 600  ? 100 : 10;
+                hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
+					   (int)first, (int)second);
+                upg_version(hintsv, TRUE);
+
+                DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
+                    "--this is only %"SVf", stopped",
+                    SVfARG(sv_2mortal(vnormal(req))),
+                    SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
+                    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
+		    );
+            }
+        }
+    }
+
+    RETPUSHYES;
+}
+
+static OP *
+S_require_file(pTHX_ SV **sp, SV *const sv)
+{
+    dVAR;
     register PERL_CONTEXT *cx;
-    SV *sv;
-    const char *name;
     STRLEN len;
+    const char *const name = SvPV_const(sv, len);
     char * unixname;
     STRLEN unixlen;
 #ifdef VMS
@@ -3611,65 +3684,6 @@ PP(pp_require)
     int saved_errno;
     bool name_is_absolute;
 
-    sv = POPs;
-    if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
-	sv = sv_2mortal(new_version(sv));
-	if (!sv_derived_from(PL_patchlevel, "version"))
-	    upg_version(PL_patchlevel, TRUE);
-	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
-	    if ( vcmp(sv,PL_patchlevel) <= 0 )
-		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
-		    SVfARG(sv_2mortal(vnormal(sv))),
-		    SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		);
-	}
-	else {
-	    if ( vcmp(sv,PL_patchlevel) > 0 ) {
-		I32 first = 0;
-		AV *lav;
-		SV * const req = SvRV(sv);
-		SV * const pv = *hv_fetchs(MUTABLE_HV(req), "original", FALSE);
-
-		/* get the left hand term */
-		lav = MUTABLE_AV(SvRV(*hv_fetchs(MUTABLE_HV(req), "version", FALSE)));
-
-		first  = SvIV(*av_fetch(lav,0,0));
-		if (   first > (int)PERL_REVISION    /* probably 'use 6.0' */
-		    || hv_exists(MUTABLE_HV(req), "qv", 2 ) /* qv style */
-		    || av_len(lav) > 1               /* FP with > 3 digits */
-		    || strstr(SvPVX(pv),".0")        /* FP with leading 0 */
-		   ) {
-		    DIE(aTHX_ "Perl %"SVf" required--this is only "
-		    	"%"SVf", stopped",
-			SVfARG(sv_2mortal(vnormal(req))),
-			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		    );
-		}
-		else { /* probably 'use 5.10' or 'use 5.8' */
-		    SV *hintsv;
-		    I32 second = 0;
-
-		    if (av_len(lav)>=1) 
-			second = SvIV(*av_fetch(lav,1,0));
-
-		    second /= second >= 600  ? 100 : 10;
-		    hintsv = Perl_newSVpvf(aTHX_ "v%d.%d.0",
-					   (int)first, (int)second);
-		    upg_version(hintsv, TRUE);
-
-		    DIE(aTHX_ "Perl %"SVf" required (did you mean %"SVf"?)"
-		    	"--this is only %"SVf", stopped",
-			SVfARG(sv_2mortal(vnormal(req))),
-			SVfARG(sv_2mortal(vnormal(sv_2mortal(hintsv)))),
-			SVfARG(sv_2mortal(vnormal(PL_patchlevel)))
-		    );
-		}
-	    }
-	}
-
-	RETPUSHYES;
-    }
-    name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
