@@ -278,7 +278,7 @@ sub make_type_tab {
 		{ "toketype_" .
 		    (defined $tokens{$1} ? $tokens{$1} : $default_token)
 		}ge;
-    $fields =~ s/, \s* 0 \s* $//x
+    $fields =~ s/, \s* (?:0|YY_NULL) \s* $//x
 	or die "make_type_tab: couldn't delete trailing ',0'\n";
 
     return 
