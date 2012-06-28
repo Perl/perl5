@@ -20,7 +20,8 @@ eval {
     'base'->import(qw(I::do::not::exist));
 };
 
-like( $@, qr/^Base class package "I::do::not::exist" is empty/);
+like( $@, qr/^Base class package "I::do::not::exist" is empty/,
+         'diagnostics not tripped up by "use base qw(Dont::Exist)"');
 
 open *whatever, ">", \my $warning
     or die "Couldn't redirect STDERR to var: $!";
