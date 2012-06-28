@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
