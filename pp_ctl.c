@@ -3609,6 +3609,7 @@ PP(pp_require)
     SV *encoding;
     OP *op;
     int saved_errno;
+    bool name_is_absolute;
 
     sv = POPs;
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
@@ -3672,7 +3673,7 @@ PP(pp_require)
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
-
+    name_is_absolute = path_is_absolute(name);
 
 #ifdef VMS
     /* The key in the %ENV hash is in the syntax of file passed as the argument
@@ -3708,12 +3709,12 @@ PP(pp_require)
 
     /* prepare to compile file */
 
-    if (path_is_absolute(name)) {
+    if (name_is_absolute) {
 	/* At this point, name is SvPVX(sv)  */
 	tryname = name;
 	tryrsfp = doopen_pm(sv);
     }
-    if (!tryrsfp && !(errno == EACCES && path_is_absolute(name))) {
+    if (!tryrsfp && !(errno == EACCES && name_is_absolute)) {
 	AV * const ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -3843,8 +3844,7 @@ PP(pp_require)
 		    }
 		}
 		else {
-		  if (!path_is_absolute(name)
-		  ) {
+		  if (!name_is_absolute) {
 		    const char *dir;
 		    STRLEN dirlen;
 
