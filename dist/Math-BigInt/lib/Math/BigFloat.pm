@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.997';
+$VERSION = '1.998';
 require 5.006002;
 
 require Exporter;
@@ -1263,7 +1263,8 @@ sub _log
   $over->bmul($u);
   $factor = $self->new(3); $f = $self->new(2);
 
-  my $steps = 0 if DEBUG;  
+  my $steps;
+  $steps = 0 if DEBUG;
   $limit = $self->new("1E-". ($scale-1));
   while (3 < 5)
     {
