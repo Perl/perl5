@@ -37,6 +37,24 @@ L</Reporting Bugs> below.
 L<Scalar::Util> and L<List::Util> have been upgraded from version 1.23 to
 version 1.25.
 
+=item *
+
+L<B::Deparse> has been updated from version 1.14 to 1.14_01.  An
+"uninitialized" warning emitted by B::Deparse has been squashed
+[perl #113464].
+
+=back
+
+=head1 Configuration and Compilation
+
+=over
+
+=item *
+
+Building perl with some Windows compilers used to fail due to a problem
+with miniperl's C<glob> operator (which uses the C<perlglob> program)
+deleting the PATH environment variable [perl #113798].
+
 =back
 
 =head1 Platform Support
@@ -68,8 +86,9 @@ was overriding all earlier ones.  [perl #113584]
 
 =item *
 
-B::COP::stashflags, accidentally broken at the last minute in 5.16.0,
-has been restored to working order.
+C<B::COP::stashlen> has been added.   This provides access to an internal
+field added in perl 5.16 under threaded builds.  It was broken at the last
+minute before 5.16 was released [perl #113034].
 
 =item *
 
@@ -84,15 +103,26 @@ overrides the data file furnished by Unicode to give the correct value.
 
 =item *
 
-A regression introduced in Perl v5.16.0 involving
-C<tr/I<SEARCHLIST>/I<REPLACEMENTLIST>/> has been fixed.  Only the first
-instance is supposed to be meaningful if a character appears more than
-once in C<I<SEARCHLIST>>.  Under some circumstances, the final instance
-was overriding all earlier ones.  [perl #113584]
+Duplicating scalar filehandles works again.  [perl #113764]
 
 =item *
 
-Duplicating scalar filehandles works again.  [perl #113764]
+Under threaded perls, a runtime code block in a regular expression could
+corrupt the package name stored in the op tree, resulting in bad reads
+in C<caller>, and possibly crashes [perl #113060].
+
+=item *
+
+For efficiency's sake, many operators and built-in functions return the
+same scalar each time.  Lvalue subroutines and subroutines in the CORE::
+namespace were allowing this implementation detail to leak through.
+C<print &CORE::uc("a"), &CORE::uc("b")> used to print "BB".  The same thing
+would happen with an lvalue subroutine returning the return value of C<uc>.
+Now the value is copied in such cases [perl #113044].
+
+=item *
+
+C<__SUB__> now works in special blocks (C<BEGIN>, C<END>, etc.).
 
 =back
 
@@ -121,15 +151,14 @@ output of C<perl -V>, will be sent off to perlbug@perl.org to be
 analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
-inappropriate to send to a publicly archived mailing list, then please send
-it to perl5-security-report@perl.org. This points to a closed subscription
-unarchived mailing list, which includes
-all the core committers, who will be able
-to help assess the impact of issues, figure out a resolution, and help
-co-ordinate the release of patches to mitigate or fix the problem across all
-platforms on which Perl is supported. Please only use this address for
-security issues in the Perl core, not for modules independently
-distributed on CPAN.
+inappropriate to send to a publicly archived mailing list, then please
+send it to perl5-security-report@perl.org. This points to a closed
+subscription unarchived mailing list, which includes all the core
+committers, who will be able to help assess the impact of issues, figure
+out a resolution, and help co-ordinate the release of patches to
+mitigate or fix the problem across all platforms on which Perl is
+supported. Please only use this address for security issues in the Perl
+core, not for modules independently distributed on CPAN.
 
 =head1 SEE ALSO
 
