@@ -511,11 +511,11 @@ sideff	:	error
 	|	expr
 			{ $$ = $1; }
 	|	expr IF expr
-			{ $$ = newLOGOP(OP_AND, 0, $3, $1);
+			{ $$ = newLOGOP(OP_AND, OPf_SPECIAL, $3, $1);
 			  TOKEN_GETMAD($2,$$,'i');
 			}
 	|	expr UNLESS expr
-			{ $$ = newLOGOP(OP_OR, 0, $3, $1);
+			{ $$ = newLOGOP(OP_OR, OPf_SPECIAL, $3, $1);
 			  TOKEN_GETMAD($2,$$,'i');
 			}
 	|	expr WHILE expr
