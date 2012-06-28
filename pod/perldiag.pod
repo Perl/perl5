@@ -4473,6 +4473,12 @@ superfluous.
 (W signal) The signal handler named in %SIG doesn't, in fact, exist.
 Perhaps you put it into the wrong package?
 
+=item Slab leaked from cv %p
+
+(S) If you see this message, then something is seriously wrong with the
+internal bookkeeping of op trees.  An op tree needed to be freed after
+a compilation error, but could not be found, so it was leaked instead.
+
 =item Smart matching a non-overloaded object breaks encapsulation
 
 (F) You should not use the C<~~> operator on an object that does not
