@@ -11881,10 +11881,12 @@ parseit:
         }
         else {
 
-            /* This is a list of all the characters that participate in folds
-             * (except marks, etc in multi-char folds */
+            /* Here, there are non-Latin1 code points, so we will have to go
+             * fetch the list of all the characters that participate in folds
+             */
             if (! PL_utf8_foldable) {
-                SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
+                SV* swash = swash_init("utf8", "_Perl_Any_Folds",
+                                       &PL_sv_undef, 1, 0);
                 PL_utf8_foldable = _swash_to_invlist(swash);
                 SvREFCNT_dec(swash);
             }
