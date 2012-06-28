@@ -3673,7 +3673,21 @@ PP(pp_require)
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
-    name_is_absolute = path_is_absolute(name);
+    if (PERL_FILE_IS_ABSOLUTE(name)
+#ifdef WIN32
+	|| (*name == '.' && ((name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/'))
+			 || (name[1] == '\\' ||
+			     ( name[1] == '.' && name[2] == '\\')))
+	    )
+#else
+	|| (*name == '.' && (name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/')))
+#endif
+	 )
+        name_is_absolute = TRUE;
+    else
+        name_is_absolute = FALSE;
 
 #ifdef VMS
     /* The key in the %ENV hash is in the syntax of file passed as the argument
@@ -5427,32 +5441,6 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	return 1;
     }
     return status;
-}
-
-/* perhaps someone can come up with a better name for
-   this?  it is not really "absolute", per se ... */
-static bool
-S_path_is_absolute(const char *name)
-{
-    PERL_ARGS_ASSERT_PATH_IS_ABSOLUTE;
-
-    if (PERL_FILE_IS_ABSOLUTE(name)
-#ifdef WIN32
-	|| (*name == '.' && ((name[1] == '/' ||
-			     (name[1] == '.' && name[2] == '/'))
-			 || (name[1] == '\\' ||
-			     ( name[1] == '.' && name[2] == '\\')))
-	    )
-#else
-	|| (*name == '.' && (name[1] == '/' ||
-			     (name[1] == '.' && name[2] == '/')))
-#endif
-	 )
-    {
-	return TRUE;
-    }
-    else
-    	return FALSE;
 }
 
 /*

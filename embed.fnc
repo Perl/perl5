@@ -1880,7 +1880,6 @@ sR	|PerlIO *|check_type_and_open|NN SV *name
 sR	|PerlIO *|doopen_pm	|NN SV *name
 #endif
 s	|SV **	|adjust_stack_on_leave|NN SV **newsp|NN SV **sp|NN SV **mark|I32 gimme|U32 flags
-sRn	|bool	|path_is_absolute|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
 sR	|PMOP*	|make_matcher	|NN REGEXP* re
 sR	|bool	|matcher_matches_sv|NN PMOP* matcher|NN SV* sv

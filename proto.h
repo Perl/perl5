@@ -6167,12 +6167,6 @@ STATIC bool	S_matcher_matches_sv(pTHX_ PMOP* matcher, SV* sv)
 STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_path_is_absolute(const char *name)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_PATH_IS_ABSOLUTE	\
-	assert(name)
-
 STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
