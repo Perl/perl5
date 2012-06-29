@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.39_03';
+$VERSION = '3.39_04';
 $VERSION =~ tr/_//;
 
 =head1 NAME
@@ -94,12 +94,14 @@ complete path ending with a filename
 =cut
 
 sub catfile {
-    my $self = shift;
-    my $file = $self->canonpath(pop @_);
-    return $file unless @_;
-    my $dir = $self->catdir(@_);
-    $dir .= "/" unless substr($dir,-1) eq "/";
-    return $dir.$file;
+    shift;
+    my $file = join '/', @_;
+    # Clean up the path as canonpath() would do it, except that a ./ at the
+    # beginning should be preserved.
+    $file =~ s|/{2,}|/|g;
+    $file =~ s{(?:/\.)+(?:/|\z)}{/}g;
+    $file =~ s{^(?:/\.\.)+(?:/|\z)}{/};
+    $file;
 }
 
 =item curdir
