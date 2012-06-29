@@ -2274,10 +2274,16 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	NOOP;   /* Equivalent to !SvTRUE and !SvOK  */
     }
 #endif
-    else if (SvTRUE(sv))
+    else if (SvTRUE(sv)) {
 	amt.fallback=AMGfallYES;
-    else if (SvOK(sv))
+        filled = 1;
+        have_ovl = 1;
+    }
+    else if (SvOK(sv)) {
 	amt.fallback=AMGfallNEVER;
+        filled = 1;
+        have_ovl = 1;
+    }
 
     for (i = 1; i < lim; i++)
 	amt.table[i] = NULL;

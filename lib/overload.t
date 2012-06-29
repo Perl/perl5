@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5184;
+plan tests => 5186;
 
 use Scalar::Util qw(tainted);
 
@@ -2627,6 +2627,18 @@ is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
     is($obj->val, 7, "correct result (add incr void)");
 }
 
+# [perl #113010]
+{
+    {
+        package OnlyFallback;
+        use overload fallback => 0;
+    }
+    my $obj = bless {}, 'OnlyFallback';
+    my $died = !eval { "".$obj; 1 };
+    my $err = $@;
+    ok($died, "fallback of 0 causes error");
+    like($err, qr/"\.": no method found/, "correct error");
+}
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;
