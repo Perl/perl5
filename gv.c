@@ -2740,16 +2740,10 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
 			  : NULL))
-	       && ((cv = cvp[off=method+assignshift])
-		   || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
-								   * usual method */
-		       (
-#ifdef DEBUGGING
-			fl = 1,
-#endif
-			cv = cvp[off=method])))) { /* Method for right
-						    * argument found */
-	lr=1;
+               && (assign ? amtp->fallback > AMGfallNEVER : 1)
+	       && (cv = cvp[off=method])) { /* Method for right
+					     * argument found */
+      lr=1;
     } else if (((cvp && amtp->fallback > AMGfallNEVER)
                 || (ocvp && oamtp->fallback > AMGfallNEVER))
 	       && !(flags & AMGf_unary)) {

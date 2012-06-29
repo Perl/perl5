@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5190;
+plan tests => 5193;
 
 use Scalar::Util qw(tainted);
 
@@ -2666,6 +2666,39 @@ is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
         ok(!$died, "fallback of 1 doesn't cause error")
             || diag("got error of $err");
         like($val, qr/^OnlyFallbackTrue=HASH\(/, "stringified correctly");
+    }
+}
+
+# [perl #113834]
+{
+    {
+        package AssignOverload;
+        use overload
+            '*' => sub { 0 },
+            '*=' => sub { 1 };
+    }
+
+    {
+        my $a = 1;
+        my $b = bless {}, 'AssignOverload';
+        $a *= $b;
+        is($a, 0, "don't call assign op with args swapped");
+    }
+
+    {
+        package AssignOverloadNoFallback;
+        use overload
+            '*' => sub { 0 },
+            fallback => 0;
+    }
+
+    {
+        my $a = 1;
+        my $b = bless {}, 'AssignOverloadNoFallback';
+        my $died = !eval { $a *= $b; 1 };
+        my $err = $@;
+        ok($died, "this should die, because we don't want fallback");
+        like($err, qr/"\*=": no method found/, "died with the right error");
     }
 }
 
