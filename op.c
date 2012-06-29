@@ -356,7 +356,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	while (o && DIFF(OpSLOT(o), OpSLOT(o)->opslot_next) < sz) {
 	    DEBUG_S_warn((aTHX_ "Alas! too small"));
 	    o = *(too = &o->op_next);
-	    if (o) DEBUG_S_warn((aTHX_ "found another free op at %p", o));
+	    if (o) { DEBUG_S_warn((aTHX_ "found another free op at %p", o)); }
 	}
 	if (o) {
 	    *too = o->op_next;
