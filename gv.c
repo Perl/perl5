@@ -2274,13 +2274,16 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	NOOP;   /* Equivalent to !SvTRUE and !SvOK  */
     }
 #endif
-    else if (SvTRUE(sv)) {
+    else if (SvTRUE(sv))
+        /* don't need to set overloading here because fallback => 1
+         * is the default setting for classes without overloading */
 	amt.fallback=AMGfallYES;
+    else if (SvOK(sv)) {
+	amt.fallback=AMGfallNEVER;
         filled = 1;
         have_ovl = 1;
     }
-    else if (SvOK(sv)) {
-	amt.fallback=AMGfallNEVER;
+    else {
         filled = 1;
         have_ovl = 1;
     }

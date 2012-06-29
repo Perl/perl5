@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5186;
+plan tests => 5190;
 
 use Scalar::Util qw(tainted);
 
@@ -2633,11 +2633,40 @@ is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
         package OnlyFallback;
         use overload fallback => 0;
     }
-    my $obj = bless {}, 'OnlyFallback';
-    my $died = !eval { "".$obj; 1 };
-    my $err = $@;
-    ok($died, "fallback of 0 causes error");
-    like($err, qr/"\.": no method found/, "correct error");
+    {
+        my $obj = bless {}, 'OnlyFallback';
+        my $died = !eval { "".$obj; 1 };
+        my $err = $@;
+        ok($died, "fallback of 0 causes error");
+        like($err, qr/"\.": no method found/, "correct error");
+    }
+
+    {
+        package OnlyFallbackUndef;
+        use overload fallback => undef;
+    }
+    {
+        my $obj = bless {}, 'OnlyFallbackUndef';
+        my $died = !eval { "".$obj; 1 };
+        my $err = $@;
+        ok($died, "fallback of undef causes error");
+        # this one tries falling back to stringify before dying
+        like($err, qr/"""": no method found/, "correct error");
+    }
+
+    {
+        package OnlyFallbackTrue;
+        use overload fallback => 1;
+    }
+    {
+        my $obj = bless {}, 'OnlyFallbackTrue';
+        my $val;
+        my $died = !eval { $val = "".$obj; 1 };
+        my $err = $@;
+        ok(!$died, "fallback of 1 doesn't cause error")
+            || diag("got error of $err");
+        like($val, qr/^OnlyFallbackTrue=HASH\(/, "stringified correctly");
+    }
 }
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
