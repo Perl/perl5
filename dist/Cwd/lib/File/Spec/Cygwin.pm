@@ -45,11 +45,12 @@ sub canonpath {
     $path =~ s|\\|/|g;
 
     # Handle network path names beginning with double slash
-    my $node = '';
     if ( $path =~ s@^(//[^/]+)(?:/|\z)@/@s ) {
-        $node = $1;
+        my $node = $1;
+        return $node . $self->File::Spec::Unix::canonpath($path);
     }
-    return $node . $self->SUPER::canonpath($path);
+
+    $self->File::Spec::Unix::canonpath($path);
 }
 
 sub catdir {
@@ -59,10 +60,10 @@ sub catdir {
     # Don't create something that looks like a //network/path
     if ($_[0] and ($_[0] eq '/' or $_[0] eq '\\')) {
         shift;
-        return $self->SUPER::catdir('', @_);
+        unshift @_, '';
     }
 
-    $self->SUPER::catdir(@_);
+    $self->File::Spec::Unix::catdir(@_);
 }
 
 =pod
