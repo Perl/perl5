@@ -577,7 +577,7 @@ C<use locale ':not_characters'>), Perl looks to the C<LC_COLLATE>
 environment variable to determine the application's notions on collation
 (ordering) of characters.  For example, "b" follows "a" in Latin
 alphabets, but where do "E<aacute>" and "E<aring>" belong?  And while
-"color" follows "chocolate" in English, what about in Spanish?
+"color" follows "chocolate" in English, what about in traditional Spanish?
 
 The following collations all make sense and you may meet any of them
 if you "use locale".
