@@ -26,8 +26,16 @@ use Storable qw(freeze thaw store retrieve);
      n => \(1 == 0)
 );
 
+{
+    %::weird_refs = (
+        REF     => \(my $aref    = []),
+        VSTRING => \(my $vstring = v1.2.3),
+        LVALUE  => \(my $substr  = substr((my $str = "foo"), 0, 3)),
+    );
+}
+
 my $test = 12;
-my $tests = $test + 23 + 2 * 6 * keys %::immortals;
+my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (2 * keys %::weird_refs);
 plan(tests => $tests);
 
 package SHORT_NAME;
@@ -257,4 +265,26 @@ is(ref $t, 'STRESS_THE_STACK');
     my $f= ::freeze($o);
     ::is ref $o->{str}, __PACKAGE__,
 	'assignment to $_[0] in STORABLE_freeze does not corrupt things';
+}
+
+# [perl #113880]
+{
+    {
+        package WeirdRefHook;
+        sub STORABLE_freeze { }
+        $INC{'WeirdRefHook.pm'} = __FILE__;
+    }
+
+    for my $weird (keys %weird_refs) {
+        my $obj = $weird_refs{$weird};
+        bless $obj, 'WeirdRefHook';
+        my $frozen;
+        my $success = eval { $frozen = freeze($obj); 1 };
+        ok($success, "can freeze $weird objects")
+            || diag("freezing failed: $@");
+        local $TODO = $weird eq 'VSTRING'
+            ? "can't store vstrings properly yet"
+            : undef;
+        is_deeply(thaw($frozen), $obj, "get the right value back");
+    }
 }

@@ -2860,6 +2860,7 @@ static int store_hook(
 	 */
 
 	switch (type) {
+        case svis_REF:
 	case svis_SCALAR:
 		obj_type = SHT_SCALAR;
 		break;
