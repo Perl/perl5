@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..7\n";
+print "1..8\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -97,3 +97,17 @@ $next = $clo1;
 &$clo2(0);
 $next = $clo2;
 &$clo1(0);
+
+# This is a variation of bug #22977, which crashes or fails an assertion
+# up to 5.16.
+# Keep this test last if you want test numbers to be sane.
+BEGIN { \&END }
+END {
+  my $test = "ok 8";
+  *STDOUT = *STDOUT5{FORMAT};
+  write;
+  format STDOUT5 =
+@<<<<<<<
+$test
+.
+}

@@ -223,9 +223,9 @@ static const char *const yytname[] =
   "':'", "DORDOR", "OROR", "ANDAND", "BITOROP", "BITANDOP", "SHIFTOP",
   "MATCHOP", "'!'", "'~'", "REFGEN", "UMINUS", "POWOP", "POSTDEC",
   "POSTINC", "PREDEC", "PREINC", "ARROW", "')'", "'('", "PEG", "$accept",
-  "grammar", "$@1", "$@2", "$@3", "$@4", "$@5", "$@6", "block", "remember",
+  "grammar", "@1", "@2", "@3", "@4", "@5", "@6", "block", "remember",
   "mydefsv", "mblock", "mremember", "stmtseq", "fullstmt", "labfullstmt",
-  "barestmt", "$@7", "$@8", "sideff", "else", "cont", "mintro", "nexpr",
+  "barestmt", "@7", "@8", "sideff", "else", "cont", "mintro", "nexpr",
   "texpr", "iexpr", "mexpr", "mnexpr", "miexpr", "formname", "startsub",
   "startanonsub", "startformsub", "subname", "proto", "subattrlist",
   "myattrlist", "subbody", "expr", "listexpr", "listop", "@9", "method",
@@ -1089,6 +1089,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * 27cce68ad4844f1b8053bfc11206fb9f559e08be6cefd4a986aaa606c0e5fb38 perly.y
+ * efdb10e4176c622005697eec1ff496d913ef986c5297086baa5088bbd3aedaf2 perly.y
  * 38f866dcd8341ad3c0810347587113eb2c6ac7d4f33bdab75b020efce92865be regen_perly.pl
  * ex: set ro: */

@@ -214,7 +214,7 @@ case 2:
 			  newFORM((ps[(2) - (4)].val.ival), (ps[(3) - (4)].val.opval), (ps[(4) - (4)].val.opval));
 			  (yyval.opval) = (OP*)NULL;
 #endif
-			  if (CvOUTSIDE(fmtcv) && !CvUNIQUE(CvOUTSIDE(fmtcv))) {
+			  if (CvOUTSIDE(fmtcv) && !CvEVAL(CvOUTSIDE(fmtcv))) {
 			      SvREFCNT_inc_simple_void(fmtcv);
 			      pad_add_anon(fmtcv, OP_NULL);
 			  }
@@ -1717,10 +1717,13 @@ case 2:
     { (yyval.opval) = (ps[(1) - (1)].val.opval); ;}
     break;
 
+
+/* Line 1267 of yacc.c.  */
+
       default: break;
     
 
 /* Generated from:
- * 27cce68ad4844f1b8053bfc11206fb9f559e08be6cefd4a986aaa606c0e5fb38 perly.y
+ * efdb10e4176c622005697eec1ff496d913ef986c5297086baa5088bbd3aedaf2 perly.y
  * 38f866dcd8341ad3c0810347587113eb2c6ac7d4f33bdab75b020efce92865be regen_perly.pl
  * ex: set ro: */

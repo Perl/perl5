@@ -292,7 +292,7 @@ barestmt:	PLUGSTMT
 			  newFORM($2, $3, $4);
 			  $$ = (OP*)NULL;
 #endif
-			  if (CvOUTSIDE(fmtcv) && !CvUNIQUE(CvOUTSIDE(fmtcv))) {
+			  if (CvOUTSIDE(fmtcv) && !CvEVAL(CvOUTSIDE(fmtcv))) {
 			      SvREFCNT_inc_simple_void(fmtcv);
 			      pad_add_anon(fmtcv, OP_NULL);
 			  }
