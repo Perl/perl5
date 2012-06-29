@@ -378,8 +378,6 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     if ((space = DIFF(&slab2->opslab_slots, slab2->opslab_first)) < sz) {
 	/* Remaining space is too small. */
 
-	OPSLAB *newslab;
-
 	/* If we can fit a BASEOP, add it to the free chain, so as not
 	   to waste it. */
 	if (space >= SIZE_TO_PSIZE(sizeof(OP)) + OPSLOT_HEADER_P) {
@@ -393,9 +391,9 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	/* Create a new slab.  Make this one twice as big. */
 	slot = slab2->opslab_first;
 	while (slot->opslot_next) slot = slot->opslot_next;
-	newslab = S_new_slab(aTHX_ DIFF(slab2, slot)*2);
-	newslab->opslab_next = slab->opslab_next;
-	slab->opslab_next = slab2 = newslab;
+	slab2 = S_new_slab(aTHX_ DIFF(slab2, slot)*2);
+	slab2->opslab_next = slab->opslab_next;
+	slab->opslab_next = slab2;
     }
     assert(DIFF(&slab2->opslab_slots, slab2->opslab_first) >= sz);
 
