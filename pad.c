@@ -1929,12 +1929,16 @@ Perl_cv_clone(pTHX_ CV *proto)
      * inside closures, however, only work if CvOUTSIDE == find_runcv.
      */
 
-    outside = CvOUTSIDE(proto);
-    if (!outside || (CvCLONE(outside) && ! CvCLONED(outside)))
+    if (SvTYPE(proto) == SVt_PVCV)
 	outside = find_runcv(NULL);
-    if (SvTYPE(proto) == SVt_PVFM
-     && CvROOT(outside) != CvROOT(CvOUTSIDE(proto)))
+    else {
 	outside = CvOUTSIDE(proto);
+	if (CvCLONE(outside) && ! CvCLONED(outside)) {
+	    CV * const runcv = find_runcv(NULL);
+	    if (CvROOT(runcv) == CvROOT(outside))
+		outside = runcv;
+	}
+    }
     depth = CvDEPTH(outside);
     assert(depth || SvTYPE(proto) == SVt_PVFM);
     if (!depth)

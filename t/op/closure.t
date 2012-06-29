@@ -733,5 +733,22 @@ do "./op/closure_test.pl" or die $@||$!;
 is $closure_test::s2->()(), '10 cubes',
   'cloning closure proto with no CvOUTSIDE';
 
+# Also brought up in #113812: Even when being cloned, a closure prototype
+# might have its CvOUTSIDE pointing to the wrong thing.
+{
+    package main::113812;
+    $s1 = sub {
+	my $x = 3;
+	$s2 = sub {
+	    $x;
+	    $s3 = sub { $x };
+	};
+    };
+    $s1->();
+    undef &$s1; # frees $s2’s prototype, causing the $s3 proto to have its
+                # CvOUTSIDE point to $s1
+    ::is $s2->()(), 3, 'cloning closure proto whose CvOUTSIDE has changed';
+}
+
 
 done_testing();
