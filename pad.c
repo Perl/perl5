@@ -1889,11 +1889,16 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     /* Since cloneable anon subs can be nested, CvOUTSIDE may point
      * to a prototype; we instead want the cloned parent who called us.
-     * Note that in general for formats, CvOUTSIDE != find_runcv */
+     * Note that in general for formats, CvOUTSIDE != find_runcv; formats
+     * inside closures, however, only work if CvOUTSIDE == find_runcv.
+     */
 
     outside = CvOUTSIDE(proto);
     if (outside && CvCLONE(outside) && ! CvCLONED(outside))
 	outside = find_runcv(NULL);
+    if (SvTYPE(proto) == SVt_PVFM
+     && CvROOT(outside) != CvROOT(CvOUTSIDE(proto)))
+	outside = CvOUTSIDE(proto);
     depth = CvDEPTH(outside);
     assert(depth || SvTYPE(proto) == SVt_PVFM);
     if (!depth)
@@ -1937,11 +1942,10 @@ Perl_cv_clone(pTHX_ CV *proto)
 	if (namesv && namesv != &PL_sv_undef) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
 		sv = outpad[PARENT_PAD_INDEX(namesv)];
-		assert(sv);
 		/* formats may have an inactive parent,
 		   while my $x if $false can leave an active var marked as
 		   stale. And state vars are always available */
-		if (SvPADSTALE(sv) && !SvPAD_STATE(namesv)) {
+		if (!sv || (SvPADSTALE(sv) && !SvPAD_STATE(namesv))) {
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
 				   "Variable \"%"SVf"\" is not available", namesv);
 		    sv = NULL;
