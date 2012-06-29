@@ -287,6 +287,11 @@ The implementations of overloaded operations are now called in the correct
 context. This allows, among other things, being able to properly override
 C<< <> >> [perl #47119].
 
+=item *
+
+Specifying only the C<fallback> key when calling C<use overload> now behaves
+properly [perl #113010].
+
 =back
 
 =head1 Testing
