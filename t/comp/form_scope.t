@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..3\n";
+print "1..5\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -50,3 +50,27 @@ sub foo {
 undef *bar;
 write;
 
+# A regression introduced in 5.10; format cloning would close over the
+# variables in the currently-running sub (the main CV in this test) if the
+# outer sub were an inactive closure.
+sub baz {
+  my $a;
+  sub {
+    $a;
+    {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t)}
+    my $x;
+    format STDOUT3 =
+@<<<<<<<<<<<<<<<<<<<<<<<<<
+defined $x ? "not ok 4 - $x" : "ok 4"
+.
+  }
+}
+*STDOUT = *STDOUT3{FORMAT};
+{
+  local $^W = 1;
+  my $w;
+  local $SIG{__WARN__} = sub { $w = shift };
+  write;
+  print "not " unless $w =~ /^Variable "\$x" is not available at/;
+  print "ok 5 - closure var not available when outer sub is inactive\n";
+}
