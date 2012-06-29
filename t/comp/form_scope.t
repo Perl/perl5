@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..5\n";
+print "1..7\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -74,3 +74,26 @@ defined $x ? "not ok 4 - $x" : "ok 4"
   print "not " unless $w =~ /^Variable "\$x" is not available at/;
   print "ok 5 - closure var not available when outer sub is inactive\n";
 }
+
+# Formats inside closures should close over the topmost clone of the outer
+# sub on the call stack.
+# Tests will be out of sequence if the wrong sub is used.
+sub make_closure {
+  my $arg = shift;
+  sub {
+    shift == 0 and &$next(1), return;
+    my $x = "ok $arg";
+    format STDOUT4 =
+@<<<<<<<
+$x
+.
+    sub { write }->(); # separate sub, so as not to rely on it being the
+  }                    # currently-running sub
+}
+*STDOUT = *STDOUT4{FORMAT};
+$clo1 = make_closure 6;
+$clo2 = make_closure 7;
+$next = $clo1;
+&$clo2(0);
+$next = $clo2;
+&$clo1(0);

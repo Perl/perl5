@@ -2327,6 +2327,8 @@ pdR	|AV*	|padlist_dup	|NULLOK AV *srcpad|NN CLONE_PARAMS *param
 #endif
 
 ApdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
+pR	|CV*	|find_runcv_where|U8 cond|NULLOK void *arg \
+				 |NULLOK U32 *db_seqp
 : Only used in perl.c
 p	|void	|free_tied_hv_pool
 #if defined(DEBUGGING)

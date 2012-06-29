@@ -526,6 +526,8 @@ True if this op will be the return value of an lvalue subroutine
 #  define MAYBE_DEREF_GV(sv)      MAYBE_DEREF_GV_flags(sv,SV_GMAGIC)
 #  define MAYBE_DEREF_GV_nomg(sv) MAYBE_DEREF_GV_flags(sv,0)
 
+#  define FIND_RUNCV_root_eq	1
+
 #endif
 
 /*

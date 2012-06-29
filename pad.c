@@ -1934,9 +1934,10 @@ Perl_cv_clone(pTHX_ CV *proto)
     else {
 	outside = CvOUTSIDE(proto);
 	if (CvCLONE(outside) && ! CvCLONED(outside)) {
-	    CV * const runcv = find_runcv(NULL);
-	    if (CvROOT(runcv) == CvROOT(outside))
-		outside = runcv;
+	    CV * const runcv = find_runcv_where(
+		FIND_RUNCV_root_eq, (void *)CvROOT(outside), NULL
+	    );
+	    if (runcv) outside = runcv;
 	}
     }
     depth = CvDEPTH(outside);

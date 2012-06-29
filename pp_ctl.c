@@ -3245,6 +3245,13 @@ than in the scope of the debugger itself).
 CV*
 Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
+    return Perl_find_runcv_where(aTHX_ 0, NULL, db_seqp);
+}
+
+/* If this becomes part of the API, it might need a better name. */
+CV *
+Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
+{
     dVAR;
     PERL_SI	 *si;
 
@@ -3254,20 +3261,29 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
         I32 ix;
 	for (ix = si->si_cxix; ix >= 0; ix--) {
 	    const PERL_CONTEXT *cx = &(si->si_cxstack[ix]);
+	    CV *cv = NULL;
 	    if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
-		CV * const cv = cx->blk_sub.cv;
+		cv = cx->blk_sub.cv;
 		/* skip DB:: code */
 		if (db_seqp && PL_debstash && CvSTASH(cv) == PL_debstash) {
 		    *db_seqp = cx->blk_oldcop->cop_seq;
 		    continue;
 		}
-		return cv;
 	    }
 	    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
-		return cx->blk_eval.cv;
+		cv = cx->blk_eval.cv;
+	    if (cv) {
+		switch (cond) {
+		case FIND_RUNCV_root_eq:
+		    if (CvROOT(cv) != (OP *)arg) continue;
+		    /* GERONIMO! */
+		default:
+		    return cv;
+		}
+	    }
 	}
     }
-    return PL_main_cv;
+    return cond == FIND_RUNCV_root_eq ? NULL : PL_main_cv;
 }
 
 
