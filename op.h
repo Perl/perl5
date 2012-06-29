@@ -28,8 +28,10 @@
  *			the op may be safely op_free()d multiple times
  *	op_latefreed	an op_latefree op has been op_free()d
  *	op_attached	this op (sub)tree has been attached to a CV
+ *	op_slabbed	allocated via opslab
+ *	op_savefree	on savestack via SAVEFREEOP
  *
- *	op_spare	three spare bits!
+ *	op_spare	a spare bit!
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
  *			by default, set to the number of children until
@@ -62,7 +64,9 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_latefree:1;	\
     PERL_BITFIELD16 op_latefreed:1;	\
     PERL_BITFIELD16 op_attached:1;	\
-    PERL_BITFIELD16 op_spare:3;		\
+    PERL_BITFIELD16 op_slabbed:1;	\
+    PERL_BITFIELD16 op_savefree:1;	\
+    PERL_BITFIELD16 op_spare:1;		\
     U8		op_flags;		\
     U8		op_private;
 #endif
@@ -708,19 +712,66 @@ least an C<UNOP>.
 #include "reentr.h"
 #endif
 
-#if defined(PL_OP_SLAB_ALLOC)
 #define NewOp(m,var,c,type)	\
 	(var = (type *) Perl_Slab_Alloc(aTHX_ c*sizeof(type)))
 #define NewOpSz(m,var,size)	\
 	(var = (OP *) Perl_Slab_Alloc(aTHX_ size))
 #define FreeOp(p) Perl_Slab_Free(aTHX_ p)
-#else
-#define NewOp(m, var, c, type)	\
-	(var = (MEM_WRAP_CHECK_(c,type) \
-	 (type*)PerlMemShared_calloc(c, sizeof(type))))
-#define NewOpSz(m, var, size)	\
-	(var = (OP*)PerlMemShared_calloc(1, size))
-#define FreeOp(p) PerlMemShared_free(p)
+
+/*
+ * The per-CV op slabs consist of a header (the opslab struct) and a bunch
+ * of space for allocating op slots, each of which consists of two pointers
+ * followed by an op.  The first pointer points to the next op slot.  The
+ * second points to the slab.  At the end of the slab is a null pointer,
+ * so that slot->opslot_next - slot can be used to determine the size
+ * of the op.
+ *
+ * Each CV can have multiple slabs; opslab_next points to the next slab, to
+ * form a chain.  All bookkeeping is done on the first slab, which is where
+ * all the op slots point.
+ *
+ * Freed ops are marked as freed and attached to the freed chain
+ * via op_next pointers.
+ *
+ * When there is more than one slab, the second slab in the slab chain is
+ * assumed to be the one with free space available.  It is used when allo-
+ * cating an op if there are no freed ops available or big enough.
+ */
+
+#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
+struct opslot {
+    /* keep opslot_next first */
+    OPSLOT *	opslot_next;		/* next slot */
+    OPSLAB *	opslot_slab;		/* owner */
+    OP		opslot_op;		/* the op itself */
+};
+
+struct opslab {
+    OPSLOT *	opslab_first;		/* first op in this slab */
+    OPSLAB *	opslab_next;		/* next slab */
+    OP *	opslab_freed;		/* chain of freed ops */
+    size_t	opslab_refcnt;		/* number of ops */
+    OPSLOT	opslab_slots;		/* slots begin here */
+};
+
+# define OPSLOT_HEADER		STRUCT_OFFSET(OPSLOT, opslot_op)
+# define OPSLOT_HEADER_P	(OPSLOT_HEADER/sizeof(I32 *))
+# ifdef DEBUGGING
+#  define OpSLOT(o)		(assert(o->op_slabbed), \
+				 (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
+# else
+#  define OpSLOT(o)		((OPSLOT *)(((char *)o)-OPSLOT_HEADER))
+# endif
+# define OpSLAB(o)		OpSLOT(o)->opslot_slab
+# define OpslabREFCNT_dec(slab)      \
+	(((slab)->opslab_refcnt == 1) \
+	 ? opslab_free_nopad(slab)     \
+	 : (void)--(slab)->opslab_refcnt)
+  /* Variant that does not null out the pads */
+# define OpslabREFCNT_dec_padok(slab) \
+	(((slab)->opslab_refcnt == 1)  \
+	 ? opslab_free(slab)		\
+	 : (void)--(slab)->opslab_refcnt)
 #endif
 
 struct block_hooks {

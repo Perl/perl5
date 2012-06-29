@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -412,7 +412,7 @@ my %msg;
 	# Since we strip "\.\n" when we search a warning, strip it here as well
 	$header =~ s/\.?$//;
 
-        my @toks = split( /(%l?[dxX]|%u|%c|%(?:\.\d+)?[fs])/, $header );
+        my @toks = split( /(%l?[dxX]|%[ucp]|%(?:\.\d+)?[fs])/, $header );
 	if (@toks > 1) {
             my $conlen = 0;
             for my $i (0..$#toks){
@@ -425,8 +425,8 @@ my %msg;
                         $toks[$i] = $i == $#toks ? '.*' : '.*?';
                     } elsif( $toks[$i] =~ '%.(\d+)s' ){
                         $toks[$i] = ".{$1}";
-                    } elsif( $toks[$i] =~ '^%l*([xX])$' ){
-                        $toks[$i] = $1 eq 'x' ? '[\da-f]+' : '[\dA-F]+';
+                    } elsif( $toks[$i] =~ '^%l*([pxX])$' ){
+                        $toks[$i] = $1 eq 'X' ? '[\dA-F]+' : '[\da-f]+';
                     }
                 } elsif( length( $toks[$i] ) ){
                     $toks[$i] = quotemeta $toks[$i];

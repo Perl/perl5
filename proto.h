@@ -23,6 +23,15 @@ PERL_CALLCONV int	Perl_Gv_AMupdate(pTHX_ HV* stash, bool destructing)
 	assert(stash)
 
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
+PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SLAB_FREE	\
+	assert(op)
+
 PERL_CALLCONV bool	Perl__is_utf8__perl_idstart(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -4977,6 +4986,30 @@ STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 
 #  endif
 #endif
+#if !defined(PL_OP_SLAB_ALLOC)
+PERL_CALLCONV void	Perl_cv_forget_slab(pTHX_ CV *cv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CV_FORGET_SLAB	\
+	assert(cv)
+
+#endif
+#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
+PERL_CALLCONV void	Perl_opslab_force_free(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE	\
+	assert(slab)
+
+PERL_CALLCONV void	Perl_opslab_free(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPSLAB_FREE	\
+	assert(slab)
+
+PERL_CALLCONV void	Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPSLAB_FREE_NOPAD	\
+	assert(slab)
+
+#endif
 #if !defined(SETUID_SCRIPTS_ARE_SECURE_NOW)
 #  if defined(PERL_IN_PERL_C)
 STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp)
@@ -5248,16 +5281,6 @@ STATIC void	S_strip_return(pTHX_ SV *sv)
 #  endif
 #endif
 #if defined(PERL_DEBUG_READONLY_OPS)
-#  if defined(PERL_IN_OP_C)
-#    if defined(PL_OP_SLAB_ALLOC)
-STATIC void	S_Slab_to_rw(pTHX_ void *op)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SLAB_TO_RW	\
-	assert(op)
-
-#    endif
-#  endif
-#  if defined(PL_OP_SLAB_ALLOC)
 PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_REFCNT_DEC	\
@@ -5265,6 +5288,12 @@ PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)
 
 PERL_CALLCONV OP *	Perl_op_refcnt_inc(pTHX_ OP *o);
 PERL_CALLCONV void	Perl_pending_Slabs_to_ro(pTHX);
+#  if defined(PERL_IN_OP_C)
+STATIC void	S_Slab_to_rw(pTHX_ void *op)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SLAB_TO_RW	\
+	assert(op)
+
 #  endif
 #endif
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
@@ -7468,17 +7497,6 @@ PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr)
 #endif
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
-#endif
-#if defined(PL_OP_SLAB_ALLOC)
-PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
-			__attribute__malloc__
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SLAB_FREE	\
-	assert(op)
-
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f)

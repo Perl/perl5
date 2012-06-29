@@ -105,6 +105,9 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
+#ifdef PERL_CORE
+# define CVf_SLABBED	0x0800	/* Holds refcount on op slab  */
+#endif
 #define CVf_DYNFILE	0x1000	/* The filename isn't static  */
 #define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
 #define CVf_HASEVAL	0x4000	/* contains string eval  */
@@ -167,6 +170,12 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvCVGV_RC_on(cv)	(CvFLAGS(cv) |= CVf_CVGV_RC)
 #define CvCVGV_RC_off(cv)	(CvFLAGS(cv) &= ~CVf_CVGV_RC)
 
+#ifdef PERL_CORE
+# define CvSLABBED(cv)		(CvFLAGS(cv) & CVf_SLABBED)
+# define CvSLABBED_on(cv)	(CvFLAGS(cv) |= CVf_SLABBED)
+# define CvSLABBED_off(cv)	(CvFLAGS(cv) &= ~CVf_SLABBED)
+#endif
+
 #define CvDYNFILE(cv)		(CvFLAGS(cv) & CVf_DYNFILE)
 #define CvDYNFILE_on(cv)	(CvFLAGS(cv) |= CVf_DYNFILE)
 #define CvDYNFILE_off(cv)	(CvFLAGS(cv) &= ~CVf_DYNFILE)
@@ -181,6 +190,10 @@ See L<perlguts/Autoloading with XSUBs>.
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
+
+#ifdef PL_OP_SLAB_ALLOC
+# define cv_forget_slab(cv)	NOOP
+#endif
 
 /*
 =head1 CV reference counts and CvOUTSIDE

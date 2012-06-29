@@ -3000,6 +3000,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
       "  H  Hash dump -- usurps values()\n"
       "  X  Scratchpad allocation\n"
       "  D  Cleaning up\n"
+      "  S  Op slab allocation\n"
       "  T  Tokenising\n"
       "  R  Include reference counts of dumped variables (eg when using -Ds)\n",
       "  J  Do not s,t,P-debug (Jump over) opcodes within package DB\n"

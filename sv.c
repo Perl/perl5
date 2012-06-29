@@ -12205,10 +12205,12 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    OP_REFCNT_LOCK;
 		    CvROOT(dstr) = OpREFCNT_inc(CvROOT(dstr));
 		    OP_REFCNT_UNLOCK;
+		    CvSLABBED_off(dstr);
 		} else if (CvCONST(dstr)) {
 		    CvXSUBANY(dstr).any_ptr =
 			sv_dup_inc((const SV *)CvXSUBANY(dstr).any_ptr, param);
 		}
+		assert(!CvSLABBED(dstr));
 		if (CvDYNFILE(dstr)) CvFILE(dstr) = SAVEPV(CvFILE(dstr));
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */

@@ -3444,6 +3444,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	PL_op = saveop;
 	if (yystatus != 3) {
 	    if (PL_eval_root) {
+		cv_forget_slab(evalcv);
 		op_free(PL_eval_root);
 		PL_eval_root = NULL;
 	    }
@@ -3486,6 +3487,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 
     CopLINE_set(&PL_compiling, 0);
     SAVEFREEOP(PL_eval_root);
+    cv_forget_slab(evalcv);
 
     DEBUG_x(dump_eval());
 

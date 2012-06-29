@@ -46,6 +46,8 @@ while (<OPS>) {
     warn qq[Description "$desc" duplicates $seen{$desc}\n]
      if $seen{$desc} and $key ne "transr";
     die qq[Opcode "$key" duplicates $seen{$key}\n] if $seen{$key};
+    die qq[Opcode "freed" is reserved for the slab allocator\n]
+	if $key eq 'freed';
     $seen{$desc} = qq[description of opcode "$key"];
     $seen{$key} = qq[opcode "$key"];
 
@@ -189,6 +191,7 @@ for (@ops) {
 print $on "\t", tab(3,"OP_max"), "\n";
 print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
+print $on "#define OP_FREED MAXO\n";
 
 # Emit op names and descriptions.
 

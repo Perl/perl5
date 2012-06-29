@@ -281,6 +281,9 @@ ApdR	|SV*	|cv_const_sv	|NULLOK const CV *const cv
 : Used in pad.c
 pR	|SV*	|op_const_sv	|NULLOK const OP* o|NULLOK CV* cv
 Apd	|void	|cv_undef	|NN CV* cv
+#ifndef PL_OP_SLAB_ALLOC
+p	|void	|cv_forget_slab	|NN CV *cv
+#endif
 Ap	|void	|cx_dump	|NN PERL_CONTEXT* cx
 Ap	|SV*	|filter_add	|NULLOK filter_t funcp|NULLOK SV* datasv
 Ap	|void	|filter_del	|NN filter_t funcp
@@ -964,6 +967,11 @@ p	|PerlIO*|nextargv	|NN GV* gv
 AnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Ap	|void	|op_free	|NULLOK OP* arg
+#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
+p	|void	|opslab_free	|NN OPSLAB *slab
+p	|void	|opslab_free_nopad|NN OPSLAB *slab
+p	|void	|opslab_force_free|NN OPSLAB *slab
+#endif
 : Used in perly.y
 #ifdef PERL_MAD
 p	|OP*	|package	|NN OP* o
@@ -1773,10 +1781,9 @@ s	|OP*	|ref_array_or_hash|NULLOK OP* cond
 s	|void	|process_special_blocks	|NN const char *const fullname\
 					|NN GV *const gv|NN CV *const cv
 #endif
-#if defined(PL_OP_SLAB_ALLOC)
-Apa	|void*	|Slab_Alloc	|size_t sz
-Ap	|void	|Slab_Free	|NN void *op
-#  if defined(PERL_DEBUG_READONLY_OPS)
+Xpa	|void*	|Slab_Alloc	|size_t sz
+Xp	|void	|Slab_Free	|NN void *op
+#if defined(PERL_DEBUG_READONLY_OPS)
 : Used in perl.c
 poxM	|void	|pending_Slabs_to_ro
 : Used in OpREFCNT_inc() in sv.c
@@ -1786,7 +1793,6 @@ poxM	|PADOFFSET	|op_refcnt_dec	|NN OP *o
 #    if defined(PERL_IN_OP_C)
 s	|void	|Slab_to_rw	|NN void *op
 #    endif
-#  endif
 #endif
 
 #if defined(PERL_IN_PERL_C)

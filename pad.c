@@ -333,6 +333,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 {
     dVAR;
     const PADLIST *padlist = CvPADLIST(cv);
+    bool const slabbed = !!CvSLABBED(cv);
 
     PERL_ARGS_ASSERT_CV_UNDEF;
 
@@ -346,6 +347,7 @@ Perl_cv_undef(pTHX_ CV *cv)
     }
     CvFILE(cv) = NULL;
 
+    CvSLABBED_off(cv);
     if (!CvISXSUB(cv) && CvROOT(cv)) {
 	if (SvTYPE(cv) == SVt_PVCV && CvDEPTH(cv))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
@@ -353,11 +355,29 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 	PAD_SAVE_SETNULLPAD();
 
+#ifndef PL_OP_SLAB_ALLOC
+	if (slabbed) OpslabREFCNT_dec_padok(OpSLAB(CvROOT(cv)));
+#endif
 	op_free(CvROOT(cv));
 	CvROOT(cv) = NULL;
 	CvSTART(cv) = NULL;
 	LEAVE;
     }
+#ifndef PL_OP_SLAB_ALLOC
+    else if (slabbed && CvSTART(cv)) {
+	ENTER;
+	PAD_SAVE_SETNULLPAD();
+
+	/* discard any leaked ops */
+	opslab_force_free((OPSLAB *)CvSTART(cv));
+	CvSTART(cv) = NULL;
+
+	LEAVE;
+    }
+# ifdef DEBUGGING
+    else if (slabbed) Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
+# endif
+#endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     CvGV_set(cv, NULL);
 
@@ -469,6 +489,26 @@ Perl_cv_undef(pTHX_ CV *cv)
      * to choose an error message */
     CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON);
 }
+
+#ifndef PL_OP_SLAB_ALLOC
+void
+Perl_cv_forget_slab(pTHX_ CV *cv)
+{
+    const bool slabbed = !!CvSLABBED(cv);
+
+    PERL_ARGS_ASSERT_CV_FORGET_SLAB;
+
+    if (!slabbed) return;
+
+    CvSLABBED_off(cv);
+
+    if      (CvROOT(cv))  OpslabREFCNT_dec(OpSLAB(CvROOT(cv)));
+    else if (CvSTART(cv)) OpslabREFCNT_dec((OPSLAB *)CvSTART(cv));
+# ifdef DEBUGGING
+    else if (slabbed)     Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
+# endif
+}
+#endif
 
 /*
 =for apidoc m|PADOFFSET|pad_alloc_name|SV *namesv|U32 flags|HV *typestash|HV *ourstash
@@ -1905,7 +1945,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     SAVESPTR(PL_compcv);
 
     cv = PL_compcv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
-    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC);
+    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
+				    |CVf_SLABBED);
     CvCLONED_on(cv);
 
     CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
