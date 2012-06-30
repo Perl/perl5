@@ -4292,6 +4292,8 @@ lib/perl5db/t/rt-61222		Tests for the Perl debugger
 lib/perl5db/t/rt-66110		Tests for the Perl debugger
 lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
 lib/perl5db/t/taint		Tests for the Perl debugger
+lib/perl5db/t/test-l-statement-1	Tests for the Perl debugger
+lib/perl5db/t/test-r-statement	Tests for the Perl debugger
 lib/perl5db/t/uncalled-subroutine	Tests for the Perl debugger
 lib/perl5db/t/with-subroutine		Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module

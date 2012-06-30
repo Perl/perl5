@@ -1,0 +1,8 @@
+$x = 1;
+print "1\n";
+
+$x = 2;
+print "2\n";
+
+$x = 3;
+print "3\n";
