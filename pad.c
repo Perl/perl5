@@ -1946,7 +1946,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     assert(depth || SvTYPE(proto) == SVt_PVFM);
     if (!depth)
 	depth = 1;
-    assert(CvPADLIST(outside));
+    assert(CvPADLIST(outside) || SvTYPE(proto) == SVt_PVFM);
 
     ENTER;
     SAVESPTR(PL_compcv);
@@ -1981,18 +1981,20 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     PL_curpad = AvARRAY(PL_comppad);
 
-    outpad = AvARRAY(AvARRAY(CvPADLIST(outside))[depth]);
+    outpad = CvPADLIST(outside)
+	? AvARRAY(AvARRAY(CvPADLIST(outside))[depth])
+	: NULL;
 
     for (ix = fpad; ix > 0; ix--) {
 	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
 	SV *sv = NULL;
 	if (namesv && namesv != &PL_sv_undef) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
-		sv = outpad[PARENT_PAD_INDEX(namesv)];
-		/* formats may have an inactive parent,
+		/* formats may have an inactive, or even undefined, parent,
 		   while my $x if $false can leave an active var marked as
 		   stale. And state vars are always available */
-		if (!sv || (SvPADSTALE(sv) && !SvPAD_STATE(namesv))) {
+		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
+		 || (SvPADSTALE(sv) && !SvPAD_STATE(namesv))) {
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
 				   "Variable \"%"SVf"\" is not available", namesv);
 		    sv = NULL;

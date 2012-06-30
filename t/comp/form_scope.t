@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..8\n";
+print "1..10\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -98,12 +98,32 @@ $next = $clo1;
 $next = $clo2;
 &$clo1(0);
 
+# Cloning a format whose outside has been undefined
+sub x {
+    {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u)}
+    my $z;
+    format STDOUT6 =
+@<<<<<<<<<<<<<<<<<<<<<<<<<
+defined $z ? "not ok 8 - $z" : "ok 8"
+.
+}
+undef &x;
+*STDOUT = *STDOUT6{FORMAT};
+{
+  local $^W = 1;
+  my $w;
+  local $SIG{__WARN__} = sub { $w = shift };
+  write;
+  print "not " unless $w =~ /^Variable "\$z" is not available at/;
+  print "ok 9 - closure var not available when outer sub is undefined\n";
+}
+
 # This is a variation of bug #22977, which crashes or fails an assertion
 # up to 5.16.
 # Keep this test last if you want test numbers to be sane.
 BEGIN { \&END }
 END {
-  my $test = "ok 8";
+  my $test = "ok 10";
   *STDOUT = *STDOUT5{FORMAT};
   write;
   format STDOUT5 =
