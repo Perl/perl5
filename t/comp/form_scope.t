@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..5\n";
+print "1..7\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -73,4 +73,24 @@ defined $x ? "not ok 4 - $x" : "ok 4"
   write;
   print "not " unless $w =~ /^Variable "\$x" is not available at/;
   print "ok 5 - closure var not available when outer sub is inactive\n";
+}
+
+# Cloning a format whose outside has been undefined
+sub x {
+    {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u)}
+    my $z;
+    format STDOUT6 =
+@<<<<<<<<<<<<<<<<<<<<<<<<<
+defined $z ? "not ok 6 - $z" : "ok 6"
+.
+}
+undef &x;
+*STDOUT = *STDOUT6{FORMAT};
+{
+  local $^W = 1;
+  my $w;
+  local $SIG{__WARN__} = sub { $w = shift };
+  write;
+  print "not " unless $w =~ /^Variable "\$z" is not available at/;
+  print "ok 7 - closure var not available when outer sub is undefined\n";
 }
