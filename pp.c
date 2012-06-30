@@ -5797,16 +5797,9 @@ PP(pp_coreargs)
 	case OA_SCALAR:
 	  try_defsv:
 	    if (!numargs && defgv && whicharg == minargs + 1) {
-		PERL_SI * const oldsi = PL_curstackinfo;
-		I32 const oldcxix = oldsi->si_cxix;
-		CV *caller;
-		if (oldcxix) oldsi->si_cxix--;
-		else PL_curstackinfo = oldsi->si_prev;
-		caller = find_runcv(NULL);
-		PL_curstackinfo = oldsi;
-		oldsi->si_cxix = oldcxix;
 		PUSHs(find_rundefsv2(
-		    caller,cxstack[cxstack_ix].blk_oldcop->cop_seq
+		    find_runcv_where(FIND_RUNCV_level_eq, (void *)1, NULL),
+		    cxstack[cxstack_ix].blk_oldcop->cop_seq
 		));
 	    }
 	    else PUSHs(numargs ? svp && *svp ? *svp : &PL_sv_undef : NULL);
@@ -5894,13 +5887,7 @@ PP(pp_runcv)
     dSP;
     CV *cv;
     if (PL_op->op_private & OPpOFFBYONE) {
-	PERL_SI * const oldsi = PL_curstackinfo;
-	I32 const oldcxix = oldsi->si_cxix;
-	if (oldcxix) oldsi->si_cxix--;
-	else PL_curstackinfo = oldsi->si_prev;
-	cv = find_runcv(NULL);
-	PL_curstackinfo = oldsi;
-	oldsi->si_cxix = oldcxix;
+	cv = find_runcv_where(FIND_RUNCV_level_eq, (void *)1, NULL);
     }
     else cv = find_runcv(NULL);
     XPUSHs(CvEVAL(cv) ? &PL_sv_undef : sv_2mortal(newRV((SV *)cv)));

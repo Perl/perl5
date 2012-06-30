@@ -3254,6 +3254,7 @@ Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
 {
     dVAR;
     PERL_SI	 *si;
+    int		 level = 0;
 
     if (db_seqp)
 	*db_seqp = PL_curcop->cop_seq;
@@ -3276,6 +3277,9 @@ Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
 		switch (cond) {
 		case FIND_RUNCV_root_eq:
 		    if (CvROOT(cv) != (OP *)arg) continue;
+		    return cv;
+		case FIND_RUNCV_level_eq:
+		    if (level++ != (int)arg) continue;
 		    /* GERONIMO! */
 		default:
 		    return cv;
