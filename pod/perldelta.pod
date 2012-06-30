@@ -328,9 +328,11 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item *
 
-XXX
+Configure now always adds -qlanglvl=extc99 to the CC flags on AIX when
+using xlC.  This will make it easier to compile a number of XS-based modules
+that assume C99 [perl #113778].
 
 =back
 
