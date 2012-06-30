@@ -1923,10 +1923,12 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     assert(!CvUNIQUE(proto));
 
-    /* Since cloneable anon subs can be nested, CvOUTSIDE may point
+    /* Anonymous subs have a weak CvOUTSIDE pointer, so its value is not
+     * reliable.  The currently-running sub is always the one we need to
+     * close over.
+     * Note that in general for formats, CvOUTSIDE != find_runcv.
+     * Since formats may be nested inside closures, CvOUTSIDE may point
      * to a prototype; we instead want the cloned parent who called us.
-     * Note that in general for formats, CvOUTSIDE != find_runcv; formats
-     * inside closures, however, only work if CvOUTSIDE == find_runcv.
      */
 
     if (SvTYPE(proto) == SVt_PVCV)
