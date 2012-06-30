@@ -2149,10 +2149,34 @@ PP(pp_bit_or)
     }
 }
 
+PERL_STATIC_INLINE bool
+S_negate_string(pTHX)
+{
+    dTARGET; dSP;
+    STRLEN len;
+    const char *s;
+    SV * const sv = TOPs;
+    if (!SvPOKp(sv) || SvNIOK(sv) || (!SvPOK(sv) && SvNIOKp(sv)))
+	return FALSE;
+    s = SvPV_nomg_const(sv, len);
+    if (isIDFIRST(*s)) {
+	sv_setpvs(TARG, "-");
+	sv_catsv(TARG, sv);
+    }
+    else if (*s == '+' || (*s == '-' && !looks_like_number(sv))) {
+	sv_setsv_nomg(TARG, sv);
+	*SvPV_force_nomg(TARG, len) = *s == '-' ? '+' : '-';
+    }
+    else return FALSE;
+    SETTARG; PUTBACK;
+    return TRUE;
+}
+
 PP(pp_negate)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(neg_amg, AMGf_numeric);
+    if (S_negate_string(aTHX)) return NORMAL;
     {
 	SV * const sv = TOPs;
 
@@ -2183,23 +2207,8 @@ PP(pp_negate)
 	}
 	if (SvNIOKp(sv) && (SvNIOK(sv) || !SvPOK(sv)))
 	    SETn(-SvNV_nomg(sv));
-	else if (SvPOKp(sv)) {
-	    STRLEN len;
-	    const char * const s = SvPV_nomg_const(sv, len);
-	    if (isIDFIRST(*s)) {
-		sv_setpvs(TARG, "-");
-		sv_catsv(TARG, sv);
-	    }
-	    else if (*s == '+' || (*s == '-' && !looks_like_number(sv))) {
-		sv_setsv_nomg(TARG, sv);
-		*SvPV_force_nomg(TARG, len) = *s == '-' ? '+' : '-';
-	    }
-	    else if (SvIV_please_nomg(sv))
+	else if (SvPOKp(sv) && SvIV_please_nomg(sv))
 		  goto oops_its_an_int;
-	    else
-		sv_setnv(TARG, -SvNV_nomg(sv));
-	    SETTARG;
-	}
 	else
 	    SETn(-SvNV_nomg(sv));
     }
@@ -2550,6 +2559,7 @@ PP(pp_i_negate)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICun_MG(neg_amg, 0);
+    if (S_negate_string(aTHX)) return NORMAL;
     {
 	SV * const sv = TOPs;
 	IV const i = SvIV_nomg(sv);
