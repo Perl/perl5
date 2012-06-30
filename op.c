@@ -3184,11 +3184,8 @@ S_op_integerize(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_OP_INTEGERIZE;
 
-    /* integerize op, unless it happens to be C<-foo>.
-     * XXX should pp_i_negate() do magic string negation instead? */
-    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER)
-	&& !(type == OP_NEGATE && cUNOPo->op_first->op_type == OP_CONST
-	     && (cUNOPo->op_first->op_private & OPpCONST_BARE)))
+    /* integerize op. */
+    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
     {
 	dVAR;
 	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
