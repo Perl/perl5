@@ -54,8 +54,11 @@ my @tests = (
 [ "Unix->catfile('a','b','c')",         'a/b/c'  ],
 [ "Unix->catfile('a','b','./c')",       'a/b/c'  ],
 [ "Unix->catfile('./a','b','c')",       'a/b/c'  ],
-[ "Unix->catfile('c')",                 'c' ],
-[ "Unix->catfile('./c')",               'c' ],
+[ "Unix->catfile('c')",                 'c'      ],
+[ "Unix->catfile('./c')",               'c'      ],
+[ "Unix->catfile('', 'c')",             '/c'     ],
+[ "Unix->catfile('.', 'c')",            './c'    ],
+[ "Unix->catfile('./', 'c')",           './c'    ],
 
 [ "Unix->splitpath('file')",            ',,file'            ],
 [ "Unix->splitpath('/d1/d2/d3/')",      ',/d1/d2/d3/,'      ],
