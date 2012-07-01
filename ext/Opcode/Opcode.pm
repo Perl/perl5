@@ -397,7 +397,7 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     gvsv gv gelem
 
-    padsv padav padhv padany
+    padsv padav padhv padcv padany
 
     once
 
