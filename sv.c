@@ -7833,6 +7833,11 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
 	if (i == EOF)			/* all done for ever? */
 	    goto thats_really_all_folks;
 
+        /* in case sv changed via signal handler during getc */
+        SvPOK_only_UTF8(sv);
+        if (PerlIO_isutf8(fp))
+            SvUTF8_on(sv);
+
 	bpx = bp - (STDCHAR*)SvPVX_const(sv);	/* box up before relocation */
 	SvCUR_set(sv, bpx);
 	SvGROW(sv, bpx + cnt + 2);

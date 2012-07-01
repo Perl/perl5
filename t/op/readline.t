@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 30;
+plan tests => 35;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -89,6 +89,43 @@ fresh_perl_is('BEGIN{<>}', '',
 fresh_perl_is('print readline', 'foo',
               { switches => ['-w'], stdin => 'foo', stderr => 1 },
               'readline() defaults to *ARGV');
+
+# [perl #113906]
+for my $assignment ('undef', '100', '"100"', '{}', 'bless({})') {
+    my $tempfile = tempfile();
+    open my $fh, '>', $tempfile
+        or die "Couldn't open $tempfile for writing: $!";
+    print $fh <<SCRIPT;
+pipe(my \$read, my \$write);
+
+if (!fork) {
+    close \$read;
+
+    sleep 3;
+    print \$write "foo\n";
+    close \$write;
+    exit;
+}
+
+close \$write;
+open STDIN, '<&', fileno(\$read);
+
+my \$line;
+\$SIG{ALRM} = sub { \$line = $assignment };
+alarm 1;
+\$line = <STDIN>;
+alarm 0;
+
+print \$line;
+SCRIPT
+    close $fh
+        or die "Couldn't close $tempfile: $!";
+
+    my $got = runperl(progfile => $tempfile, stderr => 1);
+    is($got, "foo\n",
+       "overwriting the target of readline with $assignment during the read "
+     . "doesn't end up with the wrong flags");
+}
 
 # [perl #72720] Test that sv_gets clears any variables that should be
 # empty so if the read() aborts with EINTER, the TARG is actually
