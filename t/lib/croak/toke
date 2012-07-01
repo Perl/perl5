@@ -1,0 +1,5 @@
+__END__
+# NAME Missing name in "my sub"
+my sub;
+EXPECT
+Missing name in "my sub" at - line 1.
