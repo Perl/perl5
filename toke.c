@@ -8234,7 +8234,7 @@ Perl_yylex(pTHX)
 		    if (PL_madskills)
 			nametoke = newSVpvn_flags(s, d - s, SvUTF8(PL_linestr));
 #endif
-		    if (memchr(tmpbuf, ':', len))
+		    if (memchr(tmpbuf, ':', len) || key == KEY_our)
 			sv_setpvn(PL_subname, tmpbuf, len);
 		    else {
 			sv_setsv(PL_subname,PL_curstname);
@@ -8246,12 +8246,13 @@ Perl_yylex(pTHX)
 		    have_name = TRUE;
 
 #ifdef PERL_MAD
-
-		    start_force(0);
-		    CURMAD('X', nametoke);
-		    CURMAD('_', tmpwhite);
-		    (void) force_word(PL_oldbufptr + tboffset, WORD,
+		    if (key != KEY_our) {
+			start_force(0);
+			CURMAD('X', nametoke);
+			CURMAD('_', tmpwhite);
+			(void) force_word(PL_oldbufptr + tboffset, WORD,
 				      FALSE, TRUE, TRUE);
+		    }
 
 		    s = SKIPSPACE2(d,tmpwhite);
 #else
@@ -8413,8 +8414,14 @@ Perl_yylex(pTHX)
 			sv_setpvs(PL_subname, "__ANON__::__ANON__");
 		    TOKEN(ANONSUB);
 		}
+		if (key == KEY_our) {
+		    PL_pending_ident = *PL_tokenbuf = '&';
+		    Copy(tmpbuf, PL_tokenbuf+1, len, char);
+		    PL_tokenbuf[len+1] = '\0';
+		}
 #ifndef PERL_MAD
-		(void) force_word(PL_oldbufptr + tboffset, WORD,
+		else
+		    (void) force_word(PL_oldbufptr + tboffset, WORD,
 				  FALSE, TRUE, TRUE);
 #endif
 		if (key == KEY_my)
@@ -8648,6 +8655,7 @@ S_pending_ident(pTHX)
                     ),
                     ((PL_tokenbuf[0] == '$') ? SVt_PV
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+                     : (PL_tokenbuf[0] == '&') ? SVt_PVGV
                      : SVt_PVHV));
                 return WORD;
             }
@@ -8691,6 +8699,7 @@ S_pending_ident(pTHX)
                      | ( UTF ? SVf_UTF8 : 0 ),
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV
 		      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+		      : (PL_tokenbuf[0] == '&') ? SVt_PVGV
 		      : SVt_PVHV));
     return WORD;
 }

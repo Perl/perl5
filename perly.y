@@ -314,26 +314,36 @@ barestmt:	PLUGSTMT
 			      pad_add_anon(fmtcv, OP_NULL);
 			  }
 			}
-	|	SUB startsub subname proto subattrlist subbody
+	|	SUB WORD startsub
+			{ const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv);
+			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
+			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
+			      || strEQ(name, "UNITCHECK"))
+			      CvSPECIAL_on(PL_compcv);
+			  PL_parser->in_my = 0;
+			  PL_parser->in_my_stash = NULL;
+			}
+		proto subattrlist subbody
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  {
 			      OP* o = newSVOP(OP_ANONCODE, 0,
-				(SV*)newATTRSUB($2, $3, $4, $5, $6));
+				(SV*)newATTRSUB($3, $2, $5, $6, $7));
 			      $$ = newOP(OP_NULL,0);
 			      op_getmad(o,$$,'&');
-			      op_getmad($3,$$,'n');
-			      op_getmad($4,$$,'s');
-			      op_getmad($5,$$,'a');
+			      op_getmad($2,$$,'n');
+			      op_getmad($5,$$,'s');
+			      op_getmad($6,$$,'a');
 			      token_getmad($1,$$,'d');
-			      append_madprops($6->op_madprop, $$, 0);
-			      $6->op_madprop = 0;
+			      append_madprops($7->op_madprop, $$, 0);
+			      $7->op_madprop = 0;
 			  }
 #else
-			  newATTRSUB($2, $3, $4, $5, $6);
+			  newATTRSUB($3, $2, $5, $6, $7);
 			  $$ = (OP*)NULL;
 #endif
+			  intro_my();
 			}
 	|	MYSUB startsub subname proto subattrlist subbody
 			{
