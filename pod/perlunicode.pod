@@ -1545,9 +1545,8 @@ are valid UTF-8.
 
 =item *
 
-C<is_utf8_char(s)> returns true if the pointer points to a valid UTF-8
-character.  However, this function should not be used because of
-security concerns.  Instead, use C<is_utf8_string()>.
+C<is_utf8_char_buf(buf, buf_end)> returns true if the pointer points to
+a valid UTF-8 character.
 
 =item *
 

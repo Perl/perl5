@@ -2642,7 +2642,8 @@ is what makes Unicode input an interesting problem.
 In general, you either have to know what you're dealing with, or you
 have to guess.  The API function C<is_utf8_string> can help; it'll tell
 you if a string contains only valid UTF-8 characters. However, it can't
-do the work for you. On a character-by-character basis, XXX C<is_utf8_char>
+do the work for you. On a character-by-character basis,
+C<is_utf8_char_buf>
 will tell you whether the current character in a string is valid UTF-8. 
 
 =head2 How does UTF-8 represent Unicode characters?
