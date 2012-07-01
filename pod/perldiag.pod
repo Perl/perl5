@@ -2802,7 +2802,7 @@ blank.
 (F) A double-quoted string ended with "\c", without the required control
 character name.
 
-=item Missing name in "my sub"
+=item Missing name in "%s sub"
 
 (F) The reserved syntax for lexically scoped subroutines requires that
 they have a name with which they can be found.
