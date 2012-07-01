@@ -10987,6 +10987,11 @@ S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
     return;
 }
 
+/* The names of properties whose definitions are not known at compile time are
+ * stored in this SV, after a constant heading.  So if the length has been
+ * changed since initialization, then there is a run-time definition. */
+#define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
+
 /*
    parse a class specification and produce either an ANYOF node that
    matches the pattern or perhaps will be optimized into an EXACTish node
@@ -12262,7 +12267,7 @@ parseit:
         && ! LOC
 	&& ! depends_list
 	&& ! unicode_alternate
-	&& SvCUR(listsv) == initial_listsv_len)
+	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
         _invlist_invert(cp_list);
 
@@ -12370,7 +12375,7 @@ parseit:
      * FI'. */
     if (! cp_list
 	&& ! unicode_alternate
-	&& SvCUR(listsv) == initial_listsv_len
+	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 	&& ! (ANYOF_FLAGS(ret) & (ANYOF_INVERT|ANYOF_UNICODE_ALL))
         && (((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
                               || (! ANYOF_CLASS_TEST_ANY_SET(ret)))))
@@ -12456,7 +12461,7 @@ parseit:
 	swash = NULL;
     }
     if (! cp_list
-	&& SvCUR(listsv) == initial_listsv_len
+	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 	&& ! unicode_alternate)
     {
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
@@ -12479,9 +12484,9 @@ parseit:
 	AV * const av = newAV();
 	SV *rv;
 
-	av_store(av, 0, (SvCUR(listsv) == initial_listsv_len)
-			? &PL_sv_undef
-			: listsv);
+	av_store(av, 0, (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+			? listsv
+			: &PL_sv_undef);
 	if (swash) {
 	    av_store(av, 1, swash);
 	    SvREFCNT_dec(cp_list);
@@ -12512,6 +12517,7 @@ parseit:
     }
     return ret;
 }
+#undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 
 
 /* reg_skipcomment()
