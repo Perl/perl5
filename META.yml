@@ -78,6 +78,9 @@ no_index:
     - dist/IO/poll.c
     - dist/IO/poll.h
     - dist/IO/README
+    - dist/IO/t/cachepropagate-tcp.t
+    - dist/IO/t/cachepropagate-udp.t
+    - dist/IO/t/cachepropagate-unix.t
     - dist/IO/t/IO.t
     - dist/IO/t/io_const.t
     - dist/IO/t/io_dir.t
