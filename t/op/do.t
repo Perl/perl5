@@ -1,6 +1,8 @@
 #!./perl -w
 
-require './test.pl';
+BEGIN {
+    require './test.pl';
+}
 use strict;
 no warnings 'void';
 
