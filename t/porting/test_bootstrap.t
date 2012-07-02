@@ -7,7 +7,10 @@ use strict;
 
 # This regression tests ensures that the rules aren't accidentally overlooked.
 
-require './test.pl';
+BEGIN {
+    chdir 't';
+    require './test.pl';
+}
 
 plan('no_plan');
 
