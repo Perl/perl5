@@ -1439,7 +1439,7 @@ Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv)
 /*
 =for apidoc m|void|pad_block_start|int full
 
-Update the pad compilation state variables on entry to a new block
+Update the pad compilation state variables on entry to a new block.
 
 =cut
 */
