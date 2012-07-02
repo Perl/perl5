@@ -5705,7 +5705,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
     if (!av)
 	return;
 
-    /* after multiple passes through Perl_sv_clean_all() for a thinngy
+    /* after multiple passes through Perl_sv_clean_all() for a thingy
      * that has badly leaked, the backref array may have gotten freed,
      * since we only protect it against 1 round of cleanup */
     if (SvIS_FREED(av)) {
