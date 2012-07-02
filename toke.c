@@ -5987,10 +5987,12 @@ Perl_yylex(pTHX)
 	    BAop(OP_BIT_AND);
 	}
 
-	s = scan_ident(s - 1, PL_bufend, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
-	if (*PL_tokenbuf) {
+	PL_tokenbuf[0] = '&';
+	s = scan_ident(s - 1, PL_bufend, PL_tokenbuf + 1,
+		       sizeof PL_tokenbuf - 1, TRUE);
+	if (PL_tokenbuf[1]) {
 	    PL_expect = XOPERATOR;
-	    force_ident(PL_tokenbuf, '&');
+	    PL_pending_ident = '&';
 	}
 	else
 	    PREREF('&');

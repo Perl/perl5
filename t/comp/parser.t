@@ -318,9 +318,9 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   eval qq[ %$xFC ];
   like($@, qr/Identifier too long/, "too long id in % sigil ctx");
 
-  eval qq[ \\&$xFC ]; # take a ref since I don't want to call it
-  is($@, "", "252 character & sigil ident ok");
-  eval qq[ \\&$xFD ];
+  eval qq[ \\&$xFB ]; # take a ref since I don't want to call it
+  is($@, "", "251 character & sigil ident ok");
+  eval qq[ \\&$xFC ];
   like($@, qr/Identifier too long/, "too long id in & sigil ctx");
 
   eval qq[ *$xFC ];

@@ -4994,6 +4994,7 @@ t/bigmem/read.t			Check read() handles large offsets
 t/bigmem/vec.t			Check vec() handles large offsets
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
+t/cmd/lexsub.t			See if lexical subroutines work
 t/cmd/mod.t			See if statement modifiers work
 t/cmd/subval.t			See if subroutine values work
 t/cmd/switch.t			See if switch optimizations work
