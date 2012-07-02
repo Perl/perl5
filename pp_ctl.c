@@ -3279,7 +3279,7 @@ Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
 		    if (CvROOT(cv) != (OP *)arg) continue;
 		    return cv;
 		case FIND_RUNCV_level_eq:
-		    if (level++ != (int)arg) continue;
+		    if (level++ != (IV)arg) continue;
 		    /* GERONIMO! */
 		default:
 		    return cv;
