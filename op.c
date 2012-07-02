@@ -6445,7 +6445,8 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
      * for our $x () sets OPpOUR_INTRO */
     loop->op_private = (U8)iterpflags;
 #ifndef PL_OP_SLAB_ALLOC
-    if (DIFF(loop, OpSLOT(loop)->opslot_next)
+    if (loop->op_slabbed
+     && DIFF(loop, OpSLOT(loop)->opslot_next)
 	 < SIZE_TO_PSIZE(sizeof(LOOP)))
 #endif
     {
@@ -6455,6 +6456,10 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	S_op_destroy(aTHX_ (OP*)loop);
 	loop = tmp;
     }
+#ifndef PL_OP_SLAB_ALLOC
+    else if (!loop->op_slabbed)
+	loop = (LOOP*)PerlMemShared_realloc(loop, sizeof(LOOP));
+#endif
     loop->op_targ = padoff;
     wop = newWHILEOP(flags, 1, loop, newOP(OP_ITER, 0), block, cont, 0);
     if (madsv)

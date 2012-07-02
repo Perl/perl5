@@ -3360,6 +3360,25 @@ OUTPUT:
 
 #endif
 
+bool
+test_newFOROP_without_slab()
+CODE:
+    {
+	const I32 floor = start_subparse(0,0);
+	CV * const cv = PL_compcv;
+	/* The slab allocator does not like CvROOT being set. */
+	CvROOT(PL_compcv) = (OP *)1;
+	op_free(newFOROP(0, 0, newOP(OP_PUSHMARK, 0), 0, 0));
+	CvROOT(PL_compcv) = NULL;
+	SvREFCNT_dec(PL_compcv);
+	LEAVE_SCOPE(floor);
+	/* If we have not crashed yet, then the test passes. */
+	RETVAL = TRUE;
+    }
+OUTPUT:
+    RETVAL
+
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
