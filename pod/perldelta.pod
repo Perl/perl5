@@ -114,6 +114,13 @@ L<Tie::StdHandle> has been upgraded from version 4.2 to 4.3.
 
 C<READ> now respects the offset argument to C<read> [perl #112826].
 
+=item *
+
+L<IO> has been upgraded from version 1.25_07 to 1.25_08.
+
+L<IO::Socket> tries harder to cache or otherwise fetch socket
+information.
+
 =back
 
 =head2 Removed Modules and Pragmata
