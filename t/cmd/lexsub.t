@@ -5,7 +5,7 @@ BEGIN {
     require './test.pl';
     *bar::is = *is;
 }
-plan 14;
+plan 13;
 
 {
   our sub foo { 42 }
@@ -59,11 +59,10 @@ sub bar::c { 43 }
 }
 {
   our sub d;
-  sub d { 'd42' }
   sub bar::d { 'd43' }
   package bar;
+  sub d { 'd42' }
   { local $::TODO = ' ';
-    is d, 'd42', 'our sub foo; applies to subsequent sub foo {}';
+    is eval { ::d },'d42', 'our sub foo; applies to subsequent sub foo {}';
   }
-  is &d, 'd42', 'our sub foo; applies to subsequent sub foo {} (amper)';
 }
