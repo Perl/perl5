@@ -134,7 +134,7 @@ foreach my $folded (keys %folded_closure) {
 my @bits;   # Bit map for each code point
 
 foreach my $folded (keys %folded_closure) {
-    $bits[$folded] = "_CC_NONLATIN1_FOLD" if grep { $_ > 255 }
+    $bits[$folded] = "(1U<<_CC_NONLATIN1_FOLD)" if grep { $_ > 255 }
                                                 @{$folded_closure{$folded}};
 }
 
@@ -189,7 +189,7 @@ for my $ord (0..255) {
         #print "$ord, $name $property, $re\n";
         if ($char =~ $re) {  # Add this property if matches
             $bits[$ord] .= '|' if $bits[$ord];
-            $bits[$ord] .= "_CC_$property";
+            $bits[$ord] .= "(1U<<_CC_$property)";
         }
     }
     #print __LINE__, " $ord $char $bits[$ord]\n";

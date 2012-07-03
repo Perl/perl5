@@ -605,39 +605,39 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* Bits for PL_charclass[].  These use names used in l1_char_class_tab.h but
  * their actual definitions are here.  If that has a name not used here, it
  * won't compile. */
-#  define _CC_WORDCHAR_A       (1<<0)
-#  define _CC_SPACE_A          (1<<1)
-#  define _CC_DIGIT_A          (1<<2)
-#  define _CC_ALNUMC_A         (1<<3)
-#  define _CC_ALPHA_A          (1<<4)
-#  define _CC_ASCII            (1<<5)
-#  define _CC_CNTRL_A          (1<<6)
-#  define _CC_GRAPH_A          (1<<7)
-#  define _CC_LOWER_A          (1<<8)
-#  define _CC_PRINT_A          (1<<9)
-#  define _CC_PUNCT_A          (1<<10)
-#  define _CC_UPPER_A          (1<<11)
-#  define _CC_XDIGIT_A         (1<<12)
-#  define _CC_PSXSPC_A         (1<<13)
-#  define _CC_BLANK_A          (1<<14)
+#  define _CC_WORDCHAR_A       0
+#  define _CC_SPACE_A          1
+#  define _CC_DIGIT_A          2
+#  define _CC_ALNUMC_A         3
+#  define _CC_ALPHA_A          4
+#  define _CC_ASCII            5
+#  define _CC_CNTRL_A          6
+#  define _CC_GRAPH_A          7
+#  define _CC_LOWER_A          8
+#  define _CC_PRINT_A          9
+#  define _CC_PUNCT_A          10
+#  define _CC_UPPER_A          11
+#  define _CC_XDIGIT_A         12
+#  define _CC_PSXSPC_A         13
+#  define _CC_BLANK_A          14
 
-#  define _CC_WORDCHAR_L1      (1<<15)
-#  define _CC_SPACE_L1         (1<<16)
-#  define _CC_ALNUMC_L1        (1<<17)
-#  define _CC_ALPHA_L1         (1<<18)
-#  define _CC_CNTRL_L1         (1<<19)
-#  define _CC_GRAPH_L1         (1<<20)
-#  define _CC_LOWER_L1         (1<<21)
-#  define _CC_PRINT_L1         (1<<22)
-#  define _CC_PUNCT_L1         (1<<23)
-#  define _CC_UPPER_L1         (1<<24)
-#  define _CC_PSXSPC_L1        (1<<25)
-#  define _CC_BLANK_L1         (1<<26)
-#  define _CC_IDFIRST_A        (1<<27)
-#  define _CC_IDFIRST_L1       (1<<28)
-#  define _CC_CHARNAME_CONT    (1<<29)
-#  define _CC_NONLATIN1_FOLD   (1<<30)
-#  define _CC_QUOTEMETA        (1U<<31)	/* 1U keeps Solaris from griping */
+#  define _CC_WORDCHAR_L1      15
+#  define _CC_SPACE_L1         16
+#  define _CC_ALNUMC_L1        17
+#  define _CC_ALPHA_L1         18
+#  define _CC_CNTRL_L1         19
+#  define _CC_GRAPH_L1         20
+#  define _CC_LOWER_L1         21
+#  define _CC_PRINT_L1         22
+#  define _CC_PUNCT_L1         23
+#  define _CC_UPPER_L1         24
+#  define _CC_PSXSPC_L1        25
+#  define _CC_BLANK_L1         26
+#  define _CC_IDFIRST_A        27
+#  define _CC_IDFIRST_L1       28
+#  define _CC_CHARNAME_CONT    29
+#  define _CC_NONLATIN1_FOLD   30
+#  define _CC_QUOTEMETA        31
 /* Unused: None
  * If more are needed, can give up some of the above.  The first ones to go
  * would be those that require just two tests to verify; either there are two
@@ -664,7 +664,8 @@ EXTCONST  U32 PL_charclass[] = {
 EXTCONST U32 PL_charclass[];
 #  endif
 
-#   define _generic_isCC(c, bit) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & (bit)))
+    /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
+#   define _generic_isCC(c, bit_shift) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & (1U << (bit_shift))))
 
 #   define isALNUMC_A(c) _generic_isCC(c, _CC_ALNUMC_A)
 #   define isALPHA_A(c)  _generic_isCC(c, _CC_ALPHA_A)
@@ -683,7 +684,7 @@ EXTCONST U32 PL_charclass[];
 #   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT_A)
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_NONLATIN1_FOLD))
+#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & (1U << _CC_NONLATIN1_FOLD)))
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #else   /* No perl.h. */
 #   ifdef EBCDIC
