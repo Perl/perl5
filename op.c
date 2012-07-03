@@ -5369,14 +5369,30 @@ S_is_list_assignment(pTHX_ register const OP *o)
 PERL_STATIC_INLINE bool
 S_aassign_common_vars(pTHX_ OP* o)
 {
+    bool ret = FALSE;
     OP *curop;
     for (curop = cUNOPo->op_first; curop; curop=curop->op_sibling) {
 	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 	    if (curop->op_type == OP_GV) {
 		GV *gv = cGVOPx_gv(curop);
-		if (gv == PL_defgv
-		    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
-		    return TRUE;
+                /* don't just return, so we can see all globals, to detect
+                 * the $</$> swap */
+		if (gv == PL_defgv)
+		    ret = TRUE;
+		if ((int)GvASSIGN_GENERATION(gv) == PL_generation) {
+                    ret = TRUE;
+                    if (GvNAMELEN(gv) == 1) {
+                        char name = *GvNAME(gv);
+                        if (name == '(' || name == ')') {
+                            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                                        "Swapping $( and $) is deprecated");
+                        }
+                        if (name == '<' || name == '>') {
+                            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+                                        "Swapping $< and $> is deprecated");
+                        }
+                    }
+                }
 		GvASSIGN_GENERATION_set(gv, PL_generation);
 	    }
 	    else if (curop->op_type == OP_PADSV ||
@@ -5428,7 +5444,7 @@ S_aassign_common_vars(pTHX_ OP* o)
 		return TRUE;
 	}
     }
-    return FALSE;
+    return ret;
 }
 
 /*

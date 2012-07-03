@@ -312,8 +312,7 @@ Changes to C<$)> require a check to C<$!> to detect any possible errors
 after an attempted change.
 
 C<< $< >>, C<< $> >>, C<$(> and C<$)> can be set only on
-machines that support the corresponding I<set[re][ug]id()> routine.  C<$(>
-and C<$)> can be swapped only on machines supporting C<setregid()>.
+machines that support the corresponding I<set[re][ug]id()> routine.
 
 Mnemonic: parentheses are used to I<group> things.  The effective gid
 is the group that's I<right> for you, if you're running setgid.
@@ -342,14 +341,10 @@ X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
 The effective uid of this process.  For example:
 
     $< = $>;            # set real to effective uid
-    ($<,$>) = ($>,$<);  # swap real and effective uids
 
 You can change both the effective uid and the real uid at the same
 time by using C<POSIX::setuid()>.  Changes to C<< $> >> require a check
 to C<$!> to detect any possible errors after an attempted change.
-
-C<< $< >> and C<< $> >> can be swapped only on machines
-supporting C<setreuid()>.
 
 Mnemonic: it's the uid you went I<to>, if you're running setuid.
 

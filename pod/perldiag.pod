@@ -4582,6 +4582,18 @@ assignment or as a subroutine argument for example).
 (P) Perl tried to force the upgrade of an SV to a type which was actually
 inferior to its current type.
 
+=item Swapping $( and $) is deprecated
+
+(D deprecated) The construct C<< ($(, $)) = ($), $() >> is unnecessary on any
+modern system, and can cause subtle problems.  Consider using something along
+the lines of C<< local $) = $new_gid >> instead.
+
+=item Swapping $< and $> is deprecated
+
+(D deprecated) The construct C<< ($<, $>) = ($>, $<) >> is unnecessary on any
+modern system, and can cause subtle problems.  Consider using something along
+the lines of C<< local $> = $new_uid >> instead.
+
 =item Switch (?(condition)... contains too many branches in regex; marked by <-- HERE in m/%s/
 
 (F) A (?(condition)if-clause|else-clause) construct can have at most
