@@ -385,7 +385,7 @@ struct regnode_charclass_class {
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
-/* 2n should pair with 2n+1 */
+/* 2n should be the normal one, paired with its complement at 2n+1 */
 
 #define ANYOF_ALNUM	 0	/* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
 #define ANYOF_NALNUM	 1

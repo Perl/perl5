@@ -10723,7 +10723,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 		    switch (skip) {
 		    case 4:
 			if (memEQ(posixcc, "word", 4)) /* this is not POSIX, this is the Perl \w */
-			    namedclass = complement ? ANYOF_NALNUM : ANYOF_ALNUM;
+			    namedclass = ANYOF_ALNUM;
 			break;
 		    case 5:
 			/* Names all of length 5.  */
@@ -10733,57 +10733,63 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 			switch (posixcc[4]) {
 			case 'a':
 			    if (memEQ(posixcc, "alph", 4)) /* alpha */
-				namedclass = complement ? ANYOF_NALPHA : ANYOF_ALPHA;
+				namedclass = ANYOF_ALPHA;
 			    break;
 			case 'e':
 			    if (memEQ(posixcc, "spac", 4)) /* space */
-				namedclass = complement ? ANYOF_NPSXSPC : ANYOF_PSXSPC;
+				namedclass = ANYOF_PSXSPC;
 			    break;
 			case 'h':
 			    if (memEQ(posixcc, "grap", 4)) /* graph */
-				namedclass = complement ? ANYOF_NGRAPH : ANYOF_GRAPH;
+				namedclass = ANYOF_GRAPH;
 			    break;
 			case 'i':
 			    if (memEQ(posixcc, "asci", 4)) /* ascii */
-				namedclass = complement ? ANYOF_NASCII : ANYOF_ASCII;
+				namedclass = ANYOF_ASCII;
 			    break;
 			case 'k':
 			    if (memEQ(posixcc, "blan", 4)) /* blank */
-				namedclass = complement ? ANYOF_NBLANK : ANYOF_BLANK;
+				namedclass = ANYOF_BLANK;
 			    break;
 			case 'l':
 			    if (memEQ(posixcc, "cntr", 4)) /* cntrl */
-				namedclass = complement ? ANYOF_NCNTRL : ANYOF_CNTRL;
+				namedclass = ANYOF_CNTRL;
 			    break;
 			case 'm':
 			    if (memEQ(posixcc, "alnu", 4)) /* alnum */
-				namedclass = complement ? ANYOF_NALNUMC : ANYOF_ALNUMC;
+				namedclass = ANYOF_ALNUMC;
 			    break;
 			case 'r':
 			    if (memEQ(posixcc, "lowe", 4)) /* lower */
-				namedclass = complement ? ANYOF_NLOWER : ANYOF_LOWER;
+				namedclass = ANYOF_LOWER;
 			    else if (memEQ(posixcc, "uppe", 4)) /* upper */
-				namedclass = complement ? ANYOF_NUPPER : ANYOF_UPPER;
+				namedclass = ANYOF_UPPER;
 			    break;
 			case 't':
 			    if (memEQ(posixcc, "digi", 4)) /* digit */
-				namedclass = complement ? ANYOF_NDIGIT : ANYOF_DIGIT;
+				namedclass = ANYOF_DIGIT;
 			    else if (memEQ(posixcc, "prin", 4)) /* print */
-				namedclass = complement ? ANYOF_NPRINT : ANYOF_PRINT;
+				namedclass = ANYOF_PRINT;
 			    else if (memEQ(posixcc, "punc", 4)) /* punct */
-				namedclass = complement ? ANYOF_NPUNCT : ANYOF_PUNCT;
+				namedclass = ANYOF_PUNCT;
 			    break;
 			}
 			break;
 		    case 6:
 			if (memEQ(posixcc, "xdigit", 6))
-			    namedclass = complement ? ANYOF_NXDIGIT : ANYOF_XDIGIT;
+			    namedclass = ANYOF_XDIGIT;
 			break;
 		    }
 
 		    if (namedclass == OOB_NAMEDCLASS)
 			Simple_vFAIL3("POSIX class [:%.*s:] unknown",
 				      t - s - 1, s + 1);
+
+                    /* The #defines are structured so each complement is +1 to
+                     * the normal one */
+                    if (complement) {
+                        namedclass++;
+                    }
 		    assert (posixcc[skip] == ':');
 		    assert (posixcc[skip+1] == ']');
 		} else if (!SIZE_ONLY) {
