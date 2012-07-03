@@ -1272,3 +1272,10 @@ use warnings;
 CORE::렏;
 EXPECT
 CORE::렏 is not a keyword at - line 5.
+########
+# toke.c
+# [perl #16249]
+print '';
+eval this_method_is_fake ();
+EXPECT
+Undefined subroutine &main::this_method_is_fake called at - line 4.

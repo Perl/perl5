@@ -297,6 +297,7 @@ static const char* const lex_state_names[] = {
 	pl_yylval.ival = f; \
 	PL_bufptr = s; \
 	PL_last_uni = PL_oldbufptr; \
+	PL_last_lop_op = f; \
 	if (*s == '(') \
 	    return REPORT( (int)FUNC1 ); \
 	s = PEEKSPACE(s); \
