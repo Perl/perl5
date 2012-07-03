@@ -455,7 +455,7 @@ struct aligner {
   char c;
   void *p;
 };
-#  define ALIGN_SMALL ((int)((caddr_t)&(((struct aligner*)0)->p)))
+#  define ALIGN_SMALL ((IV)((caddr_t)&(((struct aligner*)0)->p)))
 #else
 #  define ALIGN_SMALL MEM_ALIGNBYTES
 #endif
@@ -1506,7 +1506,7 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 	    require = FIRST_SBRK;
 	else if (require < (MEM_SIZE)MIN_SBRK) require = MIN_SBRK;
 
-	if (require < goodsbrk * MIN_SBRK_FRAC1000 / 1000)
+	if (require < (Size_t)(goodsbrk * MIN_SBRK_FRAC1000 / 1000))
 	    require = goodsbrk * MIN_SBRK_FRAC1000 / 1000;
 	require = ((require - 1 + MIN_SBRK) / MIN_SBRK) * MIN_SBRK;
     } else {
