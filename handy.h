@@ -662,25 +662,27 @@ EXTCONST  U32 PL_charclass[] = {
 EXTCONST U32 PL_charclass[];
 #  endif
 
-#   define isALNUMC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_A))
-#   define isALPHA_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_A))
-#   define isBLANK_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_A))
-#   define isCNTRL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CNTRL_A))
-#   define isDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_DIGIT_A))
-#   define isGRAPH_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_A))
-#   define isIDFIRST_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_A))
-#   define isLOWER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_A))
-#   define isPRINT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_A))
-#   define isPSXSPC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_A))
-#   define isPUNCT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_A))
-#   define isSPACE_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_SPACE_A))
-#   define isUPPER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_UPPER_A))
-#   define isWORDCHAR_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_WORDCHAR_A))
-#   define isXDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_XDIGIT_A))
+#   define _generic_isCC(c, bit) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & (bit)))
+
+#   define isALNUMC_A(c) _generic_isCC(c, _CC_ALNUMC_A)
+#   define isALPHA_A(c)  _generic_isCC(c, _CC_ALPHA_A)
+#   define isBLANK_A(c)  _generic_isCC(c, _CC_BLANK_A)
+#   define isCNTRL_A(c)  _generic_isCC(c, _CC_CNTRL_A)
+#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT_A)
+#   define isGRAPH_A(c)  _generic_isCC(c, _CC_GRAPH_A)
+#   define isIDFIRST_A(c)  _generic_isCC(c, _CC_IDFIRST_A)
+#   define isLOWER_A(c)  _generic_isCC(c, _CC_LOWER_A)
+#   define isPRINT_A(c)  _generic_isCC(c, _CC_PRINT_A)
+#   define isPSXSPC_A(c) _generic_isCC(c, _CC_PSXSPC_A)
+#   define isPUNCT_A(c)  _generic_isCC(c, _CC_PUNCT_A)
+#   define isSPACE_A(c)  _generic_isCC(c, _CC_SPACE_A)
+#   define isUPPER_A(c)  _generic_isCC(c, _CC_UPPER_A)
+#   define isWORDCHAR_A(c) _generic_isCC(c, _CC_WORDCHAR_A)
+#   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT_A)
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
 #   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_NONLATIN1_FOLD))
-#   define _isQUOTEMETA(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_QUOTEMETA))
+#   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #else   /* No perl.h. */
 #   ifdef EBCDIC
 #       define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
@@ -719,21 +721,21 @@ EXTCONST U32 PL_charclass[];
 
 /* Latin1 definitions */
 #ifdef H_PERL
-#   define isALNUMC_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_L1))
-#   define isALPHA_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_L1))
-#   define isBLANK_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_L1))
+#   define isALNUMC_L1(c) _generic_isCC(c, _CC_ALNUMC_L1)
+#   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA_L1)
+#   define isBLANK_L1(c)  _generic_isCC(c, _CC_BLANK_L1)
 /*  continuation character for legal NAME in \N{NAME} */
-#   define isCHARNAME_CONT(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CHARNAME_CONT))
-#   define isCNTRL_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CNTRL_L1))
-#   define isGRAPH_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_L1))
-#   define isIDFIRST_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_L1))
-#   define isLOWER_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_L1))
-#   define isPRINT_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_L1))
-#   define isPSXSPC_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_L1))
-#   define isPUNCT_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_L1))
-#   define isSPACE_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_SPACE_L1))
-#   define isUPPER_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_UPPER_L1))
-#   define isWORDCHAR_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_WORDCHAR_L1))
+#   define isCHARNAME_CONT(c) _generic_isCC(c, _CC_CHARNAME_CONT)
+#   define isCNTRL_L1(c)  _generic_isCC(c, _CC_CNTRL_L1)
+#   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH_L1)
+#   define isIDFIRST_L1(c) _generic_isCC(c, _CC_IDFIRST_L1)
+#   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER_L1)
+#   define isPRINT_L1(c)  _generic_isCC(c, _CC_PRINT_L1)
+#   define isPSXSPC_L1(c) _generic_isCC(c, _CC_PSXSPC_L1)
+#   define isPUNCT_L1(c)  _generic_isCC(c, _CC_PUNCT_L1)
+#   define isSPACE_L1(c)  _generic_isCC(c, _CC_SPACE_L1)
+#   define isUPPER_L1(c)  _generic_isCC(c, _CC_UPPER_L1)
+#   define isWORDCHAR_L1(c) _generic_isCC(c, _CC_WORDCHAR_L1)
 #else /* No access to perl.h.  Only a few provided here, just in case needed
        * for backwards compatibility */
     /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
