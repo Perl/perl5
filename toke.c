@@ -7341,8 +7341,13 @@ Perl_yylex(pTHX)
 	    s = SKIPSPACE1(s);
 	    if (*s == '{')
 		PRETERMBLOCK(DO);
-	    if (*s != '\'')
-		s = force_word(s,WORD,TRUE,TRUE,FALSE);
+	    if (*s != '\'') {
+		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, 1, &len);
+		if (len) {
+		    d = SKIPSPACE1(d);
+		    if (*d == '(') s = force_word(s,WORD,TRUE,TRUE,FALSE);
+		}
+	    }
 	    if (orig_keyword == KEY_do) {
 		orig_keyword = 0;
 		pl_yylval.ival = 1;

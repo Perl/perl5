@@ -302,4 +302,14 @@ SKIP: {
     ok($saved_errno,  "\$! set on io error");
 }
 
+# do subname should not be do "subname"
+{
+    my $called;
+    sub fungi { $called .= "fungible" }
+    $@ = "scrimptious scrobblings";
+    do fungi;
+    is $called, "fungible", "do-file does not force bareword";
+    isnt $@, "scrimptious scrobblings", "It was interpreted as do-file";
+}
+
 done_testing();
