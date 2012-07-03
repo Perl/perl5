@@ -621,6 +621,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_IDFIRST_L1       (1<<13)
 #  define _CC_LOWER_A          (1<<14)
 #  define _CC_LOWER_L1         (1<<15)
+#  define _CC_ASCII            (1<<16)
 #  define _CC_PRINT_A          (1<<17)
 #  define _CC_PRINT_L1         (1<<18)
 #  define _CC_PSXSPC_A         (1<<19)
@@ -636,7 +637,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_XDIGIT_A         (1<<29)
 #  define _CC_NONLATIN1_FOLD   (1<<30)
 #  define _CC_QUOTEMETA        (1U<<31)	/* 1U keeps Solaris from griping */
-/* Unused: (1<<16)
+/* Unused: None
  * If more are needed, can give up some of the above.  The first ones to go
  * would be those that require just two tests to verify; either there are two
  * code points, like BLANK_A, or it occupies a single range like DIGIT_A,

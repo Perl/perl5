@@ -26,6 +26,7 @@ my @properties = qw(
     ALNUMC_L1
     ALPHA_A
     ALPHA_L1
+    ASCII
     BLANK_A
     BLANK_L1
     CHARNAME_CONT
@@ -152,8 +153,8 @@ for my $ord (0..255) {
         if (! ($name =~ s/_L1$//)) {
 
             # Here, isn't an _L1.  If its _A, it's automatically false for
-            # non-ascii.  The only one current one without a suffix is valid
-            # over the whole range.
+            # non-ascii.  The only one current one (besides ASCII) without a
+            # suffix is valid over the whole range.
             next if $name =~ s/_A$// && $ord >= 128;
 
         }
