@@ -64,9 +64,11 @@ typedef struct yy_parser {
     I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     SUBLEXINFO	sublex_info;
     SV		*linestr;	/* current chunk of src text */
-    char	*bufptr;	
-    char	*oldbufptr;	
-    char	*oldoldbufptr;	
+    char	*bufptr;	/* carries the cursor (current parsing
+				   position) from one invocation of yylex
+				   to the next */
+    char	*oldbufptr;	/* in yylex, beginning of current token */
+    char	*oldoldbufptr;	/* in yylex, beginning of previous token */
     char	*bufend;	
     char	*linestart;	/* beginning of most recently read line */
     char	*last_uni;	/* position of last named-unary op */
