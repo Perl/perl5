@@ -13917,7 +13917,7 @@ S_find_array_subscript(pTHX_ const AV *const av, const SV *const val)
     return -1;
 }
 
-/* S_varname(): return the name of a variable, optionally with a subscript.
+/* varname(): return the name of a variable, optionally with a subscript.
  * If gv is non-zero, use the name of that global, along with gvtype (one
  * of "$", "@", "%"); otherwise use the name of the lexical at pad offset
  * targ.  Depending on the value of the subscript_type flag, return:
