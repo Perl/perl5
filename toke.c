@@ -7423,10 +7423,15 @@ Perl_yylex(pTHX)
 	    if (*s == '{')
 		PRETERMBLOCK(DO);
 	    if (*s != '\'') {
-		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, 1, &len);
-		if (len) {
+		*PL_tokenbuf = '&';
+		d = scan_word(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
+			      1, &len);
+		if (len && !keyword(PL_tokenbuf + 1, len, 0)) {
 		    d = SKIPSPACE1(d);
-		    if (*d == '(') s = force_word(s,WORD,TRUE,TRUE,FALSE);
+		    if (*d == '(') {
+			PL_pending_ident = '&';
+			s = d;
+		    }
 		}
 	    }
 	    if (orig_keyword == KEY_do) {

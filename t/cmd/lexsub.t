@@ -2,25 +2,30 @@
 
 BEGIN {
     chdir 't';
+    @INC = '../lib';
     require './test.pl';
     *bar::is = *is;
 }
-plan 13;
+no warnings 'deprecated';
+plan 19;
 
 {
   our sub foo { 42 }
   is foo, 42, 'calling our sub from same package';
   is &foo, 42, 'calling our sub from same package (amper)';
+  is do foo(), 42, 'calling our sub from same package (do)';
   package bar;
   sub bar::foo { 43 }
   { local $::TODO = ' ';
     is foo, 42, 'calling our sub from another package';
   }
   is &foo, 42, 'calling our sub from another package (amper)';
+  is do foo(), 42, 'calling our sub from another package (do)';
 }
 package bar;
 is foo, 43, 'our sub falling out of scope';
 is &foo, 43, 'our sub falling out of scope (called via amper)';
+is do foo(), 43, 'our sub falling out of scope (called via amper)';
 package main;
 {
   sub bar::a { 43 }
@@ -29,6 +34,7 @@ package main;
       package bar;
       is a, 43, 'our sub invisible inside itself';
       is &a, 43, 'our sub invisible inside itself (called via amper)';
+      is do a(), 43, 'our sub invisible inside itself (called via do)';
     }
     42
   }
@@ -42,6 +48,7 @@ package main;
         is b, 42, 'our sub visible inside itself after decl';
       }
       is &b, 42, 'our sub visible inside itself after decl (amper)';
+      is do b(), 42, 'our sub visible inside itself after decl (do)';
     }
     42
   }
@@ -56,6 +63,7 @@ sub bar::c { 43 }
     is c, 42, 'our sub foo; makes lex alias for existing sub';
   }
   is &c, 42, 'our sub foo; makes lex alias for existing sub (amper)';
+  is do c(), 42, 'our sub foo; makes lex alias for existing sub (do)';
 }
 {
   our sub d;
