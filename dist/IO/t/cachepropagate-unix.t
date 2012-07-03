@@ -12,7 +12,7 @@ use Config;
 use Test::More;
 
 plan skip_all => "UNIX domain sockets not implemented on $^O"
-  if ($^O =~ m/^(?:qnx|nto|vos|MSWin32)$/);
+  if ($^O =~ m/^(?:qnx|nto|vos|MSWin32|VMS)$/);
 
 plan tests => 15;
 
