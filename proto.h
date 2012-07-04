@@ -7050,6 +7050,7 @@ STATIC void	S_force_ident(pTHX_ const char *s, int kind)
 #define PERL_ARGS_ASSERT_FORCE_IDENT	\
 	assert(s)
 
+STATIC void	S_force_ident_maybe_lex(pTHX_ char pit);
 STATIC void	S_force_next(pTHX_ I32 type);
 STATIC char*	S_force_strict_version(pTHX_ char *s)
 			__attribute__nonnull__(pTHX_1);

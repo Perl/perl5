@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
 }
 no warnings 'deprecated';
-plan 19;
+plan 20;
 
 {
   our sub foo { 42 }
@@ -73,4 +73,8 @@ sub bar::c { 43 }
   { local $::TODO = ' ';
     is eval { ::d },'d42', 'our sub foo; applies to subsequent sub foo {}';
   }
+}
+{
+  our sub e ($);
+  is prototype "::e", '$', 'our sub with proto';
 }

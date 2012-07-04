@@ -70,8 +70,8 @@ typedef struct yy_parser {
     I32		multi_end;	/* last line of multi-line string */
     char	multi_open;	/* delimiter of said string */
     char	multi_close;	/* delimiter of said string */
-    char	pending_ident;	/* pending identifier lookup */
     bool	preambled;
+    /*** 8-bit hole ***/
     I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     SUBLEXINFO	sublex_info;
     LEXSHARED	*lex_shared;

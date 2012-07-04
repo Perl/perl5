@@ -11231,7 +11231,6 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     parser->multi_open	= proto->multi_open;
     parser->multi_start	= proto->multi_start;
     parser->multi_end	= proto->multi_end;
-    parser->pending_ident = proto->pending_ident;
     parser->preambled	= proto->preambled;
     parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
     parser->linestr	= sv_dup_inc(proto->linestr, param);
