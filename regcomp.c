@@ -220,7 +220,7 @@ typedef struct RExC_state_t {
 #define	WORST		0	/* Worst case. */
 #define	HASWIDTH	0x01	/* Known to match non-null strings. */
 
-/* Simple enough to be STAR/PLUS operand, in an EXACT node must be a single
+/* Simple enough to be STAR/PLUS operand; in an EXACT node must be a single
  * character, and if utf8, must be invariant.  Note that this is not the same
  * thing as REGNODE_SIMPLE */
 #define	SIMPLE		0x02
@@ -7437,7 +7437,6 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
     return;
 }
 
-
 void
 Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
 {
@@ -10920,7 +10919,7 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
  *                determined at run-time
  * run_time_list  is a SV* that contains text names of properties that are to
  *                be computed at run time.  This concatenates <Xpropertyname>
- *                to it, apppropriately
+ *                to it, appropriately
  * This is essentially DO_POSIX, but we know only the Latin1 values at compile
  * time */
 #define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
@@ -11271,7 +11270,11 @@ parseit:
 
                         /* We don't know yet, so have to assume that the
                          * property could match something in the Latin1 range,
-                         * hence something that isn't utf8 */
+                         * hence something that isn't utf8.  Note that this
+                         * would cause things in <depends_list> to match
+                         * inappropriately, except that any \p{}, including
+                         * this one forces Unicode semantics, which means there
+                         * is <no depends_list> */
                         ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
                     }
                     else {
@@ -11653,7 +11656,7 @@ parseit:
 		    break;
 		}
 
-		continue;
+		continue;   /* Go get next character */
 	    }
 	} /* end of namedclass \blah */
 
@@ -11665,7 +11668,7 @@ parseit:
 	    }
 	}
 	else {
-	    prevvalue = value; /* save the beginning of the range */
+            prevvalue = value; /* save the beginning of the potential range */
 	    if (RExC_parse+1 < RExC_end
 		&& *RExC_parse == '-'
 		&& RExC_parse[1] != ']')
@@ -11690,13 +11693,16 @@ parseit:
 	    }
 	}
 
+        /* Here, <prevvalue> is the beginning of the range, if any; or <value>
+         * if not */
+
 	/* non-Latin1 code point implies unicode semantics.  Must be set in
 	 * pass1 so is there for the whole of pass 2 */
 	if (value > 255) {
 	    RExC_uni_semantics = 1;
 	}
 
-	/* now is the next time */
+        /* Ready to process either the single value, or the completed range */
 	if (!SIZE_ONLY) {
 #ifndef EBCDIC
             cp_list = _add_range_to_invlist(cp_list, prevvalue, value);
@@ -11725,7 +11731,7 @@ parseit:
         }
 
 	range = 0; /* this range (if it was one) is done now */
-    }
+    } /* End of loop through all the text within the brackets */
 
     /* If the character class contains only a single element, it may be
      * optimizable into another node type which is smaller and runs faster.
@@ -11822,17 +11828,19 @@ parseit:
          * an optimization */
         if (op != END) {
 
-        /* Throw away this ANYOF regnode, and emit the calculated one, which
-         * should correspond to the beginning, not current, state of the parse
-         */
-        const char * cur_parse= RExC_parse;
-        RExC_parse = (char *)orig_parse;
-        RExC_emit = (regnode *)orig_emit;
-        ret = reg_node(pRExC_state, op);
-        RExC_parse = (char *) cur_parse;
+            /* Throw away this ANYOF regnode, and emit the calculated one,
+             * which should correspond to the beginning, not current, state of
+             * the parse */
+            const char * cur_parse = RExC_parse;
+            RExC_parse = (char *)orig_parse;
+            RExC_emit = (regnode *)orig_emit;
 
-        SvREFCNT_dec(listsv);
-        return ret;
+            ret = reg_node(pRExC_state, op);
+
+            RExC_parse = (char *) cur_parse;
+
+            SvREFCNT_dec(listsv);
+            return ret;
         }
     }
 
@@ -11941,7 +11949,7 @@ parseit:
                         }
                         else {
                             depends_list =
-                                add_cp_to_invlist(depends_list, PL_fold_latin1[j]);
+                             add_cp_to_invlist(depends_list, PL_fold_latin1[j]);
                         }
                     }
 
@@ -12109,7 +12117,8 @@ parseit:
 			    /* /aa doesn't allow folds between ASCII and non-;
 			     * /l doesn't allow them between above and below
 			     * 256 */
-			    if ((MORE_ASCII_RESTRICTED && (isASCII(c) != isASCII(j)))
+			    if ((MORE_ASCII_RESTRICTED
+                                      && (isASCII(c) != isASCII(j)))
 				|| (LOC && ((c < 256) != (j < 256))))
 			    {
 				continue;
@@ -12122,7 +12131,7 @@ parseit:
 				cp_list = add_cp_to_invlist(cp_list, c);
                             }
                             else {
-                                depends_list = add_cp_to_invlist(depends_list, c);
+                              depends_list = add_cp_to_invlist(depends_list, c);
 			    }
 			}
 		    }
@@ -12134,7 +12143,8 @@ parseit:
 
     /* And combine the result (if any) with any inversion list from posix
      * classes.  The lists are kept separate up to now because we don't want to
-     * fold the classes */
+     * fold the classes (folding of those is automatically handled by the swash
+     * fetching code) */
     if (posixes) {
         if (AT_LEAST_UNI_SEMANTICS) {
             if (cp_list) {
