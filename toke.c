@@ -8498,7 +8498,6 @@ static int
 S_pending_ident(pTHX)
 {
     dVAR;
-    register char *d;
     PADOFFSET tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
@@ -8540,14 +8539,6 @@ S_pending_ident(pTHX)
 
     /*
        build the ops for accesses to a my() variable.
-
-       Deny my($a) or my($b) in a sort block, *if* $a or $b is
-       then used in a comparison.  This catches most, but not
-       all cases.  For instance, it catches
-           sort { my($a); $a <=> $b }
-       but not
-           sort { my($a); $a < $b ? -1 : $a == $b ? 0 : 1; }
-       (although why you'd do that is anyone's guess).
     */
 
     if (!has_colon) {
@@ -8574,23 +8565,6 @@ S_pending_ident(pTHX)
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
                      : SVt_PVHV));
                 return WORD;
-            }
-
-            /* if it's a sort block and they're naming $a or $b */
-            if (PL_last_lop_op == OP_SORT &&
-                PL_tokenbuf[0] == '$' &&
-                (PL_tokenbuf[1] == 'a' || PL_tokenbuf[1] == 'b')
-                && !PL_tokenbuf[2])
-            {
-                for (d = PL_in_eval ? PL_oldoldbufptr : PL_linestart;
-                     d < PL_bufend && *d != '\n';
-                     d++)
-                {
-                    if (strnEQ(d,"<=>",3) || strnEQ(d,"cmp",3)) {
-                        Perl_croak(aTHX_ "Can't use \"my %s\" in sort comparison",
-                              PL_tokenbuf);
-                    }
-                }
             }
 
             pl_yylval.opval = newOP(OP_PADANY, 0);

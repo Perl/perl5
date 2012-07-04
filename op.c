@@ -9315,7 +9315,17 @@ S_simplify_sort(pTHX_ OP *o)
     GvMULTI_on(gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV));
     kid = kUNOP->op_first;				/* get past null */
     if (kid->op_type != OP_SCOPE)
+    {
+	if (kid->op_type != OP_LEAVE) return;
+	kid = kLISTOP->op_last;
+	switch(kid->op_type) {
+	case OP_NCMP:
+	case OP_I_NCMP:
+	case OP_SCMP:
+	    goto padkids;
+	}
 	return;
+    }
     kid = kLISTOP->op_last;				/* get past scope */
     switch(kid->op_type) {
 	case OP_NCMP:
@@ -9326,8 +9336,34 @@ S_simplify_sort(pTHX_ OP *o)
 	    return;
     }
     k = kid;						/* remember this node*/
-    if (kBINOP->op_first->op_type != OP_RV2SV)
+    if (kBINOP->op_first->op_type != OP_RV2SV
+     || kBINOP->op_last ->op_type != OP_RV2SV)
+    {
+	/*
+	   Warn about my($a) or my($b) in a sort block, *if* $a or $b is
+	   then used in a comparison.  This catches most, but not
+	   all cases.  For instance, it catches
+	       sort { my($a); $a <=> $b }
+	   but not
+	       sort { my($a); $a < $b ? -1 : $a == $b ? 0 : 1; }
+	   (although why you'd do that is anyone's guess).
+	*/
+
+       padkids:
+	if (!ckWARN(WARN_SYNTAX)) return;
+	kid = kBINOP->op_first;
+	do {
+	    if (kid->op_type == OP_PADSV) {
+		SV * const name = AvARRAY(PL_comppad_name)[kid->op_targ];
+		if (SvCUR(name) == 2 && *SvPVX(name) == '$'
+		 && (SvPVX(name)[1] == 'a' || SvPVX(name)[1] == 'b'))
+		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				     "\"my %s\" used in sort comparison",
+				      SvPVX(name));
+	    }
+	} while ((kid = kid->op_sibling));
 	return;
+    }
     kid = kBINOP->op_first;				/* get past cmp */
     if (kUNOP->op_first->op_type != OP_GV)
 	return;
@@ -9344,8 +9380,7 @@ S_simplify_sort(pTHX_ OP *o)
 	return;
 
     kid = k;						/* back to cmp */
-    if (kBINOP->op_last->op_type != OP_RV2SV)
-	return;
+    /* already checked above that it is rv2sv */
     kid = kBINOP->op_last;				/* down to 2nd arg */
     if (kUNOP->op_first->op_type != OP_GV)
 	return;

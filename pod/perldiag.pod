@@ -3308,6 +3308,14 @@ the meantime, try using scientific notation (e.g. "1e6" instead of
 a number.  This happens, for example with C<\o{}>, with no number between
 the braces.
 
+=item "my %s" used in sort comparison
+
+(W syntax) The package variables $a and $b are used for sort comparisons.
+You used $a or $b in as an operand to the C<< <=> >> or C<cmp> operator inside a
+sort comparison block, and the variable had earlier been declared as a
+lexical variable.  Either qualify the sort variable with the package
+name, or rename the lexical variable.
+
 =item Octal number > 037777777777 non-portable
 
 (W portable) The octal number you specified is larger than 2**32-1

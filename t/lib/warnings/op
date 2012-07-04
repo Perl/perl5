@@ -73,6 +73,8 @@
      	(Maybe you should just omit the defined()?)
 	my %h ; defined %h ;
 
+     "my %s" used in sort comparison
+
      $[ used in comparison (did you mean $] ?)
 
      length() used on @array (did you mean "scalar(@array)"?)
@@ -927,6 +929,109 @@ EXPECT
 Prototype mismatch: sub main::fred () vs ($) at - line 4.
 Prototype mismatch: sub main::freD () vs ($) at - line 11.
 Prototype mismatch: sub main::FRED () vs ($) at - line 14.
+########
+# op.c [S_simplify_sort]
+# [perl #86136]
+my @tests = split /^/, '
+  sort {$a <=> $b} @a;
+  sort {$a cmp $b} @a;
+  { use integer; sort {$a <=> $b} @a}
+  sort {$b <=> $a} @a;
+  sort {$b cmp $a} @a;
+  { use integer; sort {$b <=> $a} @a}
+';
+for my $pragma ('use warnings "syntax";', '') {
+  for my $vars ('', 'my $a;', 'my $b;', 'my ($a,$b);') {
+    for my $inner_stmt ('', 'print;', 'func();') {
+      eval "#line " . ++$line . "01 -\n$pragma\n$vars"
+          . join "", map s/sort \{\K/$inner_stmt/r, @tests;
+      $@ and die;
+    }
+  }
+}
+sub func{}
+use warnings 'syntax';
+my $a;
+# These used to be errors!
+sort { ; } $a <=> $b;
+sort { ; } $a, "<=>";
+sort { ; } $a, $cmp;
+sort $a, $b if $cmpany_name;
+sort if $a + $cmp;
+sort @t; $a + $cmp;
+EXPECT
+"my $a" used in sort comparison at - line 403.
+"my $a" used in sort comparison at - line 404.
+"my $a" used in sort comparison at - line 405.
+"my $a" used in sort comparison at - line 406.
+"my $a" used in sort comparison at - line 407.
+"my $a" used in sort comparison at - line 408.
+"my $a" used in sort comparison at - line 503.
+"my $a" used in sort comparison at - line 504.
+"my $a" used in sort comparison at - line 505.
+"my $a" used in sort comparison at - line 506.
+"my $a" used in sort comparison at - line 507.
+"my $a" used in sort comparison at - line 508.
+"my $a" used in sort comparison at - line 603.
+"my $a" used in sort comparison at - line 604.
+"my $a" used in sort comparison at - line 605.
+"my $a" used in sort comparison at - line 606.
+"my $a" used in sort comparison at - line 607.
+"my $a" used in sort comparison at - line 608.
+"my $b" used in sort comparison at - line 703.
+"my $b" used in sort comparison at - line 704.
+"my $b" used in sort comparison at - line 705.
+"my $b" used in sort comparison at - line 706.
+"my $b" used in sort comparison at - line 707.
+"my $b" used in sort comparison at - line 708.
+"my $b" used in sort comparison at - line 803.
+"my $b" used in sort comparison at - line 804.
+"my $b" used in sort comparison at - line 805.
+"my $b" used in sort comparison at - line 806.
+"my $b" used in sort comparison at - line 807.
+"my $b" used in sort comparison at - line 808.
+"my $b" used in sort comparison at - line 903.
+"my $b" used in sort comparison at - line 904.
+"my $b" used in sort comparison at - line 905.
+"my $b" used in sort comparison at - line 906.
+"my $b" used in sort comparison at - line 907.
+"my $b" used in sort comparison at - line 908.
+"my $a" used in sort comparison at - line 1003.
+"my $b" used in sort comparison at - line 1003.
+"my $a" used in sort comparison at - line 1004.
+"my $b" used in sort comparison at - line 1004.
+"my $a" used in sort comparison at - line 1005.
+"my $b" used in sort comparison at - line 1005.
+"my $b" used in sort comparison at - line 1006.
+"my $a" used in sort comparison at - line 1006.
+"my $b" used in sort comparison at - line 1007.
+"my $a" used in sort comparison at - line 1007.
+"my $b" used in sort comparison at - line 1008.
+"my $a" used in sort comparison at - line 1008.
+"my $a" used in sort comparison at - line 1103.
+"my $b" used in sort comparison at - line 1103.
+"my $a" used in sort comparison at - line 1104.
+"my $b" used in sort comparison at - line 1104.
+"my $a" used in sort comparison at - line 1105.
+"my $b" used in sort comparison at - line 1105.
+"my $b" used in sort comparison at - line 1106.
+"my $a" used in sort comparison at - line 1106.
+"my $b" used in sort comparison at - line 1107.
+"my $a" used in sort comparison at - line 1107.
+"my $b" used in sort comparison at - line 1108.
+"my $a" used in sort comparison at - line 1108.
+"my $a" used in sort comparison at - line 1203.
+"my $b" used in sort comparison at - line 1203.
+"my $a" used in sort comparison at - line 1204.
+"my $b" used in sort comparison at - line 1204.
+"my $a" used in sort comparison at - line 1205.
+"my $b" used in sort comparison at - line 1205.
+"my $b" used in sort comparison at - line 1206.
+"my $a" used in sort comparison at - line 1206.
+"my $b" used in sort comparison at - line 1207.
+"my $a" used in sort comparison at - line 1207.
+"my $b" used in sort comparison at - line 1208.
+"my $a" used in sort comparison at - line 1208.
 ########
 # op.c [Perl_ck_cmp]
 use warnings 'syntax' ;
