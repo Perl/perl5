@@ -1689,4 +1689,7 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /[\H]/	\x{A0}	n	-	-
 /[\H]/	\x{A1}	y	$&	\xA1
 
+[^\n]+	\nb	y	$&	b
+[^\n]+	a\n	y	$&	a
+
 # vim: softtabstop=0 noexpandtab

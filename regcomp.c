@@ -11819,7 +11819,10 @@ parseit:
             }
         }
         else if (! LOC) {
-            if (prevvalue == '0' && value == '9') {
+            if (invert && prevvalue == '\n' && value == '\n') {
+                op = REG_ANY; /* Optimize [^\n] */
+            }
+            else if (prevvalue == '0' && value == '9') {
                 op = (invert) ? NDIGITA : DIGITA;
             }
         }
