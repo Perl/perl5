@@ -684,6 +684,7 @@ subname	:	WORD	{ const char *const name = SvPV_nolen_const(((SVOP*)$1)->op_sv);
 			      || strEQ(name, "UNITCHECK"))
 			      CvSPECIAL_on(PL_compcv);
 			  $$ = $1; }
+	|	PRIVATEREF
 	;
 
 /* Subroutine prototype */

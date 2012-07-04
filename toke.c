@@ -8242,21 +8242,15 @@ Perl_yylex(pTHX)
                         SvUTF8_on(PL_subname);
 		    have_name = TRUE;
 
-		    if (key == KEY_our) {
-			*PL_tokenbuf = '&';
-			Copy(tmpbuf, PL_tokenbuf+1, len, char);
-			PL_tokenbuf[len+1] = '\0';
-		    }
+		    *PL_tokenbuf = '&';
+		    Copy(tmpbuf, PL_tokenbuf+1, len, char);
+		    PL_tokenbuf[len+1] = '\0';
 
 #ifdef PERL_MAD
 		    start_force(0);
 		    CURMAD('X', nametoke);
 		    CURMAD('_', tmpwhite);
-		    if (key == KEY_our)
-			force_ident_maybe_lex('&');
-		    else
-			(void) force_word(PL_oldbufptr + tboffset, WORD,
-				      FALSE, TRUE, TRUE);
+		    force_ident_maybe_lex('&');
 
 		    s = SKIPSPACE2(d,tmpwhite);
 #else
@@ -8418,13 +8412,8 @@ Perl_yylex(pTHX)
 			sv_setpvs(PL_subname, "__ANON__::__ANON__");
 		    TOKEN(ANONSUB);
 		}
-		if (key == KEY_our) {
-		    force_ident_maybe_lex('&');
-		}
 #ifndef PERL_MAD
-		else
-		    (void) force_word(PL_oldbufptr + tboffset, WORD,
-				  FALSE, TRUE, TRUE);
+		force_ident_maybe_lex('&');
 #endif
 		if (key == KEY_my)
 		    TOKEN(MYSUB);
@@ -8648,14 +8637,14 @@ S_force_ident_maybe_lex(pTHX_ char pit)
                 sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len - 1, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
                 o = (OP*)newSVOP(OP_CONST, 0, sym);
                 o->op_private = OPpCONST_ENTERED;
-                gv_fetchsv(sym,
+                if (pit != '&')
+                  gv_fetchsv(sym,
                     (PL_in_eval
                         ? (GV_ADDMULTI | GV_ADDINEVAL)
                         : GV_ADDMULTI
                     ),
                     ((PL_tokenbuf[0] == '$') ? SVt_PV
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
-                     : (PL_tokenbuf[0] == '&') ? SVt_PVGV
                      : SVt_PVHV));
                 force_type = WORD;
                 goto doforce;
@@ -8696,12 +8685,12 @@ S_force_ident_maybe_lex(pTHX_ char pit)
 						      tokenbuf_len - 1,
                                                       UTF ? SVf_UTF8 : 0 ));
     o->op_private = OPpCONST_ENTERED;
-    gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1,
+    if (pit != '&')
+	gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1,
 		     (PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD)
                      | ( UTF ? SVf_UTF8 : 0 ),
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV
 		      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
-		      : (PL_tokenbuf[0] == '&') ? SVt_PVGV
 		      : SVt_PVHV));
     force_type = WORD;
 

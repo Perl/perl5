@@ -70,9 +70,7 @@ sub bar::c { 43 }
   sub bar::d { 'd43' }
   package bar;
   sub d { 'd42' }
-  { local $::TODO = ' ';
-    is eval { ::d },'d42', 'our sub foo; applies to subsequent sub foo {}';
-  }
+  is eval ::d, 'd42', 'our sub foo; applies to subsequent sub foo {}';
 }
 {
   our sub e ($);
