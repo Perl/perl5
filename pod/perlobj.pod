@@ -325,14 +325,12 @@ methods.
   sub speak {
       my $self = shift;
 
-      $self->SUPER::speak();
-
       say 'A';
   }
 
   package B;
 
-  use parent 'A';
+  use parent -norequire, 'A';
 
   sub speak {
       my $self = shift;
@@ -344,7 +342,7 @@ methods.
 
   package C;
 
-  use parent 'B';
+  use parent -norequire, 'B';
 
   sub speak {
       my $self = shift;
