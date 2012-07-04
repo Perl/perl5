@@ -11029,13 +11029,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 			       Optimizations may be possible if this is tiny */
     UV n;
 
-    /* Certain named classes have equivalents that can appear outside a
-     * character class, e.g. \w.  These flags are set for these classes.  The
-     * first flag indicates the op depends on the character set modifier, like
-     * /d, /u....  The second is for those that don't have this dependency. */
-    bool has_special_charset_op = FALSE;
-    bool has_special_non_charset_op = FALSE;
-
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
      * character class, an optimization is to pass it directly on to the
@@ -11441,41 +11434,7 @@ parseit:
                 element_count += 2; /* So counts for three values */
 	    }
 
-	    if (SIZE_ONLY) {
-
-                /* In the first pass, do a little extra work so below can
-                 * possibly optimize the whole node to one of the nodes that
-                 * correspond to the classes given below */
-
-                /* The optimization will only take place if there is a single
-                 * element in the class, so can skip if there is more than one
-                 */
-                if (element_count == 1) {
-
-		/* Possible truncation here but in some 64-bit environments
-		 * the compiler gets heartburn about switch on 64-bit values.
-		 * A similar issue a little earlier when switching on value.
-		 * --jhi */
-                    switch ((I32)namedclass) {
-                        case ANYOF_ALNUM:
-                        case ANYOF_NALNUM:
-                        case ANYOF_DIGIT:
-                        case ANYOF_NDIGIT:
-                        case ANYOF_SPACE:
-                        case ANYOF_NSPACE:
-                            has_special_charset_op = TRUE;
-                            break;
-
-                        case ANYOF_HORIZWS:
-                        case ANYOF_NHORIZWS:
-                        case ANYOF_VERTWS:
-                        case ANYOF_NVERTWS:
-                            has_special_non_charset_op = TRUE;
-                            break;
-                    }
-                }
-            }
-            else {
+	    if (! SIZE_ONLY) {
 		switch ((I32)namedclass) {
 
 		case ANYOF_ALNUMC: /* C's alnum, in contrast to \w */
@@ -11538,13 +11497,11 @@ parseit:
 		     * them */
 		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
                         PL_PosixDigit, "XPosixDigit", listsv);
-                    has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv,
                         runtime_posix_matches_above_Unicode);
-                    has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_GRAPH:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -11562,12 +11519,10 @@ parseit:
 		     * cp_list is subject to folding.  It turns out that \h
 		     * is just a synonym for XPosixBlank */
 		    _invlist_union(cp_list, PL_XPosixBlank, &cp_list);
-                    has_special_non_charset_op = TRUE;
 		    break;
 		case ANYOF_NHORIZWS:
                     _invlist_union_complement_2nd(cp_list,
                                                  PL_XPosixBlank, &cp_list);
-                    has_special_non_charset_op = TRUE;
 		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
@@ -11629,12 +11584,10 @@ parseit:
 		case ANYOF_SPACE:
                     DO_POSIX(ret, namedclass, posixes,
                                             PL_PerlSpace, PL_XPerlSpace);
-                    has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_NSPACE:
                     DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PerlSpace, PL_XPerlSpace);
-                    has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_UPPER:   /* Same as LOWER, above */
 		case ANYOF_NUPPER:
@@ -11667,13 +11620,11 @@ parseit:
 		case ANYOF_ALNUM:   /* Really is 'Word' */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
-                    has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_NALNUM:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv,
                             runtime_posix_matches_above_Unicode);
-                    has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_VERTWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
@@ -11681,12 +11632,10 @@ parseit:
 		     * if these characters had folds other than themselves, as
 		     * cp_list is subject to folding */
 		    _invlist_union(cp_list, PL_VertSpace, &cp_list);
-                    has_special_non_charset_op = TRUE;
 		    break;
 		case ANYOF_NVERTWS:
                     _invlist_union_complement_2nd(cp_list,
                                                     PL_VertSpace, &cp_list);
-                    has_special_non_charset_op = TRUE;
 		    break;
 		case ANYOF_XDIGIT:
                     DO_POSIX(ret, namedclass, posixes,
@@ -11778,91 +11727,105 @@ parseit:
 	range = 0; /* this range (if it was one) is done now */
     }
 
-    /* [\w] can be optimized into \w, but not if there is anything else in the
-     * brackets (except for an initial '^' which indictes omplementing).  We
-     * also can optimize the common special case /[0-9]/ into /\d/a */
-    if (element_count == 1 &&
-        (has_special_charset_op
-         || has_special_non_charset_op
-         || (prevvalue == '0' && value == '9')))
-    {
-        U8 op;
-        const char * cur_parse = RExC_parse;
+    /* If the character class contains only a single element, it may be
+     * optimizable into another node type which is smaller and runs faster.
+     * Check if this is the case for this class */
+    if (element_count == 1) {
+        U8 op = END;
 
-        if (has_special_charset_op) {
-            U8 offset = get_regex_charset(RExC_flags);
+        if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like \w or
+                                              [:digit:] or \p{foo} */
 
-            /* /aa is the same as /a for these */
-            if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
-                offset = REGEX_ASCII_RESTRICTED_CHARSET;
-            }
+            /* Certain named classes have equivalents that can appear outside a
+             * character class, e.g. \w, \H.  We use these instead of a
+             * character class. */
             switch ((I32)namedclass) {
+                U8 offset;
+
+                /* The first group is for node types that depend on the charset
+                 * modifier to the regex.  We first calculate the base node
+                 * type, and if it should be inverted */
+
                 case ANYOF_NALNUM:
                     invert = ! invert;
                     /* FALLTHROUGH */
                 case ANYOF_ALNUM:
                     op = ALNUM;
-                    break;
+                    goto join_charset_classes;
+
                 case ANYOF_NSPACE:
                     invert = ! invert;
                     /* FALLTHROUGH */
                 case ANYOF_SPACE:
                     op = SPACE;
-                    break;
+                    goto join_charset_classes;
+
                 case ANYOF_NDIGIT:
                     invert = ! invert;
                     /* FALLTHROUGH */
                 case ANYOF_DIGIT:
                     op = DIGIT;
 
-                    /* There is no DIGITU */
-                    if (offset == REGEX_UNICODE_CHARSET) {
-                        offset = REGEX_DEPENDS_CHARSET;
+                  join_charset_classes:
+
+                    /* Now that we have the base node type, we take advantage
+                     * of the enum ordering of the charset modifiers to get the
+                     * exact node type,  For example the base SPACE also has
+                     * SPACEL, SPACEU, and SPACEA */
+
+                    offset = get_regex_charset(RExC_flags);
+
+                    /* /aa is the same as /a for these */
+                    if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
+                        offset = REGEX_ASCII_RESTRICTED_CHARSET;
+                    }
+                    else if (op == DIGIT && offset == REGEX_UNICODE_CHARSET) {
+                        offset = REGEX_DEPENDS_CHARSET; /* There is no DIGITU */
+                    }
+
+                    op += offset;
+
+                    /* The number of varieties of each of these is the same,
+                     * hence, so is the delta between the normal and
+                     * complemented nodes */
+                    if (invert) {
+                        op += NALNUM - ALNUM;
                     }
                     break;
-                default:
-                    Perl_croak(aTHX_ "panic: Named character class %"IVdf" is not expected to have a non-[...] version", namedclass);
-            }
 
-            /* The number of varieties of each of these is the same, hence, so
-             * is the delta between the normal and complemented nodes */
-            if (invert) {
-                offset += NALNUM - ALNUM;
-            }
-
-            op += offset;
-        }
-        else if (has_special_non_charset_op) {
-            switch ((I32)namedclass) {
+                /* The second group doesn't depend of the charset modifiers.
+                 * We just have normal and complemented */
                 case ANYOF_NHORIZWS:
                     invert = ! invert;
                     /* FALLTHROUGH */
                 case ANYOF_HORIZWS:
-                    op = HORIZWS;
+                    op = (invert) ? NHORIZWS : HORIZWS;
                     break;
+
                 case ANYOF_NVERTWS:
                     invert = ! invert;
                     /* FALLTHROUGH */
                 case ANYOF_VERTWS:
-                    op = VERTWS;
+                    op = (invert) ? NVERTWS : VERTWS;
                     break;
-                default:
-                    Perl_croak(aTHX_ "panic: Named character class %"IVdf" is not expected to have a non-[...] version", namedclass);
-            }
 
-            /* The complement version of each of these nodes is adjacently next
-             * */
-            if (invert) {
-                op++;
+
             }
         }
-        else {  /* The remaining possibility is [0-9] */
-            op = (invert) ? NDIGITA : DIGITA;
+        else if (! LOC) {
+            if (prevvalue == '0' && value == '9') {
+                op = (invert) ? NDIGITA : DIGITA;
+            }
         }
+
+        /* Here, we have changed <op> away from its initial value iff we found
+         * an optimization */
+        if (op != END) {
 
         /* Throw away this ANYOF regnode, and emit the calculated one, which
          * should correspond to the beginning, not current, state of the parse
          */
+        const char * cur_parse= RExC_parse;
         RExC_parse = (char *)orig_parse;
         RExC_emit = (regnode *)orig_emit;
         ret = reg_node(pRExC_state, op);
@@ -11870,6 +11833,7 @@ parseit:
 
         SvREFCNT_dec(listsv);
         return ret;
+        }
     }
 
     if (SIZE_ONLY)
