@@ -1033,6 +1033,21 @@ my $major
 			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
 			0);
 
+my $unfixable_db_file;
+
+if ($major < 10
+    && !extract_from_file('ext/DB_File/DB_File.xs',
+                          qr!^#else /\* Berkeley DB Version > 2 \*/$!)) {
+    # This DB_File.xs is really too old to patch up.
+    # Skip DB_File, unless we're invoked with an explicit -Unoextensions
+    if (!exists $defines{noextensions}) {
+        $defines{noextensions} = 'DB_File';
+    } elsif (defined $defines{noextensions}) {
+        $defines{noextensions} .= ' DB_File';
+    }
+    ++$unfixable_db_file;
+}
+
 patch_Configure();
 patch_hints();
 if ($options{'all-fixups'}) {
@@ -3161,15 +3176,8 @@ EOPATCH
     }
 
     if ($major < 10) {
-        if (!extract_from_file('ext/DB_File/DB_File.xs',
-                               qr!^#else /\* Berkeley DB Version > 2 \*/$!)) {
-            # This DB_File.xs is really too old to patch up.
-            # Skip DB_File, unless we're invoked with an explicit -Unoextensions
-            if (!exists $defines{noextensions}) {
-                $defines{noextensions} = 'DB_File';
-            } elsif (defined $defines{noextensions}) {
-                $defines{noextensions} .= ' DB_File';
-            }
+        if ($unfixable_db_file) {
+            # Nothing we can do.
         } elsif (!extract_from_file('ext/DB_File/DB_File.xs',
                                     qr/^#ifdef AT_LEAST_DB_4_1$/)) {
             # This line is changed by commit 3245f0580c13b3ab
