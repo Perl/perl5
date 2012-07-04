@@ -5456,7 +5456,7 @@ PP(pp_syscall)
     register I32 items = SP - MARK;
     unsigned long a[20];
     register I32 i = 0;
-    I32 retval = -1;
+    IV retval = -1;
 
     if (PL_tainting) {
 	while (++MARK <= SP) {
