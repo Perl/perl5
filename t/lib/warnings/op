@@ -1033,6 +1033,13 @@ EXPECT
 "my $b" used in sort comparison at - line 1208.
 "my $a" used in sort comparison at - line 1208.
 ########
+# op.c [S_simplify_sort]
+use warnings 'syntax'; use 5.01;
+state $a;
+sort { $a <=> $b } ();
+EXPECT
+"state $a" used in sort comparison at - line 4.
+########
 # op.c [Perl_ck_cmp]
 use warnings 'syntax' ;
 no warnings 'deprecated';

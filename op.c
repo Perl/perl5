@@ -9350,8 +9350,10 @@ S_simplify_sort(pTHX_ OP *o)
 		SV * const name = AvARRAY(PL_comppad_name)[kid->op_targ];
 		if (SvCUR(name) == 2 && *SvPVX(name) == '$'
 		 && (SvPVX(name)[1] == 'a' || SvPVX(name)[1] == 'b'))
+		    /* diag_listed_as: "my %s" used in sort comparison */
 		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				     "\"my %s\" used in sort comparison",
+				     "\"%s %s\" used in sort comparison",
+				      SvPAD_STATE(name) ? "state" : "my",
 				      SvPVX(name));
 	    }
 	} while ((kid = kid->op_sibling));
