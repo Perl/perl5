@@ -9306,6 +9306,7 @@ S_simplify_sort(pTHX_ OP *o)
     int descending;
     GV *gv;
     const char *gvname;
+    bool have_scopeop;
 
     PERL_ARGS_ASSERT_SIMPLIFY_SORT;
 
@@ -9314,23 +9315,15 @@ S_simplify_sort(pTHX_ OP *o)
     GvMULTI_on(gv_fetchpvs("a", GV_ADD|GV_NOTQUAL, SVt_PV));
     GvMULTI_on(gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV));
     kid = kUNOP->op_first;				/* get past null */
-    if (kid->op_type != OP_SCOPE)
-    {
-	if (kid->op_type != OP_LEAVE) return;
-	kid = kLISTOP->op_last;
-	switch(kid->op_type) {
-	case OP_NCMP:
-	case OP_I_NCMP:
-	case OP_SCMP:
-	    goto padkids;
-	}
+    if (!(have_scopeop = kid->op_type == OP_SCOPE)
+     && kid->op_type != OP_LEAVE)
 	return;
-    }
     kid = kLISTOP->op_last;				/* get past scope */
     switch(kid->op_type) {
 	case OP_NCMP:
 	case OP_I_NCMP:
 	case OP_SCMP:
+	    if (!have_scopeop) goto padkids;
 	    break;
 	default:
 	    return;
