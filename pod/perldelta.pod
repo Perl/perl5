@@ -264,41 +264,6 @@ Building perl with some Windows compilers used to fail due to a problem
 with miniperl's C<glob> operator (which uses the C<perlglob> program)
 deleting the PATH environment variable [perl #113798].
 
-=item *
-
-C<delete local> no longer crashes with certain magical arrays and hashes
-[perl #112966].
-
-=item *
-
-C<local> on elements of certain magical arrays and hashes used not to
-arrange to have the element deleted on scope exit, even if the element did
-not exist before C<local>.
-
-=item *
-
-C<scalar(write)> no longer returns multiple items [perl #73690].
-
-=item *
-
-String to floating point conversions no longer misparse certain strings under
-C<use locale> [perl #109318].
-
-=item *
-
-C<@INC> filters that die no longer leak memory [perl #92252].
-
-=item *
-
-The implementations of overloaded operations are now called in the correct
-context. This allows, among other things, being able to properly override
-C<< <> >> [perl #47119].
-
-=item *
-
-Specifying only the C<fallback> key when calling C<use overload> now behaves
-properly [perl #113010].
-
 =back
 
 =head1 Testing
@@ -454,6 +419,41 @@ reference a different scalar variable.  This has been fixed [perl #113764].
 C<qr//> expressions no longer crash with custom regular expression engines
 that do not set C<offs> at regular expression compilation time
 [perl #112962].
+
+=item *
+
+C<delete local> no longer crashes with certain magical arrays and hashes
+[perl #112966].
+
+=item *
+
+C<local> on elements of certain magical arrays and hashes used not to
+arrange to have the element deleted on scope exit, even if the element did
+not exist before C<local>.
+
+=item *
+
+C<scalar(write)> no longer returns multiple items [perl #73690].
+
+=item *
+
+String to floating point conversions no longer misparse certain strings under
+C<use locale> [perl #109318].
+
+=item *
+
+C<@INC> filters that die no longer leak memory [perl #92252].
+
+=item *
+
+The implementations of overloaded operations are now called in the correct
+context. This allows, among other things, being able to properly override
+C<< <> >> [perl #47119].
+
+=item *
+
+Specifying only the C<fallback> key when calling C<use overload> now behaves
+properly [perl #113010].
 
 =back
 
