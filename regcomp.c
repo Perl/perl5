@@ -11018,6 +11018,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     UV literal_endpoint = 0;
 #endif
     UV stored = 0;  /* how many chars stored in the bitmap */
+    bool invert = FALSE;    /* Is this class to be complemented */
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
@@ -11042,8 +11043,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_naughty++;
 	RExC_parse++;
-	if (!SIZE_ONLY)
-	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
+        invert = TRUE;
 
         /* We have decided to not allow multi-char folds in inverted character
 	 * classes, due to the confusion that can happen, especially with
@@ -11726,7 +11726,6 @@ parseit:
          || (prevvalue == '0' && value == '9')))
     {
         U8 op;
-        bool invert = ANYOF_FLAGS(ret) & ANYOF_INVERT;
         const char * cur_parse = RExC_parse;
 
         if (has_special_charset_op) {
@@ -12187,7 +12186,7 @@ parseit:
      * optimize locale.  Doing so perhaps could be done as long as there is
      * nothing like \w in it; some thought also would have to be given to the
      * interaction with above 0x100 chars */
-    if ((ANYOF_FLAGS(ret) & ANYOF_INVERT)
+    if (invert
         && ! LOC
 	&& ! depends_list
 	&& ! unicode_alternate
@@ -12202,7 +12201,7 @@ parseit:
         }
 
 	/* Clear the invert flag since have just done it here */
-	ANYOF_FLAGS(ret) &= ~ANYOF_INVERT;
+	invert = FALSE;
     }
 
     /* Here, <cp_list> contains all the code points we can determine at
@@ -12252,6 +12251,10 @@ parseit:
 	    SvREFCNT_dec(cp_list);
 	    cp_list = NULL;
 	}
+    }
+
+    if (invert) {
+        ANYOF_FLAGS(ret) |= ANYOF_INVERT;
     }
 
     /* Combine the two lists into one. */
