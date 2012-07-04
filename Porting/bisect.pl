@@ -58,7 +58,10 @@ unshift @ARGV, '--jobs', $jobs if defined $jobs;
 unshift @ARGV, '--make', $make if defined $make;
 
 # We try these in this order for the start revision if none is specified.
-my @stable = qw(perl-5.005 perl-5.6.0 perl-5.8.0 v5.10.0 v5.12.0 v5.14.0);
+my @stable = map {chomp $_; $_} grep {/v5\.[0-9]+[02468]\.0$/} `git tag -l`;
+die "git tag -l didn't seem to return any tags for stable releases"
+    unless @stable;
+unshift @stable, qw(perl-5.005 perl-5.6.0 perl-5.8.0);
 
 {
     my ($dev_C, $ino_C) = stat 'Configure';
