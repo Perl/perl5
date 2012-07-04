@@ -8195,7 +8195,7 @@ Perl_yylex(pTHX)
 	case KEY_sub:
 	  really_sub:
 	    {
-		char tmpbuf[sizeof PL_tokenbuf];
+		char * const tmpbuf = PL_tokenbuf + 1;
 		SSize_t tboffset = 0;
 		expectation attrful;
 		bool have_name, have_proto;
@@ -8226,7 +8226,8 @@ Perl_yylex(pTHX)
 		    attrful = XATTRBLOCK;
 		    /* remember buffer pos'n for later force_word */
 		    tboffset = s - PL_oldbufptr;
-		    d = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
+		    d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
+				  &len);
 #ifdef PERL_MAD
 		    if (PL_madskills)
 			nametoke = newSVpvn_flags(s, d - s, SvUTF8(PL_linestr));
@@ -8243,8 +8244,6 @@ Perl_yylex(pTHX)
 		    have_name = TRUE;
 
 		    *PL_tokenbuf = '&';
-		    Copy(tmpbuf, PL_tokenbuf+1, len, char);
-		    PL_tokenbuf[len+1] = '\0';
 
 #ifdef PERL_MAD
 		    start_force(0);
