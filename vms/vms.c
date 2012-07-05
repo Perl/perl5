@@ -10467,6 +10467,68 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
     for (cp = &vmsspec[1]; *rest && isspace(*rest); rest++,cp++) *cp = *rest;
   }
   else { cp = vmsspec; rest = s; }
+
+  /* If the first word is quoted, then we need to unquote it and
+   * escape spaces within it.  We'll expand into the resspec buffer,
+   * then copy back into the cmd buffer, expanding the latter if
+   * necessary.
+   */
+  if (*rest == '"') {
+    char *cp2;
+    char *r = rest;
+    bool in_quote = 0;
+    int clen = cmdlen;
+    int soff = s - cmd;
+
+    for (cp2 = resspec;
+         *rest && cp2 - resspec < (VMS_MAXRSS - 1);
+         rest++) {
+
+      if (*rest == ' ') {    /* Escape ' ' to '^_'. */
+        *cp2 = '^';
+        *(++cp2) = '_';
+        cp2++;
+        clen++;
+      }
+      else if (*rest == '"') {
+        clen--;
+        if (in_quote) {     /* Must be closing quote. */
+          rest++;
+          break;
+        }
+        in_quote = 1;
+      }
+      else {
+        *cp2 = *rest;
+        cp2++;
+      }
+    }
+    *cp2 = '\0';
+
+    /* Expand the command buffer if necessary. */
+    if (clen > cmdlen) {
+      cmd = PerlMem_realloc(cmd, clen);
+      if (cmd == NULL)
+        _ckvmssts_noperl(SS$_INSFMEM);
+      /* Where we are may have changed, so recompute offsets */
+      r = cmd + (r - s - soff);
+      rest = cmd + (rest - s - soff);
+      s = cmd + soff;
+    }
+
+    /* Shift the non-verb portion of the command (if any) up or
+     * down as necessary.
+     */
+    if (*rest)
+      memmove(rest + clen - cmdlen, rest, s - soff + cmdlen - rest);
+
+    /* Copy the unquoted and escaped command verb into place. */
+    memcpy(r, resspec, cp2 - resspec); 
+    cmd[clen] = '\0';
+    cmdlen = clen;
+    rest = r;         /* Rewind for subsequent operations. */
+  }
+
   if (*rest == '.' || *rest == '/') {
     char *cp2;
     for (cp2 = resspec;
