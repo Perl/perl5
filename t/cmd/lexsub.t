@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
 }
 no warnings 'deprecated';
-plan 21;
+plan 22;
 
 {
   our sub foo { 42 }
@@ -71,8 +71,10 @@ sub bar::c { 43 }
   is prototype "::e", '$', 'our sub with proto';
 }
 {
-  # lexical subs (even our) override all keywords
   our sub if() { 42 }
   my $x = if if if;
-  is $x, 42;
+  is $x, 42, 'lexical subs (even our) override all keywords';
+  package bar;
+  my $y = if if if;
+  is $y, 42, 'our subs from other packages override all keywords';
 }
