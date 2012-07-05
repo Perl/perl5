@@ -6599,9 +6599,13 @@ Perl_yylex(pTHX)
 
       keylookup: {
 	bool anydelim;
+	bool lex;
 	I32 tmp;
+	SV *sv;
 
+	lex = FALSE;
 	orig_keyword = 0;
+	sv = NULL;
 	gv = NULL;
 	gvp = NULL;
 
@@ -6670,6 +6674,31 @@ Perl_yylex(pTHX)
 	    TOKEN(LABEL);
 	}
 
+	/* Check for lexical sub */
+	if (PL_expect != XOPERATOR) {
+	    char tmpbuf[sizeof PL_tokenbuf + 1];
+	    PADOFFSET off;
+	    *tmpbuf = '&';
+	    Copy(PL_tokenbuf, tmpbuf+1, len, char);
+	    off = pad_findmy_pvn(tmpbuf, len+1, UTF ? SVf_UTF8 : 0);
+	    if (off != NOT_IN_PAD) {
+		if (PAD_COMPNAME_FLAGS_isOUR(off)) {
+		    HV *  const stash = PAD_COMPNAME_OURSTASH(off);
+		    HEK * const stashname = HvNAME_HEK(stash);
+		    sv = newSVhek(stashname);
+                    sv_catpvs(sv, "::");
+                    sv_catpvn_flags(sv, PL_tokenbuf, len,
+				    (UTF ? SV_CATUTF8 : SV_CATBYTES));
+		    gv = gv_fetchsv(sv, GV_NOADD_NOINIT | SvUTF8(sv),
+				    SVt_PVCV);
+		    lex = TRUE;
+		    goto just_a_word;
+		}
+		/* unreachable */
+		else Perl_croak(aTHX_ "\"my sub\" not yet implemented");
+	    }
+	}
+
 	if (tmp < 0) {			/* second-class keyword? */
 	    GV *ogv = NULL;	/* override (winner) */
 	    GV *hgv = NULL;	/* hidden (loser) */
@@ -6732,9 +6761,10 @@ Perl_yylex(pTHX)
 		gv = NULL;
 		gvp = NULL;
 		orig_keyword = 0;
+		lex = 0;
+		off = 0;
 	    }
 	  just_a_word: {
-		SV *sv;
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
 		OP *rv2cv_op;
@@ -6802,7 +6832,8 @@ Perl_yylex(pTHX)
 
 		/* if we saw a global override before, get the right name */
 
-		sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf,
+		if (!lex)
+		  sv = S_newSV_maybe_utf8(aTHX_ PL_tokenbuf,
 		    len ? len : strlen(PL_tokenbuf));
 		if (gvp) {
 		    SV * const tmp_sv = sv;
@@ -6833,7 +6864,7 @@ Perl_yylex(pTHX)
 		    const_op->op_private = OPpCONST_BARE;
 		    rv2cv_op = newCVREF(0, const_op);
 		}
-		cv = rv2cv_op_cv(rv2cv_op, 0);
+		cv = lex ? GvCV(gv) : rv2cv_op_cv(rv2cv_op, 0);
 
 		/* See if it's the indirect object for a list operator. */
 

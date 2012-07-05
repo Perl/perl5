@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
 }
 no warnings 'deprecated';
-plan 20;
+plan 21;
 
 {
   our sub foo { 42 }
@@ -16,9 +16,7 @@ plan 20;
   is do foo(), 42, 'calling our sub from same package (do)';
   package bar;
   sub bar::foo { 43 }
-  { local $::TODO = ' ';
-    is foo, 42, 'calling our sub from another package';
-  }
+  is foo, 42, 'calling our sub from another package';
   is &foo, 42, 'calling our sub from another package (amper)';
   is do foo(), 42, 'calling our sub from another package (do)';
 }
@@ -44,9 +42,7 @@ package main;
   our sub b {
     if (shift) {
       package bar;
-      { local $::TODO = ' ';
-        is b, 42, 'our sub visible inside itself after decl';
-      }
+      is b, 42, 'our sub visible inside itself after decl';
       is &b, 42, 'our sub visible inside itself after decl (amper)';
       is do b(), 42, 'our sub visible inside itself after decl (do)';
     }
@@ -59,9 +55,7 @@ sub bar::c { 43 }
 {
   our sub c;
   package bar;
-  { local $::TODO = ' ';
-    is c, 42, 'our sub foo; makes lex alias for existing sub';
-  }
+  is c, 42, 'our sub foo; makes lex alias for existing sub';
   is &c, 42, 'our sub foo; makes lex alias for existing sub (amper)';
   is do c(), 42, 'our sub foo; makes lex alias for existing sub (do)';
 }
@@ -75,4 +69,10 @@ sub bar::c { 43 }
 {
   our sub e ($);
   is prototype "::e", '$', 'our sub with proto';
+}
+{
+  # lexical subs (even our) override all keywords
+  our sub if() { 42 }
+  my $x = if if if;
+  is $x, 42;
 }
