@@ -399,7 +399,7 @@ __END__
 > %.0g<     >[]<          > 0 MISSING<
 >%.2g<      >[]<          >0 MISSING<
 >%.2gC<      >[]<          >0C MISSING<
->%.0g<      >-0.0<        >-0<		   >C99 standard mandates minus sign but C89 does not skip: MSWin32 VMS hpux:10.20 openbsd netbsd:1.5 irix darwin<
+>%.0g<      >-0.0<        >-0<		   >C99 standard mandates minus sign but C89 does not skip: MSWin32 VMS hpux:10.20 openbsd netbsd:1.5 irix darwin freebsd:4.9<
 >%.0g<      >12345.6789<  >1e+04<
 >%#.0g<     >12345.6789<  >1.e+04<
 >%.2g<      >12345.6789<  >1.2e+04<
