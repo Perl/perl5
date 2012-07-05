@@ -4269,18 +4269,17 @@ X<our> X<global>
 
 =for Pod::Functions +5.6.0 declare and assign a package variable (lexical scoping)
 
-C<our> associates a simple name with a package variable in the current
-package for use within the current scope.  When C<use strict 'vars'> is in
-effect, C<our> lets you use declared global variables without qualifying
-them with package names, within the lexical scope of the C<our> declaration.
-In this way C<our> differs from C<use vars>, which is package-scoped.
+C<our> makes a lexical alias to a package variable of the same name in the current
+package for use within the current lexical scope.
 
-Unlike C<my> or C<state>, which allocates storage for a variable and
-associates a simple name with that storage for use within the current
-scope, C<our> associates a simple name with a package (read: global)
-variable in the current package, for use within the current lexical scope.
-In other words, C<our> has the same scoping rules as C<my> or C<state>, but
-does not necessarily create a variable.
+C<our> has the same scoping rules as C<my> or C<state>, but C<our> only
+declares an alias, whereas C<my> or C<state> both declare a variable name and
+allocate storage for that name within the current scope.
+
+This means that when C<use strict 'vars'> is in effect, C<our> lets you use
+a package variable without qualifying it with the package name, but only within
+the lexical scope of the C<our> declaration.  In this way, C<our> differs from
+C<use vars>, which creates file-scoped aliases instead.
 
 If more than one value is listed, the list must be placed
 in parentheses.
@@ -4288,7 +4287,7 @@ in parentheses.
     our $foo;
     our($bar, $baz);
 
-An C<our> declaration declares a global variable that will be visible
+An C<our> declaration declares an alias for a package variable that will be visible
 across its entire lexical scope, even across package boundaries.  The
 package in which the variable is entered is determined at the point
 of the declaration, not at the point of use.  This means the following
