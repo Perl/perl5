@@ -455,6 +455,11 @@ C<< <> >> [perl #47119].
 Specifying only the C<fallback> key when calling C<use overload> now behaves
 properly [perl #113010].
 
+=item *
+
+C<< sub foo { my $a = 0; while ($a) { ... } } >> and
+C<< sub foo { while (0) { ... } } >> now return the same thing [perl #73618].
+
 =back
 
 =head1 Known Problems
