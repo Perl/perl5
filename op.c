@@ -8821,7 +8821,8 @@ Perl_ck_listiob(pTHX_ OP *o)
     if (kid && o->op_flags & OPf_STACKED)
 	kid = kid->op_sibling;
     else if (kid && !kid->op_sibling) {		/* print HANDLE; */
-	if (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE) {
+	if (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE
+	 && !(kid->op_private & OPpCONST_FOLDED)) {
 	    o->op_flags |= OPf_STACKED;	/* make it a filehandle */
 	    kid = newUNOP(OP_RV2GV, OPf_REF, scalar(kid));
 	    cLISTOPo->op_first->op_sibling = kid;
