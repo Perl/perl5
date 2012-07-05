@@ -4571,6 +4571,8 @@ PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 		}
 	    }
 	}
+        if (count > 0)
+            unread += PerlIOBase_unread(aTHX_ f, (const STDCHAR *) vbuf + unread, count);
 	return unread;
     }
 }
