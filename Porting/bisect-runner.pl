@@ -36,17 +36,21 @@ if ($^O eq 'linux') {
             push @paths, $_;
         }
     }
+    push @paths, map {$_ . $linux64} qw(/usr/local/lib /lib /usr/lib)
+        if $linux64;
 }
-
-push @paths, map {$_ . $linux64} qw(/usr/local/lib /lib /usr/lib);
 
 my %defines =
     (
      usedevel => '',
      optimize => '-g',
      ld => 'cc',
-     ($linux64 ? (libpth => \@paths) : ()),
+     (@paths ? (libpth => \@paths) : ()),
     );
+
+# Needed for the 'ignore_versioned_solibs' emulation below.
+push @paths, qw(/usr/local/lib /lib /usr/lib)
+        unless $linux64;
 
 unless(GetOptions(\%options,
                   'target=s', 'make=s', 'jobs|j=i', 'expect-pass=i',
