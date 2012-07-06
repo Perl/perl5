@@ -329,9 +329,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+Quotes are now removed from the command verb (but not the parameters) for commands
+spawned via C<system>, backticks, or a piped C<open>.  Previously, quotes on the verb 
+were passed through to DCL, which would fail to recognize the command.  Also, if the
+verb is actually a path to an image or command procedure on an ODS-5 volume, quoting it
+now allows the path to contain spaces.
 
 =back
 
