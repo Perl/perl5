@@ -4022,6 +4022,7 @@ ext/XS-APItest/t/svpv.t		More generic SvPVbyte and SvPVutf8 tests
 ext/XS-APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
 ext/XS-APItest/t/swaplabel.t	test recursive descent label parsing
 ext/XS-APItest/t/swaptwostmts.t	test recursive descent statement parsing
+ext/XS-APItest/t/sym-hook.t	Test rv2cv hooks for bareword lookup
 ext/XS-APItest/t/temp_lv_sub.t	XS::APItest: tests for lvalue subs returning temps
 ext/XS-APItest/t/underscore_length.t	Test find_rundefsv()
 ext/XS-APItest/t/utf16_to_utf8.t	Test behaviour of utf16_to_utf8{,reversed}

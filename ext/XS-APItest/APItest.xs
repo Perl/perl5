@@ -1101,6 +1101,29 @@ addissub_myck_add(pTHX_ OP *op)
     return newBINOP(OP_SUBTRACT, flags, aop, bop);
 }
 
+static Perl_check_t old_ck_rv2cv;
+
+static OP *
+my_ck_rv2cv(pTHX_ OP *o)
+{
+    SV *ref;
+    SV **flag_svp = hv_fetchs(GvHV(PL_hintgv), "XS::APItest/addunder", 0);
+    OP *aop;
+
+    if (flag_svp && SvTRUE(*flag_svp) && (o->op_flags & OPf_KIDS)
+     && (aop = cUNOPx(o)->op_first) && aop->op_type == OP_CONST
+     && aop->op_private & (OPpCONST_ENTERED|OPpCONST_BARE)
+     && (ref = cSVOPx(aop)->op_sv) && SvPOK(ref) && SvCUR(ref)
+     && *(SvEND(ref)-1) == 'o')
+    {
+	SvGROW(ref, SvCUR(ref)+2);
+	*SvEND(ref) = '_';
+	SvCUR(ref)++;
+	*SvEND(ref) = '\0';
+    }
+    return old_ck_rv2cv(aTHX_ o);
+}
+
 #include "const-c.inc"
 
 MODULE = XS::APItest		PACKAGE = XS::APItest
@@ -3348,6 +3371,11 @@ void
 setup_addissub()
 CODE:
     wrap_op_checker(OP_ADD, addissub_myck_add, &addissub_nxck_add);
+
+void
+setup_rv2cv_addunderbar()
+CODE:
+    wrap_op_checker(OP_RV2CV, my_ck_rv2cv, &old_ck_rv2cv);
 
 #ifdef USE_ITHREADS
 

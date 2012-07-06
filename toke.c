@@ -3773,8 +3773,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 			return 0;
 		}
 	    }
-	} else
-	    gv = NULL;
+	}
     }
     s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
     /* start is the beginning of the possible filehandle/object,
@@ -3783,7 +3782,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
      */
 
     if (*start == '$') {
-	if (gv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY ||
+	if (cv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY ||
 		isUPPER(*PL_tokenbuf))
 	    return 0;
 #ifdef PERL_MAD
@@ -3810,7 +3809,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
-	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, UTF ? SVf_UTF8 : 0)) {
+	if (!cv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, UTF ? SVf_UTF8 : 0)) {
 #ifdef PERL_MAD
 	    soff = s - SvPVX(PL_linestr);
 #endif
