@@ -76,7 +76,19 @@ unshift @stable, qw(perl-5.005 perl-5.6.0 perl-5.8.0);
 
 unshift @ARGV, '--gold', defined $gold ? $gold : $stable[-1];
 
-$end = 'blead' unless defined $end;
+if (!defined $end) {
+    # If we have a branch blead, use that as the end
+    $end = `git rev-parse --verify --quiet blead`;
+    die unless defined $end;
+    if (!length $end) {
+        # Else use whichever is newer - HEAD, or the most recent stable tag.
+        if (`git rev-list -n1 HEAD ^$stable[-1]` eq "") {
+            $end = pop @stable;
+        } else {
+            $end = 'HEAD';
+        }
+    }
+}
 
 # Canonicalising branches to revisions before moving the checkout permits one
 # to use revisions such as 'HEAD' for --start or --end
