@@ -62,7 +62,8 @@ unless(GetOptions(\%options,
                   },
                   'force-manifest', 'force-regen', 'test-build', 'validate',
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
-                  'check-args', 'check-shebang!', 'usage|help|?', 'A=s@',
+                  'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
+                  'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
                       if ($val =~ /\A([^=]+)=(.*)/s) {
@@ -603,6 +604,14 @@ run C<../perl/Porting/bisect.pl /usr/bin/perl ~/test/testcase.pl>
 
 =item *
 
+--gold
+
+Revision to use when checking out known-good recent versions of files,
+such as F<makedepend.SH>. F<bisect-runner.pl> defaults this to I<blead>,
+but F<bisect.pl> will default it to the most recent stable release.
+
+=item *
+
 --usage
 
 =item *
@@ -904,7 +913,7 @@ sub revert_commit {
 
 sub checkout_file {
     my ($file, $commit) = @_;
-    $commit ||= 'blead';
+    $commit ||= $options{gold} || 'blead';
     system "git show $commit:$file > $file </dev/null"
         and die_255("Could not extract $file at revision $commit");
 }

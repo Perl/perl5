@@ -11,9 +11,9 @@ Documentation for this is in bisect-runner.pl
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
 
-my ($start, $end, $validate, $usage, $bad, $jobs, $make);
+my ($start, $end, $validate, $usage, $bad, $jobs, $make, $gold);
 $bad = !GetOptions('start=s' => \$start, 'end=s' => \$end,
-                   'jobs|j=i' => \$jobs, 'make=s' => \$make,
+                   'jobs|j=i' => \$jobs, 'make=s' => \$make, 'gold=s' => \$gold,
                    validate => \$validate, 'usage|help|?' => \$usage);
 unshift @ARGV, '--help' if $bad || $usage;
 unshift @ARGV, '--validate' if $validate;
@@ -73,6 +73,8 @@ unshift @stable, qw(perl-5.005 perl-5.6.0 perl-5.8.0);
         unshift @stable, qw(perl-5.002 perl-5.003 perl-5.004)
     }
 }
+
+unshift @ARGV, '--gold', defined $gold ? $gold : $stable[-1];
 
 $end = 'blead' unless defined $end;
 
