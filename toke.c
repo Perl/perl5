@@ -3735,7 +3735,7 @@ S_intuit_more(pTHX_ register char *s)
  *
  * First argument is the stuff after the first token, e.g. "bar".
  *
- * Not a method if bar is a filehandle.
+ * Not a method if foo is a filehandle.
  * Not a method if foo is a subroutine prototyped to take a filehandle.
  * Not a method if it's really "Foo $bar"
  * Method if it's "foo $bar"
