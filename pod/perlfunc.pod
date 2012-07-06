@@ -4979,7 +4979,7 @@ when they're one of the special identifiers that qualify into C<main::>,
 like C<STDOUT>, C<ARGV>, C<ENV>, and the punctuation variables.
 
 A package statement affects dynamic variables only, including those
-you've used C<local> on, but I<not> lexical variables, which are created
+you've used C<local> on, but I<not> lexically-scoped variables, which are created
 with C<my>, C<state>, or C<our>.  Typically it would be the first 
 declaration in a file included by C<require> or C<use>.  You can switch into a
 package in more than one place, since this only determines which default 
