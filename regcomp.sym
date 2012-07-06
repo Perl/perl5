@@ -9,7 +9,8 @@
 # Note that the order in this file is important.
 #
 # Format for first section: 
-# NAME \s+ TYPE, arg-description [flags] [num-args] [longjump-len] ; DESCRIPTION
+# NAME \s+ TYPE, arg-description [num-args] [flags] [longjump-len] ; DESCRIPTION
+#   flag <S> means is REGNODE_SIMPLE; flag <V> means is REGNODE_VARIES
 #
 #
 # run perl regen.pl after editing this file
