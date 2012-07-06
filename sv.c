@@ -7611,7 +7611,10 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 =for apidoc sv_gets
 
 Get a line from the filehandle and store it into the SV, optionally
-appending to the currently-stored string.
+appending to the currently-stored string. If C<append> is not 0, the
+line is appended to the SV instead of overwriting it. C<append> should
+be set to the byte offset that the appended string should start at
+in the SV (typically, C<SvCUR(sv)> is a suitable choice).
 
 =cut
 */
