@@ -191,24 +191,28 @@ typedef U64TYPE U64;
 #endif /* PERL_CORE */
 
 #if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
-#   ifndef UINT64_C /* usually from <inttypes.h> */
-#       if defined(HAS_LONG_LONG) && QUADKIND == QUAD_IS_LONG_LONG
-#           define INT64_C(c)	CAT2(c,LL)
-#           define UINT64_C(c)	CAT2(c,ULL)
+#   if defined(HAS_LONG_LONG) && QUADKIND == QUAD_IS_LONG_LONG
+#       define PeRl_INT64_C(c)	CAT2(c,LL)
+#       define PeRl_UINT64_C(c)	CAT2(c,ULL)
+#   else
+#       if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
+#           define PeRl_INT64_C(c)	CAT2(c,L)
+#           define PeRl_UINT64_C(c)	CAT2(c,UL)
 #       else
-#           if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
-#               define INT64_C(c)	CAT2(c,L)
-#               define UINT64_C(c)	CAT2(c,UL)
+#           if defined(_WIN64) && defined(_MSC_VER)
+#               define PeRl_INT64_C(c)	CAT2(c,I64)
+#               define PeRl_UINT64_C(c)	CAT2(c,UI64)
 #           else
-#               if defined(_WIN64) && defined(_MSC_VER)
-#                   define INT64_C(c)	CAT2(c,I64)
-#                   define UINT64_C(c)	CAT2(c,UI64)
-#               else
-#                   define INT64_C(c)	((I64TYPE)(c))
-#                   define UINT64_C(c)	((U64TYPE)(c))
-#               endif
+#               define PeRl_INT64_C(c)	((I64TYPE)(c))
+#               define PeRl_UINT64_C(c)	((U64TYPE)(c))
 #           endif
 #       endif
+#   endif
+#   ifndef UINT64_C
+#   define UINT64_C(c) PeRl_UINT64_C(c)
+#   endif
+#   ifndef INT64_C
+#   define INT64_C(c) PeRl_INT64_C(c)
 #   endif
 #endif
 
