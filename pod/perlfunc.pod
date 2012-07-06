@@ -4279,8 +4279,8 @@ allocate storage for that name within the current scope.
 This means that when C<use strict 'vars'> is in effect, C<our> lets you use
 a package variable without qualifying it with the package name, but only within
 the lexical scope of the C<our> declaration.  In this way, C<our> differs from
-C<use vars>, which allows a the use of an unqualified name I<only> within the
-affected package.
+C<use vars>, which allows use of an unqualified name I<only> within the
+affected package, but across scopes.
 
 If more than one value is listed, the list must be placed
 in parentheses.
