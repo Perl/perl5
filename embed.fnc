@@ -1627,12 +1627,8 @@ Ap	|CV*	|newATTRSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NU
 p	|CV*	|newATTRSUB_flags|I32 floor|NULLOK OP *o|NULLOK OP *proto \
 				 |NULLOK OP *attrs|NULLOK OP *block \
 				 |U32 flags
-#ifdef PERL_MAD
-Apr	|OP *	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
+Ap	|CV *	|newMYSUB	|I32 floor|NN OP *o|NULLOK OP *proto \
 				|NULLOK OP *attrs|NULLOK OP *block
-#else
-Apr	|void	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
-#endif
 p	|CV*	|newSTUB	|NN GV *gv|bool fake
 : Used in perly.y
 p	|OP *	|my_attrs	|NN OP *o|NULLOK OP *attrs

@@ -314,12 +314,16 @@ barestmt:	PLUGSTMT
 			      pad_add_anon(fmtcv, OP_NULL);
 			  }
 			}
-	|	SUB WORD startsub
-			{ const char *const name = SvPV_nolen_const(((SVOP*)$2)->op_sv);
-			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
+	|	SUB subname startsub
+			{
+			  if ($2->op_type == OP_CONST) {
+			    const char *const name =
+				SvPV_nolen_const(((SVOP*)$2)->op_sv);
+			    if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
 			      || strEQ(name, "UNITCHECK"))
 			      CvSPECIAL_on(PL_compcv);
+			  }
 			  PL_parser->in_my = 0;
 			  PL_parser->in_my_stash = NULL;
 			}
@@ -329,7 +333,13 @@ barestmt:	PLUGSTMT
 #ifdef MAD
 			  {
 			      OP* o = newSVOP(OP_ANONCODE, 0,
-				(SV*)newATTRSUB($3, $2, $5, $6, $7));
+				(SV*)(
+#endif
+			  $2->op_type == OP_CONST
+			      ? newATTRSUB($3, $2, $5, $6, $7)
+			      : newMYSUB($3, $2, $5, $6, $7)
+#ifdef MAD
+				));
 			      $$ = newOP(OP_NULL,0);
 			      op_getmad(o,$$,'&');
 			      op_getmad($2,$$,'n');
@@ -340,7 +350,7 @@ barestmt:	PLUGSTMT
 			      $7->op_madprop = 0;
 			  }
 #else
-			  newATTRSUB($3, $2, $5, $6, $7);
+			  ;
 			  $$ = (OP*)NULL;
 #endif
 			  intro_my();
@@ -678,12 +688,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 	;
 
 /* Name of a subroutine - must be a bareword, could be special */
-subname	:	WORD	{ const char *const name = SvPV_nolen_const(((SVOP*)$1)->op_sv);
-			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
-			      || strEQ(name, "UNITCHECK"))
-			      CvSPECIAL_on(PL_compcv);
-			  $$ = $1; }
+subname	:	WORD
 	|	PRIVATEREF
 	;
 

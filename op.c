@@ -6856,32 +6856,324 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
     return sv;
 }
 
-#ifdef PERL_MAD
-OP *
-#else
-void
-#endif
+CV *
 Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
-#if 0
-    /* This would be the return value, but the return cannot be reached.  */
-    OP* pegop = newOP(OP_NULL, 0);
-#endif
+    dVAR;
+    GV *gv;
+    CV **spot;
+    SV **svspot;
+    const char *ps;
+    STRLEN ps_len = 0; /* init it to avoid false uninit warning from icc */
+    U32 ps_utf8 = 0;
+    register CV *cv = NULL;
+    register CV *compcv = PL_compcv;
+    SV *const_sv;
+    const bool ec = PL_parser && PL_parser->error_count;
 
-    PERL_UNUSED_ARG(floor);
+    /* If the subroutine has no body, no attributes, and no builtin attributes
+       then it's just a sub declaration, and we may be able to get away with
+       storing with a placeholder scalar in the symbol table, rather than a
+       full CV.  If anything is present then it will take a full CV to
+       store it.  */
+    const I32 gv_fetch_flags
+	= ec ? GV_NOADD_NOINIT : GV_ADD;
+    PADNAME *name;
 
-    if (o)
-	SAVEFREEOP(o);
-    if (proto)
-	SAVEFREEOP(proto);
-    if (attrs)
-	SAVEFREEOP(attrs);
-    if (block)
-	SAVEFREEOP(block);
-    Perl_croak(aTHX_ "\"my sub\" not yet implemented");
+    PERL_ARGS_ASSERT_NEWMYSUB;
+
+    /* PL_comppad is the pad owned by the new sub.  Popping scope will make
+       the PL_comppad point to the pad belonging to the enclosing sub,
+       where we store the new one. */
+    LEAVE_SCOPE(floor);
+
+    name = PadnamelistARRAY(PL_comppad_name)[o->op_targ];
+    if (!PadnameIsSTATE(name))
+	Perl_croak(aTHX_ "\"my sub\" not yet implemented");
+    svspot = &PL_curpad[o->op_targ];
+    spot = (CV **)svspot;
+
+    if (proto) {
+	assert(proto->op_type == OP_CONST);
+	ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
+        ps_utf8 = SvUTF8(((SVOP*)proto)->op_sv);
+    }
+    else
+	ps = NULL;
+
+    gv = gv_fetchpvn_flags(PadnamePV(name)+1, PadnameLEN(name)-1,
+			   PadnameUTF8(name)|gv_fetch_flags, SVt_PVCV);
+
+    if (!PL_madskills) {
+	if (o)
+	    SAVEFREEOP(o);
+	if (proto)
+	    SAVEFREEOP(proto);
+	if (attrs)
+	    SAVEFREEOP(attrs);
+    }
+
+    if (ec) {
+	op_free(block);
+	goto done;
+    }
+
+    if (SvTYPE(*spot) != SVt_PVCV) {	/* Maybe prototype now, and had at
+					   maximum a prototype before. */
+	if (SvTYPE(*spot) > SVt_NULL) {
+	    cv_ckproto_len_flags(*spot, NULL, ps, ps_len, ps_utf8);
+	}
+	if (!block && !attrs && !(CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
+	 && !PL_madskills) {
+	  if (ps) {
+	    sv_setpvn(*svspot, ps, ps_len);
+            if ( ps_utf8 ) SvUTF8_on(*svspot);
+          }
+	  else
+	    sv_setiv(*svspot, -1);
+
+	  SvREFCNT_dec(compcv);
+	  cv = compcv = NULL;
+	  goto done;
+	}
+	SvREFCNT_dec(*spot);
+	*spot = NULL;
+    }
+
+    cv = *spot;
+
+    if (!block || !ps || *ps || attrs
+	|| (CvFLAGS(compcv) & CVf_BUILTIN_ATTRS)
 #ifdef PERL_MAD
-    NORETURN_FUNCTION_END;
+	|| block->op_type == OP_NULL
 #endif
+	)
+	const_sv = NULL;
+    else
+	const_sv = op_const_sv(block, NULL);
+
+    if (cv) {
+        const bool exists = CvROOT(cv) || CvXSUB(cv);
+
+        /* if the subroutine doesn't exist and wasn't pre-declared
+         * with a prototype, assume it will be AUTOLOADed,
+         * skipping the prototype check
+         */
+        if (exists || SvPOK(cv))
+            cv_ckproto_len_flags(cv, gv, ps, ps_len, ps_utf8);
+	/* already defined? */
+	if (exists) {
+	    if ((!block
+#ifdef PERL_MAD
+		 || block->op_type == OP_NULL
+#endif
+		 )) {
+		if (CvFLAGS(compcv)) {
+		    /* might have had built-in attrs applied */
+		    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
+		    if (CvLVALUE(compcv) && ! CvLVALUE(cv) && pureperl
+		     && ckWARN(WARN_MISC))
+			Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
+		    CvFLAGS(cv) |=
+			(CvFLAGS(compcv) & CVf_BUILTIN_ATTRS
+			  & ~(CVf_LVALUE * pureperl));
+		}
+		if (attrs) goto attrs;
+		/* just a "sub foo;" when &foo is already defined */
+		SAVEFREESV(compcv);
+		goto done;
+	    }
+	    else {
+		const line_t oldline = CopLINE(PL_curcop);
+		if (PL_parser && PL_parser->copline != NOLINE)
+			CopLINE_set(PL_curcop, PL_parser->copline);
+		report_redefined_cv(name, cv, &const_sv);
+		CopLINE_set(PL_curcop, oldline);
+#ifdef PERL_MAD
+		if (!PL_minus_c)	/* keep old one around for madskills */
+#endif
+		    {
+			/* (PL_madskills unset in used file.) */
+			SvREFCNT_dec(cv);
+		    }
+		cv = NULL;
+	    }
+	}
+    }
+    if (const_sv) {
+	SvREFCNT_inc_simple_void_NN(const_sv);
+	if (cv) {
+	    assert(!CvROOT(cv) && !CvCONST(cv));
+	    cv_forget_slab(cv);
+	}
+	else {
+	    cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+	    CvFILE_set_from_cop(cv, PL_curcop);
+	    CvSTASH_set(cv, PL_curstash);
+	    *spot = cv;
+	}
+	sv_setpvs(MUTABLE_SV(cv), "");  /* prototype is "" */
+	CvXSUBANY(cv).any_ptr = const_sv;
+	CvXSUB(cv) = const_sv_xsub;
+	CvCONST_on(cv);
+	CvISXSUB_on(cv);
+	if (PL_madskills)
+	    goto install_block;
+	op_free(block);
+	SvREFCNT_dec(compcv);
+	goto done;
+    }
+    SvREFCNT_dec(CvOUTSIDE(compcv));
+    CvWEAKOUTSIDE_on(compcv);
+    if (cv) {	/* must reuse cv in case stub is referenced elsewhere */
+	/* transfer PL_compcv to cv */
+	if (block
+#ifdef PERL_MAD
+                  && block->op_type != OP_NULL
+#endif
+	) {
+	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
+	    PADLIST *const temp_padl = CvPADLIST(cv);
+	    CV *const temp_cv = CvOUTSIDE(cv);
+	    const cv_flags_t slabbed = CvSLABBED(cv);
+	    OP * const cvstart = CvSTART(cv);
+
+	    assert(CvWEAKOUTSIDE(cv));
+	    assert(CvCVGV_RC(cv));
+	    assert(CvGV(cv) == gv);
+
+	    SvPOK_off(cv);
+	    CvFLAGS(cv) =
+		CvFLAGS(compcv) | existing_builtin_attrs | CVf_CVGV_RC;
+	    CvOUTSIDE(cv) = CvOUTSIDE(compcv);
+	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(compcv);
+	    CvPADLIST(cv) = CvPADLIST(compcv);
+	    CvOUTSIDE(compcv) = temp_cv;
+	    CvPADLIST(compcv) = temp_padl;
+	    CvSTART(cv) = CvSTART(compcv);
+	    CvSTART(compcv) = cvstart;
+	    if (slabbed) CvSLABBED_on(compcv);
+	    else CvSLABBED_off(compcv);
+
+	    if (CvFILE(cv) && CvDYNFILE(cv)) {
+		Safefree(CvFILE(cv));
+	    }
+
+	    /* inner references to compcv must be fixed up ... */
+	    pad_fixup_inner_anons(CvPADLIST(cv), compcv, cv);
+	    if (PERLDB_INTER)/* Advice debugger on the new sub. */
+	      ++PL_sub_generation;
+	}
+	else {
+	    /* Might have had built-in attributes applied -- propagate them. */
+	    CvFLAGS(cv) |= (CvFLAGS(compcv) & CVf_BUILTIN_ATTRS);
+	}
+	/* ... before we throw it away */
+	SvREFCNT_dec(compcv);
+	compcv = cv;
+    }
+    else {
+	cv = compcv;
+	*spot = cv;
+	CvGV_set(cv, gv);
+    }
+    CvFILE_set_from_cop(cv, PL_curcop);
+    CvSTASH_set(cv, PL_curstash);
+
+    if (ps) {
+	sv_setpvn(MUTABLE_SV(cv), ps, ps_len);
+        if ( ps_utf8 ) SvUTF8_on(MUTABLE_SV(cv));
+    }
+
+ install_block:
+    if (!block)
+	goto attrs;
+
+    /* If we assign an optree to a PVCV, then we've defined a subroutine that
+       the debugger could be able to set a breakpoint in, so signal to
+       pp_entereval that it should not throw away any saved lines at scope
+       exit.  */
+       
+    PL_breakable_sub_gen++;
+    /* This makes sub {}; work as expected.  */
+    if (block->op_type == OP_STUB) {
+	    OP* const newblock = newSTATEOP(0, NULL, 0);
+#ifdef PERL_MAD
+	    op_getmad(block,newblock,'B');
+#else
+	    op_free(block);
+#endif
+	    block = newblock;
+    }
+    CvROOT(cv) = CvLVALUE(cv)
+		   ? newUNOP(OP_LEAVESUBLV, 0,
+			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
+		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
+    CvROOT(cv)->op_private |= OPpREFCOUNTED;
+    OpREFCNT_set(CvROOT(cv), 1);
+    /* The cv no longer needs to hold a refcount on the slab, as CvROOT
+       itself has a refcount. */
+    CvSLABBED_off(cv);
+    OpslabREFCNT_dec_padok((OPSLAB *)CvSTART(cv));
+    CvSTART(cv) = LINKLIST(CvROOT(cv));
+    CvROOT(cv)->op_next = 0;
+    CALL_PEEP(CvSTART(cv));
+    finalize_optree(CvROOT(cv));
+
+    /* now that optimizer has done its work, adjust pad values */
+
+    ENTER;
+    SAVESPTR(PL_compcv);
+    SAVECOMPPAD();
+    PL_compcv	= cv;
+    PL_comppad	= *PadlistARRAY(CvPADLIST(cv));
+    PL_curpad	= PadARRAY(PL_comppad);
+    pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+    LEAVE;
+
+    if (CvCLONE(cv)) {
+	assert(!CvCONST(cv));
+	if (ps && !*ps && op_const_sv(block, cv))
+	    CvCONST_on(cv);
+    }
+
+  attrs:
+    if (attrs) {
+	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
+	apply_attrs(PL_curstash, MUTABLE_SV(cv), attrs, FALSE);
+    }
+
+    if (block) {
+	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
+	    SV * const tmpstr = sv_newmortal();
+	    GV * const db_postponed = gv_fetchpvs("DB::postponed",
+						  GV_ADDMULTI, SVt_PVHV);
+	    HV *hv;
+	    SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%ld",
+					  CopFILE(PL_curcop),
+					  (long)PL_subline,
+					  (long)CopLINE(PL_curcop));
+	    gv_efullname3(tmpstr, gv, NULL);
+	    (void)hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr),
+		    SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr), sv, 0);
+	    hv = GvHVn(db_postponed);
+	    if (HvTOTALKEYS(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr))) {
+		CV * const pcv = GvCV(db_postponed);
+		if (pcv) {
+		    dSP;
+		    PUSHMARK(SP);
+		    XPUSHs(tmpstr);
+		    PUTBACK;
+		    call_sv(MUTABLE_SV(pcv), G_DISCARD);
+		}
+	    }
+	}
+    }
+
+  done:
+    if (PL_parser)
+	PL_parser->copline = NOLINE;
+    return cv;
 }
 
 CV *

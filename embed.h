@@ -345,6 +345,7 @@
 #define newLOGOP(a,b,c,d)	Perl_newLOGOP(aTHX_ a,b,c,d)
 #define newLOOPEX(a,b)		Perl_newLOOPEX(aTHX_ a,b)
 #define newLOOPOP(a,b,c,d)	Perl_newLOOPOP(aTHX_ a,b,c,d)
+#define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #define newNULLLIST()		Perl_newNULLLIST(aTHX)
 #define newOP(a,b)		Perl_newOP(aTHX_ a,b)
 #define newPMOP(a,b)		Perl_newPMOP(aTHX_ a,b)
@@ -715,7 +716,6 @@
 #endif
 #if !(defined(PERL_MAD))
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
-#define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 #define my_bzero		Perl_my_bzero
@@ -791,7 +791,6 @@
 #endif
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
-#define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)

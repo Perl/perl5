@@ -2644,6 +2644,11 @@ PERL_CALLCONV OP*	Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP* expr, OP* 
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV CV *	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_NEWMYSUB	\
+	assert(o)
+
 PERL_CALLCONV OP*	Perl_newNULLLIST(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
@@ -4825,9 +4830,6 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 #endif
 #if !(defined(PERL_MAD))
 PERL_CALLCONV void	Perl_newFORM(pTHX_ I32 floor, OP* o, OP* block);
-PERL_CALLCONV_NO_RET void	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
-			__attribute__noreturn__;
-
 PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PACKAGE	\
@@ -7328,9 +7330,6 @@ PERL_CALLCONV MADPROP*	Perl_newMADsv(pTHX_ char key, SV* sv)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_NEWMADSV	\
 	assert(sv)
-
-PERL_CALLCONV_NO_RET OP *	Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
-			__attribute__noreturn__;
 
 PERL_CALLCONV TOKEN*	Perl_newTOKEN(pTHX_ I32 optype, YYSTYPE lval, MADPROP* madprop);
 PERL_CALLCONV void	Perl_op_getmad(pTHX_ OP* from, OP* o, char slot);
