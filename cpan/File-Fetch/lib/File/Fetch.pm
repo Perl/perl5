@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.34';
+$VERSION        = '0.36';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -139,6 +139,13 @@ The path from the uri, will be at least a single '/'.
 The name of the remote file. For the local file name, the
 result of $ff->output_file will be used.
 
+=item $ff->file_default
+
+The name of the default local file, that $ff->output_file falls back to if
+it would otherwise return no filename. For example when fetching a URI like
+http://www.abc.net.au/ the contents retrieved may be from a remote file called
+'index.html'. The default value of this attribute is literally 'file_default'.
+
 =cut
 
 
@@ -156,6 +163,7 @@ result of $ff->output_file will be used.
         uri             => { required => 1 },
         vol             => { default => '' }, # windows for file:// uris
         share           => { default => '' }, # windows for file:// uris
+        file_default    => { default => 'file_default' },
         _error_msg      => { no_override => 1 },
         _error_msg_long => { no_override => 1 },
     };
@@ -182,7 +190,7 @@ result of $ff->output_file will be used.
                 "Hostname required when fetching from '%1'",$args->scheme));
         }
 
-        for (qw[path file]) {
+        for (qw[path]) {
             unless( $args->$_() ) { # 5.5.x needs the ()
                 return $class->_error(loc("No '%1' specified",$_));
             }
@@ -211,6 +219,8 @@ sub output_file {
     my $file = $self->file;
 
     $file =~ s/\?.*$//g;
+
+    $file ||= $self->file_default;
 
     return $file;
 }
@@ -267,15 +277,18 @@ sub new {
     my $class = shift;
     my %hash  = @_;
 
-    my ($uri);
+    my ($uri, $file_default);
     my $tmpl = {
-        uri => { required => 1, store => \$uri },
+        uri          => { required => 1, store => \$uri },
+        file_default => { required => 0, store => \$file_default },
     };
 
     check( $tmpl, \%hash ) or return;
 
     ### parse the uri to usable parts ###
     my $href    = $class->_parse_uri( $uri ) or return;
+
+    $href->{file_default} = $file_default if $file_default;
 
     ### make it into a FFI object ###
     my $ff      = $class->_create( %$href ) or return;
