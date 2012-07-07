@@ -9738,6 +9738,61 @@ S_reg_recode(pTHX_ const char value, SV **encp)
     return uv;
 }
 
+PERL_STATIC_INLINE void
+S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, STRLEN len, UV code_point)
+{
+    /* This knows the details about sizing an EXACTish node, and potentially
+     * populating it with a single character.  If <len> is non-zero, it assumes
+     * that the node has already been populated, and just does the sizing,
+     * ignoring <code_point>.  Otherwise it looks at <code_point> and
+     * calculates what <len> should be.  In pass 1, it sizes the node
+     * appropriately.  In pass 2, it additionally will populate the node's
+     * STRING with <code_point>, if <len> is 0.
+     *
+     * It knows that under FOLD, UTF characters and the Latin Sharp S must be
+     * folded (the latter only when the rules indicate it can match 'ss') */
+
+    bool len_passed_in = cBOOL(len != 0);
+    U8 character[UTF8_MAXBYTES_CASE+1];
+
+    PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT;
+
+    if (! len_passed_in) {
+        if (UTF) {
+            if (FOLD) {
+                to_uni_fold(NATIVE_TO_UNI(code_point), character, &len);
+            }
+            else {
+                uvchr_to_utf8( character, code_point);
+                len = UTF8SKIP(character);
+            }
+        }
+        else if (! FOLD
+                 || code_point != LATIN_SMALL_LETTER_SHARP_S
+                 || MORE_ASCII_RESTRICTED
+                 || ! AT_LEAST_UNI_SEMANTICS)
+        {
+            *character = (U8) code_point;
+            len = 1;
+        }
+        else {
+            *character = 's';
+            *(character + 1) = 's';
+            len = 2;
+        }
+    }
+
+    if (SIZE_ONLY) {
+        RExC_size += STR_SZ(len);
+    }
+    else {
+        RExC_emit += STR_SZ(len);
+        STR_LEN(node) = len;
+        if (! len_passed_in) {
+            Copy((char *) character, STRING(node), len, char);
+        }
+    }
+}
 
 /*
  - regatom - the lowest level
@@ -10637,12 +10692,7 @@ tryagain:
 	    if (len == 1 && UNI_IS_INVARIANT(ender))
 		*flagp |= SIMPLE;
 
-	    if (SIZE_ONLY)
-		RExC_size += STR_SZ(len);
-	    else {
-		STR_LEN(ret) = len;
-		RExC_emit += STR_SZ(len);
-            }
+            alloc_maybe_populate_EXACT(pRExC_state, ret, len, 0);
 	}
 	break;
     }
