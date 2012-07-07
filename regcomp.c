@@ -5311,9 +5311,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_L1PosixGraph = _new_invlist_C_array(L1PosixGraph_invlist);
 	PL_PosixGraph = _new_invlist_C_array(PosixGraph_invlist);
 
-	PL_L1PosixAlnum = _new_invlist_C_array(L1PosixAlnum_invlist);
-	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
-
 	PL_L1PosixLower = _new_invlist_C_array(L1PosixLower_invlist);
 	PL_PosixLower = _new_invlist_C_array(PosixLower_invlist);
 
