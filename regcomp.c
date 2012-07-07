@@ -11874,12 +11874,27 @@ parseit:
 
             }
         }
-        else if (! LOC) {
-            if (invert && prevvalue == '\n' && value == '\n') {
-                op = REG_ANY; /* Optimize [^\n] */
+        else if (value == prevvalue) {
+
+            /* Here, the class consists of just a single code point */
+
+            if (invert) {
+                if (! LOC && value == '\n') {
+                    op = REG_ANY; /* Optimize [^\n] */
+                }
             }
-            else if (prevvalue == '0' && value == '9') {
-                op = (invert) ? NDIGITA : DIGITA;
+            else if (value < 256 || UTF) {
+
+                /* Optimize a single value into an EXACTish node, but not if it
+                 * would require converting the pattern to UTF-8. */
+                op = compute_EXACTish(pRExC_state);
+            }
+        } /* Otherwise is a range */
+        else if (! LOC) {   /* locale could vary these */
+            if (prevvalue == '0') {
+                if (value == '9') {
+                    op = (invert) ? NDIGITA : DIGITA;
+                }
             }
         }
 
@@ -11907,6 +11922,10 @@ parseit:
             }
 
             ret = reg_node(pRExC_state, op);
+
+            if (PL_regkind[op] == EXACT) {
+                alloc_maybe_populate_EXACT(pRExC_state, ret, 0, value);
+            }
 
             RExC_parse = (char *) cur_parse;
 
