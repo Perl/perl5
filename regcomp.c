@@ -11113,6 +11113,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
+    const I32 orig_size = RExC_size;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCLASS;
@@ -11882,7 +11883,19 @@ parseit:
              * the parse */
             const char * cur_parse = RExC_parse;
             RExC_parse = (char *)orig_parse;
-            RExC_emit = (regnode *)orig_emit;
+            if ( SIZE_ONLY) {
+                if (! LOC) {
+
+                    /* To get locale nodes to not use the full ANYOF size would
+                     * require moving the code above that writes the portions
+                     * of it that aren't in other nodes to after this point.
+                     * e.g.  ANYOF_CLASS_SET */
+                    RExC_size = orig_size;
+                }
+            }
+            else {
+                RExC_emit = (regnode *)orig_emit;
+            }
 
             ret = reg_node(pRExC_state, op);
 
