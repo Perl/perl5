@@ -121,6 +121,15 @@ L<IO> has been upgraded from version 1.25_07 to 1.25_08.
 L<IO::Socket> tries harder to cache or otherwise fetch socket
 information.
 
+=item *
+
+L<Storable> has been upgraded from version 2.36 to 2.37.
+
+Restricted hashes were not always thawed correctly [perl #73972].
+
+Storable would croak when freezing a blessed REF object with a
+C<STORABLE_freeze()> method [perl #113880].
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -351,7 +360,9 @@ be noted as well.
 
 =item *
 
-XXX
+OP allocation for CVs now uses a slab allocator.  This simplifies
+memory management for OPs allocated to a CV, so cleaning up after a
+compilation error is simpler and safer [perl #111462][perl #112312].
 
 =back
 
@@ -368,7 +379,7 @@ L</Modules and Pragmata>.
 =item *
 
 A regression introduced in v5.14.0 has been fixed, in which some calls
-to the C<re> module would clobber C<$_>.
+to the C<re> module would clobber C<$_> [perl #113750].
 
 =item *
 
@@ -463,6 +474,16 @@ properly [perl #113010].
 
 C<< sub foo { my $a = 0; while ($a) { ... } } >> and
 C<< sub foo { while (0) { ... } } >> now return the same thing [perl #73618].
+
+=item *
+
+Fixed the debugger C<l> and C<M> commends, and other debugger
+functionality which was broken in 5.17.0 [perl #113918].
+
+=item *
+
+String negation now behaves the same under C<use integer;> as it does
+without [perl #113012].
 
 =back
 
