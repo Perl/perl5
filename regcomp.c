@@ -11155,7 +11155,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
 	}
-	ANYOF_BITMAP_ZERO(ret);
 	listsv = newSVpvs("# comment\n");
 	initial_listsv_len = SvCUR(listsv);
     }
@@ -12315,6 +12314,7 @@ parseit:
      * compile time that match under all conditions.  Go through it, and
      * for things that belong in the bitmap, put them there, and delete from
      * <cp_list> */
+    ANYOF_BITMAP_ZERO(ret);
     if (cp_list) {
 
 	/* This gets set if we actually need to modify things */
