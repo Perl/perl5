@@ -146,7 +146,10 @@ PP(pp_padhv)
 
 PP(pp_padcv)
 {
-    DIE(aTHX_ "panic: padcv");
+    dVAR; dSP; dTARGET;
+    assert(SvTYPE(TARG) == SVt_PVCV);
+    XPUSHs(TARG);
+    RETURN;
 }
 
 /* Translations. */

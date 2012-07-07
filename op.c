@@ -8034,6 +8034,10 @@ Perl_newHVREF(pTHX_ OP *o)
 OP *
 Perl_newCVREF(pTHX_ I32 flags, OP *o)
 {
+    if (o->op_type == OP_PADANY) {
+	o->op_type = OP_PADCV;
+	o->op_ppaddr = PL_ppaddr[OP_PADCV];
+    }
     return newUNOP(OP_RV2CV, flags, scalar(o));
 }
 

@@ -90,17 +90,15 @@ sub off { $::TODO = undef }
 use 5.01; # state
 {
   state sub foo { 44 }
-  isnt \&::foo, eval {\&foo}, 'state sub is not stored in the package';
-on;
-  is eval{foo}, 44, 'calling state sub from same package';
-  is eval{&foo}, 44, 'calling state sub from same package (amper)';
-  is eval{do foo()}, 44, 'calling state sub from same package (do)';
+  isnt \&::foo, \&foo, 'state sub is not stored in the package';
+  is eval foo, 44, 'calling state sub from same package';
+  is eval &foo, 44, 'calling state sub from same package (amper)';
+  is eval do foo(), 44, 'calling state sub from same package (do)';
   package bar;
-  is eval{foo}, 44, 'calling state sub from another package';
-  is eval{&foo}, 44, 'calling state sub from another package (amper)';
-  is eval{do foo()}, 44, 'calling state sub from another package (do)';
+  is eval foo, 44, 'calling state sub from another package';
+  is eval &foo, 44, 'calling state sub from another package (amper)';
+  is eval do foo(), 44, 'calling state sub from another package (do)';
 }
-off;
 package bar;
 is foo, 43, 'state sub falling out of scope';
 is &foo, 43, 'state sub falling out of scope (called via amper)';
@@ -115,9 +113,7 @@ is do foo(), 43, 'state sub falling out of scope (called via amper)';
     }
     44
   }
-SKIP: { ::skip "Tests are inside a state sub (still uncallable)", 3;
   sa(1);
-}
   sub sb { 43 }
   state sub sb;
   state sub sb {
@@ -136,21 +132,23 @@ SKIP: { ::skip "Tests are inside a state sub (still uncallable)", 3;
     }
     44
   }
-SKIP: { ::skip "Tests are inside a state sub (still uncallable)", 3;
+::on;
   sb(1);
-}
+::off;
   sub sb2 { 43 }
   state sub sb2;
   sub sb2 {
     if (shift) {
       package bar;
-      is b, 44, 'state sub visible inside itself after decl';
-      is &b, 44, 'state sub visible inside itself after decl (amper)';
-      is do b(), 44, 'state sub visible inside itself after decl (do)';
+     eval "
+      is sb2, 44, 'state sub visible inside itself after decl';
+      is &sb2, 44, 'state sub visible inside itself after decl (amper)';
+      is do sb2(), 44, 'state sub visible inside itself after decl (do)';
+     ";
     }
     44
   }
-SKIP: { ::skip "Tests are inside a state sub (still uncallable)", 3;
+SKIP: { ::skip "Assertion failure", 3;
   sb2(1);
 }
   state sub sb3;
@@ -161,7 +159,6 @@ SKIP: { ::skip "Tests are inside a state sub (still uncallable)", 3;
       sub sb3 { 47 }
     }
   }
-::on;
   is eval{sb3}, 47,
     'sub foo{} applying to "state sub foo;" even inside state sub foo{}';
 }
@@ -169,6 +166,7 @@ sub sc { 43 }
 {
   state sub sc;
   eval{sc};
+::on;
   like $@, qr/^Undefined subroutine &sb called at /,
      'state sub foo; makes no lex alias for existing sub';
   eval{&sc};
@@ -177,12 +175,12 @@ sub sc { 43 }
   eval{do sc()};
   like $@, qr/^Undefined subroutine &sb called at /,
      'state sub foo; makes no lex alias for existing sub (do)';
+::off;
 }
 package main;
 {
   state sub se ($);
   is prototype eval{\&se}, '$', 'state sub with proto';
-off;
   is prototype "se", undef, 'prototype "..." ignores state subs';
 }
 {
@@ -206,6 +204,7 @@ on;
      '"state" subroutine foo masks earlier declaration in same scope at '
    . "squidges line 88.\n",
      'redefinition warning for state sub';
+off;
 }
 # Since state vars inside anonymous subs are cloned at the same time as the
 # anonymous subs containing them, the same should happen for state subs.
@@ -219,7 +218,8 @@ sub make_closure {
 $sub1 = make_closure 48;
 $sub2 = make_closure 49;
 is &$sub1, 48, 'state sub in closure (1)';
-is &$sub1, 49, 'state sub in closure (2)';
+on;
+is &$sub2, 49, 'state sub in closure (2)';
 off;
 # But we need to test that state subs actually do persist from one invoca-
 # tion of a named sub to another (i.e., that they are not my subs).
@@ -252,7 +252,6 @@ off;
   state sub BEGIN { exit };
   pass 'state subs are never special blocks';
   state sub END { shift }
-on;
   is eval{END('jkqeudth')}, jkqeudth,
     'state sub END {shift} implies @_, not @ARGV';
 }
@@ -262,6 +261,7 @@ on;
   state $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval "#line 56 pygpyf\nsub redef {}";
+on;
   is $w, "Subroutine redef redefined at pygpyf line 56.\n",
          "sub redefinition warnings from state subs";
 }
