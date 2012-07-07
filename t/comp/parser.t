@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..135\n";
+print "1..137\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -347,6 +347,12 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   is(exists &zlonk, 1, 'sub now stubbed');
   is(defined &zlonk, '', 'but no body defined');
 }
+
+# [perl #113016] CORE::print::foo
+sub CORE'print'foo { 43 } # apostrophes intentional; do not tempt fate
+sub CORE'foo'bar { 43 }
+is CORE::print::foo, 43, 'CORE::print::foo is not CORE::print ::foo';
+is scalar eval "CORE::foo'bar", 43, "CORE::foo'bar is not an error";
 
 # bug #71748
 eval q{

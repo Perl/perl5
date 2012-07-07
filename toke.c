@@ -7226,10 +7226,19 @@ Perl_yylex(pTHX)
 
 	case KEY_CORE:
 	    if (*s == ':' && s[1] == ':') {
-		s += 2;
+		STRLEN olen = len;
 		d = s;
+		s += 2;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		if (!(tmp = keyword(PL_tokenbuf, len, 1)))
+		if ((*s == ':' && s[1] == ':')
+		 || (!(tmp = keyword(PL_tokenbuf, len, 1)) && *s == '\''))
+		{
+		    s = d;
+		    len = olen;
+		    Copy(PL_bufptr, PL_tokenbuf, olen, char);
+		    goto just_a_word;
+		}
+		if (!tmp)
 		    Perl_croak(aTHX_ "CORE::%"SVf" is not a keyword",
                                     SVfARG(newSVpvn_flags(PL_tokenbuf, len,
                                                 (UTF ? SVf_UTF8 : 0) | SVs_TEMP)));
