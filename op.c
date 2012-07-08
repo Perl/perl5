@@ -6871,7 +6871,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     register CV *cv = NULL;
     register CV *compcv = PL_compcv;
     SV *const_sv;
-    const bool ec = PL_parser && PL_parser->error_count;
     PADNAME *name;
 
     PERL_ARGS_ASSERT_NEWMYSUB;
@@ -6904,7 +6903,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    SAVEFREEOP(attrs);
     }
 
-    if (ec) {
+    if (PL_parser && PL_parser->error_count) {
 	op_free(block);
 	goto done;
     }
