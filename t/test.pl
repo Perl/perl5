@@ -189,6 +189,12 @@ sub find_git_or_skip {
     skip($reason, @_);
 }
 
+sub BAIL_OUT {
+    my ($reason) = @_;
+    _print("Bail out!  $reason\n");
+    exit 255;
+}
+
 sub _ok {
     my ($pass, $where, $name, @mess) = @_;
     # Do not try to microoptimize by factoring out the "not ".
