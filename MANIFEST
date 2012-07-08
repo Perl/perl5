@@ -5034,6 +5034,7 @@ t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/croak/mg			Test croak calls from mg.c
 t/lib/croak/op			Test croak calls from op.c
 t/lib/croak/pp_ctl		Test croak calls from pp_ctl.c
+t/lib/croak/pp_hot		Test croak calls from pp_hot.c
 t/lib/croak.t			Test calls to Perl_croak() in the C source.
 t/lib/croak/toke		Test croak calls from toke.c
 t/lib/cygwin.t			Builtin cygwin function tests

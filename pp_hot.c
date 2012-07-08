@@ -2648,15 +2648,15 @@ try_autoload:
 	    {
 		cv = GvCV(autogv);
 	    }
-	    /* sorry */
 	    else {
+	       sorry:
 		sub_name = sv_newmortal();
 		gv_efullname3(sub_name, gv, NULL);
 		DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
 	    }
 	}
 	if (!cv)
-	    DIE(aTHX_ "Not a CODE reference");
+	    goto sorry;
 	goto retry;
     }
 

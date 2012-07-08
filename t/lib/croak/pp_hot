@@ -1,0 +1,13 @@
+__END__
+# NAME calling undef sub belonging to undef GV
+   my $foosub = \&foo;
+   undef *foo;
+   &$foosub;
+EXPECT
+Undefined subroutine &main::foo called at - line 3.
+########
+# NAME calling undef sub resident in its GV
+   my $foosub = \&foo;
+   &$foosub;
+EXPECT
+Undefined subroutine &main::foo called at - line 2.
