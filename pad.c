@@ -381,7 +381,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
-    CvGV_set(cv, NULL);
+    if (CvNAMED(cv)) unshare_hek(CvNAME_HEK(cv));
+    else	     CvGV_set(cv, NULL);
 
     /* This statement and the subsequence if block was pad_undef().  */
     pad_peg("pad_undef");
@@ -1989,7 +1990,9 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
 					   : CvFILE(proto);
-    CvGV_set(cv,CvGV(proto));
+    if (CvNAMED(proto))
+	 SvANY(cv)->xcv_gv_u.xcv_hek = share_hek_hek(CvNAME_HEK(proto));
+    else CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
     OP_REFCNT_LOCK;
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));

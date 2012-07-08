@@ -207,6 +207,7 @@ void
 Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 {
     GV * const oldgv = CvGV(cv);
+    HEK *hek;
     PERL_ARGS_ASSERT_CVGV_SET;
 
     if (oldgv == gv)
@@ -221,8 +222,9 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 	    sv_del_backref(MUTABLE_SV(oldgv), MUTABLE_SV(cv));
 	}
     }
+    else if ((hek = CvNAME_HEK(cv))) unshare_hek(hek);
 
-    SvANY(cv)->xcv_gv = gv;
+    SvANY(cv)->xcv_gv_u.xcv_gv = gv;
     assert(!CvCVGV_RC(cv));
 
     if (!gv)
