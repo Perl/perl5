@@ -160,16 +160,14 @@ sub sc { 43 }
 {
   state sub sc;
   eval{sc};
-::on;
-  like $@, qr/^Undefined subroutine &sb called at /,
+  like $@, qr/^Undefined subroutine &sc called at /,
      'state sub foo; makes no lex alias for existing sub';
   eval{&sc};
-  like $@, qr/^Undefined subroutine &sb called at /,
+  like $@, qr/^Undefined subroutine &sc called at /,
      'state sub foo; makes no lex alias for existing sub (amper)';
   eval{do sc()};
-  like $@, qr/^Undefined subroutine &sb called at /,
+  like $@, qr/^Undefined subroutine &sc called at /,
      'state sub foo; makes no lex alias for existing sub (do)';
-::off;
 }
 package main;
 {
