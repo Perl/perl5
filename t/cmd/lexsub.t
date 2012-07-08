@@ -191,12 +191,10 @@ package main;
     state sub foo;
     state sub foo {};
   ';
-on;
   is $w,
-     '"state" subroutine foo masks earlier declaration in same scope at '
+     '"state" subroutine &foo masks earlier declaration in same scope at '
    . "squidges line 88.\n",
-     'redefinition warning for state sub';
-off;
+     'warning for state sub masking earlier declaration';
 }
 # Since state vars inside anonymous subs are cloned at the same time as the
 # anonymous subs containing them, the same should happen for state subs.

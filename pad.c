@@ -875,9 +875,11 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
+	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
-		"\"%s\" variable %"SVf" masks earlier declaration in same %s",
+		"\"%s\" %s %"SVf" masks earlier declaration in same %s",
 		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
+		*SvPVX(sv) == '&' ? "subroutine" : "variable",
 		sv,
 		(COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
 		    ? "scope" : "statement"));

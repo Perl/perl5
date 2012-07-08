@@ -4561,6 +4561,14 @@ was either never opened or has since been closed.
 stubs.  Stubs should never be implicitly created, but explicit calls to
 C<can> may break this.
 
+=item "%s" subroutine &%s masks earlier declaration in same %s
+
+(W misc) A "my" or "state" subroutine has been redeclared in the
+current scope or statement, effectively eliminating all access to
+the previous instance.  This is almost always a typographical error.
+Note that the earlier subroutine will still exist until the end of
+the scope or until all closure referents to it are destroyed.
+
 =item Subroutine %s redefined
 
 (W redefine) You redefined a subroutine.  To suppress this warning, say
