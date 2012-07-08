@@ -44,6 +44,10 @@
 #  include <netinet/tcp.h>
 #endif
 
+#ifdef WIN32
+# include <ws2tcpip.h>
+#endif
+
 #ifdef NETWARE
 NETDB_DEFINE_CONTEXT
 NETINET_DEFINE_CONTEXT
@@ -959,27 +963,84 @@ inet_pton(af, host)
 #endif
 
 void
-pack_ipv6_mreq(addr, interface)
-	SV *	addr
+pack_ip_mreq(multiaddr, interface=&PL_sv_undef)
+	SV *	multiaddr
+	SV *	interface
+	CODE:
+	{
+#ifdef HAS_IP_MREQ
+	struct ip_mreq mreq;
+	char * multiaddrbytes;
+	char * interfacebytes;
+	STRLEN len;
+	if (DO_UTF8(multiaddr) && !sv_utf8_downgrade(multiaddr, 1))
+		croak("Wide character in %s", "Socket::pack_ip_mreq");
+	multiaddrbytes = SvPVbyte(multiaddr, len);
+	if (len != sizeof(mreq.imr_multiaddr))
+		croak("Bad arg length %s, length is %"UVuf", should be %"UVuf,
+		      "Socket::pack_ip_mreq", (UV)len, (UV)sizeof(mreq.imr_multiaddr));
+	Zero(&mreq, sizeof(mreq), char);
+	Copy(multiaddrbytes, &mreq.imr_multiaddr, sizeof(mreq.imr_multiaddr), char);
+	if(SvOK(interface)) {
+		if (DO_UTF8(interface) && !sv_utf8_downgrade(interface, 1))
+			croak("Wide character in %s", "Socket::pack_ip_mreq");
+		interfacebytes = SvPVbyte(interface, len);
+		if (len != sizeof(mreq.imr_interface))
+			croak("Bad arg length %s, length is %"UVuf", should be %"UVuf,
+			      "Socket::pack_ip_mreq", (UV)len, (UV)sizeof(mreq.imr_interface));
+		Copy(interfacebytes, &mreq.imr_interface, sizeof(mreq.imr_interface), char);
+	}
+	else
+		mreq.imr_interface.s_addr = INADDR_ANY;
+	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
+#else
+	not_here("pack_ip_mreq");
+#endif
+	}
+
+void
+unpack_ip_mreq(mreq_sv)
+	SV * mreq_sv
+	PPCODE:
+	{
+#ifdef HAS_IP_MREQ
+	struct ip_mreq mreq;
+	STRLEN mreqlen;
+	char * mreqbytes = SvPVbyte(mreq_sv, mreqlen);
+	if (mreqlen != sizeof(mreq))
+		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
+		      "Socket::unpack_ip_mreq", (UV)mreqlen, (UV)sizeof(mreq));
+	Copy(mreqbytes, &mreq, sizeof(mreq), char);
+	EXTEND(SP, 2);
+	mPUSHp((char *)&mreq.imr_multiaddr, sizeof(mreq.imr_multiaddr));
+	mPUSHp((char *)&mreq.imr_interface, sizeof(mreq.imr_interface));
+#else
+	not_here("unpack_ip_mreq");
+#endif
+	}
+
+void
+pack_ipv6_mreq(multiaddr, interface)
+	SV *	multiaddr
 	unsigned int	interface
 	CODE:
 	{
 #ifdef HAS_IPV6_MREQ
 	struct ipv6_mreq mreq;
-	char * addrbytes;
-	STRLEN addrlen;
-	if (DO_UTF8(addr) && !sv_utf8_downgrade(addr, 1))
+	char * multiaddrbytes;
+	STRLEN len;
+	if (DO_UTF8(multiaddr) && !sv_utf8_downgrade(multiaddr, 1))
 		croak("Wide character in %s", "Socket::pack_ipv6_mreq");
-	addrbytes = SvPVbyte(addr, addrlen);
-	if (addrlen != sizeof(mreq.ipv6mr_multiaddr))
+	multiaddrbytes = SvPVbyte(multiaddr, len);
+	if (len != sizeof(mreq.ipv6mr_multiaddr))
 		croak("Bad arg length %s, length is %"UVuf", should be %"UVuf,
-		      "Socket::pack_ipv6_mreq", (UV)addrlen, (UV)sizeof(mreq.ipv6mr_multiaddr));
+		      "Socket::pack_ipv6_mreq", (UV)len, (UV)sizeof(mreq.ipv6mr_multiaddr));
 	Zero(&mreq, sizeof(mreq), char);
-	Copy(addrbytes, &mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr), char);
+	Copy(multiaddrbytes, &mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr), char);
 	mreq.ipv6mr_interface = interface;
 	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
 #else
-	ST(0) = (SV*)not_here("pack_ipv6_mreq");
+	not_here("pack_ipv6_mreq");
 #endif
 	}
 

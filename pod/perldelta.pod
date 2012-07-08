@@ -138,6 +138,10 @@ Restricted hashes were not always thawed correctly [perl #73972].
 Storable would croak when freezing a blessed REF object with a
 C<STORABLE_freeze()> method [perl #113880].
 
+=item *
+
+L<Socket> has been upgraded from version 2.001 to 2.002.
+
 =back
 
 =head2 Removed Modules and Pragmata

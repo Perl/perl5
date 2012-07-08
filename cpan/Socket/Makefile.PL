@@ -30,10 +30,15 @@ sub check_for
 	open( my $file_source_fh, ">", $file_source ) or die "Cannot write $file_source - $!";
 	print $file_source_fh <<"EOF";
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#ifdef WIN32
+# include <ws2tcpip.h>
+# include <winsock.h>
+#else
+# include <sys/socket.h>
+# include <netdb.h>
+# include <netinet/in.h>
+# include <arpa/inet.h>
+#endif
 int main(int argc, char *argv[])
   {
     (void)argc;
@@ -103,6 +108,13 @@ check_for(
     main    => "struct sockaddr_in6 sin6; sin6.sin6_scope_id = 0;"
 );
 
+# TODO: Needs adding to perl5 core before importing dual-life again
+check_for(
+    confkey => "d_ip_mreq",
+    define  => "HAS_IP_MREQ",
+    main    => "struct ip_mreq mreq; mreq.imr_multiaddr.s_addr = INADDR_ANY;"
+);
+
 check_for(
     confkey => "d_ipv6_mreq",
     define  => "HAS_IPV6_MREQ",
@@ -149,8 +161,9 @@ my @names = (
 
 	IOV_MAX
 
-	IP_OPTIONS IP_HDRINCL IP_TOS IP_TTL IP_RECVOPTS IP_RECVRETOPTS
-	IP_RETOPTS
+	IP_ADD_MEMBERSHIP IP_DROP_MEMBERSHIP IP_HDRINCL IP_MULTICAST_IF
+	IP_MULTICAST_LOOP IP_MULTICAST_TTL IP_OPTIONS IP_RECVOPTS
+	IP_RECVRETOPTS IP_RETOPTS IP_TOS IP_TTL 
 
 	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_MTU IPV6_MTU_DISCOVER
 	IPV6_MULTICAST_HOPS IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP
@@ -172,6 +185,7 @@ my @names = (
 	SCM_CONNECT SCM_CREDENTIALS SCM_CREDS SCM_TIMESTAMP
 
 	SOCK_DGRAM SOCK_RAW SOCK_RDM SOCK_SEQPACKET SOCK_STREAM
+	SOCK_NONBLOCK SOCK_CLOEXEC
 
 	SOL_SOCKET 
 
