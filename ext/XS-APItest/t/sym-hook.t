@@ -4,7 +4,7 @@
 # So far we only test RV2CV.
 
 use XS::APItest;
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 BEGIN {
     setup_rv2cv_addunderbar;
@@ -20,7 +20,13 @@ is(foo(), "phew");
 
 BEGIN { # If there is a foo symbol, this test will not be testing anything.
     delete $::{foo};
+    delete $::{goo};
 }
 is((foo bar), 'bar___');
 $bar = "baz";
 is((foo $bar), 'baz___');
+
+# Proto should cause goo() to override Foo->goo interpretation.
+{package Foom}
+sub goo_ (*) { shift . "===" }
+is((goo Foom), "Foom===");

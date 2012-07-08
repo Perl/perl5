@@ -3760,11 +3760,9 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 
     PERL_ARGS_ASSERT_INTUIT_METHOD;
 
-    if (gv) {
-	if (SvTYPE(gv) == SVt_PVGV && GvIO(gv))
+    if (gv && SvTYPE(gv) == SVt_PVGV && GvIO(gv))
 	    return 0;
-	if (cv) {
-	    if (SvPOK(cv)) {
+    if (cv && SvPOK(cv)) {
 		const char *proto = CvPROTO(cv);
 		if (proto) {
 		    if (*proto == ';')
@@ -3772,8 +3770,6 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 		    if (*proto == '*')
 			return 0;
 		}
-	    }
-	}
     }
     s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
     /* start is the beginning of the possible filehandle/object,
