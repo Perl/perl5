@@ -477,7 +477,7 @@ C<< sub foo { while (0) { ... } } >> now return the same thing [perl #73618].
 
 =item *
 
-Fixed the debugger C<l> and C<M> commends, and other debugger
+Fixed the debugger C<l> and C<M> commands, and other debugger
 functionality which was broken in 5.17.0 [perl #113918].
 
 =item *
