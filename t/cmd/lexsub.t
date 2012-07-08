@@ -138,17 +138,13 @@ is do foo(), 43, 'state sub falling out of scope (called via amper)';
   sub sb2 {
     if (shift) {
       package bar;
-     eval "
       is sb2, 44, 'state sub visible inside itself after decl';
       is &sb2, 44, 'state sub visible inside itself after decl (amper)';
       is do sb2(), 44, 'state sub visible inside itself after decl (do)';
-     ";
     }
     44
   }
-SKIP: { ::skip "Assertion failure", 3;
   sb2(1);
-}
   state sub sb3;
   {
     state sub sb3 { # new pad entry
