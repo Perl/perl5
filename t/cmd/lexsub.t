@@ -132,9 +132,7 @@ is do foo(), 43, 'state sub falling out of scope (called via amper)';
     }
     44
   }
-::on;
   sb(1);
-::off;
   sub sb2 { 43 }
   state sub sb2;
   sub sb2 {
