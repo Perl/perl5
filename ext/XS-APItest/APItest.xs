@@ -3512,8 +3512,435 @@ test_isBLANK_uni(UV ord)
         RETVAL
 
 bool
-test_isBLANK_utf8(char * p)
+test_isBLANK_A(UV ord)
     CODE:
-        RETVAL = isBLANK_utf8((U8 *) p);
+        RETVAL = isBLANK_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isBLANK_L1(UV ord)
+    CODE:
+        RETVAL = isBLANK_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isBLANK_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isBLANK_utf8(p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isUPPER_uni(UV ord)
+    CODE:
+        RETVAL = isUPPER_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isUPPER_A(UV ord)
+    CODE:
+        RETVAL = isUPPER_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isUPPER_L1(UV ord)
+    CODE:
+        RETVAL = isUPPER_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isUPPER_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isUPPER_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isLOWER_uni(UV ord)
+    CODE:
+        RETVAL = isLOWER_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isLOWER_A(UV ord)
+    CODE:
+        RETVAL = isLOWER_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isLOWER_L1(UV ord)
+    CODE:
+        RETVAL = isLOWER_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isLOWER_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isLOWER_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALPHA_uni(UV ord)
+    CODE:
+        RETVAL = isALPHA_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALPHA_A(UV ord)
+    CODE:
+        RETVAL = isALPHA_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALPHA_L1(UV ord)
+    CODE:
+        RETVAL = isALPHA_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALPHA_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isALPHA_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALNUM_uni(UV ord)
+    CODE:
+        RETVAL = isALNUM_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALNUM_A(UV ord)
+    CODE:
+        RETVAL = isWORDCHAR_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALNUM_L1(UV ord)
+    CODE:
+        RETVAL = isWORDCHAR_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALNUM_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isALNUM_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isDIGIT_uni(UV ord)
+    CODE:
+        RETVAL = isDIGIT_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isDIGIT_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isDIGIT_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isDIGIT_A(UV ord)
+    CODE:
+        RETVAL = isDIGIT_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isDIGIT_L1(UV ord)
+    CODE:
+        RETVAL = isDIGIT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDFIRST_uni(UV ord)
+    CODE:
+        RETVAL = isIDFIRST_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDFIRST_A(UV ord)
+    CODE:
+        RETVAL = isIDFIRST_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDFIRST_L1(UV ord)
+    CODE:
+        RETVAL = isIDFIRST_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDFIRST_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isIDFIRST_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isSPACE_uni(UV ord)
+    CODE:
+        RETVAL = isSPACE_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isSPACE_A(UV ord)
+    CODE:
+        RETVAL = isSPACE_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isSPACE_L1(UV ord)
+    CODE:
+        RETVAL = isSPACE_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isSPACE_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isSPACE_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isASCII_uni(UV ord)
+    CODE:
+        RETVAL = isASCII_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isASCII_A(UV ord)
+    CODE:
+        RETVAL = isASCII_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isASCII_L1(UV ord)
+    CODE:
+        RETVAL = isASCII_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isASCII_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isASCII_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isCNTRL_uni(UV ord)
+    CODE:
+        RETVAL = isCNTRL_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isCNTRL_A(UV ord)
+    CODE:
+        RETVAL = isCNTRL_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isCNTRL_L1(UV ord)
+    CODE:
+        RETVAL = isCNTRL_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isCNTRL_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isCNTRL_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPRINT_uni(UV ord)
+    CODE:
+        RETVAL = isPRINT_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPRINT_A(UV ord)
+    CODE:
+        RETVAL = isPRINT_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPRINT_L1(UV ord)
+    CODE:
+        RETVAL = isPRINT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPRINT_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isPRINT_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isGRAPH_uni(UV ord)
+    CODE:
+        RETVAL = isGRAPH_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isGRAPH_A(UV ord)
+    CODE:
+        RETVAL = isGRAPH_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isGRAPH_L1(UV ord)
+    CODE:
+        RETVAL = isGRAPH_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isGRAPH_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isGRAPH_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALNUMC_A(UV ord)
+    CODE:
+        RETVAL = isALNUMC_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isALNUMC_L1(UV ord)
+    CODE:
+        RETVAL = isALNUMC_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPUNCT_uni(UV ord)
+    CODE:
+        RETVAL = isPUNCT_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPUNCT_A(UV ord)
+    CODE:
+        RETVAL = isPUNCT_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPUNCT_L1(UV ord)
+    CODE:
+        RETVAL = isPUNCT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPUNCT_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isPUNCT_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isXDIGIT_uni(UV ord)
+    CODE:
+        RETVAL = isXDIGIT_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isXDIGIT_A(UV ord)
+    CODE:
+        RETVAL = isXDIGIT_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isXDIGIT_L1(UV ord)
+    CODE:
+        RETVAL = isXDIGIT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isXDIGIT_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isXDIGIT_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPSXSPC_uni(UV ord)
+    CODE:
+        RETVAL = isPSXSPC_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPSXSPC_A(UV ord)
+    CODE:
+        RETVAL = isPSXSPC_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPSXSPC_L1(UV ord)
+    CODE:
+        RETVAL = isPSXSPC_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isPSXSPC_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isPSXSPC_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isQUOTEMETA(UV ord)
+    CODE:
+        RETVAL = _isQUOTEMETA(ord);
     OUTPUT:
         RETVAL
