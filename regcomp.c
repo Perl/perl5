@@ -5025,7 +5025,7 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state, OP *expr,
  * the original pattern needs upgrading to utf8.
  */
 
-bool
+static bool
 S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
     char *pat, STRLEN plen)
 {
