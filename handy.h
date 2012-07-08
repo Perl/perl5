@@ -991,7 +991,7 @@ EXTCONST U32 PL_charclass[];
 #define isUPPER_utf8(p)		generic_utf8(isUPPER, is_utf8_upper, p)
 #define isLOWER_utf8(p)		generic_utf8(isLOWER, is_utf8_lower, p)
 /* Because ASCII is invariant under utf8, the non-utf8 macro works */
-#define isASCII_utf8(p)		isASCII(p)
+#define isASCII_utf8(p)		isASCII(*p)
 #define isCNTRL_utf8(p)		generic_utf8(isCNTRL, is_utf8_cntrl, p)
 #define isGRAPH_utf8(p)		generic_utf8(isGRAPH, is_utf8_graph, p)
 #define isPRINT_utf8(p)		generic_utf8(isPRINT, is_utf8_print, p)
