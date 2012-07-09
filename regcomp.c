@@ -12084,9 +12084,9 @@ parseit:
                                 break;
                             case MICRO_SIGN:
                                 cp_list = add_cp_to_invlist(cp_list,
-                                                    GREEK_SMALL_LETTER_MU);
-                                cp_list = add_cp_to_invlist(cp_list,
                                                     GREEK_CAPITAL_LETTER_MU);
+                                cp_list = add_cp_to_invlist(cp_list,
+                                                    GREEK_SMALL_LETTER_MU);
                                 break;
                             case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
                             case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
