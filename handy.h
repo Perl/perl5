@@ -935,13 +935,14 @@ EXTCONST U32 PL_charclass[];
 #define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
 #define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
 #define isXDIGIT_uni(c)		generic_uni(isXDIGIT, is_uni_xdigit, c)
+
+/* Posix and regular space differ only in U+000B, which is in Latin1 */
+#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
+
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
 #define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
 #define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
-
-/* Posix and regular space differ only in U+000B, which is in Latin1 */
-#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
 
 #define isALNUM_LC_uvchr(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
 #define isIDFIRST_LC_uvchr(c)	(c < 256 ? isIDFIRST_LC(c) : is_uni_idfirst_lc(c))
@@ -964,7 +965,7 @@ EXTCONST U32 PL_charclass[];
  * the function.  This relies on the fact that ASCII characters have the same
  * representation whether utf8 or not */
 #define generic_utf8(macro, function, p) (isASCII(*(p))                        \
-                                         ? CAT2(CAT2(macro,_),A)(*(p))               \
+                                         ? CAT2(CAT2(macro,_),A)(*(p))         \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? CAT2(macro, _L1)                  \
                                              (TWO_BYTE_UTF8_TO_UNI(*(p),       \
