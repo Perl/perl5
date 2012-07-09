@@ -11065,7 +11065,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 {
     dVAR;
     register UV nextvalue;
-    register IV prevvalue = OOB_UNICODE;
+    register UV prevvalue = OOB_UNICODE;
     register IV range = 0;
     UV value = 0; /* XXX:dmq: needs to be referenceable (unfortunately) */
     register regnode *ret;
@@ -11717,7 +11717,7 @@ parseit:
 	} /* end of namedclass \blah */
 
 	if (range) {
-	    if (prevvalue > (IV)value) /* b-a */ {
+	    if (prevvalue > value) /* b-a */ {
 		const int w = RExC_parse - rangebegin;
 		Simple_vFAIL4("Invalid [] range \"%*.*s\"", w, w, rangebegin);
 		range = 0; /* not a valid range */
@@ -12454,7 +12454,7 @@ parseit:
 				 && (! _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value))
 				 /* If the latest code point has a fold whose
 				  * bit is set, it must be the only other one */
-				&& ((prevvalue = PL_fold_latin1[value]) != (IV)value)
+				&& ((prevvalue = PL_fold_latin1[value]) != value)
 				 && ANYOF_BITMAP_TEST(ret, prevvalue)))))
     {
         /* Note that the information needed to decide to do this optimization
