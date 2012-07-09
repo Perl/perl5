@@ -3811,7 +3811,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 					(U8*) SvPVX(*entryp),
 					(U8*) SvPVX(*entryp) + SvCUR(*entryp),
 					0)));
-			/*DEBUG_U(PerlIO_printf(Perl_debug_log, "Adding %"UVXf" to list for %"UVXf"\n", valid_utf8_to_uvchr((U8*) SvPVX(*entryp), 0), u));*/
+			/*DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: Adding %"UVXf" to list for %"UVXf"\n", __FILE__, __LINE__, valid_utf8_to_uvchr((U8*) SvPVX(*entryp), 0), u));*/
 		    }
 		}
 	    }
@@ -3884,14 +3884,14 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	    /* Make sure there is a mapping to itself on the list */
 	    if (! found_key) {
 		av_push(list, newSVuv(val));
-		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "Adding %"UVXf" to list for %"UVXf"\n", val, val));*/
+		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: Adding %"UVXf" to list for %"UVXf"\n", __FILE__, __LINE__, val, val));*/
 	    }
 
 
 	    /* Simply add the value to the list */
 	    if (! found_inverse) {
 		av_push(list, newSVuv(inverse));
-		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "Adding %"UVXf" to list for %"UVXf"\n", inverse, val));*/
+		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: Adding %"UVXf" to list for %"UVXf"\n", __FILE__, __LINE__, inverse, val));*/
 	    }
 
 	    /* swatch_get() increments the value of val for each element in the
