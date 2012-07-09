@@ -231,9 +231,7 @@ is &$sub2, 49, 'state sub in closure (2)';
   my $x = 43;
   for $x (765) {
     state sub etetetet { $x }
-on;
-    is eval{etetetet}, $x, 'state sub ignores for() localisation';
-off;
+    is eval{etetetet}, 43, 'state sub ignores for() localisation';
   }
 }
 # And we also need to test that multiple state subs can close over each
