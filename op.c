@@ -6976,11 +6976,19 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		goto done;
 	    }
 	    else {
-		const line_t oldline = CopLINE(PL_curcop);
-		if (PL_parser && PL_parser->copline != NOLINE)
+		/* redundant check that avoids creating the extra SV
+		   most of the time: */
+		if (const_sv || ckWARN(WARN_REDEFINE)) {
+		    const line_t oldline = CopLINE(PL_curcop);
+		    SV *noamp = sv_2mortal(newSVpvn_utf8(
+				    PadnamePV(name)+1,PadnameLEN(name)-1,
+				     PadnameUTF8(name)
+				));
+		    if (PL_parser && PL_parser->copline != NOLINE)
 			CopLINE_set(PL_curcop, PL_parser->copline);
-		report_redefined_cv(name, cv, &const_sv);
-		CopLINE_set(PL_curcop, oldline);
+		    report_redefined_cv(noamp, cv, &const_sv);
+		    CopLINE_set(PL_curcop, oldline);
+		}
 #ifdef PERL_MAD
 		if (!PL_minus_c)	/* keep old one around for madskills */
 #endif

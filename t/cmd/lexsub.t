@@ -269,7 +269,6 @@ sub make_anon_with_state_sub{
   state $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval "#line 56 pygpyf\nsub redef {}";
-on;
   is $w, "Subroutine redef redefined at pygpyf line 56.\n",
          "sub redefinition warnings from state subs";
 }
