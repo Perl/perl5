@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 52);
+BEGIN { require q(./test.pl); } plan(tests => 64);
 
 require mro;
 
@@ -327,4 +327,54 @@ is(eval { MRO_N->testfunc() }, 123);
     @Thwit::ISA = "Sile";
     undef %Thwit::;
     ok !Thrext->isa('Sile'), 'undef %package:: updates subclasses';
+}
+
+{
+    # assigning @ISA at runtime and then modifying it
+    # note that mentioning @RuntimeSubclass::ISA at compile time makes this
+    # test not fail
+    package RuntimeSuperclass1 {
+        sub foo1 {}
+    }
+    package RuntimeSuperclass2 {
+        sub foo2 {}
+    }
+    package RuntimeSubclass { }
+
+    my $stash = \%RuntimeSubclass::;
+    my $globref = do {
+        no strict 'refs';
+        my $ref = \*{"__ANON__::REF1"};
+        delete $$__ANON__::{REF1};
+        $ref;
+    };
+    $stash->{ISA} = *$globref;
+    my $isa = (*{ $stash->{ISA} } = []);
+
+    @$isa = ('RuntimeSuperclass1');
+    {
+        my $obj = bless {}, 'RuntimeSubclass';
+        ok $obj->isa('RuntimeSuperclass1');
+        ok $obj->can('foo1');
+        ok !$obj->isa('RuntimeSuperclass2');
+        ok !$obj->can('foo2');
+
+        my $linear_isa = mro::get_linear_isa('RuntimeSubclass');
+        is scalar(@$linear_isa), 2;
+        is $linear_isa->[1], 'RuntimeSuperclass1';
+    }
+
+    @$isa = ('RuntimeSuperclass2');
+    {
+        my $obj = bless {}, 'RuntimeSubclass';
+        ok $obj->isa('RuntimeSuperclass2');
+        ok $obj->can('foo2');
+        ok !$obj->isa('RuntimeSuperclass1');
+        ok !$obj->can('foo1');
+
+        my $linear_isa = mro::get_linear_isa('RuntimeSubclass');
+        is scalar(@$linear_isa), 2;
+        is $linear_isa->[1], 'RuntimeSuperclass2';
+    }
+
 }
