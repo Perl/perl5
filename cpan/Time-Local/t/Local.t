@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Config;
-use Test::More;
+use Test::More 0.88;
 use Time::Local;
 
 # Set up time values to test
