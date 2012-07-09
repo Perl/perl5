@@ -930,7 +930,7 @@ EXTCONST U32 PL_charclass[];
 #define isLOWER_uni(c)		generic_uni(isLOWER, is_uni_lower, c)
 #define isASCII_uni(c)		isASCII(c)
 /* All controls are in Latin1 */
-#define isCNTRL_uni(c)		((c) < 256 && isCNTRL_L1(c))
+#define isCNTRL_uni(c)		isCNTRL_L1(c)
 #define isGRAPH_uni(c)		generic_uni(isGRAPH, is_uni_graph, c)
 #define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
 #define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
