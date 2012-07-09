@@ -9735,6 +9735,26 @@ S_reg_recode(pTHX_ const char value, SV **encp)
     return uv;
 }
 
+PERL_STATIC_INLINE U8
+S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
+{
+    U8 op;
+
+    PERL_ARGS_ASSERT_COMPUTE_EXACTISH;
+
+    if (! FOLD) {
+        return EXACT;
+    }
+
+    op = get_regex_charset(RExC_flags);
+    if (op >= REGEX_ASCII_RESTRICTED_CHARSET) {
+        op--; /* /a is same as /u, and map /aa's offset to what /a's would have
+                 been, so there is no hole */
+    }
+
+    return op + EXACTF;
+}
+
 PERL_STATIC_INLINE void
 S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, STRLEN len, UV code_point)
 {
@@ -10295,18 +10315,7 @@ tryagain:
 	    bool is_exactfu_sharp_s;
 
 	    ender = 0;
-            if (! FOLD) {
-                node_type = EXACT;
-            }
-            else {
-                node_type = get_regex_charset(RExC_flags);
-                if (node_type >= REGEX_ASCII_RESTRICTED_CHARSET) {
-                    node_type--; /* /a is same as /u, and map /aa's offset to
-                                    what /a's would have been, so there is no
-                                    hole */
-                }
-                node_type += EXACTF;
-            }
+            node_type = compute_EXACTish(pRExC_state);
 	    ret = reg_node(pRExC_state, node_type);
 	    s = STRING(ret);
 

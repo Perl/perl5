@@ -913,6 +913,7 @@
 #define cl_init			S_cl_init
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
+#define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
 #define get_invlist_len_addr(a)	S_get_invlist_len_addr(aTHX_ a)
 #define get_invlist_version_id_addr(a)	S_get_invlist_version_id_addr(aTHX_ a)
