@@ -398,8 +398,8 @@ static const scan_data_t zero_scan_data =
 #define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
 #define AT_LEAST_UNI_SEMANTICS (get_regex_charset(RExC_flags) >= REGEX_UNICODE_CHARSET)
 #define ASCII_RESTRICTED (get_regex_charset(RExC_flags) == REGEX_ASCII_RESTRICTED_CHARSET)
-#define MORE_ASCII_RESTRICTED (get_regex_charset(RExC_flags) == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 #define AT_LEAST_ASCII_RESTRICTED (get_regex_charset(RExC_flags) >= REGEX_ASCII_RESTRICTED_CHARSET)
+#define ASCII_FOLD_RESTRICTED (get_regex_charset(RExC_flags) == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
@@ -8387,7 +8387,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    ret = reganode(pRExC_state,
 				   ((! FOLD)
 				     ? NREF
-				     : (MORE_ASCII_RESTRICTED)
+				     : (ASCII_FOLD_RESTRICTED)
 				       ? NREFFA
                                        : (AT_LEAST_UNI_SEMANTICS)
                                          ? NREFFU
@@ -9786,7 +9786,7 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, STR
         }
         else if (! FOLD
                  || code_point != LATIN_SMALL_LETTER_SHARP_S
-                 || MORE_ASCII_RESTRICTED
+                 || ASCII_FOLD_RESTRICTED
                  || ! AT_LEAST_UNI_SEMANTICS)
         {
             *character = (U8) code_point;
@@ -10187,7 +10187,7 @@ tryagain:
                 ret = reganode(pRExC_state,
                                ((! FOLD)
                                  ? NREF
-				 : (MORE_ASCII_RESTRICTED)
+				 : (ASCII_FOLD_RESTRICTED)
 				   ? NREFFA
                                    : (AT_LEAST_UNI_SEMANTICS)
                                      ? NREFFU
@@ -10258,7 +10258,7 @@ tryagain:
 		    ret = reganode(pRExC_state,
 				   ((! FOLD)
 				     ? REF
-				     : (MORE_ASCII_RESTRICTED)
+				     : (ASCII_FOLD_RESTRICTED)
 				       ? REFFA
                                        : (AT_LEAST_UNI_SEMANTICS)
                                          ? REFFU
@@ -10566,7 +10566,7 @@ tryagain:
 			*tmpbuf = (U8) ender;
 			foldlen = 1;
 		    }
-		    else if (! MORE_ASCII_RESTRICTED && ! LOC) {
+		    else if (! ASCII_FOLD_RESTRICTED && ! LOC) {
 
 			/* Locale and /aa require more selectivity about the
 			 * fold, so are handled below.  Otherwise, here, just
@@ -12044,7 +12044,7 @@ parseit:
                     }
 
                     if (HAS_NONLATIN1_FOLD_CLOSURE(j)
-                        && (! isASCII(j) || ! MORE_ASCII_RESTRICTED))
+                        && (! isASCII(j) || ! ASCII_FOLD_RESTRICTED))
                     {
                         /* Certain Latin1 characters have matches outside
                          * Latin1, or are multi-character.  To get here, 'j' is
@@ -12103,7 +12103,7 @@ parseit:
 
                                 /* Under /a, /d, and /u, this can match the two
                                  * chars "ss" */
-                                if (! MORE_ASCII_RESTRICTED) {
+                                if (! ASCII_FOLD_RESTRICTED) {
                                     add_alternate(&unicode_alternate,
                                                   (U8 *) "ss", 2);
 
@@ -12148,7 +12148,7 @@ parseit:
                                     ((allow_full_fold) ? FOLD_FLAGS_FULL : 0)
                                     | ((LOC)
                                         ? FOLD_FLAGS_LOCALE
-                                        : (MORE_ASCII_RESTRICTED)
+                                        : (ASCII_FOLD_RESTRICTED)
                                             ? FOLD_FLAGS_NOMIX_ASCII
                                             : 0));
 
@@ -12207,7 +12207,7 @@ parseit:
 			    /* /aa doesn't allow folds between ASCII and non-;
 			     * /l doesn't allow them between above and below
 			     * 256 */
-			    if ((MORE_ASCII_RESTRICTED
+			    if ((ASCII_FOLD_RESTRICTED
                                       && (isASCII(c) != isASCII(j)))
 				|| (LOC && ((c < 256) != (j < 256))))
 			    {
@@ -12497,7 +12497,7 @@ parseit:
 	     * then EXACTFU if the regex calls for it, or is required because
 	     * the character is non-ASCII.  (If <value> is ASCII, its fold is
 	     * also ASCII for the cases where we get here.) */
-	    if (MORE_ASCII_RESTRICTED && isASCII(value)) {
+	    if (ASCII_FOLD_RESTRICTED && isASCII(value)) {
 		op = EXACTFA;
 	    }
 	    else if (AT_LEAST_UNI_SEMANTICS || !isASCII(value)) {
