@@ -13182,6 +13182,40 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 #ifdef DEBUGGING
     dVAR;
     register int k;
+
+    /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
+    static const char * const anyofs[] = {
+        "\\w",
+        "\\W",
+        "\\s",
+        "\\S",
+        "\\d",
+        "\\D",
+        "[:alnum:]",
+        "[:^alnum:]",
+        "[:alpha:]",
+        "[:^alpha:]",
+        "[:ascii:]",
+        "[:^ascii:]",
+        "[:cntrl:]",
+        "[:^cntrl:]",
+        "[:graph:]",
+        "[:^graph:]",
+        "[:lower:]",
+        "[:^lower:]",
+        "[:print:]",
+        "[:^print:]",
+        "[:punct:]",
+        "[:^punct:]",
+        "[:upper:]",
+        "[:^upper:]",
+        "[:xdigit:]",
+        "[:^xdigit:]",
+        "[:space:]",
+        "[:^space:]",
+        "[:blank:]",
+        "[:^blank:]"
+    };
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
     
@@ -13302,39 +13336,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	const U8 flags = ANYOF_FLAGS(o);
 	int do_sep = 0;
 
-	/* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
-	static const char * const anyofs[] = {
-	    "\\w",
-	    "\\W",
-	    "\\s",
-	    "\\S",
-	    "\\d",
-	    "\\D",
-	    "[:alnum:]",
-	    "[:^alnum:]",
-	    "[:alpha:]",
-	    "[:^alpha:]",
-	    "[:ascii:]",
-	    "[:^ascii:]",
-	    "[:cntrl:]",
-	    "[:^cntrl:]",
-	    "[:graph:]",
-	    "[:^graph:]",
-	    "[:lower:]",
-	    "[:^lower:]",
-	    "[:print:]",
-	    "[:^print:]",
-	    "[:punct:]",
-	    "[:^punct:]",
-	    "[:upper:]",
-	    "[:^upper:]",
-	    "[:xdigit:]",
-	    "[:^xdigit:]",
-	    "[:space:]",
-	    "[:^space:]",
-	    "[:blank:]",
-	    "[:^blank:]"
-	};
 
 	if (flags & ANYOF_LOCALE)
 	    sv_catpvs(sv, "{loc}");
