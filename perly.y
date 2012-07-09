@@ -324,6 +324,13 @@ barestmt:	PLUGSTMT
 			      || strEQ(name, "UNITCHECK"))
 			      CvSPECIAL_on(PL_compcv);
 			  }
+			  else
+			  /* State subs inside anonymous subs need to be
+			     clonable themselves. */
+			  /* XXX This will need adjustment for state subs
+			         inside my subs. */
+			  if (CvANON(CvOUTSIDE(PL_compcv)))
+			      CvCLONE_on(PL_compcv);
 			  PL_parser->in_my = 0;
 			  PL_parser->in_my_stash = NULL;
 			}

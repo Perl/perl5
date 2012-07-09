@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 58;
+plan 62;
 
 # -------------------- our -------------------- #
 
@@ -199,18 +199,16 @@ package main;
 # Since state vars inside anonymous subs are cloned at the same time as the
 # anonymous subs containing them, the same should happen for state subs.
 sub make_closure {
-  state $x = shift;
+  my $x = shift;
   sub {
     state sub foo { $x }
-    eval {foo}
+    foo
   }
 }
 $sub1 = make_closure 48;
 $sub2 = make_closure 49;
 is &$sub1, 48, 'state sub in closure (1)';
-on;
 is &$sub2, 49, 'state sub in closure (2)';
-off;
 # But we need to test that state subs actually do persist from one invoca-
 # tion of a named sub to another (i.e., that they are not my subs).
 {
@@ -237,6 +235,28 @@ on;
     is eval{etetetet}, $x, 'state sub ignores for() localisation';
 off;
   }
+}
+# And we also need to test that multiple state subs can close over each
+# other’s entries in the parent subs pad, and that cv_clone is not con-
+# fused by that.
+sub make_anon_with_state_sub{
+  sub {
+    state sub s1;
+    state sub s2 { \&s1 }
+    sub s1 { \&s2 }
+    if (@_) { return \&s1 }
+    is s1,\&s2, 'state sub in anon closure closing over sibling state sub';
+    is s2,\&s1, 'state sub in anon closure closing over sibling state sub';
+  }
+}
+{
+  my $s = make_anon_with_state_sub;
+  &$s;
+
+  # And make sure the state subs were actually cloned.
+  isnt make_anon_with_state_sub->(0), &$s(0),
+    'state subs in anon subs are cloned';
+  is &$s(0), &$s(0), 'but only when the anon sub is cloned';
 }
 {
   state sub BEGIN { exit };
