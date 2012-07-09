@@ -599,13 +599,14 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * digits */
 #define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) == '0')
 
-
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 
-/* Character class numbers.  These are used in PL_charclass[].  These use names
- * used in l1_char_class_tab.h but their actual definitions are here.  If that
- * has a name not used here, it won't compile. */
+/* Character class numbers.  These are used in PL_charclass[] and the ones
+ * up through the one that corresponds to <_HIGHEST_REGCOMP_DOT_H_SYNC> are
+ * used by regcomp.h.  These use names used in l1_char_class_tab.h but their
+ * actual definitions are here.  If that has a name not used here, it won't
+ * compile. */
 #  define _CC_WORDCHAR           0
 #  define _CC_SPACE              1
 #  define _CC_DIGIT              2
@@ -621,6 +622,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_XDIGIT            12
 #  define _CC_PSXSPC            13
 #  define _CC_BLANK             14
+#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_BLANK
+
 #  define _CC_IDFIRST           15
 #  define _CC_CHARNAME_CONT     16
 #  define _CC_NONLATIN1_FOLD    17
