@@ -1234,6 +1234,13 @@
 #define package(a)		Perl_package(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #  endif
+#  if !(defined(PL_OP_SLAB_ALLOC))
+#    if defined(PERL_CORE)
+#      if defined(PERL_DEBUG_READONLY_OPS)
+#define Slab_to_ro(a)		Perl_Slab_to_ro(aTHX_ a)
+#      endif
+#    endif
+#  endif
 #  if !defined(HAS_GETENV_LEN)
 #define getenv_len(a,b)		Perl_getenv_len(aTHX_ a,b)
 #  endif

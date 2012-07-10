@@ -12950,7 +12950,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_compiling = proto_perl->Icompiling;
 
-#ifdef PERL_DEBUG_READONLY_OPS
+#if defined(PERL_DEBUG_READONLY_OPS) && defined(PL_OP_SLAB_ALLOC)
     PL_slabs = NULL;
     PL_slab_count = 0;
 #endif

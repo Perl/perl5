@@ -1218,7 +1218,7 @@ perl_destruct(pTHXx)
 #endif
     PL_sv_count = 0;
 
-#ifdef PERL_DEBUG_READONLY_OPS
+#if defined(PERL_DEBUG_READONLY_OPS) && defined(PL_OP_SLAB_ALLOC)
     free(PL_slabs);
     PL_slabs = NULL;
     PL_slab_count = 0;
@@ -2394,7 +2394,12 @@ S_run_body(pTHX_ I32 oldscope)
 	    call_list(oldscope, PL_initav);
 	}
 #ifdef PERL_DEBUG_READONLY_OPS
+# ifdef PL_OP_SLAB_ALLOC
 	Perl_pending_Slabs_to_ro(aTHX);
+# else
+	if (PL_main_root && PL_main_root->op_slabbed)
+	    Slab_to_ro(OpSLAB(PL_main_root));
+# endif
 #endif
     }
 

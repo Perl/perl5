@@ -495,6 +495,9 @@ void
 Perl_cv_forget_slab(pTHX_ CV *cv)
 {
     const bool slabbed = !!CvSLABBED(cv);
+# ifdef PERL_DEBUG_READONLY_OPS
+    OPSLAB *slab = NULL;
+# endif
 
     PERL_ARGS_ASSERT_CV_FORGET_SLAB;
 
@@ -502,10 +505,24 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
 
     CvSLABBED_off(cv);
 
+# ifdef PERL_DEBUG_READONLY_OPS
+    if      (CvROOT(cv))  slab = OpSLAB(CvROOT(cv));
+    else if (CvSTART(cv)) slab = (OPSLAB *)CvSTART(cv);
+# else
     if      (CvROOT(cv))  OpslabREFCNT_dec(OpSLAB(CvROOT(cv)));
     else if (CvSTART(cv)) OpslabREFCNT_dec((OPSLAB *)CvSTART(cv));
+# endif
 # ifdef DEBUGGING
     else if (slabbed)     Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
+# endif
+
+# ifdef PERL_DEBUG_READONLY_OPS
+    if (slab) {
+	size_t refcnt;
+	refcnt = slab->opslab_refcnt;
+	OpslabREFCNT_dec(slab);
+	if (refcnt > 1) Slab_to_ro(slab);
+    }
 # endif
 }
 #endif

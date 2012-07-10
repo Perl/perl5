@@ -812,11 +812,11 @@ PERLVARI(I, xmlfp,	PerlIO *, NULL)
 PERLVAR(I, OpPtr,	I32 **)
 PERLVARI(I, OpSpace,	I32,	0)
 PERLVAR(I, OpSlab,	I32 *)
-#endif
 
-#ifdef PERL_DEBUG_READONLY_OPS
+# ifdef PERL_DEBUG_READONLY_OPS
 PERLVARI(I, slabs,	I32**,	NULL)	/* Array of slabs that have been allocated */
 PERLVARI(I, slab_count, U32,	0)	/* Size of the array */
+# endif
 #endif
 
 #ifdef DEBUG_LEAKING_SCALARS

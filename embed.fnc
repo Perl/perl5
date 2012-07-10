@@ -1784,8 +1784,14 @@ s	|void	|process_special_blocks	|NN const char *const fullname\
 Xpa	|void*	|Slab_Alloc	|size_t sz
 Xp	|void	|Slab_Free	|NN void *op
 #if defined(PERL_DEBUG_READONLY_OPS)
+#    ifdef PL_OP_SLAB_ALLOC
 : Used in perl.c
 poxM	|void	|pending_Slabs_to_ro
+#    else
+#     if defined(PERL_CORE)
+px	|void	|Slab_to_ro	|NN OPSLAB *slab
+#      endif
+#    endif
 : Used in OpREFCNT_inc() in sv.c
 poxM	|OP *	|op_refcnt_inc	|NULLOK OP *o
 : FIXME - can be static.

@@ -412,7 +412,7 @@ unless ($define{'PL_OP_SLAB_ALLOC'}) {
 			 );
 }
 
-unless ($define{'PERL_DEBUG_READONLY_OPS'}) {
+unless ($define{'PERL_DEBUG_READONLY_OPS'} && $define{'PL_OP_SLAB_ALLOC'}){
     ++$skip{$_} foreach qw(
 		    PL_slab_count
 		    PL_slabs

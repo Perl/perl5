@@ -229,24 +229,6 @@ S_Slab_to_rw(pTHX_ void *op)
     }
 }
 
-OP *
-Perl_op_refcnt_inc(pTHX_ OP *o)
-{
-    if(o) {
-	Slab_to_rw(o);
-	++o->op_targ;
-    }
-    return o;
-
-}
-
-PADOFFSET
-Perl_op_refcnt_dec(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_OP_REFCNT_DEC;
-    Slab_to_rw(o);
-    return --o->op_targ;
-}
 #else
 #  define Slab_to_rw(op)
 #endif
@@ -302,6 +284,12 @@ Perl_Slab_Free(pTHX_ void *op)
 
 /* See the explanatory comments above struct opslab in op.h. */
 
+# ifdef PERL_DEBUG_READONLY_OPS
+#  define PERL_SLAB_SIZE 128
+#  define PERL_MAX_SLAB_SIZE 4096
+#  include <sys/mman.h>
+# endif
+
 # ifndef PERL_SLAB_SIZE
 #  define PERL_SLAB_SIZE 64
 # endif
@@ -316,7 +304,20 @@ Perl_Slab_Free(pTHX_ void *op)
 static OPSLAB *
 S_new_slab(pTHX_ size_t sz)
 {
+# ifdef PERL_DEBUG_READONLY_OPS
+    OPSLAB *slab = (OPSLAB *) mmap(0, sz * sizeof(I32 *),
+				   PROT_READ|PROT_WRITE,
+				   MAP_ANON|MAP_PRIVATE, -1, 0);
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "mapped %lu at %p\n",
+			  (unsigned long) sz, slab));
+    if (slab == MAP_FAILED) {
+	perror("mmap failed");
+	abort();
+    }
+    slab->opslab_size = (U16)sz;
+# else
     OPSLAB *slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
+# endif
     slab->opslab_first = (OPSLOT *)((I32 **)slab + sz - 1);
     return slab;
 }
@@ -415,6 +416,53 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 
 # undef INIT_OPSLOT
 
+# ifdef PERL_DEBUG_READONLY_OPS
+void
+Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
+{
+    PERL_ARGS_ASSERT_SLAB_TO_RO;
+
+    if (slab->opslab_readonly) return;
+    slab->opslab_readonly = 1;
+    for (; slab; slab = slab->opslab_next) {
+	/*DEBUG_U(PerlIO_printf(Perl_debug_log,"mprotect ->ro %lu at %p\n",
+			      (unsigned long) slab->opslab_size, slab));*/
+	if (mprotect(slab, slab->opslab_size * sizeof(I32 *), PROT_READ))
+	    Perl_warn(aTHX_ "mprotect for %p %lu failed with %d", slab,
+			     (unsigned long)slab->opslab_size, errno);
+    }
+}
+
+STATIC void
+S_Slab_to_rw(pTHX_ void *op)
+{
+    OP * const o = (OP *)op;
+    OPSLAB *slab;
+    OPSLAB *slab2;
+
+    PERL_ARGS_ASSERT_SLAB_TO_RW;
+
+    if (!o->op_slabbed) return;
+
+    slab = OpSLAB(o);
+    if (!slab->opslab_readonly) return;
+    slab2 = slab;
+    for (; slab2; slab2 = slab2->opslab_next) {
+	/*DEBUG_U(PerlIO_printf(Perl_debug_log,"mprotect ->rw %lu at %p\n",
+			      (unsigned long) size, slab2));*/
+	if (mprotect((void *)slab2, slab2->opslab_size * sizeof(I32 *),
+		     PROT_READ|PROT_WRITE)) {
+	    Perl_warn(aTHX_ "mprotect RW for %p %lu failed with %d", slab,
+			     (unsigned long)slab2->opslab_size, errno);
+	}
+    }
+    slab->opslab_readonly = 0;
+}
+
+#else
+#  define Slab_to_rw(op)
+#endif
+
 /* This cannot possibly be right, but it was copied from the old slab
    allocator, to which it was originally added, without explanation, in
    commit 083fcd5. */
@@ -473,7 +521,16 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
 # ifdef DEBUGGING
 	slab->opslab_refcnt = ~(size_t)0;
 # endif
+# ifdef PERL_DEBUG_READONLY_OPS
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "Deallocate slab at %p\n",
+					       slab));
+	if (munmap(slab, slab->opslab_size * sizeof(I32 *))) {
+	    perror("munmap failed");
+	    abort();
+	}
+# else
 	PerlMemShared_free(slab);
+# endif
     }
 }
 
@@ -516,6 +573,26 @@ Perl_opslab_force_free(pTHX_ OPSLAB *slab)
     opslab_free(slab);
 }
 
+#endif
+#ifdef PERL_DEBUG_READONLY_OPS
+OP *
+Perl_op_refcnt_inc(pTHX_ OP *o)
+{
+    if(o) {
+	Slab_to_rw(o);
+	++o->op_targ;
+    }
+    return o;
+
+}
+
+PADOFFSET
+Perl_op_refcnt_dec(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_OP_REFCNT_DEC;
+    Slab_to_rw(o);
+    return --o->op_targ;
+}
 #endif
 /*
  * In the following definition, the ", (OP*)0" is just to make the compiler
@@ -803,9 +880,7 @@ Perl_op_free(pTHX_ OP *o)
 	}
     }
 
-#ifdef PERL_DEBUG_READONLY_OPS
     Slab_to_rw(o);
-#endif
 
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
@@ -6968,6 +7043,9 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
+#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_DEBUG_READONLY_OPS)
+    OPSLAB *slab = NULL;
+#endif
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -7243,6 +7321,9 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
        itself has a refcount. */
     CvSLABBED_off(cv);
     OpslabREFCNT_dec_padok((OPSLAB *)CvSTART(cv));
+# ifdef PERL_DEBUG_READONLY_OPS
+    slab = (OPSLAB *)CvSTART(cv);
+# endif
 #endif
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
@@ -7300,6 +7381,10 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);
+#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_DEBUG_READONLY_OPS)
+    /* Watch out for BEGIN blocks */
+    if (slab && gv && isGV(gv) && GvCV(gv)) Slab_to_ro(slab);
+#endif
     return cv;
 }
 
@@ -7625,13 +7710,13 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
-    cv_forget_slab(cv);
 #ifdef PERL_MAD
     op_getmad(o,pegop,'n');
     op_getmad_weak(block, pegop, 'b');
 #else
     op_free(o);
 #endif
+    cv_forget_slab(cv);
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);
