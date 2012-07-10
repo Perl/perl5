@@ -12397,15 +12397,14 @@ parseit:
      * Now we can see about various optimizations.  Fold calculation (which we
      * did above) needs to take place before inversion.  Otherwise /[^k]/i
      * would invert to include K, which under /i would match k, which it
-     * shouldn't. */
+     * shouldn't.  Therefore we can't invert folded locale now, as it won't be
+     * folded until runtime */
 
-    /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
-     * set the FOLD flag yet, so this does optimize those.  It doesn't
-     * optimize locale.  Doing so perhaps could be done as long as there is
-     * nothing like \w in it; some thought also would have to be given to the
-     * interaction with above 0x100 chars */
+    /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
+     * at compile time.  Besides not inverting folded locale now, we can't invert
+     * if there are things such as \w, which aren't known until runtime */
     if (invert
-        && ! LOC
+        && ! (LOC && (FOLD || (ANYOF_FLAGS(ret) & ANYOF_CLASS)))
 	&& ! depends_list
 	&& ! unicode_alternate
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
