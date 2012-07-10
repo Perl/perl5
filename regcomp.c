@@ -8180,6 +8180,77 @@ S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
 }
 #endif
 
+#if 0
+bool
+S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
+{
+    /* Return a boolean as to if the two passed in inversion lists are
+     * identical.  The final argument, if TRUE, says to take the complement of
+     * the second inversion list before doing the comparison */
+
+    UV* array_a = invlist_array(a);
+    UV* array_b = invlist_array(b);
+    UV len_a = invlist_len(a);
+    UV len_b = invlist_len(b);
+
+    UV i = 0;		    /* current index into the arrays */
+    bool retval = TRUE;     /* Assume are identical until proven otherwise */
+
+    PERL_ARGS_ASSERT__INVLISTEQ;
+
+    /* If are to compare 'a' with the complement of b, set it
+     * up so are looking at b's complement. */
+    if (complement_b) {
+
+        /* The complement of nothing is everything, so <a> would have to have
+         * just one element, starting at zero (ending at infinity) */
+        if (len_b == 0) {
+            return (len_a == 1 && array_a[0] == 0);
+        }
+        else if (array_b[0] == 0) {
+
+            /* Otherwise, to complement, we invert.  Here, the first element is
+             * 0, just remove it.  To do this, we just pretend the array starts
+             * one later, and clear the flag as we don't have to do anything
+             * else later */
+
+            array_b++;
+            len_b--;
+            complement_b = FALSE;
+        }
+        else {
+
+            /* But if the first element is not zero, we unshift a 0 before the
+             * array.  The data structure reserves a space for that 0 (which
+             * should be a '1' right now), so physical shifting is unneeded,
+             * but temporarily change that element to 0.  Before exiting the
+             * routine, we must restore the element to '1' */
+            array_b--;
+            len_b++;
+            array_b[0] = 0;
+        }
+    }
+
+    /* Make sure that the lengths are the same, as well as the final element
+     * before looping through the remainder.  (Thus we test the length, final,
+     * and first elements right off the bat) */
+    if (len_a != len_b || array_a[len_a-1] != array_b[len_a-1]) {
+        retval = FALSE;
+    }
+    else for (i = 0; i < len_a - 1; i++) {
+        if (array_a[i] != array_b[i]) {
+            retval = FALSE;
+            break;
+        }
+    }
+
+    if (complement_b) {
+        array_b[0] = 1;
+    }
+    return retval;
+}
+#endif
+
 #undef HEADER_LENGTH
 #undef INVLIST_INITIAL_LENGTH
 #undef TO_INTERNAL_SIZE
