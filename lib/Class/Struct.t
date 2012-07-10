@@ -38,7 +38,10 @@ use Class::Struct s => '$', a => '@', h => '%', c => 'aClass';
 package OverrideAccessor;
 use Class::Struct;
 
-struct( 'OverrideAccessor', { count => '$' } );
+{ 
+ no warnings qw(Class::Struct);
+ struct( 'OverrideAccessor', { count => '$' } );
+}
 
 sub count {
   my ($self,$count) = @_;
