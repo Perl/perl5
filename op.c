@@ -6875,15 +6875,15 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     PERL_ARGS_ASSERT_NEWMYSUB;
 
-    /* PL_comppad is the pad owned by the new sub.  Popping scope will make
-       the PL_comppad point to the pad belonging to the enclosing sub,
-       where we store the new one. */
-    LEAVE_SCOPE(floor);
-
-    name = PadnamelistARRAY(PL_comppad_name)[o->op_targ];
+    /* PL_comppad is the pad owned by the new sub.  We need to look in
+       CvOUTSIDE and find the pad belonging to the enclosing sub, where we
+       store the new one. */
+    name = PadlistNAMESARRAY(CvPADLIST(CvOUTSIDE(PL_compcv)))[o->op_targ];
     if (!PadnameIsSTATE(name))
 	Perl_croak(aTHX_ "\"my sub\" not yet implemented");
-    svspot = &PL_curpad[o->op_targ];
+    svspot =
+	&PadARRAY(PadlistARRAY(CvPADLIST(CvOUTSIDE(PL_compcv)))[1])
+	    [o->op_targ];
     spot = (CV **)svspot;
 
     if (proto) {
@@ -6895,8 +6895,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	ps = NULL;
 
     if (!PL_madskills) {
-	if (o)
-	    SAVEFREEOP(o);
 	if (proto)
 	    SAVEFREEOP(proto);
 	if (attrs)
@@ -6952,7 +6950,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-            cv_ckproto_len_flags(cv, (GV *)namesv, ps, ps_len, ps_utf8);
+            cv_ckproto_len_flags(cv, (GV *)name, ps, ps_len, ps_utf8);
 	/* already defined? */
 	if (exists) {
 	    if ((!block
@@ -7021,6 +7019,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    goto install_block;
 	op_free(block);
 	SvREFCNT_dec(compcv);
+	PL_compcv = NULL;
 	goto done;
     }
     SvREFCNT_dec(CvOUTSIDE(compcv));
@@ -7070,14 +7069,15 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	/* ... before we throw it away */
 	SvREFCNT_dec(compcv);
-	compcv = cv;
+	PL_compcv = compcv = cv;
     }
     else {
 	cv = compcv;
 	*spot = cv;
 	SvANY(cv)->xcv_gv_u.xcv_hek =
-	    share_hek(SvPVX(namesv)+1,
-		      SvCUR(namesv)-1 * (SvUTF8(namesv) ? -1 : 1), 0);
+	    share_hek(PadnamePV(name)+1,
+		      PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1),
+		      0);
 	CvNAMED_on(cv);
     }
     CvFILE_set_from_cop(cv, PL_curcop);
@@ -7125,14 +7125,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     /* now that optimizer has done its work, adjust pad values */
 
-    ENTER;
-    SAVESPTR(PL_compcv);
-    SAVECOMPPAD();
-    PL_compcv	= cv;
-    PL_comppad	= *PadlistARRAY(CvPADLIST(cv));
-    PL_curpad	= PadARRAY(PL_comppad);
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
-    LEAVE;
 
     if (CvCLONE(cv)) {
 	assert(!CvCONST(cv));
@@ -7161,8 +7154,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		sv_catpvs(tmpstr, "::");
 	    }
 	    else sv_setpvs(tmpstr, "__ANON__::");
-	    sv_catpvn_flags(tmpstr, SvPVX(namesv)+1, SvCUR(namesv)-1,
-			    SvUTF8(namesv) ? SV_CATUTF8 : SV_CATBYTES);
+	    sv_catpvn_flags(tmpstr, PadnamePV(name)+1, PadnameLEN(name)-1,
+			    PadnameUTF8(name) ? SV_CATUTF8 : SV_CATBYTES);
 	    (void)hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr),
 		    SvUTF8(tmpstr) ? -(I32)SvCUR(tmpstr) : (I32)SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
@@ -7182,6 +7175,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
   done:
     if (PL_parser)
 	PL_parser->copline = NOLINE;
+    LEAVE_SCOPE(floor);
+    if (o) op_free(o);
     return cv;
 }
 
