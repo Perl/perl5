@@ -681,6 +681,12 @@ already been done, it will not be redone, and C<< o->op_next >> will be
 returned. If C<< o->op_next >> is not already set, I<o> should be at
 least an C<UNOP>.
 
+The C<op_next> pointers are actually linked into a loop, as described in the
+comment at the top of F<op.c>, because the last op of the optree to be
+executed is the root node, and the root node's C<op_next> is used to point
+to first op of the tree to be executed. The loops are broken later in
+compilation.
+
 =cut
 */
 
