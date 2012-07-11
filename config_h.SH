@@ -995,7 +995,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
-#$userelocatableinc PERL_RELOCATABLE_INC  		/**/
+#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
 
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
@@ -2392,6 +2392,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
  */
+/* HAS_IP_MREQ:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ip_mreq;
+ */
 /* HAS_IPV6_MREQ:
  *	This symbol, if defined, indicates the availability of
  *	struct ipv6_mreq;
@@ -2407,6 +2411,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
 #$d_sockaddr_in6	HAS_SOCKADDR_IN6	/**/
 #$d_sin6_scope_id	HAS_SIN6_SCOPE_ID	/**/
+#$d_ip_mreq	HAS_IP_MREQ	/**/
 #$d_ipv6_mreq	HAS_IPV6_MREQ	/**/
 
 /* HAS_SRAND48_R:

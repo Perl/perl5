@@ -1271,6 +1271,10 @@ d_inetpton (d_inetpton.U):
 d_int64_t (d_int64_t.U):
 	This symbol will be defined if the C compiler supports int64_t.
 
+d_ip_mreq (d_socket.U):
+	This variable conditionally defines the HAS_IP_MREQ symbol, which
+	indicates the availability of a struct ip_mreq.
+
 d_ipv6_mreq (d_socket.U):
 	This variable conditionally defines the HAS_IPV6_MREQ symbol, which
 	indicates the availability of a struct ipv6_mreq.

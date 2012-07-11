@@ -962,7 +962,7 @@
  */
 #define BIN "/usr/local/bin"	/**/
 #define BIN_EXP "/usr/local/bin"	/**/
-/*#define PERL_RELOCATABLE_INC  		/ **/
+#define PERL_RELOCATABLE_INC "undef" 		/**/
 
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
@@ -2359,6 +2359,10 @@
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
  */
+/* HAS_IP_MREQ:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ip_mreq;
+ */
 /* HAS_IPV6_MREQ:
  *	This symbol, if defined, indicates the availability of
  *	struct ipv6_mreq;
@@ -2374,6 +2378,7 @@
 /*#define	HAS_SCM_RIGHTS	/ **/
 /*#define	HAS_SOCKADDR_IN6	/ **/
 /*#define	HAS_SIN6_SCOPE_ID	/ **/
+/*#define	HAS_IP_MREQ	/ **/
 /*#define	HAS_IPV6_MREQ	/ **/
 
 /* HAS_SRAND48_R:
@@ -4734,6 +4739,6 @@
 #endif
 
 /* Generated from:
- * d9b6a68b192c72c0695b560fae6e4916b381f55df5fdf7911b0ef434840f092e config_h.SH
- * 573628443b0f7d922ef2706de7e05f3d5ff794bcb6708b68ddcecd0e2d30e7bd uconfig.sh
+ * 450f87b8e0de509bd7e72485185b4060363119bedef2b8aff868354f42708a78 config_h.SH
+ * e3a05060ae46f0ca7ea3a4fd9a4c2dcd60caf070529116479a74830d923d1ca3 uconfig.sh
  * ex: set ro: */

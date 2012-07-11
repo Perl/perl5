@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sun Apr  1 12:00:35 CEST 2012 [metaconfig 3.5 PL0]
+# Generated on Wed Jul 11 16:58:32 CEST 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -723,6 +723,7 @@ d_snprintf=''
 d_vsnprintf=''
 d_sockatmark=''
 d_sockatmarkproto=''
+d_ip_mreq=''
 d_ipv6_mreq=''
 d_msg_ctrunc=''
 d_msg_dontroute=''
@@ -11368,6 +11369,24 @@ set try; if eval $compile; then
 	val="$define"
 fi
 set d_sin6_scope_id; eval $setvar
+$rm_try
+
+echo " "
+echo "Checking the availability struct ip_mreq ..." >&4
+$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+int main() {
+struct ip_mreq mreq;
+return (mreq.imr_multiaddr.s_addr);
+}
+EOF
+val="$undef"
+set try; if eval $compile; then
+       val="$define"
+fi
+set d_ip_mreq; eval $setvar
 $rm_try
 
 echo " "
@@ -23023,6 +23042,7 @@ d_inetaton='$d_inetaton'
 d_inetntop='$d_inetntop'
 d_inetpton='$d_inetpton'
 d_int64_t='$d_int64_t'
+d_ip_mreq='$d_ip_mreq'
 d_ipv6_mreq='$d_ipv6_mreq'
 d_isascii='$d_isascii'
 d_isblank='$d_isblank'
