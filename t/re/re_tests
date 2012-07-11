@@ -1680,4 +1680,6 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 
 # rt 113770
 \A(?>\[(?:(?:)(?:R){1}|T|V?|A)\])\z	[A]	y	$&	[A]
+# rt 114068
+/( [^z] $ [^z]+)/xm	aa\nbb\ncc\n	y	$1	a\nbb\ncc\n
 # vim: softtabstop=0 noexpandtab
