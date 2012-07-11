@@ -3161,6 +3161,13 @@ S_fold_constants(pTHX_ register OP *o)
         }
     }
 
+    /* Verify that we don't need to save it. Do this *before* we change PL_op
+       so that our panic doesn't itself panic, due to PL_restartop being
+       wrong.  ("My complication had a little complication.")  */
+    if (PL_curcop != &PL_compiling)
+        Perl_croak(aTHX_ "panic: fold_constants called when IN_PERL_COMPILETIME is false "
+                   "- the interpreter is still setup for runtime, not compile time");
+
     /* LINKLIST links the op_next pointers of the passed optree into a loop.
        The root op is always the last op to be run, so its op_next should be
        NULL. So at this point during compilation its op_next is "borrowed" to
@@ -3173,8 +3180,6 @@ S_fold_constants(pTHX_ register OP *o)
     oldscope = PL_scopestack_ix;
     create_eval_scope(G_FAKINGEVAL);
 
-    /* Verify that we don't need to save it:  */
-    assert(PL_curcop == &PL_compiling);
     StructCopy(&PL_compiling, &not_compiling, COP);
     PL_curcop = &not_compiling;
     /* The above ensures that we run with all the correct hints of the
