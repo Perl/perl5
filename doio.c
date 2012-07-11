@@ -1750,9 +1750,9 @@ nothing in the core.
 	}
 #endif
 	while (++mark <= sp) {
-	    I32 proc;
+	    Pid_t proc;
 	    SvGETMAGIC(*mark);
-	    if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
+	    if (!(SvNIOK(*mark) || looks_like_number(*mark)))
 		Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
 	    proc = SvIV_nomg(*mark);
 	    if (killgp)
