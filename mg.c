@@ -2772,7 +2772,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\\':
 	SvREFCNT_dec(PL_ors_sv);
-	if (SvOK(sv) || SvGMAGICAL(sv)) {
+	if (SvOK(sv)) {
 	    PL_ors_sv = newSVsv(sv);
 	}
 	else {
