@@ -1042,24 +1042,22 @@ Perl_op_linklist(pTHX_ OP *o)
     if (o->op_next)
 	return o->op_next;
 
-    /* establish postfix order */
     kid = cUNOPo->op_first;
-    if (kid) {
-	o->op_next = LINKLIST(kid);
-	for (;;) {
-	    if (kid->op_sibling) {
-		kid->op_next = LINKLIST(kid->op_sibling);
-		kid = kid->op_sibling;
-	    } else {
-		kid->op_next = o;
-		break;
-	    }
-	}
-    }
-    else
-	o->op_next = o;
+    /* no children, so degenerate case.  We loop to ourselves and return.  */
+    if (!kid)
+        return o->op_next = o;
 
-    return o->op_next;
+    /* establish postfix order */
+    o->op_next = LINKLIST(kid);
+    for (;;) {
+        if (kid->op_sibling) {
+            kid->op_next = LINKLIST(kid->op_sibling);
+            kid = kid->op_sibling;
+        } else {
+            kid->op_next = o;
+            return o->op_next;
+        }
+    }
 }
 
 static OP *
