@@ -1035,7 +1035,7 @@ not be called directly.
 OP *
 Perl_op_linklist(pTHX_ OP *o)
 {
-    OP *first;
+    OP *kid;
 
     PERL_ARGS_ASSERT_OP_LINKLIST;
 
@@ -1043,11 +1043,9 @@ Perl_op_linklist(pTHX_ OP *o)
 	return o->op_next;
 
     /* establish postfix order */
-    first = cUNOPo->op_first;
-    if (first) {
-        register OP *kid;
-	o->op_next = LINKLIST(first);
-	kid = first;
+    kid = cUNOPo->op_first;
+    if (kid) {
+	o->op_next = LINKLIST(kid);
 	for (;;) {
 	    if (kid->op_sibling) {
 		kid->op_next = LINKLIST(kid->op_sibling);
