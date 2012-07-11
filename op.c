@@ -3089,9 +3089,8 @@ static OP *
 S_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
-    register OP * VOL curop;
     OP *newop;
-    VOL I32 type = o->op_type;
+    const OPCODE type = o->op_type;
     SV * VOL sv = NULL;
     int ret = 0;
     I32 oldscope;
@@ -3144,22 +3143,32 @@ S_fold_constants(pTHX_ register OP *o)
     if (PL_parser && PL_parser->error_count)
 	return o;		/* Don't try to run w/ errors */
 
-    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-	const OPCODE type = curop->op_type;
-	if ((type != OP_CONST || (curop->op_private & OPpCONST_BARE)) &&
-	    type != OP_LIST &&
-	    type != OP_SCALAR &&
-	    type != OP_NULL &&
-	    type != OP_PUSHMARK)
-	{
-	    return o;
-	}
+    {
+        /* gcc, in its infinite wisdom, bleats that this variable, curop,
+           might be clobbered by the setjmp/longjmp below. ie after the
+           variable has gone out of scope. So we mark it volatile to
+           suppress the warning.  */
+        OP * VOL curop = LINKLIST(o);
+        for (; curop != o; curop = curop->op_next) {
+            const OPCODE type = curop->op_type;
+            if ((type != OP_CONST || (curop->op_private & OPpCONST_BARE)) &&
+                type != OP_LIST &&
+                type != OP_SCALAR &&
+                type != OP_NULL &&
+                type != OP_PUSHMARK) {
+                return o;
+            }
+        }
     }
 
-    curop = LINKLIST(o);
-    old_next = o->op_next;
-    o->op_next = 0;
-    PL_op = curop;
+    /* LINKLIST links the op_next pointers of the passed optree into a loop.
+       The root op is always the last op to be run, so its op_next should be
+       NULL. So at this point during compilation its op_next is "borrowed" to
+       store the address of the first op to be executed. We need to fix this
+       before we try to run the optree, as otherwise it will never terminate.
+    */
+    PL_op = old_next = o->op_next;
+    o->op_next = NULL;
 
     oldscope = PL_scopestack_ix;
     create_eval_scope(G_FAKINGEVAL);
