@@ -1165,8 +1165,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 {
     dVAR;
     OP *kid;
+    SV *useless_sv = NULL;
     const char* useless = NULL;
-    U32 useless_is_utf8 = 0;
     SV* sv;
     U8 want;
 
@@ -1367,19 +1367,19 @@ Perl_scalarvoid(pTHX_ OP *o)
 			    useless = NULL;
 		    else {
 			SV * const dsv = newSVpvs("");
-			SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
-				    "a constant (%s)",
-				    pv_pretty(dsv, maybe_macro, SvCUR(sv), 32, NULL, NULL,
-					    PERL_PV_PRETTY_DUMP | PERL_PV_ESCAPE_NOCLEAR | PERL_PV_ESCAPE_UNI_DETECT )));
+			useless_sv
+                            = Perl_newSVpvf(aTHX_
+                                            "a constant (%s)",
+                                            pv_pretty(dsv, maybe_macro,
+                                                      SvCUR(sv), 32, NULL, NULL,
+                                                      PERL_PV_PRETTY_DUMP
+                                                      | PERL_PV_ESCAPE_NOCLEAR
+                                                      | PERL_PV_ESCAPE_UNI_DETECT));
 			SvREFCNT_dec(dsv);
-			useless = SvPV_nolen(msv);
-			useless_is_utf8 = SvUTF8(msv);
 		    }
 		}
 		else if (SvOK(sv)) {
-		    SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
-				"a constant (%"SVf")", sv));
-		    useless = SvPV_nolen(msv);
+		    useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", sv);
 		}
 		else
 		    useless = "a constant (undef)";
@@ -1506,10 +1506,18 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SCALAR:
 	return scalar(o);
     }
-    if (useless)
-       Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %"SVf" in void context",
-                       newSVpvn_flags(useless, strlen(useless),
-                            SVs_TEMP | ( useless_is_utf8 ? SVf_UTF8 : 0 )));
+
+    if (useless_sv) {
+        /* mortalise it, in case warnings are fatal.  */
+        Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+                       "Useless use of %"SVf" in void context",
+                       sv_2mortal(useless_sv));
+    }
+    else if (useless) {
+       Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
+                      "Useless use of %s in void context",
+                      useless);
+    }
     return o;
 }
 
