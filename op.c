@@ -9069,8 +9069,7 @@ Perl_ck_select(pTHX_ OP *o)
 	if (kid && kid->op_sibling) {
 	    o->op_type = OP_SSELECT;
 	    o->op_ppaddr = PL_ppaddr[OP_SSELECT];
-	    o = ck_fun(o);
-	    return fold_constants(op_integerize(op_std_init(o)));
+	    return op_std_init(ck_fun(o));
 	}
     }
     o = ck_fun(o);
