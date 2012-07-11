@@ -6879,8 +6879,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
        CvOUTSIDE and find the pad belonging to the enclosing sub, where we
        store the new one. */
     name = PadlistNAMESARRAY(CvPADLIST(CvOUTSIDE(PL_compcv)))[o->op_targ];
-    if (!PadnameIsSTATE(name))
-	Perl_croak(aTHX_ "\"my sub\" not yet implemented");
     svspot =
 	&PadARRAY(PadlistARRAY(CvPADLIST(CvOUTSIDE(PL_compcv)))[1])
 	    [o->op_targ];

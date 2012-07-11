@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 62;
+plan 104;
 
 # -------------------- our -------------------- #
 
@@ -271,4 +271,195 @@ sub make_anon_with_state_sub{
   eval "#line 56 pygpyf\nsub redef {}";
   is $w, "Subroutine redef redefined at pygpyf line 56.\n",
          "sub redefinition warnings from state subs";
+}
+
+# -------------------- my -------------------- #
+
+{
+  my sub foo { 44 }
+  isnt \&::foo, \&foo, 'my sub is not stored in the package';
+  is foo, 44, 'calling my sub from same package';
+  is &foo, 44, 'calling my sub from same package (amper)';
+  is do foo(), 44, 'calling my sub from same package (do)';
+  package bar;
+  is foo, 44, 'calling my sub from another package';
+  is &foo, 44, 'calling my sub from another package (amper)';
+  is do foo(), 44, 'calling my sub from another package (do)';
+}
+package bar;
+is foo, 43, 'my sub falling out of scope';
+is &foo, 43, 'my sub falling out of scope (called via amper)';
+is do foo(), 43, 'my sub falling out of scope (called via amper)';
+{
+  sub ma { 43 }
+  my sub ma {
+    if (shift) {
+      is ma, 43, 'my sub invisible inside itself';
+      is &ma, 43, 'my sub invisible inside itself (called via amper)';
+      is do ma(), 43, 'my sub invisible inside itself (called via do)';
+    }
+    44
+  }
+  ma(1);
+  sub mb { 43 }
+  my sub mb;
+  my sub mb {
+    if (shift) {
+      # ‘my sub foo{}’ creates a new pad entry, not reusing the forward
+      #  declaration.  Being invisible inside itself, it sees the stub.
+      eval{mb};
+      like $@, qr/^Undefined subroutine &mb called at /,
+        'my sub foo {} after forward declaration';
+      eval{&mb};
+      like $@, qr/^Undefined subroutine &mb called at /,
+        'my sub foo {} after forward declaration (amper)';
+      eval{do mb()};
+      like $@, qr/^Undefined subroutine &mb called at /,
+        'my sub foo {} after forward declaration (do)';
+    }
+    44
+  }
+  mb(1);
+  sub mb2 { 43 }
+  my sub sb2;
+  sub mb2 {
+    if (shift) {
+      package bar;
+      is mb2, 44, 'my sub visible inside itself after decl';
+      is &mb2, 44, 'my sub visible inside itself after decl (amper)';
+      is do mb2(), 44, 'my sub visible inside itself after decl (do)';
+    }
+    44
+  }
+  mb2(1);
+  my sub mb3;
+  {
+    my sub mb3 { # new pad entry
+      # The sub containing this comment is invisible inside itself.
+      # So this one here will assign to the outer pad entry:
+      sub mb3 { 47 }
+    }
+  }
+  is eval{mb3}, 47,
+    'sub foo{} applying to "my sub foo;" even inside my sub foo{}';
+}
+sub mc { 43 }
+{
+  my sub mc;
+  eval{mc};
+  like $@, qr/^Undefined subroutine &mc called at /,
+     'my sub foo; makes no lex alias for existing sub';
+  eval{&mc};
+  like $@, qr/^Undefined subroutine &mc called at /,
+     'my sub foo; makes no lex alias for existing sub (amper)';
+  eval{do mc()};
+  like $@, qr/^Undefined subroutine &mc called at /,
+     'my sub foo; makes no lex alias for existing sub (do)';
+}
+package main;
+{
+  my sub me ($);
+  is prototype eval{\&me}, '$', 'my sub with proto';
+  is prototype "me", undef, 'prototype "..." ignores my subs';
+}
+{
+  my sub if() { 44 }
+  my $x = if if if;
+  is $x, 44, 'my subs override all keywords';
+  package bar;
+  my $y = if if if;
+  is $y, 44, 'my subs from other packages override all keywords';
+}
+{
+  use warnings;
+  my $w ;
+  local $SIG{__WARN__} = sub { $w .= shift };
+  eval '#line 87 squidges
+    my sub foo;
+    my sub foo {};
+  ';
+  is $w,
+     '"my" subroutine &foo masks earlier declaration in same scope at '
+   . "squidges line 88.\n",
+     'warning for my sub masking earlier declaration';
+}
+# Test that my subs are cloned inside anonymous subs.
+sub mmake_closure {
+  my $x = shift;
+  sub {
+    my sub foo { $x }
+    foo
+  }
+}
+$sub1 = mmake_closure 48;
+$sub2 = mmake_closure 49;
+on;
+is eval { &$sub1 }, 48, 'my sub in closure (1)';
+is eval { &$sub2 }, 49, 'my sub in closure (2)';
+# Test that they are cloned in named subs.
+{
+  use warnings;
+  my $w;
+  local $SIG{__WARN__} = sub { $w .= shift };
+  eval '#line 65 teetet
+    sub foom {
+      my $x = shift;
+      my sub poom { $x }
+      eval{\&poom}
+    }
+  ';
+  is $w, undef, 'my subs get no "Variable will not stay shared" messages';
+  my $poom = foom(27);
+  my $poom2 = foom(678);
+  is eval { $poom->() }, 27, 'my subs closing over outer my var (1)';
+  is eval { $poom2->() }, 678, 'my subs closing over outer my var (2)';
+  my $x = 43;
+  my sub aoeu;
+  for $x (765) {
+    my sub etetetet { $x }
+    my sub aoeu { $x }
+    is etetetet, 765, 'my sub respects for() localisation';
+off;
+    is aoeu, 43, 'unless it is declared outside the for loop';
+  }
+}
+# And we also need to test that multiple my subs can close over each
+# other’s entries in the parent subs pad, and that cv_clone is not con-
+# fused by that.
+sub make_anon_with_my_sub{
+  sub {
+    my sub s1;
+    my sub s2 { \&s1 }
+    sub s1 { \&s2 }
+    if (@_) { return eval { \&s1 } }
+    is eval{s1},eval{\&s2}, 'my sub in anon closure closing over sibling my sub';
+    is eval{s2},eval{\&s1}, 'my sub in anon closure closing over sibling my sub';
+  }
+}
+{
+  my $s = make_anon_with_my_sub;
+  &$s;
+
+  # And make sure the my subs were actually cloned.
+on;
+  isnt make_anon_with_my_sub->(0), &$s(0),
+    'my subs in anon subs are cloned';
+  isnt &$s(0), &$s(0), 'at each invocation of the enclosing sub';
+off;
+}
+{
+  my sub BEGIN { exit };
+  pass 'my subs are never special blocks';
+  my sub END { shift }
+  is END('jkqeudth'), jkqeudth,
+    'my sub END {shift} implies @_, not @ARGV';
+}
+{
+  my sub redef {}
+  use warnings;
+  my $w;
+  local $SIG{__WARN__} = sub { $w .= shift };
+  eval "#line 56 pygpyf\nsub redef {}";
+  is $w, "Subroutine redef redefined at pygpyf line 56.\n",
+         "sub redefinition warnings from my subs";
 }

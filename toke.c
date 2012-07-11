@@ -8462,8 +8462,6 @@ Perl_yylex(pTHX)
 #ifndef PERL_MAD
 		force_ident_maybe_lex('&');
 #endif
-		if (key == KEY_my)
-		    TOKEN(MYSUB);
 		TOKEN(SUB);
 	    }
 

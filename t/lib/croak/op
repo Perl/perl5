@@ -37,11 +37,6 @@ my Foo $f = Foo->new;
 EXPECT
 No such class field "c" in variable $f of type Foo at - line 8.
 ########
-# NAME my sub
-my sub foo { }
-EXPECT
-"my sub" not yet implemented at - line 1.
-########
 # NAME delete BAD
 delete $x;
 EXPECT
