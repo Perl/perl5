@@ -10507,7 +10507,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 
     /* Expand the command buffer if necessary. */
     if (clen > cmdlen) {
-      cmd = PerlMem_realloc(cmd, clen);
+      cmd = (char *)PerlMem_realloc(cmd, clen);
       if (cmd == NULL)
         _ckvmssts_noperl(SS$_INSFMEM);
       /* Where we are may have changed, so recompute offsets */
