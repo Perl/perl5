@@ -309,11 +309,8 @@ source tree.
 
 =over 4
 
-=item *
+=item XXX
 
-Configure now always adds -qlanglvl=extc99 to the CC flags on AIX when
-using xlC.  This will make it easier to compile a number of XS-based modules
-that assume C99 [perl #113778].
 
 =back
 
@@ -345,6 +342,12 @@ spawned via C<system>, backticks, or a piped C<open>.  Previously, quotes on the
 were passed through to DCL, which would fail to recognize the command.  Also, if the
 verb is actually a path to an image or command procedure on an ODS-5 volume, quoting it
 now allows the path to contain spaces.
+
+=item AIX
+
+Configure now always adds -qlanglvl=extc99 to the CC flags on AIX when
+using xlC.  This will make it easier to compile a number of XS-based modules
+that assume C99 [perl #113778].
 
 =back
 
