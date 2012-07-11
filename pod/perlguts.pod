@@ -1891,8 +1891,10 @@ judged to be constant) it is immediately executed, and a I<constant>
 node with the "return value" of the corresponding subtree is
 substituted instead.  The subtree is deleted.
 
-If constant folding was not performed, the execution-order thread is
-created.
+If constant folding was not performed then the execution-order thread in
+the C<op_next> pointers may have been created. When and whether this
+happens is an implementation detail, and the caller should not rely on it,
+as it may change.
 
 =head2 Compile pass 2: context propagation
 

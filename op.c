@@ -3085,6 +3085,49 @@ S_op_integerize(pTHX_ OP *o)
     return o;
 }
 
+/*                                                                             
+=for apidoc sd|OP*|fold_constants|NN OP *o                                    
+                                                                              
+Determines whether this op can be constant folded, and if so frees the passed
+in optree and returns an appropriate C<OP_CONST> or C<OP_GV>.
+
+C<fold_constants> is not as general as its name might suggest. It is only
+able to analyse and fold a tree consisting of just a single op and entirely
+constant arguments. It B<can't> fold anything more complex, such as this
+optree:
+
+       +
+     /  \
+    1    *
+        /  \
+       2    3
+
+
+This doesn't matter to perl's parser, as the optree is constructed from the
+bottom up, with C<fold_constants> is called immediately as each op is built,
+hence the above would be folded as C<2 * 3> and then C<1 + 6>.
+
+If constant folding was not performed then the execution-order thread in
+the C<op_next> pointers may have been created. When and whether this
+happens is an implementation detail, and the caller should not rely on it
+as it may change.
+
+C<IN_PERL_COMPILETIME> must be true before calling C<fold_constants> -
+I<i.e.> the caller responsible for ensuring that the interpreter's state is
+switched from runtime to compile time. C<fold_constants> may also modify
+C<PL_op>, possibly to C<NULL> - again the caller is responsible for restoring
+this if necessary.
+
+It is called directly from C<Perl_newUNOP>, C<Perl_newBINOP> and
+C<Perl_convert>, and therefore indirectly from quite a few other
+functions. Hence the warnings above also apply to them if they trigger
+constant folding.
+
+See L<perlguts/"Compile pass 1a: constant folding">.                           
+                                                                               
+=cut                                                                           
+*/                                                                             
+
 static OP *
 S_fold_constants(pTHX_ register OP *o)
 {

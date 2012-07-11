@@ -412,8 +412,7 @@ p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 s	|OP*	|force_list	|NULLOK OP* arg
 i	|OP*	|op_integerize	|NN OP *o
 i	|OP*	|op_std_init	|NN OP *o
-: FIXME
-s	|OP*	|fold_constants	|NN OP *o
+sd	|OP*	|fold_constants	|NN OP *o
 #endif
 Afpd	|char*	|form		|NN const char* pat|...
 Ap	|char*	|vform		|NN const char* pat|NULLOK va_list* args
