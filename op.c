@@ -222,9 +222,10 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	/* Create a new slab.  Make this one twice as big. */
 	slot = slab2->opslab_first;
 	while (slot->opslot_next) slot = slot->opslot_next;
-	slab2 = S_new_slab(aTHX_ DIFF(slab2, slot)*2 > PERL_MAX_SLAB_SIZE
+	slab2 = S_new_slab(aTHX_
+			    (DIFF(slab2, slot)+1)*2 > PERL_MAX_SLAB_SIZE
 					? PERL_MAX_SLAB_SIZE
-					: DIFF(slab2, slot)*2);
+					: (DIFF(slab2, slot)+1)*2);
 	slab2->opslab_next = slab->opslab_next;
 	slab->opslab_next = slab2;
     }
