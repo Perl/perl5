@@ -739,7 +739,7 @@ least an C<UNOP>.
  * cating an op if there are no freed ops available or big enough.
  */
 
-#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
+#ifdef PERL_CORE
 struct opslot {
     /* keep opslot_next first */
     OPSLOT *	opslot_next;		/* next slot */

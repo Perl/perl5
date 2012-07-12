@@ -355,15 +355,12 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 	PAD_SAVE_SETNULLPAD();
 
-#ifndef PL_OP_SLAB_ALLOC
 	if (slabbed) OpslabREFCNT_dec_padok(OpSLAB(CvROOT(cv)));
-#endif
 	op_free(CvROOT(cv));
 	CvROOT(cv) = NULL;
 	CvSTART(cv) = NULL;
 	LEAVE;
     }
-#ifndef PL_OP_SLAB_ALLOC
     else if (slabbed && CvSTART(cv)) {
 	ENTER;
 	PAD_SAVE_SETNULLPAD();
@@ -374,9 +371,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 	LEAVE;
     }
-# ifdef DEBUGGING
+#ifdef DEBUGGING
     else if (slabbed) Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
-# endif
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     CvGV_set(cv, NULL);
@@ -490,14 +486,13 @@ Perl_cv_undef(pTHX_ CV *cv)
     CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON);
 }
 
-#ifndef PL_OP_SLAB_ALLOC
 void
 Perl_cv_forget_slab(pTHX_ CV *cv)
 {
     const bool slabbed = !!CvSLABBED(cv);
-# ifdef PERL_DEBUG_READONLY_OPS
+#ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
-# endif
+#endif
 
     PERL_ARGS_ASSERT_CV_FORGET_SLAB;
 
@@ -505,27 +500,26 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
 
     CvSLABBED_off(cv);
 
-# ifdef PERL_DEBUG_READONLY_OPS
+#ifdef PERL_DEBUG_READONLY_OPS
     if      (CvROOT(cv))  slab = OpSLAB(CvROOT(cv));
     else if (CvSTART(cv)) slab = (OPSLAB *)CvSTART(cv);
-# else
+#else
     if      (CvROOT(cv))  OpslabREFCNT_dec(OpSLAB(CvROOT(cv)));
     else if (CvSTART(cv)) OpslabREFCNT_dec((OPSLAB *)CvSTART(cv));
-# endif
-# ifdef DEBUGGING
+#endif
+#ifdef DEBUGGING
     else if (slabbed)     Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
-# endif
+#endif
 
-# ifdef PERL_DEBUG_READONLY_OPS
+#ifdef PERL_DEBUG_READONLY_OPS
     if (slab) {
 	size_t refcnt;
 	refcnt = slab->opslab_refcnt;
 	OpslabREFCNT_dec(slab);
 	if (refcnt > 1) Slab_to_ro(slab);
     }
-# endif
-}
 #endif
+}
 
 /*
 =for apidoc m|PADOFFSET|pad_alloc_name|SV *namesv|U32 flags|HV *typestash|HV *ourstash

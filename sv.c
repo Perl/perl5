@@ -12950,11 +12950,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_compiling = proto_perl->Icompiling;
 
-#if defined(PERL_DEBUG_READONLY_OPS) && defined(PL_OP_SLAB_ALLOC)
-    PL_slabs = NULL;
-    PL_slab_count = 0;
-#endif
-
     /* pseudo environmental stuff */
     PL_origargc		= proto_perl->Iorigargc;
     PL_origargv		= proto_perl->Iorigargv;

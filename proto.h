@@ -693,6 +693,11 @@ PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto)
 PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ const CV *const cv)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV void	Perl_cv_forget_slab(pTHX_ CV *cv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CV_FORGET_SLAB	\
+	assert(cv)
+
 PERL_CALLCONV void	Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -4869,17 +4874,6 @@ PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop
 	assert(idop)
 
 #endif
-#if !(defined(PL_OP_SLAB_ALLOC))
-#  if defined(PERL_CORE)
-#    if defined(PERL_DEBUG_READONLY_OPS)
-PERL_CALLCONV void	Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SLAB_TO_RO	\
-	assert(slab)
-
-#    endif
-#  endif
-#endif
 #if !(defined(USE_ITHREADS))
 #  if defined(PERL_IN_OP_C)
 STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
@@ -5009,30 +5003,6 @@ STATIC I32	S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 	assert(sv)
 
 #  endif
-#endif
-#if !defined(PL_OP_SLAB_ALLOC)
-PERL_CALLCONV void	Perl_cv_forget_slab(pTHX_ CV *cv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CV_FORGET_SLAB	\
-	assert(cv)
-
-#endif
-#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
-PERL_CALLCONV void	Perl_opslab_force_free(pTHX_ OPSLAB *slab)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE	\
-	assert(slab)
-
-PERL_CALLCONV void	Perl_opslab_free(pTHX_ OPSLAB *slab)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OPSLAB_FREE	\
-	assert(slab)
-
-PERL_CALLCONV void	Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OPSLAB_FREE_NOPAD	\
-	assert(slab)
-
 #endif
 #if !defined(SETUID_SCRIPTS_ARE_SECURE_NOW)
 #  if defined(PERL_IN_PERL_C)
@@ -5294,6 +5264,30 @@ PERL_CALLCONV short	Perl_my_swap(pTHX_ short s)
 #if defined(NO_MATHOMS)
 /* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
 #endif
+#if defined(PERL_CORE)
+PERL_CALLCONV void	Perl_opslab_force_free(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPSLAB_FORCE_FREE	\
+	assert(slab)
+
+PERL_CALLCONV void	Perl_opslab_free(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPSLAB_FREE	\
+	assert(slab)
+
+PERL_CALLCONV void	Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OPSLAB_FREE_NOPAD	\
+	assert(slab)
+
+#  if defined(PERL_DEBUG_READONLY_OPS)
+PERL_CALLCONV void	Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SLAB_TO_RO	\
+	assert(slab)
+
+#  endif
+#endif
 #if defined(PERL_CR_FILTER)
 #  if defined(PERL_IN_TOKE_C)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
@@ -5317,9 +5311,6 @@ STATIC void	S_Slab_to_rw(pTHX_ void *op)
 #define PERL_ARGS_ASSERT_SLAB_TO_RW	\
 	assert(op)
 
-#  endif
-#  if defined(PL_OP_SLAB_ALLOC)
-PERL_CALLCONV void	Perl_pending_Slabs_to_ro(pTHX);
 #  endif
 #endif
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)

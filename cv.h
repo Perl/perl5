@@ -191,10 +191,6 @@ See L<perlguts/Autoloading with XSUBs>.
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
 
-#ifdef PL_OP_SLAB_ALLOC
-# define cv_forget_slab(cv)	NOOP
-#endif
-
 /*
 =head1 CV reference counts and CvOUTSIDE
 

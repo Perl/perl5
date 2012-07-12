@@ -404,21 +404,6 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 			 );
 }
 
-unless ($define{'PL_OP_SLAB_ALLOC'}) {
-    ++$skip{$_} foreach qw(
-                     PL_OpPtr
-                     PL_OpSlab
-                     PL_OpSpace
-			 );
-}
-
-unless ($define{'PERL_DEBUG_READONLY_OPS'} && $define{'PL_OP_SLAB_ALLOC'}){
-    ++$skip{$_} foreach qw(
-		    PL_slab_count
-		    PL_slabs
-			 );
-}
-
 unless ($define{'PERL_NEED_APPCTX'}) {
     ++$skip{PL_appctx};
 }

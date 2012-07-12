@@ -2409,7 +2409,7 @@ typedef struct padop PADOP;
 typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
-#if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
+#ifdef PERL_CORE
 typedef struct opslab OPSLAB;
 typedef struct opslot OPSLOT;
 #endif
@@ -4692,9 +4692,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_USES_PL_PIDSTATUS
 			     " PERL_USES_PL_PIDSTATUS"
-#  endif
-#  ifdef PL_OP_SLAB_ALLOC
-			     " PL_OP_SLAB_ALLOC"
 #  endif
 #  ifdef USE_64_BIT_ALL
 			     " USE_64_BIT_ALL"

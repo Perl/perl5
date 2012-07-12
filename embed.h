@@ -1053,6 +1053,7 @@
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
+#define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
 #define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #define cvstash_set(a,b)	Perl_cvstash_set(aTHX_ a,b)
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
@@ -1234,13 +1235,6 @@
 #define package(a)		Perl_package(aTHX_ a)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #  endif
-#  if !(defined(PL_OP_SLAB_ALLOC))
-#    if defined(PERL_CORE)
-#      if defined(PERL_DEBUG_READONLY_OPS)
-#define Slab_to_ro(a)		Perl_Slab_to_ro(aTHX_ a)
-#      endif
-#    endif
-#  endif
 #  if !defined(HAS_GETENV_LEN)
 #define getenv_len(a,b)		Perl_getenv_len(aTHX_ a,b)
 #  endif
@@ -1275,14 +1269,6 @@
 #define utf16_textfilter(a,b,c)	S_utf16_textfilter(aTHX_ a,b,c)
 #    endif
 #  endif
-#  if !defined(PL_OP_SLAB_ALLOC)
-#define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
-#  endif
-#  if !defined(PL_OP_SLAB_ALLOC) && defined(PERL_CORE)
-#define opslab_force_free(a)	Perl_opslab_force_free(aTHX_ a)
-#define opslab_free(a)		Perl_opslab_free(aTHX_ a)
-#define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
-#  endif
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
@@ -1316,6 +1302,14 @@
 #  if defined(MYMALLOC)
 #define malloc_good_size	Perl_malloc_good_size
 #define malloced_size		Perl_malloced_size
+#  endif
+#  if defined(PERL_CORE)
+#define opslab_force_free(a)	Perl_opslab_force_free(aTHX_ a)
+#define opslab_free(a)		Perl_opslab_free(aTHX_ a)
+#define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
+#    if defined(PERL_DEBUG_READONLY_OPS)
+#define Slab_to_ro(a)		Perl_Slab_to_ro(aTHX_ a)
+#    endif
 #  endif
 #  if defined(PERL_CR_FILTER)
 #    if defined(PERL_IN_TOKE_C)
