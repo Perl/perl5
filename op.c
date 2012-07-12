@@ -4712,8 +4712,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		 * pad_fixup_inner_anons() can find it */
 		(void)pad_add_anon(cv, o->op_type);
 		SvREFCNT_inc_simple_void(cv);
-
-		cv_forget_slab(cv);
 	    }
 	    else {
 		pm->op_code_list = expr;
