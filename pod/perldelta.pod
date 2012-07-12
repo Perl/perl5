@@ -28,6 +28,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<kill> with negative signal names
+
+C<kill> has always allowed a negative signal number, which kills the
+process group instead of a single process.  It has also allowed signal
+names.  But it did not behave consistently, because negative signal names
+were treated as 0.  Now negative signals names like C<-INT> are supported
+and treated the same way as -2 [perl #112990].
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -233,7 +241,13 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The 'Can't use "my %s" in sort comparison' error has been downgraded to a
+warning, '"my %s" used in sort comparison' (with 'state' instead of 'my'
+for state variables).  In addition, the heuristics for guessing whether
+lexical $a or $b has been misused have been improved to generate fewer
+false positives.  Lexical $a and $b are no longer disallowed if they are
+outside the sort block.  Also, a named unary or list operator inside the
+sort block no longer causes the $a or $b to be ignored [perl #86136].
 
 =back
 
@@ -367,6 +381,15 @@ OP allocation for CVs now uses a slab allocator.  This simplifies
 memory management for OPs allocated to a CV, so cleaning up after a
 compilation error is simpler and safer [perl #111462][perl #112312].
 
+=item *
+
+PERL_DEBUG_READONLY_OPS has been rewritten to work with the new slab
+allocator, allowing it to catch more violations that befor.
+
+=item *
+
+The old slab allocator for ops, which was only enabled for PERL_IMPLICIT_SYS and PERL_DEBUG_READONLY_OPS, has been retired.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -487,6 +510,73 @@ functionality which was broken in 5.17.0 [perl #113918].
 
 String negation now behaves the same under C<use integer;> as it does
 without [perl #113012].
+
+=item *
+
+C<chr> now returns the Unicode replacement character (U+FFFD) for -1,
+regardless of the internal representation.  -1 used to wrap if the argument
+was tied or a string internally.
+
+=item *
+
+Using a C<format> after its enclosing sub was freed could crash as of
+perl 5.12.0, if the format referenced lexical variables from the outer sub.
+
+=item *
+
+Using a C<format> after its enclosing sub was undefined could crash as of
+perl 5.10.0, if the format referenced lexical variables from the outer sub.
+
+=item *
+
+Using a C<format> defined inside a closures, which format references
+lexical variables from outside, never really worked unless the C<write>
+call was directly inside the closure.  In 5.10.0 it even started crashing.
+Now the copy of that closure nearest the top of the call stack is used to
+find those variables.
+
+=item *
+
+Formats that close over variables in special blocks no longer crash if a
+stub exists with the same name as the special block before the special
+block is compiled.
+
+=item *
+
+The parser no longer gets confused, treating C<eval foo ()> as a syntax
+error if preceded by C<print;> [perl #16249].
+
+=item *
+
+The return value of C<syscall> is no longer truncated on 64-bit platforms
+[perl #113980].
+
+=item *
+
+Constant folding no longer causes C<print 1 ? FOO : BAR> to print to the
+FOO handle [perl #78064].
+
+=item *
+
+C<do subname> now calls the named subroutine and uses the file name it
+returns, instead of opening a file named "subname".
+
+=item *
+
+Subroutines looked up by rv2cv check hooks (registered by XS modules) are
+now taken into consideration when determining whether C<foo bar> should be
+the sub call C<foo(bar)> or the method call C<< "bar"->foo >>.
+
+=item *
+
+C<CORE::foo::bar> is no longer treated specially, allowing global overrides
+to be called directly via C<CORE::GLOBAL::uc(...)> [perl #113016].
+
+=item *
+
+Calling an undefined sub whose typeglob has been undefined now produces the
+customary "Undefined subroutine called" error, instead of "Not a CODE
+reference".
 
 =back
 
