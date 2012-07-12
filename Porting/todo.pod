@@ -438,19 +438,6 @@ suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
 One piece of Perl code that might make a good testbed is F<installman>.
 
-=head2 Allocate OPs from arenas
-
-Currently all new OP structures are individually malloc()ed and free()d.
-All C<malloc> implementations have space overheads, and are now as fast as
-custom allocates so it would both use less memory and less CPU to allocate
-the various OP structures from arenas. The SV arena code can probably be
-re-used for this.
-
-Note that Configuring perl with C<-Accflags=-DPL_OP_SLAB_ALLOC> will use
-Perl_Slab_alloc() to pack optrees into a contiguous block, which is
-probably superior to the use of OP arenas, esp. from a cache locality
-standpoint.  See L<Profile Perl - am I hot or not?>.
-
 =head2 Improve win32/wince.c
 
 Currently, numerous functions look virtually, if not completely,
@@ -1009,29 +996,15 @@ implement per-thread working directories: Win32 already does this.
 
 See also L</"Extend PerlIO and PerlIO::Scalar">.
 
-=head2 Store the current pad in the OP slab allocator
-
-=for clarification
-I hope that I got that "current pad" part correct
-
-Currently we leak ops in various cases of parse failure. I suggested that we
-could solve this by always using the op slab allocator, and walking it to
-free ops. Dave comments that as some ops are already freed during optree
-creation one would have to mark which ops are freed, and not double free them
-when walking the slab. He notes that one problem with this is that for some ops
-you have to know which pad was current at the time of allocation, which does
-change. I suggested storing a pointer to the current pad in the memory allocated
-for the slab, and swapping to a new slab each time the pad changes. Dave thinks
-that this would work.
-
 =head2 repack the optree
 
 Repacking the optree after execution order is determined could allow
 removal of NULL ops, and optimal ordering of OPs with respect to cache-line
-filling.  The slab allocator could be reused for this purpose.  I think that
+filling.  I think that
 the best way to do this is to make it an optional step just before the
 completed optree is attached to anything else, and to use the slab allocator
-unchanged, so that freeing ops is identical whether or not this step runs.
+unchanged--but allocate a single slab the right size, avoiding partial
+slabs--, so that freeing ops is identical whether or not this step runs.
 Note that the slab allocator allocates ops downwards in memory, so one would
 have to actually "allocate" the ops in reverse-execution order to get them
 contiguous in memory in execution order.
