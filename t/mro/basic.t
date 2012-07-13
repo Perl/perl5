@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 52);
+BEGIN { require q(./test.pl); } plan(tests => 53);
 
 require mro;
 
@@ -327,4 +327,14 @@ is(eval { MRO_N->testfunc() }, 123);
     @Thwit::ISA = "Sile";
     undef %Thwit::;
     ok !Thrext->isa('Sile'), 'undef %package:: updates subclasses';
+}
+
+{
+    # Obliterating @ISA via glob assignment
+    # Broken in 5.14.0; fixed in 5.17.2
+    @Gwythaint::ISA = "Fantastic::Creature";
+    undef *This_glob_haD_better_not_exist; # paranoia; must have no array
+    *Gwythaint::ISA = *This_glob_haD_better_not_exist;
+    ok !Gwythaint->isa("Fantastic::Creature"),
+       'obliterating @ISA via glob assignment';
 }

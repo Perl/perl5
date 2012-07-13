@@ -3723,7 +3723,6 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
          /* The stash may have been detached from the symbol table, so
             check its name. */
          && GvSTASH(dstr) && HvENAME(GvSTASH(dstr))
-         && GvAV((const GV *)sstr)
         )
             mro_changes = 2;
         else {
@@ -3758,6 +3757,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	}
     GvMULTI_on(dstr);
     if(mro_changes == 2) {
+      if (GvAV((const GV *)sstr)) {
 	MAGIC *mg;
 	SV * const sref = (SV *)GvAV((const GV *)dstr);
 	if (SvSMAGICAL(sref) && (mg = mg_find(sref, PERL_MAGIC_isa))) {
@@ -3769,7 +3769,8 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	    av_push((AV *)mg->mg_obj, SvREFCNT_inc_simple_NN(dstr));
 	}
 	else sv_magic(sref, dstr, PERL_MAGIC_isa, NULL, 0);
-	mro_isa_changed_in(GvSTASH(dstr));
+      }
+      mro_isa_changed_in(GvSTASH(dstr));
     }
     else if(mro_changes == 3) {
 	HV * const stash = GvHV(dstr);
