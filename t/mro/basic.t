@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 53);
+BEGIN { require q(./test.pl); } plan(tests => 54);
 
 require mro;
 
@@ -337,4 +337,11 @@ is(eval { MRO_N->testfunc() }, 123);
     *Gwythaint::ISA = *This_glob_haD_better_not_exist;
     ok !Gwythaint->isa("Fantastic::Creature"),
        'obliterating @ISA via glob assignment';
+}
+
+{
+    # Autovivifying @ISA via @{*ISA}
+    undef *fednu::ISA;
+    @{*fednu::ISA} = "pyfg";
+    ok +fednu->isa("pyfg"), 'autovivifying @ISA via *{@ISA}';
 }
