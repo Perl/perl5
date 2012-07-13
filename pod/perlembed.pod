@@ -391,7 +391,7 @@ C<s/bob/robert/g> or C<tr[A-Z][a-z]>), substitute() modifies the string
 within the C<SV> as according to the operation, returning the number of substitutions
 made.
 
-   int matches(SV *string, char *pattern, AV **matches);
+   IV matches(SV *string, char *pattern, AV **matches);
 
 Given an C<SV>, a pattern, and a pointer to an empty C<AV>,
 matches() evaluates C<$string =~ $pattern> in a list context, and
@@ -478,7 +478,7 @@ been wrapped here):
  ** and fills in **matches with the matching substrings
  **/
 
- I32 matches(SV *string, char *pattern, AV **match_list)
+ IV matches(SV *string, char *pattern, AV **match_list)
  {
      SV *command = newSV(0);
      IV num_matches;
@@ -499,7 +499,7 @@ been wrapped here):
  {
      char *embedding[] = { "", "-e", "0" };
      AV *match_list;
-     I32 num_matches, i;
+     IV num_matches, i;
      SV *text;
 
      PERL_SYS_INIT3(&argc,&argv,&env);
@@ -541,8 +541,8 @@ been wrapped here):
      /** Remove all vowels from text **/
      num_matches = substitute(&text, "s/[aeiou]//gi");
      if (num_matches) {
- 	printf("substitute: s/[aeiou]//gi...%d substitutions made.\n",
- 	       num_matches);
+ 	printf("substitute: s/[aeiou]//gi...%lu substitutions made.\n",
+ 	       (unsigned long)num_matches);
  	printf("Now text is: %s\n\n", SvPV_nolen(text));
      }
 
