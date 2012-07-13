@@ -341,6 +341,7 @@ is(eval { MRO_N->testfunc() }, 123);
 
 {
     # Autovivifying @ISA via @{*ISA}
+    no warnings;
     undef *fednu::ISA;
     @{*fednu::ISA} = "pyfg";
     ok +fednu->isa("pyfg"), 'autovivifying @ISA via *{@ISA}';
