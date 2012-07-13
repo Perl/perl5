@@ -2,6 +2,8 @@
 #
 # Regenerate (overwriting only if changed):
 #
+#    mg_names.c
+#    mg_raw.h
 #    mg_vtable.h
 #    pod/perlguts.pod
 #
