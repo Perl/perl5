@@ -108,7 +108,7 @@ _copy(class, x)
   INIT:
     AV*	a;
     AV*	a2;
-    I32	elems;
+    IV elems;
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
@@ -144,8 +144,8 @@ __strip_zeros(x)
   INIT:
     AV*	a;
     SV*	temp;
-    I32	elems;
-    I32	index;
+    IV elems;
+    IV index;
 
   CODE:
     a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
@@ -189,8 +189,8 @@ _dec(class,x)
   INIT:
     AV*	a;
     SV*	temp;
-    I32	elems;
-    I32	index;
+    IV elems;
+    IV index;
     NV	MAX;
 
   CODE:
@@ -233,8 +233,8 @@ _inc(class,x)
   INIT:
     AV*	a;
     SV*	temp;
-    I32	elems;
-    I32	index;
+    IV elems;
+    IV index;
     NV	BASE;
 
   CODE:
@@ -347,13 +347,13 @@ _acmp(class, cx, cy);
   INIT:
     AV* array_x;
     AV* array_y;
-    I32 elemsx, elemsy, diff;
+    IV elemsx, elemsy, diff;
     SV* tempx;
     SV* tempy;
     STRLEN lenx;
     STRLEN leny;
     NV diff_nv;
-    I32 diff_str;
+    IV diff_str;
 
   CODE:
     array_x = (AV*)SvRV(cx);		/* ref to aray, don't check ref */
@@ -376,7 +376,7 @@ _acmp(class, cx, cy);
     tempy = *av_fetch(array_y, elemsx, 0);	/* fetch last element */
     SvPV(tempx, lenx);			/* convert to string & store length */
     SvPV(tempy, leny);			/* convert to string & store length */
-    diff_str = (I32)lenx - (I32)leny;
+    diff_str = (IV)lenx - (IV)leny;
     if (diff_str > 0)
       {
       RETURN_MORTAL_INT(1);		/* same len, but first elems differs in len */

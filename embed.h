@@ -498,6 +498,7 @@
 #define save_padsv_and_mortalize(a)	Perl_save_padsv_and_mortalize(aTHX_ a)
 #define save_pptr(a)		Perl_save_pptr(aTHX_ a)
 #define save_pushi32ptr(a,b,c)	Perl_save_pushi32ptr(aTHX_ a,b,c)
+#define save_pushivptr(a,b,c)	Perl_save_pushivptr(aTHX_ a,b,c)
 #define save_pushptr(a,b)	Perl_save_pushptr(aTHX_ a,b)
 #define save_pushptrptr(a,b,c)	Perl_save_pushptrptr(aTHX_ a,b,c)
 #define save_re_context()	Perl_save_re_context(aTHX)
@@ -1529,6 +1530,7 @@
 #  endif
 #  if defined(PERL_IN_SCOPE_C)
 #define save_pushptri32ptr(a,b,c,d)	S_save_pushptri32ptr(aTHX_ a,b,c,d)
+#define save_pushptrivptr(a,b,c,d)	S_save_pushptrivptr(aTHX_ a,b,c,d)
 #define save_scalar_at(a,b)	S_save_scalar_at(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_SV_C)

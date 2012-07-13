@@ -844,12 +844,12 @@ PP(pp_rv2av)
 	   (until such time as we get tools that can do blame annotation across
 	   whitespace changes.  */
 	if (gimme == G_ARRAY) {
-	    const I32 maxarg = AvFILL(av) + 1;
+	    const IV maxarg = AvFILL(av) + 1;
 	    (void)POPs;			/* XXXX May be optimized away? */
 	    EXTEND(SP, maxarg);
 	    if (SvRMAGICAL(av)) {
-		U32 i;
-		for (i=0; i < (U32)maxarg; i++) {
+	        UV i;
+		for (i=0; i < (UV)maxarg; i++) {
 		    SV ** const svp = av_fetch(av, i, FALSE);
 		    /* See note in pp_helem, and bug id #27839 */
 		    SP[i+1] = svp
@@ -864,7 +864,7 @@ PP(pp_rv2av)
 	}
 	else if (gimme == G_SCALAR) {
 	    dTARGET;
-	    const I32 maxarg = AvFILL(av) + 1;
+	    const IV maxarg = AvFILL(av) + 1;
 	    SETi(maxarg);
 	}
     } else {
@@ -941,7 +941,6 @@ PP(pp_aassign)
 
     I32 gimme;
     HV *hash;
-    I32 i;
     int magic;
     int duplicates = 0;
     SV **firsthashrelem = NULL;	/* "= 0" keeps gcc 2.95 quiet  */
@@ -993,7 +992,8 @@ PP(pp_aassign)
 	TAINT_NOT;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
-	case SVt_PVAV:
+	case SVt_PVAV: {
+            IV i;
 	    ary = MUTABLE_AV(sv);
 	    magic = SvMAGICAL(ary) != 0;
 	    ENTER;
@@ -1020,6 +1020,7 @@ PP(pp_aassign)
 		SvSETMAGIC(MUTABLE_SV(ary));
 	    LEAVE;
 	    break;
+	}
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
 		SV** topelem = relem;

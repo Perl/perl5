@@ -251,7 +251,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                hierarchy is not C3-incompatible */
             if(!winner) {
                 SV *errmsg;
-                I32 i;
+                IV i;
 
                 errmsg = newSVpvf(
                             "Inconsistent hierarchy during C3 merge of class '%"SVf"':\n\t"

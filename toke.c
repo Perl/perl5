@@ -1766,7 +1766,7 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 	    sv_setpvn(sv, buf, len);
 	(void)SvIOK_on(sv);
 	SvIV_set(sv, 0);
-	av_store(av, (I32)CopLINE(PL_curcop), sv);
+	av_store(av, CopLINE(PL_curcop), sv);
     }
 }
 

@@ -1088,7 +1088,7 @@ Mytest.xs:
 	    SV * paths
 	INIT:
 	    AV * results;
-	    I32 numpaths = 0;
+	    IV numpaths = 0;
 	    int i, n;
 	    struct statfs buf;
 

@@ -481,7 +481,7 @@ been wrapped here):
  I32 matches(SV *string, char *pattern, AV **match_list)
  {
      SV *command = newSV(0);
-     I32 num_matches;
+     IV num_matches;
 
      sv_setpvf(command, "my $string = '%s'; @array = ($string =~ %s)",
  	      SvPV_nolen(string), pattern);

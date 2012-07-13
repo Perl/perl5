@@ -4634,7 +4634,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	}
     }
     if ( qv ) { /* quoted versions always get at least three terms*/
-	I32 len = av_len(av);
+	IV len = av_len(av);
 	/* This for loop appears to trigger a compiler bug on OS X, as it
 	   loops infinitely. Yes, len is negative. No, it makes no sense.
 	   Compiler in question is:
@@ -4699,7 +4699,7 @@ Perl_new_version(pTHX_ SV *ver)
     if ( sv_isobject(ver) && sv_derived_from(ver, "version") )
 	 /* can just copy directly */
     {
-	I32 key;
+	IV key;
 	AV * const av = newAV();
 	AV *sav;
 	/* This will get reblessed later if a derived class*/
@@ -4938,7 +4938,7 @@ The SV returned has a refcount of 1.
 SV *
 Perl_vnumify(pTHX_ SV *vs)
 {
-    I32 i, len, digit;
+    IV i, len, digit;
     int width;
     bool alpha = FALSE;
     SV *sv;
@@ -5019,7 +5019,7 @@ The SV returned has a refcount of 1.
 SV *
 Perl_vnormal(pTHX_ SV *vs)
 {
-    I32 i, len, digit;
+    IV i, len, digit;
     bool alpha = FALSE;
     SV *sv;
     AV *av;
@@ -5115,11 +5115,12 @@ converted into version objects.
 int
 Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 {
-    I32 i,l,m,r,retval;
+    IV i,l,m,r;
+    int retval;
     bool lalpha = FALSE;
     bool ralpha = FALSE;
-    I32 left = 0;
-    I32 right = 0;
+    IV left = 0;
+    IV right = 0;
     AV *lav, *rav;
 
     PERL_ARGS_ASSERT_VCMP;

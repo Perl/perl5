@@ -381,6 +381,16 @@ Perl_save_pushi32ptr(pTHX_ const I32 i, void *const ptr, const int type)
 }
 
 void
+Perl_save_pushivptr(pTHX_ const IV i, void *const ptr, const int type)
+{
+    dVAR;
+    SSCHECK(3);
+    SSPUSHIV(i);
+    SSPUSHPTR(ptr);
+    SSPUSHUV(type);
+}
+
+void
 Perl_save_int(pTHX_ int *intp)
 {
     dVAR;
@@ -555,14 +565,14 @@ Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
 }
 
 void
-Perl_save_adelete(pTHX_ AV *av, I32 key)
+Perl_save_adelete(pTHX_ AV *av, IV key)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_SAVE_ADELETE;
 
     SvREFCNT_inc_void(av);
-    save_pushi32ptr(key, av, SAVEt_ADELETE);
+    save_pushivptr(key, av, SAVEt_ADELETE);
 }
 
 void
@@ -614,8 +624,19 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
     SSPUSHUV(type);
 }
 
+static void
+S_save_pushptrivptr(pTHX_ void *const ptr1, const IV i, void *const ptr2,
+			const int type)
+{
+    SSCHECK(4);
+    SSPUSHPTR(ptr1);
+    SSPUSHIV(i);
+    SSPUSHPTR(ptr2);
+    SSPUSHUV(type);
+}
+
 void
-Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
+Perl_save_aelem_flags(pTHX_ AV *av, IV idx, SV **sptr, const U32 flags)
 {
     dVAR;
     SV *sv;
@@ -623,7 +644,7 @@ Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
     PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS;
 
     SvGETMAGIC(*sptr);
-    save_pushptri32ptr(SvREFCNT_inc_simple(av), idx, SvREFCNT_inc(*sptr),
+    save_pushptrivptr(SvREFCNT_inc_simple(av), idx, SvREFCNT_inc(*sptr),
 		       SAVEt_AELEM);
     /* if it gets reified later, the restore will have the wrong refcnt */
     if (!AvREAL(av) && AvREIFY(av))
@@ -710,6 +731,7 @@ Perl_leave_scope(pTHX_ I32 base)
     void* ptr;
     register char* str;
     I32 i;
+    IV iv;
     /* Localise the effects of the TAINT_NOT inside the loop.  */
     bool was = PL_tainted;
 
@@ -961,8 +983,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_ADELETE:
 	    ptr = SSPOPPTR;
 	    av = MUTABLE_AV(ptr);
-	    i = SSPOPINT;
-	    (void)av_delete(av, i, G_DISCARD);
+	    iv = SSPOPIV;
+	    (void)av_delete(av, iv, G_DISCARD);
 	    SvREFCNT_dec(av);
 	    break;
 	case SAVEt_DESTRUCTOR_X:
@@ -984,9 +1006,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_AELEM:		/* array element */
 	    value = MUTABLE_SV(SSPOPPTR);
-	    i = SSPOPINT;
+	    iv = SSPOPIV;
 	    av = MUTABLE_AV(SSPOPPTR);
-	    ptr = av_fetch(av,i,1);
+	    ptr = av_fetch(av,iv,1);
 	    if (!AvREAL(av) && AvREIFY(av)) /* undo reify guard */
 		SvREFCNT_dec(value);
 	    if (ptr) {

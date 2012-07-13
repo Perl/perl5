@@ -413,7 +413,7 @@ mk_SortKey (self, buf)
     AV *bufAV;
     HV *selfHV;
     UV back_flag;
-    I32 i, buf_len;
+    IV i, buf_len;
     IV  lv, level, uca_vers;
     bool upper_lower, kata_hira, v2i, last_is_var;
   CODE:

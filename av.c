@@ -27,7 +27,7 @@ void
 Perl_av_reify(pTHX_ AV *av)
 {
     dVAR;
-    I32 key;
+    IV key;
 
     PERL_ARGS_ASSERT_AV_REIFY;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -64,7 +64,7 @@ extended.
 */
 
 void
-Perl_av_extend(pTHX_ AV *av, I32 key)
+Perl_av_extend(pTHX_ AV *av, IV key)
 {
     dVAR;
     MAGIC *mg;
@@ -82,8 +82,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
     }
     if (key > AvMAX(av)) {
 	SV** ary;
-	I32 tmp;
-	I32 newmax;
+	IV tmp, newmax;
 
 	if (AvALLOC(av) != AvARRAY(av)) {
 	    ary = AvALLOC(av) + AvFILLp(av) + 1;
@@ -200,7 +199,7 @@ The rough perl equivalent is C<$myarray[$idx]>.
 */
 
 SV**
-Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
+Perl_av_fetch(pTHX_ register AV *av, IV key, I32 lval)
 {
     dVAR;
 
@@ -286,7 +285,7 @@ more information on how to use this function on tied arrays.
 */
 
 SV**
-Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
+Perl_av_store(pTHX_ register AV *av, IV key, SV *val)
 {
     dVAR;
     SV** ary;
@@ -387,7 +386,7 @@ Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 */
 
 AV *
-Perl_av_make(pTHX_ register I32 size, register SV **strp)
+Perl_av_make(pTHX_ IV size, SV **strp)
 {
     register AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
     /* sv_upgrade does AvREAL_only()  */
@@ -396,7 +395,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
         register SV** ary;
-        register I32 i;
+        register IV i;
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	AvARRAY(av) = ary;
@@ -433,7 +432,7 @@ void
 Perl_av_clear(pTHX_ register AV *av)
 {
     dVAR;
-    I32 extra;
+    IV extra;
     bool real;
 
     PERL_ARGS_ASSERT_AV_CLEAR;
@@ -462,7 +461,7 @@ Perl_av_clear(pTHX_ register AV *av)
 
     if ((real = !!AvREAL(av))) {
 	SV** const ary = AvARRAY(av);
-	I32 index = AvFILLp(av) + 1;
+	IV index = AvFILLp(av) + 1;
 	ENTER;
 	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (index) {
@@ -505,7 +504,7 @@ Perl_av_undef(pTHX_ register AV *av)
 	av_fill(av, -1);
 
     if ((real = !!AvREAL(av))) {
-	register I32 key = AvFILLp(av) + 1;
+	register IV key = AvFILLp(av) + 1;
 	ENTER;
 	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (key)
@@ -645,10 +644,10 @@ Perl equivalent: C<unshift @myarray, ( (undef) x $n );>
 */
 
 void
-Perl_av_unshift(pTHX_ register AV *av, register I32 num)
+Perl_av_unshift(pTHX_ register AV *av, register IV num)
 {
     dVAR;
-    register I32 i;
+    register IV i;
     MAGIC* mg;
 
     PERL_ARGS_ASSERT_AV_UNSHIFT;
@@ -679,9 +678,9 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     }
     if (num) {
 	register SV **ary;
-	const I32 i = AvFILLp(av);
+	const IV i = AvFILLp(av);
 	/* Create extra elements */
-	const I32 slide = i > 0 ? i : 0;
+	const IV slide = i > 0 ? i : 0;
 	num += slide;
 	av_extend(av, i + num);
 	AvFILLp(av) += num;
@@ -751,7 +750,7 @@ The Perl equivalent for this is C<$#myarray>.
 =cut
 */
 
-I32
+IV
 Perl_av_len(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_LEN;
@@ -775,7 +774,7 @@ the same as C<av_clear(av)>.
 =cut
 */
 void
-Perl_av_fill(pTHX_ register AV *av, I32 fill)
+Perl_av_fill(pTHX_ register AV *av, IV fill)
 {
     dVAR;
     MAGIC *mg;
@@ -793,7 +792,7 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 	return;
     }
     if (fill <= AvMAX(av)) {
-	I32 key = AvFILLp(av);
+	IV key = AvFILLp(av);
 	SV** const ary = AvARRAY(av);
 
 	if (AvREAL(av)) {
@@ -827,7 +826,7 @@ C<G_DISCARD> version.
 =cut
 */
 SV *
-Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
+Perl_av_delete(pTHX_ AV *av, IV key, I32 flags)
 {
     dVAR;
     SV *sv;
@@ -919,7 +918,7 @@ Perl equivalent: C<exists($myarray[$key])>.
 =cut
 */
 bool
-Perl_av_exists(pTHX_ AV *av, I32 key)
+Perl_av_exists(pTHX_ AV *av, IV key)
 {
     dVAR;
     PERL_ARGS_ASSERT_AV_EXISTS;

@@ -271,7 +271,7 @@ blockhook_csc_start(pTHX_ int full)
     SAVEGENERICSV(GvAV(MY_CXT.cscgv));
 
     if (cur) {
-        I32 i;
+        IV i;
         AV *const new_av = newAV();
 
         for (i = 0; i <= av_len(cur); i++) {
@@ -3285,7 +3285,7 @@ SV*
 fetch_pad_names( cv )
 CV* cv
  PREINIT:
-  I32 i;
+  IV i;
   AV *pad_namelist;
   AV *retav = newAV();
  CODE:

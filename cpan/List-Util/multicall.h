@@ -39,8 +39,8 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 	SV** const svp = AvARRAY(padlist);
 	AV* const newpad = newAV();
 	SV** const oldpad = AvARRAY(svp[depth-1]);
-	I32 ix = AvFILLp((AV*)svp[1]);
-        const I32 names_fill = AvFILLp((AV*)svp[0]);
+	IV ix = AvFILLp((AV*)svp[1]);
+        const IV names_fill = AvFILLp((AV*)svp[0]);
 	SV** const names = AvARRAY(svp[0]);
 	AV *av;
 

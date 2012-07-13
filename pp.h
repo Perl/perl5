@@ -439,7 +439,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
             }                                                   \
             else if ((flags & AMGf_want_list) && gimme == G_ARRAY) { \
                 int i;                                          \
-                I32 len;                                        \
+                IV len;                                         \
                 assert(SvTYPE(tmpsv) == SVt_PVAV);              \
                 len = av_len((AV *)tmpsv) + 1;                  \
                 (void)POPs; /* get rid of the arg */            \

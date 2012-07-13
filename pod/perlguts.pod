@@ -332,7 +332,7 @@ empty AV:
 
 The second method both creates the AV and initially populates it with SVs:
 
-    AV*  av_make(I32 num, SV **ptr);
+    AV*  av_make(IV num, SV **ptr);
 
 The second argument points to an array containing C<num> C<SV*>'s.  Once the
 AV has been created, the SVs can be destroyed, if so desired.
@@ -342,7 +342,7 @@ Once the AV has been created, the following operations are possible on it:
     void  av_push(AV*, SV*);
     SV*   av_pop(AV*);
     SV*   av_shift(AV*);
-    void  av_unshift(AV*, I32 num);
+    void  av_unshift(AV*, IV num);
 
 These should be familiar operations, with the exception of C<av_unshift>.
 This routine adds C<num> elements at the front of the array with the C<undef>
@@ -351,9 +351,9 @@ to these new elements.
 
 Here are some other functions:
 
-    I32   av_len(AV*);
-    SV**  av_fetch(AV*, I32 key, I32 lval);
-    SV**  av_store(AV*, I32 key, SV* val);
+    IV   av_len(AV*);
+    SV**  av_fetch(AV*, IV key, I32 lval);
+    SV**  av_store(AV*, IV key, SV* val);
 
 The C<av_len> function returns the highest index value in an array (just
 like $#array in Perl).  If the array is empty, -1 is returned.  The
@@ -370,7 +370,7 @@ A few more:
 
     void  av_clear(AV*);
     void  av_undef(AV*);
-    void  av_extend(AV*, I32 key);
+    void  av_extend(AV*, IV key);
 
 The C<av_clear> function deletes all the elements in the AV* array, but
 does not actually delete the array itself.  The C<av_undef> function will

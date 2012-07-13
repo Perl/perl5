@@ -83,11 +83,11 @@ PP(pp_padav)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	const I32 maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
+	const Size_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {
-	    U32 i;
-	    for (i=0; i < (U32)maxarg; i++) {
+	    Size_t i;
+	    for (i=0; i < maxarg; i++) {
 		SV * const * const svp = av_fetch(MUTABLE_AV(TARG), i, FALSE);
 		SP[i+1] = (svp) ? *svp : &PL_sv_undef;
 	    }
@@ -99,7 +99,7 @@ PP(pp_padav)
     }
     else if (gimme == G_SCALAR) {
 	SV* const sv = sv_newmortal();
-	const I32 maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
+	const IV maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	sv_setiv(sv, maxarg);
 	PUSHs(sv);
     }
@@ -4250,9 +4250,9 @@ PP(pp_aslice)
 
 	if (lval && localizing) {
 	    register SV **svp;
-	    I32 max = -1;
+	    IV max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
-		const I32 elem = SvIV(*svp);
+		const IV elem = SvIV(*svp);
 		if (elem > max)
 		    max = elem;
 	    }
@@ -4262,7 +4262,7 @@ PP(pp_aslice)
 
 	while (++MARK <= SP) {
 	    register SV **svp;
-	    I32 elem = SvIV(*MARK);
+	    IV elem = SvIV(*MARK);
 	    bool preeminent = TRUE;
 
 	    if (localizing && can_preserve) {
@@ -4484,7 +4484,7 @@ S_do_delete_local(pTHX)
 	    if (PL_op->op_flags & OPf_SPECIAL) {
 		AV * const av = MUTABLE_AV(osv);
 		while (++MARK <= end) {
-		    I32 idx = SvIV(*MARK);
+		    IV idx = SvIV(*MARK);
 		    SV *sv = NULL;
 		    bool preeminent = TRUE;
 		    if (can_preserve)
@@ -4827,12 +4827,12 @@ PP(pp_splice)
     register AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     register SV **src;
     register SV **dst;
-    register I32 i;
-    register I32 offset;
-    register I32 length;
-    I32 newlen;
-    I32 after;
-    I32 diff;
+    register IV i;
+    register IV offset;
+    register IV length;
+    IV newlen;
+    IV after;
+    IV diff;
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -5089,7 +5089,7 @@ PP(pp_unshift)
 	SPAGAIN;
     }
     else {
-	register I32 i = 0;
+	register IV i = 0;
 	av_unshift(ary, SP - MARK);
 	while (MARK < SP) {
 	    SV * const sv = newSVsv(*++MARK);
@@ -5120,7 +5120,7 @@ PP(pp_reverse)
 	    SP = MARK;
 
 	    if (SvMAGICAL(av)) {
-		I32 i, j;
+		IV i, j;
 		register SV *tmp = sv_newmortal();
 		/* For SvCANEXISTDELETE */
 		HV *stash;
@@ -5183,7 +5183,7 @@ PP(pp_reverse)
     else {
 	register char *up;
 	register char *down;
-	register I32 tmp;
+	register char tmp;
 	dTARGET;
 	STRLEN len;
 
@@ -5216,7 +5216,7 @@ PP(pp_reverse)
 			while (down > up) {
 			    tmp = *up;
 			    *up++ = *down;
-			    *down-- = (char)tmp;
+			    *down-- = tmp;
 			}
 		    }
 		}
@@ -5226,7 +5226,7 @@ PP(pp_reverse)
 	    while (down > up) {
 		tmp = *up;
 		*up++ = *down;
-		*down-- = (char)tmp;
+		*down-- = tmp;
 	    }
 	    (void)SvPOK_only_UTF8(TARG);
 	}
@@ -5250,9 +5250,9 @@ PP(pp_split)
     register REGEXP *rx;
     register SV *dstr;
     register const char *m;
-    I32 iters = 0;
     const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (STRLEN)(strend - s);
-    I32 maxiters = slen + 10;
+    IV maxiters = (IV)slen + 10;
+    IV iters = 0;
     I32 trailing_empty = 0;
     const char *orig;
     const I32 origlimit = limit;
@@ -5648,7 +5648,7 @@ PP(pp_split)
 	    LEAVE_with_name("call_PUSH");
 	    SPAGAIN;
 	    if (gimme == G_ARRAY) {
-		I32 i;
+		IV i;
 		/* EXTEND should not be needed - we just popped them */
 		EXTEND(SP, iters);
 		for (i=0; i < iters; i++) {

@@ -5601,7 +5601,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	/* this line can have a breakpoint - store the cop in IV */
 	AV *av = CopFILEAVx(PL_curcop);
 	if (av) {
-	    SV * const * const svp = av_fetch(av, (I32)CopLINE(cop), FALSE);
+	    SV * const * const svp = av_fetch(av, CopLINE(cop), FALSE);
 	    if (svp && *svp != &PL_sv_undef ) {
 		(void)SvIOK_on(*svp);
 		SvIV_set(*svp, PTR2IV(cop));

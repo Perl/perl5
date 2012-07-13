@@ -12943,7 +12943,7 @@ mod2fname(pTHX_ CV *cv)
   dXSARGS;
   char ultimate_name[NAM$C_MAXRSS+1], work_name[NAM$C_MAXRSS*8 + 1],
        workbuff[NAM$C_MAXRSS*1 + 1];
-  int counter, num_entries;
+  IV counter, num_entries;
   /* ODS-5 ups this, but we want to be consistent, so... */
   int max_name_len = 39;
   AV *in_array = (AV *)SvRV(ST(0));

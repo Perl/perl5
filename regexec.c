@@ -6990,7 +6990,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		    /* Do the linear search to see if the fold is in the list
 		     * of multi-char folds. */
 		    if (av) {
-		        I32 i;
+		        IV i;
 			for (i = 0; i <= av_len(av); i++) {
 			    SV* const sv = *av_fetch(av, i, FALSE);
 			    STRLEN len;

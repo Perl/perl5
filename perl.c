@@ -4679,9 +4679,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	/* finally add this lib directory at the end of @INC */
 	if (unshift) {
 #ifdef PERL_IS_MINIPERL
-	    const U32 extra = 0;
+	    const Size_t extra = 0;
 #else
-	    U32 extra = av_len(av) + 1;
+	    Size_t extra = av_len(av) + 1;
 #endif
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)

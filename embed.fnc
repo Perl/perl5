@@ -190,23 +190,23 @@ Apd	|OP*	|op_prepend_elem|I32 optype|NULLOK OP* first|NULLOK OP* last
 p	|I32	|apply		|I32 type|NN SV** mark|NN SV** sp
 ApM	|void	|apply_attrs_string|NN const char *stashpv|NN CV *cv|NN const char *attrstr|STRLEN len
 Apd	|void	|av_clear	|NN AV *av
-Apd	|SV*	|av_delete	|NN AV *av|I32 key|I32 flags
-ApdR	|bool	|av_exists	|NN AV *av|I32 key
-Apd	|void	|av_extend	|NN AV *av|I32 key
-ApdR	|SV**	|av_fetch	|NN AV *av|I32 key|I32 lval
-Apd	|void	|av_fill	|NN AV *av|I32 fill
-ApdR	|I32	|av_len		|NN AV *av
-ApdR	|AV*	|av_make	|I32 size|NN SV **strp
+Apd	|SV*	|av_delete	|NN AV *av|IV key|I32 flags
+ApdR	|bool	|av_exists	|NN AV *av|IV key
+Apd	|void	|av_extend	|NN AV *av|IV key
+ApdR	|SV**	|av_fetch	|NN AV *av|IV key|I32 lval
+Apd	|void	|av_fill	|NN AV *av|IV fill
+ApdR	|IV|av_len		|NN AV *av
+ApdR	|AV*	|av_make	|IV size|NN SV **strp
 Apd	|SV*	|av_pop		|NN AV *av
 ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NN AV *av|NN SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
 ApdR	|SV*	|av_shift	|NN AV *av
-Apd	|SV**	|av_store	|NN AV *av|I32 key|NULLOK SV *val
+Apd	|SV**	|av_store	|NN AV *av|IV key|NULLOK SV *val
 Apd	|void	|av_undef	|NN AV *av
 ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
-Apd	|void	|av_unshift	|NN AV *av|I32 num
+Apd	|void	|av_unshift	|NN AV *av|IV num
 Apo	|SV**	|av_arylen_p	|NN AV *av
 Apo	|IV*	|av_iter_p	|NN AV *av
 #if defined(PERL_IN_AV_C)
@@ -1138,8 +1138,8 @@ Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
-Amp	|void	|save_aelem	|NN AV* av|I32 idx|NN SV **sptr
-Ap	|void	|save_aelem_flags|NN AV* av|I32 idx|NN SV **sptr|const U32 flags
+Amp	|void	|save_aelem	|NN AV* av|IV idx|NN SV **sptr
+Ap	|void	|save_aelem_flags|NN AV* av|IV idx|NN SV **sptr|const U32 flags
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|NN AV** aptr
 Ap	|AV*	|save_ary	|NN GV* gv
@@ -1147,7 +1147,7 @@ Ap	|void	|save_bool	|NN bool* boolp
 Ap	|void	|save_clearsv	|NN SV** svp
 Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
 Ap	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
-Ap	|void	|save_adelete	|NN AV *av|I32 key
+Ap	|void	|save_adelete	|NN AV *av|IV key
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
 Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
 Apmb	|void	|save_freesv	|NULLOK SV* sv
@@ -1184,11 +1184,14 @@ Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 Ap	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
+Ap	|void	|save_pushivptr	|const IV i|NULLOK void *const ptr|const int type
 : Used by SAVESWITCHSTACK() in pp.c
 Ap	|void	|save_pushptrptr|NULLOK void *const ptr1 \
 				|NULLOK void *const ptr2|const int type
 #if defined(PERL_IN_SCOPE_C)
 s	|void	|save_pushptri32ptr|NULLOK void *const ptr1|const I32 i \
+				|NULLOK void *const ptr2|const int type
+s	|void	|save_pushptrivptr|NULLOK void *const ptr1|const IV i \
 				|NULLOK void *const ptr2|const int type
 #endif
 : Used in perly.y

@@ -321,7 +321,7 @@ HUF_fix_trigger(pTHX_ SV *trigger, SV *new_id) {
 void
 HUF_fix_objects(pTHX) {
     dMY_CXT;
-    I32 i, len;
+    IV i, len;
     HE* ent;
     AV* oblist = (AV*)sv_2mortal((SV*)newAV());
     hv_iterinit(MY_CXT.ob_reg);

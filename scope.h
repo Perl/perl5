@@ -190,7 +190,7 @@ scope has the given name. Name must be a literal string.
 #define SAVEHDELETE(h,s) \
 	  save_hdelete(MUTABLE_HV(h), (s))
 #define SAVEADELETE(a,k) \
-	  save_adelete(MUTABLE_AV(a), (I32)(k))
+	  save_adelete(MUTABLE_AV(a), (k))
 #define SAVEDESTRUCTOR(f,p) \
 	  save_destructor((DESTRUCTORFUNC_NOCONTEXT_t)(f), (void*)(p))
 
