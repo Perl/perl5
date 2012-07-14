@@ -10650,7 +10650,8 @@ Perl_rpeep(pTHX_ register OP *o)
 		OP * const kid =
 		    cUNOPx(cLISTOP->op_first->op_sibling)->op_first;
 		if (kid->op_type == OP_SCOPE
-		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE))		    DEFER(kLISTOP->op_first);
+		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE))
+		    DEFER(kLISTOP->op_first);
 	    }
 
 	    /* check that RHS of sort is a single plain array */
