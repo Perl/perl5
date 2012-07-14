@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..15\n";
+print "1..16\n";
 
 my $i = 1;
 
@@ -42,6 +42,7 @@ q[	defined(&foo, $bar);
 
 test_too_few($_) for split /\n/,
 q[	unpack;
+	pack;
 ];
 
 test_no_error($_) for split /\n/,

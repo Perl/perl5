@@ -3139,6 +3139,22 @@ S_fold_constants(pTHX_ register OP *o)
 	if (IN_LOCALE_COMPILETIME)
 	    goto nope;
 	break;
+    case OP_PACK:
+	if (!cLISTOPo->op_first->op_sibling
+	  || cLISTOPo->op_first->op_sibling->op_type != OP_CONST)
+	    goto nope;
+	{
+	    SV * const sv = cSVOPx_sv(cLISTOPo->op_first->op_sibling);
+	    if (!SvPOK(sv) || SvGMAGICAL(sv)) goto nope;
+	    {
+		const char *s = SvPVX_const(sv);
+		while (s < SvEND(sv)) {
+		    if (*s == 'p' || *s == 'P') goto nope;
+		    s++;
+		}
+	    }
+	}
+	break;
     case OP_REPEAT:
 	if (o->op_private & OPpREPEAT_DOLIST) goto nope;
     }

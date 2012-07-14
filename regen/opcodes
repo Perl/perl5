@@ -237,7 +237,7 @@ boolkeys	boolkeys		ck_fun		%	H
 # Explosives and implosives.
 
 unpack		unpack			ck_fun		u@	S S?
-pack		pack			ck_fun		mst@	S L
+pack		pack			ck_fun		fmst@	S L
 split		split			ck_split	t@	S S S
 join		join or string		ck_join		mst@	S L
 
