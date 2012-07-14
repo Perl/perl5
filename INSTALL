@@ -104,8 +104,9 @@ On a related issue, old modules may possibly be affected by the changes
 in the Perl language in the current release.  Please see
 pod/perldelta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
-list of locally installed modules.  Also see CPAN::autobundle for one
-way to make a "bundle" of your currently installed modules.
+list of locally installed modules.  Also see the L<CPAN> module's
+C<autobundle> function for one way to make a "bundle" of your currently
+installed modules.
 
 =head1 Run Configure
 
