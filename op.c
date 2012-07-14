@@ -9177,25 +9177,10 @@ Perl_ck_sort(pTHX_ OP *o)
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
 	    LINKLIST(kid);
-	    if (kid->op_type == OP_SCOPE) {
-		kid->op_next = 0;
-	    }
-	    else if (kid->op_type == OP_LEAVE) {
-		    OP *k;
+	    if (kid->op_type == OP_LEAVE)
 		    op_null(kid);			/* wipe out leave */
-		    kid->op_next = kid;
-
-		    for (k = kLISTOP->op_first->op_next; k; k = k->op_next) {
-			if (k->op_next == kid)
-			    k->op_next = 0;
-			/* don't descend into loops */
-			else if (k->op_type == OP_ENTERLOOP
-				 || k->op_type == OP_ENTERITER)
-			{
-			    k = cLOOPx(k)->op_lastop;
-			}
-		    }
-	    }
+	    /* Prevent execution from escaping out of the sort block. */
+	    kid->op_next = 0;
 
 	    /* provide scalar context for comparison function/block */
 	    kid = scalar(firstkid);
