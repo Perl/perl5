@@ -8581,10 +8581,16 @@ Perl_ck_grep(pTHX_ OP *o)
 
     if (o->op_flags & OPf_STACKED) {
 	OP* k;
-	o = ck_sort(o);
-        kid = cUNOPx(cLISTOPo->op_first->op_sibling)->op_first;
+	OP *firstkid = cLISTOPo->op_first->op_sibling;
+        kid = cUNOPx(firstkid)->op_first;
 	if (kid->op_type != OP_SCOPE && kid->op_type != OP_LEAVE)
 	    return no_fh_allowed(o);
+	if (o->op_flags & OPf_STACKED) {
+	    LINKLIST(kid);
+	    firstkid->op_next = kLISTOP->op_first;
+	    kid->op_next = 0; /* just disconnect the leave/scope */
+	    o->op_flags |= OPf_SPECIAL;
+	}
 	for (k = kid; k; k = k->op_next) {
 	    kid = k;
 	}
@@ -9148,12 +9154,11 @@ Perl_ck_sort(pTHX_ OP *o)
 {
     dVAR;
     OP *firstkid;
+    HV * const hinthv = GvHV(PL_hintgv);
 
     PERL_ARGS_ASSERT_CK_SORT;
 
-    if (o->op_type == OP_SORT && (PL_hints & HINT_LOCALIZE_HH) != 0) {
-	HV * const hinthv = GvHV(PL_hintgv);
-	if (hinthv) {
+    if (hinthv) {
 	    SV ** const svp = hv_fetchs(hinthv, "sort", FALSE);
 	    if (svp) {
 		const I32 sorthints = (I32)SvIV(*svp);
@@ -9162,24 +9167,21 @@ Perl_ck_sort(pTHX_ OP *o)
 		if ((sorthints & HINT_SORT_STABLE) != 0)
 		    o->op_private |= OPpSORT_STABLE;
 	    }
-	}
     }
 
-    if (o->op_type == OP_SORT && o->op_flags & OPf_STACKED)
+    if (o->op_flags & OPf_STACKED)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
     if (o->op_flags & OPf_STACKED) {			/* may have been cleared */
-	OP *k = NULL;
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
 	    LINKLIST(kid);
 	    if (kid->op_type == OP_SCOPE) {
-		k = kid->op_next;
 		kid->op_next = 0;
 	    }
 	    else if (kid->op_type == OP_LEAVE) {
-		if (o->op_type == OP_SORT) {
+		    OP *k;
 		    op_null(kid);			/* wipe out leave */
 		    kid->op_next = kid;
 
@@ -9193,20 +9195,11 @@ Perl_ck_sort(pTHX_ OP *o)
 			    k = cLOOPx(k)->op_lastop;
 			}
 		    }
-		}
-		else
-		    kid->op_next = 0;		/* just disconnect the leave */
-		k = kLISTOP->op_first;
 	    }
 
-	    kid = firstkid;
-	    if (o->op_type == OP_SORT) {
-		/* provide scalar context for comparison function/block */
-		kid = scalar(kid);
-		kid->op_next = kid;
-	    }
-	    else
-		kid->op_next = k;
+	    /* provide scalar context for comparison function/block */
+	    kid = scalar(firstkid);
+	    kid->op_next = kid;
 	    o->op_flags |= OPf_SPECIAL;
 	}
 
@@ -9214,8 +9207,7 @@ Perl_ck_sort(pTHX_ OP *o)
     }
 
     /* provide list context for arguments */
-    if (o->op_type == OP_SORT)
-	list(firstkid);
+    list(firstkid);
 
     return o;
 }
