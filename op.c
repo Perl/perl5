@@ -8580,20 +8580,12 @@ Perl_ck_grep(pTHX_ OP *o)
     /* don't allocate gwop here, as we may leak it if PL_parser->error_count > 0 */
 
     if (o->op_flags & OPf_STACKED) {
-	OP* k;
 	OP *firstkid = cLISTOPo->op_first->op_sibling;
         kid = cUNOPx(firstkid)->op_first;
 	if (kid->op_type != OP_SCOPE && kid->op_type != OP_LEAVE)
 	    return no_fh_allowed(o);
-	if (o->op_flags & OPf_STACKED) {
-	    LINKLIST(kid);
-	    firstkid->op_next = kLISTOP->op_first;
-	    kid->op_next = 0; /* just disconnect the leave/scope */
-	    o->op_flags |= OPf_SPECIAL;
-	}
-	for (k = kid; k; k = k->op_next) {
-	    kid = k;
-	}
+	LINKLIST(kid);
+	firstkid->op_next = kLISTOP->op_first;
 	NewOp(1101, gwop, 1, LOGOP);
 	kid->op_next = (OP*)gwop;
 	o->op_flags &= ~OPf_STACKED;

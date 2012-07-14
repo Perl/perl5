@@ -469,7 +469,7 @@ checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
 # 3  <0> pushmark s
 # 4  <#> gv[*a] s
 # 5  <1> rv2av[t8] lKM/1
-# 6  <@> mapstart lK*
+# 6  <@> mapstart lK
 # 7  <|> mapwhile(other->8)[t9] lK
 # 8      <0> enter l
 # 9      <;> nextstate(main 500 (eval 22):1) v:{
@@ -493,7 +493,7 @@ EOT_EOT
 # 3  <0> pushmark s
 # 4  <$> gv(*a) s
 # 5  <1> rv2av[t3] lKM/1
-# 6  <@> mapstart lK*
+# 6  <@> mapstart lK
 # 7  <|> mapwhile(other->8)[t4] lK
 # 8      <0> enter l
 # 9      <;> nextstate(main 500 (eval 22):1) v:{
