@@ -3233,12 +3233,13 @@ Here is a short, but incomplete summary:
   Bit::Vector            manipulate bit vectors fast (uses C)
   Math::BigIntFast       Bit::Vector wrapper for big numbers
   Math::Pari             provides access to the Pari C library
-  Math::Cephes           uses the external Cephes C library (no big numbers)
+  Math::Cephes           uses the external Cephes C library (no
+                         big numbers)
   Math::Cephes::Fraction fractions via the Cephes library
   Math::GMP              another one using an external C library
-  Math::GMPz             an alternative interface to libgmp's big ints.
-  Math::GMPq             an interface to libgmp's fraction numbers.
-  Math::GMPf             an interface to libgmp's floating point numbers.
+  Math::GMPz             an alternative interface to libgmp's big ints
+  Math::GMPq             an interface to libgmp's fraction numbers
+  Math::GMPf             an interface to libgmp's floating point numbers
 
 Choose wisely.
 
