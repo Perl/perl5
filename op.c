@@ -8622,8 +8622,6 @@ Perl_ck_grep(pTHX_ OP *o)
     }
 
     kid = cLISTOPo->op_first->op_sibling;
-    if (!kid || !kid->op_sibling)
-	return too_few_arguments_pv(o,OP_DESC(o), 0);
     for (kid = kid->op_sibling; kid; kid = kid->op_sibling)
 	op_lvalue(kid, OP_GREPSTART);
 
