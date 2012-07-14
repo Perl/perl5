@@ -247,7 +247,6 @@ checkOptree(note   => q{},
 # b      <@> stringify[t5] sK/1
 # c      <$> const[IV 1] s
 # d      <@> list lK
-# -      <@> scope lK
 #            goto 7
 # e  <0> pushmark s
 # f  <#> gv[*hash] s
@@ -268,7 +267,6 @@ EOT_EOT
 # b      <@> stringify[t3] sK/1
 # c      <$> const(IV 1) s
 # d      <@> list lK
-# -      <@> scope lK
 #            goto 7
 # e  <0> pushmark s
 # f  <$> gv(*hash) s
@@ -301,7 +299,6 @@ checkOptree(note   => q{},
 # b      <@> stringify[t5] sK/1
 # c      <$> const[IV 1] s
 # d      <@> list lKP
-# -      <@> scope lK
 #            goto 7
 # e  <0> pushmark s
 # f  <#> gv[*hash] s
@@ -322,7 +319,6 @@ EOT_EOT
 # b      <@> stringify[t3] sK/1
 # c      <$> const(IV 1) s
 # d      <@> list lKP
-# -      <@> scope lK
 #            goto 7
 # e  <0> pushmark s
 # f  <$> gv(*hash) s
@@ -354,7 +350,6 @@ checkOptree(note   => q{},
 # a      <1> lc[t4] sK/1
 # b      <$> const[IV 1] s
 # c      <@> list lK
-# -      <@> scope lK
 #            goto 7
 # d  <0> pushmark s
 # e  <#> gv[*hash] s
@@ -374,7 +369,6 @@ EOT_EOT
 # a      <1> lc[t2] sK/1
 # b      <$> const(IV 1) s
 # c      <@> list lK
-# -      <@> scope lK
 #            goto 7
 # d  <0> pushmark s
 # e  <$> gv(*hash) s

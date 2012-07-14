@@ -9198,7 +9198,6 @@ Perl_ck_sort(pTHX_ OP *o)
 		    kid->op_next = 0;		/* just disconnect the leave */
 		k = kLISTOP->op_first;
 	    }
-	    CALL_PEEP(k);
 
 	    kid = firstkid;
 	    if (o->op_type == OP_SORT) {
@@ -10354,12 +10353,14 @@ S_inplace_aassign(pTHX_ OP *o) {
 #define MAX_DEFERRED 4
 
 #define DEFER(o) \
+  STMT_START { \
     if (defer_ix == (MAX_DEFERRED-1)) { \
 	CALL_RPEEP(defer_queue[defer_base]); \
 	defer_base = (defer_base + 1) % MAX_DEFERRED; \
 	defer_ix--; \
     } \
-    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = o;
+    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = o; \
+  } STMT_END
 
 /* A peephole optimizer.  We visit the ops in the order they're to execute.
  * See the comments at the top of this file for more details about when
@@ -10651,8 +10652,17 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 
 	case OP_SORT: {
+	    OP *oright;
+
+	    if (o->op_flags & OPf_STACKED) {
+		OP * const kid =
+		    cUNOPx(cLISTOP->op_first->op_sibling)->op_first;
+		if (kid->op_type == OP_SCOPE
+		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE))		    DEFER(kLISTOP->op_first);
+	    }
+
 	    /* check that RHS of sort is a single plain array */
-	    OP *oright = cUNOPo->op_first;
+	    oright = cUNOPo->op_first;
 	    if (!oright || oright->op_type != OP_PUSHMARK)
 		break;
 

@@ -520,7 +520,6 @@ checkOptree(name   => q{Compound sort/map Expression },
 # o      <1> rv2av[t4] sKR/1
 # p      <$> const[IV 0] s
 # q      <2> aelem sK/2
-# -      <@> scope lK
 #            goto l
 # r  <0> pushmark s
 # s  <#> gv[*new] s
@@ -555,7 +554,6 @@ EOT_EOT
 # o      <1> rv2av[t2] sKR/1
 # p      <$> const(IV 0) s
 # q      <2> aelem sK/2
-# -      <@> scope lK
 #            goto l
 # r  <0> pushmark s
 # s  <$> gv(*new) s
@@ -790,7 +788,6 @@ checkOptree(note   => q{},
 # 9      <#> gvsv[*_] s
 # a      <#> gvsv[*_] s
 # b      <2> eq sK/2
-# -      <@> scope sK
 #            goto 8
 # c  <@> sort lK/NUM
 # d  <0> pushmark s
@@ -810,7 +807,6 @@ EOT_EOT
 # 9      <$> gvsv(*_) s
 # a      <$> gvsv(*_) s
 # b      <2> eq sK/2
-# -      <@> scope sK
 #            goto 8
 # c  <@> sort lK/NUM
 # d  <0> pushmark s
@@ -869,7 +865,6 @@ checkOptree(note   => q{},
 # 8      <#> gvsv[*_] s
 # 9      <#> gvsv[*_] s
 # a      <2> eq sK/2
-# -      <@> scope sK
 #            goto 7
 # b  <@> sort K/NUM
 # c  <1> leavesub[1 ref] K/REFC,1
@@ -884,7 +879,6 @@ EOT_EOT
 # 8      <$> gvsv(*_) s
 # 9      <$> gvsv(*_) s
 # a      <2> eq sK/2
-# -      <@> scope sK
 #            goto 7
 # b  <@> sort K/NUM
 # c  <1> leavesub[1 ref] K/REFC,1
@@ -942,7 +936,6 @@ checkOptree(note   => q{},
 # 8      <#> gvsv[*_] s
 # 9      <#> gvsv[*_] s
 # a      <2> eq sK/2
-# -      <@> scope sK
 #            goto 7
 # b  <@> sort sK/NUM
 # c  <#> gvsv[*s] s
@@ -959,7 +952,6 @@ EOT_EOT
 # 8      <$> gvsv(*_) s
 # 9      <$> gvsv(*_) s
 # a      <2> eq sK/2
-# -      <@> scope sK
 #            goto 7
 # b  <@> sort sK/NUM
 # c  <$> gvsv(*s) s
