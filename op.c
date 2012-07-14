@@ -8600,7 +8600,7 @@ Perl_ck_grep(pTHX_ OP *o)
     NewOp(1101, gwop, 1, LOGOP);
     gwop->op_type = type;
     gwop->op_ppaddr = PL_ppaddr[type];
-    gwop->op_first = listkids(o);
+    gwop->op_first = o;
     gwop->op_flags |= OPf_KIDS;
     gwop->op_other = LINKLIST(kid);
     kid->op_next = (OP*)gwop;
