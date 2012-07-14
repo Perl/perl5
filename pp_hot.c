@@ -2601,9 +2601,9 @@ PP(pp_entersub)
 	else {
 	    const char *sym;
 	    STRLEN len;
-	    sym = SvPV_nomg_const(sv, len);
-	    if (!sym)
+	    if (!SvOK(sv))
 		DIE(aTHX_ PL_no_usym, "a subroutine");
+	    sym = SvPV_nomg_const(sv, len);
 	    if (PL_op->op_private & HINT_STRICT_REFS)
 		DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
 	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));

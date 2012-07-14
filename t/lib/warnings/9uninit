@@ -1225,8 +1225,6 @@ Use of uninitialized value $m1 in splice at - line 10.
 Use of uninitialized value $g1 in splice at - line 10.
 Use of uninitialized value in addition (+) at - line 10.
 Use of uninitialized value $m1 in method lookup at - line 13.
-Use of uninitialized value in subroutine entry at - line 15.
-Use of uninitialized value in subroutine entry at - line 16.
 Use of uninitialized value $m1 in warn at - line 18.
 Use of uninitialized value $g1 in warn at - line 18.
 foo at - line 18.

@@ -11,3 +11,16 @@ Undefined subroutine &main::foo called at - line 3.
    &$foosub;
 EXPECT
 Undefined subroutine &main::foo called at - line 2.
+########
+# NAME calling undef scalar
+   &{+undef};
+EXPECT
+Can't use an undefined value as a subroutine reference at - line 1.
+########
+# NAME calling undef magical scalar
+   sub TIESCALAR {bless[]}
+   sub FETCH {}
+   tie $tied, "";
+   &$tied;
+EXPECT
+Can't use an undefined value as a subroutine reference at - line 4.
