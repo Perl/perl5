@@ -74,7 +74,7 @@ PP(pp_null)
     return NORMAL;
 }
 
-/* This is sometimes called directly by pp_coreargs. */
+/* This is sometimes called directly by pp_coreargs and pp_grepstart. */
 PP(pp_pushmark)
 {
     dVAR;
