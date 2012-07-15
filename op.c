@@ -631,10 +631,6 @@ Perl_alloccopstash(pTHX_ HV *hv)
 static void
 S_op_destroy(pTHX_ OP *o)
 {
-    if (o->op_latefree) {
-	o->op_latefreed = 1;
-	return;
-    }
     FreeOp(o);
 }
 
@@ -659,11 +655,6 @@ Perl_op_free(pTHX_ OP *o)
        may be freed before their parents. */
     if (!o || o->op_type == OP_FREED)
 	return;
-    if (o->op_latefreed) {
-	if (o->op_latefree)
-	    return;
-	goto do_free;
-    }
 
     type = o->op_type;
     if (o->op_private & OPpREFCOUNTED) {
@@ -720,11 +711,6 @@ Perl_op_free(pTHX_ OP *o)
 	type = (OPCODE)o->op_targ;
 
     op_clear(o);
-    if (o->op_latefree) {
-	o->op_latefreed = 1;
-	return;
-    }
-  do_free:
     FreeOp(o);
 #ifdef DEBUG_LEAKING_SCALARS
     if (PL_op == o)
@@ -3816,9 +3802,6 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
     o->op_type = (OPCODE)type;
     o->op_ppaddr = PL_ppaddr[type];
     o->op_flags = (U8)flags;
-    o->op_latefree = 0;
-    o->op_latefreed = 0;
-    o->op_attached = 0;
 
     o->op_next = o;
     o->op_private = (U8)(0 | (flags >> 8));
@@ -7144,7 +7127,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 #endif
 	    block = newblock;
     }
-    else block->op_attached = 1;
     CvROOT(cv) = CvLVALUE(cv)
 		   ? newUNOP(OP_LEAVESUBLV, 0,
 			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
