@@ -277,7 +277,10 @@ negative the key is assumed to be in UTF-8-encoded Unicode.
 Returns the SV which corresponds to the specified key in the hash.
 The absolute value of C<klen> is the length of the key.  If C<klen> is
 negative the key is assumed to be in UTF-8-encoded Unicode.  If
-C<lval> is set then the fetch will be part of a store.  Check that the
+C<lval> is set then the fetch will be part of a store.  This means that if
+there is no value in the hash associated with the given key, then one is
+created and a pointer to it is returned.  The C<SV*> it points to can be
+assigned to.  But always check that the
 return value is non-null before dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
