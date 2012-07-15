@@ -308,16 +308,20 @@ struct regnode_charclass_class {
 #define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
 
 /* Flags for node->flags of ANYOF.  These are in short supply, so some games
- * are done to share them, as described below.  If necessary, the ANYOF_LOCALE
- * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes,
- * but this isn't quite so easy, as the optimizer also uses ANYOF_CLASS.
- * Another option would be to push them into new nodes.  E.g. there could be an
- * ANYOF_LOCALE node that would be in place of the flag of the same name.
- * The UNICODE_ALL bit could be freed up by resorting to creating a swash with
- * everything above 255 in it.  This introduces a performance penalty.
- * If flags need to be added that are applicable to the synthetic start class
- * only, with some work, they could be put in the next-node field, or in an
- * unused bit of the classflags field. */
+ * are done to share them, as described below.  Already, the ANYOF_LOCALE and
+ * ANYOF_CLASS bits are shared, making a space penalty for all locale nodes.
+ * An option would be to push them into new nodes.  E.g. there could be an
+ * ANYOF_LOCALE node that would be in place of the flag of the same name.  But
+ * there are better options.  The UNICODE_ALL bit could be freed up by
+ * resorting to creating a swash containing everything above 255.  This
+ * introduces a performance penalty.  Better would be to split it off into a
+ * separate node, which actually would improve performance by allowing adding a
+ * case statement to regexec.c use the bit map for code points under 256, and
+ * to match everything above.  If flags need to be added that are applicable to
+ * the synthetic start class only, with some work, they could be put in the
+ * next-node field, or in an unused bit of the classflags field.  This could be
+ * done with the current EOS flag, and a new node type created that is just for
+ * the scc, freeing up that bit */
 
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
@@ -335,8 +339,9 @@ struct regnode_charclass_class {
 /* Set if this is a struct regnode_charclass_class vs a regnode_charclass.  This
  * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
  * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
- * at compile-time */
-#define ANYOF_CLASS	 0x08
+ * at compile-time.  Now shared with ANYOF_LOCALE, forcing all locale nodes to
+ * be large */
+#define ANYOF_CLASS	 ANYOF_LOCALE
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
 /* EOS, meaning that it can match an empty string too, is used for the

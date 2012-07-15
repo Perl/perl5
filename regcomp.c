@@ -10968,7 +10968,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     UV value = 0; /* XXX:dmq: needs to be referenceable (unfortunately) */
     register regnode *ret;
     STRLEN numlen;
-    IV namedclass;
+    IV namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
     bool need_class = 0;
     bool allow_full_fold = TRUE;   /* Assume wants multi-char folding */
@@ -11348,15 +11348,20 @@ parseit:
 	    literal_endpoint++;
 #endif
 
-	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
-
-	    /* What matches in a locale is not known until runtime, so need to
-	     * (one time per class) allocate extra space to pass to regexec.
-	     * The space will contain a bit for each named class that is to be
-	     * matched against.  This isn't needed for \p{} and pseudo-classes,
-	     * as they are not affected by locale, and hence are dealt with
-	     * separately */
-	    if (LOC && namedclass < ANYOF_MAX && ! need_class) {
+            /* What matches in a locale is not known until runtime.  This
+             * includes what the Posix classes (like \w, [:space:]) match.
+             * Room must be reserved (one time per class) to store such
+             * classes, either if Perl is compiled so that locale nodes always
+             * should have this space, or if there is such class info to be
+             * stored.  The space will contain a bit for each named class that
+             * is to be matched against.  This isn't needed for \p{} and
+             * pseudo-classes, as they are not affected by locale, and hence
+             * are dealt with separately */
+	    if (LOC
+                && ! need_class
+                && (ANYOF_LOCALE == ANYOF_CLASS
+                    || (namedclass > OOB_NAMEDCLASS && namedclass < ANYOF_MAX)))
+            {
 		need_class = 1;
 		if (SIZE_ONLY) {
 		    RExC_size += ANYOF_CLASS_SKIP - ANYOF_SKIP;
@@ -11367,6 +11372,8 @@ parseit:
 		}
 		ANYOF_FLAGS(ret) |= ANYOF_CLASS;
 	    }
+
+	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
 
 	    /* a bad range like a-\d, a-[:digit:].  The '-' is taken as a
 	     * literal, as is the character that began the false range, i.e.
