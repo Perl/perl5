@@ -50,7 +50,7 @@ Introduced in Perl 5.6.0
 
 Accepted in Perl 5.8.0 XXX
 
-=item -Dusemultiplicity -Dusethreads
+=item -Dusemultiplicity -Duseithreads
 
 Introduced in Perl 5.6.0
 
@@ -72,13 +72,13 @@ Removed in Perl 5.10 XXX
 
 =item Test::Harness::Straps
 
-Removed in Perl 5.10.1
+Moved from Perl 5.10.1 to CPAN
 
 =item perlcc
 
 Introduced in Perl 5.005
 
-Removed in Perl 5.9.0
+Moved from Perl 5.9.0 to CPAN
 
 =item C<our> can now have an experimental optional attribute C<unique>
 
