@@ -215,6 +215,16 @@ L<Group name must start with a non-digit word character in regex; marked by <-- 
 This error has been added for C<(?&0)>, which is invalid.  It used to
 produce an incomprehensible error message [perl #101666].
 
+=item *
+
+L<Can't use an undefined value as a subroutine reference|perldiag/"Can't use an undefined value as %s reference">
+
+Calling an undefined value as a subroutine now produces this error message.
+It used to, but was accidentally disabled, first in Perl 5.004 for
+non-magical variables, and then in Perl 5.14 for magical (e.g., tied)
+variables.  It has now been restored.  In the mean time, undef was treated
+as an empty string [perl #113576].
+
 =back
 
 =head3 New Warnings
@@ -581,6 +591,23 @@ to be called directly via C<CORE::GLOBAL::uc(...)> [perl #113016].
 Calling an undefined sub whose typeglob has been undefined now produces the
 customary "Undefined subroutine called" error, instead of "Not a CODE
 reference".
+
+=item *
+
+Two bugs involving @ISA have been fixed.  C<*ISA = *glob_without_array> and
+C<undef *ISA; @{*ISA}> would prevent future modifications to @ISA from
+updating the internal caches used to look up methods.  The
+*glob_without_array case was a regression from Perl 5.12.
+
+=item *
+
+Regular expression optimisations sometimes caused C<$> with C</m> to
+produce failed or incorrect matches [perl #114068].
+
+=item *
+
+C<__SUB__> now works in a C<sort> block when the enclosing subroutine is
+predeclared with C<sub foo;> syntax [perl #113710].
 
 =back
 
