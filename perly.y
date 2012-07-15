@@ -466,15 +466,9 @@ barestmt:	PLUGSTMT
 			}
 	|	PACKAGE WORD WORD '{' remember
 			{
-			  int save_3_latefree = $3->op_latefree;
-			  $3->op_latefree = 1;
 			  package($3);
-			  $3->op_latefree = save_3_latefree;
 			  if ($2) {
-			      int save_2_latefree = $2->op_latefree;
-			      $2->op_latefree = 1;
 			      package_version($2);
-			      $2->op_latefree = save_2_latefree;
 			  }
 			}
 		stmtseq '}'
@@ -482,9 +476,6 @@ barestmt:	PLUGSTMT
 			  /* a block is a loop that happens once */
 			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				  (OP*)NULL, block_end($5, $7), (OP*)NULL, 0);
-			  op_free($3);
-			  if ($2)
-			      op_free($2);
 			  TOKEN_GETMAD($4,$$,'{');
 			  TOKEN_GETMAD($8,$$,'}');
 			  if (PL_parser->copline > (line_t)IVAL($4))
