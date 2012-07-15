@@ -313,8 +313,8 @@ struct regnode_charclass_class {
  * but this isn't quite so easy, as the optimizer also uses ANYOF_CLASS.
  * Another option would be to push them into new nodes.  E.g. there could be an
  * ANYOF_LOCALE node that would be in place of the flag of the same name.
- * Once the planned change to compile all the above-latin1 code points is done,
- * then the UNICODE_ALL bit can be freed up, with a small performance penalty.
+ * The UNICODE_ALL bit could be freed up by resorting to creating a swash with
+ * everything above 255 in it.  This introduces a performance penalty.
  * If flags need to be added that are applicable to the synthetic start class
  * only, with some work, they could be put in the next-node field, or in an
  * unused bit of the classflags field. */
