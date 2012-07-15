@@ -391,6 +391,15 @@ be noted as well.
 
 =item *
 
+Perl used to implement get magic in a way that would sometimes hide bugs in
+code could call mg_get() too many times on magical values.  This hiding of
+errors no longer occurs, so long-standing bugs may become visible now.  If
+you see magic-related errors in XS code, check to make sure it, together
+with the Perl API functions it uses, calls mg_get() only once on SvGMAGICAL()
+values.
+
+=item *
+
 OP allocation for CVs now uses a slab allocator.  This simplifies
 memory management for OPs allocated to a CV, so cleaning up after a
 compilation error is simpler and safer [perl #111462][perl #112312].
