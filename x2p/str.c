@@ -210,7 +210,7 @@ str_gets(register STR *str, register FILE *fp)
 	}
 	
 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
-	FILE_ptr(fp) = (void*)ptr; /* LHS STDCHAR* cast non-portable */
+	FILE_ptr(fp) = ptr;
 	i = getc(fp);		/* get more characters */
 	cnt = FILE_cnt(fp);
 	ptr = (STDCHAR*)FILE_ptr(fp);		/* reregisterize cnt and ptr */
@@ -230,7 +230,7 @@ str_gets(register STR *str, register FILE *fp)
 
 thats_all_folks:
     FILE_cnt(fp) = cnt;			/* put these back or we're in trouble */
-    FILE_ptr(fp) = (void*)ptr; /* LHS STDCHAR* cast non-portable */
+    FILE_ptr(fp) = ptr;
     *bp = '\0';
     str->str_cur = bp - str->str_ptr;	/* set length */
 
