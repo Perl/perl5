@@ -883,7 +883,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #ifdef DUMPADDR
     Perl_dump_indent(aTHX_ level, file, "ADDR = 0x%"UVxf" => 0x%"UVxf"\n", (UV)o, (UV)o->op_next);
 #endif
-    if (o->op_flags) {
+    if (o->op_flags || o->op_slabbed || o->op_savefree) {
 	SV * const tmpsv = newSVpvs("");
 	switch (o->op_flags & OPf_WANT) {
 	case OPf_WANT_VOID:
@@ -900,6 +900,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    break;
 	}
 	append_flags(tmpsv, o->op_flags, op_flags_names);
+	if (o->op_slabbed)  sv_catpvs(tmpsv, ",SLABBED");
+	if (o->op_savefree) sv_catpvs(tmpsv, ",SAVEFREE");
 	Perl_dump_indent(aTHX_ level, file, "FLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
     }
