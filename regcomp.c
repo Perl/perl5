@@ -10975,7 +10975,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     SV *listsv = NULL;
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
-    SV* properties = NULL;    /* Code points that match \p{} \P{} */
+    SV* properties = NULL;    /* Code points that match \p{} \P{}, or that come
+                                 from e.g., [:word:], extended beyond the
+                                 Latin1 range */
     UV element_count = 0;   /* Number of distinct elements in the class.
 			       Optimizations may be possible if this is tiny */
     UV n;
@@ -11242,7 +11244,9 @@ parseit:
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
-			    _invlist_union_complement_2nd(properties, invlist, &properties);
+			    _invlist_union_complement_2nd(properties,
+                                                          invlist,
+                                                          &properties);
 
                             /* The swash can't be used as-is, because we've
 			     * inverted things; delay removing it to here after
@@ -12126,8 +12130,8 @@ parseit:
         }
         else {
 
-            /* Under /d, we put the things that match only when the target
-             * string is utf8, into a separate list */
+            /* Under /d, we put into a separate list the Latin1 things that
+             * match only when the target string is utf8 */
             SV* nonascii_but_latin1_properties = NULL;
             _invlist_intersection(properties, PL_Latin1,
                                   &nonascii_but_latin1_properties);
@@ -12378,9 +12382,9 @@ parseit:
 	 * av[2] stores the multicharacter foldings, used later in
 	 *       regexec.c:S_reginclass().
 	 * av[3] stores the cp_list inversion list for use in addition or
-	 *       instead of av[0]; not used if av[1] isn't NULL
+	 *       instead of av[0]; used only if av[1] is NULL
 	 * av[4] is set if any component of the class is from a user-defined
-	 *       property; not used if av[1] isn't NULL */
+	 *       property; used only if av[1] is NULL */
 	AV * const av = newAV();
 	SV *rv;
 
