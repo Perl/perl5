@@ -10999,7 +10999,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 
     /* Set if a component of this character class is user-defined; just passed
      * on to the engine */
-    UV has_user_defined_property = 0;
+    bool has_user_defined_property = FALSE;
 
     /* inversion list of code points this node matches only when the target
      * string is in UTF-8.  (Because is under /d) */
@@ -11222,7 +11222,7 @@ parseit:
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n",
                                         (value == 'p' ? '+' : '!'),
                                         name);
-                        has_user_defined_property = 1;
+                        has_user_defined_property = TRUE;
 
                         /* We don't know yet, so have to assume that the
                          * property could match something in the Latin1 range,
