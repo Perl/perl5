@@ -4090,6 +4090,19 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     return invlist;
 }
 
+bool
+Perl__is_swash_user_defined(pTHX_ SV* const swash)
+{
+    SV** ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "USER_DEFINED", FALSE);
+
+    PERL_ARGS_ASSERT__IS_SWASH_USER_DEFINED;
+
+    if (! ptr) {
+        return FALSE;
+    }
+    return cBOOL(SvUV(*ptr));
+}
+
 /*
 =for apidoc uvchr_to_utf8
 

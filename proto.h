@@ -6677,6 +6677,12 @@ PERL_CALLCONV SV*	Perl__invlist_contents(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT__INVLIST_CONTENTS	\
 	assert(invlist)
 
+PERL_CALLCONV bool	Perl__is_swash_user_defined(pTHX_ SV *swash)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_SWASH_USER_DEFINED	\
+	assert(swash)
+
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SV*	Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)

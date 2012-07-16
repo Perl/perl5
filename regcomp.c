@@ -11234,13 +11234,8 @@ parseit:
                         /* Here, did get the swash and its inversion list.  If
                          * the swash is from a user-defined property, then this
                          * whole character class should be regarded as such */
-                        SV** user_defined_svp =
-                                            hv_fetchs(MUTABLE_HV(SvRV(swash)),
-                                                        "USER_DEFINED", FALSE);
-                        if (user_defined_svp) {
-                            has_user_defined_property
-                                                    |= SvUV(*user_defined_svp);
-                        }
+                        has_user_defined_property =
+                                                _is_swash_user_defined(swash);
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
