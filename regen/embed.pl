@@ -92,8 +92,11 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    $func = "S_$plain_func";
 	}
 	else {
-	    $retval = "PERL_CALLCONV $splint_flags$retval";
-	    if ($flags =~ /[bp]/) {
+        if($never_returns){
+	    $retval = "PERL_CALLCONV_NO_RET $splint_flags$retval";
+        }else{
+        $retval = "PERL_CALLCONV $splint_flags$retval";
+        }if ($flags =~ /[bp]/) {
 		$func = "Perl_$plain_func";
 	    } else {
 		$func = $plain_func;
