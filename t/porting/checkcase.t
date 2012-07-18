@@ -3,6 +3,7 @@
 
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';
+    require './test.pl';
 }
 use TestInit qw(T); # T is chdir to the top level
 
@@ -36,12 +37,8 @@ find({no_chdir => 1, wanted => sub {
 	 }}, '.');
 
 foreach (sort values %files) {
-    if (@$_ > 1) {
-		print "not ok ".++$test_count. " - ". join(", ", @$_), "\n";
-		print STDERR "# $_\n" foreach @$_;
-    } else {
-		print "ok ".++$test_count. " - ". join(", ", @$_), "\n";
-	}
+    is( @$_, 1, join(", ", @$_) ) or
+        do{ note($_) foreach @$_; };
 }
 
-print "1..".$test_count."\n";
+done_testing();
