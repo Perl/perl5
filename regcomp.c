@@ -10936,16 +10936,18 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
     }
 
 /* Like DO_POSIX_LATIN1_ONLY_KNOWN, but for the complement.  A combination of
- * this and DO_N_POSIX */
+ * this and DO_N_POSIX.  Sets <matches_above_unicode> only if it can; unchanged
+ * otherwise */
 #define DO_N_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,    \
-                              l1_sourcelist, Xpropertyname, run_time_list) \
+       l1_sourcelist, Xpropertyname, run_time_list, matches_above_unicode) \
     if (AT_LEAST_ASCII_RESTRICTED) {                                       \
         _invlist_union_complement_2nd(destlist, sourcelist, &destlist);    \
     }                                                                      \
     else {                                                                 \
         Perl_sv_catpvf(aTHX_ run_time_list, "!utf8::%s\n", Xpropertyname); \
+        matches_above_unicode = TRUE;                                      \
 	if (LOC) {                                                         \
-	    ANYOF_CLASS_SET(node, namedclass);				   \
+            ANYOF_CLASS_SET(node, namedclass);				   \
 	}                                                                  \
 	else {                                                             \
             SV* scratch_list = NULL;                                       \
@@ -11049,6 +11051,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 #endif
     UV stored = 0;  /* how many chars stored in the bitmap */
     bool invert = FALSE;    /* Is this class to be complemented */
+
+    /* Is there any thing like \W or [:^digit:] that matches above the legal
+     * Unicode range? */
+    bool runtime_posix_matches_above_Unicode = FALSE;
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
@@ -11198,6 +11204,7 @@ parseit:
                     SV** invlistsvp;
                     SV* invlist;
                     char* name;
+
 		    if (UCHARAT(RExC_parse) == '^') {
 			 RExC_parse++;
 			 n--;
@@ -11462,7 +11469,8 @@ parseit:
 		    break;
 		case ANYOF_NALNUMC:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
+                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv,
+                        runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ALPHA:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -11470,7 +11478,8 @@ parseit:
 		    break;
 		case ANYOF_NALPHA:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
+                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv,
+                        runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ASCII:
 		    if (LOC) {
@@ -11518,7 +11527,8 @@ parseit:
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv);
+                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv,
+                        runtime_posix_matches_above_Unicode);
                     has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_GRAPH:
@@ -11527,7 +11537,8 @@ parseit:
 		    break;
 		case ANYOF_NGRAPH:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
+                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv,
+                        runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_HORIZWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
@@ -11569,7 +11580,8 @@ parseit:
 		    }
 		    else {
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                            posixes, ascii_source, l1_source, Xname, listsv);
+                            posixes, ascii_source, l1_source, Xname, listsv,
+                            runtime_posix_matches_above_Unicode);
 		    }
 		    break;
 		}
@@ -11579,7 +11591,8 @@ parseit:
 		    break;
 		case ANYOF_NPRINT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
+                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv,
+                        runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PUNCT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -11587,7 +11600,8 @@ parseit:
 		    break;
 		case ANYOF_NPUNCT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
+                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv,
+                        runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PSXSPC:
                     DO_POSIX(ret, namedclass, posixes,
@@ -11630,7 +11644,8 @@ parseit:
 		    }
 		    else {
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                        posixes, ascii_source, l1_source, Xname, listsv);
+                        posixes, ascii_source, l1_source, Xname, listsv,
+                        runtime_posix_matches_above_Unicode);
 		    }
 		    break;
 		}
@@ -11641,7 +11656,8 @@ parseit:
 		    break;
 		case ANYOF_NALNUM:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
+                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv,
+                            runtime_posix_matches_above_Unicode);
                     has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_VERTWS:
@@ -12182,16 +12198,47 @@ parseit:
     }
 
     /* And combine the result (if any) with any inversion list from properties.
+     * The lists are kept separate up to now so that we can distinguish the two
+     * in regards to matching above-Unicode.  A run-time warning is generated
+     * if a Unicode property is matched against a non-Unicode code point. But,
+     * we allow user-defined properties to match anything, without any warning,
+     * and we also suppress the warning if there is a portion of the character
+     * class that isn't a Unicode property, and which matches above Unicode, \W
+     * or [\x{110000}] for example.
      * (Note that in this case, unlike the Posix one above, there is no
      * <depends_list>, because having a Unicode property forces Unicode
      * semantics */
     if (properties) {
+        bool warn_super = ! has_user_defined_property;
         if (cp_list) {
-            _invlist_union(cp_list, properties, &cp_list);
+
+            /* If it matters to the final outcome, see if a non-property
+             * component of the class matches above Unicode.  If so, the
+             * warning gets suppressed.  This is true even if just a single
+             * such code point is specified, as though not strictly correct if
+             * another such code point is matched against, the fact that they
+             * are using above-Unicode code points indicates they should know
+             * the issues involved */
+            if (warn_super) {
+                bool non_prop_matches_above_Unicode =
+                            runtime_posix_matches_above_Unicode
+                            | (invlist_highest(cp_list) > PERL_UNICODE_MAX);
+                if (invert) {
+                    non_prop_matches_above_Unicode =
+                                            !  non_prop_matches_above_Unicode;
+                }
+                warn_super = ! non_prop_matches_above_Unicode;
+            }
+
+            _invlist_union(properties, cp_list, &cp_list);
             SvREFCNT_dec(properties);
         }
         else {
             cp_list = properties;
+        }
+
+        if (warn_super) {
+            ANYOF_FLAGS(ret) |= ANYOF_WARN_SUPER;
         }
     }
 

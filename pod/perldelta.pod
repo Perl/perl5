@@ -636,6 +636,21 @@ produce failed or incorrect matches [perl #114068].
 C<__SUB__> now works in a C<sort> block when the enclosing subroutine is
 predeclared with C<sub foo;> syntax [perl #113710].
 
+=item *
+
+Unicode properties only apply to Unicode code points, which leads to
+some subtleties when regular expressions are matched against
+above-Unicode code points.  There is a warning generated to draw your
+attention to this.  However, this warning was being generated
+inappropriately in some cases, such as when a program was being parsed.
+Non-Unicode matches such as C<\w> and C<[:word;]> should not generate the
+warning, as their definitions don't limit them to apply to only Unicode
+code points.  Now the message is only generated when matching against
+C<\p{}> and C<\P{}>.  There remains a bug, [perl #114148], for the very
+few properties in Unicode that match just a single code point.  The
+warning is not generated if they are matched against an above-Unicode
+code point.
+
 =back
 
 =head1 Known Problems

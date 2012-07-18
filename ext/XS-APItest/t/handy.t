@@ -329,12 +329,15 @@ our @quotemeta = ( # Certainly isn't a public API member, but tested here
 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
 );
 
-sub truth($) {
+sub truth($) {  # Converts values so is() works
     return (shift) ? 1 : "";
 }
 
+my @warnings;
+local $SIG{__WARN__} = sub { push @warnings, @_ };
+
 use charnames ();
-for (my $i = 0; $i < 256; $i++) {
+for my $i (0 .. 255, 0x110000) {
     foreach my $name (qw(   alnum
                             alnumc
                             alpha
@@ -359,21 +362,24 @@ for (my $i = 0; $i < 256; $i++) {
         my $array = *$name{ARRAY};
         use strict 'refs';
 
-        my $display_name = sprintf "\\N{U+%02X, %s}", $i, charnames::viacode($i);
+        my $matches = ($i > 0x10FFFF) ? "" : truth($array->[$i]);
+
+        my $char_name = charnames::viacode($i) // "Above Unicode";
+        my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
         if ($name eq 'quotemeta') {
-            is(eval "test_is${function}($i)", truth($array->[$i]), "is${function}( $display_name )");
+            is(eval "test_is${function}($i)", $matches, "is${function}( $display_name )");
             next;
         }
-        is(eval "test_is${function}_A($i)", truth($array->[$i] && $i < 128), "is${function}_A( $display_name )");
-        is(eval "test_is${function}_L1($i)", truth($array->[$i]), "is${function}_L1( $display_name )");
+        is(eval "test_is${function}_A($i)", ($matches && $i < 128), "is${function}_A( $display_name )");
+        is(eval "test_is${function}_L1($i)", $matches, "is${function}_L1( $display_name )");
         next if $name eq 'alnumc';
 
-        is(eval "test_is${function}_uni($i)", truth($array->[$i]), "is${function}_uni( $display_name )");
+        is(eval "test_is${function}_uni($i)", $matches, "is${function}_uni( $display_name )");
 
         my $char = chr($i);
         utf8::upgrade($char);
         $char = quotemeta $char if $char eq '\\' || $char eq "'";
-        is(eval "test_is${function}_utf8('$char')", truth($array->[$i]), "is${function}_utf8( $display_name )");
+        is(eval "test_is${function}_utf8('$char')", $matches, "is${function}_utf8( $display_name )");
     }
 }
 
@@ -382,5 +388,8 @@ ok(test_isBLANK_utf8("\N{EM SPACE}"), "EM SPACE is blank in isBLANK_utf8()");
 
 ok(! test_isBLANK_uni(ord("\N{GREEK DASIA}")), "GREEK DASIA is not a blank in isBLANK_uni()");
 ok(! test_isBLANK_utf8("\N{GREEK DASIA}"), "GREEK DASIA is not a blank in isBLANK_utf8()");
+
+# This is primarily to make sure that no non-Unicode warnings get generated
+is(scalar @warnings, 0, "No warnings were generated " . join ", ", @warnings);
 
 done_testing;

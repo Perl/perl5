@@ -7022,6 +7022,14 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		if (! utf8_target) Safefree(utf8_p);
 	    }
 	}
+
+        if (UNICODE_IS_SUPER(c)
+            && (flags & ANYOF_WARN_SUPER)
+            && ckWARN_d(WARN_NON_UNICODE))
+        {
+            Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
+                "Code point 0x%04"UVXf" is not Unicode, all \\p{} matches fail; all \\P{} matches succeed", c);
+        }
     }
 
     return (flags & ANYOF_INVERT) ? !match : match;
