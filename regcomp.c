@@ -10975,9 +10975,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     SV *listsv = NULL;
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
-    SV* properties = NULL;    /* Code points that match \p{} \P{}, or that come
-                                 from e.g., [:word:], extended beyond the
-                                 Latin1 range */
+    SV* properties = NULL;    /* Code points that match \p{} \P{} */
+    SV* posixes = NULL;     /* Code points that match classes like, [:word:],
+                               extended beyond the Latin1 range */
     UV element_count = 0;   /* Number of distinct elements in the class.
 			       Optimizations may be possible if this is tiny */
     UV n;
@@ -11427,19 +11427,19 @@ parseit:
 		switch ((I32)namedclass) {
 
 		case ANYOF_ALNUMC: /* C's alnum, in contrast to \w */
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
 		    break;
 		case ANYOF_NALNUMC:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
 		    break;
 		case ANYOF_ALPHA:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
 		    break;
 		case ANYOF_NALPHA:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
 		    break;
 		case ANYOF_ASCII:
@@ -11447,7 +11447,7 @@ parseit:
 			ANYOF_CLASS_SET(ret, namedclass);
 		    }
                     else {
-                        _invlist_union(properties, PL_ASCII, &properties);
+                        _invlist_union(posixes, PL_ASCII, &posixes);
                     }
 		    break;
 		case ANYOF_NASCII:
@@ -11455,48 +11455,48 @@ parseit:
 			ANYOF_CLASS_SET(ret, namedclass);
 		    }
                     else {
-                        _invlist_union_complement_2nd(properties,
-                                                    PL_ASCII, &properties);
+                        _invlist_union_complement_2nd(posixes,
+                                                    PL_ASCII, &posixes);
                         if (DEPENDS_SEMANTICS) {
                             ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
                         }
                     }
 		    break;
 		case ANYOF_BLANK:
-                    DO_POSIX(ret, namedclass, properties,
+                    DO_POSIX(ret, namedclass, posixes,
                                             PL_PosixBlank, PL_XPosixBlank);
 		    break;
 		case ANYOF_NBLANK:
-                    DO_N_POSIX(ret, namedclass, properties,
+                    DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PosixBlank, PL_XPosixBlank);
 		    break;
 		case ANYOF_CNTRL:
-                    DO_POSIX(ret, namedclass, properties,
+                    DO_POSIX(ret, namedclass, posixes,
                                             PL_PosixCntrl, PL_XPosixCntrl);
 		    break;
 		case ANYOF_NCNTRL:
-                    DO_N_POSIX(ret, namedclass, properties,
+                    DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PosixCntrl, PL_XPosixCntrl);
 		    break;
 		case ANYOF_DIGIT:
 		    /* There are no digits in the Latin1 range outside of
 		     * ASCII, so call the macro that doesn't have to resolve
 		     * them */
-		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
                         PL_PosixDigit, "XPosixDigit", listsv);
                     has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_NDIGIT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv);
                     has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_GRAPH:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
 		    break;
 		case ANYOF_NGRAPH:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
 		    break;
 		case ANYOF_HORIZWS:
@@ -11534,46 +11534,46 @@ parseit:
 			Xname = "XPosixLower";
 		    }
 		    if (namedclass == ANYOF_LOWER) {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                                     ascii_source, l1_source, Xname, listsv);
 		    }
 		    else {
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                            properties, ascii_source, l1_source, Xname, listsv);
+                            posixes, ascii_source, l1_source, Xname, listsv);
 		    }
 		    break;
 		}
 		case ANYOF_PRINT:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
 		    break;
 		case ANYOF_NPRINT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
 		    break;
 		case ANYOF_PUNCT:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
 		    break;
 		case ANYOF_NPUNCT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
 		    break;
 		case ANYOF_PSXSPC:
-                    DO_POSIX(ret, namedclass, properties,
+                    DO_POSIX(ret, namedclass, posixes,
                                             PL_PosixSpace, PL_XPosixSpace);
 		    break;
 		case ANYOF_NPSXSPC:
-                    DO_N_POSIX(ret, namedclass, properties,
+                    DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PosixSpace, PL_XPosixSpace);
 		    break;
 		case ANYOF_SPACE:
-                    DO_POSIX(ret, namedclass, properties,
+                    DO_POSIX(ret, namedclass, posixes,
                                             PL_PerlSpace, PL_XPerlSpace);
                     has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_NSPACE:
-                    DO_N_POSIX(ret, namedclass, properties,
+                    DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PerlSpace, PL_XPerlSpace);
                     has_special_charset_op = TRUE;
 		    break;
@@ -11595,22 +11595,22 @@ parseit:
 			Xname = "XPosixUpper";
 		    }
 		    if (namedclass == ANYOF_UPPER) {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                                     ascii_source, l1_source, Xname, listsv);
 		    }
 		    else {
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                        properties, ascii_source, l1_source, Xname, listsv);
+                        posixes, ascii_source, l1_source, Xname, listsv);
 		    }
 		    break;
 		}
 		case ANYOF_ALNUM:   /* Really is 'Word' */
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
                     has_special_charset_op = TRUE;
 		    break;
 		case ANYOF_NALNUM:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
                     has_special_charset_op = TRUE;
 		    break;
@@ -11628,11 +11628,11 @@ parseit:
                     has_special_non_charset_op = TRUE;
 		    break;
 		case ANYOF_XDIGIT:
-                    DO_POSIX(ret, namedclass, properties,
+                    DO_POSIX(ret, namedclass, posixes,
                                             PL_PosixXDigit, PL_XPosixXDigit);
 		    break;
 		case ANYOF_NXDIGIT:
-                    DO_N_POSIX(ret, namedclass, properties,
+                    DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PosixXDigit, PL_XPosixXDigit);
 		    break;
 		case ANYOF_MAX:
@@ -12117,17 +12117,17 @@ parseit:
 	SvREFCNT_dec(fold_intersection);
     }
 
-    /* And combine the result (if any) with any inversion list from properties.
-     * The lists are kept separate up to now because we don't want to fold the
-     * properties */
-    if (properties) {
+    /* And combine the result (if any) with any inversion list from posix
+     * classes.  The lists are kept separate up to now because we don't want to
+     * fold the classes */
+    if (posixes) {
         if (AT_LEAST_UNI_SEMANTICS) {
             if (cp_list) {
-                _invlist_union(cp_list, properties, &cp_list);
-                SvREFCNT_dec(properties);
+                _invlist_union(cp_list, posixes, &cp_list);
+                SvREFCNT_dec(posixes);
             }
             else {
-                cp_list = properties;
+                cp_list = posixes;
             }
         }
         else {
@@ -12135,18 +12135,18 @@ parseit:
             /* Under /d, we put into a separate list the Latin1 things that
              * match only when the target string is utf8 */
             SV* nonascii_but_latin1_properties = NULL;
-            _invlist_intersection(properties, PL_Latin1,
+            _invlist_intersection(posixes, PL_Latin1,
                                   &nonascii_but_latin1_properties);
             _invlist_subtract(nonascii_but_latin1_properties, PL_ASCII,
                               &nonascii_but_latin1_properties);
-            _invlist_subtract(properties, nonascii_but_latin1_properties,
-                              &properties);
+            _invlist_subtract(posixes, nonascii_but_latin1_properties,
+                              &posixes);
             if (cp_list) {
-                _invlist_union(cp_list, properties, &cp_list);
-                SvREFCNT_dec(properties);
+                _invlist_union(cp_list, posixes, &cp_list);
+                SvREFCNT_dec(posixes);
             }
             else {
-                cp_list = properties;
+                cp_list = posixes;
             }
 
             if (depends_list) {
@@ -12157,6 +12157,20 @@ parseit:
             else {
                 depends_list = nonascii_but_latin1_properties;
             }
+        }
+    }
+
+    /* And combine the result (if any) with any inversion list from properties.
+     * (Note that in this case, unlike the Posix one above, there is no
+     * <depends_list>, because having a Unicode property forces Unicode
+     * semantics */
+    if (properties) {
+        if (cp_list) {
+            _invlist_union(cp_list, properties, &cp_list);
+            SvREFCNT_dec(properties);
+        }
+        else {
+            cp_list = properties;
         }
     }
 
