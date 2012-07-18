@@ -8095,6 +8095,36 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
     return TRUE;
 }
 
+PERL_STATIC_INLINE UV
+S_invlist_highest(pTHX_ SV* const invlist)
+{
+    /* Returns the highest code point that matches an inversion list.  This API
+     * has an ambiguity, as it returns 0 under either the highest is actually
+     * 0, or if the list is empty.  If this distinction matters to you, check
+     * for emptiness before calling this function */
+
+    UV len = invlist_len(invlist);
+    UV *array;
+
+    PERL_ARGS_ASSERT_INVLIST_HIGHEST;
+
+    if (len == 0) {
+	return 0;
+    }
+
+    array = invlist_array(invlist);
+
+    /* The last element in the array in the inversion list always starts a
+     * range that goes to infinity.  That range may be for code points that are
+     * matched in the inversion list, or it may be for ones that aren't
+     * matched.  In the latter case, the highest code point in the set is one
+     * less than the beginning of this range; otherwise it is the final element
+     * of this range: infinity */
+    return (ELEMENT_RANGE_MATCHES_INVLIST(len - 1))
+           ? UV_MAX
+           : array[len - 1] - 1;
+}
+
 #ifndef PERL_IN_XSUB_RE
 SV *
 Perl__invlist_contents(pTHX_ SV* const invlist)
@@ -11822,19 +11852,11 @@ parseit:
 
 	SV* fold_intersection = NULL;
 
-        const UV highest_index = invlist_len(cp_list) - 1;
-
         /* In the Latin1 range, the characters that can be folded-to or -from
          * are precisely the alphabetic characters.  If the highest code point
          * is within Latin1, we can use the compiled-in list, and not have to
-         * go out to disk.  If the last element in the array is in the
-         * inversion list set, it starts a range that goes to infinity, so the
-         * maximum of the inversion list is definitely above Latin1.
-         * Otherwise, it starts a range that isn't in the set, so the max is
-         * one less than it */
-        if (! ELEMENT_RANGE_MATCHES_INVLIST(highest_index)
-            && invlist_array(cp_list)[highest_index] <= 256)
-        {
+         * go out to disk. */
+        if (invlist_highest(cp_list) < 256) {
             _invlist_intersection(PL_L1PosixAlpha, cp_list, &fold_intersection);
         }
         else {
