@@ -36,6 +36,11 @@ names.  But it did not behave consistently, because negative signal names
 were treated as 0.  Now negative signals names like C<-INT> are supported
 and treated the same way as -2 [perl #112990].
 
+=head2 C<pack> is now constant folded.
+
+C<pack> with constant arguments is now constant folded in most cases
+[perl #113470].
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -141,6 +146,19 @@ C<STORABLE_freeze()> method [perl #113880].
 =item *
 
 L<Socket> has been upgraded from version 2.001 to 2.002.
+
+=item *
+
+L<autodie> has been upgraded from version 2.11 to 2.12.
+
+C<autodie> now plays nicely with the 'open' pragma.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.34 to 0.36.
+
+Added the 'file_default' option for URLs that do not have a file
+component.
 
 =back
 
