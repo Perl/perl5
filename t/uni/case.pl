@@ -88,9 +88,7 @@ sub casetest {
 	foreach my $func (@funcs) {
 	    my $d = $func->($c);
 	    my $e = unidump($d);
-	    print $d eq pack("U0U", $simple{$i}) ?
-		"ok $test # $i -> $w\n" : "not ok $test # $i -> $e ($w)\n";
-		$test++;
+	    is( $d, pack("U0U", $simple{$i}), "$i -> $e ($w)" );
 	}
     }
 
@@ -101,9 +99,7 @@ sub casetest {
 	foreach my $func (@funcs) {
 	    my $d = $func->($c);
 	    my $e = unidump($d);
-	    print $w eq $e ?
-		"ok $test # $i -> $w\n" : "not ok $test # $h -> $e ($w)\n";
-		$test++;
+            is( $w, $e, "$h -> $e ($w)" );
 	}
     }
 
@@ -113,13 +109,11 @@ sub casetest {
 	foreach my $func (@funcs) {
 	    my $d = $func->($c);
 	    my $e = unidump($d);
-	    print $d eq $c ?
-		"ok $test # $i -> $w\n" : "not ok $test # $i -> $e ($w)\n";
-		$test++;
+            is( $d, $c, "$i -> $e ($w)" );
 	}
     }
 
-    print "1..$tests\n";
+    done_testing();
 }
 
 1;
