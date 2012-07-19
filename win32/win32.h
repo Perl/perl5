@@ -75,6 +75,10 @@
 #      define PERL_CALLCONV_NO_RET __declspec(dllimport) __declspec(noreturn)
 #    endif
 #  endif
+#else /* MSVC noreturn support inside the interp */
+#  ifdef _MSC_VER
+#    define PERL_CALLCONV_NO_RET __declspec(noreturn)
+#  endif
 #endif
 
 #define  WIN32_LEAN_AND_MEAN
