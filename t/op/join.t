@@ -6,6 +6,8 @@ BEGIN {
     require './test.pl';
 }
 
+plan tests => 22;
+
 @x = (1, 2, 3);
 is( join(':',@x), '1:2:3', 'join an array with character');
 
@@ -95,4 +97,3 @@ is( $f, 'baeak', 'join back to self, self is join character');
   is( $ju2, $u );
 }
 
-done_testing;
