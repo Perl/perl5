@@ -3228,10 +3228,8 @@ S_fold_constants(pTHX_ register OP *o)
     op_free(o);
 #endif
     assert(sv);
-    if (type == OP_RV2GV)
-	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
-    else
-	newop = newSVOP(OP_CONST, OPpCONST_FOLDED<<8, MUTABLE_SV(sv));
+    assert(type != OP_RV2GV);
+    newop = newSVOP(OP_CONST, OPpCONST_FOLDED<<8, MUTABLE_SV(sv));
     op_getmad(o,newop,'f');
     return newop;
 
