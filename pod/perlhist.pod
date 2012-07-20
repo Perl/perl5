@@ -31,7 +31,8 @@ Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
 Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
-Little, Dave Rolsky, Max Maischein, Abigail, and Jesse Luehrs.
+Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs and Tony
+Cook.
 
 =head2 PUMPKIN?
 
@@ -483,6 +484,7 @@ the strings?).
 
  Zefram   5.17.0        2012-May-26     The 5.17 development track
  Jesse L  5.17.1        2012-Jun-20
+ TonyC    5.17.2        2012-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
