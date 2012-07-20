@@ -921,7 +921,8 @@ EXTCONST U32 PL_charclass[];
                                          : function(c))
 /* Note that all ignore 'use bytes' */
 
-#define isALNUM_uni(c)		generic_uni(isWORDCHAR, is_uni_alnum, c)
+#define isWORDCHAR_uni(c)       generic_uni(isWORDCHAR, is_uni_alnum, c)
+#define isALNUM_uni(c)          isWORDCHAR_uni(c)
 #define isBLANK_uni(c)		generic_uni(isBLANK, is_uni_blank, c)
 #define isIDFIRST_uni(c)        generic_uni(isIDFIRST, is_uni_idfirst, c)
 #define isALPHA_uni(c)		generic_uni(isALPHA, is_uni_alpha, c)
@@ -976,7 +977,8 @@ EXTCONST U32 PL_charclass[];
 /* Note that all assume that the utf8 has been validated, and ignore 'use
  * bytes' */
 
-#define isALNUM_utf8(p)		generic_utf8(isWORDCHAR, is_utf8_alnum, p)
+#define isWORDCHAR_utf8(p)             generic_utf8(isWORDCHAR, is_utf8_alnum, p)
+#define isALNUM_utf8(p)		isWORDCHAR_utf8(p)  /* back compat */
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
  * http://rt.perl.org/rt3/Ticket/Display.html?id=74022 for more detail than you
