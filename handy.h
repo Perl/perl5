@@ -602,58 +602,33 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
-/* Bits for PL_charclass[].  These use names used in l1_char_class_tab.h but
- * their actual definitions are here.  If that has a name not used here, it
- * won't compile. */
-#  define _CC_WORDCHAR_A       0
-#  define _CC_SPACE_A          1
-#  define _CC_DIGIT_A          2
-#  define _CC_ALNUMC_A         3
-#  define _CC_ALPHA_A          4
-#  define _CC_ASCII            5
-#  define _CC_CNTRL_A          6
-#  define _CC_GRAPH_A          7
-#  define _CC_LOWER_A          8
-#  define _CC_PRINT_A          9
-#  define _CC_PUNCT_A          10
-#  define _CC_UPPER_A          11
-#  define _CC_XDIGIT_A         12
-#  define _CC_PSXSPC_A         13
-#  define _CC_BLANK_A          14
 
-#  define _CC_WORDCHAR_L1      15
-#  define _CC_SPACE_L1         16
-#  define _CC_ALNUMC_L1        17
-#  define _CC_ALPHA_L1         18
-#  define _CC_CNTRL_L1         19
-#  define _CC_GRAPH_L1         20
-#  define _CC_LOWER_L1         21
-#  define _CC_PRINT_L1         22
-#  define _CC_PUNCT_L1         23
-#  define _CC_UPPER_L1         24
-#  define _CC_PSXSPC_L1        25
-#  define _CC_BLANK_L1         26
-#  define _CC_IDFIRST_A        27
-#  define _CC_IDFIRST_L1       28
-#  define _CC_CHARNAME_CONT    29
-#  define _CC_NONLATIN1_FOLD   30
-#  define _CC_QUOTEMETA        31
-/* Unused: None
- * If more are needed, can give up some of the above.  The first ones to go
- * would be those that require just two tests to verify; either there are two
- * code points, like BLANK_A, or it occupies a single range like DIGIT_A,
- * UPPER_A, and LOWER_A.  Also consider the ones that can be replaced with two
- * tests and an additional mask, so
- *
- * #define isCNTRL_A  cBOOL(FITS_IN_8_BITS(c)                             \
- *			    && (( ! (~0x1F & NATIVE_TO_UNI(c)]))	  \
- *				 || UNLIKELY(NATIVE_TO_UNI(c) == 0x7f)))
- *
- * This takes advantage of the contiguous block of these with the first one's
- * representation having the lower order bits all zero;, except the DELETE must
- * be tested specially.  A similar pattern can be used for for isCNTRL_L1,
- * isPRINT_A, and isPRINT_L1
- */
+/* Character class numbers.  These are used in PL_charclass[].  These use names
+ * used in l1_char_class_tab.h but their actual definitions are here.  If that
+ * has a name not used here, it won't compile. */
+#  define _CC_WORDCHAR           0
+#  define _CC_SPACE              1
+#  define _CC_DIGIT              2
+#  define _CC_ALNUMC             3
+#  define _CC_ALPHA              4
+#  define _CC_ASCII              5
+#  define _CC_CNTRL              6
+#  define _CC_GRAPH              7
+#  define _CC_LOWER              8
+#  define _CC_PRINT              9
+#  define _CC_PUNCT             10
+#  define _CC_UPPER             11
+#  define _CC_XDIGIT            12
+#  define _CC_PSXSPC            13
+#  define _CC_BLANK             14
+#  define _CC_IDFIRST           15
+#  define _CC_CHARNAME_CONT     16
+#  define _CC_NONLATIN1_FOLD    17
+#  define _CC_QUOTEMETA         18
+/* Unused: 19-31
+ * If more bits are needed, one could add a second word for non-64bit
+ * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
+ * word or not. */
 
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
@@ -669,21 +644,32 @@ EXTCONST U32 PL_charclass[];
 #   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
                             && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(classnum)))
 
-#   define isALNUMC_A(c) _generic_isCC(c, _CC_ALNUMC_A)
-#   define isALPHA_A(c)  _generic_isCC(c, _CC_ALPHA_A)
-#   define isBLANK_A(c)  _generic_isCC(c, _CC_BLANK_A)
-#   define isCNTRL_A(c)  _generic_isCC(c, _CC_CNTRL_A)
-#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT_A)
-#   define isGRAPH_A(c)  _generic_isCC(c, _CC_GRAPH_A)
-#   define isIDFIRST_A(c)  _generic_isCC(c, _CC_IDFIRST_A)
-#   define isLOWER_A(c)  _generic_isCC(c, _CC_LOWER_A)
-#   define isPRINT_A(c)  _generic_isCC(c, _CC_PRINT_A)
-#   define isPSXSPC_A(c) _generic_isCC(c, _CC_PSXSPC_A)
-#   define isPUNCT_A(c)  _generic_isCC(c, _CC_PUNCT_A)
-#   define isSPACE_A(c)  _generic_isCC(c, _CC_SPACE_A)
-#   define isUPPER_A(c)  _generic_isCC(c, _CC_UPPER_A)
-#   define isWORDCHAR_A(c) _generic_isCC(c, _CC_WORDCHAR_A)
-#   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT_A)
+    /* The mask for the _A versions of the macros; it just adds in the bit for
+     * ASCII. */
+#   define _CC_mask_A(classnum) (_CC_mask(classnum) | _CC_mask(_CC_ASCII))
+
+    /* The _A version makes sure that both the desired bit and the ASCII bit
+     * are present */
+#   define _generic_isCC_A(c, classnum) (FITS_IN_8_BITS(c) \
+        && ((PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask_A(classnum)) \
+                                == _CC_mask_A(classnum)))
+
+#   define isALNUMC_A(c) _generic_isCC_A(c, _CC_ALNUMC)
+#   define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
+#   define isBLANK_A(c)  _generic_isCC_A(c, _CC_BLANK)
+#   define isCNTRL_A(c)  _generic_isCC_A(c, _CC_CNTRL)
+#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT)
+#   define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
+#   define isLOWER_A(c)  _generic_isCC_A(c, _CC_LOWER)
+#   define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
+#   define isPSXSPC_A(c) _generic_isCC_A(c, _CC_PSXSPC)
+#   define isPUNCT_A(c)  _generic_isCC_A(c, _CC_PUNCT)
+#   define isSPACE_A(c)  _generic_isCC_A(c, _CC_SPACE)
+#   define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
+#   define isWORDCHAR_A(c) _generic_isCC_A(c, _CC_WORDCHAR)
+#   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT)
+#   define isIDFIRST_A(c) _generic_isCC_A(c, ( _CC_IDFIRST))
+
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
 #   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
@@ -727,21 +713,21 @@ EXTCONST U32 PL_charclass[];
 
 /* Latin1 definitions */
 #ifdef H_PERL
-#   define isALNUMC_L1(c) _generic_isCC(c, _CC_ALNUMC_L1)
-#   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA_L1)
-#   define isBLANK_L1(c)  _generic_isCC(c, _CC_BLANK_L1)
+#   define isALNUMC_L1(c) _generic_isCC(c, _CC_ALNUMC)
+#   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA)
+#   define isBLANK_L1(c)  _generic_isCC(c, _CC_BLANK)
 /*  continuation character for legal NAME in \N{NAME} */
 #   define isCHARNAME_CONT(c) _generic_isCC(c, _CC_CHARNAME_CONT)
-#   define isCNTRL_L1(c)  _generic_isCC(c, _CC_CNTRL_L1)
-#   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH_L1)
-#   define isIDFIRST_L1(c) _generic_isCC(c, _CC_IDFIRST_L1)
-#   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER_L1)
-#   define isPRINT_L1(c)  _generic_isCC(c, _CC_PRINT_L1)
-#   define isPSXSPC_L1(c) _generic_isCC(c, _CC_PSXSPC_L1)
-#   define isPUNCT_L1(c)  _generic_isCC(c, _CC_PUNCT_L1)
-#   define isSPACE_L1(c)  _generic_isCC(c, _CC_SPACE_L1)
-#   define isUPPER_L1(c)  _generic_isCC(c, _CC_UPPER_L1)
-#   define isWORDCHAR_L1(c) _generic_isCC(c, _CC_WORDCHAR_L1)
+#   define isCNTRL_L1(c)  _generic_isCC(c, _CC_CNTRL)
+#   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH)
+#   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER)
+#   define isPRINT_L1(c)  _generic_isCC(c, _CC_PRINT)
+#   define isPSXSPC_L1(c) _generic_isCC(c, _CC_PSXSPC)
+#   define isPUNCT_L1(c)  _generic_isCC(c, _CC_PUNCT)
+#   define isSPACE_L1(c)  _generic_isCC(c, _CC_SPACE)
+#   define isUPPER_L1(c)  _generic_isCC(c, _CC_UPPER)
+#   define isWORDCHAR_L1(c) _generic_isCC(c, _CC_WORDCHAR)
+#   define isIDFIRST_L1(c) _generic_isCC(c, _CC_IDFIRST)
 #else /* No access to perl.h.  Only a few provided here, just in case needed
        * for backwards compatibility */
     /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
