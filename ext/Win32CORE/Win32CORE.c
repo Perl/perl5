@@ -13,6 +13,7 @@
 #if defined(__CYGWIN__) && !defined(USEIMPORTLIB)
   #undef WIN32
 #endif
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #if defined(__CYGWIN__) && !defined(USEIMPORTLIB)
   #define EXTCONST extern const
