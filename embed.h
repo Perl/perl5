@@ -141,6 +141,7 @@
 #define foldEQ_latin1		Perl_foldEQ_latin1
 #define foldEQ_locale		Perl_foldEQ_locale
 #define foldEQ_utf8_flags(a,b,c,d,e,f,g,h,i)	Perl_foldEQ_utf8_flags(aTHX_ a,b,c,d,e,f,g,h,i)
+#define fold_constants(a)	Perl_fold_constants(aTHX_ a)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define form			Perl_form
 #endif
@@ -1403,7 +1404,6 @@
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
 #define finalize_op(a)		S_finalize_op(aTHX_ a)
 #define find_and_forget_pmops(a)	S_find_and_forget_pmops(aTHX_ a)
-#define fold_constants(a)	S_fold_constants(aTHX_ a)
 #define force_list(a)		S_force_list(aTHX_ a)
 #define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)

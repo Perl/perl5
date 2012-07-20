@@ -1124,6 +1124,21 @@ my_ck_rv2cv(pTHX_ OP *o)
     return old_ck_rv2cv(aTHX_ o);
 }
 
+static OP *
+binop_unfolded(pTHX_ int type, IV left, IV right)
+{
+    /* If we just call newBINOP for OP_MULTIPLY (etc), it "helpfully" folds
+       constants for us, and returns an OP_CONST. Which makes it a bit hard
+       to test folding_constants :-(  Hence this game here:  */
+    OP *const o = newBINOP(OP_NULL, 0,
+                           newSVOP(OP_CONST, 0, newSViv(left)),
+                           newSVOP(OP_CONST, 0, newSViv(right)));
+    o->op_type = type;
+    o->op_ppaddr = PL_ppaddr[type];
+    o->op_targ = pad_alloc(type, SVs_PADTMP);
+    return o;
+}
+
 #include "const-c.inc"
 
 MODULE = XS::APItest		PACKAGE = XS::APItest
@@ -2834,6 +2849,69 @@ test_copyhints()
 	if (SvIV(cop_hints_fetch_pvs(&PL_compiling, "t0", 0)) != 789)
 	    croak_fail();
 	LEAVE;
+
+void
+test_fold_constants (testcase)
+    int testcase;
+    PREINIT:
+        OP *had;
+        OP *got;
+        dXSTARG;
+    PPCODE:
+        ENTER;
+        SAVEVPTR(PL_curcop);
+        if (testcase >= 0)
+            PL_curcop = &PL_compiling;
+        SAVEVPTR(PL_op);
+        switch(testcase) {
+            default:
+            croak("Unknown testcase %d", testcase);
+            break;
+            case 0:
+            had = newOP(OP_NULL, 0);
+            break;
+            case 1:
+            had = newBINOP(OP_ADD, 0, newOP(OP_TIME, 0),
+                           newSVOP(OP_CONST, 0, newSViv(1)));
+            break;
+            case -1:
+            case 2:
+            had = binop_unfolded(aTHX_ OP_ADD, 1, 1);
+            break;
+            /* If changes make this test case pass, we need to update the
+               documentation, as that says that only 1 op is folded:  */
+            case 3:
+            had = newBINOP(OP_ADD, 0, binop_unfolded(aTHX_ OP_ADD, 1, 1),
+                           newSVOP(OP_CONST, 0, newSViv(1)));
+            break;
+            case 4:
+            had = newUNOP(OP_NULL, 0, newSVOP(OP_CONST, 0, newSViv(-4)));
+            had->op_type = OP_NEGATE;
+            had->op_ppaddr = PL_ppaddr[OP_NEGATE];
+            had->op_targ = pad_alloc(OP_NEGATE, SVs_PADTMP);
+            break;
+            case 54: /* Or should that be 42 :-)  */
+            had = binop_unfolded(aTHX_ OP_MULTIPLY, 6, 9);
+            break;
+        }
+        if (had->op_type == OP_CONST) {
+            op_free(had);
+            croak("bother - already have an OP_CONST for testcase %d", testcase);
+        }
+        got = fold_constants(had);
+        if (got->op_type == OP_CONST) {
+            EXTEND(SP, 2);
+            mPUSHs(SvREFCNT_inc(cSVOPx_sv(got)));
+            PUSHu(got->op_private);
+        } else if (got == had) {
+            PUSHu(got->op_type);
+        } else {
+            const int type = got->op_type;
+            op_free(got);
+            croak("got op type %d, expected OP_CONST", type);
+        }
+        op_free(got);
+        LEAVE;
 
 void
 test_op_list()

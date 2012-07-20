@@ -3086,7 +3086,7 @@ S_op_integerize(pTHX_ OP *o)
 }
 
 /*                                                                             
-=for apidoc sd|OP*|fold_constants|NN OP *o                                    
+=for apidoc Ad|OP*|fold_constants|NN OP *o                                    
                                                                               
 Determines whether this op can be constant folded, and if so frees the passed
 in optree and returns an appropriate C<OP_CONST> or C<OP_GV>.
@@ -3128,8 +3128,8 @@ See L<perlguts/"Compile pass 1a: constant folding">.
 =cut                                                                           
 */                                                                             
 
-static OP *
-S_fold_constants(pTHX_ register OP *o)
+OP *
+Perl_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
     OP *newop;

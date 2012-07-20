@@ -1085,6 +1085,11 @@ PERL_CALLCONV I32	Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1
 #define PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS	\
 	assert(s1); assert(s2)
 
+PERL_CALLCONV OP*	Perl_fold_constants(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FOLD_CONSTANTS	\
+	assert(o)
+
 PERL_CALLCONV char*	Perl_form(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2)
 			__attribute__nonnull__(pTHX_1);
@@ -5827,11 +5832,6 @@ STATIC void	S_finalize_op(pTHX_ OP* o)
 STATIC void	S_find_and_forget_pmops(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FIND_AND_FORGET_PMOPS	\
-	assert(o)
-
-STATIC OP*	S_fold_constants(pTHX_ OP *o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_FOLD_CONSTANTS	\
 	assert(o)
 
 STATIC OP*	S_force_list(pTHX_ OP* arg);
