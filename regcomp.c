@@ -11816,8 +11816,10 @@ parseit:
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
 		    }
-                    if (!SIZE_ONLY)
+                    if (!SIZE_ONLY) {
                         cp_list = add_cp_to_invlist(cp_list, '-');
+                        element_count++;
+                    }
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
