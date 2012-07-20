@@ -86,6 +86,10 @@ L<File::Fetch> has been upgraded from version 0.34 to 0.36.
 Added the 'file_default' option for URLs that do not have a file
 component.
 
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.68 to 2.69.
+
 =back
 
 =head1 Documentation
