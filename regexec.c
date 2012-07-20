@@ -1814,6 +1814,20 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!is_HORIZWS_latin1(s)
 	    );	    
 	    break;
+	case POSIXA:
+	    /* Don't need to worry about utf8, as it can match only a single
+            * byte invariant character.  The flag in this node type is the
+            * class number to pass to _generic_isCC() to build a mask for
+            * searching in PL_charclass[] */
+	    REXEC_FBC_CLASS_SCAN( _generic_isCC_A(*s, FLAGS(c)));
+	    break;
+	case NPOSIXA:
+	    REXEC_FBC_CSCAN(
+		!_generic_isCC_A(*s, FLAGS(c)),
+		!_generic_isCC_A(*s, FLAGS(c))
+	    );
+	    break;
+
 	case AHOCORASICKC:
 	case AHOCORASICK: 
 	    {
@@ -3880,6 +3894,26 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		DIGITL, NDIGITL, isDIGIT_LC, isDIGIT_LC_utf8,
 		DIGITA, NDIGITA, isDIGIT_A,
 		digit, "0");
+
+        case POSIXA:
+            if (locinput >= PL_regeol || ! _generic_isCC_A(nextchr, FLAGS(scan))) {
+                sayNO;
+            }
+            /* Matched a utf8-invariant, so don't have to worry about utf8 */
+            nextchr = UCHARAT(++locinput);
+            break;
+        case NPOSIXA:
+            if (locinput >= PL_regeol || _generic_isCC_A(nextchr, FLAGS(scan))) {
+                sayNO;
+            }
+            if (utf8_target) {
+                locinput += PL_utf8skip[nextchr];
+                nextchr = UCHARAT(locinput);
+            }
+            else {
+                nextchr = UCHARAT(++locinput);
+            }
+            break;
 
 	case CLUMP: /* Match \X: logical Unicode character.  This is defined as
 		       a Unicode extended Grapheme Cluster */
@@ -6296,6 +6330,24 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    goto utf8_Nwordchar;
 	while (scan < loceol && ! isALNUM((U8) *scan)) {
 	    scan++;
+	}
+	break;
+
+    case POSIXA:
+       while (scan < loceol && _generic_isCC_A((U8) *scan, FLAGS(p))) {
+	    scan++;
+	}
+	break;
+    case NPOSIXA:
+	if (utf8_target) {
+	    while (scan < loceol && ! _generic_isCC_A((U8) *scan, FLAGS(p))) {
+		scan += UTF8SKIP(scan);
+	    }
+	}
+	else {
+	    while (scan < loceol && ! _generic_isCC_A((U8) *scan, FLAGS(p))) {
+		scan++;
+	    }
 	}
 	break;
     case NALNUMA:

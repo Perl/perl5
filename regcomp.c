@@ -11124,6 +11124,10 @@ S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
  * changed since initialization, then there is a run-time definition. */
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
 
+/* This converts the named class defined in regcomp.h to its equivalent class
+ * number defined in handy.h. */
+#define namedclass_to_classnum(class)  ((class) / 2)
+
 /*
    parse a class specification and produce either an ANYOF node that
    matches the pattern or perhaps will be optimized into an EXACTish node
@@ -11865,6 +11869,7 @@ parseit:
      * Check if this is the case for this class */
     if (element_count == 1) {
         U8 op = END;
+        U8 arg = 0;
 
         if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like \w or
                                               [:digit:] or \p{foo} */
@@ -11942,7 +11947,26 @@ parseit:
                     op = (invert) ? NVERTWS : VERTWS;
                     break;
 
+                case ANYOF_MAX:
+                    break;
 
+                default:
+                    /* A generic posix class.  All the /a ones can be handled
+                     * by the POSIXA opcode.  And all are closed under folding
+                     * in the ASCII range, so FOLD doesn't matter */
+                    if (AT_LEAST_ASCII_RESTRICTED
+                        || (! LOC && namedclass == ANYOF_ASCII))
+                    {
+                        /* The odd numbered ones are the complements of the
+                         * next-lower even number one */
+                        if (namedclass % 2 == 1) {
+                            invert = ! invert;
+                            namedclass--;
+                        }
+                        arg = namedclass_to_classnum(namedclass);
+                        op = (invert) ? NPOSIXA : POSIXA;
+                    }
+                    break;
             }
         }
         else if (value == prevvalue) {
@@ -11994,7 +12018,12 @@ parseit:
 
             ret = reg_node(pRExC_state, op);
 
-            if (PL_regkind[op] == EXACT) {
+            if (PL_regkind[op] == POSIXD) {
+                if (! SIZE_ONLY) {
+                    FLAGS(ret) = arg;
+                }
+            }
+            else if (PL_regkind[op] == EXACT) {
                 alloc_maybe_populate_EXACT(pRExC_state, ret, 0, value);
             }
 
@@ -13542,6 +13571,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	}
 
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
+    }
+    else if (k == POSIXD) {
+        U8 index = FLAGS(o) * 2;
+        if (index > (sizeof(anyofs) / sizeof(anyofs[0]))) {
+            Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);
+        }
+        else {
+            sv_catpv(sv, anyofs[index]);
+        }
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", -(o->flags));
