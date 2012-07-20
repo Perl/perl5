@@ -665,7 +665,9 @@ EXTCONST U32 PL_charclass[];
 #  endif
 
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
-#   define _generic_isCC(c, bit_shift) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & (1U << (bit_shift))))
+#   define _CC_mask(classnum) (1U << (classnum))
+#   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
+                            && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(classnum)))
 
 #   define isALNUMC_A(c) _generic_isCC(c, _CC_ALNUMC_A)
 #   define isALPHA_A(c)  _generic_isCC(c, _CC_ALPHA_A)
@@ -684,7 +686,8 @@ EXTCONST U32 PL_charclass[];
 #   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT_A)
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & (1U << _CC_NONLATIN1_FOLD)))
+#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
+
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #else   /* No perl.h. */
 #   ifdef EBCDIC
