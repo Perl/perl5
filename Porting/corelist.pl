@@ -267,7 +267,7 @@ my $pod = join( '', <$pod_fh> );
 
 unless ( $pod =~ /and $perl_vstring releases of perl/ ) {
     warn "Adding $perl_vstring to the list of perl versions covered by Module::CoreList\n";
-    $pod =~ s/(currently covers (?:.*?))\s*and (.*?) releases of perl/$1, $2 and $perl_vstring releases of perl/ism;
+    $pod =~ s/(currently\s+covers\s+(?:.*?))\s*and\s+(.*?)\s+releases\s+of\s+perl/$1, $2 and $perl_vstring releases of perl/ism;
 }
 
 write_corelist($pod,$pod_file);
