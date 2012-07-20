@@ -17,6 +17,43 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.2 - Terry Pratchet, "The Colour of Magic"
+
+L<Announced on 2012-06-21 by TonyC|http://www.nntp.perl.org/group/perl.perl5.porters/2012/07/msg189828.html>
+
+‘I knew it,’ said Rincewind. ‘We're in a strong magical field.’
+
+Twoflower and Hrun looked around the little hollow where they had made
+their noonday halt. Then they looked at each other.
+
+The horses were quietly cropping the rich grass by the stream.  Yellow
+butterflies skittered among the bushes.  There was a smell of thyme
+and a buzzing of bees. The wild pigs on the spit sizzled gently.
+
+Hrun shrugged and went back to oiling his biceps. They gleamed.
+
+‘Looks alright to me,’ he said.
+
+‘Try tossing a coin,’ said Rincewind.
+
+‘What?’
+
+‘Go on.  Toss a coin.’
+
+‘Hokay,’ said Hrun. 'If that gives you any pleasure.’ He reached into
+his pouch and withdrew a handful of loose change plundered from a
+dozen realms. With some care he selected a Zchloty leaden
+quarter-iotum and balanced it on a purple thumbnail.
+
+‘You call,’ he said. ‘Heads or—’ he inspected the obverse with
+an air of intense concentration, ‘some sort of a fish with legs.’
+
+‘When it's in the air,’ said Rincewind.  Hrun grinned and flicked his thumb.
+
+The iotum rose, spinning.
+
+‘Edge,’ said Rincewind, without looking at it.
+
 =head2 v5.17.1 - Rand Miller, "Myst: The Book of Ti'ana"
 
 L<Announced on 2012-06-20 by doy|http://www.nntp.perl.org/group/perl.perl5.porters/2012/06/msg188354.html>
