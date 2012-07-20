@@ -11939,6 +11939,7 @@ parseit:
                     invert = ! invert;
                     /* FALLTHROUGH */
                 case ANYOF_HORIZWS:
+                  is_horizws:
                     op = (invert) ? NHORIZWS : HORIZWS;
                     break;
 
@@ -11952,6 +11953,14 @@ parseit:
                 case ANYOF_MAX:
                     break;
 
+                case ANYOF_NBLANK:
+                    invert = ! invert;
+                    /* FALLTHROUGH */
+                case ANYOF_BLANK:
+                    if (AT_LEAST_UNI_SEMANTICS && ! AT_LEAST_ASCII_RESTRICTED) {
+                        goto is_horizws;
+                    }
+                    /* FALLTHROUGH */
                 default:
                     /* A generic posix class.  All the /a ones can be handled
                      * by the POSIXA opcode.  And all are closed under folding
