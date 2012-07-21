@@ -916,30 +916,32 @@ EXTCONST U32 PL_charclass[];
  * checking, so have duplicate checks here, so could create versions of the
  * macros that don't, but experiments show that gcc optimizes them out anyway.
  */
-#define generic_uni(macro, function, c) ((c) < 256               \
-                                         ? CAT2(macro, _L1)(c)   \
-                                         : function(c))
+#define generic_uni(classnum, function, c) ((c) < 256                     \
+                                             ? _generic_isCC(c, classnum) \
+                                             : function(c))
 /* Note that all ignore 'use bytes' */
 
-#define isWORDCHAR_uni(c)       generic_uni(isWORDCHAR, is_uni_alnum, c)
+#define isWORDCHAR_uni(c)       generic_uni(_CC_WORDCHAR, is_uni_alnum, c)
 #define isALNUM_uni(c)          isWORDCHAR_uni(c)
-#define isBLANK_uni(c)		generic_uni(isBLANK, is_uni_blank, c)
-#define isIDFIRST_uni(c)        generic_uni(isIDFIRST, is_uni_idfirst, c)
-#define isALPHA_uni(c)		generic_uni(isALPHA, is_uni_alpha, c)
-#define isSPACE_uni(c)		generic_uni(isSPACE, is_uni_space, c)
-#define isDIGIT_uni(c)		generic_uni(isDIGIT, is_uni_digit, c)
-#define isUPPER_uni(c)		generic_uni(isUPPER, is_uni_upper, c)
-#define isLOWER_uni(c)		generic_uni(isLOWER, is_uni_lower, c)
-#define isASCII_uni(c)		isASCII(c)
+#define isBLANK_uni(c)          generic_uni(_CC_BLANK, is_uni_blank, c)
+#define isIDFIRST_uni(c)        generic_uni(_CC_IDFIRST, is_uni_idfirst, c)
+#define isALPHA_uni(c)          generic_uni(_CC_ALPHA, is_uni_alpha, c)
+#define isSPACE_uni(c)          generic_uni(_CC_SPACE, is_uni_space, c)
+#define isDIGIT_uni(c)          generic_uni(_CC_DIGIT, is_uni_digit, c)
+#define isUPPER_uni(c)          generic_uni(_CC_UPPER, is_uni_upper, c)
+#define isLOWER_uni(c)          generic_uni(_CC_LOWER, is_uni_lower, c)
+#define isASCII_uni(c)          isASCII(c)
+
 /* All controls are in Latin1 */
-#define isCNTRL_uni(c)		isCNTRL_L1(c)
-#define isGRAPH_uni(c)		generic_uni(isGRAPH, is_uni_graph, c)
-#define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
-#define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
-#define isXDIGIT_uni(c)		generic_uni(isXDIGIT, is_uni_xdigit, c)
+#define isCNTRL_uni(c)          isCNTRL_L1(c)
+
+#define isGRAPH_uni(c)          generic_uni(_CC_GRAPH, is_uni_graph, c)
+#define isPRINT_uni(c)          generic_uni(_CC_PRINT, is_uni_print, c)
+#define isPUNCT_uni(c)          generic_uni(_CC_PUNCT, is_uni_punct, c)
+#define isXDIGIT_uni(c)         generic_uni(_CC_XDIGIT, is_uni_xdigit, c)
 
 /* Posix and regular space differ only in U+000B, which is in Latin1 */
-#define isPSXSPC_uni(c)         generic_uni(isPSXSPC, is_uni_space, c)
+#define isPSXSPC_uni(c)         generic_uni(_CC_PSXSPC, is_uni_space, c)
 
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
@@ -966,19 +968,19 @@ EXTCONST U32 PL_charclass[];
  * Latin1 (_L1) version of the macro, after converting from utf8; otherwise use
  * the function.  This relies on the fact that ASCII characters have the same
  * representation whether utf8 or not */
-#define __is_utf8__perl_idstart(a)	Perl__is_utf8__perl_idstart(aTHX_ a)
-#define generic_utf8(macro, function, p) (isASCII(*(p))                        \
-                                         ? CAT2(CAT2(macro,_),A)(*(p))         \
+#define generic_utf8(classnum, function, p) (UTF8_IS_INVARIANT(*(p))           \
+                                         ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
-                                           ? CAT2(macro, _L1)                  \
-                                             (TWO_BYTE_UTF8_TO_UNI(*(p),       \
-                                                                   *((p)+1)))  \
-                                           : function(p))
+                                           ? _generic_isCC(                    \
+                                                   TWO_BYTE_UTF8_TO_UNI(*(p),  \
+                                                                   *((p)+1 )), \
+                                                   classnum)                   \
+                                           : (function)(aTHX_ p))
 
 /* Note that all assume that the utf8 has been validated, and ignore 'use
  * bytes' */
 
-#define isWORDCHAR_utf8(p)             generic_utf8(isWORDCHAR, is_utf8_alnum, p)
+#define isWORDCHAR_utf8(p)      generic_utf8(_CC_WORDCHAR, Perl_is_utf8_alnum, p)
 #define isALNUM_utf8(p)		isWORDCHAR_utf8(p)  /* back compat */
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -987,29 +989,30 @@ EXTCONST U32 PL_charclass[];
  * isIDFIRST_uni() which it hasn't so far.  (In the ASCII range, there isn't a
  * difference.) This used to be not the XID version, but we decided to go with
  * the more modern Unicode definition */
-#define isIDFIRST_utf8(p)       generic_utf8(isIDFIRST, __is_utf8__perl_idstart, p)
+#define isIDFIRST_utf8(p)       generic_utf8(_CC_IDFIRST, Perl__is_utf8__perl_idstart, p)
+#define isIDCONT_utf8(p)	generic_utf8(_CC_WORDCHAR, Perl_is_utf8_xidcont, p)
+#define isALPHA_utf8(p)		generic_utf8(_CC_ALPHA, Perl_is_utf8_alpha, p)
+#define isBLANK_utf8(p)		generic_utf8(_CC_BLANK, Perl_is_utf8_blank, p)
+#define isSPACE_utf8(p)		generic_utf8(_CC_SPACE, Perl_is_utf8_space, p)
+#define isDIGIT_utf8(p)		generic_utf8(_CC_DIGIT, Perl_is_utf8_digit, p)
+#define isUPPER_utf8(p)		generic_utf8(_CC_UPPER, Perl_is_utf8_upper, p)
+#define isLOWER_utf8(p)		generic_utf8(_CC_LOWER, Perl_is_utf8_lower, p)
 
-#define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
-#define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
-#define isBLANK_utf8(p)		generic_utf8(isBLANK, is_utf8_blank, p)
-#define isSPACE_utf8(p)		generic_utf8(isSPACE, is_utf8_space, p)
-#define isDIGIT_utf8(p)		generic_utf8(isDIGIT, is_utf8_digit, p)
-#define isUPPER_utf8(p)		generic_utf8(isUPPER, is_utf8_upper, p)
-#define isLOWER_utf8(p)		generic_utf8(isLOWER, is_utf8_lower, p)
 /* Because ASCII is invariant under utf8, the non-utf8 macro works */
 #define isASCII_utf8(p)		isASCII(*p)
-#define isCNTRL_utf8(p)		generic_utf8(isCNTRL, is_utf8_cntrl, p)
-#define isGRAPH_utf8(p)		generic_utf8(isGRAPH, is_utf8_graph, p)
-#define isPRINT_utf8(p)		generic_utf8(isPRINT, is_utf8_print, p)
-#define isPUNCT_utf8(p)		generic_utf8(isPUNCT, is_utf8_punct, p)
-#define isXDIGIT_utf8(p)	generic_utf8(isXDIGIT, is_utf8_xdigit, p)
+
+#define isCNTRL_utf8(p)		generic_utf8(_CC_CNTRL, Perl_is_utf8_cntrl, p)
+#define isGRAPH_utf8(p)		generic_utf8(_CC_GRAPH, Perl_is_utf8_graph, p)
+#define isPRINT_utf8(p)		generic_utf8(_CC_PRINT, Perl_is_utf8_print, p)
+#define isPUNCT_utf8(p)		generic_utf8(_CC_PUNCT, Perl_is_utf8_punct, p)
+#define isXDIGIT_utf8(p)	generic_utf8(_CC_XDIGIT, Perl_is_utf8_xdigit, p)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 
 /* Posix and regular space differ only in U+000B, which is in ASCII (and hence
  * Latin1 */
-#define isPSXSPC_utf8(p)	generic_utf8(isPSXSPC, is_utf8_space, p)
+#define isPSXSPC_utf8(p)	generic_utf8(_CC_PSXSPC, Perl_is_utf8_space, p)
 
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
