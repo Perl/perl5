@@ -1682,4 +1682,11 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 \A(?>\[(?:(?:)(?:R){1}|T|V?|A)\])\z	[A]	y	$&	[A]
 # rt 114068
 /( [^z] $ [^z]+)/xm	aa\nbb\ncc\n	y	$1	a\nbb\ncc\n
+
+# [perl #114220]
+/[\h]/	\x{A0}	y	$&	\xA0
+/[\H]/	\x{BF}	y	$&	\xBF
+/[\H]/	\x{A0}	n	-	-
+/[\H]/	\x{A1}	y	$&	\xA1
+
 # vim: softtabstop=0 noexpandtab
