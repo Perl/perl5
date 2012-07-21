@@ -939,7 +939,7 @@ EXTCONST U32 PL_charclass[];
 #define isXDIGIT_uni(c)		generic_uni(isXDIGIT, is_uni_xdigit, c)
 
 /* Posix and regular space differ only in U+000B, which is in Latin1 */
-#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
+#define isPSXSPC_uni(c)         generic_uni(isPSXSPC, is_uni_space, c)
 
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
@@ -966,6 +966,7 @@ EXTCONST U32 PL_charclass[];
  * Latin1 (_L1) version of the macro, after converting from utf8; otherwise use
  * the function.  This relies on the fact that ASCII characters have the same
  * representation whether utf8 or not */
+#define __is_utf8__perl_idstart(a)	Perl__is_utf8__perl_idstart(aTHX_ a)
 #define generic_utf8(macro, function, p) (isASCII(*(p))                        \
                                          ? CAT2(CAT2(macro,_),A)(*(p))         \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
@@ -986,12 +987,8 @@ EXTCONST U32 PL_charclass[];
  * isIDFIRST_uni() which it hasn't so far.  (In the ASCII range, there isn't a
  * difference.) This used to be not the XID version, but we decided to go with
  * the more modern Unicode definition */
-#define isIDFIRST_utf8(p)       (isASCII(*(p))                                  \
-                                ? isIDFIRST_A(*(p))                             \
-                                : (UTF8_IS_DOWNGRADEABLE_START(*(p)))           \
-                                  ? isIDFIRST_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
-                                                                      *((p)+1)))\
-                                  : Perl__is_utf8__perl_idstart(aTHX_ p))
+#define isIDFIRST_utf8(p)       generic_utf8(isIDFIRST, __is_utf8__perl_idstart, p)
+
 #define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
 #define isBLANK_utf8(p)		generic_utf8(isBLANK, is_utf8_blank, p)
@@ -1012,12 +1009,8 @@ EXTCONST U32 PL_charclass[];
 
 /* Posix and regular space differ only in U+000B, which is in ASCII (and hence
  * Latin1 */
-#define isPSXSPC_utf8(p)	((isASCII(*(p)))                               \
-                                ? isPSXSPC_A(*(p))                             \
-                                : (UTF8_IS_DOWNGRADEABLE_START(*(p))           \
-				  ? isPSXSPC_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
-                                                                     *((p)+1)))\
-                                  : isSPACE_utf8(p)))
+#define isPSXSPC_utf8(p)	generic_utf8(isPSXSPC, is_utf8_space, p)
+
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isALPHA_LC_utf8(p)	isALPHA_LC_uvchr(valid_utf8_to_uvchr(p,  0))
