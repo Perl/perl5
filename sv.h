@@ -2074,23 +2074,23 @@ Evaluates I<sv> more than once.  Sets I<len> to 0 if C<SvOOK(sv)> is false.
 #  define SvOOK_offset(sv, offset) STMT_START {				\
 	assert(sizeof(offset) == sizeof(STRLEN));			\
 	if (SvOOK(sv)) {						\
-	    const U8 *crash = (U8*)SvPVX_const(sv);			\
-	    offset = *--crash;						\
- 	    if (!offset) {						\
-		crash -= sizeof(STRLEN);				\
-		Copy(crash, (U8 *)&offset, sizeof(STRLEN), U8);		\
+	    const U8 *_crash = (U8*)SvPVX_const(sv);			\
+	    (offset) = *--_crash;					\
+	    if (!(offset)) {						\
+		_crash -= sizeof(STRLEN);				\
+		Copy(_crash, (U8 *)&(offset), sizeof(STRLEN), U8);	\
 	    }								\
 	    {								\
 		/* Validate the preceding buffer's sentinels to		\
 		   verify that no-one is using it.  */			\
-		const U8 *const bonk = (U8 *) SvPVX_const(sv) - offset;	\
-		while (crash > bonk) {					\
-		    --crash;						\
-		    assert (*crash == (U8)PTR2UV(crash));		\
+		const U8 *const _bonk = (U8*)SvPVX_const(sv) - (offset);\
+		while (_crash > _bonk) {				\
+		    --_crash;						\
+		    assert (*_crash == (U8)PTR2UV(_crash));		\
 		}							\
 	    }								\
 	} else {							\
-	    offset = 0;							\
+	    (offset) = 0;						\
 	}								\
     } STMT_END
 #else
@@ -2098,13 +2098,13 @@ Evaluates I<sv> more than once.  Sets I<len> to 0 if C<SvOOK(sv)> is false.
 #  define SvOOK_offset(sv, offset) STMT_START {				\
 	assert(sizeof(offset) == sizeof(STRLEN));			\
 	if (SvOOK(sv)) {						\
-	    offset = ((U8*)SvPVX_const(sv))[-1];			\
-	    if (!offset) {						\
+	    (offset) = ((U8*)SvPVX_const(sv))[-1];			\
+	    if (!(offset)) {						\
 		Copy(SvPVX_const(sv) - 1 - sizeof(STRLEN),		\
-		     (U8 *)&offset, sizeof(STRLEN), U8);		\
+		     (U8*)&(offset), sizeof(STRLEN), U8);		\
 	    }								\
 	} else {							\
-	    offset = 0;							\
+	    (offset) = 0;						\
 	}								\
     } STMT_END
 #endif
