@@ -4855,9 +4855,10 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 =for apidoc sv_chop
 
 Efficient removal of characters from the beginning of the string buffer.
-SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
-the string buffer.  The C<ptr> becomes the first character of the adjusted
-string.  Uses the "OOK hack".
+SvPOK(sv), or at least SvPOKp(sv), must be true and the C<ptr> must be a
+pointer to somewhere inside the string buffer.  The C<ptr> becomes the first
+character of the adjusted string.  Uses the "OOK hack".  On return, only
+SvPOK(sv) and SvPOKp(sv) among the OK flags will be true.
 
 Beware: after this function returns, C<ptr> and SvPVX_const(sv) may no longer
 refer to the same chunk of data.
@@ -4896,6 +4897,7 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 		   ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
     /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), so don't use ptr any more */
     SV_CHECK_THINKFIRST(sv);
+    SvPOK_only_UTF8(sv);
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
