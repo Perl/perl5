@@ -1595,6 +1595,11 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /[[:word:]]/	\x{2c1}	y	-	-
 /[[:word:]]/	\x{2c2}	n	-	-
 
+# [perl #114220]
+/[\h]/	\x{A0}	y	$&	\xA0
+/[\H]/	\x{BF}	y	$&	\xBF
+/[\H]/	\x{A0}	n	-	-
+/[\H]/	\x{A1}	y	$&	\xA1
 
 
 # vim: softtabstop=0 noexpandtab

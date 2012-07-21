@@ -10885,6 +10885,7 @@ parseit:
 		 * A similar issue a little earlier when switching on value.
 		 * --jhi */
 		switch ((I32)namedclass) {
+		    int i;  /* loop counter */
 
 		case ANYOF_ALNUMC: /* C's alnum, in contrast to \w */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
@@ -10957,16 +10958,32 @@ parseit:
                         PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
 		    break;
 		case ANYOF_HORIZWS:
-		    /* For these, we use the nonbitmap, as /d doesn't make a
-		     * difference in what these match.  There would be problems
-		     * if these characters had folds other than themselves, as
-		     * nonbitmap is subject to folding.  It turns out that \h
-		     * is just a synonym for XPosixBlank */
+		    /* NBSP matches this, and needs to be added unconditionally
+		     * to the bit map as it matches even under /d, unlike all
+		     * the rest of the Posix-like classes (\v doesn't have any
+		     * matches in the Latin1 range, so it is unaffected.) which
+		     * Otherwise, we use the nonbitmap, as /d doesn't make a
+		     * difference in what these match.  It turns out that \h is
+		     * just a synonym for XPosixBlank */
 		    _invlist_union(nonbitmap, PL_XPosixBlank, &nonbitmap);
+		    stored += set_regclass_bit(pRExC_state, ret,
+					       UNI_TO_NATIVE(0xA0),
+					       &l1_fold_invlist,
+					       &unicode_alternate);
+
 		    break;
 		case ANYOF_NHORIZWS:
                     _invlist_union_complement_2nd(nonbitmap,
                                                  PL_XPosixBlank, &nonbitmap);
+		    for (i = 128; i < 256; i++) {
+			if (i == 0xA0) {
+			    continue;
+			}
+			stored += set_regclass_bit(pRExC_state, ret,
+						   UNI_TO_NATIVE(i),
+						   &l1_fold_invlist,
+						   &unicode_alternate);
+		    }
 		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
