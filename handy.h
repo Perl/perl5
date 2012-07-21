@@ -728,8 +728,10 @@ EXTCONST U32 PL_charclass[];
 #   define isALNUMC_L1(c) _generic_isCC(c, _CC_ALNUMC)
 #   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA)
 #   define isBLANK_L1(c)  _generic_isCC(c, _CC_BLANK)
+
 /*  continuation character for legal NAME in \N{NAME} */
 #   define isCHARNAME_CONT(c) _generic_isCC(c, _CC_CHARNAME_CONT)
+
 #   define isCNTRL_L1(c)  _generic_isCC(c, _CC_CNTRL)
 #   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH)
 #   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER)
@@ -979,6 +981,7 @@ EXTCONST U32 PL_charclass[];
 
 #define isWORDCHAR_utf8(p)      _generic_utf8(_CC_WORDCHAR, Perl_is_utf8_alnum, p)
 #define isALNUM_utf8(p)		isWORDCHAR_utf8(p)  /* back compat */
+
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
  * http://rt.perl.org/rt3/Ticket/Display.html?id=74022 for more detail than you
@@ -987,6 +990,7 @@ EXTCONST U32 PL_charclass[];
  * difference.) This used to be not the XID version, but we decided to go with
  * the more modern Unicode definition */
 #define isIDFIRST_utf8(p)       _generic_utf8(_CC_IDFIRST, Perl__is_utf8__perl_idstart, p)
+
 #define isIDCONT_utf8(p)	_generic_utf8(_CC_WORDCHAR, Perl_is_utf8_xidcont, p)
 #define isALPHA_utf8(p)		_generic_utf8(_CC_ALPHA, Perl_is_utf8_alpha, p)
 #define isBLANK_utf8(p)		_generic_utf8(_CC_BLANK, Perl_is_utf8_blank, p)
@@ -1028,12 +1032,14 @@ EXTCONST U32 PL_charclass[];
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 
 /* This conversion works both ways, strangely enough. On EBCDIC platforms,
- * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII */
+ * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII, except that they don't
+ * necessarily mean the same characters, e.g. CTRL-D is 4 on both systems, but
+ * that is EOT on ASCII;  ST on EBCDIC */
 #  define toCTRL(c)    (toUPPER(NATIVE_TO_UNI(c)) ^ 64)
 
 /* Line numbers are unsigned, 32 bits. */
 typedef U32 line_t;
-#define NOLINE ((line_t) 4294967295UL)
+#define NOLINE ((line_t) 4294967295UL)  /* = FFFFFFFF */
 
 /* Helpful alias for version prescan */
 #define is_LAX_VERSION(a,b) \
