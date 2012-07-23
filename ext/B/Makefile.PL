@@ -20,26 +20,17 @@ if ($core) {
     $headerpath = File::Spec->catdir($Config::Config{archlibexp}, "CORE");
 }
 
-my @names = qw(CVf_ANON CVf_CLONE CVf_CLONED CVf_CONST CVf_LVALUE CVf_METHOD
-	       CVf_NODEBUG CVf_UNIQUE CVf_WEAKOUTSIDE
-	       GVf_IMPORTED_AV GVf_IMPORTED_CV GVf_IMPORTED_HV GVf_IMPORTED_SV
+my @names = qw(GVf_IMPORTED_AV GVf_IMPORTED_CV GVf_IMPORTED_HV GVf_IMPORTED_SV
 	       HEf_SVKEY
 	       SVTYPEMASK SVt_PVGV SVt_PVHV
 	       PAD_FAKELEX_ANON PAD_FAKELEX_MULTI);
 
-if ($] >= 5.009) {
-    push @names, 'CVf_ISXSUB';
-} else {
+if ($] < 5.009) {
     # Constant not present after 5.8.x
     push @names, 'AVf_REAL';
     # This is only present in 5.10, but it's useful to B::Deparse to be able
     # to import a dummy value from B
     push @names, {name=>"OPpPAD_STATE", default=>["IV", "0"]};
-}  
-
-if ($] < 5.011) {
-    # Constant not present after 5.10.x
-    push @names, 'CVf_LOCKED';
 }
 
 # First element in each tuple is the file; second is a regex snippet
@@ -47,6 +38,7 @@ if ($] < 5.011) {
 # from that file.  If none, all symbols will be defined whose values
 # match the pattern below.
 foreach my $tuple (['cop.h'],
+                   ['cv.h', 'CVf'],
                    ['op.h'],
                    ['op_reg_common.h','(?:(?:RXf_)?PMf_)'],
                    ['regexp.h','RXf_'],
