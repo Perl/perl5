@@ -97,7 +97,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<B> has been upgraded from version 1.36 to version 1.37. All C<CVf_*> and
+C<GVf_*> and more SV-related flag values are now provided as constants in
+the C<B::> namespace and available for export. The default export list has
+not changed.
 
 =back
 
