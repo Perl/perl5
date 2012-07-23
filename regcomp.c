@@ -12355,7 +12355,7 @@ parseit:
      * fold the classes (folding of those is automatically handled by the swash
      * fetching code) */
     if (posixes) {
-        if (AT_LEAST_UNI_SEMANTICS) {
+        if (! DEPENDS_SEMANTICS) {
             if (cp_list) {
                 _invlist_union(cp_list, posixes, &cp_list);
                 SvREFCNT_dec(posixes);
@@ -12365,7 +12365,6 @@ parseit:
             }
         }
         else {
-
             /* Under /d, we put into a separate list the Latin1 things that
              * match only when the target string is utf8 */
             SV* nonascii_but_latin1_properties = NULL;
