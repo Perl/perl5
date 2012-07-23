@@ -20,8 +20,7 @@ if ($core) {
     $headerpath = File::Spec->catdir($Config::Config{archlibexp}, "CORE");
 }
 
-my @names = qw(GVf_IMPORTED_AV GVf_IMPORTED_CV GVf_IMPORTED_HV GVf_IMPORTED_SV
-	       HEf_SVKEY
+my @names = qw(HEf_SVKEY
 	       SVTYPEMASK SVt_PVGV SVt_PVHV
 	       PAD_FAKELEX_ANON PAD_FAKELEX_MULTI);
 
@@ -39,6 +38,7 @@ if ($] < 5.009) {
 # match the pattern below.
 foreach my $tuple (['cop.h'],
                    ['cv.h', 'CVf'],
+                   ['gv.h', 'GVf'],
                    ['op.h'],
                    ['op_reg_common.h','(?:(?:RXf_)?PMf_)'],
                    ['regexp.h','RXf_'],
