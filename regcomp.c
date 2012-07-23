@@ -7307,8 +7307,6 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
     }
 }
 
-#ifndef PERL_IN_XSUB_RE
-
 STATIC IV
 S_invlist_search(pTHX_ SV* const invlist, const UV cp)
 {
@@ -7350,6 +7348,8 @@ S_invlist_search(pTHX_ SV* const invlist, const UV cp)
 
     return high - 1;
 }
+
+#ifndef PERL_IN_XSUB_RE
 
 void
 Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV end, U8* swatch)
@@ -11199,7 +11199,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
      * not escapes.  Thus we can tell if 'A' was input vs \x{C1} */
     UV literal_endpoint = 0;
 #endif
-    UV stored = 0;  /* how many chars stored in the bitmap */
     bool invert = FALSE;    /* Is this class to be complemented */
 
     /* Is there any thing like \W or [:^digit:] that matches above the legal
@@ -12468,10 +12467,145 @@ parseit:
 	invert = FALSE;
     }
 
+    /* If we didn't do folding, it's because some information isn't available
+     * until runtime; set the run-time fold flag for these.  (We don't have to
+     * worry about properties folding, as that is taken care of by the swash
+     * fetching) */
+    if (FOLD && (LOC || unicode_alternate))
+    {
+       ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
+    }
+
+    /* Some character classes are equivalent to other nodes.  Such nodes take
+     * up less room and generally fewer operations to execute than ANYOF nodes.
+     * Above, we checked for and optimized into some such equivalents for
+     * certain common classes that are easy to test.  Getting to this point in
+     * the code means that the class didn't get optimized there.  Since this
+     * code is only executed in Pass 2, it is too late to save space--it has
+     * been allocated in Pass 1, and currently isn't given back.  But turning
+     * things into an EXACTish node can allow the optimizer to join it to any
+     * adjacent such nodes.  And if the class is equivalent to things like /./,
+     * expensive run-time swashes can be avoided.  Now that we have more
+     * complete information, we can find things necessarily missed by the
+     * earlier code.  I (khw) am not sure how much to look for here.  It would
+     * be easy, but perhaps too slow, to check any candidates against all the
+     * node types they could possibly match using _invlistEQ(). */
+
+    if (cp_list
+        && ! unicode_alternate
+        && ! invert
+        && ! depends_list
+        && ! (ANYOF_FLAGS(ret) & ANYOF_CLASS)
+        && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+    {
+       UV start, end;
+       U8 op = END;  /* The optimzation node-type */
+        const char * cur_parse= RExC_parse;
+
+       invlist_iterinit(cp_list);
+       if (! invlist_iternext(cp_list, &start, &end)) {
+
+            /* Here, the list is empty.  This happens, for example, when a
+             * Unicode property is the only thing in the character class, and
+             * it doesn't match anything.  (perluniprops.pod notes such
+             * properties) */
+            op = OPFAIL;
+        }
+        else if (start == end) {    /* The range is a single code point */
+            if (! invlist_iternext(cp_list, &start, &end)
+
+                    /* Don't do this optimization if it would require changing
+                     * the pattern to UTF-8 */
+                && (start < 256 || UTF))
+            {
+                /* Here, the list contains a single code point.  Can optimize
+                 * into an EXACT node */
+
+                value = start;
+
+                if (! FOLD) {
+                    op = EXACT;
+                }
+                else if (LOC) {
+
+                    /* A locale node under folding with one code point can be
+                     * an EXACTFL, as its fold won't be calculated until
+                     * runtime */
+                    op = EXACTFL;
+                }
+                else {
+
+                    /* Here, we are generally folding, but there is only one
+                     * code point to match.  If we have to, we use an EXACT
+                     * node, but it would be better for joining with adjacent
+                     * nodes in the optimization pass if we used the same
+                     * EXACTFish node that any such are likely to be.  We can
+                     * do this iff the code point doesn't participate in any
+                     * folds.  For example, an EXACTF of a colon is the same as
+                     * an EXACT one, since nothing folds to or from a colon.
+                     * In the Latin1 range, being an alpha means that the
+                     * character participates in a fold (except for the
+                     * feminine and masculine ordinals, which I (khw) don't
+                     * think are worrying about optimizing for). */
+                    if (value < 256) {
+                        if (isALPHA_L1(value)) {
+                            op = EXACT;
+                        }
+                    }
+                    else {
+                        if (! PL_utf8_foldable) {
+                            SV* swash = swash_init("utf8", "_Perl_Any_Folds",
+                                                &PL_sv_undef, 1, 0);
+                            PL_utf8_foldable = _get_swash_invlist(swash);
+                            SvREFCNT_dec(swash);
+                        }
+                        if (_invlist_contains_cp(PL_utf8_foldable, value)) {
+                            op = EXACT;
+                        }
+                    }
+
+                    /* If we haven't found the node type, above, it means we
+                     * can use the prevailing one */
+                    if (op == END) {
+                        op = compute_EXACTish(pRExC_state);
+                    }
+                }
+            }
+        }
+        else if (start == 0) {
+            if (end == UV_MAX) {
+                op = SANY;
+            }
+            else if (end == '\n' - 1
+                    && invlist_iternext(cp_list, &start, &end)
+                    && start == '\n' + 1 && end == UV_MAX)
+            {
+                op = REG_ANY;
+            }
+        }
+
+        if (op != END) {
+            RExC_parse = (char *)orig_parse;
+            RExC_emit = (regnode *)orig_emit;
+
+            ret = reg_node(pRExC_state, op);
+
+            RExC_parse = (char *)cur_parse;
+
+            if (PL_regkind[op] == EXACT) {
+                alloc_maybe_populate_EXACT(pRExC_state, ret, 0, value);
+            }
+
+            SvREFCNT_dec(listsv);
+            return ret;
+        }
+    }
+
     /* Here, <cp_list> contains all the code points we can determine at
      * compile time that match under all conditions.  Go through it, and
      * for things that belong in the bitmap, put them there, and delete from
-     * <cp_list> */
+     * <cp_list>.  While we are at it, see if everything above 255 is in the
+     * list, and if so, set a flag to speed up execution */
     ANYOF_BITMAP_ZERO(ret);
     if (cp_list) {
 
@@ -12486,6 +12620,10 @@ parseit:
 	    UV high;
 	    int i;
 
+            if (end == UV_MAX && start <= 256) {
+                ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
+            }
+
 	    /* Quit if are above what we should change */
 	    if (start > 255) {
 		break;
@@ -12498,7 +12636,6 @@ parseit:
 	    for (i = start; i <= (int) high; i++) {
 		if (! ANYOF_BITMAP_TEST(ret, i)) {
 		    ANYOF_BITMAP_SET(ret, i);
-		    stored++;
 		    prevvalue = value;
 		    value = i;
 		}
@@ -12522,7 +12659,9 @@ parseit:
         ANYOF_FLAGS(ret) |= ANYOF_INVERT;
     }
 
-    /* Combine the two lists into one. */
+    /* Here, the bitmap has been populated with all the Latin1 code points that
+     * always match.  Can now add to the overall list those that match only
+     * when the target string is UTF-8 (<depends_list>). */
     if (depends_list) {
 	if (cp_list) {
 	    _invlist_union(cp_list, depends_list, &cp_list);
@@ -12533,121 +12672,13 @@ parseit:
 	}
     }
 
-    /* Folding in the bitmap is taken care of above, but not for locale (for
-     * which we have to wait to see what folding is in effect at runtime), and
-     * for some things not in the bitmap (only the upper latin folds in this
-     * case, as all other single-char folding has been set above).  Set
-     * run-time fold flag for these */
-    if (FOLD && (LOC
-		|| (DEPENDS_SEMANTICS
-		    && cp_list
-		    && ! (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
-		|| unicode_alternate))
-    {
-	ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
-    }
-
-    /* A single character class can be "optimized" into an EXACTish node.
-     * Note that since we don't currently count how many characters there are
-     * outside the bitmap, we are XXX missing optimization possibilities for
-     * them.  This optimization can't happen unless this is a truly single
-     * character class, which means that it can't be an inversion into a
-     * many-character class, and there must be no possibility of there being
-     * things outside the bitmap.  'stored' (only) for locales doesn't include
-     * \w, etc, so have to make a special test that they aren't present
-     *
-     * Similarly A 2-character class of the very special form like [bB] can be
-     * optimized into an EXACTFish node, but only for non-locales, and for
-     * characters which only have the two folds; so things like 'fF' and 'Ii'
-     * wouldn't work because they are part of the fold of 'LATIN SMALL LIGATURE
-     * FI'. */
-    if (! cp_list
-	&& ! unicode_alternate
-	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
-	&& ! (ANYOF_FLAGS(ret) & (ANYOF_INVERT|ANYOF_UNICODE_ALL))
-        && (((stored == 1 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
-                              || (! ANYOF_CLASS_TEST_ANY_SET(ret)))))
-	    || (stored == 2 && ((! (ANYOF_FLAGS(ret) & ANYOF_LOCALE))
-				 && (! _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(value))
-				 /* If the latest code point has a fold whose
-				  * bit is set, it must be the only other one */
-				&& ((prevvalue = PL_fold_latin1[value]) != value)
-				 && ANYOF_BITMAP_TEST(ret, prevvalue)))))
-    {
-        /* Note that the information needed to decide to do this optimization
-         * is not currently available until the 2nd pass, and that the actually
-	 * used EXACTish node takes less space than the calculated ANYOF node,
-	 * and hence the amount of space calculated in the first pass is larger
-         * than actually used, so this optimization doesn't gain us any space.
-	 * But an EXACT node is faster than an ANYOF node, and can be combined
-	 * with any adjacent EXACT nodes later by the optimizer for further
-	 * gains.  The speed of executing an EXACTF is similar to an ANYOF
-	 * node, so the optimization advantage comes from the ability to join
-	 * it to adjacent EXACT nodes */
-
-        const char * cur_parse= RExC_parse;
-	U8 op;
-        RExC_emit = (regnode *)orig_emit;
-        RExC_parse = (char *)orig_parse;
-
-	if (stored == 1) {
-
-	    /* A locale node with one point can be folded; all the other cases
-	     * with folding will have two points, since we calculate them above
-	     */
-	    if (ANYOF_FLAGS(ret) & ANYOF_LOC_NONBITMAP_FOLD) {
-		 op = EXACTFL;
-	    }
-	    else {
-		op = EXACT;
-	    }
-	}
-	else {   /* else 2 chars in the bit map: the folds of each other */
-
-	    /* Use the folded value, which for the cases where we get here,
-	     * is just the lower case of the current one (which may resolve to
-	     * itself, or to the other one */
-	    value = toLOWER_LATIN1(value);
-
-	    /* To join adjacent nodes, they must be the exact EXACTish type.
-	     * Try to use the most likely type, by using EXACTFA if possible,
-	     * then EXACTFU if the regex calls for it, or is required because
-	     * the character is non-ASCII.  (If <value> is ASCII, its fold is
-	     * also ASCII for the cases where we get here.) */
-	    if (ASCII_FOLD_RESTRICTED && isASCII(value)) {
-		op = EXACTFA;
-	    }
-	    else if (AT_LEAST_UNI_SEMANTICS || !isASCII(value)) {
-		op = EXACTFU;
-	    }
-	    else {    /* Otherwise, more likely to be EXACTF type */
-		op = EXACTF;
-	    }
-	}
-
-	ret = reg_node(pRExC_state, op);
-        RExC_parse = (char *)cur_parse;
-	if (UTF && ! NATIVE_IS_INVARIANT(value)) {
-	    *STRING(ret)= UTF8_EIGHT_BIT_HI((U8) value);
-	    *(STRING(ret) + 1)= UTF8_EIGHT_BIT_LO((U8) value);
-	    STR_LEN(ret)= 2;
-	    RExC_emit += STR_SZ(2);
-	}
-	else {
-	    *STRING(ret)= (char)value;
-	    STR_LEN(ret)= 1;
-	    RExC_emit += STR_SZ(1);
-	}
-	SvREFCNT_dec(listsv);
-        return ret;
-    }
-
     /* If there is a swash and more than one element, we can't use the swash in
      * the optimization below. */
     if (swash && element_count > 1) {
 	SvREFCNT_dec(swash);
 	swash = NULL;
     }
+
     if (! cp_list
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 	&& ! unicode_alternate)
