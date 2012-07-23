@@ -7938,6 +7938,18 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 
 #endif
 
+STATIC bool
+S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
+{
+    /* Does <invlist> contain code point <cp> as part of the set? */
+
+    IV index = invlist_search(invlist, cp);
+
+    PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP;
+
+    return index >= 0 && ELEMENT_RANGE_MATCHES_INVLIST(index);
+}
+
 PERL_STATIC_INLINE SV*
 S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return _add_range_to_invlist(invlist, cp, cp);
