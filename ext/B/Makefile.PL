@@ -25,8 +25,6 @@ my @names = qw(CVf_ANON CVf_CLONE CVf_CLONED CVf_CONST CVf_LVALUE CVf_METHOD
 	       GVf_IMPORTED_AV GVf_IMPORTED_CV GVf_IMPORTED_HV GVf_IMPORTED_SV
 	       HEf_SVKEY
 	       SVTYPEMASK SVt_PVGV SVt_PVHV
-	       SVf_FAKE SVf_IOK SVf_IVisUV SVf_NOK SVf_POK SVf_READONLY
-	       SVf_ROK SVp_IOK SVp_NOK SVp_POK SVpad_OUR SVs_RMG SVs_SMG
 	       PAD_FAKELEX_ANON PAD_FAKELEX_MULTI);
 
 if ($] >= 5.009) {
@@ -52,6 +50,7 @@ foreach my $tuple (['cop.h'],
                    ['op.h'],
                    ['op_reg_common.h','(?:(?:RXf_)?PMf_)'],
                    ['regexp.h','RXf_'],
+                   ['sv.h', 'SV(?:[fps]|pad)_'],
                   ) {
     my $file = $tuple->[0];
     my $pfx = $tuple->[1] || '';
