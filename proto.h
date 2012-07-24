@@ -1619,6 +1619,7 @@ PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 #define PERL_ARGS_ASSERT_INIT_ARGV_SYMBOLS	\
 	assert(argv)
 
+PERL_CALLCONV void	Perl_init_constants(pTHX);
 PERL_CALLCONV void	Perl_init_dbargs(pTHX);
 PERL_CALLCONV void	Perl_init_debugger(pTHX);
 PERL_CALLCONV int	Perl_init_i18nl10n(pTHX_ int printwarn);

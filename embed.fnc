@@ -1696,6 +1696,7 @@ Adpbm	|void	|sv_nounlocking	|NULLOK SV *sv
 Adpb	|void	|sv_nounlocking	|NULLOK SV *sv
 #endif
 Adp	|int	|nothreadhook
+p	|void	|init_constants
 
 #if defined(PERL_IN_DOOP_C)
 sR	|I32	|do_trans_simple	|NN SV * const sv
