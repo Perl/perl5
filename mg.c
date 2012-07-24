@@ -1164,11 +1164,16 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     STRLEN len = 0, klen;
-    const char *s = SvOK(sv) ? SvPV_const(sv,len) : "";
-    const char * const ptr = MgPV_const(mg,klen);
-    my_setenv(ptr, s);
+    const char * const key = MgPV_const(mg,klen);
+    const char *s = "";
 
     PERL_ARGS_ASSERT_MAGIC_SETENV;
+
+    if (SvOK(sv)) {
+	s = SvPV_const(sv,len);
+	SvPOK_only(sv); /* environment variables are strings, period */
+    }
+    my_setenv(key, s); /* does the deed */
 
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
@@ -1212,7 +1217,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    } while (my_trnlnm(s, pathbuf, i++) && (elt = pathbuf));
 	}
 #endif /* VMS */
-	if (s && klen == 4 && strEQ(ptr,"PATH")) {
+	if (s && klen == 4 && strEQ(key,"PATH")) {
 	    const char * const strend = s + len;
 
 	    while (s < strend) {

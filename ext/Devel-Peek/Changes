@@ -66,3 +66,5 @@
 1.02:
 	2004-10-22: Document "hash quality" output and update examples.
 
+1.09:
+	2012-07-23: Modify tests for 5.18's slightly different flags.
