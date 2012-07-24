@@ -1179,7 +1179,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
      /* We just undefd an environment var.  Is a replacement */
      /* waiting in the wings? */
     if (!len) {
-	SV ** const valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE);
+	SV ** const valp = hv_fetch(GvHVn(PL_envgv), key, klen, FALSE);
 	if (valp)
 	    s = SvOK(*valp) ? SvPV_const(*valp, len) : "";
     }
@@ -1191,7 +1191,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     if (PL_tainting) {
 	MgTAINTEDDIR_off(mg);
 #ifdef VMS
-	if (s && klen == 8 && strEQ(ptr, "DCL$PATH")) {
+	if (s && klen == 8 && strEQ(key, "DCL$PATH")) {
 	    char pathbuf[256], eltbuf[256], *cp, *elt;
 	    int i = 0, j = 0;
 
