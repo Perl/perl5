@@ -808,6 +808,7 @@ Perl_op_clear(pTHX_ OP *o)
         }
 #endif
 	break;
+    case OP_DUMP:
     case OP_GOTO:
     case OP_NEXT:
     case OP_LAST:
