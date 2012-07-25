@@ -3318,11 +3318,6 @@ PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
 #define PERL_ARGS_ASSERT_REGDUMP	\
 	assert(r)
 
-PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_REGDUMP	\
-	assert(r)
-
 PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ REGEXP *const rx, char *stringarg, char *strend, char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -6381,6 +6376,12 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
+STATIC bool	S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP	\
+	assert(invlist)
+
 STATIC SV*	S__new_invlist_C_array(pTHX_ UV* list)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6402,6 +6403,12 @@ STATIC U32	S_add_data(struct RExC_state_t *pRExC_state, U32 n, const char *s)
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_ADD_DATA	\
 	assert(pRExC_state); assert(s)
+
+PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ struct RExC_state_t *pRExC_state, regnode *node, STRLEN len, UV code_point)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT	\
+	assert(pRExC_state); assert(node)
 
 STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
@@ -6438,6 +6445,11 @@ STATIC void	S_cl_or(const struct RExC_state_t *pRExC_state, struct regnode_charc
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_CL_OR	\
 	assert(pRExC_state); assert(cl); assert(or_with)
+
+PERL_STATIC_INLINE U8	S_compute_EXACTish(pTHX_ struct RExC_state_t *pRExC_state)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
+	assert(pRExC_state)
 
 PERL_STATIC_INLINE UV*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
@@ -6678,13 +6690,19 @@ PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name,
 #define PERL_ARGS_ASSERT__CORE_SWASH_INIT	\
 	assert(pkg); assert(name); assert(listsv)
 
+PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__GET_SWASH_INVLIST	\
+	assert(swash)
+
 PERL_CALLCONV SV*	Perl__invlist_contents(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__INVLIST_CONTENTS	\
 	assert(invlist)
 
-PERL_CALLCONV bool	Perl__is_swash_user_defined(pTHX_ SV *swash)
+PERL_CALLCONV bool	Perl__is_swash_user_defined(pTHX_ SV* const swash)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__IS_SWASH_USER_DEFINED	\

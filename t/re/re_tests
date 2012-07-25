@@ -1689,4 +1689,11 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /[\H]/	\x{A0}	n	-	-
 /[\H]/	\x{A1}	y	$&	\xA1
 
+[^\n]+	\nb	y	$&	b
+[^\n]+	a\n	y	$&	a
+
+# /a has no effect on properties
+(?a:\p{Any})	\x{100}	y	$&	\x{100}
+(?aa:\p{Any})	\x{100}	y	$&	\x{100}
+
 # vim: softtabstop=0 noexpandtab

@@ -34,7 +34,7 @@ while (<DESC>) {
         next;
     }
     unless ($lastregop) {
-        ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+)\s*;\s*(.*)/;
+        ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+?)\s*;\s*(.*)/;
         ($type[$ind], $code[$ind], $args[$ind], $flags[$ind], $longj[$ind])
           = split /[,\s]\s*/, $desc;
         ++$ind;

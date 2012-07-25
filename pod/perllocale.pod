@@ -678,6 +678,12 @@ to your surprise--that "|" moves from the ispunct() class to isalpha().
 Unfortunately, this creates big problems for regular expressions. "|" still
 means alternation even though it matches C<\w>.
 
+Note that there are quite a few things that are unaffected by the
+current locale.  All the escape sequences for particular characters,
+C<\n> for example, always mean the platform's native one.  This means,
+for example, that C<\N> in regular expressions (every character
+but new-line) work on the platform character set.
+
 B<Note:> A broken or malicious C<LC_CTYPE> locale definition may result
 in clearly ineligible characters being considered to be alphanumeric by
 your application.  For strict matching of (mundane) ASCII letters and

@@ -1045,13 +1045,14 @@ Amb	|OP*	|ref		|NULLOK OP* o|I32 type
 s	|OP*	|refkids	|NULLOK OP* o|I32 type
 #endif
 Ap	|void	|regdump	|NN const regexp* r
-Ap	|void	|regdump	|NN const regexp* r
 Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #ifdef PERL_IN_REGCOMP_C
 EMs	|void	|add_alternate	|NN AV** alternate_ptr|NN U8* string|STRLEN len
 EMsR	|SV*	|_new_invlist_C_array|NN UV* list
+: Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|bool complement_b
+EMsR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
@@ -1421,7 +1422,8 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name|NN SV* listsv|
                 |I32 none|bool return_if_undef|NULLOK SV* invlist \
 		|bool passed_in_invlist_has_user_defined_property
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
-EXMpR	|bool	|_is_swash_user_defined|NN SV *swash
+EXMpR	|bool	|_is_swash_user_defined|NN SV* const swash
+EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
@@ -1948,6 +1950,9 @@ Es	|U32	|join_exact	|NN struct RExC_state_t *pRExC_state \
 				|U32 flags|NULLOK regnode *val|U32 depth
 EsRn	|char *	|regwhite	|NN struct RExC_state_t *pRExC_state \
 				|NN char *p
+Ei	|void   |alloc_maybe_populate_EXACT|NN struct RExC_state_t *pRExC_state \
+				|NN regnode *node|STRLEN len|UV code_point
+Ei	|U8   |compute_EXACTish|NN struct RExC_state_t *pRExC_state
 Es	|char *	|nextchar	|NN struct RExC_state_t *pRExC_state
 Es	|bool	|reg_skipcomment|NN struct RExC_state_t *pRExC_state
 Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \

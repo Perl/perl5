@@ -599,59 +599,39 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * digits */
 #define isOCTAL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (0xF8 & (c)) == '0')
 
-
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
-/* Bits for PL_charclass[].  These use names used in l1_char_class_tab.h but
- * their actual definitions are here.  If that has a name not used here, it
- * won't compile. */
-#  define _CC_ALNUMC_A         (1<<0)
-#  define _CC_ALNUMC_L1        (1<<1)
-#  define _CC_ALPHA_A          (1<<2)
-#  define _CC_ALPHA_L1         (1<<3)
-#  define _CC_BLANK_A          (1<<4)
-#  define _CC_BLANK_L1         (1<<5)
-#  define _CC_CHARNAME_CONT    (1<<6)
-#  define _CC_CNTRL_A          (1<<7)
-#  define _CC_CNTRL_L1         (1<<8)
-#  define _CC_DIGIT_A          (1<<9)
-#  define _CC_GRAPH_A          (1<<10)
-#  define _CC_GRAPH_L1         (1<<11)
-#  define _CC_IDFIRST_A        (1<<12)
-#  define _CC_IDFIRST_L1       (1<<13)
-#  define _CC_LOWER_A          (1<<14)
-#  define _CC_LOWER_L1         (1<<15)
-#  define _CC_PRINT_A          (1<<17)
-#  define _CC_PRINT_L1         (1<<18)
-#  define _CC_PSXSPC_A         (1<<19)
-#  define _CC_PSXSPC_L1        (1<<20)
-#  define _CC_PUNCT_A          (1<<21)
-#  define _CC_PUNCT_L1         (1<<22)
-#  define _CC_SPACE_A          (1<<23)
-#  define _CC_SPACE_L1         (1<<24)
-#  define _CC_UPPER_A          (1<<25)
-#  define _CC_UPPER_L1         (1<<26)
-#  define _CC_WORDCHAR_A       (1<<27)
-#  define _CC_WORDCHAR_L1      (1<<28)
-#  define _CC_XDIGIT_A         (1<<29)
-#  define _CC_NONLATIN1_FOLD   (1<<30)
-#  define _CC_QUOTEMETA        (1U<<31)	/* 1U keeps Solaris from griping */
-/* Unused: (1<<16)
- * If more are needed, can give up some of the above.  The first ones to go
- * would be those that require just two tests to verify; either there are two
- * code points, like BLANK_A, or it occupies a single range like DIGIT_A,
- * UPPER_A, and LOWER_A.  Also consider the ones that can be replaced with two
- * tests and an additional mask, so
- *
- * #define isCNTRL_A  cBOOL(FITS_IN_8_BITS(c)                             \
- *			    && (( ! (~0x1F & NATIVE_TO_UNI(c)]))	  \
- *				 || UNLIKELY(NATIVE_TO_UNI(c) == 0x7f)))
- *
- * This takes advantage of the contiguous block of these with the first one's
- * representation having the lower order bits all zero;, except the DELETE must
- * be tested specially.  A similar pattern can be used for for isCNTRL_L1,
- * isPRINT_A, and isPRINT_L1
- */
+
+/* Character class numbers.  These are used in PL_charclass[] and the ones
+ * up through the one that corresponds to <_HIGHEST_REGCOMP_DOT_H_SYNC> are
+ * used by regcomp.h.  These use names used in l1_char_class_tab.h but their
+ * actual definitions are here.  If that has a name not used here, it won't
+ * compile. */
+#  define _CC_WORDCHAR           0
+#  define _CC_SPACE              1
+#  define _CC_DIGIT              2
+#  define _CC_ALNUMC             3
+#  define _CC_ALPHA              4
+#  define _CC_ASCII              5
+#  define _CC_CNTRL              6
+#  define _CC_GRAPH              7
+#  define _CC_LOWER              8
+#  define _CC_PRINT              9
+#  define _CC_PUNCT             10
+#  define _CC_UPPER             11
+#  define _CC_XDIGIT            12
+#  define _CC_PSXSPC            13
+#  define _CC_BLANK             14
+#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_BLANK
+
+#  define _CC_IDFIRST           15
+#  define _CC_CHARNAME_CONT     16
+#  define _CC_NONLATIN1_FOLD    17
+#  define _CC_QUOTEMETA         18
+/* Unused: 19-31
+ * If more bits are needed, one could add a second word for non-64bit
+ * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
+ * word or not. */
 
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
@@ -662,25 +642,42 @@ EXTCONST  U32 PL_charclass[] = {
 EXTCONST U32 PL_charclass[];
 #  endif
 
-#   define isALNUMC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_A))
-#   define isALPHA_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_A))
-#   define isBLANK_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_A))
-#   define isCNTRL_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CNTRL_A))
-#   define isDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_DIGIT_A))
-#   define isGRAPH_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_A))
-#   define isIDFIRST_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_A))
-#   define isLOWER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_A))
-#   define isPRINT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_A))
-#   define isPSXSPC_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_A))
-#   define isPUNCT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_A))
-#   define isSPACE_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_SPACE_A))
-#   define isUPPER_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_UPPER_A))
-#   define isWORDCHAR_A(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_WORDCHAR_A))
-#   define isXDIGIT_A(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_XDIGIT_A))
+    /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
+#   define _CC_mask(classnum) (1U << (classnum))
+#   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
+                            && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(classnum)))
+
+    /* The mask for the _A versions of the macros; it just adds in the bit for
+     * ASCII. */
+#   define _CC_mask_A(classnum) (_CC_mask(classnum) | _CC_mask(_CC_ASCII))
+
+    /* The _A version makes sure that both the desired bit and the ASCII bit
+     * are present */
+#   define _generic_isCC_A(c, classnum) (FITS_IN_8_BITS(c) \
+        && ((PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask_A(classnum)) \
+                                == _CC_mask_A(classnum)))
+
+#   define isALNUMC_A(c) _generic_isCC_A(c, _CC_ALNUMC)
+#   define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
+#   define isBLANK_A(c)  _generic_isCC_A(c, _CC_BLANK)
+#   define isCNTRL_A(c)  _generic_isCC_A(c, _CC_CNTRL)
+#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT)
+#   define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
+#   define isLOWER_A(c)  _generic_isCC_A(c, _CC_LOWER)
+#   define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
+#   define isPSXSPC_A(c) _generic_isCC_A(c, _CC_PSXSPC)
+#   define isPUNCT_A(c)  _generic_isCC_A(c, _CC_PUNCT)
+#   define isSPACE_A(c)  _generic_isCC_A(c, _CC_SPACE)
+#   define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
+#   define isWORDCHAR_A(c) _generic_isCC_A(c, _CC_WORDCHAR)
+#   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT)
+#   define isIDFIRST_A(c) _generic_isCC_A(c, ( _CC_IDFIRST))
+
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_NONLATIN1_FOLD))
-#   define _isQUOTEMETA(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_QUOTEMETA))
+#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
+
+#   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #else   /* No perl.h. */
 #   ifdef EBCDIC
 #       define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
@@ -719,21 +716,21 @@ EXTCONST U32 PL_charclass[];
 
 /* Latin1 definitions */
 #ifdef H_PERL
-#   define isALNUMC_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALNUMC_L1))
-#   define isALPHA_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_ALPHA_L1))
-#   define isBLANK_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_BLANK_L1))
+#   define isALNUMC_L1(c) _generic_isCC(c, _CC_ALNUMC)
+#   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA)
+#   define isBLANK_L1(c)  _generic_isCC(c, _CC_BLANK)
 /*  continuation character for legal NAME in \N{NAME} */
-#   define isCHARNAME_CONT(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CHARNAME_CONT))
-#   define isCNTRL_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_CNTRL_L1))
-#   define isGRAPH_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_GRAPH_L1))
-#   define isIDFIRST_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_IDFIRST_L1))
-#   define isLOWER_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_LOWER_L1))
-#   define isPRINT_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PRINT_L1))
-#   define isPSXSPC_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PSXSPC_L1))
-#   define isPUNCT_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_PUNCT_L1))
-#   define isSPACE_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_SPACE_L1))
-#   define isUPPER_L1(c)  cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_UPPER_L1))
-#   define isWORDCHAR_L1(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_WORDCHAR_L1))
+#   define isCHARNAME_CONT(c) _generic_isCC(c, _CC_CHARNAME_CONT)
+#   define isCNTRL_L1(c)  _generic_isCC(c, _CC_CNTRL)
+#   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH)
+#   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER)
+#   define isPRINT_L1(c)  _generic_isCC(c, _CC_PRINT)
+#   define isPSXSPC_L1(c) _generic_isCC(c, _CC_PSXSPC)
+#   define isPUNCT_L1(c)  _generic_isCC(c, _CC_PUNCT)
+#   define isSPACE_L1(c)  _generic_isCC(c, _CC_SPACE)
+#   define isUPPER_L1(c)  _generic_isCC(c, _CC_UPPER)
+#   define isWORDCHAR_L1(c) _generic_isCC(c, _CC_WORDCHAR)
+#   define isIDFIRST_L1(c) _generic_isCC(c, _CC_IDFIRST)
 #else /* No access to perl.h.  Only a few provided here, just in case needed
        * for backwards compatibility */
     /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
@@ -925,18 +922,19 @@ EXTCONST U32 PL_charclass[];
 #define isLOWER_uni(c)		generic_uni(isLOWER, is_uni_lower, c)
 #define isASCII_uni(c)		isASCII(c)
 /* All controls are in Latin1 */
-#define isCNTRL_uni(c)		((c) < 256 && isCNTRL_L1(c))
+#define isCNTRL_uni(c)		isCNTRL_L1(c)
 #define isGRAPH_uni(c)		generic_uni(isGRAPH, is_uni_graph, c)
 #define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
 #define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
 #define isXDIGIT_uni(c)		generic_uni(isXDIGIT, is_uni_xdigit, c)
+
+/* Posix and regular space differ only in U+000B, which is in Latin1 */
+#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
+
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
 #define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
 #define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
-
-/* Posix and regular space differ only in U+000B, which is in Latin1 */
-#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
 
 #define isALNUM_LC_uvchr(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
 #define isIDFIRST_LC_uvchr(c)	(c < 256 ? isIDFIRST_LC(c) : is_uni_idfirst_lc(c))
@@ -959,7 +957,7 @@ EXTCONST U32 PL_charclass[];
  * the function.  This relies on the fact that ASCII characters have the same
  * representation whether utf8 or not */
 #define generic_utf8(macro, function, p) (isASCII(*(p))                        \
-                                         ? CAT2(CAT2(macro,_),A)(*(p))               \
+                                         ? CAT2(CAT2(macro,_),A)(*(p))         \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? CAT2(macro, _L1)                  \
                                              (TWO_BYTE_UTF8_TO_UNI(*(p),       \

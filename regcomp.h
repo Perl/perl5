@@ -385,40 +385,43 @@ struct regnode_charclass_class {
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
-/* 2n should pair with 2n+1 */
+/* 2n should be the normal one, paired with its complement at 2n+1 */
 
-#define ANYOF_ALNUM	 0	/* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
-#define ANYOF_NALNUM	 1
-#define ANYOF_SPACE	 2	/* \s */
-#define ANYOF_NSPACE	 3
-#define ANYOF_DIGIT	 4	/* \d */
-#define ANYOF_NDIGIT	 5
-#define ANYOF_ALNUMC	 6	/* [[:alnum:]] isalnum(3), utf8::IsAlnum, ALNUMC */
-#define ANYOF_NALNUMC	 7
-#define ANYOF_ALPHA	 8
-#define ANYOF_NALPHA	 9
-#define ANYOF_ASCII	10
-#define ANYOF_NASCII	11
-#define ANYOF_CNTRL	12
-#define ANYOF_NCNTRL	13
-#define ANYOF_GRAPH	14
-#define ANYOF_NGRAPH	15
-#define ANYOF_LOWER	16
-#define ANYOF_NLOWER	17
-#define ANYOF_PRINT	18
-#define ANYOF_NPRINT	19
-#define ANYOF_PUNCT	20
-#define ANYOF_NPUNCT	21
-#define ANYOF_UPPER	22
-#define ANYOF_NUPPER	23
-#define ANYOF_XDIGIT	24
-#define ANYOF_NXDIGIT	25
-#define ANYOF_PSXSPC	26	/* POSIX space: \s plus the vertical tab */
-#define ANYOF_NPSXSPC	27
-#define ANYOF_BLANK	28	/* GNU extension: space and tab: non-vertical space */
-#define ANYOF_NBLANK	29
+#define ANYOF_ALNUM    ((_CC_WORDCHAR) * 2)  /* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
+#define ANYOF_NALNUM   ((ANYOF_ALNUM) + 1)
+#define ANYOF_SPACE    ((_CC_SPACE) * 2)     /* \s */
+#define ANYOF_NSPACE   ((ANYOF_SPACE) + 1)
+#define ANYOF_DIGIT    ((_CC_DIGIT) * 2)     /* \d */
+#define ANYOF_NDIGIT   ((ANYOF_DIGIT) + 1)
+#define ANYOF_ALNUMC   ((_CC_ALNUMC) * 2)    /* [[:alnum:]] isalnum(3), utf8::IsAlnum, ALNUMC */
+#define ANYOF_NALNUMC  ((ANYOF_ALNUMC) + 1)
+#define ANYOF_ALPHA    ((_CC_ALPHA) * 2)
+#define ANYOF_NALPHA   ((ANYOF_ALPHA) + 1)
+#define ANYOF_ASCII    ((_CC_ASCII) * 2)
+#define ANYOF_NASCII   ((ANYOF_ASCII) + 1)
+#define ANYOF_CNTRL    ((_CC_CNTRL) * 2)
+#define ANYOF_NCNTRL   ((ANYOF_CNTRL) + 1)
+#define ANYOF_GRAPH    ((_CC_GRAPH) * 2)
+#define ANYOF_NGRAPH   ((ANYOF_GRAPH) + 1)
+#define ANYOF_LOWER    ((_CC_LOWER) * 2)
+#define ANYOF_NLOWER   ((ANYOF_LOWER) + 1)
+#define ANYOF_PRINT    ((_CC_PRINT) * 2)
+#define ANYOF_NPRINT   ((ANYOF_PRINT) + 1)
+#define ANYOF_PUNCT    ((_CC_PUNCT) * 2)
+#define ANYOF_NPUNCT   ((ANYOF_PUNCT) + 1)
+#define ANYOF_UPPER    ((_CC_UPPER) * 2)
+#define ANYOF_NUPPER   ((ANYOF_UPPER) + 1)
+#define ANYOF_XDIGIT   ((_CC_XDIGIT) * 2)
+#define ANYOF_NXDIGIT  ((ANYOF_XDIGIT) + 1)
+#define ANYOF_PSXSPC   ((_CC_PSXSPC) * 2)    /* POSIX space: \s plus the vertical tab */
+#define ANYOF_NPSXSPC  ((ANYOF_PSXSPC) + 1)
+#define ANYOF_BLANK    ((_CC_BLANK) * 2)     /* GNU extension: space and tab: non-vertical space */
+#define ANYOF_NBLANK   ((ANYOF_BLANK) + 1)
 
 #define ANYOF_MAX	32
+#if (ANYOF_MAX <= _HIGHEST_REGCOMP_DOT_H_SYNC * 2 + 1)
+#   error Problem with handy.h _CC_foo #defines
+#endif
 
 /* pseudo classes, not stored in the class bitmap, but used as flags
    during compilation of char classes */

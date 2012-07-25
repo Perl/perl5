@@ -22,36 +22,24 @@ require 'regen/regen_lib.pl';
 # new Unicode release, to make sure things haven't been changed by it.
 
 my @properties = qw(
-    ALNUMC_A
-    ALNUMC_L1
-    ALPHA_A
-    ALPHA_L1
-    BLANK_A
-    BLANK_L1
+    ALNUMC
+    ALPHA
+    ASCII
+    BLANK
     CHARNAME_CONT
-    CNTRL_A
-    CNTRL_L1
-    DIGIT_A
-    GRAPH_A
-    GRAPH_L1
-    IDFIRST_A
-    IDFIRST_L1
-    LOWER_A
-    LOWER_L1
-    PRINT_A
-    PRINT_L1
-    PSXSPC_A
-    PSXSPC_L1
-    PUNCT_A
-    PUNCT_L1
-    SPACE_A
-    SPACE_L1
-    UPPER_A
-    UPPER_L1
-    WORDCHAR_A
-    WORDCHAR_L1
-    XDIGIT_A
+    CNTRL
+    DIGIT
+    GRAPH
+    IDFIRST
+    LOWER
+    PRINT
+    PSXSPC
+    PUNCT
     QUOTEMETA
+    SPACE
+    UPPER
+    WORDCHAR
+    XDIGIT
 );
 
 # Read in the case fold mappings.
@@ -133,7 +121,7 @@ foreach my $folded (keys %folded_closure) {
 my @bits;   # Bit map for each code point
 
 foreach my $folded (keys %folded_closure) {
-    $bits[$folded] = "_CC_NONLATIN1_FOLD" if grep { $_ > 255 }
+    $bits[$folded] = "(1U<<_CC_NONLATIN1_FOLD)" if grep { $_ > 255 }
                                                 @{$folded_closure{$folded}};
 }
 
@@ -152,8 +140,8 @@ for my $ord (0..255) {
         if (! ($name =~ s/_L1$//)) {
 
             # Here, isn't an _L1.  If its _A, it's automatically false for
-            # non-ascii.  The only one current one without a suffix is valid
-            # over the whole range.
+            # non-ascii.  The only one current one (besides ASCII) without a
+            # suffix is valid over the whole range.
             next if $name =~ s/_A$// && $ord >= 128;
 
         }
@@ -188,7 +176,7 @@ for my $ord (0..255) {
         #print "$ord, $name $property, $re\n";
         if ($char =~ $re) {  # Add this property if matches
             $bits[$ord] .= '|' if $bits[$ord];
-            $bits[$ord] .= "_CC_$property";
+            $bits[$ord] .= "(1U<<_CC_$property)";
         }
     }
     #print __LINE__, " $ord $char $bits[$ord]\n";
