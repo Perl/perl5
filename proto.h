@@ -6684,7 +6684,7 @@ PERL_CALLCONV SV*	Perl__invlist_contents(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT__INVLIST_CONTENTS	\
 	assert(invlist)
 
-PERL_CALLCONV bool	Perl__is_swash_user_defined(pTHX_ SV *swash)
+PERL_CALLCONV bool	Perl__is_swash_user_defined(pTHX_ SV* const swash)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__IS_SWASH_USER_DEFINED	\
