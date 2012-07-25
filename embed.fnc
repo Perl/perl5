@@ -1422,6 +1422,7 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name|NN SV* listsv|
 		|bool passed_in_invlist_has_user_defined_property
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EXMpR	|bool	|_is_swash_user_defined|NN SV* const swash
+EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s

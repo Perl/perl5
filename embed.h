@@ -954,6 +954,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _core_swash_init(a,b,c,d,e,f,g,h)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g,h)
+#define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
 #define _invlist_contents(a)	Perl__invlist_contents(aTHX_ a)
 #define _is_swash_user_defined(a)	Perl__is_swash_user_defined(aTHX_ a)
 #  endif

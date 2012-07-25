@@ -11339,7 +11339,6 @@ parseit:
 		    n = 1;
 		}
 		if (!SIZE_ONLY) {
-                    SV** invlistsvp;
                     SV* invlist;
                     char* name;
 
@@ -11381,10 +11380,7 @@ parseit:
                     if (   ! swash
                         || ! SvROK(swash)
                         || ! SvTYPE(SvRV(swash)) == SVt_PVHV
-                        || ! (invlistsvp =
-				hv_fetchs(MUTABLE_HV(SvRV(swash)),
-                                "INVLIST", FALSE))
-                        || ! (invlist = *invlistsvp))
+                        || ! (invlist = _get_swash_invlist(swash)))
 		    {
                         if (swash) {
                             SvREFCNT_dec(swash);
@@ -12071,7 +12067,7 @@ parseit:
             if (! PL_utf8_foldable) {
                 SV* swash = swash_init("utf8", "_Perl_Any_Folds",
                                        &PL_sv_undef, 1, 0);
-                PL_utf8_foldable = _swash_to_invlist(swash);
+                PL_utf8_foldable = _get_swash_invlist(swash);
                 SvREFCNT_dec(swash);
             }
 

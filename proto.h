@@ -6684,6 +6684,12 @@ PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name,
 #define PERL_ARGS_ASSERT__CORE_SWASH_INIT	\
 	assert(pkg); assert(name); assert(listsv)
 
+PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__GET_SWASH_INVLIST	\
+	assert(swash)
+
 PERL_CALLCONV SV*	Perl__invlist_contents(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
