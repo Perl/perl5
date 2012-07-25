@@ -8252,14 +8252,16 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
 }
 #endif
 
-#if 0
+#ifdef PERL_ARGS_ASSERT__INVLIST_DUMP
 void
-S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
+Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
 {
     /* Dumps out the ranges in an inversion list.  The string 'header'
      * if present is output on a line before the first range */
 
     UV start, end;
+
+    PERL_ARGS_ASSERT__INVLIST_DUMP;
 
     if (header && strlen(header)) {
 	PerlIO_printf(Perl_debug_log, "%s\n", header);
@@ -8269,8 +8271,12 @@ S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
 	if (end == UV_MAX) {
 	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. INFINITY\n", start);
 	}
+	else if (end != start) {
+	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. 0x%04"UVXf"\n",
+		                                 start,         end);
+	}
 	else {
-	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. 0x%04"UVXf"\n", start, end);
+	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf"\n", start);
 	}
     }
 }
