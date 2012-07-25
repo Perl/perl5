@@ -695,20 +695,16 @@ Perl_op_free(pTHX_ OP *o)
 	    op_free(kid);
 	}
     }
+    if (type == OP_NULL)
+	type = (OPCODE)o->op_targ;
 
     Slab_to_rw(o);
 
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
-    if (type == OP_NEXTSTATE || type == OP_DBSTATE
-	    || (type == OP_NULL /* the COP might have been null'ed */
-		&& ((OPCODE)o->op_targ == OP_NEXTSTATE
-		    || (OPCODE)o->op_targ == OP_DBSTATE))) {
+    if (type == OP_NEXTSTATE || type == OP_DBSTATE) {
 	cop_free((COP*)o);
     }
-
-    if (type == OP_NULL)
-	type = (OPCODE)o->op_targ;
 
     op_clear(o);
     FreeOp(o);
