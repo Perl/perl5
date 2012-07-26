@@ -4,7 +4,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..23\n";
+print "1..25\n";
 my $test = 0;
 
 # Historically constant folding was performed by evaluating the ops, and if
@@ -132,3 +132,10 @@ package other { # hide the "ok" sub
  print " ", ++$test, " - print followed by const || URSINE\n";
  BEGIN { $^W = 1 }
 }
+
+# or stat
+print "not " unless stat(1 ? INSTALL : 0) eq stat("INSTALL");
+print "ok ", ++$test, " - stat(const ? word : ....)\n";
+# in case we are in t/
+print "not " unless stat(1 ? TEST : 0) eq stat("TEST");
+print "ok ", ++$test, " - stat(const ? word : ....)\n";
