@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 156);
+    plan (tests => 171);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -62,6 +62,17 @@ $PERL = $ENV{PERL}
        $Is_VMS                ? $^X      :
        $Is_MSWin32            ? '.\perl' :
        './perl');
+
+sub env_is {
+    my ($key, $val, $desc) = @_;
+    if ($Is_MSWin32) {
+        # cmd.exe will echo 'variable=value' but 4nt will echo just the value
+        # -- Nikola Knezevic
+        like `set $key`, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
+    } else {
+        is `echo \$\Q$key\E`, "$val\n", $desc;
+    }
+}
 
 END {
     # On VMS, environment variable changes are peristent after perl exits
@@ -604,15 +615,57 @@ SKIP: {
 	    }
 	}
 
-	$ENV{__NoNeSuCh} = "foo";
-	$0 = "bar";
-# cmd.exe will echo 'variable=value' but 4nt will echo just the value
-# -- Nikola Knezevic
-    	if ($Is_MSWin32) {
-	    like `set __NoNeSuCh`, qr/^(?:__NoNeSuCh=)?foo$/;
-	} else {
-	    is `echo \$__NoNeSuCh`, "foo\n";
+	$ENV{__NoNeSuCh} = 'foo';
+	$0 = 'bar';
+	env_is(__NoNeSuCh => 'foo', 'setting $0 does not break %ENV');
+
+	# stringify a glob
+	$ENV{foo} = *TODO;
+	env_is(foo => '*main::TODO', 'ENV store of stringified glob');
+
+	# stringify a ref
+	my $ref = [];
+	$ENV{foo} = $ref;
+	env_is(foo => "$ref", 'ENV store of stringified ref');
+
+	# downgrade utf8 when possible
+	$bytes = "eh zero \x{A0}";
+	utf8::upgrade($chars = $bytes);
+	$forced = $ENV{foo} = $chars;
+	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store downgrades utf8 in SV');
+	env_is(foo => $bytes, 'ENV store downgrades utf8 in setenv');
+
+	# warn when downgrading utf8 is not possible
+	$chars = "X-Day \x{1998}";
+	utf8::encode($bytes = $chars);
+	{
+	  my $warned = 0;
+	  local $SIG{__WARN__} = sub { ++$warned if $_[0] =~ /^Wide character in setenv/; print "# @_" };
+	  $forced = $ENV{foo} = $chars;
+	  ok($warned == 1, 'ENV store warns about wide characters');
 	}
+	ok(!utf8::is_utf8($forced) && $forced eq $bytes, 'ENV store encodes high utf8 in SV');
+	env_is(foo => $bytes, 'ENV store encodes high utf8 in SV');
+
+	# test local $ENV{foo} on existing foo
+	{
+	  local $ENV{__NoNeSuCh};
+	  { local $TODO = 'exists on %ENV should reflect real env';
+	    ok(!exists $ENV{__NoNeSuCh}, 'not exists $ENV{existing} during local $ENV{existing}'); }
+	  env_is(__NoNeLoCaL => '');
+	}
+	ok(exists $ENV{__NoNeSuCh}, 'exists $ENV{existing} after local $ENV{existing}');
+	env_is(__NoNeSuCh => 'foo');
+
+	# test local $ENV{foo} on new foo
+	{
+	  local $ENV{__NoNeLoCaL} = 'foo';
+	  ok(exists $ENV{__NoNeLoCaL}, 'exists $ENV{new} during local $ENV{new}');
+	  env_is(__NoNeLoCaL => 'foo');
+	}
+	ok(!exists $ENV{__NoNeLoCaL}, 'not exists $ENV{new} after local $ENV{new}');
+	env_is(__NoNeLoCaL => '');
+
     SKIP: {
 	    skip("\$0 check only on Linux and FreeBSD", 2)
 		unless $^O =~ /^(linux|freebsd)$/

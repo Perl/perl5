@@ -1165,13 +1165,22 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     STRLEN len = 0, klen;
     const char * const key = MgPV_const(mg,klen);
-    const char *s = "";
+    const char *s = NULL;
 
     PERL_ARGS_ASSERT_MAGIC_SETENV;
 
+    SvGETMAGIC(sv);
     if (SvOK(sv)) {
-	s = SvPV_const(sv,len);
-	SvPOK_only(sv); /* environment variables are strings, period */
+        /* defined environment variables are byte strings; unfortunately
+           there is no SvPVbyte_force_nomg(), so we must do this piecewise */
+        (void)SvPV_force_nomg_nolen(sv);
+        sv_utf8_downgrade(sv, /* fail_ok */ TRUE);
+        if (SvUTF8(sv)) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8), "Wide character in %s", "setenv");
+            SvUTF8_off(sv);
+        }
+        s = SvPVX(sv);
+        len = SvCUR(sv);
     }
     my_setenv(key, s); /* does the deed */
 

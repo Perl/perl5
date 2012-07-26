@@ -38,13 +38,21 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
 [ List each incompatible change as a =head2 entry ]
+
+=head2 C<$ENV{foo} = undef> deletes value from environ, like C<delete $ENV{foo}>
+
+This facilitates use of C<local()> with C<%ENV> entries.  In previous
+versions of Perl, C<undef> was converted to the empty string.
+
+=head2 Defined values stored in environment are forced to byte strings
+
+A value stored in an environment variable has always been stringified.  In
+this release, it is converted to be only a byte string.  First, it is forced
+to be a only a string.  Then if the string is utf8 and the equivalent of
+C<utf8::downgrade> works, that result is used; otherwise, the equivalent of
+C<utf8::encode> is used, and a warning is issued about wide characters
+(L</Diagnostics>).
 
 =head1 Deprecations
 
@@ -163,6 +171,15 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 =head2 New Diagnostics
 
 XXX Newly added diagnostic messages go here
+
+=over 4
+
+=item *
+
+Attempts to put wide characters into environment variables via %ENV provoke
+the warning "Wide character in setenv".
+
+=back
 
 =head3 New Errors
 
