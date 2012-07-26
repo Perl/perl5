@@ -9098,6 +9098,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 				  PTR2UV(sv),SvPVX_const(sv)));
 	}
     }
+    (void)SvPOK_only_UTF8(sv);
     return SvPVX_mutable(sv);
 }
 

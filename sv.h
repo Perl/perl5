@@ -924,6 +924,13 @@ in gv.h: */
 #define SvPOK_byte_nog(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == SVf_POK)
 #define SvPOK_byte_nogthink(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
 
+#define SvPOK_pure_nogthink(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+#define SvPOK_utf8_pure_nogthink(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == (SVf_POK|SVf_UTF8))
+#define SvPOK_byte_pure_nogthink(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+
 /*
 =for apidoc Am|U32|SvGAMAGIC|SV* sv
 
@@ -1440,14 +1447,14 @@ attention to precisely which outputs are influenced by which inputs.
 
 /*
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
-Like C<SvPV> but will force the SV into containing just a string
-(C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
-directly.
+Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
+only a (C<SvPOK_only>), by hook or by crook.  You want force if you are
+going to update the C<SvPVX> directly.  Processes get magic.
 
 =for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
-Like C<SvPV> but will force the SV into containing just a string
-(C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
-directly.  Doesn't process magic.
+Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
+only a (C<SvPOK_only>), by hook or by crook.  You want force if you are
+going to update the C<SvPVX> directly.  Doesn't process get magic.
 
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
 Returns a pointer to the string in the SV, or a stringified form of
@@ -1625,15 +1632,15 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SvPV_force_nomg_nolen(sv) SvPV_force_flags_nolen(sv, 0)
 
 #define SvPV_force_flags(sv, lp, flags) \
-    (SvPOK_nogthink(sv) \
+    (SvPOK_pure_nogthink(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvn_force_flags(sv, &lp, flags))
 
 #define SvPV_force_flags_nolen(sv, flags) \
-    (SvPOK_nogthink(sv) \
+    (SvPOK_pure_nogthink(sv) \
      ? SvPVX(sv) : sv_pvn_force_flags(sv, 0, flags))
 
 #define SvPV_force_flags_mutable(sv, lp, flags) \
-    (SvPOK_nogthink(sv) \
+    (SvPOK_pure_nogthink(sv) \
      ? ((lp = SvCUR(sv)), SvPVX_mutable(sv)) \
      : sv_pvn_force_flags(sv, &lp, flags|SV_MUTABLE_RETURN))
 
@@ -1660,7 +1667,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvutf8(sv, &lp))
 
 #define SvPVutf8_force(sv, lp) \
-    (SvPOK_utf8_nogthink(sv) \
+    (SvPOK_utf8_pure_nogthink(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvutf8n_force(sv, &lp))
 
 #define SvPVutf8_nolen(sv) \
@@ -1674,7 +1681,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_2pvbyte(sv, &lp))
 
 #define SvPVbyte_force(sv, lp) \
-    (SvPOK_byte_nogthink(sv) \
+    (SvPOK_byte_pure_nogthink(sv) \
      ? ((lp = SvCUR(sv)), SvPVX(sv)) : sv_pvbyten_force(sv, &lp))
 
 #define SvPVbyte_nolen(sv) \
