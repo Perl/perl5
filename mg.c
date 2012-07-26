@@ -913,9 +913,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	if (nextchar == '\0') {       /* ^P */
 	    sv_setiv(sv, (IV)PL_perldb);
 	} else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
-	    goto do_prematch_fetch;
+
+            paren = RX_BUFF_IDX_CARET_PREMATCH;
+	    goto do_numbuf_fetch;
 	} else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
-	    goto do_postmatch_fetch;
+            paren = RX_BUFF_IDX_CARET_POSTMATCH;
+	    goto do_numbuf_fetch;
 	}
 	break;
     case '\023':		/* ^S */
@@ -978,55 +981,46 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\015': /* $^MATCH */
 	if (strEQ(remaining, "ATCH")) {
+            paren = RX_BUFF_IDX_CARET_FULLMATCH;
+	    goto do_numbuf_fetch;
+        }
+
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-		/*
-		 * Pre-threads, this was paren = atoi(GvENAME((const GV *)mg->mg_obj));
-		 * XXX Does the new way break anything?
-		 */
-		paren = atoi(mg->mg_ptr); /* $& is in [0] */
-		CALLREG_NUMBUF_FETCH(rx,paren,sv);
-		break;
-	    }
-	    sv_setsv(sv,&PL_sv_undef);
-	}
+        /*
+         * Pre-threads, this was paren = atoi(GvENAME((const GV *)mg->mg_obj));
+         * XXX Does the new way break anything?
+         */
+        paren = atoi(mg->mg_ptr); /* $& is in [0] */
+      do_numbuf_fetch:
+        if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+            CALLREG_NUMBUF_FETCH(rx,paren,sv);
+            break;
+        }
+        sv_setsv(sv,&PL_sv_undef);
 	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (RX_LASTPAREN(rx)) {
-	        CALLREG_NUMBUF_FETCH(rx,RX_LASTPAREN(rx),sv);
-	        break;
-	    }
+	    paren = RX_LASTPAREN(rx);
+	    if (paren)
+                goto do_numbuf_fetch;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '\016':		/* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (RX_LASTCLOSEPAREN(rx)) {
-	        CALLREG_NUMBUF_FETCH(rx,RX_LASTCLOSEPAREN(rx),sv);
-	        break;
-	    }
-
+	    paren = RX_LASTCLOSEPAREN(rx);
+	    if (paren)
+                goto do_numbuf_fetch;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '`':
-      do_prematch_fetch:
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    CALLREG_NUMBUF_FETCH(rx,-2,sv);
-	    break;
-	}
-	sv_setsv(sv,&PL_sv_undef);
-	break;
+        paren = RX_BUFF_IDX_PREMATCH;
+        goto do_numbuf_fetch;
     case '\'':
-      do_postmatch_fetch:
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    CALLREG_NUMBUF_FETCH(rx,-1,sv);
-	    break;
-	}
-	sv_setsv(sv,&PL_sv_undef);
-	break;
+        paren = RX_BUFF_IDX_POSTMATCH;
+        goto do_numbuf_fetch;
     case '.':
 	if (GvIO(PL_last_in_gv)) {
 	    sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));

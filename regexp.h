@@ -181,9 +181,12 @@ typedef struct regexp_engine {
   paren name. >= 1 is reserved for actual numbered captures, i.e. $1,
   $2 etc.
 */
-#define RX_BUFF_IDX_PREMATCH  -2 /* $` / ${^PREMATCH}  */
-#define RX_BUFF_IDX_POSTMATCH -1 /* $' / ${^POSTMATCH} */
-#define RX_BUFF_IDX_FULLMATCH      0 /* $& / ${^MATCH}     */
+#define RX_BUFF_IDX_CARET_PREMATCH  -5 /* ${^PREMATCH}  */
+#define RX_BUFF_IDX_CARET_POSTMATCH -4 /* ${^POSTMATCH} */
+#define RX_BUFF_IDX_CARET_FULLMATCH -3 /* ${^MATCH}     */
+#define RX_BUFF_IDX_PREMATCH        -2 /* $` */
+#define RX_BUFF_IDX_POSTMATCH       -1 /* $' */
+#define RX_BUFF_IDX_FULLMATCH        0 /* $& */
 
 /*
   Flags that are passed to the named_buff and named_buff_iter
