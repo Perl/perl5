@@ -1696,4 +1696,9 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 (?a:\p{Any})	\x{100}	y	$&	\x{100}
 (?aa:\p{Any})	\x{100}	y	$&	\x{100}
 
+\w	\x{200C}	y	$&	\x{200C}
+\W	\x{200C}	n	-	-
+\w	\x{200D}	y	$&	\x{200D}
+\W	\x{200D}	n	-	-
+
 # vim: softtabstop=0 noexpandtab

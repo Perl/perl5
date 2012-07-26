@@ -13159,6 +13159,13 @@ sub compile_perl() {
     else {
         $Word += ord('_');  # Make sure this is a $Word
     }
+    my $JC = property_ref('Join_Control');  # Wasn't in release 1
+    if (defined $JC) {
+        $Word += $JC->table('Y');
+    }
+    else {
+        $Word += 0x200C + 0x200D;
+    }
 
     # This is a Perl extension, so the name doesn't begin with Posix.
     my $PerlWord = $perl->add_match_table('PerlWord',
