@@ -2215,9 +2215,9 @@ PP(pp_truncate)
 	GV *tmpgv;
 	IO *io;
 
-	if ((tmpgv = PL_op->op_flags & OPf_SPECIAL
-	               ? gv_fetchsv(sv, 0, SVt_PVIO)
-	               : MAYBE_DEREF_GV(sv) )) {
+	if (PL_op->op_flags & OPf_SPECIAL
+	               ? (tmpgv = gv_fetchsv(sv, 0, SVt_PVIO), 1)
+	               : !!(tmpgv = MAYBE_DEREF_GV(sv)) ) {
 	    io = GvIO(tmpgv);
 	    if (!io)
 		result = 0;

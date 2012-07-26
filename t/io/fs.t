@@ -46,7 +46,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 51;
+plan tests => 52;
 
 my $tmpdir = tempfile();
 my $tmpdir1 = tempfile();
@@ -372,7 +372,7 @@ SKIP: {
 
     SKIP: {
         if ($^O eq 'vos') {
-	    skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 5);
+	    skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 6);
 	}
 
 	is(-s $tmpfile, 200, "fh resize to 200 working (filename check)");
@@ -407,6 +407,14 @@ SKIP: {
 	is(-s $tmpfile, 100, "fh resize by IO slot working");
 
 	close FH;
+
+	my $n = "for_fs_dot_t$$";
+	open FH, ">$n" or die "open $n: $!";
+	print FH "bloh blah bla\n";
+	close FH or die "close $n: $!";
+	eval "truncate $n, 0; 1" or die;
+	ok !-z $n, 'truncate(word) does not fall back to file name';
+	unlink $n;
     }
 }
 
