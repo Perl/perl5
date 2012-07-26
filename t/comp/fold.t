@@ -4,7 +4,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..25\n";
+print "1..26\n";
 my $test = 0;
 
 # Historically constant folding was performed by evaluating the ops, and if
@@ -139,3 +139,13 @@ print "ok ", ++$test, " - stat(const ? word : ....)\n";
 # in case we are in t/
 print "not " unless stat(1 ? TEST : 0) eq stat("TEST");
 print "ok ", ++$test, " - stat(const ? word : ....)\n";
+
+# or truncate
+my $n = "for_fold_dot_t$$";
+open F, ">$n" or die "open: $!";
+print F "bralh blah blah \n";
+close F or die "close $!";
+eval "truncate 1 ? $n : 0, 0;";
+print "not " unless -z $n;
+print "ok ", ++$test, " - truncate(const ? word : ...)\n";
+unlink $n;
