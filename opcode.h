@@ -1596,7 +1596,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_ftst,		/* fttty */
 	Perl_ck_ftst,		/* fttext */
 	Perl_ck_ftst,		/* ftbinary */
-	Perl_ck_chdir,		/* chdir */
+	Perl_ck_trunc,		/* chdir */
 	Perl_ck_fun,		/* chown */
 	Perl_ck_fun,		/* chroot */
 	Perl_ck_fun,		/* unlink */
