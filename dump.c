@@ -2056,6 +2056,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				(UV)(r->pre_prefix));
 	    Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %"IVdf"\n",
 				(IV)(r->sublen));
+	    Perl_dump_indent(aTHX_ level, file, "  SUBOFFSET = %"IVdf"\n",
+				(IV)(r->suboffset));
+	    Perl_dump_indent(aTHX_ level, file, "  SUBCOFFSET = %"IVdf"\n",
+				(IV)(r->subcoffset));
 	    if (r->subbeg)
 		Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x%"UVxf" %s\n",
 			    PTR2UV(r->subbeg),

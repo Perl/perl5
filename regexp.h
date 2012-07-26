@@ -124,6 +124,8 @@ struct reg_code_block {
 	char *subbeg;							\
 	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
 	I32 sublen;	/* Length of string pointed by subbeg */	\
+	I32 suboffset;	/* byte offset of subbeg from logical start of str */ \
+	I32 subcoffset;	/* suboffset equiv, but in chars (for @-/@+) */ \
 	/* Information about the match that isn't often used */		\
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
@@ -477,6 +479,18 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 	assert(SvTYPE(_rx_subbeg) == SVt_REGEXP);			\
 	&SvANY(_rx_subbeg)->subbeg;					\
     }))
+#  define RX_SUBOFFSET(prog)						\
+    (*({								\
+	const REGEXP *const _rx_suboffset = (prog);			\
+	assert(SvTYPE(_rx_suboffset) == SVt_REGEXP);			\
+	&SvANY(_rx_suboffset)->suboffset;				\
+    }))
+#  define RX_SUBCOFFSET(prog)						\
+    (*({								\
+	const REGEXP *const _rx_subcoffset = (prog);			\
+	assert(SvTYPE(_rx_subcoffset) == SVt_REGEXP);			\
+	&SvANY(_rx_subcoffset)->subcoffset;				\
+    }))
 #  define RX_OFFS(prog)							\
     (*({								\
 	const REGEXP *const _rx_offs = (prog);				\
@@ -493,6 +507,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #  define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
 #  define RX_ENGINE(prog)	(((struct regexp *)SvANY(prog))->engine)
 #  define RX_SUBBEG(prog)	(((struct regexp *)SvANY(prog))->subbeg)
+#  define RX_SUBOFFSET(prog)	(((struct regexp *)SvANY(prog))->suboffset)
+#  define RX_SUBCOFFSET(prog)	(((struct regexp *)SvANY(prog))->subcoffset)
 #  define RX_OFFS(prog)		(((struct regexp *)SvANY(prog))->offs)
 #  define RX_NPARENS(prog)	(((struct regexp *)SvANY(prog))->nparens)
 #endif
@@ -541,6 +557,11 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define REXEC_SCREAM	0x04		/* use scream table. */
 #define REXEC_IGNOREPOS	0x08		/* \G matches at start. */
 #define REXEC_NOT_FIRST	0x10		/* This is another iteration of //g. */
+                                    /* under REXEC_COPY_STR, it's ok for the
+                                     * engine (modulo PL_sawamperand etc)
+                                     * to skip copying ... */
+#define REXEC_COPY_SKIP_PRE  0x20   /* ...the $` part of the string, or */
+#define REXEC_COPY_SKIP_POST 0x40   /* ...the $' part of the string */
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define ReREFCNT_inc(re)						\
@@ -763,6 +784,8 @@ typedef struct regmatch_slab {
 #define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
 #define PL_reg_oldsaved		PL_reg_state.re_state_reg_oldsaved
 #define PL_reg_oldsavedlen	PL_reg_state.re_state_reg_oldsavedlen
+#define PL_reg_oldsavedoffset	PL_reg_state.re_state_reg_oldsavedoffset
+#define PL_reg_oldsavedcoffset	PL_reg_state.re_state_reg_oldsavedcoffset
 #define PL_reg_maxiter		PL_reg_state.re_state_reg_maxiter
 #define PL_reg_leftiter		PL_reg_state.re_state_reg_leftiter
 #define PL_reg_poscache		PL_reg_state.re_state_reg_poscache
@@ -784,6 +807,8 @@ struct re_save_state {
     PMOP *re_state_reg_curpm;		/* from regexec.c */
     char *re_state_reg_oldsaved;	/* old saved substr during match */
     STRLEN re_state_reg_oldsavedlen;	/* old length of saved substr during match */
+    STRLEN re_state_reg_oldsavedoffset;	/* old offset of saved substr during match */
+    STRLEN re_state_reg_oldsavedcoffset;/* old coffset of saved substr during match */
     STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
     I32 re_state_reg_oldpos;		/* from regexec.c */
     I32 re_state_reg_maxiter;		/* max wait until caching pos */

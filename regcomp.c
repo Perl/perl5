@@ -6722,8 +6722,8 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         && rx->offs[0].end != -1)
     {
         /* $', ${^POSTMATCH} */
-	s = rx->subbeg + rx->offs[0].end;
-	i = rx->sublen - rx->offs[0].end;
+	s = rx->subbeg - rx->suboffset + rx->offs[0].end;
+	i = rx->sublen + rx->suboffset - rx->offs[0].end;
     } 
     else
     if ( 0 <= n && n <= (I32)rx->nparens &&
@@ -6732,7 +6732,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     {
         /* $&, ${^MATCH},  $1 ... */
         i = t1 - s1;
-        s = rx->subbeg + s1;
+        s = rx->subbeg + s1 - rx->suboffset;
     } else {
         goto ret_undef;
     }          
@@ -6859,7 +6859,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     }
   getlen:
     if (i > 0 && RXp_MATCH_UTF8(rx)) {
-        const char * const s = rx->subbeg + s1;
+        const char * const s = rx->subbeg - rx->suboffset + s1;
         const U8 *ep;
         STRLEN el;
 
@@ -14462,6 +14462,8 @@ Perl_save_re_context(pTHX)
 
     PL_reg_oldsaved = NULL;
     PL_reg_oldsavedlen = 0;
+    PL_reg_oldsavedoffset = 0;
+    PL_reg_oldsavedcoffset = 0;
     PL_reg_maxiter = 0;
     PL_reg_leftiter = 0;
     PL_reg_poscache = NULL;

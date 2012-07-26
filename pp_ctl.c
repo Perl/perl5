@@ -289,6 +289,7 @@ PP(pp_substcont)
     if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
 	m = s;
 	s = orig;
+        assert(!RX_SUBOFFSET(rx));
 	cx->sb_orig = orig = RX_SUBBEG(rx);
 	s = orig + (m - s);
 	cx->sb_strend = s + (cx->sb_strend - m);
@@ -353,9 +354,9 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 
     if (!p || p[1] < RX_NPARENS(rx)) {
 #ifdef PERL_OLD_COPY_ON_WRITE
-	i = 7 + RX_NPARENS(rx) * 2;
+	i = 7 + (RX_NPARENS(rx)+1) * 2;
 #else
-	i = 6 + RX_NPARENS(rx) * 2;
+	i = 6 + (RX_NPARENS(rx)+1) * 2;
 #endif
 	if (!p)
 	    Newx(p, i, UV);
@@ -364,7 +365,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 	*rsp = (void*)p;
     }
 
-    *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? RX_SUBBEG(rx) : NULL);
+    *p++ = RX_MATCH_COPIED(rx) ? 1 : 0;
     RX_MATCH_COPIED_off(rx);
 
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -373,9 +374,10 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 #endif
 
     *p++ = RX_NPARENS(rx);
-
     *p++ = PTR2UV(RX_SUBBEG(rx));
     *p++ = (UV)RX_SUBLEN(rx);
+    *p++ = (UV)RX_SUBOFFSET(rx);
+    *p++ = (UV)RX_SUBCOFFSET(rx);
     for (i = 0; i <= RX_NPARENS(rx); ++i) {
 	*p++ = (UV)RX_OFFS(rx)[i].start;
 	*p++ = (UV)RX_OFFS(rx)[i].end;
@@ -403,9 +405,10 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 #endif
 
     RX_NPARENS(rx) = *p++;
-
     RX_SUBBEG(rx) = INT2PTR(char*,*p++);
     RX_SUBLEN(rx) = (I32)(*p++);
+    RX_SUBOFFSET(rx) = (I32)*p++;
+    RX_SUBCOFFSET(rx) = (I32)*p++;
     for (i = 0; i <= RX_NPARENS(rx); ++i) {
 	RX_OFFS(rx)[i].start = (I32)(*p++);
 	RX_OFFS(rx)[i].end = (I32)(*p++);

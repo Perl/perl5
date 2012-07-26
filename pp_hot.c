@@ -1325,9 +1325,19 @@ PP(pp_match)
        appears to be quite tricky.
        Test for the unsafe vars are TODO for now. */
     if (       (!global && RX_NPARENS(rx))
-	    || SvTEMP(TARG) || SvAMAGIC(TARG) || PL_sawampersand
-	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)))
-	r_flags |= REXEC_COPY_STR;
+            || PL_sawampersand
+            || SvTEMP(TARG)
+            || SvAMAGIC(TARG)
+            || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
+    ) {
+	r_flags |= (REXEC_COPY_STR|REXEC_COPY_SKIP_PRE);
+        /* in @a =~ /(.)/g, we iterate multiple times, but copy the buffer
+         * only on the first iteration. Therefore we need to copy $' as well
+         * as $&, to make the rest of the string available for captures in
+         * subsequent iterations */
+        if (! (global && gimme == G_ARRAY))
+            r_flags |= REXEC_COPY_SKIP_POST;
+    };
 
   play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
@@ -1472,6 +1482,8 @@ yup:					/* Confirmed by INTUIT */
     if (global) {
 	/* FIXME - should rx->subbeg be const char *?  */
 	RX_SUBBEG(rx) = (char *) truebase;
+	RX_SUBOFFSET(rx) = 0;
+	RX_SUBCOFFSET(rx) = 0;
 	RX_OFFS(rx)[0].start = s - truebase;
 	if (RX_MATCH_UTF8(rx)) {
 	    char * const t = (char*)utf8_hop((U8*)s, RX_MINLENRET(rx));
@@ -1507,6 +1519,8 @@ yup:					/* Confirmed by INTUIT */
 #endif
 	}
 	RX_SUBLEN(rx) = strend - t;
+	RX_SUBOFFSET(rx) = 0;
+	RX_SUBCOFFSET(rx) = 0;
 	RX_MATCH_COPIED_on(rx);
 	off = RX_OFFS(rx)[0].start = s - t;
 	RX_OFFS(rx)[0].end = off + RX_MINLENRET(rx);
@@ -2127,9 +2141,14 @@ PP(pp_subst)
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
-    r_flags = (RX_NPARENS(rx) || SvTEMP(TARG) || PL_sawampersand
-	    || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY)) )
-	       ? REXEC_COPY_STR : 0;
+
+    r_flags = (    RX_NPARENS(rx)
+                || PL_sawampersand
+                || SvTEMP(TARG)
+                || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
+              )
+          ? REXEC_COPY_STR
+          : 0;
 
     orig = m = s;
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
@@ -2331,6 +2350,7 @@ PP(pp_subst)
 	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
 		m = s;
 		s = orig;
+                assert(RX_SUBOFFSET(rx) == 0);
 		orig = RX_SUBBEG(rx);
 		s = orig + (m - s);
 		strend = s + (strend - m);

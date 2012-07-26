@@ -637,6 +637,8 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
     return (U32)-1;
 }
 
+/* @-, @+ */
+
 int
 Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
@@ -665,7 +667,9 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    if (i > 0 && RX_MATCH_UTF8(rx)) {
 			const char * const b = RX_SUBBEG(rx);
 			if (b)
-			    i = utf8_length((U8*)b, (U8*)(b+i));
+			    i = RX_SUBCOFFSET(rx) +
+                                    utf8_length((U8*)b,
+                                        (U8*)(b-RX_SUBOFFSET(rx)+i));
 		    }
 
 		    sv_setiv(sv, i);
@@ -674,6 +678,8 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
     }
     return 0;
 }
+
+/* @-, @+ */
 
 int
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)

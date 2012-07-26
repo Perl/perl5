@@ -350,6 +350,8 @@ do_test('reference to regexp',
     GOFS = 0
     PRE_PREFIX = 4
     SUBLEN = 0
+    SUBOFFSET = 0
+    SUBCOFFSET = 0
     SUBBEG = 0x0
     ENGINE = $ADDR
     MOTHER_RE = $ADDR
