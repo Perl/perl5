@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 104;
+plan 106;
 
 # -------------------- our -------------------- #
 
@@ -155,6 +155,17 @@ is do foo(), 43, 'state sub falling out of scope (called via amper)';
   }
   is eval{sb3}, 47,
     'sub foo{} applying to "state sub foo;" even inside state sub foo{}';
+  # Same test again, but inside an anonymous sub
+  sub {
+    state sub sb4;
+    {
+      state sub sb4 {
+        sub sb4 { 47 }
+      }
+    }
+    is sb4, 47,
+      'sub foo{} applying to "state sub foo;" even inside state sub foo{}';
+  }->();
 }
 sub sc { 43 }
 {
@@ -342,6 +353,17 @@ is do foo(), 43, 'my sub falling out of scope (called via amper)';
   }
   is eval{mb3}, 47,
     'sub foo{} applying to "my sub foo;" even inside my sub foo{}';
+  # Same test again, but inside an anonymous sub
+  sub {
+    my sub mb4;
+    {
+      my sub mb4 {
+        sub mb4 { 47 }
+      }
+    }
+    is mb4, 47,
+      'sub foo{} applying to "my sub foo;" even inside my sub foo{}';
+  }->();
 }
 sub mc { 43 }
 {
