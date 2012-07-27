@@ -97,10 +97,11 @@ See C<PUSHMARK> and L<perlcall> for other uses.
 Pops an SV off the stack.
 
 =for apidoc Amn|char*|POPp
-Pops a string off the stack. Deprecated. New code should use POPpx.
+Pops a string off the stack.
 
 =for apidoc Amn|char*|POPpx
-Pops a string off the stack.
+Pops a string off the stack.  Identical to POPp.  There are two names for
+historical reasons.
 
 =for apidoc Amn|char*|POPpbytex
 Pops a string off the stack which must consist of bytes i.e. characters < 256.
@@ -123,7 +124,7 @@ Pops a long off the stack.
 #define RETURNX(x)	return (x, PUTBACK, NORMAL)
 
 #define POPs		(*sp--)
-#define POPp		(SvPVx(POPs, PL_na))		/* deprecated */
+#define POPp		POPpx
 #define POPpx		(SvPVx_nolen(POPs))
 #define POPpconstx	(SvPVx_nolen_const(POPs))
 #define POPpbytex	(SvPVbytex_nolen(POPs))
@@ -140,7 +141,7 @@ Pops a long off the stack.
 #define TOPs		(*sp)
 #define TOPm1s		(*(sp-1))
 #define TOPp1s		(*(sp+1))
-#define TOPp		(SvPV(TOPs, PL_na))		/* deprecated */
+#define TOPp		TOPpx
 #define TOPpx		(SvPV_nolen(TOPs))
 #define TOPn		(SvNV(TOPs))
 #define TOPi		((IV)SvIV(TOPs))
