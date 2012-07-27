@@ -2925,11 +2925,6 @@ S_ft_return_false(pTHX_ SV *ret) {
     return next;
 }
 
-#define FT_RETURN_FALSE(X)			     \
-    return S_ft_return_false(aTHX_ X)
-#define FT_RETURN_TRUE(X)                                               \
-    return S_ft_return_true(aTHX_ X)
-
 PERL_STATIC_INLINE OP *
 S_ft_return_true(pTHX_ SV *ret) {
     dSP;
@@ -2941,9 +2936,9 @@ S_ft_return_true(pTHX_ SV *ret) {
     return NORMAL;
 }
 
-#define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)
-#define FT_RETURNUNDEF	FT_RETURN_FALSE(&PL_sv_undef)
-#define FT_RETURNYES	FT_RETURN_TRUE(&PL_sv_yes)
+#define FT_RETURNNO	return S_ft_return_false(aTHX_ &PL_sv_no)
+#define FT_RETURNUNDEF	return S_ft_return_false(aTHX_ &PL_sv_undef)
+#define FT_RETURNYES	return S_ft_return_true(aTHX_ &PL_sv_yes)
 
 #define tryAMAGICftest_MG(chr) STMT_START { \
 	if ( (SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)) \
@@ -2971,8 +2966,8 @@ S_try_amagic_ftest(pTHX_ char chr) {
 	if (!tmpsv)
 	    return NULL;
 
-	if (SvTRUE(tmpsv)) FT_RETURN_TRUE(tmpsv);
-	FT_RETURN_FALSE(tmpsv);
+	return SvTRUE(tmpsv)
+            ? S_ft_return_true(aTHX_ tmpsv) : S_ft_return_false(aTHX_ tmpsv);
     }
     return NULL;
 }
@@ -3143,8 +3138,8 @@ PP(pp_ftis)
 	    break;
 	}
 	SvSETMAGIC(TARG);
-	if (SvTRUE_nomg(TARG)) FT_RETURN_TRUE(TARG);
-	else		       FT_RETURN_FALSE(TARG);
+	return SvTRUE_nomg(TARG)
+            ? S_ft_return_true(aTHX_ TARG) : S_ft_return_false(aTHX_ TARG);
     }
 }
 
