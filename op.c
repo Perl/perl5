@@ -7043,6 +7043,8 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    OP * const cvstart = CvSTART(cv);
 
 	    assert(!CvWEAKOUTSIDE(cv));
+
+	    CvGV_set(cv,gv);
 	    assert(!CvCVGV_RC(cv));
 	    assert(CvGV(cv) == gv);
 
