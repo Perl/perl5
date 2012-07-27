@@ -5903,6 +5903,10 @@ scalar context, and (of course) nothing at all in void context.
 or do FILE automatically returns the value of the last expression
 evaluated.)
 
+Unlike most named operators, this is also exempt from the
+looks-like-a-function rule, so C<return ("foo")."bar"> will
+cause "bar" to be part of the argument to C<return>.
+
 =item reverse LIST
 X<reverse> X<rev> X<invert>
 
