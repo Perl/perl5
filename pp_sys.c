@@ -2910,14 +2910,16 @@ PP(pp_stat)
 
 static OP *
 S_ft_stacking_return_false(pTHX_ SV *ret) {
-    dSP;
     OP *next = NORMAL;
-    while (OP_IS_FILETEST(next->op_type)
-	&& next->op_private & OPpFT_STACKED)
-	next = next->op_next;
+    dSP;
+
     if (PL_op->op_flags & OPf_REF) XPUSHs(ret);
     else			   SETs(ret);
     PUTBACK;
+
+    while (OP_IS_FILETEST(next->op_type)
+	&& next->op_private & OPpFT_STACKED)
+	next = next->op_next;
     return next;
 }
 
