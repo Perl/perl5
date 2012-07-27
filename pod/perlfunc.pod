@@ -1597,6 +1597,8 @@ file.  Manual error checking can be done this way:
 =item dump LABEL
 X<dump> X<core> X<undump>
 
+=item dump EXPR
+
 =item dump
 
 =for Pod::Functions create an immediate core dump
@@ -1609,7 +1611,9 @@ having initialized all your variables at the beginning of the
 program.  When the new binary is executed it will begin by executing
 a C<goto LABEL> (with all the restrictions that C<goto> suffers).
 Think of it as a goto with an intervening core dump and reincarnation.
-If C<LABEL> is omitted, restarts the program from the top.
+If C<LABEL> is omitted, restarts the program from the top.  The
+C<dump EXPR> form, available starting in Perl 5.18.0, allows a name to be
+computed at run time, being otherwise identical to C<dump LABEL>.
 
 B<WARNING>: Any files opened at the time of the dump will I<not>
 be open any more when the program is reincarnated, with possible
@@ -2899,6 +2903,8 @@ necessarily recommended if you're optimizing for maintainability:
 As shown in this example, C<goto-EXPR> is exempt from the "looks like a
 function" rule.  A pair of parentheses following it does not (necessarily)
 delimit its argument.  C<goto("NE")."XT"> is equivalent to C<goto NEXT>.
+Also, unlike most named operators, this has the same precedence as
+assignment.
 
 Use of C<goto-LABEL> or C<goto-EXPR> to jump into a construct is
 deprecated and will issue a warning.  Even then, it may not be used to
@@ -2921,11 +2927,6 @@ routine was called first.
 NAME needn't be the name of a subroutine; it can be a scalar variable
 containing a code reference or a block that evaluates to a code
 reference.
-
-Unlike most named operators, this has the same precedence as assignment.
-It is also exempt from the looks-like-a-function rule, so
-C<goto ("foo")."bar"> will cause "bar" to be part of the argument to
-C<goto>.
 
 =item grep BLOCK LIST
 X<grep>
@@ -3222,13 +3223,18 @@ Portability issues: L<perlport/kill>.
 =item last LABEL
 X<last> X<break>
 
+=item last EXPR
+
 =item last
 
 =for Pod::Functions exit a block prematurely
 
 The C<last> command is like the C<break> statement in C (as used in
 loops); it immediately exits the loop in question.  If the LABEL is
-omitted, the command refers to the innermost enclosing loop.  The
+omitted, the command refers to the innermost enclosing
+loop.  The C<last EXPR> form, available starting in Perl
+5.18.0, allows a label name to be computed at run time,
+and is otherwise identical to C<last LABEL>.  The
 C<continue> block, if any, is not executed:
 
     LINE: while (<STDIN>) {
@@ -3743,6 +3749,8 @@ L<attributes>, and L<Attribute::Handlers>.
 =item next LABEL
 X<next> X<continue>
 
+=item next EXPR
+
 =item next
 
 =for Pod::Functions iterate a block prematurely
@@ -3757,7 +3765,9 @@ the next iteration of the loop:
 
 Note that if there were a C<continue> block on the above, it would get
 executed even on discarded lines.  If LABEL is omitted, the command
-refers to the innermost enclosing loop.
+refers to the innermost enclosing loop.  The C<next EXPR> form, available
+as of Perl 5.18.0, allows a label name to be computed at run time, being
+otherwise identical to C<next LABEL>.
 
 C<next> cannot be used to exit a block which returns a value such as
 C<eval {}>, C<sub {}>, or C<do {}>, and should not be used to exit
@@ -5550,6 +5560,8 @@ case pretty much any characters can be read.
 =item redo LABEL
 X<redo>
 
+=item redo EXPR
+
 =item redo
 
 =for Pod::Functions start this loop iteration over again
@@ -5557,7 +5569,9 @@ X<redo>
 The C<redo> command restarts the loop block without evaluating the
 conditional again.  The C<continue> block, if any, is not executed.  If
 the LABEL is omitted, the command refers to the innermost enclosing
-loop.  Programs that want to lie to themselves about what was just input 
+loop.  The C<redo EXPR> form, available starting in Perl 5.18.0, allows a
+label name to be computed at run time, and is otherwise identical to C<redo
+LABEL>.  Programs that want to lie to themselves about what was just input 
 normally use this command:
 
     # a simpleminded Pascal comment stripper
