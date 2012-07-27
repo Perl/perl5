@@ -1620,6 +1620,11 @@ convert a core file into an executable.  That's why you should now invoke
 it as C<CORE::dump()>, if you don't want to be warned against a possible
 typo.
 
+Unlike most named operators, this has the same precedence as assignment.
+It is also exempt from the looks-like-a-function rule, so
+C<dump ("foo")."bar"> will cause "bar" to be part of the argument to
+C<dump>.
+
 Portability issues: L<perlport/dump>.
 
 =item each HASH
@@ -2917,6 +2922,11 @@ NAME needn't be the name of a subroutine; it can be a scalar variable
 containing a code reference or a block that evaluates to a code
 reference.
 
+Unlike most named operators, this has the same precedence as assignment.
+It is also exempt from the looks-like-a-function rule, so
+C<goto ("foo")."bar"> will cause "bar" to be part of the argument to
+C<goto>.
+
 =item grep BLOCK LIST
 X<grep>
 
@@ -3236,6 +3246,11 @@ exit out of such a block.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
+
+Unlike most named operators, this has the same precedence as assignment.
+It is also exempt from the looks-like-a-function rule, so
+C<last ("foo")."bar"> will cause "bar" to be part of the argument to
+C<last>.
 
 =item lc EXPR
 X<lc> X<lowercase>
@@ -3753,6 +3768,11 @@ that executes once.  Thus C<next> will exit such a block early.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
+
+Unlike most named operators, this has the same precedence as assignment.
+It is also exempt from the looks-like-a-function rule, so
+C<next ("foo")."bar"> will cause "bar" to be part of the argument to
+C<next>.
 
 =item no MODULE VERSION LIST
 X<no declarations>
@@ -5567,6 +5587,11 @@ turn it into a looping construct.
 
 See also L</continue> for an illustration of how C<last>, C<next>, and
 C<redo> work.
+
+Unlike most named operators, this has the same precedence as assignment.
+It is also exempt from the looks-like-a-function rule, so
+C<redo ("foo")."bar"> will cause "bar" to be part of the argument to
+C<redo>.
 
 =item ref EXPR
 X<ref> X<reference>

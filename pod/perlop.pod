@@ -48,7 +48,7 @@ values only, not array values.
     left	|| //
     nonassoc	..  ...
     right	?:
-    right	= += -= *= etc.
+    right	= += -= *= etc. goto last next redo dump
     left	, =>
     nonassoc	list operators (rightward)
     right	not
