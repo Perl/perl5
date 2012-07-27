@@ -21,7 +21,7 @@ SKIP: {
 	or ($^O eq 'VMS'
 	    and (`write sys\$output f\$privilege("SYSPRV")` =~ m/FALSE/));
   my $p = new Net::Ping "icmp";
-  is($p->ping("127.0.0.1"), 1);
+  is($p->ping("127.0.0.1"), 1, "icmp ping 127.0.0.1");
 }
 
 sub IsAdminUser {
