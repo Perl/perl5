@@ -141,17 +141,6 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
      * This used to be contents of do_binmode in doio.c
      */
 #ifdef DOSISH
-#  if defined(atarist)
-    PERL_UNUSED_ARG(iotype);
-    if (!fflush(fp)) {
-        if (mode & O_BINARY)
-            ((FILE *) fp)->_flag |= _IOBIN;
-        else
-            ((FILE *) fp)->_flag &= ~_IOBIN;
-        return 1;
-    }
-    return 0;
-#  else
     dTHX;
     PERL_UNUSED_ARG(iotype);
 #ifdef NETWARE
@@ -163,7 +152,6 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
     }
     else
         return 0;
-#  endif
 #else
 #  if defined(USEMYBINMODE)
     dTHX;

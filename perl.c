@@ -3432,10 +3432,6 @@ S_minus_v(pTHX)
 		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
 		      "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
-#ifdef atarist
-	PerlIO_printf(PerlIO_stdout(),
-		      "atariST series port, ++jrb  bammi@cadence.com\n");
-#endif
 #ifdef __BEOS__
 	PerlIO_printf(PerlIO_stdout(),
 		      "BeOS port Copyright Tom Spindler, 1997-1999\n");

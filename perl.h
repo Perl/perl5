@@ -510,7 +510,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  */
 
 /* define this once if either system, instead of cluttering up the src */
-#if defined(MSDOS) || defined(atarist) || defined(WIN32) || defined(NETWARE)
+#if defined(MSDOS) || defined(WIN32) || defined(NETWARE)
 #define DOSISH 1
 #endif
 

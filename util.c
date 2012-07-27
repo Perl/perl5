@@ -2759,7 +2759,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     return PerlIO_fdopen(p[This], mode);
 }
 #else
-#if defined(atarist) || defined(EPOC)
+#if defined(EPOC)
 FILE *popen();
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
@@ -3221,7 +3221,7 @@ S_pidgone(pTHX_ Pid_t pid, int status)
 }
 #endif
 
-#if defined(atarist) || defined(OS2) || defined(EPOC)
+#if defined(OS2) || defined(EPOC)
 int pclose();
 #ifdef HAS_FORK
 int					/* Cannot prototype with I32
@@ -3338,7 +3338,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     I32 len = 0;
     int retval;
     char *bufend;
-#if defined(DOSISH) && !defined(OS2) && !defined(atarist)
+#if defined(DOSISH) && !defined(OS2)
 #  define SEARCH_EXTS ".bat", ".cmd", NULL
 #  define MAX_EXT_LEN 4
 #endif
@@ -3461,28 +3461,25 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 
 	bufend = s + strlen(s);
 	while (s < bufend) {
-#if defined(atarist) || defined(DOSISH)
+#  ifdef DOSISH
 	    for (len = 0; *s
-#  ifdef atarist
-		    && *s != ','
-#  endif
 		    && *s != ';'; len++, s++) {
 		if (len < sizeof tmpbuf)
 		    tmpbuf[len] = *s;
 	    }
 	    if (len < sizeof tmpbuf)
 		tmpbuf[len] = '\0';
-#else  /* ! (atarist || DOSISH) */
+#  else
 	    s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf, s, bufend,
 			':',
 			&len);
-#endif /* ! (atarist || DOSISH) */
+#  endif
 	    if (s < bufend)
 		s++;
 	    if (len + 1 + strlen(scriptname) + MAX_EXT_LEN >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
 	    if (len
-#  if defined(atarist) || defined(DOSISH)
+#  ifdef DOSISH
 		&& tmpbuf[len - 1] != '/'
 		&& tmpbuf[len - 1] != '\\'
 #  endif

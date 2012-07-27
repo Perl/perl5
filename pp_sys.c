@@ -3298,14 +3298,6 @@ PP(pp_fttty)
     FT_RETURNNO;
 }
 
-#if defined(atarist) /* this will work with atariST. Configure will
-			make guesses for other systems. */
-# define FILE_base(f) ((f)->_base)
-# define FILE_ptr(f) ((f)->_ptr)
-# define FILE_cnt(f) ((f)->_cnt)
-# define FILE_bufsiz(f) ((f)->_cnt + ((f)->_ptr - (f)->_base))
-#endif
-
 PP(pp_fttext)
 {
     dVAR;
@@ -5511,30 +5503,6 @@ PP(pp_syscall)
     case 8:
 	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
 	break;
-#ifdef atarist
-    case 9:
-	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8]);
-	break;
-    case 10:
-	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9]);
-	break;
-    case 11:
-	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],
-	  a[10]);
-	break;
-    case 12:
-	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],
-	  a[10],a[11]);
-	break;
-    case 13:
-	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],
-	  a[10],a[11],a[12]);
-	break;
-    case 14:
-	retval = syscall(a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],
-	  a[10],a[11],a[12],a[13]);
-	break;
-#endif /* atarist */
     }
     SP = ORIGMARK;
     PUSHi(retval);

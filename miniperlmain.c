@@ -42,12 +42,6 @@
 static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
-#if defined (atarist)
-/* The Atari operating system doesn't have a dynamic stack.  The
-   stack size is determined from this value.  */
-long _stksize = 64 * 1024;
-#endif
-
 #if defined(PERL_GLOBAL_STRUCT_PRIVATE)
 /* The static struct perl_vars* may seem counterproductive since the
  * whole idea PERL_GLOBAL_STRUCT_PRIVATE was to avoid statics, but note
