@@ -527,7 +527,7 @@
  *	This symbol, if defined, indicates that the strtol routine is available
  *	to provide better numeric string conversion than atoi() and friends.
  */
-/*#define HAS_STRTOL	/ **/
+#define HAS_STRTOL	/**/
 
 /* HAS_STRXFRM:
  *	This symbol, if defined, indicates that the strxfrm() routine is
@@ -4740,5 +4740,5 @@
 
 /* Generated from:
  * 450f87b8e0de509bd7e72485185b4060363119bedef2b8aff868354f42708a78 config_h.SH
- * e3a05060ae46f0ca7ea3a4fd9a4c2dcd60caf070529116479a74830d923d1ca3 uconfig.sh
+ * 136e00f109103fdebadeec53d77fbc8f8c1bf3eb82ce970c966f362584f4b7f2 uconfig.sh
  * ex: set ro: */
