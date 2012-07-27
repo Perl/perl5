@@ -2909,7 +2909,7 @@ PP(pp_stat)
 */
 
 static OP *
-S_ft_stacking_return_false(pTHX_ SV *ret) {
+S_ft_return_false(pTHX_ SV *ret) {
     OP *next = NORMAL;
     dSP;
 
@@ -2917,21 +2917,16 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     else			   SETs(ret);
     PUTBACK;
 
-    while (OP_IS_FILETEST(next->op_type)
-	&& next->op_private & OPpFT_STACKED)
-	next = next->op_next;
+    if (PL_op->op_private & OPpFT_STACKING) {
+        while (OP_IS_FILETEST(next->op_type)
+               && next->op_private & OPpFT_STACKED)
+            next = next->op_next;
+    }
     return next;
 }
 
 #define FT_RETURN_FALSE(X)			     \
-    STMT_START {				      \
-        dSP;                                           \
-	if (PL_op->op_private & OPpFT_STACKING)	       \
-	    return S_ft_stacking_return_false(aTHX_ X);	\
-	PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X); \
-        PUTBACK;                                          \
-        return NORMAL;                                     \
-    } STMT_END
+    return S_ft_return_false(aTHX_ X)
 #define FT_RETURN_TRUE(X)                                               \
     STMT_START {                                                        \
         dSP;                                                            \
