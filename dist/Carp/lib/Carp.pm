@@ -435,20 +435,25 @@ Carp - alternative warn and die for modules
     # die of errors with stack backtrace
     confess "not implemented";
 
-    # cluck not exported by default
-    use Carp qw(cluck);
+    # cluck, longmess and shortmess not exported by default
+    use Carp qw(cluck longmess shortmess);
     cluck "This is how we got here!";
+    $long_message   = longmess( "message from cluck() or confess()" );
+    $short_message  = shortmess( "message from carp() or croak()" );
 
 =head1 DESCRIPTION
 
 The Carp routines are useful in your own modules because
-they act like die() or warn(), but with a message which is more
+they act like C<die()> or C<warn()>, but with a message which is more
 likely to be useful to a user of your module.  In the case of
-cluck, confess, and longmess that context is a summary of every
-call in the call-stack.  For a shorter message you can use C<carp>
-or C<croak> which report the error as being from where your module
-was called.  There is no guarantee that that is where the error
-was, but it is a good educated guess.
+C<cluck()> and C<confess()>, that context is a summary of every
+call in the call-stack; C<longmess()> returns the contents of the error
+message.
+
+For a shorter message you can use C<carp()> or C<croak()> which report the
+error as being from where your module was called.  C<shortmess()> returns the
+contents of this error message.  There is no guarantee that that is where the
+error was, but it is a good educated guess.
 
 You can also alter the way the output and logic of C<Carp> works, by
 changing some global variables in the C<Carp> namespace. See the
@@ -546,8 +551,8 @@ Defaults to C<8>.
 
 =head2 $Carp::Verbose
 
-This variable makes C<carp> and C<croak> generate stack backtraces
-just like C<cluck> and C<confess>.  This is how C<use Carp 'verbose'>
+This variable makes C<carp()> and C<croak()> generate stack backtraces
+just like C<cluck()> and C<confess()>.  This is how C<use Carp 'verbose'>
 is implemented internally.
 
 Defaults to C<0>.
