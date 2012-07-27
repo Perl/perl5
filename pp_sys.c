@@ -2923,6 +2923,7 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
 
 #define FT_RETURN_FALSE(X)			     \
     STMT_START {				      \
+        dSP;                                           \
 	if (PL_op->op_private & OPpFT_STACKING)	       \
 	    return S_ft_stacking_return_false(aTHX_ X);	\
 	PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X); \
@@ -2931,6 +2932,7 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     } STMT_END
 #define FT_RETURN_TRUE(X)                                               \
     STMT_START {                                                        \
+        dSP;                                                            \
         (void)(                                                         \
             PL_op->op_flags & OPf_REF                                   \
 	    ? (bool)XPUSHs(                                             \
@@ -2947,7 +2949,7 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
 #define FT_RETURNYES	FT_RETURN_TRUE(&PL_sv_yes)
 
 #define tryAMAGICftest_MG(chr) STMT_START { \
-	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
+	if ( (SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)) \
 		&& PL_op->op_flags & OPf_KIDS) {     \
 	    OP *next = S_try_amagic_ftest(aTHX_ chr);	\
 	    if (next) return next;			  \
@@ -2957,13 +2959,12 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
 STATIC OP *
 S_try_amagic_ftest(pTHX_ char chr) {
     dVAR;
-    dSP;
-    SV* const arg = TOPs;
+    SV *const arg = *PL_stack_sp;
 
     assert(chr != '?');
     if (!(PL_op->op_private & OPpFT_STACKING)) SvGETMAGIC(arg);
 
-    if (SvAMAGIC(TOPs))
+    if (SvAMAGIC(arg))
     {
 	const char tmpchr = chr;
 	SV * const tmpsv = amagic_call(arg,
@@ -3003,7 +3004,6 @@ PP(pp_ftrread)
 
     bool effective = FALSE;
     char opchar = '?';
-    dSP;
 
     switch (PL_op->op_type) {
     case OP_FTRREAD:	opchar = 'R'; break;
@@ -3067,7 +3067,7 @@ PP(pp_ftrread)
 
     if (use_access) {
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
-	const char *name = TOPpx;
+	const char *name = SvPV_nolen(*PL_stack_sp);
 	if (effective) {
 #  ifdef PERL_EFF_ACCESS
 	    result = PERL_EFF_ACCESS(name, access_mode);
@@ -3105,7 +3105,6 @@ PP(pp_ftis)
     I32 result;
     const int op_type = PL_op->op_type;
     char opchar = '?';
-    dSP;
 
     switch (op_type) {
     case OP_FTIS:	opchar = 'e'; break;
@@ -3157,7 +3156,6 @@ PP(pp_ftrowned)
     dVAR;
     I32 result;
     char opchar = '?';
-    dSP;
 
     switch (PL_op->op_type) {
     case OP_FTROWNED:	opchar = 'O'; break;
@@ -3258,7 +3256,6 @@ PP(pp_ftrowned)
 PP(pp_ftlink)
 {
     dVAR;
-    dSP;
     I32 result;
 
     tryAMAGICftest_MG('l');
@@ -3274,7 +3271,6 @@ PP(pp_ftlink)
 PP(pp_fttty)
 {
     dVAR;
-    dSP;
     int fd;
     GV *gv;
     char *name = NULL;
@@ -3285,7 +3281,7 @@ PP(pp_fttty)
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else {
-      SV *tmpsv = TOPs;
+      SV *tmpsv = *PL_stack_sp;
       if (!(gv = MAYBE_DEREF_GV_nomg(tmpsv))) {
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
@@ -3314,7 +3310,6 @@ PP(pp_fttty)
 PP(pp_fttext)
 {
     dVAR;
-    dSP;
     I32 i;
     I32 len;
     I32 odd = 0;
@@ -3333,7 +3328,7 @@ PP(pp_fttext)
 	     == OPpFT_STACKED)
 	gv = PL_defgv;
     else {
-	sv = TOPs;
+	sv = *PL_stack_sp;
 	gv = MAYBE_DEREF_GV_nomg(sv);
     }
 
