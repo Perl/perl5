@@ -2928,18 +2928,18 @@ S_ft_return_false(pTHX_ SV *ret) {
 #define FT_RETURN_FALSE(X)			     \
     return S_ft_return_false(aTHX_ X)
 #define FT_RETURN_TRUE(X)                                               \
-    STMT_START {                                                        \
-        dSP;                                                            \
-        (void)(                                                         \
-            PL_op->op_flags & OPf_REF                                   \
-	    ? (bool)XPUSHs(                                             \
-		PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (X) \
-                )                                                       \
-	    : (PL_op->op_private & OPpFT_STACKING || SETs(X))           \
-            );                                                          \
-        PUTBACK;                                                        \
-        return NORMAL;                                                  \
-    } STMT_END
+    return S_ft_return_true(aTHX_ X)
+
+PERL_STATIC_INLINE OP *
+S_ft_return_true(pTHX_ SV *ret) {
+    dSP;
+    if (PL_op->op_flags & OPf_REF)
+        XPUSHs(PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (ret));
+    else if (!(PL_op->op_private & OPpFT_STACKING))
+        SETs(ret);
+    PUTBACK;
+    return NORMAL;
+}
 
 #define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)
 #define FT_RETURNUNDEF	FT_RETURN_FALSE(&PL_sv_undef)
