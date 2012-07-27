@@ -6368,7 +6368,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 Constructs, checks, and returns a loop-exiting op (such as C<goto>
 or C<last>).  I<type> is the opcode.  I<label> supplies the parameter
 determining the target of the op; it is consumed by this function and
-become part of the constructed op tree.
+becomes part of the constructed op tree.
 
 =cut
 */
