@@ -2901,6 +2901,13 @@ PP(pp_stat)
     RETURN;
 }
 
+/* All filetest ops avoid manipulating the perl stack pointer in their main
+   bodies (since commit d2c4d2d1e22d3125), and return using either
+   S_ft_return_false() or S_ft_return_true().  These two helper functions are
+   the only two which manipulate the perl stack.  To ensure that no stack
+   manipulation macros are used, the filetest ops avoid defining a local copy
+   of the stack pointer with dSP.  */
+
 /* If the next filetest is stacked up with this one
    (PL_op->op_private & OPpFT_STACKING), we leave
    the original argument on the stack for success,
