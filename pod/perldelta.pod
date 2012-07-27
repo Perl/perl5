@@ -124,6 +124,11 @@ Now the value is copied in such cases [perl #113044].
 
 C<__SUB__> now works in special blocks (C<BEGIN>, C<END>, etc.).
 
+=item *
+
+Formats that reference lexical variables from outside no longer result
+in crashes.
+
 =back
 
 =head1 Known Problems
