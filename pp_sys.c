@@ -2925,16 +2925,22 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     STMT_START {				      \
 	if (PL_op->op_private & OPpFT_STACKING)	       \
 	    return S_ft_stacking_return_false(aTHX_ X);	\
-	RETURNX(PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X)); \
+	PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X); \
+        PUTBACK;                                          \
+        return NORMAL;                                     \
     } STMT_END
-#define FT_RETURN_TRUE(X)		 \
-    RETURNX((void)(			  \
-	PL_op->op_flags & OPf_REF	   \
-	    ? (bool)XPUSHs(		    \
+#define FT_RETURN_TRUE(X)                                               \
+    STMT_START {                                                        \
+        (void)(                                                         \
+            PL_op->op_flags & OPf_REF                                   \
+	    ? (bool)XPUSHs(                                             \
 		PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (X) \
-	      )								  \
-	    : (PL_op->op_private & OPpFT_STACKING || SETs(X))		  \
-    ))
+                )                                                       \
+	    : (PL_op->op_private & OPpFT_STACKING || SETs(X))           \
+            );                                                          \
+        PUTBACK;                                                        \
+        return NORMAL;                                                  \
+    } STMT_END
 
 #define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)
 #define FT_RETURNUNDEF	FT_RETURN_FALSE(&PL_sv_undef)
