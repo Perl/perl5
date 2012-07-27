@@ -1,4 +1,10 @@
 __END__
+# NAME dump with computed label
+my $label = "foo";
+dump $label;
+EXPECT
+Can't find label foo at - line 2.
+########
 # NAME when outside given
 use 5.01;
 when(undef){}

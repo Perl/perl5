@@ -36,7 +36,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan( tests => 61 );
+plan( tests => 64 );
 
 my $ok;
 
@@ -1065,5 +1065,42 @@ cmp_ok($ok,'==',1,'dynamically scoped');
     { local $TODO = "until is still wrongly optimized";
     is(scalar(foo_73618_until()), scalar(bar_73618_until()),
        "constant optimization doesn't change return value");
+    }
+}
+
+# [perl #113684]
+last_113684:
+{
+    label1:
+    {
+        my $label = "label1";
+        eval { last $label };
+        fail("last with non-constant label");
+        last last_113684;
+    }
+    pass("last with non-constant label");
+}
+next_113684:
+{
+    label2:
+    {
+        my $label = "label2";
+        eval { next $label };
+        fail("next with non-constant label");
+        next next_113684;
+    }
+    pass("next with non-constant label");
+}
+redo_113684:
+{
+    my $count;
+    label3:
+    {
+        if ($count++) {
+            pass("redo with non-constant label"); last redo_113684
+        }
+        my $label = "label3";
+        eval { redo $label };
+        fail("redo with non-constant label");
     }
 }

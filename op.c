@@ -6385,37 +6385,41 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 
     if (type != OP_GOTO) {
 	/* "last()" means "last" */
-	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
+	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS)) {
 	    o = newOP(type, OPf_SPECIAL);
-	else {
-	  const_label:
-	    o = newPVOP(type,
-                        label->op_type == OP_CONST
-                            ? SvUTF8(((SVOP*)label)->op_sv)
-                            : 0,
-                        savesharedpv(label->op_type == OP_CONST
-				? SvPV_nolen_const(((SVOP*)label)->op_sv)
-				: ""));
+	    goto free_label;
 	}
-#ifdef PERL_MAD
-	op_getmad(label,o,'L');
-#else
-	op_free(label);
-#endif
     }
     else {
 	/* Check whether it's going to be a goto &function */
 	if (label->op_type == OP_ENTERSUB
 		&& !(label->op_flags & OPf_STACKED))
 	    label = newUNOP(OP_REFGEN, 0, op_lvalue(label, OP_REFGEN));
-	else if (label->op_type == OP_CONST) {
+    }
+
+    /* Check for a constant argument */
+    if (label->op_type == OP_CONST) {
 	    SV * const sv = ((SVOP *)label)->op_sv;
 	    STRLEN l;
 	    const char *s = SvPV_const(sv,l);
-	    if (l == strlen(s)) goto const_label;
-	}
-	o = newUNOP(type, OPf_STACKED, label);
+	    if (l == strlen(s)) {
+		o = newPVOP(type,
+			    SvUTF8(((SVOP*)label)->op_sv),
+			    savesharedpv(
+				SvPV_nolen_const(((SVOP*)label)->op_sv)));
+	      free_label:
+#ifdef PERL_MAD
+		op_getmad(label,o,'L');
+#else
+		op_free(label);
+#endif
+		label = NULL;
+	    }
     }
+    
+    /* If we still have a label op, we need to create a stacked unop. */
+    if (label) o = newUNOP(type, OPf_STACKED, label);
+
     PL_hints |= HINT_BLOCK_SCOPE;
     return o;
 }

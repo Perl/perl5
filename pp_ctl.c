@@ -2519,10 +2519,49 @@ PP(pp_leavesublv)
     return cx->blk_sub.retop;
 }
 
+static I32
+S_unwind_loop(pTHX_ const char * const opname)
+{
+    dVAR;
+    I32 cxix;
+    if (PL_op->op_flags & OPf_SPECIAL) {
+	cxix = dopoptoloop(cxstack_ix);
+	if (cxix < 0)
+	    /* diag_listed_as: Can't "last" outside a loop block */
+	    Perl_croak(aTHX_ "Can't \"%s\" outside a loop block", opname);
+    }
+    else {
+	dSP;
+	STRLEN label_len;
+	const char * const label =
+	    PL_op->op_flags & OPf_STACKED
+		? SvPV(TOPs,label_len)
+		: (label_len = strlen(cPVOP->op_pv), cPVOP->op_pv);
+	const U32 label_flags =
+	    PL_op->op_flags & OPf_STACKED
+		? SvUTF8(POPs)
+		: (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
+	PUTBACK;
+        cxix = dopoptolabel(label, label_len, label_flags);
+	if (cxix < 0)
+	    /* diag_listed_as: Label not found for "last %s" */
+	    Perl_croak(aTHX_ "Label not found for \"%s %"SVf"\"",
+				       opname,
+                                       SVfARG(PL_op->op_flags & OPf_STACKED
+                                              && !SvGMAGICAL(TOPp1s)
+                                              ? TOPp1s
+                                              : newSVpvn_flags(label,
+                                                    label_len,
+                                                    label_flags | SVs_TEMP)));
+    }
+    if (cxix < cxstack_ix)
+	dounwind(cxix);
+    return cxix;
+}
+
 PP(pp_last)
 {
-    dVAR; dSP;
-    I32 cxix;
+    dVAR;
     register PERL_CONTEXT *cx;
     I32 pop2 = 0;
     I32 gimme;
@@ -2533,24 +2572,7 @@ PP(pp_last)
     SV **mark;
     SV *sv = NULL;
 
-
-    if (PL_op->op_flags & OPf_SPECIAL) {
-	cxix = dopoptoloop(cxstack_ix);
-	if (cxix < 0)
-	    DIE(aTHX_ "Can't \"last\" outside a loop block");
-    }
-    else {
-        cxix = dopoptolabel(cPVOP->op_pv, strlen(cPVOP->op_pv),
-                           (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0);
-	if (cxix < 0)
-	    DIE(aTHX_ "Label not found for \"last %"SVf"\"",
-                                        SVfARG(newSVpvn_flags(cPVOP->op_pv,
-                                                    strlen(cPVOP->op_pv),
-                                                    ((cPVOP->op_private & OPpPV_IS_UTF8)
-                                                    ? SVf_UTF8 : 0) | SVs_TEMP)));
-    }
-    if (cxix < cxstack_ix)
-	dounwind(cxix);
+    S_unwind_loop(aTHX_ "last");
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
@@ -2581,9 +2603,8 @@ PP(pp_last)
     }
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme,
+    PL_stack_sp = adjust_stack_on_leave(newsp, PL_stack_sp, MARK, gimme,
 				pop2 == CXt_SUB ? SVs_TEMP : 0);
-    PUTBACK;
 
     LEAVE;
     cxstack_ix--;
@@ -2611,31 +2632,13 @@ PP(pp_last)
 PP(pp_next)
 {
     dVAR;
-    I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 inner;
+    const I32 inner = PL_scopestack_ix;
 
-    if (PL_op->op_flags & OPf_SPECIAL) {
-	cxix = dopoptoloop(cxstack_ix);
-	if (cxix < 0)
-	    DIE(aTHX_ "Can't \"next\" outside a loop block");
-    }
-    else {
-	cxix = dopoptolabel(cPVOP->op_pv, strlen(cPVOP->op_pv),
-                           (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0);
- 	if (cxix < 0)
-	    DIE(aTHX_ "Label not found for \"next %"SVf"\"",
-                                        SVfARG(newSVpvn_flags(cPVOP->op_pv, 
-                                                    strlen(cPVOP->op_pv),
-                                                    ((cPVOP->op_private & OPpPV_IS_UTF8)
-                                                    ? SVf_UTF8 : 0) | SVs_TEMP)));
-    }
-    if (cxix < cxstack_ix)
-	dounwind(cxix);
+    S_unwind_loop(aTHX_ "next");
 
     /* clear off anything above the scope we're re-entering, but
      * save the rest until after a possible continue block */
-    inner = PL_scopestack_ix;
     TOPBLOCK(cx);
     if (PL_scopestack_ix < inner)
 	leave_scope(PL_scopestack[PL_scopestack_ix]);
@@ -2646,30 +2649,11 @@ PP(pp_next)
 PP(pp_redo)
 {
     dVAR;
-    I32 cxix;
+    const I32 cxix = S_unwind_loop(aTHX_ "redo");
     register PERL_CONTEXT *cx;
     I32 oldsave;
-    OP* redo_op;
+    OP* redo_op = cxstack[cxix].blk_loop.my_op->op_redoop;
 
-    if (PL_op->op_flags & OPf_SPECIAL) {
-	cxix = dopoptoloop(cxstack_ix);
-	if (cxix < 0)
-	    DIE(aTHX_ "Can't \"redo\" outside a loop block");
-    }
-    else {
-	cxix = dopoptolabel(cPVOP->op_pv, strlen(cPVOP->op_pv),
-                           (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0);
- 	if (cxix < 0)
-	    DIE(aTHX_ "Label not found for \"redo %"SVf"\"",
-                                        SVfARG(newSVpvn_flags(cPVOP->op_pv,
-                                                    strlen(cPVOP->op_pv),
-                                                    ((cPVOP->op_private & OPpPV_IS_UTF8)
-                                                    ? SVf_UTF8 : 0) | SVs_TEMP)));
-    }
-    if (cxix < cxstack_ix)
-	dounwind(cxix);
-
-    redo_op = cxstack[cxix].blk_loop.my_op->op_redoop;
     if (redo_op->op_type == OP_ENTER) {
 	/* pop one less context to avoid $x being freed in while (my $x..) */
 	cxstack_ix++;
