@@ -522,6 +522,7 @@ EXTCONST char* const PL_op_name[] = {
 	"runcv",
 	"fc",
 	"padcv",
+	"introcv",
 	"freed",
 };
 #endif
@@ -903,6 +904,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"CORE:: subroutine",
 	"__SUB__",
 	"fc",
+	"private subroutine",
 	"private subroutine",
 	"freed op",
 };
@@ -1300,6 +1302,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_runcv,
 	Perl_pp_fc,
 	Perl_pp_padcv,
+	Perl_pp_introcv,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1692,6 +1695,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* runcv */
 	Perl_ck_fun,		/* fc */
 	Perl_ck_null,		/* padcv */
+	Perl_ck_null,		/* introcv */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2078,6 +2082,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000004,	/* runcv */
 	0x00009b8e,	/* fc */
 	0x00000040,	/* padcv */
+	0x00000040,	/* introcv */
 };
 #endif
 

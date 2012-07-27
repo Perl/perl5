@@ -548,3 +548,4 @@ runcv		__SUB__			ck_null		s0
 fc		fc			ck_fun		fstu%	S?
 
 padcv		private subroutine	ck_null		d0
+introcv		private subroutine	ck_null		d0
