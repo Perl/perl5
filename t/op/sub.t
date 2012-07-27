@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 15 );
+plan( tests => 16 );
 
 sub empty_sub {}
 
@@ -71,4 +71,17 @@ fresh_perl_is
 *bar = *foo;
 eval 'sub bar { print +(caller 0)[3], "\n" }';
 bar();
+end
+
+fresh_perl_is
+  <<'end', "main::foo\nok\n", {}, 'no double free redefining anon stub';
+my $sub = sub { 4 };
+*foo = $sub;
+*bar = *foo;
+undef &$sub;
+eval 'sub bar { print +(caller 0)[3], "\n" }';
+&$sub;
+undef *foo;
+undef *bar;
+print "ok\n";
 end

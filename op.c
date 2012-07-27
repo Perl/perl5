@@ -7039,10 +7039,9 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
 	    AV *const temp_av = CvPADLIST(cv);
 	    CV *const temp_cv = CvOUTSIDE(cv);
-	    const cv_flags_t slabbed = CvSLABBED(cv);
+	    const cv_flags_t other_flags =
+		CvFLAGS(cv) & (CVf_SLABBED|CVf_WEAKOUTSIDE);
 	    OP * const cvstart = CvSTART(cv);
-
-	    assert(!CvWEAKOUTSIDE(cv));
 
 	    CvGV_set(cv,gv);
 	    assert(!CvCVGV_RC(cv));
@@ -7057,8 +7056,8 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    CvPADLIST(PL_compcv) = temp_av;
 	    CvSTART(cv) = CvSTART(PL_compcv);
 	    CvSTART(PL_compcv) = cvstart;
-	    if (slabbed) CvSLABBED_on(PL_compcv);
-	    else CvSLABBED_off(PL_compcv);
+	    CvFLAGS(PL_compcv) &= ~(CVf_SLABBED|CVf_WEAKOUTSIDE);
+	    CvFLAGS(PL_compcv) |= other_flags;
 
 	    if (CvFILE(cv) && CvDYNFILE(cv)) {
 		Safefree(CvFILE(cv));
