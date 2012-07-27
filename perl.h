@@ -3491,10 +3491,6 @@ struct ptr_tbl {
     struct ptr_tbl_ent		*tbl_arena_end;
 };
 
-#if defined(iAPX286) || defined(M_I286) || defined(I80286)
-#   define I286
-#endif
-
 #if defined(htonl) && !defined(HAS_HTONL)
 #define HAS_HTONL
 #endif

@@ -197,14 +197,7 @@
 #define MIN_BUC_POW2 (sizeof(void*) > 4 ? 3 : 2) /* Allow for 4-byte arena. */
 #define MIN_BUCKET (MIN_BUC_POW2 * BUCKETS_PER_POW2)
 
-#if !(defined(I286))
-	/* take 2k unless the block is bigger than that */
-#  define LOG_OF_MIN_ARENA 11
-#else
-	/* take 16k unless the block is bigger than that 
-	   (80286s like large segments!), probably good on the atari too */
-#  define LOG_OF_MIN_ARENA 14
-#endif
+#define LOG_OF_MIN_ARENA 11
 
 #if defined(DEBUGGING) && !defined(NO_RCHECK)
 #  define RCHECK
@@ -376,8 +369,7 @@
  */
 #define u_short unsigned short
 
-/* 286 likes big chunks, which gives too much overhead. */
-#if (defined(RCHECK) || defined(I286)) && defined(PACK_MALLOC)
+#if defined(RCHECK) && defined(PACK_MALLOC)
 #  undef PACK_MALLOC
 #endif 
 
@@ -1549,14 +1541,12 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 	/* Second, check alignment. */
 	slack = 0;
 
-#  ifndef I286 	/* The sbrk(0) call on the I286 always returns the next segment */
 	/* WANTED_ALIGNMENT may be more than NEEDED_ALIGNMENT, but this may
 	   improve performance of memory access. */
 	if (PTR2UV(cp) & (WANTED_ALIGNMENT - 1)) { /* Not aligned. */
 	    slack = WANTED_ALIGNMENT - (PTR2UV(cp) & (WANTED_ALIGNMENT - 1));
 	    add += slack;
 	}
-#  endif
 		
 	if (add) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
@@ -1617,7 +1607,6 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 	    fatalcroak("Misalignment of sbrk()\n");
 	else
 #  endif
-#ifndef I286	/* Again, this should always be ok on an 80286 */
 	if (PTR2UV(ovp) & (MEM_ALIGNBYTES - 1)) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
 				  "fixing sbrk(): %d bytes off machine alignment\n",
@@ -1630,7 +1619,6 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 	    sbrk_slack += (1 << (bucket >> BUCKET_POW2_SHIFT));
 # endif
 	}
-#endif
 	;				/* Finish "else" */
 	sbrked_remains = require - needed;
 	last_op = cp;

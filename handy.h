@@ -12,11 +12,7 @@
 #ifdef NULL
 #undef NULL
 #endif
-#ifndef I286
 #  define NULL 0
-#else
-#  define NULL 0L
-#endif
 #endif
 
 #ifndef PERL_CORE

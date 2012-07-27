@@ -344,11 +344,7 @@ union u_ops {
     int ival;
     char *cval;
 };
-#if defined(iAPX286) || defined(M_I286) || defined(I80286) 	/* 80286 hack */
-#define OPSMAX (64000/sizeof(union u_ops))	/* approx. max segment size */
-#else
 #define OPSMAX 50000
-#endif						 	/* 80286 hack */
 EXT union u_ops ops[OPSMAX];
 
 typedef struct string STR;
