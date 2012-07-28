@@ -86,7 +86,6 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_utf8,
     want_vtbl_uvar,
     want_vtbl_vec,
-    want_vtbl_vstring,
     magic_vtable_max
 };
 
@@ -120,8 +119,7 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
     "taint",
     "utf8",
     "uvar",
-    "vec",
-    "vstring"
+    "vec"
 };
 #else
 EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
@@ -182,8 +180,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setutf8, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setvstring, 0, 0, 0, 0, 0, 0 }
+  { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 }
 };
 #else
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
@@ -223,6 +220,5 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_utf8 PL_magic_vtables[want_vtbl_utf8]
 #define PL_vtbl_uvar PL_magic_vtables[want_vtbl_uvar]
 #define PL_vtbl_vec PL_magic_vtables[want_vtbl_vec]
-#define PL_vtbl_vstring PL_magic_vtables[want_vtbl_vstring]
 
 /* ex: set ro: */

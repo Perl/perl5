@@ -2326,19 +2326,6 @@ Perl_magic_setvec(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
-Perl_magic_setvstring(pTHX_ SV *sv, MAGIC *mg)
-{
-    PERL_ARGS_ASSERT_MAGIC_SETVSTRING;
-
-    if (SvPOKp(sv)) {
-	SV * const vecsv = sv_newmortal();
-	scan_vstring(mg->mg_ptr, mg->mg_ptr + mg->mg_len, vecsv);
-	if (sv_eq_flags(vecsv, sv, 0 /*nomg*/)) return 0;
-    }
-    return sv_unmagic(sv, mg->mg_type);
-}
-
-int
 Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;

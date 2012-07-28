@@ -1103,7 +1103,7 @@ will be lost.
                                              extensions
  u  PERL_MAGIC_uvar_elem      (none)         Reserved for use by
                                              extensions
- V  PERL_MAGIC_vstring        vtbl_vstring   SV was vstring literal
+ V  PERL_MAGIC_vstring        (none)         SV was vstring literal
  v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
  w  PERL_MAGIC_utf8           vtbl_utf8      Cached UTF-8 information
  x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue

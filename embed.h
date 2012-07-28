@@ -1152,7 +1152,6 @@
 #define magic_setutf8(a,b)	Perl_magic_setutf8(aTHX_ a,b)
 #define magic_setuvar(a,b)	Perl_magic_setuvar(aTHX_ a,b)
 #define magic_setvec(a,b)	Perl_magic_setvec(aTHX_ a,b)
-#define magic_setvstring(a,b)	Perl_magic_setvstring(aTHX_ a,b)
 #define magic_sizepack(a,b)	Perl_magic_sizepack(aTHX_ a,b)
 #define magic_wipepack(a,b)	Perl_magic_wipepack(aTHX_ a,b)
 #define mg_localize(a,b,c)	Perl_mg_localize(aTHX_ a,b,c)

@@ -2116,7 +2116,7 @@ PP(pp_subst)
 
   setup_match:
     s = SvPV_mutable(TARG, len);
-    if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV)
+    if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV || SvVOK(TARG))
 	force_on_match = 1;
 
     /* only replace once? */

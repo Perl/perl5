@@ -641,7 +641,7 @@ Perl_do_trans(pTHX_ SV *sv)
     if (!len)
 	return 0;
     if (!(PL_op->op_private & OPpTRANS_IDENTICAL)) {
-	if (!SvPOKp(sv))
+	if (!SvPOKp(sv) || SvTHINKFIRST(sv))
 	    (void)SvPV_force_nomg(sv, len);
 	(void)SvPOK_only_UTF8(sv);
     }

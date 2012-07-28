@@ -3035,7 +3035,8 @@ Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_2PVBYTE;
 
-    if ((SvTHINKFIRST(sv) && !SvIsCOW(sv)) || isGV_with_GP(sv)) {
+    if (((SvREADONLY(sv) || SvFAKE(sv)) && !SvIsCOW(sv))
+     || isGV_with_GP(sv) || SvROK(sv)) {
 	SV *sv2 = sv_newmortal();
 	sv_copypv(sv2,sv);
 	sv = sv2;
@@ -3061,7 +3062,8 @@ Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_2PVUTF8;
 
-    if ((SvTHINKFIRST(sv) && !SvIsCOW(sv)) || isGV_with_GP(sv))
+    if (((SvREADONLY(sv) || SvFAKE(sv)) && !SvIsCOW(sv))
+     || isGV_with_GP(sv) || SvROK(sv))
 	sv = sv_mortalcopy(sv);
     else
         SvGETMAGIC(sv);
@@ -3937,12 +3939,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
-    if ( SvVOK(dstr) )
-    {
-	/* need to nuke the magic */
-	sv_unmagic(dstr, PERL_MAGIC_vstring);
-    }
-
     /* There's a lot of redundancy below but we're going for speed here */
 
     switch (stype) {
@@ -4719,10 +4715,12 @@ S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, SV *after)
 /*
 =for apidoc sv_force_normal_flags
 
-Undo various types of fakery on an SV: if the PV is a shared string, make
+Undo various types of fakery on an SV, where fakery means
+"more than" a string: if the PV is a shared string, make
 a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
 an xpvmg; if we're a copy-on-write scalar, this is the on-write time when
-we do the copy, and is also used locally.  If C<SV_COW_DROP_PV> is set
+we do the copy, and is also used locally; if this is a
+vstring, drop the vstring magic.  If C<SV_COW_DROP_PV> is set
 then a copy-on-write scalar drops its PV buffer (if any) and becomes
 SvPOK_off rather than making a copy.  (Used where this
 scalar is about to be set to some other value.)  In addition,
@@ -4849,6 +4847,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 
 	SvREFCNT_dec(temp);
     }
+    else if (SvVOK(sv)) sv_unmagic(sv, PERL_MAGIC_vstring);
 }
 
 /*
