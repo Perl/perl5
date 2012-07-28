@@ -28,6 +28,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Computed Labels
+
+The loop controls C<next>, C<last> and C<redo>, and the special C<dump>
+operator, now allow arbitrary expressions to be used to compute labels at
+run time.  Previously, any argument that was not a constant was treated as
+the empty string.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
