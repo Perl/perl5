@@ -348,6 +348,10 @@ C<\w> now matches the code points U+200C (ZERO WIDTH NON-JOINER) and
 U+200D (ZERO WIDTH JOINER).  C<\W> no longer matches these.  This change
 is because Unicode corrected their definition of what C<\w> should match.
 
+=item *
+
+C<dump LABEL> no longer leaks its label.
+
 =back
 
 =head1 Known Problems
