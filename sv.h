@@ -1236,12 +1236,7 @@ the scalar's value cannot change unless written to.
 #define SvIV_please_nomg(sv) \
 	(!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv)) \
 	    ? (SvIV_nomg(sv), SvIOK(sv))	  \
-	    : SvGMAGICAL(sv)			   \
-		? SvIOKp(sv) || (		    \
-		       (SvNOKp(sv) || SvPOKp(sv))    \
-		    && sv_gmagical_2iv_please(sv)     \
-		  )				       \
-		: SvIOK(sv))
+	    : SvIOK(sv))
 #define SvIV_set(sv, val) \
 	STMT_START { \
 		assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\

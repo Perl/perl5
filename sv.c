@@ -2336,28 +2336,6 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 }
 
 /*
-=for apidoc sv_gmagical_2iv_please
-
-Used internally by C<SvIV_please_nomg>, this function sets the C<SvIVX>
-slot if C<sv_2iv> would have made the scalar C<SvIOK> had it not been
-magical.  In that case it returns true.
-
-=cut
-*/
-
-bool
-Perl_sv_gmagical_2iv_please(pTHX_ register SV *sv)
-{
-    bool has_int;
-    PERL_ARGS_ASSERT_SV_GMAGICAL_2IV_PLEASE;
-    assert(SvGMAGICAL(sv) && !SvIOKp(sv) && (SvNOKp(sv) || SvPOKp(sv)));
-    if (S_sv_2iuv_common(aTHX_ sv)) { SvNIOK_off(sv); return 0; }
-    has_int = !!SvIOK(sv);
-    SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK);
-    return has_int;
-}
-
-/*
 =for apidoc sv_2uv_flags
 
 Return the unsigned integer value of an SV, doing any necessary string
