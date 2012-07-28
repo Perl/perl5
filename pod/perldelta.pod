@@ -352,6 +352,13 @@ is because Unicode corrected their definition of what C<\w> should match.
 
 C<dump LABEL> no longer leaks its label.
 
+=item *
+
+Constant folding no longer changes the behaviour of functions like C<stat>
+and C<truncate> that can take either filenames or handles.
+C<stat 1 ? foo : bar> nows treats its argument as a file name (since it is
+an arbitrary expression), rather than the handle "foo".
+
 =back
 
 =head1 Known Problems
