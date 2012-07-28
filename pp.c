@@ -676,7 +676,6 @@ PP(pp_trans)
 	sv = DEFSV;
 	EXTEND(SP,1);
     }
-    TARG = sv_newmortal();
     if(PL_op->op_type == OP_TRANSR) {
 	STRLEN len;
 	const char * const pv = SvPV(sv,len);
@@ -684,7 +683,10 @@ PP(pp_trans)
 	do_trans(newsv);
 	PUSHs(newsv);
     }
-    else PUSHi(do_trans(sv));
+    else {
+	TARG = sv_newmortal();
+	PUSHi(do_trans(sv));
+    }
     RETURN;
 }
 
