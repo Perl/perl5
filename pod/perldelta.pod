@@ -141,13 +141,15 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>, L<perlop>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Loop control verbs (C<dump>, C<goto>, C<next>, C<last> and C<redo>) have
+always had the same precedence as assignment operators, but this was never
+documented until now.
 
 =back
 
