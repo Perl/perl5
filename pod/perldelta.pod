@@ -359,6 +359,11 @@ and C<truncate> that can take either filenames or handles.
 C<stat 1 ? foo : bar> nows treats its argument as a file name (since it is
 an arbitrary expression), rather than the handle "foo".
 
+=item *
+
+C<truncate FOO, $len> no longer falls back to treating "FOO" as a file name
+if the filehandle has been deleted.  This was broken in Perl 5.16.0.
+
 =back
 
 =head1 Known Problems
