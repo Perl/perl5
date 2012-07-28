@@ -2901,6 +2901,13 @@ PP(pp_stat)
     RETURN;
 }
 
+/* All filetest ops avoid manipulating the perl stack pointer in their main
+   bodies (since commit d2c4d2d1e22d3125), and return using either
+   S_ft_return_false() or S_ft_return_true().  These two helper functions are
+   the only two which manipulate the perl stack.  To ensure that no stack
+   manipulation macros are used, the filetest ops avoid defining a local copy
+   of the stack pointer with dSP.  */
+
 /* If the next filetest is stacked up with this one
    (PL_op->op_private & OPpFT_STACKING), we leave
    the original argument on the stack for success,
@@ -2909,39 +2916,39 @@ PP(pp_stat)
 */
 
 static OP *
-S_ft_stacking_return_false(pTHX_ SV *ret) {
-    dSP;
+S_ft_return_false(pTHX_ SV *ret) {
     OP *next = NORMAL;
-    while (OP_IS_FILETEST(next->op_type)
-	&& next->op_private & OPpFT_STACKED)
-	next = next->op_next;
+    dSP;
+
     if (PL_op->op_flags & OPf_REF) XPUSHs(ret);
     else			   SETs(ret);
     PUTBACK;
+
+    if (PL_op->op_private & OPpFT_STACKING) {
+        while (OP_IS_FILETEST(next->op_type)
+               && next->op_private & OPpFT_STACKED)
+            next = next->op_next;
+    }
     return next;
 }
 
-#define FT_RETURN_FALSE(X)			     \
-    STMT_START {				      \
-	if (PL_op->op_private & OPpFT_STACKING)	       \
-	    return S_ft_stacking_return_false(aTHX_ X);	\
-	RETURNX(PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X)); \
-    } STMT_END
-#define FT_RETURN_TRUE(X)		 \
-    RETURNX((void)(			  \
-	PL_op->op_flags & OPf_REF	   \
-	    ? (bool)XPUSHs(		    \
-		PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (X) \
-	      )								  \
-	    : (PL_op->op_private & OPpFT_STACKING || SETs(X))		  \
-    ))
+PERL_STATIC_INLINE OP *
+S_ft_return_true(pTHX_ SV *ret) {
+    dSP;
+    if (PL_op->op_flags & OPf_REF)
+        XPUSHs(PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (ret));
+    else if (!(PL_op->op_private & OPpFT_STACKING))
+        SETs(ret);
+    PUTBACK;
+    return NORMAL;
+}
 
-#define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)
-#define FT_RETURNUNDEF	FT_RETURN_FALSE(&PL_sv_undef)
-#define FT_RETURNYES	FT_RETURN_TRUE(&PL_sv_yes)
+#define FT_RETURNNO	return S_ft_return_false(aTHX_ &PL_sv_no)
+#define FT_RETURNUNDEF	return S_ft_return_false(aTHX_ &PL_sv_undef)
+#define FT_RETURNYES	return S_ft_return_true(aTHX_ &PL_sv_yes)
 
 #define tryAMAGICftest_MG(chr) STMT_START { \
-	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
+	if ( (SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)) \
 		&& PL_op->op_flags & OPf_KIDS) {     \
 	    OP *next = S_try_amagic_ftest(aTHX_ chr);	\
 	    if (next) return next;			  \
@@ -2951,13 +2958,12 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
 STATIC OP *
 S_try_amagic_ftest(pTHX_ char chr) {
     dVAR;
-    dSP;
-    SV* const arg = TOPs;
+    SV *const arg = *PL_stack_sp;
 
     assert(chr != '?');
     if (!(PL_op->op_private & OPpFT_STACKING)) SvGETMAGIC(arg);
 
-    if (SvAMAGIC(TOPs))
+    if (SvAMAGIC(arg))
     {
 	const char tmpchr = chr;
 	SV * const tmpsv = amagic_call(arg,
@@ -2967,8 +2973,8 @@ S_try_amagic_ftest(pTHX_ char chr) {
 	if (!tmpsv)
 	    return NULL;
 
-	if (SvTRUE(tmpsv)) FT_RETURN_TRUE(tmpsv);
-	FT_RETURN_FALSE(tmpsv);
+	return SvTRUE(tmpsv)
+            ? S_ft_return_true(aTHX_ tmpsv) : S_ft_return_false(aTHX_ tmpsv);
     }
     return NULL;
 }
@@ -2997,7 +3003,6 @@ PP(pp_ftrread)
 
     bool effective = FALSE;
     char opchar = '?';
-    dSP;
 
     switch (PL_op->op_type) {
     case OP_FTRREAD:	opchar = 'R'; break;
@@ -3061,7 +3066,7 @@ PP(pp_ftrread)
 
     if (use_access) {
 #if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
-	const char *name = TOPpx;
+	const char *name = SvPV_nolen(*PL_stack_sp);
 	if (effective) {
 #  ifdef PERL_EFF_ACCESS
 	    result = PERL_EFF_ACCESS(name, access_mode);
@@ -3099,7 +3104,6 @@ PP(pp_ftis)
     I32 result;
     const int op_type = PL_op->op_type;
     char opchar = '?';
-    dSP;
 
     switch (op_type) {
     case OP_FTIS:	opchar = 'e'; break;
@@ -3141,8 +3145,8 @@ PP(pp_ftis)
 	    break;
 	}
 	SvSETMAGIC(TARG);
-	if (SvTRUE_nomg(TARG)) FT_RETURN_TRUE(TARG);
-	else		       FT_RETURN_FALSE(TARG);
+	return SvTRUE_nomg(TARG)
+            ? S_ft_return_true(aTHX_ TARG) : S_ft_return_false(aTHX_ TARG);
     }
 }
 
@@ -3151,7 +3155,6 @@ PP(pp_ftrowned)
     dVAR;
     I32 result;
     char opchar = '?';
-    dSP;
 
     switch (PL_op->op_type) {
     case OP_FTROWNED:	opchar = 'O'; break;
@@ -3252,7 +3255,6 @@ PP(pp_ftrowned)
 PP(pp_ftlink)
 {
     dVAR;
-    dSP;
     I32 result;
 
     tryAMAGICftest_MG('l');
@@ -3268,7 +3270,6 @@ PP(pp_ftlink)
 PP(pp_fttty)
 {
     dVAR;
-    dSP;
     int fd;
     GV *gv;
     char *name = NULL;
@@ -3279,7 +3280,7 @@ PP(pp_fttty)
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else {
-      SV *tmpsv = TOPs;
+      SV *tmpsv = *PL_stack_sp;
       if (!(gv = MAYBE_DEREF_GV_nomg(tmpsv))) {
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
@@ -3308,7 +3309,6 @@ PP(pp_fttty)
 PP(pp_fttext)
 {
     dVAR;
-    dSP;
     I32 i;
     I32 len;
     I32 odd = 0;
@@ -3327,7 +3327,7 @@ PP(pp_fttext)
 	     == OPpFT_STACKED)
 	gv = PL_defgv;
     else {
-	sv = TOPs;
+	sv = *PL_stack_sp;
 	gv = MAYBE_DEREF_GV_nomg(sv);
     }
 
