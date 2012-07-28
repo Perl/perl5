@@ -364,6 +364,11 @@ an arbitrary expression), rather than the handle "foo".
 C<truncate FOO, $len> no longer falls back to treating "FOO" as a file name
 if the filehandle has been deleted.  This was broken in Perl 5.16.0.
 
+=item *
+
+Subroutine redefinitions after sub-to-glob and glob-to-glob assignments no
+longer cause double frees or panic messages.
+
 =back
 
 =head1 Known Problems
