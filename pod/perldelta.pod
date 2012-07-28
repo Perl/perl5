@@ -117,6 +117,11 @@ C<GVf_*> and more SV-related flag values are now provided as constants in
 the C<B::> namespace and available for export. The default export list has
 not changed.
 
+=item *
+
+L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
+loop controls with the correct precedence.
+
 =back
 
 =head2 Removed Modules and Pragmata
