@@ -1009,7 +1009,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 #ifdef SvVOK
 	else if (SvMAGICAL(val) && (mg = mg_find(val, 'V'))) {
-# ifndef PL_vtbl_vstring
+# ifndef PL_vtbl_vstring && PERL_VERSION < 17
 	    SV * const vecsv = sv_newmortal();
 #  if PERL_VERSION < 10
 	    scan_vstring(mg->mg_ptr, vecsv);
