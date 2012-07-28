@@ -6377,7 +6377,7 @@ OP*
 Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 {
     dVAR;
-    OP *o;
+    OP *o = NULL;
 
     PERL_ARGS_ASSERT_NEWLOOPEX;
 
@@ -6387,7 +6387,6 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	/* "last()" means "last" */
 	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS)) {
 	    o = newOP(type, OPf_SPECIAL);
-	    goto free_label;
 	}
     }
     else {
@@ -6407,18 +6406,17 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 			    SvUTF8(((SVOP*)label)->op_sv),
 			    savesharedpv(
 				SvPV_nolen_const(((SVOP*)label)->op_sv)));
-	      free_label:
+	    }
+    }
+    
+    /* If we have already created an op, we do not need the label. */
+    if (o)
 #ifdef PERL_MAD
 		op_getmad(label,o,'L');
 #else
 		op_free(label);
 #endif
-		label = NULL;
-	    }
-    }
-    
-    /* If we still have a label op, we need to create a stacked unop. */
-    if (label) o = newUNOP(type, OPf_STACKED, label);
+    else o = newUNOP(type, OPf_STACKED, label);
 
     PL_hints |= HINT_BLOCK_SCOPE;
     return o;
