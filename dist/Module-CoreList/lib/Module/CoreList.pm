@@ -8268,32 +8268,27 @@ for my $version (sort { $a <=> $b } keys %delta) {
 # Create aliases with trailing zeros for $] use
 
 $released{'5.000'} = $released{5};
-$released{'5.010000'} = $released{5.01};
-$released{'5.011000'} = $released{5.011};
-$released{'5.012000'} = $released{5.012};
-$released{'5.013000'} = $released{5.013};
-$released{'5.014000'} = $released{5.014};
-$released{'5.015000'} = $released{5.015};
-$released{'5.016000'} = $released{5.016};
-$released{'5.017000'} = $released{5.017};
-
 $version{'5.000'} = $version{5};
-$version{'5.010000'} = $version{5.01};
-$version{'5.011000'} = $version{5.011};
-$version{'5.012000'} = $version{5.012};
-$version{'5.013000'} = $version{5.013};
-$version{'5.014000'} = $version{5.014};
-$version{'5.015000'} = $version{5.015};
-$version{'5.016000'} = $version{5.016};
-$version{'5.017000'} = $version{5.017};
 
-$deprecated{'5.011000'} = $deprecated{5.011};
-$deprecated{'5.012000'} = $deprecated{5.012};
-$deprecated{'5.013000'} = $deprecated{5.013};
-$deprecated{'5.014000'} = $deprecated{5.014};
-$deprecated{'5.015000'} = $deprecated{5.015};
-$deprecated{'5.016000'} = $deprecated{5.016};
-$deprecated{'5.017000'} = $deprecated{5.017};
+_create_aliases(\%released);
+_create_aliases(\%version);
+_create_aliases(\%deprecated);
+
+sub _create_aliases {
+    my ($hash) = @_;
+
+    for my $version (keys %$hash) {
+        next unless $version >= 5.010;
+
+        my $padded = sprintf "%0.6f", $version;
+
+        # If the version in string form isn't the same as the numeric version,
+        # alias it.
+        if ($padded ne $version && $version == $padded) {
+            $hash->{$padded} = $hash->{$version};
+        }
+    }
+}
 
 1;
 __END__

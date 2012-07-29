@@ -591,10 +591,6 @@ Check that file over carefully:
 
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
 
-If this is a .0 Perl version, add the appropriate lines in F<Corelist.pm>
-to alias "5.nnn000" to "5.nnn" in each hash.  (If feeling energetic,
-amend F<corelist.pl> to automate this.)
-
 =head4 Bump C<$Module::CoreList::VERSION>
 
 If necessary, bump C<$Module::CoreList::VERSION> (there's no need to do this for
