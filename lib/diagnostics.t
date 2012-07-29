@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(19);
+    plan(20);
 }
 
 BEGIN {
@@ -152,3 +152,13 @@ like runperl(
 	main::bar\(\) called at -e line \d+
 	main::foo\(\) called at -e line \d+
 /,  'backtrace from multiline error';
+is runperl(@runperl_args, prog => 'BEGIN { die q _panic: gremlins_ }'),
+   << 'EOX', 'BEGIN{die} does not suppress diagnostics';
+panic: gremlins at -e line 1.
+BEGIN failed--compilation aborted at -e line 1 (#1)
+    (P) An internal error.
+    
+Uncaught exception from user code:
+	panic: gremlins at -e line 1.
+	BEGIN failed--compilation aborted at -e line 1.
+EOX
