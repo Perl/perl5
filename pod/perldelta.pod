@@ -383,6 +383,11 @@ if the filehandle has been deleted.  This was broken in Perl 5.16.0.
 Subroutine redefinitions after sub-to-glob and glob-to-glob assignments no
 longer cause double frees or panic messages.
 
+=item *
+
+C<s///> now turns vstrings into plain strings when performing a
+substitution, even if the resulting string is the same (C<s/a/a/>).
+
 =back
 
 =head1 Known Problems
