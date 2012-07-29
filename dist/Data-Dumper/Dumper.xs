@@ -1185,8 +1185,8 @@ Data_Dumper_Dumpxs(href, ...)
 			val = &PL_sv_undef;
 		    if ((svp = av_fetch(namesav, i, TRUE))) {
 			sv_setsv(name, *svp);
-			if (SvOK(*svp) && !SvPOK(*svp))
-			    (void)SvPV_nolen_const(name);
+			if (SvOK(name))
+			    (void)SvPV_force_nolen(name);
 		    }
 		    else
 			(void)SvOK_off(name);

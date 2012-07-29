@@ -1802,17 +1802,14 @@ ignored.
 I32
 Perl_looks_like_number(pTHX_ SV *const sv)
 {
-    register const char *sbegin;
-    STRLEN len;
-
     PERL_ARGS_ASSERT_LOOKS_LIKE_NUMBER;
 
-    if (SvPOK(sv) || SvPOKp(sv)) {
-	sbegin = SvPV_nomg_const(sv, len);
-    }
+    if (SvNIOK_pure(sv))
+	return TRUE;  /* it doesn't just look like a number, it *is* a number */
+    else if (SvPOK(sv))
+	return grok_number(SvPVX_const(sv), SvCUR(sv), NULL);
     else
-	return SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
-    return grok_number(sbegin, len, NULL);
+	return FALSE; /* potential stringifications of refs, globs, etc. do not look like numbers */
 }
 
 STATIC bool
@@ -2746,6 +2743,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 {
     dVAR;
     register char *s;
+    bool priv = FALSE;
 
     if (!sv) {
 	if (lp)
@@ -2905,6 +2903,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	Move(ptr, s, len, char);
 	s += len;
 	*s = '\0';
+	priv = TRUE;
     }
     else if (SvNOK(sv)) {
 	if (SvTYPE(sv) < SVt_PVNV)
@@ -2926,6 +2925,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	if (s[-1] == '.')
 	    *--s = '\0';
 #endif
+	priv = TRUE;
     }
     else if (isGV_with_GP(sv)) {
 	GV *const gv = MUTABLE_GV(sv);
@@ -2959,7 +2959,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    *lp = len;
 	SvCUR_set(sv, len);
     }
-    SvPOK_on(sv);
+    if (priv)
+	SvPOKp_on(sv);
+    else
+	SvPOK_on(sv);
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
 			  PTR2UV(sv),SvPVX_const(sv)));
     if (flags & SV_CONST_RETURN)
@@ -3919,6 +3922,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     register U32 sflags;
     register int dtype;
     register svtype stype;
+    MAGIC *svmg = NULL;
 
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
@@ -3949,8 +3953,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	    return;
 	}
 	break;
+
     case SVt_IV:
 	if (SvIOK(sstr)) {
+	  iv_sstr:
 	    switch (dtype) {
 	    case SVt_NULL:
 		sv_upgrade(dstr, SVt_IV);
@@ -3976,12 +3982,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	}
 	if (!SvROK(sstr))
 	    goto undef_sstr;
-	if (dtype < SVt_PV && dtype != SVt_IV)
+      rv_sstr:
+	if (dtype < SVt_IV)
 	    sv_upgrade(dstr, SVt_IV);
+	else if (dtype < SVt_PVIV)
+	    sv_upgrade(dstr, SVt_PVIV);
 	break;
 
     case SVt_NV:
+	if (SvIOK(sstr))
+	    goto iv_sstr;
 	if (SvNOK(sstr)) {
+	  nv_sstr:
 	    switch (dtype) {
 	    case SVt_NULL:
 	    case SVt_IV:
@@ -4016,17 +4028,53 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	/* Fall through */
 #endif
     case SVt_PV:
+	if (!SvOK(sstr))
+	    goto undef_sstr;
+      pv_sstr:
 	if (dtype < SVt_PV)
 	    sv_upgrade(dstr, SVt_PV);
 	break;
+
     case SVt_PVIV:
-	if (dtype < SVt_PVIV)
-	    sv_upgrade(dstr, SVt_PVIV);
+	if (!SvOK(sstr))
+	    goto undef_sstr;
+	if (SvIOK_pure(sstr))
+	    goto iv_sstr;
+      pviv_sstr:
+	if (SvIOKp(sstr)) {
+	    if (dtype < SVt_PVIV)
+		sv_upgrade(dstr, SVt_PVIV);
+	}
+	else {
+	    if (dtype < SVt_PV)
+		sv_upgrade(dstr, SVt_PV);
+	}
 	break;
+
     case SVt_PVNV:
-	if (dtype < SVt_PVNV)
-	    sv_upgrade(dstr, SVt_PVNV);
+	if (!SvOK(sstr))
+	    goto undef_sstr;
+	if (SvNIOK_pure(sstr)) {
+	    if (SvIOK(sstr))
+		goto iv_sstr;   /* authoritative IV can stand alone */
+	    else
+		goto nv_sstr;
+	}
+      pvnv_sstr:
+	if (SvNOKp(sstr)) {
+	    if (dtype < SVt_PVNV)
+		sv_upgrade(dstr, SVt_PVNV);
+	}
+	else if (SvIOKp(sstr)) {
+	    if (dtype < SVt_PVIV)
+		sv_upgrade(dstr, SVt_PVIV);
+	}
+	else {
+	    if (dtype < SVt_PV)
+		sv_upgrade(dstr, SVt_PV);
+	}
 	break;
+
     default:
 	{
 	const char * const type = sv_reftype(sstr,0);
@@ -4043,6 +4091,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	    sv_upgrade(dstr, SVt_REGEXP);
 	break;
 
+	/* Fall through */
+
 	/* case SVt_BIND: */
     case SVt_PVLV:
     case SVt_PVGV:
@@ -4055,6 +4105,38 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	if (isGV_with_GP(sstr) && dtype <= SVt_PVLV) {
 		    glob_assign_glob(dstr, sstr, dtype);
 		    return;
+	}
+	svmg = SvVSTRING_mg(sstr);
+	if ((stype == SVt_PVMG || stype == SVt_PVLV)
+	    && !svmg   /* vstring magic is copied; will need SVt_PVMG */
+	    && !PL_tainting
+	    && !PL_tainted)
+	{
+	    switch (SvFLAGS(sstr) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_FAKE)) {
+	    case 0:
+		goto undef_sstr;
+	    case SVf_IOK:
+		goto iv_sstr;
+	    case SVf_NOK:
+		goto nv_sstr;
+	    case SVf_POK:
+		/* a string that has been used as a number probably will be again */
+		switch (SvFLAGS(sstr) & (SVp_IOK|SVp_NOK)) {
+		case 0:
+		    goto pv_sstr;
+		case SVp_IOK:
+		    goto pviv_sstr;
+		default:
+		    goto pvnv_sstr;
+		}
+	    case SVf_POK|SVf_IOK:
+		goto pviv_sstr;
+	    case SVf_POK|SVf_NOK:
+	    case SVf_POK|SVf_NOK|SVf_IOK:
+		goto pvnv_sstr;
+	    case SVf_ROK:
+		goto rv_sstr;
+	    }
 	}
 	if (stype == SVt_PVLV)
 	    SvUPGRADE(dstr, SVt_PVNV);
@@ -4170,7 +4252,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     else if (dtype == SVt_REGEXP && stype == SVt_REGEXP) {
 	reg_temp_copy((REGEXP*)dstr, (REGEXP*)sstr);
     }
-    else if (sflags & SVp_POK) {
+    else if ((sflags & SVp_POK) && !SvNIOK_pure(sstr)) {
         bool isSwipe = 0;
 
 	/*
@@ -4305,9 +4387,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
                 SvTEMP_off(sstr);
             }
         }
-	if (sflags & SVp_NOK) {
-	    SvNV_set(dstr, SvNVX(sstr));
-	}
 	if (sflags & SVp_IOK) {
 	    SvIV_set(dstr, SvIVX(sstr));
 	    /* Must do this otherwise some other overloaded use of 0x80000000
@@ -4315,14 +4394,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}
-	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
-	{
-	    const MAGIC * const smg = SvVSTRING_mg(sstr);
-	    if (smg) {
-		sv_magic(dstr, NULL, PERL_MAGIC_vstring,
-			 smg->mg_ptr, smg->mg_len);
-		SvRMAGICAL_on(dstr);
-	    }
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_UTF8);
+	/* NV assignment can be skipped when IOK, to reduce upgrades; see PVNV case in top switch */
+	if ((sflags & SVp_NOK) && PL_valid_types_NV_set[dtype & SVt_MASK]) {
+	    SvNV_set(dstr, SvNVX(sstr));
+	    SvFLAGS(dstr) |= sflags & (SVf_NOK|SVp_NOK);
+	}
+
+	/* copy vstring magic, if any */
+	if (svmg) {
+	    sv_magic(dstr, NULL, PERL_MAGIC_vstring, svmg->mg_ptr, svmg->mg_len);
+	    SvRMAGICAL_on(dstr);
 	}
     }
     else if (sflags & (SVp_IOK|SVp_NOK)) {

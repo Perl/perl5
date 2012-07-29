@@ -2681,6 +2681,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		 * additional cases sv_setsv is safe, too.
 		 */
 		SV* const newref = newSVsv(tmpRef);
+		SvUPGRADE(newref, SVt_PVMG);
 		SvOBJECT_on(newref);
 		/* No need to do SvAMAGIC_on here, as SvAMAGIC macros
 		   delegate to the stash. */

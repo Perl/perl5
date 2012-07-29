@@ -918,6 +918,12 @@ in gv.h: */
 #define SvNOK_nogthink(sv)	((SvFLAGS(sv) & (SVf_NOK|SVf_THINKFIRST|SVs_GMG)) == SVf_NOK)
 #define SvNIOK_nogthink(sv)	(SvNIOK(sv) && !(SvFLAGS(sv) & (SVf_THINKFIRST|SVs_GMG)))
 
+#define SvPOK_pure(sv)		((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP)) == SVf_POK)
+#define SvIOK_pure(sv)		((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP)) == SVf_IOK)
+#define SvUOK_pure(sv)		((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_IVisUV)) == (SVf_IOK|SVf_IVisUV))
+#define SvNOK_pure(sv)		((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP)) == SVf_NOK)
+#define SvNIOK_pure(sv)		(SvNIOK(sv) && !(SvFLAGS(sv) &(SVf_POK|SVf_ROK|SVpgv_GP)))
+
 #define SvPOK_utf8_nog(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == (SVf_POK|SVf_UTF8))
 #define SvPOK_utf8_nogthink(sv)	((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == (SVf_POK|SVf_UTF8))
 
