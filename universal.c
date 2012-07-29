@@ -198,8 +198,7 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 
     SvGETMAGIC(sv);
 
-    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
-	    || (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv)))) {
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv)))) {
 	LEAVE;
 	return FALSE;
     }
@@ -334,8 +333,7 @@ XS(XS_UNIVERSAL_isa)
 
 	SvGETMAGIC(sv);
 
-	if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
-		    || (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
+	if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))))
 	    XSRETURN_UNDEF;
 
 	ST(0) = boolSV(sv_derived_from_sv(sv, ST(1), 0));
@@ -359,7 +357,7 @@ XS(XS_UNIVERSAL_can)
     SvGETMAGIC(sv);
 
     if (!SvOK(sv) || !(SvROK(sv) || SvNIOK(sv) || (SvPOK(sv) && SvCUR(sv))
-	|| (SvGMAGICAL(sv) && (SvNIOKp(sv) || (SvPOKp(sv) && SvCUR(sv))))))
+       ))
 	XSRETURN_UNDEF;
 
     rv = &PL_sv_undef;

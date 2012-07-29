@@ -2182,7 +2182,7 @@ PP(pp_negate)
     {
 	SV * const sv = TOPs;
 
-	if (SvIOK(sv) || (SvGMAGICAL(sv) && SvIOKp(sv))) {
+	if (SvIOK(sv)) {
 	    /* It's publicly an integer */
 	oops_its_an_int:
 	    if (SvIsUV(sv)) {
