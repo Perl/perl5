@@ -1607,13 +1607,17 @@ X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>
 Current state of the interpreter.
 
 	$^S         State
-	---------   -------------------
-	undef       Parsing module/eval
+	---------   -------------------------------------
+	undef       Parsing module, eval, or main program
 	true (1)    Executing an eval
 	false (0)   Otherwise
 
 The first state may happen in C<$SIG{__DIE__}> and C<$SIG{__WARN__}>
 handlers.
+
+The English name $EXCEPTIONS_BEING_CAUGHT is slightly misleading, because
+the C<undef> value does not indicate whether exceptions are being caught,
+since compilation of the main program does not catch exceptions.
 
 This variable was added in Perl 5.004.
 
