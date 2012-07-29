@@ -131,13 +131,24 @@ if ( open my $ucdv, "<", "lib/unicore/version" ) {
     close $ucdv;
 }
 
+my $delta_data = make_corelist_delta($perl_vnum, \%lines);
 my $versions_in_release = "    " . $perl_vnum . " => {\n";
-foreach my $key ( sort keys %lines ) {
-    $versions_in_release .= sprintf "\t%-24s=> %s,\n", "'$key'", $lines{$key};
+$versions_in_release .= "        delta_from => $delta_data->{delta_from},\n";
+$versions_in_release .= "        changed => {\n";
+foreach my $key (sort keys $delta_data->{changed}) {
+  $versions_in_release .= sprintf "            %-24s=> %s,\n", "'$key'",
+      defined $delta_data->{changed}{$key} ? "'"
+        . $delta_data->{changed}{$key} . "'" : "undef";
 }
+$versions_in_release .= "        },\n";
+$versions_in_release .= "        removed => {\n";
+for my $key (sort keys($delta_data->{removed} || {})) {
+  $versions_in_release .= sprintf "           %-24s=> %s,\n", "'$key'", 1;
+}
+$versions_in_release .= "        }\n";
 $versions_in_release .= "    },\n";
 
-$corelist =~ s/^(%version\s*=\s*.*?)(^\);)$/$1$versions_in_release$2/xism;
+$corelist =~ s/^(my %delta\s*=\s*.*?)(^\);)$/$1$versions_in_release$2/ism;
 
 exit unless %modlist;
 
@@ -293,4 +304,61 @@ sub fetch_url {
 	warn "Error fetching $url: $response->{status} $response->{reason}\n";
         return;
     }
+}
+
+sub make_corelist_delta {
+  my($version, $lines) = @_;
+  # Trust core perl, if someone does use a weird version number the worst that
+  # can happen is an extra delta entry for a module.
+  my %versions = map { $_ => eval $lines->{$_} } keys %$lines;
+
+  # Ensure we have the corelist data loaded from this perl checkout, not the system one.
+  require $corelist_file;
+
+  my %deltas;
+  # Search for the release with the least amount of changes (this avoids having
+  # to ask for where this perl was branched from).
+  for my $previous(reverse sort keys %Module::CoreList::version) {
+    # Shouldn't happen, but ensure we don't load weird data...
+    next if $previous > $version || $previous == $version && $previous eq $version;
+
+    my $delta = $deltas{$previous} = {};
+    ($delta->{changed}, $delta->{removed}) = calculate_delta(
+      $Module::CoreList::version{$previous}, \%versions);
+  }
+
+  my $smallest = (sort {
+      (keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
+      (keys($deltas{$b}->{changed})+ keys($deltas{$b}->{removed}))
+    } keys %deltas)[0];
+
+  return {
+    delta_from => $smallest,
+    changed => $deltas{$smallest}{changed},
+    removed => $deltas{$smallest}{removed},
+  }
+}
+
+# Calculate (changed, removed) modules between two versions.
+sub calculate_delta {
+  my($from, $to) = @_;
+  my(%changed, %removed);
+
+  for my $package(keys $from) {
+    if(not exists $to->{$package}) {
+      $removed{$package} = 1;
+    }
+  }
+
+  for my $package(keys $to) {
+    if(!exists $from->{$package}
+        || (defined $from->{$package} && !defined $to->{$package})
+        || (!defined $from->{$package} && defined $to->{$package})
+        || (defined $from->{$package} && defined $to->{$package}
+            && $from->{$package} ne $to->{$package})) {
+      $changed{$package} = $to->{$package};
+    }
+  }
+
+  return \%changed, \%removed;
 }
