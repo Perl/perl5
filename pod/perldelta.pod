@@ -388,6 +388,16 @@ longer cause double frees or panic messages.
 C<s///> now turns vstrings into plain strings when performing a
 substitution, even if the resulting string is the same (C<s/a/a/>).
 
+=item *
+
+Prototype mismatch warnings no longer erroneously treat constant subs as
+having no prototype when they actually have "".
+
+=item *
+
+Constant subroutines and forward declarations no longer prevent prototype
+mismatch warnings from omitting the sub name.
+
 =back
 
 =head1 Known Problems
