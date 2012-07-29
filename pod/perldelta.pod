@@ -398,6 +398,10 @@ having no prototype when they actually have "".
 Constant subroutines and forward declarations no longer prevent prototype
 mismatch warnings from omitting the sub name.
 
+=item *
+
+C<undef> on a subroutine now clears call checkers.
+
 =back
 
 =head1 Known Problems
