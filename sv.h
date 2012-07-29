@@ -962,6 +962,30 @@ the scalar's value cannot change unless written to.
 #define SvPCS_IMPORTED_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_PCS_IMPORTED))
 #define SvPCS_IMPORTED_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_PCS_IMPORTED))
 
+/*
+=for apidoc m|U32|SvTHINKFIRST|SV *sv
+
+A quick flag check to see whether an sv should be passed to sv_force_normal
+to be "downgraded" before SvIVX or SvPVX can be modified directly.
+
+For example, if your scalar is a reference and you want to modify the SvIVX
+slot, you can't just do SvROK_off, as that will leak the referent.
+
+This is used internally by various sv-modifying functions, such as
+sv_setsv, sv_setiv and sv_pvn_force.
+
+One case that this does not handle is a gv without SvFAKE set.  After
+
+    if (SvTHINKFIRST(gv)) sv_force_normal(gv);
+
+it will still be a gv.
+
+SvTHINKFIRST sometimes produces false positives.  In those cases
+sv_force_normal does nothing.
+
+=cut
+*/
+
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
 #define SvPADMY(sv)		(SvFLAGS(sv) & SVs_PADMY)
