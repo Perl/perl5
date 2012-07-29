@@ -486,6 +486,18 @@ Perl_cv_undef(pTHX_ CV *cv)
     CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON);
 }
 
+/*
+=for apidoc cv_forget_slab
+
+When a CV has a reference count on its slab (CvSLABBED), it is responsible
+for making sure it is freed.  (Hence, no two CVs should ever have a
+reference count on the same slab.)  The CV only needs to reference the slab
+during compilation.  Once it is compiled and CvROOT attached, it has
+finished its job, so it can forget the slab.
+
+=cut
+*/
+
 void
 Perl_cv_forget_slab(pTHX_ CV *cv)
 {
