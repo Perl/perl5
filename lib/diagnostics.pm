@@ -546,14 +546,7 @@ sub death_trap {
 
     # See if we are coming from anywhere within an eval. If so we don't
     # want to explain the exception because it's going to get caught.
-    my $in_eval = 0;
-    my $i = 0;
-    while (my $caller = (caller($i++))[3]) {
-      if ($caller eq '(eval)') {
-	$in_eval = 1;
-	last;
-      }
-    }
+    my $in_eval = $^S || !defined $^S;
 
     splainthis($exception) unless $in_eval;
     if (caller eq $WHOAMI) { print STDERR "INTERNAL EXCEPTION: $exception"; } 
