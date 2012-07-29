@@ -281,6 +281,28 @@ sub build_extension {
 	$makefile = 'Makefile';
     }
     
+    if (-f $makefile) {
+	open my $mfh, $makefile or die "Cannot open $makefile: $!";
+	while (<$mfh>) {
+	    # Plagiarised from CPAN::Distribution
+	    last if /MakeMaker post_initialize section/;
+	    next unless /^#\s+VERSION_FROM\s+=>\s+(.+)/;
+	    my $vmod = eval $1;
+	    my $oldv;
+	    while (<$mfh>) {
+		next unless /^XS_VERSION = (\S+)/;
+		$oldv = $1;
+		last;
+	    }
+	    last unless defined $oldv;
+	    require ExtUtils::MM_Unix;
+	    defined (my $newv = parse_version MM $vmod) or last;
+	    if ($newv ne $oldv) {
+		1 while unlink $makefile
+	    }
+	}
+    }
+
     if (!-f $makefile) {
 	if (!-f 'Makefile.PL') {
 	    print "\nCreating Makefile.PL in $ext_dir for $mname\n";
