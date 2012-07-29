@@ -6649,7 +6649,7 @@ void
 Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 		    const STRLEN len, const U32 flags)
 {
-    const char * const cvp = CvPROTO(cv);
+    const char * const cvp = SvROK(cv) ? "" : CvPROTO(cv);
     const STRLEN clen = CvPROTOLEN(cv);
 
     PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS;
@@ -6671,11 +6671,15 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 	SV* name = NULL;
 
 	if (gv)
+	{
+	  if (isGV(gv))
 	    gv_efullname3(name = sv_newmortal(), gv, NULL);
+	  else name = (SV *)gv;
+	}
 	sv_setpvs(msg, "Prototype mismatch:");
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, SVfARG(name));
-	if (SvPOK(cv))
+	if (cvp)
 	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")",
 		SVfARG(newSVpvn_flags(cvp,clen, SvUTF8(cv)|SVs_TEMP))
 	    );
@@ -6928,7 +6932,9 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     if (SvTYPE(gv) != SVt_PVGV) {	/* Maybe prototype now, and had at
 					   maximum a prototype before. */
 	if (SvTYPE(gv) > SVt_NULL) {
-	    cv_ckproto_len_flags((const CV *)gv, NULL, ps, ps_len, ps_utf8);
+	    cv_ckproto_len_flags((const CV *)gv,
+				 o ? (const GV *)cSVOPo->op_sv : NULL, ps,
+				 ps_len, ps_utf8);
 	}
 	if (ps) {
 	    sv_setpvn(MUTABLE_SV(gv), ps, ps_len);

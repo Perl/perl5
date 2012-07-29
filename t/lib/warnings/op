@@ -844,8 +844,13 @@ EXPECT
 # op.c
 sub fred();
 sub fred($) {}
+use constant foo=>bar; sub foo(@);
+use constant bav=>bar; sub bav(); # no warning
+sub btu; sub btu();
 EXPECT
 Prototype mismatch: sub main::fred () vs ($) at - line 3.
+Prototype mismatch: sub foo () vs (@) at - line 4.
+Prototype mismatch: sub btu: none vs () at - line 6.
 ########
 # op.c
 use utf8;
