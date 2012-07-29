@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Test::More tests => 67;
+use Test::More tests => 70;
 
 use XS::APItest;
 
@@ -167,6 +167,15 @@ $foo_got = undef;
 eval q{$foo_ret = foo2(@b, @c);};
 is $@, "";
 is_deeply $foo_got, [ qw(a b), qw(a b c) ];
+is $foo_ret, "z";
+
+cv_set_call_checker_lists(\&foo);
+undef &foo;
+$foo_got = undef;
+eval 'sub foo($@) { $foo_got = [ @_ ]; return "z"; }
+      $foo_ret = foo(@b, @c);';
+is $@, "";
+is_deeply $foo_got, [ 2, qw(a b c) ], 'undef clears call checkers';
 is $foo_ret, "z";
 
 1;

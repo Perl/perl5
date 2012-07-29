@@ -375,6 +375,7 @@ Perl_cv_undef(pTHX_ CV *cv)
     else if (slabbed) Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
+    sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
     CvGV_set(cv, NULL);
 
     /* This statement and the subsequence if block was pad_undef().  */
