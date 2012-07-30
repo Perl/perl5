@@ -905,8 +905,8 @@ This returns the file format version as number.  It is a string like
 "2.007".  This value is suitable for numeric comparisons.
 
 The constant function C<Storable::BIN_VERSION_NV> returns a comparable
-number that represent the highest file version number that this
-version of Storable fully support (but see discussion of
+number that represents the highest file version number that this
+version of Storable fully supports (but see discussion of
 C<$Storable::accept_future_minor> above).  The constant
 C<Storable::BIN_WRITE_VERSION_NV> function returns what file version
 is written and might be less than C<Storable::BIN_VERSION_NV> in some
