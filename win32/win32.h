@@ -67,12 +67,12 @@
 #  ifdef __cplusplus
 #    define PERL_CALLCONV extern "C" __declspec(dllimport)
 #    ifdef _MSC_VER
-#      define PERL_CALLCONV_NO_RET extern "C" __declspec(dllimport, noreturn)
+#      define PERL_CALLCONV_NO_RET extern "C" __declspec(dllimport) __declspec(noreturn)
 #    endif
 #  else
 #    define PERL_CALLCONV __declspec(dllimport)
 #    ifdef _MSC_VER
-#      define PERL_CALLCONV_NO_RET __declspec(dllimport, noreturn)
+#      define PERL_CALLCONV_NO_RET __declspec(dllimport) __declspec(noreturn)
 #    endif
 #  endif
 #endif
