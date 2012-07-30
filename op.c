@@ -6918,24 +6918,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (SvTYPE(*spot) != SVt_PVCV) {	/* Maybe prototype now, and had at
 					   maximum a prototype before. */
-#if 0
-	if (SvTYPE(*spot) > SVt_NULL) {
-	    cv_ckproto_len_flags(*spot, NULL, ps, ps_len, ps_utf8);
-	}
-	if (!block && !attrs && !(CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
-	 && !PL_madskills) {
-	  if (ps) {
-	    sv_setpvn(*svspot, ps, ps_len);
-            if ( ps_utf8 ) SvUTF8_on(*svspot);
-          }
-	  else
-	    sv_setiv(*svspot, -1);
-
-	  SvREFCNT_dec(compcv);
-	  cv = compcv = NULL;
-	  goto done;
-	}
-#endif
 	SvREFCNT_dec(*spot);
 	*spot = NULL;
     }
