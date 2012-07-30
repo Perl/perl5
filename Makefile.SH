@@ -1059,6 +1059,7 @@ pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
 	$(MINIPERL) $(Icwd) pod/perlmodlib.PL -q
 
 pod/perl5173delta.pod: pod/perldelta.pod
+	$(RMS) pod/perl5173delta.pod
 	$(LNS) perldelta.pod pod/perl5173delta.pod
 
 extra.pods: $(MINIPERL_EXE)
