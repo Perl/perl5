@@ -1938,6 +1938,7 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
  * Store a scalar.
  *
  * Layout is SX_LSCALAR <length> <data>, SX_SCALAR <length> <data> or SX_UNDEF.
+ * SX_LUTF8STR and SX_UTF8STR are used for UTF-8 strings.
  * The <data> section is omitted if <length> is 0.
  *
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
