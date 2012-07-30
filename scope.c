@@ -911,7 +911,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		    SvREADONLY_off(sv);
 
 		if (SvTHINKFIRST(sv))
-		    sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF);
+		    sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF
+					     |SV_COW_DROP_PV);
 		if (SvTYPE(sv) == SVt_PVHV)
 		    Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
 		if (SvMAGICAL(sv))
