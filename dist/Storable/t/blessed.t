@@ -271,7 +271,7 @@ is(ref $t, 'STRESS_THE_STACK');
 {
     {
         package WeirdRefHook;
-        sub STORABLE_freeze { }
+        sub STORABLE_freeze { () }
         $INC{'WeirdRefHook.pm'} = __FILE__;
     }
 
