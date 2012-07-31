@@ -2721,12 +2721,12 @@ typedef struct clone_params CLONE_PARAMS;
 #endif
 
 /*
-=for apidoc Am|void|PERL_SYS_INIT|int argc|char** argv
+=for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
 Provides system-specific tune up of the C runtime environment necessary to
 run Perl interpreters. This should be called only once, before creating
 any Perl interpreters.
 
-=for apidoc Am|void|PERL_SYS_INIT3|int argc|char** argv|char** env
+=for apidoc Am|void|PERL_SYS_INIT3|int *argc|char*** argv|char*** env
 Provides system-specific tune up of the C runtime environment necessary to
 run Perl interpreters. This should be called only once, before creating
 any Perl interpreters.
