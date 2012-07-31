@@ -27,14 +27,6 @@ system $^X, $runner, '--check-args', '--check-shebang', @ARGV and exit 255;
 exit 255 if $bad;
 exit 0 if $usage;
 
-{
-    my ($dev0, $ino0) = stat $0;
-    die "Can't stat $0: $!" unless defined $ino0;
-    my ($dev1, $ino1) = stat 'Porting/bisect.pl';
-    die "Can't run a bisect using the directory containing $runner"
-      if defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1;
-}
-
 my $start_time = time;
 
 if (!defined $jobs &&
@@ -99,14 +91,51 @@ foreach ($start, $end) {
     chomp;
 }
 
-my $modified = my @modified = `git ls-files --modified --deleted --others`;
+{
+    my $modified = my @modified = `git ls-files --modified --deleted --others`;
 
-die "This checkout is not clean, found file(s):\n",
-    join("\t","",@modified),
-    "$modified modified, untracked, or other file(s)\n",
-    "These files may not show in git status as they may be ignored.\n",
-    "You can use 'git clean -Xdf' to cleanup the ignored files.\n"
-    if $modified;
+    my ($dev0, $ino0) = stat $0;
+    die "Can't stat $0: $!" unless defined $ino0;
+    my ($dev1, $ino1) = stat 'Porting/bisect.pl';
+
+    my $inplace = defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1;
+
+    if ($modified) {
+        my $final = $inplace
+            ? "Can't run a bisect using a dirty directory containing $runner"
+            : "You can use 'git clean -Xdf' to cleanup the ignored files";
+
+        die "This checkout is not clean, found file(s):\n",
+            join("\t","",@modified),
+                "$modified modified, untracked, or other file(s)\n",
+                "These files may not show in git status as they may be ignored.\n",
+                "$final.\n";
+    }
+
+    if ($inplace) {
+        # We assume that it's safe to copy the runner to the temporary
+        # directory and run it from there, because a shared /tmp should be +t
+        # and hence others are not be able to delete or rename our file.
+        require File::Temp;
+        my ($to, $toname) = File::Temp::tempfile();
+        die "Can't create tempfile"
+            unless $to;
+        open my $from, '<', $runner
+            or die "Can't open '$runner': $!";
+        local $/;
+        print {$to} <$from>
+            or die "Can't copy from '$runner' to '$toname': $!";
+        close $from
+            or die "Can't close '$runner': $!";
+        close $to
+            or die "Can't close '$toname': $!";
+        chmod 0500, $toname
+            or die "Can't chmod 0500, '$toname': $!";
+        $runner = $toname;
+        system $^X, $runner, '--check-args', @ARGV
+            and die "Can't run inplace for some reason. :-(";
+    }
+}
 
 sub validate {
     my $commit = shift;
