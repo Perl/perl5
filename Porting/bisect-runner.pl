@@ -711,6 +711,26 @@ sub system_or_die {
     system($command) and croak_255("'$command' failed, \$!=$!, \$?=$?");
 }
 
+sub run_with_options {
+    my $options = shift;
+    my $name = $options->{name};
+    $name = "@_" unless defined $name;
+
+    my $pid = fork;
+    die_255("Can't fork: $!") unless defined $pid;
+    if (!$pid) {
+        if (exists $options->{stdin}) {
+            open STDIN, '<', $options->{stdin}
+                or die "Can't open STDIN from $options->{stdin}: $!";
+        }
+        { exec @_ };
+        die_255("Failed to start $name: $!");
+    }
+    waitpid $pid, 0
+        or die_255("wait for $name, pid $pid failed: $!");
+    return $?;
+}
+
 sub extract_from_file {
     my ($file, $rx, $default) = @_;
     my $fh = open_or_die($file);
@@ -1139,21 +1159,13 @@ foreach my $key (sort keys %defines) {
 }
 push @ARGS, map {"-A$_"} @{$options{A}};
 
-# </dev/null because it seems that some earlier versions of Configure can
-# call commands in a way that now has them reading from stdin (and hanging)
-my $pid = fork;
-die_255("Can't fork: $!") unless defined $pid;
-if (!$pid) {
-    open STDIN, '<', '/dev/null';
-    # If a file in MANIFEST is missing, Configure asks if you want to
-    # continue (the default being 'n'). With stdin closed or /dev/null,
-    # it exits immediately and the check for config.sh below will skip.
-    no warnings; # Don't tell me "statement unlikely to be reached". I know.
-    exec './Configure', @ARGS;
-    die_255("Failed to start Configure: $!");
-}
-waitpid $pid, 0
-    or die_255("wait for Configure, pid $pid failed: $!");
+# If a file in MANIFEST is missing, Configure asks if you want to
+# continue (the default being 'n'). With stdin closed or /dev/null,
+# it exits immediately and the check for config.sh below will skip.
+# Without redirecting stdin, the commands called will attempt to read from
+# stdin (and thus effectively hang)
+run_with_options({stdin => '/dev/null', name => 'Configure'},
+                 './Configure', @ARGS);
 
 patch_SH() unless $options{'all-fixups'};
 apply_fixups($options{'late-fixup'});
