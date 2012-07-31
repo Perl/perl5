@@ -1003,7 +1003,7 @@ sub report_and_exit {
 }
 
 sub run_report_and_exit {
-    my $ret = system @_;
+    my $ret = run_with_options(undef, @_);
     report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
 }
 
