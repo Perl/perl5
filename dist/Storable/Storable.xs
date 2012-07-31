@@ -148,7 +148,9 @@
 #define SX_CODE         C(26)   /* Code references as perl source code */
 #define SX_WEAKREF	C(27)	/* Weak reference to object forthcoming */
 #define SX_WEAKOVERLOAD	C(28)	/* Overloaded weak reference */
-#define SX_ERROR	C(29)	/* Error */
+#define SX_VSTRING	C(29)	/* vstring forthcoming (small) */
+#define SX_LVSTRING	C(30)	/* vstring forthcoming (large) */
+#define SX_ERROR	C(31)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -258,6 +260,9 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 #endif
 #ifndef SvWEAKREF
 #define WEAKREF_CROAK() CROAK(("Cannot retrieve weak references in this perl"))
+#endif
+#ifndef SvVOK
+#define VSTRING_CROAK() CROAK(("Cannot retrieve vstring in this perl"))
 #endif
 
 #ifdef HvPLACEHOLDERS
@@ -788,15 +793,17 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	8		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	9		/* Binary minor "version" */
 
 #if (PATCHLEVEL <= 5)
 #define STORABLE_BIN_WRITE_MINOR	4
-#else 
+#elif !defined (SvVOK)
 /*
- * Perl 5.6.0 onwards can do weak references.
+ * Perl 5.6.0-5.8.0 can do weak references, but not vstring magic.
 */
 #define STORABLE_BIN_WRITE_MINOR	8
+#else
+#define STORABLE_BIN_WRITE_MINOR	9
 #endif /* (PATCHLEVEL <= 5) */
 
 #if (PATCHLEVEL < 8 || (PATCHLEVEL == 8 && SUBVERSION < 1))
@@ -1128,6 +1135,8 @@ static const sv_retrieve_t sv_old_retrieve[] = {
 	(sv_retrieve_t)retrieve_other,	/* SX_CODE not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_WEAKREF not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_WEAKOVERLOAD not supported */
+	(sv_retrieve_t)retrieve_other,	/* SX_VSTRING not supported */
+	(sv_retrieve_t)retrieve_other,	/* SX_LVSTRING not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_ERROR */
 };
 
@@ -1146,6 +1155,8 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname);
 
 static const sv_retrieve_t sv_retrieve[] = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -1177,6 +1188,8 @@ static const sv_retrieve_t sv_retrieve[] = {
 	(sv_retrieve_t)retrieve_code,		/* SX_CODE */
 	(sv_retrieve_t)retrieve_weakref,	/* SX_WEAKREF */
 	(sv_retrieve_t)retrieve_weakoverloaded,	/* SX_WEAKOVERLOAD */
+	(sv_retrieve_t)retrieve_vstring,	/* SX_VSTRING */
+	(sv_retrieve_t)retrieve_lvstring,	/* SX_LVSTRING */
 	(sv_retrieve_t)retrieve_other,		/* SX_ERROR */
 };
 
@@ -1941,6 +1954,10 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
  * SX_LUTF8STR and SX_UTF8STR are used for UTF-8 strings.
  * The <data> section is omitted if <length> is 0.
  *
+ * For vstrings, the vstring portion is stored first with
+ * SX_LVSTRING <length> <data> or SX_VSTRING <length> <data>, followed by
+ * SX_(L)SCALAR or SX_(L)UTF8STR with the actual PV.
+ *
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
  * Small integers (within [-127, +127]) are stored as SX_BYTE <byte>.
  */
@@ -2117,6 +2134,9 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             TRACEME(("ok (double 0x%"UVxf", value = %"NVff")", PTR2UV(sv), nv));
 
 	} else if (flags & (SVp_POK | SVp_NOK | SVp_IOK)) {
+#ifdef SvVOK
+	    MAGIC *mg;
+#endif
             I32 wlen; /* For 64-bit machines */
 
           string_readlen:
@@ -2127,6 +2147,12 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
              * neither &PL_sv_yes nor &PL_sv_no.
              */
           string:
+
+#ifdef SvVOK
+            if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V')))
+                STORE_PV_LEN((const char *)mg->mg_ptr,
+                             mg->mg_len, SX_VSTRING, SX_LVSTRING);
+#endif
 
             wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
             if (SvUTF8 (sv))
@@ -4858,6 +4884,79 @@ static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
     }
     return sv;
+}
+
+/*
+ * retrieve_vstring
+ *
+ * Retrieve a vstring, and then retrieve the stringy scalar following it,
+ * attaching the vstring to the scalar via magic.
+ * If we're retrieving a vstring in a perl without vstring magic, croaks.
+ *
+ * The vstring layout mirrors an SX_SCALAR string:
+ * SX_VSTRING <length> <data> with SX_VSTRING already read.
+ */
+static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname)
+{
+#ifdef SvVOK
+	MAGIC *mg;
+	char s[256];
+	int len;
+	SV *sv;
+
+	GETMARK(len);
+	TRACEME(("retrieve_vstring (#%d), len = %d", cxt->tagnum, len));
+
+	READ(s, len);
+
+	sv = retrieve(aTHX_ cxt, cname);
+
+	sv_magic(sv,NULL,PERL_MAGIC_vstring,s,len);
+	/* 5.10.0 and earlier seem to need this */
+	SvRMAGICAL_on(sv);
+
+	TRACEME(("ok (retrieve_vstring at 0x%"UVxf")", PTR2UV(sv)));
+	return sv;
+#else
+	VSTRING_CROAK();
+	return Nullsv;
+#endif
+}
+
+/*
+ * retrieve_lvstring
+ *
+ * Like retrieve_vstring, but for longer vstrings.
+ */
+static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
+{
+#ifdef SvVOK
+	MAGIC *mg;
+	char *s;
+	I32 len;
+	SV *sv;
+
+	RLEN(len);
+	TRACEME(("retrieve_lvstring (#%d), len = %"IVdf,
+		  cxt->tagnum, (IV)len));
+
+	New(10003, s, len+1, char);
+	SAFEPVREAD(s, len, s);
+
+	sv = retrieve(aTHX_ cxt, 0);
+
+	sv_magic(sv,NULL,PERL_MAGIC_vstring,s,len);
+	/* 5.10.0 and earlier seem to need this */
+	SvRMAGICAL_on(sv);
+
+	Safefree(s);
+
+	TRACEME(("ok (retrieve_lvstring at 0x%"UVxf")", PTR2UV(sv)));
+	return sv;
+#else
+	VSTRING_CROAK();
+	return Nullsv;
+#endif
 }
 
 /*
