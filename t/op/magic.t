@@ -69,6 +69,8 @@ sub env_is {
         # cmd.exe will echo 'variable=value' but 4nt will echo just the value
         # -- Nikola Knezevic
         like `set $key`, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
+    } elsif ($Is_VMS) {
+        is `write sys\$output f\$trnlnm("\Q$key\E")`, "$val\n", $desc;
     } else {
         is `echo \$\Q$key\E`, "$val\n", $desc;
     }
@@ -76,7 +78,10 @@ sub env_is {
 
 END {
     # On VMS, environment variable changes are peristent after perl exits
-    delete $ENV{'FOO'} if $Is_VMS;
+    if ($Is_VMS) {
+        delete $ENV{'FOO'};
+        delete $ENV{'__NoNeSuCh'};
+    }
 }
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
@@ -596,11 +601,11 @@ SKIP: {
 
 SKIP: {
     skip("%ENV manipulations fail or aren't safe on $^O", 19)
-	if $Is_VMS || $Is_Dos;
+	if $Is_Dos;
 
  SKIP: {
-	skip("clearing \%ENV is not safe when running under valgrind")
-	    if $ENV{PERL_VALGRIND};
+	skip("clearing \%ENV is not safe when running under valgrind or on VMS")
+	    if $ENV{PERL_VALGRIND} || $Is_VMS;
 
 	    $PATH = $ENV{PATH};
 	    $PDL = $ENV{PERL_DESTRUCT_LEVEL} || 0;
