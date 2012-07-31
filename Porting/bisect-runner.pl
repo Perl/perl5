@@ -982,6 +982,11 @@ sub report_and_exit {
     exit($got eq 'bad');
 }
 
+sub run_report_and_exit {
+    my $ret = system @_;
+    report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@_");
+}
+
 sub match_and_exit {
     my ($target, @globs) = @_;
     my $matches = 0;
@@ -1167,8 +1172,7 @@ if ($target =~ /config\.s?h/) {
 
     skip("could not build $target") unless -f $target;
 
-    my $ret = system @ARGV;
-    report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
+    run_report_and_exit(@ARGV);
 } elsif (!-f 'config.sh') {
     # Skip if something went wrong with Configure
 
@@ -1289,9 +1293,7 @@ if (exists $Config{ldlibpthname}) {
     }
 }
 
-my $ret = system @ARGV;
-
-report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
+run_report_and_exit(@ARGV);
 
 ############################################################################
 #
