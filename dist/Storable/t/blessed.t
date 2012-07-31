@@ -30,6 +30,7 @@ use Storable qw(freeze thaw store retrieve);
     %::weird_refs = (
         REF     => \(my $aref    = []),
         VSTRING => \(my $vstring = v1.2.3),
+       'long VSTRING' => \(my $vstring = eval "v" . 0 x 300),
         LVALUE  => \(my $substr  = substr((my $str = "foo"), 0, 3)),
     );
 }
@@ -285,7 +286,7 @@ is(ref $t, 'STRESS_THE_STACK');
         my $thawn = thaw($frozen);
         # is_deeply ignores blessings
         is ref $thawn, ref $obj, "get the right blessing back for $weird";
-        if ($weird eq 'VSTRING') {
+        if ($weird =~ 'VSTRING') {
             # It is not just Storable that did not support vstrings. :-)
             # See https://rt.cpan.org/Ticket/Display.html?id=78678
             my $newver = "version"->can("new")
