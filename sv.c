@@ -4553,6 +4553,7 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
         {
 	    SV_CHECK_THINKFIRST_COW_DROP(sv);
 	    SvUPGRADE(sv, SVt_PV);
+	    Safefree(SvPVX(sv));
 	    SvPV_set(sv,(char *)HEK_KEY(share_hek_hek(hek)));
 	    SvCUR_set(sv, HEK_LEN(hek));
 	    SvLEN_set(sv, 0);
