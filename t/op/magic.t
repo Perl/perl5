@@ -595,7 +595,7 @@ SKIP: {
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
 SKIP: {
-    skip("%ENV manipulations fail or aren't safe on $^O", 4)
+    skip("%ENV manipulations fail or aren't safe on $^O", 19)
 	if $Is_VMS || $Is_Dos;
 
  SKIP: {
