@@ -4943,7 +4943,7 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
 	New(10003, s, len+1, char);
 	SAFEPVREAD(s, len, s);
 
-	sv = retrieve(aTHX_ cxt, 0);
+	sv = retrieve(aTHX_ cxt, cname);
 
 	sv_magic(sv,NULL,PERL_MAGIC_vstring,s,len);
 	/* 5.10.0 and earlier seem to need this */
