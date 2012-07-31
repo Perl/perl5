@@ -60,7 +60,7 @@ unless(GetOptions(\%options,
                       $options{match} = $_[1];
                       $options{'expect-pass'} = 0;
                   },
-                  'force-manifest', 'force-regen', 'setpgrp!',
+                  'force-manifest', 'force-regen', 'setpgrp!', 'timeout=i',
                   'test-build', 'validate',
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
@@ -488,10 +488,18 @@ C<--expect-pass=0> is equivalent to C<--expect-fail>. I<1> is the default.
 
 =item *
 
+--timeout I<seconds>
+
+Run the testcase with the given timeout. If this is exceeded, kill it (and
+by default all its children), and treat it as a failure.
+
+=item *
+
 --setpgrp
 
 Run the testcase in its own process group. Specifically, call C<setpgrp 0, 0>
-just before C<exec>-ing the user testcase.
+just before C<exec>-ing the user testcase. The default is not to set the
+process group, unless a timeout is used.
 
 =item *
 
@@ -724,22 +732,63 @@ sub run_with_options {
     my $name = $options->{name};
     $name = "@_" unless defined $name;
 
+    my $setgrp = $options->{setpgrp};
+    if ($options->{timeout}) {
+        # Unless you explicitly disabled it on the commandline, set it:
+        $setgrp = 1 unless defined $setgrp;
+    }
     my $pid = fork;
     die_255("Can't fork: $!") unless defined $pid;
     if (!$pid) {
         if (exists $options->{stdin}) {
             open STDIN, '<', $options->{stdin}
-                or die "Can't open STDIN from $options->{stdin}: $!";
+              or die "Can't open STDIN from $options->{stdin}: $!";
         }
-        if ($options->{setpgrp}) {
+        if ($setgrp) {
             setpgrp 0, 0
                 or die "Can't setpgrp 0, 0: $!";
         }
         { exec @_ };
         die_255("Failed to start $name: $!");
     }
+    my $start;
+    if ($options->{timeout}) {
+        require Errno;
+        require POSIX;
+        die_255("No POSIX::WNOHANG")
+            unless &POSIX::WNOHANG;
+        $start = time;
+        $SIG{ALRM} = sub {
+            my $victim = $setgrp ? -$pid : $pid;
+            my $delay = 1;
+            kill 'TERM', $victim;
+            waitpid(-1, &POSIX::WNOHANG);
+            while (kill 0, $victim) {
+                sleep $delay;
+                waitpid(-1, &POSIX::WNOHANG);
+                $delay *= 2;
+                if ($delay > 8) {
+                    if (kill 'KILL', $victim) {
+                        print STDERR "$0: Had to kill 'KILL', $victim\n"
+                    } elsif (! $!{ESRCH}) {
+                        print STDERR "$0: kill 'KILL', $victim failed: $!\n";
+                    }
+                    last;
+                }
+            }
+            report_and_exit(0, 'No timeout', 'Timeout', "when running $name");
+        };
+        alarm $options->{timeout};
+    }
     waitpid $pid, 0
-        or die_255("wait for $name, pid $pid failed: $!");
+      or die_255("wait for $name, pid $pid failed: $!");
+    alarm 0;
+    if ($options->{timeout}) {
+        my $elapsed = time - $start;
+        if ($elapsed / $options->{timeout} > 0.8) {
+            print STDERR "$0: Beware, took $elapsed seconds of $options->{timeout} permitted to run $name\n";
+        }
+    }
     return $?;
 }
 
@@ -1015,7 +1064,9 @@ sub report_and_exit {
 }
 
 sub run_report_and_exit {
-    my $ret = run_with_options({setprgp => $options{setpgrp}}, @_);
+    my $ret = run_with_options({setprgp => $options{setpgrp},
+                                timeout => $options{timeout},
+                               }, @_);
     report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
 }
 
