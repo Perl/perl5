@@ -968,15 +968,15 @@ sub skip {
 }
 
 sub report_and_exit {
-    my ($ret, $pass, $fail, $desc) = @_;
+    my ($good, $pass, $fail, $desc) = @_;
 
     clean();
 
-    my $got = ($options{'expect-pass'} ? !$ret : $ret) ? 'good' : 'bad';
-    if ($ret) {
-        print "$got - $fail $desc\n";
-    } else {
+    my $got = ($options{'expect-pass'} ? $good : !$good) ? 'good' : 'bad';
+    if ($good) {
         print "$got - $pass $desc\n";
+    } else {
+        print "$got - $fail $desc\n";
     }
 
     exit($got eq 'bad');
@@ -984,7 +984,7 @@ sub report_and_exit {
 
 sub run_report_and_exit {
     my $ret = system @_;
-    report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@_");
+    report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
 }
 
 sub match_and_exit {
@@ -1023,7 +1023,7 @@ sub match_and_exit {
         }
         close_or_die($fh);
     }
-    report_and_exit(!$matches,
+    report_and_exit($matches,
                     $matches == 1 ? '1 match for' : "$matches matches for",
                     'no matches for', $match);
 }
@@ -1167,7 +1167,7 @@ if (-f 'config.sh') {
 
 if ($target =~ /config\.s?h/) {
     match_and_exit($target, @ARGV) if $match && -f $target;
-    report_and_exit(!-f $target, 'could build', 'could not build', $target)
+    report_and_exit(-f $target, 'could build', 'could not build', $target)
         if $options{'test-build'};
 
     skip("could not build $target") unless -f $target;
@@ -1243,7 +1243,7 @@ if ($expected_file_found && $expected_file eq 't/perl') {
 }
 
 if ($options{'test-build'}) {
-    report_and_exit(!$expected_file_found, 'could build', 'could not build',
+    report_and_exit($expected_file_found, 'could build', 'could not build',
                     $real_target);
 } elsif (!$expected_file_found) {
     skip("could not build $real_target");
