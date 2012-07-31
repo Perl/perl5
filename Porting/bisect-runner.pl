@@ -60,7 +60,8 @@ unless(GetOptions(\%options,
                       $options{match} = $_[1];
                       $options{'expect-pass'} = 0;
                   },
-                  'force-manifest', 'force-regen', 'test-build', 'validate',
+                  'force-manifest', 'force-regen', 'setpgrp!',
+                  'test-build', 'validate',
                   'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
                   'A=s@',
@@ -487,6 +488,13 @@ C<--expect-pass=0> is equivalent to C<--expect-fail>. I<1> is the default.
 
 =item *
 
+--setpgrp
+
+Run the testcase in its own process group. Specifically, call C<setpgrp 0, 0>
+just before C<exec>-ing the user testcase.
+
+=item *
+
 --all-fixups
 
 F<bisect-runner.pl> will minimally patch various files on a platform and
@@ -722,6 +730,10 @@ sub run_with_options {
         if (exists $options->{stdin}) {
             open STDIN, '<', $options->{stdin}
                 or die "Can't open STDIN from $options->{stdin}: $!";
+        }
+        if ($options->{setpgrp}) {
+            setpgrp 0, 0
+                or die "Can't setpgrp 0, 0: $!";
         }
         { exec @_ };
         die_255("Failed to start $name: $!");
@@ -1003,7 +1015,7 @@ sub report_and_exit {
 }
 
 sub run_report_and_exit {
-    my $ret = run_with_options(undef, @_);
+    my $ret = run_with_options({setprgp => $options{setpgrp}}, @_);
     report_and_exit(!$ret, 'zero exit from', 'non-zero exit from', "@_");
 }
 
