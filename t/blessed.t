@@ -35,7 +35,7 @@ use Storable qw(freeze thaw store retrieve);
 }
 
 my $test = 12;
-my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (2 * keys %::weird_refs);
+my $tests = $test + 23 + (2 * 6 * keys %::immortals) + (3 * keys %::weird_refs);
 plan(tests => $tests);
 
 package SHORT_NAME;
@@ -282,9 +282,25 @@ is(ref $t, 'STRESS_THE_STACK');
         my $success = eval { $frozen = freeze($obj); 1 };
         ok($success, "can freeze $weird objects")
             || diag("freezing failed: $@");
-        local $TODO = $weird eq 'VSTRING'
-            ? "can't store vstrings properly yet"
-            : undef;
-        is_deeply(thaw($frozen), $obj, "get the right value back");
+        my $thawn = thaw($frozen);
+        # is_deeply ignores blessings
+        is ref $thawn, ref $obj, "get the right blessing back for $weird";
+        if ($weird eq 'VSTRING') {
+            # It is not just Storable that did not support vstrings. :-)
+            # See https://rt.cpan.org/Ticket/Display.html?id=78678
+            my $newver = "version"->can("new")
+                           ? sub { "version"->new(shift) }
+                           : sub { "" };
+            if (!ok
+                  $$thawn eq $$obj && &$newver($$thawn) eq &$newver($$obj),
+                 "get the right value back"
+            ) {
+                diag "$$thawn vs $$obj";
+                diag &$newver($$thawn) eq &$newver($$obj) if &$newver(1);
+             }
+        }
+        else {
+            is_deeply($thawn, $obj, "get the right value back");
+        }
     }
 }
