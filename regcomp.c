@@ -5693,7 +5693,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
 					    exp, plen);
 	if (!runtime_code) {
-	    ReREFCNT_inc(old_re);
 	    if (used_setjump) {
 		JMPENV_POP;
 	    }
