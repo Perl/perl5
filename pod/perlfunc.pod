@@ -1686,6 +1686,13 @@ The exact behaviour may change in a future version of Perl.
 
     while (($key,$value) = each $hashref) { ... }
 
+As of Perl 5.18 you can use a bare C<each> in a C<while> loop,
+which will set C<$_> on every iteration.
+
+    while(each %ENV) {
+	print "$_=$ENV{$_}\n";
+    }
+
 To avoid confusing would-be users of your code who are running earlier
 versions of Perl with mysterious syntax errors, put this sort of thing at
 the top of your file to signal that your code will work I<only> on Perls of
@@ -1693,6 +1700,7 @@ a recent vintage:
 
     use 5.012;	# so keys/values/each work on arrays
     use 5.014;	# so keys/values/each work on scalars (experimental)
+    use 5.018;	# so each assigns to $_ in a lone while test
 
 See also C<keys>, C<values>, and C<sort>.
 
