@@ -4273,8 +4273,15 @@ PP(pp_entergiven)
     ENTER_with_name("given");
     SAVETMPS;
 
-    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-    sv_setsv_mg(PAD_SV(PL_op->op_targ), POPs);
+    if (PL_op->op_targ) {
+	SAVEPADSVANDMORTALIZE(PL_op->op_targ);
+	SvREFCNT_dec(PAD_SVl(PL_op->op_targ));
+	PAD_SVl(PL_op->op_targ) = SvREFCNT_inc_NN(POPs);
+    }
+    else {
+	SAVE_DEFSV;
+	DEFSV_set(POPs);
+    }
 
     PUSHBLOCK(cx, CXt_GIVEN, SP);
     PUSHGIVEN(cx);

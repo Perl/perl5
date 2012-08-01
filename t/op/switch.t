@@ -52,7 +52,7 @@ given(my $x = "foo") {
 
 $_ = "outside";
 given("inside") { check_outside1() }
-sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
+sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 
 {
     my $_ = "outside";
@@ -598,7 +598,7 @@ sub notfoo {"bar"}
 
 my $f = tie my $v, "FetchCounter";
 
-{   my $test_name = "Only one FETCH (in given)";
+{   my $test_name = "Multiple FETCHes in given, due to aliasing";
     my $ok;
     given($v = 23) {
     	when(undef) {}
@@ -609,7 +609,7 @@ my $f = tie my $v, "FetchCounter";
 	when(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
-    is($f->count(), 1, $test_name);
+    is($f->count(), 4, $test_name);
 }
 
 {   my $test_name = "Only one FETCH (numeric when)";
@@ -1366,6 +1366,7 @@ unreified_check(undef,"");
 
 {
     sub f1 {
+	my $_;
 	given(3) {
 	    return sub { $_ } # close over lexical $_
 	}

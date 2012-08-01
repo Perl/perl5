@@ -90,7 +90,7 @@
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
 /* FIXME for MAD - are these two ival? */
-%type <ival> mydefsv mintro
+%type <ival> mintro
 
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
@@ -213,10 +213,6 @@ block	:	'{' remember stmtseq '}'
 
 remember:	/* NULL */	/* start a full lexical scope */
 			{ $$ = block_start(TRUE); }
-	;
-
-mydefsv:	/* NULL */	/* lexicalize $_ */
-			{ $$ = (I32) Perl_allocmy(aTHX_ STR_WITH_LEN("$_"), 0); }
 	;
 
 mblock	:	'{' mremember stmtseq '}'
@@ -380,10 +376,15 @@ barestmt:	PLUGSTMT
 			  TOKEN_GETMAD($5,$$,')');
 			  PL_parser->copline = (line_t)IVAL($1);
 			}
-	|	GIVEN '(' remember mydefsv mexpr ')' mblock
+	|	GIVEN '(' remember mexpr ')' mblock
 			{
+			  const PADOFFSET offset = pad_findmy_pvs("$_", 0);
 			  $$ = block_end($3,
-				  newGIVENOP($5, op_scope($7), (PADOFFSET)$4));
+				  newGIVENOP($4, op_scope($6),
+				    offset == NOT_IN_PAD
+				    || PAD_COMPNAME_FLAGS_isOUR(offset)
+				      ? 0
+				      : offset));
 			  PL_parser->copline = (line_t)IVAL($1);
 			}
 	|	WHEN '(' remember mexpr ')' mblock
