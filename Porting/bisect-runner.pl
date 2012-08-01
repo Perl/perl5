@@ -6,7 +6,7 @@ use Pod::Usage;
 use Config;
 
 my @targets
-    = qw(config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
+    = qw(none config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
 
 my %options =
     (
@@ -218,6 +218,14 @@ F<Makefile> target (or equivalent) needed, to run the test case. If specified,
 this should be one of
 
 =over 4
+
+=item *
+
+I<none>
+
+Don't build anything - just run the user test case against a clean checkout.
+Using this gives a couple of features that a plain C<git bisect run> can't
+offer - automatic start revision detection, and test case C<--timeout>.
 
 =item *
 
@@ -1117,6 +1125,9 @@ system_or_die('git clean -dxf');
 if (!defined $target) {
     match_and_exit(undef, @ARGV) if $match;
     $target = 'test_prep';
+} elsif ($target eq 'none') {
+    match_and_exit(undef, @ARGV) if $match;
+    run_report_and_exit(@ARGV);
 }
 
 skip('no Configure - is this the //depot/perlext/Compiler branch?')
