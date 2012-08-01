@@ -7946,7 +7946,7 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 
 #endif
 
-STATIC bool
+PERL_STATIC_INLINE bool
 S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
 {
     /* Does <invlist> contain code point <cp> as part of the set? */

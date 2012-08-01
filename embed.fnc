@@ -1051,7 +1051,7 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 EMs	|void	|add_alternate	|NN AV** alternate_ptr|NN U8* string|STRLEN len
 EMsR	|SV*	|_new_invlist_C_array|NN UV* list
 : Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|bool complement_b
-EMsR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
+EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \

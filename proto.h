@@ -6359,7 +6359,7 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
-STATIC bool	S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
+PERL_STATIC_INLINE bool	S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP	\
