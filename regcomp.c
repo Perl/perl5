@@ -9611,12 +9611,15 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
    consisting of a just a single code point; <*valuep> is set to that value
    if the input is such.
 
-   If <node_p> is non-null it signifies that the caller can accept any legal
-   sequence.  <*node_p> is set as follows:
+   If <node_p> is non-null it signifies that the caller can accept any other
+   legal sequence (i.e., one that isn't just a single code point).  <*node_p>
+   is set as follows:
     1) \N means not-a-NL: points to a newly created REG_ANY node;
     2) \N{}:              points to a new NOTHING node;
     3) otherwise:         points to a new EXACT node containing the resolved
                           string.
+   Note that FALSE is returned for single code point sequences if <valuep> is
+   null.
  */
 
 STATIC bool
@@ -9635,7 +9638,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 
     GET_RE_DEBUG_FLAGS;
 
-    assert(node_p || valuep);
+    assert(cBOOL(node_p) ^ cBOOL(valuep));  /* Exactly one should be set */
 
     /* The [^\n] meaning of \N ignores spaces and comments under the /x
      * modifier.  The other meaning does not */
@@ -9713,7 +9716,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
      * point, and is terminated by the brace */
     has_multiple_chars = (endchar < endbrace);
 
-    if (valuep && ! node_p && (! has_multiple_chars || in_char_class)) {
+    if (valuep && (! has_multiple_chars || in_char_class)) {
 	/* We only pay attention to the first char of
         multichar strings being returned in char classes. I kinda wonder
 	if this makes sense as it does change the behaviour
@@ -9749,7 +9752,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
         }
         RExC_parse = endbrace + 1;
     }
-    else if (! node_p) {
+    else if (! node_p || ! has_multiple_chars) {
 
         /* Here, the input is legal, but not according to the caller's
          * options.  We fail without advancing the parse, so that the
@@ -10259,12 +10262,21 @@ tryagain:
 	    }
 	    break;
         case 'N': 
-            /* Handle \N and \N{NAME} here and not below because it can be
-            multicharacter. join_exact() will join them up later on. 
-            Also this makes sure that things like /\N{BLAH}+/ and 
-            \N{BLAH} being multi char Just Happen. dmq*/
+            /* Handle \N and \N{NAME} with multiple code points here and not
+             * below because it can be multicharacter. join_exact() will join
+             * them up later on.  Also this makes sure that things like
+             * /\N{BLAH}+/ and \N{BLAH} being multi char Just Happen. dmq.
+             * The options to the grok function call causes it to fail if the
+             * sequence is just a single code point.  We then go treat it as
+             * just another character in the current EXACT node, and hence it
+             * gets uniform treatment with all the other characters.  The
+             * special treatment for quantifiers is not needed for such single
+             * character sequences */
             ++RExC_parse;
-            grok_bslash_N(pRExC_state, &ret, NULL, flagp, depth, FALSE);
+            if (! grok_bslash_N(pRExC_state, &ret, NULL, flagp, depth, FALSE)) {
+                RExC_parse--;
+                goto defchar;
+            }
             break;
 	case 'k':    /* Handle \k<NAME> and \k'NAME' */
 	parse_named_seq:
@@ -10410,7 +10422,7 @@ tryagain:
 
 	defchar: {
 	    register STRLEN len = 0;
-	    register UV ender;
+	    UV ender;
 	    register char *p;
 	    char *s;
 #define MAX_NODE_STRING_SIZE 127
@@ -10492,7 +10504,6 @@ tryagain:
 		    case 'g': case 'G':   /* generic-backref, pos assertion */
 		    case 'h': case 'H':   /* HORIZWS */
 		    case 'k': case 'K':   /* named backref, keep marker */
-		    case 'N':             /* named char sequence */
 		    case 'p': case 'P':   /* Unicode property */
 		              case 'R':   /* LNBREAK */
 		    case 's': case 'S':   /* space class */
@@ -10510,6 +10521,19 @@ tryagain:
 			ender = '\n';
 			p++;
 			break;
+		    case 'N': /* Handle a single-code point named character. */
+                        /* The options cause it to fail if a multiple code
+                         * point sequence.  Handle those in the switch() above
+                         * */
+                        RExC_parse = p + 1;
+                        if (! grok_bslash_N(pRExC_state, NULL, &ender,
+                                            flagp, depth, FALSE))
+                        {
+                            RExC_parse = p = oldp;
+                            goto loopdone;
+                        }
+                        p = RExC_parse;
+                        break;
 		    case 'r':
 			ender = '\r';
 			p++;

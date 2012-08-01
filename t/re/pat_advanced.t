@@ -2083,6 +2083,27 @@ EOP
         }
         ok(! $failed, "Matched multi-char fold across EXACTFish node boundaries; if failed, was at count $failed");
 
+        $failed = 0;
+        for my $repeat (1 .. 300) {
+            my $string = $single x $repeat;
+            my $lhs = $string . "\N{LATIN SMALL LIGATURE FFI}";
+            if ($lhs !~ m/${string}ff\N{LATIN SMALL LETTER I}/i) {
+                $failed = $repeat;
+                last;
+            }
+        }
+        ok(! $failed, "Matched multi-char fold across EXACTFish node boundaries; if failed, was at count $failed");
+
+        $failed = 0;
+        for my $repeat (1 .. 300) {
+            my $string = $single x $repeat;
+            my $lhs = $string . "\N{LATIN SMALL LIGATURE FFL}";
+            if ($lhs !~ m/${string}ff\N{U+6c}/i) {
+                $failed = $repeat;
+                last;
+            }
+        }
+        ok(! $failed, "Matched multi-char fold across EXACTFish node boundaries; if failed, was at count $failed");
     }
 
     #
