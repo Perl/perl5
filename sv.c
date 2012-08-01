@@ -10406,7 +10406,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	switch (*q) {
 #ifdef WIN32
 	case 'I':			/* Ix, I32x, and I64x */
-#  ifdef WIN64
+#  ifdef USE_64_BIT_INT
 	    if (q[1] == '6' && q[2] == '4') {
 		q += 3;
 		intsize = 'q';
@@ -10417,7 +10417,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		q += 3;
 		break;
 	    }
-#  ifdef WIN64
+#  ifdef USE_64_BIT_INT
 	    intsize = 'q';
 #  endif
 	    q++;
