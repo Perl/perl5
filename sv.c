@@ -6240,6 +6240,10 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    iter_sv = (SV*)SvSTASH(sv);
 		    assert(!SvMAGICAL(sv));
 		    hash_index = ((XPVMG*) SvANY(sv))->xmg_u.xmg_hash_index;
+#ifdef DEBUGGING
+		    /* perl -DA does not like rubbish in SvMAGIC. */
+		    SvMAGIC_set(sv, 0);
+#endif
 
 		    /* free any remaining detritus from the hash struct */
 		    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);
