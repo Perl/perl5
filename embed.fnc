@@ -1934,8 +1934,9 @@ Es	|regnode*|reg_node	|NN struct RExC_state_t *pRExC_state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
-Es	|regnode*|grok_bslash_N|NN struct RExC_state_t *pRExC_state \
-				|NULLOK UV *valuep|NULLOK I32 *flagp|U32 depth
+Es	|bool	|grok_bslash_N	|NN struct RExC_state_t *pRExC_state \
+				|NULLOK regnode** nodep|NULLOK UV *valuep \
+				|NULLOK I32 *flagp|U32 depth|bool in_char_class
 Es	|void	|reginsert	|NN struct RExC_state_t *pRExC_state \
 				|U8 op|NN regnode *opnd|U32 depth
 Es	|void	|regtail	|NN struct RExC_state_t *pRExC_state \
