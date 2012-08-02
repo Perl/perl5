@@ -214,7 +214,12 @@ the warning "Wide character in setenv".
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Unterminated delimiter for here document|perldiag/"Unterminated delimiter for here document">
+
+This message now occurs when a here document label has an initial quotation mark but the final quotation mark is missing.
+
+This replaces a bogus and misleading error message about not finding the
+label itself [perl #114104].
 
 =back
 
