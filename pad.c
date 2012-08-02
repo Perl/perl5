@@ -1934,8 +1934,10 @@ the immediately surrounding code.
 =cut
 */
 
-static CV *
-S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
+static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
+
+static void
+S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 {
     dVAR;
     I32 ix;
@@ -1949,6 +1951,9 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     SV** outpad;
     long depth;
     bool subclones = FALSE;
+#ifdef DEBUGGING
+    CV * const outside_arg = outside;
+#endif
 
     assert(!CvUNIQUE(proto));
 
@@ -1976,38 +1981,19 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
       }
     }
     depth = outside ? CvDEPTH(outside) : 0;
-    assert(depth || cv || SvTYPE(proto) == SVt_PVFM);
+#ifdef DEBUGGING
+    assert(depth || outside_arg || SvTYPE(proto) == SVt_PVFM);
+#endif
     if (!depth)
 	depth = 1;
     assert(SvTYPE(proto) == SVt_PVFM || CvPADLIST(outside));
 
     ENTER;
     SAVESPTR(PL_compcv);
-
-    if (!cv) cv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
     PL_compcv = cv;
-    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
-				    |CVf_SLABBED);
-    CvCLONED_on(cv);
 
-    CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
-					   : CvFILE(proto);
-    if (CvNAMED(proto))
-	 SvANY(cv)->xcv_gv_u.xcv_hek = share_hek_hek(CvNAME_HEK(proto));
-    else CvGV_set(cv,CvGV(proto));
-    CvSTASH_set(cv, CvSTASH(proto));
-    OP_REFCNT_LOCK;
-    CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
-    OP_REFCNT_UNLOCK;
-    CvSTART(cv)		= CvSTART(proto);
     if (CvHASEVAL(cv))
 	CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
-    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
-
-    if (SvPOK(proto))
-	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
-    if (SvMAGIC(proto))
-	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
     SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;
@@ -2085,14 +2071,44 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 		S_cv_clone(aTHX_ (CV *)ppad[ix], (CV *)PL_curpad[ix], cv);
 	}
 
+    LEAVE;
+}
+
+static CV *
+S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
+{
+    assert(!CvUNIQUE(proto));
+
+    if (!cv) cv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
+    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
+				    |CVf_SLABBED);
+    CvCLONED_on(cv);
+
+    CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
+					   : CvFILE(proto);
+    if (CvNAMED(proto))
+	 SvANY(cv)->xcv_gv_u.xcv_hek = share_hek_hek(CvNAME_HEK(proto));
+    else CvGV_set(cv,CvGV(proto));
+    CvSTASH_set(cv, CvSTASH(proto));
+    OP_REFCNT_LOCK;
+    CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
+    OP_REFCNT_UNLOCK;
+    CvSTART(cv)		= CvSTART(proto);
+    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+
+    if (SvPOK(proto))
+	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
+    if (SvMAGIC(proto))
+	mg_copy((SV *)proto, (SV *)cv, 0, 0);
+
+    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside);
+
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
-	if (outside) cv_dump(outside, "Outside");
+	if (CvOUTSIDE(cv)) cv_dump(CvOUTSIDE(cv), "Outside");
 	cv_dump(proto,	 "Proto");
 	cv_dump(cv,	 "To");
     );
-
-    LEAVE;
 
     if (CvCONST(cv)) {
 	/* Constant sub () { $x } closing over $x - see lib/constant.pm:
