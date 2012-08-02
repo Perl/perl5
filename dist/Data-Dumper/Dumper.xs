@@ -22,7 +22,7 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 		    SV *pad, SV *xpad, SV *apad, SV *sep, SV *pair,
 		    SV *freezer, SV *toaster,
 		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
-		    I32 maxdepth, SV *sortkeys);
+		    I32 maxdepth, SV *sortkeys, int use_sparse_seen_hash);
 
 #ifndef HvNAME_get
 #define HvNAME_get HvNAME
@@ -267,7 +267,8 @@ static I32
 DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
 	SV *apad, SV *sep, SV *pair, SV *freezer, SV *toaster, I32 purity,
-	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys)
+	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys,
+        int use_sparse_seen_hash)
 {
     char tmpbuf[128];
     U32 i;
@@ -493,7 +494,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys);
+			maxdepth, sortkeys, use_sparse_seen_hash);
 		sv_catpvn(retval, ")}", 2);
 	    }						     /* plain */
 	    else {
@@ -501,7 +502,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys);
+			maxdepth, sortkeys, use_sparse_seen_hash);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -513,7 +514,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 		    postav, levelp,	indent, pad, xpad, apad, sep, pair,
 		    freezer, toaster, purity, deepcopy, quotekeys, bless,
-		    maxdepth, sortkeys);
+		    maxdepth, sortkeys, use_sparse_seen_hash);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -586,7 +587,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
 			levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys);
+			maxdepth, sortkeys, use_sparse_seen_hash);
 		if (ix < ixmax)
 		    sv_catpvn(retval, ",", 1);
 	    }
@@ -793,7 +794,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ hval, SvPVX_const(sname), SvCUR(sname), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, newapad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys);
+			maxdepth, sortkeys, use_sparse_seen_hash);
 		SvREFCNT_dec(sname);
 		Safefree(nkey_buffer);
 		if (indent >= 2)
@@ -883,7 +884,12 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    return 1;
 		}
 	    }
-	    else if (val != &PL_sv_undef) {
+            /* If we're allowed to keep only a sparse "seen" hash
+             * (IOW, the user does not expect it to contain everything
+             * after the dump, then only store in seen hash if the SV
+             * ref count is larger than 1. If it's 1, then we know that
+             * there is no other reference, duh. This is an optimization. */
+	    else if (val != &PL_sv_undef && (!use_sparse_seen_hash || SvREFCNT(val) > 1)) {
 		SV * const namesv = newSVpvn("\\", 1);
 		sv_catpvn(namesv, name, namelen);
 		seenentry = newAV();
@@ -995,7 +1001,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 				seenhv, postav, &nlevel, indent, pad, xpad,
 				newapad, sep, pair, freezer, toaster, purity,
 				deepcopy, quotekeys, bless, maxdepth, 
-				sortkeys);
+				sortkeys, use_sparse_seen_hash);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -1077,6 +1083,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    I32 purity, deepcopy, quotekeys, maxdepth = 0;
 	    char tmpbuf[1024];
 	    I32 gimme = GIMME;
+            int use_sparse_seen_hash = 0;
 
 	    if (!SvROK(href)) {		/* call new to get an object first */
 		if (items < 2)
@@ -1119,6 +1126,10 @@ Data_Dumper_Dumpxs(href, ...)
 
 		if ((svp = hv_fetch(hv, "seen", 4, FALSE)) && SvROK(*svp))
 		    seenhv = (HV*)SvRV(*svp);
+                else
+                    use_sparse_seen_hash = 1;
+		if ((svp = hv_fetch(hv, "noseen", 6, FALSE)))
+		    use_sparse_seen_hash = (SvOK(*svp) && SvIV(*svp) != 0);
 		if ((svp = hv_fetch(hv, "todump", 6, FALSE)) && SvROK(*svp))
 		    todumpav = (AV*)SvRV(*svp);
 		if ((svp = hv_fetch(hv, "names", 5, FALSE)) && SvROK(*svp))
@@ -1236,7 +1247,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep, pair,
 			    freezer, toaster, purity, deepcopy, quotekeys,
-			    bless, maxdepth, sortkeys);
+			    bless, maxdepth, sortkeys, use_sparse_seen_hash);
 		    SPAGAIN;
 		
 		    if (indent >= 2 && !terse)

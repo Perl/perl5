@@ -83,11 +83,11 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 390; $XS = 1;
+  $TMAX = 402; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 195; $XS = 0;
+  $TMAX = 201; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -125,6 +125,11 @@ EOT
 TEST q(Data::Dumper->Dump([$a,$b,$c], [qw(a b), 6]));
 TEST q(Data::Dumper->Dumpxs([$a,$b,$c], [qw(a b), 6])) if $XS;
 
+SCOPE: {
+  local $Data::Dumper::Sparseseen = 1;
+  TEST q(Data::Dumper->Dump([$a,$b,$c], [qw(a b), 6]));
+  TEST q(Data::Dumper->Dumpxs([$a,$b,$c], [qw(a b), 6])) if $XS;
+}
 
 ############# 7
 ##
@@ -149,6 +154,12 @@ EOT
 $Data::Dumper::Purity = 1;         # fill in the holes for eval
 TEST q(Data::Dumper->Dump([$a, $b], [qw(*a b)])); # print as @a
 TEST q(Data::Dumper->Dumpxs([$a, $b], [qw(*a b)])) if $XS;
+
+SCOPE: {
+  local $Data::Dumper::Sparseseen = 1;
+  TEST q(Data::Dumper->Dump([$a, $b], [qw(*a b)])); # print as @a
+  TEST q(Data::Dumper->Dumpxs([$a, $b], [qw(*a b)])) if $XS;
+}
 
 ############# 13
 ##

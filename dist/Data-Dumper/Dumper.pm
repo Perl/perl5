@@ -55,6 +55,7 @@ $Pair       = ' => '    unless defined $Pair;
 $Useperl    = 0         unless defined $Useperl;
 $Sortkeys   = 0         unless defined $Sortkeys;
 $Deparse    = 0         unless defined $Deparse;
+$Sparseseen = 0         unless defined $Sparseseen;
 
 #
 # expects an arrayref of values to be dumped.
@@ -94,6 +95,7 @@ sub new {
 	     useperl    => $Useperl,    # use the pure Perl implementation
 	     sortkeys   => $Sortkeys,   # flag or filter for sorting hash keys
 	     deparse	=> $Deparse,	# use B::Deparse for coderefs
+             noseen     => $Sparseseen, # do not populate the seen hash unless necessary
 	   };
 
   if ($Indent > 0) {
@@ -700,6 +702,11 @@ sub Deparse {
   defined($v) ? (($s->{'deparse'} = $v), return $s) : $s->{'deparse'};
 }
 
+sub Sparseseen {
+  my($s, $v) = @_;
+  defined($v) ? (($s->{'noseen'} = $v), return $s) : $s->{'noseen'};
+}
+
 # used by qquote below
 my %esc = (  
     "\a" => "\\a",
@@ -1098,6 +1105,26 @@ XSUB implementation doesn't support it.
 
 Caution : use this option only if you know that your coderefs will be
 properly reconstructed by C<B::Deparse>.
+
+=item *
+
+$Data::Dumper::Sparseseen I<or>  $I<OBJ>->Sparseseen(I<[NEWVAL]>)
+
+By default, Data::Dumper builds up the "seen" hash of scalars that
+it has encountered during serialization. This is very expensive.
+This seen hash is necessary to support and even just detect circular
+references. It is exposed to the user via the C<Seen()> call both
+for writing and reading.
+
+If you, as a user, do not need explicit access to the "seen" hash,
+then you can set the C<Sparseseen> option to allow Data::Dumper
+to eschew building the "seen" hash for scalars that are known not
+to possess more than one reference. This speeds up serialization
+considerably if you use the XS implementation.
+
+Note: If you turn on C<Sparseseen>, then you must not rely on the
+content of the seen hash since its contents will be an
+implementation detail!
 
 =back
 
