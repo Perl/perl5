@@ -985,6 +985,16 @@ sub run_tests {
                    "Zerolength charname in charclass doesn't match \\\\0"];
         ok $w && $w =~ /Ignoring zero length/,
                  'Ignoring zero length \N{} in character class warning';
+        undef $w;
+        eval q [ok 'xy' =~ /x[\N{EMPTY-STR} y]/x,
+                    'Empty string charname in [] is ignored; finds a following character'];
+        ok $w && $w =~ /Ignoring zero length/,
+                 'Ignoring zero length \N{} in character class warning';
+        undef $w;
+        eval q [ok 'x ' =~ /x[\N{EMPTY-STR} y]/,
+                    'Empty string charname in [] is ignored; finds a following blank under /x'];
+        ok $w && $w =~ /Ignoring zero length/,
+                 'Ignoring zero length \N{} in character class warning';
 
         ok 'AB'  =~ /(\N{EVIL})/ && $1 eq 'A', 'Charname caching $1';
         ok 'ABC' =~ /(\N{EVIL})/,              'Charname caching $1';
