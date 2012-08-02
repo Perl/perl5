@@ -888,7 +888,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
              * (IOW, the user does not expect it to contain everything
              * after the dump, then only store in seen hash if the SV
              * ref count is larger than 1. If it's 1, then we know that
-             * there is no other reference, duh. This is an optimization. */
+             * there is no other reference, duh. This is an optimization.
+             * Note that we'd have to check for weak-refs, too, but this is
+             * already the branch for non-refs only. */
 	    else if (val != &PL_sv_undef && (!use_sparse_seen_hash || SvREFCNT(val) > 1)) {
 		SV * const namesv = newSVpvn("\\", 1);
 		sv_catpvn(namesv, name, namelen);
