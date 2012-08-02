@@ -138,9 +138,28 @@ Problems> to see those identified in the 5.16.0 release.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.16.1 represents approximately 2 months of development since Perl
+5.16.0 and contains approximately 14,000 lines of changes across 96
+files from 8 authors.
 
-  perl Porting/acknowledgements.pl v5.16.0..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to
+have contributed the improvements that became Perl 5.16.1:
+
+Chris 'BinGOs' Williams, Craig A. Berry, Father Chrysostomos, Karl
+Williamson, Paul Johnson, Reini Urban, Ricardo Signes, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not
+include the names of the (very much appreciated) contributors who
+reported issues to the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors,
+please see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
