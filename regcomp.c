@@ -11319,7 +11319,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     register UV nextvalue;
     register UV prevvalue = OOB_UNICODE;
     register IV range = 0;
-    UV value = 0; /* XXX:dmq: needs to be referenceable (unfortunately) */
+    UV value = 0;
     register regnode *ret;
     STRLEN numlen;
     IV namedclass = OOB_NAMEDCLASS;
@@ -11484,13 +11484,11 @@ parseit:
                     if this makes sense as it does change the behaviour
                     from earlier versions, OTOH that behaviour was broken
                     as well. */
-                    UV v; /* value is register so we cant & it /grrr */
-                    if (! grok_bslash_N(pRExC_state, NULL, &v, NULL, depth,
+                    if (! grok_bslash_N(pRExC_state, NULL, &value, NULL, depth,
                                       TRUE /* => charclass */))
                     {
                         goto parseit;
                     }
-                    value= v; 
                 }
                 break;
 	    case 'p':
