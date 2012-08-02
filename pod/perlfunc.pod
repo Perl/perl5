@@ -5178,16 +5178,23 @@ X<printf>
 =for Pod::Functions output a formatted list to a filehandle
 
 Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that C<$\>
-(the output record separator) is not appended.  The first argument of the
-list will be interpreted as the C<printf> format.  See
+(the output record separator) is not appended.  The FORMAT and the
+LIST are actually parsed as a single list.  The first argument
+of the list will be interpreted as the C<printf> format.  This
+means that C<printf(@_)> will use C<$_[0]> as the format.  See
 L<sprintf|/sprintf FORMAT, LIST> for an
-explanation of the format argument.  If you omit the LIST, C<$_> is used;
-to use FILEHANDLE without a LIST, you must use a real filehandle like
-C<FH>, not an indirect one like C<$fh>.  If C<use locale> (including
+explanation of the format argument.  If C<use locale> (including
 C<use locale ':not_characters'>) is in effect and
 POSIX::setlocale() has been called, the character used for the decimal
 separator in formatted floating-point numbers is affected by the LC_NUMERIC
 locale setting.  See L<perllocale> and L<POSIX>.
+
+For historical reasons, if you omit the list, C<$_> is used as the format;
+to use FILEHANDLE without a list, you must use a real filehandle like
+C<FH>, not an indirect one like C<$fh>.  However, this will rarely do what
+you want; if $_ contains formatting codes, they will be replaced with the
+empty string and a warning will be emitted if warnings are enabled.  Just
+use C<print> if you want to print the contents of $_.
 
 Don't fall into the trap of using a C<printf> when a simple
 C<print> would do.  The C<print> is more efficient and less
