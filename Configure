@@ -20424,9 +20424,9 @@ case "$pager" in
 	esac
 	;;
 *)	dflt="$pager"
-	fn="f/($pager)"
 	;;
 esac
+fn="f/($dflt)"
 echo " "
 rp='What pager is used on your system?'
 . ./getfile
