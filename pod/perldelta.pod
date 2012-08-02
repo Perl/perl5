@@ -61,6 +61,13 @@ C<utf8::downgrade> works, that result is used; otherwise, the equivalent of
 C<utf8::encode> is used, and a warning is issued about wide characters
 (L</Diagnostics>).
 
+=head2 C<given> now aliases the global $_
+
+Instead of assigning to an implicit lexical $_, C<given> now makes the
+global $_ an alias for its argument, just like C<foreach>.  However, it
+still uses lexical $_ if there is lexical $_ in scope (again, just like
+C<foreach>).
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
