@@ -5203,6 +5203,18 @@ character to get your parentheses to balance.  See L<attributes>.
 compressed integer format and could not be converted to an integer.
 See L<perlfunc/pack>.
 
+=item Unterminated delimiter for here document
+
+(F) This message occurs when a here document label has an initial
+quotation mark but the final quotation mark is missing.  Perhaps
+you wrote:
+
+    <<"foo
+
+instead of:
+
+    <<"foo"
+
 =item Unterminated \g{...} pattern in regex; marked by <-- HERE in m/%s/
 
 (F) You missed a close brace on a \g{..} pattern (group reference) in

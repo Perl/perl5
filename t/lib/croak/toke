@@ -3,3 +3,8 @@ __END__
 my sub;
 EXPECT
 Missing name in "my sub" at - line 1.
+########
+# NAME Unterminated delimiter for here document
+<<"foo
+EXPECT
+Unterminated delimiter for here document at - line 1.

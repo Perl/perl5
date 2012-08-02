@@ -9447,9 +9447,10 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = peek;
 	term = *s++;
 	s = delimcpy(d, e, s, PL_bufend, term, &len);
+	if (s == PL_bufend)
+	    Perl_croak(aTHX_ "Unterminated delimiter for here document");
 	d += len;
-	if (s < PL_bufend)
-	    s++;
+	s++;
     }
     else {
 	if (*s == '\\')
