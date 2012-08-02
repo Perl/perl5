@@ -415,6 +415,11 @@ mismatch warnings from omitting the sub name.
 
 C<undef> on a subroutine now clears call checkers.
 
+=item *
+
+The C<ref> operator started leaking memory on blessed objects in Perl
+5.16.0.  This has been fixed [perl #114340].
+
 =back
 
 =head1 Known Problems
