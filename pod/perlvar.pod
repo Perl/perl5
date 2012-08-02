@@ -107,10 +107,11 @@ Here are the places where Perl will assume C<$_> even if you don't use it:
 The following functions use C<$_> as a default argument:
 
 abs, alarm, chomp, chop, chr, chroot,
-cos, defined, eval, evalbytes, exp, glob,
-hex, int, lc, lcfirst, length, log, lstat, mkdir, oct, ord, pos, print,
+cos, defined, eval, evalbytes, exp, fc, glob, hex, int, lc,
+lcfirst, length, log, lstat, mkdir, oct, ord, pos, print, printf,
 quotemeta, readlink, readpipe, ref, require, reverse (in scalar context only),
-rmdir, sin, split (on its second argument), sqrt, stat, study, uc, ucfirst,
+rmdir, say, sin, split (for its second
+argument), sqrt, stat, study, uc, ucfirst,
 unlink, unpack.
 
 =item *
@@ -138,7 +139,8 @@ The implicit variable of C<given()>.
 
 =item *
 
-The default place to put an input record when a C<< <FH> >>
+The default place to put the next value or input record
+when a C<< <FH> >>, C<readline>, C<readdir> or C<each>
 operation's result is tested by itself as the sole criterion of a C<while>
 test.  Outside a C<while> test, this will not happen.
 
