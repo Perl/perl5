@@ -129,6 +129,12 @@ not changed.
 L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
 loop controls with the correct precedence.
 
+=item *
+
+L<Storable> has been upgraded from version 2.37 to 2.38.  It can now freeze
+and thaw vstrings correctly.  This causes a slight incompatible change in
+the storage format, so the format version has increased to 2.9.
+
 =back
 
 =head2 Removed Modules and Pragmata
