@@ -21,6 +21,6 @@ the "pod" directory inside the release and on the web.
 [ACKNOWLEDGEMENTS SECTION FROM PERLDELTA]
 
 We expect to release Perl [NEXT BLEAD VERSION] on [FUTURE DATE].  The next
-major stable release of Perl 5, version 5.16.0, should appear in May 2012.
+major stable release of Perl 5, version 5.16.1, should appear in May 2012.
 
 [YOUR SALUATION HERE]
