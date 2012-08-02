@@ -146,10 +146,16 @@ test.  Outside a C<while> test, this will not happen.
 
 =back
 
-As C<$_> is a global variable, this may lead in some cases to unwanted
-side-effects.  As of perl v5.10.0, you can now use a lexical version of
+C<$_> is by default a global variable.  However, as
+of perl v5.10.0, you can use a lexical version of
 C<$_> by declaring it in a file or in a block with C<my>.  Moreover,
-declaring C<our $_> restores the global C<$_> in the current scope.
+declaring C<our $_> restores the global C<$_> in the current scope.  Though
+this seemed like a good idea at the time it was introduced, lexical C<$_>
+actually causes more problems than it solves.  If you call a function that
+expects to be passed information via C<$_>, it may or may not work,
+depending on how the function is written, there not being any easy way to
+solve this.  Just avoid lexical C<$_>, unless you are feeling particularly
+masochistic.
 
 Mnemonic: underline is understood in certain operations.
 
