@@ -6,6 +6,14 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.135_02 (Dec 29 2011)
+
+Makes DD dump *{''} properly.
+
+[perl #101162] DD support for vstrings:
+Support for vstrings to Data::Dumper, in both Perl and XS
+implementations.
+
 =item 2.135_01 (Dec 19 2011)
 
 Make Data::Dumper UTF8- and null-clean with GVs.
