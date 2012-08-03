@@ -202,6 +202,15 @@ CvNAME_HEK(CV *sv)
 	? ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_hek
 	: 0;
 }
+/* This lowers the refernce count of the previous value, but does *not*
+   increment the reference count of the new value. */
+#define CvNAME_HEK_set(cv, hek) ( \
+	CvNAME_HEK((CV *)(cv))						 \
+	    ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)	  \
+	    : (void)0,						   \
+	((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_gv_u.xcv_hek = (hek), \
+	CvNAMED_on(cv)						     \
+    )
 
 /*
 =head1 CV reference counts and CvOUTSIDE

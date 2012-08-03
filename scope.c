@@ -937,8 +937,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		    assert(hek);
 		    share_hek_hek(hek);
 		    cv_undef((CV *)sv);
-		    SvANY((CV *)sv)->xcv_gv_u.xcv_hek = hek;
-		    CvNAMED_on(sv);
+		    CvNAME_HEK_set(sv, hek);
 		    break;
 		}
 		default:
@@ -964,9 +963,8 @@ Perl_leave_scope(pTHX_ I32 base)
 
 		    /* Share name */
 		    assert(CvNAMED(sv));
-		    SvANY((CV *)*svp)->xcv_gv_u.xcv_hek =
-			share_hek_hek(SvANY((CV *)sv)->xcv_gv_u.xcv_hek);
-		    CvNAMED_on(*svp);
+		    CvNAME_HEK_set(*svp,
+			share_hek_hek(CvNAME_HEK((CV *)sv)));
 
 		    /* Steal magic */
 		    while (mg) {

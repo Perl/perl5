@@ -381,8 +381,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
-    if (CvNAMED(cv)) unshare_hek(CvNAME_HEK(cv)),
-		     SvANY(cv)->xcv_gv_u.xcv_hek = NULL;
+    if (CvNAMED(cv)) CvNAME_HEK_set(cv, NULL);
     else	     CvGV_set(cv, NULL);
 
     /* This statement and the subsequence if block was pad_undef().  */
@@ -2071,9 +2070,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
 			assert(CvNAME_HEK((CV *)ppad[ix]));
 			sv = newSV_type(SVt_PVCV);
-			SvANY((CV *)sv)->xcv_gv_u.xcv_hek =
-			    share_hek_hek(CvNAME_HEK((CV *)ppad[ix]));
-			CvNAMED_on(sv);
+			CvNAME_HEK_set(sv,
+			    share_hek_hek(CvNAME_HEK((CV *)ppad[ix])));
 			sv_magic(sv,mg->mg_obj,PERL_MAGIC_proto,NULL,0);
 		    }
 		    else sv = SvREFCNT_inc(ppad[ix]);
@@ -2123,10 +2121,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
 					   : CvFILE(proto);
     if (CvNAMED(proto))
-    {
-	 SvANY(cv)->xcv_gv_u.xcv_hek = share_hek_hek(CvNAME_HEK(proto));
-	 CvNAMED_on(cv);
-    }
+	 CvNAME_HEK_set(cv, share_hek_hek(CvNAME_HEK(proto)));
     else CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
     OP_REFCNT_LOCK;

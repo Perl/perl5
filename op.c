@@ -6990,12 +6990,12 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
 	else {
-	    SvANY(*spot)->xcv_gv_u.xcv_hek = hek =
+	    CvNAME_HEK_set(*spot, hek =
 		share_hek(
 		    PadnamePV(name)+1,
 		    PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1), 0
-		);
-	    CvNAMED_on(*spot);
+		)
+	    );
 	}
 	mg = mg_find(*svspot, PERL_MAGIC_proto);
 	if (mg) {
@@ -7155,13 +7155,13 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	*spot = cv;
     }
     if (!CvNAME_HEK(cv)) {
-	SvANY(cv)->xcv_gv_u.xcv_hek =
+	CvNAME_HEK_set(cv,
 	 hek
 	  ? share_hek_hek(hek)
 	  : share_hek(PadnamePV(name)+1,
 		      PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1),
-		      0);
-	CvNAMED_on(cv);
+		      0)
+	);
     }
     CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH_set(cv, PL_curstash);
