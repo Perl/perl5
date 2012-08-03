@@ -157,6 +157,11 @@ PP(pp_introcv)
     DIE(aTHX_ "panic: introcv");
 }
 
+PP(pp_clonecv)
+{
+    DIE(aTHX_ "panic: clonecv");
+}
+
 /* Translations. */
 
 static const char S_no_symref_sv[] =

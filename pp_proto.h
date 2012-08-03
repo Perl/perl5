@@ -34,6 +34,7 @@ PERL_CALLCONV OP *Perl_pp_chop(pTHX);
 PERL_CALLCONV OP *Perl_pp_chown(pTHX);
 PERL_CALLCONV OP *Perl_pp_chr(pTHX);
 PERL_CALLCONV OP *Perl_pp_chroot(pTHX);
+PERL_CALLCONV OP *Perl_pp_clonecv(pTHX);
 PERL_CALLCONV OP *Perl_pp_close(pTHX);
 PERL_CALLCONV OP *Perl_pp_closedir(pTHX);
 PERL_CALLCONV OP *Perl_pp_complement(pTHX);
