@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 106;
+plan 107;
 
 # -------------------- our -------------------- #
 
@@ -83,9 +83,6 @@ sub bar::c { 43 }
 }
 
 # -------------------- state -------------------- #
-
-sub on { $::TODO = ' ' }
-sub off { $::TODO = undef }
 
 use 5.01; # state
 {
@@ -415,33 +412,31 @@ sub mmake_closure {
 }
 $sub1 = mmake_closure 48;
 $sub2 = mmake_closure 49;
-on;
-is eval { &$sub1 }, 48, 'my sub in closure (1)';
-is eval { &$sub2 }, 49, 'my sub in closure (2)';
+is &$sub1, 48, 'my sub in closure (1)';
+is &$sub2, 49, 'my sub in closure (2)';
 # Test that they are cloned in named subs.
 {
   use warnings;
   my $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 65 teetet
-    sub foom {
+    sub mfoom {
       my $x = shift;
       my sub poom { $x }
-      eval{\&poom}
+      \&poom
     }
   ';
   is $w, undef, 'my subs get no "Variable will not stay shared" messages';
-  my $poom = foom(27);
-  my $poom2 = foom(678);
-  is eval { $poom->() }, 27, 'my subs closing over outer my var (1)';
-  is eval { $poom2->() }, 678, 'my subs closing over outer my var (2)';
+  my $poom = mfoom(27);
+  my $poom2 = mfoom(678);
+  is $poom->(), 27, 'my subs closing over outer my var (1)';
+  is $poom2->(), 678, 'my subs closing over outer my var (2)';
   my $x = 43;
   my sub aoeu;
   for $x (765) {
     my sub etetetet { $x }
-    my sub aoeu { $x }
+    sub aoeu { $x }
     is etetetet, 765, 'my sub respects for() localisation';
-off;
     is aoeu, 43, 'unless it is declared outside the for loop';
   }
 }
@@ -463,11 +458,9 @@ sub make_anon_with_my_sub{
   &$s;
 
   # And make sure the my subs were actually cloned.
-on;
   isnt make_anon_with_my_sub->(0), &$s(0),
     'my subs in anon subs are cloned';
   isnt &$s(0), &$s(0), 'at each invocation of the enclosing sub';
-off;
 }
 {
   my sub BEGIN { exit };
@@ -485,3 +478,13 @@ off;
   is $w, "Subroutine redef redefined at pygpyf line 56.\n",
          "sub redefinition warnings from my subs";
 }
+
+# -------------------- Interactions (and misc tests) -------------------- #
+
+is sub {
+    my sub s1;
+    my sub s2 { 3 };
+    sub s1 { state sub foo { \&s2 } foo }
+    s1
+  }->()(), 3, 'state sub inside my sub closing over my sub uncle';
+

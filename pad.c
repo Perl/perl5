@@ -381,7 +381,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
-    if (CvNAMED(cv)) unshare_hek(CvNAME_HEK(cv));
+    if (CvNAMED(cv)) unshare_hek(CvNAME_HEK(cv)),
+		     SvANY(cv)->xcv_gv_u.xcv_hek = NULL;
     else	     CvGV_set(cv, NULL);
 
     /* This statement and the subsequence if block was pad_undef().  */
@@ -646,6 +647,8 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 	sv_upgrade(PL_curpad[offset], SVt_PVAV);
     else if (namelen != 0 && *namepv == '%')
 	sv_upgrade(PL_curpad[offset], SVt_PVHV);
+    else if (namelen != 0 && *namepv == '&')
+	sv_upgrade(PL_curpad[offset], SVt_PVCV);
     assert(SvPADMY(PL_curpad[offset]));
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
@@ -1298,6 +1301,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			*out_capture = sv_2mortal(MUTABLE_SV(newAV()));
 		    else if (namelen != 0 && *namepv == '%')
 			*out_capture = sv_2mortal(MUTABLE_SV(newHV()));
+		    else if (namelen != 0 && *namepv == '&')
+			*out_capture = sv_2mortal(newSV_type(SVt_PVCV));
 		    else
 			*out_capture = sv_newmortal();
 		}
@@ -1531,11 +1536,12 @@ lexicals in this scope and warn of any lexicals that never got introduced.
 =cut
 */
 
-void
+OP *
 Perl_pad_leavemy(pTHX)
 {
     dVAR;
     I32 off;
+    OP *o = NULL;
     SV * const * const svp = AvARRAY(PL_comppad_name);
 
     PL_pad_reset_pending = FALSE;
@@ -1552,7 +1558,7 @@ Perl_pad_leavemy(pTHX)
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
-	const SV * const sv = svp[off];
+	SV * const sv = svp[off];
 	if (sv && sv != &PL_sv_undef && !SvFAKE(sv)
 	    && COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 	{
@@ -1563,6 +1569,12 @@ Perl_pad_leavemy(pTHX)
 		(unsigned long)COP_SEQ_RANGE_LOW(sv),
 		(unsigned long)COP_SEQ_RANGE_HIGH(sv))
 	    );
+	    if (!PadnameIsSTATE(sv) && !PadnameIsOUR(sv)
+	     && *PadnamePV(sv) == '&' && PadnameLEN(sv) > 1) {
+		OP *kid = newOP(OP_INTROCV, 0);
+		kid->op_targ = off;
+		o = op_prepend_elem(OP_LINESEQ, kid, o);
+	    }
 	}
     }
     PL_cop_seqmax++;
@@ -1570,6 +1582,7 @@ Perl_pad_leavemy(pTHX)
 	PL_cop_seqmax++;
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	    "Pad leavemy: seq = %ld\n", (long)PL_cop_seqmax));
+    return o;
 }
 
 /*
@@ -2038,9 +2051,32 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		       ing over other state subs’ entries, so we have
 		       to put a stub here and then clone into it on the
 		       second pass. */
-		    sv = SvPAD_STATE(namesv) && !CvCLONED(ppad[ix])
-			? (subclones = 1, newSV_type(SVt_PVCV))
-			: SvREFCNT_inc(ppad[ix]);
+		    if (SvPAD_STATE(namesv) && !CvCLONED(ppad[ix])) {
+			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
+			subclones = 1;
+			sv = newSV_type(SVt_PVCV);
+		    }
+		    else if (PadnameLEN(namesv)>1 && !PadnameIsOUR(namesv))
+		    {
+			/* my sub */
+			/* This is actually a stub with a proto CV attached
+			   to it by magic.  Since the stub itself is used
+			   when the proto is cloned, we need a new stub
+			   that nonetheless shares the same proto.
+			 */
+			MAGIC * const mg =
+			    mg_find(ppad[ix], PERL_MAGIC_proto);
+			assert(mg);
+			assert(mg->mg_obj);
+			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
+			assert(CvNAME_HEK((CV *)ppad[ix]));
+			sv = newSV_type(SVt_PVCV);
+			SvANY((CV *)sv)->xcv_gv_u.xcv_hek =
+			    share_hek_hek(CvNAME_HEK((CV *)ppad[ix]));
+			CvNAMED_on(sv);
+			sv_magic(sv,mg->mg_obj,PERL_MAGIC_proto,NULL,0);
+		    }
+		    else sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')
 		    sv = MUTABLE_SV(newAV());
                 else if (sigil == '%')
@@ -2087,7 +2123,10 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
 					   : CvFILE(proto);
     if (CvNAMED(proto))
+    {
 	 SvANY(cv)->xcv_gv_u.xcv_hek = share_hek_hek(CvNAME_HEK(proto));
+	 CvNAMED_on(cv);
+    }
     else CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
     OP_REFCNT_LOCK;
@@ -2139,6 +2178,15 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     if (!CvPADLIST(proto)) Perl_croak(aTHX_ "panic: no pad in cv_clone");
     return S_cv_clone(aTHX_ proto, NULL, NULL);
+}
+
+/* Called only by pp_clonecv */
+CV *
+Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
+{
+    PERL_ARGS_ASSERT_CV_CLONE_INTO;
+    cv_undef(target);
+    return S_cv_clone(aTHX_ proto, target, NULL);
 }
 
 /*

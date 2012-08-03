@@ -2894,6 +2894,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     dVAR;
     const int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* retval = scalarseq(seq);
+    OP *o;
 
     CALL_BLOCK_HOOKS(bhk_pre_end, &retval);
 
@@ -2901,7 +2902,66 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     CopHINTS_set(&PL_compiling, PL_hints);
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
-    pad_leavemy();
+    o = pad_leavemy();
+
+    if (o) {
+	/* pad_leavemy has created a sequence of introcv ops for all my
+	   subs declared in the block.  We have to replicate that list with
+	   clonecv ops, to deal with this situation:
+
+	       sub {
+		   my sub s1;
+		   my sub s2;
+		   sub s1 { state sub foo { \&s2 } }
+	       }->()
+
+	   Originally, I was going to have introcv clone the CV and turn
+	   off the stale flag.  Since &s1 is declared before &s2, the
+	   introcv op for &s1 is executed (on sub entry) before the one for
+	   &s2.  But the &foo sub inside &s1 (which is cloned when &s1 is
+	   cloned, since it is a state sub) closes over &s2 and expects
+	   to see it in its outer CV’s pad.  If the introcv op clones &s1,
+	   then &s2 is still marked stale.  Since &s1 is not active, and
+	   &foo closes over &s1’s implicit entry for &s2, we get a ‘Varia-
+	   ble will not stay shared’ warning.  Because it is the same stub
+	   that will be used when the introcv op for &s2 is executed, clos-
+	   ing over it is safe.  Hence, we have to turn off the stale flag
+	   on all lexical subs in the block before we clone any of them.
+	   Hence, having introcv clone the sub cannot work.  So we create a
+	   list of ops like this:
+
+	       lineseq
+		  |
+		  +-- introcv
+		  |
+		  +-- introcv
+		  |
+		  +-- introcv
+		  |
+		  .
+		  .
+		  .
+		  |
+		  +-- clonecv
+		  |
+		  +-- clonecv
+		  |
+		  +-- clonecv
+		  |
+		  .
+		  .
+		  .
+	 */
+	OP *kid = o->op_flags & OPf_KIDS ? cLISTOPo->op_first : o;
+	OP * const last = o->op_flags & OPf_KIDS ? cLISTOPo->op_last : o;
+	for (;; kid = kid->op_sibling) {
+	    OP *newkid = newOP(OP_CLONECV, 0);
+	    newkid->op_targ = kid->op_targ;
+	    o = op_append_elem(OP_LINESEQ, o, newkid);
+	    if (kid == last) break;
+	}
+	retval = op_prepend_elem(OP_LINESEQ, o, retval);
+    }
 
     CALL_BLOCK_HOOKS(bhk_post_end, &retval);
 
@@ -6874,6 +6934,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     PADNAME *name;
     PADOFFSET pax = o->op_targ;
     CV *outcv = CvOUTSIDE(PL_compcv);
+    HEK *hek = NULL;
 
     PERL_ARGS_ASSERT_NEWMYSUB;
 
@@ -6916,13 +6977,37 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	goto done;
     }
 
-    if (SvTYPE(*spot) != SVt_PVCV) {	/* Maybe prototype now, and had at
-					   maximum a prototype before. */
-	SvREFCNT_dec(*spot);
-	*spot = NULL;
+    if (PadnameIsSTATE(name))
+	cv = *spot;
+    else {
+	MAGIC *mg;
+	assert (SvTYPE(*spot) == SVt_PVCV);
+	if (CvROOT(*spot)) {
+	    cv = *spot;
+	    *svspot = newSV_type(SVt_PVCV);
+	    SvPADMY_on(*spot);
+	}
+	if (CvNAMED(*spot))
+	    hek = CvNAME_HEK(*spot);
+	else {
+	    SvANY(*spot)->xcv_gv_u.xcv_hek = hek =
+		share_hek(
+		    PadnamePV(name)+1,
+		    PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1), 0
+		);
+	    CvNAMED_on(*spot);
+	}
+	mg = mg_find(*svspot, PERL_MAGIC_proto);
+	if (mg) {
+	    assert(mg->mg_obj);
+	    cv = (CV *)mg->mg_obj;
+	}
+	else {
+	    sv_magic(*svspot, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
+	    mg = mg_find(*svspot, PERL_MAGIC_proto);
+	}
+	spot = (CV **)(svspot = &mg->mg_obj);
     }
-
-    cv = *spot;
 
     if (!block || !ps || *ps || attrs
 	|| (CvFLAGS(compcv) & CVf_BUILTIN_ATTRS)
@@ -7027,20 +7112,17 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
                   && block->op_type != OP_NULL
 #endif
 	) {
-	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
+	    cv_flags_t preserved_flags =
+		CvFLAGS(cv) & (CVf_BUILTIN_ATTRS|CVf_NAMED);
 	    PADLIST *const temp_padl = CvPADLIST(cv);
 	    CV *const temp_cv = CvOUTSIDE(cv);
 	    const cv_flags_t other_flags =
 		CvFLAGS(cv) & (CVf_SLABBED|CVf_WEAKOUTSIDE);
 	    OP * const cvstart = CvSTART(cv);
 
-	    assert(CvWEAKOUTSIDE(cv));
-	    assert(CvNAMED(cv));
-	    assert(CvNAME_HEK(cv));
-
 	    SvPOK_off(cv);
 	    CvFLAGS(cv) =
-		CvFLAGS(compcv) | existing_builtin_attrs | CVf_NAMED;
+		CvFLAGS(compcv) | preserved_flags;
 	    CvOUTSIDE(cv) = CvOUTSIDE(compcv);
 	    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(compcv);
 	    CvPADLIST(cv) = CvPADLIST(compcv);
@@ -7071,8 +7153,12 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else {
 	cv = compcv;
 	*spot = cv;
+    }
+    if (!CvNAME_HEK(cv)) {
 	SvANY(cv)->xcv_gv_u.xcv_hek =
-	    share_hek(PadnamePV(name)+1,
+	 hek
+	  ? share_hek_hek(hek)
+	  : share_hek(PadnamePV(name)+1,
 		      PadnameLEN(name)-1 * (PadnameUTF8(name) ? -1 : 1),
 		      0);
 	CvNAMED_on(cv);

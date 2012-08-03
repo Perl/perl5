@@ -154,12 +154,35 @@ PP(pp_padcv)
 
 PP(pp_introcv)
 {
-    DIE(aTHX_ "panic: introcv");
+    dVAR; dTARGET;
+    SvPADSTALE_off(TARG);
+    return NORMAL;
 }
 
 PP(pp_clonecv)
 {
-    DIE(aTHX_ "panic: clonecv");
+    dVAR; dTARGET;
+    MAGIC * const mg = mg_find(TARG, PERL_MAGIC_proto);
+    assert(SvTYPE(TARG) == SVt_PVCV);
+    assert(mg);
+    assert(mg->mg_obj);
+    if (CvISXSUB(mg->mg_obj)) { /* constant */
+	/* XXX Should we clone it here? */
+	/* XXX Does this play nicely with pad_push? */
+	/* If this changes to use SAVECLEARSV, we can move the SAVECLEARSV
+	   to introcv and remove the SvPADSTALE_off. */
+	SAVEPADSVANDMORTALIZE(ARGTARG);
+	PAD_SVl(ARGTARG) = mg->mg_obj;
+    }
+    else {
+	if (CvROOT(mg->mg_obj)) {
+	    assert(CvCLONE(mg->mg_obj));
+	    assert(!CvCLONED(mg->mg_obj));
+	}
+	cv_clone_into((CV *)mg->mg_obj,(CV *)TARG);
+	SAVECLEARSV(PAD_SVl(ARGTARG));
+    }
+    return NORMAL;
 }
 
 /* Translations. */

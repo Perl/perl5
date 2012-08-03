@@ -916,8 +916,11 @@ Perl_leave_scope(pTHX_ I32 base)
 		if (SvTYPE(sv) == SVt_PVHV)
 		    Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
 		if (SvMAGICAL(sv))
-		    sv_unmagic(sv, PERL_MAGIC_backref),
+		{
+		  sv_unmagic(sv, PERL_MAGIC_backref);
+		  if (SvTYPE(sv) != SVt_PVCV)
 		    mg_free(sv);
+		}
 
 		switch (SvTYPE(sv)) {
 		case SVt_NULL:
@@ -929,7 +932,15 @@ Perl_leave_scope(pTHX_ I32 base)
 		    hv_clear(MUTABLE_HV(sv));
 		    break;
 		case SVt_PVCV:
-		    Perl_croak(aTHX_ "panic: leave_scope pad code");
+		{
+		    HEK * const hek = CvNAME_HEK((CV *)sv);
+		    assert(hek);
+		    share_hek_hek(hek);
+		    cv_undef((CV *)sv);
+		    SvANY((CV *)sv)->xcv_gv_u.xcv_hek = hek;
+		    CvNAMED_on(sv);
+		    break;
+		}
 		default:
 		    SvOK_off(sv);
 		    break;
@@ -942,6 +953,34 @@ Perl_leave_scope(pTHX_ I32 base)
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = MUTABLE_SV(newAV());	break;
 		case SVt_PVHV:	*(SV**)ptr = MUTABLE_SV(newHV());	break;
+		case SVt_PVCV:
+		{
+		    SV ** const svp = (SV **)ptr;
+		    MAGIC *mg = SvMAGIC(sv);
+		    MAGIC **tomg = &SvMAGIC(sv);
+
+		    /* Create a stub */
+		    *svp = newSV_type(SVt_PVCV);
+
+		    /* Share name */
+		    assert(CvNAMED(sv));
+		    SvANY((CV *)*svp)->xcv_gv_u.xcv_hek =
+			share_hek_hek(SvANY((CV *)sv)->xcv_gv_u.xcv_hek);
+		    CvNAMED_on(*svp);
+
+		    /* Steal magic */
+		    while (mg) {
+			if (mg->mg_type == PERL_MAGIC_proto) break;
+			mg = *(tomg = &mg->mg_moremagic);
+		    }
+		    assert(mg);
+		    *tomg = mg->mg_moremagic;
+		    mg->mg_moremagic = SvMAGIC(*svp);
+		    SvMAGIC(*svp) = mg;
+		    mg_magical(*svp);
+		    mg_magical(sv);
+		    break;
+		}
 		default:	*(SV**)ptr = newSV(0);		break;
 		}
 		SvREFCNT_dec(sv);	/* Cast current value to the winds. */

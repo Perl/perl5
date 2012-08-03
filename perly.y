@@ -327,9 +327,11 @@ barestmt:	PLUGSTMT
 			  else
 			  /* State subs inside anonymous subs need to be
 			     clonable themselves. */
-			  /* XXX This will need adjustment for state subs
-			         inside my subs. */
-			  if (CvANON(CvOUTSIDE(PL_compcv)))
+			  if (CvANON(CvOUTSIDE(PL_compcv))
+			   || CvCLONE(CvOUTSIDE(PL_compcv))
+			   || !PadnameIsSTATE(PadlistNAMESARRAY(CvPADLIST(
+						CvOUTSIDE(PL_compcv)
+					     ))[$2->op_targ]))
 			      CvCLONE_on(PL_compcv);
 			  PL_parser->in_my = 0;
 			  PL_parser->in_my_stash = NULL;
