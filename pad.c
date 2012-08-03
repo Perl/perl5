@@ -2137,6 +2137,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 {
     PERL_ARGS_ASSERT_CV_CLONE;
 
+    if (!CvPADLIST(proto)) Perl_croak(aTHX_ "panic: no pad in cv_clone");
     return S_cv_clone(aTHX_ proto, NULL, NULL);
 }
 
