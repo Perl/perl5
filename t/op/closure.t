@@ -654,17 +654,19 @@ __EOF__
 }
 
 sub f {
-    my $x if $_[0];
-    sub { \$x }
+    my $x;
+    format ff =
+@
+$r = \$x
+.
 }
 
 {
-    f(1);
-    my $c1= f(0);
-    my $c2= f(0);
-
-    my $r1 = $c1->();
-    my $r2 = $c2->();
+    fileno ff;
+    write ff;
+    my $r1 = $r;
+    write ff;
+    my $r2 = $r;
     isnt($r1, $r2,
 	 "don't copy a stale lexical; crate a fresh undef one instead");
 }
@@ -749,6 +751,31 @@ is $closure_test::s2->()(), '10 cubes',
                 # CvOUTSIDE point to $s1
     ::is $s2->()(), 3, 'cloning closure proto whose CvOUTSIDE has changed';
 }
+
+# This should never emit two different values:
+#     print $x, "\n";
+#     print sub { $x }->(), "\n";
+# This test case started to do just that in commit 33894c1aa3e
+# (5.10.1/5.12.0):
+sub mosquito {
+    my $x if @_;
+    return if @_;
+
+    $x = 17;
+    is sub { $x }->(), $x, 'closing over stale var in 2nd sub call';
+}
+mosquito(1);
+mosquito;
+# And this case in commit adf8f095c588 (5.14):
+sub anything {
+    my $x;
+    sub gnat {
+	$x = 3;
+	is sub { $x }->(), $x,
+	    'closing over stale var before 1st sub call';
+    }
+}
+gnat();
 
 
 done_testing();

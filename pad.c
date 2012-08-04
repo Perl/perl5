@@ -2020,7 +2020,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 		   while my $x if $false can leave an active var marked as
 		   stale. And state vars are always available */
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
-		 || (SvPADSTALE(sv) && !SvPAD_STATE(namesv))) {
+		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
+		    && !CvDEPTH(outside))  ) {
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
 				   "Variable \"%"SVf"\" is not available", namesv);
 		    sv = NULL;
