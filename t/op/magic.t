@@ -70,7 +70,8 @@ sub env_is {
     if ($Is_MSWin32) {
         # cmd.exe will echo 'variable=value' but 4nt will echo just the value
         # -- Nikola Knezevic
-        like `set $key`, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
+        (my $set = `set $key`) =~ s/\r\n$/\n/;
+        like $set, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
     } elsif ($Is_VMS) {
         is `write sys\$output f\$trnlnm("\Q$key\E")`, "$val\n", $desc;
     } else {
