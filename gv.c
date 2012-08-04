@@ -1593,7 +1593,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		stash = CopSTASH(PL_curcop);
 	}
 	else
+	{
+	    if (!len) name = "main::", len = 6;
 	    stash = PL_defstash;
+	}
     }
 
     /* By this point we should have a stash and a name */

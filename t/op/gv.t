@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 239 );
+plan( tests => 240 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -932,6 +932,9 @@ package lrcg {
   ::ok !exists $lrcg::{yz},
     'constants w/nulls in their names point 2 the right GVs when promoted';
 }
+
+# Round-tripping of stringified GVs was not working with empty names
+is \*{*{""}=~s/\*//r}, \*{""}, '*{""} round-trips [perl #107370]';
 
 # Look away, please.
 # This violates perl's internal structures by fiddling with stashes in a
