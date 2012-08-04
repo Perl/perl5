@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -197,7 +197,6 @@ ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
 ext/pod-html/testdir/perlvar-copy.pod	Apparent broken link	2
 ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
 ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 79 by	13
-ext/re/re.pm	Verbatim line length including indents exceeds 79 by	6
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
 ext/vms-dclsym/dclsym.pm	Verbatim line length including indents exceeds 79 by	1
 ext/vms-stdio/stdio.pm	Verbatim line length including indents exceeds 79 by	1
