@@ -84,7 +84,7 @@
 %token <i_tkval> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <i_tkval> RELOP EQOP MULOP ADDOP
 %token <i_tkval> DOLSHARP DO HASHBRACK NOAMP
-%token <i_tkval> LOCAL MY MYSUB REQUIRE
+%token <i_tkval> LOCAL MY REQUIRE
 %token <i_tkval> COLONATTR FORMLBRACK FORMRBRACK
 
 %type <ival> grammar remember mremember
@@ -363,18 +363,6 @@ barestmt:	PLUGSTMT
 			  $$ = (OP*)NULL;
 #endif
 			  intro_my();
-			}
-	|	MYSUB startsub subname proto subattrlist subbody
-			{
-			  /* Unimplemented "my sub foo { }" */
-			  SvREFCNT_inc_simple_void(PL_compcv);
-#ifdef MAD
-			  $$ = newMYSUB($2, $3, $4, $5, $6);
-			  token_getmad($1,$$,'d');
-#else
-			  newMYSUB($2, $3, $4, $5, $6);
-			  $$ = (OP*)NULL;
-#endif
 			}
 	|	PACKAGE WORD WORD ';'
 			{
