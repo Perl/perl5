@@ -2034,3 +2034,15 @@ use warnings 'uninitialized';
 "@{[ $x ]}";
 EXPECT
 Use of uninitialized value in join or string at - line 3.
+########
+# inside formats
+use warnings 'uninitialized';
+my $x;
+format =
+@
+"$x";
+.
+write;
+EXPECT
+Use of uninitialized value $x in string at - line 6.
+

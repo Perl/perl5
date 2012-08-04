@@ -13921,7 +13921,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	SV *sv;
 	AV *av;
 
-	assert(!cv || SvTYPE(cv) == SVt_PVCV);
+	assert(!cv || SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);
 
 	if (!cv || !CvPADLIST(cv))
 	    return NULL;
