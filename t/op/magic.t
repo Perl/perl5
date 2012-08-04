@@ -65,6 +65,8 @@ $PERL = $ENV{PERL}
 
 sub env_is {
     my ($key, $val, $desc) = @_;
+
+    use open IN => ":raw";
     if ($Is_MSWin32) {
         # cmd.exe will echo 'variable=value' but 4nt will echo just the value
         # -- Nikola Knezevic
