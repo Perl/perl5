@@ -4318,6 +4318,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     if (PL_expect != XSTATE)
 	yyerror(Perl_form(aTHX_ "\"%s\" not allowed in expression",
 		    is_use ? "use" : "no"));
+    PL_expect = XTERM;
     s = SKIPSPACE1(s);
     if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 	s = force_version(s, TRUE);
@@ -7751,7 +7752,7 @@ Perl_yylex(pTHX)
 
 	case KEY_no:
 	    s = tokenize_use(0, s);
-	    OPERATOR(USE);
+	    TERM(USE);
 
 	case KEY_not:
 	    if (*s == '(' || (s = SKIPSPACE1(s), *s == '('))
