@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.055 4 August 2012
+
+      * Fix misuse of magic in API
+        [#78079] 
+      
   2.054 8 May 2012
 
       * Build issue on Win32

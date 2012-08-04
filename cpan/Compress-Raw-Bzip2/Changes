@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.055 4 August 2012
+
+      * Fix misuse of magic in API
+        [#78080] 
+
   2.052 29 April 2012
 
       * No Changes
