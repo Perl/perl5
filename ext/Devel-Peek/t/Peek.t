@@ -690,13 +690,13 @@ do_test('FORMAT',
     XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "PIE"
     FILE = ".*\\b(?i:peek\\.t)"(?:
-    DEPTH = 0
+    DEPTH = 0)?(?:
     MUTEXP = $ADDR
     OWNER = $ADDR)?
     FLAGS = 0x0					# $] < 5.015 || !thr
     FLAGS = 0x1000				# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
-    LINES = 0
+    LINES = 0					# $] < 5.017_003
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
     OUTSIDE = $ADDR \\(MAIN\\)');
