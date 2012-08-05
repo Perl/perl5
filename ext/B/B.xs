@@ -1449,7 +1449,6 @@ MODULE = B	PACKAGE = B::IV
 #define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
 #define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
 #define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
-#define PVCV_depth_ix	sv_I32p | offsetof(struct xpvcv, xcv_depth)
 #define PVCV_padlist_ix	sv_SVp | offsetof(struct xpvcv, xcv_padlist)
 #define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
 #define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
@@ -1505,7 +1504,6 @@ IVX(sv)
 	B::CV::STASH = PVCV_stash_ix
 	B::CV::GV = PVCV_gv_ix
 	B::CV::FILE = PVCV_file_ix
-	B::CV::DEPTH = PVCV_depth_ix
 	B::CV::PADLIST = PVCV_padlist_ix
 	B::CV::OUTSIDE = PVCV_outside_ix
 	B::CV::OUTSIDE_SEQ = PVCV_outside_seq_ix
@@ -1983,6 +1981,10 @@ CvSTART(cv)
     PPCODE:
 	PUSHs(make_op_object(aTHX_ CvISXSUB(cv) ? NULL
 			     : ix ? CvROOT(cv) : CvSTART(cv)));
+
+I32
+CvDEPTH(cv)
+        B::CV   cv
 
 void
 CvXSUB(cv)

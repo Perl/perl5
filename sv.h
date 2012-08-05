@@ -415,8 +415,13 @@ perform the upgrade if necessary.  See C<svtype>.
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
+    union {								\
+	STRLEN	xpvcuru_cur;	/* length of svu_pv as a C string */    \
+	I32	xpvcuru_fmdepth;					\
+    }		xpv_cur_u;						\
     STRLEN	xpv_len 	/* allocated size */
+
+#define xpv_cur	xpv_cur_u.xpvcuru_cur
 
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
