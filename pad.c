@@ -2017,9 +2017,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 	SV *sv = NULL;
 	if (namesv && namesv != &PL_sv_undef) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
-		/* formats may have an inactive, or even undefined, parent,
-		   while my $x if $false can leave an active var marked as
-		   stale. And state vars are always available */
+		/* formats may have an inactive, or even undefined, parent;
+		   but state vars are always available. */
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
 		    && !CvDEPTH(outside))  ) {
