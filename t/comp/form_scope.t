@@ -118,6 +118,12 @@ undef &x;
   print "ok 9 - closure var not available when outer sub is undefined\n";
 }
 
+format start_subparse::assertion =
+@
+sub { }
+.
+# survived; no "print ok" necessary
+
 # This is a variation of bug #22977, which crashes or fails an assertion
 # up to 5.16.
 # Keep this test last if you want test numbers to be sane.

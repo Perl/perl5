@@ -10742,9 +10742,6 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     const I32 oldsavestack_ix = PL_savestack_ix;
     CV* const outsidecv = PL_compcv;
 
-    if (PL_compcv) {
-	assert(SvTYPE(PL_compcv) == SVt_PVCV);
-    }
     SAVEI32(PL_subline);
     save_item(PL_subname);
     SAVESPTR(PL_compcv);
