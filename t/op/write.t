@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -983,6 +983,17 @@ return
 
     close RT73690_2 or die "Could not close: $!";
 })[0];
+
+open(UNDEF, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+select +(select(UNDEF), $~ = "UNDEFFORMAT")[0];
+format UNDEFFORMAT =
+@
+undef *UNDEFFORMAT
+.
+write UNDEF;
+pass "active format cannot be freed";
+close UNDEF or die "Could not close: $!";
+
 
 #############################
 ## Section 4

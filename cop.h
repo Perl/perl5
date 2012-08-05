@@ -627,6 +627,7 @@ struct block_format {
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.retop = (retop);					\
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
+	if (!CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);		\
 	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
@@ -681,6 +682,7 @@ struct block_format {
 #define POPFORMAT(cx)							\
 	setdefout(cx->blk_format.dfoutgv);				\
 	CvDEPTH(cx->blk_format.cv)--;					\
+	if (!CvDEPTH(cx->blk_format.cv)) SvREFCNT_dec(cx->blk_format.cv); \
 	SvREFCNT_dec(cx->blk_format.dfoutgv);
 
 /* eval context */
