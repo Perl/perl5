@@ -627,6 +627,7 @@ struct block_format {
 	cx->blk_format.gv = gv;						\
 	cx->blk_format.retop = (retop);					\
 	cx->blk_format.dfoutgv = PL_defoutgv;				\
+	CvDEPTH(cv)++;							\
 	SvREFCNT_inc_void(cx->blk_format.dfoutgv)
 
 #define POP_SAVEARRAY()						\
@@ -679,6 +680,7 @@ struct block_format {
 
 #define POPFORMAT(cx)							\
 	setdefout(cx->blk_format.dfoutgv);				\
+	CvDEPTH(cx->blk_format.cv)--;					\
 	SvREFCNT_dec(cx->blk_format.dfoutgv);
 
 /* eval context */

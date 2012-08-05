@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..10\n";
+print "1..13\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -118,18 +118,27 @@ undef &x;
   print "ok 9 - closure var not available when outer sub is undefined\n";
 }
 
-format start_subparse::assertion =
-@
-sub { }
+format STDOUT7 =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<
+do { my $x = "ok 10 - closure inside format"; sub { $x }->() }
 .
-# survived; no "print ok" necessary
+*STDOUT = *STDOUT7{FORMAT};
+write;
+
+$testn = 12;
+format STDOUT8 =
+@<<<< - recursive formats
+do { my $t = "ok " . $testn--; write if $t =~ 12; $t}
+.
+*STDOUT = *STDOUT8{FORMAT};
+write;
 
 # This is a variation of bug #22977, which crashes or fails an assertion
 # up to 5.16.
 # Keep this test last if you want test numbers to be sane.
 BEGIN { \&END }
 END {
-  my $test = "ok 10";
+  my $test = "ok 13";
   *STDOUT = *STDOUT5{FORMAT};
   write;
   format STDOUT5 =
