@@ -10,7 +10,7 @@ This document describes differences between the 5.16.0 release and
 the 5.16.1 release.
 
 If you are upgrading from an earlier release such as 5.14.0, first read
-L<perl5160delta>, which describes differences between 5.16.0 and
+L<perl5160delta>, which describes differences between 5.14.0 and
 5.16.0.
 
 =head1 Security
