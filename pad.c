@@ -2010,6 +2010,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     outpad = CvPADLIST(outside)
 	? AvARRAY(AvARRAY(CvPADLIST(outside))[depth])
 	: NULL;
+    assert(outpad || SvTYPE(cv) == SVt_PVFM);
 
     for (ix = fpad; ix > 0; ix--) {
 	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
@@ -2022,6 +2023,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
 		    && !CvDEPTH(outside))  ) {
+		    assert(SvTYPE(cv) == SVt_PVFM);
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
 				   "Variable \"%"SVf"\" is not available", namesv);
 		    sv = NULL;
