@@ -2050,10 +2050,7 @@ end
     formline('@' .('<'*5) . ' | @*', 'hallo', 'welt');
     isnt_tainted($^A, "accumulator still untainted");
     formline('@' .('<'*(5+$TAINT0)) . ' | @*', 'hallo', 'welt');
-    TODO: {
-        local $::TODO = "get magic handled too late?";
-        is_tainted($^A, "the accumulator should be tainted already");
-    }
+    is_tainted($^A, "the accumulator should be tainted already");
     is_tainted($^A, "tainted formline picture makes a tainted accumulator");
 }
 

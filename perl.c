@@ -4137,9 +4137,9 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 
     PERL_ARGS_ASSERT_INIT_POSTDUMP_SYMBOLS;
 
-    PL_toptarget = newSV_type(SVt_PVFM);
+    PL_toptarget = newSV_type(SVt_PVIV);
     sv_setpvs(PL_toptarget, "");
-    PL_bodytarget = newSV_type(SVt_PVFM);
+    PL_bodytarget = newSV_type(SVt_PVIV);
     sv_setpvs(PL_bodytarget, "");
     PL_formtarget = PL_bodytarget;
 

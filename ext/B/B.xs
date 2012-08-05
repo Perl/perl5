@@ -1446,8 +1446,6 @@ MODULE = B	PACKAGE = B::IV
 
 #define PVAV_max_ix	sv_SSize_tp | offsetof(struct xpvav, xav_max)
 
-#define PVFM_lines_ix	sv_IVp | offsetof(struct xpvfm, xfm_lines)
-
 #define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
 #define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
 #define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
@@ -1504,7 +1502,6 @@ IVX(sv)
 	B::IO::IoTYPE = PVIO_type_ix
 	B::IO::IoFLAGS = PVIO_flags_ix
 	B::AV::MAX = PVAV_max_ix
-	B::FM::LINES = PVFM_lines_ix
 	B::CV::STASH = PVCV_stash_ix
 	B::CV::GV = PVCV_gv_ix
 	B::CV::FILE = PVCV_file_ix
@@ -1960,6 +1957,17 @@ AvFLAGS(av)
 	B::AV	av
 
 #endif
+
+MODULE = B	PACKAGE = B::FM		PREFIX = Fm
+
+#if PERL_VERSION > 7 || (PERL_VERSION == 7 && PERL_SUBVERSION >= 3)
+# undef FmLINES
+# define FmLINES(sv) 0
+#endif
+
+IV
+FmLINES(form)
+	B::FM	form
 
 MODULE = B	PACKAGE = B::CV		PREFIX = Cv
 

@@ -520,7 +520,6 @@ typedef U16 cv_flags_t;
 struct xpvfm {
     _XPV_HEAD;
     _XPVCV_COMMON;
-    IV		xfm_lines;
 };
 
 
@@ -1387,7 +1386,7 @@ sv_force_normal does nothing.
 
 #endif
 
-#define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
+#define FmLINES(sv)	((XPVIV*)  SvANY(sv))->xiv_iv
 
 #define LvTYPE(sv)	((XPVLV*)  SvANY(sv))->xlv_type
 #define LvTARG(sv)	((XPVLV*)  SvANY(sv))->xlv_targ

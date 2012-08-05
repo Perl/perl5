@@ -814,7 +814,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
-	sv_setsv(sv, PL_bodytarget);
+	if (SvOK(PL_bodytarget)) sv_copypv(sv, PL_bodytarget);
+	else sv_setsv(sv, &PL_sv_undef);
 	if (SvTAINTED(PL_bodytarget))
 	    SvTAINTED_on(sv);
 	break;
@@ -2542,7 +2543,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         }
         break;
     case '\001':	/* ^A */
-	sv_setsv(PL_bodytarget, sv);
+	if (SvOK(sv)) sv_copypv(PL_bodytarget, sv);
+	else SvOK_off(PL_bodytarget);
 	FmLINES(PL_bodytarget) = 0;
 	if (SvPOK(PL_bodytarget)) {
 	    char *s = SvPVX(PL_bodytarget);
