@@ -366,8 +366,6 @@ eval q{
 };
 is($@, "", "multiline whitespace inside substitute expression");
 
-# Add new tests HERE:
-
 eval '@A =~ s/a/b/; # compilation error
       sub tahi {}
       sub rua;
@@ -389,6 +387,8 @@ is $::{whitu}, undef, 'sub decl w proto ignored after compilation error';
 is $::{waru}, undef, 'sub w attr+proto ignored after compilation error';
 is $::{iwa}, undef, 'non-empty sub decl ignored after compilation error';
 is *BEGIN{CODE}, undef, 'BEGIN leaves no stub after compilation error';
+
+# Add new tests HERE (above this line)
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}
 # This test hangs if it fails.
