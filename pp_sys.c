@@ -1477,9 +1477,8 @@ PP(pp_leavewrite)
     SP = newsp; /* ignore retval of formline */
     LEAVE;
 
-    fp = IoOFP(io);
-    if (!fp) {
-	if (IoIFP(io))
+    if (!io || !(fp = IoOFP(io))) {
+	if (io && IoIFP(io))
 	    report_wrongway_fh(gv, '<');
 	else
 	    report_evil_fh(gv);
@@ -1500,7 +1499,6 @@ PP(pp_leavewrite)
 	    PUSHs(&PL_sv_yes);
 	}
     }
-    /* bad_ofp: */
     PL_formtarget = PL_bodytarget;
     PERL_UNUSED_VAR(gimme);
     RETURNOP(retop);

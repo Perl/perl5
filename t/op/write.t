@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 1;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 2;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -992,7 +992,15 @@ undef *UNDEFFORMAT
 .
 write UNDEF;
 pass "active format cannot be freed";
-close UNDEF or die "Could not close: $!";
+
+select +(select(UNDEF), $~ = "UNDEFFORMAT2")[0];
+format UNDEFFORMAT2 =
+@
+close UNDEF or die "Could not close: $!"; undef *UNDEF
+.
+write UNDEF;
+pass "freeing current handle in format";
+undef $^A;
 
 
 #############################
