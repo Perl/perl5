@@ -135,6 +135,11 @@ L<Storable> has been upgraded from version 2.37 to 2.38.  It can now freeze
 and thaw vstrings correctly.  This causes a slight incompatible change in
 the storage format, so the format version has increased to 2.9.
 
+=item *
+
+L<Data::Dumper> has been optimized to only build a seen-scalar has as
+necessary, thereby speeding up serialization drastically.
+
 =back
 
 =head2 Removed Modules and Pragmata
