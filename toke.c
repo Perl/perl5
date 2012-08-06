@@ -5687,8 +5687,8 @@ Perl_yylex(pTHX)
 	}
 	TERM(']');
     case '{':
-      leftbracket:
 	s++;
+      leftbracket:
 	if (PL_lex_brackets > 100) {
 	    Renew(PL_lex_brackstack, PL_lex_brackets + 10, char);
 	}
@@ -6024,7 +6024,6 @@ Perl_yylex(pTHX)
 #endif
 		t++;
 	    if (*t == '\n' || *t == '#') {
-		s--;
 		PL_expect = XBLOCK;
 		formbrack = TRUE;
 		ENTER;
