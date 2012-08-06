@@ -45,7 +45,6 @@ use constant SRC_DIR => 'tarballs';
 use constant UNTAR_DIR => 'untarred';
 
 use constant DIFF_CMD => 'diff';
-use constant WGET_CMD => 'wget';
 
 sub usage {
     print STDERR "\n@_\n\n" if @_;
@@ -636,7 +635,7 @@ sub get_distribution {
 
     if ( -f $download_file and !-s $download_file ) {
 
-        # wget can leave a zero-length file on failed download
+        # failed download might leave a zero-length file
         unlink $download_file;
     }
 
