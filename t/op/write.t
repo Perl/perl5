@@ -58,7 +58,7 @@ for my $tref ( @NumTests ){
 #---------------------------------------------------------
 
 # number of tests in section 1
-my $bas_tests = 20;
+my $bas_tests = 21;
 
 # number of tests in section 3
 my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 5;
@@ -277,6 +277,18 @@ open   OUT4, ">Op_write.tmp" or die "Can't create Op_write.tmp";
 write (OUT4);
 close  OUT4 or die "Could not close: $!";
 is cat('Op_write.tmp'), "1\n" and unlink_all "Op_write.tmp";
+
+# More LEX_INTERPNORMAL
+format OUT4a=
+@<<<<<<<<<<<<<<<
+"${; use
+     strict; \'Nasdaq dropping like flies'}"
+.
+open   OUT4a, ">Op_write.tmp" or die "Can't create Op_write.tmp";
+write (OUT4a);
+close  OUT4a or die "Could not close: $!";
+is cat('Op_write.tmp'), "Nasdaq dropping\n", 'skipspace inside "${...}"'
+    and unlink_all "Op_write.tmp";
 
 eval <<'EOFORMAT';
 format OUT10 =

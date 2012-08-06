@@ -2443,6 +2443,7 @@ S_sublex_push(pTHX)
     SAVEBOOL(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
     SAVEI32(PL_lex_allbrackets);
+    SAVEI32(PL_lex_formbrack);
     SAVEI8(PL_lex_fakeeof);
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
@@ -2473,7 +2474,7 @@ S_sublex_push(pTHX)
     SAVEFREESV(PL_linestr);
 
     PL_lex_dojoin = FALSE;
-    PL_lex_brackets = 0;
+    PL_lex_brackets = PL_lex_formbrack = 0;
     PL_lex_allbrackets = 0;
     PL_lex_fakeeof = LEX_FAKEEOF_NEVER;
     Newx(PL_lex_brackstack, 120, char);
