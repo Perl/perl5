@@ -28,6 +28,10 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 #define HvNAME_get HvNAME
 #endif
 
+/* Perls 7 through portions of 15 used utf8_to_uvchr() which didn't have a
+ * length parameter.  This wrongly allowed reading beyond the end of buffer
+ * given malformed input */
+
 #if PERL_VERSION <= 6 /* Perl 5.6 and earlier */
 
 # ifdef EBCDIC
@@ -47,10 +51,32 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 # if !defined(PERL_IMPLICIT_CONTEXT)
 #  define utf8_to_uvchr_buf	     Perl_utf8_to_uvchr_buf
 # else
-#  define utf8_to_uvchr_buf(a,b) Perl_utf8_to_uvchr_buf(aTHX_ a,b)
+#  define utf8_to_uvchr_buf(a,b,c) Perl_utf8_to_uvchr_buf(aTHX_ a,b,c)
 # endif
 
 #endif /* PERL_VERSION <= 6 */
+
+/* Perl 5.7 through part of 5.15 */
+#if PERL_VERSION > 6 && PERL_VERSION <= 15 && ! defined(utf8_to_uvchr_buf)
+
+UV
+Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
+{
+    /* We have to discard <send> for these versions; hence can read off the
+     * end of the buffer if there is a malformation that indicates the
+     * character is longer than the space available */
+
+    const UV uv = utf8_to_uvchr(s, retlen);
+    return UNI_TO_NATIVE(uv);
+}
+
+# if !defined(PERL_IMPLICIT_CONTEXT)
+#  define utf8_to_uvchr_buf	     Perl_utf8_to_uvchr_buf
+# else
+#  define utf8_to_uvchr_buf(a,b,c) Perl_utf8_to_uvchr_buf(aTHX_ a,b,c)
+# endif
+
+#endif /* PERL_VERSION > 6 && <= 15 */
 
 /* Changes in 5.7 series mean that now IOK is only set if scalar is
    precisely integer but in 5.6 and earlier we need to do a more
