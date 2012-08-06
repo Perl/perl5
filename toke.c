@@ -4771,7 +4771,7 @@ Perl_yylex(pTHX)
 
 	return yylex();
     case LEX_FORMLINE:
-	PL_lex_state = LEX_NORMAL;
+	PL_lex_state = PL_parser->form_lex_state;
 	s = scan_formline(PL_bufptr);
 	if (!PL_lex_formbrack)
 	{
@@ -5894,6 +5894,7 @@ Perl_yylex(pTHX)
 	    CURMAD('_', PL_thiswhite);
 	}
 	force_next(formbrack ? '.' : '}');
+	if (formbrack) LEAVE;
 #ifdef PERL_MAD
 	if (!PL_thistoken)
 	    PL_thistoken = newSVpvs("");
@@ -6026,6 +6027,9 @@ Perl_yylex(pTHX)
 		s--;
 		PL_expect = XBLOCK;
 		formbrack = TRUE;
+		ENTER;
+		SAVEI8(PL_parser->form_lex_state);
+		PL_parser->form_lex_state = PL_lex_state;
 		goto leftbracket;
 	    }
 	}
@@ -10641,13 +10645,9 @@ S_scan_formline(pTHX_ register char *s)
 		break;
             }
 	}
-	if (PL_in_eval && !PL_rsfp && !PL_parser->filtered) {
-	    eol = (char *) memchr(s,'\n',PL_bufend-s);
-	    if (!eol++)
+	eol = (char *) memchr(s,'\n',PL_bufend-s);
+	if (!eol++)
 		eol = PL_bufend;
-	}
-	else
-	    eol = PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	if (*s != '#') {
 	    for (t = s; t < eol; t++) {
 		if (*t == '~' && t[1] == '~' && SvCUR(stuff)) {
@@ -10672,7 +10672,8 @@ S_scan_formline(pTHX_ register char *s)
 	      break;
 	}
 	s = (char*)eol;
-	if (PL_rsfp || PL_parser->filtered) {
+	if ((PL_rsfp || PL_parser->filtered)
+	 && PL_parser->form_lex_state == LEX_NORMAL) {
 	    bool got_some;
 #ifdef PERL_MAD
 	    if (PL_madskills) {
@@ -10699,7 +10700,7 @@ S_scan_formline(pTHX_ register char *s)
     if (SvCUR(stuff)) {
 	PL_expect = XTERM;
 	if (needargs) {
-	    PL_lex_state = LEX_NORMAL;
+	    PL_lex_state = PL_parser->form_lex_state;
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(',');

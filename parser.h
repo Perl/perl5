@@ -80,6 +80,7 @@ typedef struct yy_parser {
     HV		*in_my_stash;	/* declared class of this "my" declaration */
     PerlIO	*rsfp;		/* current source file pointer */
     AV		*rsfp_filters;	/* holds chain of active source filters */
+    U8		form_lex_state;	/* remember lex_state when parsing fmt */
 
 #ifdef PERL_MAD
     SV		*endwhite;

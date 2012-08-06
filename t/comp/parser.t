@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..137\n";
+print "1..138\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -387,6 +387,15 @@ is $::{whitu}, undef, 'sub decl w proto ignored after compilation error';
 is $::{waru}, undef, 'sub w attr+proto ignored after compilation error';
 is $::{iwa}, undef, 'non-empty sub decl ignored after compilation error';
 is *BEGIN{CODE}, undef, 'BEGIN leaves no stub after compilation error';
+
+$test = $test + 1;
+"ok $test - format inside re-eval" =~ /(?{
+    format =
+@<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+$_
+.
+write
+}).*/;
 
 # Add new tests HERE (above this line)
 
