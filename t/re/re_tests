@@ -1543,7 +1543,7 @@ a\97	a97	y	$&	a97
 /^\p{L}/	\x{3400}	y	$&	\x{3400}
 
 # RT #89774
-/[s\xDF]/ui	\xDFs	ybT	$&	\xDFs
+/[s\xDF]a/ui	ssa	ybT	$&	ssa
 
 # RT #99928
 /^\R\x0A$/	\x0D\x0A	n	-	-
