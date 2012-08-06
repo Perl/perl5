@@ -4393,7 +4393,7 @@ Perl_yylex(pTHX)
     register char *s = PL_bufptr;
     register char *d;
     STRLEN len;
-    bool bof = FALSE;
+    bool bof = FALSE, formbrack = FALSE;
     U32 fake_eof = 0;
 
     /* orig_keyword, gvp, and gv are initialized here because
@@ -4774,7 +4774,10 @@ Perl_yylex(pTHX)
 	PL_lex_state = LEX_NORMAL;
 	s = scan_formline(PL_bufptr);
 	if (!PL_lex_formbrack)
+	{
+	    formbrack = TRUE;
 	    goto rightbracket;
+	}
 	OPERATOR(';');
     }
 
@@ -5848,7 +5851,7 @@ Perl_yylex(pTHX)
 	pl_yylval.ival = CopLINE(PL_curcop);
 	if (isSPACE(*s) || *s == '#')
 	    PL_copline = NOLINE;   /* invalidate current command line number */
-	TOKEN('{');
+	TOKEN(formbrack ? '=' : '{');
     case '}':
 	if (PL_lex_brackets && PL_lex_brackstack[PL_lex_brackets-1] == XFAKEEOF)
 	    TOKEN(0);
@@ -5859,8 +5862,6 @@ Perl_yylex(pTHX)
 	else
 	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
 	PL_lex_allbrackets--;
-	if (PL_lex_brackets < PL_lex_formbrack && PL_lex_state != LEX_INTERPNORMAL)
-	    PL_lex_formbrack = 0;
 	if (PL_lex_state == LEX_INTERPNORMAL) {
 	    if (PL_lex_brackets == 0) {
 		if (PL_expect & XFAKEBRACK) {
@@ -5892,7 +5893,7 @@ Perl_yylex(pTHX)
 	    curmad('X', newSVpvn(s-1,1));
 	    CURMAD('_', PL_thiswhite);
 	}
-	force_next('}');
+	force_next(formbrack ? '.' : '}');
 #ifdef PERL_MAD
 	if (!PL_thistoken)
 	    PL_thistoken = newSVpvs("");
@@ -6024,6 +6025,7 @@ Perl_yylex(pTHX)
 	    if (*t == '\n' || *t == '#') {
 		s--;
 		PL_expect = XBLOCK;
+		formbrack = TRUE;
 		goto leftbracket;
 	    }
 	}
@@ -6384,6 +6386,7 @@ Perl_yylex(pTHX)
 	{
 	    PL_lex_formbrack = 0;
 	    PL_expect = XSTATE;
+	    formbrack = TRUE;
 	    goto rightbracket;
 	}
 	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
@@ -8199,8 +8202,7 @@ Perl_yylex(pTHX)
 		}
 
 		if (key == KEY_format) {
-		    if (*s == '=')
-			PL_lex_formbrack = PL_lex_brackets + 1;
+		    PL_lex_formbrack = PL_lex_brackets + 1;
 #ifdef PERL_MAD
 		    PL_thistoken = subtoken;
 		    s = d;

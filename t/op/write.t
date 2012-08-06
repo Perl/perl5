@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 2;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 4;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -1001,6 +1001,21 @@ close UNDEF or die "Could not close: $!"; undef *UNDEF
 write UNDEF;
 pass "freeing current handle in format";
 undef $^A;
+
+ok !eval q|
+format foo {
+@<<<
+$a
+}
+;1
+|, 'format foo { ... } is not allowed';
+
+ok !eval q|
+format =
+@<<<
+}
+;1
+|, 'format = ... } is not allowed';
 
 
 #############################

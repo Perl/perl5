@@ -71,7 +71,7 @@
 
 %token <ival> GRAMPROG GRAMEXPR GRAMBLOCK GRAMBARESTMT GRAMFULLSTMT GRAMSTMTSEQ
 
-%token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
+%token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';' '=' '.'
 
 %token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF QWLIST
 %token <opval> FUNC0OP FUNC0SUB UNIOPSUB LSTOPSUB
@@ -96,7 +96,7 @@
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> optlistexpr optexpr indirob listop method
-%type <opval> formname subname proto subbody cont my_scalar
+%type <opval> formname subname proto subbody cont my_scalar formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
 
@@ -211,6 +211,16 @@ block	:	'{' remember stmtseq '}'
 			}
 	;
 
+/* format body */
+formblock:	'=' remember stmtseq '.'
+			{ if (PL_parser->copline > (line_t)IVAL($1))
+			      PL_parser->copline = (line_t)IVAL($1);
+			  $$ = block_end($2, $3);
+			  TOKEN_GETMAD($1,$$,'{');
+			  TOKEN_GETMAD($4,$$,'}');
+			}
+	;
+
 remember:	/* NULL */	/* start a full lexical scope */
 			{ $$ = block_start(TRUE); }
 	;
@@ -275,7 +285,7 @@ barestmt:	PLUGSTMT
 			  $$ = newOP(OP_NULL,0);
 			  TOKEN_GETMAD($1,$$,'p');
 			}
-	|	FORMAT startformsub formname block
+	|	FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
 			  SvREFCNT_inc_simple_void(PL_compcv);
