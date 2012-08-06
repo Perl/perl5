@@ -420,12 +420,8 @@ struct cop {
 				 ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
-#  ifdef DEBUGGING
-#    define CopFILEAVx(c)	(assert(CopFILE(c)), \
+#  define CopFILEAVx(c)		(assert_(CopFILE(c)) \
 				   GvAV(gv_fetchfile(CopFILE(c))))
-#  else
-#    define CopFILEAVx(c)	(GvAV(gv_fetchfile(CopFILE(c))))
-#  endif
 
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
 #  define CopSTASH_set(c,hv)	((c)->cop_stashoff = (hv)		\

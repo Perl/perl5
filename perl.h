@@ -3868,6 +3868,11 @@ Gid_t getegid (void);
 #ifndef assert
 #  define assert(what)	Perl_assert(what)
 #endif
+#ifdef DEBUGGING
+#  define assert_(what)	assert(what),
+#else
+#  define assert_(what)
+#endif
 
 struct ufuncs {
     I32 (*uf_val)(pTHX_ IV, SV*);

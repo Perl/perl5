@@ -748,12 +748,8 @@ struct opslab {
 
 # define OPSLOT_HEADER		STRUCT_OFFSET(OPSLOT, opslot_op)
 # define OPSLOT_HEADER_P	(OPSLOT_HEADER/sizeof(I32 *))
-# ifdef DEBUGGING
-#  define OpSLOT(o)		(assert(o->op_slabbed), \
+# define OpSLOT(o)		(assert_(o->op_slabbed) \
 				 (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
-# else
-#  define OpSLOT(o)		((OPSLOT *)(((char *)o)-OPSLOT_HEADER))
-# endif
 # define OpSLAB(o)		OpSLOT(o)->opslot_slab
 # define OpslabREFCNT_dec(slab)      \
 	(((slab)->opslab_refcnt == 1) \
