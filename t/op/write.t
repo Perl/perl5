@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 4;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 5;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -1016,6 +1016,24 @@ format =
 }
 ;1
 |, 'format = ... } is not allowed';
+
+open(NEST, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+format NEST =
+@<<<
+{
+    my $birds = "birds";
+    local *NEST = *BIRDS{FORMAT};
+    write NEST;
+    format BIRDS =
+@<<<<<
+$birds;
+.
+    "nest"
+}
+.
+write NEST;
+close NEST or die "Could not close: $!";
+is cat('Op_write.tmp'), "birds\nnest\n", 'nested formats';
 
 
 #############################

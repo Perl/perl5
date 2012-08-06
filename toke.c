@@ -6015,7 +6015,7 @@ Perl_yylex(pTHX)
 		    goto retry;
 		}
 	}
-	if (PL_lex_brackets < PL_lex_formbrack) {
+	if (PL_expect == XBLOCK) {
 	    const char *t = s;
 #ifdef PERL_STRICT_CR
 	    while (SPACE_OR_TAB(*t))
@@ -6028,7 +6028,9 @@ Perl_yylex(pTHX)
 		formbrack = TRUE;
 		ENTER;
 		SAVEI8(PL_parser->form_lex_state);
+		SAVEI32(PL_lex_formbrack);
 		PL_parser->form_lex_state = PL_lex_state;
+		PL_lex_formbrack = PL_lex_brackets + 1;
 		goto leftbracket;
 	    }
 	}
@@ -6387,7 +6389,6 @@ Perl_yylex(pTHX)
 #endif
 	    && (s == PL_linestart || s[-1] == '\n') )
 	{
-	    PL_lex_formbrack = 0;
 	    PL_expect = XSTATE;
 	    formbrack = TRUE;
 	    goto rightbracket;
@@ -8205,7 +8206,6 @@ Perl_yylex(pTHX)
 		}
 
 		if (key == KEY_format) {
-		    PL_lex_formbrack = PL_lex_brackets + 1;
 #ifdef PERL_MAD
 		    PL_thistoken = subtoken;
 		    s = d;
@@ -8214,7 +8214,7 @@ Perl_yylex(pTHX)
 			(void) force_word(PL_oldbufptr + tboffset, WORD,
 					  FALSE, TRUE, TRUE);
 #endif
-		    OPERATOR(FORMAT);
+		    PREBLOCK(FORMAT);
 		}
 
 		/* Look for a prototype */
