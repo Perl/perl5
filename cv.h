@@ -75,7 +75,7 @@ S_CvDEPTHp(const CV * const sv)
 			  S_CvDEPTHp(_cvdepth);				\
 			}))
 #else
-#  define CvDEPTH(sv)	*S_CvDEPTHp((const CV *)sv)
+#  define CvDEPTH(sv)	(*S_CvDEPTHp((const CV *)sv))
 #endif
 #define CvPADLIST(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
