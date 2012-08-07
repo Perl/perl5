@@ -5326,7 +5326,8 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-#if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && \
+	(QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
 #    ifdef __hpux
 #        define strtoll __strtoll	/* secret handshake */
 #    endif
@@ -5348,7 +5349,8 @@ typedef struct am_table_short AMTS;
 /* It would be more fashionable to use Strtol() to define atol()
  * (as is done for Atoul(), see below) but for backward compatibility
  * we just assume atol(). */
-#   if defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_ATOLL)
+#   if defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && defined(HAS_ATOLL) && \
+	(QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
 #    ifdef WIN64
 #       define atoll    _atoi64		/* secret handshake */
 #    endif
@@ -5358,7 +5360,8 @@ typedef struct am_table_short AMTS;
 #   endif
 #endif
 
-#if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && QUADKIND == QUAD_IS_LONG_LONG
+#if !defined(Strtoul) && defined(USE_64_BIT_INT) && defined(UV_IS_QUAD) && \
+	(QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
 #    ifdef __hpux
 #        define strtoull __strtoull	/* secret handshake */
 #    endif
