@@ -314,8 +314,7 @@ enum token_type {
     TOKENTYPE_IVAL,
     TOKENTYPE_OPNUM, /* pl_yylval.ival contains an opcode number */
     TOKENTYPE_PVAL,
-    TOKENTYPE_OPVAL,
-    TOKENTYPE_GVVAL
+    TOKENTYPE_OPVAL
 };
 
 static struct debug_tokens {
@@ -431,7 +430,6 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 	    Perl_sv_catpvf(aTHX_ report, "?? %"IVdf, (IV)rv);
 	switch (type) {
 	case TOKENTYPE_NONE:
-	case TOKENTYPE_GVVAL: /* doesn't appear to be used */
 	    break;
 	case TOKENTYPE_IVAL:
 	    Perl_sv_catpvf(aTHX_ report, "(ival=%"IVdf")", (IV)lvalp->ival);
