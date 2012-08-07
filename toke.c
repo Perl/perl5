@@ -6033,7 +6033,6 @@ Perl_yylex(pTHX)
 #endif
 		t++;
 	    if (*t == '\n' || *t == '#') {
-		PL_expect = XBLOCK;
 		formbrack = TRUE;
 		ENTER;
 		SAVEI8(PL_parser->form_lex_state);
