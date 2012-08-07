@@ -6,6 +6,25 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.135_07 (Aug 06 2012)
+
+Use the new utf8 to code point functions - fixing a potential
+reading buffer overrun.
+
+Data::Dumper: Sparseseen option to avoid building much of the seen
+hash: This has been measured to, in some cases, provide a 50% speed-up
+
+Dumper.xs: Avoid scan_vstring on 5.17.3 and up
+
+Avoid a warning from clang when compiling Data::Dumper
+
+Fix DD's dumping of qr|\/|
+
+Data::Dumper's Perl implementation was not working with overloaded
+blessed globs, which it thought were strings.
+
+Allow Data::Dumper to load on miniperl
+
 =item 2.135_02 (Dec 29 2011)
 
 Makes DD dump *{''} properly.
