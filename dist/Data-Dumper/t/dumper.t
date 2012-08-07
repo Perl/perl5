@@ -1488,22 +1488,22 @@ EOT
 {
   # If XS cannot load, the pure-Perl version cannot deparse vstrings with
   # underscores properly.  In 5.8.0, vstrings are just strings.
-  $WANT = $] > 5.0080001 ? $XS ? <<'EOT' : <<'EOV' : <<'EOU';
-#$a = \v65.66.67;
-#$b = \v65.66.067;
-#$c = \v65.66.6_7;
-#$d = \'ABC';
-EOT
-#$a = \v65.66.67;
-#$b = \v65.66.67;
-#$c = \v65.66.67;
-#$d = \'ABC';
-EOV
+  my $no_vstrings = <<'NOVSTRINGS';
 #$a = \'ABC';
 #$b = \'ABC';
 #$c = \'ABC';
 #$d = \'ABC';
-EOU
+NOVSTRINGS
+  my $vstrings_corr = <<'VSTRINGS_CORRECT';
+#$a = \v65.66.67;
+#$b = \v65.66.067;
+#$c = \v65.66.6_7;
+#$d = \'ABC';
+VSTRINGS_CORRECT
+  $WANT = $] <= 5.0080001
+          ? $no_vstrings
+          : $vstrings_corr;
+
   @::_v = (
     \v65.66.67,
     \($] < 5.007 ? v65.66.67 : eval 'v65.66.067'),
