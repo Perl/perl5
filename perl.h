@@ -729,6 +729,8 @@ EXTERN_C int usleep(unsigned int);
 #   define U64_CONST(x) ((U64)x##UL)
 #  elif QUADKIND == QUAD_IS_LONG_LONG
 #   define U64_CONST(x) ((U64)x##ULL)
+#  elif QUADKIND == QUAD_IS___INT64
+#   define U64_CONST(x) ((U64)x##UI64)
 #  else /* best guess we can make */
 #   define U64_CONST(x) ((U64)x##UL)
 #  endif

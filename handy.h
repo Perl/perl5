@@ -191,13 +191,13 @@ typedef U64TYPE U64;
 #       define PeRl_INT64_C(c)	CAT2(c,LL)
 #       define PeRl_UINT64_C(c)	CAT2(c,ULL)
 #   else
-#       if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
-#           define PeRl_INT64_C(c)	CAT2(c,L)
-#           define PeRl_UINT64_C(c)	CAT2(c,UL)
+#       if QUADKIND == QUAD_IS___INT64
+#           define PeRl_INT64_C(c)	CAT2(c,I64)
+#           define PeRl_UINT64_C(c)	CAT2(c,UI64)
 #       else
-#           if defined(_WIN64) && defined(_MSC_VER)
-#               define PeRl_INT64_C(c)	CAT2(c,I64)
-#               define PeRl_UINT64_C(c)	CAT2(c,UI64)
+#           if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
+#               define PeRl_INT64_C(c)	CAT2(c,L)
+#               define PeRl_UINT64_C(c)	CAT2(c,UL)
 #           else
 #               define PeRl_INT64_C(c)	((I64TYPE)(c))
 #               define PeRl_UINT64_C(c)	((U64TYPE)(c))
