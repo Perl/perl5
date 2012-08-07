@@ -7504,7 +7504,14 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     OP* pegop = newOP(OP_NULL, 0);
 #endif
 
-    GV * const gv = o
+    GV *gv;
+
+    if (PL_parser && PL_parser->error_count) {
+	op_free(block);
+	goto finish;
+    }
+
+    gv = o
 	? gv_fetchsv(cSVOPo->op_sv, GV_ADD, SVt_PVFM)
 	: gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVFM);
 
@@ -7527,7 +7534,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 	SvREFCNT_dec(cv);
     }
     cv = PL_compcv;
-    GvFORM(gv) = cv;
+    GvFORM(gv) = (CV *)SvREFCNT_inc_simple_NN(cv);
     CvGV_set(cv, gv);
     CvFILE_set_from_cop(cv, PL_curcop);
 
@@ -7540,13 +7547,15 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    cv_forget_slab(cv);
+
+  finish:
 #ifdef PERL_MAD
     op_getmad(o,pegop,'n');
     op_getmad_weak(block, pegop, 'b');
 #else
     op_free(o);
 #endif
-    cv_forget_slab(cv);
     if (PL_parser)
 	PL_parser->copline = NOLINE;
     LEAVE_SCOPE(floor);

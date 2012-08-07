@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 5;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 6;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -1046,6 +1046,17 @@ $birds;
 write NEST;
 close NEST or die "Could not close: $!";
 is cat('Op_write.tmp'), "birds\nnest\n", 'nested formats';
+
+# A compilation error should not create a format
+eval q|
+format ERROR =
+@
+@_ =~ s///
+.
+|;
+eval { write ERROR };
+like $@, qr'Undefined format',
+    'formats with compilation errors are not created';
 
 
 #############################

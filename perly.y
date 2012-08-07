@@ -288,7 +288,6 @@ barestmt:	PLUGSTMT
 	|	FORMAT startformsub formname formblock
 			{
 			  CV *fmtcv = PL_compcv;
-			  SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
 			  $$ = newFORM($2, $3, $4);
 			  prepend_madprops($1->tk_mad, $$, 'F');
