@@ -522,6 +522,7 @@ EXTCONST char* const PL_op_name[] = {
 	"coreargs",
 	"runcv",
 	"fc",
+	"freed",
 };
 #endif
 
@@ -903,6 +904,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"CORE:: subroutine",
 	"__SUB__",
 	"fc",
+	"freed op",
 };
 #endif
 

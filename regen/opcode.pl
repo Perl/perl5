@@ -209,6 +209,7 @@ for (@ops) {
 }
 
 print $oc <<'END';
+	"freed",
 };
 #endif
 
@@ -228,6 +229,7 @@ for (@ops) {
 }
 
 print $oc <<'END';
+	"freed op",
 };
 #endif
 
