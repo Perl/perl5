@@ -211,6 +211,28 @@
 
 
 
+#ifdef PERL_IN_TOKE_C
+static bool
+S_is_opval_token(int type) {
+    switch (type) {
+    case FUNC0OP:
+    case FUNC0SUB:
+    case FUNCMETH:
+    case LSTOPSUB:
+    case METHOD:
+    case PLUGEXPR:
+    case PLUGSTMT:
+    case PMFUNC:
+    case PRIVATEREF:
+    case QWLIST:
+    case THING:
+    case UNIOPSUB:
+    case WORD:
+	return 1;
+    }
+    return 0;
+}
+#endif /* PERL_IN_TOKE_C */
 #endif /* PERL_CORE */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
@@ -243,5 +265,5 @@ typedef union YYSTYPE
 
 /* Generated from:
  * 50649beb21bb272a5dafa43d5fbe244206c6a99e0e67b39b3123a22a35702873 perly.y
- * 38f866dcd8341ad3c0810347587113eb2c6ac7d4f33bdab75b020efce92865be regen_perly.pl
+ * 4a3ced51fe6585f6ec59e65e1ffd74bc976c498b0e6992eaab337219fee72e51 regen_perly.pl
  * ex: set ro: */

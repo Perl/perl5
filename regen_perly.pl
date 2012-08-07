@@ -95,6 +95,7 @@ close $ctmp_fh;
 
 my ($actlines, $tablines) = extract($clines);
 
+our %tokens;
 $tablines .= make_type_tab($y_file, $tablines);
 
 my ($act_fh, $tab_fh, $h_fh) = map {
@@ -120,7 +121,23 @@ my $tokens;
 while (<$tmph_fh>) {
     print $h_fh "#ifdef PERL_CORE\n" if $. == 1;
     if (!$endcore_done and /YYSTYPE_IS_DECLARED/) {
-	print $h_fh "#endif /* PERL_CORE */\n";
+	print $h_fh <<h;
+#ifdef PERL_IN_TOKE_C
+static bool
+S_is_opval_token(int type) {
+    switch (type) {
+h
+	print $h_fh <<i for sort grep $tokens{$_} eq 'opval', keys %tokens;
+    case $_:
+i
+	print $h_fh <<j;
+	return 1;
+    }
+    return 0;
+}
+#endif /* PERL_IN_TOKE_C */
+#endif /* PERL_CORE */
+j
 	$endcore_done = 1;
     }
     next if /^#line \d+ ".*"/;
@@ -240,6 +257,7 @@ sub extract {
 
 sub make_type_tab {
     my ($y_file, $tablines) = @_;
+    my %just_tokens;
     my %tokens;
     my %types;
     my $default_token;
@@ -259,11 +277,17 @@ sub make_type_tab {
 	}
 
 	next unless /^%(token|type)/;
-	s/^%(token|type)\s+<(\w+)>\s+//
+	s/^%((token)|type)\s+<(\w+)>\s+//
 	    or die "$y_file: unparseable token/type line: $_";
-	$tokens{$_} = $2 for (split ' ', $_);
-	$types{$2} = 1;
+	for (split ' ', $_) {
+	    $tokens{$_} = $3;
+	    if ($2) {
+		$just_tokens{$_} = $3;
+	    }
+	}
+	$types{$3} = 1;
     }
+    *tokens = \%just_tokens; # perly.h needs this
     die "$y_file: no __DEFAULT__ token defined\n" unless $default_token;
     $types{$default_token} = 1;
 

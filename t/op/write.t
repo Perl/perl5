@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 6;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 7;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -1057,6 +1057,19 @@ format ERROR =
 eval { write ERROR };
 like $@, qr'Undefined format',
     'formats with compilation errors are not created';
+
+# This syntax error used to cause a crash, double free, or a least
+# a bad read.
+# See the long-winded explanation at:
+#   https://rt.perl.org/rt3/Ticket/Display.html?id=43425#txn-1144500
+eval q|
+format =
+@
+use;format
+strict
+.
+|;
+pass('no crash with invalid use/format inside format');
 
 
 #############################

@@ -273,6 +273,7 @@ scope has the given name. Name must be a literal string.
 # define save_freeop(op)                    \
     ({                                       \
       OP * const _o = (OP *)(op);             \
+      assert(!_o->op_savefree);               \
       _o->op_savefree = 1;                     \
       save_pushptr((void *)(_o), SAVEt_FREEOP); \
     })
@@ -280,6 +281,7 @@ scope has the given name. Name must be a literal string.
 # define save_freeop(op)                       \
     (                                           \
       PL_Xpv = (XPV *)(op),                      \
+      assert_(!((OP *)PL_Xpv)->op_savefree)      \
       ((OP *)PL_Xpv)->op_savefree = 1,            \
       save_pushptr((void *)(PL_Xpv), SAVEt_FREEOP) \
     )

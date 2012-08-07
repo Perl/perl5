@@ -1986,6 +1986,11 @@ S_force_next(pTHX_ I32 type)
 	tokereport(type, &NEXTVAL_NEXTTOKE);
     }
 #endif
+    /* Don’t let opslab_force_free snatch it */
+    if (S_is_opval_token(type & 0xffff) && NEXTVAL_NEXTTOKE.opval) {
+	assert(!NEXTVAL_NEXTTOKE.opval->op_savefree);
+	NEXTVAL_NEXTTOKE.opval->op_savefree = 1;
+    }	
 #ifdef PERL_MAD
     if (PL_curforce < 0)
 	start_force(PL_lasttoke);
@@ -4478,6 +4483,8 @@ Perl_yylex(pTHX)
 		    PL_lex_allbrackets--;
 		next_type &= 0xffff;
 	    }
+	    if (S_is_opval_token(next_type) && pl_yylval.opval)
+		pl_yylval.opval->op_savefree = 0; /* release */
 #ifdef PERL_MAD
 	    /* FIXME - can these be merged?  */
 	    return next_type;
