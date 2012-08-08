@@ -1139,7 +1139,8 @@ on threaded and un-threaded perls.
 =head1 OPTIONS
 
 Arguments that don't start with a hyphen are taken to be the names of
-subroutines to render; if no such functions are specified, the main
+subroutines or formats to render; if no
+such functions are specified, the main
 body of the program (outside any subroutines, and not including use'd
 or require'd files) is rendered.  Passing C<BEGIN>, C<UNITCHECK>,
 C<CHECK>, C<INIT>, or C<END> will cause all of the corresponding
