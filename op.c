@@ -1085,8 +1085,11 @@ S_scalarboolean(pTHX_ OP *o)
 	if (ckWARN(WARN_SYNTAX)) {
 	    const line_t oldline = CopLINE(PL_curcop);
 
-	    if (PL_parser && PL_parser->copline != NOLINE)
+	    if (PL_parser && PL_parser->copline != NOLINE) {
+		/* This ensures that warnings are reported at the first line
+                   of the conditional, not the last.  */
 		CopLINE_set(PL_curcop, PL_parser->copline);
+            }
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Found = in conditional, should be ==");
 	    CopLINE_set(PL_curcop, oldline);
 	}

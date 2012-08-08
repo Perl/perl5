@@ -106,10 +106,15 @@ __END__
 # op.c
 use warnings 'syntax' ;
 1 if $a = 1 ;
+1 if $a
+  = 1 ;
 no warnings 'syntax' ;
 1 if $a = 1 ;
+1 if $a
+  = 1 ;
 EXPECT
 Found = in conditional, should be == at - line 3.
+Found = in conditional, should be == at - line 4.
 ########
 # op.c
 use warnings 'syntax' ;
