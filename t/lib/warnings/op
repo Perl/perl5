@@ -669,28 +669,43 @@ Bareword found in conditional at - line 3.
 use warnings 'misc' ;
 open FH, "<abc" ;
 $x = 1 if $x = <FH> ;
+$x = 1 if $x
+     = <FH> ;
 no warnings 'misc' ;
 $x = 1 if $x = <FH> ;
+$x = 1 if $x
+     = <FH> ;
 EXPECT
 Value of <HANDLE> construct can be "0"; test with defined() at - line 4.
+Value of <HANDLE> construct can be "0"; test with defined() at - line 5.
 ########
 # op.c
 use warnings 'misc' ;
 opendir FH, "." ;
 $x = 1 if $x = readdir FH ;
+$x = 1 if $x
+    = readdir FH ;
 no warnings 'misc' ;
 $x = 1 if $x = readdir FH ;
+$x = 1 if $x
+    = readdir FH ;
 closedir FH ;
 EXPECT
 Value of readdir() operator can be "0"; test with defined() at - line 4.
+Value of readdir() operator can be "0"; test with defined() at - line 5.
 ########
 # op.c
 use warnings 'misc' ;
 $x = 1 if $x = <*> ;
+$x = 1 if $x
+    = <*> ;
 no warnings 'misc' ;
 $x = 1 if $x = <*> ;
+$x = 1 if $x
+    = <*> ;
 EXPECT
 Value of glob construct can be "0"; test with defined() at - line 3.
+Value of glob construct can be "0"; test with defined() at - line 4.
 ########
 # op.c
 use warnings 'misc' ;
