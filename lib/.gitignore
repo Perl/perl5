@@ -273,8 +273,10 @@
 /Module/Build
 /Module/Build.pm
 !/Module/Build/ConfigData.pm
+/Module/CoreList
 /Module/CoreList.pm
 /Module/CoreList.pod
+/Module/CoreList/TieHashDelta.pm
 /Module/Load.pm
 /Module/Load/Conditional.pm
 /Module/Loaded.pm
