@@ -356,8 +356,6 @@ sub compile {
 	    }
 	    else {
 		# convert function names to subrefs
-		my $objref;
-		my $objref2;
 		if (ref $objname) {
 		    print $walkHandle "B::Concise::compile($objname)\n"
 			if $banner;
