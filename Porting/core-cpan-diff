@@ -655,6 +655,7 @@ sub get_distribution {
     my $path = catfile( $untar_dir, $filename );
 
     $path =~ s/\.tar\.gz$//
+      or $path =~ s/\.tgz$//
       or $path =~ s/\.zip$//
       or die
       "ERROR: downloaded file does not have a recognised suffix: $path\n";
