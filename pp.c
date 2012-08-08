@@ -2364,7 +2364,7 @@ PP(pp_i_divide)
     }
 }
 
-#if defined(__GLIBC__) && IVSIZE == 8
+#if defined(__GLIBC__) && IVSIZE == 8 && !defined(PERL_DEBUG_READONLY_OPS)
 STATIC
 PP(pp_i_modulo_0)
 #else
@@ -2387,7 +2387,7 @@ PP(pp_i_modulo)
      }
 }
 
-#if defined(__GLIBC__) && IVSIZE == 8
+#if defined(__GLIBC__) && IVSIZE == 8 && !defined(PERL_DEBUG_READONLY_OPS)
 STATIC
 PP(pp_i_modulo_1)
 
