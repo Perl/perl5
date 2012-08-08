@@ -158,9 +158,7 @@ my @writables = qw(
     win32/makefile.mk
     win32/config_H.ce
     win32/config_H.gc
-    win32/config_H.gc64
     win32/config_H.vc
-    win32/config_H.vc64
     utils/Makefile
     uconfig.h
 );
