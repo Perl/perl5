@@ -10533,6 +10533,9 @@ tryagain:
                             goto loopdone;
                         }
                         p = RExC_parse;
+                        if (ender > 0xff) {
+                            REQUIRE_UTF8;
+                        }
                         break;
 		    case 'r':
 			ender = '\r';
