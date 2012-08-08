@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 7;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 10;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -1070,6 +1070,37 @@ strict
 .
 |;
 pass('no crash with invalid use/format inside format');
+
+
+# Low-precedence operators on argument line
+format AND =
+@
+0 and die
+.
+$- = $=;
+ok eval { local $~ = "AND"; print "# "; write; 1 },
+    "low-prec ops on arg line" or diag $@;
+
+# Anonymous hashes
+open(HASH, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+format HASH =
+@<<<
+${{qw[ Sun 0 Mon 1 Tue 2 Wed 3 Thu 4 Fri 5 Sat 6 ]}}{"Wed"}
+.
+write HASH;
+close HASH or die "Could not close: $!";
+is cat('Op_write.tmp'), "3\n", 'anonymous hashes';
+
+# pragmata inside argument line
+open(STRICT, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+format STRICT =
+@<<<
+no strict; $foo
+.
+$::foo = 'oof::$';
+write STRICT;
+close STRICT or die "Could not close: $!";
+is cat('Op_write.tmp'), "oof:\n", 'pragmata on format line';
 
 
 #############################

@@ -344,6 +344,8 @@ static struct debug_tokens {
     { EQOP,		TOKENTYPE_OPNUM,	"EQOP" },
     { FOR,		TOKENTYPE_IVAL,		"FOR" },
     { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
+    { FORMLBRACK,	TOKENTYPE_NONE,		"FORMLBRACK" },
+    { FORMRBRACK,	TOKENTYPE_NONE,		"FORMRBRACK" },
     { FUNC,		TOKENTYPE_OPNUM,	"FUNC" },
     { FUNC0,		TOKENTYPE_OPNUM,	"FUNC0" },
     { FUNC0OP,		TOKENTYPE_OPVAL,	"FUNC0OP" },
@@ -4400,7 +4402,8 @@ Perl_yylex(pTHX)
     register char *s = PL_bufptr;
     register char *d;
     STRLEN len;
-    bool bof = FALSE, formbrack = FALSE;
+    bool bof = FALSE;
+    U8 formbrack = 0;
     U32 fake_eof = 0;
 
     /* orig_keyword, gvp, and gv are initialized here because
@@ -4784,10 +4787,11 @@ Perl_yylex(pTHX)
 	s = scan_formline(PL_bufptr);
 	if (!PL_lex_formbrack)
 	{
-	    formbrack = TRUE;
+	    formbrack = 1;
 	    goto rightbracket;
 	}
-	OPERATOR(';');
+	PL_bufptr = s;
+	return yylex();
     }
 
     s = PL_bufptr;
@@ -5179,9 +5183,11 @@ Perl_yylex(pTHX)
 	    }
 	}
 	if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-	    PL_bufptr = s;
 	    PL_lex_state = LEX_FORMLINE;
-	    return yylex();
+	    start_force(PL_curforce);
+	    NEXTVAL_NEXTTOKE.ival = 0;
+	    force_next(FORMRBRACK);
+	    TOKEN(';');
 	}
 	goto retry;
     case '\r':
@@ -5236,9 +5242,11 @@ Perl_yylex(pTHX)
 		incline(s);
 	    }
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
-		PL_bufptr = s;
 		PL_lex_state = LEX_FORMLINE;
-		return yylex();
+		start_force(PL_curforce);
+		NEXTVAL_NEXTTOKE.ival = 0;
+		force_next(FORMRBRACK);
+		TOKEN(';');
 	    }
 	}
 	else {
@@ -5703,10 +5711,6 @@ Perl_yylex(pTHX)
 	}
 	switch (PL_expect) {
 	case XTERM:
-	    if (PL_lex_formbrack) {
-		s--;
-		PRETERMBLOCK(DO);
-	    }
 	    if (PL_oldoldbufptr == PL_last_lop)
 		PL_lex_brackstack[PL_lex_brackets++] = XTERM;
 	    else
@@ -5908,6 +5912,12 @@ Perl_yylex(pTHX)
 	if (!PL_thistoken)
 	    PL_thistoken = newSVpvs("");
 #endif
+	if (formbrack == 2) { /* means . where arguments were expected */
+	    start_force(PL_curforce);
+	    force_next(';');
+	    start_force(PL_curforce);
+	    force_next(FORMRBRACK);
+	}
 	TOKEN(';');
     case '&':
 	s++;
@@ -6033,7 +6043,7 @@ Perl_yylex(pTHX)
 #endif
 		t++;
 	    if (*t == '\n' || *t == '#') {
-		formbrack = TRUE;
+		formbrack = 1;
 		ENTER;
 		SAVEI8(PL_parser->form_lex_state);
 		SAVEI32(PL_lex_formbrack);
@@ -6398,7 +6408,7 @@ Perl_yylex(pTHX)
 	    && (s == PL_linestart || s[-1] == '\n') )
 	{
 	    PL_expect = XSTATE;
-	    formbrack = TRUE;
+	    formbrack = 2; /* dot seen where arguments expected */
 	    goto rightbracket;
 	}
 	if (PL_expect == XSTATE && s[1] == '.' && s[2] == '.') {
@@ -10705,12 +10715,12 @@ S_scan_formline(pTHX_ register char *s)
     }
   enough:
     if (SvCUR(stuff)) {
-	PL_expect = XTERM;
+	PL_expect = XSTATE;
 	if (needargs) {
 	    PL_lex_state = PL_parser->form_lex_state;
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(',');
+	    force_next(FORMLBRACK);
 	}
 	else
 	    PL_lex_state = LEX_FORMLINE;
@@ -10723,9 +10733,6 @@ S_scan_formline(pTHX_ register char *s)
 	start_force(PL_curforce);
 	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);
-	start_force(PL_curforce);
-	NEXTVAL_NEXTTOKE.ival = OP_FORMLINE;
-	force_next(LSTOP);
     }
     else {
 	SvREFCNT_dec(stuff);

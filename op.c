@@ -2843,6 +2843,18 @@ Perl_op_scope(pTHX_ OP *o)
     return o;
 }
 
+OP *
+Perl_op_unscope(pTHX_ OP *o)
+{
+    if (o && o->op_type == OP_LINESEQ) {
+	OP *kid = cLISTOPo->op_first;
+	for(; kid; kid = kid->op_sibling)
+	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+		op_null(kid);
+    }
+    return o;
+}
+
 int
 Perl_block_start(pTHX_ int full)
 {

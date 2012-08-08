@@ -85,7 +85,7 @@
 %token <i_tkval> RELOP EQOP MULOP ADDOP
 %token <i_tkval> DOLSHARP DO HASHBRACK NOAMP
 %token <i_tkval> LOCAL MY MYSUB REQUIRE
-%token <i_tkval> COLONATTR
+%token <i_tkval> COLONATTR FORMLBRACK FORMRBRACK
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
@@ -99,6 +99,7 @@
 %type <opval> formname subname proto subbody cont my_scalar formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
+%type <opval> formstmtseq formline formarg
 
 %nonassoc <i_tkval> PREC_LOW
 %nonassoc LOOPEX
@@ -212,12 +213,12 @@ block	:	'{' remember stmtseq '}'
 	;
 
 /* format body */
-formblock:	'=' remember stmtseq '.'
+formblock:	'=' remember ';' FORMRBRACK formstmtseq ';' '.'
 			{ if (PL_parser->copline > (line_t)IVAL($1))
 			      PL_parser->copline = (line_t)IVAL($1);
-			  $$ = block_end($2, $3);
+			  $$ = block_end($2, $5);
 			  TOKEN_GETMAD($1,$$,'{');
-			  TOKEN_GETMAD($4,$$,'}');
+			  TOKEN_GETMAD($7,$$,'}');
 			}
 	;
 
@@ -242,6 +243,17 @@ mremember:	/* NULL */	/* start a partial lexical scope */
 stmtseq	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	stmtseq fullstmt
+			{   $$ = op_append_list(OP_LINESEQ, $1, $2);
+			    PL_pad_reset_pending = TRUE;
+			    if ($1 && $2)
+				PL_hints |= HINT_BLOCK_SCOPE;
+			}
+	;
+
+/* A sequence of format lines */
+formstmtseq:	/* NULL */
+			{ $$ = (OP*)NULL; }
+	|	formstmtseq formline
 			{   $$ = op_append_list(OP_LINESEQ, $1, $2);
 			    PL_pad_reset_pending = TRUE;
 			    if ($1 && $2)
@@ -504,6 +516,36 @@ barestmt:	PLUGSTMT
 			  TOKEN_GETMAD($1,$$,';');
 			  PL_parser->copline = NOLINE;
 			}
+	;
+
+/* Format line */
+formline:	THING formarg
+			{ OP *list;
+			  if ($2) {
+			      OP *term = $2;
+			      DO_MAD(term = newUNOP(OP_NULL, 0, term));
+			      list = op_append_elem(OP_LIST, $1, term);
+			  }
+			  else {
+#ifdef MAD
+			      OP *op = newNULLLIST();
+			      list = op_append_elem(OP_LIST, $1, op);
+#else
+			      list = $1;
+#endif
+			  }
+			  if (PL_parser->copline == NOLINE)
+			       PL_parser->copline = CopLINE(PL_curcop)-1;
+			  else PL_parser->copline--;
+			  $$ = newSTATEOP(0, NULL,
+					  convert(OP_FORMLINE, 0, list));
+			}
+	;
+
+formarg	:	/* NULL */
+			{ $$ = NULL; }
+	|	FORMLBRACK stmtseq FORMRBRACK
+			{ $$ = op_unscope($2); }
 	;
 
 /* An expression which may have a side-effect */

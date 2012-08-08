@@ -103,28 +103,30 @@
      MYSUB = 312,
      REQUIRE = 313,
      COLONATTR = 314,
-     PREC_LOW = 315,
-     DOROP = 316,
-     OROP = 317,
-     ANDOP = 318,
-     NOTOP = 319,
-     ASSIGNOP = 320,
-     DORDOR = 321,
-     OROR = 322,
-     ANDAND = 323,
-     BITOROP = 324,
-     BITANDOP = 325,
-     SHIFTOP = 326,
-     MATCHOP = 327,
-     REFGEN = 328,
-     UMINUS = 329,
-     POWOP = 330,
-     POSTDEC = 331,
-     POSTINC = 332,
-     PREDEC = 333,
-     PREINC = 334,
-     ARROW = 335,
-     PEG = 336
+     FORMLBRACK = 315,
+     FORMRBRACK = 316,
+     PREC_LOW = 317,
+     DOROP = 318,
+     OROP = 319,
+     ANDOP = 320,
+     NOTOP = 321,
+     ASSIGNOP = 322,
+     DORDOR = 323,
+     OROR = 324,
+     ANDAND = 325,
+     BITOROP = 326,
+     BITANDOP = 327,
+     SHIFTOP = 328,
+     MATCHOP = 329,
+     REFGEN = 330,
+     UMINUS = 331,
+     POWOP = 332,
+     POSTDEC = 333,
+     POSTINC = 334,
+     PREDEC = 335,
+     PREINC = 336,
+     ARROW = 337,
+     PEG = 338
    };
 #endif
 /* Tokens.  */
@@ -185,28 +187,30 @@
 #define MYSUB 312
 #define REQUIRE 313
 #define COLONATTR 314
-#define PREC_LOW 315
-#define DOROP 316
-#define OROP 317
-#define ANDOP 318
-#define NOTOP 319
-#define ASSIGNOP 320
-#define DORDOR 321
-#define OROR 322
-#define ANDAND 323
-#define BITOROP 324
-#define BITANDOP 325
-#define SHIFTOP 326
-#define MATCHOP 327
-#define REFGEN 328
-#define UMINUS 329
-#define POWOP 330
-#define POSTDEC 331
-#define POSTINC 332
-#define PREDEC 333
-#define PREINC 334
-#define ARROW 335
-#define PEG 336
+#define FORMLBRACK 315
+#define FORMRBRACK 316
+#define PREC_LOW 317
+#define DOROP 318
+#define OROP 319
+#define ANDOP 320
+#define NOTOP 321
+#define ASSIGNOP 322
+#define DORDOR 323
+#define OROR 324
+#define ANDAND 325
+#define BITOROP 326
+#define BITANDOP 327
+#define SHIFTOP 328
+#define MATCHOP 329
+#define REFGEN 330
+#define UMINUS 331
+#define POWOP 332
+#define POSTDEC 333
+#define POSTINC 334
+#define PREDEC 335
+#define PREINC 336
+#define ARROW 337
+#define PEG 338
 
 
 
@@ -264,6 +268,6 @@ typedef union YYSTYPE
 
 
 /* Generated from:
- * 50649beb21bb272a5dafa43d5fbe244206c6a99e0e67b39b3123a22a35702873 perly.y
+ * 580d1bac82838fb0ae1e092010e776fb247f0d4cb68834a166507fae86707700 perly.y
  * 4a3ced51fe6585f6ec59e65e1ffd74bc976c498b0e6992eaab337219fee72e51 regen_perly.pl
  * ex: set ro: */
