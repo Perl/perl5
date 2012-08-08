@@ -363,7 +363,7 @@ sub compile {
 		    $objref = $objname;
 		} else {
 		    $objname = "main::" . $objname unless $objname =~ /::/;
-		    print $walkHandle "$objname:\n";
+		    print $walkHandle "$objname:\n" if $banner;
 		    no strict 'refs';
 		    unless (exists &$objname) {
 			print $walkHandle "err: unknown function ($objname)\n";
