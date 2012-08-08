@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.052 ;
-use IO::Compress::Base::Common  2.052 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.052 ;
-use IO::Uncompress::Adapter::Identity 2.052 ;
-use IO::Compress::Zlib::Extra 2.052 ;
-use IO::Compress::Zip::Constants 2.052 ;
+use IO::Uncompress::RawInflate  2.055 ;
+use IO::Compress::Base::Common  2.055 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.055 ;
+use IO::Uncompress::Adapter::Identity 2.055 ;
+use IO::Compress::Zlib::Extra 2.055 ;
+use IO::Compress::Zip::Constants 2.055 ;
 
-use Compress::Raw::Zlib  2.052 () ;
+use Compress::Raw::Zlib  2.055 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.052';
+$VERSION = '2.055';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -64,7 +64,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.052 qw(:Parse);
+    use IO::Compress::Base::Common  2.055 qw(:Parse);
 
     
     return (
@@ -1783,7 +1783,7 @@ stream at a time.
         or die "Cannot open $zipfile: $UnzipError";
 
     my $status;
-    for ($status = 1; $stream > 0; $status = $u->nextStream())
+    for ($status = 1; $status > 0; $status = $u->nextStream())
     {
  
         my $name = $u->getHeaderInfo()->{Name};

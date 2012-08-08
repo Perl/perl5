@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+  2.055 5 August 2012
+
+      * FAQ
+        Added a few paragraphs on how to deal with pbzip2 files
+        [RT# #77743: Interoperability problems with pbzip2]
+
+      * Compress::Zip
+        speed up compress, uncompress, memGzip & memGunzip.
+        [RT# #77350: Compress::Zlib::uncompress() is slowed down needlessly 
+                     by parameter validation
+
   2.052 29 April 2012
 
       * IO::Compress::Zip

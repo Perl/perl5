@@ -7,17 +7,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.052 ;
-use Compress::Raw::Zlib 2.052 ;
-use IO::Compress::Gzip 2.052 ;
-use IO::Uncompress::Gunzip 2.052 ;
+use IO::Compress::Base::Common 2.055 ;
+use Compress::Raw::Zlib 2.055 ;
+use IO::Compress::Gzip 2.055 ;
+use IO::Uncompress::Gunzip 2.055 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.052';
+$VERSION = '2.055';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -315,7 +315,14 @@ sub compress($;$)
 
     my $level = (@_ == 2 ? $_[1] : Z_DEFAULT_COMPRESSION() );
 
-    $x = new Compress::Raw::Zlib::Deflate -AppendOutput => 1, -Level => $level
+    $x = Compress::Raw::Zlib::_deflateInit(FLAG_APPEND,
+                                           $level,
+                                           Z_DEFLATED,
+                                           MAX_WBITS,
+                                           MAX_MEM_LEVEL,
+                                           Z_DEFAULT_STRATEGY,
+                                           4096,
+                                           '') 
             or return undef ;
 
     $err = $x->deflate($in, $output) ;
@@ -325,12 +332,11 @@ sub compress($;$)
     return undef unless $err == Z_OK() ;
     
     return $output ;
-
 }
 
 sub uncompress($)
 {
-    my ($x, $output, $err, $in) =('', '', '', '') ;
+    my ($output, $in) =('', '') ;
 
     if (ref $_[0] ) {
         $in = $_[0] ;
@@ -341,17 +347,19 @@ sub uncompress($)
     }
 
     $] >= 5.008 and (utf8::downgrade($$in, 1) 
-        or croak "Wide character in uncompress");
-
-    $x = new Compress::Raw::Zlib::Inflate -ConsumeInput => 0 or return undef ;
- 
-    $err = $x->inflate($in, $output) ;
-    return undef unless $err == Z_STREAM_END() ;
- 
-    return $output ;
+        or croak "Wide character in uncompress");    
+        
+    my ($obj, $status) = Compress::Raw::Zlib::_inflateInit(0,
+                                MAX_WBITS, 4096, "") ;   
+                                
+    $status == Z_OK 
+        or return undef;
+    
+    $obj->inflate($in, $output) == Z_STREAM_END 
+        or return undef;
+    
+    return $output;
 }
-
-
  
 sub deflateInit(@)
 {
@@ -453,27 +461,41 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.052 ;
+use IO::Compress::Gzip::Constants 2.055 ;
 
 sub memGzip($)
 {
-  my $out;
+    _set_gzerr(0);
+    my $x = Compress::Raw::Zlib::_deflateInit(FLAG_APPEND|FLAG_CRC,
+                                           Z_BEST_COMPRESSION,
+                                           Z_DEFLATED,
+                                           -MAX_WBITS(),
+                                           MAX_MEM_LEVEL,
+                                           Z_DEFAULT_STRATEGY,
+                                           4096,
+                                           '') 
+            or return undef ;
+ 
+    # if the deflation buffer isn't a reference, make it one
+    my $string = (ref $_[0] ? $_[0] : \$_[0]) ;
 
-  # if the deflation buffer isn't a reference, make it one
-  my $string = (ref $_[0] ? $_[0] : \$_[0]) ;
+    $] >= 5.008 and (utf8::downgrade($$string, 1) 
+        or croak "Wide character in memGzip");
 
-  $] >= 5.008 and (utf8::downgrade($$string, 1) 
-      or croak "Wide character in memGzip");
+    my $out;
+    my $status ;
 
-  _set_gzerr(0);
-  if ( ! IO::Compress::Gzip::gzip($string, \$out, Minimal => 1) )
-  {
-      $Compress::Zlib::gzerrno = $IO::Compress::Gzip::GzipError;
-      return undef ;
-  }
-
-  return $out;
+    $x->deflate($string, $out) == Z_OK
+        or return undef ;
+ 
+    $x->flush($out) == Z_OK
+        or return undef ;
+ 
+    return IO::Compress::Gzip::Constants::GZIP_MINIMUM_HEADER . 
+           $out . 
+           pack("V V", $x->crc32(), $x->total_in());
 }
+
 
 sub _removeGzipHeader($)
 {
@@ -555,12 +577,11 @@ sub memGunzip($)
         or return _set_gzerr_undef($status);
      
     my $bufsize = length $$string > 4096 ? length $$string : 4096 ;
-    my $x = new Compress::Raw::Zlib::Inflate({-WindowBits => - MAX_WBITS(),
-                         -Bufsize => $bufsize}) 
-
+    my $x = Compress::Raw::Zlib::_inflateInit(FLAG_CRC | FLAG_CONSUME_INPUT,
+                                -MAX_WBITS(), $bufsize, '') 
               or return _ret_gun_error();
 
-    my $output = "" ;
+    my $output = '' ;
     $status = $x->inflate($string, $output);
     
     if ( $status == Z_OK() )
