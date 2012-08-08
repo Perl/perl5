@@ -58,7 +58,6 @@ Usage: $0 [opts] [ -d | -v | -x ] [ -a | module ... ]
 
 -d/--diff     Display file differences using diff(1), rather than just
               listing which files have changed.
-              The diff(1) command is assumed to be in your PATH.
 
 --diffopts    Options to pass to the diff command. Defaults to '-u'.
 
@@ -87,6 +86,10 @@ those in the perl source tree.
 
 Must be run from the root of the perl source tree.
 Module names must match the keys of %Modules in Maintainers.pl.
+
+The diff(1) command is assumed to be in your PATH and is used to diff files
+regardless of whether the --diff option has been chosen to display any file
+differences.
 HERE
     exit(1);
 }
