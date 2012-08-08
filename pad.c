@@ -1123,12 +1123,14 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     SV *new_capture;
     SV **new_capturep;
     const AV * const padlist = CvPADLIST(cv);
+    const bool staleok = !!(flags & padadd_STALEOK);
 
     PERL_ARGS_ASSERT_PAD_FINDLEX;
 
-    if (flags & ~padadd_UTF8_NAME)
+    if (flags & ~(padadd_UTF8_NAME|padadd_STALEOK))
 	Perl_croak(aTHX_ "panic: pad_findlex illegal flag bits 0x%" UVxf,
 		   (UV)flags);
+    flags &= ~ padadd_STALEOK; /* one-shot flag */
 
     *out_flags = 0;
 
@@ -1279,6 +1281,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			PTR2UV(cv), PTR2UV(*out_capture)));
 
 		    if (SvPADSTALE(*out_capture)
+			&& (!CvDEPTH(cv) || !staleok)
 			&& !SvPAD_STATE(name_svp[offset]))
 		    {
 			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
@@ -1313,7 +1316,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     new_capturep = out_capture ? out_capture :
 		CvLATE(cv) ? NULL : &new_capture;
 
-    offset = pad_findlex(namepv, namelen, flags, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
+    offset = pad_findlex(namepv, namelen,
+		flags | padadd_STALEOK*(new_capturep == &new_capture),
+		CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
 		new_capturep, out_name_sv, out_flags);
     if ((PADOFFSET)offset == NOT_IN_PAD)
 	return NOT_IN_PAD;

@@ -126,6 +126,8 @@ typedef enum {
 #define padadd_OUR		0x01	   /* our declaration. */
 #define padadd_STATE		0x02	   /* state declaration. */
 #define padadd_NO_DUP_CHECK	0x04	   /* skip warning on dups. */
+#define padadd_STALEOK		0x08	   /* allow stale lexical in active
+					    * sub, but only one level up */
 #define padadd_UTF8_NAME	SVf_UTF8   /* name is UTF-8 encoded. */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine

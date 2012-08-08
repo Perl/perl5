@@ -777,5 +777,16 @@ sub anything {
 }
 gnat();
 
+# [perl #114018] Similar to the above, but with string eval
+sub staleval {
+    my $x if @_;
+    return if @_;
+
+    $x = 3;
+    is eval '$x', $x, 'eval closing over stale var in active sub';
+    return # 
+}
+staleval 1;
+staleval;
 
 done_testing();
