@@ -7017,8 +7017,11 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 #endif
 		) {
 		const line_t oldline = CopLINE(PL_curcop);
-		if (PL_parser && PL_parser->copline != NOLINE)
+		if (PL_parser && PL_parser->copline != NOLINE) {
+                        /* This ensures that warnings are reported at the first
+                           line of a redefinition, not the last.  */
 			CopLINE_set(PL_curcop, PL_parser->copline);
+                }
 		report_redefined_cv(cSVOPo->op_sv, cv, &const_sv);
 		CopLINE_set(PL_curcop, oldline);
 #ifdef PERL_MAD

@@ -726,10 +726,15 @@ EXPECT
 use warnings 'redefine' ;
 sub fred {}
 sub fred {}
+sub fred { # warning should be for this line
+}
 no warnings 'redefine' ;
 sub fred {}
+sub fred {
+}
 EXPECT
 Subroutine fred redefined at - line 4.
+Subroutine fred redefined at - line 5.
 ########
 # op.c
 use warnings 'redefine' ;
