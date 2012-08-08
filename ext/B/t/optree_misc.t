@@ -10,7 +10,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests => 6;
+plan tests => 8;
 
 SKIP: {
 skip "no perlio in this build", 4 unless $Config::Config{useperlio};
@@ -123,3 +123,49 @@ checkOptree ( name      => 'index and PVBM',
 	      prog	=> '$_ = index q(foo), q(foo)',
 	      strip_open_hints => 1,
 	      expect	=> $t,  expect_nt => $nt);
+
+checkOptree ( name      => 'formats',
+	      bcopts    => 'STDOUT',
+	      prog	=> "no warnings;format =\n@<<<\n\$a\n@>>>\n\@b\n.",
+	      strip_open_hints => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# main::STDOUT (FORMAT):
+# c  <1> leavewrite[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->c
+# 1        <;> nextstate(main 1 -:4) v ->2
+# 5        <@> formline vK/2 ->6
+# 2           <0> pushmark s ->3
+# 3           <$> const[PV "@<<<\n"] s ->4
+# -           <@> lineseq lK ->5
+# -              <0> ex-nextstate v ->4
+# -              <1> ex-rv2sv sK/1 ->-
+# 4                 <#> gvsv[*a] s ->5
+# 6        <;> nextstate(main 1 -:6) v ->7
+# b        <@> formline sK/2 ->c
+# 7           <0> pushmark s ->8
+# 8           <$> const[PV "@>>>\n"] s ->9
+# -           <@> lineseq lK ->b
+# -              <0> ex-nextstate v ->9
+# a              <1> rv2av[t3] lK/1 ->b
+# 9                 <#> gv[*b] s ->a
+EOT_EOT
+# main::STDOUT (FORMAT):
+# c  <1> leavewrite[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->c
+# 1        <;> nextstate(main 1 -:4) v ->2
+# 5        <@> formline vK/2 ->6
+# 2           <0> pushmark s ->3
+# 3           <$> const(PV "@<<<\n") s ->4
+# -           <@> lineseq lK ->5
+# -              <0> ex-nextstate v ->4
+# -              <1> ex-rv2sv sK/1 ->-
+# 4                 <$> gvsv(*a) s ->5
+# 6        <;> nextstate(main 1 -:6) v ->7
+# b        <@> formline sK/2 ->c
+# 7           <0> pushmark s ->8
+# 8           <$> const(PV "@>>>\n") s ->9
+# -           <@> lineseq lK ->b
+# -              <0> ex-nextstate v ->9
+# a              <1> rv2av[t3] lK/1 ->b
+# 9                 <$> gv(*b) s ->a
+EONT_EONT

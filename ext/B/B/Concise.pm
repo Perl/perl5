@@ -137,7 +137,7 @@ sub concise_subref {
     my $codeobj = svref_2object($coderef);
 
     return concise_stashref(@_)
-	unless ref $codeobj eq 'B::CV';
+	unless ref($codeobj) =~ '^B::(?:CV|FM)\z';
     concise_cv_obj($order, $codeobj, $name);
 }
 
@@ -357,21 +357,31 @@ sub compile {
 	    else {
 		# convert function names to subrefs
 		my $objref;
+		my $objref2;
 		if (ref $objname) {
 		    print $walkHandle "B::Concise::compile($objname)\n"
 			if $banner;
-		    $objref = $objname;
+		    concise_subref($order, ($objname)x2);
+		    next;
 		} else {
 		    $objname = "main::" . $objname unless $objname =~ /::/;
-		    print $walkHandle "$objname:\n" if $banner;
 		    no strict 'refs';
-		    unless (exists &$objname) {
+		    my $glob = \*$objname;
+		    unless (*$glob{CODE} || *$glob{FORMAT}) {
+			print $walkHandle "$objname:\n" if $banner;
 			print $walkHandle "err: unknown function ($objname)\n";
 			return;
 		    }
-		    $objref = \&$objname;
+		    if (my $objref = *$glob{CODE}) {
+			print $walkHandle "$objname:\n" if $banner;
+			concise_subref($order, $objref, $objname);
+		    }
+		    if (my $objref = *$glob{FORMAT}) {
+			print $walkHandle "$objname (FORMAT):\n"
+			    if $banner;
+			concise_subref($order, $objref, $objname);
+		    }
 		}
-		concise_subref($order, $objref, $objname);
 	    }
 	}
 	for my $pkg (@render_packs) {
