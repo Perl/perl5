@@ -10735,7 +10735,6 @@ S_scan_formline(pTHX_ register char *s)
 	SvREFCNT_dec(stuff);
 	if (eofmt)
 	    PL_lex_formbrack = 0;
-	PL_bufptr = s;
     }
 #ifdef PERL_MAD
     if (PL_madskills) {
