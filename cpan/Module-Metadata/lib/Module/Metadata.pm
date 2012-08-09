@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000009';
+$VERSION = '1.000010';
 $VERSION = eval $VERSION;
 
 use Carp qw/croak/;
@@ -219,7 +219,7 @@ sub new_from_module {
     # separating into primary & alternative candidates
     my( %prime, %alt );
     foreach my $file (@files) {
-      my $mapped_filename = File::Spec->abs2rel( $file, $dir );
+      my $mapped_filename = File::Spec::Unix->abs2rel( $file, $dir );
       my @path = split( /\//, $mapped_filename );
       (my $prime_package = join( '::', @path )) =~ s/\.pm$//;
   
@@ -232,10 +232,12 @@ sub new_from_module {
   
         my $version = $pm_info->version( $package );
   
+        $prime_package = $package if lc($prime_package) eq lc($package);
         if ( $package eq $prime_package ) {
           if ( exists( $prime{$package} ) ) {
             croak "Unexpected conflict in '$package'; multiple versions found.\n";
           } else {
+            $mapped_filename = "$package.pm" if lc("$package.pm") eq lc($mapped_filename);
             $prime{$package}{file} = $mapped_filename;
             $prime{$package}{version} = $version if defined( $version );
           }
@@ -420,7 +422,7 @@ sub _parse_version_expression {
   my $line = shift;
 
   my( $sig, $var, $pkg );
-  if ( $line =~ $VERS_REGEXP ) {
+  if ( $line =~ /$VERS_REGEXP/o ) {
     ( $sig, $var, $pkg ) = $2 ? ( $1, $2, $3 ) : ( $4, $5, $6 );
     if ( $pkg ) {
       $pkg = ($pkg eq '::') ? 'main' : $pkg;
@@ -456,12 +458,16 @@ sub _parse_fh {
     chomp( $line );
     next if $line =~ /^\s*#/;
 
-    $in_pod = ($line =~ /^=(?!cut)/) ? 1 : ($line =~ /^=cut/) ? 0 : $in_pod;
+    my $is_cut;
+    if ( $line =~ /^=(.{0,3})/ ) {
+      $is_cut = $1 eq 'cut';
+      $in_pod = !$is_cut;
+    }
 
     # Would be nice if we could also check $in_string or something too
     last if !$in_pod && $line =~ /^__(?:DATA|END)__$/;
 
-    if ( $in_pod || $line =~ /^=cut/ ) {
+    if ( $in_pod || $is_cut ) {
 
       if ( $line =~ /^=head\d\s+(.+)\s*$/ ) {
 	push( @pod, $1 );
@@ -484,9 +490,11 @@ sub _parse_fh {
 
       # parse $line to see if it's a $VERSION declaration
       my( $vers_sig, $vers_fullname, $vers_pkg ) =
-	  $self->_parse_version_expression( $line );
+          ($line =~ /VERSION/)
+              ? $self->_parse_version_expression( $line )
+              : ();
 
-      if ( $line =~ $PKG_REGEXP ) {
+      if ( $line =~ /$PKG_REGEXP/o ) {
         $pkg = $1;
         push( @pkgs, $pkg ) unless grep( $pkg eq $_, @pkgs );
         $vers{$pkg} = (defined $2 ? $2 : undef)  unless exists( $vers{$pkg} );

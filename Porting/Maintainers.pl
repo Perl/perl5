@@ -1288,7 +1288,7 @@ use File::Glob qw(:case);
 
     'Module::Metadata' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/Module-Metadata-1.000009.tar.gz',
+        'DISTRIBUTION' => 'VPIT/Module-Metadata-1.000010.tar.gz',
         'FILES'        => q[cpan/Module-Metadata],
         'EXCLUDED'     => [
             qr{^maint},

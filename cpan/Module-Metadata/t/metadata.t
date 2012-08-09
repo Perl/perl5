@@ -203,7 +203,7 @@ package Simple v1.2.3_4 {
 );
 my %modules = reverse @modules;
 
-plan tests => 42 + 2 * keys( %modules );
+plan tests => 51 + 2 * keys( %modules );
 
 require_ok('Module::Metadata');
 
@@ -246,7 +246,7 @@ $pm_info = Module::Metadata->new_from_handle( $handle, $file );
 ok( defined( $pm_info ), 'new_from_handle() succeeds' );
 $pm_info = Module::Metadata->new_from_handle( $handle );
 is( $pm_info, undef, "new_from_handle() without filename returns undef" );
-
+close($handle);
 
 # construct from module name, using custom include path
 $pm_info = Module::Metadata->new_from_module(
@@ -581,4 +581,36 @@ is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
 
   is_deeply( $got_provides, $exp_provides, "provides()" )
     or diag explain $got_provides;
+}
+
+# Check package_versions_from_directory with regard to case-sensitivity
+{
+  $dist->change_file( 'lib/Simple.pm', <<'---' );
+package simple;
+$VERSION = '0.01';
+---
+  $dist->regen;
+
+  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  is( $pm_info->name, undef, 'no default package' );
+  is( $pm_info->version, undef, 'version for default package' );
+  is( $pm_info->version('simple'), '0.01', 'version for lower-case package' );
+  is( $pm_info->version('Simple'), undef, 'version for capitalized package' );
+
+  $dist->change_file( 'lib/Simple.pm', <<'---' );
+package simple;
+$VERSION = '0.01';
+package Simple;
+$VERSION = '0.02';
+package SiMpLe;
+$VERSION = '0.03';
+---
+  $dist->regen;
+
+  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  is( $pm_info->name, 'Simple', 'found default package' );
+  is( $pm_info->version, '0.02', 'version for default package' );
+  is( $pm_info->version('simple'), '0.01', 'version for lower-case package' );
+  is( $pm_info->version('Simple'), '0.02', 'version for capitalized package' );
+  is( $pm_info->version('SiMpLe'), '0.03', 'version for mixed-case package' );
 }
