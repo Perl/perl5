@@ -469,12 +469,6 @@ those cases. Create the branch by running
   git checkout -b release-5.xx.yy
 
 
-=head3 bump version number
-
-For a BLEAD-POINT release, if you did not bump the perl version number as
-part of I<advance actions>, do that now.
-
-
 =head3 finalize perldelta
 
 Finalize the perldelta.  In particular, fill in the Acknowledgements
