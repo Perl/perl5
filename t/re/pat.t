@@ -19,7 +19,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 452;  # Update this when adding/deleting tests.
+plan tests => 453;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1275,6 +1275,13 @@ EOP
 	my $o = bless [ bless [], "Qr1" ], 'Qr_indirect';
 	ok("A51" =~ /^A$o/, "Qr_indirect");
 	ok("51" =~ /$o/, "Qr_indirect bare");
+    }
+
+    {   # Various flags weren't being set when a [] is optimized into an
+        # EXACTish node
+        ;
+        ;
+        ok("\x{017F}\x{017F}" =~ qr/^[\x{00DF}]?$/i, "[] to EXACTish optimization");
     }
 
 } # End of sub run_tests

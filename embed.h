@@ -908,7 +908,7 @@
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
-#define alloc_maybe_populate_EXACT(a,b,c,d)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d)
+#define alloc_maybe_populate_EXACT(a,b,c,d,e)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
 #define cl_and			S_cl_and
 #define cl_anything		S_cl_anything
@@ -943,7 +943,7 @@
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b,c)		S_regatom(aTHX_ a,b,c)
 #define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
-#define regclass(a,b)		S_regclass(aTHX_ a,b)
+#define regclass(a,b,c)		S_regclass(aTHX_ a,b,c)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)

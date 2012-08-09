@@ -9866,15 +9866,23 @@ S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
 }
 
 PERL_STATIC_INLINE void
-S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, STRLEN len, UV code_point)
+S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32* flagp, STRLEN len, UV code_point)
 {
-    /* This knows the details about sizing an EXACTish node, and potentially
-     * populating it with a single character.  If <len> is non-zero, it assumes
-     * that the node has already been populated, and just does the sizing,
-     * ignoring <code_point>.  Otherwise it looks at <code_point> and
-     * calculates what <len> should be.  In pass 1, it sizes the node
-     * appropriately.  In pass 2, it additionally will populate the node's
-     * STRING with <code_point>, if <len> is 0.
+    /* This knows the details about sizing an EXACTish node, setting flags for
+     * it (by setting <*flagp>, and potentially populating it with a single
+     * character.
+     *
+     * If <len> is non-zero, this function assumes that the node has already
+     * been populated, and just does the sizing.  In this case <code_point>
+     * should be the final code point that has already been placed into the
+     * node.  This value will be ignored except that under some circumstances
+     * <*flagp> is set based on it.
+     *
+     * If <len is zero, the function assumes that the node is to contain only
+     * the single character given by <code_point> and calculates what <len>
+     * should be.  In pass 1, it sizes the node appropriately.  In pass 2, it
+     * additionally will populate the node's STRING with <code_point>, if <len>
+     * is 0.  In both cases <*flagp> is appropriately set
      *
      * It knows that under FOLD, UTF characters and the Latin Sharp S must be
      * folded (the latter only when the rules indicate it can match 'ss') */
@@ -9919,6 +9927,10 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, STR
             Copy((char *) character, STRING(node), len, char);
         }
     }
+
+    *flagp |= HASWIDTH;
+    if (len == 1 && UNI_IS_INVARIANT(code_point))
+        *flagp |= SIMPLE;
 }
 
 /*
@@ -10033,13 +10045,12 @@ tryagain:
     case '[':
     {
 	char * const oregcomp_parse = ++RExC_parse;
-        ret = regclass(pRExC_state,depth+1);
+        ret = regclass(pRExC_state, flagp,depth+1);
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
 	}
 	nextchar(pRExC_state);
-	*flagp |= HASWIDTH|SIMPLE;
         Set_Node_Length(ret, RExC_parse - oregcomp_parse + 1); /* MJD */
 	break;
     }
@@ -10250,7 +10261,7 @@ tryagain:
 		}
 		RExC_parse--;
 
-                ret = regclass(pRExC_state,depth+1);
+                ret = regclass(pRExC_state, flagp,depth+1);
 
 		RExC_end = oldregxend;
 		RExC_parse--;
@@ -10258,7 +10269,6 @@ tryagain:
 		Set_Node_Offset(ret, parse_start + 2);
 		Set_Node_Cur_Length(ret);
 		nextchar(pRExC_state);
-		*flagp |= HASWIDTH|SIMPLE;
 	    }
 	    break;
         case 'N': 
@@ -10935,6 +10945,9 @@ tryagain:
 
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
+
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender);
+
 	    RExC_parse = p - 1;
             Set_Node_Cur_Length(ret); /* MJD */
 	    nextchar(pRExC_state);
@@ -10944,12 +10957,7 @@ tryagain:
 		if (iv < 0)
 		    vFAIL("Internal disaster");
 	    }
-	    if (len > 0)
-		*flagp |= HASWIDTH;
-	    if (len == 1 && UNI_IS_INVARIANT(ender))
-		*flagp |= SIMPLE;
 
-            alloc_maybe_populate_EXACT(pRExC_state, ret, len, 0);
 	} /* End of label 'defchar:' */
 	break;
     } /* End of giant switch on input character */
@@ -11316,7 +11324,7 @@ S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
    above 255, a range list is used */
 
 STATIC regnode *
-S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
+S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     dVAR;
     register UV nextvalue;
@@ -11487,7 +11495,7 @@ parseit:
                     if this makes sense as it does change the behaviour
                     from earlier versions, OTOH that behaviour was broken
                     as well. */
-                    if (! grok_bslash_N(pRExC_state, NULL, &value, NULL, depth,
+                    if (! grok_bslash_N(pRExC_state, NULL, &value, flagp, depth,
                                       TRUE /* => charclass */))
                     {
                         goto parseit;
@@ -12106,6 +12114,7 @@ parseit:
                     if (invert) {
                         op += NALNUM - ALNUM;
                     }
+                    *flagp |= HASWIDTH|SIMPLE;
                     break;
 
                 /* The second group doesn't depend of the charset modifiers.
@@ -12116,6 +12125,7 @@ parseit:
                 case ANYOF_HORIZWS:
                   is_horizws:
                     op = (invert) ? NHORIZWS : HORIZWS;
+                    *flagp |= HASWIDTH|SIMPLE;
                     break;
 
                 case ANYOF_NVERTWS:
@@ -12123,6 +12133,7 @@ parseit:
                     /* FALLTHROUGH */
                 case ANYOF_VERTWS:
                     op = (invert) ? NVERTWS : VERTWS;
+                    *flagp |= HASWIDTH|SIMPLE;
                     break;
 
                 case ANYOF_MAX:
@@ -12162,6 +12173,8 @@ parseit:
             if (invert) {
                 if (! LOC && value == '\n') {
                     op = REG_ANY; /* Optimize [^\n] */
+                    *flagp |= HASWIDTH|SIMPLE;
+                    RExC_naughty++;
                 }
             }
             else if (value < 256 || UTF) {
@@ -12175,6 +12188,7 @@ parseit:
             if (prevvalue == '0') {
                 if (value == '9') {
                     op = (invert) ? NDIGITA : DIGITA;
+                    *flagp |= HASWIDTH|SIMPLE;
                 }
             }
         }
@@ -12208,9 +12222,10 @@ parseit:
                 if (! SIZE_ONLY) {
                     FLAGS(ret) = arg;
                 }
+                *flagp |= HASWIDTH|SIMPLE;
             }
             else if (PL_regkind[op] == EXACT) {
-                alloc_maybe_populate_EXACT(pRExC_state, ret, 0, value);
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value);
             }
 
             RExC_parse = (char *) cur_parse;
@@ -12678,6 +12693,7 @@ parseit:
              * it doesn't match anything.  (perluniprops.pod notes such
              * properties) */
             op = OPFAIL;
+            *flagp |= HASWIDTH|SIMPLE;
         }
         else if (start == end) {    /* The range is a single code point */
             if (! invlist_iternext(cp_list, &start, &end)
@@ -12743,12 +12759,16 @@ parseit:
         else if (start == 0) {
             if (end == UV_MAX) {
                 op = SANY;
+                *flagp |= HASWIDTH|SIMPLE;
+                RExC_naughty++;
             }
             else if (end == '\n' - 1
                     && invlist_iternext(cp_list, &start, &end)
                     && start == '\n' + 1 && end == UV_MAX)
             {
                 op = REG_ANY;
+                *flagp |= HASWIDTH|SIMPLE;
+                RExC_naughty++;
             }
         }
 
@@ -12761,7 +12781,7 @@ parseit:
             RExC_parse = (char *)cur_parse;
 
             if (PL_regkind[op] == EXACT) {
-                alloc_maybe_populate_EXACT(pRExC_state, ret, 0, value);
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value);
             }
 
             SvREFCNT_dec(listsv);
@@ -12902,6 +12922,8 @@ parseit:
 	RExC_rxi->data->data[n] = (void*)rv;
 	ARG_SET(ret, n);
     }
+
+    *flagp |= HASWIDTH|SIMPLE;
     return ret;
 }
 #undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION

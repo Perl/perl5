@@ -1930,14 +1930,15 @@ Es	|regnode*|regbranch	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|I32 first|U32 depth
 Es	|STRLEN	|reguni		|NN const struct RExC_state_t *pRExC_state \
 				|UV uv|NN char *s
-Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state|U32 depth
+Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state \
+				|NN I32 *flagp|U32 depth
 Es	|regnode*|reg_node	|NN struct RExC_state_t *pRExC_state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth
 Es	|bool	|grok_bslash_N	|NN struct RExC_state_t *pRExC_state \
 				|NULLOK regnode** nodep|NULLOK UV *valuep \
-				|NULLOK I32 *flagp|U32 depth|bool in_char_class
+				|NN I32 *flagp|U32 depth|bool in_char_class
 Es	|void	|reginsert	|NN struct RExC_state_t *pRExC_state \
 				|U8 op|NN regnode *opnd|U32 depth
 Es	|void	|regtail	|NN struct RExC_state_t *pRExC_state \
@@ -1951,7 +1952,8 @@ Es	|U32	|join_exact	|NN struct RExC_state_t *pRExC_state \
 EsRn	|char *	|regwhite	|NN struct RExC_state_t *pRExC_state \
 				|NN char *p
 Ei	|void   |alloc_maybe_populate_EXACT|NN struct RExC_state_t *pRExC_state \
-				|NN regnode *node|STRLEN len|UV code_point
+				|NN regnode *node|NN I32 *flagp|STRLEN len \
+				|UV code_point
 Ei	|U8   |compute_EXACTish|NN struct RExC_state_t *pRExC_state
 Es	|char *	|nextchar	|NN struct RExC_state_t *pRExC_state
 Es	|bool	|reg_skipcomment|NN struct RExC_state_t *pRExC_state
