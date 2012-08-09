@@ -91,24 +91,61 @@ for the brightly colored sporks of revolution.  A volley of shots rang
 out and Burya Rubenstein raised his hands, grinning wildly, to accept
 the salute of the soldiers from the Skull Hill garrison.
 
+=head2 v5.16.1 - Emerald Rose - Never Split The Party
+
+L<Announced on 2012-08-08 by Ricardo
+Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-08/msg00307.html>
+
+  Don't you know?  You never split the party
+  Clerics in the back to keep those fighters hale and hearty
+  The wizard in the middle, where he can shed some light
+  And you never let that damn thief out of sightâ€¦
+
+    -- Emerald Rose, Never Split The Party
+
+=head2 v5.16.1 RC1 - Tom Moldvay - Dungeons & Dragons
+
+L<Announced on 2012-08-03 by Ricardo
+Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-08/msg00157.html>
+
+I was busy rescuing the captured maiden when the dragon showed up.
+Fifty feed of scaled terror glared down at us with smoldering red eyes.
+Tendrils of smoke drifted out from between fangs larger than daggers.
+The dragon blocked the only exit from the cave.
+
+⋮
+
+I unwrapped the sword which the mysterious cleric had given me.  The
+sword was golden-tinted steel.  Its hilt was set with a rainbow
+collection of precious gems.  I shouted my battle cry and charged
+
+My charge caught the dragon by surprise.  Its titanic jaws snapped shut
+inches from my face.  I swung the golden sword with both arms.  The
+swordblade bit into the dragon's neck and continued through to the other
+side.  With an earth-shaking crash, the dragon dropped dead at my feet.
+The magic sword had saved my life and ended the reign of the
+dragon-tyrant.  The countryside was freed and I could return as a hero.
+
+  -- Tom Moldvay, Foreward to the Dungeons & Dragons Basic Rulebook
+
 =head2 v5.16.0 - W.H. Auden - September 1, 1939
 
 L<Announced on 2012-05-20 by Ricardo
 Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-05/msg00728.html>
 
-  All I have is a voice                                                         
-  To undo the folded lie,                                                       
-  The romantic lie in the brain                                                 
-  Of the sensual man-in-the-street                                              
-  And the lie of Authority                                                      
-  Whose buildings grope the sky:                                                
-  There is no such thing as the State                                           
-  And no one exists alone;                                                      
-  Hunger allows no choice                                                       
-  To the citizen or the police;                                                 
-  We must love one another or die.                                              
+  All I have is a voice
+  To undo the folded lie,
+  The romantic lie in the brain
+  Of the sensual man-in-the-street
+  And the lie of Authority
+  Whose buildings grope the sky:
+  There is no such thing as the State
+  And no one exists alone;
+  Hunger allows no choice
+  To the citizen or the police;
+  We must love one another or die.
 
-    -- W.H. Auden, September 1, 1939                                            
+    -- W.H. Auden, September 1, 1939
 
 =head2 v5.15.9 - Bob Dylan - Blowin' In The Wind
 
