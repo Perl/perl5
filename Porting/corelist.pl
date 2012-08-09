@@ -290,6 +290,7 @@ sub write_corelist {
     my $content = shift;
     my $filename = shift;
     open (my $clfh, ">", $filename);
+    binmode $clfh;
     print $clfh $content;
     close($clfh);
 }
