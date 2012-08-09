@@ -1927,12 +1927,13 @@ use File::Glob qw(:case);
 
     'Time::Local' => {
         'MAINTAINER'   => 'drolsky',
-        'DISTRIBUTION' => 'FLORA/Time-Local-1.2000.tar.gz',
+        'DISTRIBUTION' => 'DROLSKY/Time-Local-1.2300.tar.gz',
         'FILES'        => q[cpan/Time-Local],
         'EXCLUDED'     => [
             qw( t/pod-coverage.t
                 t/pod.t
                 ),
+            qr{^t/release-.*\.t},
         ],
         'UPSTREAM' => 'cpan',
     },
