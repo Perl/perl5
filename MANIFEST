@@ -858,6 +858,7 @@ cpan/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 cpan/Encode/lib/Encode/Unicode/UTF7.pm	Encode extension
 cpan/Encode/Makefile.PL			Encode extension makefile writer
 cpan/Encode/MANIFEST			Encode MANIFEST
+cpan/Encode/META.json			Encode META.json
 cpan/Encode/META.yml			Encode META.yml
 cpan/Encode/README			Encode extension
 cpan/Encode/Symbol/Makefile.PL		Encode extension

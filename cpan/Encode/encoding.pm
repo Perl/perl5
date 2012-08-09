@@ -1,4 +1,4 @@
-# $Id: encoding.pm,v 2.9 2011/08/09 07:49:44 dankogai Exp dankogai $
+# $Id: encoding.pm,v 2.10 2012/08/05 23:08:49 dankogai Exp dankogai $
 package encoding;
 our $VERSION = '2.6_01';
 
@@ -104,6 +104,10 @@ sub _get_locale_encoding {
 sub import {
     my $class = shift;
     my $name  = shift;
+    if (!$name){
+	require Carp;
+        Carp::croak("encoding: no encoding specified.");
+    }
     if ( $name eq ':_get_locale_encoding' ) {    # used by lib/open.pm
         my $caller = caller();
         {
