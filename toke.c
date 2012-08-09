@@ -4783,7 +4783,6 @@ Perl_yylex(pTHX)
 
 	return yylex();
     case LEX_FORMLINE:
-	PL_lex_state = PL_parser->form_lex_state;
 	s = scan_formline(PL_bufptr);
 	if (!PL_lex_formbrack)
 	{
@@ -10713,16 +10712,15 @@ S_scan_formline(pTHX_ register char *s)
 	incline(s);
     }
   enough:
+    if (!SvCUR(stuff) || needargs)
+	PL_lex_state = PL_parser->form_lex_state;
     if (SvCUR(stuff)) {
 	PL_expect = XSTATE;
 	if (needargs) {
-	    PL_lex_state = PL_parser->form_lex_state;
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(FORMLBRACK);
 	}
-	else
-	    PL_lex_state = LEX_FORMLINE;
 	if (!IN_BYTES) {
 	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
 		SvUTF8_on(stuff);
