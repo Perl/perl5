@@ -5915,8 +5915,7 @@ Perl_yylex(pTHX)
 	if (formbrack == 2) { /* means . where arguments were expected */
 	    start_force(PL_curforce);
 	    force_next(';');
-	    start_force(PL_curforce);
-	    force_next(FORMRBRACK);
+	    TOKEN(FORMRBRACK);
 	}
 	TOKEN(';');
     case '&':
