@@ -1171,7 +1171,7 @@ Edit F<pod/perl.pod> to add an entry for the file, e.g.:
 
 Then rebuild various files:
 
-    $ perl pod/buildtoc --build-all
+    $ perl Porting/pod_rules.pl
 
 Finally, commit:
 
