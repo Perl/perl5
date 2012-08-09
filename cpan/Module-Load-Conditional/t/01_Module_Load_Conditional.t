@@ -132,6 +132,21 @@ use_ok( 'Module::Load::Conditional' );
     is( $rv->{version}, 2,          "   Version is correct" );
 }
 
+### test that no package statement means $VERSION is $main::VERSION
+{
+    my $rv = check_install( module => 'NotMain' );
+    ok( $rv,                   'Testing $VERSION without package' );
+    is( $rv->{version}, undef, "   No version info returned" );
+}
+
+### test that the right $VERSION is picked when there are several packages
+{
+    my $rv = check_install( module => 'NotX' );
+    ok( $rv,               'Testing $VERSION with many packages' );
+    ok( $rv->{version},    "   Version found" );
+    is( $rv->{version}, 3, "   Version is correct" );
+}
+
 ### test beta/developer release versions
 {   my $test_ver = $Module::Load::Conditional::VERSION;
 
@@ -150,7 +165,7 @@ use_ok( 'Module::Load::Conditional' );
 }
 
 ### test $FIND_VERSION
-{   local $Module::Load::Conditional::FIND_VERSION = 0;
+{
     local $Module::Load::Conditional::FIND_VERSION = 0;
 
     my $rv = check_install( module  => 'Module::Load::Conditional' );
@@ -158,6 +173,29 @@ use_ok( 'Module::Load::Conditional' );
     ok( $rv,                        'Testing $FIND_VERSION' );
     is( $rv->{version}, undef,      "   No version info returned" );
     ok( $rv->{uptodate},            "   Module marked as uptodate" );
+}
+
+### test that check_install() picks up the first match
+{
+    my ($dir_a, $dir_b) = map File::Spec->catdir($FindBin::Bin, 'test_lib', $_),
+                              qw[a b];
+    my $x_pm = File::Spec->catfile($dir_a, 'X.pm');
+
+    local @INC = ($dir_a, $dir_b);
+
+    my $rv = check_install( module => 'X' );
+
+    ok( $rv,                    'Testing the file picked by check_install ($FIND_VERSION == 1)' );
+    is( $rv->{file},    $x_pm,  "   First file was picked" );
+    is( $rv->{version}, '0.01', "   Correct version for first file" );
+
+    local $Module::Load::Conditional::FIND_VERSION = 0;
+
+    $rv = check_install( module => 'X' );
+
+    ok( $rv,                    'Testing the file picked by check_install ($FIND_VERSION == 0)' );
+    is( $rv->{file},    $x_pm,  "   First file was also picked" );
+    is( $rv->{version}, undef,  "   But its VERSION was not required" );
 }
 
 ### test 'can_load' ###
