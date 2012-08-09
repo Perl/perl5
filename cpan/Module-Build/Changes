@@ -1,5 +1,32 @@
 Revision history for Perl extension Module::Build.
 
+0.4002 - Fri Jul 27 20:04:09 EEST 2012
+
+  [BUG FIXES]
+
+  - Test for TAP::Harness version properly
+
+  - Install to 'site' on 5.12+
+
+  [DOCUMENTATION]
+
+  - Document extra_{compiler|linker}_flags accessors [Nick Wellnhofer]
+
+0.4001 - Tue Jun 26 20:54:15 CEST 2012
+  [BUG FIXES]
+
+  - Parse Pod name a litte more leniently [Paul Evans]
+
+  [DOCUMENTATION]
+
+  - Various spelling fixes [Leon Timmermans, Jonathan Yu]
+
+  - Fixes configuration keys used for script location [Leon Timmermans, reported by Samuel Ferencik]
+
+  [OTHER]
+
+  - use warnings
+
 0.40 - Fri Feb 24 18:47:48 CET 2012
 
   - Released 0.39_02 as 0.40 without any code changes

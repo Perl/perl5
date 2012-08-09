@@ -1244,14 +1244,13 @@ use File::Glob qw(:case);
 
     'Module::Build' => {
         'MAINTAINER'   => 'kwilliams',
-        'DISTRIBUTION' => 'LEONT/Module-Build-0.40.tar.gz',
+        'DISTRIBUTION' => 'LEONT/Module-Build-0.4002.tar.gz',
         'FILES'        => q[cpan/Module-Build],
         'EXCLUDED'     => [
             qw( t/par.t
                 t/signature.t
                 ),
             qr{^contrib/},
-            qr{^devtools},
             qr{^inc},
         ],
         'CUSTOMIZED' => ['lib/Module/Build/ConfigData.pm'],

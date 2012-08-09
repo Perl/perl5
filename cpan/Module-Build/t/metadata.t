@@ -63,7 +63,7 @@ my $mb = Module::Build->new_from_context;
 {
   my $mb_prereq = { 'Module::Build' => $Module::Build::VERSION };
   my $mb_config_req = {
-    'Module::Build' => int($Module::Build::VERSION * 100)/100
+    'Module::Build' => sprintf '%2.2f', int($Module::Build::VERSION * 100)/100
   };
   my $node;
   my $output = stdout_stderr_of( sub {

@@ -4,9 +4,11 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.40';
+use warnings;
+
+$VERSION = '0.4002';
 $VERSION = eval $VERSION;
-BEGIN { require 5.00503 }
+BEGIN { require 5.006001 }
 
 use Carp;
 use Cwd ();
@@ -1640,6 +1642,7 @@ sub perl_version_to_float {
 sub _parse_conditions {
   my ($self, $spec) = @_;
 
+  return ">= 0" if not defined $spec;
   if ($spec =~ /^\s*([\w.]+)\s*$/) { # A plain number, maybe with dots, letters, and underscores
     return (">= $spec");
   } else {
