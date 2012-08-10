@@ -92,8 +92,9 @@ sub expand_glob {
 sub filter_excluded {
     my ($m, @files) = @_;
 
+    my $excluded = $Modules{$m}{EXCLUDED};
     return @files
-	unless my $excluded = $Modules{$m}{EXCLUDED};
+	unless $excluded and @$excluded;
 
     my ($pat) = map { qr/$_/ } join '|' => map {
 	ref $_ ? $_ : qr/\b\Q$_\E$/
