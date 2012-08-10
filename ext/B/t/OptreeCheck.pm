@@ -180,7 +180,7 @@ If name property is not provided, it is synthesized from these params:
 bcopts, note, prog, code.  This is more convenient than trying to do
 it manually.
 
-=head2 code or prog or profile
+=head2 code or prog or progfile
 
 Either code or prog or progfile must be present.
 
