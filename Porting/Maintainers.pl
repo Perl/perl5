@@ -1742,7 +1742,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'cpan',
         'CUSTOMIZED' => [
             qw( t/source.t
-                t/testargs.t
                 ),
         ],
     },
