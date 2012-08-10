@@ -10946,7 +10946,15 @@ tryagain:
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
 
+            /* I (khw) don't know if you can get here with zero length, but the
+             * old code handled this situation by creating a zero-length EXACT
+             * node.  Might as well be NOTHING instead */
+            if (len == 0) {
+                OP(ret) = NOTHING;
+            }
+            else{
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender);
+            }
 
 	    RExC_parse = p - 1;
             Set_Node_Cur_Length(ret); /* MJD */
