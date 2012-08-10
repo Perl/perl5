@@ -146,6 +146,7 @@ printf "1..%d\n" => scalar keys %module_diffs if $tap;
 
 my $count;
 my $diff_cmd = "git --no-pager diff $tag_to_compare ";
+my $q = ($^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS') ? '"' : "'";
 my (@diff);
 
 foreach my $pm_file (sort keys %module_diffs) {
@@ -166,7 +167,7 @@ foreach my $pm_file (sort keys %module_diffs) {
     } else {
 	if ($tap) {
 	    foreach (sort @{$module_diffs{$pm_file}}) {
-		print "# $_" for `$diff_cmd '$_'`;
+		print "# $_" for `$diff_cmd $q$_$q`;
 	    }
 	    if (exists $skip_versions{$pm_file}
 		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
@@ -190,6 +191,6 @@ sub get_file_from_git {
 if ($diffs) {
     for (sort @diff) {
 	print "\n";
-	system "$diff_cmd '$_'";
+	system "$diff_cmd $q$_$q";
     }
 }
