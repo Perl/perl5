@@ -250,7 +250,6 @@ use File::Glob qw(:case);
                 )
         ],
         'UPSTREAM'   => 'cpan',
-        'CUSTOMIZED' => ['t/open.t'],
     },
 
     'AutoLoader' => {
