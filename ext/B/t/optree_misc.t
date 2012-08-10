@@ -124,9 +124,14 @@ checkOptree ( name      => 'index and PVBM',
 	      strip_open_hints => 1,
 	      expect	=> $t,  expect_nt => $nt);
 
+my $tmpfile = tempfile();
+open my $fh, '>', $tmpfile or die "Cannot open $tmpfile: $!";
+print $fh "no warnings;format =\n@<<<\n\$a\n@>>>\n\@b\n.";
+close $fh;
+
 checkOptree ( name      => 'formats',
 	      bcopts    => 'STDOUT',
-	      prog	=> "no warnings;format =\n@<<<\n\$a\n@>>>\n\@b\n.",
+	      progfile	=> $tmpfile,
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # main::STDOUT (FORMAT):
@@ -169,3 +174,5 @@ EOT_EOT
 # a              <1> rv2av[t3] lK/1 ->b
 # 9                 <$> gv(*b) s ->a
 EONT_EONT
+
+unlink $tmpfile;

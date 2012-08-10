@@ -5,11 +5,11 @@ use warnings;
 use vars qw($TODO $Level $using_open);
 require "test.pl";
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
-		  require_ok runperl);
+		  require_ok runperl tempfile);
 
 
 # The hints flags will differ if ${^OPEN} is set.
@@ -135,10 +135,10 @@ results.
 
 =head2 getRendering
 
-getRendering() runs code or prog through B::Concise, and captures its
-rendering.  Errors emitted during rendering are checked against
-expected errors, and are reported as diagnostics by default, or as
-failures if 'report=fail' cmdline-option is given.
+getRendering() runs code or prog or progfile through B::Concise, and
+captures its rendering.  Errors emitted during rendering are checked
+against expected errors, and are reported as diagnostics by default,
+or as failures if 'report=fail' cmdline-option is given.
 
 prog is run in a sub-shell, with $bcopts passed through. This is the way
 to run code intended for main.  The code arg in contrast, is always a
@@ -180,9 +180,9 @@ If name property is not provided, it is synthesized from these params:
 bcopts, note, prog, code.  This is more convenient than trying to do
 it manually.
 
-=head2 code or prog
+=head2 code or prog or profile
 
-Either code or prog must be present.
+Either code or prog or progfile must be present.
 
 =head2 prog => $perl_source_string
 
@@ -190,6 +190,11 @@ prog => $src provides a snippet of code, which is run in a sub-process,
 via test.pl:runperl, and through B::Concise like so:
 
     './perl -w -MO=Concise,$bcopts_massaged -e $src'
+
+=head2 progfile => $perl_script
+
+progfile => $file provides a file containing a snippet of code which is
+run as per the prog => $src example above.
 
 =head2 code => $perl_source_string || CODEREF
 
@@ -214,8 +219,8 @@ The bcopts arg can be a single string, or an array of strings.
 
 =head2 errs => $err_str_regex || [ @err_str_regexs ] 
 
-getRendering() processes the code or prog arg under warnings, and both
-parsing and optree-traversal errors are collected.  These are
+getRendering() processes the code or prog or progfile arg under warnings,
+and both parsing and optree-traversal errors are collected.  These are
 validated against the one or more errors you specify.
 
 =head1 testcase modifier properties
@@ -463,8 +468,8 @@ sub label {
 
 sub getRendering {
     my $tc = shift;
-    fail("getRendering: code or prog is required")
-	unless $tc->{code} or $tc->{prog};
+    fail("getRendering: code or prog or progfile is required")
+	unless $tc->{code} or $tc->{prog} or $tc->{progfile};
 
     my @opts = get_bcopts($tc);
     my $rendering = ''; # suppress "Use of uninitialized value in open"
@@ -474,6 +479,10 @@ sub getRendering {
     if ($tc->{prog}) {
 	$rendering = runperl( switches => ['-w',join(',',"-MO=Concise",@opts)],
 			      prog => $tc->{prog}, stderr => 1,
+			      ); # verbose => 1);
+    } elsif ($tc->{progfile}) {
+	$rendering = runperl( switches => ['-w',join(',',"-MO=Concise",@opts)],
+			      progfile => $tc->{progfile}, stderr => 1,
 			      ); # verbose => 1);
     } else {
 	my $code = $tc->{code};
