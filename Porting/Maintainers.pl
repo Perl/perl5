@@ -1558,7 +1558,6 @@ use File::Glob qw(:case);
         'CUSTOMIZED' => [
             qw( scripts/pod2man.PL
                 scripts/pod2text.PL
-                pod/perlpodstyle.pod
                 ),
         ],
         'MAP' => {
