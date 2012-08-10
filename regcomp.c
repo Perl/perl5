@@ -2661,7 +2661,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      'ss' or not is not knowable at compile time.  It will match iff the
  *      target string is in UTF-8, unlike the EXACTFU nodes, where it always
  *      matches; and the EXACTFL and EXACTFA nodes where it never does.  Thus
- *      it can't be folded to "ss" at compile time, unlike EXACTFU does as
+ *      it can't be folded to "ss" at compile time, unlike EXACTFU does (as
  *      described in item 3).  An assumption that the optimizer part of
  *      regexec.c (probably unwittingly) makes is that a character in the
  *      pattern corresponds to at most a single character in the target string.
@@ -9577,20 +9577,22 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     return(ret);
 }
 
-/* grok_bslash_N(pRExC_state, regnode** node_p, UV *valuep, UV depth, bool in_charclass)
+STATIC bool
+S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I32 *flagp, U32 depth, bool in_char_class)
+{
    
-   This is expected to be called by a parser routine that has recognized '\N'
+ /* This is expected to be called by a parser routine that has recognized '\N'
    and needs to handle the rest. RExC_parse is expected to point at the first
    char following the N at the time of the call.  On successful return,
    RExC_parse has been updated to point to just after the sequence identified
-   by this routine.
+   by this routine, and <*flagp> has been updated.
 
-   The \N may be inside (indicated by the boolean <in_charclass>) or outside a
+   The \N may be inside (indicated by the boolean <in_char_class>) or outside a
    character class.
 
    \N may begin either a named sequence, or if outside a character class, mean
    to match a non-newline.  For non single-quoted regexes, the tokenizer has
-   attempted to decide which, and in the case of a named sequence converted it
+   attempted to decide which, and in the case of a named sequence, converted it
    into one of the forms: \N{} (if the sequence is null), or \N{U+c1.c2...},
    where c1... are the characters in the sequence.  For single-quoted regexes,
    the tokenizer passes the \N sequence through unchanged; this code will not
@@ -9622,9 +9624,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
    null.
  */
 
-STATIC bool
-S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I32 *flagp, U32 depth, bool in_char_class)
-{
     char * endbrace;    /* '}' following the name */
     char* p;
     char *endchar;	/* Points to '.' or '}' ending cur char in the input
@@ -12247,7 +12246,7 @@ parseit:
 
     if (SIZE_ONLY)
         return ret;
-    /****** !SIZE_ONLY AFTER HERE *********/
+    /****** !SIZE_ONLY (Pass 2) AFTER HERE *********/
 
     /* If folding, we calculate all characters that could fold to or from the
      * ones already on the list */
