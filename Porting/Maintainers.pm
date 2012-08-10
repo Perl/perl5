@@ -22,7 +22,7 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 		show_results process_options files_to_modules
 		finish_tap_output
 		reload_manifest);
-$VERSION = 0.06;
+$VERSION = 0.07;
 
 require Exporter;
 
