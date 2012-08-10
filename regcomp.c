@@ -9774,6 +9774,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 	SV * substitute_parse = newSVpvn_flags("?:", 2, SVf_UTF8|SVs_TEMP);
 	STRLEN len;
 	char *orig_end = RExC_end;
+        I32 flags;
 
 	while (RExC_parse < endbrace) {
 
@@ -9799,7 +9800,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 	/* The values are Unicode, and therefore not subject to recoding */
 	RExC_override_recoding = 1;
 
-	*node_p = reg(pRExC_state, 1, flagp, depth+1);
+	*node_p = reg(pRExC_state, 1, &flags, depth+1);
+	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 
 	RExC_parse = endbrace;
 	RExC_end = orig_end;
