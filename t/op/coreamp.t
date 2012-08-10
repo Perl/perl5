@@ -632,9 +632,9 @@ test_proto 'quotemeta', '$', '\$';
 
 test_proto 'rand';
 $tests += 3;
-like &CORE::rand, qr/^0[.\d]*\z/, '&rand';
+like &CORE::rand, qr/^0[.\d+-e]*\z/, '&rand';
 unlike join(" ", &CORE::rand), qr/ /, '&rand in list context';
-&cmp_ok(&CORE::rand(78), qw '< 78', '&rand with 2 args');
+&cmp_ok(&CORE::rand(78), qw '< 78', '&rand with 1 arg');
 
 test_proto 'read';
 {
