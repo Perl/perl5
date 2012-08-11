@@ -40,21 +40,21 @@ for my $i (undef, 0 .. 2, "", "0 but true") {
 # $test == 6
 my $i = 0;
 (($i ||= 1) &&= 3) += 4;
-is( $i, 7 );
+is( $i, 7, '||=, &&=');
 
 my ($x, $y) = (1, 8);
 $i = !$x || $y;
-is( $i, 8 );
+is( $i, 8, 'negation precedence with ||' );
 
 ++$y;
 $i = !$x || !$x || !$x || $y;
-is( $i, 9 );
+is( $i, 9, 'negation precedence with ||, multiple operands' );
 
 $x = 0;
 ++$y;
 $i = !$x && $y;
-is( $i, 10 );
+is( $i, 10, 'negation precedence with &&' );
 
 ++$y;
 $i = !$x && !$x && !$x && $y;
-is( $i, 11 );
+is( $i, 11, 'negation precedence with &&, multiple operands' );
