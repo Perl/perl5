@@ -1521,11 +1521,11 @@ Conditional expression. Matches C<yes-pattern> if C<condition> yields
 a true value, matches C<no-pattern> otherwise. A missing pattern always
 matches.
 
-C<(condition)> should be either an integer in
+C<(condition)> should be one of: 1) an integer in
 parentheses (which is valid if the corresponding pair of parentheses
-matched), a look-ahead/look-behind/evaluate zero-width assertion, a
+matched); 2) a look-ahead/look-behind/evaluate zero-width assertion; 3) a
 name in angle brackets or single quotes (which is valid if a group
-with the given name matched), or the special symbol (R) (true when
+with the given name matched); or 4) the special symbol (R) (true when
 evaluated inside of recursion or eval). Additionally the R may be
 followed by a number, (which will be true when evaluated when recursing
 inside of the appropriate group), or by C<&NAME>, in which case it will
@@ -1923,11 +1923,11 @@ is the same as
 
 but
 
-  / ( A (*THEN) B | C (*THEN) D ) /
+  / ( A (*THEN) B | C ) /
 
 is not the same as
 
-  / ( A (*PRUNE) B | C (*PRUNE) D ) /
+  / ( A (*PRUNE) B | C ) /
 
 as after matching the A but failing on the B the C<(*THEN)> verb will
 backtrack and try C; but the C<(*PRUNE)> verb will simply fail.
