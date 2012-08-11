@@ -3663,7 +3663,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		uc = utf8_to_uvchr_buf(s, s + l, NULL);
 		l = utf8_length(s, s + l);
 	    }
-	    else if (has_exactf_sharp_s) {
+	    if (has_exactf_sharp_s) {
 		RExC_seen |= REG_SEEN_EXACTF_SHARP_S;
 	    }
 	    min += l - min_subtract;
@@ -3960,6 +3960,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext	/* atom is fixed width */
 		      && minnext != 0	/* CURLYM can't handle zero width */
+                      && ! (RExC_seen & REG_SEEN_EXACTF_SHARP_S) /* Nor \xDF */
 		) {
 		    /* XXXX How to optimize if data == 0? */
 		    /* Optimize to a simpler form.  */
