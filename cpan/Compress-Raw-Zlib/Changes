@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.056 10 August 2012
+
+      * Fix C++ build issue
+        Thanks to Karl Williamson for supplying the patch.
+      
   2.055 4 August 2012
 
       * Fix misuse of magic in API

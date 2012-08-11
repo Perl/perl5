@@ -997,7 +997,7 @@ deflate (s, buf, output)
 
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            s->stream.next_out = Sv_Grow(output, SvLEN(output) + bufinc) ;
+            s->stream.next_out = (Bytef*) Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
             s->stream.next_out += cur_length ;
             increment = bufinc ;
@@ -1098,7 +1098,7 @@ flush(s, output, f=Z_FINISH)
     for (;;) {
         if (s->stream.avail_out == 0) {        
             /* consumed all the available output, so extend it */
-            s->stream.next_out = Sv_Grow(output, SvLEN(output) + bufinc) ;
+            s->stream.next_out = (Bytef*) Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
             s->stream.next_out += cur_length ;
             increment = bufinc ;
@@ -1388,7 +1388,7 @@ inflate (s, buf, output, eof=FALSE)
     while (RETVAL == Z_OK) {
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            s->stream.next_out = Sv_Grow(output, SvLEN(output) + bufinc +1) ;
+            s->stream.next_out = (Bytef*) Sv_Grow(output, SvLEN(output) + bufinc +1) ;
             cur_length += increment ;
             s->stream.next_out += cur_length ;
             increment = bufinc ;
