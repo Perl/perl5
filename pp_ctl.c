@@ -3580,6 +3580,9 @@ PP(pp_require)
     STRLEN unixlen;
 #ifdef VMS
     int vms_unixname = 0;
+    char *unixnamebuf;
+    char *unixdir;
+    char *unixdirbuf;
 #endif
     const char *tryname = NULL;
     SV *namesv = NULL;
@@ -3665,7 +3668,9 @@ PP(pp_require)
      * To prevent this, the key must be stored in UNIX format if the VMS
      * name can be translated to UNIX.
      */
-    if ((unixname = tounixspec(name, NULL)) != NULL) {
+    
+    if ((unixnamebuf = SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1))))
+        && (unixname = tounixspec(name, unixnamebuf)) != NULL) {
 	unixlen = strlen(unixname);
 	vms_unixname = 1;
     }
@@ -3840,8 +3845,8 @@ PP(pp_require)
 		    }
 
 #ifdef VMS
-		    char *unixdir;
-		    if ((unixdir = tounixpath(dir, NULL)) == NULL)
+		    if (((unixdirbuf = SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1)))) == NULL)
+			|| ((unixdir = tounixpath(dir, unixdirbuf)) == NULL))
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
