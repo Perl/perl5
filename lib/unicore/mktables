@@ -17622,7 +17622,7 @@ END
 
 # Create the list of input files from the objects we have defined, plus
 # version
-my @input_files = 'version';
+my @input_files = qw(version Makefile);
 foreach my $object (@input_file_objects) {
     my $file = $object->file;
     next if ! defined $file;    # Not all objects have files
@@ -17652,6 +17652,10 @@ foreach my $in (@input_files) {
         construct_filename($file, 'mutable', \@directories);
     }
 }
+
+# We use 'Makefile' just to see if it has changed since the last time we
+# rebuilt.  Now discard it.
+@input_files = grep { $_ ne 'Makefile' } @input_files;
 
 my $rebuild = $write_unchanged_files    # Rebuild: if unconditional rebuild
               || ! scalar @mktables_list_output_files  # or if no outputs known
