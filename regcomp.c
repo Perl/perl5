@@ -5206,6 +5206,50 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 }
 
 
+STATIC bool
+S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest, SV** rx_utf8, SV** rx_substr, I32* rx_end_shift, I32 lookbehind, I32 offset, I32 *minlen, STRLEN longest_length, bool eol, bool meol)
+{
+    /* This is the common code for setting up the floating and fixed length
+     * string data extracted from Perlre_op_compile() below.  Returns a boolean
+     * as to whether succeeded or not */
+
+    I32 t,ml;
+
+    if (! (longest_length
+           || (eol /* Can't have SEOL and MULTI */
+               && (! meol || (RExC_flags & RXf_PMf_MULTILINE)))
+          )
+            /* See comments for join_exact for why REG_SEEN_EXACTF_SHARP_S */
+        || (RExC_seen & REG_SEEN_EXACTF_SHARP_S))
+    {
+        return FALSE;
+    }
+
+    /* copy the information about the longest from the reg_scan_data
+        over to the program. */
+    if (SvUTF8(sv_longest)) {
+        *rx_utf8 = sv_longest;
+        *rx_substr = NULL;
+    } else {
+        *rx_substr = sv_longest;
+        *rx_utf8 = NULL;
+    }
+    /* end_shift is how many chars that must be matched that
+        follow this item. We calculate it ahead of time as once the
+        lookbehind offset is added in we lose the ability to correctly
+        calculate it.*/
+    ml = minlen ? *(minlen) : (I32)longest_length;
+    *rx_end_shift = ml - offset
+        - longest_length + (SvTAIL(sv_longest) != 0)
+        + lookbehind;
+
+    t = (eol/* Can't have SEOL and MULTI */
+         && (! meol || (RExC_flags & RXf_PMf_MULTILINE)));
+    fbm_compile(sv_longest, t ? FBMcf_TAIL : 0);
+
+    return TRUE;
+}
+
 /*
  * Perl_re_op_compile - the perl internal RE engine's function to compile a
  * regular expression into internal code.
@@ -6173,105 +6217,56 @@ reStudy:
 	scan_commit(pRExC_state, &data,&minlen,0);
 	SvREFCNT_dec(data.last_found);
 
-        /* Note that code very similar to this but for anchored string 
-           follows immediately below, changes may need to be made to both. 
-           Be careful. 
-         */
 	longest_float_length = CHR_SVLEN(data.longest_float);
-	if (longest_float_length
-	    || (data.flags & SF_FL_BEFORE_EOL
-		&& (!(data.flags & SF_FL_BEFORE_MEOL)
-		    || (RExC_flags & RXf_PMf_MULTILINE)))) 
+
+        if (! ((SvCUR(data.longest_fixed)  /* ok to leave SvCUR */
+                   && data.offset_fixed == data.offset_float_min
+                   && SvCUR(data.longest_fixed) == SvCUR(data.longest_float)))
+            && S_setup_longest (aTHX_ pRExC_state,
+                                    data.longest_float,
+                                    &(r->float_utf8),
+                                    &(r->float_substr),
+                                    &(r->float_end_shift),
+                                    data.lookbehind_float,
+                                    data.offset_float_min,
+                                    data.minlen_float,
+                                    longest_float_length,
+                                    data.flags & SF_FL_BEFORE_EOL,
+                                    data.flags & SF_FL_BEFORE_MEOL))
         {
-            I32 t,ml;
-
-            /* See comments for join_exact for why REG_SEEN_EXACTF_SHARP_S */
-	    if ((RExC_seen & REG_SEEN_EXACTF_SHARP_S)
-		|| (SvCUR(data.longest_fixed)  /* ok to leave SvCUR */
-		    && data.offset_fixed == data.offset_float_min
-		    && SvCUR(data.longest_fixed) == SvCUR(data.longest_float)))
-		    goto remove_float;		/* As in (a)+. */
-
-            /* copy the information about the longest float from the reg_scan_data
-               over to the program. */
-	    if (SvUTF8(data.longest_float)) {
-		r->float_utf8 = data.longest_float;
-		r->float_substr = NULL;
-	    } else {
-		r->float_substr = data.longest_float;
-		r->float_utf8 = NULL;
-	    }
-	    /* float_end_shift is how many chars that must be matched that 
-	       follow this item. We calculate it ahead of time as once the
-	       lookbehind offset is added in we lose the ability to correctly
-	       calculate it.*/
-	    ml = data.minlen_float ? *(data.minlen_float) 
-	                           : (I32)longest_float_length;
-	    r->float_end_shift = ml - data.offset_float_min
-	        - longest_float_length + (SvTAIL(data.longest_float) != 0)
-	        + data.lookbehind_float;
 	    r->float_min_offset = data.offset_float_min - data.lookbehind_float;
 	    r->float_max_offset = data.offset_float_max;
 	    if (data.offset_float_max < I32_MAX) /* Don't offset infinity */
 	        r->float_max_offset -= data.lookbehind_float;
-	    
-	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
-		       && (!(data.flags & SF_FL_BEFORE_MEOL)
-			   || (RExC_flags & RXf_PMf_MULTILINE)));
-	    fbm_compile(data.longest_float, t ? FBMcf_TAIL : 0);
 	}
 	else {
-	  remove_float:
 	    r->float_substr = r->float_utf8 = NULL;
 	    SvREFCNT_dec(data.longest_float);
 	    longest_float_length = 0;
 	}
 
-        /* Note that code very similar to this but for floating string 
-           is immediately above, changes may need to be made to both. 
-           Be careful. 
-         */
 	longest_fixed_length = CHR_SVLEN(data.longest_fixed);
 
-        /* See comments for join_exact for why REG_SEEN_EXACTF_SHARP_S */
-	if (! (RExC_seen & REG_SEEN_EXACTF_SHARP_S)
-	    && (longest_fixed_length
-	        || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
-		    && (!(data.flags & SF_FIX_BEFORE_MEOL)
-		        || (RExC_flags & RXf_PMf_MULTILINE)))) )
+        if (S_setup_longest (aTHX_ pRExC_state,
+                                data.longest_fixed,
+                                &(r->anchored_utf8),
+                                &(r->anchored_substr),
+                                &(r->anchored_end_shift),
+                                data.lookbehind_fixed,
+                                data.offset_fixed,
+                                data.minlen_fixed,
+                                longest_fixed_length,
+                                data.flags & SF_FIX_BEFORE_EOL,
+                                data.flags & SF_FIX_BEFORE_MEOL))
         {
-            I32 t,ml;
-
-            /* copy the information about the longest fixed 
-               from the reg_scan_data over to the program. */
-	    if (SvUTF8(data.longest_fixed)) {
-		r->anchored_utf8 = data.longest_fixed;
-		r->anchored_substr = NULL;
-	    } else {
-		r->anchored_substr = data.longest_fixed;
-		r->anchored_utf8 = NULL;
-	    }
-	    /* fixed_end_shift is how many chars that must be matched that 
-	       follow this item. We calculate it ahead of time as once the
-	       lookbehind offset is added in we lose the ability to correctly
-	       calculate it.*/
-            ml = data.minlen_fixed ? *(data.minlen_fixed) 
-                                   : (I32)longest_fixed_length;
-            r->anchored_end_shift = ml - data.offset_fixed
-	        - longest_fixed_length + (SvTAIL(data.longest_fixed) != 0)
-	        + data.lookbehind_fixed;
 	    r->anchored_offset = data.offset_fixed - data.lookbehind_fixed;
-
-	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
-		 && (!(data.flags & SF_FIX_BEFORE_MEOL)
-		     || (RExC_flags & RXf_PMf_MULTILINE)));
-	    fbm_compile(data.longest_fixed, t ? FBMcf_TAIL : 0);
 	}
 	else {
 	    r->anchored_substr = r->anchored_utf8 = NULL;
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
+
 	if (ri->regstclass
 	    && (OP(ri->regstclass) == REG_ANY || OP(ri->regstclass) == SANY))
 	    ri->regstclass = NULL;
