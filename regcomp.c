@@ -12585,7 +12585,7 @@ parseit:
 
             ret = reg_node(pRExC_state, op);
 
-            if (PL_regkind[op] == POSIXD) {
+            if (PL_regkind[op] == POSIXD || PL_regkind[op] == NPOSIXD) {
                 if (! SIZE_ONLY) {
                     FLAGS(ret) = arg;
                 }
@@ -14097,7 +14097,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
-    else if (k == POSIXD) {
+    else if (k == POSIXD || k == NPOSIXD) {
         U8 index = FLAGS(o) * 2;
         if (index > (sizeof(anyofs) / sizeof(anyofs[0]))) {
             Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);

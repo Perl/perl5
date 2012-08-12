@@ -89,10 +89,10 @@ POSIXD      POSIXD,     none 0 S   ; currently unused except as a placeholder
 POSIXL      POSIXD,     none 0 S   ; currently unused except as a placeholder
 POSIXU      POSIXD,     none 0 S   ; currently unused except as a placeholder
 POSIXA      POSIXD,     none 0 S   ; Some [[:class:]] under /a; the FLAGS field gives which one
-NPOSIXD     POSIXD,     none 0 S   ; currently unused except as a placeholder
-NPOSIXL     POSIXD,     none 0 S   ; currently unused except as a placeholder
-NPOSIXU     POSIXD,     none 0 S   ; currently unused except as a placeholder
-NPOSIXA     POSIXD,     none 0 S   ; complement of POSIXA, [[:^class:]]
+NPOSIXD     NPOSIXD,    none 0 S   ; currently unused except as a placeholder
+NPOSIXL     NPOSIXD,    none 0 S   ; currently unused except as a placeholder
+NPOSIXU     NPOSIXD,    none 0 S   ; currently unused except as a placeholder
+NPOSIXA     NPOSIXD,    none 0 S   ; complement of POSIXA, [[:^class:]]
 # End of order is important (within groups)
 
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
