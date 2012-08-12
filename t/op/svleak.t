@@ -13,6 +13,8 @@ BEGIN {
 	or skip_all("XS::APItest not available");
 }
 
+use Config;
+
 plan tests => 22;
 
 # run some code N times. If the number of SVs at the end of loop N is
@@ -165,4 +167,8 @@ leak(2,0,sub { !$^V }, '[perl #109762] version object in boolean context');
 # [perl #114356] run-time rexexp with unchanging pattern got
 # inflated refcounts
 
-leak(2, 0, sub { eval q{ my $x = "x"; "abc" =~ /$x/ for 1..5 } }, '#114356');
+SKIP: {
+    skip "disabled under -Dmad (eval leaks)" if $Config{mad};
+    leak(2, 0, sub { eval q{ my $x = "x"; "abc" =~ /$x/ for 1..5 } }, '#114356');
+}
+
