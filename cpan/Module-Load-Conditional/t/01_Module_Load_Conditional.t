@@ -180,6 +180,7 @@ use_ok( 'Module::Load::Conditional' );
     my ($dir_a, $dir_b) = map File::Spec->catdir($FindBin::Bin, 'test_lib', $_),
                               qw[a b];
     my $x_pm = File::Spec->catfile($dir_a, 'X.pm');
+    $x_pm = VMS::Filespec::unixify($x_pm) if ON_VMS;
 
     local @INC = ($dir_a, $dir_b);
 
