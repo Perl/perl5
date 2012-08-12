@@ -1947,7 +1947,7 @@ cpan/podlators/t/text.t				podlators test
 cpan/podlators/t/text-utf8.t			podlators test
 cpan/podlators/VERSION				podlators distribution version
 cpan/Pod-Parser/lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
-cpan/Pod-Parser/lib/Pod/Find.pm			used by pod/splitpod
+cpan/Pod-Parser/lib/Pod/Find.pm			find POD documents in directory trees
 cpan/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
 cpan/Pod-Parser/lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 cpan/Pod-Parser/lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
