@@ -1,8 +1,14 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.45 2012/08/05 23:08:49 dankogai Exp dankogai $
+# $Id: Changes,v 2.46 2012/08/12 05:49:30 dankogai Exp dankogai $
 #
-$Revision: 2.45 $ $Date: 2012/08/05 23:08:49 $
+$Revision: 2.46 $ $Date: 2012/08/12 05:49:30 $
+! Encode.pm
+  Fixed: RT#78917 for I18N-Charset: Fails with Encode 2.45
+  To be more exact, 2.45 broke Encode->encodings(':all')
+  https://rt.cpan.org/Ticket/Bug/Display.html?id=78917
+
+2.45 2012/08/05 23:08:49
 ! lib/Encode/Alias.pm
   Addressed RT#78125: Missed Mac Alias x-mac-ce
   https://rt.cpan.org/Ticket/Display.html?id=78125
