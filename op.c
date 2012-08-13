@@ -6758,7 +6758,8 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
  *
  *	We have just cloned an anon prototype that was marked as a const
  *	candidate. Try to grab the current value, and in the case of
- *	PADSV, ignore it if it has multiple references. Return the value.
+ *	PADSV, ignore it if it has multiple references. In this case we
+ *	return a newly created *copy* of the value.
  */
 
 SV *
@@ -7319,6 +7320,9 @@ Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
 
 Currently, the only useful value for C<flags> is SVf_UTF8.
+
+The newly created subroutine takes ownership of a reference to the passed in
+SV.
 
 Passing NULL for SV creates a constant sub equivalent to C<sub BAR () {}>,
 which won't be called if used as a destructor, but will suppress the overhead

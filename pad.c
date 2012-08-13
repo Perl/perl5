@@ -2079,6 +2079,9 @@ Perl_cv_clone(pTHX_ CV *proto)
 	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
 	if (const_sv) {
 	    SvREFCNT_dec(cv);
+            /* For this calling case, op_const_sv returns a *copy*, which we
+               donate to newCONSTSUB. Yes, this is ugly, and should be killed.
+               Need to fix how lib/constant.pm works to eliminate this.  */
 	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
 	}
 	else {
