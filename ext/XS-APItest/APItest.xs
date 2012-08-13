@@ -1971,11 +1971,11 @@ newCONSTSUB(stash, name, flags, sv)
     PPCODE:
         switch (ix) {
            case 0:
-	       cv = newCONSTSUB(stash, pv, SvOK(sv) ? sv : NULL);
+	       cv = newCONSTSUB(stash, pv, SvOK(sv) ? SvREFCNT_inc(sv) : NULL);
                break;
            case 1:
                cv = newCONSTSUB_flags(
-                 stash, pv, len, flags | SvUTF8(name), SvOK(sv) ? sv : NULL
+                 stash, pv, len, flags | SvUTF8(name), SvOK(sv) ? SvREFCNT_inc(sv) : NULL
                );
                break;
         }
