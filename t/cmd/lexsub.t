@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 107;
+plan 111;
 
 # -------------------- our -------------------- #
 
@@ -453,6 +453,19 @@ sub make_anon_with_my_sub{
     is eval{s2},eval{\&s1}, 'my sub in anon closure closing over sibling my sub';
   }
 }
+
+# Test my subs inside predeclared my subs
+{
+  my sub s2;
+  sub s2 {
+    my $x = 3;
+    my sub s3 { eval '$x' }
+    s3;
+  }
+  local $::TODO = 'closure problem?';
+  is s2, 3, 'my sub inside predeclared my sub';
+}
+
 {
   my $s = make_anon_with_my_sub;
   &$s;
@@ -488,3 +501,40 @@ is sub {
     s1
   }->()(), 3, 'state sub inside my sub closing over my sub uncle';
 
+{
+  my sub s2 { 3 };
+  sub not_lexical { state sub foo { \&s2 } foo }
+  is not_lexical->(), 3, 'state subs that reference my sub from outside';
+}
+
+# Test my subs inside predeclared package subs
+# This test also checks that CvOUTSIDE pointers are not mangled when the
+# inner sub’s CvOUTSIDE points to another sub.
+sub not_lexical2;
+sub not_lexical2 {
+  my $x = 23;
+  my sub bar;
+  sub not_lexical3 {
+    not_lexical2();
+    sub bar { $x }
+  };
+  bar
+}
+$::TODO = 'closing over wrong sub';
+is not_lexical3, 23, 'my subs inside predeclared package subs';
+
+# Test my subs inside predeclared package sub, where the lexical sub is
+# declared outside the package sub.
+# This checks that CvOUTSIDE pointers are fixed up even when the sub is
+# not declared inside the sub that its CvOUTSIDE points to.
+{
+  my sub foo;
+  sub not_lexical4;
+  sub not_lexical4 {
+    my $x = 234;
+    sub foo { $x }
+    foo
+  }
+  is not_lexical4, 234,
+    'my sub defined in predeclared pkg sub but declared outside';
+}

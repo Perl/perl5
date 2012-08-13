@@ -2213,10 +2213,15 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 	    && *SvPVX_const(namesv) == '&')
 	{
 	  if (SvTYPE(curpad[ix]) == SVt_PVCV) {
-	    CV * const innercv = MUTABLE_CV(curpad[ix]);
-	    assert(CvWEAKOUTSIDE(innercv));
-	    assert(CvOUTSIDE(innercv) == old_cv);
-	    CvOUTSIDE(innercv) = new_cv;
+	    MAGIC * const mg =
+		SvMAGICAL(curpad[ix])
+		    ? mg_find(curpad[ix], PERL_MAGIC_proto)
+		    : NULL;
+	    CV * const innercv = MUTABLE_CV(mg ? mg->mg_obj : curpad[ix]);
+	    if (CvOUTSIDE(innercv) == old_cv) {
+		assert(CvWEAKOUTSIDE(innercv));
+		CvOUTSIDE(innercv) = new_cv;
+	    }
 	  }
 	  else { /* format reference */
 	    SV * const rv = curpad[ix];
