@@ -144,6 +144,11 @@ Add change notes.
 
 =item *
 
+L<Compress::Zlib> has been upgraded from version 2.052 to 2.055.  XXX Add
+change notes.
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.135_06 to 2.135_07.  It has
 been optimized to only build a seen-scalar hash as necessary, thereby speeding
 up serialization drastically.
@@ -156,11 +161,6 @@ notes.
 =item *
 
 L<Encode> has been upgraded from version 2.44 to 2.46.  XXX Add change notes.
-
-=item *
-
-L<IO::Compress> has been upgraded from version 2.052 to 2.055.  XXX Add change
-notes.
 
 =item *
 
@@ -286,7 +286,7 @@ label itself [perl #114104].
 
 =item *
 
-L<Wide character in setenv|perldiag/"Wide character in setenv">
+L<Wide character in setenv|perldiag/"Wide character in %s">
 
 Attempts to put wide characters into environment variables via C<%ENV> now
 provoke this warning.
