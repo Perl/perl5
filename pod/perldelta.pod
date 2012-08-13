@@ -57,15 +57,15 @@ versions of Perl, C<undef> was converted to the empty string.
 A value stored in an environment variable has always been stringified.  In
 this release, it is converted to be only a byte string.  First, it is forced
 to be a only a string.  Then if the string is utf8 and the equivalent of
-C<utf8::downgrade> works, that result is used; otherwise, the equivalent of
-C<utf8::encode> is used, and a warning is issued about wide characters
+C<utf8::downgrade()> works, that result is used; otherwise, the equivalent of
+C<utf8::encode()> is used, and a warning is issued about wide characters
 (L</Diagnostics>).
 
-=head2 C<given> now aliases the global $_
+=head2 C<given> now aliases the global C<$_>
 
-Instead of assigning to an implicit lexical $_, C<given> now makes the
-global $_ an alias for its argument, just like C<foreach>.  However, it
-still uses lexical $_ if there is lexical $_ in scope (again, just like
+Instead of assigning to an implicit lexical C<$_>, C<given> now makes the
+global C<$_> an alias for its argument, just like C<foreach>.  However, it
+still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
 C<foreach>).
 
 =head1 Deprecations
@@ -119,15 +119,73 @@ XXX
 
 =item *
 
-L<B> has been upgraded from version 1.36 to version 1.37. All C<CVf_*> and
-C<GVf_*> and more SV-related flag values are now provided as constants in
-the C<B::> namespace and available for export. The default export list has
-not changed.
+L<B> has been upgraded from version 1.36 to 1.37.  All C<CVf_*> and C<GVf_*>
+and more SV-related flag values are now provided as constants in the C<B::>
+namespace and available for export.  The default export list has not changed.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.91 to 1.92.  XXX Add change
+notes.
 
 =item *
 
 L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
 loop controls with the correct precedence.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.05201 to 2.055.  XXX
+Add change notes.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.05401 to 2.056.  XXX
+Add change notes.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.135_06 to 2.135_07.  It has
+been optimized to only build a seen-scalar hash as necessary, thereby speeding
+up serialization drastically.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.08 to 1.09.  XXX Add change
+notes.
+
+=item *
+
+L<Encode> has been upgraded from version 2.44 to 2.46.  XXX Add change notes.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.052 to 2.055.  XXX Add change
+notes.
+
+=item *
+
+L<Module::Build> has been upgraded from version 0.40 to 0.4002.  XXX Add change
+notes.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.69 to 2.70.  XXX Add
+change notes.
+
+=item *
+
+L<Module::Load::Conditional> has been upgraded from version 0.50 to 0.54.  XXX
+Add change notes.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000009 to 1.000010.  XXX
+Add change notes.
+
+=item *
+
+L<re> has been upgraded from version 0.21 to 0.22.  XXX Add change notes.
 
 =item *
 
@@ -137,8 +195,18 @@ the storage format, so the format version has increased to 2.9.
 
 =item *
 
-L<Data::Dumper> has been optimized to only build a seen-scalar has as
-necessary, thereby speeding up serialization drastically.
+L<Time::Local> has been upgraded from version 1.2000 to 1.2300.  XXX Add change
+notes.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.44 to 0.45.  XXX Add change
+notes.
+
+=item *
+
+L<Win32CORE> has been upgraded from version 0.02 to 0.03.  XXX Add change
+notes.
 
 =back
 
@@ -208,7 +276,7 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-Attempts to put wide characters into environment variables via %ENV provoke
+Attempts to put wide characters into environment variables via C<%ENV> provoke
 the warning "Wide character in setenv".
 
 =back
@@ -221,7 +289,8 @@ the warning "Wide character in setenv".
 
 L<Unterminated delimiter for here document|perldiag/"Unterminated delimiter for here document">
 
-This message now occurs when a here document label has an initial quotation mark but the final quotation mark is missing.
+This message now occurs when a here document label has an initial quotation
+mark but the final quotation mark is missing.
 
 This replaces a bogus and misleading error message about not finding the
 label itself [perl #114104].
@@ -391,8 +460,8 @@ C<dump LABEL> no longer leaks its label.
 
 =item *
 
-Constant folding no longer changes the behaviour of functions like C<stat>
-and C<truncate> that can take either filenames or handles.
+Constant folding no longer changes the behaviour of functions like C<stat()>
+and C<truncate()> that can take either filenames or handles.
 C<stat 1 ? foo : bar> nows treats its argument as a file name (since it is
 an arbitrary expression), rather than the handle "foo".
 
