@@ -1461,12 +1461,12 @@ attention to precisely which outputs are influenced by which inputs.
 /*
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
 Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
-only a (C<SvPOK_only>), by hook or by crook.  You want force if you are
+only a string (C<SvPOK_only>), by hook or by crook.  You want force if you are
 going to update the C<SvPVX> directly.  Processes get magic.
 
 =for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
 Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
-only a (C<SvPOK_only>), by hook or by crook.  You want force if you are
+only a string (C<SvPOK_only>), by hook or by crook.  You want force if you are
 going to update the C<SvPVX> directly.  Doesn't process get magic.
 
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
