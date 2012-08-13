@@ -23,8 +23,9 @@ installhtml - converts a collection of POD pages to HTML format.
 =head1 DESCRIPTION
 
 I<installhtml> converts a collection of POD pages to a corresponding
-collection of HTML pages.  This is primarily used to convert the pod
-pages found in the perl distribution.
+collection of HTML pages.  This is used to convert the pod pages found in the
+perl distribution.  (It is not intended as a general-purpose
+converter/installer of POD pages in HTML format.  See L<Pod::Html>.)
 
 =head1 OPTIONS
 
@@ -67,10 +68,11 @@ relative to podroot.
 
 =item B<--splititem> POD files to split on =item directive
 
-Comma-separated list of all pod files to split by the =item directive.
-The .pod suffix is optional.  I<installhtml> does not do the actual
-split, rather it invokes I<splitpod> to do the dirty work.  As with
---splithead, these files should have names specified relative to podroot.
+Comma-separated list of all pod files to split by the =item directive.  The
+.pod suffix is optional.  I<installhtml> does not do the actual split, rather
+it invokes I<splitpod>, a separate program in the Perl 5 core distribution,
+to do the dirty work.  As with --splithead, these files should have names
+specified relative to podroot.
 
 =item B<--splitpod> Directory containing the splitpod program
 
