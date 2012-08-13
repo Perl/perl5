@@ -1957,18 +1957,19 @@ call_method(methname, flags, ...)
 	PUSHs(sv_2mortal(newSViv(i)));
 
 void
-newCONSTSUB_type(stash, name, flags, type, sv)
+newCONSTSUB(stash, name, flags, sv)
     HV* stash
     SV* name
     I32 flags
-    int type
     SV* sv
+    ALIAS:
+	newCONSTSUB_flags = 1
     PREINIT:
 	CV* cv;
 	STRLEN len;
 	const char *pv = SvPV(name, len);
     PPCODE:
-        switch (type) {
+        switch (ix) {
            case 0:
 	       cv = newCONSTSUB(stash, pv, SvOK(sv) ? sv : NULL);
                break;

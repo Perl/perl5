@@ -13,34 +13,34 @@ use XS::APItest;
  my $w;
  local $SIG{__WARN__} = sub { $w .= shift };
  sub frimple() { 78 }
- newCONSTSUB_type(\%::, "frimple", 0, 1, undef);
+ newCONSTSUB_flags(\%::, "frimple", 0, undef);
  like $w, qr/Constant subroutine frimple redefined at /,
    'newCONSTSUB constant redefinition warning is unaffected by $^W=0';
  undef $w;
- newCONSTSUB_type(\%::, "frimple", 0, 1, undef);
+ newCONSTSUB_flags(\%::, "frimple", 0, undef);
  is $w, undef, '...unless the const SVs are the same';
  eval 'sub frimple() { 78 }';
  undef $w;
- newCONSTSUB_type(\%::, "frimple", 0, 1, "78");
+ newCONSTSUB_flags(\%::, "frimple", 0, "78");
  is $w, undef, '...or the const SVs have the same value';
 }
 
 use warnings;
 
 my ($const, $glob) =
- XS::APItest::newCONSTSUB_type(\%::, "sanity_check", 0, 0, undef);
+ XS::APItest::newCONSTSUB(\%::, "sanity_check", 0, undef);
 
 ok $const;
 ok *{$glob}{CODE};
 
 ($const, $glob) =
-  XS::APItest::newCONSTSUB_type(\%::, "\x{30cb}", 0, 0, undef);
+  XS::APItest::newCONSTSUB(\%::, "\x{30cb}", 0, undef);
 ok $const, "newCONSTSUB generates the constant,";
 ok *{$glob}{CODE}, "..and the glob,";
 ok !$::{"\x{30cb}"}, "...but not the right one";
 
 ($const, $glob) =
-  XS::APItest::newCONSTSUB_type(\%::, "\x{30cd}", 0, 1, undef);
+  XS::APItest::newCONSTSUB_flags(\%::, "\x{30cd}", 0, undef);
 ok $const, "newCONSTSUB_flags generates the constant,";
 ok *{$glob}{CODE}, "..and the glob,";
 ok $::{"\x{30cd}"}, "...the right one!";
@@ -51,7 +51,7 @@ eval q{
   my $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   *foo = sub(){123};
-  newCONSTSUB_type(\%::, "foo", 0, 1, undef);
+  newCONSTSUB_flags(\%::, "foo", 0, undef);
   is $w, undef, 'newCONSTSUB uses calling scope for redefinition warnings';
  }
 };
@@ -61,11 +61,11 @@ eval q{
  *{"foo::\x{100}"} = sub(){return 123};
  my $w;
  local $SIG{__WARN__} = sub { $w .= shift };
- newCONSTSUB_type(\%foo::, "\x{100}", 0, 1, undef);
+ newCONSTSUB_flags(\%foo::, "\x{100}", 0, undef);
  like $w, qr/Subroutine \x{100} redefined at /,
    'newCONSTSUB redefinition warning + utf8';
  undef $w;
- newCONSTSUB_type(\%foo::, "\x{100}", 0, 1, 54);
+ newCONSTSUB_flags(\%foo::, "\x{100}", 0, 54);
  like $w, qr/Constant subroutine \x{100} redefined at /,
    'newCONSTSUB constant redefinition warning + utf8';
 }
