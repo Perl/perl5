@@ -1504,3 +1504,24 @@ sub ᚠርƊ () { 1 }
 EXPECT
 Constant subroutine main::ᚠርƊ redefined at - line 5.
 ########
+# OPTION regex
+sub DynaLoader::dl_error {};
+use warnings;
+# We're testing that the warnings report the same line number:
+eval <<'EOC' or die $@;
+{
+    DynaLoader::boot_DynaLoader("DynaLoader");
+}
+EOC
+eval <<'EOC' or die $@;
+BEGIN {
+    DynaLoader::boot_DynaLoader("DynaLoader");
+}
+1
+EOC
+EXPECT
+OPTION regex
+\ASubroutine DynaLoader::dl_error redefined at \(eval 1\) line 2\.
+(?s).*
+Subroutine DynaLoader::dl_error redefined at \(eval 2\) line 2\.
+########

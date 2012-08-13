@@ -7432,14 +7432,10 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                 /* Redundant check that allows us to avoid creating an SV
                    most of the time: */
                 if (CvCONST(cv) || ckWARN(WARN_REDEFINE)) {
-                    const line_t oldline = CopLINE(PL_curcop);
-                    if (PL_parser && PL_parser->copline != NOLINE)
-                        CopLINE_set(PL_curcop, PL_parser->copline);
                     report_redefined_cv(newSVpvn_flags(
                                          name,len,(flags&SVf_UTF8)|SVs_TEMP
                                         ),
                                         cv, const_svp);
-                    CopLINE_set(PL_curcop, oldline);
                 }
                 SvREFCNT_dec(cv);
                 cv = NULL;
