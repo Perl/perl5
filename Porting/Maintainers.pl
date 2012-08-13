@@ -412,6 +412,7 @@ use File::Glob qw(:case);
             qr{^t/CPAN/authors/},
             qw( lib/CPAN/Admin.pm
                 Makefile.PL
+                scripts/cpan-mirrors
                 SlayMakefile
                 t/00signature.t
                 t/04clean_load.t
@@ -423,6 +424,7 @@ use File::Glob qw(:case);
                 t/31sessions.t
                 t/41distribution.t
                 t/42distroprefs.t
+                t/44cpanmeta.t
                 t/43distroprefspref.t
                 t/50pod.t
                 t/51pod.t
@@ -435,8 +437,12 @@ use File::Glob qw(:case);
                 t/CPAN/TestPatch.txt
                 t/CPAN/modules/02packages.details.txt
                 t/CPAN/modules/03modlist.data
+                t/data/META-dynamic.json
                 t/data/META-dynamic.yml
+                t/data/META-static.json
                 t/data/META-static.yml
+                t/data/MYMETA.json
+                t/data/MYMETA.yml
                 t/local_utils.pm
                 t/perlcriticrc
                 t/yaml_code.yml
