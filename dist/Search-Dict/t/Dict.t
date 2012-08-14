@@ -99,6 +99,7 @@ close DICT or die "cannot close";
   cmp_ok $pos, ">=", 0, "case-insensitive search for 'aarhus' returned > 0";
   is $word, "Aarhus", "case-insensitive search found 'Aarhus'";
 
+  untie *DICT;
 }
 unlink "dict-$$";
 
