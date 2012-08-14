@@ -127,6 +127,10 @@ namespace and available for export.  The default export list has not changed.
 L<B::Concise> has been upgraded from version 0.91 to 0.92.  The C<-nobanner>
 option has been fixed, and C<format>s can now be dumped.
 
+B::Concise can now dump formats.  When passed a sub name to dump, it will
+check also to see whether it is the name of a format.  If a sub and a
+format share the same name, it will dump both.
+
 =item *
 
 L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
