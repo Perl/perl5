@@ -519,6 +519,11 @@ subroutine.
 Formats called recursively no longer stomp on their own lexical variables,
 but each recursive call has its own set of lexicals.
 
+=item *
+
+Attempting to free an active format or the handle associated with it no
+longer results in a crash.
+
 =back
 
 =head1 Known Problems
