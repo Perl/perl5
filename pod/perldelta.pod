@@ -539,6 +539,10 @@ always as C<do> blocks.
 Formats can now be nested inside code blocks in regular expressions and
 other quoted constructs (C</(?{...})/> and C<qq/${...}/>) [perl #114040].
 
+=item *
+
+Formats are no longer created after compilation errors.
+
 =back
 
 =head1 Known Problems
