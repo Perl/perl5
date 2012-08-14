@@ -524,6 +524,21 @@ but each recursive call has its own set of lexicals.
 Attempting to free an active format or the handle associated with it no
 longer results in a crash.
 
+=item *
+
+Format parsing no longer gets confused by braces, semicolons and
+low-precedence operators.  It used to be possible to use braces as format
+delimiters (instead of C<=> and C<.>), but only sometimes.  Semicolons and
+low-precedence operators in format argument lines no longer confuse the
+parser into ignoring the line's return value.  In format argument lines,
+braces can now be used for anonymous hashes, instead of being treated
+always as C<do> blocks.
+
+=item *
+
+Formats can now be nested inside code blocks in regular expressions and
+other quoted constructs (C</(?{...})/> and C<qq/${...}/>) [perl #114040].
+
 =back
 
 =head1 Known Problems
