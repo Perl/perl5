@@ -3631,7 +3631,9 @@ return only three values, not four.
 
 =head2 UTS
 
-There are a few known test failures, see L<perluts> (README.uts).
+There are a few known test failures.  (B<Note:> the relevant information was
+available in F<README.uts> until support for UTS was removed in Perl
+v5.18.0)
 
 =head2 VOS (Stratus)
 

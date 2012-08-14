@@ -450,13 +450,13 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item UTS Global
 
-XXX
+Support code relating to UTS global has been removed.  UTS was a mainframe
+version of System V created by Amdahl, subsequently sold to UTS Global.  The
+port has not been touched since before 5.8.0, and UTS Global is now defunct.
 
 =back
 

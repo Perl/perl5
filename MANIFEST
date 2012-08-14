@@ -3874,7 +3874,6 @@ ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
-ext/POSIX/hints/uts.pl		Hint for POSIX for named architecture
 ext/POSIX/lib/POSIX.pm		POSIX extension Perl module
 ext/POSIX/lib/POSIX.pod		POSIX extension documentation
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
@@ -4181,7 +4180,6 @@ hints/unicosmk.sh		Hints for named architecture
 hints/unicos.sh			Hints for named architecture
 hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
-hints/uts.sh			Hints for named architecture
 hints/uwin.sh			Hints for named architecture
 hints/vmesa.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
@@ -4879,7 +4877,6 @@ README.solaris			Perl notes for Solaris
 README.symbian			Perl notes for Symbian
 README.tru64			Perl notes for Tru64
 README.tw			Perl for Traditional Chinese (in Big5)
-README.uts			Perl notes for UTS
 README.vmesa			Perl notes for VM/ESA
 README.vms			Notes about installing the VMS port
 README.vos			Perl notes for Stratus VOS
@@ -5576,8 +5573,6 @@ utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 utils/zipdetails.PL			display the internal structure of zip files
-uts/sprintf_wrap.c		sprintf wrapper for UTS
-uts/strtol_wrap.c		strtol wrapper for UTS
 vmesa/Makefile			VM/ESA Makefile
 vmesa/vmesa.c			VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h		VM/ESA-specific C header for Perl core

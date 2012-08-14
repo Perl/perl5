@@ -1172,7 +1172,7 @@ EXTERN_C int usleep(unsigned int);
 #   define S_IFIFO _S_IFIFO
 #endif
 
-/* The stat macros for Amdahl UTS, Unisoft System V/88 (and derivatives
+/* The stat macros for Unisoft System V/88 (and derivatives
    like UTekV) are broken, sometimes giving false positives.  Undefine
    them here and let the code below set them to proper values.
 
@@ -1181,7 +1181,7 @@ EXTERN_C int usleep(unsigned int);
    This header file bug is corrected in gcc-2.5.8 and later versions.
    --Kaveh Ghazi (ghazi@noc.rutgers.edu) 10/3/94.  */
 
-#if defined(uts) || (defined(m88k) && defined(ghs))
+#if defined(m88k) && defined(ghs)
 #   undef S_ISDIR
 #   undef S_ISCHR
 #   undef S_ISBLK
@@ -1624,10 +1624,6 @@ EXTERN_C char *crypt(const char *, const char *);
 #undef UV
 #endif
 
-#ifdef	SPRINTF_E_BUG
-#  define sprintf UTS_sprintf_wrap
-#endif
-
 /* For the times when you want the return value of sprintf, and you want it
    to be the length. Can't have a thread variable passed in, because C89 has
    no varargs macros.
@@ -1688,13 +1684,6 @@ EXTERN_C char *crypt(const char *, const char *);
 #  define my_strlcpy	strlcpy
 #else
 #  define my_strlcpy	Perl_my_strlcpy
-#endif
-
-/* Configure gets this right but the UTS compiler gets it wrong.
-   -- Hal Morris <hom00@utsglobal.com> */
-#ifdef UTS
-#  undef  UVTYPE
-#  define UVTYPE unsigned
 #endif
 
 /*
@@ -1760,11 +1749,6 @@ typedef UVTYPE UV;
 # undef PERL_NEED_MY_LETOH64
 # undef PERL_NEED_MY_HTOBE64
 # undef PERL_NEED_MY_BETOH64
-#endif
-
-#if defined(uts) || defined(UTS)
-#	undef UV_MAX
-#	define UV_MAX (4294967295u)
 #endif
 
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
@@ -2421,9 +2405,8 @@ typedef struct custom_op XOP;
 
 typedef struct interpreter PerlInterpreter;
 
-/* Amdahl's <ksync.h> has struct sv */
 /* SGI's <sys/sema.h> has struct sv */
-#if defined(UTS) || defined(__sgi)
+#if defined(__sgi)
 #   define STRUCT_SV perl_sv
 #else
 #   define STRUCT_SV sv

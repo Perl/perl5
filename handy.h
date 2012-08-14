@@ -101,7 +101,7 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 #endif /* NeXT || __NeXT__ */
 
 #ifndef HAS_BOOL
-# if defined(UTS) || defined(VMS)
+# if defined(VMS)
 #  define bool int
 # else
 #  define bool char
