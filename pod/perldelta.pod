@@ -502,6 +502,13 @@ C<use constant { () };> a syntax error [perl #114222].
 On debugging builds, "uninitialized" warnings inside formats no longer
 cause assertion failures.
 
+=item *
+
+C<print $x> and C<sub { print $x }->()> now always produce the same output.
+It was possible for the latter to refuse to close over $x if the variable
+was not active; e.g., if it was defined outside a currently-running named
+subroutine.
+
 =back
 
 =head1 Known Problems
