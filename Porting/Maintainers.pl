@@ -1546,7 +1546,7 @@ use File::Glob qw(:case);
 
     'Pod::Simple' => {
         'MAINTAINER'   => 'arandal',
-        'DISTRIBUTION' => 'DWHEELER/Pod-Simple-3.20.tar.gz',
+        'DISTRIBUTION' => 'DWHEELER/Pod-Simple-3.23.tar.gz',
         'FILES'        => q[cpan/Pod-Simple],
         'UPSTREAM'     => 'cpan',
     },

@@ -1,13 +1,14 @@
 
 require 5;
 package Pod::Simple::DumpAsXML;
-$VERSION = '3.20';
+$VERSION = '3.23';
 use Pod::Simple ();
 BEGIN {@ISA = ('Pod::Simple')}
 
 use strict;
 
 use Carp ();
+use Text::Wrap qw(wrap);
 
 BEGIN { *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG }
 
@@ -49,15 +50,8 @@ sub _handle_text {
     my $indent = '  ' x $_[0]{'indent'};
     my $text = $_[1];
     _xml_escape($text);
-    $text =~  # A not-totally-brilliant wrapping algorithm:
-      s/(
-         [^\n]{55}         # Snare some characters from a line
-         [^\n\ ]{0,50}     #  and finish any current word
-        )
-        \x20{1,10}(?!\n)   # capture some spaces not at line-end
-       /$1\n$indent/gx     # => line-break here
-    ;
-    
+    local $Text::Wrap::huge = 'overflow';
+    $text = wrap('', $indent, $text);
     print {$_[0]{'output_fh'}} $indent, $text, "\n";
   }
   return;

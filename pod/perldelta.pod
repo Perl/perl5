@@ -192,6 +192,13 @@ by about 40%.
 
 =item *
 
+L<Pod::Simple> has been upgraded from version 3.20 to 3.23.  Numerous
+improvements have been made, mostly to Pod::Simple::XHTML, which also has a
+compatibility change: the C<codes_in_verbatim> option is now disabled by
+default.  See F<cpan/Pod-Simple/ChangeLog> for the full details.
+
+=item *
+
 L<re> has been upgraded from version 0.21 to 0.22.  Single character [class]es
 like C</[s]/> or C</[s]/i> are now optimized as if they did not have the
 brackets, i.e. C</s/> or C</s/i>.

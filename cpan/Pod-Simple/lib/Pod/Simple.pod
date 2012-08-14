@@ -14,6 +14,8 @@ documentation") markup language that is typically used for writing
 documentation for Perl and for Perl modules. The Pod format is explained
 L<perlpod>; the most common formatter is called C<perldoc>.
 
+Be sure to read L</ENCODING> if your Pod contains non-ASCII characters.
+
 Pod formatters can use Pod::Simple to parse Pod documents and render them into
 plain text, HTML, or any number of other formats. Typically, such formatters
 will be subclasses of Pod::Simple, and so they will inherit its methods, like
@@ -120,6 +122,14 @@ most likely to use.
 
 
 =over
+
+=item C<< $parser->parse_characters( I<SOMEVALUE> ) >>
+
+The Pod parser normally expects to read octets and to convert those octets
+to characters based on the C<=encoding> declaration in the Pod source.  Set
+this option to a true value to indicate that the Pod source is already a Perl
+character stream.  This tells the parser to ignore any C<=encoding> command
+and to skip all the code paths involving decoding octets.
 
 =item C<< $parser->no_whining( I<SOMEVALUE> ) >>
 
@@ -321,6 +331,21 @@ Returns a string describing the version.
 Log an error unless C<< $parser->no_whining( TRUE ); >>.
 
 =back
+
+=head1 ENCODING
+
+The Pod::Simple parser expects to read B<octets>.  The parser will decode the
+octets into Perl's internal character string representation using the value of
+the C<=encoding> declaration in the POD source.
+
+If the POD source does not include an C<=encoding> declaration, the parser will
+attempt to guess the encoding (selecting one of UTF-8 or Latin-1) by examining
+the first non-ASCII bytes and applying the heuristic described in
+L<perlpodspec>.
+
+If you set the C<parse_characters> option to a true value the parser will
+expect characters rather than octets; will ignore any C<=encoding>; and will
+make no attempt to decode the input.
 
 =head1 CAVEATS
 

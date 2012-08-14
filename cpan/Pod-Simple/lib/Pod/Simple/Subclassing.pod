@@ -378,13 +378,13 @@ That is, they all produce the same event structure (for the most part), namely:
     &#34;Member Data&#34;
   </L>
 
-The I<raw> attribute depends on what the raw content of the L<> is, so that is
-why the event structure is the same "for the most part".
+The I<raw> attribute depends on what the raw content of the C<LE<lt>E<gt>> is,
+so that is why the event structure is the same "for the most part".
 
 If you have not guessed it yet, the I<raw> attribute contains the raw,
-original, unescaped content of the L<> formatting code. In addition to the
-examples above, take notice of the following event structure produced by
-the following L<> formatting code.
+original, unescaped content of the C<LE<lt>E<gt>> formatting code. In addition
+to the examples above, take notice of the following event structure produced
+by the following C<LE<lt>E<gt>> formatting code.
 
   L<click B<here>|page/About the C<-M> switch>
 
@@ -725,10 +725,10 @@ or
     =end html
 
 ...the parser will ignore these sections unless your subclass has
-specified that it wants to see sections targetted to "html" (or whatever
+specified that it wants to see sections targeted to "html" (or whatever
 the formatter name is).
 
-If you want to process all sections, even if they're not targetted for you,
+If you want to process all sections, even if they're not targeted for you,
 call this before you start parsing:
 
   $parser->accept_targets('*');

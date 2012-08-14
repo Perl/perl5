@@ -2086,6 +2086,10 @@ cpan/Pod-Simple/t/corpus/8859_7.pod			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/8859_7.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/cp1256.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/cp1256.xml			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/encwarn01.txt			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/encwarn01.xml			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/encwarn02.txt			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/encwarn02.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_cont.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_cont.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_dup.txt			Pod::Simple test file
@@ -2203,6 +2207,7 @@ cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
+cpan/Pod-Simple/t/xhtml20.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module

@@ -474,9 +474,14 @@ $parser->parse_string_document(<<'EOPOD');
 =pod
 
 A plain paragraph with a C<functionname>.
+
+C<< This code is B<important> to E<lt>me>! >>
+
 EOPOD
 is($results, <<"EOHTML", "code entity in a paragraph");
 <p>A plain paragraph with a <code>functionname</code>.</p>
+
+<p><code>This code is <b>important</b> to &lt;me&gt;!</code></p>
 
 EOHTML
 
@@ -657,6 +662,7 @@ SKIP: for my $use_html_entities (0, 1) {
   }
   local $Pod::Simple::XHTML::HAS_HTML_ENTITIES = $use_html_entities;
   initialize($parser, $results);
+  $parser->codes_in_verbatim(1);
   $parser->parse_string_document(<<'EOPOD');
 =pod
 

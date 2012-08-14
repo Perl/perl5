@@ -74,8 +74,8 @@ ok $parser->parse_string_document( "=head1 Foo B<Bar>\n\n=head1 Foo B<Baz>" ),
     'Parse two multiword headers';
 is $results, <<'EOF', 'Should have the index';
 <ul id="index">
-  <li><a href="#Foo-Bar">Foo <b>Bar</b></a></li>
-  <li><a href="#Foo-Baz">Foo <b>Baz</b></a></li>
+  <li><a href="#Foo-Bar">Foo Bar</a></li>
+  <li><a href="#Foo-Baz">Foo Baz</a></li>
 </ul>
 
 <h1 id="Foo-Bar">Foo <b>Bar</b></h1>
