@@ -340,7 +340,7 @@ Since cygwin-1.7 pathnames are UTF-8 encoded.
 
 =item * Text/Binary
 
-Since cywgin-1.7 textmounts are deprecated and strongly discouraged.
+Since cygwin-1.7 textmounts are deprecated and strongly discouraged.
 
 When a file is opened it is in either text or binary mode.  In text mode
 a file is subject to CR/LF/Ctrl-Z translations.  With Cygwin, the default
