@@ -137,7 +137,7 @@ checkOptree ( name      => 'formats',
 # main::STDOUT (FORMAT):
 # c  <1> leavewrite[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->c
-# 1        <;> nextstate(main 1 -:4) v ->2
+# 1        <;> nextstate(main 1 -:4) v:>,<,% ->2
 # 5        <@> formline vK/2 ->6
 # 2           <0> pushmark s ->3
 # 3           <$> const[PV "@<<<\n"] s ->4
@@ -145,7 +145,7 @@ checkOptree ( name      => 'formats',
 # -              <0> ex-nextstate v ->4
 # -              <1> ex-rv2sv sK/1 ->-
 # 4                 <#> gvsv[*a] s ->5
-# 6        <;> nextstate(main 1 -:6) v ->7
+# 6        <;> nextstate(main 1 -:6) v:>,<,% ->7
 # b        <@> formline sK/2 ->c
 # 7           <0> pushmark s ->8
 # 8           <$> const[PV "@>>>\n"] s ->9
@@ -157,7 +157,7 @@ EOT_EOT
 # main::STDOUT (FORMAT):
 # c  <1> leavewrite[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->c
-# 1        <;> nextstate(main 1 -:4) v ->2
+# 1        <;> nextstate(main 1 -:4) v:>,<,% ->2
 # 5        <@> formline vK/2 ->6
 # 2           <0> pushmark s ->3
 # 3           <$> const(PV "@<<<\n") s ->4
@@ -165,7 +165,7 @@ EOT_EOT
 # -              <0> ex-nextstate v ->4
 # -              <1> ex-rv2sv sK/1 ->-
 # 4                 <$> gvsv(*a) s ->5
-# 6        <;> nextstate(main 1 -:6) v ->7
+# 6        <;> nextstate(main 1 -:6) v:>,<,% ->7
 # b        <@> formline sK/2 ->c
 # 7           <0> pushmark s ->8
 # 8           <$> const(PV "@>>>\n") s ->9
