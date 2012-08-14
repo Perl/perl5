@@ -520,6 +520,12 @@ subroutine.
 
 =item *
 
+Similarly, C<print $x> and C<print eval '$x'> now produce the same output.
+This also allows "my $x if 0" variables to be seen in the debugger
+[perl #114018].
+
+=item *
+
 Formats called recursively no longer stomp on their own lexical variables,
 but each recursive call has its own set of lexicals.
 
