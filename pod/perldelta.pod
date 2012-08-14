@@ -497,6 +497,11 @@ The C<ref> operator started leaking memory on blessed objects in Perl
 C<use> no longer tries to parse its arguments as a statement, making
 C<use constant { () };> a syntax error [perl #114222].
 
+=item *
+
+On debugging builds, "uninitialized" warnings inside formats no longer
+cause assertion failures.
+
 =back
 
 =head1 Known Problems
