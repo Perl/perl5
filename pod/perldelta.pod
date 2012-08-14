@@ -504,6 +504,11 @@ cause assertion failures.
 
 =item *
 
+On debugging builds, subroutines nested inside formats no longer cause
+assertion failures [perl #78550].
+
+=item *
+
 C<print $x> and C<sub { print $x }->()> now always produce the same output.
 It was possible for the latter to refuse to close over $x if the variable
 was not active; e.g., if it was defined outside a currently-running named
