@@ -3536,6 +3536,12 @@ an ACL related-function, but that function is not available on this
 platform.  Earlier checks mean that it should not be possible to
 enter this branch on this platform.
 
+=item panic: child pseudo-process was never scheduled
+
+(P) A child pseudo-process in the ithreads implementation on Windows
+was not scheduled within the time period allowed and therefore was not
+able to initialize properly.
+
 =item panic: ck_grep, type=%u
 
 (P) Failed an internal consistency check trying to compile a grep.
