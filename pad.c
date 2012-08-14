@@ -1716,8 +1716,8 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad clone on cv=0x%"UVxf"\n", PTR2UV(cv)));
 		CvCLONE_on(cv);
-		CvHASEVAL_on(cv);
 	    }
+	    CvHASEVAL_on(cv);
 	}
     }
 

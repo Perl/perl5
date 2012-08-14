@@ -462,7 +462,6 @@ sub make_anon_with_my_sub{
     my sub s3 { eval '$x' }
     s3;
   }
-  local $::TODO = 'closure problem?';
   is s2, 3, 'my sub inside predeclared my sub';
 }
 
