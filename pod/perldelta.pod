@@ -124,28 +124,30 @@ namespace and available for export.  The default export list has not changed.
 
 =item *
 
-L<B::Concise> has been upgraded from version 1.91 to 1.92.  XXX Add change
-notes.
+L<B::Concise> has been upgraded from version 0.91 to 0.92.  The C<-nobanner>
+option has been fixed, and C<format>s can now be dumped.
 
 =item *
 
 L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
-loop controls with the correct precedence.
+loop controls with the correct precedence, and multiple statements in a
+C<format> line are also now deparsed correctly.
 
 =item *
 
-L<Compress::Raw::Bzip2> has been upgraded from version 2.05201 to 2.055.  XXX
-Add change notes.
+L<Compress::Raw::Bzip2> has been upgraded from version 2.05201 to 2.055.  The
+misuse of Perl's "magic" API has been fixed.
 
 =item *
 
-L<Compress::Raw::Zlib> has been upgraded from version 2.05401 to 2.056.  XXX
-Add change notes.
+L<Compress::Raw::Zlib> has been upgraded from version 2.05401 to 2.056.  The
+misuse of Perl's "magic" API has been fixed.
 
 =item *
 
-L<Compress::Zlib> has been upgraded from version 2.052 to 2.055.  XXX Add
-change notes.
+L<Compress::Zlib> has been upgraded from version 2.052 to 2.055.
+C<compress()>, C<uncompress()>, C<memGzip()> and C<memGunzip()> have been
+speeded up by making parameter validation more efficient.
 
 =item *
 
@@ -155,36 +157,44 @@ up serialization drastically.
 
 =item *
 
-L<Devel::Peek> has been upgraded from version 1.08 to 1.09.  XXX Add change
-notes.
+L<Devel::Peek> has been upgraded from version 1.08 to 1.09.  The only change has
+been to the test script, to account for changes to some flags in perl's
+internals.
 
 =item *
 
-L<Encode> has been upgraded from version 2.44 to 2.46.  XXX Add change notes.
+L<Encode> has been upgraded from version 2.44 to 2.46.  The Mac alias x-mac-ce
+has been added, and various bugs have been fixed in Encode::Unicode and
+Encode::UTF7.
 
 =item *
 
-L<Module::Build> has been upgraded from version 0.40 to 0.4002.  XXX Add change
-notes.
+L<Module::Build> has been upgraded from version 0.40 to 0.4002.  A minor bug fix
+allows markup to be used around the leading "Name" in a POD "abstract" line, and
+some documentation improvements have been made.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.69 to 2.70.  XXX Add
-change notes.
+L<Module::CoreList> has been upgraded from version 2.69 to 2.70.  Version
+information is now stored as a delta, which greatly reduces the size of the
+F<CoreList.pm> file.
 
 =item *
 
-L<Module::Load::Conditional> has been upgraded from version 0.50 to 0.54.  XXX
-Add change notes.
+L<Module::Load::Conditional> has been upgraded from version 0.50 to 0.54.
+Various enhancements include the new use of Module::Metadata.
 
 =item *
 
-L<Module::Metadata> has been upgraded from version 1.000009 to 1.000010.  XXX
-Add change notes.
+L<Module::Metadata> has been upgraded from version 1.000009 to 1.000010.  The
+creation of a Module::Metadata object for a typical module file has been sped up
+by about 40%.
 
 =item *
 
-L<re> has been upgraded from version 0.21 to 0.22.  XXX Add change notes.
+L<re> has been upgraded from version 0.21 to 0.22.  Single character [class]es
+like C</[s]/> or C</[s]/i> are now optimized as if they did not have the
+brackets, i.e. C</s/> or C</s/i>.
 
 =item *
 
@@ -194,28 +204,19 @@ the storage format, so the format version has increased to 2.9.
 
 =item *
 
-L<Time::Local> has been upgraded from version 1.2000 to 1.2300.  XXX Add change
-notes.
+L<Time::Local> has been upgraded from version 1.2000 to 1.2300.  Seconds values
+greater than 59 but less than 60 no longer cause C<timegm()> and C<timelocal()>
+to croak.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.44 to 0.45.  XXX Add change
-notes.
+L<Unicode::UCD> has been upgraded from version 0.44 to 0.45.  This has been
+modified slightly for reasons of perl internal use only.
 
 =item *
 
-L<Win32CORE> has been upgraded from version 0.02 to 0.03.  XXX Add change
-notes.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
+L<Win32CORE> has been upgraded from version 0.02 to 0.03.  The use of
+PERL_NO_GET_CONTEXT here has resulted in smaller machine code.
 
 =back
 
