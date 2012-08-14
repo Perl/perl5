@@ -492,6 +492,11 @@ C<undef> on a subroutine now clears call checkers.
 The C<ref> operator started leaking memory on blessed objects in Perl
 5.16.0.  This has been fixed [perl #114340].
 
+=item *
+
+C<use> no longer tries to parse its arguments as a statement, making
+C<use constant { () };> a syntax error [perl #114222].
+
 =back
 
 =head1 Known Problems
