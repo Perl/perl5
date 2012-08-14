@@ -1271,6 +1271,46 @@ my_kill(int pid, int sig)
     return retval;
 }
 
+
+
+#ifdef USE_ITHREADS
+/*
+    will get a child psuedo process hwnd, with retrying and sleeping
+    success is hwnd != INVALID_HANDLE_VALUE, so NULL HWND can be returned
+    ms is milliseconds to sleep/tries, each try is 1 millisec, fatally
+    errors if child psuedo process doesn't schedule and deliver a HWND in the
+    time period specified, 0 milliseconds causes only Sleep(0) to be used
+    with "no" OS delay being given to the calling thread, 0 msis not recommended
+*/
+static HWND
+get_hwnd_delay(pTHX, long child, DWORD ms){
+    HWND hwnd = w32_pseudo_child_message_hwnds[child];
+/* pseudo-process has not yet properly initialized if hwnd isn't set */
+    if (hwnd != INVALID_HANDLE_VALUE) return hwnd;
+/*fast sleep, on some NT Kernels/systems, a Sleep(0) won't deschedule a
+thread 100% of the time since threads are sticked to a CPU for NUMA
+and caching reasons, and the child thread was stickied to a different CPU
+therefore there is no workload on that CPU, and Sleep(0) returns control
+without yielding the time slot
+https://rt.perl.org/rt3/Ticket/Display.html?id=88840
+*/
+    Sleep(0);
+    win32_async_check(aTHX);
+	hwnd = w32_pseudo_child_message_hwnds[child];
+    if (hwnd != INVALID_HANDLE_VALUE) return hwnd;
+    {
+        int count = 0;
+        while (count++ < ms){ /*ms=0 no Sleep(1),just fail by now*/
+            Sleep(1);
+            win32_async_check(aTHX);
+            hwnd = w32_pseudo_child_message_hwnds[child];
+            if (hwnd != INVALID_HANDLE_VALUE) return hwnd;                        
+        }
+    }
+    Perl_croak(aTHX_ "panic: child psuedo process was never scheduled");
+}
+#endif
+
 DllExport int
 win32_kill(int pid, int sig)
 {
@@ -1281,15 +1321,16 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
-            HWND hwnd = w32_pseudo_child_message_hwnds[child];
 	    HANDLE hProcess = w32_pseudo_child_handles[child];
 	    switch (sig) {
 	    case 0:
 		/* "Does process exist?" use of kill */
 		return 0;
 
-	    case 9:
+	    case 9: {
                 /* kill -9 style un-graceful exit */
+/*do a wait to make sure child starts and isnt in DLL Loader Lock*/
+            HWND hwnd = get_hwnd_delay(aTHX, child, 5);/*XXX change delay*/
 	    	if (TerminateThread(hProcess, sig)) {
                     /* Allow the scheduler to finish cleaning up the other thread.
                      * Otherwise, if we ExitProcess() before another context switch
@@ -1301,36 +1342,27 @@ win32_kill(int pid, int sig)
 		    remove_dead_pseudo_process(child);
 		    return 0;
 	    	}
+	    }
 		break;
 
 	    default: {
-                int count = 0;
-                /* pseudo-process has not yet properly initialized if hwnd isn't set */
-                while (hwnd == INVALID_HANDLE_VALUE && count < 5) {
-                    /* Yield and wait for the other thread to send us its message_hwnd */
-                    Sleep(0);
-                    win32_async_check(aTHX);
-		    hwnd = w32_pseudo_child_message_hwnds[child];
-                    ++count;
-                }
-                if (hwnd != INVALID_HANDLE_VALUE) {
-                    /* We fake signals to pseudo-processes using Win32
-                     * message queue.  In Win9X the pids are negative already. */
-                    if ((hwnd != NULL && PostMessage(hwnd, WM_USER_KILL, sig, 0)) ||
-                        PostThreadMessage(-pid, WM_USER_KILL, sig, 0))
-                    {
-                        /* Don't wait for child process to terminate after we send a SIGTERM
-                         * because the child may be blocked in a system call and never receive
-                         * the signal.
-                         */
-                        if (sig == SIGTERM) {
-                            Sleep(0);
-                            w32_pseudo_child_sigterm[child] = 1;
-                        }
-                        /* It might be us ... */
-                        PERL_ASYNC_CHECK();
-                        return 0;
+                HWND hwnd = get_hwnd_delay(aTHX, child, 5);/*XXX change delay*/
+                /* We fake signals to pseudo-processes using Win32
+                 * message queue.  In Win9X the pids are negative already. */
+                if ((hwnd != NULL && PostMessage(hwnd, WM_USER_KILL, sig, 0)) ||
+                    PostThreadMessage(-pid, WM_USER_KILL, sig, 0))
+                {
+                    /* Don't wait for child process to terminate after we send a SIGTERM
+                     * because the child may be blocked in a system call and never receive
+                     * the signal.
+                     */
+                    if (sig == SIGTERM) {
+                        Sleep(0);
+                        w32_pseudo_child_sigterm[child] = 1;
                     }
+                    /* It might be us ... */
+                    PERL_ASYNC_CHECK();
+                    return 0;
                 }
 		break;
             }
