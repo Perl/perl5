@@ -514,6 +514,11 @@ It was possible for the latter to refuse to close over $x if the variable
 was not active; e.g., if it was defined outside a currently-running named
 subroutine.
 
+=item *
+
+Formats called recursively no longer stomp on their own lexical variables,
+but each recursive call has its own set of lexicals.
+
 =back
 
 =head1 Known Problems
