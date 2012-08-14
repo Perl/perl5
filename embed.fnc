@@ -1803,7 +1803,7 @@ poxM	|OP *	|op_refcnt_inc	|NULLOK OP *o
 : FIXME - can be static.
 poxM	|PADOFFSET	|op_refcnt_dec	|NN OP *o
 #    if defined(PERL_IN_OP_C)
-s	|void	|Slab_to_rw	|NN void *op
+s	|void	|Slab_to_rw	|NN OPSLAB *const slab
 #    endif
 #endif
 

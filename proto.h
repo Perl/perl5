@@ -5324,10 +5324,10 @@ PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)
 
 PERL_CALLCONV OP *	Perl_op_refcnt_inc(pTHX_ OP *o);
 #  if defined(PERL_IN_OP_C)
-STATIC void	S_Slab_to_rw(pTHX_ void *op)
+STATIC void	S_Slab_to_rw(pTHX_ OPSLAB *const slab)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SLAB_TO_RW	\
-	assert(op)
+	assert(slab)
 
 #  endif
 #endif

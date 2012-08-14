@@ -262,17 +262,12 @@ Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
 }
 
 STATIC void
-S_Slab_to_rw(pTHX_ void *op)
+S_Slab_to_rw(pTHX_ OPSLAB *const slab)
 {
-    OP * const o = (OP *)op;
-    OPSLAB *slab;
     OPSLAB *slab2;
 
     PERL_ARGS_ASSERT_SLAB_TO_RW;
 
-    if (!o->op_slabbed) return;
-
-    slab = OpSLAB(o);
     if (!slab->opslab_readonly) return;
     slab2 = slab;
     for (; slab2; slab2 = slab2->opslab_next) {
@@ -408,7 +403,7 @@ Perl_op_refcnt_inc(pTHX_ OP *o)
     if(o) {
         OPSLAB *const slab = o->op_slabbed ? OpSLAB(o) : NULL;
         if (slab && slab->opslab_readonly) {
-            Slab_to_rw(o);
+            Slab_to_rw(slab);
             ++o->op_targ;
             Slab_to_ro(slab);
         } else {
@@ -428,7 +423,7 @@ Perl_op_refcnt_dec(pTHX_ OP *o)
     PERL_ARGS_ASSERT_OP_REFCNT_DEC;
 
     if (slab && slab->opslab_readonly) {
-        Slab_to_rw(o);
+        Slab_to_rw(slab);
         result = --o->op_targ;
         Slab_to_ro(slab);
     } else {
@@ -714,7 +709,8 @@ Perl_op_free(pTHX_ OP *o)
     if (type == OP_NULL)
 	type = (OPCODE)o->op_targ;
 
-    Slab_to_rw(o);
+    if (o->op_slabbed)
+        Slab_to_rw(OpSLAB(o));
 
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
