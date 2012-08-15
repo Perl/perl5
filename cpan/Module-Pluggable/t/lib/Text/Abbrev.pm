@@ -1,7 +1,7 @@
 package Text::Abbrev;
 use strict;
 
-sub new {
+sub module_pluggable {
     return bless {}, shift;
 }
 

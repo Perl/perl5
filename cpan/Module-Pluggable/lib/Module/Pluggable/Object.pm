@@ -8,7 +8,7 @@ use Carp qw(croak carp confess);
 use Devel::InnerPackage;
 use vars qw($VERSION);
 
-$VERSION = '4.2';
+$VERSION = '4.3';
 
 
 sub new {
@@ -83,7 +83,7 @@ sub plugins {
         my @objs   = ();
         foreach my $package (keys %plugins) {
 			next unless $package->can($method);
-            my $obj = eval { $package->new(@_) };
+            my $obj = eval { $package->$method(@_) };
 	        $self->{'on_instantiate_error'}->($package, $@) if $@;
             push @objs, $obj if $obj;           
         }

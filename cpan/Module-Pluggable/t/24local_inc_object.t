@@ -10,7 +10,11 @@ ok($ta);
 is($ta->MPCHECK, "HELLO");
 
 package IncTest;
-use Module::Pluggable search_path => "Text", search_dirs => "t/lib", instantiate => 'new', on_instantiate_error => sub {};
+use Module::Pluggable search_path => "Text", 
+                      search_dirs => "t/lib", 
+                      instantiate => 'module_pluggable', 
+                      on_require_error     => sub { },
+                      on_instantiate_error => sub { };
 
 sub new {
     my $class = shift;
