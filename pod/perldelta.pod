@@ -194,7 +194,9 @@ by about 40%.
 
 =item *
 
-L<Module::Pluggable> has been upgraded from version 4.0 to 4.2.  XXX TODO
+L<Module::Pluggable> has been upgraded from version 4.0 to 4.2.  Amongst other
+changes, triggers are now allowed on events, which gives a powerful way to
+modify behaviour.
 
 =item *
 
