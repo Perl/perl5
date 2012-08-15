@@ -1818,6 +1818,10 @@ cpan/Module-Pluggable/t/18skipped_package.t		Module::Pluggable tests
 cpan/Module-Pluggable/t/19can_ok_clobber.t		Module::Pluggable tests
 cpan/Module-Pluggable/t/20dodgy_files.t			Module::Pluggable tests
 cpan/Module-Pluggable/t/21editor_junk.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/22trigger.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/23depth.t			Module::Pluggable tests
+cpan/Module-Pluggable/t/24local_inc_object.t		Module::Pluggable tests
+cpan/Module-Pluggable/t/24local_inc_package.t		Module::Pluggable tests
 cpan/Module-Pluggable/t/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/Acme/Foo-Bar.pm		Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
@@ -1841,6 +1845,12 @@ cpan/Module-Pluggable/t/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/No/Middle.pm		Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/TA/C/A/I.pm			Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/Text/Abbrev.pm		Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/TriggerTest/Plugin/After.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/TriggerTest/Plugin/CallbackAllow.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/TriggerTest/Plugin/CallbackDeny.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/TriggerTest/Plugin/Deny.pm	Module::Pluggable tests
+cpan/Module-Pluggable/t/lib/TriggerTest/Plugin/Error.pm	Module::Pluggable tests
 cpan/Module-Pluggable/t/lib/Zot/.Zork.pm		Module::Pluggable tests
 cpan/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
 cpan/NEXT/t/actual.t		NEXT

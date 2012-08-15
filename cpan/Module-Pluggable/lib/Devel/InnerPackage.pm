@@ -11,7 +11,6 @@ $VERSION = '0.4';
 
 =head1 NAME
 
-
 Devel::InnerPackage - find all the inner packages of a package
 
 =head1 SYNOPSIS

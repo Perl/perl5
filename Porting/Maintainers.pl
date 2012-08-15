@@ -1303,8 +1303,9 @@ use File::Glob qw(:case);
 
     'Module::Pluggable' => {
         'MAINTAINER'   => 'simonw',
-        'DISTRIBUTION' => 'SIMONW/Module-Pluggable-4.0.tar.gz',
+        'DISTRIBUTION' => 'SIMONW/Module-Pluggable-4.2.tar.gz',
         'FILES'        => q[cpan/Module-Pluggable],
+        'EXCLUDED'     => ['Build.PL'],
         'UPSTREAM'     => 'cpan',
         'CUSTOMIZED'   => ['Makefile.PL'],
     },
