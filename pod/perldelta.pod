@@ -46,7 +46,7 @@ L</Selected Bug Fixes> section.
 
 [ List each incompatible change as a =head2 entry ]
 
-=head2 C<$ENV{foo} = undef> deletes value from environ, like C<delete $ENV{foo}>
+=head2 C<$ENV{foo}=undef> deletes value from environ, like C<delete $ENV{foo}>
 
 This facilitates use of C<local()> with C<%ENV> entries.  In previous
 versions of Perl, C<undef> was converted to the empty string.
@@ -159,8 +159,8 @@ up serialization drastically.
 
 =item *
 
-L<Devel::Peek> has been upgraded from version 1.08 to 1.09.  The only change has
-been to the test script, to account for changes to some flags in perl's
+L<Devel::Peek> has been upgraded from version 1.08 to 1.09.  The only change
+has been to the test script, to account for changes to some flags in perl's
 internals.
 
 =item *
@@ -171,9 +171,9 @@ Encode::UTF7 and Encode::GSM0338.
 
 =item *
 
-L<Module::Build> has been upgraded from version 0.40 to 0.4002.  A minor bug fix
-allows markup to be used around the leading "Name" in a POD "abstract" line, and
-some documentation improvements have been made.
+L<Module::Build> has been upgraded from version 0.40 to 0.4002.  A minor bug
+fix allows markup to be used around the leading "Name" in a POD "abstract"
+line, and some documentation improvements have been made.
 
 =item *
 
@@ -189,8 +189,8 @@ Various enhancements include the new use of Module::Metadata.
 =item *
 
 L<Module::Metadata> has been upgraded from version 1.000009 to 1.000010.  The
-creation of a Module::Metadata object for a typical module file has been sped up
-by about 40%.
+creation of a Module::Metadata object for a typical module file has been sped
+up by about 40%.
 
 =item *
 
