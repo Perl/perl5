@@ -232,6 +232,11 @@ modified slightly for reasons of perl internal use only.
 
 =item *
 
+L<Win32> has been upgraded from version 0.44 to 0.45.  New APIs have been added
+for getting setting the current code page.
+
+=item *
+
 L<Win32CORE> has been upgraded from version 0.02 to 0.03.  The use of
 PERL_NO_GET_CONTEXT here has resulted in smaller machine code.
 
