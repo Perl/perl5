@@ -2937,6 +2937,7 @@ cpan/Win32API-File/typemap	Win32API::File extension interface types
 cpan/Win32/Changes			Changes for Win32 extension module
 cpan/Win32/longpath.inc			Win32 extension long path support
 cpan/Win32/Makefile.PL			Win32 extension makefile writer
+cpan/Win32/t/CodePage.t			See if Win32 extension works
 cpan/Win32/t/CreateFile.t		See if Win32 extension works
 cpan/Win32/t/ExpandEnvironmentStrings.t	See if Win32 extension works
 cpan/Win32/t/GetCurrentThreadId.t	See if Win32 extension works
