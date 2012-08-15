@@ -125,11 +125,9 @@ namespace and available for export.  The default export list has not changed.
 =item *
 
 L<B::Concise> has been upgraded from version 0.91 to 0.92.  The C<-nobanner>
-option has been fixed, and C<format>s can now be dumped.
-
-B::Concise can now dump formats.  When passed a sub name to dump, it will
-check also to see whether it is the name of a format.  If a sub and a
-format share the same name, it will dump both.
+option has been fixed, and C<format>s can now be dumped.  When passed a sub
+name to dump, it will check also to see whether it is the name of a format.  If
+a sub and a format share the same name, it will dump both.
 
 =item *
 
@@ -196,6 +194,10 @@ by about 40%.
 
 =item *
 
+L<Module::Pluggable> has been upgraded from version 4.0 to 4.2.  XXX TODO
+
+=item *
+
 L<Pod::Simple> has been upgraded from version 3.20 to 3.23.  Numerous
 improvements have been made, mostly to Pod::Simple::XHTML, which also has a
 compatibility change: the C<codes_in_verbatim> option is now disabled by
@@ -233,7 +235,7 @@ modified slightly for reasons of perl internal use only.
 =item *
 
 L<Win32> has been upgraded from version 0.44 to 0.45.  New APIs have been added
-for getting setting the current code page.
+for getting and setting the current code page.
 
 =item *
 
