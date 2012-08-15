@@ -31,7 +31,7 @@ is( (unpack_ip_mreq pack_ip_mreq "\xe0\0\0\1")[1], INADDR_ANY, 'pack_ip_mreq int
 
 SKIP: {
     my $mreq;
-    skip 3, "No pack_ip_mreq_source" unless defined eval { $mreq = pack_ip_mreq_source "\xe0\0\0\2", "\x0a\0\0\1", INADDR_ANY };
+    skip "No pack_ip_mreq_source", 3 unless defined eval { $mreq = pack_ip_mreq_source "\xe0\0\0\2", "\x0a\0\0\1", INADDR_ANY };
 
     @unpacked = unpack_ip_mreq_source $mreq;
 

@@ -213,7 +213,7 @@ brackets, i.e. C</s/> or C</s/i>.
 
 =item *
 
-L<Socket> has been upgraded from version 2.002 to 2.003.  Constants and
+L<Socket> has been upgraded from version 2.002 to 2.004.  Constants and
 functions required for IP multicast source group membership have been added.
 
 =item *
