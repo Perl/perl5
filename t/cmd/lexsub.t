@@ -519,21 +519,21 @@ sub not_lexical2 {
   };
   bar
 }
-$::TODO = 'closing over wrong sub';
 is not_lexical3, 23, 'my subs inside predeclared package subs';
 
 # Test my subs inside predeclared package sub, where the lexical sub is
 # declared outside the package sub.
 # This checks that CvOUTSIDE pointers are fixed up even when the sub is
 # not declared inside the sub that its CvOUTSIDE points to.
-{
+sub not_lexical5 {
   my sub foo;
   sub not_lexical4;
   sub not_lexical4 {
     my $x = 234;
+    not_lexical5();
     sub foo { $x }
-    foo
   }
-  is not_lexical4, 234,
-    'my sub defined in predeclared pkg sub but declared outside';
+  foo
 }
+is not_lexical4, 234,
+    'my sub defined in predeclared pkg sub but declared outside';

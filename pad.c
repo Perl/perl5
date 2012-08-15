@@ -1963,15 +1963,14 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     SV** outpad;
     long depth;
     bool subclones = FALSE;
-#ifdef DEBUGGING
-    CV * const outside_arg = outside;
-#endif
 
     assert(!CvUNIQUE(proto));
 
     /* Anonymous subs have a weak CvOUTSIDE pointer, so its value is not
      * reliable.  The currently-running sub is always the one we need to
      * close over.
+     * For my subs, the currently-running sub may not be the one we want.
+     * We have to check whether it is a clone of CvOUTSIDE.
      * Note that in general for formats, CvOUTSIDE != find_runcv.
      * Since formats may be nested inside closures, CvOUTSIDE may point
      * to a prototype; we instead want the cloned parent who called us.
@@ -1979,7 +1978,11 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 
     if (!outside) {
       if (SvTYPE(proto) == SVt_PVCV)
+      {
 	outside = find_runcv(NULL);
+	if (!CvANON(proto) && CvROOT(outside) != CvROOT(CvOUTSIDE(proto)))
+	    outside = CvOUTSIDE(proto);
+      }
       else {
 	outside = CvOUTSIDE(proto);
 	if ((CvCLONE(outside) && ! CvCLONED(outside))
@@ -1993,9 +1996,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
       }
     }
     depth = outside ? CvDEPTH(outside) : 0;
-#ifdef DEBUGGING
-    assert(depth || outside_arg || SvTYPE(proto) == SVt_PVFM);
-#endif
     if (!depth)
 	depth = 1;
     assert(SvTYPE(proto) == SVt_PVFM || CvPADLIST(outside));
@@ -2032,7 +2032,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
 		    && (!outside || !CvDEPTH(outside)))  ) {
-		    assert(SvTYPE(cv) == SVt_PVFM);
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
 				   "Variable \"%"SVf"\" is not available", namesv);
 		    sv = NULL;
