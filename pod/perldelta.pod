@@ -168,8 +168,8 @@ internals.
 =item *
 
 L<Encode> has been upgraded from version 2.44 to 2.47.  The Mac alias x-mac-ce
-has been added, and various bugs have been fixed in Encode::Unicode and
-Encode::UTF7.
+has been added, and various bugs have been fixed in Encode::Unicode,
+Encode::UTF7 and Encode::GSM0338.
 
 =item *
 
