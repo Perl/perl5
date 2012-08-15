@@ -1,12 +1,23 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.46 2012/08/12 05:49:30 dankogai Exp dankogai $
+# $Id: Changes,v 2.47 2012/08/15 05:36:16 dankogai Exp dankogai $
 #
-$Revision: 2.46 $ $Date: 2012/08/12 05:49:30 $
+$Revision: 2.47 $ $Date: 2012/08/15 05:36:16 $
+! Encode.pm
+  POD Fixes: Copyright and mail address
+! Makefile.PL
+  Added LICENSE => 'perl'
+! lib/Encode/GSM0338.pm t/gsm0338.t
+  REALLY fixed RT#75670: Wrong decoding for GSM 3.38 character \x09
+  ucm/gsm0338.ucm is dropped from MANIFEST since 2.25
+  but I was fixing the wrong file!
+  https://rt.cpan.org/Ticket/Display.html?id=75670
+
+! 2.46 2012/08/12 05:49:30
 ! Encode.pm
   Fixed: RT#78917 for I18N-Charset: Fails with Encode 2.45
   To be more exact, 2.45 broke Encode->encodings(':all')
-  https://rt.cpan.org/Ticket/Bug/Display.html?id=78917
+  https://rt.cpan.org/Ticket/Display.html?id=78917
 
 2.45 2012/08/05 23:08:49
 ! lib/Encode/Alias.pm
