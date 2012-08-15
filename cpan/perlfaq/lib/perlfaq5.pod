@@ -194,11 +194,11 @@ you can fit the whole thing in memory!):
     open my $in,  '<',  $file      or die "Can't read old file: $!"
     open my $out, '>', "$file.new" or die "Can't write new file: $!";
 
-    my @lines = do { local $/; <$in> }; # slurp!
+    my $content = do { local $/; <$in> }; # slurp!
 
         # do your magic here
 
-    print $out @lines;
+    print $out $content;
 
 Modules such as L<File::Slurp> and L<Tie::File> can help with that
 too. If you can, however, avoid reading the entire file at once. Perl

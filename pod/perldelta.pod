@@ -200,6 +200,11 @@ modify behaviour.
 
 =item *
 
+L<perlfaq> has been upgraded from version 5.0150040 to 5.0150041.  This
+contains a couple of minor corrections and lists one new editor.
+
+=item *
+
 L<Pod::Simple> has been upgraded from version 3.20 to 3.23.  Numerous
 improvements have been made, mostly to Pod::Simple::XHTML, which also has a
 compatibility change: the C<codes_in_verbatim> option is now disabled by
