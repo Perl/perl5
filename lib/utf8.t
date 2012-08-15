@@ -450,7 +450,7 @@ SKIP: {
 }
 
 {
-    # utf8::decode should stringify refs [perl #91850].
+    # utf8::decode should stringify refs [perl #91852].
 
     package eieifg { use overload '""'      => sub { "\x{c3}\x{b3}" },
                                    fallback => 1 }
