@@ -1342,7 +1342,7 @@ referenced integer.  So this:
     open my $fh, "<", $myfile or die $!;
     local $_ = <$fh>;
 
-will read a record of no more than 32768 bytes from FILE.  If you're
+will read a record of no more than 32768 bytes from $fh.  If you're
 not reading from a record-oriented file (or your OS doesn't have
 record-oriented files), then you'll likely get a full chunk of data
 with every read.  If a record is larger than the record size you've
