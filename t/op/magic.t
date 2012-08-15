@@ -70,7 +70,11 @@ sub env_is {
     if ($Is_MSWin32) {
         # cmd.exe will echo 'variable=value' but 4nt will echo just the value
         # -- Nikola Knezevic
+	require Win32;
+	my $cp = Win32::GetConsoleOutputCP();
+	Win32::SetConsoleOutputCP(Win32::GetACP());
         (my $set = `set $key`) =~ s/\r\n$/\n/;
+	Win32::SetConsoleOutputCP($cp);
         like $set, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
     } elsif ($Is_VMS) {
         is `write sys\$output f\$trnlnm("\Q$key\E")`, "$val\n", $desc;
