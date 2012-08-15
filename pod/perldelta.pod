@@ -215,6 +215,12 @@ the storage format, so the format version has increased to 2.9.
 
 =item *
 
+L<Sys::Syslog> has been upgraded from version 0.29 to 0.30.  An issue with
+C<POSIX::strftime()> on Windows and a build problem on Haiku-OS have been
+resolved, and <getservbyname()> is no longer called when the port is specified.
+
+=item *
+
 L<Time::Local> has been upgraded from version 1.2000 to 1.2300.  Seconds values
 greater than 59 but less than 60 no longer cause C<timegm()> and C<timelocal()>
 to croak.

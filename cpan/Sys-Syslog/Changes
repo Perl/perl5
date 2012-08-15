@@ -1,5 +1,14 @@
 Revision history for Sys-Syslog
 
+0.30 -- 2012.08.15 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] CPAN-RT#69310: Avoid a POSIX::strftime issue on Windows
+        (Michael Ludwig).
+        [BUGFIX] CPAN-RT#77577: Build on Haiku-OS (Tony Cook).
+        [BUGFIX] CPAN-RT#77578: Silence a compilation warning (Tony Cook).
+        [BUGFIX] CPAN-RT#78044: Don't call getservbyname() when the port is
+        specified (Chan Wilson).
+        [TESTS] t/syslog.t no longer needs to chdir under PERL_CORE.
+
 0.29 -- 2011.04.18 -- Sebastien Aperghis-Tramoni (SAPER) #PerlQA2011
         [BUGFIX] CPAN-RT#55215: Sys::Syslog might call exit which triggers
         DESTROY (Alexander Berger).

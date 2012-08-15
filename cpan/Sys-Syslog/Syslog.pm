@@ -12,7 +12,7 @@ require 5.005;
 
 
 {   no strict 'vars';
-    $VERSION = '0.29';
+    $VERSION = '0.30';
     @ISA     = qw< Exporter >;
 
     %EXPORT_TAGS = (
@@ -227,6 +227,8 @@ my %mechanism = (
     },
     tcp => {
         check   => sub {
+            return 1 if defined $sock_port;
+
             if (getservbyname('syslog', 'tcp') || getservbyname('syslogng', 'tcp')) {
                 $host = $syslog_path;
                 return 1
@@ -239,6 +241,8 @@ my %mechanism = (
     },
     udp => {
         check   => sub {
+            return 1 if defined $sock_port;
+
             if (getservbyname('syslog', 'udp')) {
                 $host = $syslog_path;
                 return 1
@@ -412,7 +416,7 @@ sub syslog {
         $sum = $numpri + $numfac;
         my $oldlocale = setlocale(LC_TIME);
         setlocale(LC_TIME, 'C');
-        my $timestamp = strftime "%b %e %H:%M:%S", localtime;
+        my $timestamp = strftime "%b %d %H:%M:%S", localtime;
         setlocale(LC_TIME, $oldlocale);
 
         # construct the stream that will be transmitted
@@ -875,7 +879,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-This is the documentation of version 0.29
+This is the documentation of version 0.30
 
 =head1 SYNOPSIS
 
@@ -1521,15 +1525,16 @@ Perl and C<Sys::Syslog> versions.
 
     Sys::Syslog     Perl
     -----------     ----
-       undef        5.0.x -- 5.5.x
-       0.01         5.6.0, 5.6.1, 5.6.2
+       undef        5.0.0 ~ 5.5.4
+       0.01         5.6.*
        0.03         5.8.0
        0.04         5.8.1, 5.8.2, 5.8.3
        0.05         5.8.4, 5.8.5, 5.8.6
        0.06         5.8.7
        0.13         5.8.8
        0.22         5.10.0
-       0.27         5.8.9
+       0.27         5.8.9, 5.10.1 ~ 5.14.2
+       0.29         5.16.0, 5.16.1
 
 
 =head1 SEE ALSO
@@ -1648,9 +1653,9 @@ L<http://rt.cpan.org/Dist/Display.html?Queue=Sys-Syslog>
 
 L<http://search.cpan.org/dist/Sys-Syslog/>
 
-=item * Kobes' CPAN Search
+=item * MetaCPAN
 
-L<http://cpan.uwinnipeg.ca/dist/Sys-Syslog>
+L<https://metacpan.org/module/Sys::Syslog>
 
 =item * Perl Documentation
 
@@ -1661,7 +1666,7 @@ L<http://perldoc.perl.org/Sys/Syslog.html>
 
 =head1 COPYRIGHT
 
-Copyright (C) 1990-2009 by Larry Wall and others.
+Copyright (C) 1990-2012 by Larry Wall and others.
 
 
 =head1 LICENSE

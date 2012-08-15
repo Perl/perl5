@@ -1660,7 +1660,7 @@ use File::Glob qw(:case);
 
     'Sys::Syslog' => {
         'MAINTAINER'   => 'saper',
-        'DISTRIBUTION' => 'SAPER/Sys-Syslog-0.29.tar.gz',
+        'DISTRIBUTION' => 'SAPER/Sys-Syslog-0.30.tar.gz',
         'FILES'        => q[cpan/Sys-Syslog],
         'EXCLUDED'     => [
             qr{^eg/},
@@ -1671,11 +1671,9 @@ use File::Glob qw(:case);
                 t/podspell.t
                 t/portfs.t
                 win32/PerlLog.RES
-                win32/PerlLog_RES.uu
                 ),
         ],
         'UPSTREAM'   => 'cpan',
-        'CUSTOMIZED' => ['t/syslog.t'],
     },
 
     'Term::ANSIColor' => {
