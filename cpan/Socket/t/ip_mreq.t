@@ -5,6 +5,7 @@ use Test::More;
 use Socket qw(
     INADDR_ANY
     pack_ip_mreq unpack_ip_mreq
+    pack_ip_mreq_source unpack_ip_mreq_source
 );
 
 # Check that pack/unpack_ip_mreq either croak with "Not implemented", or
@@ -19,7 +20,7 @@ if( !defined $packed ) {
     die $@;
 }
 
-plan tests => 3;
+plan tests => 6;
 
 my @unpacked = unpack_ip_mreq $packed;
 
@@ -27,3 +28,14 @@ is( $unpacked[0], "\xe0\0\0\1", 'unpack_ip_mreq multiaddr' );
 is( $unpacked[1], INADDR_ANY,   'unpack_ip_mreq interface' );
 
 is( (unpack_ip_mreq pack_ip_mreq "\xe0\0\0\1")[1], INADDR_ANY, 'pack_ip_mreq interface defaults to INADDR_ANY' );
+
+SKIP: {
+    my $mreq;
+    skip 3, "No pack_ip_mreq_source" unless defined eval { $mreq = pack_ip_mreq_source "\xe0\0\0\2", "\x0a\0\0\1", INADDR_ANY };
+
+    @unpacked = unpack_ip_mreq_source $mreq;
+
+    is( $unpacked[0], "\xe0\0\0\2", 'unpack_ip_mreq_source multiaddr' );
+    is( $unpacked[1], "\x0a\0\0\1", 'unpack_ip_mreq_source source' );
+    is( $unpacked[2], INADDR_ANY,   'unpack_ip_mreq_source interface' );
+}

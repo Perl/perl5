@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.002';
+our $VERSION = '2.003';
 
 =head1 NAME
 
@@ -259,6 +259,18 @@ sockopts.
 
 Takes an C<ip_mreq> structure. Returns a list of two elements; the IPv4
 multicast address and interface address.
+
+=head2 $ip_mreq_source = pack_ip_mreq_source $multiaddr, $source, $interface
+
+Takes an IPv4 multicast address, source address, and optionally an interface
+address (or C<INADDR_ANY>). Returns the C<ip_mreq_source> structure with those
+arguments packed in. Suitable for use with the C<IP_ADD_SOURCE_MEMBERSHIP>
+and C<IP_DROP_SOURCE_MEMBERSHIP> sockopts.
+
+=head2 ($multiaddr, $source, $interface) = unpack_ip_mreq_source $ip_mreq
+
+Takes an C<ip_mreq_source> structure. Returns a list of three elements; the
+IPv4 multicast address, source address and interface address.
 
 =head2 $ipv6_mreq = pack_ipv6_mreq $multiaddr6, $ifindex
 
@@ -736,24 +748,26 @@ our @EXPORT_OK = qw(
 
 	SOCK_NONBLOCK SOCK_CLOEXEC
 
-	IP_ADD_MEMBERSHIP IP_DROP_MEMBERSHIP IP_MULTICAST_IF
-	IP_MULTICAST_LOOP IP_MULTICAST_TTL
+	IP_ADD_MEMBERSHIP IP_ADD_SOURCE_MEMBERSHIP IP_DROP_MEMBERSHIP
+	IP_DROP_SOURCE_MEMBERSHIP IP_MULTICAST_IF IP_MULTICAST_LOOP
+	IP_MULTICAST_TTL
 
 	IPPROTO_IP IPPROTO_IPV6 IPPROTO_RAW IPPROTO_ICMP IPPROTO_TCP
 	IPPROTO_UDP
 
-	TCP_CONGESTION TCP_CORK TCP_DEFER_ACCEPT TCP_INFO TCP_KEEPALIVE
-	TCP_KEEPCNT TCP_KEEPIDLE TCP_KEEPINTVL TCP_LINGER2 TCP_MAXRT TCP_MAXSEG
-	TCP_MD5SIG TCP_NODELAY TCP_QUICKACK TCP_STDURG TCP_SYNCNT
-	TCP_WINDOW_CLAMP 
+	TCP_CONGESTION TCP_CONNECTIONTIMEOUT TCP_CORK TCP_DEFER_ACCEPT TCP_INFO
+	TCP_INIT_CWND TCP_KEEPALIVE TCP_KEEPCNT TCP_KEEPIDLE TCP_KEEPINTVL
+	TCP_LINGER2 TCP_MAXRT TCP_MAXSEG TCP_MD5SIG TCP_NODELAY TCP_NOOPT
+	TCP_NOPUSH TCP_QUICKACK TCP_SACK_ENABLE TCP_STDURG TCP_SYNCNT
+	TCP_WINDOW_CLAMP
 
 	IN6ADDR_ANY IN6ADDR_LOOPBACK
 
-	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_MTU IPV6_MTU_DISCOVER
-	IPV6_MULTICAST_HOPS IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP
-	IPV6_UNICAST_HOPS IPV6_V6ONLY
+	IPV6_ADD_MEMBERSHIP IPV6_DROP_MEMBERSHIP IPV6_JOIN_GROUP
+	IPV6_LEAVE_GROUP IPV6_MTU IPV6_MTU_DISCOVER IPV6_MULTICAST_HOPS
+	IPV6_MULTICAST_IF IPV6_MULTICAST_LOOP IPV6_UNICAST_HOPS IPV6_V6ONLY
 
-	pack_ip_mreq unpack_ip_mreq
+	pack_ip_mreq unpack_ip_mreq pack_ip_mreq_source unpack_ip_mreq_source
 
 	pack_ipv6_mreq unpack_ipv6_mreq
 

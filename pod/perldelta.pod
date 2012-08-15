@@ -213,6 +213,11 @@ brackets, i.e. C</s/> or C</s/i>.
 
 =item *
 
+L<Socket> has been upgraded from version 2.002 to 2.003.  Constants and
+functions required for IP multicast source group membership have been added.
+
+=item *
+
 L<Storable> has been upgraded from version 2.37 to 2.38.  It can now freeze
 and thaw vstrings correctly.  This causes a slight incompatible change in
 the storage format, so the format version has increased to 2.9.
