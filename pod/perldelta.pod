@@ -334,6 +334,14 @@ mark but the final quotation mark is missing.
 This replaces a bogus and misleading error message about not finding the
 label itself [perl #114104].
 
+=item *
+
+L<panic: child pseudo-process was never scheduled>
+
+This error is thrown when a child pseudo-process in the ithreads implementation
+on Windows was not scheduled within the time period allowed and therefore was
+not able to initialize properly [perl #88840]
+
 =back
 
 =head3 New Warnings
@@ -458,9 +466,18 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+A new makefile option, USE_64_BIT_INT, has been added to the Windows makefiles.
+Set this to "define" when building a 32-bit perl if you want it to use 64-bit
+integers.
+
+Machine code size reductions, already made to the DLLs of XS modules in 5.17.2,
+have now been extended to the perl DLL itself.
+
+Building with VC++ 6.0 was inadvertently broken in 5.17.2 but has now been
+fixed again.  XXX Actually, it's now been broken again, so ensure that it gets
+fixed once more before release, or remove this comment!
 
 =back
 
@@ -610,6 +627,13 @@ have now been fixed.
 
 Under debugging builds, the B<-DA> command line option started crashing in
 Perl 5.16.  It has been fixed [perl #114368].
+
+=item *
+
+A potential deadlock scenario involving the premature termination of a
+pseudo-forked child in a Windows build with ithreads enabled has been fixed.
+This resolves the common problem of the F<t/op/fork.t> test hanging on Windows.
+[perl #88840]
 
 =back
 
