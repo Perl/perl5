@@ -598,6 +598,11 @@ Formats are no longer created after compilation errors.
 Some format syntax errors started causing crashes in perl 5.17.2, but
 have now been fixed.
 
+=item *
+
+Under debugging builds, the B<-DA> command line option started crashing in
+Perl 5.16.  It has been fixed [perl #114368].
+
 =back
 
 =head1 Known Problems
