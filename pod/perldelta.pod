@@ -282,7 +282,7 @@ section.
 =item *
 
 Loop control verbs (C<dump>, C<goto>, C<next>, C<last> and C<redo>) have
-always had the same precedence as assignment operators, but this was never
+always had the same precedence as assignment operators, but this was not
 documented until now.
 
 =back
