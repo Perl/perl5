@@ -428,6 +428,9 @@ struct regnode_charclass_class {
 #define ANYOF_HORIZWS	(ANYOF_MAX+3)
 #define ANYOF_NHORIZWS	(ANYOF_MAX+4)
 
+#define ANYOF_UNIPROP   (ANYOF_MAX+5)  /* Used to indicate a Unicode property:
+                                          \p{} or \P{} */
+
 /* Backward source code compatibility. */
 
 #define ANYOF_ALNUML	 ANYOF_ALNUM
