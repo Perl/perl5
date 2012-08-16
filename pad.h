@@ -16,13 +16,6 @@
 */
 
 
-/* a padlist is currently just an AV; but that might change,
- * so hide the type. Ditto a pad.  */
-
-typedef AV PADLIST;
-typedef AV PAD;
-
-
 /* offsets within a pad */
 
 #if PTRSIZE == 4
