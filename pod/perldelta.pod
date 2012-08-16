@@ -287,6 +287,17 @@ documented until now.
 
 =back
 
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+A caveat has been added to the documentation for C<$_> warning against the
+use of lexical C<$_> [perl #114020].
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
