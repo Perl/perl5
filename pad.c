@@ -1124,7 +1124,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     I32 offset, new_offset;
     SV *new_capture;
     SV **new_capturep;
-    const AV * const padlist = CvPADLIST(cv);
+    const PADLIST * const padlist = CvPADLIST(cv);
     const bool staleok = !!(flags & padadd_STALEOK);
 
     PERL_ARGS_ASSERT_PAD_FINDLEX;
@@ -1896,7 +1896,7 @@ S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
     dVAR;
     const CV * const outside = CvOUTSIDE(cv);
-    AV* const padlist = CvPADLIST(cv);
+    PADLIST* const padlist = CvPADLIST(cv);
 
     PERL_ARGS_ASSERT_CV_DUMP;
 
@@ -1940,9 +1940,11 @@ Perl_cv_clone(pTHX_ CV *proto)
 {
     dVAR;
     I32 ix;
-    AV* const protopadlist = CvPADLIST(proto);
-    const AV *const protopad_name = (const AV *)*av_fetch(protopadlist, 0, FALSE);
-    const AV *const protopad = (const AV *)*av_fetch(protopadlist, 1, FALSE);
+    PADLIST* const protopadlist = CvPADLIST(proto);
+    const AV *const protopad_name =
+	(const AV *)*av_fetch(protopadlist, 0, FALSE);
+    const AV *const protopad =
+	(const AV *)*av_fetch(protopadlist, 1, FALSE);
     SV** const pname = AvARRAY(protopad_name);
     SV** const ppad = AvARRAY(protopad);
     const I32 fname = AvFILLp(protopad_name);
@@ -2236,15 +2238,15 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
 #  define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
 
 /*
-=for apidoc m|AV *|padlist_dup|AV *srcpad|CLONE_PARAMS *param
+=for apidoc padlist_dup
 
 Duplicates a pad.
 
 =cut
 */
 
-AV *
-Perl_padlist_dup(pTHX_ AV *srcpad, CLONE_PARAMS *param)
+PADLIST *
+Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 {
     AV *dstpad;
     PERL_ARGS_ASSERT_PADLIST_DUP;

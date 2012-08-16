@@ -2683,7 +2683,7 @@ try_autoload:
 	/* This path taken at least 75% of the time   */
 	dMARK;
 	I32 items = SP - MARK;
-	AV* const padlist = CvPADLIST(cv);
+	PADLIST * const padlist = CvPADLIST(cv);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;

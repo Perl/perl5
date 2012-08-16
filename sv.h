@@ -477,7 +477,7 @@ typedef U16 cv_flags_t;
     }		xcv_root_u;							\
     GV *	xcv_gv;								\
     char *	xcv_file;							\
-    AV *	xcv_padlist;							\
+    PADLIST *	xcv_padlist;							\
     CV *	xcv_outside;							\
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
 				  * compilation) in the lexically enclosing	\

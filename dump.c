@@ -2177,7 +2177,7 @@ Perl_debop(pTHX_ const OP *o)
 	CV * const cv = deb_curcv(cxstack_ix);
 	SV *sv;
         if (cv) {
-	    AV * const padlist = CvPADLIST(cv);
+	    PADLIST * const padlist = CvPADLIST(cv);
             AV * const comppad = MUTABLE_AV(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else

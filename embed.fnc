@@ -2337,7 +2337,8 @@ pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 ApdR	|HV*	|pad_compname_type|const PADOFFSET po
 #if defined(USE_ITHREADS)
-pdR	|AV*	|padlist_dup	|NULLOK AV *srcpad|NN CLONE_PARAMS *param
+pdR	|PADLIST *|padlist_dup	|NULLOK PADLIST *srcpad \
+				|NN CLONE_PARAMS *param
 #endif
 
 ApdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
