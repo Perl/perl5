@@ -139,7 +139,7 @@ C<format> line are also now deparsed correctly.
 
 L<CGI> has been upgraded from version 3.59 to 3.60.  Unrecognized HTML escape
 sequences are now handled better, problematic trailing newlines are no longer
-inserted after L<lt>formL<gt> tags by C<startform()> or C<start_form()>, and
+inserted after E<lt>formE<gt> tags by C<startform()> or C<start_form()>, and
 bogus "Insecure Dependency" warnings appearing with some versions of perl are
 now worked around.
 
@@ -336,7 +336,7 @@ label itself [perl #114104].
 
 =item *
 
-L<panic: child pseudo-process was never scheduled>
+L<panic: child pseudo-process was never scheduled|perldiag/"panic: child pseudo-process was never scheduled">
 
 This error is thrown when a child pseudo-process in the ithreads implementation
 on Windows was not scheduled within the time period allowed and therefore was
