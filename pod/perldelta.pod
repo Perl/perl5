@@ -137,6 +137,14 @@ C<format> line are also now deparsed correctly.
 
 =item *
 
+L<CGI> has been upgraded from version 3.59 to 3.60.  Unrecognized HTML escape
+sequences are now handled better, problematic trailing newlines are no longer
+inserted after L<lt>formL<gt> tags by C<startform()> or C<start_form()>, and
+bogus "Insecure Dependency" warnings appearing with some versions of perl are
+now worked around.
+
+=item *
+
 L<Compress::Raw::Bzip2> has been upgraded from version 2.05201 to 2.055.  The
 misuse of Perl's "magic" API has been fixed.
 
