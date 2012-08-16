@@ -351,7 +351,6 @@ use File::Glob qw(:case);
                 t/fast.t
                 ),
         ],
-        'CUSTOMIZED' => ['t/url.t'],
         'UPSTREAM'   => 'cpan',
     },
 
