@@ -65,7 +65,7 @@ C<utf8::encode()> is used, and a warning is issued about wide characters
 Instead of assigning to an implicit lexical C<$_>, C<given> now makes the
 global C<$_> an alias for its argument, just like C<foreach>.  However, it
 still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
-C<foreach>).
+C<foreach>) [perl #114020].
 
 =head1 Deprecations
 
