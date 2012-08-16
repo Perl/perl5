@@ -622,15 +622,16 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_XDIGIT            12
 #  define _CC_PSXSPC            13
 #  define _CC_BLANK             14
-#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_BLANK
+#  define _CC_VERTSPACE         15
+#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 
-#  define _CC_IDFIRST           15
-#  define _CC_CHARNAME_CONT     16
-#  define _CC_NONLATIN1_FOLD    17
-#  define _CC_QUOTEMETA         18
-#  define _CC_NON_FINAL_FOLD    19
-#  define _CC_IS_IN_SOME_FOLD   20
-/* Unused: 21-31
+#  define _CC_IDFIRST           16
+#  define _CC_CHARNAME_CONT     17
+#  define _CC_NONLATIN1_FOLD    18
+#  define _CC_QUOTEMETA         19
+#  define _CC_NON_FINAL_FOLD    20
+#  define _CC_IS_IN_SOME_FOLD   21
+/* Unused: 22-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it

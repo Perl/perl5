@@ -42,6 +42,7 @@ my @properties = qw(
     UPPER
     WORDCHAR
     XDIGIT
+    VERTSPACE
     IS_IN_SOME_FOLD
 );
 
@@ -170,8 +171,8 @@ for my $ord (0..255) {
         if (! ($name =~ s/_L1$//)) {
 
             # Here, isn't an _L1.  If its _A, it's automatically false for
-            # non-ascii.  The only one current one (besides ASCII) without a
-            # suffix is valid over the whole range.
+            # non-ascii.  The only current ones (besides ASCII) without a
+            # suffix are valid over the whole range.
             next if $name =~ s/_A$// && $ord >= 128;
 
         }

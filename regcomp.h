@@ -427,6 +427,11 @@ struct regnode_charclass_class {
 #define ANYOF_VERTWS    ((ANYOF_MAX)+0)
 #define ANYOF_NVERTWS   ((ANYOF_MAX)+1)
 
+#if (ANYOF_VERTWS != (_CC_VERTSPACE) * 2) \
+     || (_CC_VERTSPACE != _HIGHEST_REGCOMP_DOT_H_SYNC)
+#   error Problem with handy.h _CC_VERTSPACE #define
+#endif
+
 #define ANYOF_HORIZWS	((ANYOF_MAX)+2)
 #define ANYOF_NHORIZWS	((ANYOF_MAX)+3)
 
