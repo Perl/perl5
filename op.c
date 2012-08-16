@@ -689,7 +689,7 @@ Perl_op_free(pTHX_ OP *o)
     CALL_OPFREEHOOK(o);
 
     if (o->op_flags & OPf_KIDS) {
-        register OP *kid, *nextkid;
+        OP *kid, *nextkid;
 	for (kid = cUNOPo->op_first; kid; kid = nextkid) {
 	    nextkid = kid->op_sibling; /* Get before next freeing kid */
 	    op_free(kid);
@@ -1043,7 +1043,7 @@ Perl_op_linklist(pTHX_ OP *o)
     /* establish postfix order */
     first = cUNOPo->op_first;
     if (first) {
-        register OP *kid;
+        OP *kid;
 	o->op_next = LINKLIST(first);
 	kid = first;
 	for (;;) {
@@ -3111,7 +3111,7 @@ static OP *
 S_fold_constants(pTHX_ register OP *o)
 {
     dVAR;
-    register OP * VOL curop;
+    OP * VOL curop;
     OP *newop;
     VOL I32 type = o->op_type;
     SV * VOL sv = NULL;
@@ -3261,7 +3261,7 @@ static OP *
 S_gen_constant_list(pTHX_ register OP *o)
 {
     dVAR;
-    register OP *curop;
+    OP *curop;
     const I32 oldtmps_floor = PL_tmps_floor;
 
     list(o);
@@ -3963,10 +3963,10 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     STRLEN rlen;
     const U8 *t = (U8*)SvPV_const(tstr, tlen);
     const U8 *r = (U8*)SvPV_const(rstr, rlen);
-    register I32 i;
-    register I32 j;
+    I32 i;
+    I32 j;
     I32 grows = 0;
-    register short *tbl;
+    short *tbl;
 
     const I32 complement = o->op_private & OPpTRANS_COMPLEMENT;
     const I32 squash     = o->op_private & OPpTRANS_SQUASH;
@@ -5567,7 +5567,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     dVAR;
     const U32 seq = intro_my();
     const U32 utf8 = flags & SVf_UTF8;
-    register COP *cop;
+    COP *cop;
 
     flags &= ~SVf_UTF8;
 
@@ -6867,7 +6867,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     const char *ps;
     STRLEN ps_len = 0; /* init it to avoid false uninit warning from icc */
     U32 ps_utf8 = 0;
-    register CV *cv = NULL;
+    CV *cv = NULL;
     SV *const_sv;
     const bool ec = PL_parser && PL_parser->error_count;
     /* If the subroutine has no body, no attributes, and no builtin attributes
@@ -7475,7 +7475,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 CV *
 Perl_newSTUB(pTHX_ GV *gv, bool fake)
 {
-    register CV *cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+    CV *cv = MUTABLE_CV(newSV_type(SVt_PVCV));
     PERL_ARGS_ASSERT_NEWSTUB;
     assert(!GvCVu(gv));
     GvCV_set(gv, cv);
@@ -7515,7 +7515,7 @@ void
 Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 {
     dVAR;
-    register CV *cv;
+    CV *cv;
 #ifdef PERL_MAD
     OP* pegop = newOP(OP_NULL, 0);
 #endif
@@ -8217,7 +8217,7 @@ Perl_ck_fun(pTHX_ OP *o)
 {
     dVAR;
     const int type = o->op_type;
-    register I32 oa = PL_opargs[type] >> OASHIFT;
+    I32 oa = PL_opargs[type] >> OASHIFT;
 
     PERL_ARGS_ASSERT_CK_FUN;
 
@@ -8230,7 +8230,7 @@ Perl_ck_fun(pTHX_ OP *o)
 
     if (o->op_flags & OPf_KIDS) {
         OP **tokid = &cLISTOPo->op_first;
-        register OP *kid = cLISTOPo->op_first;
+        OP *kid = cLISTOPo->op_first;
         OP *sibl;
         I32 numargs = 0;
 	bool seen_optional = FALSE;
@@ -8737,7 +8737,7 @@ Perl_ck_rfun(pTHX_ OP *o)
 OP *
 Perl_ck_listiob(pTHX_ OP *o)
 {
-    register OP *kid;
+    OP *kid;
 
     PERL_ARGS_ASSERT_CK_LISTIOB;
 
@@ -9207,7 +9207,7 @@ STATIC void
 S_simplify_sort(pTHX_ OP *o)
 {
     dVAR;
-    register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
+    OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
     OP *k;
     int descending;
     GV *gv;
@@ -9314,7 +9314,7 @@ OP *
 Perl_ck_split(pTHX_ OP *o)
 {
     dVAR;
-    register OP *kid;
+    OP *kid;
 
     PERL_ARGS_ASSERT_CK_SPLIT;
 
@@ -10337,7 +10337,7 @@ void
 Perl_rpeep(pTHX_ register OP *o)
 {
     dVAR;
-    register OP* oldop = NULL;
+    OP* oldop = NULL;
     OP* defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;

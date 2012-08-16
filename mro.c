@@ -883,8 +883,8 @@ STATIC void
 S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                               HV *stash, HV *oldstash, SV *namesv)
 {
-    register XPVHV* xhv;
-    register HE *entry;
+    XPVHV* xhv;
+    HE *entry;
     I32 riter = -1;
     I32 items = 0;
     const bool stash_had_name = stash && HvENAME(stash);

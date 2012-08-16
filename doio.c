@@ -66,7 +66,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	      I32 num_svs)
 {
     dVAR;
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
     PerlIO *saveifp = NULL;
     PerlIO *saveofp = NULL;
     int savefd = -1;
@@ -709,7 +709,7 @@ PerlIO *
 Perl_nextargv(pTHX_ register GV *gv)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 #ifndef FLEXFILENAMES
     int filedev;
     int fileino;
@@ -994,7 +994,7 @@ bool
 Perl_do_eof(pTHX_ GV *gv)
 {
     dVAR;
-    register IO * const io = GvIO(gv);
+    IO * const io = GvIO(gv);
 
     PERL_ARGS_ASSERT_DO_EOF;
 
@@ -1040,7 +1040,7 @@ Perl_do_tell(pTHX_ GV *gv)
 {
     dVAR;
     IO *const io = GvIO(gv);
-    register PerlIO *fp;
+    PerlIO *fp;
 
     PERL_ARGS_ASSERT_DO_TELL;
 
@@ -1061,7 +1061,7 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     dVAR;
     IO *const io = GvIO(gv);
-    register PerlIO *fp;
+    PerlIO *fp;
 
     if (io && (fp = IoIFP(io))) {
 #ifdef ULTRIX_STDIO_BOTCH
@@ -1080,7 +1080,7 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
     dVAR;
     IO *const io = GvIO(gv);
-    register PerlIO *fp;
+    PerlIO *fp;
 
     PERL_ARGS_ASSERT_DO_SYSSEEK;
 
@@ -1437,8 +1437,8 @@ bool
 Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 {
     dVAR;
-    register const char **a;
-    register char *s;
+    const char **a;
+    char *s;
     char *buf;
     char *cmd;
     /* Make a copy so we can change it */
@@ -1574,8 +1574,8 @@ I32
 Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
     dVAR;
-    register I32 val;
-    register I32 tot = 0;
+    I32 val;
+    I32 tot = 0;
     const char *const what = PL_op_name[type];
     const char *s;
     STRLEN len;
@@ -1648,7 +1648,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     case OP_CHOWN:
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
-            register I32 val2;
+            I32 val2;
 	    val = SvIVx(*++mark);
 	    val2 = SvIVx(*++mark);
 	    APPLY_TAINT_PROPER();
@@ -1725,7 +1725,7 @@ nothing in the core.
 	     */
 	    while (++mark <= sp) {
 		I32 proc;
-		register unsigned long int __vmssts;
+		unsigned long int __vmssts;
 		SvGETMAGIC(*mark);
 		if (!(SvIOK(*mark) || SvNOK(*mark) || looks_like_number(*mark)))
 		    Perl_croak(aTHX_ "Can't kill a non-numeric process ID");

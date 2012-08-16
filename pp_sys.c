@@ -669,8 +669,8 @@ PP(pp_pipe_op)
 #ifdef HAS_PIPE
     dVAR;
     dSP;
-    register IO *rstio;
-    register IO *wstio;
+    IO *rstio;
+    IO *wstio;
     int fd[2];
 
     GV * const wgv = MUTABLE_GV(POPs);
@@ -1059,10 +1059,10 @@ PP(pp_sselect)
 {
 #ifdef HAS_SELECT
     dVAR; dSP; dTARGET;
-    register I32 i;
-    register I32 j;
-    register char *s;
-    register SV *sv;
+    I32 i;
+    I32 j;
+    char *s;
+    SV *sv;
     NV value;
     I32 maxlen = 0;
     I32 nfound;
@@ -1322,7 +1322,7 @@ STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
     dVAR;
-    register PERL_CONTEXT *cx;
+    PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
     PERL_ARGS_ASSERT_DOFORM;
@@ -1350,8 +1350,8 @@ PP(pp_enterwrite)
 {
     dVAR;
     dSP;
-    register GV *gv;
-    register IO *io;
+    GV *gv;
+    IO *io;
     GV *fgv;
     CV *cv = NULL;
     SV *tmpsv = NULL;
@@ -1390,12 +1390,12 @@ PP(pp_leavewrite)
 {
     dVAR; dSP;
     GV * const gv = cxstack[cxstack_ix].blk_format.gv;
-    register IO * const io = GvIOp(gv);
+    IO * const io = GvIOp(gv);
     PerlIO *ofp;
     PerlIO *fp;
     SV **newsp;
     I32 gimme;
-    register PERL_CONTEXT *cx;
+    PERL_CONTEXT *cx;
     OP *retop;
 
     if (!io || !(ofp = IoOFP(io)))
@@ -2380,7 +2380,7 @@ PP(pp_socket)
     const int type = POPi;
     const int domain = POPi;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = gv ? GvIOn(gv) : NULL;
+    IO * const io = gv ? GvIOn(gv) : NULL;
     int fd;
 
     if (!io) {
@@ -2428,8 +2428,8 @@ PP(pp_sockpair)
     const int domain = POPi;
     GV * const gv2 = MUTABLE_GV(POPs);
     GV * const gv1 = MUTABLE_GV(POPs);
-    register IO * const io1 = gv1 ? GvIOn(gv1) : NULL;
-    register IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
+    IO * const io1 = gv1 ? GvIOn(gv1) : NULL;
+    IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
     int fd[2];
 
     if (!io1)
@@ -2483,7 +2483,7 @@ PP(pp_bind)
     /* OK, so on what platform does bind modify addr?  */
     const char *addr;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
     STRLEN len;
     const int op_type = PL_op->op_type;
 
@@ -2511,7 +2511,7 @@ PP(pp_listen)
     dVAR; dSP;
     const int backlog = POPi;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = gv ? GvIOn(gv) : NULL;
+    IO * const io = gv ? GvIOn(gv) : NULL;
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2530,8 +2530,8 @@ nuts:
 PP(pp_accept)
 {
     dVAR; dSP; dTARGET;
-    register IO *nstio;
-    register IO *gstio;
+    IO *nstio;
+    IO *gstio;
     char namebuf[MAXPATHLEN];
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE) || defined(__QNXNTO__)
     Sock_size_t len = sizeof (struct sockaddr_in);
@@ -2606,7 +2606,7 @@ PP(pp_shutdown)
     dVAR; dSP; dTARGET;
     const int how = POPi;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
 
     if (!io || !IoIFP(io))
 	goto nuts;
@@ -2628,7 +2628,7 @@ PP(pp_ssockopt)
     const unsigned int optname = (unsigned int) POPi;
     const unsigned int lvl = (unsigned int) POPi;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
     int fd;
     Sock_size_t len;
 
@@ -2697,7 +2697,7 @@ PP(pp_getpeername)
     dVAR; dSP;
     const int optype = PL_op->op_type;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
     Sock_size_t len;
     SV *sv;
     int fd;
@@ -3307,9 +3307,9 @@ PP(pp_fttext)
     I32 len;
     I32 odd = 0;
     STDCHAR tbuf[512];
-    register STDCHAR *s;
-    register IO *io;
-    register SV *sv = NULL;
+    STDCHAR *s;
+    IO *io;
+    SV *sv = NULL;
     GV *gv;
     PerlIO *fp;
 
@@ -3820,7 +3820,7 @@ PP(pp_open_dir)
     dVAR; dSP;
     const char * const dirname = POPpconstx;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
 
     if (!io)
 	goto nope;
@@ -3858,8 +3858,8 @@ PP(pp_readdir)
     SV *sv;
     const I32 gimme = GIMME;
     GV * const gv = MUTABLE_GV(POPs);
-    register const Direntry_t *dp;
-    register IO * const io = GvIOn(gv);
+    const Direntry_t *dp;
+    IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -3911,7 +3911,7 @@ PP(pp_telldir)
     long telldir (DIR *);
 # endif
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -3937,7 +3937,7 @@ PP(pp_seekdir)
     dVAR; dSP;
     const long along = POPl;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -3962,7 +3962,7 @@ PP(pp_rewinddir)
 #if defined(HAS_REWINDDIR) || defined(rewinddir)
     dVAR; dSP;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -3986,7 +3986,7 @@ PP(pp_closedir)
 #if defined(Direntry_t) && defined(HAS_READDIR)
     dVAR; dSP;
     GV * const gv = MUTABLE_GV(POPs);
-    register IO * const io = GvIOn(gv);
+    IO * const io = GvIOn(gv);
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
@@ -4722,8 +4722,8 @@ PP(pp_ghostent)
 #if defined(HAS_GETHOSTBYNAME) || defined(HAS_GETHOSTBYADDR) || defined(HAS_GETHOSTENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register char **elem;
-    register SV *sv;
+    char **elem;
+    SV *sv;
 #ifndef HAS_GETHOST_PROTOS /* XXX Do we need individual probes? */
     struct hostent *gethostbyaddr(Netdb_host_t, Netdb_hlen_t, int);
     struct hostent *gethostbyname(Netdb_name_t);
@@ -4812,7 +4812,7 @@ PP(pp_gnetent)
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register SV *sv;
+    SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
     struct netent *getnetbyaddr(Netdb_net_t, int);
     struct netent *getnetbyname(Netdb_name_t);
@@ -4885,7 +4885,7 @@ PP(pp_gprotoent)
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register SV *sv;
+    SV *sv;
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
     struct protoent *getprotobyname(Netdb_name_t);
     struct protoent *getprotobynumber(int);
@@ -4945,7 +4945,7 @@ PP(pp_gservent)
 #if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register SV *sv;
+    SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
     struct servent *getservbyname(Netdb_name_t, Netdb_name_t);
     struct servent *getservbyport(int, Netdb_name_t);
@@ -5122,7 +5122,7 @@ PP(pp_gpwent)
 #ifdef HAS_PASSWD
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register SV *sv;
+    SV *sv;
     struct passwd *pwent  = NULL;
     /*
      * We currently support only the SysV getsp* shadow password interface.
@@ -5446,9 +5446,9 @@ PP(pp_syscall)
 {
 #ifdef HAS_SYSCALL
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register I32 items = SP - MARK;
+    I32 items = SP - MARK;
     unsigned long a[20];
-    register I32 i = 0;
+    I32 i = 0;
     IV retval = -1;
 
     if (PL_tainting) {

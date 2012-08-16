@@ -1143,7 +1143,7 @@ perl_destruct(pTHXx)
     if (PL_sv_count != 0) {
 	SV* sva;
 	SV* sv;
-	register SV* svend;
+	SV* svend;
 
 	for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
 	    svend = &sva[SvREFCNT(sva)];
@@ -1777,7 +1777,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     char **argv = PL_origargv;
     const char *scriptname = NULL;
     VOL bool dosearch = FALSE;
-    register char c;
+    char c;
     bool doextract = FALSE;
     const char *cddir = NULL;
 #ifdef USE_SITECUSTOMIZE
@@ -3765,7 +3765,7 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 {
     dVAR;
     const char *s;
-    register const char *s2;
+    const char *s2;
 
     PERL_ARGS_ASSERT_FIND_BEGINNING;
 

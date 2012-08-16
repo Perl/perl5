@@ -798,12 +798,12 @@ void
 Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
 {
     dVAR;
-    register I32 i;
+    I32 i;
 
     PERL_ARGS_ASSERT_SAVE_LIST;
 
     for (i = 1; i <= maxsarg; i++) {
-	register SV * const sv = newSV(0);
+	SV * const sv = newSV(0);
 	sv_setsv(sv,sarg[i]);
 	SSCHECK(3);
 	SSPUSHPTR(sarg[i]);		/* remember the pointer */

@@ -22,7 +22,7 @@ str_numset(register STR *str, double num)
 char *
 str_2ptr(register STR *str)
 {
-    register char *s;
+    char *s;
 
     if (!str)
 	return (char *)"";	/* probably safe - won't be written to */
@@ -69,7 +69,7 @@ str_nset(register STR *str, register const char *ptr, register int len)
 void
 str_set(register STR *str, register const char *ptr)
 {
-    register int len;
+    int len;
 
     if (!ptr)
 	ptr = "";
@@ -106,7 +106,7 @@ str_scat(STR *dstr, register STR *sstr)
 void
 str_cat(register STR *str, register const char *ptr)
 {
-    register int len;
+    int len;
 
     if (!ptr)
 	return;
@@ -123,7 +123,7 @@ str_cat(register STR *str, register const char *ptr)
 STR *
 str_new(int len)
 {
-    register STR *str;
+    STR *str;
     
     if (freestrroot) {
 	str = freestrroot;
@@ -173,10 +173,10 @@ str_gets(register STR *str, register FILE *fp)
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
     /* Here is some breathtakingly efficient cheating */
 
-    register char *bp;		/* we're going to steal some values */
-    register int cnt;		/*  from the stdio struct and put EVERYTHING */
-    register STDCHAR *ptr;	/*   in the innermost loop into registers */
-    register char newline = '\n';	/* (assuming at least 6 registers) */
+    char *bp;		/* we're going to steal some values */
+    int cnt;		/*  from the stdio struct and put EVERYTHING */
+    STDCHAR *ptr;	/*   in the innermost loop into registers */
+    char newline = '\n';	/* (assuming at least 6 registers) */
     int i;
     int bpx;
 
@@ -252,7 +252,7 @@ thats_all_folks:
 STR *
 str_make(const char *s)
 {
-    register STR *str = str_new(0);
+    STR *str = str_new(0);
 
     str_set(str,s);
     return str;

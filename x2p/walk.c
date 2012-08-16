@@ -42,11 +42,11 @@ char *instr(char *big, const char *little);
 STR *
 walk(int useval, int level, register int node, int *numericptr, int minprec)
 {
-    register int len;
-    register STR *str;
-    register int type;
-    register int i;
-    register STR *tmpstr;
+    int len;
+    STR *str;
+    int type;
+    int i;
+    STR *tmpstr;
     STR *tmp2str;
     STR *tmp3str;
     char *t;
@@ -1559,7 +1559,7 @@ tab(register STR *str, register int lvl)
 static void
 fixtab(register STR *str, register int lvl)
 {
-    register char *s;
+    char *s;
 
     /* strip trailing white space */
 
@@ -1577,7 +1577,7 @@ fixtab(register STR *str, register int lvl)
 static void
 addsemi(register STR *str)
 {
-    register char *s;
+    char *s;
 
     s = str->str_ptr+str->str_cur - 1;
     while (s >= str->str_ptr && (*s == ' ' || *s == '\t' || *s == '\n'))
@@ -1589,7 +1589,7 @@ addsemi(register STR *str)
 static void
 emit_split(register STR *str, int level)
 {
-    register int i;
+    int i;
 
     if (split_to_array)
 	str_cat(str,"@Fld");
@@ -1622,9 +1622,9 @@ emit_split(register STR *str, int level)
 int
 prewalk(int numit, int level, register int node, int *numericptr)
 {
-    register int len;
-    register int type;
-    register int i;
+    int len;
+    int type;
+    int i;
     int numarg;
     int numeric = FALSE;
     STR *tmpstr;
@@ -2039,8 +2039,8 @@ prewalk(int numit, int level, register int node, int *numericptr)
 static void
 numericize(register int node)
 {
-    register int len;
-    register int type;
+    int len;
+    int type;
     STR *tmpstr;
     STR *tmp2str;
     int numarg;

@@ -417,8 +417,8 @@ tokenize(const char *str, char **dest, char ***destv)
     if (str) {
 	dTHX;
 	int slen = strlen(str);
-	register char *ret;
-	register char **retv;
+	char *ret;
+	char **retv;
 	Newx(ret, slen+2, char);
 	Newx(retv, (slen+3)/2, char*);
 

@@ -37,7 +37,7 @@ int
 Perl_runops_standard(pTHX)
 {
     dVAR;
-    register OP *op = PL_op;
+    OP *op = PL_op;
     while ((PL_op = op = op->op_ppaddr(aTHX))) {
     }
 

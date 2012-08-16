@@ -5303,7 +5303,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     dVAR;
     REGEXP *rx;
     struct regexp *r;
-    register regexp_internal *ri;
+    regexp_internal *ri;
     STRLEN plen;
     char  * VOL exp;
     char* xend;
@@ -8299,11 +8299,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
 {
     dVAR;
-    register regnode *ret;		/* Will be the head of the group. */
-    register regnode *br;
-    register regnode *lastbr;
-    register regnode *ender = NULL;
-    register I32 parno = 0;
+    regnode *ret;		/* Will be the head of the group. */
+    regnode *br;
+    regnode *lastbr;
+    regnode *ender = NULL;
+    I32 parno = 0;
     I32 flags;
     U32 oregflags = RExC_flags;
     bool have_branch = 0;
@@ -9309,9 +9309,9 @@ STATIC regnode *
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 {
     dVAR;
-    register regnode *ret;
-    register regnode *chain = NULL;
-    register regnode *latest;
+    regnode *ret;
+    regnode *chain = NULL;
+    regnode *latest;
     I32 flags = 0, c = 0;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -9382,9 +9382,9 @@ STATIC regnode *
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     dVAR;
-    register regnode *ret;
-    register char op;
-    register char *next;
+    regnode *ret;
+    char op;
+    char *next;
     I32 flags;
     const char * const origparse = RExC_parse;
     I32 min;
@@ -10428,9 +10428,9 @@ tryagain:
 	    RExC_parse++;
 
 	defchar: {
-	    register STRLEN len = 0;
+	    STRLEN len = 0;
 	    UV ender;
-	    register char *p;
+	    char *p;
 	    char *s;
 #define MAX_NODE_STRING_SIZE 127
 	    char foldbuf[MAX_NODE_STRING_SIZE+UTF8_MAXBYTES_CASE];
@@ -11332,11 +11332,11 @@ STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     dVAR;
-    register UV nextvalue;
-    register UV prevvalue = OOB_UNICODE;
-    register IV range = 0;
+    UV nextvalue;
+    UV prevvalue = OOB_UNICODE;
+    IV range = 0;
     UV value = 0;
-    register regnode *ret;
+    regnode *ret;
     STRLEN numlen;
     IV namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
@@ -13022,7 +13022,7 @@ STATIC regnode *			/* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
     dVAR;
-    register regnode *ptr;
+    regnode *ptr;
     regnode * const ret = RExC_emit;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -13064,7 +13064,7 @@ STATIC regnode *			/* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
     dVAR;
-    register regnode *ptr;
+    regnode *ptr;
     regnode * const ret = RExC_emit;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -13136,9 +13136,9 @@ STATIC void
 S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 {
     dVAR;
-    register regnode *src;
-    register regnode *dst;
-    register regnode *place;
+    regnode *src;
+    regnode *dst;
+    regnode *place;
     const int offset = regarglen[(U8)op];
     const int size = NODE_STEP_REGNODE + offset;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -13224,7 +13224,7 @@ STATIC void
 S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 depth)
 {
     dVAR;
-    register regnode *scan;
+    regnode *scan;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGTAIL;
@@ -13283,7 +13283,7 @@ STATIC U8
 S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 depth)
 {
     dVAR;
-    register regnode *scan;
+    regnode *scan;
     U8 exact = PSEUDO;
 #ifdef EXPERIMENTAL_INPLACESCAN
     I32 min = 0;
@@ -13524,7 +13524,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 {
 #ifdef DEBUGGING
     dVAR;
-    register int k;
+    int k;
 
     /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
     static const char * const anyofs[] = {
@@ -14328,7 +14328,7 @@ regnode *
 Perl_regnext(pTHX_ register regnode *p)
 {
     dVAR;
-    register I32 offset;
+    I32 offset;
 
     if (!p)
 	return(NULL);
@@ -14487,8 +14487,8 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    SV* sv, I32 indent, U32 depth)
 {
     dVAR;
-    register U8 op = PSEUDO;	/* Arbitrary non-END op. */
-    register const regnode *next;
+    U8 op = PSEUDO;	/* Arbitrary non-END op. */
+    const regnode *next;
     const regnode *optstart= NULL;
     
     RXi_GET_DECL(r,ri);
@@ -14539,9 +14539,9 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	if (PL_regkind[(U8)op] == BRANCHJ) {
 	    assert(next);
 	    {
-                register const regnode *nnode = (OP(next) == LONGJMP
-					     ? regnext((regnode *)next)
-					     : next);
+                const regnode *nnode = (OP(next) == LONGJMP
+                                       ? regnext((regnode *)next)
+                                       : next);
                 if (last && nnode > last)
                     nnode = last;
                 DUMPUNTIL(NEXTOPER(NEXTOPER(node)), nnode);

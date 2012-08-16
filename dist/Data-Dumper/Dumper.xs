@@ -119,7 +119,7 @@ TOP:
 static I32
 num_q(register const char *s, register STRLEN slen)
 {
-    register I32 ret = 0;
+    I32 ret = 0;
 
     while (slen > 0) {
 	if (*s == '\'' || *s == '\\')
@@ -137,7 +137,7 @@ num_q(register const char *s, register STRLEN slen)
 static I32
 esc_q(register char *d, register const char *s, register STRLEN slen)
 {
-    register I32 ret = 0;
+    I32 ret = 0;
 
     while (slen > 0) {
 	switch (*s) {

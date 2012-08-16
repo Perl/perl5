@@ -114,7 +114,7 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
 {
 #ifdef DEBUGGING
     dVAR;
-    register I32 i = stack_max - 30;
+    I32 i = stack_max - 30;
     const I32 *markscan = PL_markstack + mark_min;
 
     PERL_ARGS_ASSERT_DEB_STACK_N;

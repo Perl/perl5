@@ -4374,14 +4374,14 @@ I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2, U32 flags)
 {
     dVAR;
-    register const U8 *p1  = (const U8*)s1; /* Point to current char */
-    register const U8 *p2  = (const U8*)s2;
-    register const U8 *g1 = NULL;       /* goal for s1 */
-    register const U8 *g2 = NULL;
-    register const U8 *e1 = NULL;       /* Don't scan s1 past this */
-    register U8 *f1 = NULL;             /* Point to current folded */
-    register const U8 *e2 = NULL;
-    register U8 *f2 = NULL;
+    const U8 *p1  = (const U8*)s1; /* Point to current char */
+    const U8 *p2  = (const U8*)s2;
+    const U8 *g1 = NULL;       /* goal for s1 */
+    const U8 *g2 = NULL;
+    const U8 *e1 = NULL;       /* Don't scan s1 past this */
+    U8 *f1 = NULL;             /* Point to current folded */
+    const U8 *e2 = NULL;
+    U8 *f2 = NULL;
     STRLEN n1 = 0, n2 = 0;              /* Number of bytes in current char */
     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];

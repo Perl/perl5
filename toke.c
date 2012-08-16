@@ -629,8 +629,8 @@ Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 static void
 strip_return(SV *sv)
 {
-    register const char *s = SvPVX_const(sv);
-    register const char * const e = s + SvCUR(sv);
+    const char *s = SvPVX_const(sv);
+    const char * const e = s + SvCUR(sv);
 
     PERL_ARGS_ASSERT_STRIP_RETURN;
 
@@ -638,7 +638,7 @@ strip_return(SV *sv)
     while (s < e) {
 	if (*s++ == '\r' && *s == '\n') {
 	    /* hit a CR-LF, need to copy the rest */
-	    register char *d = s - 1;
+	    char *d = s - 1;
 	    *d++ = *s++;
 	    while (s < e) {
 		if (*s == '\r' && s[1] == '\n')
@@ -2068,7 +2068,7 @@ STATIC char *
 S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow_pack, int allow_initial_tick)
 {
     dVAR;
-    register char *s;
+    char *s;
     STRLEN len;
 
     PERL_ARGS_ASSERT_FORCE_WORD;
@@ -2313,9 +2313,9 @@ STATIC SV *
 S_tokeq(pTHX_ SV *sv)
 {
     dVAR;
-    register char *s;
-    register char *send;
-    register char *d;
+    char *s;
+    char *send;
+    char *d;
     STRLEN len = 0;
     SV *pv = sv;
 
@@ -2384,7 +2384,7 @@ STATIC I32
 S_sublex_start(pTHX)
 {
     dVAR;
-    register const I32 op_type = pl_yylval.ival;
+    const I32 op_type = pl_yylval.ival;
 
     if (op_type == OP_NULL) {
 	pl_yylval.opval = PL_lex_op;
@@ -2672,11 +2672,11 @@ STATIC char *
 S_scan_const(pTHX_ char *start)
 {
     dVAR;
-    register char *send = PL_bufend;		/* end of the constant */
+    char *send = PL_bufend;		/* end of the constant */
     SV *sv = newSV(send - start);		/* sv for the constant.  See
 						   note below on sizing. */
-    register char *s = start;			/* start of the constant */
-    register char *d = SvPVX(sv);		/* destination for copies */
+    char *s = start;			/* start of the constant */
+    char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
     bool in_charclass = FALSE;			/* within /[...]/ */
@@ -4399,8 +4399,8 @@ int
 Perl_yylex(pTHX)
 {
     dVAR;
-    register char *s = PL_bufptr;
-    register char *d;
+    char *s = PL_bufptr;
+    char *d;
     STRLEN len;
     bool bof = FALSE;
     U8 formbrack = 0;
@@ -8831,8 +8831,8 @@ STATIC char *
 S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
     dVAR;
-    register char *d = dest;
-    register char * const e = d + destlen - 3;  /* two-character token, ending NUL */
+    char *d = dest;
+    char * const e = d + destlen - 3;  /* two-character token, ending NUL */
 
     PERL_ARGS_ASSERT_SCAN_WORD;
 
@@ -8876,8 +8876,8 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     dVAR;
     char *bracket = NULL;
     char funny = *s++;
-    register char *d = dest;
-    register char * const e = d + destlen - 3;    /* two-character token, ending NUL */
+    char *d = dest;
+    char * const e = d + destlen - 3;    /* two-character token, ending NUL */
 
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
@@ -9238,7 +9238,7 @@ S_scan_subst(pTHX_ char *start)
 {
     dVAR;
     char *s;
-    register PMOP *pm;
+    PMOP *pm;
     I32 first_start;
     I32 es = 0;
     char charset = '\0';    /* character set modifier */
@@ -9344,7 +9344,7 @@ STATIC char *
 S_scan_trans(pTHX_ char *start)
 {
     dVAR;
-    register char* s;
+    char* s;
     OP *o;
     U8 squash;
     U8 del;
@@ -9444,8 +9444,8 @@ S_scan_heredoc(pTHX_ register char *s)
     SV *tmpstr;
     char term;
     const char *found_newline;
-    register char *d;
-    register char *e;
+    char *d;
+    char *e;
     char *peek;
     const int outer = (PL_rsfp || PL_parser->filtered)
 		   && !(PL_lex_inwhat == OP_SCALAR);
@@ -9722,7 +9722,7 @@ STATIC char *
 S_scan_inputsymbol(pTHX_ char *start)
 {
     dVAR;
-    register char *s = start;		/* current position in buffer */
+    char *s = start;		/* current position in buffer */
     char *end;
     I32 len;
     char *d = PL_tokenbuf;					/* start of temp holding space */
@@ -9914,9 +9914,9 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
     dVAR;
     SV *sv;				/* scalar value: string */
     const char *tmps;			/* temp string, used for delimiter matching */
-    register char *s = start;		/* current position in the buffer */
-    register char term;			/* terminating character */
-    register char *to;			/* current position in the sv's data */
+    char *s = start;		/* current position in the buffer */
+    char term;			/* terminating character */
+    char *to;			/* current position in the sv's data */
     I32 brackets = 1;			/* bracket nesting level */
     bool has_utf8 = FALSE;		/* is there any utf8 content? */
     I32 termcode;			/* terminating char. code */
@@ -10256,9 +10256,9 @@ char *
 Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 {
     dVAR;
-    register const char *s = start;	/* current position in buffer */
-    register char *d;			/* destination in temp buffer */
-    register char *e;			/* end of temp buffer */
+    const char *s = start;	/* current position in buffer */
+    char *d;			/* destination in temp buffer */
+    char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
     SV *sv = NULL;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
@@ -10629,8 +10629,8 @@ STATIC char *
 S_scan_formline(pTHX_ register char *s)
 {
     dVAR;
-    register char *eol;
-    register char *t;
+    char *eol;
+    char *t;
     SV * const stuff = newSVpvs("");
     bool needargs = FALSE;
     bool eofmt = FALSE;

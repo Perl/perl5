@@ -612,7 +612,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_REGDATA_CNT;
 
     if (PL_curpm) {
-	register const REGEXP * const rx = PM_GETRE(PL_curpm);
+	const REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
 	    if (mg->mg_obj) {			/* @+ */
 		/* return the number possible */
@@ -641,18 +641,18 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_GET;
 
     if (PL_curpm) {
-	register const REGEXP * const rx = PM_GETRE(PL_curpm);
+	const REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
-	    register const I32 paren = mg->mg_len;
-	    register I32 s;
-	    register I32 t;
+	    const I32 paren = mg->mg_len;
+	    I32 s;
+	    I32 t;
 	    if (paren < 0)
 		return 0;
 	    if (paren <= (I32)RX_NPARENS(rx) &&
 		(s = RX_OFFS(rx)[paren].start) != -1 &&
 		(t = RX_OFFS(rx)[paren].end) != -1)
 		{
-		    register I32 i;
+		    I32 i;
 		    if (mg->mg_obj)		/* @+ */
 			i = t;
 		    else			/* @- */
@@ -685,9 +685,9 @@ U32
 Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    register I32 paren;
-    register I32 i;
-    register const REGEXP * rx;
+    I32 paren;
+    I32 i;
+    const REGEXP * rx;
     const char * const remaining = mg->mg_ptr + 1;
 
     PERL_ARGS_ASSERT_MAGIC_LEN;
@@ -804,9 +804,9 @@ int
 Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    register I32 paren;
-    register const char *s = NULL;
-    register REGEXP *rx;
+    I32 paren;
+    const char *s = NULL;
+    REGEXP *rx;
     const char * const remaining = mg->mg_ptr + 1;
     const char nextchar = *remaining;
 
@@ -1514,7 +1514,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     sigset_t set, save;
     SV* save_sv;
 #endif
-    register const char *s = MgPV_const(mg,len);
+    const char *s = MgPV_const(mg,len);
 
     PERL_ARGS_ASSERT_MAGIC_SETSIG;
 
@@ -2499,9 +2499,9 @@ int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    register const char *s;
-    register I32 paren;
-    register const REGEXP * rx;
+    const char *s;
+    I32 paren;
+    const REGEXP * rx;
     const char * const remaining = mg->mg_ptr + 1;
     I32 i;
     STRLEN len;
@@ -3076,7 +3076,7 @@ Perl_whichsig_pv(pTHX_ const char *sig)
 I32
 Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
 {
-    register char* const* sigv;
+    char* const* sigv;
 
     PERL_ARGS_ASSERT_WHICHSIG_PVN;
     PERL_UNUSED_CONTEXT;

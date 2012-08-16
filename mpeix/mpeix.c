@@ -412,7 +412,7 @@ struct timezone *tpz;
    static int              dsttime         = 0;
    static int              minuteswest     = 0;
    static int              oldtime         = 0;
-   register int            newtime;
+   int            newtime;
 
 
    /*-------------------------------------------------------------------*/

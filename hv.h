@@ -140,10 +140,10 @@ struct xpvhv {
 
 #define PERL_HASH_INTERNAL_(hash,str,len,internal) \
      STMT_START	{ \
-	register const char * const s_PeRlHaSh_tmp = str; \
-	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-	register I32 i_PeRlHaSh = len; \
-	register U32 hash_PeRlHaSh = (internal ? PL_rehash_seed : PERL_HASH_SEED); \
+	const char * const s_PeRlHaSh_tmp = str; \
+	const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
+	I32 i_PeRlHaSh = len; \
+	U32 hash_PeRlHaSh = (internal ? PL_rehash_seed : PERL_HASH_SEED); \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \

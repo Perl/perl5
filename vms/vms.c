@@ -1421,7 +1421,7 @@ prime_env_iter(void)
     while (1) {
       char *cp1, *cp2, *key;
       unsigned long int sts, iosb[2], retlen, keylen;
-      register U32 hash;
+      U32 hash;
 
       sts = sys$qiow(0,chan,IO$_READVBLK,iosb,0,0,buf,mbxbufsiz,0,0,0,0);
       if (sts & 1) sts = iosb[0] & 0xffff;
@@ -8270,7 +8270,7 @@ static char *int_tovmsspec
    (const char *path, char *rslt, int dir_flag, int * utf8_flag) {
   char *dirend;
   char *lastdot;
-  register char *cp1;
+  char *cp1;
   const char *cp2;
   unsigned long int infront = 0, hasdir = 1;
   int rslt_len;
@@ -9705,7 +9705,7 @@ int
 Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
 {
   char *unixified, *unixwild, *tplate, *base, *end, *cp1, *cp2;
-  register int tmplen, reslen = 0, dirs = 0;
+  int tmplen, reslen = 0, dirs = 0;
 
   if (!wildspec || !fspec) return 0;
 
@@ -10359,9 +10359,9 @@ static char *
 setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
 {
   char *junk, *tmps = NULL;
-  register size_t cmdlen = 0;
+  size_t cmdlen = 0;
   size_t rlen;
-  register SV **idx;
+  SV **idx;
   STRLEN n_a;
 
   idx = mark;
@@ -10413,10 +10413,10 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   struct dsc$descriptor_s *vmscmd;
   struct dsc$descriptor_s imgdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   unsigned long int cxt = 0, flags = 1, retsts = SS$_NORMAL;
-  register char *s, *rest, *cp, *wordbreak;
+  char *s, *rest, *cp, *wordbreak;
   char * cmd;
   int cmdlen;
-  register int isdcl;
+  int isdcl;
 
   vmscmd = (struct dsc$descriptor_s *)PerlMem_malloc(sizeof(struct dsc$descriptor_s));
   if (vmscmd == NULL) _ckvmssts_noperl(SS$_INSFMEM);
@@ -10569,7 +10569,7 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
       isdcl = 1;
       if (suggest_quote) *suggest_quote = 1;
   } else {
-    register char *filespec = strpbrk(s,":<[.;");
+    char *filespec = strpbrk(s,":<[.;");
     rest = wordbreak = strpbrk(s," \"\t/");
     if (!wordbreak) wordbreak = s + strlen(s);
     if (*s == '$') check_img = 0;
@@ -11060,10 +11060,10 @@ int my_fclose(FILE *fp) {
 int
 my_fwrite(const void *src, size_t itmsz, size_t nitm, FILE *dest)
 {
-  register char *cp, *end, *cpd;
+  char *cp, *end, *cpd;
   char *data;
-  register unsigned int fd = fileno(dest);
-  register unsigned int fdoff = fd / sizeof(unsigned int);
+  unsigned int fd = fileno(dest);
+  unsigned int fdoff = fd / sizeof(unsigned int);
   int retval;
   int bufsize = itmsz * nitm + 1;
 
@@ -11603,7 +11603,7 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
 
 #else /* __CRTL_VER < 70300000 */
 
-  register int i;
+  int i;
   int sts;
   long int bintime[2], len = 2, lowbit, unixtime,
            secscale = 10000000; /* seconds --> 100 ns intervals */

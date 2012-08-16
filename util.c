@@ -408,7 +408,7 @@ Free_t   Perl_mfree (Malloc_t where)
 char *
 Perl_delimcpy(register char *to, register const char *toend, register const char *from, register const char *fromend, register int delim, I32 *retlen)
 {
-    register I32 tolen;
+    I32 tolen;
 
     PERL_ARGS_ASSERT_DELIMCPY;
 
@@ -438,7 +438,7 @@ Perl_delimcpy(register char *to, register const char *toend, register const char
 char *
 Perl_instr(register const char *big, register const char *little)
 {
-    register I32 first;
+    I32 first;
 
     PERL_ARGS_ASSERT_INSTR;
 
@@ -448,7 +448,7 @@ Perl_instr(register const char *big, register const char *little)
     if (!first)
 	return (char*)big;
     while (*big) {
-	register const char *s, *x;
+	const char *s, *x;
 	if (*big++ != first)
 	    continue;
 	for (x=big,s=little; *s; /**/ ) {
@@ -499,9 +499,9 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
 char *
 Perl_rninstr(register const char *big, const char *bigend, const char *little, const char *lend)
 {
-    register const char *bigbeg;
-    register const I32 first = *little;
-    register const char * const littleend = lend;
+    const char *bigbeg;
+    const I32 first = *little;
+    const char * const littleend = lend;
 
     PERL_ARGS_ASSERT_RNINSTR;
 
@@ -510,7 +510,7 @@ Perl_rninstr(register const char *big, const char *bigend, const char *little, c
     bigbeg = big;
     big = bigend - (littleend - little++);
     while (big >= bigbeg) {
-	register const char *s, *x;
+	const char *s, *x;
 	if (*big-- != first)
 	    continue;
 	for (x=big+2,s=little; s < littleend; /**/ ) {
@@ -548,7 +548,7 @@ void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
     dVAR;
-    register const U8 *s;
+    const U8 *s;
     STRLEN i;
     STRLEN len;
     STRLEN rarest = 0;
@@ -600,7 +600,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	   the BM table.  */
 	const U8 mlen = (len>255) ? 255 : (U8)len;
 	const unsigned char *const sb = s + len - mlen; /* first char (maybe) */
-	register U8 *table;
+	U8 *table;
 
 	Newx(table, 256, U8);
 	memset((void*)table, mlen, 256);
@@ -650,12 +650,11 @@ then.
 char *
 Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
 {
-    register unsigned char *s;
+    unsigned char *s;
     STRLEN l;
-    register const unsigned char *little
-	= (const unsigned char *)SvPV_const(littlestr,l);
-    register STRLEN littlelen = l;
-    register const I32 multiline = flags & FBMrf_MULTILINE;
+    const unsigned char *little = (const unsigned char *)SvPV_const(littlestr,l);
+    STRLEN littlelen = l;
+    const I32 multiline = flags & FBMrf_MULTILINE;
 
     PERL_ARGS_ASSERT_FBM_INSTR;
 
@@ -791,7 +790,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
     {
 	const MAGIC *const mg = mg_find(littlestr, PERL_MAGIC_bm);
 	const unsigned char * const table = (const unsigned char *) mg->mg_ptr;
-	register const unsigned char *oldlittle;
+	const unsigned char *oldlittle;
 
 	--littlelen;			/* Last char found by table lookup */
 
@@ -799,7 +798,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	little += littlelen;		/* last char */
 	oldlittle = little;
 	if (s < bigend) {
-	    register I32 tmp;
+	    I32 tmp;
 
 	  top2:
 	    if ((tmp = table[*s])) {
@@ -808,7 +807,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 		goto check_end;
 	    }
 	    else {		/* less expensive than calling strncmp() */
-		register unsigned char * const olds = s;
+		unsigned char * const olds = s;
 
 		tmp = littlelen;
 
@@ -867,8 +866,8 @@ range bytes match only themselves.
 I32
 Perl_foldEQ(const char *s1, const char *s2, register I32 len)
 {
-    register const U8 *a = (const U8 *)s1;
-    register const U8 *b = (const U8 *)s2;
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
 
     PERL_ARGS_ASSERT_FOLDEQ;
 
@@ -887,8 +886,8 @@ Perl_foldEQ_latin1(const char *s1, const char *s2, register I32 len)
      * LATIN_SMALL_LETTER_Y_WITH_DIAERESIS, and does not check for these.  Nor
      * does it check that the strings each have at least 'len' characters */
 
-    register const U8 *a = (const U8 *)s1;
-    register const U8 *b = (const U8 *)s2;
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
 
     PERL_ARGS_ASSERT_FOLDEQ_LATIN1;
 
@@ -914,8 +913,8 @@ I32
 Perl_foldEQ_locale(const char *s1, const char *s2, register I32 len)
 {
     dVAR;
-    register const U8 *a = (const U8 *)s1;
-    register const U8 *b = (const U8 *)s2;
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
 
     PERL_ARGS_ASSERT_FOLDEQ_LOCALE;
 
@@ -972,7 +971,7 @@ the new string can be freed with the C<Safefree()> function.
 char *
 Perl_savepvn(pTHX_ const char *pv, register I32 len)
 {
-    register char *newaddr;
+    char *newaddr;
     PERL_UNUSED_CONTEXT;
 
     Newx(newaddr,len+1,char);
@@ -998,7 +997,7 @@ which is shared between threads.
 char *
 Perl_savesharedpv(pTHX_ const char *pv)
 {
-    register char *newaddr;
+    char *newaddr;
     STRLEN pvlen;
     if (!pv)
 	return NULL;
@@ -1048,7 +1047,7 @@ Perl_savesvpv(pTHX_ SV *sv)
 {
     STRLEN len;
     const char * const pv = SvPV_const(sv, len);
-    register char *newaddr;
+    char *newaddr;
 
     PERL_ARGS_ASSERT_SAVESVPV;
 
@@ -1887,8 +1886,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #ifndef PERL_USE_SAFE_PUTENV
     if (!PL_use_safe_putenv) {
     /* most putenv()s leak, so we manipulate environ directly */
-    register I32 i;
-    register const I32 len = strlen(nam);
+    I32 i;
+    const I32 len = strlen(nam);
     int nlen, vlen;
 
     /* where does it go? */
@@ -1984,7 +1983,7 @@ void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
     dVAR;
-    register char *envstr;
+    char *envstr;
     const int nlen = strlen(nam);
     int vlen;
 
@@ -2074,9 +2073,9 @@ Perl_my_bzero(register char *loc, register I32 len)
 I32
 Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
 {
-    register const U8 *a = (const U8 *)s1;
-    register const U8 *b = (const U8 *)s2;
-    register I32 tmp;
+    const U8 *a = (const U8 *)s1;
+    const U8 *b = (const U8 *)s2;
+    I32 tmp;
 
     PERL_ARGS_ASSERT_MY_MEMCMP;
 
@@ -2179,8 +2178,8 @@ Perl_my_htonl(pTHX_ long l)
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
     Perl_croak(aTHX_ "Unknown BYTEORDER\n");
 #else
-    register I32 o;
-    register I32 s;
+    I32 o;
+    I32 s;
 
     for (o = BYTEORDER - 0x1111, s = 0; s < (sizeof(long)*8); o >>= 4, s += 8) {
 	u.c[o & 0xf] = (l >> s) & 255;
@@ -2208,8 +2207,8 @@ Perl_my_ntohl(pTHX_ long l)
 #if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
     Perl_croak(aTHX_ "Unknown BYTEORDER\n");
 #else
-    register I32 o;
-    register I32 s;
+    I32 o;
+    I32 s;
 
     u.l = l;
     l = 0;
@@ -2240,8 +2239,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register U32 i;					\
-	    register U32 s = 0;					\
+	    U32 i;					\
+	    U32 s = 0;					\
 	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -2256,8 +2255,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register U32 i;					\
-	    register U32 s = 0;					\
+	    U32 i;					\
+	    U32 s = 0;					\
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
@@ -2278,8 +2277,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register U32 i;					\
-	    register U32 s = 8*(sizeof(u.c)-1);			\
+	    U32 i;					\
+	    U32 s = 8*(sizeof(u.c)-1);			\
 	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -2294,8 +2293,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register U32 i;					\
-	    register U32 s = 8*(sizeof(u.c)-1);			\
+	    U32 i;					\
+	    U32 s = 8*(sizeof(u.c)-1);			\
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
@@ -2459,9 +2458,9 @@ BETOH(Perl_my_betohl,long)
 void
 Perl_my_swabn(void *ptr, int n)
 {
-    register char *s = (char *)ptr;
-    register char *e = s + (n-1);
-    register char tc;
+    char *s = (char *)ptr;
+    char *e = s + (n-1);
+    char tc;
 
     PERL_ARGS_ASSERT_MY_SWABN;
 
@@ -2478,8 +2477,8 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__)
     dVAR;
     int p[2];
-    register I32 This, that;
-    register Pid_t pid;
+    I32 This, that;
+    Pid_t pid;
     SV *sv;
     I32 did_pipes = 0;
     int pp[2];
@@ -2618,8 +2617,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
     dVAR;
     int p[2];
-    register I32 This, that;
-    register Pid_t pid;
+    I32 This, that;
+    Pid_t pid;
     SV *sv;
     const I32 doexec = !(*cmd == '-' && cmd[1] == '\0');
     I32 did_pipes = 0;
@@ -3209,7 +3208,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 void
 S_pidgone(pTHX_ Pid_t pid, int status)
 {
-    register SV *sv;
+    SV *sv;
 
     sv = *hv_fetch(PL_pidstatus,(const char*)&pid,sizeof(Pid_t),TRUE);
     SvUPGRADE(sv,SVt_IV);
@@ -3260,12 +3259,12 @@ Perl_repeatcpy(register char *to, register const char *from, I32 len, register I
     if (len == 1)
 	memset(to, *from, count);
     else if (count) {
-	register char *p = to;
+	char *p = to;
 	IV items, linear, half;
 
 	linear = count < PERL_REPEATCPY_LINEAR ? count : PERL_REPEATCPY_LINEAR;
 	for (items = 0; items < linear; ++items) {
-	    register const char *q = from;
+	    const char *q = from;
 	    IV todo;
 	    for (todo = len; todo > 0; todo--)
 		*p++ = *q++;
@@ -3331,7 +3330,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     const char *xfound = NULL;
     char *xfailed = NULL;
     char tmpbuf[MAXPATHLEN];
-    register char *s;
+    char *s;
     I32 len = 0;
     int retval;
     char *bufend;

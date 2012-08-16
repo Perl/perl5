@@ -365,8 +365,8 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 {
     dVAR;
     SV *const sva = MUTABLE_SV(ptr);
-    register SV* sv;
-    register SV* svend;
+    SV* sv;
+    SV* svend;
 
     PERL_ARGS_ASSERT_SV_ADD_ARENA;
 
@@ -410,8 +410,8 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
     PERL_ARGS_ASSERT_VISIT;
 
     for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
-	register const SV * const svend = &sva[SvREFCNT(sva)];
-	register SV* sv;
+	const SV * const svend = &sva[SvREFCNT(sva)];
+	SV* sv;
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) != (svtype)SVTYPEMASK
 		    && (sv->sv_flags & mask) == flags
@@ -1471,7 +1471,7 @@ Use the C<SvGROW> wrapper instead.
 char *
 Perl_sv_grow(pTHX_ register SV *const sv, register STRLEN newlen)
 {
-    register char *s;
+    char *s;
 
     PERL_ARGS_ASSERT_SV_GROW;
 
@@ -1802,7 +1802,7 @@ ignored.
 I32
 Perl_looks_like_number(pTHX_ SV *const sv)
 {
-    register const char *sbegin;
+    const char *sbegin;
     STRLEN len;
 
     PERL_ARGS_ASSERT_LOOKS_LIKE_NUMBER;
@@ -2723,7 +2723,7 @@ char *
 Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags)
 {
     dVAR;
-    register char *s;
+    char *s;
 
     if (!sv) {
 	if (lp)
@@ -3894,9 +3894,9 @@ void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 {
     dVAR;
-    register U32 sflags;
-    register int dtype;
-    register svtype stype;
+    U32 sflags;
+    int dtype;
+    svtype stype;
 
     PERL_ARGS_ASSERT_SV_SETSV_FLAGS;
 
@@ -4340,7 +4340,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 {
     STRLEN cur = SvCUR(sstr);
     STRLEN len = SvLEN(sstr);
-    register char *new_pv;
+    char *new_pv;
 
     PERL_ARGS_ASSERT_SV_SETSV_COW;
 
@@ -4419,7 +4419,7 @@ void
 Perl_sv_setpvn(pTHX_ register SV *const sv, register const char *const ptr, register const STRLEN len)
 {
     dVAR;
-    register char *dptr;
+    char *dptr;
 
     PERL_ARGS_ASSERT_SV_SETPVN;
 
@@ -4476,7 +4476,7 @@ void
 Perl_sv_setpv(pTHX_ register SV *const sv, register const char *const ptr)
 {
     dVAR;
-    register STRLEN len;
+    STRLEN len;
 
     PERL_ARGS_ASSERT_SV_SETPV;
 
@@ -5045,7 +5045,7 @@ void
 Perl_sv_catpv(pTHX_ register SV *const sv, register const char *ptr)
 {
     dVAR;
-    register STRLEN len;
+    STRLEN len;
     STRLEN tlen;
     char *junk;
 
@@ -5120,7 +5120,7 @@ SV *
 Perl_newSV(pTHX_ const STRLEN len)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     if (len) {
@@ -5726,11 +5726,11 @@ void
 Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, const char *const little, const STRLEN littlelen, const U32 flags)
 {
     dVAR;
-    register char *big;
-    register char *mid;
-    register char *midend;
-    register char *bigend;
-    register SSize_t i;		/* better be sizeof(STRLEN) or bad things happen */
+    char *big;
+    char *mid;
+    char *midend;
+    char *bigend;
+    SSize_t i;		/* better be sizeof(STRLEN) or bad things happen */
     STRLEN curlen;
 
     PERL_ARGS_ASSERT_SV_INSERT_FLAGS;
@@ -5950,7 +5950,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
     const struct body_details *sv_type_details;
     SV* iter_sv = NULL;
     SV* next_sv = NULL;
-    register SV *sv = orig_sv;
+    SV *sv = orig_sv;
     STRLEN hash_index;
 
     PERL_ARGS_ASSERT_SV_CLEAR;
@@ -7554,9 +7554,9 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
     dVAR;
     const char *rsptr;
     STRLEN rslen;
-    register STDCHAR rslast;
-    register STDCHAR *bp;
-    register I32 cnt;
+    STDCHAR rslast;
+    STDCHAR *bp;
+    I32 cnt;
     I32 i = 0;
     I32 rspara = 0;
 
@@ -7663,7 +7663,7 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
      * We're going to steal some values from the stdio struct
      * and put EVERYTHING in the innermost loop into registers.
      */
-    register STDCHAR *ptr;
+    STDCHAR *ptr;
     STRLEN bpx;
     I32 shortbuffered;
 
@@ -7809,7 +7809,7 @@ thats_really_all_folks:
 
 screamer2:
 	if (rslen) {
-            register const STDCHAR * const bpe = buf + sizeof(buf);
+            const STDCHAR * const bpe = buf + sizeof(buf);
 	    bp = buf;
 	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
 		; /* keep reading */
@@ -7903,7 +7903,7 @@ void
 Perl_sv_inc_nomg(pTHX_ register SV *const sv)
 {
     dVAR;
-    register char *d;
+    char *d;
     int flags;
 
     if (!sv)
@@ -8225,7 +8225,7 @@ SV *
 Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_setsv(sv,oldstr);
@@ -8249,7 +8249,7 @@ SV *
 Perl_sv_newmortal(pTHX)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     SvFLAGS(sv) = SVs_TEMP;
@@ -8282,7 +8282,7 @@ SV *
 Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     /* All the flags we don't support must be zero.
        And we're new code so I'm going to assert this from the start.  */
@@ -8346,7 +8346,7 @@ SV *
 Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_setpvn(sv, s, len || s == NULL ? len : strlen(s));
@@ -8370,7 +8370,7 @@ SV *
 Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_setpvn(sv,buffer,len);
@@ -8468,7 +8468,7 @@ SV *
 Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
     bool is_utf8 = FALSE;
     const char *const orig_src = src;
 
@@ -8524,7 +8524,7 @@ SV *
 Perl_newSVpvf_nocontext(const char *const pat, ...)
 {
     dTHX;
-    register SV *sv;
+    SV *sv;
     va_list args;
 
     PERL_ARGS_ASSERT_NEWSVPVF_NOCONTEXT;
@@ -8548,7 +8548,7 @@ C<sprintf>.
 SV *
 Perl_newSVpvf(pTHX_ const char *const pat, ...)
 {
-    register SV *sv;
+    SV *sv;
     va_list args;
 
     PERL_ARGS_ASSERT_NEWSVPVF;
@@ -8565,7 +8565,7 @@ SV *
 Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     PERL_ARGS_ASSERT_VNEWSVPVF;
 
@@ -8587,7 +8587,7 @@ SV *
 Perl_newSVnv(pTHX_ const NV n)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_setnv(sv,n);
@@ -8607,7 +8607,7 @@ SV *
 Perl_newSViv(pTHX_ const IV i)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_setiv(sv,i);
@@ -8627,7 +8627,7 @@ SV *
 Perl_newSVuv(pTHX_ const UV u)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_setuv(sv,u);
@@ -8646,7 +8646,7 @@ is set to 1.
 SV *
 Perl_newSV_type(pTHX_ const svtype type)
 {
-    register SV *sv;
+    SV *sv;
 
     new_SV(sv);
     sv_upgrade(sv, type);
@@ -8666,7 +8666,7 @@ SV *
 Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 {
     dVAR;
-    register SV *sv = newSV_type(SVt_IV);
+    SV *sv = newSV_type(SVt_IV);
 
     PERL_ARGS_ASSERT_NEWRV_NOINC;
 
@@ -8703,7 +8703,7 @@ SV *
 Perl_newSVsv(pTHX_ register SV *const old)
 {
     dVAR;
-    register SV *sv;
+    SV *sv;
 
     if (!old)
 	return NULL;
@@ -8780,8 +8780,8 @@ Perl_sv_reset(pTHX_ register const char *s, HV *const stash)
 		 entry;
 		 entry = HeNEXT(entry))
 	    {
-		register GV *gv;
-		register SV *sv;
+		GV *gv;
+		SV *sv;
 
 		if (!todo[(U8)*HeKEY(entry)])
 		    continue;
@@ -8978,7 +8978,7 @@ Perl_sv_true(pTHX_ register SV *const sv)
     if (!sv)
 	return 0;
     if (SvPOK(sv)) {
-	register const XPV* const tXpv = (XPV*)SvANY(sv);
+	const XPV* const tXpv = (XPV*)SvANY(sv);
 	if (tXpv &&
 		(tXpv->xpv_cur > 1 ||
 		(tXpv->xpv_cur && *sv->sv_u.svu_pv != '0')))
@@ -11337,7 +11337,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 
 #ifdef HAS_FCHDIR
     DIR *pwd;
-    register const Direntry_t *dirent;
+    const Direntry_t *dirent;
     char smallbuf[256];
     char *name = NULL;
     STRLEN len = 0;
@@ -13819,7 +13819,7 @@ STATIC SV*
 S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 {
     dVAR;
-    register HE **array;
+    HE **array;
     I32 i;
 
     PERL_ARGS_ASSERT_FIND_HASH_SUBSCRIPT;
@@ -13831,7 +13831,7 @@ S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
     array = HvARRAY(hv);
 
     for (i=HvMAX(hv); i>0; i--) {
-	register HE *entry;
+	HE *entry;
 	for (entry = array[i]; entry; entry = HeNEXT(entry)) {
 	    if (HeVAL(entry) != val)
 		continue;

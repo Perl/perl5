@@ -1345,8 +1345,8 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 int
 do_spawn3(pTHX_ char *cmd, int execf, int flag)
 {
-    register char **a;
-    register char *s;
+    char **a;
+    char *s;
     char *shell, *copt, *news = NULL;
     int rc, seenspace = 0, mergestderr = 0;
 
@@ -1477,9 +1477,9 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 int
 os2_aspawn_4(pTHX_ SV *really, register SV **args, I32 cnt, int execing)
 {
-    register SV **argp = (SV **)args;
-    register SV **last = argp + cnt;
-    register char **a;
+    SV **argp = (SV **)args;
+    SV **last = argp + cnt;
+    char **a;
     int rc;
     int flag = P_WAIT, flag_set = 0;
     STRLEN n_a;
@@ -1560,8 +1560,8 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
 {
 #ifndef USE_POPEN
     int p[2];
-    register I32 this, that, newfd;
-    register I32 pid;
+    I32 this, that, newfd;
+    I32 pid;
     SV *sv;
     int fh_fl = 0;			/* Pacify the warning */
     

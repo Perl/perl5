@@ -159,7 +159,7 @@ is a lexical $_ in scope.
 
 #define dAXMARK				\
 	I32 ax = POPMARK;	\
-	register SV **mark = PL_stack_base + ax++
+	SV **mark = PL_stack_base + ax++
 
 #define dITEMS I32 items = (I32)(SP - MARK)
 

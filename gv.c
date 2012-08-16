@@ -957,7 +957,7 @@ GV *
 Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
     dVAR;
-    register const char *nend;
+    const char *nend;
     const char *nsplit = NULL;
     GV* gv;
     HV* ostash = stash;
@@ -1410,11 +1410,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
 {
     dVAR;
-    register const char *name = nambeg;
-    register GV *gv = NULL;
+    const char *name = nambeg;
+    GV *gv = NULL;
     GV**gvp;
     I32 len;
-    register const char *name_cursor;
+    const char *name_cursor;
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
@@ -2047,7 +2047,7 @@ void
 Perl_gv_check(pTHX_ const HV *stash)
 {
     dVAR;
-    register I32 i;
+    I32 i;
 
     PERL_ARGS_ASSERT_GV_CHECK;
 
@@ -2056,7 +2056,7 @@ Perl_gv_check(pTHX_ const HV *stash)
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
-            register GV *gv;
+            GV *gv;
             HV *hv;
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
 		(gv = MUTABLE_GV(HeVAL(entry))) && isGV(gv) && (hv = GvHV(gv)))

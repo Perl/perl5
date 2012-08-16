@@ -78,7 +78,7 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {
     const int flags_masked = flags & HVhek_MASK;
     char *k;
-    register HEK *hek;
+    HEK *hek;
 
     PERL_ARGS_ASSERT_SAVE_HEK_FLAGS;
 
@@ -910,9 +910,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		   int k_flags, I32 d_flags, U32 hash)
 {
     dVAR;
-    register XPVHV* xhv;
-    register HE *entry;
-    register HE **oentry;
+    XPVHV* xhv;
+    HE *entry;
+    HE **oentry;
     bool is_utf8 = (k_flags & HVhek_UTF8) ? TRUE : FALSE;
     int masked_flags;
 
@@ -1113,12 +1113,12 @@ STATIC void
 S_hsplit(pTHX_ HV *hv)
 {
     dVAR;
-    register XPVHV* const xhv = (XPVHV*)SvANY(hv);
+    XPVHV* const xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
-    register I32 newsize = oldsize * 2;
-    register I32 i;
+    I32 newsize = oldsize * 2;
+    I32 i;
     char *a = (char*) HvARRAY(hv);
-    register HE **aep;
+    HE **aep;
     int longest_chain = 0;
     int was_shared;
 
@@ -1171,7 +1171,7 @@ S_hsplit(pTHX_ HV *hv)
 	int right_length = 0;
 	HE **oentry = aep;
 	HE *entry = *aep;
-	register HE **bep;
+	HE **bep;
 
 	if (!entry)				/* non-existent */
 	    continue;
@@ -1230,7 +1230,7 @@ S_hsplit(pTHX_ HV *hv)
     aep = HvARRAY(hv);
 
     for (i=0; i<newsize; i++,aep++) {
-	register HE *entry = *aep;
+	HE *entry = *aep;
 	while (entry) {
 	    /* We're going to trash this HE's next pointer when we chain it
 	       into the new hash below, so store where we go next.  */
@@ -1272,12 +1272,12 @@ void
 Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
     dVAR;
-    register XPVHV* xhv = (XPVHV*)SvANY(hv);
+    XPVHV* xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
-    register I32 newsize;
-    register I32 i;
-    register char *a;
-    register HE **aep;
+    I32 newsize;
+    I32 i;
+    char *a;
+    HE **aep;
 
     PERL_ARGS_ASSERT_HV_KSPLIT;
 
@@ -1337,7 +1337,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	if (!entry)				/* non-existent */
 	    continue;
 	do {
-	    register I32 j = (HeHASH(entry) & newsize);
+	    I32 j = (HeHASH(entry) & newsize);
 
 	    if (j != i) {
 		j -= i;
@@ -1561,7 +1561,7 @@ void
 Perl_hv_clear(pTHX_ HV *hv)
 {
     dVAR;
-    register XPVHV* xhv;
+    XPVHV* xhv;
     if (!hv)
 	return;
 
@@ -1786,7 +1786,7 @@ void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     dVAR;
-    register XPVHV* xhv;
+    XPVHV* xhv;
     const char *name;
     const bool save = !!SvREFCNT(hv);
 
@@ -2340,8 +2340,8 @@ HE *
 Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 {
     dVAR;
-    register XPVHV* xhv;
-    register HE *entry;
+    XPVHV* xhv;
+    HE *entry;
     HE *oldentry;
     MAGIC* mg;
     struct xpvhv_aux *iter;
@@ -2596,9 +2596,9 @@ STATIC void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
     dVAR;
-    register XPVHV* xhv;
+    XPVHV* xhv;
     HE *entry;
-    register HE **oentry;
+    HE **oentry;
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char * const save = str;
@@ -2718,10 +2718,10 @@ STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
     dVAR;
-    register HE *entry;
+    HE *entry;
     const int flags_masked = flags & HVhek_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
-    register XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
+    XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
 

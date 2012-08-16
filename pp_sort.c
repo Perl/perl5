@@ -185,8 +185,8 @@ static IV
 dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, const SVCOMPARE_t cmp)
 {
     I32 sense;
-    register gptr *b, *p, *q, *t, *p2;
-    register gptr *last, *r;
+    gptr *b, *p, *q, *t, *p2;
+    gptr *last, *r;
     IV runs = 0;
 
     b = list1;
@@ -354,7 +354,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     dVAR;
     IV i, run, offset;
     I32 sense, level;
-    register gptr *f1, *f2, *t, *b, *p;
+    gptr *f1, *f2, *t, *b, *p;
     int iwhich;
     gptr *aux;
     gptr *p1;
@@ -392,7 +392,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	    list1 = which[iwhich];		/* area where runs are now */
 	    list2 = which[++iwhich];		/* area for merged runs */
 	    do {
-		register gptr *l1, *l2, *tp2;
+		gptr *l1, *l2, *tp2;
 		offset = stackp->offset;
 		f1 = p1 = list1 + offset;		/* start of first run */
 		p = tp2 = list2 + offset;	/* where merged run will go */
@@ -422,7 +422,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 		    ** and -1 when equality should look high.
 		    */
 
-		    register gptr *q;
+		    gptr *q;
 		    if (cmp(aTHX_ *f1, *f2) <= 0) {
 			q = f2; b = f1; t = l1;
 			sense = -1;
@@ -763,7 +763,7 @@ doqsort_all_asserts(
 STATIC void /* the standard unstable (u) quicksort (qsort) */
 S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 {
-   register SV * temp;
+   SV * temp;
    struct partition_stack_entry partition_stack[QSORT_MAX_STACK];
    int next_stack_entry = 0;
    int part_left;
@@ -783,10 +783,10 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 
    /* Inoculate large partitions against quadratic behavior */
    if (num_elts > QSORT_PLAY_SAFE) {
-      register size_t n;
-      register SV ** const q = array;
+      size_t n;
+      SV ** const q = array;
       for (n = num_elts; n > 1; ) {
-         register const size_t j = (size_t)(n-- * Drand01());
+         const size_t j = (size_t)(n-- * Drand01());
          temp = q[j];
          q[j] = q[n];
          q[n] = temp;
@@ -1350,8 +1350,8 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
     dVAR;
     if ((flags & SORTf_STABLE) != 0) {
-	 register gptr **pp, *q;
-	 register size_t n, j, i;
+	 gptr **pp, *q;
+	 size_t n, j, i;
 	 gptr *small[SMALLSORT], **indir, tmp;
 	 SVCOMPARE_t savecmp;
 	 if (nmemb <= 1) return;     /* sorted trivially */
@@ -1473,8 +1473,8 @@ Perl_sortsv_flags(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 PP(pp_sort)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register SV **p1 = ORIGMARK+1, **p2;
-    register I32 max, i;
+    SV **p1 = ORIGMARK+1, **p2;
+    I32 max, i;
     AV* av = NULL;
     HV *stash;
     GV *gv;

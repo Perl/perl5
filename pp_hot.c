@@ -399,7 +399,7 @@ PP(pp_or)
 PP(pp_defined)
 {
     dVAR; dSP;
-    register SV* sv;
+    SV* sv;
     bool defined;
     const int op_type = PL_op->op_type;
     const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
@@ -513,7 +513,7 @@ PP(pp_add)
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
-	register UV auv = 0;
+	UV auv = 0;
 	bool auvok = FALSE;
 	bool a_valid = 0;
 
@@ -529,7 +529,7 @@ PP(pp_add)
 		if ((auvok = SvUOK(svl)))
 		    auv = SvUVX(svl);
 		else {
-		    register const IV aiv = SvIVX(svl);
+		    const IV aiv = SvIVX(svl);
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
@@ -543,13 +543,13 @@ PP(pp_add)
 	if (a_valid) {
 	    bool result_good = 0;
 	    UV result;
-	    register UV buv;
+	    UV buv;
 	    bool buvok = SvUOK(svr);
 	
 	    if (buvok)
 		buv = SvUVX(svr);
 	    else {
-		register const IV biv = SvIVX(svr);
+		const IV biv = SvIVX(svr);
 		if (biv >= 0) {
 		    buv = biv;
 		    buvok = 1;
@@ -668,7 +668,7 @@ PP(pp_pushre)
 PP(pp_print)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register PerlIO *fp;
+    PerlIO *fp;
     MAGIC *mg;
     GV * const gv
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
@@ -933,11 +933,11 @@ PP(pp_aassign)
     SV **firstrelem = PL_stack_base + POPMARK + 1;
     SV **firstlelem = lastrelem + 1;
 
-    register SV **relem;
-    register SV **lelem;
+    SV **relem;
+    SV **lelem;
 
-    register SV *sv;
-    register AV *ary;
+    SV *sv;
+    AV *ary;
 
     I32 gimme;
     HV *hash;
@@ -1208,7 +1208,7 @@ PP(pp_aassign)
 PP(pp_qr)
 {
     dVAR; dSP;
-    register PMOP * const pm = cPMOP;
+    PMOP * const pm = cPMOP;
     REGEXP * rx = PM_GETRE(pm);
     SV * const pkg = rx ? CALLREG_PACKAGE(rx) : NULL;
     SV * const rv = sv_newmortal();
@@ -1248,15 +1248,15 @@ PP(pp_qr)
 PP(pp_match)
 {
     dVAR; dSP; dTARG;
-    register PMOP *pm = cPMOP;
+    PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
-    register const char *t;
-    register const char *s;
+    const char *t;
+    const char *s;
     const char *strend;
     I32 global;
     U8 r_flags = REXEC_CHECKED;
     const char *truebase;			/* Start of string  */
-    register REGEXP *rx = PM_GETRE(pm);
+    REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
     const I32 gimme = GIMME;
     STRLEN len;
@@ -1562,12 +1562,12 @@ OP *
 Perl_do_readline(pTHX)
 {
     dVAR; dSP; dTARGETSTACKED;
-    register SV *sv;
+    SV *sv;
     STRLEN tmplen = 0;
     STRLEN offset;
     PerlIO *fp;
-    register IO * const io = GvIO(PL_last_in_gv);
-    register const I32 type = PL_op->op_type;
+    IO * const io = GvIO(PL_last_in_gv);
+    const I32 type = PL_op->op_type;
     const I32 gimme = GIMME_V;
 
     if (io) {
@@ -1852,7 +1852,7 @@ PP(pp_helem)
 PP(pp_iter)
 {
     dVAR; dSP;
-    register PERL_CONTEXT *cx;
+    PERL_CONTEXT *cx;
     SV *sv, *oldsv;
     SV **itersvp;
     AV *av = NULL; /* used for LOOP_FOR on arrays and the stack */
@@ -2055,23 +2055,23 @@ pp_match is just a simpler version of the above.
 PP(pp_subst)
 {
     dVAR; dSP; dTARG;
-    register PMOP *pm = cPMOP;
+    PMOP *pm = cPMOP;
     PMOP *rpm = pm;
-    register char *s;
+    char *s;
     char *strend;
-    register char *m;
+    char *m;
     const char *c;
-    register char *d;
+    char *d;
     STRLEN clen;
     I32 iters = 0;
     I32 maxiters;
-    register I32 i;
+    I32 i;
     bool once;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
 			See "how taint works" above */
     char *orig;
     U8 r_flags;
-    register REGEXP *rx = PM_GETRE(pm);
+    REGEXP *rx = PM_GETRE(pm);
     STRLEN len;
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
@@ -2082,7 +2082,7 @@ PP(pp_subst)
 #endif
     SV *nsv = NULL;
     /* known replacement string? */
-    register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
+    SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
 
     PERL_ASYNC_CHECK();
 
@@ -2334,7 +2334,7 @@ PP(pp_subst)
 	dstr = newSVpvn_flags(m, s-m, SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
 	PL_curpm = pm;
 	if (!c) {
-	    register PERL_CONTEXT *cx;
+	    PERL_CONTEXT *cx;
 	    SPAGAIN;
 	    /* note that a whole bunch of local vars are saved here for
 	     * use by pp_substcont: here's a list of them in case you're
@@ -2496,7 +2496,7 @@ PP(pp_leavesub)
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
-    register PERL_CONTEXT *cx;
+    PERL_CONTEXT *cx;
     SV *sv;
 
     if (CxMULTICALL(&cxstack[cxstack_ix]))
@@ -2560,8 +2560,8 @@ PP(pp_entersub)
 {
     dVAR; dSP; dPOPss;
     GV *gv;
-    register CV *cv;
-    register PERL_CONTEXT *cx;
+    CV *cv;
+    PERL_CONTEXT *cx;
     I32 gimme;
     const bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
 
@@ -2682,7 +2682,7 @@ try_autoload:
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
-	register I32 items = SP - MARK;
+	I32 items = SP - MARK;
 	AV* const padlist = CvPADLIST(cv);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);

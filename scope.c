@@ -174,7 +174,7 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
 {
     dVAR;
     SV * osv;
-    register SV *sv;
+    SV *sv;
 
     PERL_ARGS_ASSERT_SAVE_SCALAR_AT;
 
@@ -349,7 +349,7 @@ void
 Perl_save_item(pTHX_ register SV *item)
 {
     dVAR;
-    register SV * const sv = newSVsv(item);
+    SV * const sv = newSVsv(item);
 
     PERL_ARGS_ASSERT_SAVE_ITEM;
 
@@ -682,8 +682,8 @@ I32
 Perl_save_alloc(pTHX_ I32 size, I32 pad)
 {
     dVAR;
-    register const I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
-				- (char*)PL_savestack);
+    const I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
+                          - (char*)PL_savestack);
     const UV elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
     const UV elems_shifted = elems << SAVE_TIGHT_SHIFT;
 
@@ -702,13 +702,13 @@ void
 Perl_leave_scope(pTHX_ I32 base)
 {
     dVAR;
-    register SV *sv;
-    register SV *value;
-    register GV *gv;
-    register AV *av;
-    register HV *hv;
+    SV *sv;
+    SV *value;
+    GV *gv;
+    AV *av;
+    HV *hv;
     void* ptr;
-    register char* str;
+    char* str;
     I32 i;
     /* Localise the effects of the TAINT_NOT inside the loop.  */
     bool was = PL_tainted;

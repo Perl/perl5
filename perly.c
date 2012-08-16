@@ -238,15 +238,15 @@ Perl_yyparse (pTHX_ int gramtype)
 #endif
 {
     dVAR;
-    register int yystate;
-    register int yyn;
+    int yystate;
+    int yyn;
     int yyresult;
 
     /* Lookahead token as an internal (translated) token number.  */
     int yytoken = 0;
 
-    register yy_parser *parser;	    /* the parser object */
-    register yy_stack_frame  *ps;   /* current parser stack frame */
+    yy_parser *parser;	    /* the parser object */
+    yy_stack_frame  *ps;   /* current parser stack frame */
 
 #define YYPOPSTACK   parser->ps = --ps
 #define YYPUSHSTACK  parser->ps = ++ps

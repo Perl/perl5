@@ -61,7 +61,7 @@ usage()
 int
 main(register int argc, register const char **argv, register const char **env)
 {
-    register STR *str;
+    STR *str;
     int i;
     STR *tmpstr;
     /* char *namelist;    */
@@ -221,9 +221,9 @@ int idtype;
 int
 yylex(void)
 {
-    register char *s = bufptr;
-    register char *d;
-    register int tmp;
+    char *s = bufptr;
+    char *d;
+    int tmp;
 
   retry:
 #if YYDEBUG
@@ -828,7 +828,7 @@ yylex(void)
 char *
 scanpat(register char *s)
 {
-    register char *d;
+    char *d;
 
     switch (*s++) {
     case '/':
@@ -880,7 +880,7 @@ yyerror(const char *s)
 char *
 scannum(register char *s)
 {
-    register char *d;
+    char *d;
 
     switch (*s) {
     case '1': case '2': case '3': case '4': case '5':
@@ -1027,9 +1027,9 @@ int depth = 0;
 void
 dump(int branch)
 {
-    register int type;
-    register int len;
-    register int i;
+    int type;
+    int len;
+    int i;
 
     type = ops[branch].ival;
     len = type >> 8;
@@ -1067,8 +1067,8 @@ bl(int arg, int maybe)
 void
 fixup(STR *str)
 {
-    register char *s;
-    register char *t;
+    char *s;
+    char *t;
 
     for (s = str->str_ptr; *s; s++) {
 	if (*s == ';' && s[1] == ' ' && s[2] == '\n') {
@@ -1092,8 +1092,8 @@ fixup(STR *str)
 void
 putlines(STR *str)
 {
-    register char *d, *s, *t, *e;
-    register int pos, newpos;
+    char *d, *s, *t, *e;
+    int pos, newpos;
 
     d = tokenbuf;
     pos = 0;
@@ -1168,7 +1168,7 @@ putlines(STR *str)
 void
 putone(void)
 {
-    register char *t;
+    char *t;
 
     for (t = tokenbuf; *t; t++) {
 	*t &= 127;

@@ -389,14 +389,14 @@ Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 AV *
 Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
-    register AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
+    AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
     /* sv_upgrade does AvREAL_only()  */
     PERL_ARGS_ASSERT_AV_MAKE;
     assert(SvTYPE(av) == SVt_PVAV);
 
     if (size) {		/* "defined" was returning undef for size==0 anyway. */
-        register SV** ary;
-        register I32 i;
+        SV** ary;
+        I32 i;
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	AvARRAY(av) = ary;
@@ -505,7 +505,7 @@ Perl_av_undef(pTHX_ register AV *av)
 	av_fill(av, -1);
 
     if ((real = !!AvREAL(av))) {
-	register I32 key = AvFILLp(av) + 1;
+	I32 key = AvFILLp(av) + 1;
 	ENTER;
 	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (key)
@@ -648,7 +648,7 @@ void
 Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 {
     dVAR;
-    register I32 i;
+    I32 i;
     MAGIC* mg;
 
     PERL_ARGS_ASSERT_AV_UNSHIFT;
@@ -678,7 +678,7 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 	AvARRAY(av) = AvARRAY(av) - i;
     }
     if (num) {
-	register SV **ary;
+	SV **ary;
 	const I32 i = AvFILLp(av);
 	/* Create extra elements */
 	const I32 slide = i > 0 ? i : 0;

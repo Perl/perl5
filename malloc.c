@@ -1263,8 +1263,8 @@ Malloc_t
 Perl_malloc(size_t nbytes)
 {
         dVAR;
-  	register union overhead *p;
-  	register int bucket;
+  	union overhead *p;
+  	int bucket;
 
 #if defined(DEBUGGING) || defined(RCHECK)
 	MEM_SIZE size = nbytes;
@@ -1681,10 +1681,10 @@ static void
 morecore(register int bucket)
 {
         dVAR;
-  	register union overhead *ovp;
-  	register int rnu;       /* 2^rnu bytes will be requested */
+  	union overhead *ovp;
+  	int rnu;       /* 2^rnu bytes will be requested */
   	int nblks;		/* become nblks blocks of the desired size */
-	register MEM_SIZE siz, needed;
+	MEM_SIZE siz, needed;
 	static int were_called = 0;
 
   	if (nextf[bucket])
@@ -1816,8 +1816,8 @@ Free_t
 Perl_mfree(Malloc_t where)
 {
         dVAR;
-  	register MEM_SIZE size;
-	register union overhead *ovp;
+  	MEM_SIZE size;
+	union overhead *ovp;
 	char *cp = (char*)where;
 #ifdef PACK_MALLOC
 	u_char bucket;
@@ -1912,11 +1912,11 @@ Malloc_t
 Perl_realloc(void *mp, size_t nbytes)
 {
         dVAR;
-  	register MEM_SIZE onb;
+  	MEM_SIZE onb;
 	union overhead *ovp;
   	char *res;
 	int prev_bucket;
-	register int bucket;
+	int bucket;
 	int incr;		/* 1 if does not fit, -1 if "easily" fits in a
 				   smaller bucket, otherwise 0.  */
 	char *cp = (char*)mp;
@@ -2188,8 +2188,8 @@ int
 Perl_get_mstats(pTHX_ perl_mstats_t *buf, int buflen, int level)
 {
 #ifdef DEBUGGING_MSTATS
-  	register int i, j;
-  	register union overhead *p;
+  	int i, j;
+  	union overhead *p;
 	struct chunk_chain_s* nextchain;
 
 	PERL_ARGS_ASSERT_GET_MSTATS;
@@ -2250,7 +2250,7 @@ void
 Perl_dump_mstats(pTHX_ const char *s)
 {
 #ifdef DEBUGGING_MSTATS
-  	register int i;
+  	int i;
 	perl_mstats_t buffer;
 	UV nf[NBUCKETS];
 	UV nt[NBUCKETS];

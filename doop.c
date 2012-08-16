@@ -675,8 +675,8 @@ Perl_do_join(pTHX_ register SV *sv, SV *delim, register SV **mark, register SV *
 {
     dVAR;
     SV ** const oldmark = mark;
-    register I32 items = sp - mark;
-    register STRLEN len;
+    I32 items = sp - mark;
+    STRLEN len;
     STRLEN delimlen;
 
     PERL_ARGS_ASSERT_DO_JOIN;
@@ -912,10 +912,10 @@ void
 Perl_do_vecset(pTHX_ SV *sv)
 {
     dVAR;
-    register SSize_t offset, bitoffs = 0;
-    register int size;
-    register unsigned char *s;
-    register UV lval;
+    SSize_t offset, bitoffs = 0;
+    int size;
+    unsigned char *s;
+    UV lval;
     I32 mask;
     STRLEN targlen;
     STRLEN len;
@@ -1000,16 +1000,16 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
     dVAR;
 #ifdef LIBERAL
-    register long *dl;
-    register long *ll;
-    register long *rl;
+    long *dl;
+    long *ll;
+    long *rl;
 #endif
-    register char *dc;
+    char *dc;
     STRLEN leftlen;
     STRLEN rightlen;
-    register const char *lc;
-    register const char *rc;
-    register STRLEN len;
+    const char *lc;
+    const char *rc;
+    STRLEN len;
     STRLEN lensave;
     const char *lsave;
     const char *rsave;
@@ -1230,7 +1230,7 @@ Perl_do_kv(pTHX)
     dVAR;
     dSP;
     HV * const keys = MUTABLE_HV(POPs);
-    register HE *entry;
+    HE *entry;
     const I32 gimme = GIMME_V;
     const I32 dokv =     (PL_op->op_type == OP_RV2HV || PL_op->op_type == OP_PADHV);
     /* op_type is OP_RKEYS/OP_RVALUES if pp_rkeys delegated to here */

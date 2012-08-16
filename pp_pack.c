@@ -3615,11 +3615,11 @@ extern const double _double_constants[];
 PP(pp_pack)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register SV *cat = TARG;
+    SV *cat = TARG;
     STRLEN fromlen;
     SV *pat_sv = *++MARK;
-    register const char *pat = SvPV_const(pat_sv, fromlen);
-    register const char *patend = pat + fromlen;
+    const char *pat = SvPV_const(pat_sv, fromlen);
+    const char *patend = pat + fromlen;
 
     MARK++;
     sv_setpvs(cat, "");

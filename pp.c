@@ -1083,8 +1083,8 @@ PP(pp_pow)
                     SvIV_please_nomg(svr);
                     RETURN;
 		} else {
-		    register unsigned int highbit = 8 * sizeof(UV);
-		    register unsigned int diff = 8 * sizeof(UV);
+		    unsigned int highbit = 8 * sizeof(UV);
+		    unsigned int diff = 8 * sizeof(UV);
 		    while (diff >>= 1) {
 			highbit -= diff;
 			if (baseuv >> highbit) {
@@ -1095,8 +1095,8 @@ PP(pp_pow)
 		    if (power * highbit <= 8 * sizeof(UV)) {
 			/* result will definitely fit in UV, so use UV math
 			   on same algorithm as above */
-			register UV result = 1;
-			register UV base = baseuv;
+			UV result = 1;
+			UV base = baseuv;
 			const bool odd_power = cBOOL(power & 1);
 			if (odd_power) {
 			    result *= base;
@@ -1551,7 +1551,7 @@ PP(pp_modulo)
 PP(pp_repeat)
 {
     dVAR; dSP; dATARGET;
-    register IV count;
+    IV count;
     SV *sv;
 
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
@@ -1697,7 +1697,7 @@ PP(pp_subtract)
 	/* Unless the left argument is integer in range we are going to have to
 	   use NV maths. Hence only attempt to coerce the right argument if
 	   we know the left is integer.  */
-	register UV auv = 0;
+	UV auv = 0;
 	bool auvok = FALSE;
 	bool a_valid = 0;
 
@@ -1711,7 +1711,7 @@ PP(pp_subtract)
 		if ((auvok = SvUOK(svl)))
 		    auv = SvUVX(svl);
 		else {
-		    register const IV aiv = SvIVX(svl);
+		    const IV aiv = SvIVX(svl);
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
@@ -1725,13 +1725,13 @@ PP(pp_subtract)
 	if (a_valid) {
 	    bool result_good = 0;
 	    UV result;
-	    register UV buv;
+	    UV buv;
 	    bool buvok = SvUOK(svr);
 	
 	    if (buvok)
 		buv = SvUVX(svr);
 	    else {
-		register const IV biv = SvIVX(svr);
+		const IV biv = SvIVX(svr);
 		if (biv >= 0) {
 		    buv = biv;
 		    buvok = 1;
@@ -2242,8 +2242,8 @@ PP(pp_complement)
 	}
       }
       else {
-	register U8 *tmps;
-	register I32 anum;
+	U8 *tmps;
+	I32 anum;
 	STRLEN len;
 
 	(void)SvPV_nomg_const(sv,len); /* force check for uninit var */
@@ -2308,7 +2308,7 @@ PP(pp_complement)
 	}
 #ifdef LIBERAL
 	{
-	    register long *tmpl;
+	    long *tmpl;
 	    for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
 		*tmps = ~*tmps;
 	    tmpl = (long*)tmps;
@@ -3087,9 +3087,9 @@ bound_fail:
 PP(pp_vec)
 {
     dVAR; dSP;
-    register const IV size   = POPi;
-    register const IV offset = POPi;
-    register SV * const src = POPs;
+    const IV size   = POPi;
+    const IV offset = POPi;
+    SV * const src = POPs;
     const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     SV * ret;
 
@@ -4009,11 +4009,11 @@ PP(pp_quotemeta)
     dVAR; dSP; dTARGET;
     SV * const sv = TOPs;
     STRLEN len;
-    register const char *s = SvPV_const(sv,len);
+    const char *s = SvPV_const(sv,len);
 
     SvUTF8_off(TARG);				/* decontaminate */
     if (len) {
-	register char *d;
+	char *d;
 	SvUPGRADE(TARG, SVt_PV);
 	SvGROW(TARG, (len * 2) + 1);
 	d = SvPVX(TARG);
@@ -4236,8 +4236,8 @@ PP(pp_fc)
 PP(pp_aslice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register AV *const av = MUTABLE_AV(POPs);
-    register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
+    AV *const av = MUTABLE_AV(POPs);
+    const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
     if (SvTYPE(av) == SVt_PVAV) {
 	const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
@@ -4251,7 +4251,7 @@ PP(pp_aslice)
 	}
 
 	if (lval && localizing) {
-	    register SV **svp;
+	    SV **svp;
 	    I32 max = -1;
 	    for (svp = MARK + 1; svp <= SP; svp++) {
 		const I32 elem = SvIV(*svp);
@@ -4263,7 +4263,7 @@ PP(pp_aslice)
 	}
 
 	while (++MARK <= SP) {
-	    register SV **svp;
+	    SV **svp;
 	    I32 elem = SvIV(*MARK);
 	    bool preeminent = TRUE;
 
@@ -4439,8 +4439,7 @@ S_do_delete_local(pTHX)
     const bool sliced = !!(PL_op->op_private & OPpSLICE);
     SV *unsliced_keysv = sliced ? NULL : POPs;
     SV * const osv = POPs;
-    register SV **mark =
-	sliced ? PL_stack_base + POPMARK : &unsliced_keysv-1;
+    SV **mark = sliced ? PL_stack_base + POPMARK : &unsliced_keysv-1;
     dORIGMARK;
     const bool tied = SvRMAGICAL(osv)
 			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
@@ -4643,8 +4642,8 @@ PP(pp_exists)
 PP(pp_hslice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register HV * const hv = MUTABLE_HV(POPs);
-    register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
+    HV * const hv = MUTABLE_HV(POPs);
+    const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool can_preserve = FALSE;
 
@@ -4719,11 +4718,11 @@ PP(pp_lslice)
     SV ** const lastrelem = PL_stack_sp;
     SV ** const lastlelem = PL_stack_base + POPMARK;
     SV ** const firstlelem = PL_stack_base + POPMARK + 1;
-    register SV ** const firstrelem = lastlelem + 1;
+    SV ** const firstrelem = lastlelem + 1;
     I32 is_something_there = FALSE;
 
-    register const I32 max = lastrelem - lastlelem;
-    register SV **lelem;
+    const I32 max = lastrelem - lastlelem;
+    SV **lelem;
 
     if (GIMME != G_ARRAY) {
 	I32 ix = SvIV(*lastlelem);
@@ -4826,12 +4825,12 @@ PP(pp_splice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     int num_args = (SP - MARK);
-    register AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
-    register SV **src;
-    register SV **dst;
-    register I32 i;
-    register I32 offset;
-    register I32 length;
+    AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
+    SV **src;
+    SV **dst;
+    I32 i;
+    I32 offset;
+    I32 length;
     I32 newlen;
     I32 after;
     I32 diff;
@@ -5028,7 +5027,7 @@ PP(pp_splice)
 PP(pp_push)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register AV * const ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
+    AV * const ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -5078,7 +5077,7 @@ PP(pp_shift)
 PP(pp_unshift)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
+    AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -5091,7 +5090,7 @@ PP(pp_unshift)
 	SPAGAIN;
     }
     else {
-	register I32 i = 0;
+	I32 i = 0;
 	av_unshift(ary, SP - MARK);
 	while (MARK < SP) {
 	    SV * const sv = newSVsv(*++MARK);
@@ -5123,26 +5122,26 @@ PP(pp_reverse)
 
 	    if (SvMAGICAL(av)) {
 		I32 i, j;
-		register SV *tmp = sv_newmortal();
+		SV *tmp = sv_newmortal();
 		/* For SvCANEXISTDELETE */
 		HV *stash;
 		const MAGIC *mg;
 		bool can_preserve = SvCANEXISTDELETE(av);
 
 		for (i = 0, j = av_len(av); i < j; ++i, --j) {
-		    register SV *begin, *end;
+		    SV *begin, *end;
 
 		    if (can_preserve) {
 			if (!av_exists(av, i)) {
 			    if (av_exists(av, j)) {
-				register SV *sv = av_delete(av, j, 0);
+				SV *sv = av_delete(av, j, 0);
 				begin = *av_fetch(av, i, TRUE);
 				sv_setsv_mg(begin, sv);
 			    }
 			    continue;
 			}
 			else if (!av_exists(av, j)) {
-			    register SV *sv = av_delete(av, i, 0);
+			    SV *sv = av_delete(av, i, 0);
 			    end = *av_fetch(av, j, TRUE);
 			    sv_setsv_mg(end, sv);
 			    continue;
@@ -5163,7 +5162,7 @@ PP(pp_reverse)
 		    SV **end   = begin + AvFILLp(av);
 
 		    while (begin < end) {
-			register SV * const tmp = *begin;
+			SV * const tmp = *begin;
 			*begin++ = *end;
 			*end--   = tmp;
 		    }
@@ -5174,7 +5173,7 @@ PP(pp_reverse)
 	    SV **oldsp = SP;
 	    MARK++;
 	    while (MARK < SP) {
-		register SV * const tmp = *MARK;
+		SV * const tmp = *MARK;
 		*MARK++ = *SP;
 		*SP--   = tmp;
 	    }
@@ -5183,9 +5182,9 @@ PP(pp_reverse)
 	}
     }
     else {
-	register char *up;
-	register char *down;
-	register I32 tmp;
+	char *up;
+	char *down;
+	I32 tmp;
 	dTARGET;
 	STRLEN len;
 
@@ -5242,16 +5241,16 @@ PP(pp_split)
 {
     dVAR; dSP; dTARG;
     AV *ary;
-    register IV limit = POPi;			/* note, negative is forever */
+    IV limit = POPi;			/* note, negative is forever */
     SV * const sv = POPs;
     STRLEN len;
-    register const char *s = SvPV_const(sv, len);
+    const char *s = SvPV_const(sv, len);
     const bool do_utf8 = DO_UTF8(sv);
     const char *strend = s + len;
-    register PMOP *pm;
-    register REGEXP *rx;
-    register SV *dstr;
-    register const char *m;
+    PMOP *pm;
+    REGEXP *rx;
+    SV *dstr;
+    const char *m;
     I32 iters = 0;
     const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (STRLEN)(strend - s);
     I32 maxiters = slen + 10;
