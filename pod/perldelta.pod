@@ -538,6 +538,10 @@ assertion failures [perl #78550].
 
 =item *
 
+Formats and C<use> statements are now permitted inside formats.
+
+=item *
+
 C<print $x> and C<sub { print $x }->()> now always produce the same output.
 It was possible for the latter to refuse to close over $x if the variable
 was not active; e.g., if it was defined outside a currently-running named
@@ -577,6 +581,11 @@ other quoted constructs (C</(?{...})/> and C<qq/${...}/>) [perl #114040].
 =item *
 
 Formats are no longer created after compilation errors.
+
+=item *
+
+Some format syntax errors started causing crashes in perl 5.17.2, but
+have now been fixed.
 
 =back
 
