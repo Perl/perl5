@@ -682,6 +682,18 @@ if ( !caller ) {
 # modifiers come after the colon, valid possibilities
 # being 'fast' and 'safe'.
 #
+#
+# This is no longer used, but retained in case it is needed some day. Put the
+# lines below under __DATA__
+# TRICKYFOLD: Problematic fold case letters.  When adding to this list, also should add them to regcomp.c and fold_grind.t
+# => generic cp generic-cp generic-both :fast safe
+# 0x00DF	# LATIN SMALL LETTER SHARP S
+# 0x0390	# GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
+# 0x03B0	# GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS
+# 0x1E9E  # LATIN CAPITAL LETTER SHARP S, because maps to same as 00DF
+# 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
+# 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
+
 1; # in the unlikely case we are being used as a module
 
 __DATA__
@@ -727,13 +739,3 @@ VERTWS: Vertical Whitespace: \v \V
 0x85            # NEL
 0x2028          # LINE SEPARATOR
 0x2029          # PARAGRAPH SEPARATOR
-
-
-TRICKYFOLD: Problematic fold case letters.  When adding to this list, also should add them to regcomp.c and fold_grind.t
-=> generic cp generic-cp generic-both :fast safe
-0x00DF	# LATIN SMALL LETTER SHARP S
-0x0390	# GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS
-0x03B0	# GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS
-0x1E9E  # LATIN CAPITAL LETTER SHARP S, because maps to same as 00DF
-0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
-0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
