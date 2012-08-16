@@ -2442,9 +2442,9 @@ typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
 typedef struct ptr_tbl PTR_TBL_t;
 typedef struct clone_params CLONE_PARAMS;
 
-/* a padlist is currently just an AV; but that might change,
- * so hide the type. Ditto a pad.  */
-typedef AV PADLIST;
+/* a pad is currently just an AV; but that might change,
+ * so hide the type.  */
+typedef struct padlist PADLIST;
 typedef AV PAD;
 
 #include "handy.h"

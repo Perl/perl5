@@ -607,6 +607,9 @@ typedef HE      *B__HE;
 #if PERL_VERSION >= 9
 typedef struct refcounted_he	*B__RHE;
 #endif
+#ifdef PADLIST_ARRAY
+typedef PADLIST	*B__PADLIST;
+#endif
 
 #ifdef MULTIPLICITY
 #  define ASSIGN_COMMON_ALIAS(prefix, var) \
@@ -697,9 +700,19 @@ amagic_generation()
 
 void
 comppadlist()
+    PREINIT:
+	PADLIST *padlist = CvPADLIST(PL_main_cv ? PL_main_cv : PL_compcv);
     PPCODE:
-	PUSHs(make_sv_object(aTHX_ (SV *)(PL_main_cv ? CvPADLIST(PL_main_cv)
-						     : CvPADLIST(PL_compcv))));
+#ifdef PADLIST_ARRAY
+	{
+	    SV * const rv = sv_newmortal();
+	    sv_setiv(newSVrv(rv, padlist ? "B::PADLIST" : "B::NULL"),
+		     PTR2IV(padlist));
+	    PUSHs(rv);
+	}
+#else
+	PUSHs(make_sv_object(aTHX_ (SV *)padlist));
+#endif
 
 void
 sv_undef()
@@ -1449,7 +1462,6 @@ MODULE = B	PACKAGE = B::IV
 #define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
 #define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
 #define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
-#define PVCV_padlist_ix	sv_SVp | offsetof(struct xpvcv, xcv_padlist)
 #define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
 #define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
 #define PVCV_flags_ix	sv_U16p | offsetof(struct xpvcv, xcv_flags)
@@ -1504,7 +1516,6 @@ IVX(sv)
 	B::CV::STASH = PVCV_stash_ix
 	B::CV::GV = PVCV_gv_ix
 	B::CV::FILE = PVCV_file_ix
-	B::CV::PADLIST = PVCV_padlist_ix
 	B::CV::OUTSIDE = PVCV_outside_ix
 	B::CV::OUTSIDE_SEQ = PVCV_outside_seq_ix
 	B::CV::CvFLAGS = PVCV_flags_ix
@@ -1986,6 +1997,20 @@ I32
 CvDEPTH(cv)
         B::CV   cv
 
+#ifdef PADLIST_ARRAY
+
+B::PADLIST
+CvPADLIST(cv)
+	B::CV	cv
+
+#else
+
+B::AV
+CvPADLIST(cv)
+	B::CV	cv
+
+#endif
+
 void
 CvXSUB(cv)
 	B::CV	cv
@@ -2064,6 +2089,47 @@ HASH(h)
 	B::RHE h
     CODE:
 	RETVAL = newRV( (SV*)cophh_2hv(h, 0) );
+    OUTPUT:
+	RETVAL
+
+#endif
+
+#ifdef PADLIST_ARRAY
+
+MODULE = B	PACKAGE = B::PADLIST	PREFIX = PADLIST_
+
+SSize_t
+PADLIST_MAX(padlist)
+	B::PADLIST	padlist
+
+void
+PADLIST_ARRAY(padlist)
+	B::PADLIST	padlist
+    PPCODE:
+	if (PADLIST_MAX(padlist) >= 0) {
+	    PAD **padp = PADLIST_ARRAY(padlist);
+	    PADOFFSET i;
+	    for (i = 0; i <= PADLIST_MAX(padlist); i++)
+		XPUSHs(make_sv_object(aTHX_ (SV *)padp[i]));
+	}
+
+void
+PADLIST_ARRAYelt(padlist, idx)
+	B::PADLIST	padlist
+	PADOFFSET	idx
+    PPCODE:
+    	if (idx >= 0 && PADLIST_MAX(padlist) >= 0
+	 && idx <= PADLIST_MAX(padlist))
+	    XPUSHs(make_sv_object(aTHX_
+				  (SV *)PADLIST_ARRAY(padlist)[idx]));
+	else
+	    XPUSHs(make_sv_object(aTHX_ NULL));
+
+U32
+PADLIST_REFCNT(padlist)
+	B::PADLIST	padlist
+    CODE:
+	RETVAL = PADLIST_REFCNT(padlist);
     OUTPUT:
 	RETVAL
 

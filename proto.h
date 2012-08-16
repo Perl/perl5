@@ -138,6 +138,13 @@ PERL_CALLCONV void	Perl_av_extend(pTHX_ AV *av, I32 key)
 #define PERL_ARGS_ASSERT_AV_EXTEND	\
 	assert(av)
 
+PERL_CALLCONV void	Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp, SV ***arrayp)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
+#define PERL_ARGS_ASSERT_AV_EXTEND_GUTS	\
+	assert(maxp); assert(allocp); assert(arrayp)
+
 PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV *av, I32 key, I32 lval)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -3022,6 +3029,11 @@ PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 
 PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust);
 PERL_CALLCONV void	Perl_pad_tidy(pTHX_ padtidy_type type);
+PERL_CALLCONV PAD **	Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADLIST_STORE	\
+	assert(padlist)
+
 PERL_CALLCONV OP*	Perl_parse_arithexpr(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_barestmt(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_block(pTHX_ U32 flags);

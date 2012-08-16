@@ -3290,7 +3290,7 @@ CV* cv
   AV *pad_namelist;
   AV *retav = newAV();
  CODE:
-  pad_namelist = (AV*) *av_fetch(CvPADLIST(cv), 0, FALSE);
+  pad_namelist = *PADLIST_ARRAY(CvPADLIST(cv));
 
   for ( i = av_len(pad_namelist); i >= 0; i-- ) {
     SV** name_ptr = av_fetch(pad_namelist, i, 0);

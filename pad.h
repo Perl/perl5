@@ -27,6 +27,13 @@ typedef U64TYPE PADOFFSET;
 #endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
+
+struct padlist {
+    SSize_t	xpadl_max;	/* max index for which array has space */
+    PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
+};
+
+
 /* a value that PL_cop_seqmax is guaranteed never to be,
  * flagging that a lexical is being introduced, or has not yet left scope
  */
@@ -209,6 +216,10 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 =cut
 */
 
+#define PADLIST_ARRAY(pl)	(pl)->xpadl_alloc
+#define PADLIST_MAX(pl)		(pl)->xpadl_max
+#define PADLIST_REFCNT(pl)	1	/* reserved for future use */
+
 #ifdef DEBUGGING
 #  define PAD_SV(po)	   pad_sv(po)
 #  define PAD_SETSV(po,sv) pad_setsv(po,sv)
@@ -220,12 +231,13 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PAD_SVl(po)       (PL_curpad[po])
 
 #define PAD_BASE_SV(padlist, po) \
-	(AvARRAY(padlist)[1]) 	\
-	? AvARRAY(MUTABLE_AV((AvARRAY(padlist)[1])))[po] : NULL;
+	(PADLIST_ARRAY(padlist)[1])					\
+	    ? AvARRAY(MUTABLE_AV((PADLIST_ARRAY(padlist)[1])))[po] \
+	    : NULL;
 
 
 #define PAD_SET_CUR_NOSAVE(padlist,nth) \
-	PL_comppad = (PAD*) (AvARRAY(padlist)[nth]);		\
+	PL_comppad = (PAD*) (PADLIST_ARRAY(padlist)[nth]);	\
 	PL_curpad = AvARRAY(PL_comppad);			\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] set_cur    depth=%d\n",	\
