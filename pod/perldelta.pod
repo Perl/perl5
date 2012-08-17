@@ -681,6 +681,15 @@ the pattern hasn't changed (i.e. C</$unchanging/>).  This has now been fixed.
 A bug in the compilation of a C</(?{})/> expression which affected the TryCatch
 test suite has been fixed [perl #114242].
 
+=item *
+
+Formats no longer leak.  They started leaking in 5.17.2.
+
+=item *
+
+Pod can now be nested in code inside a quoted construct outside of a string
+eval.  This used to work only within string evals [perl #114040].
+
 =back
 
 =head1 Known Problems
