@@ -6001,7 +6001,8 @@ Perl_yylex(pTHX)
 	    if (PL_expect == XSTATE && isALPHA(tmp) &&
 		(s == PL_linestart+1 || s[-2] == '\n') )
 		{
-		    if (PL_in_eval && !PL_rsfp && !PL_parser->filtered) {
+		    if ((PL_in_eval && !PL_rsfp && !PL_parser->filtered)
+			|| PL_lex_state != LEX_NORMAL) {
 			d = PL_bufend;
 			while (s < d) {
 			    if (*s++ == '\n') {
