@@ -5083,6 +5083,9 @@ END_EXTERN_C
 #undef PERLVARI
 #undef PERLVARIC
 
+/* Static inline functions that depend on headers included above */
+#include "inline.h"
+
 START_EXTERN_C
 
 /* dummy variables that hold pointers to both runops functions, thus forcing
