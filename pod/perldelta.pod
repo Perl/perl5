@@ -131,6 +131,11 @@ a sub and a format share the same name, it will dump both.
 
 =item *
 
+L<B::Debug> has been upgraded from version 1.17 to 1.18.  This adds support
+(experimentally) for the new C<B::PADLIST>.
+
+=item *
+
 L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
 loop controls with the correct precedence, and multiple statements in a
 C<format> line are also now deparsed correctly.
