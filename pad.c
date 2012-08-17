@@ -784,6 +784,8 @@ currently-compiling function.
 The function I<func> is linked into the pad, and its C<CvOUTSIDE> link
 to the outer scope is weakened to avoid a reference loop.
 
+One reference count is stolen, so you may need to do C<SvREFCNT_inc(func)>.
+
 I<optype> should be an opcode indicating the type of operation that the
 pad entry is to support.  This doesn't affect operational semantics,
 but is used for debugging.
