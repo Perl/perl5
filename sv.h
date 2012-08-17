@@ -417,30 +417,22 @@ perform the upgrade if necessary.  See C<svtype>.
  * using an anonymous union, but only for MSVC6 since that isn't C89.
  */
 #if defined(_MSC_VER) && _MSC_VER < 1300
+# define _XPV_CUR_U_NAME
+# define xpv_cur	xpvcuru_cur
+# define xpv_fmdepth	xpvcuru_fmdepth
+#else
+# define _XPV_CUR_U_NAME xpv_cur_u
+# define xpv_cur	xpv_cur_u.xpvcuru_cur
+# define xpv_fmdepth	xpv_cur_u.xpvcuru_fmdepth
+#endif
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
     union {								\
 	STRLEN	xpvcuru_cur;	/* length of svu_pv as a C string */    \
 	I32	xpvcuru_fmdepth;					\
-    };									\
+    }		_XPV_CUR_U_NAME;					\
     STRLEN	xpv_len 	/* allocated size */
-#else
-#define _XPV_HEAD							\
-    HV*		xmg_stash;	/* class package */			\
-    union _xmgu	xmg_u;							\
-    union {								\
-	STRLEN	xpvcuru_cur;	/* length of svu_pv as a C string */    \
-	I32	xpvcuru_fmdepth;					\
-    }		xpv_cur_u;						\
-    STRLEN	xpv_len 	/* allocated size */
-#endif
-
-#if defined(_MSC_VER) && _MSC_VER < 1300
-#define xpv_cur	xpvcuru_cur
-#else
-#define xpv_cur	xpv_cur_u.xpvcuru_cur
-#endif
 
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
