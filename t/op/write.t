@@ -1111,7 +1111,6 @@ format Potshriggley =
    Scalar::Util::weaken(my $x = *Potshriggley{FORMAT});
    undef *Potshriggley;
    is $x, undef, 'formats in subs do not leak';
-   use Devel::Peek; Dump $x if $x;
 }
 
 
