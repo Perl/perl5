@@ -132,7 +132,7 @@ a sub and a format share the same name, it will dump both.
 =item *
 
 L<B::Debug> has been upgraded from version 1.17 to 1.18.  This adds support
-(experimentally) for the new C<B::PADLIST>.
+(experimentally) for C<B::PADLIST>, which will be added in Perl 5.17.4.
 
 =item *
 
