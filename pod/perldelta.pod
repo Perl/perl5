@@ -30,9 +30,9 @@ here, but most should go in the L</Performance Enhancements> section.
 =head2 Computed Labels
 
 The loop controls C<next>, C<last> and C<redo>, and the special C<dump>
-operator, now allow arbitrary expressions to be used to compute labels at
-run time.  Previously, any argument that was not a constant was treated as
-the empty string.
+operator, now allow arbitrary expressions to be used to compute labels at run
+time.  Previously, any argument that was not a constant was treated as the
+empty string.
 
 =head1 Security
 
@@ -48,14 +48,14 @@ L</Selected Bug Fixes> section.
 
 =head2 C<$ENV{foo}=undef> deletes value from environ, like C<delete $ENV{foo}>
 
-This facilitates use of C<local()> with C<%ENV> entries.  In previous
-versions of Perl, C<undef> was converted to the empty string.
+This facilitates use of C<local()> with C<%ENV> entries.  In previous versions
+of Perl, C<undef> was converted to the empty string.
 
 =head2 Defined values stored in environment are forced to byte strings
 
-A value stored in an environment variable has always been stringified.  In
-this release, it is converted to be only a byte string.  First, it is forced
-to be a only a string.  Then if the string is utf8 and the equivalent of
+A value stored in an environment variable has always been stringified.  In this
+release, it is converted to be only a byte string.  First, it is forced to be a
+only a string.  Then if the string is utf8 and the equivalent of
 C<utf8::downgrade()> works, that result is used; otherwise, the equivalent of
 C<utf8::encode()> is used, and a warning is issued about wide characters
 (L</Diagnostics>).
@@ -231,9 +231,9 @@ functions required for IP multicast source group membership have been added.
 
 =item *
 
-L<Storable> has been upgraded from version 2.37 to 2.38.  It can now freeze
-and thaw vstrings correctly.  This causes a slight incompatible change in
-the storage format, so the format version has increased to 2.9.
+L<Storable> has been upgraded from version 2.37 to 2.38.  It can now freeze and
+thaw vstrings correctly.  This causes a slight incompatible change in the
+storage format, so the format version has increased to 2.9.
 
 =item *
 
@@ -289,9 +289,9 @@ section.
 
 =item *
 
-Loop control verbs (C<dump>, C<goto>, C<next>, C<last> and C<redo>) have
-always had the same precedence as assignment operators, but this was not
-documented until now.
+Loop control verbs (C<dump>, C<goto>, C<next>, C<last> and C<redo>) have always
+had the same precedence as assignment operators, but this was not documented
+until now.
 
 =back
 
@@ -301,8 +301,8 @@ documented until now.
 
 =item *
 
-A caveat has been added to the documentation for C<$_> warning against the
-use of lexical C<$_> [perl #114020].
+A caveat has been added to the documentation for C<$_> warning against the use
+of lexical C<$_> [perl #114020].
 
 =back
 
@@ -331,8 +331,8 @@ L<Unterminated delimiter for here document|perldiag/"Unterminated delimiter for 
 This message now occurs when a here document label has an initial quotation
 mark but the final quotation mark is missing.
 
-This replaces a bogus and misleading error message about not finding the
-label itself [perl #114104].
+This replaces a bogus and misleading error message about not finding the label
+itself [perl #114104].
 
 =item *
 
@@ -340,7 +340,7 @@ L<panic: child pseudo-process was never scheduled|perldiag/"panic: child pseudo-
 
 This error is thrown when a child pseudo-process in the ithreads implementation
 on Windows was not scheduled within the time period allowed and therefore was
-not able to initialize properly [perl #88840]
+not able to initialize properly [perl #88840].
 
 =back
 
@@ -401,7 +401,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The pager detection in F<Configure> has been improved to allow responses which
+specify options after the program name, e.g. B</usr/bin/less -R>, if the user
+accepts the default value.  This helps B<perldoc> when handling ANSI escapes
+[perl #72156].
 
 =back
 
@@ -433,7 +436,7 @@ changes as paragraphs below it. ]
 =head2 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
-versions did not . These will either be enabled by new files in the F<hints/>
+versions did not.  These will either be enabled by new files in the F<hints/>
 directories, or new subdirectories and F<README> files at the top level of the
 source tree.
 
@@ -472,12 +475,16 @@ A new makefile option, USE_64_BIT_INT, has been added to the Windows makefiles.
 Set this to "define" when building a 32-bit perl if you want it to use 64-bit
 integers.
 
-Machine code size reductions, already made to the DLLs of XS modules in 5.17.2,
-have now been extended to the perl DLL itself.
+Machine code size reductions, already made to the DLLs of XS modules in Perl
+5.17.2, have now been extended to the perl DLL itself.
 
-Building with VC++ 6.0 was inadvertently broken in 5.17.2 but has now been
+Building with VC++ 6.0 was inadvertently broken in Perl 5.17.2 but has now been
 fixed again.  XXX Actually, it's now been broken again, so ensure that it gets
 fixed once more before release, or remove this comment!
+
+=item VMS
+
+The B<a2p> build has been fixed for the HP C++ compiler on OpenVMS.
 
 =back
 
@@ -508,9 +515,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-C<\w> now matches the code points U+200C (ZERO WIDTH NON-JOINER) and
-U+200D (ZERO WIDTH JOINER).  C<\W> no longer matches these.  This change
-is because Unicode corrected their definition of what C<\w> should match.
+C<\w> now matches the code points U+200C (ZERO WIDTH NON-JOINER) and U+200D
+(ZERO WIDTH JOINER).  C<\W> no longer matches these.  This change is because
+Unicode corrected their definition of what C<\w> should match.
 
 =item *
 
@@ -520,13 +527,13 @@ C<dump LABEL> no longer leaks its label.
 
 Constant folding no longer changes the behaviour of functions like C<stat()>
 and C<truncate()> that can take either filenames or handles.
-C<stat 1 ? foo : bar> nows treats its argument as a file name (since it is
-an arbitrary expression), rather than the handle "foo".
+C<stat 1 ? foo : bar> nows treats its argument as a file name (since it is an
+arbitrary expression), rather than the handle "foo".
 
 =item *
 
-C<truncate FOO, $len> no longer falls back to treating "FOO" as a file name
-if the filehandle has been deleted.  This was broken in Perl 5.16.0.
+C<truncate FOO, $len> no longer falls back to treating "FOO" as a file name if
+the filehandle has been deleted.  This was broken in Perl 5.16.0.
 
 =item *
 
@@ -535,13 +542,13 @@ longer cause double frees or panic messages.
 
 =item *
 
-C<s///> now turns vstrings into plain strings when performing a
-substitution, even if the resulting string is the same (C<s/a/a/>).
+C<s///> now turns vstrings into plain strings when performing a substitution,
+even if the resulting string is the same (C<s/a/a/>).
 
 =item *
 
-Prototype mismatch warnings no longer erroneously treat constant subs as
-having no prototype when they actually have "".
+Prototype mismatch warnings no longer erroneously treat constant subs as having
+no prototype when they actually have "".
 
 =item *
 
@@ -554,8 +561,8 @@ C<undef> on a subroutine now clears call checkers.
 
 =item *
 
-The C<ref> operator started leaking memory on blessed objects in Perl
-5.16.0.  This has been fixed [perl #114340].
+The C<ref> operator started leaking memory on blessed objects in Perl 5.16.0.
+This has been fixed [perl #114340].
 
 =item *
 
@@ -564,8 +571,8 @@ C<use constant { () };> a syntax error [perl #114222].
 
 =item *
 
-On debugging builds, "uninitialized" warnings inside formats no longer
-cause assertion failures.
+On debugging builds, "uninitialized" warnings inside formats no longer cause
+assertion failures.
 
 =item *
 
@@ -578,41 +585,39 @@ Formats and C<use> statements are now permitted inside formats.
 
 =item *
 
-C<print $x> and C<sub { print $x }->()> now always produce the same output.
-It was possible for the latter to refuse to close over $x if the variable
-was not active; e.g., if it was defined outside a currently-running named
-subroutine.
+C<print $x> and C<sub { print $x }->()> now always produce the same output.  It
+was possible for the latter to refuse to close over $x if the variable was not
+active; e.g., if it was defined outside a currently-running named subroutine.
 
 =item *
 
 Similarly, C<print $x> and C<print eval '$x'> now produce the same output.
-This also allows "my $x if 0" variables to be seen in the debugger
-[perl #114018].
+This also allows "my $x if 0" variables to be seen in the debugger [perl
+#114018].
 
 =item *
 
-Formats called recursively no longer stomp on their own lexical variables,
-but each recursive call has its own set of lexicals.
+Formats called recursively no longer stomp on their own lexical variables, but
+each recursive call has its own set of lexicals.
 
 =item *
 
-Attempting to free an active format or the handle associated with it no
-longer results in a crash.
+Attempting to free an active format or the handle associated with it no longer
+results in a crash.
 
 =item *
 
-Format parsing no longer gets confused by braces, semicolons and
-low-precedence operators.  It used to be possible to use braces as format
-delimiters (instead of C<=> and C<.>), but only sometimes.  Semicolons and
-low-precedence operators in format argument lines no longer confuse the
-parser into ignoring the line's return value.  In format argument lines,
-braces can now be used for anonymous hashes, instead of being treated
-always as C<do> blocks.
+Format parsing no longer gets confused by braces, semicolons and low-precedence
+operators.  It used to be possible to use braces as format delimiters (instead
+of C<=> and C<.>), but only sometimes.  Semicolons and low-precedence operators
+in format argument lines no longer confuse the parser into ignoring the line's
+return value.  In format argument lines, braces can now be used for anonymous
+hashes, instead of being treated always as C<do> blocks.
 
 =item *
 
-Formats can now be nested inside code blocks in regular expressions and
-other quoted constructs (C</(?{...})/> and C<qq/${...}/>) [perl #114040].
+Formats can now be nested inside code blocks in regular expressions and other
+quoted constructs (C</(?{...})/> and C<qq/${...}/>) [perl #114040].
 
 =item *
 
@@ -620,20 +625,57 @@ Formats are no longer created after compilation errors.
 
 =item *
 
-Some format syntax errors started causing crashes in perl 5.17.2, but
-have now been fixed.
+Some format syntax errors started causing crashes in Perl 5.17.2, but have now
+been fixed.
 
 =item *
 
-Under debugging builds, the B<-DA> command line option started crashing in
-Perl 5.16.  It has been fixed [perl #114368].
+Under debugging builds, the B<-DA> command line option started crashing in Perl
+5.16.0.  It has been fixed [perl #114368].
+
+=item *
+
+Scope::Escape compatibility, which was broken in Perl 5.17.2, has been restored
+[perl #113872].
 
 =item *
 
 A potential deadlock scenario involving the premature termination of a
 pseudo-forked child in a Windows build with ithreads enabled has been fixed.
-This resolves the common problem of the F<t/op/fork.t> test hanging on Windows.
-[perl #88840]
+This resolves the common problem of the F<t/op/fork.t> test hanging on Windows
+[perl #88840].
+
+=item *
+
+The microperl build, broken since Perl 5.15.7, has now been restored.
+
+=item *
+
+The code which generates errors from C<require()> could potentially read one or
+two bytes before the start of the filename for filenames less than three bytes
+long and ending C</\.p?\z/>.  This has now been fixed.  Note that it could
+never have happened with module names given to C<use()> or C<require()> anyway.
+
+=item *
+
+The handling of pathnames of modules given to C<require()> has been made
+thread-safe on VMS.
+
+=item *
+
+The C<re_compile()> API function, the entry point for perl's regex compiler,
+was accidentally changed in Perl 5.17.1 to operate on the current engine.  This
+has now been restored to its former core-engine-specific state [perl #114302].
+
+=item *
+
+Perl 5.17.1 introduced a memory leak into the re-use of run-time regexes where
+the pattern hasn't changed (i.e. C</$unchanging/>).  This has now been fixed.
+
+=item *
+
+A bug in the compilation of a C</(?{})/> expression which affected the TryCatch
+test suite has been fixed [perl #114242].
 
 =back
 
