@@ -814,7 +814,7 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     if (SvTYPE(func) == SVt_PVCV || !CvOUTSIDE(func))
 	av_store(PL_comppad, ix, (SV*)func);
     else {
-	SV *rv = newRV_inc((SV *)func);
+	SV *rv = newRV_noinc((SV *)func);
 	sv_rvweaken(rv);
 	assert (SvTYPE(func) == SVt_PVFM);
 	av_store(PL_comppad, ix, rv);

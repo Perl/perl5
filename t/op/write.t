@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 21;
 
 # number of tests in section 3
-my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 10;
+my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -1101,6 +1101,18 @@ $::foo = 'oof::$';
 write STRICT;
 close STRICT or die "Could not close: $!";
 is cat('Op_write.tmp'), "oof:\n", 'pragmata on format line';
+
+SKIP: {
+   skip "no weak refs" unless eval { require Scalar::Util };
+   sub Potshriggley {
+format Potshriggley =
+.
+   }
+   Scalar::Util::weaken(my $x = *Potshriggley{FORMAT});
+   undef *Potshriggley;
+   is $x, undef, 'formats in subs do not leak';
+   use Devel::Peek; Dump $x if $x;
+}
 
 
 #############################
