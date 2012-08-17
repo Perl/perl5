@@ -276,6 +276,7 @@ Perl_pad_new(pTHX_ int flags)
 	AvREIFY_only(a0);
     }
     else {
+	padlist->xpadl_id = PL_padlist_generation++;
 	av_store(pad, 0, NULL);
     }
 
@@ -1966,18 +1967,20 @@ Perl_cv_clone(pTHX_ CV *proto)
 	outside = find_runcv(NULL);
     else {
 	outside = CvOUTSIDE(proto);
-	if (CvCLONE(outside) && ! CvCLONED(outside)) {
-	    CV * const runcv = find_runcv_where(
-		FIND_RUNCV_root_eq, (void *)CvROOT(outside), NULL
+	if ((CvCLONE(outside) && ! CvCLONED(outside))
+	    || !CvPADLIST(outside)
+	    || CvPADLIST(outside)->xpadl_id != protopadlist->xpadl_outid) {
+	    outside = find_runcv_where(
+		FIND_RUNCV_padid_eq, (IV)protopadlist->xpadl_outid, NULL
 	    );
-	    if (runcv) outside = runcv;
+	    /* outside could be null */
 	}
     }
-    depth = CvDEPTH(outside);
+    depth = outside ? CvDEPTH(outside) : 0;
     assert(depth || SvTYPE(proto) == SVt_PVFM);
     if (!depth)
 	depth = 1;
-    assert(CvPADLIST(outside) || SvTYPE(proto) == SVt_PVFM);
+    assert(SvTYPE(proto) == SVt_PVFM || CvPADLIST(outside));
 
     ENTER;
     SAVESPTR(PL_compcv);
@@ -2005,6 +2008,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
+    CvPADLIST(cv)->xpadl_id = protopadlist->xpadl_id;
 
     av_fill(PL_comppad, fpad);
     for (ix = fname; ix > 0; ix--)
@@ -2012,10 +2016,11 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     PL_curpad = AvARRAY(PL_comppad);
 
-    outpad = CvPADLIST(outside)
+    outpad = outside && CvPADLIST(outside)
 	? AvARRAY(PADLIST_ARRAY(CvPADLIST(outside))[depth])
 	: NULL;
     assert(outpad || SvTYPE(cv) == SVt_PVFM);
+    if (outpad) CvPADLIST(cv)->xpadl_outid = CvPADLIST(outside)->xpadl_id;
 
     for (ix = fpad; ix > 0; ix--) {
 	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
@@ -2026,7 +2031,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		   but state vars are always available. */
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
-		    && !CvDEPTH(outside))  ) {
+		    && (!outside || !CvDEPTH(outside)))  ) {
 		    assert(SvTYPE(cv) == SVt_PVFM);
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
 				   "Variable \"%"SVf"\" is not available", namesv);
@@ -2063,7 +2068,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
-	cv_dump(outside, "Outside");
+	if (outside) cv_dump(outside, "Outside");
 	cv_dump(proto,	 "Proto");
 	cv_dump(cv,	 "To");
     );

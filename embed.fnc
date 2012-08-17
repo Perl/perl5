@@ -2346,7 +2346,7 @@ p	|PAD **	|padlist_store	|NN PADLIST *padlist|I32 key \
 				|NULLOK PAD *val
 
 ApdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
-pR	|CV*	|find_runcv_where|U8 cond|NULLOK void *arg \
+pR	|CV*	|find_runcv_where|U8 cond|IV arg \
 				 |NULLOK U32 *db_seqp
 : Only used in perl.c
 p	|void	|free_tied_hv_pool

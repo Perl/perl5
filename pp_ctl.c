@@ -3227,12 +3227,12 @@ than in the scope of the debugger itself).
 CV*
 Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
-    return Perl_find_runcv_where(aTHX_ 0, NULL, db_seqp);
+    return Perl_find_runcv_where(aTHX_ 0, 0, db_seqp);
 }
 
 /* If this becomes part of the API, it might need a better name. */
 CV *
-Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
+Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 {
     dVAR;
     PERL_SI	 *si;
@@ -3257,11 +3257,12 @@ Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
 		cv = cx->blk_eval.cv;
 	    if (cv) {
 		switch (cond) {
-		case FIND_RUNCV_root_eq:
-		    if (CvROOT(cv) != (OP *)arg) continue;
+		case FIND_RUNCV_padid_eq:
+		    if (!CvPADLIST(cv)
+		     || CvPADLIST(cv)->xpadl_id != (U32)arg) continue;
 		    return cv;
 		case FIND_RUNCV_level_eq:
-		    if (level++ != PTR2IV(arg)) continue;
+		    if (level++ != arg) continue;
 		    /* GERONIMO! */
 		default:
 		    return cv;
@@ -3269,7 +3270,7 @@ Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
 	    }
 	}
     }
-    return cond == FIND_RUNCV_root_eq ? NULL : PL_main_cv;
+    return cond == FIND_RUNCV_padid_eq ? NULL : PL_main_cv;
 }
 
 

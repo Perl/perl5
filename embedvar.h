@@ -255,6 +255,7 @@
 #define PL_pad_reset_pending	(vTHX->Ipad_reset_pending)
 #define PL_padix		(vTHX->Ipadix)
 #define PL_padix_floor		(vTHX->Ipadix_floor)
+#define PL_padlist_generation	(vTHX->Ipadlist_generation)
 #define PL_parser		(vTHX->Iparser)
 #define PL_patchlevel		(vTHX->Ipatchlevel)
 #define PL_peepp		(vTHX->Ipeepp)

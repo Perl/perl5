@@ -1038,7 +1038,7 @@ PERL_CALLCONV void	Perl_finalize_optree(pTHX_ OP* o)
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV CV*	Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
+PERL_CALLCONV CV*	Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_find_rundefsv(pTHX);

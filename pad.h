@@ -31,6 +31,8 @@ typedef U64TYPE PADOFFSET;
 struct padlist {
     SSize_t	xpadl_max;	/* max index for which array has space */
     PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
+    U32		xpadl_id;	/* Semi-unique ID, shared between clones */
+    U32		xpadl_outid;	/* ID of outer pad */
 };
 
 
