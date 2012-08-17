@@ -1973,10 +1973,8 @@ PP(pp_dbstate)
 	SPAGAIN;
 
 	if (CvISXSUB(cv)) {
-	    CvDEPTH(cv)++;
 	    PUSHMARK(SP);
 	    (void)(*CvXSUB(cv))(aTHX_ cv);
-	    CvDEPTH(cv)--;
 	    FREETMPS;
 	    LEAVE;
 	    return NORMAL;
