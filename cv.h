@@ -66,7 +66,11 @@ S_CvDEPTHp(const CV * const sv)
 {
     return SvTYPE(sv) == SVt_PVCV
 	? &((XPVCV*)SvANY(sv))->xcv_depth
+#if defined(_MSC_VER) && _MSC_VER < 1300
+	: &((XPVCV*)SvANY(sv))->xpvcuru_fmdepth;
+#else
 	: &((XPVCV*)SvANY(sv))->xpv_cur_u.xpvcuru_fmdepth;
+#endif
 }
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define CvDEPTH(sv) (*({const CV *const _cvdepth = (const CV *)sv; \

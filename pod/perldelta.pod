@@ -484,8 +484,7 @@ Machine code size reductions, already made to the DLLs of XS modules in Perl
 5.17.2, have now been extended to the perl DLL itself.
 
 Building with VC++ 6.0 was inadvertently broken in Perl 5.17.2 but has now been
-fixed again.  XXX Actually, it's now been broken again, so ensure that it gets
-fixed once more before release, or remove this comment!
+fixed again.
 
 =item VMS
 
