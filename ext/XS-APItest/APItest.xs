@@ -1965,23 +1965,23 @@ newCONSTSUB(stash, name, flags, sv)
     ALIAS:
 	newCONSTSUB_flags = 1
     PREINIT:
-	CV* cv;
+	CV* mycv;
 	STRLEN len;
 	const char *pv = SvPV(name, len);
     PPCODE:
         switch (ix) {
            case 0:
-	       cv = newCONSTSUB(stash, pv, SvOK(sv) ? SvREFCNT_inc(sv) : NULL);
+               mycv = newCONSTSUB(stash, pv, SvOK(sv) ? SvREFCNT_inc(sv) : NULL);
                break;
            case 1:
-               cv = newCONSTSUB_flags(
+               mycv = newCONSTSUB_flags(
                  stash, pv, len, flags | SvUTF8(name), SvOK(sv) ? SvREFCNT_inc(sv) : NULL
                );
                break;
         }
         EXTEND(SP, 2);
-        PUSHs( CvCONST(cv) ? &PL_sv_yes : &PL_sv_no );
-	PUSHs((SV*)CvGV(cv));
+        PUSHs( CvCONST(mycv) ? &PL_sv_yes : &PL_sv_no );
+        PUSHs((SV*)CvGV(mycv));
 
 void
 gv_init_type(namesv, multi, flags, type)
