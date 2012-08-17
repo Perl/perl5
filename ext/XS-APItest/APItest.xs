@@ -3287,16 +3287,16 @@ fetch_pad_names( cv )
 CV* cv
  PREINIT:
   I32 i;
-  AV *pad_namelist;
+  PADNAMELIST *pad_namelist;
   AV *retav = newAV();
  CODE:
-  pad_namelist = *PADLIST_ARRAY(CvPADLIST(cv));
+  pad_namelist = PADLIST_NAMES(CvPADLIST(cv));
 
-  for ( i = av_len(pad_namelist); i >= 0; i-- ) {
-    SV** name_ptr = av_fetch(pad_namelist, i, 0);
+  for ( i = PADNAMELIST_MAX(pad_namelist); i >= 0; i-- ) {
+    PADNAME* name = PADNAMELIST_ARRAY(pad_namelist)[i];
 
-    if (name_ptr && SvPOKp(*name_ptr)) {
-        av_push(retav, newSVsv(*name_ptr));
+    if (SvPOKp(name)) {
+        av_push(retav, newSVpadname(name));
     }
   }
   RETVAL = newRV_noinc((SV*)retav);
