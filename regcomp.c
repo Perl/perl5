@@ -7323,14 +7323,22 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
 
     IV low = 0;
     IV high = invlist_len(invlist);
-    const UV * const array = invlist_array(invlist);
+    const IV highest_element = high - 1;
+    const UV* array;
 
     PERL_ARGS_ASSERT__INVLIST_SEARCH;
 
-    /* If list is empty or the code point is before the first element, return
-     * failure. */
-    if (high == 0 || cp < array[0]) {
+    /* If list is empty, return failure. */
+    if (high == 0) {
 	return -1;
+    }
+
+    /* If the code point is before the first element, return failure.  (We
+     * can't combine this with the test above, because we can't get the array
+     * unless we know the list is non-empty) */
+    array = invlist_array(invlist);
+    if (cp < array[0]) {
+        return -1;
     }
 
     /* Binary search.  What we are looking for is <i> such that
