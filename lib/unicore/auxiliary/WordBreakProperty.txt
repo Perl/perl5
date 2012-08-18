@@ -1,8 +1,8 @@
-# WordBreakProperty-6.2.0.txt
-# Date: 2012-06-02, 23:25:43 GMT [MD]
+# WordBreakProperty-6.1.0.txt
+# Date: 2011-11-27, 05:10:51 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2012 Unicode, Inc.
+# Copyright (c) 1991-2011 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 
@@ -280,7 +280,7 @@
 1CF4          ; Extend # Mn       VEDIC TONE CANDRA ABOVE
 1DC0..1DE6    ; Extend # Mn  [39] COMBINING DOTTED GRAVE ACCENT..COMBINING LATIN SMALL LETTER Z
 1DFC..1DFF    ; Extend # Mn   [4] COMBINING DOUBLE INVERTED BREVE BELOW..COMBINING RIGHT ARROWHEAD AND DOWN ARROWHEAD BELOW
-200C          ; Extend # Cf       ZERO WIDTH NON-JOINER
+200C..200D    ; Extend # Cf   [2] ZERO WIDTH NON-JOINER..ZERO WIDTH JOINER
 20D0..20DC    ; Extend # Mn  [13] COMBINING LEFT HARPOON ABOVE..COMBINING FOUR DOTS ABOVE
 20DD..20E0    ; Extend # Me   [4] COMBINING ENCLOSING CIRCLE..COMBINING ENCLOSING CIRCLE BACKSLASH
 20E1          ; Extend # Mn       COMBINING LEFT RIGHT ARROW ABOVE
@@ -391,19 +391,7 @@ FF9E..FF9F    ; Extend # Lm   [2] HALFWIDTH KATAKANA VOICED SOUND MARK..HALFWIDT
 1D242..1D244  ; Extend # Mn   [3] COMBINING GREEK MUSICAL TRISEME..COMBINING GREEK MUSICAL PENTASEME
 E0100..E01EF  ; Extend # Mn [240] VARIATION SELECTOR-17..VARIATION SELECTOR-256
 
-# Total code points: 1648
-
-# ================================================
-
-200D          ; Joiner # Cf       ZERO WIDTH JOINER
-
-# Total code points: 1
-
-# ================================================
-
-1F1E6..1F1FF  ; After_Joiner # So  [26] REGIONAL INDICATOR SYMBOL LETTER A..REGIONAL INDICATOR SYMBOL LETTER Z
-
-# Total code points: 26
+# Total code points: 1649
 
 # ================================================
 

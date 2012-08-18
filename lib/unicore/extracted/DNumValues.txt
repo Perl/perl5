@@ -1,35 +1,33 @@
-# DerivedNumericValues-6.2.0.txt
-# Date: 2012-05-20, 17:41:09 GMT [MD]
+# DerivedNumericValues-6.1.0.txt
+# Date: 2011-08-19, 17:58:36 GMT [MD]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2012 Unicode, Inc.
+# Copyright (c) 1991-2011 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 
 # ================================================
 
 # Derived Property:   Numeric_Value
-#  Field 1:
-#    The values are based on field 8 of UnicodeData.txt, plus the fields
-#    kAccountingNumeric, kOtherNumeric, kPrimaryNumeric in the Unicode Han Database (Unihan).
-#    The derivations for these values are as follows.
-#      Numeric_Value = the value of kAccountingNumeric, kOtherNumeric, or kPrimaryNumeric, if they exist; otherwise
-#      Numeric_Value = the value of field 8, if it exists; otherwise
-#      Numeric_Value = NaN
-#  Field 2:
-#    This field is empty; it used to be a copy of the numeric type.
+#  The values are based on field 8 of UnicodeData.txt, plus the fields
+#  kAccountingNumeric, kOtherNumeric, kPrimaryNumeric in the Unicode Han Database (Unihan).
+#  The derivations for these values are as follows.
+#     Numeric_Value = the value of kAccountingNumeric, kOtherNumeric, or kPrimaryNumeric, if they exist; otherwise
+#     Numeric_Value = the value of field 8, if it exists; otherwise
+#     Numeric_Value = NaN
 #
-#  Field 3:
-#    This field was added to this extracted data as of Unicode 5.1.0,
-#    expressing the same numeric value either as a whole integer
-#    where possible, or as a rational fraction such as "1/6".
-#
-# WARNING: Certain values, such as 0.16666667, are repeating fractions.
+# WARNING: Certain values, such as 0.16666667, are repeating fractions
 # Although they are only printed with a limited number of decimal places
 # in this file, they should be expressed to the limits of the precision
 # available when used.
 #
-# @missing: 0000..10FFFF; NaN; ; NaN
+# The third field is empty; it used to be a copy of the numeric type.
+#
+# A fourth field was added to this extracted data as of
+# Unicode 5.1.0, expressing the same numeric value either as
+# a whole integer where possible or as a rational fraction, e.g. "1/6".
+#
+# @missing: 0000..10FFFF; ; NaN
 
 # ================================================
 
@@ -651,6 +649,7 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 116C4         ; 4.0 ; ; 4 # Nd       TAKRI DIGIT FOUR
 12402         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR ASH
 12409         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR DISH
+1240F         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR U
 12418         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR GESH2
 12421         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR GESHU
 12426         ; 4.0 ; ; 4 # Nl       CUNEIFORM NUMERIC SIGN FOUR SHAR2
@@ -670,7 +669,7 @@ FF14          ; 4.0 ; ; 4 # Nd       FULLWIDTH DIGIT FOUR
 200E2         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-200E2
 2626D         ; 4.0 ; ; 4 # Lo       CJK UNIFIED IDEOGRAPH-2626D
 
-# Total code points: 92
+# Total code points: 93
 
 # ================================================
 
@@ -753,6 +752,7 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 116C5         ; 5.0 ; ; 5 # Nd       TAKRI DIGIT FIVE
 12403         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE ASH
 1240A         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE DISH
+12410         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE U
 12419         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE GESH2
 12422         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE GESHU
 12427         ; 5.0 ; ; 5 # Nl       CUNEIFORM NUMERIC SIGN FIVE SHAR2
@@ -769,7 +769,7 @@ FF15          ; 5.0 ; ; 5 # Nd       FULLWIDTH DIGIT FIVE
 1F106         ; 5.0 ; ; 5 # No       DIGIT FIVE COMMA
 20121         ; 5.0 ; ; 5 # Lo       CJK UNIFIED IDEOGRAPH-20121
 
-# Total code points: 89
+# Total code points: 90
 
 # ================================================
 
@@ -848,6 +848,7 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 116C6         ; 6.0 ; ; 6 # Nd       TAKRI DIGIT SIX
 12404         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX ASH
 1240B         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX DISH
+12411         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX U
 1241A         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX GESH2
 12428         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX SHAR2
 12440         ; 6.0 ; ; 6 # Nl       CUNEIFORM NUMERIC SIGN SIX VARIANT FORM ASH9
@@ -861,7 +862,7 @@ FF16          ; 6.0 ; ; 6 # Nd       FULLWIDTH DIGIT SIX
 1F107         ; 6.0 ; ; 6 # No       DIGIT SIX COMMA
 20AEA         ; 6.0 ; ; 6 # Lo       CJK UNIFIED IDEOGRAPH-20AEA
 
-# Total code points: 81
+# Total code points: 82
 
 # ================================================
 
@@ -938,6 +939,7 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 116C7         ; 7.0 ; ; 7 # Nd       TAKRI DIGIT SEVEN
 12405         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN ASH
 1240C         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN DISH
+12412         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN U
 1241B         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN GESH2
 12429         ; 7.0 ; ; 7 # Nl       CUNEIFORM NUMERIC SIGN SEVEN SHAR2
 12441..12443  ; 7.0 ; ; 7 # Nl   [3] CUNEIFORM NUMERIC SIGN SEVEN VARIANT FORM IMIN3..CUNEIFORM NUMERIC SIGN SEVEN VARIANT FORM IMIN B
@@ -950,7 +952,7 @@ FF17          ; 7.0 ; ; 7 # Nd       FULLWIDTH DIGIT SEVEN
 1F108         ; 7.0 ; ; 7 # No       DIGIT SEVEN COMMA
 20001         ; 7.0 ; ; 7 # Lo       CJK UNIFIED IDEOGRAPH-20001
 
-# Total code points: 80
+# Total code points: 81
 
 # ================================================
 
@@ -1025,6 +1027,7 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 116C8         ; 8.0 ; ; 8 # Nd       TAKRI DIGIT EIGHT
 12406         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT ASH
 1240D         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT DISH
+12413         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT U
 1241C         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT GESH2
 1242A         ; 8.0 ; ; 8 # Nl       CUNEIFORM NUMERIC SIGN EIGHT SHAR2
 12444..12445  ; 8.0 ; ; 8 # Nl   [2] CUNEIFORM NUMERIC SIGN EIGHT VARIANT FORM USSU..CUNEIFORM NUMERIC SIGN EIGHT VARIANT FORM USSU3
@@ -1036,7 +1039,7 @@ FF18          ; 8.0 ; ; 8 # Nd       FULLWIDTH DIGIT EIGHT
 1D7FE         ; 8.0 ; ; 8 # Nd       MATHEMATICAL MONOSPACE DIGIT EIGHT
 1F109         ; 8.0 ; ; 8 # No       DIGIT EIGHT COMMA
 
-# Total code points: 76
+# Total code points: 77
 
 # ================================================
 
@@ -1112,6 +1115,7 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 116C9         ; 9.0 ; ; 9 # Nd       TAKRI DIGIT NINE
 12407         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE ASH
 1240E         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE DISH
+12414         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE U
 1241D         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE GESH2
 1242B         ; 9.0 ; ; 9 # Nl       CUNEIFORM NUMERIC SIGN NINE SHAR2
 12446..12449  ; 9.0 ; ; 9 # Nl   [4] CUNEIFORM NUMERIC SIGN NINE VARIANT FORM ILIMMU..CUNEIFORM NUMERIC SIGN NINE VARIANT FORM ILIMMU A
@@ -1124,7 +1128,7 @@ FF19          ; 9.0 ; ; 9 # Nd       FULLWIDTH DIGIT NINE
 1F10A         ; 9.0 ; ; 9 # No       DIGIT NINE COMMA
 2F890         ; 9.0 ; ; 9 # Lo       CJK COMPATIBILITY IDEOGRAPH-2F890
 
-# Total code points: 80
+# Total code points: 81
 
 # ================================================
 
@@ -1413,12 +1417,11 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10113         ; 40.0 ; ; 40 # No       AEGEAN NUMBER FORTY
 10E6C         ; 40.0 ; ; 40 # No       RUMI NUMBER FORTY
 1105E         ; 40.0 ; ; 40 # No       BRAHMI NUMBER FORTY
-1240F         ; 40.0 ; ; 40 # Nl       CUNEIFORM NUMERIC SIGN FOUR U
 1D36C         ; 40.0 ; ; 40 # No       COUNTING ROD TENS DIGIT FOUR
 2098C         ; 40.0 ; ; 40 # Lo       CJK UNIFIED IDEOGRAPH-2098C
 2099C         ; 40.0 ; ; 40 # Lo       CJK UNIFIED IDEOGRAPH-2099C
 
-# Total code points: 11
+# Total code points: 10
 
 # ================================================
 
@@ -1492,10 +1495,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10A7E         ; 50.0 ; ; 50 # No       OLD SOUTH ARABIAN NUMBER FIFTY
 10E6D         ; 50.0 ; ; 50 # No       RUMI NUMBER FIFTY
 1105F         ; 50.0 ; ; 50 # No       BRAHMI NUMBER FIFTY
-12410         ; 50.0 ; ; 50 # Nl       CUNEIFORM NUMERIC SIGN FIVE U
 1D36D         ; 50.0 ; ; 50 # No       COUNTING ROD TENS DIGIT FIVE
 
-# Total code points: 21
+# Total code points: 20
 
 # ================================================
 
@@ -1504,10 +1506,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10115         ; 60.0 ; ; 60 # No       AEGEAN NUMBER SIXTY
 10E6E         ; 60.0 ; ; 60 # No       RUMI NUMBER SIXTY
 11060         ; 60.0 ; ; 60 # No       BRAHMI NUMBER SIXTY
-12411         ; 60.0 ; ; 60 # Nl       CUNEIFORM NUMERIC SIGN SIX U
 1D36E         ; 60.0 ; ; 60 # No       COUNTING ROD TENS DIGIT SIX
 
-# Total code points: 7
+# Total code points: 6
 
 # ================================================
 
@@ -1516,10 +1517,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10116         ; 70.0 ; ; 70 # No       AEGEAN NUMBER SEVENTY
 10E6F         ; 70.0 ; ; 70 # No       RUMI NUMBER SEVENTY
 11061         ; 70.0 ; ; 70 # No       BRAHMI NUMBER SEVENTY
-12412         ; 70.0 ; ; 70 # Nl       CUNEIFORM NUMERIC SIGN SEVEN U
 1D36F         ; 70.0 ; ; 70 # No       COUNTING ROD TENS DIGIT SEVEN
 
-# Total code points: 7
+# Total code points: 6
 
 # ================================================
 
@@ -1528,10 +1528,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10117         ; 80.0 ; ; 80 # No       AEGEAN NUMBER EIGHTY
 10E70         ; 80.0 ; ; 80 # No       RUMI NUMBER EIGHTY
 11062         ; 80.0 ; ; 80 # No       BRAHMI NUMBER EIGHTY
-12413         ; 80.0 ; ; 80 # Nl       CUNEIFORM NUMERIC SIGN EIGHT U
 1D370         ; 80.0 ; ; 80 # No       COUNTING ROD TENS DIGIT EIGHT
 
-# Total code points: 7
+# Total code points: 6
 
 # ================================================
 
@@ -1540,10 +1539,9 @@ F9FD          ; 10.0 ; ; 10 # Lo       CJK COMPATIBILITY IDEOGRAPH-F9FD
 10341         ; 90.0 ; ; 90 # Nl       GOTHIC LETTER NINETY
 10E71         ; 90.0 ; ; 90 # No       RUMI NUMBER NINETY
 11063         ; 90.0 ; ; 90 # No       BRAHMI NUMBER NINETY
-12414         ; 90.0 ; ; 90 # Nl       CUNEIFORM NUMERIC SIGN NINE U
 1D371         ; 90.0 ; ; 90 # No       COUNTING ROD TENS DIGIT NINE
 
-# Total code points: 7
+# Total code points: 6
 
 # ================================================
 
