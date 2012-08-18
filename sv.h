@@ -224,42 +224,10 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvREFCNT_inc(sv)		\
-    ({					\
-	SV * const _sv = MUTABLE_SV(sv);	\
-	if (_sv)			\
-	     (SvREFCNT(_sv))++;		\
-	_sv;				\
-    })
-#  define SvREFCNT_inc_simple(sv)	\
-    ({					\
-	if (sv)				\
-	     (SvREFCNT(sv))++;		\
-	MUTABLE_SV(sv);				\
-    })
-#  define SvREFCNT_inc_NN(sv)		\
-    ({					\
-	SV * const _sv = MUTABLE_SV(sv);	\
-	SvREFCNT(_sv)++;		\
-	_sv;				\
-    })
-#  define SvREFCNT_inc_void(sv)		\
-    ({					\
-	SV * const _sv = MUTABLE_SV(sv);	\
-	if (_sv)			\
-	    (void)(SvREFCNT(_sv)++);	\
-    })
-#else
-#  define SvREFCNT_inc(sv)	\
-	((PL_Sv=MUTABLE_SV(sv)) ? (++(SvREFCNT(PL_Sv)),PL_Sv) : NULL)
-#  define SvREFCNT_inc_simple(sv) \
-	((sv) ? (SvREFCNT(sv)++,MUTABLE_SV(sv)) : NULL)
-#  define SvREFCNT_inc_NN(sv) \
-	(PL_Sv=MUTABLE_SV(sv),++(SvREFCNT(PL_Sv)),PL_Sv)
-#  define SvREFCNT_inc_void(sv) \
-	(void)((PL_Sv=MUTABLE_SV(sv)) ? ++(SvREFCNT(PL_Sv)) : 0)
-#endif
+#define SvREFCNT_inc(sv)		S_SvREFCNT_inc(MUTABLE_SV(sv))
+#define SvREFCNT_inc_simple(sv)		SvREFCNT_inc(sv)
+#define SvREFCNT_inc_NN(sv)		S_SvREFCNT_inc_NN(MUTABLE_SV(sv))
+#define SvREFCNT_inc_void(sv)		S_SvREFCNT_inc_void(MUTABLE_SV(sv))
 
 /* These guys don't need the curly blocks */
 #define SvREFCNT_inc_simple_void(sv)	STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END

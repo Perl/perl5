@@ -11,3 +11,25 @@
  *
  * Each section names the header file that the functions "belong" to.
  */
+
+/* ------------------------------- sv.h ------------------------------- */
+
+PERL_STATIC_INLINE SV *
+S_SvREFCNT_inc(SV *sv)
+{
+    if (sv)
+	SvREFCNT(sv)++;
+    return sv;
+}
+PERL_STATIC_INLINE SV *
+S_SvREFCNT_inc_NN(SV *sv)
+{
+    SvREFCNT(sv)++;
+    return sv;
+}
+PERL_STATIC_INLINE void
+S_SvREFCNT_inc_void(SV *sv)
+{
+    if (sv)
+	SvREFCNT(sv)++;
+}
