@@ -29,40 +29,38 @@
 
 =for apidoc Amx|PADLIST *|CvPADLIST|CV *cv
 
-CV's can have CvPADLIST(cv) set to point to an AV.  This is the CV's
+CV's can have CvPADLIST(cv) set to point to a PADLIST.  This is the CV's
 scratchpad, which stores lexical variables and opcode temporary and
 per-thread values.
 
-For these purposes "forms" are a kind-of CV, eval""s are too (except they're
+For these purposes "formats" are a kind-of CV; eval""s are too (except they're
 not callable at will and are always thrown away after the eval"" is done
-executing). Require'd files are simply evals without any outer lexical
+executing).  Require'd files are simply evals without any outer lexical
 scope.
 
 XSUBs don't have CvPADLIST set - dXSTARG fetches values from PL_curpad,
 but that is really the callers pad (a slot of which is allocated by
 every entersub).
 
-The CvPADLIST AV has the REFCNT of its component items managed "manually"
-(mostly in pad.c) rather than by normal av.c rules.  So we turn off AvREAL
-just before freeing it, to let av.c know not to touch the entries.
-The items in the AV are not SVs as for a normal AV, but other AVs:
+The PADLIST has a C array where pads are stored.
 
-0'th Entry of the CvPADLIST is an AV which represents the "names" or rather
-the "static type information" for lexicals.
+The 0th entry of the PADLIST is a PADNAMELIST (which is actually just an
+AV, but that may change) which represents the "names" or rather
+the "static type information" for lexicals.  The individual elements of a
+PADNAMELIST are PADNAMEs (just SVs; but, again, that may change).
 
-The CvDEPTH'th entry of CvPADLIST AV is an AV which is the stack frame at that
-depth of recursion into the CV.
-The 0'th slot of a frame AV is an AV which is @_.
-other entries are storage for variables and op targets.
+The CvDEPTH'th entry of a PADLIST is a PAD (an AV) which is the stack frame
+at that depth of recursion into the CV.  The 0th slot of a frame AV is an
+AV which is @_.  Other entries are storage for variables and op targets.
 
-Iterating over the names AV iterates over all possible pad
-items. Pad slots that are SVs_PADTMP (targets/GVs/constants) end up having
+Iterating over the PADNAMELIST iterates over all possible pad
+items.  Pad slots that are SVs_PADTMP (targets/GVs/constants) end up having
 &PL_sv_undef "names" (see pad_alloc()).
 
-Only my/our variable (SVs_PADMY/SVs_PADOUR) slots get valid names.
+Only my/our variable (SvPADMY/PADNAME_isOUR) slots get valid names.
 The rest are op targets/GVs/constants which are statically allocated
 or resolved at compile time.  These don't have names by which they
-can be looked up from Perl code at run time through eval"" like
+can be looked up from Perl code at run time through eval"" the way
 my/our variables can be.  Since they can't be looked up by "name"
 but only by their index allocated at compile time (which is usually
 in PL_op->op_targ), wasting a name SV for them doesn't make sense.
@@ -94,7 +92,7 @@ instantiated multiple times?), and for fake ANONs, xlow contains the index
 within the parent's pad where the lexical's value is stored, to make
 cloning quicker.
 
-If the 'name' is '&' the corresponding entry in frame AV
+If the 'name' is '&' the corresponding entry in the PAD
 is a CV representing a possible closure.
 (SvFAKE and name of '&' is not a meaningful combination currently but could
 become so if C<my sub foo {}> is implemented.)
@@ -103,12 +101,13 @@ Note that formats are treated as anon subs, and are cloned each time
 write is called (if necessary).
 
 The flag SVs_PADSTALE is cleared on lexicals each time the my() is executed,
-and set on scope exit. This allows the 'Variable $x is not available' warning
+and set on scope exit.  This allows the
+'Variable $x is not available' warning
 to be generated in evals, such as 
 
     { my $x = 1; sub f { eval '$x'} } f();
 
-For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'
+For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'.
 
 =for apidoc AmxU|AV *|PL_comppad_name
 
