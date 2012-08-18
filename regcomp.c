@@ -7398,7 +7398,15 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
             current = array[i];
 	    if (current >= end) {   /* Finished if beyond the end of what we
 				       are populating */
-                return;
+                if (LIKELY(end < UV_MAX)) {
+                    return;
+                }
+
+                /* We get here when the upper bound is the maximum
+                 * representable on the machine, and we are looking for just
+                 * that code point.  Have to special case it */
+                i = len;
+                goto join_end_of_list;
             }
         }
         assert(current >= start);
@@ -7414,6 +7422,8 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
             const STRLEN offset = (STRLEN)(current - start);
             swatch[offset >> 3] |= 1 << (offset & 7);
         }
+
+    join_end_of_list:
 
 	/* Quit if at the end of the list */
         if (i >= len) {
