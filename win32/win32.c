@@ -64,12 +64,7 @@
 #include <stdarg.h>
 #include <float.h>
 #include <time.h>
-
-#if defined(_MSC_VER) || defined(__MINGW32__)
-#  include <sys/utime.h>
-#else
-#  include <utime.h>
-#endif
+#include <sys/utime.h>
 
 #ifdef __GNUC__
 /* Mingw32 defaults to globing command line
