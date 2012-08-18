@@ -248,6 +248,12 @@ resolved, and <getservbyname()> is no longer called when the port is specified.
 
 =item *
 
+L<Term::ReadLine> has been upgraded from version 1.09 to 1.10.  This fixes the
+use of the B<cpan> and B<cpanp> shells on Windows in the event that the current
+drive happens to contain a F<\dev\tty> file.
+
+=item *
+
 L<Time::Local> has been upgraded from version 1.2000 to 1.2300.  Seconds values
 greater than 59 but less than 60 no longer cause C<timegm()> and C<timelocal()>
 to croak.

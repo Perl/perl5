@@ -233,7 +233,7 @@ sub findConsole {
     my $console;
     my $consoleOUT;
 
-    if (-e "/dev/tty") {
+    if (-e "/dev/tty" and $^O ne 'MSWin32') {
 	$console = "/dev/tty";
     } elsif (-e "con" or $^O eq 'MSWin32') {
        $console = 'CONIN$';
@@ -327,7 +327,7 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {
