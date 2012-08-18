@@ -822,17 +822,13 @@ previous is 5.10.0:
     find . -type f | sort > /tmp/f2
     diff -u /tmp/f[12]
 
-=head4 Test the CPAN client
+=head4 Bootstrap the CPAN client
 
 Bootstrap the CPAN client on the clean install:
 
-    $ bin/perl -MCPAN -e "shell"
+    $ bin/cpan
 
-If you're running this on Win32 you probably also need a set of Unix
-command-line tools available for CPAN to function correctly without
-Perl alternatives like LWP installed. Cygwin is an obvious choice.)
-
-=head4 Install the Inline module and test it
+=head4 Install the Inline module with CPAN and test it
 
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
@@ -851,10 +847,6 @@ Check that your perl can run this:
 Bootstrap the CPANPLUS client on the clean install:
 
     $ bin/cpanp
-
-(Again, on Win32 you'll need something like Cygwin installed, but make sure
-that you don't end up with its various F<bin/cpan*> programs being found on
-the PATH before those of the Perl that you're trying to test.)
 
 =head4 Install the DBI module with CPANPLUS
 
