@@ -7082,7 +7082,8 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
         }
     }
 
-    return (flags & ANYOF_INVERT) ? !match : match;
+    /* The xor complements the return if to invert: 1^1 = 0, 1^0 = 1 */
+    return cBOOL(flags & ANYOF_INVERT) ^ match;
 }
 
 STATIC U8 *
