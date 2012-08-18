@@ -1325,12 +1325,6 @@ EXTERN_C char *crypt(const char *, const char *);
 #   endif
 #endif
 
-#ifdef PERL_MICRO
-#   ifndef DIR
-#      define DIR void
-#   endif
-#endif
-
 #ifdef FPUTS_BOTCH
 /* work around botch in SunOS 4.0.1 and 4.0.2 */
 #   ifndef fputs
