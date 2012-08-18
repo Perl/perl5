@@ -1,19 +1,19 @@
-Perl should compile and reasonably run any version of Unicode.  That doesn't
-mean that the test suite will run without showing errors.  A few of the
-very-Unicode specific test files have been modified to account for different
-versions, but most have not.  For example, some tests use characters that
-aren't encoded in all Unicode versions; others have hard-coded the General
-Categories that were correct at the time the test was written.  Perl itself
-will not compile under Unicode releases prior to 3.0 without a simple change to
-Unicode::Normalize.  mktables contains instructions for this, as well as other
-hints for using older Unicode versions.
+# Perl should compile and reasonably run any version of Unicode.  That doesn't
+# mean that the test suite will run without showing errors.  A few of the
+# very-Unicode specific test files have been modified to account for different
+# versions, but most have not.  For example, some tests use characters that
+# aren't encoded in all Unicode versions; others have hard-coded the General
+# Categories that were correct at the time the test was written.  Perl itself
+# will not compile under Unicode releases prior to 3.0 without a simple change to
+# Unicode::Normalize.  mktables contains instructions for this, as well as other
+# hints for using older Unicode versions.
 
-The *.txt files were copied from
+# The *.txt files were copied from
 
-	ftp://www.unicode.org/Public/UNIDATA
+# 	ftp://www.unicode.org/Public/UNIDATA
 
-(which always points to the latest version) with subdirectories 'extracted' and
-'auxiliary'.  Older versions are located under Public with an appropriate name.
+# (which always points to the latest version) with subdirectories 'extracted' and
+# 'auxiliary'.  Older versions are located under Public with an appropriate name.
 
 # The Unihan files were not included due to space considerations.  Also NOT
 # included were any *.html files.  It is possible to add the Unihan files, and
@@ -37,12 +37,12 @@ mv DerivedNormalizationProps.txt DNormalizationProps.txt
 
 # Some early releases don't have the extracted directory, and hence these files
 # should be moved to it.
-mkdir extracted
-mv DerivedBidiClass.txt DerivedBinaryProperties.txt extracted
-mv DerivedCombiningClass.txt DerivedDecompositionType.txt extracted
-mv DerivedEastAsianWidth.txt DerivedGeneralCategory.txt extracted
-mv DerivedJoiningGroup.txt DerivedJoiningType.txt extracted
-mv DerivedLineBreak.txt DerivedNumericType.txt DerivedNumericValues.txt extracted
+mkdir extracted 2>/dev/null
+mv DerivedBidiClass.txt DerivedBinaryProperties.txt extracted 2>/dev/null
+mv DerivedCombiningClass.txt DerivedDecompositionType.txt extracted 2>/dev/null
+mv DerivedEastAsianWidth.txt DerivedGeneralCategory.txt extracted 2>/dev/null
+mv DerivedJoiningGroup.txt DerivedJoiningType.txt extracted 2>/dev/null
+mv DerivedLineBreak.txt DerivedNumericType.txt DerivedNumericValues.txt extracted 2>/dev/null
 
 mv extracted/DerivedBidiClass.txt extracted/DBidiClass.txt
 mv extracted/DerivedBinaryProperties.txt extracted/DBinaryProperties.txt
