@@ -443,8 +443,8 @@ PERLVARI(I, profiledata, U32 *,	NULL)	/* table of ops, counts */
 PERLVAR(I, compiling,	COP)		/* compiling/done executing marker */
 
 PERLVAR(I, compcv,	CV *)		/* currently compiling subroutine */
-PERLVAR(I, comppad,	AV *)		/* storage for lexically scoped temporaries */
-PERLVAR(I, comppad_name, AV *)		/* variable names for "my" variables */
+PERLVAR(I, comppad,	PAD *)		/* storage for lexically scoped temporaries */
+PERLVAR(I, comppad_name, PADNAMELIST *)	/* variable names for "my" variables */
 PERLVAR(I, comppad_name_fill,	I32)	/* last "introduced" variable offset */
 PERLVAR(I, comppad_name_floor,	I32)	/* start of vars in innermost block */
 

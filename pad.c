@@ -109,12 +109,12 @@ to be generated in evals, such as
 
 For state vars, SVs_PADSTALE is overloaded to mean 'not yet initialised'.
 
-=for apidoc AmxU|AV *|PL_comppad_name
+=for apidoc AmxU|PADNAMELIST *|PL_comppad_name
 
 During compilation, this points to the array containing the names part
 of the pad for the currently-compiling code.
 
-=for apidoc AmxU|AV *|PL_comppad
+=for apidoc AmxU|PAD *|PL_comppad
 
 During compilation, this points to the array containing the values
 part of the pad for the currently-compiling code.  (At runtime a CV may
