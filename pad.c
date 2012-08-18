@@ -125,7 +125,7 @@ values for the pad for the currently-executing code.
 =for apidoc AmxU|SV **|PL_curpad
 
 Points directly to the body of the L</PL_comppad> array.
-(I.e., this is C<AvARRAY(PL_comppad)>.)
+(I.e., this is C<PAD_ARRAY(PL_comppad)>.)
 
 =cut
 */
