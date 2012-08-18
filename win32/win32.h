@@ -166,12 +166,6 @@ struct utsname {
 
 #define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 
-/* Define PERL_WIN32_SOCK_DLOAD to have Perl dynamically load the winsock
-   DLL when needed. Don't use if your compiler supports delayloading (ie, VC++ 6.0)
-	-- BKS 5-29-2000 */
-#if !(defined(_M_IX86) && _MSC_VER >= 1200)
-#define PERL_WIN32_SOCK_DLOAD
-#endif
 #define ENV_IS_CASELESS
 
 #define PIPESOCK_MODE	"b"		/* pipes, sockets default to binmode */
@@ -210,9 +204,6 @@ typedef unsigned short	mode_t;
 #endif
 
 #pragma  warning(disable: 4102)	/* "unreferenced label" */
-
-/* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
-#define PERL_MEMBER_PTR_SIZE	16
 
 #define isnan		_isnan
 #define snprintf	_snprintf
