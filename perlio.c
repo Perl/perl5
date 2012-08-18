@@ -31,23 +31,7 @@
 #define dSYS dNOOP
 #endif
 
-#define VOIDUSED 1
-#ifdef PERL_MICRO
-#   include "uconfig.h"
-#else
-#   ifndef USE_CROSS_COMPILE
-#       include "config.h"
-#   else
-#       include "xconfig.h"
-#   endif
-#endif
-
 #define PERLIO_NOT_STDIO 0
-#if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
-/*
- * #define PerlIO FILE
- */
-#endif
 /*
  * This file provides those parts of PerlIO abstraction
  * which are not #defined in perlio.h.
