@@ -45,3 +45,41 @@ S_SvREFCNT_dec(pTHX_ SV *sv)
 	}
     }
 }
+
+PERL_STATIC_INLINE void
+SvAMAGIC_on(SV *sv)
+{
+    assert(SvROK(sv));
+    if (SvOBJECT(SvRV(sv))) HvAMAGIC_on(SvSTASH(SvRV(sv)));
+}
+PERL_STATIC_INLINE void
+SvAMAGIC_off(SV *sv)
+{
+    if (SvROK(sv) && SvOBJECT(SvRV(sv)))
+	HvAMAGIC_off(SvSTASH(SvRV(sv)));
+}
+
+PERL_STATIC_INLINE U32
+S_SvPADTMP_on(SV *sv)
+{
+    assert(!(SvFLAGS(sv) & SVs_PADMY));
+    return SvFLAGS(sv) |= SVs_PADTMP;
+}
+PERL_STATIC_INLINE U32
+S_SvPADTMP_off(SV *sv)
+{
+    assert(!(SvFLAGS(sv) & SVs_PADMY));
+    return SvFLAGS(sv) &= ~SVs_PADTMP;
+}
+PERL_STATIC_INLINE U32
+S_SvPADSTALE_on(SV *sv)
+{
+    assert(SvFLAGS(sv) & SVs_PADMY);
+    return SvFLAGS(sv) |= SVs_PADSTALE;
+}
+PERL_STATIC_INLINE U32
+S_SvPADSTALE_off(SV *sv)
+{
+    assert(SvFLAGS(sv) & SVs_PADMY);
+    return SvFLAGS(sv) &= ~SVs_PADSTALE;
+}

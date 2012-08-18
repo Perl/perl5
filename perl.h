@@ -5083,9 +5083,6 @@ END_EXTERN_C
 #undef PERLVARI
 #undef PERLVARIC
 
-/* Static inline functions that depend on headers included above */
-#include "inline.h"
-
 START_EXTERN_C
 
 /* dummy variables that hold pointers to both runops functions, thus forcing
@@ -5153,6 +5150,8 @@ EXTCONST bool PL_valid_types_NV_set[];
 
 #endif
 
+/* Static inline funcs that depend on includes and declarations above */
+#include "inline.h"
 
 #include "overload.h"
 

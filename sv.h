@@ -844,24 +844,6 @@ in gv.h: */
 
 #define SvAMAGIC(sv)		(SvROK(sv) && SvOBJECT(SvRV(sv)) &&	\
 				 HvAMAGIC(SvSTASH(SvRV(sv))))
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvAMAGIC_on(sv)	({ SV * const kloink = sv;		\
-				   assert(SvROK(kloink));		\
-				   if (SvOBJECT(SvRV(kloink)))		\
-				    HvAMAGIC_on(SvSTASH(SvRV(kloink)));	\
-				})
-#  define SvAMAGIC_off(sv)	({ SV * const kloink = sv;		\
-				   if(SvROK(kloink)			\
-				      && SvOBJECT(SvRV(kloink)))	\
-				     HvAMAGIC_off(SvSTASH(SvRV(kloink))); \
-				})
-#else
-#  define SvAMAGIC_on(sv) \
-	SvOBJECT(SvRV(sv)) && (SvFLAGS(SvSTASH(SvRV(sv))) |= SVf_AMAGIC)
-#  define SvAMAGIC_off(sv) \
-	(SvROK(sv) && SvOBJECT(SvRV(sv)) \
-	    && (SvFLAGS(SvSTASH(SvRV(sv))) &= ~SVf_AMAGIC))
-#endif
 
 /* To be used on the stashes themselves: */
 #define HvAMAGIC(hv)		(SvFLAGS(hv) & SVf_AMAGIC)
@@ -960,33 +942,10 @@ sv_force_normal does nothing.
 #define SvPADSTALE(sv)	((SvFLAGS(sv) & (SVs_PADMY|SVs_PADSTALE)) \
 				    == (SVs_PADMY|SVs_PADSTALE))
 
-#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvPADTMP_on(sv)	({			\
-	    SV *const _svpad = MUTABLE_SV(sv);		\
-	    assert(!(SvFLAGS(_svpad) & SVs_PADMY));	\
-	    SvFLAGS(_svpad) |= SVs_PADTMP;		\
-	})
-#  define SvPADTMP_off(sv)	({			\
-	    SV *const _svpad = MUTABLE_SV(sv);		\
-	    assert(!(SvFLAGS(_svpad) & SVs_PADMY));	\
-	    SvFLAGS(_svpad) &= ~SVs_PADTMP;		\
-	})
-#  define SvPADSTALE_on(sv)	({			\
-	    SV *const _svpad = MUTABLE_SV(sv);		\
-	    assert(SvFLAGS(_svpad) & SVs_PADMY);	\
-	    SvFLAGS(_svpad) |= SVs_PADSTALE;		\
-	})
-#  define SvPADSTALE_off(sv)	({			\
-	    SV *const _svpad = MUTABLE_SV(sv);		\
-	    assert(SvFLAGS(_svpad) & SVs_PADMY);	\
-	    SvFLAGS(_svpad) &= ~SVs_PADSTALE;		\
-	})
-#else
-#  define SvPADTMP_on(sv)	(SvFLAGS(sv) |= SVs_PADTMP)
-#  define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
-#  define SvPADSTALE_on(sv)	(SvFLAGS(sv) |= SVs_PADSTALE)
-#  define SvPADSTALE_off(sv)	(SvFLAGS(sv) &= ~SVs_PADSTALE)
-#endif
+#define SvPADTMP_on(sv)		S_SvPADTMP_on(MUTABLE_SV(sv))
+#define SvPADTMP_off(sv)	S_SvPADTMP_off(MUTABLE_SV(sv))
+#define SvPADSTALE_on(sv)	S_SvPADSTALE_on(MUTABLE_SV(sv))
+#define SvPADSTALE_off(sv)	S_SvPADSTALE_off(MUTABLE_SV(sv))
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVs_TEMP)
 #define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVs_TEMP)
