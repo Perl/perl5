@@ -4293,14 +4293,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* This API is bad. It should have been using unsigned int for maxlen.
        Not sure if we want to change the API, but if not we should sanity
        check the value here.  */
-    unsigned int correct_length
-	= maxlen < 0 ?
-#ifdef PERL_MICRO
-	0x7FFFFFFF
-#else
-	INT_MAX
-#endif
-	: maxlen;
+    unsigned int correct_length = maxlen < 0 ?  PERL_INT_MAX : maxlen;
 
     PERL_ARGS_ASSERT_FILTER_READ;
 
