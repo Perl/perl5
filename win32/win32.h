@@ -48,8 +48,7 @@
 /* now even GCC supports __declspec() */
 
 #if defined(PERLDLL)
-#define DllExport
-/*#define DllExport __declspec(dllexport)*/	/* noises with VC5+sp3 */
+#define DllExport __declspec(dllexport)
 #else
 #define DllExport __declspec(dllimport)
 #endif
@@ -177,14 +176,6 @@ struct utsname {
 
 #define PIPESOCK_MODE	"b"		/* pipes, sockets default to binmode */
 
-#ifndef VER_PLATFORM_WIN32_WINDOWS	/* VC-2.0 headers don't have this */
-#define VER_PLATFORM_WIN32_WINDOWS	1
-#endif
-
-#ifndef FILE_SHARE_DELETE		/* VC-4.0 headers don't have this */
-#define FILE_SHARE_DELETE		0x00000004
-#endif
-
 /* access() mode bits */
 #ifndef R_OK
 #  define	R_OK	4
@@ -265,12 +256,11 @@ typedef long		gid_t;
 #  endif
 #endif
 
-#endif /* __MINGW32__ */
-
-/* both GCC/Mingw32 and MSVC++ 4.0 are missing this, so we put it here */
 #ifndef CP_UTF8
 #  define CP_UTF8	65001
 #endif
+
+#endif /* __MINGW32__ */
 
 /* compatibility stuff for other compilers goes here */
 
