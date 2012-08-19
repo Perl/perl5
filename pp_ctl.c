@@ -3696,6 +3696,8 @@ PP(pp_require)
 	}
     }
 
+    LOADING_FILE_PROBE(unixname);
+
     /* prepare to compile file */
 
     if (path_is_absolute(name)) {
@@ -3997,6 +3999,8 @@ PP(pp_require)
 
     /* Restore encoding. */
     PL_encoding = encoding;
+
+    LOADED_FILE_PROBE(unixname);
 
     return op;
 }

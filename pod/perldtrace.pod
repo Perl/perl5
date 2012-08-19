@@ -57,7 +57,7 @@ The C<phase-change> probe was added.
 
 =item 5.18.0
 
-The C<op-entry> probe was added.
+The C<op-entry>, C<loading-file>, and C<loaded-file> probes weree added.
 
 =back
 
@@ -110,6 +110,29 @@ still before the opcode itself is executed).
 
     :*perl*::op-entry {
         printf("About to execute opcode %s\n", copyinstr(arg0));
+    }
+
+=item loading-file(FILENAME)
+
+Fires when Perl is about to load an individual file, whether from
+C<use>, C<require>, or C<do>. This probe fires before the file is
+read from disk. The filename argument is converted to local filesystem
+paths instead of providing C<Module::Name>-style names.
+
+    :*perl*:loading-file {
+        printf("About to load %s\n", copyinstr(arg0));
+    }
+
+=item loaded-file(FILENAME)
+
+Fires when Perl has successfully loaded an individual file, whether
+from C<use>, C<require>, or C<do>. This probe fires after the file
+is read from disk and its contentss evaluated. The filename argument
+is converted to local filesystem paths instead of providing
+C<Module::Name>-style names.
+
+    :*perl*:loaded-file {
+        printf("Successfully loaded %s\n", copyinstr(arg0));
     }
 
 =back
@@ -178,6 +201,8 @@ still before the opcode itself is executed).
     warnings::unimport                                             4589
     Exporter::Heavy::_rebuild_cache                                5039
     Exporter::import                                              14578
+
+=item 
 
 =back
 

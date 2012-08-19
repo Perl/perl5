@@ -10,6 +10,9 @@ provider perl {
     probe phase__change(const char *, const char *);
 
     probe op__entry(const char *);
+
+    probe loading__file(const char *);
+    probe loaded__file(const char *);
 };
 
 /*

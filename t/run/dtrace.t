@@ -24,7 +24,7 @@ use strict;
 use warnings;
 use IPC::Open2;
 
-plan(tests => 7);
+plan(tests => 9);
 
 dtrace_like(
     '1',
@@ -130,6 +130,25 @@ D_SCRIPT
         qr/op-entry <schop>/,
     ],
     'basic op probe',
+);
+
+dtrace_like(<< 'PERL_SCRIPT',
+    use strict;
+    require HTTP::Tiny;
+    do "run/dtrace.pl";
+PERL_SCRIPT
+    << 'D_SCRIPT',
+    loading-file { printf("loading-file <%s>\n", copyinstr(arg0)) }
+    loaded-file  { printf("loaded-file <%s>\n", copyinstr(arg0)) }
+D_SCRIPT
+    [
+        # the original test made sure that each file generated a loading-file then a loaded-file,
+        # but that had a race condition when the kernel would push the perl process onto a different
+        # CPU, so the DTrace output would appear out of order
+        qr{loading-file <strict\.pm>.*loading-file <HTTP/Tiny\.pm>.*loading-file <run/dtrace\.pl>}s,
+        qr{loaded-file <strict\.pm>.*loaded-file <HTTP/Tiny\.pm>.*loaded-file <run/dtrace\.pl>}s,
+    ],
+    'loading-file, loaded-file probes',
 );
 
 sub dtrace_like {
