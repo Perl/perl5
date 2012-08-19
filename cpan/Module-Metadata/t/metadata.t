@@ -28,6 +28,15 @@ package Simple;
 our $VERSION;
 $VERSION = '1.23';
 ---
+  '1.23' => <<'---', # commented & defined on same line
+package Simple;
+our $VERSION = '1.23'; # our $VERSION = '4.56';
+---
+  '1.23' => <<'---', # commented & defined on separate lines
+package Simple;
+# our $VERSION = '4.56';
+our $VERSION = '1.23';
+---
   '1.23' => <<'---', # use vars
 package Simple;
 use vars qw( $VERSION );
@@ -203,7 +212,7 @@ package Simple v1.2.3_4 {
 );
 my %modules = reverse @modules;
 
-plan tests => 51 + 2 * keys( %modules );
+plan tests => 54 + 2 * keys( %modules );
 
 require_ok('Module::Metadata');
 
@@ -420,6 +429,9 @@ Simple - It's easy.
 
 Simple Simon
 
+You can find me on the IRC channel
+#simon on irc.perl.org.
+
 =cut
 ---
 $dist->regen;
@@ -459,13 +471,59 @@ is( $pm_info->pod('NAME'), undef,
 $pm_info = Module::Metadata->new_from_module(
              $dist->name, inc => [ 'lib', @INC ], collect_pod => 1 );
 
-my $name = $pm_info->pod('NAME');
-if ( $name ) {
-  $name =~ s/^\s+//;
-  $name =~ s/\s+$//;
-}
-is( $name, q|Simple - It's easy.|, 'collected pod section' );
+{
+  my %pod;
+  for my $section (qw(NAME AUTHOR)) {
+    my $content = $pm_info->pod( $section );
+    if ( $content ) {
+      $content =~ s/^\s+//;
+      $content =~ s/\s+$//;
+    }
+    $pod{$section} = $content;
+  }
+  my %expected = (
+    NAME   => q|Simple - It's easy.|,
+    AUTHOR => <<'EXPECTED'
+Simple Simon
 
+You can find me on the IRC channel
+#simon on irc.perl.org.
+EXPECTED
+  );
+  for my $text (values %expected) {
+    $text =~ s/^\s+//;
+    $text =~ s/\s+$//;
+  }
+  is( $pod{NAME},   $expected{NAME},   'collected NAME pod section' );
+  is( $pod{AUTHOR}, $expected{AUTHOR}, 'collected AUTHOR pod section' );
+}
+
+{
+  # test things that look like POD, but aren't
+$dist->change_file( 'lib/Simple.pm', <<'---' );
+package Simple;
+
+=YES THIS STARTS POD
+
+our $VERSION = '999';
+
+=cute
+
+our $VERSION = '666';
+
+=cut
+
+*foo
+=*no_this_does_not_start_pod;
+
+our $VERSION = '1.23';
+
+---
+  $dist->regen;
+  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  is( $pm_info->name, 'Simple', 'found default package' );
+  is( $pm_info->version, '1.23', 'version for default package' );
+}
 
 {
   # Make sure processing stops after __DATA__

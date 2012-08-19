@@ -201,9 +201,10 @@ Various enhancements include the new use of Module::Metadata.
 
 =item *
 
-L<Module::Metadata> has been upgraded from version 1.000009 to 1.000010.  The
+L<Module::Metadata> has been upgraded from version 1.000009 to 1.000011.  The
 creation of a Module::Metadata object for a typical module file has been sped
-up by about 40%.
+up by about 40%, and some spurious warnings about C<$VERSION>s have been
+suppressed.
 
 =item *
 

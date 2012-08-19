@@ -1772,8 +1772,12 @@ cpan/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 cpan/Module-Load/t/to_load/TestModule.pm	Module::Load tests
 cpan/Module-Load/t/to_load/ToBeLoaded		Module::Load tests
 cpan/Module-Metadata/lib/Module/Metadata.pm
+cpan/Module-Metadata/t/encoding.t
 cpan/Module-Metadata/t/lib/0_1/Foo.pm
 cpan/Module-Metadata/t/lib/0_2/Foo.pm
+cpan/Module-Metadata/t/lib/BOMTest/UTF16BE.pm
+cpan/Module-Metadata/t/lib/BOMTest/UTF16LE.pm
+cpan/Module-Metadata/t/lib/BOMTest/UTF8.pm
 cpan/Module-Metadata/t/lib/DistGen.pm
 cpan/Module-Metadata/t/lib/MBTest.pm
 cpan/Module-Metadata/t/lib/Tie/CPHash.pm
