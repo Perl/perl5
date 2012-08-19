@@ -2652,7 +2652,9 @@ cpan/Text-Tabs/t/Jacobson.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/Jochen.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/sep2.t			See if Text::Tabs is working
 cpan/Text-Tabs/t/sep.t			See if Text::Tabs is working
+cpan/Text-Tabs/t/Tabs-ElCid.t		See if Text::Tabs works
 cpan/Text-Tabs/t/tabs.t			See if Text::Tabs works
+cpan/Text-Tabs/t/Wrap-JLB.t		See if Text::Wrap::wrap works
 cpan/Text-Tabs/t/wrap_separator2.t	See if Text::Wrap::wrap works
 cpan/Text-Tabs/t/wrap.t			See if Text::Wrap::wrap works
 cpan/Tie-RefHash/lib/Tie/RefHash.pm		Base class for tied hashes with references as keys

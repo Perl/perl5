@@ -1879,15 +1879,18 @@ use File::Glob qw(:case);
 
     'Text-Tabs+Wrap' => {
         'MAINTAINER'   => 'muir',
-        'DISTRIBUTION' => 'MUIR/modules/Text-Tabs+Wrap-2009.0305.tar.gz',
+        'DISTRIBUTION' => 'MUIR/modules/Text-Tabs+Wrap-2012.0818.tar.gz',
         'FILES'        => q[cpan/Text-Tabs],
-        'EXCLUDED'   => ['t/dnsparks.t'],    # see af6492bf9e
-        'UPSTREAM'   => 'cpan',
-        'CUSTOMIZED' => [
-            qw( t/fill.t
-                t/tabs.t
-                ),
+        'EXCLUDED'   => [
+            qr/^lib\.old/,
+            't/dnsparks.t',    # see af6492bf9e
         ],
+        'MAP'          => {
+            ''                        => 'cpan/Text-Tabs/',
+            'lib.modern/Text/Tabs.pm' => 'cpan/Text-Tabs/lib/Tabs.pm',
+            'lib.modern/Text/Wrap.pm' => 'cpan/Text-Tabs/lib/Wrap.pm',
+        },
+        'UPSTREAM'   => 'cpan',
     },
 
     'Thread::Queue' => {
