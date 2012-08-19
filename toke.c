@@ -9447,6 +9447,7 @@ S_scan_heredoc(pTHX_ register char *s)
     char *d;
     char *e;
     char *peek;
+    char *origd;
     const int outer = (PL_rsfp || PL_parser->filtered)
 		   && !(PL_lex_inwhat == OP_SCALAR);
 #ifdef PERL_MAD
@@ -9459,10 +9460,10 @@ S_scan_heredoc(pTHX_ register char *s)
     PERL_ARGS_ASSERT_SCAN_HEREDOC;
 
     s += 2;
-    d = PL_tokenbuf;
+    d = origd = PL_tokenbuf;
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
     if (!outer)
-	*d++ = '\n';
+	*d++ = '\n', ++origd;
     peek = s;
     while (SPACE_OR_TAB(*peek))
 	peek++;
@@ -9589,7 +9590,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 	if (s >= bufend) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
-	    missingterm(PL_tokenbuf);
+	    missingterm(origd);
 	}
 	sv_setpvn(herewas,bufptr,d-bufptr+1);
 	sv_setpvn(tmpstr,d+1,s-d);
@@ -9609,7 +9610,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 	if (s >= PL_bufend) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
-	    missingterm(PL_tokenbuf);
+	    missingterm(origd);
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 #ifdef PERL_MAD
