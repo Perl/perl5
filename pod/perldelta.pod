@@ -184,7 +184,7 @@ Encode::UTF7 and Encode::GSM0338.
 
 =item *
 
-L<Module::Build> has been upgraded from version 0.40 to 0.4002.  A minor bug
+L<Module::Build> has been upgraded from version 0.40 to 0.4003.  A minor bug
 fix allows markup to be used around the leading "Name" in a POD "abstract"
 line, and some documentation improvements have been made.
 

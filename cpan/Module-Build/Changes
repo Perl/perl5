@@ -1,12 +1,18 @@
 Revision history for Perl extension Module::Build.
 
+0.4003 - Sat Aug 18 11:17:49 CEST 2012
+
+  [BUG FIXES]
+
+  - Get rid of outdated metadata tests [Steve Hay]
+
 0.4002 - Fri Jul 27 20:04:09 EEST 2012
 
   [BUG FIXES]
 
-  - Test for TAP::Harness version properly
+  - Test for TAP::Harness version properly [Leon Timmermans]
 
-  - Install to 'site' on 5.12+
+  - Install to 'site' on 5.12+ [Leon Timmermans]
 
   [DOCUMENTATION]
 
