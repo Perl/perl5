@@ -1887,8 +1887,8 @@ use File::Glob qw(:case);
         ],
         'MAP'          => {
             ''                        => 'cpan/Text-Tabs/',
-            'lib.modern/Text/Tabs.pm' => 'cpan/Text-Tabs/lib/Tabs.pm',
-            'lib.modern/Text/Wrap.pm' => 'cpan/Text-Tabs/lib/Wrap.pm',
+            'lib.modern/Text/Tabs.pm' => 'cpan/Text-Tabs/lib/Text/Tabs.pm',
+            'lib.modern/Text/Wrap.pm' => 'cpan/Text-Tabs/lib/Text/Wrap.pm',
         },
         'UPSTREAM'   => 'cpan',
     },

@@ -255,9 +255,9 @@ drive happens to contain a F<\dev\tty> file.
 
 =item *
 
-L<Text-Tabs+Wrap> has been upgraded from version 2009.0305 to 2012.0818.
-Support for Unicode combining characters has been added to both Text::Tabs and
-Text::Wrap,
+L<Text::Tabs> and L<Text::Wrap> have been upgraded from version 2009.0305 to
+2012.0818.  Support for Unicode combining characters has been added to them
+both.
 
 =item *
 
