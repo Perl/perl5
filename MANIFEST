@@ -2246,6 +2246,7 @@ cpan/Sys-Syslog/Syslog.pm		Sys::Syslog extension Perl module
 cpan/Sys-Syslog/Syslog.xs		Sys::Syslog extension external subroutines
 cpan/Sys-Syslog/t/00-load.t		test for Sys::Syslog
 cpan/Sys-Syslog/t/constants.t		test for Sys::Syslog
+cpan/Sys-Syslog/t/facilities-routing.t	test for Sys::Syslog
 cpan/Sys-Syslog/t/syslog.t		See if Sys::Syslog works
 cpan/Sys-Syslog/win32/compile.pl	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog_dll.uu	Sys::Syslog extension Win32 related file

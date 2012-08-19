@@ -12,7 +12,7 @@ require 5.005;
 
 
 {   no strict 'vars';
-    $VERSION = '0.30';
+    $VERSION = '0.31';
     @ISA     = qw< Exporter >;
 
     %EXPORT_TAGS = (
@@ -139,7 +139,13 @@ my @fallbackMethods = ();
 # happy, the timeout is now zero by default on all systems 
 # except on OSX where it is set to 250 msec, and can be set 
 # with the infamous setlogsock() function.
-$sock_timeout = 0.25 if $^O =~ /darwin/;
+#
+# Update 2011-08: this issue is also been seen on multiprocessor
+# Debian GNU/kFreeBSD systems. See http://bugs.debian.org/627821
+# and https://rt.cpan.org/Ticket/Display.html?id=69997
+# Also, lowering the delay to 1 ms, which should be enough.
+
+$sock_timeout = 0.001 if $^O =~ /darwin|gnukfreebsd/;
 
 # coderef for a nicer handling of errors
 my $err_sub = $options{nofatal} ? \&warnings::warnif : \&croak;
@@ -288,7 +294,7 @@ sub setlogsock {
         @opt{qw< type path timeout >} = @_;
     }
 
-    # check socket type, remove
+    # check socket type, remove invalid ones
     my $diag_invalid_type = "setlogsock(): Invalid type%s; must be one of "
                           . join ", ", map { "'$_'" } sort keys %mechanism;
     croak sprintf $diag_invalid_type, "" unless defined $opt{type};
@@ -313,11 +319,14 @@ sub setlogsock {
     disconnect_log() if $connected;
     $transmit_ok = 0;
     @fallbackMethods = ();
-    @connectMethods = @defaultMethods;
+    @connectMethods = ();
+    my $found = 0;
 
+    # check each given mechanism and test if it can be used on the current system
     for my $sock_type (@sock_types) {
         if ( $mechanism{$sock_type}{check}->() ) {
-            unshift @connectMethods, $sock_type;
+            push @connectMethods, $sock_type;
+            $found = 1;
         }
         else {
             warnings::warnif "setlogsock(): type='$sock_type': "
@@ -325,7 +334,10 @@ sub setlogsock {
         }
     }
 
-    return 1;
+    # if no mechanism worked from the given ones, use the default ones
+    @connectMethods = @defaultMethods unless @connectMethods;
+
+    return $found;
 }
 
 sub syslog {
@@ -348,7 +360,7 @@ sub syslog {
 
     if ($priority =~ /^\d+$/) {
         $numpri = LOG_PRI($priority);
-        $numfac = LOG_FAC($priority);
+        $numfac = LOG_FAC($priority) << 3;
     }
     elsif ($priority =~ /^\w+/) {
         # Allow "level" or "level|facility".
@@ -366,17 +378,16 @@ sub syslog {
             if ($num < 0) {
                 croak "syslog: invalid level/facility: $word"
             }
-            elsif (my $pri = LOG_PRI($num)) {
+            elsif ($num <= LOG_PRIMASK() and $word ne "kern") {
                 croak "syslog: too many levels given: $word"
                     if defined $numpri;
                 $numpri = $num;
-                return 0 unless LOG_MASK($numpri) & $maskpri;
             }
             else {
                 croak "syslog: too many facilities given: $word"
                     if defined $numfac;
                 $facility = $word if $word =~ /^[A-Za-z]/;
-                $numfac = LOG_FAC($num);
+                $numfac = $num;
             }
         }
     }
@@ -385,6 +396,9 @@ sub syslog {
     }
 
     croak "syslog: level must be given" unless defined $numpri;
+
+    # don't log if priority is below mask level
+    return 0 unless LOG_MASK($numpri) & $maskpri;
 
     if (not defined $numfac) {  # Facility not specified in this call.
 	$facility = 'user' unless $facility;
@@ -879,7 +893,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-This is the documentation of version 0.30
+This is the documentation of version 0.31
 
 =head1 SYNOPSIS
 
@@ -897,9 +911,6 @@ This is the documentation of version 0.30
 C<Sys::Syslog> is an interface to the UNIX C<syslog(3)> program.
 Call C<syslog()> with a string priority and a list of C<printf()> args
 just like C<syslog(3)>.
-
-You can find a kind of FAQ in L<"THE RULES OF SYS::SYSLOG">.  Please read 
-it before coding, and again before asking questions. 
 
 
 =head1 EXPORTS

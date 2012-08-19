@@ -1,5 +1,21 @@
 Revision history for Sys-Syslog
 
+0.31 -- 2012.08.18 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] Level 'emerg' could not be used since v0.29.
+        [BUGFIX] Setting a message facility with syslog() was broken since v0.29
+        (Noel Butler).
+        [BUGFIX] CPAN-RT#69992: Make setlogsock() only use the requested mechanism,
+        restoring way it worked in v0.27 and before (Niko Tyni).
+        [BUGFIX] CPAN-RT#69986: setlogsock() doesn't return undef on failure
+        (Niko Tyni).
+        [BUGFIX] CPAN-RT#69997: Use the default UDP socket timeout on GNU/kFreeBSD
+        as well, and lower it to a more sensible value (Niko Tyni).
+        [BUGFIX] CPAN-RT#75827: syslog() logging everything regardless of log
+        mask when using using numeric LOG_* macros (Bryan Thale).
+        [TESTS] Added t/facilities-routing.t
+        [DOC] Don't highlight "the Rules of Sys::Syslog" from the Description.
+        [DIST] Add meta-information in Makefile.PL
+
 0.30 -- 2012.08.15 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] CPAN-RT#69310: Avoid a POSIX::strftime issue on Windows
         (Michael Ludwig).
