@@ -2386,6 +2386,8 @@ S_sublex_start(pTHX)
     dVAR;
     const I32 op_type = pl_yylval.ival;
 
+    PL_sublex_info.super_bufptr = PL_bufptr;
+    PL_sublex_info.super_bufend = PL_bufend;
     if (op_type == OP_NULL) {
 	pl_yylval.opval = PL_lex_op;
 	PL_lex_op = NULL;
@@ -9315,8 +9317,6 @@ S_scan_subst(pTHX_ char *start)
     if (es) {
 	SV * const repl = newSVpvs("");
 
-	PL_sublex_info.super_bufptr = s;
-	PL_sublex_info.super_bufend = PL_bufend;
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
 	while (es-- > 0) {
@@ -9434,6 +9434,32 @@ S_scan_trans(pTHX_ char *start)
     return s;
 }
 
+/* scan_heredoc
+   Takes a pointer to the first < in <<FOO.
+   Returns a pointer to the byte following <<FOO.
+
+   This function scans a heredoc, which involves different methods
+   depending on whether we are in a string eval, quoted construct, etc.
+   This is because PL_linestr could containing a single line of input, or
+   a whole string being evalled, or the contents of the current quote-
+   like operator.
+
+   The three methods are:
+    - Steal lines from the input stream (stream)
+    - Scan the heredoc in PL_linestr and remove it therefrom (linestr)
+    - Peek at the PL_linestr of the outer lexing scope (peek)
+
+   They are used in these cases:
+     file scope or filtered eval		stream
+     string eval				linestr
+     multiline quoted construct			linestr
+     single-line quoted construct in file	stream
+     single-line quoted construct in eval	peek
+
+   Single-line also applies to heredocs that begin on the last line of a
+   quote-like operator.
+*/
+
 STATIC char *
 S_scan_heredoc(pTHX_ register char *s)
 {
@@ -9443,13 +9469,11 @@ S_scan_heredoc(pTHX_ register char *s)
     I32 len;
     SV *tmpstr;
     char term;
-    const char *found_newline;
+    const char *found_newline = 0;
     char *d;
     char *e;
     char *peek;
-    char *origd;
-    const int outer = (PL_rsfp || PL_parser->filtered)
-		   && !(PL_lex_inwhat == OP_SCALAR);
+    const bool infile = PL_rsfp || PL_parser->filtered;
 #ifdef PERL_MAD
     I32 stuffstart = s - SvPVX(PL_linestr);
     char *tstart;
@@ -9460,10 +9484,9 @@ S_scan_heredoc(pTHX_ register char *s)
     PERL_ARGS_ASSERT_SCAN_HEREDOC;
 
     s += 2;
-    d = origd = PL_tokenbuf;
+    d = PL_tokenbuf + 1;
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
-    if (!outer)
-	*d++ = '\n', ++origd;
+    *PL_tokenbuf = '\n';
     peek = s;
     while (SPACE_OR_TAB(*peek))
 	peek++;
@@ -9496,8 +9519,8 @@ S_scan_heredoc(pTHX_ register char *s)
 
 #ifdef PERL_MAD
     if (PL_madskills) {
-	tstart = PL_tokenbuf + !outer;
-	PL_thisclose = newSVpvn(tstart, len - !outer);
+	tstart = PL_tokenbuf + 1;
+	PL_thisclose = newSVpvn(tstart, len - 1);
 	tstart = SvPVX(PL_linestr) + stuffstart;
 	PL_thisopen = newSVpvn(tstart, s - tstart);
 	stuffstart = s - SvPVX(PL_linestr);
@@ -9527,10 +9550,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
 #endif
-#ifdef PERL_MAD
-    found_newline = 0;
-#endif
-    if ( outer || !(found_newline = (char*)memchr((void*)s, '\n', PL_bufend - s)) ) {
+    if ((infile && !PL_lex_inwhat)
+     || !(found_newline = (char*)memchr((void*)s, '\n', PL_bufend - s))) {
         herewas = newSVpvn(s,PL_bufend-s);
     }
     else {
@@ -9573,12 +9594,11 @@ S_scan_heredoc(pTHX_ register char *s)
     CLINE;
     PL_multi_start = CopLINE(PL_curcop);
     PL_multi_open = PL_multi_close = '<';
-    term = *PL_tokenbuf;
-    if (PL_lex_inwhat == OP_SUBST && PL_in_eval && !PL_rsfp
-     && !PL_parser->filtered) {
+    if (!infile && PL_lex_inwhat && !found_newline) {
 	char * const bufptr = PL_sublex_info.super_bufptr;
 	char * const bufend = PL_sublex_info.super_bufend;
 	char * const olds = s - SvCUR(herewas);
+	term = *PL_tokenbuf;
 	s = strchr(bufptr, '\n');
 	if (!s)
 	    s = bufend;
@@ -9590,7 +9610,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 	if (s >= bufend) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
-	    missingterm(origd);
+	    missingterm(PL_tokenbuf + 1);
 	}
 	sv_setpvn(herewas,bufptr,d-bufptr+1);
 	sv_setpvn(tmpstr,d+1,s-d);
@@ -9601,7 +9621,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
 	goto retval;
     }
-    else if (!outer) {
+    else if (!infile || found_newline) {
+	term = *PL_tokenbuf;
 	d = s;
 	while (s < PL_bufend &&
 	  (*s != term || memNE(s,PL_tokenbuf,len)) ) {
@@ -9610,7 +9631,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 	if (s >= PL_bufend) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
-	    missingterm(origd);
+	    missingterm(PL_tokenbuf + 1);
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 #ifdef PERL_MAD
@@ -9633,6 +9654,8 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     else
 	sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
+    term = PL_tokenbuf[1];
+    len--;
     while (s >= PL_bufend) {	/* multiple line string? */
 #ifdef PERL_MAD
 	if (PL_madskills) {
@@ -9645,9 +9668,9 @@ S_scan_heredoc(pTHX_ register char *s)
 #endif
 	PL_bufptr = s;
 	CopLINE_inc(PL_curcop);
-	if (!outer || !lex_next_chunk(0)) {
+	if (!lex_next_chunk(0)) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
-	    missingterm(PL_tokenbuf);
+	    missingterm(PL_tokenbuf + 1);
 	}
 	CopLINE_dec(PL_curcop);
 	s = PL_bufptr;
@@ -9672,7 +9695,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
+	if (*s == term && memEQ(s,PL_tokenbuf + 1,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
 	    *(SvPVX(PL_linestr) + off ) = ' ';
 	    lex_grow_linestr(SvCUR(PL_linestr) + SvCUR(herewas) + 1);
