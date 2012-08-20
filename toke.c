@@ -2461,7 +2461,7 @@ S_sublex_push(pTHX)
     SAVEI8(PL_lex_state);
     SAVEPPTR(PL_sublex_info.re_eval_start);
     SAVEPPTR(PL_sublex_info.super_bufptr);
-    SAVEPPTR(PL_sublex_info.super_bufend);
+    SAVEPPTR(PL_sublex_info.super_linestr);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
@@ -2476,11 +2476,11 @@ S_sublex_push(pTHX)
     SAVEGENERICPV(PL_lex_brackstack);
     SAVEGENERICPV(PL_lex_casestack);
 
+    PL_sublex_info.super_linestr = PL_linestr;
     PL_linestr = PL_lex_stuff;
     PL_lex_stuff = NULL;
     PL_sublex_info.re_eval_start = NULL;
     PL_sublex_info.super_bufptr = PL_bufptr;
-    PL_sublex_info.super_bufend = PL_bufend;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -9602,7 +9602,7 @@ S_scan_heredoc(pTHX_ register char *s)
     PL_multi_open = PL_multi_close = '<';
     if (!infile && PL_lex_inwhat && !found_newline) {
 	char * const bufptr = PL_sublex_info.super_bufptr;
-	char * const bufend = PL_sublex_info.super_bufend;
+	char * const bufend = SvEND(PL_sublex_info.super_linestr);
 	char * const olds = s - SvCUR(herewas);
 	term = *PL_tokenbuf;
 	s = strchr(bufptr, '\n');
@@ -9623,6 +9623,9 @@ S_scan_heredoc(pTHX_ register char *s)
 	s += len - 1;
 	sv_catpvn(herewas,s,bufend-s);
 	Copy(SvPVX_const(herewas),bufptr,SvCUR(herewas) + 1,char);
+	SvCUR_set(PL_sublex_info.super_linestr,
+		  bufptr-SvPVX_const(PL_sublex_info.super_linestr)
+		   + SvCUR(herewas));
 
 	s = olds;
 	goto retval;

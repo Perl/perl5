@@ -3450,7 +3450,7 @@ struct _sublex_info {
     U16 sub_inwhat;	/* "lex_inwhat" to use */
     OP *sub_op;		/* "lex_op" to use */
     char *super_bufptr;	/* PL_parser->bufptr that was */
-    char *super_bufend;	/* PL_parser->bufend that was */
+    SV *super_linestr;	/* PL_parser->linestr that was */
     char *re_eval_start;/* start of "(?{..." text */
 };
 
