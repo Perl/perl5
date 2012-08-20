@@ -59,7 +59,7 @@ Enjoy.
 
 =head2 v5.17.2 - Terry Pratchet, "The Colour of Magic"
 
-L<Announced on 2012-06-21 by TonyC|http://www.nntp.perl.org/group/perl.perl5.porters/2012/07/msg189828.html>
+L<Announced on 2012-07-21 by TonyC|http://www.nntp.perl.org/group/perl.perl5.porters/2012/07/msg189828.html>
 
 ‘I knew it,’ said Rincewind. ‘We're in a strong magical field.’
 
