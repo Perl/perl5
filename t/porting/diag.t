@@ -561,6 +561,7 @@ Too many args on %s line of "%s"
 U0 mode on a byte string
 unable to find VMSPIPE.COM for i/o piping
 Unknown Unicode option value %d
+Unknown argument to :utf8: %s
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
