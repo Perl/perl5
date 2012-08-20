@@ -406,7 +406,7 @@ Commit your changes:
     $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
 At this point you may want to compare the commit with a previous bump to
-see if they look similar.  See commit 8891dd8d for an example of a
+see if they look similar.  See commit 0e79a3d1bc for an example of a
 previous version bump.
 
 When the version number is bumped, you should also update Module::CoreList
