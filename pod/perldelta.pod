@@ -415,9 +415,10 @@ Formats and C<use> statements are now permitted inside formats.
 
 =item *
 
-C<print $x> and C<sub { print $x }->()> now always produce the same output.  It
-was possible for the latter to refuse to close over $x if the variable was not
-active; e.g., if it was defined outside a currently-running named subroutine.
+C<print $x> and C<sub { print $x }-E<gt>()> now always produce the same output.
+It was possible for the latter to refuse to close over $x if the variable was
+not active; e.g., if it was defined outside a currently-running named
+subroutine.
 
 =item *
 
