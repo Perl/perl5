@@ -1049,7 +1049,7 @@ When C<make test_porting> passes, commit the new perldelta.
 =back
 
 At this point you may want to compare the commit with a previous bump to
-see if they look similar.  See commit e3c71926d3 for an example of a
+see if they look similar.  See commit 4eabcf701b for an example of a
 previous version bump.
 
 =for checklist skip MAINT RC
