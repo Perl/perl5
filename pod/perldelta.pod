@@ -124,7 +124,7 @@ line, and some documentation improvements have been made.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.69 to 2.70.  Version
+L<Module::CoreList> has been upgraded from version 2.69 to 2.71.  Version
 information is now stored as a delta, which greatly reduces the size of the
 F<CoreList.pm> file.
 
