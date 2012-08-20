@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..57\n";
+print "1..58\n";
 
 $x = 'x';
 
@@ -273,3 +273,10 @@ $test++;
 @a = (1,2,3);
 print "not " unless($a[~~2] == 3);
 print "ok 57\n";
+
+$_ = "";
+eval 's/(?:)/"${\q||}".<<\END/e;
+ok 58 - heredoc after "" in s/// in eval
+END
+';
+print $_ || "not ok 58\n";

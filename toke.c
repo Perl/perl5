@@ -2389,8 +2389,6 @@ S_sublex_start(pTHX)
     dVAR;
     const I32 op_type = pl_yylval.ival;
 
-    PL_sublex_info.super_bufptr = PL_bufptr;
-    PL_sublex_info.super_bufend = PL_bufend;
     if (op_type == OP_NULL) {
 	pl_yylval.opval = PL_lex_op;
 	PL_lex_op = NULL;
@@ -2462,6 +2460,8 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
     SAVEPPTR(PL_sublex_info.re_eval_start);
+    SAVEPPTR(PL_sublex_info.super_bufptr);
+    SAVEPPTR(PL_sublex_info.super_bufend);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
@@ -2479,6 +2479,8 @@ S_sublex_push(pTHX)
     PL_linestr = PL_lex_stuff;
     PL_lex_stuff = NULL;
     PL_sublex_info.re_eval_start = NULL;
+    PL_sublex_info.super_bufptr = PL_bufptr;
+    PL_sublex_info.super_bufend = PL_bufend;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
