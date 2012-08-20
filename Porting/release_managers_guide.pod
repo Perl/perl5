@@ -268,7 +268,7 @@ bit, or edit F<Porting/exec-bit.txt>
 
 =item *
 
-Run C<make>, see if C<perl> compiles.
+Run C<make> (or C<nmake> on Windows), see if C<perl> compiles.
 
 =item *
 
@@ -296,7 +296,10 @@ For entries with a non-simple C<FILES> section, or with a C<MAP>, you
 may have to take more steps than listed above.
 
 F<Porting/sync-with-cpan> is a script that automates most of the steps
-above; but see the comments at the beginning of the file.
+above; but see the comments at the beginning of the file.  In particular,
+it has not yet been exercised on Windows, but will certainly require a set
+of Unix tools such as Cygwin, and steps that run C<make> will need to run
+C<nmake> instead.
 
 
 =head3 dual-life CPAN module stability
