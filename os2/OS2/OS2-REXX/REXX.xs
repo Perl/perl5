@@ -61,7 +61,7 @@ static ULONG (*pRexxVariablePool) (PSHVBLOCK pRequest);
 static SV* exec_cv;
 
 /* Create a REXX compartment,
-   `n' callbacks `handlers' with the REXX names `handlerNames',
+   register `n' callbacks `handlers' with the REXX names `handlerNames',
    evaluate the REXX expression `cmd'.
  */
 static SV*
