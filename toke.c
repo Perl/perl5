@@ -1249,6 +1249,7 @@ buffer has reached the end of the input text.
 */
 
 #define LEX_FAKE_EOF 0x80000000
+#define LEX_NO_TERM  0x40000000
 
 bool
 Perl_lex_next_chunk(pTHX_ U32 flags)
@@ -1260,7 +1261,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     STRLEN linestart_pos, last_uni_pos, last_lop_pos;
     bool got_some_for_debugger = 0;
     bool got_some;
-    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF))
+    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF|LEX_NO_TERM))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
@@ -1291,6 +1292,8 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     } else if (filter_gets(linestr, old_bufend_pos)) {
 	got_some = 1;
 	got_some_for_debugger = 1;
+    } else if (flags & LEX_NO_TERM) {
+	got_some = 0;
     } else {
 	if (!SvPOK(linestr))   /* can get undefined by filter_gets */
 	    sv_setpvs(linestr, "");
@@ -9668,11 +9671,16 @@ S_scan_heredoc(pTHX_ register char *s)
 #endif
 	PL_bufptr = s;
 	CopLINE_inc(PL_curcop);
-	if (!lex_next_chunk(0)) {
+	if (!lex_next_chunk(LEX_NO_TERM)
+	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf + 1);
 	}
 	CopLINE_dec(PL_curcop);
+	if (!SvCUR(PL_linestr) || PL_bufend[-1] != '\n') {
+	    lex_grow_linestr(SvCUR(PL_linestr) + 2);
+	    sv_catpvs(PL_linestr, "\n\0");
+	}
 	s = PL_bufptr;
 #ifdef PERL_MAD
 	stuffstart = s - SvPVX(PL_linestr);

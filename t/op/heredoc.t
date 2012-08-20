@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 6);
+plan(tests => 7);
 
 
 # heredoc without newline (#65838)
@@ -38,6 +38,12 @@ HEREDOC
         $string,
         { switches => ['-X'] },
         "blank-terminated heredoc at EOF"
+    );
+    fresh_perl_is(
+        "print <<\n$string\n",
+        $string,
+        { switches => ['-X'] },
+        "blank-terminated heredoc at EOF and no semicolon"
     );
 }
 
