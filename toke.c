@@ -9504,6 +9504,7 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     else {
 	if (*s == '\\')
+            /* <<\FOO is equivalent to <<'FOO' */
 	    s++, term = '\'';
 	else
 	    term = '"';
