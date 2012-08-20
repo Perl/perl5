@@ -3015,6 +3015,10 @@ sub trace { return main::trace(@_); }
 
     our $addr;
 
+    # Max is initialized to a negative value that isn't adjacent to 0, for
+    # simpler tests
+    my $max_init = -2;
+
     main::setup_package();
 
     my %ranges;
@@ -3070,9 +3074,7 @@ sub trace { return main::trace(@_); }
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
-        # Max is initialized to a negative value that isn't adjacent to 0,
-        # for simpler tests
-        $max{$addr} = -2;
+        $max{$addr} = $max_init;
 
         $_search_ranges_cache{$addr} = 0;
         $ranges{$addr} = [];
@@ -4157,7 +4159,12 @@ sub trace { return main::trace(@_); }
         # otherwise recalculate it.  This is done too rarely to worry about
         # performance.
         if ($operation eq '-' && @return) {
-            $max{$addr} = $r->[-1]->end;
+            if (@$r) {
+                $max{$addr} = $r->[-1]->end;
+            }
+            else {  # Now empty
+                $max{$addr} = $max_init;
+            }
         }
         return @return;
     }
