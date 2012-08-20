@@ -36,7 +36,7 @@ HEREDOC
     fresh_perl_is(
         "print <<;\n$string\n",
         $string,
-        {},
+        { switches => ['-X'] },
         "blank-terminated heredoc at EOF"
     );
 }
@@ -54,7 +54,7 @@ HEREDOC
     fresh_perl_like(
         "print <<;\nno more newlines",
         qr/find string terminator/,
-        {},
+        { switches => ['-X'] },
         "empty string terminator still needs a newline"
     );
 
