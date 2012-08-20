@@ -154,12 +154,12 @@ recent versions of vmstar (e.g. V3.4 or later).  Contrary to advice
 provided with previous versions of Perl, do I<not> use the ODS-2
 compatibility qualifier.  Instead, use a command like the following:
 
-    vmstar -xvf perl-5^.17^.3.tar
+    vmstar -xvf perl-5^.17^.4.tar
 
 Then rename the top-level source directory like so:
 
-    set security/protection=(o:rwed) perl-5^.17^.3.dir
-    rename perl-5^.17^.3.dir perl-5_17_3.dir
+    set security/protection=(o:rwed) perl-5^.17^.4.dir
+    rename perl-5^.17^.4.dir perl-5_17_4.dir
 
 The reason for this last step is that while filenames with multiple dots
 are generally supported by Perl on VMS, I<directory> names with multiple
