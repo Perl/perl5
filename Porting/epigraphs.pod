@@ -17,6 +17,46 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.3 - Kris Ta-belle, "Smoked Perl Onion Soup"
+
+L<Announced on 2012-08-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2012/08/msg190775.html>
+
+Preparation:
+
+Cut 16 Perl Onions into quarters and put them in a grill smoker rack
+or a perforated pan over a BBQ using hickory wood chips or Special
+Blend Smoker Bisquettes.  Smoke them for an hour and remove once they
+look golden brown.
+Let them cool and put them in the fridge (or freezer) until you are
+ready to create the soup.
+
+Ingredients:
+
+16 diced, pre-smoked, Perl Onions
+3 tbsp butter
+1/4 cup olive oil
+2 small garlic cloves, finely minced
+1 tsp salt
+1 tsp sugar
+black pepper to taste
+1 cup red wine
+1/4 cup all purpose flour
+6 cups of beef or vegetable stock
+1 cup of thick cream (milk can be used as a substitute)
+
+Method:
+
+Melt the butter in a pan and then add olive oil.
+Heat and add the onions to caramelize over a medium-high heat for up
+  to half an hour.
+Add the garlic, turn down the heat and cook for a further 5 minutes.
+Add the salt, pepper and sugar.
+Now add the red wine and reduce to a jam like consistency.
+Add the flour, stir well and add the stock a cup at a time.
+Simmer for 30 minutes, add the cream and heat to almost boiling.
+
+Enjoy.
+
 =head2 v5.17.2 - Terry Pratchet, "The Colour of Magic"
 
 L<Announced on 2012-06-21 by TonyC|http://www.nntp.perl.org/group/perl.perl5.porters/2012/07/msg189828.html>
