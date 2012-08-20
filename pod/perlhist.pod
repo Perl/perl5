@@ -486,6 +486,7 @@ the strings?).
  Zefram   5.17.0        2012-May-26     The 5.17 development track
  Jesse L  5.17.1        2012-Jun-20
  TonyC    5.17.2        2012-Jul-20
+ Steve    5.17.3        2012-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
