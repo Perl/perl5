@@ -2,49 +2,93 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.17.3
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.17.4
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.17.2 release and the 5.17.3
+This document describes differences between the 5.17.3 release and the 5.17.4
 release.
 
-If you are upgrading from an earlier release such as 5.17.1, first read
-L<perl5172delta>, which describes differences between 5.17.1 and 5.17.2.
+If you are upgrading from an earlier release such as 5.17.2, first read
+L<perl5173delta>, which describes differences between 5.17.2 and 5.17.3.
+
+=head1 Notice
+
+XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 Computed Labels
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
 
-The loop controls C<next>, C<last> and C<redo>, and the special C<dump>
-operator, now allow arbitrary expressions to be used to compute labels at run
-time.  Previously, any argument that was not a constant was treated as the
-empty string.
+[ List each enhancement as a =head2 entry ]
+
+=head1 Security
+
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
+
+[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
-=head2 C<$ENV{foo}=undef> deletes value from environ, like C<delete $ENV{foo}>
+XXX For a release on a stable branch, this section aspires to be:
 
-This facilitates use of C<local()> with C<%ENV> entries.  In previous versions
-of Perl, C<undef> was converted to the empty string.
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
 
-=head2 Defined values stored in environment are forced to byte strings
+[ List each incompatible change as a =head2 entry ]
 
-A value stored in an environment variable has always been stringified.  In this
-release, it is converted to be only a byte string.  First, it is forced to be a
-only a string.  Then if the string is utf8 and the equivalent of
-C<utf8::downgrade()> works, that result is used; otherwise, the equivalent of
-C<utf8::encode()> is used, and a warning is issued about wide characters
-(L</Diagnostics>).
+=head1 Deprecations
 
-=head2 C<given> now aliases the global C<$_>
+XXX Any deprecated features, syntax, modules etc. should be listed here.  In
+particular, deprecated modules should be listed here even if they are listed as
+an updated module in the L</Modules and Pragmata> section.
 
-Instead of assigning to an implicit lexical C<$_>, C<given> now makes the
-global C<$_> an alias for its argument, just like C<foreach>.  However, it
-still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
-C<foreach>) [perl #114020].
+[ List each deprecation as a =head2 entry ]
+
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>, which prints stub
+entries to STDOUT.  Results can be pasted in place of the '=head2' entries
+below.  A paragraph summary for important changes should then be added by hand.
+In an ideal world, dual-life modules would have a F<Changes> file that could be
+cribbed.
+
+[ Within each section, list entries as a =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -52,195 +96,46 @@ C<foreach>) [perl #114020].
 
 =item *
 
-L<B> has been upgraded from version 1.36 to 1.37.  All C<CVf_*> and C<GVf_*>
-and more SV-related flag values are now provided as constants in the C<B::>
-namespace and available for export.  The default export list has not changed.
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
 
 =item *
 
-L<B::Concise> has been upgraded from version 0.91 to 0.92.  The C<-nobanner>
-option has been fixed, and C<format>s can now be dumped.  When passed a sub
-name to dump, it will check also to see whether it is the name of a format.  If
-a sub and a format share the same name, it will dump both.
-
-=item *
-
-L<B::Debug> has been upgraded from version 1.17 to 1.18.  This adds support
-(experimentally) for C<B::PADLIST>, which will be added in Perl 5.17.4.
-
-=item *
-
-L<B::Deparse> has been upgraded from version 1.15 to 1.16.  It now deparses
-loop controls with the correct precedence, and multiple statements in a
-C<format> line are also now deparsed correctly.
-
-=item *
-
-L<CGI> has been upgraded from version 3.59 to 3.60.  Unrecognized HTML escape
-sequences are now handled better, problematic trailing newlines are no longer
-inserted after E<lt>formE<gt> tags by C<startform()> or C<start_form()>, and
-bogus "Insecure Dependency" warnings appearing with some versions of perl are
-now worked around.
-
-=item *
-
-L<Compress::Raw::Bzip2> has been upgraded from version 2.05201 to 2.055.  The
-misuse of Perl's "magic" API has been fixed.
-
-=item *
-
-L<Compress::Raw::Zlib> has been upgraded from version 2.05401 to 2.056.  The
-misuse of Perl's "magic" API has been fixed.
-
-=item *
-
-L<Compress::Zlib> has been upgraded from version 2.052 to 2.055. C<compress()>,
-C<uncompress()>, C<memGzip()> and C<memGunzip()> have been speeded up by making
-parameter validation more efficient.
-
-=item *
-
-L<Data::Dumper> has been upgraded from version 2.135_06 to 2.135_07.  It has
-been optimized to only build a seen-scalar hash as necessary, thereby speeding
-up serialization drastically.
-
-=item *
-
-L<Devel::Peek> has been upgraded from version 1.08 to 1.09.  The only change
-has been to the test script, to account for changes to some flags in perl's
-internals.
-
-=item *
-
-L<Encode> has been upgraded from version 2.44 to 2.47.  The Mac alias x-mac-ce
-has been added, and various bugs have been fixed in Encode::Unicode,
-Encode::UTF7 and Encode::GSM0338.
-
-=item *
-
-L<Module::Build> has been upgraded from version 0.40 to 0.4003.  A minor bug
-fix allows markup to be used around the leading "Name" in a POD "abstract"
-line, and some documentation improvements have been made.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 2.69 to 2.71.  Version
-information is now stored as a delta, which greatly reduces the size of the
-F<CoreList.pm> file.
-
-=item *
-
-L<Module::Load::Conditional> has been upgraded from version 0.50 to 0.54.
-Various enhancements include the new use of Module::Metadata.
-
-=item *
-
-L<Module::Metadata> has been upgraded from version 1.000009 to 1.000011.  The
-creation of a Module::Metadata object for a typical module file has been sped
-up by about 40%, and some spurious warnings about C<$VERSION>s have been
-suppressed.
-
-=item *
-
-L<Module::Pluggable> has been upgraded from version 4.0 to 4.3.  Amongst other
-changes, triggers are now allowed on events, which gives a powerful way to
-modify behaviour.
-
-=item *
-
-L<perlfaq> has been upgraded from version 5.0150040 to 5.0150041.  This
-contains a couple of minor corrections and lists one new editor.
-
-=item *
-
-L<Pod::Simple> has been upgraded from version 3.20 to 3.23.  Numerous
-improvements have been made, mostly to Pod::Simple::XHTML, which also has a
-compatibility change: the C<codes_in_verbatim> option is now disabled by
-default.  See F<cpan/Pod-Simple/ChangeLog> for the full details.
-
-=item *
-
-L<re> has been upgraded from version 0.21 to 0.22.  Single character [class]es
-like C</[s]/> or C</[s]/i> are now optimized as if they did not have the
-brackets, i.e. C</s/> or C</s/i>.
-
-=item *
-
-L<Socket> has been upgraded from version 2.002 to 2.004.  Constants and
-functions required for IP multicast source group membership have been added.
-
-=item *
-
-L<Storable> has been upgraded from version 2.37 to 2.38.  It can now freeze and
-thaw vstrings correctly.  This causes a slight incompatible change in the
-storage format, so the format version has increased to 2.9.
-
-=item *
-
-L<Sys::Syslog> has been upgraded from version 0.29 to 0.31.  This contains
-several bug fixes relating to C<getservbyname()>, C<setlogsock()>and log levels
-in C<syslog()>, together with fixes for Windows, Haiku-OS and GNU/kFreeBSD.
-See F<cpan/Sys-Syslog/Changes> for the full details.
-
-=item *
-
-L<Term::ReadLine> has been upgraded from version 1.09 to 1.10.  This fixes the
-use of the B<cpan> and B<cpanp> shells on Windows in the event that the current
-drive happens to contain a F<\dev\tty> file.
-
-=item *
-
-L<Text::Tabs> and L<Text::Wrap> have been upgraded from version 2009.0305 to
-2012.0818.  Support for Unicode combining characters has been added to them
-both.
-
-=item *
-
-L<Time::Local> has been upgraded from version 1.2000 to 1.2300.  Seconds values
-greater than 59 but less than 60 no longer cause C<timegm()> and C<timelocal()>
-to croak.
-
-=item *
-
-L<Unicode::UCD> has been upgraded from version 0.44 to 0.45.  This has been
-modified slightly for reasons of perl internal use only.
-
-=item *
-
-L<Win32> has been upgraded from version 0.44 to 0.45.  New APIs have been added
-for getting and setting the current code page.
-
-=item *
-
-L<Win32CORE> has been upgraded from version 0.02 to 0.03.  The use of
-PERL_NO_GET_CONTEXT here has resulted in smaller machine code.
+XXX
 
 =back
 
 =head1 Documentation
 
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
+
 =head2 Changes to Existing Documentation
 
-=head3 L<perlfunc>, L<perlop>
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-Loop control verbs (C<dump>, C<goto>, C<next>, C<last> and C<redo>) have always
-had the same precedence as assignment operators, but this was not documented
-until now.
-
-=back
-
-=head3 L<perlvar>
-
-=over 4
-
-=item *
-
-A caveat has been added to the documentation for C<$_> warning against the use
-of lexical C<$_> [perl #114020].
+XXX Description of the change here
 
 =back
 
@@ -250,7 +145,13 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
 =head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
 
 =head3 New Errors
 
@@ -258,21 +159,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<Unterminated delimiter for here document|perldiag/"Unterminated delimiter for here document">
-
-This message now occurs when a here document label has an initial quotation
-mark but the final quotation mark is missing.
-
-This replaces a bogus and misleading error message about not finding the label
-itself [perl #114104].
-
-=item *
-
-L<panic: child pseudo-process was never scheduled|perldiag/"panic: child pseudo-process was never scheduled">
-
-This error is thrown when a child pseudo-process in the ithreads implementation
-on Windows was not scheduled within the time period allowed and therefore was
-not able to initialize properly [perl #88840].
+XXX L<message|perldiag/"message">
 
 =back
 
@@ -282,270 +169,182 @@ not able to initialize properly [perl #88840].
 
 =item *
 
-L<Wide character in setenv|perldiag/"Wide character in %s">
+XXX L<message|perldiag/"message">
 
-Attempts to put wide characters into environment variables via C<%ENV> now
-provoke this warning.
+=back
+
+=head2 Changes to Existing Diagnostics
+
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
+=over 4
+
+=item *
+
+XXX Describe change here
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
+Most of these are built within the directories F<utils> and F<x2p>.
+
+[ List utility changes as a =head3 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head3 L<XXX>
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Configuration and Compilation
 
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as a =item entry ].
+
 =over 4
 
 =item *
 
-The pager detection in F<Configure> has been improved to allow responses which
-specify options after the program name, e.g. B</usr/bin/less -R>, if the user
-accepts the default value.  This helps B<perldoc> when handling ANSI escapes
-[perl #72156].
+XXX
+
+=back
+
+=head1 Testing
+
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+[ List each test improvement as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Platform Support
 
-=head2 Discontinued Platforms
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as a =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
 
 =over 4
 
-=item UTS Global
+=item XXX-some-platform
 
-Support code relating to UTS global has been removed.  UTS was a mainframe
-version of System V created by Amdahl, subsequently sold to UTS Global.  The
-port has not been touched since before Perl 5.8.0, and UTS Global is now
-defunct.
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
 
 =back
 
 =head2 Platform-Specific Notes
 
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
 =over 4
 
-=item Windows
+=item XXX-some-platform
 
-A new makefile option, USE_64_BIT_INT, has been added to the Windows makefiles.
-Set this to "define" when building a 32-bit perl if you want it to use 64-bit
-integers.
+XXX
 
-Machine code size reductions, already made to the DLLs of XS modules in Perl
-5.17.2, have now been extended to the perl DLL itself.
+=back
 
-Building with VC++ 6.0 was inadvertently broken in Perl 5.17.2 but has now been
-fixed again.
+=head1 Internal Changes
 
-=item VMS
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
 
-The B<a2p> build has been fixed for the HP C++ compiler on OpenVMS.
+[ List each change as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Selected Bug Fixes
 
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+[ List each fix as a =item entry ]
+
 =over 4
 
 =item *
 
-C<\w> now matches the code points U+200C (ZERO WIDTH NON-JOINER) and U+200D
-(ZERO WIDTH JOINER).  C<\W> no longer matches these.  This change is because
-Unicode corrected their definition of what C<\w> should match.
-
-=item *
-
-C<dump LABEL> no longer leaks its label.
-
-=item *
-
-Constant folding no longer changes the behaviour of functions like C<stat()>
-and C<truncate()> that can take either filenames or handles.
-C<stat 1 ? foo : bar> nows treats its argument as a file name (since it is an
-arbitrary expression), rather than the handle "foo".
-
-=item *
-
-C<truncate FOO, $len> no longer falls back to treating "FOO" as a file name if
-the filehandle has been deleted.  This was broken in Perl 5.16.0.
-
-=item *
-
-Subroutine redefinitions after sub-to-glob and glob-to-glob assignments no
-longer cause double frees or panic messages.
-
-=item *
-
-C<s///> now turns vstrings into plain strings when performing a substitution,
-even if the resulting string is the same (C<s/a/a/>).
-
-=item *
-
-Prototype mismatch warnings no longer erroneously treat constant subs as having
-no prototype when they actually have "".
-
-=item *
-
-Constant subroutines and forward declarations no longer prevent prototype
-mismatch warnings from omitting the sub name.
-
-=item *
-
-C<undef> on a subroutine now clears call checkers.
-
-=item *
-
-The C<ref> operator started leaking memory on blessed objects in Perl 5.16.0.
-This has been fixed [perl #114340].
-
-=item *
-
-C<use> no longer tries to parse its arguments as a statement, making
-C<use constant { () };> a syntax error [perl #114222].
-
-=item *
-
-On debugging builds, "uninitialized" warnings inside formats no longer cause
-assertion failures.
-
-=item *
-
-On debugging builds, subroutines nested inside formats no longer cause
-assertion failures [perl #78550].
-
-=item *
-
-Formats and C<use> statements are now permitted inside formats.
-
-=item *
-
-C<print $x> and C<sub { print $x }-E<gt>()> now always produce the same output.
-It was possible for the latter to refuse to close over $x if the variable was
-not active; e.g., if it was defined outside a currently-running named
-subroutine.
-
-=item *
-
-Similarly, C<print $x> and C<print eval '$x'> now produce the same output.
-This also allows "my $x if 0" variables to be seen in the debugger [perl
-#114018].
-
-=item *
-
-Formats called recursively no longer stomp on their own lexical variables, but
-each recursive call has its own set of lexicals.
-
-=item *
-
-Attempting to free an active format or the handle associated with it no longer
-results in a crash.
-
-=item *
-
-Format parsing no longer gets confused by braces, semicolons and low-precedence
-operators.  It used to be possible to use braces as format delimiters (instead
-of C<=> and C<.>), but only sometimes.  Semicolons and low-precedence operators
-in format argument lines no longer confuse the parser into ignoring the line's
-return value.  In format argument lines, braces can now be used for anonymous
-hashes, instead of being treated always as C<do> blocks.
-
-=item *
-
-Formats can now be nested inside code blocks in regular expressions and other
-quoted constructs (C</(?{...})/> and C<qq/${...}/>) [perl #114040].
-
-=item *
-
-Formats are no longer created after compilation errors.
-
-=item *
-
-Some format syntax errors started causing crashes in Perl 5.17.2, but have now
-been fixed.
-
-=item *
-
-Under debugging builds, the B<-DA> command line option started crashing in Perl
-5.16.0.  It has been fixed [perl #114368].
-
-=item *
-
-Scope::Escape compatibility, which was broken in Perl 5.17.2, has been restored
-[perl #113872].
-
-=item *
-
-A potential deadlock scenario involving the premature termination of a pseudo-
-forked child in a Windows build with ithreads enabled has been fixed.  This
-resolves the common problem of the F<t/op/fork.t> test hanging on Windows [perl
-#88840].
-
-=item *
-
-The microperl build, broken since Perl 5.15.7, has now been restored.
-
-=item *
-
-The code which generates errors from C<require()> could potentially read one or
-two bytes before the start of the filename for filenames less than three bytes
-long and ending C</\.p?\z/>.  This has now been fixed.  Note that it could
-never have happened with module names given to C<use()> or C<require()> anyway.
-
-=item *
-
-The handling of pathnames of modules given to C<require()> has been made
-thread-safe on VMS.
-
-=item *
-
-The C<re_compile()> API function, the entry point for perl's regex compiler,
-was accidentally changed in Perl 5.17.1 to operate on the current engine.  This
-has now been restored to its former core-engine-specific state [perl #114302].
-
-=item *
-
-Perl 5.17.1 introduced a memory leak into the re-use of run-time regexes where
-the pattern hasn't changed (i.e. C</$unchanging/>).  This has now been fixed.
-
-=item *
-
-A bug in the compilation of a C</(?{})/> expression which affected the TryCatch
-test suite has been fixed [perl #114242].
-
-=item *
-
-Formats no longer leak.  They started leaking in Perl 5.17.2.
-
-=item *
-
-Pod can now be nested in code inside a quoted construct outside of a string
-eval.  This used to work only within string evals [perl #114040].
+XXX
 
 =back
 
+=head1 Known Problems
+
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Obituary
+
+XXX If any significant core contributor has died, we've added a short obituary
+here.
+
 =head1 Acknowledgements
 
-Perl 5.17.3 represents approximately 4 weeks of development since Perl 5.17.2
-and contains approximately 85,000 lines of changes across 470 files from 24
-authors.
+XXX Generate this with:
 
-Perl continues to flourish into its third decade thanks to a vibrant community
-of users and developers.  The following people are known to have contributed
-the improvements that became Perl 5.17.3:
-
-Andy Dougherty, Chip Salzenberg, Chris 'BinGOs' Williams, Craig A. Berry,
-Daniel Dragan, Dave Rolsky, David Leadbeater, David Mitchell, Eric Brine,
-Father Chrysostomos, Goro Fuji, James E Keenan, Jan Dubois, Joaquin Ferrero,
-Karl Williamson, Nicholas Clark, Paul Marquess, Reini Urban, Ricardo Signes,
-Robin Barker, Shirakata Kentaro, Steffen Müller, Steve Hay, Tony Cook.
-
-The list above is almost certainly incomplete as it is automatically generated
-from version control history.  In particular, it does not include the names of
-the (very much appreciated) contributors who reported issues to the Perl bug
-tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core.  We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please see
-the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.17.3..HEAD
 
 =head1 Reporting Bugs
 
