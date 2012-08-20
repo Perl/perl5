@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.17.3
 
 =head1 DESCRIPTION
@@ -15,17 +12,7 @@ release.
 If you are upgrading from an earlier release such as 5.17.1, first read
 L<perl5172delta>, which describes differences between 5.17.1 and 5.17.2.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 Computed Labels
 
@@ -34,17 +21,7 @@ operator, now allow arbitrary expressions to be used to compute labels at run
 time.  Previously, any argument that was not a constant was treated as the
 empty string.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
-
-[ List each incompatible change as a =head2 entry ]
 
 =head2 C<$ENV{foo}=undef> deletes value from environ, like C<delete $ENV{foo}>
 
@@ -67,50 +44,7 @@ global C<$_> an alias for its argument, just like C<foreach>.  However, it
 still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
 C<foreach>) [perl #114020].
 
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.  In
-particular, deprecated modules should be listed here even if they are listed as
-an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -160,9 +94,9 @@ misuse of Perl's "magic" API has been fixed.
 
 =item *
 
-L<Compress::Zlib> has been upgraded from version 2.052 to 2.055.
-C<compress()>, C<uncompress()>, C<memGzip()> and C<memGunzip()> have been
-speeded up by making parameter validation more efficient.
+L<Compress::Zlib> has been upgraded from version 2.052 to 2.055. C<compress()>,
+C<uncompress()>, C<memGzip()> and C<memGunzip()> have been speeded up by making
+parameter validation more efficient.
 
 =item *
 
@@ -285,22 +219,7 @@ PERL_NO_GET_CONTEXT here has resulted in smaller machine code.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by file and
-be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 =head3 L<perlfunc>, L<perlop>
 
@@ -331,13 +250,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -376,45 +289,7 @@ provoke this warning.
 
 =back
 
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
@@ -427,45 +302,7 @@ accepts the default value.  This helps B<perldoc> when handling ANSI escapes
 
 =back
 
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
 
 =head2 Discontinued Platforms
 
@@ -475,16 +312,12 @@ XXX
 
 Support code relating to UTS global has been removed.  UTS was a mainframe
 version of System V created by Amdahl, subsequently sold to UTS Global.  The
-port has not been touched since before 5.8.0, and UTS Global is now defunct.
+port has not been touched since before Perl 5.8.0, and UTS Global is now
+defunct.
 
 =back
 
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -506,28 +339,7 @@ The B<a2p> build has been fixed for the HP C++ compiler on OpenVMS.
 
 =back
 
-=head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -658,10 +470,10 @@ Scope::Escape compatibility, which was broken in Perl 5.17.2, has been restored
 
 =item *
 
-A potential deadlock scenario involving the premature termination of a
-pseudo-forked child in a Windows build with ithreads enabled has been fixed.
-This resolves the common problem of the F<t/op/fork.t> test hanging on Windows
-[perl #88840].
+A potential deadlock scenario involving the premature termination of a pseudo-
+forked child in a Windows build with ithreads enabled has been fixed.  This
+resolves the common problem of the F<t/op/fork.t> test hanging on Windows [perl
+#88840].
 
 =item *
 
@@ -697,7 +509,7 @@ test suite has been fixed [perl #114242].
 
 =item *
 
-Formats no longer leak.  They started leaking in 5.17.2.
+Formats no longer leak.  They started leaking in Perl 5.17.2.
 
 =item *
 
@@ -705,27 +517,6 @@ Pod can now be nested in code inside a quoted construct outside of a string
 eval.  This used to work only within string evals [perl #114040].
 
 =back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
