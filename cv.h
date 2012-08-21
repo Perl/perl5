@@ -61,22 +61,7 @@ See L<perlguts/Autoloading with XSUBs>.
     (CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
 #endif
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
-PERL_STATIC_INLINE I32 *
-S_CvDEPTHp(const CV * const sv)
-{
-    return SvTYPE(sv) == SVt_PVCV
-	? &((XPVCV*)SvANY(sv))->xcv_depth
-	: &((XPVCV*)SvANY(sv))->xpv_fmdepth;
-}
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define CvDEPTH(sv) (*({const CV *const _cvdepth = (const CV *)sv; \
-			  assert(SvTYPE(_cvdepth) == SVt_PVCV	      \
-			      || SvTYPE(_cvdepth) == SVt_PVFM);	       \
-			  S_CvDEPTHp(_cvdepth);				\
-			}))
-#else
-#  define CvDEPTH(sv)	(*S_CvDEPTHp((const CV *)sv))
-#endif
+#define CvDEPTH(sv)	(*S_CvDEPTHp((const CV *)sv))
 #define CvPADLIST(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
 #define CvFLAGS(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags

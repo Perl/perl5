@@ -5150,6 +5150,8 @@ EXTCONST bool PL_valid_types_NV_set[];
 
 #endif
 
+/* Static inline funcs that depend on includes and declarations above */
+#include "inline.h"
 
 #include "overload.h"
 
