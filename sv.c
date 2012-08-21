@@ -6928,7 +6928,6 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 	   calculation in bytes simply because we always know the byte
 	   length.  squareroot has the same ordering as the positive value,
 	   so don't bother with the actual square root.  */
-	const float existing = THREEWAY_SQUARE(0, cache[3], cache[1], blen);
 	if (byte > cache[1]) {
 	    /* New position is after the existing pair of pairs.  */
 	    const float keep_earlier
@@ -6937,18 +6936,14 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 		= THREEWAY_SQUARE(0, cache[1], byte, blen);
 
 	    if (keep_later < keep_earlier) {
-		if (keep_later < existing) {
-		    cache[2] = cache[0];
-		    cache[3] = cache[1];
-		    cache[0] = utf8;
-		    cache[1] = byte;
-		}
+                cache[2] = cache[0];
+                cache[3] = cache[1];
+                cache[0] = utf8;
+                cache[1] = byte;
 	    }
 	    else {
-		if (keep_earlier < existing) {
-		    cache[0] = utf8;
-		    cache[1] = byte;
-		}
+                cache[0] = utf8;
+                cache[1] = byte;
 	    }
 	}
 	else if (byte > cache[3]) {
@@ -6959,16 +6954,12 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 		= THREEWAY_SQUARE(0, byte, cache[1], blen);
 
 	    if (keep_later < keep_earlier) {
-		if (keep_later < existing) {
-		    cache[2] = utf8;
-		    cache[3] = byte;
-		}
+                cache[2] = utf8;
+                cache[3] = byte;
 	    }
 	    else {
-		if (keep_earlier < existing) {
-		    cache[0] = utf8;
-		    cache[1] = byte;
-		}
+                cache[0] = utf8;
+                cache[1] = byte;
 	    }
 	}
 	else {
@@ -6979,18 +6970,14 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, const STRLEN b
 		= THREEWAY_SQUARE(0, byte, cache[1], blen);
 
 	    if (keep_later < keep_earlier) {
-		if (keep_later < existing) {
-		    cache[2] = utf8;
-		    cache[3] = byte;
-		}
+                cache[2] = utf8;
+                cache[3] = byte;
 	    }
 	    else {
-		if (keep_earlier < existing) {
-		    cache[0] = cache[2];
-		    cache[1] = cache[3];
-		    cache[2] = utf8;
-		    cache[3] = byte;
-		}
+                cache[0] = cache[2];
+                cache[1] = cache[3];
+                cache[2] = utf8;
+                cache[3] = byte;
 	    }
 	}
     }
