@@ -7343,10 +7343,12 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
 
     /* Binary search.  What we are looking for is <i> such that
      *	array[i] <= cp < array[i+1]
-     * The loop below converges on the i+1. */
+     * The loop below converges on the i+1.  Note that there may not be an
+     * (i+1)th element in the array, and things work nonetheless */
     while (low < high) {
 	IV mid = (low + high) / 2;
-	if (array[mid] <= cp) {
+        assert(mid <= highest_element);
+	if (array[mid] <= cp) { /* cp >= array[mid] */
 	    low = mid + 1;
 
 	    /* We could do this extra test to exit the loop early.
