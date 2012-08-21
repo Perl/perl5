@@ -2459,6 +2459,7 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
+    SAVESPTR(PL_lex_repl);
     SAVEPPTR(PL_sublex_info.re_eval_start);
     SAVEPPTR(PL_sublex_info.super_bufptr);
     SAVEVPTR(PL_lex_inpat);
@@ -2496,7 +2497,9 @@ S_sublex_push(pTHX)
     SvNVX(PL_lex_stuff) = PTR2NV(PL_linestr);
 
     PL_linestr = PL_lex_stuff;
+    PL_lex_repl = PL_sublex_info.repl;
     PL_lex_stuff = NULL;
+    PL_sublex_info.repl = NULL;
     PL_sublex_info.re_eval_start = NULL;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
@@ -9350,13 +9353,13 @@ S_scan_subst(pTHX_ char *start)
 		sv_catpvs(repl, "do ");
 	}
 	sv_catpvs(repl, "{");
-	sv_catsv(repl, PL_lex_repl);
-	if (strchr(SvPVX(PL_lex_repl), '#'))
+	sv_catsv(repl, PL_sublex_info.repl);
+	if (strchr(SvPVX(PL_sublex_info.repl), '#'))
 	    sv_catpvs(repl, "\n");
 	sv_catpvs(repl, "}");
 	SvEVALED_on(repl);
-	SvREFCNT_dec(PL_lex_repl);
-	PL_lex_repl = repl;
+	SvREFCNT_dec(PL_sublex_info.repl);
+	PL_sublex_info.repl = repl;
     }
 
     PL_lex_op = (OP*)pm;
@@ -9441,7 +9444,7 @@ S_scan_trans(pTHX_ char *start)
     o->op_private &= ~OPpTRANS_ALL;
     o->op_private |= del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
-      (DO_UTF8(PL_lex_repl) ? OPpTRANS_TO_UTF   : 0);
+      (DO_UTF8(PL_sublex_info.repl) ? OPpTRANS_TO_UTF   : 0);
 
     PL_lex_op = o;
     pl_yylval.ival = nondestruct ? OP_TRANSR : OP_TRANS;
@@ -10309,7 +10312,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
     */
 
     if (PL_lex_stuff)
-	PL_lex_repl = sv;
+	PL_sublex_info.repl = sv;
     else
 	PL_lex_stuff = sv;
     return s;

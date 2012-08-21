@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..62\n";
+print "1..63\n";
 
 $x = 'x';
 
@@ -309,3 +309,7 @@ ok 62 - heredoc in "" in multiline s///e outside eval
 END
 |e;
 print $_ || "not ok 62\n";
+
+$_ = "not ok 63 - s/// in s/// pattern\n";
+s/${s|||;\""}not //;
+print;
