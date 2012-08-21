@@ -9656,10 +9656,9 @@ S_scan_heredoc(pTHX_ register char *s)
 		break;
 	    }
 	}
-	term = *PL_tokenbuf;
 	d = s;
 	while (s < bufend &&
-	  (*s != term || memNE(s,PL_tokenbuf,len)) ) {
+	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
 	    if (*s++ == '\n')
 		CopLINE_inc(PL_curcop);
 	}
@@ -9680,10 +9679,9 @@ S_scan_heredoc(pTHX_ register char *s)
 	goto retval;
     }
     else if (!infile || found_newline) {
-	term = *PL_tokenbuf;
 	d = s;
 	while (s < PL_bufend &&
-	  (*s != term || memNE(s,PL_tokenbuf,len)) ) {
+	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
 	    if (*s++ == '\n')
 		CopLINE_inc(PL_curcop);
 	}
