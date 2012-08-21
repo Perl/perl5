@@ -2264,6 +2264,7 @@ Perl_is_utf8_X_L(pTHX_ const U8 *p)
 #define SCount 11172    /* Length of block */
 #define TCount 28
 
+#if 0   /* This routine is not currently used */
 bool
 Perl_is_utf8_X_LV(pTHX_ const U8 *p)
 {
@@ -2291,6 +2292,7 @@ Perl_is_utf8_X_LV(pTHX_ const U8 *p)
             && cp >= SBASE && cp < SBASE + SCount
             && (cp - SBASE) % TCount == 0); /* Only every TCount one is LV */
 }
+#endif
 
 bool
 Perl_is_utf8_X_LVT(pTHX_ const U8 *p)

@@ -856,7 +856,6 @@
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define is_utf8_X_L(a)		Perl_is_utf8_X_L(aTHX_ a)
-#define is_utf8_X_LV(a)		Perl_is_utf8_X_LV(aTHX_ a)
 #define is_utf8_X_LVT(a)	Perl_is_utf8_X_LVT(aTHX_ a)
 #define is_utf8_X_LV_LVT_V(a)	Perl_is_utf8_X_LV_LVT_V(aTHX_ a)
 #define is_utf8_X_T(a)		Perl_is_utf8_X_T(aTHX_ a)

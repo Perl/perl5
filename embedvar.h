@@ -354,7 +354,6 @@
 #define PL_unlockhook		(vTHX->Iunlockhook)
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_X_L		(vTHX->Iutf8_X_L)
-#define PL_utf8_X_LV		(vTHX->Iutf8_X_LV)
 #define PL_utf8_X_LVT		(vTHX->Iutf8_X_LVT)
 #define PL_utf8_X_LV_LVT_V	(vTHX->Iutf8_X_LV_LVT_V)
 #define PL_utf8_X_T		(vTHX->Iutf8_X_T)
