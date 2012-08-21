@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 require Exporter;
 require Cwd;
 
@@ -523,6 +523,7 @@ sub _find_opt {
     Proc_Top_Item:
     foreach my $TOP (@_) {
 	my $top_item = $TOP;
+	$top_item = VMS::Filespec::unixify($top_item) if $Is_VMS;
 
 	($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
 
