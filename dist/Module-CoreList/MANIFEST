@@ -3,6 +3,7 @@ corelist
 identify-dependencies
 lib/Module/CoreList.pm
 lib/Module/CoreList.pod
+lib/Module/CoreList/TieHashDelta.pm
 README
 MANIFEST
 Makefile.PL
