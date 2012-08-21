@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..59\n";
+print "1..60\n";
 
 $x = 'x';
 
@@ -288,3 +288,10 @@ END
 |e
 ';
 print $_ || "not ok 59\n";
+
+$_ = "";
+eval "s/(?:)/<<foo/e #\0
+ok 60 - null on same line as heredoc in s/// in eval
+foo
+";
+print $_ || "not ok 60\n";

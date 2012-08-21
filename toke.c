@@ -9605,7 +9605,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	char * const bufend = SvEND(PL_sublex_info.super_linestr);
 	char * const olds = s - SvCUR(herewas);
 	term = *PL_tokenbuf;
-	s = strchr(bufptr, '\n');
+	s = (char *)memchr((void *)bufptr, '\n', bufend-bufptr);
 	if (!s)
 	    s = bufend;
 	d = s;
