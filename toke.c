@@ -2461,7 +2461,6 @@ S_sublex_push(pTHX)
     SAVEI8(PL_lex_state);
     SAVEPPTR(PL_sublex_info.re_eval_start);
     SAVEPPTR(PL_sublex_info.super_bufptr);
-    SAVEPPTR(PL_sublex_info.super_linestr);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
@@ -2476,11 +2475,29 @@ S_sublex_push(pTHX)
     SAVEGENERICPV(PL_lex_brackstack);
     SAVEGENERICPV(PL_lex_casestack);
 
-    PL_sublex_info.super_linestr = PL_linestr;
+    /* The here-doc parser needs to be able to peek into outer lexing
+       scopes to find the body of the here-doc.  We use SvIVX(PL_linestr)
+       to store the outer PL_bufptr and SvNVX to store the outer
+       PL_linestr.  Since SvIVX already means something else, we use
+       PL_sublex_info.super_bufptr for the innermost scope (the one we are
+       now entering), and a localised SvIVX for outer scopes.
+     */
+    SvUPGRADE(PL_linestr, SVt_PVIV);
+    /* A null super_bufptr means the outer lexing scope is not peekable,
+       because it is a single line from an input stream. */
+    SAVEIV(SvIVX(PL_linestr));
+    SvIVX(PL_linestr) = PTR2IV(PL_sublex_info.super_bufptr);
+    PL_sublex_info.super_bufptr =
+	(SvTYPE(PL_linestr) < SVt_PVNV || !SvNVX(PL_linestr))
+	 && (PL_rsfp || PL_parser->filtered)
+	 ? NULL
+	 : PL_bufptr;
+    SvUPGRADE(PL_lex_stuff, SVt_PVNV);
+    SvNVX(PL_lex_stuff) = PTR2NV(PL_linestr);
+
     PL_linestr = PL_lex_stuff;
     PL_lex_stuff = NULL;
     PL_sublex_info.re_eval_start = NULL;
-    PL_sublex_info.super_bufptr = PL_bufptr;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -2536,6 +2553,8 @@ S_sublex_done(pTHX)
     /* Is there a right-hand side to take care of? (s//RHS/ or tr//RHS/) */
     assert(PL_lex_inwhat != OP_TRANSR);
     if (PL_lex_repl && (PL_lex_inwhat == OP_SUBST || PL_lex_inwhat == OP_TRANS)) {
+	SvUPGRADE(PL_lex_repl, SVt_PVNV);
+	SvNVX(PL_lex_repl) = SvNVX(PL_linestr);
 	PL_linestr = PL_lex_repl;
 	PL_lex_inpat = 0;
 	PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
@@ -9452,17 +9471,21 @@ S_scan_trans(pTHX_ char *start)
    The three methods are:
     - Steal lines from the input stream (stream)
     - Scan the heredoc in PL_linestr and remove it therefrom (linestr)
-    - Peek at the PL_linestr of the outer lexing scope (peek)
+    - Peek at the PL_linestr of outer lexing scopes (peek)
 
    They are used in these cases:
-     file scope or filtered eval		stream
-     string eval				linestr
-     multiline quoted construct			linestr
-     single-line quoted construct in file	stream
-     single-line quoted construct in eval	peek
+     file scope or filtered eval			stream
+     string eval					linestr
+     multiline quoted construct				linestr
+     single-line quoted construct in file		stream
+     single-line quoted construct in eval or quote	peek
 
    Single-line also applies to heredocs that begin on the last line of a
    quote-like operator.
+
+   Peeking within a quote also involves falling back to the stream method,
+   if the outer quote-like operators are all on one line (or the heredoc
+   marker is on the last line).
 */
 
 STATIC char *
@@ -9600,14 +9623,37 @@ S_scan_heredoc(pTHX_ register char *s)
     CLINE;
     PL_multi_start = CopLINE(PL_curcop);
     PL_multi_open = PL_multi_close = '<';
-    if (!infile && PL_lex_inwhat && !found_newline) {
-	char * const bufptr = PL_sublex_info.super_bufptr;
-	char * const bufend = SvEND(PL_sublex_info.super_linestr);
+    if (PL_lex_inwhat && !found_newline) {
+	/* Peek into the line buffer of the parent lexing scope, going up
+ 	   as many levels as necessary to find one with a newline after
+	   bufptr.  See the comments in sublex_push for how IVX and NVX
+	   are abused.
+	 */
+	SV *linestr = NUM2PTR(SV *, SvNVX(PL_linestr));
+	char *bufptr = PL_sublex_info.super_bufptr;
+	char *bufend = SvEND(linestr);
 	char * const olds = s - SvCUR(herewas);
+	char * const real_olds = s;
+	if (!bufptr) {
+	    s = real_olds;
+	    goto streaming;
+	}
+	while (!(s = (char *)memchr((void *)bufptr, '\n', bufend-bufptr))){
+	    if (SvIVX(linestr)) {
+		bufptr = INT2PTR(char *, SvIVX(linestr));
+		linestr = NUM2PTR(SV *, SvNVX(linestr));
+		bufend = SvEND(linestr);
+	    }
+	    else if (infile) {
+		s = real_olds;
+		goto streaming;
+	    }
+	    else {
+		s = bufend;
+		break;
+	    }
+	}
 	term = *PL_tokenbuf;
-	s = (char *)memchr((void *)bufptr, '\n', bufend-bufptr);
-	if (!s)
-	    s = bufend;
 	d = s;
 	while (s < bufend &&
 	  (*s != term || memNE(s,PL_tokenbuf,len)) ) {
@@ -9623,8 +9669,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	s += len - 1;
 	sv_catpvn(herewas,s,bufend-s);
 	Copy(SvPVX_const(herewas),bufptr,SvCUR(herewas) + 1,char);
-	SvCUR_set(PL_sublex_info.super_linestr,
-		  bufptr-SvPVX_const(PL_sublex_info.super_linestr)
+	SvCUR_set(linestr,
+		  bufptr-SvPVX_const(linestr)
 		   + SvCUR(herewas));
 
 	s = olds;
@@ -9663,6 +9709,7 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     else
 	sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
+  streaming:
     term = PL_tokenbuf[1];
     len--;
     while (s >= PL_bufend) {	/* multiple line string? */

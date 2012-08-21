@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..60\n";
+print "1..62\n";
 
 $x = 'x';
 
@@ -295,3 +295,17 @@ ok 60 - null on same line as heredoc in s/// in eval
 foo
 ";
 print $_ || "not ok 60\n";
+
+$_ = "";
+eval ' s/(?:)/"${\<<END}"/e;
+ok 61 - heredoc in "" in single-line s///e in eval
+END
+';
+print $_ || "not ok 61\n";
+
+$_ = "";
+s|(?:)|"${\<<END}"
+ok 62 - heredoc in "" in multiline s///e outside eval
+END
+|e;
+print $_ || "not ok 62\n";
