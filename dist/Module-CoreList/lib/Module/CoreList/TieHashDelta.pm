@@ -68,7 +68,7 @@ sub FIRSTKEY {
 
 sub NEXTKEY {
     my ($self) = @_;
-    each $self->{changed};
+    each %{$self->{changed}};
 }
 
 1;
