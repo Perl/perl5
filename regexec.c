@@ -158,8 +158,6 @@
 	    * Unicode version in which they map to nothing */               \
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_prepend);/* U+0E40 "\xe0\xb9\x80" */ \
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_L);	    /* U+1100 "\xe1\x84\x80" */ \
-	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LV);     /* U+AC00 "\xea\xb0\x80" */ \
-	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LVT);    /* U+AC01 "\xea\xb0\x81" */ \
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LV_LVT_V);/* U+AC01 "\xea\xb0\x81" */\
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_T);      /* U+11A8 "\xe1\x86\xa8" */ \
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_V)       /* U+1160 "\xe1\x85\xa0" */  
@@ -4087,9 +4085,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 				    /* Otherwise keep going.  Must be LV, LVT
 				     * or V.  See if LVT */
-				    if (swash_fetch(PL_utf8_X_LVT,
-						    (U8*)locinput, utf8_target))
-				    {
+				    if (is_utf8_X_LVT((U8*)locinput)) {
 					locinput += UTF8SKIP(locinput);
 				    } else {
 
