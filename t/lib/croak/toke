@@ -1,4 +1,14 @@
 __END__
+# NAME Unterminated here-doc in string eval
+eval "<<foo"; die $@
+EXPECT
+Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
+########
+# NAME Unterminated here-doc in s/// string eval
+eval "s//<<foo/e"; die $@
+EXPECT
+Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
+########
 # NAME Missing name in "my sub"
 my sub;
 EXPECT

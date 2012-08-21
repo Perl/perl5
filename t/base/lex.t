@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..57\n";
+print "1..63\n";
 
 $x = 'x';
 
@@ -273,3 +273,43 @@ $test++;
 @a = (1,2,3);
 print "not " unless($a[~~2] == 3);
 print "ok 57\n";
+
+$_ = "";
+eval 's/(?:)/"${\q||}".<<\END/e;
+ok 58 - heredoc after "" in s/// in eval
+END
+';
+print $_ || "not ok 58\n";
+
+$_ = "";
+eval 's|(?:)|"${\<<\END}"
+ok 59 - heredoc in "" in multiline s///e in eval
+END
+|e
+';
+print $_ || "not ok 59\n";
+
+$_ = "";
+eval "s/(?:)/<<foo/e #\0
+ok 60 - null on same line as heredoc in s/// in eval
+foo
+";
+print $_ || "not ok 60\n";
+
+$_ = "";
+eval ' s/(?:)/"${\<<END}"/e;
+ok 61 - heredoc in "" in single-line s///e in eval
+END
+';
+print $_ || "not ok 61\n";
+
+$_ = "";
+s|(?:)|"${\<<END}"
+ok 62 - heredoc in "" in multiline s///e outside eval
+END
+|e;
+print $_ || "not ok 62\n";
+
+$_ = "not ok 63 - s/// in s/// pattern\n";
+s/${s|||;\""}not //;
+print;

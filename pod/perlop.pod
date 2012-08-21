@@ -2474,24 +2474,24 @@ you'll need to remove leading whitespace from each line manually:
     FINIS
 
 If you use a here-doc within a delimited construct, such as in C<s///eg>,
-the quoted material must come on the lines following the final delimiter.
-So instead of
+the quoted material must still come on the line following the
+C<<< <<FOO >>> marker, which means it may be inside the delimited
+construct:
 
     s/this/<<E . 'that'
     the other
     E
      . 'more '/eg;
 
-you have to write
+It works this way as of Perl 5.18.  Historically, it was inconsistent, and
+you would have to write
 
     s/this/<<E . 'that'
      . 'more '/eg;
     the other
     E
 
-If the terminating identifier is on the last line of the program, you
-must be sure there is a newline after it; otherwise, Perl will give the
-warning B<Can't find string terminator "END" anywhere before EOF...>.
+outside of string evals.
 
 Additionally, quoting rules for the end-of-string identifier are
 unrelated to Perl's quoting rules. C<q()>, C<qq()>, and the like are not
