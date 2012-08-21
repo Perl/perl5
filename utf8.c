@@ -2232,11 +2232,41 @@ Perl_is_utf8_X_extend(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_X_prepend(pTHX_ const U8 *p)
 {
+    /* If no code points in the Unicode version being worked on match
+     * GCB=Prepend, this will set PL_utf8_X_prepend to &PL_sv_undef during its
+     * first call.  Otherwise, it will set it to a swash created for it.
+     * swash_fetch() hence can't be used without checking first if it is valid
+     * to do so. */
+
     dVAR;
+    bool initialized = cBOOL(PL_utf8_X_prepend);
+    bool ret;
 
     PERL_ARGS_ASSERT_IS_UTF8_X_PREPEND;
 
-    return is_utf8_common(p, &PL_utf8_X_prepend, "_X_GCB_Prepend");
+    if (PL_utf8_X_prepend == &PL_sv_undef) {
+        return FALSE;
+    }
+
+    if ((ret = is_utf8_common(p, &PL_utf8_X_prepend, "_X_GCB_Prepend"))
+        || initialized)
+    {
+        return ret;
+    }
+
+    /* Here the code point being checked was not a prepend, and we hadn't
+     * initialized PL_utf8_X_prepend, so we don't know if it is just this
+     * particular input code point that didn't match, or if the table is
+     * completely empty. The is_utf8_common() call did the initialization, so
+     * we can inspect the swash's inversion list to find out.  If there are no
+     * elements in its inversion list, it's empty, and nothing will ever match,
+     * so set things up so we can skip the check in future calls. */
+    if (_invlist_len(_get_swash_invlist(PL_utf8_X_prepend)) == 0) {
+        SvREFCNT_dec(PL_utf8_X_prepend);
+        PL_utf8_X_prepend = &PL_sv_undef;
+    }
+
+    return FALSE;
 }
 
 bool

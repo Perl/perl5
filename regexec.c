@@ -3996,14 +3996,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		    LOAD_UTF8_CHARCLASS_GCB();
 
-		    /* Match (prepend)* */
+                    /* Match (prepend)*, but don't bother trying if empty (as
+                     * being set to _undef indicates) */
+                    if (PL_utf8_X_prepend != &PL_sv_undef) {
 		    while (locinput < PL_regeol
 			   && swash_fetch(PL_utf8_X_prepend,
 					  (U8*)locinput, utf8_target))
-		    {
+                    {
 			previous_prepend = locinput;
 			locinput += UTF8SKIP(locinput);
 		    }
+                    }
 
 		    /* As noted above, if we matched a prepend character, but
 		     * the next thing won't match, back off the last prepend we
