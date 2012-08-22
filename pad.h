@@ -215,6 +215,10 @@ The length of the name.
 =for apidoc Amx|bool|PADNAME_UTF8|PADNAME pn
 Whether PADNAME_PV is in UTF8.
 
+=for apidoc Amx|SV *|PADNAME_SV|PADNAME pn
+Returns the pad name as an SV.  This is currently just C<pn>.  It will
+begin returning a new mortal SV if pad names ever stop being SVs.
+
 =for apidoc m|bool|PADNAME_isOUR|PADNAME pn
 Whether this is an "our" variable.
 
@@ -285,6 +289,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PADNAME_PV(pn)		SvPV_nolen(pn)
 #define PADNAME_LEN(pn)		SvCUR(pn)
 #define PADNAME_UTF8(pn)	!!SvUTF8(pn)
+#define PADNAME_SV(pn)		pn
 #define PADNAME_isOUR(pn)	!!SvPAD_OUR(pn)
 #define PADNAME_OURSTASH	SvOURSTASH(pn)
 #define PADNAME_OUTER		!!SvFAKE(pn)
