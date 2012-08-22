@@ -5799,7 +5799,7 @@ PP(pp_coreargs)
 	  try_defsv:
 	    if (!numargs && defgv && whicharg == minargs + 1) {
 		PUSHs(find_rundefsv2(
-		    find_runcv_where(FIND_RUNCV_level_eq, (void *)1, NULL),
+		    find_runcv_where(FIND_RUNCV_level_eq, 1, NULL),
 		    cxstack[cxstack_ix].blk_oldcop->cop_seq
 		));
 	    }
@@ -5888,7 +5888,7 @@ PP(pp_runcv)
     dSP;
     CV *cv;
     if (PL_op->op_private & OPpOFFBYONE) {
-	cv = find_runcv_where(FIND_RUNCV_level_eq, (void *)1, NULL);
+	cv = find_runcv_where(FIND_RUNCV_level_eq, 1, NULL);
     }
     else cv = find_runcv(NULL);
     XPUSHs(CvEVAL(cv) ? &PL_sv_undef : sv_2mortal(newRV((SV *)cv)));

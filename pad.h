@@ -16,13 +16,6 @@
 */
 
 
-/* a padlist is currently just an AV; but that might change,
- * so hide the type. Ditto a pad.  */
-
-typedef AV PADLIST;
-typedef AV PAD;
-
-
 /* offsets within a pad */
 
 #if PTRSIZE == 4
@@ -33,6 +26,15 @@ typedef U64TYPE PADOFFSET;
 #   endif
 #endif
 #define NOT_IN_PAD ((PADOFFSET) -1)
+
+
+struct padlist {
+    SSize_t	xpadl_max;	/* max index for which array has space */
+    PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
+    U32		xpadl_id;	/* Semi-unique ID, shared between clones */
+    U32		xpadl_outid;	/* ID of outer pad */
+};
+
 
 /* a value that PL_cop_seqmax is guaranteed never to be,
  * flagging that a lexical is being introduced, or has not yet left scope
@@ -173,7 +175,55 @@ Clear the pointed to pad value on scope exit. (i.e. the runtime action of 'my')
 save PL_comppad and PL_curpad
 
 
+=for apidoc Amx|PAD **|PADLIST_ARRAY|PADLIST padlist
+The C array of a padlist, containing the pads.  Only subscript it with
+numbers >= 1, as the 0th entry is not guaranteed to remain usable.
 
+=for apidoc Amx|SSize_t|PADLIST_MAX|PADLIST padlist
+The index of the last pad in the padlist.
+
+=for apidoc Amx|PADNAMELIST *|PADLIST_NAMES|PADLIST padlist
+The names associated with pad entries.
+
+=for apidoc Amx|PADNAME **|PADLIST_NAMESARRAY|PADLIST padlist
+The C array of pad names.
+
+=for apidoc Amx|SSize_t|PADLIST_NAMESMAX|PADLIST padlist
+The index of the last pad name.
+
+=for apidoc Amx|U32|PADLIST_REFCNT|PADLIST padlist
+The reference count of the padlist.  Currently this is always 1.
+
+=for apidoc Amx|PADNAME **|PADNAMELIST_ARRAY|PADNAMELIST pnl
+The C array of pad names.
+
+=for apidoc Amx|SSize_t|PADNAMELIST_MAX|PADNAMELIST pnl
+The index of the last pad name.
+
+=for apidoc Amx|SV **|PAD_ARRAY|PAD pad
+The C array of pad entries.
+
+=for apidoc Amx|SSize_t|PAD_MAX|PAD pad
+The index of the last pad entry.
+
+=for apidoc Amx|char *|PADNAME_PV|PADNAME pn	
+The name stored in the pad name struct.
+
+=for apidoc Amx|STRLEN|PADNAME_LEN|PADNAME pn	
+The length of the name.
+
+=for apidoc Amx|bool|PADNAME_UTF8|PADNAME pn
+Whether PADNAME_PV is in UTF8.
+
+=for apidoc m|bool|PADNAME_isOUR|PADNAME pn
+Whether this is an "our" variable.
+
+=for apidoc m|HV *|PADNAME_OURSTASH
+The stash in which this "our" variable was declared.
+
+=for apidoc m|HV *|PADNAME_TYPE|PADNAME pn
+The stash associated with a typed lexical.  This returns the %Foo:: hash
+for C<my Foo $bar>.
 
 
 =for apidoc m|SV *|PAD_SETSV	|PADOFFSET po|SV* sv
@@ -216,6 +266,27 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 =cut
 */
 
+#define PADLIST_ARRAY(pl)	(pl)->xpadl_alloc
+#define PADLIST_MAX(pl)		(pl)->xpadl_max
+#define PADLIST_NAMES(pl)	(*PADLIST_ARRAY(pl))
+#define PADLIST_NAMESARRAY(pl)	PADNAMELIST_ARRAY(PADLIST_NAMES(pl))
+#define PADLIST_NAMESMAX(pl)	PADNAMELIST_MAX(PADLIST_NAMES(pl))
+#define PADLIST_REFCNT(pl)	1	/* reserved for future use */
+
+#define PADNAMELIST_ARRAY(pnl)	AvARRAY(pnl)
+#define PADNAMELIST_MAX(pnl)	AvFILLp(pnl)
+
+#define PAD_ARRAY(pad)		AvARRAY(pad)
+#define PAD_MAX(pad)		AvFILLp(pad)
+
+#define PADNAME_PV(pn)		SvPV_nolen(pn)
+#define PADNAME_LEN(pn)		SvCUR(pn)
+#define PADNAME_UTF8(pn)	!!SvUTF8(pn)
+#define PADNAME_isOUR(pn)	!!SvPAD_OUR(pn)
+#define PADNAME_OURSTASH	SvOURSTASH(pn)
+#define PADNAME_TYPE(pn)	(SvPAD_TYPED(pn) ? SvSTASH(pn) : NULL)
+
+
 #ifdef DEBUGGING
 #  define PAD_SV(po)	   pad_sv(po)
 #  define PAD_SETSV(po,sv) pad_setsv(po,sv)
@@ -227,12 +298,13 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PAD_SVl(po)       (PL_curpad[po])
 
 #define PAD_BASE_SV(padlist, po) \
-	(AvARRAY(padlist)[1]) 	\
-	? AvARRAY(MUTABLE_AV((AvARRAY(padlist)[1])))[po] : NULL;
+	(PADLIST_ARRAY(padlist)[1])					\
+	    ? AvARRAY(MUTABLE_AV((PADLIST_ARRAY(padlist)[1])))[po] \
+	    : NULL;
 
 
 #define PAD_SET_CUR_NOSAVE(padlist,nth) \
-	PL_comppad = (PAD*) (AvARRAY(padlist)[nth]);		\
+	PL_comppad = (PAD*) (PADLIST_ARRAY(padlist)[nth]);	\
 	PL_curpad = AvARRAY(PL_comppad);			\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] set_cur    depth=%d\n",	\
@@ -309,6 +381,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 
 */
 
+#define PAD_COMPNAME(po)	PAD_COMPNAME_SV(po)
 #define PAD_COMPNAME_SV(po) (*av_fetch(PL_comppad_name, (po), FALSE))
 #define PAD_COMPNAME_FLAGS(po) SvFLAGS(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_FLAGS_isOUR(po) SvPAD_OUR(PAD_COMPNAME_SV(po))

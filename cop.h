@@ -1189,7 +1189,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
-	AV * const padlist = CvPADLIST(cv);				\
+	PADLIST * const padlist = CvPADLIST(cv);			\
 	ENTER;								\
  	multicall_oldcatch = CATCH_GET;					\
 	SAVETMPS; SAVEVPTR(PL_op);					\
@@ -1233,7 +1233,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     STMT_START {							\
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
-	AV * const padlist = CvPADLIST(cv);				\
+	PADLIST * const padlist = CvPADLIST(cv);			\
 	cx = &cxstack[cxstack_ix];					\
 	assert(cx->cx_type & CXp_MULTICALL);				\
 	if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\

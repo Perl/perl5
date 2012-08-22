@@ -7066,7 +7066,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 #endif
 	) {
 	    cv_flags_t existing_builtin_attrs = CvFLAGS(cv) & CVf_BUILTIN_ATTRS;
-	    AV *const temp_av = CvPADLIST(cv);
+	    PADLIST *const temp_av = CvPADLIST(cv);
 	    CV *const temp_cv = CvOUTSIDE(cv);
 	    const cv_flags_t other_flags =
 		CvFLAGS(cv) & (CVf_SLABBED|CVf_WEAKOUTSIDE);

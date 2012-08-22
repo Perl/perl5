@@ -1,6 +1,6 @@
 package B::Xref;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 =head1 NAME
 
@@ -192,7 +192,7 @@ sub load_pad {
     my $padlist = shift;
     my ($namelistav, $vallistav, @namelist, $ix);
     @pad = ();
-    return if class($padlist) eq "SPECIAL";
+    return if class($padlist) =~ '^(?:SPECIAL|NULL)\z';
     ($namelistav,$vallistav) = $padlist->ARRAY;
     @namelist = $namelistav->ARRAY;
     for ($ix = 1; $ix < @namelist; $ix++) {

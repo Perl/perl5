@@ -477,7 +477,7 @@ typedef U16 cv_flags_t;
     }		xcv_root_u;							\
     GV *	xcv_gv;								\
     char *	xcv_file;							\
-    AV *	xcv_padlist;							\
+    PADLIST *	xcv_padlist;							\
     CV *	xcv_outside;							\
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
 				  * compilation) in the lexically enclosing	\
@@ -1996,6 +1996,18 @@ C<SvUTF8_on> on the new SV.  Implemented as a wrapper around C<newSVpvn_flags>.
 */
 
 #define newSVpvn_utf8(s, len, u) newSVpvn_flags((s), (len), (u) ? SVf_UTF8 : 0)
+
+/*
+=for apidoc Amx|SV*|newSVpadname|PADNAME *pn
+
+Creates a new SV containing the pad name.  This is currently identical
+to C<newSVsv>, but pad names may cease being SVs at some point, so
+C<newSVpadname> is preferable.
+
+=cut
+*/
+
+#define newSVpadname(pn) newSVsv(pn)
 
 /*
 =for apidoc Am|void|SvOOK_offset|NN SV*sv|STRLEN len

@@ -193,6 +193,8 @@ Apd	|void	|av_clear	|NN AV *av
 Apd	|SV*	|av_delete	|NN AV *av|I32 key|I32 flags
 ApdR	|bool	|av_exists	|NN AV *av|I32 key
 Apd	|void	|av_extend	|NN AV *av|I32 key
+p	|void	|av_extend_guts	|NULLOK AV *av|I32 key|NN SSize_t *maxp \
+				|NN SV ***allocp|NN SV ***arrayp
 ApdR	|SV**	|av_fetch	|NN AV *av|I32 key|I32 lval
 Apd	|void	|av_fill	|NN AV *av|I32 fill
 ApdR	|I32	|av_len		|NN AV *av
@@ -2337,11 +2339,14 @@ pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 ApdR	|HV*	|pad_compname_type|const PADOFFSET po
 #if defined(USE_ITHREADS)
-pdR	|AV*	|padlist_dup	|NULLOK AV *srcpad|NN CLONE_PARAMS *param
+pdR	|PADLIST *|padlist_dup	|NULLOK PADLIST *srcpad \
+				|NN CLONE_PARAMS *param
 #endif
+p	|PAD **	|padlist_store	|NN PADLIST *padlist|I32 key \
+				|NULLOK PAD *val
 
 ApdR	|CV*	|find_runcv	|NULLOK U32 *db_seqp
-pR	|CV*	|find_runcv_where|U8 cond|NULLOK void *arg \
+pR	|CV*	|find_runcv_where|U8 cond|IV arg \
 				 |NULLOK U32 *db_seqp
 : Only used in perl.c
 p	|void	|free_tied_hv_pool

@@ -1667,7 +1667,7 @@ PP(pp_sort)
 		if (CvDEPTH(cv)) SvREFCNT_inc_simple_void_NN(cv);
 		PUSHSUB(cx);
 		if (!is_xsub) {
-		    AV* const padlist = CvPADLIST(cv);
+		    PADLIST * const padlist = CvPADLIST(cv);
 
 		    if (++CvDEPTH(cv) >= 2) {
 			PERL_STACK_OVERFLOW_CHECK();

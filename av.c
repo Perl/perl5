@@ -80,23 +80,35 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 			    arg1);
 	return;
     }
-    if (key > AvMAX(av)) {
+    av_extend_guts(av,key,&AvMAX(av),&AvALLOC(av),&AvARRAY(av));
+}    
+
+/* The guts of av_extend.  *Not* for general use! */
+void
+Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp,
+			  SV ***arrayp)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_AV_EXTEND_GUTS;
+
+    if (key > *maxp) {
 	SV** ary;
 	I32 tmp;
 	I32 newmax;
 
-	if (AvALLOC(av) != AvARRAY(av)) {
-	    ary = AvALLOC(av) + AvFILLp(av) + 1;
-	    tmp = AvARRAY(av) - AvALLOC(av);
-	    Move(AvARRAY(av), AvALLOC(av), AvFILLp(av)+1, SV*);
-	    AvMAX(av) += tmp;
-	    AvARRAY(av) = AvALLOC(av);
+	if (av && *allocp != *arrayp) {
+	    ary = *allocp + AvFILLp(av) + 1;
+	    tmp = *arrayp - *allocp;
+	    Move(*arrayp, *allocp, AvFILLp(av)+1, SV*);
+	    *maxp += tmp;
+	    *arrayp = *allocp;
 	    if (AvREAL(av)) {
 		while (tmp)
 		    ary[--tmp] = &PL_sv_undef;
 	    }
-	    if (key > AvMAX(av) - 10) {
-		newmax = key + AvMAX(av);
+	    if (key > *maxp - 10) {
+		newmax = key + *maxp;
 		goto resize;
 	    }
 	}
@@ -106,7 +118,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 	      "Out of memory during array extend"; /* Duplicated in pp_hot.c */
 #endif
 
-	    if (AvALLOC(av)) {
+	    if (*allocp) {
 #if !defined(STRANGE_MALLOC) && !defined(MYMALLOC)
 		MEM_SIZE bytes;
 		IV itmp;
@@ -126,17 +138,17 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		   memory that might never be read. So, I feel, better to keep
 		   the current lazy system of only writing to it if our caller
 		   has a need for more space. NWC  */
-		newmax = Perl_safesysmalloc_size((void*)AvALLOC(av)) /
+		newmax = Perl_safesysmalloc_size((void*)*allocp) /
 		    sizeof(const SV *) - 1;
 
 		if (key <= newmax) 
 		    goto resized;
 #endif 
-		newmax = key + AvMAX(av) / 5;
+		newmax = key + *maxp / 5;
 	      resize:
 		MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
 #if defined(STRANGE_MALLOC) || defined(MYMALLOC)
-		Renew(AvALLOC(av),newmax+1, SV*);
+		Renew(*allocp,newmax+1, SV*);
 #else
 		bytes = (newmax + 1) * sizeof(const SV *);
 #define MALLOC_OVERHEAD 16
@@ -147,38 +159,38 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 		itmp /= sizeof(const SV *);
 		assert(itmp > newmax);
 		newmax = itmp - 1;
-		assert(newmax >= AvMAX(av));
+		assert(newmax >= *maxp);
 		Newx(ary, newmax+1, SV*);
-		Copy(AvALLOC(av), ary, AvMAX(av)+1, SV*);
-		Safefree(AvALLOC(av));
-		AvALLOC(av) = ary;
+		Copy(*allocp, ary, *maxp+1, SV*);
+		Safefree(*allocp);
+		*allocp = ary;
 #endif
 #ifdef Perl_safesysmalloc_size
 	      resized:
 #endif
-		ary = AvALLOC(av) + AvMAX(av) + 1;
-		tmp = newmax - AvMAX(av);
+		ary = *allocp + *maxp + 1;
+		tmp = newmax - *maxp;
 		if (av == PL_curstack) {	/* Oops, grew stack (via av_store()?) */
-		    PL_stack_sp = AvALLOC(av) + (PL_stack_sp - PL_stack_base);
-		    PL_stack_base = AvALLOC(av);
+		    PL_stack_sp = *allocp + (PL_stack_sp - PL_stack_base);
+		    PL_stack_base = *allocp;
 		    PL_stack_max = PL_stack_base + newmax;
 		}
 	    }
 	    else {
 		newmax = key < 3 ? 3 : key;
 		MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
-		Newx(AvALLOC(av), newmax+1, SV*);
-		ary = AvALLOC(av) + 1;
+		Newx(*allocp, newmax+1, SV*);
+		ary = *allocp + 1;
 		tmp = newmax;
-		AvALLOC(av)[0] = &PL_sv_undef;	/* For the stacks */
+		*allocp[0] = &PL_sv_undef;	/* For the stacks */
 	    }
-	    if (AvREAL(av)) {
+	    if (av && AvREAL(av)) {
 		while (tmp)
 		    ary[--tmp] = &PL_sv_undef;
 	    }
 	    
-	    AvARRAY(av) = AvALLOC(av);
-	    AvMAX(av) = newmax;
+	    *arrayp = *allocp;
+	    *maxp = newmax;
 	}
     }
 }

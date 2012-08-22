@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..13\n";
+print "1..14\n";
 
 # Tests bug #22977.  Test case from Dave Mitchell.
 sub f ($);
@@ -133,12 +133,24 @@ do { my $t = "ok " . $testn--; write if $t =~ 12; $t}
 *STDOUT = *STDOUT8{FORMAT};
 write;
 
+sub _13 {
+    my $x;
+format STDOUT13 =
+@* - formats closing over redefined subs
+ref \$x eq 'SCALAR' ? "ok 13" : "not ok 13";
+.
+}
+undef &_13;
+eval 'sub _13 { my @x; write }';
+*STDOUT = *STDOUT13{FORMAT};
+_13();
+
 # This is a variation of bug #22977, which crashes or fails an assertion
 # up to 5.16.
 # Keep this test last if you want test numbers to be sane.
 BEGIN { \&END }
 END {
-  my $test = "ok 13";
+  my $test = "ok 14";
   *STDOUT = *STDOUT5{FORMAT};
   write;
   format STDOUT5 =

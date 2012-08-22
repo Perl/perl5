@@ -138,6 +138,13 @@ PERL_CALLCONV void	Perl_av_extend(pTHX_ AV *av, I32 key)
 #define PERL_ARGS_ASSERT_AV_EXTEND	\
 	assert(av)
 
+PERL_CALLCONV void	Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp, SV ***arrayp)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
+#define PERL_ARGS_ASSERT_AV_EXTEND_GUTS	\
+	assert(maxp); assert(allocp); assert(arrayp)
+
 PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV *av, I32 key, I32 lval)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -1031,7 +1038,7 @@ PERL_CALLCONV void	Perl_finalize_optree(pTHX_ OP* o)
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp)
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV CV*	Perl_find_runcv_where(pTHX_ U8 cond, void *arg, U32 *db_seqp)
+PERL_CALLCONV CV*	Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_find_rundefsv(pTHX);
@@ -3022,6 +3029,11 @@ PERL_CALLCONV void	Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 
 PERL_CALLCONV void	Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust);
 PERL_CALLCONV void	Perl_pad_tidy(pTHX_ padtidy_type type);
+PERL_CALLCONV PAD **	Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PADLIST_STORE	\
+	assert(padlist)
+
 PERL_CALLCONV OP*	Perl_parse_arithexpr(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_barestmt(pTHX_ U32 flags);
 PERL_CALLCONV OP*	Perl_parse_block(pTHX_ U32 flags);
@@ -7619,7 +7631,7 @@ PERL_CALLCONV OP*	Perl_newPADOP(pTHX_ I32 type, I32 flags, SV* sv)
 #define PERL_ARGS_ASSERT_NEWPADOP	\
 	assert(sv)
 
-PERL_CALLCONV AV*	Perl_padlist_dup(pTHX_ AV *srcpad, CLONE_PARAMS *param)
+PERL_CALLCONV PADLIST *	Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PADLIST_DUP	\
