@@ -31,7 +31,8 @@ DeadCode(pTHX)
 	for (sv = sva + 1; sv < svend; ++sv) {
 	    if (SvTYPE(sv) == SVt_PVCV) {
 		CV *cv = (CV*)sv;
-		AV* padlist = CvPADLIST(cv), *argav;
+		PADLIST* padlist = CvPADLIST(cv);
+                AV *argav;
 		SV** svp;
 		SV** pad;
 		int i = 0, j, levelm, totm = 0, levelref, totref = 0;
@@ -53,10 +54,11 @@ DeadCode(pTHX)
 		    PerlIO_printf(Perl_debug_log, "  busy\n");
 		    continue;
 		}
-		svp = AvARRAY(padlist);
-		while (++i <= AvFILL(padlist)) { /* Depth. */
+		svp = PADLIST_ARRAY(padlist);
+		while (++i <= PADLIST_MAX(padlist)) { /* Depth. */
 		    SV **args;
 		    
+		    if (!svp[i]) continue;
 		    pad = AvARRAY((AV*)svp[i]);
 		    argav = (AV*)pad[0];
 		    if (!argav || (SV*)argav == &PL_sv_undef) {
@@ -108,7 +110,7 @@ DeadCode(pTHX)
 		    if (dumpit)
 			do_sv_dump(0, Perl_debug_log, (SV*)cv, 0, 2, 0, 0);
 		}
-		if (AvFILL(padlist) > 1) {
+		if (PADLIST_MAX(padlist) > 1) {
 		    PerlIO_printf(Perl_debug_log, "  total: refs: %i, strings: %i in %i,\targsarrays: %i, argsstrings: %i\n", 
 			    totref, totm, tots, tota, totas);
 		}
