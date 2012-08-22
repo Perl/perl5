@@ -221,6 +221,9 @@ Whether this is an "our" variable.
 =for apidoc m|HV *|PADNAME_OURSTASH
 The stash in which this "our" variable was declared.
 
+=for apidoc m|bool|PADNAME_OUTER|PADNAME pn
+Whether this entry belongs to an outer pad.
+
 =for apidoc m|HV *|PADNAME_TYPE|PADNAME pn
 The stash associated with a typed lexical.  This returns the %Foo:: hash
 for C<my Foo $bar>.
@@ -284,6 +287,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PADNAME_UTF8(pn)	!!SvUTF8(pn)
 #define PADNAME_isOUR(pn)	!!SvPAD_OUR(pn)
 #define PADNAME_OURSTASH	SvOURSTASH(pn)
+#define PADNAME_OUTER		!!SvFAKE(pn)
 #define PADNAME_TYPE(pn)	(SvPAD_TYPED(pn) ? SvSTASH(pn) : NULL)
 
 

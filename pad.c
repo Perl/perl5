@@ -85,7 +85,8 @@ SvOURSTASH slot pointing at the stash of the associated global (so that
 duplicate C<our> declarations in the same package can be detected).  SvUVX is
 sometimes hijacked to store the generation number during compilation.
 
-If SvFAKE is set on the name SV, then that slot in the frame AV is
+If PADNAME_OUTER (SvFAKE) is set on the
+name SV, then that slot in the frame AV is
 a REFCNT'ed reference to a lexical from "outside". In this case,
 the name SV does not use xlow and xhigh to store a cop_seq range, since it is
 in scope throughout. Instead xhigh stores some flags containing info about
@@ -96,7 +97,8 @@ cloning quicker.
 
 If the 'name' is '&' the corresponding entry in the PAD
 is a CV representing a possible closure.
-(SvFAKE and name of '&' is not a meaningful combination currently but could
+(PADNAME_OUTER and name of '&' is not a
+meaningful combination currently but could
 become so if C<my sub foo {}> is implemented.)
 
 Note that formats are treated as anon subs, and are cloned each time
