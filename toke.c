@@ -9715,7 +9715,9 @@ S_scan_heredoc(pTHX_ register char *s)
 	/* s now points to the newline after the heredoc terminator.
 	   d points to the newline before the body of the heredoc.
 	 */
-	if (PL_sublex_info.re_eval_start) {
+	/* See the Paranoia note in case LEX_INTERPEND in yylex, for why we
+	   check PL_sublex_info.re_eval_str. */
+	if (PL_sublex_info.re_eval_start || PL_sublex_info.re_eval_str) {
 	    /* Set aside the rest of the regexp */
 	    if (!PL_sublex_info.re_eval_str)
 		PL_sublex_info.re_eval_str =
