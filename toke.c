@@ -4517,12 +4517,7 @@ Perl_yylex(pTHX)
 	    }
 	    if (S_is_opval_token(next_type) && pl_yylval.opval)
 		pl_yylval.opval->op_savefree = 0; /* release */
-#ifdef PERL_MAD
-	    /* FIXME - can these be merged?  */
-	    return next_type;
-#else
 	    return REPORT(next_type);
-#endif
 	}
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
