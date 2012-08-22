@@ -291,8 +291,8 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PADNAME_UTF8(pn)	!!SvUTF8(pn)
 #define PADNAME_SV(pn)		pn
 #define PADNAME_isOUR(pn)	!!SvPAD_OUR(pn)
-#define PADNAME_OURSTASH	SvOURSTASH(pn)
-#define PADNAME_OUTER		!!SvFAKE(pn)
+#define PADNAME_OURSTASH(pn)	SvOURSTASH(pn)
+#define PADNAME_OUTER(pn)	!!SvFAKE(pn)
 #define PADNAME_TYPE(pn)	(SvPAD_TYPED(pn) ? SvSTASH(pn) : NULL)
 
 
