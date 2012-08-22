@@ -922,4 +922,12 @@ unless ($Config{useithreads}) {
 
 # (One block of study tests removed when study was made a no-op.)
 
+{
+    open(OUT,">peek$$") or die "Failed to open peek $$: $!";
+    open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
+    DeadCode();
+    open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
+    pass "no crash with DeadCode";
+}
+
 done_testing();
