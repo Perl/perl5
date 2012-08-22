@@ -54,7 +54,7 @@ DeadCode(pTHX)
 		    PerlIO_printf(Perl_debug_log, "  busy\n");
 		    continue;
 		}
-		svp = PADLIST_ARRAY(padlist);
+		svp = (SV**) PADLIST_ARRAY(padlist);
 		while (++i <= PADLIST_MAX(padlist)) { /* Depth. */
 		    SV **args;
 		    
