@@ -49,7 +49,7 @@ AV, but that may change) which represents the "names" or rather
 the "static type information" for lexicals.  The individual elements of a
 PADNAMELIST are PADNAMEs (just SVs; but, again, that may change).  Future
 refactorings might stop the PADNAMELIST from being stored in the PADLIST's
-array, so don't rely on it.  See L<PADLIST_NAMES>.
+array, so don't rely on it.  See L</PADLIST_NAMES>.
 
 The CvDEPTH'th entry of a PADLIST is a PAD (an AV) which is the stack frame
 at that depth of recursion into the CV.  The 0th slot of a frame AV is an
