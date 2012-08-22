@@ -4339,7 +4339,6 @@ my %delta = (
             'Module::CoreList'      => '2.50',
         },
         removed => {
-            'ExtUtils::Miniperl'    => 1,
         }
     },
     5.013 => {
@@ -4623,7 +4622,6 @@ my %delta = (
             'warnings'              => '1.10',
         },
         removed => {
-            'ExtUtils::Miniperl'    => 1,
             'TAP::Parser::Source::Perl'=> 1,
         }
     },
@@ -4644,7 +4642,6 @@ my %delta = (
             'Compress::Raw::Bzip2'  => '2.030',
             'Compress::Raw::Zlib'   => '2.030',
             'Compress::Zlib'        => '2.030',
-            'ExtUtils::Miniperl'    => undef,
             'ExtUtils::ParseXS'     => '2.2207',
             'File::Spec'            => '3.31_01',
             'I18N::Langinfo'        => '0.04',
