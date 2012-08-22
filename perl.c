@@ -522,13 +522,18 @@ perl_destruct(pTHXx)
     PERL_WAIT_FOR_CHILDREN;
 
     destruct_level = PL_perl_destruct_level;
-#ifdef DEBUGGING
+#if defined(DEBUGGING) || defined(PERL_TRACK_MEMPOOL)
     {
 	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
 	if (s) {
-            const int i = atoi(s);
-	    if (destruct_level < i)
-		destruct_level = i;
+        const int i = atoi(s);
+#ifdef DEBUGGING
+	    if (destruct_level < i) destruct_level = i;
+#endif
+#ifdef PERL_TRACK_MEMPOOL
+        /* RT #114496, for perl_free */
+        PL_perl_destruct_level = i;
+#endif
 	}
     }
 #endif
@@ -1294,8 +1299,7 @@ perl_free(pTHXx)
 	 * Don't free thread memory if PERL_DESTRUCT_LEVEL is set to a non-zero
 	 * value as we're probably hunting memory leaks then
 	 */
-	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
-	if (!s || atoi(s) == 0) {
+	if (PL_perl_destruct_level == 0) {
 	    const U32 old_debug = PL_debug;
 	    /* Emulate the PerlHost behaviour of free()ing all memory allocated in this
 	       thread at thread exit.  */
