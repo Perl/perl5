@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..63\n";
+print "1..65\n";
 
 $x = 'x';
 
@@ -313,3 +313,13 @@ print $_ || "not ok 62\n";
 $_ = "not ok 63 - s/// in s/// pattern\n";
 s/${s|||;\""}not //;
 print;
+
+/(?{print <<END
+ok 64 - here-doc in re-eval
+END
+})/;
+
+eval '/(?{print <<END
+ok 65 - here-doc in re-eval in string eval
+END
+})/';

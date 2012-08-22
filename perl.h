@@ -3458,6 +3458,7 @@ struct _sublex_info {
     OP *sub_op;		/* "lex_op" to use */
     char *super_bufptr;	/* PL_parser->bufptr that was */
     char *re_eval_start;/* start of "(?{..." text */
+    SV *re_eval_str;	/* "(?{...})" text */
     SV *repl;		/* replacement of s/// or y/// */
 };
 

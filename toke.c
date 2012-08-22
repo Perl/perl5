@@ -2461,6 +2461,7 @@ S_sublex_push(pTHX)
     SAVEI8(PL_lex_state);
     SAVESPTR(PL_lex_repl);
     SAVEPPTR(PL_sublex_info.re_eval_start);
+    SAVESPTR(PL_sublex_info.re_eval_str);
     SAVEPPTR(PL_sublex_info.super_bufptr);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
@@ -2501,6 +2502,7 @@ S_sublex_push(pTHX)
     PL_lex_stuff = NULL;
     PL_sublex_info.repl = NULL;
     PL_sublex_info.re_eval_start = NULL;
+    PL_sublex_info.re_eval_str = NULL;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -4734,18 +4736,30 @@ Perl_yylex(pTHX)
 		Perl_croak(aTHX_ "Bad evalled substitution pattern");
 	    PL_lex_repl = NULL;
 	}
-	if (PL_sublex_info.re_eval_start) {
+	/* Paranoia.  re_eval_start is adjusted when S_scan_heredoc sets
+	   re_eval_str.  If the here-doc body’s length equals the previous
+	   value of re_eval_start, re_eval_start will now be null.  So
+	   check re_eval_str as well. */
+	if (PL_sublex_info.re_eval_start || PL_sublex_info.re_eval_str) {
+	    SV *sv;
 	    if (*PL_bufptr != ')')
 		Perl_croak(aTHX_ "Sequence (?{...}) not terminated with ')'");
 	    PL_bufptr++;
 	    /* having compiled a (?{..}) expression, return the original
 	     * text too, as a const */
+	    if (PL_sublex_info.re_eval_str) {
+		sv = PL_sublex_info.re_eval_str;
+		PL_sublex_info.re_eval_str = NULL;
+		SvCUR_set(sv, PL_bufptr - PL_sublex_info.re_eval_start);
+		SvPV_shrink_to_cur(sv);
+	    }
+	    else sv = newSVpvn(PL_sublex_info.re_eval_start,
+			       PL_bufptr - PL_sublex_info.re_eval_start);
 	    start_force(PL_curforce);
 	    /* XXX probably need a CURMAD(something) here */
 	    NEXTVAL_NEXTTOKE.opval =
 		    (OP*)newSVOP(OP_CONST, 0,
-			newSVpvn(PL_sublex_info.re_eval_start,
-				PL_bufptr - PL_sublex_info.re_eval_start));
+				 sv);
 	    force_next(THING);
 	    PL_sublex_info.re_eval_start = NULL;
 	    PL_expect = XTERM;
@@ -9674,6 +9688,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	goto retval;
     }
     else if (!infile || found_newline) {
+	char * const olds = s - SvCUR(herewas);
 	d = s;
 	while (s < PL_bufend &&
 	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
@@ -9697,11 +9712,22 @@ S_scan_heredoc(pTHX_ register char *s)
 	s += len - 1;
 	CopLINE_inc(PL_curcop);	/* the preceding stmt passes a newline */
 
-	sv_catpvn(herewas,s,PL_bufend-s);
-	sv_setsv(PL_linestr,herewas);
-	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart = SvPVX(PL_linestr);
+	/* s now points to the newline after the heredoc terminator.
+	   d points to the newline before the body of the heredoc.
+	 */
+	if (PL_sublex_info.re_eval_start) {
+	    /* Set aside the rest of the regexp */
+	    if (!PL_sublex_info.re_eval_str)
+		PL_sublex_info.re_eval_str =
+		       newSVpvn(PL_sublex_info.re_eval_start,
+				PL_bufend - PL_sublex_info.re_eval_start);
+	    PL_sublex_info.re_eval_start -= s-d;
+	}
+	/* Copy everything from s onwards back to d. */
+	Move(s,d,PL_bufend-s + 1,char);
+	SvCUR_set(PL_linestr, SvCUR(PL_linestr) - (s-d));
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = NULL;
+	s = olds;
     }
     else
 	sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
