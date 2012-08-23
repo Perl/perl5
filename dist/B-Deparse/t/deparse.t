@@ -246,7 +246,6 @@ SKIP: {
 # multiple statements on format lines
 $a = `$^X $path "-MO=Deparse" -e "format =" -e "\@" -e "x();z()" -e. 2>&1`;
 $a =~ s/-e syntax OK\n//g;
-$a =~ s/z\(\);/z()/;
 is($a, <<'EOCODH', 'multiple statements on format lines');
 format STDOUT =
 @

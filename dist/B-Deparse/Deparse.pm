@@ -941,6 +941,7 @@ sub deparse_format {
 	$kid = $kid->sibling;
 	for (; not null $kid; $kid = $kid->sibling) {
 	    push @exprs, $self->deparse($kid, -1);
+	    $exprs[-1] =~ s/;\z//;
 	}
 	push @text, "\f".join(", ", @exprs)."\n" if @exprs;
 	$op = $op->sibling;
