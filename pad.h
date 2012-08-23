@@ -207,7 +207,8 @@ The C array of pad entries.
 The index of the last pad entry.
 
 =for apidoc Amx|char *|PADNAME_PV|PADNAME pn	
-The name stored in the pad name struct.
+The name stored in the pad name struct.  This returns NULL for a target or
+GV slot.
 
 =for apidoc Amx|STRLEN|PADNAME_LEN|PADNAME pn	
 The length of the name.
@@ -286,7 +287,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PAD_ARRAY(pad)		AvARRAY(pad)
 #define PAD_MAX(pad)		AvFILLp(pad)
 
-#define PADNAME_PV(pn)		SvPV_nolen(pn)
+#define PADNAME_PV(pn)		(SvPOKp(pn) ? SvPVX(pn) : NULL)
 #define PADNAME_LEN(pn)		SvCUR(pn)
 #define PADNAME_UTF8(pn)	!!SvUTF8(pn)
 #define PADNAME_SV(pn)		pn
