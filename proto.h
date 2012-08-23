@@ -6442,6 +6442,12 @@ PERL_STATIC_INLINE UV*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
 	assert(invlist)
 
+PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
+	assert(invlist)
+
 PERL_STATIC_INLINE UV*	S_get_invlist_version_id_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6502,9 +6508,20 @@ PERL_STATIC_INLINE UV	S_invlist_max(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_MAX	\
 	assert(invlist)
 
+PERL_STATIC_INLINE IV	S_invlist_previous_index(pTHX_ SV* const invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_PREVIOUS_INDEX	\
+	assert(invlist)
+
 PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
+	assert(invlist)
+
+PERL_STATIC_INLINE void	S_invlist_set_previous_index(pTHX_ SV* const invlist, const IV index)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_SET_PREVIOUS_INDEX	\
 	assert(invlist)
 
 PERL_STATIC_INLINE void	S_invlist_trim(pTHX_ SV* const invlist)

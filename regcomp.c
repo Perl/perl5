@@ -7076,6 +7076,39 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
      * Note that when inverting, SvCUR shouldn't change */
 }
 
+PERL_STATIC_INLINE IV*
+S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
+{
+    /* Return the address of the UV that is reserved to hold the cached index
+     * */
+
+    PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
+
+    return (IV *) (SvPVX(invlist) + (INVLIST_PREVIOUS_INDEX_OFFSET * sizeof (UV)));
+}
+
+PERL_STATIC_INLINE IV
+S_invlist_previous_index(pTHX_ SV* const invlist)
+{
+    /* Returns cached index of previous search */
+
+    PERL_ARGS_ASSERT_INVLIST_PREVIOUS_INDEX;
+
+    return *get_invlist_previous_index_addr(invlist);
+}
+
+PERL_STATIC_INLINE void
+S_invlist_set_previous_index(pTHX_ SV* const invlist, const IV index)
+{
+    /* Caches <index> for later retrieval */
+
+    PERL_ARGS_ASSERT_INVLIST_SET_PREVIOUS_INDEX;
+
+    assert(index == 0 || index < (int) _invlist_len(invlist));
+
+    *get_invlist_previous_index_addr(invlist) = index;
+}
+
 PERL_STATIC_INLINE UV
 S_invlist_max(pTHX_ SV* const invlist)
 {
@@ -7126,8 +7159,9 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * properly */
     *get_invlist_zero_addr(new_list) = UV_MAX;
 
+    *get_invlist_previous_index_addr(new_list) = 0;
     *get_invlist_version_id_addr(new_list) = INVLIST_VERSION_ID;
-#if HEADER_LENGTH != 4
+#if HEADER_LENGTH != 5
 #   error Need to regenerate VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
 #endif
 
@@ -7272,6 +7306,7 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
      * contains <cp> */
 
     IV low = 0;
+    IV mid;
     IV high = _invlist_len(invlist);
     const IV highest_element = high - 1;
     const UV* array;
@@ -7287,8 +7322,42 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
      * can't combine this with the test above, because we can't get the array
      * unless we know the list is non-empty) */
     array = invlist_array(invlist);
-    if (cp < array[0]) {
-        return -1;
+
+    mid = invlist_previous_index(invlist);
+    assert(mid >=0 && mid <= highest_element);
+
+    /* <mid> contains the cache of the result of the previous call to this
+     * function (0 the first time).  See if this call is for the same result,
+     * or if it is for mid-1.  This is under the theory that calls to this
+     * function will often be for related code points that are near each other.
+     * And benchmarks show that caching gives better results.  We also test
+     * here if the code point is within the bounds of the list.  These tests
+     * replace others that would have had to be made anyway to make sure that
+     * the array bounds were not exceeded, and give us extra information at the
+     * same time */
+    if (cp >= array[mid]) {
+        if (cp >= array[highest_element]) {
+            return highest_element;
+        }
+
+        /* Here, array[mid] <= cp < array[highest_element].  This means that
+         * the final element is not the answer, so can exclude it; it also
+         * means that <mid> is not the final element, so can refer to 'mid + 1'
+         * safely */
+        if (cp < array[mid + 1]) {
+            return mid;
+        }
+        high--;
+        low = mid + 1;
+    }
+    else { /* cp < aray[mid] */
+        if (cp < array[0]) { /* Fail if outside the array */
+            return -1;
+        }
+        high = mid;
+        if (cp >= array[mid - 1]) {
+            goto found_entry;
+        }
     }
 
     /* Binary search.  What we are looking for is <i> such that
@@ -7296,7 +7365,7 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
      * The loop below converges on the i+1.  Note that there may not be an
      * (i+1)th element in the array, and things work nonetheless */
     while (low < high) {
-	IV mid = (low + high) / 2;
+	mid = (low + high) / 2;
         assert(mid <= highest_element);
 	if (array[mid] <= cp) { /* cp >= array[mid] */
 	    low = mid + 1;
@@ -7312,7 +7381,10 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
 	}
     }
 
-    return high - 1;
+  found_entry:
+    high--;
+    invlist_set_previous_index(invlist, high);
+    return high;
 }
 
 void

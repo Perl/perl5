@@ -15,6 +15,8 @@
 
 #define INVLIST_LEN_OFFSET 0	/* Number of elements in the inversion list */
 #define INVLIST_ITER_OFFSET 1	/* Current iteration position */
+#define INVLIST_PREVIOUS_INDEX_OFFSET 2  /* Place to cache index of previous
+                                            result */
 
 /* This is a combination of a version and data structure type, so that one
  * being passed in can be validated to be an inversion list of the correct
@@ -22,13 +24,13 @@
  * in the range 2**31-1 should be generated and the new() method changed to
  * insert that at this location.  Then, if an auxiliary program doesn't change
  * correspondingly, it will be discovered immediately */
-#define INVLIST_VERSION_ID_OFFSET 2
-#define INVLIST_VERSION_ID 1064334010
+#define INVLIST_VERSION_ID_OFFSET 3
+#define INVLIST_VERSION_ID 290655244
 
 /* For safety, when adding new elements, remember to #undef them at the end of
  * the inversion list code section */
 
-#define INVLIST_ZERO_OFFSET 3	/* 0 or 1; must be last element in header */
+#define INVLIST_ZERO_OFFSET 4	/* 0 or 1; must be last element in header */
 /* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
  * contains the code point U+00000, and begins here.  If 1, the inversion list
  * doesn't contain U+0000, and it begins at the next UV in the array.

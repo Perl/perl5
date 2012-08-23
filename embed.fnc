@@ -1391,7 +1391,10 @@ EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EiMR	|UV*	|get_invlist_zero_addr	|NN SV* invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
-EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
+EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len
+EiMR	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
+EiMR	|IV	|invlist_previous_index|NN SV* const invlist
+EiM	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist

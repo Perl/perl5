@@ -914,6 +914,7 @@
 #define cl_or			S_cl_or
 #define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
+#define get_invlist_previous_index_addr(a)	S_get_invlist_previous_index_addr(aTHX_ a)
 #define get_invlist_version_id_addr(a)	S_get_invlist_version_id_addr(aTHX_ a)
 #define get_invlist_zero_addr(a)	S_get_invlist_zero_addr(aTHX_ a)
 #define grok_bslash_N(a,b,c,d,e,f)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f)
@@ -924,7 +925,9 @@
 #define invlist_iterinit(a)	S_invlist_iterinit(aTHX_ a)
 #define invlist_iternext(a,b,c)	S_invlist_iternext(aTHX_ a,b,c)
 #define invlist_max(a)		S_invlist_max(aTHX_ a)
+#define invlist_previous_index(a)	S_invlist_previous_index(aTHX_ a)
 #define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)
+#define invlist_set_previous_index(a,b)	S_invlist_set_previous_index(aTHX_ a,b)
 #define invlist_trim(a)		S_invlist_trim(aTHX_ a)
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)

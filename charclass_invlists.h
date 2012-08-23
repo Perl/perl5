@@ -10,7 +10,8 @@
 UV Latin1_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	0,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	256,
@@ -20,7 +21,8 @@ UV Latin1_invlist[] = {
 UV AboveLatin1_invlist[] = {
 	1,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	256
@@ -29,7 +31,8 @@ UV AboveLatin1_invlist[] = {
 UV ASCII_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	0,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	128,
@@ -39,7 +42,8 @@ UV ASCII_invlist[] = {
 UV L1Cased_invlist[] = {
 	16,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	65,
@@ -63,7 +67,8 @@ UV L1Cased_invlist[] = {
 UV VertSpace_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	10,
@@ -77,7 +82,8 @@ UV VertSpace_invlist[] = {
 UV PerlSpace_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
@@ -89,7 +95,8 @@ UV PerlSpace_invlist[] = {
 UV XPerlSpace_invlist[] = {
 	22,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
@@ -119,7 +126,8 @@ UV XPerlSpace_invlist[] = {
 UV PosixAlnum_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -133,7 +141,8 @@ UV PosixAlnum_invlist[] = {
 UV L1PosixAlnum_invlist[] = {
 	18,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -159,7 +168,8 @@ UV L1PosixAlnum_invlist[] = {
 UV PosixAlpha_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	65,
@@ -171,7 +181,8 @@ UV PosixAlpha_invlist[] = {
 UV L1PosixAlpha_invlist[] = {
 	16,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	65,
@@ -195,7 +206,8 @@ UV L1PosixAlpha_invlist[] = {
 UV PosixBlank_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
@@ -207,7 +219,8 @@ UV PosixBlank_invlist[] = {
 UV XPosixBlank_invlist[] = {
 	18,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
@@ -233,7 +246,8 @@ UV XPosixBlank_invlist[] = {
 UV PosixCntrl_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	0,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	32,
@@ -245,7 +259,8 @@ UV PosixCntrl_invlist[] = {
 UV XPosixCntrl_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	0,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	32,
@@ -257,7 +272,8 @@ UV XPosixCntrl_invlist[] = {
 UV PosixDigit_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -267,7 +283,8 @@ UV PosixDigit_invlist[] = {
 UV PosixGraph_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	33,
@@ -277,7 +294,8 @@ UV PosixGraph_invlist[] = {
 UV L1PosixGraph_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	33,
@@ -289,7 +307,8 @@ UV L1PosixGraph_invlist[] = {
 UV PosixLower_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	97,
@@ -299,7 +318,8 @@ UV PosixLower_invlist[] = {
 UV L1PosixLower_invlist[] = {
 	12,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	97,
@@ -319,7 +339,8 @@ UV L1PosixLower_invlist[] = {
 UV PosixPrint_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	32,
@@ -329,7 +350,8 @@ UV PosixPrint_invlist[] = {
 UV L1PosixPrint_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	32,
@@ -341,7 +363,8 @@ UV L1PosixPrint_invlist[] = {
 UV PosixPunct_invlist[] = {
 	8,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	33,
@@ -357,7 +380,8 @@ UV PosixPunct_invlist[] = {
 UV L1PosixPunct_invlist[] = {
 	20,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	33,
@@ -385,7 +409,8 @@ UV L1PosixPunct_invlist[] = {
 UV PosixSpace_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
@@ -397,7 +422,8 @@ UV PosixSpace_invlist[] = {
 UV XPosixSpace_invlist[] = {
 	22,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
@@ -427,7 +453,8 @@ UV XPosixSpace_invlist[] = {
 UV PosixUpper_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	65,
@@ -437,7 +464,8 @@ UV PosixUpper_invlist[] = {
 UV L1PosixUpper_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	65,
@@ -451,7 +479,8 @@ UV L1PosixUpper_invlist[] = {
 UV PosixWord_invlist[] = {
 	8,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -467,7 +496,8 @@ UV PosixWord_invlist[] = {
 UV L1PosixWord_invlist[] = {
 	20,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -495,7 +525,8 @@ UV L1PosixWord_invlist[] = {
 UV PosixXDigit_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -509,7 +540,8 @@ UV PosixXDigit_invlist[] = {
 UV XPosixXDigit_invlist[] = {
 	12,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	48,
@@ -529,7 +561,8 @@ UV XPosixXDigit_invlist[] = {
 UV NonL1_Perl_Non_Final_Folds_invlist[] = {
 	44,	/* Number of elements */
 	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
+	0,	/* Cache of previous search index result */
+	290655244, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	700,

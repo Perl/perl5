@@ -15,7 +15,7 @@ require 'regen/regen_lib.pl';
 # in the headers is used to minimize the possibility of things getting
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
-my $VERSION_DATA_STRUCTURE_TYPE = 1064334010;
+my $VERSION_DATA_STRUCTURE_TYPE = 290655244;
 
 my $out_fh = open_new('charclass_invlists.h', '>',
 		      {style => '*', by => $0,
@@ -55,6 +55,7 @@ sub output_invlist ($$) {
 
     print $out_fh "\t", scalar @$invlist, ",\t/* Number of elements */\n";
     print $out_fh "\t0,\t/* Current iteration position */\n";
+    print $out_fh "\t0,\t/* Cache of previous search index result */\n";
     print $out_fh "\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */\n";
     print $out_fh "\t", $zero_or_one,
                   ",\t/* 0 if this is the first element of the list proper;",
