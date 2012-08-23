@@ -3290,10 +3290,10 @@ CV* cv
   PADNAMELIST *pad_namelist;
   AV *retav = newAV();
  CODE:
-  pad_namelist = PADLIST_NAMES(CvPADLIST(cv));
+  pad_namelist = PadlistNAMES(CvPADLIST(cv));
 
-  for ( i = PADNAMELIST_MAX(pad_namelist); i >= 0; i-- ) {
-    PADNAME* name = PADNAMELIST_ARRAY(pad_namelist)[i];
+  for ( i = PadnamelistMAX(pad_namelist); i >= 0; i-- ) {
+    PADNAME* name = PadnamelistARRAY(pad_namelist)[i];
 
     if (SvPOKp(name)) {
         av_push(retav, newSVpadname(name));

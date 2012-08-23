@@ -607,7 +607,7 @@ typedef HE      *B__HE;
 #if PERL_VERSION >= 9
 typedef struct refcounted_he	*B__RHE;
 #endif
-#ifdef PADLIST_ARRAY
+#ifdef PadlistARRAY
 typedef PADLIST	*B__PADLIST;
 #endif
 
@@ -703,7 +703,7 @@ comppadlist()
     PREINIT:
 	PADLIST *padlist = CvPADLIST(PL_main_cv ? PL_main_cv : PL_compcv);
     PPCODE:
-#ifdef PADLIST_ARRAY
+#ifdef PadlistARRAY
 	{
 	    SV * const rv = sv_newmortal();
 	    sv_setiv(newSVrv(rv, padlist ? "B::PADLIST" : "B::NULL"),
@@ -1997,7 +1997,7 @@ I32
 CvDEPTH(cv)
         B::CV   cv
 
-#ifdef PADLIST_ARRAY
+#ifdef PadlistARRAY
 
 B::PADLIST
 CvPADLIST(cv)
@@ -2094,42 +2094,42 @@ HASH(h)
 
 #endif
 
-#ifdef PADLIST_ARRAY
+#ifdef PadlistARRAY
 
-MODULE = B	PACKAGE = B::PADLIST	PREFIX = PADLIST_
+MODULE = B	PACKAGE = B::PADLIST	PREFIX = Padlist
 
 SSize_t
-PADLIST_MAX(padlist)
+PadlistMAX(padlist)
 	B::PADLIST	padlist
 
 void
-PADLIST_ARRAY(padlist)
+PadlistARRAY(padlist)
 	B::PADLIST	padlist
     PPCODE:
-	if (PADLIST_MAX(padlist) >= 0) {
-	    PAD **padp = PADLIST_ARRAY(padlist);
+	if (PadlistMAX(padlist) >= 0) {
+	    PAD **padp = PadlistARRAY(padlist);
 	    PADOFFSET i;
-	    for (i = 0; i <= PADLIST_MAX(padlist); i++)
+	    for (i = 0; i <= PadlistMAX(padlist); i++)
 		XPUSHs(make_sv_object(aTHX_ (SV *)padp[i]));
 	}
 
 void
-PADLIST_ARRAYelt(padlist, idx)
+PadlistARRAYelt(padlist, idx)
 	B::PADLIST	padlist
 	PADOFFSET	idx
     PPCODE:
-    	if (idx >= 0 && PADLIST_MAX(padlist) >= 0
-	 && idx <= PADLIST_MAX(padlist))
+    	if (idx >= 0 && PadlistMAX(padlist) >= 0
+	 && idx <= PadlistMAX(padlist))
 	    XPUSHs(make_sv_object(aTHX_
-				  (SV *)PADLIST_ARRAY(padlist)[idx]));
+				  (SV *)PadlistARRAY(padlist)[idx]));
 	else
 	    XPUSHs(make_sv_object(aTHX_ NULL));
 
 U32
-PADLIST_REFCNT(padlist)
+PadlistREFCNT(padlist)
 	B::PADLIST	padlist
     CODE:
-	RETVAL = PADLIST_REFCNT(padlist);
+	RETVAL = PadlistREFCNT(padlist);
     OUTPUT:
 	RETVAL
 

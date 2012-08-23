@@ -54,8 +54,8 @@ DeadCode(pTHX)
 		    PerlIO_printf(Perl_debug_log, "  busy\n");
 		    continue;
 		}
-		svp = (SV**) PADLIST_ARRAY(padlist);
-		while (++i <= PADLIST_MAX(padlist)) { /* Depth. */
+		svp = (SV**) PadlistARRAY(padlist);
+		while (++i <= PadlistMAX(padlist)) { /* Depth. */
 		    SV **args;
 		    
 		    if (!svp[i]) continue;
@@ -110,7 +110,7 @@ DeadCode(pTHX)
 		    if (dumpit)
 			do_sv_dump(0, Perl_debug_log, (SV*)cv, 0, 2, 0, 0);
 		}
-		if (PADLIST_MAX(padlist) > 1) {
+		if (PadlistMAX(padlist) > 1) {
 		    PerlIO_printf(Perl_debug_log, "  total: refs: %i, strings: %i in %i,\targsarrays: %i, argsstrings: %i\n", 
 			    totref, totm, tots, tota, totas);
 		}

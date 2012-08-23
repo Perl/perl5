@@ -49,7 +49,7 @@ AV, but that may change) which represents the "names" or rather
 the "static type information" for lexicals.  The individual elements of a
 PADNAMELIST are PADNAMEs (just SVs; but, again, that may change).  Future
 refactorings might stop the PADNAMELIST from being stored in the PADLIST's
-array, so don't rely on it.  See L</PADLIST_NAMES>.
+array, so don't rely on it.  See L</PadlistNAMES>.
 
 The CvDEPTH'th entry of a PADLIST is a PAD (an AV) which is the stack frame
 at that depth of recursion into the CV.  The 0th slot of a frame AV is an
@@ -288,8 +288,8 @@ Perl_pad_new(pTHX_ int flags)
        0..3, and even an explicit call to av_extend() with <3 will be rounded
        up, so we inline the allocation of the array here.  */
     Newx(ary, 2, PAD *);
-    PADLIST_MAX(padlist) = 1;
-    PADLIST_ARRAY(padlist) = ary;
+    PadlistMAX(padlist) = 1;
+    PadlistARRAY(padlist) = ary;
     ary[0] = padname;
     ary[1] = pad;
 
@@ -407,9 +407,9 @@ Perl_cv_undef(pTHX_ CV *cv)
 	if (PL_phase != PERL_PHASE_DESTRUCT) { /* don't bother during global destruction */
 	    CV * const outercv = CvOUTSIDE(cv);
 	    const U32 seq = CvOUTSIDE_SEQ(cv);
-	    PAD * const comppad_name = PADLIST_ARRAY(padlist)[0];
+	    PAD * const comppad_name = PadlistARRAY(padlist)[0];
 	    SV ** const namepad = AvARRAY(comppad_name);
-	    PAD * const comppad = PADLIST_ARRAY(padlist)[1];
+	    PAD * const comppad = PadlistARRAY(padlist)[1];
 	    SV ** const curpad = AvARRAY(comppad);
 	    for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
 		SV * const namesv = namepad[ix];
@@ -447,9 +447,9 @@ Perl_cv_undef(pTHX_ CV *cv)
 	    }
 	}
 
-	ix = PADLIST_MAX(padlist);
+	ix = PadlistMAX(padlist);
 	while (ix > 0) {
-	    PAD * const sv = PADLIST_ARRAY(padlist)[ix--];
+	    PAD * const sv = PadlistARRAY(padlist)[ix--];
 	    if (sv) {
 		if (sv == PL_comppad) {
 		    PL_comppad = NULL;
@@ -459,12 +459,12 @@ Perl_cv_undef(pTHX_ CV *cv)
 	    }
 	}
 	{
-	    PAD * const sv = PADLIST_ARRAY(padlist)[0];
+	    PAD * const sv = PadlistARRAY(padlist)[0];
 	    if (sv == PL_comppad_name)
 		PL_comppad_name = NULL;
 	    SvREFCNT_dec(sv);
 	}
-	if (PADLIST_ARRAY(padlist)) Safefree(PADLIST_ARRAY(padlist));
+	if (PadlistARRAY(padlist)) Safefree(PadlistARRAY(padlist));
 	Safefree(padlist);
 	CvPADLIST(cv) = NULL;
     }
@@ -967,7 +967,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
      *    our $foo = 0 unless defined $foo;
      * to not give a warning. (Yes, this is a hack) */
 
-    nameav = PADLIST_ARRAY(CvPADLIST(PL_compcv))[0];
+    nameav = PadlistARRAY(CvPADLIST(PL_compcv))[0];
     name_svp = AvARRAY(nameav);
     for (offset = AvFILLp(nameav); offset > 0; offset--) {
         const SV * const namesv = name_svp[offset];
@@ -1084,7 +1084,7 @@ Perl_find_rundefsv2(pTHX_ CV *cv, U32 seq)
     if (po == NOT_IN_PAD || SvPAD_OUR(namesv))
 	return DEFSV;
 
-    return AvARRAY(PADLIST_ARRAY(CvPADLIST(cv))[CvDEPTH(cv)])[po];
+    return AvARRAY(PadlistARRAY(CvPADLIST(cv))[CvDEPTH(cv)])[po];
 }
 
 /*
@@ -1147,7 +1147,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 
     if (padlist) { /* not an undef CV */
 	I32 fake_offset = 0;
-        const AV * const nameav = PADLIST_ARRAY(padlist)[0];
+        const AV * const nameav = PadlistARRAY(padlist)[0];
 	SV * const * const name_svp = AvARRAY(nameav);
 
 	for (offset = AvFILLp(nameav); offset > 0; offset--) {
@@ -1278,7 +1278,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			return offset;
 		    }
 
-		    *out_capture = AvARRAY(PADLIST_ARRAY(padlist)[
+		    *out_capture = AvARRAY(PadlistARRAY(padlist)[
 				    CvDEPTH(cv) ? CvDEPTH(cv) : 1])[offset];
 		    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			"Pad findlex cv=0x%"UVxf" found lex=0x%"UVxf"\n",
@@ -1342,8 +1342,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	SV *new_namesv = newSVsv(*out_name_sv);
 	AV *  const ocomppad_name = PL_comppad_name;
 	PAD * const ocomppad = PL_comppad;
-	PL_comppad_name = PADLIST_ARRAY(padlist)[0];
-	PL_comppad = PADLIST_ARRAY(padlist)[1];
+	PL_comppad_name = PadlistARRAY(padlist)[0];
+	PL_comppad = PadlistARRAY(padlist)[1];
 	PL_curpad = AvARRAY(PL_comppad);
 
 	new_offset
@@ -1835,8 +1835,8 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     if (!padlist) {
 	return;
     }
-    pad_name = *PADLIST_ARRAY(padlist);
-    pad = PADLIST_ARRAY(padlist)[1];
+    pad_name = *PadlistARRAY(padlist);
+    pad = PadlistARRAY(padlist)[1];
     pname = AvARRAY(pad_name);
     ppad = AvARRAY(pad);
     Perl_dump_indent(aTHX_ level, file,
@@ -1943,8 +1943,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     dVAR;
     I32 ix;
     PADLIST* const protopadlist = CvPADLIST(proto);
-    const PAD *const protopad_name = *PADLIST_ARRAY(protopadlist);
-    const PAD *const protopad = PADLIST_ARRAY(protopadlist)[1];
+    const PAD *const protopad_name = *PadlistARRAY(protopadlist);
+    const PAD *const protopad = PadlistARRAY(protopadlist)[1];
     SV** const pname = AvARRAY(protopad_name);
     SV** const ppad = AvARRAY(protopad);
     const I32 fname = AvFILLp(protopad_name);
@@ -2020,7 +2020,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     PL_curpad = AvARRAY(PL_comppad);
 
     outpad = outside && CvPADLIST(outside)
-	? AvARRAY(PADLIST_ARRAY(CvPADLIST(outside))[depth])
+	? AvARRAY(PadlistARRAY(CvPADLIST(outside))[depth])
 	: NULL;
     assert(outpad || SvTYPE(cv) == SVt_PVFM);
     if (outpad) CvPADLIST(cv)->xpadl_outid = CvPADLIST(outside)->xpadl_id;
@@ -2115,8 +2115,8 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 {
     dVAR;
     I32 ix;
-    AV * const comppad_name = PADLIST_ARRAY(padlist)[0];
-    AV * const comppad = PADLIST_ARRAY(padlist)[1];
+    AV * const comppad_name = PadlistARRAY(padlist)[0];
+    AV * const comppad = PadlistARRAY(padlist)[1];
     SV ** const namepad = AvARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
 
@@ -2166,8 +2166,8 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 
     PERL_ARGS_ASSERT_PAD_PUSH;
 
-    if (depth > PADLIST_MAX(padlist) || !PADLIST_ARRAY(padlist)[depth]) {
-	PAD** const svp = PADLIST_ARRAY(padlist);
+    if (depth > PadlistMAX(padlist) || !PadlistARRAY(padlist)[depth]) {
+	PAD** const svp = PadlistARRAY(padlist);
 	AV* const newpad = newAV();
 	SV** const oldpad = AvARRAY(svp[depth-1]);
 	I32 ix = AvFILLp((const AV *)svp[1]);
@@ -2261,41 +2261,41 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 	return NULL;
 
     cloneall = param->flags & CLONEf_COPY_STACKS
-	|| SvREFCNT(PADLIST_ARRAY(srcpad)[1]) > 1;
-    assert (SvREFCNT(PADLIST_ARRAY(srcpad)[1]) == 1);
+	|| SvREFCNT(PadlistARRAY(srcpad)[1]) > 1;
+    assert (SvREFCNT(PadlistARRAY(srcpad)[1]) == 1);
 
-    max = cloneall ? PADLIST_MAX(srcpad) : 1;
+    max = cloneall ? PadlistMAX(srcpad) : 1;
 
     Newx(dstpad, 1, PADLIST);
     ptr_table_store(PL_ptr_table, srcpad, dstpad);
-    PADLIST_MAX(dstpad) = max;
-    Newx(PADLIST_ARRAY(dstpad), max + 1, PAD *);
+    PadlistMAX(dstpad) = max;
+    Newx(PadlistARRAY(dstpad), max + 1, PAD *);
 
     if (cloneall) {
 	PADOFFSET depth;
 	for (depth = 0; depth <= max; ++depth)
-	    PADLIST_ARRAY(dstpad)[depth] =
-		av_dup_inc(PADLIST_ARRAY(srcpad)[depth], param);
+	    PadlistARRAY(dstpad)[depth] =
+		av_dup_inc(PadlistARRAY(srcpad)[depth], param);
     } else {
 	/* CvDEPTH() on our subroutine will be set to 0, so there's no need
 	   to build anything other than the first level of pads.  */
-	I32 ix = AvFILLp(PADLIST_ARRAY(srcpad)[1]);
+	I32 ix = AvFILLp(PadlistARRAY(srcpad)[1]);
 	AV *pad1;
-	const I32 names_fill = AvFILLp(PADLIST_ARRAY(srcpad)[0]);
-	const PAD *const srcpad1 = PADLIST_ARRAY(srcpad)[1];
+	const I32 names_fill = AvFILLp(PadlistARRAY(srcpad)[0]);
+	const PAD *const srcpad1 = PadlistARRAY(srcpad)[1];
 	SV **oldpad = AvARRAY(srcpad1);
 	SV **names;
 	SV **pad1a;
 	AV *args;
 
-	PADLIST_ARRAY(dstpad)[0] =
-	    av_dup_inc(PADLIST_ARRAY(srcpad)[0], param);
-	names = AvARRAY(PADLIST_ARRAY(dstpad)[0]);
+	PadlistARRAY(dstpad)[0] =
+	    av_dup_inc(PadlistARRAY(srcpad)[0], param);
+	names = AvARRAY(PadlistARRAY(dstpad)[0]);
 
 	pad1 = newAV();
 
 	av_extend(pad1, ix);
-	PADLIST_ARRAY(dstpad)[1] = pad1;
+	PadlistARRAY(dstpad)[1] = pad1;
 	pad1a = AvARRAY(pad1);
 
 	if (ix > -1) {
@@ -2369,20 +2369,20 @@ Perl_padlist_store(pTHX_ register PADLIST *padlist, I32 key, PAD *val)
 {
     dVAR;
     PAD **ary;
-    SSize_t const oldmax = PADLIST_MAX(padlist);
+    SSize_t const oldmax = PadlistMAX(padlist);
 
     PERL_ARGS_ASSERT_PADLIST_STORE;
 
     assert(key >= 0);
 
-    if (key > PADLIST_MAX(padlist)) {
-	av_extend_guts(NULL,key,&PADLIST_MAX(padlist),
-		       (SV ***)&PADLIST_ARRAY(padlist),
-		       (SV ***)&PADLIST_ARRAY(padlist));
-	Zero(PADLIST_ARRAY(padlist)+oldmax+1, PADLIST_MAX(padlist)-oldmax,
+    if (key > PadlistMAX(padlist)) {
+	av_extend_guts(NULL,key,&PadlistMAX(padlist),
+		       (SV ***)&PadlistARRAY(padlist),
+		       (SV ***)&PadlistARRAY(padlist));
+	Zero(PadlistARRAY(padlist)+oldmax+1, PadlistMAX(padlist)-oldmax,
 	     PAD *);
     }
-    ary = PADLIST_ARRAY(padlist);
+    ary = PadlistARRAY(padlist);
     SvREFCNT_dec(ary[key]);
     ary[key] = val;
     return &ary[key];

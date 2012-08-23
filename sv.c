@@ -13904,7 +13904,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 
 	if (!cv || !CvPADLIST(cv))
 	    return NULL;
-	av = *PADLIST_ARRAY(CvPADLIST(cv));
+	av = *PadlistARRAY(CvPADLIST(cv));
 	sv = *av_fetch(av, targ, FALSE);
 	sv_setsv(name, sv);
     }

@@ -2178,7 +2178,7 @@ Perl_debop(pTHX_ const OP *o)
 	SV *sv;
         if (cv) {
 	    PADLIST * const padlist = CvPADLIST(cv);
-            PAD * const comppad = *PADLIST_ARRAY(padlist);
+            PAD * const comppad = *PadlistARRAY(padlist);
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
             sv = NULL;
