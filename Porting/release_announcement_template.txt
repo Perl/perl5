@@ -3,7 +3,7 @@
     -- [ATTRIBUTION]
 
 We are [SYNONYM FOR 'pleased'] to announce Perl [VERSION], the [N-TH]
-development release of Perl 5.15.
+development release of Perl 5.17.
 
 You will soon be able to download Perl [VERSION] from your favorite CPAN
 mirror or find it at:
