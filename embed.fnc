@@ -1054,7 +1054,6 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 EMs	|void	|add_alternate	|NN AV** alternate_ptr|NN U8* string|STRLEN len
 EMsR	|SV*	|_new_invlist_C_array|NN UV* list
 : Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|bool complement_b
-EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
@@ -1390,9 +1389,7 @@ EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV*	|get_invlist_zero_addr	|NN SV* invlist
-EiMR	|UV	|_invlist_len	|NN SV* const invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_trim	|NN SV* const invlist
@@ -1401,7 +1398,6 @@ EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
 EiMR	|UV*	|get_invlist_version_id_addr	|NN SV* invlist
 EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
-EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
 EiMR	|UV	|invlist_highest|NN SV* const invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
@@ -1423,6 +1419,10 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name|NN SV* listsv|
                 |I32 none|bool return_if_undef|NULLOK SV* invlist \
 		|bool passed_in_invlist_has_user_defined_property
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
+EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
+EiMR	|UV	|_invlist_len	|NN SV* const invlist
+EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
+EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|bool	|_is_swash_user_defined|NN SV* const swash
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 #endif

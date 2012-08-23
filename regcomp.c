@@ -6997,32 +6997,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
-#define INVLIST_LEN_OFFSET 0	/* Number of elements in the inversion list */
-#define INVLIST_ITER_OFFSET 1	/* Current iteration position */
+/* The header definitions are in F<inline_invlist.c> */
 
-/* This is a combination of a version and data structure type, so that one
- * being passed in can be validated to be an inversion list of the correct
- * vintage.  When the structure of the header is changed, a new random number
- * in the range 2**31-1 should be generated and the new() method changed to
- * insert that at this location.  Then, if an auxiliary program doesn't change
- * correspondingly, it will be discovered immediately */
-#define INVLIST_VERSION_ID_OFFSET 2
-#define INVLIST_VERSION_ID 1064334010
-
-/* For safety, when adding new elements, remember to #undef them at the end of
- * the inversion list code section */
-
-#define INVLIST_ZERO_OFFSET 3	/* 0 or 1; must be last element in header */
-/* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
- * contains the code point U+00000, and begins here.  If 1, the inversion list
- * doesn't contain U+0000, and it begins at the next UV in the array.
- * Inverting an inversion list consists of adding or removing the 0 at the
- * beginning of it.  By reserving a space for that 0, inversion can be made
- * very fast */
-
-#define HEADER_LENGTH (INVLIST_ZERO_OFFSET + 1)
-
-/* Internally things are UVs */
 #define TO_INTERNAL_SIZE(x) ((x + HEADER_LENGTH) * sizeof(UV))
 #define FROM_INTERNAL_SIZE(x) ((x / sizeof(UV)) - HEADER_LENGTH)
 
@@ -7071,27 +7047,6 @@ S_invlist_array(pTHX_ SV* const invlist)
      * element (in which case the reserved element will be set to 1). */
     return (UV *) (get_invlist_zero_addr(invlist)
 		   + *get_invlist_zero_addr(invlist));
-}
-
-PERL_STATIC_INLINE UV*
-S__get_invlist_len_addr(pTHX_ SV* invlist)
-{
-    /* Return the address of the UV that contains the current number
-     * of used elements in the inversion list */
-
-    PERL_ARGS_ASSERT__GET_INVLIST_LEN_ADDR;
-
-    return (UV *) (SvPVX(invlist) + (INVLIST_LEN_OFFSET * sizeof (UV)));
-}
-PERL_STATIC_INLINE UV
-S__invlist_len(pTHX_ SV* const invlist)
-{
-    /* Returns the current number of elements stored in the inversion list's
-     * array */
-
-    PERL_ARGS_ASSERT__INVLIST_LEN;
-
-    return *_get_invlist_len_addr(invlist);
 }
 
 PERL_STATIC_INLINE void
@@ -7224,11 +7179,6 @@ S_invlist_trim(pTHX_ SV* const invlist)
 
     SvPV_shrink_to_cur((SV *) invlist);
 }
-
-/* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
- * etc */
-#define ELEMENT_RANGE_MATCHES_INVLIST(i) (! ((i) & 1))
-#define PREV_RANGE_MATCHES_INVLIST(i) (! ELEMENT_RANGE_MATCHES_INVLIST(i))
 
 #define _invlist_union_complement_2nd(a, b, output) _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
 
@@ -7961,18 +7911,6 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 }
 
 #endif
-
-PERL_STATIC_INLINE bool
-S__invlist_contains_cp(pTHX_ SV* const invlist, const UV cp)
-{
-    /* Does <invlist> contain code point <cp> as part of the set? */
-
-    IV index = _invlist_search(invlist, cp);
-
-    PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP;
-
-    return index >= 0 && ELEMENT_RANGE_MATCHES_INVLIST(index);
-}
 
 PERL_STATIC_INLINE SV*
 S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {

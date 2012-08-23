@@ -901,11 +901,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
-#define _get_invlist_len_addr(a)	S__get_invlist_len_addr(aTHX_ a)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
-#define _invlist_contains_cp(a,b)	S__invlist_contains_cp(aTHX_ a,b)
-#define _invlist_len(a)		S__invlist_len(aTHX_ a)
-#define _invlist_search(a,b)	Perl__invlist_search(aTHX_ a,b)
 #define _new_invlist_C_array(a)	S__new_invlist_C_array(aTHX_ a)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
@@ -955,8 +951,12 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _core_swash_init(a,b,c,d,e,f,g,h)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g,h)
+#define _get_invlist_len_addr(a)	S__get_invlist_len_addr(aTHX_ a)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
+#define _invlist_contains_cp(a,b)	S__invlist_contains_cp(aTHX_ a,b)
 #define _invlist_contents(a)	Perl__invlist_contents(aTHX_ a)
+#define _invlist_len(a)		S__invlist_len(aTHX_ a)
+#define _invlist_search(a,b)	Perl__invlist_search(aTHX_ a,b)
 #define _is_swash_user_defined(a)	Perl__is_swash_user_defined(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
