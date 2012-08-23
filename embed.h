@@ -901,8 +901,10 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
+#define _get_invlist_len_addr(a)	S__get_invlist_len_addr(aTHX_ a)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
 #define _invlist_contains_cp(a,b)	S__invlist_contains_cp(aTHX_ a,b)
+#define _invlist_len(a)		S__invlist_len(aTHX_ a)
 #define _invlist_search(a,b)	Perl__invlist_search(aTHX_ a,b)
 #define _new_invlist_C_array(a)	S__new_invlist_C_array(aTHX_ a)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
@@ -917,7 +919,6 @@
 #define cl_or			S_cl_or
 #define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
-#define get_invlist_len_addr(a)	S_get_invlist_len_addr(aTHX_ a)
 #define get_invlist_version_id_addr(a)	S_get_invlist_version_id_addr(aTHX_ a)
 #define get_invlist_zero_addr(a)	S_get_invlist_zero_addr(aTHX_ a)
 #define grok_bslash_N(a,b,c,d,e,f)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f)
@@ -927,7 +928,6 @@
 #define invlist_highest(a)	S_invlist_highest(aTHX_ a)
 #define invlist_iterinit(a)	S_invlist_iterinit(aTHX_ a)
 #define invlist_iternext(a,b,c)	S_invlist_iternext(aTHX_ a,b,c)
-#define invlist_len(a)		S_invlist_len(aTHX_ a)
 #define invlist_max(a)		S_invlist_max(aTHX_ a)
 #define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)
 #define invlist_trim(a)		S_invlist_trim(aTHX_ a)

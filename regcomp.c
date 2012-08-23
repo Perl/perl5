@@ -7044,7 +7044,7 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
     PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT;
 
     /* Must be empty */
-    assert(! *get_invlist_len_addr(invlist));
+    assert(! *_get_invlist_len_addr(invlist));
 
     /* 1^1 = 0; 1^0 = 1 */
     *zero = 1 ^ will_have_0;
@@ -7062,7 +7062,7 @@ S_invlist_array(pTHX_ SV* const invlist)
 
     /* Must not be empty.  If these fail, you probably didn't check for <len>
      * being non-zero before trying to get the array */
-    assert(*get_invlist_len_addr(invlist));
+    assert(*_get_invlist_len_addr(invlist));
     assert(*get_invlist_zero_addr(invlist) == 0
 	   || *get_invlist_zero_addr(invlist) == 1);
 
@@ -7074,25 +7074,24 @@ S_invlist_array(pTHX_ SV* const invlist)
 }
 
 PERL_STATIC_INLINE UV*
-S_get_invlist_len_addr(pTHX_ SV* invlist)
+S__get_invlist_len_addr(pTHX_ SV* invlist)
 {
     /* Return the address of the UV that contains the current number
      * of used elements in the inversion list */
 
-    PERL_ARGS_ASSERT_GET_INVLIST_LEN_ADDR;
+    PERL_ARGS_ASSERT__GET_INVLIST_LEN_ADDR;
 
     return (UV *) (SvPVX(invlist) + (INVLIST_LEN_OFFSET * sizeof (UV)));
 }
-
 PERL_STATIC_INLINE UV
-S_invlist_len(pTHX_ SV* const invlist)
+S__invlist_len(pTHX_ SV* const invlist)
 {
     /* Returns the current number of elements stored in the inversion list's
      * array */
 
-    PERL_ARGS_ASSERT_INVLIST_LEN;
+    PERL_ARGS_ASSERT__INVLIST_LEN;
 
-    return *get_invlist_len_addr(invlist);
+    return *_get_invlist_len_addr(invlist);
 }
 
 PERL_STATIC_INLINE void
@@ -7102,7 +7101,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
-    *get_invlist_len_addr(invlist) = len;
+    *_get_invlist_len_addr(invlist) = len;
 
     assert(len <= SvLEN(invlist));
 
@@ -7196,7 +7195,7 @@ S__new_invlist_C_array(pTHX_ UV* list)
     SvPV_set(invlist, (char *) list);
     SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
 			       shouldn't touch it */
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(invlist_len(invlist)));
+    SvCUR_set(invlist, TO_INTERNAL_SIZE(_invlist_len(invlist)));
 
     if (*get_invlist_version_id_addr(invlist) != INVLIST_VERSION_ID) {
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
@@ -7242,7 +7241,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 
     UV* array;
     UV max = invlist_max(invlist);
-    UV len = invlist_len(invlist);
+    UV len = _invlist_len(invlist);
 
     PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST;
 
@@ -7323,7 +7322,7 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
      * contains <cp> */
 
     IV low = 0;
-    IV high = invlist_len(invlist);
+    IV high = _invlist_len(invlist);
     const IV highest_element = high - 1;
     const UV* array;
 
@@ -7377,7 +7376,7 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
      * that <swatch> is all 0's on input */
 
     UV current = start;
-    const IV len = invlist_len(invlist);
+    const IV len = _invlist_len(invlist);
     IV i;
     const UV * array;
 
@@ -7507,7 +7506,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
     assert(a != b);
 
     /* If either one is empty, the union is the other one */
-    if (a == NULL || ((len_a = invlist_len(a)) == 0)) {
+    if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
 	if (*output == a) {
             if (a != NULL) {
                 SvREFCNT_dec(a);
@@ -7521,7 +7520,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 	} /* else *output already = b; */
 	return;
     }
-    else if ((len_b = invlist_len(b)) == 0) {
+    else if ((len_b = _invlist_len(b)) == 0) {
 	if (*output == b) {
 	    SvREFCNT_dec(b);
 	}
@@ -7662,7 +7661,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 
     /* Set result to final length, which can change the pointer to array_u, so
      * re-find it */
-    if (len_u != invlist_len(u)) {
+    if (len_u != _invlist_len(u)) {
 	invlist_set_len(u, len_u);
 	invlist_trim(u);
 	array_u = invlist_array(u);
@@ -7741,8 +7740,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     assert(a != b);
 
     /* Special case if either one is empty */
-    len_a = invlist_len(a);
-    if ((len_a == 0) || ((len_b = invlist_len(b)) == 0)) {
+    len_a = _invlist_len(a);
+    if ((len_a == 0) || ((len_b = _invlist_len(b)) == 0)) {
 
         if (len_a != 0 && complement_b) {
 
@@ -7888,7 +7887,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 
     /* Set result to final length, which can change the pointer to array_r, so
      * re-find it */
-    if (len_r != invlist_len(r)) {
+    if (len_r != _invlist_len(r)) {
 	invlist_set_len(r, len_r);
 	invlist_trim(r);
 	array_r = invlist_array(r);
@@ -7936,13 +7935,13 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 	len = 0;
     }
     else {
-	len = invlist_len(invlist);
+	len = _invlist_len(invlist);
     }
 
     /* If comes after the final entry, can just append it to the end */
     if (len == 0
 	|| start >= invlist_array(invlist)
-				    [invlist_len(invlist) - 1])
+				    [_invlist_len(invlist) - 1])
     {
 	_append_range_to_invlist(invlist, start, end);
 	return invlist;
@@ -7988,7 +7987,7 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
      * have a zero; removes it otherwise.  As described above, the data
      * structure is set up so that this is very efficient */
 
-    UV* len_pos = get_invlist_len_addr(invlist);
+    UV* len_pos = _get_invlist_len_addr(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_INVERT;
 
@@ -8025,7 +8024,7 @@ Perl__invlist_invert_prop(pTHX_ SV* const invlist)
 
     _invlist_invert(invlist);
 
-    len = invlist_len(invlist);
+    len = _invlist_len(invlist);
 
     if (len != 0) { /* If empty do nothing */
 	array = invlist_array(invlist);
@@ -8057,7 +8056,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
 
     /* Need to allocate extra space to accommodate Perl's addition of a
      * trailing NUL to SvPV's, since it thinks they are always strings */
-    SV* new_invlist = _new_invlist(invlist_len(invlist) + 1);
+    SV* new_invlist = _new_invlist(_invlist_len(invlist) + 1);
     STRLEN length = SvCUR(invlist);
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
@@ -8108,7 +8107,7 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
      * will start over at the beginning of the list */
 
     UV* pos = get_invlist_iter_addr(invlist);
-    UV len = invlist_len(invlist);
+    UV len = _invlist_len(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
@@ -8140,7 +8139,7 @@ S_invlist_highest(pTHX_ SV* const invlist)
      * 0, or if the list is empty.  If this distinction matters to you, check
      * for emptiness before calling this function */
 
-    UV len = invlist_len(invlist);
+    UV len = _invlist_len(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_HIGHEST;
@@ -8227,8 +8226,8 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
 
     UV* array_a = invlist_array(a);
     UV* array_b = invlist_array(b);
-    UV len_a = invlist_len(a);
-    UV len_b = invlist_len(b);
+    UV len_a = _invlist_len(a);
+    UV len_b = _invlist_len(b);
 
     UV i = 0;		    /* current index into the arrays */
     bool retval = TRUE;     /* Assume are identical until proven otherwise */
@@ -12301,7 +12300,7 @@ parseit:
                  * rules hard-coded into Perl.  (This case happens legitimately
                  * during compilation of Perl itself before the Unicode tables
                  * are generated) */
-                if (invlist_len(PL_utf8_foldable) == 0) {
+                if (_invlist_len(PL_utf8_foldable) == 0) {
                     PL_utf8_foldclosures = newHV();
                 }
                 else {
@@ -12863,7 +12862,7 @@ parseit:
 	}
 
 	/* If have completely emptied it, remove it completely */
-	if (invlist_len(cp_list) == 0) {
+	if (_invlist_len(cp_list) == 0) {
 	    SvREFCNT_dec(cp_list);
 	    cp_list = NULL;
 	}

@@ -1390,9 +1390,9 @@ EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EiMR	|UV*	|get_invlist_len_addr	|NN SV* invlist
+EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV*	|get_invlist_zero_addr	|NN SV* invlist
-EiMR	|UV	|invlist_len	|NN SV* const invlist
+EiMR	|UV	|_invlist_len	|NN SV* const invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_trim	|NN SV* const invlist
