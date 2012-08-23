@@ -4480,6 +4480,28 @@ The C<< > >> and C<< < >> modifiers can also be used on C<()> groups
 to force a particular byte-order on all components in that group, 
 including all its subgroups.
 
+=begin comment
+
+Larry recalls that the hex and bit string formats (H, h, B, b) were added to
+pack for processing data from NASA's Magellan probe. Magellan was in an
+elliptical orbit, using the antenna for the radar mapping when close to
+Venus and for communicating data back to Earth for the rest of the orbit.
+There were two transmission units, but one of these failed, and then the
+other developed a fault whereby it would randomly flip the sense of all the
+bits. It was easy to automatically detect complete records with the correct
+sense, and complete records with all the bits flipped. However, this didn't
+recover the records where the sense flipped midway. A colleague of Larry's
+was able to pretty much eyeball where the records flipped, so they wrote an
+editor named kybble (a pun on the dog food Kibbles 'n Bits) to enable him to
+manually correct the records and recover the data. For this purpose pack
+gained the hex and bit string format specifiers.
+
+git shows that they were added to perl 3.0 in patch #44 (Jan 1991, commit
+27e2fb84680b9cc1), but the patch description makes no mention of their
+addition, let alone the story behind them.
+
+=end comment
+
 The following rules apply:
 
 =over 
