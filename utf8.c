@@ -31,6 +31,7 @@
 #include "EXTERN.h"
 #define PERL_IN_UTF8_C
 #include "perl.h"
+#include "inline_invlist.c"
 
 #ifndef EBCDIC
 /* Separate prototypes needed because in ASCII systems these are

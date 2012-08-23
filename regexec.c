@@ -80,6 +80,8 @@
 #  include "regcomp.h"
 #endif
 
+#include "inline_invlist.c"
+
 #define RF_tainted	1	/* tainted information used? e.g. locale */
 #define RF_warned	2		/* warned about big count? */
 

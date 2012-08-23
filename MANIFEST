@@ -4193,6 +4193,7 @@ hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
 inline.h			Static inline functions
+inline_invlist.c		Inline functions for handling inversion lists
 INSTALL				Detailed installation instructions
 installhtml			Perl script to install html files for pods
 install_lib.pl			functions shared between install* scripts
