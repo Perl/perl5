@@ -10460,7 +10460,7 @@ tryagain:
 	    STRLEN foldlen;
             U8 node_type;
             bool next_is_quantifier;
-            char * oldp;
+            char * oldp = NULL;
 
 	    ender = 0;
             node_type = compute_EXACTish(pRExC_state);
