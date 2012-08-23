@@ -551,10 +551,8 @@ I<blead> and subsequently cherry-pick any releases since the last
 maint release and then your recent commit.  XXX need a better example
 
 F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
-modules on CPAN. It can use a full, local CPAN mirror or fall back
-to C<wget> or C<curl> to fetch only package metadata remotely. (If you're
-on Win32, then installing Cygwin is one way to have commands like C<wget>
-and C<curl> available.)
+modules on CPAN. It can use a full, local CPAN mirror and/or fall back
+on HTTP::Tiny to fetch package metadata remotely.
 
 (If you'd prefer to have a full CPAN mirror, see 
 http://www.cpan.org/misc/cpan-faq.html#How_mirror_CPAN)
