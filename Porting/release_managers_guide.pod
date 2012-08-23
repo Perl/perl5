@@ -1216,12 +1216,11 @@ to ensure that the tarballs are available on the website.
 
 Check C</src> on CPAN (on a fast mirror) to ensure that links to
 the new tarballs have appeared.  There should be links in C</src/5.0>
-(which is accumulating all new versions), links in C</src> (which shows
-only the latest version on each branch), and an appropriate mention in
-C</src/README.html> (which describes the latest versions).
+(which is accumulating all new versions), and an appropriate mention in
+C</src> (which describes the latest versions in each branch, with links).
 
 These links should appear automatically, some hours after upload.
-If they don't, or the C<README.html> description is inadequate,
+If they don't, or the C</src> description is inadequate,
 ask Ask <ask@perl.org>.
 
 =item *
