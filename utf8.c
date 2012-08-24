@@ -37,6 +37,7 @@
 /* Separate prototypes needed because in ASCII systems these are
  * usually macros but they still are compiled as code, too. */
 PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags);
+PERL_CALLCONV UV	Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen);
 PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
 #endif
 
@@ -921,7 +922,8 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
 /* Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
  * there are no malformations in the input UTF-8 string C<s>.  surrogates,
- * non-character code points, and non-Unicode code points are allowed */
+ * non-character code points, and non-Unicode code points are allowed.  A macro
+ * in utf8.h is used to normally avoid this function wrapper */
 
 UV
 Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
