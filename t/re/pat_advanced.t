@@ -1660,7 +1660,6 @@ $x='123';
 print ">$1<\n";
 EOP
 
-        local $::TODO = 'RT #86042';
         fresh_perl_is(<<'EOP', ">abc<\n", {}, 'no mention of $&');
 my $x; 
 ($x='abc')=~/(abc)/g; 

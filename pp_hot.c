@@ -1319,12 +1319,7 @@ PP(pp_match)
 	    }
 	}
     }
-    /* XXX: comment out !global get safe $1 vars after a
-       match, BUT be aware that this leads to dramatic slowdowns on
-       /g matches against large strings.  So far a solution to this problem
-       appears to be quite tricky.
-       Test for the unsafe vars are TODO for now. */
-    if (       (!global && RX_NPARENS(rx))
+    if (       RX_NPARENS(rx)
             || PL_sawampersand
             || SvTEMP(TARG)
             || SvAMAGIC(TARG)

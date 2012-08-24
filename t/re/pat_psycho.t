@@ -25,7 +25,7 @@ BEGIN {
 
 
 skip_all('$PERL_SKIP_PSYCHO_TEST set') if $ENV{PERL_SKIP_PSYCHO_TEST};
-plan tests => 11;  # Update this when adding/deleting tests.
+plan tests => 15;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -159,6 +159,49 @@ sub run_tests {
             }
         }
         ok($ok, $msg);
+    }
+
+
+    {
+	# these bits of test code used to run quadratically. If we break
+	# anything, they'll start to take minutes to run, rather than
+	# seconds. We don't actually measure times or set alarms, since
+	# that tends to be very fragile and prone to false positives.
+	# Instead, just hope that if someone is messing with
+	# performance-related code, they'll re-run the test suite and
+	# notice it suddenly takes a lot longer.
+
+	my $x;
+
+	$x = 'x' x 1_000_000;
+	1 while $x =~ /(.)/g;
+	pass "ascii =~ /(.)/";
+
+	{
+	    local ${^UTF8CACHE} = 1; # defeat debugging
+	    $x = "\x{100}" x 1_000_000;
+	    1 while $x =~ /(.)/g;
+	    pass "utf8 =~ /(.)/";
+	}
+
+	# run these in separate processes, since they set $&
+
+        fresh_perl_is(<<'EOF', "ok\n", {}, 'ascii =~ /(.)/, mention $&');
+$&;
+$x = 'x' x 1_000_000;
+1 while $x =~ /(.)/g;
+print "ok\n";
+EOF
+
+        fresh_perl_is(<<'EOF', "ok\n", {}, 'utf8 =~ /(.)/, mention $&');
+$&;
+local ${^UTF8CACHE} = 1; # defeat debugging
+$x = "\x{100}" x 1_000_000;
+1 while $x =~ /(.)/g;
+print "ok\n";
+EOF
+
+
     }
 } # End of sub run_tests
 
