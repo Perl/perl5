@@ -928,6 +928,7 @@ unless ($Config{useithreads}) {
     DeadCode();
     open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
     pass "no crash with DeadCode";
+    close OUT;
 }
 
 done_testing();
