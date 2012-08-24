@@ -11541,6 +11541,8 @@ parseit:
 	    case 'P':
 		{
 		char *e;
+                U8 swash_init_flags = 0;
+
 		if (RExC_parse >= RExC_end)
 		    vFAIL2("Empty \\%c{}", (U8)value);
 		if (*RExC_parse == '{') {
@@ -11597,7 +11599,8 @@ parseit:
                                              0, /* not tr/// */
                                              TRUE, /* this routine will handle
                                                       undefined properties */
-                                             NULL, FALSE /* No inversion list */
+                                             NULL, /* No inversion list */
+                                             &swash_init_flags
                                             );
                     if (   ! swash
                         || ! SvROK(swash)
@@ -11632,7 +11635,8 @@ parseit:
                          * the swash is from a user-defined property, then this
                          * whole character class should be regarded as such */
                         has_user_defined_property =
-                                                _is_swash_user_defined(swash);
+                                    (swash_init_flags
+                                     & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY);
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {

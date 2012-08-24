@@ -2912,11 +2912,11 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
      * public interface, and returning a copy prevents others from doing
      * mischief on the original */
 
-    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none, FALSE, NULL, FALSE));
+    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none, FALSE, NULL, NULL));
 }
 
 SV*
-Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none, bool return_if_undef, SV* invlist, bool passed_in_invlist_has_user_defined_property)
+Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none, bool return_if_undef, SV* invlist, U8* const flags_p)
 {
     /* Initialize and return a swash, creating it if necessary.  It does this
      * by calling utf8_heavy.pl in the general case.
@@ -2938,8 +2938,12 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      * return_if_undef is TRUE if the routine shouldn't croak if it can't find
      *	    the requested property
      * invlist is an inversion list to initialize the swash with (or NULL)
-     * has_user_defined_property is TRUE if <invlist> has some component that
-     *      came from a user-defined property
+     * flags_p if non-NULL is the address of various input and output flag bits
+     *      to the routine, as follows:  ('I' means is input to the routine;
+     *      'O' means output from the routine.  Only flags marked O are
+     *      meaningful on return.)
+     *  _CORE_SWASH_INIT_USER_DEFINED_PROPERTY indicates if the swash
+     *      came from a user-defined property.  (I O)
      *
      * Thus there are three possible inputs to find the swash: <name>,
      * <listsv>, and <invlist>.  At least one must be specified.  The result
@@ -2950,6 +2954,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 
     dVAR;
     SV* retval = &PL_sv_undef;
+    HV* swash_hv = NULL;
 
     assert(listsv != &PL_sv_undef || strNE(name, "") || invlist);
     assert(! invlist || minbits == 1);
@@ -3031,19 +3036,36 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	}
     } /* End of calling the module to find the swash */
 
+    /* If this operation fetched a swash, and we will need it later, get it */
+    if (retval != &PL_sv_undef
+        && (minbits == 1 || (flags_p
+                            && ! (*flags_p
+                                  & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY))))
+    {
+        swash_hv = MUTABLE_HV(SvRV(retval));
+
+        /* If we don't already know that there is a user-defined component to
+         * this swash, and the user has indicated they wish to know if there is
+         * one (by passing <flags_p>), find out */
+        if (flags_p && ! (*flags_p & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY)) {
+            SV** user_defined = hv_fetchs(swash_hv, "USER_DEFINED", FALSE);
+            if (user_defined && SvUV(*user_defined)) {
+                *flags_p |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
+            }
+        }
+    }
+
     /* Make sure there is an inversion list for binary properties */
     if (minbits == 1) {
 	SV** swash_invlistsvp = NULL;
 	SV* swash_invlist = NULL;
 	bool invlist_in_swash_is_valid = FALSE;
-	HV* swash_hv = NULL;
 
         /* If this operation fetched a swash, get its already existing
-         * inversion list or create one for it */
-	if (retval != &PL_sv_undef) {
-	    swash_hv = MUTABLE_HV(SvRV(retval));
+         * inversion list, or create one for it */
 
-	    swash_invlistsvp = hv_fetchs(swash_hv, "INVLIST", FALSE);
+        if (swash_hv) {
+	    swash_invlistsvp = hv_fetchs(swash_hv, "I", FALSE);
 	    if (swash_invlistsvp) {
 		swash_invlist = *swash_invlistsvp;
 		invlist_in_swash_is_valid = TRUE;
@@ -3073,12 +3095,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 		retval = newRV_inc(MUTABLE_SV(swash_hv));
 		swash_invlist = invlist;
 	    }
-
-            if (passed_in_invlist_has_user_defined_property) {
-                if (! hv_stores(swash_hv, "USER_DEFINED", newSVuv(1))) {
-                    Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
-                }
-            }
 	}
 
         /* Here, we have computed the union of all the passed-in data.  It may
@@ -4119,19 +4135,6 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     }
 
     return invlist;
-}
-
-bool
-Perl__is_swash_user_defined(pTHX_ SV* const swash)
-{
-    SV** ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "USER_DEFINED", FALSE);
-
-    PERL_ARGS_ASSERT__IS_SWASH_USER_DEFINED;
-
-    if (! ptr) {
-        return FALSE;
-    }
-    return cBOOL(SvUV(*ptr));
 }
 
 SV*

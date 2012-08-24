@@ -959,7 +959,6 @@
 #define _invlist_contents(a)	Perl__invlist_contents(aTHX_ a)
 #define _invlist_len(a)		S__invlist_len(aTHX_ a)
 #define _invlist_search(a,b)	Perl__invlist_search(aTHX_ a,b)
-#define _is_swash_user_defined(a)	Perl__is_swash_user_defined(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)

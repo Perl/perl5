@@ -1418,15 +1418,14 @@ EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV en
 EXMp	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits \
-                |I32 none|bool return_if_undef|NULLOK SV* invlist \
-		|bool passed_in_invlist_has_user_defined_property
+EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
+		|NN SV* listsv|I32 minbits|I32 none|bool return_if_undef \
+		|NULLOK SV* invlist|NULLOK U8* const flags_p
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV	|_invlist_len	|NN SV* const invlist
 EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
-EXMpR	|bool	|_is_swash_user_defined|NN SV* const swash
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 #endif
 Ap	|void	|taint_env

@@ -22,6 +22,9 @@
 #define FOLD_FLAGS_FULL   0x2
 #define FOLD_FLAGS_NOMIX_ASCII 0x4
 
+/* For _core_swash_init(), internal core use only */
+#define _CORE_SWASH_INIT_USER_DEFINED_PROPERTY 0x1
+
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, FOLD_FLAGS_FULL)
 #define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, \
 	             FOLD_FLAGS_FULL, NULL)

@@ -6693,7 +6693,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 	    SV * const rv = MUTABLE_SV(data->data[n]);
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
-	    bool invlist_has_user_defined_property;
+	    U8 swash_init_flags = 0;
 	
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
@@ -6702,11 +6702,12 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 	     * that inversion list has any user-defined properties in it. */
 	    if (av_len(av) >= 3) {
 		invlist = ary[3];
-		invlist_has_user_defined_property = cBOOL(SvUV(ary[4]));
+		if (SvUV(ary[4])) {
+                    swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
+                }
 	    }
 	    else {
 		invlist = NULL;
-		invlist_has_user_defined_property = FALSE;
 	    }
 
 	    /* Element [1] is reserved for the set-up swash.  If already there,
@@ -6724,7 +6725,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 				      FALSE, /* is error if can't find
 						property */
 				      invlist,
-				      invlist_has_user_defined_property);
+				      &swash_init_flags);
 		(void)av_store(av, 1, sw);
 	    }
 
