@@ -6740,20 +6740,14 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 	
     if (listsvp) {
 	SV* matches_string = newSVpvn("", 0);
-	SV** invlistsvp;
 
 	/* Use the swash, if any, which has to have incorporated into it all
 	 * possibilities */
-	if (   sw
-	    && SvROK(sw)
-	    && SvTYPE(SvRV(sw)) == SVt_PVHV
-	    && (invlistsvp = hv_fetchs(MUTABLE_HV(SvRV(sw)), "INVLIST", FALSE)))
-	{
-	    invlist = *invlistsvp;
-	}
-	else if (si && si != &PL_sv_undef) {
+	if ((! sw || (invlist = _get_swash_invlist(sw)) == NULL)
+            && (si && si != &PL_sv_undef))
+        {
 
-	    /* If no swash, use the input nitialization string, if available */
+	    /* If no swash, use the input initialization string, if available */
 	    sv_catsv(matches_string, si);
 	}
 

@@ -4142,9 +4142,15 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 SV*
 Perl__get_swash_invlist(pTHX_ SV* const swash)
 {
-    SV** ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "INVLIST", FALSE);
+    SV** ptr;
 
     PERL_ARGS_ASSERT__GET_SWASH_INVLIST;
+
+    if (! SvROK(swash) || SvTYPE(SvRV(swash)) != SVt_PVHV) {
+        return NULL;
+    }
+
+    ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "INVLIST", FALSE);
 
     if (! ptr) {
         return NULL;

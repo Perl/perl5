@@ -11602,11 +11602,7 @@ parseit:
                                              NULL, /* No inversion list */
                                              &swash_init_flags
                                             );
-                    if (   ! swash
-                        || ! SvROK(swash)
-                        || ! SvTYPE(SvRV(swash)) == SVt_PVHV
-                        || ! (invlist = _get_swash_invlist(swash)))
-		    {
+                    if (! swash || ! (invlist = _get_swash_invlist(swash))) {
                         if (swash) {
                             SvREFCNT_dec(swash);
                             swash = NULL;
