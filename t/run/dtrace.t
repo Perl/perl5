@@ -24,7 +24,7 @@ use strict;
 use warnings;
 use IPC::Open2;
 
-plan(tests => 5);
+plan(tests => 7);
 
 dtrace_like(
     '1',
@@ -117,6 +117,21 @@ PHASES
      'make sure sub-entry and phase-change interact well',
 );
 
+dtrace_like(<< 'PERL_SCRIPT',
+    my $tmp = "foo";
+    $tmp =~ s/f/b/;
+    chop $tmp;
+PERL_SCRIPT
+    << 'D_SCRIPT',
+    op-entry { printf("op-entry <%s>\n", copyinstr(arg0)) }
+D_SCRIPT
+    [
+        qr/op-entry <subst>/,
+        qr/op-entry <schop>/,
+    ],
+    'basic op probe',
+);
+
 sub dtrace_like {
     my $perl     = shift;
     my $probes   = shift;
@@ -152,6 +167,11 @@ sub dtrace_like {
     die "Unexpected error from DTrace: $result"
         if $child_exit_status != 0;
 
-    like($result, $expected, $name);
+    if (ref($expected) eq 'ARRAY') {
+        like($result, $_, $name) for @$expected;
+    }
+    else {
+        like($result, $expected, $name);
+    }
 }
 

@@ -55,6 +55,10 @@ package name of the function.
 
 The C<phase-change> probe was added.
 
+=item 5.18.0
+
+The C<op-entry> probe was added.
+
 =back
 
 =head1 PROBES
@@ -95,6 +99,17 @@ C<${^GLOBAL_PHASE}> reports.
     :*perl*::phase-change {
         printf("Phase changed from %s to %s\n",
             copyinstr(arg1), copyinstr(arg0));
+    }
+
+=item op-entry(OPNAME)
+
+Traces the execution of each opcode in the Perl runloop. This probe
+is fired before the opcode is executed. When the Perl debugger is
+enabled, the DTrace probe is fired I<after> the debugger hooks (but
+still before the opcode itself is executed).
+
+    :*perl*::op-entry {
+        printf("About to execute opcode %s\n", copyinstr(arg0));
     }
 
 =back
@@ -156,6 +171,14 @@ C<${^GLOBAL_PHASE}> reports.
     read                                                            374
     stat64                                                         1056
 
+=item Perl functions that execute the most opcodes
+
+    # dtrace -qZn 'sub-entry { self->fqn = strjoin(copyinstr(arg3), strjoin("::", copyinstr(arg0))) } op-entry /self->fqn != ""/ { @[self->fqn] = count() } END { trunc(@, 3) }'
+
+    warnings::unimport                                             4589
+    Exporter::Heavy::_rebuild_cache                                5039
+    Exporter::import                                              14578
+
 =back
 
 =head1 REFERENCES
@@ -169,6 +192,16 @@ L<http://download.oracle.com/docs/cd/E19082-01/819-3620/index.html>
 =item DTrace: Dynamic Tracing in Oracle Solaris, Mac OS X and FreeBSD
 
 L<http://www.amazon.com/DTrace-Dynamic-Tracing-Solaris-FreeBSD/dp/0132091518/>
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item L<Devel::DTrace::Provider>
+
+This CPAN module lets you create application-level DTrace probes written in Perl.
 
 =back
 

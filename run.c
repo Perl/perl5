@@ -38,7 +38,9 @@ Perl_runops_standard(pTHX)
 {
     dVAR;
     OP *op = PL_op;
+    OP_ENTRY_PROBE(OP_NAME(op));
     while ((PL_op = op = op->op_ppaddr(aTHX))) {
+        OP_ENTRY_PROBE(OP_NAME(op));
     }
 
     TAINT_NOT;
