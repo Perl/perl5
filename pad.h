@@ -229,7 +229,7 @@ The stash in which this "our" variable was declared.
 =for apidoc m|bool|PadnameOUTER|PADNAME pn
 Whether this entry belongs to an outer pad.
 
-=for apidoc m|bool|PadnameSTATE|PADNAME pn
+=for apidoc m|bool|PadnameIsSTATE|PADNAME pn
 Whether this is a "state" variable.
 
 =for apidoc m|HV *|PadnameTYPE|PADNAME pn
@@ -297,7 +297,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PadnameIsOUR(pn)	!!SvPAD_OUR(pn)
 #define PadnameOURSTASH(pn)	SvOURSTASH(pn)
 #define PadnameOUTER(pn)	!!SvFAKE(pn)
-#define PadnameSTATE(pn)	SvPAD_STATE(pn)
+#define PadnameIsSTATE(pn)	!!SvPAD_STATE(pn)
 #define PadnameTYPE(pn)		(SvPAD_TYPED(pn) ? SvSTASH(pn) : NULL)
 
 
