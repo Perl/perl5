@@ -21,7 +21,6 @@ SKIP: {
         and skip("somehow, the files exist", 4);
     ok(!link($tmpfile1, $tmpfile2),
        "Cannot link to unknown file");
-    warn $!;
     is(0+$!, &Errno::ENOENT, "check errno is ENOENT");
     open my $fh, ">", $tmpfile1
 	or skip("Cannot create test link src", 2);
@@ -31,7 +30,6 @@ SKIP: {
     close $fh;
     ok(!link($tmpfile1, $tmpfile2),
        "Cannot link to existing file");
-    warn $!;
     is(0+$!, &Errno::EEXIST, "check for EEXIST");
 }
 
