@@ -10226,7 +10226,7 @@ S_opt_scalarhv(pTHX_ OP *rep_op) {
     rep_op->op_flags|=(OPf_REF | OPf_MOD);
     unop->op_sibling = rep_op->op_sibling;
     rep_op->op_sibling = NULL;
-    /* unop->op_targ = pad_alloc(OP_BOOLKEYS, SVs_PADTMP); */
+    unop->op_targ = pad_alloc(OP_BOOLKEYS, SVs_PADTMP);
     if (rep_op->op_type == OP_PADHV) { 
         rep_op->op_flags &= ~OPf_WANT_SCALAR;
         rep_op->op_flags |= OPf_WANT_LIST;
@@ -10570,12 +10570,14 @@ Perl_rpeep(pTHX_ register OP *o)
                         }
                     }            
                 }
-                if ((lop->op_flags & OPf_WANT) == OPf_WANT_VOID) {
-                    if (fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV) 
+                if (  (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
+                      || o->op_type == OP_AND  )
+                   && (  fop->op_type == OP_PADHV
+                      || fop->op_type == OP_RV2HV))
                         cLOGOP->op_first = opt_scalarhv(fop);
-                    if (sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)) 
+                if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
+                   && sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV))
                         cLOGOP->op_first->op_sibling = opt_scalarhv(sop);
-                }                                        
             }                  
             
 	    

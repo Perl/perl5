@@ -5722,6 +5722,7 @@ PP(pp_boolkeys)
 {
     dVAR;
     dSP;
+    dTARGET;
     HV * const hv = (HV*)TOPs;
     
     if (SvTYPE(hv) != SVt_PVHV) RETSETNO;
@@ -5734,7 +5735,8 @@ PP(pp_boolkeys)
         }	    
     }
 
-    SETs(boolSV(HvUSEDKEYS(hv) != 0));
+    if (HvUSEDKEYS(hv) != 0) RETSETYES;
+    else SETi(0); /* for $ret = %hash && foo() */
     RETURN;
 }
 
