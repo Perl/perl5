@@ -3952,11 +3952,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		   | (L* ( LVT | ( V | LV ) V*) T*)
 
 	       The last two terms can be combined like this:
-		   L* ( L
-		        | (( LVT | ( V | LV ) V*) T*))
-
-	       And refactored into this:
-		   L* (L | LVT T* | V  V* T* | LV  V* T*)
+		   L* ( L | (( LVT | ( V | LV ) V*) T*))
 
 	       That means that if we have seen any L's at all we can quit
 	       there, but if the next character is an LVT, a V, or an LV we
