@@ -3067,7 +3067,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
          * inversion list, or create one for it */
 
         if (swash_hv) {
-	    swash_invlistsvp = hv_fetchs(swash_hv, "I", FALSE);
+	    swash_invlistsvp = hv_fetchs(swash_hv, "V", FALSE);
 	    if (swash_invlistsvp) {
 		swash_invlist = *swash_invlistsvp;
 		invlist_in_swash_is_valid = TRUE;
@@ -3103,7 +3103,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
          * be that there was an inversion list in the swash which didn't get
          * touched; otherwise save the one computed one */
 	if (! invlist_in_swash_is_valid) {
-	    if (! hv_stores(MUTABLE_HV(SvRV(retval)), "INVLIST", swash_invlist))
+	    if (! hv_stores(MUTABLE_HV(SvRV(retval)), "V", swash_invlist))
             {
 		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
 	    }
@@ -3405,7 +3405,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     U8 *l, *lend, *x, *xend, *s, *send;
     STRLEN lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
-    SV** const invlistsvp = hv_fetchs(hv, "INVLIST", FALSE);
+    SV** const invlistsvp = hv_fetchs(hv, "V", FALSE);
 
     SV** listsvp = NULL; /* The string containing the main body of the table */
     SV** extssvp = NULL;
@@ -4150,7 +4150,7 @@ Perl__get_swash_invlist(pTHX_ SV* const swash)
         return NULL;
     }
 
-    ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "INVLIST", FALSE);
+    ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "V", FALSE);
 
     if (! ptr) {
         return NULL;
