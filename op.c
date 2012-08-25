@@ -10524,6 +10524,7 @@ Perl_rpeep(pTHX_ register OP *o)
         {
             OP *fop;
             OP *sop;
+            bool fopishv, sopishv;
             
         case OP_NOT:
             fop = cUNOP->op_first;
@@ -10545,10 +10546,16 @@ Perl_rpeep(pTHX_ register OP *o)
           
           stitch_keys:	    
 	    o->op_opt = 1;
-            if ((fop->op_type == OP_PADHV || fop->op_type == OP_RV2HV)
-                || ( sop && 
-                     (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV)
-                    )
+#define HV_OR_SCALARHV(op)                                   \
+    (  (op)->op_type == OP_PADHV || (op)->op_type == OP_RV2HV \
+    || (  (op)->op_type == OP_SCALAR && (op)->op_flags & OPf_KIDS \
+       && (  cUNOPx(op)->op_first->op_type == OP_PADHV          \
+          || cUNOPx(op)->op_first->op_type == OP_RV2HV)))        \
+
+            fopishv = HV_OR_SCALARHV(fop);
+            sopishv = sop && HV_OR_SCALARHV(sop);
+#undef HV_OR_SCALARHV
+            if (fopishv || sopishv
             ){	
                 OP * nop = o;
                 OP * lop = o;
@@ -10572,11 +10579,10 @@ Perl_rpeep(pTHX_ register OP *o)
                 }
                 if (  (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
                       || o->op_type == OP_AND  )
-                   && (  fop->op_type == OP_PADHV
-                      || fop->op_type == OP_RV2HV))
+                   && fopishv)
                         cLOGOP->op_first = opt_scalarhv(fop);
                 if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
-                   && sop && (sop->op_type == OP_PADHV || sop->op_type == OP_RV2HV))
+                   && sopishv)
                         cLOGOP->op_first->op_sibling = opt_scalarhv(sop);
             }                  
             
