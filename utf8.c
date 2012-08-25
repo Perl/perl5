@@ -1027,7 +1027,8 @@ Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
     uv &= UTF_START_MASK(expectlen);
 
     /* Now, loop through the remaining bytes, accumulating each into the
-     * working total as we go */
+     * working total as we go.  (I khw tried unrolling the loop for up to 4
+     * bytes, but there was no performance improvement) */
     for (++s; s < send; s++) {
 	uv = UTF8_ACCUMULATE(uv, *s);
     }
