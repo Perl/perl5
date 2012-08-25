@@ -943,6 +943,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		if (o->op_private & OPpLVAL_DEFER)
 		    sv_catpv(tmpsv, ",LVAL_DEFER");
 	    }
+	    else if ((optype == OP_RV2HV || optype == OP_PADHV)
+		  && o->op_private & OpMAYBE_TRUEBOOL) {
+		sv_catpvs(tmpsv, ",OpMAYBE_TRUEBOOL");
+	    }
 	    else {
 		if (o->op_private & HINT_STRICT_REFS)
 		    sv_catpv(tmpsv, ",STRICT_REFS");

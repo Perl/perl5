@@ -131,6 +131,9 @@ PP(pp_padhv)
     if (gimme == G_ARRAY) {
 	RETURNOP(Perl_do_kv(aTHX));
     }
+    else if (PL_op->op_private & OpMAYBE_TRUEBOOL
+	  && block_gimme() == G_VOID)
+	SETs(boolSV(HvUSEDKEYS(TARG)));
     else if (gimme == G_SCALAR) {
 	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
 	SETs(sv);

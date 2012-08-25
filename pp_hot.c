@@ -873,6 +873,9 @@ PP(pp_rv2av)
 	    *PL_stack_sp = sv;
 	    return Perl_do_kv(aTHX);
 	}
+	else if (PL_op->op_private & OpMAYBE_TRUEBOOL
+	      && block_gimme() == G_VOID)
+	    SETs(boolSV(HvUSEDKEYS(sv)));
 	else if (gimme == G_SCALAR) {
 	    dTARGET;
 	    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));

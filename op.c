@@ -10580,6 +10580,11 @@ Perl_rpeep(pTHX_ register OP *o)
                       || o->op_type == OP_AND  )
                    && fopishv)
                         cLOGOP->op_first = opt_scalarhv(fop);
+                else if (!(lop->op_flags & OPf_WANT)) {
+                    if (fop->op_type == OP_SCALAR)
+                        fop = cUNOPx(fop)->op_first;
+                    fop->op_private |= OpMAYBE_TRUEBOOL;
+                }
                 if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
                    && sopishv)
                         cLOGOP->op_first->op_sibling = opt_scalarhv(sop);

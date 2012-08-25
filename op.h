@@ -221,6 +221,9 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_RV2[AGH]V, OP_PAD[AH]V, OP_[AH]ELEM, OP_[AH]SLICE OP_AV2ARYLEN,
      OP_R?KEYS, OP_SUBSTR, OP_POS, OP_VEC */
 #define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
+  /* OP_RV2HV and OP_PADHV */
+#define OpMAYBE_TRUEBOOL	64	/* %hash in (%hash || $foo) where
+					   cx is not known till run time */
 
   /* OP_SUBSTR only */
 #define OPpSUBSTR_REPL_FIRST	16	/* 1st arg is replacement string */
