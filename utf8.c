@@ -3111,8 +3111,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
                 /* Here, there is no swash already.  Set up a minimal one, if
                  * we are going to return a swash */
                 if ((int) _invlist_len(invlist) > invlist_swash_boundary) {
-		swash_hv = newHV();
-		retval = newRV_inc(MUTABLE_SV(swash_hv));
+                    swash_hv = newHV();
+                    retval = newRV_inc(MUTABLE_SV(swash_hv));
                 }
 		swash_invlist = invlist;
 	    }
