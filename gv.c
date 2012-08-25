@@ -1315,6 +1315,16 @@ created if it does not already exist.  If the package does not exist and
 C<flags> is 0 (or any other setting that does not create packages) then NULL
 is returned.
 
+Flags may be one of:
+
+    GV_ADD
+    SVf_UTF8
+    GV_NOADD_NOINIT
+    GV_NOINIT
+    GV_NOEXPAND
+    GV_ADDMG
+
+The most important of which are probably GV_ADD and SVf_UTF8.
 
 =cut
 */

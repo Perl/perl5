@@ -208,7 +208,12 @@ be assigned to. The C<HePV()> macro is usually preferable for finding key
 lengths.
 
 =for apidoc Am|SV*|HeVAL|HE* he
-Returns the value slot (type C<SV*>) stored in the hash entry.
+Returns the value slot (type C<SV*>) stored in the hash entry. Can be assigned
+to.
+
+  SV *foo= HeVAL(hv);
+  HeVAL(hv)= sv;
+
 
 =for apidoc Am|U32|HeHASH|HE* he
 Returns the computed hash stored in the hash entry.
