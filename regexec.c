@@ -6718,8 +6718,6 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 				      si,
 				      1, /* binary */
 				      0, /* not from tr/// */
-				      FALSE, /* is error if can't find
-						property */
 				      invlist,
 				      &swash_init_flags);
 		(void)av_store(av, 1, sw);

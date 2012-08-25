@@ -2914,11 +2914,11 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
      * public interface, and returning a copy prevents others from doing
      * mischief on the original */
 
-    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none, FALSE, NULL, NULL));
+    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none, NULL, NULL));
 }
 
 SV*
-Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none, bool return_if_undef, SV* invlist, U8* const flags_p)
+Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none, SV* invlist, U8* const flags_p)
 {
     /* Initialize and return a swash, creating it if necessary.  It does this
      * by calling utf8_heavy.pl in the general case.
@@ -2937,8 +2937,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      * minbits is the number of bits required to represent each data element.
      *	    It is '1' for binary properties.
      * none I (khw) do not understand this one, but it is used only in tr///.
-     * return_if_undef is TRUE if the routine shouldn't croak if it can't find
-     *	    the requested property
      * invlist is an inversion list to initialize the swash with (or NULL)
      * flags_p if non-NULL is the address of various input and output flag bits
      *      to the routine, as follows:  ('I' means is input to the routine;
@@ -2946,6 +2944,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      *      meaningful on return.)
      *  _CORE_SWASH_INIT_USER_DEFINED_PROPERTY indicates if the swash
      *      came from a user-defined property.  (I O)
+     *  _CORE_SWASH_INIT_RETURN_IF_UNDEF indicates that instead of croaking
+     *      when the swash cannot be located, to simply return NULL. (I)
      *
      * Thus there are three possible inputs to find the swash: <name>,
      * <listsv>, and <invlist>.  At least one must be specified.  The result
@@ -3028,7 +3028,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    if (SvPOK(retval))
 
 		/* If caller wants to handle missing properties, let them */
-		if (return_if_undef) {
+		if (flags_p && *flags_p & _CORE_SWASH_INIT_RETURN_IF_UNDEF) {
 		    return NULL;
 		}
 		Perl_croak(aTHX_

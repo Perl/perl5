@@ -11541,7 +11541,9 @@ parseit:
 	    case 'P':
 		{
 		char *e;
-                U8 swash_init_flags = 0;
+
+                /* This routine will handle any undefined properties */
+                U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF;
 
 		if (RExC_parse >= RExC_end)
 		    vFAIL2("Empty \\%c{}", (U8)value);
@@ -11597,8 +11599,6 @@ parseit:
                     swash = _core_swash_init("utf8", name, &PL_sv_undef,
                                              1, /* binary */
                                              0, /* not tr/// */
-                                             TRUE, /* this routine will handle
-                                                      undefined properties */
                                              NULL, /* No inversion list */
                                              &swash_init_flags
                                             );
