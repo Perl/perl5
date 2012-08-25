@@ -10554,7 +10554,6 @@ Perl_rpeep(pTHX_ register OP *o)
 
             fopishv = HV_OR_SCALARHV(fop);
             sopishv = sop && HV_OR_SCALARHV(sop);
-#undef HV_OR_SCALARHV
             if (fopishv || sopishv
             ){	
                 OP * nop = o;
@@ -10590,12 +10589,17 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 	}    
 	
+	case OP_COND_EXPR:
+	    if (HV_OR_SCALARHV(cLOGOP->op_first))
+		cLOGOP->op_first = opt_scalarhv(cLOGOP->op_first);
+#undef HV_OR_SCALARHV
+	    /* GERONIMO! */
+
 	case OP_MAPWHILE:
 	case OP_GREPWHILE:
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
 	case OP_DORASSIGN:
-	case OP_COND_EXPR:
 	case OP_RANGE:
 	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
