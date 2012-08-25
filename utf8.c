@@ -2433,7 +2433,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     uvuni_to_utf8(tmpbuf, uv1);
 
     if (!*swashp) /* load on-demand */
-         *swashp = swash_init("utf8", normal, &PL_sv_undef, 4, 0);
+         *swashp = _core_swash_init("utf8", normal, &PL_sv_undef, 4, 0, NULL, NULL);
 
     if (special) {
          /* It might be "special" (sometimes, but not always,
