@@ -5722,19 +5722,19 @@ PP(pp_boolkeys)
 {
     dVAR;
     dSP;
-    HV * const hv = (HV*)POPs;
+    HV * const hv = (HV*)TOPs;
     
-    if (SvTYPE(hv) != SVt_PVHV) { XPUSHs(&PL_sv_no); RETURN; }
+    if (SvTYPE(hv) != SVt_PVHV) RETSETNO;
 
     if (SvRMAGICAL(hv)) {
 	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);
 	if (mg) {
-            XPUSHs(magic_scalarpack(hv, mg));
+            SETs(magic_scalarpack(hv, mg));
 	    RETURN;
         }	    
     }
 
-    XPUSHs(boolSV(HvUSEDKEYS(hv) != 0));
+    SETs(boolSV(HvUSEDKEYS(hv) != 0));
     RETURN;
 }
 
