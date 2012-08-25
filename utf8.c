@@ -1957,8 +1957,10 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * validating routine */
     if (!is_utf8_char_buf(p, p + UTF8SKIP(p)))
 	return FALSE;
-    if (!*swash)
-	*swash = swash_init("utf8", swashname, &PL_sv_undef, 1, 0);
+    if (!*swash) {
+        U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
+        *swash = _core_swash_init("utf8", swashname, &PL_sv_undef, 1, 0, NULL, &flags);
+    }
     return swash_fetch(*swash, p, TRUE) != 0;
 }
 
@@ -2922,7 +2924,11 @@ SV*
 Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none, SV* invlist, U8* const flags_p)
 {
     /* Initialize and return a swash, creating it if necessary.  It does this
-     * by calling utf8_heavy.pl in the general case.
+     * by calling utf8_heavy.pl in the general case.  The returned value may be
+     * the swash's inversion list instead if the input parameters allow it.
+     * Which is returned should be immaterial to callers, as the only
+     * operations permitted on a swash, swash_fetch() and
+     * _get_swash_invlist(), handle both these transparently.
      *
      * This interface should only be used by functions that won't destroy or
      * adversely change the swash, as doing so affects all other uses of the
@@ -2947,6 +2953,10 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      *      came from a user-defined property.  (I O)
      *  _CORE_SWASH_INIT_RETURN_IF_UNDEF indicates that instead of croaking
      *      when the swash cannot be located, to simply return NULL. (I)
+     *  _CORE_SWASH_INIT_ACCEPT_INVLIST indicates that the caller will accept a
+     *      return of an inversion list instead of a swash hash if this routine
+     *      thinks that would result in faster execution of swash_fetch() later
+     *      on. (I)
      *
      * Thus there are three possible inputs to find the swash: <name>,
      * <listsv>, and <invlist>.  At least one must be specified.  The result
@@ -2958,6 +2968,11 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
     dVAR;
     SV* retval = &PL_sv_undef;
     HV* swash_hv = NULL;
+    const int invlist_swash_boundary =
+        (flags_p && *flags_p & _CORE_SWASH_INIT_ACCEPT_INVLIST)
+        ? 512    /* Based on some benchmarking, but not extensive, see commit
+                    message */
+        : -1;   /* Never return just an inversion list */
 
     assert(listsv != &PL_sv_undef || strNE(name, "") || invlist);
     assert(! invlist || minbits == 1);
@@ -3093,9 +3108,12 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    }
 	    else {
 
-		/* Here, there is no swash already.  Set up a minimal one */
+                /* Here, there is no swash already.  Set up a minimal one, if
+                 * we are going to return a swash */
+                if ((int) _invlist_len(invlist) > invlist_swash_boundary) {
 		swash_hv = newHV();
 		retval = newRV_inc(MUTABLE_SV(swash_hv));
+                }
 		swash_invlist = invlist;
 	    }
 	}
@@ -3103,12 +3121,19 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
         /* Here, we have computed the union of all the passed-in data.  It may
          * be that there was an inversion list in the swash which didn't get
          * touched; otherwise save the one computed one */
-	if (! invlist_in_swash_is_valid) {
+	if (! invlist_in_swash_is_valid
+            && (int) _invlist_len(swash_invlist) > invlist_swash_boundary)
+        {
 	    if (! hv_stores(MUTABLE_HV(SvRV(retval)), "V", swash_invlist))
             {
 		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
 	    }
 	}
+
+        if ((int) _invlist_len(swash_invlist) <= invlist_swash_boundary) {
+	    SvREFCNT_dec(retval);
+            retval = newRV_inc(swash_invlist);
+        }
     }
 
     return retval;
@@ -3173,6 +3198,15 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     const UV c = NATIVE_TO_ASCII(*ptr);
 
     PERL_ARGS_ASSERT_SWASH_FETCH;
+
+    /* If it really isn't a hash, it isn't really swash; must be an inversion
+     * list */
+    if (SvTYPE(hv) != SVt_PVHV) {
+        return _invlist_contains_cp((SV*)hv,
+                                    (do_utf8)
+                                     ? valid_utf8_to_uvchr(ptr, NULL)
+                                     : c);
+    }
 
     /* Convert to utf8 if not already */
     if (!do_utf8 && !UNI_IS_INVARIANT(c)) {
@@ -4147,12 +4181,17 @@ Perl__get_swash_invlist(pTHX_ SV* const swash)
 
     PERL_ARGS_ASSERT__GET_SWASH_INVLIST;
 
-    if (! SvROK(swash) || SvTYPE(SvRV(swash)) != SVt_PVHV) {
+    if (! SvROK(swash)) {
         return NULL;
     }
 
-    ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "V", FALSE);
+    /* If it really isn't a hash, it isn't really swash; must be an inversion
+     * list */
+    if (SvTYPE(SvRV(swash)) != SVt_PVHV) {
+        return SvRV(swash);
+    }
 
+    ptr = hv_fetchs(MUTABLE_HV(SvRV(swash)), "V", FALSE);
     if (! ptr) {
         return NULL;
     }

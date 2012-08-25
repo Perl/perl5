@@ -6689,7 +6689,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 	    SV * const rv = MUTABLE_SV(data->data[n]);
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
-	    U8 swash_init_flags = 0;
+	    U8 swash_init_flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
 	
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
