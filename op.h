@@ -224,7 +224,7 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_RV2HV and OP_PADHV */
 #define OPpTRUEBOOL		32	/* %hash in (%hash || $foo) in
 					   void context */
-#define OpMAYBE_TRUEBOOL	64	/* %hash in (%hash || $foo) where
+#define OPpMAYBE_TRUEBOOL	64	/* %hash in (%hash || $foo) where
 					   cx is not known till run time */
 
   /* OP_SUBSTR only */

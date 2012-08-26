@@ -10555,7 +10555,7 @@ Perl_rpeep(pTHX_ register OP *o)
                       || o->op_type == OP_AND  )
                         fop->op_private |= OPpTRUEBOOL;
                     else if (!(lop->op_flags & OPf_WANT))
-                        fop->op_private |= OpMAYBE_TRUEBOOL;
+                        fop->op_private |= OPpMAYBE_TRUEBOOL;
                 }
                 if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
                    && sop)
@@ -10567,7 +10567,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	
 	case OP_COND_EXPR:
 	    if ((fop = HV_OR_SCALARHV(cLOGOP->op_first)))
-		fop->op_private |= OpMAYBE_TRUEBOOL;
+		fop->op_private |= OPpMAYBE_TRUEBOOL;
 #undef HV_OR_SCALARHV
 	    /* GERONIMO! */
 	}    

@@ -132,7 +132,7 @@ PP(pp_padhv)
 	RETURNOP(Perl_do_kv(aTHX));
     }
     else if ((PL_op->op_private & OPpTRUEBOOL
-	  || (  PL_op->op_private & OpMAYBE_TRUEBOOL
+	  || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
 	     && block_gimme() == G_VOID  ))
 	  && (!SvRMAGICAL(TARG) || !mg_find(TARG, PERL_MAGIC_tied)))
 	SETs(HvUSEDKEYS(TARG) ? &PL_sv_yes : sv_2mortal(newSViv(0)));
