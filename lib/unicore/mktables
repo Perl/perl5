@@ -13487,9 +13487,10 @@ sub compile_perl() {
 
     $perl_xidc &= $Word;
 
-    # These two tables are for the 'extended' grapheme cluster, which came in
-    # 5.1; create empty ones if not already present.  The non-extended
-    # definition differs from the extended (see
+    # These two tables are for matching \X, which is based on the 'extended'
+    # grapheme cluster, which came in 5.1; create empty ones if not already
+    # present.  The straight 'grapheme cluster' (non-extended) is used prior
+    # to 5.1, and differs from the extended (see
     # http://www.unicode.org/reports/tr29/) only by these two tables, so we
     # get the older definition automatically when they are empty.
     my $gcb = property_ref('Grapheme_Cluster_Break');
@@ -13503,31 +13504,16 @@ sub compile_perl() {
         push @tables_that_may_be_empty, $perl_prepend->complete_name;
     }
 
+    # All the tables with _X_ in their names are used in defining \X handling,
+    # and are based on the Unicode GCB property.  Basically, \X matches:
+    #   CR-LF
+    #   | Prepend* Begin Extend*
+    #   | .
+    # Begin is:           ( Hangul-syllable | ! Control )
+    # Extend is:          ( Grapheme_Extend | Spacing_Mark )
+    # Control is:         [ GCB_Control CR LF ]
+    # Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
 
-    # These are used in Unicode's definition of \X
-    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
-                                       Fate => $INTERNAL_ONLY);
-    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
-                                        Fate => $INTERNAL_ONLY);
-
-    # In the line below, two negatives means: yes hangul
-    $begin += ~ property_ref('Hangul_Syllable_Type')
-                                                ->table('Not_Applicable')
-            + ~ ($gcb->table('Control')
-                + $gcb->table('CR')
-                + $gcb->table('LF'));
-    $begin->add_comment('For use in \X; matches: Hangul_Syllable | ! Control');
-
-    $extend += $gcb->table('Extend');
-    if (defined (my $sm = $gcb->table('SpacingMark'))) {
-        $extend += $sm;
-    }
-    $extend->add_comment('For use in \X; matches: Extend | SpacingMark');
-
-    # More GCB.  Populate a combined hangul syllables table
-    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V',
-                                          Perl_Extension => 1,
-                                          Fate => $INTERNAL_ONLY);
     foreach my $gcb_name (qw{ L V T LV LVT }) {
 
         # The perl internal extension's name is the gcb table name prepended
@@ -13548,8 +13534,34 @@ sub compile_perl() {
                             Fate => $INTERNAL_ONLY,
                             Initialize => property_ref('HST')->table('NA'),
                             );
+
+    # More GCB.  Populate a combined hangul syllables table
+    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V',
+                                          Perl_Extension => 1,
+                                          Fate => $INTERNAL_ONLY);
     $lv_lvt_v += $gcb->table('LV') + $gcb->table('LVT') + $gcb->table('V');
     $lv_lvt_v->add_comment('For use in \X; matches: gcb=LV | gcb=LVT | gcb=V');
+
+    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
+                                       Fate => $INTERNAL_ONLY);
+    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
+                                        Fate => $INTERNAL_ONLY);
+
+    # In the line below, two negatives means: yes hangul
+    $begin += ~ property_ref('Hangul_Syllable_Type')
+                                                ->table('Not_Applicable')
+                + ~ ($gcb->table('Control')
+                + $gcb->table('CR')
+                + $gcb->table('LF'));
+    $begin->add_comment('For use in \X; matches: Hangul_Syllable | ! Control');
+
+    $extend += $gcb->table('Extend');
+    if (defined (my $sm = $gcb->table('SpacingMark'))) {
+        $extend += $sm;
+    }
+    $extend->add_comment('For use in \X; matches: Extend | SpacingMark');
+
+    # End of GCB \X processing
 
     my @composition = ('Name', 'Unicode_1_Name', 'Name_Alias');
 
