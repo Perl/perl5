@@ -780,34 +780,8 @@ PP(pp_rv2av)
 	else if (PL_op->op_flags & OPf_MOD
 		&& PL_op->op_private & OPpLVAL_INTRO)
 	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
-	if (PL_op->op_flags & OPf_REF) {
-	    SETs(sv);
-	    RETURN;
-	}
-	else if (PL_op->op_private & OPpMAYBE_LVSUB) {
-	  const I32 flags = is_lvalue_sub();
-	  if (flags && !(flags & OPpENTERSUB_INARGS)) {
-	    if (gimme != G_ARRAY)
-		goto croak_cant_return;
-	    SETs(sv);
-	    RETURN;
-	  }
-	}
     }
-    else {
-	if (SvTYPE(sv) == type) {
-	    if (PL_op->op_flags & OPf_REF) {
-		SETs(sv);
-		RETURN;
-	    }
-	    else if (LVRET) {
-		if (gimme != G_ARRAY)
-		    goto croak_cant_return;
-		SETs(sv);
-		RETURN;
-	    }
-	}
-	else {
+    else if (SvTYPE(sv) != type) {
 	    GV *gv;
 	
 	    if (!isGV_with_GP(sv)) {
@@ -822,11 +796,12 @@ PP(pp_rv2av)
 	    sv = is_pp_rv2av ? MUTABLE_SV(GvAVn(gv)) : MUTABLE_SV(GvHVn(gv));
 	    if (PL_op->op_private & OPpLVAL_INTRO)
 		sv = is_pp_rv2av ? MUTABLE_SV(save_ary(gv)) : MUTABLE_SV(save_hash(gv));
-	    if (PL_op->op_flags & OPf_REF) {
+    }
+    if (PL_op->op_flags & OPf_REF) {
 		SETs(sv);
 		RETURN;
-	    }
-	    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+    }
+    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
 	      const I32 flags = is_lvalue_sub();
 	      if (flags && !(flags & OPpENTERSUB_INARGS)) {
 		if (gimme != G_ARRAY)
@@ -834,8 +809,6 @@ PP(pp_rv2av)
 		SETs(sv);
 		RETURN;
 	      }
-	    }
-	}
     }
 
     if (is_pp_rv2av) {
