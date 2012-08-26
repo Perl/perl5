@@ -1426,7 +1426,6 @@
 #define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
 #define op_integerize(a)	S_op_integerize(aTHX_ a)
 #define op_std_init(a)		S_op_std_init(aTHX_ a)
-#define opt_scalarhv(a)		S_opt_scalarhv(aTHX_ a)
 #define pmtrans(a,b,c)		S_pmtrans(aTHX_ a,b,c)
 #define process_special_blocks(a,b,c)	S_process_special_blocks(aTHX_ a,b,c)
 #define ref_array_or_hash(a)	S_ref_array_or_hash(aTHX_ a)

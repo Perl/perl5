@@ -43,6 +43,7 @@
 #define Perl_pp_values Perl_do_kv
 #define Perl_pp_keys Perl_do_kv
 #define Perl_pp_rv2hv Perl_pp_rv2av
+#define Perl_pp_boolkeys Perl_unimplemented_op
 #define Perl_pp_pop Perl_pp_shift
 #define Perl_pp_mapstart Perl_unimplemented_op
 #define Perl_pp_dor Perl_pp_defined
@@ -1069,7 +1070,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_rv2hv,	/* implemented by Perl_pp_rv2av */
 	Perl_pp_helem,
 	Perl_pp_hslice,
-	Perl_pp_boolkeys,
+	Perl_pp_boolkeys,	/* implemented by Perl_unimplemented_op */
 	Perl_pp_unpack,
 	Perl_pp_pack,
 	Perl_pp_split,

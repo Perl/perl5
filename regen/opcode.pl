@@ -67,7 +67,8 @@ my %alias;
 # Format is "this function" => "does these op names"
 my @raw_alias = (
 		 Perl_do_kv => [qw( keys values )],
-		 Perl_unimplemented_op => [qw(padany mapstart custom)],
+		 Perl_unimplemented_op => [qw(padany mapstart custom
+					      boolkeys)],
 		 # All the ops with a body of { return NORMAL; }
 		 Perl_pp_null => [qw(scalar regcmaybe lineseq scope)],
 

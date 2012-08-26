@@ -5894,11 +5894,6 @@ PERL_STATIC_INLINE OP*	S_op_std_init(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_OP_STD_INIT	\
 	assert(o)
 
-STATIC OP*	S_opt_scalarhv(pTHX_ OP* rep_op)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OPT_SCALARHV	\
-	assert(rep_op)
-
 STATIC OP*	S_pmtrans(pTHX_ OP* o, OP* expr, OP* repl)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

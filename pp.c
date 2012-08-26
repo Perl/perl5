@@ -131,9 +131,11 @@ PP(pp_padhv)
     if (gimme == G_ARRAY) {
 	RETURNOP(Perl_do_kv(aTHX));
     }
-    else if (PL_op->op_private & OpMAYBE_TRUEBOOL
-	  && block_gimme() == G_VOID)
-	SETs(boolSV(HvUSEDKEYS(TARG)));
+    else if ((PL_op->op_private & OPpTRUEBOOL
+	  || (  PL_op->op_private & OpMAYBE_TRUEBOOL
+	     && block_gimme() == G_VOID  ))
+	  && (!SvRMAGICAL(TARG) || !mg_find(TARG, PERL_MAGIC_tied)))
+	SETs(HvUSEDKEYS(TARG) ? &PL_sv_yes : sv_2mortal(newSViv(0)));
     else if (gimme == G_SCALAR) {
 	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
 	SETs(sv);
@@ -281,8 +283,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
     }
     if (!SvOK(sv)) {
 	if (
-	  PL_op->op_flags & OPf_REF &&
-	  PL_op->op_next->op_type != OP_BOOLKEYS
+	  PL_op->op_flags & OPf_REF
 	)
 	    Perl_die(aTHX_ PL_no_usym, what);
 	if (ckWARN(WARN_UNINITIALIZED))
@@ -5719,28 +5720,6 @@ PP(unimplemented_op)
     if(OP_IS_SOCKET(op_type))
 	DIE(aTHX_ PL_no_sock_func, name);
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
-}
-
-PP(pp_boolkeys)
-{
-    dVAR;
-    dSP;
-    dTARGET;
-    HV * const hv = (HV*)TOPs;
-    
-    if (SvTYPE(hv) != SVt_PVHV) RETSETNO;
-
-    if (SvRMAGICAL(hv)) {
-	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);
-	if (mg) {
-            SETs(magic_scalarpack(hv, mg));
-	    RETURN;
-        }	    
-    }
-
-    if (HvUSEDKEYS(hv) != 0) RETSETYES;
-    else SETi(0); /* for $ret = %hash && foo() */
-    RETURN;
 }
 
 /* For sorting out arguments passed to a &CORE:: subroutine */

@@ -10206,34 +10206,6 @@ Perl_ck_length(pTHX_ OP *o)
     return o;
 }
 
-/* caller is supposed to assign the return to the 
-   container of the rep_op var */
-STATIC OP *
-S_opt_scalarhv(pTHX_ OP *rep_op) {
-    dVAR;
-    UNOP *unop;
-
-    PERL_ARGS_ASSERT_OPT_SCALARHV;
-
-    NewOp(1101, unop, 1, UNOP);
-    unop->op_type = (OPCODE)OP_BOOLKEYS;
-    unop->op_ppaddr = PL_ppaddr[OP_BOOLKEYS];
-    unop->op_flags = (U8)(OPf_WANT_SCALAR | OPf_KIDS );
-    unop->op_private = (U8)(1 | ((OPf_WANT_SCALAR | OPf_KIDS) >> 8));
-    unop->op_first = rep_op;
-    unop->op_next = rep_op->op_next;
-    rep_op->op_next = (OP*)unop;
-    rep_op->op_flags|=(OPf_REF | OPf_MOD);
-    unop->op_sibling = rep_op->op_sibling;
-    rep_op->op_sibling = NULL;
-    unop->op_targ = pad_alloc(OP_BOOLKEYS, SVs_PADTMP);
-    if (rep_op->op_type == OP_PADHV) { 
-        rep_op->op_flags &= ~OPf_WANT_SCALAR;
-        rep_op->op_flags |= OPf_WANT_LIST;
-    }
-    return (OP*)unop;
-}                        
-
 /* Check for in place reverse and sort assignments like "@a = reverse @a"
    and modify the optree to make them work inplace */
 
@@ -10524,7 +10496,6 @@ Perl_rpeep(pTHX_ register OP *o)
         {
             OP *fop;
             OP *sop;
-            bool fopishv, sopishv;
             
         case OP_NOT:
             fop = cUNOP->op_first;
@@ -10548,13 +10519,16 @@ Perl_rpeep(pTHX_ register OP *o)
 	    o->op_opt = 1;
 #define HV_OR_SCALARHV(op)                                   \
     (  (op)->op_type == OP_PADHV || (op)->op_type == OP_RV2HV \
-    || (  (op)->op_type == OP_SCALAR && (op)->op_flags & OPf_KIDS \
+       ? (op)                                                  \
+       : (op)->op_type == OP_SCALAR && (op)->op_flags & OPf_KIDS \
        && (  cUNOPx(op)->op_first->op_type == OP_PADHV          \
-          || cUNOPx(op)->op_first->op_type == OP_RV2HV)))        \
+          || cUNOPx(op)->op_first->op_type == OP_RV2HV)          \
+         ? cUNOPx(op)->op_first                                   \
+         : NULL)
 
-            fopishv = HV_OR_SCALARHV(fop);
-            sopishv = sop && HV_OR_SCALARHV(sop);
-            if (fopishv || sopishv
+            fop = HV_OR_SCALARHV(fop);
+            if (sop) sop = HV_OR_SCALARHV(sop);
+            if (fop || sop
             ){	
                 OP * nop = o;
                 OP * lop = o;
@@ -10576,29 +10550,27 @@ Perl_rpeep(pTHX_ register OP *o)
                         }
                     }            
                 }
-                if (  (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
+                if (fop) {
+                    if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
                       || o->op_type == OP_AND  )
-                   && fopishv)
-                        cLOGOP->op_first = opt_scalarhv(fop);
-                else if (!(lop->op_flags & OPf_WANT)) {
-                    if (fop->op_type == OP_SCALAR)
-                        fop = cUNOPx(fop)->op_first;
-                    fop->op_private |= OpMAYBE_TRUEBOOL;
+                        fop->op_private |= OPpTRUEBOOL;
+                    else if (!(lop->op_flags & OPf_WANT))
+                        fop->op_private |= OpMAYBE_TRUEBOOL;
                 }
                 if (  (lop->op_flags & OPf_WANT) == OPf_WANT_VOID
-                   && sopishv)
-                        cLOGOP->op_first->op_sibling = opt_scalarhv(sop);
+                   && sop)
+                    sop->op_private |= OPpTRUEBOOL;
             }                  
             
 	    
 	    break;
-	}    
 	
 	case OP_COND_EXPR:
-	    if (HV_OR_SCALARHV(cLOGOP->op_first))
-		cLOGOP->op_first = opt_scalarhv(cLOGOP->op_first);
+	    if ((fop = HV_OR_SCALARHV(cLOGOP->op_first)))
+		fop->op_private |= OpMAYBE_TRUEBOOL;
 #undef HV_OR_SCALARHV
 	    /* GERONIMO! */
+	}    
 
 	case OP_MAPWHILE:
 	case OP_GREPWHILE:

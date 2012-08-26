@@ -27,7 +27,6 @@ PERL_CALLCONV OP *Perl_pp_binmode(pTHX);
 PERL_CALLCONV OP *Perl_pp_bit_and(pTHX);
 PERL_CALLCONV OP *Perl_pp_bit_or(pTHX);
 PERL_CALLCONV OP *Perl_pp_bless(pTHX);
-PERL_CALLCONV OP *Perl_pp_boolkeys(pTHX);
 PERL_CALLCONV OP *Perl_pp_break(pTHX);
 PERL_CALLCONV OP *Perl_pp_caller(pTHX);
 PERL_CALLCONV OP *Perl_pp_chdir(pTHX);

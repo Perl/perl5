@@ -222,6 +222,8 @@ Deprecated.  Use C<GIMME_V> instead.
      OP_R?KEYS, OP_SUBSTR, OP_POS, OP_VEC */
 #define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
   /* OP_RV2HV and OP_PADHV */
+#define OPpTRUEBOOL		32	/* %hash in (%hash || $foo) in
+					   void context */
 #define OpMAYBE_TRUEBOOL	64	/* %hash in (%hash || $foo) where
 					   cx is not known till run time */
 
