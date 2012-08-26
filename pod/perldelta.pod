@@ -96,7 +96,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Socket> has been upgraded from version 2.004 to 2.006.
+C<unpack_sockaddr_in()> and C<unpack_sockaddr_in6()> now return just the IP
+address in scalar context, and C<inet_ntop()> now guards against incorrect
+length scalars being passed in.
 
 =back
 

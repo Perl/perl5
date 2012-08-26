@@ -3,7 +3,7 @@ package Socket;
 use strict;
 { use 5.006001; }
 
-our $VERSION = '2.004';
+our $VERSION = '2.006';
 
 =head1 NAME
 
@@ -184,6 +184,8 @@ opaque string representing the IP address (you can use inet_ntoa() to convert
 the address to the four-dotted numeric format). Will croak if the structure
 does not represent an C<AF_INET> address.
 
+In scalar context will return just the IP address.
+
 =head2 $sockaddr = sockaddr_in $port, $ip_address
 
 =head2 ($port, $ip_address) = sockaddr_in $sockaddr
@@ -210,6 +212,8 @@ number, an opaque string representing the IPv6 address, the scope ID, and the
 flow label. (You can use inet_ntop() to convert the address to the usual
 string format). Will croak if the structure does not represent an C<AF_INET6>
 address.
+
+In scalar context will return just the IP address.
 
 =head2 $sockaddr = sockaddr_in6 $port, $ip6_address, [$scope_id, [$flowinfo]]
 

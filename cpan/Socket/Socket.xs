@@ -179,6 +179,9 @@ static void *my_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 kl,
 #ifndef mPUSHp
 # define mPUSHp(p,l) sv_setpvn_mg(PUSHs(sv_newmortal()), (p), (l))
 #endif /* !mPUSHp */
+#ifndef mPUSHs
+# define mPUSHs(s) PUSHs(sv_2mortal(s))
+#endif /* !mPUSHs */
 
 #ifndef CvCONST_on
 # undef newCONSTSUB
@@ -786,8 +789,7 @@ unpack_sockaddr_in(sin_sv)
 	{
 	STRLEN sockaddrlen;
 	struct sockaddr_in addr;
-	unsigned short	port;
-	struct in_addr	ip_address;
+	SV *ip_address_sv;
 	char *	sin = SvPVbyte(sin_sv,sockaddrlen);
 	if (sockaddrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
@@ -798,12 +800,16 @@ unpack_sockaddr_in(sin_sv)
 	    croak("Bad address family for %s, got %d, should be %d",
 		  "Socket::unpack_sockaddr_in", addr.sin_family, AF_INET);
 	}
-	port = ntohs(addr.sin_port);
-	ip_address = addr.sin_addr;
+	ip_address_sv = newSVpvn((char *)&addr.sin_addr, sizeof(addr.sin_addr));
 
-	EXTEND(SP, 2);
-	PUSHs(sv_2mortal(newSViv((IV) port)));
-	PUSHs(sv_2mortal(newSVpvn((char *)&ip_address, sizeof(ip_address))));
+	if(GIMME_V == G_ARRAY) {
+	    EXTEND(SP, 2);
+	    mPUSHi(ntohs(addr.sin_port));
+	    mPUSHs(ip_address_sv);
+	}
+	else {
+	    mPUSHs(ip_address_sv);
+	}
 	}
 
 void
@@ -854,6 +860,7 @@ unpack_sockaddr_in6(sin6_sv)
 	STRLEN addrlen;
 	struct sockaddr_in6 sin6;
 	char * addrbytes = SvPVbyte(sin6_sv, addrlen);
+	SV *ip_address_sv;
 	if (addrlen != sizeof(sin6))
 		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
 		      "Socket::unpack_sockaddr_in6", (UV)addrlen, (UV)sizeof(sin6));
@@ -861,15 +868,22 @@ unpack_sockaddr_in6(sin6_sv)
 	if (sin6.sin6_family != AF_INET6)
 		croak("Bad address family for %s, got %d, should be %d",
 		      "Socket::unpack_sockaddr_in6", sin6.sin6_family, AF_INET6);
-	EXTEND(SP, 4);
-	mPUSHi(ntohs(sin6.sin6_port));
-	mPUSHp((char *)&sin6.sin6_addr, sizeof(sin6.sin6_addr));
+	ip_address_sv = newSVpvn((char *)&sin6.sin6_addr, sizeof(sin6.sin6_addr));
+
+	if(GIMME_V == G_ARRAY) {
+	    EXTEND(SP, 4);
+	    mPUSHi(ntohs(sin6.sin6_port));
+	    mPUSHs(ip_address_sv);
 #  ifdef HAS_SIN6_SCOPE_ID
-	mPUSHi(sin6.sin6_scope_id);
+	    mPUSHi(sin6.sin6_scope_id);
 #  else
-	mPUSHi(0);
+	    mPUSHi(0);
 #  endif
-	mPUSHi(ntohl(sin6.sin6_flowinfo));
+	    mPUSHi(ntohl(sin6.sin6_flowinfo));
+	}
+	else {
+	    mPUSHs(ip_address_sv);
+	}
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
 #endif
@@ -898,11 +912,20 @@ inet_ntop(af, ip_address_sv)
 
 	struct_size = sizeof(addr);
 
-	if (af != AF_INET
+	switch(af) {
+	  case AF_INET:
+	    if(addrlen != 4)
+		croak("Bad address length for Socket::inet_ntop on AF_INET;"
+		      " got %d, should be 4");
+	    break;
 #ifdef AF_INET6
-	    && af != AF_INET6
+	  case AF_INET6:
+	    if(addrlen != 16)
+		croak("Bad address length for Socket::inet_ntop on AF_INET6;"
+		      " got %d, should be 16");
+	    break;
 #endif
-	   ) {
+	  default:
 		croak("Bad address family for %s, got %d, should be"
 #ifdef AF_INET6
 		      " either AF_INET or AF_INET6",
@@ -1026,7 +1049,7 @@ pack_ip_mreq_source(multiaddr, source, interface=&PL_sv_undef)
 	SV *	interface
 	CODE:
 	{
-#if defined(HAS_IP_MREQ) && defined (IP_ADD_SOURCE_MEMBERSHIP)
+#if defined(HAS_IP_MREQ_SOURCE) && defined (IP_ADD_SOURCE_MEMBERSHIP)
 	struct ip_mreq_source mreq;
 	char * multiaddrbytes;
 	char * sourcebytes;
@@ -1069,7 +1092,7 @@ unpack_ip_mreq_source(mreq_sv)
 	SV * mreq_sv
 	PPCODE:
 	{
-#if defined(HAS_IP_MREQ) && defined (IP_ADD_SOURCE_MEMBERSHIP)
+#if defined(HAS_IP_MREQ_SOURCE) && defined (IP_ADD_SOURCE_MEMBERSHIP)
 	struct ip_mreq_source mreq;
 	STRLEN mreqlen;
 	char * mreqbytes = SvPVbyte(mreq_sv, mreqlen);

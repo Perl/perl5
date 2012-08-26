@@ -108,11 +108,17 @@ check_for(
     main    => "struct sockaddr_in6 sin6; sin6.sin6_scope_id = 0;"
 );
 
-# TODO: Needs adding to perl5 core before importing dual-life again
 check_for(
     confkey => "d_ip_mreq",
     define  => "HAS_IP_MREQ",
     main    => "struct ip_mreq mreq; mreq.imr_multiaddr.s_addr = INADDR_ANY;"
+);
+
+# TODO: Needs adding to perl5 core before importing dual-life again
+check_for(
+    confkey => "d_ip_mreq_source",
+    define  => "HAS_IP_MREQ_SOURCE",
+    main    => "struct ip_mreq_source mreq; mreq.imr_multiaddr.s_addr = INADDR_ANY;"
 );
 
 check_for(
