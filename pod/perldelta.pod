@@ -64,7 +64,10 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Speed up in regular expression matching against Unicode properties.  The
+largest gain is for C<\X>, the Unicode "extended grapheme cluster".  The
+gain for it is about 35% - 40%.  Bracketed character classes, e.g.,
+C<[0-9\x{100}]> containing code points above 255 are also now faster.
 
 =back
 
