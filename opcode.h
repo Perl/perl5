@@ -43,7 +43,6 @@
 #define Perl_pp_values Perl_do_kv
 #define Perl_pp_keys Perl_do_kv
 #define Perl_pp_rv2hv Perl_pp_rv2av
-#define Perl_pp_boolkeys Perl_unimplemented_op
 #define Perl_pp_pop Perl_pp_shift
 #define Perl_pp_mapstart Perl_unimplemented_op
 #define Perl_pp_dor Perl_pp_defined
@@ -292,7 +291,6 @@ EXTCONST char* const PL_op_name[] = {
 	"rv2hv",
 	"helem",
 	"hslice",
-	"boolkeys",
 	"unpack",
 	"pack",
 	"split",
@@ -674,7 +672,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"hash dereference",
 	"hash element",
 	"hash slice",
-	"boolkeys",
 	"unpack",
 	"pack",
 	"split",
@@ -1070,7 +1067,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_rv2hv,	/* implemented by Perl_pp_rv2av */
 	Perl_pp_helem,
 	Perl_pp_hslice,
-	Perl_pp_boolkeys,	/* implemented by Perl_unimplemented_op */
 	Perl_pp_unpack,
 	Perl_pp_pack,
 	Perl_pp_split,
@@ -1462,7 +1458,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_rvconst,	/* rv2hv */
 	Perl_ck_null,		/* helem */
 	Perl_ck_null,		/* hslice */
-	Perl_ck_fun,		/* boolkeys */
 	Perl_ck_fun,		/* unpack */
 	Perl_ck_fun,		/* pack */
 	Perl_ck_split,		/* split */
@@ -1848,7 +1843,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000148,	/* rv2hv */
 	0x00014204,	/* helem */
 	0x00024401,	/* hslice */
-	0x00004b00,	/* boolkeys */
 	0x00091480,	/* unpack */
 	0x0002140f,	/* pack */
 	0x00111408,	/* split */
