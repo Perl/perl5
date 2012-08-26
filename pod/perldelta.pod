@@ -27,6 +27,17 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Latest Unicode 6.2 beta is included
+
+This is supposed to be the final data for 6.2, unless glitches are
+found.  The earlier experimental 6.2 beta data has been reverted, and
+this used instead.  Not all the changes that were proposed for 6.2 and
+that were in the earlier beta versions are actually going into 6.2.  In
+particular, there are no changes from 6.1 in the General_Category of any
+characters.  6.2 does revise the C<\X> handling for the REGIONAL
+INDICATOR characters that were added in Unicode 6.0.  Perl now for the
+first time fully handles this revision.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
