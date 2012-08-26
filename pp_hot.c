@@ -777,13 +777,13 @@ PP(pp_rv2av)
 	if (SvTYPE(sv) != type)
 	    /* diag_listed_as: Not an ARRAY reference */
 	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
+	else if (PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO)
+	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
 	if (PL_op->op_flags & OPf_REF) {
 	    SETs(sv);
 	    RETURN;
 	}
-	else if (PL_op->op_flags & OPf_MOD
-		&& PL_op->op_private & OPpLVAL_INTRO)
-	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
 	else if (PL_op->op_private & OPpMAYBE_LVSUB) {
 	  const I32 flags = is_lvalue_sub();
 	  if (flags && !(flags & OPpENTERSUB_INARGS)) {

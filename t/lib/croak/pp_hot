@@ -23,6 +23,16 @@ Can't localize through a reference at - line 1.
 EXPECT
 Can't localize through a reference at - line 1.
 ########
+# NAME \local %$ref
+   \local %{\%hash}
+EXPECT
+Can't localize through a reference at - line 1.
+########
+# NAME \local @$ref
+   \local @{\@hash}
+EXPECT
+Can't localize through a reference at - line 1.
+########
 # NAME calling undef sub belonging to undef GV
    my $foosub = \&foo;
    undef *foo;
