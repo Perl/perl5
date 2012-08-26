@@ -2270,13 +2270,13 @@ Perl_is_utf8_X_prepend(pTHX_ const U8 *p)
 }
 
 bool
-Perl_is_utf8_X_non_hangul(pTHX_ const U8 *p)
+Perl_is_utf8_X_special_begin(pTHX_ const U8 *p)
 {
     dVAR;
 
-    PERL_ARGS_ASSERT_IS_UTF8_X_NON_HANGUL;
+    PERL_ARGS_ASSERT_IS_UTF8_X_SPECIAL_BEGIN;
 
-    return is_utf8_common(p, &PL_utf8_X_non_hangul, "_X_HST_Not_Applicable");
+    return is_utf8_common(p, &PL_utf8_X_special_begin, "_X_Special_Begin");
 }
 
 bool
@@ -2287,6 +2287,16 @@ Perl_is_utf8_X_L(pTHX_ const U8 *p)
     PERL_ARGS_ASSERT_IS_UTF8_X_L;
 
     return is_utf8_common(p, &PL_utf8_X_L, "_X_GCB_L");
+}
+
+bool
+Perl_is_utf8_X_RI(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_RI;
+
+    return is_utf8_common(p, &PL_utf8_X_RI, "_X_RI");
 }
 
 /* These constants are for finding GCB=LV and GCB=LVT.  These are for the

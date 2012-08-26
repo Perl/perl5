@@ -814,6 +814,8 @@ push @tables_that_may_be_empty, 'Script_Extensions=Katakana_Or_Hiragana'
                                                     if $v_version ge v6.0.0;
 push @tables_that_may_be_empty, 'Grapheme_Cluster_Break=Prepend'
                                                     if $v_version ge v6.1.0;
+push @tables_that_may_be_empty, 'Canonical_Combining_Class=CCC133'
+                                                    if $v_version ge v6.2.0;
 
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
@@ -13509,7 +13511,8 @@ sub compile_perl() {
     #   CR-LF
     #   | Prepend* Begin Extend*
     #   | .
-    # Begin is:           ( Hangul-syllable | ! Control )
+    # Begin is:           ( Special_Begin | ! Control )
+    # Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
     # Extend is:          ( Grapheme_Extend | Spacing_Mark )
     # Control is:         [ GCB_Control CR LF ]
     # Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
@@ -13529,11 +13532,6 @@ sub compile_perl() {
             push @tables_that_may_be_empty, $perl_table->complete_name;
         }
     }
-    $perl->add_match_table('_X_HST_Not_Applicable',
-                            Perl_Extension => 1,
-                            Fate => $INTERNAL_ONLY,
-                            Initialize => property_ref('HST')->table('NA'),
-                            );
 
     # More GCB.  Populate a combined hangul syllables table
     my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V',
@@ -13542,20 +13540,41 @@ sub compile_perl() {
     $lv_lvt_v += $gcb->table('LV') + $gcb->table('LVT') + $gcb->table('V');
     $lv_lvt_v->add_comment('For use in \X; matches: gcb=LV | gcb=LVT | gcb=V');
 
+    my $ri = $perl->add_match_table('_X_RI', Perl_Extension => 1,
+                                    Fate => $INTERNAL_ONLY);
+    $ri += $gcb->table('RI') if $v_version ge v6.2;
+
+    my $specials_begin = $perl->add_match_table('_X_Special_Begin',
+                                       Perl_Extension => 1,
+                                       Fate => $INTERNAL_ONLY,
+                                       Initialize => $lv_lvt_v
+                                                   + $gcb->table('L')
+                                                   + $gcb->table('T')
+                                                   + $ri
+                                      );
+    $specials_begin->add_comment(join_lines( <<END
+For use in \\X; matches first character of potential multi-character
+sequences that can begin an extended grapheme cluster.  They need special
+handling because of their complicated nature.
+END
+    ));
     my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
-                                       Fate => $INTERNAL_ONLY);
+                                       Fate => $INTERNAL_ONLY,
+                                       Initialize => $specials_begin
+                                                   + ~ $gcb->table('Control')
+                                                   - $gcb->table('CR')
+                                                   - $gcb->table('LF')
+                                      );
+    $begin->add_comment(join_lines( <<END
+For use in \\X; matches first character of anything that can begin an extended
+grapheme cluster.
+END
+    ));
+
     my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
-                                        Fate => $INTERNAL_ONLY);
-
-    # In the line below, two negatives means: yes hangul
-    $begin += ~ property_ref('Hangul_Syllable_Type')
-                                                ->table('Not_Applicable')
-                + ~ ($gcb->table('Control')
-                + $gcb->table('CR')
-                + $gcb->table('LF'));
-    $begin->add_comment('For use in \X; matches: Hangul_Syllable | ! Control');
-
-    $extend += $gcb->table('Extend');
+                                        Fate => $INTERNAL_ONLY,
+                                        Initialize => $gcb->table('Extend')
+                                       );
     if (defined (my $sm = $gcb->table('SpacingMark'))) {
         $extend += $sm;
     }
@@ -17351,6 +17370,13 @@ my @input_file_objects = (
                     ),
     Input_file->new('BidiMirroring.txt', v3.0.1,
                     Property => 'Bidi_Mirroring_Glyph',
+                    Has_Missings_Defaults => ($v_version lt v6.2.0)
+                                              ? $NO_DEFAULTS
+                                              # Is <none> which doesn't mean
+                                              # anything to us, we will use the
+                                              # null string
+                                              : $IGNORED,
+
                     ),
     Input_file->new("NormTest.txt", v3.0.0,
                      Handler => \&process_NormalizationsTest,

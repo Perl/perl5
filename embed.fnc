@@ -663,8 +663,9 @@ ApR	|bool	|is_utf8_mark	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_begin	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_extend	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_prepend	|NN const U8 *p
-EXpR	|bool	|is_utf8_X_non_hangul	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_special_begin|NN const U8 *p
 EXpR	|bool	|is_utf8_X_L		|NN const U8 *p
+EXpR	|bool	|is_utf8_X_RI		|NN const U8 *p
 :not currently used EXpR	|bool	|is_utf8_X_LV		|NN const U8 *p
 EXpR	|bool	|is_utf8_X_LVT		|NN const U8 *p
 EXpR	|bool	|is_utf8_X_LV_LVT_V	|NN const U8 *p

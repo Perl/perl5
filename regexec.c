@@ -149,7 +149,7 @@
 
 #define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */        \
 	LOAD_UTF8_CHARCLASS(X_begin, " ");                                  \
-	LOAD_UTF8_CHARCLASS(X_non_hangul, "A");                             \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_special_begin);                             \
 	/* These are utf8 constants, and not utf-ebcdic constants, so the   \
 	    * assert should likely and hopefully fail on an EBCDIC machine */ \
 	LOAD_UTF8_CHARCLASS(X_extend, "\xcc\x80"); /* U+0300 */             \
@@ -160,6 +160,7 @@
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_L);	    /* U+1100 "\xe1\x84\x80" */ \
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_LV_LVT_V);/* U+AC01 "\xea\xb0\x81" */\
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_T);      /* U+11A8 "\xe1\x86\xa8" */ \
+	LOAD_UTF8_CHARCLASS_NO_CHECK(X_RI);	                            \
 	LOAD_UTF8_CHARCLASS_NO_CHECK(X_V)       /* U+1160 "\xe1\x85\xa0" */  
 
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
@@ -3924,9 +3925,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	       | Prepend* Begin Extend*
 	       | .
 
-	       Begin is (Hangul-syllable | ! Control)
-	       Extend is (Grapheme_Extend | Spacing_Mark)
-	       Control is [ GCB_Control CR LF ]
+               Begin is:           ( Special_Begin | ! Control )
+               Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
+               Extend is:          ( Grapheme_Extend | Spacing_Mark )
+               Control is:         [ GCB_Control  CR  LF ]
+               Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
 
 	       The discussion below shows how the code for CLUMP is derived
 	       from this regex.  Note that most of these concepts are from
@@ -4033,21 +4036,32 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    } else {
 
 			/* Here is the beginning of a character that can have
-			 * an extender.  It is either a hangul syllable, or a
-			 * non-control */
-			if (swash_fetch(PL_utf8_X_non_hangul,
+                         * an extender.  It is either a special begin character
+                         * that requires complicated handling, or a non-control
+                         * */
+			if (! swash_fetch(PL_utf8_X_special_begin,
 					(U8*)locinput, utf8_target))
 			{
 
-			    /* Here not a Hangul syllable, must be a
+			    /* Here not a special begin, must be a
 			     * ('!  * Control') */
 			    locinput += UTF8SKIP(locinput);
 			} else {
 
-			    /* Here is a Hangul syllable.  It can be composed
-			     * of several individual characters.  One
-			     * possibility is T+ */
-			    if (swash_fetch(PL_utf8_X_T,
+			    /* Here is a special begin.  It can be composed
+                             * of several individual characters.  One
+                             * possibility is RI+ */
+			    if (swash_fetch(PL_utf8_X_RI,
+					    (U8*)locinput, utf8_target))
+			    {
+				while (locinput < PL_regeol
+					&& swash_fetch(PL_utf8_X_RI,
+							(U8*)locinput, utf8_target))
+				{
+				    locinput += UTF8SKIP(locinput);
+				}
+			    } else /* Another possibility is T+ */
+                                   if (swash_fetch(PL_utf8_X_T,
 					    (U8*)locinput, utf8_target))
 			    {
 				while (locinput < PL_regeol
@@ -4058,9 +4072,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 				}
 			    } else {
 
-				/* Here, not T+, but is a Hangul.  That means
-				 * it is one of the others: L, LV, LVT or V,
-				 * and matches:
+                                /* Here, neither RI+ nor T+; must be some other
+                                 * Hangul.  That means it is one of the others:
+                                 * L, LV, LVT or V, and matches:
 				 * L* (L | LVT T* | V  V* T* | LV  V* T*) */
 
 				/* Match L*           */
