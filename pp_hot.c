@@ -781,6 +781,9 @@ PP(pp_rv2av)
 	    SETs(sv);
 	    RETURN;
 	}
+	else if (PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO)
+	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
 	else if (PL_op->op_private & OPpMAYBE_LVSUB) {
 	  const I32 flags = is_lvalue_sub();
 	  if (flags && !(flags & OPpENTERSUB_INARGS)) {
@@ -790,9 +793,6 @@ PP(pp_rv2av)
 	    RETURN;
 	  }
 	}
-	else if (PL_op->op_flags & OPf_MOD
-		&& PL_op->op_private & OPpLVAL_INTRO)
-	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
     }
     else {
 	if (SvTYPE(sv) == type) {
