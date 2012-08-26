@@ -13549,7 +13549,7 @@ sub compile_perl() {
                             Initialize => property_ref('HST')->table('NA'),
                             );
     $lv_lvt_v += $gcb->table('LV') + $gcb->table('LVT') + $gcb->table('V');
-    $lv_lvt_v->add_comment('For use in \X; matches: hst=LV | hst=LVT | hst=V');
+    $lv_lvt_v->add_comment('For use in \X; matches: gcb=LV | gcb=LVT | gcb=V');
 
     my @composition = ('Name', 'Unicode_1_Name', 'Name_Alias');
 
