@@ -1275,9 +1275,17 @@ d_ip_mreq (d_socket.U):
 	This variable conditionally defines the HAS_IP_MREQ symbol, which
 	indicates the availability of a struct ip_mreq.
 
+d_ip_mreq_source (d_socket.U):
+	This variable conditionally defines the HAS_IP_MREQ_SOURCE symbol,
+	which indicates the availability of a struct ip_mreq_source.
+
 d_ipv6_mreq (d_socket.U):
 	This variable conditionally defines the HAS_IPV6_MREQ symbol, which
 	indicates the availability of a struct ipv6_mreq.
+
+d_ipv6_mreq_source (d_socket.U):
+	This variable conditionally defines the HAS_IPV6_MREQ_SOURCE symbol,
+	which indicates the availability of a struct ipv6_mreq_source.
 
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,

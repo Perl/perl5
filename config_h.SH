@@ -2396,9 +2396,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates the availability of
  *	struct ip_mreq;
  */
+/* HAS_IP_MREQ_SOURCE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ip_mreq_source;
+ */
 /* HAS_IPV6_MREQ:
  *	This symbol, if defined, indicates the availability of
  *	struct ipv6_mreq;
+ */
+/* HAS_IPV6_MREQ_SOURCE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ipv6_mreq_source;
  */
 #$d_socket	HAS_SOCKET		/**/
 #$d_sockpair	HAS_SOCKETPAIR	/**/
@@ -2412,7 +2420,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_sockaddr_in6	HAS_SOCKADDR_IN6	/**/
 #$d_sin6_scope_id	HAS_SIN6_SCOPE_ID	/**/
 #$d_ip_mreq	HAS_IP_MREQ	/**/
+#$d_ip_mreq_source	HAS_IP_MREQ_SOURCE	/**/
 #$d_ipv6_mreq	HAS_IPV6_MREQ	/**/
+#$d_ipv6_mreq_source	HAS_IPV6_MREQ_SOURCE	/**/
 
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine

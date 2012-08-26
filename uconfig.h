@@ -2363,9 +2363,17 @@
  *	This symbol, if defined, indicates the availability of
  *	struct ip_mreq;
  */
+/* HAS_IP_MREQ_SOURCE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ip_mreq_source;
+ */
 /* HAS_IPV6_MREQ:
  *	This symbol, if defined, indicates the availability of
  *	struct ipv6_mreq;
+ */
+/* HAS_IPV6_MREQ_SOURCE:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ipv6_mreq_source;
  */
 /*#define	HAS_SOCKET		/ **/
 /*#define	HAS_SOCKETPAIR	/ **/
@@ -2379,7 +2387,9 @@
 /*#define	HAS_SOCKADDR_IN6	/ **/
 /*#define	HAS_SIN6_SCOPE_ID	/ **/
 /*#define	HAS_IP_MREQ	/ **/
+/*#define	HAS_IP_MREQ_SOURCE	/ **/
 /*#define	HAS_IPV6_MREQ	/ **/
+/*#define	HAS_IPV6_MREQ_SOURCE	/ **/
 
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine
@@ -4739,6 +4749,6 @@
 #endif
 
 /* Generated from:
- * 450f87b8e0de509bd7e72485185b4060363119bedef2b8aff868354f42708a78 config_h.SH
- * 136e00f109103fdebadeec53d77fbc8f8c1bf3eb82ce970c966f362584f4b7f2 uconfig.sh
+ * 55f6d0595668c028fe4021a469971587307b23080241f008057ee1aba71a73c9 config_h.SH
+ * 0b6320512dbf7572c05acf6d6add343230d232f287d02f6d32a7a32edadd97b9 uconfig.sh
  * ex: set ro: */
