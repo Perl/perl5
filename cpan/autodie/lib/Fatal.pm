@@ -40,7 +40,7 @@ use constant ERROR_58_HINTS => q{Non-subroutine %s hints for %s are not supporte
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '2.12';
+our $VERSION = '2.13';
 
 our $Debug ||= 0;
 
@@ -118,6 +118,7 @@ my %TAGS = (
     ':2.10'  => [qw(:default)],
     ':2.11'  => [qw(:default)],
     ':2.12'  => [qw(:default)],
+    ':2.13'  => [qw(:default)],
 );
 
 # chmod was only introduced in 2.07
@@ -409,7 +410,9 @@ sub _install_subs {
 
     my $pkg_sym = "${pkg}::";
 
-    while(my ($sub_name, $sub_ref) = each %$subs_to_reinstate) {
+    # It does not hurt to do this in a predictable order, and might help debugging.
+    foreach my $sub_name (sort keys %$subs_to_reinstate) {
+        my $sub_ref= $subs_to_reinstate->{$sub_name};
 
         my $full_path = $pkg_sym.$sub_name;
 
