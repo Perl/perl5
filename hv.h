@@ -153,6 +153,7 @@ struct xpvhv {
 	const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
         I32 i_PeRlHaSh = (len); \
         U32 hash_PeRlHaSh = ((internal) ? PL_rehash_seed : PERL_HASH_SEED); \
+        assert(hash_PeRlHaSh!=0);                    \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
