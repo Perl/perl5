@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 15;
+plan tests => 16;
 
 my %h;
 
@@ -20,12 +20,16 @@ foreach (1..10) {
 
 ok (!Internals::HvREHASH(%h), "10 entries doesn't trigger rehash");
 
-foreach (11..20) {
-  $h{"\0"x$_}++;
+SKIP: {
+    skip  "Nulls don't hash to the same bucket regardless of length with this PERL_HASH implementation", 1
+        if Internals::PERL_HASH(%h, "\0") != Internals::PERL_HASH(%h, "\0" x 20);
+
+    foreach (11..20) {
+      $h{"\0"x$_}++;
+    }
+
+    ok (Internals::HvREHASH(%h), "20 entries triggers rehash");
 }
-
-ok (Internals::HvREHASH(%h), "20 entries triggers rehash");
-
 
 
 
@@ -44,10 +48,12 @@ my %h2 = map {$_ => 1} 'a'..'cc';
 ok (!Internals::HvREHASH(%h2), 
     "starting with pre-populated non-pathological hash (rehash flag if off)");
 
+my $foo_hash= Internals::PERL_HASH(%h2,"foo");
 my @keys = get_keys(\%h2);
 $h2{$_}++ for @keys;
 ok (Internals::HvREHASH(%h2), 
     scalar(@keys) . " colliding into the same bucket keys are triggering rehash");
+isnt(Internals::PERL_HASH(%h2,"foo"), $foo_hash,"hash of 'foo' changes after rehash");
 
 sub get_keys {
     my $hr = shift;
@@ -74,7 +80,7 @@ sub get_keys {
     my $hash;
     while (@keys < THRESHOLD+2) {
         # next if exists $hash->{$s};
-        $hash = hash($s);
+        $hash = Internals::PERL_HASH(%$hr,$s);
         next unless ($hash & $mask) == 0;
         $c++;
         printf "# %2d: %5s, %10s\n", $c, $s, $hash;
@@ -87,28 +93,6 @@ sub get_keys {
 }
 
 
-# trying to provide the fastest equivalent of C macro's PERL_HASH in
-# Perl - the main complication is that it uses U32 integer, which we
-# can't do in perl, without doing some tricks
-sub hash {
-    my $s = shift;
-    my @c = split //, $s;
-    my $u = HASH_SEED;
-    for (@c) {
-        # (A % M) + (B % M) == (A + B) % M
-        # This works because '+' produces a NV, which is big enough to hold
-        # the intermediate result. We only need the % before any "^" and "&"
-        # to get the result in the range for an I32.
-        # and << doesn't work on NV, so using 1 << 10
-        $u += ord;
-        $u += $u * (1 << 10); $u %= MASK_U32;
-        $u ^= $u >> 6;
-    }
-    $u += $u << 3;  $u %= MASK_U32;
-    $u ^= $u >> 11; $u %= MASK_U32;
-    $u += $u << 15; $u %= MASK_U32;
-    $u;
-}
 
 # This will crash perl if it fails
 
