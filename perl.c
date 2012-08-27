@@ -1484,8 +1484,10 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
      * If you set PL_rehash_seed (and presumably also PL_rehash_seed_set)
      * yourself, it is your responsibility to provide a good random seed!
      * You can also define PERL_HASH_SEED in compile time, see hv.h. */
-    if (!PL_rehash_seed_set)
-	 PL_rehash_seed = get_hash_seed();
+    if (!PL_rehash_seed_set) {
+        PL_rehash_seed = get_hash_seed();
+        PL_rehash_seed_set = TRUE;
+    }
     {
 	const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 

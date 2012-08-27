@@ -5673,7 +5673,6 @@ Perl_get_hash_seed(pTHX)
 		  Perl_croak(aTHX_ "Your random numbers are not that random");
 	  }
      }
-     PL_rehash_seed_set = TRUE;
 
      return myseed;
 }
