@@ -89,6 +89,7 @@ extern const struct regexp_engine my_reg_engine;
 #include "dquote_static.c"
 #include "charclass_invlists.h"
 #include "inline_invlist.c"
+#include "utf8_strings.h"
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
@@ -2825,18 +2826,15 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 	     * LETTER SHARP S.  We decrease the min length by 1 for each
 	     * occurrence of 'ss' found */
 
-#ifdef EBCDIC /* RD tunifold greek 0390 and 03B0 */
-#	    define U390_first_byte 0xb4
-	    const U8 U390_tail[] = "\x68\xaf\x49\xaf\x42";
-#	    define U3B0_first_byte 0xb5
-	    const U8 U3B0_tail[] = "\x46\xaf\x49\xaf\x42";
-#else
-#	    define U390_first_byte 0xce
-	    const U8 U390_tail[] = "\xb9\xcc\x88\xcc\x81";
-#	    define U3B0_first_byte 0xcf
-	    const U8 U3B0_tail[] = "\x85\xcc\x88\xcc\x81";
-#endif
-	    const U8 len = sizeof(U390_tail); /* (-1 for NUL; +1 for 1st byte;
+#define U390_FIRST_BYTE GREEK_SMALL_LETTER_IOTA_UTF8_FIRST_BYTE
+#define U3B0_FIRST_BYTE GREEK_SMALL_LETTER_UPSILON_UTF8_FIRST_BYTE
+	    const U8 U390_tail[] = GREEK_SMALL_LETTER_IOTA_UTF8_TAIL
+                                   COMBINING_DIAERESIS_UTF8
+                                   COMBINING_ACUTE_ACCENT_UTF8;
+	    const U8 U3B0_tail[] = GREEK_SMALL_LETTER_UPSILON_UTF8_TAIL
+                                   COMBINING_DIAERESIS_UTF8
+                                   COMBINING_ACUTE_ACCENT_UTF8;
+            const U8 len = sizeof(U390_tail); /* (-1 for NUL; +1 for 1st byte;
 						 yields a net of 0 */
 	    /* Examine the string for one of the problematic sequences */
 	    for (s = s0;
@@ -2866,7 +2864,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			}
 			break;
 
-		    case U390_first_byte:
+		    case U390_FIRST_BYTE:
 			if (s_end - s >= len
 
 			    /* The 1's are because are skipping comparing the
@@ -2877,7 +2875,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			}
 			break;
 
-		    case U3B0_first_byte:
+		    case U3B0_FIRST_BYTE:
 			if (! (s_end - s >= len
 			       && memEQ(s + 1, U3B0_tail, len - 1)))
 			{
@@ -12320,9 +12318,8 @@ parseit:
                         U8 dummy[UTF8_MAXBYTES+1];
                         STRLEN dummy_len;
 
-                        /* This particular string is above \xff in both UTF-8
-                         * and UTFEBCDIC */
-                        to_utf8_fold((U8*) "\xC8\x80", dummy, &dummy_len);
+                        /* This string is just a short named one above \xff */
+                        to_utf8_fold((U8*) HYPHEN_UTF8, dummy, &dummy_len);
                         assert(PL_utf8_tofold); /* Verify that worked */
                     }
                     PL_utf8_foldclosures =
