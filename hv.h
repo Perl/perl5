@@ -102,9 +102,6 @@ struct xpvhv {
 };
 
 /* hash a key */
-/* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
- * from requirements by Colin Plumb.
- * (http://burtleburtle.net/bob/hash/doobs.html) */
 /* The use of a temporary pointer and the casting games
  * is needed to serve the dual purposes of
  * (a) the hashed data being interpreted as "unsigned char" (new since 5.8,
@@ -128,22 +125,27 @@ struct xpvhv {
 #   endif
 #endif
 
-#define PERL_HASH(hash,str,len) PERL_HASH_INTERNAL_(hash,str,len,0)
+#define PERL_HASH(hash,str,len) PERL_HASH_INTERNAL_((hash),(str),(len),0)
 
 /* Only hv.c and mod_perl should be doing this.  */
 #ifdef PERL_HASH_INTERNAL_ACCESS
-#define PERL_HASH_INTERNAL(hash,str,len) PERL_HASH_INTERNAL_(hash,str,len,1)
+#define PERL_HASH_INTERNAL(hash,str,len) PERL_HASH_INTERNAL_((hash),(str),(len),1)
 #endif
 
 /* Common base for PERL_HASH and PERL_HASH_INTERNAL that parameterises
  * the source of the seed. Not for direct use outside of hv.c. */
+#undef HASH_FUNC_ONE_AT_A_TIME
 
+#ifdef HASH_FUNC_ONE_AT_A_TIME
+/* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
+ * from requirements by Colin Plumb.
+ * (http://burtleburtle.net/bob/hash/doobs.html) */
 #define PERL_HASH_INTERNAL_(hash,str,len,internal) \
      STMT_START	{ \
-	const char * const s_PeRlHaSh_tmp = str; \
+        const char * const s_PeRlHaSh_tmp = (str); \
 	const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-	I32 i_PeRlHaSh = len; \
-	U32 hash_PeRlHaSh = (internal ? PL_rehash_seed : PERL_HASH_SEED); \
+        I32 i_PeRlHaSh = (len); \
+        U32 hash_PeRlHaSh = ((internal) ? PL_rehash_seed : PERL_HASH_SEED); \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
@@ -153,6 +155,76 @@ struct xpvhv {
 	hash_PeRlHaSh ^= (hash_PeRlHaSh >> 11); \
 	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
     } STMT_END
+#else
+/* FYI: This is the "Super-Fast" algorithm mentioned by Bob Jenkins in
+ * (http://burtleburtle.net/bob/hash/doobs.html)
+ * It is by Paul Hsieh (c) 2004 and is analysed here
+ * http://www.azillionmonkeys.com/qed/hash.html
+ * license terms are here:
+ * http://www.azillionmonkeys.com/qed/weblicense.html
+ */
+#undef get16bits
+#if (defined(__GNUC__) && defined(__i386__)) || defined(__WATCOMC__) \
+  || defined(_MSC_VER) || defined (__BORLANDC__) || defined (__TURBOC__)
+#define get16bits(d) (*((const U16 *) (d)))
+#endif
+
+#if !defined (get16bits)
+#define get16bits(d) ((((const U8 *)(d))[1] << UINT32_C(8))\
+                      +((const U8 *)(d))[0])
+#endif
+#define PERL_HASH_INTERNAL_(hash,str,len,internal) \
+      STMT_START        { \
+        register const char * const strtmp_PeRlHaSh = (str); \
+        register const unsigned char *str_PeRlHaSh = (const unsigned char *)strtmp_PeRlHaSh; \
+        register U32 len_PeRlHaSh = (len); \
+        register U32 hash_PeRlHaSh = ((internal) ? PL_rehash_seed : PERL_HASH_SEED) ^ len; \
+        register U32 tmp_PeRlHaSh; \
+        register int rem_PeRlHaSh= len_PeRlHaSh & 3; \
+        len_PeRlHaSh >>= 2; \
+                            \
+        for (;len_PeRlHaSh > 0; len_PeRlHaSh--) { \
+            hash_PeRlHaSh  += get16bits (str_PeRlHaSh); \
+            tmp_PeRlHaSh    = (get16bits (str_PeRlHaSh+2) << 11) ^ hash_PeRlHaSh; \
+            hash_PeRlHaSh   = (hash_PeRlHaSh << 16) ^ tmp_PeRlHaSh; \
+            str_PeRlHaSh   += 2 * sizeof (U16); \
+            hash_PeRlHaSh  += hash_PeRlHaSh >> 11; \
+        } \
+        \
+        /* Handle end cases */ \
+        switch (rem_PeRlHaSh) { \
+            case 3: hash_PeRlHaSh += get16bits (str_PeRlHaSh); \
+                    hash_PeRlHaSh ^= hash_PeRlHaSh << 16; \
+                    hash_PeRlHaSh ^= str_PeRlHaSh[sizeof (U16)] << 18; \
+                    hash_PeRlHaSh += hash_PeRlHaSh >> 11; \
+                    break; \
+            case 2: hash_PeRlHaSh += get16bits (str_PeRlHaSh); \
+                    hash_PeRlHaSh ^= hash_PeRlHaSh << 11; \
+                    hash_PeRlHaSh += hash_PeRlHaSh >> 17; \
+                    break; \
+            case 1: hash_PeRlHaSh += *str_PeRlHaSh; \
+                    hash_PeRlHaSh ^= hash_PeRlHaSh << 10; \
+                    hash_PeRlHaSh += hash_PeRlHaSh >> 1; \
+        } \
+        \
+        /* Force "avalanching" of final 127 bits */ \
+        hash_PeRlHaSh ^= hash_PeRlHaSh << 3; \
+        hash_PeRlHaSh += hash_PeRlHaSh >> 5; \
+        hash_PeRlHaSh ^= hash_PeRlHaSh << 4; \
+        hash_PeRlHaSh += hash_PeRlHaSh >> 17; \
+        hash_PeRlHaSh ^= hash_PeRlHaSh << 25; \
+        (hash) = (hash_PeRlHaSh + (hash_PeRlHaSh >> 6)); \
+        if (0){ \
+            SV *tmp= newSV(len); \
+            PerlIO_printf(Perl_debug_log,"internal: %d seed: %"UVuf" hashvalue %"UVuf" len: %"UVuf" str: %s\n", \
+                internal, (UV)((internal) ? PL_rehash_seed : PERL_HASH_SEED),\
+                (UV)(hash), (UV)len, pv_pretty(tmp, (str), (len), 0, NULL, NULL, 0)); \
+            SvREFCNT_dec(tmp);\
+        }\
+    } STMT_END
+#endif
+
+
 
 /*
 =head1 Hash Manipulation Functions
