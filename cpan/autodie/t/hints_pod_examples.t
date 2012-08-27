@@ -154,16 +154,19 @@ my $perl58_fix = (
 # Some of the tests provide different hints for scalar or list context
 
 while (my ($test, $exception_expected) = each %scalar_tests) {
-    eval "
+    my $ok= eval(my $code= "
         $perl58_fix
         my \$scalar = $test;
-    ";
+        1;
+    ");
 
     if ($exception_expected) {
-        isnt("$@", "", "scalar test - $test");
+        isnt($ok ? "" : "$@", "", "scalar test - $test")
+            or diag($code);
     }
     else {
-        is($@, "", "scalar test - $test");
+        is($ok ? "" : "$@", "", "scalar test - $test")
+            or diag($code);
     }
 }
 
