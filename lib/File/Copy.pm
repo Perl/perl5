@@ -148,6 +148,10 @@ sub copy {
 	    }
 	}
     }
+    elsif (_eq($from, $to)) {
+	carp("'$from' and '$to' are identical (not copied)");
+	return 0;
+    }
 
     if (defined &syscopy && !$Syscopy_is_copy
 	&& !$to_a_handle
