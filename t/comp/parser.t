@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..144\n";
+print "1..148\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -526,6 +526,13 @@ eval <<'EOSTANZA'; die $@ if $@;
 #line 61 "Great hail! we cry to the comers|From the dazzling unknown shore;|Bring us hither your sun and your summers;|And renew our world as of yore;|You shall teach us your song's new numbers,|And things that we dreamed not before:|Yea, in spite of a dreamer who slumbers,|And a singer who sings no more."
 check(qr/^Great hail!.*no more\.$/, 61, "Overflow both small buffer checks");
 EOSTANZA
+
+#line 531 parser.t
+<<EOU; check('parser\.t', 531, 'on same line as heredoc');
+EOU
+s//<<EOV/e if 0;
+EOV
+check('parser\.t', 535, 'after here-doc in quotes');
 
 __END__
 # Don't add new tests HERE. See note above
