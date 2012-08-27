@@ -133,7 +133,7 @@ sub make_attributes {
     my $quote = $do_not_quote ? '' : '"';
 
     my(@att);
-    foreach (keys %{$attr}) {
+    foreach (sort keys %{$attr}) {
 	my($key) = $_;
 	$key=~s/^\-//;     # get rid of initial - if present
 

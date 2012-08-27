@@ -129,9 +129,6 @@ sub initialize_globals {
 
 # ------------------ START OF THE LIBRARY ------------
 
-#### Method: endform
-# This method is DEPRECATED
-*endform = \&end_form;
 
 # make mod_perlhappy
 initialize_globals();
@@ -1974,6 +1971,9 @@ sub end_form {
         }
     }
 }
+#### Method: endform
+# This method is DEPRECATED
+*endform = \&end_form; # deprecated!
 END_OF_FUNC
 
 #### Method: end_multipart_form
