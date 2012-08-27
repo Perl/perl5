@@ -749,8 +749,7 @@ PERLVARI(I, destroyhook, destroyable_proc_t, Perl_sv_destroyable)
 PERLVARI(I, signalhook,	despatch_signals_proc_t, Perl_despatch_signals)
 #endif
 
-PERLVARI(I, hash_seed,        UV,        823623206580625411)        /* Hash initializer */
-/* PERL VARI(I, hash_seed,        UV,        0)       *//* Hash initializer */
+PERLVARI(I, hash_seed,        UV,        0)       /* Hash initializer */
 
 PERLVARI(I, rehash_seed, UV,	0)	/* 582 hash initializer */
 

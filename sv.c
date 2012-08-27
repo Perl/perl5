@@ -13661,6 +13661,10 @@ Perl_init_constants(pTHX)
     SvLEN_set(&PL_sv_yes, 0);
     SvIV_set(&PL_sv_yes, 1);
     SvNV_set(&PL_sv_yes, 1);
+    /* we need a random number generator for these ones */
+    PL_hash_seed= get_hash_seed();
+    PL_rehash_seed= get_hash_seed();
+    PL_rehash_seed_set= TRUE;
 }
 
 /*
