@@ -218,8 +218,12 @@ is(B::opnumber("pp_null"), 0, "Testing opnumber with opname (pp_null)");
     like($hash, qr/\A0x[0-9a-f]+\z/, "Testing B::hash(\"wibble\")");
     unlike($hash, qr/\A0x0+\z/, "Testing B::hash(\"wibble\")");
 
-    like(B::hash("\0" x $_), qr/\A0x0+\z/, "Testing B::hash(\"0\" x $_)")
-	 for 0..19;
+    SKIP: {
+        skip "Nulls don't hash to the same bucket regardless of length with this PERL_HASH implementation", 20
+            if B::hash("") ne B::hash("\0" x 19);
+        like(B::hash("\0" x $_), qr/\A0x0+\z/, "Testing B::hash(\"0\" x $_)")
+             for 0..19;
+    }
 
     $hash = eval {B::hash(chr 256)};
     is($hash, undef, "B::hash() refuses non-octets");
