@@ -1122,6 +1122,24 @@ XS(XS_Internals_HvREHASH)	/* Subject to change  */
     Perl_croak(aTHX_ "Internals::HvREHASH $hashref");
 }
 
+XS(XS_Internals_PERL_HASH)        /* Subject to change  */
+{
+    dVAR;
+    dXSARGS;
+    PERL_UNUSED_ARG(cv);
+    if (items == 2 && SvROK(ST(0))) {
+        const HV * const hv = (const HV *) SvRV(ST(0));
+        if (SvTYPE(hv) == SVt_PVHV) {
+            STRLEN len;
+            char *pv= SvPV(ST(1),len);
+            UV uv;
+            PERL_HASH_INTERNAL_(uv,pv,len,HvREHASH(hv));
+            XSRETURN_UV(uv);
+        }
+    }
+    Perl_croak(aTHX_ "Internals::PERL_HASH $hashref, $value");
+}
+
 XS(XS_re_is_regexp)
 {
     dVAR; 
@@ -1401,6 +1419,7 @@ struct xsub_details details[] = {
     {"Internals::hash_seed", XS_Internals_hash_seed, ""},
     {"Internals::rehash_seed", XS_Internals_rehash_seed, ""},
     {"Internals::HvREHASH", XS_Internals_HvREHASH, "\\%"},
+    {"Internals::PERL_HASH", XS_Internals_PERL_HASH, "\\%$"},
     {"re::is_regexp", XS_re_is_regexp, "$"},
     {"re::regname", XS_re_regname, ";$$"},
     {"re::regnames", XS_re_regnames, ";$"},
