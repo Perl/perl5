@@ -309,9 +309,9 @@ static const char* const lex_state_names[] = {
 #define COPLINE_INC_WITH_HERELINES		    \
     STMT_START {				     \
 	CopLINE_inc(PL_curcop);			      \
-	if (PL_parser->herelines)		       \
-	    CopLINE(PL_curcop) += PL_parser->herelines,	\
-	    PL_parser->herelines = 0;			 \
+	if (PL_parser->lex_shared->herelines)	       \
+	    CopLINE(PL_curcop) += PL_parser->lex_shared->herelines, \
+	    PL_parser->lex_shared->herelines = 0;		     \
     } STMT_END
 
 
@@ -750,6 +750,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
     *parser->lex_casestack = '\0';
+    Newxz(parser->lex_shared, 1, LEXSHARED);
 
     if (line) {
 	STRLEN len;
@@ -794,6 +795,7 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 
     Safefree(parser->lex_brackstack);
     Safefree(parser->lex_casestack);
+    Safefree(parser->lex_shared);
     PL_parser = parser->old_parser;
     Safefree(parser);
 }
@@ -9677,7 +9679,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	while (s < bufend &&
 	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
 	    if (*s++ == '\n')
-		++PL_parser->herelines;
+		++PL_parser->lex_shared->herelines;
 	}
 	if (s >= bufend) {
 	    SvREFCNT_dec(herewas);
@@ -9703,7 +9705,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	while (s < PL_bufend &&
 	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
 	    if (*s++ == '\n')
-		++PL_parser->herelines;
+		++PL_parser->lex_shared->herelines;
 	}
 	if (s >= PL_bufend) {
 	    SvREFCNT_dec(herewas);
@@ -9722,7 +9724,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 #endif
 	s += len - 1;
-	PL_parser->herelines++;	/* the preceding stmt passes a newline */
+	/* the preceding stmt passes a newline */
+	PL_parser->lex_shared->herelines++;
 
 	/* s now points to the newline after the heredoc terminator.
 	   d points to the newline before the body of the heredoc.
@@ -9759,7 +9762,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 #endif
 	PL_bufptr = s;
-	CopLINE_set(PL_curcop, PL_multi_start + PL_parser->herelines + 1);
+	CopLINE_set(PL_curcop,
+		    PL_multi_start + PL_parser->lex_shared->herelines + 1);
 	if (!lex_next_chunk(LEX_NO_TERM)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
 	    SvREFCNT_dec(herewas);
@@ -9776,7 +9780,7 @@ S_scan_heredoc(pTHX_ register char *s)
 #ifdef PERL_MAD
 	stuffstart = s - SvPVX(PL_linestr);
 #endif
-	PL_parser->herelines++;
+	PL_parser->lex_shared->herelines++;
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
 #ifndef PERL_STRICT_CR

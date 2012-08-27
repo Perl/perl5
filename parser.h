@@ -21,6 +21,13 @@ typedef struct {
 #endif
 } yy_stack_frame;
 
+/* Fields that need to be shared with (i.e., visible to) inner lex-
+   ing scopes. */
+typedef struct yy_lexshared {
+    struct yy_lexshared	*ls_prev;
+    line_t		herelines;	/* number of lines in here-doc */
+} LEXSHARED;
+
 typedef struct yy_parser {
 
     /* parser state */
@@ -63,6 +70,7 @@ typedef struct yy_parser {
     bool	preambled;
     I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     SUBLEXINFO	sublex_info;
+    LEXSHARED	*lex_shared;
     SV		*linestr;	/* current chunk of src text */
     char	*bufptr;	/* carries the cursor (current parsing
 				   position) from one invocation of yylex
@@ -108,7 +116,6 @@ typedef struct yy_parser {
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];
 
-    line_t	herelines;	/* number of lines in here-doc */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
     U8		lex_flags;
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
