@@ -10,7 +10,7 @@ BEGIN {
     $SIG{__WARN__} = sub { $warns++; warn $_[0] };
 }
 require 'test.pl';
-plan( tests => 26 );
+plan( tests => 27 );
 
 my $unix_mode = 1;
 
@@ -48,8 +48,8 @@ $saved_filename = './0';
 cmp_ok($warns,'==',0,'no warns at start');
 
 ok(open(FILE,">$saved_filename"),'created work file');
+print FILE "0\n";
 print FILE "1\n";
-print FILE "0";
 close(FILE);
 
 open(FILE,"<$saved_filename");
@@ -58,6 +58,7 @@ my $seen = 0;
 my $dummy;
 while (my $name = <FILE>)
  {
+  chomp($name);
   $seen++ if $name eq '0';
  }
 cmp_ok($seen,'==',1,'seen in while()');
@@ -67,6 +68,7 @@ $seen = 0;
 my $line = '';
 do
  {
+  chomp($line);
   $seen++ if $line eq '0';
  } while ($line = <FILE>);
 cmp_ok($seen,'==',1,'seen in do/while');
@@ -75,15 +77,17 @@ seek(FILE,0,0);
 $seen = 0;
 while (($seen ? $dummy : $name) = <FILE> )
  {
+  chomp($name);
   $seen++ if $name eq '0';
  }
-cmp_ok($seen,'==',1,'seen in while() ternary');
+cmp_ok($seen,'==',2,'seen in while() ternary');
 
 seek(FILE,0,0);
 $seen = 0;
 my %where;
 while ($where{$seen} = <FILE>)
  {
+  chomp($where{$seen});
   $seen++ if $where{$seen} eq '0';
  }
 cmp_ok($seen,'==',1,'seen in hash while()');
@@ -167,12 +171,16 @@ ok(!(-f $saved_filename),'work file unlinked');
 
 my %hash = (0 => 1, 1 => 2);
 my @array = 1;
+my $neg_sum= 0;
 
 $seen = 0;
+
 while (my $name = each %hash)
  {
+  $neg_sum = $name - $neg_sum;
   $seen++ if $name eq '0';
  }
+cmp_ok(abs($neg_sum),'==',1,'abs(neg_sum) should equal 1');
 cmp_ok($seen,'==',1,'seen in each');
 
 $seen = 0;
@@ -181,7 +189,7 @@ while (($seen ? $dummy : $name) = each %hash)
  {
   $seen++ if $name eq '0';
  }
-cmp_ok($seen,'==',1,'seen in each ternary');
+cmp_ok($seen,'==',$neg_sum < 0 ? 1 : 2,'seen in each ternary');
 
 $seen = 0;
 while ($where{$seen} = each %hash)
