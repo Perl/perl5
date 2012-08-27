@@ -189,7 +189,7 @@ struct xpvhv {
         register U32 tmp_PeRlHaSh; \
         register int rem_PeRlHaSh= len_PeRlHaSh & 3; \
         len_PeRlHaSh >>= 2; \
-                            \
+        assert(hash_PeRlHaSh!=0);                    \
         for (;len_PeRlHaSh > 0; len_PeRlHaSh--) { \
             hash_PeRlHaSh  += get16bits (str_PeRlHaSh); \
             tmp_PeRlHaSh    = (get16bits (str_PeRlHaSh+2) << 11) ^ hash_PeRlHaSh; \
