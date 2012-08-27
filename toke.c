@@ -8441,6 +8441,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_SYSWRITE,XTERM);
 
 	case KEY_tr:
+	case KEY_y:
 	    s = scan_trans(s);
 	    TERM(sublex_start());
 
@@ -8568,10 +8569,6 @@ Perl_yylex(pTHX)
 		return REPORT(0);
 	    pl_yylval.ival = OP_XOR;
 	    OPERATOR(OROP);
-
-	case KEY_y:
-	    s = scan_trans(s);
-	    TERM(sublex_start());
 	}
     }}
 }
