@@ -9681,6 +9681,8 @@ S_scan_heredoc(pTHX_ register char *s)
 		++PL_parser->herelines;
 	}
 	if (s >= bufend) {
+	    SvREFCNT_dec(herewas);
+	    SvREFCNT_dec(tmpstr);
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf + 1);
 	}
@@ -9705,6 +9707,8 @@ S_scan_heredoc(pTHX_ register char *s)
 		++PL_parser->herelines;
 	}
 	if (s >= PL_bufend) {
+	    SvREFCNT_dec(herewas);
+	    SvREFCNT_dec(tmpstr);
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf + 1);
 	}
@@ -9759,6 +9763,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	CopLINE_set(PL_curcop, PL_multi_start + PL_parser->herelines + 1);
 	if (!lex_next_chunk(LEX_NO_TERM)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
+	    SvREFCNT_dec(herewas);
+	    SvREFCNT_dec(tmpstr);
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
 	    missingterm(PL_tokenbuf + 1);
 	}
