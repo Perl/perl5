@@ -5605,8 +5605,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
         CopLINE_set(cop, CopLINE(PL_curcop));
     else {
 	CopLINE_set(cop, PL_parser->copline);
-	if (PL_parser)
-	    PL_parser->copline = NOLINE;
+	PL_parser->copline = NOLINE;
     }
 #ifdef USE_ITHREADS
     CopFILE_set(cop, CopFILE(PL_curcop));	/* XXX share in a pvtable? */
