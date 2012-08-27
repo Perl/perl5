@@ -1491,8 +1491,10 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     {
 	const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
-	if (s && (atoi(s) == 1))
-	    PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n", PL_rehash_seed);
+        if (s && (atoi(s) == 1)) {
+            PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n", PL_hash_seed);
+            PerlIO_printf(Perl_debug_log, "REHASH_SEED = %"UVuf"\n", PL_rehash_seed);
+        }
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
 
