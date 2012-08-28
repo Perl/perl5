@@ -110,6 +110,12 @@ XXX
 
 =item *
 
+L<File::Copy> has been upgraded from version 2.23 to 2.24.  C<copy()> no longer
+zeros files when copying into the same directory, and also now fails (as it has
+long been documented to do) when attempting to copy a file over itself.
+
+=item *
+
 L<Socket> has been upgraded from version 2.004 to 2.006.
 C<unpack_sockaddr_in()> and C<unpack_sockaddr_in6()> now return just the IP
 address in scalar context, and C<inet_ntop()> now guards against incorrect
