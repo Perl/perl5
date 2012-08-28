@@ -2473,7 +2473,6 @@ S_sublex_push(pTHX)
     SAVESPTR(PL_lex_repl);
     SAVEPPTR(PL_sublex_info.re_eval_start);
     SAVESPTR(PL_sublex_info.re_eval_str);
-    SAVEPPTR(PL_sublex_info.super_bufptr);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
@@ -2490,24 +2489,11 @@ S_sublex_push(pTHX)
     SAVEGENERICPV(PL_parser->lex_shared);
 
     /* The here-doc parser needs to be able to peek into outer lexing
-       scopes to find the body of the here-doc.  We use SvIVX(PL_linestr)
-       to store the outer PL_bufptr and SvNVX to store the outer
-       PL_linestr.  Since SvIVX already means something else, we use
-       PL_sublex_info.super_bufptr for the innermost scope (the one we are
-       now entering), and a localised SvIVX for outer scopes.
+       scopes to find the body of the here-doc.  So we put PL_linestr and
+       PL_bufptr into lex_shared, to ‘share’ those values.
      */
-    SvUPGRADE(PL_linestr, SVt_PVIV);
-    /* A null super_bufptr means the outer lexing scope is not peekable,
-       because it is a single line from an input stream. */
-    SAVEIV(SvIVX(PL_linestr));
-    SvIVX(PL_linestr) = PTR2IV(PL_sublex_info.super_bufptr);
-    PL_sublex_info.super_bufptr =
-	(SvTYPE(PL_linestr) < SVt_PVNV || !SvNVX(PL_linestr))
-	 && (PL_rsfp || PL_parser->filtered)
-	 ? NULL
-	 : PL_bufptr;
-    SvUPGRADE(PL_lex_stuff, SVt_PVNV);
-    SvNVX(PL_lex_stuff) = PTR2NV(PL_linestr);
+    PL_parser->lex_shared->ls_linestr = PL_linestr;
+    PL_parser->lex_shared->ls_bufptr  = PL_bufptr;
 
     PL_linestr = PL_lex_stuff;
     PL_lex_repl = PL_sublex_info.repl;
@@ -2575,8 +2561,6 @@ S_sublex_done(pTHX)
     /* Is there a right-hand side to take care of? (s//RHS/ or tr//RHS/) */
     assert(PL_lex_inwhat != OP_TRANSR);
     if (PL_lex_repl && (PL_lex_inwhat == OP_SUBST || PL_lex_inwhat == OP_TRANS)) {
-	SvUPGRADE(PL_lex_repl, SVt_PVNV);
-	SvNVX(PL_lex_repl) = SvNVX(PL_linestr);
 	PL_linestr = PL_lex_repl;
 	PL_lex_inpat = 0;
 	PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
@@ -9657,33 +9641,31 @@ S_scan_heredoc(pTHX_ register char *s)
 	   bufptr.  See the comments in sublex_push for how IVX and NVX
 	   are abused.
 	 */
-	SV *linestr = NUM2PTR(SV *, SvNVX(PL_linestr));
-	char *bufptr = PL_sublex_info.super_bufptr;
-	char *bufend = SvEND(linestr);
+	SV *linestr;
+	char *bufptr, *bufend;
 	char * const olds = s - SvCUR(herewas);
 	char * const real_olds = s;
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
-	shared = shared->ls_prev;
-	if (!bufptr) {
-	    s = real_olds;
-	    goto streaming;
-	}
-	while (!(s = (char *)memchr((void *)bufptr, '\n', bufend-bufptr))){
-	    if (SvIVX(linestr)) {
-		bufptr = INT2PTR(char *, SvIVX(linestr));
-		linestr = NUM2PTR(SV *, SvNVX(linestr));
-		bufend = SvEND(linestr);
-		shared = shared->ls_prev;
-	    }
-	    else if (infile) {
+	do {
+	    shared = shared->ls_prev;
+	    /* A LEXSHARED struct with a null ls_prev pointer is the outer-
+	       most lexing scope.  In a file, shared->ls_linestr at that
+	       level is just one line, so there is no body to steal. */
+	    if (infile && !shared->ls_prev) {
 		s = real_olds;
 		goto streaming;
 	    }
-	    else {
-		s = bufend;
+	    else if (!shared) {
+		s = SvEND(shared->ls_linestr);
 		break;
 	    }
-	}
+	} while (!(s = (char *)memchr(
+		    (void *)shared->ls_bufptr, '\n',
+		    SvEND(shared->ls_linestr)-shared->ls_bufptr
+		)));
+	bufptr = shared->ls_bufptr;
+	linestr = shared->ls_linestr;
+	bufend = SvEND(linestr);
 	d = s;
 	while (s < bufend &&
 	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {

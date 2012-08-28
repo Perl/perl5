@@ -25,6 +25,8 @@ typedef struct {
    ing scopes. */
 typedef struct yy_lexshared {
     struct yy_lexshared	*ls_prev;
+    SV			*ls_linestr;	/* mirrors PL_parser->linestr */
+    char		*ls_bufptr;	/* mirrors PL_parser->bufptr */
     line_t		herelines;	/* number of lines in here-doc */
 } LEXSHARED;
 
