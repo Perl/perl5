@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..148\n";
+print "1..152\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -533,6 +533,10 @@ EOU
 s//<<EOV/e if 0;
 EOV
 check('parser\.t', 535, 'after here-doc in quotes');
+<<EOW;
+${check('parser\.t', 537, 'first line of interp in here-doc');;
+  check('parser\.t', 538, 'second line of interp in here-doc');}
+EOW
 
 __END__
 # Don't add new tests HERE. See note above
