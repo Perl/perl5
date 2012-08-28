@@ -14,12 +14,24 @@ plan 'no_plan';
 
 sub j { join(":",@_) }
 
+# NOTE
+#
+# Hash insertion is currently unstable, in that
+# %hash= %otherhash will not necessarily result in
+# the same internal ordering of the data in the hash.
+# For instance when keys collide the copy may not
+# match the inserted order. So we declare one hash
+# and then make all our copies from that, which should
+# mean all the copies have the same internal structure.
+our %base_hash;
+
 BEGIN { # in BEGIN for "use constant ..." later
+  %base_hash= (  pi => 3.14, e => 2.72, i => -1 );
   $array = [ qw(pi e i) ];
   $values = [ 3.14, 2.72, -1 ];
-  $hash  = { pi => 3.14, e => 2.72, i => -1 } ;
+  $hash  = { %base_hash } ;
   $data = {
-    hash => { %$hash },
+    hash => { %base_hash },
     array => [ @$array ],
   };
 }
@@ -27,7 +39,7 @@ BEGIN { # in BEGIN for "use constant ..." later
 package Foo;
 sub new {
   my $self = {
-    hash => {%{$main::hash} },
+    hash => { %base_hash },
     array => [@{$main::array}]
   };
   bless $self, shift;
@@ -58,10 +70,10 @@ use overload '@{}' => sub { $main::array }, fallback => 1;
 
 package main;
 
-use constant CONST_HASH => { %$hash };
+use constant CONST_HASH => { %base_hash };
 use constant CONST_ARRAY => [ @$array ];
 
-my %a_hash = %$hash;
+my %a_hash = %base_hash;
 my @an_array = @$array;
 sub hash_sub { return \%a_hash; }
 sub array_sub { return \@an_array; }
