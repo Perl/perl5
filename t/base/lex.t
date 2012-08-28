@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..65\n";
+print "1..66\n";
 
 $x = 'x';
 
@@ -323,3 +323,6 @@ eval '/(?{print <<END
 ok 65 - here-doc in re-eval in string eval
 END
 })/';
+
+eval 'print qq ;ok 66 - eval ending with semicolon\n;'
+  or print "not ok 66 - eval ending with semicolon\n";
