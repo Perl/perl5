@@ -13,7 +13,7 @@ use File::Find;
 my %files;
 my $test_count = 0;
 
-find(sub {
+find({no_chdir => 1, wanted => sub {
 	   my $name = $File::Find::name;
 	   # Assumes that the path separator is exactly one character.
 	   $name =~ s/^\..//;
@@ -33,7 +33,7 @@ find(sub {
 	   }
 
 	   push @{$files{lc $name}}, $name;
-	 }, '.');
+	 }}, '.');
 
 foreach (sort values %files) {
     if (@$_ > 1) {
