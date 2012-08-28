@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 86 );
+    plan( tests => 88 );
 }
 
 my @c;
@@ -265,6 +265,13 @@ fresh_perl_is <<'END', "ok\n", {},
 foo::bar
 END
     "No crash when freed stash is reused for PV with offset hack";
+
+is eval "(caller 0)[6]", "(caller 0)[6]",
+  'eval text returned by caller does not include \n;';
+
+# PL_linestr should not be modifiable
+eval '"${;BEGIN{  ${\(caller 2)[6]} = *foo  }}"';
+pass "no assertion failure after modifying eval text via caller";
 
 $::testing_caller = 1;
 

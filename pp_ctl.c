@@ -1857,7 +1857,9 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_EVAL) {
 	/* eval STRING */
 	if (CxOLD_OP_TYPE(cx) == OP_ENTEREVAL) {
-	    PUSHs(cx->blk_eval.cur_text);
+	    PUSHs(newSVpvn_flags(SvPVX(cx->blk_eval.cur_text),
+				 SvCUR(cx->blk_eval.cur_text)-2,
+				 SvUTF8(cx->blk_eval.cur_text)|SVs_TEMP));
 	    PUSHs(&PL_sv_no);
 	}
 	/* require */
