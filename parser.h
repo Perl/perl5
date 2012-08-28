@@ -81,7 +81,11 @@ typedef struct yy_parser {
     char	*linestart;	/* beginning of most recently read line */
     char	*last_uni;	/* position of last named-unary op */
     char	*last_lop;	/* position of last list operator */
-    line_t	copline;	/* current line number */
+    /* copline is used to pass a specific line number to newSTATEOP.  It
+       is a one-time line number, as newSTATEOP invalidates it (sets it to
+       NOLINE) after using it.  The purpose of this is to report line num-
+       bers in multiline constructs using the number of the first line. */
+    line_t	copline;
     U16		in_my;		/* we're compiling a "my"/"our" declaration */
     U8		lex_state;	/* next token is determined */
     U8		error_count;	/* how many compile errors so far, max 10 */
