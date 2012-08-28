@@ -3997,7 +3997,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		     * moved locinput forward, we tested the result just above
 		     * and it either passed, or we backed off so that it will
 		     * now pass */
-		    if (swash_fetch(PL_utf8_X_regular_begin, (U8*)locinput, utf8_target)) {
+		    if (swash_fetch(PL_utf8_X_regular_begin,
+                                    (U8*)locinput, utf8_target)) {
                         locinput += UTF8SKIP(locinput);
                     }
                     else if (! swash_fetch(PL_utf8_X_special_begin,
@@ -4011,93 +4012,94 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                         goto exit_utf8;
 		    } else {
 
-			    /* Here is a special begin.  It can be composed
-                             * of several individual characters.  One
-                             * possibility is RI+ */
-			    if (swash_fetch(PL_utf8_X_RI,
-					    (U8*)locinput, utf8_target))
-			    {
+                        /* Here is a special begin.  It can be composed of
+                         * several individual characters.  One possibility is
+                         * RI+ */
+                        if (swash_fetch(PL_utf8_X_RI,
+                                        (U8*)locinput, utf8_target))
+                        {
+                            locinput += UTF8SKIP(locinput);
+                            while (locinput < PL_regeol
+                                    && swash_fetch(PL_utf8_X_RI,
+                                                    (U8*)locinput, utf8_target))
+                            {
                                 locinput += UTF8SKIP(locinput);
-				while (locinput < PL_regeol
-					&& swash_fetch(PL_utf8_X_RI,
-							(U8*)locinput, utf8_target))
-				{
-				    locinput += UTF8SKIP(locinput);
-				}
-			    } else /* Another possibility is T+ */
-                                   if (swash_fetch(PL_utf8_X_T,
-					    (U8*)locinput, utf8_target))
-			    {
+                            }
+                        } else /* Another possibility is T+ */
+                               if (swash_fetch(PL_utf8_X_T,
+                                               (U8*)locinput, utf8_target))
+                        {
+                            locinput += UTF8SKIP(locinput);
+                            while (locinput < PL_regeol
+                                    && swash_fetch(PL_utf8_X_T,
+                                                    (U8*)locinput, utf8_target))
+                            {
                                 locinput += UTF8SKIP(locinput);
-				while (locinput < PL_regeol
-					&& swash_fetch(PL_utf8_X_T,
-							(U8*)locinput, utf8_target))
-				{
-				    locinput += UTF8SKIP(locinput);
-				}
-			    } else {
+                            }
+                        } else {
 
-                                /* Here, neither RI+ nor T+; must be some other
-                                 * Hangul.  That means it is one of the others:
-                                 * L, LV, LVT or V, and matches:
-				 * L* (L | LVT T* | V  V* T* | LV  V* T*) */
+                            /* Here, neither RI+ nor T+; must be some other
+                             * Hangul.  That means it is one of the others: L,
+                             * LV, LVT or V, and matches:
+                             * L* (L | LVT T* | V * V* T* | LV  V* T*) */
 
-				/* Match L*           */
-				while (locinput < PL_regeol
-					&& swash_fetch(PL_utf8_X_L,
-							(U8*)locinput, utf8_target))
-				{
-				    locinput += UTF8SKIP(locinput);
-				}
+                            /* Match L*           */
+                            while (locinput < PL_regeol
+                                    && swash_fetch(PL_utf8_X_L,
+                                                    (U8*)locinput, utf8_target))
+                            {
+                                locinput += UTF8SKIP(locinput);
+                            }
 
-				/* Here, have exhausted L*.  If the next
-				 * character is not an LV, LVT nor V, it means
-				 * we had to have at least one L, so matches L+
-				 * in the original equation, we have a complete
-				 * hangul syllable.  Are done. */
+                            /* Here, have exhausted L*.  If the next character
+                             * is not an LV, LVT nor V, it means we had to have
+                             * at least one L, so matches L+ in the original
+                             * equation, we have a complete hangul syllable.
+                             * Are done. */
 
-				if (locinput < PL_regeol
-				    && swash_fetch(PL_utf8_X_LV_LVT_V,
-						    (U8*)locinput, utf8_target))
-				{
+                            if (locinput < PL_regeol
+                                && swash_fetch(PL_utf8_X_LV_LVT_V,
+                                                (U8*)locinput, utf8_target))
+                            {
 
-				    /* Otherwise keep going.  Must be LV, LVT
-				     * or V.  See if LVT */
-				    if (is_utf8_X_LVT((U8*)locinput)) {
-					locinput += UTF8SKIP(locinput);
-				    } else {
+                                /* Otherwise keep going.  Must be LV, LVT or V.
+                                 * See if LVT */
+                                if (is_utf8_X_LVT((U8*)locinput)) {
+                                    locinput += UTF8SKIP(locinput);
+                                } else {
 
-					/* Must be  V or LV.  Take it, then
-					 * match V*     */
-					locinput += UTF8SKIP(locinput);
-					while (locinput < PL_regeol
-						&& swash_fetch(PL_utf8_X_V,
-							 (U8*)locinput, utf8_target))
-					{
-					    locinput += UTF8SKIP(locinput);
-					}
-				    }
+                                    /* Must be  V or LV.  Take it, then match
+                                     * V*     */
+                                    locinput += UTF8SKIP(locinput);
+                                    while (locinput < PL_regeol
+                                            && swash_fetch(PL_utf8_X_V,
+                                                           (U8*)locinput,
+                                                           utf8_target))
+                                    {
+                                        locinput += UTF8SKIP(locinput);
+                                    }
+                                }
 
-				    /* And any of LV, LVT, or V can be followed
-				     * by T*            */
-				    while (locinput < PL_regeol
-					   && swash_fetch(PL_utf8_X_T,
-							   (U8*)locinput,
-							   utf8_target))
-				    {
-					locinput += UTF8SKIP(locinput);
-				    }
-				}
-			    }
+                                /* And any of LV, LVT, or V can be followed
+                                    * by T*            */
+                                while (locinput < PL_regeol
+                                        && swash_fetch(PL_utf8_X_T,
+                                                        (U8*)locinput,
+                                                        utf8_target))
+                                {
+                                    locinput += UTF8SKIP(locinput);
+                                }
+                            }
                         }
+                    }
 
-			/* Match any extender */
-			while (locinput < PL_regeol
-				&& swash_fetch(PL_utf8_X_extend,
-						(U8*)locinput, utf8_target))
-			{
-			    locinput += UTF8SKIP(locinput);
-			}
+                    /* Match any extender */
+                    while (locinput < PL_regeol
+                            && swash_fetch(PL_utf8_X_extend,
+                                            (U8*)locinput, utf8_target))
+                    {
+                        locinput += UTF8SKIP(locinput);
+                    }
 		}
             exit_utf8:
 		if (locinput > PL_regeol) sayNO;
