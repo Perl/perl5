@@ -41,7 +41,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
     @names = sort +regnames(0);
     is("@names","A B","regnames");
     my $names = regnames();
-    is($names, "B", "regnames in scalar context");
+    ok(($names eq  "B" || $names eq "A"), "regnames in scalar context");
     @names = sort +regnames(1);
     is("@names","A B C","regnames");
     is(join("", @{regname("A",1)}),"13");
