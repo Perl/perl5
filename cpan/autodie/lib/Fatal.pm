@@ -411,7 +411,7 @@ sub _install_subs {
 
     # It does not hurt to do this in a predictable order, and might help debugging.
     foreach my $sub_name (sort keys %$subs_to_reinstate) {
-        $sub_ref= $subs_to_reinstate->{$sub_name};
+        my $sub_ref= $subs_to_reinstate->{$sub_name};
 
         my $full_path = $pkg_sym.$sub_name;
 
