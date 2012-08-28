@@ -22,9 +22,6 @@ if ( $^O eq "vos" ) {
 plan('no_plan');
 
 use ExtUtils::Manifest qw(maniread);
-use File::Basename;
-use File::Find;
-use File::Spec::Functions;
 
 # Copied from Porting/makerel - these will get +x in the tarball
 # XXX refactor? -- dagolden, 2010-07-23
@@ -51,4 +48,3 @@ for my $f ( map { "../$_" } @manifest ) {
 
 ok( ! %exe_list, "Everything in Porting/exec-bit.txt has +x in repo" )
   or diag( "Files missing exec bit:\n  " . join("\n  ", sort keys %exe_list) . "\n");
-
