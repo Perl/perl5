@@ -19,7 +19,7 @@ eval { @c = caller(0) };
 is( $c[3], "(eval)", "subroutine name in an eval {}" );
 ok( !$c[4], "hasargs false in an eval {}" );
 
-eval q{ @c = (Caller(0))[3] };
+eval q{ @c = caller(0) };
 is( $c[3], "(eval)", "subroutine name in an eval ''" );
 ok( !$c[4], "hasargs false in an eval ''" );
 
