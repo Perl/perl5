@@ -13364,7 +13364,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_utf8_punct	= sv_dup_inc(proto_perl->Iutf8_punct, param);
     PL_utf8_xdigit	= sv_dup_inc(proto_perl->Iutf8_xdigit, param);
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
-    PL_utf8_X_begin	= sv_dup_inc(proto_perl->Iutf8_X_begin, param);
+    PL_utf8_X_regular_begin	= sv_dup_inc(proto_perl->Iutf8_X_regular_begin, param);
     PL_utf8_X_extend	= sv_dup_inc(proto_perl->Iutf8_X_extend, param);
     PL_utf8_X_prepend	= sv_dup_inc(proto_perl->Iutf8_X_prepend, param);
     PL_utf8_X_special_begin	= sv_dup_inc(proto_perl->Iutf8_X_special_begin, param);

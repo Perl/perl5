@@ -660,9 +660,9 @@ ApR	|bool	|is_utf8_print	|NN const U8 *p
 ApR	|bool	|is_utf8_punct	|NN const U8 *p
 ApR	|bool	|is_utf8_xdigit	|NN const U8 *p
 ApR	|bool	|is_utf8_mark	|NN const U8 *p
-EXpR	|bool	|is_utf8_X_begin	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_extend	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_prepend	|NN const U8 *p
+EXpR	|bool	|is_utf8_X_regular_begin|NN const U8 *p
 EXpR	|bool	|is_utf8_X_special_begin|NN const U8 *p
 EXpR	|bool	|is_utf8_X_L		|NN const U8 *p
 EXpR	|bool	|is_utf8_X_RI		|NN const U8 *p

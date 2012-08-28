@@ -1800,12 +1800,6 @@ PERL_CALLCONV bool	Perl_is_utf8_X_V(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT_IS_UTF8_X_V	\
 	assert(p)
 
-PERL_CALLCONV bool	Perl_is_utf8_X_begin(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_UTF8_X_BEGIN	\
-	assert(p)
-
 PERL_CALLCONV bool	Perl_is_utf8_X_extend(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -1816,6 +1810,12 @@ PERL_CALLCONV bool	Perl_is_utf8_X_prepend(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_X_PREPEND	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_regular_begin(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_REGULAR_BEGIN	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_X_special_begin(pTHX_ const U8 *p)

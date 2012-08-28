@@ -13512,6 +13512,8 @@ sub compile_perl() {
     #   | Prepend* Begin Extend*
     #   | .
     # Begin is:           ( Special_Begin | ! Control )
+    # Begin is also:      ( Regular_Begin | Special_Begin )
+    #   where Regular_Begin is defined as ( ! Control - Special_Begin )
     # Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
     # Extend is:          ( Grapheme_Extend | Spacing_Mark )
     # Control is:         [ GCB_Control CR LF ]
@@ -13558,16 +13560,17 @@ sequences that can begin an extended grapheme cluster.  They need special
 handling because of their complicated nature.
 END
     ));
-    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
+    my $regular_begin = $perl->add_match_table('_X_Regular_Begin',
+                                       Perl_Extension => 1,
                                        Fate => $INTERNAL_ONLY,
-                                       Initialize => $specials_begin
-                                                   + ~ $gcb->table('Control')
+                                       Initialize => ~ $gcb->table('Control')
+                                                   - $specials_begin
                                                    - $gcb->table('CR')
                                                    - $gcb->table('LF')
                                       );
-    $begin->add_comment(join_lines( <<END
+    $regular_begin->add_comment(join_lines( <<END
 For use in \\X; matches first character of anything that can begin an extended
-grapheme cluster.
+grapheme cluster, except those that require special handling.
 END
     ));
 

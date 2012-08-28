@@ -2210,13 +2210,13 @@ Perl_is_utf8_mark(pTHX_ const U8 *p)
 }
 
 bool
-Perl_is_utf8_X_begin(pTHX_ const U8 *p)
+Perl_is_utf8_X_regular_begin(pTHX_ const U8 *p)
 {
     dVAR;
 
-    PERL_ARGS_ASSERT_IS_UTF8_X_BEGIN;
+    PERL_ARGS_ASSERT_IS_UTF8_X_REGULAR_BEGIN;
 
-    return is_utf8_common(p, &PL_utf8_X_begin, "_X_Begin");
+    return is_utf8_common(p, &PL_utf8_X_regular_begin, "_X_Regular_Begin");
 }
 
 bool
