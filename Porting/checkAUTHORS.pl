@@ -827,6 +827,7 @@ rootbeer\100teleport.com                rootbeer\100redcat.com
 rurban\100x-ray.at                      rurban\100cpan.org
 +                                       rurban\100cpanel.net
 sartak\100bestpractical.com             sartak\100gmail.com
++                                       code\100sartak.org
 sadinoff\100olf.com                     danny-cpan\100sadinoff.com
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
