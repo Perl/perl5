@@ -4017,6 +4017,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			    if (swash_fetch(PL_utf8_X_RI,
 					    (U8*)locinput, utf8_target))
 			    {
+                                locinput += UTF8SKIP(locinput);
 				while (locinput < PL_regeol
 					&& swash_fetch(PL_utf8_X_RI,
 							(U8*)locinput, utf8_target))
@@ -4027,6 +4028,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                                    if (swash_fetch(PL_utf8_X_T,
 					    (U8*)locinput, utf8_target))
 			    {
+                                locinput += UTF8SKIP(locinput);
 				while (locinput < PL_regeol
 					&& swash_fetch(PL_utf8_X_T,
 							(U8*)locinput, utf8_target))
@@ -4087,7 +4089,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 				    }
 				}
 			    }
-			}
+                        }
 
 			/* Match any extender */
 			while (locinput < PL_regeol
