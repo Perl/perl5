@@ -9662,6 +9662,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	char *bufend = SvEND(linestr);
 	char * const olds = s - SvCUR(herewas);
 	char * const real_olds = s;
+	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
 	shared = shared->ls_prev;
 	if (!bufptr) {
 	    s = real_olds;
@@ -9695,6 +9696,11 @@ S_scan_heredoc(pTHX_ register char *s)
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start-1);
 	    missingterm(PL_tokenbuf + 1);
 	}
+	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
+	 && cx->blk_eval.cur_text == linestr) {
+	    cx->blk_eval.cur_text = newSVsv(linestr);
+	    SvSCREAM_on(cx->blk_eval.cur_text);
+	}
 	sv_setpvn(herewas,bufptr,d-bufptr+1);
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
@@ -9709,6 +9715,7 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     else if (!infile || found_newline) {
 	char * const olds = s - SvCUR(herewas);
+	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
 	d = s;
 	while (s < PL_bufend &&
 	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
@@ -9747,6 +9754,11 @@ S_scan_heredoc(pTHX_ register char *s)
 		       newSVpvn(PL_sublex_info.re_eval_start,
 				PL_bufend - PL_sublex_info.re_eval_start);
 	    PL_sublex_info.re_eval_start -= s-d;
+	}
+	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
+	 && cx->blk_eval.cur_text == PL_linestr) {
+	    cx->blk_eval.cur_text = newSVsv(PL_linestr);
+	    SvSCREAM_on(cx->blk_eval.cur_text);
 	}
 	/* Copy everything from s onwards back to d. */
 	Move(s,d,PL_bufend-s + 1,char);

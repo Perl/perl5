@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 88 );
+    plan( tests => 90 );
 }
 
 my @c;
@@ -272,6 +272,13 @@ is eval "(caller 0)[6]", "(caller 0)[6]",
 # PL_linestr should not be modifiable
 eval '"${;BEGIN{  ${\(caller 2)[6]} = *foo  }}"';
 pass "no assertion failure after modifying eval text via caller";
+
+is eval "<<END;\nfoo\nEND\n(caller 0)[6]",
+        "<<END;\nfoo\nEND\n(caller 0)[6]",
+        'here-docs do not gut eval text';
+is eval "s//<<END/e;\nfoo\nEND\n(caller 0)[6]",
+        "s//<<END/e;\nfoo\nEND\n(caller 0)[6]",
+        'here-docs in quote-like ops do not gut eval text';
 
 $::testing_caller = 1;
 
