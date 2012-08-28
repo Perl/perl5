@@ -128,9 +128,7 @@ sub copy {
 
     if (_eq($from, $to)) { # works for references, too
 	carp("'$from' and '$to' are identical (not copied)");
-        # The "copy" was a success as the source and destination contain
-        # the same data.
-        return 1;
+        return 0;
     }
 
     if (!$from_a_handle && !$to_a_handle && -d $to && ! -d $from) {
@@ -472,7 +470,7 @@ glob. Obviously, if the first argument is a filehandle of some
 sort, it will be read from, and if it is a file I<name> it will
 be opened for reading. Likewise, the second argument will be
 written to (and created if need be).  Trying to copy a file on top
-of itself is a fatal error.
+of itself is an error.
 
 If the destination (second argument) already exists and is a directory,
 and the source (first argument) is not a filehandle, then the source

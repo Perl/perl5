@@ -139,7 +139,7 @@ for my $cross_partition_test (0..1) {
   { 
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= join '', @_ };
-    ok copy("file-$$", "file-$$"), 'copy(fn, fn) succeeds';
+    ok !copy("file-$$", "file-$$"), 'copy to itself fails';
 
     like $warnings, qr/are identical/, 'but warns';
     ok -s "file-$$", 'contents preserved';
@@ -411,7 +411,7 @@ SKIP: {
 	foreach my $right (qw(plain object1 object2)) {
 	    @warnings = ();
 	    $! = 0;
-	    is eval {copy $what{$left}, $what{$right}}, 1, "copy $left $right";
+	    is eval {copy $what{$left}, $what{$right}}, 0, "copy $left $right";
 	    is $@, '', 'No croaking';
 	    is $!, '', 'No system call errors';
 	    is @warnings, 1, 'Exactly 1 warning';
