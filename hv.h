@@ -141,7 +141,7 @@ struct xpvhv {
  * perls hashing algorithm), if it is not defined we use the "Super Fast"
  * hash from Paul Hsieh
  */
-#define HASH_FUNC_ONE_AT_A_TIME
+#undef HASH_FUNC_ONE_AT_A_TIME
 
 #ifdef HASH_FUNC_ONE_AT_A_TIME
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
@@ -186,7 +186,7 @@ struct xpvhv {
         register const char * const strtmp_PeRlHaSh = (str); \
         register const unsigned char *str_PeRlHaSh = (const unsigned char *)strtmp_PeRlHaSh; \
         register U32 len_PeRlHaSh = (len); \
-        register U32 hash_PeRlHaSh = ((internal) ? PL_rehash_seed : PERL_HASH_SEED); \
+        register U32 hash_PeRlHaSh = ((internal) ? PL_rehash_seed : PERL_HASH_SEED) ^ len; \
         register U32 tmp_PeRlHaSh; \
         register int rem_PeRlHaSh= len_PeRlHaSh & 3; \
         len_PeRlHaSh >>= 2; \
