@@ -1,4 +1,4 @@
-# This file is the data file for porting/podcheck.t.
+# This file is the data file for t/porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -37,6 +37,7 @@ DateTime
 DB_File(3)
 DBIx::Profile
 Devel::DProf
+Devel::DTrace::Provider
 Devel::NYTProf
 Devel::PPPort
 Devel::SawAmpersand
@@ -225,7 +226,7 @@ pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Apparent broken link	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
-pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	22
+pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	26
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	13
 pod/perlembed.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perlfunc.pod	There is more than one target	1
