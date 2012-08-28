@@ -4026,7 +4026,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
                It turns out that 98.4% of all Unicode code points match
                Regular_Begin.  Doing it this way eliminates a table match in
-               the previouls implementation for almost all Unicode code points.
+               the previous implementation for almost all Unicode code points.
 
 	       There is a subtlety with Prepend* which showed up in testing.
 	       Note that the Begin, and only the Begin is required in:
@@ -4083,8 +4083,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		     * matched, as it is guaranteed to match the begin */
 		    if (previous_prepend
 			&& (locinput >=  PL_regeol
-			    || ! swash_fetch(PL_utf8_X_regular_begin,
+			    || (! swash_fetch(PL_utf8_X_regular_begin,
+					     (U8*)locinput, utf8_target)
+			         && ! swash_fetch(PL_utf8_X_special_begin,
 					     (U8*)locinput, utf8_target)))
+                        )
 		    {
 			locinput = previous_prepend;
 		    }
