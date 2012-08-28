@@ -24,11 +24,28 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.24  (planned 2012-12-01; sbeck)
 
-=head1 VERSION 3.23  (planned 2012-09-01; sbeck)
+=head1 VERSION 3.23  (2012-09-01; sbeck)
+
+NEW CODE(s)
 
 =head1 VERSION 3.22  (2012-06-01; sbeck)
 
 NEW CODE(s)
+
+=over 4
+
+=item B<Updated perl version required>
+
+Changed 'require 5.002' (which dated back to the version 2.xx Locale-Codes)
+to 'require 5.006'.  Some features used in Locale-Codes are not supported that
+far back.  Nicholas Clark
+
+=item B<Sorted deprecated codes>
+
+The codes in the generated deprecated codes modules were not sorted making version
+diffs bigger than they should be.  Nicholas Clark
+
+=back
 
 =head1 VERSION 3.21  (2012-03-01; sbeck)
 

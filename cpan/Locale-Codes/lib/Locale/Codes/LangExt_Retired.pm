@@ -2,7 +2,7 @@ package Locale::Codes::LangExt_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Wed May 30 10:22:19 EDT 2012
+#    Generated on: Tue Aug 28 13:59:56 EDT 2012
 
 =pod
 
@@ -33,12 +33,12 @@ modify it under the same terms as Perl itself.
 =cut
 
 use strict;
+require 5.006;
 use warnings;
 use utf8;
-require 5.002;
 
 our($VERSION);
-$VERSION='3.22';
+$VERSION='3.23';
 
 $Locale::Codes::Retired{'langext'}{'alpha'}{'code'} = {
 };

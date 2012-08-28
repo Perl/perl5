@@ -1100,7 +1100,7 @@ use File::Glob qw(:case);
 
     'Locale-Codes' => {
         'MAINTAINER'   => 'sbeck',
-        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.22.tar.gz',
+        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.23.tar.gz',
         'FILES'        => q[cpan/Locale-Codes],
         'EXCLUDED'     => [
             qw( t/pod_coverage.t

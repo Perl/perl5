@@ -4,8 +4,8 @@ package Locale::Codes::LangVar;
 # under the same terms as Perl itself.
 
 use strict;
+require 5.006;
 use warnings;
-require 5.002;
 
 require Exporter;
 use Carp;
@@ -20,7 +20,7 @@ use Locale::Codes::LangVar_Retired;
 
 our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.22';
+$VERSION='3.23';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2langvar
                 langvar2code

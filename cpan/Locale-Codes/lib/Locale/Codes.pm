@@ -6,8 +6,8 @@ package Locale::Codes;
 # under the same terms as Perl itself.
 
 use strict;
+require 5.006;
 use warnings;
-require 5.002;
 
 use Carp;
 use Locale::Codes::Constants;
@@ -31,7 +31,7 @@ our($VERSION,%Data,%Retired);
 # $Retired{ TYPE }{ CODESET }{ code }{ CODE } = NAME
 #                            { name }{ NAME } = [CODE,NAME]  (the key is lowercase)
 
-$VERSION='3.22';
+$VERSION='3.23';
 
 #=======================================================================
 #
