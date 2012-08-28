@@ -57,7 +57,7 @@ The C<phase-change> probe was added.
 
 =item 5.18.0
 
-The C<op-entry>, C<loading-file>, and C<loaded-file> probes weree added.
+The C<op-entry>, C<loading-file>, and C<loaded-file> probes were added.
 
 =back
 
