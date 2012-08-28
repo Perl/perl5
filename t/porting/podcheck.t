@@ -399,6 +399,7 @@ my $non_pods = qr/ (?: \.
                            | $lib_ext # object libraries
                            | $lib_so  # shared libraries
                            | $dl_ext  # dynamic libraries
+                           | gif      # GIF images (example files from CGI.pm)
                        )
                        $
                     ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
