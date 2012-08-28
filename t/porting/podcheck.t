@@ -1275,13 +1275,15 @@ sub extract_pod {   # Extracts just the pod from a file; returns undef if file
 
 my $digest = Digest->new($digest_type);
 
+# This is used as a callback from File::Find::find(), which always constructs
+# pathnames using Unix separators
 sub is_pod_file {
     # If $_ is a pod file, add it to the lists and do other prep work.
 
     if (-d) {
         # Don't look at files in directories that are for tests, nor those
         # beginning with a dot
-        if ($_ eq 't' || $_ =~ /^\../) {
+        if (m!/t\z! || m!/\.!) {
             $File::Find::prune = 1;
         }
         return;
@@ -1291,8 +1293,9 @@ sub is_pod_file {
                                # check if 0 length
     return unless -f || -l;    # Weird file types won't be pods
 
-    if ($_ =~ /^\./           # No hidden Unix files
-        || $_ =~ $non_pods) {
+    my ($leaf) = m!([^/]+)\z!;
+    if (m!/\.!                 # No hidden Unix files
+        || $leaf =~ $non_pods) {
         note("Not considering $_") if DEBUG;
         return;
     }
@@ -1300,8 +1303,7 @@ sub is_pod_file {
     my $filename = $File::Find::name;
 
     # $filename is relative, like './path'.  Strip that initial part away.
-    # Assumes that the path separator is exactly one character.
-    $filename =~ s/^\..//;
+    $filename =~ s!^\./!! or die 'Unexpected pathname "$filename"';
 
     return if $excluded_files{canonicalize($filename)};
 
@@ -1416,7 +1418,7 @@ else { # No input files -- go find all the possibilities.
     chdir File::Spec->updir;
 
     # And look in this directory and all its subdirectories
-    find( \&is_pod_file, '.');
+    find( {wanted => \&is_pod_file, no_chdir => 1}, '.');
 
     # Add ourselves to the test
     push @files, "t/porting/podcheck.t";
