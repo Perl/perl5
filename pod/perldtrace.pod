@@ -202,8 +202,6 @@ C<Module::Name>-style names.
     Exporter::Heavy::_rebuild_cache                                5039
     Exporter::import                                              14578
 
-=item 
-
 =back
 
 =head1 REFERENCES
