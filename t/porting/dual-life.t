@@ -36,13 +36,13 @@ $dist_dir_exe{'pod2html.pl'} = '../ext/Pod-Html';
 my @programs;
 
 find(
-  sub {
+  { no_chidr => 1, wanted => sub {
     my $name = $File::Find::name;
     return if $name =~ /blib/;
     return unless $name =~ m{/(?:bin|scripts?)/\S+\z} && $name !~ m{/t/};
 
     push @programs, $name;
-  },
+  }},
   qw( ../cpan ../dist ../ext ),
 );
 
