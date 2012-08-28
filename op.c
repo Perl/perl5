@@ -10496,10 +10496,18 @@ Perl_rpeep(pTHX_ register OP *o)
             OP *fop;
             OP *sop;
             
+#define HV_OR_SCALARHV(op)                                   \
+    (  (op)->op_type == OP_PADHV || (op)->op_type == OP_RV2HV \
+       ? (op)                                                  \
+       : (op)->op_type == OP_SCALAR && (op)->op_flags & OPf_KIDS \
+       && (  cUNOPx(op)->op_first->op_type == OP_PADHV          \
+          || cUNOPx(op)->op_first->op_type == OP_RV2HV)          \
+         ? cUNOPx(op)->op_first                                   \
+         : NULL)
+
         case OP_NOT:
-            fop = cUNOP->op_first;
-            sop = NULL;
-            goto stitch_keys;
+            if ((fop = HV_OR_SCALARHV(cUNOP->op_first)))
+                fop->op_private |= OPpTRUEBOOL;
             break;
 
         case OP_AND:
@@ -10514,17 +10522,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		o->op_next = o->op_next->op_next;
 	    DEFER(cLOGOP->op_other);
           
-          stitch_keys:	    
 	    o->op_opt = 1;
-#define HV_OR_SCALARHV(op)                                   \
-    (  (op)->op_type == OP_PADHV || (op)->op_type == OP_RV2HV \
-       ? (op)                                                  \
-       : (op)->op_type == OP_SCALAR && (op)->op_flags & OPf_KIDS \
-       && (  cUNOPx(op)->op_first->op_type == OP_PADHV          \
-          || cUNOPx(op)->op_first->op_type == OP_RV2HV)          \
-         ? cUNOPx(op)->op_first                                   \
-         : NULL)
-
             fop = HV_OR_SCALARHV(fop);
             if (sop) sop = HV_OR_SCALARHV(sop);
             if (fop || sop
@@ -10566,7 +10564,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	
 	case OP_COND_EXPR:
 	    if ((fop = HV_OR_SCALARHV(cLOGOP->op_first)))
-		fop->op_private |= OPpMAYBE_TRUEBOOL;
+		fop->op_private |= OPpTRUEBOOL;
 #undef HV_OR_SCALARHV
 	    /* GERONIMO! */
 	}    
