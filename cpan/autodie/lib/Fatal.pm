@@ -409,7 +409,9 @@ sub _install_subs {
 
     my $pkg_sym = "${pkg}::";
 
-    while(my ($sub_name, $sub_ref) = each %$subs_to_reinstate) {
+    # It does not hurt to do this in a predictable order, and might help debugging.
+    foreach my $sub_name (sort keys %$subs_to_reinstate) {
+        $sub_ref= $subs_to_reinstate->{$sub_name};
 
         my $full_path = $pkg_sym.$sub_name;
 

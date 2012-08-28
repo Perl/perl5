@@ -152,8 +152,23 @@ my $perl58_fix = (
 );
 
 # Some of the tests provide different hints for scalar or list context
+# NOTE: these tests are sensitive to order (not sure why) therefore
+# this loop must use a sorted list of keys . Otherwise there is an occasional
+# failure like this:
+#
+#   Failed test 'scalar test - zero_scalar("")'
+#   at cpan/autodie/t/hints_pod_examples.t line 168.
+#          got: 'Can't zero_scalar(''):  at cpan/autodie/t/hints_pod_examples.t line 157
+# '
+#     expected: ''
+#
+#
+#         my $scalar = zero_scalar("");
+#         1;
 
-while (my ($test, $exception_expected) = each %scalar_tests) {
+
+foreach my $test (sort keys %scalar_tests) {
+    my $exception_expected= $scalar_tests{$test};
     my $ok= eval(my $code= "
         $perl58_fix
         my \$scalar = $test;
@@ -170,7 +185,10 @@ while (my ($test, $exception_expected) = each %scalar_tests) {
     }
 }
 
-while (my ($test, $exception_expected) = each %list_tests) {
+
+# this set of test is not *known* to be order dependent however we sort it anyway out caution
+foreach my $test (sort keys %list_tests) {
+    my $exception_expected= $list_tests{$test};
     eval "
         $perl58_fix
         my \@array = $test;
