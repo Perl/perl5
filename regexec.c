@@ -3922,36 +3922,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                Control is:         [ GCB_Control  CR  LF ]
                Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
 
-	       The discussion below shows how the code for CLUMP is derived
-	       from this regex.  Note that most of these concepts are from
-	       property values of the Grapheme Cluster Boundary (GCB) property.
-	       No code point can have multiple property values for a given
-	       property.  Thus a code point in Prepend can't be in Control, but
-	       it must be in !Control.  This is why Control above includes
-	       GCB_Control plus CR plus LF.  The latter two are used in the GCB
-	       property separately, and so can't be in GCB_Control, even though
-	       they logically are controls.  Control is not the same as gc=cc,
-	       but includes format and other characters as well.
-
-	       The Unicode definition of Hangul-syllable is:
-		   L+
-		   | (L* ( ( V | LV ) V* | LVT ) T*)
-		   | T+ 
-		  )
-	       Each of these is a value for the GCB property, and hence must be
-	       disjoint, so the order they are tested is immaterial, so the
-	       above can safely be changed to
-		   T+
-		   | L+
-		   | (L* ( LVT | ( V | LV ) V*) T*)
-
-	       The last two terms can be combined like this:
-		   L* ( L | (( LVT | ( V | LV ) V*) T*))
-
-	       That means that if we have seen any L's at all we can quit
-	       there, but if the next character is an LVT, a V, or an LV we
-	       should keep going.
-
 	       There is a subtlety with Prepend* which showed up in testing.
 	       Note that the Begin, and only the Begin is required in:
 	        | Prepend* Begin Extend*
