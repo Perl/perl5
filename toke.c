@@ -9648,16 +9648,18 @@ S_scan_heredoc(pTHX_ register char *s)
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
 	do {
 	    shared = shared->ls_prev;
+	    /* shared is only null if we have gone beyond the outermost
+	       lexing scope.  In a file, we will have broken out of the
+	       loop in the previous iteration.  In an eval, the string buf-
+	       fer ends with "\n;", so the while condition below will have
+	       evaluated to false.  So shared can never be null. */
+	    assert(shared);
 	    /* A LEXSHARED struct with a null ls_prev pointer is the outer-
 	       most lexing scope.  In a file, shared->ls_linestr at that
 	       level is just one line, so there is no body to steal. */
 	    if (infile && !shared->ls_prev) {
 		s = real_olds;
 		goto streaming;
-	    }
-	    else if (!shared) {
-		s = SvEND(shared->ls_linestr);
-		break;
 	    }
 	} while (!(s = (char *)memchr(
 		    (void *)shared->ls_bufptr, '\n',
