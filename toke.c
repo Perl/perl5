@@ -9678,7 +9678,6 @@ S_scan_heredoc(pTHX_ register char *s)
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start-1);
 	    missingterm(PL_tokenbuf + 1);
 	}
-	sv_setpvn(herewas,bufptr,d-bufptr+1);
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
 	shared->herelines++;	/* the preceding stmt passes a newline */
@@ -9697,12 +9696,9 @@ S_scan_heredoc(pTHX_ register char *s)
 	    cx->blk_eval.cur_text = newSVsv(linestr);
 	    SvSCREAM_on(cx->blk_eval.cur_text);
 	}
-	s++;
-	sv_catpvn(herewas,s,bufend-s);
-	Copy(SvPVX_const(herewas),bufptr,SvCUR(herewas) + 1,char);
+	Move(s,d,bufend-s + 1,char);
 	SvCUR_set(linestr,
-		  bufptr-SvPVX_const(linestr)
-		   + SvCUR(herewas));
+		  SvCUR(linestr) - (s-d));
 
 	s = olds;
 	goto retval;
