@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..68\n";
+print "1..69\n";
 
 $x = 'x';
 
@@ -338,3 +338,9 @@ END
 })/;
 print "not " unless /foo/;
 print "ok 68 - here-doc in quotes in multiline re-eval\n";
+
+eval 's//<<END/e if 0; $_ = "a
+END
+b"';
+print "not " if $_ =~ /\n\n/;
+print "ok 69 - eval 's//<<END/' does not leave extra newlines\n";

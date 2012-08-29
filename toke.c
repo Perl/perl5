@@ -9681,6 +9681,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	sv_setpvn(herewas,bufptr,d-bufptr+1);
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
+	shared->herelines++;	/* the preceding stmt passes a newline */
 	/* See the Paranoia note in case LEX_INTERPEND in yylex, for why we
 	   check shared->re_eval_str. */
 	if (shared->re_eval_start || shared->re_eval_str) {
@@ -9696,6 +9697,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    cx->blk_eval.cur_text = newSVsv(linestr);
 	    SvSCREAM_on(cx->blk_eval.cur_text);
 	}
+	s++;
 	sv_catpvn(herewas,s,bufend-s);
 	Copy(SvPVX_const(herewas),bufptr,SvCUR(herewas) + 1,char);
 	SvCUR_set(linestr,
