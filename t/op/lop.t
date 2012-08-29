@@ -12,7 +12,6 @@ BEGIN {
 
 plan tests => 17;
 
-my $test = 0;
 for my $i (undef, 0 .. 2, "", "0 but true") {
     my $true = 1;
     my $false = 0;
@@ -37,7 +36,6 @@ for my $i (undef, 0 .. 2, "", "0 but true") {
     ok( ! $false, "false: $m");
 }
 
-# $test == 6
 my $i = 0;
 (($i ||= 1) &&= 3) += 4;
 is( $i, 7, '||=, &&=');
