@@ -930,8 +930,8 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
     linestart_pos = PL_parser->linestart - buf;
     last_uni_pos = PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
     last_lop_pos = PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
-    re_eval_start_pos = PL_sublex_info.re_eval_start ?
-                            PL_sublex_info.re_eval_start - buf : 0;
+    re_eval_start_pos = PL_parser->lex_shared->re_eval_start ?
+                            PL_parser->lex_shared->re_eval_start - buf : 0;
 
     buf = sv_grow(linestr, len);
 
@@ -944,8 +944,8 @@ Perl_lex_grow_linestr(pTHX_ STRLEN len)
 	PL_parser->last_uni = buf + last_uni_pos;
     if (PL_parser->last_lop)
 	PL_parser->last_lop = buf + last_lop_pos;
-    if (PL_sublex_info.re_eval_start)
-        PL_sublex_info.re_eval_start  = buf + re_eval_start_pos;
+    if (PL_parser->lex_shared->re_eval_start)
+        PL_parser->lex_shared->re_eval_start  = buf + re_eval_start_pos;
     return buf;
 }
 
@@ -2471,8 +2471,6 @@ S_sublex_push(pTHX)
     SAVEI32(PL_lex_starts);
     SAVEI8(PL_lex_state);
     SAVESPTR(PL_lex_repl);
-    SAVEPPTR(PL_sublex_info.re_eval_start);
-    SAVESPTR(PL_sublex_info.re_eval_str);
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     SAVECOPLINE(PL_curcop);
@@ -2499,8 +2497,6 @@ S_sublex_push(pTHX)
     PL_lex_repl = PL_sublex_info.repl;
     PL_lex_stuff = NULL;
     PL_sublex_info.repl = NULL;
-    PL_sublex_info.re_eval_start = NULL;
-    PL_sublex_info.re_eval_str = NULL;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -4683,7 +4679,7 @@ Perl_yylex(pTHX)
 	}
 	/* Convert (?{...}) and friends to 'do {...}' */
 	if (PL_lex_inpat && *PL_bufptr == '(') {
-	    PL_sublex_info.re_eval_start = PL_bufptr;
+	    PL_parser->lex_shared->re_eval_start = PL_bufptr;
 	    PL_bufptr += 2;
 	    if (*PL_bufptr != '{')
 		PL_bufptr++;
@@ -4742,28 +4738,30 @@ Perl_yylex(pTHX)
 	   re_eval_str.  If the here-doc body’s length equals the previous
 	   value of re_eval_start, re_eval_start will now be null.  So
 	   check re_eval_str as well. */
-	if (PL_sublex_info.re_eval_start || PL_sublex_info.re_eval_str) {
+	if (PL_parser->lex_shared->re_eval_start
+	 || PL_parser->lex_shared->re_eval_str) {
 	    SV *sv;
 	    if (*PL_bufptr != ')')
 		Perl_croak(aTHX_ "Sequence (?{...}) not terminated with ')'");
 	    PL_bufptr++;
 	    /* having compiled a (?{..}) expression, return the original
 	     * text too, as a const */
-	    if (PL_sublex_info.re_eval_str) {
-		sv = PL_sublex_info.re_eval_str;
-		PL_sublex_info.re_eval_str = NULL;
-		SvCUR_set(sv, PL_bufptr - PL_sublex_info.re_eval_start);
+	    if (PL_parser->lex_shared->re_eval_str) {
+		sv = PL_parser->lex_shared->re_eval_str;
+		PL_parser->lex_shared->re_eval_str = NULL;
+		SvCUR_set(sv,
+			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
 		SvPV_shrink_to_cur(sv);
 	    }
-	    else sv = newSVpvn(PL_sublex_info.re_eval_start,
-			       PL_bufptr - PL_sublex_info.re_eval_start);
+	    else sv = newSVpvn(PL_parser->lex_shared->re_eval_start,
+			 PL_bufptr - PL_parser->lex_shared->re_eval_start);
 	    start_force(PL_curforce);
 	    /* XXX probably need a CURMAD(something) here */
 	    NEXTVAL_NEXTTOKE.opval =
 		    (OP*)newSVOP(OP_CONST, 0,
 				 sv);
 	    force_next(THING);
-	    PL_sublex_info.re_eval_start = NULL;
+	    PL_parser->lex_shared->re_eval_start = NULL;
 	    PL_expect = XTERM;
 	    return REPORT(',');
 	}
@@ -9680,14 +9678,24 @@ S_scan_heredoc(pTHX_ register char *s)
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start-1);
 	    missingterm(PL_tokenbuf + 1);
 	}
+	sv_setpvn(herewas,bufptr,d-bufptr+1);
+	sv_setpvn(tmpstr,d+1,s-d);
+	s += len - 1;
+	/* See the Paranoia note in case LEX_INTERPEND in yylex, for why we
+	   check shared->re_eval_str. */
+	if (shared->re_eval_start || shared->re_eval_str) {
+	    /* Set aside the rest of the regexp */
+	    if (!shared->re_eval_str)
+		shared->re_eval_str =
+		       newSVpvn(shared->re_eval_start,
+				SvEND(linestr) - shared->re_eval_start);
+	    shared->re_eval_start -= s-d;
+	}
 	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
 	 && cx->blk_eval.cur_text == linestr) {
 	    cx->blk_eval.cur_text = newSVsv(linestr);
 	    SvSCREAM_on(cx->blk_eval.cur_text);
 	}
-	sv_setpvn(herewas,bufptr,d-bufptr+1);
-	sv_setpvn(tmpstr,d+1,s-d);
-	s += len - 1;
 	sv_catpvn(herewas,s,bufend-s);
 	Copy(SvPVX_const(herewas),bufptr,SvCUR(herewas) + 1,char);
 	SvCUR_set(linestr,
@@ -9730,14 +9738,14 @@ S_scan_heredoc(pTHX_ register char *s)
 	   d points to the newline before the body of the heredoc.
 	 */
 	/* See the Paranoia note in case LEX_INTERPEND in yylex, for why we
-	   check PL_sublex_info.re_eval_str. */
-	if (PL_sublex_info.re_eval_start || PL_sublex_info.re_eval_str) {
+	   check shared->re_eval_str. */
+	if (shared->re_eval_start || shared->re_eval_str) {
 	    /* Set aside the rest of the regexp */
-	    if (!PL_sublex_info.re_eval_str)
-		PL_sublex_info.re_eval_str =
-		       newSVpvn(PL_sublex_info.re_eval_start,
-				PL_bufend - PL_sublex_info.re_eval_start);
-	    PL_sublex_info.re_eval_start -= s-d;
+	    if (!shared->re_eval_str)
+		shared->re_eval_str =
+		       newSVpvn(shared->re_eval_start,
+				PL_bufend - shared->re_eval_start);
+	    shared->re_eval_start -= s-d;
 	}
 	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
 	 && cx->blk_eval.cur_text == PL_linestr) {
@@ -9752,10 +9760,15 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     else
     {
+      SV *linestr_save;
      streaming:
       sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
       term = PL_tokenbuf[1];
       len--;
+      linestr_save = PL_linestr; /* must restore this afterwards */
+      d = s - SvCUR(herewas) - 1; /* s gets set to this afterwards */
+      PL_linestr = newSVpvs("");
+      PL_bufptr = PL_bufend = s = SvPVX(PL_linestr);
       while (s >= PL_bufend) {	/* multiple line string? */
 #ifdef PERL_MAD
 	if (PL_madskills) {
@@ -9773,6 +9786,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
 	    SvREFCNT_dec(herewas);
 	    SvREFCNT_dec(tmpstr);
+	    SvREFCNT_dec(linestr_save);
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
 	    missingterm(PL_tokenbuf + 1);
 	}
@@ -9804,12 +9818,11 @@ S_scan_heredoc(pTHX_ register char *s)
 	    PL_bufend[-1] = '\n';
 #endif
 	if (*s == term && memEQ(s,PL_tokenbuf + 1,len)) {
-	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
-	    *(SvPVX(PL_linestr) + off ) = ' ';
-	    lex_grow_linestr(SvCUR(PL_linestr) + SvCUR(herewas) + 1);
-	    sv_catsv(PL_linestr,herewas);
+	    SvREFCNT_dec(PL_linestr);
+	    PL_linestr = linestr_save;
+	    PL_linestart = SvPVX(linestr_save);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	    s = SvPVX(PL_linestr) + off; /* In case PV of PL_linestr moved. */
+	    s = d;
 	}
 	else {
 	    s = PL_bufend;

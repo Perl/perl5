@@ -3456,8 +3456,6 @@ struct _sublex_info {
     U8 super_state;	/* lexer state to save */
     U16 sub_inwhat;	/* "lex_inwhat" to use */
     OP *sub_op;		/* "lex_op" to use */
-    char *re_eval_start;/* start of "(?{..." text */
-    SV *re_eval_str;	/* "(?{...})" text */
     SV *repl;		/* replacement of s/// or y/// */
 };
 

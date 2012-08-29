@@ -27,6 +27,8 @@ typedef struct yy_lexshared {
     struct yy_lexshared	*ls_prev;
     SV			*ls_linestr;	/* mirrors PL_parser->linestr */
     char		*ls_bufptr;	/* mirrors PL_parser->bufptr */
+    char		*re_eval_start;	/* start of "(?{..." text */
+    SV			*re_eval_str;	/* "(?{...})" text */
     line_t		herelines;	/* number of lines in here-doc */
 } LEXSHARED;
 

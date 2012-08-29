@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..66\n";
+print "1..68\n";
 
 $x = 'x';
 
@@ -326,3 +326,15 @@ END
 
 eval 'print qq ;ok 66 - eval ending with semicolon\n;'
   or print "not ok 66 - eval ending with semicolon\n";
+
+print "not " unless qr/(?{<<END})/ eq '(?^:(?{<<END}))';
+foo
+END
+print "ok 67 - here-doc in single-line re-eval\n";
+
+$_ = qr/(?{"${<<END}"
+foo
+END
+})/;
+print "not " unless /foo/;
+print "ok 68 - here-doc in quotes in multiline re-eval\n";
