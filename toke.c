@@ -9751,8 +9751,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
     else
+      streaming:
 	sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
-  streaming:
     term = PL_tokenbuf[1];
     len--;
     while (s >= PL_bufend) {	/* multiple line string? */

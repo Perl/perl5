@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 8);
+plan(tests => 9);
 
 
 # heredoc without newline (#65838)
@@ -50,6 +50,12 @@ HEREDOC
         'ick and queasy',
         { switches => ['-X'] },
         "crlf-terminated heredoc"
+    );
+    fresh_perl_is(
+        "print qq|\${\\<<foo}|\nick and queasy\nfoo\n",
+        'ick and queasy',
+        { switches => ['-w'], stderr => 1 },
+        'no warning for qq|${\<<foo}| in file'
     );
 }
 
