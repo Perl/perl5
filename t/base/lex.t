@@ -197,7 +197,7 @@ my $test = 42;
     local $_ = "not ok ";
     eval q{
 	s/^not /<<EOT/e and T '^main:\(eval \d+\):2$', $test++;
-# fuggedaboudit
+# uggedaboudit
 EOT
         print $_, $test++, "\n";
 	T('^main:\(eval \d+\):6$', $test++);
