@@ -9751,11 +9751,12 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
     else
-      streaming:
-	sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
-    term = PL_tokenbuf[1];
-    len--;
-    while (s >= PL_bufend) {	/* multiple line string? */
+    {
+     streaming:
+      sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
+      term = PL_tokenbuf[1];
+      len--;
+      while (s >= PL_bufend) {	/* multiple line string? */
 #ifdef PERL_MAD
 	if (PL_madskills) {
 	    tstart = SvPVX(PL_linestr) + stuffstart;
@@ -9814,6 +9815,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    s = PL_bufend;
 	    sv_catsv(tmpstr,PL_linestr);
 	}
+      }
     }
     s++;
 retval:
