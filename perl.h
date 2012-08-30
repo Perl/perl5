@@ -2555,11 +2555,6 @@ typedef SV PADNAME;
 #  include "iperlsys.h"
 #endif
 
-#if defined(__OPEN_VM)
-#   include "vmesa/vmesaish.h"
-#   define ISHISH "vmesa"
-#endif
-
 #ifdef DOSISH
 #   if defined(OS2)
 #       include "os2ish.h"
@@ -3904,7 +3899,7 @@ double atof (const char*);
 /* All of these are in stdlib.h or time.h for ANSI C */
 Time_t time();
 struct tm *gmtime(), *localtime();
-#if defined(OEMVS) || defined(__OPEN_VM)
+#if defined(OEMVS)
 char *(strchr)(), *(strrchr)();
 char *(strcpy)(), *(strcat)();
 #else

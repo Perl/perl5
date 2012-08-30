@@ -1279,7 +1279,7 @@ and C<|>, not to mention dealing with socket interfaces to ASCII computers
 
 Fortunately, most web servers for the mainframe will correctly
 translate the C<\n> in the following statement to its ASCII equivalent
-(C<\r> is the same under both Unix and OS/390 & VM/ESA):
+(C<\r> is the same under both Unix and OS/390):
 
     print "Content-type: text/html\r\n\r\n";
 
@@ -1290,7 +1290,6 @@ The values of C<$^O> on some of these platforms includes:
     OS/390        os390      os390
     OS400         os400      os400
     POSIX-BC      posix-bc   BS2000-posix-bc
-    VM/ESA        vmesa      vmesa
 
 Some simple tricks for determining if you are running on an EBCDIC
 platform could include any of the following (perhaps all):
@@ -1312,8 +1311,7 @@ Also see:
 
 =item *
 
-L<perlos390>, F<README.os390>, F<perlbs2000>, F<README.vmesa>,
-L<perlebcdic>.
+L<perlos390>, F<README.os390>, F<perlbs2000>, L<perlebcdic>.
 
 =item *
 
@@ -1585,7 +1583,7 @@ A little funky, because VOS's notion of ownership is a little funky (VOS).
 
 =item chroot
 
-Not implemented. (Win32, VMS, S<Plan 9>, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<Plan 9>, S<RISC OS>, VOS)
 
 =item crypt
 
@@ -1609,8 +1607,6 @@ Not supported. (Cygwin, Win32)
 Invokes VMS debugger. (VMS)
 
 =item exec
-
-Implemented via Spawn. (VM/ESA)
 
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
@@ -1650,7 +1646,7 @@ Not implemented (VMS, S<RISC OS>, VOS).
 
 =item fork
 
-Not implemented. (AmigaOS, S<RISC OS>, VM/ESA, VMS)
+Not implemented. (AmigaOS, S<RISC OS>, VMS)
 
 Emulated using multiple interpreters.  See L<perlfork>.  (Win32)
 
@@ -1671,7 +1667,7 @@ Not implemented. (Win32, S<RISC OS>)
 
 =item getpriority
 
-Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
 =item getpwnam
 
@@ -1707,11 +1703,11 @@ Not implemented. (Win32, S<Plan 9>)
 
 =item getpwent
 
-Not implemented. (Win32, VM/ESA)
+Not implemented. (Win32)
 
 =item getgrent
 
-Not implemented. (Win32, VMS, VM/ESA)
+Not implemented. (Win32, VMS)
 
 =item gethostbyname
 
@@ -1752,11 +1748,11 @@ Not implemented. (S<Plan 9>, Win32, S<RISC OS>)
 
 =item endpwent
 
-Not implemented. (MPE/iX, VM/ESA, Win32)
+Not implemented. (MPE/iX, Win32)
 
 =item endgrent
 
-Not implemented. (MPE/iX, S<RISC OS>, VM/ESA, VMS, Win32)
+Not implemented. (MPE/iX, S<RISC OS>, VMS, Win32)
 
 =item endhostent
 
@@ -1932,7 +1928,7 @@ be implemented even in Unix platforms.
 
 =item socketpair
 
-Not implemented. (S<RISC OS>, VM/ESA)
+Not implemented. (S<RISC OS>)
 
 Available on OpenVOS Release 17.0 or later. (VOS)
 
@@ -1975,14 +1971,14 @@ syntax if it is intended to resolve to a valid path.
 
 =item syscall
 
-Not implemented. (Win32, VMS, S<RISC OS>, VOS, VM/ESA)
+Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
 =item sysopen
 
 The traditional "0", "1", and "2" MODEs are implemented with different
 numeric values on some systems.  The flags exported by C<Fcntl>
 (O_RDONLY, O_WRONLY, O_RDWR) should work everywhere though.  (S<Mac
-OS>, OS/390, VM/ESA)
+OS>, OS/390)
 
 =item system
 
@@ -2317,8 +2313,7 @@ L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
 L<perlmacos>, L<perlmacosx>, L<perlmpeix>,
 L<perlnetware>, L<perlos2>, L<perlos390>, L<perlos400>,
 L<perlplan9>, L<perlqnx>, L<perlsolaris>, L<perltru64>,
-L<perlunicode>, L<perlvmesa>, L<perlvms>, L<perlvos>,
-L<perlwin32>, and L<Win32>.
+L<perlunicode>, L<perlvms>, L<perlvos>, L<perlwin32>, and L<Win32>.
 
 =head1 AUTHORS / CONTRIBUTORS
 

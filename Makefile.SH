@@ -1647,9 +1647,6 @@ os390|posix-bc)
         cd ..
     fi
     ;;
-vmesa)
-    # Do nothing in VM/ESA.
-    ;;
 *)
     echo "'$osname' is an EBCDIC system I don't know that well." >&4
     ;;

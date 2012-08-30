@@ -3451,10 +3451,6 @@ S_minus_v(pTHX)
 	PerlIO_printf(PerlIO_stdout(),
 		      "Stratus VOS port by Paul.Green@stratus.com, 1997-2002\n");
 #endif
-#ifdef __OPEN_VM
-	PerlIO_printf(PerlIO_stdout(),
-		      "VM/ESA port by Neale Ferguson, 1998-1999\n");
-#endif
 #ifdef POSIX_BC
 	PerlIO_printf(PerlIO_stdout(),
 		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");

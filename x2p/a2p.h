@@ -121,7 +121,7 @@
 /* All of these are in stdlib.h or time.h for ANSI C */
 Time_t time();
 struct tm *gmtime(), *localtime();
-#if defined(OEMVS) || defined(__OPEN_VM)
+#if defined(OEMVS)
 char *(strchr)(), *(strrchr)();
 char *(strcpy)(), *(strcat)();
 #else

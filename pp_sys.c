@@ -4308,25 +4308,13 @@ PP(pp_exec)
 #ifdef VMS
 	value = (I32)vms_do_aexec(NULL, MARK, SP);
 #else
-#  ifdef __OPEN_VM
-	{
-	   (void ) do_aspawn(NULL, MARK, SP);
-	   value = 0;
-	}
-#  else
 	value = (I32)do_aexec(NULL, MARK, SP);
-#  endif
 #endif
     else {
 #ifdef VMS
 	value = (I32)vms_do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
 #else
-#  ifdef __OPEN_VM
-	(void) do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
-	value = 0;
-#  else
 	value = (I32)do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
-#  endif
 #endif
     }
 

@@ -286,13 +286,14 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item VM/ESA
 
-XXX
+Support for VM/ESA has been removed. The port was tested on 2.3.0, which
+IBM ended service on in March 2002. 2.4.0 ended service in June 2003, and
+was superseded by Z/VM. The current version of Z/VM is V6.2.0, and scheduled
+for end of service on 2015/04/30.
 
 =back
 

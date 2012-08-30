@@ -27,11 +27,7 @@ printf PIPE "oY %d -    again\n", curr_test();
 next_test();
 close PIPE;
 
-SKIP: {
-    # Technically this should be TODO.  Someone try it if you happen to
-    # have a vmesa machine.
-    skip "Doesn't work here yet", 6 if $^O eq 'vmesa';
-
+{
     if (open(PIPE, "-|")) {
 	while(<PIPE>) {
 	    s/^not //;
@@ -171,9 +167,7 @@ SKIP: {
         }
     }
 
-    SKIP: {
-        skip "Don't work yet", 9 if $^O eq 'vmesa';
-
+    {
         # check that errno gets forced to 0 if the piped program exited 
         # non-zero
         open NIL, qq{|$Perl -e "exit 23";} or die "fork failed: $!";

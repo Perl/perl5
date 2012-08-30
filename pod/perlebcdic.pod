@@ -1374,10 +1374,6 @@ or z/OS.
 
 =back
 
-=head2 VM/ESA?
-
-XXX.
-
 =head2 POSIX-BC?
 
 XXX.

@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_02';
+$VERSION = '1.39_03';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -8310,7 +8310,6 @@ my @pods = qw(
     util
     uts
     var
-    vmesa
     vms
     vos
     win32

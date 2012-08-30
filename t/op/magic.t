@@ -316,7 +316,7 @@ $^X = Cygwin::win_to_posix_path(Cygwin::posix_to_win_path($^X, 1));
 $0 = Cygwin::win_to_posix_path(Cygwin::posix_to_win_path($0, 1));
 EOX
     }
-    if ($^O eq 'os390' or $^O eq 'posix-bc' or $^O eq 'vmesa') {  # no shebang
+    if ($^O eq 'os390' or $^O eq 'posix-bc') {  # no shebang
 	$headmaybe = <<EOH ;
     eval 'exec ./perl -S \$0 \${1+"\$\@"}'
         if 0;
