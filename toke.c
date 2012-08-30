@@ -9478,24 +9478,18 @@ S_scan_trans(pTHX_ char *start)
    a whole string being evalled, or the contents of the current quote-
    like operator.
 
-   The three methods are:
-    - Steal lines from the input stream (stream)
-    - Scan the heredoc in PL_linestr and remove it therefrom (linestr)
-    - Peek at the PL_linestr of outer lexing scopes (peek)
+   The two basic methods are:
+    - Steal lines from the input stream
+    - Scan the heredoc in PL_linestr and remove it therefrom
 
-   They are used in these cases:
-     file scope or filtered eval			stream
-     string eval					linestr
-     multiline quoted construct				linestr
-     single-line quoted construct in file		stream
-     single-line quoted construct in eval or quote	peek
+   In a file scope or filtered eval, the first method is used; in a
+   string eval, the second.
 
-   Single-line also applies to heredocs that begin on the last line of a
-   quote-like operator.
-
-   Peeking within a quote also involves falling back to the stream method,
-   if the outer quote-like operators are all on one line (or the heredoc
-   marker is on the last line).
+   In a quote-like operator, we have to choose between the two,
+   depending on where we can find a newline.  We peek into outer lex-
+   ing scopes until we find one with a newline in it.  If we reach the
+   outermost lexing scope and it is a file, we use the stream method.
+   Otherwise it is treated as an eval.
 */
 
 STATIC char *
@@ -9613,11 +9607,14 @@ S_scan_heredoc(pTHX_ register char *s)
 
     PL_multi_start = CopLINE(PL_curcop) + 1;
     PL_multi_open = PL_multi_close = '<';
+    /* inside a string eval or quote-like operator */
     if (!infile || PL_lex_inwhat) {
 	SV *linestr;
 	char *bufptr, *bufend;
 	char * const olds = s;
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
+	/* These two fields are not set until an inner lexing scope is
+	   entered.  But we need them set here. */
 	shared->ls_bufptr  = s;
 	shared->ls_linestr = PL_linestr;
 	if (PL_lex_inwhat)
@@ -9678,6 +9675,10 @@ S_scan_heredoc(pTHX_ register char *s)
 	/* s now points to the newline after the heredoc terminator.
 	   d points to the newline before the body of the heredoc.
 	 */
+
+	/* We are going to modify linestr in place here, so set
+	   aside copies of the string if necessary for re-evals or
+	   (caller $n)[6]. */
 	/* See the Paranoia note in case LEX_INTERPEND in yylex, for why we
 	   check shared->re_eval_str. */
 	if (shared->re_eval_start || shared->re_eval_str) {
@@ -9696,6 +9697,9 @@ S_scan_heredoc(pTHX_ register char *s)
 	/* Copy everything from s onwards back to d. */
 	Move(s,d,bufend-s + 1,char);
 	SvCUR_set(linestr, SvCUR(linestr) - (s-d));
+	/* Setting PL_bufend only applies when we have not dug deeper
+	   into other scopes, because sublex_done sets PL_bufend to
+	   SvEND(PL_linestr). */
 	if (shared == PL_parser->lex_shared) PL_bufend = SvEND(linestr);
 	s = olds;
     }
