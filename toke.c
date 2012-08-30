@@ -9673,10 +9673,7 @@ S_scan_heredoc(pTHX_ register char *s)
 		++shared->herelines;
 	}
 	if (s >= bufend) {
-	    SvREFCNT_dec(herewas);
-	    SvREFCNT_dec(tmpstr);
-	    CopLINE_set(PL_curcop, (line_t)PL_multi_start-1);
-	    missingterm(PL_tokenbuf + 1);
+	    goto interminable;
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 	s += len - 1;
@@ -9713,10 +9710,7 @@ S_scan_heredoc(pTHX_ register char *s)
 		++shared->herelines;
 	}
 	if (s >= PL_bufend) {
-	    SvREFCNT_dec(herewas);
-	    SvREFCNT_dec(tmpstr);
-	    CopLINE_set(PL_curcop, (line_t)PL_multi_start-1);
-	    missingterm(PL_tokenbuf + 1);
+	    goto interminable;
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
 #ifdef PERL_MAD
@@ -9782,11 +9776,8 @@ S_scan_heredoc(pTHX_ register char *s)
 		    PL_multi_start + shared->herelines);
 	if (!lex_next_chunk(LEX_NO_TERM)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
-	    SvREFCNT_dec(herewas);
-	    SvREFCNT_dec(tmpstr);
 	    SvREFCNT_dec(linestr_save);
-	    CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
-	    missingterm(PL_tokenbuf + 1);
+	    goto interminable;
 	}
 	CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
 	if (!SvCUR(PL_linestr) || PL_bufend[-1] != '\n') {
@@ -9844,6 +9835,12 @@ retval:
     PL_lex_stuff = tmpstr;
     pl_yylval.ival = op_type;
     return s;
+
+  interminable:
+    SvREFCNT_dec(herewas);
+    SvREFCNT_dec(tmpstr);
+    CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
+    missingterm(PL_tokenbuf + 1);
 }
 
 /* scan_inputsymbol
