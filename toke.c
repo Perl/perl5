@@ -9506,7 +9506,6 @@ S_scan_heredoc(pTHX_ register char *s)
     I32 len;
     SV *tmpstr;
     char term;
-    char *found_newline = 0;
     char *d;
     char *e;
     char *peek;
@@ -9589,9 +9588,6 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
 #endif
-    if (!infile || PL_lex_inwhat) {
-	found_newline = (char*)memchr((void*)s, '\n', PL_bufend - s);
-    }
 #ifdef PERL_MAD
     if (PL_madskills) {
 	tstart = SvPVX(PL_linestr) + stuffstart;
@@ -9617,16 +9613,23 @@ S_scan_heredoc(pTHX_ register char *s)
 
     PL_multi_start = CopLINE(PL_curcop) + 1;
     PL_multi_open = PL_multi_close = '<';
-    if (PL_lex_inwhat && !found_newline) {
-	/* Peek into the line buffer of the parent lexing scope, going up
- 	   as many levels as necessary to find one with a newline after
-	   bufptr.
-	 */
+    if (!infile || PL_lex_inwhat) {
 	SV *linestr;
 	char *bufptr, *bufend;
 	char * const olds = s;
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
-	do {
+	shared->ls_bufptr  = s;
+	shared->ls_linestr = PL_linestr;
+	if (PL_lex_inwhat)
+	  /* Look for a newline.  If the current buffer does not have one,
+	     peek into the line buffer of the parent lexing scope, going
+ 	     up as many levels as necessary to find one with a newline
+	     after bufptr.
+	   */
+	  while (!(s = (char *)memchr(
+		    (void *)shared->ls_bufptr, '\n',
+		    SvEND(shared->ls_linestr)-shared->ls_bufptr
+		))) {
 	    shared = shared->ls_prev;
 	    /* shared is only null if we have gone beyond the outermost
 	       lexing scope.  In a file, we will have broken out of the
@@ -9641,10 +9644,11 @@ S_scan_heredoc(pTHX_ register char *s)
 		s = olds;
 		goto streaming;
 	    }
-	} while (!(s = (char *)memchr(
-		    (void *)shared->ls_bufptr, '\n',
-		    SvEND(shared->ls_linestr)-shared->ls_bufptr
-		)));
+	  }
+	else {	/* eval */
+	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
+	    assert(s);
+	}
 	bufptr = shared->ls_bufptr;
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
@@ -9655,42 +9659,6 @@ S_scan_heredoc(pTHX_ register char *s)
 		++shared->herelines;
 	}
 	if (s >= bufend) {
-	    goto interminable;
-	}
-	sv_setpvn(tmpstr,d+1,s-d);
-	s += len - 1;
-	shared->herelines++;	/* the preceding stmt passes a newline */
-	/* See the Paranoia note in case LEX_INTERPEND in yylex, for why we
-	   check shared->re_eval_str. */
-	if (shared->re_eval_start || shared->re_eval_str) {
-	    /* Set aside the rest of the regexp */
-	    if (!shared->re_eval_str)
-		shared->re_eval_str =
-		       newSVpvn(shared->re_eval_start,
-				SvEND(linestr) - shared->re_eval_start);
-	    shared->re_eval_start -= s-d;
-	}
-	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
-	 && cx->blk_eval.cur_text == linestr) {
-	    cx->blk_eval.cur_text = newSVsv(linestr);
-	    SvSCREAM_on(cx->blk_eval.cur_text);
-	}
-	Move(s,d,bufend-s + 1,char);
-	SvCUR_set(linestr,
-		  SvCUR(linestr) - (s-d));
-
-	s = olds;
-    }
-    else if (!infile || found_newline) {
-	char * const olds = s;
-	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
-	d = s = found_newline ? found_newline : PL_bufend;
-	while (s < PL_bufend &&
-	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
-	    if (*s++ == '\n')
-		++shared->herelines;
-	}
-	if (s >= PL_bufend) {
 	    goto interminable;
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
@@ -9717,18 +9685,18 @@ S_scan_heredoc(pTHX_ register char *s)
 	    if (!shared->re_eval_str)
 		shared->re_eval_str =
 		       newSVpvn(shared->re_eval_start,
-				PL_bufend - shared->re_eval_start);
+				bufend - shared->re_eval_start);
 	    shared->re_eval_start -= s-d;
 	}
 	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
-	 && cx->blk_eval.cur_text == PL_linestr) {
-	    cx->blk_eval.cur_text = newSVsv(PL_linestr);
+	 && cx->blk_eval.cur_text == linestr) {
+	    cx->blk_eval.cur_text = newSVsv(linestr);
 	    SvSCREAM_on(cx->blk_eval.cur_text);
 	}
 	/* Copy everything from s onwards back to d. */
-	Move(s,d,PL_bufend-s + 1,char);
-	SvCUR_set(PL_linestr, SvCUR(PL_linestr) - (s-d));
-	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
+	Move(s,d,bufend-s + 1,char);
+	SvCUR_set(linestr, SvCUR(linestr) - (s-d));
+	if (shared == PL_parser->lex_shared) PL_bufend = SvEND(linestr);
 	s = olds;
     }
     else
