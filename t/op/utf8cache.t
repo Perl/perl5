@@ -5,12 +5,14 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    skip_all_without_dynamic_extension('Devel::Peek');
 }
 
 use strict;
 
 plan(tests => 2);
+
+SKIP: {
+skip_without_dynamic_extension("Devel::Peek");
 
 my $pid = open CHILD, '-|';
 die "kablam: $!\n" unless defined $pid;
@@ -35,6 +37,8 @@ my $utf8magic = qr{ ^ \s+ MAGIC \s = .* \n
                       \s+ MG_LEN \s = .* \n }xm;
 
 unlike($_, qr{ $utf8magic $utf8magic }x);
+
+} # SKIP
 
 # With bad caching, this code used to go quadratic and take 10s of minutes.
 # The 'test' in this case is simply that it doesn't hang.
