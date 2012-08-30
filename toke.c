@@ -5263,6 +5263,7 @@ Perl_yylex(pTHX)
 		    incline(s);
 	    }
 	    else {
+		const bool in_comment = *s == '#';
 		d = s;
 		while (d < PL_bufend && *d != '\n')
 		    d++;
@@ -5276,7 +5277,11 @@ Perl_yylex(pTHX)
 		    PL_thiswhite = newSVpvn(s, d - s);
 #endif
 		s = d;
-		incline(s);
+		if (in_comment && d == PL_bufend
+		 && PL_lex_state == LEX_INTERPNORMAL
+		 && PL_lex_inwhat == OP_SUBST && PL_lex_repl
+		 && SvEVALED(PL_lex_repl) && d[-1] == '}') s--;
+		else incline(s);
 	    }
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_lex_state = LEX_FORMLINE;
@@ -9361,8 +9366,6 @@ S_scan_subst(pTHX_ char *start)
 	}
 	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_sublex_info.repl);
-	if (strchr(SvPVX(PL_sublex_info.repl), '#'))
-	    sv_catpvs(repl, "\n");
 	sv_catpvs(repl, "}");
 	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_sublex_info.repl);

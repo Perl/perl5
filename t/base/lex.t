@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..69\n";
+print "1..71\n";
 
 $x = 'x';
 
@@ -344,3 +344,13 @@ END
 b"';
 print "not " if $_ =~ /\n\n/;
 print "ok 69 - eval 's//<<END/' does not leave extra newlines\n";
+
+$_ = a;
+eval "s/a/'b\0'#/e";
+print 'not ' unless $_ eq "b\0";
+print "ok 70 - # after null in s/// repl\n";
+
+s//"#" . <<END/e;
+foo
+END
+print "ok 71 - s//'#' . <<END/e\n";
