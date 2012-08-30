@@ -9502,12 +9502,11 @@ STATIC char *
 S_scan_heredoc(pTHX_ register char *s)
 {
     dVAR;
-    SV *herewas;
     I32 op_type = OP_SCALAR;
     I32 len;
     SV *tmpstr;
     char term;
-    const char *found_newline = 0;
+    char *found_newline = 0;
     char *d;
     char *e;
     char *peek;
@@ -9590,17 +9589,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
 #endif
-    if ((infile && !PL_lex_inwhat)
-     || !(found_newline = (char*)memchr((void*)s, '\n', PL_bufend - s))) {
-        herewas = newSVpvn(s,PL_bufend-s);
-    }
-    else {
-#ifdef PERL_MAD
-        herewas = newSVpvn(s-1,found_newline-s+1);
-#else
-        s--;
-        herewas = newSVpvn(s,found_newline-s);
-#endif
+    if (!infile || PL_lex_inwhat) {
+	found_newline = (char*)memchr((void*)s, '\n', PL_bufend - s);
     }
 #ifdef PERL_MAD
     if (PL_madskills) {
@@ -9611,13 +9601,9 @@ S_scan_heredoc(pTHX_ register char *s)
 	    PL_thisstuff = newSVpvn(tstart, s - tstart);
     }
 #endif
-    s += SvCUR(herewas);
 
 #ifdef PERL_MAD
     stuffstart = s - SvPVX(PL_linestr);
-
-    if (found_newline)
-	s--;
 #endif
 
     tmpstr = newSV_type(SVt_PVIV);
@@ -9641,8 +9627,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	 */
 	SV *linestr;
 	char *bufptr, *bufend;
-	char * const olds = s - SvCUR(herewas);
-	char * const real_olds = s;
+	char * const olds = s;
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
 	do {
 	    shared = shared->ls_prev;
@@ -9656,7 +9641,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	       most lexing scope.  In a file, shared->ls_linestr at that
 	       level is just one line, so there is no body to steal. */
 	    if (infile && !shared->ls_prev) {
-		s = real_olds;
+		s = olds;
 		goto streaming;
 	    }
 	} while (!(s = (char *)memchr(
@@ -9698,12 +9683,11 @@ S_scan_heredoc(pTHX_ register char *s)
 		  SvCUR(linestr) - (s-d));
 
 	s = olds;
-	goto retval;
     }
     else if (!infile || found_newline) {
-	char * const olds = s - SvCUR(herewas);
+	char * const olds = s;
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
-	d = s;
+	d = s = found_newline ? found_newline : PL_bufend;
 	while (s < PL_bufend &&
 	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
 	    if (*s++ == '\n')
@@ -9758,10 +9742,10 @@ S_scan_heredoc(pTHX_ register char *s)
       term = PL_tokenbuf[1];
       len--;
       linestr_save = PL_linestr; /* must restore this afterwards */
-      d = s - SvCUR(herewas) - 1; /* s gets set to this afterwards */
+      d = s;			 /* and this */
       PL_linestr = newSVpvs("");
-      PL_bufptr = PL_bufend = s = SvPVX(PL_linestr);
-      while (s >= PL_bufend) {	/* multiple line string? */
+      PL_bufend = SvPVX(PL_linestr);
+      while (1) {
 #ifdef PERL_MAD
 	if (PL_madskills) {
 	    tstart = SvPVX(PL_linestr) + stuffstart;
@@ -9771,7 +9755,7 @@ S_scan_heredoc(pTHX_ register char *s)
 		PL_thisstuff = newSVpvn(tstart, PL_bufend - tstart);
 	}
 #endif
-	PL_bufptr = s;
+	PL_bufptr = PL_bufend;
 	CopLINE_set(PL_curcop,
 		    PL_multi_start + shared->herelines);
 	if (!lex_next_chunk(LEX_NO_TERM)
@@ -9812,20 +9796,17 @@ S_scan_heredoc(pTHX_ register char *s)
 	    PL_linestart = SvPVX(linestr_save);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    s = d;
+	    break;
 	}
 	else {
-	    s = PL_bufend;
 	    sv_catsv(tmpstr,PL_linestr);
 	}
       }
     }
-    s++;
-retval:
     PL_multi_end = CopLINE(PL_curcop);
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
 	SvPV_shrink_to_cur(tmpstr);
     }
-    SvREFCNT_dec(herewas);
     if (!IN_BYTES) {
 	if (UTF && is_utf8_string((U8*)SvPVX_const(tmpstr), SvCUR(tmpstr)))
 	    SvUTF8_on(tmpstr);
@@ -9837,7 +9818,6 @@ retval:
     return s;
 
   interminable:
-    SvREFCNT_dec(herewas);
     SvREFCNT_dec(tmpstr);
     CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
     missingterm(PL_tokenbuf + 1);
