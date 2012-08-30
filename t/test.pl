@@ -109,6 +109,16 @@ sub _comment {
            map { split /\n/ } @_;
 }
 
+sub _have_dynamic_extension {
+    my $extension = shift;
+    unless (eval {require Config; 1}) {
+	warn "test.pl had problems loading Config: $@";
+	return 1;
+    }
+    $extension =~ s!::!/!g;
+    return 1 if ($Config::Config{extensions} =~ /\b$extension\b/);
+}
+
 sub skip_all {
     if (@_) {
         _print "1..0 # Skip @_\n";
@@ -123,14 +133,9 @@ sub skip_all_if_miniperl {
 }
 
 sub skip_all_without_dynamic_extension {
-    my $extension = shift;
+    my ($extension) = @_;
     skip_all("no dynamic loading on miniperl, no $extension") if is_miniperl();
-    unless (eval {require Config; 1}) {
-	warn "test.pl had problems loading Config: $@";
-	return;
-    }
-    $extension =~ s!::!/!g;
-    return if ($Config::Config{extensions} =~ /\b$extension\b/);
+    return if &_have_dynamic_extension;
     skip_all("$extension was not built");
 }
 
@@ -452,6 +457,13 @@ sub skip {
 
 sub skip_if_miniperl {
     skip(@_) if is_miniperl();
+}
+
+sub skip_without_dynamic_extension {
+    my ($extension) = @_;
+    skip("no dynamic loading on miniperl, no $extension") if is_miniperl();
+    return if &_have_dynamic_extension;
+    skip_all("$extension was not built");
 }
 
 sub todo_skip {
