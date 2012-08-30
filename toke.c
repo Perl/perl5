@@ -9620,8 +9620,7 @@ S_scan_heredoc(pTHX_ register char *s)
     if (PL_lex_inwhat && !found_newline) {
 	/* Peek into the line buffer of the parent lexing scope, going up
  	   as many levels as necessary to find one with a newline after
-	   bufptr.  See the comments in sublex_push for how IVX and NVX
-	   are abused.
+	   bufptr.
 	 */
 	SV *linestr;
 	char *bufptr, *bufend;
