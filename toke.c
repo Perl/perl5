@@ -9600,9 +9600,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	else
 	    PL_thisstuff = newSVpvn(tstart, s - tstart);
     }
-#endif
 
-#ifdef PERL_MAD
     stuffstart = s - SvPVX(PL_linestr);
 #endif
 
