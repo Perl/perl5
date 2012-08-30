@@ -6,30 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 14;
-
-{
-    local $SIG{__DIE__} = sub { is( $_[0], "[\000]\n", 'Embedded null passed to signal handler' )};
-
-    $err = "[\000]\n";
-    eval {
-        die $err;
-    };
-    is( $@, $err, 'Embedded null passed back into $@' );
-}
-
-{
-    local $SIG{__DIE__} = sub { isa_ok( $_[0], 'ARRAY', 'pass an array ref as an argument' ); };
-    $x = [3];
-    eval { die $x; };
-
-    $SIG{__DIE__} = sub { $_[0]->[0]++; } ;
-    $x = [3];
-    eval { die $x; };
-    is( $x->[0], 4, 'actual array, not a copy, passed to signal handler' );
-}
-
-$SIG{__DIE__} = 'DEFAULT';
+plan tests => 19;
 
 eval {
     eval {
@@ -42,7 +19,24 @@ like($@, '^Horribly', 'die with no args propagates $@');
 like($@, 'propagated', '... and appends a phrase');
 
 {
-    local $SIG{__DIE__} = sub { $_[0]->[0]++ };
+    local $SIG{__DIE__} = sub { is( $_[0], "[\000]\n", 'Embedded null passed to signal handler' )};
+
+    $err = "[\000]\n";
+    eval {
+        die $err;
+    };
+    is( $@, $err, 'Embedded null passed back into $@' );
+}
+
+{
+    local $SIG{__DIE__} = sub {
+	isa_ok( $_[0], 'ARRAY', 'pass an array ref as an argument' );
+	$_[0]->[0]++;
+    };
+    $x = [3];
+    eval { die $x; };
+
+    is( $x->[0], 4, 'actual array, not a copy, passed to signal handler' );
 
     eval {
         eval {
@@ -52,6 +46,17 @@ like($@, 'propagated', '... and appends a phrase');
     };
 
     is($@->[0], 7, 'die with no arguments propagates $@, but leaves references alone');
+
+    eval {
+	eval {
+	    die bless [ 7 ], "Error";
+	};
+	isa_ok( $@, 'Error', '$@ is an Error object' );
+	die if $@;
+    };
+
+    isa_ok( $@, 'Out', 'returning a different object than what was passed in, via PROPAGATE' );
+    is($@->[0], 9, 'reference returned correctly');
 }
 
 {
@@ -62,15 +67,6 @@ like($@, 'propagated', '... and appends a phrase');
     }
 }
 
-eval {
-    eval {
-	die bless [ 7 ], "Error";
-    };
-    isa_ok( $@, 'Error', '$@ is an Error object' );
-    die if $@;
-};
-
-isa_ok( $@, 'Out', 'returning a different object than what was passed in, via PROPAGATE' );
 
 {
     # die/warn and utf8
