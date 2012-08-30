@@ -12,7 +12,6 @@ chdir 't' or die "Can't chdir to t/, $!";
 # warning in that case.
 
 {
-  local $TODO = "Test for warning on non-parameter in parameter list";
   my $out;
   open my $out_fh, ">", \$out;
   my @warnings;

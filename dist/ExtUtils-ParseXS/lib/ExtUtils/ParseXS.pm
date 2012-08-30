@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.17';
+  $VERSION = '3.18';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -1768,7 +1768,7 @@ sub output_init {
     $argsref->{init},
     $argsref->{printed_name}
   );
-  my $arg = "ST(" . ($num - 1) . ")";
+  my $arg = $num ? "ST(" . ($num - 1) . ")" : "/* not a parameter */";
 
   if (  $init =~ /^=/  ) {
     if ($printed_name) {
