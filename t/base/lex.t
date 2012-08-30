@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..71\n";
+print "1..72\n";
 
 $x = 'x';
 
@@ -354,3 +354,7 @@ s//"#" . <<END/e;
 foo
 END
 print "ok 71 - s//'#' . <<END/e\n";
+
+eval "s//3}->{3/e";
+print "not " unless $@;
+print "ok 72 - s//3}->{3/e\n";

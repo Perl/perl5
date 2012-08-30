@@ -5932,7 +5932,10 @@ Perl_yylex(pTHX)
 #endif
 		    return yylex();	/* ignore fake brackets */
 		}
-		if (*s == '-' && s[1] == '>')
+		if (PL_lex_inwhat == OP_SUBST && PL_lex_repl
+		 && SvEVALED(PL_lex_repl))
+		    PL_lex_state = LEX_INTERPEND;
+		else if (*s == '-' && s[1] == '>')
 		    PL_lex_state = LEX_INTERPENDMAYBE;
 		else if (*s != '[' && *s != '{')
 		    PL_lex_state = LEX_INTERPEND;
