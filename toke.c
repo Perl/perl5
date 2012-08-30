@@ -9773,7 +9773,6 @@ S_scan_heredoc(pTHX_ register char *s)
 	stuffstart = s - SvPVX(PL_linestr);
 #endif
 	shared->herelines++;
-	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
 #ifndef PERL_STRICT_CR
 	if (PL_bufend - PL_linestart >= 2) {
