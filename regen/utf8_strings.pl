@@ -9,6 +9,10 @@ my $out_fh = open_new('utf8_strings.h', '>',
                       from => "Unicode data"});
 
 print $out_fh <<END;
+
+#ifndef H_UTF8_STRINGS   /* Guard against nested #includes */
+#define H_UTF8_STRINGS   1
+
 /* This file contains #defines for various Unicode code points.  The values
  * for the macros are all or portions of the UTF-8 encoding for the code
  * point.  Note that the names all have the suffix "_UTF8".
@@ -91,6 +95,8 @@ while ( <DATA> ) {
     }
     print $out_fh "#define ${name}$suffix $str    /* U+$cp */\n";
 }
+
+print $out_fh "\n#endif /* H_UTF8_STRINGS */\n";
 
 read_only_bottom_close_and_rename($out_fh);
 

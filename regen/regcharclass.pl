@@ -626,6 +626,7 @@ if ( !caller ) {
     print $out_fh read_only_top( lang => 'C', by => $0,
 				 file => 'regcharclass.h', style => '*',
 				 copyright => [2007, 2011] );
+    print $out_fh "\n#ifndef H_REGCHARCLASS   /* Guard against nested #includes */\n#define H_REGCHARCLASS 1\n\n";
 
     my ( $op, $title, @txt, @types, @mods );
     my $doit= sub {
@@ -668,6 +669,9 @@ if ( !caller ) {
         }
     }
     $doit->();
+
+    print $out_fh "\n#endif /* H_REGCHARCLASS */\n";
+
     if($path eq '-') {
 	print $out_fh "/* ex: set ro: */\n";
     } else {

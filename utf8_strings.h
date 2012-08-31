@@ -4,6 +4,10 @@
  * Any changes made here will be lost!
  */
 
+
+#ifndef H_UTF8_STRINGS   /* Guard against nested #includes */
+#define H_UTF8_STRINGS   1
+
 /* This file contains #defines for various Unicode code points.  The values
  * for the macros are all or portions of the UTF-8 encoding for the code
  * point.  Note that the names all have the suffix "_UTF8".
@@ -26,5 +30,7 @@
 #define HANGUL_JUNGSEONG_FILLER_UTF8 "\xE1\x85\xA0"    /* U+1160 */
 #define HANGUL_JONGSEONG_KIYEOK_UTF8 "\xE1\x86\xA8"    /* U+11A8 */
 #define HYPHEN_UTF8 "\xE2\x80\x90"    /* U+2010 */
+
+#endif /* H_UTF8_STRINGS */
 
 /* ex: set ro: */

@@ -12,6 +12,10 @@
  * Any changes made here will be lost!
  */
 
+
+#ifndef H_REGCHARCLASS   /* Guard against nested #includes */
+#define H_REGCHARCLASS 1
+
 /*
 	LNBREAK: Line Break: \R
 
@@ -358,5 +362,7 @@
 ( 0x2028 == cp || ( 0x2028 < cp &&                                          \
 0x2029 == cp ) ) ) ) ) )
 
+
+#endif /* H_REGCHARCLASS */
 
 /* ex: set ro: */
