@@ -173,7 +173,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "disabled under -Dmad (eval leaks)" if $Config{mad};
+    skip "disabled under -Dmad (eval leaks)", 5 if $Config{mad};
     leak(2, 0, sub { eval '"${<<END}"
                  ' }, 'unterminated here-doc in quotes in multiline eval');
     leak(2, 0, sub { eval '"${<<END
