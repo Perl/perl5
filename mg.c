@@ -2204,7 +2204,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     if (!translate_substr_offsets(
-	    SvUTF8(lsv) ? sv_len_utf8(lsv) : len,
+	    SvUTF8(lsv) ? sv_len_utf8_nomg(lsv) : len,
 	    negoff ? -(IV)offs : (IV)offs, !negoff,
 	    negrem ? -(IV)rem  : (IV)rem,  !negrem, &offs, &rem
     )) {
