@@ -400,6 +400,7 @@ my $non_pods = qr/ (?: \.
                            | $lib_so  # shared libraries
                            | $dl_ext  # dynamic libraries
                            | gif      # GIF images (example files from CGI.pm)
+                           | eg       # examples from libnet
                        )
                        $
                     ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
