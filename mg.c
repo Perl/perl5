@@ -2241,7 +2241,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
 			    "Attempt to use reference as lvalue in substr"
 	);
-    if (SvUTF8(lsv)) lsv_len = sv_len_utf8(lsv);
+    if (SvUTF8(lsv)) lsv_len = sv_len_utf8_nomg(lsv);
     else (void)SvPV_nomg(lsv,lsv_len);
     if (!translate_substr_offsets(
 	    lsv_len,
