@@ -5250,8 +5250,8 @@ Perl_yylex(pTHX)
 	    PL_faketokens = 0;
 #endif
 	if (PL_lex_state != LEX_NORMAL ||
-	     (!PL_rsfp && !PL_parser->filtered)) {
-	    if (*s == '#' && s == PL_linestart
+	     (PL_in_eval && !PL_rsfp && !PL_parser->filtered)) {
+	    if (*s == '#' && s == PL_linestart && PL_in_eval
 	     && !PL_rsfp && !PL_parser->filtered) {
 		/* handle eval qq[#line 1 "foo"\n ...] */
 		CopLINE_dec(PL_curcop);
@@ -5259,7 +5259,7 @@ Perl_yylex(pTHX)
 	    }
 	    if (PL_madskills && !PL_lex_formbrack && !PL_in_eval) {
 		s = SKIPSPACE0(s);
-		if (PL_rsfp || PL_parser->filtered)
+		if (!PL_in_eval || PL_rsfp || PL_parser->filtered)
 		    incline(s);
 	    }
 	    else {
@@ -6047,7 +6047,7 @@ Perl_yylex(pTHX)
 	    if (PL_expect == XSTATE && isALPHA(tmp) &&
 		(s == PL_linestart+1 || s[-2] == '\n') )
 		{
-		    if ((!PL_rsfp && !PL_parser->filtered)
+		    if ((PL_in_eval && !PL_rsfp && !PL_parser->filtered)
 			|| PL_lex_state != LEX_NORMAL) {
 			d = PL_bufend;
 			while (s < d) {
