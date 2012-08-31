@@ -777,12 +777,17 @@ A slice of an empty list is still an empty list.  Thus:
 
     @a = ()[1,0];           # @a has no elements
     @b = (@a)[0,1];         # @b has no elements
-    @c = (0,1)[2,3];        # @c has no elements
 
 But:
 
     @a = (1)[1,0];          # @a has two elements
     @b = (1,undef)[1,0,2];  # @b has three elements
+
+More generally, a slice yields the empty list if it indexes only
+beyond the end of a list:
+
+    @a = (1)[  1,2];        # @a has no elements
+    @b = (1)[0,1,2];        # @b has three elements
 
 This makes it easy to write loops that terminate when a null list
 is returned:
