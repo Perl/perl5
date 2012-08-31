@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 309);
+    plan (tests => 310);
 }
 
 use strict;
@@ -255,6 +255,7 @@ $dummy  = pack "u", $var; check_count 'pack "u", $utf8';
 tie $var, "main", "\x{100}";
 pos$var = 0             ; check_count 'lvalue pos $utf8';
 $dummy=sprintf"%1s",$var; check_count 'sprintf "%1s", $utf8';
+$dummy=sprintf"%.1s",$var; check_count 'sprintf "%.1s", $utf8';
 $dummy  = substr$var,0,1; check_count 'substr $utf8';
 my $l   =\substr$var,0,1;
 $dummy  = $$l           ; check_count 'reading lvalue substr($utf8)';

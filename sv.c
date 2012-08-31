@@ -10517,10 +10517,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		if (DO_UTF8(argsv)) {
 		    STRLEN old_precis = precis;
 		    if (has_precis && precis < elen) {
-			STRLEN ulen = sv_len_utf8(argsv);
-			I32 p = precis > ulen ? ulen : precis;
-			sv_pos_u2b(argsv, &p, 0); /* sticks at end */
-			precis = p;
+			STRLEN ulen = sv_len_utf8_nomg(argsv);
+			STRLEN p = precis > ulen ? ulen : precis;
+			precis = sv_pos_u2b_flags(argsv, p, 0, 0);
+							/* sticks at end */
 		    }
 		    if (width) { /* fudge width (can't fudge elen) */
 			if (has_precis && precis < elen)
