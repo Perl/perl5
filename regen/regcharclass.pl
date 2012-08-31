@@ -247,8 +247,36 @@ sub new {
         my $str= $txt;
         if ( $str =~ /^[""]/ ) {
             $str= eval $str;
+        } elsif ($str =~ / - /x ) { # A range:  Replace this element on the
+                                    # list with its expansion
+            my ($lower, $upper) = $str =~ / 0x (.+?) \s* - \s* 0x (.+) /x;
+            die "Format must be like '0xDEAD - 0xBEAF'; instead was '$str'" if ! defined $lower || ! defined $upper;
+            foreach my $cp (hex $lower .. hex $upper) {
+                push @{$opt{txt}}, sprintf "0x%X", $cp;
+            }
+            next;
         } elsif ( $str =~ /^0x/ ) {
             $str= chr eval $str;
+        } elsif ( $str =~ / \s* \\p \{ ( .*? ) \} /x) {
+            my $property = $1;
+            use Unicode::UCD qw(prop_invlist);
+
+            my @invlist = prop_invlist($property, '_perl_core_internal_ok');
+            if (! @invlist) {
+
+                # An empty return could mean an unknown property, or merely
+                # that it is empty.  Call in scalar context to differentiate
+                my $count = prop_invlist($property, '_perl_core_internal_ok');
+                die "$property not found" unless defined $count;
+            }
+
+            # Replace this element on the list with the property's expansion
+            for (my $i = 0; $i < @invlist; $i += 2) {
+                foreach my $cp ($invlist[$i] .. $invlist[$i+1] - 1) {
+                    push @{$opt{txt}}, sprintf "0x%X", $cp;
+                }
+            }
+            next;
         } elsif ( /\S/ ) {
             die "Unparsable line: $txt\n";
         } else {
@@ -686,6 +714,9 @@ if ( !caller ) {
 # modifiers come after the colon, valid possibilities
 # being 'fast' and 'safe'.
 #
+# Accepts a single code point per line, prefaced by '0x'
+# or a range of two code points separated by a minus (and optional space)
+# or a single \p{} per line.
 #
 # This is no longer used, but retained in case it is needed some day. Put the
 # lines below under __DATA__
@@ -704,42 +735,12 @@ __DATA__
 LNBREAK: Line Break: \R
 => generic UTF8 LATIN1 :fast safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
-0x0A            # LF  | LINE FEED
-0x0B            # VT  | VERTICAL TAB
-0x0C            # FF  | FORM FEED
-0x0D            # CR  | CARRIAGE RETURN
-0x85            # NEL | NEXT LINE
-0x2028          # LINE SEPARATOR
-0x2029          # PARAGRAPH SEPARATOR
+\p{VertSpace}
 
 HORIZWS: Horizontal Whitespace: \h \H
 => generic UTF8 LATIN1 cp :fast safe
-0x09            # HT
-0x20            # SPACE
-0xa0            # NBSP
-0x1680          # OGHAM SPACE MARK
-0x180e          # MONGOLIAN VOWEL SEPARATOR
-0x2000          # EN QUAD
-0x2001          # EM QUAD
-0x2002          # EN SPACE
-0x2003          # EM SPACE
-0x2004          # THREE-PER-EM SPACE
-0x2005          # FOUR-PER-EM SPACE
-0x2006          # SIX-PER-EM SPACE
-0x2007          # FIGURE SPACE
-0x2008          # PUNCTUATION SPACE
-0x2009          # THIN SPACE
-0x200A          # HAIR SPACE
-0x202f          # NARROW NO-BREAK SPACE
-0x205f          # MEDIUM MATHEMATICAL SPACE
-0x3000          # IDEOGRAPHIC SPACE
+\p{HorizSpace}
 
 VERTWS: Vertical Whitespace: \v \V
 => generic UTF8 LATIN1 cp :fast safe
-0x0A            # LF
-0x0B            # VT
-0x0C            # FF
-0x0D            # CR
-0x85            # NEL
-0x2028          # LINE SEPARATOR
-0x2029          # PARAGRAPH SEPARATOR
+\p{VertSpace}

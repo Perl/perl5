@@ -20,13 +20,7 @@
 	LNBREAK: Line Break: \R
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
-	0x0A            # LF  | LINE FEED
-	0x0B            # VT  | VERTICAL TAB
-	0x0C            # FF  | FORM FEED
-	0x0D            # CR  | CARRIAGE RETURN
-	0x85            # NEL | NEXT LINE
-	0x2028          # LINE SEPARATOR
-	0x2029          # PARAGRAPH SEPARATOR
+	\p{VertSpace}
 */
 /*** GENERATED CODE ***/
 #define is_LNBREAK(s,is_utf8)                                               \
@@ -122,25 +116,7 @@
 /*
 	HORIZWS: Horizontal Whitespace: \h \H
 
-	0x09            # HT
-	0x20            # SPACE
-	0xa0            # NBSP
-	0x1680          # OGHAM SPACE MARK
-	0x180e          # MONGOLIAN VOWEL SEPARATOR
-	0x2000          # EN QUAD
-	0x2001          # EM QUAD
-	0x2002          # EN SPACE
-	0x2003          # EM SPACE
-	0x2004          # THREE-PER-EM SPACE
-	0x2005          # FOUR-PER-EM SPACE
-	0x2006          # SIX-PER-EM SPACE
-	0x2007          # FIGURE SPACE
-	0x2008          # PUNCTUATION SPACE
-	0x2009          # THIN SPACE
-	0x200A          # HAIR SPACE
-	0x202f          # NARROW NO-BREAK SPACE
-	0x205f          # MEDIUM MATHEMATICAL SPACE
-	0x3000          # IDEOGRAPHIC SPACE
+	\p{HorizSpace}
 */
 /*** GENERATED CODE ***/
 #define is_HORIZWS(s,is_utf8)                                               \
@@ -276,13 +252,7 @@
 /*
 	VERTWS: Vertical Whitespace: \v \V
 
-	0x0A            # LF
-	0x0B            # VT
-	0x0C            # FF
-	0x0D            # CR
-	0x85            # NEL
-	0x2028          # LINE SEPARATOR
-	0x2029          # PARAGRAPH SEPARATOR
+	\p{VertSpace}
 */
 /*** GENERATED CODE ***/
 #define is_VERTWS(s,is_utf8)                                                \
