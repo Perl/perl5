@@ -463,7 +463,7 @@ sub skip_without_dynamic_extension {
     my ($extension) = @_;
     skip("no dynamic loading on miniperl, no $extension") if is_miniperl();
     return if &_have_dynamic_extension;
-    skip_all("$extension was not built");
+    skip("$extension was not built");
 }
 
 sub todo_skip {
