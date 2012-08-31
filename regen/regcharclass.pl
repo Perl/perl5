@@ -8,6 +8,8 @@ use Data::Dumper;
 $Data::Dumper::Useqq= 1;
 our $hex_fmt= "0x%02X";
 
+sub ASCII_PLATFORM { (ord('A') == 65) }
+
 require 'regen/regen_lib.pl';
 
 =head1 NAME
@@ -106,14 +108,16 @@ License or the Artistic License, as specified in the README file.
 # represent the string in some given encoding with specific conditions.
 #
 # $cp - list of codepoints that make up the string.
-# $n  - list of octets that make up the string if all codepoints < 128
+# $n  - list of octets that make up the string if all codepoints are invariant
+#       regardless of if the string is in UTF-8 or not.
 # $l  - list of octets that make up the string in latin1 encoding if all
-#       codepoints < 256, and at least one codepoint is >127.
-# $u  - list of octets that make up the string in utf8 if any codepoint >127
+#       codepoints < 256, and at least one codepoint is UTF-8 variant.
+# $u  - list of octets that make up the string in utf8 if any codepoint is
+#       UTF-8 variant
 #
 #   High CP | Defined
 #-----------+----------
-#   0 - 127 : $n
+#   0 - 127 : $n            (127/128 are the values for ASCII platforms)
 # 128 - 255 : $l, $u
 # 256 - ... : $u
 #
@@ -122,13 +126,26 @@ sub __uni_latin1 {
     my $str= shift;
     my $max= 0;
     my @cp;
+    my $only_has_invariants = 1;
     for my $ch ( split //, $str ) {
         my $cp= ord $ch;
         push @cp, $cp;
         $max= $cp if $max < $cp;
+        if (! ASCII_PLATFORM && $only_has_invariants) {
+            if ($cp > 255) {
+                $only_has_invariants = 0;
+            }
+            else {
+                my $temp = chr($cp);
+                utf8::upgrade($temp);
+                my @utf8 = unpack "U0C*", $temp;
+                $only_has_invariants = (@utf8 == 1 && $utf8[0] == $cp);
+            }
+        }
     }
     my ( $n, $l, $u );
-    if ( $max < 128 ) {
+    $only_has_invariants = $max < 128 if ASCII_PLATFORM;
+    if ($only_has_invariants) {
         $n= [@cp];
     } else {
         $l= [@cp] if $max && $max < 256;
@@ -252,8 +269,17 @@ sub new {
                 push @{$opt{txt}}, sprintf "0x%X", $cp;
             }
             next;
-        } elsif ( $str =~ /^0x/ ) {
+        } elsif ($str =~ s/ ^ N (?= 0x ) //x ) {
+            # Otherwise undocumented, a leading N means is already in the
+            # native character set; don't convert.
             $str= chr eval $str;
+        } elsif ( $str =~ /^0x/ ) {
+            $str= eval $str;
+
+            # Convert from Unicode/ASCII to native, if necessary
+            $str = utf8::unicode_to_native($str) if ! ASCII_PLATFORM
+                                                    && $str <= 0xFF;
+            $str = chr $str;
         } elsif ( $str =~ / \s* \\p \{ ( .*? ) \} /x) {
             my $property = $1;
             use Unicode::UCD qw(prop_invlist);
@@ -270,7 +296,10 @@ sub new {
             # Replace this element on the list with the property's expansion
             for (my $i = 0; $i < @invlist; $i += 2) {
                 foreach my $cp ($invlist[$i] .. $invlist[$i+1] - 1) {
-                    push @{$opt{txt}}, sprintf "0x%X", $cp;
+
+                    # prop_invlist() returns native values; add leading 'N'
+                    # to indicate that.
+                    push @{$opt{txt}}, sprintf "N0x%X", $cp;
                 }
             }
             next;
@@ -711,9 +740,12 @@ if ( !caller ) {
 # modifiers come after the colon, valid possibilities
 # being 'fast' and 'safe'.
 #
-# Accepts a single code point per line, prefaced by '0x'
+# Accepts a single Unicode code point per line, prefaced by '0x'
 # or a range of two code points separated by a minus (and optional space)
 # or a single \p{} per line.
+#
+# If run on a non-ASCII platform will automatically convert the Unicode input
+# to native
 #
 # This is no longer used, but retained in case it is needed some day. Put the
 # lines below under __DATA__
