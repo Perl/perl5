@@ -492,7 +492,7 @@ SKIP: {
     local $SIG{__WARN__} = sub { $warn_message .= "@_" };
     ok(!copy($temp_file, $temp_dir),
        "Copy of foo/file to foo/ should fail");
-    like($warn_message, qr/^\Q'$temp_file' and '$temp_file'\E are identical.*Copy\.t/,
+    like($warn_message, qr/^\Q'$temp_file' and '$temp_file'\E are identical.*Copy\.t/i,
 	 "error message should describe the problem");
     1 while unlink $temp_file;
 }
