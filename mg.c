@@ -2166,7 +2166,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     pos = SvIV(sv);
 
     if (DO_UTF8(lsv)) {
-	ulen = sv_len_utf8(lsv);
+	ulen = sv_len_utf8_nomg(lsv);
 	if (ulen)
 	    len = ulen;
     }
@@ -2180,9 +2180,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	pos = len;
 
     if (ulen) {
-	I32 p = pos;
-	sv_pos_u2b(lsv, &p, 0);
-	pos = p;
+	pos = sv_pos_u2b_flags(lsv, pos, 0, 0);
     }
 
     found->mg_len = pos;
