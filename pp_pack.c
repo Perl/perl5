@@ -3569,7 +3569,7 @@ extern const double _double_constants[];
 	    from_utf8 = DO_UTF8(fromstr);
 	    if (from_utf8) {
 		aend = aptr + fromlen;
-		fromlen = sv_len_utf8(fromstr);
+		fromlen = sv_len_utf8_nomg(fromstr);
 	    } else aend = NULL; /* Unused, but keep compilers happy */
 	    GROWING(utf8, cat, start, cur, (fromlen+2) / 3 * 4 + (fromlen+len-1)/len * 2);
 	    while (fromlen > 0) {

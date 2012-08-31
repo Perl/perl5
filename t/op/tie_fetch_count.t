@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 307);
+    plan (tests => 308);
 }
 
 use strict;
@@ -247,6 +247,10 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
     $dummy  =  select $var, undef, undef, 0
                             ; check_count 'select $tied_undef, ...';
 }
+
+chop(my $u = "\xff\x{100}");
+tie $var, "main", $u;
+$dummy  = pack "u", $var; check_count 'pack "u", $utf8';
 
 tie $var, "main", "\x{100}";
 pos$var = 0             ; check_count 'lvalue pos $utf8';
