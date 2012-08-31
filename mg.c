@@ -213,6 +213,10 @@ Perl_mg_get(pTHX_ SV *sv)
 	    if (mg->mg_flags & MGf_GSKIP)
 		(SSPTR(mgs_ix, MGS *))->mgs_magical = 0;
 	}
+	else if (vtbl == &PL_vtbl_utf8) {
+	    /* get-magic can reallocate the PV */
+	    magic_setutf8(sv, mg);
+	}
 
 	mg = nextmg;
 

@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan(tests => 2);
+plan(tests => 5);
 
 SKIP: {
 skip_without_dynamic_extension("Devel::Peek");
@@ -51,3 +51,29 @@ unlike($_, qr{ $utf8magic $utf8magic }x);
     }
     pass("quadratic pos");
 }
+
+# Get-magic can reallocate the PV.  Check that the cache is reset in
+# such cases.
+
+# Regexp vars
+"\x{100}" =~ /(.+)/;
+() = substr $1, 0, 1;
+"a\x{100}" =~ /(.+)/;
+is ord substr($1, 1, 1), 0x100, 'get-magic resets utf8cache on match vars';
+
+# Substr lvalues
+my $x = "a\x{100}";
+my $l = \substr $x, 0;
+() = substr $$l, 1, 1;
+substr $x, 0, 1, = "\x{100}";
+is ord substr($$l, 1, 1), 0x100, 'get-magic resets utf8cache on LVALUEs';
+
+# defelem magic
+my %h;
+sub {
+  $_[0] = "a\x{100}";
+  () = ord substr $_[0], 1, 1;
+  $h{k} = "\x{100}"x2;
+  is ord substr($_[0], 1, 1), 0x100,
+    'get-magic resets uf8cache on defelems';
+}->($h{k});
