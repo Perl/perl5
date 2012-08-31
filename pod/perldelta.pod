@@ -110,9 +110,19 @@ XXX
 
 =item *
 
+L<DB_File> has been upgraded from version 1.826 to 1.827.  The main Perl module
+no longer uses the C<"@_"> construct.
+
+=item *
+
 L<File::Copy> has been upgraded from version 2.23 to 2.24.  C<copy()> no longer
 zeros files when copying into the same directory, and also now fails (as it has
 long been documented to do) when attempting to copy a file over itself.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.22 to 3.23.  It includes some
+new codes.
 
 =item *
 
