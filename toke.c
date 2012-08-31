@@ -5279,7 +5279,7 @@ Perl_yylex(pTHX)
 		s = d;
 		if (in_comment && d == PL_bufend
 		 && PL_lex_state == LEX_INTERPNORMAL
-		 && PL_lex_inwhat == OP_SUBST && PL_lex_repl
+		 && PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
 		 && SvEVALED(PL_lex_repl) && d[-1] == '}') s--;
 		else incline(s);
 	    }
