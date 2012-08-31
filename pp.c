@@ -3020,7 +3020,7 @@ PP(pp_substr)
     }
     tmps = SvPV_const(sv, curlen);
     if (DO_UTF8(sv)) {
-        utf8_curlen = sv_len_utf8(sv);
+        utf8_curlen = sv_len_utf8_nomg(sv);
 	if (utf8_curlen == curlen)
 	    utf8_curlen = 0;
 	else

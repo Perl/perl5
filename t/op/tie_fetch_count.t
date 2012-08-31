@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 303);
+    plan (tests => 304);
 }
 
 use strict;
@@ -247,6 +247,9 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
     $dummy  =  select $var, undef, undef, 0
                             ; check_count 'select $tied_undef, ...';
 }
+
+$var = "\x{100}";
+$dummy  = substr$var,0,1; check_count 'substr $utf8';
 
 {
     local $SIG{__WARN__} = sub {};

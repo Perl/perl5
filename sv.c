@@ -6507,10 +6507,21 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
 	return mg_length(sv);
     else
     {
-	STRLEN len;
-	const U8 *s = (U8*)SvPV_const(sv, len);
+	SvGETMAGIC(sv);
+	return sv_len_utf8_nomg(sv);
+    }
+}
 
-	if (PL_utf8cache) {
+STRLEN
+Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
+{
+    dVAR;
+    STRLEN len;
+    const U8 *s = (U8*)SvPV_nomg_const(sv, len);
+
+    PERL_ARGS_ASSERT_SV_LEN_UTF8_NOMG;
+
+    if (PL_utf8cache) {
 	    STRLEN ulen;
 	    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 
@@ -6536,9 +6547,8 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
 		utf8_mg_len_cache_update(sv, &mg, ulen);
 	    }
 	    return ulen;
-	}
-	return Perl_utf8_length(aTHX_ s, s + len);
     }
+    return Perl_utf8_length(aTHX_ s, s + len);
 }
 
 /* Walk forwards to find the byte corresponding to the passed in UTF-8
