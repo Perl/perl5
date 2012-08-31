@@ -10526,7 +10526,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			if (has_precis && precis < elen)
 			    width += precis - old_precis;
 			else
-			    width += elen - sv_len_utf8(argsv);
+			    width += elen - sv_len_utf8_nomg(argsv);
 		    }
 		    is_utf8 = TRUE;
 		}
