@@ -380,7 +380,7 @@ sub _optree {
     $depth= 0 unless defined $depth;
 
     my @conds= sort { $a <=> $b } grep { length $_ } keys %$trie;
-    if ( $trie->{''} ) {
+    if (exists $trie->{''} ) {
         if ( $ret_type eq 'cp' ) {
             $else= $self->{strs}{ $trie->{''} }{cp}[0];
             $else= sprintf "$self->{val_fmt}", $else if $else > 9;
