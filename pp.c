@@ -5552,13 +5552,6 @@ PP(pp_split)
             /* we never pass the REXEC_COPY_STR flag, so it should
              * never get copied */
             assert(!RX_MATCH_COPIED(rx));
-	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
-		m = s;
-		s = orig;
-		orig = RX_SUBBEG(rx);
-		s = orig + (m - s);
-		strend = s + (strend - m);
-	    }
 	    m = RX_OFFS(rx)[0].start + orig;
 
 	    if (gimme_scalar) {

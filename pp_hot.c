@@ -2217,7 +2217,8 @@ PP(pp_subst)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	&& !is_cow
 #endif
-	&& (I32)clen <= RX_MINLENRET(rx) && (once || !(r_flags & REXEC_COPY_STR))
+        && (I32)clen <= RX_MINLENRET(rx)
+        && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(RX_EXTFLAGS(rx) & RXf_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG))
 	&& !(rpm->op_pmflags & PMf_NONDESTRUCT))
