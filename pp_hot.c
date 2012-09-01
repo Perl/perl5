@@ -1321,8 +1321,6 @@ PP(pp_match)
     }
     if (       RX_NPARENS(rx)
             || PL_sawampersand
-            || SvTEMP(TARG)
-            || SvAMAGIC(TARG)
             || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
     ) {
 	r_flags |= (REXEC_COPY_STR|REXEC_COPY_SKIP_PRE);
@@ -2139,7 +2137,6 @@ PP(pp_subst)
 
     r_flags = (    RX_NPARENS(rx)
                 || PL_sawampersand
-                || SvTEMP(TARG)
                 || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
               )
           ? REXEC_COPY_STR
