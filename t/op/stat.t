@@ -249,6 +249,7 @@ SKIP: {
     skip "ls command not available to Perl in OpenVMS right now.", 6
       if $Is_VMS;
 
+    delete $ENV{CLICOLOR_FORCE};
     my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l";
     my $CMD = "$LS /dev 2>/dev/null";
     my $DEV = qx($CMD);
