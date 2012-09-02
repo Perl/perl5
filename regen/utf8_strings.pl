@@ -26,12 +26,13 @@ print $out_fh <<END;
 
 END
 
-# The data are at the end of this file.  Each line represents one #define.
-# Each line begins with either a Unicode character name with the blanks in it
-# squeezed out or replaced by underscores; or it may be a hexadecimal code
-# point.  In the latter case, the name will be looked-up to use as the name
-# of the macro.  In either case, the macro name will have suffixes as
-# listed above, and all blanks will be replaced by underscores.
+# The data are at the end of this file.  A blank line is output as-is.
+# Otherwise, each line represents one #define, and begins with either a
+# Unicode character name with the blanks in it squeezed out or replaced by
+# underscores; or it may be a hexadecimal Unicode code point.  In the latter
+# case, the name will be looked-up to use as the name of the macro.  In either
+# case, the macro name will have suffixes as listed above, and all blanks will
+# be replaced by underscores.
 #
 # Each line may optionally have one of the following flags on it, separated by
 # white space from the initial token.
@@ -44,6 +45,11 @@ END
 # having to figure things out.
 
 while ( <DATA> ) {
+    if ($_ !~ /\S/) {
+        print $out_fh "\n";
+        next;
+    }
+
     chomp;
     unless ($_ =~ m/ ^ ( [^\ ]* )           # Name or code point token
                        (?: [\ ]+ ( .* ) )?  # optional flag
@@ -104,10 +110,13 @@ __DATA__
 0300
 0301
 0308
-03B9 tail
-03C5 tail
+
 03B9 first
+03B9 tail
+
 03C5 first
+03C5 tail
+
 1100
 1160
 11A8
