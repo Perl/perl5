@@ -44,6 +44,9 @@ END
 #   native  indicates that the output is the code point, converted to the
 #           platform's native character set if applicable
 #
+# If the code point has no official name, the desired name may be appended
+# after the flag, which will be ignored if there is an official name.
+#
 # This program is used to make it convenient to create compile time constants
 # of UTF-8, and to generate proper EBCDIC as well as ASCII without manually
 # having to figure things out.
@@ -56,7 +59,8 @@ while ( <DATA> ) {
 
     chomp;
     unless ($_ =~ m/ ^ ( [^\ ]* )           # Name or code point token
-                       (?: [\ ]+ ( .* ) )?  # optional flag
+                       (?: [\ ]+ ( [^ ]* ) )?  # optional flag
+                       (?: [\ ]+ ( .* ) )?  # name if unnamed; flag is required
                    /x)
     {
         die "Unexpected syntax at line $.: $_\n";
@@ -64,6 +68,7 @@ while ( <DATA> ) {
 
     my $name_or_cp = $1;
     my $flag = $2;
+    my $desired_name = $3;
 
     my $name;
     my $cp;
@@ -77,11 +82,13 @@ while ( <DATA> ) {
     }
     else {
         $cp = $name_or_cp;
-        $name = charnames::viacode("0$cp"); # viacode requires a leading zero
-                                            # to be sure that the argument is hex
+        $name = charnames::viacode("0$cp") // ""; # viacode requires a leading
+                                                  # zero to be sure that the
+                                                  # argument is hex
         die "Unknown code point '$cp' at line $.: $_\n" unless defined $cp;
     }
 
+    $name = $desired_name if $name eq "";
     $name =~ s/ /_/g;   # The macro name can have no blanks in it
 
     my $str = join "", map { sprintf "\\x%02X", $_ }
@@ -128,6 +135,7 @@ __DATA__
 03C5 tail
 
 2010 string
+D800 first FIRST_SURROGATE
 
 007F native
 00DF native
