@@ -127,9 +127,6 @@ __DATA__
 03C5 first
 03C5 tail
 
-1100
-1160
-11A8
 2010 string
 
 007F native
