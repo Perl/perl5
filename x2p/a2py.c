@@ -17,6 +17,8 @@
 #include "../patchlevel.h"
 #endif
 #include "util.h"
+#include "../unicode_constants.h"
+#define DELETE_CHAR DELETE_NATIVE
 
 const char *filename;
 const char *myname;
@@ -289,11 +291,7 @@ yylex(void)
     case ':':
 	tmp = *s++;
 	XOP(tmp);
-#ifdef EBCDIC
-    case 7:
-#else
-    case 127:
-#endif
+    case DELETE_CHAR:
 	s++;
 	XTERM('}');
     case '}':

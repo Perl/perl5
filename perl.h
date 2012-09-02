@@ -5653,15 +5653,7 @@ extern void moncontrol(int);
 
 /* ISO 6429 NEL - C1 control NExt Line */
 /* See http://www.unicode.org/unicode/reports/tr13/ */
-#ifdef EBCDIC	/* In EBCDIC NEL is just an alias for LF */
-#   if '^' == 95	/* CP 1047: MVS OpenEdition - OS/390 - z/OS */
-#       define NEXT_LINE_CHAR	0x15
-#   else		/* CDRA */
-#       define NEXT_LINE_CHAR	0x25
-#   endif
-#else
-#   define NEXT_LINE_CHAR	0x85
-#endif
+#define NEXT_LINE_CHAR	NEXT_LINE_NATIVE
 
 /* The UTF-8 bytes of the Unicode LS and PS, U+2028 and U+2029 */
 #define UNICODE_LINE_SEPA_0	0xE2

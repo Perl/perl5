@@ -93,6 +93,8 @@ EXTCONST unsigned char PL_utf8skip[];
 
 END_EXTERN_C
 
+#include "unicode_constants.h"
+
 /* Native character to iso-8859-1 */
 #define NATIVE_TO_ASCII(ch)      (ch)
 #define ASCII_TO_NATIVE(ch)      (ch)
@@ -481,6 +483,14 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #    define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
 #endif
 
+#define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
+#define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \
+                                LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE
+#define MICRO_SIGN      MICRO_SIGN_NATIVE
+#define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE                               \
+                            LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE
+#define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE                                 \
+                                LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE
 #define UNICODE_GREEK_CAPITAL_LETTER_SIGMA	0x03A3
 #define UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA	0x03C2
 #define UNICODE_GREEK_SMALL_LETTER_SIGMA	0x03C3
@@ -496,14 +506,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UNI_DISPLAY_BACKSLASH	0x0002
 #define UNI_DISPLAY_QQ		(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
 #define UNI_DISPLAY_REGEX	(UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)
-
-#ifndef EBCDIC
-#   define LATIN_SMALL_LETTER_SHARP_S	0x00DF
-#   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS 0x00FF
-#   define MICRO_SIGN 0x00B5
-#   define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE 0x00C5
-#   define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE 0x00E5
-#endif
 
 #define ANYOF_FOLD_SHARP_S(node, input, end)	\
 	(ANYOF_BITMAP_TEST(node, LATIN_SMALL_LETTER_SHARP_S) && \
