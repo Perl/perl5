@@ -186,7 +186,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * is anded with it, and the result is non-zero, then using the original value
  * in UTF8_ACCUMULATE will overflow, shifting bits off the left */
 #define UTF_ACCUMULATION_OVERFLOW_MASK					\
-    (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS) - UTF_ACCUMULATION_SHIFT))
+    (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS)           \
+           - UTF_ACCUMULATION_SHIFT))
 
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
@@ -215,7 +216,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define NATIVE8_TO_UNI(ch)     NATIVE_TO_ASCII(ch)	/* a clearer synonym */
 
-#define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT) | (((U8)new) & UTF_CONTINUATION_MASK))
+#define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT)     \
+                                        | (((U8)new) & UTF_CONTINUATION_MASK))
 
 /* Convert a two (not one) byte utf8 character to a unicode code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
@@ -459,10 +461,10 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UNICODE_DISALLOW_NONCHAR   0x0020
 #define UNICODE_DISALLOW_SUPER     0x0040
 #define UNICODE_DISALLOW_FE_FF     0x0080
-#define UNICODE_WARN_ILLEGAL_INTERCHANGE \
-    (UNICODE_WARN_SURROGATE|UNICODE_WARN_NONCHAR|UNICODE_WARN_SUPER)
-#define UNICODE_DISALLOW_ILLEGAL_INTERCHANGE \
-    (UNICODE_DISALLOW_SURROGATE|UNICODE_DISALLOW_NONCHAR|UNICODE_DISALLOW_SUPER)
+#define UNICODE_WARN_ILLEGAL_INTERCHANGE                                      \
+            (UNICODE_WARN_SURROGATE|UNICODE_WARN_NONCHAR|UNICODE_WARN_SUPER)
+#define UNICODE_DISALLOW_ILLEGAL_INTERCHANGE                                  \
+ (UNICODE_DISALLOW_SURROGATE|UNICODE_DISALLOW_NONCHAR|UNICODE_DISALLOW_SUPER)
 
 /* For backward source compatibility, as are now the default */
 #define UNICODE_ALLOW_SURROGATE 0
