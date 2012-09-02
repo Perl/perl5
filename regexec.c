@@ -7315,6 +7315,74 @@ S_to_byte_substr(pTHX_ register regexp *prog)
     } while (i--);
 }
 
+/* These constants are for finding GCB=LV and GCB=LVT.  These are for the
+ * pre-composed Hangul syllables, which are all in a contiguous block and
+ * arranged there in such a way so as to facilitate alorithmic determination of
+ * their characteristics.  As such, they don't need a swash, but can be
+ * determined by simple arithmetic.  Almost all are GCB=LVT, but every 28th one
+ * is a GCB=LV */
+#define SBASE 0xAC00    /* Start of block */
+#define SCount 11172    /* Length of block */
+#define TCount 28
+
+#if 0   /* This routine is not currently used */
+PERL_STATIC_INLINE bool
+S_is_utf8_X_LV(pTHX_ const U8 *p)
+{
+    /* Unlike most other similarly named routines here, this does not create a
+     * swash, so swash_fetch() cannot be used on PL_utf8_X_LV. */
+
+    dVAR;
+
+    UV cp = valid_utf8_to_uvchr(p, NULL);
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LV;
+
+    /* The earliest Unicode releases did not have these precomposed Hangul
+     * syllables.  Set to point to undef in that case, so will return false on
+     * every call */
+    if (! PL_utf8_X_LV) {   /* Set up if this is the first time called */
+        PL_utf8_X_LV = swash_init("utf8", "_X_GCB_LV", &PL_sv_undef, 1, 0);
+        if (_invlist_len(_get_swash_invlist(PL_utf8_X_LV)) == 0) {
+            SvREFCNT_dec(PL_utf8_X_LV);
+            PL_utf8_X_LV = &PL_sv_undef;
+        }
+    }
+
+    return (PL_utf8_X_LV != &PL_sv_undef
+            && cp >= SBASE && cp < SBASE + SCount
+            && (cp - SBASE) % TCount == 0); /* Only every TCount one is LV */
+}
+#endif
+
+PERL_STATIC_INLINE bool
+S_is_utf8_X_LVT(pTHX_ const U8 *p)
+{
+    /* Unlike most other similarly named routines here, this does not create a
+     * swash, so swash_fetch() cannot be used on PL_utf8_X_LVT. */
+
+    dVAR;
+
+    UV cp = valid_utf8_to_uvchr(p, NULL);
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LVT;
+
+    /* The earliest Unicode releases did not have these precomposed Hangul
+     * syllables.  Set to point to undef in that case, so will return false on
+     * every call */
+    if (! PL_utf8_X_LVT) {   /* Set up if this is the first time called */
+        PL_utf8_X_LVT = swash_init("utf8", "_X_GCB_LVT", &PL_sv_undef, 1, 0);
+        if (_invlist_len(_get_swash_invlist(PL_utf8_X_LVT)) == 0) {
+            SvREFCNT_dec(PL_utf8_X_LVT);
+            PL_utf8_X_LVT = &PL_sv_undef;
+        }
+    }
+
+    return (PL_utf8_X_LVT != &PL_sv_undef
+            && cp >= SBASE && cp < SBASE + SCount
+            && (cp - SBASE) % TCount != 0); /* All but every TCount one is LV */
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd
