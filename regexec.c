@@ -81,7 +81,7 @@
 #endif
 
 #include "inline_invlist.c"
-#include "utf8_strings.h"
+#include "unicode_constants.h"
 
 #define RF_tainted	1	/* tainted information used? e.g. locale */
 #define RF_warned	2		/* warned about big count? */

@@ -89,7 +89,7 @@ extern const struct regexp_engine my_reg_engine;
 #include "dquote_static.c"
 #include "charclass_invlists.h"
 #include "inline_invlist.c"
-#include "utf8_strings.h"
+#include "unicode_constants.h"
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)

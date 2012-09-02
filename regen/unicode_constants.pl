@@ -4,14 +4,14 @@ use warnings;
 require 'regen/regen_lib.pl';
 use charnames qw(:loose);
 
-my $out_fh = open_new('utf8_strings.h', '>',
+my $out_fh = open_new('unicode_constants.h', '>',
 		      {style => '*', by => $0,
                       from => "Unicode data"});
 
 print $out_fh <<END;
 
-#ifndef H_UTF8_STRINGS   /* Guard against nested #includes */
-#define H_UTF8_STRINGS   1
+#ifndef H_UNICODE_CONSTANTS   /* Guard against nested #includes */
+#define H_UNICODE_CONSTANTS   1
 
 /* This file contains #defines for various Unicode code points.  The values
  * the macros expand to are the native Unicode code point, or all or portions
@@ -112,7 +112,7 @@ while ( <DATA> ) {
     print $out_fh "#define ${name}$suffix $str    /* U+$cp */\n";
 }
 
-print $out_fh "\n#endif /* H_UTF8_STRINGS */\n";
+print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
 
 read_only_bottom_close_and_rename($out_fh);
 
