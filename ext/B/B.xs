@@ -403,11 +403,7 @@ cstring(pTHX_ SV *sv, bool perlstyle)
 		sv_catpvs(sstr, "\\$");
 	    else if (perlstyle && *s == '@')
 		sv_catpvs(sstr, "\\@");
-#ifdef EBCDIC
 	    else if (isPRINT(*s))
-#else
-	    else if (*s >= ' ' && *s < 127)
-#endif /* EBCDIC */
 		sv_catpvn(sstr, s, 1);
 	    else if (*s == '\n')
 		sv_catpvs(sstr, "\\n");
@@ -448,11 +444,7 @@ cchar(pTHX_ SV *sv)
 	sv_catpvs(sstr, "\\'");
     else if (c == '\\')
 	sv_catpvs(sstr, "\\\\");
-#ifdef EBCDIC
     else if (isPRINT(c))
-#else
-    else if (c >= ' ' && c < 127)
-#endif /* EBCDIC */
 	sv_catpvn(sstr, s, 1);
     else if (c == '\n')
 	sv_catpvs(sstr, "\\n");
