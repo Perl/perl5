@@ -164,7 +164,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
 #define UTF8_IS_START(c)		(((U8)c) >= 0xc2)
-#define UTF8_IS_CONTINUATION(c)		(((U8)c) >= 0x80 && (((U8)c) <= 0xbf))
+#define UTF8_IS_CONTINUATION(c)		((((U8)c) & 0xC0) == 0x80)
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
 
 /* Masking with 0xfe allows low bit to be 0 or 1; thus this matches 0xc[23] */
