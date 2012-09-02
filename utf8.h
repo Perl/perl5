@@ -100,7 +100,9 @@ END_EXTERN_C
 #define ASCII_TO_NATIVE(ch)      (ch)
 /* Transform after encoding */
 #define NATIVE_TO_UTF(ch)        (ch)
+#define NATIVE_TO_I8(ch) NATIVE_TO_UTF(ch)	/* a clearer synonym */
 #define UTF_TO_NATIVE(ch)        (ch)
+#define I8_TO_NATIVE(ch) UTF_TO_NATIVE(ch)
 /* Transforms in wide UV chars */
 #define UNI_TO_NATIVE(ch)        (ch)
 #define NATIVE_TO_UNI(ch)        (ch)
@@ -235,8 +237,10 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * bytes from an ordinal that is known to fit into two bytes; it must be less
  * than 0x3FF to work across both encodings. */
 /* Nocast allows these to be used in the case label of a switch statement */
-#define UTF8_TWO_BYTE_HI_nocast(c)	UTF_TO_NATIVE(((c) >> UTF_ACCUMULATION_SHIFT) | (0xFF & UTF_START_MARK(2)))
-#define UTF8_TWO_BYTE_LO_nocast(c)	UTF_TO_NATIVE(((c) & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK)
+#define UTF8_TWO_BYTE_HI_nocast(c)	NATIVE_TO_I8(((c)                       \
+                        >> UTF_ACCUMULATION_SHIFT) | (0xFF & UTF_START_MARK(2)))
+#define UTF8_TWO_BYTE_LO_nocast(c)  NATIVE_TO_I8(((c) & UTF_CONTINUATION_MASK)  \
+                                    | UTF_CONTINUATION_MARK)
 
 #define UTF8_TWO_BYTE_HI(c)	((U8) (UTF8_TWO_BYTE_HI_nocast(c)))
 #define UTF8_TWO_BYTE_LO(c)	((U8) (UTF8_TWO_BYTE_LO_nocast(c)))
@@ -376,8 +380,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
  */
 #ifdef EBCDIC /* Both versions assume well-formed UTF8 */
-#   define UTF8_IS_SUPER(s)  (*(s) >= UTF_TO_NATIVE(0xF9)                       \
-      && (*(s) > UTF_TO_NATIVE(0xF9) || (*((s) + 1) >= UTF_TO_NATIVE(0xA2))))
+#   define UTF8_IS_SUPER(s)  (NATIVE_TO_I8(*(s)) >= 0xF9                       \
+      && (NATIVE_TO_I8(*(s)) > 0xF9) || (NATIVE_TO_I8(*((s)) + 1 >= 0xA2)))
 #else
 #   define UTF8_IS_SUPER(s)  (*(s) >= 0xF4                                      \
 					&& (*(s) > 0xF4 || (*((s) + 1) >= 0x90)))
