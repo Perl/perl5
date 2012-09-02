@@ -36,8 +36,9 @@ END
 #
 # Each line may optionally have one of the following flags on it, separated by
 # white space from the initial token.
-#   first   indicates that the output is to be of the FIRST_BYTE form
+#   string  indicates that the output is to be of the string form
 #           described in the comments above that are placed in the file.
+#   first   indicates that the output is to be of the FIRST_BYTE form.
 #   tail    indicates that the output is of the _TAIL form.
 #
 # This program is used to make it convenient to create compile time constants
@@ -84,7 +85,7 @@ while ( <DATA> ) {
                        unpack("U0C*", pack("U", hex $cp));
 
     my $suffix = '_UTF8';
-    if (! defined $flag) {
+    if (! defined $flag  || $flag eq 'string') {
         $str = "\"$str\"";  # Will be a string constant
     } elsif ($flag eq 'tail') {
             $str =~ s/\\x..//;  # Remove the first byte
@@ -107,9 +108,9 @@ print $out_fh "\n#endif /* H_UTF8_STRINGS */\n";
 read_only_bottom_close_and_rename($out_fh);
 
 __DATA__
-0300
-0301
-0308
+0300 string
+0301 string
+0308 string
 
 03B9 first
 03B9 tail
@@ -120,4 +121,4 @@ __DATA__
 1100
 1160
 11A8
-2010
+2010 string
