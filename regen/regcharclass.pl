@@ -303,10 +303,8 @@ sub new {
                 }
             }
             next;
-        } elsif ( /\S/ ) {
-            die "Unparsable line: $txt\n";
         } else {
-            next;
+            die "Unparsable line: $txt\n";
         }
         my ( $cp, $low, $latin1, $utf8 )= __uni_latin1( $str );
         my $UTF8= $low   || $utf8;
@@ -708,7 +706,7 @@ if ( !caller ) {
     };
 
     while ( <DATA> ) {
-        s/^\s*#//;
+        s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
         next unless /\S/;
         chomp;
         if ( /^([A-Z]+)/ ) {
@@ -744,12 +742,16 @@ if ( !caller ) {
 # Accepts a single Unicode code point per line, prefaced by '0x'
 # or a range of two code points separated by a minus (and optional space)
 # or a single \p{} per line.
+# A blank line or one whose first non-blank character is '#' is a comment
 #
 # If run on a non-ASCII platform will automatically convert the Unicode input
 # to native
 #
-# This is no longer used, but retained in case it is needed some day. Put the
-# lines below under __DATA__
+
+1; # in the unlikely case we are being used as a module
+
+__DATA__
+# This is no longer used, but retained in case it is needed some day.
 # TRICKYFOLD: Problematic fold case letters.  When adding to this list, also should add them to regcomp.c and fold_grind.t
 # => generic cp generic-cp generic-both :fast safe
 # 0x00DF	# LATIN SMALL LETTER SHARP S
@@ -759,9 +761,7 @@ if ( !caller ) {
 # 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
-1; # in the unlikely case we are being used as a module
 
-__DATA__
 LNBREAK: Line Break: \R
 => generic UTF8 LATIN1 :fast safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
