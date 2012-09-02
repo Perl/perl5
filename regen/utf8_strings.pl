@@ -14,15 +14,16 @@ print $out_fh <<END;
 #define H_UTF8_STRINGS   1
 
 /* This file contains #defines for various Unicode code points.  The values
- * for the macros are all or portions of the UTF-8 encoding for the code
- * point.  Note that the names all have the suffix "_UTF8".
+ * the macros expand to are the native Unicode code point, or all or portions
+ * of the UTF-8 encoding for the code point.  In the former case, the macro
+ * name has the suffix "_NATIVE"; otherwise, the suffix "_UTF8".
  *
- * The suffix "_FIRST_BYTE" may be appended to the name if the value is just
- * the first byte of the UTF-8 representation; the value will be a numeric
- * constant.
- *
- * The suffix "_TAIL" is appened if instead it represents all but the first
- * byte.  This, and with no suffix are both string constants */
+ * The macros that have the suffix "_UTF8" may have further suffixes, as
+ * follows:
+ *  "_FIRST_BYTE" if the value is just the first byte of the UTF-8
+ *                representation; the value will be a numeric constant.
+ *  "_TAIL"       if instead it represents all but the first byte.  This, and
+ *                with no additional suffix are both string constants */
 
 END
 
@@ -40,6 +41,8 @@ END
 #           described in the comments above that are placed in the file.
 #   first   indicates that the output is to be of the FIRST_BYTE form.
 #   tail    indicates that the output is of the _TAIL form.
+#   native  indicates that the output is the code point, converted to the
+#           platform's native character set if applicable
 #
 # This program is used to make it convenient to create compile time constants
 # of UTF-8, and to generate proper EBCDIC as well as ASCII without manually
@@ -97,6 +100,12 @@ while ( <DATA> ) {
         $suffix .= '_FIRST_BYTE';
         $str = "0x$str";        # Is a numeric constant
     }
+    elsif ($flag eq 'native') {
+        die "Are you sure you want to run this on an above-Latin1 code point?" if hex $cp > 0xff;
+        $suffix = '_NATIVE';
+        $str = utf8::unicode_to_native(hex $cp);
+        $str = "0x$cp";        # Is a numeric constant
+    }
     else {
         die "Unknown flag at line $.: $_\n";
     }
@@ -122,3 +131,11 @@ __DATA__
 1160
 11A8
 2010 string
+
+007F native
+00DF native
+00E5 native
+00C5 native
+00FF native
+00B5 native
+0085 native

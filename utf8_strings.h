@@ -9,15 +9,16 @@
 #define H_UTF8_STRINGS   1
 
 /* This file contains #defines for various Unicode code points.  The values
- * for the macros are all or portions of the UTF-8 encoding for the code
- * point.  Note that the names all have the suffix "_UTF8".
+ * the macros expand to are the native Unicode code point, or all or portions
+ * of the UTF-8 encoding for the code point.  In the former case, the macro
+ * name has the suffix "_NATIVE"; otherwise, the suffix "_UTF8".
  *
- * The suffix "_FIRST_BYTE" may be appended to the name if the value is just
- * the first byte of the UTF-8 representation; the value will be a numeric
- * constant.
- *
- * The suffix "_TAIL" is appened if instead it represents all but the first
- * byte.  This, and with no suffix are both string constants */
+ * The macros that have the suffix "_UTF8" may have further suffixes, as
+ * follows:
+ *  "_FIRST_BYTE" if the value is just the first byte of the UTF-8
+ *                representation; the value will be a numeric constant.
+ *  "_TAIL"       if instead it represents all but the first byte.  This, and
+ *                with no additional suffix are both string constants */
 
 #define COMBINING_GRAVE_ACCENT_UTF8 "\xCC\x80"    /* U+0300 */
 #define COMBINING_ACUTE_ACCENT_UTF8 "\xCC\x81"    /* U+0301 */
@@ -33,6 +34,14 @@
 #define HANGUL_JUNGSEONG_FILLER_UTF8 "\xE1\x85\xA0"    /* U+1160 */
 #define HANGUL_JONGSEONG_KIYEOK_UTF8 "\xE1\x86\xA8"    /* U+11A8 */
 #define HYPHEN_UTF8 "\xE2\x80\x90"    /* U+2010 */
+
+#define DELETE_NATIVE 0x007F    /* U+007F */
+#define LATIN_SMALL_LETTER_SHARP_S_NATIVE 0x00DF    /* U+00DF */
+#define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE 0x00E5    /* U+00E5 */
+#define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE 0x00C5    /* U+00C5 */
+#define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE 0x00FF    /* U+00FF */
+#define MICRO_SIGN_NATIVE 0x00B5    /* U+00B5 */
+#define NEXT_LINE_NATIVE 0x0085    /* U+0085 */
 
 #endif /* H_UTF8_STRINGS */
 
