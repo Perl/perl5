@@ -774,3 +774,31 @@ HORIZWS: Horizontal Whitespace: \h \H
 VERTWS: Vertical Whitespace: \v \V
 => generic UTF8 LATIN1 cp :fast safe
 \p{VertSpace}
+
+GCB_L: Grapheme_Cluster_Break=L
+=> UTF8 :fast
+\p{_X_GCB_L}
+
+GCB_LV_LVT_V: Grapheme_Cluster_Break=(LV or LVT or V)
+=> UTF8 :fast
+\p{_X_LV_LVT_V}
+
+GCB_Prepend: Grapheme_Cluster_Break=Prepend
+=> UTF8 :fast
+\p{_X_GCB_Prepend}
+
+GCB_RI: Grapheme_Cluster_Break=RI
+=> UTF8 :fast
+\p{_X_RI}
+
+GCB_SPECIAL_BEGIN: Grapheme_Cluster_Break=special_begins
+=> UTF8 :fast
+\p{_X_Special_Begin}
+
+GCB_T: Grapheme_Cluster_Break=T
+=> UTF8 :fast
+\p{_X_GCB_T}
+
+GCB_V: Grapheme_Cluster_Break=V
+=> UTF8 :fast
+\p{_X_GCB_V}
