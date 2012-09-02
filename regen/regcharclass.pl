@@ -579,6 +579,7 @@ sub _combine {
 # recursively convert an optree to text with reasonably neat formatting
 sub _render {
     my ( $self, $op, $combine, $brace )= @_;
+    return 0 if ! defined $op;  # The set is empty
     if ( !ref $op ) {
         return $op;
     }
