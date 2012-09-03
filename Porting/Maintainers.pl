@@ -2132,7 +2132,8 @@ use File::Glob qw(:case);
                 ),
             'XSLoader.pm',    # we use XSLoader_pm.PL
         ],
-        'UPSTREAM' => 'blead',
+        # Revert UPSTREAM to 'blead' after 0.17 is released
+        'UPSTREAM' => undef,
     },
 
     's2p' => {
