@@ -261,8 +261,8 @@ Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
     }
 }
 
-STATIC void
-S_Slab_to_rw(pTHX_ OPSLAB *const slab)
+void
+Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
 {
     OPSLAB *slab2;
 

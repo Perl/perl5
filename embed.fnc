@@ -1797,14 +1797,12 @@ Xp	|void	|Slab_Free	|NN void *op
 #if defined(PERL_DEBUG_READONLY_OPS)
 #    if defined(PERL_CORE)
 px	|void	|Slab_to_ro	|NN OPSLAB *slab
+px	|void	|Slab_to_rw	|NN OPSLAB *const slab
 #    endif
 : Used in OpREFCNT_inc() in sv.c
 poxM	|OP *	|op_refcnt_inc	|NULLOK OP *o
 : FIXME - can be static.
 poxM	|PADOFFSET	|op_refcnt_dec	|NN OP *o
-#    if defined(PERL_IN_OP_C)
-s	|void	|Slab_to_rw	|NN OPSLAB *const slab
-#    endif
 #endif
 
 #if defined(PERL_IN_PERL_C)
