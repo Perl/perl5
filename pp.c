@@ -29,6 +29,7 @@
 #include "keywords.h"
 
 #include "reentr.h"
+#include "regcharclass.h"
 
 /* XXX I can't imagine anyone who doesn't have this actually _needs_
    it, since pid_t is an integral type.
@@ -4041,7 +4042,7 @@ PP(pp_quotemeta)
 			to_quote = TRUE;
 		    }
 		}
-		else if (_is_utf8_quotemeta((U8 *) s)) {
+		else if (is_QUOTEMETA_high(s)) {
 		    to_quote = TRUE;
 		}
 

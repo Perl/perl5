@@ -915,3 +915,7 @@ GCB_T: Grapheme_Cluster_Break=T
 GCB_V: Grapheme_Cluster_Break=V
 => UTF8 :fast
 \p{_X_GCB_V}
+
+QUOTEMETA: Meta-characters that \Q should quote
+=> high :fast
+\p{_Perl_Quotemeta}

@@ -2229,17 +2229,6 @@ Perl_is_utf8_X_extend(pTHX_ const U8 *p)
     return is_utf8_common(p, &PL_utf8_X_extend, "_X_Extend");
 }
 
-bool
-Perl__is_utf8_quotemeta(pTHX_ const U8 *p)
-{
-    /* For exclusive use of pp_quotemeta() */
-
-    dVAR;
-
-    PERL_ARGS_ASSERT__IS_UTF8_QUOTEMETA;
-
-    return is_utf8_common(p, &PL_utf8_quotemeta, "_Perl_Quotemeta");
-}
 /*
 =for apidoc to_utf8_case
 

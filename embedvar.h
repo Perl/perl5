@@ -370,7 +370,6 @@
 #define PL_utf8_perl_idstart	(vTHX->Iutf8_perl_idstart)
 #define PL_utf8_print		(vTHX->Iutf8_print)
 #define PL_utf8_punct		(vTHX->Iutf8_punct)
-#define PL_utf8_quotemeta	(vTHX->Iutf8_quotemeta)
 #define PL_utf8_space		(vTHX->Iutf8_space)
 #define PL_utf8_tofold		(vTHX->Iutf8_tofold)
 #define PL_utf8_tolower		(vTHX->Iutf8_tolower)
