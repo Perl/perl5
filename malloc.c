@@ -1091,11 +1091,8 @@ emergency_sbrk(MEM_SIZE size)
 #  define emergency_sbrk(size)	-1
 #endif	/* defined PERL_EMERGENCY_SBRK */
 
-static void
-write2(const char *mess)
-{
-  write(2, mess, strlen(mess));
-}
+/* Don't use PerlIO buffered writes as they allocate memory. */
+#define MYMALLOC_WRITE2STDERR(s) PerlLIO_write(PerlIO_fileno(PerlIO_stderr()),s,strlen(s))
 
 #ifdef DEBUGGING
 #undef ASSERT
@@ -1113,13 +1110,13 @@ botch(const char *diag, const char *s, const char *file, int line)
 			  "assertion botched (%s?): %s %s:%d\n",
 			  diag, s, file, line) != 0) {
 	 do_write:		/* Can be initializing interpreter */
-	    write2("assertion botched (");
-	    write2(diag);
-	    write2("?): ");
-	    write2(s);
-	    write2(" (");
-	    write2(file);
-	    write2(":");
+	    MYMALLOC_WRITE2STDERR("assertion botched (");
+	    MYMALLOC_WRITE2STDERR(diag);
+	    MYMALLOC_WRITE2STDERR("?): ");
+	    MYMALLOC_WRITE2STDERR(s);
+	    MYMALLOC_WRITE2STDERR(" (");
+	    MYMALLOC_WRITE2STDERR(file);
+	    MYMALLOC_WRITE2STDERR(":");
 	    {
 	      char linebuf[10];
 	      char *s = linebuf + sizeof(linebuf) - 1;
@@ -1128,9 +1125,9 @@ botch(const char *diag, const char *s, const char *file, int line)
 	      do {
 		*--s = '0' + (n % 10);
 	      } while (n /= 10);
-	      write2(s);
+	      MYMALLOC_WRITE2STDERR(s);
 	    }
-	    write2(")\n");
+	    MYMALLOC_WRITE2STDERR(")\n");
 	}
 	PerlProc_abort();
     }
@@ -1290,14 +1287,14 @@ Perl_malloc(size_t nbytes)
 		    dTHX;
 		    if (!PL_nomemok) {
 #if defined(PLAIN_MALLOC) && defined(NO_FANCY_MALLOC)
-		        PerlIO_puts(PerlIO_stderr(),"Out of memory!\n");
+		        MYMALLOC_WRITE2STDERR("Out of memory!\n");
 #else
 			char buff[80];
 			char *eb = buff + sizeof(buff) - 1;
 			char *s = eb;
 			size_t n = nbytes;
 
-			PerlIO_puts(PerlIO_stderr(),"Out of memory during request for ");
+			MYMALLOC_WRITE2STDERR("Out of memory during request for ");
 #if defined(DEBUGGING) || defined(RCHECK)
 			n = size;
 #endif
@@ -1305,15 +1302,15 @@ Perl_malloc(size_t nbytes)
 			do {
 			    *--s = '0' + (n % 10);
 			} while (n /= 10);
-			PerlIO_puts(PerlIO_stderr(),s);
-			PerlIO_puts(PerlIO_stderr()," bytes, total sbrk() is ");
+			MYMALLOC_WRITE2STDERR(s);
+			MYMALLOC_WRITE2STDERR(" bytes, total sbrk() is ");
 			s = eb;
 			n = goodsbrk + sbrk_slack;
 			do {
 			    *--s = '0' + (n % 10);
 			} while (n /= 10);
-			PerlIO_puts(PerlIO_stderr(),s);
-			PerlIO_puts(PerlIO_stderr()," bytes!\n");
+			MYMALLOC_WRITE2STDERR(s);
+			MYMALLOC_WRITE2STDERR(" bytes!\n");
 #endif /* defined(PLAIN_MALLOC) && defined(NO_FANCY_MALLOC) */
 			my_exit(1);
 		    }
@@ -1714,9 +1711,9 @@ morecore(register int bucket)
 		    }
 		}
 		if (t && *t) {
-		    write2("Unrecognized part of PERL_MALLOC_OPT: \"");
-		    write2(t);
-		    write2("\"\n");
+		    MYMALLOC_WRITE2STDERR("Unrecognized part of PERL_MALLOC_OPT: \"");
+		    MYMALLOC_WRITE2STDERR(t);
+		    MYMALLOC_WRITE2STDERR("\"\n");
 		}
 		if (changed)
 		    MallocCfg[MallocCfg_cfg_env_read] = 1;
