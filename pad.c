@@ -265,7 +265,6 @@ Perl_pad_new(pTHX_ int flags)
     /* ... create new pad ... */
 
     Newxz(padlist, 1, PADLIST);
-    padname	= newAV();
     pad		= newAV();
 
     if (flags & padnew_CLONE) {
@@ -277,10 +276,13 @@ Perl_pad_new(pTHX_ int flags)
         AV * const a0 = newAV();			/* will be @_ */
 	av_store(pad, 0, MUTABLE_SV(a0));
 	AvREIFY_only(a0);
+
+	padname = (PAD *)SvREFCNT_inc_simple_NN(PL_comppad_name);
     }
     else {
 	padlist->xpadl_id = PL_padlist_generation++;
 	av_store(pad, 0, NULL);
+	padname = newAV();
     }
 
     /* Most subroutines never recurse, hence only need 2 entries in the padlist
@@ -295,11 +297,11 @@ Perl_pad_new(pTHX_ int flags)
 
     /* ... then update state variables */
 
-    PL_comppad_name	= padname;
     PL_comppad		= pad;
     PL_curpad		= AvARRAY(pad);
 
     if (! (flags & padnew_CLONE)) {
+	PL_comppad_name	     = padname;
 	PL_comppad_name_fill = 0;
 	PL_min_intro_pending = 0;
 	PL_padix	     = 0;
@@ -420,8 +422,6 @@ Perl_cv_undef(pTHX_ CV *cv)
 			U32 inner_rc = SvREFCNT(innercv);
 			assert(inner_rc);
 			assert(SvTYPE(innercv) != SVt_PVFM);
-			namepad[ix] = NULL;
-			SvREFCNT_dec(namesv);
 
 			if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
 			    curpad[ix] = NULL;
@@ -460,7 +460,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	}
 	{
 	    PAD * const sv = PadlistARRAY(padlist)[0];
-	    if (sv == PL_comppad_name)
+	    if (sv == PL_comppad_name && SvREFCNT(sv) == 1)
 		PL_comppad_name = NULL;
 	    SvREFCNT_dec(sv);
 	}
@@ -1937,7 +1937,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     dVAR;
     I32 ix;
     PADLIST* const protopadlist = CvPADLIST(proto);
-    const PAD *const protopad_name = *PadlistARRAY(protopadlist);
+    PAD *const protopad_name = *PadlistARRAY(protopadlist);
     const PAD *const protopad = PadlistARRAY(protopadlist)[1];
     SV** const pname = AvARRAY(protopad_name);
     SV** const ppad = AvARRAY(protopad);
@@ -2004,12 +2004,11 @@ Perl_cv_clone(pTHX_ CV *proto)
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
+    PL_comppad_name = protopad_name;
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
     CvPADLIST(cv)->xpadl_id = protopadlist->xpadl_id;
 
     av_fill(PL_comppad, fpad);
-    for (ix = fname; ix > 0; ix--)
-	av_store(PL_comppad_name, ix, SvREFCNT_inc(pname[ix]));
 
     PL_curpad = AvARRAY(PL_comppad);
 
