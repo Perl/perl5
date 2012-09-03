@@ -681,20 +681,31 @@ if ( !caller ) {
 				 copyright => [2007, 2011] );
     print $out_fh "\n#ifndef H_REGCHARCLASS   /* Guard against nested #includes */\n#define H_REGCHARCLASS 1\n\n";
 
-    my ( $op, $title, @txt, @types, @mods );
+    my ( $op, $title, @txt, @types, %mods );
     my $doit= sub {
         return unless $op;
         print $out_fh "/*\n\t$op: $title\n\n";
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
         my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt );
 
-        #die Dumper(\@types,\@mods);
+        #die Dumper(\@types,\%mods);
+
+        my @mods;
+        push @mods, 'safe' if delete $mods{safe};
+        unshift @mods, 'fast' if delete $mods{fast} || ! @mods; # Default to 'fast'
+                                                                # do this one
+                                                                # first, as
+                                                                # traditional
+        if (%mods) {
+            die "Unknown modifiers: ", join ", ", map { "'$_'" } keys %mods;
+        }
 
         foreach my $type_spec ( @types ) {
             my ( $type, $ret )= split /-/, $type_spec;
             $ret ||= 'len';
             foreach my $mod ( @mods ) {
                 next if $mod eq 'safe' and $type eq 'cp';
+                delete $mods{$mod};
                 my $macro= $obj->make_macro(
                     type     => $type,
                     ret_type => $ret,
@@ -716,7 +727,8 @@ if ( !caller ) {
         } elsif ( s/^=>// ) {
             my ( $type, $modifier )= split /:/, $_;
             @types= split ' ', $type;
-            @mods= split ' ',  $modifier;
+            undef %mods;
+            map { $mods{$_} = 1 } split ' ',  $modifier;
         } else {
             push @txt, "$_";
         }
