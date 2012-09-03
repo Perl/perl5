@@ -272,7 +272,7 @@ sub __cond_join {
 #
 # Each string is then stored in the 'strs' subhash as a hash record
 # made up of the results of __uni_latin1, using the keynames
-# 'low','latin1','utf8', as well as the synthesized 'LATIN1' and
+# 'low','latin1','utf8', as well as the synthesized 'LATIN1', 'high', and
 # 'UTF8' which hold a merge of 'low' and their lowercase equivelents.
 #
 # Size data is tracked per type in the 'size' subhash.
@@ -343,13 +343,14 @@ sub new {
         my ( $cp, $low, $latin1, $utf8 )= __uni_latin1( $str );
         my $UTF8= $low   || $utf8;
         my $LATIN1= $low || $latin1;
+        my $high = (scalar grep { $_ < 256 } @$cp) ? 0 : $utf8;
         #die Dumper($txt,$cp,$low,$latin1,$utf8)
         #    if $txt=~/NEL/ or $utf8 and @$utf8>3;
 
-        @{ $self->{strs}{$str} }{qw( str txt low utf8 latin1 cp UTF8 LATIN1 )}=
-          ( $str, $txt, $low, $utf8, $latin1, $cp, $UTF8, $LATIN1 );
+        @{ $self->{strs}{$str} }{qw( str txt low utf8 latin1 high cp UTF8 LATIN1 )}=
+          ( $str, $txt, $low, $utf8, $latin1, $high, $cp, $UTF8, $LATIN1 );
         my $rec= $self->{strs}{$str};
-        foreach my $key ( qw(low utf8 latin1 cp UTF8 LATIN1) ) {
+        foreach my $key ( qw(low utf8 latin1 high cp UTF8 LATIN1) ) {
             $self->{size}{$key}{ 0 + @{ $self->{strs}{$str}{$key} } }++
               if $self->{strs}{$str}{$key};
         }
@@ -653,7 +654,7 @@ sub render {
 # make a macro of a given type.
 # calls into make_trie and (generic_|length_)optree as needed
 # Opts are:
-# type     : 'cp','generic','low','latin1','utf8','LATIN1','UTF8'
+# type     : 'cp','generic','high','low','latin1','utf8','LATIN1','UTF8'
 # ret_type : 'cp' or 'len'
 # safe     : add length guards to macro
 #
@@ -810,6 +811,10 @@ if ( !caller ) {
 #   latin1      generate a macro whose name is 'is_BASE_latin1' and defines a
 #               class that includes only upper-Latin1-range chars.  It is not
 #               designed to take a UTF-8 input parameter.
+#   high        generate a macro whose name is 'is_BASE_high' and defines a
+#               class that includes all relevant code points that are above
+#               the Latin1 range.  This is for very specialized uses only.
+#               It is designed to take only an input UTF-8 parameter.
 #   utf8        generate a macro whose name is 'is_BASE_utf8' and defines a
 #               class that includes all relevant characters that aren't ASCII.
 #               It is designed to take only an input UTF-8 parameter.
