@@ -24,36 +24,47 @@ CharClass::Matcher -- Generate C macros that match character classes efficiently
 
 Dynamically generates macros for detecting special charclasses
 in latin-1, utf8, and codepoint forms. Macros can be set to return
-the length (in bytes) of the matched codepoint, or the codepoint itself.
+the length (in bytes) of the matched codepoint, and/or the codepoint itself.
 
-To regenerate regcharclass.h, run this script from perl-root. No arguments
+To regenerate F<regcharclass.h>, run this script from perl-root. No arguments
 are necessary.
 
-Using WHATEVER as an example the following macros will be produced:
+Using WHATEVER as an example the following macros can be produced, depending
+on the input parameters (how to get each is described by internal comments at
+the C<__DATA__> line):
 
 =over 4
 
-=item is_WHATEVER(s,is_utf8)
+=item C<is_WHATEVER(s,is_utf8)>
 
-=item is_WHATEVER_safe(s,e,is_utf8)
+=item C<is_WHATEVER_safe(s,e,is_utf8)>
 
-Do a lookup as appropriate based on the is_utf8 flag. When possible
-comparisons involving octect<128 are done before checking the is_utf8
+Do a lookup as appropriate based on the C<is_utf8> flag. When possible
+comparisons involving octect<128 are done before checking the C<is_utf8>
 flag, hopefully saving time.
 
-=item is_WHATEVER_utf8(s)
+The version without the C<_safe> suffix should be used only when the input is
+known to be well-formed.
 
-=item is_WHATEVER_utf8_safe(s,e)
+=item C<is_WHATEVER_utf8(s)>
+
+=item C<is_WHATEVER_utf8_safe(s,e)>
 
 Do a lookup assuming the string is encoded in (normalized) UTF8.
 
-=item is_WHATEVER_latin1(s)
+The version without the C<_safe> suffix should be used only when the input is
+known to be well-formed.
 
-=item is_WHATEVER_latin1_safe(s,e)
+=item C<is_WHATEVER_latin1(s)>
+
+=item C<is_WHATEVER_latin1_safe(s,e)>
 
 Do a lookup assuming the string is encoded in latin-1 (aka plan octets).
 
-=item is_WHATEVER_cp(cp)
+The version without the C<_safe> suffix should be used only when it is known
+that C<s> contains at least one character.
+
+=item C<is_WHATEVER_cp(cp)>
 
 Check to see if the string matches a given codepoint (hypothetically a
 U32). The condition is constructed as as to "break out" as early as
@@ -66,11 +77,34 @@ IOW:
 Thus if the character is X+1 only two comparisons will be done. Making
 matching lookups slower, but non-matching faster.
 
-=back
+=item C<what_len_WHATEVER_FOO(arg1, ..., len)>
 
-Additionally it is possible to generate C<what_> variants that return
-the codepoint read instead of the number of octets read, this can be
-done by suffixing '-cp' to the type description.
+A variant form of each of the macro types described above can be generated, in
+which the code point is returned by the macro, and an extra parameter (in the
+final position) is added, which is a pointer for the macro to set the byte
+length of the returned code point.
+
+These forms all have a C<what_len> prefix instead of the C<is_>, for example
+C<what_len_WHATEVER_safe(s,e,is_utf8,len)> and
+C<what_len_WHATEVER_utf8(s,len)>.
+
+These forms should not be used I<except> on small sets of mostly widely
+separated code points; otherwise the code generated is inefficient.  For these
+cases, it is best to use the C<is_> forms, and then find the code point with
+C<utf8_to_uvchr_buf>().  This program can fail with a "deep recursion"
+message on the worst of the inappropriate sets.  Examine the generated macro
+to see if it is acceptable.
+
+=item C<what_WHATEVER_FOO(arg1, ...)>
+
+A variant form of each of the C<is_> macro types described above can be generated, in
+which the code point and not the length is returned by the macro.  These have
+the same caveat as L</what_len_WHATEVER_FOO(arg1, ..., len)>, plus they should
+not be used where the set contains a NULL, as 0 is returned for two different
+cases: a) the set doesn't include the input code point; b) the set does
+include it, and it is a NULL.
+
+=back
 
 =head2 CODE FORMAT
 
@@ -79,7 +113,7 @@ perltidy  -st -bt=1 -bbt=0 -pt=0 -sbt=1 -ce -nwls== "%f"
 
 =head1 AUTHOR
 
-Author: Yves Orton (demerphq) 2007
+Author: Yves Orton (demerphq) 2007.  Maintained by Perl5 Porters.
 
 =head1 BUGS
 
@@ -582,6 +616,8 @@ sub _render {
         return $op;
     }
     my $cond= $self->_cond_as_str( $op, $combine );
+    #no warnings 'recursion';   # This would allow really really inefficient
+                                # code to be generated.  See pod
     my $yes= $self->_render( $op->{yes}, $combine, 1 );
     my $no= $self->_render( $op->{no},   $combine, 0 );
     return "( $cond )" if $yes eq '1' and $no eq '0';
@@ -721,7 +757,7 @@ if ( !caller ) {
         next unless /\S/;
         chomp;
         if ( /^([A-Z]+)/ ) {
-            $doit->();
+            $doit->();  # This starts a new definition; do the previous one
             ( $op, $title )= split /\s*:\s*/, $_, 2;
             @txt= ();
         } elsif ( s/^=>// ) {
@@ -744,21 +780,82 @@ if ( !caller ) {
     }
 }
 
+# The form of the input is a series of definitions to make macros for.
+# The first line gives the base name of the macro, followed by a colon, and
+# then text to be used in comments associated with the macro that are its
+# title or description.  In all cases the first (perhaps only) parameter to
+# the macro is a pointer to the first byte of the code point it is to test to
+# see if it is in the class determined by the macro.  In the case of non-UTF8,
+# the code point consists only of a single byte.
 #
-# Valid types: generic, LATIN1, UTF8, low, latin1, utf8
-# default return value is octects read.
-# append -cp to make it codepoint matched.
-# modifiers come after the colon, valid possibilities
-# being 'fast' and 'safe'.
+# The second line must begin with a '=>' and be followed by the types of
+# macro(s) to be generated; these are specified below.  A colon follows the
+# types, followed by the modifiers, also specified below.  At least one
+# modifier is required.
 #
-# Accepts a single Unicode code point per line, prefaced by '0x'
-# or a range of two code points separated by a minus (and optional space)
-# or a single \p{} per line.
-# A blank line or one whose first non-blank character is '#' is a comment
+# The subsequent lines give what code points go into the class defined by the
+# macro.  Multiple characters may be specified via a string like "\x0D\x0A",
+# enclosed in quotes.  Otherwise the lines consist of single Unicode code
+# point, prefaced by 0x; or a single range of Unicode code points separated by
+# a minus (and optional space); or a single Unicode property specified in the
+# standard Perl form "\p{...}".
+#
+# A blank line or one whose first non-blank character is '#' is a comment.
+# The definition of the macro is terminated by a line unlike those described.
+#
+# Valid types:
+#   low         generate a macro whose name is 'is_BASE_low' and defines a
+#               class that includes only ASCII-range chars.  (BASE is the
+#               input macro base name.)
+#   latin1      generate a macro whose name is 'is_BASE_latin1' and defines a
+#               class that includes only upper-Latin1-range chars.  It is not
+#               designed to take a UTF-8 input parameter.
+#   utf8        generate a macro whose name is 'is_BASE_utf8' and defines a
+#               class that includes all relevant characters that aren't ASCII.
+#               It is designed to take only an input UTF-8 parameter.
+#   LATIN1      generate a macro whose name is 'is_BASE_latin1' and defines a
+#               class that includes both ASCII and upper-Latin1-range chars.
+#               It is not designed to take a UTF-8 input parameter.
+#   UTF8        generate a macro whose name is 'is_BASE_utf8' and defines a
+#               class that can include any code point, adding the 'low' ones
+#               to what 'utf8' works on.  It is designed to take only an input
+#               UTF-8 parameter.
+#   generic     generate a macro whose name is 'is_BASE".  It has a 2nd,
+#               boolean, parameter which indicates if the first one points to
+#               a UTF-8 string or not.  Thus it works in all circumstances.
+#   cp          generate a macro whose name is 'is_BASE_cp' and defines a
+#               class that returns true if the UV parameter is a member of the
+#               class; false if not.
+# A macro of the given type is generated for each type listed in the input.
+# The default return value is the number of octets read to generate the match.
+# Append "-cp" to the type to have it instead return the matched codepoint.
+#               The macro name is changed to 'what_BASE...'.  See pod for
+#               caveats
+# Appending '-both" instead adds an extra parameter to the end of the argument
+#               list, which is a pointer as to where to store the number of
+#               bytes matched, while also returning the code point.  The macro
+#               name is changed to 'what_len_BASE...'.  See pod for caveats
+#
+# Valid modifiers:
+#   safe        The input string is not necessarily valid UTF-8.  In
+#               particular an extra parameter (always the 2nd) to the macro is
+#               required, which points to one beyond the end of the string.
+#               The macro will make sure not to read off the end of the
+#               string.  In the case of non-UTF8, it makes sure that the
+#               string has at least one byte in it.  The macro name has
+#               '_safe' appended to it.
+#   fast        The input string is valid UTF-8.  No bounds checking is done,
+#               and the macro can make assumptions that lead to faster
+#               execution.
+# No modifier need be specified; fast is assumed for this case.  If both
+# 'fast', and 'safe' are specified, two macros will be created for each
+# 'type'.
 #
 # If run on a non-ASCII platform will automatically convert the Unicode input
-# to native
-#
+# to native.  The documentation above is slightly wrong in this case.  'low'
+# actually refers to code points whose UTF-8 representation is the same as the
+# non-UTF-8 version (invariants); and 'latin1' refers to all the rest of the
+# code points less than 256.
 
 1; # in the unlikely case we are being used as a module
 
@@ -772,7 +869,6 @@ __DATA__
 # 0x1E9E  # LATIN CAPITAL LETTER SHARP S, because maps to same as 00DF
 # 0x1FD3  # GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA; maps same as 0390
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
-
 
 LNBREAK: Line Break: \R
 => generic UTF8 LATIN1 :fast safe
