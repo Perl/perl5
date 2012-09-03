@@ -4,7 +4,6 @@ use 5.008;
 use warnings;
 use warnings FATAL => 'all';
 use Text::Wrap qw(wrap);
-use Encode;
 use Data::Dumper;
 $Data::Dumper::Useqq= 1;
 our $hex_fmt= "0x%02X";
@@ -134,11 +133,9 @@ sub __uni_latin1 {
     } else {
         $l= [@cp] if $max && $max < 256;
 
-        my $copy= $str;    # must copy string, FB_CROAK makes encode destructive
-        $u= eval { Encode::encode( "utf8", $copy, Encode::FB_CROAK ) };
-        # $u is utf8 but with the utf8 flag OFF
-        # therefore "C*" gets us the values of the bytes involved.
-        $u= [ unpack "C*", $u ] if defined $u;
+        $u= $str;
+        utf8::upgrade($u);
+        $u= [ unpack "U0C*", $u ] if defined $u;
     }
     return ( \@cp, $n, $l, $u );
 }
