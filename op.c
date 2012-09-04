@@ -7099,7 +7099,13 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	PL_compcv = NULL;
 	goto done;
     }
-    if (outcv == CvOUTSIDE(compcv)) { 
+    /* Checking whether outcv is CvOUTSIDE(compcv) is not sufficient to
+       determine whether this sub definition is in the same scope as its
+       declaration.  If this sub definition is inside an inner named pack-
+       age sub (my sub foo; sub bar { sub foo { ... } }), outcv points to
+       the package sub.  So check PadnameOUTER(name) too.
+     */
+    if (outcv == CvOUTSIDE(compcv) && !PadnameOUTER(name)) { 
 	assert(!CvWEAKOUTSIDE(compcv));
 	SvREFCNT_dec(CvOUTSIDE(compcv));
 	CvWEAKOUTSIDE_on(compcv);

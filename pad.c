@@ -2218,7 +2218,10 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 		    : NULL;
 	    CV * const innercv = MUTABLE_CV(mg ? mg->mg_obj : curpad[ix]);
 	    if (CvOUTSIDE(innercv) == old_cv) {
-		assert(CvWEAKOUTSIDE(innercv));
+		if (!CvWEAKOUTSIDE(innercv)) {
+		    SvREFCNT_dec(old_cv);
+		    SvREFCNT_inc_simple_void_NN(new_cv);
+		}
 		CvOUTSIDE(innercv) = new_cv;
 	    }
 	  }

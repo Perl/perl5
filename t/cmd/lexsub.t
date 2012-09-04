@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 111;
+plan 112;
 
 # -------------------- our -------------------- #
 
@@ -537,3 +537,10 @@ sub not_lexical5 {
 }
 is not_lexical4, 234,
     'my sub defined in predeclared pkg sub but declared outside';
+
+undef *not_lexical6;
+{
+  my sub foo;
+  sub not_lexical6 { sub foo { } }
+  pass 'no crash when cloning a mysub declared inside an undef pack sub';
+}
