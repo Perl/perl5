@@ -545,7 +545,7 @@ sub length_optree {
 # turn a list of conditions into a text expression
 # - merges ranges of conditions, and joins the result with ||
 sub _cond_as_str {
-    my ( $self, $op, $combine )= @_;
+    my ( $self, $op, $combine, $opts_ref )= @_;
     my $cond= $op->{vals};
     my $test= $op->{test};
     return "( $test )" if !defined $cond;
@@ -611,16 +611,16 @@ sub _combine {
 # _render()
 # recursively convert an optree to text with reasonably neat formatting
 sub _render {
-    my ( $self, $op, $combine, $brace )= @_;
+    my ( $self, $op, $combine, $brace, $opts_ref )= @_;
     return 0 if ! defined $op;  # The set is empty
     if ( !ref $op ) {
         return $op;
     }
-    my $cond= $self->_cond_as_str( $op, $combine );
+    my $cond= $self->_cond_as_str( $op, $combine, $opts_ref );
     #no warnings 'recursion';   # This would allow really really inefficient
                                 # code to be generated.  See pod
-    my $yes= $self->_render( $op->{yes}, $combine, 1 );
-    my $no= $self->_render( $op->{no},   $combine, 0 );
+    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref );
+    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref );
     return "( $cond )" if $yes eq '1' and $no eq '0';
     my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
     return "$lb$cond ? $yes : $no$rb"
@@ -645,8 +645,8 @@ sub _render {
 # longer lists such as that resulting from type 'cp' output.
 # Currently only used for type 'cp' macros.
 sub render {
-    my ( $self, $op, $combine )= @_;
-    my $str= "( " . $self->_render( $op, $combine ) . " )";
+    my ( $self, $op, $combine, $opts_ref )= @_;
+    my $str= "( " . $self->_render( $op, $combine, 0, $opts_ref ) . " )";
     return __clean( $str );
 }
 
@@ -685,7 +685,7 @@ sub make_macro {
         $method= 'optree';
     }
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
-    my $text= $self->render( $optree, $type eq 'cp' );
+    my $text= $self->render( $optree, $type eq 'cp', \%opts );
     my @args= $type eq 'cp' ? 'cp' : 's';
     push @args, "e" if $opts{safe};
     push @args, "is_utf8" if $type eq 'generic';
