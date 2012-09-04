@@ -328,24 +328,17 @@ EOM
 		cc_name=`./try`
 		if test "$cc_name" = "workshop"; then
 			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^[Cc][Cc]: //p'`"
-			if test ! "$use64bitall_done"; then
-				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
-			fi
-			# Sun cc doesn't support gcc attributes
-			d_attribute_format='undef'
-			d_attribute_malloc='undef'
-			d_attribute_nonnull='undef'
-			d_attribute_noreturn='undef'
-			d_attribute_pure='undef'
-			d_attribute_unused='undef'
-			d_attribute_warn_unused_result='undef'
 		fi
 		if test "$cc_name" = "workshop CC"; then
 			ccversion="`${cc:-CC} -V 2>&1|sed -n -e '1s/^[Cc][C]: //p'`"
+		fi
+		case "$cc_name" in
+		workshop*)
+			# Settings for either cc or CC
 			if test ! "$use64bitall_done"; then
 				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
 			fi
-			# Sun CC doesn't support gcc attributes
+			# Sun CC/cc don't support gcc attributes
 			d_attribute_format='undef'
 			d_attribute_malloc='undef'
 			d_attribute_nonnull='undef'
@@ -353,7 +346,8 @@ EOM
 			d_attribute_pure='undef'
 			d_attribute_unused='undef'
 			d_attribute_warn_unused_result='undef'
-		fi
+			;;
+		esac
 	fi
 
 	# See if as(1) is GNU as(1).  GNU might not work for this job.
