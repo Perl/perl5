@@ -709,8 +709,9 @@ Perl_op_free(pTHX_ OP *o)
     if (type == OP_NULL)
 	type = (OPCODE)o->op_targ;
 
-    if (o->op_slabbed)
-        Slab_to_rw(OpSLAB(o));
+    if (o->op_slabbed) {
+	Slab_to_rw(OpSLAB(o));
+    }
 
     /* COP* is not cleared by op_clear() so that we may track line
      * numbers etc even after null() */
