@@ -395,6 +395,22 @@ sub make_trie {
     return 0 + keys( %trie ) ? \%trie : undef;
 }
 
+sub pop_count ($) {
+    my $word = shift;
+
+    # This returns a list of the positions of the bits in the input word that
+    # are 1.
+
+    my @positions;
+    my $position = 0;
+    while ($word) {
+        push @positions, $position if $word & 1;
+        $position++;
+        $word >>= 1;
+    }
+    return @positions;
+}
+
 # my $optree= _optree()
 #
 # recursively convert a trie to an optree where every node represents
@@ -541,6 +557,105 @@ sub length_optree {
     return $else;
 }
 
+sub calculate_mask(@) {
+    my @list = @_;
+    my $list_count = @list;
+
+    # Look at the input list of byte values.  This routine sees if the set
+    # consisting of those bytes is exactly determinable by using a
+    # mask/compare operation.  If not, it returns an empty list; if so, it
+    # returns a list consisting of (mask, compare).  For example, consider a
+    # set consisting of the numbers 0xF0, 0xF1, 0xF2, and 0xF3.  If we want to
+    # know if a number 'c' is in the set, we could write:
+    #   0xF0 <= c && c <= 0xF4
+    # But the following mask/compare also works, and has just one test:
+    #   c & 0xFC == 0xF0
+    # The reason it works is that the set consists of exactly those numbers
+    # whose first 4 bits are 1, and the next two are 0.  (The value of the
+    # other 2 bits is immaterial in determining if a number is in the set or
+    # not.)  The mask masks out those 2 irrelevant bits, and the comparison
+    # makes sure that the result matches all bytes that which match those 6
+    # material bits exactly.  In other words, the set of numbers contains
+    # exactly those whose bottom two bit positions are either 0 or 1.  The
+    # same principle applies to bit positions that are not necessarily
+    # adjacent.  And it can be applied to bytes that differ in 1 through all 8
+    # bit positions.  In order to be a candidate for this optimization, the
+    # number of numbers in the test must be a power of 2.  Based on this
+    # count, we know the number of bit positions that must differ.
+    my $bit_diff_count = 0;
+    my $compare = $list[0];
+    if ($list_count == 2) {
+        $bit_diff_count = 1;
+    }
+    elsif ($list_count == 4) {
+        $bit_diff_count = 2;
+    }
+    elsif ($list_count == 8) {
+        $bit_diff_count = 3;
+    }
+    elsif ($list_count == 16) {
+        $bit_diff_count = 4;
+    }
+    elsif ($list_count == 32) {
+        $bit_diff_count = 5;
+    }
+    elsif ($list_count == 64) {
+        $bit_diff_count = 6;
+    }
+    elsif ($list_count == 128) {
+        $bit_diff_count = 7;
+    }
+    elsif ($list_count == 256) {
+        return (0, 0);
+    }
+
+    # If the count wasn't a power of 2, we can't apply this optimization
+    return if ! $bit_diff_count;
+
+    my %bit_map;
+
+    # For each byte in the list, find the bit positions in it whose value
+    # differs from the first byte in the set.
+    for (my $i = 1; $i < @list; $i++) {
+        my @positions = pop_count($list[0] ^ $list[$i]);
+
+        # If the number of differing bits is greater than those permitted by
+        # the set size, this optimization doesn't apply.
+        return if @positions > $bit_diff_count;
+
+        # Save the bit positions that differ.
+        foreach my $bit (@positions) {
+            $bit_map{$bit} = 1;
+        }
+
+        # If the total so far is greater than those permitted by the set size,
+        # this optimization doesn't apply.
+        return if keys %bit_map > $bit_diff_count;
+
+
+        # The value to compare against is the AND of all the members of the
+        # set.  The bit positions that are the same in all will be correct in
+        # the AND, and the bit positions that differ will be 0.
+        $compare &= $list[$i];
+    }
+
+    # To get to here, we have gone through all bytes in the set,
+    # and determined that they all differ from each other in at most
+    # the number of bits allowed for the set's quantity.  And since we have
+    # tested all 2**N possibilities, we know that the set includes no fewer
+    # elements than we need,, so the optimization applies.
+    die "panic: internal logic error" if keys %bit_map != $bit_diff_count;
+
+    # The mask is the bit positions where things differ, complemented.
+    my $mask = 0;
+    foreach my $position (keys %bit_map) {
+        $mask |= 1 << $position;
+    }
+    $mask = ~$mask & 0xFF;
+
+    return ($mask, $compare);
+}
+
 # _cond_as_str
 # turn a list of conditions into a text expression
 # - merges ranges of conditions, and joins the result with ||
@@ -548,7 +663,18 @@ sub _cond_as_str {
     my ( $self, $op, $combine, $opts_ref )= @_;
     my $cond= $op->{vals};
     my $test= $op->{test};
+    my $is_cp_ret = $opts_ref->{ret_type} eq "cp";
     return "( $test )" if !defined $cond;
+
+    # If the input set has certain characteristics, we can optimize tests
+    # for it.  This doesn't apply if returning the code point, as we want each
+    # element of the set individually.
+    if (! $is_cp_ret) {
+        my ($mask, $base) = calculate_mask(@$cond);
+        if (defined $mask && defined $base) {
+            return sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask, $base;
+        }
+    }
 
     # rangify the list
     my @ranges;
