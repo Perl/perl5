@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 112;
+plan 113;
 
 # -------------------- our -------------------- #
 
@@ -543,4 +543,18 @@ undef *not_lexical6;
   my sub foo;
   sub not_lexical6 { sub foo { } }
   pass 'no crash when cloning a mysub declared inside an undef pack sub';
+}
+
+undef &not_lexical7;
+eval 'sub not_lexical7 { my @x }';
+{
+  my sub foo;
+  foo();
+  sub not_lexical7 {
+    state $x;
+    sub foo {
+      is ref \$x, 'SCALAR',
+        "redeffing a mysub's outside does not make it use the wrong pad"
+    }
+  }
 }

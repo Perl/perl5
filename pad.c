@@ -1980,8 +1980,14 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
       if (SvTYPE(proto) == SVt_PVCV)
       {
 	outside = find_runcv(NULL);
-	if (!CvANON(proto) && CvROOT(outside) != CvROOT(CvOUTSIDE(proto)))
-	    outside = CvOUTSIDE(proto);
+	if (!CvANON(proto)) {
+	    if (!CvPADLIST(outside) ||
+	        CvPADLIST(outside)->xpadl_id != protopadlist->xpadl_outid)
+		outside = CvOUTSIDE(proto);
+	    if (!CvPADLIST(outside) ||
+	        CvPADLIST(outside)->xpadl_id != protopadlist->xpadl_outid)
+		outside = NULL;
+	}
       }
       else {
 	outside = CvOUTSIDE(proto);
@@ -1998,7 +2004,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     depth = outside ? CvDEPTH(outside) : 0;
     if (!depth)
 	depth = 1;
-    assert(SvTYPE(proto) == SVt_PVFM || CvPADLIST(outside));
 
     ENTER;
     SAVESPTR(PL_compcv);
@@ -2019,7 +2024,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     outpad = outside && CvPADLIST(outside)
 	? AvARRAY(PadlistARRAY(CvPADLIST(outside))[depth])
 	: NULL;
-    assert(outpad || SvTYPE(cv) == SVt_PVFM);
     if (outpad) CvPADLIST(cv)->xpadl_outid = CvPADLIST(outside)->xpadl_id;
 
     for (ix = fpad; ix > 0; ix--) {
