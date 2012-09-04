@@ -327,7 +327,7 @@ EOM
 	if $tryworkshopcc >/dev/null 2>&1; then
 		cc_name=`./try`
 		if test "$cc_name" = "workshop"; then
-			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^cc: //ip'`"
+			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^[Cc][Cc]: //p'`"
 			if test ! "$use64bitall_done"; then
 				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
 			fi
@@ -341,7 +341,7 @@ EOM
 			d_attribute_warn_unused_result='undef'
 		fi
 		if test "$cc_name" = "workshop CC"; then
-			ccversion="`${cc:-CC} -V 2>&1|sed -n -e '1s/^CC: //ip'`"
+			ccversion="`${cc:-CC} -V 2>&1|sed -n -e '1s/^[Cc][C]: //p'`"
 			if test ! "$use64bitall_done"; then
 				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
 			fi
