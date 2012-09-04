@@ -19022,11 +19022,10 @@ Revision='$Revision'
 
 : check for alignment requirements
 echo " "
-case "$usecrosscompile$multiarch" in
+case "$usecrosscompile" in
 *$define*)
 	$cat <<EOM
-You seem to be either cross-compiling or doing a multiarchitecture build,
-skipping the memory alignment check.
+You seem to be cross-compiling.  Skipping the memory alignment check.
 
 EOM
 	case "$alignbytes" in
@@ -19064,6 +19063,17 @@ EOCP
 			dflt='8'
 			echo "(I can't seem to compile the test program...)"
 		fi
+		case "$multiarch" in
+		*$define*)
+			: The usual safe value is 8, but Darwin with -Duselongdouble
+			: needs 16.  Hence, we will take 8 as a minimum, but allow
+			: Configure to pick a larger value if needed.
+			if $test "$dflt" -lt 8; then
+			    dflt='8'
+				echo "Setting alignment to 8 for multiarch support.">&4
+			fi
+			;;
+		esac
 		;;
 	*) dflt="$alignbytes"
 		;;

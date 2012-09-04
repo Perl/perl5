@@ -916,13 +916,10 @@
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
  *	double, or a long double when applicable. Usual values are 2,
- *	4 and 8. The default is eight, for safety.
+ *	4 and 8. The default is eight, for safety.  For cross-compiling
+ *  	or multiarch support, Configure will set a minimum of 8.
  */
-#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
-#  define MEM_ALIGNBYTES 8
-#else
 #define MEM_ALIGNBYTES 4
-#endif
 
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
@@ -4749,6 +4746,6 @@
 #endif
 
 /* Generated from:
- * 55f6d0595668c028fe4021a469971587307b23080241f008057ee1aba71a73c9 config_h.SH
+ * b715233966bd9d5369e407526f95e2d6a28d5e6d8a9501ea859304bbe4fd4524 config_h.SH
  * 0b6320512dbf7572c05acf6d6add343230d232f287d02f6d32a7a32edadd97b9 uconfig.sh
  * ex: set ro: */

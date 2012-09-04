@@ -949,13 +949,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
  *	double, or a long double when applicable. Usual values are 2,
- *	4 and 8. The default is eight, for safety.
+ *	4 and 8. The default is eight, for safety.  For cross-compiling
+ *  	or multiarch support, Configure will set a minimum of 8.
  */
-#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
-#  define MEM_ALIGNBYTES 8
-#else
 #define MEM_ALIGNBYTES $alignbytes
-#endif
 
 /* ARCHLIB:
  *	This variable, if defined, holds the name of the directory in
