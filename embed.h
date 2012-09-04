@@ -1319,17 +1319,13 @@
 #define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
 #    if defined(PERL_DEBUG_READONLY_OPS)
 #define Slab_to_ro(a)		Perl_Slab_to_ro(aTHX_ a)
+#define Slab_to_rw(a)		Perl_Slab_to_rw(aTHX_ a)
 #    endif
 #  endif
 #  if defined(PERL_CR_FILTER)
 #    if defined(PERL_IN_TOKE_C)
 #define cr_textfilter(a,b,c)	S_cr_textfilter(aTHX_ a,b,c)
 #define strip_return(a)		S_strip_return(aTHX_ a)
-#    endif
-#  endif
-#  if defined(PERL_DEBUG_READONLY_OPS)
-#    if defined(PERL_IN_OP_C)
-#define Slab_to_rw(a)		S_Slab_to_rw(aTHX_ a)
 #    endif
 #  endif
 #  if defined(PERL_IN_AV_C)

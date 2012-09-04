@@ -2020,11 +2020,17 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
     if (svp && SvIOKp(*svp)) {
 	OP * const o = INT2PTR(OP*,SvIVX(*svp));
 	if (o) {
+#ifdef PERL_DEBUG_READONLY_OPS
+	    Slab_to_rw(OpSLAB(o));
+#endif
 	    /* set or clear breakpoint in the relevant control op */
 	    if (i)
 		o->op_flags |= OPf_SPECIAL;
 	    else
 		o->op_flags &= ~OPf_SPECIAL;
+#ifdef PERL_DEBUG_READONLY_OPS
+	    Slab_to_ro(OpSLAB(o));
+#endif
 	}
     }
     return 0;

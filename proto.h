@@ -5304,6 +5304,11 @@ PERL_CALLCONV void	Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
 #define PERL_ARGS_ASSERT_SLAB_TO_RO	\
 	assert(slab)
 
+PERL_CALLCONV void	Perl_Slab_to_rw(pTHX_ OPSLAB *const slab)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SLAB_TO_RW	\
+	assert(slab)
+
 #  endif
 #endif
 #if defined(PERL_CR_FILTER)
@@ -5323,13 +5328,6 @@ PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)
 	assert(o)
 
 PERL_CALLCONV OP *	Perl_op_refcnt_inc(pTHX_ OP *o);
-#  if defined(PERL_IN_OP_C)
-STATIC void	S_Slab_to_rw(pTHX_ void *op)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SLAB_TO_RW	\
-	assert(op)
-
-#  endif
 #endif
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
 /* PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd)
