@@ -3055,6 +3055,17 @@ Perl_newPROG(pTHX_ OP *o)
                maybe other things) also take this path, because they set up
                PL_main_start and PL_main_root directly, without generating an
                optree.
+
+               If the parsing the main program aborts (due to parse errors,
+               or due to BEGIN or similar calling exit), then newPROG()
+               isn't even called, and hence this code path and its cleanups
+               are skipped. This shouldn't make a make a difference:
+               * a non-zero return from perl_parse is a failure, and
+                 perl_destruct() should be called immediately.
+               * however, if exit(0) is called during the parse, then
+                 perl_parse() returns 0, and perl_run() is called. As
+                 PL_main_start will be NULL, perl_run() will return
+                 promptly, and the exit code will remain 0.
             */
 
 	    PL_comppad_name = 0;
