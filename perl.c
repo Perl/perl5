@@ -727,21 +727,15 @@ perl_destruct(pTHXx)
       -DDEBUG_LEAKING_SCALARS they expect PL_curcop to point to a valid
        op from which the filename structure member is copied.  */
     PL_curcop = &PL_compiling;
-    if (PL_main_root) {
-	/* ensure comppad/curpad to refer to main's pad */
-	if (CvPADLIST(PL_main_cv)) {
-	    PAD_SET_CUR_NOSAVE(CvPADLIST(PL_main_cv), 1);
-	}
-	op_free(PL_main_root);
-	PL_main_root = NULL;
-    }
-    PL_main_start = NULL;
     /* note that  PL_main_cv isn't usually actually freed at this point,
      * due to the CvOUTSIDE refs from subs compiled within it. It will
      * get freed once all the subs are freed in sv_clean_all(), for
      * destruct_level > 0 */
-    SvREFCNT_dec(PL_main_cv);
-    PL_main_cv = NULL;
+    if (PL_main_cv) {
+        CvDEPTH(PL_main_cv) = 0;
+        SvREFCNT_dec(PL_main_cv);
+        PL_main_cv = NULL;
+    }
 
     /* Tell PerlIO we are about to tear things apart in case
        we have layers which are using resources that should
@@ -820,7 +814,7 @@ perl_destruct(pTHXx)
 
 #ifdef USE_ITHREADS
     /* the syntax tree is shared between clones
-     * so op_free(PL_main_root) only ReREFCNT_dec's
+     * so op_free(CvROOT(PL_main_cv)) only ReREFCNT_dec's
      * REGEXPs in the parent interpreter
      * we need to manually ReREFCNT_dec for the clones
      */
@@ -1604,12 +1598,14 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	return 0;
     }
 
-    if (PL_main_root) {
-	op_free(PL_main_root);
-	PL_main_root = NULL;
+    if (PL_main_cv) {
+        if (CvROOT(PL_main_cv)) {
+            op_free(CvROOT(PL_main_cv));
+            CvROOT(PL_main_cv) = NULL;
+        }
+        CvSTART(PL_main_cv) = NULL;
+        SvREFCNT_dec(PL_main_cv);
     }
-    PL_main_start = NULL;
-    SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
 
     time(&PL_basetime);
@@ -2373,8 +2369,8 @@ S_run_body(pTHX_ I32 oldscope)
 	    call_list(oldscope, PL_initav);
 	}
 #ifdef PERL_DEBUG_READONLY_OPS
-	if (PL_main_root && PL_main_root->op_slabbed)
-	    Slab_to_ro(OpSLAB(PL_main_root));
+	if (PL_main_cv && CvROOT(PL_main_cv) && CvROOT(PL_main_cv)->op_slabbed)
+	    Slab_to_ro(OpSLAB(CvROOT(PL_main_cv)));
 #endif
     }
 
@@ -2388,9 +2384,9 @@ S_run_body(pTHX_ I32 oldscope)
 	PL_restartop = 0;
 	CALLRUNOPS(aTHX);
     }
-    else if (PL_main_start) {
+    else if (PL_main_cv && CvROOT(PL_main_cv) && CvSTART(PL_main_cv)) {
 	CvDEPTH(PL_main_cv) = 1;
-	PL_op = PL_main_start;
+	PL_op = CvSTART(PL_main_cv);
 	CALLRUNOPS(aTHX);
     }
     my_exit(0);

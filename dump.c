@@ -119,8 +119,8 @@ Perl_dump_all_perl(pTHX_ bool justperl)
 
     dVAR;
     PerlIO_setlinebuf(Perl_debug_log);
-    if (PL_main_root)
-	op_dump(PL_main_root);
+    if (CvROOT(PL_main_cv))
+	op_dump(CvROOT(PL_main_cv));
     dump_packsubs_perl(PL_defstash, justperl);
 }
 
@@ -2317,8 +2317,8 @@ void
 Perl_xmldump_all_perl(pTHX_ bool justperl PERL_UNUSED_DECL)
 {
     PerlIO_setlinebuf(PL_xmlfp);
-    if (PL_main_root)
-	op_xmldump(PL_main_root);
+    if (CvROOT(PL_main_cv))
+	op_xmldump(CvROOT(PL_main_cv));
     /* someday we might call this, when it outputs XML: */
     /* xmldump_packsubs_perl(PL_defstash, justperl); */
     if (PL_xmlfp != (PerlIO*)PerlIO_stdout())

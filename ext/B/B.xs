@@ -721,7 +721,7 @@ main_root()
     ALIAS:
 	main_start = 1
     PPCODE:
-	PUSHs(make_op_object(aTHX_ ix ? PL_main_start : PL_main_root));
+	PUSHs(make_op_object(aTHX_ ix ? CvSTART(PL_main_cv) : CvROOT(PL_main_cv)));
 
 UV
 sub_generation()

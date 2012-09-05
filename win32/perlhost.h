@@ -1781,7 +1781,7 @@ restart:
 
 	/* XXX hack to avoid perl_destruct() freeing optree */
         win32_checkTLS(my_perl);
-	PL_main_root = (OP*)NULL;
+	CvROOT(PL_main_cv) = (OP*)NULL;
     }
 
     win32_checkTLS(my_perl);

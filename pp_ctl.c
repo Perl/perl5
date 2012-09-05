@@ -3000,7 +3000,7 @@ PP(pp_goto)
 		    gotoprobe = cx->blk_oldcop->op_sibling;
 		    in_block = TRUE;
 		} else
-		    gotoprobe = PL_main_root;
+		    gotoprobe = CvROOT(PL_main_cv);
 		break;
 	    case CXt_SUB:
 		if (CvDEPTH(cx->blk_sub.cv) && !CxMULTICALL(cx)) {
@@ -3015,7 +3015,7 @@ PP(pp_goto)
 		if (ix)
 		    DIE(aTHX_ "panic: goto, type=%u, ix=%ld",
 			CxTYPE(cx), (long) ix);
-		gotoprobe = PL_main_root;
+		gotoprobe = CvROOT(PL_main_cv);
 		break;
 	    }
 	    if (gotoprobe) {
@@ -3089,7 +3089,7 @@ PP(pp_goto)
 
     if (do_dump) {
 #ifdef VMS
-	if (!retop) retop = PL_main_start;
+	if (!retop) retop = CvSTART(PL_main_cv);
 #endif
 	PL_restartop = retop;
 	PL_do_undump = TRUE;

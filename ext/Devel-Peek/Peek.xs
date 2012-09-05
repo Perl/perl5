@@ -382,8 +382,8 @@ DumpProg()
 PPCODE:
 {
     warn("dumpindent is %d", (int)PL_dumpindent);
-    if (PL_main_root)
-	op_dump(PL_main_root);
+    if (CvROOT(PL_main_cv))
+	op_dump(CvROOT(PL_main_cv));
 }
 
 I32

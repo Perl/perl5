@@ -1850,7 +1850,7 @@ Similar to "CHECK", but for C<INIT>-blocks, not C<CHECK> blocks.
 
 =item RUN
 
-The main run-time, i.e. the execution of C<PL_main_root>.
+The main run-time, i.e. the execution of C<CvROOT(PL_main_cv)>.
 
 =item END
 

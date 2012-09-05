@@ -3073,14 +3073,14 @@ Perl_newPROG(pTHX_ OP *o)
 	    S_op_destroy(aTHX_ o);
 	    return;
 	}
-	PL_main_root = op_scope(sawparens(scalarvoid(o)));
+	CvROOT(PL_main_cv) = op_scope(sawparens(scalarvoid(o)));
 	PL_curcop = &PL_compiling;
-	PL_main_start = LINKLIST(PL_main_root);
-	PL_main_root->op_private |= OPpREFCOUNTED;
-	OpREFCNT_set(PL_main_root, 1);
-	PL_main_root->op_next = 0;
-	CALL_PEEP(PL_main_start);
-	finalize_optree(PL_main_root);
+	CvSTART(PL_main_cv) = LINKLIST(CvROOT(PL_main_cv));
+	CvROOT(PL_main_cv)->op_private |= OPpREFCOUNTED;
+	OpREFCNT_set(CvROOT(PL_main_cv), 1);
+	CvROOT(PL_main_cv)->op_next = 0;
+	CALL_PEEP(CvSTART(PL_main_cv));
+	finalize_optree(CvROOT(PL_main_cv));
 	cv_forget_slab(PL_compcv);
 	PL_compcv = 0;
 
@@ -7734,7 +7734,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 		return;
 	} else if (*name == 'C') {
 	    if (strEQ(name, "CHECK")) {
-		if (PL_main_start)
+		if (CvROOT(PL_main_cv))
 		    /* diag_listed_as: Too late to run %s block */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
 				   "Too late to run CHECK block");
@@ -7744,7 +7744,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 		return;
 	} else if (*name == 'I') {
 	    if (strEQ(name, "INIT")) {
-		if (PL_main_start)
+		if (CvROOT(PL_main_cv))
 		    /* diag_listed_as: Too late to run %s block */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
 				   "Too late to run INIT block");

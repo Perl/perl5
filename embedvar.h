@@ -209,8 +209,6 @@
 #define PL_lockhook		(vTHX->Ilockhook)
 #define PL_madskills		(vTHX->Imadskills)
 #define PL_main_cv		(vTHX->Imain_cv)
-#define PL_main_root		(vTHX->Imain_root)
-#define PL_main_start		(vTHX->Imain_start)
 #define PL_mainstack		(vTHX->Imainstack)
 #define PL_markstack		(vTHX->Imarkstack)
 #define PL_markstack_max	(vTHX->Imarkstack_max)

@@ -4768,6 +4768,9 @@ EXTCONST char *const PL_phase_names[];
 #  define PL_dirty (PL_phase == PERL_PHASE_DESTRUCT)
 
 #  define PL_amagic_generation PL_na
+
+#  define PL_main_root CvROOT(PL_main_cv)
+#  define PL_main_start CvSTART(PL_main_cv)
 #endif /* !PERL_CORE */
 
 END_EXTERN_C
