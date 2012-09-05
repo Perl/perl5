@@ -670,6 +670,7 @@ sub _cond_as_str {
     # for it.  This doesn't apply if returning the code point, as we want each
     # element of the set individually.
     if (! $is_cp_ret) {
+        return 1 if @$cond == 256;
         my ($mask, $base) = calculate_mask(@$cond);
         if (defined $mask && defined $base) {
             return sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask, $base;
@@ -746,6 +747,8 @@ sub _render {
     #no warnings 'recursion';   # This would allow really really inefficient
                                 # code to be generated.  See pod
     my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref );
+    return $yes if $cond eq '1';
+
     my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref );
     return "( $cond )" if $yes eq '1' and $no eq '0';
     my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
