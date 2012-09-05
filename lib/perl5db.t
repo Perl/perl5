@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(34);
+plan(40);
 
 my $rc_filename = '.perldb';
 
@@ -367,7 +367,7 @@ sub _run {
         ::runperl(
             switches =>
             [
-                '-d', 
+                '-d',
                 ($self->_include_t ? ('-I', '../lib/perl5db/t') : ())
             ],
             stderr => 1,
@@ -689,11 +689,11 @@ package main;
             "'" . quotemeta($prog_fn) . "' line %s\\n",
             (map { quotemeta($_) } @$_)
             )
-        } 
+        }
         (
             ['.', 'main::baz', 14,],
             ['.', 'main::bar', 9,],
-            ['.', 'main::foo', 6]
+            ['.', 'main::foo', 6],
         )
     );
     $wrapper->contents_like(
@@ -899,6 +899,201 @@ package main;
             5:\s+print\ "2\\n";\n
         /msx,
         'l statement is working properly (test No. 1).',
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l',
+                q/# After l 1/,
+                'l',
+                q/# After l 2/,
+                '-',
+                q/# After -/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-1',
+        }
+    );
+
+    my $first_l_out = qr/
+        1==>\s+\$x\ =\ 1;\n
+        2:\s+print\ "1\\n";\n
+        3\s*\n
+        4:\s+\$x\ =\ 2;\n
+        5:\s+print\ "2\\n";\n
+        6\s*\n
+        7:\s+\$x\ =\ 3;\n
+        8:\s+print\ "3\\n";\n
+        9\s*\n
+        10:\s+\$x\ =\ 4;\n
+    /msx;
+
+    my $second_l_out = qr/
+        11:\s+print\ "4\\n";\n
+        12\s*\n
+        13:\s+\$x\ =\ 5;\n
+        14:\s+print\ "5\\n";\n
+        15\s*\n
+        16:\s+\$x\ =\ 6;\n
+        17:\s+print\ "6\\n";\n
+        18\s*\n
+        19:\s+\$x\ =\ 7;\n
+        20:\s+print\ "7\\n";\n
+    /msx;
+    $wrapper->contents_like(
+        qr/
+            ^$first_l_out
+            [^\n]*?DB<\d+>\ \#\ After\ l\ 1\n
+            [\ \t]*\n
+            [^\n]*?DB<\d+>\ l\s*\n
+            $second_l_out
+            [^\n]*?DB<\d+>\ \#\ After\ l\ 2\n
+            [\ \t]*\n
+            [^\n]*?DB<\d+>\ -\s*\n
+            $first_l_out
+            [^\n]*?DB<\d+>\ \#\ After\ -\n
+        /msx,
+        'l followed by l and then followed by -',
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l fact',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-2',
+        }
+    );
+
+    my $first_l_out = qr/
+        6\s+sub\ fact\ \{\n
+        7:\s+my\ \$n\ =\ shift;\n
+        8:\s+if\ \(\$n\ >\ 1\)\ \{\n
+        9:\s+return\ \$n\ \*\ fact\(\$n\ -\ 1\);
+    /msx;
+
+    $wrapper->contents_like(
+        qr/
+            DB<1>\s+l\ fact\n
+            $first_l_out
+        /msx,
+        'l subroutine_name',
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b fact',
+                'c',
+                # Repeat several times to avoid @typeahead problems.
+                '.',
+                '.',
+                '.',
+                '.',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-2',
+        }
+    );
+
+    my $line_out = qr /
+        ^main::fact\([^\n]*?:7\):\n
+        ^7:\s+my\ \$n\ =\ shift;\n
+    /msx;
+
+    $wrapper->contents_like(
+        qr/
+            $line_out
+            $line_out
+        /msx,
+        'Test the "." command',
+    );
+}
+
+# Testing that the f command works.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'f ../lib/perl5db/t/MyModule.pm',
+                'b 12',
+                'c',
+                q/do { use IO::Handle; STDOUT->autoflush(1); print "Var=$var\n"; }/,
+                'c',
+                'q',
+            ],
+            include_t => 1,
+            prog => '../lib/perl5db/t/filename-line-breakpoint'
+        }
+    );
+
+    $wrapper->output_like(qr/
+        ^Var=Bar$
+            .*
+        ^In\ MyModule\.$
+            .*
+        ^In\ Main\ File\.$
+            .*
+        /msx,
+        "f command is working.",
+    );
+}
+
+# We broke the /pattern/ command because apparently the CORE::eval-s inside
+# lib/perl5db.pl cannot handle lexical variable properly. So we now fix this
+# bug.
+#
+# TODO :
+#
+# 1. Go over the rest of the "eval"s in lib/perl5db.t and see if they cause
+# problems.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                '/for/',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/eval-line-bug',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/12: \s* for\ my\ \$q\ \(1\ \.\.\ 10\)\ \{/msx,
+        "/pat/ command is working and found a match.",
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 22',
+                'c',
+                '?for?',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/eval-line-bug',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/12: \s* for\ my\ \$q\ \(1\ \.\.\ 10\)\ \{/msx,
+        "?pat? command is working and found a match.",
     );
 }
 
