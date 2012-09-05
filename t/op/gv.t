@@ -315,21 +315,37 @@ is($j[0], 1);
     is ($e, '', '__DIE__ handler never called');
 }
 
+# The previous version of this test relied on the fact that PL_main_root is
+# freed *just* before global destruction is "declared". This is an unfortunate
+# ordering assumption about the C code in perl_destroy
+
+# It's possible to more easily demonstrate whether typeglobs and symbol
+# tables have a mutual loop keeping them alive until global destruction by
+# ensuring that any optree that also references the typeglob can be freed
+# at a known time (the undef &thwake below), and so one can check whether the
+# destructor hooked to $A::B has fired.
+
 {
-    # Need some sort of die or warn to get the global destruction text if the
-    # bug is still present
-    my $output = runperl(prog => <<'EOPROG');
+    my $output = runperl(prog => <<'EOPROG', stderr => 1);
 package M;
-$| = 1;
-sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
+sub DESTROY {
+    ++$state;
+}
 package main;
 
-bless \$A::B, q{M};
-*A:: = \*B::;
+sub thwacke {
+    $M::state = 1;
+    bless \$A::B, q{M};
+    *A:: = \*B::;
+};
+&thwacke;
+
+print qq{Before: $M::state\n};
+undef &thwacke;
+print qq{After: $M::state\n};
 EOPROG
-    like($output, qr/^Farewell M=SCALAR/, "DESTROY was called");
-    unlike($output, qr/global destruction/,
-           "unreferenced symbol tables should be cleaned up immediately");
+    like($output, qr/^Before: 1/m, "parsed and ran correctly");
+    like($output, qr/^After: 2/m, "DESTROY was called at the correct time");
 }
 
 # Possibly not the correct test file for these tests.

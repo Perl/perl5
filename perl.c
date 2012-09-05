@@ -716,6 +716,8 @@ perl_destruct(pTHXx)
 	close(fd[1]);
     }
 #endif
+
+    PERL_SET_PHASE(PERL_PHASE_DESTRUCT);
     
     /* We must account for everything.  */
 
@@ -740,7 +742,6 @@ perl_destruct(pTHXx)
      * destruct_level > 0 */
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
-    PERL_SET_PHASE(PERL_PHASE_DESTRUCT);
 
     /* Tell PerlIO we are about to tear things apart in case
        we have layers which are using resources that should

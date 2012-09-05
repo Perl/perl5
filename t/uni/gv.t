@@ -296,31 +296,27 @@ is($Ｊ[0], 1);
 }
 
 {
-    SKIP: {
-        skip_if_miniperl('no dynamic loading on miniperl, no Encode', 2);
-        # Need some sort of die or warn to get the global destruction text if the
-        # bug is still present
-        my $prog = <<'EOPROG';
-            use utf8;
-            use open qw( :utf8 :std );
-            package ᴹ;
-            $| = 1;
-            sub DESTROY {eval {die qq{Farewell $_[0]}}; print $@}
-            package main;
-    
-            bless \$Ⱥ::ㄅ, q{ᴹ};
-            *Ⱥ:: = \*ㄅ::;
+    my $output = runperl(prog => <<'EOPROG', stderr => 1);
+use utf8;
+package ᴹ;
+sub DESTROY {
+    ++$state;
+}
+package main;
+
+sub Ə {
+    $ᴹ::state = 1;
+    bless \$Ⱥ::ㄅ, q{ᴹ};
+    *Ⱥ:: = \*ㄅ::;
+};
+&Ə;
+
+print qq{Before: $ᴹ::state\n};
+undef &Ə;
+print qq{After: $ᴹ::state\n};
 EOPROG
-    
-        utf8::decode($prog);
-        my $output = runperl(prog => $prog);
-        
-        require Encode;
-        $output = Encode::decode("UTF-8", $output);
-        like($output, qr/^Farewell ᴹ=SCALAR/, "DESTROY was called");
-        unlike($output, qr/global destruction/,
-            "unreferenced symbol tables should be cleaned up immediately");
-    }
+    like($output, qr/^Before: 1/m, "parsed and ran correctly");
+    like($output, qr/^After: 2/m, "DESTROY was called at the correct time");
 }
 
 {
