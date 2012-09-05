@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.88";
+$VERSION                = "1.90";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -1495,8 +1495,8 @@ The following list of properties is supported: name, size, mtime
 devmajor, devminor, prefix, type.  (On MacOS, the file's path and
 modification times are converted to Unix equivalents.)
 
-Valid values for the file type are the following constants defined in
-Archive::Tar::Constants:
+Valid values for the file type are the following constants defined by
+Archive::Tar::Constant:
 
 =over 4
 
@@ -1756,7 +1756,7 @@ If C<list_archive()> is passed an array reference as its third
 argument it returns a list of hash references containing the requested
 properties of each file.  The following list of properties is
 supported: full_path, name, size, mtime (last modified date), mode,
-uid, gid, linkname, uname, gname, devmajor, devminor, prefix.
+uid, gid, linkname, uname, gname, devmajor, devminor, prefix, type.
 
 See C<Archive::Tar::File> for details about supported properties.
 
