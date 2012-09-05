@@ -666,21 +666,12 @@ sub _cond_as_str {
     my $is_cp_ret = $opts_ref->{ret_type} eq "cp";
     return "( $test )" if !defined $cond;
 
-    # If the input set has certain characteristics, we can optimize tests
-    # for it.  This doesn't apply if returning the code point, as we want each
-    # element of the set individually.
-    if (! $is_cp_ret) {
-        return 1 if @$cond == 256;
-        my ($mask, $base) = calculate_mask(@$cond);
-        if (defined $mask && defined $base) {
-            return sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask, $base;
-        }
-    }
-
-    # rangify the list
+    # rangify the list.
     my @ranges;
     my $Update= sub {
-        if ( @ranges ) {
+        # We skip this if there are optimizations that
+        # we can apply (below) to the individual ranges
+        if ( ($is_cp_ret || $combine) && @ranges && ref $ranges[-1]) {
             if ( $ranges[-1][0] == $ranges[-1][1] ) {
                 $ranges[-1]= $ranges[-1][0];
             } elsif ( $ranges[-1][0] + 1 == $ranges[-1][1] ) {
@@ -698,8 +689,11 @@ sub _cond_as_str {
         }
     }
     $Update->();
+
     return $self->_combine( $test, @ranges )
       if $combine;
+
+    if ($is_cp_ret) {
     @ranges= map {
         ref $_
           ? sprintf(
@@ -707,7 +701,71 @@ sub _cond_as_str {
             @$_ )
           : sprintf( "$self->{val_fmt} == $test", $_ );
     } @ranges;
+    }
+    else {
+        # If the input set has certain characteristics, we can optimize tests
+        # for it.  This doesn't apply if returning the code point, as we want
+        # each element of the set individually.  The code above is for this
+        # simpler case.
+
+        return 1 if @$cond == 256;  # If all bytes match, is trivially true
+
+            # See if the entire set shares optimizable characterstics, and if
+            # so, return the optimization.
+            my ($mask, $base) = calculate_mask(@$cond);
+            if (defined $mask && defined $base) {
+                return sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask, $base;
+            }
+
+        # Here, there was no entire-class optimization.  Look at each range.
+        for (my $i = 0; $i < @ranges; $i++) {
+            if (! ref $ranges[$i]) {    # Trivial case: no range
+                $ranges[$i] = sprintf "$self->{val_fmt} == $test", $ranges[$i];
+            }
+            elsif ($ranges[$i]->[0] == $ranges[$i]->[1]) {
+                $ranges[$i] =           # Trivial case: single element range
+                        sprintf "$self->{val_fmt} == $test", $ranges[$i]->[0];
+            }
+            else {
+                my $output = "";
+
+                # See if the number of elements is a power of 2 (only a single
+                # bit in the representation of its count will be set) and if
+                # so, it may be that a mask/compare optimization is possible.
+                if (pop_count($ranges[$i]->[1] - $ranges[$i]->[0] + 1) == 1) {
+                    my @list;
+                    push @list, $_  for ($ranges[$i]->[0] .. $ranges[$i]->[1]);
+                    my ($mask, $base) = calculate_mask(@list);
+                    if (defined $mask && defined $base) {
+                        $output = sprintf "( $test & $self->{val_fmt} ) == $self->{val_fmt}", $mask, $base;
+                    }
+                }
+
+                if ($output ne "") {  # Prefer any optimization
+                    $ranges[$i] = $output;
+                }
+                elsif ($ranges[$i]->[0] + 1 == $ranges[$i]->[1]) {
+                    # No optimization happened.  We need a test that the code
+                    # point is within both bounds.  But, if the bounds are
+                    # adjacent code points, it is cleaner to say
+                    # 'first == test || second == test'
+                    # than it is to say
+                    # 'first <= test && test <= second'
+                    $ranges[$i] = "( "
+                                .  join( " || ", ( map
+                                    { sprintf "$self->{val_fmt} == $test", $_ }
+                                    @{$ranges[$i]} ) )
+                                . " )";
+                }
+                else {  # Full bounds checking
+                    $ranges[$i] = sprintf("( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )", $ranges[$i]->[0], $ranges[$i]->[1]);
+                }
+            }
+        }
+    }
+
     return "( " . join( " || ", @ranges ) . " )";
+
 }
 
 # _combine
