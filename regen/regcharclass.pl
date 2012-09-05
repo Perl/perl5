@@ -710,12 +710,16 @@ sub _cond_as_str {
 
         return 1 if @$cond == 256;  # If all bytes match, is trivially true
 
+        if (@ranges > 1) {
             # See if the entire set shares optimizable characterstics, and if
-            # so, return the optimization.
+            # so, return the optimization.  We delay checking for this on sets
+            # with just a single range, as there may be better optimizations
+            # available in that case.
             my ($mask, $base) = calculate_mask(@$cond);
             if (defined $mask && defined $base) {
                 return sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask, $base;
             }
+        }
 
         # Here, there was no entire-class optimization.  Look at each range.
         for (my $i = 0; $i < @ranges; $i++) {
@@ -729,10 +733,43 @@ sub _cond_as_str {
             else {
                 my $output = "";
 
-                # See if the number of elements is a power of 2 (only a single
-                # bit in the representation of its count will be set) and if
-                # so, it may be that a mask/compare optimization is possible.
-                if (pop_count($ranges[$i]->[1] - $ranges[$i]->[0] + 1) == 1) {
+                # Well-formed UTF-8 continuation bytes on ascii platforms must
+                # be in the range 0x80 .. 0xBF.  If we know that the input is
+                # well-formed (indicated by not trying to be 'safe'), we can
+                # omit tests that verify that the input is within either of
+                # these bounds.  (No legal UTF-8 character can begin with
+                # anything in this range, so we don't have to worry about this
+                # being a continuation byte or not.)
+                if (ASCII_PLATFORM
+                    && ! $opts_ref->{safe}
+                    && $opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi)
+                {
+                    my $lower_limit_is_80 = ($ranges[$i]->[0] == 0x80);
+                    my $upper_limit_is_BF = ($ranges[$i]->[1] == 0xBF);
+
+                    # If the range is the entire legal range, it matches any
+                    # legal byte, so we can omit both tests.  (This should
+                    # happen only if the number of ranges is 1.)
+                    if ($lower_limit_is_80 && $upper_limit_is_BF) {
+                        return 1;
+                    }
+                    elsif ($lower_limit_is_80) { # Just use the upper limit test
+                        $output = sprintf("( $test <= $self->{val_fmt} )",
+                                            $ranges[$i]->[1]);
+                    }
+                    elsif ($upper_limit_is_BF) { # Just use the lower limit test
+                        $output = sprintf("( $test >= $self->{val_fmt} )",
+                                        $ranges[$i]->[0]);
+                    }
+                }
+
+                # If we didn't change to omit a test above, see if the number
+                # of elements is a power of 2 (only a single bit in the
+                # representation of its count will be set) and if so, it may
+                # be that a mask/compare optimization is possible.
+                if ($output eq ""
+                    && pop_count($ranges[$i]->[1] - $ranges[$i]->[0] + 1) == 1)
+                {
                     my @list;
                     push @list, $_  for ($ranges[$i]->[0] .. $ranges[$i]->[1]);
                     my ($mask, $base) = calculate_mask(@list);
