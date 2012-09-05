@@ -8666,8 +8666,11 @@ Look through all the symbols in the package. C<grep> out all the possible hashes
 
 =cut
 
-        my @out = map "$prefix$_", grep /^\Q$text/, grep /^_?[a-zA-Z]/,
-          keys %$pack;
+        my @out = do {
+            no strict 'refs';
+            map "$prefix$_", grep /^\Q$text/, grep /^_?[a-zA-Z]/,
+            keys %$pack;
+        };
 
 =pod
 
