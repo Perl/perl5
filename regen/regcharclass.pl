@@ -562,10 +562,10 @@ sub _cond_as_str {
             }
         }
     };
-    for my $cond ( @$cond ) {
-        if ( !@ranges || $cond != $ranges[-1][1] + 1 ) {
+    for my $condition ( @$cond ) {
+        if ( !@ranges || $condition != $ranges[-1][1] + 1 ) {
             $Update->();
-            push @ranges, [ $cond, $cond ];
+            push @ranges, [ $condition, $condition ];
         } else {
             $ranges[-1][1]++;
         }
