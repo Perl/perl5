@@ -694,13 +694,13 @@ sub _cond_as_str {
       if $combine;
 
     if ($is_cp_ret) {
-    @ranges= map {
-        ref $_
-          ? sprintf(
-            "( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )",
-            @$_ )
-          : sprintf( "$self->{val_fmt} == $test", $_ );
-    } @ranges;
+        @ranges= map {
+            ref $_
+            ? sprintf(
+                "( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )",
+                @$_ )
+            : sprintf( "$self->{val_fmt} == $test", $_ );
+        } @ranges;
     }
     else {
         # If the input set has certain characteristics, we can optimize tests
