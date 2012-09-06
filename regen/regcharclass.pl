@@ -1161,6 +1161,22 @@ GCB_V: Grapheme_Cluster_Break=V
 => UTF8 :fast
 \p{_X_GCB_V}
 
+# This program was run with this enabled, and the results copied to utf8.h;
+# then this was commented out because it takes so long to figure out these 2
+# million code points.  The results would not change unless utf8.h decides it
+# wants a maximum other than 4 bytes, or this program creates better
+# optimizations
+#UTF8_CHAR: Matches utf8 from 1 to 4 bytes
+#=> UTF8 :safe only_ascii_platform
+#0x0 - 0x1FFFFF
+
+# This hasn't been commented out, because we haven't an EBCDIC platform to run
+# it on, and the 3 types of EBCDIC allegedly supported by Perl would have
+# different results
+UTF8_CHAR: Matches utf8 from 1 to 5 bytes
+=> UTF8 :safe only_ebcdic_platform
+0x0 - 0x3FFFFF:
+
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
 \p{_Perl_Quotemeta}
