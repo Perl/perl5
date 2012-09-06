@@ -945,6 +945,11 @@ if ( !caller ) {
     my ( $op, $title, @txt, @types, %mods );
     my $doit= sub {
         return unless $op;
+
+        # Skip if to compile on a different platform.
+        return if delete $mods{only_ascii_platform} && ! ASCII_PLATFORM;
+        return if delete $mods{only_ebcdic_platform} && ord 'A' != 193;
+
         print $out_fh "/*\n\t$op: $title\n\n";
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
         my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt );
@@ -1076,6 +1081,10 @@ if ( !caller ) {
 #   fast        The input string is valid UTF-8.  No bounds checking is done,
 #               and the macro can make assumptions that lead to faster
 #               execution.
+#   only_ascii_platform   Skip this definition if this program is being run on
+#               a non-ASCII platform.
+#   only_ebcdic_platform  Skip this definition if this program is being run on
+#               a non-EBCDIC platform.
 # No modifier need be specified; fast is assumed for this case.  If both
 # 'fast', and 'safe' are specified, two macros will be created for each
 # 'type'.
