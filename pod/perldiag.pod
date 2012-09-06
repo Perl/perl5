@@ -4561,6 +4561,36 @@ was either never opened or has since been closed.
 stubs.  Stubs should never be implicitly created, but explicit calls to
 C<can> may break this.
 
+=item Subroutine "&%s" is not available
+
+(W closure) During compilation, an inner named subroutine or eval is
+attempting to capture an outer lexical subroutine that is not currently
+available.  This can happen for one of two reasons.  First, the lexical
+subroutine may be declared in an outer anonymous subroutine that has not
+yet been created.  (Remember that named subs are created at compile time,
+while anonymous subs are created at run-time.)  For example,
+
+    sub { my sub a {...} sub f { \&a } }
+
+At the time that f is created, it can't capture the current the "a" sub,
+since the anonymous subroutine hasn't been created yet.  Conversely, the
+following won't give a warning since the anonymous subroutine has by now
+been created and is live:
+
+    sub { my sub a {...} eval 'sub f { \&a }' }->();
+
+The second situation is caused by an eval accessing a variable that has
+gone out of scope, for example,
+
+    sub f {
+	my sub a {...}
+	sub { eval '\&a' }
+    }
+    f()->();
+
+Here, when the '\&a' in the eval is being compiled, f() is not currently
+being executed, so its &a is not available for capture.
+
 =item "%s" subroutine &%s masks earlier declaration in same %s
 
 (W misc) A "my" or "state" subroutine has been redeclared in the

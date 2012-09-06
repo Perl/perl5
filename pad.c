@@ -1238,8 +1238,12 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			: *out_flags & PAD_FAKELEX_ANON)
 		{
 		    if (warn)
+			/* diag_listed_as: Variable "%s" is not available*/
 			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "Variable \"%"SVf"\" is not available",
+				       "%se \"%"SVf"\" is not available",
+				       *namepv == '&'
+					 ? "Subroutin"
+					 : "Variabl",
                                        newSVpvn_flags(namepv, namelen,
                                            SVs_TEMP |
                                            (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
@@ -1287,8 +1291,12 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			&& (!CvDEPTH(cv) || !staleok)
 			&& !SvPAD_STATE(name_svp[offset]))
 		    {
+			/* diag_listed_as: Variable "%s" is not available*/
 			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "Variable \"%"SVf"\" is not available",
+				       "%se \"%"SVf"\" is not available",
+				       *namepv == '&'
+					 ? "Subroutin"
+					 : "Variabl",
                                        newSVpvn_flags(namepv, namelen,
                                            SVs_TEMP |
                                            (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));

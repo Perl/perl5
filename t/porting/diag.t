@@ -230,7 +230,7 @@ sub check_file {
       $sub = $_;
     }
     next if $sub =~ m/^XS/;
-    if (m</\* diag_listed_as: (.*) \*/>) {
+    if (m</\*\s*diag_listed_as: (.*?)\s*\*/>) {
       $listed_as = $1;
       $listed_as_line = $.+1;
     }

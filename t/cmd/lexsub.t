@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 113;
+plan 115;
 
 # -------------------- our -------------------- #
 
@@ -489,6 +489,28 @@ sub make_anon_with_my_sub{
   eval "#line 56 pygpyf\nsub redef {}";
   is $w, "Subroutine redef redefined at pygpyf line 56.\n",
          "sub redefinition warnings from my subs";
+
+  undef $w;
+  sub {
+    my sub x {};
+    sub { eval "#line 87 khaki\n\\&x" }
+  }->()();
+  is $w, "Subroutine \"&x\" is not available at khaki line 87.\n",
+         "unavailability warning during compilation of eval in closure";
+
+  undef $w;
+  no warnings 'void';
+  eval <<'->()();';
+#line 87 khaki
+    sub {
+      my sub x{}
+      sub not_lexical8 {
+        \&x
+      }
+    }
+->()();
+  is $w, "Subroutine \"&x\" is not available at khaki line 90.\n",
+         "unavailability warning during compilation of named sub in anon";
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
