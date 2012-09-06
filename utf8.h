@@ -93,6 +93,7 @@ EXTCONST unsigned char PL_utf8skip[];
 
 END_EXTERN_C
 
+#include "regcharclass.h"
 #include "unicode_constants.h"
 
 /* Native character to iso-8859-1 */
@@ -346,35 +347,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * problematic in some contexts.  This allows code that needs to check for
  * those to to quickly exclude the vast majority of code points it will
  * encounter */
-#ifdef EBCDIC
-#   define UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE UTF_TO_NATIVE(0xF1)
-#else
-#   define UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE 0xED
-#endif
+#define UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE \
+                                    FIRST_SURROGATE_UTF8_FIRST_BYTE
 
-/*		ASCII		   EBCDIC I8
- * U+D7FF:   \xED\x9F\xBF	\xF1\xB5\xBF\xBF    last before surrogates
- * U+D800:   \xED\xA0\x80	\xF1\xB6\xA0\xA0    1st surrogate
- * U+DFFF:   \xED\xBF\xBF	\xF1\xB7\xBF\xBF    final surrogate
- * U+E000:   \xEE\x80\x80	\xF1\xB8\xA0\xA0    next after surrogates
- */
-#ifdef EBCDIC /* Both versions assume well-formed UTF8 */
-#   define UTF8_IS_SURROGATE(s)  (*(s) == UTF_TO_NATIVE(0xF1)                 \
-                                 && ((*((s) +1) == UTF_TO_NATIVE(0xB6))       \
-				     || *((s) + 1) == UTF_TO_NATIVE(0xB7)))
-    /* <send> points to one beyond the end of the string that starts at <s> */
-#   define UTF8_IS_REPLACEMENT(s, send) (*(s) == UTF_TO_NATIVE(0xEF)          \
-	                                 && (send - s) >= 4                   \
-	                                 && *((s) + 1) == UTF_TO_NATIVE(0xBF) \
-	                                 && *((s) + 2) == UTF_TO_NATIVE(0xBF) \
-	                                 && *((s) + 3) == UTF_TO_NATIVE(0xBD)
-#else
-#   define UTF8_IS_SURROGATE(s) (*(s) == 0xED && *((s) + 1) >= 0xA0)
-#   define UTF8_IS_REPLACEMENT(s, send) (*(s) == 0xEF          \
-                                         && (send - s) >= 3    \
-	                                 && *((s) + 1) == 0xBF \
-	                                 && *((s) + 2) == 0xBD)
-#endif
+#define UTF8_IS_SURROGATE(s) cBOOL(is_SURROGATE_utf8(s))
+#define UTF8_IS_REPLACEMENT(s, send) cBOOL(is_REPLACEMENT_utf8_safe(s,send))
 
 /*		  ASCII		     EBCDIC I8
  * U+10FFFF: \xF4\x8F\xBF\xBF	\xF9\xA1\xBF\xBF\xBF	max legal Unicode
@@ -389,60 +366,12 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 					&& (*(s) > 0xF4 || (*((s) + 1) >= 0x90)))
 #endif
 
-/*	   ASCII		     EBCDIC I8
- * U+FDCF: \xEF\xB7\x8F		\xF1\xBF\xAE\xAF	last before non-char block
- * U+FDD0: \xEF\xB7\x90		\xF1\xBF\xAE\xB0	first non-char in block
- * U+FDEF: \xEF\xB7\xAF		\xF1\xBF\xAF\xAF	last non-char in block
- * U+FDF0: \xEF\xB7\xB0		\xF1\xBF\xAF\xB0	first after non-char block
- * U+FFFF: \xEF\xBF\xBF		\xF1\xBF\xBF\xBF
- * U+1FFFF: \xF0\x9F\xBF\xBF	\xF3\xBF\xBF\xBF
- * U+2FFFF: \xF0\xAF\xBF\xBF	\xF5\xBF\xBF\xBF
- * U+3FFFF: \xF0\xBF\xBF\xBF	\xF7\xBF\xBF\xBF
- * U+4FFFF: \xF1\x8F\xBF\xBF	\xF8\xA9\xBF\xBF\xBF
- * U+5FFFF: \xF1\x9F\xBF\xBF	\xF8\xAB\xBF\xBF\xBF
- * U+6FFFF: \xF1\xAF\xBF\xBF	\xF8\xAD\xBF\xBF\xBF
- * U+7FFFF: \xF1\xBF\xBF\xBF	\xF8\xAF\xBF\xBF\xBF
- * U+8FFFF: \xF2\x8F\xBF\xBF	\xF8\xB1\xBF\xBF\xBF
- * U+9FFFF: \xF2\x9F\xBF\xBF	\xF8\xB3\xBF\xBF\xBF
- * U+AFFFF: \xF2\xAF\xBF\xBF	\xF8\xB5\xBF\xBF\xBF
- * U+BFFFF: \xF2\xBF\xBF\xBF	\xF8\xB7\xBF\xBF\xBF
- * U+CFFFF: \xF3\x8F\xBF\xBF	\xF8\xB9\xBF\xBF\xBF
- * U+DFFFF: \xF3\x9F\xBF\xBF	\xF8\xBB\xBF\xBF\xBF
- * U+EFFFF: \xF3\xAF\xBF\xBF	\xF8\xBD\xBF\xBF\xBF
- * U+FFFFF: \xF3\xBF\xBF\xBF	\xF8\xBF\xBF\xBF\xBF
- * U+10FFFF: \xF4\x8F\xBF\xBF	\xF9\xA1\xBF\xBF\xBF
- */
-#define UTF8_IS_NONCHAR_(s) (                                                   \
-    *(s) >= UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE                        \
-    && ! UTF8_IS_SUPER(s)                                                       \
-    && UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_FIRST_PROBLEMATIC(s)         \
-
-#ifdef EBCDIC /* Both versions assume well-formed UTF8 */
-#   define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)           \
-    ((*(s) == UTF_TO_NATIVE(0xF1)                                               \
-       && (*((s) + 1) == UTF_TO_NATIVE(0xBF)                                    \
-       &&    ((*((s) + 2) == UTF_TO_NATIVE(0xAE)                                \
-	    && *((s) + 3) >= UTF_TO_NATIVE(0xB0))                               \
-	  || (*((s) + 2) == UTF_TO_NATIVE(0xAF)                                 \
-	    && *((s) + 3) <= UTF_TO_NATIVE(0xAF)))))                            \
-    || (UTF8SKIP(*(s)) > 3                                                      \
-	/* (These were all derived by inspection and experimentation with an */ \
-	/* editor)  The next line checks the next to final byte in the char */  \
-	&& *((s) + UTF8SKIP(*(s)) - 2) == UTF_TO_NATIVE(0xBF)                   \
-	&& *((s) + UTF8SKIP(*(s)) - 3) == UTF_TO_NATIVE(0xBF)                   \
-        && (NATIVE_TO_UTF(*((s) + UTF8SKIP(*(s)) - 4)) & 0x81) == 0x81          \
-        && (NATIVE_TO_UTF(*((s) + UTF8SKIP(*(s)) - 1)) & 0xBE) == 0XBE))
-#else
-#   define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)           \
-    ((*(s) == 0xEF                                                              \
-	&& ((*((s) + 1) == 0xB7 && (*((s) + 2) >= 0x90 && (*((s) + 2) <= 0xAF)))\
-		/* Gets U+FFF[EF] */                                            \
-	    || (*((s) + 1) == 0xBF && ((*((s) + 2) & 0xBE) == 0xBE))))          \
- || ((*((s) + 2) == 0xBF                                                        \
-	 && (*((s) + 3) & 0xBE) == 0xBE                                         \
-	    /* Excludes things like U+10FFE = \xF0\x90\xBF\xBE */               \
-	 && (*((s) + 1) & 0x8F) == 0x8F)))
-#endif
+/* These are now machine generated, and the 'given' clause is no longer
+ * applicable */
+#define UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)             \
+                                                    cBOOL(is_NONCHAR_utf8(s))
+#define UTF8_IS_NONCHAR_(s)                                                    \
+                    UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s)
 
 #define UNICODE_SURROGATE_FIRST		0xD800
 #define UNICODE_SURROGATE_LAST		0xDFFF

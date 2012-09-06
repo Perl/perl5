@@ -333,6 +333,45 @@
 0x2029 == cp ) ) ) ) ) )
 
 /*
+	REPLACEMENT: Unicode REPLACEMENT CHARACTER
+
+	0xFFFD
+*/
+/*** GENERATED CODE ***/
+#define is_REPLACEMENT_utf8_safe(s,e)                                       \
+( ( ( ( ((e)-(s) > 2) && ( 0xEF == ((U8*)s)[0] ) ) && ( 0xBF == ((U8*)s)[1] ) ) && ( 0xBD == ((U8*)s)[2] ) ) ? 3 : 0 )
+
+/*
+	NONCHAR: Non character code points
+
+	\p{Nchar}
+*/
+/*** GENERATED CODE ***/
+#define is_NONCHAR_utf8(s)                                                  \
+( ( 0xEF == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xB7 == ((U8*)s)[1] ) ?                                             \
+	( ( 0x90 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xAF ) ? 3 : 0 )          \
+    : ( 0xBF == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xBE ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x9F == ((U8*)s)[1] || 0xAF == ((U8*)s)[1] || 0xBF == ((U8*)s)[1] ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xBE ) ) ? 4 : 0 )\
+: ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF3 ) ?                          \
+    ( ( ( ( ( ((U8*)s)[1] & 0xCF ) == 0x8F ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xBE ) ) ? 4 : 0 )\
+: ( 0xF4 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x8F == ((U8*)s)[1] ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xBE ) ) ? 4 : 0 )\
+: 0 )
+
+/*
+	SURROGATE: Surrogate characters
+
+	\p{Gc=Cs}
+*/
+/*** GENERATED CODE ***/
+#define is_SURROGATE_utf8(s)                                                \
+( ( ( 0xED == ((U8*)s)[0] ) && ( ((U8*)s)[1] >= 0xA0 ) ) ? 3 : 0 )
+
+/*
 	GCB_L: Grapheme_Cluster_Break=L
 
 	\p{_X_GCB_L}

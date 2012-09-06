@@ -1112,6 +1112,18 @@ VERTWS: Vertical Whitespace: \v \V
 => generic UTF8 LATIN1 cp :fast safe
 \p{VertSpace}
 
+REPLACEMENT: Unicode REPLACEMENT CHARACTER
+=> UTF8 :safe
+0xFFFD
+
+NONCHAR: Non character code points
+=> UTF8 :fast
+\p{Nchar}
+
+SURROGATE: Surrogate characters
+=> UTF8 :fast
+\p{Gc=Cs}
+
 GCB_L: Grapheme_Cluster_Break=L
 => UTF8 :fast
 \p{_X_GCB_L}
