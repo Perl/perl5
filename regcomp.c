@@ -7013,9 +7013,10 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * list.)
  * Taking the complement (inverting) an inversion list is quite simple, if the
  * first element is 0, remove it; otherwise add a 0 element at the beginning.
- * This implementation reserves an element at the beginning of each inversion list
- * to contain 0 when the list contains 0, and contains 1 otherwise.  The actual
- * beginning of the list is either that element if 0, or the next one if 1.
+ * This implementation reserves an element at the beginning of each inversion
+ * list to contain 0 when the list contains 0, and contains 1 otherwise.  The
+ * actual beginning of the list is either that element if 0, or the next one if
+ * 1.
  *
  * More about inversion lists can be found in "Unicode Demystified"
  * Chapter 13 by Richard Gillam, published by Addison-Wesley.
