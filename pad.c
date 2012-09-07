@@ -1116,6 +1116,17 @@ the parent pad.
 /* the CV does late binding of its lexicals */
 #define CvLATE(cv) (CvANON(cv) || CvCLONE(cv) || SvTYPE(cv) == SVt_PVFM)
 
+static void
+S_unavailable(pTHX_ SV *namesv)
+{
+    /* diag_listed_as: Variable "%s" is not available */
+    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
+			"%se \"%"SVf"\" is not available",
+			 *SvPVX_const(namesv) == '&'
+					 ? "Subroutin"
+					 : "Variabl",
+			 namesv);
+}
 
 STATIC PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
@@ -1238,12 +1249,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			: *out_flags & PAD_FAKELEX_ANON)
 		{
 		    if (warn)
-			/* diag_listed_as: Variable "%s" is not available*/
-			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "%se \"%"SVf"\" is not available",
-				       *namepv == '&'
-					 ? "Subroutin"
-					 : "Variabl",
+			S_unavailable(aTHX_
                                        newSVpvn_flags(namepv, namelen,
                                            SVs_TEMP |
                                            (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
@@ -1291,12 +1297,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			&& (!CvDEPTH(cv) || !staleok)
 			&& !SvPAD_STATE(name_svp[offset]))
 		    {
-			/* diag_listed_as: Variable "%s" is not available*/
-			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "%se \"%"SVf"\" is not available",
-				       *namepv == '&'
-					 ? "Subroutin"
-					 : "Variabl",
+			S_unavailable(aTHX_
                                        newSVpvn_flags(namepv, namelen,
                                            SVs_TEMP |
                                            (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
@@ -2034,13 +2035,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
 		    && (!outside || !CvDEPTH(outside)))  ) {
-		    /* diag_listed_as: Variable "%s" is not available */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				   "%se \"%"SVf"\" is not available",
-				   SvPVX_const(namesv)[0] == '&'
-					? "Subroutin"
-					: "Variabl",
-				   namesv);
+		    S_unavailable(aTHX_ namesv);
 		    sv = NULL;
 		}
 		else 
