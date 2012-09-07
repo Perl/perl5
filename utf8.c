@@ -2788,8 +2788,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      * by calling utf8_heavy.pl in the general case.  The returned value may be
      * the swash's inversion list instead if the input parameters allow it.
      * Which is returned should be immaterial to callers, as the only
-     * operations permitted on a swash, swash_fetch() and
-     * _get_swash_invlist(), handle both these transparently.
+     * operations permitted on a swash, swash_fetch(), _get_swash_invlist(),
+     * and swash_to_invlist() handle both these transparently.
      *
      * This interface should only be used by functions that won't destroy or
      * adversely change the swash, as doing so affects all other uses of the
@@ -3661,7 +3661,8 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     STRLEN lcur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
 
-    /* The string containing the main body of the table */
+    /* The string containing the main body of the table.  This will have its
+     * assertion fail if the swash has been converted to its inversion list */
     SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
 
     SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
@@ -3900,21 +3901,35 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     HV *const hv = MUTABLE_HV(SvRV(swash));
     UV elements = 0;    /* Number of elements in the inversion list */
     U8 empty[] = "";
+    SV** listsvp;
+    SV** typesvp;
+    SV** bitssvp;
+    SV** extssvp;
+    SV** invert_it_svp;
 
-    /* The string containing the main body of the table */
-    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
-    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
-    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
-    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
-    SV** const invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
-
-    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
-    const STRLEN bits  = SvUV(*bitssvp);
-    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    U8* typestr;
+    STRLEN bits;
+    STRLEN octets; /* if bits == 1, then octets == 0 */
     U8 *x, *xend;
     STRLEN xcur;
 
     SV* invlist;
+
+    /* If not a hash, it must be the swash's inversion list instead */
+    if (SvTYPE(hv) != SVt_PVHV) {
+        return (SV*) hv;
+    }
+
+    /* The string containing the main body of the table */
+    listsvp = hv_fetchs(hv, "LIST", FALSE);
+    typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
+    invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
+
+    typestr = (U8*)SvPV_nolen(*typesvp);
+    bits  = SvUV(*bitssvp);
+    octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
     PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
