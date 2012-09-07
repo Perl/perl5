@@ -1145,6 +1145,14 @@ sub underscore_last_pos($_);
 sub underscore2($_;$);
 sub underscore_fail($_$);
 sub underscore_after_at(@_);
+our sub hour (@$);
+my sub migh (@$);
+use 5.01;
+state sub estate (@$);
+package other;
+sub hour (@$);
+sub migh (@$);
+sub estate (@$);
 no warnings "syntax";
 sub proto_after_array(@$);
 sub proto_after_hash(%$);
@@ -1154,6 +1162,12 @@ Prototype after '@' for main::proto_after_array : @$ at - line 3.
 Prototype after '%' for main::proto_after_hash : %$ at - line 7.
 Illegal character after '_' in prototype for main::underscore_fail : $_$ at - line 12.
 Prototype after '@' for main::underscore_after_at : @_ at - line 13.
+Prototype after '@' for hour : @$ at - line 14.
+Prototype after '@' for migh : @$ at - line 15.
+Prototype after '@' for estate : @$ at - line 17.
+Prototype after '@' for hour : @$ at - line 19.
+Prototype after '@' for migh : @$ at - line 20.
+Prototype after '@' for estate : @$ at - line 21.
 ########
 # toke.c
 use warnings "ambiguous";

@@ -8279,7 +8279,11 @@ Perl_yylex(pTHX)
 		    if (PL_madskills)
 			nametoke = newSVpvn_flags(s, d - s, SvUTF8(PL_linestr));
 #endif
-		    if (memchr(tmpbuf, ':', len) || key == KEY_our)
+		    *PL_tokenbuf = '&';
+		    if (memchr(tmpbuf, ':', len) || key != KEY_sub
+		     || pad_findmy_pvn(
+			    PL_tokenbuf, len + 1, UTF ? SVf_UTF8 : 0
+			) != NOT_IN_PAD)
 			sv_setpvn(PL_subname, tmpbuf, len);
 		    else {
 			sv_setsv(PL_subname,PL_curstname);
@@ -8290,7 +8294,6 @@ Perl_yylex(pTHX)
                         SvUTF8_on(PL_subname);
 		    have_name = TRUE;
 
-		    *PL_tokenbuf = '&';
 
 #ifdef PERL_MAD
 		    start_force(0);
