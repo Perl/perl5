@@ -2044,8 +2044,13 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
 		    && (!outside || !CvDEPTH(outside)))  ) {
+		    /* diag_listed_as: Variable "%s" is not available */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				   "Variable \"%"SVf"\" is not available", namesv);
+				   "%se \"%"SVf"\" is not available",
+				   SvPVX_const(namesv)[0] == '&'
+					? "Subroutin"
+					: "Variabl",
+				   namesv);
 		    sv = NULL;
 		}
 		else 
@@ -2069,6 +2074,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		    else if (PadnameLEN(namesv)>1 && !PadnameIsOUR(namesv))
 		    {
 			/* my sub */
+		      sv = newSV_type(SVt_PVCV);
+		      if (SvTYPE(ppad[ix]) == SVt_PVCV) {
 			/* This is actually a stub with a proto CV attached
 			   to it by magic.  Since the stub itself is used
 			   when the proto is cloned, we need a new stub
@@ -2080,10 +2087,21 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 			assert(mg->mg_obj);
 			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
 			assert(CvNAME_HEK((CV *)ppad[ix]));
-			sv = newSV_type(SVt_PVCV);
 			CvNAME_HEK_set(sv,
 			    share_hek_hek(CvNAME_HEK((CV *)ppad[ix])));
 			sv_magic(sv,mg->mg_obj,PERL_MAGIC_proto,NULL,0);
+		      }
+		      else {
+			assert(SvTYPE(ppad[ix]) == SVt_NULL);
+			/* Unavailable; just provide a stub, but name it */
+			CvNAME_HEK_set(
+			    sv,
+			    share_hek(SvPVX_const(namesv)+1,
+				      SvCUR(namesv) - 1
+					 * (SvUTF8(namesv) ? -1 : 1),
+				      0)
+			);
+		      }
 		    }
 		    else sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')

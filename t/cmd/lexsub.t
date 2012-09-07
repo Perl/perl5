@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 115;
+plan 117;
 
 # -------------------- our -------------------- #
 
@@ -511,6 +511,22 @@ sub make_anon_with_my_sub{
 ->()();
   is $w, "Subroutine \"&x\" is not available at khaki line 90.\n",
          "unavailability warning during compilation of named sub in anon";
+
+  undef $w;
+  sub not_lexical9 {
+    my sub x {};
+    format =
+@
+&x
+.
+  }
+  eval { write };
+  my($f,$l) = (__FILE__,__LINE__ - 1);
+  is $w, "Subroutine \"&x\" is not available at $f line $l.\n",
+         'unavailability warning during cloning';
+  $l -= 3;
+  is $@, "Undefined subroutine &x called at $f line $l.\n",
+         'Vivified sub is correctly named';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
