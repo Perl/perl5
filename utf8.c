@@ -2894,7 +2894,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	SAVEFREESV(errsv_save);
 	/* If we already have a pointer to the method, no need to use
 	 * call_method() to repeat the lookup.  */
-	if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
+	if (method
+            ? call_sv(MUTABLE_SV(method), G_SCALAR)
 	    : call_sv(newSVpvs_flags("SWASHNEW", SVs_TEMP), G_SCALAR | G_METHOD))
 	{
 	    retval = *PL_stack_sp--;
@@ -3003,6 +3004,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    else SvREFCNT_inc_simple_void_NN(swash_invlist);
 	}
 
+        /* Use the inversion list stand-alone if small enough */
         if ((int) _invlist_len(swash_invlist) <= invlist_swash_boundary) {
 	    SvREFCNT_dec(retval);
 	    if (!swash_invlist_unclaimed)
@@ -4441,7 +4443,6 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		f1 = (U8 *) p1;
 		n1 = UTF8SKIP(f1);
 	    }
-
 	    else {
 		/* If in locale matching, we use two sets of rules, depending
 		 * on if the code point is above or below 255.  Here, we test
