@@ -163,6 +163,7 @@ ab|cd	abcd	y	$&	ab
 ()ef	def	y	$&-$1	ef-
 ()ef	def	y	$-[0]	1
 ()ef	def	y	$+[0]	3
+()\x{100}\x{1000}	d\x{100}\x{1000}	y	$+[0]	3
 ()ef	def	y	$-[1]	1
 ()ef	def	y	$+[1]	1
 *a	-	c	-	Quantifier follows nothing

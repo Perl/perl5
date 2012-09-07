@@ -2592,7 +2592,7 @@ got_it:
                     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) /* //p */
                     && !(PL_sawampersand & SAWAMPERSAND_RIGHT)
                 ) { /* don't copy $' part of string */
-                    U32 n = (PL_sawampersand & SAWAMPERSAND_MIDDLE) ? 0 : 1;
+                    U32 n = 0;
                     max = -1;
                     /* calculate the right-most part of the string covered
                      * by a capture. Due to look-ahead, this may be to
@@ -2613,7 +2613,7 @@ got_it:
                     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) /* //p */
                     && !(PL_sawampersand & SAWAMPERSAND_LEFT)
                 ) { /* don't copy $` part of string */
-                    U32 n = (PL_sawampersand & SAWAMPERSAND_MIDDLE) ? 0 : 1;
+                    U32 n = 0;
                     min = max;
                     /* calculate the left-most part of the string covered
                      * by a capture. Due to look-behind, this may be to
