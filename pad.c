@@ -1985,18 +1985,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
      */
 
     if (!outside) {
-      if (SvTYPE(proto) == SVt_PVCV)
-      {
+      if (CvWEAKOUTSIDE(proto))
 	outside = find_runcv(NULL);
-	if (!CvANON(proto)) {
-	    if (!CvPADLIST(outside) ||
-	        CvPADLIST(outside)->xpadl_id != protopadlist->xpadl_outid)
-		outside = CvOUTSIDE(proto);
-	    if (!CvPADLIST(outside) ||
-	        CvPADLIST(outside)->xpadl_id != protopadlist->xpadl_outid)
-		outside = NULL;
-	}
-      }
       else {
 	outside = CvOUTSIDE(proto);
 	if ((CvCLONE(outside) && ! CvCLONED(outside))

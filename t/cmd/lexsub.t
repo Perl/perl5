@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 117;
+plan 118;
 
 # -------------------- our -------------------- #
 
@@ -528,6 +528,22 @@ sub make_anon_with_my_sub{
   is $@, "Undefined subroutine &x called at $f line $l.\n",
          'Vivified sub is correctly named';
 }
+sub not_lexical10 {
+  my sub foo;
+  foo();
+  sub not_lexical11 {
+    my sub bar {
+      my $x = 'khaki car keys for the khaki car';
+      not_lexical10();
+      sub foo {
+       is $x, 'khaki car keys for the khaki car',
+       'mysubs in inner clonables use the running clone of their CvOUTSIDE'
+      }
+    }
+    bar()
+  }
+}
+not_lexical11();
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
