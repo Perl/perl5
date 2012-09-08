@@ -33,6 +33,7 @@ struct padlist {
     PAD **	xpadl_alloc;	/* pointer to beginning of array of AVs */
     U32		xpadl_id;	/* Semi-unique ID, shared between clones */
     U32		xpadl_outid;	/* ID of outer pad */
+    AV *        xpadl_names;    /* Named parameters in the sub */
 };
 
 
@@ -282,6 +283,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 #define PadlistNAMES(pl)	(*PadlistARRAY(pl))
 #define PadlistNAMESARRAY(pl)	PadnamelistARRAY(PadlistNAMES(pl))
 #define PadlistNAMESMAX(pl)	PadnamelistMAX(PadlistNAMES(pl))
+#define PadlistNAMEDPARAMS(pl)  (pl)->xpadl_names
 #define PadlistREFCNT(pl)	1	/* reserved for future use */
 
 #define PadnamelistARRAY(pnl)	AvARRAY(pnl)
