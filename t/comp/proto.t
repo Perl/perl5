@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..180\n";
+print "1..179\n";
 
 my $i = 1;
 
@@ -658,10 +658,6 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   my $warn = "";
   local $SIG{__WARN__} = sub { $warn .= join("",@_) };
   
-  eval 'sub badproto (@bar) { 1; }';
-  print "not " unless $warn =~ /Illegal character in prototype for main::badproto : \@bar/;
-  print "ok ", $i++, "\n";
-
   eval 'sub badproto2 (bar) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto2 : bar/;
   print "ok ", $i++, "\n";
@@ -671,7 +667,7 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   print "ok ", $i++, "\n";
   
   eval 'sub badproto4 (@ $b ar) { 1; }';
-  print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@\$bar/;
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@\$b ar/;
   print "ok ", $i++, "\n";
 }
 

@@ -2675,6 +2675,7 @@ try_autoload:
 	dMARK;
 	I32 items = SP - MARK;
 	PADLIST * const padlist = CvPADLIST(cv);
+	AV * namedargs = PadlistNAMEDPARAMS(padlist);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
@@ -2685,7 +2686,7 @@ try_autoload:
 	}
 	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
-	if (hasargs) {
+	if (hasargs || namedargs) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
@@ -2715,6 +2716,20 @@ try_autoload:
 	    }
 	    Copy(MARK,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
+
+	    if (namedargs) {
+/* XXX TODO: Handle mismatched parameters */
+		int i;
+		int named_count = AvFILLp(namedargs) + 1;
+		int max = items < named_count ? items : named_count;
+		for (i = 0; i < max; i++) {
+		    SV * name = AvARRAY(namedargs)[i];
+		    SV * value = newSVsv(AvARRAY(av)[i]);
+		    PAD_SETSV(SvIV(name), value);
+		    SvPADTMP_on(value);
+		    SvREADONLY_on(value);
+		}
+	    }
 	
 	    while (items--) {
 		if (*MARK)
