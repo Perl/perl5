@@ -3608,6 +3608,11 @@ PERL_CALLCONV NV	Perl_scan_oct(pTHX_ const char* start, STRLEN len, STRLEN* retl
 #define PERL_ARGS_ASSERT_SCAN_OCT	\
 	assert(start); assert(retlen)
 
+PERL_CALLCONV bool	Perl_scan_proto(pTHX_ SV *sv, const bool allowextended)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SCAN_PROTO	\
+	assert(sv)
+
 PERL_CALLCONV const char*	Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -7130,6 +7135,12 @@ STATIC char*	S_scan_inputsymbol(pTHX_ char *start)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SCAN_INPUTSYMBOL	\
 	assert(start)
+
+STATIC bool	S_scan_named_proto(pTHX_ SV *sv, bool *bad)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SCAN_NAMED_PROTO	\
+	assert(sv); assert(bad)
 
 STATIC char*	S_scan_pat(pTHX_ char *start, I32 type)
 			__attribute__warn_unused_result__

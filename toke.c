@@ -8389,78 +8389,9 @@ Perl_yylex(pTHX)
 
 		/* Look for a prototype */
 		if (*s == '(') {
-		    char *p;
-		    bool bad_proto = FALSE;
-		    bool in_brackets = FALSE;
-		    char greedy_proto = ' ';
-		    bool proto_after_greedy_proto = FALSE;
-		    bool must_be_last = FALSE;
-		    bool underscore = FALSE;
-		    bool seen_underscore = FALSE;
-		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
-                    STRLEN tmplen;
-
 		    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
-		    /* strip spaces and check for bad characters */
-		    d = SvPV(PL_lex_stuff, tmplen);
-		    tmp = 0;
-		    for (p = d; tmplen; tmplen--, ++p) {
-			if (!isSPACE(*p)) {
-                            d[tmp++] = *p;
-
-			    if (warnillegalproto) {
-				if (must_be_last)
-				    proto_after_greedy_proto = TRUE;
-				if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
-				    bad_proto = TRUE;
-				}
-				else {
-				    if ( underscore ) {
-					if ( !strchr(";@%", *p) )
-					    bad_proto = TRUE;
-					underscore = FALSE;
-				    }
-				    if ( *p == '[' ) {
-					in_brackets = TRUE;
-				    }
-				    else if ( *p == ']' ) {
-					in_brackets = FALSE;
-				    }
-				    else if ( (*p == '@' || *p == '%') &&
-					 ( tmp < 2 || d[tmp-2] != '\\' ) &&
-					 !in_brackets ) {
-					must_be_last = TRUE;
-					greedy_proto = *p;
-				    }
-				    else if ( *p == '_' ) {
-					underscore = seen_underscore = TRUE;
-				    }
-				}
-			    }
-			}
-		    }
-                    d[tmp] = '\0';
-		    if (proto_after_greedy_proto)
-			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-				    "Prototype after '%c' for %"SVf" : %s",
-				    greedy_proto, SVfARG(PL_subname), d);
-		    if (bad_proto) {
-                        SV *dsv = newSVpvs_flags("", SVs_TEMP);
-			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-				    "Illegal character %sin prototype for %"SVf" : %s",
-				    seen_underscore ? "after '_' " : "",
-				    SVfARG(PL_subname),
-                                    SvUTF8(PL_lex_stuff)
-                                        ? sv_uni_display(dsv,
-                                            newSVpvn_flags(d, tmp, SVs_TEMP | SVf_UTF8),
-                                            tmp,
-                                            UNI_DISPLAY_ISPRINT)
-                                        : pv_pretty(dsv, d, tmp, 60, NULL, NULL,
-                                            PERL_PV_ESCAPE_NONASCII));
-                    }
-                    SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
 
 #ifdef PERL_MAD
@@ -8867,6 +8798,189 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    Perl_croak(aTHX_ "No comma allowed after %s", what);
 	}
     }
+}
+
+/* 
+  scan_proto:
+    If allowextended is false or the proto is strictly symbols,
+    use <= 5.16 rules:
+      remove all spaces, warn if WARN_ILLEGALPROTO is set, but set it
+      as the prototype anyway
+    If allowextended is true and an ID character is detected,
+      finish chewing spaces, and pass back a flag to scan_proto to warn
+*/
+
+bool
+Perl_scan_proto (pTHX_ SV *sv, bool allowextended)
+{
+    char *p;
+    char *d;
+    bool use_for_cvproto = TRUE;
+    bool bad_proto = FALSE;
+    bool named_proto = FALSE;
+    bool in_brackets = FALSE;
+    char greedy_proto = ' ';
+    bool proto_after_greedy_proto = FALSE;
+    bool must_be_last = FALSE;
+    bool underscore = FALSE;
+    bool seen_underscore = FALSE;
+    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
+    IV tmp = 0;
+    STRLEN tmplen;
+
+    PERL_ARGS_ASSERT_SCAN_PROTO;
+
+    /* strip spaces and check for bad characters */
+    /* skip all warnings if this looks like a named prototype */
+    d = SvPV(sv, tmplen);
+    for (p = d; tmplen; tmplen--, ++p) {
+	if ( isSPACE(*p) && named_proto)
+	    d[tmp++] = *p;
+	if (!isSPACE(*p)) {
+	    d[tmp++] = *p;
+	    if (!named_proto && (!strchr("$@%*;[]&\\_+", *p) || *p == '\0')) {
+		if (*p && !named_proto && isIDFIRST_lazy_if(p,UTF))
+		    named_proto = allowextended;
+		if (warnillegalproto)
+		    bad_proto = TRUE;
+	    }
+
+	    if (warnillegalproto && !named_proto) {
+		if (must_be_last)
+		    proto_after_greedy_proto = TRUE;
+		if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
+		    bad_proto = TRUE;
+		}
+		else {
+		  if ( underscore ) {
+			if ( !strchr(";@%", *p) )
+			    bad_proto = TRUE;
+			underscore = FALSE;
+		    }
+		    if ( *p == '[' ) {
+			in_brackets = TRUE;
+		    }
+		    else if ( *p == ']' ) {
+			in_brackets = FALSE;
+		    }
+		    else if ( (*p == '@' || *p == '%') &&
+			( tmp < 2 || d[tmp-2] != '\\' ) &&
+			!in_brackets ) {
+			must_be_last = TRUE;
+			greedy_proto = *p;
+		    }
+		    else if ( *p == '_' ) {
+			underscore = seen_underscore = TRUE;
+		    }
+		}
+	    }
+	}
+    }
+    d[tmp] = '\0';
+    SvCUR_set(sv, tmp);
+
+    if (named_proto) {
+	use_for_cvproto = scan_named_proto(sv,
+		                           &bad_proto);
+	seen_underscore = FALSE;
+    }
+
+    if (warnillegalproto && proto_after_greedy_proto)
+	Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
+		    "Prototype after '%c' for %"SVf" : %s",
+		    greedy_proto, SVfARG(PL_subname), d);
+    if (warnillegalproto && bad_proto) {
+	SV *dsv = newSVpvs_flags("", SVs_TEMP);
+	Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
+                    "Illegal character %sin prototype for %"SVf" : %s",
+                    seen_underscore ? "after '_' " : "",
+                    SVfARG(PL_subname),
+                    SvUTF8(sv)
+                        ? sv_uni_display(dsv,
+                            newSVpvn_flags(d, tmp, SVs_TEMP | SVf_UTF8),
+                            tmp,
+                            UNI_DISPLAY_ISPRINT)
+                        : pv_pretty(dsv, d, tmp, 60, NULL, NULL,
+                            PERL_PV_ESCAPE_NONASCII));
+    }
+    return use_for_cvproto;
+}
+
+/*
+  scan_named_proto parses the prototype as if its an argument list,
+    and leaves the results in @_
+    pp_entersub checks if namedargs is set, and if it is, uses that array
+    to generate the appropriate local variables prior to putting the arguments
+    from the stack into @_
+    If the prototype doesn't parse, an illegal prototype warning is generated,
+    but the whole thing is stored in CvPROTO anyway (that's the current design)
+*/
+
+bool
+S_scan_named_proto (pTHX_ SV *sv, bool * bad)
+{
+    STRLEN protolen, len;
+    char *proto;
+    char token[sizeof PL_tokenbuf];
+/* XXX TODO: Greedy named parameters are currently invalid */
+    AV *protolist;
+    int arg_count = 0;
+
+    PERL_ARGS_ASSERT_SCAN_NAMED_PROTO;
+
+    *bad = false;
+    protolist = newAV();
+    proto = SvPV(sv, protolen);
+    while (*proto) {
+	while (isSPACE(*proto)) proto++;
+	if (strchr("$", *proto)) {
+	    token[0] = *proto++;
+	    proto = scan_word(proto, token+1, sizeof(token) - 1, FALSE, &len);
+	    if (len) {
+/* XXX TODO: Disallow globals like '$1' */
+		arg_count++;
+		av_push(protolist, newSVpvn_flags(token, len + 1, UTF));
+		while (isSPACE(*proto)) proto++;
+		if (*proto == ',')
+		    proto++;
+		else if (*proto != '\0') {
+		    *bad = true;
+		    break;
+		}
+	    }
+	    else {
+		*bad = true;
+		break;
+	    }
+	}
+	else {
+	    *bad = true;
+	    break;
+	}
+    }
+
+    /* Undo what's been done if this is invalid, and return early */
+    if (*bad) {
+	sv_free(MUTABLE_SV(protolist));
+	return true;
+    }
+
+    PadlistNAMEDPARAMS(CvPADLIST(PL_compcv)) = protolist;
+    while (arg_count--) {
+	SV * pad_name;
+	SV * proto_name = AvARRAY(protolist)[arg_count];
+	/* Add the pad entry, and mark it as visible */
+	int ix = pad_add_name_pv(SvPV_nolen(proto_name), 0, NULL, NULL);
+	pad_name = AvARRAY(PL_comppad_name)[ix];
+	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xlow = PL_cop_seqmax;
+	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xhigh = PERL_PADSEQ_INTRO;
+	/* Mark the prototype entry with a pointer into the pad */
+	sv_upgrade(proto_name, SVt_PVIV);
+	SvIV_set(proto_name, ix);
+	SvIOK_on(proto_name);
+    }
+    PL_cop_seqmax++;
+    return false;
 }
 
 /* Either returns sv, or mortalizes sv and returns a new SV*.

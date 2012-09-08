@@ -2144,6 +2144,7 @@ s	|U8*	|add_utf16_textfilter|NN U8 *const s|bool reversed
 #endif
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
+s	|bool	|scan_named_proto	|NN SV *sv|NN bool *bad
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|force_ident_maybe_lex|char pit
 s	|void	|incline	|NN const char *s
@@ -2174,6 +2175,8 @@ s	|int	|tokereport	|I32 rv|NN const YYSTYPE* lvalp
 s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 #  endif
 #endif
+: used in perly.y
+px	|bool	|scan_proto	|NN SV *sv|const bool allowextended
 
 #if defined(PERL_IN_UNIVERSAL_C)
 s	|bool|isa_lookup	|NN HV *stash|NN const char * const name \
