@@ -6691,37 +6691,53 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     char *s = NULL;
     I32 i = 0;
     I32 s1, t1;
+    I32 n = paren;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
         
-    if (!rx->subbeg) {
-        sv_setsv(sv,&PL_sv_undef);
-        return;
-    } 
-    else               
-    if (paren == RX_BUFF_IDX_PREMATCH && rx->offs[0].start != -1) {
-        /* $` */
+    if ( (    n == RX_BUFF_IDX_CARET_PREMATCH
+           || n == RX_BUFF_IDX_CARET_FULLMATCH
+           || n == RX_BUFF_IDX_CARET_POSTMATCH
+         )
+         && !(rx->extflags & RXf_PMf_KEEPCOPY)
+    )
+        goto ret_undef;
+
+    if (!rx->subbeg)
+        goto ret_undef;
+
+    if (n == RX_BUFF_IDX_CARET_FULLMATCH)
+        /* no need to distinguish between them any more */
+        n = RX_BUFF_IDX_FULLMATCH;
+
+    if ((n == RX_BUFF_IDX_PREMATCH || n == RX_BUFF_IDX_CARET_PREMATCH)
+        && rx->offs[0].start != -1)
+    {
+        /* $`, ${^PREMATCH} */
 	i = rx->offs[0].start;
 	s = rx->subbeg;
     }
     else 
-    if (paren == RX_BUFF_IDX_POSTMATCH && rx->offs[0].end != -1) {
-        /* $' */
-	s = rx->subbeg + rx->offs[0].end;
-	i = rx->sublen - rx->offs[0].end;
+    if ((n == RX_BUFF_IDX_POSTMATCH || n == RX_BUFF_IDX_CARET_POSTMATCH)
+        && rx->offs[0].end != -1)
+    {
+        /* $', ${^POSTMATCH} */
+	s = rx->subbeg - rx->suboffset + rx->offs[0].end;
+	i = rx->sublen + rx->suboffset - rx->offs[0].end;
     } 
     else
-    if ( 0 <= paren && paren <= (I32)rx->nparens &&
-        (s1 = rx->offs[paren].start) != -1 &&
-        (t1 = rx->offs[paren].end) != -1)
+    if ( 0 <= n && n <= (I32)rx->nparens &&
+        (s1 = rx->offs[n].start) != -1 &&
+        (t1 = rx->offs[n].end) != -1)
     {
-        /* $& $1 ... */
+        /* $&, ${^MATCH},  $1 ... */
         i = t1 - s1;
-        s = rx->subbeg + s1;
+        s = rx->subbeg + s1 - rx->suboffset;
     } else {
-        sv_setsv(sv,&PL_sv_undef);
-        return;
+        goto ret_undef;
     }          
+
+    assert(s >= rx->subbeg);
     assert(rx->sublen >= (s - rx->subbeg) + i );
     if (i >= 0) {
         const int oldtainted = PL_tainted;
@@ -6757,6 +6773,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
                 SvTAINTED_off(sv);
         }
     } else {
+      ret_undef:
         sv_setsv(sv,&PL_sv_undef);
         return;
     }
@@ -6783,13 +6800,18 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     struct regexp *const rx = (struct regexp *)SvANY(r);
     I32 i;
     I32 s1, t1;
+    I32 n = paren;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_LENGTH;
 
     /* Some of this code was originally in C<Perl_magic_len> in F<mg.c> */
-	switch (paren) {
-      /* $` / ${^PREMATCH} */
-      case RX_BUFF_IDX_PREMATCH:
+    switch (paren) {
+      case RX_BUFF_IDX_CARET_PREMATCH: /* ${^PREMATCH} */
+         if (!(rx->extflags & RXf_PMf_KEEPCOPY))
+            goto warn_undef;
+        /*FALLTHROUGH*/
+
+      case RX_BUFF_IDX_PREMATCH:       /* $` */
         if (rx->offs[0].start != -1) {
 			i = rx->offs[0].start;
 			if (i > 0) {
@@ -6799,8 +6821,11 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 			}
 	    }
         return 0;
-      /* $' / ${^POSTMATCH} */
-      case RX_BUFF_IDX_POSTMATCH:
+
+      case RX_BUFF_IDX_CARET_POSTMATCH: /* ${^POSTMATCH} */
+         if (!(rx->extflags & RXf_PMf_KEEPCOPY))
+            goto warn_undef;
+      case RX_BUFF_IDX_POSTMATCH:       /* $' */
 	    if (rx->offs[0].end != -1) {
 			i = rx->sublen - rx->offs[0].end;
 			if (i > 0) {
@@ -6810,6 +6835,13 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 			}
 	    }
         return 0;
+
+      case RX_BUFF_IDX_CARET_FULLMATCH: /* ${^MATCH} */
+         if (!(rx->extflags & RXf_PMf_KEEPCOPY))
+            goto warn_undef;
+        n = RX_BUFF_IDX_FULLMATCH;
+        /*FALLTHROUGH*/
+
       /* $& / ${^MATCH}, $1, $2, ... */
       default:
 	    if (paren <= (I32)rx->nparens &&
@@ -6819,6 +6851,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
             i = t1 - s1;
             goto getlen;
         } else {
+          warn_undef:
             if (ckWARN(WARN_UNINITIALIZED))
                 report_uninit((const SV *)sv);
             return 0;
@@ -6826,7 +6859,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     }
   getlen:
     if (i > 0 && RXp_MATCH_UTF8(rx)) {
-        const char * const s = rx->subbeg + s1;
+        const char * const s = rx->subbeg - rx->suboffset + s1;
         const U8 *ep;
         STRLEN el;
 
@@ -14429,6 +14462,8 @@ Perl_save_re_context(pTHX)
 
     PL_reg_oldsaved = NULL;
     PL_reg_oldsavedlen = 0;
+    PL_reg_oldsavedoffset = 0;
+    PL_reg_oldsavedcoffset = 0;
     PL_reg_maxiter = 0;
     PL_reg_leftiter = 0;
     PL_reg_poscache = NULL;

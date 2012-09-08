@@ -5549,13 +5549,9 @@ PP(pp_split)
 	    if (rex_return == 0)
 		break;
 	    TAINT_IF(RX_MATCH_TAINTED(rx));
-	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
-		m = s;
-		s = orig;
-		orig = RX_SUBBEG(rx);
-		s = orig + (m - s);
-		strend = s + (strend - m);
-	    }
+            /* we never pass the REXEC_COPY_STR flag, so it should
+             * never get copied */
+            assert(!RX_MATCH_COPIED(rx));
 	    m = RX_OFFS(rx)[0].start + orig;
 
 	    if (gimme_scalar) {

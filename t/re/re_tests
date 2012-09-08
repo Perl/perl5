@@ -163,6 +163,7 @@ ab|cd	abcd	y	$&	ab
 ()ef	def	y	$&-$1	ef-
 ()ef	def	y	$-[0]	1
 ()ef	def	y	$+[0]	3
+()\x{100}\x{1000}	d\x{100}\x{1000}	y	$+[0]	3
 ()ef	def	y	$-[1]	1
 ()ef	def	y	$+[1]	1
 *a	-	c	-	Quantifier follows nothing
@@ -1702,5 +1703,10 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 \W	\x{200D}	n	-	-
 
 /^(?d:\xdf|_)*_/i	\x{17f}\x{17f}_	y	$&	\x{17f}\x{17f}_
+#
+# check that @-, @+ count chars, not bytes; especially if beginning of
+# string is not copied
+
+(\x{100})	\x{2000}\x{2000}\x{2000}\x{100}	y	$-[0]:$-[1]:$+[0]:$+[1]	3:3:4:4
 
 # vim: softtabstop=0 noexpandtab

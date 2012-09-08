@@ -860,7 +860,7 @@ perl_destruct(pTHXx)
     PL_minus_F      = FALSE;
     PL_doswitches   = FALSE;
     PL_dowarn       = G_WARN_OFF;
-    PL_sawampersand = FALSE;	/* must save all match strings */
+    PL_sawampersand = 0;	/* must save all match strings */
     PL_unsafe       = FALSE;
 
     Safefree(PL_inplace);
@@ -2343,8 +2343,9 @@ STATIC void
 S_run_body(pTHX_ I32 oldscope)
 {
     dVAR;
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
-                    PL_sawampersand ? "Enabling" : "Omitting"));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support (0x%x).\n",
+                    PL_sawampersand ? "Enabling" : "Omitting",
+                    (unsigned int)(PL_sawampersand)));
 
     if (!PL_restartop) {
 #ifdef PERL_MAD

@@ -292,7 +292,7 @@ The C variable which corresponds to Perl's $^W warning variable.
 */
 
 PERLVAR(I, dowarn,	U8)
-PERLVAR(I, sawampersand, bool)		/* must save all match strings */
+PERLVAR(I, sawampersand, U8)		/* must save all match strings */
 PERLVAR(I, unsafe,	bool)
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 

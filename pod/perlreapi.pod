@@ -209,7 +209,49 @@ faster than C<unpack>.
              I32 minend, SV* screamer,
              void* data, U32 flags);
 
-Execute a regexp.
+Execute a regexp. The arguments are
+
+=over 4
+
+=item rx
+
+The regular expression to execute.
+
+=item screamer
+
+This strangely-named arg is the SV to be matched against. Note that the
+actual char array to be matched against is supplied by the arguments
+described below; the SV is just used to determine UTF8ness, C<pos()> etc.
+
+=item strbeg
+
+Pointer to the physical start of the string.
+
+=item strend
+
+Pointer to the character following the physical end of the string (i.e.
+the \0).
+
+=item stringarg
+
+Pointer to the position in the string where matching should start; it might
+not be equal to C<strbeg> (for example in a later iteration of C</.../g>).
+
+=item minend
+
+Minimum length of string (measured in bytes from C<stringarg>) that must
+match; if the engine reaches the end of the match but hasn't reached this
+position in the string, it should fail.
+
+=item data
+
+Optimisation data; subject to change.
+
+=item flags
+
+Optimisation flags; subject to change.
+
+=back
 
 =head2 intuit
 
@@ -513,6 +555,8 @@ values.
         char *subbeg;  /* saved or original string so \digit works forever. */
         SV_SAVED_COPY  /* If non-NULL, SV which is COW from original */
         I32 sublen;    /* Length of string pointed by subbeg */
+	I32 suboffset;	/* byte offset of subbeg from logical start of str */
+	I32 subcoffset;	/* suboffset equiv, but in chars (for @-/@+) */
 
         /* Information about the match that isn't often used */
         I32 prelen;           /* length of precomp */
@@ -653,9 +697,23 @@ occur at a floating offset from the start of the pattern. Used to do
 Fast-Boyer-Moore searches on the string to find out if its worth using
 the regex engine at all, and if so where in the string to search.
 
-=head2 C<subbeg> C<sublen> C<saved_copy>
+=head2 C<subbeg> C<sublen> C<saved_copy> C<suboffset> C<subcoffset>
 
-Used during execution phase for managing search and replace patterns.
+Used during the execution phase for managing search and replace patterns,
+and for providing the text for C<$&>, C<$1> etc. C<subbeg> points to a
+buffer (either the original string, or a copy in the case of
+C<RX_MATCH_COPIED(rx)>), and C<sublen> is the length of the buffer.  The
+C<RX_OFFS> start and end indices index into this buffer.
+
+In the presence of the C<REXEC_COPY_STR> flag, but with the addition of
+the C<REXEC_COPY_SKIP_PRE> or C<REXEC_COPY_SKIP_POST> flags, an engine
+can choose not to copy the full buffer (although it must still do so in
+the presence of C<RXf_PMf_KEEPCOPY> or the relevant bits being set in
+C<PL_sawampersand>). In this case, it may set C<suboffset> to indicate the
+number of bytes from the logical start of the buffer to the physical start
+(i.e. C<subbeg>). It should also set C<subcoffset>, the number of
+characters in the offset. The latter is needed to support C<@-> and C<@+>
+which work in characters, not bytes.
 
 =head2 C<wrapped> C<wraplen>
 
