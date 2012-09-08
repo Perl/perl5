@@ -680,6 +680,10 @@ subname	:	WORD	{ const char *const name = SvPV_nolen_const(((SVOP*)$1)->op_sv);
 proto	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	THING
+			{ if (scan_proto(((SVOP*)$1)->op_sv, TRUE))
+			      $$ = $1;
+			  else
+			      $$ = (OP *)NULL; }
 	;
 
 /* Optional list of subroutine attributes */
