@@ -8128,6 +8128,7 @@ Perl_newCVREF(pTHX_ I32 flags, OP *o)
     if (o->op_type == OP_PADANY) {
 	o->op_type = OP_PADCV;
 	o->op_ppaddr = PL_ppaddr[OP_PADCV];
+	return o;
     }
     return newUNOP(OP_RV2CV, flags, scalar(o));
 }
@@ -9884,6 +9885,28 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 	    cv = (CV*)SvRV(rv);
 	    gv = NULL;
 	} break;
+	case OP_PADCV: {
+	    PADNAME *name = PAD_COMPNAME(rvop->op_targ);
+	    CV *compcv = PL_compcv;
+	    SV *sv = PAD_SV(rvop->op_targ);
+	    while (SvTYPE(sv) != SVt_PVCV) {
+		assert(PadnameOUTER(name));
+		assert(PARENT_PAD_INDEX(name));
+		compcv = CvOUTSIDE(PL_compcv);
+		sv = AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])
+			[PARENT_PAD_INDEX(name)];
+		name = PadlistNAMESARRAY(CvPADLIST(compcv))
+			[PARENT_PAD_INDEX(name)];
+	    }
+	    if (!PadnameIsOUR(name) && !PadnameIsSTATE(name)) {
+		MAGIC * mg = mg_find(sv, PERL_MAGIC_proto);
+		assert(mg);
+		assert(mg->mg_obj);
+		cv = (CV *)mg->mg_obj;
+	    }
+	    else cv = (CV *)sv;
+	    gv = NULL;
+	} break;
 	default: {
 	    return NULL;
 	} break;
@@ -10470,6 +10493,19 @@ Perl_ck_subr(pTHX_ OP *o)
 	Perl_call_checker ckfun;
 	SV *ckobj;
 	cv_get_call_checker(cv, &ckfun, &ckobj);
+	if (!namegv) { /* expletive! */
+	    /* XXX The call checker API is public.  And it guarantees that
+		   a GV will be provided with the right name.  So we have
+		   to create a GV.  But it is still not correct, as its
+		   stringification will include the package.  What we
+		   really need is a new call checker API that accepts a
+		   GV or string (or GV or CV). */
+	    HEK * const hek = CvNAME_HEK(cv);
+	    assert(hek);
+	    namegv = (GV *)sv_newmortal();
+	    gv_init_pvn(namegv, PL_curstash, HEK_KEY(hek), HEK_LEN(hek),
+			SVf_UTF8 * !!HEK_UTF8(hek));
+	}
 	return ckfun(aTHX_ o, namegv, ckobj);
     }
 }

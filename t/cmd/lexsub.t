@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 118;
+plan 121;
 
 # -------------------- our -------------------- #
 
@@ -280,6 +280,12 @@ sub make_anon_with_state_sub{
   is $w, "Subroutine redef redefined at pygpyf line 56.\n",
          "sub redefinition warnings from state subs";
 }
+{
+  state sub p (\@) {
+    is ref $_[0], 'ARRAY', 'state sub with proto';
+  }
+  p(my @a);
+}
 
 # -------------------- my -------------------- #
 
@@ -544,6 +550,19 @@ sub not_lexical10 {
   }
 }
 not_lexical11();
+{
+  my sub p (\@) {
+    is ref $_[0], 'ARRAY', 'my sub with proto';
+  }
+  p(my @a);
+}
+{
+  my sub x;
+  my $count;
+  sub x { x() if $count++ < 10 }
+  x();
+  is $count, 11, 'my recursive subs';
+}
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
