@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 121;
+plan 122;
 
 # -------------------- our -------------------- #
 
@@ -285,6 +285,11 @@ sub make_anon_with_state_sub{
     is ref $_[0], 'ARRAY', 'state sub with proto';
   }
   p(my @a);
+}
+{
+  state sub x;
+  eval 'sub x {3}';
+  is x, 3, 'state sub defined inside eval';
 }
 
 # -------------------- my -------------------- #
