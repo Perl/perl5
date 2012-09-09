@@ -3039,6 +3039,10 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	if (!method) {	/* demand load utf8 */
 	    ENTER;
 	    errsv_save = newSVsv(ERRSV);
+	    /* We might get here via a subroutine signature which uses a utf8
+	     * parameter name, at which point PL_subname will have been set
+	     * but not yet used. */
+	    save_item(PL_subname);
 	    /* It is assumed that callers of this routine are not passing in
 	     * any user derived data.  */
 	    /* Need to do this after save_re_context() as it will set
