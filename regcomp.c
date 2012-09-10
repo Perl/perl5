@@ -6800,7 +6800,6 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     struct regexp *const rx = (struct regexp *)SvANY(r);
     I32 i;
     I32 s1, t1;
-    I32 n = paren;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_LENGTH;
 
@@ -6839,7 +6838,6 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
       case RX_BUFF_IDX_CARET_FULLMATCH: /* ${^MATCH} */
          if (!(rx->extflags & RXf_PMf_KEEPCOPY))
             goto warn_undef;
-        n = RX_BUFF_IDX_FULLMATCH;
         /*FALLTHROUGH*/
 
       /* $& / ${^MATCH}, $1, $2, ... */

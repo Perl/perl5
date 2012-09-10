@@ -9616,7 +9616,7 @@ S_scan_heredoc(pTHX_ register char *s)
     /* inside a string eval or quote-like operator */
     if (!infile || PL_lex_inwhat) {
 	SV *linestr;
-	char *bufptr, *bufend;
+	char *bufend;
 	char * const olds = s;
 	PERL_CONTEXT * const cx = &cxstack[cxstack_ix];
 	/* These two fields are not set until an inner lexing scope is
@@ -9652,7 +9652,6 @@ S_scan_heredoc(pTHX_ register char *s)
 	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
 	    assert(s);
 	}
-	bufptr = shared->ls_bufptr;
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
