@@ -38,6 +38,20 @@ characters.  6.2 does revise the C<\X> handling for the REGIONAL
 INDICATOR characters that were added in Unicode 6.0.  Perl now for the
 first time fully handles this revision.
 
+=head2 New DTrace probes
+
+The following new DTrace probes have been added:
+
+=over 4
+
+=item C<op-entry>
+
+=item C<loading-file>
+
+=item C<loaded-file>
+
+=back
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -80,6 +94,58 @@ largest gain is for C<\X>, the Unicode "extended grapheme cluster".  The
 gain for it is about 35% - 40%.  Bracketed character classes, e.g.,
 C<[0-9\x{100}]> containing code points above 255 are also now faster.
 
+=item *
+
+On platforms supporting it, several former macros are now implemented as static
+inline functions. This should speed things up slightly on non-GCC platforms.
+
+=item *
+
+Apply the optimisation of hashes in boolean context, such as in C<if> or C<and>,
+to constructs in non-void context.
+
+=item *
+
+Extend the optimisation of hashes in boolean context to C<scalar(%hash)>,
+C<%hash ? ... : ...>, and C<sub { %hash || ... | }>.
+
+=item *
+
+When making a copy of the string being matched against (so that $1, $& et al
+continue to show the correct value even if the original string is subsequently
+modified), only copy that substring of the original string needed for the
+capture variables, rather than copying the whole string.
+
+This is a big win for code like
+
+    $&;
+    $_ = 'x' x 1_000_000;
+    1 while /(.)/;
+
+Also, when pessimizing if the code contains C<$`>, C<$&> or C<$'>, record the
+presence of each variable separately, so that the determination of the substring
+range is based on each variable separately. So performance-wise,
+
+   $&; /x/
+
+is now roughly equivalent to
+
+   /(x)/
+
+whereas previously it was like
+
+   /^(.*)(x)(.*)$/
+
+and
+
+   $&; $'; /x/
+
+is now roughly equivalent to
+
+   /(x)(.*)$/
+
+etc.
+
 =back
 
 =head1 Modules and Pragmata
@@ -110,8 +176,43 @@ XXX
 
 =item *
 
+L<Archive::Tar> has been upgraded from version 1.88 to 1.90.  This adds
+documentation fixes.
+
+=item *
+
+L<B> has been upgraded from version 1.37 to 1.38.  This makes the module work
+with the new pad API.
+
+=item *
+
+L<B::Concise> has been upgraded from version 0.92 to 0.93.  This adds support
+for the new C<OpMAYBE_TRUEBOOL> and C<OPpTRUEBOOL> flags.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.16 to 1.17.  This suppresses
+trailing semicolons in formats.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.826 to 1.827.  The main Perl module
 no longer uses the C<"@_"> construct.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.09 to 1.10.  This fixes
+compilation with C++ compilers and makes the module work with the new pad API.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.15 to 1.16.  This fixes warnings
+about using C<CODE> sections without an C<OUTPUT> section.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.17 to 3.18.  This avoids a
+bogus warning for initialised XSUB non-parameters.
 
 =item *
 
@@ -121,8 +222,24 @@ long been documented to do) when attempting to copy a file over itself.
 
 =item *
 
+L<File::Find> has been upgraded from version 1.21 to 1.22.  This fixes
+inconsistent unixy path handling on VMS.
+
+=item *
+
 L<Locale::Codes> has been upgraded from version 3.22 to 3.23.  It includes some
 new codes.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.71 to 2.73.  This restores
+compatibility with older versions of perl and cleans up the corelist data for
+various modules.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.23 to 1.24 to reflect the removal of
+the boolkeys opcode.
 
 =item *
 
@@ -130,6 +247,16 @@ L<Socket> has been upgraded from version 2.004 to 2.006.
 C<unpack_sockaddr_in()> and C<unpack_sockaddr_in6()> now return just the IP
 address in scalar context, and C<inet_ntop()> now guards against incorrect
 length scalars being passed in.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.40 to 1.41.  This adds the
+option to warn about or ignore attempts to clone structures that can't be
+cloned, as opposed to just unconditionally dying in that case.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.15 to 0.16.
 
 =back
 
@@ -250,7 +377,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<Configure> will now correctly detect C<isblank()> when compiling with a C++
+compiler.
 
 =back
 
@@ -316,9 +444,18 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Win32
 
-XXX
+A source of segfaults during global destruction has been fixed.
+
+=item Solaris
+
+In Configure, avoid running sed commands with flags not supported on Solaris.
+
+=item Darwin
+
+Stop hardcoding an alignment on 8 byte boundaries to fix builds using
+-Dusemorebits.
 
 =back
 
@@ -334,7 +471,13 @@ well.
 
 =item *
 
-XXX
+The APIs for accessing lexical pads have changed considerably.
+
+C<PADLIST>s are now longer C<AV>s, but their own type instead. C<PADLIST>s now
+contain a C<PAD> and a C<PADNAMELIST> of C<PADNAME>s, rather than C<AV>s for the
+pad and the list of pad names.  C<PAD>s, C<PADNAMELIST>s, and C<PADNAME>s are to
+be accessed as such though the newly added pad API instead of the plain C<AV>
+and C<SV> APIs.  See L<perlapi> for details.
 
 =back
 
@@ -343,13 +486,42 @@ XXX
 XXX Important bug fixes in the core language are summarized here.  Bug fixes in
 files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Restore ‘Can’t localize through ref’ to lvalue subs.  This error had disappeared
+under certain conditions in version 5.16.0 and has now been restored.
+
+=item *
+
+The parsing of heredocs has been improved significantly, fixing several parsing
+bugs and correcting wrong subsequent line numbers under certain conditions.
+
+=item *
+
+Reset the utf8 position cache when accessing magical variables to avoid the
+string buffer and the utf8 position cache to get out of sync.
+
+=item *
+
+Various cases of get magic being called twice for magical utf8 strings have been
+fixed.
+
+=item *
+
+This code (when not in the presence of C<$&> etc)
+
+    $_ = 'x' x 1_000_000;
+    1 while /(.)/;
+
+used to skip the buffer copy for performance reasons, but suffered from C<$1>
+etc changing if the original string changed.  That's now been fixed.
+
+=item *
+
+Perl doesn't use PerlIO anymore to report out of memory messages, as PerlIO
+might attempt to allocate more memory.
 
 =back
 
@@ -365,7 +537,10 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+Changes in the lexical pad API break several CPAN modules.
+
+To avoid having to patch those modules again later if we change pads from AVs
+into their own types, APIs for accessing the contents of pads have been added.
 
 =back
 
