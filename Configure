@@ -15068,9 +15068,9 @@ $cat >isblank.c <<'EOCP'
 int main() {
 	int c = ' ';
 	if (isblank(c))
-		exit(0);
+		return 0 ;
 	else
-		exit(1);
+		return 1 ;
 }
 EOCP
 if $cc $ccflags $ldflags -o isblank isblank.c $libs >/dev/null 2>&1 ; then
