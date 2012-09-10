@@ -1090,6 +1090,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		PL_curpad = AvARRAY(PL_comppad);
 	    else
 		PL_curpad = NULL;
+	    PL_comppad_name = (PADNAMELIST*)SSPOPPTR;
 	    break;
 	case SAVEt_PADSV_AND_MORTALIZE:
 	    {

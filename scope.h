@@ -208,7 +208,8 @@ scope has the given name. Name must be a literal string.
 
 #define SAVEHINTS()	save_hints()
 
-#define SAVECOMPPAD() save_pushptr(MUTABLE_SV(PL_comppad), SAVEt_COMPPAD)
+#define SAVECOMPPAD() save_pushptrptr(MUTABLE_SV(PL_comppad_name), \
+				     MUTABLE_SV(PL_comppad), SAVEt_COMPPAD)
 
 #define SAVESWITCHSTACK(f,t) \
     STMT_START {					\
