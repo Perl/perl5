@@ -155,7 +155,9 @@ sub run {
     }
 
     if ( defined $cache_dir ) {
-        die "ERROR: no such directory: '$cache_dir'\n" unless -d $cache_dir;
+        die "ERROR: not a directory: '$cache_dir'\n"
+            if !-d $cache_dir && -e $cache_dir;
+        File::Path::mkpath($cache_dir);
     }
     else {
         $cache_dir = File::Temp::tempdir( CLEANUP => 1 );
