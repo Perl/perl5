@@ -1817,7 +1817,7 @@ use File::Glob qw(:case);
 
     'Text::Abbrev' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/Text-Abbrev-1.01.tar.gz',
+        'DISTRIBUTION' => 'FLORA/Text-Abbrev-1.02.tar.gz',
         'FILES'        => q[dist/Text-Abbrev],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
         'UPSTREAM'     => 'blead',
