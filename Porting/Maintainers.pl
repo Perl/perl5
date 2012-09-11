@@ -1643,7 +1643,7 @@ use File::Glob qw(:case);
 
     'Storable' => {
         'MAINTAINER'   => 'ams',
-        'DISTRIBUTION' => 'AMS/Storable-2.35.tar.gz',
+        'DISTRIBUTION' => 'AMS/Storable-2.39.tar.gz',
         'FILES'        => q[dist/Storable],
         'EXCLUDED'     => [qr{^t/Test/}],
         'UPSTREAM'     => 'blead',
