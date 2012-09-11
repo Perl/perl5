@@ -131,7 +131,7 @@ while (my $line = <$makedefs>) {
   # makedef.pl loses distinction between vars and funcs, so
   # use the start of the name to guess and add specific
   # exceptions when we know about them.
-  if ($line =~ m/^PL_/
+  if ($line =~ m/^(PL_|MallocCfg)/
       || $line eq 'PerlIO_perlio'
       || $line eq 'PerlIO_pending') {
     $vars{$line}++;
