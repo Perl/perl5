@@ -458,11 +458,26 @@ by using C<-E> on one-liners (see L<feature>).  Beginning with Perl 5.16,
 the C<CORE::state> form does not require the
 C<feature> pragma.
 
+The C<state> keyword creates a lexical variable (following the same scoping
+rules as C<my>) that persists from one subroutine call to the next.  If a
+state variable resides inside an anonymous subroutine, then each copy of
+the subroutine has its own copy of the state variable.  However, the value
+of the state variable will still persist between calls to the same copy of
+the anonymous subroutine.  (Don't forget that C<sub { ... }> creates a new
+subroutine each time it is executed.)
+
 For example, the following code maintains a private counter, incremented
 each time the gimme_another() function is called:
 
     use feature 'state';
     sub gimme_another { state $x; return ++$x }
+
+And this example uses anonymous subroutines to create separate counters:
+
+    use feature 'state';
+    sub create_counter {
+	return sub { state $x; return ++$x }
+    }
 
 Also, since C<$x> is lexical, it can't be reached or modified by any Perl
 code outside.
