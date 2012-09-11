@@ -136,6 +136,7 @@ static void	remove_dead_process(long child);
 static int	terminate_process(DWORD pid, HANDLE process_handle, int sig);
 static int	my_kill(int pid, int sig);
 static void	out_of_memory(void);
+static char*	wstr_to_str(const wchar_t* wstr);
 static long	filetime_to_clock(PFILETIME ft);
 static BOOL	filetime_from_time(PFILETIME ft, time_t t);
 static char*	create_command_line(char *cname, STRLEN clen,
@@ -171,9 +172,18 @@ my_invalid_parameter_handler(const wchar_t* expression,
     uintptr_t pReserved)
 {
 #  ifdef _DEBUG
-    wprintf(L"Invalid parameter detected in function %s."
-            L" File: %s Line: %d\n", function, file, line);
-    wprintf(L"Expression: %s\n", expression);
+    char* ansi_expression;
+    char* ansi_function;
+    char* ansi_file;
+    ansi_expression = wstr_to_str(expression);
+    ansi_function = wstr_to_str(function);
+    ansi_file = wstr_to_str(file);
+    fprintf(stderr, "Invalid parameter detected in function %s. "
+                    "File: %s, line: %d\n", ansi_function, ansi_file, line);
+    fprintf(stderr, "Expression: %s\n", ansi_expression);
+    free(ansi_expression);
+    free(ansi_function);
+    free(ansi_file);
 #  endif
 }
 #endif
@@ -1649,6 +1659,24 @@ out_of_memory(void)
         my_exit(1);
     }
     exit(1);
+}
+
+/* Converts a wide character (UTF-16) string to the Windows ANSI code page,
+ * potentially using the system's default replacement character for any
+ * unrepresentable characters. The caller must free() the returned string. */
+static char*
+wstr_to_str(const wchar_t* wstr)
+{
+    BOOL used_default = FALSE;
+    size_t wlen = wcslen(wstr) + 1;
+    int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen,
+                                   NULL, 0, NULL, NULL);
+    char* str = malloc(len);
+    if (!str)
+        out_of_memory();
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen,
+                        str, len, NULL, &used_default);
+    return str;
 }
 
 /* The win32_ansipath() function takes a Unicode filename and converts it
