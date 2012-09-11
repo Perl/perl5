@@ -6934,7 +6934,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     PADNAME *name;
     PADOFFSET pax = o->op_targ;
     CV *outcv = CvOUTSIDE(PL_compcv);
+    CV *clonee = NULL;
     HEK *hek = NULL;
+    bool reusable = FALSE;
 
     PERL_ARGS_ASSERT_NEWMYSUB;
 
@@ -6954,7 +6956,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	goto redo;
     }
     svspot =
-	&PadARRAY(PadlistARRAY(CvPADLIST(outcv))[1])[pax];
+	&PadARRAY(PadlistARRAY(CvPADLIST(outcv))
+			[CvDEPTH(outcv) ? CvDEPTH(outcv) : 1])[pax];
     spot = (CV **)svspot;
 
     if (proto) {
@@ -6977,7 +6980,11 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	goto done;
     }
 
-    if (PadnameIsSTATE(name))
+    if (CvDEPTH(outcv) && CvCLONE(compcv)) {
+	cv = *spot;
+	svspot = (SV **)(spot = &clonee);
+    }
+    else if (PadnameIsSTATE(name) || CvDEPTH(outcv))
 	cv = *spot;
     else {
 	MAGIC *mg;
@@ -7070,6 +7077,10 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		cv = NULL;
 	    }
 	}
+	else if (CvDEPTH(outcv) && CvCLONE(compcv)) {
+	    cv = NULL;
+	    reusable = TRUE;
+	}
     }
     if (const_sv) {
 	SvREFCNT_inc_simple_void_NN(const_sv);
@@ -7093,7 +7104,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	op_free(block);
 	SvREFCNT_dec(compcv);
 	PL_compcv = NULL;
-	goto done;
+	goto clone;
     }
     /* Checking whether outcv is CvOUTSIDE(compcv) is not sufficient to
        determine whether this sub definition is in the same scope as its
@@ -7254,6 +7265,28 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    call_sv(MUTABLE_SV(pcv), G_DISCARD);
 		}
 	    }
+	}
+    }
+
+  clone:
+    if (clonee) {
+	assert(CvDEPTH(outcv));
+	spot = (CV **)
+	    &PadARRAY(PadlistARRAY(CvPADLIST(outcv))[CvDEPTH(outcv)])[pax];
+	if (reusable) cv_clone_into(clonee, *spot);
+	else *spot = cv_clone(clonee);
+	SvREFCNT_dec(clonee);
+	cv = *spot;
+	SvPADMY_on(cv);
+    }
+    if (CvDEPTH(outcv) && !reusable && PadnameIsSTATE(name)) {
+	PADOFFSET depth = CvDEPTH(outcv);
+	while (--depth) {
+	    SV *oldcv;
+	    svspot = &PadARRAY(PadlistARRAY(CvPADLIST(outcv))[depth])[pax];
+	    oldcv = *svspot;
+	    *svspot = SvREFCNT_inc_simple_NN(cv);
+	    SvREFCNT_dec(oldcv);
 	}
     }
 

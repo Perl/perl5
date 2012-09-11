@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 122;
+plan 124;
 
 # -------------------- our -------------------- #
 
@@ -290,6 +290,19 @@ sub make_anon_with_state_sub{
   state sub x;
   eval 'sub x {3}';
   is x, 3, 'state sub defined inside eval';
+
+  sub r {
+    state sub foo { 3 };
+    if (@_) { # outer call
+      r();
+      is foo(), 42,
+         'state sub run-time redefinition applies to all recursion levels';
+    }
+    else { # inner call
+      eval 'sub foo { 42 }';
+    }
+  }
+  r(1);
 }
 
 # -------------------- my -------------------- #
@@ -567,6 +580,11 @@ not_lexical11();
   sub x { x() if $count++ < 10 }
   x();
   is $count, 11, 'my recursive subs';
+}
+{
+  my sub x;
+  eval 'sub x {3}';
+  is x, 3, 'my sub defined inside eval';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
