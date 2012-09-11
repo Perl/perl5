@@ -1756,7 +1756,7 @@ sub DB {
                 # If there's any call stack in place, turn off single
                 # stepping into subs throughout the stack.
             for my $i (0 .. $stack_depth) {
-                $stack[ $i++ ] &= ~1;
+                $stack[ $i ] &= ~1;
             }
 
             # And we are now no longer in single-step mode.
@@ -1804,27 +1804,33 @@ sub DB {
     $max = $#dbline;
 
     # if we have something here, see if we should break.
-    if ( $dbline{$line}
-        && _is_breakpoint_enabled($filename, $line)
-        && ( my ( $stop, $action ) = split( /\0/, $dbline{$line} ) ) )
     {
+        # $stop is lexical and local to this block - $action on the other hand
+        # is global.
+        my $stop;
 
-        # Stop if the stop criterion says to just stop.
-        if ( $stop eq '1' ) {
-            $signal |= 1;
-        }
+        if ( $dbline{$line}
+            && _is_breakpoint_enabled($filename, $line)
+            && (( $stop, $action ) = split( /\0/, $dbline{$line} ) ) )
+        {
 
-        # It's a conditional stop; eval it in the user's context and
-        # see if we should stop. If so, remove the one-time sigil.
-        elsif ($stop) {
-            $evalarg = "\$DB::signal |= 1 if do {$stop}";
-            &eval;
-            # If the breakpoint is temporary, then delete its enabled status.
-            if ($dbline{$line} =~ s/;9($|\0)/$1/) {
-                _cancel_breakpoint_temp_enabled_status($filename, $line);
+            # Stop if the stop criterion says to just stop.
+            if ( $stop eq '1' ) {
+                $signal |= 1;
             }
-        }
-    } ## end if ($dbline{$line} && ...
+
+            # It's a conditional stop; eval it in the user's context and
+            # see if we should stop. If so, remove the one-time sigil.
+            elsif ($stop) {
+                $evalarg = "\$DB::signal |= 1 if do {$stop}";
+                &eval;
+                # If the breakpoint is temporary, then delete its enabled status.
+                if ($dbline{$line} =~ s/;9($|\0)/$1/) {
+                    _cancel_breakpoint_temp_enabled_status($filename, $line);
+                }
+            }
+        } ## end if ($dbline{$line} && ...
+    }
 
     # Preserve the current stop-or-not, and see if any of the W
     # (watch expressions) has changed.
@@ -2002,9 +2008,7 @@ number information, and print that.
 
             # Scan forward, stopping at either the end or the next
             # unbreakable line.
-            {
-                my $i = $line + 1;
-                while ( $i <= $max && $dbline[$i] == 0 )
+            for ( my $i = $line + 1 ; $i <= $max && $dbline[$i] == 0 ; ++$i )
             {    #{ vi
 
                 # Drop out on null statements, block closers, and comments.
@@ -2029,12 +2033,7 @@ number information, and print that.
                 else {
                     depth_print_lineinfo($explicit_stop, $incr_pos);
                 }
-            }
-            continue
-            {
-                $i++;
-            }## end while ($i = $line + 1 ; $i...
-            }
+            } ## end for ($i = $line + 1 ; $i...
         } ## end else [ if ($slave_editor)
     } ## end if ($single || ($trace...
 
@@ -2965,14 +2964,9 @@ If a command is found, it is placed in C<$cmd> and executed via C<redo>.
                     pop(@hist) if length($cmd) > 1;
 
                     # Look backward through the history.
-                    $i = $#hist;
-                    while ($i) {
-
+                    for ( $i = $#hist ; $i ; --$i ) {
                         # Stop if we find it.
                         last if $hist[$i] =~ /$pat/;
-                    }
-                    continue {
-                        $i--;
                     }
 
                     if ( !$i ) {
@@ -3045,15 +3039,11 @@ Prints the contents of C<@hist> (if any).
                     # Start at the end of the array.
                     # Stay in while we're still above the ending value.
                     # Tick back by one each time around the loop.
-                    $i = $#hist;
-                    while ( $i > $end ) {
+                    for ( $i = $#hist ; $i > $end ; $i-- ) {
 
                         # Print the command  unless it has no arguments.
                         print $OUT "$i: ", $hist[$i], "\n"
                           unless $hist[$i] =~ /^.?$/;
-                    }
-                    continue {
-                        $i--;
                     }
                     next CMD;
                 };
@@ -4001,6 +3991,8 @@ sub cmd_a {
 
                 # Add the action to the line.
                 $dbline{$lineno} .= "\0" . action($expr);
+
+                _set_breakpoint_enabled_status($filename, $lineno, 1);
             }
         } ## end if (length $expr)
     } ## end if ($line =~ /^\s*(\d*)\s*(\S.+)/)
@@ -5067,7 +5059,7 @@ sub cmd_l {
         # - whether a line has a break or not
         # - whether a line has an action or not
         else {
-            while ($i <= $end) {
+            for ( ; $i <= $end ; $i++ ) {
 
                 # Check for breakpoints and actions.
                 my ( $stop, $action );
@@ -5090,10 +5082,7 @@ sub cmd_l {
 
                 # Move on to the next line. Drop out on an interrupt.
                 $i++, last if $signal;
-            }
-            continue {
-                $i++;
-            }## end while (; $i <= $end ; $i++)
+            } ## end for (; $i <= $end ; $i++)
 
             # Line the prompt up; print a newline if the last line listed
             # didn't have a newline.
@@ -5854,11 +5843,11 @@ sub dump_trace {
     # number of stack frames, or we run out - caller() returns nothing - we
     # quit.
     # Up the stack frame index to go back one more level each time.
-    {
-        my $i = $skip;
-    while (
+    for (
+        my $i = $skip ;
         $i < $count
-        and ( $p, $file, $line, $sub, $h, $context, $e, $r ) = caller($i)
+        and ( $p, $file, $line, $sub, $h, $context, $e, $r ) = caller($i) ;
+        $i++
     )
     {
 
@@ -5945,11 +5934,7 @@ sub dump_trace {
 
         # Stop processing frames if the user hit control-C.
         last if $signal;
-    } ## end while ($i)
-    continue {
-        $i++;
-    }
-    }
+    } ## end for ($i = $skip ; $i < ...
 
     # Restore the trace value again.
     $trace = $otrace;
