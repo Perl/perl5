@@ -750,7 +750,7 @@ use File::Glob qw(:case);
 
     'ExtUtils::Manifest' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/ExtUtils-Manifest-1.60.tar.gz',
+        'DISTRIBUTION' => 'FLORA/ExtUtils-Manifest-1.61.tar.gz',
         'FILES'        => q[dist/ExtUtils-Manifest],
         'EXCLUDED'     => [qr(t/release-.*\.t)],
         'UPSTREAM'     => 'blead',
