@@ -1383,6 +1383,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	else {
 	    /* immediate creation - capture outer value right now */
 	    av_store(PL_comppad, new_offset, SvREFCNT_inc(*new_capturep));
+	    /* But also note the offset, as newMYSUB needs it */
+	    PARENT_PAD_INDEX_set(new_namesv, offset);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad findlex cv=0x%"UVxf" saved captured sv 0x%"UVxf" at offset %ld\n",
 		PTR2UV(cv), PTR2UV(*new_capturep), (long)new_offset));
@@ -2059,26 +2061,9 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		    else if (PadnameLEN(namesv)>1 && !PadnameIsOUR(namesv))
 		    {
 			/* my sub */
-		      sv = newSV_type(SVt_PVCV);
-		      if (SvTYPE(ppad[ix]) == SVt_PVCV) {
-			/* This is actually a stub with a proto CV attached
-			   to it by magic.  Since the stub itself is used
-			   when the proto is cloned, we need a new stub
-			   that nonetheless shares the same proto.
-			 */
-			MAGIC * const mg =
-			    mg_find(ppad[ix], PERL_MAGIC_proto);
-			assert(mg);
-			assert(mg->mg_obj);
-			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
-			assert(CvNAME_HEK((CV *)ppad[ix]));
-			CvNAME_HEK_set(sv,
-			    share_hek_hek(CvNAME_HEK((CV *)ppad[ix])));
-			sv_magic(sv,mg->mg_obj,PERL_MAGIC_proto,NULL,0);
-		      }
-		      else {
-			assert(SvTYPE(ppad[ix]) == SVt_NULL);
-			/* Unavailable; just provide a stub, but name it */
+			/* Just provide a stub, but name it.  It will be
+			   upgrade to the real thing on scope entry. */
+			sv = newSV_type(SVt_PVCV);
 			CvNAME_HEK_set(
 			    sv,
 			    share_hek(SvPVX_const(namesv)+1,
@@ -2086,7 +2071,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 					 * (SvUTF8(namesv) ? -1 : 1),
 				      0)
 			);
-		      }
 		    }
 		    else sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')

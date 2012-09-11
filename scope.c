@@ -955,8 +955,6 @@ Perl_leave_scope(pTHX_ I32 base)
 		case SVt_PVCV:
 		{
 		    SV ** const svp = (SV **)ptr;
-		    MAGIC *mg = SvMAGIC(sv);
-		    MAGIC **tomg = &SvMAGIC(sv);
 
 		    /* Create a stub */
 		    *svp = newSV_type(SVt_PVCV);
@@ -965,18 +963,6 @@ Perl_leave_scope(pTHX_ I32 base)
 		    assert(CvNAMED(sv));
 		    CvNAME_HEK_set(*svp,
 			share_hek_hek(CvNAME_HEK((CV *)sv)));
-
-		    /* Steal magic */
-		    while (mg) {
-			if (mg->mg_type == PERL_MAGIC_proto) break;
-			mg = *(tomg = &mg->mg_moremagic);
-		    }
-		    assert(mg);
-		    *tomg = mg->mg_moremagic;
-		    mg->mg_moremagic = SvMAGIC(*svp);
-		    SvMAGIC(*svp) = mg;
-		    mg_magical(*svp);
-		    mg_magical(sv);
 		    break;
 		}
 		default:	*(SV**)ptr = newSV(0);		break;

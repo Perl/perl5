@@ -162,13 +162,13 @@ PP(pp_introcv)
 PP(pp_clonecv)
 {
     dVAR; dTARGET;
-    MAGIC * const mg = mg_find(TARG, PERL_MAGIC_proto);
+    MAGIC * const mg =
+	mg_find(AvARRAY(PL_comppad_name)[ARGTARG], PERL_MAGIC_proto);
     assert(SvTYPE(TARG) == SVt_PVCV);
     assert(mg);
     assert(mg->mg_obj);
     if (CvISXSUB(mg->mg_obj)) { /* constant */
 	/* XXX Should we clone it here? */
-	/* XXX Does this play nicely with pad_push? */
 	/* If this changes to use SAVECLEARSV, we can move the SAVECLEARSV
 	   to introcv and remove the SvPADSTALE_off. */
 	SAVEPADSVANDMORTALIZE(ARGTARG);

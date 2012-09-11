@@ -6981,12 +6981,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	cv = *spot;
     else {
 	MAGIC *mg;
+	SvUPGRADE(name, SVt_PVMG);
+	mg = mg_find(name, PERL_MAGIC_proto);
 	assert (SvTYPE(*spot) == SVt_PVCV);
-	if (CvROOT(*spot)) {
-	    cv = *spot;
-	    *svspot = newSV_type(SVt_PVCV);
-	    SvPADMY_on(*spot);
-	}
 	if (CvNAMED(*spot))
 	    hek = CvNAME_HEK(*spot);
 	else {
@@ -6997,14 +6994,13 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		)
 	    );
 	}
-	mg = mg_find(*svspot, PERL_MAGIC_proto);
 	if (mg) {
 	    assert(mg->mg_obj);
 	    cv = (CV *)mg->mg_obj;
 	}
 	else {
-	    sv_magic(*svspot, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
-	    mg = mg_find(*svspot, PERL_MAGIC_proto);
+	    sv_magic(name, &PL_sv_undef, PERL_MAGIC_proto, NULL, 0);
+	    mg = mg_find(name, PERL_MAGIC_proto);
 	}
 	spot = (CV **)(svspot = &mg->mg_obj);
     }
@@ -9888,23 +9884,22 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 	case OP_PADCV: {
 	    PADNAME *name = PAD_COMPNAME(rvop->op_targ);
 	    CV *compcv = PL_compcv;
-	    SV *sv = PAD_SV(rvop->op_targ);
-	    while (SvTYPE(sv) != SVt_PVCV) {
-		assert(PadnameOUTER(name));
+	    PADOFFSET off = rvop->op_targ;
+	    while (PadnameOUTER(name)) {
 		assert(PARENT_PAD_INDEX(name));
 		compcv = CvOUTSIDE(PL_compcv);
-		sv = AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])
-			[PARENT_PAD_INDEX(name)];
 		name = PadlistNAMESARRAY(CvPADLIST(compcv))
-			[PARENT_PAD_INDEX(name)];
+			[off = PARENT_PAD_INDEX(name)];
 	    }
-	    if (!PadnameIsOUR(name) && !PadnameIsSTATE(name)) {
-		MAGIC * mg = mg_find(sv, PERL_MAGIC_proto);
+	    assert(!PadnameIsOUR(name));
+	    if (!PadnameIsSTATE(name)) {
+		MAGIC * mg = mg_find(name, PERL_MAGIC_proto);
 		assert(mg);
 		assert(mg->mg_obj);
 		cv = (CV *)mg->mg_obj;
 	    }
-	    else cv = (CV *)sv;
+	    else cv =
+		    (CV *)AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])[off];
 	    gv = NULL;
 	} break;
 	default: {
