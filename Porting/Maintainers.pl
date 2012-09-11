@@ -262,7 +262,7 @@ use File::Glob qw(:case);
 
     'autouse' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/autouse-1.06.tar.gz',
+        'DISTRIBUTION' => 'FLORA/autouse-1.07.tar.gz',
         'FILES'        => q[dist/autouse],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
         'UPSTREAM'     => 'blead',
