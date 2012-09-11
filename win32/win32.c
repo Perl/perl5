@@ -99,35 +99,6 @@ END_EXTERN_C
 #  define getlogin g_getlogin
 #endif
 
-static void		get_shell(void);
-static long		tokenize(const char *str, char **dest, char ***destv);
-static int		do_spawn2(pTHX_ const char *cmd, int exectype);
-static BOOL		has_shell_metachars(const char *ptr);
-static long		filetime_to_clock(PFILETIME ft);
-static BOOL		filetime_from_time(PFILETIME ft, time_t t);
-static char *		get_emd_part(SV **leading, STRLEN *const len,
-				     char *trailing, ...);
-static void		remove_dead_process(long deceased);
-static long		find_pid(int pid);
-static char *		qualified_path(const char *cmd);
-static char *		win32_get_xlib(const char *pl, const char *xlib,
-				       const char *libname, STRLEN *const len);
-static LRESULT  win32_process_message(HWND hwnd, UINT msg,
-                       WPARAM wParam, LPARAM lParam);
-
-#ifdef USE_ITHREADS
-static void		remove_dead_pseudo_process(long child);
-static long		find_pseudo_pid(int pid);
-static HWND		get_hwnd_delay(pTHX, long child, DWORD tries);
-#endif
-
-START_EXTERN_C
-HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
-char	w32_module_name[MAX_PATH+1];
-END_EXTERN_C
-
-static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
-
 /* VS2005 (MSC version 14) provides a mechanism to set an invalid
  * parameter handler.  This functionality is not available in the
  * 64-bit compiler from the Platform SDK, which unfortunately also
@@ -144,7 +115,56 @@ static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 #endif
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
-void my_invalid_parameter_handler(const wchar_t* expression,
+static void	my_invalid_parameter_handler(const wchar_t* expression,
+			const wchar_t* function, const wchar_t* file,
+			unsigned int line, uintptr_t pReserved);
+#endif
+
+static char*	get_regstr_from(HKEY hkey, const char *valuename, SV **svp);
+static char*	get_regstr(const char *valuename, SV **svp);
+static char*	get_emd_part(SV **prev_pathp, STRLEN *const len,
+			char *trailing, ...);
+static char*	win32_get_xlib(const char *pl, const char *xlib,
+			const char *libname, STRLEN *const len);
+static BOOL	has_shell_metachars(const char *ptr);
+static long	tokenize(const char *str, char **dest, char ***destv);
+static void	get_shell(void);
+static char*	find_next_space(const char *s);
+static int	do_spawn2(pTHX_ const char *cmd, int exectype);
+static long	find_pid(int pid);
+static void	remove_dead_process(long child);
+static int	terminate_process(DWORD pid, HANDLE process_handle, int sig);
+static int	my_kill(int pid, int sig);
+static void	out_of_memory(void);
+static long	filetime_to_clock(PFILETIME ft);
+static BOOL	filetime_from_time(PFILETIME ft, time_t t);
+static char*	create_command_line(char *cname, STRLEN clen,
+			const char * const *args);
+static char*	qualified_path(const char *cmd);
+static void	ansify_path(void);
+static LRESULT	win32_process_message(HWND hwnd, UINT msg,
+			WPARAM wParam, LPARAM lParam);
+
+#ifdef USE_ITHREADS
+static long	find_pseudo_pid(int pid);
+static void	remove_dead_pseudo_process(long child);
+static HWND	get_hwnd_delay(pTHX, long child, DWORD tries);
+#endif
+
+#ifdef HAVE_INTERP_INTERN
+static void	win32_csighandler(int sig);
+#endif
+
+START_EXTERN_C
+HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
+char	w32_module_name[MAX_PATH+1];
+END_EXTERN_C
+
+static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
+
+#ifdef SET_INVALID_PARAMETER_HANDLER
+static void
+my_invalid_parameter_handler(const wchar_t* expression,
     const wchar_t* function, 
     const wchar_t* file, 
     unsigned int line, 
