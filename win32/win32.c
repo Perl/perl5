@@ -115,6 +115,7 @@ END_EXTERN_C
 #endif
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
+static BOOL	set_silent_invalid_parameter_handler(BOOL newvalue);
 static void	my_invalid_parameter_handler(const wchar_t* expression,
 			const wchar_t* function, const wchar_t* file,
 			unsigned int line, uintptr_t pReserved);
@@ -164,6 +165,18 @@ END_EXTERN_C
 static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 
 #ifdef SET_INVALID_PARAMETER_HANDLER
+static BOOL silent_invalid_parameter_handler = FALSE;
+
+static BOOL
+set_silent_invalid_parameter_handler(BOOL newvalue)
+{
+#  ifdef _DEBUG
+    BOOL oldvalue = silent_invalid_parameter_handler;
+    silent_invalid_parameter_handler = newvalue;
+    return oldvalue;
+#  endif
+}
+
 static void
 my_invalid_parameter_handler(const wchar_t* expression,
     const wchar_t* function, 
@@ -175,6 +188,8 @@ my_invalid_parameter_handler(const wchar_t* expression,
     char* ansi_expression;
     char* ansi_function;
     char* ansi_file;
+    if (silent_invalid_parameter_handler)
+	return;
     ansi_expression = wstr_to_str(expression);
     ansi_function = wstr_to_str(function);
     ansi_file = wstr_to_str(file);
@@ -4343,7 +4358,16 @@ win32_signal(int sig, Sighandler_t subcode)
     dTHX;
     if (sig < SIG_SIZE) {
 	int save_errno = errno;
-	Sighandler_t result = signal(sig, subcode);
+	Sighandler_t result;
+#ifdef SET_INVALID_PARAMETER_HANDLER
+	/* Silence our invalid parameter handler since we expect to make some
+	 * calls with invalid signal numbers giving a SIG_ERR result. */
+	BOOL oldvalue = set_silent_invalid_parameter_handler(TRUE);
+#endif
+	result = signal(sig, subcode);
+#ifdef SET_INVALID_PARAMETER_HANDLER
+	set_silent_invalid_parameter_handler(oldvalue);
+#endif
 	if (result == SIG_ERR) {
 	    result = w32_sighandler[sig];
 	    errno = save_errno;
