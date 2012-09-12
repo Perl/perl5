@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(75);
+plan(77);
 
 my $rc_filename = '.perldb';
 
@@ -1701,6 +1701,34 @@ package main;
 
         #msx,
         'Test the pre-prompt debugger commands',
+    );
+}
+
+# Test the { * command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                '{ q',
+                '{ *',
+                q/b 5/,
+                q/c/,
+                q/print (("One" x 5), "\n");/,
+                q/q/,
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^All\ \{\ actions\ cleared\.\n
+        #msx,
+        'Test the { * command',
+    );
+
+    $wrapper->output_like(qr/OneOneOneOneOne/,
+        '{ * test - output is OK.',
     );
 }
 
