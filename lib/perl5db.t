@@ -65,24 +65,6 @@ sub _out_contents
     return _slurp($out_fn);
 }
 
-{
-    rc(
-        <<"EOF",
-    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-    sub afterinit {
-        push(\@DB::typeahead,
-            'b 23',
-            'c',
-            '\$new_var = "Foo"',
-            'x "new_var = <\$new_var>\\n";',
-            'q',
-        );
-    }
-EOF
-    );
-}
-
 # Test [perl #61222]
 {
     local $ENV{PERLDB_OPTS};
