@@ -65,10 +65,7 @@ sub _out_contents
     return _slurp($out_fn);
 }
 
-
 {
-    my $target = '../lib/perl5db/t/eval-line-bug';
-
     rc(
         <<"EOF",
     &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
@@ -84,16 +81,7 @@ sub _out_contents
     }
 EOF
     );
-
-    {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0";
-        runperl(switches => [ '-d' ], progfile => $target);
-    }
 }
-
-like(_out_contents(), qr/new_var = <Foo>/,
-    "no strict 'vars' in evaluated lines.",
-);
 
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0";
@@ -405,6 +393,27 @@ package main;
     );
 }
 
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0";
+    my $target = '../lib/perl5db/t/eval-line-bug';
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 23',
+                'n',
+                '$new_var = "Foo"',
+                'x "new_var = <$new_var>\\n"',
+                'q',
+            ],
+            prog => $target,
+        }
+    );
+
+    $wrapper->contents_like( qr/new_var = <Foo>/,
+        "no strict 'vars' in evaluated lines.",
+    );
+}
 # Testing that we can set a line in the middle of the file.
 {
     my $wrapper = DebugWrap->new(
