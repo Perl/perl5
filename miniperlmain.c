@@ -71,6 +71,16 @@ main(int argc, char **argv, char **env)
 #ifndef NO_ENV_ARRAY_IN_MAIN
     PERL_UNUSED_ARG(env);
 #endif
+    if (PERL_REVISION   != PL_revision
+     || PERL_VERSION    != PL_version
+     || PERL_SUBVERSION != PL_subversion) {
+	char buf[256];
+	sprintf(buf, "Version v" PERL_VERSION_STRING
+		" of perl executable doesn't match version v%u.%u.%u"
+		" of libperl\n", PL_revision, PL_version, PL_subversion);
+	write(2, buf, strlen(buf));
+	exit(1);
+    }
 #ifndef PERL_USE_SAFE_PUTENV
     PL_use_safe_putenv = FALSE;
 #endif /* PERL_USE_SAFE_PUTENV */
