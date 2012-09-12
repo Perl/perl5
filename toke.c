@@ -5543,25 +5543,20 @@ Perl_yylex(pTHX)
 	case XATTRTERM:
 	case XTERMBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
+            goto pot;
 	case XATTRBLOCK:
 	case XBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
+	  pot:
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
 	case XBLOCKTERM:
 	    PL_lex_brackstack[PL_lex_brackets++] = XTERM;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
+            goto pot;
 	case XBLOCKBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XBLOCK;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
+	    goto pot;
 	default: {
 		const char *t;
 		if (PL_oldoldbufptr == PL_last_lop)
