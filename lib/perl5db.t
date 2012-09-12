@@ -65,37 +65,6 @@ sub _out_contents
     return _slurp($out_fn);
 }
 
-{
-    my $target = '../lib/perl5db/t/eval-line-bug';
-
-    rc(
-        <<"EOF",
-    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-    sub afterinit {
-        push(\@DB::typeahead,
-            'b 23',
-            'n',
-            'n',
-            'n',
-            'c', # line 23
-            'n',
-            "p \\\@{'main::_<$target'}",
-            'q',
-        );
-    }
-EOF
-    );
-
-    {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0";
-        runperl(switches => [ '-d' ], progfile => $target);
-    }
-}
-
-like(_out_contents(), qr/sub factorial/,
-    'The ${main::_<filename} variable in the debugger was not destroyed'
-);
 
 {
     my $target = '../lib/perl5db/t/eval-line-bug';
@@ -410,6 +379,31 @@ sub contents_unlike {
 }
 
 package main;
+
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0";
+    my $target = '../lib/perl5db/t/eval-line-bug';
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 23',
+                'n',
+                'n',
+                'n',
+                'c', # line 23
+                'n',
+                "p \@{'main::_<$target'}",
+                'q',
+            ],
+            prog => $target,
+        }
+    );
+    $wrapper->contents_like(
+        qr/sub factorial/,
+        'The ${main::_<filename} variable in the debugger was not destroyed',
+    );
+}
 
 # Testing that we can set a line in the middle of the file.
 {
