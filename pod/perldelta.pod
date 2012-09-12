@@ -491,6 +491,21 @@ pad and the list of pad names.  C<PAD>s, C<PADNAMELIST>s, and C<PADNAME>s are to
 be accessed as such though the newly added pad API instead of the plain C<AV>
 and C<SV> APIs.  See L<perlapi> for details.
 
+=item *
+
+In the regex API, the numbered capture callbacks are passed an index
+indicating what match variable is being accessed. There are special
+index values for the C<$`, $&, $&> variables. Previously the same three
+values were used to retrieve C<${^PREMATCH}, ${^MATCH}, ${^POSTMATCH}>
+too, but these have now been assigned three separate values. See
+L<perlreapi/Numbered capture callbacks>.
+
+=item *
+
+C<PL_sawampersand> was previously a boolean indicating that any of
+C<$`, $&, $&> had been seen; it now contains three one-bit flags
+indicating the presence of each of the variables individually.
+
 =back
 
 =head1 Selected Bug Fixes
