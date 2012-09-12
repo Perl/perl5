@@ -365,26 +365,10 @@ perform the upgrade if necessary.  See C<svtype>.
 /* pad name vars only */
 #define SVpad_STATE	0x80000000  /* pad name is a "state" var */
 
-/* MSVC6 generates "error C2099: initializer is not a constant" when
- * initializing bodies_by_type in sv.c. Workaround the compiler bug by
- * using an anonymous union, but only for MSVC6 since that isn't C89.
- */
-#if defined(_MSC_VER) && _MSC_VER < 1300
-# define _XPV_CUR_U_NAME
-# define xpv_cur	xpvcuru_cur
-# define xpv_fmdepth	xpvcuru_fmdepth
-#else
-# define _XPV_CUR_U_NAME xpv_cur_u
-# define xpv_cur	xpv_cur_u.xpvcuru_cur
-# define xpv_fmdepth	xpv_cur_u.xpvcuru_fmdepth
-#endif
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
-    union {								\
-	STRLEN	xpvcuru_cur;	/* length of svu_pv as a C string */    \
-	I32	xpvcuru_fmdepth;					\
-    }		_XPV_CUR_U_NAME;					\
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
     STRLEN	xpv_len 	/* allocated size */
 
 union _xnvu {
@@ -482,7 +466,8 @@ typedef U16 cv_flags_t;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our	\
 				  * compilation) in the lexically enclosing	\
 				  * sub */					\
-    cv_flags_t	xcv_flags
+    cv_flags_t	xcv_flags;						\
+    I32	xcv_depth	/* >= 2 indicates recursive call */
 
 /* This structure must match XPVCV in cv.h */
 

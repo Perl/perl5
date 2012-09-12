@@ -13,7 +13,6 @@
 struct xpvcv {
     _XPV_HEAD;
     _XPVCV_COMMON;
-    I32	xcv_depth;	/* >= 2 indicates recursive call */
 };
 
 /*
