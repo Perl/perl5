@@ -3787,6 +3787,11 @@ redirected it with select().)
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
 
+=item Perl API version %s of %s does not match %s
+
+(F) An XS extension compiled for a certain API version number of Perl was trying
+to be loaded into a Perl with a different API version.
+
 =item Perl folding rules are not up-to-date for 0x%x; please use the perlbug utility to report
 
 (W regex, deprecated) You used a regular expression with
