@@ -83,17 +83,6 @@ EOF
     );
 }
 
-SKIP: {
-    if ( $Config{usethreads} ) {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-        my $output = runperl(switches => [ '-dt' ], progfile => '../lib/perl5db/t/symbol-table-bug');
-        like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table when running with thread support');
-    } else {
-        skip("This perl is not threaded, skipping threaded debugger tests");
-    }
-}
-
-
 # Test [perl #61222]
 {
     local $ENV{PERLDB_OPTS};
@@ -490,6 +479,25 @@ SKIP:
             qr/\Q$error\E/,
             'Perl debugger correctly complains that it was not built with threads',
         );
+    }
+}
+
+SKIP:
+{
+    if ( $Config{usethreads} ) {
+        calc_new_var_wrapper(
+            {
+                prog =>  '../lib/perl5db/t/symbol-table-bug',
+                switches => [ '-dt', ],
+                stderr => 1,
+            }
+        )->output_like(
+            qr/Undefined symbols 0/,
+            'there are no undefined values in the symbol table when running with thread support',
+        );
+    }
+    else {
+        skip("This perl is not threaded, skipping threaded debugger tests");
     }
 }
 
