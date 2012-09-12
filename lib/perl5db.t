@@ -85,16 +85,6 @@ EOF
 
 SKIP: {
     if ( $Config{usethreads} ) {
-        skip('This perl has threads, skipping non-threaded debugger tests');
-    } else {
-        my $error = 'This Perl not built to support threads';
-        my $output = runperl( switches => [ '-dt' ], stderr => 1 );
-        like($output, qr/$error/, 'Perl debugger correctly complains that it was not built with threads');
-    }
-
-}
-SKIP: {
-    if ( $Config{usethreads} ) {
         local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
         my $output = runperl(switches => [ '-dt' ], progfile => '../lib/perl5db/t/symbol-table-bug');
         like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table when running with thread support');
@@ -262,6 +252,19 @@ sub field
 
     return $self->{field};
 }
+
+sub _switches
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_switches} = shift;
+    }
+
+    return $self->{_switches};
+}
+
 sub _contents
 {
     my $self = shift;
@@ -297,6 +300,11 @@ sub _init
     $self->_include_t($args->{include_t} ? 1 : 0);
 
     $self->_stderr_val(exists($args->{stderr}) ? $args->{stderr} : 1);
+
+    if (exists($args->{switches}))
+    {
+        $self->_switches($args->{switches});
+    }
 
     $self->_run();
 
@@ -337,7 +345,7 @@ sub _run {
         ::runperl(
             switches =>
             [
-                '-d',
+                ($self->_switches ? (@{$self->_switches()}) : ('-d')),
                 ($self->_include_t ? ('-I', '../lib/perl5db/t') : ())
             ],
             (defined($self->_stderr_val())
@@ -463,6 +471,26 @@ sub calc_new_var_wrapper
         qr/Undefined symbols 0/,
         'there are no undefined values in the symbol table',
     );
+}
+
+SKIP:
+{
+    if ( $Config{usethreads} ) {
+        skip('This perl has threads, skipping non-threaded debugger tests');
+    }
+    else {
+        my $error = 'This Perl not built to support threads';
+        calc_new_var_wrapper(
+            {
+                prog => '../lib/perl5db/t/eval-line-bug',
+                switches => ['-dt',],
+                stderr => 1,
+            }
+        )->output_like(
+            qr/\Q$error\E/,
+            'Perl debugger correctly complains that it was not built with threads',
+        );
+    }
 }
 
 # Testing that we can set a line in the middle of the file.
