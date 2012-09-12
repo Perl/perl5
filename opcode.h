@@ -1482,7 +1482,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_bitop,		/* complement */
 	Perl_ck_bitop,		/* ncomplement */
 	Perl_ck_bitop,		/* scomplement */
-	Perl_ck_smartmatch,	/* smartmatch */
+	Perl_ck_null,		/* smartmatch */
 	Perl_ck_fun,		/* atan2 */
 	Perl_ck_fun,		/* sin */
 	Perl_ck_fun,		/* cos */

@@ -5186,6 +5186,7 @@ typedef enum {
     XTERMBLOCK,
     XBLOCKTERM,
     XPOSTDEREF,
+    XBLOCKBLOCK,
     XTERMORDORDOR /* evil hack */
     /* update exp_name[] in toke.c if adding to this enum */
 } expectation;
