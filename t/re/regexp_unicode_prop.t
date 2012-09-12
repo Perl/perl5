@@ -189,11 +189,11 @@ sub match {
     my ($str, $name);
 
     given ($char) {
-        when (/^\\/) {
+        when {/^\\/} {
             $str  = eval qq ["$char"];
             $name =      qq ["$char"];
         }
-        when (/^0x([0-9A-Fa-f]+)$/) {
+        when (qr/^0x([0-9A-Fa-f]+)$/) {
             $str  =  chr hex $1;
             $name = "chr ($char)";
         }

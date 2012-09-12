@@ -4381,7 +4381,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
+	  "ATTRTERM", "TERMBLOCK", "BLOCKBLOCK", "TERMORDORDOR"
 	};
 #endif
 
@@ -5789,6 +5789,11 @@ Perl_yylex(pTHX)
 	case XATTRTERM:
 	case XTERMBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_allbrackets++;
+	    PL_expect = XSTATE;
+	    break;
+	case XBLOCKBLOCK:
+	    PL_lex_brackstack[PL_lex_brackets++] = XBLOCK;
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
@@ -8516,7 +8521,8 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
-	    OPERATOR(WHEN);
+	    PL_expect = XBLOCKBLOCK;
+	    TOKEN(WHEN);
 
 	case KEY_while:
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)

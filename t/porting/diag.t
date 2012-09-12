@@ -20,6 +20,7 @@ $|=1;
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
 chdir '..' or die "Can't chdir ..: $!";
+
 BEGIN { defined $ENV{PERL_UNICODE} and push @INC, "lib"; }
 
 my @functions;
@@ -182,7 +183,7 @@ my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 my @todo = sort <*>;
 while (@todo) {
   my $todo = shift @todo;
-  next if $todo ~~ ['t', 'lib', 'ext', 'dist', 'cpan'];
+  next if $todo =~ /^(?:(?:ex|dis)?t|lib|cpan)\z/;
   # opmini.c is just a copy of op.c, so there's no need to check again.
   next if $todo eq 'opmini.c';
   if (-d $todo) {

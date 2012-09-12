@@ -4493,12 +4493,6 @@ Perhaps you put it into the wrong package?
 internal bookkeeping of op trees.  An op tree needed to be freed after
 a compilation error, but could not be found, so it was leaked instead.
 
-=item Smart matching a non-overloaded object breaks encapsulation
-
-(F) You should not use the C<~~> operator on an object that does not
-overload it: Perl refuses to use the object's underlying structure for
-the smart match.
-
 =item sort is now a reserved word
 
 (F) An ancient error message that almost nobody ever runs into anymore.

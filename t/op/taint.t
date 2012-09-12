@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 797;
+plan tests => 795;
 
 $| = 1;
 
@@ -2169,11 +2169,6 @@ end
     index(undef, C);
     ok(!tainted "", "tainting still works after index() of the constant");
 }
-
-# Tainted values with smartmatch
-# [perl #93590] S_do_smartmatch stealing its own string buffers
-ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
-ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
 
 # Tainted values and ref()
 for(1,2) {
