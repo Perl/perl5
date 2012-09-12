@@ -744,7 +744,7 @@ MICROCORE_SRC	=		\
 		..\doio.c	\
 		..\doop.c	\
 		..\dump.c	\
-		..\globals.c	\
+		..\globalsmini.c\
 		..\gv.c		\
 		..\mro.c	\
 		..\hv.c		\
@@ -848,12 +848,14 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h ..\git_version.h
 UUDMAP_H	= ..\uudmap.h
 BITCOUNT_H	= ..\bitcount.h
 MG_DATA_H	= ..\mg_data.h
-GENERATED_HEADERS = $(UUDMAP_H) $(BITCOUNT_H) $(MG_DATA_H)
+BINCOMPAT_H	= ..\bincompat.h
+GENERATED_HEADERS_MINI = $(UUDMAP_H) $(BITCOUNT_H) $(MG_DATA_H)
+GENERATED_HEADERS = $(GENERATED_HEADERS_MINI) $(BINCOMPAT_H)
 
 MICROCORE_OBJ	= $(MICROCORE_SRC:db:+$(o))
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:db:+$(o))
 WIN32_OBJ	= $(WIN32_SRC:db:+$(o))
-MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o)}
+MINICORE_OBJ	= $(MINIDIR)\{$(MICROCORE_OBJ:f) miniperlmain$(o) perlio$(o) globalsmini$(o)}
 MINIWIN32_OBJ	= $(MINIDIR)\{$(WIN32_OBJ:f)}
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DYNALOADER)
@@ -1048,6 +1050,9 @@ config.w32 : $(CFGSH_TMPL)
 ..\git_version.h : $(MINIPERL) ..\make_patchnum.pl
 	cd .. && miniperl -Ilib make_patchnum.pl
 
+..\bincompat.h : $(MINIPERL) $(CONFIGPM) ..\make_bincompat.pl
+	cd .. && miniperl -Ilib make_bincompat.pl > bincompat.h
+
 # make sure that we recompile perl.c if the git version changes
 ..\perl$(o) : ..\git_version.h
 
@@ -1201,7 +1206,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ) Extensions
 	$(EMBED_EXE_MANI)
 .ENDIF
 
-$(MINIDIR)\globals$(o) : $(GENERATED_HEADERS)
+$(MINIDIR)\globalsmini$(o) : $(GENERATED_HEADERS_MINI)
 
 $(UUDMAP_H) $(MG_DATA_H) : $(BITCOUNT_H)
 
@@ -1539,6 +1544,7 @@ _test :
 
 _clean :
 	-@erase miniperlmain$(o)
+	-@erase globalsmini$(o)
 	-@erase $(MINIPERL)
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)

@@ -4615,116 +4615,121 @@ EXTCONST char* PL_block_type[];
    However, this string will be embedded in any shared perl library, which will
    allow us add a comparison check in perlmain.c in the near future.  */
 #ifdef DOINIT
+#  ifdef PERL_IS_MINIPERL
 EXTCONST char PL_bincompat_options[] =
-#  ifdef DEBUG_LEAKING_SCALARS
+#    ifdef DEBUG_LEAKING_SCALARS
 			     " DEBUG_LEAKING_SCALARS"
-#  endif
-#  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+#    endif
+#    ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
-#  endif
-#  ifdef FAKE_THREADS
+#    endif
+#    ifdef FAKE_THREADS
 			     " FAKE_THREADS"
-#  endif
-#  ifdef FCRYPT
+#    endif
+#    ifdef FCRYPT
 			     " FCRYPT"
-#  endif
-#  ifdef HAS_TIMES
+#    endif
+#    ifdef HAS_TIMES
 			     " HAS_TIMES"
-#  endif
-#  ifdef HAVE_INTERP_INTERN
+#    endif
+#    ifdef HAVE_INTERP_INTERN
 			     " HAVE_INTERP_INTERN"
-#  endif
-#  ifdef MULTIPLICITY
+#    endif
+#    ifdef MULTIPLICITY
 			     " MULTIPLICITY"
-#  endif
-#  ifdef MYMALLOC
+#    endif
+#    ifdef MYMALLOC
 			     " MYMALLOC"
-#  endif
-#  ifdef PERLIO_LAYERS
+#    endif
+#    ifdef PERLIO_LAYERS
 			     " PERLIO_LAYERS"
-#  endif
-#  ifdef PERL_DEBUG_READONLY_OPS
+#    endif
+#    ifdef PERL_DEBUG_READONLY_OPS
 			     " PERL_DEBUG_READONLY_OPS"
-#  endif
-#  ifdef PERL_GLOBAL_STRUCT
+#    endif
+#    ifdef PERL_GLOBAL_STRUCT
 			     " PERL_GLOBAL_STRUCT"
-#  endif
-#  ifdef PERL_IMPLICIT_CONTEXT
+#    endif
+#    ifdef PERL_IMPLICIT_CONTEXT
 			     " PERL_IMPLICIT_CONTEXT"
-#  endif
-#  ifdef PERL_IMPLICIT_SYS
+#    endif
+#    ifdef PERL_IMPLICIT_SYS
 			     " PERL_IMPLICIT_SYS"
-#  endif
-#  ifdef PERL_MAD
+#    endif
+#    ifdef PERL_MAD
 			     " PERL_MAD"
-#  endif
-#  ifdef PERL_MICRO
+#    endif
+#    ifdef PERL_MICRO
 			     " PERL_MICRO"
-#  endif
-#  ifdef PERL_NEED_APPCTX
+#    endif
+#    ifdef PERL_NEED_APPCTX
 			     " PERL_NEED_APPCTX"
-#  endif
-#  ifdef PERL_NEED_TIMESBASE
+#    endif
+#    ifdef PERL_NEED_TIMESBASE
 			     " PERL_NEED_TIMESBASE"
-#  endif
-#  ifdef PERL_OLD_COPY_ON_WRITE
+#    endif
+#    ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
-#  endif
-#  ifdef PERL_POISON
+#    endif
+#    ifdef PERL_POISON
 			     " PERL_POISON"
-#  endif
-#  ifdef PERL_TRACK_MEMPOOL
+#    endif
+#    ifdef PERL_TRACK_MEMPOOL
 			     " PERL_TRACK_MEMPOOL"
-#  endif
-#  ifdef PERL_USES_PL_PIDSTATUS
+#    endif
+#    ifdef PERL_USES_PL_PIDSTATUS
 			     " PERL_USES_PL_PIDSTATUS"
-#  endif
-#  ifdef USE_64_BIT_ALL
+#    endif
+#    ifdef USE_64_BIT_ALL
 			     " USE_64_BIT_ALL"
-#  endif
-#  ifdef USE_64_BIT_INT
+#    endif
+#    ifdef USE_64_BIT_INT
 			     " USE_64_BIT_INT"
-#  endif
-#  ifdef USE_IEEE
+#    endif
+#    ifdef USE_IEEE
 			     " USE_IEEE"
-#  endif
-#  ifdef USE_ITHREADS
+#    endif
+#    ifdef USE_ITHREADS
 			     " USE_ITHREADS"
-#  endif
-#  ifdef USE_LARGE_FILES
+#    endif
+#    ifdef USE_LARGE_FILES
 			     " USE_LARGE_FILES"
-#  endif
-#  ifdef USE_LOCALE_COLLATE
+#    endif
+#    ifdef USE_LOCALE_COLLATE
 			     " USE_LOCALE_COLLATE"
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
+#    endif
+#    ifdef USE_LOCALE_NUMERIC
 			     " USE_LOCALE_NUMERIC"
-#  endif
-#  ifdef USE_LONG_DOUBLE
+#    endif
+#    ifdef USE_LONG_DOUBLE
 			     " USE_LONG_DOUBLE"
-#  endif
-#  ifdef USE_PERLIO
+#    endif
+#    ifdef USE_PERLIO
 			     " USE_PERLIO"
-#  endif
-#  ifdef USE_REENTRANT_API
+#    endif
+#    ifdef USE_REENTRANT_API
 			     " USE_REENTRANT_API"
-#  endif
-#  ifdef USE_SFIO
+#    endif
+#    ifdef USE_SFIO
 			     " USE_SFIO"
-#  endif
-#  ifdef USE_SOCKS
+#    endif
+#    ifdef USE_SOCKS
 			     " USE_SOCKS"
-#  endif
-#  ifdef VMS_DO_SOCKETS
+#    endif
+#    ifdef VMS_DO_SOCKETS
 			     " VMS_DO_SOCKETS"
-#  endif
-#  ifdef VMS_SHORTEN_LONG_SYMBOLS
+#    endif
+#    ifdef VMS_SHORTEN_LONG_SYMBOLS
 			     " VMS_SHORTEN_LONG_SYMBOLS"
-#  endif
-#  ifdef VMS_WE_ARE_CASE_SENSITIVE
+#    endif
+#    ifdef VMS_WE_ARE_CASE_SENSITIVE
 			     " VMS_SYMBOL_CASE_AS_IS"
-#  endif
+#    endif
   "";
+#  else
+#    include "bincompat.h"
+EXTCONST char PL_bincompat_options[] = PERL_BINCOMPAT_OPTIONS;
+#  endif
 #else
 EXTCONST char PL_bincompat_options[];
 #endif

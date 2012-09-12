@@ -26,6 +26,7 @@ bug*.pl
 /opmini.c
 /perlmain.c
 /perlmini.c
+/globalsmini.c
 /pod/Makefile
 /runtests
 /writemain
@@ -92,6 +93,7 @@ MYMETA.*
 /uudmap.h
 /bitcount.h
 /mg_data.h
+/bincompat.h
 
 lib/inc/
 lib/Win32.pm

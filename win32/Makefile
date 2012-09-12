@@ -744,14 +744,18 @@ CORE_H		= $(CORE_NOCFG_H) .\config.h ..\git_version.h
 UUDMAP_H	= ..\uudmap.h
 BITCOUNT_H	= ..\bitcount.h
 MG_DATA_H	= ..\mg_data.h
-GENERATED_HEADERS = $(UUDMAP_H) $(BITCOUNT_H) $(MG_DATA_H)
+BINCOMPAT_H	= ..\bincompat.h
+
+GENERATED_HEADERS_MINI = $(UUDMAP_H) $(BITCOUNT_H) $(MG_DATA_H)
+GENERATED_HEADERS = $(GENERATED_HEADERS_MINI) $(BINCOMPAT_H)
 
 MICROCORE_OBJ	= $(MICROCORE_SRC:.c=.obj)
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:.c=.obj)
 WIN32_OBJ	= $(WIN32_SRC:.c=.obj)
 MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
 		  $(MINIDIR)\miniperlmain$(o)	\
-		  $(MINIDIR)\perlio$(o)
+		  $(MINIDIR)\perlio$(o)		\
+		  $(MINIDIR)\globals$(o)
 MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DYNALOADER)
@@ -926,6 +930,11 @@ config.w32 : $(CFGSH_TMPL)
 	miniperl -Ilib make_patchnum.pl
 	cd win32
 
+..\bincompat.h : $(MINIPERL) ..\make_bincompat.pl
+	cd ..
+	miniperl -Ilib make_bincompat.pl > bincompat.h
+	cd win32
+
 # make sure that we recompile perl.c if the git version changes
 ..\perl$(o) : ..\git_version.h
 
@@ -1035,7 +1044,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ) Extensions
 <<
 	$(EMBED_EXE_MANI)
 
-$(MINIDIR)\globals$(o) : $(GENERATED_HEADERS)
+$(MINIDIR)\globals$(o) : $(GENERATED_HEADERS_MINI)
 
 $(UUDMAP_H) $(MG_DATA_H) : $(BITCOUNT_H)
 

@@ -4464,6 +4464,7 @@ mad/P5AST.pm			Used by nomad
 mad/P5re.pm			Used by nomad
 mad/PLXML.pm			Used by nomad
 mad/t/p55.t			Test for the Perl 5 to Perl 5 translator
+make_bincompat.pl		Script to generate bincompat.h
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
 make_ext.pl			Used by Makefile to execute extension Makefiles

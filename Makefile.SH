@@ -469,13 +469,13 @@ c3 = taint.c toke.c util.c deb.c run.c universal.c pad.c globals.c keywords.c
 c4 = perlio.c perlapi.c numeric.c mathoms.c locale.c pp_pack.c pp_sort.c
 c5 = $(madlysrc) $(mallocsrc)
 
-c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c opmini.c perlmini.c
+c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c opmini.c perlmini.c globalsmini.c
 
-obj0 = op$(OBJ_EXT) perl$(OBJ_EXT)
-obj0mini = perlmini$(OBJ_EXT) opmini$(OBJ_EXT) miniperlmain$(OBJ_EXT)
+obj0 = op$(OBJ_EXT) perl$(OBJ_EXT) globals$(OBJ_EXT)
+obj0mini = perlmini$(OBJ_EXT) opmini$(OBJ_EXT) miniperlmain$(OBJ_EXT) globalsmini$(OBJ_EXT)
 obj1 = $(madlyobj) $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT) mro$(OBJ_EXT) keywords$(OBJ_EXT)
 obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
-obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) mathoms$(OBJ_EXT) locale$(OBJ_EXT) pp_pack$(OBJ_EXT) pp_sort$(OBJ_EXT)
+obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) mathoms$(OBJ_EXT) locale$(OBJ_EXT) pp_pack$(OBJ_EXT) pp_sort$(OBJ_EXT)
 
 minindt_obj = $(obj0mini) $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 mini_obj = $(minindt_obj) $(MINIDTRACE_O)
@@ -484,7 +484,8 @@ obj = $(ndt_obj) $(DTRACE_O)
 
 perltoc_pod_prereqs = extra.pods pod/perl5174delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
-generated_headers = uudmap.h bitcount.h mg_data.h
+generated_headers_mini = uudmap.h bitcount.h mg_data.h
+generated_headers = $(generated_headers_mini) bincompat.h
 
 Icwd = -Idist/Cwd -Idist/Cwd/lib -Idist/Carp/lib
 
@@ -568,6 +569,9 @@ git_version.h: lib/Config_git.pl
 lib/Config_git.pl: $(MINIPERL_EXE) make_patchnum.pl
 	$(MINIPERL) make_patchnum.pl
 
+bincompat.h: $(MINIPERL_EXE) $(CONFIGPM) make_bincompat.pl
+	$(MINIPERL) make_bincompat.pl > bincompat.h
+
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
 
@@ -617,7 +621,7 @@ FORCE:
 	@sh -c true
 !NO!SUBS!
 
-for file in op perl; do
+for file in op perl globals; do
     if $issymlink $file.c; then
         $spitshell >>$Makefile <<!GROK!THIS!
 
@@ -645,27 +649,33 @@ ${file}mini\$(OBJ_EXT): ${file}mini.c
 !GROK!THIS!
 done
 
+$spitshell >>$Makefile <<!GROK!THIS!
+
+miniperlmain\$(OBJ_EXT): miniperlmain.c patchlevel.h
+	\$(CCCMD) $DPERL_IS_MINIPERL \$(PLDLFLAGS) \$*.c
+
+!GROK!THIS!
+
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
 globals$(OBJ_EXT): $(generated_headers)
 
+globalsmini$(OBJ_EXT): $(generated_headers_mini)
+
 uudmap.h mg_data.h: bitcount.h
 
 bitcount.h: generate_uudmap$(HOST_EXE_EXT)
-	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) $(generated_headers)
+	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) $(generated_headers_mini)
 
 generate_uudmap$(OBJ_EXT): mg_raw.h
 
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
 
-miniperlmain$(OBJ_EXT): miniperlmain.c patchlevel.h
-	$(CCCMD) $(PLDLFLAGS) $*.c
-
 perlmain.c: $(MINIPERL_EXE) lib/ExtUtils/Miniperl.pm
 	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(@ARGV)' DynaLoader $(static_ext) > perlmain.c
 
-perlmain$(OBJ_EXT): perlmain.c
+perlmain$(OBJ_EXT): perlmain.c bincompat.h
 	$(CCCMD) $(PLDLFLAGS) $*.c
 
 # The file ext.libs is a list of libraries that must be linked in
@@ -705,9 +715,9 @@ $(LIBPERL_NONSHR): $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
 	$(AR) rcu $(LIBPERL_NONSHR) $(obj)
 
-$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)  perlmini$(OBJ_EXT)
+$(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perlmini$(OBJ_EXT) globalsmini$(OBJ_EXT)
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
-	    opmini$(OBJ_EXT) perlmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
+	    opmini$(OBJ_EXT) perlmini$(OBJ_EXT) globalsmini$(OBJ_EXT) $(LIBPERL_NONSHR) $(LIBS)
 
 MINIPERLEXP		= $(MINIPERL_NONSHR)
 
@@ -1252,7 +1262,7 @@ veryclean:	_verycleaner _mopup _clobber
 
 # Do not 'make _mopup' directly.
 _mopup:
-	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c generate_uudmap$(EXE_EXT) $(generated_headers)
+	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c globalsmini.c generate_uudmap$(EXE_EXT) $(generated_headers)
 	-rmdir .depending
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
@@ -1585,7 +1595,7 @@ distcheck: FORCE
 .PHONY: ctags
 
 ctags:
-	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c --exclude=perlmini.c *.c *.h
+	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c --exclude=perlmini.c --exclude=globalsmini.c *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.

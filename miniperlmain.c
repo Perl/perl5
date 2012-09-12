@@ -39,6 +39,10 @@
 #define PERL_IN_MINIPERLMAIN_C
 #include "perl.h"
 
+#ifndef PERL_IS_MINIPERL
+#  include "bincompat.h"
+#endif
+
 static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
@@ -81,6 +85,17 @@ main(int argc, char **argv, char **env)
 	write(2, buf, strlen(buf));
 	exit(1);
     }
+#ifndef PERL_IS_MINIPERL
+    if (!strnEQ(PERL_BINCOMPAT_OPTIONS, PL_bincompat_options,
+		sizeof(PERL_BINCOMPAT_OPTIONS))) {
+	char buf[1024];
+	sprintf(buf, "Binary compatibility options of perl executable ("
+		PERL_BINCOMPAT_OPTIONS ") do not match compatibility options"
+		" of libperl (%s)\n", PL_bincompat_options);
+	write(2, buf, strlen(buf));
+	exit(1);
+    }
+#endif
 #ifndef PERL_USE_SAFE_PUTENV
     PL_use_safe_putenv = FALSE;
 #endif /* PERL_USE_SAFE_PUTENV */

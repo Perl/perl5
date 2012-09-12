@@ -240,13 +240,13 @@ c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regex
 c3 = run.c scope.c sv.c taint.c toke.c universal.c utf8.c util.c vms.c keywords.c
 c = $(c0) $(c1) $(c2) $(c3)
 
-obj0 = perl$(O)
-obj1 = $(MALLOC_O) av$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro$(O) globals$(O) gv$(O) hv$(O) 
+obj0 = perl$(O) globals$(O)
+obj1 = $(MALLOC_O) av$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro$(O) gv$(O) hv$(O) 
 obj2 = keywords$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlapi$(O) perlio$(O) 
 obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) 
 obj4 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O) universal$(O) utf8$(O) util$(O) vms$(O)
 
-mini_obj = perlmini$(O) $(obj1) $(obj2) $(obj3) $(obj4)
+mini_obj = perlmini$(O) globalsmini$(O) $(obj1) $(obj2) $(obj3) $(obj4)
 obj = $(obj0) $(obj1) $(obj2) $(obj3) $(obj4)
 
 h0 = av.h config.h cop.h cv.h embed.h embedvar.h
@@ -262,7 +262,8 @@ h = $(h0) $(h1) $(h2) $(h3) $(h4) $(h5) $(h6) $(h7)
 acopt = $(ARCHCORE)perlshr_attr.opt $(ARCHCORE)$(DBG)perlshr_bld.opt
 ac = archcore_includes.ts $(acopt)
 
-generated_headers = uudmap.h bitcount.h mg_data.h
+generated_headers_mini = uudmap.h bitcount.h mg_data.h
+generated_headers = $(generated_headers_mini) bincompat.h
 
 CRTL = []crtl.opt
 CRTLOPTS =,$(CRTL)/Options
@@ -312,6 +313,9 @@ all : base extras x2p archcorefiles preplibrary [.pod]perltoc.pod
 
 git_version.h : $(MINIPERL_EXE) make_patchnum.pl
         $(MINIPERL) make_patchnum.pl
+
+bincompat.h : $(MINIPERL_EXE) make_patchnum.pl
+	$(MINIPERL) make_bincompat.pl > bincompat.h
 
 base : miniperl git_version.h nonxsext perl
 	@ $(NOOP)
@@ -371,6 +375,9 @@ $(DBG)libperlmini$(OLB) : $(mini_obj)
 perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.lib.ExtUtils]Miniperl.pm
 	$(MINIPERL) -"MExtUtils::Miniperl" -e "writemain(@ARGV)" "$(EXT)" > perlmain.c
 
+globalsmini.c : globals.c
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
+
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger
 perl : $(DBG)perl$(E)
@@ -403,7 +410,7 @@ bitcount.h mg_data.h : uudmap.h
 	@ $(NOOP)
 
 uudmap.h : generate_uudmap$(E)
-	MCR SYS$DISK:[]generate_uudmap$(E) $(generated_headers)
+	MCR SYS$DISK:[]generate_uudmap$(E) $(generated_headers_mini)
 
 generate_uudmap$(E) : generate_uudmap$(O) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) generate_uudmap$(O) $(CRTLOPTS)
@@ -697,6 +704,8 @@ dump$(O) : dump.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 globals$(O) : globals.c $(generated_headers) $(h)
         $(CC) $(CORECFLAGS) $(MMS$SOURCE)
+globalsmini$(O) : globalsmini.c $(generated_headers_mini) $(h)
+        $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 gv$(O) : gv.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 mro$(O) : mro.c $(h)
@@ -714,7 +723,7 @@ mathoms$(O) : mathoms.c $(h)
 mg$(O) : mg.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 miniperlmain$(O) : miniperlmain.c $(h)
-	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+	$(CC) $(CORECFLAGS) -DPERL_IS_MINIPERL $(MMS$SOURCE)
 numeric$(O) : numeric.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 pad$(O) : pad.c $(h)
@@ -831,6 +840,7 @@ tidy : cleanlis
 	- If F$Search("uudmap.h;-1")   .nes."" Then Purge/NoConfirm/Log uudmap.h
 	- If F$Search("bitcount.h;-1")   .nes."" Then Purge/NoConfirm/Log bitcount.h
 	- If F$Search("mg_data.h;-1")   .nes."" Then Purge/NoConfirm/Log mg_data.h
+	- If F$Search("bincompat.h;-1")   .nes."" Then Purge/NoConfirm/Log bincompat.h
 	- If F$Search("Perlshr_Gbl*.Mar;-1")   .nes."" Then Purge/NoConfirm/Log Perlshr_Gbl*.Mar
 	- If F$Search("[.ext.Opcode...];-1").nes."" Then Purge/NoConfirm/Log [.ext.Opcode]
 	- If F$Search("[.vms.ext...]*.C;-1").nes."" Then Purge/NoConfirm/Log [.vms.ext...]*.C
@@ -861,6 +871,7 @@ clean : tidy cleantest
 	- If F$Search("uudmap.h")   .nes."" Then Delete/NoConfirm/Log uudmap.h;*
 	- If F$Search("bitcount.h")   .nes."" Then Delete/NoConfirm/Log bitcount.h;*
 	- If F$Search("mg_data.h")   .nes."" Then Delete/NoConfirm/Log mg_data.h;*
+	- If F$Search("bincompat.h;-1")   .nes."" Then Purge/NoConfirm/Log bincompat.h
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.vms.ext...]*.C").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*.C;*
