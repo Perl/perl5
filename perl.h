@@ -4609,6 +4609,10 @@ EXTCONST char* const PL_block_type[] = {
 EXTCONST char* PL_block_type[];
 #endif
 
+#ifndef PERL_CORE
+#  include "bincompat.h"
+#endif
+
 /* These are all the compile time options that affect binary compatibility.
    Other compile time options that are binary compatible are in perl.c
    Both are combined for the output of perl -V
