@@ -91,6 +91,12 @@ extern const struct regexp_engine my_reg_engine;
 #include "inline_invlist.c"
 #include "unicode_constants.h"
 
+#ifdef HAS_ISBLANK
+#   define hasISBLANK 1
+#else
+#   define hasISBLANK 0
+#endif
+
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
@@ -11854,32 +11860,83 @@ parseit:
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ASCII:
+#ifdef HAS_ISASCII
 		    if (LOC) {
 			ANYOF_CLASS_SET(ret, namedclass);
 		    }
-                    else {
+                    else
+#endif  /* Not isascii(); just use the hard-coded definition for it */
                         _invlist_union(posixes, PL_ASCII, &posixes);
-                    }
 		    break;
 		case ANYOF_NASCII:
+#ifdef HAS_ISASCII
 		    if (LOC) {
 			ANYOF_CLASS_SET(ret, namedclass);
 		    }
                     else {
+#endif
                         _invlist_union_complement_2nd(posixes,
                                                     PL_ASCII, &posixes);
                         if (DEPENDS_SEMANTICS) {
                             ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
                         }
+#ifdef HAS_ISASCII
                     }
+#endif
 		    break;
 		case ANYOF_BLANK:
-                    DO_POSIX(ret, namedclass, posixes,
+                    if (hasISBLANK || ! LOC) {
+                        DO_POSIX(ret, namedclass, posixes,
                                             PL_PosixBlank, PL_XPosixBlank);
+                    }
+                    else { /* There is no isblank() and we are in locale:  We
+                              use the ASCII range and the above-Latin1 range
+                              code points */
+                        SV* scratch_list = NULL;
+
+                        /* Include all above-Latin1 blanks */
+                        _invlist_intersection(PL_AboveLatin1,
+                                              PL_XPosixBlank,
+                                              &scratch_list);
+                        /* Add it to the running total of posix classes */
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+                        /* Add the ASCII-range blanks to the running total. */
+                        _invlist_union(posixes, PL_PosixBlank, &posixes);
+                    }
 		    break;
 		case ANYOF_NBLANK:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixBlank, PL_XPosixBlank);
+                    if (hasISBLANK || ! LOC) {
+                        DO_N_POSIX(ret, namedclass, posixes,
+                                                PL_PosixBlank, PL_XPosixBlank);
+                    }
+                    else { /* There is no isblank() and we are in locale */
+                        SV* scratch_list = NULL;
+
+                        /* Include all above-Latin1 non-blanks */
+                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank, &scratch_list);
+
+                        /* Add them to the running total of posix classes */
+                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank, &scratch_list);
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+
+                        /* Get the list of all non-ASCII-blanks in Latin 1, and
+                         * add them to the running total */
+                        _invlist_subtract(PL_Latin1, PL_PosixBlank, &scratch_list);
+                        _invlist_union(posixes, scratch_list, &posixes);
+                        SvREFCNT_dec(scratch_list);
+                    }
 		    break;
 		case ANYOF_CNTRL:
                     DO_POSIX(ret, namedclass, posixes,
