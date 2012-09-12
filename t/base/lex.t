@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..74\n";
+print "1..75\n";
 
 $x = 'x';
 
@@ -367,3 +367,8 @@ print "$_ - s//\${\\%x}{3}/e\n";
 eval 's/${foo#}//e';
 print "not " unless $@;
 print "ok 74 - s/\${foo#}//e\n";
+
+eval 'warn ({$_ => 1} + 1) if 0';
+print "not " if $@;
+print "ok 75 - listop({$_ => 1} + 1)\n";
+print "# $@" if $@;

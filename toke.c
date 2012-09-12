@@ -5753,10 +5753,7 @@ Perl_yylex(pTHX)
 	}
 	switch (PL_expect) {
 	case XTERM:
-	    if (PL_oldoldbufptr == PL_last_lop)
-		PL_lex_brackstack[PL_lex_brackets++] = XTERM;
-	    else
-		PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
 	    PL_lex_allbrackets++;
 	    OPERATOR(HASHBRACK);
 	case XOPERATOR:
