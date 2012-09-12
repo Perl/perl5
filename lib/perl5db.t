@@ -393,10 +393,12 @@ package main;
     );
 }
 
+sub calc_new_var_wrapper
 {
-    local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    my $target = '../lib/perl5db/t/eval-line-bug';
-    my $wrapper = DebugWrap->new(
+    my ($target, $extra_opts) = @_;
+    $extra_opts ||= '';
+    local $ENV{PERLDB_OPTS} = "ReadLine=0" . $extra_opts;
+    return DebugWrap->new(
         {
             cmds =>
             [
@@ -409,11 +411,16 @@ package main;
             prog => $target,
         }
     );
-
-    $wrapper->contents_like( qr/new_var = <Foo>/,
-        "no strict 'vars' in evaluated lines.",
-    );
 }
+
+{
+    calc_new_var_wrapper('../lib/perl5db/t/eval-line-bug')
+        ->contents_like(
+            qr/new_var = <Foo>/,
+            "no strict 'vars' in evaluated lines.",
+        );
+}
+
 # Testing that we can set a line in the middle of the file.
 {
     my $wrapper = DebugWrap->new(
