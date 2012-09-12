@@ -406,7 +406,7 @@ package main;
     );
 }
 
-sub calc_new_var_wrapper
+sub _calc_new_var_wrapper
 {
     my $args = shift;
 
@@ -430,7 +430,7 @@ sub calc_new_var_wrapper
 }
 
 {
-    calc_new_var_wrapper({ prog => '../lib/perl5db/t/eval-line-bug'})
+    _calc_new_var_wrapper({ prog => '../lib/perl5db/t/eval-line-bug'})
         ->contents_like(
             qr/new_var = <Foo>/,
             "no strict 'vars' in evaluated lines.",
@@ -438,7 +438,7 @@ sub calc_new_var_wrapper
 }
 
 {
-    calc_new_var_wrapper(
+    _calc_new_var_wrapper(
         {
             prog => '../lib/perl5db/t/lvalue-bug',
             stderr => undef(),
@@ -450,7 +450,7 @@ sub calc_new_var_wrapper
 }
 
 {
-    calc_new_var_wrapper(
+    _calc_new_var_wrapper(
         {
             prog =>  '../lib/perl5db/t/symbol-table-bug',
             extra_opts => "NonStop=1",
@@ -469,7 +469,7 @@ SKIP:
     }
     else {
         my $error = 'This Perl not built to support threads';
-        calc_new_var_wrapper(
+        _calc_new_var_wrapper(
             {
                 prog => '../lib/perl5db/t/eval-line-bug',
                 switches => ['-dt',],
@@ -485,7 +485,7 @@ SKIP:
 SKIP:
 {
     if ( $Config{usethreads} ) {
-        calc_new_var_wrapper(
+        _calc_new_var_wrapper(
             {
                 prog =>  '../lib/perl5db/t/symbol-table-bug',
                 switches => [ '-dt', ],
