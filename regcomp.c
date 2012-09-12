@@ -4215,7 +4215,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		case ALNUM:
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NALNUM);
+			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NWORDCHAR);
                             if (OP(scan) == ALNUMU) {
                                 for (value = 0; value < 256; value++) {
                                     if (!isWORDCHAR_L1(value)) {
@@ -4233,7 +4233,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_ALNUM);
+			    ANYOF_CLASS_SET(data->start_class,ANYOF_WORDCHAR);
 
 			/* Even if under locale, set the bits for non-locale
 			 * in case it isn't a true locale-node.  This will
@@ -4256,7 +4256,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		case NALNUM:
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_ALNUM);
+			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_WORDCHAR);
                             if (OP(scan) == NALNUMU) {
                                 for (value = 0; value < 256; value++) {
                                     if (isWORDCHAR_L1(value)) {
@@ -4274,7 +4274,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		    else {
 			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NALNUM);
+			    ANYOF_CLASS_SET(data->start_class,ANYOF_NWORDCHAR);
 
 			/* Even if under locale, set the bits for non-locale in
 			 * case it isn't a true locale-node.  This will create
@@ -11124,7 +11124,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 		    switch (skip) {
 		    case 4:
 			if (memEQ(posixcc, "word", 4)) /* this is not POSIX, this is the Perl \w */
-			    namedclass = ANYOF_ALNUM;
+			    namedclass = ANYOF_WORDCHAR;
 			break;
 		    case 5:
 			/* Names all of length 5.  */
@@ -11565,8 +11565,8 @@ parseit:
 	     * A similar issue a little bit later when switching on
 	     * namedclass. --jhi */
 	    switch ((I32)value) {
-	    case 'w':	namedclass = ANYOF_ALNUM;	break;
-	    case 'W':	namedclass = ANYOF_NALNUM;	break;
+	    case 'w':	namedclass = ANYOF_WORDCHAR;	break;
+	    case 'W':	namedclass = ANYOF_NWORDCHAR;	break;
 	    case 's':	namedclass = ANYOF_SPACE;	break;
 	    case 'S':	namedclass = ANYOF_NSPACE;	break;
 	    case 'd':	namedclass = ANYOF_DIGIT;	break;
@@ -12072,11 +12072,11 @@ parseit:
 		    }
 		    break;
 		}
-		case ANYOF_ALNUM:   /* Really is 'Word' */
+		case ANYOF_WORDCHAR:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
 		    break;
-		case ANYOF_NALNUM:
+		case ANYOF_NWORDCHAR:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                             PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv,
                             runtime_posix_matches_above_Unicode);
@@ -12207,10 +12207,10 @@ parseit:
                  * modifier to the regex.  We first calculate the base node
                  * type, and if it should be inverted */
 
-                case ANYOF_NALNUM:
+                case ANYOF_NWORDCHAR:
                     invert = ! invert;
                     /* FALLTHROUGH */
-                case ANYOF_ALNUM:
+                case ANYOF_WORDCHAR:
                     op = ALNUM;
                     goto join_charset_classes;
 

@@ -387,8 +387,8 @@ struct regnode_charclass_class {
 /* Should be synchronized with a table in regprop() */
 /* 2n should be the normal one, paired with its complement at 2n+1 */
 
-#define ANYOF_ALNUM    ((_CC_WORDCHAR) * 2)  /* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
-#define ANYOF_NALNUM   ((ANYOF_ALNUM) + 1)
+#define ANYOF_WORDCHAR ((_CC_WORDCHAR) * 2)  /* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
+#define ANYOF_NWORDCHAR   ((ANYOF_WORDCHAR) + 1)
 #define ANYOF_SPACE    ((_CC_SPACE) * 2)     /* \s */
 #define ANYOF_NSPACE   ((ANYOF_SPACE) + 1)
 #define ANYOF_DIGIT    ((_CC_DIGIT) * 2)     /* \d */
@@ -437,6 +437,8 @@ struct regnode_charclass_class {
 #define ANYOF_NALNUML	 ANYOF_NALNUM
 #define ANYOF_SPACEL	 ANYOF_SPACE
 #define ANYOF_NSPACEL	 ANYOF_NSPACE
+#define ANYOF_ALNUM ANYOF_WORDCHAR
+#define ANYOF_NALNUM ANYOF_NWORDCHAR
 
 /* Utility macros for the bitmap and classes of ANYOF */
 
