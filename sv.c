@@ -12644,8 +12644,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
 		new_state->re_state_bostr
 		    = pv_dup(old_state->re_state_bostr);
-		new_state->re_state_reginput
-		    = pv_dup(old_state->re_state_reginput);
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
 #ifdef PERL_OLD_COPY_ON_WRITE
