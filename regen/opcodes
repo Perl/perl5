@@ -181,7 +181,7 @@ ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S
 # warning is gone, this can change to ck_null.
 scomplement	string 1's complement (~)	ck_bitop	fsT1	S
 
-smartmatch	smart match		ck_smartmatch	s2
+smartmatch	smart match		ck_null		s2
 
 # High falutin' math.
 
