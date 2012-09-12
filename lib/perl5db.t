@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(77);
+plan(78);
 
 my $rc_filename = '.perldb';
 
@@ -1729,6 +1729,32 @@ package main;
 
     $wrapper->output_like(qr/OneOneOneOneOne/,
         '{ * test - output is OK.',
+    );
+}
+
+# Test the ! command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 3-5',
+                '!',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        (^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";)\n
+        .*?
+        ^l\ 3-5\n
+        \1
+        #msx,
+        'Test the ! command (along with l 3-5)',
     );
 }
 
