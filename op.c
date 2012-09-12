@@ -6648,7 +6648,7 @@ I<cond> supplies the expression that will be locally assigned to a lexical
 variable, and I<block> supplies the body of the C<given> construct; they
 are consumed by this function and become part of the constructed op tree.
 I<defsv_off> is the pad offset of the scalar lexical variable that will
-be affected.
+be affected.  If it is 0, the global $_ will be used.
 
 =cut
 */
