@@ -84,12 +84,6 @@ EOF
 }
 
 {
-    local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/lvalue-bug');
-    like($output, qr/foo is defined/, 'lvalue subs work in the debugger');
-}
-
-{
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/symbol-table-bug');
     like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
@@ -251,6 +245,29 @@ sub _include_t
     return $self->{_include_t};
 }
 
+sub _stderr_val
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_stderr_val} = shift;
+    }
+
+    return $self->{_stderr_val};
+}
+
+sub field
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{field} = shift;
+    }
+
+    return $self->{field};
+}
 sub _contents
 {
     my $self = shift;
@@ -284,6 +301,8 @@ sub _init
     $self->_prog($prog);
 
     $self->_include_t($args->{include_t} ? 1 : 0);
+
+    $self->_stderr_val(exists($args->{stderr}) ? $args->{stderr} : 1);
 
     $self->_run();
 
@@ -327,7 +346,10 @@ sub _run {
                 '-d',
                 ($self->_include_t ? ('-I', '../lib/perl5db/t') : ())
             ],
-            stderr => 1,
+            (defined($self->_stderr_val())
+                ? (stderr => $self->_stderr_val())
+                : ()
+            ),
             progfile => $self->_prog()
         );
 
@@ -395,7 +417,9 @@ package main;
 
 sub calc_new_var_wrapper
 {
-    my ($target, $extra_opts) = @_;
+    my $args = shift;
+
+    my $extra_opts = delete($args->{extra_opts});
     $extra_opts ||= '';
     local $ENV{PERLDB_OPTS} = "ReadLine=0" . $extra_opts;
     return DebugWrap->new(
@@ -403,22 +427,35 @@ sub calc_new_var_wrapper
             cmds =>
             [
                 'b 23',
-                'n',
+                'c',
                 '$new_var = "Foo"',
                 'x "new_var = <$new_var>\\n"',
                 'q',
             ],
-            prog => $target,
+            prog => delete($args->{prog}),
+            %$args,
         }
     );
 }
 
 {
-    calc_new_var_wrapper('../lib/perl5db/t/eval-line-bug')
+    calc_new_var_wrapper({ prog => '../lib/perl5db/t/eval-line-bug'})
         ->contents_like(
             qr/new_var = <Foo>/,
             "no strict 'vars' in evaluated lines.",
         );
+}
+
+{
+    calc_new_var_wrapper(
+        {
+            prog => '../lib/perl5db/t/lvalue-bug',
+            stderr => undef(),
+        },
+    )->output_like(
+            qr/foo is defined/,
+             'lvalue subs work in the debugger',
+         );
 }
 
 # Testing that we can set a line in the middle of the file.
