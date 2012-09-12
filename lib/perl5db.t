@@ -83,12 +83,6 @@ EOF
     );
 }
 
-{
-    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/symbol-table-bug');
-    like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
-}
-
 SKIP: {
     if ( $Config{usethreads} ) {
         skip('This perl has threads, skipping non-threaded debugger tests');
@@ -456,6 +450,19 @@ sub calc_new_var_wrapper
             qr/foo is defined/,
              'lvalue subs work in the debugger',
          );
+}
+
+{
+    calc_new_var_wrapper(
+        {
+            prog =>  '../lib/perl5db/t/symbol-table-bug',
+            extra_opts => "NonStop=1",
+            stderr => undef(),
+        }
+    )->output_like(
+        qr/Undefined symbols 0/,
+        'there are no undefined values in the symbol table',
+    );
 }
 
 # Testing that we can set a line in the middle of the file.
