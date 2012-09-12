@@ -896,8 +896,10 @@ use C<$&>, C<$`> or C<$'>, then patterns I<without> capturing
 parentheses will not be penalized.  So avoid C<$&>, C<$'>, and C<$`>
 if you can, but if you can't (and some algorithms really appreciate
 them), once you've used them once, use them at will, because you've
-already paid the price.  As of 5.005, C<$&> is not so costly as the
-other two.
+already paid the price.  As of 5.17.4, the presence of each of the three
+variables in a program is recorded separately, and depending on
+circumstances, perl may be able be more efficient knowing that only C<$&>
+rather than all three have been seen, for example.
 X<$&> X<$`> X<$'>
 
 As a workaround for this problem, Perl 5.10.0 introduces C<${^PREMATCH}>,
