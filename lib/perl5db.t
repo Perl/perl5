@@ -411,6 +411,19 @@ sub _calc_new_var_wrapper
     );
 }
 
+sub _calc_threads_wrapper
+{
+    my $args = shift;
+
+    return _calc_new_var_wrapper(
+        {
+            switches => [ '-dt', ],
+            stderr => 1,
+            %$args
+        }
+    );
+}
+
 {
     _calc_new_var_wrapper({ prog => '../lib/perl5db/t/eval-line-bug'})
         ->contents_like(
@@ -451,11 +464,9 @@ SKIP:
     }
     else {
         my $error = 'This Perl not built to support threads';
-        _calc_new_var_wrapper(
+        _calc_threads_wrapper(
             {
                 prog => '../lib/perl5db/t/eval-line-bug',
-                switches => ['-dt',],
-                stderr => 1,
             }
         )->output_like(
             qr/\Q$error\E/,
@@ -467,11 +478,9 @@ SKIP:
 SKIP:
 {
     if ( $Config{usethreads} ) {
-        _calc_new_var_wrapper(
+        _calc_threads_wrapper(
             {
                 prog =>  '../lib/perl5db/t/symbol-table-bug',
-                switches => [ '-dt', ],
-                stderr => 1,
             }
         )->output_like(
             qr/Undefined symbols 0/,
