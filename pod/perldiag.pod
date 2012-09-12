@@ -5075,12 +5075,6 @@ requested.
 hash) parameter.  The slurpy parameter takes all the available arguments,
 so there can't be any left to fill later parameters.
 
-=item Smart matching a non-overloaded object breaks encapsulation
-
-(F) You should not use the C<~~> operator on an object that does not
-overload it: Perl refuses to use the object's underlying structure
-for the smart match.
-
 =item Smartmatch is experimental
 
 (S experimental::smartmatch) This warning is emitted if you

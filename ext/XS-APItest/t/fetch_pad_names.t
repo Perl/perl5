@@ -313,9 +313,9 @@ sub general_tests {
     for my $var (@{$tests->{vars}}) {
         no warnings 'experimental::smartmatch';
         if ($var->{type} eq 'ok') {
-            ok $var->{name} ~~ $names_av, $var->{msg};
+            ok grep($_ eq $var->{name}, @$names_av), $var->{msg};
         } else {
-            ok !($var->{name} ~~ $names_av), $var->{msg};
+            ok !grep($_ eq $var->{name}, @$names_av), $var->{msg};
         }
     }
 

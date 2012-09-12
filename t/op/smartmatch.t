@@ -74,7 +74,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan tests => 349;
+plan tests => 341;
 
 while (<DATA>) {
   SKIP: {
@@ -192,37 +192,37 @@ __DATA__
 !	undef		$ov_obj
 
 # regular object
-@	$obj		$obj
-@	$ov_obj		$obj
-=@	\&fatal		$obj
-@	\&FALSE		$obj
-@	\&foo		$obj
-@	sub { 1 }	$obj
-@	sub { 0 }	$obj
-@	%keyandmore	$obj
-@	{"key" => 1}	$obj
-@	@fooormore	$obj
-@	["key" => 1]	$obj
-@	/key/		$obj
-@	qr/key/		$obj
-@	"key"		$obj
-@	FALSE		$obj
+	$obj		$obj
+!	$ov_obj		$obj
+!	\&fatal		$obj
+!	\&FALSE		$obj
+!	\&foo		$obj
+!	sub { 1 }	$obj
+!	sub { 0 }	$obj
+!	%keyandmore	$obj
+!	{"key" => 1}	$obj
+!	@fooormore	$obj
+!	["key" => 1]	$obj
+!	/key/		$obj
+!	qr/key/		$obj
+!	"key"		$obj
+!	FALSE		$obj
 
 # regular object with "" overload
-@	$obj		$str_obj
-=@	\&fatal		$str_obj
-@	\&FALSE		$str_obj
-@	\&foo		$str_obj
-@	sub { 1 }	$str_obj
-@	sub { 0 }	$str_obj
-@	%keyandmore	$str_obj
-@	{"object" => 1}	$str_obj
-@	@fooormore	$str_obj
-@	["object" => 1]	$str_obj
-@	/object/	$str_obj
-@	qr/object/	$str_obj
-@	"object"	$str_obj
-@	FALSE		$str_obj
+!	$obj		$str_obj
+!	\&fatal		$str_obj
+!	\&FALSE		$str_obj
+!	\&foo		$str_obj
+!	sub { 1 }	$str_obj
+!	sub { 0 }	$str_obj
+!	%keyandmore	$str_obj
+!	{"object" => 1}	$str_obj
+!	@fooormore	$str_obj
+!	["object" => 1]	$str_obj
+!	/object/	$str_obj
+!	qr/object/	$str_obj
+	"object"	$str_obj
+!	FALSE		$str_obj
 # Those will treat the $str_obj as a string because of fallback:
 
 # object (overloaded or not) ~~ Any
@@ -230,30 +230,24 @@ __DATA__
 	$ov_obj		qr/^stringified$/
 =	"$ov_obj"	"stringified"
 =	"$str_obj"	"object"
-!=	$ov_obj		"stringified"
+	$ov_obj		"stringified"
 	$str_obj	"object"
-	$ov_obj		'magic'
+!	$ov_obj		'magic'
 !	$ov_obj		'not magic'
 
 # ~~ Coderef
 	sub{0}		sub { ref $_[0] eq "CODE" }
-	%fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
-!	%fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
-	\%fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
-!	\%fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
-	+{%fooormore}	sub { $_[0] =~ /^(foo|or|more)$/ }
-!	+{%fooormore}	sub { $_[0] =~ /^(foo|or|less)$/ }
-	@fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
-!	@fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
-	\@fooormore	sub { $_[0] =~ /^(foo|or|more)$/ }
-!	\@fooormore	sub { $_[0] =~ /^(foo|or|less)$/ }
-	[@fooormore]	sub { $_[0] =~ /^(foo|or|more)$/ }
-!	[@fooormore]	sub { $_[0] =~ /^(foo|or|less)$/ }
+	%fooormore	sub { !ref $_[0] && $_[0] =~ /\d/ }
+	\%fooormore	sub { ref $_[0] eq 'HASH' }
+	+{%fooormore}	sub { ref $_[0] eq 'HASH' }
+	@fooormore	sub { !ref $_[0] && $_[0] =~ /\d/ }
+	\@fooormore	sub { ref $_[0] eq 'ARRAY' }
+	[@fooormore]	sub { ref $_[0] eq 'ARRAY' }
 	%fooormore	sub{@_==1}
 	@fooormore	sub{@_==1}
 	"foo"		sub { $_[0] =~ /^(foo|or|more)$/ }
 !	"more"		sub { $_[0] =~ /^(foo|or|less)$/ }
-	/fooormore/	sub{ref $_[0] eq 'Regexp'}
+	/fooormore/	sub{!ref $_[0]}
 	qr/fooormore/	sub{ref $_[0] eq 'Regexp'}
 	1		sub{shift}
 !	0		sub{shift}
@@ -269,11 +263,12 @@ __DATA__
 !	{a=>1}		\&foo
 	$obj		sub { ref($_[0]) =~ /NoOverload/ }
 	$ov_obj		sub { ref($_[0]) =~ /WithOverload/ }
-# empty stuff matches, because the sub is never called:
-	[]		\&foo
-	{}		\&foo
-	@empty		\&foo
-	%empty		\&foo
+# empty stuff used to match, because the sub was never called, but under
+# Smart Match 3™ it calls the sub anyway:
+!	[]		\&foo
+!	{}		\&foo
+!	@empty		\&foo
+!	%empty		\&foo
 !	qr//		\&foo
 !	undef		\&foo
 	undef		\&bar
@@ -283,82 +278,84 @@ __DATA__
 @	{a=>1}		\&fatal
 @	"foo"		\&fatal
 @	qr//		\&fatal
-# sub is not called on empty hashes / arrays
-	[]		\&fatal
-	+{}		\&fatal
-	@empty		\&fatal
-	%empty		\&fatal
+@	$obj		\&fatal
+@	$str_obj	\&fatal
+# sub *is* called on empty hashes / arrays
+@	[]		\&fatal
+@	+{}		\&fatal
+@	@empty		\&fatal
+@	%empty		\&fatal
 # sub is not special on the left
 	sub {0}		qr/^CODE/
 	sub {0}		sub { ref shift eq "CODE" }
 
 # HASH ref against:
 #   - another hash ref
-	{}		{}
+!	{}		{}
 =!	{}		{1 => 2}
-	{1 => 2}	{1 => 2}
-	{1 => 2}	{1 => 3}
+!	{1 => 2}	{1 => 2}
+!	{1 => 2}	{1 => 3}
 =!	{1 => 2}	{2 => 3}
-=	\%main::	{map {$_ => 'x'} keys %main::}
+=!	\%main::	+{map {$_ => 'x'} keys %main::}
 
 #  - tied hash ref
-=	\%hash		\%tied_hash
+!=	\%hash		\%tied_hash
 	\%tied_hash	\%tied_hash
 !=	{"a"=>"b"}	\%tied_hash
 =	%hash		%tied_hash
 	%tied_hash	%tied_hash
 !=	{"a"=>"b"}	%tied_hash
-	$ov_obj		%refh		MINISKIP
+!	$ov_obj		%refh		MINISKIP
 !	"$ov_obj"	%refh		MINISKIP
-	[$ov_obj]	%refh		MINISKIP
+!	[$ov_obj]	%refh		MINISKIP
 !	["$ov_obj"]	%refh		MINISKIP
 	%refh		%refh		MINISKIP
 
 #  - an array ref
 #  (since this is symmetrical, tests as well hash~~array)
-=	[keys %main::]	\%::
-=	[qw[STDIN STDOUT]]	\%::
+=!	[keys %main::]	\%::
+=!	[qw[STDIN STDOUT]]	\%::
 =!	[]		\%::
 =!	[""]		{}
 =!	[]		{}
 =!	@empty		{}
-=	[undef]		{"" => 1}
-=	[""]		{"" => 1}
-=	["foo"]		{ foo => 1 }
-=	["foo", "bar"]	{ foo => 1 }
-=	["foo", "bar"]	\%hash
-=	["foo"]		\%hash
+=!	[undef]		{"" => 1}
+=!	[""]		{"" => 1}
+=!	["foo"]		{ foo => 1 }
+=!	["foo", "bar"]	{ foo => 1 }
+=!	["foo", "bar"]	\%hash
+=!	["foo"]		\%hash
 =!	["quux"]	\%hash
-=	[qw(foo quux)]	\%hash
-=	@fooormore	{ foo => 1, or => 2, more => 3 }
-=	@fooormore	%fooormore
-=	@fooormore	\%fooormore
-=	\@fooormore	%fooormore
+=!	[qw(foo quux)]	\%hash
+=!	@fooormore	{ foo => 1, or => 2, more => 3 }
+=!	@fooormore	%fooormore
+=!	@fooormore	\%fooormore
+=!	\@fooormore	%fooormore
 
 #  - a regex
-=	qr/^(fo[ox])$/		{foo => 1}
-=	/^(fo[ox])$/		%fooormore
+=!	qr/^(fo[ox])$/		{foo => 1}
+=!	/^(fo[ox])$/		%fooormore
 =!	qr/[13579]$/		+{0..99}
-=!	qr/a*/			{}
-=	qr/a*/			{b=>2}
-=	qr/B/i			{b=>2}
-=	/B/i			{b=>2}
-=!	qr/a+/			{b=>2}
-=	qr/^à/			{"à"=>2}
+!	qr/a*/			{}
+!	qr/a*/			{b=>2}
+!	qr/G/i			{g=>2}
+=!	/B/i			{b=>2}
+=!	qr/g+/			{b=>2}
+=!	qr/^à/			{"à"=>2}
 
 #  - a scalar
-	"foo"		+{foo => 1, bar => 2}
-	"foo"		%fooormore
+!	"foo"		+{foo => 1, bar => 2}
+!	"foo"		%fooormore
 !	"baz"		+{foo => 1, bar => 2}
 !	"boz"		%fooormore
 !	1		+{foo => 1, bar => 2}
 !	1		%fooormore
-	1		{ 1 => 3 }
-	1.0		{ 1 => 3 }
+!	1		{ 1 => 3 }
+!	1.0		{ 1 => 3 }
 !	"1.0"		{ 1 => 3 }
 !	"1.0"		{ 1.0 => 3 }
-	"1.0"		{ "1.0" => 3 }
-	"à"		{ "à" => "À" }
+!	"1.0"		{ "1.0" => 3 }
+!	"à"		{ "à" => "À" }
 
 #  - undef
 !	undef		{ hop => 'zouu' }
@@ -368,63 +365,63 @@ __DATA__
 
 # ARRAY ref against:
 #  - another array ref
-	[]			[]
+!	[]			[]
 =!	[]			[1]
-	[["foo"], ["bar"]]	[qr/o/, qr/a/]
+!	[["foo"], ["bar"]]	[qr/o/, qr/a/]
 !	[["foo"], ["bar"]]	[qr/ARRAY/, qr/ARRAY/]
-	["foo", "bar"]		[qr/o/, qr/a/]
+!	["foo", "bar"]		[qr/o/, qr/a/]
 !	[qr/o/, qr/a/]		["foo", "bar"]
-	["foo", "bar"]		[["foo"], ["bar"]]
+!	["foo", "bar"]		[["foo"], ["bar"]]
 !	["foo", "bar"]		[qr/o/, "foo"]
-	["foo", undef, "bar"]	[qr/o/, undef, "bar"]
+!	["foo", undef, "bar"]	[qr/o/, undef, "bar"]
 !	["foo", undef, "bar"]	[qr/o/, "",    "bar"]
 !	["foo", "", "bar"]	[qr/o/, undef, "bar"]
 	$deep1			$deep1
 	@$deep1			@$deep1
 !	$deep1			$deep2
 
-=	\@nums			\@tied_nums
-=	@nums			\@tied_nums
-=	\@nums			@tied_nums
+=!	\@nums			\@tied_nums
+=!	@nums			\@tied_nums
+=!	\@nums			@tied_nums
 =	@nums			@tied_nums
 
 #  - an object
 !	$obj		@fooormore
-	$obj		[sub{ref shift}]
+!	$obj		[sub{ref shift}]
 
 #  - a regex
-=	qr/x/		[qw(foo bar baz quux)]
+!	qr/x/		[qw(foo bar baz quux)]
 =!	qr/y/		[qw(foo bar baz quux)]
-=	/x/		[qw(foo bar baz quux)]
+=!	/x/		[qw(foo bar baz quux)]
 =!	/y/		[qw(foo bar baz quux)]
-=	/FOO/i		@fooormore
+=!	/FOO/i		@fooormore
 =!	/bar/		@fooormore
 
 # - a number
-	2		[qw(1.00 2.00)]
-	2		[qw(foo 2)]
-	2.0_0e+0	[qw(foo 2)]
+!	2		[qw(1.00 2.00)]
+!	2		[qw(foo 2)]
+!	2.0_0e+0	[qw(foo 2)]
 !	2		[qw(1foo bar2)]
 
 # - a string
 !	"2"		[qw(1foo 2bar)]
-	"2bar"		[qw(1foo 2bar)]
+!	"2bar"		[qw(1foo 2bar)]
 
 # - undef
-	undef		[1, 2, undef, 4]
+!	undef		[1, 2, undef, 4]
 !	undef		[1, 2, [undef], 4]
 !	undef		@fooormore
-	undef		@sparse
-	undef		[undef]
+!	undef		@sparse
+!	undef		[undef]
 !	0		[undef]
 !	""		[undef]
 !	undef		[0]
 !	undef		[""]
 
 # - nested arrays and ~~ distributivity
-	11		[[11]]
+!	11		[[11]]
 !	11		[[12]]
-	"foo"		[{foo => "bar"}]
+!	"foo"		[{foo => "bar"}]
 !	"bar"		[{foo => "bar"}]
 
 # Number against number
@@ -438,12 +435,12 @@ __DATA__
 
 # Number against string
 =	2		"2"
-=	2		"2.0"
+!=	2		"2.0"
 !	2		"2bananas"
-!=	2_3		"2_3"		NOWARNINGS
+!=	2_3		"2_3"
 	FALSE		"0"
 !	undef		"0"
-!	undef		""
+	undef		""
 
 # Regex against string
 	"x"		qr/x/
@@ -453,51 +450,56 @@ __DATA__
 	12345		qr/3/
 !	12345		qr/7/
 
+# Regexp against aggregate
+	[qw(foo bar baz quux)]	qr/x/
+	{b=>2}			qr/a*/
+	{}			qr/a*/
+!	{g=>2}			qr/G/i
+
 # array/hash against string
-	@fooormore	"".\@fooormore
+!	@fooormore	"".\@fooormore
 !	@keyandmore	"".\@fooormore
-	%fooormore	"".\%fooormore
+!	%fooormore	"".\%fooormore
 !	%keyandmore	"".\%fooormore
 
 # Test the implicit referencing
-	7		@nums
-	@nums		\@nums
+!	7		@nums
+!	@nums		\@nums
 !	@nums		\\@nums
-	@nums		[1..10]
+!	@nums		[1..10]
 !	@nums		[0..9]
 
-	"foo"		%hash
-	/bar/		%hash
-	[qw(bar)]	%hash
+!	"foo"		%hash
+!	/bar/		%hash
+!	[qw(bar)]	%hash
 !	[qw(a b c)]	%hash
 	%hash		%hash
-	%hash		+{%hash}
-	%hash		\%hash
-	%hash		%tied_hash
+!	%hash		+{%hash}
+!	%hash		\%hash
 	%tied_hash	%tied_hash
-	%hash		{ foo => 5, bar => 10 }
+!	%hash		{ foo => 5, bar => 10 }
 !	%hash		{ foo => 5, bar => 10, quux => 15 }
 
-	@nums		{  1, '',  2, '' }
-	@nums		{  1, '', 12, '' }
+!	@nums		{  1, '',  2, '' }
+!	@nums		{  1, '', 12, '' }
 !	@nums		{ 11, '', 12, '' }
 
 # array slices
-	@nums[0..-1]	[]
-	@nums[0..0]	[1]
+!	@nums[0..-1]	[]
+!	@nums[0..0]	[1]
 !	@nums[0..1]	[0..2]
-	@nums[0..4]	[1..5]
+!	@nums[0..4]	[1..5]
 
-!	undef		@nums[0..-1]
+	undef		@nums[0..-1]
 	1		@nums[0..0]
 	2		@nums[0..1]
-!	@nums[0..1]	2
+	@nums[0..1]	2
 
 	@nums[0..1]	@nums[0..1]
 
 # hash slices
-	@keyandmore{qw(not)}		[undef]
-	@keyandmore{qw(key)}		[0]
+!	@keyandmore{qw(not)}		[undef]
+!	@keyandmore{qw(key)}		[0]
 
 	undef				@keyandmore{qw(not)}
 	0				@keyandmore{qw(key and more)}

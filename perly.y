@@ -331,7 +331,14 @@ barestmt:	PLUGSTMT
 			  PL_parser->copline = (line_t)$1;
 			}
 	|	WHEN '(' remember mexpr ')' mblock
-			{ $$ = block_end($3, newWHENOP($4, op_scope($6))); }
+			{ $4->op_flags |= OPf_PARENS;
+			  $$ = block_end($3, newWHENOP($4, op_scope($6)));
+			}
+	|	WHEN block block
+			{ $$ = newWHENOP(newUNOP(OP_NULL, OPf_SPECIAL,
+						 op_scope($2)),
+					 op_scope($3));
+			}
 	|	DEFAULT block
 			{ $$ = newWHENOP(0, op_scope($2)); }
 	|	WHILE '(' remember texpr ')' mintro mblock cont
@@ -455,7 +462,9 @@ sideff	:	error
 			{ $$ = newFOROP(0, (OP*)NULL, $3, $1, (OP*)NULL);
 			  PL_parser->copline = (line_t)$2; }
 	|	expr WHEN expr
-			{ $$ = newWHENOP($3, op_scope($1)); }
+			{ $3->op_flags |= OPf_PARENS;
+			  $$ = newWHENOP($3, op_scope($1));
+			}
 	;
 
 /* else and elsif blocks */
