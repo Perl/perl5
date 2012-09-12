@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(73);
+plan(74);
 
 my $rc_filename = '.perldb';
 
@@ -1641,6 +1641,32 @@ package main;
 
     $wrapper->output_unlike(qr/FOO=/,
         q#Test the '> *' command.#,
+    );
+}
+
+# Test the < and > commands together
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/$::lorem = 0;/,
+                q/< $::lorem += 10;/,
+                q/> print "\nLOREM=<$::lorem>\n"/,
+                q/b 7/,
+                q/b 5/,
+                'c',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->output_like(qr#
+        ^LOREM=<10>\n
+        #msx,
+        q#Test < and > commands. #,
     );
 }
 
