@@ -4797,6 +4797,12 @@ PERL_CALLCONV void	Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *ap
 #define PERL_ARGS_ASSERT_XS_APIVERSION_BOOTCHECK	\
 	assert(module); assert(api_p)
 
+PERL_CALLCONV void	Perl_xs_bincompat_bootcheck(pTHX_ SV *module, const char *bincompat_p, STRLEN bincompat_len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_XS_BINCOMPAT_BOOTCHECK	\
+	assert(module); assert(bincompat_p)
+
 PERL_CALLCONV void	Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK	\

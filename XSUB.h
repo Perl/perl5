@@ -333,6 +333,9 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XS_APIVERSION_BOOTCHECK						\
     Perl_xs_apiversion_bootcheck(aTHX_ ST(0), STR_WITH_LEN("v" PERL_API_VERSION_STRING))
 
+#define XS_BINCOMPAT_BOOTCHECK                  \
+    Perl_xs_bincompat_bootcheck(aTHX_ ST(0), STR_WITH_LEN(PERL_BINCOMPAT_OPTIONS))
+
 #ifdef NO_XSLOCKS
 #  define dXCPT             dJMPENV; int rEtV = 0
 #  define XCPT_TRY_START    JMPENV_PUSH(rEtV); if (rEtV == 0)

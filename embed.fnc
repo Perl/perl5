@@ -2518,6 +2518,10 @@ Xpo	|void	|xs_version_bootcheck|U32 items|U32 ax|NN const char *xs_p \
 : XS_APIVERSION_BOOTCHECK
 Xpo	|void	|xs_apiversion_bootcheck|NN SV *module|NN const char *api_p \
 				|STRLEN api_len
+: This function is an implementation detail. The public API for this is
+: XS_BINCOMPAT_BOOTCHECK
+Xpo	|void	|xs_bincompat_bootcheck|NN SV *module \
+				|NN const char *bincompat_p|STRLEN bincompat_len
 
 #ifndef HAS_STRLCAT
 Apno	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size

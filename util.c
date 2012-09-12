@@ -6304,6 +6304,17 @@ Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p,
 	Perl_croak_sv(aTHX_ xpt);
 }
 
+void
+Perl_xs_bincompat_bootcheck(pTHX_ SV *module, const char *bincompat_p,
+			    STRLEN bincompat_len)
+{
+    PERL_ARGS_ASSERT_XS_BINCOMPAT_BOOTCHECK;
+
+    if (strnNE(bincompat_p, PL_bincompat_options, bincompat_len+1))
+	Perl_croak(aTHX_ "Binary compatibility options for perl (%s) do not"
+		   " match binary compatibility options of extension %"SVf
+		   " (%s)", PL_bincompat_options, module, bincompat_p);
+}
 #ifndef HAS_STRLCAT
 Size_t
 Perl_my_strlcat(char *dst, const char *src, Size_t size)

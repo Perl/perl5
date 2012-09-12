@@ -934,6 +934,9 @@ EOF
 ##ifdef XS_APIVERSION_BOOTCHECK
 #    XS_APIVERSION_BOOTCHECK;
 ##endif
+##ifdef XS_BINCOMPAT_BOOTCHECK
+#    XS_BINCOMPAT_BOOTCHECK;
+##endif
 EOF
 
   print Q(<<"EOF") if $self->{WantVersionChk};
