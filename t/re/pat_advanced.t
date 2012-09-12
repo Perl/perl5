@@ -789,6 +789,12 @@ sub run_tests {
     }
 
     {
+        # The second half of RT #114808
+        warning_is(sub {'aa' =~ /.+\x{100}/}, undef,
+                   'utf8-only floating substr, non-utf8 target, no warning');
+    }
+
+    {
         my $message = "qr /.../x";
         my $R = qr / A B C # D E/x;
         ok("ABCDE" =~    $R   && $& eq "ABC", $message);

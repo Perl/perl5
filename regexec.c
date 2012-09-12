@@ -2471,8 +2471,15 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	    STRLEN len;
 	    const char *little;
 
-	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
-		utf8_target ? to_utf8_substr(prog) : to_byte_substr(prog);
+	    if (utf8_target && !prog->float_utf8)
+		to_utf8_substr(prog);
+	    else if (!utf8_target && !prog->float_substr) {
+		to_byte_substr(prog);
+		if (prog->float_substr == &PL_sv_undef)
+		    /* downgrading failed, but target is not utf8, so
+		     * matching must fail */
+		    goto phooey;
+	    }
 	    float_real = utf8_target ? prog->float_utf8 : prog->float_substr;
 
             little = SvPV_const(float_real, len);
