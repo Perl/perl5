@@ -65,27 +65,6 @@ sub _out_contents
     return _slurp($out_fn);
 }
 
-# Test [perl #61222]
-{
-    local $ENV{PERLDB_OPTS};
-    rc(
-        <<'EOF',
-        &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-        sub afterinit {
-            push(@DB::typeahead,
-                'm Pie',
-                'q',
-            );
-        }
-EOF
-    );
-
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-61222');
-    unlike(_out_contents(), qr/INCORRECT/, "[perl #61222]");
-}
-
-
 
 # Test for Proxy constants
 {
@@ -491,6 +470,24 @@ SKIP:
         skip("This perl is not threaded, skipping threaded debugger tests");
     }
 }
+
+# Test [perl #61222]
+{
+    local $ENV{PERLDB_OPTS};
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'm Pie',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/rt-61222',
+        }
+    );
+
+    $wrapper->contents_unlike(qr/INCORRECT/, "[perl #61222]");
+}
+
 
 # Testing that we can set a line in the middle of the file.
 {
