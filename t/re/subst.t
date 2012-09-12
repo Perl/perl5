@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 189 );
+plan( tests => 190 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -798,4 +798,13 @@ is(*bam =~ s/\*//rg, 'main::bam', 'Can s///rg a tyepglob');
  tie my $kror, cowBug =>;
  $kror =~ s/(?:)/""/e;
 }
-pass("s/// on tied var returning a cow")
+pass("s/// on tied var returning a cow");
+
+# a test for 6502e08109cd003b2cdf39bc94ef35e52203240b
+# previously this would segfault
+
+{
+    my $s = "abc";
+    eval { $s =~ s/(.)/die/e; };
+    like($@, qr/Died at/, "s//die/e");
+}
