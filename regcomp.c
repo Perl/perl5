@@ -5501,8 +5501,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		else  {
                     while (SvAMAGIC(msv)
                             && (sv = AMG_CALLunary(msv, string_amg))
-                            && sv != msv)
-                    {
+                            && sv != msv
+                            &&  !(   SvROK(msv)
+                                  && SvROK(sv)
+                                  && SvRV(msv) == SvRV(sv))
+                    ) {
                         msv = sv;
                         SvGETMAGIC(msv);
                     }

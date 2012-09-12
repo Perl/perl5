@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5190;
+plan tests => 5191;
 
 use Scalar::Util qw(tainted);
 
@@ -2667,6 +2667,24 @@ is eval {"$a"}, overload::StrVal($a), 'fallback is stored under "()"';
             || diag("got error of $err");
         like($val, qr/^OnlyFallbackTrue=HASH\(/, "stringified correctly");
     }
+}
+
+{
+    # Making Regexp class overloaded: avoid infinite recursion.
+    # Do this in a separate process since it, well, overloads Regexp!
+    fresh_perl_is(
+	<<'EOF',
+package Regexp;
+use overload q{""} => sub {$_[0] };
+package main;
+my $r1 = qr/1/;
+my $r2 = qr/ABC$r1/;
+print $r2,"\n";
+EOF
+	'(?^:ABC(?^:1))',
+	{ stderr => 1 },
+	'overloaded REGEXP'
+    );
 }
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
