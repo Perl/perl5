@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 189;
+plan tests => 193;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -42,7 +42,7 @@ like($@, qr/^Can't "break" outside/, "break outside");
     is($x, "foo", "given scope ends");
 }
 
-sub be_true {1}
+sub be_true {"foo"}
 
 given(my $x = "foo") {
     when(be_true(my $x = "bar")) {
@@ -77,7 +77,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when(4) { $ok = 'four'; }
 	default { $ok = 'd'; }
     }
-    is($ok, 'three', "integer comparison");
+    is($ok, 'd', "no integer comparison");
 }
 
 {    
@@ -89,7 +89,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	default     { $ok2 = 'n'; }
     }
     is($ok1, 'y', "more numeric (pt. 1)");
-    is($ok2, 'y', "more numeric (pt. 2)");
+    is($ok2, 'n', "more numeric (pt. 2)");
 }
 
 {
@@ -158,17 +158,18 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
     is($ok, 1, 'Given("") when($undef)');
 }
 {
-    no warnings "uninitialized";
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
     my $ok = 1;
     given (undef) { when("") {$ok = 0} }
-    is($ok, 1, 'Given(undef) when("")');
+    is($ok, 0, 'Given(undef) when("")');
+    is $w, undef, 'no warnings with given(undef) when("")';
 }
 {
-    no warnings "uninitialized";
     my $undef;
     my $ok = 1;
     given ($undef) { when("") {$ok = 0} }
-    is($ok, 1, 'Given($undef) when("")');
+    is($ok, 0, 'Given($undef) when("")');
 }
 ########
 {
@@ -200,22 +201,27 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 {
     my ($ok1, $ok2);
     given("Hello, world!") {
-	when(/lo/)
+	when(qr/lo/)
 	    { $ok1 = 'y'; continue}
-	when(/no/)
+	when(/lo/)
 	    { $ok1 = 'n'; continue}
-	when(/^(Hello,|Goodbye cruel) world[!.?]/)
+	when(qr/^(Hello,|Goodbye cruel) world[!.?]/)
 	    { $ok2 = 'Y'; continue}
-	when(/^(Hello cruel|Goodbye,) world[!.?]/)
+	when(/^(Hello,|Goodbye cruel) world[!.?]/)
 	    { $ok2 = 'n'; continue}
     }
     is($ok1, 'y', "regex 1");
     is($ok2, 'Y', "regex 2");
+
+    given("hello whirled") {
+	$ok1 = 42 when ${qr/llo/}
+    }
+    is $ok1, 42, 'plain REGEXP scalar';
 }
 
 # Comparisons
 {
-    my $test = "explicit numeric comparison (<)";
+    my $test = "explicit numeric comparison (<) does not trump smartmatch";
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
@@ -225,175 +231,39 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when ($_ < 40) { $ok = "forty" }
 	default        { $ok = "default" }
     }
-    is($ok, "thirty", $test);
+    is($ok, "default", $test);
 }
 
+# when-block-block
 {
-    use integer;
-    my $test = "explicit numeric comparison (integer <)";
+    my $test = "explicit numeric comparison (<) inside blockblock";
     my $twenty_five = 25;
     my $ok;
     given($twenty_five) {
-	when ($_ < 10) { $ok = "ten" }
-	when ($_ < 20) { $ok = "twenty" }
-	when ($_ < 30) { $ok = "thirty" }
-	when ($_ < 40) { $ok = "forty" }
+	when {$_ < 10} { $ok = "ten" }
+	when {$_ < 20} { $ok = "twenty" }
+	when {$_ < 30} { $ok = "thirty" }
+	when {$_ < 40} { $ok = "forty" }
 	default        { $ok = "default" }
     }
     is($ok, "thirty", $test);
 }
 
 {
-    my $test = "explicit numeric comparison (<=)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ <= 10) { $ok = "ten" }
-	when ($_ <= 20) { $ok = "twenty" }
-	when ($_ <= 30) { $ok = "thirty" }
-	when ($_ <= 40) { $ok = "forty" }
-	default         { $ok = "default" }
+    my $test = "blockblock scope";
+    my $x;
+    given('anything') {
+	when {my $x = 3} { $x = "ten" }
     }
-    is($ok, "thirty", $test);
-}
-
-{
-    use integer;
-    my $test = "explicit numeric comparison (integer <=)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ <= 10) { $ok = "ten" }
-	when ($_ <= 20) { $ok = "twenty" }
-	when ($_ <= 30) { $ok = "thirty" }
-	when ($_ <= 40) { $ok = "forty" }
-	default         { $ok = "default" }
-    }
-    is($ok, "thirty", $test);
-}
-
-
-{
-    my $test = "explicit numeric comparison (>)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ > 40) { $ok = "forty" }
-	when ($_ > 30) { $ok = "thirty" }
-	when ($_ > 20) { $ok = "twenty" }
-	when ($_ > 10) { $ok = "ten" }
-	default        { $ok = "default" }
-    }
-    is($ok, "twenty", $test);
-}
-
-{
-    my $test = "explicit numeric comparison (>=)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ >= 40) { $ok = "forty" }
-	when ($_ >= 30) { $ok = "thirty" }
-	when ($_ >= 20) { $ok = "twenty" }
-	when ($_ >= 10) { $ok = "ten" }
-	default         { $ok = "default" }
-    }
-    is($ok, "twenty", $test);
-}
-
-{
-    use integer;
-    my $test = "explicit numeric comparison (integer >)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ > 40) { $ok = "forty" }
-	when ($_ > 30) { $ok = "thirty" }
-	when ($_ > 20) { $ok = "twenty" }
-	when ($_ > 10) { $ok = "ten" }
-	default        { $ok = "default" }
-    }
-    is($ok, "twenty", $test);
-}
-
-{
-    use integer;
-    my $test = "explicit numeric comparison (integer >=)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ >= 40) { $ok = "forty" }
-	when ($_ >= 30) { $ok = "thirty" }
-	when ($_ >= 20) { $ok = "twenty" }
-	when ($_ >= 10) { $ok = "ten" }
-	default         { $ok = "default" }
-    }
-    is($ok, "twenty", $test);
-}
-
-
-{
-    my $test = "explicit string comparison (lt)";
-    my $twenty_five = "25";
-    my $ok;
-    given($twenty_five) {
-	when ($_ lt "10") { $ok = "ten" }
-	when ($_ lt "20") { $ok = "twenty" }
-	when ($_ lt "30") { $ok = "thirty" }
-	when ($_ lt "40") { $ok = "forty" }
-	default           { $ok = "default" }
-    }
-    is($ok, "thirty", $test);
-}
-
-{
-    my $test = "explicit string comparison (le)";
-    my $twenty_five = "25";
-    my $ok;
-    given($twenty_five) {
-	when ($_ le "10") { $ok = "ten" }
-	when ($_ le "20") { $ok = "twenty" }
-	when ($_ le "30") { $ok = "thirty" }
-	when ($_ le "40") { $ok = "forty" }
-	default           { $ok = "default" }
-    }
-    is($ok, "thirty", $test);
-}
-
-{
-    my $test = "explicit string comparison (gt)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ ge "40") { $ok = "forty" }
-	when ($_ ge "30") { $ok = "thirty" }
-	when ($_ ge "20") { $ok = "twenty" }
-	when ($_ ge "10") { $ok = "ten" }
-	default           { $ok = "default" }
-    }
-    is($ok, "twenty", $test);
-}
-
-{
-    my $test = "explicit string comparison (ge)";
-    my $twenty_five = 25;
-    my $ok;
-    given($twenty_five) {
-	when ($_ ge "40") { $ok = "forty" }
-	when ($_ ge "30") { $ok = "thirty" }
-	when ($_ ge "20") { $ok = "twenty" }
-	when ($_ ge "10") { $ok = "ten" }
-	default           { $ok = "default" }
-    }
-    is($ok, "twenty", $test);
+    is($x, "ten", $test);
 }
 
 # Optimized-away comparisons
 {
     my $ok;
     given(23) {
-	when (2 + 2 == 4) { $ok = 'y'; continue }
-	when (2 + 2 == 5) { $ok = 'n' }
+	when {2 + 2 == 4} { $ok = 'y'; continue }
+	when {2 + 2 == 5} { $ok = 'n' }
     }
     is($ok, 'y', "Optimized-away comparison");
 }
@@ -419,9 +289,9 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 	when(!-f) {$ok_f = 1; continue}
 	when(-r)  {$ok_r = 1; continue}
     }
-    ok($ok_d, "Filetest -d");
-    ok($ok_f, "Filetest -f");
-    ok($ok_r, "Filetest -r");
+    ok(!$ok_d, "Filetest -d does not trump smartmatch");
+    ok(!$ok_f, "Filetest -f does not trump smartmatch");
+    ok(!$ok_r, "Filetest -r does not trump smartmatch");
 }
 
 # Sub and method calls
@@ -431,7 +301,12 @@ sub notfoo {"bar"}
     given("foo") {
 	when(notfoo()) {$ok = 1}
     }
-    ok($ok, "Sub call acts as boolean")
+    ok(!$ok, "Sub call acts not as boolean");
+    $ok = 0;
+    given("bar") {
+	when(notfoo()) {$ok = 1}
+    }
+    ok $ok, 'sub call uses smartmatch';
 }
 
 {
@@ -439,7 +314,12 @@ sub notfoo {"bar"}
     given("foo") {
 	when(main->notfoo()) {$ok = 1}
     }
-    ok($ok, "Class-method call acts as boolean")
+    ok(!$ok, "Class->method call acts not as boolean");
+    $ok = 0;
+    given("bar") {
+	when(main->notfoo()) {$ok = 1}
+    }
+    ok $ok, 'Class->method uses smart match';
 }
 
 {
@@ -448,18 +328,27 @@ sub notfoo {"bar"}
     given("foo") {
 	when($obj->notfoo()) {$ok = 1}
     }
-    ok($ok, "Object-method call acts as boolean")
+    ok(!$ok, "Object-method call acts not as boolean");
+    $ok = 0;
+    given("bar") {
+	when($obj->notfoo()) {$ok = 1}
+    }
+    ok($ok, "Object-method call uses smartmatch")
 }
 
 # Other things that should not be smart matched
 {
     my $ok = 0;
-    given(12) {
+    given(my $x = 12) {
         when( /(\d+)/ and ( 1 <= $1 and $1 <= 12 ) ) {
             $ok = 1;
         }
+	$_ = 1;
+        when( /(\d+)/ and ( 1 <= $1 and $1 <= 12 ) ) {
+            $ok = 2;
+        }
     }
-    ok($ok, "bool not smartmatches");
+    is($ok, 2, "...and... smartmatches");
 }
 
 {
@@ -469,7 +358,7 @@ sub notfoo {"bar"}
 	    $ok = 1;
 	}
     }
-    ok($ok, "eof() not smartmatched");
+    ok(!$ok, "eof() smartmatches");
 }
 
 {
@@ -480,7 +369,7 @@ sub notfoo {"bar"}
 	    $ok = 1;
 	}
     }
-    ok($ok, "exists() not smartmatched");
+    ok(!$ok, "exists() smartmatched");
 }
 
 {
@@ -490,7 +379,7 @@ sub notfoo {"bar"}
 	    $ok = 1;
 	}
     }
-    ok($ok, "defined() not smartmatched");
+    ok(!$ok, "defined() smartmatched");
 }
 
 {
@@ -503,7 +392,7 @@ sub notfoo {"bar"}
 	    $ok = 2;
 	}
     }
-    is($ok, 2, "((1 == 1) && \"bar\") not smartmatched");
+    is($ok, 1, "((1 == 1) && \"bar\") smartmatched");
 }
 
 {
@@ -513,7 +402,7 @@ sub notfoo {"bar"}
 	    when ($_ eq "b" .. $_ eq "c") { $n = 1 }
 	    default { $n = 0 }
 	}
-	ok(($n xor $l =~ /[ad]/), 'when(E1..E2) evaluates in boolean context');
+	is $n, 0, 'when(E1..E2) evaluates as smartmatch';
     }
 }
 
@@ -524,7 +413,7 @@ sub notfoo {"bar"}
 	    when ($_ eq "b" ... $_ eq "c") { $n = 1 }
 	    default { $n = 0 }
 	}
-	ok(($n xor $l =~ /[ad]/), 'when(E1...E2) evaluates in boolean context');
+	is $n, 0, 'when(E1...E2) evaluates as smartmatch';
     }
 }
 
@@ -586,7 +475,7 @@ my $f = tie my $v, "FetchCounter";
 	when(/24/) {$ok = 0}
     }
     is($ok, 1, "precheck: $test_name");
-    is($f->count(), 4, $test_name);
+    is($f->count(), 5, $test_name);
 }
 
 {   my $test_name = "Only one FETCH (numeric when)";
@@ -694,10 +583,11 @@ sub contains_x {
     my $x = shift;
     return ($x =~ /x/);
 }
+sub contains_x_qr { qr/x/ }
 {
     my ($ok1, $ok2) = (0,0);
     given("foxy!") {
-	when(contains_x($_))
+	when(contains_x_qr())
 	    { $ok1 = 1; continue }
 	when(\&contains_x)
 	    { $ok2 = 1; continue }
@@ -706,7 +596,7 @@ sub contains_x {
     is($ok2, 1, "Calling sub indirectly (true)");
 
     given("foggy") {
-	when(contains_x($_))
+	when(contains_x_qr())
 	    { $ok1 = 2; continue }
 	when(\&contains_x)
 	    { $ok2 = 2; continue }
@@ -721,7 +611,7 @@ SKIP: {
     { package OverloadTest;
 
       use overload '""' => sub{"string value of obj"};
-      use overload 'eq' => sub{"$_[0]" eq "$_[1]"};
+      use overload 'eq' => sub{$_[0]{eqcalled}++; "$_[0]" eq "$_[1]"};
 
       use overload "~~" => sub {
 	  my ($self, $other, $reversed) = @_;
@@ -752,11 +642,11 @@ SKIP: {
 	my $obj = OverloadTest->new(1);
 	my $matched;
 	given($obj) {
-	    when ("other arg") {$matched = 1}
+	    when ("string value of obj") {$matched = 1}
 	    default {$matched = 0}
 	}
     
-	is($obj->{called}, 1, "$test: called");
+	is($obj->{eqcalled}, 1, "$test: called");
 	ok($matched, "$test: matched");
     }
 
@@ -768,7 +658,7 @@ SKIP: {
 	    when ("other arg") {$matched = 1}
 	}
     
-	is($obj->{called}, 1, "$test: called");
+	is($obj->{eqcalled}, 1, "$test: called");
 	ok(!$matched, "$test: not matched");
     }
 
@@ -819,14 +709,14 @@ SKIP: {
 	$ok += 1 when 7;
 	$ok += 2 when 9.1685;
 	$ok += 4 when $_ > 4;
-	$ok += 8 when $_ < 2.5;
+	$ok += 8 when 2;
     }
     is($ok, 8, "postfix numeric");
 }
 {
     my $ok;
     given ("apple") {
-	$ok = 1, continue when $_ eq "apple";
+	$ok = 1, continue when "apple";
 	$ok += 2;
 	$ok = 0 when "banana";
     }
@@ -835,7 +725,7 @@ SKIP: {
 {
     my $ok;
     given ("pear") {
-	do { $ok = 1; continue } when /pea/;
+	do { $ok = 1; continue } when qr/pea/;
 	$ok += 2;
 	$ok = 0 when /pie/;
 	default { $ok += 4 }
@@ -888,7 +778,7 @@ is($letter, "b", "last LABEL in when");
 $letter = '';
 for ("a".."e") {
     given ($_) {
-	when (/b|d/) { next }
+	when {/b|d/} { next }
 	$letter .= $_;
     }
     $letter .= ',';
@@ -898,7 +788,7 @@ is($letter, "a,c,e,", "next in when");
 $letter = '';
 LETTER2: for ("a".."e") {
     given ($_) {
-	when (/b|d/) { next LETTER2 }
+	when {/b|d/} { next LETTER2 }
 	$letter .= $_;
     }
     $letter .= ',';
@@ -954,13 +844,6 @@ GIVEN5:
     }
     is($flag, 1, "goto inside given and when to the given stmt");
 }
-
-# test with unreified @_ in smart match [perl #71078]
-sub unreified_check { ok([@_] ~~ \@_) } # should always match
-unreified_check(1,2,"lala");
-unreified_check(1,2,undef);
-unreified_check(undef);
-unreified_check(undef,"");
 
 # Test do { given } as a rvalue
 
@@ -1063,7 +946,7 @@ unreified_check(undef,"");
     my $smart_hash = sub {
 	do { given ($_[0]) {
 	    'undef' when undef;
-	    when ([ 1 .. 3 ]) { 1 .. 3 }
+	    when {/[123]/} { 1 .. 3 }
 	    when (4) { my $fake; do { 4, 5 } }
 	} };
     };
@@ -1094,42 +977,29 @@ unreified_check(undef,"");
     is("@list", '',      "rvalue given - list context propagation [999]");
 }
 {
-    # Array slices
+    # Array stringification
     my @list = 10 .. 15;
-    my @in_list;
-    my @in_slice;
-    for (5, 10, 15) {
-        given ($_) {
+    my $ok;
+    given (@list) {
+            is @list, 6, 'given(@array)';
             when (@list) {
-                push @in_list, $_;
-                continue;
+                $ok = 3;
             }
-            when (@list[0..2]) {
-                push @in_slice, $_;
-            }
-        }
     }
-    is("@in_list", "10 15", "when(array)");
-    is("@in_slice", "10", "when(array slice)");
+    is $ok, 3, 'when(@list)';
 }
 {
-    # Hash slices
+    # Hash stringification
     my %list = map { $_ => $_ } "a" .. "f";
-    my @in_list;
-    my @in_slice;
-    for ("a", "e", "i") {
-        given ($_) {
+    my $ok;
+    given (%list) {
+            is $_, scalar(%list), 'given(%hash)';
             when (%list) {
-                push @in_list, $_;
+                $ok += 1;
                 continue;
             }
-            when (@list{"a".."c"}) {
-                push @in_slice, $_;
-            }
-        }
     }
-    is("@in_list", "a e", "when(hash)");
-    is("@in_slice", "a", "when(hash slice)");
+    is $ok , 1, 'when(%hash)';
 }
 
 { # RT#84526 - Handle magical TARG
@@ -1205,7 +1075,7 @@ unreified_check(undef,"");
 	    my $id_plus_1 = $id + 1;
 	    given ($id_plus_1) {
 		do {
-		    when (/\d/) {
+		    when (qr/\d/) {
 			--$id_plus_1;
 			continue;
 			456;
@@ -1276,7 +1146,7 @@ unreified_check(undef,"");
     my @res = (1, do {
 	given ("x") {
 	    2, 3, do {
-		when (/[a-z]/) {
+		when (qr/[a-z]/) {
 		    4, 5, 6, break
 		}
 	    }
@@ -1304,6 +1174,9 @@ unreified_check(undef,"");
     }
     f2();
 }
+
+# blocks can be empty (will cause a syntax error otherwise)
+when{}{}
 
 
 
