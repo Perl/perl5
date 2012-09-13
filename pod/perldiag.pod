@@ -4259,7 +4259,7 @@ really a dirhandle.  Check your control flow.
 
 =item Scalars leaked: %d
 
-(W internal) Something went wrong in Perl's internal bookkeeping
+(S internal) Something went wrong in Perl's internal bookkeeping
 of scalars: not all scalar variables were deallocated by the time
 Perl exited.  What this usually indicates is a memory leak, which
 is of course bad, especially if the Perl program is intended to be
