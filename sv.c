@@ -4356,7 +4356,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	if (SvTHINKFIRST(dstr))
 	    sv_force_normal_flags(dstr, SV_COW_DROP_PV);
 	else if (SvPVX_const(dstr))
-	    Safefree(SvPVX_const(dstr));
+	    Safefree(SvPVX_mutable(dstr));
     }
     else
 	new_SV(dstr);
@@ -6160,7 +6160,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
 		    SvFAKE_off(sv);
 		} else if (SvLEN(sv)) {
-		    Safefree(SvPVX_const(sv));
+		    Safefree(SvPVX_mutable(sv));
 		}
 	    }
 #else
