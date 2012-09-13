@@ -2082,7 +2082,9 @@ This variable controls the state of the internal UTF-8 offset caching code.
 1 for on (the default), 0 for off, -1 to debug the caching code by checking
 all its results against linear scans, and panicking on any discrepancy.
 
-This variable was added in Perl v5.8.9.
+This variable was added in Perl v5.8.9.  It is subject to change or
+removal without notice, but is currently used to avoid recalculating the
+boundaries of multi-byte UTF-8-encoded characters.
 
 =item ${^UTF8LOCALE}
 X<${^UTF8LOCALE}>
