@@ -77,7 +77,7 @@ sub no_warnings {
 }
 
 BEGIN {
-    print "1..18\n";
+    print "1..23\n";
     $test = 0;
     if (!is_miniperl) {
         require Scalar::Util;
@@ -168,6 +168,25 @@ BEGIN {
     @warnings = ();
 }
 
+{
+    my $sub = sub ($x, $y) { $x * $y };
+
+    is($sub->(3, 4), 12, "anonymous subs work");
+}
+
+{
+    sub empty ($bar, $baz) { }
+    BEGIN { no_warnings("empty sub body") }
+
+    { local $TODO = "this doesn't work yet";
+    is(scalar(empty(1, 2)), undef, "empty sub returns undef in scalar context");
+    }
+    my $ret = [empty(1, 2)];
+    is(scalar(@$ret), 0, "empty sub returns nothing in list context");
+}
+
 # Test UTF-8
+
+BEGIN { no_warnings("end of compile time") }
 
 1;
