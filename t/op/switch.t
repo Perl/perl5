@@ -10,7 +10,7 @@ use strict;
 use warnings;
 no warnings 'experimental::smartmatch';
 
-plan tests => 193;
+plan tests => 196;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -559,7 +559,7 @@ my $f = tie my $v, "FetchCounter";
 	when ("two") {
 	    is($first, 0, "Loop: second");
 	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
+	    like($@, qr/^Can't "break" outside a given block/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
 	when (1) {
@@ -576,7 +576,7 @@ my $f = tie my $v, "FetchCounter";
 	when ("two") {
 	    is($first, 0, "Explicit \$_: second");
 	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
+	    like($@, qr/^Can't "break" outside a given block/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
 	when (1) {
@@ -595,7 +595,7 @@ my $f = tie my $v, "FetchCounter";
 	when ("two") {
 	    is($first, 0, "Implicitly lexical loop: second");
 	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
+	    like($@, qr/^Can't "break" outside a given block/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
 	when (1) {
@@ -614,7 +614,7 @@ my $f = tie my $v, "FetchCounter";
 	when ("two") {
 	    is($first, 0, "Implicitly lexical, explicit \$_: second");
 	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
+	    like($@, qr/^Can't "break" outside a given block/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
 	when (1) {
@@ -632,7 +632,7 @@ my $f = tie my $v, "FetchCounter";
 	when ("two") {
 	    is($first, 0, "Lexical loop: second");
 	    eval {break};
-	    like($@, qr/^Can't "break" in a loop topicalizer/,
+	    like($@, qr/^Can't "break" outside a given block/,
 	    	q{Can't "break" in a loop topicalizer});
 	}
 	when (1) {
@@ -641,6 +641,29 @@ my $f = tie my $v, "FetchCounter";
 	    # Implicit break is okay
 	}
     }
+}
+
+{
+    my %a = (1=>undef);
+    my $ok;
+    for (3) {
+	local $_;
+	while(each %a) {
+	    when (1) { $ok = 10 }
+	}
+	$ok++;
+    }
+    is $ok, 11, 'implicit next is just "next", and works with any loop';
+}
+
+{
+    my %a = (1=>undef, 2=>undef);
+    my $count;
+    while(each %a) {
+ 	$count++;
+	default{}
+    }
+    is $count, 2, 'implicit break in while is a next, not a last';
 }
 
 
@@ -845,7 +868,7 @@ for ("a".."e") {
     }
     $letter = "z";
 }
-is($letter, "b", "last in when");
+is($letter, "z", "last in given");
 
 $letter = '';
 LETTER1: for ("a".."e") {
@@ -865,7 +888,7 @@ for ("a".."e") {
     }
     $letter .= ',';
 }
-is($letter, "a,c,e,", "next in when");
+is($letter, "a,,c,,e,", "next in given");
 
 $letter = '';
 LETTER2: for ("a".."e") {
@@ -1012,12 +1035,13 @@ GIVEN5:
 }
 {
     # Switch control
-    my @exp = ('6 7', '', '6 7');
-    for (0, 1, 2, 3) {
+    my @exp = ('6 7', '', '', '6 7');
+    F: for (0, 1, 2, 3, 4) {
 	my @list = do { given ($_) {
 	    continue when $_ <= 1;
 	    break    when 1;
 	    next     when 2;
+	    next F   when 3;
 	    6, 7;
 	} };
 	is("@list", shift(@exp), "rvalue given - default list [$_]");

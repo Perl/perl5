@@ -2014,7 +2014,7 @@ sR	|OP*	|dofindlabel	|NN OP *o|NN const char *label|STRLEN len \
 s	|MAGIC *|doparseform	|NN SV *sv
 snR	|bool	|num_overflow	|NV value|I32 fldsize|I32 frcsize
 sR	|I32	|dopoptoeval	|I32 startingblock
-sR	|I32	|dopoptogiven	|I32 startingblock
+sR	|I32	|dopoptogiven	|I32 startingblock|bool justgiven
 sR	|I32	|dopoptolabel	|NN const char *label|STRLEN len|U32 flags
 sR	|I32	|dopoptoloop	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock

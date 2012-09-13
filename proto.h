@@ -6425,7 +6425,7 @@ STATIC MAGIC *	S_doparseform(pTHX_ SV *sv)
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_dopoptogiven(pTHX_ I32 startingblock)
+STATIC I32	S_dopoptogiven(pTHX_ I32 startingblock, bool justgiven)
 			__attribute__warn_unused_result__;
 
 STATIC I32	S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)

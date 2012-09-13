@@ -619,11 +619,6 @@ to compress something else.  See L<perlfunc/pack>.
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
 
-=item Can't "break" in a loop topicalizer
-
-(F) You called C<break>, but you're in a C<foreach> block rather than
-a C<given> block.  You probably meant to use C<next> or C<last>.
-
 =item Can't "break" outside a given block
 
 (F) You called C<break>, but you're not inside a C<given> block.
