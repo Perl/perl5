@@ -4903,7 +4903,7 @@ many blocks were entered and left.
 
 =item Unbalanced string table refcount: (%d) for "%s"
 
-(W internal) On exit, Perl found some strings remaining in the shared
+(S internal) On exit, Perl found some strings remaining in the shared
 string table used for copy on write and for hash keys.  The entries
 should have been freed, so this indicates a bug somewhere.
 
