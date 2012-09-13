@@ -477,7 +477,7 @@ SKIP:
     $wrapper->contents_unlike(qr/INCORRECT/, "[perl #61222]");
 }
 
-sub _calc_foo_wrapper
+sub _calc_trace_wrapper
 {
     my $args = shift;
 
@@ -500,14 +500,14 @@ sub _calc_foo_wrapper
 
 # [perl 104168] level option for tracing
 {
-    my $wrapper = _calc_foo_wrapper({ prog =>  '../lib/perl5db/t/rt-104168' });
+    my $wrapper = _calc_trace_wrapper({ prog =>  '../lib/perl5db/t/rt-104168' });
     $wrapper->contents_like(qr/level 2/, "[perl #104168] - level 2 appears");
     $wrapper->contents_unlike(qr/baz/, "[perl #104168] - no 'baz'");
 }
 
 # taint tests
 {
-    my $wrapper = _calc_foo_wrapper(
+    my $wrapper = _calc_trace_wrapper(
         {
             prog => '../lib/perl5db/t/taint',
             extra_opts => ' NonStop=1',
