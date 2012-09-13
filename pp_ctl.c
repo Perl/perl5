@@ -1452,6 +1452,9 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	    if ((CxTYPE(cx)) == CXt_NULL)
 		return -1;
 	    break;
+	case CXt_GIVEN:
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptoloop(): found given at cx=%ld)\n", (long)i));
+	    return i;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
@@ -1464,7 +1467,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 }
 
 STATIC I32
-S_dopoptogiven(pTHX_ I32 startingblock)
+S_dopoptogiven(pTHX_ I32 startingblock, bool justgiven)
 {
     I32 i;
     for (i = startingblock; i >= 0; i--) {
@@ -1476,15 +1479,12 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogiven(): found given at cx=%ld)\n", (long)i));
 	    return i;
 	case CXt_LOOP_PLAIN:
-	    assert(!CxFOREACHDEF(cx));
-	    break;
 	case CXt_LOOP_LAZYIV:
 	case CXt_LOOP_LAZYSV:
 	case CXt_LOOP_FOR:
-	    if (CxFOREACHDEF(cx)) {
-		DEBUG_l( Perl_deb(aTHX_ "(dopoptogiven(): found foreach at cx=%ld)\n", (long)i));
-		return i;
-	    }
+	    if (justgiven) continue;
+	    DEBUG_l( Perl_deb(aTHX_ "(dopoptogiven(): found loop at cx=%ld)\n", (long)i));
+	    return i;
 	}
     }
     return i;
@@ -2537,9 +2537,15 @@ PP(pp_last)
         || CxTYPE(cx) == CXt_LOOP_LAZYSV
         || CxTYPE(cx) == CXt_LOOP_FOR
         || CxTYPE(cx) == CXt_LOOP_PLAIN
+        || CxTYPE(cx) == CXt_GIVEN
     );
-    newsp = PL_stack_base + cx->blk_loop.resetsp;
-    nextop = cx->blk_loop.my_op->op_lastop->op_next;
+    if (CxTYPE(cx) == CXt_GIVEN) {
+        return(cx->blk_givwhen.leave_op);
+    }
+    else {
+        newsp = PL_stack_base + cx->blk_loop.resetsp;
+        nextop = cx->blk_loop.my_op->op_lastop->op_next;
+    }
 
     TAINT_NOT;
     PL_stack_sp = newsp;
@@ -2562,9 +2568,12 @@ PP(pp_next)
 
     S_unwind_loop(aTHX_ "next");
 
+
+    TOPBLOCK(cx);
+    if (CxTYPE(cx) == CXt_GIVEN) return cx->blk_givwhen.leave_op;
+
     /* clear off anything above the scope we're re-entering, but
      * save the rest until after a possible continue block */
-    TOPBLOCK(cx);
     if (PL_scopestack_ix < inner)
 	leave_scope(PL_scopestack[PL_scopestack_ix]);
     PL_curcop = cx->blk_oldcop;
@@ -4580,7 +4589,7 @@ PP(pp_leavewhen)
     SV **newsp;
     PMOP *newpm;
 
-    cxix = dopoptogiven(cxstack_ix);
+    cxix = dopoptogiven(cxstack_ix, 0);
     if (cxix < 0)
 	/* diag_listed_as: Can't "when" outside a topicalizer */
 	DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
@@ -4600,7 +4609,7 @@ PP(pp_leavewhen)
 
     cx = &cxstack[cxix];
 
-    if (CxFOREACH(cx)) {
+    if (CxTYPE_is_LOOP(cx)) {
 	/* clear off anything above the scope we're re-entering */
 	I32 inner = PL_scopestack_ix;
 
@@ -4651,13 +4660,11 @@ PP(pp_break)
     I32 cxix;
     PERL_CONTEXT *cx;
 
-    cxix = dopoptogiven(cxstack_ix); 
+    cxix = dopoptogiven(cxstack_ix, 1); 
     if (cxix < 0)
 	DIE(aTHX_ "Can't \"break\" outside a given block");
 
     cx = &cxstack[cxix];
-    if (CxFOREACH(cx))
-	DIE(aTHX_ "Can't \"break\" in a loop topicalizer");
 
     if (cxix < cxstack_ix)
         dounwind(cxix);
