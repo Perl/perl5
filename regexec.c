@@ -2568,6 +2568,7 @@ got_it:
 				  "Copy on write: regexp capture, type %d\n",
 				  (int) SvTYPE(sv));
 		}
+                RX_MATCH_COPY_FREE(rx);
 		prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
 		prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
 		assert (SvPOKp(prog->saved_copy));
@@ -2640,8 +2641,8 @@ got_it:
                 prog->subbeg[sublen] = '\0';
                 prog->suboffset = min;
                 prog->sublen = sublen;
+                RX_MATCH_COPIED_on(rx);
 	    }
-            RX_MATCH_COPIED_on(rx);
             prog->subcoffset = prog->suboffset;
             if (prog->suboffset && utf8_target) {
                 /* Convert byte offset to chars.
