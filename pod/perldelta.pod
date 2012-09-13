@@ -227,6 +227,14 @@ inconsistent unixy path handling on VMS.
 
 =item *
 
+L<IPC::Open3> has been upgraded from version 1.12 to 1.13.  The C<open3()>
+function no longer uses C<POSIX::close()> to close file descriptors since that
+breaks the ref-counting of file descriptors done by PerlIO in cases where the
+file descriptors are shared by PerlIO streams, leading to attempts to close the
+file descriptors a second time when any such PerlIO streams are closed later on.
+
+=item *
+
 L<Locale::Codes> has been upgraded from version 3.22 to 3.23.  It includes some
 new codes.
 
