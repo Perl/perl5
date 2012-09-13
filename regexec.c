@@ -6155,8 +6155,9 @@ no_silent:
     /* clean up; in particular, free all slabs above current one */
     LEAVE_SCOPE(oldsave);
 
-    assert(!result ||  reginput - PL_bostr >= 0);
-    return result ?  reginput - PL_bostr : -1;
+    assert(!result || reginput == locinput);
+    assert(!result ||  locinput - PL_bostr >= 0);
+    return result ?  locinput - PL_bostr : -1;
 }
 
 /*
