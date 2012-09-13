@@ -3214,8 +3214,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     regnode *next;
     U32 n = 0;	/* general value; init to avoid compiler warning */
     I32 ln = 0; /* len or last;  init to avoid compiler warning */
-    char *reginput = startpos;
-    char *locinput = reginput;
+    char *locinput = startpos;
     char *pushinput; /* where to continue after a PUSH */
     I32 nextchr;   /* is always set to UCHARAT(locinput) */
 
@@ -3235,7 +3234,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     U32 state_num;
     bool no_final = 0;      /* prevent failure from backtracking? */
     bool do_cutgroup = 0;   /* no_final only until next branch/trie entry */
-    char *startpoint = reginput;
+    char *startpoint = locinput;
     SV *popmark = NULL;     /* are we looking for a mark? */
     SV *sv_commit = NULL;   /* last mark name seen in failure */
     SV *sv_yes_mark = NULL; /* last mark name we have seen 
@@ -3352,7 +3351,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case KEEPS:
 	    /* update the startpoint */
 	    st->u.keeper.val = rex->offs[0].start;
-	    reginput = locinput;
 	    rex->offs[0].start = locinput - PL_bostr;
 	    PUSH_STATE_GOTO(KEEPS_next, next, locinput);
 	    /*NOT-REACHED*/
@@ -4632,7 +4630,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		re->lastparen = 0;
 		re->lastcloseparen = 0;
 
-		reginput = locinput;
 		PL_regsize = 0;
 
 		/* XXXX This is too dramatic a measure... */
@@ -4686,7 +4683,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    rex = (struct regexp *)SvANY(rex_sv);
 	    rexi = RXi_GET(rex); 
 
-	    reginput = locinput;
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex);
 	    cur_eval = ST.prev_eval;
@@ -4939,7 +4935,6 @@ NULL
 	    ST.cache_offset = 0;
 	    ST.cache_mask = 0;
 	    
-	    reginput = locinput;
 
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 		  "%*s  whilem: matched %ld out of %d..%d\n",
@@ -5071,7 +5066,6 @@ NULL
 	case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex);	/* Restore some previous $<digit>s? */
-	    reginput = locinput;
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 		"%*s  whilem: failed, trying continuation...\n",
 		REPORT_CODE_OFF+depth*2, "")
@@ -5120,7 +5114,6 @@ NULL
 		"%*s  trying longer...\n", REPORT_CODE_OFF+depth*2, "")
 	    );
 	    /* Try grabbing another A and see if it helps. */
-	    reginput = locinput;
 	    cur_curlyx->u.curlyx.lastloc = locinput;
 	    ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor);
 	    REGCP_SET(ST.lastcp);
@@ -5724,7 +5717,6 @@ NULL
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
 
 		REGCP_SET(st->u.eval.lastcp);
-		reginput = locinput;
 
 		/* Restore parens of the outer rex without popping the
 		 * savestack */
@@ -5752,7 +5744,6 @@ NULL
                				      
 		sayNO_SILENT;		/* Cannot match: too short. */
 	    }
-	    reginput = locinput;	/* put where regtry can find it */
 	    sayYES;			/* Success! */
 
 	case SUCCEED: /* successful SUSPEND/UNLESSM/IFMATCH/CURLYM */
@@ -5760,7 +5751,6 @@ NULL
 	    PerlIO_printf(Perl_debug_log,
 		"%*s  %ssubpattern success...%s\n",
 		REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5]));
-	    reginput = locinput;	/* put where regtry can find it */
 	    sayYES;			/* Success! */
 
 #undef  ST
@@ -5843,7 +5833,6 @@ NULL
 	    reginfo->cutpoint = PL_regeol;
 	    /* FALLTHROUGH */
 	case PRUNE:
-	    reginput = locinput;
 	    if (!scan->flags)
 	        sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
 	    PUSH_STATE_GOTO(COMMIT_next, next, locinput);
@@ -5889,7 +5878,6 @@ NULL
             sayNO;
             assert(0); /* NOTREACHED */
         case SKIP:
-            reginput = locinput;
             if (scan->flags) {
                 /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
@@ -6155,18 +6143,19 @@ no_silent:
     /* clean up; in particular, free all slabs above current one */
     LEAVE_SCOPE(oldsave);
 
-    assert(!result || reginput == locinput);
     assert(!result ||  locinput - PL_bostr >= 0);
     return result ?  locinput - PL_bostr : -1;
 }
 
 /*
  - regrepeat - repeatedly match something simple, report how many
- */
-/*
- * [This routine now assumes that it will only match on things of length 1.
- * That was true before, but now we assume scan - reginput is the count,
- * rather than incrementing count on every character.  [Er, except utf8.]]
+ *
+ * startposp - pointer a pointer to the start position.  This is updated
+ *             to point to the byte following the highest successful
+ *             match.
+ * p         - the regnode to be repeatedly matched against.
+ * max       - maximum number of characters to match.
+ * depth     - (for debugging) backtracking depth.
  */
 STATIC I32
 S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 max, int depth)
