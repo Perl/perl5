@@ -5496,17 +5496,14 @@ NULL
 
 	    ST.A = scan;
 	    ST.B = next;
-	    reginput = locinput;
 	    if (minmod) {
-                /* avoid taking address of reginput, so it can remain
-                 * a register var */
-                char *ri = reginput;
+                char *li = locinput;
 		minmod = 0;
-		if (ST.min && regrepeat(rex, &ri, ST.A, ST.min, depth) < ST.min)
+		if (ST.min && regrepeat(rex, &li, ST.A, ST.min, depth) < ST.min)
 		    sayNO;
-                reginput = ri;
+                locinput = li;
+                nextchr = UCHARAT(locinput);
 		ST.count = ST.min;
-		locinput = reginput;
 		REGCP_SET(ST.cp);
 		if (ST.c1 == CHRTEST_VOID)
 		    goto curly_try_B_min;
@@ -5536,12 +5533,14 @@ NULL
 
 	    }
 	    else {
-                char *ri = reginput;
-		ST.count = regrepeat(rex, &ri, ST.A, ST.max, depth);
-                reginput = ri;
-		locinput = reginput;
+                /* avoid taking address of locinput, so it can remain
+                 * a register var */
+                char *li = locinput;
+		ST.count = regrepeat(rex, &li, ST.A, ST.max, depth);
 		if (ST.count < ST.min)
 		    sayNO;
+                locinput = li;
+                nextchr = UCHARAT(locinput);
 		if ((ST.count > ST.min)
 		    && (PL_regkind[OP(ST.B)] == EOL) && (OP(ST.B) != MEOL))
 		{
@@ -5551,7 +5550,7 @@ NULL
 		    /* ...except that $ and \Z can match before *and* after
 		       newline at the end.  Consider "\n\n" =~ /\n+\Z\n/.
 		       We may back off by one in this case. */
-		    if (UCHARAT(reginput - 1) == '\n' && OP(ST.B) != EOS)
+		    if (UCHARAT(locinput - 1) == '\n' && OP(ST.B) != EOS)
 			ST.min--;
 		}
 		REGCP_SET(ST.cp);
@@ -5563,7 +5562,6 @@ NULL
 	case CURLY_B_min_known_fail:
 	    /* failed to find B in a non-greedy match where c1,c2 valid */
 
-	    reginput = locinput;	/* Could be reset... */
 	    REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
@@ -5622,15 +5620,16 @@ NULL
 		}
 		if (locinput > ST.maxpos)
 		    sayNO;
-		/* reginput == oldloc now */
 		if (n) {
-                    char *ri = reginput;
+                    /* In /a{m,n}b/, ST.oldloc is at "a" x m, locinput is
+                     * at b; check that everything between oldloc and
+                     * locinput matches */
+                    char *li = ST.oldloc;
 		    ST.count += n;
-		    if (regrepeat(rex, &ri, ST.A, n, depth) < n)
+		    if (regrepeat(rex, &li, ST.A, n, depth) < n)
 			sayNO;
-                    reginput = ri;
+                    assert(n == REG_INFTY || locinput == li);
 		}
-		reginput = locinput;
 		CURLY_SETPAREN(ST.paren, ST.count);
 		if (cur_eval && cur_eval->u.eval.close_paren && 
 		    cur_eval->u.eval.close_paren == (U32)ST.paren) {
@@ -5649,17 +5648,15 @@ NULL
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             }
 	    /* failed -- move forward one */
-	    reginput = locinput;
             {
-                char *ri = reginput;
-                if (!regrepeat(rex, &ri, ST.A, 1, depth)) {
+                char *li = locinput;
+                if (!regrepeat(rex, &li, ST.A, 1, depth)) {
                     sayNO;
                 }
-                reginput = ri;
+                locinput = li;
             }
             {
 		ST.count++;
-		locinput = reginput;
 		if (ST.count <= ST.max || (ST.max == REG_INFTY &&
 			ST.count > 0)) /* count overflow ? */
 		{
@@ -5684,9 +5681,9 @@ NULL
 	    {
 		UV c = 0;
 		if (ST.c1 != CHRTEST_VOID)
-		    c = utf8_target ? utf8n_to_uvchr((U8*)reginput,
+		    c = utf8_target ? utf8n_to_uvchr((U8*)locinput,
 					   UTF8_MAXBYTES, 0, uniflags)
-				: (UV) UCHARAT(reginput);
+				: (UV) UCHARAT(locinput);
 		/* If it could work, try it. */
 		if (ST.c1 == CHRTEST_VOID || c == (UV)ST.c1 || c == (UV)ST.c2) {
 		    CURLY_SETPAREN(ST.paren, ST.count);
@@ -5705,7 +5702,7 @@ NULL
 	    /*  back up. */
 	    if (--ST.count < ST.min)
 		sayNO;
-	    reginput = locinput = HOPc(locinput, -1);
+	    locinput = HOPc(locinput, -1);
 	    goto curly_try_B_max;
 
 #undef ST
