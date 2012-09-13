@@ -366,13 +366,13 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     /* what (if anything) to free on croak */
     *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? RX_SUBBEG(rx) : NULL);
     RX_MATCH_COPIED_off(rx);
+    *p++ = RX_NPARENS(rx);
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     *p++ = PTR2UV(RX_SAVED_COPY(rx));
     RX_SAVED_COPY(rx) = NULL;
 #endif
 
-    *p++ = RX_NPARENS(rx);
     *p++ = PTR2UV(RX_SUBBEG(rx));
     *p++ = (UV)RX_SUBLEN(rx);
     *p++ = (UV)RX_SUBOFFSET(rx);
@@ -395,6 +395,7 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     RX_MATCH_COPY_FREE(rx);
     RX_MATCH_COPIED_set(rx, *p);
     *p++ = 0;
+    RX_NPARENS(rx) = *p++;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (RX_SAVED_COPY(rx))
@@ -403,7 +404,6 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     *p++ = 0;
 #endif
 
-    RX_NPARENS(rx) = *p++;
     RX_SUBBEG(rx) = INT2PTR(char*,*p++);
     RX_SUBLEN(rx) = (I32)(*p++);
     RX_SUBOFFSET(rx) = (I32)*p++;
@@ -423,19 +423,23 @@ S_rxres_free(pTHX_ void **rsp)
     PERL_UNUSED_CONTEXT;
 
     if (p) {
-#ifdef PERL_POISON
 	void *tmp = INT2PTR(char*,*p);
-	Safefree(tmp);
-	if (*p)
-	    PoisonFree(*p, 1, sizeof(*p));
-#else
-	Safefree(INT2PTR(char*,*p));
-#endif
+#ifdef PERL_POISON
 #ifdef PERL_OLD_COPY_ON_WRITE
-	if (p[1]) {
-	    SvREFCNT_dec (INT2PTR(SV*,p[1]));
-	}
+	U32 i = 9 + p[1] * 2;
+#else
+	U32 i = 8 + p[1] * 2;
 #endif
+#endif
+
+#ifdef PERL_OLD_COPY_ON_WRITE
+        SvREFCNT_dec (INT2PTR(SV*,p[2]));
+#endif
+#ifdef PERL_POISON
+        PoisonFree(p, i, sizeof(UV));
+#endif
+
+	Safefree(tmp);
 	Safefree(p);
 	*rsp = NULL;
     }
