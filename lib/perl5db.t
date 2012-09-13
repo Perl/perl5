@@ -109,16 +109,6 @@ sub afterinit {
 EOF
 }
 
-# taint tests
-
-{
-    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d', '-T' ], stderr => 1,
-        progfile => '../lib/perl5db/t/taint');
-    chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
-    is($output, '[$^X][done]', "taint");
-}
-
 package DebugWrap;
 
 sub new {
@@ -304,6 +294,11 @@ sub _run {
     $self->_contents(::_out_contents());
 
     return;
+}
+
+sub get_output
+{
+    return shift->_output();
 }
 
 sub output_like {
@@ -508,6 +503,21 @@ sub _calc_foo_wrapper
     my $wrapper = _calc_foo_wrapper({ prog =>  '../lib/perl5db/t/rt-104168' });
     $wrapper->contents_like(qr/level 2/, "[perl #104168] - level 2 appears");
     $wrapper->contents_unlike(qr/baz/, "[perl #104168] - no 'baz'");
+}
+
+# taint tests
+{
+    my $wrapper = _calc_foo_wrapper(
+        {
+            prog => '../lib/perl5db/t/taint',
+            extra_opts => ' NonStop=1',
+            switches => [ '-d', '-T', ],
+        }
+    );
+
+    my $output = $wrapper->get_output();
+    chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
+    is($output, '[$^X][done]', "taint");
 }
 
 # Testing that we can set a line in the middle of the file.
