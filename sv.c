@@ -10375,12 +10375,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		 * vectorize happen normally
 		 */
 		if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
-		    char *version = savesvpv(vecsv);
+		    char *version;
 		    if ( hv_exists(MUTABLE_HV(SvRV(vecsv)), "alpha", 5 ) ) {
-			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+			Perl_ck_warner_d(aTHX_ packWARN(WARN_PRINTF),
 			"vector argument not supported with alpha versions");
-			goto unknown;
+			goto vdblank;
 		    }
+		    version = savesvpv(vecsv);
 		    vecsv = sv_newmortal();
 		    scan_vstring(version, version + veclen, vecsv);
 		    vecstr = (U8*)SvPV_const(vecsv, veclen);
@@ -10389,6 +10390,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		}
 	    }
 	    else {
+	      vdblank:
 		vecstr = (U8*)"";
 		veclen = 0;
 	    }

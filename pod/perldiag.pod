@@ -5695,7 +5695,7 @@ are automatically rebound to the current values of such variables.
 
 =item vector argument not supported with alpha versions
 
-(W internal) The %vd (s)printf format does not support version objects
+(S printf) The %vd (s)printf format does not support version objects
 with alpha parts.
 
 =item Verb pattern '%s' has a mandatory argument in regex; marked by <-- HERE in m/%s/ 

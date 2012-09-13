@@ -62,6 +62,8 @@ $SIG{__WARN__} = sub {
 	$w .= ' UNINIT';
     } elsif ($_[0] =~ /^Missing argument/) {
 	$w .= ' MISSING';
+    } elsif ($_[0]=~/^vector argument not supported with alpha versions/) {
+	$w .= ' ALPHA';
     } else {
 	warn @_;
     }
@@ -317,6 +319,7 @@ __END__
 >%vd<       >[version->new("1.002")]< >1.2<
 >%vd<       >[version->new("1048576.5")]< >1048576.5<
 >%vd<       >[version->new("50")]< >50<
+>[%vd]<     >[version->new(v1.1_1)]< >[] ALPHA<
 >%v.3d<     >"\01\02\03"< >001.002.003<
 >%0v3d<     >"\01\02\03"< >001.002.003<
 >%v.3d<     >[version::qv("1.2.3")]< >001.002.003<
