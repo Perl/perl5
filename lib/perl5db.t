@@ -356,7 +356,7 @@ package main;
     );
 }
 
-sub _calc_new_var_wrapper
+sub _calc_generic_wrapper
 {
     my $args = shift;
 
@@ -364,6 +364,18 @@ sub _calc_new_var_wrapper
     $extra_opts ||= '';
     local $ENV{PERLDB_OPTS} = "ReadLine=0" . $extra_opts;
     return DebugWrap->new(
+        {
+            cmds => delete($args->{cmds}),
+            prog => delete($args->{prog}),
+            %$args,
+        }
+    );
+}
+
+sub _calc_new_var_wrapper
+{
+    my ($args) = @_;
+    return _calc_generic_wrapper(
         {
             cmds =>
             [
@@ -373,7 +385,6 @@ sub _calc_new_var_wrapper
                 'x "new_var = <$new_var>\\n"',
                 'q',
             ],
-            prog => delete($args->{prog}),
             %$args,
         }
     );
@@ -479,12 +490,9 @@ SKIP:
 
 sub _calc_trace_wrapper
 {
-    my $args = shift;
+    my ($args) = @_;
 
-    my $extra_opts = delete($args->{extra_opts});
-    $extra_opts ||= '';
-    local $ENV{PERLDB_OPTS} = "ReadLine=0" . $extra_opts;
-    return DebugWrap->new(
+    return _calc_generic_wrapper(
         {
             cmds =>
             [
@@ -492,7 +500,6 @@ sub _calc_trace_wrapper
                 'c',
                 'q',
             ],
-            prog => delete($args->{prog}),
             %$args,
         }
     );
