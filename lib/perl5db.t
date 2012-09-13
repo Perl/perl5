@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(79);
+plan(80);
 
 my $rc_filename = '.perldb';
 
@@ -1901,6 +1901,38 @@ sub _calc_trace_wrapper
         #msx,
         'Test the ! -n command (along with l)',
     );
+}
+
+# Test the 'source' command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'source ../lib/perl5db/t/source-cmd-test.perldb',
+                # If we have a 'q' here, then the typeahead will override the
+                # input, and so it won't be reached - solution:
+                # put a q inside the .perldb commands.
+                # ( This may be a bug or a misfeature. )
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";\n
+        6\s*\n
+        7:\s+\$dummy\+\+;\n
+        8\s*\n
+        9:\s+\$x\ =\ "SecondVal";\n
+        10\s*\n
+        #msx,
+        'Test the source command (along with l)',
+    );
+
+    print $wrapper->get_output(), "\n";
 }
 
 END {
