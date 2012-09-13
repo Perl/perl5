@@ -6517,6 +6517,20 @@ sub readline {
     # Localize to prevent it from being smashed in the program being debugged.
     local $.;
 
+    # If there are stacked filehandles to read from ...
+    # (Handle it before the typeahead, because we may call source/etc. from
+    # the typeahead.)
+    while (@cmdfhs) {
+
+        # Read from the last one in the stack.
+        my $line = CORE::readline( $cmdfhs[-1] );
+
+        # If we got a line ...
+        defined $line
+          ? ( print $OUT ">> $line" and return $line )    # Echo and return
+          : close pop @cmdfhs;                            # Pop and close
+    } ## end while (@cmdfhs)
+
     # Pull a line out of the typeahead if there's stuff there.
     if (@typeahead) {
 
@@ -6541,18 +6555,6 @@ sub readline {
     # return value printing.
     local $frame = 0;
     local $doret = -2;
-
-    # If there are stacked filehandles to read from ...
-    while (@cmdfhs) {
-
-        # Read from the last one in the stack.
-        my $line = CORE::readline( $cmdfhs[-1] );
-
-        # If we got a line ...
-        defined $line
-          ? ( print $OUT ">> $line" and return $line )    # Echo and return
-          : close pop @cmdfhs;                            # Pop and close
-    } ## end while (@cmdfhs)
 
     # Nothing on the filehandle stack. Socket?
     if ( ref $OUT and UNIVERSAL::isa( $OUT, 'IO::Socket::INET' ) ) {

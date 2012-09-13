@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(80);
+plan(81);
 
 my $rc_filename = '.perldb';
 
@@ -1931,8 +1931,33 @@ sub _calc_trace_wrapper
         #msx,
         'Test the source command (along with l)',
     );
+}
 
-    print $wrapper->get_output(), "\n";
+# Test the 'source' command being traversed from withing typeahead.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'source ../lib/perl5db/t/source-cmd-test-no-q.perldb',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";\n
+        6\s*\n
+        7:\s+\$dummy\+\+;\n
+        8\s*\n
+        9:\s+\$x\ =\ "SecondVal";\n
+        10\s*\n
+        #msx,
+        'Test the source command inside a typeahead',
+    );
 }
 
 END {
