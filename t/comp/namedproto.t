@@ -4,20 +4,86 @@
 # 
 
 my @warnings;
+my $test;
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.');
-    require './test.pl';
     $SIG{'__WARN__'} = sub { push @warnings, @_ };
     $| = 1;
 }
 
-use warnings;
-use Scalar::Util qw(set_prototype);
+sub is_miniperl { !defined &DynaLoader::boot_DynaLoader }
+
+sub failed {
+    my ($got, $expected, $name) = @_;
+    print "not ok $test - $name\n";
+    my @caller = caller(1);
+    print "# Failed test at $caller[1] line $caller[2]\n";
+    if (defined $got) {
+	print "# Got '$got'\n";
+    } else {
+	print "# Got undef\n";
+    }
+    print "# Expected $expected\n";
+    return;
+}
+
+sub like {
+    my ($got, $pattern, $name) = @_;
+    $test = $test + 1;
+    if ($::TODO) {
+        $name .= " # TODO: $::TODO";
+    }
+    if (defined $got && $got =~ $pattern) {
+	print "ok $test - $name\n";
+	# Principle of least surprise - maintain the expected interface, even
+	# though we aren't using it here (yet).
+	return 1;
+    }
+    failed($got, $pattern, $name);
+}
+
+sub is {
+    my ($got, $expect, $name) = @_;
+    $test = $test + 1;
+    if ($::TODO) {
+        $name .= " # TODO: $::TODO";
+    }
+    if (defined $got && $got eq $expect) {
+	print "ok $test - $name\n";
+	return 1;
+    }
+    failed($got, "'$expect'", $name);
+}
+
+sub skip {
+    my ($desc) = @_;
+    $test = $test + 1;
+    print "ok $test # SKIP $desc\n";
+}
+
+sub no_warnings {
+    my ($desc) = @_;
+
+    if (is_miniperl) {
+        skip("warnings may not be available in miniperl");
+    }
+    else {
+        is(scalar(@warnings), 0, "No warnings with $desc");
+        print "# $warnings[0]" if $#warnings >= 0;
+    }
+    @warnings = ();
+}
 
 BEGIN {
-    plan tests => 18;  # Update this when adding/deleting tests.
+    print "1..18\n";
+    $test = 0;
+    if (!is_miniperl) {
+        require Scalar::Util;
+        require warnings;
+        warnings->import;
+    }
 }
 
 # Not yet implemented: Greedy
@@ -25,24 +91,20 @@ BEGIN {
 sub greedyarray(@array){return $#array; @array = ();}
 BEGIN {
     local $TODO = "Named arrays not yet implemented";
-    is($#warnings,-1);
-    print "# $warnings[0]" if $#warnings >= 0;
+    no_warnings("named arrays");
     my @array = qw(1 2 3);
     is(greedyarray(@array),2);
     is(greedyarray(1,2,3),2);
-    @warnings = ();
 }
 
 # Hashes (%hash = ()) silences the used only once warning)
 sub greedyhash(%hash){my @keys = sort keys %hash; return "@keys"; %hash = ();}
 BEGIN {
     local $TODO = "Named hashes not yet implemented";
-    is($#warnings,-1);
-    print "# $warnings[0]" if $#warnings >= 0;
+    no_warnings("named hashes");
     my %hash = (c => 1, d => 2);
     is(greedyhash(%hash),"c d");
     is(greedyhash("c",1,"d",2),"c d");
-    @warnings = ();
 }
 
 # Checking params
@@ -54,15 +116,12 @@ is(twop("A","B"), "A B", "Checking two param");
 
 sub recc($a,$c){ return recc("$a $a",$c-1) if $c; return $a; }
 is(recc("A", 2), "A A A A", "Checking recursive");
-is($#warnings,-1,"No warnings checking params");
-print "@warnings" if $#warnings != -1;
+no_warnings("checking params");
 
 # Make sure whitespace doesn't matter
 sub whitespace (  $a  ,  $b   ) { return $b; }
 BEGIN {
-    is($#warnings,-1,"No warnings with extra whitespace in the definition");
-    print "# $warnings[0]" if $#warnings >= 0;
-    @warnings = ();
+    no_warnings("extra whitespace in the definition");
 }
 is(whitespace(4,5),5,"Prototype ignores whitespace");
 
@@ -78,25 +137,34 @@ sub oldproto(*){ my $name = shift; return $name;}
 is(oldproto STDOUT,"STDOUT", "Traditional prototype behavior still works");
 
 sub manualproto($name){ return $name; }
-BEGIN { set_prototype(\&manualproto,"*");}
-is(manualproto STDOUT, "STDOUT", "Forcing it with set_prototype works");
+BEGIN { if (!is_miniperl) { Scalar::Util::set_prototype(\&manualproto,"*") } }
+if (is_miniperl) {
+    skip("Scalar::Util may not be available in miniperl");
+}
+else {
+    eval "is(manualproto STDOUT, 'STDOUT', 'Forcing it with set_prototype works'); 1" || die $@;
+}
 
 sub manualrecproto($name){
-    BEGIN { set_prototype(\&manualrecproto,"*");}
+    BEGIN { if (!is_miniperl) { Scalar::Util::set_prototype(\&manualrecproto,"*") } }
     return $name;
 }
 BEGIN {
     local $TODO = "Not sure how to use set_prototype for a recursive";
-    is($#warnings,-1);
-    print "# $warnings[0]" if $#warnings >= 0;
-    @warnings = ();
+    no_warnings("set_prototype on recursive function");
 }
 
 sub ignoredproto(*);
 sub ignoredproto($name){ return $name;}
 BEGIN {
-    is($#warnings,0,"Should have exactly one error");
-    like($warnings[0],"vs none","ignoredproto should complain of a mismatch");
+    if (is_miniperl) {
+        skip("warnings may not be available in miniperl");
+        skip("warnings may not be available in miniperl");
+    }
+    else {
+        is(scalar(@warnings), 1, "Should have exactly one warning");
+        like($warnings[0], "vs none", "ignoredproto should complain of a mismatch");
+    }
     @warnings = ();
 }
 

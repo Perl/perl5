@@ -20,6 +20,7 @@ open my $fh, '<', '../MANIFEST' or die "Can't open MANIFEST: $!";
 my %exceptions = (hints => "require './test.pl'",
 		  parser => 'use DieDieDie',
 		  proto => 'use strict',
+                  namedproto => qr/require (?:warnings|Scalar::Util)/,
 		 );
 		  
 while (my $file = <$fh>) {
@@ -38,7 +39,12 @@ while (my $file = <$fh>) {
     # Remove only the excepted constructions for the specific files.
     if ($file =~ m!comp/(.*)\.t! && $exceptions{$1}) {
 	my $allowed = $exceptions{$1};
-	$contents =~ s/\Q$allowed//gs;
+        if (ref $allowed) {
+            $contents =~ s/$allowed//gs;
+        }
+        else {
+            $contents =~ s/\Q$allowed//gs;
+        }
     }
 
     # All uses of use are allowed in t/comp/use.t
