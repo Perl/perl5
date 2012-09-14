@@ -173,15 +173,11 @@
 	if (POS_OR_NEG (UTF8_TEST)) {                                         \
 	    sayNO;                                                            \
 	}                                                                     \
-	locinput += PL_utf8skip[nextchr];                                     \
-	nextchr = UCHARAT(locinput);                                          \
-	break;                                                                \
     }                                                                         \
-    if (POS_OR_NEG (FUNC(nextchr))) {                                         \
-	sayNO;                                                                \
+    else if (POS_OR_NEG (FUNC(nextchr))) {                                    \
+            sayNO;                                                            \
     }                                                                         \
-    nextchr = UCHARAT(++locinput);                                            \
-    break;
+    goto increment_locinput;
 
 /* Handle the non-locale cases for a character class and its complement.  It
  * calls _CCC_TRY_CODE with a ! to complement the test for the character class.
@@ -233,14 +229,7 @@
 	if (locinput >= PL_regeol || FUNCA(nextchr)) {                        \
 	    sayNO;                                                            \
 	}                                                                     \
-	if (utf8_target) {                                                    \
-	    locinput += PL_utf8skip[nextchr];                                 \
-	    nextchr = UCHARAT(locinput);                                      \
-	}                                                                     \
-	else {                                                                \
-	    nextchr = UCHARAT(++locinput);                                    \
-	}                                                                     \
-	break;                                                                \
+        goto increment_locinput;                                              \
     /* Generate the non-locale cases */                                       \
     _CCC_TRY_NONLOCALE(NAME, NNAME, FUNC, CLASS, STR)
 
@@ -3379,15 +3368,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case SANY:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
- 	    if (utf8_target) {
-	        locinput += PL_utf8skip[nextchr];
-		if (locinput > PL_regeol)
- 		    sayNO;
- 		nextchr = UCHARAT(locinput);
- 	    }
- 	    else
- 		nextchr = UCHARAT(++locinput);
-	    break;
+            goto increment_locinput;
 	case CANY:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
@@ -3396,15 +3377,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case REG_ANY:
 	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
 		sayNO;
-	    if (utf8_target) {
-		locinput += PL_utf8skip[nextchr];
-		if (locinput > PL_regeol)
-		    sayNO;
-		nextchr = UCHARAT(locinput);
-	    }
-	    else
-		nextchr = UCHARAT(++locinput);
-	    break;
+            goto increment_locinput;
+
 
 #undef  ST
 #define ST st->u.trie
@@ -4021,14 +3995,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (locinput >= PL_regeol || _generic_isCC_A(nextchr, FLAGS(scan))) {
                 sayNO;
             }
-            if (utf8_target) {
-                locinput += PL_utf8skip[nextchr];
-                nextchr = UCHARAT(locinput);
-            }
-            else {
-                nextchr = UCHARAT(++locinput);
-            }
-            break;
+            goto increment_locinput;
 
 	case CLUMP: /* Match \X: logical Unicode character.  This is defined as
 		       a Unicode extended Grapheme Cluster */
@@ -5983,6 +5950,19 @@ NULL
 	    PerlIO_printf(Perl_error_log, "%"UVxf" %d\n",
 			  PTR2UV(scan), OP(scan));
 	    Perl_croak(aTHX_ "regexp memory corruption");
+
+        /* this is a point to jump to in order to increment
+         * locinput by one character */
+        increment_locinput:
+            if (utf8_target) {
+                locinput += PL_utf8skip[nextchr];
+                if (locinput > PL_regeol)
+                    sayNO;
+                nextchr = UCHARAT(locinput);
+            }
+            else
+                nextchr = UCHARAT(++locinput);
+            break;
 	    
 	} /* end switch */ 
 
