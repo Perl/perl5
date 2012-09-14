@@ -53,11 +53,11 @@ my $tree = {
 			   }],
        	'severe'	=> [ 5.008, { 	
 				'inplace'	=> [ 5.008, DEFAULT_ON],
-	 			'internal'	=> [ 5.008, DEFAULT_ON],
+	 			'internal'	=> [ 5.008, DEFAULT_OFF],
          			'debugging'	=> [ 5.008, DEFAULT_ON],
          			'malloc'	=> [ 5.008, DEFAULT_ON],
 	 		   }],
-        'deprecated'	=> [ 5.008, DEFAULT_OFF],
+        'deprecated'	=> [ 5.008, DEFAULT_ON],
        	'void'		=> [ 5.008, DEFAULT_OFF],
        	'recursion'	=> [ 5.008, DEFAULT_OFF],
        	'redefine'	=> [ 5.008, DEFAULT_OFF],
@@ -66,7 +66,7 @@ my $tree = {
        	'once'		=> [ 5.008, DEFAULT_OFF],
        	'misc'		=> [ 5.008, DEFAULT_OFF],
        	'regexp'	=> [ 5.008, DEFAULT_OFF],
-       	'glob'		=> [ 5.008, DEFAULT_OFF],
+       	'glob'		=> [ 5.008, DEFAULT_ON],
        	'untie'		=> [ 5.008, DEFAULT_OFF],
 	'substr'	=> [ 5.008, DEFAULT_OFF],
 	'taint'		=> [ 5.008, DEFAULT_OFF],
@@ -89,6 +89,7 @@ my $tree = {
   	}],
 } ;
 
+my @def ;
 my %list ;
 my %Value ;
 my %ValueToName ;
@@ -151,6 +152,8 @@ sub walk
 	my ($ver, $rest) = @{ $v } ;
 	if (ref $rest)
 	  { push (@{ $list{$k} }, walk ($rest)) }
+	elsif ($rest == DEFAULT_ON)
+	  { push @def, $NameToValue{uc $k} }
 
 	push @list, @{ $list{$k} } ;
     }
@@ -416,6 +419,8 @@ foreach $k (sort keys  %list) {
 
 print $pm "  );\n\n" ;
 print $pm '$NONE     = "', ('\0' x $warn_size) , "\";\n" ;
+print $pm '$DEFAULT  = "', mkHex($warn_size, map $_ * 2, @def),
+			   '", # [', mkRange(@def), "]\n" ;
 print $pm '$LAST_BIT = ' . "$index ;\n" ;
 print $pm '$BYTES    = ' . "$warn_size ;\n" ;
 while (<DATA>) {
@@ -636,7 +641,7 @@ sub import
 {
     shift;
 
-    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $NONE) ;
+    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
@@ -652,7 +657,7 @@ sub unimport
     shift;
 
     my $catmask ;
-    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $NONE) ;
+    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
@@ -731,8 +736,11 @@ sub __chk
         $i = _error_loc(); # see where Carp will allocate the error
     }
 
-    # Defaulting this to 0 reduces complexity in code paths below.
-    my $callers_bitmask = (caller($i))[9] || 0 ;
+    # Default to 0 if caller returns nothing.  Default to $DEFAULT if it
+    # explicitly returns undef.
+    my(@callers_bitmask) = (caller($i))[9] ;
+    my $callers_bitmask =
+	 @callers_bitmask ? $callers_bitmask[0] // $DEFAULT : 0 ;
 
     my @results;
     foreach my $type (FATAL, NORMAL) {

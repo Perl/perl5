@@ -175,6 +175,7 @@ ok ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');
 
 {
     package Pickup;
+    no warnings "deprecated";
     use UNIVERSAL qw( isa can VERSION );
 
     ::ok isa "Pickup", UNIVERSAL;

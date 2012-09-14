@@ -336,6 +336,7 @@ our %DeadBits = (
   );
 
 $NONE     = "\0\0\0\0\0\0\0\0\0\0\0\0\0";
+$DEFAULT  = "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00", # [2,4,22,23,25]
 $LAST_BIT = 102 ;
 $BYTES    = 13 ;
 
@@ -387,7 +388,7 @@ sub import
 {
     shift;
 
-    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $NONE) ;
+    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
@@ -403,7 +404,7 @@ sub unimport
     shift;
 
     my $catmask ;
-    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $NONE) ;
+    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $DEFAULT) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
@@ -482,8 +483,11 @@ sub __chk
         $i = _error_loc(); # see where Carp will allocate the error
     }
 
-    # Defaulting this to 0 reduces complexity in code paths below.
-    my $callers_bitmask = (caller($i))[9] || 0 ;
+    # Default to 0 if caller returns nothing.  Default to $DEFAULT if it
+    # explicitly returns undef.
+    my(@callers_bitmask) = (caller($i))[9] ;
+    my $callers_bitmask =
+	 @callers_bitmask ? $callers_bitmask[0] // $DEFAULT : 0 ;
 
     my @results;
     foreach my $type (FATAL, NORMAL) {

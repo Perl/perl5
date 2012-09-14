@@ -54,7 +54,7 @@ Unrecognized escape \m passed through in regex; marked by <-- HERE in m/a\m <-- 
 ########
 # regcomp.c [S_regatom]
 # The \q should warn, the \_ should NOT warn.
-use warnings 'regexp';
+use warnings 'regexp'; no warnings "deprecated";
 "foo" =~ /\q/;
 "foo" =~ /\q{/;
 "foo" =~ /\w{/;
