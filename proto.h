@@ -6796,26 +6796,28 @@ STATIC bool	S_reginclass(pTHX_ const regexp * const prog, const regnode * const 
 #define PERL_ARGS_ASSERT_REGINCLASS	\
 	assert(n); assert(p)
 
-STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
+STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGMATCH	\
-	assert(reginfo); assert(prog)
+	assert(reginfo); assert(startpos); assert(prog)
 
-STATIC I32	S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
+STATIC I32	S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 max, int depth)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGREPEAT	\
-	assert(prog); assert(p)
+	assert(prog); assert(startposp); assert(p)
 
-STATIC I32	S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
+STATIC I32	S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGTRY	\
-	assert(reginfo); assert(startpos)
+	assert(reginfo); assert(startposp)
 
 STATIC void	S_to_byte_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);

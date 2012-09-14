@@ -2006,9 +2006,9 @@ Es	|U8	|regtail_study	|NN struct RExC_state_t *pRExC_state \
 #endif
 
 #if defined(PERL_IN_REGEXEC_C)
-ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN regnode *prog
-ERs	|I32	|regrepeat	|NN const regexp *prog|NN const regnode *p|I32 max|int depth
-ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startpos
+ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
+ERs	|I32	|regrepeat	|NN const regexp *prog|NN char **startposp|NN const regnode *p|I32 max|int depth
+ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p|NULLOK STRLEN *lenp\
 				|bool const do_utf8sv_is_utf8
 Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor

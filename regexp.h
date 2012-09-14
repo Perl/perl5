@@ -775,7 +775,6 @@ typedef struct regmatch_slab {
 
 #define PL_reg_flags		PL_reg_state.re_state_reg_flags
 #define PL_bostr		PL_reg_state.re_state_bostr
-#define PL_reginput		PL_reg_state.re_state_reginput
 #define PL_regeol		PL_reg_state.re_state_regeol
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
 #define PL_reg_magic		PL_reg_state.re_state_reg_magic
@@ -800,7 +799,6 @@ struct re_save_state {
     bool re_state_reg_match_utf8;	/* from regexec.c */
     bool re_reparsing;			/* runtime (?{}) fed back into parser */
     char *re_state_bostr;
-    char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
     PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
