@@ -13544,7 +13544,12 @@ sub compile_perl() {
 
     my $ri = $perl->add_match_table('_X_RI', Perl_Extension => 1,
                                     Fate => $INTERNAL_ONLY);
-    $ri += $gcb->table('RI') if $v_version ge v6.2;
+    if ($v_version ge v6.2) {
+        $ri += $gcb->table('RI');
+    }
+    else {
+        push @tables_that_may_be_empty, $ri->full_name;
+    }
 
     my $specials_begin = $perl->add_match_table('_X_Special_Begin',
                                        Perl_Extension => 1,

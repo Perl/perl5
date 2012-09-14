@@ -89,7 +89,7 @@ extern const struct regexp_engine my_reg_engine;
 #include "dquote_static.c"
 #include "charclass_invlists.h"
 #include "inline_invlist.c"
-#include "utf8_strings.h"
+#include "unicode_constants.h"
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
@@ -7013,9 +7013,10 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * list.)
  * Taking the complement (inverting) an inversion list is quite simple, if the
  * first element is 0, remove it; otherwise add a 0 element at the beginning.
- * This implementation reserves an element at the beginning of each inversion list
- * to contain 0 when the list contains 0, and contains 1 otherwise.  The actual
- * beginning of the list is either that element if 0, or the next one if 1.
+ * This implementation reserves an element at the beginning of each inversion
+ * list to contain 0 when the list contains 0, and contains 1 otherwise.  The
+ * actual beginning of the list is either that element if 0, or the next one if
+ * 1.
  *
  * More about inversion lists can be found in "Unicode Demystified"
  * Chapter 13 by Richard Gillam, published by Addison-Wesley.

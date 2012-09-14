@@ -81,7 +81,7 @@
 #endif
 
 #include "inline_invlist.c"
-#include "utf8_strings.h"
+#include "unicode_constants.h"
 
 #define RF_tainted	1	/* tainted information used? e.g. locale */
 #define RF_warned	2		/* warned about big count? */
@@ -145,14 +145,7 @@
         /* No asserts are done for some of these, in case called on a   */  \
         /* Unicode version in which they map to nothing */                  \
 	LOAD_UTF8_CHARCLASS(X_regular_begin, HYPHEN_UTF8);                          \
-	LOAD_UTF8_CHARCLASS_NO_CHECK(X_special_begin);                      \
 	LOAD_UTF8_CHARCLASS(X_extend, COMBINING_GRAVE_ACCENT_UTF8);         \
-	LOAD_UTF8_CHARCLASS_NO_CHECK(X_prepend);/* empty in most releases*/ \
-	LOAD_UTF8_CHARCLASS(X_L, HANGUL_CHOSEONG_KIYEOK_UTF8);	            \
-	LOAD_UTF8_CHARCLASS(X_LV_LVT_V, HANGUL_JUNGSEONG_FILLER_UTF8);      \
-	LOAD_UTF8_CHARCLASS_NO_CHECK(X_RI);    /* empty in many releases */ \
-	LOAD_UTF8_CHARCLASS(X_T, HANGUL_JONGSEONG_KIYEOK_UTF8);             \
-	LOAD_UTF8_CHARCLASS(X_V, HANGUL_JUNGSEONG_FILLER_UTF8)
 
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
 
@@ -4026,7 +4019,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
                It turns out that 98.4% of all Unicode code points match
                Regular_Begin.  Doing it this way eliminates a table match in
-               the previouls implementation for almost all Unicode code points.
+               the previous implementation for almost all Unicode code points.
 
 	       There is a subtlety with Prepend* which showed up in testing.
 	       Note that the Begin, and only the Begin is required in:
@@ -4058,6 +4051,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    locinput += 2;
 		}
 		else {
+                    STRLEN len;
+
 		    /* In case have to backtrack to beginning, then match '.' */
 		    char *starting = locinput;
 
@@ -4066,16 +4061,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
 		    LOAD_UTF8_CHARCLASS_GCB();
 
-                    /* Match (prepend)*, but don't bother trying if empty (as
-                     * being set to _undef indicates) */
-                    if (PL_utf8_X_prepend != &PL_sv_undef) {
-                        while (locinput < PL_regeol
-                               && swash_fetch(PL_utf8_X_prepend,
-                                              (U8*)locinput, utf8_target))
-                        {
-                            previous_prepend = locinput;
-                            locinput += UTF8SKIP(locinput);
-                        }
+                    /* Match (prepend)*   */
+                    while (locinput < PL_regeol
+                           && (len = is_GCB_Prepend_utf8(locinput)))
+                    {
+                        previous_prepend = locinput;
+                        locinput += len;
                     }
 
 		    /* As noted above, if we matched a prepend character, but
@@ -4083,8 +4074,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		     * matched, as it is guaranteed to match the begin */
 		    if (previous_prepend
 			&& (locinput >=  PL_regeol
-			    || ! swash_fetch(PL_utf8_X_regular_begin,
-					     (U8*)locinput, utf8_target)))
+			    || (! swash_fetch(PL_utf8_X_regular_begin,
+					     (U8*)locinput, utf8_target)
+			         && ! is_GCB_SPECIAL_BEGIN_utf8(locinput)))
+                        )
 		    {
 			locinput = previous_prepend;
 		    }
@@ -4098,9 +4091,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                                     (U8*)locinput, utf8_target)) {
                         locinput += UTF8SKIP(locinput);
                     }
-                    else if (! swash_fetch(PL_utf8_X_special_begin,
-					(U8*)locinput, utf8_target))
-			{
+                    else if (! is_GCB_SPECIAL_BEGIN_utf8(locinput)) {
 
 			/* Here did not match the required 'Begin' in the
 			 * second term.  So just match the very first
@@ -4112,26 +4103,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                         /* Here is a special begin.  It can be composed of
                          * several individual characters.  One possibility is
                          * RI+ */
-                        if (swash_fetch(PL_utf8_X_RI,
-                                        (U8*)locinput, utf8_target))
-                        {
-                            locinput += UTF8SKIP(locinput);
+                        if ((len = is_GCB_RI_utf8(locinput))) {
+                            locinput += len;
                             while (locinput < PL_regeol
-                                    && swash_fetch(PL_utf8_X_RI,
-                                                    (U8*)locinput, utf8_target))
+                                   && (len = is_GCB_RI_utf8(locinput)))
                             {
-                                locinput += UTF8SKIP(locinput);
+                                locinput += len;
                             }
-                        } else /* Another possibility is T+ */
-                               if (swash_fetch(PL_utf8_X_T,
-                                               (U8*)locinput, utf8_target))
-                        {
-                            locinput += UTF8SKIP(locinput);
+                        } else if ((len = is_GCB_T_utf8(locinput))) {
+                            /* Another possibility is T+ */
+                            locinput += len;
                             while (locinput < PL_regeol
-                                    && swash_fetch(PL_utf8_X_T,
-                                                    (U8*)locinput, utf8_target))
+                                && (len = is_GCB_T_utf8(locinput)))
                             {
-                                locinput += UTF8SKIP(locinput);
+                                locinput += len;
                             }
                         } else {
 
@@ -4142,10 +4127,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 
                             /* Match L*           */
                             while (locinput < PL_regeol
-                                    && swash_fetch(PL_utf8_X_L,
-                                                    (U8*)locinput, utf8_target))
+                                   && (len = is_GCB_L_utf8(locinput)))
                             {
-                                locinput += UTF8SKIP(locinput);
+                                locinput += len;
                             }
 
                             /* Here, have exhausted L*.  If the next character
@@ -4155,8 +4139,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                              * Are done. */
 
                             if (locinput < PL_regeol
-                                && swash_fetch(PL_utf8_X_LV_LVT_V,
-                                                (U8*)locinput, utf8_target))
+                                && is_GCB_LV_LVT_V_utf8(locinput))
                             {
 
                                 /* Otherwise keep going.  Must be LV, LVT or V.
@@ -4169,22 +4152,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                                      * V*     */
                                     locinput += UTF8SKIP(locinput);
                                     while (locinput < PL_regeol
-                                            && swash_fetch(PL_utf8_X_V,
-                                                           (U8*)locinput,
-                                                           utf8_target))
+                                           && (len = is_GCB_V_utf8(locinput)))
                                     {
-                                        locinput += UTF8SKIP(locinput);
+                                        locinput += len;
                                     }
                                 }
 
                                 /* And any of LV, LVT, or V can be followed
-                                    * by T*            */
+                                 * by T*            */
                                 while (locinput < PL_regeol
-                                        && swash_fetch(PL_utf8_X_T,
-                                                        (U8*)locinput,
-                                                        utf8_target))
+                                       && (len = is_GCB_T_utf8(locinput)))
                                 {
-                                    locinput += UTF8SKIP(locinput);
+                                    locinput += len;
                                 }
                             }
                         }
@@ -7334,6 +7313,74 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 		prog->check_substr = sv;
 	}
     } while (i--);
+}
+
+/* These constants are for finding GCB=LV and GCB=LVT.  These are for the
+ * pre-composed Hangul syllables, which are all in a contiguous block and
+ * arranged there in such a way so as to facilitate alorithmic determination of
+ * their characteristics.  As such, they don't need a swash, but can be
+ * determined by simple arithmetic.  Almost all are GCB=LVT, but every 28th one
+ * is a GCB=LV */
+#define SBASE 0xAC00    /* Start of block */
+#define SCount 11172    /* Length of block */
+#define TCount 28
+
+#if 0   /* This routine is not currently used */
+PERL_STATIC_INLINE bool
+S_is_utf8_X_LV(pTHX_ const U8 *p)
+{
+    /* Unlike most other similarly named routines here, this does not create a
+     * swash, so swash_fetch() cannot be used on PL_utf8_X_LV. */
+
+    dVAR;
+
+    UV cp = valid_utf8_to_uvchr(p, NULL);
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LV;
+
+    /* The earliest Unicode releases did not have these precomposed Hangul
+     * syllables.  Set to point to undef in that case, so will return false on
+     * every call */
+    if (! PL_utf8_X_LV) {   /* Set up if this is the first time called */
+        PL_utf8_X_LV = swash_init("utf8", "_X_GCB_LV", &PL_sv_undef, 1, 0);
+        if (_invlist_len(_get_swash_invlist(PL_utf8_X_LV)) == 0) {
+            SvREFCNT_dec(PL_utf8_X_LV);
+            PL_utf8_X_LV = &PL_sv_undef;
+        }
+    }
+
+    return (PL_utf8_X_LV != &PL_sv_undef
+            && cp >= SBASE && cp < SBASE + SCount
+            && (cp - SBASE) % TCount == 0); /* Only every TCount one is LV */
+}
+#endif
+
+PERL_STATIC_INLINE bool
+S_is_utf8_X_LVT(pTHX_ const U8 *p)
+{
+    /* Unlike most other similarly named routines here, this does not create a
+     * swash, so swash_fetch() cannot be used on PL_utf8_X_LVT. */
+
+    dVAR;
+
+    UV cp = valid_utf8_to_uvchr(p, NULL);
+
+    PERL_ARGS_ASSERT_IS_UTF8_X_LVT;
+
+    /* The earliest Unicode releases did not have these precomposed Hangul
+     * syllables.  Set to point to undef in that case, so will return false on
+     * every call */
+    if (! PL_utf8_X_LVT) {   /* Set up if this is the first time called */
+        PL_utf8_X_LVT = swash_init("utf8", "_X_GCB_LVT", &PL_sv_undef, 1, 0);
+        if (_invlist_len(_get_swash_invlist(PL_utf8_X_LVT)) == 0) {
+            SvREFCNT_dec(PL_utf8_X_LVT);
+            PL_utf8_X_LVT = &PL_sv_undef;
+        }
+    }
+
+    return (PL_utf8_X_LVT != &PL_sv_undef
+            && cp >= SBASE && cp < SBASE + SCount
+            && (cp - SBASE) % TCount != 0); /* All but every TCount one is LV */
 }
 
 /*

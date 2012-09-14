@@ -789,9 +789,6 @@
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
 #endif
-#if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
-#define _is_utf8_quotemeta(a)	Perl__is_utf8_quotemeta(aTHX_ a)
-#endif
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
@@ -855,16 +852,8 @@
 #define _is_utf8__perl_idstart(a)	Perl__is_utf8__perl_idstart(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
-#define is_utf8_X_L(a)		Perl_is_utf8_X_L(aTHX_ a)
-#define is_utf8_X_LVT(a)	Perl_is_utf8_X_LVT(aTHX_ a)
-#define is_utf8_X_LV_LVT_V(a)	Perl_is_utf8_X_LV_LVT_V(aTHX_ a)
-#define is_utf8_X_RI(a)		Perl_is_utf8_X_RI(aTHX_ a)
-#define is_utf8_X_T(a)		Perl_is_utf8_X_T(aTHX_ a)
-#define is_utf8_X_V(a)		Perl_is_utf8_X_V(aTHX_ a)
 #define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
-#define is_utf8_X_prepend(a)	Perl_is_utf8_X_prepend(aTHX_ a)
 #define is_utf8_X_regular_begin(a)	Perl_is_utf8_X_regular_begin(aTHX_ a)
-#define is_utf8_X_special_begin(a)	Perl_is_utf8_X_special_begin(aTHX_ a)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #define reg_named_buff(a,b,c,d)	Perl_reg_named_buff(aTHX_ a,b,c,d)
@@ -975,6 +964,7 @@
 #  if defined(PERL_IN_REGEXEC_C)
 #define core_regclass_swash(a,b,c,d,e)	S_core_regclass_swash(aTHX_ a,b,c,d,e)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
+#define is_utf8_X_LVT(a)	S_is_utf8_X_LVT(aTHX_ a)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
 #define regcppop(a)		S_regcppop(aTHX_ a)
 #define regcppush(a,b)		S_regcppush(aTHX_ a,b)

@@ -614,7 +614,6 @@ EXp        |UV        |_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_or_s
-ApRM	|bool	|_is_utf8_quotemeta|NN const U8 *p
 #endif
 Ap	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
 Amp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
@@ -661,16 +660,7 @@ ApR	|bool	|is_utf8_punct	|NN const U8 *p
 ApR	|bool	|is_utf8_xdigit	|NN const U8 *p
 ApR	|bool	|is_utf8_mark	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_extend	|NN const U8 *p
-EXpR	|bool	|is_utf8_X_prepend	|NN const U8 *p
 EXpR	|bool	|is_utf8_X_regular_begin|NN const U8 *p
-EXpR	|bool	|is_utf8_X_special_begin|NN const U8 *p
-EXpR	|bool	|is_utf8_X_L		|NN const U8 *p
-EXpR	|bool	|is_utf8_X_RI		|NN const U8 *p
-:not currently used EXpR	|bool	|is_utf8_X_LV		|NN const U8 *p
-EXpR	|bool	|is_utf8_X_LVT		|NN const U8 *p
-EXpR	|bool	|is_utf8_X_LV_LVT_V	|NN const U8 *p
-EXpR	|bool	|is_utf8_X_T		|NN const U8 *p
-EXpR	|bool	|is_utf8_X_V		|NN const U8 *p
 : Used in perly.y
 p	|OP*	|jmaybe		|NN OP *o
 : Used in pp.c 
@@ -2027,6 +2017,8 @@ ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim
 ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
+:not currently used EiR	|bool	|is_utf8_X_LV		|NN const U8 *p
+EiR	|bool	|is_utf8_X_LVT		|NN const U8 *p
 #ifdef XXX_dmq
 ERsn	|U8*	|reghop4	|NN U8 *s|I32 off|NN const U8 *llim \
 				|NN const U8 *rlim

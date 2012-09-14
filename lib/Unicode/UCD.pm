@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 
 require Exporter;
 
@@ -2017,7 +2017,8 @@ by the input parameter string:
  prints:
  0, 1114112
 
-An empty list is returned if the input is unknown; the number of elements in
+If the input is unknown C<undef> is returned in scalar context; an empty-list
+in list context.  If the input is known, the number of elements in
 the list is returned if called in scalar context.
 
 L<perluniprops|perluniprops/Properties accessible through \p{} and \P{}> gives

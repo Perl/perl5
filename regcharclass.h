@@ -12,17 +12,15 @@
  * Any changes made here will be lost!
  */
 
+
+#ifndef H_REGCHARCLASS   /* Guard against nested #includes */
+#define H_REGCHARCLASS 1
+
 /*
 	LNBREAK: Line Break: \R
 
 	"\x0D\x0A"      # CRLF - Network (Windows) line ending
-	0x0A            # LF  | LINE FEED
-	0x0B            # VT  | VERTICAL TAB
-	0x0C            # FF  | FORM FEED
-	0x0D            # CR  | CARRIAGE RETURN
-	0x85            # NEL | NEXT LINE
-	0x2028          # LINE SEPARATOR
-	0x2029          # PARAGRAPH SEPARATOR
+	\p{VertSpace}
 */
 /*** GENERATED CODE ***/
 #define is_LNBREAK(s,is_utf8)                                               \
@@ -33,7 +31,7 @@
     ( ( 0xC2 == ((U8*)s)[0] ) ?                                             \
 	( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                                 \
     : ( 0xE2 == ((U8*)s)[0] ) ?                                             \
-	( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+	( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
     : 0 )                                                                   \
 : ( 0x85 == ((U8*)s)[0] ) )
 
@@ -47,7 +45,7 @@
 	( ( 0xC2 == ((U8*)s)[0] ) ?                                         \
 	    ( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                             \
 	: ( 0xE2 == ((U8*)s)[0] ) ?                                         \
-	    ( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+	    ( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
 	: 0 )                                                               \
     : ( 0x85 == ((U8*)s)[0] ) )                                             \
 : ((e)-(s) > 1) ?                                                           \
@@ -72,7 +70,7 @@
 : ( 0xC2 == ((U8*)s)[0] ) ?                                                 \
     ( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                                     \
 : ( 0xE2 == ((U8*)s)[0] ) ?                                                 \
-    ( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+    ( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
 : 0 )
 
 /*** GENERATED CODE ***/
@@ -84,7 +82,7 @@
     : ( 0xC2 == ((U8*)s)[0] ) ?                                             \
 	( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                                 \
     : ( 0xE2 == ((U8*)s)[0] ) ?                                             \
-	( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+	( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
     : 0 )                                                                   \
 : ((e)-(s) > 1) ?                                                           \
     ( ( 0x0A <= ((U8*)s)[0] && ((U8*)s)[0] <= 0x0C ) ? 1                    \
@@ -118,25 +116,7 @@
 /*
 	HORIZWS: Horizontal Whitespace: \h \H
 
-	0x09            # HT
-	0x20            # SPACE
-	0xa0            # NBSP
-	0x1680          # OGHAM SPACE MARK
-	0x180e          # MONGOLIAN VOWEL SEPARATOR
-	0x2000          # EN QUAD
-	0x2001          # EM QUAD
-	0x2002          # EN SPACE
-	0x2003          # EM SPACE
-	0x2004          # THREE-PER-EM SPACE
-	0x2005          # FOUR-PER-EM SPACE
-	0x2006          # SIX-PER-EM SPACE
-	0x2007          # FIGURE SPACE
-	0x2008          # PUNCTUATION SPACE
-	0x2009          # THIN SPACE
-	0x200A          # HAIR SPACE
-	0x202f          # NARROW NO-BREAK SPACE
-	0x205f          # MEDIUM MATHEMATICAL SPACE
-	0x3000          # IDEOGRAPHIC SPACE
+	\p{HorizSpace}
 */
 /*** GENERATED CODE ***/
 #define is_HORIZWS(s,is_utf8)                                               \
@@ -209,7 +189,7 @@
     : 0 )                                                                   \
 : ( 0xE2 == ((U8*)s)[0] ) ?                                                 \
     ( ( 0x80 == ((U8*)s)[1] ) ?                                             \
-	( ( ( 0x80 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x8A ) || 0xAF == ((U8*)s)[2] ) ? 3 : 0 )\
+	( ( ( ((U8*)s)[2] <= 0x8A ) || 0xAF == ((U8*)s)[2] ) ? 3 : 0 )      \
     : ( 0x81 == ((U8*)s)[1] ) ?                                             \
 	( ( 0x9F == ((U8*)s)[2] ) ? 3 : 0 )                                 \
     : 0 )                                                                   \
@@ -272,13 +252,7 @@
 /*
 	VERTWS: Vertical Whitespace: \v \V
 
-	0x0A            # LF
-	0x0B            # VT
-	0x0C            # FF
-	0x0D            # CR
-	0x85            # NEL
-	0x2028          # LINE SEPARATOR
-	0x2029          # PARAGRAPH SEPARATOR
+	\p{VertSpace}
 */
 /*** GENERATED CODE ***/
 #define is_VERTWS(s,is_utf8)                                                \
@@ -287,7 +261,7 @@
     ( ( 0xC2 == ((U8*)s)[0] ) ?                                             \
 	( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                                 \
     : ( 0xE2 == ((U8*)s)[0] ) ?                                             \
-	( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+	( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
     : 0 )                                                                   \
 : ( 0x85 == ((U8*)s)[0] ) )
 
@@ -299,7 +273,7 @@
 	( ( 0xC2 == ((U8*)s)[0] ) ?                                         \
 	    ( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                             \
 	: ( 0xE2 == ((U8*)s)[0] ) ?                                         \
-	    ( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+	    ( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
 	: 0 )                                                               \
     : ( 0x85 == ((U8*)s)[0] ) )                                             \
 : ((e)-(s) > 1) ?                                                           \
@@ -320,7 +294,7 @@
 : ( 0xC2 == ((U8*)s)[0] ) ?                                                 \
     ( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                                     \
 : ( 0xE2 == ((U8*)s)[0] ) ?                                                 \
-    ( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+    ( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
 : 0 )
 
 /*** GENERATED CODE ***/
@@ -330,7 +304,7 @@
     : ( 0xC2 == ((U8*)s)[0] ) ?                                             \
 	( ( 0x85 == ((U8*)s)[1] ) ? 2 : 0 )                                 \
     : ( 0xE2 == ((U8*)s)[0] ) ?                                             \
-	( ( ( 0x80 == ((U8*)s)[1] ) && ( 0xA8 == ((U8*)s)[2] || 0xA9 == ((U8*)s)[2] ) ) ? 3 : 0 )\
+	( ( ( 0x80 == ((U8*)s)[1] ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
     : 0 )                                                                   \
 : ((e)-(s) > 1) ?                                                           \
     ( ( 0x0A <= ((U8*)s)[0] && ((U8*)s)[0] <= 0x0D ) ? 1                    \
@@ -358,5 +332,246 @@
 ( 0x2028 == cp || ( 0x2028 < cp &&                                          \
 0x2029 == cp ) ) ) ) ) )
 
+/*
+	REPLACEMENT: Unicode REPLACEMENT CHARACTER
+
+	0xFFFD
+*/
+/*** GENERATED CODE ***/
+#define is_REPLACEMENT_utf8_safe(s,e)                                       \
+( ( ( ( ((e)-(s) > 2) && ( 0xEF == ((U8*)s)[0] ) ) && ( 0xBF == ((U8*)s)[1] ) ) && ( 0xBD == ((U8*)s)[2] ) ) ? 3 : 0 )
+
+/*
+	NONCHAR: Non character code points
+
+	\p{Nchar}
+*/
+/*** GENERATED CODE ***/
+#define is_NONCHAR_utf8(s)                                                  \
+( ( 0xEF == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xB7 == ((U8*)s)[1] ) ?                                             \
+	( ( 0x90 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xAF ) ? 3 : 0 )          \
+    : ( 0xBF == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xBE ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x9F == ((U8*)s)[1] || 0xAF == ((U8*)s)[1] || 0xBF == ((U8*)s)[1] ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xBE ) ) ? 4 : 0 )\
+: ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF3 ) ?                          \
+    ( ( ( ( ( ((U8*)s)[1] & 0xCF ) == 0x8F ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xBE ) ) ? 4 : 0 )\
+: ( 0xF4 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x8F == ((U8*)s)[1] ) && ( 0xBF == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xBE ) ) ? 4 : 0 )\
+: 0 )
+
+/*
+	SURROGATE: Surrogate characters
+
+	\p{Gc=Cs}
+*/
+/*** GENERATED CODE ***/
+#define is_SURROGATE_utf8(s)                                                \
+( ( ( 0xED == ((U8*)s)[0] ) && ( ((U8*)s)[1] >= 0xA0 ) ) ? 3 : 0 )
+
+/*
+	GCB_L: Grapheme_Cluster_Break=L
+
+	\p{_X_GCB_L}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_L_utf8(s)                                                    \
+( ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x84 == ((U8*)s)[1] ) ?                                             \
+	3                                                                   \
+    : ( 0x85 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0x9F ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: ( 0xEA == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( 0xA5 == ((U8*)s)[1] ) && ( 0xA0 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBC ) ) ? 3 : 0 )\
+: 0 )
+
+/*
+	GCB_LV_LVT_V: Grapheme_Cluster_Break=(LV or LVT or V)
+
+	\p{_X_LV_LVT_V}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_LV_LVT_V_utf8(s)                                             \
+( ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x85 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xA0 ) ? 3 : 0 )                                 \
+    : ( 0x86 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0xA7 ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: ( 0xEA == ((U8*)s)[0] ) ?                                                 \
+    ( ( ((U8*)s)[1] >= 0xB0 ) ?                                             \
+	3                                                                   \
+    : 0 )                                                                   \
+: ( 0xEB == ((U8*)s)[0] || 0xEC == ((U8*)s)[0] ) ?                          \
+    3                                                                       \
+: ( 0xED == ((U8*)s)[0] ) ?                                                 \
+    ( ( ((U8*)s)[1] <= 0x9D ) ?                                             \
+	3                                                                   \
+    : ( 0x9E == ((U8*)s)[1] ) ?                                             \
+	( ( ( ((U8*)s)[2] <= 0xA3 ) || ( ((U8*)s)[2] >= 0xB0 ) ) ? 3 : 0 )  \
+    : ( 0x9F == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0x86 ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: 0 )
+
+/*
+	GCB_Prepend: Grapheme_Cluster_Break=Prepend
+
+	\p{_X_GCB_Prepend}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_Prepend_utf8(s)                                              \
+( 0 )
+
+/*
+	GCB_RI: Grapheme_Cluster_Break=RI
+
+	\p{_X_RI}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_RI_utf8(s)                                                   \
+( ( ( ( ( 0xF0 == ((U8*)s)[0] ) && ( 0x9F == ((U8*)s)[1] ) ) && ( 0x87 == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xA6 ) ) ? 4 : 0 )
+
+/*
+	GCB_SPECIAL_BEGIN: Grapheme_Cluster_Break=special_begins
+
+	\p{_X_Special_Begin}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_SPECIAL_BEGIN_utf8(s)                                        \
+( ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ((U8*)s)[1] & 0xFC ) == 0x84 ) ?                                  \
+	3                                                                   \
+    : 0 )                                                                   \
+: ( 0xEA == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xA5 == ((U8*)s)[1] ) ?                                             \
+	( ( 0xA0 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBC ) ? 3 : 0 )          \
+    : ( ((U8*)s)[1] >= 0xB0 ) ?                                             \
+	3                                                                   \
+    : 0 )                                                                   \
+: ( 0xEB == ((U8*)s)[0] || 0xEC == ((U8*)s)[0] ) ?                          \
+    3                                                                       \
+: ( 0xED == ((U8*)s)[0] ) ?                                                 \
+    ( ( ((U8*)s)[1] <= 0x9D ) ?                                             \
+	3                                                                   \
+    : ( 0x9E == ((U8*)s)[1] ) ?                                             \
+	( ( ( ((U8*)s)[2] <= 0xA3 ) || ( ((U8*)s)[2] >= 0xB0 ) ) ? 3 : 0 )  \
+    : ( 0x9F == ((U8*)s)[1] ) ?                                             \
+	( ( ( ((U8*)s)[2] <= 0x86 ) || ( 0x8B <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBB ) ) ? 3 : 0 )\
+    : 0 )                                                                   \
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x9F == ((U8*)s)[1] ) && ( 0x87 == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xA6 ) ) ? 4 : 0 )\
+: 0 )
+
+/*
+	GCB_T: Grapheme_Cluster_Break=T
+
+	\p{_X_GCB_T}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_T_utf8(s)                                                    \
+( ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x86 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xA8 ) ? 3 : 0 )                                 \
+    : ( 0x87 == ((U8*)s)[1] ) ?                                             \
+	3                                                                   \
+    : 0 )                                                                   \
+: ( 0xED == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( 0x9F == ((U8*)s)[1] ) && ( 0x8B <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xBB ) ) ? 3 : 0 )\
+: 0 )
+
+/*
+	GCB_V: Grapheme_Cluster_Break=V
+
+	\p{_X_GCB_V}
+*/
+/*** GENERATED CODE ***/
+#define is_GCB_V_utf8(s)                                                    \
+( ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x85 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xA0 ) ? 3 : 0 )                                 \
+    : ( 0x86 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0xA7 ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: ( 0xED == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x9E == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xB0 ) ? 3 : 0 )                                 \
+    : ( 0x9F == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0x86 ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: 0 )
+
+/*
+	QUOTEMETA: Meta-characters that \Q should quote
+
+	\p{_Perl_Quotemeta}
+*/
+/*** GENERATED CODE ***/
+#define is_QUOTEMETA_high(s)                                                \
+( ( 0xCD == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x8F == ((U8*)s)[1] ) ? 2 : 0 )                                     \
+: ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x85 == ((U8*)s)[1] ) ?                                             \
+	( ( 0x9F == ((U8*)s)[2] || 0xA0 == ((U8*)s)[2] ) ? 3 : 0 )          \
+    : ( 0x9A == ((U8*)s)[1] ) ?                                             \
+	( ( 0x80 == ((U8*)s)[2] ) ? 3 : 0 )                                 \
+    : ( 0x9E == ((U8*)s)[1] ) ?                                             \
+	( ( ( ((U8*)s)[2] & 0xFE ) == 0xB4 ) ? 3 : 0 )                      \
+    : ( 0xA0 == ((U8*)s)[1] ) ?                                             \
+	( ( 0x8B <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x8E ) ? 3 : 0 )          \
+    : 0 )                                                                   \
+: ( 0xE2 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x80 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0xBE ) ? 3 : 0 )                                 \
+    : ( 0x81 == ((U8*)s)[1] ) ?                                             \
+	( ( ( 0x81 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x93 ) || ( 0x95 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xAF ) ) ? 3 : 0 )\
+    : ( 0x86 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0x90 ) ? 3 : 0 )                                 \
+    : ( 0x87 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0x90 ) ?                      \
+	3                                                                   \
+    : ( 0x91 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0x9F ) ? 3 : 0 )                                 \
+    : ( 0x94 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0x9C ) ?                      \
+	3                                                                   \
+    : ( 0x9D == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0xB5 ) ? 3 : 0 )                                 \
+    : ( 0x9E == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0x94 ) ? 3 : 0 )                                 \
+    : ( ( 0x9F <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xAF ) || ( ((U8*)s)[1] & 0xFE ) == 0xB8 ) ?\
+	3                                                                   \
+    : 0 )                                                                   \
+: ( 0xE3 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0x80 == ((U8*)s)[1] ) ?                                             \
+	( ( ( ((U8*)s)[2] <= 0x83 ) || ( 0x88 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xA0 ) || 0xB0 == ((U8*)s)[2] ) ? 3 : 0 )\
+    : ( 0x85 == ((U8*)s)[1] ) ?                                             \
+	( ( 0xA4 == ((U8*)s)[2] ) ? 3 : 0 )                                 \
+    : 0 )                                                                   \
+: ( 0xEF == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xB4 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] >= 0xBE ) ? 3 : 0 )                                 \
+    : ( 0xB8 == ((U8*)s)[1] ) ?                                             \
+	( ( ((U8*)s)[2] <= 0x8F ) ? 3 : 0 )                                 \
+    : ( 0xB9 == ((U8*)s)[1] ) ?                                             \
+	( ( 0x85 == ((U8*)s)[2] || 0x86 == ((U8*)s)[2] ) ? 3 : 0 )          \
+    : ( 0xBB == ((U8*)s)[1] ) ?                                             \
+	( ( 0xBF == ((U8*)s)[2] ) ? 3 : 0 )                                 \
+    : ( 0xBE == ((U8*)s)[1] ) ?                                             \
+	( ( 0xA0 == ((U8*)s)[2] ) ? 3 : 0 )                                 \
+    : ( 0xBF == ((U8*)s)[1] ) ?                                             \
+	( ( 0xB0 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xB8 ) ? 3 : 0 )          \
+    : 0 )                                                                   \
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x9D == ((U8*)s)[1] ) && ( 0x85 == ((U8*)s)[2] ) ) && ( 0xB3 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBA ) ) ? 4 : 0 )\
+: ( 0xF3 == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xA0 == ((U8*)s)[1] ) ?                                             \
+	4                                                                   \
+    : 0 )                                                                   \
+: 0 )
+
+
+#endif /* H_REGCHARCLASS */
 
 /* ex: set ro: */
