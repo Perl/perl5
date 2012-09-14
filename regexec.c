@@ -223,7 +223,7 @@
 	    sayNO;                                                            \
 	}                                                                     \
 	/* Matched a utf8-invariant, so don't have to worry about utf8 */     \
-	nextchr = UCHARAT(++locinput);                                        \
+	locinput++;                                        \
 	break;                                                                \
     case NNAMEA:                                                              \
 	if (locinput >= PL_regeol || FUNCA(nextchr)) {                        \
@@ -3313,6 +3313,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
       reenter_switch:
 
+        nextchr = UCHARAT(locinput);
         assert(nextchr >= 0);
 
 	switch (state_num) {
@@ -3374,7 +3375,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case CANY:
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
-	    nextchr = UCHARAT(++locinput);
+	    locinput++;
 	    break;
 	case REG_ANY:
 	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
@@ -3717,7 +3718,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    });
 
 	    locinput = (char*)uc;
-	    nextchr = UCHARAT(locinput);
 	    continue; /* execute rest of RE */
 	    assert(0); /* NOTREACHED */
         }
@@ -3785,7 +3785,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    }
 		}
 		locinput = l;
-		nextchr = UCHARAT(locinput);
 		break;
 	    }
 	    /* The target and the pattern have the same utf8ness. */
@@ -3797,7 +3796,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (ln > 1 && memNE(s, locinput, ln))
 		sayNO;
 	    locinput += ln;
-	    nextchr = UCHARAT(locinput);
 	    break;
 	    }
 	case EXACTFL: {
@@ -3847,7 +3845,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    sayNO;
 		}
 		locinput = e;
-		nextchr = UCHARAT(locinput);
 		break;
 	    }
 
@@ -3862,7 +3859,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (ln > 1 && ! folder(s, locinput, ln))
 		sayNO;
 	    locinput += ln;
-	    nextchr = UCHARAT(locinput);
 	    break;
 	}
 
@@ -3954,7 +3950,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, utf8_target))
 		    sayNO;
 		locinput += inclasslen;
-		nextchr = UCHARAT(locinput);
 		break;
 	    }
 	    else {
@@ -3962,7 +3957,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    sayNO;
 		if (!REGINCLASS(rex, scan, (U8*)locinput))
 		    sayNO;
-		nextchr = UCHARAT(++locinput);
+		locinput++;
 		break;
 	    }
 	    break;
@@ -3989,7 +3984,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sayNO;
             }
             /* Matched a utf8-invariant, so don't have to worry about utf8 */
-            nextchr = UCHARAT(++locinput);
+            locinput++;
             break;
         case NPOSIXA:
             if (locinput >= PL_regeol || _generic_isCC_A(nextchr, FLAGS(scan))) {
@@ -4180,7 +4175,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             exit_utf8:
 		if (locinput > PL_regeol) sayNO;
 	    }
-	    nextchr = UCHARAT(locinput);
 	    break;
             
 	case NREFFL:
@@ -4299,7 +4293,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    sayNO;
 		}
 		locinput = limit;
-		nextchr = UCHARAT(locinput);
 		break;
 	    }
 
@@ -4316,7 +4309,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			   : ! folder(s, locinput, ln)))
 		sayNO;
 	    locinput += ln;
-	    nextchr = UCHARAT(locinput);
 	    break;
 	}
 	case NOTHING:
@@ -5807,7 +5799,6 @@ NULL
 	    if (OP(ST.me) != SUSPEND) {
                 /* restore old position except for (?>...) */
 		locinput = st->locinput;
-		nextchr = UCHARAT(locinput);
 	    }
 	    scan = ST.me + ARG(ST.me);
 	    if (scan == ST.me)
@@ -5916,7 +5907,6 @@ NULL
         case LNBREAK:
             if ((n=is_LNBREAK(locinput,utf8_target))) {
                 locinput += n;
-                nextchr = UCHARAT(locinput);
             } else
                 sayNO;
             break;
@@ -5927,7 +5917,6 @@ NULL
 		sayNO;                                \
             if ((n=is_##nAmE(locinput,utf8_target))) {    \
                 locinput += n;                        \
-                nextchr = UCHARAT(locinput);          \
             } else                                    \
                 sayNO;                                \
             break;                                    \
@@ -5938,7 +5927,6 @@ NULL
                 sayNO;                                \
             } else {                                  \
                 locinput += UTF8SKIP(locinput);       \
-                nextchr = UCHARAT(locinput);          \
             }                                         \
             break
 
@@ -5958,10 +5946,9 @@ NULL
                 locinput += PL_utf8skip[nextchr];
                 if (locinput > PL_regeol)
                     sayNO;
-                nextchr = UCHARAT(locinput);
             }
             else
-                nextchr = UCHARAT(++locinput);
+                locinput++;
             break;
 	    
 	} /* end switch */ 
@@ -6010,7 +5997,6 @@ NULL
 	    PL_regmatch_state = newst;
 
 	    locinput = pushinput;
-	    nextchr = UCHARAT(locinput);
 	    st = newst;
 	    continue;
 	    assert(0); /* NOTREACHED */
@@ -6061,10 +6047,8 @@ yes:
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
         
-        if (no_final) {
+        if (no_final)
             locinput= st->locinput;
-            nextchr = UCHARAT(locinput);
-        }
 	state_num = st->resume_state + no_final;
 	goto reenter_switch;
     }
@@ -6109,7 +6093,6 @@ no_silent:
 	}
 	PL_regmatch_state = st;
 	locinput= st->locinput;
-	nextchr = UCHARAT(locinput);
 
 	DEBUG_STATE_pp("pop");
 	depth--;
