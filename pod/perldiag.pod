@@ -313,7 +313,7 @@ try to free it.
 
 =item Attempt to free unreferenced scalar: SV 0x%x
 
-(W internal) Perl went to decrement the reference count of a scalar to
+(S internal) Perl went to decrement the reference count of a scalar to
 see if it would go to 0, and discovered that it had already gone to 0
 earlier, and should have been freed, and in fact, probably was freed.
 This could indicate that SvREFCNT_dec() was called too many times, or
