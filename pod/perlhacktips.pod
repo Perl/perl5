@@ -1466,34 +1466,11 @@ write access to an op results in a C<SIGBUS> and abort.
 
 This code is intended for development only, and may not be portable
 even to all Unix variants. Also, it is an 80% solution, in that it
-isn't able to make all ops read only. Specifically it
+isn't able to make all ops read only. Specifically it does not apply to op
+slabs belonging to C<BEGIN> blocks.
 
-=over
-
-=item * 1
-
-Does not apply to op slabs belonging to C<BEGIN> blocks.
-
-=item * 2
-
-Turns an entire slab of ops read-write if the refcount of any op in the
-slab needs to be increased or decreased.  This means that anonymous
-closures will never have read-only ops, and thread creation will make all
-existing ops read-write.
-
-=item * 3
-
-Turns an entire slab of ops read-write if any op from the slab is
-freed.
-
-=back
-
-It's not possible to turn the slabs to read-only after an action
-requiring read-write access, as either can happen during op tree
-building time, so there may still be legitimate write access.
-
-However, as an 80% solution it is still effective, as currently it catches
-the setting of breakpoints in the debugger and some XSUB definitions.
+However, as an 80% solution it is still effective, as it has caught bugs in
+the past.
 
 =head2 The .i Targets
 
