@@ -3412,7 +3412,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* In this case the charclass data is available inline so
                we can fail fast without a lot of extra overhead. 
              */
-            if(!ANYOF_BITMAP_TEST(scan, *locinput)) {
+            if(!ANYOF_BITMAP_TEST(scan, nextchr)) {
                 DEBUG_EXECUTE_r(
                     PerlIO_printf(Perl_debug_log,
                               "%*s  %sfailed to match trie start class...%s\n",
@@ -3477,7 +3477,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
-                if (trie->bitmap && !TRIE_BITMAP_TEST(trie,*locinput) ) {
+                if (trie->bitmap && !TRIE_BITMAP_TEST(trie, nextchr) ) {
         	    if (trie->states[ state ].wordnum) {
         	         DEBUG_EXECUTE_r(
                             PerlIO_printf(Perl_debug_log,
