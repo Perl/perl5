@@ -692,10 +692,12 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     }
 
     packlen = HvNAMELEN_get(stash);
-    if (packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER")) {
+    if ((packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER"))
+     || (packlen == 5 && strEQ(hvname, "SUPER"))) {
         HV* basestash;
-        packlen -= 7;
-        basestash = gv_stashpvn(hvname, packlen,
+        basestash = packlen == 5
+		     ? PL_defstash
+		     : gv_stashpvn(hvname, packlen - 7,
                                 GV_ADD | (HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
         linear_av = mro_get_linear_isa(basestash);
     }

@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 107);
+plan(tests => 108);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -243,6 +243,12 @@ sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
    ::is $ret[0], 'OtherSaab',
       "->SUPER::method uses current package, not invocant";
 }  
+() = *SUPER::;
+{
+   local our @ISA = "Souper";
+   is eval { (main->SUPER::method)[0] }, 'main',
+      'Mentioning *SUPER:: does not stop ->SUPER from working in main';
+}
 
 # failed method call or UNIVERSAL::can() should not autovivify packages
 is( $::{"Foo::"} || "none", "none");  # sanity check 1
