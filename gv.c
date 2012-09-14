@@ -994,12 +994,12 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    /* ->SUPER::method should really be looked up in original stash */
 	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_
 		     "%"HEKf"::SUPER",
-		      HEKfARG(HvNAME_HEK((HV*)CopSTASH(PL_curcop)))
+		      HEKfARG(HvENAME_HEK((HV*)CopSTASH(PL_curcop)))
 	    ));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr), SvUTF8(tmpstr));
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
-			 origname, HvNAME_get(stash), name) );
+			 origname, HvENAME_get(stash), name) );
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */

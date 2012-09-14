@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 108);
+plan(tests => 109);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -248,6 +248,20 @@ sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
    local our @ISA = "Souper";
    is eval { (main->SUPER::method)[0] }, 'main',
       'Mentioning *SUPER:: does not stop ->SUPER from working in main';
+}
+{
+    BEGIN {
+        *Mover:: = *Mover2::;
+        *Mover2:: = *foo;
+    }
+    package Mover;
+    no strict;
+    # Not our(@ISA), because the bug we are testing for interacts with an
+    # our() bug that cancels this bug out.
+    @ISA = 'door';
+    sub door::dohtem { 'dohtem' }
+    ::is eval { Mover->SUPER::dohtem; }, 'dohtem',
+        'SUPER inside moved package';
 }
 
 # failed method call or UNIVERSAL::can() should not autovivify packages
