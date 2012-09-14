@@ -3313,6 +3313,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
       reenter_switch:
 
+        assert(nextchr >= 0);
+
 	switch (state_num) {
 	case BOL:
 	    if (locinput == PL_bostr)
@@ -3956,8 +3958,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		break;
 	    }
 	    else {
-		if (nextchr < 0)
-		    nextchr = UCHARAT(locinput);
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
 		if (!REGINCLASS(rex, scan, (U8*)locinput))
