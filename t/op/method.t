@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 101);
+plan(tests => 107);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -223,7 +223,26 @@ like ($@, qr/^\QCan't locate object method "foo" via package "E::F" at/);
 eval '$e = bless {}, "UNIVERSAL"; $e->E::F::foo()';
 like ($@, qr/^\QCan't locate object method "foo" via package "E::F" at/);
 
-# TODO: we need some tests for the SUPER:: pseudoclass
+# SUPER:: pseudoclass
+@Saab::ISA = "Souper";
+sub Souper::method { @_ }
+@OtherSaab::ISA = "OtherSouper";
+sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
+{
+   my $o = bless [], "Saab";
+   package Saab;
+   my @ret = $o->SUPER::method('whatever');
+   ::is $ret[0], $o, 'object passed to SUPER::method';
+   ::is $ret[1], 'whatever', 'argument passed to SUPER::method';
+   @ret = $o->SUPER'method('whatever');
+   ::is $ret[0], $o, "object passed to SUPER'method";
+   ::is $ret[1], 'whatever', "argument passed to SUPER'method";
+   @ret = Saab->SUPER::method;
+   ::is $ret[0], 'Saab', "package name passed to SUPER::method";
+   @ret = OtherSaab->SUPER::method;
+   ::is $ret[0], 'OtherSaab',
+      "->SUPER::method uses current package, not invocant";
+}  
 
 # failed method call or UNIVERSAL::can() should not autovivify packages
 is( $::{"Foo::"} || "none", "none");  # sanity check 1
