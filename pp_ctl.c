@@ -1896,9 +1896,6 @@ PP(pp_caller)
 	Copy(AvALLOC(ary), AvARRAY(PL_dbargs), AvFILLp(ary) + 1 + off, SV*);
 	AvFILLp(PL_dbargs) = AvFILLp(ary) + off;
     }
-    /* XXX only hints propagated via op_private are currently
-     * visible (others are not easily accessible, since they
-     * use the global PL_hints) */
     mPUSHi(CopHINTS_get(cx->blk_oldcop));
     {
 	SV * mask ;
