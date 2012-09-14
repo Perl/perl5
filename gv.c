@@ -921,7 +921,7 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
     GvMULTI_on(gv);
     sv_magic(MUTABLE_SV(superisa), MUTABLE_SV(gv), PERL_MAGIC_isa, NULL, 0);
     av_push(superisa, newSVhek(CopSTASH(PL_curcop)
-			       ? HvNAME_HEK(CopSTASH(PL_curcop)) : NULL));
+			       ? HvENAME_HEK(CopSTASH(PL_curcop)) : NULL));
 
     return stash;
 }

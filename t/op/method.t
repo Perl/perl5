@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 109);
+plan(tests => 110);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -262,6 +262,10 @@ sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
     sub door::dohtem { 'dohtem' }
     ::is eval { Mover->SUPER::dohtem; }, 'dohtem',
         'SUPER inside moved package';
+    undef *door::dohtem;
+    *door::dohtem = sub { 'method' };
+    ::is eval { Mover->SUPER::dohtem; }, 'method',
+        'SUPER inside moved package respects method changes';
 }
 
 # failed method call or UNIVERSAL::can() should not autovivify packages
