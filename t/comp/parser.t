@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..152\n";
+print "1..153\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -442,6 +442,10 @@ is prototype "Hello::_he_said", '_', 'initial tick in sub declaration';
     like("$x[0]-> [0]", qr/^ARRAY\([^)]*\)-> \[0]\z/,
 	'literal -> [0] after an array subscript within ""');
 }
+
+eval 'no if $] >= 5.17.4 warnings => "deprecated"';
+is 1,1, ' no crash for "no ... syntax error"';
+
 
 # Add new tests HERE (above this line)
 

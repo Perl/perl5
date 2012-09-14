@@ -522,8 +522,6 @@ Perl_yyparse (pTHX_ int gramtype)
 	}
 
 	YYDSYMPRINTF ("Error: discarding", yytoken, &parser->yylval);
-	if (yy_type_tab[yytoken] == toketype_opval)
-	    op_free(parser->yylval.opval);
 	parser->yychar = YYEMPTY;
 
     }
