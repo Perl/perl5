@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 98);
+plan(tests => 101);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -417,3 +417,15 @@ eval { () = undef; new {} };
 like $@,
      qr/^Can't call method "new" without a package or object reference/,
     'Err msg from new{} when stack contains undef';
+
+package egakacp {
+  our @ISA = 'ASI';
+  sub ASI::m { shift; "@_" };
+  my @a = (bless([]), 'arg');
+  my $r = SUPER::m{@a};
+  ::is $r, 'arg', 'method{@array}';
+  $r = SUPER::m{}@a;
+  ::is $r, 'arg', 'method{}@array';
+  $r = SUPER::m{@a}"b";
+  ::is $r, 'arg b', 'method{@array}$more_args';
+}
