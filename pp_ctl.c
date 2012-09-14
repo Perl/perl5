@@ -1904,9 +1904,10 @@ PP(pp_caller)
 	SV * mask ;
 	STRLEN * const old_warnings = cx->blk_oldcop->cop_warnings ;
 
-	if  (old_warnings == pWARN_NONE ||
-		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
+	if  (old_warnings == pWARN_NONE)
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
+	else if (old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0)
+            mask = &PL_sv_undef ;
         else if (old_warnings == pWARN_ALL ||
 		  (old_warnings == pWARN_STD && PL_dowarn & G_WARN_ON)) {
 	    /* Get the bit mask for $warnings::Bits{all}, because

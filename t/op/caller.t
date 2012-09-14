@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 90 );
+    plan( tests => 91 );
 }
 
 my @c;
@@ -279,6 +279,23 @@ is eval "<<END;\nfoo\nEND\n(caller 0)[6]",
 is eval "s//<<END/e;\nfoo\nEND\n(caller 0)[6]",
         "s//<<END/e;\nfoo\nEND\n(caller 0)[6]",
         'here-docs in quote-like ops do not gut eval text';
+
+# The bitmask should be assignable to ${^WARNING_BITS} without resulting in
+# different warnings settings.
+{
+ my $ bits = sub { (caller 0)[9] }->();
+ my $w;
+ local $SIG{__WARN__} = sub { $w++ };
+ eval '
+   use warnings;
+   BEGIN { ${^WARNING_BITS} = $bits }
+   local $^W = 1;
+   () = 1 + undef;
+   $^W = 0;
+   () = 1 + undef;
+ ';
+ is $w, 1, 'value from (caller 0)[9] (bitmask) works in ${^WARNING_BITS}';
+}
 
 $::testing_caller = 1;
 
