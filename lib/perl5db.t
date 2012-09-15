@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(83);
+plan(84);
 
 my $rc_filename = '.perldb';
 
@@ -2020,6 +2020,32 @@ sub _calc_trace_wrapper
         \d+:\s+l\ 1-10\n
         #msx,
         'Test the H command (without a number.)',
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                '= quit q',
+                '= foobar l',
+                'foobar',
+                'quit',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/
+            ^1==>\s+\$x\ =\ 1;\n
+            2:\s+print\ "1\\n";\n
+            3\s*\n
+            4:\s+\$x\ =\ 2;\n
+            5:\s+print\ "2\\n";\n
+        /msx,
+        'Test the = (command alias) command.',
     );
 }
 
