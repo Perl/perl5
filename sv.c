@@ -10381,7 +10381,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 			goto vdblank;
 		    }
 		    vecsv = sv_newmortal();
-		    scan_vstring(vecstr, vecstr + veclen, vecsv);
+		    scan_vstring((char *)vecstr, (char *)vecstr + veclen,
+				 vecsv);
 		    vecstr = (U8*)SvPV_const(vecsv, veclen);
 		    vec_utf8 = DO_UTF8(vecsv);
 		}
