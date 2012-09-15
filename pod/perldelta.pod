@@ -558,6 +558,12 @@ etc changing if the original string changed.  That's now been fixed.
 Perl doesn't use PerlIO anymore to report out of memory messages, as PerlIO
 might attempt to allocate more memory.
 
+=item *
+
+In a regular expression, if something is quantified with C<{n,m}>
+where C<S<n E<gt> m>>, it can't possibly match.  Previously this was a fatal error,
+but now is merely a warning (and that something won't match).  [perl #82954].
+
 =back
 
 =head1 Known Problems

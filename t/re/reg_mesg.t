@@ -74,7 +74,6 @@ my @death =
 
  "/x{$inf_p1}/" => "Quantifier in {,} bigger than $inf_m1 in regex; marked by {#} in m/x{{#}$inf_p1}/",
 
- '/x{3,1}/' => 'Can\'t do {n,m} with n > m in regex; marked by {#} in m/x{3,1}{#}/',
 
  '/x**/' => 'Nested quantifiers in regex; marked by {#} in m/x**{#}/',
 
@@ -126,6 +125,7 @@ my @warning = (
     'm/[a-\pM]/' => 'False [] range "a-\pM" in regex; marked by {#} in m/[a-\pM{#}]/',
     'm/[\pM-x]/' => 'False [] range "\pM-" in regex; marked by {#} in m/[\pM-{#}x]/',
     "m'\\y'"     => 'Unrecognized escape \y passed through in regex; marked by {#} in m/\y{#}/',
+    '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match in regex; marked by {#} in m/x{3,1}{#}/',
 );
 
 while (my ($regex, $expect) = splice @death, 0, 2) {

@@ -9456,6 +9456,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     char *parse_start;
 #endif
     const char *maxpos = NULL;
+
+    /* Save the original in case we change the emitted regop to a FAIL. */
+    regnode * const orig_emit = RExC_emit;
+
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGPIECE;
@@ -9502,6 +9506,23 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		vFAIL2("Quantifier in {,} bigger than %d", REG_INFTY - 1);
 	    RExC_parse = next;
 	    nextchar(pRExC_state);
+            if (max < min) {    /* If can't match, warn and optimize to fail
+                                   unconditionally */
+                if (SIZE_ONLY) {
+                    ckWARNreg(RExC_parse, "Quantifier {n,m} with n > m can't match");
+
+                    /* We can't back off the size because we have to reserve
+                     * enough space for all the things we are about to throw
+                     * away, but we can shrink it by the ammount we are about
+                     * to re-use here */
+                    RExC_size = PREVOPER(RExC_size) - regarglen[(U8)OPFAIL];
+                }
+                else {
+                    RExC_emit = orig_emit;
+                }
+                ret = reg_node(pRExC_state, OPFAIL);
+                return ret;
+            }
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
@@ -9539,8 +9560,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		*flagp = WORST;
 	    if (max > 0)
 		*flagp |= HASWIDTH;
-	    if (max < min)
-		vFAIL("Can't do {n,m} with n > m");
 	    if (!SIZE_ONLY) {
 		ARG1_SET(ret, (U16)min);
 		ARG2_SET(ret, (U16)max);
