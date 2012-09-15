@@ -1988,7 +1988,7 @@ sub _calc_trace_wrapper
         \d+:\s+l\ 5-10\n
         \d+:\s+l\ 1-10\n
         #msx,
-        'Test the source command (along with l)',
+        'Test the H -num command',
     );
 }
 
@@ -2019,7 +2019,7 @@ sub _calc_trace_wrapper
         \d+:\s+l\ 5-10\n
         \d+:\s+l\ 1-10\n
         #msx,
-        'Test the source command (along with l)',
+        'Test the H command (without a number.)',
     );
 }
 
