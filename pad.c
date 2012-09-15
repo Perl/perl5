@@ -247,8 +247,8 @@ Perl_pad_new(pTHX_ int flags)
 
     if (flags & padnew_SAVE) {
 	SAVECOMPPAD();
-	SAVESPTR(PL_comppad_name);
 	if (! (flags & padnew_CLONE)) {
+	    SAVESPTR(PL_comppad_name);
 	    SAVEI32(PL_padix);
 	    SAVEI32(PL_comppad_name_fill);
 	    SAVEI32(PL_min_intro_pending);
@@ -2004,6 +2004,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
+    SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
     CvPADLIST(cv)->xpadl_id = protopadlist->xpadl_id;

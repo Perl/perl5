@@ -789,4 +789,30 @@ sub staleval {
 staleval 1;
 staleval;
 
+# [perl #114888]
+# Test that closure creation localises PL_comppad_name properly.  Usually
+# at compile time a BEGIN block will localise PL_comppad_name for use, so
+# pp_anoncode can mess with it without any visible effects.
+# But inside a source filter, it affects the directly enclosing compila-
+# tion scope.
+SKIP: {
+    skip_if_miniperl("no XS on miniperl (for source filters)");
+    fresh_perl_is <<'    [perl #114888]', "ok\n", {stderr=>1},
+	use strict;
+	BEGIN {
+	    package Foo;
+	    use Filter::Util::Call;
+	    sub import { filter_add( sub {
+		my $status = filter_read();
+		sub { $status };
+		$status;
+	    })}
+	    Foo->import
+	}
+	my $x = "ok\n";	# stores $x in the wrong padnamelist
+	print $x;	# cannot find it - strict violation
+    [perl #114888]
+        'closures in source filters do not interfere with pad names';
+}
+
 done_testing();
