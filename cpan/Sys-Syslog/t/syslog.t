@@ -96,7 +96,9 @@ SKIP: {
     is( $@, '', "setlogsock() called with '$sock_type'" );
     TODO: {
         local $TODO = "minor bug";
+        SKIP: { skip "TODO $TODO", 1 if $] < 5.006002;
         ok( $r, "setlogsock() should return true: '$r'" );
+        }
     }
 
     # open syslog with a "local0" facility

@@ -12,7 +12,7 @@ require 5.005;
 
 
 {   no strict 'vars';
-    $VERSION = '0.31';
+    $VERSION = '0.32';
     @ISA     = qw< Exporter >;
 
     %EXPORT_TAGS = (
@@ -91,7 +91,7 @@ my $connected       = 0;        # flag to indicate if we're connected or not
 my $syslog_send;                # coderef of the function used to send messages
 my $syslog_path     = undef;    # syslog path for "stream" and "unix" mechanisms
 my $syslog_xobj     = undef;    # if defined, holds the external object used to send messages
-my $transmit_ok     = 0;        # flag to indicate if the last message was transmited
+my $transmit_ok     = 0;        # flag to indicate if the last message was transmitted
 my $sock_port       = undef;    # socket port
 my $sock_timeout    = 0;        # socket timeout, see below
 my $current_proto   = undef;    # current mechanism used to transmit messages
@@ -146,6 +146,14 @@ my @fallbackMethods = ();
 # Also, lowering the delay to 1 ms, which should be enough.
 
 $sock_timeout = 0.001 if $^O =~ /darwin|gnukfreebsd/;
+
+
+# Perl 5.6.0's warnings.pm doesn't have warnings::warnif()
+if (not defined &warnings::warnif) {
+    *warnings::warnif = sub {
+        goto &warnings::warn if warnings::enabled(__PACKAGE__)
+    }
+}
 
 # coderef for a nicer handling of errors
 my $err_sub = $options{nofatal} ? \&warnings::warnif : \&croak;
@@ -329,8 +337,8 @@ sub setlogsock {
             $found = 1;
         }
         else {
-            warnings::warnif "setlogsock(): type='$sock_type': "
-                           . $mechanism{$sock_type}{err_msg};
+            warnings::warnif("setlogsock(): type='$sock_type': "
+                           . $mechanism{$sock_type}{err_msg});
         }
     }
 
@@ -341,8 +349,7 @@ sub setlogsock {
 }
 
 sub syslog {
-    my $priority = shift;
-    my $mask = shift;
+    my ($priority, $mask, @args) = @_;
     my ($message, $buf);
     my (@words, $num, $numpri, $numfac, $sum);
     my $failed = undef;
@@ -409,13 +416,13 @@ sub syslog {
 
     if ($mask =~ /%m/) {
         # escape percent signs for sprintf()
-        $error =~ s/%/%%/g if @_;
+        $error =~ s/%/%%/g if @args;
         # replace %m with $error, if preceded by an even number of percent signs
         $mask =~ s/(?<!%)((?:%%)*)%m/$1$error/g;
     }
 
     $mask .= "\n" unless $mask =~ /\n$/;
-    $message = @_ ? sprintf($mask, @_) : $mask;
+    $message = @args ? sprintf($mask, @args) : $mask;
 
     if ($current_proto eq 'native') {
         $buf = $message;
@@ -893,7 +900,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-This is the documentation of version 0.31
+This is the documentation of version 0.32
 
 =head1 SYNOPSIS
 
