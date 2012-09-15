@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(82);
+plan(83);
 
 my $rc_filename = '.perldb';
 
@@ -1982,6 +1982,37 @@ sub _calc_trace_wrapper
     $wrapper->contents_like(qr#
         ^\d+:\s+H\ -7\n
         \d+:\s+x\ \(20\+4\)\n
+        \d+:\s+b\ 3\n
+        \d+:\s+l\ 1-5\n
+        \d+:\s+x\ "Hello\ World"\n
+        \d+:\s+l\ 5-10\n
+        \d+:\s+l\ 1-10\n
+        #msx,
+        'Test the source command (along with l)',
+    );
+}
+
+# Add a test for H (without arguments)
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 1-10',
+                'l 5-10',
+                'x "Hello World"',
+                'l 1-5',
+                'b 3',
+                'x (20+4)',
+                'H',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^\d+:\s+x\ \(20\+4\)\n
         \d+:\s+b\ 3\n
         \d+:\s+l\ 1-5\n
         \d+:\s+x\ "Hello\ World"\n
