@@ -57,6 +57,19 @@ sub is {
     failed($got, "'$expect'", $name);
 }
 
+sub ok {
+    my ($got, $name) = @_;
+    $test = $test + 1;
+    if ($::TODO) {
+        $name .= " # TODO: $::TODO";
+    }
+    if ($got) {
+	print "ok $test - $name\n";
+	return 1;
+    }
+    failed($got, "a true value", $name);
+}
+
 sub skip {
     my ($desc) = @_;
     $test = $test + 1;
@@ -206,10 +219,57 @@ BEGIN {
     is(arg_length(@foo), '4FOO4BAR', "three args passed");
 }
 
+{
+    my $x = 10;
+
+    sub closure1 ($y) {
+        return $x * $y;
+    }
+
+    is(closure1(3), 30, "closures work");
+}
+
+{
+    my $x = 10;
+
+    sub shadowing1 ($x) {
+        return $x + 5;
+    }
+    BEGIN { no_warnings("variable shadowing") } # XXX or do we want one?
+
+    is(shadowing1(3), 8, "variable shadowing works");
+}
+
+{
+    sub shadowing2 ($x) {
+        my $x = 10;
+        return $x + 5;
+    }
+    BEGIN { no_warnings("variable shadowing") } # XXX or do we want one?
+
+    is(shadowing2(3), 15, "variable shadowing works");
+}
+
+{ local $TODO = "slurpy parameters not supported yet";
+{
+    my $failed = !eval 'sub bad_slurpy_array (@foo, $bar) { }; 1';
+    my $err = $@;
+    ok($failed, "slurpies must come last");
+    like($err, qr/slurpy/, "slurpies must come last"); # XXX better regex
+}
+
+{
+    my $failed = !eval 'sub bad_slurpy_hash (%foo, $bar) { }; 1';
+    my $err = $@;
+    ok($failed, "slurpies must come last");
+    like($err, qr/slurpy/, "slurpies must come last"); # XXX better regex
+}
+no_warnings("invalid slurpy parameters");
+}
+
 # Test UTF-8
 
 BEGIN { no_warnings("end of compile time") }
+no_warnings("end of runtime");
 
 END { print "1..$test\n" }
-
-1;
