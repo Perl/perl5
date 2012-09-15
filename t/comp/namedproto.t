@@ -185,6 +185,28 @@ BEGIN {
     is(scalar(@$ret), 0, "empty sub returns nothing in list context");
 }
 
+{
+    sub arg_length ($foo, $bar) {
+        return ($foo // 'undef') . ($bar // 'undef');
+    }
+
+    is(arg_length, 'undefundef', "no args passed");
+    is(arg_length('FOO2'), 'FOO2undef', "one arg passed");
+    is(arg_length('FOO3', 'BAR3'), 'FOO3BAR3', "two args passed");
+    is(arg_length('FOO4', 'BAR4', 'BAZ4'), 'FOO4BAR4', "three args passed");
+
+    my @foo;
+    { local $TODO = "args are persisting between calls";
+    is(arg_length(@foo), 'undefundef', "no args passed");
+    @foo = ('2FOO');
+    is(arg_length(@foo), '2FOOundef', "one arg passed");
+    }
+    @foo = ('3FOO', '3BAR');
+    is(arg_length(@foo), '3FOO3BAR', "two args passed");
+    @foo = ('4FOO', '4BAR', '4BAZ');
+    is(arg_length(@foo), '4FOO4BAR', "three args passed");
+}
+
 # Test UTF-8
 
 BEGIN { no_warnings("end of compile time") }
