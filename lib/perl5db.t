@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(84);
+plan(86);
 
 my $rc_filename = '.perldb';
 
@@ -2046,6 +2046,32 @@ sub _calc_trace_wrapper
             5:\s+print\ "2\\n";\n
         /msx,
         'Test the = (command alias) command.',
+    );
+}
+
+# Add a test for H (without arguments)
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'm main',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^via\ UNIVERSAL:\ DOES$
+        #msx,
+        "Test m for main - 1",
+    );
+
+    $wrapper->contents_like(qr#
+        ^via\ UNIVERSAL:\ can$
+        #msx,
+        "Test m for main - 2",
     );
 }
 
