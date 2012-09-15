@@ -77,7 +77,6 @@ sub no_warnings {
 }
 
 BEGIN {
-    print "1..23\n";
     $test = 0;
     if (!is_miniperl) {
         require Scalar::Util;
@@ -210,5 +209,7 @@ BEGIN {
 # Test UTF-8
 
 BEGIN { no_warnings("end of compile time") }
+
+END { print "1..$test\n" }
 
 1;
