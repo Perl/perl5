@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(88);
+plan(89);
 
 my $rc_filename = '.perldb';
 
@@ -2097,6 +2097,27 @@ sub _calc_trace_wrapper
     $wrapper->contents_like(qr#^via UNIVERSAL: can$#ms,
         "Test m for obj - 1",
     );
+}
+
+# Test the M command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'M',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-m-statement-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^'strict\.pm'\ =>\ '\d+\.\d+\ from
+        #msx,
+        "Test M",
+    );
+
 }
 
 END {
