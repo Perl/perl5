@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(86);
+plan(88);
 
 my $rc_filename = '.perldb';
 
@@ -2049,7 +2049,7 @@ sub _calc_trace_wrapper
     );
 }
 
-# Add a test for H (without arguments)
+# Test the m statement.
 {
     my $wrapper = DebugWrap->new(
         {
@@ -2072,6 +2072,30 @@ sub _calc_trace_wrapper
         ^via\ UNIVERSAL:\ can$
         #msx,
         "Test m for main - 2",
+    );
+}
+
+# Test the m statement.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 41',
+                'c',
+                'm $obj',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-m-statement-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#^greet$#ms,
+        "Test m for obj - 1",
+    );
+
+    $wrapper->contents_like(qr#^via UNIVERSAL: can$#ms,
+        "Test m for obj - 1",
     );
 }
 
