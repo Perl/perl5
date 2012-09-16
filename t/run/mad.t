@@ -30,7 +30,7 @@ END {
 plan tests => 4;
 
 {
-    local %ENV = %ENV;
+    delete local $ENV{$_} for keys %ENV;
     my $fn = File::Spec->catfile(File::Spec->curdir(), "withoutT.xml");
     $ENV{PERL_XMLDUMP} = $fn;
     fresh_perl_is('print q/hello/', '', {}, 'mad without -T');
@@ -38,7 +38,7 @@ plan tests => 4;
 }
 
 {
-    local %ENV = %ENV;
+    delete local $ENV{$_} for keys %ENV;
     my $fn = File::Spec->catfile(File::Spec->curdir(), "withT.xml");
     fresh_perl_is('print q/hello/', 'hello', { switches => [ "-T" ] },
 		  'mad with -T');
