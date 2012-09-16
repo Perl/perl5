@@ -4364,6 +4364,7 @@ dotted_decimal_version:
     } 					/* end if dotted-decimal */
     else
     {					/* decimal versions */
+	int j = 0;			/* may need this later */
 	/* special strict case for leading '.' or '0' */
 	if (strict) {
 	    if (*d == '.') {
@@ -4426,7 +4427,7 @@ dotted_decimal_version:
 	}
 
 	while (isDIGIT(*d)) {
-	    d++;
+	    d++; j++;
 	    if (*d == '.' && isDIGIT(d[-1])) {
 		if (alpha) {
 		    BADVERSION(s,errstr,"Invalid version format (underscores before decimal)");
@@ -4448,6 +4449,7 @@ dotted_decimal_version:
 		if ( ! isDIGIT(d[1]) ) {
 		    BADVERSION(s,errstr,"Invalid version format (misplaced underscore)");
 		}
+		width = j;
 		d++;
 		alpha = TRUE;
 	    }

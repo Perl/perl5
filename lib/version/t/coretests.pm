@@ -538,9 +538,10 @@ EOF
     {
 	# https://rt.cpan.org/Ticket/Display.html?id=72365
 	# https://rt.perl.org/rt3/Ticket/Display.html?id=102586
+    	# https://rt.cpan.org/Ticket/Display.html?id=78328
 	eval 'my $v = $CLASS->$method("version")';
 	like $@, qr/Invalid version format/,
-	    'The string "version" is not a version';
+	    "The string 'version' is not a version for $method";
 	eval 'my $v = $CLASS->$method("ver510n")';
 	like $@, qr/Invalid version format/,
 	    'All strings starting with "v" are not versions';
@@ -593,6 +594,14 @@ SKIP: {
 	eval { _112478->VERSION(9e99) };
 	unlike $@, qr/panic/, '->VERSION(9e99) does not panic';
     }
+
+    { # https://rt.cpan.org/Ticket/Display.html?id=79259
+	my $v = $CLASS->new("0.52_0");
+	ok $v->is_alpha, 'Just checking';
+	is $v->numify, '0.520', 'Correctly nummified';
+    }
+
 }
 
 1;
+
