@@ -226,12 +226,13 @@ PP(pp_substcont)
 	if (SvTAINTED(TOPs))
 	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
-	/* XXX: adjust for positive offsets of \G for instance s/(.)\G//g with positive pos() */
-	s -= RX_GOFS(rx);
-
+        /* XXX: the RX_GOFS stuff is to adjust for positive offsets of
+         * \G for instance s/(.)\G//g with positive pos(). See #69056 and #114884
+         * This whole \G thing makes a *lot* of things more difficult than they
+         * should be. - Yves */
 	/* Are we done */
 	if (CxONCE(cx) || s < orig ||
-		!CALLREGEXEC(rx, s, cx->sb_strend, orig,
+                !CALLREGEXEC(rx, s - RX_GOFS(rx), cx->sb_strend, orig,
 			     (s == m) + RX_GOFS(rx), cx->sb_targ, NULL,
                                 (REXEC_IGNOREPOS|REXEC_NOT_FIRST)))
 	{

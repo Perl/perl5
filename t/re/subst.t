@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 206 );
+plan( tests => 207 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -668,8 +668,12 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
     }
 }
 
-fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo', '[perl #69056] positive GPOS regex segfault' );
-fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXX[c-e][e-f]f', 'positive GPOS regex substitution failure' );
+fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo',
+                '[perl #69056] positive GPOS regex segfault' );
+fresh_perl_is( '$_="abcdef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXX[c-d][d-e][e-f]',
+                'positive GPOS regex substitution failure (#69056, #114884)' );
+fresh_perl_is( '$_="abcdefg123456"; s/(?<=...\G)?(\d)/($1)/; print' => 'abcdefg(1)23456',
+                'positive GPOS lookbehind regex substitution failure #114884' );
 
 # [perl #71470] $var =~ s/$qr//e calling get-magic on $_ as well as $var
 {
