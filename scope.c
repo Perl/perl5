@@ -160,12 +160,9 @@ Perl_free_tmps(pTHX)
     /* XXX should tmps_floor live in cxstack? */
     const I32 myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
-#ifdef PERL_POISON
-        SV* const sv = PL_tmps_stack[PL_tmps_ix];
-        PoisonWith(sv, 1, sizeof(SV *), 0xAB);
-        PL_tmps_ix--;
-#else
 	SV* const sv = PL_tmps_stack[PL_tmps_ix--];
+#ifdef PERL_POISON
+	PoisonWith(PL_tmps_stack + PL_tmps_ix + 1, 1, SV *, 0xAB);
 #endif
 	if (sv && sv != &PL_sv_undef) {
 	    SvTEMP_off(sv);
