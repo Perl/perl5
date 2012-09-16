@@ -807,24 +807,23 @@ END { unlink_all keys %tmpfiles }
 $::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
 
 # Avoid ++, avoid ranges, avoid split //
+my $tempfile_count = 0;
 sub tempfile {
-    my $count = 0;
-    do {
-	my $temp = $count;
+    while(1){
 	my $try = "tmp$$";
-	do {
-	    $try = $try . $letters[$temp % 26];
-	    $temp = int ($temp / 26);
-	} while $temp;
+        my $alpha = _num_to_alpha($tempfile_count,2);
+        last unless defined $alpha;
+        $try = $try . $alpha;
+        $tempfile_count = $tempfile_count + 1;
+
 	# Need to note all the file names we allocated, as a second request may
 	# come before the first is created.
-	if (!-e $try && !$tmpfiles{$try}) {
+	if (!$tmpfiles{$try} && !-e $try) {
 	    # We have a winner
 	    $tmpfiles{$try} = 1;
 	    return $try;
 	}
-	$count = $count + 1;
-    } while $count < 26 * 26;
+    }
     die "Can't find temporary file name starting 'tmp$$'";
 }
 
