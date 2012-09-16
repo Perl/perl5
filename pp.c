@@ -163,7 +163,8 @@ PP(pp_clonecv)
 {
     dVAR; dTARGET;
     MAGIC * const mg =
-	mg_find(AvARRAY(PL_comppad_name)[ARGTARG], PERL_MAGIC_proto);
+	mg_find(PadlistNAMESARRAY(CvPADLIST(find_runcv(NULL)))[ARGTARG],
+		PERL_MAGIC_proto);
     assert(SvTYPE(TARG) == SVt_PVCV);
     assert(mg);
     assert(mg->mg_obj);
