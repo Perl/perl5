@@ -822,6 +822,107 @@ subroutine never gets that chance.  Consider;
 
 =back
 
+=head2 Lexical Subroutines
+X<my sub> X<state sub> X<our sub> X<subroutine, lexical>
+
+B<WARNING>: Lexical subroutines are still experimental and the
+implementation may change in future versions of Perl.
+
+Lexical subroutines are only available under the C<use feature
+'lexical_subs'> pragma, which produces a warning unless the
+"experimental:lexical_subs" warning is disabled.
+
+Beginning with Perl 5.18, you can declare a private subroutine with C<my>
+or C<state>.  As with state variables, the C<state> keyword is only
+available under C<use feature 'state'> or C<use 5.010> or higher.
+
+These subroutines are only visible within the block in which they are
+declared, and only after that declaration:
+
+    no warnings "experimental:lexical_subs";
+    use feature 'lexical_subs';
+
+    foo();		# calls the package/global subroutine
+    state sub foo {
+	foo();		# also calls the package subroutine
+    }
+    foo();		# calls "state" sub
+    my $ref = \&foo;	# take a reference to "state" sub
+
+    my sub bar { ... }
+    bar();		# calls "my" sub
+
+To use a lexical subroutine from inside the subroutine itself, you must
+predeclare it.  The C<sub foo {...}> subroutine definition syntax respects
+any previous C<my sub;> or C<state sub;> declaration.
+
+    my sub baz;		# predeclaration
+    sub baz {		# define the "my" sub
+	baz();		# recursive call
+    }
+
+=head3 C<state sub> vs C<my sub>
+
+What is the difference between "state" subs and "my" subs?  Each time that
+execution enters a block when "my" subs are declared, a new copy of each
+sub is created.  "State" subroutines persist from one execution of the
+containing block to the next.
+
+So, in general, "state" subroutines are faster.  But "my" subs are
+necessary if you want to create closures:
+
+    no warnings "experimental:lexical_subs";
+    use feature 'lexical_subs';
+
+    sub whatever {
+	my $x = shift;
+	my sub inner {
+	    ... do something with $x ...
+	}
+	inner();
+    }
+
+In this example, a new C<$x> is created when C<whatever> is called, and
+also a new C<inner>, which can see the new C<$x>.  A "state" sub will only
+see the C<$x> from the first call to C<whatever>.
+
+=head3 C<our> subroutines
+
+Like C<our $variable>, C<our sub> creates a lexical alias to the package
+subroutine of the same name.
+
+The two main uses for this are to switch back to using the package sub
+inside an inner scope:
+
+    no warnings "experimental:lexical_subs";
+    use feature 'lexical_subs';
+
+    sub foo { ... }
+
+    sub bar {
+	my sub foo { ... }
+	{
+	    # need to use the outer foo here
+	    our sub foo;
+	    foo();
+	}
+    }
+
+and to make a subroutine visible to other packages in the same scope:
+
+    package MySneakyModule;
+
+    no warnings "experimental:lexical_subs";
+    use feature 'lexical_subs';
+
+    our sub do_something { ... }
+
+    sub do_something_with_caller {
+	package DB;
+	() = caller 1;		# sets @DB::args
+	do_something(@args);	# uses MySneakyModule::do_something
+    }
+
 =head2 Passing Symbol Table Entries (typeglobs)
 X<typeglob> X<*>
 

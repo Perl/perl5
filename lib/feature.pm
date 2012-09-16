@@ -230,6 +230,20 @@ See L<perlfunc/fc> for details.
 
 This feature is available from Perl 5.16 onwards.
 
+=head2 The 'lexical_subs' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, F<feature.pm> will
+warn when you enable the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental:lexical_subs";
+
+This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
+and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
+
+This feature is available from Perl 5.18 onwards.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using

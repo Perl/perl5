@@ -256,6 +256,12 @@ See L<perlapi/PL_keyword_plugin> for the mechanism.
 
 Introduced in: Perl 5.11.2
 
+=item Lexical subroutines
+
+Introduced in: Perl 5.18
+
+See also: L<perlsub/Lexical Subroutines>
+
 =back
 
 =head2 Accepted features
