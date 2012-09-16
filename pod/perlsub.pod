@@ -825,8 +825,8 @@ subroutine never gets that chance.  Consider;
 =head2 Lexical Subroutines
 X<my sub> X<state sub> X<our sub> X<subroutine, lexical>
 
-B<WARNING>: Lexical subroutines are still experimental and the
-implementation may change in future versions of Perl.
+B<WARNING>: Lexical subroutines are still experimental.  The feature may be
+modified or removed in future versions of Perl.
 
 Lexical subroutines are only available under the C<use feature
 'lexical_subs'> pragma, which produces a warning unless the
