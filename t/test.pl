@@ -762,7 +762,33 @@ sub unlink_all {
     $count;
 }
 
+# _num_to_alpha - Returns a string of letters representing a positive integer.
+# Arguments :
+#   number to convert
+
+# returns undef if the number is negative
+
+# _num_to_alpha( 0) eq 'A';
+# _num_to_alpha( 1) eq 'B';
+# _num_to_alpha(25) eq 'Z';
+# _num_to_alpha(26) eq 'AA';
+# _num_to_alpha(27) eq 'AB';
+
 my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
+
+# Avoid ++ -- ranges split negative numbers
+sub _num_to_alpha{
+    my($num) = @_;
+    return unless $num >= 0;
+    my $alpha = '';
+    while( 1 ){
+        $alpha = $letters[ $num % 26 ] . $alpha;
+        $num = int( $num / 26 );
+        last if $num == 0;
+        $num = $num - 1;
+    }
+    return $alpha;
+}
 
 my %tmpfiles;
 END { unlink_all keys %tmpfiles }
