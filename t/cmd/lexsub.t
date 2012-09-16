@@ -8,10 +8,24 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 124;
+plan 127;
+
+# -------------------- Errors with feature disabled -------------------- #
+
+eval "#line 8 foo\nmy sub foo";
+is $@, qq 'Experimental "my" subs not enabled at foo line 8.\n',
+  'my sub unexperimental error';
+eval "#line 8 foo\nCORE::state sub foo";
+is $@, qq 'Experimental "state" subs not enabled at foo line 8.\n',
+  'state sub unexperimental error';
+eval "#line 8 foo\nour sub foo";
+is $@, qq 'Experimental "our" subs not enabled at foo line 8.\n',
+  'our sub unexperimental error';
 
 # -------------------- our -------------------- #
 
+no warnings "experimental:lexical_subs";
+use feature 'lexical_subs';
 {
   our sub foo { 42 }
   is foo, 42, 'calling our sub from same package';
@@ -84,7 +98,7 @@ sub bar::c { 43 }
 
 # -------------------- state -------------------- #
 
-use 5.01; # state
+use feature 'state'; # state
 {
   state sub foo { 44 }
   isnt \&::foo, \&foo, 'state sub is not stored in the package';

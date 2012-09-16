@@ -7834,7 +7834,14 @@ Perl_yylex(pTHX)
 #endif
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
 		if (len == 3 && strnEQ(PL_tokenbuf, "sub", 3))
+		{
+		    if (!FEATURE_LEXSUBS_IS_ENABLED)
+			Perl_croak(aTHX_
+				  "Experimental \"%s\" subs not enabled",
+				   tmp == KEY_my    ? "my"    :
+				   tmp == KEY_state ? "state" : "our");
 		    goto really_sub;
+		}
 		PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
 		if (!PL_in_my_stash) {
 		    char tmpbuf[1024];
