@@ -1193,6 +1193,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 #ifdef DEBUGGING
     PerlIO_printf(Perl_debug_log, "CX %ld = %s\n", (long)(cx - cxstack), PL_block_type[CxTYPE(cx)]);
     if (CxTYPE(cx) != CXt_SUBST) {
+	const char *gimme_text;
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSP = %ld\n", (long)cx->blk_oldsp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDCOP = 0x%"UVxf"\n",
 		      PTR2UV(cx->blk_oldcop));
@@ -1200,7 +1201,21 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_OLDSCOPESP = %ld\n", (long)cx->blk_oldscopesp);
 	PerlIO_printf(Perl_debug_log, "BLK_OLDPM = 0x%"UVxf"\n",
 		      PTR2UV(cx->blk_oldpm));
-	PerlIO_printf(Perl_debug_log, "BLK_GIMME = %s\n", cx->blk_gimme ? "LIST" : "SCALAR");
+	switch (cx->blk_gimme) {
+	    case G_VOID:
+		gimme_text = "VOID";
+		break;
+	    case G_SCALAR:
+		gimme_text = "SCALAR";
+		break;
+	    case G_ARRAY:
+		gimme_text = "LIST";
+		break;
+	    default:
+		gimme_text = "UNKNOWN";
+		break;
+	}
+	PerlIO_printf(Perl_debug_log, "BLK_GIMME = %s\n", gimme_text);
     }
     switch (CxTYPE(cx)) {
     case CXt_NULL:
