@@ -765,8 +765,10 @@ sub unlink_all {
 # _num_to_alpha - Returns a string of letters representing a positive integer.
 # Arguments :
 #   number to convert
+#   maximum number of letters
 
 # returns undef if the number is negative
+# returns undef if the number of letters is greater than the maximum wanted
 
 # _num_to_alpha( 0) eq 'A';
 # _num_to_alpha( 1) eq 'B';
@@ -778,14 +780,22 @@ my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
 
 # Avoid ++ -- ranges split negative numbers
 sub _num_to_alpha{
-    my($num) = @_;
+    my($num,$max_char) = @_;
     return unless $num >= 0;
     my $alpha = '';
+    my $char_count = 0;
+    $max_char = 0 if $max_char < 0;
+
     while( 1 ){
         $alpha = $letters[ $num % 26 ] . $alpha;
         $num = int( $num / 26 );
         last if $num == 0;
         $num = $num - 1;
+
+        # char limit
+        next unless $max_char;
+        $char_count = $char_count + 1;
+        return if $char_count == $max_char;
     }
     return $alpha;
 }

@@ -2,7 +2,6 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = '../lib';
     require './test.pl';
 }
 
@@ -30,5 +29,14 @@ is( _num_to_alpha(26 ** 2 + 26 + 1), 'AAB');
 is( _num_to_alpha(26 ** 3 + 26 ** 2 + 26 - 1 ), 'ZZZ');
 is( _num_to_alpha(26 ** 3 + 26 ** 2 + 26     ), 'AAAA');
 is( _num_to_alpha(26 ** 3 + 26 ** 2 + 26 + 1 ), 'AAAB');
+
+is( _num_to_alpha(26 - 1 , 1), 'Z');
+is( _num_to_alpha(26     , 1), undef); # AA
+
+is( _num_to_alpha(26 ** 2 + 26 - 1 , 2 ), 'ZZ');
+is( _num_to_alpha(26 ** 2 + 26     , 2 ), undef); # AAA
+
+is( _num_to_alpha(26 ** 3 + 26 ** 2 + 26 - 1 , 3 ), 'ZZZ');
+is( _num_to_alpha(26 ** 3 + 26 ** 2 + 26     , 3 ), undef); # AAAA
 
 done_testing();
