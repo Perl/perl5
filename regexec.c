@@ -3317,30 +3317,33 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         assert(nextchr >= 0);
 
 	switch (state_num) {
-	case BOL:
+	case BOL: /*  /^../  */
 	    if (locinput == PL_bostr)
 	    {
 		/* reginfo->till = reginfo->bol; */
 		break;
 	    }
 	    sayNO;
-	case MBOL:
+
+	case MBOL: /*  /^../m  */
 	    if (locinput == PL_bostr ||
 		((nextchr || locinput < PL_regeol) && locinput[-1] == '\n'))
 	    {
 		break;
 	    }
 	    sayNO;
-	case SBOL:
+
+	case SBOL: /*  /^../s  */
 	    if (locinput == PL_bostr)
 		break;
 	    sayNO;
-	case GPOS:
+
+	case GPOS: /*  \G  */
 	    if (locinput == reginfo->ganch)
 		break;
 	    sayNO;
 
-	case KEEPS:
+	case KEEPS: /*   \K  */
 	    /* update the startpoint */
 	    st->u.keeper.val = rex->offs[0].start;
 	    rex->offs[0].start = locinput - PL_bostr;
@@ -3351,33 +3354,40 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    rex->offs[0].start = st->u.keeper.val;
 	    sayNO_SILENT;
 	    /*NOT-REACHED*/
-	case EOL:
+
+	case EOL: /* /..$/  */
 		goto seol;
-	case MEOL:
+
+	case MEOL: /* /..$/m  */
 	    if ((nextchr || locinput < PL_regeol) && nextchr != '\n')
 		sayNO;
 	    break;
-	case SEOL:
+
+	case SEOL: /* /..$/s  */
 	  seol:
 	    if ((nextchr || locinput < PL_regeol) && nextchr != '\n')
 		sayNO;
 	    if (PL_regeol - locinput > 1)
 		sayNO;
 	    break;
-	case EOS:
+
+	case EOS: /*  \z  */
 	    if (PL_regeol != locinput)
 		sayNO;
 	    break;
-	case SANY:
+
+	case SANY: /*  /./s  */
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
             goto increment_locinput;
-	case CANY:
+
+	case CANY: /*  \C  */
 	    if (!nextchr && locinput >= PL_regeol)
 		sayNO;
 	    locinput++;
 	    break;
-	case REG_ANY:
+
+	case REG_ANY: /*  /./  */
 	    if ((!nextchr && locinput >= PL_regeol) || nextchr == '\n')
 		sayNO;
             goto increment_locinput;
@@ -3385,7 +3395,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 #undef  ST
 #define ST st->u.trie
-        case TRIEC:
+        case TRIEC: /* (ab|cd) with known charclass */
             /* In this case the charclass data is available inline so
                we can fail fast without a lot of extra overhead. 
              */
@@ -3399,7 +3409,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 assert(0); /* NOTREACHED */
             }
             /* FALL THROUGH */
-	case TRIE:
+	case TRIE:  /* (ab|cd)  */
 	    /* the basic plan of execution of the trie is:
 	     * At the beginning, run though all the states, and
 	     * find the longest-matching word. Also remember the position
@@ -3723,7 +3733,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         }
 #undef  ST
 
-	case EXACT: {
+	case EXACT: {            /*  /abc/        */
 	    char *s = STRING(scan);
 	    ln = STR_LEN(scan);
 	    if (utf8_target != UTF_PATTERN) {
@@ -3798,7 +3808,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    locinput += ln;
 	    break;
 	    }
-	case EXACTFL: {
+	case EXACTFL: {          /*  /abc/il      */
 	    re_fold_t folder;
 	    const U8 * fold_array;
 	    const char * s;
@@ -3810,21 +3820,21 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_utf8_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_exactf;
 
-	case EXACTFU_SS:
-	case EXACTFU_TRICKYFOLD:
-	case EXACTFU:
+	case EXACTFU_SS:         /*  /\x{df}/iu   */
+	case EXACTFU_TRICKYFOLD: /*  /\x{390}/iu  */
+	case EXACTFU:            /*  /abc/iu      */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    fold_utf8_flags = (UTF_PATTERN) ? FOLDEQ_S1_ALREADY_FOLDED : 0;
 	    goto do_exactf;
 
-	case EXACTFA:
+	case EXACTFA:            /*  /abc/iaa     */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    fold_utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_exactf;
 
-	case EXACTF:
+	case EXACTF:             /*  /abc/i       */
 	    folder = foldEQ;
 	    fold_array = PL_fold;
 	    fold_utf8_flags = 0;
@@ -3865,16 +3875,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	/* XXX Could improve efficiency by separating these all out using a
 	 * macro or in-line function.  At that point regcomp.c would no longer
 	 * have to set the FLAGS fields of these */
-	case BOUNDL:
-	case NBOUNDL:
+	case BOUNDL:  /*  /\b/l  */
+	case NBOUNDL: /*  /\B/l  */
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
-	case BOUND:
-	case BOUNDU:
-	case BOUNDA:
-	case NBOUND:
-	case NBOUNDU:
-	case NBOUNDA:
+	case BOUND:   /*  /\b/   */
+	case BOUNDU:  /*  /\b/u  */
+	case BOUNDA:  /*  /\b/a  */
+	case NBOUND:  /*  /\B/   */
+	case NBOUNDU: /*  /\B/u  */
+	case NBOUNDA: /*  /\B/a  */
 	    /* was last char in word? */
 	    if (utf8_target
 		&& FLAGS(scan) != REGEX_ASCII_RESTRICTED_CHARSET
@@ -3940,8 +3950,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (((!ln) == (!n)) == (OP(scan) < NBOUND))
 		    sayNO;
 	    break;
-	case ANYOFV:
-	case ANYOF:
+
+	case ANYOFV: /*  /[abx{df}]/i  */
+	case ANYOF:  /*  /[abc]/       */
 	    if (utf8_target || state_num == ANYOFV) {
 	        STRLEN inclasslen = PL_regeol - locinput;
 		if (locinput >= PL_regeol)
@@ -3961,7 +3972,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		break;
 	    }
 	    break;
-	/* Special char classes - The defines start on line 129 or so */
+
+	/* Special char classes: \d, \w etc.
+         * The defines start on line 166 or so */
         CCC_TRY_U(ALNUM,  NALNUM,  isWORDCHAR,
 		  ALNUML, NALNUML, isALNUM_LC, isALNUM_LC_utf8,
 		  ALNUMU, NALNUMU, isWORDCHAR_L1,
@@ -3979,14 +3992,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		DIGITA, NDIGITA, isDIGIT_A,
 		digit, "0");
 
-        case POSIXA:
+        case POSIXA: /* /[[:ascii:]]/ etc */
             if (locinput >= PL_regeol || ! _generic_isCC_A(nextchr, FLAGS(scan))) {
                 sayNO;
             }
             /* Matched a utf8-invariant, so don't have to worry about utf8 */
             locinput++;
             break;
-        case NPOSIXA:
+
+        case NPOSIXA: /*  /[^[:ascii:]]/  etc */
             if (locinput >= PL_regeol || _generic_isCC_A(nextchr, FLAGS(scan))) {
                 sayNO;
             }
@@ -4177,7 +4191,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 	    break;
             
-	case NREFFL:
+	case NREFFL:  /*  /\g{name}/il  */
 	{   /* The capture buffer cases.  The ones beginning with N for the
 	       named buffers just convert to the equivalent numbered and
 	       pretend they were called as the corresponding numbered buffer
@@ -4197,28 +4211,28 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_nref;
 
-	case NREFFA:
+	case NREFFA:  /*  /\g{name}/iaa  */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    type = REFFA;
 	    utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_nref;
 
-	case NREFFU:
+	case NREFFU:  /*  /\g{name}/iu  */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    type = REFFU;
 	    utf8_fold_flags = 0;
 	    goto do_nref;
 
-	case NREFF:
+	case NREFF:  /*  /\g{name}/i  */
 	    folder = foldEQ;
 	    fold_array = PL_fold;
 	    type = REFF;
 	    utf8_fold_flags = 0;
 	    goto do_nref;
 
-	case NREF:
+	case NREF:  /*  /\g{name}/   */
 	    type = REF;
 	    folder = NULL;
 	    fold_array = NULL;
@@ -4234,32 +4248,32 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 	    goto do_nref_ref_common;
 
-	case REFFL:
+	case REFFL:  /*  /\1/il  */
 	    PL_reg_flags |= RF_tainted;
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_ref;
 
-	case REFFA:
+	case REFFA:  /*  /\1/iaa  */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_ref;
 
-	case REFFU:
+	case REFFU:  /*  /\1/iu  */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
 	    utf8_fold_flags = 0;
 	    goto do_ref;
 
-	case REFF:
+	case REFF:  /*  /\1/i  */
 	    folder = foldEQ;
 	    fold_array = PL_fold;
 	    utf8_fold_flags = 0;
 	    goto do_ref;
 
-        case REF:
+        case REF:  /*  /\1/    */
 	    folder = NULL;
 	    fold_array = NULL;
 	    utf8_fold_flags = 0;
@@ -4311,10 +4325,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    locinput += ln;
 	    break;
 	}
-	case NOTHING:
-	case TAIL:
+
+	case NOTHING: /* null op; e.g. the 'nothing' following
+                       * the '*' in m{(a+|b)*}' */
 	    break;
-	case BACK:
+	case TAIL: /* placeholder while compiling (A|B|C) */
+	    break;
+
+	case BACK: /* ??? doesn't appear to be used ??? */
 	    break;
 
 #undef  ST
@@ -4326,7 +4344,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             regexp_internal *rei;
             regnode *startpoint;
 
-	case GOSTART:
+	case GOSTART: /*  (?R)  */
 	case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
 	    if (cur_eval && cur_eval->locinput==locinput) {
                 if (cur_eval->u.eval.close_paren == (U32)ARG(scan)) 
@@ -4350,6 +4368,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             goto eval_recurse_doit;
             assert(0); /* NOTREACHED */
+
         case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
             if (cur_eval && cur_eval->locinput==locinput) {
 		if ( ++nochange_depth > max_nochange_depth )
@@ -4678,7 +4697,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sayNO_SILENT;
 #undef ST
 
-	case OPEN:
+	case OPEN: /*  (  */
 	    n = ARG(scan);  /* which paren pair */
 	    rex->offs[n].start_tmp = locinput - PL_bostr;
 	    if (n > PL_regsize)
@@ -4707,7 +4726,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	(IV)rex->offs[n].end \
     ))
 
-	case CLOSE:
+	case CLOSE:  /*  )  */
 	    n = ARG(scan);  /* which paren pair */
 	    CLOSE_CAPTURE;
 	    /*if (n > PL_regsize)
@@ -4719,7 +4738,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	        goto fake_end;
 	    }    
 	    break;
-        case ACCEPT:
+
+        case ACCEPT:  /*  (*ACCEPT)  */
             if (ARG(scan)){
                 regnode *cursor;
                 for (cursor=scan;
@@ -4744,22 +4764,27 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
 	    goto fake_end;
 	    /*NOTREACHED*/	    
-	case GROUPP:
+
+	case GROUPP:  /*  (?(1))  */
 	    n = ARG(scan);  /* which paren pair */
 	    sw = cBOOL(rex->lastparen >= n && rex->offs[n].end != -1);
 	    break;
-	case NGROUPP:
+
+	case NGROUPP:  /*  (?(<name>))  */
 	    /* reg_check_named_buff_matched returns 0 for no match */
 	    sw = cBOOL(0 < reg_check_named_buff_matched(rex,scan));
 	    break;
-        case INSUBP:
+
+        case INSUBP:   /*  (?(R))  */
             n = ARG(scan);
             sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == n));
             break;
-        case DEFINEP:
+
+        case DEFINEP:  /*  (?(DEFINE))  */
             sw = 0;
             break;
-	case IFTHEN:
+
+	case IFTHEN:   /*  (?(cond)A|B)  */
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
 	    if (sw)
 		next = NEXTOPER(NEXTOPER(scan));
@@ -4769,7 +4794,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    next = NEXTOPER(NEXTOPER(next));
 	    }
 	    break;
-	case LOGICAL:
+
+	case LOGICAL:  /* modifier for EVAL and IFMATCH */
 	    logical = scan->flags;
 	    break;
 
@@ -5130,11 +5156,13 @@ NULL
 	        PUSH_STATE_GOTO(BRANCH_next, scan, locinput);
 	    }
 	    assert(0); /* NOTREACHED */
-        case CUTGROUP:
+
+        case CUTGROUP:  /*  /(*THEN)/  */
             sv_yes_mark = st->u.mark.mark_name = scan->flags ? NULL :
                 MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
             PUSH_STATE_GOTO(CUTGROUP_next, next, locinput);
             assert(0); /* NOTREACHED */
+
         case CUTGROUP_next_fail:
             do_cutgroup = 1;
             no_final = 1;
@@ -5142,9 +5170,11 @@ NULL
                 sv_commit = st->u.mark.mark_name;
             sayNO;	    
             assert(0); /* NOTREACHED */
+
         case BRANCH_next:
             sayYES;
             assert(0); /* NOTREACHED */
+
 	case BRANCH_next_fail: /* that branch failed; try the next, if any */
 	    if (do_cutgroup) {
 	        do_cutgroup = 0;
@@ -5167,7 +5197,7 @@ NULL
 	    continue; /* execute next BRANCH[J] op */
 	    assert(0); /* NOTREACHED */
     
-	case MINMOD:
+	case MINMOD: /* next op will be non-greedy, e.g. A*?  */
 	    minmod = 1;
 	    break;
 
@@ -5378,12 +5408,14 @@ NULL
 	    ST.max = REG_INFTY;
 	    scan = NEXTOPER(scan);
 	    goto repeat;
+
 	case PLUS:		/*  /A+B/ where A is width 1 */
 	    ST.paren = 0;
 	    ST.min = 1;
 	    ST.max = REG_INFTY;
 	    scan = NEXTOPER(scan);
 	    goto repeat;
+
 	case CURLYN:		/*  /(A){m,n}B/ where A is width 1 */
 	    ST.paren = scan->flags;	/* Which paren to set */
 	    ST.lastparen      = rex->lastparen;
@@ -5399,6 +5431,7 @@ NULL
 	    }
             scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
 	    goto repeat;
+
 	case CURLY:		/*  /A{m,n}B/ where A is width 1 */
 	    ST.paren = 0;
 	    ST.min = ARG1(scan);  /* min to match */
@@ -5669,6 +5702,7 @@ NULL
 		}
 	    }
 	    /* FALL THROUGH */
+
 	case CURLY_B_max_fail:
 	    /* failed to find B in a greedy match */
 
@@ -5684,7 +5718,7 @@ NULL
 
 #undef ST
 
-	case END:
+	case END: /*  last op of main pattern  */
 	    fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
@@ -5807,28 +5841,33 @@ NULL
 
 #undef ST
 
-	case LONGJMP:
+	case LONGJMP: /*  alternative with many branches compiles to
+                       * (BRANCHJ; EXACT ...; LONGJMP ) x N */
 	    next = scan + ARG(scan);
 	    if (next == scan)
 		next = NULL;
 	    break;
-	case COMMIT:
+
+	case COMMIT:  /*  (*COMMIT)  */
 	    reginfo->cutpoint = PL_regeol;
 	    /* FALLTHROUGH */
-	case PRUNE:
+
+	case PRUNE:   /*  (*PRUNE)   */
 	    if (!scan->flags)
 	        sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
 	    PUSH_STATE_GOTO(COMMIT_next, next, locinput);
 	    assert(0); /* NOTREACHED */
+
 	case COMMIT_next_fail:
 	    no_final = 1;    
 	    /* FALLTHROUGH */	    
-	case OPFAIL:
+
+	case OPFAIL:   /* (*FAIL)  */
 	    sayNO;
 	    assert(0); /* NOTREACHED */
 
 #define ST st->u.mark
-        case MARKPOINT:
+        case MARKPOINT: /*  (*MARK:foo)  */
             ST.prev_mark = mark_state;
             ST.mark_name = sv_commit = sv_yes_mark 
                 = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
@@ -5836,10 +5875,12 @@ NULL
             ST.mark_loc = locinput;
             PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput);
             assert(0); /* NOTREACHED */
+
         case MARKPOINT_next:
             mark_state = ST.prev_mark;
             sayYES;
             assert(0); /* NOTREACHED */
+
         case MARKPOINT_next_fail:
             if (popmark && sv_eq(ST.mark_name,popmark)) 
             {
@@ -5860,7 +5901,8 @@ NULL
                 mark_state->u.mark.mark_name : NULL;
             sayNO;
             assert(0); /* NOTREACHED */
-        case SKIP:
+
+        case SKIP:  /*  (*SKIP)  */
             if (scan->flags) {
                 /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
@@ -5885,6 +5927,7 @@ NULL
             }    
             /* Didn't find our (*MARK:NAME) so ignore this (*SKIP:NAME) */
             break;    
+
 	case SKIP_next_fail:
 	    if (ST.mark_name) {
 	        /* (*CUT:NAME) - Set up to search for the name as we 
@@ -5904,7 +5947,8 @@ NULL
             sayNO;
             assert(0); /* NOTREACHED */
 #undef ST
-        case LNBREAK:
+
+        case LNBREAK: /* \R */
             if ((n=is_LNBREAK(locinput,utf8_target))) {
                 locinput += n;
             } else
@@ -5930,8 +5974,8 @@ NULL
             }                                         \
             break
 
-        CASE_CLASS(VERTWS);
-        CASE_CLASS(HORIZWS);
+        CASE_CLASS(VERTWS);  /*  \v \V  */
+        CASE_CLASS(HORIZWS); /*  \h \H  */
 #undef CASE_CLASS
 
 	default:
