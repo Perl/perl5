@@ -377,7 +377,7 @@ pragma.)
 =head2 Lexical effect
 
 Like other pragmas (C<use strict>, for example), features have a lexical
-effect. C<use feature qw(foo)> will only make the feature "foo" available
+effect.  C<use feature qw(foo)> will only make the feature "foo" available
 from that point to the end of the enclosing block.
 
     {
