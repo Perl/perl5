@@ -4763,6 +4763,17 @@ think the U.S. Government thinks it's a secret, or at least that they
 will continue to pretend that it is.  And if you quote me on that, I
 will deny it.
 
+=item The %s feature is experimental
+
+(S experimental) This warning is emitted if you enable an experimental
+feature via C<use feature>.  Simply suppress the warning if you want
+to use the feature, but know that in doing so you are taking the risk
+of using an experimental feature which may change or be removed in a
+future Perl version:
+
+    no warnings "experimental:lexical_subs";
+    use feature "lexical_subs";
+
 =item The %s function is unimplemented
 
 (F) The function indicated isn't implemented on this architecture, according

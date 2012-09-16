@@ -28,6 +28,7 @@ my %feature = (
     evalbytes       => 'evalbytes',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
+    lexical_subs    => 'lexsubs',
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
     fc              => 'fc',
@@ -50,6 +51,8 @@ my %feature_bundle = (
     "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
 );
+
+my @experimental = qw( lexical_subs );
 
 
 ###########################################################################
@@ -151,7 +154,7 @@ sub longest {
 
 print $pm "our %feature = (\n";
 my $width = length longest keys %feature;
-for(sort { length $a <=> length $b } keys %feature) {
+for(sort { length $a <=> length $b || $a cmp $b } keys %feature) {
     print $pm "    $_" . " "x($width-length)
 	    . " => 'feature_$feature{$_}',\n";
 }
@@ -171,6 +174,10 @@ for (sort keys %Aliases) {
     print $pm
 	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
 };
+
+print $pm "my \%experimental = (\n";
+print $pm "    $_ => 1,\n", for @experimental;
+print $pm ");\n";
 
 print $pm <<EOPM;
 
@@ -251,7 +258,7 @@ print $h <<EOL;
 EOL
 
 for (
-    sort { length $a <=> length $b } keys %feature
+    sort { length $a <=> length $b || $a cmp $b } keys %feature
 ) {
     my($first,$last) =
 	map { (my $__ = uc) =~ y/.//d; $__ } @{$BundleRanges{$_}};
@@ -280,7 +287,7 @@ EOI
 
 EOH3
     }
-    else {
+    elsif ($first) {
 	print $h <<EOH4;
 #define FEATURE_$NAME\_IS_ENABLED \\
     ( \\
@@ -290,6 +297,16 @@ EOH3
     )
 
 EOH4
+    }
+    else {
+	print $h <<EOH5;
+#define FEATURE_$NAME\_IS_ENABLED \\
+    ( \\
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
+	 FEATURE_IS_ENABLED("$name") \\
+    )
+
+EOH5
     }
 }
 
@@ -647,6 +664,11 @@ sub __common {
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	    if ($experimental{$name}) {
+		require warnings;
+		warnings::warnif("experimental:$name",
+				 "The $name feature is experimental");
+	    }
 	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';

@@ -15,6 +15,7 @@ our %feature = (
     evalbytes       => 'feature_evalbytes',
     array_base      => 'feature_arybase',
     current_sub     => 'feature___SUB__',
+    lexical_subs    => 'feature_lexsubs',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
 );
@@ -23,7 +24,7 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs say state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -34,6 +35,9 @@ $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.17"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.18"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
+my %experimental = (
+    lexical_subs => 1,
+);
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x1c000000;
@@ -362,6 +366,11 @@ sub __common {
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	    if ($experimental{$name}) {
+		require warnings;
+		warnings::warnif("experimental:$name",
+				 "The $name feature is experimental");
+	    }
 	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
