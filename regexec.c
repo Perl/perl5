@@ -3418,7 +3418,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	     *    ab|a|x|abcd|abc
 	     * when matched against the string "abcde", will generate
 	     * accept states for all words except 3, with the longest
-	     * matching word being 4, and the shortest being 1 (with
+	     * matching word being 4, and the shortest being 2 (with
 	     * the position being after char 1 of the string).
 	     *
 	     * Then for each matching word, in word order (i.e. 1,2,4,5),
