@@ -3756,31 +3756,56 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		const char * const e = s + ln;
 
 		if (utf8_target) {
-		    /* The target is utf8, the pattern is not utf8. */
+                    /* The target is utf8, the pattern is not utf8.
+                     * Above-Latin1 code points can't match the pattern;
+                     * invariants match exactly, and the other Latin1 ones need
+                     * to be downgraded to a single byte in order to do the
+                     * comparison.  (If we could be confident that the target
+                     * is not malformed, this could be refactored to have fewer
+                     * tests by just assuming that if the first bytes match, it
+                     * is an invariant, but there are tests in the test suite
+                     * dealing with (??{...}) which violate this) */
 		    while (s < e) {
-			STRLEN ulen;
 			if (l >= PL_regeol)
 			     sayNO;
-			if (NATIVE_TO_UNI(*(U8*)s) !=
-			    utf8n_to_uvuni((U8*)l, UTF8_MAXBYTES, &ulen,
-					    uniflags))
-			     sayNO;
-			l += ulen;
-			s ++;
+                        if (UTF8_IS_ABOVE_LATIN1(* (U8*) l)) {
+                            sayNO;
+                        }
+                        if (UTF8_IS_INVARIANT(*(U8*)l)) {
+			    if (*l != *s) {
+                                sayNO;
+                            }
+                            l++;
+                        }
+                        else {
+                            if (TWO_BYTE_UTF8_TO_UNI(*l, *(l+1)) != * (U8*) s) {
+                                sayNO;
+                            }
+                            l += 2;
+                        }
+			s++;
 		    }
 		}
 		else {
 		    /* The target is not utf8, the pattern is utf8. */
 		    while (s < e) {
-			STRLEN ulen;
-			if (l >= PL_regeol)
-			    sayNO;
-			if (NATIVE_TO_UNI(*((U8*)l)) !=
-			    utf8n_to_uvuni((U8*)s, UTF8_MAXBYTES, &ulen,
-					   uniflags))
-			    sayNO;
-			s += ulen;
-			l ++;
+                        if (l >= PL_regeol || UTF8_IS_ABOVE_LATIN1(* (U8*) s))
+                        {
+                            sayNO;
+                        }
+                        if (UTF8_IS_INVARIANT(*(U8*)s)) {
+			    if (*s != *l) {
+                                sayNO;
+                            }
+                            s++;
+                        }
+                        else {
+                            if (TWO_BYTE_UTF8_TO_UNI(*s, *(s+1)) != * (U8*) l) {
+                                sayNO;
+                            }
+                            s += 2;
+                        }
+			l++;
 		    }
 		}
 		locinput = l;
