@@ -381,7 +381,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
-    CvGV_set(cv, NULL);
+    if (CvNAMED(cv)) CvNAME_HEK_set(cv, NULL);
+    else	     CvGV_set(cv, NULL);
 
     /* This statement and the subsequence if block was pad_undef().  */
     pad_peg("pad_undef");
@@ -645,6 +646,8 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 	sv_upgrade(PL_curpad[offset], SVt_PVAV);
     else if (namelen != 0 && *namepv == '%')
 	sv_upgrade(PL_curpad[offset], SVt_PVHV);
+    else if (namelen != 0 && *namepv == '&')
+	sv_upgrade(PL_curpad[offset], SVt_PVCV);
     assert(SvPADMY(PL_curpad[offset]));
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
@@ -874,9 +877,11 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
+	    /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
-		"\"%s\" variable %"SVf" masks earlier declaration in same %s",
+		"\"%s\" %s %"SVf" masks earlier declaration in same %s",
 		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
+		*SvPVX(sv) == '&' ? "subroutine" : "variable",
 		sv,
 		(COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
 		    ? "scope" : "statement"));
@@ -1109,8 +1114,19 @@ the parent pad.
 #define CvCOMPILED(cv)	CvROOT(cv)
 
 /* the CV does late binding of its lexicals */
-#define CvLATE(cv) (CvANON(cv) || SvTYPE(cv) == SVt_PVFM)
+#define CvLATE(cv) (CvANON(cv) || CvCLONE(cv) || SvTYPE(cv) == SVt_PVFM)
 
+static void
+S_unavailable(pTHX_ SV *namesv)
+{
+    /* diag_listed_as: Variable "%s" is not available */
+    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
+			"%se \"%"SVf"\" is not available",
+			 *SvPVX_const(namesv) == '&'
+					 ? "Subroutin"
+					 : "Variabl",
+			 namesv);
+}
 
 STATIC PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
@@ -1233,8 +1249,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			: *out_flags & PAD_FAKELEX_ANON)
 		{
 		    if (warn)
-			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "Variable \"%"SVf"\" is not available",
+			S_unavailable(aTHX_
                                        newSVpvn_flags(namepv, namelen,
                                            SVs_TEMP |
                                            (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
@@ -1282,8 +1297,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			&& (!CvDEPTH(cv) || !staleok)
 			&& !SvPAD_STATE(name_svp[offset]))
 		    {
-			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "Variable \"%"SVf"\" is not available",
+			S_unavailable(aTHX_
                                        newSVpvn_flags(namepv, namelen,
                                            SVs_TEMP |
                                            (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
@@ -1295,6 +1309,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			*out_capture = sv_2mortal(MUTABLE_SV(newAV()));
 		    else if (namelen != 0 && *namepv == '%')
 			*out_capture = sv_2mortal(MUTABLE_SV(newHV()));
+		    else if (namelen != 0 && *namepv == '&')
+			*out_capture = sv_2mortal(newSV_type(SVt_PVCV));
 		    else
 			*out_capture = sv_newmortal();
 		}
@@ -1367,6 +1383,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 	else {
 	    /* immediate creation - capture outer value right now */
 	    av_store(PL_comppad, new_offset, SvREFCNT_inc(*new_capturep));
+	    /* But also note the offset, as newMYSUB needs it */
+	    PARENT_PAD_INDEX_set(new_namesv, offset);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		"Pad findlex cv=0x%"UVxf" saved captured sv 0x%"UVxf" at offset %ld\n",
 		PTR2UV(cv), PTR2UV(*new_capturep), (long)new_offset));
@@ -1528,11 +1546,12 @@ lexicals in this scope and warn of any lexicals that never got introduced.
 =cut
 */
 
-void
+OP *
 Perl_pad_leavemy(pTHX)
 {
     dVAR;
     I32 off;
+    OP *o = NULL;
     SV * const * const svp = AvARRAY(PL_comppad_name);
 
     PL_pad_reset_pending = FALSE;
@@ -1549,7 +1568,7 @@ Perl_pad_leavemy(pTHX)
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
-	const SV * const sv = svp[off];
+	SV * const sv = svp[off];
 	if (sv && sv != &PL_sv_undef && !SvFAKE(sv)
 	    && COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 	{
@@ -1560,6 +1579,12 @@ Perl_pad_leavemy(pTHX)
 		(unsigned long)COP_SEQ_RANGE_LOW(sv),
 		(unsigned long)COP_SEQ_RANGE_HIGH(sv))
 	    );
+	    if (!PadnameIsSTATE(sv) && !PadnameIsOUR(sv)
+	     && *PadnamePV(sv) == '&' && PadnameLEN(sv) > 1) {
+		OP *kid = newOP(OP_INTROCV, 0);
+		kid->op_targ = off;
+		o = op_prepend_elem(OP_LINESEQ, kid, o);
+	    }
 	}
     }
     PL_cop_seqmax++;
@@ -1567,6 +1592,7 @@ Perl_pad_leavemy(pTHX)
 	PL_cop_seqmax++;
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	    "Pad leavemy: seq = %ld\n", (long)PL_cop_seqmax));
+    return o;
 }
 
 /*
@@ -1701,8 +1727,8 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad clone on cv=0x%"UVxf"\n", PTR2UV(cv)));
 		CvCLONE_on(cv);
-		CvHASEVAL_on(cv);
 	    }
+	    CvHASEVAL_on(cv);
 	}
     }
 
@@ -1931,8 +1957,10 @@ the immediately surrounding code.
 =cut
 */
 
-CV *
-Perl_cv_clone(pTHX_ CV *proto)
+static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
+
+static void
+S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 {
     dVAR;
     I32 ix;
@@ -1943,26 +1971,26 @@ Perl_cv_clone(pTHX_ CV *proto)
     SV** const ppad = AvARRAY(protopad);
     const I32 fname = AvFILLp(protopad_name);
     const I32 fpad = AvFILLp(protopad);
-    CV* cv;
     SV** outpad;
-    CV* outside;
     long depth;
-
-    PERL_ARGS_ASSERT_CV_CLONE;
+    bool subclones = FALSE;
 
     assert(!CvUNIQUE(proto));
 
     /* Anonymous subs have a weak CvOUTSIDE pointer, so its value is not
      * reliable.  The currently-running sub is always the one we need to
      * close over.
+     * For my subs, the currently-running sub may not be the one we want.
+     * We have to check whether it is a clone of CvOUTSIDE.
      * Note that in general for formats, CvOUTSIDE != find_runcv.
      * Since formats may be nested inside closures, CvOUTSIDE may point
      * to a prototype; we instead want the cloned parent who called us.
      */
 
-    if (SvTYPE(proto) == SVt_PVCV)
+    if (!outside) {
+      if (CvWEAKOUTSIDE(proto))
 	outside = find_runcv(NULL);
-    else {
+      else {
 	outside = CvOUTSIDE(proto);
 	if ((CvCLONE(outside) && ! CvCLONED(outside))
 	    || !CvPADLIST(outside)
@@ -1972,37 +2000,18 @@ Perl_cv_clone(pTHX_ CV *proto)
 	    );
 	    /* outside could be null */
 	}
+      }
     }
     depth = outside ? CvDEPTH(outside) : 0;
-    assert(depth || SvTYPE(proto) == SVt_PVFM);
     if (!depth)
 	depth = 1;
-    assert(SvTYPE(proto) == SVt_PVFM || CvPADLIST(outside));
 
     ENTER;
     SAVESPTR(PL_compcv);
+    PL_compcv = cv;
 
-    cv = PL_compcv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
-    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
-				    |CVf_SLABBED);
-    CvCLONED_on(cv);
-
-    CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
-					   : CvFILE(proto);
-    CvGV_set(cv,CvGV(proto));
-    CvSTASH_set(cv, CvSTASH(proto));
-    OP_REFCNT_LOCK;
-    CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
-    OP_REFCNT_UNLOCK;
-    CvSTART(cv)		= CvSTART(proto);
     if (CvHASEVAL(cv))
 	CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
-    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
-
-    if (SvPOK(proto))
-	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
-    if (SvMAGIC(proto))
-	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
     SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;
@@ -2016,7 +2025,6 @@ Perl_cv_clone(pTHX_ CV *proto)
     outpad = outside && CvPADLIST(outside)
 	? AvARRAY(PadlistARRAY(CvPADLIST(outside))[depth])
 	: NULL;
-    assert(outpad || SvTYPE(cv) == SVt_PVFM);
     if (outpad) CvPADLIST(cv)->xpadl_outid = CvPADLIST(outside)->xpadl_id;
 
     for (ix = fpad; ix > 0; ix--) {
@@ -2029,9 +2037,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		if (!outpad || !(sv = outpad[PARENT_PAD_INDEX(namesv)])
 		 || (  SvPADSTALE(sv) && !SvPAD_STATE(namesv)
 		    && (!outside || !CvDEPTH(outside)))  ) {
-		    assert(SvTYPE(cv) == SVt_PVFM);
-		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				   "Variable \"%"SVf"\" is not available", namesv);
+		    S_unavailable(aTHX_ namesv);
 		    sv = NULL;
 		}
 		else 
@@ -2040,7 +2046,33 @@ Perl_cv_clone(pTHX_ CV *proto)
 	    if (!sv) {
                 const char sigil = SvPVX_const(namesv)[0];
                 if (sigil == '&')
-		    sv = SvREFCNT_inc(ppad[ix]);
+		    /* If there are state subs, we need to clone them, too.
+		       But they may need to close over variables we have
+		       not cloned yet.  So we will have to do a second
+		       pass.  Furthermore, there may be state subs clos-
+		       ing over other state subs’ entries, so we have
+		       to put a stub here and then clone into it on the
+		       second pass. */
+		    if (SvPAD_STATE(namesv) && !CvCLONED(ppad[ix])) {
+			assert(SvTYPE(ppad[ix]) == SVt_PVCV);
+			subclones = 1;
+			sv = newSV_type(SVt_PVCV);
+		    }
+		    else if (PadnameLEN(namesv)>1 && !PadnameIsOUR(namesv))
+		    {
+			/* my sub */
+			/* Just provide a stub, but name it.  It will be
+			   upgrade to the real thing on scope entry. */
+			sv = newSV_type(SVt_PVCV);
+			CvNAME_HEK_set(
+			    sv,
+			    share_hek(SvPVX_const(namesv)+1,
+				      SvCUR(namesv) - 1
+					 * (SvUTF8(namesv) ? -1 : 1),
+				      0)
+			);
+		    }
+		    else sv = SvREFCNT_inc(ppad[ix]);
                 else if (sigil == '@')
 		    sv = MUTABLE_SV(newAV());
                 else if (sigil == '%')
@@ -2049,7 +2081,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		    sv = newSV(0);
 		SvPADMY_on(sv);
 		/* reset the 'assign only once' flag on each state var */
-		if (SvPAD_STATE(namesv))
+		if (sigil != '&' && SvPAD_STATE(namesv))
 		    SvPADSTALE_on(sv);
 	    }
 	}
@@ -2063,14 +2095,52 @@ Perl_cv_clone(pTHX_ CV *proto)
 	PL_curpad[ix] = sv;
     }
 
+    if (subclones)
+	for (ix = fpad; ix > 0; ix--) {
+	    SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
+	    if (namesv && namesv != &PL_sv_undef && !SvFAKE(namesv)
+	     && SvPVX_const(namesv)[0] == '&' && SvPAD_STATE(namesv))
+		S_cv_clone(aTHX_ (CV *)ppad[ix], (CV *)PL_curpad[ix], cv);
+	}
+
+    LEAVE;
+}
+
+static CV *
+S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
+{
+    assert(!CvUNIQUE(proto));
+
+    if (!cv) cv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
+    CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC
+				    |CVf_SLABBED);
+    CvCLONED_on(cv);
+
+    CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
+					   : CvFILE(proto);
+    if (CvNAMED(proto))
+	 CvNAME_HEK_set(cv, share_hek_hek(CvNAME_HEK(proto)));
+    else CvGV_set(cv,CvGV(proto));
+    CvSTASH_set(cv, CvSTASH(proto));
+    OP_REFCNT_LOCK;
+    CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
+    OP_REFCNT_UNLOCK;
+    CvSTART(cv)		= CvSTART(proto);
+    CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
+
+    if (SvPOK(proto))
+	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
+    if (SvMAGIC(proto))
+	mg_copy((SV *)proto, (SV *)cv, 0, 0);
+
+    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside);
+
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
-	if (outside) cv_dump(outside, "Outside");
+	if (CvOUTSIDE(cv)) cv_dump(CvOUTSIDE(cv), "Outside");
 	cv_dump(proto,	 "Proto");
 	cv_dump(cv,	 "To");
     );
-
-    LEAVE;
 
     if (CvCONST(cv)) {
 	/* Constant sub () { $x } closing over $x - see lib/constant.pm:
@@ -2092,6 +2162,24 @@ Perl_cv_clone(pTHX_ CV *proto)
     }
 
     return cv;
+}
+
+CV *
+Perl_cv_clone(pTHX_ CV *proto)
+{
+    PERL_ARGS_ASSERT_CV_CLONE;
+
+    if (!CvPADLIST(proto)) Perl_croak(aTHX_ "panic: no pad in cv_clone");
+    return S_cv_clone(aTHX_ proto, NULL, NULL);
+}
+
+/* Called only by pp_clonecv */
+CV *
+Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
+{
+    PERL_ARGS_ASSERT_CV_CLONE_INTO;
+    cv_undef(target);
+    return S_cv_clone(aTHX_ proto, target, NULL);
 }
 
 /*
@@ -2119,14 +2207,22 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
         const SV * const namesv = namepad[ix];
-	if (namesv && namesv != &PL_sv_undef
+	if (namesv && namesv != &PL_sv_undef && !SvPAD_STATE(namesv)
 	    && *SvPVX_const(namesv) == '&')
 	{
 	  if (SvTYPE(curpad[ix]) == SVt_PVCV) {
-	    CV * const innercv = MUTABLE_CV(curpad[ix]);
-	    assert(CvWEAKOUTSIDE(innercv));
-	    assert(CvOUTSIDE(innercv) == old_cv);
-	    CvOUTSIDE(innercv) = new_cv;
+	    MAGIC * const mg =
+		SvMAGICAL(curpad[ix])
+		    ? mg_find(curpad[ix], PERL_MAGIC_proto)
+		    : NULL;
+	    CV * const innercv = MUTABLE_CV(mg ? mg->mg_obj : curpad[ix]);
+	    if (CvOUTSIDE(innercv) == old_cv) {
+		if (!CvWEAKOUTSIDE(innercv)) {
+		    SvREFCNT_dec(old_cv);
+		    SvREFCNT_inc_simple_void_NN(new_cv);
+		}
+		CvOUTSIDE(innercv) = new_cv;
+	    }
 	  }
 	  else { /* format reference */
 	    SV * const rv = curpad[ix];

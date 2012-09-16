@@ -10,9 +10,23 @@ EXPECT
 Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
 ########
 # NAME Missing name in "my sub"
-my sub;
+use feature 'lexical_subs'; my sub;
 EXPECT
+The lexical_subs feature is experimental at - line 1.
 Missing name in "my sub" at - line 1.
+########
+# NAME Missing name in "our sub"
+use feature 'lexical_subs'; our sub;
+EXPECT
+The lexical_subs feature is experimental at - line 1.
+Missing name in "our sub" at - line 1.
+########
+# NAME Missing name in "state sub"
+use 5.01; use feature 'lexical_subs';
+state sub;
+EXPECT
+The lexical_subs feature is experimental at - line 1.
+Missing name in "state sub" at - line 2.
 ########
 # NAME Unterminated delimiter for here document
 <<"foo

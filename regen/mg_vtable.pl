@@ -94,6 +94,7 @@ my %mg =
 		  desc => "Shadow \"foreach\" iterator variable /\nsmart parameter vivification" },
      arylen => { char => '#', vtable => 'arylen', value_magic => 1,
 		 desc => 'Array length ($#ary)' },
+     proto => { char => '&', desc => 'my sub prototype CV' },
      pos => { char => '.', vtable => 'pos', value_magic => 1,
 	      desc => 'pos() lvalue' },
      backref => { char => '<', vtable => 'backref', value_magic => 1,

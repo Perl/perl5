@@ -172,7 +172,7 @@ XXX DAPM it would make more sense to make the arg a PADOFFSET
 Clear the pointed to pad value on scope exit. (i.e. the runtime action of 'my')
 
 =for apidoc m|void|SAVECOMPPAD
-save PL_comppad and PL_curpad
+Save PL_comppad_name, PL_comppad and PL_curpad.
 
 
 =for apidoc Amx|PAD **|PadlistARRAY|PADLIST padlist
@@ -318,6 +318,7 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 
 #define PAD_SET_CUR_NOSAVE(padlist,nth) \
+	PL_comppad_name = PadlistNAMES(padlist);		\
 	PL_comppad = (PAD*) (PadlistARRAY(padlist)[nth]);	\
 	PL_curpad = AvARRAY(PL_comppad);			\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\

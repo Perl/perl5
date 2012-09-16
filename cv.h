@@ -49,7 +49,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvROOT(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_root
 #define CvXSUB(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_xsubany
-#define CvGV(sv)	(0+((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv)
+#define CvGV(sv)	S_CvGV((CV *)(sv))
 #define CvGV_set(cv,gv)	Perl_cvgv_set(aTHX_ cv, gv)
 #define CvFILE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
@@ -103,6 +103,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_DYNFILE	0x1000	/* The filename isn't static  */
 #define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
 #define CVf_HASEVAL	0x4000	/* contains string eval  */
+#define CVf_NAMED	0x8000  /* Has a name HEK */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE)
@@ -180,8 +181,36 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvHASEVAL_on(cv)	(CvFLAGS(cv) |= CVf_HASEVAL)
 #define CvHASEVAL_off(cv)	(CvFLAGS(cv) &= ~CVf_HASEVAL)
 
+#define CvNAMED(cv)		(CvFLAGS(cv) & CVf_NAMED)
+#define CvNAMED_on(cv)		(CvFLAGS(cv) |= CVf_NAMED)
+#define CvNAMED_off(cv)		(CvFLAGS(cv) &= ~CVf_NAMED)
+
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
+
+PERL_STATIC_INLINE GV *
+S_CvGV(CV *sv)
+{
+    return CvNAMED(sv)
+	? 0
+	: ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_gv;
+}
+PERL_STATIC_INLINE HEK *
+CvNAME_HEK(CV *sv)
+{
+    return CvNAMED(sv)
+	? ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_gv_u.xcv_hek
+	: 0;
+}
+/* This lowers the refernce count of the previous value, but does *not*
+   increment the reference count of the new value. */
+#define CvNAME_HEK_set(cv, hek) ( \
+	CvNAME_HEK((CV *)(cv))						 \
+	    ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)	  \
+	    : (void)0,						   \
+	((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_gv_u.xcv_hek = (hek), \
+	CvNAMED_on(cv)						     \
+    )
 
 /*
 =head1 CV reference counts and CvOUTSIDE

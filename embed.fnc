@@ -1627,12 +1627,8 @@ Ap	|CV*	|newATTRSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NU
 p	|CV*	|newATTRSUB_flags|I32 floor|NULLOK OP *o|NULLOK OP *proto \
 				 |NULLOK OP *attrs|NULLOK OP *block \
 				 |U32 flags
-#ifdef PERL_MAD
-Apr	|OP *	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
+Ap	|CV *	|newMYSUB	|I32 floor|NN OP *o|NULLOK OP *proto \
 				|NULLOK OP *attrs|NULLOK OP *block
-#else
-Apr	|void	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
-#endif
 p	|CV*	|newSTUB	|NN GV *gv|bool fake
 : Used in perly.y
 p	|OP *	|my_attrs	|NN OP *o|NULLOK OP *attrs
@@ -2148,6 +2144,7 @@ s	|U8*	|add_utf16_textfilter|NN U8 *const s|bool reversed
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
 s	|void	|force_ident	|NN const char *s|int kind
+so	|void	|force_ident_maybe_lex|char pit
 s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s
@@ -2315,7 +2312,7 @@ Apd	|void	|pad_setsv	|PADOFFSET po|NN SV* sv
 #endif
 pd	|void	|pad_block_start|int full
 pd	|U32	|intro_my
-pd	|void	|pad_leavemy
+pd	|OP *	|pad_leavemy
 pd	|void	|pad_swipe	|PADOFFSET po|bool refadjust
 #if defined(PERL_IN_PAD_C)
 sd	|void	|pad_reset
@@ -2329,6 +2326,7 @@ sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 #endif
 Apd	|CV*	|cv_clone	|NN CV* proto
+pd	|CV*	|cv_clone_into	|NN CV* proto|NN CV *target
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 ApdR	|HV*	|pad_compname_type|const PADOFFSET po

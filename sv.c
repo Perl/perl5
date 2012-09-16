@@ -5906,10 +5906,11 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
     assert(GvGP(gv));
     assert(!CvANON(cv));
     assert(CvGV(cv) == gv);
+    assert(!CvNAMED(cv));
 
     /* will the CV shortly be freed by gp_free() ? */
     if (GvCV(gv) == cv && GvGP(gv)->gp_refcnt < 2 && SvREFCNT(cv) < 2) {
-	SvANY(cv)->xcv_gv = NULL;
+	SvANY(cv)->xcv_gv_u.xcv_gv = NULL;
 	return;
     }
 
@@ -5923,7 +5924,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 
     CvANON_on(cv);
     CvCVGV_RC_on(cv);
-    SvANY(cv)->xcv_gv = MUTABLE_GV(SvREFCNT_inc(anongv));
+    SvANY(cv)->xcv_gv_u.xcv_gv = MUTABLE_GV(SvREFCNT_inc(anongv));
 }
 
 
@@ -11231,7 +11232,6 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     parser->multi_open	= proto->multi_open;
     parser->multi_start	= proto->multi_start;
     parser->multi_end	= proto->multi_end;
-    parser->pending_ident = proto->pending_ident;
     parser->preambled	= proto->preambled;
     parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
     parser->linestr	= sv_dup_inc(proto->linestr, param);
@@ -12160,9 +12160,13 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		}
 		assert(!CvSLABBED(dstr));
 		if (CvDYNFILE(dstr)) CvFILE(dstr) = SAVEPV(CvFILE(dstr));
+		if (CvNAMED(dstr))
+		    SvANY((CV *)dstr)->xcv_gv_u.xcv_hek =
+			share_hek_hek(CvNAME_HEK((CV *)sstr));
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */
-		SvANY(MUTABLE_CV(dstr))->xcv_gv =
+		else
+		  SvANY(MUTABLE_CV(dstr))->xcv_gv_u.xcv_gv =
 		    CvCVGV_RC(dstr)
 		    ? gv_dup_inc(CvGV(sstr), param)
 		    : (param->flags & CLONEf_JOIN_IN)
@@ -12465,6 +12469,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    /* fall through */
 	case SAVEt_COMPPAD:
+	    sv = (const SV *) POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	case SAVEt_NSTAB:
 	    sv = (const SV *) POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup(sv, param);

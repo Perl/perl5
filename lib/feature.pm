@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -15,6 +15,7 @@ our %feature = (
     evalbytes       => 'feature_evalbytes',
     array_base      => 'feature_arybase',
     current_sub     => 'feature___SUB__',
+    lexical_subs    => 'feature_lexsubs',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
 );
@@ -23,7 +24,7 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs say state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -34,6 +35,9 @@ $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.17"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.18"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
+my %experimental = (
+    lexical_subs => 1,
+);
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x1c000000;
@@ -79,7 +83,7 @@ pragma.)
 =head2 Lexical effect
 
 Like other pragmas (C<use strict>, for example), features have a lexical
-effect. C<use feature qw(foo)> will only make the feature "foo" available
+effect.  C<use feature qw(foo)> will only make the feature "foo" available
 from that point to the end of the enclosing block.
 
     {
@@ -226,6 +230,20 @@ See L<perlfunc/fc> for details.
 
 This feature is available from Perl 5.16 onwards.
 
+=head2 The 'lexical_subs' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, F<feature.pm> will
+warn when you enable the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental:lexical_subs";
+
+This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
+and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
+
+This feature is available from Perl 5.18 onwards.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -362,6 +380,11 @@ sub __common {
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	    if ($experimental{$name}) {
+		require warnings;
+		warnings::warnif("experimental:$name",
+				 "The $name feature is experimental");
+	    }
 	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';

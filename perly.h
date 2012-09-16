@@ -100,33 +100,32 @@
      NOAMP = 309,
      LOCAL = 310,
      MY = 311,
-     MYSUB = 312,
-     REQUIRE = 313,
-     COLONATTR = 314,
-     FORMLBRACK = 315,
-     FORMRBRACK = 316,
-     PREC_LOW = 317,
-     DOROP = 318,
-     OROP = 319,
-     ANDOP = 320,
-     NOTOP = 321,
-     ASSIGNOP = 322,
-     DORDOR = 323,
-     OROR = 324,
-     ANDAND = 325,
-     BITOROP = 326,
-     BITANDOP = 327,
-     SHIFTOP = 328,
-     MATCHOP = 329,
-     REFGEN = 330,
-     UMINUS = 331,
-     POWOP = 332,
-     POSTDEC = 333,
-     POSTINC = 334,
-     PREDEC = 335,
-     PREINC = 336,
-     ARROW = 337,
-     PEG = 338
+     REQUIRE = 312,
+     COLONATTR = 313,
+     FORMLBRACK = 314,
+     FORMRBRACK = 315,
+     PREC_LOW = 316,
+     DOROP = 317,
+     OROP = 318,
+     ANDOP = 319,
+     NOTOP = 320,
+     ASSIGNOP = 321,
+     DORDOR = 322,
+     OROR = 323,
+     ANDAND = 324,
+     BITOROP = 325,
+     BITANDOP = 326,
+     SHIFTOP = 327,
+     MATCHOP = 328,
+     REFGEN = 329,
+     UMINUS = 330,
+     POWOP = 331,
+     POSTDEC = 332,
+     POSTINC = 333,
+     PREDEC = 334,
+     PREINC = 335,
+     ARROW = 336,
+     PEG = 337
    };
 #endif
 /* Tokens.  */
@@ -184,33 +183,32 @@
 #define NOAMP 309
 #define LOCAL 310
 #define MY 311
-#define MYSUB 312
-#define REQUIRE 313
-#define COLONATTR 314
-#define FORMLBRACK 315
-#define FORMRBRACK 316
-#define PREC_LOW 317
-#define DOROP 318
-#define OROP 319
-#define ANDOP 320
-#define NOTOP 321
-#define ASSIGNOP 322
-#define DORDOR 323
-#define OROR 324
-#define ANDAND 325
-#define BITOROP 326
-#define BITANDOP 327
-#define SHIFTOP 328
-#define MATCHOP 329
-#define REFGEN 330
-#define UMINUS 331
-#define POWOP 332
-#define POSTDEC 333
-#define POSTINC 334
-#define PREDEC 335
-#define PREINC 336
-#define ARROW 337
-#define PEG 338
+#define REQUIRE 312
+#define COLONATTR 313
+#define FORMLBRACK 314
+#define FORMRBRACK 315
+#define PREC_LOW 316
+#define DOROP 317
+#define OROP 318
+#define ANDOP 319
+#define NOTOP 320
+#define ASSIGNOP 321
+#define DORDOR 322
+#define OROR 323
+#define ANDAND 324
+#define BITOROP 325
+#define BITANDOP 326
+#define SHIFTOP 327
+#define MATCHOP 328
+#define REFGEN 329
+#define UMINUS 330
+#define POWOP 331
+#define POSTDEC 332
+#define POSTINC 333
+#define PREDEC 334
+#define PREINC 335
+#define ARROW 336
+#define PEG 337
 
 
 
@@ -268,6 +266,6 @@ typedef union YYSTYPE
 
 
 /* Generated from:
- * 580d1bac82838fb0ae1e092010e776fb247f0d4cb68834a166507fae86707700 perly.y
+ * 8f20aa8c321935dad8457c5b097cd153aacc2f87cd51dc911d1d791d045b642f perly.y
  * 4a3ced51fe6585f6ec59e65e1ffd74bc976c498b0e6992eaab337219fee72e51 regen_perly.pl
  * ex: set ro: */

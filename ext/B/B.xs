@@ -1452,7 +1452,11 @@ MODULE = B	PACKAGE = B::IV
 #define PVAV_max_ix	sv_SSize_tp | offsetof(struct xpvav, xav_max)
 
 #define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
-#define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
+#if PERL_VERSION > 17 || (PERL_VERSION == 17 && PERL_SUBVERSION >= 3)
+# define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv_u.xcv_gv)
+#else
+# define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
+#endif
 #define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
 #define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
 #define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)

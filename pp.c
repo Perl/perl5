@@ -144,6 +144,47 @@ PP(pp_padhv)
     RETURN;
 }
 
+PP(pp_padcv)
+{
+    dVAR; dSP; dTARGET;
+    assert(SvTYPE(TARG) == SVt_PVCV);
+    XPUSHs(TARG);
+    RETURN;
+}
+
+PP(pp_introcv)
+{
+    dVAR; dTARGET;
+    SvPADSTALE_off(TARG);
+    return NORMAL;
+}
+
+PP(pp_clonecv)
+{
+    dVAR; dTARGET;
+    MAGIC * const mg =
+	mg_find(AvARRAY(PL_comppad_name)[ARGTARG], PERL_MAGIC_proto);
+    assert(SvTYPE(TARG) == SVt_PVCV);
+    assert(mg);
+    assert(mg->mg_obj);
+    if (CvISXSUB(mg->mg_obj)) { /* constant */
+	/* XXX Should we clone it here? */
+	/* If this changes to use SAVECLEARSV, we can move the SAVECLEARSV
+	   to introcv and remove the SvPADSTALE_off. */
+	SAVEPADSVANDMORTALIZE(ARGTARG);
+	PAD_SVl(ARGTARG) = mg->mg_obj;
+    }
+    else {
+	if (CvROOT(mg->mg_obj)) {
+	    assert(CvCLONE(mg->mg_obj));
+	    assert(!CvCLONED(mg->mg_obj));
+	}
+	cv_clone_into((CV *)mg->mg_obj,(CV *)TARG);
+	SAVECLEARSV(PAD_SVl(ARGTARG));
+    }
+    return NORMAL;
+}
+
 /* Translations. */
 
 static const char S_no_symref_sv[] =
@@ -927,8 +968,14 @@ PP(pp_undef)
 	{
 	    /* let user-undef'd sub keep its identity */
 	    GV* const gv = CvGV((const CV *)sv);
+	    HEK * const hek = CvNAME_HEK((CV *)sv);
+	    if (hek) share_hek_hek(hek);
 	    cv_undef(MUTABLE_CV(sv));
-	    CvGV_set(MUTABLE_CV(sv), gv);
+	    if (gv) CvGV_set(MUTABLE_CV(sv), gv);
+	    else if (hek) {
+		SvANY((CV *)sv)->xcv_gv_u.xcv_hek = hek;
+		CvNAMED_on(sv);
+	    }
 	}
 	break;
     case SVt_PVGV:

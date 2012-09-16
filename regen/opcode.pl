@@ -44,7 +44,7 @@ while (<OPS>) {
     $args = '' unless defined $args;
 
     warn qq[Description "$desc" duplicates $seen{$desc}\n]
-     if $seen{$desc} and $key ne "transr";
+     if $seen{$desc} and $key !~ "transr|(?:intro|clone)cv";
     die qq[Opcode "$key" duplicates $seen{$key}\n] if $seen{$key};
     die qq[Opcode "freed" is reserved for the slab allocator\n]
 	if $key eq 'freed';

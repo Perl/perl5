@@ -84,6 +84,10 @@ my $tree = {
        	'unpack'	=> [ 5.008, DEFAULT_OFF],
        	'threads'	=> [ 5.008, DEFAULT_OFF],
        	'imprecision'	=> [ 5.011, DEFAULT_OFF],
+       	'experimental'	=> [ 5.017, {
+                                'experimental:lexical_subs' =>
+                                    [ 5.017, DEFAULT_ON ],
+                        }],
 
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
   	}],
@@ -208,7 +212,7 @@ sub printTree
 	}
 
 	my ($ver, $rest) = @{ $v } ;
-	if (ref $rest)
+	if (ref $rest && $k ne 'experimental')
 	{
 	    my $bar = @keys ? "|" : " ";
 	    print " -" . "-" x ($max - length $k ) . "+\n" ;
@@ -313,7 +317,8 @@ foreach $k (sort { $a <=> $b } keys %ValueToName) {
     my ($name, $version) = @{ $ValueToName{$k} };
     print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
         if $last_ver != $version ;
-    print $warn tab(5, "#define WARN_$name"), "$k\n" ;
+    $name =~ y/:/_/;
+    print $warn tab(5, "#define WARN_$name"), " $k\n" ;
     $last_ver = $version ;
 }
 print $warn "\n" ;
@@ -481,6 +486,10 @@ If no import list is supplied, all possible warnings are either enabled
 or disabled.
 
 A number of functions are provided to assist module authors.
+
+In all the descriptions below, $category can also be a warnings category
+and ID separated by a colon, such as "experimental:lexical_subs".  See
+L<perllexwarn/Individual Warning IDs>.
 
 =over 4
 
