@@ -52,6 +52,60 @@ The following new DTrace probes have been added:
 
 =back
 
+=head2 Looser here-doc parsing
+
+Here-doc terminators no longer require a terminating newline character when
+they occur at the end of a file.  This was already the case at the end of a
+string eval [perl #65838].
+
+=head2 New mechanism for experimental features
+
+Newly-added experimental features will now require this incantation:
+
+    no warnings "experimental:feature_name";
+    use feature "feature_name";  # would warn without the prev line
+
+There is a new warnings category, called "experimental", containing
+warnings that the L<feature> pragma emits when enabling experimental
+features.
+
+Newly-added experimental features will also be given special warning IDs,
+which consist of "experimental:" followed by the name of the feature.  (The
+plan is to extend this mechanism eventually to all warnings, to allow them
+to be enabled or disabled individually, and not just by category.)
+
+By saying
+
+    no warnings "experimental:feature_name";
+
+you are taking responsibility for any breakage that future changes to, or
+removal of, the feature may cause.
+
+=head2 Lexical subroutines
+
+This new feature is still considered experimental.  To enable it, use the
+mechanism described above:
+
+    use 5.018;
+    no warnings "experimental:lexical_subs";
+    use feature "lexical_subs";
+
+You can now declare subroutines with C<state sub foo>, C<my sub foo>, and
+C<our sub foo>.  (C<state sub> requires that the "state" feature be
+enabled, unless you write it as C<CORE::state sub foo>.)
+
+C<state sub> creates a subroutine visible within the lexical scope in which
+it is declared.  The subroutine is shared between calls to the outer sub.
+
+C<my sub> declares a lexical subroutine that is created each time the
+enclosing block is entered.  C<state sub> is generally slightly faster than
+C<my sub>.
+
+C<our sub> declares a lexical alias to the package subroutine of the same
+name.
+
+See L<perlsub/Lexical Subroutines>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -69,6 +123,51 @@ XXX For a release on a stable branch, this section aspires to be:
     report.  See L</Reporting Bugs> below.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Here-doc parsing
+
+The body of a here-document inside a quote-like operator now always begins
+on the line after the "<<foo" marker.  Previously, it was documented to
+begin on the line following the containing quote-like operator, but that
+was only sometimes the case [perl #114040].
+
+=head2 Stricter parsing of substitution replacement
+
+It is no longer possible to abuse the way the parser parses C<s///e> like
+this:
+
+    %_=(_,"Just another ");
+    $_="Perl hacker,\n";
+    s//_}->{_/e;print
+
+=head2 Interaction of lexical and default warnings
+
+Turning on any lexical warnings used first to disable all default warnings
+if lexical warnings were not already enabled:
+
+    $*; # deprecation warning
+    use warnings "void";
+    $#; # void warning; no deprecation warning
+
+Now, the debugging, deprecated, glob, inplace and malloc warnings
+categories are left on when turning on lexical warnings (unless they are
+turned off by C<no warnings>, of course).
+
+This may cause deprecation warnings to occur in code that used to be free
+of warnings.
+
+Those are the only categories consisting only of default warnings.  Default
+warnings in other categories are still disabled by C<use warnings
+"category">, as we do not yet have the infrastructure for controlling
+individual warnings.
+
+=head2 C<state sub> and C<our sub>
+
+Due to an accident of history, C<state sub> and C<our sub> were equivalent
+to a plain C<sub>, so one could even create an anonymous sub with
+C<our sub { ... }>.  These are now disallowed outside of the "lexical_subs"
+feature.  Under the "lexical_subs" feature they have new meanings described
+in L<perlsub/Lexical Subroutines>.
 
 =head1 Deprecations
 
@@ -107,7 +206,7 @@ to constructs in non-void context.
 =item *
 
 Extend the optimisation of hashes in boolean context to C<scalar(%hash)>,
-C<%hash ? ... : ...>, and C<sub { %hash || ... | }>.
+C<%hash ? ... : ...>, and C<sub { %hash || ... }>.
 
 =item *
 
@@ -212,7 +311,7 @@ about using C<CODE> sections without an C<OUTPUT> section.
 =item *
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.17 to 3.18.  This avoids a
-bogus warning for initialised XSUB non-parameters.
+bogus warning for initialised XSUB non-parameters [perl #112776].
 
 =item *
 
@@ -247,7 +346,8 @@ various modules.
 =item *
 
 L<Opcode> has been upgraded from version 1.23 to 1.24 to reflect the removal of
-the boolkeys opcode.
+the boolkeys opcode and the addition of the clonecv, introcv and padcv
+opcodes.
 
 =item *
 
@@ -343,7 +443,68 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Experimental "%s" subs not enabled|perldiag/"Experimental "%s" subs not enabled">
+
+(F) To use lexical subs, you must first enable them:
+
+    no warnings 'experimental:lexical_subs';
+    use feature 'lexical_subs';
+    my sub foo { ... }
+
+=item *
+
+L<Subroutine "&%s" is not available|perldiag/"Subroutine "&%s" is not available">
+
+(W closure) During compilation, an inner named subroutine or eval is
+attempting to capture an outer lexical subroutine that is not currently
+available.  This can happen for one of two reasons.  First, the lexical
+subroutine may be declared in an outer anonymous subroutine that has not
+yet been created.  (Remember that named subs are created at compile time,
+while anonymous subs are created at run-time.)  For example,
+
+    sub { my sub a {...} sub f { \&a } }
+
+At the time that f is created, it can't capture the current the "a" sub,
+since the anonymous subroutine hasn't been created yet.  Conversely, the
+following won't give a warning since the anonymous subroutine has by now
+been created and is live:
+
+    sub { my sub a {...} eval 'sub f { \&a }' }->();
+
+The second situation is caused by an eval accessing a variable that has
+gone out of scope, for example,
+
+    sub f {
+	my sub a {...}
+	sub { eval '\&a' }
+    }
+    f()->();
+
+Here, when the '\&a' in the eval is being compiled, f() is not currently
+being executed, so its &a is not available for capture.
+
+=item *
+
+L<"%s" subroutine &%s masks earlier declaration in same %s|perldiag/"%s" subroutine &%s masks earlier declaration in same %s>
+
+(W misc) A "my" or "state" subroutine has been redeclared in the
+current scope or statement, effectively eliminating all access to
+the previous instance.  This is almost always a typographical error.
+Note that the earlier subroutine will still exist until the end of
+the scope or until all closure references to it are destroyed.
+
+=item *
+
+L<The %s feature is experimental|perldiag/"The %s feature is experimental">
+
+(S experimental) This warning is emitted if you enable an experimental
+feature via C<use feature>.  Simply suppress the warning if you want
+to use the feature, but know that in doing so you are taking the risk
+of using an experimental feature which may change or be removed in a
+future Perl version:
+
+    no warnings "experimental:lexical_subs";
+    use feature "lexical_subs";
 
 =back
 
@@ -355,7 +516,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<vector argument not supported with alpha versions|perldiag/vector argument not supported with alpha versions>
+
+This warning was not suppressable, even with C<no warnings>.  Now it is
+suppressible, and has been moved from the "internal" category to the
+"printf" category.
 
 =back
 
@@ -525,18 +690,61 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Restore ‘Can’t localize through ref’ to lvalue subs.  This error had disappeared
-under certain conditions in version 5.16.0 and has now been restored.
+The error "Can't localize through a reference" had disappeared in 5.16.0
+when C<local %$ref> appeared on the last line of an lvalue subroutine.
+This error disappeared for C<\local %$ref> in perl 5.8.1.  It has now
+been restored.
 
 =item *
 
-The parsing of heredocs has been improved significantly, fixing several parsing
-bugs and correcting wrong subsequent line numbers under certain conditions.
+The parsing of here-docs has been improved significantly, fixing several
+parsing bugs and crashes and one memory leak, and correcting wrong
+subsequent line numbers under certain conditions.
+
+=item *
+
+Inside an eval, the error message for an unterminated here-doc no longer
+has a newline in the middle of it [perl #70836].
+
+=item *
+
+A substitution inside a substitution pattern (C<s/${s|||}//>) no longer
+confuses the parser.
+
+=item *
+
+It may be an odd place to allow comments, but C<s//"" # hello/e> has
+always worked, I<unless> there happens to be a null character before the
+first #.  Now it works even in the presence of nulls.
+
+=item *
+
+An invalid range in C<tr///> or C<y///> no longer results in a memory leak.
+
+=item *
+
+String eval no longer treats a semicolon-delimited quote-like operator at
+the very end (C<eval 'q;;'>) as a syntax error.
+
+=item *
+
+C<< warn {$_ => 1} + 1 >> is no longer a syntax error.  The parser used to
+get confused with certain list operators followed by an anonymous hash and
+then an infix operator that shares its form with a unary operator.
+
+=item *
+
+C<(caller $n)[6]> (which gives the text of the eval) used to return the
+actual parser buffer.  Modifying it could result in crashes.  Now it always
+returns a copy.  The string returned no longer has "\n;" tacked on to the
+end.  The returned text also includes here-doc bodies, which used to be
+omitted.
 
 =item *
 
 Reset the utf8 position cache when accessing magical variables to avoid the
-string buffer and the utf8 position cache to get out of sync.
+string buffer and the utf8 position cache to get out of sync
+[perl #114410].
 
 =item *
 
@@ -563,6 +771,42 @@ might attempt to allocate more memory.
 In a regular expression, if something is quantified with C<{n,m}>
 where C<S<n E<gt> m>>, it can't possibly match.  Previously this was a fatal error,
 but now is merely a warning (and that something won't match).  [perl #82954].
+
+=item *
+
+It used to be possible for formats defined in subroutines that have
+subquently been undefined and redefined to close over variables in the
+wrong pad (the newly-defined enclosing sub), resulting in crashes or
+"Bizarre copy" errors.
+
+=item *
+
+Redefinition of XSUBs at run time could produce warnings with the wrong
+line number.
+
+=item *
+
+The %vd sprintf format does not support version objects for alpha versions.
+It used to output the format itself (%vd) when passed an alpha version, and
+also emit an "Invalid conversion in printf" warning.  It no longer does,
+but produces the empty string in the output.  It also no longer leaks
+memory in this case.
+
+=item *
+
+A bug fix in an earlier 5.17.x release caused C<no a a 3> (a syntax error)
+to result in a bad read or assertion failure, because an op was being freed
+twice.
+
+=item *
+
+C<< $obj->SUPER::method >> calls in the main package could fail if the
+SUPER package had already been accessed by other means.
+
+=item *
+
+Stash aliasing (C<*foo:: = *bar::>) no longer causes SUPER calls to ignore
+changes to methods or @ISA or use the wrong package.
 
 =back
 
