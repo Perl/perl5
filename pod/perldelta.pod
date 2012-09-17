@@ -169,6 +169,14 @@ C<our sub { ... }>.  These are now disallowed outside of the "lexical_subs"
 feature.  Under the "lexical_subs" feature they have new meanings described
 in L<perlsub/Lexical Subroutines>.
 
+=head2 C<gv_fetchmeth_*> and SUPER
+
+The various C<gv_fetchmeth_*> XS functions used to treat a package whose
+named ended with ::SUPER specially.  A method lookup on the Foo::SUPER
+package would be treated as a SUPER method lookup on the Foo package.  This
+is no longer the case.  To do a SUPER lookup, pass the Foo stash and the
+GV_SUPER flag.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.  In
@@ -807,6 +815,13 @@ SUPER package had already been accessed by other means.
 
 Stash aliasing (C<*foo:: = *bar::>) no longer causes SUPER calls to ignore
 changes to methods or @ISA or use the wrong package.
+
+=item *
+
+Method calls on packages whose names end in ::SUPER are no longer treated
+as SUPER method calls, resulting in failure to find the method.
+Furthermore, defining subroutines in such packages no longer causes them to
+be found by SUPER method calls on the containing package [perl #114924].
 
 =back
 
