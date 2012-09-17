@@ -90,6 +90,7 @@ struct xpvhv_aux {
  */
     I32		xhv_name_count;
     struct mro_meta *xhv_mro_meta;
+    HV *	xhv_super;	/* SUPER method cache */
 };
 
 /* hash structure: */

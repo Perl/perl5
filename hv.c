@@ -1858,6 +1858,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	Safefree(meta);
 	aux->xhv_mro_meta = NULL;
       }
+      SvREFCNT_dec(aux->xhv_super);
       if (!aux->xhv_name_u.xhvnameu_name && ! aux->xhv_backreferences)
 	SvFLAGS(hv) &= ~SVf_OOK;
     }
@@ -1933,6 +1934,7 @@ S_hv_auxinit(HV *hv) {
     iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
     iter->xhv_mro_meta = NULL;
+    iter->xhv_super = NULL;
     return iter;
 }
 

@@ -5565,11 +5565,6 @@ PERL_CALLCONV void	Perl_hv_kill_backrefs(pTHX_ HV *hv)
 
 #endif
 #if defined(PERL_IN_GV_C)
-STATIC HV*	S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GV_GET_SUPER_PKG	\
-	assert(name)
-
 STATIC void	S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_INIT_SVTYPE	\

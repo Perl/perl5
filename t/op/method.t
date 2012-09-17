@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 110);
+plan(tests => 111);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -472,3 +472,8 @@ package egakacp {
   $r = SUPER::m{@a}"b";
   ::is $r, 'arg b', 'method{@array}$more_args';
 }
+
+# [perl #114924] SUPER->method
+@SUPER::ISA = "SUPPER";
+sub SUPPER::foo { "supper" }
+is "SUPER"->foo, 'supper', 'SUPER->method';

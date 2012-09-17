@@ -1703,7 +1703,6 @@ sR	|I32	|do_trans_complex_utf8	|NN SV * const sv
 #if defined(PERL_IN_GV_C)
 s	|void	|gv_init_svtype	|NN GV *gv|const svtype sv_type
 s	|void	|gv_magicalize_isa	|NN GV *gv
-s	|HV*	|gv_get_super_pkg|NN const char* name|I32 namelen|U32 flags
 s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 				|NN const char *methpv|const U32 flags
 #endif

@@ -608,9 +608,12 @@ side-effect creates a glob with the given C<name> in the given C<stash>
 which in the case of success contains an alias for the subroutine, and sets
 up caching info for this glob.
 
-Currently, the only significant value for C<flags> is SVf_UTF8.
+The only significant values for C<flags> are GV_SUPER and SVf_UTF8.
 
-This function grants C<"SUPER"> token as a postfix of the stash name. The
+GV_SUPER indicates that we want to look up the method in the superclasses
+of the C<stash>.
+
+The
 GV returned from C<gv_fetchmeth> may be a method cache entry, which is not
 visible to Perl code.  So when calling C<call_sv>, you should not use
 the GV directly; instead, you should use the method's CV, which can be
@@ -629,7 +632,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     AV* linear_av;
     SV** linear_svp;
     SV* linear_sv;
-    HV* cstash;
+    HV* cstash, *cachestash;
     GV* candidate = NULL;
     CV* cand_cv = NULL;
     GV* topgv = NULL;
@@ -658,12 +661,20 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     assert(hvname);
     assert(name);
 
-    DEBUG_o( Perl_deb(aTHX_ "Looking for method %s in package %s\n",name,hvname) );
+    DEBUG_o( Perl_deb(aTHX_ "Looking for %smethod %s in package %s\n",
+		      flags & GV_SUPER ? "SUPER " : "",name,hvname) );
 
     topgen_cmp = HvMROMETA(stash)->cache_gen + PL_sub_generation;
 
+    if (flags & GV_SUPER) {
+	if (!HvAUX(stash)->xhv_super) HvAUX(stash)->xhv_super = newHV();
+	cachestash = HvAUX(stash)->xhv_super;
+    }
+    else cachestash = stash;
+
     /* check locally for a real method or a cache entry */
-    gvp = (GV**)hv_fetch(stash, name, is_utf8 ? -(I32)len : (I32)len, create);
+    gvp = (GV**)hv_fetch(cachestash, name, is_utf8 ? -(I32)len : (I32)len,
+			 create);
     if(gvp) {
         topgv = *gvp;
       have_gv:
@@ -687,26 +698,15 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
             /* cache indicates no such method definitively */
             return 0;
         }
-	else if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4
+	else if (stash == cachestash
+	      && len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4
               && strnEQ(hvname, "CORE", 4)
               && S_maybe_add_coresub(aTHX_ NULL,topgv,name,len))
 	    goto have_gv;
     }
 
     packlen = HvNAMELEN_get(stash);
-    if ((packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER"))
-     || (packlen == 5 && strEQ(hvname, "SUPER"))) {
-        HV* basestash;
-        basestash = packlen == 5
-		     ? PL_defstash
-		     : gv_stashpvn(hvname, packlen - 7,
-                                GV_ADD | (HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
-        linear_av = mro_get_linear_isa(basestash);
-    }
-    else {
-        linear_av = mro_get_linear_isa(stash); /* has ourselves at the top of the list */
-    }
-
+    linear_av = mro_get_linear_isa(stash); /* has ourselves at the top of the list */
     linear_svp = AvARRAY(linear_av) + 1; /* skip over self */
     items = AvFILLp(linear_av); /* no +1, to skip over self */
     while (items--) {
@@ -760,7 +760,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 
     /* Check UNIVERSAL without caching */
     if(level == 0 || level == -1) {
-        candidate = gv_fetchmeth_pvn(NULL, name, len, 1, flags);
+        candidate = gv_fetchmeth_pvn(NULL, name, len, 1, flags &~GV_SUPER);
         if(candidate) {
             cand_cv = GvCV(candidate);
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
@@ -899,35 +899,6 @@ C<call_sv> apply equally to these functions.
 =cut
 */
 
-STATIC HV*
-S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
-{
-    AV* superisa;
-    GV** gvp;
-    GV* gv;
-    HV* stash;
-
-    PERL_ARGS_ASSERT_GV_GET_SUPER_PKG;
-
-    stash = gv_stashpvn(name, namelen, flags);
-    if(stash) return stash;
-
-    /* If we must create it, give it an @ISA array containing
-       the real package this SUPER is for, so that it's tied
-       into the cache invalidation code correctly */
-    stash = gv_stashpvn(name, namelen, GV_ADD | flags);
-    gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
-    gv = *gvp;
-    gv_init(gv, stash, "ISA", 3, TRUE);
-    superisa = GvAVn(gv);
-    GvMULTI_on(gv);
-    sv_magic(MUTABLE_SV(superisa), MUTABLE_SV(gv), PERL_MAGIC_isa, NULL, 0);
-    av_push(superisa, newSVhek(CopSTASH(PL_curcop)
-			       ? HvENAME_HEK(CopSTASH(PL_curcop)) : NULL));
-
-    return stash;
-}
-
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
@@ -994,25 +965,20 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     if (nsplit) {
 	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_
-		     "%"HEKf"::SUPER",
-		      HEKfARG(HvENAME_HEK((HV*)CopSTASH(PL_curcop)))
-	    ));
-	    /* __PACKAGE__::SUPER stash should be autovivified */
-	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr), SvUTF8(tmpstr));
+	    stash = CopSTASH(PL_curcop);
+	    flags |= GV_SUPER;
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvENAME_get(stash), name) );
+	}
+	else if ((nsplit - origname) >= 7 &&
+		 strnEQ(nsplit - 7, "::SUPER", 7)) {
+            /* don't autovifify if ->NoSuchStash::SUPER::method */
+	    stash = gv_stashpvn(origname, nsplit - origname - 7, is_utf8);
+	    if (stash) flags |= GV_SUPER;
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */
             stash = gv_stashpvn(origname, nsplit - origname, is_utf8);
-
-	    /* however, explicit calls to Pkg::SUPER::method may
-	       happen, and may require autovivification to work */
-	    if (!stash && (nsplit - origname) >= 7 &&
-		strnEQ(nsplit - 7, "::SUPER", 7) &&
-		gv_stashpvn(origname, nsplit - origname - 7, is_utf8))
-	      stash = gv_get_super_pkg(origname, nsplit - origname, flags);
 	}
 	ostash = stash;
     }
@@ -1139,6 +1105,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	}
 	else
 	    packname = sv_2mortal(newSVhek(HvNAME_HEK(stash)));
+	if (flags & GV_SUPER) sv_catpvs(packname, "::SUPER");
     }
     if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, is_utf8)))
 	return NULL;
