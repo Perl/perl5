@@ -345,9 +345,9 @@ C</\pLl/> is valid, but means something different.
 It matches a two character string: a letter (Unicode property C<\pL>),
 followed by a lowercase C<l>.
 
-If neither the C</a> modifier nor locale rules are in effect, the use of
+If locale rules are not in effect, the use of
 a Unicode property will force the regular expression into using Unicode
-rules.
+rules, if it isn't already.
 
 Note that almost all properties are immune to case-insensitive matching.
 That is, adding a C</i> regular expression modifier does not change what
@@ -707,7 +707,7 @@ plus 127 (C<DEL>) are control characters.
 
 On EBCDIC platforms, it is likely that the code page will define C<[[:cntrl:]]>
 to be the EBCDIC equivalents of the ASCII controls, plus the controls
-that in Unicode have code pointss from 128 through 159.
+that in Unicode have code points from 128 through 159.
 
 =item [3]
 
@@ -840,11 +840,11 @@ either construct raises an exception.
  /[01[:lower:]]/          # Matches a character that is either a
                           # lowercase letter, or '0' or '1'.
  /[[:digit:][:^xdigit:]]/ # Matches a character that can be anything
-			  # except the letters 'a' to 'f'.  This is
-			  # because the main character class is composed
-			  # of two POSIX character classes that are ORed
-			  # together, one that matches any digit, and
-			  # the other that matches anything that isn't a
-			  # hex digit.  The result matches all
-			  # characters except the letters 'a' to 'f' and
-			  # 'A' to 'F'.
+                          # except the letters 'a' to 'f' and 'A' to
+                          # 'F'.  This is because the main character
+                          # class is composed of two POSIX character
+                          # classes that are ORed together, one that
+                          # matches any digit, and the other that
+                          # matches anything that isn't a hex digit.
+                          # The OR adds the digits, leaving only the
+                          # letters 'a' to 'f' and 'A' to 'F' excluded.
