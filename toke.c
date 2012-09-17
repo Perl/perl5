@@ -8924,7 +8924,7 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
     char token[sizeof PL_tokenbuf];
 /* XXX TODO: Greedy named parameters are currently invalid */
     AV *protolist;
-    int arg_count = 0;
+    int argcount, index;
 
     PERL_ARGS_ASSERT_SCAN_NAMED_PROTO;
 
@@ -8938,7 +8938,6 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
 	    proto = scan_word(proto, token+1, sizeof(token) - 1, FALSE, &len);
 	    if (len) {
 /* XXX TODO: Disallow globals like '$1' */
-		arg_count++;
 		av_push(protolist, newSVpvn_flags(token, len + 1, UTF));
 		while (isSPACE(*proto)) proto++;
 		if (*proto == ',')
@@ -8965,20 +8964,20 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
 	return true;
     }
 
-    PadlistNAMEDPARAMS(CvPADLIST(PL_compcv)) = protolist;
-    while (arg_count--) {
+    argcount = AvFILL(protolist) + 1;
+    PadlistNAMECNT(CvPADLIST(PL_compcv)) = argcount;
+    for (index = 0; index < argcount; index++) {
 	SV * pad_name;
-	SV * proto_name = AvARRAY(protolist)[arg_count];
-	/* Add the pad entry, and mark it as visible */
-	int ix = pad_add_name_pv(SvPV_nolen(proto_name), 0, NULL, NULL);
-	pad_name = AvARRAY(PL_comppad_name)[ix];
+	SV * proto_name = AvARRAY(protolist)[index];
+	const int pad_ix = pad_add_name_pv(SvPV_nolen(proto_name), 0, NULL, NULL);
+	/* The named parameters must be the first entries in the pad */
+	assert(pad_ix == index + 1);
+	pad_name = AvARRAY(PL_comppad_name)[pad_ix];
+	/* Mark the entries as in scope */
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xlow = PL_cop_seqmax;
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xhigh = PERL_PADSEQ_INTRO;
-	/* Mark the prototype entry with a pointer into the pad */
-	sv_upgrade(proto_name, SVt_PVIV);
-	SvIV_set(proto_name, ix);
-	SvIOK_on(proto_name);
     }
+    sv_free(MUTABLE_SV(protolist));
     PL_cop_seqmax++;
     return false;
 }

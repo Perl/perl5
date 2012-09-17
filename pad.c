@@ -292,7 +292,7 @@ Perl_pad_new(pTHX_ int flags)
     Newx(ary, 2, PAD *);
     PadlistMAX(padlist) = 1;
     PadlistARRAY(padlist) = ary;
-    PadlistNAMEDPARAMS(padlist) = NULL;
+    PadlistNAMECNT(padlist) = 0;
     ary[0] = padname;
     ary[1] = pad;
 
