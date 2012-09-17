@@ -46,12 +46,6 @@ hard reference.
 X<reference, hard> X<hard reference>
 
 References are easy to use in Perl.  There is just one overriding
-principle: Perl does no implicit referencing or dereferencing.  When a
-scalar is holding a reference, it always behaves as a simple scalar.  It
-doesn't magically start being an array or hash or subroutine; you have to
-tell it explicitly to do so, by dereferencing it.
-
-References are easy to use in Perl.  There is just one overriding
 principle: in general, Perl does no implicit referencing or dereferencing.
 When a scalar is holding a reference, it always behaves as a simple scalar.
 It doesn't magically start being an array or hash or subroutine; you have to
