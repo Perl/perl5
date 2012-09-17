@@ -2732,7 +2732,6 @@ try_autoload:
 		SSCHECK(max);
 		while (max) {
 		    sv_setsv(PAD_SVl(max), source[max-1]);
-		    SvPADMY_on(PAD_SVl(max));
 		    saveclearval += (1 << SAVE_TIGHT_SHIFT);
 		    SSPUSHUV(saveclearval);
 		    --max;
