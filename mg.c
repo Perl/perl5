@@ -906,6 +906,20 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\011':		/* ^I */ /* NOT \t in EBCDIC */
 	sv_setpv(sv, PL_inplace); /* Will undefine sv if PL_inplace is NULL */
 	break;
+    case '\014':		/* ^LAST_FH */
+	if (strEQ(remaining, "AST_FH")) {
+	    if (PL_last_in_gv) {
+		assert(isGV_with_GP(PL_last_in_gv));
+		SV_CHECK_THINKFIRST_COW_DROP(sv);
+		prepare_SV_for_RV(sv);
+		SvOK_off(sv);
+		SvRV_set(sv, SvREFCNT_inc_simple_NN(PL_last_in_gv));
+		SvROK_on(sv);
+		sv_rvweaken(sv);
+	    }
+	    else sv_setsv_nomg(sv, NULL);
+	}
+	break;
     case '\017':		/* ^O & ^OPEN */
 	if (nextchar == '\0') {
 	    sv_setpv(sv, PL_osname);

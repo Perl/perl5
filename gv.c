@@ -1787,6 +1787,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "LOBAL_PHASE"))
 		    goto ro_magicalize;
 		break;
+	    case '\014':	/* $^LAST_FH */
+		if (strEQ(name2, "AST_FH"))
+		    goto ro_magicalize;
+		break;
             case '\015':        /* $^MATCH */
                 if (strEQ(name2, "ATCH"))
 		    goto magicalize;

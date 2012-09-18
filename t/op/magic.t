@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 171);
+    plan (tests => 176);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -20,6 +20,7 @@ BEGIN {
 	SIG ^OPEN ^TAINT ^UNICODE ^UTF8LOCALE ^WARNING_BITS 1 2 3 4 5 6 7 8
 	9 42 & ` ' : ? ! _ - [ ^ ~ = % . ( ) < > \ / $ | + ; ] ^A ^C ^D
 	^E ^F ^H ^I ^L ^N ^O ^P ^S ^T ^V ^W ^UTF8CACHE ::12345 main::98732
+	^LAST_FH
     )) {
 	my $v = $_;
 	# avoid using any global vars here:
@@ -603,6 +604,20 @@ SKIP: {
 	  "$var still loads $mod when stash and UNIVERSAL::AUTOLOAD exist";
     }
 }
+
+# ${^LAST_FH}
+() = tell STDOUT;
+is ${^LAST_FH}, \*STDOUT, '${^LAST_FH} after tell';
+() = tell STDIN;
+is ${^LAST_FH}, \*STDIN, '${^LAST_FH} after another tell';
+{
+    my $fh = *STDOUT;
+    () = tell $fh;
+    is ${^LAST_FH}, \$fh, '${^LAST_FH} referencing lexical coercible glob';
+}
+# This also tests that ${^LAST_FH} is a weak reference:
+is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
+
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
 
