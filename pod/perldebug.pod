@@ -683,7 +683,7 @@ either interactively or from the environment or an rc file.
 X<debugger option, recallCommand>
 X<debugger option, ShellBang>
 
-The characters used to recall command or spawn shell.  By
+The characters used to recall a command or spawn a shell.  By
 default, both are set to C<!>, which is unfortunate.
 
 =item C<pager>
