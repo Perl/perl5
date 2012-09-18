@@ -643,8 +643,8 @@ Fixed a problem where perl could crash while cleaning up threads (including the
 main thread) in threaded debugging builds on Win32 and possibly other platforms
 [perl #114496].
 
-A rare race condition that would lead to L<sleep|perlfunc/sleep>
-taking more time than requested, and upto a hang has been fixed [perl #33096].
+A rare race condition that would lead to L<sleep|perlfunc/sleep> taking more
+time than requested, and possibly even hanging, has been fixed [perl #33096].
 
 =item Solaris
 

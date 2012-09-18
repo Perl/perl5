@@ -2239,10 +2239,11 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
      * causes msctf.dll to be loaded into Perl by kernel), see [perl #33096].
      */
     while (ticks.ft_i64 <= endtime) {
-    /* if timeout's type is lengthened, remember to split 64b timeout
-     * into multiple non-infinity runs of MWFMO */
-	DWORD result = MsgWaitForMultipleObjects(count,handles,FALSE,(DWORD)(endtime-ticks.ft_i64)
-                                            , QS_POSTMESSAGE|QS_TIMER|QS_SENDMESSAGE);
+	/* if timeout's type is lengthened, remember to split 64b timeout
+	 * into multiple non-infinity runs of MWFMO */
+	DWORD result = MsgWaitForMultipleObjects(count, handles, FALSE,
+						(DWORD)(endtime - ticks.ft_i64),
+						QS_POSTMESSAGE|QS_TIMER|QS_SENDMESSAGE);
 	if (resultp)
 	   *resultp = result;
 	if (result == WAIT_TIMEOUT) {
@@ -2265,12 +2266,12 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
 	}
     }
     /* If we are past the end say zero */
-    if(!ticks.ft_i64 || ticks.ft_i64 > endtime)
+    if (!ticks.ft_i64 || ticks.ft_i64 > endtime)
 	return 0;
     /* compute time left to wait */
     ticks.ft_i64 = endtime - ticks.ft_i64;
-    /*if more ms than DWORD, then return max DWORD*/
-    return ticks.ft_i64 <= UINT_MAX ? (DWORD)ticks.ft_i64:UINT_MAX;
+    /* if more ms than DWORD, then return max DWORD */
+    return ticks.ft_i64 <= UINT_MAX ? (DWORD)ticks.ft_i64 : UINT_MAX;
 }
 
 int
