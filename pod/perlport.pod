@@ -1921,6 +1921,12 @@ Not implemented. (S<Plan 9>)
 
 Not implemented. (Win32, VMS, S<RISC OS>, VOS)
 
+=item sleep
+
+On Win32 C<sleep> is limited to a maximum of 4294967 seconds, approximately 49
+days, and also signals do not cause C<sleep> to return early once a signal
+fires. C<sleep> will always wait the full time period before returning.
+
 =item sockatmark
 
 A relatively recent addition to socket functions, may not

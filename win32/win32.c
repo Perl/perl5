@@ -2217,13 +2217,32 @@ DllExport DWORD
 win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD resultp)
 {
     /* We may need several goes at this - so compute when we stop */
-    DWORD ticks = 0;
+    FT_t ticks = {0};
+    unsigned __int64 endtime = timeout;
     if (timeout != INFINITE) {
-	ticks = GetTickCount();
-	timeout += ticks;
+	GetSystemTimeAsFileTime(&ticks.ft_val);
+	ticks.ft_i64 /= 10000;
+	endtime += ticks.ft_i64;
     }
-    while (1) {
-	DWORD result = MsgWaitForMultipleObjects(count,handles,FALSE,timeout-ticks, QS_POSTMESSAGE|QS_TIMER|QS_SENDMESSAGE);
+    /* This was a race condition. Do not let a non INFINITE timeout to
+     * MsgWaitForMultipleObjects roll under 0 creating a near
+     * infinity/~(UINT32)0 timeout which will appear as a deadlock to the
+     * user who did a CORE perl function with a non infinity timeout,
+     * sleep for example.  This is 64 to 32 truncation minefield.
+     *
+     * This scenario can only be created if the timespan from the return of
+     * MsgWaitForMultipleObjects to GetSystemTimeAsFileTime exceeds 1 ms. To
+     * generate the scenario, manual breakpoints in a C debugger are required,
+     * or a context switch occured in win32_async_check in PeekMessage, or random
+     * messages are delivered to the *thread* message queue of the Perl thread
+     * from another process (msctf.dll doing IPC among its instances, VS debugger
+     * causes msctf.dll to be loaded into Perl by kernel), see [perl #33096].
+     */
+    while (ticks.ft_i64 <= endtime) {
+    /* if timeout's type is lengthened, remember to split 64b timeout
+     * into multiple non-infinity runs of MWFMO */
+	DWORD result = MsgWaitForMultipleObjects(count,handles,FALSE,(DWORD)(endtime-ticks.ft_i64)
+                                            , QS_POSTMESSAGE|QS_TIMER|QS_SENDMESSAGE);
 	if (resultp)
 	   *resultp = result;
 	if (result == WAIT_TIMEOUT) {
@@ -2233,8 +2252,9 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
 	    return 0;
 	}
 	if (timeout != INFINITE) {
-	    ticks = GetTickCount();
-        }
+	    GetSystemTimeAsFileTime(&ticks.ft_val);
+	    ticks.ft_i64 /= 10000;
+	}
 	if (result == WAIT_OBJECT_0 + count) {
 	    /* Message has arrived - check it */
 	    (void)win32_async_check(aTHX);
@@ -2244,10 +2264,13 @@ win32_msgwait(pTHX_ DWORD count, LPHANDLE handles, DWORD timeout, LPDWORD result
 	   break;
 	}
     }
-    /* compute time left to wait */
-    ticks = timeout - ticks;
     /* If we are past the end say zero */
-    return (ticks > 0) ? ticks : 0;
+    if(!ticks.ft_i64 || ticks.ft_i64 > endtime)
+	return 0;
+    /* compute time left to wait */
+    ticks.ft_i64 = endtime - ticks.ft_i64;
+    /*if more ms than DWORD, then return max DWORD*/
+    return ticks.ft_i64 <= UINT_MAX ? (DWORD)ticks.ft_i64:UINT_MAX;
 }
 
 int
