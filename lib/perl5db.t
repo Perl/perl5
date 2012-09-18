@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(89);
+plan(90);
 
 my $rc_filename = '.perldb';
 
@@ -2120,6 +2120,35 @@ sub _calc_trace_wrapper
 
 }
 
+# Test the recallCommand option.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o recallCommand=%',
+                'l 3-5',
+                'l 2',
+                '% -1',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        (^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";)\n
+        .*?
+        ^2==\>\s+my\ \$x\ =\ "One";\n
+        .*?
+        ^l\ 3-5\n
+        \1
+        #msx,
+        'Test the o recallCommand option',
+    );
+}
 END {
     1 while unlink ($rc_filename, $out_fn);
 }
