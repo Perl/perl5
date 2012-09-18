@@ -52,6 +52,12 @@ The following new DTrace probes have been added:
 
 =back
 
+=head2 C<${^LAST_FH}>
+
+This new variable provides access to the filehandle that was last read.
+This is the handle used by C<$.> and by C<tell> and C<eof> without
+arguments.
+
 =head2 Looser here-doc parsing
 
 Here-doc terminators no longer require a terminating newline character when
