@@ -170,11 +170,11 @@ static BOOL silent_invalid_parameter_handler = FALSE;
 static BOOL
 set_silent_invalid_parameter_handler(BOOL newvalue)
 {
-#  ifdef _DEBUG
     BOOL oldvalue = silent_invalid_parameter_handler;
+#  ifdef _DEBUG
     silent_invalid_parameter_handler = newvalue;
-    return oldvalue;
 #  endif
+    return oldvalue;
 }
 
 static void
@@ -1342,7 +1342,7 @@ get_hwnd_delay(pTHX, long child, DWORD tries)
     if (hwnd != INVALID_HANDLE_VALUE) return hwnd;
 
     {
-	int count = 0;
+	unsigned int count = 0;
 	/* No Sleep(1) if tries==0, just fail instead if we get this far. */
 	while (count++ < tries) {
 	    Sleep(1);
