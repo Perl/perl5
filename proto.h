@@ -7104,6 +7104,7 @@ STATIC void	S_no_op(pTHX_ const char *const what, char *s)
 #define PERL_ARGS_ASSERT_NO_OP	\
 	assert(what)
 
+STATIC int	S_pending_ident(pTHX);
 STATIC void	S_readpipe_override(pTHX);
 STATIC char*	S_scan_const(pTHX_ char *start)
 			__attribute__warn_unused_result__

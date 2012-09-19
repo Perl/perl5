@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..153\n";
+print "1..154\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -446,6 +446,9 @@ is prototype "Hello::_he_said", '_', 'initial tick in sub declaration';
 eval 'no if $] >= 5.17.4 warnings => "deprecated"';
 is 1,1, ' no crash for "no ... syntax error"';
 
+for my $pkg(()){}
+$pkg = 3;
+is $pkg, 3, '[perl #114942] for my $foo()){} $foo';
 
 # Add new tests HERE (above this line)
 

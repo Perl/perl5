@@ -110,9 +110,6 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nextval		(PL_parser->nextval)
 #endif
 
-#define force_ident_maybe_lex(p) \
-	(PL_bufptr = s, S_force_ident_maybe_lex(aTHX_ p))
-
 static const char ident_too_long[] = "Identifier too long";
 
 #ifdef PERL_MAD
@@ -2151,6 +2148,14 @@ S_force_ident(pTHX_ register const char *s, int kind)
 			      );
 	}
     }
+}
+
+static void
+S_force_ident_maybe_lex(pTHX_ char pit)
+{
+    start_force(PL_curforce);
+    NEXTVAL_NEXTTOKE.ival = pit;
+    force_next('p');
 }
 
 NV
@@ -4504,7 +4509,7 @@ Perl_yylex(pTHX)
 	    }
 	    if (S_is_opval_token(next_type) && pl_yylval.opval)
 		pl_yylval.opval->op_savefree = 0; /* release */
-	    return REPORT(next_type);
+	    return REPORT(next_type == 'p' ? pending_ident() : next_type);
 	}
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
@@ -8631,18 +8636,18 @@ Perl_yylex(pTHX)
 #pragma segment Main
 #endif
 
-static void
-S_force_ident_maybe_lex(pTHX_ char pit)
+static int
+S_pending_ident(pTHX)
 {
     dVAR;
-    OP *o;
-    int force_type;
     PADOFFSET tmp = 0;
+    const char pit = (char)pl_yylval.ival;
     const STRLEN tokenbuf_len = strlen(PL_tokenbuf);
     /* All routes through this function want to know if there is a colon.  */
     const char *const has_colon = (const char*) memchr (PL_tokenbuf, ':', tokenbuf_len);
 
-    start_force(PL_curforce);
+    DEBUG_T({ PerlIO_printf(Perl_debug_log,
+          "### Pending identifier '%s'\n", PL_tokenbuf); });
 
     /* if we're in a my(), we can't allow dynamics here.
        $foo'bar has already been turned into $foo::bar, so
@@ -8664,11 +8669,10 @@ S_force_ident_maybe_lex(pTHX_ char pit)
 			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf),
                             UTF ? SVf_UTF8 : 0);
 
-            o = newOP(OP_PADANY, 0);
-            o->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
+            pl_yylval.opval = newOP(OP_PADANY, 0);
+            pl_yylval.opval->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,
                                                         UTF ? SVf_UTF8 : 0);
-            force_type = PRIVATEREF;
-            goto doforce;
+	    return PRIVATEREF;
         }
     }
 
@@ -8689,8 +8693,8 @@ S_force_ident_maybe_lex(pTHX_ char pit)
 		SV *  const sym = newSVhek(stashname);
                 sv_catpvs(sym, "::");
                 sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len - 1, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
-                o = (OP*)newSVOP(OP_CONST, 0, sym);
-                o->op_private = OPpCONST_ENTERED;
+                pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
+                pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 if (pit != '&')
                   gv_fetchsv(sym,
                     (PL_in_eval
@@ -8700,14 +8704,12 @@ S_force_ident_maybe_lex(pTHX_ char pit)
                     ((PL_tokenbuf[0] == '$') ? SVt_PV
                      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
                      : SVt_PVHV));
-                force_type = WORD;
-                goto doforce;
+                return WORD;
             }
 
-            o = newOP(OP_PADANY, 0);
-            o->op_targ = tmp;
-            force_type = PRIVATEREF;
-            goto doforce;
+            pl_yylval.opval = newOP(OP_PADANY, 0);
+            pl_yylval.opval->op_targ = tmp;
+            return PRIVATEREF;
         }
     }
 
@@ -8735,10 +8737,11 @@ S_force_ident_maybe_lex(pTHX_ char pit)
     }
 
     /* build ops for a bareword */
-    o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(PL_tokenbuf + 1,
+    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+				   newSVpvn_flags(PL_tokenbuf + 1,
 						      tokenbuf_len - 1,
                                                       UTF ? SVf_UTF8 : 0 ));
-    o->op_private = OPpCONST_ENTERED;
+    pl_yylval.opval->op_private = OPpCONST_ENTERED;
     if (pit != '&')
 	gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1,
 		     (PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD)
@@ -8746,11 +8749,7 @@ S_force_ident_maybe_lex(pTHX_ char pit)
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV
 		      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
 		      : SVt_PVHV));
-    force_type = WORD;
-
-   doforce:
-    NEXTVAL_NEXTTOKE.opval = o;
-    force_next(force_type);
+    return WORD;
 }
 
 STATIC void
