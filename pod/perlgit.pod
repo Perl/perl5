@@ -656,7 +656,7 @@ then merge it into blead then push it out to the main repository:
 
   % git checkout blead
   % git merge experimental
-  % git push
+  % git push origin blead
 
 If you want to delete your temporary branch, you may do so with:
 
@@ -824,7 +824,7 @@ Or you could just merge the whole branch if you like it all:
 
 And then push back to the repository:
 
-  % git push
+  % git push origin blead
 
 =head2 Using a smoke-me branch to test changes
 
