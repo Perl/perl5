@@ -639,7 +639,6 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     const char *hvname;
     I32 create = (level >= 0) ? 1 : 0;
     I32 items;
-    STRLEN packlen;
     U32 topgen_cmp;
     U32 is_utf8 = flags & SVf_UTF8;
 
@@ -705,7 +704,6 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 	    goto have_gv;
     }
 
-    packlen = HvNAMELEN_get(stash);
     linear_av = mro_get_linear_isa(stash); /* has ourselves at the top of the list */
     linear_svp = AvARRAY(linear_av) + 1; /* skip over self */
     items = AvFILLp(linear_av); /* no +1, to skip over self */
