@@ -5622,11 +5622,23 @@ Perl_yylex(pTHX)
 		    }
 		}
 		if (PL_lex_stuff) {
-		    sv_catsv(sv, PL_lex_stuff);
-		    attrs = op_append_elem(OP_LIST, attrs,
-					newSVOP(OP_CONST, 0, sv));
-		    SvREFCNT_dec(PL_lex_stuff);
-		    PL_lex_stuff = NULL;
+		    if (len == 5 && strnEQ(s, "proto", len) && SvCUR(PL_lex_stuff) >= 2) {
+			SV * proto = newSVpvn(SvPV_nolen(PL_lex_stuff)+1,SvCUR(PL_lex_stuff)-2);
+			scan_proto(proto, FALSE);
+			sv_catpv(sv, " ");
+			sv_catsv(sv, proto);
+			attrs = op_prepend_elem(OP_LIST,
+					    newSVOP(OP_CONST, 0, sv), attrs);
+			PL_lex_stuff = NULL;
+			sv_free(proto);
+		    }
+		    else {
+			sv_catsv(sv, PL_lex_stuff);
+			attrs = op_append_elem(OP_LIST, attrs,
+					    newSVOP(OP_CONST, 0, sv));
+			SvREFCNT_dec(PL_lex_stuff);
+			PL_lex_stuff = NULL;
+		    }
 		}
 		else {
 		    if (len == 6 && strnEQ(SvPVX(sv), "unique", len)) {

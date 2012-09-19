@@ -7334,6 +7334,48 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     else
 	ps = NULL;
 
+    /* Check for a proto attribute.  It's prepended to the list if found,
+       so its either the first item or none at all */
+    if (attrs) {
+	SV * protosv;
+	proto = NULL;
+	if (attrs->op_type == OP_CONST) {
+	    protosv = ((SVOP*)attrs)->op_sv;
+	    if (SvLEN(protosv) >= 6 && strnEQ(SvPVX(protosv), "proto ", 6)) {
+		proto = attrs;
+		attrs = NULL;
+	    }
+	}
+	else {
+	    assert(attrs->op_type == OP_LIST);
+	    proto = ((LISTOP*)attrs)->op_first->op_sibling;
+	    protosv = ((SVOP*)proto)->op_sv;
+	    if (SvLEN(protosv) >= 6 && strnEQ(SvPVX(protosv), "proto ", 6)) {
+		((LISTOP*)attrs)->op_first->op_sibling = proto->op_sibling;
+	    }
+	    else
+		proto = NULL;
+	}
+	if (proto) {
+	    sv_chop(protosv,SvPVX(protosv)+6);
+	    /* XXX sub foo($$) : proto($*) ... for now, warn, and use the proto() */
+	    if (ps && (ps_len != SvLEN(protosv) || strnNE(SvPV_nolen(protosv), ps, ps_len))) {
+		if (ckWARN_d(WARN_PROTOTYPE)) {
+		    SV* const msg = sv_newmortal();
+		    sv_setpvs(msg, "Prototype mismatch:");
+		    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")",
+			SVfARG(newSVpvn_flags(ps,ps_len,ps_utf8|SVs_TEMP)));
+		    sv_catpvs(msg, " vs ");
+		    Perl_sv_catpvf(aTHX_ msg, "proto(%"SVf")",
+			SVfARG(protosv));
+		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, SVfARG(msg));
+		}
+	    }
+	    ps = SvPV_const(protosv, ps_len);
+	    ps_utf8 = SvUTF8(protosv);
+	}
+    }
+
     if (o_is_gv) {
 	gv = (GV*)o;
 	o = NULL;
