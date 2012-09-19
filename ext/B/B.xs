@@ -671,8 +671,10 @@ BOOT:
     ASSIGN_COMMON_ALIAS(I, defstash);
     cv = newXS("B::curstash", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, curstash);
+#ifdef PL_formfeed
     cv = newXS("B::formfeed", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, formfeed);
+#endif
 #ifdef USE_ITHREADS
     cv = newXS("B::regex_padav", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, regex_padav);
@@ -682,6 +684,15 @@ BOOT:
     cv = newXS("B::diehook", intrpvar_sv_common, file);
     ASSIGN_COMMON_ALIAS(I, diehook);
 }
+
+#ifndef PL_formfeed
+
+void
+formfeed()
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ GvSV(gv_fetchpvs("\f", GV_ADD, SVt_PV))));
+
+#endif
 
 long 
 amagic_generation()
