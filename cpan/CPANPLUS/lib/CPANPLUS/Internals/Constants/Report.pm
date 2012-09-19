@@ -347,6 +347,8 @@ use constant REPORT_TOOLCHAIN_VERSIONS
                                     ExtUtils::ParseXS
                                     File::Spec
                                     Module::Build
+                                    Pod::Parser
+                                    Pod::Simple
                                     Test::Harness
                                     Test::More
                                     version

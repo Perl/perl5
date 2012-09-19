@@ -240,7 +240,6 @@ CPANPLUS::Internals::Source::SQLite - SQLite implementation
         *$sub = sub {
             my $self = shift;
             my %hash = @_;
-            my $dbh  = $self->__sqlite_dbh;
 
             my($list,$type);
             my $tmpl = {
@@ -256,9 +255,15 @@ CPANPLUS::Internals::Source::SQLite - SQLite implementation
             ### we aliased 'module' to 'name', so change that here too
             $type = 'module' if $type eq 'name';
 
+            my $meth = $table .'_tree';
+
+            {
+              my $throw = $self->$meth;
+            }
+
+            my $dbh  = $self->__sqlite_dbh;
             my $res = $dbh->query( "SELECT * from $table" );
 
-            my $meth = $table .'_tree';
             my @rv = map  { $self->$meth( $_->{$key} ) }
                      grep { allow( $_->{$type} => $list ) } $res->hashes;
 
