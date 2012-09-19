@@ -251,7 +251,7 @@ foreach my $module ( sort keys %module_to_upstream ) {
         if $dist;
     $bug_tracker = $bug_tracker->{web} if ref($bug_tracker) eq "HASH";
 
-    $bug_tracker = defined $bug_tracker ? "'$bug_tracker'" : 'undef';
+    $bug_tracker = defined $bug_tracker ? quote($bug_tracker) : 'undef';
 	next if $bug_tracker eq "'http://rt.perl.org/perlbug/'";
     $tracker .= sprintf "    %-24s=> %s,\n", "'$module'", $bug_tracker;
 }
@@ -362,4 +362,13 @@ sub calculate_delta {
   }
 
   return \%changed, \%removed;
+}
+
+sub quote {
+    my ($str) = @_;
+    # There's gotta be something already doing this properly that we could just
+    # reuse, but I can't quite thing of where to look for it, so I'm gonna do
+    # the simplest possible thing that'll allow me to release 5.17.4.  --rafl
+    $str =~ s/'/\\'/g;
+    "'${str}'";
 }
