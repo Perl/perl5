@@ -7401,8 +7401,10 @@ meanings of the fields:
   8 atime    last access time in seconds since the epoch
   9 mtime    last modify time in seconds since the epoch
  10 ctime    inode change time in seconds since the epoch (*)
- 11 blksize  preferred block size for file system I/O
- 12 blocks   actual number of blocks allocated
+ 11 blksize  preferred I/O size in bytes for interacting with the
+             file (may vary from file to file)
+ 12 blocks   actual number of system-specific blocks allocated
+             on disk (often, but not always, 512 bytes each)
 
 (The epoch was at 00:00 January 1, 1970 GMT.)
 
