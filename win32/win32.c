@@ -2426,7 +2426,11 @@ win32_sleep(unsigned int t)
 {
     dTHX;
     /* Win32 times are in ms so *1000 in and /1000 out */
-    return win32_msgwait(aTHX_ 0, NULL, t*1000, NULL)/1000;
+    if (t > UINT_MAX / 1000) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+			"sleep(%lu) too large", t);
+    }
+    return win32_msgwait(aTHX_ 0, NULL, t * 1000, NULL) / 1000;
 }
 
 DllExport unsigned int

@@ -4499,6 +4499,12 @@ Perhaps you put it into the wrong package?
 internal bookkeeping of op trees.  An op tree needed to be freed after
 a compilation error, but could not be found, so it was leaked instead.
 
+=item sleep(%u) too large
+
+(W overflow) You called C<sleep> with a number that was larger than
+it can reliably handle and C<sleep> probably slept for less time than
+requested.
+
 =item Smart matching a non-overloaded object breaks encapsulation
 
 (F) You should not use the C<~~> operator on an object that does not
