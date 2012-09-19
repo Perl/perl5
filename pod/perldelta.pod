@@ -309,6 +309,11 @@ trailing semicolons in formats.
 
 =item *
 
+L<CPANPLUS> has been upgraded from version 0.9130 to 0.9131.  This resolves
+issues with the SQLite source engine.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.826 to 1.827.  The main Perl module
 no longer uses the C<"@_"> construct.
 
@@ -378,9 +383,18 @@ handling.
 
 =item *
 
+L<Sys::Syslog> has been upgraded from version 0.31 to 0.32.  This includes
+several documentation and bug fixes.
+
+=item *
+
 L<threads::shared> has been upgraded from version 1.40 to 1.41.  This adds the
 option to warn about or ignore attempts to clone structures that can't be
 cloned, as opposed to just unconditionally dying in that case.
+
+=item *
+
+L<version> has been upgraded from version 0.99 to 0.9901.
 
 =item *
 
@@ -520,6 +534,13 @@ future Perl version:
     no warnings "experimental:lexical_subs";
     use feature "lexical_subs";
 
+=item *
+
+L<sleep(%u) too large|perldiag/"sleep(%u) too large">
+
+(W overflow) You called C<sleep> with a number that was larger than it can
+reliably handle and C<sleep> probably slept for less time than requested.
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -535,6 +556,17 @@ L<vector argument not supported with alpha versions|perldiag/vector argument not
 This warning was not suppressable, even with C<no warnings>.  Now it is
 suppressible, and has been moved from the "internal" category to the
 "printf" category.
+
+=item *
+
+C<< Can't do {n,m} with n > m in regex; marked by <-- HERE in m/%s/ >>
+
+This fatal error has been turned into a warning that reads:
+
+L<< Quantifier {n,m} with n > m can't match in regex | perldiag/Quantifier {n,m} with n > m can't match in regex >>
+
+(W regexp) Minima should be less than or equal to maxima.  If you really want
+your regexp to match something 0 times, just put {0}.
 
 =back
 
