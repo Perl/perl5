@@ -74,7 +74,7 @@
 :
 :      The really OLD name for API funcs
 :
-:   o  Has no Perl_foo compatibility macro:
+:   o  Has no Perl_foo or S_foo compatibility macro:
 :
 :         embed.h: suppress "#define foo Perl_foo"
 :
