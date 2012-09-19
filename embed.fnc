@@ -2326,7 +2326,7 @@ sd	|void	|cv_dump	|NN const CV *cv|NN const char *title
 #  endif
 #endif
 Apd	|CV*	|cv_clone	|NN CV* proto
-pd	|CV*	|cv_clone_into	|NN CV* proto|NN CV *target
+p	|CV*	|cv_clone_into	|NN CV* proto|NN CV *target
 pd	|void	|pad_fixup_inner_anons|NN PADLIST *padlist|NN CV *old_cv|NN CV *new_cv
 pdX	|void	|pad_push	|NN PADLIST *padlist|int depth
 ApdR	|HV*	|pad_compname_type|const PADOFFSET po
