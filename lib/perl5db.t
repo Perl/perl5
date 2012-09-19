@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(90);
+plan(91);
 
 my $rc_filename = '.perldb';
 
@@ -2149,6 +2149,32 @@ sub _calc_trace_wrapper
         'Test the o recallCommand option',
     );
 }
+
+# Test the dieLevel option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/o dieLevel='1'/,
+                q/c/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-dieLevel-option-1',
+        }
+    );
+
+    $wrapper->output_like(qr#
+        ^This\ program\ dies\.\ at\ \S+\ line\ 18\.\n
+        .*?
+        ^\s+main::baz\(\)\ called\ at\ \S+\ line\ 13\n
+        \s+main::bar\(\)\ called\ at\ \S+\ line\ 7\n
+        \s+main::foo\(\)\ called\ at\ \S+\ line\ 21\n
+        #msx,
+        'Test the o dieLevel option',
+    );
+}
+
 END {
     1 while unlink ($rc_filename, $out_fn);
 }
