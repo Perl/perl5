@@ -1,0 +1,749 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5174delta - what is new for perl v5.17.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.17.3 release and the 5.17.4
+release.
+
+If you are upgrading from an earlier release such as 5.17.2, first read
+L<perl5173delta>, which describes differences between 5.17.2 and 5.17.3.
+
+=head1 Core Enhancements
+
+=head2 Latest Unicode 6.2 beta is included
+
+This is supposed to be the final data for 6.2, unless glitches are
+found.  The earlier experimental 6.2 beta data has been reverted, and
+this used instead.  Not all the changes that were proposed for 6.2 and
+that were in the earlier beta versions are actually going into 6.2.  In
+particular, there are no changes from 6.1 in the General_Category of any
+characters.  6.2 does revise the C<\X> handling for the REGIONAL
+INDICATOR characters that were added in Unicode 6.0.  Perl now for the
+first time fully handles this revision.
+
+=head2 New DTrace probes
+
+The following new DTrace probes have been added:
+
+=over 4
+
+=item C<op-entry>
+
+=item C<loading-file>
+
+=item C<loaded-file>
+
+=back
+
+=head2 C<${^LAST_FH}>
+
+This new variable provides access to the filehandle that was last read.
+This is the handle used by C<$.> and by C<tell> and C<eof> without
+arguments.
+
+=head2 Looser here-doc parsing
+
+Here-doc terminators no longer require a terminating newline character when
+they occur at the end of a file.  This was already the case at the end of a
+string eval [perl #65838].
+
+=head2 New mechanism for experimental features
+
+Newly-added experimental features will now require this incantation:
+
+    no warnings "experimental:feature_name";
+    use feature "feature_name";  # would warn without the prev line
+
+There is a new warnings category, called "experimental", containing
+warnings that the L<feature> pragma emits when enabling experimental
+features.
+
+Newly-added experimental features will also be given special warning IDs,
+which consist of "experimental:" followed by the name of the feature.  (The
+plan is to extend this mechanism eventually to all warnings, to allow them
+to be enabled or disabled individually, and not just by category.)
+
+By saying
+
+    no warnings "experimental:feature_name";
+
+you are taking responsibility for any breakage that future changes to, or
+removal of, the feature may cause.
+
+=head2 Lexical subroutines
+
+This new feature is still considered experimental.  To enable it, use the
+mechanism described above:
+
+    use 5.018;
+    no warnings "experimental:lexical_subs";
+    use feature "lexical_subs";
+
+You can now declare subroutines with C<state sub foo>, C<my sub foo>, and
+C<our sub foo>.  (C<state sub> requires that the "state" feature be
+enabled, unless you write it as C<CORE::state sub foo>.)
+
+C<state sub> creates a subroutine visible within the lexical scope in which
+it is declared.  The subroutine is shared between calls to the outer sub.
+
+C<my sub> declares a lexical subroutine that is created each time the
+enclosing block is entered.  C<state sub> is generally slightly faster than
+C<my sub>.
+
+C<our sub> declares a lexical alias to the package subroutine of the same
+name.
+
+See L<perlsub/Lexical Subroutines>.
+
+=head1 Incompatible Changes
+
+=head2 Here-doc parsing
+
+The body of a here-document inside a quote-like operator now always begins
+on the line after the "<<foo" marker.  Previously, it was documented to
+begin on the line following the containing quote-like operator, but that
+was only sometimes the case [perl #114040].
+
+=head2 Stricter parsing of substitution replacement
+
+It is no longer possible to abuse the way the parser parses C<s///e> like
+this:
+
+    %_=(_,"Just another ");
+    $_="Perl hacker,\n";
+    s//_}->{_/e;print
+
+=head2 Interaction of lexical and default warnings
+
+Turning on any lexical warnings used first to disable all default warnings
+if lexical warnings were not already enabled:
+
+    $*; # deprecation warning
+    use warnings "void";
+    $#; # void warning; no deprecation warning
+
+Now, the debugging, deprecated, glob, inplace and malloc warnings
+categories are left on when turning on lexical warnings (unless they are
+turned off by C<no warnings>, of course).
+
+This may cause deprecation warnings to occur in code that used to be free
+of warnings.
+
+Those are the only categories consisting only of default warnings.  Default
+warnings in other categories are still disabled by C<use warnings
+"category">, as we do not yet have the infrastructure for controlling
+individual warnings.
+
+=head2 C<state sub> and C<our sub>
+
+Due to an accident of history, C<state sub> and C<our sub> were equivalent
+to a plain C<sub>, so one could even create an anonymous sub with
+C<our sub { ... }>.  These are now disallowed outside of the "lexical_subs"
+feature.  Under the "lexical_subs" feature they have new meanings described
+in L<perlsub/Lexical Subroutines>.
+
+=head2 C<gv_fetchmeth_*> and SUPER
+
+The various C<gv_fetchmeth_*> XS functions used to treat a package whose
+named ended with ::SUPER specially.  A method lookup on the Foo::SUPER
+package would be treated as a SUPER method lookup on the Foo package.  This
+is no longer the case.  To do a SUPER lookup, pass the Foo stash and the
+GV_SUPER flag.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Speed up in regular expression matching against Unicode properties.  The
+largest gain is for C<\X>, the Unicode "extended grapheme cluster".  The
+gain for it is about 35% - 40%.  Bracketed character classes, e.g.,
+C<[0-9\x{100}]> containing code points above 255 are also now faster.
+
+=item *
+
+On platforms supporting it, several former macros are now implemented as static
+inline functions. This should speed things up slightly on non-GCC platforms.
+
+=item *
+
+Apply the optimisation of hashes in boolean context, such as in C<if> or C<and>,
+to constructs in non-void context.
+
+=item *
+
+Extend the optimisation of hashes in boolean context to C<scalar(%hash)>,
+C<%hash ? ... : ...>, and C<sub { %hash || ... }>.
+
+=item *
+
+When making a copy of the string being matched against (so that $1, $& et al
+continue to show the correct value even if the original string is subsequently
+modified), only copy that substring of the original string needed for the
+capture variables, rather than copying the whole string.
+
+This is a big win for code like
+
+    $&;
+    $_ = 'x' x 1_000_000;
+    1 while /(.)/;
+
+Also, when pessimizing if the code contains C<$`>, C<$&> or C<$'>, record the
+presence of each variable separately, so that the determination of the substring
+range is based on each variable separately. So performance-wise,
+
+   $&; /x/
+
+is now roughly equivalent to
+
+   /(x)/
+
+whereas previously it was like
+
+   /^(.*)(x)(.*)$/
+
+and
+
+   $&; $'; /x/
+
+is now roughly equivalent to
+
+   /(x)(.*)$/
+
+etc.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 1.88 to 1.90.  This adds
+documentation fixes.
+
+=item *
+
+L<B> has been upgraded from version 1.37 to 1.38.  This makes the module work
+with the new pad API.
+
+=item *
+
+L<B::Concise> has been upgraded from version 0.92 to 0.93.  This adds support
+for the new C<OpMAYBE_TRUEBOOL> and C<OPpTRUEBOOL> flags.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.16 to 1.17.  This suppresses
+trailing semicolons in formats.
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9130 to 0.9131.  This resolves
+issues with the SQLite source engine.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.826 to 1.827.  The main Perl module
+no longer uses the C<"@_"> construct.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.09 to 1.10.  This fixes
+compilation with C++ compilers and makes the module work with the new pad API.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.15 to 1.16.  This fixes warnings
+about using C<CODE> sections without an C<OUTPUT> section.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.17 to 3.18.  This avoids a
+bogus warning for initialised XSUB non-parameters [perl #112776].
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.23 to 2.24.  C<copy()> no longer
+zeros files when copying into the same directory, and also now fails (as it has
+long been documented to do) when attempting to copy a file over itself.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.21 to 1.22.  This fixes
+inconsistent unixy path handling on VMS.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.12 to 1.13.  The C<open3()>
+function no longer uses C<POSIX::close()> to close file descriptors since that
+breaks the ref-counting of file descriptors done by PerlIO in cases where the
+file descriptors are shared by PerlIO streams, leading to attempts to close the
+file descriptors a second time when any such PerlIO streams are closed later on.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.22 to 3.23.  It includes some
+new codes.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.71 to 2.73.  This restores
+compatibility with older versions of perl and cleans up the corelist data for
+various modules.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.23 to 1.24 to reflect the removal of
+the boolkeys opcode and the addition of the clonecv, introcv and padcv
+opcodes.
+
+=item *
+
+L<Socket> has been upgraded from version 2.004 to 2.006.
+C<unpack_sockaddr_in()> and C<unpack_sockaddr_in6()> now return just the IP
+address in scalar context, and C<inet_ntop()> now guards against incorrect
+length scalars being passed in.
+
+=item *
+
+L<Storable> has been upgraded from version 2.38 to 2.39.  This contains various
+bugfixes, including compatibility fixes for older versions of Perl and vstring
+handling.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.31 to 0.32.  This includes
+several documentation and bug fixes.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.40 to 1.41.  This adds the
+option to warn about or ignore attempts to clone structures that can't be
+cloned, as opposed to just unconditionally dying in that case.
+
+=item *
+
+L<version> has been upgraded from version 0.99 to 0.9901.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.15 to 0.16.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<Experimental "%s" subs not enabled|perldiag/"Experimental "%s" subs not enabled">
+
+(F) To use lexical subs, you must first enable them:
+
+    no warnings 'experimental:lexical_subs';
+    use feature 'lexical_subs';
+    my sub foo { ... }
+
+=item *
+
+L<Subroutine "&%s" is not available|perldiag/"Subroutine "&%s" is not available">
+
+(W closure) During compilation, an inner named subroutine or eval is
+attempting to capture an outer lexical subroutine that is not currently
+available.  This can happen for one of two reasons.  First, the lexical
+subroutine may be declared in an outer anonymous subroutine that has not
+yet been created.  (Remember that named subs are created at compile time,
+while anonymous subs are created at run-time.)  For example,
+
+    sub { my sub a {...} sub f { \&a } }
+
+At the time that f is created, it can't capture the current the "a" sub,
+since the anonymous subroutine hasn't been created yet.  Conversely, the
+following won't give a warning since the anonymous subroutine has by now
+been created and is live:
+
+    sub { my sub a {...} eval 'sub f { \&a }' }->();
+
+The second situation is caused by an eval accessing a variable that has
+gone out of scope, for example,
+
+    sub f {
+	my sub a {...}
+	sub { eval '\&a' }
+    }
+    f()->();
+
+Here, when the '\&a' in the eval is being compiled, f() is not currently
+being executed, so its &a is not available for capture.
+
+=item *
+
+L<"%s" subroutine &%s masks earlier declaration in same %s|perldiag/"%s" subroutine &%s masks earlier declaration in same %s>
+
+(W misc) A "my" or "state" subroutine has been redeclared in the
+current scope or statement, effectively eliminating all access to
+the previous instance.  This is almost always a typographical error.
+Note that the earlier subroutine will still exist until the end of
+the scope or until all closure references to it are destroyed.
+
+=item *
+
+L<The %s feature is experimental|perldiag/"The %s feature is experimental">
+
+(S experimental) This warning is emitted if you enable an experimental
+feature via C<use feature>.  Simply suppress the warning if you want
+to use the feature, but know that in doing so you are taking the risk
+of using an experimental feature which may change or be removed in a
+future Perl version:
+
+    no warnings "experimental:lexical_subs";
+    use feature "lexical_subs";
+
+=item *
+
+L<sleep(%u) too large|perldiag/"sleep(%u) too large">
+
+(W overflow) You called C<sleep> with a number that was larger than it can
+reliably handle and C<sleep> probably slept for less time than requested.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<vector argument not supported with alpha versions|perldiag/vector argument not supported with alpha versions>
+
+This warning was not suppressable, even with C<no warnings>.  Now it is
+suppressible, and has been moved from the "internal" category to the
+"printf" category.
+
+=item *
+
+C<< Can't do {n,m} with n > m in regex; marked by <-- HERE in m/%s/ >>
+
+This fatal error has been turned into a warning that reads:
+
+L<< Quantifier {n,m} with n > m can't match in regex | perldiag/Quantifier {n,m} with n > m can't match in regex >>
+
+(W regexp) Minima should be less than or equal to maxima.  If you really want
+your regexp to match something 0 times, just put {0}.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+F<Configure> will now correctly detect C<isblank()> when compiling with a C++
+compiler.
+
+=back
+
+=head1 Platform Support
+
+=head2 Discontinued Platforms
+
+=over 4
+
+=item VM/ESA
+
+Support for VM/ESA has been removed. The port was tested on 2.3.0, which
+IBM ended service on in March 2002. 2.4.0 ended service in June 2003, and
+was superseded by Z/VM. The current version of Z/VM is V6.2.0, and scheduled
+for end of service on 2015/04/30.
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Win32
+
+Fixed a problem where perl could crash while cleaning up threads (including the
+main thread) in threaded debugging builds on Win32 and possibly other platforms
+[perl #114496].
+
+A rare race condition that would lead to L<sleep|perlfunc/sleep> taking more
+time than requested, and possibly even hanging, has been fixed [perl #33096].
+
+=item Solaris
+
+In Configure, avoid running sed commands with flags not supported on Solaris.
+
+=item Darwin
+
+Stop hardcoding an alignment on 8 byte boundaries to fix builds using
+-Dusemorebits.
+
+=item VMS
+
+Fix linking on builds configured with -Dusemymalloc=y.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The APIs for accessing lexical pads have changed considerably.
+
+C<PADLIST>s are now longer C<AV>s, but their own type instead. C<PADLIST>s now
+contain a C<PAD> and a C<PADNAMELIST> of C<PADNAME>s, rather than C<AV>s for the
+pad and the list of pad names.  C<PAD>s, C<PADNAMELIST>s, and C<PADNAME>s are to
+be accessed as such through the newly added pad API instead of the plain C<AV>
+and C<SV> APIs.  See L<perlapi> for details.
+
+=item *
+
+In the regex API, the numbered capture callbacks are passed an index
+indicating what match variable is being accessed. There are special
+index values for the C<$`, $&, $&> variables. Previously the same three
+values were used to retrieve C<${^PREMATCH}, ${^MATCH}, ${^POSTMATCH}>
+too, but these have now been assigned three separate values. See
+L<perlreapi/Numbered capture callbacks>.
+
+=item *
+
+C<PL_sawampersand> was previously a boolean indicating that any of
+C<$`, $&, $&> had been seen; it now contains three one-bit flags
+indicating the presence of each of the variables individually.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The error "Can't localize through a reference" had disappeared in 5.16.0
+when C<local %$ref> appeared on the last line of an lvalue subroutine.
+This error disappeared for C<\local %$ref> in perl 5.8.1.  It has now
+been restored.
+
+=item *
+
+The parsing of here-docs has been improved significantly, fixing several
+parsing bugs and crashes and one memory leak, and correcting wrong
+subsequent line numbers under certain conditions.
+
+=item *
+
+Inside an eval, the error message for an unterminated here-doc no longer
+has a newline in the middle of it [perl #70836].
+
+=item *
+
+A substitution inside a substitution pattern (C<s/${s|||}//>) no longer
+confuses the parser.
+
+=item *
+
+It may be an odd place to allow comments, but C<s//"" # hello/e> has
+always worked, I<unless> there happens to be a null character before the
+first #.  Now it works even in the presence of nulls.
+
+=item *
+
+An invalid range in C<tr///> or C<y///> no longer results in a memory leak.
+
+=item *
+
+String eval no longer treats a semicolon-delimited quote-like operator at
+the very end (C<eval 'q;;'>) as a syntax error.
+
+=item *
+
+C<< warn {$_ => 1} + 1 >> is no longer a syntax error.  The parser used to
+get confused with certain list operators followed by an anonymous hash and
+then an infix operator that shares its form with a unary operator.
+
+=item *
+
+C<(caller $n)[6]> (which gives the text of the eval) used to return the
+actual parser buffer.  Modifying it could result in crashes.  Now it always
+returns a copy.  The string returned no longer has "\n;" tacked on to the
+end.  The returned text also includes here-doc bodies, which used to be
+omitted.
+
+=item *
+
+Reset the utf8 position cache when accessing magical variables to avoid the
+string buffer and the utf8 position cache getting out of sync
+[perl #114410].
+
+=item *
+
+Various cases of get magic being called twice for magical utf8 strings have been
+fixed.
+
+=item *
+
+This code (when not in the presence of C<$&> etc)
+
+    $_ = 'x' x 1_000_000;
+    1 while /(.)/;
+
+used to skip the buffer copy for performance reasons, but suffered from C<$1>
+etc changing if the original string changed.  That's now been fixed.
+
+=item *
+
+Perl doesn't use PerlIO anymore to report out of memory messages, as PerlIO
+might attempt to allocate more memory.
+
+=item *
+
+In a regular expression, if something is quantified with C<{n,m}>
+where C<S<n E<gt> m>>, it can't possibly match.  Previously this was a fatal error,
+but now is merely a warning (and that something won't match).  [perl #82954].
+
+=item *
+
+It used to be possible for formats defined in subroutines that have
+subsequently been undefined and redefined to close over variables in the
+wrong pad (the newly-defined enclosing sub), resulting in crashes or
+"Bizarre copy" errors.
+
+=item *
+
+Redefinition of XSUBs at run time could produce warnings with the wrong
+line number.
+
+=item *
+
+The %vd sprintf format does not support version objects for alpha versions.
+It used to output the format itself (%vd) when passed an alpha version, and
+also emit an "Invalid conversion in printf" warning.  It no longer does,
+but produces the empty string in the output.  It also no longer leaks
+memory in this case.
+
+=item *
+
+A bug fix in an earlier 5.17.x release caused C<no a a 3> (a syntax error)
+to result in a bad read or assertion failure, because an op was being freed
+twice.
+
+=item *
+
+C<< $obj->SUPER::method >> calls in the main package could fail if the
+SUPER package had already been accessed by other means.
+
+=item *
+
+Stash aliasing (C<*foo:: = *bar::>) no longer causes SUPER calls to ignore
+changes to methods or @ISA or use the wrong package.
+
+=item *
+
+Method calls on packages whose names end in ::SUPER are no longer treated
+as SUPER method calls, resulting in failure to find the method.
+Furthermore, defining subroutines in such packages no longer causes them to
+be found by SUPER method calls on the containing package [perl #114924].
+
+=back
+
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+Changes in the lexical pad API break some CPAN modules.
+
+To avoid having to patch those modules again later if we change pads from AVs
+into their own types, APIs for accessing the contents of pads have been added.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.17.4 represents approximately 4 weeks of development since Perl 5.17.3
+and contains approximately 82,000 lines of changes across 360 files from 37
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.4:
+
+Abhijit Menon-Sen, Andy Dougherty, Aristotle Pagaltzis, Chris 'BinGOs'
+Williams, Colin Kuskie, Craig A. Berry, Daniel Dragan, David Golden, David
+Leadbeater, David Mitchell, David Nicol, Dominic Hargreaves, Father
+Chrysostomos, Florian Ragwitz, H.Merijn Brand, James E Keenan, Jerry D. Hedden,
+Jesse Luehrs, John Peacock, Karen Etheridge, Karl Williamson, Leon Timmermans,
+Michael G Schwern, Nicholas Clark, Peter Martini, Rafael Garcia-Suarez, Ricardo
+Signes, Shawn M Moore, Shlomi Fish, Steffen Müller, Steve Hay, Sullivan Beck,
+Sébastien Aperghis-Tramoni, Tony Cook, Vincent Pit, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+http://rt.perl.org/perlbug/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
