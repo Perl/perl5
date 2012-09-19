@@ -716,8 +716,7 @@ Then delete the temporary installation.
 
 Push all your recent commits:
 
-    $ git push origin ....
-
+    $ git push origin release-5.xx.yy
 
 =head3 tag the release
 
