@@ -206,6 +206,7 @@ sub changes_between {
     5.017001 => '2012-06-20',
     5.017002 => '2012-07-20',
     5.017003 => '2012-08-20',
+    5.017004 => '2012-09-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -7152,6 +7153,78 @@ my %delta = (
         removed => {
         }
     },
+    5.017004 => {
+        delta_from => 5.017003,
+        changed => {
+            'Archive::Tar'          => '1.90',
+            'Archive::Tar::Constant'=> '1.90',
+            'Archive::Tar::File'    => '1.90',
+            'B'                     => '1.38',
+            'B::Concise'            => '0.93',
+            'B::Deparse'            => '1.17',
+            'B::Xref'               => '1.04',
+            'CPANPLUS'              => '0.9131',
+            'CPANPLUS::Internals'   => '0.9131',
+            'CPANPLUS::Shell::Default'=> '0.9131',
+            'DB_File'               => '1.827',
+            'Devel::Peek'           => '1.10',
+            'DynaLoader'            => '1.16',
+            'Errno'                 => '1.16',
+            'ExtUtils::ParseXS'     => '3.18',
+            'ExtUtils::ParseXS::Constants'=> '3.18',
+            'ExtUtils::ParseXS::CountLines'=> '3.18',
+            'ExtUtils::ParseXS::Utilities'=> '3.18',
+            'File::Copy'            => '2.24',
+            'File::Find'            => '1.22',
+            'IPC::Open3'            => '1.13',
+            'Locale::Codes'         => '3.23',
+            'Locale::Codes::Constants'=> '3.23',
+            'Locale::Codes::Country'=> '3.23',
+            'Locale::Codes::Country_Codes'=> '3.23',
+            'Locale::Codes::Country_Retired'=> '3.23',
+            'Locale::Codes::Currency'=> '3.23',
+            'Locale::Codes::Currency_Codes'=> '3.23',
+            'Locale::Codes::Currency_Retired'=> '3.23',
+            'Locale::Codes::LangExt'=> '3.23',
+            'Locale::Codes::LangExt_Codes'=> '3.23',
+            'Locale::Codes::LangExt_Retired'=> '3.23',
+            'Locale::Codes::LangFam'=> '3.23',
+            'Locale::Codes::LangFam_Codes'=> '3.23',
+            'Locale::Codes::LangFam_Retired'=> '3.23',
+            'Locale::Codes::LangVar'=> '3.23',
+            'Locale::Codes::LangVar_Codes'=> '3.23',
+            'Locale::Codes::LangVar_Retired'=> '3.23',
+            'Locale::Codes::Language'=> '3.23',
+            'Locale::Codes::Language_Codes'=> '3.23',
+            'Locale::Codes::Language_Retired'=> '3.23',
+            'Locale::Codes::Script' => '3.23',
+            'Locale::Codes::Script_Codes'=> '3.23',
+            'Locale::Codes::Script_Retired'=> '3.23',
+            'Locale::Country'       => '3.23',
+            'Locale::Currency'      => '3.23',
+            'Locale::Language'      => '3.23',
+            'Locale::Script'        => '3.23',
+            'Math::BigFloat::Trace' => '0.30',
+            'Math::BigInt::Trace'   => '0.30',
+            'Module::CoreList'      => '2.73',
+            'Module::CoreList::TieHashDelta'=> '2.73',
+            'Opcode'                => '1.24',
+            'Socket'                => '2.006',
+            'Storable'              => '2.39',
+            'Sys::Syslog'           => '0.32',
+            'Unicode::UCD'          => '0.46',
+            'XS::APItest'           => '0.43',
+            'bignum'                => '0.30',
+            'bigrat'                => '0.30',
+            'constant'              => '1.24',
+            'feature'               => '1.30',
+            'threads::shared'       => '1.41',
+            'version'               => '0.9901',
+            'warnings'              => '1.14',
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %delta) {
@@ -7311,6 +7384,8 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.017002 => {
     },
     5.017003 => {
+    },
+    5.017004 => {
     },
 );
 
@@ -7835,7 +7910,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
     'Win32API::File'        => 'cpan',
     'Win32API::File::ExtUtils::Myconst2perl'=> 'cpan',
     'Win32CORE'             => undef,
-    'XSLoader'              => 'blead',
+    'XSLoader'              => undef,
     'autodie'               => 'cpan',
     'autodie::exception'    => 'cpan',
     'autodie::exception::system'=> 'cpan',
@@ -8374,7 +8449,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
     'Win32'                 => undef,
     'Win32API::File'        => undef,
     'Win32API::File::ExtUtils::Myconst2perl'=> undef,
-    'XSLoader'              => undef,
+    'XSLoader'              => 'https://rt.perl.org/rt3/Search/Results.html?Query=Queue=\'perl5\' AND Content LIKE \'module=XSLoader\' AND (Status=\'open\' OR Status=\'new\' OR Status=\'stalled\')',
     'autodie'               => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'autodie::exception'    => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
     'autodie::exception::system'=> 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=autodie',
