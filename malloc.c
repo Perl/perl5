@@ -1711,6 +1711,7 @@ morecore(register int bucket)
 		    }
 		}
 		if (t && *t) {
+		    dTHX;
 		    MYMALLOC_WRITE2STDERR("Unrecognized part of PERL_MALLOC_OPT: \"");
 		    MYMALLOC_WRITE2STDERR(t);
 		    MYMALLOC_WRITE2STDERR("\"\n");
