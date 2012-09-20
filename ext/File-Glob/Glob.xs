@@ -93,6 +93,7 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
     /* chuck it all out, quick or slow */
     if (gimme == G_ARRAY) {
 	if (!on_stack) {
+	    EXTEND(SP, AvFILLp(entries)+1);
 	    Copy(AvARRAY(entries), SP+1, AvFILLp(entries)+1, SV *);
 	    SP += AvFILLp(entries)+1;
 	}
