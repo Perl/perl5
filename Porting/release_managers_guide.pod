@@ -1251,7 +1251,7 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 I<You MUST SKIP this step for a RC release>
 
-In your C<perlorg> repository, link to the new release.  For a new
+In your C<perlweb> repository, link to the new release.  For a new
 latest-maint release, edit F<docs/shared/tpl/stats.html>.  Otherwise,
 edit F<docs/dev/perl5/index.html>.
 
