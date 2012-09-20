@@ -315,7 +315,7 @@ length scalars being passed in.
 
 =item *
 
-L<Storable> has been upgraded from version 2.38 to 2.39.  This contains Various
+L<Storable> has been upgraded from version 2.38 to 2.39.  This contains various
 bugfixes, including compatibility fixes for older versions of Perl and vstring
 handling.
 
@@ -516,7 +516,7 @@ The APIs for accessing lexical pads have changed considerably.
 C<PADLIST>s are now longer C<AV>s, but their own type instead. C<PADLIST>s now
 contain a C<PAD> and a C<PADNAMELIST> of C<PADNAME>s, rather than C<AV>s for the
 pad and the list of pad names.  C<PAD>s, C<PADNAMELIST>s, and C<PADNAME>s are to
-be accessed as such though the newly added pad API instead of the plain C<AV>
+be accessed as such through the newly added pad API instead of the plain C<AV>
 and C<SV> APIs.  See L<perlapi> for details.
 
 =item *
@@ -595,7 +595,7 @@ omitted.
 =item *
 
 Reset the utf8 position cache when accessing magical variables to avoid the
-string buffer and the utf8 position cache to get out of sync
+string buffer and the utf8 position cache getting out of sync
 [perl #114410].
 
 =item *
@@ -627,7 +627,7 @@ but now is merely a warning (and that something won't match).  [perl #82954].
 =item *
 
 It used to be possible for formats defined in subroutines that have
-subquently been undefined and redefined to close over variables in the
+subsequently been undefined and redefined to close over variables in the
 wrong pad (the newly-defined enclosing sub), resulting in crashes or
 "Bizarre copy" errors.
 
