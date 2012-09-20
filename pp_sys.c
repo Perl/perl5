@@ -1453,7 +1453,7 @@ PP(pp_leavewrite)
 	    }
 	}
 	if (IoLINES_LEFT(io) >= 0 && IoPAGE(io) > 0)
-	    do_print(GvSV(gv_fetchpv("\f", TRUE, SVt_PV)), ofp);
+	    do_print(GvSV(gv_fetchpvs("\f", GV_ADD, SVt_PV)), ofp);
 	IoLINES_LEFT(io) = IoPAGE_LEN(io);
 	IoPAGE(io)++;
 	PL_formtarget = PL_toptarget;
