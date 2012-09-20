@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(91);
+plan(92);
 
 my $rc_filename = '.perldb';
 
@@ -2172,6 +2172,31 @@ sub _calc_trace_wrapper
         \s+main::foo\(\)\ called\ at\ \S+\ line\ 21\n
         #msx,
         'Test the o dieLevel option',
+    );
+}
+
+# Test the warnLevel option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/o warnLevel='1'/,
+                q/c/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^This\ is\ not\ a\ warning\.\ at\ \S+\ line\ 18\.\n
+        .*?
+        ^\s+main::baz\(\)\ called\ at\ \S+\ line\ 13\n
+        \s+main::bar\(\)\ called\ at\ \S+\ line\ 25\n
+        \s+main::myfunc\(\)\ called\ at\ \S+\ line\ 28\n
+        #msx,
+        'Test the o warnLevel option',
     );
 }
 
