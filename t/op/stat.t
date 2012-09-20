@@ -31,7 +31,6 @@ $Is_Amiga   = $^O eq 'amigaos';
 $Is_Cygwin  = $^O eq 'cygwin';
 $Is_Darwin  = $^O eq 'darwin';
 $Is_Dos     = $^O eq 'dos';
-$Is_MPE     = $^O eq 'mpeix';
 $Is_MSWin32 = $^O eq 'MSWin32';
 $Is_NetWare = $^O eq 'NetWare';
 $Is_OS2     = $^O eq 'os2';

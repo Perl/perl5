@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_03';
+$VERSION = '1.39_04';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -8276,7 +8276,6 @@ my @pods = qw(
     modlib
     mod
     modstyle
-    mpeix
     netware
     newmod
     number

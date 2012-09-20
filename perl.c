@@ -3439,10 +3439,6 @@ S_minus_v(pTHX)
 	PerlIO_printf(PerlIO_stdout(),
 		      "BeOS port Copyright Tom Spindler, 1997-1999\n");
 #endif
-#ifdef MPE
-	PerlIO_printf(PerlIO_stdout(),
-		      "MPE/iX port Copyright by Mark Klein and Mark Bixby, 1996-2003\n");
-#endif
 #ifdef OEMVS
 	PerlIO_printf(PerlIO_stdout(),
 		      "MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");

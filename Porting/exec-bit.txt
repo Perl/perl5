@@ -56,7 +56,5 @@ Porting/perlhist_calculate.pl
 Porting/sort_perldiag.pl
 Porting/sync-with-cpan
 Porting/valgrindpp.pl
-mpeix/nm
-mpeix/relink
 Cross/generate_config_sh
 Cross/warp

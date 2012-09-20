@@ -1322,7 +1322,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.linux    ..\pod\perllinux.pod
 	copy ..\README.macos    ..\pod\perlmacos.pod
 	copy ..\README.macosx   ..\pod\perlmacosx.pod
-	copy ..\README.mpeix    ..\pod\perlmpeix.pod
 	copy ..\README.netware  ..\pod\perlnetware.pod
 	copy ..\README.openbsd  ..\pod\perlopenbsd.pod
 	copy ..\README.os2      ..\pod\perlos2.pod
@@ -1434,11 +1433,11 @@ distclean: realclean
 	    perlcygwin.pod perldgux.pod perldos.pod perlepoc.pod \
 	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
 	    perlintern.pod perlirix.pod perljp.pod perlko.pod perllinux.pod \
-	    perlmacos.pod perlmacosx.pod perlmodlib.pod perlmpeix.pod \
-	    perlnetware.pod perlopenbsd.pod perlos2.pod perlos390.pod \
-	    perlos400.pod perlplan9.pod perlqnx.pod perlriscos.pod \
-	    perlsolaris.pod perlsymbian.pod perltoc.pod perltru64.pod \
-	    perltw.pod perluniprops.pod perlvos.pod perlwin32.pod
+	    perlmacos.pod perlmacosx.pod perlmodlib.pod perlnetware.pod \
+	    perlopenbsd.pod perlos2.pod perlos390.pod perlos400.pod \
+	    perlplan9.pod perlqnx.pod perlriscos.pod perlsolaris.pod \
+	    perlsymbian.pod perltoc.pod perltru64.pod perltw.pod \
+	    perluniprops.pod perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep cpanp-run-perl cpanp cpan2dist shasum corelist config_data zipdetails

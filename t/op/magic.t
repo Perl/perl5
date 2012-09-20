@@ -55,7 +55,6 @@ $Is_VMS      = $^O eq 'VMS';
 $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
-$Is_MPE      = $^O eq 'mpeix';		
 $Is_BeOS     = $^O eq 'beos';
 
 $PERL = $ENV{PERL}
@@ -107,7 +106,7 @@ close FOO; # just mention it, squelch used-only-once
 
 SKIP: {
     skip('SIGINT not safe on this platform', 5)
-	if $Is_MSWin32 || $Is_NetWare || $Is_Dos || $Is_MPE;
+	if $Is_MSWin32 || $Is_NetWare || $Is_Dos;
   # the next tests are done in a subprocess because sh spits out a
   # newline onto stderr when a child process kills itself with SIGINT.
   # We use a pipe rather than system() because the VMS command buffer

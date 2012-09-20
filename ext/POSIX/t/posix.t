@@ -23,7 +23,6 @@ $| = 1;
 
 $Is_W32     = $^O eq 'MSWin32';
 $Is_Dos     = $^O eq 'dos';
-$Is_MPE     = $^O eq 'mpeix';
 $Is_MacOS   = $^O eq 'MacOS';
 $Is_VMS     = $^O eq 'VMS';
 $Is_OS2     = $^O eq 'os2';
@@ -141,7 +140,6 @@ SKIP: {
 }
 
 SKIP: {
-    skip("_POSIX_OPEN_MAX is inaccurate on MPE", 1) if $Is_MPE;
     skip("_POSIX_OPEN_MAX undefined ($fds[1])",  1) unless &_POSIX_OPEN_MAX;
 
     cmp_ok(&_POSIX_OPEN_MAX, '>=', 16,

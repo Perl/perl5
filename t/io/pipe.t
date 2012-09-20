@@ -176,9 +176,8 @@ SKIP: {
         is($!, '',      '       errno');
         isnt($?, 0,     '       status');
 
-        SKIP: {
-            skip "Don't work yet", 6 if $^O eq 'mpeix';
-
+	# Former skip block:
+        {
             # check that status for the correct process is collected
             my $zombie;
             unless( $zombie = fork ) {

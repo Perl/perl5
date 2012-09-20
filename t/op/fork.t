@@ -11,9 +11,6 @@ BEGIN {
 	unless ($Config::Config{d_fork} or $Config::Config{d_pseudofork});
 }
 
-skip_all('fork/status problems on MPE/iX')
-    if $^O eq 'mpeix';
-
 $|=1;
 
 run_multiple_progs('', \*DATA);

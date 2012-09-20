@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.24';
+$VERSION = '2.25';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -154,7 +154,6 @@ sub copy {
     if (defined &syscopy && !$Syscopy_is_copy
 	&& !$to_a_handle
 	&& !($from_a_handle && $^O eq 'os2' )	# OS/2 cannot handle handles
-	&& !($from_a_handle && $^O eq 'mpeix')	# and neither can MPE/iX.
 	&& !($from_a_handle && $^O eq 'MSWin32')
 	&& !($from_a_handle && $^O eq 'NetWare')
        )
@@ -412,13 +411,6 @@ sub mv   { _move(@_,\&cp);   }
 unless (defined &syscopy) {
     if ($^O eq 'VMS') {
 	*syscopy = \&rmscopy;
-    } elsif ($^O eq 'mpeix') {
-	*syscopy = sub {
-	    return 0 unless @_ == 2;
-	    # Use the MPE cp program in order to
-	    # preserve MPE file attributes.
-	    return system('/bin/cp', '-f', $_[0], $_[1]) == 0;
-	};
     } elsif ($^O eq 'MSWin32' && defined &DynaLoader::boot_DynaLoader) {
 	# Win32::CopyFile() fill only work if we can load Win32.xs
 	*syscopy = sub {

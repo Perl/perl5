@@ -1667,7 +1667,7 @@ PP(pp_sysread)
     if (PL_op->op_type == OP_RECV) {
 	Sock_size_t bufsize;
 	char namebuf[MAXPATHLEN];
-#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE) || defined(__QNXNTO__)
+#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
 	bufsize = sizeof (struct sockaddr_in);
 #else
 	bufsize = sizeof namebuf;
@@ -2533,7 +2533,7 @@ PP(pp_accept)
     IO *nstio;
     IO *gstio;
     char namebuf[MAXPATHLEN];
-#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE) || defined(__QNXNTO__)
+#if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
     Sock_size_t len = sizeof (struct sockaddr_in);
 #else
     Sock_size_t len = sizeof namebuf;

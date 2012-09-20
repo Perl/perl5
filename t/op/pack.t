@@ -300,8 +300,6 @@ sub list_eq ($$) {
 
     skip("-- $^O has serious fp indigestion on w-packed infinities", 1)
        if (
-	   ($^O eq 'mpeix')
-	   ||
 	   ($^O eq 'ultrix')
 	   ||
 	   ($^O =~ /^svr4/ && -f "/etc/issue" && -f "/etc/.relid") # NCR MP-RAS
