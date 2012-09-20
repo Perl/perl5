@@ -1294,3 +1294,11 @@ print '';
 eval this_method_is_fake ();
 EXPECT
 Undefined subroutine &main::this_method_is_fake called at - line 4.
+########
+# toke.c
+# [perl #107002] Erroneous ambiguity warnings
+sub { # do not actually call require
+  require a::b . 1; # These used to produce erroneous
+  require a::b + 1; # ambiguity warnings.
+}
+EXPECT
