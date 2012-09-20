@@ -2956,12 +2956,14 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     PERL_ARGS_ASSERT_METHOD_COMMON;
 
     if (!sv)
+       undefined:
 	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on an undefined value",
 		   SVfARG(meth));
 
     SvGETMAGIC(sv);
     if (SvROK(sv))
 	ob = MUTABLE_SV(SvRV(sv));
+    else if (!SvOK(sv)) goto undefined;
     else {
 	GV* iogv;
         STRLEN packlen;
@@ -2990,17 +2992,11 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    !(ob=MUTABLE_SV(GvIO(iogv))))
 	{
 	    /* this isn't the name of a filehandle either */
-	    if (!packname ||
-		((UTF8_IS_START(*packname) && DO_UTF8(sv))
-		    ? !isIDFIRST_utf8((U8*)packname)
-		    : !isIDFIRST_L1((U8)*packname)
-		))
+	    if (!packname || !packlen)
 	    {
-		/* diag_listed_as: Can't call method "%s" without a package or object reference */
-		Perl_croak(aTHX_ "Can't call method \"%"SVf"\" %s",
-			   SVfARG(meth),
-			   SvOK(sv) ? "without a package or object reference"
-				    : "on an undefined value");
+		Perl_croak(aTHX_ "Can't call method \"%"SVf"\" "
+				 "without a package or object reference",
+				  SVfARG(meth));
 	    }
 	    /* assume it's a package name */
 	    stash = gv_stashpvn(packname, packlen, packname_is_utf8 ? SVf_UTF8 : 0);

@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 111);
+plan(tests => 116);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -477,3 +477,15 @@ package egakacp {
 @SUPER::ISA = "SUPPER";
 sub SUPPER::foo { "supper" }
 is "SUPER"->foo, 'supper', 'SUPER->method';
+
+sub flomp { "flimp" }
+sub main::::flomp { "flump" }
+is "::"->flomp, 'flump', 'method call on ::';
+is "::main"->flomp, 'flimp', 'method call on ::main';
+eval { ""->flomp };
+like $@,
+     qr/^Can't call method "flomp" without a package or object reference/,
+    'method call on empty string';
+is "3foo"->CORE::uc, '3FOO', '"3foo"->CORE::uc';
+{ no strict; @{"3foo::ISA"} = "CORE"; }
+is "3foo"->uc, '3FOO', '"3foo"->uc (autobox style!)';
