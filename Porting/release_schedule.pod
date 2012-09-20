@@ -29,8 +29,8 @@ addressed.  This typically means some time in April or May.)
 Release schedule (with release managers):
 
   2012-05-20  5.16.0 ✓        Ricardo Signes
-  2012-06-??  5.16.1          Ricardo Signes
-  2012-09-14  5.16.2          ??
+  2012-08-08  5.16.1 ✓        Ricardo Signes
+  2012-11-01  5.16.2          Ricardo Signes
   2013-0?-??  5.16.3          ??
   ????-??-??  5.16.4          ??
 
@@ -41,7 +41,7 @@ Release schedule (with release managers):
   2011-05-14  5.14.0 (final)  Jesse Vincent
   2011-06-16  5.14.1 ✓        Jesse Vincent
   2011-09-14  5.14.2 ✓        Florian Ragwitz
-  2012-0?-??  5.14.3          Dominic Hargreaves
+  2012-10-??  5.14.3          Dominic Hargreaves
   ????-??-??  5.14.4          ??
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
@@ -60,15 +60,15 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.17
 
-  2012-05-26  5.17.0          Zefram
-  2012-06-20  5.17.1          Jesse Luehrs
-  2012-07-20  5.17.2          Tony Cook
-  2012-08-20  5.17.3          Steve Hay
-  2012-09-20  5.17.4          Florian Ragwitz
-  2012-10-20  5.17.5          ?
+  2012-05-26  5.17.0  ✓       Zefram
+  2012-06-20  5.17.1  ✓       Jesse Luehrs
+  2012-07-20  5.17.2  ✓       Tony Cook
+  2012-08-20  5.17.3  ✓       Steve Hay
+  2012-09-20  5.17.4  ✓       Florian Ragwitz
+  2012-10-20  5.17.5          Florian Ragwitz
   2012-11-20  5.17.6          Abigail
   2012-12-18  5.17.7          Dave Rolsky
-  2013-01-20  5.17.8
+  2013-01-20  5.17.8          Aaron Crane
   2013-02-20  5.17.9
   2013-03-20  5.17.10
 
