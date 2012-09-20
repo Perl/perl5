@@ -299,7 +299,6 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 PERLVAR(I, inplace,	char *)
 PERLVAR(I, e_script,	SV *)
 
-/* magical thingies */
 PERLVAR(I, basetime,	Time_t)		/* $^T */
 
 PERLVARI(I, maxsysfd,	I32,	MAXSYSFD)
