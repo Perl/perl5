@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 27;
+plan tests => 28;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -183,3 +183,6 @@ SKIP: {
     leak(2, 0, sub { eval 'tr/9-0//' }, 'tr/9-0//');
     leak(2, 0, sub { eval 'tr/a-z-0//' }, 'tr/a-z-0//');
 }
+
+# [perl #114764] Attributes leak scalars
+leak(2, 0, sub { eval 'my $x : shared' }, 'my $x :shared used to leak');

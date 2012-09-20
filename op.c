@@ -2453,13 +2453,11 @@ STATIC void
 S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 {
     dVAR;
-    SV *stashsv;
 
     PERL_ARGS_ASSERT_APPLY_ATTRS;
 
     /* fake up C<use attributes $pkg,$rv,@attrs> */
     ENTER;		/* need to protect against side-effects of 'use' */
-    stashsv = stash ? newSVhek(HvNAME_HEK(stash)) : &PL_sv_no;
 
 #define ATTRSMODULE "attributes"
 #define ATTRSMODULE_PM "attributes.pm"
@@ -2474,6 +2472,8 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 			     newSVpvs(ATTRSMODULE), NULL);
     }
     else {
+	SV * const stashsv =
+	    stash ? newSVhek(HvNAME_HEK(stash)) : &PL_sv_no;
 	Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
 			 newSVpvs(ATTRSMODULE),
 			 NULL,
