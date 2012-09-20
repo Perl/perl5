@@ -7508,6 +7508,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_DBMCLOSE);
 
 	case KEY_dump:
+	    PL_expect = XOPERATOR;
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_DUMP);
 
@@ -7640,6 +7641,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_GREPSTART, XREF);
 
 	case KEY_goto:
+	    PL_expect = XOPERATOR;
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_GOTO);
 
@@ -7762,6 +7764,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_KILL,XTERM);
 
 	case KEY_last:
+	    PL_expect = XOPERATOR;
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_LAST);
 	
@@ -7866,6 +7869,7 @@ Perl_yylex(pTHX)
 	    OPERATOR(MY);
 
 	case KEY_next:
+	    PL_expect = XOPERATOR;
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_NEXT);
 
@@ -8051,6 +8055,7 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = SKIPSPACE1(s);
+	    PL_expect = XOPERATOR;
 	    if (isDIGIT(*s)) {
 		s = force_version(s, FALSE);
 	    }
@@ -8082,6 +8087,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_RESET);
 
 	case KEY_redo:
+	    PL_expect = XOPERATOR;
 	    s = force_word(s,WORD,TRUE,FALSE,FALSE);
 	    LOOPX(OP_REDO);
 

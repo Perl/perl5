@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..75\n";
+print "1..81\n";
 
 $x = 'x';
 
@@ -372,3 +372,11 @@ eval 'warn ({$_ => 1} + 1) if 0';
 print "not " if $@;
 print "ok 75 - listop({$_ => 1} + 1)\n";
 print "# $@" if $@;
+
+$test = 76;
+for(qw< require goto last next redo dump >) {
+    eval "sub { $_ foo << 2 }";
+    print "not " if $@;
+    print "ok ", $test++, " - [perl #105924] $_ WORD << ...\n";
+    print "# $@" if $@;
+}
