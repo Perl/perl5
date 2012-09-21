@@ -5,6 +5,16 @@ use strict;
 # This test checks that anything with an executable bit is
 # identified in Porting/exec-bit.txt to makerel will set
 # the exe bit in the release tarball
+# and that anything with an executable bit also has a shebang
+
+sub has_shebang {
+  my $fname = shift;
+  open my $fh, '<', $fname or die "Can't open '$fname': $!";
+  my $line = <$fh>;
+  close $fh;
+
+  return $line =~ /^\#!\s*([A-Za-z0-9_\-\/\.])+\s?/ ? 1 : 0;
+}
 
 require './test.pl';
 if ( $^O eq "MSWin32" ) {
@@ -39,6 +49,8 @@ my @manifest = sort keys %{ maniread("../MANIFEST") };
 # Check that +x files in repo get +x from makerel
 for my $f ( map { "../$_" } @manifest ) {
   next unless -x $f;
+
+  ok( has_shebang($f), "File $f has shebang" );
 
   ok( $exe_list{$f}, "tarball will chmod +x $f" )
     or diag( "Remove the exec bit or add '$f' to Porting/exec-bit.txt" );
