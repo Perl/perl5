@@ -657,7 +657,7 @@ if this is the first release under the stewardship of a new pumpking, make
 sure that his or her name is listed in the section entitled
 C<THE KEEPERS OF THE PUMPKIN>.
 
-I<If you're making a BLEAD-POINT release>, also update the "SELECTED
+I<If you're making a BLEAD-FINAL release>, also update the "SELECTED
 RELEASE SIZES" section with the output of
 F<Porting/perlhist_calculate.pl>.
 
