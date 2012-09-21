@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(94);
+plan(95);
 
 my $rc_filename = '.perldb';
 
@@ -2245,6 +2245,33 @@ sub _calc_trace_wrapper
         17:\s+\$x\ =\ "FourthVal";\n
         /msx,
         'Test the o AutoTrace command',
+    );
+}
+
+# Test the t command with function calls
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                't',
+                'b 18',
+                'c',
+                'x ["foo"]',
+                'x ["bar"]',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:28\):\n
+        28:\s+myfunc\(\);\n
+        main::myfunc\([^:]+:25\):\n
+        25:\s+bar\(\);\n
+        /msx,
+        'Test the t command with function calls.',
     );
 }
 
