@@ -2357,7 +2357,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 
     if (!SvOOK(hv)) {
 	/* Too many things (well, pp_each at least) merrily assume that you can
-	   call iv_iternext without calling hv_iterinit, so we'll have to deal
+	   call hv_iternext without calling hv_iterinit, so we'll have to deal
 	   with it.  */
 	hv_iterinit(hv);
     }
