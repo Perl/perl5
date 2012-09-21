@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(95);
+plan(96);
 
 my $rc_filename = '.perldb';
 
@@ -2275,6 +2275,32 @@ sub _calc_trace_wrapper
     );
 }
 
+# Test the o AutoTrace command with function calls
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o AutoTrace',
+                'b 18',
+                'c',
+                'x ["foo"]',
+                'x ["bar"]',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:28\):\n
+        28:\s+myfunc\(\);\n
+        main::myfunc\([^:]+:25\):\n
+        25:\s+bar\(\);\n
+        /msx,
+        'Test the t command with function calls.',
+    );
+}
 END {
     1 while unlink ($rc_filename, $out_fn);
 }

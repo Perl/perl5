@@ -914,8 +914,8 @@ $inhibit_exit = $option{PrintRet} = 1;
 
 use vars qw($trace_to_depth);
 
-# Default to 1 so the prompt will display the first line.
-$trace_to_depth = 1;
+# Default to 1E9 so it won't be limited to a certain recursion depth.
+$trace_to_depth = 1E9;
 
 =head1 OPTION PROCESSING
 
