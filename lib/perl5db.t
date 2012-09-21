@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(93);
+plan(94);
 
 my $rc_filename = '.perldb';
 
@@ -2221,6 +2221,30 @@ sub _calc_trace_wrapper
         17:\s+\$x\ =\ "FourthVal";\n
         /msx,
         'Test the t command (without a number.)',
+    );
+}
+
+# Test the o AutoTrace command
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o AutoTrace',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:15\):\n
+        15:\s+\$dummy\+\+;\n
+        main::\([^:]+:17\):\n
+        17:\s+\$x\ =\ "FourthVal";\n
+        /msx,
+        'Test the o AutoTrace command',
     );
 }
 
