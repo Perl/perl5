@@ -1289,4 +1289,16 @@ untie @a;
 
 sub T::TIEARRAY { my $s; bless \$s => "T" }
 EXPECT
+########
 
+# NAME Test that tying a hash does not leak a deleted iterator
+# This produced unbalanced string table warnings under
+# PERL_DESTRUCT_LEVEL=2.
+package l {
+    sub TIEHASH{bless[]}
+}
+$h = {foo=>0};
+each %$h;
+delete $$h{foo};
+tie %$h, 'l';
+EXPECT

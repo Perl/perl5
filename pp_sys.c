@@ -861,9 +861,16 @@ PP(pp_tie)
 
     switch(SvTYPE(varsv)) {
 	case SVt_PVHV:
+	{
+	    HE *entry;
 	    methname = "TIEHASH";
+	    if (HvLAZYDEL(varsv) && (entry = HvEITER((HV *)varsv))) {
+		HvLAZYDEL_off(varsv);
+		hv_free_ent((HV *)varsv, entry);
+	    }
 	    HvEITER_set(MUTABLE_HV(varsv), 0);
 	    break;
+	}
 	case SVt_PVAV:
 	    methname = "TIEARRAY";
 	    if (!AvREAL(varsv)) {
