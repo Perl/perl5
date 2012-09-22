@@ -770,7 +770,8 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
 
 {
     local $TODO = "sort should make sure elements are not freed in the sort block";
-    eval { @nomodify_x=(1..8); our @copy = sort { @nomodify_x = (0) } (@nomodify_x, 3); };
+    eval { @nomodify_x=(1..8);
+	   our @copy = sort { undef @nomodify_x; 1 } (@nomodify_x, 3); };
     is($@, "");
 }
 

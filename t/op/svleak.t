@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 30;
+plan tests => 31;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -200,7 +200,8 @@ leak(2, 0, sub {
     undef $h;
 }, 'tied hash iteration does not leak');
 
-# Hash assignment was leaking when assigning explosive scalars
+# List assignment was leaking when assigning explosive scalars to
+# aggregates.
 package sty {
     sub TIESCALAR { bless [] }
     sub FETCH    { die }
@@ -211,4 +212,8 @@ leak(2, 0, sub {
     eval {%a = (0, $x)}; # value
     eval {%a = ($x,$x)}; # both
 }, 'hash assignment does not leak');
+leak(2, 0, sub {
+    tie my $x, sty;
+    eval {@a = ($x)};
+}, 'array assignment does not leak');
 
