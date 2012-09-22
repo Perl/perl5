@@ -1013,7 +1013,7 @@ PP(pp_aassign)
 		    HE *didstore;
 		    sv = *relem ? *relem : &PL_sv_no;
 		    relem++;
-		    tmpstr = newSV(0);
+		    tmpstr = sv_newmortal();
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    relem++;
@@ -1030,11 +1030,10 @@ PP(pp_aassign)
 			}
 		    }
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
+		    if (didstore) SvREFCNT_inc_simple_void_NN(tmpstr);
 		    if (magic) {
 			if (SvSMAGICAL(tmpstr))
 			    mg_set(tmpstr);
-			if (!didstore)
-			    sv_2mortal(tmpstr);
 		    }
 		    TAINT_NOT;
 		}
