@@ -1,3 +1,4 @@
+#!perl
 package CharClass::Matcher;
 use strict;
 use 5.008;
