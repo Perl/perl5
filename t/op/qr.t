@@ -2,7 +2,10 @@
 
 use strict;
 
-BEGIN { require './test.pl'; }
+BEGIN {
+    chdir 't';
+    require './test.pl';
+}
 
 plan(tests => 18);
 
