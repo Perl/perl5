@@ -2370,6 +2370,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             if (entry) {
                 sv_setsv(key, HeSVKEY_force(entry));
                 SvREFCNT_dec(HeSVKEY(entry));       /* get rid of previous key */
+		HeSVKEY_set(entry, NULL);
             }
             else {
                 char *k;
@@ -2377,6 +2378,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 
                 /* one HE per MAGICAL hash */
                 iter->xhv_eiter = entry = new_HE(); /* HvEITER(hv) = new_HE() */
+		HvLAZYDEL_on(hv); /* make sure entry gets freed */
                 Zero(entry, 1, HE);
                 Newxz(k, HEK_BASESIZE + sizeof(const SV *), char);
                 hek = (HEK*)k;
@@ -2393,6 +2395,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
             iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
+	    HvLAZYDEL_off(hv);
             return NULL;
         }
     }
