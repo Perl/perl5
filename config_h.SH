@@ -1,3 +1,5 @@
+#!/bin/sh
+#
 # THIS IS A GENERATED FILE
 # DO NOT HAND-EDIT
 #
