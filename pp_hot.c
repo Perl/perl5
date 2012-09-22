@@ -1286,8 +1286,10 @@ PP(pp_match)
 
 
 
-    /* empty pattern special-cased to use last successful pattern if possible */
-    if (!RX_PRELEN(rx) && PL_curpm) {
+    /* empty pattern special-cased to use last successful pattern if
+       possible, except for qr// */
+    if (!((struct regexp *)SvANY(rx))->mother_re && !RX_PRELEN(rx)
+     && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
