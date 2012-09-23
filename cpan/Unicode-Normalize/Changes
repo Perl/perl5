@@ -1,5 +1,9 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.15  Sun Sep 23 10:43:14 2012
+    - perl 5.11.0 or later: Install to 'site' instead of 'perl'
+      (see [rt.cpan.org #79801])
+
 1.14  Sat Mar 10 13:34:53 2012
     - avoid "use Test".
 
