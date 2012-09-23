@@ -2386,7 +2386,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 
     case OP_SCALAR:
     case OP_NULL:
-	if (!(o->op_flags & OPf_KIDS))
+	if (!(o->op_flags & OPf_KIDS) || type == OP_DEFINED)
 	    break;
 	doref(cBINOPo->op_first, type, set_op_ref);
 	break;
