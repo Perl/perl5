@@ -6,14 +6,14 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = qw(. ../lib);
+    @INC = qw(. ../lib lib);
     require "test.pl";
 }
 
 use strict;
 no warnings 'once';
 
-plan(tests => 116);
+plan(tests => 141);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -489,3 +489,135 @@ like $@,
 is "3foo"->CORE::uc, '3FOO', '"3foo"->CORE::uc';
 { no strict; @{"3foo::ISA"} = "CORE"; }
 is "3foo"->uc, '3FOO', '"3foo"->uc (autobox style!)';
+
+# Test that PL_stashcache doesn't change the resolution behaviour for file
+# handles and package names.
+SKIP: {
+    skip_if_miniperl('file handles as methods requires loading IO::File', 25);
+    require Fcntl;
+
+    foreach (qw (Count::DATA Count Colour::H1 Color::H1 C3::H1)) {
+	eval qq{
+            package $_;
+
+            sub getline {
+                return "method in $_";
+            }
+
+            1;
+        } or die $@;
+    }
+
+    BEGIN {
+	*The::Count:: = \*Count::;
+    }
+
+    is(Count::DATA->getline(), 'method in Count::DATA',
+       'initial resolution is a method');
+    is(The::Count::DATA->getline(), 'method in Count::DATA',
+       'initial resolution is a method in aliased classes');
+
+    require Count;
+
+    is(Count::DATA->getline(), "one! ha ha ha\n", 'file handles take priority');
+    is(The::Count::DATA->getline(), "two! ha ha ha\n",
+       'file handles take priority in aliased classes');
+
+    eval q{close Count::DATA} or die $!;
+
+    {
+	no warnings 'io';
+	is(Count::DATA->getline(), undef,
+	   "closing a file handle doesn't change object resolution");
+	is(The::Count::DATA->getline(), undef,
+	   "closing a file handle doesn't change object resolution in aliased classes");
+}
+
+    undef *Count::DATA;
+    is(Count::DATA->getline(), 'method in Count::DATA',
+       'undefining the typeglob does change object resolution');
+    is(The::Count::DATA->getline(), 'method in Count::DATA',
+       'undefining the typeglob does change object resolution in aliased classes');
+
+    is(Count->getline(), 'method in Count',
+       'initial resolution is a method');
+    is(The::Count->getline(), 'method in Count',
+       'initial resolution is a method in aliased classes');
+
+    eval q{
+        open Count, '<', $INC{'Count.pm'}
+            or die "Can't open $INC{'Count.pm'}: $!";
+1;
+    } or die $@;
+
+    is(Count->getline(), "# zero! ha ha ha\n", 'file handles take priority');
+    is(The::Count->getline(), 'method in Count', 'but not in an aliased class');
+
+    eval q{close Count} or die $!;
+
+    {
+	no warnings 'io';
+	is(Count->getline(), undef,
+	   "closing a file handle doesn't change object resolution");
+    }
+
+    undef *Count;
+    is(Count->getline(), 'method in Count',
+       'undefining the typeglob does change object resolution');
+
+    open Colour::H1, 'op/method.t' or die $!;
+    while (<Colour::H1>) {
+	last if /^__END__/;
+    }
+    open CLOSED, 'TEST' or die $!;
+    close CLOSED or die $!;
+
+    my $fh_start = tell Colour::H1;
+    my $data_start = tell DATA;
+    is(Colour::H1->getline(), <DATA>, 'read from a file');
+    is(Color::H1->getline(), 'method in Color::H1',
+       'initial resolution is a method');
+
+    *Color::H1 = *Colour::H1{IO};
+
+    is(Colour::H1->getline(), <DATA>, 'read from a file');
+    is(Color::H1->getline(), <DATA>,
+       'file handles take priority after typeglob assignment');
+
+    *Color::H1 = *CLOSED{IO};
+    {
+	no warnings 'io';
+	is(Color::H1->getline(), undef,
+	   "assigning a closed a file handle doesn't change object resolution");
+    }
+
+    undef *Color::H1;
+    is(Color::H1->getline(), 'method in Color::H1',
+       'undefining the typeglob does change object resolution');
+
+    seek Colour::H1, $fh_start, Fcntl::SEEK_SET() or die $!;
+    seek DATA, $data_start, Fcntl::SEEK_SET() or die $!;
+
+    is(Colour::H1->getline(), <DATA>, 'read from a file');
+    is(C3::H1->getline(), 'method in C3::H1', 'intial resolution is a method');
+
+    *Copy:: = \*C3::;
+    *C3:: = \*Colour::;
+
+    is(Colour::H1->getline(), <DATA>, 'read from a file');
+    is(C3::H1->getline(), <DATA>,
+       'file handles take priority after stash aliasing');
+
+    *C3:: = \*Copy::;
+
+    is(C3::H1->getline(), 'method in C3::H1',
+       'restoring the stash returns to a method');
+}
+
+__END__
+#FF9900
+#F78C08
+#FFA500
+#FF4D00
+#FC5100
+#FF5D00

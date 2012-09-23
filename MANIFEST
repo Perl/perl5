@@ -5065,6 +5065,7 @@ t/lib/Cname.pm			Test charnames in regexes (op/pat.t)
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
+t/lib/Count.pm			Helper for t/op/method.t
 t/lib/croak/mg			Test croak calls from mg.c
 t/lib/croak/op			Test croak calls from op.c
 t/lib/croak/pp_ctl		Test croak calls from pp_ctl.c
