@@ -2971,11 +2971,11 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	GV* iogv;
         STRLEN packlen;
         const char * const packname = SvPV_nomg_const(sv, packlen);
-	bool packname_is_utf8 = FALSE;
+        const bool packname_is_utf8 = !!SvUTF8(sv);
         const HE* const he =
-	    (const HE *)hv_common_key_len(
-	      PL_stashcache, packname,
-	      packlen * -(packname_is_utf8 = !!SvUTF8(sv)), 0, NULL, 0
+	    (const HE *)hv_common(
+                PL_stashcache, NULL, packname, packlen,
+                packname_is_utf8 ? HVhek_UTF8 : 0, 0, NULL, 0
 	    );
 	  
         if (he) { 
