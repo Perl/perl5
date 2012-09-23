@@ -952,9 +952,13 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	    while (items--) {
                 const U32 name_utf8 = SvUTF8(*svp);
 		STRLEN len;
-		const char *name = SvPVx_const(*svp++, len);
-		if(PL_stashcache)
+		const char *name = SvPVx_const(*svp, len);
+		if(PL_stashcache) {
+                    DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%"SVf"'\n",
+                                     *svp));
 		   (void)hv_delete(PL_stashcache, name, name_utf8 ? -(I32)len : (I32)len, G_DISCARD);
+                }
+                ++svp;
 	        hv_ename_delete(oldstash, name, len, name_utf8);
 
 		if (!fetched_isarev) {

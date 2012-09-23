@@ -2980,6 +2980,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	  
         if (he) { 
             stash = INT2PTR(HV*,SvIV(HeVAL(he)));
+            DEBUG_o(Perl_deb(aTHX_ "PL_stashcache hit %p for '%"SVf"'\n",
+                             stash, sv));
             goto fetch;
         }
 
@@ -3003,6 +3005,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	        SV* const ref = newSViv(PTR2IV(stash));
 	        (void)hv_store(PL_stashcache, packname,
                                 packname_is_utf8 ? -(I32)packlen : (I32)packlen, ref, 0);
+                DEBUG_o(Perl_deb(aTHX_ "PL_stashcache caching %p for '%"SVf"'\n",
+                                 stash, sv));
 	    }
 	    goto fetch;
 	}

@@ -1397,6 +1397,7 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 	    SvOBJECT_on(io);
 	    /* Clear the stashcache because a new IO could overrule a package
 	       name */
+            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
 	    hv_clear(PL_stashcache);
 
 	    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
@@ -6047,9 +6048,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		if (   PL_phase != PERL_PHASE_DESTRUCT
 		    && (name = HvNAME((HV*)sv)))
 		{
-		    if (PL_stashcache)
+		    if (PL_stashcache) {
+                    DEBUG_o(Perl_deb(aTHX_ "sv_clear clearing PL_stashcache for '%"SVf"'\n",
+                                     sv));
 			(void)hv_delete(PL_stashcache, name,
 			    HvNAMEUTF8((HV*)sv) ? -HvNAMELEN_get((HV*)sv) : HvNAMELEN_get((HV*)sv), G_DISCARD);
+                    }
 		    hv_name_set((HV*)sv, NULL, 0, 0);
 		}
 

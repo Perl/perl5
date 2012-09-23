@@ -1812,11 +1812,14 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     /* note that the code following prior to hfreeentries is duplicated
      * in sv_clear(), and changes here should be done there too */
     if (PL_phase != PERL_PHASE_DESTRUCT && (name = HvNAME(hv))) {
-        if (PL_stashcache)
+        if (PL_stashcache) {
+            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"
+                             HEKf"'\n", HvNAME_HEK(hv)));
 	    (void)hv_delete(PL_stashcache, name,
                             HEK_UTF8(HvNAME_HEK(hv)) ? -HvNAMELEN_get(hv) : HvNAMELEN_get(hv),
                             G_DISCARD
                            );
+        }
 	hv_name_set(hv, NULL, 0, 0);
     }
     if (save) {
@@ -1831,20 +1834,26 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       if ((name = HvENAME_get(hv))) {
 	if (PL_phase != PERL_PHASE_DESTRUCT)
 	    mro_isa_changed_in(hv);
-        if (PL_stashcache)
+        if (PL_stashcache) {
+            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for effective name '%"
+                             HEKf"'\n", HvENAME_HEK(hv)));
 	    (void)hv_delete(
 	            PL_stashcache, name,
                     HEK_UTF8(HvENAME_HEK(hv)) ? -HvENAMELEN_get(hv) : HvENAMELEN_get(hv),
                     G_DISCARD
 	          );
+        }
       }
 
       /* If this call originated from sv_clear, then we must check for
        * effective names that need freeing, as well as the usual name. */
       name = HvNAME(hv);
       if (flags & HV_NAME_SETALL ? !!aux->xhv_name_u.xhvnameu_name : !!name) {
-        if (name && PL_stashcache)
+        if (name && PL_stashcache) {
+            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
+                             HEKf"'\n", HvNAME_HEK(hv)));
 	    (void)hv_delete(PL_stashcache, name, (HEK_UTF8(HvNAME_HEK(hv)) ? -HvNAMELEN_get(hv) : HvNAMELEN_get(hv)), G_DISCARD);
+        }
 	hv_name_set(hv, NULL, 0, flags);
       }
       if((meta = aux->xhv_mro_meta)) {
