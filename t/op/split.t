@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 102;
+plan tests => 103;
 
 $FS = ':';
 
@@ -417,3 +417,8 @@ is($cnt, scalar(@ary));
            # 'my' doesn't trigger the bug
     is "@PATH", "Font GlyphNames", "hybrid scalar-and-array context";
 }
+
+# [perl #94490] constant folding should not invoke special split " "
+# behaviour.
+@_=split(0||" ","foo  bar");
+is @_, 3, 'split(0||" ") is not treated like split(" ")';

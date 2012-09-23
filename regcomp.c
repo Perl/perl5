@@ -6401,18 +6401,12 @@ reStudy:
 #ifdef STUPID_PATTERN_CHECKS            
     if (RX_PRELEN(rx) == 0)
         r->extflags |= RXf_NULL;
-    if (r->extflags & RXf_SPLIT && RX_PRELEN(rx) == 1 && RX_PRECOMP(rx)[0] == ' ')
-        /* XXX: this should happen BEFORE we compile */
-        r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
-    else if (RX_PRELEN(rx) == 3 && memEQ("\\s+", RX_PRECOMP(rx), 3))
+    if (RX_PRELEN(rx) == 3 && memEQ("\\s+", RX_PRECOMP(rx), 3))
         r->extflags |= RXf_WHITE;
     else if (RX_PRELEN(rx) == 1 && RXp_PRECOMP(rx)[0] == '^')
         r->extflags |= RXf_START_ONLY;
 #else
-    if (r->extflags & RXf_SPLIT && RX_PRELEN(rx) == 1 && RX_PRECOMP(rx)[0] == ' ')
-            /* XXX: this should happen BEFORE we compile */
-            r->extflags |= (RXf_SKIPWHITE|RXf_WHITE); 
-    else {
+    {
         regnode *first = ri->program + 1;
         U8 fop = OP(first);
 
