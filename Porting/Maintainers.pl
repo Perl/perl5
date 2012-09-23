@@ -671,7 +671,7 @@ use File::Glob qw(:case);
 
     'Exporter' => {
         'MAINTAINER'   => 'ferreira',
-        'DISTRIBUTION' => 'TODDR/Exporter-5.66.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.67.tar.gz',
         'FILES'        => q[lib/Exporter.pm
                             lib/Exporter.t
                             lib/Exporter/Heavy.pm
@@ -1262,7 +1262,7 @@ use File::Glob qw(:case);
 
     'Module::CoreList' => {
         'MAINTAINER'   => 'bingos',
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-2.72.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-2.73.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
         'UPSTREAM'     => 'blead',
     },
