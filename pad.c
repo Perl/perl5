@@ -2362,6 +2362,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
     Newx(dstpad, 1, PADLIST);
     ptr_table_store(PL_ptr_table, srcpad, dstpad);
     PadlistMAX(dstpad) = max;
+    PadlistNAMECNT(dstpad) = PadlistNAMECNT(srcpad);
     Newx(PadlistARRAY(dstpad), max + 1, PAD *);
 
     if (cloneall) {
