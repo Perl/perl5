@@ -3883,6 +3883,14 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    assert(mg);
 	    Perl_magic_clearisa(aTHX_ NULL, mg);
 	}
+        else if (stype == SVt_PVIO) {
+            DEBUG_o(Perl_deb(aTHX_ "glob_assign_ref clearing PL_stashcache\n"));
+            /* It's a cache. It will rebuild itself quite happily.
+               It's a lot of effort to work out exactly which key (or keys)
+               might be invalidated by the creation of the this file handle.
+            */
+            hv_clear(PL_stashcache);
+        }
 	break;
     }
     SvREFCNT_dec(dref);

@@ -581,14 +581,11 @@ SKIP: {
     *Color::H1 = *Colour::H1{IO};
 
     is(Colour::H1->getline(), <DATA>, 'read from a file');
-    { local $::TODO = "regression introduced when PL_stashcache was first added";
     is(Color::H1->getline(), <DATA>,
        'file handles take priority after typeglob assignment');
-    }
 
     *Color::H1 = *CLOSED{IO};
     {
-	local $::TODO = "regression introduced when PL_stashcache was first added";
 	no warnings 'io';
 	is(Color::H1->getline(), undef,
 	   "assigning a closed a file handle doesn't change object resolution");
