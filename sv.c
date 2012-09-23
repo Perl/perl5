@@ -8709,11 +8709,12 @@ Perl_newSVsv(pTHX_ register SV *const old)
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
 	return NULL;
     }
+    /* Do this here, otherwise we leak the new SV if this croaks. */
+    SvGETMAGIC(old);
     new_SV(sv);
-    /* SV_GMAGIC is the default for sv_setv()
-       SV_NOSTEAL prevents TEMP buffers being, well, stolen, and saves games
+    /* SV_NOSTEAL prevents TEMP buffers being, well, stolen, and saves games
        with SvTEMP_off and SvTEMP_on round a call to sv_setsv.  */
-    sv_setsv_flags(sv, old, SV_GMAGIC | SV_NOSTEAL);
+    sv_setsv_flags(sv, old, SV_NOSTEAL);
     return sv;
 }
 

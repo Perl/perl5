@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 31;
+plan tests => 32;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -217,3 +217,22 @@ leak(2, 0, sub {
     eval {@a = ($x)};
 }, 'array assignment does not leak');
 
+# [perl #107000]
+package hhtie {
+    sub TIEHASH { bless [] }
+    sub STORE    { $_[0][0]{$_[1]} = $_[2] }
+    sub FETCH    { die if $explosive; $_[0][0]{$_[1]} }
+    sub FIRSTKEY { keys %{$_[0][0]}; each %{$_[0][0]} }
+    sub NEXTKEY  { each %{$_[0][0]} }
+}
+leak(2,!!$Config{mad}, sub {
+    eval q`
+    	BEGIN {
+	    $hhtie::explosive = 0;
+	    tie %^H, hhtie;
+	    $^H{foo} = bar;
+	    $hhtie::explosive = 1;
+    	}
+	{ 1; }
+    `;
+}, 'hint-hash copying does not leak');

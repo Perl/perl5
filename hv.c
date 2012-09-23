@@ -1462,6 +1462,9 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	const I32 riter = HvRITER_get(ohv);
 	HE * const eiter = HvEITER_get(ohv);
 
+	ENTER;
+	SAVEFREESV(hv);
+
 	while (hv_max && hv_max + 1 >= hv_fill * 2)
 	    hv_max = hv_max / 2;
 	HvMAX(hv) = hv_max;
@@ -1483,6 +1486,9 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	}
 	HvRITER_set(ohv, riter);
 	HvEITER_set(ohv, eiter);
+
+	SvREFCNT_inc_simple_void_NN(hv);
+	LEAVE;
     }
     hv_magic(hv, NULL, PERL_MAGIC_hints);
     return hv;
