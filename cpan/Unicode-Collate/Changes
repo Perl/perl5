@@ -1,5 +1,9 @@
 Revision history for Perl module Unicode::Collate.
 
+0.90  Sun Sep 23 10:42:26 2012
+    - perl 5.11.0 or later: Install to 'site' instead of 'perl'
+      (see [rt.cpan.org #79800])
+
 0.89  Sat Mar 10 20:19:11 2012
     - avoid "use Test".
 
