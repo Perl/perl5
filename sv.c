@@ -8740,7 +8740,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 {
     dVAR;
     char todo[PERL_UCHAR_MAX+1];
-    char *send;
+    const char *send;
 
     if (!stash)
 	return;
