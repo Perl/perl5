@@ -1521,6 +1521,9 @@ PP(pp_prtf)
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
     IO *const io = GvIO(gv);
 
+    /* Treat empty list as "" */
+    if (MARK == SP) XPUSHs(&PL_sv_no);
+
     if (io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
