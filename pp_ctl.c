@@ -1960,7 +1960,10 @@ PP(pp_dbstate)
 	const I32 gimme = G_ARRAY;
 	U8 hasargs;
 	GV * const gv = PL_DBgv;
-	CV * const cv = GvCV(gv);
+	CV * cv = NULL;
+
+        if (gv && isGV_with_GP(gv))
+            cv = GvCV(gv);
 
 	if (!cv)
 	    DIE(aTHX_ "No DB::DB routine defined");
