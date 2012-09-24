@@ -5433,7 +5433,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	    if (pRExC_state->num_code_blocks) {
 		o = cLISTOPx(expr)->op_first;
-		assert(o->op_type == OP_PUSHMARK);
+		assert(   o->op_type == OP_PUSHMARK
+                       || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)
+                       || o->op_type == OP_PADRANGE);
 		o = o->op_sibling;
 	    }
 
@@ -5457,6 +5459,17 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		SV *sv, *msv = *svp;
 		SV *rx;
 		bool code = 0;
+                /* we make the assumption here that each op in the list of
+                 * op_siblings maps to one SV pushed onto the stack,
+                 * except for code blocks, with have both an OP_NULL and
+                 * and OP_CONST.
+                 * This allows us to match up the list of SVs against the
+                 * list of OPs to find the next code block.
+                 *
+                 * Note that       PUSHMARK PADSV PADSV ..
+                 * is optimised to
+                 *                 PADRANGE NULL  NULL  ..
+                 * so the alignment still works. */
 		if (o) {
 		    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
 			assert(n < pRExC_state->num_code_blocks);

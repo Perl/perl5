@@ -905,6 +905,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     }
     if (o->op_private) {
 	SV * const tmpsv = newSVpvs("");
+
 	if (PL_opargs[optype] & OA_TARGLEX) {
 	    if (o->op_private & OPpTARGET_MY)
 		sv_catpv(tmpsv, ",TARGET_MY");
@@ -962,10 +963,19 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    if (o->op_private & OPpFT_STACKED)
 		sv_catpv(tmpsv, ",FT_STACKED");
 	}
+
 	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    sv_catpv(tmpsv, ",INTRO");
+
+	if (o->op_type == OP_PADRANGE)
+	    Perl_sv_catpvf(aTHX_ tmpsv, ",COUNT=%"UVuf,
+                (UV)(o->op_private & OPpPADRANGE_COUNTMASK));
+
 	if (SvCUR(tmpsv))
 	    Perl_dump_indent(aTHX_ level, file, "PRIVATE = (%s)\n", SvPVX_const(tmpsv) + 1);
+        else
+	    Perl_dump_indent(aTHX_ level, file, "PRIVATE = (0x%"UVxf")\n",
+                                (UV)o->op_private);
 	SvREFCNT_dec(tmpsv);
     }
 
@@ -2189,25 +2199,45 @@ Perl_debop(pTHX_ const OP *o)
 	else
 	    PerlIO_printf(Perl_debug_log, "(NULL)");
 	break;
+
+    {
+        int count;
+
     case OP_PADSV:
     case OP_PADAV:
     case OP_PADHV:
-	{
+        count = 1;
+        goto dump_padop;
+    case OP_PADRANGE:
+        count = o->op_private & OPpPADRANGE_COUNTMASK;
+    dump_padop:
 	/* print the lexical's name */
-	CV * const cv = deb_curcv(cxstack_ix);
-	SV *sv;
-        if (cv) {
-	    PADLIST * const padlist = CvPADLIST(cv);
-            PAD * const comppad = *PadlistARRAY(padlist);
-            sv = *av_fetch(comppad, o->op_targ, FALSE);
-        } else
-            sv = NULL;
-        if (sv)
-	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
-        else
-	    PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
-	}
+        {
+            CV * const cv = deb_curcv(cxstack_ix);
+            SV *sv;
+            PAD * comppad = NULL;
+            int i;
+
+            if (cv) {
+                PADLIST * const padlist = CvPADLIST(cv);
+                comppad = *PadlistARRAY(padlist);
+            }
+            PerlIO_printf(Perl_debug_log, "(");
+            for (i = 0; i < count; i++) {
+                if (comppad &&
+                        (sv = *av_fetch(comppad, o->op_targ + i, FALSE)))
+                    PerlIO_printf(Perl_debug_log, "%s", SvPV_nolen_const(sv));
+                else
+                    PerlIO_printf(Perl_debug_log, "[%"UVuf"]",
+                            (UV)o->op_targ+i);
+                if (i < count-1)
+                    PerlIO_printf(Perl_debug_log, ",");
+            }
+            PerlIO_printf(Perl_debug_log, ")");
+        }
         break;
+    }
+
     default:
 	break;
     }

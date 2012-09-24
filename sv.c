@@ -14041,8 +14041,16 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_PADAV:
     case OP_PADHV:
       {
-	const bool pad  = (obase->op_type == OP_PADAV || obase->op_type == OP_PADHV);
-	const bool hash = (obase->op_type == OP_PADHV || obase->op_type == OP_RV2HV);
+	const bool pad  = (    obase->op_type == OP_PADAV
+                            || obase->op_type == OP_PADHV
+                            || obase->op_type == OP_PADRANGE
+                          );
+
+	const bool hash = (    obase->op_type == OP_PADHV
+                            || obase->op_type == OP_RV2HV
+                            || (obase->op_type == OP_PADRANGE
+                                && SvTYPE(PAD_SVl(obase->op_targ)) == SVt_PVHV)
+                          );
 	I32 index = 0;
 	SV *keysv = NULL;
 	int subscript_type = FUV_SUBSCRIPT_WITHIN;
@@ -14248,7 +14256,9 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
     case OP_OPEN:
 	o = cUNOPx(obase)->op_first;
-	if (o->op_type == OP_PUSHMARK)
+	if (   o->op_type == OP_PUSHMARK
+	   || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)
+        )
 	    o = o->op_sibling;
 
 	if (!o->op_sibling) {
@@ -14292,7 +14302,10 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	match = 1; /* print etc can return undef on defined args */
 	/* skip filehandle as it can't produce 'undef' warning  */
 	o = cUNOPx(obase)->op_first;
-	if ((obase->op_flags & OPf_STACKED) && o->op_type == OP_PUSHMARK)
+	if ((obase->op_flags & OPf_STACKED)
+            &&
+               (   o->op_type == OP_PUSHMARK
+               || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)))
 	    o = o->op_sibling->op_sibling;
 	goto do_op2;
 
@@ -14420,6 +14433,8 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	 * left that is not skipped, then we *know* it is responsible for
 	 * the uninitialized value.  If there is more than one op left, we
 	 * have to look for an exact match in the while() loop below.
+         * Note that we skip padrange, because the individual pad ops that
+         * it replaced are still in the tree, so we work on them instead.
 	 */
 	o2 = NULL;
 	for (kid=o; kid; kid = kid->op_sibling) {
@@ -14428,6 +14443,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
 		  || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
 		  || (type == OP_PUSHMARK)
+		  || (type == OP_PADRANGE)
 		)
 		continue;
 	    }

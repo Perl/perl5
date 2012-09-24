@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.24";
+$VERSION = "1.25";
 
 use Carp;
 use Exporter ();
@@ -397,7 +397,7 @@ These are a hotchpotch of opcodes still waiting to be considered
 
     gvsv gv gelem
 
-    padsv padav padhv padcv padany introcv clonecv
+    padsv padav padhv padcv padany padrange introcv clonecv
 
     once
 

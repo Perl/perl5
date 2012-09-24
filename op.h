@@ -235,6 +235,10 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpPAD_STATE		16	/* is a "state" pad */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 
+  /* OP_PADRANGE only */
+  /* bit 7 is OPpLVAL_INTRO */
+#define OPpPADRANGE_COUNTMASK	127	/* bits 6..0 hold target range */
+
   /* OP_RV2GV only */
 #define OPpDONT_INIT_GV		4	/* Call gv_fetchpv with GV_NOINIT */
 /* (Therefore will return whatever is currently in the symbol table, not
