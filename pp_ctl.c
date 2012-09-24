@@ -1969,7 +1969,7 @@ PP(pp_dbstate)
         if (gv && isGV_with_GP(gv))
             cv = GvCV(gv);
 
-	if (!cv)
+	if (!cv || (!CvROOT(cv) && !CvXSUB(cv)))
 	    DIE(aTHX_ "No DB::DB routine defined");
 
 	if (CvDEPTH(cv) >= 1 && !(PL_debug & DEBUG_DB_RECURSE_FLAG))

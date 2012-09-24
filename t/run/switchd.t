@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 8);
+plan(tests => 9);
 
 my $r;
 
@@ -119,5 +119,14 @@ like(
     stderr   => 1,
   ),
   qr/^No DB::DB routine defined/,
-  "No crash when DB::DB isn't actually defined",
+  "No crash when *DB::DB exists but not &DB::DB",
+);
+like(
+  runperl(
+    switches => [ '-Ilib' ],
+    prog     => 'sub DB::DB; BEGIN { $^P = 0x22; } for(0..9){ warn }',
+    stderr   => 1,
+  ),
+  qr/^No DB::DB routine defined/,
+  "No crash when &DB::DB exists but isn't actually defined",
 );
