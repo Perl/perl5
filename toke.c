@@ -6786,6 +6786,10 @@ Perl_yylex(pTHX)
 	  just_a_word: {
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
+		const char penultchar =
+		    lastchar && PL_bufptr - 2 >= PL_linestart
+			 ? PL_bufptr[-2]
+			 : 0;
 #ifdef PERL_MAD
 		SV *nextPL_nextwhite = 0;
 #endif
@@ -7014,7 +7018,7 @@ Perl_yylex(pTHX)
 		/* Not a method, so call it a subroutine (if defined) */
 
 		if (cv) {
-		    if (lastchar == '-') {
+		    if (lastchar == '-' && penultchar != '-') {
                         const SV *tmpsv = newSVpvn_flags( PL_tokenbuf, len ? len : strlen(PL_tokenbuf), (UTF ? SVf_UTF8 : 0) | SVs_TEMP );
  			Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
 				"Ambiguous use of -%"SVf" resolved as -&%"SVf"()",

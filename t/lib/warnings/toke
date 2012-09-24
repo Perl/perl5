@@ -718,6 +718,8 @@ EXPECT
 # toke.c
 sub fred {};
 -fred ;
+sub hank : lvalue {$_}
+--hank; # This should *not* warn [perl #77240]
 EXPECT
 Ambiguous use of -fred resolved as -&fred() at - line 3.
 ########
