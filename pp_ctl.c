@@ -1933,9 +1933,13 @@ PP(pp_reset)
 {
     dVAR;
     dSP;
-    const char * const tmps =
-	(MAXARG < 1 || (!TOPs && !POPs)) ? (const char *)"" : POPpconstx;
-    sv_reset(tmps, CopSTASH(PL_curcop));
+    const char * tmps;
+    STRLEN len = 0;
+    if (MAXARG < 1 || (!TOPs && !POPs))
+	tmps = NULL, len = 0;
+    else
+	tmps = SvPVx_const(POPs, len);
+    sv_resetpvn(tmps, len, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
 }

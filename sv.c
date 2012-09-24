@@ -8730,15 +8730,22 @@ Note that the perl-level function is vaguely deprecated.
 void
 Perl_sv_reset(pTHX_ register const char *s, HV *const stash)
 {
+    PERL_ARGS_ASSERT_SV_RESET;
+
+    sv_resetpvn(*s ? s : NULL, strlen(s), stash);
+}
+
+void
+Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
+{
     dVAR;
     char todo[PERL_UCHAR_MAX+1];
-
-    PERL_ARGS_ASSERT_SV_RESET;
+    char *send;
 
     if (!stash)
 	return;
 
-    if (!*s) {		/* reset ?? searches */
+    if (!s) {		/* reset ?? searches */
 	MAGIC * const mg = mg_find((const SV *)stash, PERL_MAGIC_symtab);
 	if (mg) {
 	    const U32 count = mg->mg_len / sizeof(PMOP**);
@@ -8763,7 +8770,8 @@ Perl_sv_reset(pTHX_ register const char *s, HV *const stash)
 	return;
 
     Zero(todo, 256, char);
-    while (*s) {
+    send = s + len;
+    while (s < send) {
 	I32 max;
 	I32 i = (unsigned char)*s;
 	if (s[1] == '-') {
