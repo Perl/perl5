@@ -982,12 +982,14 @@ PP(pp_aassign)
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		SV **didstore;
 		assert(*relem);
-		sv = sv_newmortal();
-		sv_setsv(sv, *relem);
+		SvGETMAGIC(*relem); /* before newSV, in case it dies */
+		sv = newSV(0);
+		sv_setsv_nomg(sv, *relem);
 		*(relem++) = sv;
 		didstore = av_store(ary,i++,sv);
-		if (didstore) SvREFCNT_inc_simple_void_NN(sv);
 		if (magic) {
+		    if (!didstore)
+			sv_2mortal(sv);
 		    if (SvSMAGICAL(sv))
 			mg_set(sv);
 		}
