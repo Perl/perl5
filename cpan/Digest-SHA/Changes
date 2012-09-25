@@ -1,5 +1,11 @@
 Revision history for Perl extension Digest::SHA.
 
+5.72  Mon Sep 24 15:22:08 MST 2012
+	- adjusted module installation directory for later Perls
+		-- As of 5.11 Perl searches 'site' first, so use that
+			-- ref. INSTALLDIRS in Makefile.PL
+		-- thanks to Robert Sedlacek for patch
+
 5.71  Wed Feb 29 04:06:10 MST 2012
 	- prevented $! from getting clobbered in _bail() routine
 		-- thanks to Zefram for patch

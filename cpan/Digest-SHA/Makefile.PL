@@ -33,7 +33,7 @@ my %att = (
 	'DEFINE'	=> $define,
 	'INC'		=> '-I.',
 	'EXE_FILES'	=> [ 'shasum' ],
-	'INSTALLDIRS'	=> ($] >= 5.010) ? 'perl' : 'site',
+	'INSTALLDIRS'	=> ($] >= 5.010 and $] < 5.011) ? 'perl' : 'site',
 );
 
 my $MMversion = $ExtUtils::MakeMaker::VERSION || 0;
