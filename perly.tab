@@ -205,7 +205,7 @@ static const yytype_uint16 yyrline[] =
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
+#if YYDEBUG || YYERROR_VERBOSE || 0
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -224,17 +224,17 @@ static const char *const yytname[] =
   "ANDOP", "NOTOP", "','", "ASSIGNOP", "'?'", "':'", "DORDOR", "OROR",
   "ANDAND", "BITOROP", "BITANDOP", "SHIFTOP", "MATCHOP", "'!'", "'~'",
   "REFGEN", "UMINUS", "POWOP", "POSTDEC", "POSTINC", "PREDEC", "PREINC",
-  "ARROW", "')'", "'('", "PEG", "$accept", "grammar", "@1", "@2", "@3",
-  "@4", "@5", "@6", "block", "formblock", "remember", "mblock",
+  "ARROW", "')'", "'('", "PEG", "$accept", "grammar", "$@1", "$@2", "$@3",
+  "$@4", "$@5", "$@6", "block", "formblock", "remember", "mblock",
   "mremember", "stmtseq", "formstmtseq", "fullstmt", "labfullstmt",
-  "barestmt", "@7", "@8", "@9", "formline", "formarg", "sideff", "else",
+  "barestmt", "$@7", "$@8", "$@9", "formline", "formarg", "sideff", "else",
   "cont", "mintro", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "miexpr",
   "formname", "startsub", "startanonsub", "startformsub", "subname",
   "proto", "subattrlist", "myattrlist", "subbody", "expr", "listexpr",
   "listop", "@10", "method", "subscripted", "termbinop", "termunop",
   "anonymous", "termdo", "term", "@11", "myattrterm", "myterm",
   "optlistexpr", "optexpr", "my_scalar", "amper", "scalar", "ary", "hsh",
-  "arylen", "star", "indirob", 0
+  "arylen", "star", "indirob", YY_NULL
 };
 #endif
 
@@ -313,8 +313,8 @@ static const yytype_uint8 yyr2[] =
        2,     2,     2,     1,     1,     1,     1
 };
 
-/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
-   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
+/* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
+   Performed when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
@@ -445,8 +445,7 @@ static const yytype_int16 yypgoto[] =
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If zero, do what YYDEFACT says.
-   If YYTABLE_NINF, syntax error.  */
+   number is the opposite.  If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -202
 static const yytype_int16 yytable[] =
 {
@@ -743,6 +742,12 @@ static const yytype_int16 yytable[] =
      180,     0,     0,     0,     0,   181,   182,   183,     0,     0,
      184
 };
+
+#define yypact_value_is_default(yystate) \
+  ((yystate) == (-391))
+
+#define yytable_value_is_error(yytable_value) \
+  ((yytable_value) == (-202))
 
 static const yytype_int16 yycheck[] =
 {
@@ -1127,6 +1132,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * 8f20aa8c321935dad8457c5b097cd153aacc2f87cd51dc911d1d791d045b642f perly.y
- * 4a3ced51fe6585f6ec59e65e1ffd74bc976c498b0e6992eaab337219fee72e51 regen_perly.pl
+ * ab4cdcf44477d03652bf8c6c7ecfb5ee121b7d02357d9eb1000b62b17fba1627 perly.y
+ * 73288b53f1f6dc0183252a5a8e4f39cfe36e357e77233704fad3021fee88eb5b regen_perly.pl
  * ex: set ro: */
