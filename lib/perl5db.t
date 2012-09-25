@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(96);
+plan(97);
 
 my $rc_filename = '.perldb';
 
@@ -2301,6 +2301,31 @@ sub _calc_trace_wrapper
         'Test the t command with function calls.',
     );
 }
+
+# Test the o inhibit_exit=0 command
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o inhibit_exit=0',
+                'n',
+                'n',
+                'n',
+                'n',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(qr/
+        ^Debugged\ program\ terminated\.
+        /msx,
+        'Test the o inhibit_exit=0 command.',
+    );
+}
+
 END {
     1 while unlink ($rc_filename, $out_fn);
 }
