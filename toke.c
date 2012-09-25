@@ -6553,8 +6553,16 @@ Perl_yylex(pTHX)
 		s = scan_num(s, &pl_yylval);
 		TERM(THING);
 	    }
+	    else if ((*start == ':' && start[1] == ':')
+		  || (PL_expect == XSTATE && *start == ':'))
+		goto keylookup;
+	    else if (PL_expect == XSTATE) {
+		d = start;
+		while (d < PL_bufend && isSPACE(*d)) d++;
+		if (*d == ':') goto keylookup;
+	    }
 	    /* avoid v123abc() or $h{v1}, allow C<print v10;> */
-	    else if (!isALPHA(*start) && (PL_expect == XTERM
+	    if (!isALPHA(*start) && (PL_expect == XTERM
 			|| PL_expect == XREF || PL_expect == XSTATE
 			|| PL_expect == XTERMORDORDOR)) {
 		GV *const gv = gv_fetchpvn_flags(s, start - s,
