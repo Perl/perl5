@@ -34,7 +34,7 @@
       "/* env 'E' %ENV hash */" },
     { 'e', "want_vtbl_envelem",
       "/* envelem 'e' %ENV hash element */" },
-    { 'f', "want_vtbl_regdata | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
+    { 'f', "want_vtbl_regexp | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
       "/* fm 'f' Formline ('compiled' format) */" },
     { 'g', "want_vtbl_mglob | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
       "/* regex_global 'g' m//g target */" },

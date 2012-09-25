@@ -42,7 +42,7 @@ my %mg =
      env => { char => 'E', vtable => 'env', desc => '%ENV hash' },
      envelem => { char => 'e', vtable => 'envelem',
 		  desc => '%ENV hash element' },
-     fm => { char => 'f', vtable => 'regdata', value_magic => 1,
+     fm => { char => 'f', vtable => 'regexp', value_magic => 1,
 	     readonly_acceptable => 1, desc => "Formline ('compiled' format)" },
      regex_global => { char => 'g', vtable => 'mglob', value_magic => 1,
 		       readonly_acceptable => 1, desc => 'm//g target' },
