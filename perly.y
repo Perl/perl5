@@ -997,7 +997,7 @@ termbinop:	term ASSIGNOP term                     /* $x = $y */
 			      op = (UNOP*)op->op_first;	/* get to flip */
 			      op = (UNOP*)op->op_first;	/* get to range */
 			      token_getmad($2,(OP*)op,'o');
-			    })
+			    });
 			}
 	|	term ANDAND term                       /* $x && $y */
 			{ $$ = newLOGOP(OP_AND, 0, $1, $3);
@@ -1233,7 +1233,7 @@ term	:	termbinop
 			      }
 			      token_getmad($2,op,'(');
 			      token_getmad($4,op,')');
-			  })
+			  });
 			}
 	|	NOAMP subname optlistexpr               /* foo(@args) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -1347,7 +1347,7 @@ myattrterm:	MY myterm myattrlist
 			      token_getmad($1,$$,'d');
 			      append_madprops($3->op_madprop, $$, 'a');
 			      $3->op_madprop = 0;
-			  )
+			  );
 			}
 	|	MY myterm
 			{ $$ = localize($2,IVAL($1));

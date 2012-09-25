@@ -73,7 +73,7 @@ unless ($version) { die <<EOF; }
 Could not find a version of bison in your path. Please install bison.
 EOF
 
-unless ($version =~ /\b(1\.875[a-z]?|2\.[01345])\b/) { die <<EOF; }
+unless ($version =~ /\b(1\.875[a-z]?|2\.[013456])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
 2.0, 2.1, 2.3, 2.4 or 2.5 is required.  Try installing
@@ -116,9 +116,13 @@ open my $tmph_fh, '<', $tmph_file or die "Can't open $tmph_file: $!\n";
 
 my $endcore_done = 0;
 # Token macros need to be generated manually from bison 2.4 on
-my $gather_tokens = ($version =~ /\b2\.[45]\b/ ? undef : 0);
+my $gather_tokens = ($version =~ /\b2\.[456]\b/ ? undef : 0);
 my $tokens;
 while (<$tmph_fh>) {
+    # bison 2.6 adds header guards, which break things because of where we
+    # insert #ifdef PERL_CORE, so strip them because they aren't important
+    next if /YY_PERLYTMP_H/;
+
     print $h_fh "#ifdef PERL_CORE\n" if $. == 1;
     if (!$endcore_done and /YYSTYPE_IS_DECLARED/) {
 	print $h_fh <<h;
@@ -302,7 +306,7 @@ sub make_type_tab {
 		{ "toketype_" .
 		    (defined $tokens{$1} ? $tokens{$1} : $default_token)
 		}ge;
-    $fields =~ s/, \s* 0 \s* $//x
+    $fields =~ s/, \s* (?:0|YY_NULL) \s* $//x
 	or die "make_type_tab: couldn't delete trailing ',0'\n";
 
     return 
