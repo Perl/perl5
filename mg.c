@@ -167,7 +167,7 @@ Perl_mg_magical(pTHX_ SV *sv)
 /*
 =for apidoc mg_get
 
-Do magic after a value is retrieved from the SV.  See C<sv_magic>.
+Do magic before a value is retrieved from the SV.  See C<sv_magic>.
 
 =cut
 */
