@@ -762,6 +762,8 @@ sub unlink_all {
     $count;
 }
 
+my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
+
 my %tmpfiles;
 END { unlink_all keys %tmpfiles }
 
@@ -769,7 +771,6 @@ END { unlink_all keys %tmpfiles }
 $::tempfile_regexp = 'tmp\d+[A-Z][A-Z]?';
 
 # Avoid ++, avoid ranges, avoid split //
-my @letters = qw(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z);
 sub tempfile {
     my $count = 0;
     do {
