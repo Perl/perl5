@@ -3989,6 +3989,7 @@ ext/XS-APItest/t/blockhooks.t	XS::APItest: tests for PL_blockhooks
 ext/XS-APItest/t/Block.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/call_checker.t	test call checker plugin API
 ext/XS-APItest/t/caller.t	XS::APItest: tests for caller_cx
+ext/XS-APItest/t/callregexec.t	XS::APItest: tests for CALLREGEXEC()
 ext/XS-APItest/t/call.t		XS::APItest extension
 ext/XS-APItest/t/check_warnings.t	test scope of "Too late for CHECK"
 ext/XS-APItest/t/cleanup.t	test stack behaviour on unwinding

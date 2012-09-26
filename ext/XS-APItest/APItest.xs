@@ -3407,6 +3407,30 @@ CODE:
 OUTPUT:
     RETVAL
 
+ # provide access to CALLREGEXEC, except replace pointers within the
+ # string with offsets from the start of the string
+
+I32
+callregexec(SV *prog, STRLEN stringarg, STRLEN strend, I32 minend, SV *sv, U32 nosave)
+CODE:
+    {
+	STRLEN len;
+	char *strbeg;
+	if (SvROK(prog))
+	    prog = SvRV(prog);
+	strbeg = SvPV_force(sv, len);
+	RETVAL = CALLREGEXEC((REGEXP *)prog,
+			    strbeg + stringarg,
+			    strbeg + strend,
+			    strbeg,
+			    minend,
+			    sv,
+			    NULL, /* data */
+			    nosave);
+    }
+OUTPUT:
+    RETVAL
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
