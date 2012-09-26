@@ -717,9 +717,17 @@ case 2:
     { (yyval.opval) = (OP*)NULL; }
     break;
 
+  case 84:
+#line 683 "perly.y"
+    { if (scan_proto(((SVOP*)(ps[(1) - (1)].val.opval))->op_sv, TRUE))
+			      (yyval.opval) = (ps[(1) - (1)].val.opval);
+			  else
+			      (yyval.opval) = (OP *)NULL; }
+    break;
+
   case 85:
-#line 700 "perly.y"
-    { (yyval.opval) = (OP*)NULL; }
+#line 687 "perly.y"
+    { (yyval.opval) = (OP*)NULL; ;}
     break;
 
   case 86:

@@ -693,6 +693,10 @@ subname	:	WORD
 proto	:	/* NULL */
 			{ $$ = (OP*)NULL; }
 	|	THING
+			{ if (scan_proto(((SVOP*)$1)->op_sv, TRUE))
+			      $$ = $1;
+			  else
+			      $$ = (OP *)NULL; }
 	;
 
 /* Optional list of subroutine attributes */
