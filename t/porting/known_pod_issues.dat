@@ -265,7 +265,6 @@ pod/perlpacktut.pod	Verbatim line length including indents exceeds 79 by	6
 pod/perlperf.pod	Verbatim line length including indents exceeds 79 by	154
 pod/perlpodspec.pod	Verbatim line length including indents exceeds 79 by	9
 pod/perlpodstyle.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlreapi.pod	Verbatim line length including indents exceeds 79 by	18
 pod/perlrebackslash.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlref.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlreguts.pod	Verbatim line length including indents exceeds 79 by	17

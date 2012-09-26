@@ -11,24 +11,40 @@ Each engine is supposed to provide access to a constant structure of the
 following format:
 
     typedef struct regexp_engine {
-        REGEXP* (*comp) (pTHX_ const SV * const pattern, const U32 flags);
-        I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
-                         char* strbeg, I32 minend, SV* screamer,
+        REGEXP* (*comp) (pTHX_
+                         const SV * const pattern, const U32 flags);
+        I32     (*exec) (pTHX_
+                         REGEXP * const rx,
+                         char* stringarg,
+                         char* strend, char* strbeg,
+                         I32 minend, SV* screamer,
                          void* data, U32 flags);
-        char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
-                           char *strend, U32 flags,
+        char*   (*intuit) (pTHX_
+                           REGEXP * const rx, SV *sv,
+                           char *strpos, char *strend, U32 flags,
                            struct re_scream_pos_data_s *data);
         SV*     (*checkstr) (pTHX_ REGEXP * const rx);
         void    (*free) (pTHX_ REGEXP * const rx);
-        void    (*numbered_buff_FETCH) (pTHX_ REGEXP * const rx, const I32 paren,
-                                 SV * const sv);
-        void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
+        void    (*numbered_buff_FETCH) (pTHX_
+                                        REGEXP * const rx,
+                                        const I32 paren,
+                                        SV * const sv);
+        void    (*numbered_buff_STORE) (pTHX_
+                                        REGEXP * const rx,
+                                        const I32 paren,
                                        SV const * const value);
-        I32     (*numbered_buff_LENGTH) (pTHX_ REGEXP * const rx, const SV * const sv,
-                                        const I32 paren);
-        SV*     (*named_buff) (pTHX_ REGEXP * const rx, SV * const key,
-                               SV * const value, U32 flags);
-        SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
+        I32     (*numbered_buff_LENGTH) (pTHX_
+                                         REGEXP * const rx,
+                                         const SV * const sv,
+                                         const I32 paren);
+        SV*     (*named_buff) (pTHX_
+                               REGEXP * const rx,
+                               SV * const key,
+                               SV * const value,
+                               U32 flags);
+        SV*     (*named_buff_iter) (pTHX_
+                                    REGEXP * const rx,
+                                    const SV * const lastkey,
                                     const U32 flags);
         SV*     (*qr_package)(pTHX_ REGEXP * const rx);
     #ifdef USE_ITHREADS
@@ -325,7 +341,9 @@ that's something you'd like your engine to do as well.
 
 =head3 numbered_buff_STORE
 
-    void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
+    void    (*numbered_buff_STORE) (pTHX_
+                                    REGEXP * const rx,
+                                    const I32 paren,
                                     SV const * const value);
 
 Set the value of a numbered capture variable. C<value> is the scalar
@@ -344,8 +362,10 @@ variables, to do this in another engine use the following callback
 (copied from C<Perl_reg_numbered_buff_store>):
 
     void
-    Example_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,
-    							    SV const * const value)
+    Example_reg_numbered_buff_store(pTHX_
+                                    REGEXP * const rx,
+                                    const I32 paren,
+                                    SV const * const value)
     {
         PERL_UNUSED_ARG(rx);
         PERL_UNUSED_ARG(paren);
@@ -381,7 +401,9 @@ just die when assigned to in the default engine.
 
 =head3 numbered_buff_LENGTH
 
-    I32 numbered_buff_LENGTH (pTHX_ REGEXP * const rx, const SV * const sv,
+    I32 numbered_buff_LENGTH (pTHX_
+                              REGEXP * const rx,
+                              const SV * const sv,
                               const I32 paren);
 
 Get the C<length> of a capture variable. There's a special callback
@@ -450,7 +472,9 @@ releases. For instance this might be implemented by magic instead
 
 =head3 named_buff_iter
 
-    SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
+    SV*     (*named_buff_iter) (pTHX_
+                                REGEXP * const rx,
+                                const SV * const lastkey,
                                 const U32 flags);
 
 =head2 qr_package
@@ -540,7 +564,8 @@ values.
         /* what re is this a lightweight copy of? */
         struct regexp* mother_re;
 
-        /* Information about the match that the perl core uses to manage things */
+        /* Information about the match that the perl core uses to manage
+         * things */
         U32 extflags;   /* Flags used both externally and internally */
         I32 minlen;     /* mininum possible length of string to match */
         I32 minlenret;  /* mininum possible length of $& */
@@ -557,16 +582,20 @@ values.
         void *pprivate; /* Data private to the regex engine which 
                            created this object. */
 
-        /* Data about the last/current match. These are modified during matching*/
+        /* Data about the last/current match. These are modified during
+         * matching*/
         U32 lastparen;            /* highest close paren matched ($+) */
         U32 lastcloseparen;       /* last close paren matched ($^N) */
         regexp_paren_pair *swap;  /* Swap copy of *offs */
-        regexp_paren_pair *offs;  /* Array of offsets for (@-) and (@+) */
+        regexp_paren_pair *offs;  /* Array of offsets for (@-) and
+                                     (@+) */
 
-        char *subbeg;  /* saved or original string so \digit works forever. */
+        char *subbeg;  /* saved or original string so \digit works
+                          forever. */
         SV_SAVED_COPY  /* If non-NULL, SV which is COW from original */
         I32 sublen;    /* Length of string pointed by subbeg */
-	I32 suboffset;	/* byte offset of subbeg from logical start of str */
+        I32 suboffset;	/* byte offset of subbeg from logical start of
+                           str */
 	I32 subcoffset;	/* suboffset equiv, but in chars (for @-/@+) */
 
         /* Information about the match that isn't often used */
@@ -576,7 +605,8 @@ values.
         char *wrapped;  /* wrapped version of the pattern */
         I32 wraplen;    /* length of wrapped */
 
-        I32 seen_evals;   /* number of eval groups in the pattern - for security checks */
+        I32 seen_evals;   /* number of eval groups in the pattern - for
+                             security checks */
         HV *paren_names;  /* Optional hash of paren names */
 
         /* Refcount of this regexp */
