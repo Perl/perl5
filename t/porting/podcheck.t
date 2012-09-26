@@ -472,7 +472,7 @@ sub suppressed {
         $current_test++;
         print "not " unless $success;
         print "ok $current_test - $message\n";
-        return;
+        return $success;
     }
 
     sub skip {
