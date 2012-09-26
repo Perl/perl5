@@ -582,6 +582,8 @@ Ap	|void	|init_tm	|NN struct tm *ptm
 AnpPR	|char*	|instr		|NN const char* big|NN const char* little
 : Used in sv.c
 p	|bool	|io_close	|NN IO* io|bool not_implicit
+: Used in toke.c
+pR	|bool	|is_sub_with_sig
 : Used in perly.y
 pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub

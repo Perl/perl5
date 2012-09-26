@@ -1662,6 +1662,9 @@ PERL_CALLCONV bool	Perl_is_ascii_string(const U8 *s, STRLEN len)
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV bool	Perl_is_sub_with_sig(pTHX)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV bool	Perl_is_uni_alnum(pTHX_ UV c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;

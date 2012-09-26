@@ -1381,6 +1381,18 @@ Perl_block_gimme(pTHX)
     }
 }
 
+bool
+Perl_is_sub_with_sig(pTHX)
+{
+    dVAR;
+    const CV * const cv = CvEVAL(PL_compcv) ? CvOUTSIDE(PL_compcv) : PL_compcv;
+
+    if (PadlistNAMECNT(CvPADLIST(cv)))
+	return TRUE;
+    else
+	return FALSE;
+}
+
 I32
 Perl_is_lvalue_sub(pTHX)
 {
