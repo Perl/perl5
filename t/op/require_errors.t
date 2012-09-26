@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 9);
+plan(tests => 11);
 
 my $nonfile = tempfile();
 
@@ -42,6 +42,15 @@ for my $file ("$nonfile.h", ".h") {
     };
 
     like $@, qr/^Can't locate \Q$file\E in \@INC \(change \.h to \.ph maybe\?\) \(did you run h2ph\?\) \(\@INC contains: @INC\) at/,
+	"correct error message for require '$file'";
+}
+
+for my $file ("$nonfile.ph", ".ph") {
+    eval {
+	require $file
+    };
+
+    like $@, qr/^Can't locate \Q$file\E in \@INC \(did you run h2ph\?\) \(\@INC contains: @INC\) at/,
 	"correct error message for require '$file'";
 }
 
