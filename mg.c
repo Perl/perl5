@@ -288,7 +288,13 @@ Perl_mg_set(pTHX_ SV *sv)
 /*
 =for apidoc mg_length
 
-Report on the SV's length.  See C<sv_magic>.
+This function is deprecated.
+
+It reports on the SV's length in bytes, calling length magic if available,
+but does not set the UTF8 flag on the sv.  It will fall back to 'get'
+magic if there is no 'length' magic, but with no indication as to
+whether it called 'get' magic.  It assumes the sv is a PVMG or
+higher.  Use sv_len() instead.
 
 =cut
 */
@@ -314,15 +320,7 @@ Perl_mg_length(pTHX_ SV *sv)
 	}
     }
 
-    {
-	/* You can't know whether it's UTF-8 until you get the string again...
-	 */
-        const U8 *s = (U8*)SvPV_const(sv, len);
-
-	if (DO_UTF8(sv)) {
-	    len = utf8_length(s, s + len);
-	}
-    }
+    (void)SvPV_const(sv, len);
     return len;
 }
 
