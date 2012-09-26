@@ -137,13 +137,6 @@ BEGIN {
 }
 is(whitespace(4,5),5,"Prototype ignores whitespace");
 
-
-# Testing readonly
-my $a = 5;
-sub testro($a){ $a = 5; }
-eval { testro($a); };
-like($@,"read-only","Args should be passed read-only");
-
 # Checking old prototype behavior
 sub oldproto(*){ my $name = shift; return $name;}
 is(oldproto STDOUT,"STDOUT", "Traditional prototype behavior still works");
