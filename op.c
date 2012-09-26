@@ -7663,7 +7663,10 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	}
 
 	if (name && ! (PL_parser && PL_parser->error_count))
+	{
+	    LEAVE_SCOPE(floor);
 	    process_special_blocks(name, gv, cv);
+	}
     }
 
   done:
