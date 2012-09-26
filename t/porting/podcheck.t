@@ -458,7 +458,8 @@ sub suppressed {
 
     sub plan {
         my %plan = @_;
-        $planned = $plan{tests};
+        $planned = $plan{tests} + 1;    # +1 for final test that files haven't
+                                        # been removed
         print "1..$planned\n";
         return;
     }
@@ -1841,7 +1842,17 @@ foreach my $filename (@files) {
             note(join "", @diagnostics,
             "See end of this test output for your options on silencing this");
         }
+
+        delete $known_problems{$canonical};
     }
+}
+
+if (! ok (keys %known_problems == 0, "The known problems data base includes no references to non-existent files")) {
+    note("The following files were not found: "
+         . join ", ", keys %known_problems);
+    note("They will automatically be removed from the db the next time");
+    note("  cd t; ./perl -I../lib porting/podcheck.t --regen");
+    note("is run");
 }
 
 my $how_to = <<EOF;
