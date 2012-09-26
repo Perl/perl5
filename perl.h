@@ -3596,7 +3596,7 @@ long vtohl(long n);
 #endif
 
 #ifndef __cplusplus
-#if !(defined(UNDER_CE) || defined(SYMBIAN))
+#if !(defined(WIN32) || defined(UNDER_CE) || defined(SYMBIAN))
 Uid_t getuid (void);
 Uid_t geteuid (void);
 Gid_t getgid (void);
@@ -3993,9 +3993,11 @@ Off_t lseek (int,Off_t,int);
 #      endif
 #    endif
 #  endif /* !DONT_DECLARE_STD */
-#ifndef getlogin
+#  ifndef WIN32
+#    ifndef getlogin
 char *getlogin (void);
-#endif
+#    endif
+#  endif /* !WIN32 */
 #endif /* !__cplusplus */
 
 /* Fixme on VMS.  This needs to be a run-time, not build time options */

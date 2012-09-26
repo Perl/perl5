@@ -265,12 +265,14 @@ START_EXTERN_C
 
 /* For UNIX compatibility. */
 
+extern  int	setuid(uid_t uid);
+extern  int	setgid(gid_t gid);
+
+#ifdef PERL_CORE
 extern  uid_t	getuid(void);
 extern  gid_t	getgid(void);
 extern  uid_t	geteuid(void);
 extern  gid_t	getegid(void);
-extern  int	setuid(uid_t uid);
-extern  int	setgid(gid_t gid);
 extern  int	kill(int pid, int sig);
 extern  int	killpg(int pid, int sig);
 #ifndef USE_PERL_SBRK
@@ -280,6 +282,7 @@ extern  void	*sbrk(ptrdiff_t need);
 extern	char *	getlogin(void);
 extern	int	chown(const char *p, uid_t o, gid_t g);
 extern  int	mkstemp(const char *path);
+#endif
 
 #undef	 Stat
 #define  Stat		win32_stat
