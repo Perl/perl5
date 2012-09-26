@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 11;
+plan tests => 12;
 
 $x='banana';
 $x=~/.a/g;
@@ -56,3 +56,10 @@ like $@, qr/^Can't modify hash dereference in match position at /,
   'pos refuses %hashes';
 eval 'pos *a = 1';
 is eval 'pos *a', 1, 'pos *glob works';
+
+# Test that UTF8-ness of $1 changing does not confuse pos
+"f" =~ /(f)/; "$1";	# first make sure UTF8-ness is off
+"\x{100}a" =~ /(..)/;	# give PL_curpm a UTF8 string; $1 does not know yet
+pos($1) = 2;		# set pos; was ignoring UTF8-ness
+"$1";			# turn on UTF8 flag
+is pos($1), 2, 'pos is not confused about changing UTF8-ness';
