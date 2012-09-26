@@ -98,6 +98,19 @@ BEGIN {
     }
 }
 
+use feature 'experimental::sub_signature';
+
+{
+    no feature 'experimental::sub_signature';
+    eval 'sub a($foo){} a(5);';
+    like($@, "Not enough arguments", "no feature should force old style processing $@");
+    like($warnings[0], "Illegal character", "The warning should be on as well");
+    @warnings = ();
+    eval 'sub b($ foo $){}';
+    like($warnings[0], "\\\$foo\\\$", "It should still be removing spaces");
+    @warnings = ();
+}
+
 # Not yet implemented: Greedy
 # Arrays (@array = ()) silences the used only once warning)
 sub greedyarray(@array){return $#array; @array = ();}

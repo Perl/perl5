@@ -102,6 +102,12 @@
 	 FEATURE_IS_ENABLED("unicode")) \
     )
 
+#define FEATURE_SUBSIGS_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED("subsigs") \
+    )
+
 
 #endif /* PERL_CORE or PERL_EXT */
 

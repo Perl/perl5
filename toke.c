@@ -8852,7 +8852,7 @@ Perl_scan_proto (pTHX_ SV *sv, bool allowextended)
 	    d[tmp++] = *p;
 	    if (!named_proto && (!strchr("$@%*;[]&\\_+", *p) || *p == '\0')) {
 		if (*p && !named_proto && isIDFIRST_lazy_if(p,UTF))
-		    named_proto = allowextended;
+		    named_proto = allowextended && FEATURE_SUBSIGS_IS_ENABLED;
 		if (warnillegalproto)
 		    bad_proto = TRUE;
 	    }

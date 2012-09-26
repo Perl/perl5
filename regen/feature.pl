@@ -32,6 +32,7 @@ my %feature = (
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
     fc              => 'fc',
+    'experimental::sub_signature'    => 'subsigs',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
