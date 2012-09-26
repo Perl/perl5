@@ -1415,7 +1415,7 @@
 #define op_integerize(a)	S_op_integerize(aTHX_ a)
 #define op_std_init(a)		S_op_std_init(aTHX_ a)
 #define pmtrans(a,b,c)		S_pmtrans(aTHX_ a,b,c)
-#define process_special_blocks(a,b,c)	S_process_special_blocks(aTHX_ a,b,c)
+#define process_special_blocks(a,b,c,d)	S_process_special_blocks(aTHX_ a,b,c,d)
 #define ref_array_or_hash(a)	S_ref_array_or_hash(aTHX_ a)
 #define refkids(a,b)		S_refkids(aTHX_ a,b)
 #define scalar_mod_type		S_scalar_mod_type

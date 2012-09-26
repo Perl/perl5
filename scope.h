@@ -162,7 +162,9 @@ scope has the given name. Name must be a literal string.
 #define ENTER_with_name(name) ENTER
 #define LEAVE_with_name(name) LEAVE
 #endif
-#define LEAVE_SCOPE(old) if (PL_savestack_ix > old) leave_scope(old)
+#define LEAVE_SCOPE(old) STMT_START { \
+	if (PL_savestack_ix > old) leave_scope(old); \
+    } STMT_END
 
 #define SAVEI8(i)	save_I8((I8*)&(i))
 #define SAVEI16(i)	save_I16((I16*)&(i))

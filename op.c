@@ -7663,10 +7663,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	}
 
 	if (name && ! (PL_parser && PL_parser->error_count))
-	{
-	    LEAVE_SCOPE(floor);
-	    process_special_blocks(name, gv, cv);
-	}
+	    process_special_blocks(floor, name, gv, cv);
     }
 
   done:
@@ -7681,7 +7678,8 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 }
 
 STATIC void
-S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
+S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
+			 GV *const gv,
 			 CV *const cv)
 {
     const char *const colon = strrchr(fullname,':');
@@ -7692,6 +7690,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
     if (*name == 'B') {
 	if (strEQ(name, "BEGIN")) {
 	    const I32 oldscope = PL_scopestack_ix;
+	    if (floor) LEAVE_SCOPE(floor);
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
@@ -7906,7 +7905,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
         CvXSUB(cv) = subaddr;
     
         if (name)
-            process_special_blocks(name, gv, cv);
+            process_special_blocks(0, name, gv, cv);
     }
 
     if (flags & XS_DYNAMIC_FILENAME) {
