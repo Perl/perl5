@@ -252,7 +252,6 @@ pod/perlmacosx.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlmod.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlmodlib.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlmodstyle.pod	Verbatim line length including indents exceeds 79 by	2
-pod/perlmpeix.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlmroapi.pod	? Should you be using L<...> instead of	1
 pod/perlnetware.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perlnewmod.pod	Verbatim line length including indents exceeds 79 by	1
