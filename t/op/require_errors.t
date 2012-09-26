@@ -27,7 +27,7 @@ for my $file ($nonfile, ' ') {
 
 eval "require $nonfile";
 
-like $@, qr/^Can't locate $nonfile\.pm in \@INC \(\@INC contains: @INC\) at/,
+like $@, qr/^Can't locate $nonfile\.pm in \@INC \(you may need to install the $nonfile module\) \(\@INC contains: @INC\) at/,
     "correct error message for require $nonfile";
 
 eval {
