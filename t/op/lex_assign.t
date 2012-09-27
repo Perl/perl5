@@ -25,12 +25,10 @@ sub subb {"in s"}
 
 @INPUT = <DATA>;
 @simple_input = grep /^\s*\w+\s*\$\w+\s*[#\n]/, @INPUT;
-$ord = 0;
 
 sub wrn {"@_"}
 
 # Check correct optimization of ucfirst etc
-$ord++;
 my $a = "AB";
 my $b = "\u\L$a";
 is( $b, 'Ab', 'Check correct optimization of ucfirst, etc');
@@ -42,15 +40,12 @@ $a=8;
 my $b;
 { my $c = 6; $b = bless \$c, "A"}
 
-$ord++;
 is($dc, 0, 'No destruction yet');
 
 $b = $a+5;
 
-$ord++;
 is($dc, 1, 'object descruction via reassignment to variable');
 
-$ord++;
 my $xxx = 'b';
 $xxx = 'c' . ($xxx || 'e');
 is( $xxx, 'cb', 'variables can be read before being overwritten');
@@ -66,22 +61,17 @@ is( $xxx, 'cb', 'variables can be read before being overwritten');
   tie $m, 'B';
   $m = 100;
 
-  $ord++;
   is( $sc, 1, 'STORE called when assigning scalar to tied variable' );
 
   my $t = 11;
   $m = $t + 89;
   
-  $ord++;
   is( $sc, 2, 'and again' );
-  $ord++;
   is( $m,  -117, 'checking the tied variable result' );
 
   $m += $t;
 
-  $ord++;
   is( $sc, 3, 'called on self-increment' );
-  $ord++;
   is( $m,  89, 'checking the tied variable result' );
 
 }
@@ -100,7 +90,6 @@ is($l3,   13, 'chain assignment, part5');
 is($l4,   13, 'chain assignment, part6');
 
 for (@INPUT) {
-  $ord++;
   ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
   chomp;
@@ -147,7 +136,6 @@ EOE
 }
 
 for (@simple_input) {
-  $ord++;
   ($op, undef, $comment) = /^([^\#]+)(\#\s+(.*))?/;
   $comment = $op unless defined $comment;
   chomp;
@@ -180,7 +168,6 @@ EOE
   }
 }
 
-$ord++;
 eval {
     sub PVBM () { 'foo' }
     index 'foo', PVBM;
