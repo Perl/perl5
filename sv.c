@@ -6472,7 +6472,8 @@ Perl_sv_free2(pTHX_ SV *const sv)
 =for apidoc sv_len
 
 Returns the length of the string in the SV.  Handles magic and type
-coercion.  See also C<SvCUR>, which gives raw access to the xpv_cur slot.
+coercion and sets the UTF8 flag appropriately.  See also C<SvCUR>, which
+gives raw access to the xpv_cur slot.
 
 =cut
 */
