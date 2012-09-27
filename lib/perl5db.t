@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(102);
+plan(103);
 
 my $rc_filename = '.perldb';
 
@@ -2448,6 +2448,31 @@ sub _calc_trace_wrapper
     $wrapper->contents_like(
         qr/void context return from main::return_void/,
         "Test o PrintRet=1 in void context",
+    );
+}
+
+# Test the o PrintRet=1 option in void context
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=0',
+                'b 29',
+                'c',
+                q/$x = 'v';/,
+                'b 24',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/void context/,
+        "Test o PrintRet=0 in void context",
     );
 }
 
