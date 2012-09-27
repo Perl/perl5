@@ -182,9 +182,9 @@ POSIX char classes called C<regnode_charclass_class> which has an
 additional 4-byte (32-bit) bitmap indicating which POSIX char classes
 have been included.
 
-    regnode_charclass_class  U32 arg1;
-                             char bitmap[ANYOF_BITMAP_SIZE];
-                             char classflags[ANYOF_CLASSBITMAP_SIZE];
+   regnode_charclass_class  U32 arg1;
+                            char bitmap[ANYOF_BITMAP_SIZE];
+                            char classflags[ANYOF_CLASSBITMAP_SIZE];
 
 =back
 
@@ -354,20 +354,23 @@ simpler form.
 
 The call graph looks like this:
 
-    reg()                        # parse a top level regex, or inside of parens
-        regbranch()              # parse a single branch of an alternation
-            regpiece()           # parse a pattern followed by a quantifier
-                regatom()        # parse a simple pattern
-                    regclass()   #   used to handle a class
-                    reg()        #   used to handle a parenthesised subpattern
-                    ....
-            ...
-            regtail()            # finish off the branch
-        ...
-        regtail()                # finish off the branch sequence. Tie each
-                                 # branch's tail to the tail of the sequence
-                                 # (NEW) In Debug mode this is
-                                 # regtail_study().
+ reg()                        # parse a top level regex, or inside of
+                              # parens
+     regbranch()              # parse a single branch of an alternation
+         regpiece()           # parse a pattern followed by a quantifier
+             regatom()        # parse a simple pattern
+                 regclass()   #   used to handle a class
+                 reg()        #   used to handle a parenthesised
+                              #   subpattern
+                 ....
+         ...
+         regtail()            # finish off the branch
+     ...
+     regtail()                # finish off the branch sequence. Tie each
+                              # branch's tail to the tail of the
+                              # sequence
+                              # (NEW) In Debug mode this is
+                              # regtail_study().
 
 A grammar form might be something like this:
 
@@ -489,11 +492,11 @@ Now for something much more complex: C</x(?:foo*|b[a][rR])(foo|bar)$/>
                                       atom
  >)$<             34              tail~ BRANCH (28)
                   36              tsdy~ BRANCH (END) (31)
-                                      ~ attach to CLOSE1 (34) offset to 3
+                                     ~ attach to CLOSE1 (34) offset to 3
                                   tsdy~ EXACT <foo> (EXACT) (29)
-                                      ~ attach to CLOSE1 (34) offset to 5
+                                     ~ attach to CLOSE1 (34) offset to 5
                                   tsdy~ EXACT <bar> (EXACT) (32)
-                                      ~ attach to CLOSE1 (34) offset to 2
+                                     ~ attach to CLOSE1 (34) offset to 2
  >$<                        tail~ BRANCH (3)
                                 ~ BRANCH (9)
                                 ~ TAIL (25)
@@ -765,7 +768,7 @@ implement things such as the stringification of C<qr//>.
 The other structure is pointed to be the C<regexp> struct's
 C<pprivate> and is in addition to C<intflags> in the same struct
 considered to be the property of the regex engine which compiled the
-regular expression; 
+regular expression;
 
 The regexp structure contains all the data that perl needs to be aware of
 to properly work with the regular expression. It includes data about
@@ -792,19 +795,22 @@ The following structure is used as the C<pprivate> struct by perl's
 regex engine. Since it is specific to perl it is only of curiosity
 value to other engine implementations.
 
-    typedef struct regexp_internal {
-            regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
-            U32 *offsets;           /* offset annotations 20001228 MJD 
-                                       data about mapping the program to the 
-                                       string*/
-            regnode *regstclass;    /* Optional startclass as identified or constructed
-                                       by the optimiser */
-            struct reg_data *data;  /* Additional miscellaneous data used by the program.
-                                       Used to make it easier to clone and free arbitrary
-                                       data that the regops need. Often the ARG field of
-                                       a regop is an index into this structure */
-            regnode program[1];     /* Unwarranted chumminess with compiler. */
-    } regexp_internal;
+ typedef struct regexp_internal {
+         regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
+         U32 *offsets;           /* offset annotations 20001228 MJD
+                                  * data about mapping the program to
+                                  * the string*/
+         regnode *regstclass;    /* Optional startclass as identified or
+                                  * constructed by the optimiser */
+         struct reg_data *data;  /* Additional miscellaneous data used
+                                  * by the program.  Used to make it
+                                  * easier to clone and free arbitrary
+                                  * data that the regops need. Often the
+                                  * ARG field of a regop is an index
+                                  * into this structure */
+         regnode program[1];     /* Unwarranted chumminess with
+                                  * compiler. */
+ } regexp_internal;
 
 =over 5
 
