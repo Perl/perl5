@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(97);
+plan(98);
 
 my $rc_filename = '.perldb';
 
@@ -2323,6 +2323,31 @@ sub _calc_trace_wrapper
         ^Debugged\ program\ terminated\.
         /msx,
         'Test the o inhibit_exit=0 command.',
+    );
+}
+
+# Test the o PrintRet=1 command
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=1',
+                'b 29',
+                'c',
+                q/$x = 's';/,
+                'b 10',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/scalar context return from main::return_scalar: 20024/,
+        "Test o PrintRet=1",
     );
 }
 
