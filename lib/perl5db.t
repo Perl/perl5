@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(98);
+plan(99);
 
 my $rc_filename = '.perldb';
 
@@ -2326,7 +2326,7 @@ sub _calc_trace_wrapper
     );
 }
 
-# Test the o PrintRet=1 command
+# Test the o PrintRet=1 option
 {
     my $wrapper = DebugWrap->new(
         {
@@ -2348,6 +2348,31 @@ sub _calc_trace_wrapper
     $wrapper->contents_like(
         qr/scalar context return from main::return_scalar: 20024/,
         "Test o PrintRet=1",
+    );
+}
+
+# Test the o PrintRet=0 option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=0',
+                'b 29',
+                'c',
+                q/$x = 's';/,
+                'b 10',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/scalar context/,
+        "Test o PrintRet=0",
     );
 }
 
