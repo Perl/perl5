@@ -1,5 +1,5 @@
 # DerivedAge-6.2.0.txt
-# Date: 2012-05-20, 00:42:24 GMT [MD]
+# Date: 2012-09-20, 21:30:39 GMT [MD]
 #
 # Unicode Character Database
 # Copyright (c) 1991-2012 Unicode, Inc.
@@ -1298,7 +1298,7 @@ FA2E..FA2F    ; 6.1 #   [2] CJK COMPATIBILITY IDEOGRAPH-FA2E..CJK COMPATIBILITY 
 
 # Age=V6_2
 
-# Newly assigned in Unicode 6.2.0 (Planned for September, 2012)
+# Newly assigned in Unicode 6.2.0 (September, 2012)
 
 20BA          ; 6.2 #       TURKISH LIRA SIGN
 

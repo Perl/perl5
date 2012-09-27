@@ -27,6 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Upgrade to Unicode 6.2
+
+Perl now supports the final version of Unicode 6.2.  Earlier releases in
+the 5.17 series supported Unicode 6.2 beta versions.  There were no
+substantive changes in the final Unicode 6.2 version from the most
+recent beta, included in Perl 5.17.4.  A list of changes from Unicode
+6.1 is at L<http://www.unicode.org/versions/Unicode6.2.0>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
