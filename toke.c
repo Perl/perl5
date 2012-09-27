@@ -8742,6 +8742,13 @@ S_pending_ident(pTHX)
         }
     }
 
+    /* Disable access to @_ from within a sub with named parameters,
+       at compile time. This only works for a literal @_ - @main::_ (etc)
+       can still pass through. Aliases must be handled separately */
+    if (tokenbuf_len == 2 && strnEQ(PL_tokenbuf, "@_", 2) && is_sub_with_sig()) {
+	Perl_croak(aTHX_ "Cannot use @_ in a sub with a signature\n");
+    }
+
     /* build ops for a bareword */
     pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
 				   newSVpvn_flags(PL_tokenbuf + 1,

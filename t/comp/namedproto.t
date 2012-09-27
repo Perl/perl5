@@ -271,6 +271,23 @@ BEGIN {
 no_warnings("invalid slurpy parameters");
 }
 
+# Ban @_ inside the sub if it has a named proto
+{
+    my ($legal, $failed);
+    $legal = eval 'sub not_banned1 { $#_ }; 1';
+    ok($legal, "No changes to \$#_ within traditional subs");
+    $legal = eval 'sub not_banned2 { @_; }; 1';
+    ok($legal, "No changes to \@_ within traditional subs");
+    $failed = !eval 'sub banned1 ($foo){ $#_ }; 1';
+    ok($failed, "Cannot use a literal \$#_ with subroutine signatures");
+    $failed = !eval 'sub banned2 ($foo){ @_ }; 1';
+    ok($failed, "Cannot use a literal \@_ with subroutine signatures");
+    $legal = eval 'sub banned3 ($foo){ sub not_banned3 { $#_ }; }; 1';
+    ok($legal, "\$#_ restriction doesn't apply to nested subs");
+    $legal = eval 'sub banned4 ($foo){ sub not_banned4 { @_ }; }; 1';
+    ok($legal, "\@_ restriction doesn't apply to nested subs");
+}
+
 # Test UTF-8
 
 BEGIN { no_warnings("end of compile time") }
