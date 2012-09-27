@@ -15,6 +15,8 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-i>[I<extension>] ]>
 	S<[ [B<-e>|B<-E>] I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
+For more information on these options, you can run C<perldoc perlrun>.
+
 =head1 GETTING HELP
 
 The F<perldoc> program gives you access to all the documentation that comes
@@ -50,6 +52,7 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
 
     perl		Perl overview (this section)
     perlintro		Perl introduction for beginners
+    perlrun		Perl execution and options
     perltoc		Perl documentation table of contents
 
 =head2 Tutorials
@@ -94,7 +97,6 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
     perlpod		Perl plain old documentation
     perlpodspec 	Perl plain old documentation format specification
     perlpodstyle	Perl POD style guide
-    perlrun		Perl execution and options
     perldiag		Perl diagnostic messages
     perllexwarn 	Perl warnings and their control
     perldebug		Perl debugging
