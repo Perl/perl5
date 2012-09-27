@@ -207,11 +207,15 @@ an experimental feature useful and want to help shape its future.
 If something in the Perl core is marked as B<deprecated>, we may remove it
 from the core in the next stable release series, though we may not. As of
 Perl 5.12, deprecated features and modules warn the user as they're used.
-If you use a deprecated feature and believe that its removal from the Perl
-core would be a mistake, please contact the perl5-porters mailinglist and
-plead your case.  We don't deprecate things without a good reason, but
-sometimes there's a counterargument we haven't considered.  Historically,
-we did not distinguish between "deprecated" and "discouraged" features.
+When a module is deprecated, it will also be made available on CPAN.
+Installing it from CPAN will silence deprecation warnings for that module.
+
+If you use a deprecated feature or module and believe that its removal from
+the Perl core would be a mistake, please contact the perl5-porters
+mailinglist and plead your case.  We don't deprecate things without a good
+reason, but sometimes there's a counterargument we haven't considered.
+Historically, we did not distinguish between "deprecated" and "discouraged"
+features.
 
 =item discouraged
 
@@ -225,7 +229,8 @@ significant improvement to the Perl core.
 
 Once a feature, construct or module has been marked as deprecated for a
 stable release cycle, we may remove it from the Perl core.  Unsurprisingly,
-we say we've B<removed> these things.
+we say we've B<removed> these things.  When a module is removed, it will
+no longer ship with Perl, but will continue to be available on CPAN.
 
 =back
 
