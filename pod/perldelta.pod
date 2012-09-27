@@ -150,6 +150,10 @@ Various build and test fixes were included for GNU/Hurd.
 
 LFS support was enabled in GNU/Hurd.
 
+=item NetBSD
+
+The NetBSD hints file was corrected to be compatible with NetBSD 6.*
+
 =back
 
 =head1 Bug Fixes
