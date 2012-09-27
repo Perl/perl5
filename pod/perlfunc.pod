@@ -721,10 +721,10 @@ See L<perlmod/"Perl Modules">.
 
 Break out of a C<given()> block.
 
-This keyword is enabled by the C<"switch"> feature: see
-L<feature> for more information.  You can also access it by
-prefixing it with C<CORE::>.  Alternately, include a C<use
-v5.10> or later to the current scope.
+This keyword is enabled by the C<"switch"> feature; see L<feature> for
+more information on C<"switch">.  You can also access it by prefixing it
+with C<CORE::>.  Alternatively, include a C<use v5.10> or later to the
+current scope.
 
 =item caller EXPR
 X<caller> X<call stack> X<stack> X<stack trace>
