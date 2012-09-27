@@ -1021,7 +1021,7 @@ if ($v_version ge v4.1.0) {
     $why_suppressed{'Script=Katakana_Or_Hiragana'} = 'Obsolete.  All code points previously matched by this have been moved to "Script=Common".';
 }
 if ($v_version ge v6.0.0) {
-    $why_suppressed{'Script=Katakana_Or_Hiragana'} .= '  Consider instead using "Script_Extensions=Katakana" or "Script_Extensions=Hiragana (or both)"';
+    $why_suppressed{'Script=Katakana_Or_Hiragana'} .= '  Consider instead using "Script_Extensions=Katakana" or "Script_Extensions=Hiragana" (or both)';
     $why_suppressed{'Script_Extensions=Katakana_Or_Hiragana'} = 'All code points that would be matched by this are matched by either "Script_Extensions=Katakana" or "Script_Extensions=Hiragana"';
 }
 
@@ -1078,7 +1078,7 @@ END
 # The input files don't list every code point.  Those not listed are to be
 # defaulted to some value.  Below are hard-coded what those values are for
 # non-binary properties as of 5.1.  Starting in 5.0, there are
-# machine-parsable comment lines in the files the give the defaults; so this
+# machine-parsable comment lines in the files that give the defaults; so this
 # list shouldn't have to be extended.  The claim is that all missing entries
 # for binary properties will default to 'N'.  Unicode tried to change that in
 # 5.2, but the beta period produced enough protest that they backed off.
@@ -15336,7 +15336,7 @@ the left brace completely changes the meaning of the construct, from "match"
 (for C<\\p{}>) to "doesn't match" (for C<\\P{}>).  Casing in this document is
 for improved legibility.
 
-Also, white space, hyphens, and underscores are also normally ignored
+Also, white space, hyphens, and underscores are normally ignored
 everywhere between the {braces}, and hence can be freely added or removed
 even if the C</x> modifier hasn't been specified on the regular expression.
 But $a_bold_stricter at the beginning of an entry in the table below
