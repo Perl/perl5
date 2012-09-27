@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(99);
+plan(100);
 
 my $rc_filename = '.perldb';
 
@@ -2373,6 +2373,31 @@ sub _calc_trace_wrapper
     $wrapper->contents_unlike(
         qr/scalar context/,
         "Test o PrintRet=0",
+    );
+}
+
+# Test the o PrintRet=1 option in list context
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=1',
+                'b 29',
+                'c',
+                q/$x = 'l';/,
+                'b 17',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/list context return from main::return_list:\n0\s*'Foo'\n1\s*'Bar'\n2\s*'Baz'\n/,
+        "Test o PrintRet=1 in list context",
     );
 }
 
