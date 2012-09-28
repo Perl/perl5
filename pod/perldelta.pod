@@ -104,7 +104,8 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Carp> has been upgraded from version 1.26 to 1.27.  The longmess()
+and shortmess() functions are now documented.
 
 =back
 
