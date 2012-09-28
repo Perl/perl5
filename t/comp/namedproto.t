@@ -274,18 +274,45 @@ no_warnings("invalid slurpy parameters");
 # Ban @_ inside the sub if it has a named proto
 {
     my ($legal, $failed);
+    my $err = "Cannot use \@_ in a sub with a signature\n";
     $legal = eval 'sub not_banned1 { $#_ }; 1';
     ok($legal, "No changes to \$#_ within traditional subs");
     $legal = eval 'sub not_banned2 { @_; }; 1';
     ok($legal, "No changes to \@_ within traditional subs");
     $failed = !eval 'sub banned1 ($foo){ $#_ }; 1';
     ok($failed, "Cannot use a literal \$#_ with subroutine signatures");
+    is($@,$err, "Died for the right reason");
     $failed = !eval 'sub banned2 ($foo){ @_ }; 1';
     ok($failed, "Cannot use a literal \@_ with subroutine signatures");
+    is($@,$err, "Died for the right reason");
     $legal = eval 'sub banned3 ($foo){ sub not_banned3 { $#_ }; }; 1';
     ok($legal, "\$#_ restriction doesn't apply to nested subs");
     $legal = eval 'sub banned4 ($foo){ sub not_banned4 { @_ }; }; 1';
     ok($legal, "\@_ restriction doesn't apply to nested subs");
+
+    # Test aliases too
+    *globb = *main::_;
+    $legal = eval 'sub banned5 ($foo) { $#globb;}; 1';
+    ok($legal, "Using an alias compiles fine - count");
+    no_warnings("using a global alias - count");
+    $legal = eval 'sub banned6 ($foo) { my ($a) = @globb; }; 1';
+    ok($legal, "Using an alias compiles fine - assignment");
+    no_warnings("using a global alias - assignment");
+    $legal = eval 'sub banned7 ($foo) { $globb[0]; }; 1';
+    ok($legal, "Using an alias compiles fine - direct access");
+    no_warnings("using a global alias - direct access");
+    $failed = !eval 'banned5(); 1';
+    ok($failed, "An alias to \$#_ dies in execution - () syntax");
+    is($@,$err, "Died for the right reason");
+    $failed = !eval '&banned5; 1';
+    ok($failed, "An alias to \$#_ dies in execution - & syntax");
+    is($@,$err, "Died for the right reason");
+    @normal = qw(1 2 3);
+    *globb = *normal;
+    $legal = eval 'banned5(); 1';
+    ok($legal, "globb is fine again - ()");
+    $legal = eval '&banned5; 1';
+    ok($legal, "globb is fine again - &");
 }
 
 # Test UTF-8
