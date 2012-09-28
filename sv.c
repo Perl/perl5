@@ -6642,7 +6642,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
     if (!uoffset)
 	return 0;
 
-    if (!SvREADONLY(sv) && !SvGMAGICAL(sv)
+    if (!SvREADONLY(sv) && !SvGMAGICAL(sv) && SvPOK(sv)
 	&& PL_utf8cache
 	&& (*mgp || (SvTYPE(sv) >= SVt_PVMG &&
 		     (*mgp = mg_find(sv, PERL_MAGIC_utf8))))) {
@@ -6725,7 +6725,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 	boffset = real_boffset;
     }
 
-    if (PL_utf8cache && !SvGMAGICAL(sv)) {
+    if (PL_utf8cache && !SvGMAGICAL(sv) && SvPOK(sv)) {
 	if (at_end)
 	    utf8_mg_len_cache_update(sv, mgp, uoffset);
 	else
@@ -6837,7 +6837,7 @@ S_utf8_mg_len_cache_update(pTHX_ SV *const sv, MAGIC **const mgp,
 			   const STRLEN ulen)
 {
     PERL_ARGS_ASSERT_UTF8_MG_LEN_CACHE_UPDATE;
-    if (SvREADONLY(sv))
+    if (SvREADONLY(sv) || !SvPOK(sv))
 	return;
 
     if (!*mgp && (SvTYPE(sv) < SVt_PVMG ||
