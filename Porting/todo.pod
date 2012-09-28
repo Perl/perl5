@@ -844,6 +844,12 @@ I<';' isn't legal inside an expression - if you need multiple statements use a
 do {...} block>. See the thread starting at
 L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html>
 
+=head2 strict as warnings
+
+See L<http://markmail.org/message/vbrupaslr3bybmvk>, where Josua ben Jore
+writes:  I've been of the opinion that everything strict.pm does ought to be
+able to considered just warnings that have been promoted to 'FATAL'.
+
 =head2 lexicals used only once
 
 This warns:
