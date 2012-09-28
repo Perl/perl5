@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(103);
+plan(104);
 
 my $rc_filename = '.perldb';
 
@@ -2472,6 +2472,34 @@ sub _calc_trace_wrapper
 
     $wrapper->contents_unlike(
         qr/void context/,
+        "Test o PrintRet=0 in void context",
+    );
+}
+
+# Test the o frame option.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                # This is to avoid getting the "Debugger program terminated"
+                # junk that interferes with the normal output.
+                'o inhibit_exit=0',
+                'b 10',
+                'c',
+                'o frame=255',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-frame-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/
+            in\s*\.=main::my_other_func\(3,\ 1200\)\ from.*?
+            out\s*\.=main::my_other_func\(3,\ 1200\)\ from
+        /msx,
         "Test o PrintRet=0 in void context",
     );
 }
