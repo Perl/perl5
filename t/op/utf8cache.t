@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan(tests => 5);
+plan(tests => 7);
 
 SKIP: {
 skip_without_dynamic_extension("Devel::Peek");
@@ -77,3 +77,35 @@ sub {
   is ord substr($_[0], 1, 1), 0x100,
     'get-magic resets uf8cache on defelems';
 }->($h{k});
+
+
+# Overloading can also reallocate the PV.
+
+package UTF8Toggle {
+    use overload '""' => 'stringify', fallback => 1;
+
+    sub new {
+	my $class = shift;
+	my $value = shift;
+	my $state = shift||0;
+	return bless [$value, $state], $class;
+    }
+
+    sub stringify {
+	my $self = shift;
+	$self->[1] = ! $self->[1];
+	if ($self->[1]) {
+	    utf8::downgrade($self->[0]);
+	} else {
+	    utf8::upgrade($self->[0]);
+	}
+	$self->[0];
+    }
+}
+my $u = UTF8Toggle->new(" \x{c2}7 ");
+
+pos $u = 2;
+is pos $u, 2, 'pos on overloaded utf8 toggler';
+() = "$u"; # flip flag
+pos $u = 2;
+is pos $u, 2, 'pos on overloaded utf8 toggler (again)'

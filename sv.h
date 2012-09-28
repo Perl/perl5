@@ -1818,6 +1818,17 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 	    sv_catsv_nomg(dsv, nsv);			\
 	} STMT_END
 
+#ifdef PERL_CORE
+# define sv_or_pv_len_utf8(sv, pv, bytelen)	      \
+    (SvGAMAGIC(sv)				       \
+	? utf8_length((U8 *)(pv), (U8 *)(pv)+(bytelen))	\
+	: sv_len_utf8(sv))
+# define sv_or_pv_pos_u2b(sv, pv, pos)			 \
+    (SvGAMAGIC(sv)					  \
+	? (STRLEN)(utf8_hop((U8 *)(pv), pos) - (U8 *)(pv)) \
+	: sv_pos_u2b_flags(sv,pos,0,0))
+#endif
+
 /*
 =for apidoc Am|SV*|newRV_inc|SV* sv
 

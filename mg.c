@@ -2157,6 +2157,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     STRLEN len;
     STRLEN ulen = 0;
     MAGIC* found;
+    const char *s;
 
     PERL_ARGS_ASSERT_MAGIC_SETPOS;
     PERL_UNUSED_ARG(mg);
@@ -2179,12 +2180,12 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	found->mg_len = -1;
 	return 0;
     }
-    len = SvPOK_nog(lsv) ? SvCUR(lsv) : sv_len(lsv);
+    s = SvPV_const(lsv, len);
 
     pos = SvIV(sv);
 
     if (DO_UTF8(lsv)) {
-	ulen = sv_len_utf8_nomg(lsv);
+	ulen = sv_or_pv_len_utf8(lsv, s, len);
 	if (ulen)
 	    len = ulen;
     }
@@ -2198,7 +2199,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	pos = len;
 
     if (ulen) {
-	pos = sv_pos_u2b_flags(lsv, pos, 0, 0);
+	pos = sv_or_pv_pos_u2b(lsv, s, pos);
     }
 
     found->mg_len = pos;
