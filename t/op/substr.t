@@ -23,7 +23,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(381);
+plan(382);
 
 run_tests() unless caller;
 
@@ -817,3 +817,15 @@ is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
 
     is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
 }
+
+# Test that UTF8-ness of magic var changing does not confuse substr lvalue
+# assignment.
+# We use overloading for our magic var, but a typeglob would work, too.
+package o {
+    use overload '""' => sub { $_[0][0] }
+}
+my $refee = bless ["\x{100}a"], o::;
+my $substr = \substr $refee, -2;	# UTF8 flag still off for $$substr.
+$$substr = "b";				# UTF8 flag turns on when setsubstr
+is $refee, "b",				# magic stringifies $$substr.
+     'substr lvalue assignment when stringification turns on UTF8ness';
