@@ -742,7 +742,6 @@ p	|int	|magic_getsubstr|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_gettaint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getuvar	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getvec	|NN SV* sv|NN MAGIC* mg
-p	|U32	|magic_len	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_nextpack	|NN SV *sv|NN MAGIC *mg|NN SV *key
 p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg

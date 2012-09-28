@@ -2152,12 +2152,6 @@ PERL_CALLCONV int	Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 #define PERL_ARGS_ASSERT_MAGIC_KILLBACKREFS	\
 	assert(sv); assert(mg)
 
-PERL_CALLCONV U32	Perl_magic_len(pTHX_ SV* sv, MAGIC* mg)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_MAGIC_LEN	\
-	assert(sv); assert(mg)
-
 PERL_CALLCONV SV*	Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags, U32 argc, ...)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

@@ -113,7 +113,7 @@ my %mg =
 # These have a subtly different "namespace" from the magic types.
 my %sig =
     (
-     'sv' => {get => 'get', set => 'set', len => 'len'},
+     'sv' => {get => 'get', set => 'set'},
      'env' => {set => 'set_all_env', clear => 'clear_all_env'},
      'envelem' => {set => 'setenv', clear => 'clearenv'},
      'sigelem' => {get => 'getsig', set => 'setsig', clear => 'clearsig',
