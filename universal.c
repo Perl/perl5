@@ -808,6 +808,7 @@ XS(XS_utf8_encode)
     if (items != 1)
 	croak_xs_usage(cv, "sv");
     sv_utf8_encode(ST(0));
+    SvSETMAGIC(ST(0));
     XSRETURN_EMPTY;
 }
 

@@ -3164,7 +3164,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ register SV *const sv, const I32 flags, ST
 
     if (sv == &PL_sv_undef)
 	return 0;
-    if (!SvPOK(sv)) {
+    if (!SvPOK_nog(sv)) {
 	STRLEN len = 0;
 	if (SvREADONLY(sv) && (SvPOKp(sv) || SvIOKp(sv) || SvNOKp(sv))) {
 	    (void) sv_2pv_flags(sv,&len, flags);
@@ -9123,7 +9123,7 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
     PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE;
 
     sv_pvn_force(sv,lp);
-    sv_utf8_upgrade(sv);
+    sv_utf8_upgrade_nomg(sv);
     *lp = SvCUR(sv);
     return SvPVX(sv);
 }
