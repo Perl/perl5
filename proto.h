@@ -2169,6 +2169,12 @@ PERL_CALLCONV int	Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 #define PERL_ARGS_ASSERT_MAGIC_NEXTPACK	\
 	assert(sv); assert(mg); assert(key)
 
+PERL_CALLCONV int	Perl_magic_poison(pTHX_ SV *sv, MAGIC *mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_POISON	\
+	assert(sv); assert(mg)
+
 PERL_CALLCONV U32	Perl_magic_regdata_cnt(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

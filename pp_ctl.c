@@ -1385,7 +1385,8 @@ bool
 Perl_is_sub_with_sig(pTHX)
 {
     dVAR;
-    const CV * const cv = CvEVAL(PL_compcv) ? CvOUTSIDE(PL_compcv) : PL_compcv;
+    const CV * const cv = (CvEVAL(PL_compcv) && CvOUTSIDE(PL_compcv)) ?
+	CvOUTSIDE(PL_compcv) : PL_compcv;
 
     if (PadlistNAMECNT(CvPADLIST(cv)))
 	return TRUE;

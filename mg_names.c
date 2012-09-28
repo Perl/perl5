@@ -47,6 +47,7 @@
 	{ PERL_MAGIC_substr,         "substr(x)" },
 	{ PERL_MAGIC_defelem,        "defelem(y)" },
 	{ PERL_MAGIC_checkcall,      "checkcall(])" },
+	{ PERL_MAGIC_poison,         "poison(_)" },
 	{ PERL_MAGIC_ext,            "ext(~)" },
 
 /* ex: set ro: */

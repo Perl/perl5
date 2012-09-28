@@ -1120,6 +1120,7 @@
 #define magic_getvec(a,b)	Perl_magic_getvec(aTHX_ a,b)
 #define magic_killbackrefs(a,b)	Perl_magic_killbackrefs(aTHX_ a,b)
 #define magic_nextpack(a,b,c)	Perl_magic_nextpack(aTHX_ a,b,c)
+#define magic_poison(a,b)	Perl_magic_poison(aTHX_ a,b)
 #define magic_regdata_cnt(a,b)	Perl_magic_regdata_cnt(aTHX_ a,b)
 #define magic_regdatum_get(a,b)	Perl_magic_regdatum_get(aTHX_ a,b)
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)

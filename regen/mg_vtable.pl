@@ -108,6 +108,8 @@ my %mg =
      ext => { char => '~', desc => 'Available for use by extensions' },
      checkcall => { char => ']', value_magic => 1, vtable => 'checkcall',
 		    desc => 'inlining/mutation of call to this CV'},
+     poison => { char => '_', value_magic => 1, vtable => 'poison',
+		    desc => 'Make any access to @_ croak' },
 );
 
 # These have a subtly different "namespace" from the magic types.
@@ -144,6 +146,7 @@ my %sig =
      'hintselem' => {set => 'sethint', clear => 'clearhint'},
      'hints' => {clear => 'clearhints'},
      'checkcall' => {copy => 'copycallchecker'},
+     'poison' => {get => 'poison', set => 'poison', len => 'poison', clear => 'poison'},
 );
 
 my ($vt, $raw, $names) = map {

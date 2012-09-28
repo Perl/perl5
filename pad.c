@@ -1763,6 +1763,10 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     else if (type == padtidy_SUB) {
 	/* XXX DAPM this same bit of code keeps appearing !!! Rationalise? */
 	AV * const av = newAV();			/* Will be @_ */
+	/* This bit ought to go in scan_named_proto, if it weren't for the av being trashed */
+	if (PadlistNAMECNT(CvPADLIST(PL_compcv))) {
+	    sv_magic((SV *)av, NULL, PERL_MAGIC_poison, NULL, 0);
+	}
 	av_store(PL_comppad, 0, MUTABLE_SV(av));
 	AvREIFY_only(av);
     }

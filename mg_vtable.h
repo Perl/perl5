@@ -55,6 +55,7 @@
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
                                          smart parameter vivification */
 #define PERL_MAGIC_checkcall      ']' /* inlining/mutation of call to this CV */
+#define PERL_MAGIC_poison         '_' /* Make any access to @_ croak */
 #define PERL_MAGIC_ext            '~' /* Available for use by extensions */
 
 enum {		/* pass one of these to get_vtbl */
@@ -76,6 +77,7 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_ovrld,
     want_vtbl_pack,
     want_vtbl_packelem,
+    want_vtbl_poison,
     want_vtbl_pos,
     want_vtbl_regdata,
     want_vtbl_regdatum,
@@ -110,6 +112,7 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
     "ovrld",
     "pack",
     "packelem",
+    "poison",
     "pos",
     "regdata",
     "regdatum",
@@ -167,6 +170,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
   { 0, 0, Perl_magic_sizepack, Perl_magic_wipepack, 0, 0, 0, 0 },
   { Perl_magic_getpack, Perl_magic_setpack, 0, Perl_magic_clearpack, 0, 0, 0, 0 },
+  { Perl_magic_poison, Perl_magic_poison, Perl_magic_poison, Perl_magic_poison, 0, 0, 0, 0 },
   { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 },
   { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 },
   { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 },
@@ -210,6 +214,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_ovrld PL_magic_vtables[want_vtbl_ovrld]
 #define PL_vtbl_pack PL_magic_vtables[want_vtbl_pack]
 #define PL_vtbl_packelem PL_magic_vtables[want_vtbl_packelem]
+#define PL_vtbl_poison PL_magic_vtables[want_vtbl_poison]
 #define PL_vtbl_pos PL_magic_vtables[want_vtbl_pos]
 #define PL_vtbl_regdata PL_magic_vtables[want_vtbl_regdata]
 #define PL_vtbl_regdatum PL_magic_vtables[want_vtbl_regdatum]

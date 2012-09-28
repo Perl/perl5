@@ -3357,6 +3357,16 @@ Perl_magic_copycallchecker(pTHX_ SV *sv, MAGIC *mg, SV *nsv,
     return 1;
 }
 
+int
+Perl_magic_poison(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_POISON;
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(mg);
+    Perl_croak(aTHX_ "Cannot use @_ in a sub with a signature\n");
+    return 0;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

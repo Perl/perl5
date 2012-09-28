@@ -745,6 +745,7 @@ p	|int	|magic_gettaint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getuvar	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getvec	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_nextpack	|NN SV *sv|NN MAGIC *mg|NN SV *key
+p	|int	|magic_poison	|NN SV *sv|NN MAGIC *mg
 p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg
 pr	|int	|magic_regdatum_set|NN SV* sv|NN MAGIC* mg

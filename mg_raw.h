@@ -82,6 +82,8 @@
       "/* defelem 'y' Shadow \"foreach\" iterator variable / smart parameter vivification */" },
     { ']', "want_vtbl_checkcall | PERL_MAGIC_VALUE_MAGIC",
       "/* checkcall ']' inlining/mutation of call to this CV */" },
+    { '_', "want_vtbl_poison | PERL_MAGIC_VALUE_MAGIC",
+      "/* poison '_' Make any access to @_ croak */" },
     { '~', "magic_vtable_max",
       "/* ext '~' Available for use by extensions */" },
 

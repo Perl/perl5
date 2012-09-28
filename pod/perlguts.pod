@@ -1111,6 +1111,7 @@ will be lost.
                                              vivification
  ]  PERL_MAGIC_checkcall      vtbl_checkcall inlining/mutation of call
                                              to this CV
+ _  PERL_MAGIC_poison         vtbl_poison    Make any access to @_ croak
  ~  PERL_MAGIC_ext            (none)         Available for use by
                                              extensions
 
