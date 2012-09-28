@@ -2109,6 +2109,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 static CV *
 S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 {
+    dVAR;
+
     assert(!CvUNIQUE(proto));
 
     if (!cv) cv = MUTABLE_CV(newSV_type(SvTYPE(proto)));
