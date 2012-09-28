@@ -635,18 +635,16 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #    define socketpair		PerlSock_socketpair
 #	endif	/* NETWARE && USE_STDIO */
 
-#    ifdef USE_SOCKETS_AS_HANDLES
-#      undef fd_set
-#      undef FD_SET
-#      undef FD_CLR
-#      undef FD_ISSET
-#      undef FD_ZERO
-#      define fd_set		Perl_fd_set
-#      define FD_SET(n,p)	PERL_FD_SET(n,p)
-#      define FD_CLR(n,p)	PERL_FD_CLR(n,p)
-#      define FD_ISSET(n,p)	PERL_FD_ISSET(n,p)
-#      define FD_ZERO(p)	PERL_FD_ZERO(p)
-#    endif	/* USE_SOCKETS_AS_HANDLES */
+#    undef fd_set
+#    undef FD_SET
+#    undef FD_CLR
+#    undef FD_ISSET
+#    undef FD_ZERO
+#    define fd_set		Perl_fd_set
+#    define FD_SET(n,p)		PERL_FD_SET(n,p)
+#    define FD_CLR(n,p)		PERL_FD_CLR(n,p)
+#    define FD_ISSET(n,p)	PERL_FD_ISSET(n,p)
+#    define FD_ZERO(p)		PERL_FD_ZERO(p)
 
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_IMPLICIT_SYS && !PERL_CORE */

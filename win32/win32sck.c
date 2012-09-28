@@ -29,13 +29,8 @@
 #include <io.h>
 
 /* thanks to Beverly Brown	(beverly@datacube.com) */
-#ifdef USE_SOCKETS_AS_HANDLES
-#	define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
-#	define TO_SOCKET(x)	_get_osfhandle(x)
-#else
-#	define OPEN_SOCKET(x)	(x)
-#	define TO_SOCKET(x)	(x)
-#endif	/* USE_SOCKETS_AS_HANDLES */
+#define OPEN_SOCKET(x)	win32_open_osfhandle(x,O_RDWR|O_BINARY)
+#define TO_SOCKET(x)	_get_osfhandle(x)
 
 #define StartSockets() \
     STMT_START {					\
@@ -86,44 +81,6 @@ start_sockets(void)
     /* atexit((void (*)(void)) EndSockets); */
     wsock_started = 1;
 }
-
-#ifndef USE_SOCKETS_AS_HANDLES
-#undef fdopen
-FILE *
-my_fdopen(int fd, char *mode)
-{
-    FILE *fp;
-    char sockbuf[256];
-    int optlen = sizeof(sockbuf);
-    int retval;
-
-    if (!wsock_started)
-	return(fdopen(fd, mode));
-
-    retval = getsockopt((SOCKET)fd, SOL_SOCKET, SO_TYPE, sockbuf, &optlen);
-    if(retval == SOCKET_ERROR && WSAGetLastError() == WSAENOTSOCK) {
-	return(fdopen(fd, mode));
-    }
-
-    /*
-     * If we get here, then fd is actually a socket.
-     */
-    Newxz(fp, 1, FILE);	/* XXX leak, good thing this code isn't used */
-    if(fp == NULL) {
-	errno = ENOMEM;
-	return NULL;
-    }
-
-    fp->_file = fd;
-    if(*mode == 'r')
-	fp->_flag = _IOREAD;
-    else
-	fp->_flag = _IOWRT;
-   
-    return fp;
-}
-#endif	/* USE_SOCKETS_AS_HANDLES */
-
 
 u_long
 win32_htonl(u_long hostlong)
@@ -258,7 +215,6 @@ int
 win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const struct timeval* timeout)
 {
     int r;
-#ifdef USE_SOCKETS_AS_HANDLES
     int i, fd, save_errno = errno;
     FD_SET nrd, nwr, nex;
     bool just_sleep = TRUE;
@@ -320,9 +276,6 @@ win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, Perl_fd_set* ex, const 
 	}
     }
     errno = save_errno;
-#else
-    SOCKET_TEST_ERROR(r = select(nfds, rd, wr, ex, timeout));
-#endif
     return r;
 }
 
@@ -371,9 +324,6 @@ win32_closesocket(SOCKET s)
     SOCKET_TEST_ERROR(r = closesocket(TO_SOCKET(s)));
     return r;
 }
-
-#ifdef USE_SOCKETS_AS_HANDLES
-#define WIN32_OPEN_SOCKET(af, type, protocol) open_ifs_socket(af, type, protocol)
 
 void
 convert_proto_info_w2a(WSAPROTOCOL_INFOW *in, WSAPROTOCOL_INFOA *out)
@@ -433,25 +383,17 @@ open_ifs_socket(int af, int type, int protocol)
     return out;
 }
 
-#else
-#define WIN32_OPEN_SOCKET(af, type, protocol) socket(af, type, protocol)
-#endif
-
 SOCKET
 win32_socket(int af, int type, int protocol)
 {
     SOCKET s;
 
-#ifndef USE_SOCKETS_AS_HANDLES
-    SOCKET_TEST(s = socket(af, type, protocol), INVALID_SOCKET);
-#else
     StartSockets();
 
-    if((s = WIN32_OPEN_SOCKET(af, type, protocol)) == INVALID_SOCKET)
+    if((s = open_ifs_socket(af, type, protocol)) == INVALID_SOCKET)
 	errno = WSAGetLastError();
     else
 	s = OPEN_SOCKET(s);
-#endif	/* USE_SOCKETS_AS_HANDLES */
 
     return s;
 }

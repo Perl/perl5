@@ -2703,11 +2703,6 @@ win32_fopen(const char *filename, const char *mode)
     return f;
 }
 
-#ifndef USE_SOCKETS_AS_HANDLES
-#undef fdopen
-#define fdopen my_fdopen
-#endif
-
 DllExport FILE *
 win32_fdopen(int handle, const char *mode)
 {

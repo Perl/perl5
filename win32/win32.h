@@ -156,10 +156,6 @@ struct utsname {
 #define  DOSISH		1		/* no escaping our roots */
 #define  OP_BINARY	O_BINARY	/* mistake in in pp_sys.c? */
 
-/* Define USE_SOCKETS_AS_HANDLES to enable emulation of windows sockets as
- * real filehandles. XXX Should always be defined (the other version is untested) */
-#define USE_SOCKETS_AS_HANDLES
-
 /* read() and write() aren't transparent for socket handles */
 #define PERL_SOCK_SYSREAD_IS_RECV
 #define PERL_SOCK_SYSWRITE_IS_SEND
@@ -322,9 +318,6 @@ typedef struct {
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
 DllExport HWND		win32_create_message_window(void);
 
-#ifndef USE_SOCKETS_AS_HANDLES
-extern FILE *		my_fdopen(int, char *);
-#endif
 extern int		my_fclose(FILE *);
 extern char *		win32_get_privlib(const char *pl, STRLEN *const len);
 extern char *		win32_get_sitelib(const char *pl, STRLEN *const len);
@@ -377,9 +370,7 @@ struct thread_intern {
     char		Wstrerror_buffer[512];
     struct servent	Wservent;
     char		Wgetlogin_buffer[128];
-#    ifdef USE_SOCKETS_AS_HANDLES
     int			Winit_socktype;
-#    endif
     char		Wcrypt_buffer[30];
 #    ifdef USE_RTL_THREAD_API
     void *		retv;	/* slot for thread return value */
