@@ -2916,7 +2916,7 @@ PP(pp_length)
 	    SETi(len);
     } else if (SvOK(sv)) {
 	/* Neither magic nor overloaded.  */
-	if (DO_UTF8(sv))
+	if (!IN_BYTES)
 	    SETi(sv_len_utf8(sv));
 	else
 	    SETi(sv_len(sv));
