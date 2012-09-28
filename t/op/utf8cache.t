@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan(tests => 7);
+plan(tests => 9);
 
 SKIP: {
 skip_without_dynamic_extension("Devel::Peek");
@@ -108,4 +108,12 @@ pos $u = 2;
 is pos $u, 2, 'pos on overloaded utf8 toggler';
 () = "$u"; # flip flag
 pos $u = 2;
-is pos $u, 2, 'pos on overloaded utf8 toggler (again)'
+is pos $u, 2, 'pos on overloaded utf8 toggler (again)';
+
+() = ord ${\substr $u, 1};
+is ord ${\substr($u, 1)}, 0xc2,
+    'utf8 cache + overloading does not confuse substr lvalues';
+() = "$u"; # flip flag
+() = ord substr $u, 1;
+is ord substr($u, 1), 0xc2,
+    'utf8 cache + overloading does not confuse substr lvalues (again)';

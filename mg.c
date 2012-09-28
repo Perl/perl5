@@ -2199,7 +2199,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	pos = len;
 
     if (ulen) {
-	pos = sv_or_pv_pos_u2b(lsv, s, pos);
+	pos = sv_or_pv_pos_u2b(lsv, s, pos, 0);
     }
 
     found->mg_len = pos;
@@ -2223,7 +2223,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     if (!translate_substr_offsets(
-	    SvUTF8(lsv) ? sv_len_utf8_nomg(lsv) : len,
+	    SvUTF8(lsv) ? sv_or_pv_len_utf8(lsv, tmps, len) : len,
 	    negoff ? -(IV)offs : (IV)offs, !negoff,
 	    negrem ? -(IV)rem  : (IV)rem,  !negrem, &offs, &rem
     )) {
@@ -2233,7 +2233,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     }
 
     if (SvUTF8(lsv))
-	offs = sv_pos_u2b_flags(lsv, offs, &rem, SV_CONST_RETURN);
+	offs = sv_or_pv_pos_u2b(lsv, tmps, offs, &rem);
     sv_setpvn(sv, tmps + offs, rem);
     if (SvUTF8(lsv))
         SvUTF8_on(sv);
