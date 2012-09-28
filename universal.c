@@ -823,6 +823,7 @@ XS(XS_utf8_decode)
 	bool RETVAL;
 	SvPV_force_nolen(sv);
 	RETVAL = sv_utf8_decode(sv);
+	SvSETMAGIC(sv);
 	ST(0) = boolSV(RETVAL);
     }
     XSRETURN(1);
