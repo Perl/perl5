@@ -2271,7 +2271,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	Perl_croak(aTHX_ "substr outside of string");
     oldtarglen = lvlen;
     if (DO_UTF8(sv)) {
-	sv_utf8_upgrade(lsv);
+	sv_utf8_upgrade_nomg(lsv);
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
 	newtarglen = sv_len_utf8(sv);
