@@ -5233,15 +5233,13 @@ sub cmd_L {
             last BREAK_ON_LOAD if $signal;
         }
     } ## end if (%break_on_load and...
-    if ($watch_wanted) {
-        if ( $trace & 2 ) {
-            print {$OUT} "Watch-expressions:\n" if @to_watch;
-            TO_WATCH: for my $expr (@to_watch) {
-                print {$OUT} " $expr\n";
-                last TO_WATCH if $signal;
-            }
-        } ## end if ($trace & 2)
-    } ## end if ($watch_wanted)
+    if ($watch_wanted and ( $trace & 2 )) {
+        print {$OUT} "Watch-expressions:\n" if @to_watch;
+        TO_WATCH: for my $expr (@to_watch) {
+            print {$OUT} " $expr\n";
+            last TO_WATCH if $signal;
+        }
+    }
 } ## end sub cmd_L
 
 =head3 C<cmd_M> - list modules (command)
