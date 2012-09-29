@@ -4950,11 +4950,14 @@ sub cmd_l {
         my ($s) = &eval;
 
         # Ooops. Bad scalar.
-        print( $OUT "Error: $@\n" ), next CMD if $@;
+        if ($@) {
+            print {$OUT} "Error: $@\n";
+            next CMD;
+        }
 
         # Good scalar. If it's a reference, find what it points to.
         $s = CvGV_name($s);
-        print( $OUT "Interpreted as: $1 $s\n" );
+        print {$OUT} "Interpreted as: $1 $s\n";
         $line = "$1 $s";
 
         # Call self recursively to really do the command.
@@ -4962,8 +4965,8 @@ sub cmd_l {
     } ## end if ($line =~ /^(\$.*)/s)
 
     # l name. Try to find a sub by that name.
-    elsif ( $line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s ) {
-        my $s = $subname = $1;
+    elsif ( ($subname) = $line =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
+        my $s = $subname;
 
         # De-Perl4.
         $subname =~ s/\'/::/;
@@ -5022,7 +5025,7 @@ sub cmd_l {
     } ## end elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s)
 
     # Bare 'l' command.
-    elsif ( $line =~ /^\s*$/ ) {
+    elsif ( $line !~ /\S/ ) {
 
         # Compute new range to list.
         $incr = $window - 1;
@@ -5033,14 +5036,14 @@ sub cmd_l {
     }
 
     # l [start]+number_of_lines
-    elsif ( $line =~ /^(\d*)\+(\d*)$/ ) {
+    elsif ( my ($new_start, $new_incr) = $line =~ /\A(\d*)\+(\d*)\z/ ) {
 
         # Don't reset start for 'l +nnn'.
-        $start = $1 if $1;
+        $start = $new_start if $new_start;
 
         # Increment for list. Use window size if not specified.
         # (Allows 'l +' to work.)
-        $incr = $2;
+        $incr = $new_incr;
         $incr = $window - 1 unless $incr;
 
         # Create a line range we'll understand, and recurse to do it.
