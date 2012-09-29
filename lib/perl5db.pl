@@ -4450,10 +4450,12 @@ doesn't work.
 =cut 
 
 sub cmd_b_line {
-    eval { break_on_line(@_); 1 } or do {
+    if (not eval { break_on_line(@_); 1 }) {
         local $\ = '';
         print $OUT $@ and return;
-    };
+    }
+
+    return;
 } ## end sub cmd_b_line
 
 =head3 cmd_b_filename_line(line, [condition]) (command)
@@ -4464,10 +4466,12 @@ doesn't work.
 =cut 
 
 sub cmd_b_filename_line {
-    eval { break_on_filename_line(@_); 1 } or do {
+    if (not eval { break_on_filename_line(@_); 1 }) {
         local $\ = '';
         print $OUT $@ and return;
-    };
+    }
+
+    return;
 }
 
 =head3 break_on_filename_line(file, line, [condition]) (API)
@@ -4607,10 +4611,12 @@ sub cmd_b_sub {
     } ## end unless (ref $subname eq 'CODE')
 
     # Try to set the breakpoint.
-    eval { break_subroutine( $subname, $cond ); 1 } or do {
+    if (not eval { break_subroutine( $subname, $cond ); 1 }) {
         local $\ = '';
         print $OUT $@ and return;
-      }
+    }
+
+    return;
 } ## end sub cmd_b_sub
 
 =head3 C<cmd_B> - delete breakpoint(s) (command)
@@ -4642,10 +4648,10 @@ sub cmd_B {
 
     # If there is a line spec, delete the breakpoint on that line.
     elsif ( $line =~ /^(\S.*)/ ) {
-        eval { &delete_breakpoint( $line || $dbline ); 1 } or do {
+        if (not eval { &delete_breakpoint( $line || $dbline ); 1 }) {
             local $\ = '';
             print $OUT $@ and return;
-        };
+        }
     } ## end elsif ($line =~ /^(\S.*)/)
 
     # No line spec.
@@ -6582,18 +6588,22 @@ sub readline {
         # Receive anything there is to receive.
         my $stuff = '';
         my $buf;
-        do {
+        my $first_time = 1;
+
+        while ($first_time or (length($buf) && ($stuff .= $buf) !~ /\n/))
+        {
+            $first_time = 0;
             $IN->recv( $buf = '', 2048 );   # XXX "what's wrong with sysread?"
                                             # XXX Don't know. You tell me.
-        } while length $buf and ($stuff .= $buf) !~ /\n/;
+        }
 
         # What we got.
-        $stuff;
+        return $stuff;
     } ## end if (ref $OUT and UNIVERSAL::isa...
 
     # No socket. Just read from the terminal.
     else {
-        $term->readline(@_);
+        return $term->readline(@_);
     }
 } ## end sub readline
 
@@ -8045,23 +8055,35 @@ this way, it brute-force searches C<%sub>, checking for identical references.
 
 =cut
 
+sub _find_sub_helper {
+    my $subr = shift;
+
+    return unless defined &$subr;
+    my $name = CvGV_name_or_bust($subr);
+    my $data;
+    $data = $sub{$name} if defined $name;
+    return $data if defined $data;
+
+    # Old stupid way...
+    $subr = \&$subr;    # Hard reference
+    my $s;
+    for ( keys %sub ) {
+        $s = $_, last if $subr eq \&$_;
+    }
+    if ($s)
+    {
+        return $sub{$s};
+    }
+    else
+    {
+        return;
+    }
+
+}
+
 sub find_sub {
     my $subr = shift;
-    $sub{$subr} or do {
-        return unless defined &$subr;
-        my $name = CvGV_name_or_bust($subr);
-        my $data;
-        $data = $sub{$name} if defined $name;
-        return $data if defined $data;
-
-        # Old stupid way...
-        $subr = \&$subr;    # Hard reference
-        my $s;
-        for ( keys %sub ) {
-            $s = $_, last if $subr eq \&$_;
-        }
-        $sub{$s} if $s;
-      } ## end do
+    return ( $sub{$subr} || _find_sub_helper($subr) );
 } ## end sub find_sub
 
 =head2 C<methods>
