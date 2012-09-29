@@ -3255,8 +3255,9 @@ Return to any given position in the B<true>-history list
 
                 # R - restart execution.
                 # rerun - controlled restart execution.
-                $cmd =~ /^(R|rerun\s*(.*))$/ && do {
-                    my @args = ($1 eq 'R' ? restart() : rerun($2));
+                if (my ($cmd_cmd, $cmd_params) =
+                    $cmd =~ /\A((?:R)|(?:rerun\s*(.*)))\z/) {
+                    my @args = ($cmd_cmd eq 'R' ? restart() : rerun($cmd_params));
 
                     # Close all non-system fds for a clean restart.  A more
                     # correct method would be to close all fds that were not
@@ -3281,7 +3282,7 @@ Return to any given position in the B<true>-history list
                     exec(@args) || print $OUT "exec failed: $!\n";
 
                     last CMD;
-                };
+                }
 
 =head4 C<|, ||> - pipe output through the pager.
 
@@ -3298,7 +3299,7 @@ reading another.
 =cut
 
                 # || - run command in the pager, with output to DB::OUT.
-                $cmd =~ /^\|\|?\s*[^|]/ && do {
+                if ($cmd =~ m#\A\|\|?\s*[^|]#) {
                     if ( $pager =~ /^\|/ ) {
 
                         # Default pager is into a pipe. Redirect I/O.
@@ -3351,29 +3352,34 @@ reading another.
                     select($selected), $selected = "" unless $cmd =~ /^\|\|/;
 
                     # Trim off the pipe symbols and run the command now.
-                    $cmd =~ s/^\|+\s*//;
+                    $cmd =~ s#\A\|+\s*##;
                     redo PIPE;
-                };
+                }
 
 =head3 END OF COMMAND PARSING
 
-Anything left in C<$cmd> at this point is a Perl expression that we want to 
-evaluate. We'll always evaluate in the user's context, and fully qualify 
+Anything left in C<$cmd> at this point is a Perl expression that we want to
+evaluate. We'll always evaluate in the user's context, and fully qualify
 any variables we might want to address in the C<DB> package.
 
 =cut
 
                 # t - turn trace on.
-                $cmd =~ s/^t\s+(\d+)?/\$DB::trace |= 1;\n/ && do {
-                    $trace_to_depth = $1 ? $stack_depth||0 + $1 : 1E9;
-                };
+                if ($cmd =~ s#\At\s+(\d+)?#\$DB::trace |= 1;\n#) {
+                    my $trace_arg = $1;
+                    $trace_to_depth = $trace_arg ? $stack_depth||0 + $1 : 1E9;
+                }
 
                 # s - single-step. Remember the last command was 's'.
-                $cmd =~ s/^s\s/\$DB::single = 1;\n/ && do { $laststep = 's' };
+                if ($cmd =~ s/\As\s/\$DB::single = 1;\n/) {
+                    $laststep = 's';
+                }
 
                 # n - single-step, but not into subs. Remember last command
                 # was 'n'.
-                $cmd =~ s/^n\s/\$DB::single = 2;\n/ && do { $laststep = 'n' };
+                if ($cmd =~ s#\An\s#\$DB::single = 2;\n#) {
+                    $laststep = 'n';
+                }
 
             }    # PIPE:
 
