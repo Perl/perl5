@@ -2154,10 +2154,10 @@ the new command. This is faster, but perhaps a bit more convoluted.
             $signal = 0;
 
             # Handle continued commands (ending with \):
-            $cmd =~ s/\\$/\n/ && do {
+            if ($cmd =~ s/\\\z/\n/) {
                 $cmd .= &readline("  cont: ");
                 redo CMD;
-            };
+            }
 
 =head4 The null command
 
@@ -2228,11 +2228,11 @@ environment, and executing with the last value of C<$?>.
 
 =cut
 
-                $cmd =~ /^q$/ && do {
+                if ($cmd eq 'q') {
                     $fall_off_end = 1;
                     clean_ENV();
                     exit $?;
-                };
+                }
 
 =head4 C<t> - trace [n]
 
@@ -2241,8 +2241,7 @@ If level is specified, set C<$trace_to_depth>.
 
 =cut
 
-                $cmd =~ /^t(?:\s+(\d+))?$/ && do {
-                    my $levels = $1;
+                if (my ($levels) = $cmd =~ /\At(?:\s+(\d+))?\z/) {
                     $trace ^= 1;
                     local $\ = '';
                     $trace_to_depth = $levels ? $stack_depth + $levels : 1E9;
@@ -2251,7 +2250,7 @@ If level is specified, set C<$trace_to_depth>.
                       ? ( $levels ? "on (to level $trace_to_depth)" : "on" )
                       : "off" ) . "\n";
                     next CMD;
-                };
+                }
 
 =head4 C<S> - list subroutines matching/not matching a pattern
 
