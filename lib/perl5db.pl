@@ -7723,29 +7723,40 @@ C<$fixed_less> so we don't have to go through doing the stats again.
 
 use vars qw($fixed_less);
 
-sub fix_less {
-
-    # We already know if this is set.
-    return if $fixed_less;
-
-    # Pager is less for sure.
-    my $is_less = $pager =~ /\bless\b/;
-    if ( $pager =~ /\bmore\b/ ) {
-
+sub _calc_is_less {
+    if ($pager =~ /\bless\b/)
+    {
+        return 1;
+    }
+    elsif ($pager =~ /\bmore\b/)
+    {
         # Nope, set to more. See what's out there.
         my @st_more = stat('/usr/bin/more');
         my @st_less = stat('/usr/bin/less');
 
         # is it really less, pretending to be more?
-             $is_less = @st_more
-          && @st_less
-          && $st_more[0] == $st_less[0]
-          && $st_more[1] == $st_less[1];
-    } ## end if ($pager =~ /\bmore\b/)
+        return (
+            @st_more
+            && @st_less
+            && $st_more[0] == $st_less[0]
+            && $st_more[1] == $st_less[1]
+        );
+    }
+    else {
+        return;
+    }
+}
+
+sub fix_less {
+
+    # We already know if this is set.
+    return if $fixed_less;
 
     # changes environment!
     # 'r' added so we don't do (slow) stats again.
-    $fixed_less = 1 if $is_less;
+    $fixed_less = 1 if _calc_is_less();
+
+    return;
 } ## end sub fix_less
 
 =head1 DIE AND WARN MANAGEMENT
