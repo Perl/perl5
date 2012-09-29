@@ -1629,9 +1629,7 @@ and if we can.
     } ## end elsif (from if(defined $remoteport))
 
     # Unbuffer DB::OUT. We need to see responses right away.
-    my $previous = select($OUT);
-    $| = 1;                                  # for DB::OUT
-    select($previous);
+    $OUT->autoflush(1);
 
     # Line info goes to debugger output unless pointed elsewhere.
     # Pointing elsewhere makes it possible for slave editors to
@@ -3344,10 +3342,9 @@ reading another.
                       if $pager =~ /^\|/
                       && ( "" eq $SIG{PIPE} || "DEFAULT" eq $SIG{PIPE} );
 
-                    # Save current filehandle, unbuffer out, and put it back.
+                    OUT->autoflush(1);
+                    # Save current filehandle, and put it back.
                     $selected = select(OUT);
-                    $|        = 1;
-
                     # Don't put it back if pager was a pipe.
                     select($selected), $selected = "" unless $cmd =~ /^\|\|/;
 
@@ -6111,9 +6108,7 @@ sub setterm {
             open( OUT, ">$o" ) or die "Cannot open TTY '$o' for write: $!";
             $IN  = \*IN;
             $OUT = \*OUT;
-            my $sel = select($OUT);
-            $| = 1;
-            select($sel);
+            $OUT->autoflush(1);
         } ## end if ($tty)
 
         # We don't have a TTY - try to find one via Term::Rendezvous.
@@ -6933,9 +6928,7 @@ sub reset_IN_OUT {
     }
 
     # Unbuffer the output filehandle.
-    my $o = select $OUT;
-    $| = 1;
-    select $o;
+    $OUT->autoflush(1);
 
     # Point LINEINFO to the same output filehandle if it was there before.
     $LINEINFO = $OUT if $switch_li;
