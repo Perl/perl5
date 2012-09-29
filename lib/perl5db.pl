@@ -7664,7 +7664,7 @@ C<Term::ReadLine::TermCap>).
 =cut
 
 sub print_help {
-    local $_ = shift;
+    my $help_str = (@_);
 
     # Restore proper alignment destroyed by eeevil I<> and B<>
     # ornaments: A pox on both their houses!
@@ -7672,7 +7672,7 @@ sub print_help {
     # A help command will have everything up to and including
     # the first tab sequence padded into a field 16 (or if indented 20)
     # wide.  If it's wider than that, an extra space will be added.
-    s{
+    $help_str =~ s{
         ^                       # only matters at start of line
           ( \040{4} | \t )*     # some subcommands are indented
           ( < ?                 # so <CR> works
@@ -7693,7 +7693,7 @@ sub print_help {
 
     }mgex;
 
-    s{                          # handle bold ornaments
+    $help_str =~ s{                          # handle bold ornaments
        B < ( [^>] + | > ) >
     } {
           $Term::ReadLine::TermCap::rl_term_set[2]
@@ -7701,7 +7701,7 @@ sub print_help {
         . $Term::ReadLine::TermCap::rl_term_set[3]
     }gex;
 
-    s{                         # handle italic ornaments
+    $help_str =~ s{                         # handle italic ornaments
        I < ( [^>] + | > ) >
     } {
           $Term::ReadLine::TermCap::rl_term_set[0]
@@ -7710,7 +7710,9 @@ sub print_help {
     }gex;
 
     local $\ = '';
-    print $OUT $_;
+    print {$OUT} $help_str;
+
+    return;
 } ## end sub print_help
 
 =head2 C<fix_less>
