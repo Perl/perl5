@@ -5235,10 +5235,10 @@ sub cmd_L {
     } ## end if (%break_on_load and...
     if ($watch_wanted) {
         if ( $trace & 2 ) {
-            print $OUT "Watch-expressions:\n" if @to_watch;
-            for my $expr (@to_watch) {
-                print $OUT " $expr\n";
-                last if $signal;
+            print {$OUT} "Watch-expressions:\n" if @to_watch;
+            TO_WATCH: for my $expr (@to_watch) {
+                print {$OUT} " $expr\n";
+                last TO_WATCH if $signal;
             }
         } ## end if ($trace & 2)
     } ## end if ($watch_wanted)
