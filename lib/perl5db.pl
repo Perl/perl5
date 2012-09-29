@@ -4839,18 +4839,15 @@ sub cmd_h {
     my $line = shift || '';
 
     # 'h h'. Print the long-format help.
-    if ( $line =~ /^h\s*/ ) {
+    if ( $line =~ /\Ah\s*\z/ ) {
         print_help($help);
     }
 
     # 'h <something>'. Search for the command and print only its help.
-    elsif ( $line =~ /^(\S.*)$/ ) {
+    elsif ( my ($asked) = $line =~ /\A(\S.*)\z/ ) {
 
         # support long commands; otherwise bogus errors
         # happen when you ask for h on <CR> for example
-        my $asked = $1;    # the command requested
-                           # (for proper error message)
-
         my $qasked = quotemeta($asked);    # for searching; we don't
                                            # want to use it as a pattern.
                                            # XXX: finds CR but not <CR>
