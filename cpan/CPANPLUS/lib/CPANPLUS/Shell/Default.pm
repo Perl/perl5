@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.9131";
+    $VERSION = "0.9133";
 }
 
 load CPANPLUS::Shell;
