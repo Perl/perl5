@@ -8191,48 +8191,8 @@ program's STDIN and STDOUT.
 
 =cut
 
-sub runman {
-    my $page = shift;
-    unless ($page) {
-        &system("$doccmd $doccmd");
-        return;
-    }
-
-    # this way user can override, like with $doccmd="man -Mwhatever"
-    # or even just "man " to disable the path check.
-    unless ( $doccmd eq 'man' ) {
-        &system("$doccmd $page");
-        return;
-    }
-
-    $page = 'perl' if lc($page) eq 'help';
-
-    require Config;
-    my $man1dir = $Config::Config{'man1dir'};
-    my $man3dir = $Config::Config{'man3dir'};
-    for ( $man1dir, $man3dir ) { s#/[^/]*\z## if /\S/ }
-    my $manpath = '';
-    $manpath .= "$man1dir:" if $man1dir =~ /\S/;
-    $manpath .= "$man3dir:" if $man3dir =~ /\S/ && $man1dir ne $man3dir;
-    chop $manpath if $manpath;
-
-    # harmless if missing, I figure
-    my $oldpath = $ENV{MANPATH};
-    $ENV{MANPATH} = $manpath if $manpath;
-    my $nopathopt = $^O =~ /dunno what goes here/;
-    if (
-        CORE::system(
-            $doccmd,
-
-            # I just *know* there are men without -M
-            ( ( $manpath && !$nopathopt ) ? ( "-M", $manpath ) : () ),
-            split ' ', $page
-        )
-      )
-    {
-        unless ( $page =~ /^perl\w/ ) {
-# do it this way because its easier to slurp in to keep up to date - clunky though.
-my @pods = qw(
+my %_is_in_pods = (map { $_ => 1 }
+    qw(
     5004delta
     5005delta
     561delta
@@ -8363,13 +8323,56 @@ my @pods = qw(
     win32
     xs
     xstut
+    )
 );
-            if (grep { $page eq $_ } @pods) {
+
+sub runman {
+    my $page = shift;
+    unless ($page) {
+        &system("$doccmd $doccmd");
+        return;
+    }
+
+    # this way user can override, like with $doccmd="man -Mwhatever"
+    # or even just "man " to disable the path check.
+    unless ( $doccmd eq 'man' ) {
+        &system("$doccmd $page");
+        return;
+    }
+
+    $page = 'perl' if lc($page) eq 'help';
+
+    require Config;
+    my $man1dir = $Config::Config{'man1dir'};
+    my $man3dir = $Config::Config{'man3dir'};
+    for ( $man1dir, $man3dir ) { s#/[^/]*\z## if /\S/ }
+    my $manpath = '';
+    $manpath .= "$man1dir:" if $man1dir =~ /\S/;
+    $manpath .= "$man3dir:" if $man3dir =~ /\S/ && $man1dir ne $man3dir;
+    chop $manpath if $manpath;
+
+    # harmless if missing, I figure
+    my $oldpath = $ENV{MANPATH};
+    $ENV{MANPATH} = $manpath if $manpath;
+    my $nopathopt = $^O =~ /dunno what goes here/;
+    if (
+        CORE::system(
+            $doccmd,
+
+            # I just *know* there are men without -M
+            ( ( $manpath && !$nopathopt ) ? ( "-M", $manpath ) : () ),
+            split ' ', $page
+        )
+      )
+    {
+        unless ( $page =~ /^perl\w/ ) {
+# do it this way because its easier to slurp in to keep up to date - clunky though.
+            if (exists($_is_in_pods{$page})) {
                 $page =~ s/^/perl/;
                 CORE::system( $doccmd,
                     ( ( $manpath && !$nopathopt ) ? ( "-M", $manpath ) : () ),
                     $page );
-            } ## end if (grep { $page eq $_...
+            }
         } ## end unless ($page =~ /^perl\w/)
     } ## end if (CORE::system($doccmd...
     if ( defined $oldpath ) {
