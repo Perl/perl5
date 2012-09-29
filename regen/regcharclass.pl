@@ -1181,3 +1181,8 @@ UTF8_CHAR: Matches utf8 from 1 to 5 bytes
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
 \p{_Perl_Quotemeta}
+
+FOR_TESTING_DEMO: This is used to test if we generate incorrect code (currently is bad)
+=> UTF8 :safe
+"\x{3B7}\x{342}"
+"\x{3B9}\x{308}\x{301}"
