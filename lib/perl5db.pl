@@ -2258,11 +2258,13 @@ Walks through C<%sub>, checking to see whether or not to print the name.
 
 =cut
 
-                $cmd =~ /^S(\s+(!)?(.+))?$/ && do {
-
-                    my $Srev     = defined $2;     # Reverse scan?
-                    my $Spatt    = $3;             # The pattern (if any) to use.
-                    my $Snocheck = !defined $1;    # No args - print all subs.
+                if (my ($print_all_subs, $should_reverse, $Spatt)
+                    = $cmd =~ /\AS(\s+(!)?(.+))?\z/) {
+                    # $Spatt is the pattern (if any) to use.
+                    # Reverse scan?
+                    my $Srev     = defined $should_reverse;
+                    # No args - print all subs.
+                    my $Snocheck = !defined $print_all_subs;
 
                     # Need to make these sane here.
                     local $\ = '';
@@ -2278,7 +2280,7 @@ Walks through C<%sub>, checking to see whether or not to print the name.
                         }
                     }
                     next CMD;
-                };
+                }
 
 =head4 C<X> - list variables in current package
 
@@ -2297,12 +2299,13 @@ Uses C<dumpvar.pl> to dump out the current values for selected variables.
 
                 # Bare V commands get the currently-being-debugged package
                 # added.
-                $cmd =~ /^V$/ && do {
+                if ($cmd eq "V") {
                     $cmd = "V $package";
-                };
+                }
 
                 # V - show variables in package.
-                $cmd =~ /^V\b\s*(\S+)\s*(.*)/ && do {
+                if (my ($new_packname, $new_vars_str) =
+                    $cmd =~ /\AV\b\s*(\S+)\s*(.*)/) {
 
                     # Save the currently selected filehandle and
                     # force output to debugger's filehandle (dumpvar
@@ -2310,8 +2313,8 @@ Uses C<dumpvar.pl> to dump out the current values for selected variables.
                     my $savout = select($OUT);
 
                     # Grab package name and variables to dump.
-                    $packname = $1;
-                    my @vars     = split( ' ', $2 );
+                    $packname = $new_packname;
+                    my @vars     = split( ' ', $new_vars_str );
 
                     # If main::dumpvar isn't here, get it.
                     do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
@@ -2349,7 +2352,7 @@ Uses C<dumpvar.pl> to dump out the current values for selected variables.
                     # Restore the output filehandle, and go round again.
                     select($savout);
                     next CMD;
-                };
+                }
 
 =head4 C<x> - evaluate and print an expression
 
@@ -2358,15 +2361,15 @@ via C<dumpvar.pl> instead of just printing it directly.
 
 =cut
 
-                $cmd =~ s/^x\b/ / && do {    # Remainder gets done by DB::eval()
+                if ($cmd =~ s#\Ax\b# #) {    # Remainder gets done by DB::eval()
                     $onetimeDump = 'dump';    # main::dumpvar shows the output
 
                     # handle special  "x 3 blah" syntax XXX propagate
                     # doc back to special variables.
-                    if ( $cmd =~ s/^\s*(\d+)(?=\s)/ / ) {
+                    if ( $cmd =~ s#\A\s*(\d+)(?=\s)# #) {
                         $onetimedumpDepth = $1;
                     }
-                };
+                }
 
 =head4 C<m> - print methods
 
@@ -2374,22 +2377,21 @@ Just uses C<DB::methods> to determine what methods are available.
 
 =cut
 
-                $cmd =~ s/^m\s+([\w:]+)\s*$/ / && do {
+                if ($cmd =~ s#\Am\s+([\w:]+)\s*\z# #) {
                     methods($1);
                     next CMD;
-                };
+                }
 
                 # m expr - set up DB::eval to do the work
-                $cmd =~ s/^m\b/ / && do {    # Rest gets done by DB::eval()
+                if ($cmd =~ s#\Am\b# #) {    # Rest gets done by DB::eval()
                     $onetimeDump = 'methods';   #  method output gets used there
-                };
+                }
 
 =head4 C<f> - switch files
 
 =cut
 
-                $cmd =~ /^f\b\s*(.*)/ && do {
-                    $file = $1;
+                if (($file) = $cmd =~ /\Af\b\s*(.*)/) {
                     $file =~ s/\s+$//;
 
                     # help for no arguments (old-style was return from sub).
@@ -2431,7 +2433,7 @@ Just uses C<DB::methods> to determine what methods are available.
                         print $OUT "Already in $file.\n";
                         next CMD;
                     }
-                };
+                }
 
 =head4 C<.> - return to last-executed line.
 
@@ -2441,7 +2443,7 @@ and then we look up the line in the magical C<%dbline> hash.
 =cut
 
                 # . command.
-                $cmd =~ /^\.$/ && do {
+                if ($cmd eq '.') {
                     $incr = -1;    # stay at current line
 
                     # Reset everything to the old location.
@@ -2453,7 +2455,7 @@ and then we look up the line in the magical C<%dbline> hash.
                     # Now where are we?
                     print_lineinfo($position);
                     next CMD;
-                };
+                }
 
 =head4 C<-> - back one window
 
@@ -2465,7 +2467,7 @@ C<$start>) in C<$cmd> to be executed later.
 =cut
 
                 # - - back a window.
-                $cmd =~ /^-$/ && do {
+                if ($cmd eq '-') {
 
                     # back up by a window; go to 1 if back too far.
                     $start -= $incr + $window + 1;
@@ -2474,7 +2476,7 @@ C<$start>) in C<$cmd> to be executed later.
 
                     # Generate and execute a "l +" command (handled below).
                     $cmd = 'l ' . ($start) . '+';
-                };
+                }
 
 =head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, {, {{>
 
@@ -2489,19 +2491,20 @@ deal with them instead of processing them in-line.
 
                 # All of these commands were remapped in perl 5.8.0;
                 # we send them off to the secondary dispatcher (see below).
-                $cmd =~ /^([aAbBeEhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so && do {
-                    &cmd_wrapper( $1, $2, $line );
+                if (my ($cmd_letter, $my_arg) = $cmd =~ /\A([aAbBeEhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so) {
+                    &cmd_wrapper( $cmd_letter, $my_arg, $line );
                     next CMD;
-                };
+                }
 
 =head4 C<y> - List lexicals in higher scope
 
-Uses C<PadWalker> to find the lexicals supplied as arguments in a scope    
+Uses C<PadWalker> to find the lexicals supplied as arguments in a scope
 above the current one and then displays then using C<dumpvar.pl>.
 
 =cut
 
-                $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/ && do {
+                if (my ($match_level, $match_vars)
+                    = $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/) {
 
                     # See if we've got the necessary support.
                     eval { require PadWalker; PadWalker->VERSION(0.08) }
@@ -2519,10 +2522,10 @@ above the current one and then displays then using C<dumpvar.pl>.
                       and next CMD;
 
                     # Got all the modules we need. Find them and print them.
-                    my @vars = split( ' ', $2 || '' );
+                    my @vars = split( ' ', $match_vars || '' );
 
                     # Find the pad.
-                    my $h = eval { PadWalker::peek_my( ( $1 || 0 ) + 1 ) };
+                    my $h = eval { PadWalker::peek_my( ( $match_level || 0 ) + 1 ) };
 
                     # Oops. Can't find it.
                     $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
@@ -2537,7 +2540,7 @@ above the current one and then displays then using C<dumpvar.pl>.
                       for sort keys %$h;
                     select($savout);
                     next CMD;
-                };
+                }
 
 =head3 COMMANDS NOT WORKING AFTER PROGRAM ENDS
 
@@ -2551,12 +2554,12 @@ they can't.
 
 Done by setting C<$single> to 2, which forces subs to execute straight through
 when entered (see C<DB::sub>). We also save the C<n> command in C<$laststep>,
-so a null command knows what to re-execute. 
+so a null command knows what to re-execute.
 
 =cut
 
                 # n - next
-                $cmd =~ /^n$/ && do {
+                if ($cmd eq 'n') {
                     end_report(), next CMD if $finished and $level <= 1;
 
                     # Single step, but don't enter subs.
@@ -2565,17 +2568,17 @@ so a null command knows what to re-execute.
                     # Save for empty command (repeat last).
                     $laststep = $cmd;
                     last CMD;
-                };
+                }
 
 =head4 C<s> - single-step, entering subs
 
-Sets C<$single> to 1, which causes C<DB::sub> to continue tracing inside     
+Sets C<$single> to 1, which causes C<DB::sub> to continue tracing inside
 subs. Also saves C<s> as C<$lastcmd>.
 
 =cut
 
                 # s - single step.
-                $cmd =~ /^s$/ && do {
+                if ($cmd eq 's') {
 
                     # Get out and restart the command loop if program
                     # has finished.
@@ -2587,7 +2590,7 @@ subs. Also saves C<s> as C<$lastcmd>.
                     # Save for empty command (repeat last).
                     $laststep = $cmd;
                     last CMD;
-                };
+                }
 
 =head4 C<c> - run continuously, setting an optional breakpoint
 
