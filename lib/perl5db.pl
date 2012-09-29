@@ -186,7 +186,7 @@ uses this hash to determine where breakpoints have been set. Any true value is
 considered to be a breakpoint; C<perl5db.pl> uses C<$break_condition\0$action>.
 Values are magical in numeric context: 1 if the line is breakable, 0 if not.
 
-The scalar C<${"_<$filename"}> simply contains the string C<_<$filename>.
+The scalar C<${"_<$filename"}> simply contains the string C<<< _<$filename> >>>.
 This is also the case for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings looks
 like C<(eval 34).
@@ -2602,14 +2602,14 @@ in this and all call levels above this one.
 =cut
 
                 # c - start continuous execution.
-                $cmd =~ /^c\b\s*([\w:]*)\s*$/ && do {
+                if (($i) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
 
                     # Hey, show's over. The debugged program finished
                     # executing already.
                     end_report(), next CMD if $finished and $level <= 1;
 
                     # Capture the place to put a one-time break.
-                    $subname = $i = $1;
+                    $subname = $i;
 
                     #  Probably not needed, since we finish an interactive
                     #  sub-session anyway...
@@ -2700,7 +2700,7 @@ in this and all call levels above this one.
                         $stack[ $i ] &= ~1;
                     }
                     last CMD;
-                };
+                }
 
 =head4 C<r> - return from a subroutine
 
@@ -2713,7 +2713,7 @@ appropriately, and force us out of the command loop.
 =cut
 
                 # r - return from the current subroutine.
-                $cmd =~ /^r$/ && do {
+                if ($cmd eq 'r') {
 
                     # Can't do anything if the program's over.
                     end_report(), next CMD if $finished and $level <= 1;
@@ -2724,7 +2724,7 @@ appropriately, and force us out of the command loop.
                     # Print return value unless the stack is empty.
                     $doret = $option{PrintRet} ? $stack_depth - 1 : -2;
                     last CMD;
-                };
+                }
 
 =head4 C<T> - stack trace
 
@@ -2732,10 +2732,10 @@ Just calls C<DB::print_trace>.
 
 =cut
 
-                $cmd =~ /^T$/ && do {
+                if ($cmd eq 'T') {
                     print_trace( $OUT, 1 );    # skip DB
                     next CMD;
-                };
+                }
 
 =head4 C<w> - List window around current line.
 
@@ -2743,7 +2743,10 @@ Just calls C<DB::cmd_w>.
 
 =cut
 
-                $cmd =~ /^w\b\s*(.*)/s && do { &cmd_w( 'w', $1 ); next CMD; };
+                if (my ($arg) = $cmd =~ /\Aw\b\s*(.*)/s) {
+                    &cmd_w( 'w', $arg );
+                    next CMD;
+                }
 
 =head4 C<W> - watch-expression processing.
 
@@ -2751,22 +2754,24 @@ Just calls C<DB::cmd_W>.
 
 =cut
 
-                $cmd =~ /^W\b\s*(.*)/s && do { &cmd_W( 'W', $1 ); next CMD; };
+                if (my ($arg) = $cmd =~ /\AW\b\s*(.*)/s) {
+                    &cmd_W( 'W', $arg );
+                    next CMD;
+                }
 
 =head4 C</> - search forward for a string in the source
 
-We take the argument and treat it as a pattern. If it turns out to be a 
+We take the argument and treat it as a pattern. If it turns out to be a
 bad one, we return the error we got from trying to C<eval> it and exit.
-If not, we create some code to do the search and C<eval> it so it can't 
+If not, we create some code to do the search and C<eval> it so it can't
 mess us up.
 
 =cut
 
-                $cmd =~ /^\/(.*)$/ && do {
+                # The pattern as a string.
+                use vars qw($inpat);
 
-                    # The pattern as a string.
-                    use vars qw($inpat);
-                    $inpat = $1;
+                if (($inpat) = $cmd =~ m#\A/(.*)\z#) {
 
                     # Remove the final slash.
                     $inpat =~ s:([^\\])/$:$1:;
@@ -2831,7 +2836,7 @@ mess us up.
                     # If we wrapped, there never was a match.
                     print $OUT "/$pat/: not found\n" if ( $start == $end );
                     next CMD;
-                };
+                }
 
 =head4 C<?> - search backward for a string in the source
 
@@ -2840,10 +2845,9 @@ Same as for C</>, except the loop runs backwards.
 =cut
 
                 # ? - backward pattern search.
-                $cmd =~ /^\?(.*)$/ && do {
+                if (my ($inpat) = $cmd =~ m#\A\?(.*)\z#) {
 
                     # Get the pattern, remove trailing question mark.
-                    my $inpat = $1;
                     $inpat =~ s:([^\\])\?$:$1:;
 
                     # If we've got one ...
@@ -2902,7 +2906,7 @@ Same as for C</>, except the loop runs backwards.
                     # Say we failed if the loop never found anything,
                     print $OUT "?$pat?: not found\n" if ( $start == $end );
                     next CMD;
-                };
+                }
 
 =head4 C<$rc> - Recall command
 
@@ -2913,7 +2917,7 @@ into C<$cmd>, and redoes the loop to execute it.
 =cut
 
                 # $rc - recall command.
-                $cmd =~ /^$rc+\s*(-)?(\d+)?$/ && do {
+                if (my ($minus, $arg) = $cmd =~ m#\A$rc+\s*(-)?(\d+)?\z#) {
 
                     # No arguments, take one thing off history.
                     pop(@hist) if length($cmd) > 1;
@@ -2922,7 +2926,7 @@ into C<$cmd>, and redoes the loop to execute it.
                     #  Y - index back from most recent (by 1 if bare minus)
                     #  N - go to that particular command slot or the last
                     #      thing if nothing following.
-                    $i = $1 ? ( $#hist - ( $2 || 1 ) ) : ( $2 || $#hist );
+                    $i = $minus ? ( $#hist - ( $arg || 1 ) ) : ( $arg || $#hist );
 
                     # Pick out the command desired.
                     $cmd = $hist[$i];
@@ -2931,7 +2935,7 @@ into C<$cmd>, and redoes the loop to execute it.
                     # with that command in the buffer.
                     print $OUT $cmd, "\n";
                     redo CMD;
-                };
+                }
 
 =head4 C<$sh$sh> - C<system()> command
 
@@ -2942,12 +2946,12 @@ C<STDOUT> from getting messed up.
 
                 # $sh$sh - run a shell command (if it's all ASCII).
                 # Can't run shell commands with Unicode in the debugger, hmm.
-                $cmd =~ /^$sh$sh\s*([\x00-\xff]*)/ && do {
+                if (my ($arg) = $cmd =~ m#\A$sh$sh\s*(.*)#ms) {
 
                     # System it.
-                    &system($1);
+                    &system($arg);
                     next CMD;
-                };
+                }
 
 =head4 C<$rc I<pattern> $rc> - Search command history
 
@@ -2957,10 +2961,10 @@ If a command is found, it is placed in C<$cmd> and executed via C<redo>.
 =cut
 
                 # $rc pattern $rc - find a command in the history.
-                $cmd =~ /^$rc([^$rc].*)$/ && do {
+                if (my ($arg) = $cmd =~ /\A$rc([^$rc].*)\z/) {
 
                     # Create the pattern to use.
-                    $pat = "^$1";
+                    $pat = "^$arg";
 
                     # Toss off last entry if length is >1 (and it always is).
                     pop(@hist) if length($cmd) > 1;
@@ -2982,22 +2986,22 @@ If a command is found, it is placed in C<$cmd> and executed via C<redo>.
                     $cmd = $hist[$i];
                     print $OUT $cmd, "\n";
                     redo CMD;
-                };
+                }
 
-=head4 C<$sh> - Invoke a shell     
+=head4 C<$sh> - Invoke a shell
 
 Uses C<DB::system> to invoke a shell.
 
 =cut
 
                 # $sh - start a shell.
-                $cmd =~ /^$sh$/ && do {
+                if ($cmd =~ /\A$sh\z/) {
 
                     # Run the user's shell. If none defined, run Bourne.
                     # We resume execution when the shell terminates.
                     &system( $ENV{SHELL} || "/bin/sh" );
                     next CMD;
-                };
+                }
 
 =head4 C<$sh I<command>> - Force execution of a command in a shell
 
@@ -3007,15 +3011,15 @@ C<DB::system> to avoid problems with C<STDIN> and C<STDOUT>.
 =cut
 
                 # $sh command - start a shell and run a command in it.
-                $cmd =~ /^$sh\s*([\x00-\xff]*)/ && do {
+                if (my ($arg) = $cmd =~ m#\A$sh\s*(.*)#ms) {
 
                     # XXX: using csh or tcsh destroys sigint retvals!
                     #&system($1);  # use this instead
 
                     # use the user's shell, or Bourne if none defined.
-                    &system( $ENV{SHELL} || "/bin/sh", "-c", $1 );
+                    &system( $ENV{SHELL} || "/bin/sh", "-c", $arg );
                     next CMD;
-                };
+                }
 
 =head4 C<H> - display commands in history
 
@@ -3023,17 +3027,18 @@ Prints the contents of C<@hist> (if any).
 
 =cut
 
-                $cmd =~ /^H\b\s*\*/ && do {
+                if ($cmd =~ /\AH\b\s*\*/) {
                     @hist = @truehist = ();
                     print $OUT "History cleansed\n";
                     next CMD;
-                };
+                }
 
-                $cmd =~ /^H\b\s*(-(\d+))?/ && do {
+                if (my ($num)
+                    = $cmd =~ /\AH\b\s*(?:-(\d+))?/) {
 
                     # Anything other than negative numbers is ignored by
                     # the (incorrect) pattern, so this test does nothing.
-                    $end = $2 ? ( $#hist - $2 ) : 0;
+                    $end = $num ? ( $#hist - $num ) : 0;
 
                     # Set to the minimum if less than zero.
                     $hist = 0 if $hist < 0;
@@ -3048,7 +3053,7 @@ Prints the contents of C<@hist> (if any).
                           unless $hist[$i] =~ /^.?$/;
                     }
                     next CMD;
-                };
+                }
 
 =head4 C<man, doc, perldoc> - look up documentation
 
@@ -3057,10 +3062,11 @@ Just calls C<runman()> to print the appropriate document.
 =cut
 
                 # man, perldoc, doc - show manual pages.
-                $cmd =~ /^(?:man|(?:perl)?doc)\b(?:\s+([^(]*))?$/ && do {
-                    runman($1);
+                if (my ($man_page)
+                    = $cmd =~ /\A(?:man|(?:perl)?doc)\b(?:\s+([^(]*))?\z/) {
+                    runman($man_page);
                     next CMD;
-                };
+                }
 
 =head4 C<p> - print
 
@@ -3069,11 +3075,14 @@ the bottom of the loop.
 
 =cut
 
+                my $print_cmd = 'print {$DB::OUT} ';
                 # p - print (no args): print $_.
-                $cmd =~ s/^p$/print {\$DB::OUT} \$_/;
+                if ($cmd eq 'p') {
+                    $cmd = $print_cmd . '$_';
+                }
 
                 # p - print the given expression.
-                $cmd =~ s/^p\b/print {\$DB::OUT} /;
+                $cmd =~ s/\Ap\b/$print_cmd /;
 
 =head4 C<=> - define command alias
 
@@ -3082,7 +3091,7 @@ Manipulates C<%alias> to add or list command aliases.
 =cut
 
                 # = - set up a command alias.
-                $cmd =~ s/^=\s*// && do {
+                if ($cmd =~ s/\A=\s*//) {
                     my @keys;
                     if ( length $cmd == 0 ) {
 
@@ -3151,7 +3160,7 @@ Manipulates C<%alias> to add or list command aliases.
                         }
                     } ## end for my $k (@keys)
                     next CMD;
-                };
+                }
 
 =head4 C<source> - read commands from a file.
 
@@ -3161,8 +3170,8 @@ pick it up.
 =cut
 
                 # source - read commands from a file (or pipe!) and execute.
-                $cmd =~ /^source\s+(.*\S)/ && do {
-                    if ( open my $fh, $1 ) {
+                if (my ($sourced_fn) = $cmd =~ /\Asource\s+(.*\S)/) {
+                    if ( open my $fh, $sourced_fn ) {
 
                         # Opened OK; stick it in the list of file handles.
                         push @cmdfhs, $fh;
@@ -3170,13 +3179,13 @@ pick it up.
                     else {
 
                         # Couldn't open it.
-                        &warn("Can't execute '$1': $!\n");
+                        &warn("Can't execute '$sourced_fn': $!\n");
                     }
                     next CMD;
-                };
+                }
 
-                $cmd =~ /^(enable|disable)\s+(\S+)\s*$/ && do {
-                    my ($cmd, $position) = ($1, $2);
+                if (my ($which_cmd, $position)
+                    = $cmd =~ /^(enable|disable)\s+(\S+)\s*$/) {
 
                     my ($fn, $line_num);
                     if ($position =~ m{\A\d+\z})
@@ -3184,9 +3193,9 @@ pick it up.
                         $fn = $filename;
                         $line_num = $position;
                     }
-                    elsif ($position =~ m{\A(.*):(\d+)\z})
-                    {
-                        ($fn, $line_num) = ($1, $2);
+                    elsif (my ($new_fn, $new_line_num)
+                        = $position =~ m{\A(.*):(\d+)\z}) {
+                        ($fn, $line_num) = ($new_fn, $new_line_num);
                     }
                     else
                     {
@@ -3196,7 +3205,7 @@ pick it up.
                     if (defined($fn)) {
                         if (_has_breakpoint_data_ref($fn, $line_num)) {
                             _set_breakpoint_enabled_status($fn, $line_num,
-                                ($cmd eq 'enable' ? 1 : '')
+                                ($which_cmd eq 'enable' ? 1 : '')
                             );
                         }
                         else {
@@ -3205,7 +3214,7 @@ pick it up.
                     }
 
                     next CMD;
-                };
+                }
 
 =head4 C<save> - send current history to a file
 
@@ -3217,9 +3226,9 @@ Note that all C<^(save|source)>'s are commented out with a view to minimise recu
 =cut
 
                 # save source - write commands to a file for later use
-                $cmd =~ /^save\s*(.*)$/ && do {
-                    my $file = $1 || '.perl5dbrc';    # default?
-                    if ( open my $fh, "> $file" ) {
+                if (my ($new_fn) = $cmd =~ /\Asave\s*(.*)\z/) {
+                    my $filename = $new_fn || '.perl5dbrc';    # default?
+                    if ( open my $fh, '>', $filename ) {
 
                        # chomp to remove extraneous newlines from source'd files
                         chomp( my @truelist =
@@ -3229,14 +3238,14 @@ Note that all C<^(save|source)>'s are commented out with a view to minimise recu
                         print "commands saved in $file\n";
                     }
                     else {
-                        &warn("Can't save debugger commands in '$1': $!\n");
+                        &warn("Can't save debugger commands in '$new_fn': $!\n");
                     }
                     next CMD;
-                };
+                }
 
 =head4 C<R> - restart
 
-Restart the debugger session. 
+Restart the debugger session.
 
 =head4 C<rerun> - rerun the current session
 
