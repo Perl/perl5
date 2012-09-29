@@ -6700,7 +6700,7 @@ during initialization.
 =cut
 
 sub parse_options {
-    local ($_) = @_;
+    my ($s) = @_;
     local $\ = '';
 
     my $option;
@@ -6711,30 +6711,41 @@ sub parse_options {
       pager quote ReadLine recallCommand RemotePort ShellBang TTY CommandSet
     };
 
-    while (length) {
+    while (length($s)) {
         my $val_defaulted;
 
         # Clean off excess leading whitespace.
-        s/^\s+// && next;
+        $s =~ s/^\s+// && next;
 
         # Options are always all word characters, followed by a non-word
         # separator.
-        s/^(\w+)(\W?)// or print( $OUT "Invalid option '$_'\n" ), last;
+        if ($s !~ s/^(\w+)(\W?)//) {
+            print {$OUT} "Invalid option '$s'\n";
+            last;
+        }
         my ( $opt, $sep ) = ( $1, $2 );
 
         # Make sure that such an option exists.
-        my $matches = grep( /^\Q$opt/ && ( $option = $_ ), @options )
-          || grep( /^\Q$opt/i && ( $option = $_ ), @options );
+        my $matches = ( grep { /^\Q$opt/ && ( $option = $_ ) } @options )
+          || ( grep { /^\Q$opt/i && ( $option = $_ ) } @options );
 
-        print( $OUT "Unknown option '$opt'\n" ), next unless $matches;
-        print( $OUT "Ambiguous option '$opt'\n" ), next if $matches > 1;
+        unless ($matches) {
+            print {$OUT} "Unknown option '$opt'\n";
+            next;
+        }
+        if ($matches > 1) {
+            print {$OUT} "Ambiguous option '$opt'\n";
+            next;
+        }
         my $val;
 
         # '?' as separator means query, but must have whitespace after it.
         if ( "?" eq $sep ) {
-            print( $OUT "Option query '$opt?' followed by non-space '$_'\n" ),
-              last
-              if /^\S/;
+            if ($s =~ /\A\S/) {
+                print {$OUT} "Option query '$opt?' followed by non-space '$s'\n" ;
+
+                last;
+            }
 
             #&dump_option($opt);
         } ## end if ("?" eq $sep)
@@ -6750,14 +6761,14 @@ sub parse_options {
         elsif ( $sep eq "=" ) {
 
             # If quoted, extract a quoted string.
-            if (s/ (["']) ( (?: \\. | (?! \1 ) [^\\] )* ) \1 //x) {
+            if ($s =~ s/ (["']) ( (?: \\. | (?! \1 ) [^\\] )* ) \1 //x) {
                 my $quote = $1;
                 ( $val = $2 ) =~ s/\\([$quote\\])/$1/g;
             }
 
             # Not quoted. Use the whole thing. Warn about 'option='.
             else {
-                s/^(\S*)//;
+                $s =~ s/^(\S*)//;
                 $val = $1;
                 print OUT qq(Option better cleared using $opt=""\n)
                   unless length $val;
@@ -6769,7 +6780,7 @@ sub parse_options {
         else {    #{ to "let some poor schmuck bounce on the % key in B<vi>."
             my ($end) =
               "\\" . substr( ")]>}$sep", index( "([<{", $sep ), 1 );    #}
-            s/^(([^\\$end]|\\[\\$end])*)$end($|\s+)//
+            $s =~ s/^(([^\\$end]|\\[\\$end])*)$end($|\s+)//
               or print( $OUT "Unclosed option value '$opt$sep$_'\n" ), last;
             ( $val = $1 ) =~ s/\\([\\$end])/$1/g;
         } ## end else [ if ("?" eq $sep)
@@ -6777,7 +6788,7 @@ sub parse_options {
         # Exclude non-booleans from getting set to 1 by default.
         if ( $opt_needs_val{$option} && $val_defaulted ) {
             my $cmd = ( $CommandSet eq '580' ) ? 'o' : 'O';
-            print $OUT
+            print {$OUT}
 "Option '$opt' is non-boolean.  Use '$cmd $option=VAL' to set, '$cmd $option?' to query\n";
             next;
         } ## end if ($opt_needs_val{$option...
@@ -6786,29 +6797,31 @@ sub parse_options {
         $option{$option} = $val if defined $val;
 
         # Load any module that this option requires.
-        eval qq{
-                local \$frame = 0;
-                local \$doret = -2;
-                require '$optionRequire{$option}';
-                1;
-               } || die $@   # XXX: shouldn't happen
-          if defined $optionRequire{$option}
-          && defined $val;
+        if ( defined($optionRequire{$option}) && defined($val) ) {
+            eval qq{
+            local \$frame = 0;
+            local \$doret = -2;
+            require '$optionRequire{$option}';
+            1;
+            } || die $@   # XXX: shouldn't happen
+        }
 
         # Set it.
         # Stick it in the proper variable if it goes in a variable.
-        ${ $optionVars{$option} } = $val
-          if defined $optionVars{$option}
-          && defined $val;
+        if (defined($optionVars{$option}) && defined($val)) {
+            ${ $optionVars{$option} } = $val;
+        }
 
         # Call the appropriate sub if it gets set via sub.
-        &{ $optionAction{$option} }($val)
-          if defined $optionAction{$option}
-          && defined &{ $optionAction{$option} }
-          && defined $val;
+        if (defined($optionAction{$option})
+          && defined (&{ $optionAction{$option} })
+          && defined ($val))
+        {
+          &{ $optionAction{$option} }($val);
+        }
 
         # Not initialization - echo the value we set it to.
-        dump_option($option) unless $OUT eq \*STDERR;
+        dump_option($option) if ($OUT ne \*STDERR);
     } ## end while (length)
 } ## end sub parse_options
 
