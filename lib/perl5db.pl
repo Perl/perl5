@@ -5209,12 +5209,10 @@ sub cmd_L {
     # If there are any, list them.
     if ( @have and ( $break_wanted or $action_wanted ) ) {
         print $OUT "Postponed breakpoints in files:\n";
-        my ( $file, $line );
-
-        for $file ( keys %postponed_file ) {
+        for my $file ( keys %postponed_file ) {
             my $db = $postponed_file{$file};
             print $OUT " $file:\n";
-            for $line ( sort { $a <=> $b } keys %$db ) {
+            for my $line ( sort { $a <=> $b } keys %$db ) {
                 print $OUT "  $line:\n";
                 my ( $stop, $action ) = split( /\0/, $$db{$line} );
                 print $OUT "    break if (", $stop, ")\n"
