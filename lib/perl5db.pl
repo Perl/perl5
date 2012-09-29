@@ -8368,12 +8368,11 @@ sub runman {
         unless ( $page =~ /^perl\w/ ) {
 # do it this way because its easier to slurp in to keep up to date - clunky though.
             if (exists($_is_in_pods{$page})) {
-                $page =~ s/^/perl/;
                 CORE::system( $doccmd,
                     ( ( $manpath && !$nopathopt ) ? ( "-M", $manpath ) : () ),
-                    $page );
+                    "perl$page" );
             }
-        } ## end unless ($page =~ /^perl\w/)
+        }
     } ## end if (CORE::system($doccmd...
     if ( defined $oldpath ) {
         $ENV{MANPATH} = $manpath;
