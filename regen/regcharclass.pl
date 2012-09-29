@@ -201,14 +201,31 @@ sub __uni_latin1 {
 
 sub __clean {
     my ( $expr )= @_;
+
     our $parens;
     $parens= qr/ (?> \( (?> (?: (?> [^()]+ ) | (??{ $parens }) )* ) \) ) /x;
 
-    #print "$parens\n$expr\n";
+    ## remove redundant parens
     1 while $expr =~ s/ \( \s* ( $parens ) \s* \) /$1/gx;
-    1 while $expr =~ s/ \( \s* ($parens) \s* \? \s*
-        \( \s* ($parens) \s* \? \s* ($parens|[^:]+?) \s* : \s* ($parens|[^)]+?) \s* \)
-        \s* : \s* \4 \s* \)/( ( $1 && $2 ) ? $3 : 0 )/gx;
+
+
+    # repeatedly simplify conditions like
+    #       ( (cond1) ? ( (cond2) ? X : Y ) : Y )
+    # into
+    #       ( ( (cond1) && (cond2) ) ? X : Y )
+    #
+    1 while $expr =~ s/
+        \(  \s*
+            ($parens) \s*
+            \? \s*
+                \( \s* ($parens) \s*
+                    \? \s* ($parens|[^()?:]+?) \s*
+                    :  \s* ($parens|[^()?:]+?) \s*
+                \) \s*
+            : \s* \4 \s*
+        \)
+    /( ( $1 && $2 ) ? $3 : $4 )/gx;
+
     return $expr;
 }
 
@@ -1182,7 +1199,7 @@ QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
 \p{_Perl_Quotemeta}
 
-FOR_TESTING_DEMO: This is used to test if we generate incorrect code (currently is bad)
+FOR_TESTING_DEMO: This is used to test if we generate incorrect code (currently it is ok)
 => UTF8 :safe
 "\x{3B7}\x{342}"
 "\x{3B9}\x{308}\x{301}"
