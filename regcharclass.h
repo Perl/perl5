@@ -493,22 +493,6 @@
     ( ( ( ( 0x9D == ((U8*)s)[1] ) && ( 0x85 == ((U8*)s)[2] ) ) && ( 0xB3 <= ((U8*)s)[3] && ((U8*)s)[3] <= 0xBA ) ) ? 4 : 0 )\
 : ( ( 0xF3 == ((U8*)s)[0] ) && ( 0xA0 == ((U8*)s)[1] ) ) ? 4 : 0 )
 
-/*
-	FOR_TESTING_DEMO: This is used to test if we generate incorrect code (currently it is ok)
-
-	"\x{3B7}\x{342}"
-	"\x{3B9}\x{308}\x{301}"
-*/
-/*** GENERATED CODE ***/
-#define is_FOR_TESTING_DEMO_utf8_safe(s,e)                                  \
-( ((e)-(s) > 5) ?                                                           \
-    ( ( 0xCE == ((U8*)s)[0] ) ?                                             \
-	( ( 0xB7 == ((U8*)s)[1] ) ?                                         \
-	    ( ( ( 0xCD == ((U8*)s)[2] ) && ( 0x82 == ((U8*)s)[3] ) ) ? 4 : 0 )\
-	: ( ( ( ( ( 0xB9 == ((U8*)s)[1] ) && ( 0xCC == ((U8*)s)[2] ) ) && ( 0x88 == ((U8*)s)[3] ) ) && ( 0xCC == ((U8*)s)[4] ) ) && ( 0x81 == ((U8*)s)[5] ) ) ? 6 : 0 )\
-    : 0 )                                                                   \
-: ( ( ( ( ((e)-(s) > 3) && ( 0xCE == ((U8*)s)[0] ) ) && ( 0xB7 == ((U8*)s)[1] ) ) && ( 0xCD == ((U8*)s)[2] ) ) && ( 0x82 == ((U8*)s)[3] ) ) ? 4 : 0 )
-
 
 #endif /* H_REGCHARCLASS */
 
