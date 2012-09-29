@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 33;
+plan tests => 34;
 
 # because of ebcdic.c these should be the same on asciiish 
 # and ebcdic machines.
@@ -78,3 +78,5 @@ $c = "\c_";
 is (ord($c), 31, '\c_');
 $c = "\c?";
 is (ord($c), 127, '\c?');
+$c = '';
+is (ord($c), 0, 'ord("") is 0');
