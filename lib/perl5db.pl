@@ -5249,7 +5249,9 @@ Just call C<list_modules>.
 =cut
 
 sub cmd_M {
-    &list_modules();
+    list_modules();
+
+    return;
 }
 
 =head3 C<cmd_o> - options (command)
