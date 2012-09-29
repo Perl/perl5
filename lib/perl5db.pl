@@ -7189,25 +7189,23 @@ file or pipe again to the caller.
 =cut
 
 sub LineInfo {
-    return $lineinfo unless @_;
-    $lineinfo = shift;
+    if (@_) {
+        $lineinfo = shift;
 
-    #  If this is a valid "thing to be opened for output", tack a
-    # '>' onto the front.
-    my $stream = ( $lineinfo =~ /^(\+?\>|\|)/ ) ? $lineinfo : ">$lineinfo";
+        #  If this is a valid "thing to be opened for output", tack a
+        # '>' onto the front.
+        my $stream = ( $lineinfo =~ /^(\+?\>|\|)/ ) ? $lineinfo : ">$lineinfo";
 
-    # If this is a pipe, the stream points to a slave editor.
-    $slave_editor = ( $stream =~ /^\|/ );
+        # If this is a pipe, the stream points to a slave editor.
+        $slave_editor = ( $stream =~ /^\|/ );
 
-    # Open it up and unbuffer it.
-    open( LINEINFO, "$stream" ) || &warn("Cannot open '$stream' for write");
-    $LINEINFO = \*LINEINFO;
-    my $save = select($LINEINFO);
-    $| = 1;
-    select($save);
+        # Open it up and unbuffer it.
+        open( LINEINFO, $stream ) || &warn("Cannot open '$stream' for write");
+        $LINEINFO = \*LINEINFO;
+        $LINEINFO->autoflush(1);
+    }
 
-    # Hand the file or pipe back again.
-    $lineinfo;
+    return $lineinfo;
 } ## end sub LineInfo
 
 =head1 COMMAND SUPPORT ROUTINES
