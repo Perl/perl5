@@ -201,14 +201,36 @@ sub __uni_latin1 {
 
 sub __clean {
     my ( $expr )= @_;
+
     our $parens;
     $parens= qr/ (?> \( (?> (?: (?> [^()]+ ) | (??{ $parens }) )* ) \) ) /x;
 
-    #print "$parens\n$expr\n";
+    ## remove redundant parens
     1 while $expr =~ s/ \( \s* ( $parens ) \s* \) /$1/gx;
-    1 while $expr =~ s/ \( \s* ($parens) \s* \? \s*
-        \( \s* ($parens) \s* \? \s* ($parens|[^:]+?) \s* : \s* ($parens|[^)]+?) \s* \)
-        \s* : \s* \4 \s* \)/( ( $1 && $2 ) ? $3 : 0 )/gx;
+
+
+    # repeatedly simplify conditions like
+    #       ( (cond1) ? ( (cond2) ? X : Y ) : Y )
+    # into
+    #       ( ( (cond1) && (cond2) ) ? X : Y )
+    # Also similarly handles expressions like:
+    #       : (cond1) ? ( (cond2) ? X : Y ) : Y )
+    # Note the inclusion of the close paren in ([:()]) and the open paren in ([()]) is
+    # purely to ensure we have a balanced set of parens in the expression which makes
+    # it easier to understand the pattern in an editor that understands paren's, we do
+    # not expect either of these cases to actually fire. - Yves
+    1 while $expr =~ s/
+        ([:()])  \s*
+            ($parens) \s*
+            \? \s*
+                \( \s* ($parens) \s*
+                    \? \s* ($parens|[^()?:\s]+?) \s*
+                    :  \s* ($parens|[^()?:\s]+?) \s*
+                \) \s*
+            : \s* \5 \s*
+        ([()])
+    /$1 ( $2 && $3 ) ? $4 : $5 $6/gx;
+
     return $expr;
 }
 
