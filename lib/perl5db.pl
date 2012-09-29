@@ -1,5 +1,5 @@
 
-=head1 NAME 
+=head1 NAME
 
 perl5db.pl - the perl debugger
 
@@ -22,7 +22,7 @@ a number of reasons for this, many stemming out of the debugger's history.
 When the debugger was first written, Perl didn't have a lot of its nicer
 features - no references, no lexical variables, no closures, no object-oriented
 programming. So a lot of the things one would normally have done using such
-features was done using global variables, globs and the C<local()> operator 
+features was done using global variables, globs and the C<local()> operator
 in creative ways.
 
 Some of these have survived into the current debugger; a few of the more
@@ -34,7 +34,7 @@ on the comments themselves.
 Experienced Perl programmers will note that the debugger code tends to use
 mostly package globals rather than lexically-scoped variables. This is done
 to allow a significant amount of control of the debugger from outside the
-debugger itself.       
+debugger itself.
 
 Unfortunately, though the variables are accessible, they're not well
 documented, so it's generally been a decision that hasn't made a lot of
@@ -46,9 +46,9 @@ API, but for now, the variables are what we've got.
 
 =head2 Automated variable stacking via C<local()>
 
-As you may recall from reading C<perlfunc>, the C<local()> operator makes a 
+As you may recall from reading C<perlfunc>, the C<local()> operator makes a
 temporary copy of a variable in the current scope. When the scope ends, the
-old copy is restored. This is often used in the debugger to handle the 
+old copy is restored. This is often used in the debugger to handle the
 automatic stacking of variables during recursive calls:
 
      sub foo {
@@ -59,45 +59,45 @@ automatic stacking of variables during recursive calls:
      }
 
 What happens is that on entry to the subroutine, C<$some_global> is localized,
-then altered. When the subroutine returns, Perl automatically undoes the 
+then altered. When the subroutine returns, Perl automatically undoes the
 localization, restoring the previous value. Voila, automatic stack management.
 
-The debugger uses this trick a I<lot>. Of particular note is C<DB::eval>, 
+The debugger uses this trick a I<lot>. Of particular note is C<DB::eval>,
 which lets the debugger get control inside of C<eval>'ed code. The debugger
 localizes a saved copy of C<$@> inside the subroutine, which allows it to
 keep C<$@> safe until it C<DB::eval> returns, at which point the previous
-value of C<$@> is restored. This makes it simple (well, I<simpler>) to keep 
+value of C<$@> is restored. This makes it simple (well, I<simpler>) to keep
 track of C<$@> inside C<eval>s which C<eval> other C<eval's>.
 
 In any case, watch for this pattern. It occurs fairly often.
 
 =head2 The C<^> trick
 
-This is used to cleverly reverse the sense of a logical test depending on 
+This is used to cleverly reverse the sense of a logical test depending on
 the value of an auxiliary variable. For instance, the debugger's C<S>
-(search for subroutines by pattern) allows you to negate the pattern 
+(search for subroutines by pattern) allows you to negate the pattern
 like this:
 
    # Find all non-'foo' subs:
-   S !/foo/      
+   S !/foo/
 
 Boolean algebra states that the truth table for XOR looks like this:
 
 =over 4
 
-=item * 0 ^ 0 = 0 
+=item * 0 ^ 0 = 0
 
 (! not present and no match) --> false, don't print
 
-=item * 0 ^ 1 = 1 
+=item * 0 ^ 1 = 1
 
 (! not present and matches) --> true, print
 
-=item * 1 ^ 0 = 1 
+=item * 1 ^ 0 = 1
 
 (! present and no match) --> true, print
 
-=item * 1 ^ 1 = 0 
+=item * 1 ^ 1 = 0
 
 (! present and matches) --> false, don't print
 
@@ -105,7 +105,7 @@ Boolean algebra states that the truth table for XOR looks like this:
 
 As you can see, the first pair applies when C<!> isn't supplied, and
 the second pair applies when it is. The XOR simply allows us to
-compact a more complicated if-then-elseif-else into a more elegant 
+compact a more complicated if-then-elseif-else into a more elegant
 (but perhaps overly clever) single test. After all, it needed this
 explanation...
 
@@ -114,20 +114,20 @@ explanation...
 There is a certain C programming legacy in the debugger. Some variables,
 such as C<$single>, C<$trace>, and C<$frame>, have I<magical> values composed
 of 1, 2, 4, etc. (powers of 2) OR'ed together. This allows several pieces
-of state to be stored independently in a single scalar. 
+of state to be stored independently in a single scalar.
 
 A test like
 
     if ($scalar & 4) ...
 
-is checking to see if the appropriate bit is on. Since each bit can be 
+is checking to see if the appropriate bit is on. Since each bit can be
 "addressed" independently in this way, C<$scalar> is acting sort of like
-an array of bits. Obviously, since the contents of C<$scalar> are just a 
+an array of bits. Obviously, since the contents of C<$scalar> are just a
 bit-pattern, we can save and restore it easily (it will just look like
 a number).
 
 The problem, is of course, that this tends to leave magic numbers scattered
-all over your program whenever a bit is set, cleared, or checked. So why do 
+all over your program whenever a bit is set, cleared, or checked. So why do
 it?
 
 =over 4
@@ -137,24 +137,24 @@ it?
 First, doing an arithmetical or bitwise operation on a scalar is
 just about the fastest thing you can do in Perl: C<use constant> actually
 creates a subroutine call, and array and hash lookups are much slower. Is
-this over-optimization at the expense of readability? Possibly, but the 
+this over-optimization at the expense of readability? Possibly, but the
 debugger accesses these  variables a I<lot>. Any rewrite of the code will
 probably have to benchmark alternate implementations and see which is the
-best balance of readability and speed, and then document how it actually 
+best balance of readability and speed, and then document how it actually
 works.
 
 =item *
 
-Second, it's very easy to serialize a scalar number. This is done in 
+Second, it's very easy to serialize a scalar number. This is done in
 the restart code; the debugger state variables are saved in C<%ENV> and then
 restored when the debugger is restarted. Having them be just numbers makes
-this trivial. 
+this trivial.
 
 =item *
 
-Third, some of these variables are being shared with the Perl core 
-smack in the middle of the interpreter's execution loop. It's much faster for 
-a C program (like the interpreter) to check a bit in a scalar than to access 
+Third, some of these variables are being shared with the Perl core
+smack in the middle of the interpreter's execution loop. It's much faster for
+a C program (like the interpreter) to check a bit in a scalar than to access
 several different variables (or a Perl array).
 
 =back
@@ -162,13 +162,13 @@ several different variables (or a Perl array).
 =head2 What are those C<XXX> comments for?
 
 Any comment containing C<XXX> means that the comment is either somewhat
-speculative - it's not exactly clear what a given variable or chunk of 
+speculative - it's not exactly clear what a given variable or chunk of
 code is doing, or that it is incomplete - the basics may be clear, but the
 subtleties are not completely documented.
 
 Send in a patch if you can clear up, fill out, or clarify an C<XXX>.
 
-=head1 DATA STRUCTURES MAINTAINED BY CORE         
+=head1 DATA STRUCTURES MAINTAINED BY CORE
 
 There are a number of special data structures provided to the debugger by
 the Perl interpreter.
@@ -179,9 +179,9 @@ element corresponding to a single line of C<$filename>. Additionally,
 breakable lines will be dualvars with the numeric component being the
 memory address of a COP node. Non-breakable lines are dualvar to 0.
 
-The hash C<%{'_<'.$filename}> (aliased locally to C<%dbline> via glob 
-assignment) contains breakpoints and actions.  The keys are line numbers; 
-you can set individual values, but not the whole hash. The Perl interpreter 
+The hash C<%{'_<'.$filename}> (aliased locally to C<%dbline> via glob
+assignment) contains breakpoints and actions.  The keys are line numbers;
+you can set individual values, but not the whole hash. The Perl interpreter
 uses this hash to determine where breakpoints have been set. Any true value is
 considered to be a breakpoint; C<perl5db.pl> uses C<$break_condition\0$action>.
 Values are magical in numeric context: 1 if the line is breakable, 0 if not.
@@ -196,10 +196,10 @@ like C<(eval 34).
 When C<perl5db.pl> starts, it reads an rcfile (C<perl5db.ini> for
 non-interactive sessions, C<.perldb> for interactive ones) that can set a number
 of options. In addition, this file may define a subroutine C<&afterinit>
-that will be executed (in the debugger's context) after the debugger has 
+that will be executed (in the debugger's context) after the debugger has
 initialized itself.
 
-Next, it checks the C<PERLDB_OPTS> environment variable and treats its 
+Next, it checks the C<PERLDB_OPTS> environment variable and treats its
 contents as the argument of a C<o> command in the debugger.
 
 =head2 STARTUP-ONLY OPTIONS
@@ -210,32 +210,32 @@ C<&parse_options("optionName=new_value")>.
 
 =over 4
 
-=item * TTY 
+=item * TTY
 
 the TTY to use for debugging i/o.
 
-=item * noTTY 
+=item * noTTY
 
 if set, goes in NonStop mode.  On interrupt, if TTY is not set,
 uses the value of noTTY or F<$HOME/.perldbtty$$> to find TTY using
 Term::Rendezvous.  Current variant is to have the name of TTY in this
 file.
 
-=item * ReadLine 
+=item * ReadLine
 
 if false, a dummy ReadLine is used, so you can debug
 ReadLine applications.
 
-=item * NonStop 
+=item * NonStop
 
 if true, no i/o is performed until interrupt.
 
-=item * LineInfo 
+=item * LineInfo
 
 file or pipe to print line number info to.  If it is a
 pipe, a short "emacs like" message is used.
 
-=item * RemotePort 
+=item * RemotePort
 
 host:port to connect to on remote host for remote debugging.
 
@@ -279,9 +279,9 @@ is the expanded name of the C<require>d file (as found via C<%INC>).
 =head4 C<$CreateTTY>
 
 Used to control when the debugger will attempt to acquire another TTY to be
-used for input. 
+used for input.
 
-=over   
+=over
 
 =item * 1 -  on C<fork()>
 
@@ -304,7 +304,7 @@ contents of C<@_> when C<DB::eval> is called.
 =head4 C<$frame>
 
 Determines what messages (if any) will get printed when a subroutine (or eval)
-is entered or exited. 
+is entered or exited.
 
 =over 4
 
@@ -328,8 +328,8 @@ protect external modules that the debugger uses from getting traced.
 
 =head4 C<$level>
 
-Tracks current debugger nesting level. Used to figure out how many 
-C<E<lt>E<gt>> pairs to surround the line number with when the debugger 
+Tracks current debugger nesting level. Used to figure out how many
+C<E<lt>E<gt>> pairs to surround the line number with when the debugger
 outputs a prompt. Also used to help determine if the program has finished
 during command parsing.
 
@@ -364,7 +364,7 @@ command mode if it finds C<$signal> set to a true value.
 Controls behavior during single-stepping. Stacked in C<@stack> on entry to
 each subroutine; popped again at the end of each subroutine.
 
-=over 4 
+=over 4
 
 =item * 0 - run continuously.
 
@@ -379,7 +379,7 @@ recursion> occurs.
 
 =head4 C<$trace>
 
-Controls the output of trace information. 
+Controls the output of trace information.
 
 =over 4
 
@@ -402,7 +402,7 @@ Manipulated by the debugger's C<source> command and C<DB::readline()> itself.
 
 =head4 C<@dbline>
 
-Local alias to the magical line array, C<@{$main::{'_<'.$filename}}> , 
+Local alias to the magical line array, C<@{$main::{'_<'.$filename}}> ,
 supplied by the Perl interpreter to the debugger. Contains the source.
 
 =head4 C<@old_watch>
@@ -450,7 +450,7 @@ in the actual hash entry.
 
 Keys are file names; values are bitfields:
 
-=over 4 
+=over 4
 
 =item * 1 - file has a breakpoint in it.
 
@@ -487,10 +487,10 @@ definitions (C<condition\0action>).
 =head1 DEBUGGER INITIALIZATION
 
 The debugger's initialization actually jumps all over the place inside this
-package. This is because there are several BEGIN blocks (which of course 
-execute immediately) spread through the code. Why is that? 
+package. This is because there are several BEGIN blocks (which of course
+execute immediately) spread through the code. Why is that?
 
-The debugger needs to be able to change some things and set some things up 
+The debugger needs to be able to change some things and set some things up
 before the debugger code is compiled; most notably, the C<$deep> variable that
 C<DB::sub> uses to tell when a program has recursed deeply. In addition, the
 debugger has to turn off warnings while the debugger code is compiled, but then
@@ -500,7 +500,7 @@ executing.
 The first C<BEGIN> block simply turns off warnings by saving the current
 setting of C<$^W> and then setting it to zero. The second one initializes
 the debugger variables that are needed before the debugger begins executing.
-The third one puts C<$^X> back to its former value. 
+The third one puts C<$^X> back to its former value.
 
 We'll detail the second C<BEGIN> block later; just remember that if you need
 to initialize something before the debugger starts really executing, that's
@@ -534,7 +534,7 @@ $header = "perl5db.pl version $VERSION";
 This function replaces straight C<eval()> inside the debugger; it simplifies
 the process of evaluating code in the user's context.
 
-The code to be evaluated is passed via the package global variable 
+The code to be evaluated is passed via the package global variable
 C<$DB::evalarg>; this is done to avoid fiddling with the contents of C<@_>.
 
 Before we do the C<eval()>, we preserve the current settings of C<$trace>,
@@ -545,26 +545,26 @@ proper context to be used when the eval is actually done.  Afterward, we
 restore C<$trace>, C<$single>, and C<$^D>.
 
 Next we need to handle C<$@> without getting confused. We save C<$@> in a
-local lexical, localize C<$saved[0]> (which is where C<save()> will put 
-C<$@>), and then call C<save()> to capture C<$@>, C<$!>, C<$^E>, C<$,>, 
+local lexical, localize C<$saved[0]> (which is where C<save()> will put
+C<$@>), and then call C<save()> to capture C<$@>, C<$!>, C<$^E>, C<$,>,
 C<$/>, C<$\>, and C<$^W>) and set C<$,>, C<$/>, C<$\>, and C<$^W> to values
-considered sane by the debugger. If there was an C<eval()> error, we print 
-it on the debugger's output. If C<$onetimedump> is defined, we call 
-C<dumpit> if it's set to 'dump', or C<methods> if it's set to 
-'methods'. Setting it to something else causes the debugger to do the eval 
-but not print the result - handy if you want to do something else with it 
+considered sane by the debugger. If there was an C<eval()> error, we print
+it on the debugger's output. If C<$onetimedump> is defined, we call
+C<dumpit> if it's set to 'dump', or C<methods> if it's set to
+'methods'. Setting it to something else causes the debugger to do the eval
+but not print the result - handy if you want to do something else with it
 (the "watch expressions" code does this to get the value of the watch
 expression but not show it unless it matters).
 
-In any case, we then return the list of output from C<eval> to the caller, 
-and unwinding restores the former version of C<$@> in C<@saved> as well 
+In any case, we then return the list of output from C<eval> to the caller,
+and unwinding restores the former version of C<$@> in C<@saved> as well
 (the localization of C<$saved[0]> goes away at the end of this scope).
 
 =head3 Parameters and variables influencing execution of DB::eval()
 
 C<DB::eval> isn't parameterized in the standard way; this is to keep the
 debugger's calls to C<DB::eval()> from mucking with C<@_>, among other things.
-The variables listed below influence C<DB::eval()>'s execution directly. 
+The variables listed below influence C<DB::eval()>'s execution directly.
 
 =over 4
 
@@ -574,14 +574,14 @@ The variables listed below influence C<DB::eval()>'s execution directly.
 
 =item C<$single> - Current state of single-stepping
 
-=item C<$onetimeDump> - what is to be displayed after the evaluation 
+=item C<$onetimeDump> - what is to be displayed after the evaluation
 
 =item C<$onetimeDumpDepth> - how deep C<dumpit()> should go when dumping results
 
 =back
 
 The following variables are altered by C<DB::eval()> during its execution. They
-are "stacked" via C<local()>, enabling recursive calls to C<DB::eval()>. 
+are "stacked" via C<local()>, enabling recursive calls to C<DB::eval()>.
 
 =over 4
 
@@ -589,13 +589,13 @@ are "stacked" via C<local()>, enabling recursive calls to C<DB::eval()>.
 
 =item C<$otrace> - saved value of C<$trace>.
 
-=item C<$osingle> - saved value of C<$single>.      
+=item C<$osingle> - saved value of C<$single>.
 
 =item C<$od> - saved value of C<$^D>.
 
 =item C<$saved[0]> - saved value of C<$@>.
 
-=item $\ - for output of C<$@> if there is an evaluation error.      
+=item $\ - for output of C<$@> if there is an evaluation error.
 
 =back
 
@@ -604,7 +604,7 @@ are "stacked" via C<local()>, enabling recursive calls to C<DB::eval()>.
 The context of C<DB::eval()> presents us with some problems. Obviously,
 we want to be 'sandboxed' away from the debugger's internals when we do
 the eval, but we need some way to control how punctuation variables and
-debugger globals are used. 
+debugger globals are used.
 
 We can't use local, because the code inside C<DB::eval> can see localized
 variables; and we can't use C<my> either for the same reason. The code
@@ -840,7 +840,7 @@ command prompt.  The prompt will show: C<[0]> when running under threads, but
 not actually in a thread.  C<[tid]> is consistent with C<gdb> usage.
 
 While running under threads, when you set or delete a breakpoint (etc.), this
-will apply to all threads, not just the currently running one.  When you are 
+will apply to all threads, not just the currently running one.  When you are
 in a currently executing thread, you will stay there until it completes.  With
 the current implementation it is not currently possible to hop from one thread
 to another.
@@ -919,8 +919,8 @@ $trace_to_depth = 1E9;
 
 =head1 OPTION PROCESSING
 
-The debugger's options are actually spread out over the debugger itself and 
-C<dumpvar.pl>; some of these are variables to be set, while others are 
+The debugger's options are actually spread out over the debugger itself and
+C<dumpvar.pl>; some of these are variables to be set, while others are
 subs to be called with a value. To try to make this a little easier to
 manage, the debugger uses a few data structures to define what options
 are legal and how they are to be processed.
@@ -987,7 +987,7 @@ use vars qw(%optionVars);
 Third, C<%optionAction> defines the subroutine to be called to process each
 option.
 
-=cut 
+=cut
 
 use vars qw(%optionAction);
 
@@ -1217,10 +1217,10 @@ use vars qw($slave_editor);
 
 =head2 READING THE RC FILE
 
-The debugger will read a file of initialization options if supplied. If    
+The debugger will read a file of initialization options if supplied. If
 running interactively, this is C<.perldb>; if not, it's C<perldb.ini>.
 
-=cut      
+=cut
 
 # As noted, this test really doesn't check accurately that the debugger
 # is running at a terminal or not.
@@ -1259,7 +1259,7 @@ sub safe_do {
     unless ( is_safe_file($file) ) {
         CORE::warn <<EO_GRIPE;
 perldb: Must not source insecure rcfile $file.
-        You or the superuser must be the owner, and it must not 
+        You or the superuser must be the owner, and it must not
         be writable by anyone but its owner.
 EO_GRIPE
         return;
@@ -1323,7 +1323,7 @@ the debugger only handles TCP sockets, X11, OS/2, amd Mac OS X
 
 if (not defined &get_fork_TTY)       # only if no routine exists
 {
-    if ( defined $remoteport ) {                 
+    if ( defined $remoteport ) {
                                                  # Expect an inetd-like server
         *get_fork_TTY = \&socket_get_fork_TTY;   # to listen to us
     }
@@ -1363,7 +1363,7 @@ then sets C<PERLDB_RESTART>. When we start executing again, we check to see
 if C<PERLDB_RESTART> is there; if so, we reload all the information that
 the R command stuffed into the environment variables.
 
-  PERLDB_RESTART   - flag only, contains no restart data itself.       
+  PERLDB_RESTART   - flag only, contains no restart data itself.
   PERLDB_HIST      - command history, if it's available
   PERLDB_ON_LOAD   - breakpoints set by the rc file
   PERLDB_POSTPONE  - subs that have been loaded/not executed, and have actions
@@ -1553,7 +1553,7 @@ If there is a TTY hanging around from a parent, we use that as the console.
 
     $console = $tty if defined $tty;
 
-=head2 SOCKET HANDLING   
+=head2 SOCKET HANDLING
 
 The debugger is capable of opening a socket and carrying out a debugging
 session over the socket.
@@ -1640,7 +1640,7 @@ and if we can.
     $LINEINFO = $OUT     unless defined $LINEINFO;
     $lineinfo = $console unless defined $lineinfo;
 	# share($LINEINFO); # <- unable to share globs
-	share($lineinfo);   # 
+	share($lineinfo);   #
 
 =pod
 
@@ -1865,10 +1865,10 @@ EOP
 =head2 C<watchfunction()>
 
 C<watchfunction()> is a function that can be defined by the user; it is a
-function which will be run on each entry to C<DB::DB>; it gets the 
+function which will be run on each entry to C<DB::DB>; it gets the
 current package, filename, and line as its parameters.
 
-The watchfunction can do anything it likes; it is executing in the 
+The watchfunction can do anything it likes; it is executing in the
 debugger's context, so it has access to all of the debugger's internal
 data structures and functions.
 
@@ -1876,7 +1876,7 @@ C<watchfunction()> can control the debugger's actions. Any of the following
 will cause the debugger to return control to the user's program after
 C<watchfunction()> executes:
 
-=over 4 
+=over 4
 
 =item *
 
@@ -1944,7 +1944,7 @@ won't cause trouble, and we say that the program is over.
 
 =pod
 
-Special check: if we're in package C<DB::fake>, we've gone through the 
+Special check: if we're in package C<DB::fake>, we've gone through the
 C<END> block at least once. We set up everything so that we can continue
 to enter commands and have a valid context to be in.
 
@@ -1957,7 +1957,7 @@ to enter commands and have a valid context to be in.
             print_help(<<EOP);
 Debugged program terminated.  Use B<q> to quit or B<R> to restart,
   use B<o> I<inhibit_exit> to avoid stopping after program termination,
-  B<h q>, B<h R> or B<h o> to get additional info.  
+  B<h q>, B<h R> or B<h o> to get additional info.
 EOP
 
             # Set the DB::eval context appropriately.
@@ -1969,7 +1969,7 @@ EOP
 
 If the program hasn't finished executing, we scan forward to the
 next executable line, print that out, build the prompt from the file and line
-number information, and print that.   
+number information, and print that.
 
 =cut
 
@@ -2040,7 +2040,7 @@ number information, and print that.
 =pod
 
 If there's an action to be executed for the line we stopped at, execute it.
-If there are any preprompt actions, execute those as well.      
+If there are any preprompt actions, execute those as well.
 
 =cut
 
@@ -2218,11 +2218,11 @@ completely replacing it.
 =head3 MAIN-LINE COMMANDS
 
 All of these commands work up to and after the program being debugged has
-terminated. 
+terminated.
 
 =head4 C<q> - quit
 
-Quit the debugger. This entails setting the C<$fall_off_end> flag, so we don't 
+Quit the debugger. This entails setting the C<$fall_off_end> flag, so we don't
 try to execute further, cleaning any restart-related stuff out of the
 environment, and executing with the last value of C<$?>.
 
@@ -2284,7 +2284,7 @@ Walks through C<%sub>, checking to see whether or not to print the name.
 
 =head4 C<X> - list variables in current package
 
-Since the C<V> command actually processes this, just change this to the 
+Since the C<V> command actually processes this, just change this to the
 appropriate C<V> command and fall through.
 
 =cut
@@ -2293,7 +2293,7 @@ appropriate C<V> command and fall through.
 
 =head4 C<V> - list variables
 
-Uses C<dumpvar.pl> to dump out the current values for selected variables. 
+Uses C<dumpvar.pl> to dump out the current values for selected variables.
 
 =cut
 
@@ -2750,7 +2750,7 @@ Just calls C<DB::cmd_w>.
 
 =head4 C<W> - watch-expression processing.
 
-Just calls C<DB::cmd_W>. 
+Just calls C<DB::cmd_W>.
 
 =cut
 
@@ -2823,7 +2823,7 @@ mess us up.
                                 if ($slave_editor) {
                                     # Handle proper escaping in the slave.
                                     print $OUT "\032\032$filename:$start:0\n";
-                                } 
+                                }
                                 else {
                                     # Just print the line normally.
                                     print $OUT "$start:\t",$dbline[$start],"\n";
@@ -2892,7 +2892,7 @@ Same as for C</>, except the loop runs backwards.
                                 if ($slave_editor) {
                                     # Yep, follow slave editor requirements.
                                     print $OUT "\032\032$filename:$start:0\n";
-                                } 
+                                }
                                 else {
                                     # Yep, just print normally.
                                     print $OUT "$start:\t",$dbline[$start],"\n";
@@ -3289,7 +3289,7 @@ Return to any given position in the B<true>-history list
 For C<|>, we save C<OUT> (the debugger's output filehandle) and C<STDOUT>
 (the program's standard output). For C<||>, we only save C<OUT>. We open a
 pipe to the pager (restoring the output filehandles if this fails). If this
-is the C<|> command, we also set up a C<SIGPIPE> handler which will simply 
+is the C<|> command, we also set up a C<SIGPIPE> handler which will simply
 set C<$signal>, sending us back into the debugger.
 
 We then trim off the pipe symbols and C<redo> the command loop at the
@@ -3503,7 +3503,7 @@ again.
 
 =head2 sub
 
-C<sub> is called whenever a subroutine call happens in the program being 
+C<sub> is called whenever a subroutine call happens in the program being
 debugged. The variable C<$DB::sub> contains the name of the subroutine
 being called.
 
@@ -3517,7 +3517,7 @@ C<DB::sub> hadn't been there at all.
 
 C<sub> does all the work of printing the subroutine entry and exit messages
 enabled by setting C<$frame>. It notes what sub the autoloader got called for,
-and also prints the return value if needed (for the C<r> command and if 
+and also prints the return value if needed (for the C<r> command and if
 the 16 bit is set in C<$frame>).
 
 It also tracks the subroutine call depth by saving the current setting of
@@ -3597,7 +3597,7 @@ sub DB::sub {
     # return value in (if needed).
     my ( $al, $ret, @ret ) = "";
 	if ($sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
-		print "creating new thread\n"; 
+		print "creating new thread\n";
 	}
 
     # If the last ten characters are '::AUTOLOAD', note we've traced
@@ -3819,14 +3819,14 @@ In Perl 5.8.0, there was a major realignment of the commands and what they did,
 Most of the changes were to systematize the command structure and to eliminate
 commands that threw away user input without checking.
 
-The following sections describe the code added to make it easy to support 
-multiple command sets with conflicting command names. This section is a start 
+The following sections describe the code added to make it easy to support
+multiple command sets with conflicting command names. This section is a start
 at unifying all command processing to make it simpler to develop commands.
 
-Note that all the cmd_[a-zA-Z] subroutines require the command name, a line 
+Note that all the cmd_[a-zA-Z] subroutines require the command name, a line
 number, and C<$dbline> (the current line) as arguments.
 
-Support functions in this section which have multiple modes of failure C<die> 
+Support functions in this section which have multiple modes of failure C<die>
 on error; the rest simply return a false value.
 
 The user-interface functions (all of the C<cmd_*> functions) just output
@@ -3835,13 +3835,13 @@ error messages.
 =head2 C<%set>
 
 The C<%set> hash defines the mapping from command letter to subroutine
-name suffix. 
+name suffix.
 
 C<%set> is a two-level hash, indexed by set name and then by command name.
 Note that trying to set the CommandSet to C<foobar> simply results in the
 5.8.0 command set being used, since there's no top-level entry for C<foobar>.
 
-=cut 
+=cut
 
 ### The API section
 
@@ -3922,7 +3922,7 @@ sub _cancel_breakpoint_temp_enabled_status {
     my ($filename, $line) = @_;
 
     my $ref = _get_breakpoint_data_ref($filename, $line);
-    
+
     delete ($ref->{'temp_enabled'});
 
     if (! %$ref) {
@@ -3941,16 +3941,16 @@ sub _is_breakpoint_enabled {
 
 =head2 C<cmd_wrapper()> (API)
 
-C<cmd_wrapper()> allows the debugger to switch command sets 
-depending on the value of the C<CommandSet> option. 
+C<cmd_wrapper()> allows the debugger to switch command sets
+depending on the value of the C<CommandSet> option.
 
 It tries to look up the command in the C<%set> package-level I<lexical>
-(which means external entities can't fiddle with it) and create the name of 
-the sub to call based on the value found in the hash (if it's there). I<All> 
-of the commands to be handled in a set have to be added to C<%set>; if they 
+(which means external entities can't fiddle with it) and create the name of
+the sub to call based on the value found in the hash (if it's there). I<All>
+of the commands to be handled in a set have to be added to C<%set>; if they
 aren't found, the 5.8.0 equivalent is called (if there is one).
 
-This code uses symbolic references. 
+This code uses symbolic references.
 
 =cut
 
@@ -3973,8 +3973,8 @@ sub cmd_wrapper {
 =head3 C<cmd_a> (command)
 
 The C<a> command handles pre-execution actions. These are associated with a
-particular line, so they're stored in C<%dbline>. We default to the current 
-line if none is specified. 
+particular line, so they're stored in C<%dbline>. We default to the current
+line if none is specified.
 
 =cut
 
@@ -4061,7 +4061,7 @@ sub cmd_A {
 =head3 C<delete_action> (API)
 
 C<delete_action> accepts either a line number or C<undef>. If a line number
-is specified, we check for the line being executable (if it's not, it 
+is specified, we check for the line being executable (if it's not, it
 couldn't have had an  action). If it is, we just take the action off (this
 will get any kind of an action, including breakpoints).
 
@@ -4156,7 +4156,7 @@ sub cmd_b {
         my ($filename, $line_num, $cond) = ($1, $2, $3);
         cmd_b_filename_line(
             $filename,
-            $line_num, 
+            $line_num,
             (length($cond) ? $cond : '1'),
         );
     }
@@ -4191,7 +4191,7 @@ sub cmd_b {
 =head3 C<break_on_load> (API)
 
 We want to break when this file is loaded. Mark this file in the
-C<%break_on_load> hash, and note that it has a breakpoint in 
+C<%break_on_load> hash, and note that it has a breakpoint in
 C<%had_breakpoints>.
 
 =cut
@@ -4204,7 +4204,7 @@ sub break_on_load {
 
 =head3 C<report_break_on_load> (API)
 
-Gives us an array of filenames that are set to break on load. Note that 
+Gives us an array of filenames that are set to break on load. Note that
 only files with break-on-load are in here, so simply showing the keys
 suffices.
 
@@ -4217,7 +4217,7 @@ sub report_break_on_load {
 =head3 C<cmd_b_load> (command)
 
 We take the file passed in and try to find it in C<%INC> (which maps modules
-to files they came from). We mark those files for break-on-load via 
+to files they came from). We mark those files for break-on-load via
 C<break_on_load> and then report that it was done.
 
 =cut
@@ -4255,7 +4255,7 @@ sub cmd_b_load {
 
 Several of the functions we need to implement in the API need to work both
 on the current file and on other files. We don't want to duplicate code, so
-C<$filename_error> is used to contain the name of the file that's being 
+C<$filename_error> is used to contain the name of the file that's being
 worked on (if it's not the current one).
 
 We can now build functions in pairs: the basic function works on the current
@@ -4265,7 +4265,7 @@ current file.
 
 The second function is a wrapper which does the following:
 
-=over 4 
+=over 4
 
 =item *
 
@@ -4273,11 +4273,11 @@ Localizes C<$filename_error> and sets it to the name of the file to be processed
 
 =item *
 
-Localizes the C<*dbline> glob and reassigns it to point to the file we want to process. 
+Localizes the C<*dbline> glob and reassigns it to point to the file we want to process.
 
 =item *
 
-Calls the first function. 
+Calls the first function.
 
 The first function works on the I<current> file (i.e., the one we changed to),
 and prints C<$filename_error> in the error message (the name of the other file)
@@ -4302,7 +4302,7 @@ The subroutine decides whether or not a line in the current file is breakable.
 It walks through C<@dbline> within the range of lines specified, looking for
 the first line that is breakable.
 
-If C<$to> is greater than C<$from>, the search moves forwards, finding the 
+If C<$to> is greater than C<$from>, the search moves forwards, finding the
 first line I<after> C<$to> that's breakable, if there is one.
 
 If C<$from> is greater than C<$to>, the search goes I<backwards>, finding the
@@ -4405,7 +4405,7 @@ sub breakable_line_in_filename {
 
 =head3 break_on_line(lineno, [condition]) (API)
 
-Adds a breakpoint with the specified condition (or 1 if no condition was 
+Adds a breakpoint with the specified condition (or 1 if no condition was
 specified) to the specified line. Dies if it can't.
 
 =cut
@@ -4444,10 +4444,10 @@ sub break_on_line {
 
 =head3 cmd_b_line(line, [condition]) (command)
 
-Wrapper for C<break_on_line>. Prints the failure message if it 
+Wrapper for C<break_on_line>. Prints the failure message if it
 doesn't work.
 
-=cut 
+=cut
 
 sub cmd_b_line {
     if (not eval { break_on_line(@_); 1 }) {
@@ -4460,10 +4460,10 @@ sub cmd_b_line {
 
 =head3 cmd_b_filename_line(line, [condition]) (command)
 
-Wrapper for C<break_on_filename_line>. Prints the failure message if it 
+Wrapper for C<break_on_filename_line>. Prints the failure message if it
 doesn't work.
 
-=cut 
+=cut
 
 sub cmd_b_filename_line {
     if (not eval { break_on_filename_line(@_); 1 }) {
@@ -4476,7 +4476,7 @@ sub cmd_b_filename_line {
 
 =head3 break_on_filename_line(file, line, [condition]) (API)
 
-Switches to the file specified and then calls C<break_on_line> to set 
+Switches to the file specified and then calls C<break_on_line> to set
 the breakpoint.
 
 =cut
@@ -4500,7 +4500,7 @@ sub break_on_filename_line {
 
 =head3 break_on_filename_line_range(file, from, to, [condition]) (API)
 
-Switch to another file, search the range of lines specified for an 
+Switch to another file, search the range of lines specified for an
 executable one, and put a breakpoint on the first one you find.
 
 =cut
@@ -4537,7 +4537,7 @@ sub subroutine_filename_lines {
 =head3 break_subroutine(subname) (API)
 
 Places a break on the first line possible in the specified subroutine. Uses
-C<subroutine_filename_lines> to find the subroutine, and 
+C<subroutine_filename_lines> to find the subroutine, and
 C<break_on_filename_line_range> to place the break.
 
 =cut
@@ -4564,7 +4564,7 @@ We take the incoming subroutine name and fully-qualify it as best we can.
 
 =over 4
 
-=item 1. If it's already fully-qualified, leave it alone. 
+=item 1. If it's already fully-qualified, leave it alone.
 
 =item 2. Try putting it in the current package.
 
@@ -4574,7 +4574,7 @@ We take the incoming subroutine name and fully-qualify it as best we can.
 
 =back
 
-After all this cleanup, we call C<break_subroutine> to try to set the 
+After all this cleanup, we call C<break_subroutine> to try to set the
 breakpoint.
 
 =cut
@@ -4673,14 +4673,14 @@ part of the 'condition\0action' that says there's a breakpoint here. If,
 after we've done that, there's nothing left, we delete the corresponding
 line in C<%dbline> to signal that no action needs to be taken for this line.
 
-For all breakpoints, we iterate through the keys of C<%had_breakpoints>, 
+For all breakpoints, we iterate through the keys of C<%had_breakpoints>,
 which lists all currently-loaded files which have breakpoints. We then look
 at each line in each of these files, temporarily switching the C<%dbline>
 and C<@dbline> structures to point to the files in question, and do what
 we did in the single line case: delete the condition in C<@dbline>, and
 delete the key in C<%dbline> if nothing's left.
 
-We then wholesale delete C<%postponed>, C<%postponed_file>, and 
+We then wholesale delete C<%postponed>, C<%postponed_file>, and
 C<%break_on_load>, because these structures contain breakpoints for files
 and code that haven't been loaded yet. We can just kill these off because there
 are no magical debugger structures associated with them.
@@ -4803,14 +4803,14 @@ This could be used (when implemented) to send commands to all threads (E cmd).
 sub cmd_E {
     my $cmd  = shift;
     my $line = shift;
-	unless (exists($INC{'threads.pm'})) { 
+	unless (exists($INC{'threads.pm'})) {
 		print "threads not loaded($ENV{PERL5DB_THREADED})
 		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
 	} else {
 		my $tid = threads->tid;
-		print "thread ids: ".join(', ', 
+		print "thread ids: ".join(', ',
 			map { ($tid == $_->tid ? '<'.$_->tid.'>' : $_->tid) } threads->list
-		)."\n"; 
+		)."\n";
 	}
 } ## end sub cmd_E
 
@@ -4876,7 +4876,7 @@ sub cmd_h {
                                  $qasked     # The command
                                  ([\s\S]*?)  # Description line(s)
                               \n)            # End of last description line
-                              (?!\s)         # Next line not starting with 
+                              (?!\s)         # Next line not starting with
                                              # whitespace
                              /mgx
               )
@@ -4928,10 +4928,10 @@ sub cmd_i {
 
 Most of the command is taken up with transforming all the different line
 specification syntaxes into 'start-stop'. After that is done, the command
-runs a loop over C<@dbline> for the specified range of lines. It handles 
+runs a loop over C<@dbline> for the specified range of lines. It handles
 the printing of each line and any markers (C<==E<gt>> for current line,
 C<b> for break on this line, C<a> for action on this line, C<:> for this
-line breakable). 
+line breakable).
 
 We save the last line listed in the C<$start> global for further listing
 later.
@@ -5123,11 +5123,11 @@ sub cmd_l {
 
 To list breakpoints, the command has to look determine where all of them are
 first. It starts a C<%had_breakpoints>, which tells us what all files have
-breakpoints and/or actions. For each file, we switch the C<*dbline> glob (the 
-magic source and breakpoint data structures) to the file, and then look 
-through C<%dbline> for lines with breakpoints and/or actions, listing them 
-out. We look through C<%postponed> not-yet-compiled subroutines that have 
-breakpoints, and through C<%postponed_file> for not-yet-C<require>'d files 
+breakpoints and/or actions. For each file, we switch the C<*dbline> glob (the
+magic source and breakpoint data structures) to the file, and then look
+through C<%dbline> for lines with breakpoints and/or actions, listing them
+out. We look through C<%postponed> not-yet-compiled subroutines that have
+breakpoints, and through C<%postponed_file> for not-yet-C<require>'d files
 that have breakpoints.
 
 Watchpoints are simpler: we just list the entries in C<@to_watch>.
@@ -5262,7 +5262,7 @@ sub cmd_M {
 
 =head3 C<cmd_o> - options (command)
 
-If this is just C<o> by itself, we list the current settings via 
+If this is just C<o> by itself, we list the current settings via
 C<dump_option>. If there's a nonblank value following it, we pass that on to
 C<parse_options> for processing.
 
@@ -5303,7 +5303,7 @@ Uses the C<$preview> variable set in the second C<BEGIN> block (q.v.) to
 move back a few lines to list the selected line in context. Uses C<cmd_l>
 to do the actual listing after figuring out the range of line to request.
 
-=cut 
+=cut
 
 use vars qw($preview);
 
@@ -5383,13 +5383,13 @@ sub cmd_w {
 This command accepts either a watch expression to be removed from the list
 of watch expressions, or C<*> to delete them all.
 
-If C<*> is specified, we simply empty the watch expression list and the 
-watch expression value list. We also turn off the bit that says we've got 
+If C<*> is specified, we simply empty the watch expression list and the
+watch expression value list. We also turn off the bit that says we've got
 watch expressions.
 
 If an expression (or partial expression) is specified, we pattern-match
 through the expressions and remove the ones that match. We also discard
-the corresponding values. If no watch expressions are left, we turn off 
+the corresponding values. If no watch expressions are left, we turn off
 the I<watching expressions> bit.
 
 =cut
@@ -5453,7 +5453,7 @@ throughout the debugger.
 =head2 save
 
 save() saves the user's versions of globals that would mess us up in C<@saved>,
-and installs the versions we like better. 
+and installs the versions we like better.
 
 =cut
 
@@ -5474,7 +5474,7 @@ sub save {
 
 print_lineinfo prints whatever it is that it is handed; it prints it to the
 C<$LINEINFO> filehandle instead of just printing it to STDOUT. This allows
-us to feed line information to a slave editor without messing up the 
+us to feed line information to a slave editor without messing up the
 debugger output.
 
 =cut
@@ -5493,11 +5493,11 @@ sub print_lineinfo {
 Handles setting postponed breakpoints in subroutines once they're compiled.
 For breakpoints, we use C<DB::find_sub> to locate the source file and line
 range for the subroutine, then mark the file as having a breakpoint,
-temporarily switch the C<*dbline> glob over to the source file, and then 
+temporarily switch the C<*dbline> glob over to the source file, and then
 search the given range of lines to find a breakable line. If we find one,
 we set the breakpoint on it, deleting the breakpoint from C<%postponed>.
 
-=cut 
+=cut
 
 # The following takes its argument via $evalarg to preserve current @_
 
@@ -5556,11 +5556,11 @@ sub postponed_sub {
 =head2 C<postponed>
 
 Called after each required file is compiled, but before it is executed;
-also called if the name of a just-compiled subroutine is a key of 
+also called if the name of a just-compiled subroutine is a key of
 C<%postponed>. Propagates saved breakpoints (from C<b compile>, C<b load>,
 etc.) into the just-compiled code.
 
-If this is a C<require>'d file, the incoming parameter is the glob 
+If this is a C<require>'d file, the incoming parameter is the glob
 C<*{"_<$filename"}>, with C<$filename> the name of the C<require>'d file.
 
 If it's a subroutine, the incoming parameter is the subroutine name.
@@ -5619,36 +5619,36 @@ sub postponed {
 
 =head2 C<dumpit>
 
-C<dumpit> is the debugger's wrapper around dumpvar.pl. 
+C<dumpit> is the debugger's wrapper around dumpvar.pl.
 
 It gets a filehandle (to which C<dumpvar.pl>'s output will be directed) and
-a reference to a variable (the thing to be dumped) as its input. 
+a reference to a variable (the thing to be dumped) as its input.
 
 The incoming filehandle is selected for output (C<dumpvar.pl> is printing to
 the currently-selected filehandle, thank you very much). The current
-values of the package globals C<$single> and C<$trace> are backed up in 
+values of the package globals C<$single> and C<$trace> are backed up in
 lexicals, and they are turned off (this keeps the debugger from trying
 to single-step through C<dumpvar.pl> (I think.)). C<$frame> is localized to
 preserve its current value and it is set to zero to prevent entry/exit
-messages from printing, and C<$doret> is localized as well and set to -2 to 
+messages from printing, and C<$doret> is localized as well and set to -2 to
 prevent return values from being shown.
 
-C<dumpit()> then checks to see if it needs to load C<dumpvar.pl> and 
-tries to load it (note: if you have a C<dumpvar.pl>  ahead of the 
-installed version in C<@INC>, yours will be used instead. Possible security 
+C<dumpit()> then checks to see if it needs to load C<dumpvar.pl> and
+tries to load it (note: if you have a C<dumpvar.pl>  ahead of the
+installed version in C<@INC>, yours will be used instead. Possible security
 problem?).
 
 It then checks to see if the subroutine C<main::dumpValue> is now defined
-(it should have been defined by C<dumpvar.pl>). If it has, C<dumpit()> 
+it should have been defined by C<dumpvar.pl>). If it has, C<dumpit()>
 localizes the globals necessary for things to be sane when C<main::dumpValue()>
-is called, and picks up the variable to be dumped from the parameter list. 
+is called, and picks up the variable to be dumped from the parameter list.
 
-It checks the package global C<%options> to see if there's a C<dumpDepth> 
-specified. If not, -1 is assumed; if so, the supplied value gets passed on to 
-C<dumpvar.pl>. This tells C<dumpvar.pl> where to leave off when dumping a 
+It checks the package global C<%options> to see if there's a C<dumpDepth>
+specified. If not, -1 is assumed; if so, the supplied value gets passed on to
+C<dumpvar.pl>. This tells C<dumpvar.pl> where to leave off when dumping a
 structure: -1 means dump everything.
 
-C<dumpValue()> is then called if possible; if not, C<dumpit()>just prints a 
+C<dumpValue()> is then called if possible; if not, C<dumpit()>just prints a
 warning.
 
 In either case, C<$single>, C<$trace>, C<$frame>, and C<$doret> are restored
@@ -5704,7 +5704,7 @@ sub dumpit {
 
 =head2 C<print_trace>
 
-C<print_trace>'s job is to print a stack trace. It does this via the 
+C<print_trace>'s job is to print a stack trace. It does this via the
 C<dump_trace> routine, which actually does all the ferreting-out of the
 stack trace data. C<print_trace> takes care of formatting it nicely and
 printing it to the proper filehandle.
@@ -5808,7 +5808,7 @@ some filtering and cleanup of the data, but mostly it just collects it to
 make C<print_trace()>'s job easier.
 
 C<skip> defines the number of stack frames to be skipped, working backwards
-from the most current. C<count> determines the total number of frames to 
+from the most current. C<count> determines the total number of frames to
 be returned; all of them (well, the first 10^9) are returned if C<count>
 is omitted.
 
@@ -5993,7 +5993,7 @@ to check that the thing it's being matched against has properly-matched
 curly braces.
 
 Of note is the definition of the C<$balanced_brace_re> global via C<||=>, which
-speeds things up by only creating the qr//'ed expression once; if it's 
+speeds things up by only creating the qr//'ed expression once; if it's
 already defined, we don't try to define it again. A speed hack.
 
 =cut
@@ -6003,7 +6003,7 @@ use vars qw($balanced_brace_re);
 sub unbalanced {
 
     # I hate using globals!
-    $balanced_brace_re ||= qr{ 
+    $balanced_brace_re ||= qr{
         ^ \{
              (?:
                  (?> [^{}] + )              # Non-parens without backtracking
@@ -6030,8 +6030,8 @@ sub gets {
 =head2 C<DB::system()> - handle calls to<system()> without messing up the debugger
 
 The C<system()> function assumes that it can just go ahead and use STDIN and
-STDOUT, but under the debugger, we want it to use the debugger's input and 
-outout filehandles. 
+STDOUT, but under the debugger, we want it to use the debugger's input and
+outout filehandles.
 
 C<DB::system()> socks away the program's STDIN and STDOUT, and then substitutes
 the debugger's IN and OUT filehandles for them. It does the C<system()> call,
@@ -6083,12 +6083,12 @@ by the debugger.
 
 If the C<noTTY> debugger option was set, we'll either use the terminal
 supplied (the value of the C<noTTY> option), or we'll use C<Term::Rendezvous>
-to find one. If we're a forked debugger, we call C<resetterm> to try to 
-get a whole new terminal if we can. 
+to find one. If we're a forked debugger, we call C<resetterm> to try to
+get a whole new terminal if we can.
 
 In either case, we set up the terminal next. If the C<ReadLine> option was
 true, we'll get a C<Term::ReadLine> object for the current terminal and save
-the appropriate attributes. We then 
+the appropriate attributes. We then
 
 =cut
 
@@ -6208,8 +6208,8 @@ C<IN> and C<OUT> filehandle for the new debugger. Otherwise, the two processes
 fight over the terminal, and you can never quite be sure who's going to get the
 input you're typing.
 
-C<get_fork_TTY> is a glob-aliased function which calls the real function that 
-is tasked with doing all the necessary operating system mojo to get a new 
+C<get_fork_TTY> is a glob-aliased function which calls the real function that
+is tasked with doing all the necessary operating system mojo to get a new
 TTY (and probably another window) and to direct the new debugger to read and
 write there.
 
@@ -6220,7 +6220,7 @@ work for I<your> platform and contribute them.
 
 =head3 C<socket_get_fork_TTY>
 
-=cut 
+=cut
 
 sub connect_remoteport {
     require IO::Socket;
@@ -6247,18 +6247,18 @@ sub socket_get_fork_TTY {
 
 =head3 C<xterm_get_fork_TTY>
 
-This function provides the C<get_fork_TTY> function for X11. If a 
+This function provides the C<get_fork_TTY> function for X11. If a
 program running under the debugger forks, a new <xterm> window is opened and
 the subsidiary debugger is directed there.
 
 The C<open()> call is of particular note here. We have the new C<xterm>
-we're spawning route file number 3 to STDOUT, and then execute the C<tty> 
-command (which prints the device name of the TTY we'll want to use for input 
+we're spawning route file number 3 to STDOUT, and then execute the C<tty>
+command (which prints the device name of the TTY we'll want to use for input
 and output to STDOUT, then C<sleep> for a very long time, routing this output
 to file number 3. This way we can simply read from the <XT> filehandle (which
-is STDOUT from the I<commands> we ran) to get the TTY we want to use. 
+is STDOUT from the I<commands> we ran) to get the TTY we want to use.
 
-Only works if C<xterm> is in your path and C<$ENV{DISPLAY}>, etc. are 
+Only works if C<xterm> is in your path and C<$ENV{DISPLAY}>, etc. are
 properly set up.
 
 =cut
@@ -6471,13 +6471,13 @@ EOP
 
 Handles rejiggering the prompt when we've forked off a new debugger.
 
-If the new debugger happened because of a C<system()> that invoked a 
+If the new debugger happened because of a C<system()> that invoked a
 program under the debugger, the arrow between the old pid and the new
 in the prompt has I<two> dashes instead of one.
 
 We take the current list of pids and add this one to the end. If there
-isn't any list yet, we make one up out of the initial pid associated with 
-the terminal and our new pid, sticking an arrow (either one-dashed or 
+isn't any list yet, we make one up out of the initial pid associated with
+the terminal and our new pid, sticking an arrow (either one-dashed or
 two dashed) in between them.
 
 If C<CreateTTY> is off, or C<resetterm> was called with no arguments,
@@ -6529,8 +6529,8 @@ If there are any filehandles there, read from the last one, and return the line
 if we got one. If not, we pop the filehandle off and close it, and try the
 next one up the stack.
 
-If we've emptied the filehandle stack, we check to see if we've got a socket 
-open, and we read that and return it if we do. If we don't, we just call the 
+If we've emptied the filehandle stack, we check to see if we've got a socket
+open, and we read that and return it if we do. If we don't, we just call the
 core C<readline()> and return its value.
 
 =cut
@@ -6695,7 +6695,7 @@ If C<option=value> is entered, we try to extract a quoted string from the
 value (if it is quoted). If it's not, we just use the whole value as-is.
 
 We load any modules required to service this option, and then we set it: if
-it just gets stuck in a variable, we do that; if there's a subroutine to 
+it just gets stuck in a variable, we do that; if there's a subroutine to
 handle setting the option, we call that.
 
 Finally, if we're running in interactive mode, we display the effect of the
@@ -6792,8 +6792,8 @@ sub parse_options {
 
         # Load any module that this option requires.
         eval qq{
-                local \$frame = 0; 
-                local \$doret = -2; 
+                local \$frame = 0;
+                local \$doret = -2;
                 require '$optionRequire{$option}';
                 1;
                } || die $@   # XXX: shouldn't happen
@@ -6819,7 +6819,7 @@ sub parse_options {
 
 =head1 RESTART SUPPORT
 
-These routines are used to store (and restore) lists of items in environment 
+These routines are used to store (and restore) lists of items in environment
 variables during a restart.
 
 =head2 set_list
@@ -6853,7 +6853,7 @@ sub set_list {
 Reverse the set_list operation: grab VAR_n to see how many we should be getting
 back, and then pull VAR_0, VAR_1. etc. back out.
 
-=cut 
+=cut
 
 sub get_list {
     my $stem = shift;
@@ -6873,7 +6873,7 @@ sub get_list {
 =head2 catch()
 
 The C<catch()> subroutine is the essence of fast and low-impact. We simply
-set an already-existing global scalar variable to a constant value. This 
+set an already-existing global scalar variable to a constant value. This
 avoids allocating any memory possibly in the middle of something that will
 get all confused if we do, particularly under I<unsafe signals>.
 
@@ -6889,9 +6889,9 @@ sub catch {
 C<warn> emits a warning, by joining together its arguments and printing
 them, with couple of fillips.
 
-If the composited message I<doesn't> end with a newline, we automatically 
-add C<$!> and a newline to the end of the message. The subroutine expects $OUT 
-to be set to the filehandle to be used to output warnings; it makes no 
+If the composited message I<doesn't> end with a newline, we automatically
+add C<$!> and a newline to the end of the message. The subroutine expects $OUT
+to be set to the filehandle to be used to output warnings; it makes no
 assumptions about what filehandles are available.
 
 =cut
@@ -6908,7 +6908,7 @@ sub warn {
 =head2 C<reset_IN_OUT>
 
 This routine handles restoring the debugger's input and output filehandles
-after we've tried and failed to move them elsewhere.  In addition, it assigns 
+after we've tried and failed to move them elsewhere.  In addition, it assigns
 the debugger's output filehandle to $LINEINFO if it was already open there.
 
 =cut
@@ -6943,7 +6943,7 @@ sub reset_IN_OUT {
 
 =head1 OPTION SUPPORT ROUTINES
 
-The following routines are used to process some of the more complicated 
+The following routines are used to process some of the more complicated
 debugger options.
 
 =head2 C<TTY>
@@ -7018,7 +7018,7 @@ sub noTTY {
 
 =head2 C<ReadLine>
 
-Sets the C<$rl> option variable. If 0, we use C<Term::ReadLine::Stub> 
+Sets the C<$rl> option variable. If 0, we use C<Term::ReadLine::Stub>
 (essentially, no C<readline> processing on this I<terminal>). Otherwise, we
 use C<Term::ReadLine>. Can't be changed after a terminal's in place; we save
 the value in case a restart is done so we can change it then.
@@ -7109,7 +7109,7 @@ sub pager {
 
 =head2 C<shellBang>
 
-Sets the shell escape command, and generates a printable copy to be used 
+Sets the shell escape command, and generates a printable copy to be used
 in the help.
 
 =cut
@@ -7136,7 +7136,7 @@ If the terminal has its own ornaments, fetch them. Otherwise accept whatever
 was passed as the argument. (This means you can't override the terminal's
 ornaments.)
 
-=cut 
+=cut
 
 sub ornaments {
     if ( defined $term ) {
@@ -7182,8 +7182,8 @@ sub recallCommand {
 
 Called with no arguments, returns the file or pipe that line info should go to.
 
-Called with an argument (a file or a pipe), it opens that onto the 
-C<LINEINFO> filehandle, unbuffers the filehandle, and then returns the 
+Called with an argument (a file or a pipe), it opens that onto the
+C<LINEINFO> filehandle, unbuffers the filehandle, and then returns the
 file or pipe again to the caller.
 
 =cut
@@ -7614,7 +7614,7 @@ B<O> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ...
 B<q> or B<^D>        Quit. Set B<\$DB::finished = 0> to debug global destruction.
 B<h> [I<db_command>]    Get help [on a specific debugger command], enter B<|h> to page.
 B<h h>        Summary of debugger commands.
-B<$doccmd> I<manpage>    Runs the external doc viewer B<$doccmd> command on the 
+B<$doccmd> I<manpage>    Runs the external doc viewer B<$doccmd> command on the
         named Perl I<manpage>, or on B<$doccmd> itself if omitted.
         Set B<\$DB::doccmd> to change viewer.
 
@@ -7864,14 +7864,14 @@ sub dbwarn {
 =head2 C<dbdie>
 
 The debugger's own C<$SIG{__DIE__}> handler. Handles providing a stack trace
-by loading C<Carp> and calling C<Carp::longmess()> to get it. We turn off 
-single stepping and tracing during the call to C<Carp::longmess> to avoid 
+by loading C<Carp> and calling C<Carp::longmess()> to get it. We turn off
+single stepping and tracing during the call to C<Carp::longmess> to avoid
 debugging it - we just want to use it.
 
 If C<dieLevel> is zero, we let the program being debugged handle the
 exceptions. If it's 1, you get backtraces for any exception. If it's 2,
 the debugger takes over all exception handling, printing a backtrace and
-displaying the exception via its C<dbwarn()> routine. 
+displaying the exception via its C<dbwarn()> routine.
 
 =cut
 
@@ -7945,7 +7945,7 @@ sub warnLevel {
 
 =head2 C<dielevel>
 
-Similar to C<warnLevel>. Non-zero values for C<dieLevel> result in the 
+Similar to C<warnLevel>. Non-zero values for C<dieLevel> result in the
 C<DB::dbdie()> function overriding any other C<die()> handler. Setting it to
 zero lets you use your own C<die()> handler.
 
@@ -7990,7 +7990,7 @@ sub dieLevel {
 =head2 C<signalLevel>
 
 Number three in a series: set C<signalLevel> to zero to keep your own
-signal handler for C<SIGSEGV> and/or C<SIGBUS>. Otherwise, the debugger 
+signal handler for C<SIGSEGV> and/or C<SIGBUS>. Otherwise, the debugger
 takes over and handles them with C<DB::diesignal()>.
 
 =cut
@@ -8058,7 +8058,7 @@ sub CvGV_name_or_bust {
 
 =head2 C<find_sub>
 
-A utility routine used in various places; finds the file where a subroutine 
+A utility routine used in various places; finds the file where a subroutine
 was defined, and returns that filename and a line-number range.
 
 Tries to use C<@sub> first; if it can't find it there, it tries building a
@@ -8102,7 +8102,7 @@ sub find_sub {
 =head2 C<methods>
 
 A subroutine that uses the utility function C<methods_via> to find all the
-methods in the class corresponding to the current reference and in 
+methods in the class corresponding to the current reference and in
 C<UNIVERSAL>.
 
 =cut
@@ -8407,7 +8407,7 @@ This block sets things up so that (basically) the world is sane
 before the debugger starts executing. We set up various variables that the
 debugger has to have set up before the Perl core starts running:
 
-=over 4 
+=over 4
 
 =item *
 
@@ -8532,14 +8532,14 @@ BEGIN { $^W = $ini_warn; }    # Switch warnings back
 
 =head2 db_complete
 
-C<readline> support - adds command completion to basic C<readline>. 
+C<readline> support - adds command completion to basic C<readline>.
 
 Returns a list of possible completions to C<readline> when invoked. C<readline>
-will print the longest common substring following the text already entered. 
+will print the longest common substring following the text already entered.
 
 If there is only a single possible completion, C<readline> will use it in full.
 
-This code uses C<map> and C<grep> heavily to create lists of possible 
+This code uses C<map> and C<grep> heavily to create lists of possible
 completion. Think LISP in this section.
 
 =cut
@@ -8558,7 +8558,7 @@ sub db_complete {
     my ( $itext, $search, $prefix, $pack ) =
       ( $text, "^\Q${package}::\E([^:]+)\$" );
 
-=head3 C<b postpone|compile> 
+=head3 C<b postpone|compile>
 
 =over 4
 
@@ -8584,7 +8584,7 @@ Return this as the list of possible completions
 
 =back
 
-=cut 
+=cut
 
     return sort grep /^\Q$text/, ( keys %sub ),
       qw(postpone load compile),    # subroutines
@@ -8621,7 +8621,7 @@ get all possible matching packages. Return this sorted list.
 
 Take a partially-qualified package and find all subpackages for it
 by getting all the subpackages for the package so far, matching all
-the subpackages against the text, and discarding all of them which 
+the subpackages against the text, and discarding all of them which
 start with 'main::'. Return this list.
 
 =cut
@@ -8660,9 +8660,9 @@ Possibilities are:
 
 =pod
 
-Under the debugger, source files are represented as C<_E<lt>/fullpath/to/file> 
-(C<eval>s are C<_E<lt>(eval NNN)>) keys in C<%main::>. We pull all of these 
-out of C<%main::>, add the initial source file, and extract the ones that 
+Under the debugger, source files are represented as C<_E<lt>/fullpath/to/file>
+(C<eval>s are C<_E<lt>(eval NNN)>) keys in C<%main::>. We pull all of these
+out of C<%main::>, add the initial source file, and extract the ones that
 match the completion text so far.
 
 =cut
@@ -8700,7 +8700,7 @@ Much like the above, except we have to do a little more cleanup:
 
 =pod
 
-=over 4 
+=over 4
 
 =item *
 
@@ -8838,10 +8838,10 @@ If there's only one hit, it's a package qualifier, and it's not equal to the ini
         return sort @out;
     } ## end if ($text =~ /^[\$@%]/)
 
-=head3 Options 
+=head3 Options
 
 We use C<option_val()> to look up the current value of the option. If there's
-only a single value, we complete the command in such a way that it is a 
+only a single value, we complete the command in such a way that it is a
 complete command for setting the option in question. If there are multiple
 possible values, we generate a command consisting of the option plus a trailing
 question mark, which, if executed, will list the current value of the option.
@@ -9028,7 +9028,7 @@ appropriate arguments to rerun the current session.
 =cut
 
 sub rerun {
-    my $i = shift; 
+    my $i = shift;
     my @args;
     pop(@truehist);                      # strim
     unless (defined $truehist[$i]) {
@@ -9124,7 +9124,7 @@ just popped into environment variables directly.
     # Save the break-on-loads.
     set_list( "PERLDB_ON_LOAD", %break_on_load );
 
-=pod 
+=pod
 
 The most complex part of this is the saving of all of the breakpoints. They
 can live in an awful lot of places, and we have to go through all of them,
@@ -9164,7 +9164,7 @@ variable via C<DB::set_list>.
 
         # Serialize the extra data %breakpoints_data hash.
         # That's a bug fix.
-        set_list( "PERLDB_FILE_ENABLED_$_", 
+        set_list( "PERLDB_FILE_ENABLED_$_",
             map { _is_breakpoint_enabled($file, $_) ? 1 : 0 }
             sort { $a <=> $b } keys(%dbline)
         )
@@ -9233,7 +9233,7 @@ variable via C<DB::set_list>.
     # Set this back to the initial pid.
     $ENV{PERLDB_PIDS} = $ini_pids if defined $ini_pids;
 
-=pod 
+=pod
 
 After all the debugger status has been saved, we take the command we built up
 and then return it, so we can C<exec()> it. The debugger will spot the
@@ -9245,7 +9245,7 @@ from the environment.
     # And run Perl again. Add the "-d" flag, all the
     # flags we built up, the script (whether a one-liner
     # or a file), add on the -emacs flag for a slave editor,
-    # and then the old arguments. 
+    # and then the old arguments.
 
     return ($^X, '-d', @flags, @script, ($slave_editor ? '-emacs' : ()), @ARGS);
 
@@ -9255,9 +9255,9 @@ from the environment.
 
 =head1 END PROCESSING - THE C<END> BLOCK
 
-Come here at the very end of processing. We want to go into a 
-loop where we allow the user to enter commands and interact with the 
-debugger, but we don't want anything else to execute. 
+Come here at the very end of processing. We want to go into a
+loop where we allow the user to enter commands and interact with the
+debugger, but we don't want anything else to execute.
 
 First we set the C<$finished> variable, so that some commands that
 shouldn't be run after the end of program quit working.
@@ -9270,7 +9270,7 @@ We then call C<DB::fake::at_exit()>, which returns the C<Use 'q' to quit ...>
 message and returns control to the debugger. Repeat.
 
 When the user finally enters a C<q> command, C<$fall_off_end> is set to
-1 and the C<END> block simply exits with C<$single> set to 0 (don't 
+1 and the C<END> block simply exits with C<$single> set to 0 (don't
 break, run to completion.).
 
 =cut
@@ -9290,12 +9290,12 @@ END {
 
 =head1 PRE-5.8 COMMANDS
 
-Some of the commands changed function quite a bit in the 5.8 command 
+Some of the commands changed function quite a bit in the 5.8 command
 realignment, so much so that the old code had to be replaced completely.
 Because we wanted to retain the option of being able to go back to the
 former command set, we moved the old code off to this section.
 
-There's an awful lot of duplicated code here. We've duplicated the 
+There's an awful lot of duplicated code here. We've duplicated the
 comments to keep things clear.
 
 =head2 Null command
@@ -9360,7 +9360,7 @@ sub cmd_pre580_a {
     } ## end if ($cmd =~ /^(\d*)\s*(.*)/)
 } ## end sub cmd_pre580_a
 
-=head2 Old C<b> command 
+=head2 Old C<b> command
 
 Add breakpoints.
 
@@ -9475,7 +9475,7 @@ sub cmd_pre580_D {
 
 =head2 Old C<h> command
 
-Print help. Defaults to printing the long-form help; the 5.8 version 
+Print help. Defaults to printing the long-form help; the 5.8 version
 prints the summary by default.
 
 =cut
@@ -9575,9 +9575,9 @@ sub cmd_pre580_W {
 
 =head1 PRE-AND-POST-PROMPT COMMANDS AND ACTIONS
 
-The debugger used to have a bunch of nearly-identical code to handle 
+The debugger used to have a bunch of nearly-identical code to handle
 the pre-and-post-prompt action commands. C<cmd_pre590_prepost> and
-C<cmd_prepost> unify all this into one set of code to handle the 
+C<cmd_prepost> unify all this into one set of code to handle the
 appropriate actions.
 
 =head2 C<cmd_pre590_prepost>
