@@ -7269,8 +7269,8 @@ newline. The descriptive text can also be marked up in the same way. If you
 need to continue the descriptive text to another line, start that line with
 just tabs and then enter the marked-up text.
 
-If you are modifying the help text, I<be careful>. The help-string parser is 
-not very sophisticated, and if you don't follow these rules it will mangle the 
+If you are modifying the help text, I<be careful>. The help-string parser is
+not very sophisticated, and if you don't follow these rules it will mangle the
 help beyond hope until you fix the string.
 
 =cut
@@ -7285,8 +7285,8 @@ sub sethelp {
     #      eeevil ornaments enabled.  This is an insane mess.
 
     $help = "
-Help is currently only available for the new 5.8 command set. 
-No help is available for the old command set. 
+Help is currently only available for the new 5.8 command set.
+No help is available for the old command set.
 We assume you know what you're doing if you switch to it.
 
 B<T>        Stack trace.
@@ -7327,7 +7327,7 @@ B<b> I<subname> [I<condition>]
 B<b> I<\$var>        Set breakpoint at first line of subroutine referenced by I<\$var>.
 B<b> B<load> I<filename> Set breakpoint on 'require'ing the given file.
 B<b> B<postpone> I<subname> [I<condition>]
-        Set breakpoint at first line of subroutine after 
+        Set breakpoint at first line of subroutine after
         it is compiled.
 B<b> B<compile> I<subname>
         Stop after the subroutine is compiled.
@@ -7398,12 +7398,12 @@ I<command>        Execute as a perl statement in current package.
 B<R>        Pure-man-restart of debugger, some of debugger state
         and command-line options may be lost.
         Currently the following settings are preserved:
-        history, breakpoints and actions, debugger B<O>ptions 
+        history, breakpoints and actions, debugger B<O>ptions
         and the following command-line options: I<-w>, I<-I>, I<-e>.
 
 B<o> [I<opt>] ...    Set boolean option to true
 B<o> [I<opt>B<?>]    Query options
-B<o> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ... 
+B<o> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ...
         Set options.  Use quotes if spaces in value.
     I<recallCommand>, I<ShellBang>    chars used to recall command or spawn shell;
     I<pager>            program for output of \"|cmd\";
@@ -7439,7 +7439,7 @@ B<q> or B<^D>        Quit. Set B<\$DB::finished = 0> to debug global destruction
 B<h>        Summary of debugger commands.
 B<h> [I<db_command>]    Get help [on a specific debugger command], enter B<|h> to page.
 B<h h>        Long help for debugger commands
-B<$doccmd> I<manpage>    Runs the external doc viewer B<$doccmd> command on the 
+B<$doccmd> I<manpage>    Runs the external doc viewer B<$doccmd> command on the
         named Perl I<manpage>, or on B<$doccmd> itself if omitted.
         Set B<\$DB::doccmd> to change viewer.
 
@@ -7518,7 +7518,7 @@ B<b> I<subname> [I<condition>]
 B<b> I<\$var>        Set breakpoint at first line of subroutine referenced by I<\$var>.
 B<b> B<load> I<filename> Set breakpoint on 'require'ing the given file.
 B<b> B<postpone> I<subname> [I<condition>]
-        Set breakpoint at first line of subroutine after 
+        Set breakpoint at first line of subroutine after
         it is compiled.
 B<b> B<compile> I<subname>
         Stop after the subroutine is compiled.
@@ -7574,12 +7574,12 @@ B<v>        Show versions of loaded modules.
 B<R>        Pure-man-restart of debugger, some of debugger state
         and command-line options may be lost.
         Currently the following settings are preserved:
-        history, breakpoints and actions, debugger B<O>ptions 
+        history, breakpoints and actions, debugger B<O>ptions
         and the following command-line options: I<-w>, I<-I>, I<-e>.
 
 B<O> [I<opt>] ...    Set boolean option to true
 B<O> [I<opt>B<?>]    Query options
-B<O> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ... 
+B<O> [I<opt>B<=>I<val>] [I<opt>=B<\">I<val>B<\">] ...
         Set options.  Use quotes if spaces in value.
     I<recallCommand>, I<ShellBang>    chars used to recall command or spawn shell;
     I<pager>            program for output of \"|cmd\";
@@ -7658,7 +7658,7 @@ END_SUM
 
 Most of what C<print_help> does is just text formatting. It finds the
 C<B> and C<I> ornaments, cleans them off, and substitutes the proper
-terminal control characters to simulate them (courtesy of 
+terminal control characters to simulate them (courtesy of
 C<Term::ReadLine::TermCap>).
 
 =cut
@@ -7678,12 +7678,12 @@ sub print_help {
           ( < ?                 # so <CR> works
             [BI] < [^\t\n] + )  # find an eeevil ornament
           ( \t+ )               # original separation, discarded
-          ( .* )                # this will now start (no earlier) than 
+          ( .* )                # this will now start (no earlier) than
                                 # column 16
     } {
         my($leadwhite, $command, $midwhite, $text) = ($1, $2, $3, $4);
         my $clean = $command;
-        $clean =~ s/[BI]<([^>]*)>/$1/g;  
+        $clean =~ s/[BI]<([^>]*)>/$1/g;
 
         # replace with this whole string:
         ($leadwhite ? " " x 4 : "")
@@ -7696,7 +7696,7 @@ sub print_help {
     s{                          # handle bold ornaments
        B < ( [^>] + | > ) >
     } {
-          $Term::ReadLine::TermCap::rl_term_set[2] 
+          $Term::ReadLine::TermCap::rl_term_set[2]
         . $1
         . $Term::ReadLine::TermCap::rl_term_set[3]
     }gex;
@@ -7704,7 +7704,7 @@ sub print_help {
     s{                         # handle italic ornaments
        I < ( [^>] + | > ) >
     } {
-          $Term::ReadLine::TermCap::rl_term_set[0] 
+          $Term::ReadLine::TermCap::rl_term_set[0]
         . $1
         . $Term::ReadLine::TermCap::rl_term_set[1]
     }gex;
@@ -7713,7 +7713,7 @@ sub print_help {
     print $OUT $_;
 } ## end sub print_help
 
-=head2 C<fix_less> 
+=head2 C<fix_less>
 
 This routine does a lot of gyrations to be sure that the pager is C<less>.
 It checks for C<less> masquerading as C<more> and records the result in
