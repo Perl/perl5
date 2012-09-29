@@ -5100,7 +5100,7 @@ PP(pp_push)
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER_with_name("call_PUSH");
-	call_method("PUSH",G_SCALAR|G_DISCARD);
+	call_method("PUSH",G_SCALAR|G_DISCARD|G_METHOD_NAMED);
 	LEAVE_with_name("call_PUSH");
 	SPAGAIN;
     }
@@ -5153,7 +5153,7 @@ PP(pp_unshift)
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER_with_name("call_UNSHIFT");
-	call_method("UNSHIFT",G_SCALAR|G_DISCARD);
+	call_method("UNSHIFT",G_SCALAR|G_DISCARD|G_METHOD_NAMED);
 	LEAVE_with_name("call_UNSHIFT");
 	SPAGAIN;
     }
@@ -5711,7 +5711,7 @@ PP(pp_split)
 	else {
 	    PUTBACK;
 	    ENTER_with_name("call_PUSH");
-	    call_method("PUSH",G_SCALAR|G_DISCARD);
+	    call_method("PUSH",G_SCALAR|G_DISCARD|G_METHOD_NAMED);
 	    LEAVE_with_name("call_PUSH");
 	    SPAGAIN;
 	    if (gimme == G_ARRAY) {

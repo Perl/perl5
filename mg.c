@@ -1745,10 +1745,10 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     }
     PUTBACK;
     if (flags & G_DISCARD) {
-	call_method(meth, G_SCALAR|G_DISCARD);
+	call_method(meth, G_SCALAR|G_DISCARD|G_METHOD_NAMED);
     }
     else {
-	if (call_method(meth, G_SCALAR))
+	if (call_method(meth, G_SCALAR|G_METHOD_NAMED))
 	    ret = *PL_stack_sp--;
     }
     POPSTACK;

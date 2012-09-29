@@ -2674,12 +2674,15 @@ Perl_call_method(pTHX_ const char *methname, I32 flags)
           		/* See G_* flags in cop.h */
 {
     STRLEN len;
+    SV* sv;
     PERL_ARGS_ASSERT_CALL_METHOD;
 
     len = strlen(methname);
+    sv = flags & G_METHOD_NAMED
+        ? sv_2mortal(newSVpvn_share(methname, len,0))
+        : newSVpvn_flags(methname, len, SVs_TEMP);
 
-    /* XXX: sv_2mortal(newSVpvn_share(methname, len)) can be faster */
-    return call_sv(newSVpvn_flags(methname, len, SVs_TEMP), flags | G_METHOD);
+    return call_sv(sv, flags | G_METHOD);
 }
 
 /* May be called with any of a CV, a GV, or an SV containing the name. */
@@ -2698,7 +2701,9 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 {
     dVAR; dSP;
     LOGOP myop;		/* fake syntax tree node */
-    UNOP method_op;
+    OP* method;
+    UNOP method_unop;
+    SVOP method_svop;
     I32 oldmark;
     VOL I32 retval = 0;
     I32 oldscope;
@@ -2727,7 +2732,8 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     PL_op = (OP*)&myop;
 
     EXTEND(PL_stack_sp, 1);
-    *++PL_stack_sp = sv;
+    if (!(flags & G_METHOD_NAMED))
+        *++PL_stack_sp = sv;
     oldmark = TOPMARK;
     oldscope = PL_scopestack_ix;
 
@@ -2740,14 +2746,24 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	  && !(flags & G_NODEBUG))
 	myop.op_private |= OPpENTERSUB_DB;
 
-    if (flags & G_METHOD) {
-	Zero(&method_op, 1, UNOP);
-	method_op.op_next = (OP*)&myop;
-	method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
-	method_op.op_type = OP_METHOD;
-	myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
-	myop.op_type = OP_ENTERSUB;
-	PL_op = (OP*)&method_op;
+    if (flags & (G_METHOD|G_METHOD_NAMED)) {
+        if ( flags & G_METHOD_NAMED ) {
+            Zero(&method_svop, 1, SVOP);
+            method_svop.op_next = (OP*)&myop;
+            method_svop.op_ppaddr = PL_ppaddr[OP_METHOD_NAMED];
+            method_svop.op_type = OP_METHOD_NAMED;
+            method_svop.op_sv = sv;
+            PL_op = (OP*)&method_svop;
+        } else {
+            Zero(&method_unop, 1, UNOP);
+            method_unop.op_next = (OP*)&myop;
+            method_unop.op_ppaddr = PL_ppaddr[OP_METHOD];
+            method_unop.op_type = OP_METHOD;
+            PL_op = (OP*)&method_unop;
+        }
+        myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+        myop.op_type = OP_ENTERSUB;
+
     }
 
     if (!(flags & G_EVAL)) {
