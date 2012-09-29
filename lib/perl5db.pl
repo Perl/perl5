@@ -5227,11 +5227,10 @@ sub cmd_L {
         } ## end for $file (keys %postponed_file)
     } ## end if (@have and ($break_wanted...
     if ( %break_on_load and $break_wanted ) {
-        print $OUT "Breakpoints on load:\n";
-        my $file;
-        for $file ( keys %break_on_load ) {
-            print $OUT " $file\n";
-            last if $signal;
+        print {$OUT} "Breakpoints on load:\n";
+        BREAK_ON_LOAD: for my $filename ( keys %break_on_load ) {
+            print {$OUT} " $filename\n";
+            last BREAK_ON_LOAD if $signal;
         }
     } ## end if (%break_on_load and...
     if ($watch_wanted) {
