@@ -4640,14 +4640,14 @@ sub cmd_B {
 
     # If it's * we're deleting all the breakpoints.
     if ( $line eq '*' ) {
-        if (not eval { &delete_breakpoint(); 1 }) {
+        if (not eval { delete_breakpoint(); 1 }) {
             print {$OUT} $@;
         }
     }
 
     # If there is a line spec, delete the breakpoint on that line.
     elsif ( $line =~ /\A(\S.*)/ ) {
-        if (not eval { &delete_breakpoint( $line || $dbline ); 1 }) {
+        if (not eval { delete_breakpoint( $line || $dbline ); 1 }) {
             local $\ = '';
             print {$OUT} $@;
         }
