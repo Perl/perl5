@@ -4688,6 +4688,15 @@ are no magical debugger structures associated with them.
 
 =cut
 
+sub _remove_breakpoint_entry {
+    my ($fn, $i) = @_;
+
+    delete $dbline{$i};
+    _delete_breakpoint_data_ref($fn, $i);
+
+    return;
+}
+
 sub _delete_all_breakpoints {
     print {$OUT} "Deleting all breakpoints...\n";
 
@@ -4710,10 +4719,8 @@ sub _delete_all_breakpoints {
                 # ... remove the breakpoint.
                 $dbline{$i} =~ s/\A[^\0]+//;
                 if ( $dbline{$i} =~ s/\A\0?\z// ) {
-
                     # Remove the entry altogether if no action is there.
-                    delete $dbline{$i};
-                    _delete_breakpoint_data_ref($fn, $i);
+                    _remove_breakpoint_entry($fn, $i);
                 }
             } ## end if (defined $dbline{$i...
         } ## end for $i (1 .. $max)
@@ -4751,8 +4758,7 @@ sub delete_breakpoint {
 
         # Remove the entry entirely if there's no action left.
         if ($dbline{$i} eq '') {
-            delete $dbline{$i};
-            _delete_breakpoint_data_ref($fn, $i);
+            _remove_breakpoint_entry($fn, $i);
         }
     }
 
