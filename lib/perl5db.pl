@@ -4741,33 +4741,37 @@ sub _delete_all_breakpoints {
     return;
 }
 
+sub _delete_breakpoint_from_line {
+    my ($i) = @_;
+
+    # Woops. This line wasn't breakable at all.
+    die "Line $i not breakable.\n" if $dbline[$i] == 0;
+
+    # Kill the condition, but leave any action.
+    $dbline{$i} =~ s/\A[^\0]*//;
+
+    # Remove the entry entirely if there's no action left.
+    if ($dbline{$i} eq '') {
+        _remove_breakpoint_entry($filename, $i);
+    }
+
+    return;
+}
+
 sub delete_breakpoint {
     my $i = shift;
 
-    my $fn = $filename;
-
     # If we got a line, delete just that one.
     if ( defined($i) ) {
-
-        # Woops. This line wasn't breakable at all.
-        die "Line $i not breakable.\n" if $dbline[$i] == 0;
-
-        # Kill the condition, but leave any action.
-        $dbline{$i} =~ s/\A[^\0]*//;
-
-        # Remove the entry entirely if there's no action left.
-        if ($dbline{$i} eq '') {
-            _remove_breakpoint_entry($fn, $i);
-        }
+        _delete_breakpoint_from_line($i);
     }
-
     # No line; delete them all.
     else {
         _delete_all_breakpoints();
-    } ## end else [ if (defined($i))
+    }
 
     return;
-} ## end sub delete_breakpoint
+}
 
 =head3 cmd_stop (command)
 
