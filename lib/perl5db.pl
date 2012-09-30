@@ -1857,6 +1857,116 @@ EOP
     return;
 }
 
+sub _DB__grab_control
+{
+    my ($args) = @_;
+
+    # Yes, grab control.
+    if ($slave_editor) {
+
+        # Tell the editor to update its position.
+        ${ $args->{position} } = "\032\032$filename:$line:0\n";
+        print_lineinfo(${ $args->{position} });
+    }
+
+=pod
+
+Special check: if we're in package C<DB::fake>, we've gone through the
+C<END> block at least once. We set up everything so that we can continue
+to enter commands and have a valid context to be in.
+
+=cut
+
+    elsif ( $package eq 'DB::fake' ) {
+
+        # Fallen off the end already.
+        $term || &setterm;
+        print_help(<<EOP);
+Debugged program terminated.  Use B<q> to quit or B<R> to restart,
+use B<o> I<inhibit_exit> to avoid stopping after program termination,
+B<h q>, B<h R> or B<h o> to get additional info.
+EOP
+
+        # Set the DB::eval context appropriately.
+        $package     = 'main';
+        $usercontext = _calc_usercontext($package);
+    } ## end elsif ($package eq 'DB::fake')
+
+=pod
+
+If the program hasn't finished executing, we scan forward to the
+next executable line, print that out, build the prompt from the file and line
+number information, and print that.
+
+=cut
+
+    else {
+
+
+        # Still somewhere in the midst of execution. Set up the
+        #  debugger prompt.
+        $sub =~ s/\'/::/;    # Swap Perl 4 package separators (') to
+                             # Perl 5 ones (sorry, we don't print Klingon
+                             #module names)
+
+        ${$args->{prefix}} = $sub =~ /::/ ? "" : ($package . '::');
+        ${$args->{prefix}} .= "$sub($filename:";
+        ${$args->{after}}= ( $dbline[$line] =~ /\n$/ ? '' : "\n" );
+
+        # Break up the prompt if it's really long.
+        if ( length(${$args->{prefix}}) > 30 ) {
+            ${$args->{position} } = ${$args->{prefix}} . "$line):\n$line:\t$dbline[$line]" . ${$args->{after}};
+            ${$args->{prefix}}   = "";
+            ${ $args->{infix} }    = ":\t";
+        }
+        else {
+            ${ $args->{infix} }    = "):\t";
+            ${ $args->{position} } = ${$args->{prefix}} . "$line${ $args->{infix} }$dbline[$line]" . ${$args->{after}};
+        }
+
+        # Print current line info, indenting if necessary.
+        if ($frame) {
+            print_lineinfo( ' ' x $stack_depth,
+                "$line:\t$dbline[$line]" . ${$args->{after}} );
+        }
+        else {
+            depth_print_lineinfo(${ $args->{explicit_stop} }, ${ $args->{ position } });
+        }
+
+        # Scan forward, stopping at either the end or the next
+        # unbreakable line.
+        for ( my $i = $line + 1 ; $i <= $max && $dbline[$i] == 0 ; ++$i )
+        {    #{ vi
+
+            # Drop out on null statements, block closers, and comments.
+            last if $dbline[$i] =~ /^\s*[\;\}\#\n]/;
+
+            # Drop out if the user interrupted us.
+            last if $signal;
+
+            # Append a newline if the line doesn't have one. Can happen
+            # in eval'ed text, for instance.
+            ${ $args->{after} } = ( $dbline[$i] =~ /\n$/ ? '' : "\n" );
+
+            # Next executable line.
+            my $incr_pos = ${ $args->{prefix} } . "$i${ $args->{infix} }$dbline[$i]" .
+                ${ $args->{after} };
+            ${ $args->{position} } .= $incr_pos;
+            if ($frame) {
+
+                # Print it indented if tracing is on.
+                print_lineinfo( ' ' x $stack_depth,
+                    "$i:\t$dbline[$i]" . ${ $args->{after} } );
+            }
+            else {
+                depth_print_lineinfo(${ $args->{explicit_stop} }, $incr_pos);
+            }
+        } ## end for ($i = $line + 1 ; $i...
+    } ## end else [ if ($slave_editor)
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -1975,108 +2085,15 @@ won't cause trouble, and we say that the program is over.
     # Check to see if we should grab control ($single true,
     # trace set appropriately, or we got a signal).
     if ( $explicit_stop || ( $trace & 1 ) ) {
-
-        # Yes, grab control.
-        if ($slave_editor) {
-
-            # Tell the editor to update its position.
-            $position = "\032\032$filename:$line:0\n";
-            print_lineinfo($position);
-        }
-
-=pod
-
-Special check: if we're in package C<DB::fake>, we've gone through the
-C<END> block at least once. We set up everything so that we can continue
-to enter commands and have a valid context to be in.
-
-=cut
-
-        elsif ( $package eq 'DB::fake' ) {
-
-            # Fallen off the end already.
-            $term || &setterm;
-            print_help(<<EOP);
-Debugged program terminated.  Use B<q> to quit or B<R> to restart,
-  use B<o> I<inhibit_exit> to avoid stopping after program termination,
-  B<h q>, B<h R> or B<h o> to get additional info.
-EOP
-
-            # Set the DB::eval context appropriately.
-            $package     = 'main';
-            $usercontext = _calc_usercontext($package);
-        } ## end elsif ($package eq 'DB::fake')
-
-=pod
-
-If the program hasn't finished executing, we scan forward to the
-next executable line, print that out, build the prompt from the file and line
-number information, and print that.
-
-=cut
-
-        else {
-
-
-            # Still somewhere in the midst of execution. Set up the
-            #  debugger prompt.
-            $sub =~ s/\'/::/;    # Swap Perl 4 package separators (') to
-                                 # Perl 5 ones (sorry, we don't print Klingon
-                                 #module names)
-
-            $prefix = $sub =~ /::/ ? "" : ($package . '::');
-            $prefix .= "$sub($filename:";
-            $after = ( $dbline[$line] =~ /\n$/ ? '' : "\n" );
-
-            # Break up the prompt if it's really long.
-            if ( length($prefix) > 30 ) {
-                $position = "$prefix$line):\n$line:\t$dbline[$line]$after";
-                $prefix   = "";
-                $infix    = ":\t";
-            }
-            else {
-                $infix    = "):\t";
-                $position = "$prefix$line$infix$dbline[$line]$after";
-            }
-
-            # Print current line info, indenting if necessary.
-            if ($frame) {
-                print_lineinfo( ' ' x $stack_depth,
-                    "$line:\t$dbline[$line]$after" );
-            }
-            else {
-                depth_print_lineinfo($explicit_stop, $position);
-            }
-
-            # Scan forward, stopping at either the end or the next
-            # unbreakable line.
-            for ( my $i = $line + 1 ; $i <= $max && $dbline[$i] == 0 ; ++$i )
-            {    #{ vi
-
-                # Drop out on null statements, block closers, and comments.
-                last if $dbline[$i] =~ /^\s*[\;\}\#\n]/;
-
-                # Drop out if the user interrupted us.
-                last if $signal;
-
-                # Append a newline if the line doesn't have one. Can happen
-                # in eval'ed text, for instance.
-                $after = ( $dbline[$i] =~ /\n$/ ? '' : "\n" );
-
-                # Next executable line.
-                my $incr_pos = "$prefix$i$infix$dbline[$i]$after";
-                $position .= $incr_pos;
-                if ($frame) {
-
-                    # Print it indented if tracing is on.
-                    print_lineinfo( ' ' x $stack_depth,
-                        "$i:\t$dbline[$i]$after" );
-                }
-                else {
-                    depth_print_lineinfo($explicit_stop, $incr_pos);
-                }
-            } ## end for ($i = $line + 1 ; $i...
-        } ## end else [ if ($slave_editor)
+        _DB__grab_control(
+            {
+                position => \$position,
+                prefix => \$prefix,
+                after => \$after,
+                explicit_stop => \$explicit_stop,
+                infix => \$infix,
+            },
+        );
     } ## end if ($single || ($trace...
 
 =pod
