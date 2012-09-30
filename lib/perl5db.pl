@@ -699,7 +699,7 @@ sub _calc_usercontext {
 
     # Cancel strict completely for the evaluated code, so the code
     # the user evaluates won't be affected by it. (Shlomi Fish)
-    return 'no strict; ($@, $!, $^E, $,, $/, $\, $^W) = @saved;'
+    return 'no strict; ($@, $!, $^E, $,, $/, $\, $^W) = @DB::saved;'
     . "package $package;";    # this won't let them modify, alas
 }
 
@@ -1759,44 +1759,6 @@ use vars qw(
     $end
 );
 
-sub _DB_on_init__initialize_globals
-{
-    # Check for whether we should be running continuously or not.
-    # _After_ the perl program is compiled, $single is set to 1:
-    if ( $single and not $second_time++ ) {
-
-        # Options say run non-stop. Run until we get an interrupt.
-        if ($runnonstop) {    # Disable until signal
-                # If there's any call stack in place, turn off single
-                # stepping into subs throughout the stack.
-            for my $i (0 .. $stack_depth) {
-                $stack[ $i ] &= ~1;
-            }
-
-            # And we are now no longer in single-step mode.
-            $single = 0;
-
-            # If we simply returned at this point, we wouldn't get
-            # the trace info. Fall on through.
-            # return;
-        } ## end if ($runnonstop)
-
-        elsif ($ImmediateStop) {
-
-            # We are supposed to stop here; XXX probably a break.
-            $ImmediateStop = 0;    # We've processed it; turn it off
-            $signal        = 1;    # Simulate an interrupt to force
-                                   # us into the command loop
-        }
-    } ## end if ($single and not $second_time...
-
-    # If we're in single-step mode, or an interrupt (real or fake)
-    # has occurred, turn off non-stop mode.
-    $runnonstop = 0 if $single or $signal;
-
-    return;
-}
-
 sub _DB__determine_if_we_should_break
 {
     # if we have something here, see if we should break.
@@ -1827,146 +1789,6 @@ sub _DB__determine_if_we_should_break
     } ## end if ($dbline{$line} && ...
 }
 
-sub _DB__handle_watch_expressions
-{
-    if ( $trace & 2 ) {
-        for my $n (0 .. $#to_watch) {
-            $evalarg = $to_watch[$n];
-            local $onetimeDump;    # Tell DB::eval() to not output results
-
-            # Fix context DB::eval() wants to return an array, but
-            # we need a scalar here.
-            my ($val) = join( "', '", &eval );
-            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
-
-            # Did it change?
-            if ( $val ne $old_watch[$n] ) {
-
-                # Yep! Show the difference, and fake an interrupt.
-                $signal = 1;
-                print $OUT <<EOP;
-Watchpoint $n:\t$to_watch[$n] changed:
-    old value:\t$old_watch[$n]
-    new value:\t$val
-EOP
-                $old_watch[$n] = $val;
-            } ## end if ($val ne $old_watch...
-        } ## end for my $n (0 ..
-    } ## end if ($trace & 2)
-
-    return;
-}
-
-sub _DB__grab_control
-{
-    my ($args) = @_;
-
-    # Yes, grab control.
-    if ($slave_editor) {
-
-        # Tell the editor to update its position.
-        ${ $args->{position} } = "\032\032$filename:$line:0\n";
-        print_lineinfo(${ $args->{position} });
-    }
-
-=pod
-
-Special check: if we're in package C<DB::fake>, we've gone through the
-C<END> block at least once. We set up everything so that we can continue
-to enter commands and have a valid context to be in.
-
-=cut
-
-    elsif ( $package eq 'DB::fake' ) {
-
-        # Fallen off the end already.
-        $term || &setterm;
-        print_help(<<EOP);
-Debugged program terminated.  Use B<q> to quit or B<R> to restart,
-use B<o> I<inhibit_exit> to avoid stopping after program termination,
-B<h q>, B<h R> or B<h o> to get additional info.
-EOP
-
-        # Set the DB::eval context appropriately.
-        $package     = 'main';
-        $usercontext = _calc_usercontext($package);
-    } ## end elsif ($package eq 'DB::fake')
-
-=pod
-
-If the program hasn't finished executing, we scan forward to the
-next executable line, print that out, build the prompt from the file and line
-number information, and print that.
-
-=cut
-
-    else {
-
-
-        # Still somewhere in the midst of execution. Set up the
-        #  debugger prompt.
-        $sub =~ s/\'/::/;    # Swap Perl 4 package separators (') to
-                             # Perl 5 ones (sorry, we don't print Klingon
-                             #module names)
-
-        ${$args->{prefix}} = $sub =~ /::/ ? "" : ($package . '::');
-        ${$args->{prefix}} .= "$sub($filename:";
-        ${$args->{after}}= ( $dbline[$line] =~ /\n$/ ? '' : "\n" );
-
-        # Break up the prompt if it's really long.
-        if ( length(${$args->{prefix}}) > 30 ) {
-            ${$args->{position} } = ${$args->{prefix}} . "$line):\n$line:\t$dbline[$line]" . ${$args->{after}};
-            ${$args->{prefix}}   = "";
-            ${ $args->{infix} }    = ":\t";
-        }
-        else {
-            ${ $args->{infix} }    = "):\t";
-            ${ $args->{position} } = ${$args->{prefix}} . "$line${ $args->{infix} }$dbline[$line]" . ${$args->{after}};
-        }
-
-        # Print current line info, indenting if necessary.
-        if ($frame) {
-            print_lineinfo( ' ' x $stack_depth,
-                "$line:\t$dbline[$line]" . ${$args->{after}} );
-        }
-        else {
-            depth_print_lineinfo(${ $args->{explicit_stop} }, ${ $args->{ position } });
-        }
-
-        # Scan forward, stopping at either the end or the next
-        # unbreakable line.
-        for ( my $i = $line + 1 ; $i <= $max && $dbline[$i] == 0 ; ++$i )
-        {    #{ vi
-
-            # Drop out on null statements, block closers, and comments.
-            last if $dbline[$i] =~ /^\s*[\;\}\#\n]/;
-
-            # Drop out if the user interrupted us.
-            last if $signal;
-
-            # Append a newline if the line doesn't have one. Can happen
-            # in eval'ed text, for instance.
-            ${ $args->{after} } = ( $dbline[$i] =~ /\n$/ ? '' : "\n" );
-
-            # Next executable line.
-            my $incr_pos = ${ $args->{prefix} } . "$i${ $args->{infix} }$dbline[$i]" .
-                ${ $args->{after} };
-            ${ $args->{position} } .= $incr_pos;
-            if ($frame) {
-
-                # Print it indented if tracing is on.
-                print_lineinfo( ' ' x $stack_depth,
-                    "$i:\t$dbline[$i]" . ${ $args->{after} } );
-            }
-            else {
-                depth_print_lineinfo(${ $args->{explicit_stop} }, $incr_pos);
-            }
-        } ## end for ($i = $line + 1 ; $i...
-    } ## end else [ if ($slave_editor)
-
-    return;
-}
-
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -1975,12 +1797,23 @@ sub DB {
     my $position;
     my ($prefix, $after, $infix);
     my $pat;
+    my $explicit_stop;
 
     if ($ENV{PERL5DB_THREADED}) {
         $tid = eval { "[".threads->tid."]" };
     }
 
-    _DB_on_init__initialize_globals();
+    my $obj = DB::Obj->new(
+        {
+            position => \$position,
+            prefix => \$prefix,
+            after => \$after,
+            explicit_stop => \$explicit_stop,
+            infix => \$infix,
+        },
+    );
+
+    $obj->_DB_on_init__initialize_globals(@_);
 
     # Preserve current values of $@, $!, $^E, $,, $/, $\, $^W.
     # The code being debugged may have altered them.
@@ -2005,14 +1838,14 @@ sub DB {
     # Last line in the program.
     $max = $#dbline;
 
-    _DB__determine_if_we_should_break();
+    _DB__determine_if_we_should_break(@_);
 
     # Preserve the current stop-or-not, and see if any of the W
     # (watch expressions) has changed.
     my $was_signal = $signal;
 
     # If we have any watch expressions ...
-    _DB__handle_watch_expressions();
+    $obj->_DB__handle_watch_expressions(@_);
 
 =head2 C<watchfunction()>
 
@@ -2080,20 +1913,12 @@ won't cause trouble, and we say that the program is over.
 
     # Make sure that we always print if asked for explicitly regardless
     # of $trace_to_depth .
-    my $explicit_stop = ($single || $was_signal);
+    $explicit_stop = ($single || $was_signal);
 
     # Check to see if we should grab control ($single true,
     # trace set appropriately, or we got a signal).
     if ( $explicit_stop || ( $trace & 1 ) ) {
-        _DB__grab_control(
-            {
-                position => \$position,
-                prefix => \$prefix,
-                after => \$after,
-                explicit_stop => \$explicit_stop,
-                infix => \$infix,
-            },
-        );
+        $obj->_DB__grab_control(@_);
     } ## end if ($single || ($trace...
 
 =pod
@@ -2104,7 +1929,7 @@ If there are any preprompt actions, execute those as well.
 =cut
 
     # If there's an action, do it now.
-    $evalarg = $action, &eval if $action;
+    $evalarg = $action, DB::eval(@_) if $action;
 
     # Are we nested another level (e.g., did we evaluate a function
     # that had a breakpoint in it at the debugger prompt)?
@@ -2115,7 +1940,7 @@ If there are any preprompt actions, execute those as well.
 
         # Do any pre-prompt actions.
         foreach $evalarg (@$pre) {
-            &eval;
+            DB::eval(@_);
         }
 
         # Complain about too much recursion if we passed the limit.
@@ -2843,7 +2668,7 @@ mess us up.
                         local $SIG{__WARN__};
 
                         # Create the pattern.
-                        eval '$inpat =~ m' . "\a$inpat\a";
+                        eval 'no strict q/vars/; $inpat =~ m' . "\a$inpat\a";
                         if ( $@ ne "" ) {
 
                             # Oops. Bad pattern. No biscuit.
@@ -2864,6 +2689,7 @@ mess us up.
                     # Done in eval so nothing breaks if the pattern
                     # does something weird.
                     eval '
+                        no strict q/vars/;
                         for (;;) {
                             # Move ahead one line.
                             ++$start;
@@ -2935,6 +2761,7 @@ Same as for C</>, except the loop runs backwards.
                     # Search inside the eval to prevent pattern badness
                     # from killing us.
                     eval '
+                        no strict q/vars/;
                         for (;;) {
                             # Back up a line.
                             --$start;
@@ -3446,7 +3273,7 @@ any variables we might want to address in the C<DB> package.
             $evalarg = "\$^D = \$^D | \$DB::db_stop;\n$cmd";
 
             # Run *our* eval that executes in the caller's context.
-            &eval;
+            DB::eval(@_);
 
             # Turn off the one-time-dump stuff now.
             if ($onetimeDump) {
@@ -3547,7 +3374,7 @@ again.
 
         # Evaluate post-prompt commands.
         foreach $evalarg (@$post) {
-            &eval;
+            DB::eval(@_);
         }
     }    # if ($single || $signal)
 
@@ -3555,6 +3382,234 @@ again.
     ( $@, $!, $^E, $,, $/, $\, $^W ) = @saved;
     ();
 } ## end sub DB
+
+package DB::Obj;
+
+sub new {
+    my $class = shift;
+
+    my $self = bless {}, $class;
+
+    $self->_init(@_);
+
+    return $self;
+}
+
+sub _init {
+    my ($self, $args) = @_;
+
+    %{$self} = (%$self, %$args);
+
+    return;
+}
+
+{
+    no strict 'refs';
+    foreach my $slot_name (qw(after explicit_stop infix position prefix)) {
+        my $slot = $slot_name;
+        *{$slot} = sub {
+            my $self = shift;
+
+            if (@_) {
+                ${ $self->{$slot} } = shift;
+            }
+
+            return ${ $self->{$slot} };
+        };
+    }
+}
+
+sub _DB_on_init__initialize_globals
+{
+    my $self = shift;
+
+    # Check for whether we should be running continuously or not.
+    # _After_ the perl program is compiled, $single is set to 1:
+    if ( $DB::single and not $DB::second_time++ ) {
+
+        # Options say run non-stop. Run until we get an interrupt.
+        if ($DB::runnonstop) {    # Disable until signal
+                # If there's any call stack in place, turn off single
+                # stepping into subs throughout the stack.
+            for my $i (0 .. $DB::stack_depth) {
+                $DB::stack[ $i ] &= ~1;
+            }
+
+            # And we are now no longer in single-step mode.
+            $DB::single = 0;
+
+            # If we simply returned at this point, we wouldn't get
+            # the trace info. Fall on through.
+            # return;
+        } ## end if ($runnonstop)
+
+        elsif ($DB::ImmediateStop) {
+
+            # We are supposed to stop here; XXX probably a break.
+            $DB::ImmediateStop = 0;    # We've processed it; turn it off
+            $DB::signal        = 1;    # Simulate an interrupt to force
+                                   # us into the command loop
+        }
+    } ## end if ($single and not $second_time...
+
+    # If we're in single-step mode, or an interrupt (real or fake)
+    # has occurred, turn off non-stop mode.
+    $DB::runnonstop = 0 if $DB::single or $DB::signal;
+
+    return;
+}
+
+sub _DB__handle_watch_expressions
+{
+    my $self = shift;
+
+    if ( $DB::trace & 2 ) {
+        for my $n (0 .. $#DB::to_watch) {
+            $DB::evalarg = $DB::to_watch[$n];
+            local $DB::onetimeDump;    # Tell DB::eval() to not output results
+
+            # Fix context DB::eval() wants to return an array, but
+            # we need a scalar here.
+            my ($val) = join( "', '", DB::eval(@_) );
+            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
+
+            # Did it change?
+            if ( $val ne $DB::old_watch[$n] ) {
+
+                # Yep! Show the difference, and fake an interrupt.
+                $DB::signal = 1;
+                print {$DB::OUT} <<EOP;
+Watchpoint $n:\t$DB::to_watch[$n] changed:
+    old value:\t$DB::old_watch[$n]
+    new value:\t$val
+EOP
+                $DB::old_watch[$n] = $val;
+            } ## end if ($val ne $old_watch...
+        } ## end for my $n (0 ..
+    } ## end if ($trace & 2)
+
+    return;
+}
+
+sub _DB__grab_control
+{
+    my $self = shift;
+
+    # Yes, grab control.
+    if ($DB::slave_editor) {
+
+        # Tell the editor to update its position.
+        $self->position("\032\032${DB::filename}:${DB::line}:0\n");
+        DB::print_lineinfo($self->position());
+    }
+
+=pod
+
+Special check: if we're in package C<DB::fake>, we've gone through the
+C<END> block at least once. We set up everything so that we can continue
+to enter commands and have a valid context to be in.
+
+=cut
+
+    elsif ( $DB::package eq 'DB::fake' ) {
+
+        # Fallen off the end already.
+        if (!$DB::term) {
+            DB::setterm();
+        }
+
+        DB::print_help(<<EOP);
+Debugged program terminated.  Use B<q> to quit or B<R> to restart,
+use B<o> I<inhibit_exit> to avoid stopping after program termination,
+B<h q>, B<h R> or B<h o> to get additional info.
+EOP
+
+        # Set the DB::eval context appropriately.
+        $DB::package     = 'main';
+        $DB::usercontext = DB::_calc_usercontext($DB::package);
+    } ## end elsif ($package eq 'DB::fake')
+
+=pod
+
+If the program hasn't finished executing, we scan forward to the
+next executable line, print that out, build the prompt from the file and line
+number information, and print that.
+
+=cut
+
+    else {
+
+
+        # Still somewhere in the midst of execution. Set up the
+        #  debugger prompt.
+        $DB::sub =~ s/\'/::/;    # Swap Perl 4 package separators (') to
+                             # Perl 5 ones (sorry, we don't print Klingon
+                             #module names)
+
+        $self->prefix($DB::sub =~ /::/ ? "" : ($DB::package . '::'));
+        $self->prefix(
+            $self->prefix() . "$DB::sub(${DB::filename}:"
+        );
+        $self->after( $DB::dbline[$DB::line] =~ /\n$/ ? '' : "\n" );
+
+        # Break up the prompt if it's really long.
+        if ( length($self->prefix()) > 30 ) {
+            $self->position($self->prefix . "$DB::line):\n$DB::line:\t$DB::dbline[$DB::line]" . $self->after);
+            $self->prefix("");
+            $self->infix(":\t");
+        }
+        else {
+            $self->infix("):\t");
+            $self->position(
+                $self->prefix . $DB::line. $self->infix
+                . $DB::dbline[$DB::line] . $self->after
+            );
+        }
+
+        # Print current line info, indenting if necessary.
+        if ($DB::frame) {
+            DB::print_lineinfo( ' ' x $DB::stack_depth,
+                "$DB::line:\t$DB::dbline[$DB::line]" . $self->after );
+        }
+        else {
+            DB::depth_print_lineinfo($self->explicit_stop, $self->position);
+        }
+
+        # Scan forward, stopping at either the end or the next
+        # unbreakable line.
+        for ( my $i = $DB::line + 1 ; $i <= $DB::max && $DB::dbline[$i] == 0 ; ++$i )
+        {    #{ vi
+
+            # Drop out on null statements, block closers, and comments.
+            last if $DB::dbline[$i] =~ /^\s*[\;\}\#\n]/;
+
+            # Drop out if the user interrupted us.
+            last if $DB::signal;
+
+            # Append a newline if the line doesn't have one. Can happen
+            # in eval'ed text, for instance.
+            $self->after( $DB::dbline[$i] =~ /\n$/ ? '' : "\n" );
+
+            # Next executable line.
+            my $incr_pos = $self->prefix . $i . $self->infix . $DB::dbline[$i]
+                . $self->after;
+            $self->position($self->position . $incr_pos);
+            if ($DB::frame) {
+
+                # Print it indented if tracing is on.
+                DB::print_lineinfo( ' ' x $DB::stack_depth,
+                    "$i:\t$DB::dbline[$i]" . $self->after );
+            }
+            else {
+                DB::depth_print_lineinfo($self->explicit_stop, $incr_pos);
+            }
+        } ## end for ($i = $line + 1 ; $i...
+    } ## end else [ if ($slave_editor)
+
+    return;
+}
+
+package DB;
 
 # The following code may be executed now:
 # BEGIN {warn 4}
@@ -4984,7 +5039,7 @@ sub cmd_i {
     my $line = shift;
     foreach my $isa ( split( /\s+/, $line ) ) {
         $evalarg = $isa;
-        ($isa) = &eval;
+        ($isa) = DB::eval(@_);
         no strict 'refs';
         print join(
             ', ',
@@ -5029,7 +5084,7 @@ sub cmd_l {
         # Set up for DB::eval() - evaluate in *user* context.
         $evalarg = $1;
         # $evalarg = $2;
-        my ($s) = &eval;
+        my ($s) = DB::eval(@_);
 
         # Ooops. Bad scalar.
         if ($@) {
@@ -5438,7 +5493,7 @@ sub cmd_w {
         # in the user's context. This version can handle expressions which
         # return a list value.
         $evalarg = $expr;
-        my ($val) = join( ' ', &eval );
+        my ($val) = join( ' ', DB::eval(@_) );
         $val = ( defined $val ) ? "'$val'" : 'undef';
 
         # Save the current value of the expression.
@@ -9644,7 +9699,7 @@ sub cmd_pre580_W {
         # Get the current value of the expression.
         # Doesn't handle expressions returning list values!
         $evalarg = $1;
-        my ($val) = &eval;
+        my ($val) = DB::eval(@_);
         $val = ( defined $val ) ? "'$val'" : 'undef';
 
         # Save it.
