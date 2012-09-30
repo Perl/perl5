@@ -3425,7 +3425,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                      * trietype so we can turn them into a trie. If/when we
                                      * allow NOTHING to start a trie sequence this condition will be
                                      * required, and it isn't expensive so we leave it in for now. */
-                                    if ( trietype != NOTHING )
+                                    if ( trietype && trietype != NOTHING )
                                         make_trie( pRExC_state,
                                                 startbranch, first, cur, tail, count,
                                                 trietype, depth+1 );
@@ -3456,7 +3456,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                               "", SvPV_nolen_const( mysv ),REG_NODE_NUM(cur));
 
                         });
-                        if ( last ) {
+                        if ( last && trietype ) {
                             if ( trietype != NOTHING ) {
                                 /* the last branch of the sequence was part of a trie,
                                  * so we have to construct it here outside of the loop

@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 2521;  # Update this when adding/deleting tests.
+plan tests => 2525;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1128,6 +1128,17 @@ $t =~ s/([^a])//ge;
 EOP
     }
 
+    {
+        # pattern must be compiled late or we can break the test file
+        my $message = '[perl #115050] repeated nothings in a trie can cause panic';
+        my $pattern;
+        $pattern = '[xyz]|||';
+        ok("blah blah" =~ /$pattern/, $message);
+        ok("blah blah" =~ /(?:$pattern)h/, $message);
+        $pattern = '|||[xyz]';
+        ok("blah blah" =~ /$pattern/, $message);
+        ok("blah blah" =~ /(?:$pattern)h/, $message);
+    }
 } # End of sub run_tests
 
 1;
