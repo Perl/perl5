@@ -1486,9 +1486,10 @@ else {
 
     # Is Perl being run from a slave editor or graphical debugger?
     # If so, don't use readline, and set $slave_editor = 1.
-    $slave_editor =
-      ( ( defined $main::ARGV[0] ) and ( $main::ARGV[0] eq '-emacs' ) );
-    $rl = 0, shift(@main::ARGV) if $slave_editor;
+    if ($slave_editor = ( @main::ARGV && ( $main::ARGV[0] eq '-emacs' ) )) {
+        $rl = 0;
+        shift(@main::ARGV);
+    }
 
     #require Term::ReadLine;
 
@@ -1648,7 +1649,10 @@ and if we can.
 
         # Keep copies of the filehandles so that when the pager runs, it
         # can close standard input without clobbering ours.
-        $IN = \*IN, $OUT = \*OUT if $console or not defined $console;
+        if ($console or (not defined($console))) {
+            $IN = \*IN;
+            $OUT = \*OUT;
+        }
     } ## end elsif (from if(defined $remoteport))
 
     # Unbuffer DB::OUT. We need to see responses right away.
@@ -1703,7 +1707,7 @@ and then call the C<afterinit()> subroutine if there is one.
 # If there was an afterinit() sub defined, call it. It will get
 # executed in our scope, so it can fiddle with debugger globals.
 if ( defined &afterinit ) {    # May be defined in $rcfile
-    &afterinit();
+    afterinit();
 }
 
 # Inform us about "Stack dump during die enabled ..." in dieLevel().
@@ -1755,19 +1759,8 @@ use vars qw(
     $end
 );
 
-sub DB {
-
-    # lock the debugger and get the thread id for the prompt
-	lock($DBGR);
-	my $tid;
-	my $position;
-	my ($prefix, $after, $infix);
-	my $pat;
-
-	if ($ENV{PERL5DB_THREADED}) {
-		$tid = eval { "[".threads->tid."]" };
-	}
-
+sub _DB_on_init__initialize_globals
+{
     # Check for whether we should be running continuously or not.
     # _After_ the perl program is compiled, $single is set to 1:
     if ( $single and not $second_time++ ) {
@@ -1800,6 +1793,24 @@ sub DB {
     # If we're in single-step mode, or an interrupt (real or fake)
     # has occurred, turn off non-stop mode.
     $runnonstop = 0 if $single or $signal;
+
+    return;
+}
+
+sub DB {
+
+    # lock the debugger and get the thread id for the prompt
+    lock($DBGR);
+    my $tid;
+    my $position;
+    my ($prefix, $after, $infix);
+    my $pat;
+
+    if ($ENV{PERL5DB_THREADED}) {
+        $tid = eval { "[".threads->tid."]" };
+    }
+
+    _DB_on_init__initialize_globals();
 
     # Preserve current values of $@, $!, $^E, $,, $/, $\, $^W.
     # The code being debugged may have altered them.
