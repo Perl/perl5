@@ -1379,6 +1379,18 @@ back into the appropriate spots in the debugger.
 
 use vars qw(@hist @truehist %postponed_file @typeahead);
 
+sub _restore_shared_globals_after_restart
+{
+    @hist          = get_list('PERLDB_HIST');
+    %break_on_load = get_list("PERLDB_ON_LOAD");
+    %postponed     = get_list("PERLDB_POSTPONE");
+
+    share(@hist);
+    share(@truehist);
+    share(%break_on_load);
+    share(%postponed);
+}
+
 sub _restore_breakpoints_and_actions {
 
     my @had_breakpoints = get_list("PERLDB_VISITED");
@@ -1428,20 +1440,14 @@ sub _restore_globals_after_restart
     return;
 }
 
+
 if ( exists $ENV{PERLDB_RESTART} ) {
 
     # We're restarting, so we don't need the flag that says to restart anymore.
     delete $ENV{PERLDB_RESTART};
 
     # $restart = 1;
-    @hist          = get_list('PERLDB_HIST');
-    %break_on_load = get_list("PERLDB_ON_LOAD");
-    %postponed     = get_list("PERLDB_POSTPONE");
-
-    share(@hist);
-    share(@truehist);
-    share(%break_on_load);
-    share(%postponed);
+    _restore_shared_globals_after_restart();
 
     _restore_breakpoints_and_actions();
 
