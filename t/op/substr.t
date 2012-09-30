@@ -855,3 +855,6 @@ $refee = bless ["\x{100}"], o::;
 $o::count = 0;
 () = substr $refee, 0;
 is $o::count, 1, 'rvalue substr calls overloading once on utf8 target';
+
+# [perl #7678] core dump with substr reference and localisation
+{$b="abcde"; local $k; *k=\substr($b, 2, 1);}
