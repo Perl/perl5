@@ -24,7 +24,7 @@ is $@, qq 'Experimental "our" subs not enabled at foo line 8.\n',
 
 # -------------------- our -------------------- #
 
-no warnings "experimental:lexical_subs";
+no warnings "experimental::lexical_subs";
 use feature 'lexical_subs';
 {
   our sub foo { 42 }

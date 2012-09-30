@@ -90,7 +90,7 @@
 /* Warnings Categories added in Perl 5.017 */
 
 #define WARN_EXPERIMENTAL	 51
-#define WARN_EXPERIMENTAL_LEXICAL_SUBS 52
+#define WARN_EXPERIMENTAL__LEXICAL_SUBS 52
 
 #define WARNsize		14
 #define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125"

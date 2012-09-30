@@ -1864,7 +1864,7 @@ as a return, a goto, or a loop control statement.
 
 (F) To use lexical subs, you must first enable them:
 
-    no warnings 'experimental:lexical_subs';
+    no warnings 'experimental::lexical_subs';
     use feature 'lexical_subs';
     my sub foo { ... }
 
@@ -4785,7 +4785,7 @@ to use the feature, but know that in doing so you are taking the risk
 of using an experimental feature which may change or be removed in a
 future Perl version:
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature "lexical_subs";
 
 =item The %s function is unimplemented

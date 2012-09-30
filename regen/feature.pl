@@ -548,7 +548,7 @@ change in future versions of Perl.  For this reason, F<feature.pm> will
 warn when you enable the feature, unless you have explicitly disabled the
 warning:
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
 
 This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
 and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
@@ -680,7 +680,7 @@ sub __common {
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
 	    if ($experimental{$name}) {
 		require warnings;
-		warnings::warnif("experimental:$name",
+		warnings::warnif("experimental::$name",
 				 "The $name feature is experimental");
 	    }
 	} else {

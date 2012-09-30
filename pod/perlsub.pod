@@ -830,7 +830,7 @@ modified or removed in future versions of Perl.
 
 Lexical subroutines are only available under the C<use feature
 'lexical_subs'> pragma, which produces a warning unless the
-"experimental:lexical_subs" warning is disabled.
+"experimental::lexical_subs" warnings category is disabled.
 
 Beginning with Perl 5.18, you can declare a private subroutine with C<my>
 or C<state>.  As with state variables, the C<state> keyword is only
@@ -839,7 +839,7 @@ available under C<use feature 'state'> or C<use 5.010> or higher.
 These subroutines are only visible within the block in which they are
 declared, and only after that declaration:
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
     foo();		# calls the package/global subroutine
@@ -871,7 +871,7 @@ containing block to the next.
 So, in general, "state" subroutines are faster.  But "my" subs are
 necessary if you want to create closures:
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
     sub whatever {
@@ -894,7 +894,7 @@ subroutine of the same name.
 The two main uses for this are to switch back to using the package sub
 inside an inner scope:
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
     sub foo { ... }
@@ -912,7 +912,7 @@ and to make a subroutine visible to other packages in the same scope:
 
     package MySneakyModule;
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature 'lexical_subs';
 
     our sub do_something { ... }
