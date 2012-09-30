@@ -3416,6 +3416,13 @@ sub _init {
 
             return ${ $self->{$slot} };
         };
+
+        *{"append_to_$slot"} = sub {
+            my $self = shift;
+            my $s = shift;
+
+            return $self->$slot($self->$slot . $s);
+        };
     }
 }
 
@@ -3561,9 +3568,7 @@ number information, and print that.
                              #module names)
 
         $self->prefix($DB::sub =~ /::/ ? "" : ($DB::package . '::'));
-        $self->prefix(
-            $self->prefix() . "$DB::sub(${DB::filename}:"
-        );
+        $self->append_to_prefix( "$DB::sub(${DB::filename}:" );
         $self->after( $DB::dbline[$DB::line] =~ /\n$/ ? '' : "\n" );
 
         # Break up the prompt if it's really long.
@@ -3601,7 +3606,7 @@ number information, and print that.
             # Next executable line.
             my $incr_pos = $self->prefix . $i . $self->infix . $DB::dbline[$i]
                 . $self->after;
-            $self->position($self->position . $incr_pos);
+            $self->append_to_position($incr_pos);
             $self->_my_print_lineinfo($i, $incr_pos);
         } ## end for ($i = $line + 1 ; $i...
     } ## end else [ if ($slave_editor)
