@@ -1379,23 +1379,10 @@ back into the appropriate spots in the debugger.
 
 use vars qw(@hist @truehist %postponed_file @typeahead);
 
-if ( exists $ENV{PERLDB_RESTART} ) {
+sub _restore_breakpoints_and_actions {
 
-    # We're restarting, so we don't need the flag that says to restart anymore.
-    delete $ENV{PERLDB_RESTART};
-
-    # $restart = 1;
-    @hist          = get_list('PERLDB_HIST');
-    %break_on_load = get_list("PERLDB_ON_LOAD");
-    %postponed     = get_list("PERLDB_POSTPONE");
-
-	share(@hist);
-	share(@truehist);
-	share(%break_on_load);
-	share(%postponed);
-
-    # restore breakpoints/actions
     my @had_breakpoints = get_list("PERLDB_VISITED");
+
     for my $file_idx ( 0 .. $#had_breakpoints ) {
         my $filename = $had_breakpoints[$file_idx];
         my %pf = get_list("PERLDB_FILE_$file_idx");
@@ -1410,6 +1397,26 @@ if ( exists $ENV{PERLDB_RESTART} ) {
             );
         }
     }
+
+    return;
+}
+
+if ( exists $ENV{PERLDB_RESTART} ) {
+
+    # We're restarting, so we don't need the flag that says to restart anymore.
+    delete $ENV{PERLDB_RESTART};
+
+    # $restart = 1;
+    @hist          = get_list('PERLDB_HIST');
+    %break_on_load = get_list("PERLDB_ON_LOAD");
+    %postponed     = get_list("PERLDB_POSTPONE");
+
+    share(@hist);
+    share(@truehist);
+    share(%break_on_load);
+    share(%postponed);
+
+    _restore_breakpoints_and_actions();
 
     # restore options
     my %opt = get_list("PERLDB_OPT");
