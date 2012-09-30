@@ -2198,7 +2198,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	newtarglen = sv_len_utf8(sv);
 	SvUTF8_on(lsv);
     }
-    else if (lsv && SvUTF8(lsv)) {
+    else if (SvUTF8(lsv)) {
 	const char *utf8;
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	newtarglen = len;
