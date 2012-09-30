@@ -868,27 +868,26 @@ BEGIN {
   }
 }
 
-# This would probably be better done with "use vars", but that wasn't around
-# when this code was originally written. (Neither was "use strict".) And on
-# the principle of not fiddling with something that was working, this was
-# left alone.
-warn(               # Do not ;-)
-    # These variables control the execution of 'dumpvar.pl'.
-    $dumpvar::hashDepth,
-    $dumpvar::arrayDepth,
-    $dumpvar::dumpDBFiles,
-    $dumpvar::dumpPackages,
-    $dumpvar::quoteHighBit,
-    $dumpvar::printUndef,
-    $dumpvar::globPrint,
-    $dumpvar::usageOnly,
+# These variables control the execution of 'dumpvar.pl'.
+{
+    package dumpvar;
+    use vars qw(
+    $hashDepth
+    $arrayDepth
+    $dumpDBFiles
+    $dumpPackages
+    $quoteHighBit
+    $printUndef
+    $globPrint
+    $usageOnly
+    );
+}
 
-    # used to control die() reporting in diesignal()
-    $Carp::CarpLevel,
-
-
-  )
-  if 0;
+# used to control die() reporting in diesignal()
+{
+    package Carp;
+    use vars qw($CarpLevel);
+}
 
 # without threads, $filename is not defined until DB::DB is called
 foreach my $k (keys (%INC)) {
@@ -1133,8 +1132,8 @@ setman();
 
 # Set up defaults for command recall and shell escape (note:
 # these currently don't work in linemode debugging).
-&recallCommand("!") unless defined $prc;
-&shellBang("!")     unless defined $psh;
+recallCommand("!") unless defined $prc;
+shellBang("!")     unless defined $psh;
 
 =pod
 
