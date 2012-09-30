@@ -4632,7 +4632,7 @@ sub cmd_B {
 
     # No line spec? Use dbline.
     # If there is one, use it if it's non-zero, or wipe it out if it is.
-    my $line   = ( $_[0] =~ /^\./ ) ? $dbline : shift || '';
+    my $line   = ( $_[0] =~ /\A\./ ) ? $dbline : (shift || '');
     my $dbline = shift;
 
     # If the line was dot, make the line the current one.
@@ -4640,23 +4640,27 @@ sub cmd_B {
 
     # If it's * we're deleting all the breakpoints.
     if ( $line eq '*' ) {
-        eval { &delete_breakpoint(); 1 } or print $OUT $@ and return;
+        if (not eval { &delete_breakpoint(); 1 }) {
+            print {$OUT} $@;
+        }
     }
 
     # If there is a line spec, delete the breakpoint on that line.
-    elsif ( $line =~ /^(\S.*)/ ) {
+    elsif ( $line =~ /\A(\S.*)/ ) {
         if (not eval { &delete_breakpoint( $line || $dbline ); 1 }) {
             local $\ = '';
-            print $OUT $@ and return;
+            print {$OUT} $@;
         }
     } ## end elsif ($line =~ /^(\S.*)/)
 
     # No line spec.
     else {
-        print $OUT
+        print {$OUT}
           "Deleting a breakpoint requires a line number, or '*' for all\n"
           ;    # hint
     }
+
+    return;
 } ## end sub cmd_B
 
 =head3 delete_breakpoint([line]) (API)
