@@ -1413,6 +1413,21 @@ sub _restore_options_after_restart
     return;
 }
 
+sub _restore_globals_after_restart
+{
+    # restore original @INC
+    @INC     = get_list("PERLDB_INC");
+    @ini_INC = @INC;
+
+    # return pre/postprompt actions and typeahead buffer
+    $pretype   = [ get_list("PERLDB_PRETYPE") ];
+    $pre       = [ get_list("PERLDB_PRE") ];
+    $post      = [ get_list("PERLDB_POST") ];
+    @typeahead = get_list( "PERLDB_TYPEAHEAD", @typeahead );
+
+    return;
+}
+
 if ( exists $ENV{PERLDB_RESTART} ) {
 
     # We're restarting, so we don't need the flag that says to restart anymore.
@@ -1433,15 +1448,7 @@ if ( exists $ENV{PERLDB_RESTART} ) {
     # restore options
     _restore_options_after_restart();
 
-    # restore original @INC
-    @INC     = get_list("PERLDB_INC");
-    @ini_INC = @INC;
-
-    # return pre/postprompt actions and typeahead buffer
-    $pretype   = [ get_list("PERLDB_PRETYPE") ];
-    $pre       = [ get_list("PERLDB_PRE") ];
-    $post      = [ get_list("PERLDB_POST") ];
-    @typeahead = get_list( "PERLDB_TYPEAHEAD", @typeahead );
+    _restore_globals_after_restart();
 } ## end if (exists $ENV{PERLDB_RESTART...
 
 =head2 SETTING UP THE TERMINAL
