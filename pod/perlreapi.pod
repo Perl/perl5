@@ -567,8 +567,9 @@ values.
         /* Information about the match that the perl core uses to manage
          * things */
         U32 extflags;   /* Flags used both externally and internally */
-        I32 minlen;     /* mininum possible length of string to match */
-        I32 minlenret;  /* mininum possible length of $& */
+	I32 minlen;	/* mininum possible number of chars in */
+                           string to match */
+	I32 minlenret;	/* mininum possible number of chars in $& */
         U32 gofs;       /* chars left of pos that we search from */
 
         /* substring data about strings that must appear
@@ -639,14 +640,15 @@ valid flags.
 
 =head2 C<minlen> C<minlenret>
 
-The minimum string length required for the pattern to match.  This is used to
+The minimum string length (in characters) required for the pattern to match.
+This is used to
 prune the search space by not bothering to match any closer to the end of a
 string than would allow a match. For instance there is no point in even
 starting the regex engine if the minlen is 10 but the string is only 5
 characters long. There is no way that the pattern can match.
 
-C<minlenret> is the minimum length of the string that would be found
-in $& after a match.
+C<minlenret> is the minimum length (in characters) of the string that would
+be found in $& after a match.
 
 The difference between C<minlen> and C<minlenret> can be seen in the
 following pattern:

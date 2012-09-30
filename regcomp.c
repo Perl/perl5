@@ -297,8 +297,8 @@ typedef struct RExC_state_t {
     string can occur infinitely far to the right.
   
   - minlenp
-    A pointer to the minimum length of the pattern that the string 
-    was found inside. This is important as in the case of positive 
+    A pointer to the minimum number of characters of the pattern that the
+    string was found inside. This is important as in the case of positive
     lookahead or positive lookbehind we can have multiple patterns 
     involved. Consider
     
@@ -2599,9 +2599,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * these get optimized out
  *
  * If there are problematic code sequences, *min_subtract is set to the delta
- * that the minimum size of the node can be less than its actual size.  And,
- * the node type of the result is changed to reflect that it contains these
- * sequences.
+ * number of characters that the minimum size of the node can be less than its
+ * actual size.  And, the node type of the result is changed to reflect that it
+ * contains these sequences.
  *
  * And *has_exactf_sharp_s is set to indicate whether or not the node is EXACTF
  * and contains LATIN SMALL LETTER SHARP S
@@ -2818,15 +2818,12 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 	     * U+03C5 U+0308 U+0301         0xCF 0x85 0xCC 0x88 0xCC 0x81
              *
 	     * This means that in case-insensitive matching (or "loose
-	     * matching", as Unicode calls it), an EXACTF of length six (the
-	     * UTF-8 encoded byte length of the above casefolded versions) can
-	     * match a target string of length two (the byte length of UTF-8
-	     * encoded U+0390 or U+03B0).  This would rather mess up the
-	     * minimum length computation.  (there are other code points that
-	     * also fold to these two sequences, but the delta is smaller)
+	     * matching", as Unicode calls it), an EXACTF of length 3 chars can
+             * match a target string of length 1 char.  This would rather mess
+             * up the minimum length computation.
 	     *
 	     * If these sequences are found, the minimum length is decreased by
-	     * four (six minus two).
+	     * two.
 	     *
 	     * Similarly, 'ss' may match the single char and byte LATIN SMALL
 	     * LETTER SHARP S.  We decrease the min length by 1 for each
@@ -2888,7 +2885,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			    break;
 			}
 		      greek_sequence:
-			*min_subtract += 4;
+			*min_subtract += 2;
 
 			/* This requires special handling by trie's, so change
 			 * the node type to indicate this.  If EXACTFA and
@@ -3031,7 +3028,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
 {
     dVAR;
-    I32 min = 0, pars = 0, code;
+    I32 min = 0;    /* There must be at least this number of characters to match */
+    I32 pars = 0, code;
     regnode *scan = *scanp, *next;
     I32 delta = 0;
     int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
@@ -3058,9 +3056,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
   fake_study_recurse:
     while ( scan && OP(scan) != END && scan < last ){
-        UV min_subtract = 0;    /* How much to subtract from the minimum node
-                                   length to get a real minimum (because the
-                                   folded version may be shorter) */
+        UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
+                                   node length to get a real minimum (because
+                                   the folded version may be shorter) */
 	bool has_exactf_sharp_s = FALSE;
 	/* Peephole optimizer: */
 	DEBUG_STUDYDATA("Peep:", data,depth);
@@ -3672,9 +3670,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		RExC_seen |= REG_SEEN_EXACTF_SHARP_S;
 	    }
 	    min += l - min_subtract;
-            if (min < 0) {
-                min = 0;
-            }
+            assert (min >= 0);
             delta += min_subtract;
 	    if (flags & SCF_DO_SUBSTR) {
 		data->pos_min += l - min_subtract;
