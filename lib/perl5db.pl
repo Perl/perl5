@@ -891,7 +891,7 @@ BEGIN {
 
 # without threads, $filename is not defined until DB::DB is called
 foreach my $k (keys (%INC)) {
-	&share(\$main::{'_<'.$filename}) if defined $filename;
+	share(\$main::{'_<'.$filename}) if defined $filename;
 };
 
 # Command-line + PERLLIB:
@@ -1224,14 +1224,11 @@ running interactively, this is C<.perldb>; if not, it's C<perldb.ini>.
 # As noted, this test really doesn't check accurately that the debugger
 # is running at a terminal or not.
 
-my $dev_tty = '/dev/tty';
-   $dev_tty = 'TT:' if ($^O eq 'VMS');
 use vars qw($rcfile);
-if ( -e $dev_tty ) {                      # this is the wrong metric!
-    $rcfile = ".perldb";
-}
-else {
-    $rcfile = "perldb.ini";
+{
+    my $dev_tty = (($^O eq 'VMS') ? 'TT:' : '/dev/tty');
+    # this is the wrong metric!
+    $rcfile = ((-e $dev_tty) ? ".perldb" : "perldb.ini");
 }
 
 =pod
