@@ -4688,6 +4688,53 @@ are no magical debugger structures associated with them.
 
 =cut
 
+sub _delete_all_breakpoints {
+    print {$OUT} "Deleting all breakpoints...\n";
+
+    # %had_breakpoints lists every file that had at least one
+    # breakpoint in it.
+    for my $fn ( keys %had_breakpoints ) {
+
+        # Switch to the desired file temporarily.
+        local *dbline = $main::{ '_<' . $fn };
+
+        $max = $#dbline;
+        my $was;
+
+        # For all lines in this file ...
+        for my $i (1 .. $max) {
+
+            # If there's a breakpoint or action on this line ...
+            if ( defined $dbline{$i} ) {
+
+                # ... remove the breakpoint.
+                $dbline{$i} =~ s/\A[^\0]+//;
+                if ( $dbline{$i} =~ s/\A\0?\z// ) {
+
+                    # Remove the entry altogether if no action is there.
+                    delete $dbline{$i};
+                    _delete_breakpoint_data_ref($fn, $i);
+                }
+            } ## end if (defined $dbline{$i...
+        } ## end for $i (1 .. $max)
+
+        # If, after we turn off the "there were breakpoints in this file"
+        # bit, the entry in %had_breakpoints for this file is zero,
+        # we should remove this file from the hash.
+        if ( not $had_breakpoints{$fn} &= (~1) ) {
+            delete $had_breakpoints{$fn};
+        }
+    } ## end for my $fn (keys %had_breakpoints)
+
+    # Kill off all the other breakpoints that are waiting for files that
+    # haven't been loaded yet.
+    undef %postponed;
+    undef %postponed_file;
+    undef %break_on_load;
+
+    return;
+}
+
 sub delete_breakpoint {
     my $i = shift;
 
@@ -4700,7 +4747,7 @@ sub delete_breakpoint {
         die "Line $i not breakable.\n" if $dbline[$i] == 0;
 
         # Kill the condition, but leave any action.
-        $dbline{$i} =~ s/^[^\0]*//;
+        $dbline{$i} =~ s/\A[^\0]*//;
 
         # Remove the entry entirely if there's no action left.
         if ($dbline{$i} eq '') {
@@ -4711,49 +4758,10 @@ sub delete_breakpoint {
 
     # No line; delete them all.
     else {
-        print $OUT "Deleting all breakpoints...\n";
-
-        # %had_breakpoints lists every file that had at least one
-        # breakpoint in it.
-        for my $file ( keys %had_breakpoints ) {
-
-            # Switch to the desired file temporarily.
-            local *dbline = $main::{ '_<' . $file };
-
-            $max = $#dbline;
-            my $was;
-
-            # For all lines in this file ...
-            for $i (1 .. $max) {
-
-                # If there's a breakpoint or action on this line ...
-                if ( defined $dbline{$i} ) {
-
-                    # ... remove the breakpoint.
-                    $dbline{$i} =~ s/^[^\0]+//;
-                    if ( $dbline{$i} =~ s/^\0?$// ) {
-
-                        # Remove the entry altogether if no action is there.
-                        delete $dbline{$i};
-                        _delete_breakpoint_data_ref($file, $i);
-                    }
-                } ## end if (defined $dbline{$i...
-            } ## end for $i (1 .. $max)
-
-            # If, after we turn off the "there were breakpoints in this file"
-            # bit, the entry in %had_breakpoints for this file is zero,
-            # we should remove this file from the hash.
-            if ( not $had_breakpoints{$file} &= ~1 ) {
-                delete $had_breakpoints{$file};
-            }
-        } ## end for my $file (keys %had_breakpoints)
-
-        # Kill off all the other breakpoints that are waiting for files that
-        # haven't been loaded yet.
-        undef %postponed;
-        undef %postponed_file;
-        undef %break_on_load;
+        _delete_all_breakpoints();
     } ## end else [ if (defined($i))
+
+    return;
 } ## end sub delete_breakpoint
 
 =head3 cmd_stop (command)
