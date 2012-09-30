@@ -3066,7 +3066,7 @@ PP(pp_substr)
 	tmps = SvPV_force_nomg(sv, curlen);
 	if (DO_UTF8(repl_sv) && repl_len) {
 	    if (!DO_UTF8(sv)) {
-		sv_utf8_upgrade(sv);
+		sv_utf8_upgrade_nomg(sv);
 		curlen = SvCUR(sv);
 	    }
 	}
