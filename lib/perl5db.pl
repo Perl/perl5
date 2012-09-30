@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_04';
+$VERSION = '1.39_05';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1827,6 +1827,36 @@ sub _DB__determine_if_we_should_break
     } ## end if ($dbline{$line} && ...
 }
 
+sub _DB__handle_watch_expressions
+{
+    if ( $trace & 2 ) {
+        for my $n (0 .. $#to_watch) {
+            $evalarg = $to_watch[$n];
+            local $onetimeDump;    # Tell DB::eval() to not output results
+
+            # Fix context DB::eval() wants to return an array, but
+            # we need a scalar here.
+            my ($val) = join( "', '", &eval );
+            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
+
+            # Did it change?
+            if ( $val ne $old_watch[$n] ) {
+
+                # Yep! Show the difference, and fake an interrupt.
+                $signal = 1;
+                print $OUT <<EOP;
+Watchpoint $n:\t$to_watch[$n] changed:
+    old value:\t$old_watch[$n]
+    new value:\t$val
+EOP
+                $old_watch[$n] = $val;
+            } ## end if ($val ne $old_watch...
+        } ## end for my $n (0 ..
+    } ## end if ($trace & 2)
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -1872,30 +1902,7 @@ sub DB {
     my $was_signal = $signal;
 
     # If we have any watch expressions ...
-    if ( $trace & 2 ) {
-        for my $n (0 .. $#to_watch) {
-            $evalarg = $to_watch[$n];
-            local $onetimeDump;    # Tell DB::eval() to not output results
-
-            # Fix context DB::eval() wants to return an array, but
-            # we need a scalar here.
-            my ($val) = join( "', '", &eval );
-            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
-
-            # Did it change?
-            if ( $val ne $old_watch[$n] ) {
-
-                # Yep! Show the difference, and fake an interrupt.
-                $signal = 1;
-                print $OUT <<EOP;
-Watchpoint $n:\t$to_watch[$n] changed:
-    old value:\t$old_watch[$n]
-    new value:\t$val
-EOP
-                $old_watch[$n] = $val;
-            } ## end if ($val ne $old_watch...
-        } ## end for my $n (0 ..
-    } ## end if ($trace & 2)
+    _DB__handle_watch_expressions();
 
 =head2 C<watchfunction()>
 
