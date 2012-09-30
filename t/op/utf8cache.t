@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan(tests => 13);
+plan(tests => 15);
 
 SKIP: {
 skip_without_dynamic_extension("Devel::Peek");
@@ -117,6 +117,18 @@ is ord ${\substr($u, 1)}, 0xc2,
 () = ord substr $u, 1;
 is ord substr($u, 1), 0xc2,
     'utf8 cache + overloading does not confuse substr lvalues (again)';
+
+$u = UTF8Toggle->new(" \x{c2}7 ");
+() = ord ${\substr $u, 2};
+{ no warnings; ${\substr($u, 2, 1)} = 0; }
+is $u, " \x{c2}0 ",
+    'utf8 cache + overloading does not confuse substr lvalue assignment';
+$u = UTF8Toggle->new(" \x{c2}7 ");
+() = "$u"; # flip flag
+() = ord ${\substr $u, 2};
+{ no warnings; ${\substr($u, 2, 1)} = 0; }
+is $u, " \x{c2}0 ",
+    'utf8 cache + overload does not confuse substr lv assignment (again)';
 
 
 # Typeglobs and references should not get a cache

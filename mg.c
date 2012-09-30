@@ -2167,7 +2167,6 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     STRLEN len, lsv_len, oldtarglen, newtarglen;
     const char * const tmps = SvPV_const(sv, len);
-    const char *targs;
     SV * const lsv = LvTARG(sv);
     STRLEN lvoff = LvTARGOFF(sv);
     STRLEN lvlen = LvTARGLEN(sv);
@@ -2182,8 +2181,8 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
 			    "Attempt to use reference as lvalue in substr"
 	);
-    targs = SvPV_nomg(lsv,lsv_len);
-    if (SvUTF8(lsv)) lsv_len = sv_or_pv_len_utf8(lsv,targs,lsv_len);
+    SvPV_force_nomg(lsv,lsv_len);
+    if (SvUTF8(lsv)) lsv_len = sv_len_utf8_nomg(lsv);
     if (!translate_substr_offsets(
 	    lsv_len,
 	    negoff ? -(IV)lvoff : (IV)lvoff, !negoff,
