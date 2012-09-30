@@ -1797,6 +1797,36 @@ sub _DB_on_init__initialize_globals
     return;
 }
 
+sub _DB__determine_if_we_should_break
+{
+    # if we have something here, see if we should break.
+    # $stop is lexical and local to this block - $action on the other hand
+    # is global.
+    my $stop;
+
+    if ( $dbline{$line}
+        && _is_breakpoint_enabled($filename, $line)
+        && (( $stop, $action ) = split( /\0/, $dbline{$line} ) ) )
+    {
+
+        # Stop if the stop criterion says to just stop.
+        if ( $stop eq '1' ) {
+            $signal |= 1;
+        }
+
+        # It's a conditional stop; eval it in the user's context and
+        # see if we should stop. If so, remove the one-time sigil.
+        elsif ($stop) {
+            $evalarg = "\$DB::signal |= 1 if do {$stop}";
+            &eval;
+            # If the breakpoint is temporary, then delete its enabled status.
+            if ($dbline{$line} =~ s/;9($|\0)/$1/) {
+                _cancel_breakpoint_temp_enabled_status($filename, $line);
+            }
+        }
+    } ## end if ($dbline{$line} && ...
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -1835,34 +1865,7 @@ sub DB {
     # Last line in the program.
     $max = $#dbline;
 
-    # if we have something here, see if we should break.
-    {
-        # $stop is lexical and local to this block - $action on the other hand
-        # is global.
-        my $stop;
-
-        if ( $dbline{$line}
-            && _is_breakpoint_enabled($filename, $line)
-            && (( $stop, $action ) = split( /\0/, $dbline{$line} ) ) )
-        {
-
-            # Stop if the stop criterion says to just stop.
-            if ( $stop eq '1' ) {
-                $signal |= 1;
-            }
-
-            # It's a conditional stop; eval it in the user's context and
-            # see if we should stop. If so, remove the one-time sigil.
-            elsif ($stop) {
-                $evalarg = "\$DB::signal |= 1 if do {$stop}";
-                &eval;
-                # If the breakpoint is temporary, then delete its enabled status.
-                if ($dbline{$line} =~ s/;9($|\0)/$1/) {
-                    _cancel_breakpoint_temp_enabled_status($filename, $line);
-                }
-            }
-        } ## end if ($dbline{$line} && ...
-    }
+    _DB__determine_if_we_should_break();
 
     # Preserve the current stop-or-not, and see if any of the W
     # (watch expressions) has changed.
