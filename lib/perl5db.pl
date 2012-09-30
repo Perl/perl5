@@ -3491,6 +3491,20 @@ EOP
     return;
 }
 
+sub _my_print_lineinfo
+{
+    my ($self, $i, $incr_pos) = @_;
+
+    if ($DB::frame) {
+        # Print it indented if tracing is on.
+        DB::print_lineinfo( ' ' x $DB::stack_depth,
+            "$i:\t$DB::dbline[$i]" . $self->after );
+    }
+    else {
+        DB::depth_print_lineinfo($self->explicit_stop, $incr_pos);
+    }
+}
+
 sub _DB__grab_control
 {
     my $self = shift;
@@ -3567,13 +3581,7 @@ number information, and print that.
         }
 
         # Print current line info, indenting if necessary.
-        if ($DB::frame) {
-            DB::print_lineinfo( ' ' x $DB::stack_depth,
-                "$DB::line:\t$DB::dbline[$DB::line]" . $self->after );
-        }
-        else {
-            DB::depth_print_lineinfo($self->explicit_stop, $self->position);
-        }
+        $self->_my_print_lineinfo($DB::line, $self->position);
 
         # Scan forward, stopping at either the end or the next
         # unbreakable line.
@@ -3594,15 +3602,7 @@ number information, and print that.
             my $incr_pos = $self->prefix . $i . $self->infix . $DB::dbline[$i]
                 . $self->after;
             $self->position($self->position . $incr_pos);
-            if ($DB::frame) {
-
-                # Print it indented if tracing is on.
-                DB::print_lineinfo( ' ' x $DB::stack_depth,
-                    "$i:\t$DB::dbline[$i]" . $self->after );
-            }
-            else {
-                DB::depth_print_lineinfo($self->explicit_stop, $incr_pos);
-            }
+            $self->_my_print_lineinfo($i, $incr_pos);
         } ## end for ($i = $line + 1 ; $i...
     } ## end else [ if ($slave_editor)
 
