@@ -3512,6 +3512,10 @@ sub _my_print_lineinfo
     }
 }
 
+sub _curr_line {
+    return $DB::dbline[$DB::line];
+}
+
 sub _DB__grab_control
 {
     my $self = shift;
@@ -3569,11 +3573,11 @@ number information, and print that.
 
         $self->prefix($DB::sub =~ /::/ ? "" : ($DB::package . '::'));
         $self->append_to_prefix( "$DB::sub(${DB::filename}:" );
-        $self->after( $DB::dbline[$DB::line] =~ /\n$/ ? '' : "\n" );
+        $self->after( $self->_curr_line =~ /\n$/ ? '' : "\n" );
 
         # Break up the prompt if it's really long.
         if ( length($self->prefix()) > 30 ) {
-            $self->position($self->prefix . "$DB::line):\n$DB::line:\t$DB::dbline[$DB::line]" . $self->after);
+            $self->position($self->prefix . "$DB::line):\n$DB::line:\t" . $self->_curr_line . $self->after);
             $self->prefix("");
             $self->infix(":\t");
         }
@@ -3581,30 +3585,33 @@ number information, and print that.
             $self->infix("):\t");
             $self->position(
                 $self->prefix . $DB::line. $self->infix
-                . $DB::dbline[$DB::line] . $self->after
+                . $self->_curr_line . $self->after
             );
         }
 
         # Print current line info, indenting if necessary.
         $self->_my_print_lineinfo($DB::line, $self->position);
 
+        my $i;
+        my $line_i = sub { return $DB::dbline[$i]; };
+
         # Scan forward, stopping at either the end or the next
         # unbreakable line.
-        for ( my $i = $DB::line + 1 ; $i <= $DB::max && $DB::dbline[$i] == 0 ; ++$i )
+        for ( $i = $DB::line + 1 ; $i <= $DB::max && $line_i->() == 0 ; ++$i )
         {    #{ vi
 
             # Drop out on null statements, block closers, and comments.
-            last if $DB::dbline[$i] =~ /^\s*[\;\}\#\n]/;
+            last if $line_i->() =~ /^\s*[\;\}\#\n]/;
 
             # Drop out if the user interrupted us.
             last if $DB::signal;
 
             # Append a newline if the line doesn't have one. Can happen
             # in eval'ed text, for instance.
-            $self->after( $DB::dbline[$i] =~ /\n$/ ? '' : "\n" );
+            $self->after( $line_i->() =~ /\n$/ ? '' : "\n" );
 
             # Next executable line.
-            my $incr_pos = $self->prefix . $i . $self->infix . $DB::dbline[$i]
+            my $incr_pos = $self->prefix . $i . $self->infix . $line_i->()
                 . $self->after;
             $self->append_to_position($incr_pos);
             $self->_my_print_lineinfo($i, $incr_pos);
