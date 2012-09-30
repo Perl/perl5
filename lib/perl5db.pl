@@ -4708,7 +4708,6 @@ sub _delete_all_breakpoints {
         local *dbline = $main::{ '_<' . $fn };
 
         $max = $#dbline;
-        my $was;
 
         # For all lines in this file ...
         for my $i (1 .. $max) {
