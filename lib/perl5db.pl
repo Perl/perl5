@@ -1401,6 +1401,18 @@ sub _restore_breakpoints_and_actions {
     return;
 }
 
+sub _restore_options_after_restart
+{
+    my %options_map = get_list("PERLDB_OPT");
+
+    while ( my ( $opt, $val ) = each %options_map ) {
+        $val =~ s/[\\\']/\\$1/g;
+        parse_options("$opt'$val'");
+    }
+
+    return;
+}
+
 if ( exists $ENV{PERLDB_RESTART} ) {
 
     # We're restarting, so we don't need the flag that says to restart anymore.
@@ -1419,12 +1431,7 @@ if ( exists $ENV{PERLDB_RESTART} ) {
     _restore_breakpoints_and_actions();
 
     # restore options
-    my %opt = get_list("PERLDB_OPT");
-    my ( $opt, $val );
-    while ( ( $opt, $val ) = each %opt ) {
-        $val =~ s/[\\\']/\\$1/g;
-        parse_options("$opt'$val'");
-    }
+    _restore_options_after_restart();
 
     # restore original @INC
     @INC     = get_list("PERLDB_INC");
