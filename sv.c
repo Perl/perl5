@@ -9122,7 +9122,7 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE;
 
-    sv_pvn_force(sv,lp);
+    sv_pvn_force(sv,0);
     sv_utf8_upgrade_nomg(sv);
     *lp = SvCUR(sv);
     return SvPVX(sv);
