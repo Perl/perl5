@@ -23,7 +23,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(385);
+plan(386);
 
 run_tests() unless caller;
 
@@ -850,3 +850,8 @@ $refee = bless ["foo"], o::;
 $o::count = 0;
 substr $refee, 0, 0, "";
 is $o::count, 1, '4-arg substr calls overloading once on the target';
+$refee = bless ["\x{100}"], o::;
+() = "$refee"; # turn UTF8 flag on
+$o::count = 0;
+() = substr $refee, 0;
+is $o::count, 1, 'rvalue substr calls overloading once on utf8 target';

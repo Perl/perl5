@@ -3075,7 +3075,7 @@ PP(pp_substr)
     }
     else tmps = SvPV_const(sv, curlen);
     if (DO_UTF8(sv)) {
-        utf8_curlen = sv_len_utf8_nomg(sv);
+        utf8_curlen = sv_or_pv_len_utf8(sv, tmps, curlen);
 	if (utf8_curlen == curlen)
 	    utf8_curlen = 0;
 	else
@@ -3093,7 +3093,7 @@ PP(pp_substr)
 
 	byte_len = len;
 	byte_pos = utf8_curlen
-	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
+	    ? sv_or_pv_pos_u2b(sv, tmps, pos, &byte_len) : pos;
 
 	tmps += byte_pos;
 
