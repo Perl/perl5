@@ -2916,7 +2916,7 @@ PP(pp_length)
 	    SETi(len);
     } else if (SvOK(sv)) {
 	/* Neither magic nor overloaded.  */
-	if (DO_UTF8(sv))
+	if (!IN_BYTES)
 	    SETi(sv_len_utf8(sv));
 	else
 	    SETi(sv_len(sv));
@@ -3017,7 +3017,6 @@ PP(pp_substr)
     STRLEN repl_len;
     int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;
-    bool repl_is_utf8 = FALSE;
 
     if (num_args > 2) {
 	if (num_args > 3) {
@@ -3038,17 +3037,7 @@ PP(pp_substr)
 	repl_sv = POPs;
     }
     PUTBACK;
-    if (repl_sv) {
-	repl = SvPV_const(repl_sv, repl_len);
-	repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
-	if (repl_is_utf8) {
-	    if (!DO_UTF8(sv))
-		sv_utf8_upgrade(sv);
-	}
-	else if (DO_UTF8(sv))
-	    repl_need_utf8_upgrade = TRUE;
-    }
-    else if (lvalue) {
+    if (lvalue && !repl_sv) {
 	SV * ret;
 	ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
 	sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
@@ -3067,9 +3056,26 @@ PP(pp_substr)
 	PUSHs(ret);    /* avoid SvSETMAGIC here */
 	RETURN;
     }
-    tmps = SvPV_const(sv, curlen);
+    if (repl_sv) {
+	repl = SvPV_const(repl_sv, repl_len);
+	SvGETMAGIC(sv);
+	if (SvROK(sv))
+	    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
+			    "Attempt to use reference as lvalue in substr"
+	    );
+	tmps = SvPV_force_nomg(sv, curlen);
+	if (DO_UTF8(repl_sv) && repl_len) {
+	    if (!DO_UTF8(sv)) {
+		sv_utf8_upgrade_nomg(sv);
+		curlen = SvCUR(sv);
+	    }
+	}
+	else if (DO_UTF8(sv))
+	    repl_need_utf8_upgrade = TRUE;
+    }
+    else tmps = SvPV_const(sv, curlen);
     if (DO_UTF8(sv)) {
-        utf8_curlen = sv_len_utf8_nomg(sv);
+        utf8_curlen = sv_or_pv_len_utf8(sv, tmps, curlen);
 	if (utf8_curlen == curlen)
 	    utf8_curlen = 0;
 	else
@@ -3087,7 +3093,7 @@ PP(pp_substr)
 
 	byte_len = len;
 	byte_pos = utf8_curlen
-	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
+	    ? sv_or_pv_pos_u2b(sv, tmps, pos, &byte_len) : pos;
 
 	tmps += byte_pos;
 
@@ -3109,17 +3115,10 @@ PP(pp_substr)
 		repl_sv_copy = newSVsv(repl_sv);
 		sv_utf8_upgrade(repl_sv_copy);
 		repl = SvPV_const(repl_sv_copy, repl_len);
-		repl_is_utf8 = DO_UTF8(repl_sv_copy) && repl_len;
 	    }
-	    if (SvROK(sv))
-		Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
-			    "Attempt to use reference as lvalue in substr"
-		);
 	    if (!SvOK(sv))
 		sv_setpvs(sv, "");
 	    sv_insert_flags(sv, byte_pos, byte_len, repl, repl_len, 0);
-	    if (repl_is_utf8)
-		SvUTF8_on(sv);
 	    SvREFCNT_dec(repl_sv_copy);
 	}
     }

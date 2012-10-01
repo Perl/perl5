@@ -3164,7 +3164,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ register SV *const sv, const I32 flags, ST
 
     if (sv == &PL_sv_undef)
 	return 0;
-    if (!SvPOK(sv)) {
+    if (!SvPOK_nog(sv)) {
 	STRLEN len = 0;
 	if (SvREADONLY(sv) && (SvPOKp(sv) || SvIOKp(sv) || SvNOKp(sv))) {
 	    (void) sv_2pv_flags(sv,&len, flags);
@@ -6472,7 +6472,8 @@ Perl_sv_free2(pTHX_ SV *const sv)
 =for apidoc sv_len
 
 Returns the length of the string in the SV.  Handles magic and type
-coercion.  See also C<SvCUR>, which gives raw access to the xpv_cur slot.
+coercion and sets the UTF8 flag appropriately.  See also C<SvCUR>, which
+gives raw access to the xpv_cur slot.
 
 =cut
 */
@@ -6485,10 +6486,7 @@ Perl_sv_len(pTHX_ register SV *const sv)
     if (!sv)
 	return 0;
 
-    if (SvGMAGICAL(sv))
-	len = mg_length(sv);
-    else
-        (void)SvPV_const(sv, len);
+    (void)SvPV_const(sv, len);
     return len;
 }
 
@@ -6516,13 +6514,8 @@ Perl_sv_len_utf8(pTHX_ register SV *const sv)
     if (!sv)
 	return 0;
 
-    if (SvGMAGICAL(sv))
-	return mg_length(sv);
-    else
-    {
-	SvGETMAGIC(sv);
-	return sv_len_utf8_nomg(sv);
-    }
+    SvGETMAGIC(sv);
+    return sv_len_utf8_nomg(sv);
 }
 
 STRLEN
@@ -6534,7 +6527,7 @@ Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
 
     PERL_ARGS_ASSERT_SV_LEN_UTF8_NOMG;
 
-    if (PL_utf8cache) {
+    if (PL_utf8cache && SvUTF8(sv)) {
 	    STRLEN ulen;
 	    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
 
@@ -6561,7 +6554,7 @@ Perl_sv_len_utf8_nomg(pTHX_ SV * const sv)
 	    }
 	    return ulen;
     }
-    return Perl_utf8_length(aTHX_ s, s + len);
+    return SvUTF8(sv) ? Perl_utf8_length(aTHX_ s, s + len) : len;
 }
 
 /* Walk forwards to find the byte corresponding to the passed in UTF-8
@@ -6649,7 +6642,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
     if (!uoffset)
 	return 0;
 
-    if (!SvREADONLY(sv)
+    if (!SvREADONLY(sv) && !SvGMAGICAL(sv) && SvPOK(sv)
 	&& PL_utf8cache
 	&& (*mgp || (SvTYPE(sv) >= SVt_PVMG &&
 		     (*mgp = mg_find(sv, PERL_MAGIC_utf8))))) {
@@ -6732,7 +6725,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 	boffset = real_boffset;
     }
 
-    if (PL_utf8cache) {
+    if (PL_utf8cache && !SvGMAGICAL(sv) && SvPOK(sv)) {
 	if (at_end)
 	    utf8_mg_len_cache_update(sv, mgp, uoffset);
 	else
@@ -6844,7 +6837,7 @@ S_utf8_mg_len_cache_update(pTHX_ SV *const sv, MAGIC **const mgp,
 			   const STRLEN ulen)
 {
     PERL_ARGS_ASSERT_UTF8_MG_LEN_CACHE_UPDATE;
-    if (SvREADONLY(sv))
+    if (SvREADONLY(sv) || SvGMAGICAL(sv) || !SvPOK(sv))
 	return;
 
     if (!*mgp && (SvTYPE(sv) < SVt_PVMG ||
@@ -9129,8 +9122,8 @@ Perl_sv_pvutf8n_force(pTHX_ SV *const sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_PVUTF8N_FORCE;
 
-    sv_pvn_force(sv,lp);
-    sv_utf8_upgrade(sv);
+    sv_pvn_force(sv,0);
+    sv_utf8_upgrade_nomg(sv);
     *lp = SvCUR(sv);
     return SvPVX(sv);
 }
@@ -10539,16 +10532,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		if (DO_UTF8(argsv)) {
 		    STRLEN old_precis = precis;
 		    if (has_precis && precis < elen) {
-			STRLEN ulen = sv_len_utf8_nomg(argsv);
+			STRLEN ulen = sv_or_pv_len_utf8(argsv, eptr, elen);
 			STRLEN p = precis > ulen ? ulen : precis;
-			precis = sv_pos_u2b_flags(argsv, p, 0, 0);
+			precis = sv_or_pv_pos_u2b(argsv, eptr, p, 0);
 							/* sticks at end */
 		    }
 		    if (width) { /* fudge width (can't fudge elen) */
 			if (has_precis && precis < elen)
 			    width += precis - old_precis;
 			else
-			    width += elen - sv_len_utf8_nomg(argsv);
+			    width +=
+				elen - sv_or_pv_len_utf8(argsv,eptr,elen);
 		    }
 		    is_utf8 = TRUE;
 		}

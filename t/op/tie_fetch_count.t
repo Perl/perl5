@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 310);
+    plan (tests => 312);
 }
 
 use strict;
@@ -260,6 +260,10 @@ $dummy  = substr$var,0,1; check_count 'substr $utf8';
 my $l   =\substr$var,0,1;
 $dummy  = $$l           ; check_count 'reading lvalue substr($utf8)';
 $$l     = 0             ; check_count 'setting lvalue substr($utf8)';
+tie $var, "main", "a";
+$$l     = "\x{100}"     ; check_count 'assigning $utf8 to lvalue substr';
+tie $var1, "main", "a";
+substr$var1,0,0,"\x{100}"; check_count '4-arg substr with utf8 replacement';
 
 {
     local $SIG{__WARN__} = sub {};

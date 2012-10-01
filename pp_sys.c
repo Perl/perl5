@@ -1660,12 +1660,7 @@ PP(pp_sysread)
 	buffer_utf8 = !IN_BYTES && SvUTF8(bufsv);
     }
     if (DO_UTF8(bufsv)) {
-	/* offset adjust in characters not bytes */
-        /* SV's length cache is only safe for non-magical values */
-        if (SvGMAGICAL(bufsv))
-            blen = utf8_length((const U8 *)buffer, (const U8 *)buffer + blen);
-        else
-            blen = sv_len_utf8(bufsv);
+	blen = sv_len_utf8_nomg(bufsv);
     }
 
     charstart = TRUE;
@@ -1946,15 +1941,9 @@ PP(pp_syswrite)
 		blen_chars = orig_blen_bytes;
 	    } else {
 		/* The SV really is UTF-8.  */
-		if (SvGMAGICAL(bufsv) || SvAMAGIC(bufsv)) {
-		    /* Don't call sv_len_utf8 again because it will call magic
-		       or overloading a second time, and we might get back a
-		       different result.  */
-		    blen_chars = utf8_length((U8*)buffer, (U8*)buffer + blen);
-		} else {
-		    /* It's safe, and it may well be cached.  */
-		    blen_chars = sv_len_utf8(bufsv);
-		}
+		/* Don't call sv_len_utf8 on a magical or overloaded
+		   scalar, as we might get back a different result.  */
+		blen_chars = sv_or_pv_len_utf8(bufsv, buffer, blen);
 	    }
 	} else {
 	    blen_chars = blen;

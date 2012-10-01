@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan (tests => 38);
+plan (tests => 39);
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
@@ -230,5 +230,11 @@ is($ul, undef, "Assigned length of overloaded undef with result in TARG");
     };
     eval ' sub { length my @forecasts } ';
 }
+
+# length could be fooled by UTF8ness of non-magical variables changing with
+# stringification.
+my $ref = [];
+bless $ref, "\x{100}";
+is length $ref, length "$ref", 'length on reference blessed to utf8 class';
 
 is($warnings, 0, "There were no other warnings");

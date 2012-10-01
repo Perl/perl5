@@ -92,3 +92,15 @@ S_SvPADSTALE_off(SV *sv)
     assert(SvFLAGS(sv) & SVs_PADMY);
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
 }
+#ifdef PERL_CORE
+PERL_STATIC_INLINE STRLEN
+sv_or_pv_pos_u2b(aTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
+{
+    if (SvGAMAGIC(sv)) {
+	U8 *hopped = utf8_hop((U8 *)pv, pos);
+	if (lenp) *lenp = (STRLEN)(utf8_hop(hopped, *lenp) - hopped);
+	return (STRLEN)(hopped - (U8 *)pv);
+    }
+    return sv_pos_u2b_flags(sv,pos,lenp,SV_CONST_RETURN);
+}
+#endif
