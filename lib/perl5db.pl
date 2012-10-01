@@ -5513,6 +5513,28 @@ of any of the expressions changes.
 
 =cut
 
+sub _add_watch_expr {
+    my $expr = shift;
+
+    # ... save it.
+    push @to_watch, $expr;
+
+    # Parameterize DB::eval and call it to get the expression's value
+    # in the user's context. This version can handle expressions which
+    # return a list value.
+    $evalarg = $expr;
+    my ($val) = join( ' ', DB::eval(@_) );
+    $val = ( defined $val ) ? "'$val'" : 'undef';
+
+    # Save the current value of the expression.
+    push @old_watch, $val;
+
+    # We are now watching expressions.
+    $trace |= 2;
+
+    return;
+}
+
 sub cmd_w {
     my $cmd = shift;
 
@@ -5521,29 +5543,16 @@ sub cmd_w {
 
     # If expression is not null ...
     if ( $expr =~ /\A\S/ ) {
-
-        # ... save it.
-        push @to_watch, $expr;
-
-        # Parameterize DB::eval and call it to get the expression's value
-        # in the user's context. This version can handle expressions which
-        # return a list value.
-        $evalarg = $expr;
-        my ($val) = join( ' ', DB::eval(@_) );
-        $val = ( defined $val ) ? "'$val'" : 'undef';
-
-        # Save the current value of the expression.
-        push @old_watch, $val;
-
-        # We are now watching expressions.
-        $trace |= 2;
+        _add_watch_expr($expr);
     } ## end if ($expr =~ /^(\S.*)/)
 
     # You have to give one to get one.
     else {
         print $OUT "Adding a watch-expression requires an expression\n";  # hint
     }
-} ## end sub cmd_w
+
+    return;
+}
 
 =head3 C<cmd_W> - delete watch expressions (command)
 
