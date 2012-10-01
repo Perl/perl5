@@ -4536,10 +4536,8 @@ specified) to the specified line. Dies if it can't.
 =cut
 
 sub break_on_line {
-    my ( $i, $cond ) = @_;
-
-    # Always true if no condition supplied.
-    $cond = 1 unless @_ >= 2;
+    my $i = shift;
+    my $cond = @_ ? shift(@_) : 1;
 
     my $inii  = $i;
     my $after = '';
