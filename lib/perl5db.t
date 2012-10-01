@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(104);
+plan(105);
 
 my $rc_filename = '.perldb';
 
@@ -2299,6 +2299,26 @@ sub _calc_trace_wrapper
         25:\s+bar\(\);\n
         /msx,
         'Test the t command with function calls.',
+    );
+}
+
+# Test the final message.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^Debugged\ program\ terminated\.
+        /msx,
+        'Test the final "Debugged program terminated" message.',
     );
 }
 

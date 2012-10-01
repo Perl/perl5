@@ -7814,7 +7814,7 @@ C<Term::ReadLine::TermCap>).
 =cut
 
 sub print_help {
-    my $help_str = (@_);
+    my $help_str = shift;
 
     # Restore proper alignment destroyed by eeevil I<> and B<>
     # ornaments: A pox on both their houses!
