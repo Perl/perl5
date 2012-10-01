@@ -787,9 +787,6 @@ ok eval {
     is ref \$x, 'REF', '\substr does not coerce its ref arg just yet';
 }
 
-} # sub run_tests - put tests above this line that can run in threads
-
-
 my $destroyed;
 { package Class; DESTROY { ++$destroyed; } }
 
@@ -862,3 +859,5 @@ is $o::count, 1, 'assigning utf8 overload to substr lvalue calls ovld 1ce';
 
 # [perl #7678] core dump with substr reference and localisation
 {$b="abcde"; local $k; *k=\substr($b, 2, 1);}
+
+} # sub run_tests - put tests above this line that can run in threads
