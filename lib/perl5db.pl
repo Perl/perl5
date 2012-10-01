@@ -4607,10 +4607,9 @@ the breakpoint.
 =cut
 
 sub break_on_filename_line {
-    my ( $f, $i, $cond ) = @_;
-
-    # Always true if condition left off.
-    $cond = 1 unless @_ >= 3;
+    my $f = shift;
+    my $i = shift;
+    my $cond = @_ ? shift(@_) : 1;
 
     # Switch the magical hash temporarily.
     local *dbline = $main::{ '_<' . $f };
@@ -4633,13 +4632,13 @@ executable one, and put a breakpoint on the first one you find.
 =cut
 
 sub break_on_filename_line_range {
-    my ( $f, $from, $to, $cond ) = @_;
+    my $f = shift;
+    my $from = shift;
+    my $to = shift;
+    my $cond = @_ ? shift(@_) : 1;
 
     # Find a breakable line if there is one.
     my $i = breakable_line_in_filename( $f, $from, $to );
-
-    # Always true if missing.
-    $cond = 1 unless @_ >= 3;
 
     # Add the breakpoint.
     break_on_filename_line( $f, $i, $cond );
@@ -4655,12 +4654,11 @@ Uses C<find_sub> to locate the desired subroutine.
 =cut
 
 sub subroutine_filename_lines {
-    my ( $subname, $cond ) = @_;
+    my ( $subname ) = @_;
 
     # Returned value from find_sub() is fullpathname:startline-endline.
-    # The match creates the list (fullpathname, start, end). Falling off
-    # the end of the subroutine returns this implicitly.
-    find_sub($subname) =~ /^(.*):(\d+)-(\d+)$/;
+    # The match creates the list (fullpathname, start, end).
+    return (find_sub($subname) =~ /^(.*):(\d+)-(\d+)$/);
 } ## end sub subroutine_filename_lines
 
 =head3 break_subroutine(subname) (API)
