@@ -5520,7 +5520,7 @@ sub cmd_w {
     my $expr = shift || '';
 
     # If expression is not null ...
-    if ( $expr =~ /^(\S.*)/ ) {
+    if ( $expr =~ /\A\S/ ) {
 
         # ... save it.
         push @to_watch, $expr;
