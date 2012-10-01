@@ -1,5 +1,7 @@
 #!./perl -w
 
+# Tests for sprintf that do not fit the format of sprintf.t.
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
