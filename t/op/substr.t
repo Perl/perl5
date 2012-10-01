@@ -23,7 +23,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(386);
+plan(387);
 
 run_tests() unless caller;
 
@@ -855,6 +855,10 @@ $refee = bless ["\x{100}"], o::;
 $o::count = 0;
 () = substr $refee, 0;
 is $o::count, 1, 'rvalue substr calls overloading once on utf8 target';
+$o::count = 0;
+$refee = "";
+${\substr $refee, 0} = bless ["\x{100}"], o::;
+is $o::count, 1, 'assigning utf8 overload to substr lvalue calls ovld 1ce';
 
 # [perl #7678] core dump with substr reference and localisation
 {$b="abcde"; local $k; *k=\substr($b, 2, 1);}

@@ -2194,7 +2194,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	sv_utf8_upgrade_nomg(lsv);
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
-	newtarglen = sv_len_utf8(sv);
+	newtarglen = sv_or_pv_len_utf8(sv, tmps, len);
 	SvUTF8_on(lsv);
     }
     else if (SvUTF8(lsv)) {
