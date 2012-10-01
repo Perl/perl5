@@ -4259,17 +4259,11 @@ sub cmd_b {
     # b compile|postpone <some sub> [<condition>]
     # The interpreter actually traps this one for us; we just put the
     # necessary condition in the %postponed hash.
-    elsif ( $line =~ /^(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ ) {
-
-        # Capture the condition if there is one. Make it true if none.
-        my $cond = $default_cond->($3);
-
-        # Save the sub name and set $break to 1 if $1 was 'postpone', 0
-        # if it was 'compile'.
-        my ( $subname, $break ) = ( $2, $1 eq 'postpone' );
+    elsif ( my ($action, $subname, $cond)
+        = $line =~ /^(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ ) {
 
         # De-Perl4-ify the name - ' separators to ::.
-        $subname =~ s/\'/::/g;
+        $subname =~ s/'/::/g;
 
         # Qualify it into the current package unless it's already qualified.
         $subname = "${package}::" . $subname unless $subname =~ /::/;
@@ -4278,7 +4272,9 @@ sub cmd_b {
         $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
 
         # Save the break type for this sub.
-        $postponed{$subname} = $break ? "break +0 if $cond" : "compile";
+        $postponed{$subname} = (($action eq 'postpone')
+            ? ( "break +0 if " . $default_cond->($cond) )
+            : "compile");
     } ## end elsif ($line =~ ...
     # b <filename>:<line> [<condition>]
     elsif (my ($filename, $line_num, $cond)
