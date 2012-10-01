@@ -4192,35 +4192,50 @@ will get any kind of an action, including breakpoints).
 
 =cut
 
+sub _remove_action_from_dbline {
+    my $i = shift;
+
+    $dbline{$i} =~ s/\0[^\0]*//;    # \^a
+    delete $dbline{$i} if $dbline{$i} eq '';
+
+    return;
+}
+
+sub _delete_all_actions {
+    print {$OUT} "Deleting all actions...\n";
+
+    for my $file ( keys %had_breakpoints ) {
+        local *dbline = $main::{ '_<' . $file };
+        $max = $#dbline;
+        my $was;
+        for my $i (1 .. $max) {
+            if ( defined $dbline{$i} ) {
+                _remove_action_from_dbline($i);
+            }
+        }
+
+        unless ( $had_breakpoints{$file} &= ~2 ) {
+            delete $had_breakpoints{$file};
+        }
+    }
+
+    return;
+}
+
 sub delete_action {
     my $i = shift;
-    if ( defined($i) ) {
 
+    if ( defined($i) ) {
         # Can there be one?
         die "Line $i has no action .\n" if $dbline[$i] == 0;
 
         # Nuke whatever's there.
-        $dbline{$i} =~ s/\0[^\0]*//;    # \^a
-        delete $dbline{$i} if $dbline{$i} eq '';
+        _remove_action_from_dbline($i);
     }
     else {
-        print $OUT "Deleting all actions...\n";
-        for my $file ( keys %had_breakpoints ) {
-            local *dbline = $main::{ '_<' . $file };
-            $max = $#dbline;
-            my $was;
-            for $i (1 .. $max) {
-                if ( defined $dbline{$i} ) {
-                    $dbline{$i} =~ s/\0[^\0]*//;
-                    delete $dbline{$i} if $dbline{$i} eq '';
-                }
-                unless ( $had_breakpoints{$file} &= ~2 ) {
-                    delete $had_breakpoints{$file};
-                }
-            } ## end for ($i = 1 .. $max)
-        } ## end for my $file (keys %had_breakpoints)
-    } ## end else [ if (defined($i))
-} ## end sub delete_action
+        _delete_all_actions();
+    }
+}
 
 =head3 C<cmd_b> (command)
 
