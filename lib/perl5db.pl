@@ -4565,6 +4565,8 @@ sub break_on_line {
 
         _set_breakpoint_enabled_status($filename, $i, 1);
     }
+
+    return;
 } ## end sub break_on_line
 
 =head3 cmd_b_line(line, [condition]) (command)
@@ -4621,6 +4623,8 @@ sub break_on_filename_line {
 
     # Add the breakpoint.
     break_on_line( $i, $cond );
+
+    return;
 } ## end sub break_on_filename_line
 
 =head3 break_on_filename_line_range(file, from, to, [condition]) (API)
@@ -4641,6 +4645,8 @@ sub break_on_filename_line_range {
 
     # Add the breakpoint.
     break_on_filename_line( $f, $i, $cond );
+
+    return;
 } ## end sub break_on_filename_line_range
 
 =head3 subroutine_filename_lines(subname, [condition]) (API)
@@ -4681,6 +4687,8 @@ sub break_subroutine {
     # Put a break the first place possible in the range of lines
     # that make up this subroutine.
     break_on_filename_line_range( $file, $s, $e, $cond );
+
+    return;
 } ## end sub break_subroutine
 
 =head3 cmd_b_sub(subname, [condition]) (command)
