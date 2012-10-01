@@ -3540,6 +3540,7 @@ dist/threads-shared/t/blessed.t		Test blessed shared variables
 dist/threads-shared/t/clone.t		Test shared cloning
 dist/threads-shared/t/cond.t		Test condition variables
 dist/threads-shared/t/disabled.t	Test threads::shared when threads are disabled.
+dist/threads-shared/t/dualvar.t	Test dual-valued variables
 dist/threads-shared/t/hv_refs.t		Test shared hashes containing references
 dist/threads-shared/t/hv_simple.t	Tests for basic shared hash functionality.
 dist/threads-shared/t/no_share.t	Tests for disabled share on variables.

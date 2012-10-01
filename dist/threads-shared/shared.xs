@@ -937,6 +937,7 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
     dTHXc;
     SV *saggregate = S_sharedsv_from_obj(aTHX_ mg->mg_obj);
     SV **svp;
+    U32 dualvar_flags = SvFLAGS(sv) & (SVf_IOK|SVf_NOK);
     /* Theory - SV itself is magically shared - and we have ordered the
        magic such that by the time we get here it has been stored
        to its shared counterpart
@@ -965,6 +966,10 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
     CALLER_CONTEXT;
     Perl_sharedsv_associate(aTHX_ sv, *svp);
     sharedsv_scalar_store(aTHX_ sv, *svp);
+    /* Propagate dualvar flags */
+    if (SvPOK(*svp)) {
+        SvFLAGS(*svp) |= dualvar_flags;
+    }
     LEAVE_LOCK;
     return (0);
 }

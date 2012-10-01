@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.41';
+our $VERSION = '1.42';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -195,7 +195,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.41
+This document describes threads::shared version 1.42
 
 =head1 SYNOPSIS
 
@@ -565,7 +565,7 @@ C<share()> allows you to C<< share($hashref->{key}) >> and
 C<< share($arrayref->[idx]) >> without giving any error message.  But the
 C<< $hashref->{key} >> or C<< $arrayref->[idx] >> is B<not> shared, causing
 the error "lock can only be used on shared values" to occur when you attempt
-to C<< lock($hasref->{key}) >> or C<< lock($arrayref->[idx]) >> in another
+to C<< lock($hashref->{key}) >> or C<< lock($arrayref->[idx]) >> in another
 thread.
 
 Using L<refaddr()|Scalar::Util/"refaddr EXPR">) is unreliable for testing
@@ -606,6 +606,13 @@ Either of the following will work instead:
         my $val = $foo{'bar'}{$key};
         ...
     }
+
+This module supports dual-valued variables created using L<dualvar() from
+Scalar::Util|Scalar::Util/"dualvar NUM, STRING">).  However, while C<$!> acts
+like a dualvar, it is implemented as a tied SV.  To propagate its value, use
+the follow construct, if needed:
+
+    my $errno :shared = dualvar($!,$!);
 
 View existing bug reports at, and submit any new bugs, problems, patches, etc.
 to: L<http://rt.cpan.org/Public/Dist/Display.html?Name=threads-shared>
