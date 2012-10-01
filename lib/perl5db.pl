@@ -4242,14 +4242,13 @@ sub cmd_b {
 
     # No line number, no condition. Simple break on current line.
     if ( $line =~ /^\s*$/ ) {
-        &cmd_b_line( $dbline, 1 );
+        cmd_b_line( $dbline, 1 );
     }
 
     # Break on load for a file.
-    elsif ( $line =~ /^load\b\s*(.*)/ ) {
-        my $file = $1;
-        $file =~ s/\s+$//;
-        &cmd_b_load($file);
+    elsif ( my ($file) = $line =~ /^load\b\s*(.*)/ ) {
+        $file =~ s/\s+\z//;
+        cmd_b_load($file);
     }
 
     # b compile|postpone <some sub> [<condition>]
@@ -4277,8 +4276,8 @@ sub cmd_b {
         $postponed{$subname} = $break ? "break +0 if $cond" : "compile";
     } ## end elsif ($line =~ ...
     # b <filename>:<line> [<condition>]
-    elsif ($line =~ /\A(\S+[^:]):(\d+)\s*(.*)/ms) {
-        my ($filename, $line_num, $cond) = ($1, $2, $3);
+    elsif (my ($filename, $line_num, $cond)
+        = $line =~ /\A(\S+[^:]):(\d+)\s*(.*)/ms) {
         cmd_b_filename_line(
             $filename,
             $line_num,
@@ -4286,31 +4285,36 @@ sub cmd_b {
         );
     }
     # b <sub name> [<condition>]
-    elsif ( $line =~ /^([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ ) {
+    elsif ( my ($new_subname) =
+        $line =~ /^([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ ) {
 
         #
-        $subname = $1;
+        $subname = $new_subname;
         my $cond = length $2 ? $2 : '1';
-        &cmd_b_sub( $subname, $cond );
+        cmd_b_sub( $subname, $cond );
     }
 
     # b <line> [<condition>].
-    elsif ( $line =~ /^(\d*)\s*(.*)/ ) {
+    elsif ( my ($line_n, $cond) = $line =~ /^(\d*)\s*(.*)/ ) {
 
         # Capture the line. If none, it's the current line.
-        $line = $1 || $dbline;
+        $line = $line_n || $dbline;
 
         # If there's no condition, make it '1'.
-        my $cond = length $2 ? $2 : '1';
+        if (! length $cond) {
+            $cond = '1';
+        }
 
         # Break on line.
-        &cmd_b_line( $line, $cond );
+        cmd_b_line( $line, $cond );
     }
 
     # Line didn't make sense.
     else {
         print "confused by line($line)?\n";
     }
+
+    return;
 } ## end sub cmd_b
 
 =head3 C<break_on_load> (API)
