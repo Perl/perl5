@@ -4167,13 +4167,19 @@ sub cmd_A {
     # if delete_action blows up for some reason, in which case
     # we print $@ and get out.
     if ( $line eq '*' ) {
-        eval { &delete_action(); 1 } or print $OUT $@ and return;
+        if (! eval { _delete_all_actions(); 1 }) {
+            print {$OUT} $@;
+            return;
+        }
     }
 
     # There's a real line  number. Pass it to delete_action.
     # Error trapping is as above.
     elsif ( $line =~ /^(\S.*)/ ) {
-        eval { &delete_action($1); 1 } or print $OUT $@ and return;
+        if (! eval { delete_action($1); 1 }) {
+            print {$OUT} $@;
+            return;
+        }
     }
 
     # Swing and a miss. Bad syntax.
