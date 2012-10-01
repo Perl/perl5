@@ -741,7 +741,7 @@ sub eval {
     # Since we're only saving $@, we only have to localize the array element
     # that it will be stored in.
     local $saved[0];    # Preserve the old value of $@
-    eval { &DB::save };
+    eval { DB::save() };
 
     # Now see whether we need to report an error back to the user.
     if ($at) {
@@ -1929,7 +1929,7 @@ If there are any preprompt actions, execute those as well.
 =cut
 
     # If there's an action, do it now.
-    $evalarg = $action, DB::eval(@_) if $action;
+    $evalarg = $action, DB::eval() if $action;
 
     # Are we nested another level (e.g., did we evaluate a function
     # that had a breakpoint in it at the debugger prompt)?
@@ -1940,7 +1940,7 @@ If there are any preprompt actions, execute those as well.
 
         # Do any pre-prompt actions.
         foreach $evalarg (@$pre) {
-            DB::eval(@_);
+            DB::eval();
         }
 
         # Complain about too much recursion if we passed the limit.
@@ -3273,7 +3273,7 @@ any variables we might want to address in the C<DB> package.
             $evalarg = "\$^D = \$^D | \$DB::db_stop;\n$cmd";
 
             # Run *our* eval that executes in the caller's context.
-            DB::eval(@_);
+            DB::eval();
 
             # Turn off the one-time-dump stuff now.
             if ($onetimeDump) {
@@ -3374,7 +3374,7 @@ again.
 
         # Evaluate post-prompt commands.
         foreach $evalarg (@$post) {
-            DB::eval(@_);
+            DB::eval();
         }
     }    # if ($single || $signal)
 
@@ -3477,7 +3477,7 @@ sub _DB__handle_watch_expressions
 
             # Fix context DB::eval() wants to return an array, but
             # we need a scalar here.
-            my ($val) = join( "', '", DB::eval(@_) );
+            my ($val) = join( "', '", DB::eval() );
             $val = ( ( defined $val ) ? "'$val'" : 'undef' );
 
             # Did it change?
@@ -5075,7 +5075,7 @@ sub cmd_i {
     my $line = shift;
     foreach my $isa ( split( /\s+/, $line ) ) {
         $evalarg = $isa;
-        ($isa) = DB::eval(@_);
+        ($isa) = DB::eval();
         no strict 'refs';
         print join(
             ', ',
@@ -5120,7 +5120,7 @@ sub cmd_l {
         # Set up for DB::eval() - evaluate in *user* context.
         $evalarg = $1;
         # $evalarg = $2;
-        my ($s) = DB::eval(@_);
+        my ($s) = DB::eval();
 
         # Ooops. Bad scalar.
         if ($@) {
@@ -5523,7 +5523,7 @@ sub _add_watch_expr {
     # in the user's context. This version can handle expressions which
     # return a list value.
     $evalarg = $expr;
-    my ($val) = join( ' ', DB::eval(@_) );
+    my ($val) = join( ' ', DB::eval() );
     $val = ( defined $val ) ? "'$val'" : 'undef';
 
     # Save the current value of the expression.
@@ -9744,7 +9744,7 @@ sub cmd_pre580_W {
         # Get the current value of the expression.
         # Doesn't handle expressions returning list values!
         $evalarg = $1;
-        my ($val) = DB::eval(@_);
+        my ($val) = DB::eval();
         $val = ( defined $val ) ? "'$val'" : 'undef';
 
         # Save it.
