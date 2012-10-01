@@ -4237,6 +4237,11 @@ sub cmd_b {
     my $line   = shift;    # [.|line] [cond]
     my $dbline = shift;
 
+    my $default_cond = sub {
+        my $cond = shift;
+        return length($cond) ? $cond : '1';
+    };
+
     # Make . the current line number if it's there..
     $line =~ s/^\.(\s|\z)/$dbline$1/;
 
@@ -4257,7 +4262,7 @@ sub cmd_b {
     elsif ( $line =~ /^(postpone|compile)\b\s*([':A-Za-z_][':\w]*)\s*(.*)/ ) {
 
         # Capture the condition if there is one. Make it true if none.
-        my $cond = length $3 ? $3 : '1';
+        my $cond = $default_cond->($3);
 
         # Save the sub name and set $break to 1 if $1 was 'postpone', 0
         # if it was 'compile'.
@@ -4285,13 +4290,12 @@ sub cmd_b {
         );
     }
     # b <sub name> [<condition>]
-    elsif ( my ($new_subname) =
+    elsif ( my ($new_subname, $new_cond) =
         $line =~ /^([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ ) {
 
         #
         $subname = $new_subname;
-        my $cond = length $2 ? $2 : '1';
-        cmd_b_sub( $subname, $cond );
+        cmd_b_sub( $subname, $default_cond->($new_cond) );
     }
 
     # b <line> [<condition>].
@@ -4300,13 +4304,8 @@ sub cmd_b {
         # Capture the line. If none, it's the current line.
         $line = $line_n || $dbline;
 
-        # If there's no condition, make it '1'.
-        if (! length $cond) {
-            $cond = '1';
-        }
-
         # Break on line.
-        cmd_b_line( $line, $cond );
+        cmd_b_line( $line, $default_cond->($cond) );
     }
 
     # Line didn't make sense.
