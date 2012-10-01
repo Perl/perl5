@@ -94,7 +94,7 @@ S_SvPADSTALE_off(SV *sv)
 }
 #ifdef PERL_CORE
 PERL_STATIC_INLINE STRLEN
-sv_or_pv_pos_u2b(aTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
+S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 {
     if (SvGAMAGIC(sv)) {
 	U8 *hopped = utf8_hop((U8 *)pv, pos);

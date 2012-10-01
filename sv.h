@@ -1823,6 +1823,7 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
     (SvGAMAGIC(sv)				       \
 	? utf8_length((U8 *)(pv), (U8 *)(pv)+(bytelen))	\
 	: sv_len_utf8(sv))
+# define sv_or_pv_pos_u2b(sv,s,p,lp) S_sv_or_pv_pos_u2b(aTHX_ sv,s,p,lp)
 #endif
 
 /*
