@@ -329,28 +329,7 @@ extern MGVTBL sharedsv_elem_vtbl;      /* Elements of hashes and arrays have
 STATIC SV *
 S_sharedsv_from_obj(pTHX_ SV *sv)
 {
-    return ((SvROK(sv)) ? INT2PTR(SV *, SvIV(SvRV(sv))) : NULL);
-}
-
-
-/* Return SV flags associated with dual-valued variables */
-U32
-S_get_dualvar_flags(pTHX_ SV *sv)
-{
-    if (SvPOK(sv) && (SvNIOK(sv) || SvNIOKp(sv))) {
-        if (SvNOK(sv) || SvNOKp(sv)) {
-            return SVf_NOK;
-        }
-#ifdef SVf_IVisUV
-        if (SvIsUV(sv)) {
-            return (SVf_IOK | SVf_IVisUV);
-        }
-#endif
-        if (SvIOK(sv) || SvIOKp(sv)) {
-            return SVf_IOK;
-        }
-    }
-    return 0;
+     return ((SvROK(sv)) ? INT2PTR(SV *, SvIV(SvRV(sv))) : NULL);
 }
 
 
@@ -958,8 +937,7 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
     dTHXc;
     SV *saggregate = S_sharedsv_from_obj(aTHX_ mg->mg_obj);
     SV **svp;
-    U32 dualvar_flags;
-
+    U32 dualvar_flags = SvFLAGS(sv) & (SVf_IOK|SVf_NOK);
     /* Theory - SV itself is magically shared - and we have ordered the
        magic such that by the time we get here it has been stored
        to its shared counterpart
@@ -986,10 +964,12 @@ sharedsv_elem_mg_STORE(pTHX_ SV *sv, MAGIC *mg)
         svp = hv_fetch((HV*) saggregate, key, len, 1);
     }
     CALLER_CONTEXT;
-    dualvar_flags = S_get_dualvar_flags(aTHX_ sv);
     Perl_sharedsv_associate(aTHX_ sv, *svp);
     sharedsv_scalar_store(aTHX_ sv, *svp);
-    SvFLAGS(*svp) |= dualvar_flags;
+    /* Propagate dualvar flags */
+    if (SvPOK(*svp)) {
+        SvFLAGS(*svp) |= dualvar_flags;
+    }
     LEAVE_LOCK;
     return (0);
 }
@@ -1209,7 +1189,7 @@ Perl_sharedsv_locksv(pTHX_ SV *sv)
         sv = SvRV(sv);
     ssv = Perl_sharedsv_find(aTHX_ sv);
     if (!ssv)
-        croak("lock can only be used on shared values");
+       croak("lock can only be used on shared values");
     Perl_sharedsv_lock(aTHX_ ssv);
 }
 
@@ -1244,7 +1224,7 @@ S_shared_signal_hook(pTHX) {
     us = (PL_sharedsv_lock.owner == aTHX);
     MUTEX_UNLOCK(&PL_sharedsv_lock.mutex);
     if (us)
-        return; /* try again later */
+	return; /* try again later */
     prev_signal_hook(aTHX);
 }
 #endif
@@ -1268,8 +1248,8 @@ Perl_sharedsv_init(pTHX)
 #endif
 #ifdef PL_signalhook
     if (!prev_signal_hook) {
-        prev_signal_hook = PL_signalhook;
-        PL_signalhook = &S_shared_signal_hook;
+	prev_signal_hook = PL_signalhook;
+	PL_signalhook = &S_shared_signal_hook;
     }
 #endif
 }
@@ -1287,15 +1267,13 @@ PUSH(SV *obj, ...)
     CODE:
         dTHXc;
         SV *sobj = S_sharedsv_from_obj(aTHX_ obj);
-        int ii;
-        for (ii = 1; ii < items; ii++) {
-            SV* tmp = newSVsv(ST(ii));
+        int i;
+        for (i = 1; i < items; i++) {
+            SV* tmp = newSVsv(ST(i));
             SV *stmp;
-            U32 dualvar_flags = S_get_dualvar_flags(aTHX_ tmp);
             ENTER_LOCK;
             stmp = S_sharedsv_new_shared(aTHX_ tmp);
             sharedsv_scalar_store(aTHX_ tmp, stmp);
-            SvFLAGS(stmp) |= dualvar_flags;
             SHARED_CONTEXT;
             av_push((AV*) sobj, stmp);
             SvREFCNT_inc_void(stmp);
@@ -1309,19 +1287,17 @@ UNSHIFT(SV *obj, ...)
     CODE:
         dTHXc;
         SV *sobj = S_sharedsv_from_obj(aTHX_ obj);
-        int ii;
+        int i;
         ENTER_LOCK;
         SHARED_CONTEXT;
         av_unshift((AV*)sobj, items - 1);
         CALLER_CONTEXT;
-        for (ii = 1; ii < items; ii++) {
-            SV *tmp = newSVsv(ST(ii));
-            U32 dualvar_flags = S_get_dualvar_flags(aTHX_ tmp);
+        for (i = 1; i < items; i++) {
+            SV *tmp = newSVsv(ST(i));
             SV *stmp = S_sharedsv_new_shared(aTHX_ tmp);
             sharedsv_scalar_store(aTHX_ tmp, stmp);
             SHARED_CONTEXT;
-            SvFLAGS(stmp) |= dualvar_flags;
-            av_store((AV*) sobj, ii - 1, stmp);
+            av_store((AV*) sobj, i - 1, stmp);
             SvREFCNT_inc_void(stmp);
             CALLER_CONTEXT;
             SvREFCNT_dec(tmp);
@@ -1671,7 +1647,7 @@ cond_broadcast(SV *myref)
 
 
 void
-bless(SV* myref, ...)
+bless(SV* myref, ...);
     PROTOTYPE: $;$
     PREINIT:
         HV* stash;
