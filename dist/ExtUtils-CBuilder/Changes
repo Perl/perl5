@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280209 - 2012-10-20 (Perl v5.17.5)
+
+  Fixed:
+
+  - Allow options to be passed to prelink in Windows (perl #115100)
+    [Eric Brine]
+
 0.280208 - 2012-06-20 (Perl v5.17.1)
 
   Fixed:
