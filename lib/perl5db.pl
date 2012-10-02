@@ -2157,16 +2157,7 @@ If level is specified, set C<$trace_to_depth>.
 
 =cut
 
-                if (my ($levels) = $cmd =~ /\At(?:\s+(\d+))?\z/) {
-                    $trace ^= 1;
-                    local $\ = '';
-                    $trace_to_depth = $levels ? $stack_depth + $levels : 1E9;
-                    print $OUT "Trace = "
-                      . ( ( $trace & 1 )
-                      ? ( $levels ? "on (to level $trace_to_depth)" : "on" )
-                      : "off" ) . "\n";
-                    next CMD;
-                }
+                $obj->_handle_t_command();
 
 =head4 C<S> - list subroutines matching/not matching a pattern
 
@@ -3649,6 +3640,21 @@ number information, and print that.
             $self->_my_print_lineinfo($i, $incr_pos);
         } ## end for ($i = $line + 1 ; $i...
     } ## end else [ if ($slave_editor)
+
+    return;
+}
+
+sub _handle_t_command {
+    if (my ($levels) = $DB::cmd =~ /\At(?:\s+(\d+))?\z/) {
+        $DB::trace ^= 1;
+        local $\ = '';
+        $DB::trace_to_depth = $levels ? $DB::stack_depth + $levels : 1E9;
+        print {$DB::OUT} "Trace = "
+        . ( ( $DB::trace & 1 )
+            ? ( $levels ? "on (to level $DB::trace_to_depth)" : "on" )
+            : "off" ) . "\n";
+        next CMD;
+    }
 
     return;
 }
