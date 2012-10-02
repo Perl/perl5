@@ -1214,7 +1214,7 @@ use vars qw($pidprompt);
 $pidprompt = '';
 
 # Sets up $emacs as a synonym for $slave_editor.
-use vars qw($slave_editor);
+our ($slave_editor);
 *emacs = $slave_editor if $slave_editor;    # May be used in afterinit()...
 
 =head2 READING THE RC FILE
@@ -3547,7 +3547,7 @@ sub _DB__grab_control
     my $self = shift;
 
     # Yes, grab control.
-    if ($DB::slave_editor) {
+    if ($slave_editor) {
 
         # Tell the editor to update its position.
         $self->position("\032\032${DB::filename}:$line:0\n");
