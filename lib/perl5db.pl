@@ -636,7 +636,6 @@ use vars qw(
     %dbline
     $dieLevel
     $filename
-    $frame
     $hist
     $histfile
     $histsize
@@ -644,7 +643,6 @@ use vars qw(
     $inhibit_exit
     @ini_INC
     $ini_warn
-    $line
     $maxtrace
     $od
     $onetimedumpDepth
@@ -676,7 +674,9 @@ use vars qw(
     $window
 );
 
-our ($trace, $single, $signal, $ImmediateStop, $evalarg, $onetimeDump, $OUT, );
+our ($trace, $single, $signal, $ImmediateStop, $evalarg, $onetimeDump,
+    $OUT, $frame, $line,
+);
 
 # Used to save @ARGV and extract any debugger-related flags.
 use vars qw(@ARGS);
@@ -3520,7 +3520,7 @@ sub _my_print_lineinfo
 {
     my ($self, $i, $incr_pos) = @_;
 
-    if ($DB::frame) {
+    if ($frame) {
         # Print it indented if tracing is on.
         DB::print_lineinfo( ' ' x $stack_depth,
             "$i:\t$DB::dbline[$i]" . $self->after );
@@ -3531,7 +3531,7 @@ sub _my_print_lineinfo
 }
 
 sub _curr_line {
-    return $DB::dbline[$DB::line];
+    return $DB::dbline[$line];
 }
 
 sub _DB__grab_control
@@ -3542,7 +3542,7 @@ sub _DB__grab_control
     if ($DB::slave_editor) {
 
         # Tell the editor to update its position.
-        $self->position("\032\032${DB::filename}:${DB::line}:0\n");
+        $self->position("\032\032${DB::filename}:$line:0\n");
         DB::print_lineinfo($self->position());
     }
 
@@ -3595,27 +3595,27 @@ number information, and print that.
 
         # Break up the prompt if it's really long.
         if ( length($self->prefix()) > 30 ) {
-            $self->position($self->prefix . "$DB::line):\n$DB::line:\t" . $self->_curr_line . $self->after);
+            $self->position($self->prefix . "$line):\n$line:\t" . $self->_curr_line . $self->after);
             $self->prefix("");
             $self->infix(":\t");
         }
         else {
             $self->infix("):\t");
             $self->position(
-                $self->prefix . $DB::line. $self->infix
+                $self->prefix . $line. $self->infix
                 . $self->_curr_line . $self->after
             );
         }
 
         # Print current line info, indenting if necessary.
-        $self->_my_print_lineinfo($DB::line, $self->position);
+        $self->_my_print_lineinfo($line, $self->position);
 
         my $i;
         my $line_i = sub { return $DB::dbline[$i]; };
 
         # Scan forward, stopping at either the end or the next
         # unbreakable line.
-        for ( $i = $DB::line + 1 ; $i <= $DB::max && $line_i->() == 0 ; ++$i )
+        for ( $i = $line + 1 ; $i <= $DB::max && $line_i->() == 0 ; ++$i )
         {    #{ vi
 
             # Drop out on null statements, block closers, and comments.
