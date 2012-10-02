@@ -212,7 +212,8 @@ sub link {
 
   (my $def_base = $spec{def_file}) =~ tr/'"//d;
   $def_base =~ s/\.def$//;
-  $self->prelink( dl_name => $args{module_name},
+  $self->prelink( %args,
+                  dl_name => $args{module_name},
                   dl_file => $def_base,
                   dl_base => $spec{basename} );
 
