@@ -1929,7 +1929,10 @@ If there are any preprompt actions, execute those as well.
 =cut
 
     # If there's an action, do it now.
-    $evalarg = $action, DB::eval() if $action;
+    if ($action) {
+        $evalarg = $action;
+        DB::eval();
+    }
 
     # Are we nested another level (e.g., did we evaluate a function
     # that had a breakpoint in it at the debugger prompt)?
@@ -1944,8 +1947,9 @@ If there are any preprompt actions, execute those as well.
         }
 
         # Complain about too much recursion if we passed the limit.
-        print $OUT $stack_depth . " levels deep in subroutine calls!\n"
-          if $single & 4;
+        if ($single & 4) {
+            print $OUT $stack_depth . " levels deep in subroutine calls!\n";
+        }
 
         # The line we're currently on. Set $incr to -1 to stay here
         # until we get a command that tells us to advance.
