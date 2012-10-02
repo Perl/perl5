@@ -2448,7 +2448,10 @@ so a null command knows what to re-execute.
 
                 # n - next
                 if ($cmd eq 'n') {
-                    end_report(), next CMD if $finished and $level <= 1;
+                    if ($finished and $level <= 1) {
+                        end_report();
+                        next CMD;
+                    }
 
                     # Single step, but don't enter subs.
                     $single = 2;
