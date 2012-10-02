@@ -669,9 +669,7 @@ use vars qw(
     @res
     $rl
     @saved
-    $signal
     $signalLevel
-    $single
     $start
     $sub
     %sub
@@ -682,7 +680,7 @@ use vars qw(
     $window
 );
 
-our ($trace);
+our ($trace, $single, $signal);
 
 # Used to save @ARGV and extract any debugger-related flags.
 use vars qw(@ARGS);
@@ -693,7 +691,7 @@ use vars qw($panic);
 
 # Used to prevent the debugger from running nonstop
 # after a restart
-use vars qw($second_time);
+our ($second_time);
 
 sub _calc_usercontext {
     my ($package) = @_;
@@ -1466,8 +1464,10 @@ to be anyone there to enter commands.
 
 =cut
 
-use vars qw($notty $runnonstop $console $tty $LINEINFO);
+use vars qw($notty $console $tty $LINEINFO);
 use vars qw($lineinfo $doccmd);
+
+our ($runnonstop);
 
 if ($notty) {
     $runnonstop = 1;
@@ -3456,10 +3456,10 @@ sub _DB_on_init__initialize_globals
 
     # Check for whether we should be running continuously or not.
     # _After_ the perl program is compiled, $single is set to 1:
-    if ( $DB::single and not $DB::second_time++ ) {
+    if ( $single and not $second_time++ ) {
 
         # Options say run non-stop. Run until we get an interrupt.
-        if ($DB::runnonstop) {    # Disable until signal
+        if ($runnonstop) {    # Disable until signal
                 # If there's any call stack in place, turn off single
                 # stepping into subs throughout the stack.
             for my $i (0 .. $DB::stack_depth) {
@@ -3467,7 +3467,7 @@ sub _DB_on_init__initialize_globals
             }
 
             # And we are now no longer in single-step mode.
-            $DB::single = 0;
+            $single = 0;
 
             # If we simply returned at this point, we wouldn't get
             # the trace info. Fall on through.
@@ -3478,14 +3478,14 @@ sub _DB_on_init__initialize_globals
 
             # We are supposed to stop here; XXX probably a break.
             $DB::ImmediateStop = 0;    # We've processed it; turn it off
-            $DB::signal        = 1;    # Simulate an interrupt to force
+            $signal        = 1;    # Simulate an interrupt to force
                                    # us into the command loop
         }
     } ## end if ($single and not $second_time...
 
     # If we're in single-step mode, or an interrupt (real or fake)
     # has occurred, turn off non-stop mode.
-    $DB::runnonstop = 0 if $DB::single or $DB::signal;
+    $runnonstop = 0 if $single or $signal;
 
     return;
 }
@@ -3508,7 +3508,7 @@ sub _DB__handle_watch_expressions
             if ( $val ne $DB::old_watch[$n] ) {
 
                 # Yep! Show the difference, and fake an interrupt.
-                $DB::signal = 1;
+                $signal = 1;
                 print {$DB::OUT} <<EOP;
 Watchpoint $n:\t$DB::to_watch[$n] changed:
     old value:\t$DB::old_watch[$n]
@@ -3628,7 +3628,7 @@ number information, and print that.
             last if $line_i->() =~ /^\s*[\;\}\#\n]/;
 
             # Drop out if the user interrupted us.
-            last if $DB::signal;
+            last if $signal;
 
             # Append a newline if the line doesn't have one. Can happen
             # in eval'ed text, for instance.
