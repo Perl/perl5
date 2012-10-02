@@ -27,13 +27,6 @@
 
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
-
-#ifdef DEBUGGING
-#  define YYDEBUG 1
-#else
-#  define YYDEBUG 0
-#endif
-
 #include "perl.h"
 
 typedef unsigned char yytype_uint8;
@@ -44,6 +37,15 @@ typedef signed char yysigned_char;
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #define YYINITDEPTH 200
+
+#ifdef YYDEBUG
+#  undef YYDEBUG
+#endif
+#ifdef DEBUGGING
+#  define YYDEBUG 1
+#else
+#  define YYDEBUG 0
+#endif
 
 #ifndef YY_NULL
 # define YY_NULL 0
