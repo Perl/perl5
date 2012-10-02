@@ -677,11 +677,12 @@ use vars qw(
     %sub
     $subname
     $term
-    $trace
     $usercontext
     $warnLevel
     $window
 );
+
+our ($trace);
 
 # Used to save @ARGV and extract any debugger-related flags.
 use vars qw(@ARGS);
@@ -3493,7 +3494,7 @@ sub _DB__handle_watch_expressions
 {
     my $self = shift;
 
-    if ( $DB::trace & 2 ) {
+    if ( $trace & 2 ) {
         for my $n (0 .. $#DB::to_watch) {
             $DB::evalarg = $DB::to_watch[$n];
             local $DB::onetimeDump;    # Tell DB::eval() to not output results
@@ -3646,11 +3647,11 @@ number information, and print that.
 
 sub _handle_t_command {
     if (my ($levels) = $DB::cmd =~ /\At(?:\s+(\d+))?\z/) {
-        $DB::trace ^= 1;
+        $trace ^= 1;
         local $\ = '';
         $DB::trace_to_depth = $levels ? $DB::stack_depth + $levels : 1E9;
         print {$DB::OUT} "Trace = "
-        . ( ( $DB::trace & 1 )
+        . ( ( $trace & 1 )
             ? ( $levels ? "on (to level $DB::trace_to_depth)" : "on" )
             : "off" ) . "\n";
         next CMD;
