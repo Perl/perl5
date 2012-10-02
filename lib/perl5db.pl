@@ -512,7 +512,7 @@ package DB;
 
 use strict;
 
-BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
+BEGIN {eval 'use IO::Handle'}; # Needed for flush only? breaks under miniperl
 
 BEGIN {
     require feature;
@@ -833,7 +833,7 @@ Each new thread will be announced and the debugger prompt will always inform
 you of each new thread created.  It will also indicate the thread id in which
 we are currently running within the prompt like this:
 
-	[tid] DB<$i>
+    [tid] DB<$i>
 
 Where C<[tid]> is an integer thread id and C<$i> is the familiar debugger
 command prompt.  The prompt will show: C<[0]> when running under threads, but
@@ -853,19 +853,19 @@ C<5.8.6> and debugger version C<1.2.8>.
 =cut
 
 BEGIN {
-  # ensure we can share our non-threaded variables or no-op
-  if ($ENV{PERL5DB_THREADED}) {
-	require threads;
-	require threads::shared;
-	import threads::shared qw(share);
-	$DBGR;
-	share(\$DBGR);
-	lock($DBGR);
-	print "Threads support enabled\n";
-  } else {
-	*lock  = sub(*) {};
-	*share = sub(*) {};
-  }
+    # ensure we can share our non-threaded variables or no-op
+    if ($ENV{PERL5DB_THREADED}) {
+        require threads;
+        require threads::shared;
+        import threads::shared qw(share);
+        $DBGR;
+        share(\$DBGR);
+        lock($DBGR);
+        print "Threads support enabled\n";
+    } else {
+        *lock  = sub(*) {};
+        *share = sub(*) {};
+    }
 }
 
 # These variables control the execution of 'dumpvar.pl'.
@@ -891,7 +891,7 @@ BEGIN {
 
 # without threads, $filename is not defined until DB::DB is called
 foreach my $k (keys (%INC)) {
-	share(\$main::{'_<'.$filename}) if defined $filename;
+    share(\$main::{'_<'.$filename}) if defined $filename;
 };
 
 # Command-line + PERLLIB:
@@ -1470,7 +1470,7 @@ use vars qw($lineinfo $doccmd);
 
 if ($notty) {
     $runnonstop = 1;
-	share($runnonstop);
+    share($runnonstop);
 }
 
 =pod
@@ -1664,8 +1664,8 @@ and if we can.
     # and a I/O description to keep track of.
     $LINEINFO = $OUT     unless defined $LINEINFO;
     $lineinfo = $console unless defined $lineinfo;
-	# share($LINEINFO); # <- unable to share globs
-	share($lineinfo);   #
+    # share($LINEINFO); # <- unable to share globs
+    share($lineinfo);   #
 
 =pod
 
@@ -2081,8 +2081,8 @@ it up.
             chomp($cmd);    # get rid of the annoying extra newline
             push( @hist, $cmd ) if length($cmd) > 1;
             push( @truehist, $cmd );
-			share(@hist);
-			share(@truehist);
+            share(@hist);
+            share(@truehist);
 
             # This is a restart point for commands that didn't arrive
             # via direct user input. It allows us to 'redo PIPE' to
@@ -3733,19 +3733,19 @@ use vars qw($deep);
 # We need to fully qualify the name ("DB::sub") to make "use strict;"
 # happy. -- Shlomi Fish
 sub DB::sub {
-	# Do not use a regex in this subroutine -> results in corrupted memory
-	# See: [perl #66110]
+    # Do not use a regex in this subroutine -> results in corrupted memory
+    # See: [perl #66110]
 
-	# lock ourselves under threads
-	lock($DBGR);
+    # lock ourselves under threads
+    lock($DBGR);
 
     # Whether or not the autoloader was running, a scalar to put the
     # sub's return value in (if needed), and an array to put the sub's
     # return value in (if needed).
     my ( $al, $ret, @ret ) = "";
-	if ($sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
-		print "creating new thread\n";
-	}
+    if ($sub eq 'threads::new' && $ENV{PERL5DB_THREADED}) {
+        print "creating new thread\n";
+    }
 
     # If the last ten characters are '::AUTOLOAD', note we've traced
     # into AUTOLOAD for $sub.
@@ -3841,17 +3841,17 @@ sub DB::sub {
 
     # Scalar context.
     else {
-	if ( defined wantarray ) {
-        no strict 'refs';
-	    # Save the value if it's wanted at all.
-	    $ret = &$sub;
-	}
-	else {
-        no strict 'refs';
-	    # Void return, explicitly.
-	    &$sub;
-	    undef $ret;
-	}
+        if ( defined wantarray ) {
+            no strict 'refs';
+            # Save the value if it's wanted at all.
+            $ret = &$sub;
+        }
+        else {
+            no strict 'refs';
+            # Void return, explicitly.
+            &$sub;
+            undef $ret;
+        }
 
         # Pop the single-step value off the stack.
         $single |= $stack[ $stack_depth-- ];
@@ -3892,16 +3892,16 @@ sub lsub : lvalue {
 
     no strict 'refs';
 
-	# lock ourselves under threads
-	lock($DBGR);
+    # lock ourselves under threads
+    lock($DBGR);
 
     # Whether or not the autoloader was running, a scalar to put the
     # sub's return value in (if needed), and an array to put the sub's
     # return value in (if needed).
     my ( $al, $ret, @ret ) = "";
-	if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
-		print "creating new thread\n";
-	}
+    if ($sub =~ /^threads::new$/ && $ENV{PERL5DB_THREADED}) {
+        print "creating new thread\n";
+    }
 
     # If the last ten characters are C'::AUTOLOAD', note we've traced
     # into AUTOLOAD for $sub.
@@ -4963,7 +4963,7 @@ sub cmd_stop {    # As on ^C, but not signal-safy.
 
 Display the current thread id:
 
-	e
+    e
 
 This could be how (when implemented) to send commands to this thread id (e cmd)
 or that thread id (e tid cmd).
@@ -4973,20 +4973,20 @@ or that thread id (e tid cmd).
 sub cmd_e {
     my $cmd  = shift;
     my $line = shift;
-	unless (exists($INC{'threads.pm'})) {
-		print "threads not loaded($ENV{PERL5DB_THREADED})
-		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
-	} else {
-		my $tid = threads->tid;
-		print "thread id: $tid\n";
-	}
+    unless (exists($INC{'threads.pm'})) {
+        print "threads not loaded($ENV{PERL5DB_THREADED})
+        please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
+    } else {
+        my $tid = threads->tid;
+        print "thread id: $tid\n";
+    }
 } ## end sub cmd_e
 
 =head3 C<cmd_E> - list of thread ids
 
 Display the list of available thread ids:
 
-	E
+    E
 
 This could be used (when implemented) to send commands to all threads (E cmd).
 
@@ -4995,15 +4995,15 @@ This could be used (when implemented) to send commands to all threads (E cmd).
 sub cmd_E {
     my $cmd  = shift;
     my $line = shift;
-	unless (exists($INC{'threads.pm'})) {
-		print "threads not loaded($ENV{PERL5DB_THREADED})
-		please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
-	} else {
-		my $tid = threads->tid;
-		print "thread ids: ".join(', ',
-			map { ($tid == $_->tid ? '<'.$_->tid.'>' : $_->tid) } threads->list
-		)."\n";
-	}
+    unless (exists($INC{'threads.pm'})) {
+        print "threads not loaded($ENV{PERL5DB_THREADED})
+        please run the debugger with PERL5DB_THREADED=1 set in the environment\n";
+    } else {
+        my $tid = threads->tid;
+        print "thread ids: ".join(', ',
+            map { ($tid == $_->tid ? '<'.$_->tid.'>' : $_->tid) } threads->list
+        )."\n";
+    }
 } ## end sub cmd_E
 
 =head3 C<cmd_h> - help command (command)
@@ -6496,8 +6496,8 @@ my $c_pipe = 0;
 sub os2_get_fork_TTY { # A simplification of the following (and works without):
     local $\  = '';
     ( my $name = $0 ) =~ s,^.*[/\\],,s;
-    my %opt = (	title => "Daughter Perl debugger $pids $name",
-		($rl ? (read_by_key => 1) : ()) );
+    my %opt = ( title => "Daughter Perl debugger $pids $name",
+        ($rl ? (read_by_key => 1) : ()) );
     require OS2::Process;
     my ($in, $out, $pid) = eval { OS2::Process::io_term(related => 0, %opt) }
       or return;
@@ -6580,10 +6580,10 @@ sub macosx_get_fork_TTY
 
     return unless $version=$ENV{TERM_PROGRAM_VERSION};
     foreach my $entry (@script_versions) {
-	if ($version>=$entry->[0]) {
-	    $script=$entry->[1];
-	    last;
-	}
+        if ($version>=$entry->[0]) {
+            $script=$entry->[1];
+            last;
+        }
     }
     return unless defined($script);
     return unless open($pipe,'-|','/usr/bin/osascript','-e',$script);
@@ -8354,23 +8354,23 @@ sub methods_via {
     # Extract from all the symbols in this class.
     my $class_ref = do { no strict "refs"; \%{$class . '::'} };
     while (my ($name, $glob) = each %$class_ref) {
-	# references directly in the symbol table are Proxy Constant
-	# Subroutines, and are by their very nature defined
-	# Otherwise, check if the thing is a typeglob, and if it is, it decays
-	# to a subroutine reference, which can be tested by defined.
-	# $glob might also be the value -1  (from sub foo;)
-	# or (say) '$$' (from sub foo ($$);)
-	# \$glob will be SCALAR in both cases.
-	if ((ref $glob || ($glob && ref \$glob eq 'GLOB' && defined &$glob))
-	    && !$seen{$name}++) {
-	    push @to_print, "$prepend$name\n";
-	}
+        # references directly in the symbol table are Proxy Constant
+        # Subroutines, and are by their very nature defined
+        # Otherwise, check if the thing is a typeglob, and if it is, it decays
+        # to a subroutine reference, which can be tested by defined.
+        # $glob might also be the value -1  (from sub foo;)
+        # or (say) '$$' (from sub foo ($$);)
+        # \$glob will be SCALAR in both cases.
+        if ((ref $glob || ($glob && ref \$glob eq 'GLOB' && defined &$glob))
+            && !$seen{$name}++) {
+            push @to_print, "$prepend$name\n";
+        }
     }
 
     {
-	local $\ = '';
-	local $, = '';
-	print $DB::OUT $_ foreach sort @to_print;
+        local $\ = '';
+        local $, = '';
+        print $DB::OUT $_ foreach sort @to_print;
     }
 
     # If the $crawl_upward argument is false, just quit here.
