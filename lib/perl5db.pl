@@ -2050,7 +2050,7 @@ the new command. This is faster, but perhaps a bit more convoluted.
         while (_DB__read_next_cmd($tid))
         {
 
-			share($cmd);
+            share($cmd);
             # ... try to execute the input as debugger commands.
 
             # Don't stop running.
@@ -3303,13 +3303,13 @@ any variables we might want to address in the C<DB> package.
                 $onetimedumpDepth = undef;
             }
             elsif ( $term_pid == $$ ) {
-		eval {		# May run under miniperl, when not available...
+                eval { # May run under miniperl, when not available...
                     STDOUT->flush();
                     STDERR->flush();
-		};
+                };
 
                 # XXX If this is the master pid, print a newline.
-                print $OUT "\n";
+                print {$OUT} "\n";
             }
         } ## end while (($term || &setterm...
 
