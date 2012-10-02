@@ -13925,7 +13925,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	    return NULL;
 	av = *PadlistARRAY(CvPADLIST(cv));
 	sv = *av_fetch(av, targ, FALSE);
-	sv_setsv(name, sv);
+	sv_setsv_flags(name, sv, 0);
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
