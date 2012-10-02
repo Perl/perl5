@@ -2069,7 +2069,7 @@ the new command. This is faster, but perhaps a bit more convoluted.
 
             # Handle continued commands (ending with \):
             if ($cmd =~ s/\\\z/\n/) {
-                $cmd .= &readline("  cont: ");
+                $cmd .= DB::readline("  cont: ");
                 redo CMD;
             }
 
@@ -2085,9 +2085,13 @@ it up.
 =cut
 
             # Empty input means repeat the last command.
-            $cmd =~ /^$/ && ( $cmd = $laststep );
+            if ($cmd eq '') {
+                $cmd = $laststep;
+            }
             chomp($cmd);    # get rid of the annoying extra newline
-            push( @hist, $cmd ) if length($cmd) > 1;
+            if (length($cmd) >= 2) {
+                push( @hist, $cmd );
+            }
             push( @truehist, $cmd );
             share(@hist);
             share(@truehist);
