@@ -2023,23 +2023,29 @@ the new command. This is faster, but perhaps a bit more convoluted.
 
       CMD:
         while (
+            do
+            {
+                # We have a terminal, or can get one ...
+                if (!$term) {
+                    setterm();
+                }
 
-            # We have a terminal, or can get one ...
-            ( $term || setterm() ),
+                # ... and it belogs to this PID or we get one for this PID ...
+                if ($term_pid != $$) {
+                    resetterm(1);
+                }
 
-            # ... and it belogs to this PID or we get one for this PID ...
-            ( $term_pid == $$ or resetterm(1) ),
-
-            # ... and we got a line of command input ...
-            defined(
-                $cmd = &readline(
+                # ... and we got a line of command input ...
+                defined(
+                    $cmd = DB::readline(
                         "$pidprompt $tid DB"
-                      . ( '<' x $level )
-                      . ( $#hist + 1 )
-                      . ( '>' x $level ) . " "
-                )
-            )
-          )
+                        . ( '<' x $level )
+                        . ( $#hist + 1 )
+                        . ( '>' x $level ) . " "
+                    )
+                );
+            }
+        )
         {
 
 			share($cmd);
