@@ -1789,6 +1789,16 @@ sub _DB__determine_if_we_should_break
     } ## end if ($dbline{$line} && ...
 }
 
+sub _DB__is_finished {
+    if ($finished and $level <= 1) {
+        end_report();
+        return 1;
+    }
+    else {
+        return;
+    }
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2366,7 +2376,7 @@ C<$start>) in C<$cmd> to be executed later.
                     $cmd = 'l ' . ($start) . '+';
                 }
 
-=head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, {, {{>
+=head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, E<0x7B>, E<0x7B>E<0x7B>>
 
 In Perl 5.8.0, a realignment of the commands was done to fix up a number of
 problems, most notably that the default case of several commands destroying
@@ -2448,10 +2458,7 @@ so a null command knows what to re-execute.
 
                 # n - next
                 if ($cmd eq 'n') {
-                    if ($finished and $level <= 1) {
-                        end_report();
-                        next CMD;
-                    }
+                    next CMD if _DB__is_finished();
 
                     # Single step, but don't enter subs.
                     $single = 2;
@@ -2473,10 +2480,7 @@ subs. Also saves C<s> as C<$lastcmd>.
 
                     # Get out and restart the command loop if program
                     # has finished.
-                    if ($finished and $level <= 1) {
-                        end_report();
-                        next CMD;
-                    }
+                    next CMD if _DB__is_finished();
 
                     # Single step should enter subs.
                     $single = 1;
@@ -2500,10 +2504,7 @@ in this and all call levels above this one.
 
                     # Hey, show's over. The debugged program finished
                     # executing already.
-                    if ($finished and $level <= 1) {
-                        end_report();
-                        next CMD;
-                    }
+                    next CMD if _DB__is_finished();
 
                     # Capture the place to put a one-time break.
                     $subname = $i;
@@ -2613,10 +2614,7 @@ appropriately, and force us out of the command loop.
                 if ($cmd eq 'r') {
 
                     # Can't do anything if the program's over.
-                    if ($finished and $level <= 1) {
-                        end_report();
-                        next CMD;
-                    }
+                    next CMD if _DB__is_finished();
 
                     # Turn on stack trace.
                     $stack[$stack_depth] |= 1;
