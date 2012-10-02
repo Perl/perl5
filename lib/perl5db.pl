@@ -635,13 +635,11 @@ use vars qw(
     $dbline
     %dbline
     $dieLevel
-    $evalarg
     $filename
     $frame
     $hist
     $histfile
     $histsize
-    $ImmediateStop
     $IN
     $inhibit_exit
     @ini_INC
@@ -649,13 +647,11 @@ use vars qw(
     $line
     $maxtrace
     $od
-    $onetimeDump
     $onetimedumpDepth
     %option
     @options
     $osingle
     $otrace
-    $OUT
     $packname
     $pager
     $post
@@ -680,7 +676,7 @@ use vars qw(
     $window
 );
 
-our ($trace, $single, $signal);
+our ($trace, $single, $signal, $ImmediateStop, $evalarg, $onetimeDump, $OUT, );
 
 # Used to save @ARGV and extract any debugger-related flags.
 use vars qw(@ARGS);
@@ -1749,16 +1745,14 @@ use vars qw(
     $laststep
     $level
     $max
-    @old_watch
     $package
     $rc
     $sh
-    @stack
-    $stack_depth
-    @to_watch
     $try
     $end
 );
+
+our ( $stack_depth, @stack, @to_watch, @old_watch, );
 
 sub _DB__determine_if_we_should_break
 {
@@ -3462,8 +3456,8 @@ sub _DB_on_init__initialize_globals
         if ($runnonstop) {    # Disable until signal
                 # If there's any call stack in place, turn off single
                 # stepping into subs throughout the stack.
-            for my $i (0 .. $DB::stack_depth) {
-                $DB::stack[ $i ] &= ~1;
+            for my $i (0 .. $stack_depth) {
+                $stack[ $i ] &= ~1;
             }
 
             # And we are now no longer in single-step mode.
@@ -3474,10 +3468,10 @@ sub _DB_on_init__initialize_globals
             # return;
         } ## end if ($runnonstop)
 
-        elsif ($DB::ImmediateStop) {
+        elsif ($ImmediateStop) {
 
             # We are supposed to stop here; XXX probably a break.
-            $DB::ImmediateStop = 0;    # We've processed it; turn it off
+            $ImmediateStop = 0;    # We've processed it; turn it off
             $signal        = 1;    # Simulate an interrupt to force
                                    # us into the command loop
         }
@@ -3495,9 +3489,9 @@ sub _DB__handle_watch_expressions
     my $self = shift;
 
     if ( $trace & 2 ) {
-        for my $n (0 .. $#DB::to_watch) {
-            $DB::evalarg = $DB::to_watch[$n];
-            local $DB::onetimeDump;    # Tell DB::eval() to not output results
+        for my $n (0 .. $#to_watch) {
+            $evalarg = $to_watch[$n];
+            local $onetimeDump;    # Tell DB::eval() to not output results
 
             # Fix context DB::eval() wants to return an array, but
             # we need a scalar here.
@@ -3505,16 +3499,16 @@ sub _DB__handle_watch_expressions
             $val = ( ( defined $val ) ? "'$val'" : 'undef' );
 
             # Did it change?
-            if ( $val ne $DB::old_watch[$n] ) {
+            if ( $val ne $old_watch[$n] ) {
 
                 # Yep! Show the difference, and fake an interrupt.
                 $signal = 1;
-                print {$DB::OUT} <<EOP;
-Watchpoint $n:\t$DB::to_watch[$n] changed:
-    old value:\t$DB::old_watch[$n]
+                print {$OUT} <<EOP;
+Watchpoint $n:\t$to_watch[$n] changed:
+    old value:\t$old_watch[$n]
     new value:\t$val
 EOP
-                $DB::old_watch[$n] = $val;
+                $old_watch[$n] = $val;
             } ## end if ($val ne $old_watch...
         } ## end for my $n (0 ..
     } ## end if ($trace & 2)
@@ -3528,7 +3522,7 @@ sub _my_print_lineinfo
 
     if ($DB::frame) {
         # Print it indented if tracing is on.
-        DB::print_lineinfo( ' ' x $DB::stack_depth,
+        DB::print_lineinfo( ' ' x $stack_depth,
             "$i:\t$DB::dbline[$i]" . $self->after );
     }
     else {
@@ -3649,8 +3643,8 @@ sub _handle_t_command {
     if (my ($levels) = $DB::cmd =~ /\At(?:\s+(\d+))?\z/) {
         $trace ^= 1;
         local $\ = '';
-        $DB::trace_to_depth = $levels ? $DB::stack_depth + $levels : 1E9;
-        print {$DB::OUT} "Trace = "
+        $DB::trace_to_depth = $levels ? $stack_depth + $levels : 1E9;
+        print {$OUT} "Trace = "
         . ( ( $trace & 1 )
             ? ( $levels ? "on (to level $DB::trace_to_depth)" : "on" )
             : "off" ) . "\n";
