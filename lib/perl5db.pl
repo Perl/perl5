@@ -1824,6 +1824,14 @@ sub _DB__read_next_cmd
     return defined($cmd);
 }
 
+sub _DB__trim_command_and_return_first_component {
+    $cmd =~ s/\A\s+//s;    # trim annoying leading whitespace
+    $cmd =~ s/\s+\z//s;    # trim annoying trailing whitespace
+
+    $cmd =~ m{\A(\S*)};
+    return $1;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2088,9 +2096,7 @@ it up.
             # via direct user input. It allows us to 'redo PIPE' to
             # re-execute command processing without reading a new command.
           PIPE: {
-                $cmd =~ s/^\s+//s;    # trim annoying leading whitespace
-                $cmd =~ s/\s+$//s;    # trim annoying trailing whitespace
-                my ($i) = split( /\s+/, $cmd );
+                my $i = _DB__trim_command_and_return_first_component();
 
 =head3 COMMAND ALIASES
 
