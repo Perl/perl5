@@ -2470,7 +2470,10 @@ subs. Also saves C<s> as C<$lastcmd>.
 
                     # Get out and restart the command loop if program
                     # has finished.
-                    end_report(), next CMD if $finished and $level <= 1;
+                    if ($finished and $level <= 1) {
+                        end_report();
+                        next CMD;
+                    }
 
                     # Single step should enter subs.
                     $single = 1;
@@ -2494,7 +2497,10 @@ in this and all call levels above this one.
 
                     # Hey, show's over. The debugged program finished
                     # executing already.
-                    end_report(), next CMD if $finished and $level <= 1;
+                    if ($finished and $level <= 1) {
+                        end_report();
+                        next CMD;
+                    }
 
                     # Capture the place to put a one-time break.
                     $subname = $i;
@@ -2604,7 +2610,10 @@ appropriately, and force us out of the command loop.
                 if ($cmd eq 'r') {
 
                     # Can't do anything if the program's over.
-                    end_report(), next CMD if $finished and $level <= 1;
+                    if ($finished and $level <= 1) {
+                        end_report();
+                        next CMD;
+                    }
 
                     # Turn on stack trace.
                     $stack[$stack_depth] |= 1;
