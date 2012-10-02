@@ -4720,7 +4720,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
-	if (SvFAKE(sv)) {
+	if (SvIsCOW(sv)) {
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvLEN(sv);
 	    const STRLEN cur = SvCUR(sv);
