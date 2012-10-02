@@ -1799,6 +1799,31 @@ sub _DB__is_finished {
     }
 }
 
+sub _DB__read_next_cmd
+{
+    my ($tid) = @_;
+
+    # We have a terminal, or can get one ...
+    if (!$term) {
+        setterm();
+    }
+
+    # ... and it belogs to this PID or we get one for this PID ...
+    if ($term_pid != $$) {
+        resetterm(1);
+    }
+
+    # ... and we got a line of command input ...
+    $cmd = DB::readline(
+        "$pidprompt $tid DB"
+        . ( '<' x $level )
+        . ( $#hist + 1 )
+        . ( '>' x $level ) . " "
+    );
+
+    return defined($cmd);
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2022,30 +2047,7 @@ the new command. This is faster, but perhaps a bit more convoluted.
         my $selected;
 
       CMD:
-        while (
-            do
-            {
-                # We have a terminal, or can get one ...
-                if (!$term) {
-                    setterm();
-                }
-
-                # ... and it belogs to this PID or we get one for this PID ...
-                if ($term_pid != $$) {
-                    resetterm(1);
-                }
-
-                # ... and we got a line of command input ...
-                defined(
-                    $cmd = DB::readline(
-                        "$pidprompt $tid DB"
-                        . ( '<' x $level )
-                        . ( $#hist + 1 )
-                        . ( '>' x $level ) . " "
-                    )
-                );
-            }
-        )
+        while (_DB__read_next_cmd($tid))
         {
 
 			share($cmd);
