@@ -674,8 +674,16 @@ use vars qw(
     $window
 );
 
-our ($trace, $single, $signal, $ImmediateStop, $evalarg, $onetimeDump,
-    $OUT, $frame, $line,
+our (
+    $evalarg,
+    $frame,
+    $ImmediateStop,
+    $line,
+    $onetimeDump,
+    $OUT,
+    $signal,
+    $single,
+    $trace,
 );
 
 # Used to save @ARGV and extract any debugger-related flags.
