@@ -128,11 +128,9 @@ __DATA__
 0301 string
 0308 string
 
-03B9 first
-03B9 tail
+03B9 string
 
-03C5 first
-03C5 tail
+03C5 string
 
 2010 string
 D800 first FIRST_SURROGATE
