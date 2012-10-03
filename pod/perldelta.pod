@@ -104,8 +104,14 @@ XXX
 
 =item *
 
-L<Carp> has been upgraded from version 1.26 to 1.27.  The longmess()
-and shortmess() functions are now documented.
+L<Carp> has been upgraded from version 1.26 to 1.27.  The C<longmess()> and
+C<shortmess()> functions are now documented.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280208 to 0.280209.  A
+list of symbols to export can now be passed to C<link()> when on Windows, as on
+other OSes [perl #115100].
 
 =back
 
