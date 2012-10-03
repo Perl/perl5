@@ -646,11 +646,9 @@ use vars qw(
     $maxtrace
     $od
     $onetimedumpDepth
-    %option
     @options
     $osingle
     $otrace
-    $packname
     $pager
     $post
     %postponed
@@ -678,7 +676,9 @@ our (
     $ImmediateStop,
     $line,
     $onetimeDump,
+    %option,
     $OUT,
+    $packname,
     $signal,
     $single,
     %sub,
@@ -1743,7 +1743,6 @@ use vars qw(
     $action
     %alias
     $cmd
-    $doret
     $fall_off_end
     $file
     $filename_ini
@@ -1760,7 +1759,13 @@ use vars qw(
     $end
 );
 
-our ( $stack_depth, @stack, @to_watch, @old_watch, );
+our (
+    $doret,
+    $stack_depth,
+    @stack,
+    @to_watch,
+    @old_watch,
+);
 
 sub _DB__determine_if_we_should_break
 {
@@ -2175,72 +2180,13 @@ Walks through C<%sub>, checking to see whether or not to print the name.
 Since the C<V> command actually processes this, just change this to the
 appropriate C<V> command and fall through.
 
-=cut
-
-                $cmd =~ s/^X\b/V $package/;
-
 =head4 C<V> - list variables
 
 Uses C<dumpvar.pl> to dump out the current values for selected variables.
 
 =cut
 
-                # Bare V commands get the currently-being-debugged package
-                # added.
-                if ($cmd eq "V") {
-                    $cmd = "V $package";
-                }
-
-                # V - show variables in package.
-                if (my ($new_packname, $new_vars_str) =
-                    $cmd =~ /\AV\b\s*(\S+)\s*(.*)/) {
-
-                    # Save the currently selected filehandle and
-                    # force output to debugger's filehandle (dumpvar
-                    # just does "print" for output).
-                    my $savout = select($OUT);
-
-                    # Grab package name and variables to dump.
-                    $packname = $new_packname;
-                    my @vars     = split( ' ', $new_vars_str );
-
-                    # If main::dumpvar isn't here, get it.
-                    do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
-                    if ( defined &main::dumpvar ) {
-
-                        # We got it. Turn off subroutine entry/exit messages
-                        # for the moment, along with return values.
-                        local $frame = 0;
-                        local $doret = -2;
-
-                        # must detect sigpipe failures  - not catching
-                        # then will cause the debugger to die.
-                        eval {
-                            &main::dumpvar(
-                                $packname,
-                                defined $option{dumpDepth}
-                                ? $option{dumpDepth}
-                                : -1,    # assume -1 unless specified
-                                @vars
-                            );
-                        };
-
-                        # The die doesn't need to include the $@, because
-                        # it will automatically get propagated for us.
-                        if ($@) {
-                            die unless $@ =~ /dumpvar print failed/;
-                        }
-                    } ## end if (defined &main::dumpvar)
-                    else {
-
-                        # Couldn't load dumpvar.
-                        print $OUT "dumpvar.pl not available.\n";
-                    }
-
-                    # Restore the output filehandle, and go round again.
-                    select($savout);
-                    next CMD;
-                }
+                $obj->_handle_V_command_and_X_command;
 
 =head4 C<x> - evaluate and print an expression
 
@@ -3663,6 +3609,70 @@ sub _handle_S_command {
                 print $OUT $subname, "\n";
             }
         }
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_V_command_and_X_command {
+
+    $DB::cmd =~ s/^X\b/V $DB::package/;
+
+    # Bare V commands get the currently-being-debugged package
+    # added.
+    if ($DB::cmd eq "V") {
+        $DB::cmd = "V $DB::package";
+    }
+
+    # V - show variables in package.
+    if (my ($new_packname, $new_vars_str) =
+        $DB::cmd =~ /\AV\b\s*(\S+)\s*(.*)/) {
+
+        # Save the currently selected filehandle and
+        # force output to debugger's filehandle (dumpvar
+        # just does "print" for output).
+        my $savout = select($OUT);
+
+        # Grab package name and variables to dump.
+        $packname = $new_packname;
+        my @vars     = split( ' ', $new_vars_str );
+
+        # If main::dumpvar isn't here, get it.
+        do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
+        if ( defined &main::dumpvar ) {
+
+            # We got it. Turn off subroutine entry/exit messages
+            # for the moment, along with return values.
+            local $frame = 0;
+            local $doret = -2;
+
+            # must detect sigpipe failures  - not catching
+            # then will cause the debugger to die.
+            eval {
+                &main::dumpvar(
+                    $packname,
+                    defined $option{dumpDepth}
+                    ? $option{dumpDepth}
+                    : -1,    # assume -1 unless specified
+                    @vars
+                );
+            };
+
+            # The die doesn't need to include the $@, because
+            # it will automatically get propagated for us.
+            if ($@) {
+                die unless $@ =~ /dumpvar print failed/;
+            }
+        } ## end if (defined &main::dumpvar)
+        else {
+
+            # Couldn't load dumpvar.
+            print $OUT "dumpvar.pl not available.\n";
+        }
+
+        # Restore the output filehandle, and go round again.
+        select($savout);
         next CMD;
     }
 
