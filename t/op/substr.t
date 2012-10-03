@@ -787,34 +787,6 @@ ok eval {
     is ref \$x, 'REF', '\substr does not coerce its ref arg just yet';
 }
 
-my $destroyed;
-{ package Class; DESTROY { ++$destroyed; } }
-
-$destroyed = 0;
-{
-    my $x = '';
-    substr($x,0,1) = "";
-    $x = bless({}, 'Class');
-}
-is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
-
-{
-    my $result_3363;
-    sub a_3363 {
-        my ($word, $replace) = @_;
-        my $ref = \substr($word, 0, 1);
-        $$ref = $replace;
-        if ($replace eq "b") {
-            $result_3363 = $word;
-        } else {
-            a_3363($word, "b");
-        }
-    }
-    a_3363($_, "v") for "test";
-
-    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
-}
-
 # Test that UTF8-ness of magic var changing does not confuse substr lvalue
 # assignment.
 # We use overloading for our magic var, but a typeglob would work, too.
@@ -861,3 +833,32 @@ is $o::count, 1, 'assigning utf8 overload to substr lvalue calls ovld 1ce';
 {$b="abcde"; local $k; *k=\substr($b, 2, 1);}
 
 } # sub run_tests - put tests above this line that can run in threads
+
+
+my $destroyed;
+{ package Class; DESTROY { ++$destroyed; } }
+
+$destroyed = 0;
+{
+    my $x = '';
+    substr($x,0,1) = "";
+    $x = bless({}, 'Class');
+}
+is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
+
+{
+    my $result_3363;
+    sub a_3363 {
+        my ($word, $replace) = @_;
+        my $ref = \substr($word, 0, 1);
+        $$ref = $replace;
+        if ($replace eq "b") {
+            $result_3363 = $word;
+        } else {
+            a_3363($word, "b");
+        }
+    }
+    a_3363($_, "v") for "test";
+
+    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
+}
