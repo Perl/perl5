@@ -202,6 +202,8 @@ sub __uni_latin1 {
 sub __clean {
     my ( $expr )= @_;
 
+    #return $expr;
+
     our $parens;
     $parens= qr/ (?> \( (?> (?: (?> [^()]+ ) | (??{ $parens }) )* ) \) ) /x;
 
@@ -477,17 +479,11 @@ sub _optree {
     return $else if !@conds;
 
 
-    my %root;
-    my $node= \%root;
-    my ( $yes_res, $as_code, @vals );
     my $test= $test_type eq 'cp' ? "cp" : "((U8*)s)[$depth]";
-    my $Update= sub {
-        $node->{vals}= [@vals];
-        $node->{test}= $test;
-        $node->{yes}= $yes_res;
-        $node->{depth}= $depth;
-        return $node->{no}= shift;
-    };
+    # first we loop over the possible keys/conditions and find out what they look like
+    # we group conditions with the same optree together.
+    my %dmp_res;
+    my @res_order;
     local $Data::Dumper::Sortkeys=1;
     foreach my $cond ( @conds ) {
 
@@ -496,19 +492,29 @@ sub _optree {
         # convert it to a string with Dumper
         my $res_code= Dumper( $res );
 
-        # either merge in this optree or merge in this value into the current op.
-        if ( !$yes_res || $res_code ne $as_code ) {
-            # initialize/merge in the
-            if ( $yes_res ) {
-                $node= $Update->( {} );
-            }
-            ( $yes_res, $as_code )= ( $res, $res_code );
-            @vals= ( $cond );
-        } else {
-            push @vals, $cond;
+        push @{$dmp_res{$res_code}{vals}}, $cond;
+        if (!$dmp_res{$res_code}{optree}) {
+            $dmp_res{$res_code}{optree}= $res;
+            push @res_order, $res_code;
         }
     }
-    $Update->( $else ); # finalize the optree's else with the value passed in
+
+    # now that we have deduped the optrees we construct a new optree containing the merged
+    # results.
+    my %root;
+    my $node= \%root;
+    foreach my $res_code_idx (0 .. $#res_order) {
+        my $res_code= $res_order[$res_code_idx];
+        $node->{vals}= $dmp_res{$res_code}{vals};
+        $node->{test}= $test;
+        $node->{yes}= $dmp_res{$res_code}{optree};
+        $node->{depth}= $depth;
+        if ($res_code_idx < $#res_order) {
+            $node= $node->{no}= {};
+        } else {
+            $node->{no}= $else;
+        }
+    }
 
     # return the optree.
     return \%root;
