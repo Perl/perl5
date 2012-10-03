@@ -362,6 +362,14 @@ sub new {
                 }
             }
             next;
+        } elsif ($str =~ / ^ do \s+ ( .* ) /x) {
+            die "do '$1' failed: $!$@" if ! do $1 or $@;
+            next;
+        } elsif ($str =~ / ^ & \s* ( .* ) /x) { # user-furnished sub() call
+            my @results = eval "$1";
+            die "eval '$1' failed: $@" if $@;
+            push @{$opt{txt}}, @results;
+            next;
         } else {
             die "Unparsable line: $txt\n";
         }
@@ -1071,10 +1079,21 @@ if ( !caller ) {
 #
 # The subsequent lines give what code points go into the class defined by the
 # macro.  Multiple characters may be specified via a string like "\x0D\x0A",
-# enclosed in quotes.  Otherwise the lines consist of single Unicode code
-# point, prefaced by 0x; or a single range of Unicode code points separated by
-# a minus (and optional space); or a single Unicode property specified in the
-# standard Perl form "\p{...}".
+# enclosed in quotes.  Otherwise the lines consist of one of:
+#   1)  a single Unicode code point, prefaced by 0x
+#   2)  a single range of Unicode code points separated by a minus (and
+#       optional space)
+#   3)  a single Unicode property specified in the standard Perl form
+#       "\p{...}"
+#   4)  a line like 'do path'.  This will do a 'do' on the file given by
+#       'path'.  It is assumed that this does nothing but load subroutines
+#       (See item 5 below).  The reason 'require path' is not used instead is
+#       because 'do' doesn't assume that path is in @INC.
+#   5)  a subroutine call
+#           &pkg::foo(arg1, ...)
+#       where pkg::foo was loaded by a 'do' line (item 4).  The subroutine
+#       returns an array of entries of forms like items 1-3 above.  This
+#       allows more complex inputs than achievable from the other input types.
 #
 # A blank line or one whose first non-blank character is '#' is a comment.
 # The definition of the macro is terminated by a line unlike those described.
