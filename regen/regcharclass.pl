@@ -451,8 +451,12 @@ sub _optree {
     $else= 0  unless defined $else;
     $depth= 0 unless defined $depth;
 
-    my @conds= sort { $a <=> $b } grep { length $_ } keys %$trie;
+    # if we have an emptry string as a key it means we are in an
+    # accepting state and unless we can match further on should
+    # return the value of the '' key.
     if (exists $trie->{''} ) {
+        # we can now update the "else" value, anything failing to match
+        # after this point should return the value from this.
         if ( $ret_type eq 'cp' ) {
             $else= $self->{strs}{ $trie->{''} }{cp}[0];
             $else= sprintf "$self->{val_fmt}", $else if $else > 9;
@@ -464,37 +468,50 @@ sub _optree {
             $else= "len=$depth, $else";
         }
     }
+    # extract the meaningful keys from the trie, filter out '' as
+    # it means we are an accepting state (end of sequence).
+    my @conds= sort { $a <=> $b } grep { length $_ } keys %$trie;
+
+    # if we havent any keys there is no further we can match and we
+    # can return the "else" value.
     return $else if !@conds;
-    my $node= {};
-    my $root= $node;
-    my ( $yes_res, $as_code, @cond );
+
+
+    my %root;
+    my $node= \%root;
+    my ( $yes_res, $as_code, @vals );
     my $test= $test_type eq 'cp' ? "cp" : "((U8*)s)[$depth]";
     my $Update= sub {
-        $node->{vals}= [@cond];
+        $node->{vals}= [@vals];
         $node->{test}= $test;
         $node->{yes}= $yes_res;
         $node->{depth}= $depth;
-        $node->{no}= shift;
+        return $node->{no}= shift;
     };
-    while ( @conds ) {
-        my $cond= shift @conds;
-        my $res=
-          $self->_optree( $trie->{$cond}, $test_type, $ret_type, $else,
-            $depth + 1 );
+    local $Data::Dumper::Sortkeys=1;
+    foreach my $cond ( @conds ) {
+
+        # get the optree for this child/condition
+        my $res= $self->_optree( $trie->{$cond}, $test_type, $ret_type, $else, $depth + 1 );
+        # convert it to a string with Dumper
         my $res_code= Dumper( $res );
+
+        # either merge in this optree or merge in this value into the current op.
         if ( !$yes_res || $res_code ne $as_code ) {
+            # initialize/merge in the
             if ( $yes_res ) {
-                $Update->( {} );
-                $node= $node->{no};
+                $node= $Update->( {} );
             }
             ( $yes_res, $as_code )= ( $res, $res_code );
-            @cond= ( $cond );
+            @vals= ( $cond );
         } else {
-            push @cond, $cond;
+            push @vals, $cond;
         }
     }
-    $Update->( $else );
-    return $root;
+    $Update->( $else ); # finalize the optree's else with the value passed in
+
+    # return the optree.
+    return \%root;
 }
 
 # my $optree= optree(%opts);
