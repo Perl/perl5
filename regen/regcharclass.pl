@@ -1040,7 +1040,7 @@ if ( !caller ) {
         s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
         next unless /\S/;
         chomp;
-        if ( /^([A-Z]+)/ ) {
+        if ( /^[A-Z]/ ) {
             $doit->();  # This starts a new definition; do the previous one
             ( $op, $title )= split /\s*:\s*/, $_, 2;
             @txt= ();
