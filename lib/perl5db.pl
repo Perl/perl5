@@ -666,8 +666,6 @@ use vars qw(
     $signalLevel
     $start
     $sub
-    %sub
-    $subname
     $term
     $usercontext
     $warnLevel
@@ -683,6 +681,8 @@ our (
     $OUT,
     $signal,
     $single,
+    %sub,
+    $subname,
     $trace,
 );
 
@@ -2160,7 +2160,7 @@ If level is specified, set C<$trace_to_depth>.
 
 =cut
 
-                $obj->_handle_t_command();
+                $obj->_handle_t_command;
 
 =head4 C<S> - list subroutines matching/not matching a pattern
 
@@ -2168,29 +2168,7 @@ Walks through C<%sub>, checking to see whether or not to print the name.
 
 =cut
 
-                if (my ($print_all_subs, $should_reverse, $Spatt)
-                    = $cmd =~ /\AS(\s+(!)?(.+))?\z/) {
-                    # $Spatt is the pattern (if any) to use.
-                    # Reverse scan?
-                    my $Srev     = defined $should_reverse;
-                    # No args - print all subs.
-                    my $Snocheck = !defined $print_all_subs;
-
-                    # Need to make these sane here.
-                    local $\ = '';
-                    local $, = '';
-
-                    # Search through the debugger's magical hash of subs.
-                    # If $nocheck is true, just print the sub name.
-                    # Otherwise, check it against the pattern. We then use
-                    # the XOR trick to reverse the condition as required.
-                    foreach $subname ( sort( keys %sub ) ) {
-                        if ( $Snocheck or $Srev ^ ( $subname =~ /$Spatt/ ) ) {
-                            print $OUT $subname, "\n";
-                        }
-                    }
-                    next CMD;
-                }
+                $obj->_handle_S_command;
 
 =head4 C<X> - list variables in current package
 
@@ -3656,6 +3634,35 @@ sub _handle_t_command {
         . ( ( $trace & 1 )
             ? ( $levels ? "on (to level $DB::trace_to_depth)" : "on" )
             : "off" ) . "\n";
+        next CMD;
+    }
+
+    return;
+}
+
+
+sub _handle_S_command {
+    if (my ($print_all_subs, $should_reverse, $Spatt)
+        = $DB::cmd =~ /\AS(\s+(!)?(.+))?\z/) {
+        # $Spatt is the pattern (if any) to use.
+        # Reverse scan?
+        my $Srev     = defined $should_reverse;
+        # No args - print all subs.
+        my $Snocheck = !defined $print_all_subs;
+
+        # Need to make these sane here.
+        local $\ = '';
+        local $, = '';
+
+        # Search through the debugger's magical hash of subs.
+        # If $nocheck is true, just print the sub name.
+        # Otherwise, check it against the pattern. We then use
+        # the XOR trick to reverse the condition as required.
+        foreach $subname ( sort( keys %sub ) ) {
+            if ( $Snocheck or $Srev ^ ( $subname =~ /$Spatt/ ) ) {
+                print $OUT $subname, "\n";
+            }
+        }
         next CMD;
     }
 
