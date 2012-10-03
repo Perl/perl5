@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(105);
+plan(106);
 
 my $rc_filename = '.perldb';
 
@@ -1400,7 +1400,7 @@ sub _calc_trace_wrapper
     );
 }
 
-# Test the a command.
+# Test the 'a' command.
 {
     my $wrapper = DebugWrap->new(
         {
@@ -1420,6 +1420,28 @@ sub _calc_trace_wrapper
         \nVar<Q>=3\n
         #msx,
         "a command is working",
+    );
+}
+
+# Test the 'a' command with no line number.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'n',
+                q/a print "Hello " . (3 * 4) . "\n";/,
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-a-statement-1',
+        }
+    );
+
+    $wrapper->output_like(qr#
+        (?:^Hello\ 12\n.*?){4}
+        #msx,
+        "a command with no line number is working",
     );
 }
 

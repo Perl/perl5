@@ -4150,11 +4150,14 @@ sub cmd_a {
     my $dbline = shift;
 
     # If it's dot (here), or not all digits,  use the current line.
-    $line =~ s/^(\.|(?:[^\d]))/$dbline/;
+    $line =~ s/\A\./$dbline/;
 
     # Should be a line number followed by an expression.
-    if ( $line =~ /^\s*(\d*)\s*(\S.+)/ ) {
-        my ( $lineno, $expr ) = ( $1, $2 );
+    if ( my ($lineno, $expr) = $line =~ /^\s*(\d*)\s*(\S.+)/ ) {
+
+        if (! length($lineno)) {
+            $lineno = $dbline;
+        }
 
         # If we have an expression ...
         if ( length $expr ) {
