@@ -1840,6 +1840,54 @@ sub _DB__trim_command_and_return_first_component {
     return $1;
 }
 
+sub _DB__handle_f_command {
+    if (($file) = $cmd =~ /\Af\b\s*(.*)/) {
+        $file =~ s/\s+$//;
+
+        # help for no arguments (old-style was return from sub).
+        if ( !$file ) {
+            print $OUT
+            "The old f command is now the r command.\n";    # hint
+            print $OUT "The new f command switches filenames.\n";
+            next CMD;
+        } ## end if (!$file)
+
+        # if not in magic file list, try a close match.
+        if ( !defined $main::{ '_<' . $file } ) {
+            if ( ($try) = grep( m#^_<.*$file#, keys %main:: ) ) {
+                {
+                    $try = substr( $try, 2 );
+                    print $OUT "Choosing $try matching '$file':\n";
+                    $file = $try;
+                }
+            } ## end if (($try) = grep(m#^_<.*$file#...
+        } ## end if (!defined $main::{ ...
+
+        # If not successfully switched now, we failed.
+        if ( !defined $main::{ '_<' . $file } ) {
+            print $OUT "No file matching '$file' is loaded.\n";
+            next CMD;
+        }
+
+        # We switched, so switch the debugger internals around.
+        elsif ( $file ne $filename ) {
+            *dbline   = $main::{ '_<' . $file };
+            $max      = $#dbline;
+            $filename = $file;
+            $start    = 1;
+            $cmd      = "l";
+        } ## end elsif ($file ne $filename)
+
+        # We didn't switch; say we didn't.
+        else {
+            print $OUT "Already in $file.\n";
+            next CMD;
+        }
+    }
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2225,49 +2273,7 @@ Just uses C<DB::methods> to determine what methods are available.
 
 =cut
 
-                if (($file) = $cmd =~ /\Af\b\s*(.*)/) {
-                    $file =~ s/\s+$//;
-
-                    # help for no arguments (old-style was return from sub).
-                    if ( !$file ) {
-                        print $OUT
-                          "The old f command is now the r command.\n";    # hint
-                        print $OUT "The new f command switches filenames.\n";
-                        next CMD;
-                    } ## end if (!$file)
-
-                    # if not in magic file list, try a close match.
-                    if ( !defined $main::{ '_<' . $file } ) {
-                        if ( ($try) = grep( m#^_<.*$file#, keys %main:: ) ) {
-                            {
-                                $try = substr( $try, 2 );
-                                print $OUT "Choosing $try matching '$file':\n";
-                                $file = $try;
-                            }
-                        } ## end if (($try) = grep(m#^_<.*$file#...
-                    } ## end if (!defined $main::{ ...
-
-                    # If not successfully switched now, we failed.
-                    if ( !defined $main::{ '_<' . $file } ) {
-                        print $OUT "No file matching '$file' is loaded.\n";
-                        next CMD;
-                    }
-
-                    # We switched, so switch the debugger internals around.
-                    elsif ( $file ne $filename ) {
-                        *dbline   = $main::{ '_<' . $file };
-                        $max      = $#dbline;
-                        $filename = $file;
-                        $start    = 1;
-                        $cmd      = "l";
-                    } ## end elsif ($file ne $filename)
-
-                    # We didn't switch; say we didn't.
-                    else {
-                        print $OUT "Already in $file.\n";
-                        next CMD;
-                    }
-                }
+                _DB__handle_f_command();
 
 =head4 C<.> - return to last-executed line.
 
