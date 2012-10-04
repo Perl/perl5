@@ -1952,6 +1952,116 @@ sub _DB__handle_y_command {
     }
 }
 
+sub _DB__handle_c_command {
+    my ($obj) = @_;
+
+    if (my ($new_i) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
+
+        $obj->i_cmd($new_i);
+
+        # Hey, show's over. The debugged program finished
+        # executing already.
+        next CMD if _DB__is_finished();
+
+        # Capture the place to put a one-time break.
+        $subname = $obj->i_cmd;
+
+        #  Probably not needed, since we finish an interactive
+        #  sub-session anyway...
+        # local $filename = $filename;
+        # local *dbline = *dbline; # XXX Would this work?!
+        #
+        # The above question wonders if localizing the alias
+        # to the magic array works or not. Since it's commented
+        # out, we'll just leave that to speculation for now.
+
+        # If the "subname" isn't all digits, we'll assume it
+        # is a subroutine name, and try to find it.
+        if ( $subname =~ /\D/ ) {    # subroutine name
+            # Qualify it to the current package unless it's
+            # already qualified.
+            $subname = $package . "::" . $subname
+            unless $subname =~ /::/;
+
+            # find_sub will return "file:line_number" corresponding
+            # to where the subroutine is defined; we call find_sub,
+            # break up the return value, and assign it in one
+            # operation.
+            ( $file, $new_i ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
+
+            # Force the line number to be numeric.
+            $obj->i_cmd($new_i + 0);
+
+            # If we got a line number, we found the sub.
+            if ($obj->i_cmd) {
+
+                # Switch all the debugger's internals around so
+                # we're actually working with that file.
+                $filename = $file;
+                *dbline   = $main::{ '_<' . $filename };
+
+                # Mark that there's a breakpoint in this file.
+                $had_breakpoints{$filename} |= 1;
+
+                # Scan forward to the first executable line
+                # after the 'sub whatever' line.
+                $max = $#dbline;
+                my $ii = $obj->i_cmd;
+                ++$ii while $dbline[$ii] == 0 && $ii < $max;
+                $obj->i_cmd($ii);
+            } ## end if ($i)
+
+            # We didn't find a sub by that name.
+            else {
+                print $OUT "Subroutine $subname not found.\n";
+                next CMD;
+            }
+        } ## end if ($subname =~ /\D/)
+
+        # At this point, either the subname was all digits (an
+        # absolute line-break request) or we've scanned through
+        # the code following the definition of the sub, looking
+        # for an executable, which we may or may not have found.
+        #
+        # If $i (which we set $subname from) is non-zero, we
+        # got a request to break at some line somewhere. On
+        # one hand, if there wasn't any real subroutine name
+        # involved, this will be a request to break in the current
+        # file at the specified line, so we have to check to make
+        # sure that the line specified really is breakable.
+        #
+        # On the other hand, if there was a subname supplied, the
+        # preceding block has moved us to the proper file and
+        # location within that file, and then scanned forward
+        # looking for the next executable line. We have to make
+        # sure that one was found.
+        #
+        # On the gripping hand, we can't do anything unless the
+        # current value of $i points to a valid breakable line.
+        # Check that.
+        if ($obj->i_cmd) {
+
+            # Breakable?
+            if ( $dbline[$obj->i_cmd] == 0 ) {
+                print $OUT "Line " . $obj->i_cmd . " not breakable.\n";
+                next CMD;
+            }
+
+            # Yes. Set up the one-time-break sigil.
+            $dbline{$obj->i_cmd} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
+            _enable_breakpoint_temp_enabled_status($filename, $obj->i_cmd);
+        } ## end if ($i)
+
+        # Turn off stack tracing from here up.
+        for my $i (0 .. $stack_depth) {
+            $stack[ $i ] &= ~1;
+        }
+        last CMD;
+    }
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -1966,6 +2076,8 @@ sub DB {
         $tid = eval { "[".threads->tid."]" };
     }
 
+    my $i;
+
     my $obj = DB::Obj->new(
         {
             position => \$position,
@@ -1973,6 +2085,7 @@ sub DB {
             after => \$after,
             explicit_stop => \$explicit_stop,
             infix => \$infix,
+            i_cmd => \$i,
         },
     );
 
@@ -2220,7 +2333,7 @@ it up.
             # via direct user input. It allows us to 'redo PIPE' to
             # re-execute command processing without reading a new command.
           PIPE: {
-                my $i = _DB__trim_command_and_return_first_component();
+                $i = _DB__trim_command_and_return_first_component();
 
 =head3 COMMAND ALIASES
 
@@ -2425,105 +2538,7 @@ in this and all call levels above this one.
 =cut
 
                 # c - start continuous execution.
-                if (($i) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
-
-                    # Hey, show's over. The debugged program finished
-                    # executing already.
-                    next CMD if _DB__is_finished();
-
-                    # Capture the place to put a one-time break.
-                    $subname = $i;
-
-                    #  Probably not needed, since we finish an interactive
-                    #  sub-session anyway...
-                    # local $filename = $filename;
-                    # local *dbline = *dbline; # XXX Would this work?!
-                    #
-                    # The above question wonders if localizing the alias
-                    # to the magic array works or not. Since it's commented
-                    # out, we'll just leave that to speculation for now.
-
-                    # If the "subname" isn't all digits, we'll assume it
-                    # is a subroutine name, and try to find it.
-                    if ( $subname =~ /\D/ ) {    # subroutine name
-                            # Qualify it to the current package unless it's
-                            # already qualified.
-                        $subname = $package . "::" . $subname
-                          unless $subname =~ /::/;
-
-                        # find_sub will return "file:line_number" corresponding
-                        # to where the subroutine is defined; we call find_sub,
-                        # break up the return value, and assign it in one
-                        # operation.
-                        ( $file, $i ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
-
-                        # Force the line number to be numeric.
-                        $i += 0;
-
-                        # If we got a line number, we found the sub.
-                        if ($i) {
-
-                            # Switch all the debugger's internals around so
-                            # we're actually working with that file.
-                            $filename = $file;
-                            *dbline   = $main::{ '_<' . $filename };
-
-                            # Mark that there's a breakpoint in this file.
-                            $had_breakpoints{$filename} |= 1;
-
-                            # Scan forward to the first executable line
-                            # after the 'sub whatever' line.
-                            $max = $#dbline;
-                            ++$i while $dbline[$i] == 0 && $i < $max;
-                        } ## end if ($i)
-
-                        # We didn't find a sub by that name.
-                        else {
-                            print $OUT "Subroutine $subname not found.\n";
-                            next CMD;
-                        }
-                    } ## end if ($subname =~ /\D/)
-
-                    # At this point, either the subname was all digits (an
-                    # absolute line-break request) or we've scanned through
-                    # the code following the definition of the sub, looking
-                    # for an executable, which we may or may not have found.
-                    #
-                    # If $i (which we set $subname from) is non-zero, we
-                    # got a request to break at some line somewhere. On
-                    # one hand, if there wasn't any real subroutine name
-                    # involved, this will be a request to break in the current
-                    # file at the specified line, so we have to check to make
-                    # sure that the line specified really is breakable.
-                    #
-                    # On the other hand, if there was a subname supplied, the
-                    # preceding block has moved us to the proper file and
-                    # location within that file, and then scanned forward
-                    # looking for the next executable line. We have to make
-                    # sure that one was found.
-                    #
-                    # On the gripping hand, we can't do anything unless the
-                    # current value of $i points to a valid breakable line.
-                    # Check that.
-                    if ($i) {
-
-                        # Breakable?
-                        if ( $dbline[$i] == 0 ) {
-                            print $OUT "Line $i not breakable.\n";
-                            next CMD;
-                        }
-
-                        # Yes. Set up the one-time-break sigil.
-                        $dbline{$i} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
-                        _enable_breakpoint_temp_enabled_status($filename, $i);
-                    } ## end if ($i)
-
-                    # Turn off stack tracing from here up.
-                    for my $i (0 .. $stack_depth) {
-                        $stack[ $i ] &= ~1;
-                    }
-                    last CMD;
-                }
+                _DB__handle_c_command($obj);
 
 =head4 C<r> - return from a subroutine
 
@@ -3344,7 +3359,7 @@ sub _init {
 
 {
     no strict 'refs';
-    foreach my $slot_name (qw(after explicit_stop infix position prefix)) {
+    foreach my $slot_name (qw(after explicit_stop infix position prefix i_cmd)) {
         my $slot = $slot_name;
         *{$slot} = sub {
             my $self = shift;
