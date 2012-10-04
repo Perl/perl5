@@ -1748,7 +1748,6 @@ use vars qw(
     $filename_ini
     $finished
     %had_breakpoints
-    $laststep
     $level
     $max
     $package
@@ -1761,6 +1760,7 @@ use vars qw(
 our (
     $doret,
     $incr,
+    $laststep,
     $stack_depth,
     @stack,
     @to_watch,
@@ -2404,16 +2404,7 @@ so a null command knows what to re-execute.
 =cut
 
                 # n - next
-                if ($cmd eq 'n') {
-                    next CMD if _DB__is_finished();
-
-                    # Single step, but don't enter subs.
-                    $single = 2;
-
-                    # Save for empty command (repeat last).
-                    $laststep = $cmd;
-                    last CMD;
-                }
+                $obj->_handle_n_command;
 
 =head4 C<s> - single-step, entering subs
 
@@ -3702,6 +3693,24 @@ sub _handle_dash_command {
         # Generate and execute a "l +" command (handled below).
         $DB::cmd = 'l ' . ($start) . '+';
     }
+    return;
+}
+
+sub _handle_n_command {
+    my ($obj) = @_;
+
+    # n - next
+    if ($DB::cmd eq 'n') {
+        next CMD if DB::_DB__is_finished();
+
+        # Single step, but don't enter subs.
+        $single = 2;
+
+        # Save for empty command (repeat last).
+        $laststep = $DB::cmd;
+        last CMD;
+    }
+
     return;
 }
 
