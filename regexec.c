@@ -5405,13 +5405,20 @@ NULL
 		        
 			ST.c1 = (U8)*STRING(text_node);
 			switch (OP(text_node)) {
-			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
+			    case EXACTF:
+                                ST.c2 = PL_fold[ST.c1];
+                                break;
 			    case EXACTFA:
 			    case EXACTFU_SS:
 			    case EXACTFU_TRICKYFOLD:
-			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
-			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
-			    default: ST.c2 = ST.c1;
+			    case EXACTFU:
+                                ST.c2 = PL_fold_latin1[ST.c1];
+                                break;
+			    case EXACTFL:
+                                ST.c2 = PL_fold_locale[ST.c1];
+                                break;
+			    default:
+                                ST.c2 = ST.c1;
 			}
 		    }
 		}
@@ -5570,7 +5577,7 @@ NULL
                     
                         if this changes back then the macro for IS_TEXT and 
                         friends need to change. */
-		    if (!UTF_PATTERN) {
+		    if (! UTF_PATTERN) {
 			ST.c1 = *s;
 			switch (OP(text_node)) {
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
