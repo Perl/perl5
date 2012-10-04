@@ -29,10 +29,14 @@ BEGIN
   @_ = 1..20;
   is hex(@_), "32", 'bigint hex override provides scalar context';
   is oct(@_), "16", 'bigint oct override provides scalar context';
-  is ref hex(1), 'Math::BigInt',
-    'bigint hex() works when bignum and bigrat are loaded';
-  is ref oct(1), 'Math::BigInt',
-    'bigint oct() works when bignum and bigrat are loaded';
+  SKIP:
+    {
+    skip "no lexical hex/oct", 2 unless $] > 5.009004;
+    is ref hex(1), 'Math::BigInt',
+      'bigint hex() works when bignum and bigrat are loaded';
+    is ref oct(1), 'Math::BigInt',
+      'bigint oct() works when bignum and bigrat are loaded';
+    }
 }
 {
   use bignum;
@@ -42,10 +46,14 @@ BEGIN
   @_ = 1..20;
   is hex(@_), "32", 'bignum hex override provides scalar context';
   is oct(@_), "16", 'bignum oct override provides scalar context';
-  is ref hex(1), 'Math::BigInt',
-    'bignum hex() works when bigint and bigrat are loaded';
-  is ref oct(1), 'Math::BigInt',
-    'bignum oct() works when bigint and bigrat are loaded';
+  SKIP:
+    {
+    skip "no lexical hex/oct", 2 unless $] > 5.009004;
+    is ref hex(1), 'Math::BigInt',
+      'bignum hex() works when bigint and bigrat are loaded';
+    is ref oct(1), 'Math::BigInt',
+      'bignum oct() works when bigint and bigrat are loaded';
+    }
 }
 {
   use bigrat;
@@ -55,10 +63,14 @@ BEGIN
   @_ = 1..20;
   is hex(@_), "32", 'bigrat hex override provides scalar context';
   is oct(@_), "16", 'bigrat oct override provides scalar context';
-  is ref hex(1), 'Math::BigInt',
-    'bigrat hex() works when bignum and bigint are loaded';
-  is ref oct(1), 'Math::BigInt',
-    'bigrat oct() works when bignum and bigint are loaded';
+  SKIP:
+    {
+    skip "no lexical hex/oct", 2 unless $] > 5.009004;
+    is ref hex(1), 'Math::BigInt',
+      'bigrat hex() works when bignum and bigint are loaded';
+    is ref oct(1), 'Math::BigInt',
+      'bigrat oct() works when bignum and bigint are loaded';
+    }
 }
 
 $hex_called = 0;
