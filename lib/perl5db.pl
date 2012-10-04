@@ -2551,18 +2551,7 @@ appropriately, and force us out of the command loop.
 =cut
 
                 # r - return from the current subroutine.
-                if ($cmd eq 'r') {
-
-                    # Can't do anything if the program's over.
-                    next CMD if _DB__is_finished();
-
-                    # Turn on stack trace.
-                    $stack[$stack_depth] |= 1;
-
-                    # Print return value unless the stack is empty.
-                    $doret = $option{PrintRet} ? $stack_depth - 1 : -2;
-                    last CMD;
-                }
+                $obj->_handle_r_command;
 
 =head4 C<T> - stack trace
 
@@ -3731,6 +3720,25 @@ sub _handle_s_command {
     my $self = shift;
 
     return $self->_n_or_s('s', 1);
+}
+
+sub _handle_r_command {
+    my $self = shift;
+    # r - return from the current subroutine.
+    if ($DB::cmd eq 'r') {
+
+        # Can't do anything if the program's over.
+        next CMD if DB::_DB__is_finished();
+
+        # Turn on stack trace.
+        $stack[$stack_depth] |= 1;
+
+        # Print return value unless the stack is empty.
+        $doret = $option{PrintRet} ? $stack_depth - 1 : -2;
+        last CMD;
+    }
+
+    return;
 }
 
 package DB;
