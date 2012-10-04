@@ -2525,38 +2525,43 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 
             little = SvPV_const(float_real, len);
 	    if (SvTAIL(float_real)) {
-		    /* This means that float_real contains an artificial \n on the end
-		     * due to the presence of something like this: /foo$/
-		     * where we can match both "foo" and "foo\n" at the end of the string.
-		     * So we have to compare the end of the string first against the float_real
-		     * without the \n and then against the full float_real with the string.
-		     * We have to watch out for cases where the string might be smaller
-		     * than the float_real or the float_real without the \n.
-		     */
+                    /* This means that float_real contains an artificial \n on
+                     * the end due to the presence of something like this:
+                     * /foo$/ where we can match both "foo" and "foo\n" at the
+                     * end of the string.  So we have to compare the end of the
+                     * string first against the float_real without the \n and
+                     * then against the full float_real with the string.  We
+                     * have to watch out for cases where the string might be
+                     * smaller than the float_real or the float_real without
+                     * the \n. */
 		    char *checkpos= strend - len;
 		    DEBUG_OPTIMISE_r(
 			PerlIO_printf(Perl_debug_log,
 			    "%sChecking for float_real.%s\n",
 			    PL_colors[4], PL_colors[5]));
 		    if (checkpos + 1 < strbeg) {
-			/* can't match, even if we remove the trailing \n string is too short to match */
+                        /* can't match, even if we remove the trailing \n
+                         * string is too short to match */
 			DEBUG_EXECUTE_r(
 			    PerlIO_printf(Perl_debug_log,
 				"%sString shorter than required trailing substring, cannot match.%s\n",
 				PL_colors[4], PL_colors[5]));
 			goto phooey;
 		    } else if (memEQ(checkpos + 1, little, len - 1)) {
-			/* can match, the end of the string matches without the "\n" */
+                        /* can match, the end of the string matches without the
+                         * "\n" */
 			last = checkpos + 1;
 		    } else if (checkpos < strbeg) {
-			/* cant match, string is too short when the "\n" is included */
+                        /* cant match, string is too short when the "\n" is
+                         * included */
 			DEBUG_EXECUTE_r(
 			    PerlIO_printf(Perl_debug_log,
 				"%sString does not contain required trailing substring, cannot match.%s\n",
 				PL_colors[4], PL_colors[5]));
 			goto phooey;
 		    } else if (!multiline) {
-			/* non multiline match, so compare with the "\n" at the end of the string */
+                        /* non multiline match, so compare with the "\n" at the
+                         * end of the string */
 			if (memEQ(checkpos, little, len)) {
 			    last= checkpos;
 			} else {
@@ -2567,7 +2572,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 			    goto phooey;
 			}
 		    } else {
-			/* multiline match, so we have to search for a place where the full string is located */
+                        /* multiline match, so we have to search for a place
+                         * where the full string is located */
 			goto find_last;
 		    }
 	    } else {
@@ -2578,11 +2584,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 			last = strend;	/* matching "$" */
 	    }
 	    if (!last) {
-		/* at one point this block contained a comment which was probably
-		 * incorrect, which said that this was a "should not happen" case.
-		 * Even if it was true when it was written I am pretty sure it is
-		 * not anymore, so I have removed the comment and replaced it with
-		 * this one. Yves */
+                /* at one point this block contained a comment which was
+                 * probably incorrect, which said that this was a "should not
+                 * happen" case.  Even if it was true when it was written I am
+                 * pretty sure it is not anymore, so I have removed the comment
+                 * and replaced it with this one. Yves */
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
 			"String does not contain required substring, cannot match.\n"
