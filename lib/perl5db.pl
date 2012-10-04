@@ -1888,6 +1888,27 @@ sub _DB__handle_f_command {
     return;
 }
 
+sub _DB__handle_dot_command {
+    my ($obj) = @_;
+
+    # . command.
+    if ($cmd eq '.') {
+        $incr = -1;    # stay at current line
+
+        # Reset everything to the old location.
+        $start    = $line;
+        $filename = $filename_ini;
+        *dbline   = $main::{ '_<' . $filename };
+        $max      = $#dbline;
+
+        # Now where are we?
+        print_lineinfo($obj->position());
+        next CMD;
+    }
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2282,20 +2303,7 @@ and then we look up the line in the magical C<%dbline> hash.
 
 =cut
 
-                # . command.
-                if ($cmd eq '.') {
-                    $incr = -1;    # stay at current line
-
-                    # Reset everything to the old location.
-                    $start    = $line;
-                    $filename = $filename_ini;
-                    *dbline   = $main::{ '_<' . $filename };
-                    $max      = $#dbline;
-
-                    # Now where are we?
-                    print_lineinfo($position);
-                    next CMD;
-                }
+        _DB__handle_dot_command($obj);
 
 =head4 C<-> - back one window
 
