@@ -2413,20 +2413,7 @@ subs. Also saves C<s> as C<$lastcmd>.
 
 =cut
 
-                # s - single step.
-                if ($cmd eq 's') {
-
-                    # Get out and restart the command loop if program
-                    # has finished.
-                    next CMD if _DB__is_finished();
-
-                    # Single step should enter subs.
-                    $single = 1;
-
-                    # Save for empty command (repeat last).
-                    $laststep = $cmd;
-                    last CMD;
-                }
+                $obj->_handle_s_command;
 
 =head4 C<c> - run continuously, setting an optional breakpoint
 
@@ -3696,22 +3683,39 @@ sub _handle_dash_command {
     return;
 }
 
-sub _handle_n_command {
-    my ($obj) = @_;
-
+sub _n_or_s_commands_generic {
+    my ($self, $new_val) = @_;
     # n - next
-    if ($DB::cmd eq 'n') {
-        next CMD if DB::_DB__is_finished();
+    next CMD if DB::_DB__is_finished();
 
-        # Single step, but don't enter subs.
-        $single = 2;
+    # Single step, but don't enter subs.
+    $single = $new_val;
 
-        # Save for empty command (repeat last).
-        $laststep = $DB::cmd;
-        last CMD;
+    # Save for empty command (repeat last).
+    $laststep = $DB::cmd;
+    last CMD;
+}
+
+sub _n_or_s {
+    my ($self, $letter, $new_val) = @_;
+
+    if ($DB::cmd eq $letter) {
+        $self->_n_or_s_commands_generic($new_val);
     }
 
     return;
+}
+
+sub _handle_n_command {
+    my $self = shift;
+
+    return $self->_n_or_s('n', 2);
+}
+
+sub _handle_s_command {
+    my $self = shift;
+
+    return $self->_n_or_s('s', 1);
 }
 
 package DB;
