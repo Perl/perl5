@@ -3054,6 +3054,7 @@ dist/bignum/t/infnan.inc		See if bignum with inf/NaN works
 dist/bignum/t/option_a.t		See if bignum a => X works
 dist/bignum/t/option_l.t		See if bignum l => X works
 dist/bignum/t/option_p.t		See if bignum p => X works
+dist/bignum/t/overrides.t		See if global overrides behave
 dist/bignum/t/ratopt_a.t		See if bigrat a => X works
 dist/bignum/t/scope_f.t			See if no bignum works
 dist/bignum/t/scope_i.t			See if no bigint works
