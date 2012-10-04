@@ -662,12 +662,10 @@ use vars qw(
     $rl
     @saved
     $signalLevel
-    $start
     $sub
     $term
     $usercontext
     $warnLevel
-    $window
 );
 
 our (
@@ -681,9 +679,11 @@ our (
     $packname,
     $signal,
     $single,
+    $start,
     %sub,
     $subname,
     $trace,
+    $window,
 );
 
 # Used to save @ARGV and extract any debugger-related flags.
@@ -1748,7 +1748,6 @@ use vars qw(
     $filename_ini
     $finished
     %had_breakpoints
-    $incr
     $laststep
     $level
     $max
@@ -1761,6 +1760,7 @@ use vars qw(
 
 our (
     $doret,
+    $incr,
     $stack_depth,
     @stack,
     @to_watch,
@@ -2315,16 +2315,7 @@ C<$start>) in C<$cmd> to be executed later.
 =cut
 
                 # - - back a window.
-                if ($cmd eq '-') {
-
-                    # back up by a window; go to 1 if back too far.
-                    $start -= $incr + $window + 1;
-                    $start = 1 if $start <= 0;
-                    $incr  = $window - 1;
-
-                    # Generate and execute a "l +" command (handled below).
-                    $cmd = 'l ' . ($start) . '+';
-                }
+                $obj->_handle_dash_command;
 
 =head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, E<0x7B>, E<0x7B>E<0x7B>>
 
@@ -3690,6 +3681,21 @@ sub _handle_V_command_and_X_command {
         next CMD;
     }
 
+    return;
+}
+
+sub _handle_dash_command {
+
+    if ($DB::cmd eq '-') {
+
+        # back up by a window; go to 1 if back too far.
+        $start -= $incr + $window + 1;
+        $start = 1 if $start <= 0;
+        $incr  = $window - 1;
+
+        # Generate and execute a "l +" command (handled below).
+        $DB::cmd = 'l ' . ($start) . '+';
+    }
     return;
 }
 
