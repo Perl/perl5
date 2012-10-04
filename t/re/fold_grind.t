@@ -636,6 +636,27 @@ foreach my $test (sort { numerically } keys %tests) {
           $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|xyz/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
           run_test($eval, "", "");
 
+          # Check that works when the folded character follows something that
+          # is quantified.  This test knows the regex code internals to the
+          # extent that it knows this is a potential problem, and that there
+          # are three different types of quantifiers generated: 1) The thing
+          # being quantified matches a single character; 2) it matches more
+          # than one character, but is fixed width; 3) it can match a variable
+          # number of characters.  (It doesn't know that case 3 shouldn't
+          # matter, since it doesn't do anything special for the character
+          # following the quantifier; nor that some of the different
+          # quantifiers execute the same underlying code, as these tests are
+          # quick, and this insulates these tests from changes in the
+          # implementation.)
+          for my $quantifier ('?', '??', '*', '*?', '+', '+?', '{1,2}', '{1,2}?') {
+            $eval = "my \$c = \"_$lhs\"; my \$p = qr/(?$charset:.$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", "");
+            $eval = "my \$c = \"__$lhs\"; my \$p = qr/(?$charset:(?:..)$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", "");
+            $eval = "my \$c = \"__$lhs\"; my \$p = qr/(?$charset:(?:.|\\R)$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", "");
+          }
+
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             next if $bracketed && @pattern != 1;    # bracketed makes these
                                                     # or's instead of a sequence

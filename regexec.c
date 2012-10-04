@@ -95,6 +95,8 @@ const char* const non_utf8_target_but_utf8_required
 
 #define UTF_PATTERN ((PL_reg_flags & RF_utf8) != 0)
 
+#define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
+
 #ifndef STATIC
 #define	STATIC	static
 #endif
@@ -3271,7 +3273,180 @@ S_clear_backtrack_stack(pTHX_ void *p)
 	Safefree(osl);
     }
 }
+static bool
+S_setup_EXACTISH_ST_c1_c2(pTHX_ regnode *text_node, I32 *c1, I32 *c2)
+{
+    /* This sets up a relatively quick check for the initial part of what must
+     * match after a CURLY-type operation condition (the "B" in A*B), where B
+     * starts with an EXACTish node, <text_node>.  If this check is not met,
+     * the caller knows that it should continue with the loop.  If the check is
+     * met, the caller must see if all of B is met, before making the decision.
+     *
+     * This function sets *<c1> and *<c2> to be the first code point of B.  If
+     * there are two possible such code points (as when the text_node is
+     * folded), *<c2> is set to the second.  If there are more than two (which
+     * happens for some folds), or there is some other complication, these
+     * parameters are set to CHRTEST_VOID, to indicate not to do a quick check:
+     * just try all of B after every time through the loop.
+     *
+     * If the routine determines that there is no possible way for there to be
+     * a match, it returns FALSE.
+     * */
 
+    const bool utf8_target = PL_reg_match_utf8;
+    const U32 uniflags = UTF8_ALLOW_DEFAULT;
+    dVAR;
+
+    /* First byte from the EXACTish node */
+    U8 *pat_byte = (U8*)STRING(text_node);
+
+    if (! UTF_PATTERN) {    /* Not UTF-8: the code point is the byte */
+        *c1 = *pat_byte;
+        if (OP(text_node) == EXACT) {
+            *c2 = *c1;
+        }
+        else if (utf8_target
+                 && HAS_NONLATIN1_FOLD_CLOSURE(*c1)
+                 && (OP(text_node) != EXACTFA || ! isASCII(*c1)))
+        {
+            /* Here, there could be something above Latin1 in the target which
+             * folds to this character in the pattern, which means there are
+             * more than two possible beginnings of B. */
+            *c1 = *c2 = CHRTEST_VOID;
+        }
+        else { /* Here nothing above Latin1 can fold to the pattern character */
+            switch (OP(text_node)) {
+
+                case EXACTFL:   /* /l rules */
+                    *c2 = PL_fold_locale[*c1];
+                    break;
+
+                case EXACTFU_SS: /* This requires special handling: Don't
+                                    shortcut */
+                    *c1 = *c2 = CHRTEST_VOID;
+                    break;
+
+                case EXACTF:
+                    if (! utf8_target) {    /* /d rules */
+                        *c2 = PL_fold[*c1];
+                        break;
+                    }
+                    /* FALLTHROUGH */
+                    /* /u rules for all these.  This happens to work for
+                     * EXACTFA in the ASCII range as nothing in Latin1 folds to
+                     * ASCII */
+                case EXACTFA:
+                case EXACTFU_TRICKYFOLD:
+                case EXACTFU:
+                    *c2 = PL_fold_latin1[*c1];
+                    break;
+
+		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
+            }
+        }
+    }
+    else { /* UTF_PATTERN */
+        if (OP(text_node) == EXACT) {
+            *c2 = *c1 = utf8n_to_uvchr(pat_byte, UTF8_MAXBYTES, 0, uniflags);
+            if (*c1 < 0) {  /* Overflowed what we can handle */
+                *c1 = *c2 = CHRTEST_VOID;
+            }
+            else if (*c1 > 255 && ! utf8_target) {
+                return FALSE; /* Can't possibly match */
+            }
+        }
+        else {
+            if (UTF8_IS_ABOVE_LATIN1(*pat_byte)) {
+
+                /* A multi-character fold is complicated, probably has more
+                 * than two possibilities */
+                if (is_MULTI_CHAR_FOLD_utf8_safe((char*) pat_byte,
+                                        (char*) pat_byte + STR_LEN(text_node)))
+                {
+                    *c1 = *c2 = CHRTEST_VOID;
+                }
+                else {  /* Not a multi-char fold */
+
+                    /* Load the folds hash, if not already done */
+                    SV** listp;
+                    if (! PL_utf8_foldclosures) {
+                        if (! PL_utf8_tofold) {
+                            U8 dummy[UTF8_MAXBYTES+1];
+                            STRLEN dummy_len;
+
+                            /* Force loading this by folding an above-Latin1
+                             * char */
+                            to_utf8_fold((U8*) HYPHEN_UTF8, dummy, &dummy_len);
+                            assert(PL_utf8_tofold); /* Verify that worked */
+                        }
+                        PL_utf8_foldclosures =
+                                         _swash_inversion_hash(PL_utf8_tofold);
+                    }
+
+                    /* The fold closures data structure is a hash with the keys
+                    * being every character that is folded to, like 'k', and
+                    * the values each an array of everything that folds to its
+                    * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+                    if ((! (listp = hv_fetch(PL_utf8_foldclosures,
+                                             (char *) pat_byte,
+                                             UTF8SKIP(pat_byte),
+                                             FALSE))))
+                    {
+                        /* Not found in the hash, therefore there are no folds
+                         * containing it, so there is only a single char
+                         * possible for beginning B */
+                        *c2 = *c1 = utf8n_to_uvchr(pat_byte, STR_LEN(text_node),
+                                                                  0, uniflags);
+                        if (*c1 < 0) {  /* Overflowed what we can handle */
+                            *c1 = *c2 = CHRTEST_VOID;
+                        }
+                    }
+                    else {
+                        AV* list = (AV*) *listp;
+                        if (av_len(list) != 1) {    /* If there aren't exactly
+                                                       two folds to this, have
+                                                       to test B completely */
+                            *c1 = *c2 = CHRTEST_VOID;
+                        }
+                        else {  /* There are two.  Set *c1 and *c2 to them */
+                            SV** c_p = av_fetch(list, 0, FALSE);
+                            if (c_p == NULL) {
+                                Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                            }
+                            *c1 = SvUV(*c_p);
+                            c_p = av_fetch(list, 1, FALSE);
+                            if (c_p == NULL) {
+                                Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                            }
+                            *c2 = SvUV(*c_p);
+                        }
+                    }
+                }
+            }
+            else {
+                /* Get the character represented by the UTF-8-encoded byte */
+                U8 c = (UTF8_IS_INVARIANT(*pat_byte))
+                        ? *pat_byte
+                        : TWO_BYTE_UTF8_TO_UNI(*pat_byte, *(pat_byte+1));
+
+                if (HAS_NONLATIN1_FOLD_CLOSURE(c)
+                    && (OP(text_node) != EXACTFA || ! isASCII(c)))
+                {   /* Something above Latin1 folds to this; hence there are
+                       more than 2 possibilities for B to begin with */
+                    *c1 = *c2 = CHRTEST_VOID;
+                }
+                else {
+                    *c1 = c;
+                    *c2 = (OP(text_node) == EXACTFL)
+                           ? PL_fold_locale[*c1]
+                           : PL_fold_latin1[*c1];
+                }
+            }
+        }
+    }
+
+    return TRUE;
+}
 
 /* returns -1 on failure, $+[0] on success */
 STATIC I32
@@ -5400,26 +5575,12 @@ NULL
 	            	if this changes back then the macro for 
 	            	IS_TEXT and friends need to change.
 	             */
-		    if (PL_regkind[OP(text_node)] == EXACT)
-		    {
-		        
-			ST.c1 = (U8)*STRING(text_node);
-			switch (OP(text_node)) {
-			    case EXACTF:
-                                ST.c2 = PL_fold[ST.c1];
-                                break;
-			    case EXACTFA:
-			    case EXACTFU_SS:
-			    case EXACTFU_TRICKYFOLD:
-			    case EXACTFU:
-                                ST.c2 = PL_fold_latin1[ST.c1];
-                                break;
-			    case EXACTFL:
-                                ST.c2 = PL_fold_locale[ST.c1];
-                                break;
-			    default:
-                                ST.c2 = ST.c1;
-			}
+		    if (PL_regkind[OP(text_node)] == EXACT) {
+                        if (! S_setup_EXACTISH_ST_c1_c2(aTHX_ text_node,
+                                                              &ST.c1, &ST.c2))
+                        {
+                            sayNO;
+                        }
 		    }
 		}
 	    }
@@ -5430,11 +5591,13 @@ NULL
 		    (int)(REPORT_CODE_OFF+(depth*2)),
 		    "", (IV)ST.count)
 		);
-	    if (       !NEXTCHR_IS_EOS
-                    && ST.c1 != CHRTEST_VOID
-		    && nextchr != ST.c1
-		    && nextchr != ST.c2)
-	    {
+	    if (! NEXTCHR_IS_EOS && ST.c1 != CHRTEST_VOID) {
+                const UV c = (utf8_target)
+                              ? utf8n_to_uvchr((U8*)locinput,
+                                               UTF8_MAXBYTES, NULL,
+                                               uniflags)
+                              : nextchr;
+                if (c != (UV) ST.c1 && c != (UV) ST.c2) {
 		/* simulate B failing */
 		DEBUG_OPTIMISE_r(
 		    PerlIO_printf(Perl_debug_log,
@@ -5445,6 +5608,7 @@ NULL
 		state_num = CURLYM_B_fail;
 		goto reenter_switch;
 	    }
+            }
 
 	    if (ST.me->flags) {
 		/* emulate CLOSE: mark current A as captured */
@@ -5567,8 +5731,7 @@ NULL
 			ST.c1 = ST.c2 = CHRTEST_VOID;
 			goto assume_ok_easy;
 		    }
-		    else
-			s = (U8*)STRING(text_node);
+		    else {
                     
                     /*  Currently we only get here when 
                         
@@ -5576,32 +5739,12 @@ NULL
                     
                         if this changes back then the macro for IS_TEXT and 
                         friends need to change. */
-		    if (! UTF_PATTERN) {
-			ST.c1 = *s;
-			switch (OP(text_node)) {
-			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
-			    case EXACTFA:
-			    case EXACTFU_SS:
-			    case EXACTFU_TRICKYFOLD:
-			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
-			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
-			    default: ST.c2 = ST.c1; break;
-			}
-		    }
-		    else { /* UTF_PATTERN */
-			if (IS_TEXTFU(text_node) || IS_TEXTF(text_node)) {
-			     STRLEN ulen;
-			     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-
-			     to_utf8_fold((U8*)s, tmpbuf, &ulen);
-			     ST.c1 = ST.c2 = utf8n_to_uvchr(tmpbuf, UTF8_MAXLEN, 0,
-						    uniflags);
-			}
-			else {
-			    ST.c2 = ST.c1 = utf8n_to_uvchr(s, UTF8_MAXBYTES, 0,
-						     uniflags);
-			}
-		    }
+                        if (! S_setup_EXACTISH_ST_c1_c2(aTHX_ text_node,
+                                                              &ST.c1, &ST.c2))
+                        {
+                            sayNO;
+                        }
+                    }
 		}
 	    }
 	    else
@@ -5781,6 +5924,7 @@ NULL
 		    PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput);
 		}
 	    }
+            sayNO;
 	    assert(0); /* NOTREACHED */
 
 
