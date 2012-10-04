@@ -1,10 +1,16 @@
 =head1 NAME
 
-HISTORY - public release history for Data::Dumper
+Changes - public release history for Data::Dumper
 
 =head1 DESCRIPTION
 
 =over 8
+
+=item 2.136 (Oct 04 2012)
+
+Promote to stable release.
+
+Drop some "register" declarations.
 
 =item 2.135_07 (Aug 06 2012)
 
