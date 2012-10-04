@@ -9,7 +9,7 @@ require Exporter;
 
 use strict;
 use overload;
-require bigint;		# no "use" to avoid callind import
+use bigint ();
 
 ############################################################################## 
 
