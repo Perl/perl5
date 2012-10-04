@@ -5552,8 +5552,7 @@ NULL
 	    * of the quantifier and the EXACT-like node.  -- japhy
 	    */
 
-	    if (ST.min > ST.max) /* XXX make this a compile-time check? */
-		sayNO;
+	    assert(ST.min <= ST.max);
 	    if (HAS_TEXT(next) || JUMPABLE(next)) {
 		U8 *s;
 		regnode *text_node = next;
