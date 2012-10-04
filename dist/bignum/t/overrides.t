@@ -31,7 +31,7 @@ BEGIN
   is oct(@_), "16", 'bigint oct override provides scalar context';
   SKIP:
     {
-    skip "no lexical hex/oct", 2 unless $] > 5.009004;
+    skip "no lexical hex/oct", 2 unless $] > do { no bigint; 5.009004};
     is ref hex(1), 'Math::BigInt',
       'bigint hex() works when bignum and bigrat are loaded';
     is ref oct(1), 'Math::BigInt',
@@ -108,5 +108,5 @@ is $oct_called, 1, 'existing oct overrides are called';
   ::is \&hex, \&bigint::hex, 'bigrat exports same hex as bigint';
   ::is \&oct, \&bigint::oct, 'bigrat exports same oct as bigint';
 }
-is ref hex 0, "", 'hex export is not global';
-is ref oct 0, "", 'oct export is not global';
+is ref(hex 0), "", 'hex export is not global';
+is ref(oct 0), "", 'oct export is not global';
