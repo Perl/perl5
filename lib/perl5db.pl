@@ -1909,6 +1909,49 @@ sub _DB__handle_dot_command {
     return;
 }
 
+sub _DB__handle_y_command {
+    my ($obj) = @_;
+
+    if (my ($match_level, $match_vars)
+        = $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/) {
+
+        # See if we've got the necessary support.
+        eval { require PadWalker; PadWalker->VERSION(0.08) }
+            or &warn(
+            $@ =~ /locate/
+            ? "PadWalker module not found - please install\n"
+            : $@
+        )
+            and next CMD;
+
+        # Load up dumpvar if we don't have it. If we can, that is.
+        do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
+        defined &main::dumpvar
+            or print $OUT "dumpvar.pl not available.\n"
+            and next CMD;
+
+        # Got all the modules we need. Find them and print them.
+        my @vars = split( ' ', $match_vars || '' );
+
+        # Find the pad.
+        my $h = eval { PadWalker::peek_my( ( $match_level || 0 ) + 1 ) };
+
+        # Oops. Can't find it.
+        $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
+
+        # Show the desired vars with dumplex().
+        my $savout = select($OUT);
+
+        # Have dumplex dump the lexicals.
+        dumpvar::dumplex( $_, $h->{$_},
+            defined $option{dumpDepth} ? $option{dumpDepth} : -1,
+            @vars )
+        for sort keys %$h;
+        select($savout);
+        next CMD;
+    }
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2342,44 +2385,7 @@ above the current one and then displays then using C<dumpvar.pl>.
 
 =cut
 
-                if (my ($match_level, $match_vars)
-                    = $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/) {
-
-                    # See if we've got the necessary support.
-                    eval { require PadWalker; PadWalker->VERSION(0.08) }
-                      or &warn(
-                        $@ =~ /locate/
-                        ? "PadWalker module not found - please install\n"
-                        : $@
-                      )
-                      and next CMD;
-
-                    # Load up dumpvar if we don't have it. If we can, that is.
-                    do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
-                    defined &main::dumpvar
-                      or print $OUT "dumpvar.pl not available.\n"
-                      and next CMD;
-
-                    # Got all the modules we need. Find them and print them.
-                    my @vars = split( ' ', $match_vars || '' );
-
-                    # Find the pad.
-                    my $h = eval { PadWalker::peek_my( ( $match_level || 0 ) + 1 ) };
-
-                    # Oops. Can't find it.
-                    $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
-
-                    # Show the desired vars with dumplex().
-                    my $savout = select($OUT);
-
-                    # Have dumplex dump the lexicals.
-                    dumpvar::dumplex( $_, $h->{$_},
-                        defined $option{dumpDepth} ? $option{dumpDepth} : -1,
-                        @vars )
-                      for sort keys %$h;
-                    select($savout);
-                    next CMD;
-                }
+                _DB__handle_y_command($obj);
 
 =head3 COMMANDS NOT WORKING AFTER PROGRAM ENDS
 
