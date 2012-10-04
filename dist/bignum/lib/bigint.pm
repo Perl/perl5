@@ -137,7 +137,7 @@ sub oct(' . $proto . ')' . <<'.';
   {
   my $i = @_ ? $_[0] : $_;
   # oct() should never fall back to decimal
-  return Math::BigInt->from_oct($i) if $i =~ /^(?:0[0-9]|[1-9])/;
+  return Math::BigInt->from_oct($i) if $i =~ s/^(?=0[0-9]|[1-9])/0/;
   Math::BigInt->new($i);
   }
 .
@@ -166,7 +166,7 @@ sub _oct(_)
     unless $$hh{bigint}||$$hh{bignum}||$$hh{bigrat};
   my $i = $_[0];
   # oct() should never fall back to decimal
-  return Math::BigInt->from_oct($i) if $i =~ /^(?:0[0-9]|[1-9])/;
+  return Math::BigInt->from_oct($i) if $i =~ s/^(?=0[0-9]|[1-9])/0/;
   Math::BigInt->new($i);
   }
 .
