@@ -2575,10 +2575,7 @@ Just calls C<DB::cmd_W>.
 
 =cut
 
-                if (my ($arg) = $cmd =~ /\AW\b\s*(.*)/s) {
-                    &cmd_W( 'W', $arg );
-                    next CMD;
-                }
+                $obj->_handle_W_command;
 
 =head4 C</> - search forward for a string in the source
 
@@ -3747,6 +3744,15 @@ sub _handle_T_command {
 sub _handle_w_command {
     if (my ($arg) = $DB::cmd =~ /\Aw\b\s*(.*)/s) {
         DB::cmd_w( 'w', $arg );
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_W_command {
+    if (my ($arg) = $DB::cmd =~ /\AW\b\s*(.*)/s) {
+        DB::cmd_W( 'W', $arg );
         next CMD;
     }
 
