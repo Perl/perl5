@@ -1844,6 +1844,8 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #  define SvRELEASE_IVX_(sv)  /**/
 #endif /* PERL_OLD_COPY_ON_WRITE */
 
+/* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
+   on-write.  */
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
 			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
 			 SVf_OOK|SVf_BREAK|SVf_READONLY)

@@ -66,8 +66,6 @@
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define SV_COW_NEXT_SV(sv)	INT2PTR(SV *,SvUVX(sv))
 #define SV_COW_NEXT_SV_SET(current,next)	SvUV_set(current, PTR2UV(next))
-/* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
-   on-write.  */
 #endif
 
 /* ============================================================================
