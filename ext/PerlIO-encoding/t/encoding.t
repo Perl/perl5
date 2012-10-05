@@ -11,7 +11,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 18;
+use Test::More tests => 22;
 
 my $grk = "grk$$";
 my $utf = "utf$$";
@@ -123,6 +123,70 @@ if (ord('A') == 193) { # EBCDIC
 } else {
     is($dstr, "foo\\xF0\\x80\\x80\\x80bar\n:\\x80foo\n");
 }
+
+# Check that PerlIO::encoding can handle custom encodings that do funny
+# things with the buffer.
+use Encode::Encoding;
+package Extensive {
+ @ISA = Encode::Encoding;
+ __PACKAGE__->Define('extensive');
+ sub encode($$;$) {
+  my ($self,$buf,$chk) = @_;
+  my $leftovers = '';
+  if ($buf =~ /(.*\n)(?!\z)/) {
+    $buf = $1;
+    $leftovers = $';
+  }
+  if ($chk) {
+   my $x = ' ' x 8000;  # prevent realloc from simply extending the buffer
+   $_[1] = ' ' x 8000;  # make SvPVX point elsewhere
+   $_[1] = $leftovers;
+  }
+  $buf;
+ }
+ no warnings 'once'; 
+ *decode = *encode;
+}
+open my $fh, ">:encoding(extensive)", \$buf;
+$fh->autoflush;
+print $fh "doughnut\n";
+print $fh "quaffee\n";
+close $fh;
+is $buf, "doughnut\nquaffee\n", 'buffer realloc during encoding';
+$buf = "Sheila surely shod Sean\nin shoddy shoes.\n";
+open $fh, "<:encoding(extensive)", \$buf;
+is join("", <$fh>), "Sheila surely shod Sean\nin shoddy shoes.\n",
+   'buffer realloc during decoding';
+
+package Globber {
+ no warnings 'once';
+ @ISA = Encode::Encoding;
+ __PACKAGE__->Define('globber');
+ sub encode($$;$) {
+  my ($self,$buf,$chk) = @_;
+  $_[1] = *foo if $chk;
+  $buf;
+ }
+ *decode = *encode;
+}
+
+# Here we just want to test there is no crash.  The actual output is not so
+# important.
+# We need a double eval, as scope unwinding will close the handle,
+# which croaks.
+eval { eval {
+    open my $fh, ">:encoding(globber)", \$buf;
+    print $fh "Agathopous Goodfoot\n";
+    close $fh;
+}; $e = $@};
+like $@||$e, qr/Close with partial character/,
+     'no crash when assigning glob to buffer in encode';
+$buf = "To hymn him who heard her herd herd\n";
+open $fh, "<:encoding(globber)", \$buf;
+my $x = <$fh>;
+close $fh;
+is $x, "To hymn him who heard her herd herd\n",
+     'no crash when assigning glob to buffer in decode';
 
 END {
     1 while unlink($grk, $utf, $fail1, $fail2, $russki, $threebyte);
