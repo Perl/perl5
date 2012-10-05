@@ -1741,6 +1741,8 @@ see what's happening in any given command.
 
 =cut
 
+# $cmd cannot be an our() variable unfortunately (possible perl bug?).
+
 use vars qw(
     $action
     %alias
