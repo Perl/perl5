@@ -1792,7 +1792,7 @@ sub _DB__determine_if_we_should_break
         # see if we should stop. If so, remove the one-time sigil.
         elsif ($stop) {
             $evalarg = "\$DB::signal |= 1 if do {$stop}";
-            &eval;
+            DB::eval();
             # If the breakpoint is temporary, then delete its enabled status.
             if ($dbline{$line} =~ s/;9($|\0)/$1/) {
                 _cancel_breakpoint_temp_enabled_status($filename, $line);
