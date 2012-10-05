@@ -49,24 +49,24 @@ is( $_, 'abcdef', 'concat using $_');
 
     #a\0a\0b
     my $t2 = $a; $t2 .= $uab;
-    eval { like( $t2, qr/$ub/, '... a\0a\0b' ); };
+    ok( eval '$t2 =~ /$ub/', '... a\0a\0b' );
 
     #\0aa\0b
     my $t3 = $ua; $t3 .= $ab;
-    like( $t3, qr/$ub/, '... \0aa\0b' );
+    ok( eval '$t3 =~ /$ub/', '... \0aa\0b' );
 
     my $t4 = $ua; $t4 .= $uab;
-    eval { like( $t4, qr/$ub/, '... \0a\0a\0b' ); };
+    ok( eval '$t4 =~ /$ub/', '... \0a\0a\0b' );
 
     my $t5 = $a; $t5 = $ab . $t5;
     like( $t5, qr/$ub/, '... a\0ba' );
 
     my $t6 = $a; $t6 = $uab . $t6;
-    eval { like( $t6, qr/$ub/, '... \0a\0ba' ); };
+    ok( eval '$t6 =~ /$ub/', '... \0a\0ba' );
 
     my $t7 = $ua; $t7 = $ab . $t7;
     like( $t7, qr/$ub/, '... a\0b\0a' );
 
     my $t8 = $ua; $t8 = $uab . $t8;
-    eval { like( $t8, qr/$ub/, '... \0a\0b\0a' ); };
+    ok( eval '$t8 =~ /$ub/', '... \0a\0b\0a' );
 }
