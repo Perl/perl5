@@ -1380,7 +1380,9 @@ back into the appropriate spots in the debugger.
 
 =cut
 
-use vars qw(@hist @truehist %postponed_file @typeahead);
+use vars qw(@truehist %postponed_file @typeahead);
+
+our (@hist);
 
 sub _restore_shared_globals_after_restart
 {
@@ -1751,7 +1753,6 @@ use vars qw(
     $level
     $max
     $package
-    $rc
     $sh
     $try
     $end
@@ -1761,6 +1762,7 @@ our (
     $doret,
     $incr,
     $laststep,
+    $rc,
     $stack_depth,
     @stack,
     @to_watch,
@@ -2768,25 +2770,7 @@ into C<$cmd>, and redoes the loop to execute it.
 =cut
 
                 # $rc - recall command.
-                if (my ($minus, $arg) = $cmd =~ m#\A$rc+\s*(-)?(\d+)?\z#) {
-
-                    # No arguments, take one thing off history.
-                    pop(@hist) if length($cmd) > 1;
-
-                    # Relative (- found)?
-                    #  Y - index back from most recent (by 1 if bare minus)
-                    #  N - go to that particular command slot or the last
-                    #      thing if nothing following.
-                    $i = $minus ? ( $#hist - ( $arg || 1 ) ) : ( $arg || $#hist );
-
-                    # Pick out the command desired.
-                    $cmd = $hist[$i];
-
-                    # Print the command to be executed and restart the loop
-                    # with that command in the buffer.
-                    print $OUT $cmd, "\n";
-                    redo CMD;
-                }
+                $obj->_handle_rc_recall_command;
 
 =head4 C<$sh$sh> - C<system()> command
 
@@ -3787,6 +3771,35 @@ sub _handle_W_command {
     if (my ($arg) = $DB::cmd =~ /\AW\b\s*(.*)/s) {
         DB::cmd_W( 'W', $arg );
         next CMD;
+    }
+
+    return;
+}
+
+sub _handle_rc_recall_command {
+    my $self = shift;
+
+    # $rc - recall command.
+    if (my ($minus, $arg) = $DB::cmd =~ m#\A$rc+\s*(-)?(\d+)?\z#) {
+
+        # No arguments, take one thing off history.
+        pop(@hist) if length($DB::cmd) > 1;
+
+        # Relative (- found)?
+        #  Y - index back from most recent (by 1 if bare minus)
+        #  N - go to that particular command slot or the last
+        #      thing if nothing following.
+        my $new_i = $minus ? ( $#hist - ( $arg || 1 ) ) : ( $arg || $#hist );
+
+        $self->i_cmd($new_i);
+
+        # Pick out the command desired.
+        $DB::cmd = $hist[$self->i_cmd];
+
+        # Print the command to be executed and restart the loop
+        # with that command in the buffer.
+        print {$OUT} $DB::cmd, "\n";
+        redo CMD;
     }
 
     return;
