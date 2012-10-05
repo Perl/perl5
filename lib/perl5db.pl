@@ -2559,10 +2559,7 @@ Just calls C<DB::print_trace>.
 
 =cut
 
-                if ($cmd eq 'T') {
-                    print_trace( $OUT, 1 );    # skip DB
-                    next CMD;
-                }
+                $obj->_handle_T_command;
 
 =head4 C<w> - List window around current line.
 
@@ -3736,6 +3733,15 @@ sub _handle_r_command {
         # Print return value unless the stack is empty.
         $doret = $option{PrintRet} ? $stack_depth - 1 : -2;
         last CMD;
+    }
+
+    return;
+}
+
+sub _handle_T_command {
+    if ($DB::cmd eq 'T') {
+        DB::print_trace( $OUT, 1 );    # skip DB
+        next CMD;
     }
 
     return;
