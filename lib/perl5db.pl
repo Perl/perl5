@@ -2567,10 +2567,7 @@ Just calls C<DB::cmd_w>.
 
 =cut
 
-                if (my ($arg) = $cmd =~ /\Aw\b\s*(.*)/s) {
-                    &cmd_w( 'w', $arg );
-                    next CMD;
-                }
+                $obj->_handle_w_command;
 
 =head4 C<W> - watch-expression processing.
 
@@ -3741,6 +3738,15 @@ sub _handle_r_command {
 sub _handle_T_command {
     if ($DB::cmd eq 'T') {
         DB::print_trace( $OUT, 1 );    # skip DB
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_w_command {
+    if (my ($arg) = $DB::cmd =~ /\Aw\b\s*(.*)/s) {
+        DB::cmd_w( 'w', $arg );
         next CMD;
     }
 
