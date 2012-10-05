@@ -2149,6 +2149,81 @@ sub _DB__handle_forward_slash_command {
     return;
 }
 
+sub _DB__handle_question_mark_command {
+    my ($obj) = @_;
+
+    # ? - backward pattern search.
+    if (my ($inpat) = $cmd =~ m#\A\?(.*)\z#) {
+
+        # Get the pattern, remove trailing question mark.
+        $inpat =~ s:([^\\])\?$:$1:;
+
+        # If we've got one ...
+        if ( $inpat ne "" ) {
+
+            # Turn off die & warn handlers.
+            local $SIG{__DIE__};
+            local $SIG{__WARN__};
+            eval '$inpat =~ m' . "\a$inpat\a";
+
+            if ( $@ ne "" ) {
+
+                # Ouch. Not good. Print the error.
+                print $OUT $@;
+                next CMD;
+            }
+            $obj->pat($inpat);
+        } ## end if ($inpat ne "")
+
+        # Where we are now is where to stop after wraparound.
+        $end = $start;
+
+        # Don't move away from this line.
+        $incr = -1;
+
+        my $pat = $obj->pat;
+        # Search inside the eval to prevent pattern badness
+        # from killing us.
+        eval {
+            no strict q/vars/;
+            for (;;) {
+                # Back up a line.
+                --$start;
+
+                # Wrap if we pass the first line.
+
+                $start = $max if ($start <= 0);
+
+                # Quit if we get back where we started,
+                last if ($start == $end);
+
+                # Match?
+                if ($dbline[$start] =~ m/$pat/i) {
+                    if ($slave_editor) {
+                        # Yep, follow slave editor requirements.
+                        print $OUT "\032\032$filename:$start:0\n";
+                    }
+                    else {
+                        # Yep, just print normally.
+                        print $OUT "$start:\t",$dbline[$start],"\n";
+                    }
+
+                    # Found, so done.
+                    last;
+                }
+            }
+        };
+
+        # Say we failed if the loop never found anything,
+        if ( $start == $end ) {
+            print {$OUT} "?$pat?: not found\n";
+        }
+        next CMD;
+    }
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2682,70 +2757,7 @@ Same as for C</>, except the loop runs backwards.
 
 =cut
 
-                # ? - backward pattern search.
-                if (my ($inpat) = $cmd =~ m#\A\?(.*)\z#) {
-
-                    # Get the pattern, remove trailing question mark.
-                    $inpat =~ s:([^\\])\?$:$1:;
-
-                    # If we've got one ...
-                    if ( $inpat ne "" ) {
-
-                        # Turn off die & warn handlers.
-                        local $SIG{__DIE__};
-                        local $SIG{__WARN__};
-                        eval '$inpat =~ m' . "\a$inpat\a";
-
-                        if ( $@ ne "" ) {
-
-                            # Ouch. Not good. Print the error.
-                            print $OUT $@;
-                            next CMD;
-                        }
-                        $pat = $inpat;
-                    } ## end if ($inpat ne "")
-
-                    # Where we are now is where to stop after wraparound.
-                    $end = $start;
-
-                    # Don't move away from this line.
-                    $incr = -1;
-
-                    # Search inside the eval to prevent pattern badness
-                    # from killing us.
-                    eval '
-                        no strict q/vars/;
-                        for (;;) {
-                            # Back up a line.
-                            --$start;
-
-                            # Wrap if we pass the first line.
-
-                            $start = $max if ($start <= 0);
-
-                            # Quit if we get back where we started,
-                            last if ($start == $end);
-
-                            # Match?
-                            if ($dbline[$start] =~ m' . "\a$pat\a" . 'i) {
-                                if ($slave_editor) {
-                                    # Yep, follow slave editor requirements.
-                                    print $OUT "\032\032$filename:$start:0\n";
-                                }
-                                else {
-                                    # Yep, just print normally.
-                                    print $OUT "$start:\t",$dbline[$start],"\n";
-                                }
-
-                                # Found, so done.
-                                last;
-                            }
-                        } ';
-
-                    # Say we failed if the loop never found anything,
-                    print $OUT "?$pat?: not found\n" if ( $start == $end );
-                    next CMD;
-                }
+                _DB__handle_question_mark_command($obj);
 
 =head4 C<$rc> - Recall command
 
