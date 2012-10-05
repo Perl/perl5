@@ -786,8 +786,6 @@ try_symbols(qw(
 
 if ($ARGS{PLATFORM} eq 'win32') {
     try_symbols(qw(
-				 setgid
-				 setuid
 				 win32_free_childdir
 				 win32_free_childenv
 				 win32_get_childdir
