@@ -3998,7 +3998,11 @@ PERL_CALLCONV MAGIC *	Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const 
 #define PERL_ARGS_ASSERT_SV_MAGICEXT	\
 	assert(sv)
 
-PERL_CALLCONV SV*	Perl_sv_mortalcopy(pTHX_ SV *const oldsv)
+/* PERL_CALLCONV SV*	Perl_sv_mortalcopy(pTHX_ SV *const oldsv)
+			__attribute__malloc__
+			__attribute__warn_unused_result__; */
+
+PERL_CALLCONV SV*	Perl_sv_mortalcopy_flags(pTHX_ SV *const oldsv, U32 flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 

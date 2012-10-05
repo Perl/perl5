@@ -1805,6 +1805,8 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #define sv_insert(bigstr, offset, len, little, littlelen)		\
 	Perl_sv_insert_flags(aTHX_ (bigstr),(offset), (len), (little),	\
 			     (littlelen), SV_GMAGIC)
+#define sv_mortalcopy(sv) \
+	Perl_sv_mortalcopy_flags(aTHX_ sv, SV_GMAGIC|SV_DO_COW_SVSETSV)
 
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_nomg_utf8_upgrade(dsv, sstr, slen, nsv)	\

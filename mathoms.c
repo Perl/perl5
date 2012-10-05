@@ -93,6 +93,7 @@ PERL_CALLCONV UV Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 PERL_CALLCONV UV Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV SV *Perl_sv_mortalcopy(pTHX_ SV *const oldstr);
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1200,6 +1201,12 @@ Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UTF8_UPPER;
 
     return _to_utf8_upper_flags(p, ustrp, lenp, FALSE, NULL);
+}
+
+SV *
+Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
+{
+    Perl_sv_mortalcopy_flags(aTHX_ oldstr, SV_GMAGIC);
 }
 
 END_EXTERN_C

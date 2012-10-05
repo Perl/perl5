@@ -1314,7 +1314,8 @@ Apd	|void	|sv_magic	|NN SV *const sv|NULLOK SV *const obj|const int how \
 Apd	|MAGIC *|sv_magicext	|NN SV *const sv|NULLOK SV *const obj|const int how \
 				|NULLOK const MGVTBL *const vtbl|NULLOK const char *const name \
 				|const I32 namlen
-ApdaR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
+ApdbamR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
+XpaR	|SV*	|sv_mortalcopy_flags|NULLOK SV *const oldsv|U32 flags
 ApdR	|SV*	|sv_newmortal
 Apd	|SV*	|sv_newref	|NULLOK SV *const sv
 Ap	|char*	|sv_peek	|NULLOK SV* sv

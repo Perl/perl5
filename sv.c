@@ -8225,13 +8225,13 @@ statement boundaries.  See also C<sv_newmortal> and C<sv_2mortal>.
  * permanent location. */
 
 SV *
-Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
+Perl_sv_mortalcopy_flags(pTHX_ SV *const oldstr, U32 flags)
 {
     dVAR;
     SV *sv;
 
     new_SV(sv);
-    sv_setsv(sv,oldstr);
+    sv_setsv_flags(sv,oldstr,flags);
     PUSH_EXTEND_MORTAL__SV_C(sv);
     SvTEMP_on(sv);
     return sv;

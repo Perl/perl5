@@ -3452,6 +3452,12 @@ lexical_import(SV *name, CV *cv)
 	LEAVE;
     }
 
+SV *
+sv_mortalcopy(SV *sv)
+    CODE:
+	RETVAL = SvREFCNT_inc(sv_mortalcopy(sv));
+    OUTPUT:
+	RETVAL
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
