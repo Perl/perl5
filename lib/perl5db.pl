@@ -2062,6 +2062,93 @@ sub _DB__handle_c_command {
     return;
 }
 
+sub _DB__handle_forward_slash_command {
+    my ($obj) = @_;
+
+    # The pattern as a string.
+    use vars qw($inpat);
+
+    if (($inpat) = $cmd =~ m#\A/(.*)\z#) {
+
+        # Remove the final slash.
+        $inpat =~ s:([^\\])/$:$1:;
+
+        # If the pattern isn't null ...
+        if ( $inpat ne "" ) {
+
+            # Turn of warn and die procesing for a bit.
+            local $SIG{__DIE__};
+            local $SIG{__WARN__};
+
+            # Create the pattern.
+            eval 'no strict q/vars/; $inpat =~ m' . "\a$inpat\a";
+            if ( $@ ne "" ) {
+
+                # Oops. Bad pattern. No biscuit.
+                # Print the eval error and go back for more
+                # commands.
+                print $OUT "$@";
+                next CMD;
+            }
+            $obj->pat($inpat);
+        } ## end if ($inpat ne "")
+
+        # Set up to stop on wrap-around.
+        $end = $start;
+
+        # Don't move off the current line.
+        $incr = -1;
+
+        my $pat = $obj->pat;
+
+        # Done in eval so nothing breaks if the pattern
+        # does something weird.
+        eval
+        {
+            no strict q/vars/;
+            for (;;) {
+                # Move ahead one line.
+                ++$start;
+
+                # Wrap if we pass the last line.
+                $start = 1 if ($start > $max);
+
+                # Stop if we have gotten back to this line again,
+                last if ($start == $end);
+
+                # A hit! (Note, though, that we are doing
+                # case-insensitive matching. Maybe a qr//
+                # expression would be better, so the user could
+                # do case-sensitive matching if desired.
+                if ($dbline[$start] =~ m/$pat/i) {
+                    if ($slave_editor) {
+                        # Handle proper escaping in the slave.
+                        print $OUT "\032\032$filename:$start:0\n";
+                    }
+                    else {
+                        # Just print the line normally.
+                        print $OUT "$start:\t",$dbline[$start],"\n";
+                    }
+                    # And quit since we found something.
+                    last;
+                }
+            }
+        };
+
+        if ($@) {
+            warn $@;
+        }
+
+        # If we wrapped, there never was a match.
+        if ( $start == $end ) {
+            print {$OUT} "/$pat/: not found\n";
+        }
+        next CMD;
+    }
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2086,6 +2173,7 @@ sub DB {
             explicit_stop => \$explicit_stop,
             infix => \$infix,
             i_cmd => \$i,
+            pat => \$pat,
         },
     );
 
@@ -2586,76 +2674,7 @@ mess us up.
 
 =cut
 
-                # The pattern as a string.
-                use vars qw($inpat);
-
-                if (($inpat) = $cmd =~ m#\A/(.*)\z#) {
-
-                    # Remove the final slash.
-                    $inpat =~ s:([^\\])/$:$1:;
-
-                    # If the pattern isn't null ...
-                    if ( $inpat ne "" ) {
-
-                        # Turn of warn and die procesing for a bit.
-                        local $SIG{__DIE__};
-                        local $SIG{__WARN__};
-
-                        # Create the pattern.
-                        eval 'no strict q/vars/; $inpat =~ m' . "\a$inpat\a";
-                        if ( $@ ne "" ) {
-
-                            # Oops. Bad pattern. No biscuit.
-                            # Print the eval error and go back for more
-                            # commands.
-                            print $OUT "$@";
-                            next CMD;
-                        }
-                        $pat = $inpat;
-                    } ## end if ($inpat ne "")
-
-                    # Set up to stop on wrap-around.
-                    $end = $start;
-
-                    # Don't move off the current line.
-                    $incr = -1;
-
-                    # Done in eval so nothing breaks if the pattern
-                    # does something weird.
-                    eval '
-                        no strict q/vars/;
-                        for (;;) {
-                            # Move ahead one line.
-                            ++$start;
-
-                            # Wrap if we pass the last line.
-                            $start = 1 if ($start > $max);
-
-                            # Stop if we have gotten back to this line again,
-                            last if ($start == $end);
-
-                            # A hit! (Note, though, that we are doing
-                            # case-insensitive matching. Maybe a qr//
-                            # expression would be better, so the user could
-                            # do case-sensitive matching if desired.
-                            if ($dbline[$start] =~ m' . "\a$pat\a" . 'i) {
-                                if ($slave_editor) {
-                                    # Handle proper escaping in the slave.
-                                    print $OUT "\032\032$filename:$start:0\n";
-                                }
-                                else {
-                                    # Just print the line normally.
-                                    print $OUT "$start:\t",$dbline[$start],"\n";
-                                }
-                                # And quit since we found something.
-                                last;
-                            }
-                         } ';
-
-                    # If we wrapped, there never was a match.
-                    print $OUT "/$pat/: not found\n" if ( $start == $end );
-                    next CMD;
-                }
+                _DB__handle_forward_slash_command($obj);
 
 =head4 C<?> - search backward for a string in the source
 
@@ -3339,7 +3358,9 @@ sub _init {
 
 {
     no strict 'refs';
-    foreach my $slot_name (qw(after explicit_stop infix position prefix i_cmd)) {
+    foreach my $slot_name (qw(
+        after explicit_stop infix pat position prefix i_cmd
+        )) {
         my $slot = $slot_name;
         *{$slot} = sub {
             my $self = shift;
