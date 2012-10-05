@@ -1920,13 +1920,15 @@ sub _DB__handle_y_command {
         = $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/) {
 
         # See if we've got the necessary support.
-        eval { require PadWalker; PadWalker->VERSION(0.08) }
-            or &warn(
-            $@ =~ /locate/
-            ? "PadWalker module not found - please install\n"
-            : $@
-        )
-            and next CMD;
+        if (!eval { require PadWalker; PadWalker->VERSION(0.08) }) {
+            my $Err = $@;
+            DB::warn(
+                $Err =~ /locate/
+                ? "PadWalker module not found - please install\n"
+                : $Err
+            );
+            next CMD;
+        }
 
         # Load up dumpvar if we don't have it. If we can, that is.
         do 'dumpvar.pl' || die $@ unless defined &main::dumpvar;
@@ -1941,16 +1943,21 @@ sub _DB__handle_y_command {
         my $h = eval { PadWalker::peek_my( ( $match_level || 0 ) + 1 ) };
 
         # Oops. Can't find it.
-        $@ and $@ =~ s/ at .*//, &warn($@), next CMD;
+        if (my $Err = $@) {
+            $Err =~ s/ at .*//;
+            DB::warn($Err);
+            next CMD;
+        }
 
         # Show the desired vars with dumplex().
         my $savout = select($OUT);
 
         # Have dumplex dump the lexicals.
-        dumpvar::dumplex( $_, $h->{$_},
-            defined $option{dumpDepth} ? $option{dumpDepth} : -1,
-            @vars )
-        for sort keys %$h;
+        foreach my $key (sort keys %$h) {
+            dumpvar::dumplex( $key, $h->{$key},
+                defined $option{dumpDepth} ? $option{dumpDepth} : -1,
+                @vars );
+        }
         select($savout);
         next CMD;
     }
