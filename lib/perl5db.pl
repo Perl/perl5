@@ -2853,12 +2853,7 @@ Just calls C<runman()> to print the appropriate document.
 
 =cut
 
-                # man, perldoc, doc - show manual pages.
-                if (my ($man_page)
-                    = $cmd =~ /\A(?:man|(?:perl)?doc)\b(?:\s+([^(]*))?\z/) {
-                    runman($man_page);
-                    next CMD;
-                }
+                $obj->_handle_doc_command;
 
 =head4 C<p> - print
 
@@ -3833,6 +3828,19 @@ sub _handle_H_command {
 
         $self->i_cmd($i);
 
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_doc_command {
+    my $self = shift;
+
+    # man, perldoc, doc - show manual pages.
+    if (my ($man_page)
+        = $DB::cmd =~ /\A(?:man|(?:perl)?doc)\b(?:\s+([^(]*))?\z/) {
+        runman($man_page);
         next CMD;
     }
 
