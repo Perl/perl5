@@ -2804,33 +2804,7 @@ If a command is found, it is placed in C<$cmd> and executed via C<redo>.
 
 =cut
 
-                # $rc pattern $rc - find a command in the history.
-                if (my ($arg) = $cmd =~ /\A$rc([^$rc].*)\z/) {
-
-                    # Create the pattern to use.
-                    $pat = "^$arg";
-
-                    # Toss off last entry if length is >1 (and it always is).
-                    pop(@hist) if length($cmd) > 1;
-
-                    # Look backward through the history.
-                    for ( $i = $#hist ; $i ; --$i ) {
-                        # Stop if we find it.
-                        last if $hist[$i] =~ /$pat/;
-                    }
-
-                    if ( !$i ) {
-
-                        # Never found it.
-                        print $OUT "No such command!\n\n";
-                        next CMD;
-                    }
-
-                    # Found it. Put it in the buffer, print it, and process it.
-                    $cmd = $hist[$i];
-                    print $OUT $cmd, "\n";
-                    redo CMD;
-                }
+                $obj->_handle_rc_search_history_command;
 
 =head4 C<$sh> - Invoke a shell
 
@@ -3812,6 +3786,44 @@ sub _handle_rc_recall_command {
     }
 
     return;
+}
+
+sub _handle_rc_search_history_command {
+    my $self = shift;
+
+    # $rc pattern $rc - find a command in the history.
+    if (my ($arg) = $DB::cmd =~ /\A$rc([^$rc].*)\z/) {
+
+        # Create the pattern to use.
+        my $pat = "^$arg";
+        $self->pat($pat);
+
+        # Toss off last entry if length is >1 (and it always is).
+        pop(@hist) if length($DB::cmd) > 1;
+
+        my $i = $self->i_cmd;
+
+        # Look backward through the history.
+        SEARCH_HIST:
+        for ( $i = $#hist ; $i ; --$i ) {
+            # Stop if we find it.
+            last SEARCH_HIST if $hist[$i] =~ /$pat/;
+        }
+
+        $self->i_cmd($i);
+
+        if ( !$self->i_cmd ) {
+
+            # Never found it.
+            print $OUT "No such command!\n\n";
+            next CMD;
+        }
+
+        # Found it. Put it in the buffer, print it, and process it.
+        $DB::cmd = $hist[$self->i_cmd];
+        print $OUT $DB::cmd, "\n";
+        redo CMD;
+    }
 }
 
 package DB;
