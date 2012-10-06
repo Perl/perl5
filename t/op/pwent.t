@@ -96,6 +96,8 @@ if (!defined $where && $Config::Config{useperlio}) {
 	    }
 	}
 	if (@rec) {
+        # see above
+        no warnings 'uninitialized';
 	    push @lines, join (':', @rec) . "\n";
 	}
 	my $data = join '', @lines;
