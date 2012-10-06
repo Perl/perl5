@@ -3100,7 +3100,7 @@ Always sets the SvUTF8 flag to avoid future validity checks even
 if the whole string is the same in UTF-8 as not.
 Returns the number of bytes in the converted string
 
-This is not as a general purpose byte encoding to Unicode interface:
+This is not a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 =for apidoc sv_utf8_upgrade_nomg
@@ -3119,7 +3119,7 @@ Returns the number of bytes in the converted string
 C<sv_utf8_upgrade> and
 C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
 
-This is not as a general purpose byte encoding to Unicode interface:
+This is not a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
 =cut
@@ -3422,7 +3422,7 @@ in a byte, this conversion will fail;
 in this case, either returns false or, if C<fail_ok> is not
 true, croaks.
 
-This is not as a general purpose Unicode to byte encoding interface:
+This is not a general purpose Unicode to byte encoding interface:
 use the Encode extension for that.
 
 =cut
