@@ -6822,7 +6822,7 @@ STATIC I32	S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 #define PERL_ARGS_ASSERT_REGTRY	\
 	assert(reginfo); assert(startposp)
 
-STATIC void	S_to_byte_substr(pTHX_ regexp * prog)
+STATIC bool	S_to_byte_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_TO_BYTE_SUBSTR	\
 	assert(prog)

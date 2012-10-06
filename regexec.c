@@ -37,6 +37,11 @@
 #include "re_top.h"
 #endif
 
+/* At least one required character in the target string is expressible only in
+ * UTF-8. */
+const char* const non_utf8_target_but_utf8_required
+                = "Can't match, because target string needs to be in UTF-8\n";
+
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
@@ -630,14 +635,14 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	    to_utf8_substr(prog);
 	check = prog->check_utf8;
     } else {
-	if (!prog->check_substr && prog->check_utf8)
-	    to_byte_substr(prog);
+	if (!prog->check_substr && prog->check_utf8) {
+	    if (! to_byte_substr(prog)) {
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                        non_utf8_target_but_utf8_required));
+                goto fail;
+            }
+        }
 	check = prog->check_substr;
-    }
-    if (check == &PL_sv_undef) {
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-		"Non-utf8 string cannot match utf8 check string\n"));
-	goto fail;
     }
     if (prog->extflags & RXf_ANCH) {	/* Match at beg-of-str or after \n */
 	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
@@ -2317,11 +2322,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 #ifdef DEBUGGING
 	int did_match = 0;
 #endif
-	if (!(utf8_target ? prog->anchored_utf8 : prog->anchored_substr))
-	    utf8_target ? to_utf8_substr(prog) : to_byte_substr(prog);
-	ch = SvPVX_const(utf8_target ? prog->anchored_utf8 : prog->anchored_substr)[0];
-
 	if (utf8_target) {
+            if (! prog->anchored_utf8) {
+                to_utf8_substr(prog);
+            }
+            ch = SvPVX_const(prog->anchored_utf8)[0];
 	    REXEC_FBC_SCAN(
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
@@ -2331,8 +2336,17 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 			s += UTF8SKIP(s);
 		}
 	    );
+
 	}
 	else {
+            if (! prog->anchored_substr) {
+                if (! to_byte_substr(prog)) {
+                    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                            non_utf8_target_but_utf8_required));
+                    goto phooey;
+                }
+            }
+            ch = SvPVX_const(prog->anchored_substr)[0];
 	    REXEC_FBC_SCAN(
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
@@ -2361,23 +2375,44 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	int did_match = 0;
 #endif
 	if (prog->anchored_substr || prog->anchored_utf8) {
-	    if (!(utf8_target ? prog->anchored_utf8 : prog->anchored_substr))
-		utf8_target ? to_utf8_substr(prog) : to_byte_substr(prog);
-	    must = utf8_target ? prog->anchored_utf8 : prog->anchored_substr;
+	    if (utf8_target) {
+                if (! prog->anchored_utf8) {
+                    to_utf8_substr(prog);
+                }
+                must = prog->anchored_utf8;
+            }
+            else {
+                if (! prog->anchored_substr) {
+                    if (! to_byte_substr(prog)) {
+                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                            non_utf8_target_but_utf8_required));
+                        goto phooey;
+                    }
+                }
+                must = prog->anchored_substr;
+            }
 	    back_max = back_min = prog->anchored_offset;
 	} else {
-	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
-		utf8_target ? to_utf8_substr(prog) : to_byte_substr(prog);
-	    must = utf8_target ? prog->float_utf8 : prog->float_substr;
+	    if (utf8_target) {
+                if (! prog->float_utf8) {
+                    to_utf8_substr(prog);
+                }
+                must = prog->float_utf8;
+            }
+            else {
+                if (! prog->float_substr) {
+                    if (! to_byte_substr(prog)) {
+                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                            non_utf8_target_but_utf8_required));
+                        goto phooey;
+                    }
+                }
+                must = prog->float_substr;
+            }
 	    back_max = prog->float_max_offset;
 	    back_min = prog->float_min_offset;
 	}
-	
 	    
-	if (must == &PL_sv_undef)
-	    /* could not downgrade utf8 check substring, so must fail */
-	    goto phooey;
-
         if (back_min<0) {
 	    last = strend;
 	} else {
@@ -2471,16 +2506,22 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	    STRLEN len;
 	    const char *little;
 
-	    if (utf8_target && !prog->float_utf8)
-		to_utf8_substr(prog);
-	    else if (!utf8_target && !prog->float_substr) {
-		to_byte_substr(prog);
-		if (prog->float_substr == &PL_sv_undef)
-		    /* downgrading failed, but target is not utf8, so
-		     * matching must fail */
-		    goto phooey;
-	    }
-	    float_real = utf8_target ? prog->float_utf8 : prog->float_substr;
+	    if (utf8_target) {
+                if (! prog->float_utf8) {
+                    to_utf8_substr(prog);
+                }
+                float_real = prog->float_utf8;
+            }
+            else {
+                if (! prog->float_substr) {
+                    if (! to_byte_substr(prog)) {
+                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                            non_utf8_target_but_utf8_required));
+                        goto phooey;
+                    }
+                }
+                float_real = prog->float_substr;
+            }
 
             little = SvPV_const(float_real, len);
 	    if (SvTAIL(float_real)) {
@@ -7357,6 +7398,9 @@ restore_pos(pTHX_ void *arg)
 STATIC void
 S_to_utf8_substr(pTHX_ register regexp *prog)
 {
+    /* Converts substr fields in prog from bytes to UTF-8, calling fbm_compile
+     * on the converted value */
+
     int i = 1;
 
     PERL_ARGS_ASSERT_TO_UTF8_SUBSTR;
@@ -7385,9 +7429,12 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
     } while (i--);
 }
 
-STATIC void
+STATIC bool
 S_to_byte_substr(pTHX_ register regexp *prog)
 {
+    /* Converts substr fields in prog from UTF-8 to bytes, calling fbm_compile
+     * on the converted value; returns FALSE if can't be converted. */
+
     dVAR;
     int i = 1;
 
@@ -7397,7 +7444,9 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	if (prog->substrs->data[i].utf8_substr
 	    && !prog->substrs->data[i].substr) {
 	    SV* sv = newSVsv(prog->substrs->data[i].utf8_substr);
-	    if (sv_utf8_downgrade(sv, TRUE)) {
+	    if (! sv_utf8_downgrade(sv, TRUE)) {
+                return FALSE;
+            }
 		if (SvVALID(prog->substrs->data[i].utf8_substr)) {
 		    if (SvTAIL(prog->substrs->data[i].utf8_substr)) {
 			/* Trim the trailing \n that fbm_compile added last
@@ -7407,15 +7456,13 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 		    } else
 			fbm_compile(sv, 0);
 		}
-	    } else {
-		SvREFCNT_dec(sv);
-		sv = &PL_sv_undef;
-	    }
 	    prog->substrs->data[i].substr = sv;
 	    if (prog->substrs->data[i].utf8_substr == prog->check_utf8)
 		prog->check_substr = sv;
 	}
     } while (i--);
+
+    return TRUE;
 }
 
 /* These constants are for finding GCB=LV and GCB=LVT.  These are for the
