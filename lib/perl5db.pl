@@ -636,7 +636,6 @@ use vars qw(
     %dbline
     $dieLevel
     $filename
-    $hist
     $histfile
     $histsize
     $IN
@@ -671,6 +670,7 @@ use vars qw(
 our (
     $evalarg,
     $frame,
+    $hist,
     $ImmediateStop,
     $line,
     $onetimeDump,
@@ -1380,9 +1380,9 @@ back into the appropriate spots in the debugger.
 
 =cut
 
-use vars qw(@truehist %postponed_file @typeahead);
+use vars qw(%postponed_file @typeahead);
 
-our (@hist);
+our (@hist, @truehist);
 
 sub _restore_shared_globals_after_restart
 {
@@ -1757,11 +1757,11 @@ use vars qw(
     $package
     $sh
     $try
-    $end
 );
 
 our (
     $doret,
+    $end,
     $incr,
     $laststep,
     $rc,
@@ -2845,33 +2845,7 @@ Prints the contents of C<@hist> (if any).
 
 =cut
 
-                if ($cmd =~ /\AH\b\s*\*/) {
-                    @hist = @truehist = ();
-                    print $OUT "History cleansed\n";
-                    next CMD;
-                }
-
-                if (my ($num)
-                    = $cmd =~ /\AH\b\s*(?:-(\d+))?/) {
-
-                    # Anything other than negative numbers is ignored by
-                    # the (incorrect) pattern, so this test does nothing.
-                    $end = $num ? ( $#hist - $num ) : 0;
-
-                    # Set to the minimum if less than zero.
-                    $hist = 0 if $hist < 0;
-
-                    # Start at the end of the array.
-                    # Stay in while we're still above the ending value.
-                    # Tick back by one each time around the loop.
-                    for ( $i = $#hist ; $i > $end ; $i-- ) {
-
-                        # Print the command  unless it has no arguments.
-                        print $OUT "$i: ", $hist[$i], "\n"
-                          unless $hist[$i] =~ /^.?$/;
-                    }
-                    next CMD;
-                }
+                $obj->_handle_H_command;
 
 =head4 C<man, doc, perldoc> - look up documentation
 
@@ -3824,6 +3798,45 @@ sub _handle_rc_search_history_command {
         print $OUT $DB::cmd, "\n";
         redo CMD;
     }
+}
+
+sub _handle_H_command {
+    my $self = shift;
+
+    if ($DB::cmd =~ /\AH\b\s*\*/) {
+        @hist = @truehist = ();
+        print $OUT "History cleansed\n";
+        next CMD;
+    }
+
+    if (my ($num)
+        = $DB::cmd =~ /\AH\b\s*(?:-(\d+))?/) {
+
+        # Anything other than negative numbers is ignored by
+        # the (incorrect) pattern, so this test does nothing.
+        $end = $num ? ( $#hist - $num ) : 0;
+
+        # Set to the minimum if less than zero.
+        $hist = 0 if $hist < 0;
+
+        # Start at the end of the array.
+        # Stay in while we're still above the ending value.
+        # Tick back by one each time around the loop.
+        my $i;
+
+        for ( $i = $#hist ; $i > $end ; $i-- ) {
+
+            # Print the command  unless it has no arguments.
+            print $OUT "$i: ", $hist[$i], "\n"
+            unless $hist[$i] =~ /^.?$/;
+        }
+
+        $self->i_cmd($i);
+
+        next CMD;
+    }
+
+    return;
 }
 
 package DB;
