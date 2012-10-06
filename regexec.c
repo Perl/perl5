@@ -5598,16 +5598,16 @@ NULL
                                                uniflags)
                               : nextchr;
                 if (c != (UV) ST.c1 && c != (UV) ST.c2) {
-		/* simulate B failing */
-		DEBUG_OPTIMISE_r(
-		    PerlIO_printf(Perl_debug_log,
-		        "%*s  CURLYM Fast bail c1=%"IVdf" c2=%"IVdf"\n",
-		        (int)(REPORT_CODE_OFF+(depth*2)),"",
-		        (IV)ST.c1,(IV)ST.c2
-		));
-		state_num = CURLYM_B_fail;
-		goto reenter_switch;
-	    }
+                    /* simulate B failing */
+                    DEBUG_OPTIMISE_r(
+                        PerlIO_printf(Perl_debug_log,
+                            "%*s  CURLYM Fast bail c1=%"IVdf" c2=%"IVdf"\n",
+                            (int)(REPORT_CODE_OFF+(depth*2)),"",
+                            (IV)ST.c1,(IV)ST.c2
+                    ));
+                    state_num = CURLYM_B_fail;
+                    goto reenter_switch;
+                }
             }
 
 	    if (ST.me->flags) {
@@ -5686,8 +5686,8 @@ NULL
 	    goto repeat;
 
 	case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
-	    ST.paren = scan->flags;	/* Which paren to set */
-	    ST.lastparen      = rex->lastparen;
+            ST.paren = scan->flags;	/* Which paren to set */
+            ST.lastparen      = rex->lastparen;
 	    ST.lastcloseparen = rex->lastcloseparen;
 	    if (ST.paren > PL_regsize)
 		PL_regsize = ST.paren;
@@ -5857,7 +5857,7 @@ NULL
 			}
 		    }
 		}
-		else {
+		else {  /* Not utf8_target */
 		    if (ST.c1 == ST.c2) {
 			while (locinput <= ST.maxpos &&
 			       UCHARAT(locinput) != ST.c1)
@@ -5939,7 +5939,7 @@ NULL
 					   UTF8_MAXBYTES, 0, uniflags)
 				: (UV) UCHARAT(locinput);
 		/* If it could work, try it. */
-		if (ST.c1 == CHRTEST_VOID
+                if (ST.c1 == CHRTEST_VOID
                     || (locinput < PL_regeol &&
                         (c == (UV)ST.c1 || c == (UV)ST.c2)))
                 {
@@ -6577,10 +6577,9 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	else {
 	    U8 folded;
 
-	    /* Here, the string isn't utf8 and c is a single byte; and either
-	     * the pattern isn't utf8 or c is an invariant, so its utf8ness
-	     * doesn't affect c.  Can just do simple comparisons for exact or
-	     * fold matching. */
+            /* Here, the string isn't utf8; and either the pattern isn't utf8
+             * or c is an invariant, so its utf8ness doesn't affect c.  Can
+             * just do simple comparisons for exact or fold matching. */
 	    switch (OP(p)) {
 		case EXACTF: folded = PL_fold[c]; break;
 		case EXACTFA:
@@ -7607,15 +7606,15 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	    if (! sv_utf8_downgrade(sv, TRUE)) {
                 return FALSE;
             }
-		if (SvVALID(prog->substrs->data[i].utf8_substr)) {
-		    if (SvTAIL(prog->substrs->data[i].utf8_substr)) {
-			/* Trim the trailing \n that fbm_compile added last
-			   time.  */
-			SvCUR_set(sv, SvCUR(sv) - 1);
-			fbm_compile(sv, FBMcf_TAIL);
-		    } else
-			fbm_compile(sv, 0);
-		}
+            if (SvVALID(prog->substrs->data[i].utf8_substr)) {
+                if (SvTAIL(prog->substrs->data[i].utf8_substr)) {
+                    /* Trim the trailing \n that fbm_compile added last
+                        time.  */
+                    SvCUR_set(sv, SvCUR(sv) - 1);
+                    fbm_compile(sv, FBMcf_TAIL);
+                } else
+                    fbm_compile(sv, 0);
+            }
 	    prog->substrs->data[i].substr = sv;
 	    if (prog->substrs->data[i].utf8_substr == prog->check_utf8)
 		prog->check_substr = sv;
