@@ -6155,7 +6155,7 @@ sub print_trace {
         $file = $file eq '-e' ? $file : "file '$file'" unless $short;
 
         # Get the actual sub's name, and shorten to $maxtrace's requirement.
-        $s = $sub[$i]{sub};
+        $s = $sub[$i]{'sub'};
         $s = ( substr $s, 0, $maxtrace - 3 ) . '...' if length $s > $maxtrace;
 
         # Short report uses trimmed file and sub names.
