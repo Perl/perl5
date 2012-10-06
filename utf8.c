@@ -1096,10 +1096,7 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
     if (e < s)
 	goto warn_and_return;
     while (s < e) {
-	if (!UTF8_IS_INVARIANT(*s))
-	    s += UTF8SKIP(s);
-	else
-	    s++;
+        s += UTF8SKIP(s);
 	len++;
     }
 
