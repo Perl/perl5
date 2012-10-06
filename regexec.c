@@ -5507,21 +5507,21 @@ NULL
 	} \
     }
 
-	case STAR:		/*  /A*B/ where A is width 1 */
+        case STAR:		/*  /A*B/ where A is width 1 char */
 	    ST.paren = 0;
 	    ST.min = 0;
 	    ST.max = REG_INFTY;
 	    scan = NEXTOPER(scan);
 	    goto repeat;
 
-	case PLUS:		/*  /A+B/ where A is width 1 */
+        case PLUS:		/*  /A+B/ where A is width 1 char */
 	    ST.paren = 0;
 	    ST.min = 1;
 	    ST.max = REG_INFTY;
 	    scan = NEXTOPER(scan);
 	    goto repeat;
 
-	case CURLYN:		/*  /(A){m,n}B/ where A is width 1 */
+	case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
 	    ST.paren = scan->flags;	/* Which paren to set */
 	    ST.lastparen      = rex->lastparen;
 	    ST.lastcloseparen = rex->lastcloseparen;
@@ -5537,7 +5537,7 @@ NULL
             scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
 	    goto repeat;
 
-	case CURLY:		/*  /A{m,n}B/ where A is width 1 */
+	case CURLY:		/*  /A{m,n}B/ where A is width 1 char */
 	    ST.paren = 0;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
@@ -6344,25 +6344,30 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	scan = loceol;
 	break;
     case EXACT:
-	/* To get here, EXACTish nodes must have *byte* length == 1.  That
-	 * means they match only characters in the string that can be expressed
-	 * as a single byte.  For non-utf8 strings, that means a simple match.
-	 * For utf8 strings, the character matched must be an invariant, or
-	 * downgradable to a single byte.  The pattern's utf8ness is
-	 * irrelevant, as since it's a single byte, it either isn't utf8, or if
-	 * it is, it's an invariant */
-
 	c = (U8)*STRING(p);
-	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
 
 	if (! utf8_target || UNI_IS_INVARIANT(c)) {
 	    while (scan < loceol && UCHARAT(scan) == c) {
 		scan++;
 	    }
 	}
+	else if (UTF_PATTERN) {
+            STRLEN scan_char_len;
+
+	    loceol = PL_regeol;
+
+	    while (hardcount < max
+                   && scan + (scan_char_len = UTF8SKIP(scan)) < loceol
+                   && scan_char_len <= STR_LEN(p)
+                   && memEQ(scan, STRING(p), scan_char_len))
+            {
+		scan += scan_char_len;
+		hardcount++;
+	    }
+        }
 	else {
 
-	    /* Here, the string is utf8, and the pattern char is different
+	    /* Here, the string is utf8, the pattern isn't, but <c> is different
 	     * in utf8 than not, so can't compare them directly.  Outside the
 	     * loop, find the two utf8 bytes that represent c, and then
 	     * look for those in sequence in the utf8 string */
@@ -6398,17 +6403,19 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     case EXACTFU:
 	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
-	/* The comments for the EXACT case above apply as well to these fold
-	 * ones */
-
     do_exactf:
 	c = (U8)*STRING(p);
 
-	if (utf8_target || OP(p) == EXACTFU_SS) { /* Use full Unicode fold matching */
+	if (utf8_target
+            || OP(p) == EXACTFU_SS
+            || (UTF_PATTERN && ! UTF8_IS_INVARIANT(c)))
+        {
+            /* Use full Unicode fold matching */
 	    char *tmpeol = loceol;
+            STRLEN pat_len = (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1;
 	    while (hardcount < max
 		    && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
-				   STRING(p), NULL, 1, cBOOL(UTF_PATTERN), utf8_flags))
+                       STRING(p), NULL, pat_len, cBOOL(UTF_PATTERN), utf8_flags))
 	    {
 		scan = tmpeol;
 		tmpeol = loceol;

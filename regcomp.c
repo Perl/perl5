@@ -229,8 +229,7 @@ typedef struct RExC_state_t {
 #define	HASWIDTH	0x01	/* Known to match non-null strings. */
 
 /* Simple enough to be STAR/PLUS operand; in an EXACT node must be a single
- * character, and if utf8, must be invariant.  Note that this is not the same
- * thing as REGNODE_SIMPLE */
+ * character.  Note that this is not the same thing as REGNODE_SIMPLE */
 #define	SIMPLE		0x02
 #define	SPSTART		0x04	/* Starts with * or +. */
 #define TRYAGAIN	0x08	/* Weeded out a declaration. */
@@ -9917,13 +9916,13 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
      * it (by setting <*flagp>, and potentially populating it with a single
      * character.
      *
-     * If <len> is non-zero, this function assumes that the node has already
-     * been populated, and just does the sizing.  In this case <code_point>
-     * should be the final code point that has already been placed into the
-     * node.  This value will be ignored except that under some circumstances
-     * <*flagp> is set based on it.
+     * If <len> (the length in bytes) is non-zero, this function assumes that
+     * the node has already been populated, and just does the sizing.  In this
+     * case <code_point> should be the final code point that has already been
+     * placed into the node.  This value will be ignored except that under some
+     * circumstances <*flagp> is set based on it.
      *
-     * If <len is zero, the function assumes that the node is to contain only
+     * If <len> is zero, the function assumes that the node is to contain only
      * the single character given by <code_point> and calculates what <len>
      * should be.  In pass 1, it sizes the node appropriately.  In pass 2, it
      * additionally will populate the node's STRING with <code_point>, if <len>
@@ -9974,8 +9973,12 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
     }
 
     *flagp |= HASWIDTH;
-    if (len == 1 && (code_point != LATIN_SMALL_LETTER_SHARP_S
-                     || ! FOLD || ! DEPENDS_SEMANTICS))
+
+    /* A single character node is SIMPLE, except for the special-cased SHARP S
+     * under /di. */
+    if ((len == 1 || (UTF && len == UNISKIP(code_point)))
+        && (code_point != LATIN_SMALL_LETTER_SHARP_S
+            || ! FOLD || ! DEPENDS_SEMANTICS))
     {
         *flagp |= SIMPLE;
     }
