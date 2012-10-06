@@ -2862,14 +2862,7 @@ the bottom of the loop.
 
 =cut
 
-                my $print_cmd = 'print {$DB::OUT} ';
-                # p - print (no args): print $_.
-                if ($cmd eq 'p') {
-                    $cmd = $print_cmd . '$_';
-                }
-
-                # p - print the given expression.
-                $cmd =~ s/\Ap\b/$print_cmd /;
+                $obj->_handle_p_command;
 
 =head4 C<=> - define command alias
 
@@ -3793,6 +3786,8 @@ sub _handle_rc_search_history_command {
         print $OUT $DB::cmd, "\n";
         redo CMD;
     }
+
+    return;
 }
 
 sub _handle_H_command {
@@ -3843,6 +3838,21 @@ sub _handle_doc_command {
         runman($man_page);
         next CMD;
     }
+
+    return;
+}
+
+sub _handle_p_command {
+    my $self = shift;
+
+    my $print_cmd = 'print {$DB::OUT} ';
+    # p - print (no args): print $_.
+    if ($DB::cmd eq 'p') {
+        $DB::cmd = $print_cmd . '$_';
+    }
+
+    # p - print the given expression.
+    $DB::cmd =~ s/\Ap\b/$print_cmd /;
 
     return;
 }
