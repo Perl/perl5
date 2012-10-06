@@ -2793,7 +2793,7 @@ C<STDOUT> from getting messed up.
                 if (my ($arg) = $cmd =~ m#\A$sh$sh\s*(.*)#ms) {
 
                     # System it.
-                    &system($arg);
+                    DB::system($arg);
                     next CMD;
                 }
 
@@ -6415,24 +6415,24 @@ sub system {
 
     # We save, change, then restore STDIN and STDOUT to avoid fork() since
     # some non-Unix systems can do system() but have problems with fork().
-    open( SAVEIN,  "<&STDIN" )  || &warn("Can't save STDIN");
-    open( SAVEOUT, ">&STDOUT" ) || &warn("Can't save STDOUT");
-    open( STDIN,   "<&IN" )     || &warn("Can't redirect STDIN");
-    open( STDOUT,  ">&OUT" )    || &warn("Can't redirect STDOUT");
+    open( SAVEIN,  "<&STDIN" )  || DB::warn("Can't save STDIN");
+    open( SAVEOUT, ">&STDOUT" ) || DB::warn("Can't save STDOUT");
+    open( STDIN,   "<&IN" )     || DB::warn("Can't redirect STDIN");
+    open( STDOUT,  ">&OUT" )    || DB::warn("Can't redirect STDOUT");
 
     # XXX: using csh or tcsh destroys sigint retvals!
     system(@_);
-    open( STDIN,  "<&SAVEIN" )  || &warn("Can't restore STDIN");
-    open( STDOUT, ">&SAVEOUT" ) || &warn("Can't restore STDOUT");
+    open( STDIN,  "<&SAVEIN" )  || DB::warn("Can't restore STDIN");
+    open( STDOUT, ">&SAVEOUT" ) || DB::warn("Can't restore STDOUT");
     close(SAVEIN);
     close(SAVEOUT);
 
     # most of the $? crud was coping with broken cshisms
     if ( $? >> 8 ) {
-        &warn( "(Command exited ", ( $? >> 8 ), ")\n" );
+        DB::warn( "(Command exited ", ( $? >> 8 ), ")\n" );
     }
     elsif ($?) {
-        &warn(
+        DB::warn(
             "(Command died of SIG#",
             ( $? & 127 ),
             ( ( $? & 128 ) ? " -- core dumped" : "" ),
