@@ -6403,7 +6403,6 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 
     do_exactf:
 	c = (U8)*STRING(p);
-	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
 
 	if (utf8_target || OP(p) == EXACTFU_SS) { /* Use full Unicode fold matching */
 	    char *tmpeol = loceol;

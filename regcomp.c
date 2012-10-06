@@ -9974,8 +9974,11 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
     }
 
     *flagp |= HASWIDTH;
-    if (len == 1 && UNI_IS_INVARIANT(code_point))
+    if (len == 1 && (code_point != LATIN_SMALL_LETTER_SHARP_S
+                     || ! FOLD || ! DEPENDS_SEMANTICS))
+    {
         *flagp |= SIMPLE;
+    }
 }
 
 /*
