@@ -2101,8 +2101,8 @@ PP(pp_subst)
 	Perl_croak_no_modify(aTHX);
     PUTBACK;
 
-  setup_match:
     s = SvPV_mutable(TARG, len);
+  setup_match:
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV || SvVOK(TARG))
 	force_on_match = 1;
 
@@ -2179,13 +2179,15 @@ PP(pp_subst)
 	 * http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg158809.html
 	 */
 	if (DO_UTF8(dstr) && ! DO_UTF8(TARG)) {
-	    char * const orig_pvx =  SvPVX(TARG);
+	    char * const orig_pvx = SvPOKp(TARG) ? SvPVX(TARG) : NULL;
 	    const STRLEN new_len = sv_utf8_upgrade_nomg(TARG);
 
 	    /* If the lengths are the same, the pattern contains only
 	     * invariants, can keep going; otherwise, various internal markers
 	     * could be off, so redo */
 	    if (new_len != len || orig_pvx != SvPVX(TARG)) {
+		/* Do this here, to avoid multiple FETCHes. */
+		s = SvPV_nomg(TARG, len);
 		goto setup_match;
 	    }
 	}
@@ -2231,7 +2233,7 @@ PP(pp_subst)
 #endif
 	if (force_on_match) {
 	    force_on_match = 0;
-	    s = SvPV_force(TARG, len);
+	    s = SvPV_force_nomg(TARG, len);
 	    goto force_it;
 	}
 	d = s;
@@ -2315,7 +2317,7 @@ PP(pp_subst)
 		   cases where it would be viable to drop into the copy code. */
 		TARG = sv_2mortal(newSVsv(TARG));
 	    }
-	    s = SvPV_force(TARG, len);
+	    s = SvPV_force_nomg(TARG, len);
 	    goto force_it;
 	}
 #ifdef PERL_OLD_COPY_ON_WRITE

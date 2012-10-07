@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 190 );
+plan( tests => 200 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -746,6 +746,8 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
     # when substituted with a UTF8 replacement string, due to
     # magic getting called multiple times, and pointers now pointing
     # to stale/freed strings
+    # The original fix for this caused infinite loops for non- or cow-
+    # strings, so we test those, too.
     package FOO;
     my $fc;
     sub TIESCALAR { bless [ "abcdefgh" ] }
@@ -757,6 +759,35 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
     $s =~ s/..../\x{101}/;
     ::is($fc, 1, "tied UTF8 stuff FETCH count");
     ::is("$s", "\x{101}efgh", "tied UTF8 stuff");
+
+    ::watchdog(300);
+    $fc = 0;
+    $s = *foo;
+    $s =~ s/..../\x{101}/;
+    ::is($fc, 1, '$tied_glob =~ s/non-utf8/utf8/ fetch count');
+    ::is("$s", "\x{101}::foo", '$tied_glob =~ s/non-utf8/utf8/ result');
+    $fc = 0;
+    $s = *foo;
+    $s =~ s/(....)/\x{101}/g;
+    ::is($fc, 1, '$tied_glob =~ s/(non-utf8)/utf8/g fetch count');
+    ::is("$s", "\x{101}\x{101}o",
+         '$tied_glob =~ s/(non-utf8)/utf8/g result');
+    $fc = 0;
+    $s = "\xff\xff\xff\xff\xff";
+    $s =~ s/..../\x{101}/;
+    ::is($fc, 1, '$tied_latin1 =~ s/non-utf8/utf8/ fetch count');
+    ::is("$s", "\x{101}\xff", '$tied_latin1 =~ s/non-utf8/utf8/ result');
+    $fc = 0;
+    { package package_name; tied($s)->[0] = __PACKAGE__ };
+    $s =~ s/..../\x{101}/;
+    ::is($fc, 1, '$tied_cow =~ s/non-utf8/utf8/ fetch count');
+    ::is("$s", "\x{101}age_name", '$tied_cow =~ s/non-utf8/utf8/ result');
+    $fc = 0;
+    $s = \1;
+    $s =~ s/..../\x{101}/;
+    ::is($fc, 1, '$tied_ref =~ s/non-utf8/utf8/ fetch count');
+    ::like("$s", qr/^\x{101}AR\(0x.*\)\z/,
+           '$tied_ref =~ s/non-utf8/utf8/ result');
 }
 
 # RT #97954
