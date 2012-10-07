@@ -2235,6 +2235,43 @@ sub _DB__handle_question_mark_command {
     return;
 }
 
+sub _DB__handle_restart_and_rerun_commands {
+    my ($obj) = @_;
+
+    # R - restart execution.
+    # rerun - controlled restart execution.
+    if (my ($cmd_cmd, $cmd_params) =
+        $cmd =~ /\A((?:R)|(?:rerun\s*(.*)))\z/) {
+        my @args = ($cmd_cmd eq 'R' ? restart() : rerun($cmd_params));
+
+        # Close all non-system fds for a clean restart.  A more
+        # correct method would be to close all fds that were not
+        # open when the process started, but this seems to be
+        # hard.  See "debugger 'R'estart and open database
+        # connections" on p5p.
+
+        my $max_fd = 1024; # default if POSIX can't be loaded
+        if (eval { require POSIX }) {
+            eval { $max_fd = POSIX::sysconf(POSIX::_SC_OPEN_MAX()) };
+        }
+
+        if (defined $max_fd) {
+            foreach ($^F+1 .. $max_fd-1) {
+                next unless open FD_TO_CLOSE, "<&=$_";
+                close(FD_TO_CLOSE);
+            }
+        }
+
+        # And run Perl again.  We use exec() to keep the
+        # PID stable (and that way $ini_pids is still valid).
+        exec(@args) or print {$OUT} "exec failed: $!\n";
+
+        last CMD;
+    }
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2914,34 +2951,7 @@ Return to any given position in the B<true>-history list
 
                 # R - restart execution.
                 # rerun - controlled restart execution.
-                if (my ($cmd_cmd, $cmd_params) =
-                    $cmd =~ /\A((?:R)|(?:rerun\s*(.*)))\z/) {
-                    my @args = ($cmd_cmd eq 'R' ? restart() : rerun($cmd_params));
-
-                    # Close all non-system fds for a clean restart.  A more
-                    # correct method would be to close all fds that were not
-                    # open when the process started, but this seems to be
-                    # hard.  See "debugger 'R'estart and open database
-                    # connections" on p5p.
-
-                    my $max_fd = 1024; # default if POSIX can't be loaded
-                    if (eval { require POSIX }) {
-                        eval { $max_fd = POSIX::sysconf(POSIX::_SC_OPEN_MAX()) };
-                    }
-
-                    if (defined $max_fd) {
-                        foreach ($^F+1 .. $max_fd-1) {
-                            next unless open FD_TO_CLOSE, "<&=$_";
-                            close(FD_TO_CLOSE);
-                        }
-                    }
-
-                    # And run Perl again.  We use exec() to keep the
-                    # PID stable (and that way $ini_pids is still valid).
-                    exec(@args) || print $OUT "exec failed: $!\n";
-
-                    last CMD;
-                }
+                _DB__handle_restart_and_rerun_commands($obj);
 
 =head4 C<|, ||> - pipe output through the pager.
 
