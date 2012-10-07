@@ -2900,22 +2900,7 @@ Note that all C<^(save|source)>'s are commented out with a view to minimise recu
 =cut
 
                 # save source - write commands to a file for later use
-                if (my ($new_fn) = $cmd =~ /\Asave\s*(.*)\z/) {
-                    my $filename = $new_fn || '.perl5dbrc';    # default?
-                    if ( open my $fh, '>', $filename ) {
-
-                       # chomp to remove extraneous newlines from source'd files
-                        chomp( my @truelist =
-                              map { m/^\s*(save|source)/ ? "#$_" : $_ }
-                              @truehist );
-                        print $fh join( "\n", @truelist );
-                        print "commands saved in $file\n";
-                    }
-                    else {
-                        &warn("Can't save debugger commands in '$new_fn': $!\n");
-                    }
-                    next CMD;
-                }
+                $obj->_handle_save_command;
 
 =head4 C<R> - restart
 
@@ -3881,6 +3866,29 @@ sub _handle_enable_disable_commands {
             }
         }
 
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_save_command {
+    my $self = shift;
+
+    if (my ($new_fn) = $DB::cmd =~ /\Asave\s*(.*)\z/) {
+        my $filename = $new_fn || '.perl5dbrc';    # default?
+        if ( open my $fh, '>', $filename ) {
+
+            # chomp to remove extraneous newlines from source'd files
+            chomp( my @truelist =
+                map { m/\A\s*(save|source)/ ? "#$_" : $_ }
+                @truehist );
+            print {$fh} join( "\n", @truelist );
+            print "commands saved in $filename\n";
+        }
+        else {
+            DB::warn("Can't save debugger commands in '$new_fn': $!\n");
+        }
         next CMD;
     }
 
