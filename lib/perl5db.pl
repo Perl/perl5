@@ -2272,6 +2272,73 @@ sub _DB__handle_restart_and_rerun_commands {
     return;
 }
 
+sub _DB__handle_run_command_in_pager_command {
+    my ($obj) = @_;
+
+    if ($cmd =~ m#\A\|\|?\s*[^|]#) {
+        if ( $pager =~ /^\|/ ) {
+
+            # Default pager is into a pipe. Redirect I/O.
+            open( SAVEOUT, ">&STDOUT" )
+            || DB::warn("Can't save STDOUT");
+            open( STDOUT, ">&OUT" )
+            || DB::warn("Can't redirect STDOUT");
+        } ## end if ($pager =~ /^\|/)
+        else {
+
+            # Not into a pipe. STDOUT is safe.
+            open( SAVEOUT, ">&OUT" ) || &warn("Can't save DB::OUT");
+        }
+
+        # Fix up environment to record we have less if so.
+        fix_less();
+
+        unless ( $obj->piped(scalar ( open( OUT, $pager ) ) ) ) {
+
+            # Couldn't open pipe to pager.
+            DB::warn("Can't pipe output to '$pager'");
+            if ( $pager =~ /^\|/ ) {
+
+                # Redirect I/O back again.
+                open( OUT, ">&STDOUT" )    # XXX: lost message
+                || DB::warn("Can't restore DB::OUT");
+                open( STDOUT, ">&SAVEOUT" )
+                || DB::warn("Can't restore STDOUT");
+                close(SAVEOUT);
+            } ## end if ($pager =~ /^\|/)
+            else {
+
+                # Redirect I/O. STDOUT already safe.
+                open( OUT, ">&STDOUT" )    # XXX: lost message
+                || DB::warn("Can't restore DB::OUT");
+            }
+            next CMD;
+        } ## end unless ($piped = open(OUT,...
+
+        # Set up broken-pipe handler if necessary.
+        $SIG{PIPE} = \&DB::catch
+        if $pager =~ /^\|/
+        && ( "" eq $SIG{PIPE} || "DEFAULT" eq $SIG{PIPE} );
+
+        OUT->autoflush(1);
+        # Save current filehandle, and put it back.
+        $obj->selected(scalar( select(OUT) ));
+        # Don't put it back if pager was a pipe.
+        if ($cmd !~ /\A\|\|/)
+        {
+            select($obj->selected());
+            $obj->selected("");
+        }
+
+        # Trim off the pipe symbols and run the command now.
+        $cmd =~ s#\A\|+\s*##;
+        redo PIPE;
+    }
+
+    return;
+}
+
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2281,6 +2348,8 @@ sub DB {
     my ($prefix, $after, $infix);
     my $pat;
     my $explicit_stop;
+    my $piped;
+    my $selected;
 
     if ($ENV{PERL5DB_THREADED}) {
         $tid = eval { "[".threads->tid."]" };
@@ -2297,6 +2366,8 @@ sub DB {
             infix => \$infix,
             i_cmd => \$i,
             pat => \$pat,
+            piped => \$piped,
+            selected => \$selected,
         },
     );
 
@@ -2495,8 +2566,6 @@ the new command. This is faster, but perhaps a bit more convoluted.
         #
         # If we have a terminal for input, and we get something back
         # from readline(), keep on processing.
-        my $piped;
-        my $selected;
 
       CMD:
         while (_DB__read_next_cmd($tid))
@@ -2968,61 +3037,7 @@ reading another.
 =cut
 
                 # || - run command in the pager, with output to DB::OUT.
-                if ($cmd =~ m#\A\|\|?\s*[^|]#) {
-                    if ( $pager =~ /^\|/ ) {
-
-                        # Default pager is into a pipe. Redirect I/O.
-                        open( SAVEOUT, ">&STDOUT" )
-                          || &warn("Can't save STDOUT");
-                        open( STDOUT, ">&OUT" )
-                          || &warn("Can't redirect STDOUT");
-                    } ## end if ($pager =~ /^\|/)
-                    else {
-
-                        # Not into a pipe. STDOUT is safe.
-                        open( SAVEOUT, ">&OUT" ) || &warn("Can't save DB::OUT");
-                    }
-
-                    # Fix up environment to record we have less if so.
-                    fix_less();
-
-                    unless ( $piped = open( OUT, $pager ) ) {
-
-                        # Couldn't open pipe to pager.
-                        &warn("Can't pipe output to '$pager'");
-                        if ( $pager =~ /^\|/ ) {
-
-                            # Redirect I/O back again.
-                            open( OUT, ">&STDOUT" )    # XXX: lost message
-                              || &warn("Can't restore DB::OUT");
-                            open( STDOUT, ">&SAVEOUT" )
-                              || &warn("Can't restore STDOUT");
-                            close(SAVEOUT);
-                        } ## end if ($pager =~ /^\|/)
-                        else {
-
-                            # Redirect I/O. STDOUT already safe.
-                            open( OUT, ">&STDOUT" )    # XXX: lost message
-                              || &warn("Can't restore DB::OUT");
-                        }
-                        next CMD;
-                    } ## end unless ($piped = open(OUT,...
-
-                    # Set up broken-pipe handler if necessary.
-                    $SIG{PIPE} = \&DB::catch
-                      if $pager =~ /^\|/
-                      && ( "" eq $SIG{PIPE} || "DEFAULT" eq $SIG{PIPE} );
-
-                    OUT->autoflush(1);
-                    # Save current filehandle, and put it back.
-                    $selected = select(OUT);
-                    # Don't put it back if pager was a pipe.
-                    select($selected), $selected = "" unless $cmd =~ /^\|\|/;
-
-                    # Trim off the pipe symbols and run the command now.
-                    $cmd =~ s#\A\|+\s*##;
-                    redo PIPE;
-                }
+                _DB__handle_run_command_in_pager_command($obj);
 
 =head3 END OF COMMAND PARSING
 
@@ -3189,7 +3204,7 @@ sub _init {
 {
     no strict 'refs';
     foreach my $slot_name (qw(
-        after explicit_stop infix pat position prefix i_cmd
+        after explicit_stop infix pat piped position prefix selected i_cmd
         )) {
         my $slot = $slot_name;
         *{$slot} = sub {
