@@ -5717,8 +5717,10 @@ NULL
 	    */
 
 	    assert(ST.min <= ST.max);
-	    if (HAS_TEXT(next) || JUMPABLE(next)) {
-		U8 *s;
+            if (! HAS_TEXT(next) && ! JUMPABLE(next)) {
+                ST.c1 = ST.c2 = CHRTEST_VOID;
+            }
+            else {
 		regnode *text_node = next;
 
 		if (! HAS_TEXT(text_node)) 
@@ -5729,7 +5731,6 @@ NULL
 		else {
 		    if ( PL_regkind[OP(text_node)] != EXACT ) {
 			ST.c1 = ST.c2 = CHRTEST_VOID;
-			goto assume_ok_easy;
 		    }
 		    else {
                     
@@ -5747,9 +5748,6 @@ NULL
                     }
 		}
 	    }
-	    else
-		ST.c1 = ST.c2 = CHRTEST_VOID;
-	assume_ok_easy:
 
 	    ST.A = scan;
 	    ST.B = next;
