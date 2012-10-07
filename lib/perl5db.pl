@@ -3047,12 +3047,6 @@ any variables we might want to address in the C<DB> package.
 
 =cut
 
-                # t - turn trace on.
-                if ($cmd =~ s#\At\s+(\d+)?#\$DB::trace |= 1;\n#) {
-                    my $trace_arg = $1;
-                    $trace_to_depth = $trace_arg ? $stack_depth||0 + $1 : 1E9;
-                }
-
                 # s - single-step. Remember the last command was 's'.
                 if ($cmd =~ s/\As\s/\$DB::single = 1;\n/) {
                     $laststep = 's';
