@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 218;
+plan tests => 238;
 
 my @comma = ("key", "value");
 
@@ -320,3 +320,52 @@ SKIP: {
  undef %tb;
  is $p, \%tb, "hash undef should not zap weak refs";
 }
+
+# test odd hash assignment warnings
+{
+    my ($s, %h);
+    warning_like(sub {%h = (1..3)}, qr/^Odd number of elements in hash assignment/);
+    warning_like(sub {%h = ({})}, qr/^Reference found where even-sized list expected/);
+
+    warning_like(sub { ($s, %h) = (1..4)}, qr/^Odd number of elements in hash assignment/);
+    warning_like(sub { ($s, %h) = (1, {})}, qr/^Reference found where even-sized list expected/);
+}
+
+# hash assignment in scalar and list context with odd number of elements
+{
+    no warnings 'misc', 'uninitialized';
+    my %h; my $x;
+    is( join( ':', %h = (1..3)), '1:2:3:',
+	'odd hash assignment in list context' );
+    ok( eq_hash( \%h, {1 => 2, 3 => undef} ), "correct value stored" );
+    is( scalar( %h = (1..3) ), 3,
+	'odd hash assignment in scalar context' );
+    ok( eq_hash( \%h, {1 => 2, 3 => undef} ), "correct value stored" );
+    is( join(':', ($x,%h) = (0,1,2,3) ), '0:1:2:3:',
+	'scalar + odd hash assignment in list context' );
+    ok( eq_hash( \%h, {1 => 2, 3 => undef} ), "correct value stored" );
+    is( scalar( ($x,%h) = (0,1,2,3) ), 4,
+	'scalar + odd hash assignment in scalar context' );
+    ok( eq_hash( \%h, {1 => 2, 3 => undef} ), "correct value stored" );
+}
+
+# hash assignment in scalar and list context with odd number of elements
+# and duplicates
+{
+    no warnings 'misc', 'uninitialized';
+    my %h; my $x;
+    is( (join ':', %h = (1,1,1)), '1:',
+	'odd hash assignment in list context with duplicates' );
+    ok( eq_hash( \%h, {1 => undef} ), "correct value stored" );
+    is( scalar(%h = (1,1,1)), 3,
+	'odd hash assignment in scalar context with duplicates' );
+    ok( eq_hash( \%h, {1 => undef} ), "correct value stored" );
+    is( join(':', ($x,%h) = (0,1,1,1) ), '0:1:',
+	'scalar + odd hash assignment in list context with duplicates' );
+    ok( eq_hash( \%h, {1 => undef} ), "correct value stored" );
+    is( scalar( ($x,%h) = (0,1,1,1) ), 4,
+	'scalar + odd hash assignment in scalar context with duplicates' );
+    ok( eq_hash( \%h, {1 => undef} ), "correct value stored" );
+}
+
+
