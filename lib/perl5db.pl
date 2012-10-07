@@ -627,7 +627,6 @@ context, so we can use C<my> freely.
 use vars qw(
     @args
     %break_on_load
-    @cmdfhs
     $CommandSet
     $CreateTTY
     $DBGR
@@ -668,6 +667,7 @@ use vars qw(
 );
 
 our (
+    @cmdfhs,
     $evalarg,
     $frame,
     $hist,
@@ -2880,20 +2880,7 @@ pick it up.
 
 =cut
 
-                # source - read commands from a file (or pipe!) and execute.
-                if (my ($sourced_fn) = $cmd =~ /\Asource\s+(.*\S)/) {
-                    if ( open my $fh, $sourced_fn ) {
-
-                        # Opened OK; stick it in the list of file handles.
-                        push @cmdfhs, $fh;
-                    }
-                    else {
-
-                        # Couldn't open it.
-                        &warn("Can't execute '$sourced_fn': $!\n");
-                    }
-                    next CMD;
-                }
+                $obj->_handle_source_command;
 
                 if (my ($which_cmd, $position)
                     = $cmd =~ /^(enable|disable)\s+(\S+)\s*$/) {
@@ -3859,6 +3846,27 @@ sub _handle_equal_sign_command {
                 print "No alias for $k\n";
             }
         } ## end for my $k (@keys)
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_source_command {
+    my $self = shift;
+
+    # source - read commands from a file (or pipe!) and execute.
+    if (my ($sourced_fn) = $DB::cmd =~ /\Asource\s+(.*\S)/) {
+        if ( open my $fh, $sourced_fn ) {
+
+            # Opened OK; stick it in the list of file handles.
+            push @cmdfhs, $fh;
+        }
+        else {
+
+            # Couldn't open it.
+            DB::warn("Can't execute '$sourced_fn': $!\n");
+        }
         next CMD;
     }
 
