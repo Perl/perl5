@@ -1234,7 +1234,7 @@ PP(pp_aassign)
     else if (gimme == G_SCALAR) {
 	dTARGET;
 	SP = firstrelem;
-	SETi(lastrelem - firstrelem + 1 - duplicates);
+	SETi(lastrelem - firstrelem + 1);
     }
     else {
 	if (ary)
