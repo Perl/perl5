@@ -1124,7 +1124,7 @@ PP(pp_aassign)
 		    TAINT_NOT;
 		}
 		if (relem == lastrelem) {
-		    do_oddball(hash, relem, firstrelem);
+		    do_oddball(hash, relem, firsthashrelem);
 		    relem++;
 		}
 		LEAVE;
