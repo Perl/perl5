@@ -1745,7 +1745,6 @@ see what's happening in any given command.
 
 use vars qw(
     $action
-    %alias
     $cmd
     $fall_off_end
     $file
@@ -1760,6 +1759,7 @@ use vars qw(
 );
 
 our (
+    %alias,
     $doret,
     $end,
     $incr,
@@ -2871,76 +2871,7 @@ Manipulates C<%alias> to add or list command aliases.
 =cut
 
                 # = - set up a command alias.
-                if ($cmd =~ s/\A=\s*//) {
-                    my @keys;
-                    if ( length $cmd == 0 ) {
-
-                        # No args, get current aliases.
-                        @keys = sort keys %alias;
-                    }
-                    elsif ( my ( $k, $v ) = ( $cmd =~ /^(\S+)\s+(\S.*)/ ) ) {
-
-                        # Creating a new alias. $k is alias name, $v is
-                        # alias value.
-
-                        # can't use $_ or kill //g state
-                        for my $x ( $k, $v ) {
-
-                            # Escape "alarm" characters.
-                            $x =~ s/\a/\\a/g;
-                        }
-
-                        # Substitute key for value, using alarm chars
-                        # as separators (which is why we escaped them in
-                        # the command).
-                        $alias{$k} = "s\a$k\a$v\a";
-
-                        # Turn off standard warn and die behavior.
-                        local $SIG{__DIE__};
-                        local $SIG{__WARN__};
-
-                        # Is it valid Perl?
-                        unless ( eval "sub { s\a$k\a$v\a }; 1" ) {
-
-                            # Nope. Bad alias. Say so and get out.
-                            print $OUT "Can't alias $k to $v: $@\n";
-                            delete $alias{$k};
-                            next CMD;
-                        }
-
-                        # We'll only list the new one.
-                        @keys = ($k);
-                    } ## end elsif (my ($k, $v) = ($cmd...
-
-                    # The argument is the alias to list.
-                    else {
-                        @keys = ($cmd);
-                    }
-
-                    # List aliases.
-                    for my $k (@keys) {
-
-                        # Messy metaquoting: Trim the substitution code off.
-                        # We use control-G as the delimiter because it's not
-                        # likely to appear in the alias.
-                        if ( ( my $v = $alias{$k} ) =~ ss\a$k\a(.*)\a$1 ) {
-
-                            # Print the alias.
-                            print $OUT "$k\t= $1\n";
-                        }
-                        elsif ( defined $alias{$k} ) {
-
-                            # Couldn't trim it off; just print the alias code.
-                            print $OUT "$k\t$alias{$k}\n";
-                        }
-                        else {
-
-                            # No such, dude.
-                            print "No alias for $k\n";
-                        }
-                    } ## end for my $k (@keys)
-                    next CMD;
-                }
+                $obj->_handle_equal_sign_command;
 
 =head4 C<source> - read commands from a file.
 
@@ -3853,6 +3784,83 @@ sub _handle_p_command {
 
     # p - print the given expression.
     $DB::cmd =~ s/\Ap\b/$print_cmd /;
+
+    return;
+}
+
+sub _handle_equal_sign_command {
+    my $self = shift;
+
+    if ($DB::cmd =~ s/\A=\s*//) {
+        my @keys;
+        if ( length $DB::cmd == 0 ) {
+
+            # No args, get current aliases.
+            @keys = sort keys %alias;
+        }
+        elsif ( my ( $k, $v ) = ( $DB::cmd =~ /^(\S+)\s+(\S.*)/ ) ) {
+
+            # Creating a new alias. $k is alias name, $v is
+            # alias value.
+
+            # can't use $_ or kill //g state
+            for my $x ( $k, $v ) {
+
+                # Escape "alarm" characters.
+                $x =~ s/\a/\\a/g;
+            }
+
+            # Substitute key for value, using alarm chars
+            # as separators (which is why we escaped them in
+            # the command).
+            $alias{$k} = "s\a$k\a$v\a";
+
+            # Turn off standard warn and die behavior.
+            local $SIG{__DIE__};
+            local $SIG{__WARN__};
+
+            # Is it valid Perl?
+            unless ( eval "sub { s\a$k\a$v\a }; 1" ) {
+
+                # Nope. Bad alias. Say so and get out.
+                print $OUT "Can't alias $k to $v: $@\n";
+                delete $alias{$k};
+                next CMD;
+            }
+
+            # We'll only list the new one.
+            @keys = ($k);
+        } ## end elsif (my ($k, $v) = ($DB::cmd...
+
+        # The argument is the alias to list.
+        else {
+            @keys = ($DB::cmd);
+        }
+
+        # List aliases.
+        for my $k (@keys) {
+
+            # Messy metaquoting: Trim the substitution code off.
+            # We use control-G as the delimiter because it's not
+            # likely to appear in the alias.
+            if ( ( my $v = $alias{$k} ) =~ ss\a$k\a(.*)\a$1 ) {
+
+                # Print the alias.
+                print $OUT "$k\t= $1\n";
+            }
+            elsif ( defined $alias{$k} ) {
+
+                # Couldn't trim it off; just print the alias code.
+                print $OUT "$k\t$alias{$k}\n";
+            }
+            else {
+
+                # No such, dude.
+                print "No alias for $k\n";
+            }
+        } ## end for my $k (@keys)
+        next CMD;
+    }
 
     return;
 }
