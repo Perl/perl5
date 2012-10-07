@@ -2882,37 +2882,13 @@ pick it up.
 
                 $obj->_handle_source_command;
 
-                if (my ($which_cmd, $position)
-                    = $cmd =~ /^(enable|disable)\s+(\S+)\s*$/) {
+=head4 C<enable> C<disable> - enable or disable breakpoints
 
-                    my ($fn, $line_num);
-                    if ($position =~ m{\A\d+\z})
-                    {
-                        $fn = $filename;
-                        $line_num = $position;
-                    }
-                    elsif (my ($new_fn, $new_line_num)
-                        = $position =~ m{\A(.*):(\d+)\z}) {
-                        ($fn, $line_num) = ($new_fn, $new_line_num);
-                    }
-                    else
-                    {
-                        &warn("Wrong spec for enable/disable argument.\n");
-                    }
+This enables or disables breakpoints.
 
-                    if (defined($fn)) {
-                        if (_has_breakpoint_data_ref($fn, $line_num)) {
-                            _set_breakpoint_enabled_status($fn, $line_num,
-                                ($which_cmd eq 'enable' ? 1 : '')
-                            );
-                        }
-                        else {
-                            &warn("No breakpoint set at ${fn}:${line_num}\n");
-                        }
-                    }
+=cut
 
-                    next CMD;
-                }
+                $obj->_handle_enable_disable_commands;
 
 =head4 C<save> - send current history to a file
 
@@ -3867,6 +3843,44 @@ sub _handle_source_command {
             # Couldn't open it.
             DB::warn("Can't execute '$sourced_fn': $!\n");
         }
+        next CMD;
+    }
+
+    return;
+}
+
+sub _handle_enable_disable_commands {
+    my $self = shift;
+
+    if (my ($which_cmd, $position)
+        = $DB::cmd =~ /\A(enable|disable)\s+(\S+)\s*\z/) {
+
+        my ($fn, $line_num);
+        if ($position =~ m{\A\d+\z})
+        {
+            $fn = $DB::filename;
+            $line_num = $position;
+        }
+        elsif (my ($new_fn, $new_line_num)
+            = $position =~ m{\A(.*):(\d+)\z}) {
+            ($fn, $line_num) = ($new_fn, $new_line_num);
+        }
+        else
+        {
+            DB::warn("Wrong spec for enable/disable argument.\n");
+        }
+
+        if (defined($fn)) {
+            if (DB::_has_breakpoint_data_ref($fn, $line_num)) {
+                DB::_set_breakpoint_enabled_status($fn, $line_num,
+                    ($which_cmd eq 'enable' ? 1 : '')
+                );
+            }
+            else {
+                DB::warn("No breakpoint set at ${fn}:${line_num}\n");
+            }
+        }
+
         next CMD;
     }
 
