@@ -1206,7 +1206,7 @@ Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 SV *
 Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
 {
-    Perl_sv_mortalcopy_flags(aTHX_ oldstr, SV_GMAGIC);
+    return Perl_sv_mortalcopy_flags(aTHX_ oldstr, SV_GMAGIC);
 }
 
 END_EXTERN_C
