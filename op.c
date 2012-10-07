@@ -7851,13 +7851,11 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
     PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS;
 
     {
-        GV * const gv = name
-			 ? gv_fetchpvn(
-				name,len,GV_ADDMULTI|flags,SVt_PVCV
-			   )
-			 : gv_fetchpv(
-                            (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
-                            GV_ADDMULTI | flags, SVt_PVCV);
+        GV * const gv = gv_fetchpvn(
+			    name ? name : PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
+			    name ? len : PL_curstash ? sizeof("__ANON__") - 1:
+				sizeof("__ANON__::__ANON__") - 1,
+			    GV_ADDMULTI | flags, SVt_PVCV);
     
         if (!subaddr)
             Perl_croak(aTHX_ "panic: no address for '%s' in '%s'", name, filename);
