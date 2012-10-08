@@ -89,6 +89,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    warn "$func: i and s flags are mutually exclusive"
 					    if $flags =~ /s/ && $flags =~ /i/;
 	    $retval = "$type $splint_flags$retval";
+	    if ($never_returns) {
+		$retval = "PERL_CALLCONV_NO_RET $retval";
+	    }
 	    $func = "S_$plain_func";
 	}
 	else {
