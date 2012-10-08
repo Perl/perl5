@@ -3370,6 +3370,7 @@ Perl_moreswitches(pTHX_ const char *s)
 STATIC void
 S_minus_v(pTHX)
 {
+	PerlIO * PIO_stdout;
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    upg_version(PL_patchlevel, TRUE);
 #if !defined(DGUX)
@@ -3381,16 +3382,22 @@ S_minus_v(pTHX)
 #  else
 	    SV *num = newSVpvs(PERL_PATCHNUM);
 #  endif
-
-	    if (sv_len(num)>=sv_len(level) && strnEQ(SvPV_nolen(num),SvPV_nolen(level),sv_len(level))) {
-		SvREFCNT_dec(level);
-		level= num;
-	    } else {
-		Perl_sv_catpvf(aTHX_ level, " (%"SVf")", num);
-		SvREFCNT_dec(num);
+	    {
+		STRLEN level_len, num_len;
+		char * level_str, * num_str;
+		num_str = SvPV(num, num_len);
+		level_str = SvPV(level, level_len);
+		if (num_len>=level_len && strnEQ(num_str,level_str,level_len)) {
+		    SvREFCNT_dec(level);
+		    level= num;
+		} else {
+		    Perl_sv_catpvf(aTHX_ level, " (%"SVf")", num);
+		    SvREFCNT_dec(num);
+		}
 	    }
  #endif
-	    PerlIO_printf(PerlIO_stdout(),
+	PIO_stdout =  PerlIO_stdout();
+	    PerlIO_printf(PIO_stdout,
 		"\nThis is perl "	STRINGIFY(PERL_REVISION)
 		", version "		STRINGIFY(PERL_VERSION)
 		", subversion "		STRINGIFY(PERL_SUBVERSION)
@@ -3399,75 +3406,77 @@ S_minus_v(pTHX)
 	    SvREFCNT_dec(level);
 	}
 #else /* DGUX */
+	PIO_stdout =  PerlIO_stdout();
 /* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		Perl_form(aTHX_ "\nThis is perl, %"SVf"\n",
 		    SVfARG(vstringify(PL_patchlevel))));
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 			Perl_form(aTHX_ "        built under %s at %s %s\n",
 					OSNAME, __DATE__, __TIME__));
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 			Perl_form(aTHX_ "        OS Specific Release: %s\n",
 					OSVERS));
 #endif /* !DGUX */
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
-	    PerlIO_printf(PerlIO_stdout(),
+	    PerlIO_printf(PIO_stdout,
 			  "\n(with %d registered patch%s, "
 			  "see perl -V for more detail)",
 			  LOCAL_PATCH_COUNT,
 			  (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "\n\nCopyright 1987-2012, Larry Wall\n");
 #ifdef MSDOS
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
 #endif
 #ifdef DJGPP
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "djgpp v2 port (jpl5003c) by Hirofumi Watanabe, 1996\n"
 		      "djgpp v2 port (perl5004+) by Laszlo Molnar, 1997-1999\n");
 #endif
 #ifdef OS2
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
 		      "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
 #endif
 #ifdef __BEOS__
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "BeOS port Copyright Tom Spindler, 1997-1999\n");
 #endif
 #ifdef OEMVS
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "MVS (OS390) port by Mortice Kern Systems, 1997-1999\n");
 #endif
 #ifdef __VOS__
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "Stratus VOS port by Paul.Green@stratus.com, 1997-2002\n");
 #endif
 #ifdef POSIX_BC
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
 #ifdef EPOC
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "EPOC port by Olaf Flebbe, 1999-2002\n");
 #endif
 #ifdef UNDER_CE
-	PerlIO_printf(PerlIO_stdout(),"WINCE port by Rainer Keuchel, 2001-2002\n");
-	PerlIO_printf(PerlIO_stdout(),"Built on " __DATE__ " " __TIME__ "\n\n");
+	PerlIO_printf(PIO_stdout,
+			"WINCE port by Rainer Keuchel, 2001-2002\n"
+			"Built on " __DATE__ " " __TIME__ "\n\n");
 	wce_hitreturn();
 #endif
 #ifdef __SYMBIAN32__
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "Symbian port by Nokia, 2004-2005\n");
 #endif
 #ifdef BINARY_BUILD_NOTICE
 	BINARY_BUILD_NOTICE;
 #endif
-	PerlIO_printf(PerlIO_stdout(),
+	PerlIO_printf(PIO_stdout,
 		      "\n\
 Perl may be copied only under the terms of either the Artistic License or the\n\
 GNU General Public License, which may be found in the Perl 5 source kit.\n\n\
