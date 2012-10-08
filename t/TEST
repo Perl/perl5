@@ -113,6 +113,9 @@ $| = 1;
 #BEGIN { require '../lib/strict.pm'; "strict"->import() };
 #BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
+# allow setting -options from env
+unshift @ARGV, split /;/, $ENV{TEST_OPTS} if $ENV{TEST_OPTS};
+
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
@@ -123,12 +126,22 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
     $::tstamp = sprintf("%d-%.2d%.2d-%.2d%.2d-%.2d-$$", @dt[5,4,3,2,1,0]);
 }
 
+# wrapper template for linux perf
+our %cmdwrap = (
+    tool	=> "perf",	# path
+    cmd		=> "stat",	# others possible, none tried
+    rptdir	=> $ENV{PWD},	# typically ./t, better if absolute
+    name	=> "",	 	# $::tstamp prefixed implicitly
+    # reps	=> 1		# 
+    opts	=> "",		# pass-thru to perf stat: 'opts=-x,' gives CSV
+    );
+
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
 # can't rely on require working.
 {
     my @argv = ();
     foreach my $idx (0..$#ARGV) {
-	push( @argv, $ARGV[$idx] ), next unless $ARGV[$idx] =~ /^-(\S+)$/;
+	push( @argv, $ARGV[$idx] ), next unless $ARGV[$idx] =~ /^-(\S+?)(?:=(.+))?$/;
 	$::benchmark = 1 if $1 eq 'benchmark';
 	$::core    = 1 if $1 eq 'core';
 	$::verbose = 1 if $1 eq 'v';
@@ -140,6 +153,16 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 	    $::deparse = 1;
 	    $::deparse_opts = $1;
             _process_deparse_config();
+	}
+	if ($1 eq 'lxperf') {
+	    die "perf only available on linux" unless $^O eq 'linux';
+	    $::perf = 1;
+	    next unless $2;
+	    # $2 is either Reps or : delimited $k=$v pairs
+	    my (@v) = split /:/, $2;
+	    $cmdwrap{reps} = $v[0] if @v == 1 and $v[0] =~ /^\d+$/;
+	    # parse as $k=$v to override %cmdwrap defaults
+	    m/(.+?)=(.+)/ and $cmdwrap{$1} = $2 for @v;
 	}
     }
     @ARGV = @argv;
@@ -308,6 +331,14 @@ sub _cmd {
 	    }
             $perl = "$valgrind_exe $vg_opts $perl";
         }
+	if ($::perf) {
+	    my $ofile = "$cmdwrap{rptdir}/$::tstamp$cmdwrap{name}.perf";
+	    my $wrapper = "$cmdwrap{tool} $cmdwrap{cmd} "
+		. ( defined $cmdwrap{reps} && $cmdwrap{reps} > 0
+		    ? "--repeat $cmdwrap{reps}" : "" )
+		. " --append -o $ofile $cmdwrap{opts} -- ";
+	    $perl = "$wrapper $perl";
+	}
 
         my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
         $cmd = $perl . _quote_args($args) . " $test $redir";
