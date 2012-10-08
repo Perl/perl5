@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 238;
+plan tests => 244;
 
 my @comma = ("key", "value");
 
@@ -366,6 +366,28 @@ SKIP: {
     is( scalar( ($x,%h) = (0,1,1,1) ), 4,
 	'scalar + odd hash assignment in scalar context with duplicates' );
     ok( eq_hash( \%h, {1 => undef} ), "correct value stored" );
+}
+
+# lvaluedness of list context
+{
+    my %h; my $x;
+    $_++ foreach %h = (1,2,3,4);
+    ok( eq_hash( \%h, {1 => 3, 3 => 5} ), "aassign in list context returns lvalues" );
+
+    $_++ foreach %h = (1,2,1,4);
+    ok( eq_hash( \%h, {1 => 5} ), "the same for assignment with duplicates" );
+
+    $x = 0;
+    $_++ foreach %h = ($x,$x);
+    is($x, 0, "returned values are not binded to RHS of the assignment operation");
+
+    $_++ foreach ($x, %h) = (0,1,2,3,4);
+    is( $x, 1, "... and leading scalar" );
+    ok( eq_hash( \%h, {1 => 3, 3 => 5} ), "... scalar followed by hash" );
+
+    no warnings 'misc';
+    $_++ foreach %h = (1,2,3);
+    ok( eq_hash( \%h, {1 => 3, 3 => 1} ), "odd elements also lvalued" );
 }
 
 
