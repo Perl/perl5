@@ -3047,9 +3047,6 @@ any variables we might want to address in the C<DB> package.
 
 =cut
 
-                $obj->_handle_s_and_arg_command;
-                $obj->_handle_n_and_arg_command;
-
             }    # PIPE:
 
             # Make sure the flag that says "the debugger's running" is
@@ -3549,6 +3546,9 @@ sub _n_or_s {
     if ($DB::cmd eq $letter) {
         $self->_n_or_s_commands_generic($new_val);
     }
+    elsif ($DB::cmd =~ m#\A\Q$letter\E\b#) {
+        $self->_n_or_s_and_arg_commands_generic($letter, $new_val);
+    }
 
     return;
 }
@@ -3906,7 +3906,7 @@ sub _handle_save_command {
     return;
 }
 
-sub _handle_n_or_s_and_arg_command {
+sub _n_or_s_and_arg_commands_generic {
     my ($self, $letter, $new_val) = @_;
 
     # s - single-step. Remember the last command was 's'.
@@ -3915,19 +3915,6 @@ sub _handle_n_or_s_and_arg_command {
     }
 
     return;
-}
-
-
-sub _handle_s_and_arg_command {
-    my $self = shift;
-
-    return $self->_handle_n_or_s_and_arg_command('s', 1);
-}
-
-sub _handle_n_and_arg_command {
-    my $self = shift;
-
-    return $self->_handle_n_or_s_and_arg_command('n', 2);
 }
 
 package DB;
