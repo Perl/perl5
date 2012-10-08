@@ -2923,7 +2923,7 @@ Uses C<DB::system> to invoke a shell.
 
                     # Run the user's shell. If none defined, run Bourne.
                     # We resume execution when the shell terminates.
-                    &system( $ENV{SHELL} || "/bin/sh" );
+                    DB::system( $ENV{SHELL} || "/bin/sh" );
                     next CMD;
                 }
 
