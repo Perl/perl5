@@ -1086,7 +1086,7 @@ PP(pp_aassign)
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    HE *didstore;
 		    ODD:
-		    sv = *relem ? *relem : &PL_sv_no;
+		    sv = *relem ? gimme == G_ARRAY ? sv_mortalcopy(*relem) : *relem : &PL_sv_no;
 		    relem++;
 		    tmpstr = sv_newmortal();
 		    if (*relem)
