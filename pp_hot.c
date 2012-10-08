@@ -957,9 +957,6 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
     PERL_ARGS_ASSERT_DO_ODDBALL;
 
     if (*relem) {
-	SV *tmpstr;
-        const HE *didstore;
-
         if (ckWARN(WARN_MISC)) {
 	    const char *err;
 	    if (relem == firstrelem &&
@@ -974,15 +971,6 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), "%s", err);
 	}
 
-        tmpstr = newSV(0);
-        didstore = hv_store_ent(hash,*relem,tmpstr,0);
-        if (SvMAGICAL(hash)) {
-            if (SvSMAGICAL(tmpstr))
-                mg_set(tmpstr);
-            if (!didstore)
-                sv_2mortal(tmpstr);
-        }
-        TAINT_NOT;
     }
 }
 
@@ -1097,6 +1085,7 @@ PP(pp_aassign)
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    HE *didstore;
+		    ODD:
 		    sv = *relem ? *relem : &PL_sv_no;
 		    relem++;
 		    tmpstr = sv_newmortal();
@@ -1125,7 +1114,9 @@ PP(pp_aassign)
 		}
 		if (relem == lastrelem) {
 		    do_oddball(hash, relem, firsthashrelem);
-		    relem++;
+                    /* we have lelem to reuse, it's not needed anymore */
+                    *(relem+1) = NULL;
+		    goto ODD;
 		}
 		LEAVE;
 	    }
@@ -1249,14 +1240,14 @@ PP(pp_aassign)
 		 * obliterates the earlier key. So refresh all values. */
 		lastrelem -= duplicates;
 		relem = firsthashrelem;
-		while (relem < lastrelem) {
+		while (relem <= lastrelem) {
 		    HE *he;
 		    sv = *relem++;
 		    he = hv_fetch_ent(hash, sv, 0, 0);
 		    *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
 		}
 	    }
-	    SP = lastrelem;
+	    SP = ((lastrelem - firsthashrelem)&1)? lastrelem : lastrelem+1;
 	}
 	else
 	    SP = firstrelem + (lastlelem - firstlelem);
