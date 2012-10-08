@@ -2721,7 +2721,6 @@ try_autoload:
 
 	    /* If we're using subroutine signatures, and there's something to copy, do it */
 	    if (namecnt) {
-/* XXX TODO: Handle mismatched parameters */
 		I32 max = items < namecnt ? items : namecnt;
 		SV ** source = AvARRAY(av);
 		UV saveclearval = SAVEt_CLEARSV;
