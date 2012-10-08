@@ -8952,7 +8952,7 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
     proto = SvPV(sv, protolen);
     while (*proto) {
 	while (isSPACE(*proto)) proto++;
-	if (strchr("$@", *proto)) {
+	if (strchr("$@%", *proto)) {
 	    token[0] = *proto++;
 	    proto = scan_word(proto, token+1, sizeof(token) - 1, FALSE, &len);
 	    if (len) {
@@ -8996,9 +8996,12 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
 	/* Mark the entries as in scope */
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xlow = PL_cop_seqmax;
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xhigh = PERL_PADSEQ_INTRO;
-	/* Upgrade to an array if needed */
+	/* Upgrade to an array / hash if needed */
 	if (proto_type == '@') {
 	    sv_upgrade(PAD_SVl(pad_ix), SVt_PVAV);
+	}
+	else if (proto_type == '%') {
+	    sv_upgrade(PAD_SVl(pad_ix), SVt_PVHV);
 	}
     }
     sv_free(MUTABLE_SV(protolist));

@@ -124,11 +124,10 @@ BEGIN {
 # Hashes (%hash = ()) silences the used only once warning)
 sub greedyhash(%hash){my @keys = sort keys %hash; return "@keys"; %hash = ();}
 BEGIN {
-    local $TODO = "Named hashes not yet implemented";
     no_warnings("named hashes");
     my %hash = (c => 1, d => 2);
-    is(greedyhash(%hash),"c d");
-    is(greedyhash("c",1,"d",2),"c d");
+    is(greedyhash(%hash),"c d","Named hash using a literal hash");
+    is(greedyhash("c",1,"d",2),"c d","Named hash using a list of args");
 }
 
 # Checking params

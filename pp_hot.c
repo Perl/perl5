@@ -2746,6 +2746,27 @@ try_autoload:
 			    MARK++;
 			}
 		    }
+		    else if (SvTYPE(PAD_SVl(namecnt)) == SVt_PVHV) {
+			HV * const hv = MUTABLE_HV(PAD_SVl(namecnt));
+			SvPADSTALE_off(hv);
+			HvSHAREKEYS_off(hv);
+			if ((items - namecnt) % 2 == 0) {
+			    (void)hv_store_ent(hv, source[--items], newSV(0), 0);
+			    if (*MARK)
+				SvTEMP_off(*MARK);
+			    MARK++;
+			}
+			while (items > namecnt) {
+			    SV * const val = newSVsv(source[--items]);
+			    if (*MARK)
+				SvTEMP_off(*MARK);
+			    MARK++;
+			    (void)hv_store_ent(hv, source[--items], val, 0);
+			    if (*MARK)
+				SvTEMP_off(*MARK);
+			    MARK++;
+			}
+		    }
 		    SSPUSHUV(saveclearval + (namecnt-- * (1 << SAVE_TIGHT_SHIFT)));
 		    /* XXX TODO: Refactor, this is for the while(items) check */
 		    if (items < 0)
