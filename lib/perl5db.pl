@@ -3906,27 +3906,28 @@ sub _handle_save_command {
     return;
 }
 
-sub _handle_s_and_arg_command {
-    my $self = shift;
+sub _handle_n_or_s_and_arg_command {
+    my ($self, $letter, $new_val) = @_;
 
     # s - single-step. Remember the last command was 's'.
-    if ($DB::cmd =~ s#\As\s#\$DB::single = 1;\n#) {
-        $laststep = 's';
+    if ($DB::cmd =~ s#\A\Q$letter\E\s#\$DB::single = $new_val;\n#) {
+        $laststep = $letter;
     }
 
     return;
 }
 
+
+sub _handle_s_and_arg_command {
+    my $self = shift;
+
+    return $self->_handle_n_or_s_and_arg_command('s', 1);
+}
+
 sub _handle_n_and_arg_command {
     my $self = shift;
 
-    # n - single-step, but not into subs. Remember last command
-    # was 'n'.
-    if ($DB::cmd =~ s#\An\s#\$DB::single = 2;\n#) {
-        $laststep = 'n';
-    }
-
-    return;
+    return $self->_handle_n_or_s_and_arg_command('n', 2);
 }
 
 package DB;
