@@ -3047,16 +3047,8 @@ any variables we might want to address in the C<DB> package.
 
 =cut
 
-                # s - single-step. Remember the last command was 's'.
-                if ($cmd =~ s/\As\s/\$DB::single = 1;\n/) {
-                    $laststep = 's';
-                }
-
-                # n - single-step, but not into subs. Remember last command
-                # was 'n'.
-                if ($cmd =~ s#\An\s#\$DB::single = 2;\n#) {
-                    $laststep = 'n';
-                }
+                $obj->_handle_s_and_arg_command;
+                $obj->_handle_n_and_arg_command;
 
             }    # PIPE:
 
@@ -3909,6 +3901,29 @@ sub _handle_save_command {
             DB::warn("Can't save debugger commands in '$new_fn': $!\n");
         }
         next CMD;
+    }
+
+    return;
+}
+
+sub _handle_s_and_arg_command {
+    my $self = shift;
+
+    # s - single-step. Remember the last command was 's'.
+    if ($DB::cmd =~ s#\As\s#\$DB::single = 1;\n#) {
+        $laststep = 's';
+    }
+
+    return;
+}
+
+sub _handle_n_and_arg_command {
+    my $self = shift;
+
+    # n - single-step, but not into subs. Remember last command
+    # was 'n'.
+    if ($DB::cmd =~ s#\An\s#\$DB::single = 2;\n#) {
+        $laststep = 'n';
     }
 
     return;
