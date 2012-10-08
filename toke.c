@@ -8952,7 +8952,7 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
     proto = SvPV(sv, protolen);
     while (*proto) {
 	while (isSPACE(*proto)) proto++;
-	if (strchr("$", *proto)) {
+	if (strchr("$@", *proto)) {
 	    token[0] = *proto++;
 	    proto = scan_word(proto, token+1, sizeof(token) - 1, FALSE, &len);
 	    if (len) {
@@ -8988,6 +8988,7 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
     for (index = 0; index < argcount; index++) {
 	SV * pad_name;
 	SV * proto_name = AvARRAY(protolist)[index];
+	const char proto_type = SvPVX(proto_name)[0];
 	const int pad_ix = pad_add_name_pv(SvPV_nolen(proto_name), 0, NULL, NULL);
 	/* The named parameters must be the first entries in the pad */
 	assert(pad_ix == index + 1);
@@ -8995,6 +8996,10 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
 	/* Mark the entries as in scope */
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xlow = PL_cop_seqmax;
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xhigh = PERL_PADSEQ_INTRO;
+	/* Upgrade to an array if needed */
+	if (proto_type == '@') {
+	    sv_upgrade(PAD_SVl(pad_ix), SVt_PVAV);
+	}
     }
     sv_free(MUTABLE_SV(protolist));
     PL_cop_seqmax++;

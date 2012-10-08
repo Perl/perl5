@@ -115,11 +115,10 @@ use feature 'experimental::sub_signature';
 # Arrays (@array = ()) silences the used only once warning)
 sub greedyarray(@array){return $#array; @array = ();}
 BEGIN {
-    local $TODO = "Named arrays not yet implemented";
     no_warnings("named arrays");
     my @array = qw(1 2 3);
-    is(greedyarray(@array),2);
-    is(greedyarray(1,2,3),2);
+    is(greedyarray(@array),2,"Named array using a literal array");
+    is(greedyarray(1,2,3),2,"Named array using a list of args");
 }
 
 # Hashes (%hash = ()) silences the used only once warning)

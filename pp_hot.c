@@ -2721,14 +2721,42 @@ try_autoload:
 
 	    /* If we're using subroutine signatures, and there's something to copy, do it */
 	    if (namecnt) {
-		I32 max = items < namecnt ? items : namecnt;
+		const bool greedy = SvTYPE(PAD_SVl(namecnt)) >= SVt_PVAV ? TRUE: FALSE;
+		I32 max = items < namecnt ? items : greedy ? namecnt - 1 : namecnt;
 		SV ** source = AvARRAY(av);
 		UV saveclearval = SAVEt_CLEARSV;
+		SSCHECK(max + (I32)greedy);
+		if (items >= namecnt) {
+		    if (SvTYPE(PAD_SVl(namecnt)) < SVt_PVAV) {
+			sv_setsv(PAD_SVl(namecnt), source[namecnt-1]);
+			--max;
+		    }
+		    else if (SvTYPE(PAD_SVl(namecnt)) == SVt_PVAV) {
+			SV ** ary;
+			AV * const av = (AV *)PAD_SVl(namecnt);
+			SvPADSTALE_off(av);
+			av_extend(av, items - namecnt);
+			AvMAX(av) = items - namecnt;
+			AvFILLp(av) = items - namecnt;
+			ary = AvARRAY(av);
+			while (items-- > max) {
+			    ary[items-max] = newSVsv(source[items]);
+			    if (*MARK)
+				SvTEMP_off(*MARK);
+			    MARK++;
+			}
+		    }
+		    SSPUSHUV(saveclearval + (namecnt-- * (1 << SAVE_TIGHT_SHIFT)));
+		    /* XXX TODO: Refactor, this is for the while(items) check */
+		    if (items < 0)
+			items = 0;
+		}
+		else if (greedy)
+		    SSPUSHUV(saveclearval + (namecnt-- * (1 << SAVE_TIGHT_SHIFT)));
 		while (namecnt > max) {
 		    sv_setsv(PAD_SVl(namecnt), &PL_sv_undef);
 		    --namecnt;
 		}
-		SSCHECK(max);
 		while (max) {
 		    sv_setsv(PAD_SVl(max), source[max-1]);
 		    SvPADSTALE_off(PAD_SVl(max));
