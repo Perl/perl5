@@ -2849,8 +2849,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	method = gv_fetchmeth(stash, "SWASHNEW", 8, -1);
 	if (!method) {	/* demand load utf8 */
 	    ENTER;
-	    errsv_save = newSVsv(ERRSV);
-	    SAVEFREESV(errsv_save);
+	    if ((errsv_save = GvSV(PL_errgv))) SAVEFREESV(errsv_save);
+	    GvSV(PL_errgv) = NULL;
 	    /* It is assumed that callers of this routine are not passing in
 	     * any user derived data.  */
 	    /* Need to do this after save_re_context() as it will set
@@ -2864,9 +2864,13 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
 			     NULL);
 	    {
-		SV * const errsv = ERRSV;
-		if (!SvTRUE_NN(errsv))
-		    sv_setsv(errsv, errsv_save);
+		/* Not ERRSV, as there is no need to vivify a scalar we are
+		   about to discard. */
+		SV * const errsv = GvSV(PL_errgv);
+		if (!SvTRUE(errsv)) {
+		    GvSV(PL_errgv) = SvREFCNT_inc_simple(errsv_save);
+		    SvREFCNT_dec(errsv);
+		}
 	    }
 	    LEAVE;
 	}
@@ -2879,8 +2883,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	mPUSHi(minbits);
 	mPUSHi(none);
 	PUTBACK;
-	errsv_save = newSVsv(ERRSV);
-	SAVEFREESV(errsv_save);
+	if ((errsv_save = GvSV(PL_errgv))) SAVEFREESV(errsv_save);
+	GvSV(PL_errgv) = NULL;
 	/* If we already have a pointer to the method, no need to use
 	 * call_method() to repeat the lookup.  */
 	if (method
@@ -2891,9 +2895,12 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    SvREFCNT_inc(retval);
 	}
 	{
-	    SV * const errsv = ERRSV;
-	    if (!SvTRUE_NN(errsv))
-		sv_setsv(errsv, errsv_save);
+	    /* Not ERRSV.  See above. */
+	    SV * const errsv = GvSV(PL_errgv);
+	    if (!SvTRUE(errsv)) {
+		GvSV(PL_errgv) = SvREFCNT_inc_simple(errsv_save);
+		SvREFCNT_dec(errsv);
+	    }
 	}
 	LEAVE;
 	POPSTACK;

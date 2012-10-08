@@ -354,7 +354,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     PERL_UNUSED_CONTEXT;
 
     if (!p || p[1] < RX_NPARENS(rx)) {
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 	i = 7 + (RX_NPARENS(rx)+1) * 2;
 #else
 	i = 6 + (RX_NPARENS(rx)+1) * 2;
@@ -371,7 +371,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     RX_MATCH_COPIED_off(rx);
     *p++ = RX_NPARENS(rx);
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     *p++ = PTR2UV(RX_SAVED_COPY(rx));
     RX_SAVED_COPY(rx) = NULL;
 #endif
@@ -400,7 +400,7 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     *p++ = 0;
     RX_NPARENS(rx) = *p++;
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     if (RX_SAVED_COPY(rx))
 	SvREFCNT_dec (RX_SAVED_COPY(rx));
     RX_SAVED_COPY(rx) = INT2PTR(SV*,*p);
@@ -428,14 +428,14 @@ S_rxres_free(pTHX_ void **rsp)
     if (p) {
 	void *tmp = INT2PTR(char*,*p);
 #ifdef PERL_POISON
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 	U32 i = 9 + p[1] * 2;
 #else
 	U32 i = 8 + p[1] * 2;
 #endif
 #endif
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
         SvREFCNT_dec (INT2PTR(SV*,p[2]));
 #endif
 #ifdef PERL_POISON
