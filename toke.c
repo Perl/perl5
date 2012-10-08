@@ -8941,7 +8941,6 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
     STRLEN protolen, len;
     char *proto;
     char token[sizeof PL_tokenbuf];
-/* XXX TODO: Greedy named parameters are currently invalid */
     AV *protolist;
     int argcount, index;
 
