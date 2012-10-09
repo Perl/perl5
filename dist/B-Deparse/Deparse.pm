@@ -1681,6 +1681,17 @@ my %feature_keywords = (
    fc       => 'fc',
 );
 
+# keywords that are strong and also have a prototype
+#
+my %strong_proto_keywords = map { $_ => 1 } qw(
+    glob
+    pos
+    prototype
+    scalar
+    study
+    undef
+);
+
 sub keyword {
     my $self = shift;
     my $name = shift;
@@ -1696,9 +1707,9 @@ sub keyword {
 	 if !$hh
 	 || !$hh->{"feature_$feature_keywords{$name}"}
     }
-    if (
-      $name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
-       && !defined eval{prototype "CORE::$name"}
+    if ($strong_proto_keywords{$name}
+        || ($name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
+	    && !defined eval{prototype "CORE::$name"})
     ) { return $name }
     if (
 	exists $self->{subs_declared}{$name}
