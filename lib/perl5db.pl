@@ -1754,7 +1754,6 @@ use vars qw(
     $level
     $max
     $package
-    $sh
     $try
 );
 
@@ -1765,6 +1764,7 @@ our (
     $incr,
     $laststep,
     $rc,
+    $sh,
     $stack_depth,
     @stack,
     @to_watch,
@@ -2894,14 +2894,7 @@ C<STDOUT> from getting messed up.
 
 =cut
 
-                # $sh$sh - run a shell command (if it's all ASCII).
-                # Can't run shell commands with Unicode in the debugger, hmm.
-                if (my ($arg) = $cmd =~ m#\A$sh$sh\s*(.*)#ms) {
-
-                    # System it.
-                    DB::system($arg);
-                    next CMD;
-                }
+                $obj->_handle_sh_sh_command;
 
 =head4 C<$rc I<pattern> $rc> - Search command history
 
@@ -3915,6 +3908,19 @@ sub _n_or_s_and_arg_commands_generic {
     }
 
     return;
+}
+
+sub _handle_sh_sh_command {
+    my $self = shift;
+
+    # $sh$sh - run a shell command (if it's all ASCII).
+    # Can't run shell commands with Unicode in the debugger, hmm.
+    if (my ($arg) = $DB::cmd =~ m#\A$sh$sh\s*(.*)#ms) {
+
+        # System it.
+        DB::system($arg);
+        next CMD;
+    }
 }
 
 package DB;
