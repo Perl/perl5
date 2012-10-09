@@ -69,9 +69,6 @@ inline void MEMODSlx(char *str, long x)
  * optionaly track by using a doubly linked header
  */
 
-typedef void (*LPFREE)(void *block);
-typedef void* (*LPMALLOC)(size_t size);
-typedef void* (*LPREALLOC)(void *block, size_t size);
 #ifdef _USE_LINKED_LIST
 class VMem;
 typedef struct _MemoryBlockHeader* PMEMORY_BLOCK_HEADER;
@@ -87,14 +84,14 @@ class VMem
 public:
     VMem();
     ~VMem();
-    virtual void* Malloc(size_t size);
-    virtual void* Realloc(void* pMem, size_t size);
-    virtual void Free(void* pMem);
-    virtual void GetLock(void);
-    virtual void FreeLock(void);
-    virtual int IsLocked(void);
-    virtual long Release(void);
-    virtual long AddRef(void);
+    void* Malloc(size_t size);
+     void* Realloc(void* pMem, size_t size);
+     void Free(void* pMem);
+     void GetLock(void);
+     void FreeLock(void);
+     int IsLocked(void);
+     long Release(void);
+     long AddRef(void);
 
     inline BOOL CreateOk(void)
     {
@@ -121,30 +118,20 @@ protected:
     }
 
     MEMORY_BLOCK_HEADER	m_Dummy;
+    CRITICAL_SECTION	m_cs;		// access lock
 #endif
 
     long		m_lRefCount;	// number of current users
-    CRITICAL_SECTION	m_cs;		// access lock
-    HINSTANCE		m_hLib;
-    LPFREE		m_pfree;
-    LPMALLOC		m_pmalloc;
-    LPREALLOC		m_prealloc;
 };
 
 VMem::VMem()
 {
     m_lRefCount = 1;
-    InitializeCriticalSection(&m_cs);
 #ifdef _USE_LINKED_LIST
+    InitializeCriticalSection(&m_cs);
     m_Dummy.pNext = m_Dummy.pPrev =  &m_Dummy;
     m_Dummy.owner = this;
 #endif
-    m_hLib = LoadLibrary("msvcrt.dll");
-    if (m_hLib) {
-	m_pfree = (LPFREE)GetProcAddress(m_hLib, "free");
-	m_pmalloc = (LPMALLOC)GetProcAddress(m_hLib, "malloc");
-	m_prealloc = (LPREALLOC)GetProcAddress(m_hLib, "realloc");
-    }
 }
 
 VMem::~VMem(void)
@@ -153,17 +140,15 @@ VMem::~VMem(void)
     while (m_Dummy.pNext != &m_Dummy) {
 	Free(m_Dummy.pNext+1);
     }
-#endif
-    if (m_hLib)
-	FreeLibrary(m_hLib);
     DeleteCriticalSection(&m_cs);
+#endif
 }
 
 void* VMem::Malloc(size_t size)
 {
 #ifdef _USE_LINKED_LIST
     GetLock();
-    PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)m_pmalloc(size+sizeof(MEMORY_BLOCK_HEADER));
+    PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)malloc(size+sizeof(MEMORY_BLOCK_HEADER));
     if (!ptr) {
 	FreeLock();
 	return NULL;
@@ -172,7 +157,7 @@ void* VMem::Malloc(size_t size)
     FreeLock();
     return (ptr+1);
 #else
-    return m_pmalloc(size);
+    return malloc(size);
 #endif
 }
 
@@ -190,7 +175,7 @@ void* VMem::Realloc(void* pMem, size_t size)
     GetLock();
     PMEMORY_BLOCK_HEADER ptr = (PMEMORY_BLOCK_HEADER)(((char*)pMem)-sizeof(MEMORY_BLOCK_HEADER));
     UnlinkBlock(ptr);
-    ptr = (PMEMORY_BLOCK_HEADER)m_prealloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
+    ptr = (PMEMORY_BLOCK_HEADER)realloc(ptr, size+sizeof(MEMORY_BLOCK_HEADER));
     if (!ptr) {
 	FreeLock();
 	return NULL;
@@ -200,7 +185,7 @@ void* VMem::Realloc(void* pMem, size_t size)
 
     return (ptr+1);
 #else
-    return m_prealloc(pMem, size);
+    return realloc(pMem, size);
 #endif
 }
 
@@ -226,22 +211,26 @@ void VMem::Free(void* pMem)
 	GetLock();
 	UnlinkBlock(ptr);
 	ptr->owner = NULL;
-	m_pfree(ptr);
+	free(ptr);
 	FreeLock();
     }
-#else
-    m_pfree(pMem);
+#else /*_USE_LINKED_LIST*/
+    free(pMem);
 #endif
 }
 
 void VMem::GetLock(void)
 {
+#ifdef _USE_LINKED_LIST
     EnterCriticalSection(&m_cs);
+#endif
 }
 
 void VMem::FreeLock(void)
 {
+#ifdef _USE_LINKED_LIST
     LeaveCriticalSection(&m_cs);
+#endif
 }
 
 int VMem::IsLocked(void)
@@ -413,14 +402,14 @@ class VMem
 public:
     VMem();
     ~VMem();
-    virtual void* Malloc(size_t size);
-    virtual void* Realloc(void* pMem, size_t size);
-    virtual void Free(void* pMem);
-    virtual void GetLock(void);
-    virtual void FreeLock(void);
-    virtual int IsLocked(void);
-    virtual long Release(void);
-    virtual long AddRef(void);
+     void* Malloc(size_t size);
+     void* Realloc(void* pMem, size_t size);
+     void Free(void* pMem);
+     void GetLock(void);
+     void FreeLock(void);
+     int IsLocked(void);
+     long Release(void);
+     long AddRef(void);
 
     inline BOOL CreateOk(void)
     {
