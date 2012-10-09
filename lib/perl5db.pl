@@ -186,7 +186,7 @@ uses this hash to determine where breakpoints have been set. Any true value is
 considered to be a breakpoint; C<perl5db.pl> uses C<$break_condition\0$action>.
 Values are magical in numeric context: 1 if the line is breakable, 0 if not.
 
-The scalar C<${"_<$filename"}> simply contains the string C<<< _<$filename> >>>.
+The scalar C<${"_<$filename"}> simply contains the string C<$filename>.
 This is also the case for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings looks
 like C<(eval 34).
