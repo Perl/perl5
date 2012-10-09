@@ -4332,8 +4332,8 @@ lib/perl5db/t/proxy-constants	Tests for the Perl debugger
 lib/perl5db/t/rt-104168		Tests for the Perl debugger
 lib/perl5db/t/rt-61222		Tests for the Perl debugger
 lib/perl5db/t/rt-66110		Tests for the Perl debugger
-lib/perl5db/t/source-cmd-test-no-q.perldb		TTests for the Perl debugger
-lib/perl5db/t/source-cmd-test.perldb		TTests for the Perl debugger
+lib/perl5db/t/source-cmd-test-no-q.perldb		Tests for the Perl debugger
+lib/perl5db/t/source-cmd-test.perldb		Tests for the Perl debugger
 lib/perl5db/t/symbol-table-bug	Tests for the Perl debugger
 lib/perl5db/t/taint		Tests for the Perl debugger
 lib/perl5db/t/test-a-statement-1	Tests for the Perl debugger
