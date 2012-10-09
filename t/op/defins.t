@@ -10,7 +10,7 @@ BEGIN {
     $SIG{__WARN__} = sub { $warns++; warn $_[0] };
 }
 require 'test.pl';
-plan( tests => 23 );
+plan( tests => 26 );
 
 my $unix_mode = 1;
 
@@ -32,6 +32,15 @@ if ($^O eq 'VMS') {
     }
     $unix_mode = 1 if $drop_dot && unix_rpt;
 }
+
+# $wanted_filename should be 0 for readdir() and glob() tests.
+# This is because it is the only valid filename that is false in a boolean test.
+
+# $filename = '0';
+# print "hi\n" if $filename; # doesn't print
+
+# In the case of VMS, '0' isn't always the filename that you get.
+# Which makes those particular tests pointless.
 
 $wanted_filename = $unix_mode ? '0' : '0.';
 $saved_filename = './0';
@@ -105,6 +114,30 @@ while ($where{$seen} = readdir(DIR))
   $seen++ if $where{$seen} eq $wanted_filename;
  }
 cmp_ok($seen,'==',1,'saw file in hash while()');
+
+rewinddir(DIR);
+$seen = 0;
+$_ = 'not 0';
+while (readdir(DIR))
+ {
+  $seen++ if $_ eq $wanted_filename;
+ }
+cmp_ok($seen,'==',1,'saw file in bare while(readdir){...}');
+
+rewinddir(DIR);
+$seen = 0;
+$_ = 'not 0';
+
+$_ eq $wanted_filename && $seen++ while readdir(DIR);
+cmp_ok($seen,'==',1,'saw file in bare "... while readdir"');
+
+rewinddir(DIR);
+$seen = 0;
+do
+ {
+  $seen++ if $_ eq $wanted_filename;
+ } while (readdir(DIR));
+cmp_ok($seen,'==',1,'saw file in bare do{...}while(readdir)');
 
 $seen = 0;
 while (my $name = glob('*'))
