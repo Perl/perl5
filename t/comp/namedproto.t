@@ -161,13 +161,13 @@ else {
     eval "is(manualproto STDOUT, 'STDOUT', 'Forcing it with set_prototype works'); 1" || die $@;
 }
 
-sub manualrecproto($name){
-    BEGIN { if (!is_miniperl) { Scalar::Util::set_prototype(\&manualrecproto,"*") } }
-    return $name;
+sub prototag($name) : proto(*){ return $name; }
+BEGIN { no_warnings("sub with proto attribute") }
+if (is_miniperl) {
+    skip("Scalar::Util may not be available in miniperl");
 }
-BEGIN {
-    local $TODO = "Not sure how to use set_prototype for a recursive";
-    no_warnings("set_prototype on recursive function");
+else {
+    eval "is(prototag STDOUT, 'STDOUT', 'Forcing it with a proto attribute works'); 1" || die $@;
 }
 
 sub ignoredproto(*);
@@ -183,6 +183,8 @@ BEGIN {
     }
     @warnings = ();
 }
+
+
 
 {
     my $sub = sub ($x, $y) { $x * $y };
