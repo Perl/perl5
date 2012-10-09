@@ -7145,11 +7145,10 @@ STATIC char*	S_scan_inputsymbol(pTHX_ char *start)
 #define PERL_ARGS_ASSERT_SCAN_INPUTSYMBOL	\
 	assert(start)
 
-STATIC bool	S_scan_named_proto(pTHX_ SV *sv, bool *bad)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC bool	S_scan_named_proto(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SCAN_NAMED_PROTO	\
-	assert(sv); assert(bad)
+	assert(sv)
 
 STATIC char*	S_scan_pat(pTHX_ char *start, I32 type)
 			__attribute__warn_unused_result__

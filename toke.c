@@ -8899,8 +8899,7 @@ Perl_scan_proto (pTHX_ SV *sv, bool allowextended)
     SvCUR_set(sv, tmp);
 
     if (named_proto) {
-	use_for_cvproto = scan_named_proto(sv,
-		                           &bad_proto);
+	use_for_cvproto = bad_proto = scan_named_proto(sv);
 	seen_underscore = FALSE;
     }
 
@@ -8936,17 +8935,17 @@ Perl_scan_proto (pTHX_ SV *sv, bool allowextended)
 */
 
 bool
-S_scan_named_proto (pTHX_ SV *sv, bool * bad)
+S_scan_named_proto (pTHX_ SV *sv)
 {
     STRLEN protolen, len;
     char *proto;
     char token[sizeof PL_tokenbuf];
     AV *protolist;
     int argcount, index;
+    bool bad = false;
 
     PERL_ARGS_ASSERT_SCAN_NAMED_PROTO;
 
-    *bad = false;
     protolist = newAV();
     proto = SvPV(sv, protolen);
     while (*proto) {
@@ -8961,23 +8960,23 @@ S_scan_named_proto (pTHX_ SV *sv, bool * bad)
 		if (*proto == ',')
 		    proto++;
 		else if (*proto != '\0') {
-		    *bad = true;
+		    bad = true;
 		    break;
 		}
 	    }
 	    else {
-		*bad = true;
+		bad = true;
 		break;
 	    }
 	}
 	else {
-	    *bad = true;
+	    bad = true;
 	    break;
 	}
     }
 
     /* Undo what's been done if this is invalid, and return early */
-    if (*bad) {
+    if (bad) {
 	sv_free(MUTABLE_SV(protolist));
 	return true;
     }
