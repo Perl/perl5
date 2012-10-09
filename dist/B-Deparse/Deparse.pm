@@ -2791,7 +2791,8 @@ sub mapop {
     if (is_scope $code) {
 	$code = "{" . $self->deparse($code, 0) . "} ";
     } else {
-	$code = $self->deparse($code, 24) . ", ";
+	$code = $self->deparse($code, 24);
+	$code .= ", " if !null($kid->sibling);
     }
     $kid = $kid->sibling;
     for (; !null($kid); $kid = $kid->sibling) {
