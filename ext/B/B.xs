@@ -2140,4 +2140,12 @@ PadlistREFCNT(padlist)
     OUTPUT:
 	RETVAL
 
+I32
+PadlistNAMECNT(padlist)
+	B::PADLIST	padlist
+    CODE:
+	RETVAL = PadlistNAMECNT(padlist);
+    OUTPUT:
+	RETVAL
+
 #endif
