@@ -4,10 +4,10 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
+    require './test.pl';
 }
 
-require './test.pl';
-plan( tests => 200 );
+plan( tests => 201 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -839,3 +839,12 @@ pass("s/// on tied var returning a cow");
     eval { $s =~ s/(.)/die/e; };
     like($@, qr/Died at/, "s//die/e");
 }
+
+
+# [perl #26986] logop in repl resulting in incorrect optimisation
+"g" =~ /(.)/;
+@l{'a'..'z'} = 'A'..':';
+$_ = "hello";
+{ s/(.)/$l{my $a||$1}/g }
+is $_, "HELLO",
+  'logop in s/// repl does not result in "constant" repl optimisation';

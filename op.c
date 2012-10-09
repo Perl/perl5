@@ -4793,6 +4793,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		    else
 			break;
 		}
+		else if ((PL_opargs[curop->op_type] & OA_CLASS_MASK)
+			   == OA_LOGOP)
+		    break;
 		lastop = curop;
 	    }
 	}
