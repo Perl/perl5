@@ -528,11 +528,51 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   define VOL
 #endif
 
-#define TAINT		(PL_tainted = TRUE)
-#define TAINT_NOT	(PL_tainted = FALSE)
-#define TAINT_IF(c)	if (c) { PL_tainted = TRUE; }
-#define TAINT_ENV()	if (PL_tainting) { taint_env(); }
-#define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(NULL, s); }
+/* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
+ * you get a perl without taint support, but doubtlessly with a lesser
+ * degree of support. Do not do so unless you know exactly what it means
+ * technically, have a good reason to do so, and know exactly how the
+ * perl will be used. perls with -DSILENT_NO_TAINT_SUPPORT are considered
+ * a potential security risk due to flat out ignoring the security-relevant
+ * taint flags. This being said, a perl without taint support compiled in
+ * has marginal run-time performance benefits.
+ * SILENT_NO_TAINT_SUPPORT implies NO_TAINT_SUPPORT.
+ * SILENT_NO_TAINT_SUPPORT is the same as NO_TAINT_SUPPORT except it
+ * silently ignores -t/-T instead of throwing an exception.
+ */
+#if SILENT_NO_TAINT_SUPPORT && !defined(NO_TAINT_SUPPORT)
+#  define NO_TAINT_SUPPORT 1
+#endif
+
+/* NO_TAINT_SUPPORT can be set to transform virtually all taint-related
+ * operations into no-ops for a very modest speed-up. Enable only if you
+ * know what you're doing: tests and CPAN modules' tests are bound to fail.
+ */
+#if NO_TAINT_SUPPORT
+#   define TAINT		NOOP
+#   define TAINT_NOT		NOOP
+#   define TAINT_IF(c)		NOOP
+#   define TAINT_ENV()		NOOP
+#   define TAINT_PROPER(s)	NOOP
+#   define TAINT_set(s)		NOOP
+#   define TAINT_get		0
+#   define TAINTING_get		0
+#   define TAINTING_set(s)	NOOP
+#   define TAINT_WARN_get       0
+#   define TAINT_WARN_set(s)    NOOP
+#else
+#   define TAINT		(PL_tainted = TRUE)
+#   define TAINT_NOT	(PL_tainted = FALSE)
+#   define TAINT_IF(c)	if (c) { PL_tainted = TRUE; }
+#   define TAINT_ENV()	if (PL_tainting) { taint_env(); }
+#   define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(NULL, s); }
+#   define TAINT_set(s)		(PL_tainted = (s))
+#   define TAINT_get		(PL_tainted)
+#   define TAINTING_get		(PL_tainting)
+#   define TAINTING_set(s)	(PL_tainting = (s))
+#   define TAINT_WARN_get       (PL_taint_warn)
+#   define TAINT_WARN_set(s)    (PL_taint_warn = (s))
+#endif
 
 /* flags used internally only within pp_subst and pp_substcont */
 #ifdef PERL_CORE

@@ -122,7 +122,7 @@ PP(pp_sassign)
 	SV * const temp = left;
 	left = right; right = temp;
     }
-    if (PL_tainting && PL_tainted && !SvTAINTED(right))
+    if (TAINTING_get && TAINT_get && !SvTAINTED(right))
 	TAINT_NOT;
     if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
 	SV * const cv = SvRV(right);
@@ -1142,7 +1142,7 @@ PP(pp_aassign)
 	    tmp_gid  = PerlProc_getgid();
 	    tmp_egid = PerlProc_getegid();
 	}
-	PL_tainting |= (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid));
+	TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
     }
     PL_delaymagic = 0;
 
@@ -1217,7 +1217,7 @@ PP(pp_qr)
 	(void)sv_bless(rv, stash);
     }
 
-    if (RX_EXTFLAGS(rx) & RXf_TAINTED) {
+    if (RX_ISTAINTED(rx)) {
         SvTAINTED_on(rv);
         SvTAINTED_on(SvRV(rv));
     }
@@ -1264,8 +1264,8 @@ PP(pp_match)
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
     strend = s + len;
-    rxtainted = ((RX_EXTFLAGS(rx) & RXf_TAINTED) ||
-		 (PL_tainted && (pm->op_pmflags & PMf_RETAINT)));
+    rxtainted = (RX_ISTAINTED(rx) ||
+		 (TAINT_get && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
@@ -1976,14 +1976,19 @@ PP(pp_iter)
 /*
 A description of how taint works in pattern matching and substitution.
 
+This is all conditional on NO_TAINT_SUPPORT not being defined. Under
+NO_TAINT_SUPPORT, taint-related operations should become no-ops.
+
 While the pattern is being assembled/concatenated and then compiled,
-PL_tainted will get set if any component of the pattern is tainted, e.g.
-/.*$tainted/.  At the end of pattern compilation, the RXf_TAINTED flag
-is set on the pattern if PL_tainted is set.
+PL_tainted will get set (via TAINT_set) if any component of the pattern
+is tainted, e.g. /.*$tainted/.  At the end of pattern compilation,
+the RXf_TAINTED flag is set on the pattern if PL_tainted is set (via
+TAINT_get).
 
 When the pattern is copied, e.g. $r = qr/..../, the SV holding the ref to
 the pattern is marked as tainted. This means that subsequent usage, such
-as /x$r/, will set PL_tainted, and thus RXf_TAINTED, on the new pattern too.
+as /x$r/, will set PL_tainted using TAINT_set, and thus RXf_TAINTED,
+on the new pattern too.
 
 During execution of a pattern, locale-variant ops such as ALNUML set the
 local flag RF_tainted. At the end of execution, the engine sets the
@@ -2111,10 +2116,10 @@ PP(pp_subst)
     once = !(rpm->op_pmflags & PMf_GLOBAL);
 
     /* See "how taint works" above */
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	rxtainted  = (
 	    (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
-	  | ((RX_EXTFLAGS(rx) & RXf_TAINTED) ? SUBST_TAINT_PAT : 0)
+	  | (RX_ISTAINTED(rx) ? SUBST_TAINT_PAT : 0)
 	  | ((pm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
 	  | ((once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
 		? SUBST_TAINT_BOOLRET : 0));
@@ -2402,7 +2407,7 @@ PP(pp_subst)
     }
 
     /* See "how taint works" above */
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	if ((rxtainted & SUBST_TAINT_PAT) ||
 	    ((rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT)) ==
 				(SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
@@ -2417,8 +2422,9 @@ PP(pp_subst)
 	    SvTAINTED_off(TOPs);  /* may have got tainted earlier */
 
 	/* needed for mg_set below */
-	PL_tainted =
-	  cBOOL(rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL));
+	TAINT_set(
+	  cBOOL(rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL))
+        );
 	SvTAINT(TARG);
     }
     SvSETMAGIC(TARG); /* PL_tainted must be correctly set for this mg_set */

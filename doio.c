@@ -1599,11 +1599,11 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 
 #define APPLY_TAINT_PROPER() \
     STMT_START {							\
-	if (PL_tainted) { TAINT_PROPER(what); }				\
+	if (TAINT_get) { TAINT_PROPER(what); }				\
     } STMT_END
 
     /* This is a first heuristic; it doesn't catch tainting magic. */
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	while (++mark <= sp) {
 	    if (SvTAINTED(*mark)) {
 		TAINT;

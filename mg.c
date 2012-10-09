@@ -876,8 +876,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #endif
         }
 	else if (strEQ(remaining, "AINT"))
-            sv_setiv(sv, PL_tainting
-		    ? (PL_taint_warn || PL_unsafe ? -1 : 1)
+            sv_setiv(sv, TAINTING_get
+		    ? (TAINT_WARN_get || PL_unsafe ? -1 : 1)
 		    : 0);
         break;
     case '\025':		/* $^UNICODE, $^UTF8LOCALE, $^UTF8CACHE */
@@ -1132,7 +1132,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 #if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32) && !defined(MSDOS)
 			    /* And you'll never guess what the dog had */
 			    /*   in its mouth... */
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	MgTAINTEDDIR_off(mg);
 #ifdef VMS
 	if (s && klen == 8 && strEQ(key, "DCL$PATH")) {
@@ -1832,7 +1832,7 @@ Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
      * fake up a temporary tainted value (this is easier than temporarily
      * re-enabling magic on sv). */
 
-    if (PL_tainting && (tmg = mg_find(sv, PERL_MAGIC_taint))
+    if (TAINTING_get && (tmg = mg_find(sv, PERL_MAGIC_taint))
 	&& (tmg->mg_len & 1))
     {
 	val = sv_mortalcopy(sv);
@@ -2233,7 +2233,7 @@ Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
 
     /* update taint status */
-    if (PL_tainted)
+    if (TAINT_get)
 	mg->mg_len |= 1;
     else
 	mg->mg_len &= ~1;
@@ -2493,7 +2493,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	/* mg_set() has temporarily made sv non-magical */
-	if (PL_tainting) {
+	if (TAINTING_get) {
 	    if ((tmg = mg_find(sv,PERL_MAGIC_taint)) && tmg->mg_len & 1)
 		SvTAINTED_on(PL_bodytarget);
 	    else

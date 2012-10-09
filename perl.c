@@ -1230,8 +1230,8 @@ perl_destruct(pTHXx)
 	Safefree(psig_save);
     }
     nuke_stacks();
-    PL_tainting = FALSE;
-    PL_taint_warn = FALSE;
+    TAINTING_set(FALSE);
+    TAINT_WARN_set(FALSE);
     PL_hints = 0;		/* Reset hints. Should hints be per-interpreter ? */
     PL_debug = 0;
 
@@ -1594,7 +1594,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	PL_do_undump = FALSE;
 	cxstack_ix = -1;		/* start label stack again */
 	init_ids();
-	assert (!PL_tainted);
+	assert (!TAINT_get);
 	TAINT;
 	S_set_caret_X(aTHX);
 	TAINT_NOT;
@@ -1832,17 +1832,31 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    break;
 
 	case 't':
+#if SILENT_NO_TAINT_SUPPORT
+            /* silently ignore */
+#elif NO_TAINT_SUPPORT
+            Perl_croak("This perl was compiled without taint support. "
+                       "Cowardly refusing to run with -t or -T flags");
+#else
 	    CHECK_MALLOC_TOO_LATE_FOR('t');
-	    if( !PL_tainting ) {
-	         PL_taint_warn = TRUE;
-	         PL_tainting = TRUE;
+	    if( !TAINTING_get ) {
+	         TAINT_WARN_set(TRUE);
+	         TAINTING_set(TRUE);
 	    }
+#endif
 	    s++;
 	    goto reswitch;
 	case 'T':
+#if SILENT_NO_TAINT_SUPPORT
+            /* silently ignore */
+#elif NO_TAINT_SUPPORT
+            Perl_croak("This perl was compiled without taint support. "
+                       "Cowardly refusing to run with -t or -T flags");
+#else
 	    CHECK_MALLOC_TOO_LATE_FOR('T');
-	    PL_tainting = TRUE;
-	    PL_taint_warn = FALSE;
+	    TAINTING_set(TRUE);
+	    TAINT_WARN_set(FALSE);
+#endif
 	    s++;
 	    goto reswitch;
 
@@ -1943,16 +1957,23 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     if (
 #ifndef SECURE_INTERNAL_GETENV
-        !PL_tainting &&
+        !TAINTING_get &&
 #endif
 	(s = PerlEnv_getenv("PERL5OPT")))
     {
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T') {
+#if SILENT_NO_TAINT_SUPPORT
+            /* silently ignore */
+#elif NO_TAINT_SUPPORT
+            Perl_croak("This perl was compiled without taint support. "
+                       "Cowardly refusing to run with -t or -T flags");
+#else
 	    CHECK_MALLOC_TOO_LATE_FOR('T');
-	    PL_tainting = TRUE;
-            PL_taint_warn = FALSE;
+	    TAINTING_set(TRUE);
+            TAINT_WARN_set(FALSE);
+#endif
 	}
 	else {
 	    char *popt_copy = NULL;
@@ -1982,10 +2003,17 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		    }
 		}
 		if (*d == 't') {
-		    if( !PL_tainting ) {
-		        PL_taint_warn = TRUE;
-		        PL_tainting = TRUE;
+#if SILENT_NO_TAINT_SUPPORT
+            /* silently ignore */
+#elif NO_TAINT_SUPPORT
+                    Perl_croak("This perl was compiled without taint support. "
+                               "Cowardly refusing to run with -t or -T flags");
+#else
+		    if( !TAINTING_get) {
+		        TAINT_WARN_set(TRUE);
+		        TAINTING_set(TRUE);
 		    }
+#endif
 		} else {
 		    moreswitches(d);
 		}
@@ -1996,7 +2024,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     /* Set $^X early so that it can be used for relocatable paths in @INC  */
     /* and for SITELIB_EXP in USE_SITECUSTOMIZE                            */
-    assert (!PL_tainted);
+    assert (!TAINT_get);
     TAINT;
     S_set_caret_X(aTHX);
     TAINT_NOT;
@@ -2052,7 +2080,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	scriptname = "-";
     }
 
-    assert (!PL_tainted);
+    assert (!TAINT_get);
     init_perllib();
 
     {
@@ -2195,7 +2223,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef PERL_MAD
     {
 	const char *s;
-    if (!PL_tainting &&
+    if (!TAINTING_get &&
         (s = PerlEnv_getenv("PERL_XMLDUMP"))) {
 	PL_madskills = 1;
 	PL_minus_c = 1;
@@ -3299,8 +3327,15 @@ Perl_moreswitches(pTHX_ const char *s)
 	return s;
     case 't':
     case 'T':
-        if (!PL_tainting)
+#if SILENT_NO_TAINT_SUPPORT
+            /* silently ignore */
+#elif NO_TAINT_SUPPORT
+        Perl_croak("This perl was compiled without taint support. "
+                   "Cowardly refusing to run with -t or -T flags");
+#else
+        if (!TAINTING_get)
 	    TOO_LATE_FOR(*s);
+#endif
         s++;
 	return s;
     case 'u':
@@ -3796,6 +3831,9 @@ S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 STATIC void
 S_init_ids(pTHX)
 {
+    /* no need to do anything here any more if we don't
+     * do tainting. */
+#if !NO_TAINT_SUPPORT
     dVAR;
     const UV my_uid = PerlProc_getuid();
     const UV my_euid = PerlProc_geteuid();
@@ -3804,7 +3842,8 @@ S_init_ids(pTHX)
 
     /* Should not happen: */
     CHECK_MALLOC_TAINT(my_uid && (my_euid != my_uid || my_egid != my_gid));
-    PL_tainting |= (my_uid && (my_euid != my_uid || my_egid != my_gid));
+    TAINTING_set( TAINTING_get | (my_uid && (my_euid != my_uid || my_egid != my_gid)) );
+#endif
     /* BUG */
     /* PSz 27 Feb 04
      * Should go by suidscript, not uid!=euid: why disallow
@@ -4221,7 +4260,7 @@ S_init_perllib(pTHX)
     STRLEN len;
 #endif
 
-    if (!PL_tainting) {
+    if (!TAINTING_get) {
 #ifndef VMS
 	perl5lib = PerlEnv_getenv("PERL5LIB");
 /*
@@ -4337,7 +4376,7 @@ S_init_perllib(pTHX)
 		      |INCPUSH_CAN_RELOCATE);
 #endif
 
-    if (!PL_tainting) {
+    if (!TAINTING_get) {
 #ifndef VMS
 /*
  * It isn't possible to delete an environment variable with
@@ -4394,7 +4433,7 @@ S_init_perllib(pTHX)
 #endif
 #endif /* !PERL_IS_MINIPERL */
 
-    if (!PL_tainting)
+    if (!TAINTING_get)
 	S_incpush(aTHX_ STR_WITH_LEN("."), 0);
 }
 
@@ -4560,7 +4599,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		    SvREFCNT_dec(libdir);
 		    /* And this is the new libdir.  */
 		    libdir = tempsv;
-		    if (PL_tainting &&
+		    if (TAINTING_get &&
 			(PerlProc_getuid() != PerlProc_geteuid() ||
 			 PerlProc_getgid() != PerlProc_getegid())) {
 			/* Need to taint relocated paths if running set ID  */

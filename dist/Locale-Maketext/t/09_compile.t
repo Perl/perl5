@@ -13,7 +13,8 @@ my $tainted_value;
 do { $tainted_value = shift @ENV_values  } while(!$tainted_value || ref $tainted_value);
 $tainted_value =~ s/([\[\]])/~$1/g;
 
-ok(tainted($tainted_value), "\$tainted_value is tainted") or die('huh... %ENV has no entries? I don\'t know how to test taint without it');
+# If ${^TAINT} is not set despite -T, thsi perl doesn't have taint support
+ok(!${^TAINT} || tainted($tainted_value), "\$tainted_value is tainted") or die('huh... %ENV has no entries? I don\'t know how to test taint without it');
 
 my $result = Locale::Maketext::_compile("hello [_1]", $tainted_value);
 

@@ -550,8 +550,9 @@ do_test('scalar with pos magic',
 # VMS is setting FAKE and READONLY flags.  What VMS uses for storing
 # ENV hashes is also not always null terminated.
 #
-do_test('tainted value in %ENV',
-        $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
+if (${^TAINT}) {
+  do_test('tainted value in %ENV',
+          $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(GMG,SMG,RMG(?:,POK)?(?:,pIOK)?,pPOK\\)
@@ -577,6 +578,7 @@ do_test('tainted value in %ENV',
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
+}
 
 do_test('blessed reference',
 	bless(\\undef, 'Foobar'),

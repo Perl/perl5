@@ -1072,7 +1072,7 @@ int Perl_my_trnlnm(pTHX_ const char *lnm, char *eqv, unsigned long int idx)
     if (aTHX != NULL)
 #endif
 #ifdef SECURE_INTERNAL_GETENV
-        flags = (PL_curinterp ? PL_tainting : will_taint) ?
+        flags = (PL_curinterp ? TAINTING_get : will_taint) ?
                  PERL__TRNENV_SECURE : 0;
 #endif
 
@@ -1145,7 +1145,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
       /* Impose security constraints only if tainting */
       if (sys) {
         /* Impose security constraints only if tainting */
-        secure = PL_curinterp ? PL_tainting : will_taint;
+        secure = PL_curinterp ? TAINTING_get : will_taint;
         saverr = errno;  savvmserr = vaxc$errno;
       }
       else {
@@ -1244,7 +1244,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
     else {
       if (sys) {
         /* Impose security constraints only if tainting */
-        secure = PL_curinterp ? PL_tainting : will_taint;
+        secure = PL_curinterp ? TAINTING_get : will_taint;
         saverr = errno;  savvmserr = vaxc$errno;
       }
       else {

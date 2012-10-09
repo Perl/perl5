@@ -1442,14 +1442,18 @@ attention to precisely which outputs are influenced by which inputs.
 
 #define sv_taint(sv)	  sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0)
 
-#define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
-#define SvTAINTED_on(sv)  STMT_START{ if(PL_tainting){sv_taint(sv);}   }STMT_END
-#define SvTAINTED_off(sv) STMT_START{ if(PL_tainting){sv_untaint(sv);} }STMT_END
+#if NO_TAINT_SUPPORT
+#   define SvTAINTED(sv) 0
+#else
+#   define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
+#endif
+#define SvTAINTED_on(sv)  STMT_START{ if(TAINTING_get){sv_taint(sv);}   }STMT_END
+#define SvTAINTED_off(sv) STMT_START{ if(TAINTING_get){sv_untaint(sv);} }STMT_END
 
 #define SvTAINT(sv)			\
     STMT_START {			\
-	if (PL_tainting) {		\
-	    if (PL_tainted)		\
+	if (TAINTING_get) {		\
+	    if (TAINT_get)		\
 		SvTAINTED_on(sv);	\
 	}				\
     } STMT_END

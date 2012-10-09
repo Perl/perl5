@@ -450,7 +450,7 @@ PerlIO_debug(const char *fmt, ...)
     dSYS;
     va_start(ap, fmt);
     if (!PL_perlio_debug_fd) {
-	if (!PL_tainting &&
+	if (!TAINTING_get &&
 	    PerlProc_getuid() == PerlProc_geteuid() &&
 	    PerlProc_getgid() == PerlProc_getegid()) {
 	    const char * const s = PerlEnv_getenv("PERLIO_DEBUG");
@@ -1155,7 +1155,7 @@ PerlIO_default_layers(pTHX)
 {
     dVAR;
     if (!PL_def_layerlist) {
-	const char * const s = (PL_tainting) ? NULL : PerlEnv_getenv("PERLIO");
+	const char * const s = TAINTING_get ? NULL : PerlEnv_getenv("PERLIO");
 	PERLIO_FUNCS_DECL(*osLayer) = &PerlIO_unix;
 	PL_def_layerlist = PerlIO_list_alloc(aTHX);
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_unix));
@@ -5014,7 +5014,7 @@ PerlIO_tmpfile(void)
 #    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
      int fd = -1;
      char tempname[] = "/tmp/PerlIO_XXXXXX";
-     const char * const tmpdir = PL_tainting ? NULL : PerlEnv_getenv("TMPDIR");
+     const char * const tmpdir = TAINTING_get ? NULL : PerlEnv_getenv("TMPDIR");
      SV * sv = NULL;
      /*
       * I have no idea how portable mkstemp() is ... NI-S

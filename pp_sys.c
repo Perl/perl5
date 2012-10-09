@@ -387,7 +387,7 @@ PP(pp_glob)
     ENTER_with_name("glob");
 
 #ifndef VMS
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	/*
 	 * The external globbing program may use things we can't control,
 	 * so for security reasons we must assume the worst.
@@ -4138,11 +4138,11 @@ PP(pp_system)
     I32 value;
     int result;
 
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
-	    if (PL_tainted)
+	    if (TAINT_get)
 		break;
 	}
 	MARK = ORIGMARK;
@@ -4285,11 +4285,11 @@ PP(pp_exec)
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	TAINT_ENV();
 	while (++MARK <= SP) {
 	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
-	    if (PL_tainted)
+	    if (TAINT_get)
 		break;
 	}
 	MARK = ORIGMARK;
@@ -5435,7 +5435,7 @@ PP(pp_syscall)
     I32 i = 0;
     IV retval = -1;
 
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	while (++MARK <= SP) {
 	    if (SvTAINTED(*MARK)) {
 		TAINT;

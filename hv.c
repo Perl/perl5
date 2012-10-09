@@ -526,13 +526,13 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    bool needs_store;
 	    hv_magic_check (hv, &needs_copy, &needs_store);
 	    if (needs_copy) {
-		const bool save_taint = PL_tainted;
+		const bool save_taint = TAINT_get; /* Unused var warning under NO_TAINT_SUPPORT */
 		if (keysv || is_utf8) {
 		    if (!keysv) {
 			keysv = newSVpvn_utf8(key, klen, TRUE);
 		    }
-		    if (PL_tainting)
-			PL_tainted = SvTAINTED(keysv);
+		    if (TAINTING_get)
+			TAINT_set(SvTAINTED(keysv));
 		    keysv = sv_2mortal(newSVsv(keysv));
 		    mg_copy(MUTABLE_SV(hv), val, (char*)keysv, HEf_SVKEY);
 		} else {

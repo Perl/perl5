@@ -12948,9 +12948,14 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_origargc		= proto_perl->Iorigargc;
     PL_origargv		= proto_perl->Iorigargv;
 
+#if !NO_TAINT_SUPPORT
     /* Set tainting stuff before PerlIO_debug can possibly get called */
     PL_tainting		= proto_perl->Itainting;
     PL_taint_warn	= proto_perl->Itaint_warn;
+#else
+    PL_tainting         = FALSE;
+    PL_taint_warn	= FALSE;
+#endif
 
     PL_minus_c		= proto_perl->Iminus_c;
 
@@ -13123,7 +13128,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_timesbuf		= proto_perl->Itimesbuf;
 #endif
 
+#if !NO_TAINT_SUPPORT
     PL_tainted		= proto_perl->Itainted;
+#else
+    PL_tainted          = FALSE;
+#endif
     PL_curpm		= proto_perl->Icurpm;	/* XXX No PMOP ref count */
 
     PL_chopset		= proto_perl->Ichopset;	/* XXX never deallocated */

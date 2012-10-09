@@ -2867,8 +2867,10 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	     * PL_tainted to 1 while saving $1 etc (see the code after getrx:
 	     * in Perl_magic_get).  Even line to create errsv_save can turn on
 	     * PL_tainted.  */
-	    SAVEBOOL(PL_tainted);
-	    PL_tainted = 0;
+#ifndef NO_TAINT_SUPPORT
+	    SAVEBOOL(TAINT_get);
+	    TAINT_NOT;
+#endif
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
 			     NULL);
 	    if (!SvTRUE(ERRSV))

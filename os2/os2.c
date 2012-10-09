@@ -1568,7 +1568,7 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
     that = !this;
-    if (PL_tainting) {
+    if (TAINTING_get) {
 	taint_env();
 	taint_proper("Insecure %s%s", "EXEC");
     }
