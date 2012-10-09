@@ -893,9 +893,8 @@ BEGIN {
 }
 
 # without threads, $filename is not defined until DB::DB is called
-foreach my $k (keys (%INC)) {
-    share(\$main::{'_<'.$filename}) if defined $filename;
-};
+# We need the & here because we want to override the prototype.
+&share(\$main::{'_<'.$filename}) if defined $filename;
 
 # Command-line + PERLLIB:
 # Save the contents of @INC before they are modified elsewhere.
