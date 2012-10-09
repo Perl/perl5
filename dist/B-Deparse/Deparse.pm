@@ -2568,6 +2568,15 @@ sub listop {
 	return "$exprs[0] = $fullname"
 	         . ($parens ? "($exprs[0])" : " $exprs[0]");
     }
+    if ($name =~ /^(system|exec)$/
+	&& ($op->flags & OPf_STACKED)
+	&& @exprs > 1)
+    {
+	# handle the "system prog a1,a2,.." form
+	my $prog = shift @exprs;
+	$exprs[0] = "$prog $exprs[0]";
+    }
+
     if ($parens && $nollafr) {
 	return "($fullname " . join(", ", @exprs) . ")";
     } elsif ($parens) {
