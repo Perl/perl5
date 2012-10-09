@@ -3297,10 +3297,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ regnode *text_node, I32 *c1, I32 *c2)
     dVAR;
 
     /* First byte from the EXACTish node */
-    U8 *pat_byte = (U8*)STRING(text_node);
+    U8 *pat = (U8*)STRING(text_node);
 
     if (! UTF_PATTERN) {    /* Not UTF-8: the code point is the byte */
-        *c1 = *pat_byte;
+        *c1 = *pat;
         if (OP(text_node) == EXACT) {
             *c2 = *c1;
         }
@@ -3346,7 +3346,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ regnode *text_node, I32 *c1, I32 *c2)
     }
     else { /* UTF_PATTERN */
         if (OP(text_node) == EXACT) {
-            *c2 = *c1 = utf8n_to_uvchr(pat_byte, UTF8_MAXBYTES, 0, uniflags);
+            *c2 = *c1 = utf8n_to_uvchr(pat, UTF8_MAXBYTES, 0, uniflags);
             if (*c1 < 0) {  /* Overflowed what we can handle */
                 *c1 = *c2 = CHRTEST_VOID;
             }
@@ -3355,12 +3355,12 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ regnode *text_node, I32 *c1, I32 *c2)
             }
         }
         else {
-            if (UTF8_IS_ABOVE_LATIN1(*pat_byte)) {
+            if (UTF8_IS_ABOVE_LATIN1(*pat)) {
 
                 /* A multi-character fold is complicated, probably has more
                  * than two possibilities */
-                if (is_MULTI_CHAR_FOLD_utf8_safe((char*) pat_byte,
-                                        (char*) pat_byte + STR_LEN(text_node)))
+                if (is_MULTI_CHAR_FOLD_utf8_safe((char*) pat,
+                                        (char*) pat + STR_LEN(text_node)))
                 {
                     *c1 = *c2 = CHRTEST_VOID;
                 }
@@ -3387,14 +3387,14 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ regnode *text_node, I32 *c1, I32 *c2)
                     * the values each an array of everything that folds to its
                     * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
                     if ((! (listp = hv_fetch(PL_utf8_foldclosures,
-                                             (char *) pat_byte,
-                                             UTF8SKIP(pat_byte),
+                                             (char *) pat,
+                                             UTF8SKIP(pat),
                                              FALSE))))
                     {
                         /* Not found in the hash, therefore there are no folds
                          * containing it, so there is only a single char
                          * possible for beginning B */
-                        *c2 = *c1 = utf8n_to_uvchr(pat_byte, STR_LEN(text_node),
+                        *c2 = *c1 = utf8n_to_uvchr(pat, STR_LEN(text_node),
                                                                   0, uniflags);
                         if (*c1 < 0) {  /* Overflowed what we can handle */
                             *c1 = *c2 = CHRTEST_VOID;
@@ -3424,9 +3424,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ regnode *text_node, I32 *c1, I32 *c2)
             }
             else {
                 /* Get the character represented by the UTF-8-encoded byte */
-                U8 c = (UTF8_IS_INVARIANT(*pat_byte))
-                        ? *pat_byte
-                        : TWO_BYTE_UTF8_TO_UNI(*pat_byte, *(pat_byte+1));
+                U8 c = (UTF8_IS_INVARIANT(*pat))
+                        ? *pat
+                        : TWO_BYTE_UTF8_TO_UNI(*pat, *(pat+1));
 
                 if (HAS_NONLATIN1_FOLD_CLOSURE(c)
                     && (OP(text_node) != EXACTFA || ! isASCII(c)))
