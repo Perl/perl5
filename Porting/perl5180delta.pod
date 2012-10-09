@@ -331,7 +331,19 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+=item *
+
+The following CPAN modules have test failures with perl 5.16.  Patches have
+been submitted for all of these, so hopefully there will be new releases
+soon:
+
+=over
+
+=item *
+
+L<B::Generate> version 1.46
+
+=back
 
 =back
 
