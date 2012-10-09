@@ -506,8 +506,10 @@ default for print() statements.  The extension, if supplied, is used to
 modify the name of the old file to make a backup copy, following these
 rules:
 
-If no extension is supplied, no backup is made and the current file is
-overwritten.
+If no extension is supplied, and your system supports it, the original
+I<file> is kept open without a name while the output is redirected to
+a new file with the original I<filename>.  When perl exits, cleanly or not,
+the original I<file> is unlinked.
 
 If the extension doesn't contain a C<*>, then it is appended to the
 end of the current filename as a suffix.  If the extension does
