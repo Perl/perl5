@@ -102,8 +102,8 @@ struct reg_code_block {
 	/* Information about the match that the perl core uses to */	\
 	/* manage things */						\
 	U32 extflags;	/* Flags used both externally and internally */	\
-	I32 minlen;	/* mininum possible length of string to match */\
-	I32 minlenret;	/* mininum possible length of $& */		\
+	I32 minlen;	/* mininum possible number of chars in string to match */\
+	I32 minlenret;	/* mininum possible number of chars in $& */		\
 	U32 gofs;	/* chars left of pos that we search from */	\
 	/* substring data about strings that must appear in the */	\
 	/* final match, used for optimisations */			\
