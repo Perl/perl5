@@ -2753,6 +2753,7 @@ sub indirop {
 	}
     } elsif (
 	!$indir && $name eq "sort"
+      && !null($op->first->sibling)
       && $op->first->sibling->name eq 'entersub'
     ) {
 	# We cannot say sort foo(bar), as foo will be interpreted as a
