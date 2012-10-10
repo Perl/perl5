@@ -2764,7 +2764,7 @@ deal with them instead of processing them in-line.
                 # All of these commands were remapped in perl 5.8.0;
                 # we send them off to the secondary dispatcher (see below).
                 if (my ($cmd_letter, $my_arg) = $cmd =~ /\A([aAbBeEhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so) {
-                    &cmd_wrapper( $cmd_letter, $my_arg, $line );
+                    cmd_wrapper( $cmd_letter, $my_arg, $line );
                     next CMD;
                 }
 
