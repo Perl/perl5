@@ -1020,7 +1020,7 @@ win32_dirp_dup(DIR *const dirp, CLONE_PARAMS *const param)
 {
     dVAR;
     PerlInterpreter *const from = param->proto_perl;
-    PerlInterpreter *const to   = PERL_GET_THX;
+    PerlInterpreter *const to   = (PerlInterpreter *)PERL_GET_THX;
 
     long pos;
     DIR *dup;
@@ -1686,7 +1686,7 @@ wstr_to_str(const wchar_t* wstr)
     size_t wlen = wcslen(wstr) + 1;
     int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen,
                                    NULL, 0, NULL, NULL);
-    char* str = malloc(len);
+    char* str = (char*)malloc(len);
     if (!str)
         out_of_memory();
     WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen,
@@ -1719,7 +1719,7 @@ win32_ansipath(const WCHAR *widename)
     size_t widelen = wcslen(widename)+1;
     int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
                                   NULL, 0, NULL, NULL);
-    name = win32_malloc(len);
+    name = (char*)win32_malloc(len);
     if (!name)
         out_of_memory();
 
@@ -1728,14 +1728,14 @@ win32_ansipath(const WCHAR *widename)
     if (use_default) {
         DWORD shortlen = GetShortPathNameW(widename, NULL, 0);
         if (shortlen) {
-            WCHAR *shortname = win32_malloc(shortlen*sizeof(WCHAR));
+            WCHAR *shortname = (WCHAR*)win32_malloc(shortlen*sizeof(WCHAR));
             if (!shortname)
                 out_of_memory();
             shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
 
             len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
                                       NULL, 0, NULL, NULL);
-            name = win32_realloc(name, len);
+            name = (char*)win32_realloc(name, len);
             if (!name)
                 out_of_memory();
             WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
@@ -4093,7 +4093,7 @@ win32_dynaload(const char* filename)
 {
     dTHX;
     char buf[MAX_PATH+1];
-    char *first;
+    const char *first;
 
     /* LoadLibrary() doesn't recognize forward slashes correctly,
      * so turn 'em back. */
@@ -4237,13 +4237,13 @@ ansify_path(void)
 
     /* fetch Unicode version of PATH */
     len = 2000;
-    wide_path = win32_malloc(len*sizeof(WCHAR));
+    wide_path = (WCHAR*)win32_malloc(len*sizeof(WCHAR));
     while (wide_path) {
         size_t newlen = GetEnvironmentVariableW(L"PATH", wide_path, len);
         if (newlen < len)
             break;
         len = newlen;
-        wide_path = win32_realloc(wide_path, len*sizeof(WCHAR));
+        wide_path = (WCHAR*)win32_realloc(wide_path, len*sizeof(WCHAR));
     }
     if (!wide_path)
         return;
@@ -4272,7 +4272,7 @@ ansify_path(void)
         ansi_len = strlen(ansi_dir);
         if (ansi_path) {
             size_t newlen = len + 1 + ansi_len;
-            ansi_path = win32_realloc(ansi_path, newlen+1);
+            ansi_path = (char*)win32_realloc(ansi_path, newlen+1);
             if (!ansi_path)
                 break;
             ansi_path[len] = ';';
@@ -4281,7 +4281,7 @@ ansify_path(void)
         }
         else {
             len = ansi_len;
-            ansi_path = win32_malloc(5+len+1);
+            ansi_path = (char*)win32_malloc(5+len+1);
             if (!ansi_path)
                 break;
             memcpy(ansi_path, "PATH=", 5);
