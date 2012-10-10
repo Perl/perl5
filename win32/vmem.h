@@ -9,8 +9,8 @@
  * Options:
  *
  * Defining _USE_MSVCRT_MEM_ALLOC will cause all memory allocations
- * to be forwarded to MSVCRT.DLL. Defining _USE_LINKED_LIST as well will
- * track all allocations in a doubly linked list, so that the host can
+ * to be forwarded to the compiler's MSVCR*.DLL. Defining _USE_LINKED_LIST as
+ * well will track all allocations in a doubly linked list, so that the host can
  * free all memory allocated when it goes away.
  * If _USE_MSVCRT_MEM_ALLOC is not defined then Knuth's boundary tag algorithm
  * is used; defining _USE_BUDDY_BLOCKS will use Knuth's algorithm R
@@ -65,8 +65,8 @@ inline void MEMODSlx(char *str, long x)
 #endif
 
 /* 
- * Pass all memory requests throught to msvcrt.dll 
- * optionaly track by using a doubly linked header
+ * Pass all memory requests through to the compiler's msvcr*.dll.
+ * Optionaly track by using a doubly linked header.
  */
 
 #ifdef _USE_LINKED_LIST
@@ -85,13 +85,13 @@ public:
     VMem();
     ~VMem();
     void* Malloc(size_t size);
-     void* Realloc(void* pMem, size_t size);
-     void Free(void* pMem);
-     void GetLock(void);
-     void FreeLock(void);
-     int IsLocked(void);
-     long Release(void);
-     long AddRef(void);
+    void* Realloc(void* pMem, size_t size);
+    void Free(void* pMem);
+    void GetLock(void);
+    void FreeLock(void);
+    int IsLocked(void);
+    long Release(void);
+    long AddRef(void);
 
     inline BOOL CreateOk(void)
     {
@@ -402,14 +402,14 @@ class VMem
 public:
     VMem();
     ~VMem();
-     void* Malloc(size_t size);
-     void* Realloc(void* pMem, size_t size);
-     void Free(void* pMem);
-     void GetLock(void);
-     void FreeLock(void);
-     int IsLocked(void);
-     long Release(void);
-     long AddRef(void);
+    void* Malloc(size_t size);
+    void* Realloc(void* pMem, size_t size);
+    void Free(void* pMem);
+    void GetLock(void);
+    void FreeLock(void);
+    int IsLocked(void);
+    long Release(void);
+    long AddRef(void);
 
     inline BOOL CreateOk(void)
     {
