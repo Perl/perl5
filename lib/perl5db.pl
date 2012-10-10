@@ -2736,7 +2736,7 @@ and then we look up the line in the magical C<%dbline> hash.
 
 =cut
 
-        _DB__handle_dot_command($obj);
+                _DB__handle_dot_command($obj);
 
 =head4 C<-> - back one window
 
