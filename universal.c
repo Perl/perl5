@@ -1415,7 +1415,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
 {
     dVAR;
     static const char file[] = __FILE__;
-    struct xsub_details *xsub = details;
+    const struct xsub_details *xsub = details;
     const struct xsub_details *end
 	= details + sizeof(details) / sizeof(details[0]);
 
