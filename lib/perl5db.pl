@@ -866,8 +866,7 @@ BEGIN {
         lock($DBGR);
         print "Threads support enabled\n";
     } else {
-        *lock  = sub(*) {};
-        *share = sub(*) {};
+        *share = sub(\[$@%]) {};
     }
 }
 
@@ -893,8 +892,7 @@ BEGIN {
 }
 
 # without threads, $filename is not defined until DB::DB is called
-# We need the & here because we want to override the prototype.
-&share(\$main::{'_<'.$filename}) if defined $filename;
+share($main::{'_<'.$filename}) if defined $filename;
 
 # Command-line + PERLLIB:
 # Save the contents of @INC before they are modified elsewhere.
