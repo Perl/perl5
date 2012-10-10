@@ -1913,10 +1913,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 				 "$%c is no longer supported", *name);
 	    break;
-	case '|':		/* $| */
-	    sv_setiv(GvSVn(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
-	    goto magicalize;
-
 	case '\010':	/* $^H */
 	    {
 		HV *const hv = GvHVn(gv);
@@ -1957,6 +1953,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '>':		/* $> */
 	case '\\':		/* $\ */
 	case '/':		/* $/ */
+	case '|':		/* $| */
 	case '$':		/* $$ */
 	case '\001':	/* $^A */
 	case '\003':	/* $^C */
