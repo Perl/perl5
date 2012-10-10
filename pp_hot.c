@@ -2688,7 +2688,7 @@ try_autoload:
 	}
 	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
-	if (hasargs || namecnt) {
+	if (hasargs) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
