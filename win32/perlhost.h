@@ -1534,13 +1534,13 @@ PerlProcCrypt(struct IPerlProc* piPerl, const char* clear, const char* salt)
     return win32_crypt(clear, salt);
 }
 
-void
+PERL_CALLCONV_NO_RET void
 PerlProcExit(struct IPerlProc* piPerl, int status)
 {
     exit(status);
 }
 
-void
+PERL_CALLCONV_NO_RET void
 PerlProc_Exit(struct IPerlProc* piPerl, int status)
 {
     _exit(status);
