@@ -2541,9 +2541,13 @@ sub listop {
     $name = "socketpair" if $name eq "sockpair";
     my $fullname = $self->keyword($name);
     my $proto = prototype("CORE::$name");
-    if (defined $proto
-	&& $proto =~ /^;?\*/
-	&& $kid->name eq "rv2gv" && !($kid->private & OPpLVAL_INTRO)) {
+    if (
+	 (     (defined $proto && $proto =~ /^;?\*/)
+	    || $name eq 'select' # select(F) doesn't have a proto
+	 )
+	 && $kid->name eq "rv2gv"
+	 && !($kid->private & OPpLVAL_INTRO)
+    ) {
 	$first = $self->rv2gv_or_string($kid->first);
     }
     else {

@@ -1263,3 +1263,17 @@ foreach my $i (1 .. 3) {
 continue {
     ();
 }
+####
+# file handles
+no strict;
+my $mfh;
+open F;
+open *F;
+open $fh;
+open $mfh;
+open 'a+b';
+select *F;
+select F;
+select $f;
+select $mfh;
+select 'a+b';
