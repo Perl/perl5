@@ -30,6 +30,16 @@ the algorithm name used, or be able to execute arbitrary Perl code already.
 
 This problem has been fixed.
 
+=head2 Heap buffer overrun in 'x' string repeat operator (CVE-2012-5195)
+
+Poorly written perl code that allows an attacker to specify the count to
+perl's 'x' string repeat operator can already cause a memory exhaustion
+denial-of-service attack. A flaw in versions of perl before 5.15.5 can
+escalate that into a heap buffer overrun; coupled with versions of glibc
+before 2.16, it possibly allows the execution of arbitrary code.
+
+This problem has been fixed.
+
 =head1 Incompatible Changes
 
 There are no changes intentionally incompatible with 5.14.0. If any
