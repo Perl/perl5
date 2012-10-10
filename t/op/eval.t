@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 126);
+plan(tests => 128);
 
 eval 'pass();';
 
@@ -608,4 +608,13 @@ pass("phew! dodged the assertion after a parsing (not lexing) error");
      ),
      qr/Unbalanced string table/,
     'Errors in finalize_optree do not leak string eval op tree';
+}
+
+# [perl #114658] Line numbers at end of string eval
+for("{;", "{") {
+    eval $_; is $@ =~ s/eval \d+/eval 1/rag, <<'EOE',
+Missing right curly or square bracket at (eval 1) line 1, at end of line
+syntax error at (eval 1) line 1, at EOF
+EOE
+	qq'Right line number for eval "$_"';
 }
