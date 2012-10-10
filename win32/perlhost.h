@@ -26,11 +26,10 @@
 #endif
 
 START_EXTERN_C
-extern char *		g_win32_get_privlib(const char *pl, STRLEN *const len);
-extern char *		g_win32_get_sitelib(const char *pl, STRLEN *const len);
-extern char *		g_win32_get_vendorlib(const char *pl,
-					      STRLEN *const len);
-extern char *		g_getlogin(void);
+extern char *	g_win32_get_privlib(const char *pl, STRLEN *const len);
+extern char *	g_win32_get_sitelib(const char *pl, STRLEN *const len);
+extern char *	g_win32_get_vendorlib(const char *pl, STRLEN *const len);
+extern char *	g_getlogin(void);
 END_EXTERN_C
 
 class CPerlHost

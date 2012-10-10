@@ -381,7 +381,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
     return NULL;
 }
 
-char *
+EXTERN_C char *
 win32_get_privlib(const char *pl, STRLEN *const len)
 {
     dTHX;
@@ -439,7 +439,7 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname,
     return SvPVX(sv1);
 }
 
-char *
+EXTERN_C char *
 win32_get_sitelib(const char *pl, STRLEN *const len)
 {
     return win32_get_xlib(pl, "sitelib", "site", len);
@@ -449,7 +449,7 @@ win32_get_sitelib(const char *pl, STRLEN *const len)
 #  define PERL_VENDORLIB_NAME	"vendor"
 #endif
 
-char *
+EXTERN_C char *
 win32_get_vendorlib(const char *pl, STRLEN *const len)
 {
     return win32_get_xlib(pl, "vendorlib", PERL_VENDORLIB_NAME, len);
@@ -1109,7 +1109,7 @@ setgid(gid_t agid)
     return (agid == ROOT_GID ? 0 : -1);
 }
 
-char *
+EXTERN_C char *
 getlogin(void)
 {
     dTHX;
