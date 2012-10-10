@@ -1681,6 +1681,17 @@ my %feature_keywords = (
    fc       => 'fc',
 );
 
+# keywords that are strong and also have a prototype
+#
+my %strong_proto_keywords = map { $_ => 1 } qw(
+    glob
+    pos
+    prototype
+    scalar
+    study
+    undef
+);
+
 sub keyword {
     my $self = shift;
     my $name = shift;
@@ -1696,9 +1707,9 @@ sub keyword {
 	 if !$hh
 	 || !$hh->{"feature_$feature_keywords{$name}"}
     }
-    if (
-      $name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
-       && !defined eval{prototype "CORE::$name"}
+    if ($strong_proto_keywords{$name}
+        || ($name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
+	    && !defined eval{prototype "CORE::$name"})
     ) { return $name }
     if (
 	exists $self->{subs_declared}{$name}
@@ -2530,9 +2541,13 @@ sub listop {
     $name = "socketpair" if $name eq "sockpair";
     my $fullname = $self->keyword($name);
     my $proto = prototype("CORE::$name");
-    if (defined $proto
-	&& $proto =~ /^;?\*/
-	&& $kid->name eq "rv2gv" && !($kid->private & OPpLVAL_INTRO)) {
+    if (
+	 (     (defined $proto && $proto =~ /^;?\*/)
+	    || $name eq 'select' # select(F) doesn't have a proto
+	 )
+	 && $kid->name eq "rv2gv"
+	 && !($kid->private & OPpLVAL_INTRO)
+    ) {
 	$first = $self->rv2gv_or_string($kid->first);
     }
     else {
@@ -2557,6 +2572,15 @@ sub listop {
 	return "$exprs[0] = $fullname"
 	         . ($parens ? "($exprs[0])" : " $exprs[0]");
     }
+    if ($name =~ /^(system|exec)$/
+	&& ($op->flags & OPf_STACKED)
+	&& @exprs > 1)
+    {
+	# handle the "system prog a1,a2,.." form
+	my $prog = shift @exprs;
+	$exprs[0] = "$prog $exprs[0]";
+    }
+
     if ($parens && $nollafr) {
 	return "($fullname " . join(", ", @exprs) . ")";
     } elsif ($parens) {
@@ -2753,6 +2777,7 @@ sub indirop {
 	}
     } elsif (
 	!$indir && $name eq "sort"
+      && !null($op->first->sibling)
       && $op->first->sibling->name eq 'entersub'
     ) {
 	# We cannot say sort foo(bar), as foo will be interpreted as a
@@ -2779,7 +2804,8 @@ sub mapop {
     if (is_scope $code) {
 	$code = "{" . $self->deparse($code, 0) . "} ";
     } else {
-	$code = $self->deparse($code, 24) . ", ";
+	$code = $self->deparse($code, 24);
+	$code .= ", " if !null($kid->sibling);
     }
     $kid = $kid->sibling;
     for (; !null($kid); $kid = $kid->sibling) {
