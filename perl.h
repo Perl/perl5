@@ -5017,6 +5017,20 @@ struct tempsym; /* defined in pp_pack.c */
 #    define PERL_CALLCONV_NO_RET PERL_CALLCONV
 #endif
 
+/* PERL_STATIC_NO_RET is supposed to be equivalent to STATIC on builds that
+   dont have a noreturn as a declaration specifier
+*/
+#ifndef PERL_STATIC_NO_RET
+#  define PERL_STATIC_NO_RET STATIC
+#endif
+/* PERL_STATIC_NO_RET is supposed to be equivalent to PERL_STATIC_INLINE on
+   builds that dont have a noreturn as a declaration specifier
+*/
+#ifndef PERL_STATIC_INLINE_NO_RET
+#  define PERL_STATIC_INLINE_NO_RET PERL_STATIC_INLINE
+#endif
+
+
 #undef PERL_CKDEF
 #undef PERL_PPDEF
 #define PERL_CKDEF(s)	PERL_CALLCONV OP *s (pTHX_ OP *o);

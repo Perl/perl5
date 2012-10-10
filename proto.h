@@ -5626,7 +5626,7 @@ STATIC void	S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
 #define PERL_ARGS_ASSERT_HV_MAGIC_CHECK	\
 	assert(hv); assert(needs_copy); assert(needs_store)
 
-PERL_CALLCONV_NO_RET STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg)
+PERL_STATIC_NO_RET void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4);
@@ -5992,10 +5992,10 @@ STATIC SV*	S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #define PERL_ARGS_ASSERT_MAYBERELOCATE	\
 	assert(dir)
 
-PERL_CALLCONV_NO_RET STATIC void	S_minus_v(pTHX)
+PERL_STATIC_NO_RET void	S_minus_v(pTHX)
 			__attribute__noreturn__;
 
-PERL_CALLCONV_NO_RET STATIC void	S_my_exit_jump(pTHX)
+PERL_STATIC_NO_RET void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
@@ -6006,10 +6006,10 @@ STATIC PerlIO *	S_open_script(pTHX_ const char *scriptname, bool dosearch, bool 
 	assert(scriptname); assert(suidscript)
 
 STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
-PERL_CALLCONV_NO_RET STATIC void	S_run_body(pTHX_ I32 oldscope)
+PERL_STATIC_NO_RET void	S_run_body(pTHX_ I32 oldscope)
 			__attribute__noreturn__;
 
-PERL_CALLCONV_NO_RET STATIC void	S_usage(pTHX)
+PERL_STATIC_NO_RET void	S_usage(pTHX)
 			__attribute__noreturn__;
 
 #endif
@@ -6522,7 +6522,7 @@ STATIC char *	S_nextchar(pTHX_ struct RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_NEXTCHAR	\
 	assert(pRExC_state)
 
-PERL_CALLCONV_NO_RET STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
+PERL_STATIC_NO_RET void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -7090,7 +7090,7 @@ STATIC I32	S_lop(pTHX_ I32 f, int x, char *s)
 #define PERL_ARGS_ASSERT_LOP	\
 	assert(s)
 
-PERL_CALLCONV_NO_RET STATIC void	S_missingterm(pTHX_ char *s)
+PERL_STATIC_NO_RET void	S_missingterm(pTHX_ char *s)
 			__attribute__noreturn__;
 
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen, SV *sv, SV *pv, const char *type, STRLEN typelen)
@@ -7297,7 +7297,7 @@ STATIC SV *	S_with_queued_errors(pTHX_ SV *ex)
 #define PERL_ARGS_ASSERT_WITH_QUEUED_ERRORS	\
 	assert(ex)
 
-PERL_CALLCONV_NO_RET STATIC char *	S_write_no_mem(pTHX)
+PERL_STATIC_NO_RET char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 
 #  if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
