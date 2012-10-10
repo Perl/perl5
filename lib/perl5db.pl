@@ -2891,7 +2891,7 @@ C<STDOUT> from getting messed up.
 
 =cut
 
-                $obj->_handle_sh_sh_command;
+                $obj->_handle_sh_command;
 
 =head4 C<$rc I<pattern> $rc> - Search command history
 
@@ -2908,32 +2908,10 @@ Uses C<DB::system> to invoke a shell.
 
 =cut
 
-                # $sh - start a shell.
-                if ($cmd =~ /\A$sh\z/) {
-
-                    # Run the user's shell. If none defined, run Bourne.
-                    # We resume execution when the shell terminates.
-                    DB::system( $ENV{SHELL} || "/bin/sh" );
-                    next CMD;
-                }
-
 =head4 C<$sh I<command>> - Force execution of a command in a shell
 
 Like the above, but the command is passed to the shell. Again, we use
 C<DB::system> to avoid problems with C<STDIN> and C<STDOUT>.
-
-=cut
-
-                # $sh command - start a shell and run a command in it.
-                if (my ($arg) = $cmd =~ m#\A$sh\s*(.*)#ms) {
-
-                    # XXX: using csh or tcsh destroys sigint retvals!
-                    #&system($1);  # use this instead
-
-                    # use the user's shell, or Bourne if none defined.
-                    &system( $ENV{SHELL} || "/bin/sh", "-c", $arg );
-                    next CMD;
-                }
 
 =head4 C<H> - display commands in history
 
@@ -3907,16 +3885,29 @@ sub _n_or_s_and_arg_commands_generic {
     return;
 }
 
-sub _handle_sh_sh_command {
+sub _handle_sh_command {
     my $self = shift;
 
     # $sh$sh - run a shell command (if it's all ASCII).
     # Can't run shell commands with Unicode in the debugger, hmm.
-    if (my ($arg) = $DB::cmd =~ m#\A$sh$sh\s*(.*)#ms) {
+    my $my_cmd = $DB::cmd;
+    if ($my_cmd =~ m#\A$sh#gms) {
 
-        # System it.
-        DB::system($arg);
-        next CMD;
+        if ($my_cmd =~ m#\G\z#cgms) {
+            # Run the user's shell. If none defined, run Bourne.
+            # We resume execution when the shell terminates.
+            DB::system( $ENV{SHELL} || "/bin/sh" );
+            next CMD;
+        }
+        elsif (my ($arg) = $my_cmd =~ m#\G$sh\s*(.*)#cgms) {
+            # System it.
+            DB::system($arg);
+            next CMD;
+        }
+        elsif (($arg) = $my_cmd =~ m#\G\s*(.*)#cgms) {
+            DB::system( $ENV{SHELL} || "/bin/sh", "-c", $arg );
+            next CMD;
+        }
     }
 }
 
