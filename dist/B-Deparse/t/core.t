@@ -16,6 +16,12 @@
 # for weak:   CORE::keyword(..) deparsed as CORE::keyword(..)
 # for strong: CORE::keyword(..) deparsed as keyword(..)
 #
+# Three permutations of lex/nonlex args are checked for:
+#
+#   foo($a,$b,$c,...)
+#   foo(my $a,$b,$c,...)
+#   my ($a,$b,$c,...); foo($a,$b,$c,...)
+#
 # Note that tests for prefixing feature.pm-enabled keywords with CORE:: when
 # feature.pm is not enabled are in deparse.t, as they fit that format better.
 
@@ -30,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 707;
+plan tests => 2063;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -49,31 +55,58 @@ sub testit {
     $expected_expr //= $expr;
     $SEEN{$keyword} = 1;
 
-    my $code_ref;
-    {
-	package test;
-	use subs ();
-	import subs $keyword;
-	$code_ref = eval "no strict 'vars'; sub { () = $expr }"
-			or die "$@ in $expr";
-    }
 
-    my $got_text = $deparse->coderef2text($code_ref);
+    # lex=0:   () = foo($a,$b,$c)
+    # lex=1:   my ($a,$b); () = foo($a,$b,$c)
+    # lex=2:   () = foo(my $a,$b,$c)
+    for my $lex (0, 1, 2) {
+	if ($lex) {
+	    next if $keyword =~ /local|our|state|my/;
+	    # XXX glob(my $x) incorrectly becomes <my $x>
+	    next if $keyword eq 'glob';
+	}
+	my $vars = $lex == 1 ? 'my($a, $b, $c, $d, $e);' . "\n    " : "";
 
-    unless ($got_text =~ /^{
+	if ($lex == 2) {
+	    my $repl = 'my $a';
+	    if ($expr =~ /\bmap\(\$a|CORE::(chomp|chop|lstat|stat)\b/) {
+		# for some reason only these do:
+		#  'foo my $a, $b,' => foo my($a), $b, ...
+		#  the rest don't parenthesize the my var.
+		$repl = 'my($a)';
+	    }
+	    s/\$a/$repl/ for $expr, $expected_expr;
+	}
+
+	my $desc = "$keyword: lex=$lex $expr => $expected_expr";
+
+
+	my $code_ref;
+	{
+	    package test;
+	    use subs ();
+	    import subs $keyword;
+	    $code_ref = eval "no strict 'vars'; sub { ${vars}() = $expr }"
+			    or die "$@ in $expr";
+	}
+
+	my $got_text = $deparse->coderef2text($code_ref);
+
+	unless ($got_text =~ /^{
     package test;
     use strict 'refs', 'subs';
-    use feature .*
-    \(\) = (.*)
+    use feature [^\n]+
+    \Q$vars\E\(\) = (.*)
 }/s) {
-	::fail("$keyword:   $expr");
-	::diag("couldn't extract line from boilerplate\n");
-	::diag($got_text);
-	return;
-    }
+	    ::fail($desc);
+	    ::diag("couldn't extract line from boilerplate\n");
+	    ::diag($got_text);
+	    return;
+	}
 
-    my $got_expr = $1;
-    is $got_expr, $expected_expr, "$keyword: $expr => $expected_expr";
+	my $got_expr = $1;
+	is $got_expr, $expected_expr, $desc;
+    }
 }
 
 
