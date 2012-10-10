@@ -3899,13 +3899,13 @@ sub _handle_sh_command {
             DB::system( $ENV{SHELL} || "/bin/sh" );
             next CMD;
         }
-        elsif (my ($arg) = $my_cmd =~ m#\G$sh\s*(.*)#cgms) {
+        elsif ($my_cmd =~ m#\G$sh\s*(.*)#cgms) {
             # System it.
-            DB::system($arg);
+            DB::system($1);
             next CMD;
         }
-        elsif (($arg) = $my_cmd =~ m#\G\s*(.*)#cgms) {
-            DB::system( $ENV{SHELL} || "/bin/sh", "-c", $arg );
+        elsif ($my_cmd =~ m#\G\s*(.*)#cgms) {
+            DB::system( $ENV{SHELL} || "/bin/sh", "-c", $1 );
             next CMD;
         }
     }
