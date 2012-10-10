@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 176);
+    plan (tests => 177);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -616,6 +616,11 @@ is ${^LAST_FH}, \*STDIN, '${^LAST_FH} after another tell';
 }
 # This also tests that ${^LAST_FH} is a weak reference:
 is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
+
+
+# $|
+fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']}, 
+ '[perl #4760] print $| = ~$|';
 
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
