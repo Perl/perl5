@@ -672,8 +672,6 @@ S_pm_description(pTHX_ const PMOP *pm)
             if (RX_EXTFLAGS(regex) & RXf_CHECK_ALL)
                 sv_catpv(desc, ",ALL");
         }
-        if (RX_EXTFLAGS(regex) & RXf_SKIPWHITE)
-            sv_catpv(desc, ",SKIPWHITE");
     }
 
     append_flags(desc, pmflags, pmflags_flags_names);
@@ -1417,12 +1415,10 @@ const struct flag_to_name regexp_flags_names[] = {
     {RXf_USE_INTUIT_NOML, "USE_INTUIT_NOML,"},
     {RXf_USE_INTUIT_ML,   "USE_INTUIT_ML,"},
     {RXf_INTUIT_TAIL,     "INTUIT_TAIL,"},
-    {RXf_SPLIT,           "SPLIT,"},
     {RXf_COPY_DONE,       "COPY_DONE,"},
     {RXf_TAINTED_SEEN,    "TAINTED_SEEN,"},
     {RXf_TAINTED,         "TAINTED,"},
     {RXf_START_ONLY,      "START_ONLY,"},
-    {RXf_SKIPWHITE,       "SKIPWHITE,"},
     {RXf_WHITE,           "WHITE,"},
     {RXf_NULL,            "NULL,"},
 };

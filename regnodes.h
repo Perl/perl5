@@ -785,7 +785,7 @@ EXTCONST char * const PL_reg_name[] = {
 EXTCONST char * PL_reg_extflags_name[];
 #else
 EXTCONST char * const PL_reg_extflags_name[] = {
-	/* Bits in extflags defined: 11111111111111111111111011111111 */
+	/* Bits in extflags defined: 11011110111111111111111011111111 */
 	"MULTILINE",        /* 0x00000001 */
 	"SINGLELINE",       /* 0x00000002 */
 	"FOLD",             /* 0x00000004 */
@@ -810,12 +810,12 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"USE_INTUIT_NOML",  /* 0x00200000 */
 	"USE_INTUIT_ML",    /* 0x00400000 */
 	"INTUIT_TAIL",      /* 0x00800000 */
-	"SPLIT",            /* 0x01000000 */
+	"UNUSED_BIT_24",    /* 0x01000000 */
 	"COPY_DONE",        /* 0x02000000 */
 	"TAINTED_SEEN",     /* 0x04000000 */
 	"TAINTED",          /* 0x08000000 */
 	"START_ONLY",       /* 0x10000000 */
-	"SKIPWHITE",        /* 0x20000000 */
+	"UNUSED_BIT_29",    /* 0x20000000 */
 	"WHITE",            /* 0x40000000 */
 	"NULL",             /* 0x80000000 */
 };

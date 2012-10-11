@@ -365,6 +365,19 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     }
 }
 
+/*
+  Two flags no longer used.
+  RXf_SPLIT used to be set in Perl_pmruntime if op_flags & OPf_SPECIAL,
+  i.e., split.  It was used by the regex engine to check whether it should
+  set RXf_SKIPWHITE.  Regexp plugins on CPAN also have done the same thing
+  historically, so we leave these flags defined.
+*/
+#ifndef PERL_CORE
+# define RXf_SPLIT		0
+# define RXf_SKIPWHITE		0
+#endif
+
+
 /* Anchor and GPOS related stuff */
 #define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+0))
 #define RXf_ANCH_MBOL   	(1<<(RXf_BASE_SHIFT+1))
@@ -393,17 +406,6 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+12))
 #define RXf_USE_INTUIT_ML	(1<<(RXf_BASE_SHIFT+13))
 #define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+14))
-
-/*
-  This used to be set in Perl_pmruntime if op_flags & OPf_SPECIAL, i.e.
-  split.  It was used by the regex engine to check whether it should set
-  RXf_SKIPWHITE.  Regexp plugins on CPAN also have done the same thing
-  historically, so we leave this flag defined, even though it is never set.
-*/
-#if !defined(PERL_CORE) || defined(PERL_IN_DUMP_C)
-# define RXf_SPLIT		(1<<(RXf_BASE_SHIFT+15))
-#endif
-
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Copy and tainted info */
@@ -417,10 +419,6 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 
 /* Flags indicating special patterns */
 #define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+19)) /* Pattern is /^/ */
-/* No longer used, but CPAN modules still mention it. */
-#if !defined(PERL_CORE) || defined(PERL_IN_DUMP_C)
-# define RXf_SKIPWHITE		(1<<(RXf_BASE_SHIFT+20)) /* Pattern is for a split " " */
-#endif
 #define RXf_WHITE		(1<<(RXf_BASE_SHIFT+21)) /* Pattern is /\s+/ */
 #define RXf_NULL		(1U<<(RXf_BASE_SHIFT+22)) /* Pattern is // */
 #if RXf_BASE_SHIFT+22 > 31
