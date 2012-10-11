@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.49_03';
+$VERSION = '2.49_04';
 
 =head1 NAME
 
@@ -350,7 +350,7 @@ sub removed_raw {
     5.014000 => '2011-05-14',
     5.014001 => '2011-06-16',
     5.014002 => '2011-09-26',
-    5.014003 => '2012-09-26',
+    5.014003 => '2012-10-12',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -26055,7 +26055,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Module::Build::PodParser'=> '0.3800',
 	'Module::Build::Version'=> '0.87',
 	'Module::Build::YAML'   => '1.41',
-	'Module::CoreList'      => '2.49_03',
+	'Module::CoreList'      => '2.49_04',
 	'Module::Load'          => '0.18',
 	'Module::Load::Conditional'=> '0.44',
 	'Module::Loaded'        => '0.06',
