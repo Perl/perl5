@@ -2351,6 +2351,72 @@ sub _DB__handle_m_command {
     return;
 }
 
+sub _DB__at_end_of_every_command {
+    my ($obj) = @_;
+
+    # At the end of every command:
+    if ($obj->piped) {
+
+        # Unhook the pipe mechanism now.
+        if ( $pager =~ /^\|/ ) {
+
+            # No error from the child.
+            $? = 0;
+
+            # we cannot warn here: the handle is missing --tchrist
+            close(OUT) || print SAVEOUT "\nCan't close DB::OUT\n";
+
+            # most of the $? crud was coping with broken cshisms
+            # $? is explicitly set to 0, so this never runs.
+            if ($?) {
+                print SAVEOUT "Pager '$pager' failed: ";
+                if ( $? == -1 ) {
+                    print SAVEOUT "shell returned -1\n";
+                }
+                elsif ( $? >> 8 ) {
+                    print SAVEOUT ( $? & 127 )
+                    ? " (SIG#" . ( $? & 127 ) . ")"
+                    : "", ( $? & 128 ) ? " -- core dumped" : "", "\n";
+                }
+                else {
+                    print SAVEOUT "status ", ( $? >> 8 ), "\n";
+                }
+            } ## end if ($?)
+
+            # Reopen filehandle for our output (if we can) and
+            # restore STDOUT (if we can).
+            open( OUT, ">&STDOUT" ) || &warn("Can't restore DB::OUT");
+            open( STDOUT, ">&SAVEOUT" )
+            || &warn("Can't restore STDOUT");
+
+            # Turn off pipe exception handler if necessary.
+            $SIG{PIPE} = "DEFAULT" if $SIG{PIPE} eq \&DB::catch;
+
+            # Will stop ignoring SIGPIPE if done like nohup(1)
+            # does SIGINT but Perl doesn't give us a choice.
+        } ## end if ($pager =~ /^\|/)
+        else {
+
+            # Non-piped "pager". Just restore STDOUT.
+            open( OUT, ">&SAVEOUT" ) || &warn("Can't restore DB::OUT");
+        }
+
+        # Close filehandle pager was using, restore the normal one
+        # if necessary,
+        close(SAVEOUT);
+
+        if ($obj->selected() ne "") {
+            select($obj->selected);
+            $obj->selected("");
+        }
+
+        # No pipes now.
+        $obj->piped("");
+    } ## end if ($piped)
+
+    return;
+}
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -3048,62 +3114,7 @@ our standard filehandles for input and output.
 =cut
 
         continue {    # CMD:
-
-            # At the end of every command:
-            if ($piped) {
-
-                # Unhook the pipe mechanism now.
-                if ( $pager =~ /^\|/ ) {
-
-                    # No error from the child.
-                    $? = 0;
-
-                    # we cannot warn here: the handle is missing --tchrist
-                    close(OUT) || print SAVEOUT "\nCan't close DB::OUT\n";
-
-                    # most of the $? crud was coping with broken cshisms
-                    # $? is explicitly set to 0, so this never runs.
-                    if ($?) {
-                        print SAVEOUT "Pager '$pager' failed: ";
-                        if ( $? == -1 ) {
-                            print SAVEOUT "shell returned -1\n";
-                        }
-                        elsif ( $? >> 8 ) {
-                            print SAVEOUT ( $? & 127 )
-                              ? " (SIG#" . ( $? & 127 ) . ")"
-                              : "", ( $? & 128 ) ? " -- core dumped" : "", "\n";
-                        }
-                        else {
-                            print SAVEOUT "status ", ( $? >> 8 ), "\n";
-                        }
-                    } ## end if ($?)
-
-                    # Reopen filehandle for our output (if we can) and
-                    # restore STDOUT (if we can).
-                    open( OUT, ">&STDOUT" ) || &warn("Can't restore DB::OUT");
-                    open( STDOUT, ">&SAVEOUT" )
-                      || &warn("Can't restore STDOUT");
-
-                    # Turn off pipe exception handler if necessary.
-                    $SIG{PIPE} = "DEFAULT" if $SIG{PIPE} eq \&DB::catch;
-
-                    # Will stop ignoring SIGPIPE if done like nohup(1)
-                    # does SIGINT but Perl doesn't give us a choice.
-                } ## end if ($pager =~ /^\|/)
-                else {
-
-                    # Non-piped "pager". Just restore STDOUT.
-                    open( OUT, ">&SAVEOUT" ) || &warn("Can't restore DB::OUT");
-                }
-
-                # Close filehandle pager was using, restore the normal one
-                # if necessary,
-                close(SAVEOUT);
-                select($selected), $selected = "" unless $selected eq "";
-
-                # No pipes now.
-                $piped = "";
-            } ## end if ($piped)
+            _DB__at_end_of_every_command($obj);
         }    # CMD:
 
 =head3 COMMAND LOOP TERMINATION
