@@ -8746,7 +8746,7 @@ S_pending_ident(pTHX)
        at compile time. This only works for a literal @_ - @main::_ (etc)
        can still pass through. Aliases must be handled separately */
     if (tokenbuf_len == 2 && strnEQ(PL_tokenbuf, "@_", 2) && is_sub_with_sig()) {
-	Perl_croak(aTHX_ "Cannot use @_ in a sub with a signature\n");
+	Perl_croak(aTHX_ "Can't use @_ in a sub with a signature");
     }
 
     /* build ops for a bareword */

@@ -3363,7 +3363,7 @@ Perl_magic_poison(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_POISON;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
-    Perl_croak(aTHX_ "Cannot use @_ in a sub with a signature\n");
+    Perl_croak(aTHX_ "Can't use @_ in a sub with a signature");
     return 0;
 }
 
