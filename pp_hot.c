@@ -2172,9 +2172,6 @@ PP(pp_subst)
 
     /* known replacement string? */
     if (dstr) {
-	if (SvTAINTED(dstr))
-	    rxtainted |= SUBST_TAINT_REPL;
-
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
 	     nsv = sv_newmortal();
@@ -2190,6 +2187,9 @@ PP(pp_subst)
 	    c = SvPV_const(dstr, clen);
 	    doutf8 = DO_UTF8(dstr);
 	}
+
+	if (SvTAINTED(dstr))
+	    rxtainted |= SUBST_TAINT_REPL;
     }
     else {
 	c = NULL;
@@ -2347,8 +2347,6 @@ PP(pp_subst)
 	      first = FALSE;
 	    }
 	    else {
-		if (SvTAINTED(dstr))
-		    rxtainted |= SUBST_TAINT_REPL;
 		if (PL_encoding) {
 		    if (!nsv) nsv = sv_newmortal();
 		    sv_copypv(nsv, repl);
@@ -2356,6 +2354,8 @@ PP(pp_subst)
 		    sv_catsv(dstr, nsv);
 		}
 		else sv_catsv(dstr, repl);
+		if (SvTAINTED(repl))
+		    rxtainted |= SUBST_TAINT_REPL;
 	    }
 	    if (once)
 		break;

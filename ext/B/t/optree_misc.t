@@ -66,25 +66,23 @@ checkOptree ( name	=> 'PMOP children',
 	      code	=> sub { $foo =~ s/(a)/$1/ },
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->6
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
 # 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
-# 3        </> subst(/"(a)"/ replstart->4) KS ->6
+# 4        </> subst(/"(a)"/) KS ->5
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <#> gvsv[*foo] s ->3
-# 5           <|> substcont(other->3) sK/1 ->(end)
-# -              <1> ex-rv2sv sK/1 ->5
-# 4                 <#> gvsv[*1] s ->5
+# -           <1> ex-rv2sv sK/1 ->4
+# 3              <#> gvsv[*1] s ->4
 EOT_EOT
-# 6  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->6
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
 # 1        <;> nextstate(main 1 -e:1) v:>,<,%,{ ->2
-# 3        </> subst(/"(a)"/ replstart->4) KS ->6
+# 4        </> subst(/"(a)"/) KS ->5
 # -           <1> ex-rv2sv sKRM/1 ->3
 # 2              <$> gvsv(*foo) s ->3
-# 5           <|> substcont(other->3) sK/1 ->(end)
-# -              <1> ex-rv2sv sK/1 ->5
-# 4                 <$> gvsv(*1) s ->5
+# -           <1> ex-rv2sv sK/1 ->4
+# 3              <$> gvsv(*1) s ->4
 EONT_EONT
 
 } #skip

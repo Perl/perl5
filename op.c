@@ -4752,54 +4752,29 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     }
 
     if (repl) {
-	OP *curop;
+	bool konst;
 	if (pm->op_pmflags & PMf_EVAL) {
-	    curop = NULL;
+	    konst = FALSE;
 	    if (CopLINE(PL_curcop) < (line_t)PL_parser->multi_end)
 		CopLINE_set(PL_curcop, (line_t)PL_parser->multi_end);
 	}
 	else if (repl->op_type == OP_CONST)
-	    curop = repl;
-	else {
-	    OP *lastop = NULL;
-	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
-		if (curop->op_type == OP_SCOPE
-			|| curop->op_type == OP_LEAVE
-			|| (PL_opargs[curop->op_type] & OA_DANGEROUS)) {
-		    if (curop->op_type == OP_GV) {
-			GV * const gv = cGVOPx_gv(curop);
-			repl_has_vars = 1;
-			if (strchr("&`'123456789+-\016\022", *GvENAME(gv)))
-			    break;
-		    }
-		    else if (curop->op_type == OP_RV2CV)
-			break;
-		    else if (curop->op_type == OP_RV2SV ||
-			     curop->op_type == OP_RV2AV ||
-			     curop->op_type == OP_RV2HV ||
-			     curop->op_type == OP_RV2GV) {
-			if (lastop && lastop->op_type != OP_GV)	/*funny deref?*/
-			    break;
-		    }
-		    else if (curop->op_type == OP_PADSV ||
-			     curop->op_type == OP_PADAV ||
-			     curop->op_type == OP_PADHV ||
-			     curop->op_type == OP_PADANY)
-		    {
-			repl_has_vars = 1;
-		    }
-		    else if (curop->op_type == OP_PUSHRE)
-			NOOP; /* Okay here, dangerous in newASSIGNOP */
-		    else
-			break;
-		}
-		else if ((PL_opargs[curop->op_type] & OA_CLASS_MASK)
-			   == OA_LOGOP)
-		    break;
-		lastop = curop;
-	    }
+	    konst = TRUE;
+	else if (( (repl->op_type == OP_RV2SV ||
+		    repl->op_type == OP_RV2AV ||
+		    repl->op_type == OP_RV2HV ||
+		    repl->op_type == OP_RV2GV)
+		 && cUNOPx(repl)->op_first
+		 && cUNOPx(repl)->op_first->op_type == OP_GV )
+	      || repl->op_type == OP_PADSV
+	      || repl->op_type == OP_PADAV
+	      || repl->op_type == OP_PADHV
+	      || repl->op_type == OP_PADANY) {
+	    repl_has_vars = 1;
+	    konst = TRUE;
 	}
-	if (curop == repl
+	else konst = FALSE;
+	if (konst
 	    && !(repl_has_vars
 		 && (!PM_GETRE(pm)
 		     || RX_EXTFLAGS(PM_GETRE(pm)) & RXf_EVAL_SEEN)))

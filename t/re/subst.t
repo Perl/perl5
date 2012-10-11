@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 203 );
+plan( tests => 204 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -857,6 +857,13 @@ $_ = "hello";
     s/(.)\1/$a/g;
 }
 is $_, 'helo', 's/pat/$alias_to_match_var/';
+"g" =~ /(.)/;
+$_ = "hello";
+{
+    local *a = *1;
+    s/e(.)\1/a$a/g;
+}
+is $_, 'halo', 's/pat/$alias_to_match_var/';
 
 
 $_ = "\xc4\x80";
