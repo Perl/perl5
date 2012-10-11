@@ -75,6 +75,11 @@ L<IPC::Open3> has been updated to fix a regression introduced in perl
 5.12, which broke C<IPC::Open3::open3($in, $out, $err, '-')>.
 [perl #95748]
 
+=item *
+
+L<Module::CoreList> has been updated to version 2.49_04 to add data for
+this release.
+
 =back
 
 =head2 Removed Modules and Pragmata
