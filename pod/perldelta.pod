@@ -77,6 +77,12 @@ L<IPC::Open3> has been updated to fix a regression introduced in perl
 
 =item *
 
+L<Digest> has been upgraded from version 1.16 to 1.16_01.
+
+See L</Security>.
+
+=item *
+
 L<Module::CoreList> has been updated to version 2.49_04 to add data for
 this release.
 
