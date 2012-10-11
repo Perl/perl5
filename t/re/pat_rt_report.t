@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 2525;  # Update this when adding/deleting tests.
+plan tests => 2527;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -921,6 +921,10 @@ sub run_tests {
          $_ = "CCCCBAA";
          ok(s/(*:X)A+|(*:Y)B+|(*:Z)C+/$REGMARK/g, $message);
          is($_, "ZYX", $message);
+         # Use a longer name to force reallocation of $REGMARK.
+         $_ = "CCCCBAA";
+         ok(s/(*:X)A+|(*:YYYYYYYYYYYYYYYY)B+|(*:Z)C+/$REGMARK/g, $message);
+         is($_, "ZYYYYYYYYYYYYYYYYX", $message);
     }
 
     {

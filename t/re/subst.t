@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 202 );
+plan( tests => 203 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -841,6 +841,7 @@ pass("s/// on tied var returning a cow");
 }
 
 
+# Test problems with constant replacement optimisation
 # [perl #26986] logop in repl resulting in incorrect optimisation
 "g" =~ /(.)/;
 @l{'a'..'z'} = 'A'..':';
@@ -848,6 +849,15 @@ $_ = "hello";
 { s/(.)/$l{my $a||$1}/g }
 is $_, "HELLO",
   'logop in s/// repl does not result in "constant" repl optimisation';
+# Aliases to match vars
+"g" =~ /(.)/;
+$_ = "hello";
+{
+    local *a = *1;
+    s/(.)\1/$a/g;
+}
+is $_, 'helo', 's/pat/$alias_to_match_var/';
+
 
 $_ = "\xc4\x80";
 $a = "";

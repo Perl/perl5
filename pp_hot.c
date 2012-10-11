@@ -2168,6 +2168,8 @@ PP(pp_subst)
 	RETURN;
     }
 
+    PL_curpm = pm;
+
     /* known replacement string? */
     if (dstr) {
 	if (SvTAINTED(dstr))
@@ -2201,7 +2203,7 @@ PP(pp_subst)
 #endif
         && (I32)clen <= RX_MINLENRET(rx)
         && (once || !(r_flags & REXEC_COPY_STR))
-	&& !(RX_EXTFLAGS(rx) & RXf_LOOKBEHIND_SEEN)
+	&& !(RX_EXTFLAGS(rx) & (RXf_LOOKBEHIND_SEEN|RXf_MODIFIES_VARS))
 	&& (!doutf8 || SvUTF8(TARG))
 	&& !(rpm->op_pmflags & PMf_NONDESTRUCT))
     {
@@ -2218,7 +2220,6 @@ PP(pp_subst)
 	    goto force_it;
 	}
 	d = s;
-	PL_curpm = pm;
 	if (once) {
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		rxtainted |= SUBST_TAINT_PAT;
@@ -2288,6 +2289,8 @@ PP(pp_subst)
 	}
     }
     else {
+	bool first;
+	SV *repl;
 	if (force_on_match) {
 	    force_on_match = 0;
 	    if (rpm->op_pmflags & PMf_NONDESTRUCT) {
@@ -2306,8 +2309,8 @@ PP(pp_subst)
 #endif
 	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 	    rxtainted |= SUBST_TAINT_PAT;
+	repl = dstr;
 	dstr = newSVpvn_flags(m, s-m, SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
-	PL_curpm = pm;
 	if (!c) {
 	    PERL_CONTEXT *cx;
 	    SPAGAIN;
@@ -2320,6 +2323,7 @@ PP(pp_subst)
 	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
 	}
 	r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
+	first = TRUE;
 	do {
 	    if (iters++ > maxiters)
 		DIE(aTHX_ "Substitution loop");
@@ -2336,8 +2340,23 @@ PP(pp_subst)
 	    m = RX_OFFS(rx)[0].start + orig;
 	    sv_catpvn_nomg_maybeutf8(dstr, s, m - s, DO_UTF8(TARG));
 	    s = RX_OFFS(rx)[0].end + orig;
-	    if (clen)
+	    if (first) {
+		/* replacement already stringified */
+	      if (clen)
 		sv_catpvn_nomg_maybeutf8(dstr, c, clen, doutf8);
+	      first = FALSE;
+	    }
+	    else {
+		if (SvTAINTED(dstr))
+		    rxtainted |= SUBST_TAINT_REPL;
+		if (PL_encoding) {
+		    if (!nsv) nsv = sv_newmortal();
+		    sv_copypv(nsv, repl);
+		    if (!DO_UTF8(nsv)) sv_recode_to_utf8(nsv, PL_encoding);
+		    sv_catsv(dstr, nsv);
+		}
+		else sv_catsv(dstr, repl);
+	    }
 	    if (once)
 		break;
 	} while (CALLREGEXEC(rx, s, strend, orig, s == m,
