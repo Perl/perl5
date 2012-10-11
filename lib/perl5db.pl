@@ -2335,6 +2335,21 @@ sub _DB__handle_run_command_in_pager_command {
     return;
 }
 
+sub _DB__handle_m_command {
+    my ($obj) = @_;
+
+    if ($cmd =~ s#\Am\s+([\w:]+)\s*\z# #) {
+        methods($1);
+        next CMD;
+    }
+
+    # m expr - set up DB::eval to do the work
+    if ($cmd =~ s#\Am\b# #) {    # Rest gets done by DB::eval()
+        $onetimeDump = 'methods';   #  method output gets used there
+    }
+
+    return;
+}
 
 sub DB {
 
@@ -2705,15 +2720,7 @@ Just uses C<DB::methods> to determine what methods are available.
 
 =cut
 
-                if ($cmd =~ s#\Am\s+([\w:]+)\s*\z# #) {
-                    methods($1);
-                    next CMD;
-                }
-
-                # m expr - set up DB::eval to do the work
-                if ($cmd =~ s#\Am\b# #) {    # Rest gets done by DB::eval()
-                    $onetimeDump = 'methods';   #  method output gets used there
-                }
+                _DB__handle_m_command($obj);
 
 =head4 C<f> - switch files
 
@@ -3905,6 +3912,7 @@ sub _handle_sh_command {
 
 sub _handle_x_command {
     my $self = shift;
+
     if ($DB::cmd =~ s#\Ax\b# #) {    # Remainder gets done by DB::eval()
         $onetimeDump = 'dump';    # main::dumpvar shows the output
 
