@@ -6488,31 +6488,48 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     case EXACT:
 	c = (U8)*STRING(p);
 
-	if (! utf8_target || UNI_IS_INVARIANT(c)) {
+        /* Can use a simple loop if the pattern char to match on is invariant
+         * under UTF-8, or both target and pattern aren't UTF-8.  Note that we
+         * can use UTF8_IS_INVARIANT() even if the pattern isn't UTF-8, as it's
+         * true iff it doesn't matter if the argument is in UTF-8 or not */
+        if (UTF8_IS_INVARIANT(c) || (! utf8_target && ! UTF_PATTERN)) {
 	    while (scan < loceol && UCHARAT(scan) == c) {
 		scan++;
 	    }
 	}
 	else if (UTF_PATTERN) {
-            STRLEN scan_char_len;
+            if (utf8_target) {
+                STRLEN scan_char_len;
+                loceol = PL_regeol;
 
-	    loceol = PL_regeol;
+                /* When both target and pattern are UTF-8, we have to do s
+                 * string EQ */
+                while (hardcount < max
+                       && scan + (scan_char_len = UTF8SKIP(scan)) <= loceol
+                       && scan_char_len <= STR_LEN(p)
+                       && memEQ(scan, STRING(p), scan_char_len))
+                {
+                    scan += scan_char_len;
+                    hardcount++;
+                }
+            }
+            else if (! UTF8_IS_ABOVE_LATIN1(c)) {
 
-	    while (hardcount < max
-                   && scan + (scan_char_len = UTF8SKIP(scan)) < loceol
-                   && scan_char_len <= STR_LEN(p)
-                   && memEQ(scan, STRING(p), scan_char_len))
-            {
-		scan += scan_char_len;
-		hardcount++;
-	    }
+                /* Target isn't utf8; convert the character in the UTF-8
+                 * pattern to non-UTF8, and do a simple loop */
+                c = TWO_BYTE_UTF8_TO_UNI(c, *(STRING(p) + 1));
+                while (scan < loceol && UCHARAT(scan) == c) {
+                    scan++;
+                }
+            } /* else pattern char is above Latin1, can't possibly match the
+                 non-UTF-8 target */
         }
-	else {
+        else {
 
-	    /* Here, the string is utf8, the pattern isn't, but <c> is different
-	     * in utf8 than not, so can't compare them directly.  Outside the
-	     * loop, find the two utf8 bytes that represent c, and then
-	     * look for those in sequence in the utf8 string */
+            /* Here, the string must be utf8; pattern isn't, and <c> is
+             * different in utf8 than not, so can't compare them directly.
+             * Outside the loop, find the two utf8 bytes that represent c, and
+             * then look for those in sequence in the utf8 string */
 	    U8 high = UTF8_TWO_BYTE_HI(c);
 	    U8 low = UTF8_TWO_BYTE_LO(c);
 	    loceol = PL_regeol;
@@ -6527,6 +6544,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	    }
 	}
 	break;
+
     case EXACTFA:
 	utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	goto do_exactf;

@@ -19,7 +19,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 453;  # Update this when adding/deleting tests.
+plan tests => 465;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1282,6 +1282,21 @@ EOP
         ;
         ;
         ok("\x{017F}\x{017F}" =~ qr/^[\x{00DF}]?$/i, "[] to EXACTish optimization");
+    }
+
+    {
+        for my $char (":", "\x{f7}", "\x{2010}") {
+            my $utf8_char = $char;
+            utf8::upgrade($utf8_char);
+            my $display = $char;
+            $display = display($display);
+            my $utf8_display = "utf8::upgrade(\"$display\")";
+
+            like($char, qr/^$char?$/, "\"$display\" =~ /^$display?\$/");
+            like($char, qr/^$utf8_char?$/, "my \$p = \"$display\"; utf8::upgrade(\$p); \"$display\" =~ /^\$p?\$/");
+            like($utf8_char, qr/^$char?$/, "my \$c = \"$display\"; utf8::upgrade(\$c); \"\$c\" =~ /^$display?\$/");
+            like($utf8_char, qr/^$utf8_char?$/, "my \$c = \"$display\"; utf8::upgrade(\$c); my \$p = \"$display\"; utf8::upgrade(\$p); \"\$c\" =~ /^\$p?\$/");
+        }
     }
 
 } # End of sub run_tests
