@@ -304,14 +304,14 @@ no_warnings("invalid slurpy parameters");
     $failed = !eval 'banned5(); 1';
     ok($failed, "An alias to \$#_ dies in execution - () syntax");
     like($@,$err, "Died for the right reason");
-    $failed = !eval '&banned5; 1';
+    $failed = !eval '&banned5(); 1';
     ok($failed, "An alias to \$#_ dies in execution - & syntax");
     like($@,$err, "Died for the right reason");
     @normal = qw(1 2 3);
     *globb = *normal;
     $legal = eval 'banned5(); 1';
     ok($legal, "globb is fine again - ()");
-    $legal = eval '&banned5; 1';
+    $legal = eval '&banned5(); 1';
     ok($legal, "globb is fine again - &");
 }
 
