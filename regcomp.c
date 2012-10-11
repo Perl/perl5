@@ -10495,6 +10495,11 @@ tryagain:
             bool next_is_quantifier;
             char * oldp = NULL;
 
+            /* If a folding node contains only code points that don't
+             * participate in folds, it can be changed into an EXACT node,
+             * which allows the optimizer more things to look for */
+            bool maybe_exact;
+
 	    ender = 0;
             node_type = compute_EXACTish(pRExC_state);
 	    ret = reg_node(pRExC_state, node_type);
@@ -10506,6 +10511,11 @@ tryagain:
             s0 = s;
 
 	reparse:
+
+            /* We do the EXACTFish to EXACT node only if folding, and not if in
+             * locale, as whether a character folds or not isn't known until
+             * runtime */
+            maybe_exact = FOLD && ! LOC;
 
 	    /* XXX The node can hold up to 255 bytes, yet this only goes to
              * 127.  I (khw) do not know why.  Keeping it somewhat less than
@@ -10788,13 +10798,44 @@ tryagain:
                             }
                         }
                         else {
-                            ender = _to_uni_fold_flags(ender, (U8 *) s, &foldlen,
-                                    FOLD_FLAGS_FULL
-                                     | ((LOC) ?  FOLD_FLAGS_LOCALE
-                                              : (ASCII_FOLD_RESTRICTED)
-                                                ? FOLD_FLAGS_NOMIX_ASCII
-                                                : 0)
-                                );
+                            UV folded = _to_uni_fold_flags(
+                                           ender,
+                                           (U8 *) s,
+                                           &foldlen,
+                                           FOLD_FLAGS_FULL
+                                           | ((LOC) ?  FOLD_FLAGS_LOCALE
+                                                    : (ASCII_FOLD_RESTRICTED)
+                                                      ? FOLD_FLAGS_NOMIX_ASCII
+                                                      : 0)
+                                            );
+
+                            /* If this node only contains non-folding code
+                             * points so far, see if this new one is also
+                             * non-folding */
+                            if (maybe_exact) {
+                                if (folded != ender) {
+                                    maybe_exact = FALSE;
+                                }
+                                else {
+                                    /* Here the fold is the original; we have
+                                     * to check further to see if anything
+                                     * folds to it */
+                                    if (! PL_utf8_foldable) {
+                                        SV* swash = swash_init("utf8",
+                                                           "_Perl_Any_Folds",
+                                                           &PL_sv_undef, 1, 0);
+                                        PL_utf8_foldable =
+                                                    _get_swash_invlist(swash);
+                                        SvREFCNT_dec(swash);
+                                    }
+                                    if (_invlist_contains_cp(PL_utf8_foldable,
+                                                             ender))
+                                    {
+                                        maybe_exact = FALSE;
+                                    }
+                                }
+                            }
+                            ender = folded;
                         }
 			s += foldlen;
 
@@ -10808,6 +10849,7 @@ tryagain:
                     }
                     else {
                         *(s++) = ender;
+                        maybe_exact &= ! isALPHA_L1(ender);
                     }
 		}
 		else if (UTF) {
@@ -10996,6 +11038,12 @@ tryagain:
 
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
+
+            /* If 'maybe_exact' is still set here, means there are no
+             * code points in the node that participate in folds */
+            if (FOLD && maybe_exact) {
+                OP(ret) = EXACT;
+            }
 
             /* I (khw) don't know if you can get here with zero length, but the
              * old code handled this situation by creating a zero-length EXACT
