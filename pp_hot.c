@@ -2062,7 +2062,7 @@ PP(pp_subst)
     int force_on_match = 0;
     const I32 oldsave = PL_savestack_ix;
     STRLEN slen;
-    bool doutf8 = FALSE;
+    bool doutf8 = FALSE; /* whether replacement is in utf8 */
 #ifdef PERL_OLD_COPY_ON_WRITE
     bool is_cow;
 #endif
