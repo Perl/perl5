@@ -2828,7 +2828,9 @@ PP(pp_goto)
 	    }
 	    else if (CxMULTICALL(cx))
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
-	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
+	    if (CxTYPE(cx) == CXt_SUB && PadlistNAMECNT(CvPADLIST(cv)))
+		DIE(aTHX_ "Can't goto into a sub with signatures");
+	    else if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 
