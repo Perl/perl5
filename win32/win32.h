@@ -46,11 +46,15 @@
  */
 
 /* now even GCC supports __declspec() */
-
-#if defined(PERLDLL)
-#define DllExport __declspec(dllexport)
+/* miniperl has no reason to export anything */
+#if defined(PERL_IS_MINIPERL) && !defined(UNDER_CE) && defined(_MSC_VER)
+#  define DllExport
 #else
-#define DllExport __declspec(dllimport)
+#  if defined(PERLDLL)
+#    define DllExport __declspec(dllexport)
+#  else
+#    define DllExport __declspec(dllimport)
+#  endif
 #endif
 
 /* The Perl APIs can only be called directly inside the perl5xx.dll.

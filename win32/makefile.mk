@@ -1097,7 +1097,7 @@ $(MINICORE_OBJ) : $(CORE_NOCFG_H)
 	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*B).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(OBJOUT_FLAG)$@ $(*B).c
+	$(CC) -c $(CFLAGS) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*B).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # rules wrapped in .IFs break Win9X build (we end up with unbalanced []s unless

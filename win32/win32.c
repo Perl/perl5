@@ -4146,10 +4146,12 @@ Perl_init_os_extras(void)
     char *file = __FILE__;
 
     /* Initialize Win32CORE if it has been statically linked. */
+#ifndef PERL_IS_MINIPERL
     void (*pfn_init)(pTHX);
     pfn_init = (void (*)(pTHX))GetProcAddress((HMODULE)w32_perldll_handle, "init_Win32CORE");
     if (pfn_init)
         pfn_init(aTHX);
+#endif
 
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
 }
