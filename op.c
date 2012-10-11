@@ -4808,9 +4808,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    op_prepend_elem(o->op_type, scalar(repl), o);
 	}
 	else {
-	    if (curop == repl && !PM_GETRE(pm)) { /* Has variables. */
-		pm->op_pmflags |= PMf_MAYBE_CONST;
-	    }
 	    NewOp(1101, rcop, 1, LOGOP);
 	    rcop->op_type = OP_SUBSTCONT;
 	    rcop->op_ppaddr = PL_ppaddr[OP_SUBSTCONT];

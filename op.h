@@ -408,9 +408,6 @@ struct pmop {
  * OP_MATCH and OP_QR */
 #define PMf_ONCE	(1<<(PMf_BASE_SHIFT+1))
 
-/* replacement contains variables */
-#define PMf_MAYBE_CONST (1<<(PMf_BASE_SHIFT+2))
-
 /* PMf_ONCE has matched successfully.  Not used under threading. */
 #define PMf_USED        (1<<(PMf_BASE_SHIFT+3))
 
