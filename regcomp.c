@@ -6360,7 +6360,10 @@ reStudy:
     if (RExC_seen & REG_SEEN_CANY)
 	r->extflags |= RXf_CANY_SEEN;
     if (RExC_seen & REG_SEEN_VERBARG)
+    {
 	r->intflags |= PREGf_VERBARG_SEEN;
+	r->extflags |= RXf_MODIFIES_VARS;
+    }
     if (RExC_seen & REG_SEEN_CUTGROUP)
 	r->intflags |= PREGf_CUTGROUP_SEEN;
     if (pm_flags & PMf_USE_RE_EVAL)

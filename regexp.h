@@ -408,6 +408,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_INTUIT_TAIL 	(1<<(RXf_BASE_SHIFT+14))
 #define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
+#define RXf_MODIFIES_VARS	(1<<(RXf_BASE_SHIFT+15))
+
 /* Copy and tainted info */
 #define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+16))
 
