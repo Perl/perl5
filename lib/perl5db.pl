@@ -643,7 +643,6 @@ use vars qw(
     $ini_warn
     $maxtrace
     $od
-    $onetimedumpDepth
     @options
     $osingle
     $otrace
@@ -674,6 +673,7 @@ our (
     $ImmediateStop,
     $line,
     $onetimeDump,
+    $onetimedumpDepth,
     %option,
     $OUT,
     $packname,
@@ -2697,15 +2697,7 @@ via C<dumpvar.pl> instead of just printing it directly.
 
 =cut
 
-                if ($cmd =~ s#\Ax\b# #) {    # Remainder gets done by DB::eval()
-                    $onetimeDump = 'dump';    # main::dumpvar shows the output
-
-                    # handle special  "x 3 blah" syntax XXX propagate
-                    # doc back to special variables.
-                    if ( $cmd =~ s#\A\s*(\d+)(?=\s)# #) {
-                        $onetimedumpDepth = $1;
-                    }
-                }
+                $obj->_handle_x_command;
 
 =head4 C<m> - print methods
 
@@ -3909,6 +3901,21 @@ sub _handle_sh_command {
             next CMD;
         }
     }
+}
+
+sub _handle_x_command {
+    my $self = shift;
+    if ($DB::cmd =~ s#\Ax\b# #) {    # Remainder gets done by DB::eval()
+        $onetimeDump = 'dump';    # main::dumpvar shows the output
+
+        # handle special  "x 3 blah" syntax XXX propagate
+        # doc back to special variables.
+        if ( $DB::cmd =~ s#\A\s*(\d+)(?=\s)# #) {
+            $onetimedumpDepth = $1;
+        }
+    }
+
+    return;
 }
 
 package DB;
