@@ -4379,7 +4379,7 @@ sub cmd_wrapper {
     # default to the older version of the command.
     my $call = 'cmd_'
       . ( $set{$CommandSet}{$cmd}
-          || ( $cmd =~ /^[<>{]+/o ? 'prepost' : $cmd ) );
+          || ( $cmd =~ /\A[<>{]+/o ? 'prepost' : $cmd ) );
 
     # Call the command subroutine, call it by name.
     return __PACKAGE__->can($call)->( $cmd, $line, $dblineno );
