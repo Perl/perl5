@@ -1819,6 +1819,8 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 	    sv_utf8_upgrade(nsv);			\
 	    sv_catsv_nomg(dsv, nsv);			\
 	} STMT_END
+#define sv_catpvn_nomg_maybeutf8(dsv, sstr, slen, is_utf8) \
+	sv_catpvn_flags(dsv, sstr, slen, (is_utf8)?SV_CATUTF8:SV_CATBYTES)
 
 #ifdef PERL_CORE
 # define sv_or_pv_len_utf8(sv, pv, bytelen)	      \

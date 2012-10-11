@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 201 );
+plan( tests => 202 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -848,3 +848,9 @@ $_ = "hello";
 { s/(.)/$l{my $a||$1}/g }
 is $_, "HELLO",
   'logop in s/// repl does not result in "constant" repl optimisation';
+
+$_ = "\xc4\x80";
+$a = "";
+utf8::upgrade $a;
+$_ =~ s/$/$a/;
+is $_, "\xc4\x80", "empty utf8 repl does not result in mangled utf8";

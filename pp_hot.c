@@ -2081,6 +2081,7 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
 
+    SvGETMAGIC(TARG); /* must come before cow check */
 #ifdef PERL_OLD_COPY_ON_WRITE
     /* Awooga. Awooga. "bool" types that are actually char are dangerous,
        because they make integers such as 256 "false".  */
@@ -2100,8 +2101,7 @@ PP(pp_subst)
 	Perl_croak_no_modify(aTHX);
     PUTBACK;
 
-    s = SvPV_mutable(TARG, len);
-  setup_match:
+    s = SvPV_nomg(TARG, len);
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV || SvVOK(TARG))
 	force_on_match = 1;
 
@@ -2172,24 +2172,6 @@ PP(pp_subst)
     if (dstr) {
 	if (SvTAINTED(dstr))
 	    rxtainted |= SUBST_TAINT_REPL;
-
-	/* Upgrade the source if the replacement is utf8 but the source is not,
-	 * but only if it matched; see
-	 * http://www.nntp.perl.org/group/perl.perl5.porters/2010/04/msg158809.html
-	 */
-	if (DO_UTF8(dstr) && ! DO_UTF8(TARG)) {
-	    char * const orig_pvx = SvPOKp(TARG) ? SvPVX(TARG) : NULL;
-	    const STRLEN new_len = sv_utf8_upgrade_nomg(TARG);
-
-	    /* If the lengths are the same, the pattern contains only
-	     * invariants, can keep going; otherwise, various internal markers
-	     * could be off, so redo */
-	    if (new_len != len || orig_pvx != SvPVX(TARG)) {
-		/* Do this here, to avoid multiple FETCHes. */
-		s = SvPV_nomg(TARG, len);
-		goto setup_match;
-	    }
-	}
 
 	/* replacement needing upgrading? */
 	if (DO_UTF8(TARG) && !doutf8) {
@@ -2352,21 +2334,15 @@ PP(pp_subst)
 		strend = s + (strend - m);
 	    }
 	    m = RX_OFFS(rx)[0].start + orig;
-	    if (doutf8 && !SvUTF8(dstr))
-		sv_catpvn_nomg_utf8_upgrade(dstr, s, m - s, nsv);
-            else
-		sv_catpvn_nomg(dstr, s, m-s);
+	    sv_catpvn_nomg_maybeutf8(dstr, s, m - s, DO_UTF8(TARG));
 	    s = RX_OFFS(rx)[0].end + orig;
 	    if (clen)
-		sv_catpvn_nomg(dstr, c, clen);
+		sv_catpvn_nomg_maybeutf8(dstr, c, clen, doutf8);
 	    if (once)
 		break;
 	} while (CALLREGEXEC(rx, s, strend, orig, s == m,
 			     TARG, NULL, r_flags));
-	if (doutf8 && !DO_UTF8(TARG))
-	    sv_catpvn_nomg_utf8_upgrade(dstr, s, strend - s, nsv);
-	else
-	    sv_catpvn_nomg(dstr, s, strend - s);
+	sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
 
 	if (rpm->op_pmflags & PMf_NONDESTRUCT) {
 	    /* From here on down we're using the copy, and leaving the original
@@ -2391,7 +2367,7 @@ PP(pp_subst)
 	    SvPV_set(TARG, SvPVX(dstr));
 	    SvCUR_set(TARG, SvCUR(dstr));
 	    SvLEN_set(TARG, SvLEN(dstr));
-	    doutf8 |= DO_UTF8(dstr);
+	    SvFLAGS(TARG) |= SvUTF8(dstr);
 	    SvPV_set(dstr, NULL);
 
 	    SPAGAIN;
@@ -2401,8 +2377,6 @@ PP(pp_subst)
 
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
 	(void)SvPOK_only_UTF8(TARG);
-	if (doutf8)
-	    SvUTF8_on(TARG);
     }
 
     /* See "how taint works" above */
