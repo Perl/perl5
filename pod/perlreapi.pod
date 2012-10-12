@@ -59,7 +59,7 @@ the right routines to do so.
 
 In order to install a new regexp handler, C<$^H{regcomp}> is set
 to an integer which (when casted appropriately) resolves to one of these
-structures. When compiling, the C<comp> method is executed, and the
+structures.  When compiling, the C<comp> method is executed, and the
 resulting C<regexp> structure's engine field is expected to point back at
 the same structure.
 
@@ -76,7 +76,7 @@ routines get an extra argument.
 
 Compile the pattern stored in C<pattern> using the given C<flags> and
 return a pointer to a prepared C<REGEXP> structure that can perform
-the match. See L</The REGEXP structure> below for an explanation of
+the match.  See L</The REGEXP structure> below for an explanation of
 the individual fields in the REGEXP struct.
 
 The C<pattern> parameter is the scalar that was used as the
@@ -96,23 +96,23 @@ stringify everything using the snippet above, but that doesn't mean
 other engines have to.
 
 The C<flags> parameter is a bitfield which indicates which of the
-C<msixp> flags the regex was compiled with. It also contains
+C<msixp> flags the regex was compiled with.  It also contains
 additional info, such as if C<use locale> is in effect.
 
 The C<eogc> flags are stripped out before being passed to the comp
-routine. The regex engine does not need to know if any of these
+routine.  The regex engine does not need to know if any of these
 are set, as those flags should only affect what Perl does with the
 pattern and its match variables, not how it gets compiled and
 executed.
 
 By the time the comp callback is called, some of these flags have
-already had effect (noted below where applicable). However most of
+already had effect (noted below where applicable).  However most of
 their effect occurs after the comp callback has run, in routines that
 read the C<< rx->extflags >> field which it populates.
 
 In general the flags should be preserved in C<< rx->extflags >> after
 compilation, although the regex engine might want to add or delete
-some of them to invoke or disable some special behavior in Perl. The
+some of them to invoke or disable some special behavior in Perl.  The
 flags along with any special behavior they cause are documented below:
 
 The pattern modifiers:
@@ -149,7 +149,7 @@ C<get_regex_charset(const U32 flags)>.  The only currently documented
 value returned from it is REGEX_LOCALE_CHARSET, which is set if
 C<use locale> is in effect. If present in C<< rx->extflags >>,
 C<split> will use the locale dependent definition of whitespace
-when RXf_SKIPWHITE or RXf_WHITE is in effect. ASCII whitespace
+when RXf_SKIPWHITE or RXf_WHITE is in effect.  ASCII whitespace
 is defined as per L<isSPACE|perlapi/isSPACE>, and by the internal
 macros C<is_utf8_space> under UTF-8, and C<isSPACE_LC> under C<use
 locale>.
@@ -168,8 +168,8 @@ This is how it used to work:
 
 If C<split> is invoked as C<split ' '> or with no arguments (which
 really means C<split(' ', $_)>, see L<split|perlfunc/split>), Perl will
-set this flag. The regex engine can then check for it and set the
-SKIPWHITE and WHITE extflags. To do this, the Perl engine does:
+set this flag.  The regex engine can then check for it and set the
+SKIPWHITE and WHITE extflags.  To do this, the Perl engine does:
 
     if (flags & RXf_SPLIT && r->prelen == 1 && r->precomp[0] == ' ')
         r->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
@@ -188,7 +188,7 @@ set it, but doing so will have no effect.  This is how it used to work:
 
 If the flag is present in C<< rx->extflags >> C<split> will delete
 whitespace from the start of the subject string before it's operated
-on. What is considered whitespace depends on if the subject is a
+on.  What is considered whitespace depends on if the subject is a
 UTF-8 string and if the C<RXf_PMf_LOCALE> flag is set.
 
 If RXf_WHITE is set in addition to this flag, C<split> will behave like
@@ -200,14 +200,14 @@ Tells the split operator to split the target string on newlines
 (C<\n>) without invoking the regex engine.
 
 Perl's engine sets this if the pattern is C</^/> (C<plen == 1 && *exp
-== '^'>), even under C</^/s>; see L<split|perlfunc>. Of course a
+== '^'>), even under C</^/s>; see L<split|perlfunc>.  Of course a
 different regex engine might want to use the same optimizations
 with a different syntax.
 
 =item RXf_WHITE
 
 Tells the split operator to split the target string on whitespace
-without invoking the regex engine. The definition of whitespace varies
+without invoking the regex engine.  The definition of whitespace varies
 depending on if the target string is a UTF-8 string and on
 if RXf_PMf_LOCALE is set.
 
@@ -216,11 +216,11 @@ Perl's engine sets this flag if the pattern is C<\s+>.
 =item RXf_NULL
 
 Tells the split operator to split the target string on
-characters. The definition of character varies depending on if
+characters.  The definition of character varies depending on if
 the target string is a UTF-8 string.
 
 Perl's engine sets this flag on empty patterns, this optimization
-makes C<split //> much faster than it would otherwise be. It's even
+makes C<split //> much faster than it would otherwise be.  It's even
 faster than C<unpack>.
 
 =item RXf_MODIFIES_VARS
@@ -248,7 +248,7 @@ The regular expression to execute.
 
 =item screamer
 
-This strangely-named arg is the SV to be matched against. Note that the
+This strangely-named arg is the SV to be matched against.  Note that the
 actual char array to be matched against is supplied by the arguments
 described below; the SV is just used to determine UTF8ness, C<pos()> etc.
 
@@ -290,7 +290,7 @@ Optimisation flags; subject to change.
 
 Find the start position where a regex match should be attempted,
 or possibly if the regex engine should not be run because the
-pattern can't match. This is called, as appropriate, by the core,
+pattern can't match.  This is called, as appropriate, by the core,
 depending on the values of the C<extflags> member of the C<regexp>
 structure.
 
@@ -307,7 +307,7 @@ by C<split> for optimising matches.
 
 Called by Perl when it is freeing a regexp pattern so that the engine
 can release any resources pointed to by the C<pprivate> member of the
-C<regexp> structure. This is only responsible for freeing private data;
+C<regexp> structure.  This is only responsible for freeing private data;
 Perl will handle releasing anything else contained in the C<regexp> structure.
 
 =head2 Numbered capture callbacks
@@ -331,7 +331,7 @@ used for the caret variants of the variables.
 
 
 The names have been chosen by analogy with L<Tie::Scalar> methods
-names with an additional B<LENGTH> callback for efficiency. However
+names with an additional B<LENGTH> callback for efficiency.  However
 named capture variables are currently not tied internally but
 implemented via magic.
 
@@ -340,15 +340,15 @@ implemented via magic.
     void numbered_buff_FETCH(pTHX_ REGEXP * const rx, const I32 paren,
                              SV * const sv);
 
-Fetch a specified numbered capture. C<sv> should be set to the scalar
+Fetch a specified numbered capture.  C<sv> should be set to the scalar
 to return, the scalar is passed as an argument rather than being
 returned from the function because when it's called Perl already has a
 scalar to store the value, creating another one would be
-redundant. The scalar can be set with C<sv_setsv>, C<sv_setpvn> and
+redundant.  The scalar can be set with C<sv_setsv>, C<sv_setpvn> and
 friends, see L<perlapi>.
 
 This callback is where Perl untaints its own capture variables under
-taint mode (see L<perlsec>). See the C<Perl_reg_numbered_buff_fetch>
+taint mode (see L<perlsec>).  See the C<Perl_reg_numbered_buff_fetch>
 function in F<regcomp.c> for how to untaint capture variables if
 that's something you'd like your engine to do as well.
 
@@ -359,8 +359,8 @@ that's something you'd like your engine to do as well.
                                     const I32 paren,
                                     SV const * const value);
 
-Set the value of a numbered capture variable. C<value> is the scalar
-that is to be used as the new value. It's up to the engine to make
+Set the value of a numbered capture variable.  C<value> is the scalar
+that is to be used as the new value.  It's up to the engine to make
 sure this is used as the new value (or reject it).
 
 Example:
@@ -389,9 +389,9 @@ variables, to do this in another engine use the following callback
     }
 
 Actually Perl will not I<always> croak in a statement that looks
-like it would modify a numbered capture variable. This is because the
+like it would modify a numbered capture variable.  This is because the
 STORE callback will not be called if Perl can determine that it
-doesn't have to modify the value. This is exactly how tied variables
+doesn't have to modify the value.  This is exactly how tied variables
 behave in the same situation:
 
     package CaptureVar;
@@ -408,7 +408,7 @@ behave in the same situation:
 
 Because C<$sv> is C<undef> when the C<y///> operator is applied to it,
 the transliteration won't actually execute and the program won't
-C<die>. This is different to how 5.8 and earlier versions behaved
+C<die>.  This is different to how 5.8 and earlier versions behaved
 since the capture variables were READONLY variables then; now they'll
 just die when assigned to in the default engine.
 
@@ -419,7 +419,7 @@ just die when assigned to in the default engine.
                               const SV * const sv,
                               const I32 paren);
 
-Get the C<length> of a capture variable. There's a special callback
+Get the C<length> of a capture variable.  There's a special callback
 for this so that Perl doesn't have to do a FETCH and run C<length> on
 the result, since the length is (in Perl's case) known from an offset
 stored in C<< rx->offs >>, this is much more efficient:
@@ -464,7 +464,7 @@ If C<%+> or C<%-> is being operated on, if any.
     RXapif_ALL /* %- */
 
 If this is being called as C<re::regname>, C<re::regnames> or
-C<re::regnames_count>, if any. The first two will be combined with
+C<re::regnames_count>, if any.  The first two will be combined with
 C<RXapif_ONE> or C<RXapif_ALL>.
 
     RXapif_REGNAME
@@ -472,10 +472,10 @@ C<RXapif_ONE> or C<RXapif_ALL>.
     RXapif_REGNAMES_COUNT
 
 Internally C<%+> and C<%-> are implemented with a real tied interface
-via L<Tie::Hash::NamedCapture>. The methods in that package will call
-back into these functions. However the usage of
+via L<Tie::Hash::NamedCapture>.  The methods in that package will call
+back into these functions.  However the usage of
 L<Tie::Hash::NamedCapture> for this purpose might change in future
-releases. For instance this might be implemented by magic instead
+releases.  For instance this might be implemented by magic instead
 (would need an extension to mgvtbl).
 
 =head3 named_buff
@@ -495,12 +495,12 @@ releases. For instance this might be implemented by magic instead
     SV* qr_package(pTHX_ REGEXP * const rx);
 
 The package the qr// magic object is blessed into (as seen by C<ref
-qr//>). It is recommended that engines change this to their package
+qr//>).  It is recommended that engines change this to their package
 name for identification regardless of if they implement methods
 on the object.
 
 The package this method returns should also have the internal
-C<Regexp> package in its C<@ISA>. C<< qr//->isa("Regexp") >> should always
+C<Regexp> package in its C<@ISA>.  C<< qr//->isa("Regexp") >> should always
 be true regardless of what engine is being used.
 
 Example implementation might be:
@@ -532,7 +532,7 @@ Functions>.
     void* dupe(pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 
 On threaded builds a regexp may need to be duplicated so that the pattern
-can be used by multiple threads. This routine is expected to handle the
+can be used by multiple threads.  This routine is expected to handle the
 duplication of any private data pointed to by the C<pprivate> member of
 the C<regexp> structure.  It will be called with the preconstructed new
 C<regexp> structure as an argument, the C<pprivate> member will point at
@@ -552,11 +552,12 @@ null.
 
 =head1 The REGEXP structure
 
-The REGEXP struct is defined in F<regexp.h>. All regex engines must be able to
+The REGEXP struct is defined in F<regexp.h>.
+All regex engines must be able to
 correctly build such a structure in their L</comp> routine.
 
 The REGEXP structure contains all the data that Perl needs to be aware of
-to properly work with the regular expression. It includes data about
+to properly work with the regular expression.  It includes data about
 optimisations that Perl can use to determine if the regex engine should
 really be used, and various other control info that is needed to properly
 execute patterns in various contexts, such as if the pattern anchored in
@@ -564,10 +565,10 @@ some way, or what flags were used during the compile, or if the
 program contains special constructs that Perl needs to be aware of.
 
 In addition it contains two fields that are intended for the private
-use of the regex engine that compiled the pattern. These are the
-C<intflags> and C<pprivate> members. C<pprivate> is a void pointer to
+use of the regex engine that compiled the pattern.  These are the
+C<intflags> and C<pprivate> members.  C<pprivate> is a void pointer to
 an arbitrary structure, whose use and management is the responsibility
-of the compiling engine. Perl will never modify either of these
+of the compiling engine.  Perl will never modify either of these
 values.
 
     typedef struct regexp {
@@ -632,7 +633,7 @@ The fields are discussed in more detail below:
 =head2 C<engine>
 
 This field points at a C<regexp_engine> structure which contains pointers
-to the subroutines that are to be used for performing a match. It
+to the subroutines that are to be used for performing a match.  It
 is the compiling routine's responsibility to populate this field before
 returning the regexp object.
 
@@ -648,7 +649,7 @@ TODO, see L<http://www.mail-archive.com/perl5-changes@perl.org/msg17328.html>
 
 This will be used by Perl to see what flags the regexp was compiled
 with, this will normally be set to the value of the flags parameter by
-the L<comp|/comp> callback. See the L<comp|/comp> documentation for
+the L<comp|/comp> callback.  See the L<comp|/comp> documentation for
 valid flags.
 
 =head2 C<minlen> C<minlenret>
@@ -656,9 +657,9 @@ valid flags.
 The minimum string length (in characters) required for the pattern to match.
 This is used to
 prune the search space by not bothering to match any closer to the end of a
-string than would allow a match. For instance there is no point in even
+string than would allow a match.  For instance there is no point in even
 starting the regex engine if the minlen is 10 but the string is only 5
-characters long. There is no way that the pattern can match.
+characters long.  There is no way that the pattern can match.
 
 C<minlenret> is the minimum length (in characters) of the string that would
 be found in $& after a match.
@@ -669,7 +670,8 @@ following pattern:
     /ns(?=\d)/
 
 where the C<minlen> would be 3 but C<minlenret> would only be 2 as the \d is
-required to match but is not actually included in the matched content. This
+required to match but is not actually
+included in the matched content.  This
 distinction is particularly important as the substitution logic uses the
 C<minlenret> to tell if it can do in-place substitutions (these can
 result in considerable speed-up).
@@ -680,7 +682,7 @@ Left offset from pos() to start match at.
 
 =head2 C<substrs>
 
-Substring data about strings that must appear in the final match. This
+Substring data about strings that must appear in the final match.  This
 is currently only used internally by Perl's engine, but might be
 used in the future for all engines for optimisations.
 
@@ -697,13 +699,14 @@ this is the same as C<extflags> unless the engine chose to modify one of them.
 
 =head2 C<pprivate>
 
-A void* pointing to an engine-defined data structure. The Perl engine uses the
+A void* pointing to an engine-defined
+data structure.  The Perl engine uses the
 C<regexp_internal> structure (see L<perlreguts/Base Structures>) but a custom
 engine should use something else.
 
 =head2 C<swap>
 
-Unused. Left in for compatibility with Perl 5.10.0.
+Unused.  Left in for compatibility with Perl 5.10.0.
 
 =head2 C<offs>
 
@@ -717,14 +720,15 @@ C<regexp_paren_pair> struct is defined as follows:
     } regexp_paren_pair;
 
 If C<< ->offs[num].start >> or C<< ->offs[num].end >> is C<-1> then that
-capture group did not match. C<< ->offs[0].start/end >> represents C<$&> (or
+capture group did not match.
+C<< ->offs[0].start/end >> represents C<$&> (or
 C<${^MATCH}> under C<//p>) and C<< ->offs[paren].end >> matches C<$$paren> where
 C<$paren >= 1>.
 
 =head2 C<precomp> C<prelen>
 
-Used for optimisations. C<precomp> holds a copy of the pattern that
-was compiled and C<prelen> its length. When a new pattern is to be
+Used for optimisations.  C<precomp> holds a copy of the pattern that
+was compiled and C<prelen> its length.  When a new pattern is to be
 compiled (such as inside a loop) the internal C<regcomp> operator
 checks if the last compiled C<REGEXP>'s C<precomp> and C<prelen>
 are equivalent to the new one, and if so uses the old pattern instead
@@ -739,7 +743,7 @@ The relevant snippet from C<Perl_pp_regcomp>:
 =head2 C<paren_names>
 
 This is a hash used internally to track named capture groups and their
-offsets. The keys are the names of the buffers the values are dualvars,
+offsets.  The keys are the names of the buffers the values are dualvars,
 with the IV slot holding the number of buffers with the given name and the
 pv being an embedded array of I32.  The values may also be contained
 independently in the data array in cases where named backreferences are
@@ -749,7 +753,7 @@ used.
 
 Holds information on the longest string that must occur at a fixed
 offset from the start of the pattern, and the longest string that must
-occur at a floating offset from the start of the pattern. Used to do
+occur at a floating offset from the start of the pattern.  Used to do
 Fast-Boyer-Moore searches on the string to find out if its worth using
 the regex engine at all, and if so where in the string to search.
 
@@ -765,9 +769,9 @@ In the presence of the C<REXEC_COPY_STR> flag, but with the addition of
 the C<REXEC_COPY_SKIP_PRE> or C<REXEC_COPY_SKIP_POST> flags, an engine
 can choose not to copy the full buffer (although it must still do so in
 the presence of C<RXf_PMf_KEEPCOPY> or the relevant bits being set in
-C<PL_sawampersand>). In this case, it may set C<suboffset> to indicate the
+C<PL_sawampersand>).  In this case, it may set C<suboffset> to indicate the
 number of bytes from the logical start of the buffer to the physical start
-(i.e. C<subbeg>). It should also set C<subcoffset>, the number of
+(i.e. C<subbeg>).  It should also set C<subcoffset>, the number of
 characters in the offset. The latter is needed to support C<@-> and C<@+>
 which work in characters, not bytes.
 
@@ -790,13 +794,15 @@ engine understand a construct like C<(?:)>.
 
 =head2 C<seen_evals>
 
-This stores the number of eval groups in the pattern. This is used for security
+This stores the number of eval groups in
+the pattern.  This is used for security
 purposes when embedding compiled regexes into larger patterns with C<qr//>.
 
 =head2 C<refcnt>
 
-The number of times the structure is referenced. When this falls to 0, the
-regexp is automatically freed by a call to pregfree. This should be set to 1 in
+The number of times the structure is referenced.  When
+this falls to 0, the regexp is automatically freed
+by a call to pregfree.  This should be set to 1 in
 each engine's L</comp> routine.
 
 =head1 HISTORY
