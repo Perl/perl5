@@ -4406,21 +4406,40 @@ S_word_takes_any_delimeter(char *p, STRLEN len)
   stitching them into a tree.
 
   Returns:
-    PRIVATEREF
+    The type of the next token
 
   Structure:
-      if read an identifier
-          if we're in a my declaration
-	      croak if they tried to say my($foo::bar)
-	      build the ops for a my() declaration
-	  if it's an access to a my() variable
-	      are we in a sort block?
-	          croak if my($a); $a <=> $b
-	      build ops for access to a my() variable
-	  if in a dq string, and they've said @foo and we can't find @foo
-	      croak
-	  build ops for a bareword
-      if we already built the token before, use it.
+      Switch based on the current state:
+	  - if we already built the token before, use it
+	  - if we have a case modifier in a string, deal with that
+	  - handle other cases of interpolation inside a string
+	  - scan the next line if we are inside a format
+      In the normal state switch on the next character:
+	  - default:
+	    if alphabetic, go to key lookup
+	    unrecoginized character - croak
+	  - 0/4/26: handle end-of-line or EOF
+	  - cases for whitespace
+	  - \n and #: handle comments and line numbers
+	  - various operators, brackets and sigils
+	  - numbers
+	  - quotes
+	  - 'v': vstrings (or go to key lookup)
+	  - 'x' repetition operator (or go to key lookup)
+	  - other ASCII alphanumerics (key lookup begins here):
+	      word before => ?
+	      keyword plugin
+	      scan built-in keyword (but do nothing with it yet)
+	      check for statement label
+	      check for lexical subs
+		  goto just_a_word if there is one
+	      see whether built-in keyword is overridden
+	      switch on keyword number:
+		  - default: just_a_word:
+		      not a built-in keyword; handle bareword lookup
+		      disambiguate between method and sub call
+		      fall back to bareword
+		  - cases for built-in keywords
 */
 
 
@@ -8659,6 +8678,26 @@ Perl_yylex(pTHX)
 #ifdef __SC__
 #pragma segment Main
 #endif
+
+/*
+  S_pending_ident
+
+  Looks up an identifier in the pad or in a package
+
+  Returns:
+    PRIVATEREF if this is a lexical name.
+    WORD       if this belongs to a package.
+
+  Structure:
+      if we're in a my declaration
+	  croak if they tried to say my($foo::bar)
+	  build the ops for a my() declaration
+      if it's an access to a my() variable
+	  build ops for access to a my() variable
+      if in a dq string, and they've said @foo and we can't find @foo
+	  warn
+      build ops for a bareword
+*/
 
 static int
 S_pending_ident(pTHX)
