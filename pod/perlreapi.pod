@@ -183,6 +183,9 @@ the C<split> operator.
 
 =item RXf_SKIPWHITE
 
+This flag was removed in perl 5.18.0.  It is still #defined, so you can
+set it, but doing so will have no effect.  This is how it used to work:
+
 If the flag is present in C<< rx->extflags >> C<split> will delete
 whitespace from the start of the subject string before it's operated
 on. What is considered whitespace depends on if the subject is a
