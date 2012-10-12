@@ -99,6 +99,7 @@ extern const struct regexp_engine my_reg_engine;
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
+#define IS_IN_SOME_FOLD(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
 #ifdef op
 #undef op
@@ -10849,7 +10850,7 @@ tryagain:
                     }
                     else {
                         *(s++) = ender;
-                        maybe_exact &= ! isALPHA_L1(ender);
+                        maybe_exact &= ! IS_IN_SOME_FOLD(ender);
                     }
 		}
 		else if (UTF) {
@@ -12883,13 +12884,9 @@ parseit:
                      * EXACTFish node that any such are likely to be.  We can
                      * do this iff the code point doesn't participate in any
                      * folds.  For example, an EXACTF of a colon is the same as
-                     * an EXACT one, since nothing folds to or from a colon.
-                     * In the Latin1 range, being an alpha means that the
-                     * character participates in a fold (except for the
-                     * feminine and masculine ordinals, which I (khw) don't
-                     * think are worrying about optimizing for). */
+                     * an EXACT one, since nothing folds to or from a colon. */
                     if (value < 256) {
-                        if (isALPHA_L1(value)) {
+                        if (IS_IN_SOME_FOLD(value)) {
                             op = EXACT;
                         }
                     }
