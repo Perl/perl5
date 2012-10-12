@@ -53,6 +53,30 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 New Restrictions in Multi-Character Case-Insensitive Matching in Regular Expression Bracketed Character Classes
+
+Unicode has now withdrawn their previous recommendation for regular
+expressions to automatically handle cases where a single character can
+match multiple characters case-insensitively; for example, the letter
+LATIN SMALL LETTER SHARP S and the sequence C<ss>.  This is because
+it turns out to be impracticable to do this correctly in all
+circumstances.  Because Perl has tried to do this as best it can, it
+will continue to do so.  (We are considering an option to turn it off.)
+However, a new restriction is being added on such matches when they
+occur in [bracketed] character classes.  People were specifying
+things such as C</[\0-\xff]/i>, and being surprised that it matches the
+two character sequence C<ss> (since LATIN SMALL LETTER SHARP S occurs in
+this range).  This behavior is also inconsistent with the using a
+property instead of a range:  C<\p{Block=Latin1}> also includes LATIN
+SMALL LETTER SHARP S, but C</[\p{Block=Latin1}]/i> does not match C<ss>.
+The new rule is that for there to be a multi-character case-insensitive
+match within a bracketed character class, the character must be
+explicitly listed, and not as an end point of a range.  This more
+closely obeys the Principle of Least Astonishment.  See
+L<perlrecharclass/Bracketed Character Classes>.  Note that a bug [perl
+#89774], now fixed as part of this change, prevented the previous
+behavior from working fully.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.  In
@@ -315,7 +339,9 @@ well.
 
 =item *
 
-XXX
+Case-insensitive matching inside a [bracketed] character class with a
+multi-character fold, no longer excludes one of the possibilities in the
+circumstances that it used to. [perl #89774].
 
 =back
 

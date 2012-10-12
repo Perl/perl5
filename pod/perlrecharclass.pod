@@ -441,7 +441,8 @@ Examples:
 
 * There is an exception to a bracketed character class matching a
 single character only.  When the class is to match caselessly under C</i>
-matching rules, and a character inside the class matches a
+matching rules, and a character that is explicitly mentioned inside the
+class matches a
 multiple-character sequence caselessly under Unicode rules, the class
 (when not L<inverted|/Negation>) will also match that sequence.  For
 example, Unicode says that the letter C<LATIN SMALL LETTER SHARP S>
@@ -449,6 +450,18 @@ should match the sequence C<ss> under C</i> rules.  Thus,
 
  'ss' =~ /\A\N{LATIN SMALL LETTER SHARP S}\z/i             # Matches
  'ss' =~ /\A[aeioust\N{LATIN SMALL LETTER SHARP S}]\z/i    # Matches
+
+For this to happen, the character must be explicitly specified, and not
+be part of a multi-character range (not even as one of its endpoints).
+(L</Character Ranges> will be explained shortly.)  Therefore,
+
+ 'ss' =~ /\A[\0-\x{ff}]\z/i        # Doesn't match
+ 'ss' =~ /\A[\0-\N{LATIN SMALL LETTER SHARP S}]\z/i    # No match
+ 'ss' =~ /\A[\xDF-\xDF]\z/i    # Matches on ASCII platforms, since \XDF
+                               # is LATIN SMALL LETTER SHARP S, and the
+                               # range is just a single element
+
+Note that it isn't a good idea to specify these types of ranges anyway.
 
 =head3 Special Characters Inside a Bracketed Character Class
 

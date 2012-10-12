@@ -72,26 +72,12 @@ are split between groupings, or when one or more are quantified.  Thus
  # be even if it did!!
  "\N{LATIN SMALL LIGATURE FI}" =~ /(f)(i)/i;      # Doesn't match!
 
-Perl doesn't match multiple characters in an inverted bracketed
-character class, which otherwise could be highly confusing.  See
+Perl doesn't match multiple characters in a bracketed
+character class unless the character that maps to them is explicitly
+mentioned, and it doesn't match them at all if the character class is
+inverted, which otherwise could be highly confusing.  See
+L<perlrecharclass/Bracketed Character Classes>, and
 L<perlrecharclass/Negation>.
-
-Another bug involves character classes that match both a sequence of
-multiple characters, and an initial sub-string of that sequence.  For
-example,
-
- /[s\xDF]/i
-
-should match both a single and a double "s", since C<\xDF> (on ASCII
-platforms) matches "ss".  However, this bug
-(L<[perl #89774]|https://rt.perl.org/rt3/Ticket/Display.html?id=89774>)
-causes it to only match a single "s", even if the final larger match
-fails, and matching the double "ss" would have succeeded.
-
-Also, Perl matching doesn't fully conform to the current Unicode C</i>
-recommendations, which ask that the matching be made upon the NFD
-(Normalization Form Decomposed) of the text.  However, Unicode is
-in the process of reconsidering and revising their recommendations.
 
 =item x
 X</x>

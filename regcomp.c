@@ -159,6 +159,7 @@ typedef struct RExC_state_t {
     I32		in_lookbehind;
     I32		contains_locale;
     I32		override_recoding;
+    I32		in_multi_char_class;
     struct reg_code_block *code_blocks;	/* positions of literal (?{})
 					    within pattern */
     int		num_code_blocks;	/* size of code_blocks[] */
@@ -213,7 +214,8 @@ typedef struct RExC_state_t {
 #define RExC_recurse_count	(pRExC_state->recurse_count)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
-#define RExC_override_recoding	(pRExC_state->override_recoding)
+#define RExC_override_recoding (pRExC_state->override_recoding)
+#define RExC_in_multi_char_class (pRExC_state->in_multi_char_class)
 
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
@@ -5361,6 +5363,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	PL_PosixXDigit = _new_invlist_C_array(PosixXDigit_invlist);
 	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
+
+        PL_HasMultiCharFold = _new_invlist_C_array(_Perl_Multi_Char_Folds_invlist);
     }
 #endif
 
@@ -5768,6 +5772,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_extralen = 0;
     RExC_override_recoding = 0;
+    RExC_in_multi_char_class = 0;
 
     /* First pass: determine size, legality. */
     RExC_parse = exp;
@@ -11427,21 +11432,35 @@ S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
  * number defined in handy.h. */
 #define namedclass_to_classnum(class)  ((class) / 2)
 
-/*
-   parse a class specification and produce either an ANYOF node that
-   matches the pattern or perhaps will be optimized into an EXACTish node
-   instead. The node contains a bit map for the first 256 characters, with the
-   corresponding bit set if that character is in the list.  For characters
-   above 255, a range list is used */
-
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
+    /* parse a bracketed class specification.  Most of these will produce an ANYOF node;
+     * but something like [a] will produce an EXACT node; [aA], an EXACTFish
+     * node; [[:ascii:]], a POSIXA node; etc.  It is more complex under /i with
+     * multi-character folds: it will be rewritten following the paradigm of
+     * this example, where the <multi-fold>s are characters which fold to
+     * multiple character sequences:
+     *      /[abc\x{multi-fold1}def\x{multi-fold2}ghi]/i
+     * gets effectively rewritten as:
+     *      /(?:\x{multi-fold1}|\x{multi-fold2}|[abcdefghi]/i
+     * reg() gets called (recursively) on the rewritten version, and this
+     * function will return what it constructs.  (Actually the <multi-fold>s
+     * aren't physically removed from the [abcdefghi], it's just that they are
+     * ignored in the recursion by means of a a flag:
+     * <RExC_in_multi_char_class>.)
+     *
+     * ANYOF nodes contain a bit map for the first 256 characters, with the
+     * corresponding bit set if that character is in the list.  For characters
+     * above 255, a range list or swash is used.  There are extra bits for \w,
+     * etc. in locale ANYOFs, as what these match is not determinable at
+     * compile time */
+
     dVAR;
     UV nextvalue;
-    UV prevvalue = OOB_UNICODE;
+    UV prevvalue, save_prevvalue = OOB_UNICODE;
     IV range = 0;
-    UV value = 0;
+    UV value, save_value = 0;
     regnode *ret;
     STRLEN numlen;
     IV namedclass = OOB_NAMEDCLASS;
@@ -11456,6 +11475,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                extended beyond the Latin1 range */
     UV element_count = 0;   /* Number of distinct elements in the class.
 			       Optimizations may be possible if this is tiny */
+    AV * multi_char_matches = NULL; /* Code points that fold to more than one
+                                       character; used under /i */
     UV n;
 
     /* Unicode properties are stored in a swash; this holds the current one
@@ -11514,9 +11535,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
-	RExC_naughty++;
 	RExC_parse++;
+        if (! RExC_in_multi_char_class) {
         invert = TRUE;
+        RExC_naughty++;
 
         /* We have decided to not allow multi-char folds in inverted character
 	 * classes, due to the confusion that can happen, especially with
@@ -11527,6 +11549,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
          *
          * See [perl #89750] */
         allow_full_fold = FALSE;
+        }
     }
 
     if (SIZE_ONLY) {
@@ -11557,6 +11580,8 @@ parseit:
     charclassloop:
 
 	namedclass = OOB_NAMEDCLASS; /* initialize as illegal */
+        save_value = value;
+        save_prevvalue = prevvalue;
 
 	if (!range) {
 	    rangebegin = RExC_parse;
@@ -12180,8 +12205,92 @@ parseit:
 	    RExC_uni_semantics = 1;
 	}
 
-        /* Ready to process either the single value, or the completed range */
-	if (!SIZE_ONLY) {
+        /* Ready to process either the single value, or the completed range.
+         * For single-valued non-inverted ranges, we consider the possibility
+         * of multi-char folds.  (We made a conscious decision to not do this
+         * for the other cases because it can often lead to non-intuitive
+         * results) */
+        if (FOLD && ! invert && value == prevvalue) {
+            if (value == LATIN_SMALL_LETTER_SHARP_S
+                || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
+                                                        value)))
+            {
+                /* Here <value> is indeed a multi-char fold.  Get what it is */
+
+                U8 foldbuf[UTF8_MAXBYTES_CASE];
+                STRLEN foldlen;
+
+                UV folded = _to_uni_fold_flags(
+                                value,
+                                foldbuf,
+                                &foldlen,
+                                FOLD_FLAGS_FULL
+                                | ((LOC) ?  FOLD_FLAGS_LOCALE
+                                            : (ASCII_FOLD_RESTRICTED)
+                                              ? FOLD_FLAGS_NOMIX_ASCII
+                                              : 0)
+                                );
+
+                /* Here, <folded> should be the first character of the
+                 * multi-char fold of <value>, with <foldbuf> containing the
+                 * whole thing.  But, if this fold is not allowed (because of
+                 * the flags), <fold> will be the same as <value>, and should
+                 * be processed like any other character, so skip the special
+                 * handling */
+                if (folded != value) {
+
+                    /* Skip if we are recursed, currently parsing the class
+                     * again.  Otherwise add this character to the list of
+                     * multi-char folds. */
+                    if (! RExC_in_multi_char_class) {
+                        AV** this_array_ptr;
+                        AV* this_array;
+                        STRLEN cp_count = utf8_length(foldbuf, foldbuf + foldlen);
+                        SV* multi_fold = sv_2mortal(newSVpvn("", 0));
+
+                        Perl_sv_catpvf(aTHX_ multi_fold, "\\x{%"UVXf"}", value);
+
+
+                        if (! multi_char_matches) {
+                            multi_char_matches = newAV();
+                        }
+
+                        /* <multi_char_matches> is actually an array of arrays.
+                         * There will be one or two top-level elements: [2],
+                         * and/or [3].  The [2] element is an array, each
+                         * element thereof is a character which folds to two
+                         * characters; likewise for [3].  (Unicode guarantees a
+                         * maximum of 3 characters in any fold.)  When we
+                         * rewrite the character class below, we will do so
+                         * such that the longest folds are written first, so
+                         * that it prefers the longest matching strings first.
+                         * This is done even if it turns out that any
+                         * quantifier is non-greedy, out of programmer
+                         * laziness.  Tom Christiansen has agreed that this is
+                         * ok.  This makes the test for the ligature 'ffi' come
+                         * before the test for 'ff' */
+                        if (av_exists(multi_char_matches, cp_count)) {
+                            this_array_ptr = (AV**) av_fetch(multi_char_matches, cp_count, FALSE);
+                            this_array = *this_array_ptr;
+                        }
+                        else {
+                            this_array = newAV();
+                            av_store(multi_char_matches, cp_count, (SV*) this_array);
+                        }
+                        av_push(this_array, multi_fold);
+                    }
+
+                    /* This element should not be processed further in this class */
+                    element_count--;
+                    value = save_value;
+                    prevvalue = save_prevvalue;
+                    continue;
+                }
+            }
+        }
+
+        /* Deal with this element of the class */
+	if (! SIZE_ONLY) {
 #ifndef EBCDIC
             cp_list = _add_range_to_invlist(cp_list, prevvalue, value);
 #else
@@ -12210,6 +12319,80 @@ parseit:
 
 	range = 0; /* this range (if it was one) is done now */
     } /* End of loop through all the text within the brackets */
+
+    /* If anything in the class expands to more than one character, we have to
+     * deal with them by building up a substitute parse string, and recursively
+     * calling reg() on it, instead of proceeding */
+    if (multi_char_matches) {
+	SV * substitute_parse = newSVpvn_flags("?:", 2, SVs_TEMP);
+        I32 cp_count;
+	STRLEN len;
+	char *save_end = RExC_end;
+	char *save_parse = RExC_parse;
+        bool first_time = TRUE;     /* First multi-char occurrence doesn't get
+                                       a "|" */
+        I32 reg_flags;
+
+        assert(! invert);
+#if 0   /* Have decided not to deal with multi-char folds in inverted classes,
+           because too confusing */
+        if (invert) {
+            sv_catpv(substitute_parse, "(?:");
+        }
+#endif
+
+        /* Look at the longest folds first */
+        for (cp_count = av_len(multi_char_matches); cp_count > 0; cp_count--) {
+
+            if (av_exists(multi_char_matches, cp_count)) {
+                AV** this_array_ptr;
+                SV* this_sequence;
+
+                this_array_ptr = (AV**) av_fetch(multi_char_matches, cp_count, FALSE);
+                while ((this_sequence = av_pop(*this_array_ptr)) != &PL_sv_undef) {
+                    if (! first_time) {
+                        sv_catpv(substitute_parse, "|");
+                    }
+                    first_time = FALSE;
+
+                    sv_catpv(substitute_parse, SvPVX(this_sequence));
+                }
+            }
+        }
+
+        /* If the character class contains anything else besides these
+         * multi-character folds, have to include it in recursive parsing */
+        if (element_count) {
+            sv_catpv(substitute_parse, "|[");
+            sv_catpvn(substitute_parse, orig_parse, RExC_parse - orig_parse);
+            sv_catpv(substitute_parse, "]");
+        }
+
+        sv_catpv(substitute_parse, ")");
+#if 0
+        if (invert) {
+            /* This is a way to get the parse to skip forward a whole named
+             * sequence instead of matching the 2nd character when it fails the
+             * first */
+            sv_catpv(substitute_parse, "(*THEN)(*SKIP)(*FAIL)|.)");
+        }
+#endif
+
+	RExC_parse = SvPV(substitute_parse, len);
+	RExC_end = RExC_parse + len;
+        RExC_in_multi_char_class = 1;
+        RExC_emit = (regnode *)orig_emit;
+
+	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
+
+	*flagp |= reg_flags&(HASWIDTH|SPSTART|POSTPONED);
+
+	RExC_parse = save_parse;
+	RExC_end = save_end;
+	RExC_in_multi_char_class = 0;
+        SvREFCNT_dec(multi_char_matches);
+        return ret;
+    }
 
     /* If the character class contains only a single element, it may be
      * optimizable into another node type which is smaller and runs faster.
