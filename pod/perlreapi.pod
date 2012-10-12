@@ -162,6 +162,10 @@ Additional flags:
 
 =item RXf_SPLIT
 
+This flag was removed in perl 5.18.0.  C<split ' '> is now special-cased
+solely in the parser.  RXf_SPLIT is still #defined, so you can test for it.
+This is how it used to work:
+
 If C<split> is invoked as C<split ' '> or with no arguments (which
 really means C<split(' ', $_)>, see L<split|perlfunc/split>), Perl will
 set this flag. The regex engine can then check for it and set the
