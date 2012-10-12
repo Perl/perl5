@@ -250,6 +250,7 @@ PP(pp_substcont)
 		    SvUTF8_on(targ);
 		SvPV_set(dstr, NULL);
 
+		PL_tainted = 0;
 		mPUSHi(saviters - 1);
 
 		(void)SvPOK_only_UTF8(targ);

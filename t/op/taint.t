@@ -561,7 +561,7 @@ my $TEST = 'TEST';
 	$one = $1;
     }
     is_tainted($s,     "$desc: s tainted");
-    is_tainted($res,   "$desc: res tainted");
+    isnt_tainted($res, "$desc: res tainted");
     isnt_tainted($one, "$desc: \$1 not tainted");
     is($s,  '123',     "$desc: s value");
     is($res, 3,        "$desc: res value");
@@ -918,7 +918,7 @@ my $TEST = 'TEST';
 	    $one = $1;
 	}
 	is_tainted($s,     "$desc: s tainted");
-	is_tainted($res,   "$desc: res tainted");
+	isnt_tainted($res, "$desc: res tainted");
 	isnt_tainted($one, "$desc: \$1 not tainted");
 	is($s,  '123',     "$desc: s value");
 	is($res, 3,        "$desc: res value");
