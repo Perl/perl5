@@ -11537,18 +11537,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
         if (! RExC_in_multi_char_class) {
-        invert = TRUE;
-        RExC_naughty++;
+            invert = TRUE;
+            RExC_naughty++;
 
-        /* We have decided to not allow multi-char folds in inverted character
-	 * classes, due to the confusion that can happen, especially with
-	 * classes that are designed for a non-Unicode world:  You have the
-	 * peculiar case that:
-            "s s" =~ /^[^\xDF]+$/i => Y
-            "ss"  =~ /^[^\xDF]+$/i => N
-         *
-         * See [perl #89750] */
-        allow_full_fold = FALSE;
+            /* We have decided to not allow multi-char folds in inverted
+             * character classes, due to the confusion that can happen,
+             * especially with classes that are designed for a non-Unicode
+             * world:  You have the peculiar case that:
+                "s s" =~ /^[^\xDF]+$/i => Y
+                "ss"  =~ /^[^\xDF]+$/i => N
+            *
+            * See [perl #89750] */
+            allow_full_fold = FALSE;
         }
     }
 
