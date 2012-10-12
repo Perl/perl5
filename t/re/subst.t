@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 204 );
+plan( tests => 205 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -864,6 +864,16 @@ $_ = "hello";
     s/e(.)\1/a$a/g;
 }
 is $_, 'halo', 's/pat/$alias_to_match_var/';
+# Last-used pattern containing re-evals that modify "constant" rhs
+{
+    local *a;
+    $x = "hello";
+    $x =~ /(?{*a = \"a"})./;
+    undef *a;
+    $x =~ s//$a/g;
+    is $x, 'aaaaa',
+	'last-used pattern disables constant repl optimisation';
+}
 
 
 $_ = "\xc4\x80";

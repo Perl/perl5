@@ -4787,6 +4787,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	if (konst
 	    && !(repl_has_vars
 		 && (!PM_GETRE(pm)
+		     || !RX_PRELEN(PM_GETRE(pm))
 		     || RX_EXTFLAGS(PM_GETRE(pm)) & RXf_EVAL_SEEN)))
 	{
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */

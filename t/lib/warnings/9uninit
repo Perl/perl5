@@ -830,9 +830,8 @@ Use of uninitialized value $m1 in regexp compilation at - line 10.
 Use of uninitialized value $_ in substitution (s///) at - line 10.
 Use of uninitialized value $_ in substitution (s///) at - line 10.
 Use of uninitialized value $_ in substitution (s///) at - line 11.
-Use of uninitialized value $g1 in substitution (s///) at - line 11.
 Use of uninitialized value $_ in substitution (s///) at - line 11.
-Use of uninitialized value $g1 in substitution (s///) at - line 11.
+Use of uninitialized value $g1 in substitution iterator at - line 11.
 Use of uninitialized value $m1 in regexp compilation at - line 12.
 Use of uninitialized value $_ in substitution (s///) at - line 12.
 Use of uninitialized value $_ in substitution (s///) at - line 12.
@@ -849,9 +848,8 @@ Use of uninitialized value $m1 in regexp compilation at - line 21.
 Use of uninitialized value $_ in substitution (s///) at - line 21.
 Use of uninitialized value $_ in substitution (s///) at - line 21.
 Use of uninitialized value $_ in substitution (s///) at - line 22.
-Use of uninitialized value $g1 in substitution (s///) at - line 22.
 Use of uninitialized value $_ in substitution (s///) at - line 22.
-Use of uninitialized value $g1 in substitution (s///) at - line 22.
+Use of uninitialized value $g1 in substitution iterator at - line 22.
 Use of uninitialized value $m1 in regexp compilation at - line 23.
 Use of uninitialized value $_ in substitution (s///) at - line 23.
 Use of uninitialized value $_ in substitution (s///) at - line 23.
@@ -868,9 +866,8 @@ Use of uninitialized value $m1 in regexp compilation at - line 31.
 Use of uninitialized value $g2 in substitution (s///) at - line 31.
 Use of uninitialized value $g2 in substitution (s///) at - line 31.
 Use of uninitialized value $g2 in substitution (s///) at - line 32.
-Use of uninitialized value $g1 in substitution (s///) at - line 32.
 Use of uninitialized value $g2 in substitution (s///) at - line 32.
-Use of uninitialized value $g1 in substitution (s///) at - line 32.
+Use of uninitialized value $g1 in substitution iterator at - line 32.
 Use of uninitialized value $m1 in regexp compilation at - line 33.
 Use of uninitialized value $g2 in substitution (s///) at - line 33.
 Use of uninitialized value $g2 in substitution (s///) at - line 33.
@@ -880,7 +877,7 @@ Use of uninitialized value in transliteration (tr///) at - line 35.
 Use of uninitialized value $m1 in regexp compilation at - line 38.
 Use of uninitialized value $g1 in regexp compilation at - line 39.
 Use of uninitialized value $m1 in regexp compilation at - line 41.
-Use of uninitialized value $g1 in substitution (s///) at - line 42.
+Use of uninitialized value $g1 in substitution iterator at - line 42.
 Use of uninitialized value $m1 in regexp compilation at - line 43.
 Use of uninitialized value $g1 in substitution iterator at - line 43.
 Use of uninitialized value $m1 in substitution (s///) at - line 44.
