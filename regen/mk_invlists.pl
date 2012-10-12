@@ -128,6 +128,7 @@ for my $prop (qw(
                 PosixXDigit
                     XPosixXDigit
                 NonL1_Perl_Non_Final_Folds
+                _Perl_Multi_Char_Folds
     )
 ) {
 
