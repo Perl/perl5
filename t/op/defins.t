@@ -133,6 +133,7 @@ cmp_ok($seen,'==',1,'saw file in bare "... while readdir"');
 
 rewinddir(DIR);
 $seen = 0;
+$_ = "";  # suppress uninit warning
 do
  {
   $seen++ if $_ eq $wanted_filename;
