@@ -41,6 +41,7 @@ my @properties = qw(
     UPPER
     WORDCHAR
     XDIGIT
+    IS_IN_SOME_FOLD
 );
 
 # Read in the case fold mappings.
@@ -169,6 +170,8 @@ for my $ord (0..255) {
             $re = qr/\p{_Perl_Quotemeta}/;
         } elsif ($name eq 'NON_FINAL_FOLD') {
             $re = qr/\p{_Perl_Non_Final_Folds}/;
+        } elsif ($name eq 'IS_IN_SOME_FOLD') {
+            $re = qr/\p{_Perl_Any_Folds}/;
         } else {    # The remainder have the same name and values as Unicode
             $re = eval "qr/\\p{$name}/";
             use Carp;
