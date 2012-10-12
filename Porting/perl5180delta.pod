@@ -341,10 +341,6 @@ soon:
 
 =item *
 
-L<B::Generate> version 1.46
-
-=item *
-
 L<B::Hooks::Parser> version 0.11
 
 =back
