@@ -330,7 +330,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A bug, case-insensitive regex with UTF8-flagged strings, introduced
+earlier in the 5.17 series has been fixed.  [perl #114982]
 
 =back
 
