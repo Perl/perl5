@@ -625,10 +625,14 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_NONLATIN1_FOLD    17
 #  define _CC_QUOTEMETA         18
 #  define _CC_NON_FINAL_FOLD    19
-/* Unused: 20-31
+#  define _CC_IS_IN_SOME_FOLD   20
+/* Unused: 21-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
- * word or not. */
+ * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
+ * is used only for optimization (as of this writing), and differs in the
+ * Latin1 range from the ALPHA bit only in two relatively unimportant
+ * characters: the masculine and feminine ordinal indicators */
 
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
@@ -677,6 +681,8 @@ EXTCONST U32 PL_charclass[];
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #   define _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
                                             _generic_isCC(c, _CC_NON_FINAL_FOLD)
+#   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
+                                            _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
 #else   /* No perl.h. */
 #   ifdef EBCDIC
 #       define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
