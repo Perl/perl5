@@ -353,6 +353,25 @@ don't have enough dots to connect, and they end up with very linear solutions
 without a broad perspective on the problem. The broader one's understanding of
 the human experience, the better design we will have.
 
+=head2 v5.14.3 - William Shakespeare, As You Like It
+
+Announced on 2012-10-12 by Dominic Hargreaves
+
+  The poor world is almost six thousand years old, and in all
+  this time there was not any man died in his own person,
+  videlicit, in a love-cause. Troilus had his brains dashed
+  out with a Grecian club; yet he did what he could to die
+  before, and he is one of the patterns of love. Leander, he
+  would have lived many a fair year, though Hero had turned
+  nun, if it had not been for a hot midsummer night; for, good
+  youth, he went but forth to wash him in the Hellespont and
+  being taken with the cramp was drowned and the foolish
+  coroners of that age found it was 'Hero of Sestos.' But these
+  are all lies: men have died from time to time and worms have
+  eaten them, but not for love.
+
+    -- As You Like It, William Shakespeare
+
 =head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-09-26 by Florian
