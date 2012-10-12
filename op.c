@@ -4752,24 +4752,34 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     }
 
     if (repl) {
+	OP *curop = repl;
 	bool konst;
 	if (pm->op_pmflags & PMf_EVAL) {
-	    konst = FALSE;
 	    if (CopLINE(PL_curcop) < (line_t)PL_parser->multi_end)
 		CopLINE_set(PL_curcop, (line_t)PL_parser->multi_end);
 	}
-	else if (repl->op_type == OP_CONST)
+	/* If we are looking at s//.../e with a single statement, get past
+	   the implicit do{}. */
+	if (curop->op_type == OP_NULL && curop->op_flags & OPf_KIDS
+	 && cUNOPx(curop)->op_first->op_type == OP_SCOPE
+	 && cUNOPx(curop)->op_first->op_flags & OPf_KIDS) {
+	    OP *kid = cUNOPx(cUNOPx(curop)->op_first)->op_first;
+	    if (kid->op_type == OP_NULL && kid->op_sibling
+	     && !kid->op_sibling->op_sibling)
+		curop = kid->op_sibling;
+	}
+	if (curop->op_type == OP_CONST)
 	    konst = TRUE;
-	else if (( (repl->op_type == OP_RV2SV ||
-		    repl->op_type == OP_RV2AV ||
-		    repl->op_type == OP_RV2HV ||
-		    repl->op_type == OP_RV2GV)
-		 && cUNOPx(repl)->op_first
-		 && cUNOPx(repl)->op_first->op_type == OP_GV )
-	      || repl->op_type == OP_PADSV
-	      || repl->op_type == OP_PADAV
-	      || repl->op_type == OP_PADHV
-	      || repl->op_type == OP_PADANY) {
+	else if (( (curop->op_type == OP_RV2SV ||
+		    curop->op_type == OP_RV2AV ||
+		    curop->op_type == OP_RV2HV ||
+		    curop->op_type == OP_RV2GV)
+		   && cUNOPx(curop)->op_first
+		   && cUNOPx(curop)->op_first->op_type == OP_GV )
+		|| curop->op_type == OP_PADSV
+		|| curop->op_type == OP_PADAV
+		|| curop->op_type == OP_PADHV
+		|| curop->op_type == OP_PADANY) {
 	    repl_has_vars = 1;
 	    konst = TRUE;
 	}

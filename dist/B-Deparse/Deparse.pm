@@ -4726,19 +4726,19 @@ sub pp_subst {
     my $flags = "";
     my $pmflags = $op->pmflags;
     if (null($op->pmreplroot)) {
-	$repl = $self->dq($kid);
+	$repl = $kid;
 	$kid = $kid->sibling;
     } else {
 	$repl = $op->pmreplroot->first; # skip substcont
-	while ($repl->name eq "entereval") {
+    }
+    while ($repl->name eq "entereval") {
 	    $repl = $repl->first;
 	    $flags .= "e";
-	}
-	if ($pmflags & PMf_EVAL) {
+    }
+    if ($pmflags & PMf_EVAL) {
 	    $repl = $self->deparse($repl->first, 0);
-	} else {
+    } else {
 	    $repl = $self->dq($repl);	
-	}
     }
     my $extended = ($pmflags & PMf_EXTENDED);
     if (null $kid) {

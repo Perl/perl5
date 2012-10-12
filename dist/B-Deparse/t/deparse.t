@@ -322,6 +322,8 @@ my $foo = "Ab\x{100}\200\x{200}\237Cd\000Ef\x{1000}\cA\x{2000}\cZ";
 ####
 # s///e
 s/x/'y';/e;
+s/x/$a;/e;
+s/x/complex_expression();/e;
 ####
 # block
 { my $x; }
