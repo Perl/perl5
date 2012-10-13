@@ -957,7 +957,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 
 $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
-	$(LINK_FLAGS) $(LIBFILES) $(MINI_OBJ)
+	$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
 	$(EMBED_EXE_MANI)
 

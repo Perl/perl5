@@ -1086,7 +1086,7 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 	    $(mktmp $(LKPRE) $(MINI_OBJ) $(LIBFILES) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
-	    @$(mktmp $(LIBFILES) $(MINI_OBJ))
+	    @$(mktmp $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ))
 	$(EMBED_EXE_MANI)
 .ENDIF
 

@@ -13,6 +13,38 @@
 #  define _WIN32_WINNT 0x0500     /* needed for CreateHardlink() etc. */
 #endif
 
+#ifdef PERL_IS_MINIPERL
+/* this macro will remove Winsock only on miniperl, PERL_IMPLICIT_SYS and
+ * makedef.pl create dependencies that will keep Winsock linked in even with
+ * this macro defined, even though sockets will be umimplemented from a script
+ * level in full perl
+ */
+#  define WIN32_NO_SOCKETS
+#endif
+
+#ifdef WIN32_NO_SOCKETS
+#  undef HAS_SOCKET
+#  undef HAS_GETPROTOBYNAME
+#  undef HAS_GETPROTOBYNUMBER
+#  undef HAS_GETPROTOENT
+#  undef HAS_GETNETBYNAME
+#  undef HAS_GETNETBYADDR
+#  undef HAS_GETNETENT
+#  undef HAS_GETSERVBYNAME
+#  undef HAS_GETSERVBYPORT
+#  undef HAS_GETSERVENT
+#  undef HAS_GETHOSTBYNAME
+#  undef HAS_GETHOSTBYADDR
+#  undef HAS_GETHOSTENT
+#  undef HAS_SELECT
+#  undef HAS_IOCTL
+#  undef HAS_NTOHL
+#  undef HAS_HTONL
+#  undef HAS_HTONS
+#  undef HAS_NTOHS
+#  define WIN32SCK_IS_STDSCK
+#endif
+
 #if defined(PERL_IMPLICIT_SYS)
 #  define DYNAMIC_ENV_FETCH
 #  define HAS_GETENV_LEN
@@ -166,8 +198,10 @@ struct utsname {
 #define  OP_BINARY	O_BINARY	/* mistake in in pp_sys.c? */
 
 /* read() and write() aren't transparent for socket handles */
-#define PERL_SOCK_SYSREAD_IS_RECV
-#define PERL_SOCK_SYSWRITE_IS_SEND
+#ifndef WIN32_NO_SOCKETS
+#  define PERL_SOCK_SYSREAD_IS_RECV
+#  define PERL_SOCK_SYSWRITE_IS_SEND
+#endif
 
 #define PERL_NO_FORCE_LINK		/* no need for PL_force_link_funcs */
 

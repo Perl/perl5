@@ -82,31 +82,50 @@ start_sockets(void)
     wsock_started = 1;
 }
 
+/* in no sockets Win32 builds, this fowards to replacements in util.c, dTHX
+ * is required
+ */
 u_long
 win32_htonl(u_long hostlong)
 {
+#ifdef MYSWAP
+    dTHX;
+#else
     StartSockets();
+#endif
     return htonl(hostlong);
 }
 
 u_short
 win32_htons(u_short hostshort)
 {
+#ifdef MYSWAP
+    dTHX;
+#else
     StartSockets();
+#endif
     return htons(hostshort);
 }
 
 u_long
 win32_ntohl(u_long netlong)
 {
+#ifdef MYSWAP
+    dTHX;
+#else
     StartSockets();
+#endif
     return ntohl(netlong);
 }
 
 u_short
 win32_ntohs(u_short netshort)
 {
+#ifdef MYSWAP
+    dTHX;
+#else
     StartSockets();
+#endif
     return ntohs(netshort);
 }
 
