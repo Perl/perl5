@@ -13409,7 +13409,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_AboveLatin1	= sv_dup_inc(proto_perl->IAboveLatin1, param);
     PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
 
-
     if (proto_perl->Ipsig_pend) {
 	Newxz(PL_psig_pend, SIG_SIZE, int);
     }

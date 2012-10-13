@@ -7201,7 +7201,6 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 	{
 	    match = TRUE;
 	}
-
 	else if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;
 
@@ -7249,7 +7248,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
     }
 
     /* If the bitmap didn't (or couldn't) match, and something outside the
-     * bitmap could match, try that.  Locale nodes specifiy completely the
+     * bitmap could match, try that.  Locale nodes specify completely the
      * behavior of code points in the bit map (otherwise, a utf8 target would
      * cause them to be treated as Unicode and not locale), except in
      * the very unlikely event when this node is a synthetic start class, which

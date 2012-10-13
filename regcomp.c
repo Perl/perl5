@@ -9801,6 +9801,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
         if (in_char_class && has_multiple_chars) {
 	    ckWARNreg(endchar, "Using just the first character returned by \\N{} in character class");
         }
+
         RExC_parse = endbrace + 1;
     }
     else if (! node_p || ! has_multiple_chars) {
@@ -11509,7 +11510,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state, ANYOF, 0);
 
-
     if (!SIZE_ONLY) {
 	ANYOF_FLAGS(ret) = 0;
     }
@@ -11948,10 +11948,12 @@ parseit:
                         SV* scratch_list = NULL;
 
                         /* Include all above-Latin1 non-blanks */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank, &scratch_list);
+                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank,
+                                          &scratch_list);
 
                         /* Add them to the running total of posix classes */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank, &scratch_list);
+                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank,
+                                          &scratch_list);
                         if (! posixes) {
                             posixes = scratch_list;
                         }
@@ -11962,7 +11964,8 @@ parseit:
 
                         /* Get the list of all non-ASCII-blanks in Latin 1, and
                          * add them to the running total */
-                        _invlist_subtract(PL_Latin1, PL_PosixBlank, &scratch_list);
+                        _invlist_subtract(PL_Latin1, PL_PosixBlank,
+                                          &scratch_list);
                         _invlist_union(posixes, scratch_list, &posixes);
                         SvREFCNT_dec(scratch_list);
                     }
@@ -12225,7 +12228,8 @@ parseit:
                     if (! RExC_in_multi_char_class) {
                         AV** this_array_ptr;
                         AV* this_array;
-                        STRLEN cp_count = utf8_length(foldbuf, foldbuf + foldlen);
+                        STRLEN cp_count = utf8_length(foldbuf,
+                                                      foldbuf + foldlen);
                         SV* multi_fold = sv_2mortal(newSVpvn("", 0));
 
                         Perl_sv_catpvf(aTHX_ multi_fold, "\\x{%"UVXf"}", value);
@@ -12250,17 +12254,20 @@ parseit:
                          * ok.  This makes the test for the ligature 'ffi' come
                          * before the test for 'ff' */
                         if (av_exists(multi_char_matches, cp_count)) {
-                            this_array_ptr = (AV**) av_fetch(multi_char_matches, cp_count, FALSE);
+                            this_array_ptr = (AV**) av_fetch(multi_char_matches,
+                                                             cp_count, FALSE);
                             this_array = *this_array_ptr;
                         }
                         else {
                             this_array = newAV();
-                            av_store(multi_char_matches, cp_count, (SV*) this_array);
+                            av_store(multi_char_matches, cp_count,
+                                     (SV*) this_array);
                         }
                         av_push(this_array, multi_fold);
                     }
 
-                    /* This element should not be processed further in this class */
+                    /* This element should not be processed further in this
+                     * class */
                     element_count--;
                     value = save_value;
                     prevvalue = save_prevvalue;
@@ -12328,8 +12335,11 @@ parseit:
                 AV** this_array_ptr;
                 SV* this_sequence;
 
-                this_array_ptr = (AV**) av_fetch(multi_char_matches, cp_count, FALSE);
-                while ((this_sequence = av_pop(*this_array_ptr)) != &PL_sv_undef) {
+                this_array_ptr = (AV**) av_fetch(multi_char_matches,
+                                                 cp_count, FALSE);
+                while ((this_sequence = av_pop(*this_array_ptr)) !=
+                                                                &PL_sv_undef)
+                {
                     if (! first_time) {
                         sv_catpv(substitute_parse, "|");
                     }
@@ -12750,47 +12760,45 @@ parseit:
                                             ? FOLD_FLAGS_NOMIX_ASCII
                                             : 0));
 
-                    /* Single character fold of above Latin1.  Add everything
-                     * in its fold closure to the list that this node should
-                     * match */
-		    /* The fold closures data structure is a hash with the keys
-		     * being every character that is folded to, like 'k', and
-		     * the values each an array of everything that folds to its
-		     * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
-		    if ((listp = hv_fetch(PL_utf8_foldclosures,
-				    (char *) foldbuf, foldlen, FALSE)))
-		    {
-			AV* list = (AV*) *listp;
-			IV k;
-			for (k = 0; k <= av_len(list); k++) {
-			    SV** c_p = av_fetch(list, k, FALSE);
-			    UV c;
-			    if (c_p == NULL) {
-				Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
-			    }
-			    c = SvUV(*c_p);
+                /* Single character fold of above Latin1.  Add everything in
+                 * its fold closure to the list that this node should match.
+                 * The fold closures data structure is a hash with the keys
+                 * being every character that is folded to, like 'k', and the
+                 * values each an array of everything that folds to its key.
+                 * e.g. [ 'k', 'K', KELVIN_SIGN ] */
+                if ((listp = hv_fetch(PL_utf8_foldclosures,
+                                      (char *) foldbuf, foldlen, FALSE)))
+                {
+                    AV* list = (AV*) *listp;
+                    IV k;
+                    for (k = 0; k <= av_len(list); k++) {
+                        SV** c_p = av_fetch(list, k, FALSE);
+                        UV c;
+                        if (c_p == NULL) {
+                            Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                        }
+                        c = SvUV(*c_p);
 
-			    /* /aa doesn't allow folds between ASCII and non-;
-			     * /l doesn't allow them between above and below
-			     * 256 */
-			    if ((ASCII_FOLD_RESTRICTED
-                                      && (isASCII(c) != isASCII(j)))
-				|| (LOC && ((c < 256) != (j < 256))))
-			    {
-				continue;
-			    }
+                        /* /aa doesn't allow folds between ASCII and non-; /l
+                         * doesn't allow them between above and below 256 */
+                        if ((ASCII_FOLD_RESTRICTED
+                                  && (isASCII(c) != isASCII(j)))
+                            || (LOC && ((c < 256) != (j < 256))))
+                        {
+                            continue;
+                        }
 
-                            /* Folds involving non-ascii Latin1 characters
-                             * under /d are added to a separate list */
-			    if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS)
-                            {
-				cp_list = add_cp_to_invlist(cp_list, c);
-                            }
-                            else {
-                              depends_list = add_cp_to_invlist(depends_list, c);
-			    }
-			}
-		    }
+                        /* Folds involving non-ascii Latin1 characters
+                         * under /d are added to a separate list */
+                        if (isASCII(c) || c > 255 || AT_LEAST_UNI_SEMANTICS)
+                        {
+                            cp_list = add_cp_to_invlist(cp_list, c);
+                        }
+                        else {
+                          depends_list = add_cp_to_invlist(depends_list, c);
+                        }
+                    }
+                }
             }
 	}
 	SvREFCNT_dec(fold_intersection);
@@ -12894,8 +12902,9 @@ parseit:
      * folded until runtime */
 
     /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
-     * at compile time.  Besides not inverting folded locale now, we can't invert
-     * if there are things such as \w, which aren't known until runtime */
+     * at compile time.  Besides not inverting folded locale now, we can't
+     * invert if there are things such as \w, which aren't known until runtime
+     * */
     if (invert
         && ! (LOC && (FOLD || (ANYOF_FLAGS(ret) & ANYOF_CLASS)))
 	&& ! depends_list
