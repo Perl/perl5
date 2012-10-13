@@ -7076,12 +7076,12 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 	
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
-	    /* Elements 3 and 4 are either both present or both absent. [3] is
-	     * any inversion list generated at compile time; [4] indicates if
+	    /* Elements 2 and 3 are either both present or both absent. [2] is
+	     * any inversion list generated at compile time; [3] indicates if
 	     * that inversion list has any user-defined properties in it. */
-	    if (av_len(av) >= 3) {
-		invlist = ary[3];
-		if (SvUV(ary[4])) {
+	    if (av_len(av) >= 2) {
+		invlist = ary[2];
+		if (SvUV(ary[3])) {
                     swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
                 }
 	    }

@@ -13138,10 +13138,9 @@ parseit:
 	 * av[1] if NULL, is a placeholder to later contain the swash computed
 	 *       from av[0].  But if no further computation need be done, the
 	 *       swash is stored there now.
-         * av[2] is always NULL
-	 * av[3] stores the cp_list inversion list for use in addition or
+	 * av[2] stores the cp_list inversion list for use in addition or
 	 *       instead of av[0]; used only if av[1] is NULL
-	 * av[4] is set if any component of the class is from a user-defined
+	 * av[3] is set if any component of the class is from a user-defined
 	 *       property; used only if av[1] is NULL */
 	AV * const av = newAV();
 	SV *rv;
@@ -13156,12 +13155,11 @@ parseit:
 	else {
 	    av_store(av, 1, NULL);
 	    if (cp_list) {
-		av_store(av, 3, cp_list);
-		av_store(av, 4, newSVuv(has_user_defined_property));
+		av_store(av, 2, cp_list);
+		av_store(av, 3, newSVuv(has_user_defined_property));
 	    }
 	}
 
-            av_store(av, 2, NULL);
 	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rxi->data->data[n] = (void*)rv;
