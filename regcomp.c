@@ -99,7 +99,7 @@ extern const struct regexp_engine my_reg_engine;
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
-#define IS_IN_SOME_FOLD(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
+#define IS_IN_SOME_FOLD_L1(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
 #ifdef op
 #undef op
@@ -10853,7 +10853,7 @@ tryagain:
                     }
                     else {
                         *(s++) = ender;
-                        maybe_exact &= ! IS_IN_SOME_FOLD(ender);
+                        maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
                     }
 		}
 		else if (UTF) {
@@ -12408,10 +12408,11 @@ parseit:
 
 	SV* fold_intersection = NULL;
 
-        /* In the Latin1 range, the characters that can be folded-to or -from
-         * are precisely the alphabetic characters.  If the highest code point
-         * is within Latin1, we can use the compiled-in list, and not have to
-         * go out to disk. */
+        /* If the highest code point is within Latin1, we can use the
+         * compiled-in Alphas list, and not have to go out to disk.  This
+         * yields two false positives, the masculine and feminine oridinal
+         * indicators, which are weeded out below using the
+         * IS_IN_SOME_FOLD_L1() macro */
         if (invlist_highest(cp_list) < 256) {
             _invlist_intersection(PL_L1PosixAlpha, cp_list, &fold_intersection);
         }
@@ -12491,7 +12492,7 @@ parseit:
                      * mappings, though that is not really likely, and may be
                      * caught by the default: case of the switch below. */
 
-                    if (PL_fold_latin1[j] != j) {
+                    if (IS_IN_SOME_FOLD_L1(j)) {
 
                         /* ASCII is always matched; non-ASCII is matched only
                          * under Unicode rules */
@@ -12889,7 +12890,7 @@ parseit:
                      * folds.  For example, an EXACTF of a colon is the same as
                      * an EXACT one, since nothing folds to or from a colon. */
                     if (value < 256) {
-                        if (IS_IN_SOME_FOLD(value)) {
+                        if (IS_IN_SOME_FOLD_L1(value)) {
                             op = EXACT;
                         }
                     }
