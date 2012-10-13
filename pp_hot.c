@@ -1045,6 +1045,14 @@ PP(pp_aassign)
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
+            if (relem > lastrelem) {
+	        av_clear(MUTABLE_AV(sv));
+                if (PL_delaymagic & DM_ARRAY_ISA)
+                    SvSETMAGIC(sv);
+                if (gimme == G_ARRAY && !hash && !ary)
+                    ary = MUTABLE_AV(sv);
+                break;
+            }
 	    ary = MUTABLE_AV(sv);
 	    magic = SvMAGICAL(ary) != 0;
 	    ENTER;
@@ -1075,6 +1083,14 @@ PP(pp_aassign)
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
 		SV** topelem = relem;
+		if (relem > lastrelem) {
+		    hv_clear(MUTABLE_HV(sv));
+		    if (gimme == G_ARRAY && !hash && !ary) {
+                        hash = MUTABLE_HV(sv);
+                        firsthashrelem = relem;
+                    }
+                    break;
+                }
 
 		hash = MUTABLE_HV(sv);
 		magic = SvMAGICAL(hash) != 0;
