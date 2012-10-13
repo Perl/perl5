@@ -101,7 +101,7 @@ const char* const non_utf8_target_but_utf8_required
 #define	STATIC	static
 #endif
 
-/* Valid for non-utf8 strings, non-ANYOFV nodes only: avoids the reginclass
+/* Valid for non-utf8 strings: avoids the reginclass
  * call if there are no complications: i.e., if everything matchable is
  * straight forward in the bitmap */
 #define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,0,0)   \
@@ -1452,9 +1452,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         
 	/* We know what class it must start with. */
 	switch (OP(c)) {
-	case ANYOFV:
 	case ANYOF:
-	    if (utf8_target || OP(c) == ANYOFV) {
+	    if (utf8_target) {
 		STRLEN inclasslen = strend - s;
 		REXEC_FBC_UTF8_CLASS_SCAN(
                           reginclass(prog, c, (U8*)s, &inclasslen, utf8_target));
@@ -4224,11 +4223,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    sayNO;
 	    break;
 
-	case ANYOFV: /*  /[abx{df}]/i  */
 	case ANYOF:  /*  /[abc]/       */
             if (NEXTCHR_IS_EOS)
                 sayNO;
-	    if (utf8_target || state_num == ANYOFV) {
+	    if (utf8_target) {
 	        STRLEN inclasslen = PL_regeol - locinput;
 	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, utf8_target))
 		    sayNO;
@@ -6613,9 +6611,8 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	    }
 	}
 	break;
-    case ANYOFV:
     case ANYOF:
-	if (utf8_target || OP(p) == ANYOFV) {
+	if (utf8_target) {
 	    STRLEN inclasslen;
 	    loceol = PL_regeol;
 	    inclasslen = loceol - scan;
@@ -7030,32 +7027,35 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
 /*
 - regclass_swash - prepare the utf8 swash.  Wraps the shared core version to
-create a copy so that changes the caller makes won't change the shared one
+create a copy so that changes the caller makes won't change the shared one.
+If <altsvp> is non-null, will return NULL in it, for back-compat.
  */
 SV *
 Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
     PERL_ARGS_ASSERT_REGCLASS_SWASH;
-    return newSVsv(core_regclass_swash(prog, node, doinit, listsvp, altsvp));
+
+    if (altsvp) {
+        *altsvp = NULL;
+    }
+
+    return newSVsv(core_regclass_swash(prog, node, doinit, listsvp));
 }
 #endif
 
 STATIC SV *
-S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
+S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp)
 {
     /* Returns the swash for the input 'node' in the regex 'prog'.
      * If <doinit> is true, will attempt to create the swash if not already
      *	  done.
      * If <listsvp> is non-null, will return the swash initialization string in
      *	  it.
-     * If <altsvp> is non-null, will return the alternates to the regular swash
-     *	  in it
      * Tied intimately to how regcomp.c sets up the data structure */
 
     dVAR;
     SV *sw  = NULL;
     SV *si  = NULL;
-    SV *alt = NULL;
     SV*  invlist = NULL;
 
     RXi_GET_DECL(prog,progi);
@@ -7105,13 +7105,6 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 				      &swash_init_flags);
 		(void)av_store(av, 1, sw);
 	    }
-
-	    /* Element [2] is for any multi-char folds.  Note that is a
-	     * fundamentally flawed design, because can't backtrack and try
-	     * again.  See [perl #89774] */
-	    if (SvTYPE(ary[2]) == SVt_PVAV) {
-	        alt = ary[2];
-	    }
 	}
     }
 	
@@ -7135,9 +7128,6 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
 	}
 	*listsvp = matches_string;
     }
-
-    if (altsvp)
-	*altsvp  = alt;
 
     return sw;
 }
@@ -7278,167 +7268,19 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			     || (! (flags & ANYOF_LOCALE))
 			     || (flags & ANYOF_IS_SYNTHETIC)))))
 	{
-	    AV *av;
-	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0, (SV**)&av);
-
+	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0);
 	    if (sw) {
 		U8 * utf8_p;
 		if (utf8_target) {
 		    utf8_p = (U8 *) p;
-		} else {
-
-		    /* Not utf8.  Convert as much of the string as available up
-		     * to the limit of how far the (single) character in the
-		     * pattern can possibly match (no need to go further).  If
-		     * the node is a straight ANYOF or not folding, it can't
-		     * match more than one.  Otherwise, It can match up to how
-		     * far a single char can fold to.  Since not utf8, each
-		     * character is a single byte, so the max it can be in
-		     * bytes is the same as the max it can be in characters */
-		    STRLEN len = (OP(n) == ANYOF
-				  || ! (flags & ANYOF_LOC_NONBITMAP_FOLD))
-				  ? 1
-				  : (maxlen < UTF8_MAX_FOLD_CHAR_EXPAND)
-				    ? maxlen
-				    : UTF8_MAX_FOLD_CHAR_EXPAND;
+		} else { /* Convert to utf8 */
+		    STRLEN len = 1;
 		    utf8_p = bytes_to_utf8(p, &len);
 		}
 
-		if (swash_fetch(sw, utf8_p, TRUE))
+		if (swash_fetch(sw, utf8_p, TRUE)) {
 		    match = TRUE;
-		else if (flags & ANYOF_LOC_NONBITMAP_FOLD) {
-
-		    /* Here, we need to test if the fold of the target string
-		     * matches.  The non-multi char folds have all been moved to
-                     * the compilation phase, and the multi-char folds have
-                     * been stored by regcomp into 'av'; we linearly check to
-                     * see if any match the target string (folded).   We know
-                     * that the originals were each one character, but we don't
-                     * currently know how many characters/bytes each folded to,
-                     * except we do know that there are small limits imposed by
-                     * Unicode.  XXX A performance enhancement would be to have
-                     * regcomp.c store the max number of chars/bytes that are
-                     * in an av entry, as, say the 0th element.  Even better
-                     * would be to have a hash of the few characters that can
-                     * start a multi-char fold to the max number of chars of
-                     * those folds.
-		     *
-		     * If there is a match, we will need to advance (if lenp is
-		     * specified) the match pointer in the target string.  But
-		     * what we are comparing here isn't that string directly,
-		     * but its fold, whose length may differ from the original.
-		     * As we go along in constructing the fold, therefore, we
-		     * create a map so that we know how many bytes in the
-		     * source to advance given that we have matched a certain
-		     * number of bytes in the fold.  This map is stored in
-		     * 'map_fold_len_back'.  Let n mean the number of bytes in
-		     * the fold of the first character that we are folding.
-		     * Then map_fold_len_back[n] is set to the number of bytes
-		     * in that first character.  Similarly let m be the
-		     * corresponding number for the second character to be
-		     * folded.  Then map_fold_len_back[n+m] is set to the
-		     * number of bytes occupied by the first two source
-		     * characters. ... */
-		    U8 map_fold_len_back[UTF8_MAXBYTES_CASE+1] = { 0 };
-		    U8 folded[UTF8_MAXBYTES_CASE+1];
-		    STRLEN foldlen = 0; /* num bytes in fold of 1st char */
-		    STRLEN total_foldlen = 0; /* num bytes in fold of all
-						  chars */
-
-		    if (OP(n) == ANYOF || maxlen == 1 || ! lenp || ! av) {
-
-			/* Here, only need to fold the first char of the target
-			 * string.  It the source wasn't utf8, is 1 byte long */
-			to_utf8_fold(utf8_p, folded, &foldlen);
-			total_foldlen = foldlen;
-			map_fold_len_back[foldlen] = (utf8_target)
-						     ? UTF8SKIP(utf8_p)
-						     : 1;
-		    }
-		    else {
-
-			/* Here, need to fold more than the first char.  Do so
-			 * up to the limits */
-			U8* source_ptr = utf8_p;    /* The source for the fold
-						       is the regex target
-						       string */
-			U8* folded_ptr = folded;
-			U8* e = utf8_p + maxlen;    /* Can't go beyond last
-						       available byte in the
-						       target string */
-			U8 i;
-			for (i = 0;
-			     i < UTF8_MAX_FOLD_CHAR_EXPAND && source_ptr < e;
-			     i++)
-			{
-
-			    /* Fold the next character */
-			    U8 this_char_folded[UTF8_MAXBYTES_CASE+1];
-			    STRLEN this_char_foldlen;
-			    to_utf8_fold(source_ptr,
-				         this_char_folded,
-					 &this_char_foldlen);
-
-			    /* Bail if it would exceed the byte limit for
-			     * folding a single char. */
-			    if (this_char_foldlen + folded_ptr - folded >
-							    UTF8_MAXBYTES_CASE)
-			    {
-				break;
-			    }
-
-			    /* Add the fold of this character */
-			    Copy(this_char_folded,
-				 folded_ptr,
-				 this_char_foldlen,
-				 U8);
-			    source_ptr += UTF8SKIP(source_ptr);
-			    folded_ptr += this_char_foldlen;
-			    total_foldlen = folded_ptr - folded;
-
-			    /* Create map from the number of bytes in the fold
-			     * back to the number of bytes in the source.  If
-			     * the source isn't utf8, the byte count is just
-			     * the number of characters so far */
-			    map_fold_len_back[total_foldlen]
-						      = (utf8_target)
-							? source_ptr - utf8_p
-							: i + 1;
-			}
-			*folded_ptr = '\0';
-		    }
-
-
-		    /* Do the linear search to see if the fold is in the list
-		     * of multi-char folds. */
-		    if (av) {
-		        I32 i;
-			for (i = 0; i <= av_len(av); i++) {
-			    SV* const sv = *av_fetch(av, i, FALSE);
-			    STRLEN len;
-			    const char * const s = SvPV_const(sv, len);
-
-			    if (len <= total_foldlen
-				&& memEQ(s, (char*)folded, len)
-
-				   /* If 0, means matched a partial char. See
-				    * [perl #90536] */
-				&& map_fold_len_back[len])
-			    {
-
-				/* Advance the target string ptr to account for
-				 * this fold, but have to translate from the
-				 * folded length to the corresponding source
-				 * length. */
-				if (lenp) {
-				    *lenp = map_fold_len_back[len];
-				}
-				match = TRUE;
-				break;
-			    }
-			}
-		    }
-		}
+                }
 
 		/* If we allocated a string above, free it */
 		if (! utf8_target) Safefree(utf8_p);

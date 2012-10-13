@@ -55,7 +55,6 @@ REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
 ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
-ANYOFV      ANYOF,      sv 0 V    ; Match character in (or not in) this class, can match-multiple chars
 
 # Order (within each group) of the below is important.  See ordering comment
 # above.  The PLACEHOLDERn ones are wasting a value.  Right now, we have plenty

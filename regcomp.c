@@ -11405,24 +11405,6 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
 	}                                                                  \
     }
 
-STATIC void
-S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
-{
-    /* Adds input 'string' with length 'len' to the ANYOF node's unicode
-     * alternate list, pointed to by 'alternate_ptr'.  This is an array of
-     * the multi-character folds of characters in the node */
-    SV *sv;
-
-    PERL_ARGS_ASSERT_ADD_ALTERNATE;
-
-    if (! *alternate_ptr) {
-	*alternate_ptr = newAV();
-    }
-    sv = newSVpvn_utf8((char*)string, len, TRUE);
-    av_push(*alternate_ptr, sv);
-    return;
-}
-
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
  * changed since initialization, then there is a run-time definition. */
@@ -11500,8 +11482,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
      * of the target string */
     SV* cp_list = NULL;
 
-    /* List of multi-character folds that are matched by this node */
-    AV* unicode_alternate  = NULL;
 #ifdef EBCDIC
     /* In a range, counts how many 0-2 of the ends of it came from literals,
      * not escapes.  Thus we can tell if 'A' was input vs \x{C1} */
@@ -12664,6 +12644,7 @@ parseit:
 		U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 		STRLEN foldlen;
                 UV f;
+                SV** listp;
 
                 if (j < 256) {
 
@@ -12693,30 +12674,13 @@ parseit:
                         && (! isASCII(j) || ! ASCII_FOLD_RESTRICTED))
                     {
                         /* Certain Latin1 characters have matches outside
-                         * Latin1, or are multi-character.  To get here, 'j' is
-                         * one of those characters.   None of these matches is
-                         * valid for ASCII characters under /aa, which is why
-                         * the 'if' just above excludes those.  The matches
-                         * fall into three categories:
-                         * 1) They are singly folded-to or -from an above 255
-                         *    character, e.g., LATIN SMALL LETTER Y WITH
-                         *    DIAERESIS and LATIN CAPITAL LETTER Y WITH
-                         *    DIAERESIS;
-                         * 2) They are part of a multi-char fold with another
-                         *    latin1 character; only LATIN SMALL LETTER
-                         *    SHARP S => "ss" fits this;
-                         * 3) They are part of a multi-char fold with a
-                         *    character outside of Latin1, such as various
-                         *    ligatures.
-                        * We aren't dealing fully with multi-char folds, except
-                        * we do deal with the pattern containing a character
-                        * that has a multi-char fold (not so much the inverse).
-                        * For types 1) and 3), the matches only happen when the
-                        * target string is utf8; that's not true for 2), and we
-                        * set a flag for it.
-                        *
-                        * The code below adds the single fold closures for 'j'
-                        * to the inversion list. */
+                         * Latin1.  To get here, <j> is one of those
+                         * characters.   None of these matches is valid for
+                         * ASCII characters under /aa, which is why the 'if'
+                         * just above excludes those.  These matches only
+                         * happen when the target string is utf8.  The code
+                         * below adds the single fold closures for <j> to the
+                         * inversion list. */
                         switch (j) {
                             case 'k':
                             case 'K':
@@ -12746,20 +12710,6 @@ parseit:
                             case LATIN_SMALL_LETTER_SHARP_S:
                                 cp_list = add_cp_to_invlist(cp_list,
                                                 LATIN_CAPITAL_LETTER_SHARP_S);
-
-                                /* Under /a, /d, and /u, this can match the two
-                                 * chars "ss" */
-                                if (! ASCII_FOLD_RESTRICTED) {
-                                    add_alternate(&unicode_alternate,
-                                                  (U8 *) "ss", 2);
-
-                                    /* And under /u or /a, it can match even if
-                                     * the target is not utf8 */
-                                    if (AT_LEAST_UNI_SEMANTICS) {
-                                        ANYOF_FLAGS(ret) |=
-                                                    ANYOF_NONBITMAP_NON_UTF8;
-                                    }
-                                }
                                 break;
                             case 'F': case 'f':
                             case 'I': case 'i':
@@ -12776,7 +12726,8 @@ parseit:
                                  * express, so they can't match unless the
                                  * target string is in UTF-8, so no action here
                                  * is necessary, as regexec.c properly handles
-                                 * the general case for UTF-8 matching */
+                                 * the general case for UTF-8 matching and
+                                 * multi-char folds */
                                 break;
                             default:
                                 /* Use deprecated warning to increase the
@@ -12789,50 +12740,19 @@ parseit:
                 }
 
                 /* Here is an above Latin1 character.  We don't have the rules
-                 * hard-coded for it.  First, get its fold */
+                 * hard-coded for it.  First, get its fold.  This is the simple
+                 * fold, as the multi-character folds have been handled earlier
+                 * and separated out */
 		f = _to_uni_fold_flags(j, foldbuf, &foldlen,
-                                    ((allow_full_fold) ? FOLD_FLAGS_FULL : 0)
-                                    | ((LOC)
+                                        ((LOC)
                                         ? FOLD_FLAGS_LOCALE
                                         : (ASCII_FOLD_RESTRICTED)
                                             ? FOLD_FLAGS_NOMIX_ASCII
                                             : 0));
 
-		if (foldlen > (STRLEN)UNISKIP(f)) {
-
-		    /* Any multicharacter foldings (disallowed in lookbehind
-		     * patterns) require the following transform: [ABCDEF] ->
-		     * (?:[ABCabcDEFd]|pq|rst) where E folds into "pq" and F
-		     * folds into "rst", all other characters fold to single
-		     * characters.  We save away these multicharacter foldings,
-		     * to be later saved as part of the additional "s" data. */
-		    if (! RExC_in_lookbehind) {
-			U8* loc = foldbuf;
-			U8* e = foldbuf + foldlen;
-
-			/* If any of the folded characters of this are in the
-			 * Latin1 range, tell the regex engine that this can
-			 * match a non-utf8 target string.  */
-                        while (loc < e) {
-                            if (UTF8_IS_INVARIANT(*loc)
-                                || UTF8_IS_DOWNGRADEABLE_START(*loc))
-                            {
-                                ANYOF_FLAGS(ret)
-                                        |= ANYOF_NONBITMAP_NON_UTF8;
-                                break;
-                            }
-                            loc += UTF8SKIP(loc);
-                        }
-
-			add_alternate(&unicode_alternate, foldbuf, foldlen);
-		    }
-		}
-                else {
                     /* Single character fold of above Latin1.  Add everything
                      * in its fold closure to the list that this node should
                      * match */
-		    SV** listp;
-
 		    /* The fold closures data structure is a hash with the keys
 		     * being every character that is folded to, like 'k', and
 		     * the values each an array of everything that folds to its
@@ -12871,7 +12791,6 @@ parseit:
 			    }
 			}
 		    }
-		}
             }
 	}
 	SvREFCNT_dec(fold_intersection);
@@ -12980,7 +12899,6 @@ parseit:
     if (invert
         && ! (LOC && (FOLD || (ANYOF_FLAGS(ret) & ANYOF_CLASS)))
 	&& ! depends_list
-	&& ! unicode_alternate
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
         _invlist_invert(cp_list);
@@ -12999,7 +12917,7 @@ parseit:
      * until runtime; set the run-time fold flag for these.  (We don't have to
      * worry about properties folding, as that is taken care of by the swash
      * fetching) */
-    if (FOLD && (LOC || unicode_alternate))
+    if (FOLD && LOC)
     {
        ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
     }
@@ -13020,7 +12938,6 @@ parseit:
      * node types they could possibly match using _invlistEQ(). */
 
     if (cp_list
-        && ! unicode_alternate
         && ! invert
         && ! depends_list
         && ! (ANYOF_FLAGS(ret) & ANYOF_CLASS)
@@ -13209,12 +13126,10 @@ parseit:
     }
 
     if (! cp_list
-	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
-	&& ! unicode_alternate)
+	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
 	SvREFCNT_dec(listsv);
-	SvREFCNT_dec(unicode_alternate);
     }
     else {
 	/* av[0] stores the character class description in its textual form:
@@ -13223,8 +13138,7 @@ parseit:
 	 * av[1] if NULL, is a placeholder to later contain the swash computed
 	 *       from av[0].  But if no further computation need be done, the
 	 *       swash is stored there now.
-	 * av[2] stores the multicharacter foldings, used later in
-	 *       regexec.c:S_reginclass().
+         * av[2] is always NULL
 	 * av[3] stores the cp_list inversion list for use in addition or
 	 *       instead of av[0]; used only if av[1] is NULL
 	 * av[4] is set if any component of the class is from a user-defined
@@ -13247,17 +13161,7 @@ parseit:
 	    }
 	}
 
-        /* Store any computed multi-char folds only if we are allowing
-         * them */
-        if (allow_full_fold) {
-            av_store(av, 2, MUTABLE_SV(unicode_alternate));
-            if (unicode_alternate) { /* This node is variable length */
-                OP(ret) = ANYOFV;
-            }
-        }
-        else {
             av_store(av, 2, NULL);
-        }
 	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rxi->data->data[n] = (void*)rv;
@@ -14068,7 +13972,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 	if (ANYOF_NONBITMAP(o)) {
 	    SV *lv; /* Set if there is something outside the bit map */
-	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
+	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, NULL);
             bool byte_output = FALSE;   /* If something in the bitmap has been
                                            output */
 
