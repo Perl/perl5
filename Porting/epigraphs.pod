@@ -355,7 +355,7 @@ the human experience, the better design we will have.
 
 =head2 v5.14.3 - William Shakespeare, As You Like It
 
-Announced on 2012-10-12 by Dominic Hargreaves
+L<Announced on 2012-10-12 by Dominic Hargreaves|http://www.nntp.perl.org/group/perl.perl5.porters/2012/10/msg194057.html>
 
   The poor world is almost six thousand years old, and in all
   this time there was not any man died in his own person,
