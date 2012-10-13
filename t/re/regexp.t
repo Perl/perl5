@@ -187,6 +187,7 @@ EOFCODE
 	else {
 	    if (!$match || $got ne $expect) {
 	        eval { require Data::Dumper };
+                no warnings "utf8"; # But handle should be utf8
 		if ($@ || !defined &DynaLoader::boot_DynaLoader) {
 		    # Data::Dumper will load on miniperl, but fail when used in
 		    # anger as it tries to load B. I'd prefer to keep the
