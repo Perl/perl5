@@ -758,7 +758,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_BITMAP_SETALL(cl);
     cl->flags = ANYOF_CLASS|ANYOF_EOS|ANYOF_UNICODE_ALL
-		|ANYOF_LOC_NONBITMAP_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
+		|ANYOF_LOC_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -824,8 +824,8 @@ S_cl_and(struct regnode_charclass_class *cl,
     if (!(ANYOF_CLASS_TEST_ANY_SET(and_with))
 	&& !(ANYOF_CLASS_TEST_ANY_SET(cl))
 	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	&& !(and_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
-	&& !(cl->flags & ANYOF_LOC_NONBITMAP_FOLD)) {
+	&& !(and_with->flags & ANYOF_LOC_FOLD)
+	&& !(cl->flags & ANYOF_LOC_FOLD)) {
 	int i;
 
 	if (and_with->flags & ANYOF_INVERT)
@@ -958,8 +958,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	 *   (OK1(i) | OK1(i')) | (!OK1(i) & !OK1(i'))
 	 */
 	else if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && !(or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
-	     && !(cl->flags & ANYOF_LOC_NONBITMAP_FOLD) ) {
+	     && !(or_with->flags & ANYOF_LOC_FOLD)
+	     && !(cl->flags & ANYOF_LOC_FOLD) ) {
 	    int i;
 
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
@@ -985,8 +985,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     } else {    /* 'or_with' is not inverted */
 	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
 	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
-	     && (!(or_with->flags & ANYOF_LOC_NONBITMAP_FOLD)
-		 || (cl->flags & ANYOF_LOC_NONBITMAP_FOLD)) ) {
+	     && (!(or_with->flags & ANYOF_LOC_FOLD)
+		 || (cl->flags & ANYOF_LOC_FOLD)) ) {
 	    int i;
 
 	    /* OR char bitmap and class bitmap separately */
@@ -3583,7 +3583,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (uc >= 0x100 ||
 		    (!(data->start_class->flags & (ANYOF_CLASS | ANYOF_LOCALE))
 		    && !ANYOF_BITMAP_TEST(data->start_class, uc)
-		    && (!(data->start_class->flags & ANYOF_LOC_NONBITMAP_FOLD)
+		    && (!(data->start_class->flags & ANYOF_LOC_FOLD)
 			|| !ANYOF_BITMAP_TEST(data->start_class, PL_fold_latin1[uc])))
                     )
 		{
@@ -3669,7 +3669,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (compat) {
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		    data->start_class->flags &= ~ANYOF_EOS;
-		    data->start_class->flags |= ANYOF_LOC_NONBITMAP_FOLD;
+		    data->start_class->flags |= ANYOF_LOC_FOLD;
 		    if (OP(scan) == EXACTFL) {
 			/* XXX This set is probably no longer necessary, and
 			 * probably wrong as LOCALE now is on in the initial
@@ -3709,7 +3709,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
-		if (data->start_class->flags & ANYOF_LOC_NONBITMAP_FOLD) {
+		if (data->start_class->flags & ANYOF_LOC_FOLD) {
 		    /* false positive possible if the class is case-folded.
 		       Assume that the locale settings are the same... */
 		    if (uc < 0x100) {
@@ -12919,7 +12919,7 @@ parseit:
      * fetching) */
     if (FOLD && LOC)
     {
-       ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
+       ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
     }
 
     /* Some character classes are equivalent to other nodes.  Such nodes take
@@ -13920,7 +13920,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 	if (flags & ANYOF_LOCALE)
 	    sv_catpvs(sv, "{loc}");
-	if (flags & ANYOF_LOC_NONBITMAP_FOLD)
+	if (flags & ANYOF_LOC_FOLD)
 	    sv_catpvs(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (flags & ANYOF_INVERT)

@@ -326,13 +326,10 @@ struct regnode_charclass_class {
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
 /* The fold is calculated and stored in the bitmap where possible at compile
- * time.  However there are two cases where it isn't possible.  These share
- * this bit:  1) under locale, where the actual folding varies depending on
- * what the locale is at the time of execution; and 2) where the folding is
- * specified in a swash, not the bitmap, such as characters which aren't
- * specified in the bitmap, or properties that aren't looked at at compile time
- */
-#define ANYOF_LOC_NONBITMAP_FOLD 0x02
+ * time.  However under locale, the actual folding varies depending on
+ * what the locale is at the time of execution, so it has to be deferred until
+ * then */
+#define ANYOF_LOC_FOLD 0x02
 
 #define ANYOF_INVERT		 0x04
 
@@ -378,7 +375,7 @@ struct regnode_charclass_class {
  * regardless of being inverted; whereas ANYOF_UNICODE_ALL means something
  * different if inverted */
 #define INVERSION_UNAFFECTED_FLAGS (ANYOF_LOCALE                        \
-	                           |ANYOF_LOC_NONBITMAP_FOLD            \
+	                           |ANYOF_LOC_FOLD                      \
 	                           |ANYOF_CLASS                         \
 	                           |ANYOF_EOS                           \
 	                           |ANYOF_NONBITMAP_NON_UTF8)

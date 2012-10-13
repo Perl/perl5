@@ -7205,7 +7205,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 	else if (flags & ANYOF_LOCALE) {
 	    PL_reg_flags |= RF_tainted;
 
-	    if ((flags & ANYOF_LOC_NONBITMAP_FOLD)
+	    if ((flags & ANYOF_LOC_FOLD)
 		 && ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
 	    {
 		match = TRUE;
