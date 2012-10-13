@@ -955,9 +955,11 @@ PP(pp_aassign)
 		    Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
 			       (void*)sv);
 		}
-		/* Specifically *not* sv_mortalcopy(), as that will steal TEMPs,
-		   and we need a second copy of a temp here.  */
-		*relem = sv_2mortal(newSVsv(sv));
+		/* Not newSVsv(), as it does not allow copy-on-write,
+		   resulting in wasteful copies.  We need a second copy of
+		   a temp here, hence the SV_NOSTEAL.  */
+		*relem = sv_mortalcopy_flags(sv,SV_GMAGIC|SV_DO_COW_SVSETSV
+					       |SV_NOSTEAL);
 	    }
 	}
     }
