@@ -1092,12 +1092,11 @@ PP(pp_aassign)
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    relem++;
-		    if (gimme != G_VOID) {
+		    if (gimme == G_ARRAY) {
 			if (hv_exists_ent(hash, sv, 0))
 			    /* key overwrites an existing entry */
 			    duplicates += 2;
-			else
-			if (gimme == G_ARRAY) {
+			else {
 			    /* copy element back: possibly to an earlier
 			     * stack location if we encountered dups earlier */
 			    *topelem++ = sv;
