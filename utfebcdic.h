@@ -578,6 +578,19 @@ END_EXTERN_C
 #define UTF_CONTINUATION_MASK		((U8)0x1f)
 #define UTF_ACCUMULATION_SHIFT		5
 
+/* How wide can a single UTF-8 encoded character become in bytes. */
+/* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
+ * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
+ * expressed with 5 bytes.  However, Perl thinks of UTF-8 as a way to encode
+ * non-negative integers in a binary format, even those above Unicode */
+#define UTF8_MAXBYTES 7
+
+/* The maximum number of UTF-8 bytes a single Unicode character can
+ * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
+ * expansion is 3 characters.  On EBCDIC platforms, the highest Unicode
+ * character occupies 5 bytes, therefore this number is 15 */
+#define UTF8_MAXBYTES_CASE	15
+
 /*
  * Local variables:
  * c-indentation-style: bsd

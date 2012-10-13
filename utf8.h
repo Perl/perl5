@@ -209,6 +209,25 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 		      (uv) < 0x80000000     ? 6 : 7 )
 #endif
 
+/* How wide can a single UTF-8 encoded character become in bytes. */
+/* NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8 since UTF-8
+ * is an encoding of Unicode, and Unicode's upper limit, 0x10FFFF, can be
+ * expressed with 4 bytes.  However, Perl thinks of UTF-8 as a way to encode
+ * non-negative integers in a binary format, even those above Unicode */
+#define UTF8_MAXBYTES 13
+
+/* The maximum number of UTF-8 bytes a single Unicode character can
+ * uppercase/lowercase/fold into.  Unicode guarantees that the maximum
+ * expansion is 3 characters.  On ASCIIish platforms, the highest Unicode
+ * character occupies 4 bytes, therefore this number would be 12, but this is
+ * smaller than the maximum width a single above-Unicode character can occupy,
+ * so use that instead */
+#if UTF8_MAXBYTES < 12
+#error UTF8_MAXBYTES must be at least 12
+#endif
+
+#define UTF8_MAXBYTES_CASE	UTF8_MAXBYTES
+
 #endif /* EBCDIC vs ASCII */
 
 /* Rest of these are attributes of Unicode and perl's internals rather than the
@@ -270,22 +289,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
 #define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)
 
-#define UTF8_MAXBYTES 13
-/* How wide can a single UTF-8 encoded character become in bytes.
- * NOTE: Strictly speaking Perl's UTF-8 should not be called UTF-8
- * since UTF-8 is an encoding of Unicode and given Unicode's current
- * upper limit only four bytes is possible.  Perl thinks of UTF-8
- * as a way to encode non-negative integers in a binary format. */
 #define UTF8_MAXLEN UTF8_MAXBYTES
-
-/* The maximum number of UTF-8 bytes a single Unicode character can
- * uppercase/lowercase/fold into; this number depends on the Unicode
- * version.  An example of maximal expansion is the U+03B0 which
- * uppercases to U+03C5 U+0308 U+0301.  The Unicode databases that
- * tell these things are UnicodeData.txt, CaseFolding.txt, and
- * SpecialCasing.txt.  The value is 6 for strict Unicode characters, but it has
- * to be as big as Perl allows for a single character */
-#define UTF8_MAXBYTES_CASE	UTF8_MAXBYTES
 
 /* A Unicode character can fold to up to 3 characters */
 #define UTF8_MAX_FOLD_CHAR_EXPAND 3
