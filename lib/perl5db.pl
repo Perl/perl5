@@ -1743,7 +1743,6 @@ see what's happening in any given command.
 use vars qw(
     $action
     $cmd
-    $fall_off_end
     $file
     $filename_ini
     $finished
@@ -1758,6 +1757,7 @@ our (
     %alias,
     $doret,
     $end,
+    $fall_off_end,
     $incr,
     $laststep,
     $rc,
@@ -2735,11 +2735,7 @@ environment, and executing with the last value of C<$?>.
 
 =cut
 
-                if ($cmd eq 'q') {
-                    $fall_off_end = 1;
-                    clean_ENV();
-                    exit $?;
-                }
+                $obj->_handle_q_command;
 
 =head4 C<t> - trace [n]
 
@@ -3932,6 +3928,18 @@ sub _handle_x_command {
         if ( $DB::cmd =~ s#\A\s*(\d+)(?=\s)# #) {
             $onetimedumpDepth = $1;
         }
+    }
+
+    return;
+}
+
+sub _handle_q_command {
+    my $self = shift;
+
+    if ($DB::cmd eq 'q') {
+        $fall_off_end = 1;
+        DB::clean_ENV();
+        exit $?;
     }
 
     return;
