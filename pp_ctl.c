@@ -5383,6 +5383,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	LEAVE_with_name("call_filter_sub");
     }
 
+    if (SvIsCOW(upstream)) sv_force_normal(upstream);
     if(!err && SvOK(upstream)) {
 	got_p = SvPV(upstream, got_len);
 	if (umaxlen) {
