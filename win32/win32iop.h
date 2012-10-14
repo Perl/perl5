@@ -123,7 +123,7 @@ DllExport  int		win32_closedir(DIR *dirp);
 DllExport  DIR*		win32_dirp_dup(DIR *const dirp, CLONE_PARAMS *const param);
 
 DllExport  char*        win32_getenvironmentstrings(void);
-DllExport  void         win32_freeenvironmentstrings(void *block);
+/* also see win32_freeenvironmentstrings macro */
 DllExport  char*	win32_getenv(const char *name);
 DllExport  int		win32_putenv(const char *name);
 
@@ -160,6 +160,8 @@ DllExport Sighandler_t	win32_signal(int sig, Sighandler_t subcode);
 
 END_EXTERN_C
 
+/* see comment in win32_getenvironmentstrings */
+#define win32_freeenvironmentstrings(x) win32_free(x)
 #undef alarm
 #define alarm				win32_alarm
 #undef strerror

@@ -1746,6 +1746,10 @@ win32_ansipath(const WCHAR *widename)
     return name;
 }
 
+/* the returned string must be freed with win32_freeenvironmentstrings which is
+ * implemented as a macro
+ * void win32_freeenvironmentstrings(void* block)
+ */
 DllExport char *
 win32_getenvironmentstrings(void)
 {
@@ -1773,12 +1777,6 @@ win32_getenvironmentstrings(void)
                         aenvstrings_len, NULL, NULL);
 
     return(lpStr);
-}
-
-DllExport void
-win32_freeenvironmentstrings(void* block)
-{
-    win32_free(block);
 }
 
 DllExport char *
