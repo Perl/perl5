@@ -2423,7 +2423,15 @@ sub _DB__at_end_of_every_command {
 # 's' is subroutine.
 my %cmd_lookup =
 (
-    'q' => { t => 'm', v => '_handle_q_command' },
+    '.' => { t => 's', v => \&_DB__handle_dot_command, },
+    'f' => { t => 's', v => \&_DB__handle_f_command, },
+    'm' => { t => 's', v => \&_DB__handle_m_command, },
+    'q' => { t => 'm', v => '_handle_q_command', },
+    'S' => { t => 'm', v => '_handle_S_command', },
+    't' => { t => 'm', v => '_handle_t_command', },
+    'x' => { t => 'm', v => '_handle_x_command', },
+    (map { $_ => { t => 'm', v => '_handle_V_command_and_X_command', }, }
+        ('X', 'V')),
 );
 
 sub DB {
@@ -2763,15 +2771,11 @@ If level is specified, set C<$trace_to_depth>.
 
 =cut
 
-                $obj->_handle_t_command;
-
 =head4 C<S> - list subroutines matching/not matching a pattern
 
 Walks through C<%sub>, checking to see whether or not to print the name.
 
 =cut
-
-                $obj->_handle_S_command;
 
 =head4 C<X> - list variables in current package
 
@@ -2784,8 +2788,6 @@ Uses C<dumpvar.pl> to dump out the current values for selected variables.
 
 =cut
 
-                $obj->_handle_V_command_and_X_command;
-
 =head4 C<x> - evaluate and print an expression
 
 Hands the expression off to C<DB::eval>, setting it up to print the value
@@ -2793,21 +2795,15 @@ via C<dumpvar.pl> instead of just printing it directly.
 
 =cut
 
-                $obj->_handle_x_command;
-
 =head4 C<m> - print methods
 
 Just uses C<DB::methods> to determine what methods are available.
 
 =cut
 
-                _DB__handle_m_command($obj);
-
 =head4 C<f> - switch files
 
 =cut
-
-                _DB__handle_f_command($obj);
 
 =head4 C<.> - return to last-executed line.
 
@@ -2815,8 +2811,6 @@ We set C<$incr> to -1 to indicate that the debugger shouldn't move ahead,
 and then we look up the line in the magical C<%dbline> hash.
 
 =cut
-
-                _DB__handle_dot_command($obj);
 
 =head4 C<-> - back one window
 
