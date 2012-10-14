@@ -992,8 +992,6 @@ PP(pp_aassign)
     HV *hash;
     I32 i;
     int magic;
-    int duplicates = 0;
-    SV **firsthashrelem = NULL;	/* "= 0" keeps gcc 2.95 quiet  */
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
     gimme = GIMME_V;
@@ -1045,14 +1043,6 @@ PP(pp_aassign)
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
-            if (relem > lastrelem) {
-	        av_clear(MUTABLE_AV(sv));
-                if (PL_delaymagic & DM_ARRAY_ISA)
-                    SvSETMAGIC(sv);
-                if (gimme == G_ARRAY && !hash && !ary)
-                    ary = MUTABLE_AV(sv);
-                break;
-            }
 	    ary = MUTABLE_AV(sv);
 	    magic = SvMAGICAL(ary) != 0;
 	    ENTER;
@@ -1082,32 +1072,31 @@ PP(pp_aassign)
 	    break;
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
+                int odd;
+                int duplicates = 0;
 		SV** topelem = relem;
-		if (relem > lastrelem) {
-		    hv_clear(MUTABLE_HV(sv));
-		    if (gimme == G_ARRAY && !hash && !ary) {
-                        hash = MUTABLE_HV(sv);
-                        firsthashrelem = relem;
-                    }
-                    break;
-                }
+                SV **firsthashrelem = relem;
 
 		hash = MUTABLE_HV(sv);
 		magic = SvMAGICAL(hash) != 0;
+
+                odd = ((lastrelem - firsthashrelem)&1)? 0 : 1;
+                if ( odd ) {
+                    do_oddball(hash, lastrelem, firsthashrelem);
+                    /* we have lelem to reuse, it's not needed anymore */
+                    *(lastrelem+1) = &PL_sv_undef;
+                }
+
 		ENTER;
 		SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
 		hv_clear(hash);
-		firsthashrelem = relem;
-
-		while (relem < lastrelem) {	/* gobble up all the rest */
+		while (relem < lastrelem+odd) {	/* gobble up all the rest */
 		    HE *didstore;
-		    ODD:
-		    sv = *relem ? gimme == G_ARRAY ? sv_mortalcopy(*relem) : *relem : &PL_sv_no;
+                    assert(*relem);
+		    sv = gimme == G_ARRAY ? sv_mortalcopy(*relem) : *relem;
 		    relem++;
-		    tmpstr = sv_newmortal();
-		    if (*relem)
-			sv_setsv(tmpstr,*relem);	/* value */
-		    relem++;
+                    assert(*relem);
+		    tmpstr = sv_mortalcopy( *relem++ ); /* value */
 		    if (gimme == G_ARRAY) {
 			if (hv_exists_ent(hash, sv, 0))
 			    /* key overwrites an existing entry */
@@ -1121,19 +1110,26 @@ PP(pp_aassign)
 		    }
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
 		    if (didstore) SvREFCNT_inc_simple_void_NN(tmpstr);
-		    if (magic) {
-			if (SvSMAGICAL(tmpstr))
-			    mg_set(tmpstr);
-		    }
+                    if (magic) SvSETMAGIC(tmpstr);
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem) {
-		    do_oddball(hash, relem, firsthashrelem);
-                    /* we have lelem to reuse, it's not needed anymore */
-                    *(relem+1) = NULL;
-		    goto ODD;
-		}
 		LEAVE;
+                if (duplicates && gimme == G_ARRAY) {
+                    /* at this point we have removed the duplicate key/value
+                     * pairs from the stack, but the remaining values may be
+                     * wrong; i.e. with (a 1 a 2 b 3) on the stack we've removed
+                     * the (a 2), but the stack now probably contains
+                     * (a <freed> b 3), because { hv_save(a,1); hv_save(a,2) }
+                     * obliterates the earlier key. So refresh all values. */
+                    lastrelem -= duplicates;
+                    relem = firsthashrelem;
+                    while (relem < lastrelem+odd) {
+                        HE *he;
+                        he = hv_fetch_ent(hash, *relem++, 0, 0);
+                        *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
+                    }
+                }
+                if (odd && gimme == G_ARRAY) lastrelem++;
 	    }
 	    break;
 	default:
@@ -1243,32 +1239,14 @@ PP(pp_aassign)
 	SETi(lastrelem - firstrelem + 1);
     }
     else {
-	if (ary)
+	if (ary || hash)
 	    SP = lastrelem;
-	else if (hash) {
-	    if (duplicates) {
-		/* at this point we have removed the duplicate key/value
-		 * pairs from the stack, but the remaining values may be
-		 * wrong; i.e. with (a 1 a 2 b 3) on the stack we've removed
-		 * the (a 2), but the stack now probably contains
-		 * (a <freed> b 3), because { hv_save(a,1); hv_save(a,2) }
-		 * obliterates the earlier key. So refresh all values. */
-		lastrelem -= duplicates;
-		relem = firsthashrelem;
-		while (relem <= lastrelem) {
-		    HE *he;
-		    sv = *relem++;
-		    he = hv_fetch_ent(hash, sv, 0, 0);
-		    *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
-		}
-	    }
-	    SP = ((lastrelem - firsthashrelem)&1)? lastrelem : lastrelem+1;
-	}
-	else
+	else {
 	    SP = firstrelem + (lastlelem - firstlelem);
-	lelem = firstlelem + (relem - firstrelem);
-	while (relem <= SP)
-	    *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
+            lelem = firstlelem + (relem - firstrelem);
+            while (relem <= SP)
+                *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
+        }
     }
 
     RETURN;
