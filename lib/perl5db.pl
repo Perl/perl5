@@ -2788,13 +2788,9 @@ environment, and executing with the last value of C<$?>.
 Turn tracing on or off. Inverts the appropriate bit in C<$trace> (q.v.).
 If level is specified, set C<$trace_to_depth>.
 
-=cut
-
 =head4 C<S> - list subroutines matching/not matching a pattern
 
 Walks through C<%sub>, checking to see whether or not to print the name.
-
-=cut
 
 =head4 C<X> - list variables in current package
 
@@ -2805,31 +2801,23 @@ appropriate C<V> command and fall through.
 
 Uses C<dumpvar.pl> to dump out the current values for selected variables.
 
-=cut
-
 =head4 C<x> - evaluate and print an expression
 
 Hands the expression off to C<DB::eval>, setting it up to print the value
 via C<dumpvar.pl> instead of just printing it directly.
 
-=cut
-
 =head4 C<m> - print methods
 
 Just uses C<DB::methods> to determine what methods are available.
 
-=cut
-
 =head4 C<f> - switch files
 
-=cut
+Switch to a different filename.
 
 =head4 C<.> - return to last-executed line.
 
 We set C<$incr> to -1 to indicate that the debugger shouldn't move ahead,
 and then we look up the line in the magical C<%dbline> hash.
-
-=cut
 
 =head4 C<-> - back one window
 
