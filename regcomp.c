@@ -758,7 +758,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
     ANYOF_BITMAP_SETALL(cl);
     cl->flags = ANYOF_CLASS|ANYOF_EOS|ANYOF_UNICODE_ALL
-		|ANYOF_LOC_FOLD|ANYOF_NON_UTF8_LATIN1_ALL;
+		|ANYOF_NON_UTF8_LATIN1_ALL;
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -769,7 +769,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
      * necessary. */
     if (RExC_contains_locale) {
 	ANYOF_CLASS_SETALL(cl);	    /* /l uses class */
-	cl->flags |= ANYOF_LOCALE;
+	cl->flags |= ANYOF_LOCALE|ANYOF_LOC_FOLD;
     }
     else {
 	ANYOF_CLASS_ZERO(cl);	    /* Only /l uses class now */
@@ -3669,12 +3669,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (compat) {
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		    data->start_class->flags &= ~ANYOF_EOS;
-		    data->start_class->flags |= ANYOF_LOC_FOLD;
 		    if (OP(scan) == EXACTFL) {
 			/* XXX This set is probably no longer necessary, and
 			 * probably wrong as LOCALE now is on in the initial
 			 * state */
-			data->start_class->flags |= ANYOF_LOCALE;
+			data->start_class->flags |= ANYOF_LOCALE|ANYOF_LOC_FOLD;
 		    }
 		    else {
 
