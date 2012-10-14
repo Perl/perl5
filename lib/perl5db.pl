@@ -2417,6 +2417,15 @@ sub _DB__at_end_of_every_command {
     return;
 }
 
+# 't' is type.
+# 'm' is method.
+# 'v' is the value (i.e: method name or subroutine ref).
+# 's' is subroutine.
+my %cmd_lookup =
+(
+    'q' => { t => 'm', v => '_handle_q_command' },
+);
+
 sub DB {
 
     # lock the debugger and get the thread id for the prompt
@@ -2720,6 +2729,7 @@ completely replacing it.
                         print $OUT "Couldn't evaluate '$i' alias: $@";
                         next CMD;
                     }
+                    $i = _DB__trim_command_and_return_first_component();
                 } ## end if ($alias{$i})
 
 =head3 MAIN-LINE COMMANDS
@@ -2735,7 +2745,16 @@ environment, and executing with the last value of C<$?>.
 
 =cut
 
-                $obj->_handle_q_command;
+                if (my $cmd_rec = $cmd_lookup{$i}) {
+                    my $type = $cmd_rec->{t};
+                    my $val = $cmd_rec->{v};
+                    if ($type eq 'm') {
+                        $obj->$val();
+                    }
+                    elsif ($type eq 's') {
+                        $val->($obj);
+                    }
+                }
 
 =head4 C<t> - trace [n]
 
