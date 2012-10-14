@@ -2788,7 +2788,7 @@ Just uses C<DB::methods> to determine what methods are available.
 
 =cut
 
-                _DB__handle_f_command();
+                _DB__handle_f_command($obj);
 
 =head4 C<.> - return to last-executed line.
 
