@@ -2451,6 +2451,8 @@ my %cmd_lookup =
     (map { $_ =>
         { t => 's', v => \&_DB__handle_restart_and_rerun_commands, },
         } qw(R rerun)),
+    (map { $_ => {t => 'm', v => '_handle_cmd_wrapper_commands' }, }
+    qw(a A b B e E h i l L M o O P v w W)),
 );
 
 sub DB {
@@ -2772,6 +2774,11 @@ environment, and executing with the last value of C<$?>.
 
 =cut
 
+                # All of these commands were remapped in perl 5.8.0;
+                # we send them off to the secondary dispatcher (see below).
+                $obj->_handle_special_char_cmd_wrapper_commands;
+                $i = _DB__trim_command_and_return_first_component();
+
                 if (my $cmd_rec = $cmd_lookup{$i}) {
                     my $type = $cmd_rec->{t};
                     my $val = $cmd_rec->{v};
@@ -2834,12 +2841,6 @@ the user's work in setting watchpoints, actions, etc. We wanted, however, to
 retain the old commands for those who were used to using them or who preferred
 them. At this point, we check for the new commands and call C<cmd_wrapper> to
 deal with them instead of processing them in-line.
-
-=cut
-
-                # All of these commands were remapped in perl 5.8.0;
-                # we send them off to the secondary dispatcher (see below).
-                $obj->_handle_cmd_wrapper_commands;
 
 =head4 C<y> - List lexicals in higher scope
 
@@ -3442,6 +3443,7 @@ sub _handle_dash_command {
 
         # Generate and execute a "l +" command (handled below).
         $DB::cmd = 'l ' . ($start) . '+';
+        redo CMD;
     }
     return;
 }
@@ -3895,13 +3897,27 @@ sub _handle_cmd_wrapper_commands {
 
     # All of these commands were remapped in perl 5.8.0;
     # we send them off to the secondary dispatcher (see below).
-    if (my ($cmd_letter, $my_arg) = $DB::cmd =~ /\A([aAbBeEhilLMoOPvwW]\b|[<>\{]{1,2})\s*(.*)/so) {
+    if (my ($cmd_letter, $my_arg) = $DB::cmd =~ /\A([aAbBeEhilLMoOPvwW]\b)\s*(.*)/so) {
         DB::cmd_wrapper( $cmd_letter, $my_arg, $line );
         next CMD;
     }
 
     return;
 }
+
+sub _handle_special_char_cmd_wrapper_commands {
+    my $self = shift;
+
+    # All of these commands were remapped in perl 5.8.0;
+    # we send them off to the secondary dispatcher (see below).
+    if (my ($cmd_letter, $my_arg) = $DB::cmd =~ /\A([<>\{]{1,2})\s*(.*)/so) {
+        DB::cmd_wrapper( $cmd_letter, $my_arg, $line );
+        next CMD;
+    }
+
+    return;
+}
+
 package DB;
 
 # The following code may be executed now:
