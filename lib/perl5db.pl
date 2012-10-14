@@ -2425,20 +2425,32 @@ my %cmd_lookup =
 (
     '-' => { t => 'm', v => '_handle_dash_command', },
     '.' => { t => 's', v => \&_DB__handle_dot_command, },
+    '=' => { t => 'm', v => '_handle_equal_sign_command', },
+    'H' => { t => 'm', v => '_handle_H_command', },
     'S' => { t => 'm', v => '_handle_S_command', },
     'T' => { t => 'm', v => '_handle_T_command', },
+    'W' => { t => 'm', v => '_handle_W_command', },
     'c' => { t => 's', v => \&_DB__handle_c_command, },
     'f' => { t => 's', v => \&_DB__handle_f_command, },
     'm' => { t => 's', v => \&_DB__handle_m_command, },
     'n' => { t => 'm', v => '_handle_n_command', },
+    'p' => { t => 'm', v => '_handle_p_command', },
     'q' => { t => 'm', v => '_handle_q_command', },
     'r' => { t => 'm', v => '_handle_r_command', },
     's' => { t => 'm', v => '_handle_s_command', },
+    'save' => { t => 'm', v => '_handle_save_command', },
+    'source' => { t => 'm', v => '_handle_source_command', },
     't' => { t => 'm', v => '_handle_t_command', },
+    'w' => { t => 'm', v => '_handle_w_command', },
     'x' => { t => 'm', v => '_handle_x_command', },
     'y' => { t => 's', v => \&_DB__handle_y_command, },
     (map { $_ => { t => 'm', v => '_handle_V_command_and_X_command', }, }
         ('X', 'V')),
+    (map { $_ => { t => 'm', v => '_handle_enable_disable_commands', }, }
+        qw(enable disable)),
+    (map { $_ =>
+        { t => 's', v => \&_DB__handle_restart_and_rerun_commands, },
+        } qw(R rerun)),
 );
 
 sub DB {
@@ -2888,17 +2900,9 @@ Just calls C<DB::print_trace>.
 
 Just calls C<DB::cmd_w>.
 
-=cut
-
-                $obj->_handle_w_command;
-
 =head4 C<W> - watch-expression processing.
 
 Just calls C<DB::cmd_W>.
-
-=cut
-
-                $obj->_handle_W_command;
 
 =head4 C</> - search forward for a string in the source
 
@@ -2963,10 +2967,6 @@ C<DB::system> to avoid problems with C<STDIN> and C<STDOUT>.
 
 Prints the contents of C<@hist> (if any).
 
-=cut
-
-                $obj->_handle_H_command;
-
 =head4 C<man, doc, perldoc> - look up documentation
 
 Just calls C<runman()> to print the appropriate document.
@@ -2980,35 +2980,18 @@ Just calls C<runman()> to print the appropriate document.
 Builds a C<print EXPR> expression in the C<$cmd>; this will get executed at
 the bottom of the loop.
 
-=cut
-
-                $obj->_handle_p_command;
-
 =head4 C<=> - define command alias
 
 Manipulates C<%alias> to add or list command aliases.
-
-=cut
-
-                # = - set up a command alias.
-                $obj->_handle_equal_sign_command;
 
 =head4 C<source> - read commands from a file.
 
 Opens a lexical filehandle and stacks it on C<@cmdfhs>; C<DB::readline> will
 pick it up.
 
-=cut
-
-                $obj->_handle_source_command;
-
 =head4 C<enable> C<disable> - enable or disable breakpoints
 
 This enables or disables breakpoints.
-
-=cut
-
-                $obj->_handle_enable_disable_commands;
 
 =head4 C<save> - send current history to a file
 
@@ -3017,11 +3000,6 @@ and saves it to the given filename, so it can be replayed using C<source>.
 
 Note that all C<^(save|source)>'s are commented out with a view to minimise recursion.
 
-=cut
-
-                # save source - write commands to a file for later use
-                $obj->_handle_save_command;
-
 =head4 C<R> - restart
 
 Restart the debugger session.
@@ -3029,12 +3007,6 @@ Restart the debugger session.
 =head4 C<rerun> - rerun the current session
 
 Return to any given position in the B<true>-history list
-
-=cut
-
-                # R - restart execution.
-                # rerun - controlled restart execution.
-                _DB__handle_restart_and_rerun_commands($obj);
 
 =head4 C<|, ||> - pipe output through the pager.
 
