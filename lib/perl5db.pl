@@ -2423,13 +2423,20 @@ sub _DB__at_end_of_every_command {
 # 's' is subroutine.
 my %cmd_lookup =
 (
+    '-' => { t => 'm', v => '_handle_dash_command', },
     '.' => { t => 's', v => \&_DB__handle_dot_command, },
+    'S' => { t => 'm', v => '_handle_S_command', },
+    'T' => { t => 'm', v => '_handle_T_command', },
+    'c' => { t => 's', v => \&_DB__handle_c_command, },
     'f' => { t => 's', v => \&_DB__handle_f_command, },
     'm' => { t => 's', v => \&_DB__handle_m_command, },
+    'n' => { t => 'm', v => '_handle_n_command', },
     'q' => { t => 'm', v => '_handle_q_command', },
-    'S' => { t => 'm', v => '_handle_S_command', },
+    'r' => { t => 'm', v => '_handle_r_command', },
+    's' => { t => 'm', v => '_handle_s_command', },
     't' => { t => 'm', v => '_handle_t_command', },
     'x' => { t => 'm', v => '_handle_x_command', },
+    'y' => { t => 's', v => \&_DB__handle_y_command, },
     (map { $_ => { t => 'm', v => '_handle_V_command_and_X_command', }, }
         ('X', 'V')),
 );
@@ -2819,11 +2826,6 @@ we set it to be the first line. We ser C<$incr> to put us back at the
 currently-executing line, and then put a C<l $start +> (list one window from
 C<$start>) in C<$cmd> to be executed later.
 
-=cut
-
-                # - - back a window.
-                $obj->_handle_dash_command;
-
 =head3 PRE-580 COMMANDS VS. NEW COMMANDS: C<a, A, b, B, h, l, L, M, o, O, P, v, w, W, E<lt>, E<lt>E<lt>, E<0x7B>, E<0x7B>E<0x7B>>
 
 In Perl 5.8.0, a realignment of the commands was done to fix up a number of
@@ -2844,10 +2846,6 @@ deal with them instead of processing them in-line.
 Uses C<PadWalker> to find the lexicals supplied as arguments in a scope
 above the current one and then displays then using C<dumpvar.pl>.
 
-=cut
-
-                _DB__handle_y_command($obj);
-
 =head3 COMMANDS NOT WORKING AFTER PROGRAM ENDS
 
 All of the commands below this point don't work after the program being
@@ -2862,19 +2860,10 @@ Done by setting C<$single> to 2, which forces subs to execute straight through
 when entered (see C<DB::sub>). We also save the C<n> command in C<$laststep>,
 so a null command knows what to re-execute.
 
-=cut
-
-                # n - next
-                $obj->_handle_n_command;
-
 =head4 C<s> - single-step, entering subs
 
 Sets C<$single> to 1, which causes C<DB::sub> to continue tracing inside
 subs. Also saves C<s> as C<$lastcmd>.
-
-=cut
-
-                $obj->_handle_s_command;
 
 =head4 C<c> - run continuously, setting an optional breakpoint
 
@@ -2882,11 +2871,6 @@ Most of the code for this command is taken up with locating the optional
 breakpoint, which is either a subroutine name or a line number. We set
 the appropriate one-time-break in C<@dbline> and then turn off single-stepping
 in this and all call levels above this one.
-
-=cut
-
-                # c - start continuous execution.
-                _DB__handle_c_command($obj);
 
 =head4 C<r> - return from a subroutine
 
@@ -2896,18 +2880,9 @@ single-stepping to be on in the call level above the current one. If
 we are printing return values when a C<r> is executed, set C<$doret>
 appropriately, and force us out of the command loop.
 
-=cut
-
-                # r - return from the current subroutine.
-                $obj->_handle_r_command;
-
 =head4 C<T> - stack trace
 
 Just calls C<DB::print_trace>.
-
-=cut
-
-                $obj->_handle_T_command;
 
 =head4 C<w> - List window around current line.
 
