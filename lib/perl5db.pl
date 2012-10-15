@@ -1968,9 +1968,9 @@ sub _DB__handle_y_command {
 sub _DB__handle_c_command {
     my ($obj) = @_;
 
-    if (my ($new_i) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
+    if (my ($new_verb) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
 
-        $obj->cmd_verb($new_i);
+        $obj->cmd_verb($new_verb);
 
         # Hey, show's over. The debugged program finished
         # executing already.
@@ -2000,10 +2000,10 @@ sub _DB__handle_c_command {
             # to where the subroutine is defined; we call find_sub,
             # break up the return value, and assign it in one
             # operation.
-            ( $file, $new_i ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
+            ( $file, $new_verb ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
 
             # Force the line number to be numeric.
-            $obj->cmd_verb($new_i + 0);
+            $obj->cmd_verb($new_verb + 0);
 
             # If we got a line number, we found the sub.
             if ($obj->cmd_verb) {
@@ -2019,9 +2019,12 @@ sub _DB__handle_c_command {
                 # Scan forward to the first executable line
                 # after the 'sub whatever' line.
                 $max = $#dbline;
-                my $ii = $obj->cmd_verb;
-                ++$ii while $dbline[$ii] == 0 && $ii < $max;
-                $obj->cmd_verb($ii);
+                my $_line_num = $obj->cmd_verb;
+                while ($dbline[$_line_num] == 0 && $_line_num< $max)
+                {
+                    $_line_num++;
+                }
+                $obj->cmd_verb($_line_num);
             } ## end if ($i)
 
             # We didn't find a sub by that name.
@@ -3550,9 +3553,10 @@ sub _handle_rc_recall_command {
         #  Y - index back from most recent (by 1 if bare minus)
         #  N - go to that particular command slot or the last
         #      thing if nothing following.
-        my $new_i = $minus ? ( $#hist - ( $arg || 1 ) ) : ( $arg || $#hist );
 
-        $self->cmd_verb($new_i);
+        $self->cmd_verb(
+            scalar($minus ? ( $#hist - ( $arg || 1 ) ) : ( $arg || $#hist ))
+        );
 
         # Pick out the command desired.
         $DB::cmd = $hist[$self->cmd_verb];
@@ -3579,7 +3583,7 @@ sub _handle_rc_search_history_command {
         # Toss off last entry if length is >1 (and it always is).
         pop(@hist) if length($DB::cmd) > 1;
 
-        my $i = $self->cmd_verb;
+        my $i;
 
         # Look backward through the history.
         SEARCH_HIST:
@@ -3588,9 +3592,7 @@ sub _handle_rc_search_history_command {
             last SEARCH_HIST if $hist[$i] =~ /$pat/;
         }
 
-        $self->cmd_verb($i);
-
-        if ( !$self->cmd_verb ) {
+        if ( !$i ) {
 
             # Never found it.
             print $OUT "No such command!\n\n";
@@ -3598,7 +3600,7 @@ sub _handle_rc_search_history_command {
         }
 
         # Found it. Put it in the buffer, print it, and process it.
-        $DB::cmd = $hist[$self->cmd_verb];
+        $DB::cmd = $hist[$i];
         print $OUT $DB::cmd, "\n";
         redo CMD;
     }
@@ -3636,8 +3638,6 @@ sub _handle_H_command {
             print $OUT "$i: ", $hist[$i], "\n"
             unless $hist[$i] =~ /^.?$/;
         }
-
-        $self->cmd_verb($i);
 
         next CMD;
     }
