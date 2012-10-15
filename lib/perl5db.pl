@@ -1834,11 +1834,16 @@ sub _DB__read_next_cmd
 }
 
 sub _DB__trim_command_and_return_first_component {
+    my ($obj) = @_;
+
     $cmd =~ s/\A\s+//s;    # trim annoying leading whitespace
     $cmd =~ s/\s+\z//s;    # trim annoying trailing whitespace
 
     $cmd =~ m{\A(\S*)};
-    return $1;
+
+    $obj->i_cmd($1);
+
+    return;
 }
 
 sub _DB__handle_f_command {
@@ -2729,7 +2734,7 @@ it up.
             # via direct user input. It allows us to 'redo PIPE' to
             # re-execute command processing without reading a new command.
           PIPE: {
-                $i = _DB__trim_command_and_return_first_component();
+                _DB__trim_command_and_return_first_component($obj);
 
 =head3 COMMAND ALIASES
 
@@ -2758,7 +2763,7 @@ completely replacing it.
                         print $OUT "Couldn't evaluate '$i' alias: $@";
                         next CMD;
                     }
-                    $i = _DB__trim_command_and_return_first_component();
+                    _DB__trim_command_and_return_first_component($obj);
                 } ## end if ($alias{$i})
 
 =head3 MAIN-LINE COMMANDS
@@ -2777,7 +2782,7 @@ environment, and executing with the last value of C<$?>.
                 # All of these commands were remapped in perl 5.8.0;
                 # we send them off to the secondary dispatcher (see below).
                 $obj->_handle_special_char_cmd_wrapper_commands;
-                $i = _DB__trim_command_and_return_first_component();
+                _DB__trim_command_and_return_first_component($obj);
 
                 if (my $cmd_rec = $cmd_lookup{$i}) {
                     my $type = $cmd_rec->{t};
