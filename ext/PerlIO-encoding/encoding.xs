@@ -443,8 +443,12 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    }
 	    if (!SvPOKp(e->bufsv) || SvTHINKFIRST(e->bufsv))
 		(void)SvPV_force_nolen(e->bufsv);
-	    if ((STDCHAR *)SvPVX(e->bufsv) != e->base.buf)
+	    if ((STDCHAR *)SvPVX(e->bufsv) != e->base.buf) {
+		e->base.ptr = SvEND(e->bufsv);
+		e->base.end = SvPVX(e->bufsv) + (e->base.end-e->base.buf);
 		e->base.buf = (STDCHAR *)SvPVX(e->bufsv);
+	    }
+	    (void)PerlIOEncode_get_base(aTHX_ f);
 	    if (SvCUR(e->bufsv)) {
 		/* Did not all translate */
 		e->base.ptr = e->base.buf+SvCUR(e->bufsv);

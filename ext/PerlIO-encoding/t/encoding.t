@@ -138,10 +138,10 @@ package Extensive {
     $leftovers = $';
   }
   if ($chk) {
-   my $x = ' ' x 8000;  # prevent realloc from simply extending the buffer
-   $_[1] = ' ' x 8000;  # make SvPVX point elsewhere
-   $_[1] = $leftovers;
-  }
+   undef $_[1];
+   my @x = (' ') x 8000; # reuse the just-freed buffer
+   $_[1] = $leftovers;   # SvPVX now points elsewhere and is shorter
+  }                      # than bufsiz
   $buf;
  }
  no warnings 'once'; 
@@ -151,8 +151,11 @@ open my $fh, ">:encoding(extensive)", \$buf;
 $fh->autoflush;
 print $fh "doughnut\n";
 print $fh "quaffee\n";
+# Print something longer than the buffer that encode() shrunk:
+print $fh "The beech leaves beech leaves on the beach by the beech.\n";
 close $fh;
-is $buf, "doughnut\nquaffee\n", 'buffer realloc during encoding';
+is $buf, "doughnut\nquaffee\nThe beech leaves beech leaves on the beach by"
+        ." the beech.\n", 'buffer realloc during encoding';
 $buf = "Sheila surely shod Sean\nin shoddy shoes.\n";
 open $fh, "<:encoding(extensive)", \$buf;
 is join("", <$fh>), "Sheila surely shod Sean\nin shoddy shoes.\n",
