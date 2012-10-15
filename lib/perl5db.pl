@@ -1899,7 +1899,7 @@ sub _DB__handle_dot_command {
     my ($obj) = @_;
 
     # . command.
-    if ($cmd eq '.') {
+    if ($obj->_is_full('.')) {
         $incr = -1;    # stay at current line
 
         # Reset everything to the old location.
@@ -3231,6 +3231,12 @@ sub _curr_line {
     return $DB::dbline[$line];
 }
 
+sub _is_full {
+    my ($self, $letter) = @_;
+
+    return ($DB::cmd eq $letter);
+}
+
 sub _DB__grab_control
 {
     my $self = shift;
@@ -3383,12 +3389,13 @@ sub _handle_S_command {
 }
 
 sub _handle_V_command_and_X_command {
+    my $self = shift;
 
     $DB::cmd =~ s/^X\b/V $DB::package/;
 
     # Bare V commands get the currently-being-debugged package
     # added.
-    if ($DB::cmd eq "V") {
+    if ($self->_is_full('V')) {
         $DB::cmd = "V $DB::package";
     }
 
@@ -3447,8 +3454,9 @@ sub _handle_V_command_and_X_command {
 }
 
 sub _handle_dash_command {
+    my $self = shift;
 
-    if ($DB::cmd eq '-') {
+    if ($self->_is_full('-')) {
 
         # back up by a window; go to 1 if back too far.
         $start -= $incr + $window + 1;
@@ -3478,7 +3486,7 @@ sub _n_or_s_commands_generic {
 sub _n_or_s {
     my ($self, $letter, $new_val) = @_;
 
-    if ($DB::cmd eq $letter) {
+    if ($self->_is_full($letter)) {
         $self->_n_or_s_commands_generic($new_val);
     }
     else {
@@ -3503,7 +3511,7 @@ sub _handle_s_command {
 sub _handle_r_command {
     my $self = shift;
     # r - return from the current subroutine.
-    if ($DB::cmd eq 'r') {
+    if ($self->_is_full('r')) {
 
         # Can't do anything if the program's over.
         next CMD if DB::_DB__is_finished();
@@ -3520,7 +3528,9 @@ sub _handle_r_command {
 }
 
 sub _handle_T_command {
-    if ($DB::cmd eq 'T') {
+    my $self = shift;
+
+    if ($self->_is_full('T')) {
         DB::print_trace( $OUT, 1 );    # skip DB
         next CMD;
     }
@@ -3670,7 +3680,7 @@ sub _handle_p_command {
 
     my $print_cmd = 'print {$DB::OUT} ';
     # p - print (no args): print $_.
-    if ($DB::cmd eq 'p') {
+    if ($self->_is_full('p')) {
         $DB::cmd = $print_cmd . '$_';
     }
     else {
@@ -3896,7 +3906,7 @@ sub _handle_x_command {
 sub _handle_q_command {
     my $self = shift;
 
-    if ($DB::cmd eq 'q') {
+    if ($self->_is_full('q')) {
         $fall_off_end = 1;
         DB::clean_ENV();
         exit $?;
