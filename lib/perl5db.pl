@@ -1839,9 +1839,10 @@ sub _DB__trim_command_and_return_first_component {
     $cmd =~ s/\A\s+//s;    # trim annoying leading whitespace
     $cmd =~ s/\s+\z//s;    # trim annoying trailing whitespace
 
-    $cmd =~ m{\A(\S*)};
+    my ($verb, $args) = $cmd =~ m{\A(\S*)\s*(.*)}s;
 
-    $obj->cmd_verb($1);
+    $obj->cmd_verb($verb);
+    $obj->cmd_args($args);
 
     return;
 }
@@ -2480,6 +2481,7 @@ sub DB {
     }
 
     my $cmd_verb;
+    my $cmd_args;
 
     my $obj = DB::Obj->new(
         {
@@ -2488,6 +2490,7 @@ sub DB {
             after => \$after,
             explicit_stop => \$explicit_stop,
             infix => \$infix,
+            cmd_args => \$cmd_args,
             cmd_verb => \$cmd_verb,
             pat => \$pat,
             piped => \$piped,
@@ -3116,6 +3119,7 @@ sub _init {
     no strict 'refs';
     foreach my $slot_name (qw(
         after explicit_stop infix pat piped position prefix selected cmd_verb
+        cmd_args
         )) {
         my $slot = $slot_name;
         *{$slot} = sub {
@@ -3349,8 +3353,10 @@ sub _handle_t_command {
 
 
 sub _handle_S_command {
+    my $self = shift;
+
     if (my ($print_all_subs, $should_reverse, $Spatt)
-        = $DB::cmd =~ /\AS(\s+(!)?(.+))?\z/) {
+        = $self->cmd_args =~ /\A((!)?(.+))?\z/) {
         # $Spatt is the pattern (if any) to use.
         # Reverse scan?
         my $Srev     = defined $should_reverse;
@@ -3611,14 +3617,13 @@ sub _handle_rc_search_history_command {
 sub _handle_H_command {
     my $self = shift;
 
-    if ($DB::cmd =~ /\AH\b\s*\*/) {
+    if ($self->cmd_args =~ m#\A\*#) {
         @hist = @truehist = ();
         print $OUT "History cleansed\n";
         next CMD;
     }
 
-    if (my ($num)
-        = $DB::cmd =~ /\AH\b\s*(?:-(\d+))?/) {
+    if (my ($num) = $self->cmd_args =~ /\A(?:-(\d+))?/) {
 
         # Anything other than negative numbers is ignored by
         # the (incorrect) pattern, so this test does nothing.
