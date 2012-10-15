@@ -1841,7 +1841,7 @@ sub _DB__trim_command_and_return_first_component {
 
     $cmd =~ m{\A(\S*)};
 
-    $obj->i_cmd($1);
+    $obj->cmd_verb($1);
 
     return;
 }
@@ -1970,14 +1970,14 @@ sub _DB__handle_c_command {
 
     if (my ($new_i) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
 
-        $obj->i_cmd($new_i);
+        $obj->cmd_verb($new_i);
 
         # Hey, show's over. The debugged program finished
         # executing already.
         next CMD if _DB__is_finished();
 
         # Capture the place to put a one-time break.
-        $subname = $obj->i_cmd;
+        $subname = $obj->cmd_verb;
 
         #  Probably not needed, since we finish an interactive
         #  sub-session anyway...
@@ -2003,10 +2003,10 @@ sub _DB__handle_c_command {
             ( $file, $new_i ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
 
             # Force the line number to be numeric.
-            $obj->i_cmd($new_i + 0);
+            $obj->cmd_verb($new_i + 0);
 
             # If we got a line number, we found the sub.
-            if ($obj->i_cmd) {
+            if ($obj->cmd_verb) {
 
                 # Switch all the debugger's internals around so
                 # we're actually working with that file.
@@ -2019,9 +2019,9 @@ sub _DB__handle_c_command {
                 # Scan forward to the first executable line
                 # after the 'sub whatever' line.
                 $max = $#dbline;
-                my $ii = $obj->i_cmd;
+                my $ii = $obj->cmd_verb;
                 ++$ii while $dbline[$ii] == 0 && $ii < $max;
-                $obj->i_cmd($ii);
+                $obj->cmd_verb($ii);
             } ## end if ($i)
 
             # We didn't find a sub by that name.
@@ -2052,17 +2052,17 @@ sub _DB__handle_c_command {
         # On the gripping hand, we can't do anything unless the
         # current value of $i points to a valid breakable line.
         # Check that.
-        if ($obj->i_cmd) {
+        if ($obj->cmd_verb) {
 
             # Breakable?
-            if ( $dbline[$obj->i_cmd] == 0 ) {
-                print $OUT "Line " . $obj->i_cmd . " not breakable.\n";
+            if ( $dbline[$obj->cmd_verb] == 0 ) {
+                print $OUT "Line " . $obj->cmd_verb . " not breakable.\n";
                 next CMD;
             }
 
             # Yes. Set up the one-time-break sigil.
-            $dbline{$obj->i_cmd} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
-            _enable_breakpoint_temp_enabled_status($filename, $obj->i_cmd);
+            $dbline{$obj->cmd_verb} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
+            _enable_breakpoint_temp_enabled_status($filename, $obj->cmd_verb);
         } ## end if ($i)
 
         # Turn off stack tracing from here up.
@@ -2476,7 +2476,7 @@ sub DB {
         $tid = eval { "[".threads->tid."]" };
     }
 
-    my $i;
+    my $cmd_verb;
 
     my $obj = DB::Obj->new(
         {
@@ -2485,7 +2485,7 @@ sub DB {
             after => \$after,
             explicit_stop => \$explicit_stop,
             infix => \$infix,
-            i_cmd => \$i,
+            cmd_verb => \$cmd_verb,
             pat => \$pat,
             piped => \$piped,
             selected => \$selected,
@@ -2746,7 +2746,7 @@ completely replacing it.
 =cut
 
                 # See if there's an alias for the command, and set it up if so.
-                if ( $alias{$i} ) {
+                if ( $alias{$cmd_verb} ) {
 
                     # Squelch signal handling; we want to keep control here
                     # if something goes loco during the alias eval.
@@ -2757,14 +2757,14 @@ completely replacing it.
                     # scope! Otherwise, we can't see the special debugger
                     # variables, or get to the debugger's subs. (Well, we
                     # _could_, but why make it even more complicated?)
-                    eval "\$cmd =~ $alias{$i}";
+                    eval "\$cmd =~ $alias{$cmd_verb}";
                     if ($@) {
                         local $\ = '';
-                        print $OUT "Couldn't evaluate '$i' alias: $@";
+                        print $OUT "Couldn't evaluate '$cmd_verb' alias: $@";
                         next CMD;
                     }
                     _DB__trim_command_and_return_first_component($obj);
-                } ## end if ($alias{$i})
+                } ## end if ($alias{$cmd_verb})
 
 =head3 MAIN-LINE COMMANDS
 
@@ -2784,7 +2784,7 @@ environment, and executing with the last value of C<$?>.
                 $obj->_handle_special_char_cmd_wrapper_commands;
                 _DB__trim_command_and_return_first_component($obj);
 
-                if (my $cmd_rec = $cmd_lookup{$i}) {
+                if (my $cmd_rec = $cmd_lookup{$cmd_verb}) {
                     my $type = $cmd_rec->{t};
                     my $val = $cmd_rec->{v};
                     if ($type eq 'm') {
@@ -3112,7 +3112,7 @@ sub _init {
 {
     no strict 'refs';
     foreach my $slot_name (qw(
-        after explicit_stop infix pat piped position prefix selected i_cmd
+        after explicit_stop infix pat piped position prefix selected cmd_verb
         )) {
         my $slot = $slot_name;
         *{$slot} = sub {
@@ -3552,10 +3552,10 @@ sub _handle_rc_recall_command {
         #      thing if nothing following.
         my $new_i = $minus ? ( $#hist - ( $arg || 1 ) ) : ( $arg || $#hist );
 
-        $self->i_cmd($new_i);
+        $self->cmd_verb($new_i);
 
         # Pick out the command desired.
-        $DB::cmd = $hist[$self->i_cmd];
+        $DB::cmd = $hist[$self->cmd_verb];
 
         # Print the command to be executed and restart the loop
         # with that command in the buffer.
@@ -3579,7 +3579,7 @@ sub _handle_rc_search_history_command {
         # Toss off last entry if length is >1 (and it always is).
         pop(@hist) if length($DB::cmd) > 1;
 
-        my $i = $self->i_cmd;
+        my $i = $self->cmd_verb;
 
         # Look backward through the history.
         SEARCH_HIST:
@@ -3588,9 +3588,9 @@ sub _handle_rc_search_history_command {
             last SEARCH_HIST if $hist[$i] =~ /$pat/;
         }
 
-        $self->i_cmd($i);
+        $self->cmd_verb($i);
 
-        if ( !$self->i_cmd ) {
+        if ( !$self->cmd_verb ) {
 
             # Never found it.
             print $OUT "No such command!\n\n";
@@ -3598,7 +3598,7 @@ sub _handle_rc_search_history_command {
         }
 
         # Found it. Put it in the buffer, print it, and process it.
-        $DB::cmd = $hist[$self->i_cmd];
+        $DB::cmd = $hist[$self->cmd_verb];
         print $OUT $DB::cmd, "\n";
         redo CMD;
     }
@@ -3637,7 +3637,7 @@ sub _handle_H_command {
             unless $hist[$i] =~ /^.?$/;
         }
 
-        $self->i_cmd($i);
+        $self->cmd_verb($i);
 
         next CMD;
     }
