@@ -1969,16 +1969,16 @@ sub _DB__handle_y_command {
 sub _DB__handle_c_command {
     my ($obj) = @_;
 
-    if (my ($new_verb) = $cmd =~ m#\Ac\b\s*([\w:]*)\s*\z#) {
+    my $i = $obj->cmd_args;
 
-        $obj->cmd_verb($new_verb);
+    if ($i =~ m#\A[\w:]*\z#) {
 
         # Hey, show's over. The debugged program finished
         # executing already.
         next CMD if _DB__is_finished();
 
         # Capture the place to put a one-time break.
-        $subname = $obj->cmd_verb;
+        $subname = $i;
 
         #  Probably not needed, since we finish an interactive
         #  sub-session anyway...
@@ -2001,13 +2001,13 @@ sub _DB__handle_c_command {
             # to where the subroutine is defined; we call find_sub,
             # break up the return value, and assign it in one
             # operation.
-            ( $file, $new_verb ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
+            ( $file, $i ) = ( find_sub($subname) =~ /^(.*):(.*)$/ );
 
             # Force the line number to be numeric.
-            $obj->cmd_verb($new_verb + 0);
+            $i = $i + 0;
 
             # If we got a line number, we found the sub.
-            if ($obj->cmd_verb) {
+            if ($i) {
 
                 # Switch all the debugger's internals around so
                 # we're actually working with that file.
@@ -2020,12 +2020,12 @@ sub _DB__handle_c_command {
                 # Scan forward to the first executable line
                 # after the 'sub whatever' line.
                 $max = $#dbline;
-                my $_line_num = $obj->cmd_verb;
+                my $_line_num = $i;
                 while ($dbline[$_line_num] == 0 && $_line_num< $max)
                 {
                     $_line_num++;
                 }
-                $obj->cmd_verb($_line_num);
+                $i = $_line_num;
             } ## end if ($i)
 
             # We didn't find a sub by that name.
@@ -2056,22 +2056,22 @@ sub _DB__handle_c_command {
         # On the gripping hand, we can't do anything unless the
         # current value of $i points to a valid breakable line.
         # Check that.
-        if ($obj->cmd_verb) {
+        if ($i) {
 
             # Breakable?
-            if ( $dbline[$obj->cmd_verb] == 0 ) {
-                print $OUT "Line " . $obj->cmd_verb . " not breakable.\n";
+            if ( $dbline[$i] == 0 ) {
+                print $OUT "Line $i not breakable.\n";
                 next CMD;
             }
 
             # Yes. Set up the one-time-break sigil.
-            $dbline{$obj->cmd_verb} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
-            _enable_breakpoint_temp_enabled_status($filename, $obj->cmd_verb);
+            $dbline{$i} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
+            _enable_breakpoint_temp_enabled_status($filename, $i);
         } ## end if ($i)
 
         # Turn off stack tracing from here up.
-        for my $i (0 .. $stack_depth) {
-            $stack[ $i ] &= ~1;
+        for my $j (0 .. $stack_depth) {
+            $stack[ $j ] &= ~1;
         }
         last CMD;
     }
@@ -3538,7 +3538,9 @@ sub _handle_w_command {
 }
 
 sub _handle_W_command {
-    if (my ($arg) = $DB::cmd =~ /\AW\b\s*(.*)/s) {
+    my $self = shift;
+
+    if (my $arg = $self->cmd_args) {
         DB::cmd_W( 'W', $arg );
         next CMD;
     }
