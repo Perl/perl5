@@ -1848,9 +1848,9 @@ sub _DB__trim_command_and_return_first_component {
 }
 
 sub _DB__handle_f_command {
-    if (($file) = $cmd =~ /\Af\b\s*(.*)/) {
-        $file =~ s/\s+$//;
+    my ($obj) = @_;
 
+    if ($file = $obj->cmd_args) {
         # help for no arguments (old-style was return from sub).
         if ( !$file ) {
             print $OUT
@@ -3481,7 +3481,7 @@ sub _n_or_s {
     if ($DB::cmd eq $letter) {
         $self->_n_or_s_commands_generic($new_val);
     }
-    elsif ($DB::cmd =~ m#\A\Q$letter\E\b#) {
+    else {
         $self->_n_or_s_and_arg_commands_generic($letter, $new_val);
     }
 
@@ -3673,9 +3673,10 @@ sub _handle_p_command {
     if ($DB::cmd eq 'p') {
         $DB::cmd = $print_cmd . '$_';
     }
-
-    # p - print the given expression.
-    $DB::cmd =~ s/\Ap\b/$print_cmd /;
+    else {
+        # p - print the given expression.
+        $DB::cmd =~ s/\Ap\b/$print_cmd /;
+    }
 
     return;
 }
