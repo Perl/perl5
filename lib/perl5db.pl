@@ -3510,6 +3510,7 @@ sub _handle_s_command {
 
 sub _handle_r_command {
     my $self = shift;
+
     # r - return from the current subroutine.
     if ($self->_is_full('r')) {
 
@@ -3772,7 +3773,7 @@ sub _handle_source_command {
     my $self = shift;
 
     # source - read commands from a file (or pipe!) and execute.
-    if (my ($sourced_fn) = $DB::cmd =~ /\Asource\s+(.*\S)/) {
+    if (my $sourced_fn = $self->cmd_args) {
         if ( open my $fh, $sourced_fn ) {
 
             # Opened OK; stick it in the list of file handles.
@@ -3830,7 +3831,7 @@ sub _handle_enable_disable_commands {
 sub _handle_save_command {
     my $self = shift;
 
-    if (my ($new_fn) = $DB::cmd =~ /\Asave\s*(.*)\z/) {
+    if (my $new_fn = $self->cmd_args) {
         my $filename = $new_fn || '.perl5dbrc';    # default?
         if ( open my $fh, '>', $filename ) {
 
