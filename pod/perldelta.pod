@@ -77,6 +77,12 @@ L<perlrecharclass/Bracketed Character Classes>.  Note that a bug [perl
 #89774], now fixed as part of this change, prevented the previous
 behavior from working fully.
 
+=head2 Change to Warnings About Lexical Subroutines
+
+The warnings category for lexical subroutines is now
+"experimental::lexical_subs", with two colons, not
+"experimental:lexical_subs";
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.  In
@@ -136,6 +142,13 @@ C<shortmess()> functions are now documented.
 L<ExtUtils::CBuilder> has been upgraded from version 0.280208 to 0.280209.  A
 list of symbols to export can now be passed to C<link()> when on Windows, as on
 other OSes [perl #115100].
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.17 to 1.18.  A
+space-separated list of patterns return long lists of results no longer
+results in memory corruption or crashes.  This bug was introduced in Perl
+5.16.0.  [perl #114984]
 
 =back
 
@@ -220,7 +233,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The error produced when a module cannot be loaded now includes a hint that
+the module may need to be installed: "Can't locate hopping.pm in @INC (you
+may need to install the hopping module) (@INC contains: ...)"
 
 =back
 
@@ -233,13 +248,13 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<h2xs>
 
 =over 4
 
 =item *
 
-XXX
+F<h2xs> no longer produces invalid code for empty defines.  [perl #20636]
 
 =back
 
@@ -306,9 +321,9 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item MPE/IX
 
-XXX
+Support for MPE/IX has been removed.
 
 =back
 
@@ -343,6 +358,34 @@ Case-insensitive matching inside a [bracketed] character class with a
 multi-character fold, no longer excludes one of the possibilities in the
 circumstances that it used to. [perl #89774].
 
+=item *
+
+C<PL_formfeed> has been removed.
+
+=item *
+
+The regular expression engine no longer reads one byte past the end of the
+target string.  While for all internally well-formed scalars this should
+never have been a problem, this change facilitates clever tricks with
+string buffers in CPAN modules.  [perl #73542]
+
+=item *
+
+Inside a BEGIN block, C<PL_compcv> now points to the currently-compiling
+subroutine, rather than the BEGIN block itself.
+
+=item *
+
+C<mg_length> has been deprecated.
+
+=item *
+
+C<sv_len> now always returns a byte count and C<sv_len_utf8> a character
+count.  Previously, C<sv_len> and C<sv_len_utf8> were both buggy and would
+sometimes returns bytes and sometimes characters.  C<sv_len_utf8> no longer
+assumes that its argument is in UTF8.  Neither of these creates UTF8 caches
+for tied or overloaded values or for non-PVs any more.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -358,6 +401,107 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 A bug, case-insensitive regex with UTF8-flagged strings, introduced
 earlier in the 5.17 series has been fixed.  [perl #114982]
+
+=item *
+
+Attributes applied to lexical variables no longer leak memory.
+[perl #114764]
+
+=item *
+
+C<dump>, C<goto>, C<last>, C<next>, C<redo> or C<require> followed by a
+bareword (or version) and then an infix operator is no longer a syntax
+error.  It used to be for those infix operators (like C<+>) that have a
+different meaning where a term is expected.  [perl #105924]
+
+=item *
+
+C<require a::b . 1> and C<require a::b + 1> no longer produce erroneous
+ambiguity warnings.  [perl #107002]
+
+=item *
+
+Class method calls are now allowed on any string, and not just strings
+beginning with an alphanumeric character.  [perl #105922]
+
+=item *
+
+An empty pattern created with C<qr//> used in C<m///> no longer triggers
+the "empty pattern reuses last pattern" behaviour.  C<s///> has not yet
+been fixed.  [perl #96230]
+
+XXX There is no reason s/// should not be fixed before 5.17.5.  Nag sprout.
+
+=item *
+
+Tying a hash during iteration no longer results in a memory leak.
+
+=item *
+
+Freeing a tied hash during iteration no longer results in a memory leak.
+
+=item *
+
+List assignment to a tied array or hash that dies on STORE no longer
+results in a memory leak.
+
+=item *
+
+If the hint hash (C<%^H>) is tied, compile-time scope entry (which copies
+the hint hash) no longer leaks memory if FETCH dies.  [perl #107000]
+
+=item *
+
+Constant folding no longer inappropriately triggers the special
+C<split " "> behaviour.  [perl #94490]
+
+=item *
+
+C<defined scalar(@array)>, C<defined do { &foo }>, and similar constructs
+now treat the argument to C<defined> as a simple scalar.  [perl #97466]
+
+=item *
+
+Running a custom debugging that defines no C<*DB::DB> glob or provides a
+subroutine stub for C<&DB::DB> no longer results in a crash, but an error
+instead.  [perl #114990]
+
+=item *
+
+C<reset ""> now matches its documentation.  C<reset> only resets C<m?...?>
+patterns when called with no argument.  An empty string for an argument now
+does nothing.  (It used to be treated as no argument.)  [perl #97958]
+
+=item *
+
+C<printf> with an argument returning an empty list no longer reads past the
+end of the stack, resulting in erratic behaviour.  [perl #77094]
+
+=item *
+
+C<--subname> no longer produces erroneous ambiguity warnings.
+[perl #77240]
+
+=item *
+
+C<v10> is now allowed as a label or package name.  This was inadvertently
+broken when v-strings were added in Perl 5.6.  [perl #56880]
+
+=item *
+
+A regression introduced in 5.17.2 has been fixed, which made C</[\@\\]||/>
+result in a "panic" error.  [perl #115050]
+
+=item *
+
+C<length>, C<pos>, C<substr> and C<sprintf> could be confused by ties,
+overloading, references and typeglobs if the stringification of such
+changed the internal representation to or from UTF8.  [perl #114410]
+
+=item *
+
+utf8::encode now calls FETCH and STORE on tied variables.  utf8::decode now
+calls STORE (it was already calling FETCH).
 
 =back
 
