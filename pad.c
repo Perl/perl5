@@ -2022,6 +2022,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     PL_comppad_name = protopad_name;
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
     CvPADLIST(cv)->xpadl_id = protopadlist->xpadl_id;
+    PadlistNAMECNT(CvPADLIST(cv)) = PadlistNAMECNT(protopadlist);
 
     av_fill(PL_comppad, fpad);
 
