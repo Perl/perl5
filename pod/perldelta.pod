@@ -1,5 +1,10 @@
 =encoding utf8
 
+=for comment
+A Windows-specific commit that may need mention (does this have any
+user-visible effects?):
+0c38a57 Remove exports of dummy set[ug]id functions on Windows
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
@@ -134,6 +139,53 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.17 to 1.18.  It no longer
+dies when deparsing C<sort> without arguments.  It now correctly omits the
+comma for C<system $prog @args> and C<exec $prog @args>.
+
+=item *
+
+L<bignum>, L<bigint> and L<bigrat> have been upgraded from version 0.30 to
+0.31.  The overrides for C<hex> and C<oct> have been rewritten, eliminating
+several problems, and making one incompatible change:
+
+=over
+
+=item *
+
+Formerly, whichever of C<use bigint> or C<use bigrat> was compiled later
+would take precedence over the other, causing C<hex> and C<oct> not to
+respect the other pragma when in scope.
+
+=item *
+
+Using any of these three pragmata would cause C<hex> and C<oct> anywhere
+else in the program to evalute their arguments in list context and prevent
+them from inferring $_ when called without arguments.
+
+=item *
+
+Using any of these three pragmata would make C<oct("1234")> return 1234
+(for any number not beginning with 0) anywhere in the program.  Now "1234"
+is translated from octal to decimal, whether within the pragma's scope or
+not.
+
+=item *
+
+The global overrides that facilitate lexical use of C<hex> and C<oct> now
+respect any existing overrides that were in place before the new overrides
+were installed, falling back to them outside of the scope of C<use bignum>.
+
+=item *
+
+C<use bignum "hex">, C<use bignum "oct"> and similar invocations for bigint
+and bigrat now export a C<hex> or C<oct> function, instead of providing a
+global override.
+
+=back
+
+=item *
+
 L<Carp> has been upgraded from version 1.26 to 1.27.  The C<longmess()> and
 C<shortmess()> functions are now documented.
 
@@ -149,6 +201,13 @@ L<File::Glob> has been upgraded from version 1.17 to 1.18.  A
 space-separated list of patterns return long lists of results no longer
 results in memory corruption or crashes.  This bug was introduced in Perl
 5.16.0.  [perl #114984]
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.15 to 0.16.  This is
+the module implementing the ":encoding(...)" I/O layer.  It no longer
+corrupts memory or crashes when the encoding back-end reallocates the
+buffer or gives it a typeglob or shared hash key scalar.
 
 =back
 
@@ -386,6 +445,24 @@ sometimes returns bytes and sometimes characters.  C<sv_len_utf8> no longer
 assumes that its argument is in UTF8.  Neither of these creates UTF8 caches
 for tied or overloaded values or for non-PVs any more.
 
+=item *
+
+C<sv_mortalcopy> now copies string buffers of shared hash key scalars when
+called from XS modules [perl #79824].
+
+=item *
+
+C<RXf_SPLIT> and C<RXf_SKIPWHITE> are no longer used.  They are now
+#defined as 0.
+
+=item *
+
+The new C<RXf_MODIFIES_VARS> flag can be set by custom regular expression
+engines to indicate that the execution of the regular expression may cause
+variables to be modified.  This lets C<s///> know to skip certain
+optimisations.  Perl's own regular expression engine sets this flag for the
+special backtracking verbs that set $REGMARK and $REGERROR.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -502,6 +579,64 @@ changed the internal representation to or from UTF8.  [perl #114410]
 
 utf8::encode now calls FETCH and STORE on tied variables.  utf8::decode now
 calls STORE (it was already calling FETCH).
+
+=item *
+
+C<$tied =~ s/$non_utf8/$utf8/> no longer loops infinitely if the tied
+variable returns a Latin-1 string, shared hash key scalar, or reference or
+typeglob that stringifies as ASCII or Latin-1.  This is a regression from
+5.12.x.
+
+=item *
+
+C<s///> without /e is now better at detecting when it needs to forego
+certain optimisations, fixing some buggy cases:
+
+=over
+
+=item *
+
+Match variables in certain constructs (C<&&>, C<||>, C<..> and others) in
+the replacement part; e.g., C<s/(.)/$l{$a||$1}/g>.  [perl #26986]
+
+=item *
+
+Aliases to match variables in the replacement.
+
+=item *
+
+$REGERROR or $REGMARK in the replacement.  [perl #49190]
+
+=item *
+
+An empty pattern (C<s//$foo/>) that causes the last-successful pattern to
+be used, when that pattern contains code blocks that modify the variables
+in the replacement.
+
+=back
+
+=item *
+
+The taintedness of the replacement string no longer affects the taintedness
+of the return value of C<s///e>.
+
+=item *
+
+The C<$|> autoflush variable is created on-the-fly when needed.  If this
+happened (e.g., if it was mentioned in a module or eval) when the
+currently-selected filehandle was a typeglob with an empty IO slot, it used
+to crash.  [perl #115206]
+
+=item *
+
+Line numbers at the end of a string eval are no longer off by one.
+[perl #114658]
+
+=item *
+
+@INC filters (subroutines returned by subroutines in @INC) that set $_ to a
+copy-on-write scalar no longer cause the parser to modify that string
+buffer in place.
 
 =back
 
