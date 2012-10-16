@@ -11,7 +11,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 22;
+use Test::More tests => 24;
 
 my $grk = "grk$$";
 my $utf = "utf$$";
@@ -160,6 +160,35 @@ $buf = "Sheila surely shod Sean\nin shoddy shoes.\n";
 open $fh, "<:encoding(extensive)", \$buf;
 is join("", <$fh>), "Sheila surely shod Sean\nin shoddy shoes.\n",
    'buffer realloc during decoding';
+
+package Cower {
+ @ISA = Encode::Encoding;
+ __PACKAGE__->Define('cower');
+ sub encode($$;$) {
+  my ($self,$buf,$chk) = @_;
+  my $leftovers = '';
+  if ($buf =~ /(.*\n)(?!\z)/) {
+    $buf = $1;
+    $leftovers = $';
+  }
+  if ($chk) {
+   no warnings; # stupid @_[1] warning
+   @_[1] = keys %{{$leftovers=>1}}; # shared hash key (copy-on-write)
+  }
+  $buf;
+ }
+ no warnings 'once'; 
+ *decode = *encode;
+}
+open $fh, ">:encoding(cower)", \$buf;
+$fh->autoflush;
+print $fh $_ for qw "pumping plum pits";
+close $fh;
+is $buf, "pumpingplumpits", 'cowing buffer during encoding';
+$buf = "pumping\nplum\npits\n";
+open $fh, "<:encoding(cower)", \$buf;
+is join("", <$fh>), "pumping\nplum\npits\n",
+  'cowing buffer during decoding';
 
 package Globber {
  no warnings 'once';

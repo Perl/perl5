@@ -341,6 +341,8 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	SPAGAIN;
 	uni = POPs;
 	PUTBACK;
+	/* No cows allowed. */
+	if (SvTHINKFIRST(e->dataSV)) SvPV_force_nolen(e->dataSV);
 	/* Now get translated string (forced to UTF-8) and use as buffer */
 	if (SvPOK(uni)) {
 	    s = SvPVutf8(uni, len);
