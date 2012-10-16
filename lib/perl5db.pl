@@ -1920,7 +1920,7 @@ sub _DB__handle_y_command {
     my ($obj) = @_;
 
     if (my ($match_level, $match_vars)
-        = $cmd =~ /^y(?:\s+(\d*)\s*(.*))?$/) {
+        = $obj->cmd_args =~ /\A(?:(\d*)\s*(.*))?\z/) {
 
         # See if we've got the necessary support.
         if (!eval { require PadWalker; PadWalker->VERSION(0.08) }) {
@@ -3343,7 +3343,11 @@ number information, and print that.
 }
 
 sub _handle_t_command {
-    if (my ($levels) = $DB::cmd =~ /\At(?:\s+(\d+))?\z/) {
+    my $self = shift;
+
+    my $levels = $self->cmd_args();
+
+    if ((!length($levels)) or ($levels !~ /\D/)) {
         $trace ^= 1;
         local $\ = '';
         $DB::trace_to_depth = $levels ? $stack_depth + $levels : 1E9;
@@ -3540,10 +3544,10 @@ sub _handle_T_command {
 }
 
 sub _handle_w_command {
-    if (my ($arg) = $DB::cmd =~ /\Aw\b\s*(.*)/s) {
-        DB::cmd_w( 'w', $arg );
-        next CMD;
-    }
+    my $self = shift;
+
+    DB::cmd_w( 'w', $self->cmd_args() );
+    next CMD;
 
     return;
 }
