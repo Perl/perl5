@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef H_UTF8      /* Guard against recursive inclusion */
+#define H_UTF8 1
+
 /* Use UTF-8 as the default script encoding?
  * Turning this on will break scripts having non-UTF-8 binary
  * data (such as Latin-1) in string literals. */
@@ -513,6 +516,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #else
 #   define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
 #endif
+
+#endif /* H_UTF8 */
 
 /*
  * Local variables:
