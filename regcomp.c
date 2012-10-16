@@ -10274,7 +10274,7 @@ tryagain:
 	    goto finish_meta_pat;
 	case 'R':
 	    ret = reg_node(pRExC_state, LNBREAK);
-	    *flagp |= HASWIDTH|SIMPLE;
+	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
 	case 'h':
 	    ret = reg_node(pRExC_state, HORIZWS);

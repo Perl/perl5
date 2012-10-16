@@ -7022,25 +7022,8 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	}
 	break;
     case LNBREAK:
-        if (utf8_target) {
-	    loceol = PL_regeol;
-	    while (hardcount < max && scan < loceol &&
-                    (c=is_LNBREAK_utf8_safe(scan, loceol))) {
-		scan += c;
-		hardcount++;
-	    }
-	} else {
-	    /*
-	      LNBREAK can match two latin chars, which is ok,
-	      because we have a null terminated string, but we
-	      have to use hardcount in this situation
-	    */
-	    while (scan < loceol && (c=is_LNBREAK_latin1_safe(scan, loceol))) {
-		scan+=c;
-		hardcount++;
-	    }
-	}	
-	break;
+        Perl_croak(aTHX_ "panic: regrepeat() should not be called with non-simple: LNBREAK");
+        assert(0); /* NOTREACHED */
     case HORIZWS:
         if (utf8_target) {
 	    loceol = PL_regeol;
