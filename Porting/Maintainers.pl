@@ -106,7 +106,7 @@ use File::Glob qw(:case);
     GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
     MANIFEST MANIFEST.SKIP META.yml MYMETA.yml META.json MYMETA.json
     NEW NOTES perlcritic.rc ppport.h README README.PATCHING SIGNATURE
-    THANKS TODO Todo VERSION WHATSNEW
+    THANKS TODO Todo VERSION WHATSNEW CONTRIBUTING
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
@@ -971,7 +971,7 @@ use File::Glob qw(:case);
 
     'HTTP::Tiny' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.022.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.024.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             't/00-report-prereqs.t',
