@@ -41,7 +41,7 @@ Release schedule (with release managers):
   2011-05-14  5.14.0 (final)  Jesse Vincent
   2011-06-16  5.14.1 ✓        Jesse Vincent
   2011-09-14  5.14.2 ✓        Florian Ragwitz
-  2012-10-??  5.14.3          Dominic Hargreaves
+  2012-10-12  5.14.3 ✓        Dominic Hargreaves
   ????-??-??  5.14.4          ??
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
