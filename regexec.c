@@ -6579,6 +6579,8 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	scan = loceol;
 	break;
     case EXACT:
+        assert(STR_LEN(p) == (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1);
+
 	c = (U8)*STRING(p);
 
         /* Can use a simple loop if the pattern char to match on is invariant
@@ -6656,13 +6658,14 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     case EXACTFU:
 	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
-    do_exactf:
-	c = (U8)*STRING(p);
+    do_exactf: {
+        int c1, c2;
+        U8 c1_utf8[UTF8_MAXBYTES+1], c2_utf8[UTF8_MAXBYTES+1];
 
-	if (utf8_target
-            || OP(p) == EXACTFU_SS
-            || (UTF_PATTERN && ! UTF8_IS_INVARIANT(c)))
-        {
+        assert(STR_LEN(p) == (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1);
+
+        if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8)) {
+            if (c1 == CHRTEST_VOID) {
             /* Use full Unicode fold matching */
 	    char *tmpeol = loceol;
             STRLEN pat_len = (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1;
@@ -6674,38 +6677,41 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 		tmpeol = loceol;
 		hardcount++;
 	    }
-
-	    /* XXX Note that the above handles properly the German sharp s in
-	     * the pattern matching ss in the string.  But it doesn't handle
-	     * properly cases where the string contains say 'LIGATURE ff' and
-	     * the pattern is 'f+'.  This would require, say, a new function or
-	     * revised interface to foldEQ_utf8(), in which the maximum number
-	     * of characters to match could be passed and it would return how
-	     * many actually did.  This is just one of many cases where
-	     * multi-char folds don't work properly, and so the fix is being
-	     * deferred */
-	}
-	else {
-	    U8 folded;
-
-            /* Here, the string isn't utf8; and either the pattern isn't utf8
-             * or c is an invariant, so its utf8ness doesn't affect c.  Can
-             * just do simple comparisons for exact or fold matching. */
-	    switch (OP(p)) {
-		case EXACTF: folded = PL_fold[c]; break;
-		case EXACTFA:
-		case EXACTFU_TRICKYFOLD:
-		case EXACTFU: folded = PL_fold_latin1[c]; break;
-		case EXACTFL: folded = PL_fold_locale[c]; break;
-		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));
-	    }
-	    while (scan < loceol &&
-		   (UCHARAT(scan) == c || UCHARAT(scan) == folded))
-	    {
-		scan++;
-	    }
+            }
+            else if (utf8_target) {
+                if (c1 == c2) {
+                    while (hardcount < max
+                           && memEQ(scan, c1_utf8, UTF8SKIP(scan)))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                }
+                else {
+                    while (hardcount < max
+                           && (memEQ(scan, c1_utf8, UTF8SKIP(scan))
+                               || memEQ(scan, c2_utf8, UTF8SKIP(scan))))
+                    {
+                        scan += UTF8SKIP(scan);
+                        hardcount++;
+                    }
+                }
+            }
+            else if (c1 == c2) {
+                while (scan < loceol && UCHARAT(scan) == c1) {
+                    scan++;
+                }
+            }
+            else {
+                while (scan < loceol &&
+                    (UCHARAT(scan) == c1 || UCHARAT(scan) == c2))
+                {
+                    scan++;
+                }
+            }
 	}
 	break;
+    }
     case ANYOF:
 	if (utf8_target) {
 	    STRLEN inclasslen;
