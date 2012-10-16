@@ -18,6 +18,8 @@
 /* we don't want to include this stuff if we are inside of
    an external regex engine based on the core one - like re 'debug'*/
 
+#include "utf8.h"
+
 struct regnode {
     U8	flags;
     U8  type;
@@ -740,7 +742,7 @@ typedef struct regmatch_state {
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    I32 c1, c2;		/* case fold search */
+	    int c1, c2;		/* case fold search */
 	    CHECKPOINT cp;
 	    U32 lastparen;
 	    U32 lastcloseparen;
@@ -749,6 +751,8 @@ typedef struct regmatch_state {
 	    bool minmod;
 	    regnode *A, *B;	/* the nodes corresponding to /A*B/  */
 	    regnode *me;	/* the curlym node */
+            U8 c1_utf8[UTF8_MAXBYTES+1];  /* */
+            U8 c2_utf8[UTF8_MAXBYTES+1];
 	} curlym;
 
 	struct {
@@ -756,12 +760,14 @@ typedef struct regmatch_state {
 	    CHECKPOINT cp;
 	    U32 lastparen;
 	    U32 lastcloseparen;
-	    I32 c1, c2;		/* case fold search */
+	    int c1, c2;		/* case fold search */
 	    char *maxpos;	/* highest possible point in string to match */
 	    char *oldloc;	/* the previous locinput */
 	    int count;
 	    int min, max;	/* {m,n} */
 	    regnode *A, *B;	/* the nodes corresponding to /A*B/  */
+            U8 c1_utf8[UTF8_MAXBYTES+1];  /* */
+            U8 c2_utf8[UTF8_MAXBYTES+1];
 	} curly; /* and CURLYN/PLUS/STAR */
 
     } u;
