@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan (tests => 39);
+plan (tests => 41);
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
@@ -191,7 +191,12 @@ is($u, undef);
 
 my $uo = bless [], 'U';
 
-is(length($uo), undef, "Length of overloaded reference");
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
+    is(length($uo), 0, "Length of overloaded reference");
+    like $w, qr/uninitialized/, 'uninit warning for stringifying as undef';
+}
 
 my $ul = 3;
 is(($ul = length(undef)), undef, 
@@ -204,11 +209,14 @@ is(($ul = length($u)), undef,
 is($ul, undef, "Assigned length of tied undef with result in TARG");
 
 $ul = 3;
-is(($ul = length($uo)), undef,
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
+    is(($ul = length($uo)), 0,
                 "Returned length of overloaded undef with result in TARG");
-is($ul, undef, "Assigned length of overloaded undef with result in TARG");
-
-# ok(!defined $uo); Turns you can't test this. FIXME for pp_defined?
+    like $w, qr/uninitialized/, 'uninit warning for stringifying as undef';
+}    
+is($ul, 0, "Assigned length of overloaded undef with result in TARG");
 
 {
     my $y = "\x{100}BC";
