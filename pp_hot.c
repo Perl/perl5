@@ -2787,6 +2787,8 @@ try_autoload:
 		MARK++;
 	    }
 	}
+	else if (namecnt)
+	    DIE(aTHX_ "Can't call a sub with signatures using an inherited @_");
 	if ((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
 	    !CvLVALUE(cv))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
