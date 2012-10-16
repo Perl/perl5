@@ -2866,7 +2866,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
             /* Here, the pattern is not UTF-8.  Look for the multi-char folds
              * that are all ASCII.  As in the above case, EXACTFL and EXACTFA
              * nodes can't have multi-char folds to this range (and there are
-             * no existing ones to the upper latin1 range).  In the EXACTF
+             * no existing ones in the upper latin1 range).  In the EXACTF
              * case we look also for the sharp s, which can be in the final
              * position.  Otherwise we can stop looking 1 byte earlier because
              * have to find at least two characters for a multi-fold */
@@ -12762,9 +12762,10 @@ parseit:
                 /* Single character fold of above Latin1.  Add everything in
                  * its fold closure to the list that this node should match.
                  * The fold closures data structure is a hash with the keys
-                 * being every character that is folded to, like 'k', and the
-                 * values each an array of everything that folds to its key.
-                 * e.g. [ 'k', 'K', KELVIN_SIGN ] */
+                 * being the UTF-8 of every character that is folded to, like
+                 * 'k', and the values each an array of all code points that
+                 * fold to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ].
+                 * Multi-character folds are not included */
                 if ((listp = hv_fetch(PL_utf8_foldclosures,
                                       (char *) foldbuf, foldlen, FALSE)))
                 {

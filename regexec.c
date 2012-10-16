@@ -4648,7 +4648,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		/* This call case insensitively compares the entire buffer
 		    * at s, with the current input starting at locinput, but
 		    * not going off the end given by PL_regeol, and returns in
-		    * limit upon success, how much of the current input was
+		    * <limit> upon success, how much of the current input was
 		    * matched */
 		if (! foldEQ_utf8_flags(s, NULL, rex->offs[n].end - ln, utf8_target,
 				    locinput, &limit, 0, utf8_target, utf8_fold_flags))
