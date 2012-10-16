@@ -2727,6 +2727,7 @@ try_autoload:
 		UV saveclearval = SAVEt_CLEARSV;
 		SSCHECK(max + (I32)greedy);
 		if (items >= namecnt) {
+		    SvPADSTALE_off(PAD_SVl(namecnt));
 		    if (SvTYPE(PAD_SVl(namecnt)) < SVt_PVAV) {
 			sv_setsv(PAD_SVl(namecnt), source[namecnt-1]);
 			--max;
@@ -2734,7 +2735,6 @@ try_autoload:
 		    else if (SvTYPE(PAD_SVl(namecnt)) == SVt_PVAV) {
 			SV ** ary;
 			AV * const av = (AV *)PAD_SVl(namecnt);
-			SvPADSTALE_off(av);
 			av_extend(av, items - namecnt);
 			AvMAX(av) = items - namecnt;
 			AvFILLp(av) = items - namecnt;
@@ -2748,8 +2748,6 @@ try_autoload:
 		    }
 		    else if (SvTYPE(PAD_SVl(namecnt)) == SVt_PVHV) {
 			HV * const hv = MUTABLE_HV(PAD_SVl(namecnt));
-			SvPADSTALE_off(hv);
-			HvSHAREKEYS_off(hv);
 			if ((items - namecnt) % 2 == 0) {
 			    (void)hv_store_ent(hv, source[--items], newSV(0), 0);
 			    if (*MARK)
