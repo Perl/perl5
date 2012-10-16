@@ -2883,7 +2883,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
             const U8 s_masked = 's' & S_or_s_mask;
 
 	    while (s < upper) {
-                int len = is_MULTI_CHAR_FOLD_low_safe(s, s_end);
+                int len = is_MULTI_CHAR_FOLD_latin1_safe(s, s_end);
                 if (! len) {    /* Not a multi-char fold. */
                     if (*s == LATIN_SMALL_LETTER_SHARP_S && OP(scan) == EXACTF)
                     {

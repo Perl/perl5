@@ -694,12 +694,12 @@
 : 0 )
 
 /*
-	MULTI_CHAR_FOLD: multi-char ascii strings that are folded to by a single character
+	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
 	&regcharclass_multi_char_folds::multi_char_folds(0)
 */
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_low_safe(s,e)                                    \
+#define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( ( ((U8*)s)[0] & 0xDF ) == 0x46 ) ?                                  \
 	( ( ( ((U8*)s)[1] & 0xDF ) == 0x46 ) ?                              \

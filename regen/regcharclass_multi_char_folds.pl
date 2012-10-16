@@ -9,15 +9,19 @@ use Unicode::UCD "prop_invmap";
 # of the sequences of code points that are multi-character folds in the
 # current Unicode version.  If the parameter is 1, all such folds are
 # returned.  If the parameters is 0, only the ones containing exclusively
-# ASCII characters are returned.  In the latter case all combinations of ASCII
-# characters that can fold to the base one are returned.  Thus for 'ss', it
-# would return in addition, 'Ss', 'sS', and 'SS'.  This is because this code
-# is designed to help regcomp.c, and EXACTFish regnodes.  For non-UTF-8
-# patterns, the strings are not folded, so we need to check for the upper and
-# lower case versions.  For UTF-8 patterns, the strings are folded, so we only
-# need to worry about the fold version.  There are no non-ASCII Latin1
-# multi-char folds currently, and none likely to be ever added, so this
-# doesn't worry about that case, except to croak should it happen.
+# Latin1 characters are returned.  In the latter case all combinations of
+# Latin1 characters that can fold to the base one are returned.  Thus for
+# 'ss', it would return in addition, 'Ss', 'sS', and 'SS'.  This is because
+# this code is designed to help regcomp.c, and EXACTFish regnodes.  For
+# non-UTF-8 patterns, the strings are not folded, so we need to check for the
+# upper and lower case versions.  For UTF-8 patterns, the strings are folded,
+# so we only need to worry about the fold version.  There are no non-ASCII
+# Latin1 multi-char folds currently, and none likely to be ever added.  Thus
+# the output is the same as if it were just asking for ASCII characters, not
+# full Latin1.  Hence, it is suitable for generating things that match
+# EXACTFA.  It does check for and croak if there ever were to be an upper
+# Latin1 range multi-character fold.
+#
 # This is designed for input to regen/regcharlass.pl.
 
 sub gen_combinations ($;) {
