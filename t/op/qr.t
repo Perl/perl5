@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 19);
+plan(tests => 20);
 
 sub r {
     return qr/Good/;
@@ -63,3 +63,7 @@ like("$e", qr/\Stew=SCALAR\(0x[0-9a-f]+\)\z/);
 # [perl #96230] qr// should not have the reuse-last-pattern magic
 "foo" =~ /foo/;
 like "bar",qr//,'[perl #96230] =~ qr// does not reuse last successful pat';
+"foo" =~ /foo/;
+$_ = "bar";
+$_ =~ s/${qr||}/baz/;
+is $_, "bazbar", '[perl #96230] s/$qr// does not reuse last pat';

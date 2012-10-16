@@ -504,10 +504,7 @@ beginning with an alphanumeric character.  [perl #105922]
 =item *
 
 An empty pattern created with C<qr//> used in C<m///> no longer triggers
-the "empty pattern reuses last pattern" behaviour.  C<s///> has not yet
-been fixed.  [perl #96230]
-
-XXX There is no reason s/// should not be fixed before 5.17.5.  Nag sprout.
+the "empty pattern reuses last pattern" behaviour.  [perl #96230]
 
 =item *
 

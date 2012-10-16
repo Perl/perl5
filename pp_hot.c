@@ -2133,7 +2133,8 @@ PP(pp_subst)
 				   position, once with zero-length,
 				   second time with non-zero. */
 
-    if (!RX_PRELEN(rx) && PL_curpm) {
+    if (!RX_PRELEN(rx) && PL_curpm
+     && !((struct regexp *)SvANY(rx))->mother_re) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
