@@ -980,11 +980,9 @@ PP(pp_undef)
 	}
 	break;
     case SVt_PVGV:
-	if (SvFAKE(sv)) {
-	    SvSetMagicSV(sv, &PL_sv_undef);
-	    break;
-	}
-	else if (isGV_with_GP(sv)) {
+	assert(isGV_with_GP(sv));
+	assert(!SvFAKE(sv));
+	{
 	    GP *gp;
             HV *stash;
 
@@ -1022,7 +1020,6 @@ PP(pp_undef)
 
 	    break;
 	}
-	/* FALL THROUGH */
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)) {
 	    SvPV_free(sv);
