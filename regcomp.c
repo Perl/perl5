@@ -12618,10 +12618,9 @@ parseit:
                      * to force that */
                     if (! PL_utf8_tofold) {
                         U8 dummy[UTF8_MAXBYTES+1];
-                        STRLEN dummy_len;
 
                         /* This string is just a short named one above \xff */
-                        to_utf8_fold((U8*) HYPHEN_UTF8, dummy, &dummy_len);
+                        to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);
                         assert(PL_utf8_tofold); /* Verify that worked */
                     }
                     PL_utf8_foldclosures =
