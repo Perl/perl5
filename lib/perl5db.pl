@@ -2244,10 +2244,11 @@ sub _DB__handle_question_mark_command {
 sub _DB__handle_restart_and_rerun_commands {
     my ($obj) = @_;
 
+    my $cmd_cmd = $obj->cmd_verb;
+    my $cmd_params = $obj->cmd_args;
     # R - restart execution.
     # rerun - controlled restart execution.
-    if (my ($cmd_cmd, $cmd_params) =
-        $cmd =~ /\A((?:R)|(?:rerun\s*(.*)))\z/) {
+    if ($cmd_cmd eq 'rerun' or $cmd_params eq '') {
         my @args = ($cmd_cmd eq 'R' ? restart() : rerun($cmd_params));
 
         # Close all non-system fds for a clean restart.  A more
@@ -3797,9 +3798,10 @@ sub _handle_source_command {
 sub _handle_enable_disable_commands {
     my $self = shift;
 
-    if (my ($which_cmd, $position)
-        = $DB::cmd =~ /\A(enable|disable)\s+(\S+)\s*\z/) {
+    my $which_cmd = $self->cmd_verb;
+    my $position = $self->cmd_args;
 
+    if ($position !~ /\s/) {
         my ($fn, $line_num);
         if ($position =~ m{\A\d+\z})
         {
@@ -3923,14 +3925,8 @@ sub _handle_q_command {
 sub _handle_cmd_wrapper_commands {
     my $self = shift;
 
-    # All of these commands were remapped in perl 5.8.0;
-    # we send them off to the secondary dispatcher (see below).
-    if (my ($cmd_letter, $my_arg) = $DB::cmd =~ /\A([aAbBeEhilLMoOPvwW]\b)\s*(.*)/so) {
-        DB::cmd_wrapper( $cmd_letter, $my_arg, $line );
-        next CMD;
-    }
-
-    return;
+    DB::cmd_wrapper( $self->cmd_verb, $self->cmd_args, $line );
+    next CMD;
 }
 
 sub _handle_special_char_cmd_wrapper_commands {
