@@ -6666,17 +6666,18 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 
         if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8)) {
             if (c1 == CHRTEST_VOID) {
-            /* Use full Unicode fold matching */
-	    char *tmpeol = loceol;
-            STRLEN pat_len = (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1;
-	    while (hardcount < max
-		    && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
-                       STRING(p), NULL, pat_len, cBOOL(UTF_PATTERN), utf8_flags))
-	    {
-		scan = tmpeol;
-		tmpeol = loceol;
-		hardcount++;
-	    }
+                /* Use full Unicode fold matching */
+                char *tmpeol = loceol;
+                STRLEN pat_len = (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1;
+                while (hardcount < max
+                        && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
+                                             STRING(p), NULL, pat_len,
+                                             cBOOL(UTF_PATTERN), utf8_flags))
+                {
+                    scan = tmpeol;
+                    tmpeol = loceol;
+                    hardcount++;
+                }
             }
             else if (utf8_target) {
                 if (c1 == c2) {
