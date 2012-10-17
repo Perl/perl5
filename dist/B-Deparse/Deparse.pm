@@ -874,9 +874,10 @@ sub deparse_sub {
 Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
-    if ($cv->PADLIST->NAMECNT) {
+    my $padlist = $cv->PADLIST;
+    if ($padlist->isa("B::PADLIST") && $padlist->NAMECNT) {
 	$proto = "("
-	    . join(", ", map { $cv->PADLIST->ARRAYelt(0)->ARRAYelt($_)->PV } 1 .. $cv->PADLIST->NAMECNT)
+	    . join(", ", map { $padlist->ARRAYelt(0)->ARRAYelt($_)->PV } 1 .. $padlist->NAMECNT)
 	    . ")";
 	if ($cv->FLAGS & SVf_POK) {
 		$proto .= " : proto(" . $cv->PV . ") ";
