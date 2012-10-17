@@ -1925,7 +1925,7 @@ sub _DB__handle_y_command {
         # See if we've got the necessary support.
         if (!eval { require PadWalker; PadWalker->VERSION(0.08) }) {
             my $Err = $@;
-            DB::warn(
+            _db_warn(
                 $Err =~ /locate/
                 ? "PadWalker module not found - please install\n"
                 : $Err
@@ -1948,7 +1948,7 @@ sub _DB__handle_y_command {
         # Oops. Can't find it.
         if (my $Err = $@) {
             $Err =~ s/ at .*//;
-            DB::warn($Err);
+            _db_warn($Err);
             next CMD;
         }
 
@@ -2287,14 +2287,14 @@ sub _DB__handle_run_command_in_pager_command {
 
             # Default pager is into a pipe. Redirect I/O.
             open( SAVEOUT, ">&STDOUT" )
-            || DB::warn("Can't save STDOUT");
+            || _db_warn("Can't save STDOUT");
             open( STDOUT, ">&OUT" )
-            || DB::warn("Can't redirect STDOUT");
+            || _db_warn("Can't redirect STDOUT");
         } ## end if ($pager =~ /^\|/)
         else {
 
             # Not into a pipe. STDOUT is safe.
-            open( SAVEOUT, ">&OUT" ) || DB::warn("Can't save DB::OUT");
+            open( SAVEOUT, ">&OUT" ) || _db_warn("Can't save DB::OUT");
         }
 
         # Fix up environment to record we have less if so.
@@ -2303,21 +2303,21 @@ sub _DB__handle_run_command_in_pager_command {
         unless ( $obj->piped(scalar ( open( OUT, $pager ) ) ) ) {
 
             # Couldn't open pipe to pager.
-            DB::warn("Can't pipe output to '$pager'");
+            _db_warn("Can't pipe output to '$pager'");
             if ( $pager =~ /^\|/ ) {
 
                 # Redirect I/O back again.
                 open( OUT, ">&STDOUT" )    # XXX: lost message
-                || DB::warn("Can't restore DB::OUT");
+                || _db_warn("Can't restore DB::OUT");
                 open( STDOUT, ">&SAVEOUT" )
-                || DB::warn("Can't restore STDOUT");
+                || _db_warn("Can't restore STDOUT");
                 close(SAVEOUT);
             } ## end if ($pager =~ /^\|/)
             else {
 
                 # Redirect I/O. STDOUT already safe.
                 open( OUT, ">&STDOUT" )    # XXX: lost message
-                || DB::warn("Can't restore DB::OUT");
+                || _db_warn("Can't restore DB::OUT");
             }
             next CMD;
         } ## end unless ($piped = open(OUT,...
@@ -2395,9 +2395,9 @@ sub _DB__at_end_of_every_command {
 
             # Reopen filehandle for our output (if we can) and
             # restore STDOUT (if we can).
-            open( OUT, ">&STDOUT" ) || DB::warn("Can't restore DB::OUT");
+            open( OUT, ">&STDOUT" ) || _db_warn("Can't restore DB::OUT");
             open( STDOUT, ">&SAVEOUT" )
-            || DB::warn("Can't restore STDOUT");
+            || _db_warn("Can't restore STDOUT");
 
             # Turn off pipe exception handler if necessary.
             $SIG{PIPE} = "DEFAULT" if $SIG{PIPE} eq \&DB::catch;
@@ -2408,7 +2408,7 @@ sub _DB__at_end_of_every_command {
         else {
 
             # Non-piped "pager". Just restore STDOUT.
-            open( OUT, ">&SAVEOUT" ) || DB::warn("Can't restore DB::OUT");
+            open( OUT, ">&SAVEOUT" ) || _db_warn("Can't restore DB::OUT");
         }
 
         # Close filehandle pager was using, restore the normal one
@@ -3787,7 +3787,7 @@ sub _handle_source_command {
         else {
 
             # Couldn't open it.
-            DB::warn("Can't execute '$sourced_fn': $!\n");
+            DB::_db_warn("Can't execute '$sourced_fn': $!\n");
         }
         next CMD;
     }
@@ -3814,7 +3814,7 @@ sub _handle_enable_disable_commands {
         }
         else
         {
-            DB::warn("Wrong spec for enable/disable argument.\n");
+            DB::_db_warn("Wrong spec for enable/disable argument.\n");
         }
 
         if (defined($fn)) {
@@ -3824,7 +3824,7 @@ sub _handle_enable_disable_commands {
                 );
             }
             else {
-                DB::warn("No breakpoint set at ${fn}:${line_num}\n");
+                DB::_db_warn("No breakpoint set at ${fn}:${line_num}\n");
             }
         }
 
@@ -3849,7 +3849,7 @@ sub _handle_save_command {
             print "commands saved in $filename\n";
         }
         else {
-            DB::warn("Can't save debugger commands in '$new_fn': $!\n");
+            DB::_db_warn("Can't save debugger commands in '$new_fn': $!\n");
         }
         next CMD;
     }
@@ -6543,24 +6543,24 @@ sub system {
 
     # We save, change, then restore STDIN and STDOUT to avoid fork() since
     # some non-Unix systems can do system() but have problems with fork().
-    open( SAVEIN,  "<&STDIN" )  || DB::warn("Can't save STDIN");
-    open( SAVEOUT, ">&STDOUT" ) || DB::warn("Can't save STDOUT");
-    open( STDIN,   "<&IN" )     || DB::warn("Can't redirect STDIN");
-    open( STDOUT,  ">&OUT" )    || DB::warn("Can't redirect STDOUT");
+    open( SAVEIN,  "<&STDIN" )  || db_warn("Can't save STDIN");
+    open( SAVEOUT, ">&STDOUT" ) || db_warn("Can't save STDOUT");
+    open( STDIN,   "<&IN" )     || db_warn("Can't redirect STDIN");
+    open( STDOUT,  ">&OUT" )    || db_warn("Can't redirect STDOUT");
 
     # XXX: using csh or tcsh destroys sigint retvals!
     system(@_);
-    open( STDIN,  "<&SAVEIN" )  || DB::warn("Can't restore STDIN");
-    open( STDOUT, ">&SAVEOUT" ) || DB::warn("Can't restore STDOUT");
+    open( STDIN,  "<&SAVEIN" )  || db_warn("Can't restore STDIN");
+    open( STDOUT, ">&SAVEOUT" ) || db_warn("Can't restore STDOUT");
     close(SAVEIN);
     close(SAVEOUT);
 
     # most of the $? crud was coping with broken cshisms
     if ( $? >> 8 ) {
-        DB::warn( "(Command exited ", ( $? >> 8 ), ")\n" );
+        db_warn( "(Command exited ", ( $? >> 8 ), ")\n" );
     }
     elsif ($?) {
-        DB::warn(
+        db_warn(
             "(Command died of SIG#",
             ( $? & 127 ),
             ( ( $? & 128 ) ? " -- core dumped" : "" ),
@@ -7407,12 +7407,14 @@ assumptions about what filehandles are available.
 
 =cut
 
-sub warn {
+sub _db_warn {
     my ($msg) = join( "", @_ );
     $msg .= ": $!\n" unless $msg =~ /\n$/;
     local $\ = '';
     print $OUT $msg;
 } ## end sub warn
+
+*warn = \&_db_warn;
 
 =head1 INITIALIZATION TTY SUPPORT
 
@@ -7435,7 +7437,7 @@ sub reset_IN_OUT {
 
     # This term can't get a new tty now. Better luck later.
     elsif ($term) {
-        DB::warn("Too late to set IN/OUT filehandles, enabled on next 'R'!\n");
+        _db_warn("Too late to set IN/OUT filehandles, enabled on next 'R'!\n");
     }
 
     # Set the filehndles up as they were.
@@ -7500,7 +7502,9 @@ sub TTY {
 
     # Terminal doesn't support new TTY, or doesn't support readline.
     # Can't do it now, try restarting.
-    DB::warn("Too late to set TTY, enabled on next 'R'!\n") if $term and @_;
+    if ($term and @_) {
+        _db_warn("Too late to set TTY, enabled on next 'R'!\n");
+    }
 
     # Useful if done through PERLDB_OPTS:
     $console = $tty = shift if @_;
@@ -7519,7 +7523,7 @@ we save the value to use it if we're restarted.
 
 sub noTTY {
     if ($term) {
-        DB::warn("Too late to set noTTY, enabled on next 'R'!\n") if @_;
+        _db_warn("Too late to set noTTY, enabled on next 'R'!\n") if @_;
     }
     $notty = shift if @_;
     $notty;
@@ -7536,7 +7540,7 @@ the value in case a restart is done so we can change it then.
 
 sub ReadLine {
     if ($term) {
-        DB::warn("Too late to set ReadLine, enabled on next 'R'!\n") if @_;
+        _db_warn("Too late to set ReadLine, enabled on next 'R'!\n") if @_;
     }
     $rl = shift if @_;
     $rl;
@@ -7552,7 +7556,7 @@ setting in case the user does a restart.
 
 sub RemotePort {
     if ($term) {
-        DB::warn("Too late to set RemotePort, enabled on next 'R'!\n") if @_;
+        _db_warn("Too late to set RemotePort, enabled on next 'R'!\n") if @_;
     }
     $remoteport = shift if @_;
     $remoteport;
@@ -7585,7 +7589,7 @@ debugger remembers the setting in case you restart, though.
 
 sub NonStop {
     if ($term) {
-        DB::warn("Too late to set up NonStop mode, enabled on next 'R'!\n")
+        _db_warn("Too late to set up NonStop mode, enabled on next 'R'!\n")
           if @_;
     }
     $runnonstop = shift if @_;
@@ -7594,7 +7598,7 @@ sub NonStop {
 
 sub DollarCaretP {
     if ($term) {
-        DB::warn("Some flag changes could not take effect until next 'R'!\n")
+        _db_warn("Some flag changes could not take effect until next 'R'!\n")
           if @_;
     }
     $^P = parse_DollarCaretP_flags(shift) if @_;
@@ -7709,7 +7713,7 @@ sub LineInfo {
         $slave_editor = ( $stream =~ /^\|/ );
 
         # Open it up and unbuffer it.
-        open( LINEINFO, $stream ) || DB::warn("Cannot open '$stream' for write");
+        open( LINEINFO, $stream ) || _db_warn("Cannot open '$stream' for write");
         $LINEINFO = \*LINEINFO;
         $LINEINFO->autoflush(1);
     }
@@ -8306,7 +8310,7 @@ sub diesignal {
         local $Carp::CarpLevel = 2;    # mydie + confess
 
         # Tell us all about it.
-        DB::warn( Carp::longmess("Signal @_") );
+        _db_warn( Carp::longmess("Signal @_") );
     }
 
     # No Carp. Tell us about the signal as best we can.
@@ -8365,7 +8369,7 @@ sub dbwarn {
 
     # Use the debugger's own special way of printing warnings to print
     # the stack trace message.
-    DB::warn($mess);
+    _db_warn($mess);
 } ## end sub dbwarn
 
 =head2 C<dbdie>
@@ -8392,7 +8396,7 @@ sub dbdie {
     my $sub;
     if ( $dieLevel > 2 ) {
         local $SIG{__WARN__} = \&dbwarn;
-        DB::warn(@_);    # Yell no matter what
+        _db_warn(@_);    # Yell no matter what
         return;
     }
     if ( $dieLevel < 2 ) {
