@@ -11007,6 +11007,12 @@ Perl_rpeep(pTHX_ register OP *o)
                 if (count >= OPpPADRANGE_COUNTMASK)
                     break;
 
+                /* there's a biggest base we can fit into a
+                 * SAVEt_CLEARPADRANGE in pp_padrange */
+                if (intro && base >
+                        (UV_MAX >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT)))
+                    break;
+
                 /* Success! We've got another valid pad op to optimise away */
                 count++;
                 followop = p->op_next;

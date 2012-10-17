@@ -237,7 +237,8 @@ Deprecated.  Use C<GIMME_V> instead.
 
   /* OP_PADRANGE only */
   /* bit 7 is OPpLVAL_INTRO */
-#define OPpPADRANGE_COUNTMASK	127	/* bits 6..0 hold target range */
+#define OPpPADRANGE_COUNTMASK	127	/* bits 6..0 hold target range, */
+#define OPpPADRANGE_COUNTSHIFT	7	/* 7 bits in total */
 
   /* OP_RV2GV only */
 #define OPpDONT_INIT_GV		4	/* Call gv_fetchpv with GV_NOINIT */

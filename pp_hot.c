@@ -322,8 +322,18 @@ PP(pp_padrange)
             *++SP = PAD_SV(base+i);
     }
     if (PL_op->op_private & OPpLVAL_INTRO) {
+        SV **svp = &(PAD_SVl(base));
+        const UV payload = (UV)(
+                      (base << (OPpPADRANGE_COUNTSHIFT + SAVE_TIGHT_SHIFT))
+                    | (count << SAVE_TIGHT_SHIFT)
+                    | SAVEt_CLEARPADRANGE);
+        assert(OPpPADRANGE_COUNTMASK + 1 == (1 <<OPpPADRANGE_COUNTSHIFT));
+        assert((payload >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT)) == base);
+        SSCHECK(1);
+        SSPUSHUV(payload);
+
         for (i = 0; i <count; i++)
-            SAVECLEARSV(PAD_SVl(base+i));
+            SvPADSTALE_off(*svp++); /* mark lexical as active */
     }
     RETURN;
 }

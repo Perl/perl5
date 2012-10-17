@@ -892,14 +892,25 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    Safefree(ptr);
 	    break;
+
+        {
+          SV **svp;
+        case SAVEt_CLEARPADRANGE:
+            i = (I32)((uv >> SAVE_TIGHT_SHIFT) & OPpPADRANGE_COUNTMASK);
+	    svp = &PL_curpad[uv >>
+                    (OPpPADRANGE_COUNTSHIFT + SAVE_TIGHT_SHIFT)] + i - 1;
+            goto clearsv;
 	case SAVEt_CLEARSV:
-	    ptr = (void*)&PL_curpad[uv >> SAVE_TIGHT_SHIFT];
-	    sv = *(SV**)ptr;
+	    svp = &PL_curpad[uv >> SAVE_TIGHT_SHIFT];
+            i = 1;
+          clearsv:
+            for (; i; i--, svp--) {
+	    sv = *svp;
 
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	     "Pad 0x%"UVxf"[0x%"UVxf"] clearsv: %ld sv=0x%"UVxf"<%"IVdf"> %s\n",
 		PTR2UV(PL_comppad), PTR2UV(PL_curpad),
-		(long)((SV **)ptr-PL_curpad), PTR2UV(sv), (IV)SvREFCNT(sv),
+		(long)(svp-PL_curpad), PTR2UV(sv), (IV)SvREFCNT(sv),
 		(SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) ? "clear" : "abandon"
 	    ));
 
@@ -953,12 +964,10 @@ Perl_leave_scope(pTHX_ I32 base)
 		assert(  SvFLAGS(sv) & SVs_PADMY);
 		assert(!(SvFLAGS(sv) & SVs_PADTMP));
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
-		case SVt_PVAV:	*(SV**)ptr = MUTABLE_SV(newAV());	break;
-		case SVt_PVHV:	*(SV**)ptr = MUTABLE_SV(newHV());	break;
+		case SVt_PVAV:	*svp = MUTABLE_SV(newAV());	break;
+		case SVt_PVHV:	*svp = MUTABLE_SV(newHV());	break;
 		case SVt_PVCV:
 		{
-		    SV ** const svp = (SV **)ptr;
-
 		    /* Create a stub */
 		    *svp = newSV_type(SVt_PVCV);
 
@@ -968,14 +977,16 @@ Perl_leave_scope(pTHX_ I32 base)
 			share_hek_hek(CvNAME_HEK((CV *)sv)));
 		    break;
 		}
-		default:	*(SV**)ptr = newSV(0);		break;
+		default:	*svp = newSV(0);		break;
 		}
 		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
 		/* preserve pad nature, but also mark as not live
 		 * for any closure capturing */
-		SvFLAGS(*(SV**)ptr) |= (SVs_PADMY|SVs_PADSTALE);
+		SvFLAGS(*svp) |= (SVs_PADMY|SVs_PADSTALE);
 	    }
+            }
 	    break;
+        }
 	case SAVEt_DELETE:
 	    ptr = SSPOPPTR;
 	    hv = MUTABLE_HV(ptr);

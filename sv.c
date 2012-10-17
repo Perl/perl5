@@ -12493,6 +12493,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	TOPUV(nss,ix) = uv;
 	switch (type) {
 	case SAVEt_CLEARSV:
+	case SAVEt_CLEARPADRANGE:
 	    break;
 	case SAVEt_HELEM:		/* hash element */
 	    sv = (const SV *)POPPTR(ss,ix);

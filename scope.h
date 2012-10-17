@@ -58,6 +58,7 @@
 #define SAVEt_INT_SMALL		48
 #define SAVEt_GVSV		49
 #define SAVEt_FREECOPHH		50
+#define SAVEt_CLEARPADRANGE	51
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2
