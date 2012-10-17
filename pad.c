@@ -280,7 +280,6 @@ Perl_pad_new(pTHX_ int flags)
 	padname = (PAD *)SvREFCNT_inc_simple_NN(PL_comppad_name);
     }
     else {
-	padlist->xpadl_id = PL_padlist_generation++;
 	av_store(pad, 0, NULL);
 	padname = newAV();
     }
@@ -1994,7 +1993,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 	outside = CvOUTSIDE(proto);
 	if ((CvCLONE(outside) && ! CvCLONED(outside))
 	    || !CvPADLIST(outside)
-	    || CvPADLIST(outside)->xpadl_id != protopadlist->xpadl_outid) {
+	    || PadlistNAMES(CvPADLIST(outside))
+		 != protopadlist->xpadl_outid) {
 	    outside = find_runcv_where(
 		FIND_RUNCV_padid_eq, (IV)protopadlist->xpadl_outid, NULL
 	    );
@@ -2016,7 +2016,6 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
-    CvPADLIST(cv)->xpadl_id = protopadlist->xpadl_id;
 
     av_fill(PL_comppad, fpad);
 
@@ -2025,7 +2024,8 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     outpad = outside && CvPADLIST(outside)
 	? AvARRAY(PadlistARRAY(CvPADLIST(outside))[depth])
 	: NULL;
-    if (outpad) CvPADLIST(cv)->xpadl_outid = CvPADLIST(outside)->xpadl_id;
+    if (outpad)
+	CvPADLIST(cv)->xpadl_outid = PadlistNAMES(CvPADLIST(outside));
 
     for (ix = fpad; ix > 0; ix--) {
 	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;

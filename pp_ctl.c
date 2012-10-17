@@ -3273,7 +3273,8 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 		switch (cond) {
 		case FIND_RUNCV_padid_eq:
 		    if (!CvPADLIST(cv)
-		     || CvPADLIST(cv)->xpadl_id != (U32)arg) continue;
+		     || PadlistNAMES(CvPADLIST(cv)) != (PADNAMELIST *)arg)
+			continue;
 		    return cv;
 		case FIND_RUNCV_level_eq:
 		    if (level++ != arg) continue;

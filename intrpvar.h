@@ -768,7 +768,6 @@ PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 PERLVARI(I, globhook,	globhook_t, NULL)
 
 PERLVARI(I, glob_index,	int,	0)
-PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
 PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
 
 /* The last unconditional member of the interpreter structure when 5.10.0 was
