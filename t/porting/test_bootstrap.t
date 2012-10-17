@@ -20,7 +20,7 @@ open my $fh, '<', '../MANIFEST' or die "Can't open MANIFEST: $!";
 my %exceptions = (hints => "require './test.pl'",
 		  parser => 'use DieDieDie',
 		  proto => 'use strict',
-                  namedproto => qr/require (?:warnings|Scalar::Util)/,
+                  namedproto => qr/(?:require (?:warnings|Scalar::Util)|use feature)/,
 		 );
 		  
 while (my $file = <$fh>) {
