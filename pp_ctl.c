@@ -2828,7 +2828,6 @@ PP(pp_goto)
 	    }
 	    else if (CxMULTICALL(cx))
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
-	    /* XXX TODO: Why would CvPADLIST be null? */
 	    if (CxTYPE(cx) == CXt_SUB && CvPADLIST(cv) && PadlistNAMECNT(CvPADLIST(cv)))
 		DIE(aTHX_ "Can't goto into a sub with signatures");
 	    else if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
