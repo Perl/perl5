@@ -11440,7 +11440,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     dVAR;
     UV nextvalue;
-    UV prevvalue, save_prevvalue = OOB_UNICODE;
+    UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
     IV range = 0;
     UV value, save_value = 0;
     regnode *ret;
