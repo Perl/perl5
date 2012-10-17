@@ -2937,7 +2937,7 @@ into C<$cmd>, and redoes the loop to execute it.
 
 =head4 C<$sh$sh> - C<system()> command
 
-Calls the C<DB::system()> to handle the command. This keeps the C<STDIN> and
+Calls the C<_db_system()> to handle the command. This keeps the C<STDIN> and
 C<STDOUT> from getting messed up.
 
 =cut
@@ -2955,14 +2955,14 @@ If a command is found, it is placed in C<$cmd> and executed via C<redo>.
 
 =head4 C<$sh> - Invoke a shell
 
-Uses C<DB::system> to invoke a shell.
+Uses C<_db_system()> to invoke a shell.
 
 =cut
 
 =head4 C<$sh I<command>> - Force execution of a command in a shell
 
 Like the above, but the command is passed to the shell. Again, we use
-C<DB::system> to avoid problems with C<STDIN> and C<STDOUT>.
+C<_db_system()> to avoid problems with C<STDIN> and C<STDOUT>.
 
 =head4 C<H> - display commands in history
 
@@ -3879,16 +3879,16 @@ sub _handle_sh_command {
         if ($my_cmd =~ m#\G\z#cgms) {
             # Run the user's shell. If none defined, run Bourne.
             # We resume execution when the shell terminates.
-            DB::system( $ENV{SHELL} || "/bin/sh" );
+            DB::_db_system( $ENV{SHELL} || "/bin/sh" );
             next CMD;
         }
         elsif ($my_cmd =~ m#\G$sh\s*(.*)#cgms) {
             # System it.
-            DB::system($1);
+            DB::_db_system($1);
             next CMD;
         }
         elsif ($my_cmd =~ m#\G\s*(.*)#cgms) {
-            DB::system( $ENV{SHELL} || "/bin/sh", "-c", $1 );
+            DB::_db_system( $ENV{SHELL} || "/bin/sh", "-c", $1 );
             next CMD;
         }
     }
@@ -6527,19 +6527,19 @@ sub gets {
     return DB::readline("cont: ");
 }
 
-=head2 C<DB::system()> - handle calls to<system()> without messing up the debugger
+=head2 C<_db_system()> - handle calls to<system()> without messing up the debugger
 
 The C<system()> function assumes that it can just go ahead and use STDIN and
 STDOUT, but under the debugger, we want it to use the debugger's input and
 outout filehandles.
 
-C<DB::system()> socks away the program's STDIN and STDOUT, and then substitutes
+C<_db_system()> socks away the program's STDIN and STDOUT, and then substitutes
 the debugger's IN and OUT filehandles for them. It does the C<system()> call,
 and then puts everything back again.
 
 =cut
 
-sub system {
+sub _db_system {
 
     # We save, change, then restore STDIN and STDOUT to avoid fork() since
     # some non-Unix systems can do system() but have problems with fork().
@@ -6571,6 +6571,8 @@ sub system {
     return $?;
 
 } ## end sub system
+
+*system = \&_db_system;
 
 =head1 TTY MANAGEMENT
 
@@ -8707,7 +8709,7 @@ sub setman {
 =head2 C<runman> - run the appropriate command to show documentation
 
 Accepts a man page name; runs the appropriate command to display it (set up
-during debugger initialization). Uses C<DB::system> to avoid mucking up the
+during debugger initialization). Uses C<_db_system()> to avoid mucking up the
 program's STDIN and STDOUT.
 
 =cut
@@ -8850,14 +8852,14 @@ my %_is_in_pods = (map { $_ => 1 }
 sub runman {
     my $page = shift;
     unless ($page) {
-        DB::system("$doccmd $doccmd");
+        _db_system("$doccmd $doccmd");
         return;
     }
 
     # this way user can override, like with $doccmd="man -Mwhatever"
     # or even just "man " to disable the path check.
     unless ( $doccmd eq 'man' ) {
-        DB::system("$doccmd $page");
+        _db_system("$doccmd $page");
         return;
     }
 
