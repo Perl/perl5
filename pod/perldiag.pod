@@ -633,6 +633,12 @@ a C<given> block.  You probably meant to use C<next> or C<last>.
 
 (F) You called C<break>, but you're not inside a C<given> block.
 
+=item Can't call a sub with signatures using an inherited @_
+
+(F) The C<&foo;> syntax calls foo without reinitializing C<@_>.
+Since the purpose of a sub signature is to perform initialization
+routines (and perhaps checks), the two are conceptually incompatible.
+
 =item Can't call method "%s" on an undefined value
 
 (F) You used the syntax of a method call, but the slot filled by the
@@ -871,6 +877,13 @@ loop.  You can't get there from here.  See L<perlfunc/goto>.
 a block, except that it isn't a proper block.  This usually occurs if
 you tried to jump out of a sort() block or subroutine, which is a no-no.
 See L<perlfunc/goto>.
+
+=item Can't goto into a sub with signatures
+
+(F) A sub with named arguments is not a valid target for goto.  "goto"
+passes control to a sub without going through the normal initialization,
+which makes it conceptually incompatible with the start up required by
+a sub with a signature.
 
 =item Can't goto subroutine from a sort sub (or similar callback)
 
@@ -1178,6 +1191,13 @@ redefined subroutine while the old routine is running.  Go figure.
 into a more specialized kind of SV.  The top several SV types are so
 specialized, however, that they cannot be interconverted.  This message
 indicates that such a conversion was attempted.
+
+=item Can't use @_ in a sub with a signature
+
+(F) If a sub is using a signature, the named arguments in the signature
+are initialized when the sub is called, and '@_' will not be available.
+If you want or need to use '@_', you'll have to define the sub without
+a signature.
 
 =item Can't use '%c' after -mname
 
