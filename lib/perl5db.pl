@@ -2294,7 +2294,7 @@ sub _DB__handle_run_command_in_pager_command {
         else {
 
             # Not into a pipe. STDOUT is safe.
-            open( SAVEOUT, ">&OUT" ) || &warn("Can't save DB::OUT");
+            open( SAVEOUT, ">&OUT" ) || DB::warn("Can't save DB::OUT");
         }
 
         # Fix up environment to record we have less if so.
@@ -2395,9 +2395,9 @@ sub _DB__at_end_of_every_command {
 
             # Reopen filehandle for our output (if we can) and
             # restore STDOUT (if we can).
-            open( OUT, ">&STDOUT" ) || &warn("Can't restore DB::OUT");
+            open( OUT, ">&STDOUT" ) || DB::warn("Can't restore DB::OUT");
             open( STDOUT, ">&SAVEOUT" )
-            || &warn("Can't restore STDOUT");
+            || DB::warn("Can't restore STDOUT");
 
             # Turn off pipe exception handler if necessary.
             $SIG{PIPE} = "DEFAULT" if $SIG{PIPE} eq \&DB::catch;
@@ -2408,7 +2408,7 @@ sub _DB__at_end_of_every_command {
         else {
 
             # Non-piped "pager". Just restore STDOUT.
-            open( OUT, ">&SAVEOUT" ) || &warn("Can't restore DB::OUT");
+            open( OUT, ">&SAVEOUT" ) || DB::warn("Can't restore DB::OUT");
         }
 
         # Close filehandle pager was using, restore the normal one
@@ -2503,7 +2503,7 @@ sub DB {
 
     # Preserve current values of $@, $!, $^E, $,, $/, $\, $^W.
     # The code being debugged may have altered them.
-    &save;
+    DB::save();
 
     # Since DB::DB gets called after every line, we can use caller() to
     # figure out where we last were executing. Sneaky, eh? This works because
@@ -3429,7 +3429,7 @@ sub _handle_V_command_and_X_command {
             # must detect sigpipe failures  - not catching
             # then will cause the debugger to die.
             eval {
-                &main::dumpvar(
+                main::dumpvar(
                     $packname,
                     defined $option{dumpDepth}
                     ? $option{dumpDepth}
@@ -5765,13 +5765,13 @@ sub cmd_o {
 
     # Nonblank. Try to parse and process.
     if ( $opt =~ /^(\S.*)/ ) {
-        &parse_options($1);
+        parse_options($1);
     }
 
     # Blank. List the current option settings.
     else {
         for (@options) {
-            &dump_option($_);
+            dump_option($_);
         }
     }
 } ## end sub cmd_o
@@ -6080,7 +6080,7 @@ sub postponed {
     }
 
     # If this is a subroutine, let postponed_sub() deal with it.
-    return &postponed_sub unless ref \$_[0] eq 'GLOB';
+    return postponed_sub(@_) unless ref \$_[0] eq 'GLOB';
 
     # Not a subroutine. Deal with the file.
     local *dbline = shift;
@@ -6185,7 +6185,7 @@ sub dumpit {
         my $v = shift;
         my $maxdepth = shift || $option{dumpDepth};
         $maxdepth = -1 unless defined $maxdepth;    # -1 means infinite depth
-        &main::dumpValue( $v, $maxdepth );
+        main::dumpValue( $v, $maxdepth );
     } ## end if (defined &main::dumpValue)
 
     # Oops, couldn't load dumpvar.pl.
@@ -6479,7 +6479,7 @@ sub action {
     while ( $action =~ s/\\$// ) {
 
         # We have a backslash on the end. Read more.
-        $action .= &gets;
+        $action .= gets();
     } ## end while ($action =~ s/\\$//)
 
     # Return the assembled action.
@@ -6524,7 +6524,7 @@ it just reads more input with C<readline()> and returns it.
 =cut
 
 sub gets {
-    &readline("cont: ");
+    return DB::readline("cont: ");
 }
 
 =head2 C<DB::system()> - handle calls to<system()> without messing up the debugger
@@ -6658,7 +6658,7 @@ sub setterm {
 
     $term->MinLine(2);
 
-    &load_hist();
+    load_hist();
 
     if ( $term->Features->{setHistory} and "@hist" ne "?" ) {
         $term->SetHistory(@hist);
@@ -6921,7 +6921,7 @@ sub create_IN_OUT {    # Create a window with IN/OUT handles redirected there
 
     # If we know how to get a new TTY, do it! $in will have
     # the TTY name if get_fork_TTY works.
-    my $in = &get_fork_TTY if defined &get_fork_TTY;
+    my $in = get_fork_TTY(@_) if defined &get_fork_TTY;
 
     # It used to be that
     $in = $fork_TTY if defined $fork_TTY;    # Backward compatibility
@@ -7435,7 +7435,7 @@ sub reset_IN_OUT {
 
     # This term can't get a new tty now. Better luck later.
     elsif ($term) {
-        &warn("Too late to set IN/OUT filehandles, enabled on next 'R'!\n");
+        DB::warn("Too late to set IN/OUT filehandles, enabled on next 'R'!\n");
     }
 
     # Set the filehndles up as they were.
@@ -7500,7 +7500,7 @@ sub TTY {
 
     # Terminal doesn't support new TTY, or doesn't support readline.
     # Can't do it now, try restarting.
-    &warn("Too late to set TTY, enabled on next 'R'!\n") if $term and @_;
+    DB::warn("Too late to set TTY, enabled on next 'R'!\n") if $term and @_;
 
     # Useful if done through PERLDB_OPTS:
     $console = $tty = shift if @_;
@@ -7519,7 +7519,7 @@ we save the value to use it if we're restarted.
 
 sub noTTY {
     if ($term) {
-        &warn("Too late to set noTTY, enabled on next 'R'!\n") if @_;
+        DB::warn("Too late to set noTTY, enabled on next 'R'!\n") if @_;
     }
     $notty = shift if @_;
     $notty;
@@ -7536,7 +7536,7 @@ the value in case a restart is done so we can change it then.
 
 sub ReadLine {
     if ($term) {
-        &warn("Too late to set ReadLine, enabled on next 'R'!\n") if @_;
+        DB::warn("Too late to set ReadLine, enabled on next 'R'!\n") if @_;
     }
     $rl = shift if @_;
     $rl;
@@ -7552,7 +7552,7 @@ setting in case the user does a restart.
 
 sub RemotePort {
     if ($term) {
-        &warn("Too late to set RemotePort, enabled on next 'R'!\n") if @_;
+        DB::warn("Too late to set RemotePort, enabled on next 'R'!\n") if @_;
     }
     $remoteport = shift if @_;
     $remoteport;
@@ -7585,7 +7585,7 @@ debugger remembers the setting in case you restart, though.
 
 sub NonStop {
     if ($term) {
-        &warn("Too late to set up NonStop mode, enabled on next 'R'!\n")
+        DB::warn("Too late to set up NonStop mode, enabled on next 'R'!\n")
           if @_;
     }
     $runnonstop = shift if @_;
@@ -7594,7 +7594,7 @@ sub NonStop {
 
 sub DollarCaretP {
     if ($term) {
-        &warn("Some flag changes could not take effect until next 'R'!\n")
+        DB::warn("Some flag changes could not take effect until next 'R'!\n")
           if @_;
     }
     $^P = parse_DollarCaretP_flags(shift) if @_;
@@ -7709,7 +7709,7 @@ sub LineInfo {
         $slave_editor = ( $stream =~ /^\|/ );
 
         # Open it up and unbuffer it.
-        open( LINEINFO, $stream ) || &warn("Cannot open '$stream' for write");
+        open( LINEINFO, $stream ) || DB::warn("Cannot open '$stream' for write");
         $LINEINFO = \*LINEINFO;
         $LINEINFO->autoflush(1);
     }
@@ -8306,7 +8306,7 @@ sub diesignal {
         local $Carp::CarpLevel = 2;    # mydie + confess
 
         # Tell us all about it.
-        &warn( Carp::longmess("Signal @_") );
+        DB::warn( Carp::longmess("Signal @_") );
     }
 
     # No Carp. Tell us about the signal as best we can.
@@ -8365,7 +8365,7 @@ sub dbwarn {
 
     # Use the debugger's own special way of printing warnings to print
     # the stack trace message.
-    &warn($mess);
+    DB::warn($mess);
 } ## end sub dbwarn
 
 =head2 C<dbdie>
@@ -8392,7 +8392,7 @@ sub dbdie {
     my $sub;
     if ( $dieLevel > 2 ) {
         local $SIG{__WARN__} = \&dbwarn;
-        &warn(@_);    # Yell no matter what
+        DB::warn(@_);    # Yell no matter what
         return;
     }
     if ( $dieLevel < 2 ) {
@@ -8849,14 +8849,14 @@ my %_is_in_pods = (map { $_ => 1 }
 sub runman {
     my $page = shift;
     unless ($page) {
-        &system("$doccmd $doccmd");
+        DB::system("$doccmd $doccmd");
         return;
     }
 
     # this way user can override, like with $doccmd="man -Mwhatever"
     # or even just "man " to disable the path check.
     unless ( $doccmd eq 'man' ) {
-        &system("$doccmd $page");
+        DB::system("$doccmd $page");
         return;
     }
 
@@ -9545,9 +9545,9 @@ sub rerun {
         my @temp = @truehist;            # store
         push(@DB::typeahead, @truehist); # saved
         @truehist = @hist = ();          # flush
-        @args = &restart();              # setup
-        &get_list("PERLDB_HIST");        # clean
-        &set_list("PERLDB_HIST", @temp); # reset
+        @args = restart();              # setup
+        get_list("PERLDB_HIST");        # clean
+        set_list("PERLDB_HIST", @temp); # reset
     }
     return @args;
 }
@@ -9788,7 +9788,7 @@ END {
 
     # Do not stop in at_exit() and destructors on exit:
     if ($fall_off_end or $runnonstop) {
-        &save_hist();
+        save_hist();
     } else {
         $DB::single = 1;
         DB::fake::at_exit();
@@ -9882,7 +9882,7 @@ sub cmd_pre580_b {
     if ( $cmd =~ /^load\b\s*(.*)/ ) {
         my $file = $1;
         $file =~ s/\s+$//;
-        &cmd_b_load($file);
+        cmd_b_load($file);
     }
 
     # b compile|postpone <some sub> [<condition>]
@@ -9915,13 +9915,13 @@ sub cmd_pre580_b {
     elsif ( $cmd =~ /^([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ ) {
         my $subname = $1;
         my $cond = length $2 ? $2 : '1';
-        &cmd_b_sub( $subname, $cond );
+        cmd_b_sub( $subname, $cond );
     }
     # b <line> [<condition>].
     elsif ( $cmd =~ /^(\d*)\s*(.*)/ ) {
         my $i = $1 || $dbline;
         my $cond = length $2 ? $2 : '1';
-        &cmd_b_line( $i, $cond );
+        cmd_b_line( $i, $cond );
     }
 } ## end sub cmd_pre580_b
 
@@ -10100,7 +10100,7 @@ sub cmd_pre590_prepost {
     my $line   = shift || '*';
     my $dbline = shift;
 
-    return &cmd_prepost( $cmd, $line, $dbline );
+    return cmd_prepost( $cmd, $line, $dbline );
 } ## end sub cmd_pre590_prepost
 
 =head2 C<cmd_prepost>
