@@ -1670,7 +1670,7 @@ S_Internals_V(pTHX_ CV *cv)
 #endif
     const int entries = 3 + local_patch_count;
     int i;
-    static char non_bincompat_options[] = 
+    static const char non_bincompat_options[] = 
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif

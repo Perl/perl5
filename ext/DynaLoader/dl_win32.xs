@@ -67,9 +67,9 @@ dl_private_init(pTHX)
 static int
 dl_static_linked(char *filename)
 {
-    char **p;
+    const char **p;
     char *ptr, *hptr;
-    static char subStr[] = "/auto/";
+    static const char subStr[] = "/auto/";
     char szBuffer[MAX_PATH];
 
     /* avoid buffer overflow when called with invalid filenames */
@@ -93,7 +93,7 @@ dl_static_linked(char *filename)
     else
 	ptr = szBuffer;
 
-    for (p = staticlinkmodules; *p;p++) {
+    for (p = (const char **) staticlinkmodules; *p;p++) {
 	if (hptr = strstr(ptr, *p)) {
 	    /* found substring, need more detailed check if module name match */
 	    if (hptr==ptr) {
