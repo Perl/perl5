@@ -8391,9 +8391,6 @@ sub dbdie {
     local $doret         = -2;
     local $SIG{__DIE__}  = '';
     local $SIG{__WARN__} = '';
-    my $i      = 0;
-    my $ineval = 0;
-    my $sub;
     if ( $dieLevel > 2 ) {
         local $SIG{__WARN__} = \&dbwarn;
         _db_warn(@_);    # Yell no matter what
