@@ -635,6 +635,11 @@ Line numbers at the end of a string eval are no longer off by one.
 copy-on-write scalar no longer cause the parser to modify that string
 buffer in place.
 
+=item *
+
+C<length($object)> no longer returns the undefined value if the object has
+string overloading that returns undef.  [perl #115260]
+
 =back
 
 =head1 Known Problems
