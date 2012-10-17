@@ -992,9 +992,12 @@ PP(pp_aassign)
     HV *hash;
     I32 i;
     int magic;
+    U32 lval = 0;
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
     gimme = GIMME_V;
+    if (gimme == G_ARRAY)
+        lval = PL_op->op_flags & OPf_MOD || LVRET;
 
     /* If there's a common identifier on both sides we have to take
      * special care that assigning the identifier on the left doesn't
@@ -1093,7 +1096,7 @@ PP(pp_aassign)
 		while (relem < lastrelem+odd) {	/* gobble up all the rest */
 		    HE *didstore;
                     assert(*relem);
-		    sv = gimme == G_ARRAY ? sv_mortalcopy(*relem) : *relem;
+		    sv = lval ? sv_mortalcopy(*relem) : *relem;
 		    relem++;
                     assert(*relem);
 		    tmpstr = sv_mortalcopy( *relem++ ); /* value */
