@@ -8942,7 +8942,7 @@ S_scan_named_proto (pTHX_ SV *sv)
     char token[sizeof PL_tokenbuf];
     AV *protolist;
     int argcount, index;
-    bool bad = false;
+    bool bad = FALSE;
 
     PERL_ARGS_ASSERT_SCAN_NAMED_PROTO;
 
@@ -8960,17 +8960,17 @@ S_scan_named_proto (pTHX_ SV *sv)
 		if (*proto == ',')
 		    proto++;
 		else if (*proto != '\0') {
-		    bad = true;
+		    bad = TRUE;
 		    break;
 		}
 	    }
 	    else {
-		bad = true;
+		bad = TRUE;
 		break;
 	    }
 	}
 	else {
-	    bad = true;
+	    bad = TRUE;
 	    break;
 	}
     }
@@ -8978,7 +8978,7 @@ S_scan_named_proto (pTHX_ SV *sv)
     /* Undo what's been done if this is invalid, and return early */
     if (bad) {
 	sv_free(MUTABLE_SV(protolist));
-	return true;
+	return TRUE;
     }
 
     argcount = AvFILL(protolist) + 1;
@@ -9004,7 +9004,7 @@ S_scan_named_proto (pTHX_ SV *sv)
     }
     sv_free(MUTABLE_SV(protolist));
     PL_cop_seqmax++;
-    return false;
+    return FALSE;
 }
 
 /* Either returns sv, or mortalizes sv and returns a new SV*.
