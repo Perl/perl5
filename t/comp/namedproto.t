@@ -254,22 +254,27 @@ BEGIN {
     is(shadowing2(3), 15, "variable shadowing works");
 }
 
-{ local $TODO = "slurpy parameters not supported yet";
 {
     my $failed = !eval 'sub bad_slurpy_array (@foo, $bar) { }; 1';
     my $err = $@;
     ok($failed, "slurpies must come last");
-    like($err, qr/slurpy/, "slurpies must come last"); # XXX better regex
+    like($err, qr/^Illegal signature/, "slurpies must come last");
 }
 
 {
     my $failed = !eval 'sub bad_slurpy_hash (%foo, $bar) { }; 1';
     my $err = $@;
     ok($failed, "slurpies must come last");
-    like($err, qr/slurpy/, "slurpies must come last"); # XXX better regex
+    like($err, qr/^Illegal signature/, "slurpies must come last");
+}
+
+{
+    my $failed = !eval 'sub bad_slurpy_dup (%foo, %bar) { }; 1';
+    my $err = $@;
+    ok($failed, "Can't use two slurpy args");
+    like($err, qr/^Illegal signature/, "Can't use two slurpy args");
 }
 no_warnings("invalid slurpy parameters");
-}
 
 # Ban @_ inside the sub if it has a named proto
 {

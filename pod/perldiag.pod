@@ -2223,6 +2223,12 @@ two from 1 to 32 (or 64, if your platform supports that).
 (W digit) You may have tried to use an 8 or 9 in an octal number.
 Interpretation of the octal number stopped before the 8 or 9.
 
+=item Illegal signature for %s (%s): only the last arg can be an array or hash
+
+(F) An array or a hash in a signature will be constructed from 0 or more
+values in the calling function, so having one of those types anywhere but
+the last parameter is ambiguous and thus illegal.
+
 =item Illegal switch in PERL5OPT: -%c
 
 (X) The PERL5OPT environment variable may only be used to set the

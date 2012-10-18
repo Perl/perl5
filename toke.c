@@ -8943,6 +8943,7 @@ S_scan_named_proto (pTHX_ SV *sv)
     AV *protolist;
     int argcount, index;
     bool bad = FALSE;
+    bool has_greedy = FALSE;
 
     PERL_ARGS_ASSERT_SCAN_NAMED_PROTO;
 
@@ -8990,6 +8991,14 @@ S_scan_named_proto (pTHX_ SV *sv)
 	const int pad_ix = pad_add_name_pv(SvPV_nolen(proto_name), 0, NULL, NULL);
 	/* The named parameters must be the first entries in the pad */
 	assert(pad_ix == index + 1);
+	if (has_greedy) {
+	    sv_free(MUTABLE_SV(protolist));
+	    Perl_croak(aTHX_
+	               "Illegal signature for %"SVf" (%s): "
+	               "only the last arg can be an array or hash",
+	               SVfARG(PL_subname),
+	               SvPVX(sv));
+	}
 	pad_name = AvARRAY(PL_comppad_name)[pad_ix];
 	/* Mark the entries as in scope */
 	((XPVNV*)SvANY(pad_name))->xnv_u.xpad_cop_seq.xlow = PL_cop_seqmax;
@@ -8997,9 +9006,11 @@ S_scan_named_proto (pTHX_ SV *sv)
 	/* Upgrade to an array / hash if needed */
 	if (proto_type == '@') {
 	    sv_upgrade(PAD_SVl(pad_ix), SVt_PVAV);
+	    has_greedy = TRUE;
 	}
 	else if (proto_type == '%') {
 	    sv_upgrade(PAD_SVl(pad_ix), SVt_PVHV);
+	    has_greedy = TRUE;
 	}
     }
     sv_free(MUTABLE_SV(protolist));
