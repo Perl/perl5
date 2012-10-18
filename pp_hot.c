@@ -2726,8 +2726,8 @@ try_autoload:
 		SV ** source = AvARRAY(av);
 		UV saveclearval = SAVEt_CLEARSV;
 		SSCHECK(max + (I32)greedy);
+		SvPADSTALE_off(PAD_SVl(namecnt));
 		if (items >= namecnt) {
-		    SvPADSTALE_off(PAD_SVl(namecnt));
 		    if (SvTYPE(PAD_SVl(namecnt)) < SVt_PVAV) {
 			sv_setsv(PAD_SVl(namecnt), source[namecnt-1]);
 			--max;
