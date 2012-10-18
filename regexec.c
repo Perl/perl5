@@ -3658,6 +3658,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
       reenter_switch:
 
         SET_nextchr;
+        assert(nextchr < 256 && (nextchr >= 0 || nextchr == NEXTCHR_EOS));
 
 	switch (state_num) {
 	case BOL: /*  /^../  */
@@ -6326,6 +6327,7 @@ NULL
         /* this is a point to jump to in order to increment
          * locinput by one character */
         increment_locinput:
+            assert(!NEXTCHR_IS_EOS);
             if (utf8_target) {
                 locinput += PL_utf8skip[nextchr];
                 /* locinput is allowed to go 1 char off the end, but not 2+ */
