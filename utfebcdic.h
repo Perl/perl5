@@ -562,8 +562,8 @@ END_EXTERN_C
 		      (uv) < 0x400000       ? 5 : \
 		      (uv) < 0x4000000      ? 6 : 7 )
 
-
 #define UNI_IS_INVARIANT(c)		((c) <  0xA0)
+
 /* UTF-EBCDIC semantic macros - transform back into I8 and then compare */
 
 #define UTF8_IS_START(c)		(NATIVE_TO_UTF(c) >= 0xC5 && NATIVE_TO_UTF(c) != 0xE0)
