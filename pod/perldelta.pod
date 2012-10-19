@@ -205,6 +205,10 @@ C<shortmess()> functions are now documented.
 
 =item *
 
+L<CPAN> has been upgraded from version 1.98 to 1.99_51.
+
+=item *
+
 L<CPANPLUS> has been upgraded from version 0.9131 to 0.9133.
 
 =item *
