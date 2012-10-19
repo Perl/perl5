@@ -1273,11 +1273,11 @@ prints "ABCD":
 In patterns where the text of the code is derived from run-time
 information rather than appearing literally in a source code /pattern/,
 the code is compiled at the same time that the pattern is compiled, and
-fro reasons of security, C<use re 'eval'> must be in scope. This is to
+for reasons of security, C<use re 'eval'> must be in scope. This is to
 stop user-supplied patterns containing code snippets from being
 executable.
 
-In situations where you need enable this with C<use re 'eval'>, you should
+In situations where you need to enable this with C<use re 'eval'>, you should
 also have taint checking enabled.  Better yet, use the carefully
 constrained evaluation within a Safe compartment.  See L<perlsec> for
 details about both these mechanisms.
