@@ -1711,4 +1711,8 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 
 ^\R{2}$	\r\n\r\n	y	$&	\r\n\r\n
 
+/^\D{11}/a	\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}	n	-	-
+/^\S{11}/a	\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}	n	-	-
+/^\W{11}/a	\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}	n	-	-
+
 # vim: softtabstop=0 noexpandtab
