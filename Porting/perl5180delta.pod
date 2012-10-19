@@ -333,7 +333,7 @@ platform specific bugs also go here.
 
 =item *
 
-The following CPAN modules have test failures with perl 5.16.  Patches have
+The following CPAN modules have test failures with perl 5.18.  Patches have
 been submitted for all of these, so hopefully there will be new releases
 soon:
 
