@@ -7157,8 +7157,27 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	}	
 	break;
 
-    default:		/* Called on something of 0 width. */
-	break;		/* So match right here or not at all. */
+    case BOUND:
+    case BOUNDA:
+    case BOUNDL:
+    case BOUNDU:
+    case EOS:
+    case GPOS:
+    case KEEPS:
+    case NBOUND:
+    case NBOUNDA:
+    case NBOUNDL:
+    case NBOUNDU:
+    case OPFAIL:
+    case SBOL:
+    case SEOL:
+        /* These are all 0 width, so match right here or not at all. */
+        break;
+
+    default:
+        Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized node type %d='%s'", OP(p), PL_reg_name[OP(p)]);
+        assert(0); /* NOTREACHED */
+
     }
 
     if (hardcount)
