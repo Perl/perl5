@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.20_01";
+our $VERSION = "1.20_02";
 
 my %err = ();
 
@@ -131,10 +131,12 @@ sub get_files {
 	      $Config{gccversion} !~ /intel/i
 	      # might be using, say, Intel's icc
 	     ) {
+    # When cross-compiling we may store a path for gcc's "sysroot" option:
+    my $sysroot = $Config{sysroot} || '';
 	# Some Linuxes have weird errno.hs which generate
 	# no #file or #line directives
 	my ($linux_errno_h) = grep { -e $_ } map { "$_/errno.h" }
-	    "/usr/include", "/usr/local/include",
+	    "$sysroot/usr/include", "$sysroot/usr/local/include",
 	    split / / => $Config{locincpth} or
 		die "Cannot find errno.h";
 	$file{$linux_errno_h} = 1;

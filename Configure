@@ -209,6 +209,7 @@ from=''
 run=''
 targetarch=''
 to=''
+sysroot=''
 usecrosscompile=''
 extern_C=''
 mistrustnm=''
@@ -1952,6 +1953,29 @@ true)
 	;;
 esac
 
+: Set 'sysroot' to change the logical root directory to your headers and libraries see man gcc
+: This is primarily meant for cross-compile environments, and may fail to be useful in other cases
+
+if test "X$sysroot" != X; then
+  case "$cc" in
+    *gcc*|*g++*)
+        echo "Using $sysroot to find your headers and libraries, adding to ccflags"
+        case "$ccflags" in
+            *sysroot*) ;;
+            'undef'|*)
+                ccflags="$ccflags --sysroot=$sysroot"
+        esac
+        case "$ldflags" in
+            *sysroot*) ;;
+            'undef'|*)
+                ldflags="$ldflags --sysroot=$sysroot"
+        esac
+        # lddlflags updated below in lddlflags section;
+        # same with cccdlflags
+  ;;
+  esac
+fi
+
 : Eunice requires " " instead of "", can you believe it
 echo " "
 : Here we go...
@@ -2389,7 +2413,7 @@ uname
 zip
 "
 pth=`echo $PATH | sed -e "s/$p_/ /g"`
-pth="$pth /lib /usr/lib"
+pth="$pth $sysroot/lib $sysroot/usr/lib"
 for file in $loclist; do
 	eval xxx=\$$file
 	case "$xxx" in
@@ -4297,8 +4321,8 @@ echo exit 1 >xenix
 echo exit 1 >venix
 echo exit 1 >os2
 d_bsd="$undef"
-$cat /usr/include/signal.h /usr/include/sys/signal.h >foo 2>/dev/null
-if test -f /osf_boot || $contains 'OSF/1' /usr/include/ctype.h >/dev/null 2>&1
+$cat $sysroot/usr/include/signal.h $sysroot/usr/include/sys/signal.h >foo 2>/dev/null
+if test -f /osf_boot || $contains 'OSF/1' $sysroot/usr/include/ctype.h >/dev/null 2>&1
 then
 	echo "Looks kind of like an OSF/1 system, but we'll see..."
 	echo exit 0 >osf1
@@ -4684,9 +4708,10 @@ case "$ccname" in
 esac
 
 : What should the include directory be ?
+: Use sysroot if set, so findhdr looks in the right place.
 echo " "
 $echo $n "Hmm...  $c"
-dflt='/usr/include'
+dflt="$sysroot/usr/include"
 incpath=''
 mips_type=''
 if $test -f /bin/mips && /bin/mips; then
@@ -4732,7 +4757,7 @@ esac
 : Set private lib path
 case "$plibpth" in
 '') if ./mips; then
-		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
+		plibpth="$incpath/usr/lib $sysroot/usr/local/lib $sysroot/usr/ccs/lib"
 	fi;;
 esac
 case "$libpth" in
@@ -4742,7 +4767,6 @@ case "$libpth" in
 esac
 
 : Now check and see which directories actually exist, avoiding duplicates
-libpth=''
 for xxx in $dlist
 do
     if $test -d $xxx; then
@@ -4760,6 +4784,14 @@ know not to be holding relevant libraries, and add any that are needed.
 Say "none" for none.
 
 EOM
+
+if test "X$sysroot" != X; then
+  $cat <<EOM
+You have set sysroot to $sysroot, please supply the directories excluding sysroot
+
+EOM
+fi
+
 case "$libpth" in
 '') dflt='none';;
 *)
@@ -7508,8 +7540,8 @@ unknown)
 			 $sort | $sed -e 's/^.* //'`
 		eval set \$$#
 	done
-	$test -r $1 || set /usr/ccs/lib/libc.$so
-	$test -r $1 || set /lib/libsys_s$_a
+	$test -r $1 || set $sysroot/usr/ccs/lib/libc.$so
+	$test -r $1 || set $sysroot/lib/libsys_s$_a
 	;;
 *)
 	set blurfl
@@ -7928,6 +7960,29 @@ EOM
 	' ') dflt='none' ;;
     *)	dflt="$cccdlflags" ;;
     esac
+    
+    case "$dflt" in
+    none) dflt='' ;;
+    esac
+    
+    # If -Dsysroot was specified, now's the time to add it
+    # to cccdlflags
+    if test "X$sysroot" != X; then
+        case "$gccversion" in
+        '') ;;
+        *)  case "$dflt" in
+                *sysroot*) ;;
+                'undef'|*)
+                    dflt="$dflt --sysroot=$sysroot" ;;
+            esac
+            ;;
+        esac
+    fi
+    
+    case "$dflt" in
+    '') dflt='none';;
+    esac
+    
     rp="Any special flags to pass to $cc -c to compile shared library modules?"
     . ./myread
     case "$ans" in
@@ -8030,6 +8085,17 @@ EOM
 			;;
     *) dflt="$lddlflags" ;;
     esac
+
+    : Only do this for gcc, since, for example, qcc has no concept
+    : of --sysroot.
+    if $test "X$sysroot" != X; then
+        case "$gccversion" in
+        '') ;;
+        *)
+               dflt="$dflt --sysroot $sysroot"
+        ;;
+        esac
+    fi
 
 	: Try to guess additional flags to pick up local libraries.
 	: Be careful not to append to a plain 'none'
@@ -11305,16 +11371,16 @@ else
 		else
 			for net in net socket
 			do
-				if test -f /usr/lib/lib$net$_a; then
-					( ($nm $nm_opt /usr/lib/lib$net$_a | eval $nm_extract) ||  \
-					$ar t /usr/lib/lib$net$_a) 2>/dev/null >> libc.list
+				if test -f $sysroot/usr/lib/lib$net$_a; then
+					( ($nm $nm_opt $sysroot/usr/lib/lib$net$_a | eval $nm_extract) ||  \
+					$ar t $sysroot/usr/lib/lib$net$_a) 2>/dev/null >> libc.list
 					if $contains socket libc.list >/dev/null 2>&1; then
 						d_socket="$define"
 						socketlib="-l$net"
 						case "$net" in
 						net)
 							echo "...but the Wollongong group seems to have hacked it in." >&4
-							sockethdr="-I/usr/netinclude"
+							sockethdr="-I$sysroot/usr/netinclude"
 							;;
 						esac
 						echo "Found Berkeley sockets interface in lib$net." >&4
@@ -20722,7 +20788,7 @@ esac
 : Trace out the files included by signal.h, then look for SIGxxx names.
 if [ "X$fieldn" = X ]; then
 	: Just make some guesses.  We check them later.
-	xxx='/usr/include/signal.h /usr/include/sys/signal.h'
+	xxx="$sysroot/usr/include/signal.h $sysroot/usr/include/sys/signal.h"
 else
 	xxx=`echo '#include <signal.h>' |
 	$cppstdin $cppminus $cppflags 2>/dev/null |
@@ -23631,6 +23697,7 @@ strings='$strings'
 submit='$submit'
 subversion='$subversion'
 sysman='$sysman'
+sysroot='$sysroot'
 tail='$tail'
 tar='$tar'
 targetarch='$targetarch'
