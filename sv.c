@@ -3913,6 +3913,19 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
     return;
 }
 
+/* Work around compiler warnings about unsigned >= THRESHOLD when thres-
+   hold is 0. */
+#if SV_COW_THRESHOLD
+# define GE_COW_THRESHOLD(len)		((len) >= SV_COW_THRESHOLD)
+#else
+# define GE_COW_THRESHOLD(len)		1
+#endif
+#if SV_COWBUF_THRESHOLD
+# define GE_COWBUF_THRESHOLD(len)	((len) >= SV_COWBUF_THRESHOLD)
+#else
+# define GE_COWBUF_THRESHOLD(len)	1
+#endif
+
 void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 {
@@ -4178,6 +4191,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
     }
     else if (sflags & SVp_POK) {
         bool isSwipe = 0;
+	const STRLEN cur = SvCUR(sstr);
+	const STRLEN len = SvLEN(sstr);
 
 	/*
 	 * Check to see if we can just swipe the string.  If so, it's a
@@ -4202,9 +4217,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
             (((flags & SV_COW_SHARED_HASH_KEYS)
 	       ? !(sflags & SVf_IsCOW)
 #ifdef PERL_NEW_COPY_ON_WRITE
+		|| (len &&
+		    ((!GE_COWBUF_THRESHOLD(cur) && SvLEN(dstr) > cur)
 		   /* If this is a regular (non-hek) COW, only so many COW
 		      "copies" are possible. */
-		|| (SvLEN(sstr) && CowREFCNT(sstr) == SV_COW_REFCNT_MAX)
+		    || CowREFCNT(sstr) == SV_COW_REFCNT_MAX))
 #endif
 	       : 1 /* If making a COW copy is forbidden then the behaviour we
 		       desire is as if the source SV isn't actually already
@@ -4236,7 +4253,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	         (!(flags & SV_NOSTEAL)) &&
 					/* and we're allowed to steal temps */
                  SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
-                 SvLEN(sstr))             /* and really is a string */
+                 len)             /* and really is a string */
 #ifdef PERL_ANY_COW
             && ((flags & SV_COW_SHARED_HASH_KEYS)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
@@ -4245,7 +4262,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		     && SvTYPE(sstr) >= SVt_PVIV
 # else
 		     && !(sflags & SVf_IsCOW)
-		     && SvCUR(sstr)+1 < SvLEN(sstr)
+		     && GE_COW_THRESHOLD(cur) && cur+1 < len
+		     && (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)
 # endif
 		    ))
 		: 1)
@@ -4253,10 +4271,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
             ) {
             /* Failed the swipe test, and it's not a shared hash key either.
                Have to copy the string.  */
-	    STRLEN len = SvCUR(sstr);
-            SvGROW(dstr, len + 1);	/* inlined from sv_setpvn */
-            Move(SvPVX_const(sstr),SvPVX(dstr),len,char);
-            SvCUR_set(dstr, len);
+            SvGROW(dstr, cur + 1);	/* inlined from sv_setpvn */
+            Move(SvPVX_const(sstr),SvPVX(dstr),cur,char);
+            SvCUR_set(dstr, cur);
             *SvEND(dstr) = '\0';
         } else {
             /* If PERL_OLD_COPY_ON_WRITE is not defined, then isSwipe will always
@@ -4289,8 +4306,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 
             if (!isSwipe) {
                 /* making another shared SV.  */
-                STRLEN cur = SvCUR(sstr);
-                STRLEN len = SvLEN(sstr);
 #ifdef PERL_ANY_COW
                 if (len) {
 # ifdef PERL_OLD_COPY_ON_WRITE

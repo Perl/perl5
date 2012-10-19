@@ -1853,6 +1853,12 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
    /* Note: To allow 256 COW "copies", a refcnt of 0 means 1. */
 #   define CowREFCNT(sv)	(*(U8 *)(SvPVX(sv)+SvLEN(sv)-1))
 #   define SV_COW_REFCNT_MAX	((1 << sizeof(U8)*8) - 1)
+#   ifndef SV_COW_THRESHOLD
+#    define SV_COW_THRESHOLD	0	/* min string length for cow */
+#   endif
+#   ifndef SV_COWBUF_THRESHOLD
+#    define SV_COWBUF_THRESHOLD	1250	/* min string length for cow */
+#   endif				/* over existing buffer */
 #  endif
 #endif /* PERL_OLD_COPY_ON_WRITE */
 
