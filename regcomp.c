@@ -231,10 +231,10 @@ typedef struct RExC_state_t {
 #define	WORST		0	/* Worst case. */
 #define	HASWIDTH	0x01	/* Known to match non-null strings. */
 
-/* Simple enough to be STAR/PLUS operand; in an EXACT node must be a single
+/* Simple enough to be STAR/PLUS operand; in an EXACTish node must be a single
  * character.  Note that this is not the same thing as REGNODE_SIMPLE */
 #define	SIMPLE		0x02
-#define	SPSTART		0x04	/* Starts with * or +. */
+#define	SPSTART		0x04	/* Starts with * or + */
 #define TRYAGAIN	0x08	/* Weeded out a declaration. */
 #define POSTPONED	0x10    /* (?1),(?&name), (??{...}) or similar */
 
@@ -10274,7 +10274,7 @@ tryagain:
 	    goto finish_meta_pat;
 	case 'R':
 	    ret = reg_node(pRExC_state, LNBREAK);
-	    *flagp |= HASWIDTH;
+	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'h':
 	    ret = reg_node(pRExC_state, HORIZWS);
@@ -12374,7 +12374,7 @@ parseit:
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
-	*flagp |= reg_flags&(HASWIDTH|SPSTART|POSTPONED);
+	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED);
 
 	RExC_parse = save_parse;
 	RExC_end = save_end;

@@ -6526,6 +6526,9 @@ no_silent:
 /*
  - regrepeat - repeatedly match something simple, report how many
  *
+ * What 'simple' means is a node which can be the operand of a quantifier like
+ * '+', or {1,3}
+ *
  * startposp - pointer a pointer to the start position.  This is updated
  *             to point to the byte following the highest successful
  *             match.
@@ -7081,8 +7084,23 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 	}
 	break;
     case LNBREAK:
-        Perl_croak(aTHX_ "panic: regrepeat() should not be called with non-simple: LNBREAK");
-        assert(0); /* NOTREACHED */
+        if (utf8_target) {
+	    while (hardcount < max && scan < loceol &&
+                    (c=is_LNBREAK_utf8_safe(scan, loceol))) {
+		scan += c;
+		hardcount++;
+	    }
+	} else {
+            /* LNBREAK can match one or two latin chars, which is ok, but we
+             * have to use hardcount in this situation, and throw away the
+             * adjustment to <loceol> done before the switch statement */
+            loceol = PL_regeol;
+	    while (scan < loceol && (c=is_LNBREAK_latin1_safe(scan, loceol))) {
+		scan+=c;
+		hardcount++;
+	    }
+	}
+	break;
     case HORIZWS:
         if (utf8_target) {
 	    while (hardcount < max && scan < loceol &&
