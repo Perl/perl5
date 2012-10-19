@@ -1029,7 +1029,7 @@ sub init {
         and $^O ne "MSWin32") {
         # as long as Windows needs $self->_build_command, we cannot
         # support sudo on windows :-)
-        my $default = "./Build";
+        my $default = $^O eq 'VMS' ? '@Build.com' : "./Build";
         if ( $CPAN::Config->{install_help} eq 'sudo' ) {
             if ( find_exe('sudo') ) {
                 $default = "sudo $default";

@@ -1,3 +1,13 @@
+2012-10-16  Andreas Koenig  <andreas.koenig.7os6VVqR@franz.ak.mind.de>
+
+	* release 1.99_51
+
+	* RT #79969: fix incompatibilities with VMS (Craig Berry)
+
+  * bugfix: distroprefs of type pl/args were dropped for 'perl Build.PL'
+
+	* RT #73742: watch build_dirs and react calmly when one has gone lost
+
 2011-08-07  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.9800
