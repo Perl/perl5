@@ -4206,8 +4206,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    }
 
 	    /* Neither the target nor the pattern are utf8 */
-	    if (UCHARAT(s) != nextchr &&
-		UCHARAT(s) != fold_array[nextchr])
+	    if (UCHARAT(s) != nextchr
+                && !NEXTCHR_IS_EOS
+		&& UCHARAT(s) != fold_array[nextchr])
 	    {
 		sayNO;
 	    }
