@@ -605,6 +605,10 @@ C<$Module::CoreList::TieHashDelta::VERSION> should always be equal to
 C<$Module::CoreList::VERSION>. Make sure the two versions match before
 proceeding.
 
+Edit the version number in the new
+C<< 'Module::CoreList::TieHashDelta' => 'X.YZ' >> entry, as that is likely to
+reflect the previous version number.
+
 =head4 Bump version in Module::CoreList F<Changes>
 
 Also edit Module::CoreList's new version number in its F<Changes>

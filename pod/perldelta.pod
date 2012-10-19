@@ -165,7 +165,7 @@ SSL support.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.73 to 2.74.
+L<Module::CoreList> has been upgraded from version 2.73 to 2.75.
 
 =item *
 
