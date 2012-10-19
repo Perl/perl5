@@ -1,0 +1,555 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5175delta - what is new for perl v5.17.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.17.4 release and the 5.17.5
+release.
+
+If you are upgrading from an earlier release such as 5.17.3, first read
+L<perl5174delta>, which describes differences between 5.17.3 and 5.17.4.
+
+=head1 Core Enhancements
+
+=head2 Upgrade to Unicode 6.2
+
+Perl now supports the final version of Unicode 6.2.  Earlier releases in
+the 5.17 series supported Unicode 6.2 beta versions.  There were no
+substantive changes in the final Unicode 6.2 version from the most
+recent beta, included in Perl 5.17.4.  A list of changes from Unicode
+6.1 is at L<http://www.unicode.org/versions/Unicode6.2.0>.
+
+=head1 Security
+
+=head2 Avoid calling memset with a negative count
+
+Poorly written perl code that allows an attacker to specify the count to perl's
+C<x> string repeat operator can already cause a memory exhaustion
+denial-of-service attack. A flaw in versions of perl before 5.15.5 can escalate
+that into a heap buffer overrun; coupled with versions of glibc before 2.16, it
+possibly allows the execution of arbitrary code.
+
+The flaw addressed to this commit has been assigned identifier CVE-2012-5195.
+
+=head1 Incompatible Changes
+
+=head2 New Restrictions in Multi-Character Case-Insensitive Matching in Regular Expression Bracketed Character Classes
+
+Unicode has now withdrawn their previous recommendation for regular
+expressions to automatically handle cases where a single character can
+match multiple characters case-insensitively; for example, the letter
+LATIN SMALL LETTER SHARP S and the sequence C<ss>.  This is because
+it turns out to be impracticable to do this correctly in all
+circumstances.  Because Perl has tried to do this as best it can, it
+will continue to do so.  (We are considering an option to turn it off.)
+However, a new restriction is being added on such matches when they
+occur in [bracketed] character classes.  People were specifying
+things such as C</[\0-\xff]/i>, and being surprised that it matches the
+two character sequence C<ss> (since LATIN SMALL LETTER SHARP S occurs in
+this range).  This behavior is also inconsistent with the using a
+property instead of a range:  C<\p{Block=Latin1}> also includes LATIN
+SMALL LETTER SHARP S, but C</[\p{Block=Latin1}]/i> does not match C<ss>.
+The new rule is that for there to be a multi-character case-insensitive
+match within a bracketed character class, the character must be
+explicitly listed, and not as an end point of a range.  This more
+closely obeys the Principle of Least Astonishment.  See
+L<perlrecharclass/Bracketed Character Classes>.  Note that a bug [perl
+#89774], now fixed as part of this change, prevented the previous
+behavior from working fully.
+
+=head2 Change to Warnings About Lexical Subroutines
+
+The warnings category for lexical subroutines is now
+"experimental::lexical_subs", with two colons, not
+"experimental:lexical_subs";
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<AutoLoader> has been upgraded from version 5.72 to 5.73.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.17 to 1.18.  It no longer
+dies when deparsing C<sort> without arguments.  It now correctly omits the
+comma for C<system $prog @args> and C<exec $prog @args>.
+
+=item *
+
+L<bignum>, L<bigint> and L<bigrat> have been upgraded from version 0.30 to
+0.31.  The overrides for C<hex> and C<oct> have been rewritten, eliminating
+several problems, and making one incompatible change:
+
+=over
+
+=item *
+
+Formerly, whichever of C<use bigint> or C<use bigrat> was compiled later
+would take precedence over the other, causing C<hex> and C<oct> not to
+respect the other pragma when in scope.
+
+=item *
+
+Using any of these three pragmata would cause C<hex> and C<oct> anywhere
+else in the program to evalute their arguments in list context and prevent
+them from inferring $_ when called without arguments.
+
+=item *
+
+Using any of these three pragmata would make C<oct("1234")> return 1234
+(for any number not beginning with 0) anywhere in the program.  Now "1234"
+is translated from octal to decimal, whether within the pragma's scope or
+not.
+
+=item *
+
+The global overrides that facilitate lexical use of C<hex> and C<oct> now
+respect any existing overrides that were in place before the new overrides
+were installed, falling back to them outside of the scope of C<use bignum>.
+
+=item *
+
+C<use bignum "hex">, C<use bignum "oct"> and similar invocations for bigint
+and bigrat now export a C<hex> or C<oct> function, instead of providing a
+global override.
+
+=back
+
+=item *
+
+L<Carp> has been upgraded from version 1.26 to 1.27.  The C<longmess()> and
+C<shortmess()> functions are now documented.
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9131 to 0.9133.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.135_07 to 2.136.  This promotes
+the previous development release to a stable release.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.71 to 5.72.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280208 to 0.280209.  A
+list of symbols to export can now be passed to C<link()> when on Windows, as on
+other OSes [perl #115100].
+
+=item *
+
+L<feature> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.17 to 1.18.  A
+space-separated list of patterns return long lists of results no longer
+results in memory corruption or crashes.  This bug was introduced in Perl
+5.16.0.  [perl #114984]
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.022 to 0.024.  This improves
+SSL support.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.73 to 2.75.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.15 to 0.16.  This is
+the module implementing the ":encoding(...)" I/O layer.  It no longer
+corrupts memory or crashes when the encoding back-end reallocates the
+buffer or gives it a typeglob or shared hash key scalar.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.41 to 1.42.  This adds
+support for dual-valued values as created by
+L<Scalar::Util::dualvar|Scalar::Util/"dualvar NUM, STRING">.
+
+=item *
+
+L<Unicode::Collate> hsa been upgraded from version 0.89 to 0.90.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<warnings> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<Win32CORE> has been upgraded from version 0.03 to 0.04.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The error produced when a module cannot be loaded now includes a hint that
+the module may need to be installed: "Can't locate hopping.pm in @INC (you
+may need to install the hopping module) (@INC contains: ...)"
+
+=back
+
+=head1 Utility Changes
+
+=head3 L<h2xs>
+
+=over 4
+
+=item *
+
+F<h2xs> no longer produces invalid code for empty defines.  [perl #20636]
+
+=back
+
+=head1 Platform Support
+
+=head2 Discontinued Platforms
+
+=over 4
+
+=item MPE/IX
+
+Support for MPE/IX has been removed.
+
+=back
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Win32
+
+The option to build without USE_SOCKETS_AS_HANDLES has been removed.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Case-insensitive matching inside a [bracketed] character class with a
+multi-character fold, no longer excludes one of the possibilities in the
+circumstances that it used to. [perl #89774].
+
+=item *
+
+C<PL_formfeed> has been removed.
+
+=item *
+
+The regular expression engine no longer reads one byte past the end of the
+target string.  While for all internally well-formed scalars this should
+never have been a problem, this change facilitates clever tricks with
+string buffers in CPAN modules.  [perl #73542]
+
+=item *
+
+Inside a BEGIN block, C<PL_compcv> now points to the currently-compiling
+subroutine, rather than the BEGIN block itself.
+
+=item *
+
+C<mg_length> has been deprecated.
+
+=item *
+
+C<sv_len> now always returns a byte count and C<sv_len_utf8> a character
+count.  Previously, C<sv_len> and C<sv_len_utf8> were both buggy and would
+sometimes returns bytes and sometimes characters.  C<sv_len_utf8> no longer
+assumes that its argument is in UTF8.  Neither of these creates UTF8 caches
+for tied or overloaded values or for non-PVs any more.
+
+=item *
+
+C<sv_mortalcopy> now copies string buffers of shared hash key scalars when
+called from XS modules [perl #79824].
+
+=item *
+
+C<RXf_SPLIT> and C<RXf_SKIPWHITE> are no longer used.  They are now
+#defined as 0.
+
+=item *
+
+The new C<RXf_MODIFIES_VARS> flag can be set by custom regular expression
+engines to indicate that the execution of the regular expression may cause
+variables to be modified.  This lets C<s///> know to skip certain
+optimisations.  Perl's own regular expression engine sets this flag for the
+special backtracking verbs that set $REGMARK and $REGERROR.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+A bug, case-insensitive regex with UTF8-flagged strings, introduced
+earlier in the 5.17 series has been fixed.  [perl #114982]
+
+=item *
+
+Attributes applied to lexical variables no longer leak memory.
+[perl #114764]
+
+=item *
+
+C<dump>, C<goto>, C<last>, C<next>, C<redo> or C<require> followed by a
+bareword (or version) and then an infix operator is no longer a syntax
+error.  It used to be for those infix operators (like C<+>) that have a
+different meaning where a term is expected.  [perl #105924]
+
+=item *
+
+C<require a::b . 1> and C<require a::b + 1> no longer produce erroneous
+ambiguity warnings.  [perl #107002]
+
+=item *
+
+Class method calls are now allowed on any string, and not just strings
+beginning with an alphanumeric character.  [perl #105922]
+
+=item *
+
+An empty pattern created with C<qr//> used in C<m///> no longer triggers
+the "empty pattern reuses last pattern" behaviour.  [perl #96230]
+
+=item *
+
+Tying a hash during iteration no longer results in a memory leak.
+
+=item *
+
+Freeing a tied hash during iteration no longer results in a memory leak.
+
+=item *
+
+List assignment to a tied array or hash that dies on STORE no longer
+results in a memory leak.
+
+=item *
+
+If the hint hash (C<%^H>) is tied, compile-time scope entry (which copies
+the hint hash) no longer leaks memory if FETCH dies.  [perl #107000]
+
+=item *
+
+Constant folding no longer inappropriately triggers the special
+C<split " "> behaviour.  [perl #94490]
+
+=item *
+
+C<defined scalar(@array)>, C<defined do { &foo }>, and similar constructs
+now treat the argument to C<defined> as a simple scalar.  [perl #97466]
+
+=item *
+
+Running a custom debugging that defines no C<*DB::DB> glob or provides a
+subroutine stub for C<&DB::DB> no longer results in a crash, but an error
+instead.  [perl #114990]
+
+=item *
+
+C<reset ""> now matches its documentation.  C<reset> only resets C<m?...?>
+patterns when called with no argument.  An empty string for an argument now
+does nothing.  (It used to be treated as no argument.)  [perl #97958]
+
+=item *
+
+C<printf> with an argument returning an empty list no longer reads past the
+end of the stack, resulting in erratic behaviour.  [perl #77094]
+
+=item *
+
+C<--subname> no longer produces erroneous ambiguity warnings.
+[perl #77240]
+
+=item *
+
+C<v10> is now allowed as a label or package name.  This was inadvertently
+broken when v-strings were added in Perl 5.6.  [perl #56880]
+
+=item *
+
+A regression introduced in 5.17.2 has been fixed, which made C</[\@\\]||/>
+result in a "panic" error.  [perl #115050]
+
+=item *
+
+C<length>, C<pos>, C<substr> and C<sprintf> could be confused by ties,
+overloading, references and typeglobs if the stringification of such
+changed the internal representation to or from UTF8.  [perl #114410]
+
+=item *
+
+utf8::encode now calls FETCH and STORE on tied variables.  utf8::decode now
+calls STORE (it was already calling FETCH).
+
+=item *
+
+C<$tied =~ s/$non_utf8/$utf8/> no longer loops infinitely if the tied
+variable returns a Latin-1 string, shared hash key scalar, or reference or
+typeglob that stringifies as ASCII or Latin-1.  This is a regression from
+5.12.x.
+
+=item *
+
+C<s///> without /e is now better at detecting when it needs to forego
+certain optimisations, fixing some buggy cases:
+
+=over
+
+=item *
+
+Match variables in certain constructs (C<&&>, C<||>, C<..> and others) in
+the replacement part; e.g., C<s/(.)/$l{$a||$1}/g>.  [perl #26986]
+
+=item *
+
+Aliases to match variables in the replacement.
+
+=item *
+
+$REGERROR or $REGMARK in the replacement.  [perl #49190]
+
+=item *
+
+An empty pattern (C<s//$foo/>) that causes the last-successful pattern to
+be used, when that pattern contains code blocks that modify the variables
+in the replacement.
+
+=back
+
+=item *
+
+The taintedness of the replacement string no longer affects the taintedness
+of the return value of C<s///e>.
+
+=item *
+
+The C<$|> autoflush variable is created on-the-fly when needed.  If this
+happened (e.g., if it was mentioned in a module or eval) when the
+currently-selected filehandle was a typeglob with an empty IO slot, it used
+to crash.  [perl #115206]
+
+=item *
+
+Line numbers at the end of a string eval are no longer off by one.
+[perl #114658]
+
+=item *
+
+@INC filters (subroutines returned by subroutines in @INC) that set $_ to a
+copy-on-write scalar no longer cause the parser to modify that string
+buffer in place.
+
+=item *
+
+C<length($object)> no longer returns the undefined value if the object has
+string overloading that returns undef.  [perl #115260]
+
+=item *
+
+The use of C<PL_stashcache>, the stash name lookup cache for method calls, has
+been restored,
+
+Commit da6b625f78f5f133 in August 2011 inadvertently broke the code that looks
+up values in C<PL_stashcache>. As it's a only cache, quite correctly everything
+carried on working without it.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.17.5 represents approximately 4 weeks of development since Perl 5.17.4
+and contains approximately 17,000 lines of changes across 310 files from 32
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.5:
+
+Aaron Crane, Adrian M. Enache, Andy Dougherty, Brad Gilbert, Chris 'BinGOs'
+Williams, Colin Kuskie, Craig A. Berry, Daniel Dragan, David Golden, David
+Mitchell, Dominic Hargreaves, Eric Brine, Father Chrysostomos, Florian Ragwitz,
+H.Merijn Brand, James E Keenan, Jerry D. Hedden, Jesse Luehrs, Karl Williamson,
+Nicholas Clark, Niko Tyni, Paul Johnson, Peter Martini, Reini Urban, Ricardo
+Signes, Ruslan Zakirov, Sawyer X, Smylers, Steffen Müller, Steve Hay, Tony
+Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+http://rt.perl.org/perlbug/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
