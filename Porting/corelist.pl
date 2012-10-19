@@ -368,7 +368,7 @@ sub quote {
     my ($str) = @_;
     # There's gotta be something already doing this properly that we could just
     # reuse, but I can't quite thing of where to look for it, so I'm gonna do
-    # the simplest possible thing that'll allow me to release 5.17.5.  --rafl
+    # the simplest possible thing that'll allow me to release 5.17.6.  --rafl
     $str =~ s/'/\\'/g;
     "'${str}'";
 }
