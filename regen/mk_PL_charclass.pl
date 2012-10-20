@@ -22,6 +22,7 @@ require 'regen/regen_lib.pl';
 # new Unicode release, to make sure things haven't been changed by it.
 
 my @properties = qw(
+    NONLATIN1_FOLD
     ALNUMC
     ALPHA
     ASCII
@@ -46,14 +47,18 @@ my @properties = qw(
 
 # Read in the case fold mappings.
 my %folded_closure;
-my $file="lib/unicore/CaseFolding.txt";
+my @hex_non_final_folds;
 my @folds;
 use Unicode::UCD;
+
+BEGIN { # Have to do this at compile time because using user-defined \p{property}
 
 # Use the Unicode data file if we are on an ASCII platform (which its data is
 # for), and it is in the modern format (starting in Unicode 3.1.0) and it is
 # available.  This avoids being affected by potential bugs introduced by other
 # layers of Perl
+my $file="lib/unicore/CaseFolding.txt";
+
 if (ord('A') == 65
     && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
     && open my $fh, "<", $file)
@@ -105,10 +110,13 @@ for (@folds) {
     # Get each code point in the range that participates in this line's fold.
     # The hash has keys of each code point in the range, and values of what it
     # folds to and what folds to it
-    foreach my $hex_fold (@folded) {
+    for my $i (0 .. @folded - 1) {
+        my $hex_fold = $folded[$i];
         my $fold = hex $hex_fold;
         push @{$folded_closure{$fold}}, $from if $fold < 256;
         push @{$folded_closure{$from}}, $fold if $from < 256;
+
+        push @hex_non_final_folds, $hex_fold if $i < @folded -1 && $fold < 256;
     }
 }
 
@@ -120,12 +128,23 @@ foreach my $folded (keys %folded_closure) {
     }
 }
 
-my @bits;   # Bit map for each code point
-
-foreach my $folded (keys %folded_closure) {
-    $bits[$folded] = "(1U<<_CC_NONLATIN1_FOLD)" if grep { $_ > 255 }
-                                                @{$folded_closure{$folded}};
 }
+
+sub Is_Non_Latin1_Fold {
+    my @return;
+
+    foreach my $folded (keys %folded_closure) {
+        push @return, sprintf("%X", $folded), if grep { $_ > 255 }
+                                                     @{$folded_closure{$folded}};
+    }
+    return join("\n", @return) . "\n";
+}
+
+sub Is_Non_Final_Fold {
+    return join("\n", @hex_non_final_folds) . "\n";
+}
+
+my @bits;   # Bit map for each code point
 
 # For each character, calculate which properties it matches.
 for my $ord (0..255) {
@@ -168,8 +187,10 @@ for my $ord (0..255) {
             $re = qr/\p{Alnum}/;
         } elsif ($name eq 'QUOTEMETA') {
             $re = qr/\p{_Perl_Quotemeta}/;
+        } elsif ($name eq 'NONLATIN1_FOLD') {
+            $re = qr/\p{Is_Non_Latin1_Fold}/;
         } elsif ($name eq 'NON_FINAL_FOLD') {
-            $re = qr/\p{_Perl_Non_Final_Folds}/;
+            $re = qr/\p{Is_Non_Final_Fold}/;
         } elsif ($name eq 'IS_IN_SOME_FOLD') {
             $re = qr/\p{_Perl_Any_Folds}/;
         } else {    # The remainder have the same name and values as Unicode
