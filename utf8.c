@@ -4294,9 +4294,11 @@ scanning won't continue past that goal.  Correspondingly for C<l2> with respect 
 C<s2>.
 
 If C<pe1> is non-NULL and the pointer it points to is not NULL, that pointer is
-considered an end pointer beyond which scanning of C<s1> will not continue under
-any circumstances.  This means that if both C<l1> and C<pe1> are specified, and
-C<pe1>
+considered an end pointer to the position 1 byte past the maximum point
+in C<s1> beyond which scanning will not continue under any circumstances.
+(This routine assumes that UTF-8 encoded input strings are not malformed;
+malformed input can cause it to read past C<pe1>).
+This means that if both C<l1> and C<pe1> are specified, and C<pe1>
 is less than C<s1>+C<l1>, the match will never be successful because it can
 never
 get as far as its goal (and in fact is asserted against).  Correspondingly for
