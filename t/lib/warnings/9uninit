@@ -2042,4 +2042,34 @@ format =
 write;
 EXPECT
 Use of uninitialized value $x in string at - line 6.
+########
+# TODO bugfix will come next patch
+# NAME off-by-one error in hash bucket walk in key detection logic
+use warnings 'uninitialized';
 
+for ( 0 .. 20 ) { # we assume that this means we test keys for every bucket
+    my %h= ( $_ => undef );
+    my $s= sprintf "%s", $h{$_};
+}
+EXPECT
+Use of uninitialized value $h{"0"} in sprintf at - line 5.
+Use of uninitialized value $h{"1"} in sprintf at - line 5.
+Use of uninitialized value $h{"2"} in sprintf at - line 5.
+Use of uninitialized value $h{"3"} in sprintf at - line 5.
+Use of uninitialized value $h{"4"} in sprintf at - line 5.
+Use of uninitialized value $h{"5"} in sprintf at - line 5.
+Use of uninitialized value $h{"6"} in sprintf at - line 5.
+Use of uninitialized value $h{"7"} in sprintf at - line 5.
+Use of uninitialized value $h{"8"} in sprintf at - line 5.
+Use of uninitialized value $h{"9"} in sprintf at - line 5.
+Use of uninitialized value $h{"10"} in sprintf at - line 5.
+Use of uninitialized value $h{"11"} in sprintf at - line 5.
+Use of uninitialized value $h{"12"} in sprintf at - line 5.
+Use of uninitialized value $h{"13"} in sprintf at - line 5.
+Use of uninitialized value $h{"14"} in sprintf at - line 5.
+Use of uninitialized value $h{"15"} in sprintf at - line 5.
+Use of uninitialized value $h{"16"} in sprintf at - line 5.
+Use of uninitialized value $h{"17"} in sprintf at - line 5.
+Use of uninitialized value $h{"18"} in sprintf at - line 5.
+Use of uninitialized value $h{"19"} in sprintf at - line 5.
+Use of uninitialized value $h{"20"} in sprintf at - line 5.
