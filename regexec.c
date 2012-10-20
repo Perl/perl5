@@ -660,8 +660,12 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;
 	  }
-	  if (prog->check_offset_min == prog->check_offset_max &&
-	      !(prog->extflags & RXf_CANY_SEEN)) {
+	  if (prog->check_offset_min == prog->check_offset_max
+              && !(prog->extflags & RXf_CANY_SEEN)
+              && ! multiline)   /* /m can cause \n's to match that aren't
+                                   accounted for in the string max length.
+                                   See [perl #115242] */
+          {
 	    /* Substring at constant offset from beg-of-str... */
 	    I32 slen;
 
