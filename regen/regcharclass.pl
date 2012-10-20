@@ -1033,16 +1033,16 @@ sub _cond_as_str {
 
                 $range_count_extra++;   # This range requires 2 branches to
                                         # represent
-            if ($ranges[$i]->[0] + 1 == $ranges[$i]->[1]) {
-                $ranges[$i] = "( "
-                            .  join( " || ", ( map
-                                { sprintf "$self->{val_fmt} == $test", $_ }
-                                @{$ranges[$i]} ) )
-                            . " )";
-            }
-            else {  # Full bounds checking
-                $ranges[$i] = sprintf("( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )", $ranges[$i]->[0], $ranges[$i]->[1]);
-            }
+                if ($ranges[$i]->[0] + 1 == $ranges[$i]->[1]) {
+                    $ranges[$i] = "( "
+                                .  join( " || ", ( map
+                                    { sprintf "$self->{val_fmt} == $test", $_ }
+                                    @{$ranges[$i]} ) )
+                                . " )";
+                }
+                else {  # Full bounds checking
+                    $ranges[$i] = sprintf("( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )", $ranges[$i]->[0], $ranges[$i]->[1]);
+                }
             }
         }
     }
