@@ -53,81 +53,81 @@ use Unicode::UCD;
 
 BEGIN { # Have to do this at compile time because using user-defined \p{property}
 
-# Use the Unicode data file if we are on an ASCII platform (which its data is
-# for), and it is in the modern format (starting in Unicode 3.1.0) and it is
-# available.  This avoids being affected by potential bugs introduced by other
-# layers of Perl
-my $file="lib/unicore/CaseFolding.txt";
+    # Use the Unicode data file if we are on an ASCII platform (which its data
+    # is for), and it is in the modern format (starting in Unicode 3.1.0) and
+    # it is available.  This avoids being affected by potential bugs
+    # introduced by other layers of Perl
+    my $file="lib/unicore/CaseFolding.txt";
 
-if (ord('A') == 65
-    && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
-    && open my $fh, "<", $file)
-{
-    @folds = <$fh>;
-}
-else {
-    my ($invlist_ref, $invmap_ref, undef, $default)
+    if (ord('A') == 65
+        && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
+        && open my $fh, "<", $file)
+    {
+        @folds = <$fh>;
+    }
+    else {
+        my ($invlist_ref, $invmap_ref, undef, $default)
                                     = Unicode::UCD::prop_invmap('Case_Folding');
-    for my $i (0 .. @$invlist_ref - 1 - 1) {
-        next if $invmap_ref->[$i] == $default;
-        my $adjust = -1;
-        for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
-            $adjust++;
+        for my $i (0 .. @$invlist_ref - 1 - 1) {
+            next if $invmap_ref->[$i] == $default;
+            my $adjust = -1;
+            for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
+                $adjust++;
 
-            # Single-code point maps go to a 'C' type
-            if (! ref $invmap_ref->[$i]) {
-                push @folds, sprintf("%04X; C; %04X\n",
-                                     $j,
-                                     $invmap_ref->[$i] + $adjust);
-            }
-            else {  # Multi-code point maps go to 'F'.  prop_invmap()
-                    # guarantees that no adjustment is needed for these,
-                    # as the range will contain just one element
-                push @folds, sprintf("%04X; F; %s\n",
-                                    $j,
-                                    join " ", map { sprintf "%04X", $_ }
-                                                    @{$invmap_ref->[$i]});
+                # Single-code point maps go to a 'C' type
+                if (! ref $invmap_ref->[$i]) {
+                    push @folds, sprintf("%04X; C; %04X\n",
+                                        $j,
+                                        $invmap_ref->[$i] + $adjust);
+                }
+                else {  # Multi-code point maps go to 'F'.  prop_invmap()
+                        # guarantees that no adjustment is needed for these,
+                        # as the range will contain just one element
+                    push @folds, sprintf("%04X; F; %s\n",
+                                        $j,
+                                        join " ", map { sprintf "%04X", $_ }
+                                                        @{$invmap_ref->[$i]});
+                }
             }
         }
     }
-}
 
-for (@folds) {
-    chomp;
+    for (@folds) {
+        chomp;
 
-    # Lines look like (without the initial '#'
-    #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
-    # Get rid of comments, ignore blank or comment-only lines
-    my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
-    next unless length $line;
-    my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
+        # Lines look like (without the initial '#'
+        #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
+        # Get rid of comments, ignore blank or comment-only lines
+        my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
+        next unless length $line;
+        my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
 
-    my $from = hex $hex_from;
+        my $from = hex $hex_from;
 
-    # Perl only deals with C and F folds
-    next if $fold_type ne 'C' and $fold_type ne 'F';
+        # Perl only deals with C and F folds
+        next if $fold_type ne 'C' and $fold_type ne 'F';
 
-    # Get each code point in the range that participates in this line's fold.
-    # The hash has keys of each code point in the range, and values of what it
-    # folds to and what folds to it
-    for my $i (0 .. @folded - 1) {
-        my $hex_fold = $folded[$i];
-        my $fold = hex $hex_fold;
-        push @{$folded_closure{$fold}}, $from if $fold < 256;
-        push @{$folded_closure{$from}}, $fold if $from < 256;
+        # Get each code point in the range that participates in this line's fold.
+        # The hash has keys of each code point in the range, and values of what it
+        # folds to and what folds to it
+        for my $i (0 .. @folded - 1) {
+            my $hex_fold = $folded[$i];
+            my $fold = hex $hex_fold;
+            push @{$folded_closure{$fold}}, $from if $fold < 256;
+            push @{$folded_closure{$from}}, $fold if $from < 256;
 
-        push @hex_non_final_folds, $hex_fold if $i < @folded -1 && $fold < 256;
+            push @hex_non_final_folds, $hex_fold if $i < @folded-1 && $fold < 256;
+        }
     }
-}
 
-# Now having read all the lines, combine them into the full closure of each
-# code point in the range by adding lists together that share a common element
-foreach my $folded (keys %folded_closure) {
-    foreach my $from (grep { $_ < 256 } @{$folded_closure{$folded}}) {
-        push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
+    # Now having read all the lines, combine them into the full closure of each
+    # code point in the range by adding lists together that share a common
+    # element
+    foreach my $folded (keys %folded_closure) {
+        foreach my $from (grep { $_ < 256 } @{$folded_closure{$folded}}) {
+            push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
+        }
     }
-}
-
 }
 
 sub Is_Non_Latin1_Fold {
