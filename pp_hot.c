@@ -950,19 +950,19 @@ PP(pp_rv2av)
 }
 
 STATIC void
-S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
+S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_DO_ODDBALL;
 
-    if (*relem) {
+    if (*oddkey) {
         if (ckWARN(WARN_MISC)) {
 	    const char *err;
-	    if (relem == firstrelem &&
-		SvROK(*relem) &&
-		(SvTYPE(SvRV(*relem)) == SVt_PVAV ||
-		 SvTYPE(SvRV(*relem)) == SVt_PVHV))
+	    if (oddkey == firstkey &&
+		SvROK(*oddkey) &&
+		(SvTYPE(SvRV(*oddkey)) == SVt_PVAV ||
+		 SvTYPE(SvRV(*oddkey)) == SVt_PVHV))
 	    {
 		err = "Reference found where even-sized list expected";
 	    }
@@ -1085,7 +1085,7 @@ PP(pp_aassign)
 
                 odd = ((lastrelem - firsthashrelem)&1)? 0 : 1;
                 if ( odd ) {
-                    do_oddball(hash, lastrelem, firsthashrelem);
+                    do_oddball(lastrelem, firsthashrelem);
                     /* we have lelem to reuse, it's not needed anymore */
                     *(lastrelem+1) = &PL_sv_undef;
                 }
