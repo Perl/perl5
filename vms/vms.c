@@ -14190,7 +14190,7 @@ extern void (*vmsperl_unused_global_1)(void) = LIB$INITIALIZE;
  * LIB$INITIALIZE section. In our case, the array only has one entry.
  */ 
 #pragma extern_model save 
-#pragma extern_model strict_refdef "LIB$INITIALIZE" gbl,noexe,nowrt,noshr,long 
+#pragma extern_model strict_refdef "LIB$INITIALIZE" nopic,gbl,nowrt,noshr,long 
 extern void (* const vmsperl_unused_global_2[])() = 
 { 
    vmsperl_set_features,
