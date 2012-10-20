@@ -299,6 +299,19 @@ no_warnings("invalid slurpy parameters");
     $failed = !not_banned5(12);
     ok($failed, "\@_ restriction in effect for string eval at run time");
 
+    # Allow use of @_ as slurpy - bypassing the ban
+    $legal = eval 'sub not_banned6($x, @_) { return scalar(@_) }; 1';
+    ok($legal, "\@_ as slurpy bypasses \@_ ban");
+    is(scalar(not_banned6(1..10)), 9, "\@_ as slurpy works");
+
+    # @_ as slurpy should have copy, not alias semantics
+    $legal = eval 'sub not_banned7($x, @_) { $_[0] += 1; $_[0] }; 1';
+    ok($legal, "\@_ as slurpy bypasses \@_ ban (2)");
+    is(eval 'not_banned7(2, 12)', 13, "slurpy \@_ has copy semantics");
+    my $x = 12;
+    is(not_banned7(2, $x), 13, "slurpy \@_ has copy semantics (2)");
+    is($x, 12, "slurpy \@_ has copy semantics (3)");
+
     # Test aliases too
     *globb = *main::_;
     $legal = eval 'sub banned5 ($foo) { $#globb;}; 1';
