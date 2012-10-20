@@ -294,6 +294,10 @@ no_warnings("invalid slurpy parameters");
     ok($legal, "\$#_ restriction doesn't apply to nested subs");
     $legal = eval 'sub banned4 ($foo){ sub not_banned4 { @_ }; }; 1';
     ok($legal, "\@_ restriction doesn't apply to nested subs");
+    $legal = eval 'sub not_banned5 ($foo){ return eval q{"@_"; 1}; } 1';
+    ok($legal, "\@_ restriction not visible in string eval at compile time");
+    $failed = !not_banned5(12);
+    ok($failed, "\@_ restriction in effect for string eval at run time");
 
     # Test aliases too
     *globb = *main::_;
