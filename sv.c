@@ -13836,7 +13836,7 @@ S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
 
     array = HvARRAY(hv);
 
-    for (i=HvMAX(hv); i>0; i--) {
+    for (i=HvMAX(hv); i>=0; i--) {
 	HE *entry;
 	for (entry = array[i]; entry; entry = HeNEXT(entry)) {
 	    if (HeVAL(entry) != val)

@@ -2043,7 +2043,6 @@ write;
 EXPECT
 Use of uninitialized value $x in string at - line 6.
 ########
-# TODO bugfix will come next patch
 # NAME off-by-one error in hash bucket walk in key detection logic
 use warnings 'uninitialized';
 
