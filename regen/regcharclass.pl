@@ -755,8 +755,9 @@ sub _cond_as_str {
                 @$_ )
             : sprintf( "$self->{val_fmt} == $test", $_ );
         } @ranges;
+
+        return "( " . join( " || ", @ranges ) . " )";
     }
-    else {
         # If the input set has certain characteristics, we can optimize tests
         # for it.  This doesn't apply if returning the code point, as we want
         # each element of the set individually.  The code above is for this
@@ -853,7 +854,6 @@ sub _cond_as_str {
                 }
             }
         }
-    }
 
     return "( " . join( " || ", @ranges ) . " )";
 
