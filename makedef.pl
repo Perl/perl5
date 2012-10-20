@@ -105,6 +105,7 @@ open(CFG, '<', 'config.h') || die "Cannot open config.h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
                                            |SPRINTF_RETURNS_STRLEN
+                                           |KILL_BY_SIGPRC
                                            |(?:PERL|USE|HAS)_\w+)\b/x;
 }
 close(CFG);
@@ -471,7 +472,17 @@ if ($define{HAS_SIGACTION}) {
     if ($ARGS{PLATFORM} eq 'vms') {
         # FAKE_PERSISTENT_SIGNAL_HANDLERS defined as !defined(HAS_SIGACTION)
         ++$skip{PL_sig_ignoring};
+        ++$skip{PL_sig_handlers_initted} unless $define{KILL_BY_SIGPRC};
     }
+}
+
+if ($ARGS{PLATFORM} eq 'vms' && !$define{KILL_BY_SIGPRC}) {
+    # FAKE_DEFAULT_SIGNAL_HANDLERS defined as KILL_BY_SIGPRC
+    ++$skip{Perl_csighandler_init};
+    ++$skip{Perl_my_kill};
+    ++$skip{Perl_sig_to_vmscondition};
+    ++$skip{PL_sig_defaulting};
+    ++$skip{PL_sig_handlers_initted} unless !$define{HAS_SIGACTION};
 }
 
 unless ($define{USE_LOCALE_COLLATE}) {
