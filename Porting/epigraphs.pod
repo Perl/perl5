@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.17.5 - Charles Stross, "Singularity Sky"
 
-Announced on 2012-10-20 by Florian Ragwitz
+L<Announced on 2012-10-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-10/msg01007.html>
 
 Neither of them noticed the pair of polka-dotted knickers hiding
 behind the ventilation duct overhead, listening patiently and
