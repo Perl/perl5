@@ -232,7 +232,9 @@ typedef struct RExC_state_t {
 #define	HASWIDTH	0x01	/* Known to match non-null strings. */
 
 /* Simple enough to be STAR/PLUS operand; in an EXACTish node must be a single
- * character.  Note that this is not the same thing as REGNODE_SIMPLE */
+ * character.  (There needs to be a case: in the switch statement in regexec.c
+ * for any node marked SIMPLE.)  Note that this is not the same thing as
+ * REGNODE_SIMPLE */
 #define	SIMPLE		0x02
 #define	SPSTART		0x04	/* Starts with * or + */
 #define TRYAGAIN	0x08	/* Weeded out a declaration. */
