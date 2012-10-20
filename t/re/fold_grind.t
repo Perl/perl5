@@ -75,6 +75,7 @@ sub numerically {
 }
 
 my $list_all_tests = $ENV{PERL_DEBUG_FULL_TEST} || $DEBUG;
+$| = 1 if $list_all_tests;
 
 # Significant time is saved by not outputting each test but grouping the
 # output into subtests
