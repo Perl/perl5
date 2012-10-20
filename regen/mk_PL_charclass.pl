@@ -116,7 +116,16 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
             push @{$folded_closure{$fold}}, $from if $fold < 256;
             push @{$folded_closure{$from}}, $fold if $from < 256;
 
-            push @hex_non_final_folds, $hex_fold if $i < @folded-1 && $fold < 256;
+            if ($i < @folded-1
+                && $fold < 256
+                && ! grep { $_ eq $hex_fold } @hex_non_final_folds)
+            {
+                push @hex_non_final_folds, $hex_fold;
+
+                # Also add the upper case, which in the latin1 range folds to
+                # $fold
+                push @hex_non_final_folds, sprintf "%04X", ord uc chr $fold;
+            }
         }
     }
 
@@ -199,11 +208,7 @@ for my $ord (0..255) {
             carp $@ if ! defined $re;
         }
         #print "$ord, $name $property, $re\n";
-        if ($char =~ $re  # Add this property if matches
-            || ($name eq 'NON_FINAL_FOLD'
-                # Also include chars that fold to the non-final
-                && CORE::fc($char) =~ $re))
-        {
+        if ($char =~ $re) {  # Add this property if matches
             $bits[$ord] .= '|' if $bits[$ord];
             $bits[$ord] .= "(1U<<_CC_$property)";
         }
