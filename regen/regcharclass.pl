@@ -9,6 +9,9 @@ use Data::Dumper;
 $Data::Dumper::Useqq= 1;
 our $hex_fmt= "0x%02X";
 
+sub DEBUG () { 0 }
+$|=1 if DEBUG;
+
 sub ASCII_PLATFORM { (ord('A') == 65) }
 
 require 'regen/regen_lib.pl';
@@ -612,102 +615,257 @@ sub length_optree {
 }
 
 sub calculate_mask(@) {
+    # Look at the input list of byte values.  This routine returns an array of
+    # mask/base pairs to generate that list.
+
     my @list = @_;
     my $list_count = @list;
 
-    # Look at the input list of byte values.  This routine sees if the set
-    # consisting of those bytes is exactly determinable by using a
-    # mask/compare operation.  If not, it returns an empty list; if so, it
-    # returns a list consisting of (mask, compare).  For example, consider a
-    # set consisting of the numbers 0xF0, 0xF1, 0xF2, and 0xF3.  If we want to
-    # know if a number 'c' is in the set, we could write:
+    # Consider a set of byte values, A, B, C ....  If we want to determine if
+    # <c> is one of them, we can write c==A || c==B || c==C ....  If the
+    # values are consecutive, we can shorten that to A<=c && c<=Z, which uses
+    # far fewer branches.  If only some of them are consecutive we can still
+    # save some branches by creating range tests for just those that are
+    # consecutive. _cond_as_str() does this work for looking for ranges.
+    #
+    # Another approach is to look at the bit patterns for A, B, C .... and see
+    # if they have some commonalities.  That's what this function does.  For
+    # example, consider a set consisting of the bytes
+    # 0xF0, 0xF1, 0xF2, and 0xF3.  We could write:
     #   0xF0 <= c && c <= 0xF4
     # But the following mask/compare also works, and has just one test:
-    #   c & 0xFC == 0xF0
-    # The reason it works is that the set consists of exactly those numbers
+    #   (c & 0xFC) == 0xF0
+    # The reason it works is that the set consists of exactly those bytes
     # whose first 4 bits are 1, and the next two are 0.  (The value of the
-    # other 2 bits is immaterial in determining if a number is in the set or
+    # other 2 bits is immaterial in determining if a byte is in the set or
     # not.)  The mask masks out those 2 irrelevant bits, and the comparison
-    # makes sure that the result matches all bytes that which match those 6
-    # material bits exactly.  In other words, the set of numbers contains
+    # makes sure that the result matches all bytes which match those 6
+    # material bits exactly.  In other words, the set of bytes contains
     # exactly those whose bottom two bit positions are either 0 or 1.  The
     # same principle applies to bit positions that are not necessarily
     # adjacent.  And it can be applied to bytes that differ in 1 through all 8
     # bit positions.  In order to be a candidate for this optimization, the
-    # number of numbers in the test must be a power of 2.  Based on this
-    # count, we know the number of bit positions that must differ.
-    my $bit_diff_count = 0;
-    my $compare = $list[0];
-    if ($list_count == 2) {
-        $bit_diff_count = 1;
-    }
-    elsif ($list_count == 4) {
-        $bit_diff_count = 2;
-    }
-    elsif ($list_count == 8) {
-        $bit_diff_count = 3;
-    }
-    elsif ($list_count == 16) {
-        $bit_diff_count = 4;
-    }
-    elsif ($list_count == 32) {
-        $bit_diff_count = 5;
-    }
-    elsif ($list_count == 64) {
-        $bit_diff_count = 6;
-    }
-    elsif ($list_count == 128) {
-        $bit_diff_count = 7;
-    }
-    elsif ($list_count == 256) {
+    # number of bytes in the set must be a power of 2.
+    #
+    # Consider a different example, the set 0x53, 0x54, 0x73, and 0x74.  That
+    # requires 4 tests using either ranges or individual values, and even
+    # though the number in the set is a power of 2, it doesn't qualify for the
+    # mask optimization described above because the number of bits that are
+    # different is too large for that.  However, the set can be expressed as
+    # two branches with masks thusly:
+    #   (c & 0xDF) == 0x53 || (c & 0xDF) == 0x54
+    # a branch savings of 50%.  This is done by splitting the set into two
+    # subsets each of which has 2 elements, and within each set the values
+    # differ by 1 byte.
+    #
+    # This function attempts to find some way to save some branches using the
+    # mask technique.  If not, it returns an empty list; if so, it
+    # returns a list consisting of
+    #   [ [compare1, mask1], [compare2, mask2], ...
+    #     [compare_n, undef], [compare_m, undef], ...
+    #   ]
+    # The <mask> is undef in the above for those bytes that must be tested
+    # for individually.
+    #
+    # This function does not attempt to find the optimal set.  To do so would
+    # probably require testing all possible combinations, and keeping track of
+    # the current best one.
+    #
+    # There are probably much better algorithms, but this is the one I (khw)
+    # came up with.  We start with doing a bit-wise compare of every byte in
+    # the set with every other byte.  The results are sorted into arrays of
+    # all those that differ by the same bit positions.  These are stored in a
+    # hash with the each key being the bits they differ in.  Here is the hash
+    # for the 0x53, 0x54, 0x73, 0x74 set:
+    # {
+    #    4 => {
+    #            "0,1,2,5" => [
+    #                            83,
+    #                            116,
+    #                            84,
+    #                            115
+    #                        ]
+    #        },
+    #    3 => {
+    #            "0,1,2" => [
+    #                        83,
+    #                        84,
+    #                        115,
+    #                        116
+    #                        ]
+    #        }
+    #    1 => {
+    #            5 => [
+    #                    83,
+    #                    115,
+    #                    84,
+    #                    116
+    #                ]
+    #        },
+    # }
+    #
+    # The set consisting of values which differ in the 4 bit positions 0, 1,
+    # 2, and 5 from some other value in the set consists of all 4 values.
+    # Likewise all 4 values differ from some other value in the 3 bit
+    # positions 0, 1, and 2; and all 4 values differ from some other value in
+    # the single bit position 5.  The keys at the uppermost level in the above
+    # hash, 1, 3, and 4, give the number of bit positions that each sub-key
+    # below it has.  For example, the 4 key could have as its value an array
+    # consisting of "0,1,2,5", "0,1,2,6", and "3,4,6,7", if the inputs were
+    # such.  The best optimization will group the most values into a single
+    # mask.  The most values will be the ones that differ in the most
+    # positions, the ones with the largest value for the topmost key.  These
+    # keys, are thus just for convenience of sorting by that number, and do
+    # not have any bearing on the core of the algorithm.
+    #
+    # We start with an element from largest number of differing bits.  The
+    # largest in this case is 4 bits, and there is only one situation in this
+    # set which has 4 differing bits, "0,1,2,5".  We look for any subset of
+    # this set which has 16 values that differ in these 4 bits.  There aren't
+    # any, because there are only 4 values in the entire set.  We then look at
+    # the next possible thing, which is 3 bits differing in positions "0,1,2".
+    # We look for a subset that has 8 values that differ in these 3 bits.
+    # Again there are none.  So we go to look for the next possible thing,
+    # which is a subset of 2**1 values that differ only in bit position 5.  83
+    # and 115 do, so we calculate a mask and base for those and remove them
+    # from every set.  Since there is only the one set remaining, we remove
+    # them from just this one.  We then look to see if there is another set of
+    # 2 values that differ in bit position 5.  84 and 116 do, so we calculate
+    # a mask and base for those and remove them from every set (again only
+    # this set remains in this example).  The set is now empty, and there are
+    # no more sets to look at, so we are done.
+
+    if ($list_count == 256) {   # All 256 is trivially masked
         return (0, 0);
     }
 
-    # If the count wasn't a power of 2, we can't apply this optimization
-    return if ! $bit_diff_count;
+    my %hash;
 
-    my %bit_map;
-
-    # For each byte in the list, find the bit positions in it whose value
-    # differs from the first byte in the set.
-    for (my $i = 1; $i < @list; $i++) {
-        my @positions = pop_count($list[0] ^ $list[$i]);
-
-        # If the number of differing bits is greater than those permitted by
-        # the set size, this optimization doesn't apply.
-        return if @positions > $bit_diff_count;
-
-        # Save the bit positions that differ.
-        foreach my $bit (@positions) {
-            $bit_map{$bit} = 1;
+    # Generate bits-differing lists for each element compared against each
+    # other element
+    for my $i (0 .. $list_count - 2) {
+        for my $j ($i + 1 .. $list_count - 1) {
+            my @bits_that_differ = pop_count($list[$i] ^ $list[$j]);
+            my $differ_count = @bits_that_differ;
+            my $key = join ",", @bits_that_differ;
+            push @{$hash{$differ_count}{$key}}, $list[$i] unless grep { $_ == $list[$i] } @{$hash{$differ_count}{$key}};
+            push @{$hash{$differ_count}{$key}}, $list[$j];
         }
-
-        # If the total so far is greater than those permitted by the set size,
-        # this optimization doesn't apply.
-        return if keys %bit_map > $bit_diff_count;
-
-
-        # The value to compare against is the AND of all the members of the
-        # set.  The bit positions that are the same in all will be correct in
-        # the AND, and the bit positions that differ will be 0.
-        $compare &= $list[$i];
     }
 
-    # To get to here, we have gone through all bytes in the set,
-    # and determined that they all differ from each other in at most
-    # the number of bits allowed for the set's quantity.  And since we have
-    # tested all 2**N possibilities, we know that the set includes no fewer
-    # elements than we need,, so the optimization applies.
-    die "panic: internal logic error" if keys %bit_map != $bit_diff_count;
+    print STDERR __LINE__, ": calculate_mask() called:  List of values grouped by differing bits: ", Dumper \%hash if DEBUG;
 
-    # The mask is the bit positions where things differ, complemented.
-    my $mask = 0;
-    foreach my $position (keys %bit_map) {
-        $mask |= 1 << $position;
+    my @final_results;
+    foreach my $count (reverse sort { $a <=> $b } keys %hash) {
+        my $need = 2 ** $count;     # Need 8 values for 3 differing bits, etc
+        foreach my $bits (keys $hash{$count}) {
+
+            print STDERR __LINE__, ": For $count bit(s) difference ($bits), need $need; have ", scalar @{$hash{$count}{$bits}}, "\n" if DEBUG;
+
+            # Look only as long as there are at least as many elements in the
+            # subset as are needed
+            while ((my $cur_count = @{$hash{$count}{$bits}}) >= $need) {
+
+                print STDERR __LINE__, ": Looking at bit positions ($bits): ", Dumper $hash{$count}{$bits} if DEBUG;
+
+                # Start with the first element in it
+                my $try_base = $hash{$count}{$bits}[0];
+                my @subset = $try_base;
+
+                # If it succeeds, we return a mask and a base to compare
+                # against the masked value.  That base will be the AND of
+                # every element in the subset.  Initialize to the one element
+                # we have so far.
+                my $compare = $try_base;
+
+                # We are trying to find a subset of this that has <need>
+                # elements that differ in the bit positions given by the
+                # string $bits, which is comma separated.
+                my @bits = split ",", $bits;
+
+                TRY: # Look through the remainder of the list for other
+                     # elements that differ only by these bit positions.
+
+                for (my $i = 1; $i < $cur_count; $i++) {
+                    my $try_this = $hash{$count}{$bits}[$i];
+                    my @positions = pop_count($try_base ^ $try_this);
+
+                    print STDERR __LINE__, ": $try_base vs $try_this: is (", join(',', @positions), ") a subset of ($bits)?" if DEBUG;;
+
+                    foreach my $pos (@positions) {
+                        unless (grep { $pos == $_ } @bits) {
+                            print STDERR "  No\n" if DEBUG;
+                            my $remaining = $cur_count - $i - 1;
+                            if ($remaining && @subset + $remaining < $need) {
+                                print STDERR __LINE__, ": Can stop trying $try_base, because even if all the remaining $remaining values work, they wouldn't add up to the needed $need when combined with the existing ", scalar @subset, " ones\n" if DEBUG;
+                                last TRY;
+                            }
+                            next TRY;
+                        }
+                    }
+
+                    print STDERR "  Yes\n" if DEBUG;
+                    push @subset, $try_this;
+
+                    # Add this to the mask base, in case it ultimately
+                    # succeeds,
+                    $compare &= $try_this;
+                }
+
+                print STDERR __LINE__, ": subset (", join(", ", @subset), ") has ", scalar @subset, " elements; needs $need\n" if DEBUG;
+
+                if (@subset < $need) {
+                    shift @{$hash{$count}{$bits}};
+                    next;   # Try with next value
+                }
+
+                # Create the mask
+                my $mask = 0;
+                foreach my $position (@bits) {
+                    $mask |= 1 << $position;
+                }
+                $mask = ~$mask & 0xFF;
+                push @final_results, [$compare, $mask];
+
+                printf STDERR "%d: Got it: compare=%d=0x%X; mask=%X\n", __LINE__, $compare, $compare, $mask if DEBUG;
+
+                # These values are now spoken for.  Remove them from future
+                # consideration
+                foreach my $remove_count (keys %hash) {
+                    foreach my $bits (keys %{$hash{$remove_count}}) {
+                        foreach my $to_remove (@subset) {
+                            @{$hash{$remove_count}{$bits}} = grep { $_ != $to_remove } @{$hash{$remove_count}{$bits}};
+                        }
+                    }
+                }
+            }
+        }
     }
-    $mask = ~$mask & 0xFF;
 
-    return ($mask, $compare);
+    # Any values that remain in the list are ones that have to be tested for
+    # individually.
+    my @individuals;
+    foreach my $count (reverse sort { $a <=> $b } keys %hash) {
+        foreach my $bits (keys $hash{$count}) {
+            foreach my $remaining (@{$hash{$count}{$bits}}) {
+
+                # If we already know about this value, just ignore it.
+                next if grep { $remaining == $_ } @individuals;
+
+                # Otherwise it needs to be returned as something to match
+                # individually
+                push @final_results, [$remaining, undef];
+                push @individuals, $remaining;
+            }
+        }
+    }
+
+    # Sort by increasing numeric value
+    @final_results = sort { $a->[0] <=> $b->[0] } @final_results;
+
+    print STDERR __LINE__, ": Final return: ", Dumper \@final_results if DEBUG;
+
+    return @final_results;
 }
 
 # _cond_as_str
@@ -758,6 +916,7 @@ sub _cond_as_str {
 
         return "( " . join( " || ", @ranges ) . " )";
     }
+
     # If the input set has certain characteristics, we can optimize tests
     # for it.  This doesn't apply if returning the code point, as we want
     # each element of the set individually.  The code above is for this
@@ -765,18 +924,42 @@ sub _cond_as_str {
 
     return 1 if @$cond == 256;  # If all bytes match, is trivially true
 
+    my @masks;
     if (@ranges > 1) {
+
         # See if the entire set shares optimizable characterstics, and if so,
         # return the optimization.  We delay checking for this on sets with
         # just a single range, as there may be better optimizations available
         # in that case.
-        my ($mask, $base) = calculate_mask(@$cond);
-        if (defined $mask && defined $base) {
-            return sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask, $base;
+        @masks = calculate_mask(@$cond);
+
+        # Stringify the output of calculate_mask()
+        if (@masks) {
+            my @return;
+            foreach my $mask_ref (@masks) {
+                if (defined $mask_ref->[1]) {
+                    push @return, sprintf "( ( $test & $self->{val_fmt} ) == $self->{val_fmt} )", $mask_ref->[1], $mask_ref->[0];
+                }
+                else {  # An undefined mask means to use the value as-is
+                    push @return, sprintf "$test == $self->{val_fmt}", $mask_ref->[0];
+                }
+            }
+
+            # The best possible case below for specifying this set of values via
+            # ranges is 1 branch per range.  If our mask method yielded better
+            # results, there is no sense trying something that is bound to be
+            # worse.
+            if (@return < @ranges) {
+                return "( " . join( " || ", @return ) . " )";
+            }
+
+            @masks = @return;
         }
     }
 
-    # Here, there was no entire-class optimization.  Look at each range.
+    # Here, there was no entire-class optimization that was clearly better
+    # than doing things by ranges.  Look at each range.
+    my $range_count_extra = 0;
     for (my $i = 0; $i < @ranges; $i++) {
         if (! ref $ranges[$i]) {    # Trivial case: no range
             $ranges[$i] = sprintf "$self->{val_fmt} == $test", $ranges[$i];
@@ -827,22 +1010,30 @@ sub _cond_as_str {
             {
                 my @list;
                 push @list, $_  for ($ranges[$i]->[0] .. $ranges[$i]->[1]);
-                my ($mask, $base) = calculate_mask(@list);
-                if (defined $mask && defined $base) {
-                    $output = sprintf "( $test & $self->{val_fmt} ) == $self->{val_fmt}", $mask, $base;
+                my @this_masks = calculate_mask(@list);
+
+                # Use the mask if there is just one for the whole range.
+                # Otherwise there is no savings over the two branches that can
+                # define the range.
+                if (@this_masks == 1 && defined $this_masks[0][1]) {
+                    $output = sprintf "( $test & $self->{val_fmt} ) == $self->{val_fmt}", $this_masks[0][1], $this_masks[0][0];
                 }
             }
 
             if ($output ne "") {  # Prefer any optimization
                 $ranges[$i] = $output;
             }
-            elsif ($ranges[$i]->[0] + 1 == $ranges[$i]->[1]) {
+            else {
                 # No optimization happened.  We need a test that the code
                 # point is within both bounds.  But, if the bounds are
                 # adjacent code points, it is cleaner to say
                 # 'first == test || second == test'
                 # than it is to say
                 # 'first <= test && test <= second'
+
+                $range_count_extra++;   # This range requires 2 branches to
+                                        # represent
+            if ($ranges[$i]->[0] + 1 == $ranges[$i]->[1]) {
                 $ranges[$i] = "( "
                             .  join( " || ", ( map
                                 { sprintf "$self->{val_fmt} == $test", $_ }
@@ -852,11 +1043,19 @@ sub _cond_as_str {
             else {  # Full bounds checking
                 $ranges[$i] = sprintf("( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )", $ranges[$i]->[0], $ranges[$i]->[1]);
             }
+            }
         }
     }
 
-    return "( " . join( " || ", @ranges ) . " )";
-
+    # We have generated the list of bytes in two ways; one trying to use masks
+    # to cut the number of branches down, and the other to look at individual
+    # ranges (some of which could be cut down by using a mask for just it).
+    # We return whichever method uses the fewest branches.
+    return "( "
+           . join( " || ", (@masks && @masks < @ranges + $range_count_extra)
+                            ? @masks
+                            : @ranges)
+           . " )";
 }
 
 # _combine
