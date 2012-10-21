@@ -42,6 +42,11 @@
 const char* const non_utf8_target_but_utf8_required
                 = "Can't match, because target string needs to be in UTF-8\n";
 
+#define NON_UTF8_TARGET_BUT_UTF8_REQUIRED(target) STMT_START { \
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%s", non_utf8_target_but_utf8_required));\
+    goto target; \
+} STMT_END
+
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
@@ -639,9 +644,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     } else {
 	if (!prog->check_substr && prog->check_utf8) {
 	    if (! to_byte_substr(prog)) {
-                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                        non_utf8_target_but_utf8_required));
-                goto fail;
+                NON_UTF8_TARGET_BUT_UTF8_REQUIRED(fail);
             }
         }
 	check = prog->check_substr;
@@ -2345,9 +2348,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	else {
             if (! prog->anchored_substr) {
                 if (! to_byte_substr(prog)) {
-                    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                            non_utf8_target_but_utf8_required));
-                    goto phooey;
+                    NON_UTF8_TARGET_BUT_UTF8_REQUIRED(phooey);
                 }
             }
             ch = SvPVX_const(prog->anchored_substr)[0];
@@ -2388,9 +2389,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
             else {
                 if (! prog->anchored_substr) {
                     if (! to_byte_substr(prog)) {
-                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                            non_utf8_target_but_utf8_required));
-                        goto phooey;
+                        NON_UTF8_TARGET_BUT_UTF8_REQUIRED(phooey);
                     }
                 }
                 must = prog->anchored_substr;
@@ -2406,9 +2405,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
             else {
                 if (! prog->float_substr) {
                     if (! to_byte_substr(prog)) {
-                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                            non_utf8_target_but_utf8_required));
-                        goto phooey;
+                        NON_UTF8_TARGET_BUT_UTF8_REQUIRED(phooey);
                     }
                 }
                 must = prog->float_substr;
@@ -2519,9 +2516,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
             else {
                 if (! prog->float_substr) {
                     if (! to_byte_substr(prog)) {
-                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                            non_utf8_target_but_utf8_required));
-                        goto phooey;
+                        NON_UTF8_TARGET_BUT_UTF8_REQUIRED(phooey);
                     }
                 }
                 float_real = prog->float_substr;
