@@ -8926,13 +8926,13 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 			    "Constant(%s) unknown", (type ? type: "undef"));
 	}
 	else {
-	why1 = "$^H{";
-	why2 = key;
-	why3 = "} is not defined";
-    report:
-	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
-			    (type ? type: "undef"), why1, why2, why3);
-	}
+            why1 = "$^H{";
+            why2 = key;
+            why3 = "} is not defined";
+        report:
+            msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
+                                (type ? type: "undef"), why1, why2, why3);
+        }
 	yyerror(SvPVX_const(msg));
  	SvREFCNT_dec(msg);
   	return sv;
