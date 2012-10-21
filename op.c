@@ -303,7 +303,8 @@ Perl_Slab_Free(pTHX_ void *op)
     PERL_ARGS_ASSERT_SLAB_FREE;
 
     if (!o->op_slabbed) {
-	PerlMemShared_free(op);
+        if (!o->op_static)
+	    PerlMemShared_free(op);
 	return;
     }
 

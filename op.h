@@ -20,8 +20,10 @@
  *	op_opt		Whether or not the op has been optimised by the
  *			peephole optimiser.
  *	op_slabbed	allocated via opslab
+ *	op_static	tell op_free() to skip PerlMemShared_free(), when
+ *                      !op_slabbed.
  *	op_savefree	on savestack via SAVEFREEOP
- *	op_spare	Four spare bits!
+ *	op_spare	Three spare bits
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
  *			by default, set to the number of children until
@@ -53,7 +55,8 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_opt:1;		\
     PERL_BITFIELD16 op_slabbed:1;	\
     PERL_BITFIELD16 op_savefree:1;	\
-    PERL_BITFIELD16 op_spare:4;		\
+    PERL_BITFIELD16 op_static:1;	\
+    PERL_BITFIELD16 op_spare:3;		\
     U8		op_flags;		\
     U8		op_private;
 #endif
