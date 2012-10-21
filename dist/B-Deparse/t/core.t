@@ -334,7 +334,9 @@ my %not_tested = map { $_ => 1} qw(
 # make sure we haven't missed any keywords,
 # and that we got the strength right.
 
-if (defined $ENV{PERL_CORE} and $^O ne 'VMS') {
+SKIP:
+{
+    skip "sanity checks when not PERL_CORE", 1 unless defined $ENV{PERL_CORE};
     my $count = 0;
     my $file = '../../regen/keywords.pl';
     my $pass = 1;
