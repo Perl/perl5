@@ -324,6 +324,20 @@ no_warnings("invalid slurpy parameters");
     ok($legal, "globb is fine again - &");
 }
 
+# Forbid using the same variable multiple times in the same signature
+{
+    my ($legal, $failed);
+    local $TODO = "this doesn't work yet";
+    $failed = !eval 'sub multivar1 ($foo, $foo){ }; 1';
+    ok($failed, "Cannot use the same variable multiple times in a signature");
+    $failed = !eval 'sub multivar2 ($foo, $bar, $foo){ }; 1';
+    ok($failed, "Cannot use the same variable multiple times in a signature (2)");
+    $legal = eval 'sub multivar3 ($foo, @foo){ }; 1';
+    ok($legal, "Can use the same variable name with different types");
+    $failed = !eval 'sub multivar4 (%foo, %foo){ }; 1'; # also fails because of 2 slurpies
+    ok($failed, "Cannot use the same variable multiple times in a signature (3)");
+}
+
 # Test UTF-8
 
 BEGIN { no_warnings("end of compile time") }
