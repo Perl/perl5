@@ -1035,40 +1035,41 @@ XS(XS_PerlIO_get_layers)
 		  const bool argok = argsvp && *argsvp && SvPOK(*argsvp);
 		  const bool flgok = flgsvp && *flgsvp && SvIOK(*flgsvp);
 
+		  EXTEND(SP, 3); /* Three is the max in all branches: better check just once */
 		  if (details) {
 		      /* Indents of 5? Yuck.  */
 		      /* We know that PerlIO_get_layers creates a new SV for
 			 the name and flags, so we can just take a reference
 			 and "steal" it when we free the AV below.  */
-		       XPUSHs(namok
+		       PUSHs(namok
 			      ? sv_2mortal(SvREFCNT_inc_simple_NN(*namsvp))
 			      : &PL_sv_undef);
-		       XPUSHs(argok
+		       PUSHs(argok
 			      ? newSVpvn_flags(SvPVX_const(*argsvp),
 					       SvCUR(*argsvp),
 					       (SvUTF8(*argsvp) ? SVf_UTF8 : 0)
 					       | SVs_TEMP)
 			      : &PL_sv_undef);
-		       XPUSHs(flgok
+		       PUSHs(flgok
 			      ? sv_2mortal(SvREFCNT_inc_simple_NN(*flgsvp))
 			      : &PL_sv_undef);
 		       nitem += 3;
 		  }
 		  else {
 		       if (namok && argok)
-			    XPUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
+			    PUSHs(sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
 						 SVfARG(*namsvp),
 						 SVfARG(*argsvp))));
 		       else if (namok)
-			   XPUSHs(sv_2mortal(SvREFCNT_inc_simple_NN(*namsvp)));
+			    PUSHs(sv_2mortal(SvREFCNT_inc_simple_NN(*namsvp)));
 		       else
-			    XPUSHs(&PL_sv_undef);
+			    PUSHs(&PL_sv_undef);
 		       nitem++;
 		       if (flgok) {
 			    const IV flags = SvIVX(*flgsvp);
 
 			    if (flags & PERLIO_F_UTF8) {
-				 XPUSHs(newSVpvs_flags("utf8", SVs_TEMP));
+				 PUSHs(newSVpvs_flags("utf8", SVs_TEMP));
 				 nitem++;
 			    }
 		       }
@@ -1234,13 +1235,14 @@ XS(XS_re_regnames)
     av = MUTABLE_AV(SvRV(ret));
     length = av_len(av);
 
+    EXTEND(SP, length+1); /* better extend stack just once */
     for (i = 0; i <= length; i++) {
         entry = av_fetch(av, i, FALSE);
         
         if (!entry)
             Perl_croak(aTHX_ "NULL array element in re::regnames()");
 
-        mXPUSHs(SvREFCNT_inc_simple_NN(*entry));
+        mPUSHs(SvREFCNT_inc_simple_NN(*entry));
     }
 
     SvREFCNT_dec(ret);
@@ -1311,8 +1313,9 @@ XS(XS_re_regexp_pattern)
 				     (RX_UTF8(re) ? SVf_UTF8 : 0) | SVs_TEMP);
 
             /* return the pattern and the modifiers */
-            XPUSHs(pattern);
-            XPUSHs(newSVpvn_flags(reflags, left, SVs_TEMP));
+            EXTEND(SP, 2);
+            PUSHs(pattern);
+            PUSHs(newSVpvn_flags(reflags, left, SVs_TEMP));
             XSRETURN(2);
         } else {
             /* Scalar, so use the string that Perl would return */
