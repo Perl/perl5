@@ -1121,10 +1121,11 @@ Data_Dumper_Dumpxs(href, ...)
 		SAVETMPS;
 		
 		PUSHMARK(sp);
-		XPUSHs(href);
-		XPUSHs(sv_2mortal(newSVsv(ST(1))));
+                EXTEND(SP, 3); /* 3 == max of all branches below */
+		PUSHs(href);
+		PUSHs(sv_2mortal(newSVsv(ST(1))));
 		if (items >= 3)
-		    XPUSHs(sv_2mortal(newSVsv(ST(2))));
+		    PUSHs(sv_2mortal(newSVsv(ST(2))));
 		PUTBACK;
 		i = perl_call_method("new", G_SCALAR);
 		SPAGAIN;
