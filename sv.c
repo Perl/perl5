@@ -13716,8 +13716,8 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	save_re_context();
 	PUSHMARK(sp);
 	EXTEND(SP, 3);
-	XPUSHs(encoding);
-	XPUSHs(sv);
+	PUSHs(encoding);
+	PUSHs(sv);
 /*
   NI-S 2002/07/09
   Passing sv_yes is wrong - it needs to be or'ed set of constants
@@ -13787,12 +13787,12 @@ Perl_sv_cat_decode(pTHX_ SV *dsv, SV *encoding,
 	save_re_context();
 	PUSHMARK(sp);
 	EXTEND(SP, 6);
-	XPUSHs(encoding);
-	XPUSHs(dsv);
-	XPUSHs(ssv);
+	PUSHs(encoding);
+	PUSHs(dsv);
+	PUSHs(ssv);
 	offsv = newSViv(*offset);
-	mXPUSHs(offsv);
-	mXPUSHp(tstr, tlen);
+	mPUSHs(offsv);
+	mPUSHp(tstr, tlen);
 	PUTBACK;
 	call_method("cat_decode", G_SCALAR);
 	SPAGAIN;
