@@ -100,8 +100,9 @@ PPCODE:
         } else if (RX_FLOAT_UTF8(re)) {
             fl = sv_2mortal(newSVsv(RX_FLOAT_UTF8(re)));
         }
-        XPUSHs(an);
-        XPUSHs(fl);
+        EXTEND(SP, 2);
+        PUSHs(an);
+        PUSHs(fl);
         XSRETURN(2);
     }
     XSRETURN_UNDEF;
