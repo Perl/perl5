@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 32;
+plan tests => 37;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -200,21 +200,25 @@ leak(2, 0, sub {
     undef $h;
 }, 'tied hash iteration does not leak');
 
+package explosive_scalar {
+    sub TIESCALAR { my $self = shift; bless [undef, {@_}], $self  }
+    sub FETCH     { die 'FETCH' if $_[0][1]{FETCH}; $_[0][0] }
+    sub STORE     { die 'STORE' if $_[0][1]{STORE}; $_[0][0] = $_[1] }
+}
+tie my $die_on_fetch, 'explosive_scalar', FETCH => 1;
+
 # List assignment was leaking when assigning explosive scalars to
 # aggregates.
-package sty {
-    sub TIESCALAR { bless [] }
-    sub FETCH    { die }
-}
 leak(2, 0, sub {
-    tie my $x, sty;
-    eval {%a = ($x, 0)}; # key
-    eval {%a = (0, $x)}; # value
-    eval {%a = ($x,$x)}; # both
+    eval {%a = ($die_on_fetch, 0)}; # key
+    eval {%a = (0, $die_on_fetch)}; # value
+    eval {%a = ($die_on_fetch, $die_on_fetch)}; # both
 }, 'hash assignment does not leak');
 leak(2, 0, sub {
-    tie my $x, sty;
-    eval {@a = ($x)};
+    eval {@a = ($die_on_fetch)};
+    eval {($die_on_fetch, $b) = ($b, $die_on_fetch)};
+    # restore
+    tie $die_on_fetch, 'explosive_scalar', FETCH => 1;
 }, 'array assignment does not leak');
 
 # [perl #107000]
@@ -236,3 +240,41 @@ leak(2,!!$Config{mad}, sub {
 	{ 1; }
     `;
 }, 'hint-hash copying does not leak');
+
+package explosive_array {
+    sub TIEARRAY  { bless [[], {}], $_[0]  }
+    sub FETCH     { die if $_[0]->[1]{FETCH}; $_[0]->[0][$_[1]]  }
+    sub FETCHSIZE { die if $_[0]->[1]{FETCHSIZE}; scalar @{ $_[0]->[0]  }  }
+    sub STORE     { die if $_[0]->[1]{STORE}; $_[0]->[0][$_[1]] = $_[2]  }
+    sub CLEAR     { die if $_[0]->[1]{CLEAR}; @{$_[0]->[0]} = ()  }
+    sub EXTEND    { die if $_[0]->[1]{EXTEND}; return  }
+    sub explode   { my $self = shift; $self->[1] = {@_} }
+}
+
+leak(2, 0, sub {
+    tie my @a, 'explosive_array';
+    tied(@a)->explode( STORE => 1 );
+    my $x = 0;
+    eval { @a = ($x)  };
+}, 'explosive array assignment does not leak');
+
+leak(2, 0, sub {
+    my ($a, $b);
+    eval { warn $die_on_fetch };
+}, 'explosive warn argument');
+
+leak(2, 0, sub {
+    my $foo = sub { return $die_on_fetch };
+    my $res = eval { $foo->() };
+    my @res = eval { $foo->() };
+}, 'function returning explosive does not leak');
+
+leak(2, 0, sub {
+    my $res = eval { {$die_on_fetch, 0} };
+    $res = eval { {0, $die_on_fetch} };
+}, 'building anon hash with explosives does not leak');
+
+leak(2, 0, sub {
+    my @a;
+    eval { push @a, $die_on_fetch };
+}, 'pushing exploding scalar does not leak');
