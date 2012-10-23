@@ -320,4 +320,60 @@ SKIP: {
 	'different COP->stashoff for different stashes';
 }
 
+
+# Test $B::overlay
+{
+    my $methods = {
+	BINOP =>  [ qw(last) ],
+	COP   =>  [ qw(arybase cop_seq file filegv hints hints_hash io
+		       label line stash stashpv
+		       stashoff warnings) ],
+	LISTOP => [ qw(children) ],
+	LOGOP =>  [ qw(other) ],
+	LOOP  =>  [ qw(lastop nextop redoop) ],
+	OP    =>  [ qw(desc flags name next opt ppaddr private sibling
+		       size spare targ type) ],
+	PADOP =>  [ qw(gv padix sv) ],
+	PMOP  =>  [ qw(code_list pmflags pmoffset pmreplroot pmreplstart pmstash pmstashpv precomp reflags) ],
+	PVOP  =>  [ qw(pv) ],
+	SVOP  =>  [ qw(gv sv) ],
+	UNOP  =>  [ qw(first) ],
+    };
+
+    my $overlay = {};
+    my $op = B::svref_2object(sub { my $x = 1 })->ROOT;
+
+    for my $class (sort keys %$methods) {
+	for my $meth (@{$methods->{$class}}) {
+	    my $full = "B::${class}::$meth";
+	    die "Duplicate method '$full'\n"
+		if grep $_ eq $full, @{$overlay->{$meth}};
+	    push @{$overlay->{$meth}}, "B::${class}::$meth";
+	}
+    }
+
+    {
+	local $B::overlay; # suppress 'used once' warning
+	local $B::overlay = { $$op => $overlay };
+
+	for my $class (sort keys %$methods) {
+	    bless $op, "B::$class"; # naughty
+	    for my $meth (@{$methods->{$class}}) {
+		if ($op->can($meth)) {
+		    my $list = $op->$meth;
+		    ok(defined $list
+			    && ref($list) eq "ARRAY"
+			    && grep($_ eq "B::${class}::$meth", @$list),
+			"overlay: B::$class $meth");
+		}
+		else {
+		    pass("overlay: B::$class $meth (skipped; no method)");
+		}
+	    }
+	}
+    }
+    # B::overlay should be disabled again here
+    is($op->name, "leavesub", "overlay: orig name");
+}
+
 done_testing();

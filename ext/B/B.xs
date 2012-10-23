@@ -241,6 +241,38 @@ make_op_object(pTHX_ const OP *o)
     return opsv;
 }
 
+
+static SV *
+get_overlay_object(pTHX_ const OP *o, const char * const name, U32 namelen)
+{
+    HE *he;
+    SV **svp;
+    SV *key;
+    SV *sv =get_sv("B::overlay", 0);
+    if (!sv || !SvROK(sv))
+	return NULL;
+    sv = SvRV(sv);
+    if (SvTYPE(sv) != SVt_PVHV)
+	return NULL;
+    key = newSViv(PTR2IV(o));
+    he = hv_fetch_ent((HV*)sv, key, 0, 0);
+    SvREFCNT_dec(key);
+    if (!he)
+	return NULL;
+    sv = HeVAL(he);
+    if (!sv || !SvROK(sv))
+	return NULL;
+    sv = SvRV(sv);
+    if (SvTYPE(sv) != SVt_PVHV)
+	return NULL;
+    svp = hv_fetch((HV*)sv, name, namelen, 0);
+    if (!svp)
+	return NULL;
+    sv = *svp;
+    return sv;
+}
+
+
 static SV *
 make_sv_object(pTHX_ SV *sv)
 {
@@ -967,10 +999,16 @@ next(o)
     PPCODE:
 	if (ix < 0 || ix > 46)
 	    croak("Illegal alias %d for B::*OP::next", (int)ix);
-	offset = op_methods[ix].offset;
+	ret = get_overlay_object(aTHX_ o,
+			    op_methods[ix].name, op_methods[ix].namelen);
+	if (ret) {
+	    ST(0) = ret;
+	    XSRETURN(1);
+	}
 
 	/* handle non-direct field access */
 
+	offset = op_methods[ix].offset;
 	if (offset < 0) {
 	    switch (ix) {
 #ifdef USE_ITHREADS
