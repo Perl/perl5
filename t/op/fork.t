@@ -15,6 +15,19 @@ $|=1;
 
 run_multiple_progs('', \*DATA);
 
+my $shell = $ENV{SHELL} || '';
+SKIP: {
+    skip "This test can only be run under bash or zsh"
+        unless $shell =~ m{/(?:ba|z)sh$};
+
+    my $out = qx{
+        $shell -c 'ulimit -u 1; exec $^X -e "
+            print((() = fork) == 1 ? q[ok] : q[not ok])
+        "'
+    };
+    is($out, "ok");
+}
+
 done_testing();
 
 __END__

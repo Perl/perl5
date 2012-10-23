@@ -4046,7 +4046,7 @@ PP(pp_fork)
     }
 #endif
     if (childpid < 0)
-	RETSETUNDEF;
+	RETPUSHUNDEF;
     if (!childpid) {
 #ifdef PERL_USES_PL_PIDSTATUS
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
@@ -4063,7 +4063,7 @@ PP(pp_fork)
     PERL_FLUSHALL_FOR_CHILD;
     childpid = PerlProc_fork();
     if (childpid == -1)
-	RETSETUNDEF;
+	RETPUSHUNDEF;
     PUSHi(childpid);
     RETURN;
 #  else
