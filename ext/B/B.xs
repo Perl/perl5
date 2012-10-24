@@ -880,7 +880,11 @@ threadsv_names()
 #define OP_private_ix		U8p | offsetof(struct op, op_private)
 
 #define PMOP_pmflags_ix		U32p | offsetof(struct pmop, op_pmflags)
-#define PMOP_code_list_ix	OPp | offsetof(struct pmop, op_code_list)
+#if PERL_VERSION >= 17
+#  define PMOP_code_list_ix	OPp | offsetof(struct pmop, op_code_list)
+#else
+#  define PMOP_code_list_ix	-1
+#endif
 
 #ifdef USE_ITHREADS
 #define PMOP_pmoffset_ix	IVp | offsetof(struct pmop, op_pmoffset)
@@ -1182,7 +1186,7 @@ BOOT:
 #ifdef USE_ITHREADS
         cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = PMOP_pmoffset_ix;
-# if PERL_VERSION < 17 || defined(CopSTASH_len)
+# if PERL_VERSION < 17
         cv = newXS("B::COP::stashpv", XS_B__OP_next, __FILE__);
         XSANY.any_i32 = COP_stashpv_ix;
 # else
@@ -1286,7 +1290,7 @@ COP_file(o)
 
 #endif
 
-#if PERL_VERSION >= 10
+#if PERL_VERSION >= 17
 
 SV *
 COP_stashpv(o)
@@ -1299,6 +1303,7 @@ COP_stashpv(o)
 	RETVAL
 
 #else
+#  ifndef USE_ITHREADS
 
 char *
 COP_stashpv(o)
@@ -1308,6 +1313,7 @@ COP_stashpv(o)
     OUTPUT:
 	RETVAL
 
+#  endif
 #endif
 
 I32
@@ -2015,6 +2021,9 @@ CvPADLIST(cv)
 B::AV
 CvPADLIST(cv)
 	B::CV	cv
+    PPCODE:
+	PUSHs(make_sv_object(aTHX_ (SV *)CvPADLIST(cv)));
+
 
 #endif
 

@@ -5,7 +5,7 @@ use warnings;
 use vars qw($TODO $Level $using_open);
 require "test.pl";
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
@@ -212,6 +212,10 @@ sampled from known-ok threaded and un-threaded bleadperl (5.9.1) builds.
 They're both required, and the correct one is selected for the platform
 being tested, and saved into the synthesized property B<wanted>.
 
+Individual sample lines may be suffixed with whitespace followed
+by (<|<=|==|>=|>)5.nnnn to select that line only for the listed perl
+version; the whitespace and conditional are stripped.
+
 =head2 bcopts => $bcopts || [ @bcopts ]
 
 When getRendering() runs, it passes bcopts into B::Concise::compile().
@@ -409,7 +413,14 @@ sub checkOptree {
 
     print "checkOptree args: ",mydumper($tc) if $tc->{dump};
     SKIP: {
-	skip("$tc->{skip} $tc->{name}", 1) if $tc->{skip};
+	if ($tc->{skip}) {
+	    skip("$tc->{skip} $tc->{name}",
+		    ($gOpts{selftest}
+			? 1
+			: 1 + @{$modes{$gOpts{testmode}}}
+			)
+	    );
+	}
 
 	return runSelftest($tc) if $gOpts{selftest};
 
@@ -627,6 +638,24 @@ sub mkCheckRex {
     die("no '$want' golden-sample found: $tc->{name}") unless $str;
 
     $str =~ s/^\# //mg;	# ease cut-paste testcase authoring
+
+    # strip out conditional lines
+
+    $str =~ s{^(.*?)\s+(<|<=|==|>=|>)\s*(5\.\d+)\ *\n}
+     {
+	my ($line, $cmp, $version) = ($1,$2,$3);
+	my $repl = "";
+	if (  $cmp eq '<'  ? $] <  $version
+	    : $cmp eq '<=' ? $] <= $version
+	    : $cmp eq '==' ? $] == $version
+	    : $cmp eq '>=' ? $] >= $version
+	    : $cmp eq '>'  ? $] >  $version
+	    : die("bad comparision '$cmp' in string [$str]\n")
+	) {
+	    $repl = "$line\n";
+	}
+	$repl;
+     }gem;
 
     if ($] < 5.009) {
 	# add 5.8 private flags, which bleadperl (5.9.1) doesn't have/use/render

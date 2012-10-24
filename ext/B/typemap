@@ -88,9 +88,6 @@ T_PL_OBJ
 	    croak(\"$var is not a reference\")
 
 OUTPUT
-T_SV_OBJ
-	make_sv_object(aTHX_ ($arg), (SV*)($var));
-
 T_MG_OBJ
 	sv_setiv(newSVrv($arg, "B::MAGIC"), PTR2IV($var));
 

@@ -251,6 +251,7 @@ EODIE
 if (%opts) {
     require Data::Dumper;
     Data::Dumper->import('Dumper');
+    { my $x = \*Data::Dumper::Sortkeys } # shut up 'used once' warning
     $Data::Dumper::Sortkeys = 1;
 }
 my @argpkgs = @ARGV;
@@ -353,6 +354,7 @@ sub corecheck {
 	warn "Module::CoreList not available on $]\n";
 	return;
     }
+    { my $x = \*Module::CoreList::version } # shut up 'used once' warning
     my $mods = $Module::CoreList::version{'5.009002'};
     $mods = [ sort keys %$mods ];
     print Dumper($mods);
@@ -364,6 +366,7 @@ sub corecheck {
 
 END {
     if ($opts{c}) {
+	{ my $x = \*Data::Dumper::Indent } # shut up 'used once' warning
 	$Data::Dumper::Indent = 1;
 	print "Corrections: ", Dumper(\%report);
 

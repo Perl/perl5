@@ -306,8 +306,14 @@ my $cop = B::svref_2object($sub1)->ROOT->first->first;
 my $bobby = B::svref_2object($sub2)->ROOT->first->first;
 is $cop->stash->object_2svref, \%main::, 'COP->stash';
 is $cop->stashpv, 'main', 'COP->stashpv';
-is $bobby->stashpv, "Pe\0e\x{142}", 'COP->stashpv with utf8 and nulls';
-if ($Config::Config{useithreads}) {
+
+SKIP: {
+    skip "no nulls in packages before 5.17", 1 if $] < 5.017;
+    is $bobby->stashpv, "Pe\0e\x{142}", 'COP->stashpv with utf8 and nulls';
+}
+
+SKIP: {
+    skip "no stashoff", 2 if $] < 5.017 || !$Config::Config{useithreads};
     like $cop->stashoff, qr/^[1-9]\d*\z/a, 'COP->stashoff';
     isnt $cop->stashoff, $bobby->stashoff,
 	'different COP->stashoff for different stashes';
