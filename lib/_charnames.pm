@@ -7,7 +7,7 @@ package _charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -454,18 +454,8 @@ sub lookup_name ($$$) {
           }
 
           my $case = $name_has_uppercase ? "CAPITAL" : "SMALL";
-          if (! $scripts_trie
-              || $txt !~
-              /\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm)
-          {
-            # Here we still don't have it, give up.
-            return if $runtime;
-
-            # May have zapped input name, get it again.
-            $name = (defined $save_input) ? $save_input : $_[0];
-            carp "Unknown charname '$name'";
-            return ($wants_ord) ? 0xFFFD : pack("U", 0xFFFD);
-          }
+          return if (! $scripts_trie || $txt !~
+             /\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm);
 
           # Here have found the input name in the table.
           @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab

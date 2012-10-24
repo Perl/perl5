@@ -36,8 +36,9 @@ no warnings;
 use charnames "alias";
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'e_ACUTE' at
+OPTIONS random fatal
+Unknown charname 'e_ACUTE' at - line 3, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias without an argument
 use warnings;
@@ -60,8 +61,10 @@ use warnings;
 use charnames ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN SMALL LETTER E WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 3.
+Unknown charname 'e_ACUTE' at - line 3, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref but with :short
 use warnings;
@@ -69,8 +72,10 @@ no warnings 'void';
 use charnames ":short", ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN SMALL LETTER E WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref to :full OK
 use warnings;
@@ -96,8 +101,10 @@ no warnings 'void';
 use charnames ":loose", ":alias" => { e_ACUTE => "latin SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'latin SMALL LETTER E WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref to :short but using :full
 use warnings;
@@ -105,8 +112,10 @@ no warnings 'void';
 use charnames ":full", ":alias" => { e_ACUTE => "LATIN:e WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN:e WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref to :short OK
 use warnings;
@@ -152,8 +161,10 @@ use charnames ":short", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname '' at
+OPTIONS random fatal
+Use of uninitialized value at - line 7.
+Unknown charname 'a_ACUTE' at - line 7, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref two aliases
 use warnings;
@@ -175,8 +186,10 @@ use charnames ":short", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN SMALL LETTER A WITH ACUT' at
+OPTIONS random fatal
+Use of uninitialized value at - line 6.
+Unknown charname 'a_ACUTE' at - line 6, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref using mixed aliases
 use warnings;
@@ -186,8 +199,10 @@ use charnames ":short", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN SMALL LETTER A WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 6.
+Unknown charname 'a_ACUTE' at - line 6, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with hashref using mixed aliases
 use warnings;
@@ -198,8 +213,11 @@ use charnames ":full", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN:e WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 7.
+Use of uninitialized value at - line 7.
+Unknown charname 'e_ACUTE' at - line 7, within string
+Execution of - aborted due to compilation errors.
 ########
 # NAME alias with nonexisting file
 use warnings;
@@ -251,8 +269,11 @@ no warnings 'void';
 use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'e_ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 4.
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # alias with file OK but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
@@ -266,8 +287,10 @@ no warnings 'void';
 use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN:e WITH ACUTE' at
+Use of uninitialized value at - line 4.
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # alias with :short and file OK
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
@@ -296,8 +319,11 @@ no warnings 'void';
 use charnames ":short", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN SMALL LETTER E WITH ACUTE' at
+OPTIONS random fatal
+Use of uninitialized value at - line 4.
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # alias with file implicit :full but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
@@ -311,8 +337,10 @@ no warnings 'void';
 use charnames ":alias" => ":xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS regex
-Unknown charname 'LATIN:e WITH ACUTE' at
+Use of uninitialized value at - line 4.
+Use of uninitialized value at - line 4.
+Unknown charname 'e_ACUTE' at - line 4, within string
+Execution of - aborted due to compilation errors.
 ########
 # alias with file implicit :full and file has :long aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl

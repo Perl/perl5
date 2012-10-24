@@ -8930,8 +8930,15 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
             why2 = key;
             why3 = "} is not defined";
         report:
-            msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
+            if (strEQ(key,"charnames")) {
+                msg = Perl_newSVpvf(aTHX_
+                        /* The +3 is for '\N{'; -4 for that, plus '}' */
+                        "Unknown charname '%.*s'", typelen - 4, type + 3);
+            }
+            else {
+                msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
                                 (type ? type: "undef"), why1, why2, why3);
+            }
         }
 	yyerror(SvPVX_const(msg));
  	SvREFCNT_dec(msg);

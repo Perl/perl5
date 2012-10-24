@@ -45,6 +45,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 An unknown character name in C<\N{...}> is now a syntax error
+
+Previously, it warned, and the Unicode REPLACEMENT CHARACTER was
+substituted.  Unicode now recommends that this situation be a syntax
+error.  Also, the previous behavior led to some confusing warnings and
+behaviors, and since the REPLACEMENT CHARACTER has no use other than as
+a stand-in for some unknown character, any code that has this problem is
+buggy.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.  In

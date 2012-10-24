@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 
@@ -214,8 +214,7 @@ L<charnames::string_vianame()|/charnames::string_vianame(I<name>)>.
 Since Unicode 6.0, it is deprecated to use C<BELL>.  Instead use C<ALERT> (but
 C<BEL> will continue to work).
 
-If the input name is unknown, C<\N{NAME}> raises a warning and
-substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
+It is a syntax error to use C<\N{NAME}> where C<NAME> is unknown.
 
 For C<\N{NAME}>, it is a fatal error if C<use bytes> is in effect and the
 input name is that of a character that won't fit into a byte (i.e., whose
@@ -338,8 +337,7 @@ L<script list, C<:short> option|/DESCRIPTION>, or L<custom aliases|/CUSTOM
 ALIASES> you may have defined.
 
 The only difference is that if the input name is unknown, C<string_vianame>
-returns C<undef> instead of the REPLACEMENT CHARACTER and does not raise a
-warning message.
+returns C<undef> instead of it being a syntax error.
 
 =head1 charnames::vianame(I<name>)
 

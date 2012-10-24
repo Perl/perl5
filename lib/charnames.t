@@ -836,7 +836,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         is("\N{mychar1}", "f", "Inner block: verify that \\N{mychar1} is redefined");
         is(charnames::vianame("mychar1"), ord("f"), "Inner block: verify that vianame(mychar1) is redefined");
         is(charnames::string_vianame("mychar1"), "f", "Inner block: verify that string_vianame(mychar1) is redefined");
-        is("\N{mychar2}", "\x{FFFD}", "Inner block: verify that \\N{mychar2} outer definition didn't leak");
+        eval '"\N{mychar2}"';
+        like($@, qr/Unknown charname 'mychar2'/, "Inner block: verify that \\N{mychar2} outer definition didn't leak");
         ok( ! defined charnames::vianame("mychar2"), "Inner block: verify that vianame(mychar2) outer definition didn't leak");
         ok( ! defined charnames::string_vianame("mychar2"), "Inner block: verify that string_vianame(mychar2) outer definition didn't leak");
         is("\N{myprivate1}", "\x{E8001}", "Inner block: verify that \\N{myprivate1} is redefined ");
@@ -844,38 +845,46 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         is(charnames::string_vianame("myprivate1"), chr(0xE8001), "Inner block: verify that string_vianame(myprivate1) is redefined");
         is(charnames::viacode(0xE8001), "myprivate1", "Inner block: verify that myprivate1 viacode is redefined");
         ok(! defined charnames::viacode(0xE8000), "Inner block: verify that outer myprivate1 viacode didn't leak");
-        is("\N{myprivate2}", "\x{FFFD}", "Inner block: verify that \\N{myprivate2} outer definition didn't leak");
+        eval '"\N{myprivate2}"';
+        like($@, qr/Unknown charname 'myprivate2'/, "Inner block: verify that \\N{myprivate2} outer definition didn't leak");
         ok(! defined charnames::vianame("myprivate2"), "Inner block: verify that vianame(myprivate2) outer definition didn't leak");
         ok(! defined charnames::string_vianame("myprivate2"), "Inner block: verify that string_vianame(myprivate2) outer definition didn't leak");
         ok(! defined charnames::viacode(0x100000), "Inner block: verify that myprivate2 viacode outer definition didn't leak");
         is("\N{BE}", $hiragana_be, "Inner block: verify that \\N uses the correct script");
         cmp_ok(charnames::vianame("BE"), "==", ord($hiragana_be), "Inner block: verify that vianame uses the correct script");
         cmp_ok(charnames::string_vianame("BE"), "==", $hiragana_be, "Inner block: verify that string_vianame uses the correct script");
-        is("\N{Hiragana: BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
+        eval '"\N{Hiragana: BE}"';
+        like($@, qr/Unknown charname 'Hiragana: BE'/, "Inner block without :short: \\N with short doesn't work");
         ok(! defined charnames::vianame("Hiragana: BE"), "Inner block without :short: verify that vianame with short doesn't work");
         ok(! defined charnames::string_vianame("Hiragana: BE"), "Inner block without :short: verify that string_vianame with short doesn't work");
 
         {   # An inner block where only :short definitions are valid.
             use charnames ":short";
-            is("\N{mychar1}", "\x{FFFD}", "Inner inner block: verify that mychar1 outer definition didn't leak with \\N");
+            eval '"\N{mychar1}"';
+            like($@, qr/Unknown charname 'mychar1'/, "Inner inner block: verify that mychar1 outer definition didn't leak with \\N");
             ok( ! defined charnames::vianame("mychar1"), "Inner inner block: verify that mychar1 outer definition didn't leak with vianame");
             ok( ! defined charnames::string_vianame("mychar1"), "Inner inner block: verify that mychar1 outer definition didn't leak with string_vianame");
-            is("\N{mychar2}", "\x{FFFD}", "Inner inner block: verify that mychar2 outer definition didn't leak with \\N");
+            eval '"\N{mychar2}"';
+            like($@, qr/Unknown charname 'mychar2'/, "Inner inner block: verify that mychar2 outer definition didn't leak with \\N");
             ok( ! defined charnames::vianame("mychar2"), "Inner inner block: verify that mychar2 outer definition didn't leak with vianame");
             ok( ! defined charnames::string_vianame("mychar2"), "Inner inner block: verify that mychar2 outer definition didn't leak with string_vianame");
-            is("\N{myprivate1}", "\x{FFFD}", "Inner inner block: verify that myprivate1 outer definition didn't leak with \\N");
+            eval '"\N{myprivate1}"';
+            like($@, qr/Unknown charname 'myprivate1'/, "Inner inner block: verify that myprivate1 outer definition didn't leak with \\N");
             ok(! defined charnames::vianame("myprivate1"), "Inner inner block: verify that myprivate1 outer definition didn't leak with vianame");
             ok(! defined charnames::string_vianame("myprivate1"), "Inner inner block: verify that myprivate1 outer definition didn't leak with string_vianame");
-            is("\N{myprivate2}", "\x{FFFD}", "Inner inner block: verify that myprivate2 outer definition didn't leak with \\N");
+            eval '"\N{myprivate2}"';
+            like($@, qr/Unknown charname 'myprivate2'/, "Inner inner block: verify that myprivate2 outer definition didn't leak with \\N");
             ok(! defined charnames::vianame("myprivate2"), "Inner inner block: verify that myprivate2 outer definition didn't leak with vianame");
             ok(! defined charnames::string_vianame("myprivate2"), "Inner inner block: verify that myprivate2 outer definition didn't leak with string_vianame");
             ok(! defined charnames::viacode(0xE8000), "Inner inner block: verify that mychar1 outer outer definition didn't leak with viacode");
             ok(! defined charnames::viacode(0xE8001), "Inner inner block: verify that mychar1 outer definition didn't leak with viacode");
             ok(! defined charnames::viacode(0x100000), "Inner inner block: verify that mychar2 outer definition didn't leak with viacode");
-            is("\N{BE}", "\x{FFFD}", "Inner inner block without script: verify that outer :script didn't leak with \\N");
+            eval '"\N{BE}"';
+            like($@, qr/Unknown charname 'BE'/, "Inner inner block without script: verify that outer :script didn't leak with \\N");
             ok(! defined charnames::vianame("BE"), "Inner inner block without script: verify that outer :script didn't leak with vianames");
             ok(! defined charnames::string_vianame("BE"), "Inner inner block without script: verify that outer :script didn't leak with string_vianames");
-            is("\N{HIRAGANA LETTER BE}", "\x{FFFD}", "Inner inner block without :full: verify that outer :full didn't leak with \\N");
+            eval '"\N{HIRAGANA LETTER BE}"';
+            like($@, qr/Unknown charname 'HIRAGANA LETTER BE'/, "Inner inner block without :full: verify that outer :full didn't leak with \\N");
             is("\N{Hiragana: BE}", $hiragana_be, "Inner inner block with :short: verify that \\N works with :short");
             cmp_ok(charnames::vianame("Hiragana: BE"), "==", ord($hiragana_be), "Inner inner block with :short: verify that vianame works with :short");
             cmp_ok(charnames::string_vianame("Hiragana: BE"), "==", $hiragana_be, "Inner inner block with :short: verify that string_vianame works with :short");
@@ -885,7 +894,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         is("\N{mychar1}", "f", "Inner block: verify that \\N{mychar1} is redefined");
         is(charnames::vianame("mychar1"), ord("f"), "Inner block: verify that vianame(mychar1) is redefined");
         is(charnames::string_vianame("mychar1"), "f", "Inner block: verify that string_vianame(mychar1) is redefined");
-        is("\N{mychar2}", "\x{FFFD}", "Inner block: verify that \\N{mychar2} outer definition didn't leak");
+        eval '"\N{mychar2}"';
+        like($@, qr/Unknown charname 'mychar2'/, "Inner block: verify that \\N{mychar2} outer definition didn't leak");
         ok( ! defined charnames::vianame("mychar2"), "Inner block: verify that vianame(mychar2) outer definition didn't leak");
         ok( ! defined charnames::string_vianame("mychar2"), "Inner block: verify that string_vianame(mychar2) outer definition didn't leak");
         is("\N{myprivate1}", "\x{E8001}", "Inner block: verify that \\N{myprivate1} is redefined ");
@@ -893,14 +903,16 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         is(charnames::string_vianame("myprivate1"), chr(0xE8001), "Inner block: verify that string_vianame(myprivate1) is redefined");
         is(charnames::viacode(0xE8001), "myprivate1", "Inner block: verify that myprivate1 viacode is redefined");
         ok(! defined charnames::viacode(0xE8000), "Inner block: verify that outer myprivate1 viacode didn't leak");
-        is("\N{myprivate2}", "\x{FFFD}", "Inner block: verify that \\N{myprivate2} outer definition didn't leak");
+        eval '"\N{myprivate2}"';
+        like($@, qr/Unknown charname 'myprivate2'/, "Inner block: verify that \\N{myprivate2} outer definition didn't leak");
         ok(! defined charnames::vianame("myprivate2"), "Inner block: verify that vianame(myprivate2) outer definition didn't leak");
         ok(! defined charnames::string_vianame("myprivate2"), "Inner block: verify that string_vianame(myprivate2) outer definition didn't leak");
         ok(! defined charnames::viacode(0x100000), "Inner block: verify that myprivate2 viacode outer definition didn't leak");
         is("\N{BE}", $hiragana_be, "Inner block: verify that \\N uses the correct script");
         cmp_ok(charnames::vianame("BE"), "==", ord($hiragana_be), "Inner block: verify that vianame uses the correct script");
         cmp_ok(charnames::string_vianame("BE"), "==", $hiragana_be, "Inner block: verify that string_vianame uses the correct script");
-        is("\N{Hiragana: BE}", "\x{FFFD}", "Inner block without :short: \\N with short doesn't work");
+        eval '"\N{Hiragana: BE}"';
+        like($@, qr/Unknown charname 'Hiragana: BE'/, "Inner block without :short: \\N with short doesn't work");
         ok(! defined charnames::vianame("Hiragana: BE"), "Inner block without :short: verify that vianame with short doesn't work");
         ok(! defined charnames::string_vianame("Hiragana: BE"), "Inner block without :short: verify that string_vianame with short doesn't work");
     }
@@ -933,7 +945,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         is(charnames::string_vianame("O-i"), chr(0x10426), "Verify that loose script list matching works with string_vianame");
         is(charnames::vianame("o i"), 0x1044E, "Verify that loose script list matching works with vianame");
     }
-    is ("\N{latincapitallettera}", "\x{FFFD}", "Verify that loose matching caching doesn't leak outside of scope");
+    eval '"\N{latincapitallettera}"';
+    like($@, qr/Unknown charname 'latincapitallettera'/, "Verify that loose matching caching doesn't leak outside of scope");
     {
         use charnames qw(:loose :short);
         cmp_ok("\N{co pt-ic:she-i}", "==", chr(0x3E3), "Verify that loose :short matching works");
