@@ -531,7 +531,7 @@ EE<lt>...E<gt> code sometimes.  For example, instead of
 "C<NEE<lt>ltE<gt>3>" (for "NE<lt>3") you could write
 "C<NZE<lt>E<gt>E<lt>3>" (the "ZE<lt>E<gt>" breaks up the "N" and
 the "E<lt>" so they can't be considered
-the part of a (fictitious) "NE<lt>...E<gt>" code.
+the part of a (fictitious) "NE<lt>...E<gt>" code).
 
 =for comment
  This was formerly explained as a "zero-width character".  But it in

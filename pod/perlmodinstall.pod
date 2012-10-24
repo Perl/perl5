@@ -19,7 +19,7 @@ and install them on their own computer.
 
 First, are you sure that the module isn't already on your system?  Try
 C<perl -MFoo -e 1>.  (Replace "Foo" with the name of the module; for
-instance, C<perl -MCGI::Carp -e 1>.
+instance, C<perl -MCGI::Carp -e 1>.)
 
 If you don't see an error message, you have the module.  (If you do
 see an error message, it's still possible you have the module, but
