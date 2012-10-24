@@ -2006,8 +2006,8 @@ Es	|U8	|regtail_study	|NN struct RExC_state_t *pRExC_state \
 ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 ERs	|I32	|regrepeat	|NN const regexp *prog|NN char **startposp|NN const regnode *p|I32 max|int depth
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
-ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p|NULLOK STRLEN *lenp\
-				|bool const do_utf8sv_is_utf8
+ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p\
+				|bool const utf8_target
 Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor
 Es	|void	|regcppop	|NN regexp *rex
 ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim

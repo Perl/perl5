@@ -104,7 +104,7 @@ const char* const non_utf8_target_but_utf8_required
 /* Valid for non-utf8 strings: avoids the reginclass
  * call if there are no complications: i.e., if everything matchable is
  * straight forward in the bitmap */
-#define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,0,0)   \
+#define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,0)   \
 					      : ANYOF_BITMAP_TEST(p,*(c)))
 
 /*
@@ -1458,9 +1458,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	switch (OP(c)) {
 	case ANYOF:
 	    if (utf8_target) {
-		STRLEN inclasslen = strend - s;
 		REXEC_FBC_UTF8_CLASS_SCAN(
-                          reginclass(prog, c, (U8*)s, &inclasslen, utf8_target));
+                          reginclass(prog, c, (U8*)s, utf8_target));
 	    }
 	    else {
 		REXEC_FBC_CLASS_SCAN(REGINCLASS(prog, c, (U8*)s));
@@ -4315,10 +4314,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (NEXTCHR_IS_EOS)
                 sayNO;
 	    if (utf8_target) {
-	        STRLEN inclasslen = PL_regeol - locinput;
-	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, utf8_target))
+	        if (!reginclass(rex, scan, (U8*)locinput, utf8_target))
 		    sayNO;
-		locinput += inclasslen;
+		locinput += UTF8SKIP(locinput);
 		break;
 	    }
 	    else {
@@ -6763,10 +6761,9 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     case ANYOF:
 	if (utf8_target) {
 	    STRLEN inclasslen;
-	    inclasslen = loceol - scan;
 	    while (hardcount < max
-		   && ((inclasslen = loceol - scan) > 0)
-		   && reginclass(prog, p, (U8*)scan, &inclasslen, utf8_target))
+                   && scan + (inclasslen = UTF8SKIP(scan)) <= loceol
+		   && reginclass(prog, p, (U8*)scan, utf8_target))
 	    {
 		scan += inclasslen;
 		hardcount++;
@@ -7321,15 +7318,9 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
  
   n is the ANYOF regnode
   p is the target string
-  lenp is pointer to the maximum number of bytes of how far to go in p
-    (This is assumed wthout checking to always be at least the current
-    character's size)
   utf8_target tells whether p is in UTF-8.
 
-  Returns true if matched; false otherwise.  If lenp is not NULL, on return
-  from a successful match, the value it points to will be updated to how many
-  bytes in p were matched.  If there was no match, the value is undefined,
-  possibly changed from the input.
+  Returns true if matched; false otherwise.
 
   Note that this can be a synthetic start class, a combination of various
   nodes, so things you think might be mutually exclusive, such as locale,
@@ -7338,19 +7329,18 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
  */
 
 STATIC bool
-S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, register const U8* const p, STRLEN* lenp, register const bool utf8_target)
+S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, register const U8* const p, register const bool utf8_target)
 {
     dVAR;
     const char flags = ANYOF_FLAGS(n);
     bool match = FALSE;
     UV c = *p;
-    STRLEN c_len = 0;
-    STRLEN maxlen;
 
     PERL_ARGS_ASSERT_REGINCLASS;
 
     /* If c is not already the code point, get it */
     if (utf8_target && !UTF8_IS_INVARIANT(c)) {
+        STRLEN c_len = 0;
 	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &c_len,
 		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV)
 		| UTF8_ALLOW_FFFF | UTF8_CHECK_ONLY);
@@ -7358,21 +7348,6 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 		 * UTF8_ALLOW_FFFF */
 	if (c_len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
-    }
-    else {
-	c_len = 1;
-    }
-
-    /* Use passed in max length, or one character if none passed in or less
-     * than one character.  And assume will match just one character.  This is
-     * overwritten later if matched more. */
-    if (lenp) {
-	maxlen = (*lenp > c_len) ? *lenp : c_len;
-	*lenp = c_len;
-
-    }
-    else {
-	maxlen = c_len;
     }
 
     /* If this character is potentially in the bitmap, check it */

@@ -967,7 +967,7 @@
 #define regcppush(a,b)		S_regcppush(aTHX_ a,b)
 #define reghop3			S_reghop3
 #define reghopmaybe3		S_reghopmaybe3
-#define reginclass(a,b,c,d,e)	S_reginclass(aTHX_ a,b,c,d,e)
+#define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #define regmatch(a,b,c)		S_regmatch(aTHX_ a,b,c)
 #define regrepeat(a,b,c,d,e)	S_regrepeat(aTHX_ a,b,c,d,e)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
