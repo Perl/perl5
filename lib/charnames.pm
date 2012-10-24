@@ -336,8 +336,10 @@ controlling C<"use charnames"> in the same scope apply, like C<:loose> or any
 L<script list, C<:short> option|/DESCRIPTION>, or L<custom aliases|/CUSTOM
 ALIASES> you may have defined.
 
-The only difference is that if the input name is unknown, C<string_vianame>
-returns C<undef> instead of it being a syntax error.
+The only differences are due to the fact that C<string_vianame> is run-time
+and C<\N{}> is compile time.  You can't interpolate inside a C<\N{}>, (so
+C<\N{$variable}> doesn't work); and if the input name is unknown,
+C<string_vianame> returns C<undef> instead of it being a syntax error.
 
 =head1 charnames::vianame(I<name>)
 
