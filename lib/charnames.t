@@ -776,7 +776,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     $res .= '-' . ($^H{73174} // "");
     $res .= '-2' if ":" =~ /\N{COLON}/;
     $res .= '-3' if ":" =~ /\N{COLON}/i;
-    is($res, "foo-foo-1--2-3", "Verify %^H doesn't get reset by \N{...}");
+    is($res, "foo-foo-1--2-3", "Verify %^H doesn't get reset by \\N{...}");
 }
 
 {   use charnames qw(.*);
