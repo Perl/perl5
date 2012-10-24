@@ -11516,8 +11516,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
-            invert = TRUE;
-            RExC_naughty++;
+        invert = TRUE;
+        RExC_naughty++;
     }
 
     if (SIZE_ONLY) {
