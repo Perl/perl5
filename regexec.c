@@ -3490,7 +3490,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p, U8* c
                     c2 = PL_fold_latin1[c1];
                     break;
 
-		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
+		default:
+                    Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
+                    assert(0); /* NOTREACHED */
             }
         }
     }
@@ -3697,12 +3699,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    st->u.keeper.val = rex->offs[0].start;
 	    rex->offs[0].start = locinput - PL_bostr;
 	    PUSH_STATE_GOTO(KEEPS_next, next, locinput);
-	    /*NOT-REACHED*/
+	    assert(0); /*NOTREACHED*/
 	case KEEPS_next_fail:
 	    /* rollback the start point change */
 	    rex->offs[0].start = st->u.keeper.val;
 	    sayNO_SILENT;
-	    /*NOT-REACHED*/
+	    assert(0); /*NOTREACHED*/
 
 	case EOL: /* /..$/  */
 		goto seol;
