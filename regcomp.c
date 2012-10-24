@@ -11450,7 +11450,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     IV namedclass = OOB_NAMEDCLASS;
     char *rangebegin = NULL;
     bool need_class = 0;
-    bool allow_full_fold = TRUE;   /* Assume wants multi-char folding */
     SV *listsv = NULL;
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
@@ -11517,20 +11516,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
-        if (! RExC_in_multi_char_class) {
             invert = TRUE;
             RExC_naughty++;
-
-            /* We have decided to not allow multi-char folds in inverted
-             * character classes, due to the confusion that can happen,
-             * especially with classes that are designed for a non-Unicode
-             * world:  You have the peculiar case that:
-                "s s" =~ /^[^\xDF]+$/i => Y
-                "ss"  =~ /^[^\xDF]+$/i => N
-            *
-            * See [perl #89750] */
-            allow_full_fold = FALSE;
-        }
     }
 
     if (SIZE_ONLY) {
@@ -12193,7 +12180,11 @@ parseit:
          * For single-valued non-inverted ranges, we consider the possibility
          * of multi-char folds.  (We made a conscious decision to not do this
          * for the other cases because it can often lead to non-intuitive
-         * results) */
+         * results.  For example, you have the peculiar case that:
+         *  "s s" =~ /^[^\xDF]+$/i => Y
+         *  "ss"  =~ /^[^\xDF]+$/i => N
+         *
+         * See [perl #89750] */
         if (FOLD && ! invert && value == prevvalue) {
             if (value == LATIN_SMALL_LETTER_SHARP_S
                 || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
@@ -12653,7 +12644,6 @@ parseit:
 
 		U8 foldbuf[UTF8_MAXBYTES_CASE+1];
 		STRLEN foldlen;
-                UV f;
                 SV** listp;
 
                 if (j < 256) {
@@ -12753,12 +12743,12 @@ parseit:
                  * hard-coded for it.  First, get its fold.  This is the simple
                  * fold, as the multi-character folds have been handled earlier
                  * and separated out */
-		f = _to_uni_fold_flags(j, foldbuf, &foldlen,
-                                        ((LOC)
-                                        ? FOLD_FLAGS_LOCALE
-                                        : (ASCII_FOLD_RESTRICTED)
-                                            ? FOLD_FLAGS_NOMIX_ASCII
-                                            : 0));
+		_to_uni_fold_flags(j, foldbuf, &foldlen,
+                                               ((LOC)
+                                               ? FOLD_FLAGS_LOCALE
+                                               : (ASCII_FOLD_RESTRICTED)
+                                                  ? FOLD_FLAGS_NOMIX_ASCII
+                                                  : 0));
 
                 /* Single character fold of above Latin1.  Add everything in
                  * its fold closure to the list that this node should match.
