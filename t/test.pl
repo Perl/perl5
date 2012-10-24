@@ -1014,7 +1014,7 @@ sub run_multiple_progs {
 	}
 
 	if ($prog =~ /--FILE--/) {
-	    my @files = split(/\n--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
+	    my @files = split(/\n?--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
 	    shift @files ;
 	    die "Internal error: test $_ didn't split into pairs, got " .
 		scalar(@files) . "[" . join("%%%%", @files) ."]\n"
