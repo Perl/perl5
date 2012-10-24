@@ -307,12 +307,12 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
     }
     else
-	Perl_croak_nocontext("%s", PL_memory_wrap);
+	croak_memory_wrap();
 #ifdef PERL_TRACK_MEMPOOL
     if (sTHX <= MEM_SIZE_MAX - (MEM_SIZE)total_size)
 	total_size += sTHX;
     else
-	Perl_croak_nocontext("%s", PL_memory_wrap);
+	croak_memory_wrap();
 #endif
 #ifdef HAS_64K_LIMIT
     if (total_size > 0xffff) {
@@ -3257,7 +3257,7 @@ Perl_repeatcpy(register char *to, register const char *from, I32 len, register I
     PERL_ARGS_ASSERT_REPEATCPY;
 
     if (count < 0)
-	Perl_croak_nocontext("%s",PL_memory_wrap);
+	croak_memory_wrap();
 
     if (len == 1)
 	memset(to, *from, count);

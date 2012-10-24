@@ -640,6 +640,9 @@ PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__null_ok__(__printf__,pTHX_1,pTHX_2);
 
+PERL_STATIC_NO_RET void	S_croak_memory_wrap(void)
+			__attribute__noreturn__;
+
 PERL_CALLCONV_NO_RET void	Perl_croak_no_modify(pTHX)
 			__attribute__noreturn__;
 

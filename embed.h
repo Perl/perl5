@@ -76,6 +76,7 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define croak			Perl_croak
 #endif
+#define croak_memory_wrap	S_croak_memory_wrap
 #define croak_no_modify()	Perl_croak_no_modify(aTHX)
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
 #define croak_xs_usage(a,b)	Perl_croak_xs_usage(aTHX_ a,b)

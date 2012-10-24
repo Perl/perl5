@@ -1553,6 +1553,7 @@ Anpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size
 Anpa	|Malloc_t|safesysrealloc|Malloc_t where|MEM_SIZE nbytes
 Anp	|Free_t	|safesysfree	|Malloc_t where
+Asrnx	|void	|croak_memory_wrap
 #if defined(PERL_GLOBAL_STRUCT)
 Ap	|struct perl_vars *|GetVars
 Ap	|struct perl_vars*|init_global_struct
