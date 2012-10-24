@@ -602,6 +602,72 @@ static XSPROTO(intrpvar_sv_common)
     XSRETURN(1);
 }
 
+
+
+#define SVp            0x00000
+#define U32p           0x10000
+#define line_tp        0x20000
+#define OPp            0x30000
+#define PADOFFSETp     0x40000
+#define U8p            0x50000
+#define IVp            0x60000
+#define char_pp        0x70000
+
+/* table that drives most of the B::*OP methods */
+
+struct OP_methods {
+    const char *name;
+    STRLEN namelen;
+    I32    type;
+    size_t offset; /* if -1, access is handled on a case-by-case basis */
+} op_methods[] = {
+    STR_WITH_LEN("next"),    OPp,    offsetof(struct op, op_next),       /* 0*/
+    STR_WITH_LEN("sibling"), OPp,    offsetof(struct op, op_sibling),    /* 1*/
+    STR_WITH_LEN("targ"),    PADOFFSETp, offsetof(struct op, op_targ),   /* 2*/
+    STR_WITH_LEN("flags"),   U8p,    offsetof(struct op, op_flags),      /* 3*/
+    STR_WITH_LEN("private"), U8p,    offsetof(struct op, op_private),    /* 4*/
+    STR_WITH_LEN("first"),   OPp,    offsetof(struct unop, op_first),     /* 5*/
+    STR_WITH_LEN("last"),    OPp,    offsetof(struct binop, op_last),    /* 6*/
+    STR_WITH_LEN("other"),   OPp,    offsetof(struct logop, op_other),   /* 7*/
+    STR_WITH_LEN("pmreplstart"), OPp,
+	     offsetof(struct pmop,   op_pmstashstartu.op_pmreplstart),   /* 8*/
+    STR_WITH_LEN("redoop"),  OPp,    offsetof(struct loop, op_redoop),   /* 9*/
+    STR_WITH_LEN("nextop"),  OPp,    offsetof(struct loop, op_nextop),   /*10*/
+    STR_WITH_LEN("lastop"),  OPp,    offsetof(struct loop, op_lastop),   /*11*/
+    STR_WITH_LEN("pmflags"), U32p,   offsetof(struct pmop, op_pmflags),  /*12*/
+#if PERL_VERSION >= 17
+    STR_WITH_LEN("code_list"),OPp,   offsetof(struct pmop, op_code_list),/*13*/
+#else
+    STR_WITH_LEN("code_list"),0,     -1,
+#endif
+    STR_WITH_LEN("sv"),      SVp,     offsetof(struct svop, op_sv),      /*14*/
+    STR_WITH_LEN("gv"),      SVp,     offsetof(struct svop, op_sv),      /*15*/
+    STR_WITH_LEN("padix"),   PADOFFSETp,offsetof(struct padop, op_padix),/*16*/
+    STR_WITH_LEN("cop_seq"), U32p,    offsetof(struct cop, cop_seq),     /*17*/
+    STR_WITH_LEN("line"),    line_tp, offsetof(struct cop, cop_line),    /*18*/
+    STR_WITH_LEN("hints"),   U32p,    offsetof(struct cop, cop_hints),   /*19*/
+#ifdef USE_ITHREADS
+    STR_WITH_LEN("pmoffset"),IVp,     offsetof(struct pmop, op_pmoffset),/*20*/
+    STR_WITH_LEN("filegv"),  0,       -1,                                /*21*/
+    STR_WITH_LEN("file"),    char_pp, offsetof(struct cop, cop_file),    /*22*/
+    STR_WITH_LEN("stash"),   0,       -1,                                /*23*/
+#  if PERL_VERSION < 17
+    STR_WITH_LEN("stashpv"), char_pp, offsetof(struct cop, cop_stashpv), /*24*/
+    STR_WITH_LEN("stashoff"),0,       -1,                                /*25*/
+#  else
+    STR_WITH_LEN("stashpv"), 0,       -1,                                /*24*/
+    STR_WITH_LEN("stashoff"),PADOFFSETp,offsetof(struct cop, cop_stashoff),/*25*/
+#  endif
+#else
+    STR_WITH_LEN("pmoffset"),0,       -1,                                /*20*/
+    STR_WITH_LEN("filegv"),  SVp,     offsetof(struct cop, cop_filegv),  /*21*/
+    STR_WITH_LEN("file"),    0,       -1,                                /*22*/
+    STR_WITH_LEN("stash"),   SVp,     offsetof(struct cop, cop_stash),   /*23*/
+    STR_WITH_LEN("stashpv"), 0,       -1,                                /*24*/
+    STR_WITH_LEN("stashoff"),0,       -1,                              /*25*/
+#endif
+};
+
 #include "const-c.inc"
 
 MODULE = B	PACKAGE = B
@@ -812,59 +878,7 @@ threadsv_names()
     PPCODE:
 
 
-#define SVp		0x00000
-#define U32p		0x10000
-#define line_tp		0x20000
-#define OPp		0x30000
-#define PADOFFSETp	0x40000
-#define U8p		0x50000
-#define IVp		0x60000
-#define char_pp		0x70000
 
-#define OP_next_ix		OPp | offsetof(struct op, op_next)
-#define OP_sibling_ix		OPp | offsetof(struct op, op_sibling)
-#define UNOP_first_ix		OPp | offsetof(struct unop, op_first)
-#define BINOP_last_ix		OPp | offsetof(struct binop, op_last)
-#define LOGOP_other_ix		OPp | offsetof(struct logop, op_other)
-#define PMOP_pmreplstart_ix \
-		OPp | offsetof(struct pmop, op_pmstashstartu.op_pmreplstart)
-#define LOOP_redoop_ix		OPp | offsetof(struct loop, op_redoop)
-#define LOOP_nextop_ix		OPp | offsetof(struct loop, op_nextop)
-#define LOOP_lastop_ix		OPp | offsetof(struct loop, op_lastop)
-
-#define OP_targ_ix		PADOFFSETp | offsetof(struct op, op_targ)
-#define OP_flags_ix		U8p | offsetof(struct op, op_flags)
-#define OP_private_ix		U8p | offsetof(struct op, op_private)
-
-#define PMOP_pmflags_ix		U32p | offsetof(struct pmop, op_pmflags)
-#if PERL_VERSION >= 17
-#  define PMOP_code_list_ix	OPp | offsetof(struct pmop, op_code_list)
-#else
-#  define PMOP_code_list_ix	-1
-#endif
-
-#ifdef USE_ITHREADS
-#define PMOP_pmoffset_ix	IVp | offsetof(struct pmop, op_pmoffset)
-#endif
-
-#  Yes, B::SV::sv and B::SV::gv really do end up generating identical code.
-#define SVOP_sv_ix		SVp | offsetof(struct svop, op_sv)
-#define SVOP_gv_ix		SVp | offsetof(struct svop, op_sv)
-
-#define PADOP_padix_ix		PADOFFSETp | offsetof(struct padop, op_padix)
-
-#define COP_seq_ix		U32p | offsetof(struct cop, cop_seq)
-#define COP_line_ix		line_tp | offsetof(struct cop, cop_line)
-#define COP_hints_ix		U32p | offsetof(struct cop, cop_hints)
-
-#ifdef USE_ITHREADS
-#define COP_stashpv_ix		char_pp | offsetof(struct cop, cop_stashpv)
-#define COP_stashoff_ix	    PADOFFSETp | offsetof(struct cop, cop_stashoff)
-#define COP_file_ix		char_pp | offsetof(struct cop, cop_file)
-#else
-#define COP_stash_ix		SVp | offsetof(struct cop, cop_stash)
-#define COP_filegv_ix		SVp | offsetof(struct cop, cop_filegv)
-#endif
 
 MODULE = B	PACKAGE = B::OP
 
@@ -883,36 +897,90 @@ void
 next(o)
 	B::OP		o
     ALIAS:
-	B::OP::next = OP_next_ix
-	B::OP::sibling = OP_sibling_ix
-	B::OP::targ = OP_targ_ix
-	B::OP::flags = OP_flags_ix
-	B::OP::private = OP_private_ix
-	B::UNOP::first = UNOP_first_ix
-	B::BINOP::last = BINOP_last_ix
-	B::LOGOP::other = LOGOP_other_ix
-	B::PMOP::pmreplstart = PMOP_pmreplstart_ix
-	B::LOOP::redoop = LOOP_redoop_ix
-	B::LOOP::nextop = LOOP_nextop_ix
-	B::LOOP::lastop = LOOP_lastop_ix
-	B::PMOP::pmflags = PMOP_pmflags_ix
-	B::PMOP::code_list = PMOP_code_list_ix
-	B::SVOP::sv = SVOP_sv_ix
-	B::SVOP::gv = SVOP_gv_ix
-	B::PADOP::padix = PADOP_padix_ix
-	B::COP::cop_seq = COP_seq_ix
-	B::COP::line = COP_line_ix
-	B::COP::hints = COP_hints_ix
+	B::OP::next          =  0
+	B::OP::sibling       =  1
+	B::OP::targ          =  2
+	B::OP::flags         =  3
+	B::OP::private       =  4
+	B::UNOP::first       =  5
+	B::BINOP::last       =  6
+	B::LOGOP::other      =  7
+	B::PMOP::pmreplstart =  8
+	B::LOOP::redoop      =  9
+	B::LOOP::nextop      = 10
+	B::LOOP::lastop      = 11
+	B::PMOP::pmflags     = 12
+	B::PMOP::code_list   = 13
+	B::SVOP::sv          = 14
+	B::SVOP::gv          = 15
+	B::PADOP::padix      = 16
+	B::COP::cop_seq      = 17
+	B::COP::line         = 18
+	B::COP::hints        = 19
+	B::PMOP::pmoffset    = 20
+	B::COP::filegv       = 21
+	B::COP::file         = 22
+	B::COP::stash        = 23
+	B::COP::stashpv      = 24
+	B::COP::stashoff     = 25
     PREINIT:
 	char *ptr;
 	SV *ret;
+	I32 type;
+	I32 offset;
+	STRLEN len;
     PPCODE:
-	ptr = (ix & 0xFFFF) + (char *)o;
-	switch ((U8)(ix >> 16)) {
-	case (U8)(OPp >> 16):
+	if (ix < 0 || ix > 25)
+	    croak("Illegal alias %d for B::*next", (int)ix);
+	offset = op_methods[ix].offset;
+
+	/* handle non-direct field access */
+
+	if (offset < 0) {
+	    switch (ix) {
+#ifdef USE_ITHREADS
+	    case 21: /* filegv */
+		ret = make_sv_object(aTHX_ (SV *)CopFILEGV((COP*)o));
+		break;
+#endif
+#ifndef USE_ITHREADS
+	    case 22: /* file */
+		ret = sv_2mortal(newSVpv(CopFILE((COP*)o), 0));
+		break;
+#endif
+#ifdef USE_ITHREADS
+	    case 23: /* stash */
+		ret = make_sv_object(aTHX_ (SV *)CopSTASH((COP*)o));
+		break;
+#endif
+#if PERL_VERSION >= 17 || !defined USE_ITHREADS
+	    case 24: /* stashpv */
+#  if PERL_VERSION >= 17
+		ret = sv_2mortal(CopSTASH((COP*)o)
+				&& SvTYPE(CopSTASH((COP*)o)) == SVt_PVHV
+		    ? newSVhek(HvNAME_HEK(CopSTASH((COP*)o)))
+		    : &PL_sv_undef);
+#  else
+		ret = sv_2mortal(newSVpv(CopSTASHPV((COP*)o), 0));
+#  endif
+		break;
+#endif
+	    default:
+		croak("method %s not implemented", op_methods[ix].name);
+	    }
+	    ST(0) = ret;
+	    XSRETURN(1);
+	}
+
+	/* do a direct structure offset lookup */
+
+	ptr  = (char *)o + offset;
+	type = op_methods[ix].type;
+	switch ((U8)(type >> 16)) {
+	case  (U8)(OPp >> 16):
 	    ret = make_op_object(aTHX_ *((OP **)ptr));
 	    break;
-	case (U8)(PADOFFSETp >> 16):
+	case  (U8)(PADOFFSETp >> 16):
 	    ret = sv_2mortal(newSVuv(*((PADOFFSET*)ptr)));
 	    break;
 	case (U8)(U8p >> 16):
@@ -927,16 +995,14 @@ next(o)
 	case (U8)(line_tp >> 16):
 	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
 	    break;
-#ifdef USE_ITHREADS
 	case (U8)(IVp >> 16):
 	    ret = sv_2mortal(newSViv(*((IV*)ptr)));
 	    break;
 	case (U8)(char_pp >> 16):
 	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
 	    break;
-#endif
 	default:
-	    croak("Illegal alias 0x%08x for B::*next", (unsigned)ix);
+	    croak("Illegal type 0x%08x for B::*next", (unsigned)type);
 
 	}
 	ST(0) = ret;
@@ -1072,24 +1138,6 @@ PMOP_precomp(o)
 BOOT:
 {
 	CV *cv;
-#ifdef USE_ITHREADS
-        cv = newXS("B::PMOP::pmoffset", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = PMOP_pmoffset_ix;
-# if PERL_VERSION < 17
-        cv = newXS("B::COP::stashpv", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = COP_stashpv_ix;
-# else
-        cv = newXS("B::COP::stashoff", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = COP_stashoff_ix;
-# endif
-        cv = newXS("B::COP::file", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = COP_file_ix;
-#else
-        cv = newXS("B::COP::stash", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = COP_stash_ix;
-        cv = newXS("B::COP::filegv", XS_B__OP_next, __FILE__);
-        XSANY.any_i32 = COP_filegv_ix;
-#endif
         cv = newXS("B::PMOP::reflags", XS_B__PMOP_precomp, __FILE__);
         XSANY.any_i32 = 1;
 }
@@ -1149,59 +1197,7 @@ const char *
 COP_label(o)
 	B::COP	o
 
-# Both pairs of accessors are provided for both ithreads and not, but for each,
-# one pair is direct structure access, and 1 pair "faked up" with a more complex
-# macro. We implement the direct structure access pair using the common code
-# above (B::OP::next)
- 
-#ifdef USE_ITHREADS
 
-void
-COP_stash(o)
-	B::COP	o
-    ALIAS:
-	filegv = 1
-    PPCODE:
-	PUSHs(make_sv_object(aTHX_
-			     ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o)));
-
-#else
-
-char *
-COP_file(o)
-	B::COP	o
-    CODE:
-	RETVAL = CopFILE(o);
-    OUTPUT:
-	RETVAL
-
-#endif
-
-#if PERL_VERSION >= 17
-
-SV *
-COP_stashpv(o)
-	B::COP	o
-    CODE:
-	RETVAL = CopSTASH(o) && SvTYPE(CopSTASH(o)) == SVt_PVHV
-	    ? newSVhek(HvNAME_HEK(CopSTASH(o)))
-	    : &PL_sv_undef;
-    OUTPUT:
-	RETVAL
-
-#else
-#  ifndef USE_ITHREADS
-
-char *
-COP_stashpv(o)
-	B::COP	o
-    CODE:
-	RETVAL = CopSTASHPV(o);
-    OUTPUT:
-	RETVAL
-
-#  endif
-#endif
 
 I32
 COP_arybase(o)
