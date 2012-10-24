@@ -951,9 +951,6 @@ sub fresh_perl_like {
 # The expected output may contain:
 #   OPTION list of options
 #   OPTIONS list of options
-#   PREFIX
-#     indicates that the supplied output is only a prefix to the
-#     expected output
 #
 # The possible options for OPTION may be:
 #   regex - the expected output is a regular expression
@@ -962,6 +959,9 @@ sub fresh_perl_like {
 #
 # If the actual output contains a line "SKIPPED" the test will be
 # skipped.
+#
+# If the actual output contains a line "PREFIX", any output starting with that
+# line will be ignored when comparing with the expected output
 #
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
