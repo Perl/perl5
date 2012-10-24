@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.93";
+our $VERSION   = "0.94";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -47,8 +47,7 @@ my %style =
     "(?(#seq)?)#noise#arg(?([#targarg])?)"],
    "debug" =>
    ["#class (#addr)\n\top_next\t\t#nextaddr\n\top_sibling\t#sibaddr\n\t"
-    . "op_ppaddr\tPL_ppaddr[OP_#NAME]\n\top_type\t\t#typenum\n" .
-    ($] > 5.009 ? '' : "\top_seq\t\t#seqnum\n")
+    . "op_ppaddr\tPL_ppaddr[OP_#NAME]\n\top_type\t\t#typenum\n"
     . "\top_flags\t#flagval\n\top_private\t#privval\t#hintsval\n"
     . "(?(\top_first\t#firstaddr\n)?)(?(\top_last\t\t#lastaddr\n)?)"
     . "(?(\top_sv\t\t#svaddr\n)?)",
@@ -510,15 +509,9 @@ sub walk_exec {
 		push @$targ, $ar;
 		push @todo, [$op->pmreplstart, $ar];
 	    } elsif ($name =~ /^enter(loop|iter)$/) {
-		if ($] > 5.009) {
-		    $labels{${$op->nextop}} = "NEXT";
-		    $labels{${$op->lastop}} = "LAST";
-		    $labels{${$op->redoop}} = "REDO";
-		} else {
-		    $labels{$op->nextop->seq} = "NEXT";
-		    $labels{$op->lastop->seq} = "LAST";
-		    $labels{$op->redoop->seq} = "REDO";		
-		}
+		$labels{${$op->nextop}} = "NEXT";
+		$labels{${$op->lastop}} = "LAST";
+		$labels{${$op->redoop}} = "REDO";
 	    }
 	}
     }
@@ -606,7 +599,7 @@ $priv{$_}{128} = "LVINTRO"
        "padav", "padhv", "enteriter", "entersub");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
-$priv{"aassign"}{32} = $] < 5.009 ? "PHASH" : "STATE";
+$priv{"aassign"}{32} = "STATE";
 $priv{"sassign"}{32} = "STATE";
 $priv{"sassign"}{64} = "BKWARD";
 $priv{"sassign"}{128}= "CV2GV";
@@ -659,18 +652,14 @@ $priv{"exit"}{128} = "VMS";
 $priv{$_}{2} = "FTACCESS"
   for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec");
 @{$priv{"entereval"}}{2,4,8,16} = qw "HAS_HH UNI BYTES COPHH";
-if ($] >= 5.009) {
-  # Stacked filetests are post 5.8.x
-  @{$priv{$_}}{4,8,16} = ("FTSTACKED","FTSTACKING","FTAFTERt")
-    for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec",
-         "ftis", "fteowned", "ftrowned", "ftzero", "ftsize", "ftmtime",
-	 "ftatime", "ftctime", "ftsock", "ftchr", "ftblk", "ftfile", "ftdir",
-	 "ftpipe", "ftlink", "ftsuid", "ftsgid", "ftsvtx", "fttty", "fttext",
-	 "ftbinary");
-  # Lexical $_ is post 5.8.x
-  $priv{$_}{2} = "GREPLEX"
-    for ("mapwhile", "mapstart", "grepwhile", "grepstart");
-}
+@{$priv{$_}}{4,8,16} = ("FTSTACKED","FTSTACKING","FTAFTERt")
+for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec",
+     "ftis", "fteowned", "ftrowned", "ftzero", "ftsize", "ftmtime",
+     "ftatime", "ftctime", "ftsock", "ftchr", "ftblk", "ftfile", "ftdir",
+     "ftpipe", "ftlink", "ftsuid", "ftsgid", "ftsvtx", "fttty", "fttext",
+     "ftbinary");
+$priv{$_}{2} = "GREPLEX"
+for ("mapwhile", "mapstart", "grepwhile", "grepstart");
 $priv{$_}{128} = '+1' for qw "caller wantarray runcv";
 @{$priv{coreargs}}{1,2,64,128} = ('DREF1','DREF2','$MOD','MARK');
 $priv{$_}{128} = 'UTF' for qw "last redo next goto dump";
@@ -801,20 +790,16 @@ sub concise_op {
 	if (defined $padname and class($padname) ne "SPECIAL") {
 	    $h{targarg}  = $padname->PVX;
 	    if ($padname->FLAGS & SVf_FAKE) {
-		if ($] < 5.009) {
-		    $h{targarglife} = "$h{targarg}:FAKE";
-		} else {
-		    # These changes relate to the jumbo closure fix.
-		    # See changes 19939 and 20005
-		    my $fake = '';
-		    $fake .= 'a'
-		   	if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
-		    $fake .= 'm'
-		   	if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
-		    $fake .= ':' . $padname->PARENT_PAD_INDEX
-			if $curcv->CvFLAGS & CVf_ANON;
-		    $h{targarglife} = "$h{targarg}:FAKE:$fake";
-		}
+		# These changes relate to the jumbo closure fix.
+		# See changes 19939 and 20005
+		my $fake = '';
+		$fake .= 'a'
+		    if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
+		$fake .= 'm'
+		    if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
+		$fake .= ':' . $padname->PARENT_PAD_INDEX
+		    if $curcv->CvFLAGS & CVf_ANON;
+		$h{targarglife} = "$h{targarg}:FAKE:$fake";
 	    }
 	    else {
 		my $intro = $padname->COP_SEQ_RANGE_LOW - $cop_seq_base;
@@ -899,13 +884,8 @@ sub concise_op {
     }
     $h{seq} = $h{hyphseq} = seq($op);
     $h{seq} = "" if $h{seq} eq "-";
-    if ($] > 5.009) {
-	$h{opt} = $op->opt;
-	$h{label} = $labels{$$op};
-    } else {
-	$h{seqnum} = $op->seq;
-	$h{label} = $labels{$op->seq};
-    }
+    $h{opt} = $op->opt;
+    $h{label} = $labels{$$op};
     $h{next} = $op->next;
     $h{next} = (class($h{next}) eq "NULL") ? "(end)" : seq($h{next});
     $h{nextaddr} = sprintf("%#x", $ {$op->next});

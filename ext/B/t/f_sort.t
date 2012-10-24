@@ -687,10 +687,6 @@ EOT_EOT
 # b  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
-if($] < 5.009) {
-    # 5.8.x doesn't show the /STABLE flag, so massage the golden results.
-    s!/STABLE!!s foreach ($expect, $expect_nt);
-}
 
 checkOptree(note   => q{},
 	    bcopts => q{-exec},

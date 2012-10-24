@@ -146,7 +146,7 @@ my $testpkgs = {
 		  formfeed end_av dowarn diehook defstash curstash
 		  cstring comppadlist check_av cchar cast_I32 bootstrap
 		  begin_av amagic_generation sub_generation address
-		  ), $] > 5.009 ? ('unitcheck_av') : ()],
+		  unitcheck_av) ],
     },
 
     B::Deparse => { dflt => 'perl',	# 236 functions
@@ -171,7 +171,7 @@ my $testpkgs = {
 		     POSTFIX SVf_FAKE SVf_IOK SVf_NOK SVf_POK SVf_ROK
 		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN OPpPAD_STATE
 		     OPpCONST_ARYBASE OPpEVAL_BYTES OPpSUBSTR_REPL_FIRST
-		     /, $] > 5.009 ? ('RXf_SKIPWHITE') : ('PMf_SKIPWHITE'),
+		     RXf_SKIPWHITE /,
 		    'CVf_LOCKED', # This ends up as a constant, pre or post 5.10
 		    ],
 		 },
@@ -218,7 +218,7 @@ my $testpkgs = {
 			     new listen import getsockopt croak
 			     connected connect configure confess close
 			     carp bind atmark accept sockaddr_in6
-			     /, $] > 5.009 ? ('blocking') : () ],
+			     blocking/ ],
 
 		    XS => [qw/ unpack_sockaddr_un unpack_sockaddr_in
 			   sockatmark sockaddr_family pack_sockaddr_un

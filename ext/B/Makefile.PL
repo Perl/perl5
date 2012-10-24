@@ -24,13 +24,6 @@ my @names = qw(HEf_SVKEY
 	       SVTYPEMASK SVt_PVGV SVt_PVHV
 	       PAD_FAKELEX_ANON PAD_FAKELEX_MULTI);
 
-if ($] < 5.009) {
-    # Constant not present after 5.8.x
-    push @names, 'AVf_REAL';
-    # This is only present in 5.10, but it's useful to B::Deparse to be able
-    # to import a dummy value from B
-    push @names, {name=>"OPpPAD_STATE", default=>["IV", "0"]};
-}
 
 # First element in each tuple is the file; second is a regex snippet
 # giving the prefix to limit the names of symbols to define that come

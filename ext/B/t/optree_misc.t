@@ -135,11 +135,6 @@ my $nt = <<'EONT_EONT';
 # 6           <$> gvsv(*_) s ->7
 EONT_EONT
 
-if ($] < 5.009) {
-    $t =~ s/GV /BM /;
-    $nt =~ s/GV /BM /;
-} 
-
 checkOptree ( name      => 'index and PVBM',
 	      prog	=> '$_ = index q(foo), q(foo)',
 	      strip_open_hints => 1,

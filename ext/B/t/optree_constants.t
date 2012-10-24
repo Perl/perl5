@@ -49,7 +49,6 @@ my $want = {	# expected types, how value renders in-line, todos (maybe)
     # these are not inlined, at least not per BC::Concise
     #myyes	=> [ $RV_class, ],
     #myno	=> [ $RV_class, ],
-    $] > 5.009 ? (
     myaref	=> [ $RV_class, '\\\\' ],
     myfl	=> [ 'NV', myfl ],
     myint	=> [ 'IV', myint ],
@@ -59,13 +58,6 @@ my $want = {	# expected types, how value renders in-line, todos (maybe)
     myrex	=> [ $RV_class, '\\\\' ],
     ),
     myundef	=> [ 'NULL', ],
-    ) : (
-    myaref	=> [ 'PVIV', '' ],
-    myfl	=> [ 'PVNV', myfl ],
-    myint	=> [ 'PVIV', myint ],
-    myrex	=> [ 'PVNV', '' ],
-    myundef	=> [ 'PVIV', ],
-    )
 };
 
 use constant WEEKDAYS
@@ -196,10 +188,6 @@ EOT_EOT
 # 2        <0> padav[@list:FAKE:m:71] ->3
 EONT_EONT
 
-if($] < 5.009) {
-    # 5.8.x doesn't add the m flag to padav
-    s/FAKE:m:\d+/FAKE/ foreach ($expect, $expect_nt);
-}
 
 checkOptree ( name	=> 'constant sub returning list',
 	      code	=> \&WEEKDAYS,
@@ -248,13 +236,6 @@ EONT_EONT
 
 if($] < 5.015) {
     s/M(?=\*? ->)//g for $expect, $expect_nt;
-}
-if($] < 5.009) {
-    # 5.8.x's use constant has larger types
-    foreach ($expect, $expect_nt) {
-	s/IV 42/PV$&/;
-	s/NV 1.41/PV$&/;
-    }
 }
 
 checkOptree ( name	=> 'call many in a print statement',
