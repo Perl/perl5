@@ -246,7 +246,7 @@ EXPECT
 OPTIONS regex
 unicore/perl_alias.pl cannot be used as alias file for charnames at
 ########
-# alias with bad file
+# NAME alias with bad file
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 0;
@@ -259,7 +259,7 @@ EXPECT
 OPTIONS regex
 unicore/xyzzy_alias.pl did not return a \(valid\) list of alias pairs at
 ########
-# alias with file with empty list
+# NAME alias with file with empty list
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 ();
@@ -275,7 +275,7 @@ Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
-# alias with file OK but file has :short aliases
+# NAME alias with file OK but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
@@ -292,7 +292,7 @@ Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
-# alias with :short and file OK
+# NAME alias with :short and file OK
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
@@ -307,7 +307,7 @@ EXPECT
 OPTIONS regex
 $
 ########
-# alias with :short and file OK has :long aliases
+# NAME alias with :short and file OK has :long aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
@@ -325,7 +325,7 @@ Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
-# alias with file implicit :full but file has :short aliases
+# NAME alias with file implicit :full but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
@@ -342,7 +342,7 @@ Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
-# alias with file implicit :full and file has :long aliases
+# NAME alias with file implicit :full and file has :long aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
