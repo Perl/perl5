@@ -3333,7 +3333,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p, U8* c
 
     const bool utf8_target = PL_reg_match_utf8;
 
-    UV c1, c2;
+    UV c1 = CHRTEST_NOT_A_CP_1;
+    UV c2 = CHRTEST_NOT_A_CP_2;
     bool use_chrtest_void = FALSE;
 
     /* Used when we have both utf8 input and utf8 output, to avoid converting
