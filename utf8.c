@@ -507,7 +507,13 @@ determinable reasonable value.
 The UTF8_CHECK_ONLY flag overrides the behavior when a non-allowed (by other
 flags) malformation is found.  If this flag is set, the routine assumes that
 the caller will raise a warning, and this function will silently just set
-C<retlen> to C<-1> and return zero.
+C<retlen> to C<-1> (cast to C<STRLEN>) and return zero.
+
+Note that this API requires disambiguation between successful decoding a NUL
+character, and an error return (unless the UTF8_CHECK_ONLY flag is set), as
+in both cases, 0 is returned.  To disambiguate, upon a zero return, see if the
+first byte of C<s> is 0 as well.  If so, the input was a NUL; if not, the input
+had an error.
 
 Certain code points are considered problematic.  These are Unicode surrogates,
 Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
