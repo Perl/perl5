@@ -804,8 +804,10 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
     PERL_ARGS_ASSERT_SAVE_LIST;
 
     for (i = 1; i <= maxsarg; i++) {
-	SV * const sv = newSV(0);
-	sv_setsv(sv,sarg[i]);
+	SV *sv;
+	SvGETMAGIC(sarg[i]);
+	sv = newSV(0);
+	sv_setsv_nomg(sv,sarg[i]);
 	SSCHECK(3);
 	SSPUSHPTR(sarg[i]);		/* remember the pointer */
 	SSPUSHPTR(sv);			/* remember the value */

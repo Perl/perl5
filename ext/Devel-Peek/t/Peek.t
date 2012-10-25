@@ -241,7 +241,7 @@ do_test('reference to hash',
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 1
+    REFCNT = [12]
     FLAGS = \\(SHAREKEYS\\)
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
@@ -390,7 +390,7 @@ do_test('reference to blessed hash',
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 1
+    REFCNT = [12]
     FLAGS = \\(OBJECT,SHAREKEYS\\)
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
@@ -466,7 +466,7 @@ do_test('reference to hash containing Unicode',
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 1
+    REFCNT = [12]
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
     UV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
@@ -497,7 +497,7 @@ do_test('reference to hash containing Unicode',
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 1
+    REFCNT = [12]
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
     UV = 1					# $] < 5.009
     NV = 0					# $] < 5.009
@@ -710,7 +710,7 @@ do_test('blessing to a class with embedded NUL characters',
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 1
+    REFCNT = [12]
     FLAGS = \\(OBJECT,SHAREKEYS\\)
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009

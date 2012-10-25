@@ -412,7 +412,10 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	AvARRAY(av) = ary;
-	AvFILLp(av) = AvMAX(av) = size - 1;
+	AvMAX(av) = size - 1;
+	AvFILLp(av) = -1;
+	ENTER;
+	SAVEFREESV(av);
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
 
@@ -420,11 +423,15 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 	       have multiple references to the same temp scalar (e.g.
 	       from a list slice) */
 
+	    SvGETMAGIC(*strp); /* before newSV, in case it dies */
+	    AvFILLp(av)++;
 	    ary[i] = newSV(0);
 	    sv_setsv_flags(ary[i], *strp,
-			   SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+			   SV_DO_COW_SVSETSV|SV_NOSTEAL);
 	    strp++;
 	}
+	SvREFCNT_inc_simple_void_NN(av);
+	LEAVE;
     }
     return av;
 }

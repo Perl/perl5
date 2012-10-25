@@ -4804,20 +4804,30 @@ PP(pp_anonlist)
 PP(pp_anonhash)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    HV* const hv = newHV();
+    HV* const hv = (HV *)sv_2mortal((SV *)newHV());
 
     while (MARK < SP) {
-	SV * const key = *++MARK;
-	SV * const val = newSV(0);
+	SV * const key =
+	    (MARK++, SvGMAGICAL(*MARK) ? sv_mortalcopy(*MARK) : *MARK);
+	SV *val;
 	if (MARK < SP)
-	    sv_setsv(val, *++MARK);
+	{
+	    MARK++;
+	    SvGETMAGIC(*MARK);
+	    val = newSV(0);
+	    sv_setsv(val, *MARK);
+	}
 	else
+	{
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Odd number of elements in anonymous hash");
+	    val = newSV(0);
+	}
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
-    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
-	    ? newRV_noinc(MUTABLE_SV(hv)) : MUTABLE_SV(hv));
+    if (PL_op->op_flags & OPf_SPECIAL)
+	mXPUSHs(newRV_inc(MUTABLE_SV(hv)));
+    else XPUSHs(MUTABLE_SV(hv));
     RETURN;
 }
 
@@ -5072,9 +5082,11 @@ PP(pp_push)
     else {
 	PL_delaymagic = DM_DELAY;
 	for (++MARK; MARK <= SP; MARK++) {
-	    SV * const sv = newSV(0);
+	    SV *sv;
+	    if (*MARK) SvGETMAGIC(*MARK);
+	    sv = newSV(0);
 	    if (*MARK)
-		sv_setsv(sv, *MARK);
+		sv_setsv_nomg(sv, *MARK);
 	    av_store(ary, AvFILLp(ary)+1, sv);
 	}
 	if (PL_delaymagic & DM_ARRAY_ISA)

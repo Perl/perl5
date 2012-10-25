@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 37;
+plan tests => 38;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -273,6 +273,10 @@ leak(2, 0, sub {
     my $res = eval { {$die_on_fetch, 0} };
     $res = eval { {0, $die_on_fetch} };
 }, 'building anon hash with explosives does not leak');
+
+leak(2, 0, sub {
+    my $res = eval { [$die_on_fetch] };
+}, 'building anon array with explosives does not leak');
 
 leak(2, 0, sub {
     my @a;

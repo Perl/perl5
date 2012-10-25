@@ -8230,8 +8230,10 @@ Perl_sv_mortalcopy_flags(pTHX_ SV *const oldstr, U32 flags)
     dVAR;
     SV *sv;
 
+    if (flags & SV_GMAGIC)
+	SvGETMAGIC(oldstr); /* before new_SV, in case it dies */
     new_SV(sv);
-    sv_setsv_flags(sv,oldstr,flags);
+    sv_setsv_flags(sv,oldstr,flags & ~SV_GMAGIC);
     PUSH_EXTEND_MORTAL__SV_C(sv);
     SvTEMP_on(sv);
     return sv;
