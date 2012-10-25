@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 308;
+plan tests => 309;
 
 my @comma = ("key", "value");
 
@@ -512,6 +512,12 @@ SKIP: {
     $x = 0;
     $_++ foreach %h = ($x,$x);
     is($x, 0, "returned values are not aliased to RHS of the assignment operation");
+
+    %h = ();
+    $x = 0;
+    $_++ foreach sub :lvalue { %h = ($x,$x) }->();
+    is($x, 0,
+     "returned values are not aliased to RHS of assignment in lvalue sub");
 
     $_++ foreach ($x,$y,%h,$z) = (0);
     ok( eq_array([$x,$y,%h,$z], [1,undef,undef]), "only assigned values are returned" );
