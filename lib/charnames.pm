@@ -211,8 +211,9 @@ use variables inside the C<\N{...}>.  If you want similar run-time
 functionality, use
 L<charnames::string_vianame()|/charnames::string_vianame(I<name>)>.
 
-Since Unicode 6.0, it is deprecated to use C<BELL>.  Instead use C<ALERT> (but
-C<BEL> will continue to work).
+Note, starting in Perl 5.18, the name C<BELL> refers to the Unicode character
+U+1F514, instead of the traditional U+0007.  For the latter, use C<ALERT>
+or C<BEL>.
 
 It is a syntax error to use C<\N{NAME}> where C<NAME> is unknown.
 
@@ -247,8 +248,8 @@ C<:loose> slows down look-ups by a factor of 2 to 3 versus
 C<:full>, but the trade-off may be worth it to you.  Each individual look-up
 takes very little time, and the results are cached, so the speed difference
 would become a factor only in programs that do look-ups of many different
-spellings, and probably only when those look-ups are through vianame() and
-string_vianame(), since C<\N{...}> look-ups are done at compile time.
+spellings, and probably only when those look-ups are through C<vianame()> and
+C<string_vianame()>, since C<\N{...}> look-ups are done at compile time.
 
 =head1 ALIASES
 
@@ -379,7 +380,7 @@ If you define more than one name for the code point, it is indeterminate
 which one will be returned.
 
 As mentioned, the function returns C<undef> if no name is known for the code
-point.  In Unicode the proper name of these is the empty string, which
+point.  In Unicode the proper name for these is the empty string, which
 C<undef> stringifies to.  (If you ask for a code point past the legal
 Unicode maximum of U+10FFFF that you haven't assigned an alias to, you
 get C<undef> plus a warning.)
