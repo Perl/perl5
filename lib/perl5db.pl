@@ -4032,6 +4032,37 @@ use vars qw($deep);
 # We need to fully qualify the name ("DB::sub") to make "use strict;"
 # happy. -- Shlomi Fish
 
+sub _indent_print_line_info {
+    my ($offset, $str) = @_;
+
+    print_lineinfo( ' ' x ($stack_depth - $offset), $str);
+
+    return;
+}
+
+sub _print_frame_message {
+    my ($al) = @_;
+
+    if ($frame) {
+        if ($frame & 4) {   # Extended frame entry message
+            _indent_print_line_info(-1, "in  ");
+
+            # Why -1? But it works! :-(
+            # Because print_trace will call add 1 to it and then call
+            # dump_trace; this results in our skipping -1+1 = 0 stack frames
+            # in dump_trace.
+            #
+            # Now it's 0 because we extracted a function.
+            print_trace( $LINEINFO, 0, 1, 1, "$sub$al" );
+        }
+        else {
+            _indent_print_line_info(-1, "entering $sub$al\n" );
+        }
+    }
+
+    return;
+}
+
 sub DB::sub {
     # Do not use a regex in this subroutine -> results in corrupted memory
     # See: [perl #66110]
@@ -4074,22 +4105,9 @@ sub DB::sub {
     $single |= 4 if $stack_depth == $deep;
 
     # If frame messages are on ...
-    (
-        $frame & 4    # Extended frame entry message
-        ? (
-            print_lineinfo( ' ' x ( $stack_depth - 1 ), "in  " ),
 
-            # Why -1? But it works! :-(
-            # Because print_trace will call add 1 to it and then call
-            # dump_trace; this results in our skipping -1+1 = 0 stack frames
-            # in dump_trace.
-            print_trace( $LINEINFO, -1, 1, 1, "$sub$al" )
-          )
-        : print_lineinfo( ' ' x ( $stack_depth - 1 ), "entering $sub$al\n" )
-
-          # standard frame entry message
-      )
-      if $frame;
+    _print_frame_message($al);
+    # standard frame entry message
 
     my $print_exit_msg = sub {
         # Check for exit trace messages...
@@ -4097,12 +4115,12 @@ sub DB::sub {
         {
             if ($frame & 4)    # Extended exit message
             {
-                print_lineinfo( ' ' x $stack_depth, "out " );
+                _indent_print_line_info(0, "out ");
                 print_trace( $LINEINFO, 0, 1, 1, "$sub$al" );
             }
             else
             {
-                print_lineinfo( ' ' x $stack_depth, "exited $sub$al\n" );
+                _indent_print_line_info(0, "exited $sub$al\n" );
             }
         }
         return;
@@ -4228,22 +4246,7 @@ sub lsub : lvalue {
     $single |= 4 if $stack_depth == $deep;
 
     # If frame messages are on ...
-    (
-        $frame & 4    # Extended frame entry message
-        ? (
-            print_lineinfo( ' ' x ( $stack_depth - 1 ), "in  " ),
-
-            # Why -1? But it works! :-(
-            # Because print_trace will call add 1 to it and then call
-            # dump_trace; this results in our skipping -1+1 = 0 stack frames
-            # in dump_trace.
-            print_trace( $LINEINFO, -1, 1, 1, "$sub$al" )
-          )
-        : print_lineinfo( ' ' x ( $stack_depth - 1 ), "entering $sub$al\n" )
-
-          # standard frame entry message
-      )
-      if $frame;
+    _print_frame_message($al);
 
     # Pop the single-step value back off the stack.
     $single |= $stack[ $stack_depth-- ];
