@@ -271,9 +271,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+5.14.3 failed to compile on VMS due to incomplete application of a patch series
+that allowed userelocatableinc and usesitecustomize to be used simultaneously.
+Other platforms were not affected and the problem has now been corrected.
 
 =back
 
