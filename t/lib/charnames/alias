@@ -62,7 +62,6 @@ use charnames ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 3.
 Unknown charname 'e_ACUTE' at - line 3, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -73,7 +72,6 @@ use charnames ":short", ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUT
 "Here: \N{e_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -102,7 +100,6 @@ use charnames ":loose", ":alias" => { e_ACUTE => "latin SMALL LETTER E WITH ACUT
 "Here: \N{e_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -113,7 +110,6 @@ use charnames ":full", ":alias" => { e_ACUTE => "LATIN:e WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -162,7 +158,6 @@ use charnames ":short", ":alias" => {
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 7.
 Unknown charname 'a_ACUTE' at - line 7, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -187,7 +182,6 @@ use charnames ":short", ":alias" => {
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 6.
 Unknown charname 'a_ACUTE' at - line 6, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -200,7 +194,6 @@ use charnames ":short", ":alias" => {
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 6.
 Unknown charname 'a_ACUTE' at - line 6, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -214,8 +207,6 @@ use charnames ":full", ":alias" => {
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 7.
-Use of uninitialized value at - line 7.
 Unknown charname 'e_ACUTE' at - line 7, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -270,8 +261,6 @@ use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 4.
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -287,8 +276,6 @@ no warnings 'void';
 use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Use of uninitialized value at - line 4.
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -320,8 +307,6 @@ use charnames ":short", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS random fatal
-Use of uninitialized value at - line 4.
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########
@@ -337,8 +322,6 @@ no warnings 'void';
 use charnames ":alias" => ":xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Use of uninitialized value at - line 4.
-Use of uninitialized value at - line 4.
 Unknown charname 'e_ACUTE' at - line 4, within string
 Execution of - aborted due to compilation errors.
 ########

@@ -3288,6 +3288,7 @@ S_scan_const(pTHX_ char *start)
 		     * revisited to not have charnames use utf8 for characters
 		     * that don't need it when regexes don't have to be in utf8
 		     * for Unicode semantics.  If doing so, remember EBCDIC */
+		    if (SvPOK(res)) {
 		    sv_utf8_upgrade(res);
 		    str = SvPV_const(res, len);
 
@@ -3470,6 +3471,7 @@ S_scan_const(pTHX_ char *start)
 					(int)(i - s + 1), s, (int)(e - i), i + 1);
 			}
 		    }
+		}
 		} /* End \N{NAME} */
 #ifdef EBCDIC
 		if (!dorange) 
