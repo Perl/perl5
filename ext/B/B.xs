@@ -664,8 +664,29 @@ struct OP_methods {
     STR_WITH_LEN("file"),    0,       -1,                                /*22*/
     STR_WITH_LEN("stash"),   SVp,     offsetof(struct cop, cop_stash),   /*23*/
     STR_WITH_LEN("stashpv"), 0,       -1,                                /*24*/
-    STR_WITH_LEN("stashoff"),0,       -1,                              /*25*/
+    STR_WITH_LEN("stashoff"),0,       -1,                                /*25*/
 #endif
+    STR_WITH_LEN("size"),    0,       -1,                                /*26*/
+    STR_WITH_LEN("name"),    0,       -1,                                /*27*/
+    STR_WITH_LEN("desc"),    0,       -1,                                /*28*/
+    STR_WITH_LEN("ppaddr"),  0,       -1,                                /*29*/
+    STR_WITH_LEN("type"),    0,       -1,                                /*30*/
+    STR_WITH_LEN("opt"),     0,       -1,                                /*31*/
+    STR_WITH_LEN("spare"),   0,       -1,                                /*32*/
+    STR_WITH_LEN("children"),0,       -1,                                /*33*/
+    STR_WITH_LEN("pmreplroot"), 0,    -1,                                /*34*/
+    STR_WITH_LEN("pmstashpv"), 0,     -1,                                /*35*/
+    STR_WITH_LEN("pmstash"), 0,       -1,                                /*36*/
+    STR_WITH_LEN("precomp"), 0,       -1,                                /*37*/
+    STR_WITH_LEN("reflags"), 0,       -1,                                /*38*/
+    STR_WITH_LEN("sv"),      0,       -1,                                /*39*/
+    STR_WITH_LEN("gv"),      0,       -1,                                /*40*/
+    STR_WITH_LEN("pv"),      0,       -1,                                /*41*/
+    STR_WITH_LEN("label"),   0,       -1,                                /*42*/
+    STR_WITH_LEN("arybase"), 0,       -1,                                /*43*/
+    STR_WITH_LEN("warnings"),0,       -1,                                /*44*/
+    STR_WITH_LEN("io"),      0,       -1,                                /*45*/
+    STR_WITH_LEN("hints_hash"),0,     -1,                                /*46*/
 };
 
 #include "const-c.inc"
@@ -882,13 +903,6 @@ threadsv_names()
 
 MODULE = B	PACKAGE = B::OP
 
-size_t
-size(o)
-	B::OP		o
-    CODE:
-	RETVAL = opsizes[cc_opclass(aTHX_ o)];
-    OUTPUT:
-	RETVAL
 
 # The type checking code in B has always been identical for all OP types,
 # irrespective of whether the action is actually defined on that OP.
@@ -923,6 +937,27 @@ next(o)
 	B::COP::stash        = 23
 	B::COP::stashpv      = 24
 	B::COP::stashoff     = 25
+	B::OP::size          = 26
+	B::OP::name          = 27
+	B::OP::desc          = 28
+	B::OP::ppaddr        = 29
+	B::OP::type          = 30
+	B::OP::opt           = 31
+	B::OP::spare         = 32
+	B::LISTOP::children  = 33
+	B::PMOP::pmreplroot  = 34
+	B::PMOP::pmstashpv   = 35
+	B::PMOP::pmstash     = 36
+	B::PMOP::precomp     = 37
+	B::PMOP::reflags     = 38
+	B::PADOP::sv         = 39
+	B::PADOP::gv         = 40
+	B::PVOP::pv          = 41
+	B::COP::label        = 42
+	B::COP::arybase      = 43
+	B::COP::warnings     = 44
+	B::COP::io           = 45
+	B::COP::hints_hash   = 46
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -930,8 +965,8 @@ next(o)
 	I32 offset;
 	STRLEN len;
     PPCODE:
-	if (ix < 0 || ix > 25)
-	    croak("Illegal alias %d for B::*next", (int)ix);
+	if (ix < 0 || ix > 46)
+	    croak("Illegal alias %d for B::*OP::next", (int)ix);
 	offset = op_methods[ix].offset;
 
 	/* handle non-direct field access */
@@ -965,6 +1000,134 @@ next(o)
 #  endif
 		break;
 #endif
+	    case 26: /* size */
+		ret = sv_2mortal(newSVuv((UV)(opsizes[cc_opclass(aTHX_ o)])));
+		break;
+	    case 27: /* name */
+	    case 28: /* desc */
+		ret = sv_2mortal(newSVpv(
+			    (char *)(ix == 28 ? OP_DESC(o) : OP_NAME(o)), 0));
+		break;
+	    case 29: /* ppaddr */
+		{
+		    int i;
+		    ret = sv_2mortal(Perl_newSVpvf(aTHX_ "PL_ppaddr[OP_%s]",
+						  PL_op_name[o->op_type]));
+		    for (i=13; (STRLEN)i < SvCUR(ret); ++i)
+			SvPVX(ret)[i] = toUPPER(SvPVX(ret)[i]);
+		}
+		break;
+	    case 30: /* type  */
+	    case 31: /* opt   */
+	    case 32: /* spare */
+	    /* These 3 are all bitfields, so we can't take their addresses */
+		ret = sv_2mortal(newSVuv((UV)(
+				      ix == 30 ? o->op_type
+		                    : ix == 31 ? o->op_opt
+		                    :            o->op_spare)));
+		break;
+	    case 33: /* children */
+		{
+		    OP *kid;
+		    UV i = 0;
+		    for (kid = ((LISTOP*)o)->op_first; kid; kid = kid->op_sibling)
+			i++;
+		    ret = sv_2mortal(newSVuv(i));
+		}
+		break;
+	    case 34: /* pmreplroot */
+		if (cPMOPo->op_type == OP_PUSHRE) {
+#ifdef USE_ITHREADS
+		    ret = sv_newmortal();
+		    sv_setiv(ret, cPMOPo->op_pmreplrootu.op_pmtargetoff);
+#else
+		    GV *const target = cPMOPo->op_pmreplrootu.op_pmtargetgv;
+		    ret = sv_newmortal();
+		    sv_setiv(newSVrv(ret, target ?
+				     svclassnames[SvTYPE((SV*)target)] : "B::SV"),
+			     PTR2IV(target));
+#endif
+		}
+		else {
+		    OP *const root = cPMOPo->op_pmreplrootu.op_pmreplroot;
+		    ret = make_op_object(aTHX_ root);
+		}
+		break;
+#ifdef USE_ITHREADS
+	    case 35: /* pmstashpv */
+		ret = sv_2mortal(newSVpv(PmopSTASHPV(cPMOPo),0));
+		break;
+#else
+	    case 36: /* pmstash */
+		ret = make_sv_object(aTHX_ (SV *) PmopSTASH(cPMOPo));
+		break;
+#endif
+	    case 37: /* precomp */
+	    case 38: /* reflags */
+		{
+		    REGEXP *rx = PM_GETRE(cPMOPo);
+		    ret = sv_newmortal();
+		    if (rx) {
+			if (ix==38) {
+			    sv_setuv(ret, RX_EXTFLAGS(rx));
+			}
+			else {
+			    sv_setpvn(ret, RX_PRECOMP(rx), RX_PRELEN(rx));
+			}
+		    }
+		}
+		break;
+	    case 39: /* sv */
+	    case 40: /* gv */
+		/* It happens that the output typemaps for B::SV and B::GV
+		 * are identical. The "smarts" are in make_sv_object(),
+		 * which determines which class to use based on SvTYPE(),
+		 * rather than anything baked in at compile time.  */
+		if (cPADOPo->op_padix) {
+		    ret = PAD_SVl(cPADOPo->op_padix);
+		    if (ix == 40 && SvTYPE(ret) != SVt_PVGV)
+			ret = NULL;
+		} else {
+		    ret = NULL;
+		}
+		ret = make_sv_object(aTHX_ ret);
+		break;
+	    case 41: /* pv */
+		/* OP_TRANS uses op_pv to point to a table of 256 or >=258
+		 * shorts whereas other PVOPs point to a null terminated
+		 * string.  */
+		if (    (cPVOPo->op_type == OP_TRANS
+			|| cPVOPo->op_type == OP_TRANSR) &&
+			(cPVOPo->op_private & OPpTRANS_COMPLEMENT) &&
+			!(cPVOPo->op_private & OPpTRANS_DELETE))
+		{
+		    const short* const tbl = (short*)cPVOPo->op_pv;
+		    const short entries = 257 + tbl[256];
+		    ret = newSVpvn_flags(cPVOPo->op_pv, entries * sizeof(short), SVs_TEMP);
+		}
+		else if (cPVOPo->op_type == OP_TRANS || cPVOPo->op_type == OP_TRANSR) {
+		    ret = newSVpvn_flags(cPVOPo->op_pv, 256 * sizeof(short), SVs_TEMP);
+		}
+		else
+		    ret = newSVpvn_flags(cPVOPo->op_pv, strlen(cPVOPo->op_pv), SVs_TEMP);
+		break;
+	    case 42: /* label */
+		ret = sv_2mortal(newSVpv(CopLABEL(cCOPo),0));
+		break;
+	    case 43: /* arybase */
+		ret = sv_2mortal(newSVuv(0));
+		break;
+	    case 44: /* warnings */
+		ret = make_warnings_object(aTHX_ cCOPo);
+		break;
+	    case 45: /* io */
+		ret = make_cop_io_object(aTHX_ cCOPo);
+		break;
+	    case 46: /* hints_hash */
+		ret = sv_newmortal();
+		sv_setiv(newSVrv(ret, "B::RHE"),
+			PTR2IV(CopHINTHASH_get(cCOPo)));
+		break;
 	    default:
 		croak("method %s not implemented", op_methods[ix].name);
 	    }
@@ -1002,55 +1165,12 @@ next(o)
 	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
 	    break;
 	default:
-	    croak("Illegal type 0x%08x for B::*next", (unsigned)type);
+	    croak("Illegal type 0x%08x for B::*OP::%s",
+		    (unsigned)type, op_methods[ix].name);
 
 	}
 	ST(0) = ret;
 	XSRETURN(1);
-
-char *
-name(o)
-	B::OP		o
-    ALIAS:
-	desc = 1
-    CODE:
-	RETVAL = (char *)(ix ? OP_DESC(o) : OP_NAME(o));
-    OUTPUT:
-	RETVAL
-
-void
-ppaddr(o)
-	B::OP		o
-    PREINIT:
-	int i;
-	SV *sv;
-    CODE:
-	sv = sv_2mortal(Perl_newSVpvf(aTHX_ "PL_ppaddr[OP_%s]",
-				      PL_op_name[o->op_type]));
-	for (i=13; (STRLEN)i < SvCUR(sv); ++i)
-	    SvPVX(sv)[i] = toUPPER(SvPVX(sv)[i]);
-	ST(0) = sv;
-
-#  These 3 are all bitfields, so we can't take their addresses.
-UV
-type(o)
-	B::OP		o
-    ALIAS:
-	opt = 1
-	spare = 2
-    CODE:
-	switch(ix) {
-	  case 1:
-	    RETVAL = o->op_opt;
-	    break;
-	  case 2:
-	    RETVAL = o->op_spare;
-	    break;
-	  default:
-	    RETVAL = o->op_type;
-	}
-    OUTPUT:
-	RETVAL
 
 
 void
@@ -1058,172 +1178,6 @@ oplist(o)
 	B::OP		o
     PPCODE:
 	SP = oplist(aTHX_ o, SP);
-
-MODULE = B	PACKAGE = B::LISTOP
-
-U32
-children(o)
-	B::LISTOP	o
-	OP *		kid = NO_INIT
-	int		i = NO_INIT
-    CODE:
-	i = 0;
-	for (kid = o->op_first; kid; kid = kid->op_sibling)
-	    i++;
-	RETVAL = i;
-    OUTPUT:
-	RETVAL
-
-MODULE = B	PACKAGE = B::PMOP		PREFIX = PMOP_
-
-
-void
-PMOP_pmreplroot(o)
-	B::PMOP		o
-    CODE:
-	if (o->op_type == OP_PUSHRE) {
-#ifdef USE_ITHREADS
-	    ST(0) = sv_newmortal();
-            sv_setiv(ST(0), o->op_pmreplrootu.op_pmtargetoff);
-#else
-	    GV *const target = o->op_pmreplrootu.op_pmtargetgv;
-	    ST(0) = sv_newmortal();
-	    sv_setiv(newSVrv(ST(0), target ?
-			     svclassnames[SvTYPE((SV*)target)] : "B::SV"),
-		     PTR2IV(target));
-#endif
-	}
-	else {
-	    OP *const root = o->op_pmreplrootu.op_pmreplroot; 
-	    ST(0) = make_op_object(aTHX_ root);
-	}
-
-
-#ifdef USE_ITHREADS
-#define PMOP_pmstashpv(o)	PmopSTASHPV(o);
-
-char*
-PMOP_pmstashpv(o)
-	B::PMOP		o
-
-#else
-
-void
-PMOP_pmstash(o)
-	B::PMOP		o
-    PPCODE:
-	PUSHs(make_sv_object(aTHX_ (SV *) PmopSTASH(o)));
-
-#endif
-
-
-void
-PMOP_precomp(o)
-	B::PMOP		o
-    PREINIT:
-	dXSI32;
-	REGEXP *rx;
-    CODE:
-	rx = PM_GETRE(o);
-	ST(0) = sv_newmortal();
-	if (rx) {
-	    if (ix) {
-		sv_setuv(ST(0), RX_EXTFLAGS(rx));
-	    }
-	    else {
-		sv_setpvn(ST(0), RX_PRECOMP(rx), RX_PRELEN(rx));
-	    }
-	}
-
-BOOT:
-{
-	CV *cv;
-        cv = newXS("B::PMOP::reflags", XS_B__PMOP_precomp, __FILE__);
-        XSANY.any_i32 = 1;
-}
-
-MODULE = B	PACKAGE = B::PADOP
-
-void
-sv(o)
-	B::PADOP o
-    PREINIT:
-	SV *ret;
-    ALIAS:
-	gv = 1
-    PPCODE:
-	/* It happens that the output typemaps for B::SV and B::GV are
-	   identical. The "smarts" are in make_sv_object(), which determines
-	   which class to use based on SvTYPE(), rather than anything baked in
-	   at compile time.  */	   
-	if (o->op_padix) {
-	    ret = PAD_SVl(o->op_padix);
-	    if (ix && SvTYPE(ret) != SVt_PVGV)
-		ret = NULL;
-	} else {
-	    ret = NULL;
-	}
-	PUSHs(make_sv_object(aTHX_ ret));
-
-MODULE = B	PACKAGE = B::PVOP
-
-void
-pv(o)
-	B::PVOP	o
-    CODE:
-	/*
-	 * OP_TRANS uses op_pv to point to a table of 256 or >=258 shorts
-	 * whereas other PVOPs point to a null terminated string.
-	 */
-	if ((o->op_type == OP_TRANS || o->op_type == OP_TRANSR) &&
-		(o->op_private & OPpTRANS_COMPLEMENT) &&
-		!(o->op_private & OPpTRANS_DELETE))
-	{
-	    const short* const tbl = (short*)o->op_pv;
-	    const short entries = 257 + tbl[256];
-	    ST(0) = newSVpvn_flags(o->op_pv, entries * sizeof(short), SVs_TEMP);
-	}
-	else if (o->op_type == OP_TRANS || o->op_type == OP_TRANSR) {
-	    ST(0) = newSVpvn_flags(o->op_pv, 256 * sizeof(short), SVs_TEMP);
-	}
-	else
-	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
-
-#define COP_label(o)	CopLABEL(o)
-
-MODULE = B	PACKAGE = B::COP		PREFIX = COP_
-
-const char *
-COP_label(o)
-	B::COP	o
-
-
-
-I32
-COP_arybase(o)
-	B::COP	o
-    CODE:
-	RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-void
-COP_warnings(o)
-	B::COP	o
-    ALIAS:
-	io = 1
-    PPCODE:
-	ST(0) = ix ? make_cop_io_object(aTHX_ o) : make_warnings_object(aTHX_ o);
-	XSRETURN(1);
-
-
-B::RHE
-COP_hints_hash(o)
-	B::COP o
-    CODE:
-	RETVAL = CopHINTHASH_get(o);
-    OUTPUT:
-	RETVAL
 
 
 MODULE = B	PACKAGE = B::SV
