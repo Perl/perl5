@@ -12,7 +12,8 @@ unsupported special ':scoobydoo' in charnames at
 print "Here: \N{DIGIT ONE}\n";
 charnames::vianame("DIGIT TWO");
 EXPECT
-Undefined subroutine &charnames::vianame called at - line 2.
+OPTIONS regex
+Undefined subroutine &charnames::vianame called at - line \d+.
 Here: 1
 ########
 # NAME autoload doesn't get viacode
@@ -20,7 +21,7 @@ print "Here: \N{DIGIT THREE}\n";
 charnames::viacode(0x34);
 EXPECT
 OPTIONS regex
-Undefined subroutine &charnames::viacode called at - line 2.
+Undefined subroutine &charnames::viacode called at - line \d+.
 Here: 3
 ########
 # NAME autoload doesn't get string_vianame
@@ -28,7 +29,7 @@ print "Here: \N{DIGIT FOUR}\n";
 charnames::string_vianame("DIGIT FIVE");
 EXPECT
 OPTIONS regex
-Undefined subroutine &charnames::string_vianame called at - line 2.
+Undefined subroutine &charnames::string_vianame called at - line \d+.
 Here: 4
 ########
 # NAME wrong type of alias (missing colon)
@@ -36,9 +37,8 @@ no warnings;
 use charnames "alias";
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 3, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias without an argument
 use warnings;
@@ -61,9 +61,8 @@ use warnings;
 use charnames ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 3, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref but with :short
 use warnings;
@@ -71,9 +70,8 @@ no warnings 'void';
 use charnames ":short", ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref to :full OK
 use warnings;
@@ -99,9 +97,8 @@ no warnings 'void';
 use charnames ":loose", ":alias" => { e_ACUTE => "latin SMALL LETTER E WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref to :short but using :full
 use warnings;
@@ -109,9 +106,8 @@ no warnings 'void';
 use charnames ":full", ":alias" => { e_ACUTE => "LATIN:e WITH ACUTE" };
 "Here: \N{e_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref to :short OK
 use warnings;
@@ -157,9 +153,8 @@ use charnames ":short", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'a_ACUTE' at - line 7, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'a_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref two aliases
 use warnings;
@@ -181,9 +176,8 @@ use charnames ":short", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'a_ACUTE' at - line 6, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'a_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref using mixed aliases
 use warnings;
@@ -193,9 +187,8 @@ use charnames ":short", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'a_ACUTE' at - line 6, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'a_ACUTE' at - line \d+, within string
 ########
 # NAME alias with hashref using mixed aliases
 use warnings;
@@ -206,9 +199,8 @@ use charnames ":full", ":alias" => {
     };
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 7, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with nonexisting file
 use warnings;
@@ -260,9 +252,8 @@ no warnings 'void';
 use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with file OK but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
@@ -276,8 +267,8 @@ no warnings 'void';
 use charnames ":full", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with :short and file OK
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
@@ -306,9 +297,8 @@ no warnings 'void';
 use charnames ":short", ":alias" => "xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-OPTIONS random fatal
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with file implicit :full but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
@@ -322,8 +312,8 @@ no warnings 'void';
 use charnames ":alias" => ":xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
-Unknown charname 'e_ACUTE' at - line 4, within string
-Execution of - aborted due to compilation errors.
+OPTIONS regex fatal
+Unknown charname 'e_ACUTE' at - line \d+, within string
 ########
 # NAME alias with file implicit :full and file has :long aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
