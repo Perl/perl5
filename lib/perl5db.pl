@@ -4031,6 +4031,7 @@ use vars qw($deep);
 
 # We need to fully qualify the name ("DB::sub") to make "use strict;"
 # happy. -- Shlomi Fish
+
 sub DB::sub {
     # Do not use a regex in this subroutine -> results in corrupted memory
     # See: [perl #66110]
@@ -4090,6 +4091,23 @@ sub DB::sub {
       )
       if $frame;
 
+    my $print_exit_msg = sub {
+        # Check for exit trace messages...
+        if ($frame & 2)
+        {
+            if ($frame & 4)    # Extended exit message
+            {
+                print_lineinfo( ' ' x $stack_depth, "out " );
+                print_trace( $LINEINFO, 0, 1, 1, "$sub$al" );
+            }
+            else
+            {
+                print_lineinfo( ' ' x $stack_depth, "exited $sub$al\n" );
+            }
+        }
+        return;
+    };
+
     # Determine the sub's return type, and capture appropriately.
     if (wantarray) {
 
@@ -4104,18 +4122,7 @@ sub DB::sub {
         # Pop the single-step value back off the stack.
         $single |= $stack[ $stack_depth-- ];
 
-        # Check for exit trace messages...
-        (
-            $frame & 4    # Extended exit message
-            ? (
-                print_lineinfo( ' ' x $stack_depth, "out " ),
-                print_trace( $LINEINFO, -1, 1, 1, "$sub$al" )
-              )
-            : print_lineinfo( ' ' x $stack_depth, "exited $sub$al\n" )
-
-              # Standard exit message
-          )
-          if $frame & 2;
+        $print_exit_msg->();
 
         # Print the return info if we need to.
         if ( $doret eq $stack_depth or $frame & 16 ) {
@@ -4125,10 +4132,13 @@ sub DB::sub {
             my $fh = ( $doret eq $stack_depth ? $OUT : $LINEINFO );
 
             # Indent if we're printing because of $frame tracing.
-            print $fh ' ' x $stack_depth if $frame & 16;
+            if ($frame & 16)
+            {
+                print {$fh} ' ' x $stack_depth;
+            }
 
             # Print the return value.
-            print $fh "list context return from $sub:\n";
+            print {$fh} "list context return from $sub:\n";
             dumpit( $fh, \@ret );
 
             # And don't print it again.
@@ -4156,17 +4166,7 @@ sub DB::sub {
         $single |= $stack[ $stack_depth-- ];
 
         # If we're doing exit messages...
-        (
-            $frame & 4    # Extended messages
-            ? (
-                print_lineinfo( ' ' x $stack_depth, "out " ),
-                print_trace( $LINEINFO, -1, 1, 1, "$sub$al" )
-              )
-            : print_lineinfo( ' ' x $stack_depth, "exited $sub$al\n" )
-
-              # Standard messages
-          )
-          if $frame & 2;
+        $print_exit_msg->();
 
         # If we are supposed to show the return value... same as before.
         if ( $doret eq $stack_depth or $frame & 16 and defined wantarray ) {
