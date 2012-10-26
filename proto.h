@@ -7064,6 +7064,13 @@ STATIC char*	S_force_word(pTHX_ char *start, int token, int check_keyword, int a
 #define PERL_ARGS_ASSERT_FORCE_WORD	\
 	assert(start)
 
+PERL_STATIC_INLINE SV*	S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME	\
+	assert(s); assert(e)
+
 STATIC void	S_incline(pTHX_ const char *s)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INCLINE	\

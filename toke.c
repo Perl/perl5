@@ -2632,6 +2632,98 @@ S_sublex_done(pTHX)
     }
 }
 
+PERL_STATIC_INLINE SV*
+S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
+{
+    /* Get the value for NAME */
+    STRLEN len;
+    const char *str;
+    SV* res = newSVpvn(s, e - s);
+
+    PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
+
+    res = new_constant( NULL, 0, "charnames",
+                        /* includes all of: \N{...} */
+                        res, NULL, s - 3, e - s + 4 );
+    if (! SvPOK(res)) {
+        return NULL;
+    }
+
+    /* Most likely res will be in utf8 already since the standard charnames
+     * uses pack U, but a custom translator can leave it otherwise, so make
+     * sure.  XXX This can be revisited to not have charnames use utf8 for
+     * characters that don't need it when regexes don't have to be in utf8 for
+     * Unicode semantics.  If doing so, remember EBCDIC */
+    sv_utf8_upgrade(res);
+
+    /* Don't accept malformed input */
+    str = SvPV_const(res, len);
+    if (! is_utf8_string((U8 *) str, len)) {
+        yyerror("Malformed UTF-8 returned by \\N");
+        return NULL;
+    }
+
+    /* Deprecate non-approved name syntax */
+    if (ckWARN_d(WARN_DEPRECATED)) {
+        bool problematic = FALSE;
+        const char* i = s;
+
+        /* For non-ut8 input, look to see that the first character is an alpha,
+         * then loop through the rest checking that each is a continuation */
+        if (! UTF) {
+            if (! isALPHAU(*i)) problematic = TRUE;
+            else for (i = s + 1; i < e; i++) {
+                if (isCHARNAME_CONT(*i)) continue;
+                problematic = TRUE;
+                break;
+            }
+        }
+        else {
+            /* Similarly for utf8.  For invariants can check directly.  We
+             * accept anything above the latin1 range because it is immaterial
+             * to Perl if it is correct or not, and is expensive to check.  But
+             * it is fairly easy in the latin1 range to convert the variants
+             * into a single character and check those */
+            if (UTF8_IS_INVARIANT(*i)) {
+                if (! isALPHAU(*i)) problematic = TRUE;
+            } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
+                if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
+                                                            *(i+1)))))
+                {
+                    problematic = TRUE;
+                }
+            }
+            if (! problematic) for (i = s + UTF8SKIP(s);
+                                    i < e;
+                                    i+= UTF8SKIP(i))
+            {
+                if (UTF8_IS_INVARIANT(*i)) {
+                    if (isCHARNAME_CONT(*i)) continue;
+                } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
+                    continue;
+                } else if (isCHARNAME_CONT(
+                            UNI_TO_NATIVE(
+                            TWO_BYTE_UTF8_TO_UNI(*i, *(i+1)))))
+                {
+                    continue;
+                }
+                problematic = TRUE;
+                break;
+            }
+        }
+        if (problematic) {
+            /* The e-i passed to the final %.*s makes sure that should the
+             * trailing NUL be missing that this print won't run off the end of
+             * the string */
+            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                        "Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%.*s<-- HERE %.*s",
+                        (int)(i - s + 1), s, (int)(e - i), i + 1);
+        }
+    }
+
+    return res;
+}
+
 /*
   scan_const
 
@@ -2739,6 +2831,7 @@ S_scan_const(pTHX_ char *start)
 						   isn't utf8, as for example
 						   when it is entirely composed
 						   of hex constants */
+    SV *res;		                /* result from charnames */
 
     /* Note on sizing:  The scanned constant is placed into sv, which is
      * initialized by newSV() assuming one byte of output for every byte of
@@ -3288,33 +3381,12 @@ S_scan_const(pTHX_ char *start)
 			else d = (char*)uvuni_to_utf8((U8*)d, uv);
 		    }
 		}
-		else { /* Here is \N{NAME} but not \N{U+...}. */
-
-		    SV *res;		/* result from charnames */
-		    const char *str;    /* the string in 'res' */
-		    STRLEN len;		/* its length */
-
-		    /* Get the value for NAME */
-		    res = newSVpvn(s, e - s);
-		    res = new_constant( NULL, 0, "charnames",
-					/* includes all of: \N{...} */
-					res, NULL, s - 3, e - s + 4 );
-
-		    /* Most likely res will be in utf8 already since the
-		     * standard charnames uses pack U, but a custom translator
-		     * can leave it otherwise, so make sure.  XXX This can be
-		     * revisited to not have charnames use utf8 for characters
-		     * that don't need it when regexes don't have to be in utf8
-		     * for Unicode semantics.  If doing so, remember EBCDIC */
-		    if (SvPOK(res)) {
-		    sv_utf8_upgrade(res);
-		    str = SvPV_const(res, len);
-
-		    /* Don't accept malformed input */
-		    if (! is_utf8_string((U8 *) str, len)) {
-			yyerror("Malformed UTF-8 returned by \\N");
-		    }
-		    else if (PL_lex_inpat) {
+		else /* Here is \N{NAME} but not \N{U+...}. */
+                     if ((res = get_and_check_backslash_N_name(s, e)))
+                {
+                    STRLEN len;
+                    const char *str = SvPV_const(res, len);
+                    if (PL_lex_inpat) {
 
 			if (! len) { /* The name resolved to an empty string */
 			    Copy("\\N{}", d, 4, char);
@@ -3427,69 +3499,9 @@ S_scan_const(pTHX_ char *start)
 			Copy(str, d, len, char);
 			d += len;
 		    }
+
 		    SvREFCNT_dec(res);
 
-		    /* Deprecate non-approved name syntax */
-		    if (ckWARN_d(WARN_DEPRECATED)) {
-			bool problematic = FALSE;
-			char* i = s;
-
-			/* For non-ut8 input, look to see that the first
-			 * character is an alpha, then loop through the rest
-			 * checking that each is a continuation */
-			if (! this_utf8) {
-			    if (! isALPHAU(*i)) problematic = TRUE;
-			    else for (i = s + 1; i < e; i++) {
-				if (isCHARNAME_CONT(*i)) continue;
-				problematic = TRUE;
-				break;
-			    }
-			}
-			else {
-			    /* Similarly for utf8.  For invariants can check
-			     * directly.  We accept anything above the latin1
-			     * range because it is immaterial to Perl if it is
-			     * correct or not, and is expensive to check.  But
-			     * it is fairly easy in the latin1 range to convert
-			     * the variants into a single character and check
-			     * those */
-			    if (UTF8_IS_INVARIANT(*i)) {
-				if (! isALPHAU(*i)) problematic = TRUE;
-			    } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
-				if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
-									    *(i+1)))))
-				{
-				    problematic = TRUE;
-				}
-			    }
-			    if (! problematic) for (i = s + UTF8SKIP(s);
-						    i < e;
-						    i+= UTF8SKIP(i))
-			    {
-				if (UTF8_IS_INVARIANT(*i)) {
-				    if (isCHARNAME_CONT(*i)) continue;
-				} else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
-				    continue;
-				} else if (isCHARNAME_CONT(
-					    UNI_TO_NATIVE(
-					    TWO_BYTE_UTF8_TO_UNI(*i, *(i+1)))))
-				{
-				    continue;
-				}
-				problematic = TRUE;
-				break;
-			    }
-			}
-			if (problematic) {
-			    /* The e-i passed to the final %.*s makes sure that
-			     * should the trailing NUL be missing that this
-			     * print won't run off the end of the string */
-			    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-					"Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%.*s<-- HERE %.*s",
-					(int)(i - s + 1), s, (int)(e - i), i + 1);
-			}
-		    }
-		}
 		} /* End \N{NAME} */
 #ifdef EBCDIC
 		if (!dorange) 
