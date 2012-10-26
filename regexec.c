@@ -39,7 +39,7 @@
 
 /* At least one required character in the target string is expressible only in
  * UTF-8. */
-const char* const non_utf8_target_but_utf8_required
+static const char* const non_utf8_target_but_utf8_required
                 = "Can't match, because target string needs to be in UTF-8\n";
 
 #define NON_UTF8_TARGET_BUT_UTF8_REQUIRED(target) STMT_START { \
