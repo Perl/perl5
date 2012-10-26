@@ -2663,8 +2663,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    /* Deprecate non-approved name syntax */
-    if (ckWARN_d(WARN_DEPRECATED)) {
+    {
         bool problematic = FALSE;
         const char* i = s;
 
@@ -2715,9 +2714,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
             /* The e-i passed to the final %.*s makes sure that should the
              * trailing NUL be missing that this print won't run off the end of
              * the string */
-            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                        "Deprecated character in \\N{...}; marked by <-- HERE  in \\N{%.*s<-- HERE %.*s",
-                        (int)(i - s + 1), s, (int)(e - i), i + 1);
+            yyerror(Perl_form(aTHX_
+                        "Invalid character in \\N{...}; marked by <-- HERE in \\N{%.*s<-- HERE %.*s",
+                        (int)(i - s + 1), s, (int)(e - i), i + 1));
+            return NULL;
         }
     }
 

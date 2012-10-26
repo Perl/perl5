@@ -270,13 +270,9 @@ conventions.  The aliases override any standard definitions, so, if
 you're twisted enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to
 mean C<"B">, etc.
 
-Note that an alias should not be something that is a legal curly
-brace-enclosed quantifier (see L<perlreref/QUANTIFIERS>).  For example
-C<\N{123}> means to match 123 non-newline characters, and is not treated as a
-charnames alias.  Aliases are discouraged from beginning with anything
-other than an alphabetic character and from containing anything other
-than alphanumerics, spaces, dashes, parentheses, and underscores.
-Currently they must be Latin1.
+Aliases may not begin with anything other than an alphabetic character nor
+contain anything other than alphanumerics, spaces, dashes, parentheses, and
+underscores.  Currently they must be Latin1.
 
 An alias can map to either an official Unicode character name (not a loose
 matched name) or to a
