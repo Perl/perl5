@@ -276,7 +276,7 @@ C<\N{123}> means to match 123 non-newline characters, and is not treated as a
 charnames alias.  Aliases are discouraged from beginning with anything
 other than an alphabetic character and from containing anything other
 than alphanumerics, spaces, dashes, parentheses, and underscores.
-Currently they must be ASCII.
+Currently they must be Latin1.
 
 An alias can map to either an official Unicode character name (not a loose
 matched name) or to a
