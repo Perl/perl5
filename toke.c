@@ -2663,7 +2663,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    {
+    {   /* This code needs to be sync'ed with a regex in _charnames.pm which
+           does the same thing */
         bool problematic = FALSE;
         const char* i = s;
 
@@ -2672,7 +2673,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         if (! UTF) {
             if (! isALPHAU(*i)) problematic = TRUE;
             else for (i = s + 1; i < e; i++) {
-                if (isCHARNAME_CONT(*i)) continue;
+                if (isCHARNAME_CONT(*i) || *i == ':') continue;
                 problematic = TRUE;
                 break;
             }
@@ -2697,7 +2698,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                                     i+= UTF8SKIP(i))
             {
                 if (UTF8_IS_INVARIANT(*i)) {
-                    if (isCHARNAME_CONT(*i)) continue;
+                    if (isCHARNAME_CONT(*i) || *i == ':') continue;
                 } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
                     continue;
                 } else if (isCHARNAME_CONT(

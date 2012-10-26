@@ -2365,6 +2365,12 @@ recognized by Perl or by a user-supplied handler.  See L<attributes>.
 (F) Only certain characters are valid for character names.  The
 indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
 
+=item Invalid character in charnames alias definition; marked by <-- HERE in '%s
+
+(F) You tried to create a custom alias for a character name, with
+the C<:alias> option to C<use charnames> and the specified character in
+the indicated name isn't valid.  See L<charnames/CUSTOM ALIASES>.
+
 =item Invalid conversion in %s: "%s"
 
 (W printf) Perl does not understand the given format conversion.  See

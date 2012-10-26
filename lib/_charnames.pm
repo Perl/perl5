@@ -143,8 +143,12 @@ sub carp
 
 sub alias (@) # Set up a single alias
 {
+  my @errors;
+
   my $alias = ref $_[0] ? $_[0] : { @_ };
-  foreach my $name (keys %$alias) {
+  foreach my $name (sort keys %$alias) {  # Sort only because it helps having
+                                          # deterministic output for
+                                          # t/lib/charnames/alias
     my $value = $alias->{$name};
     next unless defined $value;          # Omit if screwed up.
 
@@ -163,11 +167,31 @@ sub alias (@) # Set up a single alias
         $^H{charnames_inverse_ords}{sprintf("%05X", $value)} = $name;
     }
     else {
-        # XXX validate syntax when deprecation cycle complete. ie. start
-        # with an alpha only, etc.
-        $^H{charnames_name_aliases}{$name} = $value;
+        if ($name !~ / ^
+                       \p{_Perl_Charname_Begin}
+                       \p{_Perl_Charname_Continue}*
+                       $ /x) {
+          push @errors, $name;
+        }
+        else {
+          $^H{charnames_name_aliases}{$name} = $value;
+        }
     }
   }
+
+  # We find and output all errors from this :alias definition, rather than
+  # failing on the first one, so fewer runs are needed to get it to compile
+  if (@errors) {
+    foreach my $name (@errors) {
+      my $ok = "";
+      $ok = $1 if $name =~ / ^ ( \p{Alpha} [-\p{XPosixWord} ():\xa0]* ) /x;
+      my $first_bad = substr($name, length($ok), 1);
+      $name = "Invalid character in charnames alias definition; marked by <-- HERE in '$ok$first_bad<-- HERE " . substr($name, length($ok) + 1) . "'";
+    }
+    croak join "\n", @errors;
+  }
+
+  return;
 } # alias
 
 sub not_legal_use_bytes_msg {

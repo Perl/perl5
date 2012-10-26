@@ -347,3 +347,17 @@ print charnames::viacode(0x80), "\n";
 EXPECT
 OPTIONS regex
 PADDING CHARACTER
+########
+# NAME various wrong characters in :alias are errors
+# Below, one of the EXPECT regexes matches both the UTF-8 and non-UTF-8 form.
+# This is because under some circumstances the message gets output as UTF-8.
+use charnames ":full", ":alias" => {
+                            "4e_ACUTE" => "LATIN SMALL LETTER E WITH ACUTE",
+                            "e_A,CUTE" => "LATIN SMALL LETTER E WITH ACUTE",
+                            "e_ACUT\x{d7}E" => "LATIN SMALL LETTER E WITH ACUTE",
+                    };
+EXPECT
+OPTIONS regex
+Invalid character in charnames alias definition; marked by <-- HERE in '4<-- HERE e_ACUTE'
+Invalid character in charnames alias definition; marked by <-- HERE in 'e_A,<-- HERE CUTE'
+Invalid character in charnames alias definition; marked by <-- HERE in 'e_ACUT(?:\x{d7}|\x{C3}\x{97})<-- HERE E'
