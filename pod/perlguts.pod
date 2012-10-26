@@ -604,17 +604,13 @@ macro and then check the return value.
 
 The most useful types that will be returned are:
 
-    SVt_IV    Scalar
-    SVt_NV    Scalar
-    SVt_PV    Scalar
-    SVt_RV    Scalar
-    SVt_PVAV  Array
-    SVt_PVHV  Hash
-    SVt_PVCV  Code
-    SVt_PVGV  Glob (possibly a file handle)
-    SVt_PVMG  Blessed or Magical Scalar
+    < SVt_PVAV  Scalar
+    SVt_PVAV    Array
+    SVt_PVHV    Hash
+    SVt_PVCV    Code
+    SVt_PVGV    Glob (possibly a file handle)
 
-See the F<sv.h> header file for more details.
+See L<perlapi/svtype> for more details.
 
 =head2 Blessed References and Class Objects
 

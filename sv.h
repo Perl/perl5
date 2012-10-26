@@ -19,26 +19,101 @@
 An enum of flags for Perl types.  These are found in the file B<sv.h>
 in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 
-=for apidoc AmU||SVt_PV
-Pointer type flag for scalars.  See C<svtype>.
+The types are:
+
+    SVt_NULL
+    SVt_BIND (unused)
+    SVt_IV
+    SVt_NV
+    SVt_RV
+    SVt_PV
+    SVt_PVIV
+    SVt_PVNV
+    SVt_PVMG
+    SVt_REGEXP
+    SVt_PVGV
+    SVt_PVLV
+    SVt_PVAV
+    SVt_PVHV
+    SVt_PVCV
+    SVt_PVFM
+    SVt_PVIO
+
+These are most easily explained from the bottom up.
+
+SVt_PVIO is for I/O objects, SVt_PVFM for formats, SVt_PVCV for
+subroutines, SVt_PVHV for hashes and SVt_PVAV for arrays.
+
+All the others are scalar types, that is, things that can be bound to a
+C<$> variable.  For these, the internal types are mostly orthogonal to
+types in the Perl language.
+
+Hence, checking C<< SvTYPE(sv) < SVt_PVAV >> is the best way to see whether
+something is a scalar.
+
+SVt_PVGV represents a typeglob.  If !SvFAKE(sv), then it is a real,
+incoercible typeglob.  If SvFAKE(sv), then it is a scalar to which a
+typeglob has been assigned.  Assigning to it again will stop it from being
+a typeglob.  SVt_PVLV represents a scalar that delegates to another scalar
+behind the scenes.  It is used, e.g., for the return value of C<substr> and
+for tied hash and array elements.  It can hold any scalar value, including
+a typeglob. SVt_REGEXP is for regular expressions.
+
+SVt_PVMG represents a "normal" scalar (not a typeglob, regular expression,
+or delegate).  Since most scalars do not need all the internal fields of a
+PVMG, we save memory by allocating smaller structs when possible.  All the
+other types are just simpler forms of SVt_PVMG, with fewer internal fields.
+ SVt_NULL can only hold undef.  SVt_IV can hold undef, an integer, or a
+reference.  (SVt_RV is an alias for SVt_IV, which exists for backward
+compatibility.)  SVt_NV can hold any of those or a double.  SVt_PV can only
+hold undef or a string.  SVt_PVIV is a superset of SVt_PV and SVt_IV.
+SVt_PVNV is similar.  SVt_PVMG can hold anything SVt_PVNV can hold, but it
+can, but does not have to, be blessed or magical.
+
+=for apidoc AmU||SVt_NULL
+Type flag for scalars.  See L</svtype>.
 
 =for apidoc AmU||SVt_IV
-Integer type flag for scalars.  See C<svtype>.
+Type flag for scalars.  See L</svtype>.
 
 =for apidoc AmU||SVt_NV
-Double type flag for scalars.  See C<svtype>.
+Type flag for scalars.  See L</svtype>.
+
+=for apidoc AmU||SVt_PV
+Type flag for scalars.  See L</svtype>.
+
+=for apidoc AmU||SVt_PVIV
+Type flag for scalars.  See L</svtype>.
+
+=for apidoc AmU||SVt_PVNV
+Type flag for scalars.  See L</svtype>.
 
 =for apidoc AmU||SVt_PVMG
-Type flag for blessed scalars.  See C<svtype>.
+Type flag for scalars.  See L</svtype>.
+
+=for apidoc AmU||SVt_REGEXP
+Type flag for regular expressions.  See L</svtype>.
+
+=for apidoc AmU||SVt_PVGV
+Type flag for typeglobs.  See L</svtype>.
+
+=for apidoc AmU||SVt_PVLV
+Type flag for scalars.  See L</svtype>.
 
 =for apidoc AmU||SVt_PVAV
-Type flag for arrays.  See C<svtype>.
+Type flag for arrays.  See L</svtype>.
 
 =for apidoc AmU||SVt_PVHV
-Type flag for hashes.  See C<svtype>.
+Type flag for hashes.  See L</svtype>.
 
 =for apidoc AmU||SVt_PVCV
-Type flag for code refs.  See C<svtype>.
+Type flag for subroutines.  See L</svtype>.
+
+=for apidoc AmU||SVt_PVFM
+Type flag for formats.  See L</svtype>.
+
+=for apidoc AmU||SVt_PVIO
+Type flag for I/O objects.  See L</svtype>.
 
 =cut
 */
