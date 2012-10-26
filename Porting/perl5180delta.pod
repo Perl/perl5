@@ -343,6 +343,22 @@ soon:
 
 L<B::Hooks::Parser> version 0.11
 
+=item *
+
+L<Coro> version 6.10
+
+=item *
+
+L<Data::Dump::Streamer> version 2.34
+
+=item *
+
+L<Devel::LexAlias> version 0.04
+
+=item *
+
+L<Lexical::Var> version 0.007
+
 =back
 
 =back
