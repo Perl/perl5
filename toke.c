@@ -2640,6 +2640,14 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     const char *str;
     SV* res = newSVpvn(s, e - s);
 
+    HV * table;
+    SV **cvp;
+    SV *cv;
+    SV *rv;
+    HV *stash;
+    const U8* first_bad_char_loc;
+    const char* backslash_ptr = s - 3; /* Points to the <\> of \N{... */
+
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
     res = new_constant( NULL, 0, "charnames",
@@ -2649,11 +2657,25 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    /* Most likely res will be in utf8 already since the standard charnames
-     * uses pack U, but a custom translator can leave it otherwise, so make
-     * sure.  XXX This can be revisited to not have charnames use utf8 for
-     * characters that don't need it when regexes don't have to be in utf8 for
-     * Unicode semantics.  If doing so, remember EBCDIC */
+    /* See if the charnames handler is the Perl core's, and if so, we can skip
+     * the validation needed for a user-supplied one, as Perl's does its own
+     * validation. */
+    table = GvHV(PL_hintgv);		 /* ^H */
+    cvp = hv_fetchs(table, "charnames", FALSE);
+    cv = *cvp;
+    if (((rv = SvRV(cv)) != NULL)
+        && ((stash = CvSTASH(rv)) != NULL))
+    {
+        const char * const name = HvNAME(stash);
+        if strEQ(name, "_charnames") {
+           return res;
+       }
+    }
+
+    /* A custom translator can leave res not in UTF-8, so make sure.  XXX This
+     * can be revisited to not use utf8 for characters that don't need it when
+     * regexes don't have to be in utf8 for Unicode semantics.  If doing so,
+     * remember EBCDIC */
     sv_utf8_upgrade(res);
 
     /* Don't accept malformed input */
@@ -2673,7 +2695,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         if (! UTF) {
             if (! isALPHAU(*i)) problematic = TRUE;
             else for (i = s + 1; i < e; i++) {
-                if (isCHARNAME_CONT(*i) || *i == ':') continue;
+                if (isCHARNAME_CONT(*i)) continue;
                 problematic = TRUE;
                 break;
             }
@@ -2698,7 +2720,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                                     i+= UTF8SKIP(i))
             {
                 if (UTF8_IS_INVARIANT(*i)) {
-                    if (isCHARNAME_CONT(*i) || *i == ':') continue;
+                    if (isCHARNAME_CONT(*i)) continue;
                 } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
                     continue;
                 } else if (isCHARNAME_CONT(
