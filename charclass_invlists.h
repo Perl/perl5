@@ -7,7 +7,9 @@
 /* See the generating file for comments */
 
 
-UV Latin1_invlist[] = {
+#ifndef PERL_IN_XSUB_RE
+
+static UV Latin1_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -18,7 +20,11 @@ UV Latin1_invlist[] = {
 	0
 };
 
-UV AboveLatin1_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV AboveLatin1_invlist[] = {
 	1,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -28,7 +34,11 @@ UV AboveLatin1_invlist[] = {
 	256
 };
 
-UV ASCII_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV ASCII_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -39,7 +49,11 @@ UV ASCII_invlist[] = {
 	0
 };
 
-UV L1Cased_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1Cased_invlist[] = {
 	16,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -64,7 +78,11 @@ UV L1Cased_invlist[] = {
 	443
 };
 
-UV VertSpace_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV VertSpace_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -79,7 +97,11 @@ UV VertSpace_invlist[] = {
 	8234
 };
 
-UV PerlSpace_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PerlSpace_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -92,7 +114,11 @@ UV PerlSpace_invlist[] = {
 	33
 };
 
-UV XPerlSpace_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV XPerlSpace_invlist[] = {
 	22,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -123,7 +149,11 @@ UV XPerlSpace_invlist[] = {
 	12289
 };
 
-UV PosixAlnum_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixAlnum_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -138,7 +168,11 @@ UV PosixAlnum_invlist[] = {
 	123
 };
 
-UV L1PosixAlnum_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixAlnum_invlist[] = {
 	18,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -165,7 +199,11 @@ UV L1PosixAlnum_invlist[] = {
 	706
 };
 
-UV PosixAlpha_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixAlpha_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -178,7 +216,11 @@ UV PosixAlpha_invlist[] = {
 	123
 };
 
-UV L1PosixAlpha_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixAlpha_invlist[] = {
 	16,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -203,7 +245,11 @@ UV L1PosixAlpha_invlist[] = {
 	706
 };
 
-UV PosixBlank_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixBlank_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -216,7 +262,11 @@ UV PosixBlank_invlist[] = {
 	33
 };
 
-UV XPosixBlank_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV XPosixBlank_invlist[] = {
 	18,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -243,7 +293,11 @@ UV XPosixBlank_invlist[] = {
 	12289
 };
 
-UV PosixCntrl_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixCntrl_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -256,7 +310,11 @@ UV PosixCntrl_invlist[] = {
 	0
 };
 
-UV XPosixCntrl_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV XPosixCntrl_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -269,7 +327,11 @@ UV XPosixCntrl_invlist[] = {
 	0
 };
 
-UV PosixDigit_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixDigit_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -280,7 +342,11 @@ UV PosixDigit_invlist[] = {
 	58
 };
 
-UV PosixGraph_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixGraph_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -291,7 +357,11 @@ UV PosixGraph_invlist[] = {
 	127
 };
 
-UV L1PosixGraph_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixGraph_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -304,7 +374,11 @@ UV L1PosixGraph_invlist[] = {
 	888
 };
 
-UV PosixLower_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixLower_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -315,7 +389,11 @@ UV PosixLower_invlist[] = {
 	123
 };
 
-UV L1PosixLower_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixLower_invlist[] = {
 	12,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -336,7 +414,11 @@ UV L1PosixLower_invlist[] = {
 	256
 };
 
-UV PosixPrint_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixPrint_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -347,7 +429,11 @@ UV PosixPrint_invlist[] = {
 	127
 };
 
-UV L1PosixPrint_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixPrint_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -360,7 +446,11 @@ UV L1PosixPrint_invlist[] = {
 	888
 };
 
-UV PosixPunct_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixPunct_invlist[] = {
 	8,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -377,7 +467,11 @@ UV PosixPunct_invlist[] = {
 	127
 };
 
-UV L1PosixPunct_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixPunct_invlist[] = {
 	20,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -406,7 +500,11 @@ UV L1PosixPunct_invlist[] = {
 	192
 };
 
-UV PosixSpace_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixSpace_invlist[] = {
 	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -419,7 +517,11 @@ UV PosixSpace_invlist[] = {
 	33
 };
 
-UV XPosixSpace_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV XPosixSpace_invlist[] = {
 	22,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -450,7 +552,11 @@ UV XPosixSpace_invlist[] = {
 	12289
 };
 
-UV PosixUpper_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixUpper_invlist[] = {
 	2,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -461,7 +567,11 @@ UV PosixUpper_invlist[] = {
 	91
 };
 
-UV L1PosixUpper_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixUpper_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -476,7 +586,11 @@ UV L1PosixUpper_invlist[] = {
 	223
 };
 
-UV PosixWord_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixWord_invlist[] = {
 	8,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -493,7 +607,11 @@ UV PosixWord_invlist[] = {
 	123
 };
 
-UV L1PosixWord_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV L1PosixWord_invlist[] = {
 	20,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -522,7 +640,11 @@ UV L1PosixWord_invlist[] = {
 	706
 };
 
-UV PosixXDigit_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV PosixXDigit_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -537,7 +659,11 @@ UV PosixXDigit_invlist[] = {
 	103
 };
 
-UV XPosixXDigit_invlist[] = {
+#endif
+
+#ifndef PERL_IN_XSUB_RE
+
+static UV XPosixXDigit_invlist[] = {
 	12,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -558,7 +684,9 @@ UV XPosixXDigit_invlist[] = {
 	65351
 };
 
-UV NonL1_Perl_Non_Final_Folds_invlist[] = {
+#endif
+
+static UV NonL1_Perl_Non_Final_Folds_invlist[] = {
 	44,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -611,7 +739,9 @@ UV NonL1_Perl_Non_Final_Folds_invlist[] = {
 	8061
 };
 
-UV _Perl_Multi_Char_Folds_invlist[] = {
+#ifndef PERL_IN_XSUB_RE
+
+static UV _Perl_Multi_Char_Folds_invlist[] = {
 	58,	/* Number of elements */
 	0,	/* Current iteration position */
 	0,	/* Cache of previous search index result */
@@ -677,5 +807,7 @@ UV _Perl_Multi_Char_Folds_invlist[] = {
 	64275,
 	64280
 };
+
+#endif
 
 /* ex: set ro: */

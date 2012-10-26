@@ -23,6 +23,8 @@ my $out_fh = open_new('charclass_invlists.h', '>',
 
 print $out_fh "/* See the generating file for comments */\n\n";
 
+my %include_in_ext_re = ( NonL1_Perl_Non_Final_Folds => 1 );
+
 sub output_invlist ($$) {
     my $name = shift;
     my $invlist = shift;     # Reference to inversion list array
@@ -51,7 +53,8 @@ sub output_invlist ($$) {
         $zero_or_one = 1;
     }
 
-    print $out_fh "\nUV ${name}_invlist[] = {\n";
+    print $out_fh "\n#ifndef PERL_IN_XSUB_RE\n" unless exists $include_in_ext_re{$name};
+    print $out_fh "\nstatic UV ${name}_invlist[] = {\n";
 
     print $out_fh "\t", scalar @$invlist, ",\t/* Number of elements */\n";
     print $out_fh "\t0,\t/* Current iteration position */\n";
@@ -71,6 +74,8 @@ sub output_invlist ($$) {
     print $out_fh "\t$invlist->[-1]\n";
 
     print $out_fh "};\n";
+    print $out_fh "\n#endif\n" unless exists $include_in_ext_re{$name};
+
 }
 
 sub mk_invlist_from_cp_list {
