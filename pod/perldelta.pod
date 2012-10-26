@@ -21,23 +21,13 @@ report.  See L</Reporting Bugs> below.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<Module::CoreList> has been upgraded from version 2.70 to version 2.76.
 
 =back
 
@@ -79,9 +69,29 @@ There are no new known problems.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.16.2 represents approximately 2 months of development since Perl
+5.16.1 and contains approximately 740 lines of changes across 20 files
+from 9 authors.
 
-  perl Porting/acknowledgements.pl v5.16.1..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to
+have contributed the improvements that became Perl 5.16.2:
+
+Andy Dougherty, Craig A. Berry, Darin McBride, Dominic Hargreaves, Karen
+Etheridge, Karl Williamson, Peter Martini, Ricardo Signes, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not
+include the names of the (very much appreciated) contributors who
+reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors,
+please see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
@@ -97,15 +107,14 @@ output of C<perl -V>, will be sent off to perlbug@perl.org to be
 analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
-inappropriate to send to a publicly archived mailing list, then please send
-it to perl5-security-report@perl.org. This points to a closed subscription
-unarchived mailing list, which includes
-all the core committers, who will be able
-to help assess the impact of issues, figure out a resolution, and help
-co-ordinate the release of patches to mitigate or fix the problem across all
-platforms on which Perl is supported. Please only use this address for
-security issues in the Perl core, not for modules independently
-distributed on CPAN.
+inappropriate to send to a publicly archived mailing list, then please
+send it to perl5-security-report@perl.org. This points to a closed
+subscription unarchived mailing list, which includes all the core
+committers, who will be able to help assess the impact of issues, figure
+out a resolution, and help co-ordinate the release of patches to
+mitigate or fix the problem across all platforms on which Perl is
+supported. Please only use this address for security issues in the Perl
+core, not for modules independently distributed on CPAN.
 
 =head1 SEE ALSO
 
