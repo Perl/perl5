@@ -8935,7 +8935,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
             if (strEQ(key,"charnames")) {
                 msg = Perl_newSVpvf(aTHX_
                         /* The +3 is for '\N{'; -4 for that, plus '}' */
-                        "Unknown charname '%.*s'", typelen - 4, type + 3);
+                        "Unknown charname '%.*s'", (int)typelen - 4, type + 3);
             }
             else {
                 msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
