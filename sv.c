@@ -4189,7 +4189,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		in a newer implementation.  */
 	     /* If we are COW and dstr is a suitable target then we drop down
 		into the else and make dest a COW of us.  */
-	     || (SvFLAGS(dstr) & CAN_COW_MASK) != CAN_COW_FLAGS
+	     || (SvFLAGS(dstr) & SVf_BREAK)
 #endif
 	     )
             &&
