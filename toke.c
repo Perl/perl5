@@ -9826,8 +9826,10 @@ S_scan_heredoc(pTHX_ register char *s)
 				bufend - shared->re_eval_start);
 	    shared->re_eval_start -= s-d;
 	}
-	if (CxTYPE(cx) == CXt_EVAL && CxOLD_OP_TYPE(cx) == OP_ENTEREVAL
-	 && cx->blk_eval.cur_text == linestr) {
+	if (cxstack_ix >= 0 && CxTYPE(cx) == CXt_EVAL &&
+            CxOLD_OP_TYPE(cx) == OP_ENTEREVAL &&
+            cx->blk_eval.cur_text == linestr)
+        {
 	    cx->blk_eval.cur_text = newSVsv(linestr);
 	    SvSCREAM_on(cx->blk_eval.cur_text);
 	}
