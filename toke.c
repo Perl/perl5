@@ -8974,8 +8974,11 @@ now_ok:
 
     /* Check the eval first */
     if (!PL_in_eval && SvTRUE(ERRSV)) {
- 	sv_catpvs(ERRSV, "Propagated");
-	yyerror(SvPV_nolen_const(ERRSV)); /* Duplicates the message inside eval */
+	STRLEN errlen;
+	const char * errstr;
+	sv_catpvs(ERRSV, "Propagated");
+	errstr = SvPV_const(ERRSV, errlen);
+	yyerror_pvn(errstr, errlen, 0); /* Duplicates the message inside eval */
 	(void)POPs;
 	res = SvREFCNT_inc_simple(sv);
     }
