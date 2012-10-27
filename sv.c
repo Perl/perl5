@@ -1161,7 +1161,7 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
        no longer need to unshare so as to free up the IVX slot for its proper
        purpose. So it's safe to move the early return earlier.  */
 
-    if (new_type != SVt_PV && SvIsCOW(sv)) {
+    if (new_type > SVt_PVMG && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
     }
 
