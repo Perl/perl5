@@ -586,9 +586,9 @@ EOT
 	    next if /^\s*$/; # skip blank lines
 	    if (/^1..$/ && ($^O eq 'VMS')) {
 		# VMS pipe bug inserts blank lines.
-		my $l2 = <RESULTS>;
+		my $l2 = <$results>;
 		if ($l2 =~ /^\s*$/) {
-		    $l2 = <RESULTS>;
+		    $l2 = <$results>;
 		}
 		$_ = '1..' . $l2;
 	    }
