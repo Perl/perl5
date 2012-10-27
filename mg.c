@@ -111,22 +111,19 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 	bumped = TRUE;
     }
 
-    /* Turning READONLY off for a copy-on-write scalar (including shared
-       hash keys) is a bad idea.  */
-    if (SvIsCOW(sv))
-      sv_force_normal_flags(sv, 0);
-
     SAVEDESTRUCTOR_X(S_restore_magic, INT2PTR(void*, (IV)mgs_ix));
 
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
     mgs->mgs_magical = SvMAGICAL(sv);
-    mgs->mgs_readonly = SvREADONLY(sv) != 0;
+    mgs->mgs_readonly = SvREADONLY(sv) && !SvIsCOW(sv);
     mgs->mgs_ss_ix = PL_savestack_ix;   /* points after the saved destructor */
     mgs->mgs_bumped = bumped;
 
     SvMAGICAL_off(sv);
-    SvREADONLY_off(sv);
+    /* Turning READONLY off for a copy-on-write scalar (including shared
+       hash keys) is a bad idea.  */
+    if (!SvIsCOW(sv)) SvREADONLY_off(sv);
 }
 
 /*
