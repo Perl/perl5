@@ -3,7 +3,7 @@ require 5.003000;
 use strict;
 use ExtUtils::MakeMaker;
 use Getopt::Std;
-use Config;
+use Config qw(%Config);
 
 my $PM = 'lib/Digest/SHA.pm';
 
@@ -23,8 +23,19 @@ push(@defines, '-DNO_SHA_384_512')  if $opts{'x'};
 if ($Config{archname} =~ /^i[3456]86/) {
 	push(@defines, '-DSHA_STO_CLASS=static') unless $opts{'t'};
 }
-
 my $define = join(' ', @defines);
+
+	# Workaround for DEC compiler bug, adopted from Digest::MD5
+
+my @extra = ();
+if ($^O eq 'VMS') {
+	if (defined($Config{ccname})) {
+		if (grep(/VMS_VAX/, @INC) && ($Config{ccname} eq 'DEC')) {
+			# VAX compiler optimizer even up to v6.4 gets stuck
+			push(@extra, OPTIMIZE => "/Optimize=(NODISJOINT)");
+		}
+	}
+}
 
 my %att = (
 	'NAME'		=> 'Digest::SHA',
@@ -34,6 +45,7 @@ my %att = (
 	'INC'		=> '-I.',
 	'EXE_FILES'	=> [ 'shasum' ],
 	'INSTALLDIRS'	=> ($] >= 5.010 and $] < 5.011) ? 'perl' : 'site',
+	@extra,
 );
 
 my $MMversion = $ExtUtils::MakeMaker::VERSION || 0;
