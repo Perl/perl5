@@ -1329,11 +1329,6 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
 	}
 	break;
 
-
-    case SVt_REGEXP:
-	/* This ensures that SvTHINKFIRST(sv) is true, and hence that
-	   sv_force_normal_flags(sv) is called.  */
-	SvFAKE_on(sv);
     case SVt_PVIV:
 	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
 	   no route from NV to PVIV, NOK can never be true  */
@@ -1344,6 +1339,7 @@ Perl_sv_upgrade(pTHX_ register SV *const sv, svtype new_type)
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
+    case SVt_REGEXP:
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PV:

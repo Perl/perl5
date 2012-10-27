@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 20);
+plan(tests => 21);
 
 sub r {
     return qr/Good/;
@@ -67,3 +67,8 @@ like "bar",qr//,'[perl #96230] =~ qr// does not reuse last successful pat';
 $_ = "bar";
 $_ =~ s/${qr||}/baz/;
 is $_, "bazbar", '[perl #96230] s/$qr// does not reuse last pat';
+
+{
+    my $x = 1.1; $x = ${qr//};
+    pass 'no assertion failure when upgrading NV to regexp';
+}

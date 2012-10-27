@@ -14178,6 +14178,9 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 
     if (!ret_x)
 	ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
+    /* This ensures that SvTHINKFIRST(sv) is true, and hence that
+       sv_force_normal(sv) is called.  */
+    SvFAKE_on(ret_x);
     ret = (struct regexp *)SvANY(ret_x);
     
     (void)ReREFCNT_inc(rx);
