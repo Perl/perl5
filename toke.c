@@ -2689,51 +2689,50 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         return NULL;
     }
 
-    {   /* This code needs to be sync'ed with a regex in _charnames.pm which
-           does the same thing */
+    /* This code needs to be sync'ed with a regex in _charnames.pm which does
+     * the same thing */
 
-        /* For non-ut8 input, look to see that the first character is an alpha,
-         * then loop through the rest checking that each is a continuation */
-        if (! UTF) {
+    /* For non-ut8 input, look to see that the first character is an alpha,
+     * then loop through the rest checking that each is a continuation */
+    if (! UTF) {
+        if (! isALPHAU(*i)) {
+            goto bad_charname;
+        }
+        else for (i = s + 1; i < e; i++) {
+            if (! isCHARNAME_CONT(*i)) {
+                goto bad_charname;
+            }
+        }
+    }
+    else {
+        /* Similarly for utf8.  For invariants can check directly.  We accept
+         * anything above the latin1 range because it is immaterial to Perl if
+         * it is correct or not, and is expensive to check.  But it is fairly
+         * easy in the latin1 range to convert the variants into a single
+         * character and check those */
+        if (UTF8_IS_INVARIANT(*i)) {
             if (! isALPHAU(*i)) {
                 goto bad_charname;
             }
-            else for (i = s + 1; i < e; i++) {
-                if (! isCHARNAME_CONT(*i)) {
-                    goto bad_charname;
-                }
-            }
-        }
-        else {
-            /* Similarly for utf8.  For invariants can check directly.  We
-             * accept anything above the latin1 range because it is immaterial
-             * to Perl if it is correct or not, and is expensive to check.  But
-             * it is fairly easy in the latin1 range to convert the variants
-             * into a single character and check those */
-            if (UTF8_IS_INVARIANT(*i)) {
-                if (! isALPHAU(*i)) {
-                    goto bad_charname;
-                }
-            } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
-                if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
-                                                            *(i+1)))))
-                {
-                    goto bad_charname;
-                }
-            }
-            for (i = s + UTF8SKIP(s); i < e; i+= UTF8SKIP(i)) {
-                if (UTF8_IS_INVARIANT(*i)) {
-                    if (isCHARNAME_CONT(*i)) continue;
-                } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
-                    continue;
-                } else if (isCHARNAME_CONT(
-                            UNI_TO_NATIVE(
-                            TWO_BYTE_UTF8_TO_UNI(*i, *(i+1)))))
-                {
-                    continue;
-                }
+        } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
+            if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
+                                                        *(i+1)))))
+            {
                 goto bad_charname;
             }
+        }
+        for (i = s + UTF8SKIP(s); i < e; i+= UTF8SKIP(i)) {
+            if (UTF8_IS_INVARIANT(*i)) {
+                if (isCHARNAME_CONT(*i)) continue;
+            } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
+                continue;
+            } else if (isCHARNAME_CONT(
+                        UNI_TO_NATIVE(
+                        TWO_BYTE_UTF8_TO_UNI(*i, *(i+1)))))
+            {
+                continue;
+            }
+            goto bad_charname;
         }
     }
 
