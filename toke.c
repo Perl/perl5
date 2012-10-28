@@ -2642,7 +2642,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     STRLEN len;
     const char *str;
     const char* i = s;
-    SV* res = newSVpvn(s, e - s);
+    SV* res = newSVpvn_flags(s, e - s, UTF ? SVf_UTF8 : 0);
 
     HV * table;
     SV **cvp;
