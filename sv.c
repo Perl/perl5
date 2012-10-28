@@ -2282,7 +2282,8 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 
 	   Regexps have no SvIVX and SvNVX fields.
 	*/
-	    assert(SvPOKp(sv));
+	assert(SvPOKp(sv));
+	{
 	    UV value;
 	    const int numtype
 		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
@@ -2303,6 +2304,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 		    not_a_number(sv);
 	    }
 	    return I_V(Atof(SvPVX_const(sv)));
+	}
     }
 
     if (SvTHINKFIRST(sv)) {
@@ -2366,7 +2368,8 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  
 	   Regexps have no SvIVX and SvNVX fields. */
-	    assert(SvPOKp(sv));
+	assert(SvPOKp(sv));
+	{
 	    UV value;
 	    const int numtype
 		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
@@ -2382,6 +2385,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 		    not_a_number(sv);
 	    }
 	    return U_V(Atof(SvPVX_const(sv)));
+	}
     }
 
     if (SvTHINKFIRST(sv)) {
