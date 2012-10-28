@@ -2063,7 +2063,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 				  SvUVX(sv)));
 	}
     }
-    else if (SvPOKp(sv) && SvLEN(sv)) {
+    else if (SvPOKp(sv)) {
 	UV value;
 	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 	/* We want to avoid a possible problem when we cache an IV/ a UV which
@@ -2273,18 +2273,20 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 	return PTR2IV(SvRV(sv));
     }
 
-    if (SvVALID(sv)) {
+    if (SvVALID(sv) || SvTYPE(sv) == SVt_REGEXP) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.
 	   In practice they are extremely unlikely to actually get anywhere
 	   accessible by user Perl code - the only way that I'm aware of is when
 	   a constant subroutine which is used as the second argument to index.
+
+	   Regexps have no SvIVX and SvNVX fields.
 	*/
 	if (SvIOKp(sv))
 	    return SvIVX(sv);
 	if (SvNOKp(sv))
 	    return I_V(SvNVX(sv));
-	if (SvPOKp(sv) && SvLEN(sv)) {
+	if (SvPOKp(sv)) {
 	    UV value;
 	    const int numtype
 		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
@@ -2366,14 +2368,15 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 	return PTR2UV(SvRV(sv));
     }
 
-    if (SvVALID(sv)) {
+    if (SvVALID(sv) || SvTYPE(sv) == SVt_REGEXP) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
-	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  */
+	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  
+	   Regexps have no SvIVX and SvNVX fields. */
 	if (SvIOKp(sv))
 	    return SvUVX(sv);
 	if (SvNOKp(sv))
 	    return U_V(SvNVX(sv));
-	if (SvPOKp(sv) && SvLEN(sv)) {
+	if (SvPOKp(sv)) {
 	    UV value;
 	    const int numtype
 		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
@@ -2432,14 +2435,15 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
     dVAR;
     if (!sv)
 	return 0.0;
-    if (SvGMAGICAL(sv) || SvVALID(sv)) {
+    if (SvGMAGICAL(sv) || SvVALID(sv) || SvTYPE(sv) == SVt_REGEXP) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
-	   the same flag bit as SVf_IVisUV, so must not let them cache NVs.  */
+	   the same flag bit as SVf_IVisUV, so must not let them cache NVs.
+	   Regexps have no SvIVX and SvNVX fields.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
-	if ((SvPOKp(sv) && SvLEN(sv)) && !SvIOKp(sv)) {
+	if (SvPOKp(sv) && !SvIOKp(sv)) {
 	    if (!SvIOKp(sv) && ckWARN(WARN_NUMERIC) &&
 		!grok_number(SvPVX_const(sv), SvCUR(sv), NULL))
 		not_a_number(sv);
@@ -2523,7 +2527,7 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
 	    SvNOKp_on(sv);
 #endif
     }
-    else if (SvPOKp(sv) && SvLEN(sv)) {
+    else if (SvPOKp(sv)) {
 	UV value;
 	const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
 	if (!SvIOKp(sv) && !numtype && ckWARN(WARN_NUMERIC))

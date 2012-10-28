@@ -2072,3 +2072,17 @@ Use of uninitialized value $h{"17"} in sprintf at - line 5.
 Use of uninitialized value $h{"18"} in sprintf at - line 5.
 Use of uninitialized value $h{"19"} in sprintf at - line 5.
 Use of uninitialized value $h{"20"} in sprintf at - line 5.
+########
+# NAME SvPOK && SvLEN==0 should not produce uninit warning
+use warnings 'uninitialized';
+
+$v = int(${qr||}); # sv_2iv on a regexp
+$v = 1.1 *  ${qr||}; # sv_2nv on a regexp
+$v = ${qr||} << 2; # sv_2uv on a regexp
+
+sub TIESCALAR{bless[]}
+sub FETCH {${qr||}}
+tie $t, "";
+$v = 1.1 * $t; # sv_2nv on a tied regexp
+
+EXPECT
