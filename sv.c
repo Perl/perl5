@@ -9446,9 +9446,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
         Perl_croak(aTHX_ "Can't bless non-reference value");
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
-	if (SvIsCOW(tmpRef))
-	    sv_force_normal_flags(tmpRef, 0);
-	if (SvREADONLY(tmpRef))
+	if (SvREADONLY(tmpRef) && !SvIsCOW(tmpRef))
 	    Perl_croak_no_modify(aTHX);
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
