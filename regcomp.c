@@ -14193,8 +14193,6 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     memcpy(&(ret->xpv_cur), &(r->xpv_cur),
 	   sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
     SvLEN_set(ret_x, 0);
-    SvSTASH_set(ret_x, NULL);
-    SvMAGIC_set(ret_x, NULL);
     if (r->offs) {
         const I32 npar = r->nparens+1;
         Newx(ret->offs, npar, regexp_paren_pair);

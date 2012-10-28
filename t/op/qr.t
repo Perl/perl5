@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 21);
+plan(tests => 24);
 
 sub r {
     return qr/Good/;
@@ -72,3 +72,13 @@ is $_, "bazbar", '[perl #96230] s/$qr// does not reuse last pat';
     my $x = 1.1; $x = ${qr//};
     pass 'no assertion failure when upgrading NV to regexp';
 }
+
+sub TIESCALAR{bless[]}
+sub STORE { is ref\pop, "REGEXP", "stored regexp" }
+tie my $t, "";
+$t = ${qr||};
+ok tied $t, 'tied var is still tied after regexp assignment';
+
+bless \my $t2;
+$t2 = ${qr||};
+is ref \$t2, 'main', 'regexp assignment is not maledictory';
