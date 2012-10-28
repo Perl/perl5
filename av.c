@@ -211,6 +211,31 @@ The rough perl equivalent is C<$myarray[$idx]>.
 =cut
 */
 
+static bool
+S_adjust_index(pTHX_ AV *av, const MAGIC *mg, I32 *keyp)
+{
+    bool adjust_index = 1;
+    if (mg) {
+	/* Handle negative array indices 20020222 MJD */
+	SV * const ref = SvTIED_obj(MUTABLE_SV(av), mg);
+	SvGETMAGIC(ref);
+	if (SvROK(ref) && SvOBJECT(SvRV(ref))) {
+	    SV * const * const negative_indices_glob =
+		hv_fetchs(SvSTASH(SvRV(ref)), NEGATIVE_INDICES_VAR, 0);
+
+	    if (negative_indices_glob && SvTRUE(GvSV(*negative_indices_glob)))
+		adjust_index = 0;
+	}
+    }
+
+    if (adjust_index) {
+	*keyp += AvFILL(av) + 1;
+	if (*keyp < 0)
+	    return FALSE;
+    }
+    return TRUE;
+}
+
 SV**
 Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
@@ -225,23 +250,8 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
         if (tied_magic || mg_find((const SV *)av, PERL_MAGIC_regdata)) {
 	    SV *sv;
 	    if (key < 0) {
-		I32 adjust_index = 1;
-		if (tied_magic) {
-		    /* Handle negative array indices 20020222 MJD */
-		    SV * const * const negative_indices_glob =
-			hv_fetch(SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(av),
-							 tied_magic))),
-				NEGATIVE_INDICES_VAR, 16, 0);
-
-		    if (negative_indices_glob && SvTRUE(GvSV(*negative_indices_glob)))
-			adjust_index = 0;
-		}
-
-		if (adjust_index) {
-		    key += AvFILL(av) + 1;
-		    if (key < 0)
+		if (!S_adjust_index(aTHX_ av, tied_magic, &key))
 			return NULL;
-		}
 	    }
 
             sv = sv_newmortal();
@@ -316,21 +326,9 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((const SV *)av, PERL_MAGIC_tied);
         if (tied_magic) {
-            /* Handle negative array indices 20020222 MJD */
             if (key < 0) {
-		bool adjust_index = 1;
-		SV * const * const negative_indices_glob =
-                    hv_fetch(SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(av), 
-                                                     tied_magic))), 
-                             NEGATIVE_INDICES_VAR, 16, 0);
-                if (negative_indices_glob
-                    && SvTRUE(GvSV(*negative_indices_glob)))
-                    adjust_index = 0;
-                if (adjust_index) {
-                    key += AvFILL(av) + 1;
-                    if (key < 0)
+		if (!S_adjust_index(aTHX_ av, tied_magic, &key))
                         return 0;
-                }
             }
 	    if (val != &PL_sv_undef) {
 		mg_copy(MUTABLE_SV(av), val, 0, key);
@@ -861,24 +859,10 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
         const MAGIC * const tied_magic
 	    = mg_find((const SV *)av, PERL_MAGIC_tied);
         if ((tied_magic || mg_find((const SV *)av, PERL_MAGIC_regdata))) {
-            /* Handle negative array indices 20020222 MJD */
             SV **svp;
             if (key < 0) {
-                unsigned adjust_index = 1;
-                if (tied_magic) {
-		    SV * const * const negative_indices_glob =
-                        hv_fetch(SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(av), 
-                                                         tied_magic))), 
-                                 NEGATIVE_INDICES_VAR, 16, 0);
-                    if (negative_indices_glob
-                        && SvTRUE(GvSV(*negative_indices_glob)))
-                        adjust_index = 0;
-                }
-                if (adjust_index) {
-                    key += AvFILL(av) + 1;
-                    if (key < 0)
+		if (!S_adjust_index(aTHX_ av, tied_magic, &key))
 			return NULL;
-                }
             }
             svp = av_fetch(av, key, TRUE);
             if (svp) {
@@ -954,21 +938,8 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
             MAGIC *mg;
             /* Handle negative array indices 20020222 MJD */
             if (key < 0) {
-                unsigned adjust_index = 1;
-                if (tied_magic) {
-		    SV * const * const negative_indices_glob =
-                        hv_fetch(SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(av), 
-                                                         tied_magic))), 
-                                 NEGATIVE_INDICES_VAR, 16, 0);
-                    if (negative_indices_glob
-                        && SvTRUE(GvSV(*negative_indices_glob)))
-                        adjust_index = 0;
-                }
-                if (adjust_index) {
-                    key += AvFILL(av) + 1;
-                    if (key < 0)
+		if (!S_adjust_index(aTHX_ av, tied_magic, &key))
                         return FALSE;
-                }
             }
 
             if(key >= 0 && regdata_magic) {

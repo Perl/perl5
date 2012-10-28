@@ -1317,3 +1317,18 @@ EXPECT
 does 1 exist?
 does 49 exist?
 does -1 exist?
+########
+
+# Crash when using negative index on array tied to non-object
+sub TIEARRAY{bless[]};
+${\tie @a, ""} = undef;
+eval { $_ = $a[-1] }; print $@;
+eval { $a[-1] = '' }; print $@;
+eval { delete $a[-1] }; print $@;
+eval { exists $a[-1] }; print $@;
+
+EXPECT
+Can't call method "FETCHSIZE" on an undefined value at - line 5.
+Can't call method "FETCHSIZE" on an undefined value at - line 6.
+Can't call method "FETCHSIZE" on an undefined value at - line 7.
+Can't call method "FETCHSIZE" on an undefined value at - line 8.
