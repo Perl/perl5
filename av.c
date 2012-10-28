@@ -968,8 +968,6 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
                     key += AvFILL(av) + 1;
                     if (key < 0)
                         return FALSE;
-                    else
-                        return TRUE;
                 }
             }
 

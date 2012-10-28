@@ -1302,3 +1302,18 @@ each %$h;
 delete $$h{foo};
 tie %$h, 'l';
 EXPECT
+########
+
+# NAME EXISTS on arrays
+sub TIEARRAY{bless[]};
+sub FETCHSIZE { 50 }
+sub EXISTS { print "does $_[1] exist?\n" }
+tie @a, "";
+exists $a[1];
+exists $a[-1];
+$NEGATIVE_INDICES=1;
+exists $a[-1];
+EXPECT
+does 1 exist?
+does 49 exist?
+does -1 exist?
