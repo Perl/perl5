@@ -1278,8 +1278,7 @@ PerlSockGethostbyname(struct IPerlSock* piPerl, const char* name)
 struct hostent*
 PerlSockGethostent(struct IPerlSock* piPerl)
 {
-    dTHX;
-    Perl_croak(aTHX_ "gethostent not implemented!\n");
+    win32_croak_not_implemented("gethostent");
     return NULL;
 }
 
@@ -1861,7 +1860,7 @@ PerlProcFork(struct IPerlProc* piPerl)
 #  endif
     return -(int)id;
 #else
-    Perl_croak(aTHX_ "fork() not implemented!\n");
+    win32_croak_not_implemented("fork()");
     return -1;
 #endif /* USE_ITHREADS */
 }

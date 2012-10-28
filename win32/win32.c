@@ -1676,6 +1676,14 @@ out_of_memory(void)
     exit(1);
 }
 
+void
+win32_croak_not_implemented(const char * fname)
+{
+    PERL_ARGS_ASSERT_WIN32_CROAK_NOT_IMPLEMENTED;
+
+    Perl_croak_nocontext("%s not implemented!\n", fname);
+}
+
 /* Converts a wide character (UTF-16) string to the Windows ANSI code page,
  * potentially using the system's default replacement character for any
  * unrepresentable characters. The caller must free() the returned string. */
@@ -2901,8 +2909,7 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport PerlIO*
 win32_popenlist(const char *mode, IV narg, SV **args)
 {
- dTHX;
- Perl_croak(aTHX_ "List form of pipe open not implemented");
+ Perl_croak_nocontext("List form of pipe open not implemented");
  return NULL;
 }
 

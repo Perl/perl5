@@ -249,7 +249,9 @@ Aprd	|void	|vcroak		|NULLOK const char* pat|NULLOK va_list* args
 Aprd	|void	|croak_no_modify
 Aprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
-
+#if defined(WIN32)
+norx	|void	|win32_croak_not_implemented|NN const char * fname
+#endif
 #if defined(PERL_IMPLICIT_CONTEXT)
 Afnrp	|void	|croak_nocontext|NULLOK const char* pat|...
 Afnp	|OP*	|die_nocontext	|NULLOK const char* pat|...

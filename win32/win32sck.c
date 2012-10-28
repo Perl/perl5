@@ -596,101 +596,88 @@ win32_inet_addr(const char FAR *cp)
 void
 win32_endhostent() 
 {
-    dTHX;
-    Perl_croak_nocontext("endhostent not implemented!\n");
+    win32_croak_not_implemented("endhostent");
 }
 
 void
 win32_endnetent()
 {
-    dTHX;
-    Perl_croak_nocontext("endnetent not implemented!\n");
+    win32_croak_not_implemented("endnetent");
 }
 
 void
 win32_endprotoent()
 {
-    dTHX;
-    Perl_croak_nocontext("endprotoent not implemented!\n");
+    win32_croak_not_implemented("endprotoent");
 }
 
 void
 win32_endservent()
 {
-    dTHX;
-    Perl_croak_nocontext("endservent not implemented!\n");
+    win32_croak_not_implemented("endservent");
 }
 
 
 struct netent *
 win32_getnetent(void) 
 {
-    dTHX;
-    Perl_croak_nocontext("getnetent not implemented!\n");
+    win32_croak_not_implemented("getnetent");
     return (struct netent *) NULL;
 }
 
 struct netent *
 win32_getnetbyname(char *name) 
 {
-    dTHX;
-    Perl_croak_nocontext("getnetbyname not implemented!\n");
+    win32_croak_not_implemented("getnetbyname");
     return (struct netent *)NULL;
 }
 
 struct netent *
 win32_getnetbyaddr(long net, int type) 
 {
-    dTHX;
-    Perl_croak_nocontext("getnetbyaddr not implemented!\n");
+    win32_croak_not_implemented("getnetbyaddr");
     return (struct netent *)NULL;
 }
 
 struct protoent *
 win32_getprotoent(void) 
 {
-    dTHX;
-    Perl_croak_nocontext("getprotoent not implemented!\n");
+    win32_croak_not_implemented("getprotoent");
     return (struct protoent *) NULL;
 }
 
 struct servent *
 win32_getservent(void) 
 {
-    dTHX;
-    Perl_croak_nocontext("getservent not implemented!\n");
+    win32_croak_not_implemented("getservent");
     return (struct servent *) NULL;
 }
 
 void
 win32_sethostent(int stayopen)
 {
-    dTHX;
-    Perl_croak_nocontext("sethostent not implemented!\n");
+    win32_croak_not_implemented("sethostent");
 }
 
 
 void
 win32_setnetent(int stayopen)
 {
-    dTHX;
-    Perl_croak_nocontext("setnetent not implemented!\n");
+    win32_croak_not_implemented("setnetent");
 }
 
 
 void
 win32_setprotoent(int stayopen)
 {
-    dTHX;
-    Perl_croak_nocontext("setprotoent not implemented!\n");
+    win32_croak_not_implemented("setprotoent");
 }
 
 
 void
 win32_setservent(int stayopen)
 {
-    dTHX;
-    Perl_croak_nocontext("setservent not implemented!\n");
+    win32_croak_not_implemented("setservent");
 }
 
 static struct servent*

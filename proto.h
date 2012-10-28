@@ -7728,6 +7728,14 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_
 	assert(vbuf)
 
 #endif
+#if defined(WIN32)
+PERL_CALLCONV_NO_RET void	win32_croak_not_implemented(const char * fname)
+			__attribute__noreturn__
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_WIN32_CROAK_NOT_IMPLEMENTED	\
+	assert(fname)
+
+#endif
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
