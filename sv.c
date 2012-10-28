@@ -2314,9 +2314,11 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
     }
 
     if (SvTHINKFIRST(sv)) {
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
 	}
+#endif
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
@@ -2399,9 +2401,11 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
     }
 
     if (SvTHINKFIRST(sv)) {
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
 	}
+#endif
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
@@ -2475,9 +2479,11 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
 	    }
 	    return PTR2NV(SvRV(sv));
 	}
+#ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
 	}
+#endif
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
