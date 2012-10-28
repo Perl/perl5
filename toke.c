@@ -2635,9 +2635,13 @@ S_sublex_done(pTHX)
 PERL_STATIC_INLINE SV*
 S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 {
-    /* Get the value for NAME */
+    /* <s> points to first character of interior of \N{}, <e> to one beyond the
+     * interior, hence to the "}".  Finds what the name resolves to, returning
+     * an SV* containing it; NULL if no valid one found */
+
     STRLEN len;
     const char *str;
+    const char* i = s;
     SV* res = newSVpvn(s, e - s);
 
     HV * table;
@@ -2687,17 +2691,17 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
     {   /* This code needs to be sync'ed with a regex in _charnames.pm which
            does the same thing */
-        bool problematic = FALSE;
-        const char* i = s;
 
         /* For non-ut8 input, look to see that the first character is an alpha,
          * then loop through the rest checking that each is a continuation */
         if (! UTF) {
-            if (! isALPHAU(*i)) problematic = TRUE;
+            if (! isALPHAU(*i)) {
+                goto bad_charname;
+            }
             else for (i = s + 1; i < e; i++) {
-                if (isCHARNAME_CONT(*i)) continue;
-                problematic = TRUE;
-                break;
+                if (! isCHARNAME_CONT(*i)) {
+                    goto bad_charname;
+                }
             }
         }
         else {
@@ -2707,18 +2711,17 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
              * it is fairly easy in the latin1 range to convert the variants
              * into a single character and check those */
             if (UTF8_IS_INVARIANT(*i)) {
-                if (! isALPHAU(*i)) problematic = TRUE;
+                if (! isALPHAU(*i)) {
+                    goto bad_charname;
+                }
             } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
                 if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
                                                             *(i+1)))))
                 {
-                    problematic = TRUE;
+                    goto bad_charname;
                 }
             }
-            if (! problematic) for (i = s + UTF8SKIP(s);
-                                    i < e;
-                                    i+= UTF8SKIP(i))
-            {
+            for (i = s + UTF8SKIP(s); i < e; i+= UTF8SKIP(i)) {
                 if (UTF8_IS_INVARIANT(*i)) {
                     if (isCHARNAME_CONT(*i)) continue;
                 } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
@@ -2729,22 +2732,21 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 {
                     continue;
                 }
-                problematic = TRUE;
-                break;
+                goto bad_charname;
             }
-        }
-        if (problematic) {
-            /* The e-i passed to the final %.*s makes sure that should the
-             * trailing NUL be missing that this print won't run off the end of
-             * the string */
-            yyerror(Perl_form(aTHX_
-                        "Invalid character in \\N{...}; marked by <-- HERE in \\N{%.*s<-- HERE %.*s",
-                        (int)(i - s + 1), s, (int)(e - i), i + 1));
-            return NULL;
         }
     }
 
     return res;
+
+  bad_charname:
+
+    /* The e-i passed to the final %.*s makes sure that should the trailing NUL
+     * be missing that this print won't run off the end of the string */
+    yyerror(Perl_form(aTHX_
+        "Invalid character in \\N{...}; marked by <-- HERE in \\N{%.*s<-- HERE %.*s",
+        (int)(i - s + 1), s, (int)(e - i), i + 1));
+    return NULL;
 }
 
 /*
