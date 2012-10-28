@@ -3257,7 +3257,7 @@ Perl_moreswitches(pTHX_ const char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2010, Larry Wall\n");
+		      "\n\nCopyright 1987-2012, Larry Wall\n");
 #ifdef MSDOS
 	PerlIO_printf(PerlIO_stdout(),
 		      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
