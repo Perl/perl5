@@ -14188,6 +14188,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
        by pointing directly at the buffer, but flagging that the allocated
        space in the copy is zero. As we've just done a struct copy, it's now
        a case of zero-ing that, rather than copying the current length.  */
+    if (SvPOKp(ret_x)) SvPV_free(ret_x);
     SvPV_set(ret_x, RX_WRAPPED(rx));
     SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
     memcpy(&(ret->xpv_cur), &(r->xpv_cur),
