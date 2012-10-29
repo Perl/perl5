@@ -5061,7 +5061,7 @@ sub cmd_b_sub {
 
     # If the subname isn't a code reference, qualify it so that
     # break_subroutine() will work right.
-    unless ( ref $subname eq 'CODE' ) {
+    if ( ref($subname) ne 'CODE' ) {
 
         # Not Perl 4.
         $subname =~ s/'/::/g;
@@ -5089,7 +5089,7 @@ sub cmd_b_sub {
         {
             $subname = "main" . $subname;
         }
-    } ## end unless (ref $subname eq 'CODE')
+    } ## end if ( ref($subname) ne 'CODE' ) {
 
     # Try to set the breakpoint.
     if (not eval { break_subroutine( $subname, $cond ); 1 }) {
@@ -5643,7 +5643,10 @@ sub cmd_L {
     # If no argument, list everything. Pre-5.8.0 version always lists
     # everything
     my $arg = shift || 'abw';
-    $arg = 'abw' unless $CommandSet eq '580';    # sigh...
+    if ($CommandSet ne '580')
+    {
+        $arg = 'abw';
+    }
 
     # See what is wanted.
     my $action_wanted = ( $arg =~ /a/ ) ? 1 : 0;
@@ -6089,7 +6092,9 @@ sub postponed {
     }
 
     # If this is a subroutine, let postponed_sub() deal with it.
-    return postponed_sub(@_) unless ref \$_[0] eq 'GLOB';
+    if (ref(\$_[0]) ne 'GLOB') {
+        return postponed_sub(@_);
+    }
 
     # Not a subroutine. Deal with the file.
     local *dbline = shift;
@@ -8867,7 +8872,7 @@ sub runman {
 
     # this way user can override, like with $doccmd="man -Mwhatever"
     # or even just "man " to disable the path check.
-    unless ( $doccmd eq 'man' ) {
+    if ( $doccmd ne 'man' ) {
         _db_system("$doccmd $page");
         return;
     }
