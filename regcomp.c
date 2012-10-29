@@ -14179,7 +14179,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     if (!ret_x)
 	ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
     else {
-	if (SvPOKp(ret_x)) SvPV_free(ret_x);
+	SvPV_free(ret_x);
 	SvOK_off((SV *)ret_x);
     }
     /* This ensures that SvTHINKFIRST(sv) is true, and hence that
