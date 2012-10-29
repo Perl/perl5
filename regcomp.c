@@ -14183,7 +14183,6 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
     SvFAKE_on(ret_x);
     ret = (struct regexp *)SvANY(ret_x);
     
-    (void)ReREFCNT_inc(rx);
     /* We can take advantage of the existing "copied buffer" mechanism in SVs
        by pointing directly at the buffer, but flagging that the allocated
        space in the copy is zero. As we've just done a struct copy, it's now
@@ -14215,7 +14214,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 #ifdef PERL_OLD_COPY_ON_WRITE
     ret->saved_copy = NULL;
 #endif
-    ret->mother_re = rx;
+    ret->mother_re = ReREFCNT_inc(r->mother_re ? r->mother_re : rx);
     SvREFCNT_inc_void(ret->qr_anoncv);
     
     return ret_x;
@@ -14431,8 +14430,8 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	       2: something we no longer hold a reference on
 	       so we need to copy it locally.  */
 	    /* Note we need to use SvCUR(), rather than
-	       SvLEN(), on our mother_re, because it, in
-	       turn, may well be pointing to its own mother_re.  */
+	       SvLEN(), on our mother_re, because its buffer may not be
+	       the same size as our newly-allocated one.  */
 	    SvPV_set(dstr, SAVEPVN(SvPVX_const(ret->mother_re),
 				   SvCUR(ret->mother_re)+1));
 	    SvLEN_set(dstr, SvCUR(ret->mother_re)+1);
