@@ -5056,40 +5056,46 @@ breakpoint.
 =cut
 
 sub cmd_b_sub {
-    my ( $subname, $cond ) = @_;
-
-    # Add always-true condition if we have none.
-    $cond = 1 unless @_ >= 2;
+    my $subname = shift;
+    my $cond = @_ ? shift : 1;
 
     # If the subname isn't a code reference, qualify it so that
     # break_subroutine() will work right.
     unless ( ref $subname eq 'CODE' ) {
 
-        # Not Perl4.
-        $subname =~ s/\'/::/g;
+        # Not Perl 4.
+        $subname =~ s/'/::/g;
         my $s = $subname;
 
         # Put it in this package unless it's already qualified.
-        $subname = "${package}::" . $subname
-          unless $subname =~ /::/;
+        if ($subname !~ /::/)
+        {
+            $subname = $package . '::' . $subname;
+        };
 
         # Requalify it into CORE::GLOBAL if qualifying it into this
         # package resulted in its not being defined, but only do so
         # if it really is in CORE::GLOBAL.
-        $subname = "CORE::GLOBAL::$s"
-          if not defined &$subname
-          and $s !~ /::/
-          and defined &{"CORE::GLOBAL::$s"};
+        my $core_name = "CORE::GLOBAL::$s";
+        if ((!defined(&$subname))
+                and ($s !~ /::/)
+                and (defined &{$core_name}))
+        {
+            $subname = $core_name;
+        }
 
         # Put it in package 'main' if it has a leading ::.
-        $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
-
+        if ($subname =~ /\A::/)
+        {
+            $subname = "main" . $subname;
+        }
     } ## end unless (ref $subname eq 'CODE')
 
     # Try to set the breakpoint.
     if (not eval { break_subroutine( $subname, $cond ); 1 }) {
         local $\ = '';
-        print $OUT $@ and return;
+        print {$OUT} $@;
+        return;
     }
 
     return;
