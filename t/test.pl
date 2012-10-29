@@ -497,7 +497,10 @@ sub eq_hash {
     # Force a hash recompute if this perl's internals can cache the hash key.
     $key = "" . $key;
     if (exists $orig->{$key}) {
-      if ($orig->{$key} ne $value) {
+      if (
+        defined $orig->{$key} != defined $value
+        || (defined $value && $orig->{$key} ne $value)
+      ) {
         _print "# key ", _qq($key), " was ", _qq($orig->{$key}),
                      " now ", _qq($value), "\n";
         $fail = 1;
