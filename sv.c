@@ -4799,8 +4799,11 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	/* Remember that SvPVX is in the head, not the body. */
 	assert(!SvLEN(sv));
 	/* Their buffer is already owned by someone else. */
-	SvPVX(sv) = savepvn(SvPVX(sv), SvCUR(sv));
-	SvLEN_set(temp, SvCUR(sv)+1);
+	if (flags & SV_COW_DROP_PV) SvPOK_off(sv);
+	else {
+	    SvPVX(sv) = savepvn(SvPVX(sv), SvCUR(sv));
+	    SvLEN_set(temp, SvCUR(sv)+1);
+	}
 
 	/* Now swap the rest of the bodies. */
 
