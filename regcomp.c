@@ -14178,6 +14178,10 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 
     if (!ret_x)
 	ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
+    else {
+	if (SvPOKp(ret_x)) SvPV_free(ret_x);
+	SvOK_off((SV *)ret_x);
+    }
     /* This ensures that SvTHINKFIRST(sv) is true, and hence that
        sv_force_normal(sv) is called.  */
     SvFAKE_on(ret_x);
@@ -14187,7 +14191,6 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
        by pointing directly at the buffer, but flagging that the allocated
        space in the copy is zero. As we've just done a struct copy, it's now
        a case of zero-ing that, rather than copying the current length.  */
-    if (SvPOKp(ret_x)) SvPV_free(ret_x);
     SvPV_set(ret_x, RX_WRAPPED(rx));
     SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
     memcpy(&(ret->xpv_cur), &(r->xpv_cur),

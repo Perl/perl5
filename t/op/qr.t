@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 24);
+plan(tests => 28);
 
 sub r {
     return qr/Good/;
@@ -82,3 +82,17 @@ ok tied $t, 'tied var is still tied after regexp assignment';
 bless \my $t2;
 $t2 = ${qr||};
 is ref \$t2, 'main', 'regexp assignment is not maledictory';
+
+{
+    my $w;
+    local $SIG{__WARN__}=sub{$w=$_[0]};
+    $_ = 1.1;
+    $_ = ${qr//};
+    is 0+$_, 0, 'double upgraded to regexp';
+    like $w, 'numeric', 'produces non-numeric warning';
+    undef $w;
+    $_ = 1;
+    $_ = ${qr//};
+    is 0+$_, 0, 'int upgraded to regexp';
+    like $w, 'numeric', 'likewise produces non-numeric warning';
+}
