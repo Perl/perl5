@@ -4797,17 +4797,10 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	}
 	SvCUR_set(temp, SvCUR(sv));
 	/* Remember that SvPVX is in the head, not the body. */
-	if (SvLEN(temp)) {
-	    SvLEN_set(temp, SvLEN(sv));
-	    /* This signals "buffer is owned by someone else" in sv_clear,
-	       which is the least effort way to stop it freeing the buffer.
-	    */
-	    SvLEN_set(sv, SvLEN(sv)+1);
-	} else {
-	    /* Their buffer is already owned by someone else. */
-	    SvPVX(sv) = savepvn(SvPVX(sv), SvCUR(sv));
-	    SvLEN_set(temp, SvCUR(sv)+1);
-	}
+	assert(!SvLEN(sv));
+	/* Their buffer is already owned by someone else. */
+	SvPVX(sv) = savepvn(SvPVX(sv), SvCUR(sv));
+	SvLEN_set(temp, SvCUR(sv)+1);
 
 	/* Now swap the rest of the bodies. */
 
