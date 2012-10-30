@@ -21,6 +21,15 @@ S_CvDEPTHp(const CV * const sv)
     return &((XPVCV*)SvANY(sv))->xcv_depth;
 }
 
+/* ----------------------------- regexp.h ----------------------------- */
+
+PERL_STATIC_INLINE struct regexp *
+S_ReANY(const REGEXP * const re)
+{
+    assert(isREGEXP(re));
+    return re->sv_u.svu_rx;
+}
+
 /* ------------------------------- sv.h ------------------------------- */
 
 PERL_STATIC_INLINE SV *

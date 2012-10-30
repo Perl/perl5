@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 28);
+plan(tests => 32);
 
 sub r {
     return qr/Good/;
@@ -96,3 +96,17 @@ is ref \$t2, 'main', 'regexp assignment is not maledictory';
     is 0+$_, 0, 'int upgraded to regexp';
     like $w, 'numeric', 'likewise produces non-numeric warning';
 }
+
+sub {
+    $_[0] = ${qr=crumpets=};
+    is ref\$_[0], 'REGEXP', 'PVLVs';
+    # Don’t use like() here, as we would no longer be testing a PVLV.
+    ok " crumpets " =~ $_[0], 'using a regexpvlv as regexp';
+    my $x = $_[0];
+    is ref\$x, 'REGEXP', 'copying a regexpvlv';
+    $_[0] = ${qr//};
+    my $str = "".qr//;
+    $_[0] .= " ";
+    is $_[0], "$str ", 'stringifying regexpvlv in place';
+}
+ ->((\my%hash)->{key});

@@ -1612,7 +1612,10 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
 
     if (type <= SVt_PVLV && !isGV_with_GP(sv)) {
-	if (SvPVX_const(sv)) {
+	const bool re = isREGEXP(sv);
+	const char * const ptr =
+	    re ? RX_WRAPPED((REGEXP*)sv) : SvPVX_const(sv);
+	if (ptr) {
 	    STRLEN delta;
 	    if (SvOOK(sv)) {
 		SvOOK_offset(sv, delta);
@@ -1621,18 +1624,22 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    } else {
 		delta = 0;
 	    }
-	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX_const(sv)));
+	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(ptr));
 	    if (SvOOK(sv)) {
 		PerlIO_printf(file, "( %s . ) ",
-			      pv_display(d, SvPVX_const(sv) - delta, delta, 0,
+			      pv_display(d, ptr - delta, delta, 0,
 					 pvlim));
 	    }
-	    PerlIO_printf(file, "%s", pv_display(d, SvPVX_const(sv), SvCUR(sv), SvLEN(sv), pvlim));
+	    PerlIO_printf(file, "%s", pv_display(d, ptr, SvCUR(sv),
+						 re ? 0 : SvLEN(sv),
+						 pvlim));
 	    if (SvUTF8(sv)) /* the 6?  \x{....} */
 	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 6 * SvCUR(sv), UNI_DISPLAY_QQ));
 	    PerlIO_printf(file, "\n");
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %"IVdf"\n", (IV)SvCUR(sv));
-	    Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n", (IV)SvLEN(sv));
+	    if (!re)
+		Perl_dump_indent(aTHX_ level, file, "  LEN = %"IVdf"\n",
+				       (IV)SvLEN(sv));
 	}
 	else
 	    Perl_dump_indent(aTHX_ level, file, "  PV = 0\n");
@@ -1958,6 +1965,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
 		    dumpops, pvlim);
 	}
+	if (isREGEXP(sv)) goto dumpregexp;
 	if (!isGV_with_GP(sv))
 	    break;
 	Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", GvNAME(sv));
@@ -2026,8 +2034,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = 0x%"UVxf"\n", (UV)IoFLAGS(sv));
 	break;
     case SVt_REGEXP:
+      dumpregexp:
 	{
-	    struct regexp * const r = (struct regexp *)SvANY(sv);
+	    struct regexp * const r = ReANY((REGEXP*)sv);
 	    flags = RX_EXTFLAGS((REGEXP*)sv);
 	    sv_setpv(d,"");
 	    append_flags(d, flags, regexp_flags_names);

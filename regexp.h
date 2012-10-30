@@ -457,76 +457,31 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXp_EXTFLAGS(rx)	((rx)->extflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#define RX_PRECOMP(prog)	(RX_WRAPPED(prog) + ((struct regexp *)SvANY(prog))->pre_prefix)
-#define RX_PRECOMP_const(prog)	(RX_WRAPPED_const(prog) + ((struct regexp *)SvANY(prog))->pre_prefix)
+#define RX_PRECOMP(prog)	(RX_WRAPPED(prog) + ReANY(prog)->pre_prefix)
+#define RX_PRECOMP_const(prog)	(RX_WRAPPED_const(prog) + ReANY(prog)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
-#define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ((struct regexp *)SvANY(prog))->pre_prefix - 1)
-#define RX_WRAPPED(prog)	SvPVX(prog)
-#define RX_WRAPPED_const(prog)	SvPVX_const(prog)
+#define RX_PRELEN(prog)		(RX_WRAPLEN(prog) - ReANY(prog)->pre_prefix - 1)
+#define RX_WRAPPED(prog)	ReANY(prog)->xpv_len_u.xpvlenu_pv
+#define RX_WRAPPED_const(prog)	((const char *)RX_WRAPPED(prog))
 #define RX_WRAPLEN(prog)	SvCUR(prog)
-#define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
+#define RX_CHECK_SUBSTR(prog)	(ReANY(prog)->check_substr)
 #define RX_REFCNT(prog)		SvREFCNT(prog)
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define RX_EXTFLAGS(prog)						\
-    (*({								\
-	const REGEXP *const _rx_extflags = (prog);			\
-	assert(SvTYPE(_rx_extflags) == SVt_REGEXP);			\
-	&RXp_EXTFLAGS(SvANY(_rx_extflags));				\
-    }))
-#  define RX_ENGINE(prog)						\
-    (*({								\
-	const REGEXP *const _rx_engine = (prog);			\
-	assert(SvTYPE(_rx_engine) == SVt_REGEXP);			\
-	&SvANY(_rx_engine)->engine;					\
-    }))
-#  define RX_SUBBEG(prog)						\
-    (*({								\
-	const REGEXP *const _rx_subbeg = (prog);			\
-	assert(SvTYPE(_rx_subbeg) == SVt_REGEXP);			\
-	&SvANY(_rx_subbeg)->subbeg;					\
-    }))
-#  define RX_SUBOFFSET(prog)						\
-    (*({								\
-	const REGEXP *const _rx_suboffset = (prog);			\
-	assert(SvTYPE(_rx_suboffset) == SVt_REGEXP);			\
-	&SvANY(_rx_suboffset)->suboffset;				\
-    }))
-#  define RX_SUBCOFFSET(prog)						\
-    (*({								\
-	const REGEXP *const _rx_subcoffset = (prog);			\
-	assert(SvTYPE(_rx_subcoffset) == SVt_REGEXP);			\
-	&SvANY(_rx_subcoffset)->subcoffset;				\
-    }))
-#  define RX_OFFS(prog)							\
-    (*({								\
-	const REGEXP *const _rx_offs = (prog);				\
-	assert(SvTYPE(_rx_offs) == SVt_REGEXP);				\
-	&SvANY(_rx_offs)->offs;						\
-    }))
-#  define RX_NPARENS(prog)						\
-    (*({								\
-	const REGEXP *const _rx_nparens = (prog);			\
-	assert(SvTYPE(_rx_nparens) == SVt_REGEXP);			\
-	&SvANY(_rx_nparens)->nparens;					\
-    }))
-#else
-#  define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
-#  define RX_ENGINE(prog)	(((struct regexp *)SvANY(prog))->engine)
-#  define RX_SUBBEG(prog)	(((struct regexp *)SvANY(prog))->subbeg)
-#  define RX_SUBOFFSET(prog)	(((struct regexp *)SvANY(prog))->suboffset)
-#  define RX_SUBCOFFSET(prog)	(((struct regexp *)SvANY(prog))->subcoffset)
-#  define RX_OFFS(prog)		(((struct regexp *)SvANY(prog))->offs)
-#  define RX_NPARENS(prog)	(((struct regexp *)SvANY(prog))->nparens)
-#endif
-#define RX_SUBLEN(prog)		(((struct regexp *)SvANY(prog))->sublen)
-#define RX_MINLEN(prog)		(((struct regexp *)SvANY(prog))->minlen)
-#define RX_MINLENRET(prog)	(((struct regexp *)SvANY(prog))->minlenret)
-#define RX_GOFS(prog)		(((struct regexp *)SvANY(prog))->gofs)
-#define RX_LASTPAREN(prog)	(((struct regexp *)SvANY(prog))->lastparen)
-#define RX_LASTCLOSEPAREN(prog)	(((struct regexp *)SvANY(prog))->lastcloseparen)
-#define RX_SAVED_COPY(prog)	(((struct regexp *)SvANY(prog))->saved_copy)
+#define RX_EXTFLAGS(prog)	RXp_EXTFLAGS(ReANY(prog))
+#define RX_ENGINE(prog)		(ReANY(prog)->engine)
+#define RX_SUBBEG(prog)		(ReANY(prog)->subbeg)
+#define RX_SUBOFFSET(prog)	(ReANY(prog)->suboffset)
+#define RX_SUBCOFFSET(prog)	(ReANY(prog)->subcoffset)
+#define RX_OFFS(prog)		(ReANY(prog)->offs)
+#define RX_NPARENS(prog)	(ReANY(prog)->nparens)
+#define RX_SUBLEN(prog)		(ReANY(prog)->sublen)
+#define RX_MINLEN(prog)		(ReANY(prog)->minlen)
+#define RX_MINLENRET(prog)	(ReANY(prog)->minlenret)
+#define RX_GOFS(prog)		(ReANY(prog)->gofs)
+#define RX_LASTPAREN(prog)	(ReANY(prog)->lastparen)
+#define RX_LASTCLOSEPAREN(prog)	(ReANY(prog)->lastcloseparen)
+#define RX_SAVED_COPY(prog)	(ReANY(prog)->saved_copy)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 
@@ -590,6 +545,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
 #  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
 #endif
+#define ReANY(re)		S_ReANY((const REGEXP *)(re))
 
 /* FIXME for plugins. */
 

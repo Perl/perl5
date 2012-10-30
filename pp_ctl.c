@@ -116,7 +116,7 @@ PP(pp_regcomp)
 		pm->op_pmflags |
 		    (PL_op->op_flags & OPf_SPECIAL ? PMf_USE_RE_EVAL : 0));
     if (pm->op_pmflags & PMf_HAS_CV)
-	((struct regexp *)SvANY(new_re))->qr_anoncv
+	ReANY(new_re)->qr_anoncv
 			= (CV*) SvREFCNT_inc(PAD_SV(PL_op->op_targ));
 
     if (is_bare_re) {

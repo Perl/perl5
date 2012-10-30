@@ -4644,7 +4644,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		/* handle the implicit sub{} wrapped round the qr/(?{..})/ */
 		SvREFCNT_inc_simple_void(PL_compcv);
 		cv = newATTRSUB(floor, 0, NULL, NULL, qr);
-		((struct regexp *)SvANY(re))->qr_anoncv = cv;
+		ReANY(re)->qr_anoncv = cv;
 
 		/* attach the anon CV to the pad so that
 		 * pad_fixup_inner_anons() can find it */

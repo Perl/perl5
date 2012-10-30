@@ -586,10 +586,10 @@ struct reg_data {
 #define check_offset_max substrs->data[2].max_offset
 #define check_end_shift substrs->data[2].end_shift
 
-#define RX_ANCHORED_SUBSTR(rx)	(((struct regexp *)SvANY(rx))->anchored_substr)
-#define RX_ANCHORED_UTF8(rx)	(((struct regexp *)SvANY(rx))->anchored_utf8)
-#define RX_FLOAT_SUBSTR(rx)	(((struct regexp *)SvANY(rx))->float_substr)
-#define RX_FLOAT_UTF8(rx)	(((struct regexp *)SvANY(rx))->float_utf8)
+#define RX_ANCHORED_SUBSTR(rx)	(ReANY(rx)->anchored_substr)
+#define RX_ANCHORED_UTF8(rx)	(ReANY(rx)->anchored_utf8)
+#define RX_FLOAT_SUBSTR(rx)	(ReANY(rx)->float_substr)
+#define RX_FLOAT_UTF8(rx)	(ReANY(rx)->float_utf8)
 
 /* trie related stuff */
 

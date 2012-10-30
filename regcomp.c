@@ -5123,7 +5123,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
     /* merge the main (r1) and run-time (r2) code blocks into one */
     {
-	RXi_GET_DECL(((struct regexp*)SvANY(qr)), r2);
+	RXi_GET_DECL(ReANY((REGEXP *)qr), r2);
 	struct reg_code_block *new_block, *dst;
 	RExC_state_t * const r1 = pRExC_state; /* convenient alias */
 	int i1 = 0, i2 = 0;
@@ -5500,7 +5500,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    && RX_ENGINE((REGEXP*)rx)->op_comp)
 		{
 
-		    RXi_GET_DECL(((struct regexp*)SvANY(rx)), ri);
+		    RXi_GET_DECL(ReANY((REGEXP *)rx), ri);
 		    if (ri->num_code_blocks) {
 			int i;
 			/* the presence of an embedded qr// with code means
@@ -5515,7 +5515,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 			for (i=0; i < ri->num_code_blocks; i++) {
 			    struct reg_code_block *src, *dst;
 			    STRLEN offset =  orig_patlen
-				+ ((struct regexp *)SvANY(rx))->pre_prefix;
+				+ ReANY((REGEXP *)rx)->pre_prefix;
 			    assert(n < pRExC_state->num_code_blocks);
 			    src = &ri->code_blocks[i];
 			    dst = &pRExC_state->code_blocks[n];
@@ -5845,7 +5845,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        of zeroing when in debug mode, thus anything assigned has to 
        happen after that */
     rx = (REGEXP*) newSV_type(SVt_REGEXP);
-    r = (struct regexp*)SvANY(rx);
+    r = ReANY(rx);
     Newxc(ri, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp_internal);
     if ( r == NULL || ri == NULL )
@@ -5898,8 +5898,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             + (sizeof(STD_PAT_MODS) - 1)
             + (sizeof("(?:)") - 1);
 
-        p = sv_grow(MUTABLE_SV(rx), wraplen + 1); /* +1 for the ending NUL */
-	SvPOK_on(rx);
+        Newx(p, wraplen + 1, char); /* +1 for the ending NUL */
+	r->xpv_len_u.xpvlenu_pv = p;
 	if (RExC_utf8)
 	    SvFLAGS(rx) |= SVf_UTF8;
         *p++='('; *p++='?';
@@ -5934,7 +5934,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             *p++ = '\n';
         *p++ = ')';
         *p = 0;
-	SvCUR_set(rx, p - SvPVX_const(rx));
+	SvCUR_set(rx, p - RX_WRAPPED(rx));
     }
 
     r->intflags = 0;
@@ -6489,7 +6489,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
 {
     AV *retarray = NULL;
     SV *ret;
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_FETCH;
 
@@ -6529,7 +6529,7 @@ bool
 Perl_reg_named_buff_exists(pTHX_ REGEXP * const r, SV * const key,
                            const U32 flags)
 {
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_EXISTS;
 
@@ -6553,7 +6553,7 @@ Perl_reg_named_buff_exists(pTHX_ REGEXP * const r, SV * const key,
 SV*
 Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const r, const U32 flags)
 {
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_FIRSTKEY;
 
@@ -6569,7 +6569,7 @@ Perl_reg_named_buff_firstkey(pTHX_ REGEXP * const r, const U32 flags)
 SV*
 Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const r, const U32 flags)
 {
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_NEXTKEY;
@@ -6605,7 +6605,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
     SV *ret;
     AV *av;
     I32 length;
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_SCALAR;
 
@@ -6629,7 +6629,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
 SV*
 Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
 {
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
     AV *av = newAV();
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_ALL;
@@ -6665,7 +6665,7 @@ void
 Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
 			     SV * const sv)
 {
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
     char *s = NULL;
     I32 i = 0;
     I32 s1, t1;
@@ -6775,7 +6775,7 @@ I32
 Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
                               const I32 paren)
 {
-    struct regexp *const rx = (struct regexp *)SvANY(r);
+    struct regexp *const rx = ReANY(r);
     I32 i;
     I32 s1, t1;
 
@@ -14077,7 +14077,7 @@ SV *
 Perl_re_intuit_string(pTHX_ REGEXP * const r)
 {				/* Assume that RE_INTUIT is set */
     dVAR;
-    struct regexp *const prog = (struct regexp *)SvANY(r);
+    struct regexp *const prog = ReANY(r);
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_RE_INTUIT_STRING;
@@ -14125,7 +14125,7 @@ void
 Perl_pregfree2(pTHX_ REGEXP *rx)
 {
     dVAR;
-    struct regexp *const r = (struct regexp *)SvANY(rx);
+    struct regexp *const r = ReANY(rx);
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_PREGFREE2;
@@ -14135,6 +14135,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     } else {
         CALLREGFREE_PVT(rx); /* free the private data */
         SvREFCNT_dec(RXp_PAREN_NAMES(r));
+	Safefree(r->xpv_len_u.xpvlenu_pv);
     }        
     if (r->substrs) {
         SvREFCNT_dec(r->anchored_substr);
@@ -14149,6 +14150,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 #endif
     Safefree(r->offs);
     SvREFCNT_dec(r->qr_anoncv);
+    rx->sv_u.svu_rx = 0;
 }
 
 /*  reg_temp_copy()
@@ -14172,30 +14174,42 @@ REGEXP *
 Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 {
     struct regexp *ret;
-    struct regexp *const r = (struct regexp *)SvANY(rx);
+    struct regexp *const r = ReANY(rx);
+    const bool islv = ret_x && SvTYPE(ret_x) == SVt_PVLV;
 
     PERL_ARGS_ASSERT_REG_TEMP_COPY;
 
     if (!ret_x)
 	ret_x = (REGEXP*) newSV_type(SVt_REGEXP);
     else {
-	SvPV_free(ret_x);
 	SvOK_off((SV *)ret_x);
+	if (islv) {
+	    /* For PVLVs, SvANY points to the xpvlv body while sv_u points
+	       to the regexp.  (For SVt_REGEXPs, sv_upgrade has already
+	       made both spots point to the same regexp body.) */
+	    REGEXP *temp = (REGEXP *)newSV_type(SVt_REGEXP);
+	    assert(!SvPVX(ret_x));
+	    ret_x->sv_u.svu_rx = temp->sv_any;
+	    temp->sv_any = NULL;
+	    SvFLAGS(temp) = (SvFLAGS(temp) & ~SVTYPEMASK) | SVt_NULL;
+	    SvREFCNT_dec(temp);
+	    /* SvCUR still resides in the xpvlv struct, so the regexp copy-
+	       ing below will not set it. */
+	    SvCUR_set(ret_x, SvCUR(rx));
+	}
     }
     /* This ensures that SvTHINKFIRST(sv) is true, and hence that
        sv_force_normal(sv) is called.  */
     SvFAKE_on(ret_x);
-    ret = (struct regexp *)SvANY(ret_x);
+    ret = ReANY(ret_x);
     
-    /* We can take advantage of the existing "copied buffer" mechanism in SVs
-       by pointing directly at the buffer, but flagging that the allocated
-       space in the copy is zero. As we've just done a struct copy, it's now
-       a case of zero-ing that, rather than copying the current length.  */
-    SvPV_set(ret_x, RX_WRAPPED(rx));
-    SvFLAGS(ret_x) |= SvFLAGS(rx) & (SVf_POK|SVp_POK|SVf_UTF8);
+    SvFLAGS(ret_x) |= SvUTF8(rx);
+    /* We share the same string buffer as the original regexp, on which we
+       hold a reference count, incremented when mother_re is set below.
+       The string pointer is copied here, being part of the regexp struct.
+     */
     memcpy(&(ret->xpv_cur), &(r->xpv_cur),
 	   sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
-    SvLEN_set(ret_x, 0);
     if (r->offs) {
         const I32 npar = r->nparens+1;
         Newx(ret->offs, npar, regexp_paren_pair);
@@ -14240,7 +14254,7 @@ void
 Perl_regfree_internal(pTHX_ REGEXP * const rx)
 {
     dVAR;
-    struct regexp *const r = (struct regexp *)SvANY(rx);
+    struct regexp *const r = ReANY(rx);
     RXi_GET_DECL(r,ri);
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -14361,8 +14375,8 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 {
     dVAR;
     I32 npar;
-    const struct regexp *r = (const struct regexp *)SvANY(sstr);
-    struct regexp *ret = (struct regexp *)SvANY(dstr);
+    const struct regexp *r = ReANY(sstr);
+    struct regexp *ret = ReANY(dstr);
     
     PERL_ARGS_ASSERT_RE_DUP_GUTS;
 
@@ -14426,21 +14440,14 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
     ret->saved_copy = NULL;
 #endif
 
-    if (ret->mother_re) {
-	if (SvPVX_const(dstr) == SvPVX_const(ret->mother_re)) {
-	    /* Our storage points directly to our mother regexp, but that's
+    /* Whether mother_re be set or no, we need to copy the string.  We
+       cannot refrain from copying it when the storage points directly to
+       our mother regexp, because that's
 	       1: a buffer in a different thread
 	       2: something we no longer hold a reference on
 	       so we need to copy it locally.  */
-	    /* Note we need to use SvCUR(), rather than
-	       SvLEN(), on our mother_re, because its buffer may not be
-	       the same size as our newly-allocated one.  */
-	    SvPV_set(dstr, SAVEPVN(SvPVX_const(ret->mother_re),
-				   SvCUR(ret->mother_re)+1));
-	    SvLEN_set(dstr, SvCUR(ret->mother_re)+1);
-	}
-	ret->mother_re      = NULL;
-    }
+    RX_WRAPPED(dstr) = SAVEPVN(RX_WRAPPED(sstr), SvCUR(sstr)+1);
+    ret->mother_re   = NULL;
     ret->gofs = 0;
 }
 #endif /* PERL_IN_XSUB_RE */
@@ -14463,7 +14470,7 @@ void *
 Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 {
     dVAR;
-    struct regexp *const r = (struct regexp *)SvANY(rx);
+    struct regexp *const r = ReANY(rx);
     regexp_internal *reti;
     int len;
     RXi_GET_DECL(r,ri);

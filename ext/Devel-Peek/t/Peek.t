@@ -333,10 +333,11 @@ do_test('reference to regexp',
   RV = $ADDR
   SV = REGEXP\\($ADDR\\) at $ADDR
     REFCNT = 1
-    FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)
+    FLAGS = \\(OBJECT,POK,FAKE,pPOK\\)		# $] < 5.017006
+    FLAGS = \\(OBJECT,FAKE\\)			# $] >= 5.017006
     PV = $ADDR "\\(\\?\\^:tic\\)"
     CUR = 8
-    LEN = 0
+    LEN = 0					# $] < 5.017006
     STASH = $ADDR\\t"Regexp"'
 . ($] < 5.013 ? '' :
 '

@@ -1205,7 +1205,7 @@ PP(pp_qr)
     SvRV_set(rv, MUTABLE_SV(reg_temp_copy(NULL, rx)));
     SvROK_on(rv);
 
-    cvp = &( ((struct regexp*)SvANY(SvRV(rv)))->qr_anoncv);
+    cvp = &( ReANY((REGEXP *)SvRV(rv))->qr_anoncv);
     if ((cv = *cvp) && CvCLONE(*cvp)) {
 	*cvp = cv_clone(cv);
 	SvREFCNT_dec(cv);
@@ -1258,7 +1258,7 @@ PP(pp_match)
     PUTBACK;				/* EVAL blocks need stack_sp. */
     /* Skip get-magic if this is a qr// clone, because regcomp has
        already done it. */
-    s = ((struct regexp *)SvANY(rx))->mother_re
+    s = ReANY(rx)->mother_re
 	 ? SvPV_nomg_const(TARG, len)
 	 : SvPV_const(TARG, len);
     if (!s)
@@ -1290,7 +1290,7 @@ PP(pp_match)
 
     /* empty pattern special-cased to use last successful pattern if
        possible, except for qr// */
-    if (!((struct regexp *)SvANY(rx))->mother_re && !RX_PRELEN(rx)
+    if (!ReANY(rx)->mother_re && !RX_PRELEN(rx)
      && PL_curpm) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
@@ -2134,7 +2134,7 @@ PP(pp_subst)
 				   second time with non-zero. */
 
     if (!RX_PRELEN(rx) && PL_curpm
-     && !((struct regexp *)SvANY(rx))->mother_re) {
+     && !ReANY(rx)->mother_re) {
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }

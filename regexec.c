@@ -579,7 +579,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 		     char *strend, const U32 flags, re_scream_pos_data *data)
 {
     dVAR;
-    struct regexp *const prog = (struct regexp *)SvANY(rx);
+    struct regexp *const prog = ReANY(rx);
     I32 start_shift = 0;
     /* Should be nonnegative! */
     I32 end_shift   = 0;
@@ -2095,7 +2095,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 
 {
     dVAR;
-    struct regexp *const prog = (struct regexp *)SvANY(rx);
+    struct regexp *const prog = ReANY(rx);
     /*register*/ char *s;
     regnode *c;
     /*register*/ char *startpos = stringarg;
@@ -2796,7 +2796,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     dVAR;
     CHECKPOINT lastcp;
     REGEXP *const rx = reginfo->prog;
-    regexp *const prog = (struct regexp *)SvANY(rx);
+    regexp *const prog = ReANY(rx);
     I32 result;
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
@@ -3538,7 +3538,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     const bool utf8_target = PL_reg_match_utf8;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
     REGEXP *rex_sv = reginfo->prog;
-    regexp *rex = (struct regexp *)SvANY(rex_sv);
+    regexp *rex = ReANY(rex_sv);
     RXi_GET_DECL(rex,rexi);
     I32	oldsave;
     /* the current state. This is a cached copy of PL_regmatch_state */
@@ -4768,7 +4768,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		n = ARG(scan);
 
 		if (rexi->data->what[n] == 'r') { /* code from an external qr */
-		    newcv = ((struct regexp *)SvANY(
+		    newcv = (ReANY(
 						(REGEXP*)(rexi->data->data[n])
 					    ))->qr_anoncv
 					;
@@ -4962,7 +4962,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			 * compiled */
 			S_regcp_restore(aTHX_ rex, runops_cp);
 		    }
-		    re = (struct regexp *)SvANY(re_sv);
+		    re = ReANY(re_sv);
 		}
                 RXp_MATCH_COPIED_off(re);
                 re->subbeg = rex->subbeg;
@@ -5017,7 +5017,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    PL_reg_flags ^= ST.toggle_reg_flags; 
 	    rex_sv = ST.prev_rex;
 	    SET_reg_curpm(rex_sv);
-	    rex = (struct regexp *)SvANY(rex_sv);
+	    rex = ReANY(rex_sv);
 	    rexi = RXi_GET(rex);
 	    regcpblow(ST.cp);
 	    cur_eval = ST.prev_eval;
@@ -5035,7 +5035,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    PL_reg_flags ^= ST.toggle_reg_flags; 
 	    rex_sv = ST.prev_rex;
 	    SET_reg_curpm(rex_sv);
-	    rex = (struct regexp *)SvANY(rex_sv);
+	    rex = ReANY(rex_sv);
 	    rexi = RXi_GET(rex); 
 
 	    REGCP_UNWIND(ST.lastcp);
@@ -6072,7 +6072,7 @@ NULL
 		st->u.eval.cp = regcppush(rex, 0); /* Save *all* the positions. */
 		rex_sv = cur_eval->u.eval.prev_rex;
 		SET_reg_curpm(rex_sv);
-		rex = (struct regexp *)SvANY(rex_sv);
+		rex = ReANY(rex_sv);
 		rexi = RXi_GET(rex);
 		cur_curlyx = cur_eval->u.eval.prev_curlyx;
 

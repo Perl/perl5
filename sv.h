@@ -183,6 +183,7 @@ typedef struct hek HEK;
 	IV      svu_iv;			\
 	UV      svu_uv;			\
 	SV*     svu_rv;		/* pointer to another SV */		\
+	struct regexp* svu_rx;		\
 	SV**    svu_array;		\
 	HE**	svu_hash;		\
 	GP*	svu_gp;			\
@@ -444,7 +445,12 @@ perform the upgrade if necessary.  See C<svtype>.
     HV*		xmg_stash;	/* class package */			\
     union _xmgu	xmg_u;							\
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */    \
-    STRLEN	xpv_len 	/* allocated size */
+    union {								\
+	STRLEN	xpvlenu_len; 	/* allocated size */			\
+	char *	xpvlenu_pv;	/* regexp string */			\
+    } xpv_len_u	
+
+#define xpv_len	xpv_len_u.xpvlenu_len
 
 union _xnvu {
     NV	    xnv_nv;		/* numeric value, if any */
@@ -783,8 +789,10 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
 #define SvOK(sv)		((SvTYPE(sv) == SVt_BIND)		\
-				 ? (SvFLAGS(SvRV(sv)) & SVf_OK)		\
-				 : (SvFLAGS(sv) & SVf_OK))
+				 ? (SvFLAGS(SvRV(sv)) & SVf_OK		\
+					|| isREGEXP(SvRV(sv)))		\
+				 : (SvFLAGS(sv) & SVf_OK		\
+					 || isREGEXP(sv)))
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\
@@ -1146,7 +1154,8 @@ sv_force_normal does nothing.
 	 }))
 #    define SvCUR(sv)							\
 	(*({ const SV *const _svcur = (const SV *)(sv);			\
-	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
+	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]	\
+		|| SvTYPE(_svcur) == SVt_REGEXP);			\
 	    assert(!isGV_with_GP(_svcur));				\
 	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
 		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
@@ -1278,7 +1287,8 @@ sv_force_normal does nothing.
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { \
-		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
+		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]	\
+			|| SvTYPE(sv) == SVt_REGEXP);	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
@@ -2041,6 +2051,10 @@ See also C<PL_sv_yes> and C<PL_sv_no>.
 	assert (!SvIOKp(sv));					       \
 	(SvFLAGS(sv) &= ~SVpgv_GP);				       \
     } STMT_END
+#define isREGEXP(sv) \
+    (SvTYPE(sv) == SVt_REGEXP				      \
+     || (SvFLAGS(sv) & (SVTYPEMASK|SVp_POK|SVpgv_GP|SVf_FAKE)) \
+	 == (SVt_PVLV|SVf_FAKE))
 
 
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))

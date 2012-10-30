@@ -1510,20 +1510,37 @@ PV(sv)
 	       5.15 and later store the BM table via MAGIC, so the compiler
 	       should handle this just fine without changes if PVBM now
 	       always returns the SvPVX() buffer.  */
+#ifdef isREGEXP
+	    p = isREGEXP(sv)
+		 ? RX_WRAPPED_const((REGEXP*)sv)
+		 : SvPVX_const(sv);
+#else
 	    p = SvPVX_const(sv);
+#endif
 #ifdef PERL_FBM_TABLE_OFFSET
 	    len = SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0);
 #else
 	    len = SvCUR(sv);
 #endif
 	} else if (ix) {
+#ifdef isREGEXP
+	    p = isREGEXP(sv) ? RX_WRAPPED((REGEXP*)sv) : SvPVX(sv);
+#else
 	    p = SvPVX(sv);
+#endif
 	    len = strlen(p);
 	} else if (SvPOK(sv)) {
 	    len = SvCUR(sv);
 	    p = SvPVX_const(sv);
 	    utf8 = SvUTF8(sv);
         }
+#ifdef isREGEXP
+	else if (isREGEXP(sv)) {
+	    len = SvCUR(sv);
+	    p = RX_WRAPPED_const((REGEXP*)sv);
+	    utf8 = SvUTF8(sv);
+	}
+#endif
         else {
             /* XXX for backward compatibility, but should fail */
             /* croak( "argument is not SvPOK" ); */
