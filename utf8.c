@@ -383,8 +383,6 @@ Perl_is_utf8_string(const U8 *s, STRLEN len)
 	 if (UTF8_IS_INVARIANT(*x)) {
 	    x++;
 	 }
-	 else if (!UTF8_IS_START(*x))
-	     return FALSE;
 	 else {
 	      /* ... and call is_utf8_char() only if really needed. */
 	     const STRLEN c = UTF8SKIP(x);
@@ -447,8 +445,6 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
 	 if (UTF8_IS_INVARIANT(*x))
 	     next_char_ptr = x + 1;
-	 else if (!UTF8_IS_START(*x))
-	     goto out;
 	 else {
 	     /* ... and call is_utf8_char() only if really needed. */
 	     c = UTF8SKIP(x);
