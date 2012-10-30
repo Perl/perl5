@@ -7383,8 +7383,8 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
      * And benchmarks show that caching gives better results.  We also test
      * here if the code point is within the bounds of the list.  These tests
      * replace others that would have had to be made anyway to make sure that
-     * the array bounds were not exceeded, and give us extra information at the
-     * same time */
+     * the array bounds were not exceeded, and these give us extra information
+     * at the same time */
     if (cp >= array[mid]) {
         if (cp >= array[highest_element]) {
             return highest_element;
