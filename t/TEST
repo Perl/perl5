@@ -2,7 +2,7 @@
 
 # This is written in a peculiar style, since we're trying to avoid
 # most of the constructs we'll be testing for.  (This comment is
-# probably obsolete on the avoidance side, though still currrent
+# probably obsolete on the avoidance side, though still current
 # on the peculiarity side.)
 
 # t/TEST and t/harness need to share code. The logical way to do this would be
@@ -24,7 +24,7 @@ my %dir_to_switch =
      );
 
 # "not absolute" is the the default, as it saves some fakery within TestInit
-# which can peturb tests, and takes CPU. Working with the upstream author of
+# which can perturb tests, and takes CPU. Working with the upstream author of
 # any of these, to figure out how to remove them from this list, considered
 # "a good thing".
 my %abs = (
@@ -548,7 +548,7 @@ EOT
 	    # in BEGIN/END blocks (giving better visibility of self vs
 	    # children of each testprog), but that would require some
 	    # IPC to send results back here, or a completely different
-	    # collection scheme (Storable isnt tuned for incremental use)
+	    # collection scheme (Storable isn't tuned for incremental use)
 	    @starttimes = times;
 	}
 	if ($test =~ /^$/) {
