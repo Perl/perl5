@@ -2860,6 +2860,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	if (!method) {	/* demand load utf8 */
 	    ENTER;
 	    errsv_save = newSVsv(ERRSV);
+	    SAVEFREESV(errsv_save);
 	    /* It is assumed that callers of this routine are not passing in
 	     * any user derived data.  */
 	    /* Need to do this after save_re_context() as it will set
@@ -2872,7 +2873,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 			     NULL);
 	    if (!SvTRUE(ERRSV))
 		sv_setsv(ERRSV, errsv_save);
-	    SvREFCNT_dec(errsv_save);
 	    LEAVE;
 	}
 	SPAGAIN;
@@ -2885,6 +2885,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	mPUSHi(none);
 	PUTBACK;
 	errsv_save = newSVsv(ERRSV);
+	SAVEFREESV(errsv_save);
 	/* If we already have a pointer to the method, no need to use
 	 * call_method() to repeat the lookup.  */
 	if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
@@ -2895,7 +2896,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	}
 	if (!SvTRUE(ERRSV))
 	    sv_setsv(ERRSV, errsv_save);
-	SvREFCNT_dec(errsv_save);
 	LEAVE;
 	POPSTACK;
 	if (IN_PERL_COMPILETIME) {
