@@ -329,18 +329,24 @@ sub _pessimise_walk {
 
 	if ($ppname eq "padrange") {
 	    # remove PADRANGE:
-	    # the original optimisation changed this:
+	    # the original optimisation either (1) changed this:
 	    #    pushmark -> (various pad and list and null ops) -> the_rest
+	    # or (2), for the = @_ case, changed this:
+	    #    pushmark -> gv[_] -> rv2av -> (pad stuff)       -> the_rest
 	    # into this:
 	    #    padrange ----------------------------------------> the_rest
 	    # so we just need to convert the padrange back into a
-	    # pushmark, and set its op_next to op_sibling, which is the
-	    # head of the original chain of optimised-away pad ops.
+	    # pushmark, and in case (1), set its op_next to op_sibling,
+	    # which is the head of the original chain of optimised-away
+	    # pad ops, or for (2), set it to sibling->first, which is
+	    # the original gv[_].
 
 	    $B::overlay->{$$op} = {
 		    name => 'pushmark',
 		    private => ($op->private & OPpLVAL_INTRO),
-		    next    => $op->sibling,
+		    next    => ($op->flags & OPf_SPECIAL)
+				    ? $op->sibling->first
+				    : $op->sibling,
 	    };
 	}
 

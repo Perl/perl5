@@ -1365,3 +1365,6 @@ $a x= $b;
 @e = ($a, $b) x $d;
 @e = ($a, $b, $c) x $d;
 @e = ($a, 1) x $d;
+####
+# @_ with padrange
+my($a, $b, $c) = @_;

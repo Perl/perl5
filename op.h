@@ -140,6 +140,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    - Before ck_glob, called as CORE::glob
 				    - After ck_glob, use Perl glob function
 			         */
+                                /*  On OP_PADRANGE, push @_ */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

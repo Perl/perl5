@@ -10943,16 +10943,48 @@ Perl_rpeep(pTHX_ register OP *o)
             U8 intro = 0;
             PADOFFSET base = 0; /* init only to stop compiler whining */
             U8 gimme       = 0; /* init only to stop compiler whining */
+            bool defav = 0;  /* seen (...) = @_ */
 
-            /* To allow Deparse to pessimise this, it needs to be able
-             * to restore the pushmark's original op_next, which it
-             * will assume to be the same as op_sibling. */
-            if (o->op_next != o->op_sibling)
-                break;
+            /* look for a pushmark -> gv[_] -> rv2av */
+
+            {
+                GV *gv;
+                OP *rv2av, *q;
+                p = o->op_next;
+                if (   p->op_type == OP_GV
+                    && (gv = cGVOPx_gv(p))
+                    && GvNAMELEN_get(gv) == 1
+                    && *GvNAME_get(gv) == '_'
+                    && GvSTASH(gv) == PL_defstash
+                    && (rv2av = p->op_next)
+                    && rv2av->op_type == OP_RV2AV
+                    && !(rv2av->op_flags & OPf_REF)
+                    && !(rv2av->op_private & (OPpLVAL_INTRO|OPpMAYBE_LVSUB))
+                    && ((rv2av->op_flags & OPf_WANT) == OPf_WANT_LIST)
+                    && o->op_sibling == rv2av /* these two for Deparse */
+                    && cUNOPx(rv2av)->op_first == p
+                ) {
+                    q = rv2av->op_next;
+                    if (q->op_type == OP_NULL)
+                        q = q->op_next;
+                    if (q->op_type == OP_PUSHMARK) {
+                        defav = 1;
+                        p = q;
+                    }
+                }
+            }
+            if (!defav) {
+                /* To allow Deparse to pessimise this, it needs to be able
+                 * to restore the pushmark's original op_next, which it
+                 * will assume to be the same as op_sibling. */
+                if (o->op_next != o->op_sibling)
+                    break;
+                p = o;
+            }
 
             /* scan for PAD ops */
 
-            for (p = o->op_next; p; p = p->op_next) {
+            for (p = p->op_next; p; p = p->op_next) {
                 if (p->op_type == OP_NULL)
                     continue;
 
@@ -11052,7 +11084,8 @@ Perl_rpeep(pTHX_ register OP *o)
             o->op_targ = base;
             /* bit 7: INTRO; bit 6..0: count */
             o->op_private = (intro | count);
-            o->op_flags = ((o->op_flags & ~OPf_WANT) | gimme);
+            o->op_flags = ((o->op_flags & ~(OPf_WANT|OPf_SPECIAL))
+                                | gimme | (defav ? OPf_SPECIAL : 0));
 
             break;
         }
