@@ -5129,7 +5129,10 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	int i1 = 0, i2 = 0;
 
 	if (!r2->num_code_blocks) /* we guessed wrong */
+	{
+	    SvREFCNT_dec(qr);
 	    return 1;
+	}
 
 	Newx(new_block,
 	    r1->num_code_blocks + r2->num_code_blocks,
