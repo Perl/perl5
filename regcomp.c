@@ -5870,7 +5870,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	ri->num_code_blocks = pRExC_state->num_code_blocks;
     }
     else
+    {
+	int n;
+	for (n = 0; n < pRExC_state->num_code_blocks; n++)
+	    if (pRExC_state->code_blocks[n].src_regex)
+		SAVEFREESV(pRExC_state->code_blocks[n].src_regex);
 	SAVEFREEPV(pRExC_state->code_blocks);
+    }
 
     {
         bool has_p     = ((r->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);

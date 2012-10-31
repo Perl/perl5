@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 40;
+plan tests => 42;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -286,7 +286,8 @@ leak(2, 0, sub {
 
 # Run-time regexp code blocks
 {
-    my @tests = ('[(?{})]');
+    use re 'eval';
+    my @tests = ('[(?{})]','(?{})');
     for my $t (@tests) {
 	leak(2, 0, sub {
 	    / $t/;
