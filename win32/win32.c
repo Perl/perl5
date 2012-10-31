@@ -924,7 +924,6 @@ win32_readdir(DIR *dirp)
 	/* Now set up for the next call to readdir */
 	dirp->curr += len + 1;
 	if (dirp->curr >= dirp->end) {
-	    dTHX;
 	    BOOL res;
 	    char buffer[MAX_PATH*2];
 
@@ -1847,13 +1846,12 @@ win32_getenv(const char *name)
 DllExport int
 win32_putenv(const char *name)
 {
-    dTHX;
     char* curitem;
     char* val;
     int relval = -1;
 
     if (name) {
-        Newx(curitem,strlen(name)+1,char);
+        curitem = (char *) win32_malloc(strlen(name)+1);
         strcpy(curitem, name);
         val = strchr(curitem, '=');
         if (val) {
@@ -1877,7 +1875,7 @@ win32_putenv(const char *name)
             if (SetEnvironmentVariableA(curitem, *val ? val : NULL))
                 relval = 0;
         }
-        Safefree(curitem);
+        win32_free(curitem);
     }
     return relval;
 }
@@ -2596,10 +2594,11 @@ win32_strerror(int e)
 #endif
 
     if (e < 0 || e > sys_nerr) {
-        dTHX;
+        dTHXa(NULL);
 	if (e < 0)
 	    e = GetLastError();
 
+	aTHXa(PERL_GET_THX);
 	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
                          |FORMAT_MESSAGE_IGNORE_INSERTS, NULL, e, 0,
 			  w32_strerror_buffer, sizeof(w32_strerror_buffer),
@@ -2847,7 +2846,6 @@ win32_rewind(FILE *pf)
 DllExport int
 win32_tmpfd(void)
 {
-    dTHX;
     char prefix[MAX_PATH+1];
     char filename[MAX_PATH+1];
     DWORD len = GetTempPath(MAX_PATH, prefix);
@@ -2925,7 +2923,6 @@ win32_popen(const char *command, const char *mode)
 #ifdef USE_RTL_POPEN
     return _popen(command, mode);
 #else
-    dTHX;
     int p[2];
     int parent, child;
     int stdfd, oldfd;
@@ -3357,7 +3354,6 @@ win32_chmod(const char *path, int mode)
 static char *
 create_command_line(char *cname, STRLEN clen, const char * const *args)
 {
-    dTHX;
     int index, argc;
     char *cmd, *ptr;
     const char *arg;
@@ -3636,7 +3632,6 @@ win32_clearenv(void)
 DllExport char*
 win32_get_childdir(void)
 {
-    dTHX;
     char* ptr;
     char szfilename[MAX_PATH+1];
 
@@ -3649,7 +3644,6 @@ win32_get_childdir(void)
 DllExport void
 win32_free_childdir(char* d)
 {
-    dTHX;
     Safefree(d);
 }
 
@@ -3671,7 +3665,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 #ifdef USE_RTL_SPAWNVP
     return spawnvp(mode, cmdname, (char * const *)argv);
 #else
-    dTHX;
+    dTHXa(NULL);
     int ret;
     void* env;
     char* dir;
@@ -3704,6 +3698,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 
     cmd = create_command_line(cname, clen, argv);
 
+    aTHXa(PERL_GET_THX);
     env = PerlEnv_get_childenv();
     dir = PerlEnv_get_childdir();
 

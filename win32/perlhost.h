@@ -1807,8 +1807,8 @@ restart:
 int
 PerlProcFork(struct IPerlProc* piPerl)
 {
-    dTHX;
 #ifdef USE_ITHREADS
+    dTHX;
     DWORD id;
     HANDLE handle;
     CPerlHost *h;

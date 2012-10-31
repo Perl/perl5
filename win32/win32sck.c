@@ -551,7 +551,6 @@ win32_getservbyport(int port, const char *proto)
 int
 win32_ioctl(int i, unsigned int u, char *data)
 {
-    dTHX;
     u_long u_long_arg; 
     int retval;
     

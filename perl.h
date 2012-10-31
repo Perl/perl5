@@ -172,6 +172,7 @@
 #  define tTHX	PerlInterpreter*
 #  define pTHX  register tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
+#  define aTHXa(a) aTHX = (tTHX)a
 #  ifdef PERL_GLOBAL_STRUCT
 #    define dTHXa(a)	dVAR; pTHX = (tTHX)a
 #  else
@@ -364,6 +365,7 @@
 #  define pTHX_
 #  define aTHX
 #  define aTHX_
+#  define aTHXa(a)      NOOP
 #  define dTHXa(a)	dNOOP
 #  define dTHX		dNOOP
 #  define pTHX_1	1	
