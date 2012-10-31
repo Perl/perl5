@@ -78,6 +78,17 @@ sub is_deprecated {
     return $deprecated{$perl_version}{$module};
 }
 
+sub deprecated_in {
+    my $module = shift;
+    $module = shift if eval { $module->isa(__PACKAGE__) }
+      and scalar @_ and $_[0] =~ m#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z#;
+    return unless $module;
+    my @perls = grep { exists $deprecated{$_}{$module} } keys %deprecated;
+    return unless @perls;
+    require List::Util;
+    return List::Util::min(@perls);
+}
+
 sub removed_from {
   my @perls = &removed_raw;
   return shift @perls;

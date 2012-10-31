@@ -124,6 +124,7 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 use warnings;
+use List::Util qw/maxstr/;
 
 my %Opts;
 
@@ -275,16 +276,21 @@ sub module_version {
 	? Module::CoreList->removed_from_by_date($mod)
 	: Module::CoreList->removed_from($mod);
 
+	my $when = maxstr(values %Module::CoreList::released);
+    print "\n","Data for $when\n";
+
     if( defined $ret ) {
+        my $deprecated = Module::CoreList->deprecated_in($mod);
         $msg .= " was ";
         $msg .= "first " unless $ver;
         $msg .= "released with perl " . format_perl_version($ret);
+        $msg .= ( $rem ? ',' : ' and' ) . " deprecated in " . format_perl_version($deprecated) if $deprecated;
         $msg .= " and removed from " . format_perl_version($rem) if $rem;
     } else {
         $msg .= " was not in CORE (or so I think)";
     }
 
-    print "\n",$msg,"\n";
+    print $msg,"\n";
 
     if(defined $ret and exists $Opts{a} and $Opts{a}){
         display_a($mod);
