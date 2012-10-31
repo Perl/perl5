@@ -107,6 +107,10 @@ XXX
 
 L<CPAN> has been upgraded from version 1.98 to 1.99_51.
 
+=item *
+
+L<DynaLoader> has been upgraded from version 1.16 to 1.17.
+
 =back
 
 =head2 Removed Modules and Pragmata
