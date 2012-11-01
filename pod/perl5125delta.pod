@@ -22,6 +22,11 @@ XXX Any important notices here
 
 =head1 Security
 
+=head2 C<Encode> decode_xs n-byte heap-overflow (CVE-2011-2939)
+
+A bug in C<Encode> could, on certain inputs, cause the heap to overflow.
+This problem has been corrected.  Bug reported by Robert Zacek.
+
 =head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
 
 Calling C<File::Glob::bsd_glob> with the unsupported flag GLOB_ALTDIRFUNC would 
@@ -88,6 +93,10 @@ L<B::Concise> no longer produces mangled output with the B<-tree> option
 A regression introduced in Perl 5.8.8 has been fixed, that caused
 C<charnames::viacode(0)> to return C<undef> instead of the string "NULL"
 [perl #72624].
+
+=head3 L<Encode> has been upgraded from version 2.39 to version 2.39_01.
+
+See L</Security>.
 
 =head3 L<File::Glob> has been upgraded from version 1.07 to version 1.07_01.
 
