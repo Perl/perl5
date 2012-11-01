@@ -5289,6 +5289,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 minlen = 0;
     U32 rx_flags;
     SV * VOL pat;
+    SV * VOL code_blocksv = NULL;
 
     /* these are all flags - maybe they should be turned
      * into a single int with different bit masks */
@@ -5808,11 +5809,23 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         RExC_lastnum=0;
         RExC_lastparse=NULL;
     );
+    /* reg may croak on us, not giving us a chance to free
+       pRExC_state->code_blocks.  We cannot SAVEFREEPV it now, as we may
+       need it to survive as long as the regexp (qr/(?{})/).
+       We must check that code_blocksv is not already set, because we may
+       have longjmped back. */
+    if (pRExC_state->code_blocks && !code_blocksv) {
+	code_blocksv = newSV_type(SVt_PV);
+	SAVEFREESV(code_blocksv);
+	SvPV_set(code_blocksv, (char *)pRExC_state->code_blocks);
+	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
+    }
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	RExC_precomp = NULL;
-	Safefree(pRExC_state->code_blocks);
 	return(NULL);
     }
+    if (code_blocksv)
+	SvLEN_set(code_blocksv,0); /* no you can't have it, sv_clear */
 
     /* Here, finished first pass.  Get rid of any added setjmp */
     if (used_setjump) {
