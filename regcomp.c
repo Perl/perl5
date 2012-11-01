@@ -5005,7 +5005,7 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state, OP *expr,
  *
  * becomes
  *
- *    qr'a\\bc                       def\'ghi\\\\jkl(?{"this is runtime"})mno'
+ *    qr'a\\bc_______________________def\'ghi\\\\jkl(?{"this is runtime"})mno'
  *
  * After eval_sv()-ing that, grab any new code blocks from the returned qr
  * and merge them with any code blocks of the original regexp.
@@ -5058,7 +5058,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 		/* blank out literal code block */
 		assert(pat[s] == '(');
 		while (s <= pRExC_state->code_blocks[n].end) {
-		    *p++ = ' ';
+		    *p++ = '_';
 		    s++;
 		}
 		s--;
