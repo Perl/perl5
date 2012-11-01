@@ -2654,9 +2654,28 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
     PERL_ARGS_ASSERT_GET_AND_CHECK_BACKSLASH_N_NAME;
 
-    res = new_constant( NULL, 0, "charnames",
-                        /* includes all of: \N{...} */
-                        res, NULL, s - 3, e - s + 4 );
+    if (UTF && ! is_utf8_string_loc((U8 *) backslash_ptr,
+                                     e - backslash_ptr,
+                                     &first_bad_char_loc))
+    {
+        /* If warnings are on, this will print a more detailed analysis of what
+         * is wrong than the error message below */
+        utf8n_to_uvuni(first_bad_char_loc,
+                       e - ((char *) first_bad_char_loc),
+                       NULL, 0);
+
+        /* We deliberately don't try to print the malformed character, which
+         * might not print very well; it also may be just the first of many
+         * malformations, so don't print what comes after it */
+        yyerror(Perl_form(aTHX_
+            "Malformed UTF-8 character immediately after '%.*s'",
+            (int) (first_bad_char_loc - (U8 *) backslash_ptr), backslash_ptr));
+	return NULL;
+    }
+
+    res = new_constant( NULL, 0, "charnames", res, NULL, backslash_ptr,
+                        /* include the <}> */
+                        e - backslash_ptr + 1);
     if (! SvPOK(res)) {
         return NULL;
     }
@@ -8931,7 +8950,8 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 /* Either returns sv, or mortalizes sv and returns a new SV*.
    Best used as sv=new_constant(..., sv, ...).
    If s, pv are NULL, calls subroutine with one argument,
-   and type is used with error messages only. */
+   and <type> is used with error messages only.
+   <type> is assumed to be well formed UTF-8 */
 
 STATIC SV *
 S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
