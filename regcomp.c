@@ -5096,7 +5096,10 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	qr_ref = POPs;
 	PUTBACK;
 	if (SvTRUE(ERRSV))
+	{
+	    Safefree(pRExC_state->code_blocks);
 	    Perl_croak(aTHX_ "%s", SvPVx_nolen_const(ERRSV));
+	}
 	assert(SvROK(qr_ref));
 	qr = SvRV(qr_ref);
 	assert(SvTYPE(qr) == SVt_REGEXP && RX_ENGINE((REGEXP*)qr)->op_comp);
