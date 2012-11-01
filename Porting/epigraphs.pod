@@ -17,6 +17,29 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.16.2 - Stanislaw Lem, The Cyberiad, Trurl's Machine
+
+L<Announced on 2012-11-01 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-11/msg00017.html>
+
+Once upon a time Trurl the constructor built an eight-story thinking
+machine.  When it was finished, he gave it a coat of white paint,
+trimmed the edges in lavender, stepped back, squinted, then added a
+little curlicue on the front and, where one might imagine the forehead
+to be, a few pale orange polkadots.  Extremely pleased with himself,
+he whistled an air and, as is always done on suh occasions, asked it
+the ritual question of how much is two plus two.
+
+The machine stirred.  Its tubes began to glow, its coils warmed up,
+current coursed through all its circuits like a waterfall,
+transformers hummed and throbbed, there was a clanging, and a
+chugging, and such an ungodly racket that Trurl began to think of
+adding a special mentation muffler.  Meanwhile the machine labored on,
+as if it had been given the most difficult problem in the Universe to
+solve; the ground shook, the sand slid underfoot from the vibration,
+valves popped like champagne corks, the relays nearly gave way under
+the strain.  At last, when Trurl had grown extremely impatient, the
+machine ground to a halt and said in a voice like thunder: SEVEN!
+
 =head2 v5.17.5 - Charles Stross, "Singularity Sky"
 
 L<Announced on 2012-10-20 by Florian Ragwitz|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-10/msg01007.html>
