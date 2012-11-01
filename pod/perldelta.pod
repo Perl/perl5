@@ -83,12 +83,7 @@ Etheridge, Karl Williamson, Peter Martini, Ricardo Signes, Tony Cook.
 The list above is almost certainly incomplete as it is automatically
 generated from version control history. In particular, it does not
 include the names of the (very much appreciated) contributors who
-reported issues to the Perl bug
-tracker.
-
-Many of the changes included in this version originated in the CPAN
-modules included in Perl's core. We're grateful to the entire CPAN
-community for helping Perl to flourish.
+reported issues to the Perl bug tracker.
 
 For a more complete list of all of Perl's historical contributors,
 please see the F<AUTHORS> file in the Perl source distribution.
