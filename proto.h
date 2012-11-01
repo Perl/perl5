@@ -5227,17 +5227,14 @@ PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
 #endif
 #if defined(MYSWAP)
 PERL_CALLCONV long	Perl_my_htonl(pTHX_ long l)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV long	Perl_my_ntohl(pTHX_ long l)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV short	Perl_my_swap(pTHX_ short s)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
