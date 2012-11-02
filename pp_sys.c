@@ -1515,7 +1515,6 @@ PP(pp_prtf)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     PerlIO *fp;
-    SV *sv = NULL;
 
     GV * const gv
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
@@ -1554,7 +1553,7 @@ PP(pp_prtf)
 	goto just_say_no;
     }
     else {
-	sv = newSV(0);
+	SV *sv = sv_newmortal();
 	do_sprintf(sv, SP - MARK, MARK + 1);
 	if (!do_print(sv, fp))
 	    goto just_say_no;
@@ -1563,13 +1562,11 @@ PP(pp_prtf)
 	    if (PerlIO_flush(fp) == EOF)
 		goto just_say_no;
     }
-    SvREFCNT_dec(sv);
     SP = ORIGMARK;
     PUSHs(&PL_sv_yes);
     RETURN;
 
   just_say_no:
-    SvREFCNT_dec(sv);
     SP = ORIGMARK;
     PUSHs(&PL_sv_undef);
     RETURN;

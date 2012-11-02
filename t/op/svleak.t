@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 44;
+plan tests => 45;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -308,5 +308,9 @@ leak(2, 0, sub {
     leak(2, 0, sub {
 	eval { printf uNopened 42 };
     }, 'printfing to bad handle under fatal warnings does not leak');
-    
+    open my $fh, ">", \my $buf;
+    leak(2, 0, sub {
+	eval { printf $fh chr 2455 };
+    }, 'wide fatal warning does not make printf leak');
+    close $fh or die $!;
 }
