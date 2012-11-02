@@ -10790,6 +10790,7 @@ Perl_rpeep(pTHX_ register OP *o)
 {
     dVAR;
     OP* oldop = NULL;
+    OP* oldoldop = NULL;
     OP* defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;
@@ -11053,7 +11054,7 @@ Perl_rpeep(pTHX_ register OP *o)
             if (count < 1)
                 break;
 
-            /* op_padrange in specifically compile-time void context
+            /* pp_padrange in specifically compile-time void context
              * skips pushing a mark and lexicals; in all other contexts
              * (including unknown till runtime) it pushes a mark and the
              * lexicals. We must be very careful then, that the ops we
@@ -11072,7 +11073,32 @@ Perl_rpeep(pTHX_ register OP *o)
                         && gimme == (followop->op_flags & OPf_WANT)
                         && (   followop->op_next->op_type == OP_NEXTSTATE
                             || followop->op_next->op_type == OP_DBSTATE))
+                {
                     followop = followop->op_next; /* skip OP_LIST */
+
+                    /* consolidate two successive my(...);'s */
+                    if (   oldoldop
+                        && oldoldop->op_type == OP_PADRANGE
+                        && (oldoldop->op_flags & OPf_WANT) == OPf_WANT_VOID
+                        && (oldoldop->op_private & OPpLVAL_INTRO) == intro
+                    ) {
+                        U8 old_count;
+                        assert(oldoldop->op_next == oldop);
+                        assert(   oldop->op_type == OP_NEXTSTATE
+                               || oldop->op_type == OP_DBSTATE);
+                        assert(oldop->op_next == o);
+
+                        old_count
+                            = (oldoldop->op_private & OPpPADRANGE_COUNTMASK);
+                        assert(oldoldop->op_targ + old_count == base);
+
+                        if (old_count < OPpPADRANGE_COUNTMASK - count) {
+                            oldoldop->op_private = (intro | (old_count+count));
+                            oldoldop->op_next = followop;
+                            break;
+                        }
+                    }
+                }
                 else
                     break;
             }
@@ -11446,6 +11472,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	}
 	    
 	}
+	oldoldop = oldop;
 	oldop = o;
     }
     LEAVE;

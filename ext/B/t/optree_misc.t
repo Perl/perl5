@@ -10,7 +10,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests => 12;
+plan tests => 14;
 
 SKIP: {
 skip "no perlio in this build", 4 unless $Config::Config{useperlio};
@@ -329,5 +329,42 @@ EOT_EOT
 # -              <0> padsv[$e:3,4] lRM*/LVINTRO ->-
 # -              <0> padsv[$f:3,4] lRM*/LVINTRO ->-
 EONT_EONT
+
+checkOptree ( name      => 'consolidate padranges',
+	      code	=> sub { my ($a,$b); my ($c,$d); 1 },
+	      strip_open_hints => 1,
+	      skip	=> ($] < 5.017006),
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 900 optree_misc.t:334) v ->2
+# -        <@> list vKP ->-
+# 2           <0> padrange[$a:900,902; $b:900,902; $c:901,902; $d:901,902] vM/LVINTRO,4 ->3
+# -           <0> padsv[$a:900,902] vM/LVINTRO ->-
+# -           <0> padsv[$b:900,902] vM/LVINTRO ->-
+# -        <;> nextstate(main 901 optree_misc.t:334) v ->-
+# -        <@> list vKP ->3
+# -           <0> pushmark vM/LVINTRO ->-
+# -           <0> padsv[$c:901,902] vM/LVINTRO ->-
+# -           <0> padsv[$d:901,902] vM/LVINTRO ->-
+# 3        <;> nextstate(main 902 optree_misc.t:334) v:{ ->4
+# 4        <$> const[IV 1] s ->5
+EOT_EOT
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 900 optree_misc.t:334) v ->2
+# -        <@> list vKP ->-
+# 2           <0> padrange[$a:900,902; $b:900,902; $c:901,902; $d:901,902] vM/LVINTRO,4 ->3
+# -           <0> padsv[$a:900,902] vM/LVINTRO ->-
+# -           <0> padsv[$b:900,902] vM/LVINTRO ->-
+# -        <;> nextstate(main 901 optree_misc.t:334) v ->-
+# -        <@> list vKP ->3
+# -           <0> pushmark vM/LVINTRO ->-
+# -           <0> padsv[$c:901,902] vM/LVINTRO ->-
+# -           <0> padsv[$d:901,902] vM/LVINTRO ->-
+# 3        <;> nextstate(main 902 optree_misc.t:334) v:{ ->4
+# 4        <$> const(IV 1) s ->5
+EONT_EONT
+
 
 unlink $tmpfile;
