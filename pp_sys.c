@@ -1515,7 +1515,7 @@ PP(pp_prtf)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     PerlIO *fp;
-    SV *sv;
+    SV *sv = NULL;
 
     GV * const gv
 	= (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
@@ -1540,7 +1540,6 @@ PP(pp_prtf)
 	}
     }
 
-    sv = newSV(0);
     if (!io) {
 	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
@@ -1555,6 +1554,7 @@ PP(pp_prtf)
 	goto just_say_no;
     }
     else {
+	sv = newSV(0);
 	do_sprintf(sv, SP - MARK, MARK + 1);
 	if (!do_print(sv, fp))
 	    goto just_say_no;
