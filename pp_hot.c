@@ -273,8 +273,8 @@ PP(pp_concat)
 		report_uninit(right);
 	    sv_setpvs(left, "");
 	}
-	lbyte = (SvROK(left) && SvTYPE(SvRV(left)) == SVt_REGEXP)
-		    ?  !DO_UTF8(SvRV(left)) : !DO_UTF8(left);
+	SvPV_force_nomg_nolen(left);
+	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
 	    SvUTF8_off(TARG);
     }
