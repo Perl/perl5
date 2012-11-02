@@ -39,7 +39,7 @@ my $null = devnull();
 unless (defined $tag_to_compare) {
     # Thanks to David Golden for this suggestion.
 
-    $tag_to_compare = `git describe --abbrev=0`;
+    $tag_to_compare = `git describe --abbrev=0 2>$null`;
     chomp $tag_to_compare;
 }
 
