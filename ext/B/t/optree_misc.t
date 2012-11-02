@@ -10,7 +10,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests => 14;
+plan tests => 16;
 
 SKIP: {
 skip "no perlio in this build", 4 unless $Config::Config{useperlio};
@@ -363,6 +363,70 @@ EOT_EOT
 # -           <0> padsv[$c:901,902] vM/LVINTRO ->-
 # -           <0> padsv[$d:901,902] vM/LVINTRO ->-
 # 3        <;> nextstate(main 902 optree_misc.t:334) v:{ ->4
+# 4        <$> const(IV 1) s ->5
+EONT_EONT
+
+
+checkOptree ( name      => 'consolidate padranges and singletons',
+	      code	=> sub { my ($a,$b); my $c; my ($d,$e);
+				 my @f; my $g; my ($h,$i); my %j; 1 },
+	      strip_open_hints => 1,
+	      skip	=> ($] < 5.017006),
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 903 optree_misc.t:371) v ->2
+# -        <@> list vKP ->-
+# 2           <0> padrange[$a:903,910; $b:903,910; $c:904,910; $d:905,910; $e:905,910; @f:906,910; $g:907,910; $h:908,910; $i:908,910; %j:909,910] vM/LVINTRO,10 ->3
+# -           <0> padsv[$a:903,910] vM/LVINTRO ->-
+# -           <0> padsv[$b:903,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 904 optree_misc.t:371) v ->-
+# -        <0> padsv[$c:904,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 905 optree_misc.t:371) v:{ ->-
+# -        <@> list vKP ->-
+# -           <0> pushmark vM/LVINTRO ->-
+# -           <0> padsv[$d:905,910] vM/LVINTRO ->-
+# -           <0> padsv[$e:905,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 906 optree_misc.t:372) v:{ ->-
+# -        <0> padav[@f:906,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 907 optree_misc.t:372) v:{ ->-
+# -        <0> padsv[$g:907,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 908 optree_misc.t:372) v:{ ->-
+# -        <@> list vKP ->-
+# -           <0> pushmark vM/LVINTRO ->-
+# -           <0> padsv[$h:908,910] vM/LVINTRO ->-
+# -           <0> padsv[$i:908,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 909 optree_misc.t:372) v:{ ->-
+# -        <0> padhv[%j:909,910] vM/LVINTRO ->3
+# 3        <;> nextstate(main 910 optree_misc.t:372) v:{ ->4
+# 4        <$> const[IV 1] s ->5
+EOT_EOT
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 903 optree_misc.t:371) v ->2
+# -        <@> list vKP ->-
+# 2           <0> padrange[$a:903,910; $b:903,910; $c:904,910; $d:905,910; $e:905,910; @f:906,910; $g:907,910; $h:908,910; $i:908,910; %j:909,910] vM/LVINTRO,10 ->3
+# -           <0> padsv[$a:903,910] vM/LVINTRO ->-
+# -           <0> padsv[$b:903,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 904 optree_misc.t:371) v ->-
+# -        <0> padsv[$c:904,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 905 optree_misc.t:371) v:{ ->-
+# -        <@> list vKP ->-
+# -           <0> pushmark vM/LVINTRO ->-
+# -           <0> padsv[$d:905,910] vM/LVINTRO ->-
+# -           <0> padsv[$e:905,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 906 optree_misc.t:372) v:{ ->-
+# -        <0> padav[@f:906,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 907 optree_misc.t:372) v:{ ->-
+# -        <0> padsv[$g:907,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 908 optree_misc.t:372) v:{ ->-
+# -        <@> list vKP ->-
+# -           <0> pushmark vM/LVINTRO ->-
+# -           <0> padsv[$h:908,910] vM/LVINTRO ->-
+# -           <0> padsv[$i:908,910] vM/LVINTRO ->-
+# -        <;> nextstate(main 909 optree_misc.t:372) v:{ ->-
+# -        <0> padhv[%j:909,910] vM/LVINTRO ->3
+# 3        <;> nextstate(main 910 optree_misc.t:372) v:{ ->4
 # 4        <$> const(IV 1) s ->5
 EONT_EONT
 

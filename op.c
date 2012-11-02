@@ -10945,6 +10945,7 @@ Perl_rpeep(pTHX_ register OP *o)
             PADOFFSET base = 0; /* init only to stop compiler whining */
             U8 gimme       = 0; /* init only to stop compiler whining */
             bool defav = 0;  /* seen (...) = @_ */
+            bool reuse = 0;  /* reuse an existing padrange op */
 
             /* look for a pushmark -> gv[_] -> rv2av */
 
@@ -11077,10 +11078,12 @@ Perl_rpeep(pTHX_ register OP *o)
                     followop = followop->op_next; /* skip OP_LIST */
 
                     /* consolidate two successive my(...);'s */
+
                     if (   oldoldop
                         && oldoldop->op_type == OP_PADRANGE
                         && (oldoldop->op_flags & OPf_WANT) == OPf_WANT_VOID
                         && (oldoldop->op_private & OPpLVAL_INTRO) == intro
+                        && !(oldoldop->op_flags & OPf_SPECIAL)
                     ) {
                         U8 old_count;
                         assert(oldoldop->op_next == oldop);
@@ -11093,26 +11096,62 @@ Perl_rpeep(pTHX_ register OP *o)
                         assert(oldoldop->op_targ + old_count == base);
 
                         if (old_count < OPpPADRANGE_COUNTMASK - count) {
-                            oldoldop->op_private = (intro | (old_count+count));
-                            oldoldop->op_next = followop;
-                            break;
+                            base = oldoldop->op_targ;
+                            count += old_count;
+                            reuse = 1;
                         }
+                    }
+
+                    /* if there's any immediately following singleton
+                     * my var's; then swallow them and the associated
+                     * nextstates; i.e.
+                     *    my ($a,$b); my $c; my $d;
+                     * is treated as
+                     *    my ($a,$b,$c,$d);
+                     */
+
+                    while (    ((p = followop->op_next))
+                            && (  p->op_type == OP_PADSV
+                               || p->op_type == OP_PADAV
+                               || p->op_type == OP_PADHV)
+                            && (p->op_flags & OPf_WANT) == OPf_WANT_VOID
+                            && (p->op_private & OPpLVAL_INTRO) == intro
+                            && p->op_next
+                            && (   p->op_next->op_type == OP_NEXTSTATE
+                                || p->op_next->op_type == OP_DBSTATE)
+                            && count < OPpPADRANGE_COUNTMASK
+                    ) {
+                        assert(base + count == p->op_targ);
+                        count++;
+                        followop = p->op_next;
                     }
                 }
                 else
                     break;
             }
 
-            /* Convert the pushmark into a padrange */
-            o->op_next = followop;
-            o->op_type = OP_PADRANGE;
-            o->op_ppaddr = PL_ppaddr[OP_PADRANGE];
-            o->op_targ = base;
-            /* bit 7: INTRO; bit 6..0: count */
-            o->op_private = (intro | count);
-            o->op_flags = ((o->op_flags & ~(OPf_WANT|OPf_SPECIAL))
-                                | gimme | (defav ? OPf_SPECIAL : 0));
-
+            if (reuse) {
+                assert(oldoldop->op_type == OP_PADRANGE);
+                oldoldop->op_next = followop;
+                oldoldop->op_private = (intro | count);
+                o = oldoldop;
+                oldop = NULL;
+                oldoldop = NULL;
+            }
+            else {
+                /* Convert the pushmark into a padrange.
+                 * To make Deparse easier, we guarantee that a padrange was
+                 * *always* formerly a pushmark */
+                assert(o->op_type == OP_PUSHMARK);
+                o->op_next = followop;
+                o->op_type = OP_PADRANGE;
+                o->op_ppaddr = PL_ppaddr[OP_PADRANGE];
+                o->op_targ = base;
+                /* bit 7: INTRO; bit 6..0: count */
+                o->op_private = (intro | count);
+                o->op_flags = ((o->op_flags & ~(OPf_WANT|OPf_SPECIAL))
+                                    | gimme | (defav ? OPf_SPECIAL : 0));
+            }
             break;
         }
 
