@@ -308,6 +308,7 @@ leak(2, 0, sub {
 {
     use warnings FATAL => 'all';
     leak(2, 0, sub {
+	no warnings 'once';
 	eval { printf uNopened 42 };
     }, 'printfing to bad handle under fatal warnings does not leak');
     open my $fh, ">", \my $buf;
