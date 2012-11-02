@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 45;
+plan tests => 46;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -173,7 +173,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "disabled under -Dmad (eval leaks)", 5 if $Config{mad};
+    skip "disabled under -Dmad (eval leaks)", 6 if $Config{mad};
     leak(2, 0, sub { eval '"${<<END}"
                  ' }, 'unterminated here-doc in quotes in multiline eval');
     leak(2, 0, sub { eval '"${<<END
@@ -182,6 +182,8 @@ SKIP: {
         'unterminated here-doc in file');
     leak(2, 0, sub { eval 'tr/9-0//' }, 'tr/9-0//');
     leak(2, 0, sub { eval 'tr/a-z-0//' }, 'tr/a-z-0//');
+    leak(2, 0, sub { eval 'no warnings; nonexistent_function 33838' },
+        'bareword followed by number');
 }
 
 # [perl #114764] Attributes leak scalars
