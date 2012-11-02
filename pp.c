@@ -5080,6 +5080,7 @@ PP(pp_push)
 	SPAGAIN;
     }
     else {
+	if (SvREADONLY(ary) && MARK < SP) Perl_croak_no_modify(aTHX);
 	PL_delaymagic = DM_DELAY;
 	for (++MARK; MARK <= SP; MARK++) {
 	    SV *sv;

@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 42;
+plan tests => 43;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -282,6 +282,10 @@ leak(2, 0, sub {
     my @a;
     eval { push @a, $die_on_fetch };
 }, 'pushing exploding scalar does not leak');
+
+leak(2, 0, sub {
+    eval { push @-, '' };
+}, 'pushing onto read-only array does not leak');
 
 
 # Run-time regexp code blocks
