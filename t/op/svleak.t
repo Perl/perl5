@@ -307,12 +307,13 @@ leak(2, 0, sub {
 # Run-time regexp code blocks
 {
     use re 'eval';
+    my $madness = !!$Config{mad};
     my @tests = ('[(?{})]','(?{})');
     for my $t (@tests) {
-	leak(2, 0, sub {
+	leak(2, $madness, sub {
 	    / $t/;
 	}, "/ \$x/ where \$x is $t does not leak");
-	leak(2, 0, sub {
+	leak(2, $madness, sub {
 	    /(?{})$t/;
 	}, "/(?{})\$x/ where \$x is $t does not leak");
     }
