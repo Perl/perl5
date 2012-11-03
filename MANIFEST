@@ -4815,6 +4815,7 @@ Porting/git-make-p4-refs	Output git refs for each p4 change number, suitable for
 Porting/GitUtils.pm		Generate the contents of a .patch file
 Porting/Glossary		Glossary of config.sh variables
 Porting/how_to_write_a_perldelta.pod	Bluffer's guide to writing a perldelta.
+Porting/leakfinder.pl		Hacky script for finding memory leaks
 Porting/Maintainers		Program to pretty print info in Maintainers.pl
 Porting/Maintainers.pl		Information about maintainers
 Porting/Maintainers.pm		Library to pretty print info in Maintainers.pl
