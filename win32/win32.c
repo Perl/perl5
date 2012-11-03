@@ -1005,7 +1005,6 @@ win32_rewinddir(DIR *dirp)
 DllExport int
 win32_closedir(DIR *dirp)
 {
-    dTHX;
     if (dirp->handle != INVALID_HANDLE_VALUE)
 	FindClose(dirp->handle);
     Safefree(dirp->start);
@@ -2711,7 +2710,6 @@ win32_fopen(const char *filename, const char *mode)
 DllExport FILE *
 win32_fdopen(int handle, const char *mode)
 {
-    dTHX;
     FILE *f;
     f = fdopen(handle, (char *) mode);
     /* avoid buffering headaches for child processes */
@@ -3328,7 +3326,6 @@ win32_rmdir(const char *dir)
 DllExport int
 win32_chdir(const char *dir)
 {
-    dTHX;
     if (!dir) {
 	errno = ENOENT;
 	return -1;
@@ -4370,7 +4367,6 @@ Perl_win32_init(int *argcp, char ***argvp)
 void
 Perl_win32_term(void)
 {
-    dTHX;
     HINTS_REFCNT_TERM;
     OP_REFCNT_TERM;
     PERLIO_TERM;

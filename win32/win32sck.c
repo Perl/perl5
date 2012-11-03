@@ -63,7 +63,6 @@ EndSockets(void)
 void
 start_sockets(void) 
 {
-    dTHX;
     unsigned short version;
     WSADATA retdata;
     int ret;

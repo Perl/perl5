@@ -2176,7 +2176,6 @@ compare(const void *arg1, const void *arg2)
 void
 CPerlHost::Add(LPCSTR lpStr)
 {
-    dTHX;
     char szBuffer[1024];
     LPSTR *lpPtr;
     int index, length = strlen(lpStr)+1;
@@ -2223,14 +2222,12 @@ CPerlHost::CalculateEnvironmentSpace(void)
 void
 CPerlHost::FreeLocalEnvironmentStrings(LPSTR lpStr)
 {
-    dTHX;
     Safefree(lpStr);
 }
 
 char*
 CPerlHost::GetChildDir(void)
 {
-    dTHX;
     char* ptr;
     size_t length;
 
@@ -2247,14 +2244,12 @@ CPerlHost::GetChildDir(void)
 void
 CPerlHost::FreeChildDir(char* pStr)
 {
-    dTHX;
     Safefree(pStr);
 }
 
 LPSTR
 CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 {
-    dTHX;
     LPSTR lpStr, lpPtr, lpEnvPtr, lpTmp, lpLocalEnv, lpAllocPtr;
     DWORD dwSize, dwEnvIndex;
     int nLength, compVal;
@@ -2344,7 +2339,6 @@ CPerlHost::CreateLocalEnvironmentStrings(VDir &vDir)
 void
 CPerlHost::Reset(void)
 {
-    dTHX;
     if(m_lppEnvList != NULL) {
 	for(DWORD index = 0; index < m_dwEnvCount; ++index) {
 	    Free(m_lppEnvList[index]);
@@ -2359,7 +2353,6 @@ CPerlHost::Reset(void)
 void
 CPerlHost::Clearenv(void)
 {
-    dTHX;
     char ch;
     LPSTR lpPtr, lpStr, lpEnvPtr;
     if (m_lppEnvList != NULL) {
@@ -2399,7 +2392,6 @@ CPerlHost::Clearenv(void)
 char*
 CPerlHost::Getenv(const char *varname)
 {
-    dTHX;
     if (!m_bTopLevel) {
 	char *pEnv = Find(varname);
 	if (pEnv && *pEnv)
@@ -2411,7 +2403,6 @@ CPerlHost::Getenv(const char *varname)
 int
 CPerlHost::Putenv(const char *envstring)
 {
-    dTHX;
     Add(envstring);
     if (m_bTopLevel)
 	return win32_putenv(envstring);
@@ -2422,7 +2413,6 @@ CPerlHost::Putenv(const char *envstring)
 int
 CPerlHost::Chdir(const char *dirname)
 {
-    dTHX;
     int ret;
     if (!dirname) {
 	errno = ENOENT;

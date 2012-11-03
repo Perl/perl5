@@ -197,9 +197,8 @@ void VMem::Free(void* pMem)
         if (ptr->owner != this) {
 	    if (ptr->owner) {
 #if 1
-		dTHX;
 	    	int *nowhere = NULL;
-	    	Perl_warn(aTHX_ "Free to wrong pool %p not %p",this,ptr->owner);
+	    	Perl_warn_nocontext("Free to wrong pool %p not %p",this,ptr->owner);
             	*nowhere = 0; /* this segfault is deliberate, 
             	                 so you can see the stack trace */
 #else
