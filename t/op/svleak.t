@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 49;
+plan tests => 50;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -332,3 +332,6 @@ leak(2, 0, sub {
     }, 'wide fatal warning does not make printf leak');
     close $fh or die $!;
 }
+
+
+leak(2,0,sub{eval{require untohunothu}}, 'requiring nonexistent module');
