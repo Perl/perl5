@@ -72,6 +72,11 @@ See L</Security>.
 The documentation for the C<upper> function now actually says "upper", not
 "lower".
 
+=head3 L<Module::CoreList>
+
+L<Module::CoreList> has been updated to version 2.50_01 to add data for
+this release.
+
 =head1 Changes to Existing Documentation
 
 =head2 L<perlebcdic>
