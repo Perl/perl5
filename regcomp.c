@@ -12398,6 +12398,7 @@ parseit:
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
         SvREFCNT_dec(multi_char_matches);
+        SvREFCNT_dec(listsv);
         return ret;
     }
 
@@ -12583,6 +12584,7 @@ parseit:
             RExC_parse = (char *) cur_parse;
 
             SvREFCNT_dec(listsv);
+            SvREFCNT_dec(cp_list);
             return ret;
         }
     }

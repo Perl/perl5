@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 46;
+plan tests => 48;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -30,6 +30,15 @@ sub leak {
 	$sv0 = $sv1 if $i == 1;
     }
     cmp_ok($sv1-$sv0, '<=', ($n-1)*$delta, @rest);
+}
+
+# Like leak, but run a string eval instead; takes into account existing
+# string eval leaks under -Dmad.  The code is used instead of the test name
+# if the name is absent.
+sub eleak {
+    my ($n,$delta,$code,@rest) = @_;
+    leak $n, $delta + !!$Config{mad}, sub { eval $code },
+         @rest ? @rest : $code
 }
 
 # run some expression N times. The expr is concatenated N times and then
@@ -160,6 +169,9 @@ leak(2, 0,
         my $tag = $+{tag};
     }, "named regexp captures");
 }
+
+eleak(2,0,'/[:]/');
+eleak(2,0,'/[\xdf]/i');
 
 leak(2,0,sub { !$^V }, '[perl #109762] version object in boolean context');
 
