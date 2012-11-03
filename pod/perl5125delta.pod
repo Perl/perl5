@@ -107,6 +107,10 @@ This document has been corrected to take non-ASCII platforms into account.
 There have been configuration and test fixes to make Perl build cleanly on
 Lion and Mountain Lion.
 
+=item NetBSD
+
+The NetBSD hints file was corrected to be compatible with NetBSD 6.*
+
 =back
 
 =head1 Selected Bug Fixes
@@ -175,18 +179,18 @@ that release's L<perl5120delta>.
 
 =head1 Acknowledgements
 
-Perl 5.12.5 represents approximately 16 months of development since Perl 5.12.4
-and contains approximately 2,000 lines of changes across 62 files from 17
+Perl 5.12.5 represents approximately 17 months of development since Perl 5.12.4
+and contains approximately 1,900 lines of changes across 64 files from 18
 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.12.5:
 
-Andy Dougherty, Craig A. Berry, David Mitchell, Dominic Hargreaves, Father
-Chrysostomos, Florian Ragwitz, George Greer, Goro Fuji, Jesse Vincent, Karl
-Williamson, Leon Brocard, Nicholas Clark, Rafael Garcia-Suarez, Reini Urban,
-Ricardo Signes, Steve Hay, Tony Cook.
+Andy Dougherty, Chris 'BinGOs' Williams, Craig A. Berry, David Mitchell,
+Dominic Hargreaves, Father Chrysostomos, Florian Ragwitz, George Greer, Goro
+Fuji, Jesse Vincent, Karl Williamson, Leon Brocard, Nicholas Clark, Rafael
+Garcia-Suarez, Reini Urban, Ricardo Signes, Steve Hay, Tony Cook.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history. In particular, it does not include the names of
