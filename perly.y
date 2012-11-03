@@ -280,12 +280,14 @@ labfullstmt:	LABEL barestmt
                                         savepv(SvPVX(((SVOP*)$1)->op_sv)), $2);
 			  TOKEN_GETMAD($1,
 			      $2 ? cLISTOPx($$)->op_first : $$, 'L');
+			  op_free((OP*)$1);
 			}
 	|	LABEL labfullstmt
 			{
 			  $$ = newSTATEOP(SvUTF8(((SVOP*)$1)->op_sv),
                                         savepv(SvPVX(((SVOP*)$1)->op_sv)), $2);
 			  TOKEN_GETMAD($1, cLISTOPx($$)->op_first, 'L');
+			  op_free((OP*)$1);
 			}
 	;
 

@@ -181,31 +181,31 @@ static const yytype_uint16 yyrline[] =
 {
        0,   141,   141,   140,   150,   149,   159,   158,   171,   170,
      183,   182,   195,   194,   206,   216,   226,   229,   239,   244,
-     245,   255,   256,   265,   273,   277,   284,   293,   295,   300,
-     318,   317,   367,   383,   382,   399,   408,   417,   428,   430,
-     432,   442,   452,   473,   482,   491,   500,   507,   506,   523,
-     529,   539,   563,   564,   569,   571,   573,   577,   581,   585,
-     589,   594,   600,   601,   607,   621,   622,   631,   637,   638,
-     643,   646,   650,   655,   659,   663,   667,   668,   672,   678,
-     683,   688,   689,   694,   695,   700,   701,   705,   715,   719,
-     729,   730,   740,   744,   748,   752,   756,   766,   775,   779,
-     784,   791,   800,   806,   812,   820,   824,   831,   830,   841,
-     842,   846,   855,   860,   868,   875,   882,   892,   901,   908,
-     917,   924,   930,   937,   942,   952,   956,   960,   966,   970,
-     974,   978,   982,   986,   990,  1002,  1006,  1010,  1014,  1024,
-    1028,  1035,  1039,  1043,  1048,  1053,  1058,  1067,  1072,  1077,
-    1083,  1089,  1100,  1104,  1108,  1120,  1133,  1141,  1153,  1154,
-    1155,  1156,  1157,  1162,  1166,  1168,  1172,  1177,  1179,  1184,
-    1186,  1188,  1190,  1192,  1194,  1196,  1205,  1216,  1218,  1220,
-    1225,  1238,  1243,  1248,  1252,  1256,  1260,  1264,  1268,  1272,
-    1276,  1278,  1281,  1285,  1291,  1293,  1298,  1301,  1310,  1317,
-    1316,  1332,  1333,  1334,  1340,  1344,  1352,  1359,  1364,  1369,
-    1371,  1373,  1378,  1380,  1385,  1386,  1392,  1396,  1402,  1408,
-    1414,  1420,  1426,  1433,  1435,  1437,  1440
+     245,   255,   256,   265,   273,   277,   285,   295,   297,   302,
+     320,   319,   369,   385,   384,   401,   410,   419,   430,   432,
+     434,   444,   454,   475,   484,   493,   502,   509,   508,   525,
+     531,   541,   565,   566,   571,   573,   575,   579,   583,   587,
+     591,   596,   602,   603,   609,   623,   624,   633,   639,   640,
+     645,   648,   652,   657,   661,   665,   669,   670,   674,   680,
+     685,   690,   691,   696,   697,   702,   703,   707,   717,   721,
+     731,   732,   742,   746,   750,   754,   758,   768,   777,   781,
+     786,   793,   802,   808,   814,   822,   826,   833,   832,   843,
+     844,   848,   857,   862,   870,   877,   884,   894,   903,   910,
+     919,   926,   932,   939,   944,   954,   958,   962,   968,   972,
+     976,   980,   984,   988,   992,  1004,  1008,  1012,  1016,  1026,
+    1030,  1037,  1041,  1045,  1050,  1055,  1060,  1069,  1074,  1079,
+    1085,  1091,  1102,  1106,  1110,  1122,  1135,  1143,  1155,  1156,
+    1157,  1158,  1159,  1164,  1168,  1170,  1174,  1179,  1181,  1186,
+    1188,  1190,  1192,  1194,  1196,  1198,  1207,  1218,  1220,  1222,
+    1227,  1240,  1245,  1250,  1254,  1258,  1262,  1266,  1270,  1274,
+    1278,  1280,  1283,  1287,  1293,  1295,  1300,  1303,  1312,  1319,
+    1318,  1334,  1335,  1336,  1342,  1346,  1354,  1361,  1366,  1371,
+    1373,  1375,  1380,  1382,  1387,  1388,  1394,  1398,  1404,  1410,
+    1416,  1422,  1428,  1435,  1437,  1439,  1442
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 0
+#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
 /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
    First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
 static const char *const yytname[] =
@@ -224,17 +224,17 @@ static const char *const yytname[] =
   "ANDOP", "NOTOP", "','", "ASSIGNOP", "'?'", "':'", "DORDOR", "OROR",
   "ANDAND", "BITOROP", "BITANDOP", "SHIFTOP", "MATCHOP", "'!'", "'~'",
   "REFGEN", "UMINUS", "POWOP", "POSTDEC", "POSTINC", "PREDEC", "PREINC",
-  "ARROW", "')'", "'('", "PEG", "$accept", "grammar", "$@1", "$@2", "$@3",
-  "$@4", "$@5", "$@6", "block", "formblock", "remember", "mblock",
+  "ARROW", "')'", "'('", "PEG", "$accept", "grammar", "@1", "@2", "@3",
+  "@4", "@5", "@6", "block", "formblock", "remember", "mblock",
   "mremember", "stmtseq", "formstmtseq", "fullstmt", "labfullstmt",
-  "barestmt", "$@7", "$@8", "$@9", "formline", "formarg", "sideff", "else",
+  "barestmt", "@7", "@8", "@9", "formline", "formarg", "sideff", "else",
   "cont", "mintro", "nexpr", "texpr", "iexpr", "mexpr", "mnexpr", "miexpr",
   "formname", "startsub", "startanonsub", "startformsub", "subname",
   "proto", "subattrlist", "myattrlist", "subbody", "expr", "listexpr",
   "listop", "@10", "method", "subscripted", "termbinop", "termunop",
   "anonymous", "termdo", "term", "@11", "myattrterm", "myterm",
   "optlistexpr", "optexpr", "my_scalar", "amper", "scalar", "ary", "hsh",
-  "arylen", "star", "indirob", YY_NULL
+  "arylen", "star", "indirob", 0
 };
 #endif
 
@@ -313,8 +313,8 @@ static const yytype_uint8 yyr2[] =
        2,     2,     2,     1,     1,     1,     1
 };
 
-/* YYDEFACT[STATE-NAME] -- Default reduction number in state STATE-NUM.
-   Performed when YYTABLE doesn't specify something else to do.  Zero
+/* YYDEFACT[STATE-NAME] -- Default rule to reduce with in state
+   STATE-NUM when YYTABLE doesn't specify something else to do.  Zero
    means the default is an error.  */
 static const yytype_uint8 yydefact[] =
 {
@@ -445,7 +445,8 @@ static const yytype_int16 yypgoto[] =
 
 /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule which
-   number is the opposite.  If YYTABLE_NINF, syntax error.  */
+   number is the opposite.  If zero, do what YYDEFACT says.
+   If YYTABLE_NINF, syntax error.  */
 #define YYTABLE_NINF -202
 static const yytype_int16 yytable[] =
 {
@@ -742,12 +743,6 @@ static const yytype_int16 yytable[] =
      180,     0,     0,     0,     0,   181,   182,   183,     0,     0,
      184
 };
-
-#define yypact_value_is_default(yystate) \
-  ((yystate) == (-391))
-
-#define yytable_value_is_error(yytable_value) \
-  ((yytable_value) == (-202))
 
 static const yytype_int16 yycheck[] =
 {
@@ -1132,6 +1127,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * ab4cdcf44477d03652bf8c6c7ecfb5ee121b7d02357d9eb1000b62b17fba1627 perly.y
+ * f140f4bf4565d188246d4b85b0baf052281eeed1824a5697fcb811727a34da08 perly.y
  * 73288b53f1f6dc0183252a5a8e4f39cfe36e357e77233704fad3021fee88eb5b regen_perly.pl
  * ex: set ro: */

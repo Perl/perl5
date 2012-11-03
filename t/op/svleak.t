@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 48;
+plan tests => 49;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -200,6 +200,8 @@ SKIP: {
 
 # [perl #114764] Attributes leak scalars
 leak(2, 0, sub { eval 'my $x : shared' }, 'my $x :shared used to leak');
+
+eleak(2, 0, 'ref: 1', 'labels');
 
 # Tied hash iteration was leaking if the hash was freed before itera-
 # tion was over.
