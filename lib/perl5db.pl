@@ -7728,9 +7728,11 @@ sub LineInfo {
         # If this is a pipe, the stream points to a slave editor.
         $slave_editor = ( $stream =~ /^\|/ );
 
+        my $new_lineinfo_fh;
         # Open it up and unbuffer it.
-        open( LINEINFO, $stream ) || _db_warn("Cannot open '$stream' for write");
-        $LINEINFO = \*LINEINFO;
+        open ($new_lineinfo_fh , $stream )
+            or _db_warn("Cannot open '$stream' for write");
+        $LINEINFO = $new_lineinfo_fh;
         $LINEINFO->autoflush(1);
     }
 
