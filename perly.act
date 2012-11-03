@@ -190,21 +190,21 @@ case 2:
   case 25:
 #line 278 "perly.y"
     {
-			  (yyval.opval) = newSTATEOP(SvUTF8(((SVOP*)(ps[(1) - (2)].val.p_tkval))->op_sv),
-                                        savepv(SvPVX(((SVOP*)(ps[(1) - (2)].val.p_tkval))->op_sv)), (ps[(2) - (2)].val.opval));
+			  (yyval.opval) = newSTATEOP(SVf_UTF8
+					   * PVAL((ps[(1) - (2)].val.p_tkval))[strlen(PVAL((ps[(1) - (2)].val.p_tkval)))+1],
+					  PVAL((ps[(1) - (2)].val.p_tkval)), (ps[(2) - (2)].val.opval));
 			  TOKEN_GETMAD((ps[(1) - (2)].val.p_tkval),
 			      (ps[(2) - (2)].val.opval) ? cLISTOPx((yyval.opval))->op_first : (yyval.opval), 'L');
-			  op_free((OP*)(ps[(1) - (2)].val.p_tkval));
 			;}
     break;
 
   case 26:
 #line 286 "perly.y"
     {
-			  (yyval.opval) = newSTATEOP(SvUTF8(((SVOP*)(ps[(1) - (2)].val.p_tkval))->op_sv),
-                                        savepv(SvPVX(((SVOP*)(ps[(1) - (2)].val.p_tkval))->op_sv)), (ps[(2) - (2)].val.opval));
+			  (yyval.opval) = newSTATEOP(SVf_UTF8
+					   * PVAL((ps[(1) - (2)].val.p_tkval))[strlen(PVAL((ps[(1) - (2)].val.p_tkval)))+1],
+					  PVAL((ps[(1) - (2)].val.p_tkval)), (ps[(2) - (2)].val.opval));
 			  TOKEN_GETMAD((ps[(1) - (2)].val.p_tkval), cLISTOPx((yyval.opval))->op_first, 'L');
-			  op_free((OP*)(ps[(1) - (2)].val.p_tkval));
 			;}
     break;
 
@@ -1781,6 +1781,6 @@ case 2:
     
 
 /* Generated from:
- * f140f4bf4565d188246d4b85b0baf052281eeed1824a5697fcb811727a34da08 perly.y
+ * 28c2c7738eefc00762e227af0363c729186c992e9127e0c935684cccbf3a3b4f perly.y
  * 73288b53f1f6dc0183252a5a8e4f39cfe36e357e77233704fad3021fee88eb5b regen_perly.pl
  * ex: set ro: */

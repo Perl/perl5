@@ -276,18 +276,18 @@ fullstmt:	barestmt
 
 labfullstmt:	LABEL barestmt
 			{
-			  $$ = newSTATEOP(SvUTF8(((SVOP*)$1)->op_sv),
-                                        savepv(SvPVX(((SVOP*)$1)->op_sv)), $2);
+			  $$ = newSTATEOP(SVf_UTF8
+					   * PVAL($1)[strlen(PVAL($1))+1],
+					  PVAL($1), $2);
 			  TOKEN_GETMAD($1,
 			      $2 ? cLISTOPx($$)->op_first : $$, 'L');
-			  op_free((OP*)$1);
 			}
 	|	LABEL labfullstmt
 			{
-			  $$ = newSTATEOP(SvUTF8(((SVOP*)$1)->op_sv),
-                                        savepv(SvPVX(((SVOP*)$1)->op_sv)), $2);
+			  $$ = newSTATEOP(SVf_UTF8
+					   * PVAL($1)[strlen(PVAL($1))+1],
+					  PVAL($1), $2);
 			  TOKEN_GETMAD($1, cLISTOPx($$)->op_first, 'L');
-			  op_free((OP*)$1);
 			}
 	;
 
