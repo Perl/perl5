@@ -623,9 +623,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
                 char newname[FILENAME_MAX+1];
                 if (PerlIO_getname(fp, newname)) {
                     if (fd == PerlIO_fileno(PerlIO_stdout()))
-                        Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT", newname);
+                        vmssetuserlnm("SYS$OUTPUT", newname);
                     if (fd == PerlIO_fileno(PerlIO_stderr()))
-                        Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",  newname);
+                        vmssetuserlnm("SYS$ERROR", newname);
                 }
 	    }
 #endif

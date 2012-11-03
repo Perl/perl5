@@ -1716,14 +1716,9 @@ Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
 /*  vmssetuserlnm
  *  sets a user-mode logical in the process logical name table
  *  used for redirection of sys$error
- *
- *  Fix-me: The pTHX is not needed for this routine, however doio.c
- *          is calling it with one instead of using a macro.
- *          A macro needs to be added to vmsish.h and doio.c updated to use it.
- *
  */
 void
-Perl_vmssetuserlnm(pTHX_ const char *name, const char *eqv)
+Perl_vmssetuserlnm(const char *name, const char *eqv)
 {
     $DESCRIPTOR(d_tab, "LNM$PROCESS");
     struct dsc$descriptor_d d_name = {0,DSC$K_DTYPE_T,DSC$K_CLASS_D,0};
@@ -4264,7 +4259,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 	    info->fp  = PerlIO_open(mbx, mode);
         } else {
             info->fp = (PerlIO *) freopen(mbx, mode, stdin);
-            Perl_vmssetuserlnm(aTHX_ "SYS$INPUT",mbx);
+            vmssetuserlnm("SYS$INPUT", mbx);
         }
 
         if (!info->fp && info->out) {
@@ -4319,7 +4314,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
 	    info->fp  = PerlIO_open(mbx, mode);
         } else {
             info->fp = (PerlIO *) freopen(mbx, mode, stdout);
-            Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT",mbx);
+            vmssetuserlnm("SYS$OUTPUT", mbx);
         }
 
         if (info->in) {
@@ -9164,12 +9159,12 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 	fprintf(stderr,"Can't open output file %s as stdout",out);
 	exit(vaxc$errno);
 	}
-	if (out != NULL) Perl_vmssetuserlnm(aTHX_ "SYS$OUTPUT",out);
+	if (out != NULL) vmssetuserlnm("SYS$OUTPUT", out);
 
     if (err != NULL) {
         if (strcmp(err,"&1") == 0) {
             dup2(fileno(stdout), fileno(stderr));
-            Perl_vmssetuserlnm(aTHX_ "SYS$ERROR","SYS$OUTPUT");
+            vmssetuserlnm("SYS$ERROR", "SYS$OUTPUT");
         } else {
 	FILE *tmperr;
 	if (NULL == (tmperr = fopen(err, errmode, "mbc=32", "mbf=2")))
@@ -9182,7 +9177,7 @@ mp_getredirection(pTHX_ int *ac, char ***av)
 		{
 		exit(vaxc$errno);
 		}
-	    Perl_vmssetuserlnm(aTHX_ "SYS$ERROR",err);
+	    vmssetuserlnm("SYS$ERROR", err);
 	}
         }
 #ifdef ARGPROC_DEBUG

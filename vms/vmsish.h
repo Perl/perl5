@@ -214,6 +214,7 @@
 #define vms_realpath(a,b,c)		Perl_vms_realpath(aTHX_ a,b,c)
 #define vmssetenv(a,b,c)		Perl_vmssetenv(aTHX_ a,b,c)
 #define vmstrnenv(a,b,c,d,e)		Perl_vmstrnenv(a,b,c,d,e)
+#define vmssetuserlnm(a,b)		Perl_vmssetuserlnm(a,b)
 
 /* Delete if at all possible, changing protections if necessary. */
 #define unlink(a) kill_file(a)
@@ -735,7 +736,7 @@ bool	Perl_vms_do_aexec (pTHX_ SV *, SV **, SV **);
 int	Perl_vms_case_tolerant(void);
 char *	Perl_my_getenv_len (pTHX_ const char *, unsigned long *, bool);
 int	Perl_vmssetenv (pTHX_ const char *, const char *, struct dsc$descriptor_s **);
-void	Perl_vmssetuserlnm(pTHX_ const char *name, const char *eqv);
+void	Perl_vmssetuserlnm(const char *name, const char *eqv);
 char *	Perl_my_crypt (pTHX_ const char *, const char *);
 Pid_t	Perl_my_waitpid (pTHX_ Pid_t, int *, int);
 char *	my_gconvert (double, int, int, char *);
