@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 53;
+plan tests => 54;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -198,6 +198,11 @@ eleak(2, 0, 'no warnings; nonexistent_function 33838',
 eleak(2, 0, '//dd;'x20, '"too many errors" when parsing m// flags');
 eleak(2, 0, 's///dd;'x20, '"too many errors" when parsing s/// flags');
 eleak(2, 0, 'no warnings; 2 2;BEGIN{}', 'BEGIN block after syntax error');
+{
+    local %INC; # in case Errno is already loaded
+    eleak(2, 0, 'no warnings; 2@!{',
+                'implicit "use Errno" after syntax error');
+}
 
 # [perl #114764] Attributes leak scalars
 leak(2, 0, sub { eval 'my $x : shared' }, 'my $x :shared used to leak');
