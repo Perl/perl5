@@ -66,11 +66,9 @@ typedef PERL_BITFIELD16 Optype;
    then all the other bit-fields before/after it should change their
    types too to let VC pack them into the same 4 byte integer.*/
 
+/* for efficiency, requires OPf_WANT_VOID == G_VOID etc */
 #define OP_GIMME(op,dfl) \
-	(((op)->op_flags & OPf_WANT) == OPf_WANT_VOID   ? G_VOID   : \
-	 ((op)->op_flags & OPf_WANT) == OPf_WANT_SCALAR ? G_SCALAR : \
-	 ((op)->op_flags & OPf_WANT) == OPf_WANT_LIST   ? G_ARRAY   : \
-	 dfl)
+	(((op)->op_flags & OPf_WANT) ? ((op)->op_flags & OPf_WANT) : dfl)
 
 #define OP_GIMME_REVERSE(flags)	((flags) & G_WANT)
 
