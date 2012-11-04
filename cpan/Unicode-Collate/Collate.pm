@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.90';
+our $VERSION = '0.91';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###

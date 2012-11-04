@@ -1,3 +1,8 @@
+
+#define PERL_NO_GET_CONTEXT /* we want efficiency */
+
+/* I guese no private function needs pTHX_ and aTHX_ */
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
