@@ -182,7 +182,9 @@ Public API:
 #endif
 
 #ifdef DEBUG_LEAKING_SCALARS
-#  define FREE_SV_DEBUG_FILE(sv) Safefree((sv)->sv_debug_file)
+#  define FREE_SV_DEBUG_FILE(sv) STMT_START { \
+	if ((sv)->sv_debug_file) PerlMemShared_free((sv)->sv_debug_file); \
+    } STMT_END
 #  define DEBUG_SV_SERIAL(sv)						    \
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) del_SV\n",    \
 	    PTR2UV(sv), (long)(sv)->sv_debug_serial))
@@ -275,7 +277,7 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 	    );
     sv->sv_debug_inpad = 0;
     sv->sv_debug_parent = NULL;
-    sv->sv_debug_file = PL_curcop ? savepv(CopFILE(PL_curcop)): NULL;
+    sv->sv_debug_file = PL_curcop ? savesharedpv(CopFILE(PL_curcop)): NULL;
 
     sv->sv_debug_serial = PL_sv_serial++;
 
@@ -11905,7 +11907,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
     dstr->sv_debug_inpad = sstr->sv_debug_inpad;
     dstr->sv_debug_parent = (SV*)sstr;
     FREE_SV_DEBUG_FILE(dstr);
-    dstr->sv_debug_file = savepv(sstr->sv_debug_file);
+    dstr->sv_debug_file = savesharedpv(sstr->sv_debug_file);
 #endif
 
     ptr_table_store(PL_ptr_table, sstr, dstr);
