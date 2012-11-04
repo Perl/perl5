@@ -7368,12 +7368,15 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (ec) {
 	op_free(block);
+	cv = PL_compcv;
 	if (name && block) {
 	    const char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
 		const char not_safe[] =
 		    "BEGIN not safe after errors--compilation aborted";
+		PL_compcv = 0;
+		SvREFCNT_dec(cv);
 		if (PL_in_eval & EVAL_KEEPERR)
 		    Perl_croak(aTHX_ not_safe);
 		else {
@@ -7383,7 +7386,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		}
 	    }
 	}
-	cv = PL_compcv;
 	goto done;
     }
 
