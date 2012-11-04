@@ -20,21 +20,18 @@ is($CGITempFile::TMPDIRECTORY, $testdir, "can pre-set \$CGITempFile::TMPDIRECTOR
 CGITempFile->new;
 is($CGITempFile::TMPDIRECTORY, $testdir, "\$CGITempFile::TMPDIRECTORY unchanged");
 
-TODO: {
- local $TODO = "figuring out why these tests fail on some platforms";
- ok(chmod 0500, $testdir, "revoking write access to $testdir");
- ok(! -w $testdir, "write access to $testdir revoked");
+ok(chmod 0500, $testdir, "revoking write access to $testdir");
+ok(! -w $testdir, "write access to $testdir revoked");
 CGITempFile->new;
 is($CGITempFile::TMPDIRECTORY, $testdir2,
- "unwritable \$CGITempFile::TMPDIRECTORY overridden");
+    "unwritable \$CGITempFile::TMPDIRECTORY overridden");
 
 ok(chmod 0500, $testdir2, "revoking write access to $testdir2");
 ok(! -w $testdir, "write access to $testdir revoked");
 CGITempFile->new;
 isnt($CGITempFile::TMPDIRECTORY, $testdir2,
- "unwritable \$ENV{TMPDIR} overridden");
+    "unwritable \$ENV{TMPDIR} overridden");
 isnt($CGITempFile::TMPDIRECTORY, $testdir,
- "unwritable \$ENV{TMPDIR} not overridden with an unwritable \$CGITempFile::TMPDIRECTORY");
-}
+    "unwritable \$ENV{TMPDIR} not overridden with an unwritable \$CGITempFile::TMPDIRECTORY");
 
 END { for ($testdir, $testdir2) { chmod 0700, $_; rmdir; } }

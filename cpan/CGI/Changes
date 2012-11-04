@@ -1,3 +1,14 @@
+Version 3.61 Nov 2nd, 2012
+
+  (No code changes)
+
+  [INTERNALS]
+   - formatting of CGI::Carp documentation was improved. Thanks to benkasminbullock.
+   - un-TODO some tests in t/tmpdir.t that were passing in most cases. 
+     More on this:
+       https://github.com/markstos/CGI.pm/issues/19#
+       https://github.com/markstos/CGI.pm/commit/cc73dc9807b0fabb56b3cdf1a9726588b2eda0f7
+
 Version 3.60 Aug 15th, 2012
 
   [BUG FIXES]  
