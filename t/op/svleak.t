@@ -184,19 +184,17 @@ SKIP: {
     leak(2, 0, sub { eval q{ my $x = "x"; "abc" =~ /$x/ for 1..5 } }, '#114356');
 }
 
-SKIP: {
-    skip "disabled under -Dmad (eval leaks)", 6 if $Config{mad};
-    leak(2, 0, sub { eval '"${<<END}"
-                 ' }, 'unterminated here-doc in quotes in multiline eval');
-    leak(2, 0, sub { eval '"${<<END
-               }"' }, 'unterminated here-doc in multiline quotes in eval');
-    leak(2, 0, sub { eval { do './op/svleak.pl' } },
+# Syntax errors
+eleak(2, 0, '"${<<END}"
+                 ', 'unterminated here-doc in quotes in multiline eval');
+eleak(2, 0, '"${<<END
+               }"', 'unterminated here-doc in multiline quotes in eval');
+leak(2, !!$Config{mad}, sub { eval { do './op/svleak.pl' } },
         'unterminated here-doc in file');
-    leak(2, 0, sub { eval 'tr/9-0//' }, 'tr/9-0//');
-    leak(2, 0, sub { eval 'tr/a-z-0//' }, 'tr/a-z-0//');
-    leak(2, 0, sub { eval 'no warnings; nonexistent_function 33838' },
+eleak(2, 0, 'tr/9-0//');
+eleak(2, 0, 'tr/a-z-0//');
+eleak(2, 0, 'no warnings; nonexistent_function 33838',
         'bareword followed by number');
-}
 
 # [perl #114764] Attributes leak scalars
 leak(2, 0, sub { eval 'my $x : shared' }, 'my $x :shared used to leak');
