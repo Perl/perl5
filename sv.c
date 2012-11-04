@@ -4257,10 +4257,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 #ifdef PERL_ANY_COW
             && ((flags & SV_COW_SHARED_HASH_KEYS)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
 # ifdef PERL_OLD_COPY_ON_WRITE
+		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && SvTYPE(sstr) >= SVt_PVIV
 # else
+		     && !(SvFLAGS(dstr) & SVf_BREAK)
 		     && !(sflags & SVf_IsCOW)
 		     && GE_COW_THRESHOLD(cur) && cur+1 < len
 		     && (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)

@@ -2296,8 +2296,9 @@ PP(pp_subst)
 
 #ifdef PERL_ANY_COW
 	if (SvIsCOW(TARG)) {
-	    assert (!force_on_match);
+	  if (!force_on_match)
 	    goto have_a_cow;
+	  assert(SvVOK(TARG));
 	}
 #endif
 	if (force_on_match) {

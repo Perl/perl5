@@ -1837,6 +1837,11 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #  define SvRELEASE_IVX_(sv)	SvRELEASE_IVX(sv),
 #  define SvCANCOW(sv) \
 	(SvIsCOW(sv) || (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS)
+/* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
+   on-write.  */
+#  define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
+			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
+			 SVf_OOK|SVf_BREAK|SVf_READONLY)
 #else
 #  define SvRELEASE_IVX(sv)   0
 /* This little game brought to you by the need to shut this warning up:
@@ -1859,14 +1864,11 @@ mg.c:1024: warning: left-hand operand of comma expression has no effect
 #   ifndef SV_COWBUF_THRESHOLD
 #    define SV_COWBUF_THRESHOLD	1250	/* min string length for cow */
 #   endif				/* over existing buffer */
+#   define CAN_COW_MASK	(SVf_POK|SVf_ROK|SVp_POK|SVf_FAKE| \
+			 SVf_OOK|SVf_BREAK|SVf_READONLY)
 #  endif
 #endif /* PERL_OLD_COPY_ON_WRITE */
 
-/* This is a pessimistic view. Scalar must be purely a read-write PV to copy-
-   on-write.  */
-#define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
-			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
-			 SVf_OOK|SVf_BREAK|SVf_READONLY)
 #define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
 
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) \
