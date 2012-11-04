@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 50;
+plan tests => 52;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -195,6 +195,8 @@ eleak(2, 0, 'tr/9-0//');
 eleak(2, 0, 'tr/a-z-0//');
 eleak(2, 0, 'no warnings; nonexistent_function 33838',
         'bareword followed by number');
+eleak(2, 0, '//dd;'x20, '"too many errors" when parsing m// flags');
+eleak(2, 0, 's///dd;'x20, '"too many errors" when parsing s/// flags');
 
 # [perl #114764] Attributes leak scalars
 leak(2, 0, sub { eval 'my $x : shared' }, 'my $x :shared used to leak');

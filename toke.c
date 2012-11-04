@@ -784,6 +784,8 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 		(parser->old_parser && parser->rsfp != parser->old_parser->rsfp)))
 	PerlIO_close(parser->rsfp);
     SvREFCNT_dec(parser->rsfp_filters);
+    SvREFCNT_dec(parser->lex_stuff);
+    SvREFCNT_dec(parser->sublex_info.repl);
 
     Safefree(parser->lex_brackstack);
     Safefree(parser->lex_casestack);
