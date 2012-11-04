@@ -14,20 +14,22 @@
 # inner for loop) are also skipped.
 
 use XS::APItest "sv_count";
+use Data::Dumper;
+$Data::Dumper::Useqq++;
 for(`find .`) {
  chomp;
  for(`cat \Q$_\E 2>/dev/null`) {
     next if exists $exceptions{$_};
     next if /rm -rf/; # Could be an example from perlsec, e.g.
     next if /END \{/; # Creating an END block creates SVs, obviously
-    s/[\\']/sprintf "\\%02x", ord $&/egg;
-    s/\0/'."\\0".'/g;
+    my $q = s/[\\']/sprintf "\\%02x", ord $&/gore
+         =~ s/\0/'."\\0".'/grid;
     $prog = <<end;   
             open oUt, ">&", STDOUT;
             open STDOUT, ">/dev/null";
             open STDIN, "</dev/null";
             open STDERR, ">/dev/null";
-            \$unused_variable = '$_';
+            \$unused_variable = '$q';
             eval \$unused_variable;
             print oUt sv_count, "\n";
             eval \$unused_variable;
@@ -39,7 +41,7 @@ end
     $out = <$fh>;
     close $fh;
     @_ = split ' ', $out;
-    if (@_ == 2 && $_[1] > $_[0]) { print $_ }
+    if (@_ == 2 && $_[1] > $_[0]) { print Dumper $_ }
  }
 }
 
