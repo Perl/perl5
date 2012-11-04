@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
  *
- * Version: 5.72
- * Mon Sep 24 15:22:08 MST 2012
+ * Version: 5.73
+ * Wed Oct 31 04:32:44 MST 2012
  *
  */
 
@@ -216,7 +216,7 @@ static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 
 #define SETBIT(s, pos)	s[(pos) >> 3] |=  (0x01 << (7 - (pos) % 8))
 #define CLRBIT(s, pos)	s[(pos) >> 3] &= ~(0x01 << (7 - (pos) % 8))
-#define NBYTES(nbits)	((nbits) > 0 ? 1 + (((nbits) - 1) >> 3) : 0)
+#define NBYTES(nbits)	(((nbits) + 7) >> 3)
 #define HEXLEN(nbytes)	((nbytes) << 1)
 #define B64LEN(nbytes)	(((nbytes) % 3 == 0) ? ((nbytes) / 3) * 4 \
 			: ((nbytes) / 3) * 4 + ((nbytes) % 3) + 1)

@@ -25,7 +25,7 @@ if ($Config{archname} =~ /^i[3456]86/) {
 }
 my $define = join(' ', @defines);
 
-	# Workaround for DEC compiler bug, adopted from Digest::MD5
+	# Workaround for DEC compiler bug, adapted from Digest::MD5
 
 my @extra = ();
 if ($^O eq 'VMS') {

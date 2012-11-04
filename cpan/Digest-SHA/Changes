@@ -1,5 +1,8 @@
 Revision history for Perl extension Digest::SHA.
 
+5.73  Wed Oct 31 04:32:44 MST 2012
+	- provided workaround for DEC compiler bug (ref. Makefile.PL)
+
 5.72  Mon Sep 24 15:22:08 MST 2012
 	- adjusted module installation directory for later Perls
 		-- As of 5.11 Perl searches 'site' first, so use that
