@@ -1262,7 +1262,7 @@ use File::Glob qw(:case);
 
     'Module::CoreList' => {
         'MAINTAINER'   => 'bingos',
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-2.75.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Module-CoreList-2.76.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
         'UPSTREAM'     => 'blead',
     },
