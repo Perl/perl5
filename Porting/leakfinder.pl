@@ -17,6 +17,7 @@ use XS::APItest "sv_count";
 use Data::Dumper;
 $Data::Dumper::Useqq++;
 for(`find .`) {
+ warn $_;
  chomp;
  for(`cat \Q$_\E 2>/dev/null`) {
     next if exists $exceptions{$_};
