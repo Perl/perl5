@@ -53,6 +53,7 @@ eval 'v23: $counter++; goto v23 unless $counter == 2';
 eval 'v23 : $counter++; goto v23 unless $counter == 2';
 END { unlink "./foo"; }
 exit 1;
+    my $select_ret = select($rout = $rin, undef, undef, $timeout);
         push @a, \$x;
 	push(@non_v, "#$_"); # not a name='value' line
 	    push @v_others, "CONFIG='$v'\n";
