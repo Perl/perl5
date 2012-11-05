@@ -380,9 +380,8 @@ Perl_opslab_force_free(pTHX_ OPSLAB *slab)
 		 )
 	    ) {
 		assert(slot->opslot_op.op_slabbed);
-		slab->opslab_refcnt++; /* op_free may free slab */
 		op_free(&slot->opslot_op);
-		if (!--slab->opslab_refcnt) goto free;
+		if (slab->opslab_refcnt == 1) goto free;
 	    }
 	}
     } while ((slab2 = slab2->opslab_next));
