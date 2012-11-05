@@ -1239,7 +1239,7 @@ standard C library function C<fputs()>. This is all we need:
 
 The real work is done in the standard typemap.
 
-B<But> you loose all the fine stuff done by the perlio layers. This
+B<But> you lose all the fine stuff done by the perlio layers. This
 calls the stdio function C<fputs()>, which knows nothing about them.
 
 The standard typemap offers three variants of PerlIO *:
