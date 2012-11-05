@@ -1892,6 +1892,8 @@ PerlProcSpawnvp(struct IPerlProc* piPerl, int mode, const char *cmdname, const c
 int
 PerlProcLastHost(struct IPerlProc* piPerl)
 {
+ /* this dTHX is unused in an optimized build since CPerlHost::num_hosts
+    is a static */
  dTHX;
  CPerlHost *h = (CPerlHost*)w32_internal_host;
  return h->LastHost();

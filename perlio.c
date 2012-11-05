@@ -4847,8 +4847,8 @@ Perl_PerlIO_stderr(pTHX)
 char *
 PerlIO_getname(PerlIO *f, char *buf)
 {
-    dTHX;
 #ifdef VMS
+    dTHX;
     char *name = NULL;
     bool exported = FALSE;
     FILE *stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
@@ -4864,7 +4864,7 @@ PerlIO_getname(PerlIO *f, char *buf)
 #else
     PERL_UNUSED_ARG(f);
     PERL_UNUSED_ARG(buf);
-    Perl_croak(aTHX_ "Don't know how to get file name");
+    Perl_croak_nocontext("Don't know how to get file name");
     return NULL;
 #endif
 }
@@ -5004,7 +5004,9 @@ PerlIO_stdoutf(const char *fmt, ...)
 PerlIO *
 PerlIO_tmpfile(void)
 {
+#ifndef WIN32
      dTHX;
+#endif
      PerlIO *f = NULL;
 #ifdef WIN32
      const int fd = win32_tmpfd();

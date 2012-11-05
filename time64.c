@@ -303,7 +303,9 @@ static void S_copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
 #ifndef HAS_LOCALTIME_R
 /* Simulate localtime_r() to the best of our ability */
 static struct tm * S_localtime_r(const time_t *clock, struct tm *result) {
+#ifdef VMS
     dTHX;    /* in case the following is defined as Perl_my_localtime(aTHX_ ...) */
+#endif
     const struct tm *static_result = localtime(clock);
 
     assert(result != NULL);

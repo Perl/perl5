@@ -384,7 +384,6 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 EXTERN_C char *
 win32_get_privlib(const char *pl, STRLEN *const len)
 {
-    dTHX;
     char *stdlib = "lib";
     char buffer[MAX_PATH+1];
     SV *sv = NULL;
@@ -544,7 +543,6 @@ tokenize(const char *str, char **dest, char ***destv)
     char **retvstart = 0;
     int items = -1;
     if (str) {
-	dTHX;
 	int slen = strlen(str);
 	char *ret;
 	char **retv;
