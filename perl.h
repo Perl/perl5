@@ -539,6 +539,9 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * SILENT_NO_TAINT_SUPPORT implies NO_TAINT_SUPPORT.
  * SILENT_NO_TAINT_SUPPORT is the same as NO_TAINT_SUPPORT except it
  * silently ignores -t/-T instead of throwing an exception.
+ *
+ * DANGER! Using NO_TAINT_SUPPORT or SILENT_NO_TAINT_SUPPORT
+ *         voids your non-existant warranty!
  */
 #if SILENT_NO_TAINT_SUPPORT && !defined(NO_TAINT_SUPPORT)
 #  define NO_TAINT_SUPPORT 1
