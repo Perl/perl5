@@ -20,9 +20,10 @@ for(`find .`) {
  warn $_;
  chomp;
  for(`cat \Q$_\E 2>/dev/null`) {
-    next if exists $exceptions{$_};
+    next if exists $exceptions{s/^\s+//r};
     next if /rm -rf/; # Could be an example from perlsec, e.g.
     next if /END\s*\{/; # Creating an END block creates SVs, obviously
+    next if /^\s*(?:push|unshift)/;
     my $q = s/[\\']/sprintf "\\%02x", ord $&/gore
          =~ s/\0/'."\\0".'/grid;
     $prog = <<end;   
@@ -51,19 +52,8 @@ BEGIN {
 do {$x[$x] = $x;} while ($x++) < 10;
 eval 'v23: $counter++; goto v23 unless $counter == 2';
 eval 'v23 : $counter++; goto v23 unless $counter == 2';
-END { unlink "./foo"; }
-exit 1;
-    my $select_ret = select($rout = $rin, undef, undef, $timeout);
-        push @a, \$x;
-	push(@non_v, "#$_"); # not a name='value' line
-	    push @v_others, "CONFIG='$v'\n";
-    push(@v_others, $line);
-	    push @v_others, "PATCHLEVEL='$v'\n";
-	    push @v_others, "SUBVERSION='$v'\n";
-        select(undef,undef,undef,$delay);
-    unshift @INC, "../lib";
-	    unshift(@inc_version_list, grep { -d } $d->[0]."/$archname", $d->[0]);
-  unshift(@INC,"xlib/$Opts{cross}");
+my $select_ret = select($rout = $rin, undef, undef, $timeout);
+select(undef,undef,undef,$delay);
 end
  @exceptions{@exceptions} = ();
 }
