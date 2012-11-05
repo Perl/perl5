@@ -818,7 +818,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(bool*)ptr = cBOOL(uv >> 8);
 #if !NO_TAINT_SUPPORT
-	    if (ptr == TAINT_get) {
+	    if (ptr == &(TAINT_get)) {
 		/* If we don't update <was>, to reflect what was saved on the
 		 * stack for PL_tainted, then we will overwrite this attempt to
 		 * restore it when we exit this routine.  Note that this won't
