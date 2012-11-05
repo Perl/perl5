@@ -391,6 +391,8 @@ Perl_opslab_force_free(pTHX_ OPSLAB *slab)
 #ifdef DEBUGGING
 	assert(savestack_count == slab->opslab_refcnt-1);
 #endif
+	/* Remove the CV’s reference count. */
+	slab->opslab_refcnt--;
 	return;
     }
    free:
