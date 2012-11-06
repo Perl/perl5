@@ -3,7 +3,13 @@ use warnings;
 use v5.16.0;
 use File::Temp 'tempdir';
 use File::Spec::Functions;
-use Test::More tests => 1;
+use Test::More;
+
+BEGIN {
+  plan skip_all => "Home-grown glob does not do character classes on $^O" if $^O eq 'VMS';
+}
+
+plan tests => 1;
 
 my @md = (1..305);
 my @mp = (1000..1205);
