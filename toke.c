@@ -773,6 +773,12 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 void
 Perl_parser_free(pTHX_  const yy_parser *parser)
 {
+#ifdef PERL_MAD
+   I32 nexttoke = parser->lasttoke;
+#else
+   I32 nexttoke = parser->nexttoke;
+#endif
+
     PERL_ARGS_ASSERT_PARSER_FREE;
 
     PL_curcop = parser->saved_curcop;
@@ -786,6 +792,16 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
     SvREFCNT_dec(parser->rsfp_filters);
     SvREFCNT_dec(parser->lex_stuff);
     SvREFCNT_dec(parser->sublex_info.repl);
+    while (nexttoke--) {
+#ifdef PERL_MAD
+	if (S_is_opval_token(parser->nexttoke[nexttoke].next_type
+				& 0xffff))
+	    op_free(parser->nexttoke[nexttoke].next_val.opval);
+#else
+	if (S_is_opval_token(parser->nexttype[nexttoke] & 0xffff))
+	    op_free(parser->nextval[nexttoke].opval);
+#endif
+    }
 
     Safefree(parser->lex_brackstack);
     Safefree(parser->lex_casestack);

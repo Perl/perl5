@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 55;
+plan tests => 56;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -205,6 +205,7 @@ eleak(2, 0, 'no warnings; 2 2;BEGIN{}', 'BEGIN block after syntax error');
     eleak(2, 0, 'no warnings; 2@!{',
                 'implicit "use Errno" after syntax error');
 }
+eleak(2, 0, "\"\$\0\356\"", 'qq containing $ <null> something');
 
 # [perl #114764] Attributes leak scalars
 leak(2, 0, sub { eval 'my $x : shared' }, 'my $x :shared used to leak');
