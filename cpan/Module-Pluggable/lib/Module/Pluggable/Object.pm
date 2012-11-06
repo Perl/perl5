@@ -8,7 +8,7 @@ use Carp qw(croak carp confess);
 use Devel::InnerPackage;
 use vars qw($VERSION);
 
-$VERSION = '4.3';
+$VERSION = '4.5';
 
 
 sub new {
