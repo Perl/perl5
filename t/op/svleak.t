@@ -33,7 +33,8 @@ sub leak {
 }
 
 # Like leak, but run a string eval instead; takes into account existing
-# string eval leaks under -Dmad.  The code is used instead of the test name
+# string eval leaks under -Dmad (except when -Dmad leaks two or
+# more SVs). The code is used instead of the test name
 # if the name is absent.
 sub eleak {
     my ($n,$delta,$code,@rest) = @_;
@@ -199,7 +200,8 @@ eleak(2, 0, 'no warnings; nonexistent_function 33838',
         'bareword followed by number');
 eleak(2, 0, '//dd;'x20, '"too many errors" when parsing m// flags');
 eleak(2, 0, 's///dd;'x20, '"too many errors" when parsing s/// flags');
-eleak(2, 0, 'no warnings; 2 2;BEGIN{}', 'BEGIN block after syntax error');
+eleak(2, !!$Config{mad}, 'no warnings; 2 2;BEGIN{}',
+      'BEGIN block after syntax error');
 {
     local %INC; # in case Errno is already loaded
     eleak(2, 0, 'no warnings; 2@!{',
