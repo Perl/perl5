@@ -162,17 +162,37 @@ Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
     U32 hash;
-#ifdef USE_ITHREADS
-    const char *const file
-	= (PL_curcop && CopFILE(PL_curcop)) ? CopFILE(PL_curcop) : "";
-    const STRLEN len = strlen(file);
-#else
-    SV *const temp_sv = CopFILESV(PL_curcop);
     const char *file;
     STRLEN len;
+#ifndef USE_ITHREADS
+    SV * temp_sv;
+#endif
 
     PERL_ARGS_ASSERT_NEWGP;
+    Newxz(gp, 1, GP);
+    gp->gp_egv = gv; /* allow compiler to reuse gv after this */
+#ifndef PERL_DONT_CREATE_GVSV
+    gp->gp_sv = newSV(0);
+#endif
 
+#ifdef USE_ITHREADS
+    if (PL_curcop) {
+	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
+	if (CopFILE(PL_curcop)) {
+	    file = CopFILE(PL_curcop);
+	    len = strlen(file);
+	}
+	else goto no_file;
+    }
+    else {
+	no_file:
+	file = "";
+	len = 0;
+    }
+#else
+    if(PL_curcop)
+	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
+    temp_sv = CopFILESV(PL_curcop);
     if (temp_sv) {
 	file = SvPVX(temp_sv);
 	len = SvCUR(temp_sv);
@@ -183,18 +203,7 @@ Perl_newGP(pTHX_ GV *const gv)
 #endif
 
     PERL_HASH(hash, file, len);
-
-    Newxz(gp, 1, GP);
-
-#ifndef PERL_DONT_CREATE_GVSV
-    gp->gp_sv = newSV(0);
-#endif
-
-    gp->gp_line = PL_curcop ? CopLINE(PL_curcop) : 0;
-    /* XXX Ideally this cast would be replaced with a change to const char*
-       in the struct.  */
     gp->gp_file_hek = share_hek(file, len, hash);
-    gp->gp_egv = gv;
     gp->gp_refcnt = 1;
 
     return gp;
