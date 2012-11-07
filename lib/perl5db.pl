@@ -7671,17 +7671,24 @@ sub ornaments {
     if ( defined $term ) {
 
         # We don't want to show warning backtraces, but we do want die() ones.
-        local ( $warnLevel, $dieLevel ) = ( 0, 1 );
+        local $warnLevel = 0;
+        local $dieLevel = 1;
 
         # No ornaments if the terminal doesn't support them.
-        return '' unless $term->Features->{ornaments};
-        eval { $term->ornaments(@_) } || '';
+        if (not $term->Features->{ornaments}) {
+            return '';
+        }
+
+        return (eval { $term->ornaments(@_) } || '');
     }
 
     # Use what was passed in if we can't determine it ourselves.
     else {
         $ornaments = shift;
+
+        return $ornaments;
     }
+
 } ## end sub ornaments
 
 =head2 C<recallCommand>
@@ -7701,10 +7708,10 @@ sub recallCommand {
     }
 
     # Build it into a printable version.
-    $prc = $rc;    # Copy it
+    $prc = $rc;              # Copy it
     $prc =~ s/\\b$//;        # Remove trailing \b
     $prc =~ s/\\(.)/$1/g;    # Remove escapes
-    $prc;                    # Return the printable version
+    return $prc;             # Return the printable version
 } ## end sub recallCommand
 
 =head2 C<LineInfo> - where the line number information goes
