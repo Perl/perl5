@@ -162,12 +162,19 @@ sub caller_info {
                 = "** Incomplete caller override detected$where; \@DB::args were not set **";
         }
         else {
-            @args = map { Carp::format_arg($_) } @DB::args;
-        }
-        if ( $MaxArgNums and @args > $MaxArgNums )
-        {    # More than we want to show?
-            $#args = $MaxArgNums;
-            push @args, '...';
+            @args = @DB::args;
+            my $overflow;
+            if ( $MaxArgNums and @args > $MaxArgNums )
+            {    # More than we want to show?
+                $#args = $MaxArgNums;
+                $overflow = 1;
+            }
+
+            @args = map { Carp::format_arg($_) } @args;
+
+            if ($overflow) {
+                push @args, '...';
+            }
         }
 
         # Push the args onto the subroutine
