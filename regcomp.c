@@ -13178,7 +13178,7 @@ parseit:
 
 	av_store(av, 0, (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
 			? listsv
-			: &PL_sv_undef);
+			: (SvREFCNT_dec(listsv), &PL_sv_undef));
 	if (swash) {
 	    av_store(av, 1, swash);
 	    SvREFCNT_dec(cp_list);
