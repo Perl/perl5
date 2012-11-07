@@ -11460,7 +11460,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
      * reg() gets called (recursively) on the rewritten version, and this
      * function will return what it constructs.  (Actually the <multi-fold>s
      * aren't physically removed from the [abcdefghi], it's just that they are
-     * ignored in the recursion by means of a a flag:
+     * ignored in the recursion by means of a flag:
      * <RExC_in_multi_char_class>.)
      *
      * ANYOF nodes contain a bit map for the first 256 characters, with the
