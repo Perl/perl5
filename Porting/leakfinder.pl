@@ -24,6 +24,7 @@ for(`find .`) {
     next if /rm -rf/; # Could be an example from perlsec, e.g.
     next if /END\s*\{/; # Creating an END block creates SVs, obviously
     next if /^\s*(?:push|unshift)/;
+    next if /\bselect(?:\s*\()[^()]+,/; # 4-arg select hangs
     my $q = s/[\\']/sprintf "\\%02x", ord $&/gore
          =~ s/\0/'."\\0".'/grid;
     $prog = <<end;   
@@ -49,11 +50,11 @@ end
 
 BEGIN {
  @exceptions = split /^/, <<'end';
+$char++ while substr( $got, $char, 1 ) eq substr( $wanted, $char, 1 );
 do {$x[$x] = $x;} while ($x++) < 10;
 eval 'v23: $counter++; goto v23 unless $counter == 2';
 eval 'v23 : $counter++; goto v23 unless $counter == 2';
-my $select_ret = select($rout = $rin, undef, undef, $timeout);
-select(undef,undef,undef,$delay);
+sleep;
 end
  @exceptions{@exceptions} = ();
 }
