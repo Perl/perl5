@@ -171,8 +171,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_IS_CONTINUATION(c)		((((U8)c) & 0xC0) == 0x80)
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
 
-/* Masking with 0xfe allows low bit to be 0 or 1; thus this matches 0xc[23] */
+/* Use UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
+ * be well-formed.  Masking with 0xfe allows low bit to be 0 or 1; thus this
+ * matches 0xc[23]. */
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfe) == 0xc2)
+
 #define UTF8_IS_ABOVE_LATIN1(c)	((U8)(c) >= 0xc4)
 
 #define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFE << (7-(len))))
@@ -242,6 +245,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT)     \
                                         | (((U8)new) & UTF_CONTINUATION_MASK))
+
+/* This works in the face of malformed UTF-8. */
+#define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e) (UTF8_IS_DOWNGRADEABLE_START(*s) \
+                                               && ( (e) - (s) > 1)             \
+                                               && UTF8_IS_CONTINUATION(*((s)+1)))
 
 /* Convert a two (not one) byte utf8 character to a unicode code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
