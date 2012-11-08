@@ -994,10 +994,13 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	if (flags & LEX_STUFF_UTF8) {
 	    goto plain_copy;
 	} else {
-	    STRLEN highhalf = 0;
+	    STRLEN highhalf = 0;    /* Count of variants */
 	    const char *p, *e = pv+len;
-	    for (p = pv; p != e; p++)
-		highhalf += !!(((U8)*p) & 0x80);
+	    for (p = pv; p != e; p++) {
+		if (! UTF8_IS_INVARIANT(*p)) {
+                    highhalf++;
+                }
+            }
 	    if (!highhalf)
 		goto plain_copy;
 	    lex_grow_linestr(SvCUR(PL_parser->linestr)+1+len+highhalf);
@@ -1008,9 +1011,9 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	    PL_parser->bufend += len+highhalf;
 	    for (p = pv; p != e; p++) {
 		U8 c = (U8)*p;
-		if (c & 0x80) {
-		    *bufptr++ = (char)(0xc0 | (c >> 6));
-		    *bufptr++ = (char)(0x80 | (c & 0x3f));
+		if (! UTF8_IS_INVARIANT(c)) {
+		    *bufptr++ = UTF8_TWO_BYTE_HI(c);
+		    *bufptr++ = UTF8_TWO_BYTE_LO(c);
 		} else {
 		    *bufptr++ = (char)c;
 		}
@@ -1022,14 +1025,13 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	    const char *p, *e = pv+len;
 	    for (p = pv; p != e; p++) {
 		U8 c = (U8)*p;
-		if (c >= 0xc4) {
+		if (UTF8_IS_ABOVE_LATIN1(c)) {
 		    Perl_croak(aTHX_ "Lexing code attempted to stuff "
 				"non-Latin-1 character into Latin-1 input");
-		} else if (c >= 0xc2 && p+1 != e &&
-			    (((U8)p[1]) & 0xc0) == 0x80) {
+		} else if (UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, e)) {
 		    p++;
 		    highhalf++;
-		} else if (c >= 0x80) {
+		} else if (! UTF8_IS_INVARIANT(c)) {
 		    /* malformed UTF-8 */
 		    ENTER;
 		    SAVESPTR(PL_warnhook);
@@ -1046,17 +1048,20 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 	    SvCUR_set(PL_parser->linestr,
 	    	SvCUR(PL_parser->linestr) + len-highhalf);
 	    PL_parser->bufend += len-highhalf;
-	    for (p = pv; p != e; p++) {
-		U8 c = (U8)*p;
-		if (c & 0x80) {
-		    *bufptr++ = (char)(((c & 0x3) << 6) | (p[1] & 0x3f));
-		    p++;
-		} else {
-		    *bufptr++ = (char)c;
+	    p = pv;
+	    while (p < e) {
+		if (UTF8_IS_INVARIANT(*p)) {
+		    *bufptr++ = *p;
+                    p++;
 		}
+		else {
+                    assert(p < e -1 );
+		    *bufptr++ = TWO_BYTE_UTF8_TO_UNI(*p, *(p+1));
+		    p += 2;
+                }
 	    }
 	} else {
-	    plain_copy:
+	  plain_copy:
 	    lex_grow_linestr(SvCUR(PL_parser->linestr)+1+len);
 	    bufptr = PL_parser->bufptr;
 	    Move(bufptr, bufptr+len, PL_parser->bufend+1-bufptr, char);
@@ -1404,10 +1409,10 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 	    bufend = PL_parser->bufend;
 	}
 	head = (U8)*s;
-	if (!(head & 0x80))
+	if (UTF8_IS_INVARIANT(head))
 	    return head;
-	if (head & 0x40) {
-	    len = PL_utf8skip[head];
+	if (UTF8_IS_START(head)) {
+	    len = UTF8SKIP(&head);
 	    while ((STRLEN)(bufend-s) < len) {
 		if (!lex_next_chunk(flags | LEX_KEEP_PREVIOUS))
 		    break;
