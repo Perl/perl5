@@ -182,7 +182,7 @@ for my $ord (0..255) {
             # just \pP outside it.
             $re = qr/\p{Punct}|[^\P{Symbol}\P{ASCII}]/;
         } elsif ($name eq 'CHARNAME_CONT') {;
-            $re = qr/[-\p{XPosixWord} ():\xa0]/;
+            $re = qr/\p{_Perl_Charname_Continue}/,
         } elsif ($name eq 'SPACE') {;
             $re = qr/\p{XPerlSpace}/;
         } elsif ($name eq 'IDFIRST') {
