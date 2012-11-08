@@ -13213,7 +13213,7 @@ sub compile_perl() {
                 Initialize => $Blank + $VertSpace,
     );
     $Space->add_alias('XPosixSpace');
-    $perl->add_match_table("PosixSpace",
+    my $posix_space = $perl->add_match_table("PosixSpace",
                             Description => "\\t, \\n, \\cK, \\f, \\r, and ' '.  (\\cK is vertical tab)",
                             Initialize => $Space & $ASCII,
                             );
@@ -13479,6 +13479,23 @@ sub compile_perl() {
     }
 
     $perl_xidc &= $Word;
+
+    my $charname_begin = $perl->add_match_table('_Perl_Charname_Begin',
+                    Perl_Extension => 1,
+                    Fate => $INTERNAL_ONLY,
+                    Initialize => $gc->table('Letter') & $Alpha & $perl_xids,
+                    );
+
+    my $charname_continue = $perl->add_match_table('_Perl_Charname_Continue',
+                        Perl_Extension => 1,
+                        Fate => $INTERNAL_ONLY,
+                        Initialize => $perl_xidc
+                                    + 0x0020        # SPACE
+                                    + 0x0028        # (
+                                    + 0x0029        # )
+                                    + 0x002D        # -
+                                    + 0x00A0        # NBSP
+                        );
 
     # These two tables are for matching \X, which is based on the 'extended'
     # grapheme cluster, which came in 5.1; create empty ones if not already
