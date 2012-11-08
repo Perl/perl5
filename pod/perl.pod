@@ -278,8 +278,9 @@ On a Unix-like system, these documentation files will usually also be
 available as manpages for use with the F<man> program.
 
 In general, if something strange has gone wrong with your program and you're
-not sure where you should look for help, try the B<-w> switch first.  It will
-often point out exactly where the trouble is.
+not sure where you should look for help, try making your code comply with
+B<use strict> and B<use warnings>.  These will often point out exactly
+where the trouble is.
 
 =head1 DESCRIPTION
 
@@ -429,8 +430,11 @@ Perl developers, please write to perl-thanks@perl.org .
 
 =head1 DIAGNOSTICS
 
-The C<use warnings> pragma (and the B<-w> switch) produces some 
-lovely diagnostics.
+Using the C<use strict> pragma ensures that all variables are properly
+declared and prevents other misuses of legacy Perl features.
+
+The C<use warnings> pragma (and the globally applied and deprecated B<-w>
+switch) produce some lovely diagnostics.
 
 See L<perldiag> for explanations of all Perl's diagnostics.  The C<use
 diagnostics> pragma automatically turns Perl's normally terse warnings
@@ -444,12 +448,12 @@ B<-e> is counted as one line.)
 Setuid scripts have additional constraints that can produce error
 messages such as "Insecure dependency".  See L<perlsec>.
 
-Did we mention that you should definitely consider using the B<-w>
-switch?
+Did we mention that you should definitely consider using the B<use warnings>
+pragma?
 
 =head1 BUGS
 
-The B<-w> switch is not mandatory.
+The behavior implied by the B<use warnings> pragma is not mandatory.
 
 Perl is at the mercy of your machine's definitions of various
 operations such as type casting, atof(), and floating-point
