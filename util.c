@@ -871,6 +871,8 @@ Perl_foldEQ(const char *s1, const char *s2, register I32 len)
 
     PERL_ARGS_ASSERT_FOLDEQ;
 
+    assert(len >= 0);
+
     while (len--) {
 	if (*a != *b && *a != PL_fold[*b])
 	    return 0;
@@ -890,6 +892,8 @@ Perl_foldEQ_latin1(const char *s1, const char *s2, register I32 len)
     const U8 *b = (const U8 *)s2;
 
     PERL_ARGS_ASSERT_FOLDEQ_LATIN1;
+
+    assert(len >= 0);
 
     while (len--) {
 	if (*a != *b && *a != PL_fold_latin1[*b]) {
@@ -917,6 +921,8 @@ Perl_foldEQ_locale(const char *s1, const char *s2, register I32 len)
     const U8 *b = (const U8 *)s2;
 
     PERL_ARGS_ASSERT_FOLDEQ_LOCALE;
+
+    assert(len >= 0);
 
     while (len--) {
 	if (*a != *b && *a != PL_fold_locale[*b])
@@ -973,6 +979,8 @@ Perl_savepvn(pTHX_ const char *pv, register I32 len)
 {
     char *newaddr;
     PERL_UNUSED_CONTEXT;
+
+    assert(len >= 0);
 
     Newx(newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
@@ -2024,6 +2032,8 @@ Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 
     PERL_ARGS_ASSERT_MY_BCOPY;
 
+    assert(len >= 0);
+
     if (from - to >= 0) {
 	while (len--)
 	    *to++ = *from++;
@@ -2047,6 +2057,8 @@ Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 
     PERL_ARGS_ASSERT_MY_MEMSET;
 
+    assert(len >= 0);
+
     while (len--)
 	*loc++ = ch;
     return retval;
@@ -2061,6 +2073,8 @@ Perl_my_bzero(register char *loc, register I32 len)
     char * const retval = loc;
 
     PERL_ARGS_ASSERT_MY_BZERO;
+
+    assert(len >= 0);
 
     while (len--)
 	*loc++ = 0;
@@ -2078,6 +2092,8 @@ Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
     I32 tmp;
 
     PERL_ARGS_ASSERT_MY_MEMCMP;
+
+    assert(len >= 0);
 
     while (len--) {
         if ((tmp = *a++ - *b++))
@@ -3255,6 +3271,8 @@ void
 Perl_repeatcpy(register char *to, register const char *from, I32 len, register IV count)
 {
     PERL_ARGS_ASSERT_REPEATCPY;
+
+    assert(len >= 0);
 
     if (count < 0)
 	croak_memory_wrap();
