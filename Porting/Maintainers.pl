@@ -230,7 +230,7 @@ use File::Glob qw(:case);
 
     'autodie' => {
         'MAINTAINER'   => 'pjf',
-        'DISTRIBUTION' => 'PJF/autodie-2.12.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.13.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{^inc/Module/},
