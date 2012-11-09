@@ -940,7 +940,6 @@
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-#define _core_swash_init(a,b,c,d,e,f,g)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g)
 #define _get_invlist_len_addr(a)	S__get_invlist_len_addr(aTHX_ a)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
 #define _invlist_contains_cp(a,b)	S__invlist_contains_cp(aTHX_ a,b)
@@ -948,6 +947,9 @@
 #define _invlist_len(a)		S__invlist_len(aTHX_ a)
 #define _invlist_search(a,b)	Perl__invlist_search(aTHX_ a,b)
 #define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
+#define _core_swash_init(a,b,c,d,e,f,g)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)

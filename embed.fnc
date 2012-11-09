@@ -1410,10 +1410,12 @@ EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
 EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EXMp	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
 EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 		|NN SV* listsv|I32 minbits|I32 none \
 		|NULLOK SV* invlist|NULLOK U8* const flags_p
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV	|_invlist_len	|NN SV* const invlist
