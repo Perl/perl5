@@ -74,7 +74,7 @@ The documentation for the C<upper> function now actually says "upper", not
 
 =head3 L<Module::CoreList>
 
-L<Module::CoreList> has been updated to version 2.50_01 to add data for
+L<Module::CoreList> has been updated to version 2.50_02 to add data for
 this release.
 
 =head1 Changes to Existing Documentation
