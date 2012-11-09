@@ -433,8 +433,10 @@ Perl developers, please write to perl-thanks@perl.org .
 Using the C<use strict> pragma ensures that all variables are properly
 declared and prevents other misuses of legacy Perl features.
 
-The C<use warnings> pragma (and the globally applied and deprecated B<-w>
-switch) produce some lovely diagnostics.
+The C<use warnings> pragma produces some lovely diagnostics. One can
+also use the B<-w> flag, but its use is normally discouraged, because
+it gets applied to all executed Perl code, including that not under
+your control.
 
 See L<perldiag> for explanations of all Perl's diagnostics.  The C<use
 diagnostics> pragma automatically turns Perl's normally terse warnings
