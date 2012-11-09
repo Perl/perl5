@@ -444,6 +444,7 @@ the strings?).
  Ricardo  5.12.3        2011-Jan-21
  Leon     5.12.4-RC1    2011-Jun-08
  Leon     5.12.4        2011-Jun-20
+ Dominic  5.12.5        2012-Nov-10
 
  Leon     5.13.0        2010-Apr-20     The 5.13 development track
  Ricardo  5.13.1        2010-May-20
