@@ -2639,9 +2639,6 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
      * interior, hence to the "}".  Finds what the name resolves to, returning
      * an SV* containing it; NULL if no valid one found */
 
-    STRLEN len;
-    const char *str;
-    const char* i = s;
     SV* res = newSVpvn_flags(s, e - s, UTF ? SVf_UTF8 : 0);
 
     HV * table;
@@ -2695,76 +2692,134 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
        }
     }
 
-    /* A custom translator can leave res not in UTF-8, so make sure.  XXX This
-     * can be revisited to not use utf8 for characters that don't need it when
-     * regexes don't have to be in utf8 for Unicode semantics.  If doing so,
-     * remember EBCDIC */
-    sv_utf8_upgrade(res);
-
-    /* Don't accept malformed input */
-    str = SvPV_const(res, len);
-    if (! is_utf8_string((U8 *) str, len)) {
-        yyerror("Malformed UTF-8 returned by \\N");
-        return NULL;
-    }
+    /* Here, it isn't Perl's charname handler.  We can't rely on a
+     * user-supplied handler to validate the input name.  For non-ut8 input,
+     * look to see that the first character is legal.  Then loop through the
+     * rest checking that each is a continuation */
 
     /* This code needs to be sync'ed with a regex in _charnames.pm which does
      * the same thing */
 
-    /* For non-ut8 input, look to see that the first character is an alpha,
-     * then loop through the rest checking that each is a continuation */
     if (! UTF) {
-        if (! isALPHAU(*i)) {
+        if (! isALPHAU(*s)) {
             goto bad_charname;
         }
-        else for (i = s + 1; i < e; i++) {
-            if (! isCHARNAME_CONT(*i)) {
+        s++;
+        while (s < e) {
+            if (! isCHARNAME_CONT(*s)) {
                 goto bad_charname;
             }
+            s++;
         }
     }
     else {
-        /* Similarly for utf8.  For invariants can check directly.  We accept
-         * anything above the latin1 range because it is immaterial to Perl if
-         * it is correct or not, and is expensive to check.  But it is fairly
-         * easy in the latin1 range to convert the variants into a single
-         * character and check those */
-        if (UTF8_IS_INVARIANT(*i)) {
-            if (! isALPHAU(*i)) {
+        /* Similarly for utf8.  For invariants can check directly; for other
+         * Latin1, can calculate their code point and check; otherwise  use a
+         * swash */
+        if (UTF8_IS_INVARIANT(*s)) {
+            if (! isALPHAU(*s)) {
                 goto bad_charname;
             }
-        } else if (UTF8_IS_DOWNGRADEABLE_START(*i)) {
-            if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*i,
-                                                        *(i+1)))))
-            {
+            s++;
+        } else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+            if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*s, *(s+1))))) {
                 goto bad_charname;
+            }
+            s += 2;
+        }
+        else {
+            if (! PL_utf8_charname_begin) {
+                U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
+                PL_utf8_charname_begin = _core_swash_init("utf8",
+                                                        "_Perl_Charname_Begin",
+                                                        &PL_sv_undef,
+                                                        1, 0, NULL, &flags);
+            }
+            if (! swash_fetch(PL_utf8_charname_begin, (U8 *) s, TRUE)) {
+                goto bad_charname;
+            }
+            s += UTF8SKIP(s);
+        }
+
+        while (s < e) {
+            if (UTF8_IS_INVARIANT(*s)) {
+                if (! isCHARNAME_CONT(*s)) {
+                    goto bad_charname;
+                }
+                s++;
+            }
+            else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+                if (! isCHARNAME_CONT(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*s,
+                                                                    *(s+1)))))
+                {
+                    goto bad_charname;
+                }
+                s += 2;
+            }
+            else {
+                if (! PL_utf8_charname_continue) {
+                    U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
+                    PL_utf8_charname_continue = _core_swash_init("utf8",
+                                                "_Perl_Charname_Continue",
+                                                &PL_sv_undef,
+                                                1, 0, NULL, &flags);
+                }
+                if (! swash_fetch(PL_utf8_charname_continue, (U8 *) s, TRUE)) {
+                    goto bad_charname;
+                }
+                s += UTF8SKIP(s);
             }
         }
-        for (i = s + UTF8SKIP(s); i < e; i+= UTF8SKIP(i)) {
-            if (UTF8_IS_INVARIANT(*i)) {
-                if (isCHARNAME_CONT(*i)) continue;
-            } else if (! UTF8_IS_DOWNGRADEABLE_START(*i)) {
-                continue;
-            } else if (isCHARNAME_CONT(
-                        UNI_TO_NATIVE(
-                        TWO_BYTE_UTF8_TO_UNI(*i, *(i+1)))))
-            {
-                continue;
-            }
-            goto bad_charname;
+    }
+
+    /* A custom translator can leave res not in UTF-8, so make sure.  XXX This
+     * can be revisited to not use utf8 for characters that don't need it when
+     * regexes don't have to be in utf8 for Unicode semantics.  If doing so,
+     * remember EBCDIC */
+    if (! SvUTF8(res)) {
+        sv_utf8_upgrade(res);
+    }
+    else { /* Don't accept malformed input */
+        const U8* first_bad_char_loc;
+        STRLEN len;
+        const char* const str = SvPV_const(res, len);
+        if (! is_utf8_string_loc((U8 *) str, len, &first_bad_char_loc)) {
+            /* If warnings are on, this will print a more detailed analysis of
+             * what is wrong than the error message below */
+            utf8n_to_uvuni(first_bad_char_loc,
+                           (char *) first_bad_char_loc - str,
+                           NULL, 0);
+
+            /* We deliberately don't try to print the malformed character,
+             * which might not print very well; it also may be just the first
+             * of many malformations, so don't print what comes after it */
+            yyerror_pv(
+              Perl_form(aTHX_
+                "Malformed UTF-8 returned by %.*s immediately after '%.*s'",
+                 (int) (e - backslash_ptr + 1), backslash_ptr,
+                 (int) ((char *) first_bad_char_loc - str), str
+              ),
+              SVf_UTF8);
+            return NULL;
         }
     }
 
     return res;
 
-  bad_charname:
+  bad_charname: {
+        int bad_char_size = ((UTF) ? UTF8SKIP(s) : 1);
 
-    /* The e-i passed to the final %.*s makes sure that should the trailing NUL
-     * be missing that this print won't run off the end of the string */
-    yyerror(Perl_form(aTHX_
-        "Invalid character in \\N{...}; marked by <-- HERE in \\N{%.*s<-- HERE %.*s",
-        (int)(i - s + 1), s, (int)(e - i), i + 1));
-    return NULL;
+        /* The final %.*s makes sure that should the trailing NUL be missing
+         * that this print won't run off the end of the string */
+        yyerror_pv(
+          Perl_form(aTHX_
+            "Invalid character in \\N{...}; marked by <-- HERE in %.*s<-- HERE %.*s",
+            (int)(s - backslash_ptr + bad_char_size), backslash_ptr,
+            (int)(e - s + bad_char_size), s + bad_char_size
+          ),
+          UTF ? SVf_UTF8 : 0);
+        return NULL;
+    }
 }
 
 /*
@@ -9010,9 +9065,12 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
             why3 = "} is not defined";
         report:
             if (strEQ(key,"charnames")) {
-                msg = Perl_newSVpvf(aTHX_
-                        /* The +3 is for '\N{'; -4 for that, plus '}' */
-                        "Unknown charname '%.*s'", (int)typelen - 4, type + 3);
+                yyerror_pv(Perl_form(aTHX_
+                            /* The +3 is for '\N{'; -4 for that, plus '}' */
+                            "Unknown charname '%.*s'", (int)typelen - 4, type + 3
+                           ),
+                           UTF ? SVf_UTF8 : 0);
+                return sv;
             }
             else {
                 msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",

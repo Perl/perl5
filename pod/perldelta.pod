@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Character name aliases may now include non-Latin1-range characters
+
+It is possible to define your own names for characters for use in
+C<\N{...}>, C<charnames::vianame()>, etc.  These names can now be
+comprised of characters from the whole Unicode range.  This allows for
+names to be in your native language, and not just English.  Certain
+restrictions apply to the characters that may be used (you can't define
+a name that has punctuation in it, for example).  See L<charnames/CUSTOM
+ALIASES>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

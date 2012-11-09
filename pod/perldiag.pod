@@ -2710,7 +2710,7 @@ just before the first bad one.  If C<utf8> warnings are enabled, a
 warning is generated that gives more details about the type of
 malformation.
 
-=item Malformed UTF-8 returned by \N
+=item Malformed UTF-8 returned by \N{%s} immediately after '%s'
 
 (F) The charnames handler returned malformed UTF-8.
 

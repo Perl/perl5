@@ -1024,6 +1024,25 @@ sub run_tests {
         my $name = "A\x{D7}O";
         eval "q(W) =~ /\\N{$name}/";
         ok $@ && $@ =~ /Invalid character/, 'Verify that latin1 symbol in name gives error';
+        my $utf8_name = "7 CITIES OF GOLD";
+        utf8::upgrade($utf8_name);
+        eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
+        ok $@ && $@ =~ /Invalid character/, 'Verify that leading digit in utf8 name gives error';
+        $utf8_name = "SHARP #";
+        utf8::upgrade($utf8_name);
+        eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
+        ok $@ && $@ =~ /Invalid character/, 'Verify that ASCII symbol in utf8 name gives error';
+        $utf8_name = "A HOUSE \xF7 AGAINST ITSELF";
+        utf8::upgrade($utf8_name);
+        eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
+        ok $@ && $@ =~ /Invalid character/, 'Verify that latin1 symbol in utf8 name gives error';
+        $utf8_name = "\x{664} HORSEMEN}";
+        eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
+        ok $@ && $@ =~ /Invalid character/, 'Verify that leading above Latin1 digit in utf8 name gives error';
+        $utf8_name = "A \x{1F4A9} WOULD SMELL AS SWEET}";
+        eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
+        ok $@ && $@ =~ /Invalid character/, 'Verify that above Latin1 symbol in utf8 name gives error';
+
         undef $w;
         $name = "A\x{D1}O";
         eval "q(W) =~ /\\N{$name}/";

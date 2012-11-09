@@ -88,6 +88,8 @@ sub string_vianame {
 1;
 __END__
 
+=encoding utf8
+
 =head1 NAME
 
 charnames - access to Unicode character names and named character sequences; also define character names
@@ -110,12 +112,16 @@ charnames - access to Unicode character names and named character sequences; als
  use charnames qw(cyrillic greek);
  print "\N{sigma} is Greek sigma, and \N{be} is Cyrillic b.\n";
 
+ use utf8;
  use charnames ":full", ":alias" => {
    e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
    mychar => 0xE8000,  # Private use area
+   "自転車に乗る人" => "BICYCLIST"
  };
  print "\N{e_ACUTE} is a small letter e with an acute.\n";
  print "\N{mychar} allows me to name private use characters.\n";
+ print "And I can create synonyms in other languages,",
+       " such as \N{自転車に乗る人} for "BICYCLIST (U+1F6B4)\n";
 
  use charnames ();
  print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
@@ -270,9 +276,19 @@ conventions.  The aliases override any standard definitions, so, if
 you're twisted enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to
 mean C<"B">, etc.
 
-Aliases may not begin with anything other than an alphabetic character nor
-contain anything other than alphanumerics, spaces, dashes, parentheses, and
-underscores.  Currently they must be Latin1.
+Aliases must begin with a character that is alphabetic.  After that, each may
+contain any combination of word (C<\w>) characters, SPACE, (U+0020),
+HYPHEN-MINUS (U+002D), LEFT PARENTHESIS (U+0028), RIGHT PARENTHESIS (U+0029),
+and NO-BREAK SPACE (U+00A0).  These last three should never have been allowed
+in names, and are retained for backwards compatibility only; they may be
+deprecated and removed in future releases of Perl, so don't use them for new
+names.  (More precisely, the first character of a name you specify must be
+something that matches all of C<\p{ID_Start}>, C<\p{Alphabetic}>, and
+C<\p{Gc=Letter}>.  This makes sure it is what any reasonable person would view
+as an alphabetic character.  And, the other characters that match C<\w> must
+also match C<\p{ID_Continue}>.)  Starting with Perl v5.18, any Unicode
+characters meeting the above criteria may be used; prior to that only
+Latin1-range characters were acceptable.
 
 An alias can map to either an official Unicode character name (not a loose
 matched name) or to a
@@ -470,10 +486,6 @@ vianame() normally returns an ordinal code point, but when the input name is of
 the form C<U+...>, it returns a chr instead.  In this case, if C<use bytes> is
 in effect and the character won't fit into a byte, it returns C<undef> and
 raises a warning.
-
-Names must be ASCII characters only, which means that you are out of luck if
-you want to create aliases in a language where some or all the characters of
-the desired aliases are non-ASCII.
 
 Since evaluation of the translation function (see L</CUSTOM
 TRANSLATORS>) happens in the middle of compilation (of a string

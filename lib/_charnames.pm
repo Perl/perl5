@@ -167,6 +167,8 @@ sub alias (@) # Set up a single alias
         $^H{charnames_inverse_ords}{sprintf("%05X", $value)} = $name;
     }
     else {
+        # This regex needs to be sync'd with the code in toke.c that checks
+        # for the same thing
         if ($name !~ / ^
                        \p{_Perl_Charname_Begin}
                        \p{_Perl_Charname_Continue}*

@@ -362,10 +362,35 @@ Invalid character in charnames alias definition; marked by <-- HERE in '4<-- HER
 Invalid character in charnames alias definition; marked by <-- HERE in 'e_A,<-- HERE CUTE'
 Invalid character in charnames alias definition; marked by <-- HERE in 'e_ACUT(?:\x{d7}|\x{C3}\x{97})<-- HERE E'
 ########
-# RT#73022, \N{...} interprets ... as octets rather than UTF-8
+# RT#73022
+# NAME \N{...} interprets ... as octets rather than UTF-8
 use utf8;
 use open qw( :utf8 :std );
-use charnames ":full", ":alias" => { ニ => "KATAKANA LETTER NI" };
-print "ok\n" if "\N{ニ}" eq "\x{30cb}";
+use charnames ":full", ":alias" => { "自転車に乗る人" => "BICYCLIST" };
+print "ok\n" if "\N{自転車に乗る人}" eq "\x{1F6B4}";
 EXPECT
 ok
+########
+# NAME Misspelled \N{} UTF-8 names are errors
+use utf8;
+use open qw( :utf8 :std );
+use charnames ":full", ":alias" => { "自転車に乗る人" => "BICYCLIST" };
+print "ok\n" if "\N{転車に乗る人}" eq "\x{1F6B4}";
+EXPECT
+OPTIONS regex
+Unknown charname '転車に乗る人' at - line \d+, within string
+########
+# NAME various wrong UTF-8 characters in :alias are errors
+# First has a punctuation, KATAKANA MIDDLE DOT, in it; second begins with a
+# digit: ARABIC-INDIC DIGIT FOUR
+use utf8;
+use open qw( :utf8 :std );
+use charnames ":full", ":alias" => { "自転車・に乗る人" => "BICYCLIST",
+                                     "٤転車に乗る人" => "BICYCLIST",
+                                    };
+print "ok\n" if "\N{自転車・に乗る人}" eq "\x{1F6B4}";
+print "ok\n" if "\N{٤転車に乗る人}" eq "\x{1F6B4}";
+EXPECT
+OPTIONS regex
+Invalid character in charnames alias definition; marked by <-- HERE in '٤<-- HERE 転車に乗る人'
+Invalid character in charnames alias definition; marked by <-- HERE in '自転車・<-- HERE に乗る人' at - line \d+
