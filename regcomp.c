@@ -12600,6 +12600,7 @@ parseit:
 
             RExC_parse = (char *) cur_parse;
 
+            SvREFCNT_dec(posixes);
             SvREFCNT_dec(listsv);
             SvREFCNT_dec(cp_list);
             return ret;
@@ -13086,6 +13087,7 @@ parseit:
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value);
             }
 
+            SvREFCNT_dec(cp_list);
             SvREFCNT_dec(listsv);
             return ret;
         }

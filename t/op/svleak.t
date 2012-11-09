@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 58;
+plan tests => 60;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -176,6 +176,8 @@ leak(2, 0,
 eleak(2,0,'/[:]/');
 eleak(2,0,'/[\xdf]/i');
 eleak(2,0,'s![^/]!!');
+eleak(2,0,'/[pp]/');
+eleak(2,0,'/[[:ascii:]]/');
 
 leak(2,0,sub { !$^V }, '[perl #109762] version object in boolean context');
 
