@@ -41,7 +41,7 @@ This problem has been fixed.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.XXX.XXX. If any
+There are no changes intentionally incompatible with 5.12.4. If any
 exist, they are bugs and reports are welcome.
 
 =head1 Modules and Pragmata
