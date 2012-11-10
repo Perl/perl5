@@ -1810,6 +1810,7 @@ void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
     dVAR;
+    SV *sv;
     ASSERT_CURPAD_LEGAL("pad_free");
     if (!PL_curpad)
 	return;
@@ -1824,9 +1825,11 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	    PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po)
     );
 
-    if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef) {
-	SvFLAGS(PL_curpad[po]) &= ~SVs_PADTMP; /* also clears SVs_PADSTALE */
-    }
+
+    sv = PL_curpad[po];
+    if (sv && sv != &PL_sv_undef && !SvPADMY(sv))
+	SvFLAGS(sv) &= ~SVs_PADTMP;
+
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
 }

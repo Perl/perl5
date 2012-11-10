@@ -84,6 +84,7 @@ PP(pp_padav)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
+        /* XXX see also S_pushav in pp_hot.c */
 	const I32 maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
 	EXTEND(SP, maxarg);
 	if (SvMAGICAL(TARG)) {

@@ -306,6 +306,75 @@ PP(pp_concat)
   }
 }
 
+/* push the elements of av onto the stack.
+ * XXX Note that padav has similar code but without the mg_get().
+ * I suspect that the mg_get is no longer needed, but while padav
+ * differs, it can't share this function */
+
+void
+S_pushav(pTHX_ AV* const av)
+{
+    dSP;
+    const I32 maxarg = AvFILL(av) + 1;
+    EXTEND(SP, maxarg);
+    if (SvRMAGICAL(av)) {
+        U32 i;
+        for (i=0; i < (U32)maxarg; i++) {
+            SV ** const svp = av_fetch(av, i, FALSE);
+            /* See note in pp_helem, and bug id #27839 */
+            SP[i+1] = svp
+                ? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
+                : &PL_sv_undef;
+        }
+    }
+    else {
+        Copy(AvARRAY(av), SP+1, maxarg, SV*);
+    }
+    SP += maxarg;
+    PUTBACK;
+}
+
+
+/* ($lex1,@lex2,...)   or my ($lex1,@lex2,...)  */
+
+PP(pp_padrange)
+{
+    dVAR; dSP;
+    PADOFFSET base = PL_op->op_targ;
+    int count = (int)(PL_op->op_private) & OPpPADRANGE_COUNTMASK;
+    int i;
+    if (PL_op->op_flags & OPf_SPECIAL) {
+        /* fake the RHS of my ($x,$y,..) = @_ */
+        PUSHMARK(SP);
+        S_pushav(aTHX_ GvAVn(PL_defgv));
+        SPAGAIN;
+    }
+
+    /* note, this is only skipped for compile-time-known void cxt */
+    if ((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID) {
+        EXTEND(SP, count);
+        PUSHMARK(SP);
+        for (i = 0; i <count; i++)
+            *++SP = PAD_SV(base+i);
+    }
+    if (PL_op->op_private & OPpLVAL_INTRO) {
+        SV **svp = &(PAD_SVl(base));
+        const UV payload = (UV)(
+                      (base << (OPpPADRANGE_COUNTSHIFT + SAVE_TIGHT_SHIFT))
+                    | (count << SAVE_TIGHT_SHIFT)
+                    | SAVEt_CLEARPADRANGE);
+        assert(OPpPADRANGE_COUNTMASK + 1 == (1 <<OPpPADRANGE_COUNTSHIFT));
+        assert((payload >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT)) == base);
+        SSCHECK(1);
+        SSPUSHUV(payload);
+
+        for (i = 0; i <count; i++)
+            SvPADSTALE_off(*svp++); /* mark lexical as active */
+    }
+    RETURN;
+}
+
+
 PP(pp_padsv)
 {
     dVAR; dSP; dTARGET;
@@ -817,23 +886,10 @@ PP(pp_rv2av)
 	   (until such time as we get tools that can do blame annotation across
 	   whitespace changes.  */
 	if (gimme == G_ARRAY) {
-	    const I32 maxarg = AvFILL(av) + 1;
-	    (void)POPs;			/* XXXX May be optimized away? */
-	    EXTEND(SP, maxarg);
-	    if (SvRMAGICAL(av)) {
-		U32 i;
-		for (i=0; i < (U32)maxarg; i++) {
-		    SV ** const svp = av_fetch(av, i, FALSE);
-		    /* See note in pp_helem, and bug id #27839 */
-		    SP[i+1] = svp
-			? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
-			: &PL_sv_undef;
-		}
-	    }
-	    else {
-		Copy(AvARRAY(av), SP+1, maxarg, SV*);
-	    }
-	    SP += maxarg;
+            SP--;
+            PUTBACK;
+            S_pushav(aTHX_ av);
+            SPAGAIN;
 	}
 	else if (gimme == G_SCALAR) {
 	    dTARGET;

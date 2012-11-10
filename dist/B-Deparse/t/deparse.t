@@ -1279,3 +1279,92 @@ select F;
 select $f;
 select $mfh;
 select 'a+b';
+####
+# 'my' works with padrange op
+my($z, @z);
+my $m1;
+$m1 = 1;
+$z = $m1;
+my $m2 = 2;
+my($m3, $m4);
+($m3, $m4) = (1, 2);
+@z = ($m3, $m4);
+my($m5, $m6) = (1, 2);
+my($m7, undef, $m8) = (1, 2, 3);
+@z = ($m7, undef, $m8);
+($m7, undef, $m8) = (1, 2, 3);
+####
+# 'our/local' works with padrange op
+no strict;
+our($z, @z);
+our $o1;
+local $o11;
+$o1 = 1;
+local $o1 = 1;
+$z = $o1;
+$z = local $o1;
+our $o2 = 2;
+our($o3, $o4);
+($o3, $o4) = (1, 2);
+local($o3, $o4) = (1, 2);
+@z = ($o3, $o4);
+@z = local($o3, $o4);
+our($o5, $o6) = (1, 2);
+our($o7, undef, $o8) = (1, 2, 3);
+@z = ($o7, undef, $o8);
+@z = local($o7, undef, $o8);
+($o7, undef, $o8) = (1, 2, 3);
+local($o7, undef, $o8) = (1, 2, 3);
+####
+# 'state' works with padrange op
+no strict;
+use feature 'state';
+state($z, @z);
+state $s1;
+$s1 = 1;
+$z = $s1;
+state $s2 = 2;
+state($s3, $s4);
+($s3, $s4) = (1, 2);
+@z = ($s3, $s4);
+# assignment of state lists isn't implemented yet
+#state($s5, $s6) = (1, 2);
+#state($s7, undef, $s8) = (1, 2, 3);
+#@z = ($s7, undef, $s8);
+($s7, undef, $s8) = (1, 2, 3);
+####
+# anon lists with padrange
+my($a, $b);
+my $c = [$a, $b];
+my $d = {$a, $b};
+####
+# slices with padrange
+my($a, $b);
+my(@x, %y);
+@x = @x[$a, $b];
+@x = @y{$a, $b};
+####
+# binops with padrange
+my($a, $b, $c);
+$c = $a cmp $b;
+$c = $a + $b;
+$a += $b;
+$c = $a - $b;
+$a -= $b;
+$c = my $a1 cmp $b;
+$c = my $a2 + $b;
+$a += my $b1;
+$c = my $a3 - $b;
+$a -= my $b2;
+####
+# 'x' with padrange
+my($a, $b, $c, $d, @e);
+$c = $a x $b;
+$a x= $b;
+@e = ($a) x $d;
+@e = ($a, $b) x $d;
+@e = ($a, $b, $c) x $d;
+@e = ($a, 1) x $d;
+####
+# @_ with padrange
+my($a, $b, $c) = @_;

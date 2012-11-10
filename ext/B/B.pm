@@ -1235,6 +1235,29 @@ Since perl 5.17.1
 =back
 
 
+=head2 $B::overlay
+
+Although the optree is read-only, there is an overlay facility that allows
+you to override what values the various B::*OP methods return for a
+particular op. C<$B::overlay> should be set to reference a two-deep hash:
+indexed by OP address, then method name. Whenever a an op method is
+called, the value in the hash is returned if it exists. This facility is
+used by B::Deparse to "undo" some optimisations. For example:
+
+
+    local $B::overlay = {};
+    ...
+    if ($op->name eq "foo") {
+        $B::overlay->{$$op} = {
+                name => 'bar',
+                next => $op->next->next,
+        };
+    }
+    ...
+    $op->name # returns "bar"
+    $op->next # returns the next op but one
+
+
 =head1 AUTHOR
 
 Malcolm Beattie, C<mbeattie@sable.ox.ac.uk>

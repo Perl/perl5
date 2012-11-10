@@ -167,6 +167,7 @@ PERL_CALLCONV OP *Perl_pp_pack(pTHX);
 PERL_CALLCONV OP *Perl_pp_padav(pTHX);
 PERL_CALLCONV OP *Perl_pp_padcv(pTHX);
 PERL_CALLCONV OP *Perl_pp_padhv(pTHX);
+PERL_CALLCONV OP *Perl_pp_padrange(pTHX);
 PERL_CALLCONV OP *Perl_pp_padsv(pTHX);
 PERL_CALLCONV OP *Perl_pp_pipe_op(pTHX);
 PERL_CALLCONV OP *Perl_pp_pos(pTHX);

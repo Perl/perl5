@@ -140,6 +140,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    - Before ck_glob, called as CORE::glob
 				    - After ck_glob, use Perl glob function
 			         */
+                                /*  On OP_PADRANGE, push @_ */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -234,6 +235,11 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_PADSV only */
 #define OPpPAD_STATE		16	/* is a "state" pad */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
+
+  /* OP_PADRANGE only */
+  /* bit 7 is OPpLVAL_INTRO */
+#define OPpPADRANGE_COUNTMASK	127	/* bits 6..0 hold target range, */
+#define OPpPADRANGE_COUNTSHIFT	7	/* 7 bits in total */
 
   /* OP_RV2GV only */
 #define OPpDONT_INIT_GV		4	/* Call gv_fetchpv with GV_NOINIT */

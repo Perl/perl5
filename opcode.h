@@ -524,6 +524,7 @@ EXTCONST char* const PL_op_name[] = {
 	"padcv",
 	"introcv",
 	"clonecv",
+	"padrange",
 	"freed",
 };
 #endif
@@ -908,6 +909,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"private subroutine",
 	"private subroutine",
 	"private subroutine",
+	"list of private variables",
 	"freed op",
 };
 #endif
@@ -1306,6 +1308,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_padcv,
 	Perl_pp_introcv,
 	Perl_pp_clonecv,
+	Perl_pp_padrange,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1700,6 +1703,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* padcv */
 	Perl_ck_null,		/* introcv */
 	Perl_ck_null,		/* clonecv */
+	Perl_ck_null,		/* padrange */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2088,6 +2092,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* padcv */
 	0x00000040,	/* introcv */
 	0x00000040,	/* clonecv */
+	0x00000040,	/* padrange */
 };
 #endif
 

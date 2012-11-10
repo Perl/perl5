@@ -693,7 +693,7 @@ sub mkCheckRex {
 		)
 		(?:(:>,<,%,\\{)		# hints when open.pm is in force
 		   |(:>,<,%))		# (two variations)
-		(\ ->[0-9a-z]+)?
+		(\ ->(?:-|[0-9a-z]+))?
 		$
 	       ]
 	[$1 . ($2 && ':{') . $4]xegm;	# change to the hints without open.pm

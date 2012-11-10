@@ -596,7 +596,7 @@ our %priv; # used to display each opcode's BASEOP.op_private values
 $priv{$_}{128} = "LVINTRO"
   for ("pos", "substr", "vec", "threadsv", "gvsv", "rv2sv", "rv2hv", "rv2gv",
        "rv2av", "rv2arylen", "aelem", "helem", "aslice", "hslice", "padsv",
-       "padav", "padhv", "enteriter", "entersub");
+       "padav", "padhv", "enteriter", "entersub", "padrange", "pushmark");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
 $priv{"aassign"}{32} = "STATE";
@@ -787,30 +787,39 @@ sub concise_op {
 	    $h{targarglife} = $h{targarg} = "$h{targ} $refs";
 	}
     } elsif ($h{targ}) {
-	my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}];
-	if (defined $padname and class($padname) ne "SPECIAL") {
-	    $h{targarg}  = $padname->PVX;
-	    if ($padname->FLAGS & SVf_FAKE) {
-		# These changes relate to the jumbo closure fix.
-		# See changes 19939 and 20005
-		my $fake = '';
-		$fake .= 'a'
-		    if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
-		$fake .= 'm'
-		    if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
-		$fake .= ':' . $padname->PARENT_PAD_INDEX
-		    if $curcv->CvFLAGS & CVf_ANON;
-		$h{targarglife} = "$h{targarg}:FAKE:$fake";
+	my $count = $h{name} eq 'padrange' ? ($op->private & 127) : 1;
+	my (@targarg, @targarglife);
+	for my $i (0..$count-1) {
+	    my ($targarg, $targarglife);
+	    my $padname = (($curcv->PADLIST->ARRAY)[0]->ARRAY)[$h{targ}+$i];
+	    if (defined $padname and class($padname) ne "SPECIAL") {
+		$targarg  = $padname->PVX;
+		if ($padname->FLAGS & SVf_FAKE) {
+		    # These changes relate to the jumbo closure fix.
+		    # See changes 19939 and 20005
+		    my $fake = '';
+		    $fake .= 'a'
+			if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
+		    $fake .= 'm'
+			if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
+		    $fake .= ':' . $padname->PARENT_PAD_INDEX
+			if $curcv->CvFLAGS & CVf_ANON;
+		    $targarglife = "$targarg:FAKE:$fake";
+		}
+		else {
+		    my $intro = $padname->COP_SEQ_RANGE_LOW - $cop_seq_base;
+		    my $finish = int($padname->COP_SEQ_RANGE_HIGH) - $cop_seq_base;
+		    $finish = "end" if $finish == 999999999 - $cop_seq_base;
+		    $targarglife = "$targarg:$intro,$finish";
+		}
+	    } else {
+		$targarglife = $targarg = "t" . ($h{targ}+$i);
 	    }
-	    else {
-		my $intro = $padname->COP_SEQ_RANGE_LOW - $cop_seq_base;
-		my $finish = int($padname->COP_SEQ_RANGE_HIGH) - $cop_seq_base;
-		$finish = "end" if $finish == 999999999 - $cop_seq_base;
-		$h{targarglife} = "$h{targarg}:$intro,$finish";
-	    }
-	} else {
-	    $h{targarglife} = $h{targarg} = "t" . $h{targ};
+	    push @targarg,     $targarg;
+	    push @targarglife, $targarglife;
 	}
+	$h{targarg}     = join '; ', @targarg;
+	$h{targarglife} = join '; ', @targarglife;
     }
     $h{arg} = "";
     $h{svclass} = $h{svaddr} = $h{svval} = "";

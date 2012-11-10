@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.18';
+$VERSION = '1.19';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -311,6 +311,115 @@ BEGIN {
 # \f - flush left (no indent)
 # \cK - kill following semicolon, if any
 
+
+
+
+# _pessimise_walk(): recursively walk the optree of a sub,
+# possibly undoing optimisations along the way.
+
+sub _pessimise_walk {
+    my ($self, $startop) = @_;
+
+    return unless $$startop;
+    my ($op, $prevop);
+    for ($op = $startop; $$op; $prevop = $op, $op = $op->sibling) {
+	my $ppname = $op->name;
+
+	# pessimisations start here
+
+	if ($ppname eq "padrange") {
+	    # remove PADRANGE:
+	    # the original optimisation either (1) changed this:
+	    #    pushmark -> (various pad and list and null ops) -> the_rest
+	    # or (2), for the = @_ case, changed this:
+	    #    pushmark -> gv[_] -> rv2av -> (pad stuff)       -> the_rest
+	    # into this:
+	    #    padrange ----------------------------------------> the_rest
+	    # so we just need to convert the padrange back into a
+	    # pushmark, and in case (1), set its op_next to op_sibling,
+	    # which is the head of the original chain of optimised-away
+	    # pad ops, or for (2), set it to sibling->first, which is
+	    # the original gv[_].
+
+	    $B::overlay->{$$op} = {
+		    name => 'pushmark',
+		    private => ($op->private & OPpLVAL_INTRO),
+		    next    => ($op->flags & OPf_SPECIAL)
+				    ? $op->sibling->first
+				    : $op->sibling,
+	    };
+	}
+
+	# pessimisations end here
+
+	if (class($op) eq 'PMOP'
+	    && ref($op->pmreplroot)
+	    && ${$op->pmreplroot}
+	    && $op->pmreplroot->isa( 'B::OP' ))
+	{
+	    $self-> _pessimise_walk($op->pmreplroot);
+	}
+
+	if ($op->flags & OPf_KIDS) {
+	    $self-> _pessimise_walk($op->first);
+	}
+
+    }
+}
+
+
+# _pessimise_walk_exe(): recursively walk the op_next chain of a sub,
+# possibly undoing optimisations along the way.
+
+sub _pessimise_walk_exe {
+    my ($self, $startop, $visited) = @_;
+
+    return unless $$startop;
+    return if $visited->{$$startop};
+    my ($op, $prevop);
+    for ($op = $startop; $$op; $prevop = $op, $op = $op->next) {
+	last if $visited->{$$op};
+	$visited->{$$op} = 1;
+	my $ppname = $op->name;
+	if ($ppname =~
+	    /^((and|d?or)(assign)?|(map|grep)while|range|cond_expr|once)$/
+	    # entertry is also a logop, but its op_other invariably points
+	    # into the same chain as the main execution path, so we skip it
+	) {
+	    $self->_pessimise_walk_exe($op->other, $visited);
+	}
+	elsif ($ppname eq "subst") {
+	    $self->_pessimise_walk_exe($op->pmreplstart, $visited);
+	}
+	elsif ($ppname =~ /^(enter(loop|iter))$/) {
+	    # redoop and nextop will already be covered by the main block
+	    # of the loop
+	    $self->_pessimise_walk_exe($op->lastop, $visited);
+	}
+
+	# pessimisations start here
+    }
+}
+
+# Go through an optree and and "remove" some optimisations by using an
+# overlay to selectively modify or un-null some ops. Deparsing in the
+# absence of those optimisations is then easier.
+#
+# Note that older optimisations are not removed, as Deparse was already
+# written to recognise them before the pessimise/overlay system was added.
+
+sub pessimise {
+    my ($self, $root, $start) = @_;
+
+    # walk tree in root-to-branch order
+    $self->_pessimise_walk($root);
+
+    my %visited;
+    # walk tree in execution order
+    $self->_pessimise_walk_exe($start, \%visited);
+}
+
+
 sub null {
     my $op = shift;
     return class($op) eq "NULL";
@@ -377,6 +486,8 @@ sub begin_is_use {
     my ($self, $cv) = @_;
     my $root = $cv->ROOT;
     local @$self{qw'curcv curcvlex'} = ($cv);
+    local $B::overlay = {};
+    $self->pessimise($root, $cv->START);
 #require B::Debug;
 #B::walkoptree($cv->ROOT, "debug");
     my $lineseq = $root->first;
@@ -680,8 +791,12 @@ sub compile {
 	print $self->print_protos;
 	@{$self->{'subs_todo'}} =
 	  sort {$a->[0] <=> $b->[0]} @{$self->{'subs_todo'}};
-	print $self->indent($self->deparse_root(main_root)), "\n"
-	  unless null main_root;
+	my $root = main_root;
+	local $B::overlay = {};
+	unless (null $root) {
+	    $self->pessimise($root, main_start);
+	    print $self->indent($self->deparse_root($root)), "\n";
+	}
 	my @text;
 	while (scalar(@{$self->{'subs_todo'}})) {
 	    push @text, $self->next_todo;
@@ -889,8 +1004,11 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local(@$self{qw'curstash warnings hints hinthash'})
 		= @$self{qw'curstash warnings hints hinthash'};
     my $body;
-    if (not null $cv->ROOT) {
-	my $lineseq = $cv->ROOT->first;
+    my $root = $cv->ROOT;
+    local $B::overlay = {};
+    if (not null $root) {
+	$self->pessimise($root, $cv->START);
+	my $lineseq = $root->first;
 	if ($lineseq->name eq "lineseq") {
 	    my @ops;
 	    for(my$o=$lineseq->first; $$o; $o=$o->sibling) {
@@ -904,7 +1022,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	    }
 	}
 	else {
-	    $body = $self->deparse($cv->ROOT->first, 0);
+	    $body = $self->deparse($root->first, 0);
 	}
     }
     else {
@@ -929,6 +1047,8 @@ sub deparse_format {
     local(@$self{qw'curstash warnings hints hinthash'})
 		= @$self{qw'curstash warnings hints hinthash'};
     my $op = $form->ROOT;
+    local $B::overlay = {};
+    $self->pessimise($op, $form->START);
     my $kid;
     return "\f." if $op->first->name eq 'stub'
                 || $op->first->name eq 'nextstate';
