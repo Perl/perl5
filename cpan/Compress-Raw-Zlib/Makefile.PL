@@ -82,7 +82,7 @@ WriteMakefile(
         : (LIBS => [ "-L$ZLIB_LIB -lz " ])
     ),
       
-    INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
+    INSTALLDIRS => ($] >= 5.009 && $] < 5.011 ? 'perl' : 'site'),
 
     META_MERGE => {
         no_index => {
@@ -101,7 +101,6 @@ sub version_Macro
 
     return [ "#if ZLIB_VERNUM >= 0x$ver\n", "#endif\n" ];
 }
-
 
 my @names = qw(
 
