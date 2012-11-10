@@ -70,6 +70,8 @@ adds new features that you might find useful.
 You can always find the latest version of perl on a CPAN (Comprehensive Perl
 Archive Network) site near you at http://www.cpan.org/src/
 
+If you want to submit a simple patch to the perl source, see the "SUPER
+QUICK PATCH GUIDE" in pod/perlhack.pod.
 
 Just a personal note:  I want you to know that I create nice things like this
 because it pleases the Author of my story.  If this bothers you, then your
