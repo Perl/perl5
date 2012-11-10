@@ -2099,7 +2099,7 @@ sub _DB__handle_forward_slash_command {
                 # Oops. Bad pattern. No biscuit.
                 # Print the eval error and go back for more
                 # commands.
-                print $OUT "$@";
+                print {$OUT} "$@";
                 next CMD;
             }
             $obj->pat($inpat);
@@ -2123,7 +2123,9 @@ sub _DB__handle_forward_slash_command {
                 ++$start;
 
                 # Wrap if we pass the last line.
-                $start = 1 if ($start > $max);
+                if ($start > $max) {
+                    $start = 1;
+                }
 
                 # Stop if we have gotten back to this line again,
                 last if ($start == $end);
@@ -2135,11 +2137,11 @@ sub _DB__handle_forward_slash_command {
                 if ($dbline[$start] =~ m/$pat/i) {
                     if ($slave_editor) {
                         # Handle proper escaping in the slave.
-                        print $OUT "\032\032$filename:$start:0\n";
+                        print {$OUT} "\032\032$filename:$start:0\n";
                     }
                     else {
                         # Just print the line normally.
-                        print $OUT "$start:\t",$dbline[$start],"\n";
+                        print {$OUT} "$start:\t",$dbline[$start],"\n";
                     }
                     # And quit since we found something.
                     last;
@@ -5436,6 +5438,24 @@ later.
 
 =cut
 
+sub _min {
+    my $min = shift;
+    foreach my $v (@_) {
+        if ($v < $min) {
+            $v = $min;
+        }
+    }
+    return $min;
+}
+
+sub _minify_to_max {
+    my $ref = shift;
+
+    $$ref = _min($$ref, $max);
+
+    return;
+}
+
 sub cmd_l {
     my $current_line = $line;
     my $cmd  = shift;
@@ -5501,8 +5521,9 @@ sub cmd_l {
 
         # If we're not in that file, switch over to it.
         if ( $file ne $filename ) {
-            print $OUT "Switching to file '$file'.\n"
-              unless $slave_editor;
+            if (! $slave_editor) {
+                print {$OUT} "Switching to file '$file'.\n";
+            }
 
             # Switch debugger's magic structures.
             *dbline   = $main::{ '_<' . $file };
@@ -5524,7 +5545,7 @@ sub cmd_l {
 
         # Couldn't find it.
         else {
-            print $OUT "Subroutine $subname not found.\n";
+            print {$OUT} "Subroutine $subname not found.\n";
         }
     } ## end elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s)
 
@@ -5547,8 +5568,7 @@ sub cmd_l {
 
         # Increment for list. Use window size if not specified.
         # (Allows 'l +' to work.)
-        $incr = $new_incr;
-        $incr = $window - 1 unless $incr;
+        $incr = $new_incr || ($window - 1);
 
         # Create a line range we'll understand, and recurse to do it.
         $line = $start . '-' . ( $start + $incr );
@@ -5562,7 +5582,7 @@ sub cmd_l {
         my $end = ( !defined $2 ) ? $max : ( $4 ? $4 : $2 );
 
         # Go on to the end, and then stop.
-        $end = $max if $end > $max;
+        _minify_to_max(\$end);
 
         # Determine start line.
         my $i    = $2;
@@ -5583,12 +5603,14 @@ sub cmd_l {
         # - whether a line has a break or not
         # - whether a line has an action or not
         else {
+            I_TO_END:
             for ( ; $i <= $end ; $i++ ) {
 
                 # Check for breakpoints and actions.
                 my ( $stop, $action );
-                ( $stop, $action ) = split( /\0/, $dbline{$i} )
-                  if $dbline{$i};
+                if ($dbline{$i}) {
+                    ( $stop, $action ) = split( /\0/, $dbline{$i} );
+                }
 
                 # ==> if this is the current line in execution,
                 # : if it's breakable.
@@ -5602,21 +5624,26 @@ sub cmd_l {
                 $arrow .= 'a' if $action;
 
                 # Print the line.
-                print $OUT "$i$arrow\t", $dbline[$i];
+                print {$OUT} "$i$arrow\t", $dbline[$i];
 
                 # Move on to the next line. Drop out on an interrupt.
-                $i++, last if $signal;
+                if ($signal) {
+                    $i++;
+                    last I_TO_END;
+                }
             } ## end for (; $i <= $end ; $i++)
 
             # Line the prompt up; print a newline if the last line listed
             # didn't have a newline.
-            print $OUT "\n" unless $dbline[ $i - 1 ] =~ /\n$/;
+            if ($dbline[ $i - 1 ] !~ /\n\z/) {
+                print {$OUT} "\n";
+            }
         } ## end else [ if ($slave_editor)
 
         # Save the point we last listed to in case another relative 'l'
         # command is desired. Don't let it run off the end.
         $start = $i;
-        $start = $max if $start > $max;
+        _minify_to_max(\$start);
     } ## end elsif ($line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/)
 } ## end sub cmd_l
 
