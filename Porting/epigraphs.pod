@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.12.5 - William Shakespeare, Measure for Measure
+
+Announced on 2012-11-10 by Dominic Hargreaves
+
+Music oft hath such a charm                                                   
+To make bad good, and good provoke to harm.                 
+
 =head2 v5.16.2 - Stanislaw Lem, The Cyberiad, Trurl's Machine
 
 L<Announced on 2012-11-01 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-11/msg00017.html>
