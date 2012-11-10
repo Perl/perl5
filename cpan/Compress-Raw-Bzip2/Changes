@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+  2.057 10 November 2012
+
+      * Compress::Raw::Bzip2 needs to use PERL_NO_GET_CONTEXT
+        [#80318]
+
+      * Install to 'site' instead of 'perl' when perl version is 5.11+
+        [#79811]
+
+      * update to ppport.h that includes SvPV_nomg_nolen
+        [#78080] 
+
   2.055 4 August 2012
 
       * Fix misuse of magic in API

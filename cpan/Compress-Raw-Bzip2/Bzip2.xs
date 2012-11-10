@@ -9,7 +9,7 @@
  *
  */
 
-
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -496,7 +496,7 @@ bzdeflate (s, buf, output)
     if (DO_UTF8(buf) && !sv_utf8_downgrade(buf, 1))
          croak("Wide character in " COMPRESS_CLASS "::bzdeflate input parameter");
 #endif         
-    s->stream.next_in = (char*)SvPVbyte_nolen(buf) ;
+    s->stream.next_in = (char*)SvPV_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf) ;
      
     /* and retrieve the output buffer */
@@ -723,7 +723,6 @@ bzinflate (s, buf, output)
     uInt	cur_length = 0;
     uInt	prefix_length = 0;
     uInt	increment = 0;
-    STRLEN  stmp   = NO_INIT
     uInt    bufinc = NO_INIT
   PREINIT:
 #ifdef UTF8_AVAILABLE    
@@ -742,7 +741,7 @@ bzinflate (s, buf, output)
 #endif         
     
     /* initialise the input buffer */
-    s->stream.next_in = (char*)SvPVbyte_force(buf, stmp) ;
+    s->stream.next_in = (char*)SvPV_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf);
 	
     /* and retrieve the output buffer */
