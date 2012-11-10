@@ -80,10 +80,10 @@ directory.
 
 =head2 Changes and Incompatibilities
 
-Please see pod/perl5125delta.pod for a description of the changes and
+Please see pod/perl5126delta.pod for a description of the changes and
 potential incompatibilities introduced with this release.  A few of
 the most important issues are listed below, but you should refer
-to pod/perl5125delta.pod for more detailed information.
+to pod/perl5126delta.pod for more detailed information.
 
 B<WARNING:> This version is not binary compatible with releases of Perl
 prior to 5.12.0. If you have built extensions (i.e. modules that include
@@ -98,7 +98,7 @@ The standard extensions supplied with Perl will be handled automatically.
 
 On a related issue, old modules may possibly be affected by the changes
 in the Perl language in the current release.  Please see
-pod/perl5125delta.pod for a description of what's changed.  See your
+pod/perl5126delta.pod for a description of what's changed.  See your
 installed copy of the perllocal.pod file for a (possibly incomplete)
 list of locally installed modules.  Also see CPAN::autobundle for one
 way to make a "bundle" of your currently installed modules.
