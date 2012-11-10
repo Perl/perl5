@@ -1,3 +1,8 @@
+2.77 Sat Nov 10 2012
+  - Updated for v5.12.5
+  - deprecated_in() function added
+  - corelist reports deprecated data
+
 2.76 Fri Nov  1 2012
   - Updated for v5.16.2
 

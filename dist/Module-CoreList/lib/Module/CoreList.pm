@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.76';
+$VERSION = '2.77';
 
 my $dumpinc = 0;
 sub import {
@@ -199,6 +199,7 @@ sub changes_between {
     5.013011 => '2011-03-20',
     5.014000 => '2011-05-14',
     5.012004 => '2011-06-20',
+    5.012005 => '2012-11-10',
     5.014001 => '2011-06-16',
     5.015000 => '2011-06-20',
     5.015001 => '2011-07-20',
@@ -4356,6 +4357,19 @@ my %delta = (
         removed => {
         }
     },
+    5.012005 => {
+        delta_from => 5.012004,
+        changed => {
+            'B::Concise'            => '0.78_01',
+            'Encode'                => '2.39_01',
+            'File::Glob'            => '1.07_01',
+            'Module::CoreList'      => '2.50_02',
+            'Unicode::UCD'          => '0.29',
+            'charnames'             => '1.07_01',
+        },
+        removed => {
+        }
+    },
     5.013 => {
         delta_from => 5.012,
         changed => {
@@ -7418,6 +7432,12 @@ for my $version (sort { $a <=> $b } keys %delta) {
 	'Shell'                 => '1',
     },
     5.012004 => {
+	'Class::ISA'            => '1',
+	'Pod::Plainer'          => '1',
+	'Shell'                 => '1',
+	'Switch'                => '1',
+    },
+    5.012005 => {
 	'Class::ISA'            => '1',
 	'Pod::Plainer'          => '1',
 	'Shell'                 => '1',
