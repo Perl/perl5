@@ -1,6 +1,10 @@
 #!perl
-use Test::More tests => 9;
+use Test::More;
 use strict;
+
+if( $> == 0 ) {
+    plan skip_all => "Root can write to 'unwritable files', so many of these tests don't make sense for root.";
+}
 
 my ($testdir, $testdir2);
 
@@ -33,5 +37,7 @@ isnt($CGITempFile::TMPDIRECTORY, $testdir2,
     "unwritable \$ENV{TMPDIR} overridden");
 isnt($CGITempFile::TMPDIRECTORY, $testdir,
     "unwritable \$ENV{TMPDIR} not overridden with an unwritable \$CGITempFile::TMPDIRECTORY");
+
+done_testing();
 
 END { for ($testdir, $testdir2) { chmod 0700, $_; rmdir; } }

@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.61';
+$CGI::VERSION='3.62';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -128,10 +128,6 @@ sub initialize_globals {
 }
 
 # ------------------ START OF THE LIBRARY ------------
-
-#### Method: endform
-# This method is DEPRECATED
-*endform = \&end_form;
 
 # make mod_perlhappy
 initialize_globals();
@@ -1960,8 +1956,25 @@ END_OF_FUNC
 
 #### Method: end_form
 # End a form
+# Note: This repeated below under the older name.
 'end_form' => <<'END_OF_FUNC',
 sub end_form {
+    my($self,@p) = self_or_default(@_);
+    if ( $NOSTICKY ) {
+        return wantarray ? ("</form>") : "\n</form>";
+    } else {
+        if (my @fields = $self->get_fields) {
+            return wantarray ? ("<div>",@fields,"</div>","</form>")
+                             : "<div>".(join '',@fields)."</div>\n</form>";
+        } else {
+            return "</form>";
+        }
+    }
+}
+END_OF_FUNC
+
+'endform' => <<'END_OF_FUNC',
+sub endform {
     my($self,@p) = self_or_default(@_);
     if ( $NOSTICKY ) {
         return wantarray ? ("</form>") : "\n</form>";
