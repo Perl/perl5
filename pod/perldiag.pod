@@ -711,7 +711,7 @@ error if you use an explicit C<continue>.)
 =item Can't do inplace edit: %s is not a regular file
 
 (S inplace) You tried to use the B<-i> switch on a special file, such as
-a file in /dev, or a FIFO.  The file was ignored.
+a file in /dev, a FIFO or an uneditable directory.  The file was ignored.
 
 =item Can't do inplace edit on %s: %s
 
