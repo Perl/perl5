@@ -922,29 +922,29 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
     }
     XSRETURN_UNDEF; /* Can't happen. */
 }
-
 XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
     dVAR;
     dXSARGS;
     SV * const svz = ST(0);
     SV * sv;
+    U32 refcnt;
     PERL_UNUSED_ARG(cv);
 
     /* [perl #77776] - called as &foo() not foo() */
-    if (!SvROK(svz))
+    if ((items != 1 && items != 2) || !SvROK(svz))
         croak_xs_usage(cv, "SCALAR[, REFCOUNT]");
 
     sv = SvRV(svz);
 
-    if (items == 1)
-	 XSRETURN_UV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
-    else if (items == 2) {
          /* I hope you really know what you are doing. */
-	 SvREFCNT(sv) = SvUV(ST(1)) + 1; /* we free one ref on exit */
-	 XSRETURN_UV(SvREFCNT(sv) - 1);
-    }
-    XSRETURN_UNDEF; /* Can't happen. */
+    /* idea is for SvREFCNT(sv) to be accessed only once */
+    refcnt = items == 2 ?
+                /* we free one ref on exit */
+                (SvREFCNT(sv) = SvUV(ST(1)) + 1)
+                : SvREFCNT(sv);
+    XSRETURN_UV(refcnt - 1); /* Minus the ref created for us. */        
+
 }
 
 XS(XS_Internals_hv_clear_placehold)
