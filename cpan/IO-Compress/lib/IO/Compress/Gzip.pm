@@ -8,12 +8,12 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.055 () ; 
-use IO::Compress::Adapter::Deflate 2.055 ;
+use IO::Compress::RawDeflate 2.057 () ; 
+use IO::Compress::Adapter::Deflate 2.057 ;
 
-use IO::Compress::Base::Common  2.055 qw(:Status :Parse isaScalar createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.055 ;
-use IO::Compress::Zlib::Extra 2.055 ;
+use IO::Compress::Base::Common  2.057 qw(:Status );
+use IO::Compress::Gzip::Constants 2.057 ;
+use IO::Compress::Zlib::Extra 2.057 ;
 
 BEGIN
 {
@@ -25,7 +25,7 @@ BEGIN
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $GzipError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -39,7 +39,7 @@ sub new
 {
     my $class = shift ;
 
-    my $obj = createSelfTiedObject($class, \$GzipError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$GzipError);
 
     $obj->_create(undef, @_);
 }
@@ -47,7 +47,7 @@ sub new
 
 sub gzip
 {
-    my $obj = createSelfTiedObject(undef, \$GzipError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$GzipError);
     return $obj->_def(@_);
 }
 
@@ -65,17 +65,17 @@ sub getExtraParams
     return (
             # zlib behaviour
             $self->getZlibParams(),
-
+           
             # Gzip header fields
-            'Minimal'   => [0, 1, Parse_boolean,   0],
-            'Comment'   => [0, 1, Parse_any,       undef],
-            'Name'      => [0, 1, Parse_any,       undef],
-            'Time'      => [0, 1, Parse_any,       undef],
-            'TextFlag'  => [0, 1, Parse_boolean,   0],
-            'HeaderCRC' => [0, 1, Parse_boolean,   0],
-            'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
-            'ExtraField'=> [0, 1, Parse_any,       undef],
-            'ExtraFlags'=> [0, 1, Parse_any,       undef],
+            'minimal'   => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'comment'   => [IO::Compress::Base::Common::Parse_any,       undef],
+            'name'      => [IO::Compress::Base::Common::Parse_any,       undef],
+            'time'      => [IO::Compress::Base::Common::Parse_any,       undef],
+            'textflag'  => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'headercrc' => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'os_code'   => [IO::Compress::Base::Common::Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
+            'extrafield'=> [IO::Compress::Base::Common::Parse_any,       undef],
+            'extraflags'=> [IO::Compress::Base::Common::Parse_any,       undef],
 
         );
 }
@@ -87,24 +87,24 @@ sub ckParams
     my $got = shift ;
 
     # gzip always needs crc32
-    $got->value('CRC32' => 1);
+    $got->setValue('crc32' => 1);
 
     return 1
-        if $got->value('Merge') ;
+        if $got->getValue('merge') ;
 
-    my $strict = $got->value('Strict') ;
+    my $strict = $got->getValue('strict') ;
 
 
     {
-        if (! $got->parsed('Time') ) {
+        if (! $got->parsed('time') ) {
             # Modification time defaults to now.
-            $got->value('Time' => time) ;
+            $got->setValue(time => time) ;
         }
 
         # Check that the Name & Comment don't have embedded NULLs
         # Also check that they only contain ISO 8859-1 chars.
-        if ($got->parsed('Name') && defined $got->value('Name')) {
-            my $name = $got->value('Name');
+        if ($got->parsed('name') && defined $got->getValue('name')) {
+            my $name = $got->getValue('name');
                 
             return $self->saveErrorString(undef, "Null Character found in Name",
                                                 Z_DATA_ERROR)
@@ -115,8 +115,8 @@ sub ckParams
                 if $strict && $name =~ /$GZIP_FNAME_INVALID_CHAR_RE/o ;
         }
 
-        if ($got->parsed('Comment') && defined $got->value('Comment')) {
-            my $comment = $got->value('Comment');
+        if ($got->parsed('comment') && defined $got->getValue('comment')) {
+            my $comment = $got->getValue('comment');
 
             return $self->saveErrorString(undef, "Null Character found in Comment",
                                                 Z_DATA_ERROR)
@@ -127,8 +127,8 @@ sub ckParams
                 if $strict && $comment =~ /$GZIP_FCOMMENT_INVALID_CHAR_RE/o;
         }
 
-        if ($got->parsed('OS_Code') ) {
-            my $value = $got->value('OS_Code');
+        if ($got->parsed('os_code') ) {
+            my $value = $got->getValue('os_code');
 
             return $self->saveErrorString(undef, "OS_Code must be between 0 and 255, got '$value'")
                 if $value < 0 || $value > 255 ;
@@ -136,22 +136,22 @@ sub ckParams
         }
 
         # gzip only supports Deflate at present
-        $got->value('Method' => Z_DEFLATED) ;
+        $got->setValue('method' => Z_DEFLATED) ;
 
-        if ( ! $got->parsed('ExtraFlags')) {
-            $got->value('ExtraFlags' => 2) 
-                if $got->value('Level') == Z_BEST_COMPRESSION ;
-            $got->value('ExtraFlags' => 4) 
-                if $got->value('Level') == Z_BEST_SPEED ;
+        if ( ! $got->parsed('extraflags')) {
+            $got->setValue('extraflags' => 2) 
+                if $got->getValue('level') == Z_BEST_COMPRESSION ;
+            $got->setValue('extraflags' => 4) 
+                if $got->getValue('level') == Z_BEST_SPEED ;
         }
 
-        my $data = $got->value('ExtraField') ;
+        my $data = $got->getValue('extrafield') ;
         if (defined $data) {
             my $bad = IO::Compress::Zlib::Extra::parseExtraField($data, $strict, 1) ;
             return $self->saveErrorString(undef, "Error with ExtraField Parameter: $bad", Z_DATA_ERROR)
                 if $bad ;
 
-            $got->value('ExtraField', $data) ;
+            $got->setValue('extrafield' => $data) ;
         }
     }
 
@@ -177,15 +177,15 @@ sub getFileInfo
     my $params = shift;
     my $filename = shift ;
 
-    return if isaScalar($filename);
+    return if IO::Compress::Base::Common::isaScalar($filename);
 
     my $defaultTime = (stat($filename))[9] ;
 
-    $params->value('Name' => $filename)
-        if ! $params->parsed('Name') ;
+    $params->setValue('name' => $filename)
+        if ! $params->parsed('name') ;
 
-    $params->value('Time' => $defaultTime) 
-        if ! $params->parsed('Time') ;
+    $params->setValue('time' => $defaultTime) 
+        if ! $params->parsed('time') ;
 }
 
 
@@ -195,27 +195,27 @@ sub mkHeader
     my $param = shift ;
 
     # stort-circuit if a minimal header is requested.
-    return GZIP_MINIMUM_HEADER if $param->value('Minimal') ;
+    return GZIP_MINIMUM_HEADER if $param->getValue('minimal') ;
 
     # METHOD
-    my $method = $param->valueOrDefault('Method', GZIP_CM_DEFLATED) ;
+    my $method = $param->valueOrDefault('method', GZIP_CM_DEFLATED) ;
 
     # FLAGS
     my $flags       = GZIP_FLG_DEFAULT ;
-    $flags |= GZIP_FLG_FTEXT    if $param->value('TextFlag') ;
-    $flags |= GZIP_FLG_FHCRC    if $param->value('HeaderCRC') ;
-    $flags |= GZIP_FLG_FEXTRA   if $param->wantValue('ExtraField') ;
-    $flags |= GZIP_FLG_FNAME    if $param->wantValue('Name') ;
-    $flags |= GZIP_FLG_FCOMMENT if $param->wantValue('Comment') ;
+    $flags |= GZIP_FLG_FTEXT    if $param->getValue('textflag') ;
+    $flags |= GZIP_FLG_FHCRC    if $param->getValue('headercrc') ;
+    $flags |= GZIP_FLG_FEXTRA   if $param->wantValue('extrafield') ;
+    $flags |= GZIP_FLG_FNAME    if $param->wantValue('name') ;
+    $flags |= GZIP_FLG_FCOMMENT if $param->wantValue('comment') ;
     
     # MTIME
-    my $time = $param->valueOrDefault('Time', GZIP_MTIME_DEFAULT) ;
+    my $time = $param->valueOrDefault('time', GZIP_MTIME_DEFAULT) ;
 
     # EXTRA FLAGS
-    my $extra_flags = $param->valueOrDefault('ExtraFlags', GZIP_XFL_DEFAULT);
+    my $extra_flags = $param->valueOrDefault('extraflags', GZIP_XFL_DEFAULT);
 
     # OS CODE
-    my $os_code = $param->valueOrDefault('OS_Code', GZIP_OS_DEFAULT) ;
+    my $os_code = $param->valueOrDefault('os_code', GZIP_OS_DEFAULT) ;
 
 
     my $out = pack("C4 V C C", 
@@ -230,13 +230,13 @@ sub mkHeader
 
     # EXTRA
     if ($flags & GZIP_FLG_FEXTRA) {
-        my $extra = $param->value('ExtraField') ;
+        my $extra = $param->getValue('extrafield') ;
         $out .= pack("v", length $extra) . $extra ;
     }
 
     # NAME
     if ($flags & GZIP_FLG_FNAME) {
-        my $name .= $param->value('Name') ;
+        my $name .= $param->getValue('name') ;
         $name =~ s/\x00.*$//;
         $out .= $name ;
         # Terminate the filename with NULL unless it already is
@@ -247,7 +247,7 @@ sub mkHeader
 
     # COMMENT
     if ($flags & GZIP_FLG_FCOMMENT) {
-        my $comment .= $param->value('Comment') ;
+        my $comment .= $param->getValue('comment') ;
         $comment =~ s/\x00.*$//;
         $out .= $comment ;
         # Terminate the comment with NULL unless it already is
@@ -257,7 +257,7 @@ sub mkHeader
     }
 
     # HEADER CRC
-    $out .= pack("v", Compress::Raw::Zlib::crc32($out) & 0x00FF ) if $param->value('HeaderCRC') ;
+    $out .= pack("v", Compress::Raw::Zlib::crc32($out) & 0x00FF ) if $param->getValue('headercrc') ;
 
     noUTF8($out);
 

@@ -6,16 +6,15 @@ use strict ;
 use warnings;
 use bytes;
 
-
-use IO::Compress::Base 2.055 ;
-use IO::Compress::Base::Common  2.055 qw(:Status createSelfTiedObject);
-use IO::Compress::Adapter::Deflate 2.055 ;
+use IO::Compress::Base 2.057 ;
+use IO::Compress::Base::Common  2.057 qw(:Status );
+use IO::Compress::Adapter::Deflate 2.057 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -49,14 +48,14 @@ sub new
 {
     my $class = shift ;
 
-    my $obj = createSelfTiedObject($class, \$RawDeflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$RawDeflateError);
 
     return $obj->_create(undef, @_);
 }
 
 sub rawdeflate
 {
-    my $obj = createSelfTiedObject(undef, \$RawDeflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$RawDeflateError);
     return $obj->_def(@_);
 }
 
@@ -74,10 +73,10 @@ sub mkComp
     my $got = shift ;
 
     my ($obj, $errstr, $errno) = IO::Compress::Adapter::Deflate::mkCompObject(
-                                                 $got->value('CRC32'),
-                                                 $got->value('Adler32'),
-                                                 $got->value('Level'),
-                                                 $got->value('Strategy')
+                                                 $got->getValue('crc32'),
+                                                 $got->getValue('adler32'),
+                                                 $got->getValue('level'),
+                                                 $got->getValue('strategy')
                                                  );
 
    return $self->saveErrorString(undef, $errstr, $errno)
@@ -114,30 +113,24 @@ sub mkFinalTrailer
 sub getExtraParams
 {
     my $self = shift ;
-    return $self->getZlibParams();
+    return getZlibParams();
 }
 
+use IO::Compress::Base::Common  2.057 qw(:Parse);
+use Compress::Raw::Zlib  2.057 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+our %PARAMS = (
+            #'method'   => [IO::Compress::Base::Common::Parse_unsigned,  Z_DEFLATED],
+            'level'     => [IO::Compress::Base::Common::Parse_signed,    Z_DEFAULT_COMPRESSION],
+            'strategy'  => [IO::Compress::Base::Common::Parse_signed,    Z_DEFAULT_STRATEGY],
+
+            'crc32'     => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'adler32'   => [IO::Compress::Base::Common::Parse_boolean,   0],
+            'merge'     => [IO::Compress::Base::Common::Parse_boolean,   0], 
+        );
+        
 sub getZlibParams
 {
-    my $self = shift ;
-
-    use IO::Compress::Base::Common  2.055 qw(:Parse);
-    use Compress::Raw::Zlib  2.055 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
-
-    
-    return (
-        
-            # zlib behaviour
-            #'Method'   => [0, 1, Parse_unsigned,  Z_DEFLATED],
-            'Level'     => [0, 1, Parse_signed,    Z_DEFAULT_COMPRESSION],
-            'Strategy'  => [0, 1, Parse_signed,    Z_DEFAULT_STRATEGY],
-
-            'CRC32'     => [0, 1, Parse_boolean,   0],
-            'ADLER32'   => [0, 1, Parse_boolean,   0],
-            'Merge'     => [1, 1, Parse_boolean,   0],
-        );
-    
-    
+    return %PARAMS;    
 }
 
 sub getInverseClass

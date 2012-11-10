@@ -7,17 +7,17 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.055 ;
-use Compress::Raw::Zlib 2.055 ;
-use IO::Compress::Gzip 2.055 ;
-use IO::Uncompress::Gunzip 2.055 ;
+use IO::Compress::Base::Common 2.057 ;
+use Compress::Raw::Zlib 2.057 ;
+use IO::Compress::Gzip 2.057 ;
+use IO::Uncompress::Gunzip 2.057 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -365,31 +365,31 @@ sub deflateInit(@)
 {
     my ($got) = ParseParameters(0,
                 {
-                'Bufsize'       => [1, 1, Parse_unsigned, 4096],
-                'Level'         => [1, 1, Parse_signed,   Z_DEFAULT_COMPRESSION()],
-                'Method'        => [1, 1, Parse_unsigned, Z_DEFLATED()],
-                'WindowBits'    => [1, 1, Parse_signed,   MAX_WBITS()],
-                'MemLevel'      => [1, 1, Parse_unsigned, MAX_MEM_LEVEL()],
-                'Strategy'      => [1, 1, Parse_unsigned, Z_DEFAULT_STRATEGY()],
-                'Dictionary'    => [1, 1, Parse_any,      ""],
+                'bufsize'       => [IO::Compress::Base::Common::Parse_unsigned, 4096],
+                'level'         => [IO::Compress::Base::Common::Parse_signed,   Z_DEFAULT_COMPRESSION()],
+                'method'        => [IO::Compress::Base::Common::Parse_unsigned, Z_DEFLATED()],
+                'windowbits'    => [IO::Compress::Base::Common::Parse_signed,   MAX_WBITS()],
+                'memlevel'      => [IO::Compress::Base::Common::Parse_unsigned, MAX_MEM_LEVEL()],
+                'strategy'      => [IO::Compress::Base::Common::Parse_unsigned, Z_DEFAULT_STRATEGY()],
+                'dictionary'    => [IO::Compress::Base::Common::Parse_any,      ""],
                 }, @_ ) ;
 
     croak "Compress::Zlib::deflateInit: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
-        unless $got->value('Bufsize') >= 1;
+            $got->getValue('bufsize')
+        unless $got->getValue('bufsize') >= 1;
 
     my $obj ;
  
     my $status = 0 ;
     ($obj, $status) = 
       Compress::Raw::Zlib::_deflateInit(0,
-                $got->value('Level'), 
-                $got->value('Method'), 
-                $got->value('WindowBits'), 
-                $got->value('MemLevel'), 
-                $got->value('Strategy'), 
-                $got->value('Bufsize'),
-                $got->value('Dictionary')) ;
+                $got->getValue('level'), 
+                $got->getValue('method'), 
+                $got->getValue('windowbits'), 
+                $got->getValue('memlevel'), 
+                $got->getValue('strategy'), 
+                $got->getValue('bufsize'),
+                $got->getValue('dictionary')) ;
 
     my $x = ($status == Z_OK() ? bless $obj, "Zlib::OldDeflate"  : undef) ;
     return wantarray ? ($x, $status) : $x ;
@@ -399,22 +399,22 @@ sub inflateInit(@)
 {
     my ($got) = ParseParameters(0,
                 {
-                'Bufsize'       => [1, 1, Parse_unsigned, 4096],
-                'WindowBits'    => [1, 1, Parse_signed,   MAX_WBITS()],
-                'Dictionary'    => [1, 1, Parse_any,      ""],
+                'bufsize'       => [IO::Compress::Base::Common::Parse_unsigned, 4096],
+                'windowbits'    => [IO::Compress::Base::Common::Parse_signed,   MAX_WBITS()],
+                'dictionary'    => [IO::Compress::Base::Common::Parse_any,      ""],
                 }, @_) ;
 
 
     croak "Compress::Zlib::inflateInit: Bufsize must be >= 1, you specified " . 
-            $got->value('Bufsize')
-        unless $got->value('Bufsize') >= 1;
+            $got->getValue('bufsize')
+        unless $got->getValue('bufsize') >= 1;
 
     my $status = 0 ;
     my $obj ;
     ($obj, $status) = Compress::Raw::Zlib::_inflateInit(FLAG_CONSUME_INPUT,
-                                $got->value('WindowBits'), 
-                                $got->value('Bufsize'), 
-                                $got->value('Dictionary')) ;
+                                $got->getValue('windowbits'), 
+                                $got->getValue('bufsize'), 
+                                $got->getValue('dictionary')) ;
 
     my $x = ($status == Z_OK() ? bless $obj, "Zlib::OldInflate"  : undef) ;
 
@@ -461,7 +461,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.055 ;
+use IO::Compress::Gzip::Constants 2.057 ;
 
 sub memGzip($)
 {

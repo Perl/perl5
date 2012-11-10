@@ -6,22 +6,22 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.055 qw(createSelfTiedObject);
+use IO::Compress::Base::Common  2.057 ();
 
-use IO::Uncompress::Adapter::Inflate  2.055 ();
+use IO::Uncompress::Adapter::Inflate  2.057 ();
 
 
-use IO::Uncompress::Base  2.055 ;
-use IO::Uncompress::Gunzip  2.055 ;
-use IO::Uncompress::Inflate  2.055 ;
-use IO::Uncompress::RawInflate  2.055 ;
-use IO::Uncompress::Unzip  2.055 ;
+use IO::Uncompress::Base  2.057 ;
+use IO::Uncompress::Gunzip  2.057 ;
+use IO::Uncompress::Inflate  2.057 ;
+use IO::Uncompress::RawInflate  2.057 ;
+use IO::Uncompress::Unzip  2.057 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyInflateError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $AnyInflateError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -36,20 +36,20 @@ Exporter::export_ok_tags('all');
 sub new
 {
     my $class = shift ;
-    my $obj = createSelfTiedObject($class, \$AnyInflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$AnyInflateError);
     $obj->_create(undef, 0, @_);
 }
 
 sub anyinflate
 {
-    my $obj = createSelfTiedObject(undef, \$AnyInflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$AnyInflateError);
     return $obj->_inf(@_) ;
 }
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.055 qw(:Parse);
-    return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
+    use IO::Compress::Base::Common  2.057 qw(:Parse);
+    return ( 'rawinflate' => [Parse_boolean,  0] ) ;
 }
 
 sub ckParams
@@ -58,8 +58,8 @@ sub ckParams
     my $got = shift ;
 
     # any always needs both crc32 and adler32
-    $got->value('CRC32' => 1);
-    $got->value('ADLER32' => 1);
+    $got->setValue('crc32' => 1);
+    $got->setValue('adler32' => 1);
 
     return 1;
 }
@@ -78,7 +78,7 @@ sub mkUncomp
     
      my @possible = qw( Inflate Gunzip Unzip );
      unshift @possible, 'RawInflate' 
-        if 1 || $got->value('RawInflate');
+        if 1 || $got->getValue('rawinflate');
 
      my $magic = $self->ckMagic( @possible );
 
@@ -798,6 +798,13 @@ Returns true if the end of the compressed input stream has been reached.
 Provides a sub-set of the C<seek> functionality, with the restriction
 that it is only legal to seek forward in the input file/buffer.
 It is a fatal error to attempt to seek backward.
+
+Note that the implementation of C<seek> in this module does not provide
+true random access to a compressed file/buffer. It  works by uncompressing
+data from the current offset in the file/buffer until it reaches the
+ucompressed offset specified in the parameters to C<seek>. For very small
+files this may be acceptable behaviour. For large files it may cause an
+unacceptable delay.
 
 The C<$whence> parameter takes one the usual values, namely SEEK_SET,
 SEEK_CUR or SEEK_END.

@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.055 qw(createSelfTiedObject);
+use IO::Compress::Base::Common 2.057 ();
 
-use IO::Uncompress::Base 2.055 ;
+use IO::Uncompress::Base 2.057 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -27,42 +27,41 @@ Exporter::export_ok_tags('all');
 
 BEGIN
 {
-   eval ' use IO::Uncompress::Adapter::Inflate 2.055 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.055 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.055 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.055 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzma 2.055 ;';
-   eval ' use IO::Uncompress::Adapter::UnXz 2.055 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.057 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.057 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.057 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.057 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.057 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.057 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.055 ;';
-   eval ' use IO::Uncompress::UnLzop 2.055 ;';
-   eval ' use IO::Uncompress::Gunzip 2.055 ;';
-   eval ' use IO::Uncompress::Inflate 2.055 ;';
-   eval ' use IO::Uncompress::RawInflate 2.055 ;';
-   eval ' use IO::Uncompress::Unzip 2.055 ;';
-   eval ' use IO::Uncompress::UnLzf 2.055 ;';
-   eval ' use IO::Uncompress::UnLzma 2.055 ;';
-   eval ' use IO::Uncompress::UnXz 2.055 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.057 ;';
+   eval ' use IO::Uncompress::UnLzop 2.057 ;';
+   eval ' use IO::Uncompress::Gunzip 2.057 ;';
+   eval ' use IO::Uncompress::Inflate 2.057 ;';
+   eval ' use IO::Uncompress::RawInflate 2.057 ;';
+   eval ' use IO::Uncompress::Unzip 2.057 ;';
+   eval ' use IO::Uncompress::UnLzf 2.057 ;';
+   eval ' use IO::Uncompress::UnLzma 2.057 ;';
+   eval ' use IO::Uncompress::UnXz 2.057 ;';
 }
 
 sub new
 {
     my $class = shift ;
-    my $obj = createSelfTiedObject($class, \$AnyUncompressError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$AnyUncompressError);
     $obj->_create(undef, 0, @_);
 }
 
 sub anyuncompress
 {
-    my $obj = createSelfTiedObject(undef, \$AnyUncompressError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$AnyUncompressError);
     return $obj->_inf(@_) ;
 }
 
 sub getExtraParams
-{
-    use IO::Compress::Base::Common 2.055 qw(:Parse);
-    return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ,
-             'UnLzma'     => [1, 1, Parse_boolean,  0] ) ;
+{ 
+    return ( 'rawinflate' => [IO::Compress::Base::Common::Parse_boolean,  0] ,
+             'unlzma'     => [IO::Compress::Base::Common::Parse_boolean,  0] ) ;
 }
 
 sub ckParams
@@ -71,8 +70,8 @@ sub ckParams
     my $got = shift ;
 
     # any always needs both crc32 and adler32
-    $got->value('CRC32' => 1);
-    $got->value('ADLER32' => 1);
+    $got->setValue('crc32' => 1);
+    $got->setValue('adler32' => 1);
 
     return 1;
 }
@@ -96,7 +95,7 @@ sub mkUncomp
         
         my @possible = qw( Inflate Gunzip Unzip );
         unshift @possible, 'RawInflate' 
-            if $got->value('RawInflate');
+            if $got->getValue('rawinflate');
 
         $magic = $self->ckMagic( @possible );
         
@@ -108,7 +107,7 @@ sub mkUncomp
         }
      }
 
-    if (defined $IO::Uncompress::UnLzma::VERSION && $got->value('UnLzma'))
+    if (defined $IO::Uncompress::UnLzma::VERSION && $got->getValue('unlzma'))
     {
         my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::UnLzma::mkUncompObject();
 
@@ -119,7 +118,7 @@ sub mkUncomp
         
         my @possible = qw( UnLzma );
         #unshift @possible, 'RawInflate' 
-        #    if $got->value('RawInflate');
+        #    if $got->getValue('rawinflate');
 
         if ( *$self->{Info} = $self->ckMagic( @possible ))
         {
@@ -846,6 +845,13 @@ Returns true if the end of the compressed input stream has been reached.
 Provides a sub-set of the C<seek> functionality, with the restriction
 that it is only legal to seek forward in the input file/buffer.
 It is a fatal error to attempt to seek backward.
+
+Note that the implementation of C<seek> in this module does not provide
+true random access to a compressed file/buffer. It  works by uncompressing
+data from the current offset in the file/buffer until it reaches the
+ucompressed offset specified in the parameters to C<seek>. For very small
+files this may be acceptable behaviour. For large files it may cause an
+unacceptable delay.
 
 The C<$whence> parameter takes one the usual values, namely SEEK_SET,
 SEEK_CUR or SEEK_END.

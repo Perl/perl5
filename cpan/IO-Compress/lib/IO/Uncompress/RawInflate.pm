@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.055 ;
-use IO::Compress::Base::Common  2.055 qw(:Status createSelfTiedObject);
+use Compress::Raw::Zlib  2.057 ;
+use IO::Compress::Base::Common  2.057 qw(:Status );
 
-use IO::Uncompress::Base  2.055 ;
-use IO::Uncompress::Adapter::Inflate  2.055 ;
+use IO::Uncompress::Base  2.057 ;
+use IO::Uncompress::Adapter::Inflate  2.057 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -45,13 +45,13 @@ Exporter::export_ok_tags('all');
 sub new
 {
     my $class = shift ;
-    my $obj = createSelfTiedObject($class, \$RawInflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$RawInflateError);
     $obj->_create(undef, 0, @_);
 }
 
 sub rawinflate
 {
-    my $obj = createSelfTiedObject(undef, \$RawInflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$RawInflateError);
     return $obj->_inf(@_);
 }
 
@@ -74,9 +74,9 @@ sub mkUncomp
     my $got = shift ;
 
     my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::Inflate::mkUncompObject(
-                                                                $got->value('CRC32'),
-                                                                $got->value('ADLER32'),
-                                                                $got->value('Scan'),
+                                                                $got->getValue('crc32'),
+                                                                $got->getValue('adler32'),
+                                                                $got->getValue('scan'),
                                                             );
 
     return $self->saveErrorString(undef, $errstr, $errno)
@@ -332,8 +332,8 @@ sub createDeflate
     my ($def, $status) = *$self->{Uncomp}->createDeflateStream(
                                     -AppendOutput   => 1,
                                     -WindowBits => - MAX_WBITS,
-                                    -CRC32      => *$self->{Params}->value('CRC32'),
-                                    -ADLER32    => *$self->{Params}->value('ADLER32'),
+                                    -CRC32      => *$self->{Params}->getValue('crc32'),
+                                    -ADLER32    => *$self->{Params}->getValue('adler32'),
                                 );
     
     return wantarray ? ($status, $def) : $def ;                                
@@ -921,6 +921,13 @@ Returns true if the end of the compressed input stream has been reached.
 Provides a sub-set of the C<seek> functionality, with the restriction
 that it is only legal to seek forward in the input file/buffer.
 It is a fatal error to attempt to seek backward.
+
+Note that the implementation of C<seek> in this module does not provide
+true random access to a compressed file/buffer. It  works by uncompressing
+data from the current offset in the file/buffer until it reaches the
+ucompressed offset specified in the parameters to C<seek>. For very small
+files this may be acceptable behaviour. For large files it may cause an
+unacceptable delay.
 
 The C<$whence> parameter takes one the usual values, namely SEEK_SET,
 SEEK_CUR or SEEK_END.

@@ -1,6 +1,19 @@
 CHANGES
 -------
 
+  2.057 10 November 2012
+
+      * IO::Compress::Zip
+        Allow member name & Zip Comment to be "0"
+   
+      * IO::Compress::Base::Common
+        Remove "-r" test - the file open will catch this.
+        RT# 80855: IO::Compress::Base::Common returns that it cannot read readable files in NFS
+
+      * RT# 79820: Install to 'site' instead of 'perl' when perl version is 5.11+
+      
+      * General Performance improvements.
+                
   2.055 5 August 2012
 
       * FAQ

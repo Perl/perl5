@@ -5,15 +5,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.055 qw(:Status createSelfTiedObject);
-use IO::Compress::Zlib::Constants 2.055 ;
+use IO::Compress::Base::Common  2.057 qw(:Status );
+use IO::Compress::Zlib::Constants 2.057 ;
 
-use IO::Uncompress::RawInflate  2.055 ;
+use IO::Uncompress::RawInflate  2.057 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $InflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::RawInflate );
@@ -26,14 +26,14 @@ Exporter::export_ok_tags('all');
 sub new
 {
     my $class = shift ;
-    my $obj = createSelfTiedObject($class, \$InflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$InflateError);
 
     $obj->_create(undef, 0, @_);
 }
 
 sub inflate
 {
-    my $obj = createSelfTiedObject(undef, \$InflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$InflateError);
     return $obj->_inf(@_);
 }
 
@@ -48,7 +48,7 @@ sub ckParams
     my $got = shift ;
 
     # gunzip always needs adler32
-    $got->value('ADLER32' => 1);
+    $got->setValue('adler32' => 1);
 
     return 1;
 }
@@ -793,6 +793,13 @@ Returns true if the end of the compressed input stream has been reached.
 Provides a sub-set of the C<seek> functionality, with the restriction
 that it is only legal to seek forward in the input file/buffer.
 It is a fatal error to attempt to seek backward.
+
+Note that the implementation of C<seek> in this module does not provide
+true random access to a compressed file/buffer. It  works by uncompressing
+data from the current offset in the file/buffer until it reaches the
+ucompressed offset specified in the parameters to C<seek>. For very small
+files this may be acceptable behaviour. For large files it may cause an
+unacceptable delay.
 
 The C<$whence> parameter takes one the usual values, namely SEEK_SET,
 SEEK_CUR or SEEK_END.

@@ -8,16 +8,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.055 ();
-use IO::Compress::Adapter::Deflate 2.055 ;
+use IO::Compress::RawDeflate 2.057 ();
+use IO::Compress::Adapter::Deflate 2.057 ;
 
-use IO::Compress::Zlib::Constants 2.055 ;
-use IO::Compress::Base::Common  2.055 qw(createSelfTiedObject);
+use IO::Compress::Zlib::Constants 2.057 ;
+use IO::Compress::Base::Common  2.057 qw();
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.055';
+$VERSION = '2.057';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -32,13 +32,13 @@ sub new
 {
     my $class = shift ;
 
-    my $obj = createSelfTiedObject($class, \$DeflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject($class, \$DeflateError);
     return $obj->_create(undef, @_);
 }
 
 sub deflate
 {
-    my $obj = createSelfTiedObject(undef, \$DeflateError);
+    my $obj = IO::Compress::Base::Common::createSelfTiedObject(undef, \$DeflateError);
     return $obj->_def(@_);
 }
 
@@ -85,8 +85,8 @@ sub mkHeader
     my $self = shift ;
     my $param = shift ;
 
-    my $level = $param->value('Level');
-    my $strategy = $param->value('Strategy');
+    my $level = $param->getValue('level');
+    my $strategy = $param->getValue('strategy');
 
     my $lflag ;
     $level = 6 
@@ -119,7 +119,7 @@ sub ckParams
     my $self = shift ;
     my $got = shift;
     
-    $got->value('ADLER32' => 1);
+    $got->setValue('adler32' => 1);
     return 1 ;
 }
 
