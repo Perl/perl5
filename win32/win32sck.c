@@ -524,11 +524,12 @@ win32_getprotobynumber(int num)
 struct servent *
 win32_getservbyname(const char *name, const char *proto)
 {
-    dTHX;    
+    dTHXa(NULL);    
     struct servent *r;
 
     SOCKET_TEST(r = getservbyname(name, proto), NULL);
     if (r) {
+        aTHXa(PERL_GET_THX);
 	r = win32_savecopyservent(&w32_servent, r, proto);
     }
     return r;
@@ -537,11 +538,12 @@ win32_getservbyname(const char *name, const char *proto)
 struct servent *
 win32_getservbyport(int port, const char *proto)
 {
-    dTHX; 
+    dTHXa(NULL); 
     struct servent *r;
 
     SOCKET_TEST(r = getservbyport(port, proto), NULL);
     if (r) {
+        aTHXa(PERL_GET_THX);
 	r = win32_savecopyservent(&w32_servent, r, proto);
     }
     return r;

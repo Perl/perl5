@@ -73,14 +73,14 @@ static BOOL		filetime_from_time(PFILETIME ft, time_t t);
 static char *		get_emd_part(SV **leading, STRLEN *const len,
 				     char *trailing, ...);
 static void		remove_dead_process(long deceased);
-static long		find_pid(int pid);
+static long		find_pid(pTHX_ int pid);
 static char *		qualified_path(const char *cmd);
 static char *		win32_get_xlib(const char *pl, const char *xlib,
 				       const char *libname, STRLEN *const len);
 
 #ifdef USE_ITHREADS
 static void		remove_dead_pseudo_process(long child);
-static long		find_pseudo_pid(int pid);
+static long		find_pseudo_pid(pTHX_ int pid);
 #endif
 
 int _fmode = O_TEXT; /* celib do not provide _fmode, so we define it here */
