@@ -2975,7 +2975,7 @@ S_scan_const(pTHX_ char *start)
 #ifdef EBCDIC
 		    && !native_range
 #endif
-		    ) {
+                ) {
 		    char * const c = (char*)utf8_hop((U8*)d, -1);
 		    char *e = d++;
 		    while (e-- > c)
@@ -3498,57 +3498,61 @@ S_scan_const(pTHX_ char *start)
                                            dot with a right brace */
                             }
                             else {
-			    STRLEN char_length;	    /* cur char's byte length */
-			    STRLEN output_length;   /* and the number of bytes
-						       after this is translated
-						       into hex digits */
-			    /* 2 hex per byte; 2 chars for '\N'; 2 chars for
-			     * max('U+', '.'); and 1 for NUL */
-			    char hex_string[2 * UTF8_MAXBYTES + 5];
+                                STRLEN char_length; /* cur char's byte length */
 
-			    /* Get the first character of the result. */
-			    U32 uv = utf8n_to_uvuni((U8 *) str,
-						    len,
-						    &char_length,
-						    UTF8_ALLOW_ANYUV);
-			    /* Convert first code point to hex, including the
-			     * boiler plate before it.  For all these, we
-			     * convert to native format so that downstream code
-			     * can continue to assume the input is native */
-			    output_length =
-				my_snprintf(hex_string, sizeof(hex_string),
-					    "\\N{U+%X",
-					    (unsigned int) UNI_TO_NATIVE(uv));
+                                /* and the number of bytes after this is
+                                 * translated into hex digits */
+                                STRLEN output_length;
 
-			    /* Make sure there is enough space to hold it */
-			    d = off + SvGROW(sv, off
-						 + output_length
-						 + (STRLEN)(send - e)
-						 + 2);	/* '}' + NUL */
-			    /* And output it */
-			    Copy(hex_string, d, output_length, char);
-			    d += output_length;
+                                /* 2 hex per byte; 2 chars for '\N'; 2 chars
+                                 * for max('U+', '.'); and 1 for NUL */
+                                char hex_string[2 * UTF8_MAXBYTES + 5];
 
-			    /* For each subsequent character, append dot and
-			     * its ordinal in hex */
-			    while ((str += char_length) < str_end) {
-				const STRLEN off = d - SvPVX_const(sv);
-				U32 uv = utf8n_to_uvuni((U8 *) str,
-							str_end - str,
-							&char_length,
-							UTF8_ALLOW_ANYUV);
-				output_length =
-				    my_snprintf(hex_string, sizeof(hex_string),
-					    ".%X",
-					    (unsigned int) UNI_TO_NATIVE(uv));
+                                /* Get the first character of the result. */
+                                U32 uv = utf8n_to_uvuni((U8 *) str,
+                                                        len,
+                                                        &char_length,
+                                                        UTF8_ALLOW_ANYUV);
+                                /* Convert first code point to hex, including
+                                 * the boiler plate before it.  For all these,
+                                 * we convert to native format so that
+                                 * downstream code can continue to assume the
+                                 * input is native */
+                                output_length =
+                                    my_snprintf(hex_string, sizeof(hex_string),
+                                            "\\N{U+%X",
+                                            (unsigned int) UNI_TO_NATIVE(uv));
 
-				d = off + SvGROW(sv, off
-						     + output_length
-						     + (STRLEN)(send - e)
-						     + 2);	/* '}' +  NUL */
-				Copy(hex_string, d, output_length, char);
-				d += output_length;
-			    }
+                                /* Make sure there is enough space to hold it */
+                                d = off + SvGROW(sv, off
+                                                    + output_length
+                                                    + (STRLEN)(send - e)
+                                                    + 2);	/* '}' + NUL */
+                                /* And output it */
+                                Copy(hex_string, d, output_length, char);
+                                d += output_length;
+
+                                /* For each subsequent character, append dot and
+                                * its ordinal in hex */
+                                while ((str += char_length) < str_end) {
+                                    const STRLEN off = d - SvPVX_const(sv);
+                                    U32 uv = utf8n_to_uvuni((U8 *) str,
+                                                            str_end - str,
+                                                            &char_length,
+                                                            UTF8_ALLOW_ANYUV);
+                                    output_length =
+                                        my_snprintf(hex_string,
+                                            sizeof(hex_string),
+                                            ".%X",
+                                            (unsigned int) UNI_TO_NATIVE(uv));
+
+                                    d = off + SvGROW(sv, off
+                                                        + output_length
+                                                        + (STRLEN)(send - e)
+                                                        + 2);	/* '}' +  NUL */
+                                    Copy(hex_string, d, output_length, char);
+                                    d += output_length;
+                                }
 			    }
 
 			    *d++ = '}';	/* Done.  Add the trailing brace */
