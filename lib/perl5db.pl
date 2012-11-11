@@ -5466,11 +5466,9 @@ sub cmd_l {
 
     # If the line is '$something', assume this is a scalar containing a
     # line number.
-    if ( $line =~ /^(\$.*)/s ) {
+    # Set up for DB::eval() - evaluate in *user* context.
+    if ( ($evalarg) = $line =~ /\A(\$.*)/s ) {
 
-        # Set up for DB::eval() - evaluate in *user* context.
-        $evalarg = $1;
-        # $evalarg = $2;
         my ($s) = DB::eval();
 
         # Ooops. Bad scalar.
