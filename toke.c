@@ -3518,17 +3518,6 @@ S_scan_const(pTHX_ char *start)
 						    len,
 						    &char_length,
 						    UTF8_ALLOW_ANYUV);
-
-			    /* The call to is_utf8_string() above hopefully
-			     * guarantees that there won't be an error.  But
-			     * it's easy here to make sure.  The function just
-			     * above warns and returns 0 if invalid utf8, but
-			     * it can also return 0 if the input is validly a
-			     * NUL. Disambiguate */
-			    if (uv == 0 && NATIVE_TO_ASCII(*str) != '\0') {
-				uv = UNICODE_REPLACEMENT;
-			    }
-
 			    /* Convert first code point to hex, including the
 			     * boiler plate before it.  For all these, we
 			     * convert to native format so that downstream code
@@ -3555,10 +3544,6 @@ S_scan_const(pTHX_ char *start)
 							str_end - str,
 							&char_length,
 							UTF8_ALLOW_ANYUV);
-				if (uv == 0 && NATIVE_TO_ASCII(*str) != '\0') {
-				    uv = UNICODE_REPLACEMENT;
-				}
-
 				output_length =
 				    my_snprintf(hex_string, sizeof(hex_string),
 					    ".%X",
