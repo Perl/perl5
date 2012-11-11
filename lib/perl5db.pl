@@ -5456,6 +5456,28 @@ sub _minify_to_max {
     return;
 }
 
+sub _cmd_l_handle_var_name {
+    my $var_name = shift;
+
+    $evalarg = $var_name;
+
+    my ($s) = DB::eval();
+
+    # Ooops. Bad scalar.
+    if ($@) {
+        print {$OUT} "Error: $@\n";
+        next CMD;
+    }
+
+    # Good scalar. If it's a reference, find what it points to.
+    $s = CvGV_name($s);
+    print {$OUT} "Interpreted as: $1 $s\n";
+    $line = "$1 $s";
+
+    # Call self recursively to really do the command.
+    return cmd_l( 'l', $s );
+}
+
 sub cmd_l {
     my $current_line = $line;
     my $cmd  = shift;
@@ -5467,23 +5489,8 @@ sub cmd_l {
     # If the line is '$something', assume this is a scalar containing a
     # line number.
     # Set up for DB::eval() - evaluate in *user* context.
-    if ( ($evalarg) = $line =~ /\A(\$.*)/s ) {
-
-        my ($s) = DB::eval();
-
-        # Ooops. Bad scalar.
-        if ($@) {
-            print {$OUT} "Error: $@\n";
-            next CMD;
-        }
-
-        # Good scalar. If it's a reference, find what it points to.
-        $s = CvGV_name($s);
-        print {$OUT} "Interpreted as: $1 $s\n";
-        $line = "$1 $s";
-
-        # Call self recursively to really do the command.
-        return cmd_l( 'l', $s );
+    if ( my ($var_name) = $line =~ /\A(\$.*)/s ) {
+        return _cmd_l_handle_var_name($var_name);
     } ## end if ($line =~ /^(\$.*)/s)
 
     # l name. Try to find a sub by that name.
