@@ -5565,6 +5565,80 @@ sub _cmd_l_plus {
     return cmd_l( 'l', $line );
 }
 
+sub _cmd_l_range {
+    my ($cmd, $line, $current_line, $start_match, $end_match) = @_;
+
+    # Determine end point; use end of file if not specified.
+    my $end = ( !defined $start_match ) ? $max :
+    ( $end_match ? $end_match : $start_match );
+
+    # Go on to the end, and then stop.
+    _minify_to_max(\$end);
+
+    # Determine start line.
+    my $i    = $start_match;
+    $i    = $line if $i eq '.';
+    $i    = 1 if $i < 1;
+    $incr = $end - $i;
+
+    # If we're running under a slave editor, force it to show the lines.
+    if ($slave_editor) {
+        print $OUT "\032\032$filename:$i:0\n";
+        $i = $end;
+    }
+
+    # We're doing it ourselves. We want to show the line and special
+    # markers for:
+    # - the current line in execution
+    # - whether a line is breakable or not
+    # - whether a line has a break or not
+    # - whether a line has an action or not
+    else {
+        I_TO_END:
+        for ( ; $i <= $end ; $i++ ) {
+
+            # Check for breakpoints and actions.
+            my ( $stop, $action );
+            if ($dbline{$i}) {
+                ( $stop, $action ) = split( /\0/, $dbline{$i} );
+            }
+
+            # ==> if this is the current line in execution,
+            # : if it's breakable.
+            my $arrow =
+            ( $i == $current_line and $filename eq $filename_ini )
+            ? '==>'
+            : ( $dbline[$i] + 0 ? ':' : ' ' );
+
+            # Add break and action indicators.
+            $arrow .= 'b' if $stop;
+            $arrow .= 'a' if $action;
+
+            # Print the line.
+            print {$OUT} "$i$arrow\t", $dbline[$i];
+
+            # Move on to the next line. Drop out on an interrupt.
+            if ($signal) {
+                $i++;
+                last I_TO_END;
+            }
+        } ## end for (; $i <= $end ; $i++)
+
+        # Line the prompt up; print a newline if the last line listed
+        # didn't have a newline.
+        if ($dbline[ $i - 1 ] !~ /\n\z/) {
+            print {$OUT} "\n";
+        }
+    } ## end else [ if ($slave_editor)
+
+    # Save the point we last listed to in case another relative 'l'
+    # command is desired. Don't let it run off the end.
+    $start = $i;
+    _minify_to_max(\$start);
+
+    return;
+}
+
 sub cmd_l {
     my $current_line = $line;
     my $cmd  = shift;
@@ -5597,76 +5671,11 @@ sub cmd_l {
     } ## end elsif ($line =~ /^(\d*)\+(\d*)$/)
 
     # l start-stop or l start,stop
-    elsif ( $line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/ ) {
+    elsif ( my ($start_match, $end_match) =
+        $line =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
 
-        # Determine end point; use end of file if not specified.
-        my $end = ( !defined $2 ) ? $max : ( $4 ? $4 : $2 );
+        return _cmd_l_range($cmd, $line, $current_line, $start_match, $end_match);
 
-        # Go on to the end, and then stop.
-        _minify_to_max(\$end);
-
-        # Determine start line.
-        my $i    = $2;
-        $i    = $line if $i eq '.';
-        $i    = 1 if $i < 1;
-        $incr = $end - $i;
-
-        # If we're running under a slave editor, force it to show the lines.
-        if ($slave_editor) {
-            print $OUT "\032\032$filename:$i:0\n";
-            $i = $end;
-        }
-
-        # We're doing it ourselves. We want to show the line and special
-        # markers for:
-        # - the current line in execution
-        # - whether a line is breakable or not
-        # - whether a line has a break or not
-        # - whether a line has an action or not
-        else {
-            I_TO_END:
-            for ( ; $i <= $end ; $i++ ) {
-
-                # Check for breakpoints and actions.
-                my ( $stop, $action );
-                if ($dbline{$i}) {
-                    ( $stop, $action ) = split( /\0/, $dbline{$i} );
-                }
-
-                # ==> if this is the current line in execution,
-                # : if it's breakable.
-                my $arrow =
-                  ( $i == $current_line and $filename eq $filename_ini )
-                  ? '==>'
-                  : ( $dbline[$i] + 0 ? ':' : ' ' );
-
-                # Add break and action indicators.
-                $arrow .= 'b' if $stop;
-                $arrow .= 'a' if $action;
-
-                # Print the line.
-                print {$OUT} "$i$arrow\t", $dbline[$i];
-
-                # Move on to the next line. Drop out on an interrupt.
-                if ($signal) {
-                    $i++;
-                    last I_TO_END;
-                }
-            } ## end for (; $i <= $end ; $i++)
-
-            # Line the prompt up; print a newline if the last line listed
-            # didn't have a newline.
-            if ($dbline[ $i - 1 ] !~ /\n\z/) {
-                print {$OUT} "\n";
-            }
-        } ## end else [ if ($slave_editor)
-
-        # Save the point we last listed to in case another relative 'l'
-        # command is desired. Don't let it run off the end.
-        $start = $i;
-        _minify_to_max(\$start);
-
-        return;
     } ## end elsif ($line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/)
 } ## end sub cmd_l
 
