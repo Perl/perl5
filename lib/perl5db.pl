@@ -5645,38 +5645,32 @@ sub cmd_l {
     my $line = shift;
 
     # If this is '-something', delete any spaces after the dash.
-    $line =~ s/^-\s*$/-/;
+    $line =~ s/\A-\s*\z/-/;
 
     # If the line is '$something', assume this is a scalar containing a
     # line number.
     # Set up for DB::eval() - evaluate in *user* context.
     if ( my ($var_name) = $line =~ /\A(\$.*)/s ) {
         return _cmd_l_handle_var_name($var_name);
-    } ## end if ($line =~ /^(\$.*)/s)
-
+    }
     # l name. Try to find a sub by that name.
     elsif ( ($subname) = $line =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
         return _cmd_l_handle_subname($cmd, $line);
-    } ## end elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s)
-
+    }
     # Bare 'l' command.
     elsif ( $line !~ /\S/ ) {
         return _cmd_l_empty();
     }
-
     # l [start]+number_of_lines
     elsif ( my ($new_start, $new_incr) = $line =~ /\A(\d*)\+(\d*)\z/ ) {
-
         return _cmd_l_plus($new_start, $new_incr);
-    } ## end elsif ($line =~ /^(\d*)\+(\d*)$/)
-
+    }
     # l start-stop or l start,stop
-    elsif ( my ($start_match, $end_match) =
-        $line =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
+    elsif (my ($s, $e) = $line =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
+        return _cmd_l_range($cmd, $line, $current_line, $s, $e);
+    }
 
-        return _cmd_l_range($cmd, $line, $current_line, $start_match, $end_match);
-
-    } ## end elsif ($line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/)
+    return;
 } ## end sub cmd_l
 
 =head3 C<cmd_L> - list breakpoints, actions, and watch expressions (command)
