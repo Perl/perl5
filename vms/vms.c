@@ -13984,13 +13984,12 @@ vmsperl_set_features(void)
 	 vms_unlink_all_versions = 0;
     }
 
-    /* Dectect running under GNV Bash or other UNIX like shell */
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
+    /* Detect running under GNV Bash or other UNIX like shell */
     gnv_unix_shell = 0;
     status = simple_trnlnm("GNV$UNIX_SHELL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
 	 gnv_unix_shell = 1;
-	 set_feature_default("DECC$EFS_CASE_PRESERVE", 1);
 	 set_feature_default("DECC$EFS_CHARSET", 1);
 	 set_feature_default("DECC$FILENAME_UNIX_NO_VERSION", 1);
 	 set_feature_default("DECC$FILENAME_UNIX_REPORT", 1);
@@ -13999,6 +13998,8 @@ vmsperl_set_features(void)
 	 vms_unlink_all_versions = 1;
 	 vms_posix_exit = 1;
     }
+    /* Some reasonable defaults that are not CRTL defaults */
+    set_feature_default("DECC$EFS_CASE_PRESERVE", 1);
 #endif
 
     /* hacks to see if known bugs are still present for testing */
