@@ -977,6 +977,9 @@ sub run_tests {
         use Cname;
 
         ok 'fooB'  =~ /\N{foo}[\N{B}\N{b}]/, "Passthrough charname";
+        my $name = "foo\xDF";
+        my $result = eval "'A${name}B'  =~ /^A\\N{$name}B\$/";
+        ok !$@ && $result,  "Passthrough charname of non-ASCII, Latin1";
         #
         # Why doesn't must_warn work here?
         #
@@ -1021,7 +1024,7 @@ sub run_tests {
         ok $@ && $@ =~ /Invalid character/, 'Verify that leading digit in name gives error';
         eval 'q() =~ /\N{COM,MA}/';
         ok $@ && $@ =~ /Invalid character/, 'Verify that comma in name gives error';
-        my $name = "A\x{D7}O";
+        $name = "A\x{D7}O";
         eval "q(W) =~ /\\N{$name}/";
         ok $@ && $@ =~ /Invalid character/, 'Verify that latin1 symbol in name gives error';
         my $utf8_name = "7 CITIES OF GOLD";

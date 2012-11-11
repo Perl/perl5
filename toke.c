@@ -2777,14 +2777,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         }
     }
 
-    /* A custom translator can leave res not in UTF-8, so make sure.  XXX This
-     * can be revisited to not use utf8 for characters that don't need it when
-     * regexes don't have to be in utf8 for Unicode semantics.  If doing so,
-     * remember EBCDIC */
-    if (! SvUTF8(res)) {
-        sv_utf8_upgrade(res);
-    }
-    else { /* Don't accept malformed input */
+    if (SvUTF8(res)) { /* Don't accept malformed input */
         const U8* first_bad_char_loc;
         STRLEN len;
         const char* const str = SvPV_const(res, len);
@@ -3398,31 +3391,6 @@ S_scan_const(pTHX_ char *start)
 
 		/* Here it looks like a named character */
 
-		if (PL_lex_inpat) {
-
-		    /* XXX This block is temporary code.  \N{} implies that the
-		     * pattern is to have Unicode semantics, and therefore
-		     * currently has to be encoded in utf8.  By putting it in
-		     * utf8 now, we save a whole pass in the regular expression
-		     * compiler.  Once that code is changed so Unicode
-		     * semantics doesn't necessarily have to be in utf8, this
-		     * block should be removed.  However, the code that parses
-		     * the output of this would have to be changed to not
-		     * necessarily expect utf8 */
-		    if (!has_utf8) {
-			SvCUR_set(sv, d - SvPVX_const(sv));
-			SvPOK_on(sv);
-			*d = '\0';
-			/* See Note on sizing above.  */
-			sv_utf8_upgrade_flags_grow(sv,
-					SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-					/* 5 = '\N{' + cur char + NUL */
-					(STRLEN)(send - s) + 5);
-			d = SvPVX(sv) + SvCUR(sv);
-			has_utf8 = TRUE;
-		    }
-		}
-
 		if (*s == 'U' && s[1] == '+') { /* \N{U+...} */
 		    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
 				| PERL_SCAN_DISALLOW_PREFIX;
@@ -3504,11 +3472,36 @@ S_scan_const(pTHX_ char *start)
 
 			    const char *str_end = str + len;
 			    const STRLEN off = d - SvPVX_const(sv);
+
+                            if (! SvUTF8(res)) {
+                                /* For the non-UTF-8 case, we can determine the
+                                 * exact length needed without having to parse
+                                 * through the string.  Each character takes up
+                                 * 2 hex digits plus either a trailing dot or
+                                 * the "}" */
+                                d = off + SvGROW(sv, off
+                                                    + 3 * len
+                                                    + 6 /* For the "\N{U+", and
+                                                           trailing NUL */
+                                                    + (STRLEN)(send - e));
+                                Copy("\\N{U+", d, 5, char);
+                                d += 5;
+                                while (str < str_end) {
+                                    char hex_string[4];
+                                    my_snprintf(hex_string, sizeof(hex_string),
+                                                "%02X.", (U8) *str);
+                                    Copy(hex_string, d, 3, char);
+                                    d += 3;
+                                    str++;
+                                }
+                                d--;    /* We will overwrite below the final
+                                           dot with a right brace */
+                            }
+                            else {
 			    STRLEN char_length;	    /* cur char's byte length */
 			    STRLEN output_length;   /* and the number of bytes
 						       after this is translated
 						       into hex digits */
-
 			    /* 2 hex per byte; 2 chars for '\N'; 2 chars for
 			     * max('U+', '.'); and 1 for NUL */
 			    char hex_string[2 * UTF8_MAXBYTES + 5];
@@ -3555,6 +3548,7 @@ S_scan_const(pTHX_ char *start)
 						     + 2);	/* '}' +  NUL */
 				Copy(hex_string, d, output_length, char);
 				d += output_length;
+			    }
 			    }
 
 			    *d++ = '}';	/* Done.  Add the trailing brace */
