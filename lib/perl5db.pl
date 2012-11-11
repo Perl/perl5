@@ -5478,6 +5478,93 @@ sub _cmd_l_handle_var_name {
     return cmd_l( 'l', $s );
 }
 
+sub _cmd_l_handle_subname {
+    my $cmd  = shift;
+    my $line = shift;
+
+    my $s = $subname;
+
+    # De-Perl4.
+    $subname =~ s/\'/::/;
+
+    # Put it in this package unless it starts with ::.
+    $subname = $package . "::" . $subname unless $subname =~ /::/;
+
+    # Put it in CORE::GLOBAL if t doesn't start with :: and
+    # it doesn't live in this package and it lives in CORE::GLOBAL.
+    $subname = "CORE::GLOBAL::$s"
+    if not defined &$subname
+        and $s !~ /::/
+        and defined &{"CORE::GLOBAL::$s"};
+
+    # Put leading '::' names into 'main::'.
+    $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
+
+    # Get name:start-stop from find_sub, and break this up at
+    # colons.
+    my @pieces = split( /:/, find_sub($subname) || $sub{$subname} );
+
+    # Pull off start-stop.
+    my $subrange = pop @pieces;
+
+    # If the name contained colons, the split broke it up.
+    # Put it back together.
+    $file = join( ':', @pieces );
+
+    # If we're not in that file, switch over to it.
+    if ( $file ne $filename ) {
+        if (! $slave_editor) {
+            print {$OUT} "Switching to file '$file'.\n";
+        }
+
+        # Switch debugger's magic structures.
+        *dbline   = $main::{ '_<' . $file };
+        $max      = $#dbline;
+        $filename = $file;
+    } ## end if ($file ne $filename)
+
+    # Subrange is 'start-stop'. If this is less than a window full,
+    # swap it to 'start+', which will list a window from the start point.
+    if ($subrange) {
+        if ( eval($subrange) < -$window ) {
+            $subrange =~ s/-.*/+/;
+        }
+
+        # Call self recursively to list the range.
+        $line = $subrange;
+        return cmd_l( 'l', $subrange );
+    } ## end if ($subrange)
+
+    # Couldn't find it.
+    else {
+        print {$OUT} "Subroutine $subname not found.\n";
+        return;
+    }
+}
+
+sub _cmd_l_empty {
+    # Compute new range to list.
+    $incr = $window - 1;
+
+    # Recurse to do it.
+    return cmd_l( 'l', $start . '-' . ( $start + $incr ) );
+}
+
+sub _cmd_l_plus {
+    my ($new_start, $new_incr) = @_;
+
+    # Don't reset start for 'l +nnn'.
+    $start = $new_start if $new_start;
+
+    # Increment for list. Use window size if not specified.
+    # (Allows 'l +' to work.)
+    $incr = $new_incr || ($window - 1);
+
+    # Create a line range we'll understand, and recurse to do it.
+    my $line = $start . '-' . ( $start + $incr );
+    return cmd_l( 'l', $line );
+}
+
 sub cmd_l {
     my $current_line = $line;
     my $cmd  = shift;
@@ -5495,90 +5582,18 @@ sub cmd_l {
 
     # l name. Try to find a sub by that name.
     elsif ( ($subname) = $line =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
-        my $s = $subname;
-
-        # De-Perl4.
-        $subname =~ s/\'/::/;
-
-        # Put it in this package unless it starts with ::.
-        $subname = $package . "::" . $subname unless $subname =~ /::/;
-
-        # Put it in CORE::GLOBAL if t doesn't start with :: and
-        # it doesn't live in this package and it lives in CORE::GLOBAL.
-        $subname = "CORE::GLOBAL::$s"
-          if not defined &$subname
-          and $s !~ /::/
-          and defined &{"CORE::GLOBAL::$s"};
-
-        # Put leading '::' names into 'main::'.
-        $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
-
-        # Get name:start-stop from find_sub, and break this up at
-        # colons.
-        my @pieces = split( /:/, find_sub($subname) || $sub{$subname} );
-
-        # Pull off start-stop.
-        my $subrange = pop @pieces;
-
-        # If the name contained colons, the split broke it up.
-        # Put it back together.
-        $file = join( ':', @pieces );
-
-        # If we're not in that file, switch over to it.
-        if ( $file ne $filename ) {
-            if (! $slave_editor) {
-                print {$OUT} "Switching to file '$file'.\n";
-            }
-
-            # Switch debugger's magic structures.
-            *dbline   = $main::{ '_<' . $file };
-            $max      = $#dbline;
-            $filename = $file;
-        } ## end if ($file ne $filename)
-
-        # Subrange is 'start-stop'. If this is less than a window full,
-        # swap it to 'start+', which will list a window from the start point.
-        if ($subrange) {
-            if ( eval($subrange) < -$window ) {
-                $subrange =~ s/-.*/+/;
-            }
-
-            # Call self recursively to list the range.
-            $line = $subrange;
-            return cmd_l( 'l', $subrange );
-        } ## end if ($subrange)
-
-        # Couldn't find it.
-        else {
-            print {$OUT} "Subroutine $subname not found.\n";
-            return;
-        }
+        return _cmd_l_handle_subname($cmd, $line);
     } ## end elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s)
 
     # Bare 'l' command.
     elsif ( $line !~ /\S/ ) {
-
-        # Compute new range to list.
-        $incr = $window - 1;
-        $line = $start . '-' . ( $start + $incr );
-
-        # Recurse to do it.
-        return cmd_l( 'l', $line );
+        return _cmd_l_empty();
     }
 
     # l [start]+number_of_lines
     elsif ( my ($new_start, $new_incr) = $line =~ /\A(\d*)\+(\d*)\z/ ) {
 
-        # Don't reset start for 'l +nnn'.
-        $start = $new_start if $new_start;
-
-        # Increment for list. Use window size if not specified.
-        # (Allows 'l +' to work.)
-        $incr = $new_incr || ($window - 1);
-
-        # Create a line range we'll understand, and recurse to do it.
-        $line = $start . '-' . ( $start + $incr );
-        return cmd_l( 'l', $line );
+        return _cmd_l_plus($new_start, $new_incr);
     } ## end elsif ($line =~ /^(\d*)\+(\d*)$/)
 
     # l start-stop or l start,stop
