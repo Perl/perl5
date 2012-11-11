@@ -212,7 +212,7 @@ sub my_preprocess {
     print "# --preprocess--\n";
     print "#   \$File::Find::dir => '$File::Find::dir' \n";
     foreach $file (@files) {
-        $file =~ s/\.(dir)?$// if $^O eq 'VMS';
+        $file =~ s/\.(dir)?$//i if $^O eq 'VMS';
         print "#   $file \n";
         delete $Expect_Dir{ $File::Find::dir }->{$file};
     }
