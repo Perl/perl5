@@ -1217,7 +1217,8 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 #define POP_MULTICALL \
     STMT_START {							\
-	if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
+	cx = &cxstack[cxstack_ix];					\
+        if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
 		LEAVESUB(multicall_cv);					\
 	}								\
 	POPBLOCK(cx,PL_curpm);						\
