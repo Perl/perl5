@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS $Is_VMS_mode $Is_VMS_lc $Is_VMS_nodot
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.61';
+$VERSION = '1.62';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -183,8 +183,9 @@ sub manifind {
 	warn "Debug: diskfile $name\n" if $Debug;
 	return if -d $_;
 
+        $name =~ s/\.$// if $Is_VMS;
         if( $Is_VMS_lc ) {
-            $name =~ s#(.*)\.$#\L$1#;
+            $name = lc($name);
             $name = uc($name) if $name =~ /^MANIFEST(\.SKIP)?$/i;
         }
 	$found->{$name} = "";
@@ -378,8 +379,10 @@ sub maniread {
                 warn "Debug: Illegal name $file changed to $okfile\n" if $Debug;
                 $file = $okfile;
             }
-            $file = lc($file)
-                unless $Is_VMS_lc &&($file =~ /^MANIFEST(\.SKIP)?$/);
+            if( $Is_VMS_lc ) {
+                $file = lc($file);
+                $file = uc($file) if $file =~ /^MANIFEST(\.SKIP)?$/i;
+            }
         }
 
         $read->{$file} = $comment;
