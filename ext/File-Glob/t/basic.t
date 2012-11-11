@@ -159,9 +159,10 @@ is_deeply(\@a, ['a', 'b']);
 @a = grep !/(,v$|~$|\.(pm|ori?g|rej)$)/, @a;
 @a = (grep !/test.pl/, @a) if $^O eq 'VMS';
 
+map { $_  =~ s/test\.?/TEST/i } @a if $^O eq 'VMS';
 print "# @a\n";
 
-is_deeply(\@a, [($vms_mode ? 'test.' : 'TEST'), 'a', 'b']);
+is_deeply(\@a, ['TEST', 'a', 'b']);
 
 # "~" should expand to $ENV{HOME}
 {
