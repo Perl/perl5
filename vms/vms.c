@@ -85,34 +85,6 @@ struct item_list_3 {
 };
 #pragma member_alignment restore
 
-#if __CRTL_VER >= 70300000 && !defined(__VAX)
-
-static int set_feature_default(const char *name, int value)
-{
-    int status;
-    int index;
-
-    index = decc$feature_get_index(name);
-
-    status = decc$feature_set_value(index, 1, value);
-    if (index == -1 || (status == -1)) {
-      return -1;
-    }
-
-    status = decc$feature_get_value(index, 1);
-    if (status != value) {
-      return -1;
-    }
-
-    /* Various things may check for an environment setting
-     * rather than the feature directly, so set that too.
-     */
-    vmssetuserlnm(name, value ? "ENABLE" : "DISABLE");
-
-    return 0;
-}
-#endif
-
 /* Older versions of ssdef.h don't have these */
 #ifndef SS$_INVFILFOROP
 #  define SS$_INVFILFOROP 3930
@@ -13894,6 +13866,35 @@ int Perl_vms_case_tolerant(void)
 
 
  /* Start of DECC RTL Feature handling */
+
+#if __CRTL_VER >= 70300000 && !defined(__VAX)
+
+static int
+set_feature_default(const char *name, int value)
+{
+    int status;
+    int index;
+
+    index = decc$feature_get_index(name);
+
+    status = decc$feature_set_value(index, 1, value);
+    if (index == -1 || (status == -1)) {
+      return -1;
+    }
+
+    status = decc$feature_get_value(index, 1);
+    if (status != value) {
+      return -1;
+    }
+
+    /* Various things may check for an environment setting
+     * rather than the feature directly, so set that too.
+     */
+    vmssetuserlnm(name, value ? "ENABLE" : "DISABLE");
+
+    return 0;
+}
+#endif
 
 
 /* C RTL Feature settings */
