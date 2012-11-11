@@ -104,7 +104,12 @@ static int set_feature_default(const char *name, int value)
       return -1;
     }
 
-return 0;
+    /* Various things may check for an environment setting
+     * rather than the feature directly, so set that too.
+     */
+    vmssetuserlnm(name, value ? "ENABLE" : "DISABLE");
+
+    return 0;
 }
 #endif
 
