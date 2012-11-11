@@ -5485,7 +5485,7 @@ sub cmd_l {
         $line = "$1 $s";
 
         # Call self recursively to really do the command.
-        cmd_l( 'l', $s );
+        return cmd_l( 'l', $s );
     } ## end if ($line =~ /^(\$.*)/s)
 
     # l name. Try to find a sub by that name.
@@ -5540,12 +5540,13 @@ sub cmd_l {
 
             # Call self recursively to list the range.
             $line = $subrange;
-            cmd_l( 'l', $subrange );
+            return cmd_l( 'l', $subrange );
         } ## end if ($subrange)
 
         # Couldn't find it.
         else {
             print {$OUT} "Subroutine $subname not found.\n";
+            return;
         }
     } ## end elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s)
 
@@ -5557,7 +5558,7 @@ sub cmd_l {
         $line = $start . '-' . ( $start + $incr );
 
         # Recurse to do it.
-        cmd_l( 'l', $line );
+        return cmd_l( 'l', $line );
     }
 
     # l [start]+number_of_lines
@@ -5572,7 +5573,7 @@ sub cmd_l {
 
         # Create a line range we'll understand, and recurse to do it.
         $line = $start . '-' . ( $start + $incr );
-        cmd_l( 'l', $line );
+        return cmd_l( 'l', $line );
     } ## end elsif ($line =~ /^(\d*)\+(\d*)$/)
 
     # l start-stop or l start,stop
@@ -5644,6 +5645,8 @@ sub cmd_l {
         # command is desired. Don't let it run off the end.
         $start = $i;
         _minify_to_max(\$start);
+
+        return;
     } ## end elsif ($line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/)
 } ## end sub cmd_l
 
