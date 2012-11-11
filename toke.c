@@ -3503,11 +3503,11 @@ S_scan_const(pTHX_ char *start)
 			    * returned by charnames */
 
 			    const char *str_end = str + len;
+			    const STRLEN off = d - SvPVX_const(sv);
 			    STRLEN char_length;	    /* cur char's byte length */
 			    STRLEN output_length;   /* and the number of bytes
 						       after this is translated
 						       into hex digits */
-			    const STRLEN off = d - SvPVX_const(sv);
 
 			    /* 2 hex per byte; 2 chars for '\N'; 2 chars for
 			     * max('U+', '.'); and 1 for NUL */
