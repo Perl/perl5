@@ -633,7 +633,7 @@ Perl_do_trans(pTHX_ SV *sv)
 
     if (SvREADONLY(sv) && !(PL_op->op_private & OPpTRANS_IDENTICAL)) {
         if (!SvIsCOW(sv))
-            Perl_croak_no_modify(aTHX);
+            Perl_croak_no_modify();
     }
     (void)SvPV_const(sv, len);
     if (!len)

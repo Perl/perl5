@@ -231,7 +231,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		if (vivify_sv && sv != &PL_sv_undef) {
 		    GV *gv;
 		    if (SvREADONLY(sv))
-			Perl_croak_no_modify(aTHX);
+			Perl_croak_no_modify();
 		    if (cUNOP->op_targ) {
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
 			gv = MUTABLE_GV(newSV(0));
@@ -777,7 +777,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	    sv_force_normal_flags(sv, 0);
         }
         else
-            Perl_croak_no_modify(aTHX);
+            Perl_croak_no_modify();
     }
 
     if (PL_encoding) {
@@ -1040,7 +1040,7 @@ PP(pp_postinc)
     const bool inc =
 	PL_op->op_type == OP_POSTINC || PL_op->op_type == OP_I_POSTINC;
     if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
-	Perl_croak_no_modify(aTHX);
+	Perl_croak_no_modify();
     if (SvROK(TOPs))
 	TARG = sv_newmortal();
     sv_setsv(TARG, TOPs);
@@ -5081,7 +5081,7 @@ PP(pp_push)
 	SPAGAIN;
     }
     else {
-	if (SvREADONLY(ary) && MARK < SP) Perl_croak_no_modify(aTHX);
+	if (SvREADONLY(ary) && MARK < SP) Perl_croak_no_modify();
 	PL_delaymagic = DM_DELAY;
 	for (++MARK; MARK <= SP; MARK++) {
 	    SV *sv;

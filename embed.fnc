@@ -246,8 +246,8 @@ Aprd	|void	|croak_sv	|NN SV *baseex
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Afprd	|void	|croak		|NULLOK const char* pat|...
 Aprd	|void	|vcroak		|NULLOK const char* pat|NULLOK va_list* args
-Aprd	|void	|croak_no_modify
-Aprd	|void	|croak_xs_usage	|NN const CV *const cv \
+Anprd	|void	|croak_no_modify
+Anprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
 #if defined(WIN32)
 norx	|void	|win32_croak_not_implemented|NN const char * fname

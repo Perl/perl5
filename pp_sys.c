@@ -1100,7 +1100,7 @@ PP(pp_sselect)
 	    if (SvIsCOW(sv))
 		sv_force_normal_flags(sv, 0);
 	    if (SvREADONLY(sv) && !(SvPOK(sv) && SvCUR(sv) == 0))
-		Perl_croak_no_modify(aTHX);
+		Perl_croak_no_modify();
 	}
 	if (!SvPOK(sv)) {
 	    if (!SvPOKp(sv))

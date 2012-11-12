@@ -132,6 +132,10 @@ L<CPAN> has been upgraded from version 1.98 to 1.99_51.
 
 L<DynaLoader> has been upgraded from version 1.16 to 1.17.
 
+=item *
+
+L<Tie::Hash::NamedCapture> has been upgraded from version 0.08 to 0.09.
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -331,6 +335,12 @@ well.
 [ List each change as a =item entry ]
 
 =over 4
+
+=item *
+
+The private Perl_croak_no_modify has had its context parameter removed. It is
+now has a void prototype. Users of the public API croak_no_modify remain
+unaffected.
 
 =item *
 

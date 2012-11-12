@@ -77,9 +77,9 @@
 #define croak			Perl_croak
 #endif
 #define croak_memory_wrap	S_croak_memory_wrap
-#define croak_no_modify()	Perl_croak_no_modify(aTHX)
+#define croak_no_modify		Perl_croak_no_modify
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
-#define croak_xs_usage(a,b)	Perl_croak_xs_usage(aTHX_ a,b)
+#define croak_xs_usage		Perl_croak_xs_usage
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)

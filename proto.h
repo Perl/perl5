@@ -643,7 +643,7 @@ PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 PERL_STATIC_NO_RET void	S_croak_memory_wrap(void)
 			__attribute__noreturn__;
 
-PERL_CALLCONV_NO_RET void	Perl_croak_no_modify(pTHX)
+PERL_CALLCONV_NO_RET void	Perl_croak_no_modify(void)
 			__attribute__noreturn__;
 
 PERL_CALLCONV_NO_RET void	Perl_croak_sv(pTHX_ SV *baseex)
@@ -652,10 +652,10 @@ PERL_CALLCONV_NO_RET void	Perl_croak_sv(pTHX_ SV *baseex)
 #define PERL_ARGS_ASSERT_CROAK_SV	\
 	assert(baseex)
 
-PERL_CALLCONV_NO_RET void	Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
+PERL_CALLCONV_NO_RET void	Perl_croak_xs_usage(const CV *const cv, const char *const params)
 			__attribute__noreturn__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE	\
 	assert(cv); assert(params)
 

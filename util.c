@@ -1625,9 +1625,9 @@ paths reduces CPU cache pressure.
 */
 
 void
-Perl_croak_no_modify(pTHX)
+Perl_croak_no_modify()
 {
-    Perl_croak(aTHX_ "%s", PL_no_modify);
+    Perl_croak_nocontext( "%s", PL_no_modify);
 }
 
 /*

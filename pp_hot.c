@@ -438,7 +438,7 @@ PP(pp_preinc)
     const bool inc =
 	PL_op->op_type == OP_PREINC || PL_op->op_type == OP_I_PREINC;
     if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
-	Perl_croak_no_modify(aTHX);
+	Perl_croak_no_modify();
     if (!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
     {
@@ -2161,7 +2161,7 @@ PP(pp_subst)
 	    || ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
 		  || SvTYPE(TARG) > SVt_PVLV)
 		 && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
-	Perl_croak_no_modify(aTHX);
+	Perl_croak_no_modify();
     PUTBACK;
 
     s = SvPV_nomg(TARG, len);
@@ -2946,7 +2946,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     SvGETMAGIC(sv);
     if (!SvOK(sv)) {
 	if (SvREADONLY(sv))
-	    Perl_croak_no_modify(aTHX);
+	    Perl_croak_no_modify();
 	prepare_SV_for_RV(sv);
 	switch (to_what) {
 	case OPpDEREF_SV:

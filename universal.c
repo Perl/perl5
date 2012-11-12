@@ -298,7 +298,7 @@ C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 */
 
 void
-Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
+Perl_croak_xs_usage(const CV *const cv, const char *const params)
 {
     const GV *const gv = CvGV(cv);
 
@@ -308,16 +308,16 @@ Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 	const HV *const stash = GvSTASH(gv);
 
 	if (HvNAME_get(stash))
-	    Perl_croak(aTHX_ "Usage: %"HEKf"::%"HEKf"(%s)",
+	    Perl_croak_nocontext("Usage: %"HEKf"::%"HEKf"(%s)",
                                 HEKfARG(HvNAME_HEK(stash)),
                                 HEKfARG(GvNAME_HEK(gv)),
                                 params);
 	else
-	    Perl_croak(aTHX_ "Usage: %"HEKf"(%s)",
+	    Perl_croak_nocontext("Usage: %"HEKf"(%s)",
                                 HEKfARG(GvNAME_HEK(gv)), params);
     } else {
 	/* Pants. I don't think that it should be possible to get here. */
-	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
+	Perl_croak_nocontext("Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
     }
 }
 

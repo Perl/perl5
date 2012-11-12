@@ -4785,7 +4785,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
             }
 	}
 	else if (IN_PERL_RUNTIME)
-	    Perl_croak_no_modify(aTHX);
+	    Perl_croak_no_modify();
     }
 #else
     if (SvREADONLY(sv)) {
@@ -4807,7 +4807,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	    unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	}
 	else if (IN_PERL_RUNTIME)
-	    Perl_croak_no_modify(aTHX);
+	    Perl_croak_no_modify();
     }
 #endif
     if (SvROK(sv))
@@ -5320,7 +5320,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	    && !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
 	   )
 	{
-	    Perl_croak_no_modify(aTHX);
+	    Perl_croak_no_modify();
 	}
     }
     if (SvMAGICAL(sv) || (how == PERL_MAGIC_taint && SvTYPE(sv) >= SVt_PVMG)) {
@@ -7954,7 +7954,7 @@ Perl_sv_inc_nomg(pTHX_ register SV *const sv)
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 	    if (IN_PERL_RUNTIME)
-		Perl_croak_no_modify(aTHX);
+		Perl_croak_no_modify();
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -8136,7 +8136,7 @@ Perl_sv_dec_nomg(pTHX_ register SV *const sv)
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 	    if (IN_PERL_RUNTIME)
-		Perl_croak_no_modify(aTHX);
+		Perl_croak_no_modify();
 	}
 	if (SvROK(sv)) {
 	    IV i;
@@ -9495,7 +9495,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
 	if (SvREADONLY(tmpRef) && !SvIsCOW(tmpRef))
-	    Perl_croak_no_modify(aTHX);
+	    Perl_croak_no_modify();
 	if (SvOBJECT(tmpRef)) {
 	    if (SvTYPE(tmpRef) != SVt_PVIO)
 		--PL_sv_objcount;
