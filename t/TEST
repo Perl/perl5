@@ -23,7 +23,7 @@ my %dir_to_switch =
      '../ext/File-Glob/t' => '-I.. -MTestInit', # FIXME - tests assume t/
      );
 
-# "not absolute" is the the default, as it saves some fakery within TestInit
+# "not absolute" is the default, as it saves some fakery within TestInit
 # which can perturb tests, and takes CPU. Working with the upstream author of
 # any of these, to figure out how to remove them from this list, considered
 # "a good thing".
