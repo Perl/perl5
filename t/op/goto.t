@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 85;
+plan tests => 88;
 our $TODO;
 
 my $deprecated = 0;
@@ -460,12 +460,27 @@ a32039();
 
 # goto &foo not allowed in evals
 
-
 sub null { 1 };
 eval 'goto &null';
 like($@, qr/Can't goto subroutine from an eval-string/, 'eval string');
 eval { goto &null };
 like($@, qr/Can't goto subroutine from an eval-block/, 'eval block');
+ 
+# goto &foo leaves @_ alone when called from a sub
+sub returnarg { $_[0] };
+is sub {
+    local *_ = ["ick and queasy"];
+    goto &returnarg;
+}->("quick and easy"), "ick and queasy",
+  'goto &foo with *_{ARRAY} replaced';
+my @__ = "\xc4\x80";
+sub { local *_ = \@__; goto &utf8::decode }->("no thinking aloud");
+is "@__", chr 256, 'goto &xsub with replaced *_{ARRAY}';
+
+# And goto &foo should leave reified @_ alone
+sub { *__ = \@_;  goto &null } -> ("rough and tubbery");
+is ${*__}[0], 'rough and tubbery', 'goto &foo leaves reified @_ alone';
+
 
 # [perl #36521] goto &foo in warn handler could defeat recursion avoider
 

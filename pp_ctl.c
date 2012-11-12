@@ -2770,10 +2770,8 @@ PP(pp_goto)
 	    I32 cxix;
 	    PERL_CONTEXT *cx;
 	    CV *cv = MUTABLE_CV(SvRV(sv));
-	    SV** mark;
-	    I32 items = 0;
+	    AV *arg = GvAV(PL_defgv);
 	    I32 oldsave;
-	    bool reified = 0;
 
 	retry:
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
@@ -2818,33 +2816,20 @@ PP(pp_goto)
 	    else if (CxMULTICALL(cx))
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
-		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 
-		items = AvFILLp(av) + 1;
-		EXTEND(SP, items+1); /* @_ could have been extended. */
-		Copy(AvARRAY(av), SP + 1, items, SV*);
-		SvREFCNT_dec(GvAV(PL_defgv));
-		GvAV(PL_defgv) = cx->blk_sub.savearray;
-		CLEAR_ARGARRAY(av);
-		/* abandon @_ if it got reified */
-		if (AvREAL(av)) {
-		    reified = 1;
+		/* abandon the original @_ if it got reified or if it is
+		   the same as the current @_ */
+		if (AvREAL(av) || av == arg) {
 		    SvREFCNT_dec(av);
 		    av = newAV();
-		    av_extend(av, items-1);
 		    AvREIFY_only(av);
 		    PAD_SVl(0) = MUTABLE_SV(cx->blk_sub.argarray = av);
 		}
+		else CLEAR_ARGARRAY(av);
 	    }
-	    else if (CvISXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
-		AV* const av = GvAV(PL_defgv);
-		items = AvFILLp(av) + 1;
-		EXTEND(SP, items+1); /* @_ could have been extended. */
-		Copy(AvARRAY(av), SP + 1, items, SV*);
-	    }
-	    mark = SP;
-	    SP += items;
+	    /* We donate this refcount later to the callee’s pad. */
+	    SvREFCNT_inc_simple_void(arg);
 	    if (CxTYPE(cx) == CXt_SUB &&
 		!(CvDEPTH(cx->blk_sub.cv) = cx->blk_sub.olddepth))
 		SvREFCNT_dec(cx->blk_sub.cv);
@@ -2855,6 +2840,7 @@ PP(pp_goto)
 	     * our precious cv.  See bug #99850. */
 	    if (!CvROOT(cv) && !CvXSUB(cv)) {
 		const GV * const gv = CvGV(cv);
+		SvREFCNT_dec(arg);
 		if (gv) {
 		    SV * const tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
@@ -2871,10 +2857,25 @@ PP(pp_goto)
 		OP* const retop = cx->blk_sub.retop;
 		SV **newsp PERL_UNUSED_DECL;
 		I32 gimme PERL_UNUSED_DECL;
-		if (reified) {
+		const SSize_t items = AvFILLp(arg) + 1;
+		SV** mark;
+
+		/* put GvAV(defgv) back onto stack */
+		EXTEND(SP, items+1); /* @_ could have been extended. */
+		Copy(AvARRAY(arg), SP + 1, items, SV*);
+		mark = SP;
+		SP += items;
+		if (AvREAL(arg)) {
 		    I32 index;
 		    for (index=0; index<items; index++)
-			sv_2mortal(SP[-index]);
+			SvREFCNT_inc_void(sv_2mortal(SP[-index]));
+		}
+		SvREFCNT_dec(arg);
+		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
+		    /* Restore old @_ */
+		    arg = GvAV(PL_defgv);
+		    GvAV(PL_defgv) = cx->blk_sub.savearray;
+		    SvREFCNT_dec(arg);
 		}
 
 		/* XS subs don't have a CxSUB, so pop it */
@@ -2909,41 +2910,26 @@ PP(pp_goto)
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))
 		{
-		    AV *const av = MUTABLE_AV(PAD_SVl(0));
-
-		    cx->blk_sub.savearray = GvAV(PL_defgv);
-		    GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
 		    CX_CURPAD_SAVE(cx->blk_sub);
-		    cx->blk_sub.argarray = av;
 
-		    if (items >= AvMAX(av) + 1) {
-			SV **ary = AvALLOC(av);
-			if (AvARRAY(av) != ary) {
-			    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-			    AvARRAY(av) = ary;
-			}
-			if (items >= AvMAX(av) + 1) {
-			    AvMAX(av) = items - 1;
-			    Renew(ary,items+1,SV*);
-			    AvALLOC(av) = ary;
-			    AvARRAY(av) = ary;
-			}
-		    }
-		    ++mark;
-		    Copy(mark,AvARRAY(av),items,SV*);
-		    AvFILLp(av) = items - 1;
-		    assert(!AvREAL(av));
-		    if (reified) {
-			/* transfer 'ownership' of refcnts to new @_ */
-			AvREAL_on(av);
-			AvREIFY_off(av);
-		    }
-		    while (items--) {
-			if (*mark)
-			    SvTEMP_off(*mark);
-			mark++;
+		    /* cx->blk_sub.argarray has no reference count, so we
+		       need something to hang on to our argument array so
+		       that cx->blk_sub.argarray does not end up pointing
+		       to freed memory as the result of undef *_.  So put
+		       it in the callee’s pad, donating our refer-
+		       ence count. */
+		    SvREFCNT_dec(PAD_SVl(0));
+		    PAD_SVl(0) = (SV *)(cx->blk_sub.argarray = arg);
+
+		    /* GvAV(PL_defgv) might have been modified on scope
+		       exit, so restore it. */
+		    if (arg != GvAV(PL_defgv)) {
+			AV * const av = GvAV(PL_defgv);
+			GvAV(PL_defgv) = (AV *)SvREFCNT_inc_simple(arg);
+			SvREFCNT_dec(av);
 		    }
 		}
+		else SvREFCNT_dec(arg);
 		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
 		    Perl_get_db_sub(aTHX_ NULL, cv);
 		    if (PERLDB_GOTO) {
