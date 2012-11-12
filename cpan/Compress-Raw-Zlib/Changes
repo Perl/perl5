@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.058 12 November 2012
+
+      * No Changes
+
   2.057 10 November 2012
 
       * Compress::Raw::Zlib needs to use PERL_NO_GET_CONTEXT
