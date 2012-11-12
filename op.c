@@ -11020,10 +11020,11 @@ Perl_rpeep(pTHX_ register OP *o)
                 else {
                     if ((p->op_private & OPpLVAL_INTRO) != intro)
                         break;
-                    /* we expect targs to be contiguous in my($a,$b,$c)
-                     * but not in ($a, $x, $z). In the latter case, stop
-                     * on the first non-contiguous padop */
-                    if (!intro && p->op_targ != base + count)
+                    /* Note that you'd normally  expect targs to be
+                     * contiguous in my($a,$b,$c), but that's not the case
+                     * when external modules start doing things, e.g.
+                     i* Function::Parameters */
+                    if (p->op_targ != base + count)
                         break;
                     assert(p->op_targ == base + count);
                     /* all the padops should be in the same context */
