@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.77';
+$VERSION = '2.78';
 
 my $dumpinc = 0;
 sub import {
@@ -86,7 +86,7 @@ sub deprecated_in {
     my @perls = grep { exists $deprecated{$_}{$module} } keys %deprecated;
     return unless @perls;
     require List::Util;
-    return List::Util::min(@perls);
+    return List::Util::minstr(@perls);
 }
 
 sub removed_from {

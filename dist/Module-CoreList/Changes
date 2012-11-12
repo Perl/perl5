@@ -1,3 +1,11 @@
+2.78 Sat Nov 12 2012
+  - Fix hash order dependency bug in deprecated_in().
+    Tests would would fail or succeed depending on what order keys()
+    would return the version list in. List::Utils::min() considers
+    '5.011' and '5.011000' to be equivalent, and returns the first
+    whichever it encounters. Changing to List::Utils::minstr() fixes
+    this.
+
 2.77 Sat Nov 10 2012
   - Updated for v5.12.5
   - deprecated_in() function added
