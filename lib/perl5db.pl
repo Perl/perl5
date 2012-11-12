@@ -5575,8 +5575,15 @@ sub _cmd_l_plus {
     return cmd_l( 'l', $line );
 }
 
-sub _cmd_l_calc_initial_i {
-    my ($line, $start_match, $end) = @_;
+sub _cmd_l_calc_initial_end_and_i {
+    my ($line, $start_match, $end_match) = @_;
+
+    # Determine end point; use end of file if not specified.
+    my $end = ( !defined $start_match ) ? $max :
+    ( $end_match ? $end_match : $start_match );
+
+    # Go on to the end, and then stop.
+    _minify_to_max(\$end);
 
     # Determine start line.
     my $i = $start_match;
@@ -5589,20 +5596,14 @@ sub _cmd_l_calc_initial_i {
 
     $incr = $end - $i;
 
-    return $i;
+    return ($end, $i);
 }
 
 sub _cmd_l_range {
     my ($cmd, $line, $current_line, $start_match, $end_match) = @_;
 
-    # Determine end point; use end of file if not specified.
-    my $end = ( !defined $start_match ) ? $max :
-    ( $end_match ? $end_match : $start_match );
-
-    # Go on to the end, and then stop.
-    _minify_to_max(\$end);
-
-    my $i = _cmd_l_calc_initial_i($line, $start_match, $end);
+    my ($end, $i) =
+        _cmd_l_calc_initial_end_and_i($line, $start_match, $end_match);
 
     # If we're running under a slave editor, force it to show the lines.
     if ($slave_editor) {
