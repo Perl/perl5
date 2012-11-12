@@ -249,6 +249,7 @@ Aprd	|void	|vcroak		|NULLOK const char* pat|NULLOK va_list* args
 Anprd	|void	|croak_no_modify
 Anprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
+npr	|void	|croak_no_mem
 #if defined(WIN32)
 norx	|void	|win32_croak_not_implemented|NN const char * fname
 #endif
@@ -2198,7 +2199,6 @@ s	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
 s	|SV *|with_queued_errors|NN SV *ex
 s	|bool	|invoke_exception_hook|NULLOK SV *ex|bool warn
-sr	|char *	|write_no_mem
 #if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \
 				|NN const char *type_name|NULLOK const SV *sv \

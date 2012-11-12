@@ -59,17 +59,6 @@ int putenv(char *);
  * XXX This advice seems to be widely ignored :-(   --AD  August 1996.
  */
 
-static char *
-S_write_no_mem(pTHX)
-{
-    dVAR;
-    /* Can't use PerlIO to write as it allocates memory */
-    PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		  PL_no_mem, strlen(PL_no_mem));
-    my_exit(1);
-    NORETURN_FUNCTION_END;
-}
-
 #if defined (DEBUGGING) || defined(PERL_IMPLICIT_SYS) || defined (PERL_TRACK_MEMPOOL)
 #  define ALWAYS_NEED_THX
 #endif
@@ -131,7 +120,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	if (PL_nomemok)
 	    return NULL;
 	else {
-	    return write_no_mem();
+	    croak_no_mem();
 	}
     }
     /*NOTREACHED*/
@@ -234,7 +223,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	if (PL_nomemok)
 	    return NULL;
 	else {
-	    return write_no_mem();
+	    croak_no_mem();
 	}
     }
     /*NOTREACHED*/
@@ -368,7 +357,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
 	if (PL_nomemok)
 	    return NULL;
-	return write_no_mem();
+	croak_no_mem();
     }
 }
 
@@ -1013,7 +1002,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
     pvlen = strlen(pv)+1;
     newaddr = (char*)PerlMemShared_malloc(pvlen);
     if (!newaddr) {
-	return write_no_mem();
+	croak_no_mem();
     }
     return (char*)memcpy(newaddr, pv, pvlen);
 }
@@ -1035,7 +1024,7 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
     /* PERL_ARGS_ASSERT_SAVESHAREDPVN; */
 
     if (!newaddr) {
-	return write_no_mem();
+	croak_no_mem();
     }
     newaddr[len] = '\0';
     return (char*)memcpy(newaddr, pv, len);
@@ -1628,6 +1617,20 @@ void
 Perl_croak_no_modify()
 {
     Perl_croak_nocontext( "%s", PL_no_modify);
+}
+
+/* does not return, used in util.c perlio.c and win32.c
+   This is typically called when malloc returns NULL.
+*/
+void
+Perl_croak_no_mem()
+{
+    dTHX;
+    dVAR;
+    /* Can't use PerlIO to write as it allocates memory */
+    PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		  PL_no_mem, sizeof(PL_no_mem)-1);
+    my_exit(1);
 }
 
 /*

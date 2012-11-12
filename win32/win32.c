@@ -1662,13 +1662,8 @@ win32_longpath(char *path)
 static void
 out_of_memory(void)
 {
-    if (PL_curinterp) {
-        dTHX;
-        /* Can't use PerlIO to write as it allocates memory */
-        PerlLIO_write(PerlIO_fileno(Perl_error_log),
-                      PL_no_mem, strlen(PL_no_mem));
-        my_exit(1);
-    }
+    if (PL_curinterp)
+	croak_no_mem();
     exit(1);
 }
 

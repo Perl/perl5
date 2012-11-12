@@ -643,6 +643,9 @@ PERL_CALLCONV_NO_RET void	Perl_croak(pTHX_ const char* pat, ...)
 PERL_STATIC_NO_RET void	S_croak_memory_wrap(void)
 			__attribute__noreturn__;
 
+PERL_CALLCONV_NO_RET void	Perl_croak_no_mem(void)
+			__attribute__noreturn__;
+
 PERL_CALLCONV_NO_RET void	Perl_croak_no_modify(void)
 			__attribute__noreturn__;
 
@@ -7299,9 +7302,6 @@ STATIC SV *	S_with_queued_errors(pTHX_ SV *ex)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_WITH_QUEUED_ERRORS	\
 	assert(ex)
-
-PERL_STATIC_NO_RET char *	S_write_no_mem(pTHX)
-			__attribute__noreturn__;
 
 #  if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)

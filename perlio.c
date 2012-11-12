@@ -2337,10 +2337,7 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
 #ifdef USE_ITHREADS
 	MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
-	/* Can't use PerlIO to write as it allocates memory */
-	PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		      PL_no_mem, strlen(PL_no_mem));
-	my_exit(1);
+	croak_no_mem();
     }
 
     PL_perlio_fd_refcnt_size = new_max;

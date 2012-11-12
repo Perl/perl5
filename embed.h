@@ -1050,6 +1050,7 @@
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
+#define croak_no_mem		Perl_croak_no_mem
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define cv_clone_into(a,b)	Perl_cv_clone_into(aTHX_ a,b)
 #define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
@@ -1633,7 +1634,6 @@
 #define invoke_exception_hook(a,b)	S_invoke_exception_hook(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
 #define with_queued_errors(a)	S_with_queued_errors(aTHX_ a)
-#define write_no_mem()		S_write_no_mem(aTHX)
 #    if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 #define mem_log_common		S_mem_log_common
 #    endif
