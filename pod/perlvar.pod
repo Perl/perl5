@@ -1256,7 +1256,7 @@ when doing edit-in-place processing with B<-i>.  Useful when you have
 to do a lot of inserting and don't want to keep modifying C<$_>.  See
 L<perlrun> for the B<-i> switch.
 
-=item Handle->output_field_separator( EXPR )
+=item IO::Handle->output_field_separator( EXPR )
 
 =item $OUTPUT_FIELD_SEPARATOR
 
@@ -1267,6 +1267,9 @@ X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>
 
 The output field separator for the print operator.  If defined, this
 value is printed between each of print's arguments.  Default is C<undef>.
+
+You cannot call C<output_field_separator()> on a handle, only as a
+static method. See L<IO::Handle|IO::Handle>.
 
 Mnemonic: what is printed when there is a "," in your print statement.
 
@@ -1305,7 +1308,7 @@ which handle you last accessed.
 
 Mnemonic: many programs use "." to mean the current line number.
 
-=item HANDLE->input_record_separator( EXPR )
+=item IO::Handle->input_record_separator( EXPR )
 
 =item $INPUT_RECORD_SEPARATOR
 
@@ -1361,11 +1364,14 @@ and may not be reading the number of bytes from the underlying file
 that you specified.  This behaviour may change without warning in a
 future version of perl.
 
+You cannot call C<input_record_separator()> on a handle, only as a
+static method. See L<IO::Handle|IO::Handle>.
+
 See also L<perlport/"Newlines">. Also see L</$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
-=item Handle->output_record_separator( EXPR )
+=item IO::Handle->output_record_separator( EXPR )
 
 =item $OUTPUT_RECORD_SEPARATOR
 
@@ -1376,6 +1382,9 @@ X<$\> X<$ORS> X<$OUTPUT_RECORD_SEPARATOR>
 
 The output record separator for the print operator.  If defined, this
 value is printed after the last of print's arguments.  Default is C<undef>.
+
+You cannot call C<output_record_separator()> on a handle, only as a
+static method. See L<IO::Handle|IO::Handle>.
 
 Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
 Also, it's just like C<$/>, but it's what you get "back" from Perl.
@@ -1434,7 +1443,7 @@ of C<$^A> and empties.  So you never really see the contents of C<$^A>
 unless you call C<formline()> yourself and then look at it.  See
 L<perlform> and L<perlfunc/"formline PICTURE,LIST">.
 
-=item HANDLE->format_formfeed(EXPR)
+=item IO::Handle->format_formfeed(EXPR)
 
 =item $FORMAT_FORMFEED
 
@@ -1442,6 +1451,9 @@ L<perlform> and L<perlfunc/"formline PICTURE,LIST">.
 X<$^L> X<$FORMAT_FORMFEED>
 
 What formats output as a form feed.  The default is C<\f>.
+
+You cannot call C<format_formfeed()> on a handle, only as a static
+method. See L<IO::Handle|IO::Handle>.
 
 =item HANDLE->format_page_number(EXPR)
 
@@ -1466,7 +1478,7 @@ channel.
 
 Mnemonic: lines_on_page - lines_printed.
 
-=item Handle->format_line_break_characters EXPR
+=item IO::Handle->format_line_break_characters EXPR
 
 =item $FORMAT_LINE_BREAK_CHARACTERS
 
@@ -1476,6 +1488,9 @@ X<$:> X<FORMAT_LINE_BREAK_CHARACTERS>
 The current set of characters after which a string may be broken to
 fill continuation fields (starting with C<^>) in a format.  The default is
 S<" \n-">, to break on a space, newline, or a hyphen.
+
+You cannot call C<format_line_break_characters()> on a handle, only as
+a static method. See L<IO::Handle|IO::Handle>.
 
 Mnemonic: a "colon" in poetry is a part of a line.
 
