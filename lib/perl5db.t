@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(73);
+plan(106);
 
 my $rc_filename = '.perldb';
 
@@ -65,121 +65,6 @@ sub _out_contents
     return _slurp($out_fn);
 }
 
-{
-    my $target = '../lib/perl5db/t/eval-line-bug';
-
-    rc(
-        <<"EOF",
-    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-    sub afterinit {
-        push(\@DB::typeahead,
-            'b 23',
-            'n',
-            'n',
-            'n',
-            'c', # line 23
-            'n',
-            "p \\\@{'main::_<$target'}",
-            'q',
-        );
-    }
-EOF
-    );
-
-    {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0";
-        runperl(switches => [ '-d' ], progfile => $target);
-    }
-}
-
-like(_out_contents(), qr/sub factorial/,
-    'The ${main::_<filename} variable in the debugger was not destroyed'
-);
-
-{
-    my $target = '../lib/perl5db/t/eval-line-bug';
-
-    rc(
-        <<"EOF",
-    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-    sub afterinit {
-        push(\@DB::typeahead,
-            'b 23',
-            'c',
-            '\$new_var = "Foo"',
-            'x "new_var = <\$new_var>\\n";',
-            'q',
-        );
-    }
-EOF
-    );
-
-    {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0";
-        runperl(switches => [ '-d' ], progfile => $target);
-    }
-}
-
-like(_out_contents(), qr/new_var = <Foo>/,
-    "no strict 'vars' in evaluated lines.",
-);
-
-{
-    local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/lvalue-bug');
-    like($output, qr/foo is defined/, 'lvalue subs work in the debugger');
-}
-
-{
-    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d' ], progfile => '../lib/perl5db/t/symbol-table-bug');
-    like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table');
-}
-
-SKIP: {
-    if ( $Config{usethreads} ) {
-        skip('This perl has threads, skipping non-threaded debugger tests');
-    } else {
-        my $error = 'This Perl not built to support threads';
-        my $output = runperl( switches => [ '-dt' ], stderr => 1 );
-        like($output, qr/$error/, 'Perl debugger correctly complains that it was not built with threads');
-    }
-
-}
-SKIP: {
-    if ( $Config{usethreads} ) {
-        local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-        my $output = runperl(switches => [ '-dt' ], progfile => '../lib/perl5db/t/symbol-table-bug');
-        like($output, qr/Undefined symbols 0/, 'there are no undefined values in the symbol table when running with thread support');
-    } else {
-        skip("This perl is not threaded, skipping threaded debugger tests");
-    }
-}
-
-
-# Test [perl #61222]
-{
-    local $ENV{PERLDB_OPTS};
-    rc(
-        <<'EOF',
-        &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-        sub afterinit {
-            push(@DB::typeahead,
-                'm Pie',
-                'q',
-            );
-        }
-EOF
-    );
-
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-61222');
-    unlike(_out_contents(), qr/INCORRECT/, "[perl #61222]");
-}
-
-
 
 # Test for Proxy constants
 {
@@ -209,7 +94,6 @@ EOF
     like($output, "All tests successful.", "[perl #66110]");
 }
 
-# [perl 104168] level option for tracing
 {
     rc(<<'EOF');
 &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
@@ -223,21 +107,6 @@ sub afterinit {
 
 }
 EOF
-
-    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-104168');
-    my $contents = _out_contents();
-    like($contents, qr/level 2/, "[perl #104168]");
-    unlike($contents, qr/baz/, "[perl #104168]");
-}
-
-# taint tests
-
-{
-    local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
-    my $output = runperl(switches => [ '-d', '-T' ], stderr => 1,
-        progfile => '../lib/perl5db/t/taint');
-    chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
-    is($output, '[$^X][done]', "taint");
 }
 
 package DebugWrap;
@@ -294,6 +163,42 @@ sub _include_t
     return $self->{_include_t};
 }
 
+sub _stderr_val
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_stderr_val} = shift;
+    }
+
+    return $self->{_stderr_val};
+}
+
+sub field
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{field} = shift;
+    }
+
+    return $self->{field};
+}
+
+sub _switches
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_switches} = shift;
+    }
+
+    return $self->{_switches};
+}
+
 sub _contents
 {
     my $self = shift;
@@ -327,6 +232,13 @@ sub _init
     $self->_prog($prog);
 
     $self->_include_t($args->{include_t} ? 1 : 0);
+
+    $self->_stderr_val(exists($args->{stderr}) ? $args->{stderr} : 1);
+
+    if (exists($args->{switches}))
+    {
+        $self->_switches($args->{switches});
+    }
 
     $self->_run();
 
@@ -367,10 +279,13 @@ sub _run {
         ::runperl(
             switches =>
             [
-                '-d',
+                ($self->_switches ? (@{$self->_switches()}) : ('-d')),
                 ($self->_include_t ? ('-I', '../lib/perl5db/t') : ())
             ],
-            stderr => 1,
+            (defined($self->_stderr_val())
+                ? (stderr => $self->_stderr_val())
+                : ()
+            ),
             progfile => $self->_prog()
         );
 
@@ -379,6 +294,11 @@ sub _run {
     $self->_contents(::_out_contents());
 
     return;
+}
+
+sub get_output
+{
+    return shift->_output();
 }
 
 sub output_like {
@@ -410,6 +330,202 @@ sub contents_unlike {
 }
 
 package main;
+
+{
+    local $ENV{PERLDB_OPTS} = "ReadLine=0";
+    my $target = '../lib/perl5db/t/eval-line-bug';
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 23',
+                'n',
+                'n',
+                'n',
+                'c', # line 23
+                'n',
+                "p \@{'main::_<$target'}",
+                'q',
+            ],
+            prog => $target,
+        }
+    );
+    $wrapper->contents_like(
+        qr/sub factorial/,
+        'The ${main::_<filename} variable in the debugger was not destroyed',
+    );
+}
+
+sub _calc_generic_wrapper
+{
+    my $args = shift;
+
+    my $extra_opts = delete($args->{extra_opts});
+    $extra_opts ||= '';
+    local $ENV{PERLDB_OPTS} = "ReadLine=0" . $extra_opts;
+    return DebugWrap->new(
+        {
+            cmds => delete($args->{cmds}),
+            prog => delete($args->{prog}),
+            %$args,
+        }
+    );
+}
+
+sub _calc_new_var_wrapper
+{
+    my ($args) = @_;
+    return _calc_generic_wrapper(
+        {
+            cmds =>
+            [
+                'b 23',
+                'c',
+                '$new_var = "Foo"',
+                'x "new_var = <$new_var>\\n"',
+                'q',
+            ],
+            %$args,
+        }
+    );
+}
+
+sub _calc_threads_wrapper
+{
+    my $args = shift;
+
+    return _calc_new_var_wrapper(
+        {
+            switches => [ '-dt', ],
+            stderr => 1,
+            %$args
+        }
+    );
+}
+
+{
+    _calc_new_var_wrapper({ prog => '../lib/perl5db/t/eval-line-bug'})
+        ->contents_like(
+            qr/new_var = <Foo>/,
+            "no strict 'vars' in evaluated lines.",
+        );
+}
+
+{
+    _calc_new_var_wrapper(
+        {
+            prog => '../lib/perl5db/t/lvalue-bug',
+            stderr => undef(),
+        },
+    )->output_like(
+            qr/foo is defined/,
+             'lvalue subs work in the debugger',
+         );
+}
+
+{
+    _calc_new_var_wrapper(
+        {
+            prog =>  '../lib/perl5db/t/symbol-table-bug',
+            extra_opts => "NonStop=1",
+            stderr => undef(),
+        }
+    )->output_like(
+        qr/Undefined symbols 0/,
+        'there are no undefined values in the symbol table',
+    );
+}
+
+SKIP:
+{
+    if ( $Config{usethreads} ) {
+        skip('This perl has threads, skipping non-threaded debugger tests');
+    }
+    else {
+        my $error = 'This Perl not built to support threads';
+        _calc_threads_wrapper(
+            {
+                prog => '../lib/perl5db/t/eval-line-bug',
+            }
+        )->output_like(
+            qr/\Q$error\E/,
+            'Perl debugger correctly complains that it was not built with threads',
+        );
+    }
+}
+
+SKIP:
+{
+    if ( $Config{usethreads} ) {
+        _calc_threads_wrapper(
+            {
+                prog =>  '../lib/perl5db/t/symbol-table-bug',
+            }
+        )->output_like(
+            qr/Undefined symbols 0/,
+            'there are no undefined values in the symbol table when running with thread support',
+        );
+    }
+    else {
+        skip("This perl is not threaded, skipping threaded debugger tests");
+    }
+}
+
+# Test [perl #61222]
+{
+    local $ENV{PERLDB_OPTS};
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'm Pie',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/rt-61222',
+        }
+    );
+
+    $wrapper->contents_unlike(qr/INCORRECT/, "[perl #61222]");
+}
+
+sub _calc_trace_wrapper
+{
+    my ($args) = @_;
+
+    return _calc_generic_wrapper(
+        {
+            cmds =>
+            [
+                't 2',
+                'c',
+                'q',
+            ],
+            %$args,
+        }
+    );
+}
+
+# [perl 104168] level option for tracing
+{
+    my $wrapper = _calc_trace_wrapper({ prog =>  '../lib/perl5db/t/rt-104168' });
+    $wrapper->contents_like(qr/level 2/, "[perl #104168] - level 2 appears");
+    $wrapper->contents_unlike(qr/baz/, "[perl #104168] - no 'baz'");
+}
+
+# taint tests
+{
+    my $wrapper = _calc_trace_wrapper(
+        {
+            prog => '../lib/perl5db/t/taint',
+            extra_opts => ' NonStop=1',
+            switches => [ '-d', '-T', ],
+        }
+    );
+
+    my $output = $wrapper->get_output();
+    chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
+    is($output, '[$^X][done]', "taint");
+}
 
 # Testing that we can set a line in the middle of the file.
 {
@@ -1284,7 +1400,7 @@ package main;
     );
 }
 
-# Test the a command.
+# Test the 'a' command.
 {
     my $wrapper = DebugWrap->new(
         {
@@ -1304,6 +1420,28 @@ package main;
         \nVar<Q>=3\n
         #msx,
         "a command is working",
+    );
+}
+
+# Test the 'a' command with no line number.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'n',
+                q/a print "Hello " . (3 * 4) . "\n";/,
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-a-statement-1',
+        }
+    );
+
+    $wrapper->output_like(qr#
+        (?:^Hello\ 12\n.*?){4}
+        #msx,
+        "a command with no line number is working",
     );
 }
 
@@ -1641,6 +1779,770 @@ package main;
 
     $wrapper->output_unlike(qr/FOO=/,
         q#Test the '> *' command.#,
+    );
+}
+
+# Test the < and > commands together
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/$::lorem = 0;/,
+                q/< $::lorem += 10;/,
+                q/> print "\nLOREM=<$::lorem>\n"/,
+                q/b 7/,
+                q/b 5/,
+                'c',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->output_like(qr#
+        ^LOREM=<10>\n
+        #msx,
+        q#Test < and > commands. #,
+    );
+}
+
+# Test the { ? and { [command] commands.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                '{ ?',
+                '{ l',
+                '{ ?',
+                q/b 5/,
+                q/c/,
+                q/q/,
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^No\ pre-debugger\ actions\.\n
+        .*?
+        ^pre-debugger\ commands:\n
+        \s+\{\ --\ l\n
+        .*?
+        ^5==>b\s+\$x\ =\ "FirstVal";\n
+        6\s*\n
+        7:\s+\$dummy\+\+;\n
+        8\s*\n
+        9:\s+\$x\ =\ "SecondVal";\n
+
+        #msx,
+        'Test the pre-prompt debugger commands',
+    );
+}
+
+# Test the { * command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                '{ q',
+                '{ *',
+                q/b 5/,
+                q/c/,
+                q/print (("One" x 5), "\n");/,
+                q/q/,
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^All\ \{\ actions\ cleared\.\n
+        #msx,
+        'Test the { * command',
+    );
+
+    $wrapper->output_like(qr/OneOneOneOneOne/,
+        '{ * test - output is OK.',
+    );
+}
+
+# Test the ! command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 3-5',
+                '!',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        (^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";)\n
+        .*?
+        ^l\ 3-5\n
+        \1
+        #msx,
+        'Test the ! command (along with l 3-5)',
+    );
+}
+
+# Test the ! -number command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 3-5',
+                'l 2',
+                '! -1',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        (^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";)\n
+        .*?
+        ^2==\>\s+my\ \$x\ =\ "One";\n
+        .*?
+        ^l\ 3-5\n
+        \1
+        #msx,
+        'Test the ! -n command (along with l)',
+    );
+}
+
+# Test the 'source' command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'source ../lib/perl5db/t/source-cmd-test.perldb',
+                # If we have a 'q' here, then the typeahead will override the
+                # input, and so it won't be reached - solution:
+                # put a q inside the .perldb commands.
+                # ( This may be a bug or a misfeature. )
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";\n
+        6\s*\n
+        7:\s+\$dummy\+\+;\n
+        8\s*\n
+        9:\s+\$x\ =\ "SecondVal";\n
+        10\s*\n
+        #msx,
+        'Test the source command (along with l)',
+    );
+}
+
+# Test the 'source' command being traversed from withing typeahead.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'source ../lib/perl5db/t/source-cmd-test-no-q.perldb',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";\n
+        6\s*\n
+        7:\s+\$dummy\+\+;\n
+        8\s*\n
+        9:\s+\$x\ =\ "SecondVal";\n
+        10\s*\n
+        #msx,
+        'Test the source command inside a typeahead',
+    );
+}
+
+# Test the 'H -number' command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 1-10',
+                'l 5-10',
+                'x "Hello World"',
+                'l 1-5',
+                'b 3',
+                'x (20+4)',
+                'H -7',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^\d+:\s+H\ -7\n
+        \d+:\s+x\ \(20\+4\)\n
+        \d+:\s+b\ 3\n
+        \d+:\s+l\ 1-5\n
+        \d+:\s+x\ "Hello\ World"\n
+        \d+:\s+l\ 5-10\n
+        \d+:\s+l\ 1-10\n
+        #msx,
+        'Test the H -num command',
+    );
+}
+
+# Add a test for H (without arguments)
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 1-10',
+                'l 5-10',
+                'x "Hello World"',
+                'l 1-5',
+                'b 3',
+                'x (20+4)',
+                'H',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^\d+:\s+x\ \(20\+4\)\n
+        \d+:\s+b\ 3\n
+        \d+:\s+l\ 1-5\n
+        \d+:\s+x\ "Hello\ World"\n
+        \d+:\s+l\ 5-10\n
+        \d+:\s+l\ 1-10\n
+        #msx,
+        'Test the H command (without a number.)',
+    );
+}
+
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                '= quit q',
+                '= foobar l',
+                'foobar',
+                'quit',
+            ],
+            prog => '../lib/perl5db/t/test-l-statement-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/
+            ^1==>\s+\$x\ =\ 1;\n
+            2:\s+print\ "1\\n";\n
+            3\s*\n
+            4:\s+\$x\ =\ 2;\n
+            5:\s+print\ "2\\n";\n
+        /msx,
+        'Test the = (command alias) command.',
+    );
+}
+
+# Test the m statement.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'm main',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^via\ UNIVERSAL:\ DOES$
+        #msx,
+        "Test m for main - 1",
+    );
+
+    $wrapper->contents_like(qr#
+        ^via\ UNIVERSAL:\ can$
+        #msx,
+        "Test m for main - 2",
+    );
+}
+
+# Test the m statement.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 41',
+                'c',
+                'm $obj',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-m-statement-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#^greet$#ms,
+        "Test m for obj - 1",
+    );
+
+    $wrapper->contents_like(qr#^via UNIVERSAL: can$#ms,
+        "Test m for obj - 1",
+    );
+}
+
+# Test the M command.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'M',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-m-statement-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^'strict\.pm'\ =>\ '\d+\.\d+\ from
+        #msx,
+        "Test M",
+    );
+
+}
+
+# Test the recallCommand option.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o recallCommand=%',
+                'l 3-5',
+                'l 2',
+                '% -1',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        (^3:\s+my\ \$dummy\ =\ 0;\n
+        4\s*\n
+        5:\s+\$x\ =\ "FirstVal";)\n
+        .*?
+        ^2==\>\s+my\ \$x\ =\ "One";\n
+        .*?
+        ^l\ 3-5\n
+        \1
+        #msx,
+        'Test the o recallCommand option',
+    );
+}
+
+# Test the dieLevel option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/o dieLevel='1'/,
+                q/c/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-dieLevel-option-1',
+        }
+    );
+
+    $wrapper->output_like(qr#
+        ^This\ program\ dies\.\ at\ \S+\ line\ 18\.\n
+        .*?
+        ^\s+main::baz\(\)\ called\ at\ \S+\ line\ 13\n
+        \s+main::bar\(\)\ called\ at\ \S+\ line\ 7\n
+        \s+main::foo\(\)\ called\ at\ \S+\ line\ 21\n
+        #msx,
+        'Test the o dieLevel option',
+    );
+}
+
+# Test the warnLevel option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/o warnLevel='1'/,
+                q/c/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr#
+        ^This\ is\ not\ a\ warning\.\ at\ \S+\ line\ 18\.\n
+        .*?
+        ^\s+main::baz\(\)\ called\ at\ \S+\ line\ 13\n
+        \s+main::bar\(\)\ called\ at\ \S+\ line\ 25\n
+        \s+main::myfunc\(\)\ called\ at\ \S+\ line\ 28\n
+        #msx,
+        'Test the o warnLevel option',
+    );
+}
+
+# Test the t command
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                't',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:15\):\n
+        15:\s+\$dummy\+\+;\n
+        main::\([^:]+:17\):\n
+        17:\s+\$x\ =\ "FourthVal";\n
+        /msx,
+        'Test the t command (without a number.)',
+    );
+}
+
+# Test the o AutoTrace command
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o AutoTrace',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:15\):\n
+        15:\s+\$dummy\+\+;\n
+        main::\([^:]+:17\):\n
+        17:\s+\$x\ =\ "FourthVal";\n
+        /msx,
+        'Test the o AutoTrace command',
+    );
+}
+
+# Test the t command with function calls
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                't',
+                'b 18',
+                'c',
+                'x ["foo"]',
+                'x ["bar"]',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:28\):\n
+        28:\s+myfunc\(\);\n
+        main::myfunc\([^:]+:25\):\n
+        25:\s+bar\(\);\n
+        /msx,
+        'Test the t command with function calls.',
+    );
+}
+
+# Test the o AutoTrace command with function calls
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o AutoTrace',
+                'b 18',
+                'c',
+                'x ["foo"]',
+                'x ["bar"]',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^main::\([^:]+:28\):\n
+        28:\s+myfunc\(\);\n
+        main::myfunc\([^:]+:25\):\n
+        25:\s+bar\(\);\n
+        /msx,
+        'Test the t command with function calls.',
+    );
+}
+
+# Test the final message.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_like(qr/
+        ^Debugged\ program\ terminated\.
+        /msx,
+        'Test the final "Debugged program terminated" message.',
+    );
+}
+
+# Test the o inhibit_exit=0 command
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o inhibit_exit=0',
+                'n',
+                'n',
+                'n',
+                'n',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-warnLevel-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(qr/
+        ^Debugged\ program\ terminated\.
+        /msx,
+        'Test the o inhibit_exit=0 command.',
+    );
+}
+
+# Test the o PrintRet=1 option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=1',
+                'b 29',
+                'c',
+                q/$x = 's';/,
+                'b 10',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/scalar context return from main::return_scalar: 20024/,
+        "Test o PrintRet=1",
+    );
+}
+
+# Test the o PrintRet=0 option
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=0',
+                'b 29',
+                'c',
+                q/$x = 's';/,
+                'b 10',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/scalar context/,
+        "Test o PrintRet=0",
+    );
+}
+
+# Test the o PrintRet=1 option in list context
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=1',
+                'b 29',
+                'c',
+                q/$x = 'l';/,
+                'b 17',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/list context return from main::return_list:\n0\s*'Foo'\n1\s*'Bar'\n2\s*'Baz'\n/,
+        "Test o PrintRet=1 in list context",
+    );
+}
+
+# Test the o PrintRet=0 option in list context
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=0',
+                'b 29',
+                'c',
+                q/$x = 'l';/,
+                'b 17',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/list context/,
+        "Test o PrintRet=0 in list context",
+    );
+}
+
+# Test the o PrintRet=1 option in void context
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=1',
+                'b 29',
+                'c',
+                q/$x = 'v';/,
+                'b 24',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/void context return from main::return_void/,
+        "Test o PrintRet=1 in void context",
+    );
+}
+
+# Test the o PrintRet=1 option in void context
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'o PrintRet=0',
+                'b 29',
+                'c',
+                q/$x = 'v';/,
+                'b 24',
+                'c',
+                'r',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-PrintRet-option-1',
+        }
+    );
+
+    $wrapper->contents_unlike(
+        qr/void context/,
+        "Test o PrintRet=0 in void context",
+    );
+}
+
+# Test the o frame option.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                # This is to avoid getting the "Debugger program terminated"
+                # junk that interferes with the normal output.
+                'o inhibit_exit=0',
+                'b 10',
+                'c',
+                'o frame=255',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-frame-option-1',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/
+            in\s*\.=main::my_other_func\(3,\ 1200\)\ from.*?
+            out\s*\.=main::my_other_func\(3,\ 1200\)\ from
+        /msx,
+        "Test o PrintRet=0 in void context",
     );
 }
 
