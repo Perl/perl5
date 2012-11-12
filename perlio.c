@@ -466,7 +466,6 @@ PerlIO_debug(const char *fmt, ...)
 	}
     }
     if (PL_perlio_debug_fd > 0) {
-	dTHX;
 #ifdef USE_ITHREADS
 	const char * const s = CopFILE(PL_curcop);
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
@@ -2392,7 +2391,6 @@ PerlIOUnix_refcnt_inc(int fd)
 int
 PerlIOUnix_refcnt_dec(int fd)
 {
-    dTHX;
     int cnt = 0;
     if (fd >= 0) {
 	dVAR;
@@ -2401,12 +2399,12 @@ PerlIOUnix_refcnt_dec(int fd)
 #endif
 	if (fd >= PL_perlio_fd_refcnt_size) {
 	    /* diag_listed_as: refcnt_dec: fd %d%s */
-	    Perl_croak(aTHX_ "refcnt_dec: fd %d >= refcnt_size %d\n",
+	    Perl_croak_nocontext("refcnt_dec: fd %d >= refcnt_size %d\n",
 		       fd, PL_perlio_fd_refcnt_size);
 	}
 	if (PL_perlio_fd_refcnt[fd] <= 0) {
 	    /* diag_listed_as: refcnt_dec: fd %d%s */
-	    Perl_croak(aTHX_ "refcnt_dec: fd %d: %d <= 0\n",
+	    Perl_croak_nocontext("refcnt_dec: fd %d: %d <= 0\n",
 		       fd, PL_perlio_fd_refcnt[fd]);
 	}
 	cnt = --PL_perlio_fd_refcnt[fd];
@@ -2416,7 +2414,7 @@ PerlIOUnix_refcnt_dec(int fd)
 #endif
     } else {
 	/* diag_listed_as: refcnt_dec: fd %d%s */
-	Perl_croak(aTHX_ "refcnt_dec: fd %d < 0\n", fd);
+	Perl_croak_nocontext("refcnt_dec: fd %d < 0\n", fd);
     }
     return cnt;
 }
@@ -3790,12 +3788,14 @@ PerlIO_releaseFILE(PerlIO *p, FILE *f)
     while ((l = *p)) {
 	if (l->tab == &PerlIO_stdio) {
 	    PerlIOStdio *s = PerlIOSelf(&l, PerlIOStdio);
-	    if (s->stdio == f) {
-		dTHX;
+	    if (s->stdio == f) { /* not in a loop */
 		const int fd = fileno(f);
 		if (fd >= 0)
 		    PerlIOUnix_refcnt_dec(fd);
-		PerlIO_pop(aTHX_ p);
+		{
+		    dTHX;
+		    PerlIO_pop(aTHX_ p);
+		}
 		return;
 	    }
 	}
@@ -5093,9 +5093,9 @@ Perl_PerlIO_context_layers(pTHX_ const char *mode)
 int
 PerlIO_setpos(PerlIO *f, SV *pos)
 {
-    dTHX;
     if (SvOK(pos)) {
 	STRLEN len;
+	dTHX;
 	const Off_t * const posn = (Off_t *) SvPV(pos, len);
 	if (f && len == sizeof(Off_t))
 	    return PerlIO_seek(f, *posn, SEEK_SET);
