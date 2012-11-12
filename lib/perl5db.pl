@@ -5441,11 +5441,21 @@ later.
 sub _min {
     my $min = shift;
     foreach my $v (@_) {
-        if ($v < $min) {
-            $v = $min;
+        if ($min > $v) {
+            $min = $v;
         }
     }
     return $min;
+}
+
+sub _max {
+    my $max = shift;
+    foreach my $v (@_) {
+        if ($max < $v) {
+            $max = $v;
+        }
+    }
+    return $max;
 }
 
 sub _minify_to_max {
@@ -5565,6 +5575,23 @@ sub _cmd_l_plus {
     return cmd_l( 'l', $line );
 }
 
+sub _cmd_l_calc_initial_i {
+    my ($line, $start_match, $end) = @_;
+
+    # Determine start line.
+    my $i = $start_match;
+
+    if ($i eq '.') {
+        $i = $line;
+    }
+
+    $i = _max($i, 1);
+
+    $incr = $end - $i;
+
+    return $i;
+}
+
 sub _cmd_l_range {
     my ($cmd, $line, $current_line, $start_match, $end_match) = @_;
 
@@ -5575,18 +5602,13 @@ sub _cmd_l_range {
     # Go on to the end, and then stop.
     _minify_to_max(\$end);
 
-    # Determine start line.
-    my $i    = $start_match;
-    $i    = $line if $i eq '.';
-    $i    = 1 if $i < 1;
-    $incr = $end - $i;
+    my $i = _cmd_l_calc_initial_i($line, $start_match, $end);
 
     # If we're running under a slave editor, force it to show the lines.
     if ($slave_editor) {
-        print $OUT "\032\032$filename:$i:0\n";
+        print {$OUT} "\032\032$filename:$i:0\n";
         $i = $end;
     }
-
     # We're doing it ourselves. We want to show the line and special
     # markers for:
     # - the current line in execution
