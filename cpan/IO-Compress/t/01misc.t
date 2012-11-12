@@ -72,18 +72,18 @@ sub My::testParseParameters()
     {
         use Config;
 
-        skip 'readonly + threads', 1
+        skip 'readonly + threads', 2
             if $Config{useithreads};
 
         eval { ParseParameters(1, {'fred' => [Parse_writable_scalar, 0]}, fred => 'abc') ; };
         like $@, mkErr("Parameter 'fred' not writable"), 
                 "wanted writable, got readonly";
+
+        eval { ParseParameters(1, {'fred' => [Parse_writable_scalar, 0]}, fred => \'abc') ; };
+        like $@, mkErr("Parameter 'fred' not writable"), 
+                "wanted writable, got readonly";
     }
 
-    eval { ParseParameters(1, {'fred' => [Parse_writable_scalar, 0]}, fred => \'abc') ; };
-    like $@, mkErr("Parameter 'fred' not writable"), 
-            "wanted writable, got readonly";
-            
     my @xx;
     eval { ParseParameters(1, {'fred' => [Parse_writable_scalar, 0]}, fred => \@xx) ; };
     like $@, mkErr("Parameter 'fred' not a scalar reference"), 

@@ -6,7 +6,7 @@ require 5.006 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.057 ;
+use IO::Compress::Base::Common 2.058 ;
 
 use IO::File (); ;
 use Scalar::Util ();
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.057';
+$VERSION = '2.058';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -234,9 +234,7 @@ sub _create
     #if ($outType eq 'filename' && -e $outValue && ! -w _)
     #  { return $obj->saveErrorString(undef, "Output file '$outValue' is not writable" ) }
 
-
-
-    if ($got->parsed('encode')) { 
+    if ($got->getValue('encode')) { 
         my $want_encoding = $got->getValue('encode');
         *$obj->{Encoding} = getEncoding($obj, $class, $want_encoding);
     }
@@ -678,7 +676,7 @@ sub printf
 
 
 sub flush
-{
+{   
     my $self = shift ;
 
     my $outBuffer='';
@@ -793,7 +791,6 @@ sub _writeFinalTrailer
 sub close
 {
     my $self = shift ;
-
     return 1 if *$self->{Closed} || ! *$self->{Compress} ;
     *$self->{Closed} = 1 ;
 
