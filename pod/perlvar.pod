@@ -1269,7 +1269,7 @@ The output field separator for the print operator.  If defined, this
 value is printed between each of print's arguments.  Default is C<undef>.
 
 You cannot call C<output_field_separator()> on a handle, only as a
-static method. See L<IO::Handle|IO::Handle>.
+static method.  See L<IO::Handle|IO::Handle>.
 
 Mnemonic: what is printed when there is a "," in your print statement.
 
@@ -1365,9 +1365,9 @@ that you specified.  This behaviour may change without warning in a
 future version of perl.
 
 You cannot call C<input_record_separator()> on a handle, only as a
-static method. See L<IO::Handle|IO::Handle>.
+static method.  See L<IO::Handle|IO::Handle>.
 
-See also L<perlport/"Newlines">. Also see L</$.>.
+See also L<perlport/"Newlines">.  Also see L</$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
@@ -1384,7 +1384,7 @@ The output record separator for the print operator.  If defined, this
 value is printed after the last of print's arguments.  Default is C<undef>.
 
 You cannot call C<output_record_separator()> on a handle, only as a
-static method. See L<IO::Handle|IO::Handle>.
+static method.  See L<IO::Handle|IO::Handle>.
 
 Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
 Also, it's just like C<$/>, but it's what you get "back" from Perl.
@@ -1453,7 +1453,7 @@ X<$^L> X<$FORMAT_FORMFEED>
 What formats output as a form feed.  The default is C<\f>.
 
 You cannot call C<format_formfeed()> on a handle, only as a static
-method. See L<IO::Handle|IO::Handle>.
+method.  See L<IO::Handle|IO::Handle>.
 
 =item HANDLE->format_page_number(EXPR)
 
@@ -1490,7 +1490,7 @@ fill continuation fields (starting with C<^>) in a format.  The default is
 S<" \n-">, to break on a space, newline, or a hyphen.
 
 You cannot call C<format_line_break_characters()> on a handle, only as
-a static method. See L<IO::Handle|IO::Handle>.
+a static method.  See L<IO::Handle|IO::Handle>.
 
 Mnemonic: a "colon" in poetry is a part of a line.
 
