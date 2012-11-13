@@ -1996,23 +1996,23 @@ PP(pp_iter)
             sv = AvARRAY(av)[ix];
         }
 
-        if (sv && SvIS_FREED(sv)) {
-            *itersvp = NULL;
-            Perl_croak(aTHX_ "Use of freed value in iteration");
-        }
-
         if (sv) {
+            if (SvIS_FREED(sv)) {
+                *itersvp = NULL;
+                Perl_croak(aTHX_ "Use of freed value in iteration");
+            }
             SvTEMP_off(sv);
             SvREFCNT_inc_simple_void_NN(sv);
         }
         else
             sv = &PL_sv_undef;
+
         if (!av_is_stack && sv == &PL_sv_undef) {
             SV *lv = newSV_type(SVt_PVLV);
             LvTYPE(lv) = 'y';
             sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
             LvTARG(lv) = SvREFCNT_inc_simple(av);
-            LvTARGOFF(lv) = cx->blk_loop.state_u.ary.ix;
+            LvTARGOFF(lv) = ix;
             LvTARGLEN(lv) = (STRLEN)UV_MAX;
             sv = lv;
         }
