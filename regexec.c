@@ -4962,6 +4962,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			 * compiled */
 			S_regcp_restore(aTHX_ rex, runops_cp);
 		    }
+		    SAVEFREESV(re_sv);
 		    re = ReANY(re_sv);
 		}
                 RXp_MATCH_COPIED_off(re);
