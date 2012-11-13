@@ -1937,32 +1937,34 @@ PP(pp_iter)
             break;
         }
 
-    case CXt_LOOP_LAZYIV:
-	/* integer increment */
-	if (cx->blk_loop.state_u.lazyiv.cur > cx->blk_loop.state_u.lazyiv.end)
+    case CXt_LOOP_LAZYIV: /* integer increment */
+    {
+        IV cur = cx->blk_loop.state_u.lazyiv.cur;
+	if (cur > cx->blk_loop.state_u.lazyiv.end)
 	    RETPUSHNO;
 
+        oldsv = *itersvp;
 	/* don't risk potential race */
-	if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
+	if (SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv)) {
 	    /* safe to reuse old SV */
-	    sv_setiv(*itersvp, cx->blk_loop.state_u.lazyiv.cur);
+	    sv_setiv(oldsv, cur);
 	}
 	else
 	{
 	    /* we need a fresh SV every time so that loop body sees a
 	     * completely new SV for closures/references to work as they
 	     * used to */
-	    oldsv = *itersvp;
-	    *itersvp = newSViv(cx->blk_loop.state_u.lazyiv.cur);
+	    *itersvp = newSViv(cur);
 	    SvREFCNT_dec(oldsv);
 	}
 
-	if (cx->blk_loop.state_u.lazyiv.cur == IV_MAX) {
+	if (cur == IV_MAX) {
 	    /* Handle end of range at IV_MAX */
 	    cx->blk_loop.state_u.lazyiv.end = IV_MIN;
 	} else
 	    ++cx->blk_loop.state_u.lazyiv.cur;
         break;
+    }
 
     case CXt_LOOP_FOR:
     {
