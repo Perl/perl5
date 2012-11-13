@@ -1626,7 +1626,7 @@ void
 Perl_croak_no_mem()
 {
     dTHX;
-    dVAR;
+
     /* Can't use PerlIO to write as it allocates memory */
     PerlLIO_write(PerlIO_fileno(Perl_error_log),
 		  PL_no_mem, sizeof(PL_no_mem)-1);
