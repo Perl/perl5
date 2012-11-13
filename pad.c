@@ -1999,7 +1999,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 	    || PadlistNAMES(CvPADLIST(outside))
 		 != protopadlist->xpadl_outid) {
 	    outside = find_runcv_where(
-		FIND_RUNCV_padid_eq, (IV)protopadlist->xpadl_outid, NULL
+		FIND_RUNCV_padid_eq, PTR2IV(protopadlist->xpadl_outid), NULL
 	    );
 	    /* outside could be null */
 	}
