@@ -1897,10 +1897,8 @@ PP(pp_iter)
 {
     dVAR; dSP;
     PERL_CONTEXT *cx;
-    SV *sv, *oldsv;
+    SV *oldsv;
     SV **itersvp;
-    AV *av = NULL; /* used for LOOP_FOR on arrays and the stack */
-    bool av_is_stack = FALSE;
 
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
@@ -1967,9 +1965,13 @@ PP(pp_iter)
         break;
 
     case CXt_LOOP_FOR:
+    {
 
         /* iterate array */
-        av = cx->blk_loop.state_u.ary.ary;
+        AV *av = cx->blk_loop.state_u.ary.ary;
+        SV *sv;
+        bool av_is_stack = FALSE;
+
         if (!av) {
             av_is_stack = TRUE;
             av = PL_curstack;
@@ -2026,6 +2028,7 @@ PP(pp_iter)
         *itersvp = sv;
         SvREFCNT_dec(oldsv);
         break;
+    }
 
     default:
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
