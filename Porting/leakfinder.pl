@@ -84,6 +84,7 @@ $n = push @a, "rec0", "rec1", "rec2";
 $n = push @a, "rec3", "rec4$:";
 $n = unshift @a, "rec0", "rec1", "rec2";
 $n = unshift @a, "rec3", "rec4$:";
+@$obj = ($meth, (bless [@$obj]), 1); # Avoid circular reference
 @old = splice(@h, 1, 2, qw(bananas just before));
 package XS::APItest; require XSLoader; XSLoader::load()
 $pa = { -exitval => $pa };
@@ -94,6 +95,7 @@ prog => 'use Config; CHECK { $Config{awk} }',
 $p->{share_dir} = { dist => [ $p->{share_dir} ] };
 $p->{share_dir} = { dist => $p->{share_dir} };
 { push (@Bad, $key) }
+( push @hard, $file ), next
 { push @keep, $_ }
 { push (@values, $value) }
 $resp = [$resp]
@@ -102,6 +104,7 @@ $share_dir->{dist} = [ $share_dir->{dist} ];
 sleep;
 sleep(300);
 sleep($waitfor - 2);    # Workaround for perlbug #49073
+s![^/+]*$!man!&&-d&&!$s{$_}++&&push@m,#_;END{print"@m"}'
 $spec = [$spec, $_[0]];
 $stack[$i++] &= ~1;
 $step = [$step];
