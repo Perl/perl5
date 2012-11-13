@@ -1919,23 +1919,23 @@ PP(pp_iter)
 	    if (SvNIOK(cur) || SvCUR(cur) > maxlen)
                 RETPUSHNO;
 
-		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
-		    /* safe to reuse old SV */
-		    sv_setsv(*itersvp, cur);
-		}
-		else
-		{
-		    /* we need a fresh SV every time so that loop body sees a
-		     * completely new SV for closures/references to work as
-		     * they used to */
-		    oldsv = *itersvp;
-		    *itersvp = newSVsv(cur);
-		    SvREFCNT_dec(oldsv);
-		}
-		if (strEQ(SvPVX_const(cur), max))
-		    sv_setiv(cur, 0); /* terminate next time */
-		else
-		    sv_inc(cur);
+            if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
+                /* safe to reuse old SV */
+                sv_setsv(*itersvp, cur);
+            }
+            else
+            {
+                /* we need a fresh SV every time so that loop body sees a
+                 * completely new SV for closures/references to work as
+                 * they used to */
+                oldsv = *itersvp;
+                *itersvp = newSVsv(cur);
+                SvREFCNT_dec(oldsv);
+            }
+            if (strEQ(SvPVX_const(cur), max))
+                sv_setiv(cur, 0); /* terminate next time */
+            else
+                sv_inc(cur);
             break;
         }
 
