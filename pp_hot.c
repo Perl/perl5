@@ -1971,36 +1971,29 @@ PP(pp_iter)
         AV *av = cx->blk_loop.state_u.ary.ary;
         SV *sv;
         bool av_is_stack = FALSE;
+        IV ix;
 
         if (!av) {
             av_is_stack = TRUE;
             av = PL_curstack;
         }
         if (PL_op->op_private & OPpITER_REVERSED) {
-            if (cx->blk_loop.state_u.ary.ix <= (av_is_stack
-                                        ? cx->blk_loop.resetsp + 1 : 0))
+            ix = --cx->blk_loop.state_u.ary.ix;
+            if (ix <= (av_is_stack ? cx->blk_loop.resetsp : -1))
                 RETPUSHNO;
-
-            if (SvMAGICAL(av) || AvREIFY(av)) {
-                SV * const * const svp = av_fetch(av, --cx->blk_loop.state_u.ary.ix, FALSE);
-                sv = svp ? *svp : NULL;
-            }
-            else {
-                sv = AvARRAY(av)[--cx->blk_loop.state_u.ary.ix];
-            }
         }
         else {
-            if (cx->blk_loop.state_u.ary.ix >= (av_is_stack ? cx->blk_oldsp :
-                                        AvFILL(av)))
+            ix = ++cx->blk_loop.state_u.ary.ix;
+            if (ix > (av_is_stack ? cx->blk_oldsp : AvFILL(av)))
                 RETPUSHNO;
+        }
 
-            if (SvMAGICAL(av) || AvREIFY(av)) {
-                SV * const * const svp = av_fetch(av, ++cx->blk_loop.state_u.ary.ix, FALSE);
-                sv = svp ? *svp : NULL;
-            }
-            else {
-                sv = AvARRAY(av)[++cx->blk_loop.state_u.ary.ix];
-            }
+        if (SvMAGICAL(av) || AvREIFY(av)) {
+            SV * const * const svp = av_fetch(av, ix, FALSE);
+            sv = svp ? *svp : NULL;
+        }
+        else {
+            sv = AvARRAY(av)[ix];
         }
 
         if (sv && SvIS_FREED(sv)) {
