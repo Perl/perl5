@@ -60,6 +60,7 @@ binmode *STDERR, ":encoding(utf8)";
 binmode *STDOUT, ":encoding(utf8)";
 $char++ while substr( $got, $char, 1 ) eq substr( $wanted, $char, 1 );
 CHECK { $main::phase++ }
+$config{$k} = [ $config{$k} ]
 const char* file = __FILE__;
 $data = [ $data ];
 do { $tainted_value = shift @ENV_values  } while(!$tainted_value || ref $tainted_value);
@@ -70,6 +71,7 @@ $formdata->{$key} = [ $formdata->{$key}, $value ];
 $got_arrayref ? unshift(@{$args[0]}, $cmd) : unshift(@args, $cmd);
 { $h[++$i] = $_ }
 $i = int($i/2) until defined $self->[$i/2];
+$invmap_ref->[$i] = [ $invmap_ref->[$i] ];
 $i++ while $self->{ids}{"$t$i"}++;
 $mod_hash->{$k} = [ $mod_hash->{$k} ];
 $modlibname =~ s,[\5c\5c/][^\5c\5c/]+$,, while $c--;    # Q&D basename
@@ -98,8 +100,10 @@ $resp = [$resp]
 $self->{DIR} = [grep $_, split ":", $self->{DIR}];
 $share_dir->{dist} = [ $share_dir->{dist} ];
 sleep;
+sleep(300);
 sleep($waitfor - 2);    # Workaround for perlbug #49073
 $spec = [$spec, $_[0]];
+$stack[$i++] &= ~1;
 $step = [$step];
 Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 weaken($objs[@objs] = $h{$_} = []);
