@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 66;
+plan tests => 67;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -197,6 +197,7 @@ SKIP: {
 
 eleak(2, 0, '+sub:a{}', 'anon subs with invalid attributes');
 eleak(2, 0, 'no warnings; sub a{1 1}', 'sub with syntax error');
+eleak(2, 0, 'no warnings; sub {1 1}', 'anon sub with syntax error');
 
 # Syntax errors
 eleak(2, 0, '"${<<END}"
