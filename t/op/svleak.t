@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 63;
+plan tests => 64;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -193,6 +193,8 @@ SKIP: {
     skip "disabled under -Dmad (eval leaks)" if $Config{mad};
     leak(2, 0, sub { eval q{ my $x = "x"; "abc" =~ /$x/ for 1..5 } }, '#114356');
 }
+
+eleak(2, 0, '+sub:a{}', 'anon subs with invalid attributes');
 
 # Syntax errors
 eleak(2, 0, '"${<<END}"
