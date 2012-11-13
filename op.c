@@ -4650,7 +4650,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
 		/* attach the anon CV to the pad so that
 		 * pad_fixup_inner_anons() can find it */
-		(void)pad_add_anon(cv, o->op_type);
+		if (cv) (void)pad_add_anon(cv, o->op_type);
 		SvREFCNT_inc_simple_void(cv);
 	    }
 	    else {
@@ -7370,15 +7370,14 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (ec) {
 	op_free(block);
-	cv = PL_compcv;
+	SvREFCNT_dec(PL_compcv);
+	PL_compcv = 0;
 	if (name && block) {
 	    const char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
 		const char not_safe[] =
 		    "BEGIN not safe after errors--compilation aborted";
-		PL_compcv = 0;
-		SvREFCNT_dec(cv);
 		if (PL_in_eval & EVAL_KEEPERR)
 		    Perl_croak(aTHX_ not_safe);
 		else {
@@ -8175,6 +8174,9 @@ OP *
 Perl_ck_anoncode(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_ANONCODE;
+
+    /* After errors, we won’t have any sub. */
+    if (!cSVOPo->op_sv) return o;
 
     cSVOPo->op_targ = pad_add_anon((CV*)cSVOPo->op_sv, o->op_type);
     if (!PL_madskills)
