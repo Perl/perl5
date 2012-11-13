@@ -1917,16 +1917,16 @@ PP(pp_iter)
 	    if (SvNIOK(cur) || SvCUR(cur) > maxlen)
                 RETPUSHNO;
 
-            if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
+            oldsv = *itersvp;
+            if (SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv)) {
                 /* safe to reuse old SV */
-                sv_setsv(*itersvp, cur);
+                sv_setsv(oldsv, cur);
             }
             else
             {
                 /* we need a fresh SV every time so that loop body sees a
                  * completely new SV for closures/references to work as
                  * they used to */
-                oldsv = *itersvp;
                 *itersvp = newSVsv(cur);
                 SvREFCNT_dec(oldsv);
             }
