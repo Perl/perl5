@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 60;
+plan tests => 63;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -71,6 +71,10 @@ leak(5, 0, sub {push @a,1;pop @a}, "basic check 2 of leak test infrastructure");
 leak(5, 1, sub {push @a,1;},       "basic check 3 of leak test infrastructure");
 
 eleak(2, 0, 'sub{<*>}');
+
+eleak(2, 0, 'goto sub {}', 'goto &sub in eval');
+eleak(2, 0, '() = sort { goto sub {} } 1,2', 'goto &sub in sort');
+eleak(2, 0, '/(?{ goto sub {} })/', 'goto &sub in regexp');
 
 sub TIEARRAY	{ bless [], $_[0] }
 sub FETCH	{ $_[0]->[$_[1]] }

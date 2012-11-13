@@ -2799,13 +2799,17 @@ PP(pp_goto)
 	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
+	    {
+		SvREFCNT_dec(cv);
 		DIE(aTHX_ "Can't goto subroutine outside a subroutine");
+	    }
 	    if (cxix < cxstack_ix)
 		dounwind(cxix);
 	    TOPBLOCK(cx);
 	    SPAGAIN;
 	    /* ban goto in eval: see <20050521150056.GC20213@iabyn.com> */
 	    if (CxTYPE(cx) == CXt_EVAL) {
+		SvREFCNT_dec(cv);
 		if (CxREALEVAL(cx))
 		/* diag_listed_as: Can't goto subroutine from an eval-%s */
 		    DIE(aTHX_ "Can't goto subroutine from an eval-string");
@@ -2814,7 +2818,10 @@ PP(pp_goto)
 		    DIE(aTHX_ "Can't goto subroutine from an eval-block");
 	    }
 	    else if (CxMULTICALL(cx))
+	    {
+		SvREFCNT_dec(cv);
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
+	    }
 	    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		AV* av = cx->blk_sub.argarray;
 
