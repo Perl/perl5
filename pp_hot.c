@@ -1970,66 +1970,66 @@ PP(pp_iter)
 
     case CXt_LOOP_FOR:
 
-    /* iterate array */
-    av = cx->blk_loop.state_u.ary.ary;
-    if (!av) {
-	av_is_stack = TRUE;
-	av = PL_curstack;
-    }
-    if (PL_op->op_private & OPpITER_REVERSED) {
-	if (cx->blk_loop.state_u.ary.ix <= (av_is_stack
-				    ? cx->blk_loop.resetsp + 1 : 0))
-	    RETPUSHNO;
+        /* iterate array */
+        av = cx->blk_loop.state_u.ary.ary;
+        if (!av) {
+            av_is_stack = TRUE;
+            av = PL_curstack;
+        }
+        if (PL_op->op_private & OPpITER_REVERSED) {
+            if (cx->blk_loop.state_u.ary.ix <= (av_is_stack
+                                        ? cx->blk_loop.resetsp + 1 : 0))
+                RETPUSHNO;
 
-	if (SvMAGICAL(av) || AvREIFY(av)) {
-	    SV * const * const svp = av_fetch(av, --cx->blk_loop.state_u.ary.ix, FALSE);
-	    sv = svp ? *svp : NULL;
-	}
-	else {
-	    sv = AvARRAY(av)[--cx->blk_loop.state_u.ary.ix];
-	}
-    }
-    else {
-	if (cx->blk_loop.state_u.ary.ix >= (av_is_stack ? cx->blk_oldsp :
-				    AvFILL(av)))
-	    RETPUSHNO;
+            if (SvMAGICAL(av) || AvREIFY(av)) {
+                SV * const * const svp = av_fetch(av, --cx->blk_loop.state_u.ary.ix, FALSE);
+                sv = svp ? *svp : NULL;
+            }
+            else {
+                sv = AvARRAY(av)[--cx->blk_loop.state_u.ary.ix];
+            }
+        }
+        else {
+            if (cx->blk_loop.state_u.ary.ix >= (av_is_stack ? cx->blk_oldsp :
+                                        AvFILL(av)))
+                RETPUSHNO;
 
-	if (SvMAGICAL(av) || AvREIFY(av)) {
-	    SV * const * const svp = av_fetch(av, ++cx->blk_loop.state_u.ary.ix, FALSE);
-	    sv = svp ? *svp : NULL;
-	}
-	else {
-	    sv = AvARRAY(av)[++cx->blk_loop.state_u.ary.ix];
-	}
-    }
+            if (SvMAGICAL(av) || AvREIFY(av)) {
+                SV * const * const svp = av_fetch(av, ++cx->blk_loop.state_u.ary.ix, FALSE);
+                sv = svp ? *svp : NULL;
+            }
+            else {
+                sv = AvARRAY(av)[++cx->blk_loop.state_u.ary.ix];
+            }
+        }
 
-    if (sv && SvIS_FREED(sv)) {
-	*itersvp = NULL;
-	Perl_croak(aTHX_ "Use of freed value in iteration");
-    }
+        if (sv && SvIS_FREED(sv)) {
+            *itersvp = NULL;
+            Perl_croak(aTHX_ "Use of freed value in iteration");
+        }
 
-    if (sv) {
-	SvTEMP_off(sv);
-	SvREFCNT_inc_simple_void_NN(sv);
-    }
-    else
-	sv = &PL_sv_undef;
-    if (!av_is_stack && sv == &PL_sv_undef) {
-	SV *lv = newSV_type(SVt_PVLV);
-	LvTYPE(lv) = 'y';
-	sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
-	LvTARG(lv) = SvREFCNT_inc_simple(av);
-	LvTARGOFF(lv) = cx->blk_loop.state_u.ary.ix;
-	LvTARGLEN(lv) = (STRLEN)UV_MAX;
-	sv = lv;
-    }
+        if (sv) {
+            SvTEMP_off(sv);
+            SvREFCNT_inc_simple_void_NN(sv);
+        }
+        else
+            sv = &PL_sv_undef;
+        if (!av_is_stack && sv == &PL_sv_undef) {
+            SV *lv = newSV_type(SVt_PVLV);
+            LvTYPE(lv) = 'y';
+            sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
+            LvTARG(lv) = SvREFCNT_inc_simple(av);
+            LvTARGOFF(lv) = cx->blk_loop.state_u.ary.ix;
+            LvTARGLEN(lv) = (STRLEN)UV_MAX;
+            sv = lv;
+        }
 
-    oldsv = *itersvp;
-    *itersvp = sv;
-    SvREFCNT_dec(oldsv);
+        oldsv = *itersvp;
+        *itersvp = sv;
+        SvREFCNT_dec(oldsv);
 
-    RETPUSHYES;
-    break;
+        RETPUSHYES;
+        break;
 
     default:
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
