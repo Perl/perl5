@@ -1904,11 +1904,11 @@ PP(pp_iter)
 
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
-    if (!CxTYPE_is_LOOP(cx))
-	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
-
     itersvp = CxITERVAR(cx);
-    if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {
+
+    switch (CxTYPE(cx)) {
+    case CXt_LOOP_LAZYSV:
+        {
 	    /* string increment */
 	    SV* cur = cx->blk_loop.state_u.lazysv.cur;
 	    SV *end = cx->blk_loop.state_u.lazysv.end;
@@ -1937,8 +1937,10 @@ PP(pp_iter)
 		RETPUSHYES;
 	    }
 	    RETPUSHNO;
-    }
-    else if (CxTYPE(cx) == CXt_LOOP_LAZYIV) {
+            break;
+        }
+
+    case CXt_LOOP_LAZYIV:
 	/* integer increment */
 	if (cx->blk_loop.state_u.lazyiv.cur > cx->blk_loop.state_u.lazyiv.end)
 	    RETPUSHNO;
@@ -1963,12 +1965,12 @@ PP(pp_iter)
 	    cx->blk_loop.state_u.lazyiv.end = IV_MIN;
 	} else
 	    ++cx->blk_loop.state_u.lazyiv.cur;
-
 	RETPUSHYES;
-    }
+        break;
+
+    case CXt_LOOP_FOR:
 
     /* iterate array */
-    assert(CxTYPE(cx) == CXt_LOOP_FOR);
     av = cx->blk_loop.state_u.ary.ary;
     if (!av) {
 	av_is_stack = TRUE;
@@ -2027,6 +2029,11 @@ PP(pp_iter)
     SvREFCNT_dec(oldsv);
 
     RETPUSHYES;
+    break;
+
+    default:
+	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
+    }
 }
 
 /*
