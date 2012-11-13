@@ -1916,7 +1916,9 @@ PP(pp_iter)
 	       It has SvPVX of "" and SvCUR of 0, which is what we want.  */
 	    STRLEN maxlen = 0;
 	    const char *max = SvPV_const(end, maxlen);
-	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
+	    if (SvNIOK(cur) || SvCUR(cur) > maxlen)
+                RETPUSHNO;
+
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */
 		    sv_setsv(*itersvp, cur);
@@ -1934,9 +1936,6 @@ PP(pp_iter)
 		    sv_setiv(cur, 0); /* terminate next time */
 		else
 		    sv_inc(cur);
-		RETPUSHYES;
-	    }
-	    RETPUSHNO;
             break;
         }
 
@@ -1965,7 +1964,6 @@ PP(pp_iter)
 	    cx->blk_loop.state_u.lazyiv.end = IV_MIN;
 	} else
 	    ++cx->blk_loop.state_u.lazyiv.cur;
-	RETPUSHYES;
         break;
 
     case CXt_LOOP_FOR:
@@ -2027,13 +2025,12 @@ PP(pp_iter)
         oldsv = *itersvp;
         *itersvp = sv;
         SvREFCNT_dec(oldsv);
-
-        RETPUSHYES;
         break;
 
     default:
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
     }
+        RETPUSHYES;
 }
 
 /*
