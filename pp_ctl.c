@@ -2896,11 +2896,6 @@ PP(pp_goto)
 	    }
 	    else {
 		PADLIST * const padlist = CvPADLIST(cv);
-		if (CxTYPE(cx) == CXt_EVAL) {
-		    PL_in_eval = CxOLD_IN_EVAL(cx);
-		    PL_eval_root = cx->blk_eval.old_eval_root;
-		    cx->cx_type = CXt_SUB;
-		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
 
