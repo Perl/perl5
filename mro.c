@@ -312,8 +312,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 			sv_upgrade(val, SVt_PV);
 			SvPV_set(val, HEK_KEY(share_hek_hek(key)));
 			SvCUR_set(val, HEK_LEN(key));
-			SvREADONLY_on(val);
-			SvFAKE_on(val);
+			SvIsCOW_on(val);
 			SvPOK_on(val);
 			if (HEK_UTF8(key))
 			    SvUTF8_on(val);

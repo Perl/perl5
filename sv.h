@@ -338,7 +338,8 @@ perform the upgrade if necessary.  See C<svtype>.
 				       subroutine in another package. Set the
 				       GvIMPORTED_CV_on() if it needs to be
 				       expanded to a real GV */
-/*                      0x00010000  *** FREE SLOT */
+#define SVf_IsCOW	0x00010000  /* copy on write (shared hash key if
+				       SvLEN == 0) */
 #define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
 #define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
 					only valid for SVs_PADMY */
@@ -353,17 +354,13 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVf_FAKE	0x01000000  /* 0: glob is just a copy
 				       1: SV head arena wasn't malloc()ed
-				       2: in conjunction with SVf_READONLY
-					  marks a shared hash key scalar
-					  (SvLEN == 0) or a copy on write
-					  string (SvLEN != 0) [SvIsCOW(sv)]
-				       3: For PVCV, whether CvUNIQUE(cv)
+				       2: For PVCV, whether CvUNIQUE(cv)
 					  refers to an eval or once only
 					  [CvEVAL(cv), CvSPECIAL(cv)]
-				       4: On a pad name SV, that slot in the
+				       3: On a pad name SV, that slot in the
 					  frame AV is a REFCNT'ed reference
 					  to a lexical from "outside". */
-#define SVphv_REHASH	SVf_FAKE    /* 5: On a PVHV, hash values are being
+#define SVphv_REHASH	SVf_FAKE    /* 4: On a PVHV, hash values are being
 					  recalculated */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
@@ -377,7 +374,7 @@ perform the upgrade if necessary.  See C<svtype>.
 
 
 
-#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE|SVs_RMG)
+#define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE|SVs_RMG|SVf_IsCOW)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK|SVpgv_GP)
@@ -1765,9 +1762,9 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 	 || (PL_Xpv->xpv_cur && *PL_Sv->sv_u.svu_pv != '0')))
 #endif /* __GNU__ */
 
-#define SvIsCOW(sv)	((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
-			   (SVf_FAKE | SVf_READONLY) && !isGV_with_GP(sv) \
-			   && SvTYPE(sv) != SVt_REGEXP)
+#define SvIsCOW(sv)		(SvFLAGS(sv) & SVf_IsCOW)
+#define SvIsCOW_on(sv)		(SvFLAGS(sv) |= SVf_IsCOW)
+#define SvIsCOW_off(sv)		(SvFLAGS(sv) &= ~SVf_IsCOW)
 #define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
 #define SvSHARED_HEK_FROM_PV(pvx) \

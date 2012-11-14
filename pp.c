@@ -772,12 +772,10 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 	return;
     }
     else if (SvREADONLY(sv)) {
-        if (SvFAKE(sv)) {
-            /* SV is copy-on-write */
-	    sv_force_normal_flags(sv, 0);
-        }
-        else
             Perl_croak_no_modify();
+    }
+    else if (SvIsCOW(sv)) {
+	sv_force_normal_flags(sv, 0);
     }
 
     if (PL_encoding) {

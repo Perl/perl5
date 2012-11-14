@@ -4199,7 +4199,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	       shared hash keys then we don't do the COW setup, even if the
 	       source scalar is a shared hash key scalar.  */
             (((flags & SV_COW_SHARED_HASH_KEYS)
-	       ? (sflags & (SVf_FAKE|SVf_READONLY)) != (SVf_FAKE|SVf_READONLY)
+	       ? !(sflags & SVf_IsCOW)
 	       : 1 /* If making a COW copy is forbidden then the behaviour we
 		       desire is as if the source SV isn't actually already
 		       COW, even if it is.  So we act as if the source flags
@@ -4253,10 +4253,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
             }
 #ifdef PERL_OLD_COPY_ON_WRITE
             if (!isSwipe) {
-                if ((sflags & (SVf_FAKE | SVf_READONLY))
-                    != (SVf_FAKE | SVf_READONLY)) {
-                    SvREADONLY_on(sstr);
-                    SvFAKE_on(sstr);
+                if (!(sflags & SVf_IsCOW)) {
+                    SvIsCOW_on(sstr);
                     /* Make the source SV into a loop of 1.
                        (about to become 2) */
                     SV_COW_NEXT_SV_SET(sstr, sstr);
@@ -4293,8 +4291,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 		}
                 SvLEN_set(dstr, len);
                 SvCUR_set(dstr, cur);
-                SvREADONLY_on(dstr);
-                SvFAKE_on(dstr);
+                SvIsCOW_on(dstr);
             }
             else
                 {	/* Passes the swipe test.  */
@@ -4417,8 +4414,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     } else {
 	assert ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS);
 	SvUPGRADE(sstr, SVt_PVIV);
-	SvREADONLY_on(sstr);
-	SvFAKE_on(sstr);
+	SvIsCOW_on(sstr);
 	DEBUG_C(PerlIO_printf(Perl_debug_log,
 			      "Fast copy on write: Converting sstr to COW\n"));
 	SV_COW_NEXT_SV_SET(dstr, sstr);
@@ -4428,7 +4424,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 
   common_exit:
     SvPV_set(dstr, new_pv);
-    SvFLAGS(dstr) = (SVt_PVIV|SVf_POK|SVp_POK|SVf_FAKE|SVf_READONLY);
+    SvFLAGS(dstr) = (SVt_PVIV|SVf_POK|SVp_POK|SVf_IsCOW);
     if (SvUTF8(sstr))
 	SvUTF8_on(dstr);
     SvLEN_set(dstr, len);
@@ -4584,8 +4580,7 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
 	    SvPV_set(sv,(char *)HEK_KEY(share_hek_hek(hek)));
 	    SvCUR_set(sv, HEK_LEN(hek));
 	    SvLEN_set(sv, 0);
-	    SvREADONLY_on(sv);
-	    SvFAKE_on(sv);
+	    SvIsCOW_on(sv);
 	    SvPOK_on(sv);
 	    if (HEK_UTF8(hek))
 		SvUTF8_on(sv);
@@ -4699,8 +4694,7 @@ S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, SV *after)
             /* The SV we point to points back to us (there were only two of us
                in the loop.)
                Hence other SV is no longer copy on write either.  */
-            SvFAKE_off(after);
-            SvREADONLY_off(after);
+            SvIsCOW_off(after);
         } else {
             /* We need to follow the pointers around the loop.  */
             SV *next;
@@ -4746,6 +4740,10 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
+	if (IN_PERL_RUNTIME)
+	    Perl_croak_no_modify(aTHX);
+    }
+    else
 	if (SvIsCOW(sv)) {
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvLEN(sv);
@@ -4761,8 +4759,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
                               (long) flags);
                 sv_dump(sv);
             }
-            SvFAKE_off(sv);
-            SvREADONLY_off(sv);
+            SvIsCOW_off(sv);
             /* This SV doesn't own the buffer, so need to Newx() a new one:  */
             SvPV_set(sv, NULL);
             SvLEN_set(sv, 0);
@@ -4784,16 +4781,16 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
                 sv_dump(sv);
             }
 	}
-	else if (IN_PERL_RUNTIME)
-	    Perl_croak_no_modify();
-    }
 #else
     if (SvREADONLY(sv)) {
+	if (IN_PERL_RUNTIME)
+	    Perl_croak_no_modify();
+    }
+    else
 	if (SvIsCOW(sv)) {
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
-	    SvFAKE_off(sv);
-	    SvREADONLY_off(sv);
+	    SvIsCOW_off(sv);
 	    SvPV_set(sv, NULL);
 	    SvLEN_set(sv, 0);
 	    if (flags & SV_COW_DROP_PV) {
@@ -4806,9 +4803,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 	    }
 	    unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	}
-	else if (IN_PERL_RUNTIME)
-	    Perl_croak_no_modify();
-    }
 #endif
     if (SvROK(sv))
 	sv_unref_flags(sv, flags);
@@ -6209,7 +6203,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 		    }
 
-		    SvFAKE_off(sv);
 		} else if (SvLEN(sv)) {
 		    Safefree(SvPVX_mutable(sv));
 		}
@@ -6221,7 +6214,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		Safefree(SvPVX_mutable(sv));
 	    else if (SvPVX_const(sv) && SvIsCOW(sv)) {
 		unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
-		SvFAKE_off(sv);
 	    }
 #endif
 	    break;
@@ -8482,8 +8474,7 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
 	    SvPV_set(sv, (char *)HEK_KEY(share_hek_hek(hek)));
 	    SvCUR_set(sv, HEK_LEN(hek));
 	    SvLEN_set(sv, 0);
-	    SvREADONLY_on(sv);
-	    SvFAKE_on(sv);
+	    SvIsCOW_on(sv);
 	    SvPOK_on(sv);
 	    if (HEK_UTF8(hek))
 		SvUTF8_on(sv);
@@ -8531,8 +8522,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
     SvPV_set(sv, sharepvn(src, is_utf8?-len:len, hash));
     SvCUR_set(sv, len);
     SvLEN_set(sv, 0);
-    SvREADONLY_on(sv);
-    SvFAKE_on(sv);
+    SvIsCOW_on(sv);
     SvPOK_on(sv);
     if (is_utf8)
         SvUTF8_on(sv);
@@ -11797,19 +11787,16 @@ Perl_rvpv_dup(pTHX_ SV *const dstr, const SV *const sstr, CLONE_PARAMS *const pa
 	if (SvLEN(sstr)) {
 	    /* Normal PV - clone whole allocated space */
 	    SvPV_set(dstr, SAVEPVN(SvPVX_const(sstr), SvLEN(sstr)-1));
-	    if (SvREADONLY(sstr) && SvFAKE(sstr)) {
-		/* Not that normal - actually sstr is copy on write.
-		   But we are a true, independent SV, so:  */
-		SvREADONLY_off(dstr);
-		SvFAKE_off(dstr);
-	    }
+	    /* sstr may not be that normal, but actually copy on write.
+	       But we are a true, independent SV, so:  */
+	    SvIsCOW_off(dstr);
 	}
 	else {
 	    /* Special case - not normally malloced for some reason */
 	    if (isGV_with_GP(sstr)) {
 		/* Don't need to do anything here.  */
 	    }
-	    else if ((SvREADONLY(sstr) && SvFAKE(sstr))) {
+	    else if ((SvIsCOW(sstr))) {
 		/* A "shared" PV - clone it as "shared" PV */
 		SvPV_set(dstr,
 			 HEK_KEY(hek_dup(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)),

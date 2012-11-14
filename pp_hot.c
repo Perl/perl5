@@ -1695,7 +1695,7 @@ Perl_do_readline(pTHX)
 	}
 	SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
-	if (!tmplen && !SvREADONLY(sv)) {
+	if (!tmplen && !SvREADONLY(sv) && !SvIsCOW(sv)) {
             /* try short-buffering it. Please update t/op/readline.t
 	     * if you change the growth length.
 	     */

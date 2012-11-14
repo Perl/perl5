@@ -1762,7 +1762,7 @@ S_finalize_op(pTHX_ OP* o)
 		/* If op_sv is already a PADTMP/MY then it is being used by
 		 * some pad, so make a copy. */
 		sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
-		SvREADONLY_on(PAD_SVl(ix));
+		if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
 		SvREFCNT_dec(cSVOPo->op_sv);
 	    }
 	    else if (o->op_type != OP_METHOD_NAMED
@@ -1782,7 +1782,7 @@ S_finalize_op(pTHX_ OP* o)
 		SvPADTMP_on(cSVOPo->op_sv);
 		PAD_SETSV(ix, cSVOPo->op_sv);
 		/* XXX I don't know how this isn't readonly already. */
-		SvREADONLY_on(PAD_SVl(ix));
+		if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
 	    }
 	    cSVOPo->op_sv = NULL;
 	    o->op_targ = ix;
@@ -1803,7 +1803,7 @@ S_finalize_op(pTHX_ OP* o)
 
 	/* Make the CONST have a shared SV */
 	svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv))
+	if ((!SvIsCOW(sv = *svp))
 	    && SvTYPE(sv) < SVt_PVMG && !SvROK(sv)) {
 	    key = SvPV_const(sv, keylen);
 	    lexname = newSVpvn_share(key,
@@ -9344,7 +9344,7 @@ Perl_ck_method(pTHX_ OP *o)
 	const char * const method = SvPVX_const(sv);
 	if (!(strchr(method, ':') || strchr(method, '\''))) {
 	    OP *cmop;
-	    if (!SvREADONLY(sv) || !SvFAKE(sv)) {
+	    if (!SvIsCOW(sv)) {
 		sv = newSVpvn_share(method, SvUTF8(sv) ? -(I32)SvCUR(sv) : (I32)SvCUR(sv), 0);
 	    }
 	    else {
@@ -9469,14 +9469,9 @@ Perl_ck_require(pTHX_ OP *o)
 	    const char *end;
 
 	    if (was_readonly) {
-		if (SvFAKE(sv)) {
-		    sv_force_normal_flags(sv, 0);
-		    assert(!SvREADONLY(sv));
-		    was_readonly = 0;
-		} else {
 		    SvREADONLY_off(sv);
-		}
 	    }   
+	    if (SvIsCOW(sv)) sv_force_normal_flags(sv, 0);
 
 	    s = SvPVX(sv);
 	    len = SvCUR(sv);
@@ -10543,7 +10538,7 @@ Perl_ck_svconst(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_SVCONST;
     PERL_UNUSED_CONTEXT;
-    SvREADONLY_on(cSVOPo->op_sv);
+    if (!SvIsCOW(cSVOPo->op_sv)) SvREADONLY_on(cSVOPo->op_sv);
     return o;
 }
 

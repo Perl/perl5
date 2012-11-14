@@ -486,11 +486,11 @@ is($s, "AxBC", "utf8, DELETE");
 
 ($s) = keys %{{pie => 3}};
 SKIP: {
-    if (!eval { require B }) { skip "no B", 2 }
-    my $wasro = B::svref_2object(\$s)->FLAGS & &B::SVf_READONLY;
+    if (!eval { require XS::APItest }) { skip "no XS::APItest", 2 }
+    my $wasro = XS::APItest::SvIsCOW($s);
     ok $wasro, "have a COW";
     $s =~ tr/i//;
-    ok( B::svref_2object(\$s)->FLAGS & &B::SVf_READONLY,
+    ok( XS::APItest::SvIsCOW($s),
        "count-only tr doesn't deCOW COWs" );
 }
 
