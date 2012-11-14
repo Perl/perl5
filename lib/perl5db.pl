@@ -5739,6 +5739,7 @@ sub cmd_L {
     # for both.
     if ( $break_wanted or $action_wanted ) {
 
+        BREAKPOINTS_SCAN:
         # Look in all the files with breakpoints...
         for my $file ( keys %had_breakpoints ) {
 
@@ -5757,26 +5758,30 @@ sub cmd_L {
                 if ( defined $dbline{$i} ) {
 
                     # Print the header if we haven't.
-                    print $OUT "$file:\n" unless $was++;
+                    if (not $was++) {
+                        print {$OUT} "$file:\n";
+                    }
 
                     # Print the line.
-                    print $OUT " $i:\t", $dbline[$i];
+                    print {$OUT} " $i:\t", $dbline[$i];
 
                     # Pull out the condition and the action.
                     my ( $stop, $action ) = split( /\0/, $dbline{$i} );
 
                     # Print the break if there is one and it's wanted.
-                    print $OUT "   break if (", $stop, ")\n"
-                      if $stop
-                      and $break_wanted;
+                    if ($stop && $break_wanted) {
+                        print {$OUT} "   break if (", $stop, ")\n";
+                    }
 
                     # Print the action if there is one and it's wanted.
-                    print $OUT "   action:  ", $action, "\n"
-                      if $action
-                      and $action_wanted;
+                    if ($action && $action_wanted) {
+                        print {$OUT} "   action:  ", $action, "\n";
+                    }
 
                     # Quit if the user hit interrupt.
-                    last if $signal;
+                    if ($signal) {
+                        last BREAKPOINTS_SCAN;
+                    }
                 } ## end if (defined $dbline{$i...
             } ## end for my $i (1 .. $max)
         } ## end for my $file (keys %had_breakpoints)
@@ -5784,11 +5789,14 @@ sub cmd_L {
 
     # Look for breaks in not-yet-compiled subs:
     if ( %postponed and $break_wanted ) {
-        print $OUT "Postponed breakpoints in subroutines:\n";
+        print {$OUT} "Postponed breakpoints in subroutines:\n";
         my $subname;
+        SUBS_SCAN:
         for $subname ( keys %postponed ) {
-            print $OUT " $subname\t$postponed{$subname}\n";
-            last if $signal;
+            print {$OUT} " $subname\t$postponed{$subname}\n";
+            if ($signal) {
+                last SUBS_SCAN;
+            }
         }
     } ## end if (%postponed and $break_wanted)
 
@@ -5799,22 +5807,31 @@ sub cmd_L {
 
     # If there are any, list them.
     if ( @have and ( $break_wanted or $action_wanted ) ) {
-        print $OUT "Postponed breakpoints in files:\n";
+        print {$OUT} "Postponed breakpoints in files:\n";
+        POSTPONED_SCANS:
         for my $file ( keys %postponed_file ) {
             my $db = $postponed_file{$file};
-            print $OUT " $file:\n";
+            print {$OUT} " $file:\n";
             for my $line ( sort { $a <=> $b } keys %$db ) {
-                print $OUT "  $line:\n";
+                print {$OUT} "  $line:\n";
+
                 my ( $stop, $action ) = split( /\0/, $$db{$line} );
-                print $OUT "    break if (", $stop, ")\n"
-                  if $stop
-                  and $break_wanted;
-                print $OUT "    action:  ", $action, "\n"
-                  if $action
-                  and $action_wanted;
-                last if $signal;
+
+                if ($stop and $break_wanted) {
+                    print {$OUT} "    break if (", $stop, ")\n"
+                }
+
+                if ($action && $action_wanted) {
+                    print {$OUT} "    action:  ", $action, "\n"
+                }
+
+                if ($signal) {
+                    last POSTPONED_SCANS;
+                }
             } ## end for $line (sort { $a <=>...
-            last if $signal;
+            if ($signal) {
+                last POSTPONED_SCANS;
+            }
         } ## end for $file (keys %postponed_file)
     } ## end if (@have and ($break_wanted...
     if ( %break_on_load and $break_wanted ) {
