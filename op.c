@@ -6970,6 +6970,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (PL_parser && PL_parser->error_count) {
 	op_free(block);
+	SvREFCNT_dec(PL_compcv);
+	PL_compcv = 0;
 	goto done;
     }
 
