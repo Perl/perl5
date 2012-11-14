@@ -3798,7 +3798,7 @@ Perl_mad_free(pTHX_ MADPROP* mp)
     case MAD_NULL:
 	break;
     case MAD_PV:
-	Safefree((char*)mp->mad_val);
+	Safefree(mp->mad_val);
 	break;
     case MAD_OP:
 	if (mp->mad_vlen)	/* vlen holds "strong/weak" boolean */
