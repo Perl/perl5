@@ -33,7 +33,7 @@ for(`find .`) {
             open STDIN, "</dev/null";
             open STDERR, ">/dev/null";
             \$unused_variable = '$q';
-            eval \$unused_variable for my \$also_unused(1..3);
+            eval \$unused_variable while \$also_unused++ < 3;
             print oUt sv_count, "\n";
             eval \$unused_variable;
             print oUt sv_count, "\n";
