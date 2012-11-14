@@ -5662,33 +5662,32 @@ sub _cmd_l_range {
 }
 
 sub _cmd_l_main {
-    my $current_line = $line;
-    my $line = shift;
+    my $spec = shift;
 
     # If this is '-something', delete any spaces after the dash.
-    $line =~ s/\A-\s*\z/-/;
+    $spec =~ s/\A-\s*\z/-/;
 
     # If the line is '$something', assume this is a scalar containing a
     # line number.
     # Set up for DB::eval() - evaluate in *user* context.
-    if ( my ($var_name) = $line =~ /\A(\$.*)/s ) {
+    if ( my ($var_name) = $spec =~ /\A(\$.*)/s ) {
         return _cmd_l_handle_var_name($var_name);
     }
     # l name. Try to find a sub by that name.
-    elsif ( ($subname) = $line =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
-        return _cmd_l_handle_subname($line);
+    elsif ( ($subname) = $spec =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
+        return _cmd_l_handle_subname($spec);
     }
     # Bare 'l' command.
-    elsif ( $line !~ /\S/ ) {
+    elsif ( $spec !~ /\S/ ) {
         return _cmd_l_empty();
     }
     # l [start]+number_of_lines
-    elsif ( my ($new_start, $new_incr) = $line =~ /\A(\d*)\+(\d*)\z/ ) {
+    elsif ( my ($new_start, $new_incr) = $spec =~ /\A(\d*)\+(\d*)\z/ ) {
         return _cmd_l_plus($new_start, $new_incr);
     }
     # l start-stop or l start,stop
-    elsif (my ($s, $e) = $line =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
-        return _cmd_l_range($line, $current_line, $s, $e);
+    elsif (my ($s, $e) = $spec =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
+        return _cmd_l_range($spec, $line, $s, $e);
     }
 
     return;
