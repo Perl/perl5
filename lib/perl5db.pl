@@ -5735,6 +5735,22 @@ sub cmd_L {
     my ($action_wanted, $break_wanted, $watch_wanted) =
         _cmd_L_calc_wanted_flags(shift);
 
+    my $handle_db_line = sub {
+        my ($l) = @_;
+
+        my ( $stop, $action ) = split( /\0/, $l );
+
+        if ($stop and $break_wanted) {
+            print {$OUT} "    break if (", $stop, ")\n"
+        }
+
+        if ($action && $action_wanted) {
+            print {$OUT} "    action:  ", $action, "\n"
+        }
+
+        return;
+    };
+
     # Breaks and actions are found together, so we look in the same place
     # for both.
     if ( $break_wanted or $action_wanted ) {
@@ -5765,18 +5781,7 @@ sub cmd_L {
                     # Print the line.
                     print {$OUT} " $i:\t", $dbline[$i];
 
-                    # Pull out the condition and the action.
-                    my ( $stop, $action ) = split( /\0/, $dbline{$i} );
-
-                    # Print the break if there is one and it's wanted.
-                    if ($stop && $break_wanted) {
-                        print {$OUT} "   break if (", $stop, ")\n";
-                    }
-
-                    # Print the action if there is one and it's wanted.
-                    if ($action && $action_wanted) {
-                        print {$OUT} "   action:  ", $action, "\n";
-                    }
+                    $handle_db_line->($dbline{$i});
 
                     # Quit if the user hit interrupt.
                     if ($signal) {
@@ -5815,15 +5820,7 @@ sub cmd_L {
             for my $line ( sort { $a <=> $b } keys %$db ) {
                 print {$OUT} "  $line:\n";
 
-                my ( $stop, $action ) = split( /\0/, $$db{$line} );
-
-                if ($stop and $break_wanted) {
-                    print {$OUT} "    break if (", $stop, ")\n"
-                }
-
-                if ($action && $action_wanted) {
-                    print {$OUT} "    action:  ", $action, "\n"
-                }
+                $handle_db_line->($db->{$line});
 
                 if ($signal) {
                     last POSTPONED_SCANS;
