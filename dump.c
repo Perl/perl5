@@ -870,11 +870,10 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
     }
 
 #if !defined(PERL_MAD)
-  #ifdef PERL_IMPLICIT_CONTEXT
-  #  define S_xmldump_attr(myperl, level, file, pat, arg)
-  #else
-  #  define S_xmldump_attr(level, file, pat, arg)
-  #endif
+# define xmldump_attr1(level, file, pat, arg)
+#else
+# define xmldump_attr1(level, file, pat, arg) \
+	S_xmldump_attr(aTHX_ level, file, pat, arg)
 #endif
 
 #define DUMP_OP_PRIVATE(o,xml,level,file)                               \
@@ -949,7 +948,7 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
                            (UV)(oppriv & OPpPADRANGE_COUNTMASK));       \
 	if (SvCUR(tmpsv)) {                                             \
             if (xml)                                                    \
-                S_xmldump_attr(aTHX_ level+1, file, "private=\"%s\"", SvPVX(tmpsv)+1); \
+                xmldump_attr1(level+1, file, "private=\"%s\"", SvPVX(tmpsv)+1); \
             else                                                        \
                 Perl_dump_indent(aTHX_ level, file, "PRIVATE = (%s)\n", SvPVX_const(tmpsv) + 1); \
 	} else if (!xml)                                                \
