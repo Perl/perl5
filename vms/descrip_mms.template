@@ -329,7 +329,7 @@ extra.pods : miniperl
 PERLDELTA_CURRENT = [.pod]perl5176delta.pod
 
 $(PERLDELTA_CURRENT) : [.pod]perldelta.pod
-	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(PERLDELTA_CURRENT)
 
 [.pod]perlapi.pod : embed.fnc autodoc.pl $(MINIPERL_EXE)
 	$(MINIPERL) autodoc.pl
