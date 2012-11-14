@@ -5729,6 +5729,49 @@ sub _cmd_L_calc_wanted_flags {
     return (map { index($arg, $_) >= 0 ? 1 : 0 } qw(a b w));
 }
 
+
+sub _cmd_L_handle_breakpoints {
+    my ($handle_db_line) = @_;
+
+    BREAKPOINTS_SCAN:
+    # Look in all the files with breakpoints...
+    for my $file ( keys %had_breakpoints ) {
+
+        # Temporary switch to this file.
+        local *dbline = $main::{ '_<' . $file };
+
+        # Set up to look through the whole file.
+        $max = $#dbline;
+        my $was;    # Flag: did we print something
+        # in this file?
+
+        # For each line in the file ...
+        for my $i (1 .. $max) {
+
+            # We've got something on this line.
+            if ( defined $dbline{$i} ) {
+
+                # Print the header if we haven't.
+                if (not $was++) {
+                    print {$OUT} "$file:\n";
+                }
+
+                # Print the line.
+                print {$OUT} " $i:\t", $dbline[$i];
+
+                $handle_db_line->($dbline{$i});
+
+                # Quit if the user hit interrupt.
+                if ($signal) {
+                    last BREAKPOINTS_SCAN;
+                }
+            } ## end if (defined $dbline{$i...
+        } ## end for my $i (1 .. $max)
+    } ## end for my $file (keys %had_breakpoints)
+
+    return;
+}
+
 sub cmd_L {
     my $cmd = shift;
 
@@ -5754,42 +5797,7 @@ sub cmd_L {
     # Breaks and actions are found together, so we look in the same place
     # for both.
     if ( $break_wanted or $action_wanted ) {
-
-        BREAKPOINTS_SCAN:
-        # Look in all the files with breakpoints...
-        for my $file ( keys %had_breakpoints ) {
-
-            # Temporary switch to this file.
-            local *dbline = $main::{ '_<' . $file };
-
-            # Set up to look through the whole file.
-            $max = $#dbline;
-            my $was;    # Flag: did we print something
-                        # in this file?
-
-            # For each line in the file ...
-            for my $i (1 .. $max) {
-
-                # We've got something on this line.
-                if ( defined $dbline{$i} ) {
-
-                    # Print the header if we haven't.
-                    if (not $was++) {
-                        print {$OUT} "$file:\n";
-                    }
-
-                    # Print the line.
-                    print {$OUT} " $i:\t", $dbline[$i];
-
-                    $handle_db_line->($dbline{$i});
-
-                    # Quit if the user hit interrupt.
-                    if ($signal) {
-                        last BREAKPOINTS_SCAN;
-                    }
-                } ## end if (defined $dbline{$i...
-            } ## end for my $i (1 .. $max)
-        } ## end for my $file (keys %had_breakpoints)
+        _cmd_L_handle_breakpoints($handle_db_line);
     } ## end if ($break_wanted or $action_wanted)
 
     # Look for breaks in not-yet-compiled subs:
