@@ -218,10 +218,7 @@ eleak(2, 0, 'no warnings; 2 2;BEGIN{}',
                 'implicit "use Errno" after syntax error');
 }
 eleak(2, 0, "\"\$\0\356\"", 'qq containing $ <null> something');
-{
-    local $::TODO = 'eval "END blah blah" still leaks';
-    eleak(2, 0, 'END OF TERMS AND CONDITIONS', 'END followed by words');
-}
+eleak(2, 0, 'END OF TERMS AND CONDITIONS', 'END followed by words');
 
 
 # [perl #114764] Attributes leak scalars

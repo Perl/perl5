@@ -1547,6 +1547,10 @@ p	|void	|yyunlex
 p	|int	|yyparse	|int gramtype
 : Only used in scope.c
 p	|void	|parser_free	|NN const yy_parser *parser
+#ifdef PERL_CORE
+p	|void	|parser_free_nexttoke_ops|NN yy_parser *parser \
+					 |NN OPSLAB *slab
+#endif
 #if defined(PERL_IN_TOKE_C)
 s	|int	|yywarn		|NN const char *const s|U32 flags
 #endif

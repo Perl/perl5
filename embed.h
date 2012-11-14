@@ -1310,6 +1310,7 @@
 #define opslab_force_free(a)	Perl_opslab_force_free(aTHX_ a)
 #define opslab_free(a)		Perl_opslab_free(aTHX_ a)
 #define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
+#define parser_free_nexttoke_ops(a,b)	Perl_parser_free_nexttoke_ops(aTHX_ a,b)
 #    if defined(PERL_DEBUG_READONLY_OPS)
 #define Slab_to_ro(a)		Perl_Slab_to_ro(aTHX_ a)
 #define Slab_to_rw(a)		Perl_Slab_to_rw(aTHX_ a)

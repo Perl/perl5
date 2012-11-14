@@ -370,6 +370,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 	PAD_SAVE_SETNULLPAD();
 
 	/* discard any leaked ops */
+	if (PL_parser)
+	    parser_free_nexttoke_ops(PL_parser, (OPSLAB *)CvSTART(cv));
 	opslab_force_free((OPSLAB *)CvSTART(cv));
 	CvSTART(cv) = NULL;
 

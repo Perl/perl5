@@ -5261,6 +5261,12 @@ PERL_CALLCONV void	Perl_opslab_free_nopad(pTHX_ OPSLAB *slab)
 #define PERL_ARGS_ASSERT_OPSLAB_FREE_NOPAD	\
 	assert(slab)
 
+PERL_CALLCONV void	Perl_parser_free_nexttoke_ops(pTHX_ yy_parser *parser, OPSLAB *slab)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_PARSER_FREE_NEXTTOKE_OPS	\
+	assert(parser); assert(slab)
+
 #  if defined(PERL_DEBUG_READONLY_OPS)
 PERL_CALLCONV void	Perl_Slab_to_ro(pTHX_ OPSLAB *slab)
 			__attribute__nonnull__(pTHX_1);
