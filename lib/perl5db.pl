@@ -5568,12 +5568,11 @@ sub _cmd_l_plus {
     $incr = $new_incr || ($window - 1);
 
     # Create a line range we'll understand, and recurse to do it.
-    my $line = $start . '-' . ( $start + $incr );
-    return _cmd_l_main( $line );
+    return _cmd_l_main( $start . '-' . ( $start + $incr ) );
 }
 
 sub _cmd_l_calc_initial_end_and_i {
-    my ($line, $start_match, $end_match) = @_;
+    my ($spec, $start_match, $end_match) = @_;
 
     # Determine end point; use end of file if not specified.
     my $end = ( !defined $start_match ) ? $max :
@@ -5586,7 +5585,7 @@ sub _cmd_l_calc_initial_end_and_i {
     my $i = $start_match;
 
     if ($i eq '.') {
-        $i = $line;
+        $i = $spec;
     }
 
     $i = _max($i, 1);
@@ -5597,10 +5596,10 @@ sub _cmd_l_calc_initial_end_and_i {
 }
 
 sub _cmd_l_range {
-    my ($line, $current_line, $start_match, $end_match) = @_;
+    my ($spec, $current_line, $start_match, $end_match) = @_;
 
     my ($end, $i) =
-        _cmd_l_calc_initial_end_and_i($line, $start_match, $end_match);
+        _cmd_l_calc_initial_end_and_i($spec, $start_match, $end_match);
 
     # If we're running under a slave editor, force it to show the lines.
     if ($slave_editor) {
@@ -5712,9 +5711,7 @@ Watchpoints are simpler: we just list the entries in C<@to_watch>.
 
 =cut
 
-sub cmd_L {
-    my $cmd = shift;
-
+sub _cmd_L_calc_arg {
     # If no argument, list everything. Pre-5.8.0 version always lists
     # everything
     my $arg = shift || 'abw';
@@ -5723,10 +5720,20 @@ sub cmd_L {
         $arg = 'abw';
     }
 
-    # See what is wanted.
-    my $action_wanted = ( $arg =~ /a/ ) ? 1 : 0;
-    my $break_wanted  = ( $arg =~ /b/ ) ? 1 : 0;
-    my $watch_wanted  = ( $arg =~ /w/ ) ? 1 : 0;
+    return $arg;
+}
+
+sub _cmd_L_calc_wanted_flags {
+    my $arg = _cmd_L_calc_arg(shift);
+
+    return (map { index($arg, $_) >= 0 ? 1 : 0 } qw(a b w));
+}
+
+sub cmd_L {
+    my $cmd = shift;
+
+    my ($action_wanted, $break_wanted, $watch_wanted) =
+        _cmd_L_calc_wanted_flags(shift);
 
     # Breaks and actions are found together, so we look in the same place
     # for both.
