@@ -1,5 +1,17 @@
 Revision history for Perl module Unicode::Collate.
 
+0.92  Wed Nov 14 20:58:19 2012
+    - fix: index() etc. with preprocess/normalization should be always croaked.
+    - doc: referred to the latest UTS #10 and updated its section numbers.
+    - supported the identical level (see 'identical' in POD).
+    - Now UCA_Version 26 (for Unicode 6.2.0) is supported.
+    - added ident.t in t.
+    - modified tests: cjkrange.t, compatui.t, hangtype.t, index.t,
+      overcjk0.t, overcjk1.t, test.t, view.t in t.
+
+    * But the default UCA_Version is still 24.
+     (In the next release, UCA_Version 26 will be the default.)
+
 0.91  Sun Nov  4 17:00:20 2012
     - XSUB: use PERL_NO_GET_CONTEXT (see perlguts)
       (see [rt.cpan.org #80313])
@@ -310,7 +322,7 @@ Revision history for Perl module Unicode::Collate.
 
 0.29  Mon Oct 13 12:18:23 2003
     - now UCA Version 11 (but no functionality is different from Version 9).
-    - supported hangul_terminator.
+    - supported 'hangul_terminator'.
     - fix: Base_Unicode_Version falsely returns Perl's Unicode version.
       C4 in UTS #10 requires UTS's Unicode version.
     - For variable weighting, 'variable' is recommended

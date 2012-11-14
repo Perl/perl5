@@ -2814,6 +2814,7 @@ cpan/Unicode-Collate/t/contract.t		Unicode::Collate
 cpan/Unicode-Collate/t/default.t		Unicode::Collate
 cpan/Unicode-Collate/t/hangtype.t		Unicode::Collate
 cpan/Unicode-Collate/t/hangul.t			Unicode::Collate
+cpan/Unicode-Collate/t/ident.t
 cpan/Unicode-Collate/t/iglevel2.t			Unicode::Collate
 cpan/Unicode-Collate/t/ignor.t			Unicode::Collate
 cpan/Unicode-Collate/t/illegalp.t		Unicode::Collate

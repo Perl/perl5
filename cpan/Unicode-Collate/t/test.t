@@ -13,7 +13,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..107\n"; }
+BEGIN { $| = 1; print "1..112\n"; }
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -385,5 +385,36 @@ $_ = 'Foo';
 @temp = $c->index("perl5", "LR");
 ok($_, 'Foo');
 
-#####
+##### 108..109
 
+{
+    my $caseless = Unicode::Collate->new(
+	table => "keys.txt",
+	normalization => undef,
+	preprocess => sub { uc shift },
+    );
+    ok( $Collator->gt("ABC","abc") );
+    ok( $caseless->eq("ABC","abc") );
+}
+
+##### 110..112
+
+{
+    eval { require Unicode::Normalize; };
+    if ($@) {
+	eval { my $n1 = Unicode::Collate->new(table => "keys.txt"); };
+        ok($@ =~ /Unicode::Normalize is required/);
+
+	eval { my $n2 = Unicode::Collate->new
+		(table => "keys.txt", normalization => undef); };
+	ok(!$@);
+
+	eval { my $n3 = Unicode::Collate->new
+		(table => "keys.txt", normalization => 'prenormalized'); };
+        ok($@ =~ /Unicode::Normalize is required/);
+    } else {
+	ok(1) for 1..3;
+    }
+}
+
+#####
