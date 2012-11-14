@@ -50,6 +50,8 @@ end
 
 BEGIN {
  @exceptions = split /^/, <<'end';
+$aliases{$code_point} = [ $aliases{$code_point} ];
+$aliases_maps->[$i] = [ $aliases_maps->[$i] ]
 $allow ? $hash{$acc} = $allow : push @list, $acc;
 $args{include_dirs} = [ $args{include_dirs} ] 
 $ARRAY[++$#ARRAY] = $value;
