@@ -5798,7 +5798,7 @@ sub cmd_L {
     # for both.
     if ( $break_wanted or $action_wanted ) {
         _cmd_L_handle_breakpoints($handle_db_line);
-    } ## end if ($break_wanted or $action_wanted)
+    }
 
     # Look for breaks in not-yet-compiled subs:
     if ( %postponed and $break_wanted ) {
