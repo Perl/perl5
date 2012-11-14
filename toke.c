@@ -2165,8 +2165,8 @@ S_force_ident(pTHX_ register const char *s, int kind)
 
     PERL_ARGS_ASSERT_FORCE_IDENT;
 
-    if (*s) {
-	const STRLEN len = strlen(s);
+    if (s[0]) {
+	const STRLEN len = s[1] ? strlen(s) : 1; /* s = "\"" see yylex */
 	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
                                                                 UTF ? SVf_UTF8 : 0));
 	start_force(PL_curforce);
