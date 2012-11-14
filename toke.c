@@ -4696,9 +4696,11 @@ Perl_yylex(pTHX)
 #ifdef PERL_MAD
 	    while (PL_bufptr != PL_bufend &&
 	      PL_bufptr[0] == '\\' && PL_bufptr[1] == 'E') {
-		if (!PL_thiswhite)
+		if (PL_madskills) {
+		  if (!PL_thiswhite)
 		    PL_thiswhite = newSVpvs("");
-		sv_catpvn(PL_thiswhite, PL_bufptr, 2);
+		  sv_catpvn(PL_thiswhite, PL_bufptr, 2);
+		}
 		PL_bufptr += 2;
 	    }
 #else
@@ -4714,9 +4716,11 @@ Perl_yylex(pTHX)
 	    s = PL_bufptr + 1;
 	    if (s[1] == '\\' && s[2] == 'E') {
 #ifdef PERL_MAD
-		if (!PL_thiswhite)
+		if (PL_madskills) {
+		  if (!PL_thiswhite)
 		    PL_thiswhite = newSVpvs("");
-		sv_catpvn(PL_thiswhite, PL_bufptr, 4);
+		  sv_catpvn(PL_thiswhite, PL_bufptr, 4);
+		}
 #endif
 	        PL_bufptr = s + 3;
 		PL_lex_state = LEX_INTERPCONCAT;
@@ -5374,9 +5378,11 @@ Perl_yylex(pTHX)
     case ' ': case '\t': case '\f': case 013:
 #ifdef PERL_MAD
 	PL_realtokenstart = -1;
-	if (!PL_thiswhite)
+	if (PL_madskills) {
+	  if (!PL_thiswhite)
 	    PL_thiswhite = newSVpvs("");
-	sv_catpvn(PL_thiswhite, s, 1);
+	  sv_catpvn(PL_thiswhite, s, 1);
+	}
 #endif
 	s++;
 	goto retry;
@@ -6090,7 +6096,7 @@ Perl_yylex(pTHX)
 	force_next(formbrack ? '.' : '}');
 	if (formbrack) LEAVE;
 #ifdef PERL_MAD
-	if (!PL_thistoken)
+	if (PL_madskills && !PL_thistoken)
 	    PL_thistoken = newSVpvs("");
 #endif
 	if (formbrack == 2) { /* means . where arguments were expected */
@@ -8428,7 +8434,9 @@ Perl_yylex(pTHX)
 		SV *tmpwhite = 0;
 
 		char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
-		SV *subtoken = newSVpvn_flags(tstart, s - tstart, SvUTF8(PL_linestr));
+		SV *subtoken = PL_madskills
+		   ? newSVpvn_flags(tstart, s - tstart, SvUTF8(PL_linestr))
+		   : NULL;
 		PL_thistoken = 0;
 
 		d = s;
@@ -10336,7 +10344,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
     s += termlen;
 #ifdef PERL_MAD
     tstart = SvPVX(PL_linestr) + stuffstart;
-    if (!PL_thisopen && !keep_delims) {
+    if (PL_madskills && !PL_thisopen && !keep_delims) {
 	PL_thisopen = newSVpvn(tstart, s - tstart);
 	stuffstart = s - SvPVX(PL_linestr);
     }
