@@ -5485,7 +5485,7 @@ sub _cmd_l_handle_var_name {
     $line = "$1 $s";
 
     # Call self recursively to really do the command.
-    return cmd_l( 'l', $s );
+    return _cmd_l_main( $s );
 }
 
 sub _cmd_l_handle_subname {
@@ -5541,7 +5541,7 @@ sub _cmd_l_handle_subname {
 
         # Call self recursively to list the range.
         $line = $subrange;
-        return cmd_l( 'l', $subrange );
+        return _cmd_l_main( $subrange );
     } ## end if ($subrange)
 
     # Couldn't find it.
@@ -5556,7 +5556,7 @@ sub _cmd_l_empty {
     $incr = $window - 1;
 
     # Recurse to do it.
-    return cmd_l( 'l', $start . '-' . ( $start + $incr ) );
+    return _cmd_l_main( $start . '-' . ( $start + $incr ) );
 }
 
 sub _cmd_l_plus {
@@ -5571,7 +5571,7 @@ sub _cmd_l_plus {
 
     # Create a line range we'll understand, and recurse to do it.
     my $line = $start . '-' . ( $start + $incr );
-    return cmd_l( 'l', $line );
+    return _cmd_l_main( $line );
 }
 
 sub _cmd_l_calc_initial_end_and_i {
@@ -5661,9 +5661,9 @@ sub _cmd_l_range {
     return;
 }
 
-sub cmd_l {
+sub _cmd_l_main {
     my $current_line = $line;
-    my (undef, $line) = @_;
+    my $line = shift;
 
     # If this is '-something', delete any spaces after the dash.
     $line =~ s/\A-\s*\z/-/;
@@ -5693,6 +5693,12 @@ sub cmd_l {
 
     return;
 } ## end sub cmd_l
+
+sub cmd_l {
+    my (undef, $line) = @_;
+
+    return _cmd_l_main($line);
+}
 
 =head3 C<cmd_L> - list breakpoints, actions, and watch expressions (command)
 
