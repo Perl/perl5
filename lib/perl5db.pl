@@ -5489,7 +5489,6 @@ sub _cmd_l_handle_var_name {
 }
 
 sub _cmd_l_handle_subname {
-    my $cmd  = shift;
     my $line = shift;
 
     my $s = $subname;
@@ -5600,7 +5599,7 @@ sub _cmd_l_calc_initial_end_and_i {
 }
 
 sub _cmd_l_range {
-    my ($cmd, $line, $current_line, $start_match, $end_match) = @_;
+    my ($line, $current_line, $start_match, $end_match) = @_;
 
     my ($end, $i) =
         _cmd_l_calc_initial_end_and_i($line, $start_match, $end_match);
@@ -5664,8 +5663,7 @@ sub _cmd_l_range {
 
 sub cmd_l {
     my $current_line = $line;
-    my $cmd  = shift;
-    my $line = shift;
+    my (undef, $line) = @_;
 
     # If this is '-something', delete any spaces after the dash.
     $line =~ s/\A-\s*\z/-/;
@@ -5678,7 +5676,7 @@ sub cmd_l {
     }
     # l name. Try to find a sub by that name.
     elsif ( ($subname) = $line =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
-        return _cmd_l_handle_subname($cmd, $line);
+        return _cmd_l_handle_subname($line);
     }
     # Bare 'l' command.
     elsif ( $line !~ /\S/ ) {
@@ -5690,7 +5688,7 @@ sub cmd_l {
     }
     # l start-stop or l start,stop
     elsif (my ($s, $e) = $line =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
-        return _cmd_l_range($cmd, $line, $current_line, $s, $e);
+        return _cmd_l_range($line, $current_line, $s, $e);
     }
 
     return;
