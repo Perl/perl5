@@ -1258,7 +1258,7 @@ a literal string is handled, for example
 
 In particular, braces do not need to be balanced:
 
-    /abc(?{ f('{'); })/def/
+    s/abc(?{ f('{'); })/def/
 
 Even in a pattern that is interpolated and compiled at run-time, literal
 code blocks will be compiled once, at perl compile time; the following
