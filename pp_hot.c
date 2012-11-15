@@ -1905,37 +1905,37 @@ PP(pp_iter)
     itersvp = CxITERVAR(cx);
 
     switch (CxTYPE(cx)) {
-    case CXt_LOOP_LAZYSV:
-        {
-	    /* string increment */
-	    SV* cur = cx->blk_loop.state_u.lazysv.cur;
-	    SV *end = cx->blk_loop.state_u.lazysv.end;
-	    /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
-	       It has SvPVX of "" and SvCUR of 0, which is what we want.  */
-	    STRLEN maxlen = 0;
-	    const char *max = SvPV_const(end, maxlen);
-	    if (SvNIOK(cur) || SvCUR(cur) > maxlen)
-                RETPUSHNO;
 
-            oldsv = *itersvp;
-            if (SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv)) {
-                /* safe to reuse old SV */
-                sv_setsv(oldsv, cur);
-            }
-            else
-            {
-                /* we need a fresh SV every time so that loop body sees a
-                 * completely new SV for closures/references to work as
-                 * they used to */
-                *itersvp = newSVsv(cur);
-                SvREFCNT_dec(oldsv);
-            }
-            if (strEQ(SvPVX_const(cur), max))
-                sv_setiv(cur, 0); /* terminate next time */
-            else
-                sv_inc(cur);
-            break;
+    case CXt_LOOP_LAZYSV: /* string increment */
+    {
+        SV* cur = cx->blk_loop.state_u.lazysv.cur;
+        SV *end = cx->blk_loop.state_u.lazysv.end;
+        /* If the maximum is !SvOK(), pp_enteriter substitutes PL_sv_no.
+           It has SvPVX of "" and SvCUR of 0, which is what we want.  */
+        STRLEN maxlen = 0;
+        const char *max = SvPV_const(end, maxlen);
+        if (SvNIOK(cur) || SvCUR(cur) > maxlen)
+            RETPUSHNO;
+
+        oldsv = *itersvp;
+        if (SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv)) {
+            /* safe to reuse old SV */
+            sv_setsv(oldsv, cur);
         }
+        else
+        {
+            /* we need a fresh SV every time so that loop body sees a
+             * completely new SV for closures/references to work as
+             * they used to */
+            *itersvp = newSVsv(cur);
+            SvREFCNT_dec(oldsv);
+        }
+        if (strEQ(SvPVX_const(cur), max))
+            sv_setiv(cur, 0); /* terminate next time */
+        else
+            sv_inc(cur);
+        break;
+    }
 
     case CXt_LOOP_LAZYIV: /* integer increment */
     {
@@ -1966,10 +1966,9 @@ PP(pp_iter)
         break;
     }
 
-    case CXt_LOOP_FOR:
+    case CXt_LOOP_FOR: /* iterate array */
     {
 
-        /* iterate array */
         AV *av = cx->blk_loop.state_u.ary.ary;
         SV *sv;
         bool av_is_stack = FALSE;
@@ -2028,7 +2027,7 @@ PP(pp_iter)
     default:
 	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
     }
-        RETPUSHYES;
+    RETPUSHYES;
 }
 
 /*
