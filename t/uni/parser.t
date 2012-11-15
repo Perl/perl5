@@ -150,5 +150,5 @@ like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
     no warnings 'utf8';
     my $malformed_to_be = "\x{c0}\x{a0}";   # Overlong sequence
     CORE::evalbytes "use charnames ':full'; use utf8; my \$x = \"\\N{abc$malformed_to_be}\"";
-    like( $@, qr/Malformed UTF-8 character immediately after '\\N{abc' at .* within string/, 'Malformed UTF-8 input to \N{}');
+    like( $@, qr/Malformed UTF-8 character immediately after '\\N\{abc' at .* within string/, 'Malformed UTF-8 input to \N{}');
 }
