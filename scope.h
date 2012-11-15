@@ -272,23 +272,14 @@ scope has the given name. Name must be a literal string.
 
 #define save_freesv(op)		save_pushptr((void *)(op), SAVEt_FREESV)
 #define save_mortalizesv(op)	save_pushptr((void *)(op), SAVEt_MORTALIZESV)
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+
 # define save_freeop(op)                    \
-    ({                                       \
+STMT_START {                                 \
       OP * const _o = (OP *)(op);             \
       assert(!_o->op_savefree);               \
       _o->op_savefree = 1;                     \
       save_pushptr((void *)(_o), SAVEt_FREEOP); \
-    })
-#else
-# define save_freeop(op)                       \
-    (                                           \
-      PL_Xpv = (XPV *)(op),                      \
-      assert_(!((OP *)PL_Xpv)->op_savefree)      \
-      ((OP *)PL_Xpv)->op_savefree = 1,            \
-      save_pushptr((void *)(PL_Xpv), SAVEt_FREEOP) \
-    )
-#endif
+    } STMT_END
 #define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
 #define save_op()		save_pushptr((void *)(PL_op), SAVEt_OP)
 
