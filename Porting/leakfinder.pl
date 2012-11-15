@@ -50,6 +50,8 @@ end
 
 BEGIN {
  @exceptions = split /^/, <<'end';
+1 while some_condition_with_side_effects;  */
+$a{buttons}[2*$a{default_button}] = [$a{buttons}[2*$a{default_button}]];
 $aliases{$code_point} = [ $aliases{$code_point} ];
 $aliases_maps->[$i] = [ $aliases_maps->[$i] ]
 $allow ? $hash{$acc} = $allow : push @list, $acc;
@@ -110,7 +112,10 @@ s![^/+]*$!man!&&-d&&!$s{$_}++&&push@m,#_;END{print"@m"}'
 $spec = [$spec, $_[0]];
 $stack[$i++] &= ~1;
 $step = [$step];
+the while clause.  */
 Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
+*tmpl = ~*tmpl;
+*tmps = ~*tmps;
 weaken($objs[@objs] = $h{$_} = []);
 weaken($objs[@objs] = $$h{$_} = []);
 while (1) { my $k; }
