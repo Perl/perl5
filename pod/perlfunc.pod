@@ -1915,7 +1915,8 @@ errors:
 C<eval BLOCK> does I<not> count as a loop, so the loop control statements
 C<next>, C<last>, or C<redo> cannot be used to leave or restart the block.
 
-An C<eval ''> executed within the C<DB> package doesn't see the usual
+An C<eval ''> executed within a subroutine defined
+in the C<DB> package doesn't see the usual
 surrounding lexical scope, but rather the scope of the first non-DB piece
 of code that called it.  You don't normally need to worry about this unless
 you are writing a Perl debugger.
