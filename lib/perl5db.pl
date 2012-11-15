@@ -5772,6 +5772,33 @@ sub _cmd_L_handle_breakpoints {
     return;
 }
 
+sub _cmd_L_handle_postponed_breakpoints {
+    my ($handle_db_line) = @_;
+
+    print {$OUT} "Postponed breakpoints in files:\n";
+
+    POSTPONED_SCANS:
+    for my $file ( keys %postponed_file ) {
+        my $db = $postponed_file{$file};
+        print {$OUT} " $file:\n";
+        for my $line ( sort { $a <=> $b } keys %$db ) {
+            print {$OUT} "  $line:\n";
+
+            $handle_db_line->($db->{$line});
+
+            if ($signal) {
+                last POSTPONED_SCANS;
+            }
+        }
+        if ($signal) {
+            last POSTPONED_SCANS;
+        }
+    }
+
+    return;
+}
+
+
 sub cmd_L {
     my $cmd = shift;
 
@@ -5820,24 +5847,7 @@ sub cmd_L {
 
     # If there are any, list them.
     if ( @have and ( $break_wanted or $action_wanted ) ) {
-        print {$OUT} "Postponed breakpoints in files:\n";
-        POSTPONED_SCANS:
-        for my $file ( keys %postponed_file ) {
-            my $db = $postponed_file{$file};
-            print {$OUT} " $file:\n";
-            for my $line ( sort { $a <=> $b } keys %$db ) {
-                print {$OUT} "  $line:\n";
-
-                $handle_db_line->($db->{$line});
-
-                if ($signal) {
-                    last POSTPONED_SCANS;
-                }
-            } ## end for $line (sort { $a <=>...
-            if ($signal) {
-                last POSTPONED_SCANS;
-            }
-        } ## end for $file (keys %postponed_file)
+        _cmd_L_handle_postponed_breakpoints($handle_db_line);
     } ## end if (@have and ($break_wanted...
 
     if ( %break_on_load and $break_wanted ) {
