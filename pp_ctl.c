@@ -2000,8 +2000,12 @@ PP(pp_dbstate)
 	    PUSHSUB_DB(cx);
 	    cx->blk_sub.retop = PL_op->op_next;
 	    CvDEPTH(cv)++;
+	    if (CvDEPTH(cv) >= 2) {
+		PERL_STACK_OVERFLOW_CHECK();
+		pad_push(CvPADLIST(cv), CvDEPTH(cv));
+	    }
 	    SAVECOMPPAD();
-	    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
+	    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
 	    RETURNOP(CvSTART(cv));
 	}
     }

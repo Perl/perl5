@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 9);
+plan(tests => 10);
 
 my $r;
 
@@ -129,4 +129,31 @@ like(
   ),
   qr/^No DB::DB routine defined/,
   "No crash when &DB::DB exists but isn't actually defined",
+);
+
+# [perl #115742] Recursive DB::DB clobbering its own pad
+like(
+  runperl(
+    switches => [ '-Ilib' ],
+    progs    => [ split "\n", <<'='
+     BEGIN {
+      $^P = 0x22;
+     }
+     package DB;
+     sub DB {
+      my $x = 42;
+      return if $__++;
+      $^D |= 1 << 30; # allow recursive calls
+      main::foo();
+      print $x//q-u-, qq-\n-;
+     }
+     package main;
+     chop;
+     sub foo { chop; }
+=
+    ],
+    stderr   => 1,
+  ),
+  qr/42/,
+  "Recursive DB::DB does not clobber its own pad",
 );
