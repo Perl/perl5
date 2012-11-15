@@ -798,6 +798,30 @@ sub _calc_trace_wrapper
     );
 }
 
+# Tests for x with AutoTrace=1.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'n',
+                'o AutoTrace=1',
+                # So it may fail.
+                q/x "failure"/,
+                q/x \$x/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/with-subroutine',
+        }
+    );
+
+    $wrapper->contents_like(
+        # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
+        qr/^0\sSCALAR\([^\)]+\)\n\s+-> 'hello world'\n/ms,
+        "x after AutoTrace=1 command is working."
+    );
+}
+
 # Tests for "T" (stack trace).
 {
     my $prog_fn = '../lib/perl5db/t/rt-104168';
