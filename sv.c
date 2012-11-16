@@ -6332,9 +6332,17 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	dSP;
 	HV* stash;
 	do {
-	    CV* destructor;
-	    stash = SvSTASH(sv);
-	    destructor = StashHANDLER(stash,DESTROY);
+	  if ((stash = SvSTASH(sv)) && HvNAME(stash)) {
+	    CV* destructor = NULL;
+	    if (!SvOBJECT(stash)) destructor = (CV *)SvSTASH(stash);
+	    if (!destructor) {
+		GV * const gv =
+		    gv_fetchmeth_autoload(stash, "DESTROY", 7, 0);
+		if (gv && (destructor = GvCV(gv))) {
+		    if (!SvOBJECT(stash))
+			SvSTASH(stash) = (HV *)destructor;
+		}
+	    }
 	    if (destructor
 		/* A constant subroutine can have no side effects, so
 		   don't bother calling it.  */
@@ -6374,6 +6382,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 		}
 		SvREFCNT_dec(tmpref);
 	    }
+	  }
 	} while (SvOBJECT(sv) && SvSTASH(sv) != stash);
 
 

@@ -2252,7 +2252,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   if (mg) {
       const AMT * const amtp = (AMT*)mg->mg_ptr;
       if (amtp->was_ok_sub == newgen) {
-	  return AMT_OVERLOADED(amtp) ? 1 : 0;
+	  return AMT_AMAGIC(amtp) ? 1 : 0;
       }
       sv_unmagic(MUTABLE_SV(stash), PERL_MAGIC_overload_table);
   }
@@ -2265,8 +2265,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   amt.flags = 0;
 
   {
-    int filled = 0, have_ovl = 0;
-    int i, lim = 1;
+    int filled = 0;
+    int i;
 
     /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
@@ -2278,7 +2278,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     if (!gv)
     {
       if (!gv_fetchmeth_pvn(stash, "((", 2, -1, 0))
-	lim = DESTROY_amg;		/* Skip overloading entries. */
+	goto no_table;
     }
 #ifdef PERL_DONT_CREATE_GVSV
     else if (!sv) {
@@ -2292,19 +2292,15 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     else if (SvOK(sv)) {
 	amt.fallback=AMGfallNEVER;
         filled = 1;
-        have_ovl = 1;
     }
     else {
         filled = 1;
-        have_ovl = 1;
     }
 
-    for (i = 1; i < lim; i++)
-	amt.table[i] = NULL;
-    for (; i < NofAMmeth; i++) {
+    for (i = 1; i < NofAMmeth; i++) {
 	const char * const cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
-	const char * const cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
+	const char * const cp = AMG_id2name(i);
 	const STRLEN l = PL_AMG_namelens[i];
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
@@ -2316,10 +2312,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	   then we could have created stubs for "(+0" in A and C too.
 	   But if B overloads "bool", we may want to use it for
 	   numifying instead of C's "+0". */
-	if (i >= DESTROY_amg)
-	    gv = Perl_gv_fetchmeth_pvn_autoload(aTHX_ stash, cooky, l, 0, 0);
-	else				/* Autoload taken care of below */
-	    gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
+	gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
         cv = 0;
         if (gv && (cv = GvCV(gv))) {
 	    if(GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")){
@@ -2365,8 +2358,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 			 cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
 			 GvNAME(CvGV(cv))) );
 	    filled = 1;
-	    if (i < DESTROY_amg)
-		have_ovl = 1;
 	} else if (gv) {		/* Autoloaded... */
 	    cv = MUTABLE_CV(gv);
 	    filled = 1;
@@ -2375,15 +2366,13 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     }
     if (filled) {
       AMT_AMAGIC_on(&amt);
-      if (have_ovl)
-	  AMT_OVERLOADED_on(&amt);
       sv_magic(MUTABLE_SV(stash), 0, PERL_MAGIC_overload_table,
 						(char*)&amt, sizeof(AMT));
-      return have_ovl;
+      return TRUE;
     }
   }
   /* Here we have no table: */
-  /* no_table: */
+ no_table:
   AMT_AMAGIC_off(&amt);
   sv_magic(MUTABLE_SV(stash), 0, PERL_MAGIC_overload_table,
 						(char*)&amt, sizeof(AMTS));
@@ -2409,19 +2398,8 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
     if (!mg) {
       do_update:
-	/* If we're looking up a destructor to invoke, we must avoid
-	 * that Gv_AMupdate croaks, because we might be dying already */
-	if (Gv_AMupdate(stash, cBOOL(id == DESTROY_amg)) == -1) {
-	    /* and if it didn't found a destructor, we fall back
-	     * to a simpler method that will only look for the
-	     * destructor instead of the whole magic */
-	    if (id == DESTROY_amg) {
-		GV * const gv = gv_fetchmethod(stash, "DESTROY");
-		if (gv)
-		    return GvCV(gv);
-	    }
+	if (Gv_AMupdate(stash, 0) == -1)
 	    return NULL;
-	}
 	mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
     }
     assert(mg);

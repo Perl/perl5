@@ -544,6 +544,9 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
     /* Changes to @ISA might turn overloading on */
     HvAMAGIC_on(stash);
 
+    /* DESTROY can be cached in SvSTASH. */
+    if (!SvOBJECT(stash)) SvSTASH(stash) = NULL;
+
     /* Iterate the isarev (classes that are our children),
        wiping out their linearization, method and isa caches
        and upating PL_isarev. */
@@ -1326,6 +1329,9 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
 
     /* Inc the package generation, since a local method changed */
     HvMROMETA(stash)->pkg_gen++;
+
+    /* DESTROY can be cached in SvSTASH. */
+    if (!SvOBJECT(stash)) SvSTASH(stash) = NULL;
 
     /* If stash is UNIVERSAL, or one of UNIVERSAL's parents,
        invalidate all method caches globally */
