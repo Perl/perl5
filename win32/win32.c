@@ -4242,6 +4242,8 @@ ansify_path(void)
     wide_path = (WCHAR*)win32_malloc(len*sizeof(WCHAR));
     while (wide_path) {
         size_t newlen = GetEnvironmentVariableW(L"PATH", wide_path, len);
+        if (newlen == 0)
+            return;
         if (newlen < len)
             break;
         len = newlen;
