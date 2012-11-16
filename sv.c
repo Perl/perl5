@@ -13493,6 +13493,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	Newxz(PL_scopestack_name, PL_scopestack_max, const char *);
 	Copy(proto_perl->Iscopestack_name, PL_scopestack_name, PL_scopestack_ix, const char *);
 #endif
+        /* reset stack AV to correct length before its duped via
+         * PL_curstackinfo */
+        AvFILLp(proto_perl->Icurstack) =
+                            proto_perl->Istack_sp - proto_perl->Istack_base;
+
 	/* NOTE: si_dup() looks at PL_markstack */
 	PL_curstackinfo		= si_dup(proto_perl->Icurstackinfo, param);
 
