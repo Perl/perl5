@@ -817,7 +817,7 @@ sub _calc_trace_wrapper
 
     $wrapper->contents_like(
         # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
-        qr/^0\sSCALAR\([^\)]+\)\n\s+-> 'hello world'\n/ms,
+        qr/^0\s+SCALAR\([^\)]+\)\n\s+-> 'hello world'\n/ms,
         "x after AutoTrace=1 command is working."
     );
 }
