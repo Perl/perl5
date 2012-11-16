@@ -1778,18 +1778,6 @@ PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
-PERL_CALLCONV bool	Perl_is_utf8_X_extend(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_UTF8_X_EXTEND	\
-	assert(p)
-
-PERL_CALLCONV bool	Perl_is_utf8_X_regular_begin(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_UTF8_X_REGULAR_BEGIN	\
-	assert(p)
-
 PERL_CALLCONV bool	Perl_is_utf8_alnum(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -7290,6 +7278,18 @@ PERL_CALLCONV UV	Perl__to_fold_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, con
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT__TO_FOLD_LATIN1	\
 	assert(p); assert(lenp)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_extend(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_EXTEND	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl_is_utf8_X_regular_begin(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_IS_UTF8_X_REGULAR_BEGIN	\
+	assert(p)
 
 #endif
 #if defined(PERL_IN_UTIL_C)
