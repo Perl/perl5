@@ -1522,6 +1522,6 @@ EOC
 EXPECT
 OPTION regex
 \ASubroutine DynaLoader::dl_error redefined at \(eval 1\) line 2\.
-(?s).*
+?(?s).*
 Subroutine DynaLoader::dl_error redefined at \(eval 2\) line 2\.
 ########
