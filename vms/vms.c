@@ -14000,6 +14000,7 @@ vmsperl_set_features(void)
     }
     /* Some reasonable defaults that are not CRTL defaults */
     set_feature_default("DECC$EFS_CASE_PRESERVE", 1);
+    set_feature_default("DECC$ARGV_PARSE_STYLE", 1);     /* Requires extended parse. */
 #endif
 
     /* hacks to see if known bugs are still present for testing */
