@@ -1076,8 +1076,13 @@ sub _combine {
         $gtv= sprintf "$self->{val_fmt}", $item;
     }
     if ( @cond ) {
-        return "( $cstr || ( $gtv < $test &&\n"
-          . $self->_combine( $test, @cond ) . " ) )";
+        my $combine= $self->_combine( $test, @cond );
+        if (@cond >1) {
+            return "( $cstr || ( $gtv < $test &&\n"
+                   . $combine . " ) )";
+        } else {
+            return "( $cstr || $combine )";
+        }
     } else {
         return $cstr;
     }

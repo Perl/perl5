@@ -210,8 +210,7 @@
 ( 0x180E == cp || ( 0x180E < cp &&                                          \
 ( ( 0x2000 <= cp && cp <= 0x200A ) || ( 0x200A < cp &&                      \
 ( 0x202F == cp || ( 0x202F < cp &&                                          \
-( 0x205F == cp || ( 0x205F < cp &&                                          \
-0x3000 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+( 0x205F == cp || 0x3000 == cp ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
 
 /*
 	VERTWS: Vertical Whitespace: \v \V
@@ -283,8 +282,7 @@
 #define is_VERTWS_cp(cp)                                                    \
 ( ( 0x0A <= cp && cp <= 0x0D ) || ( 0x0D < cp &&                            \
 ( 0x85 == cp || ( 0x85 < cp &&                                              \
-( 0x2028 == cp || ( 0x2028 < cp &&                                          \
-0x2029 == cp ) ) ) ) ) )
+( 0x2028 == cp || 0x2029 == cp ) ) ) ) )
 
 /*
 	REPLACEMENT: Unicode REPLACEMENT CHARACTER
