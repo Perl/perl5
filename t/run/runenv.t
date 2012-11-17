@@ -53,7 +53,7 @@ sub runperl_and_capture {
     }
     open STDOUT, '>', $STDOUT or exit $FAILURE_CODE;
     open STDERR, '>', $STDERR and do { exec $PERL, @$args };
-    # it didn't_work:
+    # it did not work:
     print STDOUT "IWHCWJIHCI\cNHJWCJQWKJQJWCQW\n";
     exit $FAILURE_CODE;
   }
@@ -63,15 +63,20 @@ sub try {
   my ($env, $args, $stdout, $stderr) = @_;
   my ($actual_stdout, $actual_stderr) = runperl_and_capture($env, $args);
   local $::Level = $::Level + 1;
+  my @envpairs = ();
+  for my $k (sort keys %$env) {
+    push @envpairs, "$k => $env->{$k}";
+  }
+  my $label = join(',' => (@envpairs, @$args));
   if (ref $stdout) {
-    ok ( $actual_stdout =~/$stdout/ );
+    ok ( $actual_stdout =~/$stdout/, $label . ' stdout' );
   } else {
-    is ($stdout, $actual_stdout);
+    is ( $actual_stdout, $stdout, $label . ' stdout' );
   }
   if (ref $stderr) {
-    ok ( $actual_stderr =~/$stderr/);
+    ok ( $actual_stderr =~/$stderr/, $label . ' stderr' );
   } else {
-    is ($stderr, $actual_stderr);
+    is ( $actual_stderr, $stderr, $label . ' stderr' );
   }
 }
 
