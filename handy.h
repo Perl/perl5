@@ -546,6 +546,10 @@ Returns a boolean indicating whether the specified character is a hexadecimal
 digit, [0-9A-Fa-f].  Variants C<isXDIGIT_A()> and C<isXDIGIT_L1()> are
 identical to C<isXDIGIT()>.
 
+=for apidoc Am|U8|READ_XDIGIT|char str*
+Returns the value of a hex digit and advances the string pointer.
+Behaviour is only well defined when isXDIGIT(*str) is true.
+
 =head1 Character case changing
 
 =for apidoc Am|char|toUPPER|char ch
@@ -1048,6 +1052,8 @@ typedef U32 line_t;
 	    *b = c; \
 	} \
 	return a;
+
+#define READ_XDIGIT(s) (isALPHA(*(s)) ? ((*(s)++ + 9) & 0xf) : (*(s)++ & 0xf))
 
 /*
 =head1 Memory Management
