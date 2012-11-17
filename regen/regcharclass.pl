@@ -758,7 +758,7 @@ sub calculate_mask(@) {
     my @final_results;
     foreach my $count (reverse sort { $a <=> $b } keys %hash) {
         my $need = 2 ** $count;     # Need 8 values for 3 differing bits, etc
-        foreach my $bits (keys $hash{$count}) {
+        foreach my $bits (sort keys $hash{$count}) {
 
             print STDERR __LINE__, ": For $count bit(s) difference ($bits), need $need; have ", scalar @{$hash{$count}{$bits}}, "\n" if DEBUG;
 
@@ -831,8 +831,8 @@ sub calculate_mask(@) {
 
                 # These values are now spoken for.  Remove them from future
                 # consideration
-                foreach my $remove_count (keys %hash) {
-                    foreach my $bits (keys %{$hash{$remove_count}}) {
+                foreach my $remove_count (sort keys %hash) {
+                    foreach my $bits (sort keys %{$hash{$remove_count}}) {
                         foreach my $to_remove (@subset) {
                             @{$hash{$remove_count}{$bits}} = grep { $_ != $to_remove } @{$hash{$remove_count}{$bits}};
                         }
@@ -846,7 +846,7 @@ sub calculate_mask(@) {
     # individually.
     my @individuals;
     foreach my $count (reverse sort { $a <=> $b } keys %hash) {
-        foreach my $bits (keys $hash{$count}) {
+        foreach my $bits (sort keys $hash{$count}) {
             foreach my $remaining (@{$hash{$count}{$bits}}) {
 
                 # If we already know about this value, just ignore it.
@@ -1221,7 +1221,7 @@ if ( !caller ) {
                                                                 # first, as
                                                                 # traditional
         if (%mods) {
-            die "Unknown modifiers: ", join ", ", map { "'$_'" } keys %mods;
+            die "Unknown modifiers: ", join ", ", map { "'$_'" } sort keys %mods;
         }
 
         foreach my $type_spec ( @types ) {
