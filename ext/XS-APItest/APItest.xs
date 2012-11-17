@@ -3262,7 +3262,7 @@ CODE:
 OUTPUT:
     RETVAL
 
-bool
+U32
 SvIsCOW(SV *sv)
 CODE:
     RETVAL = SvIsCOW(sv);
