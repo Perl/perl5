@@ -239,7 +239,6 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
     perlcygwin		Perl notes for Cygwin
     perldgux		Perl notes for DG/UX
     perldos		Perl notes for DOS
-    perlepoc		Perl notes for EPOC
     perlfreebsd 	Perl notes for FreeBSD
     perlhaiku		Perl notes for Haiku
     perlhpux		Perl notes for HP-UX

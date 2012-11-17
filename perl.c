@@ -2151,7 +2151,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     if (xsinit)
 	(*xsinit)(aTHX);	/* in case linked C routines want magical variables */
 #ifndef PERL_MICRO
-#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN)
+#if defined(VMS) || defined(WIN32) || defined(DJGPP) || defined(__CYGWIN__) || defined(SYMBIAN)
     init_os_extras();
 #endif
 #endif
@@ -3505,10 +3505,6 @@ S_minus_v(pTHX)
 	PerlIO_printf(PIO_stdout,
 		      "BS2000 (POSIX) port by Start Amadeus GmbH, 1998-1999\n");
 #endif
-#ifdef EPOC
-	PerlIO_printf(PIO_stdout,
-		      "EPOC port by Olaf Flebbe, 1999-2002\n");
-#endif
 #ifdef UNDER_CE
 	PerlIO_printf(PIO_stdout,
 			"WINCE port by Rainer Keuchel, 2001-2002\n"
@@ -4448,7 +4444,7 @@ S_init_perllib(pTHX)
 	S_incpush(aTHX_ STR_WITH_LEN("."), 0);
 }
 
-#if defined(DOSISH) || defined(EPOC) || defined(__SYMBIAN32__)
+#if defined(DOSISH) || defined(__SYMBIAN32__)
 #    define PERLLIB_SEP ';'
 #else
 #  if defined(VMS)

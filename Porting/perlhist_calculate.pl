@@ -147,7 +147,7 @@ sub calc_longtable {
 
 	emit Configure => $configure_size, 1;
 
-	foreach my $dir (qw(Cross djgpp emacs epoc h2pl hints mad NetWare os2 plan9 Porting qnx symbian utils vms vos win32 x2p)) {
+	foreach my $dir (qw(Cross djgpp emacs h2pl hints mad NetWare os2 plan9 Porting qnx symbian utils vms vos win32 x2p)) {
 		calc_dir($dir);
 	}
 }

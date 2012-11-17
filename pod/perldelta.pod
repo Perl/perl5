@@ -321,13 +321,13 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item EPOC
 
-XXX
+Support code relating to EPOC has been removed.  EPOC was a family of
+operating systems developed by Psion for mobile devices.  It was the
+predecessor of Symbian.  The port was last updated in April 2002.
 
 =back
 

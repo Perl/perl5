@@ -1685,10 +1685,6 @@ PP(pp_sysread)
 	/* MSG_TRUNC can give oversized count; quietly lose it */
 	if (count > length)
 	    count = length;
-#ifdef EPOC
-        /* Bogus return without padding */
-	bufsize = sizeof (struct sockaddr_in);
-#endif
 	SvCUR_set(bufsv, count);
 	*SvEND(bufsv) = '\0';
 	(void)SvPOK_only(bufsv);
@@ -2405,10 +2401,6 @@ PP(pp_socket)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
-#ifdef EPOC
-    setbuf( IoIFP(io), NULL); /* EPOC gets confused about sockets */
-#endif
-
     RETPUSHYES;
 }
 #endif
@@ -2575,10 +2567,6 @@ PP(pp_accept)
     fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
 #endif
 
-#ifdef EPOC
-    len = sizeof (struct sockaddr_in); /* EPOC somehow truncates info */
-    setbuf( IoIFP(nstio), NULL); /* EPOC gets confused about sockets */
-#endif
 #ifdef __SCO_VERSION__
     len = sizeof (struct sockaddr_in); /* OpenUNIX 8 somehow truncates info */
 #endif

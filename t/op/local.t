@@ -9,7 +9,7 @@ plan tests => 310;
 
 my $list_assignment_supported = 1;
 
-#mg.c says list assignment not supported on VMS, EPOC, and SYMBIAN.
+#mg.c says list assignment not supported on VMS and SYMBIAN.
 $list_assignment_supported = 0 if ($^O eq 'VMS');
 
 

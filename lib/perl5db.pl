@@ -1545,7 +1545,7 @@ We then determine what the console should be on various systems:
 
 Several other systems don't use a specific console. We C<undef $console>
 for those (Windows using a slave editor/graphical debugger, NetWare, OS/2
-with a slave editor, Epoc).
+with a slave editor).
 
 =cut
 
@@ -1565,11 +1565,6 @@ with a slave editor, Epoc).
     # it pretty much looks like Unix otherwise.
     if ( defined $ENV{OS2_SHELL} and ( $slave_editor or $ENV{WINDOWID} ) )
     {    # In OS/2
-        $console = undef;
-    }
-
-    # EPOC also falls into the 'got to use STDIN' camp.
-    if ( $^O eq 'epoc' ) {
         $console = undef;
     }
 
@@ -8785,7 +8780,6 @@ my %_is_in_pods = (map { $_ => 1 }
     dsc
     ebcdic
     embed
-    epoc
     faq1
     faq2
     faq3

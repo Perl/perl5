@@ -27,11 +27,11 @@
 	 || ((f)[0] == '\\' && (f)[1] == '\\')	/* UNC path */	\
 	 ||	((f)[3] == ':'))				/* volume name, currently only sys */
 #  else		/* !NETWARE */
-#    if defined(DOSISH) || defined(EPOC) || defined(__SYMBIAN32__)
+#    if defined(DOSISH) || defined(__SYMBIAN32__)
 #      define PERL_FILE_IS_ABSOLUTE(f) \
 	(*(f) == '/'							\
 	 || ((f)[0] && (f)[1] == ':'))		/* drive name */
-#    else	/* NEITHER DOSISH NOR EPOCISH NOR SYMBIANISH */
+#    else	/* NEITHER DOSISH NOR SYMBIANISH */
 #      define PERL_FILE_IS_ABSOLUTE(f)	(*(f) == '/')
 #    endif	/* DOSISH */
 #   endif	/* NETWARE */

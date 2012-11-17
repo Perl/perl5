@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.16";
+our $VERSION = "1.17";
 
 my %err = ();
 my %wsa = ();
@@ -125,9 +125,6 @@ sub get_files {
     } elsif ($^O eq 'os390') {
 	# OS/390 C compiler doesn't generate #file or #line directives
 	$file{'/usr/include/errno.h'} = 1;
-    } elsif ($Config{archname} eq 'epoc') {
-	# Watch out for cross compiling for EPOC (usually done on linux)
-	$file{'/usr/local/epocemx/epocsdk/include/libc/sys/errno.h'} = 1;
     } elsif ($Config{archname} eq 'arm-riscos') {
 	# Watch out for cross compiling for RISC OS
 	my $dep = `echo "#include <errno.h>" | gcc -E -M -`;

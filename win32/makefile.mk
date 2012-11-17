@@ -1311,7 +1311,6 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.cygwin   ..\pod\perlcygwin.pod
 	copy ..\README.dgux     ..\pod\perldgux.pod
 	copy ..\README.dos      ..\pod\perldos.pod
-	copy ..\README.epoc     ..\pod\perlepoc.pod
 	copy ..\README.freebsd  ..\pod\perlfreebsd.pod
 	copy ..\README.haiku    ..\pod\perlhaiku.pod
 	copy ..\README.hpux     ..\pod\perlhpux.pod
@@ -1430,14 +1429,14 @@ distclean: realclean
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
 	    perl5176delta.pod perlaix.pod perlamiga.pod perlapi.pod \
 	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
-	    perlcygwin.pod perldgux.pod perldos.pod perlepoc.pod \
-	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
-	    perlintern.pod perlirix.pod perljp.pod perlko.pod perllinux.pod \
-	    perlmacos.pod perlmacosx.pod perlmodlib.pod perlnetware.pod \
-	    perlopenbsd.pod perlos2.pod perlos390.pod perlos400.pod \
-	    perlplan9.pod perlqnx.pod perlriscos.pod perlsolaris.pod \
-	    perlsymbian.pod perltoc.pod perltru64.pod perltw.pod \
-	    perluniprops.pod perlvos.pod perlwin32.pod
+	    perlcygwin.pod perldgux.pod perldos.pod perlfreebsd.pod \
+	    perlhaiku.pod perlhpux.pod perlhurd.pod perlintern.pod \
+	    perlirix.pod perljp.pod perlko.pod perllinux.pod perlmacos.pod \
+	    perlmacosx.pod perlmodlib.pod perlnetware.pod perlopenbsd.pod \
+	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
+	    perlqnx.pod perlriscos.pod perlsolaris.pod perlsymbian.pod \
+	    perltoc.pod perltru64.pod perltw.pod perluniprops.pod \
+	    perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep cpanp-run-perl cpanp cpan2dist shasum corelist config_data zipdetails

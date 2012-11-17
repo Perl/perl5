@@ -1716,7 +1716,7 @@ to avoid the BIND.
 
 Perl can be cross-compiled.  It is just not trivial, cross-compilation
 rarely is.  Perl is routinely cross-compiled for many platforms (as of
-June 2005 at least PocketPC aka WinCE, Open Zaurus, EPOC, Symbian, and
+June 2005 at least PocketPC aka WinCE, Open Zaurus, Symbian, and
 the IBM OS/400).  These platforms are known as the B<target> platforms,
 while the systems where the compilation takes place are the B<host>
 platforms.
@@ -1741,10 +1741,6 @@ README.ce
 =item Open Zaurus
 
 Cross/README
-
-=item EPOC
-
-README.epoc
 
 =item Symbian
 

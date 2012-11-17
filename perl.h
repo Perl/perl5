@@ -91,8 +91,8 @@
 /* Any stack-challenged places.  The limit varies (and often
  * is configurable), but using more than a kilobyte of stack
  * is usually dubious in these systems. */
-#if defined(EPOC) || defined(__SYMBIAN32__)
-/* EPOC/Symbian: need to work around the SDK features. *
+#if defined(__SYMBIAN32__)
+/* Symbian: need to work around the SDK features. *
  * On WINS: MS VC5 generates calls to _chkstk,         *
  * if a "large" stack frame is allocated.              *
  * gcc on MARM does not generate calls like these.     */
@@ -516,11 +516,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined(EPOC) || defined(NETWARE) || defined(__SYMBIAN32__)
+#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined(NETWARE) || defined(__SYMBIAN32__)
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__DGUX) || defined(EPOC) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__DGUX) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -1012,7 +1012,7 @@ EXTERN_C int usleep(unsigned int);
 #define PERL_USES_PL_PIDSTATUS
 #endif
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(__SYMBIAN32__)
+#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(__SYMBIAN32__)
 #define PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 #endif
 
@@ -2628,11 +2628,6 @@ typedef SV PADNAME;
 #   define ISHISH "vos"
 #endif
 
-#if defined(EPOC)
-#   include "epocish.h"
-#   define ISHISH "epoc"
-#endif
-
 #ifdef __SYMBIAN32__
 #   include "symbian/symbianish.h"
 #   define ISHISH "symbian"
@@ -4030,7 +4025,7 @@ char *crypt (const char*, const char*);
 #    ifndef getenv
 char *getenv (const char*);
 #    endif /* !getenv */
-#    if !defined(HAS_LSEEK_PROTO) && !defined(EPOC) && !defined(__hpux)
+#    if !defined(HAS_LSEEK_PROTO) && !defined(__hpux)
 #      ifdef _FILE_OFFSET_BITS
 #        if _FILE_OFFSET_BITS == 64
 Off_t lseek (int,Off_t,int);
