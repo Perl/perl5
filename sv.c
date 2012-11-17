@@ -6338,12 +6338,12 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	    if (!destructor) {
 		GV * const gv =
 		    gv_fetchmeth_autoload(stash, "DESTROY", 7, 0);
-		if (gv && (destructor = GvCV(gv))) {
-		    if (!SvOBJECT(stash))
-			SvSTASH(stash) = (HV *)destructor;
-		}
+		if (gv) destructor = GvCV(gv);
+		if (!SvOBJECT(stash))
+		    SvSTASH(stash) =
+			destructor ? (HV *)destructor : ((HV *)0)+1;
 	    }
-	    if (destructor
+	    if (destructor && destructor != ((CV *)0)+1
 		/* A constant subroutine can have no side effects, so
 		   don't bother calling it.  */
 		&& !CvCONST(destructor)
@@ -12000,7 +12000,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		    SvOURSTASH_set(dstr, hv_dup_inc(SvOURSTASH(dstr), param));
 		} else if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
-		if (SvSTASH(dstr))
+		if (SvOBJECT(dstr) && SvSTASH(dstr))
 		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));
 	    }
 
