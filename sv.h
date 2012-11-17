@@ -360,8 +360,6 @@ perform the upgrade if necessary.  See C<svtype>.
 				       3: On a pad name SV, that slot in the
 					  frame AV is a REFCNT'ed reference
 					  to a lexical from "outside". */
-#define SVphv_REHASH	SVf_FAKE    /* 4: On a PVHV, hash values are being
-					  recalculated */
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
 				       after the main array */

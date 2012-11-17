@@ -1416,7 +1416,6 @@ const struct flag_to_name hv_flags_names[] = {
     {SVphv_SHAREKEYS, "SHAREKEYS,"},
     {SVphv_LAZYDEL, "LAZYDEL,"},
     {SVphv_HASKFLAGS, "HASKFLAGS,"},
-    {SVphv_REHASH, "REHASH,"},
     {SVphv_CLONEABLE, "CLONEABLE,"}
 };
 
@@ -1900,7 +1899,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 			SV * keysv;
 			const char * keypv;
 			SV * elt;
-		STRLEN len;
+                        STRLEN len;
 
 			if (count-- <= 0) goto DONEHV;
 
@@ -1909,16 +1908,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 			keypv = SvPV_const(keysv, len);
 			elt = HeVAL(he);
 
-		Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
-		if (SvUTF8(keysv))
-		    PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
+                        Perl_dump_indent(aTHX_ level+1, file, "Elt %s ", pv_display(d, keypv, len, 0, pvlim));
+                        if (SvUTF8(keysv))
+                            PerlIO_printf(file, "[UTF8 \"%s\"] ", sv_uni_display(d, keysv, 6 * SvCUR(keysv), UNI_DISPLAY_QQ));
 			if (HvEITER_get(hv) == he)
 			    PerlIO_printf(file, "[CURRENT] ");
-		if (HeKREHASH(he))
-		    PerlIO_printf(file, "[REHASH] ");
-			PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV) hash);
-		do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
-	    }
+                        PerlIO_printf(file, "HASH = 0x%"UVxf"\n", (UV) hash);
+                        do_sv_dump(level+1, file, elt, nest+1, maxnest, dumpops, pvlim);
+                    }
 		}
 	      DONEHV:;
 	    }

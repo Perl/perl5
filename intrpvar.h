@@ -162,7 +162,6 @@ PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
-PERLVARI(I, rehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
 PERLVARA(I, colors,6,	char *)		/* from regcomp.c */
 
@@ -741,10 +740,6 @@ PERLVARI(I, destroyhook, destroyable_proc_t, Perl_sv_destroyable)
 PERLVARI(I, signalhook,	despatch_signals_proc_t, Perl_despatch_signals)
 #endif
 
-PERLVARI(I, hash_seed,	UV,	0)	/* Hash initializer */
-
-PERLVARI(I, rehash_seed, UV,	0)	/* 582 hash initializer */
-
 PERLVARI(I, isarev, HV *, NULL)		/* Reverse map of @ISA dependencies */
 
 /* Register of known Method Resolution Orders.
@@ -770,6 +765,7 @@ PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 PERLVARI(I, globhook,	globhook_t, NULL)
 
 PERLVARI(I, glob_index,	int,	0)
+
 PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
 
 /* The last unconditional member of the interpreter structure when 5.10.0 was

@@ -24,6 +24,7 @@
 #include "EXTERN.h"
 #define PERL_IN_UTIL_C
 #include "perl.h"
+#include "reentr.h"
 
 #ifdef USE_PERLIO
 #include "perliol.h" /* For PerlIOUnix_refcnt */
@@ -5666,43 +5667,41 @@ Perl_seed(pTHX)
     return u;
 }
 
-UV
-Perl_get_hash_seed(pTHX)
+void
+Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
 {
     dVAR;
-     const char *s = PerlEnv_getenv("PERL_HASH_SEED");
-     UV myseed = 0;
+    const char *s;
+    const unsigned char * const end= seed_buffer + PERL_HASH_SEED_BYTES;
 
-     if (s)
-	while (isSPACE(*s))
+    PERL_ARGS_ASSERT_GET_HASH_SEED;
+
+    s= PerlEnv_getenv("PERL_HASH_SEED");
+
+    if ( s )
+#ifndef USE_HASH_SEED_EXPLICIT
+    {
+        while (isSPACE(*s))
 	    s++;
-     if (s && isDIGIT(*s))
-	  myseed = (UV)Atoul(s);
-     else
-#ifdef USE_HASH_SEED_EXPLICIT
-     if (s)
-#endif
-     {
-	  /* Compute a random seed */
-	  (void)seedDrand01((Rand_seed_t)seed());
-	  myseed = (UV)(Drand01() * (NV)UV_MAX);
-#if RANDBITS < (UVSIZE * 8)
-	  /* Since there are not enough randbits to to reach all
-	   * the bits of a UV, the low bits might need extra
-	   * help.  Sum in another random number that will
-	   * fill in the low bits. */
-	  myseed +=
-	       (UV)(Drand01() * (NV)((((UV)1) << ((UVSIZE * 8 - RANDBITS))) - 1));
-#endif /* RANDBITS < (UVSIZE * 8) */
-	  if (myseed == 0) { /* Superparanoia. */
-	      myseed = (UV)(Drand01() * (NV)UV_MAX); /* One more chance. */
-	      if (myseed == 0)
-		  Perl_croak(aTHX_ "Your random numbers are not that random");
-	  }
-     }
-     PL_rehash_seed_set = TRUE;
 
-     return myseed;
+        while (isXDIGIT(*s) && seed_buffer < end) {
+            *seed_buffer = READ_XDIGIT(s) << 4;
+            if (isXDIGIT(*s)) {
+                *seed_buffer |= READ_XDIGIT(s);
+            }
+            seed_buffer++;
+        }
+        /* should we check for unparsed crap? */
+    }
+    else
+#endif
+    {
+        (void)seedDrand01((Rand_seed_t)seed());
+
+        while (seed_buffer < end) {
+            *seed_buffer++ = (unsigned char)(Drand01() * (U8_MAX+1));
+        }
+     }
 }
 
 #ifdef PERL_GLOBAL_STRUCT

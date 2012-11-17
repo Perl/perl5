@@ -33,10 +33,11 @@ BEGIN {
                      lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
 
-                     hash_seed hv_store
+                     hash_seed hash_value bucket_stats bucket_info bucket_array
+                     hv_store
                      lock_hash_recurse unlock_hash_recurse
                     );
-    plan tests => 226 + @Exported_Funcs;
+    plan tests => 234 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
 }
 foreach my $func (@Exported_Funcs) {
@@ -326,7 +327,7 @@ like(
 }
 
 my $hash_seed = hash_seed();
-ok($hash_seed >= 0, "hash_seed $hash_seed");
+ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 
 {
     package Minder;
@@ -529,4 +530,27 @@ ok($hash_seed >= 0, "hash_seed $hash_seed");
         "unlock_hash_recurse(): element which is hashref unlocked" );
     ok( hash_unlocked(%{$hash{c}[1]}),
         "unlock_hash_recurse(): element which is hashref in array ref not locked" );
+}
+
+{
+    my $h1= hash_value("foo");
+    my $h2= hash_value("bar");
+    is( $h1, hash_value("foo") );
+    is( $h2, hash_value("bar") );
+}
+{
+    my @info1= bucket_info({});
+    my @info2= bucket_info({1..10});
+    my @stats1= bucket_stats({});
+    my @stats2= bucket_stats({1..10});
+    my $array1= bucket_array({});
+    my $array2= bucket_array({1..10});
+    is("@info1","0 8 0");
+    is("@info2[0,1]","5 8");
+    is("@stats1","0 8 0");
+    is("@stats2[0,1]","5 8");
+    my @keys1= sort map { ref $_ ? @$_ : () } @$array1;
+    my @keys2= sort map { ref $_ ? @$_ : () } @$array2;
+    is("@keys1","");
+    is("@keys2","1 3 5 7 9");
 }
