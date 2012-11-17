@@ -2695,24 +2695,37 @@ extern double drand48 (void);
 
 PP(pp_rand)
 {
-    dVAR; dSP; dTARGET;
-    NV value;
-    if (MAXARG < 1)
-	value = 1.0;
-    else if (!TOPs) {
-	value = 1.0; (void)POPs;
-    }
-    else
-	value = POPn;
-    if (value == 0.0)
-	value = 1.0;
+    dVAR;
     if (!PL_srand_called) {
 	(void)seedDrand01((Rand_seed_t)seed());
 	PL_srand_called = TRUE;
     }
-    value *= Drand01();
-    XPUSHn(value);
-    RETURN;
+    {
+	dSP;
+	NV value;
+	EXTEND(SP, 1);
+    
+	if (MAXARG < 1)
+	    value = 1.0;
+	else {
+	    SV * const sv = POPs;
+	    if(!sv)
+		value = 1.0;
+	    else
+		value = SvNV(sv);
+	}
+    /* 1 of 2 things can be carried through SvNV, SP or TARG, SP was carried */
+	if (value == 0.0)
+	    value = 1.0;
+	{
+	    dTARGET;
+	    PUSHs(TARG);
+	    PUTBACK;
+	    value *= Drand01();
+	    sv_setnv_mg(TARG, value);
+	}
+    }
+    return NORMAL;
 }
 
 PP(pp_srand)
