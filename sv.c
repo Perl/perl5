@@ -4566,7 +4566,7 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
 	    sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
 	    SvUTF8_on(sv);
             return;
-	} else if (flags & (HVhek_REHASH|HVhek_UNSHARED)) {
+        } else if (flags & HVhek_UNSHARED) {
 	    sv_setpvn(sv, HEK_KEY(hek), HEK_LEN(hek));
 	    if (HEK_UTF8(hek))
 		SvUTF8_on(sv);
@@ -8457,13 +8457,8 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
 	    sv_usepvn_flags(sv, as_utf8, utf8_len, SV_HAS_TRAILING_NUL);
 	    SvUTF8_on (sv);
 	    return sv;
-	} else if (flags & (HVhek_REHASH|HVhek_UNSHARED)) {
-	    /* We don't have a pointer to the hv, so we have to replicate the
-	       flag into every HEK. This hv is using custom a hasing
-	       algorithm. Hence we can't return a shared string scalar, as
-	       that would contain the (wrong) hash value, and might get passed
-	       into an hv routine with a regular hash.
-	       Similarly, a hash that isn't using shared hash keys has to have
+        } else if (flags & HVhek_UNSHARED) {
+            /* A hash that isn't using shared hash keys has to have
 	       the flag in every key so that we know not to try to call
 	       share_hek_hek on it.  */
 
@@ -12912,6 +12907,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Proc		= ipP;
 #endif		/* PERL_IMPLICIT_SYS */
 
+
     param->flags = flags;
     /* Nothing in the core code uses this, but we make it available to
        extensions (using mg_dup).  */
@@ -12920,6 +12916,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
        with Perl_clone_params_new().  */
     param->new_perl = my_perl;
     param->unreferenced = NULL;
+
 
     INIT_TRACK_MEMPOOL(my_perl->Imemory_debug_header, my_perl);
 
@@ -12932,9 +12929,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sv_arenaroot	= NULL;
 
     PL_debug		= proto_perl->Idebug;
-
-    PL_hash_seed	= proto_perl->Ihash_seed;
-    PL_rehash_seed	= proto_perl->Irehash_seed;
 
     /* dbargs array probably holds garbage */
     PL_dbargs		= NULL;

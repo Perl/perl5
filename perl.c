@@ -290,6 +290,19 @@ perl_construct(pTHXx)
 #ifdef USE_REENTRANT_API
     Perl_reentrant_init(aTHX);
 #endif
+#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
+        /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
+         * This MUST be done before any hash stores or fetches take place.
+         * If you set PL_hash_seed (and presumably also PL_hash_seed_set)
+         * yourself, it is your responsibility to provide a good random seed!
+         * You can also define PERL_HASH_SEED in compile time, see hv.h.
+         *
+         * XXX: fix this comment */
+    if (PL_hash_seed_set == FALSE) {
+        Perl_get_hash_seed(aTHX_ PL_hash_seed);
+        PL_hash_seed_set= TRUE;
+    }
+#endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
 
     /* Note that strtab is a rather special HV.  Assumptions are made
        about not iterating on it, and not adding tie magic to it.
@@ -1476,23 +1489,21 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
-
-#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
-    /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
-     * This MUST be done before any hash stores or fetches take place.
-     * If you set PL_rehash_seed (and presumably also PL_rehash_seed_set)
-     * yourself, it is your responsibility to provide a good random seed!
-     * You can also define PERL_HASH_SEED in compile time, see hv.h. */
-    if (!PL_rehash_seed_set)
-	 PL_rehash_seed = get_hash_seed();
+#if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) || defined(USE_HASH_SEED_DEBUG)
     {
-	const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
+        const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
-	if (s && (atoi(s) == 1))
-	    PerlIO_printf(Perl_debug_log, "HASH_SEED = %"UVuf"\n", PL_rehash_seed);
+        if (s && (atoi(s) == 1)) {
+            unsigned char *seed= PERL_HASH_SEED;
+            unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
+            PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
+            while (seed < seed_end) {
+                PerlIO_printf(Perl_debug_log, "%02x", *seed++);
+            }
+            PerlIO_printf(Perl_debug_log, "\n");
+        }
     }
 #endif /* #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT) */
-
     PL_origargc = argc;
     PL_origargv = argv;
 

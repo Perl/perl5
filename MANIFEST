@@ -3769,7 +3769,6 @@ ext/Hash-Util-FieldHash/t/02_function.t		Test script
 ext/Hash-Util-FieldHash/t/03_class.t		Test script
 ext/Hash-Util-FieldHash/t/04_thread.t		Test script
 ext/Hash-Util-FieldHash/t/05_perlhook.t		Test script
-ext/Hash-Util-FieldHash/t/10_hash.t		Adapted from t/op/hash.t
 ext/Hash-Util-FieldHash/t/11_hashassign.t	Adapted from t/op/hashassign.t
 ext/Hash-Util-FieldHash/t/12_hashwarn.t		Adapted from t/op/hashwarn.t
 ext/Hash-Util/lib/Hash/Util.pm	Hash::Util

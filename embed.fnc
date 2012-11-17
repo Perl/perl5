@@ -1509,7 +1509,7 @@ p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 p	|U32	|parse_unicode_opts|NN const char **popt
 Ap	|U32	|seed
 : Only used in perl.c
-pR	|UV	|get_hash_seed
+p        |void        |get_hash_seed        |NN unsigned char *seed_buffer
 : Used in doio.c, pp_hot.c, pp_sys.c
 p	|void	|report_evil_fh	|NULLOK const GV *gv
 : Used in doio.c, pp_hot.c, pp_sys.c

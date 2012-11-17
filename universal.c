@@ -1086,44 +1086,6 @@ XS(XS_PerlIO_get_layers)
     XSRETURN(0);
 }
 
-XS(XS_Internals_hash_seed)
-{
-    dVAR;
-    /* Using dXSARGS would also have dITEM and dSP,
-     * which define 2 unused local variables.  */
-    dAXMARK;
-    PERL_UNUSED_ARG(cv);
-    PERL_UNUSED_VAR(mark);
-    XSRETURN_UV(PERL_HASH_SEED);
-}
-
-XS(XS_Internals_rehash_seed)
-{
-    dVAR;
-    /* Using dXSARGS would also have dITEM and dSP,
-     * which define 2 unused local variables.  */
-    dAXMARK;
-    PERL_UNUSED_ARG(cv);
-    PERL_UNUSED_VAR(mark);
-    XSRETURN_UV(PL_rehash_seed);
-}
-
-XS(XS_Internals_HvREHASH)	/* Subject to change  */
-{
-    dVAR;
-    dXSARGS;
-    PERL_UNUSED_ARG(cv);
-    if (SvROK(ST(0))) {
-	const HV * const hv = (const HV *) SvRV(ST(0));
-	if (items == 1 && SvTYPE(hv) == SVt_PVHV) {
-	    if (HvREHASH(hv))
-		XSRETURN_YES;
-	    else
-		XSRETURN_NO;
-	}
-    }
-    Perl_croak(aTHX_ "Internals::HvREHASH $hashref");
-}
 
 XS(XS_re_is_regexp)
 {
@@ -1403,9 +1365,6 @@ const struct xsub_details details[] = {
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
-    {"Internals::hash_seed", XS_Internals_hash_seed, ""},
-    {"Internals::rehash_seed", XS_Internals_rehash_seed, ""},
-    {"Internals::HvREHASH", XS_Internals_HvREHASH, "\\%"},
     {"re::is_regexp", XS_re_is_regexp, "$"},
     {"re::regname", XS_re_regname, ";$$"},
     {"re::regnames", XS_re_regnames, ";$"},

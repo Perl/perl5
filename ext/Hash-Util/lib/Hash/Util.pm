@@ -28,10 +28,11 @@ our @EXPORT_OK  = qw(
                      lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
 
-                     hash_seed hv_store
+                     hash_seed hash_value bucket_stats bucket_info bucket_array
+                     hv_store
                      lock_hash_recurse unlock_hash_recurse
                     );
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 require XSLoader;
 XSLoader::load();
 
@@ -459,9 +460,7 @@ unrestricted hash.
 
     my $hash_seed = hash_seed();
 
-hash_seed() returns the seed number used to randomise hash ordering.
-Zero means the "traditional" random hash ordering, non-zero means the
-new even more random hash ordering introduced in Perl 5.8.1.
+hash_seed() returns the seed bytes used to randomise hash ordering.
 
 B<Note that the hash seed is sensitive information>: by knowing it one
 can craft a denial-of-service attack against Perl code, even remotely,
@@ -469,10 +468,100 @@ see L<perlsec/"Algorithmic Complexity Attacks"> for more information.
 B<Do not disclose the hash seed> to people who don't need to know it.
 See also L<perlrun/PERL_HASH_SEED_DEBUG>.
 
+Prior to Perl 5.17.6 this function returned a UV, it now returns a string,
+which may be of nearly any size as determined by the hash function your
+Perl has been built with. Possible sizes may be but are not limited to
+4 bytes (for most hash algorithms) and 16 bytes (for siphash).
+
+=item B<hash_value>
+
+    my $hash_value = hash_value($string);
+
+hash_value() returns the current perls internal hash value for a given
+string.
+
+Returns a 32 bit integer representing the hash value of the string passed
+in. This value is only reliable for the lifetime of the process. It may
+be different depending on invocation, environment variables,  perl version,
+architectures, and build options.
+
+B<Note that the hash value of a given string is sensitive information>:
+by knowing it one can deduce the hash seed which in turn can allow one to
+craft a denial-of-service attack against Perl code, even remotely,
+see L<perlsec/"Algorithmic Complexity Attacks"> for more information.
+B<Do not disclose the hash value of a string> to people who don't need to
+know it. See also L<perlrun/PERL_HASH_SEED_DEBUG>.
+
+=item B<bucket_info>
+
+Return a set of basic information about a hash.
+
+    my ($keys, $buckets, $used, @length_counts)= bucket_info($hash);
+
+Fields are as follows:
+
+    0: Number of keys in the hash
+    1: Number of buckets in the hash
+    2: Number of used buckets in the hash
+    rest : list of counts, Kth element is the number of buckets
+           with K keys in it.
+
+See also bucket_stats() and bucket_array().
+
+=item B<bucket_stats>
+
+Returns a list of statistics about a hash.
+
+    my ($keys, buckets, $used, $utilization_ratio, $collision_pct,
+        $mean, $stddev, @length_counts)= bucket_info($hashref);
+
+
+Fields are as follows:
+
+
+    0: Number of keys in the hash
+    1: Number of buckets in the hash
+    2: Number of used buckets in the hash
+    3: Percent of buckets used
+    4: Percent of keys which are in collision
+    5: Average bucket length
+    6: Standard Deviation of bucket lengths.
+    rest : list of counts, Kth element is the number of buckets
+           with K keys in it.
+
+See also bucket_info() and bucket_array().
+
+=item B<bucket_array>
+
+    my $array= bucket_array(\%hash);
+
+Returns a packed representation of the bucket array associated with a hash. Each element
+of the array is either an integer K, in which case it represents K empty buckets, or
+a reference to another array which contains the keys that are in that bucket.
+
+B<Note that the information returned by bucket_array is sensitive information>:
+by knowing it one can directly attack perls hash function which in turn may allow
+one to craft a denial-of-service attack against Perl code, even remotely,
+see L<perlsec/"Algorithmic Complexity Attacks"> for more information.
+B<Do not disclose the outputof this function> to people who don't need to
+know it. See also L<perlrun/PERL_HASH_SEED_DEBUG>. This function is provided strictly
+for  debugging and diagnostics purposes only, it is hard to imagine a reason why it
+would be used in production code.
+
 =cut
 
-sub hash_seed () {
-    Internals::rehash_seed();
+
+sub bucket_stats {
+    my ($hash)= @_;
+    my ($keys, $buckets, $used, @length_counts)= bucket_info($hash);
+    my $sum;
+    $sum += ($length_counts[$_] * $_) for 0 .. $#length_counts;
+    my $mean= $sum/$buckets;
+    $sum= 0;
+    $sum += ($length_counts[$_] * (($_-$mean)**2)) for 0 .. $#length_counts;
+
+    my $stddev= sqrt($sum/$buckets);
+    return $keys, $buckets, $used, $keys ? ($used/$buckets, ($keys-$used)/$keys, $mean, $stddev, @length_counts) : ();
 }
 
 =item B<hv_store>
