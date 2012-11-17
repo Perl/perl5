@@ -1,5 +1,9 @@
 =encoding utf8
 
+=for todo
+284167a smueller Add C define to remove taint support from perl
+ba593ad davem    clone() wasn't cloning the whole stack
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
@@ -94,7 +98,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Lists of lexical variable declarations (C<my($x, $y)>) are now optimised
+down to a single op, and are hence faster than before.
 
 =back
 
@@ -126,11 +131,24 @@ XXX
 
 =item *
 
+L<Carp> has been upgraded from version 1.27 to 1.28.
+
+Carp is no longer confused when C<caller> returns undef for a package that
+has been deleted.
+
+=item *
+
 L<CPAN> has been upgraded from version 1.98 to 1.99_51.
 
 =item *
 
 L<DynaLoader> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Env> has been upgraded from version 1.03 to 1.04.
+
+Its SPLICE implementation no longer misbehaves in list context.
 
 =item *
 
@@ -344,7 +362,9 @@ unaffected.
 
 =item *
 
-XXX
+Copy-on-write (shared hash key) scalars are no longer marked read-only.
+C<SvREADONLY> returns false on such an SV, but C<SvIsCOW> still returns
+true.
 
 =back
 
@@ -359,7 +379,91 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Uninitialized warnings mentioning hash elements would only mention the
+element name if it was not in the first bucket of the hash, due to an
+off-by-one error.
+
+=item *
+
+A regular expression optimizer bug could cause multiline "^" to behave
+incorrectly in the presence of line breaks, such that
+C<"/\n\n" =~ m#\A(?:^/$)#im> would not match [perl #115242].
+
+=item *
+
+Failed C<fork> in list context no longer currupts the stack.
+C<@a = (1, 2, fork, 3)> used to gobble up the 2 and assign C<(1, undef, 3)>
+if the C<fork> call failed.
+
+=item *
+
+Numerous memory leaks have been fixed, mostly involving tied variables that
+die, regular expression character classes and code blocks, and syntax
+errors.
+
+=item *
+
+Assigning a regular expression (C<${qr//}>) to a variable that happens to
+hold a floating point number no longer causes assertion failures on
+debugging builds.
+
+=item *
+
+Assigning a regular expression to a scalar containing a number no longer
+causes subsequent nummification to produce random numbers.
+
+=item *
+
+Assigning a regular expression to a magic variable no longer wipes away the
+magic.  This is a regression from 5.10.
+
+=item *
+
+Assigning a regular expression to a blessed scalar no longer results in
+crashes.  This is also a regression from 5.10.
+
+=item *
+
+Regular expression can now be assigned to tied hash and array elements with
+flattening into strings.
+
+=item *
+
+Nummifying a regular expression no longer results in an uninitialized
+warning.
+
+=item *
+
+Negative array indices no longer cause EXISTS methods of tied variables to
+be ignored.  This is a regression from 5.12.
+
+=item *
+
+Negative array indices no longer result in crashes on arrays tied to
+non-objects.
+
+=item *
+
+C<$x = "(?{})"; /a++(?{})+$x/x> no longer erroneous produces an error (just
+a warning, as expected).  This was broken in 5.17.1.
+
+=item *
+
+C<$byte_overload .= $utf8> no longer results in doubly-encoded UTF8 if the
+left-hand scalar happened to have produced a UTF8 string the last time
+overloading was invoked.
+
+=item *
+
+C<goto &sub> now uses the current value of @_, instead of using the array
+the subroutine was originally called with.  This means
+C<local @_ = (...); goto &sub> now works [perl #43077].
+
+=item *
+
+If a debugger is invoked recursively, it no longer stomps on its own
+lexical variables.  Formerly under recursion all calls would share the same
+set of lexical variables [perl #115742].
 
 =back
 
