@@ -164,10 +164,12 @@ sub __uni_latin1 {
     my $str= shift;
     my $max= 0;
     my @cp;
+    my @cp_high;
     my $only_has_invariants = 1;
     for my $ch ( split //, $str ) {
         my $cp= ord $ch;
         push @cp, $cp;
+        push @cp_high, $cp if $cp > 255;
         $max= $cp if $max < $cp;
         if (! ASCII_PLATFORM && $only_has_invariants) {
             if ($cp > 255) {
@@ -192,7 +194,7 @@ sub __uni_latin1 {
         utf8::upgrade($u);
         $u= [ unpack "U0C*", $u ] if defined $u;
     }
-    return ( \@cp, $n, $l, $u );
+    return ( \@cp, \@cp_high, $n, $l, $u );
 }
 
 #
@@ -376,17 +378,17 @@ sub new {
         } else {
             die "Unparsable line: $txt\n";
         }
-        my ( $cp, $low, $latin1, $utf8 )= __uni_latin1( $str );
+        my ( $cp, $cp_high, $low, $latin1, $utf8 )= __uni_latin1( $str );
         my $UTF8= $low   || $utf8;
         my $LATIN1= $low || $latin1;
         my $high = (scalar grep { $_ < 256 } @$cp) ? 0 : $utf8;
         #die Dumper($txt,$cp,$low,$latin1,$utf8)
         #    if $txt=~/NEL/ or $utf8 and @$utf8>3;
 
-        @{ $self->{strs}{$str} }{qw( str txt low utf8 latin1 high cp UTF8 LATIN1 )}=
-          ( $str, $txt, $low, $utf8, $latin1, $high, $cp, $UTF8, $LATIN1 );
+        @{ $self->{strs}{$str} }{qw( str txt low utf8 latin1 high cp cp_high UTF8 LATIN1 )}=
+          ( $str, $txt, $low, $utf8, $latin1, $high, $cp, $cp_high, $UTF8, $LATIN1 );
         my $rec= $self->{strs}{$str};
-        foreach my $key ( qw(low utf8 latin1 high cp UTF8 LATIN1) ) {
+        foreach my $key ( qw(low utf8 latin1 high cp cp_high UTF8 LATIN1) ) {
             $self->{size}{$key}{ 0 + @{ $self->{strs}{$str}{$key} } }++
               if $self->{strs}{$str}{$key};
         }
@@ -490,7 +492,7 @@ sub _optree {
     return $else if !@conds;
 
 
-    my $test= $test_type eq 'cp' ? "cp" : "((U8*)s)[$depth]";
+    my $test= $test_type =~ /^cp/ ? "cp" : "((U8*)s)[$depth]";
     # first we loop over the possible keys/conditions and find out what they look like
     # we group conditions with the same optree together.
     my %dmp_res;
@@ -540,7 +542,7 @@ sub optree {
     my %opt= @_;
     my $trie= $self->make_trie( $opt{type}, $opt{max_depth} );
     $opt{ret_type} ||= 'len';
-    my $test_type= $opt{type} eq 'cp' ? 'cp' : 'depth';
+    my $test_type= $opt{type} =~ /^cp/ ? 'cp' : 'depth';
     return $self->_optree( $trie, $test_type, $opt{ret_type}, $opt{else}, 0 );
 }
 
@@ -588,7 +590,7 @@ sub length_optree {
     my $type= $opt{type};
 
     die "Can't do a length_optree on type 'cp', makes no sense."
-      if $type eq 'cp';
+      if $type =~ /^cp/;
 
     my ( @size, $method );
 
@@ -1136,7 +1138,7 @@ sub render {
 # make a macro of a given type.
 # calls into make_trie and (generic_|length_)optree as needed
 # Opts are:
-# type     : 'cp','generic','high','low','latin1','utf8','LATIN1','UTF8'
+# type     : 'cp','cp_high', 'generic','high','low','latin1','utf8','LATIN1','UTF8'
 # ret_type : 'cp' or 'len'
 # safe     : add length guards to macro
 #
@@ -1155,9 +1157,9 @@ sub make_macro {
     my %opts= @_;
     my $type= $opts{type} || 'generic';
     die "Can't do a 'cp' on multi-codepoint character class '$self->{op}'"
-      if $type eq 'cp'
+      if $type =~ /^cp/
       and $self->{has_multi};
-    my $ret_type= $opts{ret_type} || ( $opts{type} eq 'cp' ? 'cp' : 'len' );
+    my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
@@ -1167,8 +1169,8 @@ sub make_macro {
         $method= 'optree';
     }
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
-    my $text= $self->render( $optree, $type eq 'cp', \%opts );
-    my @args= $type eq 'cp' ? 'cp' : 's';
+    my $text= $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts );
+    my @args= $type =~ /^cp/ ? 'cp' : 's';
     push @args, "e" if $opts{safe};
     push @args, "is_utf8" if $type eq 'generic';
     push @args, "len" if $ret_type eq 'both';
@@ -1228,7 +1230,7 @@ if ( !caller ) {
             my ( $type, $ret )= split /-/, $type_spec;
             $ret ||= 'len';
             foreach my $mod ( @mods ) {
-                next if $mod eq 'safe' and $type eq 'cp';
+                next if $mod eq 'safe' and $type =~ /^cp/;
                 delete $mods{$mod};
                 my $macro= $obj->make_macro(
                     type     => $type,
@@ -1329,6 +1331,10 @@ if ( !caller ) {
 #   cp          generate a macro whose name is 'is_BASE_cp' and defines a
 #               class that returns true if the UV parameter is a member of the
 #               class; false if not.
+#   cp_high     like cp, but it is assumed that it is known that the UV
+#               parameter is above Latin1.  The name of the generated macro is
+#               'is_BASE_cp_high'.  This is different from high-cp, derived
+#               below.
 # A macro of the given type is generated for each type listed in the input.
 # The default return value is the number of octets read to generate the match.
 # Append "-cp" to the type to have it instead return the matched codepoint.
