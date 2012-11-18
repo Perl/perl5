@@ -9833,46 +9833,50 @@ variable via C<DB::set_list>.
 
     # The breakpoint was inside an eval. This is a little
     # more difficult. XXX and I don't understand it.
-    for (@hard) {
+    foreach my $hard_file (@hard) {
         # Get over to the eval in question.
-        *dbline = $main::{ '_<' . $_ };
-        my ( $quoted, $sub, %subs, $line ) = quotemeta $_;
-        for $sub ( keys %sub ) {
-            next unless $sub{$sub} =~ /^$quoted:(\d+)-(\d+)$/;
-            $subs{$sub} = [ $1, $2 ];
+        *dbline = $main::{ '_<' . $hard_file };
+        my $quoted = quotemeta $hard_file;
+        my %subs;
+        for my $sub ( keys %sub ) {
+            if (my ($n1, $n2) = $sub{$sub} =~ /\A$quoted:(\d+)-(\d+)\z/) {
+                $subs{$sub} = [ $n1, $n2 ];
+            }
         }
         unless (%subs) {
-            print $OUT
-              "No subroutines in $_, ignoring breakpoints.\n";
+            print {$OUT}
+            "No subroutines in $hard_file, ignoring breakpoints.\n";
             next;
         }
-      LINES: for $line ( keys %dbline ) {
+        LINES: foreach my $line ( keys %dbline ) {
 
             # One breakpoint per sub only:
-            my ( $offset, $sub, $found );
-          SUBS: for $sub ( keys %subs ) {
+            my ( $offset, $found );
+            SUBS: foreach my $sub ( keys %subs ) {
                 if (
-                    $subs{$sub}->[1] >=
-                    $line    # Not after the subroutine
+                    $subs{$sub}->[1] >= $line    # Not after the subroutine
                     and (
                         not defined $offset    # Not caught
-                        or $offset < 0
+                            or $offset < 0
                     )
-                  )
+                )
                 {                              # or badly caught
                     $found  = $sub;
                     $offset = $line - $subs{$sub}->[0];
-                    $offset = "+$offset", last SUBS
-                      if $offset >= 0;
+                    if ($offset >= 0) {
+                        $offset = "+$offset";
+                        last SUBS;
+                    }
                 } ## end if ($subs{$sub}->[1] >=...
             } ## end for $sub (keys %subs)
             if ( defined $offset ) {
                 $postponed{$found} =
-                  "break $offset if $dbline{$line}";
+                "break $offset if $dbline{$line}";
             }
             else {
-                print $OUT
-"Breakpoint in $_:$line ignored: after all the subroutines.\n";
+                print {$OUT}
+                ("Breakpoint in ${hard_file}:$line ignored:"
+                . " after all the subroutines.\n");
             }
         } ## end for $line (keys %dbline)
     } ## end for (@hard)
