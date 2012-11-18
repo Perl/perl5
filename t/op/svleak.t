@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 71;
+plan tests => 72;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -145,6 +145,9 @@ SKIP:
   }
   ok(!$weak, "hash referenced weakened SV released");
 }
+
+# prototype() errors
+leak(2,0, sub { eval { prototype "CORE::fu" } }, 'prototype errors');
 
 # RT #72246: rcatline memory leak on bad $/
 
