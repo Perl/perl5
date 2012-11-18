@@ -6463,6 +6463,47 @@ stack frame. Each has the following keys and values:
 
 =cut
 
+sub _dump_trace_calc_save_args {
+    my ($nothard) = @_;
+
+    my @a;
+    for my $arg (@args) {
+        my $type;
+        if ( not defined $arg ) {    # undefined parameter
+            push @a, "undef";
+        }
+
+        elsif ( $nothard and tied $arg ) {    # tied parameter
+            push @a, "tied";
+        }
+        elsif ( $nothard and $type = ref $arg ) {    # reference
+            push @a, "ref($type)";
+        }
+        else {                                       # can be stringified
+            local $_ =
+            "$arg";    # Safe to stringify now - should not call f().
+
+            # Backslash any single-quotes or backslashes.
+            s/([\'\\])/\\$1/g;
+
+            # Single-quote it unless it's a number or a colon-separated
+            # name.
+            s/(.*)/'$1'/s
+            unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
+
+            # Turn high-bit characters into meta-whatever.
+            s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
+
+            # Turn control characters into ^-whatever.
+            s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+
+            push( @a, $_ );
+        } ## end else [ if (not defined $arg)
+    } ## end for $arg (@args)
+
+    return \@a;
+}
+
 sub dump_trace {
 
     # How many levels to skip.
@@ -6507,40 +6548,7 @@ sub dump_trace {
     {
 
         # Go through the arguments and save them for later.
-        my @a;
-        for my $arg (@args) {
-            my $type;
-            if ( not defined $arg ) {    # undefined parameter
-                push @a, "undef";
-            }
-
-            elsif ( $nothard and tied $arg ) {    # tied parameter
-                push @a, "tied";
-            }
-            elsif ( $nothard and $type = ref $arg ) {    # reference
-                push @a, "ref($type)";
-            }
-            else {                                       # can be stringified
-                local $_ =
-                  "$arg";    # Safe to stringify now - should not call f().
-
-                # Backslash any single-quotes or backslashes.
-                s/([\'\\])/\\$1/g;
-
-                # Single-quote it unless it's a number or a colon-separated
-                # name.
-                s/(.*)/'$1'/s
-                  unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
-
-                # Turn high-bit characters into meta-whatever.
-                s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
-
-                # Turn control characters into ^-whatever.
-                s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
-
-                push( @a, $_ );
-            } ## end else [ if (not defined $arg)
-        } ## end for $arg (@args)
+        my $save_args = _dump_trace_calc_save_args($nothard);
 
         # If context is true, this is array (@)context.
         # If context is false, this is scalar ($) context.
@@ -6550,7 +6558,7 @@ sub dump_trace {
 
         # if the sub has args ($h true), make an anonymous array of the
         # dumped args.
-        $args = $h ? [@a] : undef;
+        $args = $h ? $save_args : undef;
 
         # remove trailing newline-whitespace-semicolon-end of line sequence
         # from the eval text, if any.
