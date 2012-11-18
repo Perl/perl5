@@ -167,6 +167,7 @@ Perl_newGP(pTHX_ GV *const gv)
 #ifndef USE_ITHREADS
     SV * temp_sv;
 #endif
+    dVAR;
 
     PERL_ARGS_ASSERT_NEWGP;
     Newxz(gp, 1, GP);

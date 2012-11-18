@@ -2638,6 +2638,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
          we should flag that it needs upgrading on keys or each.  Also flag
          that we need share_hek_flags to free the string.  */
       if (str != save) {
+          dVAR;
           PERL_HASH(hash, str, len);
           flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
       }
