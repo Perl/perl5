@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 241 );
+plan( tests => 242 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -166,6 +166,8 @@ XXX This text isn't used. Should it be?
 curr_test($test);
 
 is (ref *x{FORMAT}, "FORMAT");
+is ("@{sub { *_{ARRAY} }->(1..3)}", "1 2 3",
+    'returning *_{ARRAY} from sub');
 *x = *STDOUT;
 is (*{*x{GLOB}}, "*main::STDOUT");
 

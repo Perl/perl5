@@ -638,7 +638,12 @@ PP(pp_gelem)
 	switch (*elem) {
 	case 'A':
 	    if (len == 5 && strEQ(second_letter, "RRAY"))
+	    {
 		tmpRef = MUTABLE_SV(GvAV(gv));
+		if (tmpRef && !AvREAL((const AV *)tmpRef)
+		 && AvREIFY((const AV *)tmpRef))
+		    av_reify(MUTABLE_AV(tmpRef));
+	    }
 	    break;
 	case 'C':
 	    if (len == 4 && strEQ(second_letter, "ODE"))
