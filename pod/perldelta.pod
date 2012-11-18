@@ -185,13 +185,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlref>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+C<*foo{NAME}> and C<*foo{PACKAGE}>, which have existed since perl 5.005,
+are now documented.
 
 =back
 
@@ -464,6 +465,11 @@ C<local @_ = (...); goto &sub> now works [perl #43077].
 If a debugger is invoked recursively, it no longer stomps on its own
 lexical variables.  Formerly under recursion all calls would share the same
 set of lexical variables [perl #115742].
+
+=item *
+
+C<*_{ARRAY}> returned from a subroutine no longer spontaneously
+becomes empty.
 
 =back
 
