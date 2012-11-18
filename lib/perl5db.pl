@@ -6482,7 +6482,7 @@ sub dump_trace {
     # These variables are used to capture output from caller();
     my ( $p, $file, $line, $sub, $h, $context );
 
-    my ( $e, $r, @a, @sub, $args );
+    my ( $e, $r, @sub, $args );
 
     # XXX Okay... why'd we do that?
     my $nothard = not $frame & 8;
@@ -6507,7 +6507,7 @@ sub dump_trace {
     {
 
         # Go through the arguments and save them for later.
-        @a = ();
+        my @a;
         for my $arg (@args) {
             my $type;
             if ( not defined $arg ) {    # undefined parameter
