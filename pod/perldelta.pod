@@ -3,6 +3,7 @@
 =for todo
 284167a smueller Add C define to remove taint support from perl
 ba593ad davem    clone() wasn't cloning the whole stack
+7dc8663 demerphq Hash Function Change - Murmur hash and true per process...
 
 =head1 NAME
 
