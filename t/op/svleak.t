@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 69;
+plan tests => 71;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -196,6 +196,12 @@ eleak(2, 0, 'no warnings; sub a{1 1}', 'sub with syntax error');
 eleak(2, 0, 'no warnings; sub {1 1}', 'anon sub with syntax error');
 eleak(2, 0, 'no warnings; use feature ":all"; my sub a{1 1}',
      'my sub with syntax error');
+
+# Reification (or lack thereof)
+leak(2, 0, sub { sub { local $_[0]; shift }->(1) },
+    'local $_[0] on surreal @_, followed by shift');
+leak(2, 0, sub { sub { local $_[0]; \@_ }->(1) },
+    'local $_[0] on surreal @_, followed by reification');
 
 # Syntax errors
 eleak(2, 0, '"${<<END}"

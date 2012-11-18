@@ -627,9 +627,10 @@ Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
     SvGETMAGIC(*sptr);
     save_pushptri32ptr(SvREFCNT_inc_simple(av), idx, SvREFCNT_inc(*sptr),
 		       SAVEt_AELEM);
-    /* if it gets reified later, the restore will have the wrong refcnt */
+    /* The array needs to hold a reference count on its new element, so it
+       must be AvREAL. */
     if (!AvREAL(av) && AvREIFY(av))
-	SvREFCNT_inc_void(*sptr);
+	av_reify(av);
     save_scalar_at(sptr, flags); /* XXX - FIXME - see #60360 */
     if (flags & SAVEf_KEEPOLDELEM)
 	return;
