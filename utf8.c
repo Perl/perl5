@@ -2945,6 +2945,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	SV** swash_invlistsvp = NULL;
 	SV* swash_invlist = NULL;
 	bool invlist_in_swash_is_valid = FALSE;
+	bool swash_invlist_unclaimed = FALSE; /* whether swash_invlist has
+					    an unclaimed reference count */
 
         /* If this operation fetched a swash, get its already existing
          * inversion list, or create one for it */
@@ -2957,6 +2959,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    }
 	    else {
 		swash_invlist = _swash_to_invlist(retval);
+		swash_invlist_unclaimed = TRUE;
 	    }
 	}
 
@@ -2999,7 +3002,9 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 
         if ((int) _invlist_len(swash_invlist) <= invlist_swash_boundary) {
 	    SvREFCNT_dec(retval);
-            retval = newRV_inc(swash_invlist);
+	    if (!swash_invlist_unclaimed)
+		SvREFCNT_inc_simple_void_NN(swash_invlist);
+            retval = newRV_noinc(swash_invlist);
         }
     }
 
