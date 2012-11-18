@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 239 );
+plan( tests => 241 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -185,6 +185,8 @@ is (*{*x{GLOB}}, "*main::STDOUT");
     curr_test(++$test);
 }
 
+is *x{NAME}, 'x', '*foo{NAME}';
+is *x{PACKAGE}, 'main', '*foo{PACKAGE}';
 
 {
     # test if defined() doesn't create any new symbols

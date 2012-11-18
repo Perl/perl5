@@ -262,8 +262,11 @@ known as foo).
     $ioref     = *STDIN{IO};
     $globref   = *foo{GLOB};
     $formatref = *foo{FORMAT};
+    $globname  = *foo{NAME};    # "foo"
+    $pkgname   = *foo{PACKAGE}; # "main"
 
-All of these are self-explanatory except for C<*foo{IO}>.  It returns
+Most of these are self-explanatory, but C<*foo{IO}>
+deserves special attention.  It returns
 the IO handle, used for file handles (L<perlfunc/open>), sockets
 (L<perlfunc/socket> and L<perlfunc/socketpair>), and directory
 handles (L<perlfunc/opendir>).  For compatibility with previous
@@ -275,6 +278,13 @@ C<*foo{THING}> returns undef if that particular THING hasn't been used yet,
 except in the case of scalars.  C<*foo{SCALAR}> returns a reference to an
 anonymous scalar if $foo hasn't been used yet.  This might change in a
 future release.
+
+C<*foo{NAME}> and C<*foo{PACKAGE}> are the exception, in that they return
+strings, rather than references.  These return the package and name of the
+typeglob itself, rather than one that has been assigned to it.  So, after
+C<*foo=*Foo::bar>, C<*foo> will become "*Foo::bar" when used as a string,
+but C<*foo{PACKAGE}> and C<*foo{NAME}> will continue to produce "main" and
+"foo", respectively.
 
 C<*foo{IO}> is an alternative to the C<*HANDLE> mechanism given in
 L<perldata/"Typeglobs and Filehandles"> for passing filehandles
