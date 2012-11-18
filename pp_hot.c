@@ -377,19 +377,29 @@ PP(pp_padrange)
 
 PP(pp_padsv)
 {
-    dVAR; dSP; dTARGET;
-    XPUSHs(TARG);
-    if (PL_op->op_flags & OPf_MOD) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    if (!(PL_op->op_private & OPpPAD_STATE))
-		SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-        if (PL_op->op_private & OPpDEREF) {
-	    PUTBACK;
-	    TOPs = vivify_ref(TOPs, PL_op->op_private & OPpDEREF);
-	    SPAGAIN;
+    dVAR; dSP;
+    EXTEND(SP, 1);
+    {
+	OP * const op = PL_op;
+	/* access PL_curpad once */
+	SV ** const padentry = &(PAD_SVl(op->op_targ));
+	{
+	    dTARG;
+	    TARG = *padentry;
+	    PUSHs(TARG);
+	    PUTBACK; /* no pop/push after this, TOPs ok */
 	}
+	if (op->op_flags & OPf_MOD) {
+	    if (op->op_private & OPpLVAL_INTRO)
+		if (!(op->op_private & OPpPAD_STATE))
+		    save_clearsv(padentry);
+	    if (op->op_private & OPpDEREF) {
+		/* TOPs arg is TARG, but TOPs (SP) rmvs a var across save_clearsv */
+		TOPs = vivify_ref(TOPs, op->op_private & OPpDEREF);
+	    }
+	}
+	return op->op_next;
     }
-    RETURN;
 }
 
 PP(pp_readline)
