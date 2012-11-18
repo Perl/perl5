@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 242 );
+plan( tests => 245 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -189,6 +189,10 @@ is (*{*x{GLOB}}, "*main::STDOUT");
 
 is *x{NAME}, 'x', '*foo{NAME}';
 is *x{PACKAGE}, 'main', '*foo{PACKAGE}';
+*x = *Foo::y;
+is *x, '*Foo::y', 'glob stringifies as assignee after glob-to-glob assign';
+is *x{NAME}, 'x', 'but *foo{NAME} still returns the original name';
+is *x{PACKAGE}, 'main', 'and *foo{PACKAGE} the original package';
 
 {
     # test if defined() doesn't create any new symbols
