@@ -4,8 +4,8 @@ use Test::More;
 BEGIN {
     plan(
         ${^TAINT}
-        ? (skip_all => "A perl without taint support") 
-        : (tests => 45)
+        ? (tests => 45)
+        : (skip_all => "A perl without taint support") 
     );
 }
 
