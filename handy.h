@@ -967,21 +967,25 @@ EXTCONST U32 PL_charclass[];
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 /* For internal core Perl use only.  If the input is in the Latin1 range, use
- * the Latin1 macro, after converting from utf8 if necessary; otherwise use the
- * function.  This relies on the fact that ASCII characters have the same
- * representation whether utf8 or not.  Note that all assume that the utf8 has
- * been validated, and ignore 'use bytes' */
-#define _generic_utf8(classnum, function, p) (UTF8_IS_INVARIANT(*(p))           \
+ * the Latin1 macro 'classnum' on 'p' which is a pointer to a UTF-8 string.
+ * Otherwise use the value given by the 'utf8' parameter.  This relies on the
+ * fact that ASCII characters have the same representation whether utf8 or not.
+ * Note that it assumes that the utf8 has been validated, and ignores 'use
+ * bytes' */
+#define _generic_utf8_utf8(classnum, p, utf8) (UTF8_IS_INVARIANT(*(p))         \
                                          ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? _generic_isCC(                    \
                                                    TWO_BYTE_UTF8_TO_UNI(*(p),  \
                                                                    *((p)+1 )), \
                                                    classnum)                   \
-                                           : (function)(aTHX_ p))
+                                           : utf8)
+/* Like the above, but calls 'function(p)' to get the utf8 value */
+#define _generic_utf8(classnum, function, p)  \
+                                    _generic_utf8_utf8(classnum, p, function(p))
 
-#define isWORDCHAR_utf8(p)      _generic_utf8(_CC_WORDCHAR, Perl_is_utf8_alnum, p)
-#define isALNUM_utf8(p)		isWORDCHAR_utf8(p)  /* back compat */
+#define isWORDCHAR_utf8(p)      _generic_utf8(_CC_WORDCHAR, is_utf8_alnum, p)
+#define isALNUM_utf8(p)         isWORDCHAR_utf8(p)  /* back compat */
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -990,31 +994,32 @@ EXTCONST U32 PL_charclass[];
  * isIDFIRST_uni() which it hasn't so far.  (In the ASCII range, there isn't a
  * difference.) This used to be not the XID version, but we decided to go with
  * the more modern Unicode definition */
-#define isIDFIRST_utf8(p)       _generic_utf8(_CC_IDFIRST, Perl__is_utf8__perl_idstart, p)
+#define isIDFIRST_utf8(p)       _generic_utf8(_CC_IDFIRST,               \
+                                              _is_utf8__perl_idstart, p)
 
-#define isIDCONT_utf8(p)	_generic_utf8(_CC_WORDCHAR, Perl_is_utf8_xidcont, p)
-#define isALPHA_utf8(p)		_generic_utf8(_CC_ALPHA, Perl_is_utf8_alpha, p)
-#define isBLANK_utf8(p)		_generic_utf8(_CC_BLANK, Perl_is_utf8_blank, p)
-#define isSPACE_utf8(p)		_generic_utf8(_CC_SPACE, Perl_is_utf8_space, p)
-#define isDIGIT_utf8(p)		_generic_utf8(_CC_DIGIT, Perl_is_utf8_digit, p)
-#define isUPPER_utf8(p)		_generic_utf8(_CC_UPPER, Perl_is_utf8_upper, p)
-#define isLOWER_utf8(p)		_generic_utf8(_CC_LOWER, Perl_is_utf8_lower, p)
+#define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
+#define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
+#define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_utf8_blank, p)
+#define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_utf8_space, p)
+#define isDIGIT_utf8(p)         _generic_utf8(_CC_DIGIT, is_utf8_digit, p)
+#define isUPPER_utf8(p)         _generic_utf8(_CC_UPPER, is_utf8_upper, p)
+#define isLOWER_utf8(p)         _generic_utf8(_CC_LOWER, is_utf8_lower, p)
 
 /* Because ASCII is invariant under utf8, the non-utf8 macro works */
-#define isASCII_utf8(p)		isASCII(*p)
+#define isASCII_utf8(p)         isASCII(*p)
 
-#define isCNTRL_utf8(p)		_generic_utf8(_CC_CNTRL, Perl_is_utf8_cntrl, p)
-#define isGRAPH_utf8(p)		_generic_utf8(_CC_GRAPH, Perl_is_utf8_graph, p)
-#define isPRINT_utf8(p)		_generic_utf8(_CC_PRINT, Perl_is_utf8_print, p)
-#define isPUNCT_utf8(p)		_generic_utf8(_CC_PUNCT, Perl_is_utf8_punct, p)
-#define isXDIGIT_utf8(p)	_generic_utf8(_CC_XDIGIT, Perl_is_utf8_xdigit, p)
+#define isCNTRL_utf8(p)         _generic_utf8(_CC_CNTRL, is_utf8_cntrl, p)
+#define isGRAPH_utf8(p)         _generic_utf8(_CC_GRAPH, is_utf8_graph, p)
+#define isPRINT_utf8(p)         _generic_utf8(_CC_PRINT, is_utf8_print, p)
+#define isPUNCT_utf8(p)         _generic_utf8(_CC_PUNCT, is_utf8_punct, p)
+#define isXDIGIT_utf8(p)        _generic_utf8(_CC_XDIGIT, is_utf8_xdigit, p)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 
 /* Posix and regular space differ only in U+000B, which is in ASCII (and hence
  * Latin1 */
-#define isPSXSPC_utf8(p)	_generic_utf8(_CC_PSXSPC, Perl_is_utf8_space, p)
+#define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_utf8_space, p)
 
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
