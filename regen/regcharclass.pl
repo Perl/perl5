@@ -1396,6 +1396,10 @@ VERTWS: Vertical Whitespace: \v \V
 => generic UTF8 high LATIN1 cp cp_high :fast safe
 \p{VertSpace}
 
+XDIGIT: Hexadecimal digits
+=> UTF8 high cp_high :fast
+\p{XDigit}
+
 REPLACEMENT: Unicode REPLACEMENT CHARACTER
 => UTF8 :safe
 0xFFFD

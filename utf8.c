@@ -1583,9 +1583,7 @@ Perl_is_uni_punct(pTHX_ UV c)
 bool
 Perl_is_uni_xdigit(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_xdigit(tmpbuf);
+    return isXDIGIT_uni(c);
 }
 
 UV
@@ -2185,7 +2183,7 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_XDIGIT;
 
-    return is_utf8_common(p, &PL_utf8_xdigit, "IsXDigit");
+    return is_XDIGIT_utf8(p);
 }
 
 bool

@@ -331,6 +331,33 @@
 ( 0x2028 == cp || 0x2029 == cp )
 
 /*
+	XDIGIT: Hexadecimal digits
+
+	\p{XDigit}
+*/
+/*** GENERATED CODE ***/
+#define is_XDIGIT_utf8(s)                                                   \
+( ( ( 0x30 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0x39 ) || ( 0x41 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0x46 ) || ( 0x61 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0x66 ) ) ? 1\
+: ( 0xEF == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xBC == ((U8*)s)[1] ) ?                                             \
+	( ( ( 0x90 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x99 ) || ( 0xA1 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xA6 ) ) ? 3 : 0 )\
+    : ( ( 0xBD == ((U8*)s)[1] ) && ( 0x81 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x86 ) ) ? 3 : 0 )\
+: 0 )
+
+/*** GENERATED CODE ***/
+#define is_XDIGIT_high(s)                                                   \
+( ( 0xEF == ((U8*)s)[0] ) ?                                                 \
+    ( ( 0xBC == ((U8*)s)[1] ) ?                                             \
+	( ( ( 0x90 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x99 ) || ( 0xA1 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0xA6 ) ) ? 3 : 0 )\
+    : ( ( 0xBD == ((U8*)s)[1] ) && ( 0x81 <= ((U8*)s)[2] && ((U8*)s)[2] <= 0x86 ) ) ? 3 : 0 )\
+: 0 )
+
+/*** GENERATED CODE ***/
+#define is_XDIGIT_cp_high(cp)                                               \
+( ( 0xFF10 <= cp && cp <= 0xFF19 ) || ( 0xFF19 < cp &&                      \
+( ( 0xFF21 <= cp && cp <= 0xFF26 ) || ( 0xFF41 <= cp && cp <= 0xFF46 ) ) ) )
+
+/*
 	REPLACEMENT: Unicode REPLACEMENT CHARACTER
 
 	0xFFFD

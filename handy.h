@@ -942,7 +942,7 @@ EXTCONST U32 PL_charclass[];
 #define isGRAPH_uni(c)          _generic_uni(_CC_GRAPH, is_uni_graph, c)
 #define isPRINT_uni(c)          _generic_uni(_CC_PRINT, is_uni_print, c)
 #define isPUNCT_uni(c)          _generic_uni(_CC_PUNCT, is_uni_punct, c)
-#define isXDIGIT_uni(c)         _generic_uni(_CC_XDIGIT, is_uni_xdigit, c)
+#define isXDIGIT_uni(c)         _generic_uni(_CC_XDIGIT, is_XDIGIT_cp_high, c)
 
 /* Posix and regular space differ only in U+000B, which is in Latin1 */
 #define isPSXSPC_uni(c)         _generic_uni(_CC_PSXSPC, is_uni_space, c)
@@ -1014,7 +1014,7 @@ EXTCONST U32 PL_charclass[];
 #define isGRAPH_utf8(p)         _generic_utf8(_CC_GRAPH, is_utf8_graph, p)
 #define isPRINT_utf8(p)         _generic_utf8(_CC_PRINT, is_utf8_print, p)
 #define isPUNCT_utf8(p)         _generic_utf8(_CC_PUNCT, is_utf8_punct, p)
-#define isXDIGIT_utf8(p)        _generic_utf8(_CC_XDIGIT, is_utf8_xdigit, p)
+#define isXDIGIT_utf8(p)        _generic_utf8(_CC_XDIGIT, is_XDIGIT_high, p)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
