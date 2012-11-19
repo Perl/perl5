@@ -28,6 +28,7 @@ my %properties = (
                    punct => 'XPosixPunct',
                    quotemeta => '_Perl_Quotemeta',
                    space => 'XPerlSpace',
+                   vertws => 'VertSpace',
                    upper => 'Upper',
                    xdigit => 'XDigit',
                 );
@@ -86,6 +87,7 @@ foreach my $name (sort keys %properties) {
             }
             next;
         }
+        if ($name ne 'vertws') {
             $ret = truth eval "test_is${function}_A($i)";
             if ($@) {
                 fail($@);
@@ -102,6 +104,7 @@ foreach my $name (sort keys %properties) {
                 my $truth = truth($matches && $i < 256);
                 is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
             }
+        }
         next if $name eq 'alnumc';
 
         $ret = truth eval "test_is${function}_uni($i)";

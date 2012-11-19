@@ -269,6 +269,14 @@
 : 0 )
 
 /*** GENERATED CODE ***/
+#define is_VERTWS_high(s)                                                   \
+( ( ( ( 0xE2 == ((U8*)s)[0] ) && ( 0x80 == ((U8*)s)[1] ) ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )
+
+/*** GENERATED CODE ***/
+#define is_VERTWS_high_safe(s,e)                                            \
+( ( ( ( ((e)-(s) > 2) && ( 0xE2 == ((U8*)s)[0] ) ) && ( 0x80 == ((U8*)s)[1] ) ) && ( ( ((U8*)s)[2] & 0xFE ) == 0xA8 ) ) ? 3 : 0 )
+
+/*** GENERATED CODE ***/
 #define is_VERTWS_latin1(s)                                                 \
 ( ( 0x0A <= ((U8*)s)[0] && ((U8*)s)[0] <= 0x0D ) || 0x85 == ((U8*)s)[0] )
 
@@ -283,6 +291,10 @@
 ( ( 0x0A <= cp && cp <= 0x0D ) || ( 0x0D < cp &&                            \
 ( 0x85 == cp || ( 0x85 < cp &&                                              \
 ( 0x2028 == cp || 0x2029 == cp ) ) ) ) )
+
+/*** GENERATED CODE ***/
+#define is_VERTWS_cp_high(cp)                                               \
+( 0x2028 == cp || 0x2029 == cp )
 
 /*
 	REPLACEMENT: Unicode REPLACEMENT CHARACTER

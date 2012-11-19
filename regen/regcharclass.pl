@@ -1393,7 +1393,7 @@ HORIZWS: Horizontal Whitespace: \h \H
 \p{HorizSpace}
 
 VERTWS: Vertical Whitespace: \v \V
-=> generic UTF8 LATIN1 cp :fast safe
+=> generic UTF8 high LATIN1 cp cp_high :fast safe
 \p{VertSpace}
 
 REPLACEMENT: Unicode REPLACEMENT CHARACTER

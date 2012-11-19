@@ -3585,6 +3585,20 @@ test_isBLANK_utf8(unsigned char * p)
         RETVAL
 
 bool
+test_isVERTWS_uni(UV ord)
+    CODE:
+        RETVAL = isVERTWS_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isVERTWS_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isVERTWS_utf8(p);
+    OUTPUT:
+        RETVAL
+
+bool
 test_isUPPER_uni(UV ord)
     CODE:
         RETVAL = isUPPER_uni(ord);
