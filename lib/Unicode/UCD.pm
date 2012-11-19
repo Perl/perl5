@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.46';
+our $VERSION = '0.47';
 
 require Exporter;
 
@@ -2255,7 +2255,8 @@ sub prop_invlist ($;$) {
 
 sub _search_invlist {
     # Find the range in the inversion list which contains a code point; that
-    # is, find i such that l[i] <= code_point < l[i+1]
+    # is, find i such that l[i] <= code_point < l[i+1].  Returns undef if no
+    # such i.
 
     # If this is ever made public, could use to speed up .t specials.  Would
     # need to use code point argument, as in other functions in this pm
@@ -2265,7 +2266,10 @@ sub _search_invlist {
     # Verify non-neg numeric  XXX
 
     my $max_element = @$list_ref - 1;
-    return if ! $max_element < 0;     # Undef if list is empty.
+
+    # Return undef if list is empty or requested item is before the first element.
+    return if $max_element < 0;
+    return if $code_point < $list_ref->[0];
 
     # Short cut something at the far-end of the table.  This also allows us to
     # refer to element [$i+1] without fear of being out-of-bounds in the loop
