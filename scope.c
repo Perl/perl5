@@ -522,13 +522,13 @@ Perl_save_clearsv(pTHX_ SV **svp)
     PERL_ARGS_ASSERT_SAVE_CLEARSV;
 
     ASSERT_CURPAD_ACTIVE("save_clearsv");
+    SvPADSTALE_off(*svp); /* mark lexical as active */
     if ((offset_shifted >> SAVE_TIGHT_SHIFT) != offset)
 	Perl_croak(aTHX_ "panic: pad offset %"UVuf" out of range (%p-%p)",
 		   offset, svp, PL_curpad);
 
     SSCHECK(1);
     SSPUSHUV(offset_shifted | SAVEt_CLEARSV);
-    SvPADSTALE_off(*svp); /* mark lexical as active */
 }
 
 void
