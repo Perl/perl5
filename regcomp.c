@@ -11162,7 +11162,7 @@ S_regwhite( RExC_state_t *pRExC_state, char *p )
 #define POSIXCC_NOTYET(c) ((c) == '=' || (c) == '.')
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
 
-STATIC I32
+PERL_STATIC_INLINE I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 {
     dVAR;
