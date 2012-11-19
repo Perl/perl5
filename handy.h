@@ -926,7 +926,7 @@ EXTCONST U32 PL_charclass[];
 
 #define isWORDCHAR_uni(c)       _generic_uni(_CC_WORDCHAR, is_uni_alnum, c)
 #define isALNUM_uni(c)          isWORDCHAR_uni(c)
-#define isBLANK_uni(c)          _generic_uni(_CC_BLANK, is_uni_blank, c)
+#define isBLANK_uni(c)          _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
 #define isIDFIRST_uni(c)        _generic_uni(_CC_IDFIRST, is_uni_idfirst, c)
 #define isALPHA_uni(c)          _generic_uni(_CC_ALPHA, is_uni_alpha, c)
 #define isSPACE_uni(c)          _generic_uni(_CC_SPACE, is_uni_space, c)
@@ -1000,7 +1000,7 @@ EXTCONST U32 PL_charclass[];
 
 #define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
-#define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_utf8_blank, p)
+#define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_HORIZWS_high, p)
 #define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_utf8_space, p)
 #define isVERTWS_utf8(p)        _generic_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
 #define isDIGIT_utf8(p)         _generic_utf8(_CC_DIGIT, is_utf8_digit, p)

@@ -1515,9 +1515,7 @@ Perl_is_uni_ascii(pTHX_ UV c)
 bool
 Perl_is_uni_blank(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_blank(tmpbuf);
+    return isBLANK_uni(c);
 }
 
 bool
@@ -2061,7 +2059,7 @@ Perl_is_utf8_blank(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_BLANK;
 
-    return is_utf8_common(p, &PL_utf8_blank, "XPosixBlank");
+    return isBLANK_utf8(p);
 }
 
 bool
