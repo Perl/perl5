@@ -931,7 +931,7 @@
 #define regclass(a,b,c)		S_regclass(aTHX_ a,b,c)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
-#define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)
+#define regpposixcc(a,b,c)	S_regpposixcc(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regwhite		S_regwhite

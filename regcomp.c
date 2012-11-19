@@ -11163,7 +11163,7 @@ S_regwhite( RExC_state_t *pRExC_state, char *p )
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
 
 STATIC I32
-S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
+S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 {
     dVAR;
     I32 namedclass = OOB_NAMEDCLASS;
@@ -11273,7 +11273,8 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 		       the class closes */
 		    while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse) != ']')
 			RExC_parse++;
-		    Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
+		    SvREFCNT_dec(free_me);
+		    vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 		}
 	    } else {
 		/* Maternal grandfather:
@@ -11565,7 +11566,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		   the class closes */
 		while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse++) != ']')
 		    NOOP;
-		Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
+		SvREFCNT_dec(listsv);
+		vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 	    }
 	}
     }
@@ -11598,7 +11600,7 @@ parseit:
 
 	nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
 	if (value == '[' && POSIXCC(nextvalue))
-	    namedclass = regpposixcc(pRExC_state, value);
+	    namedclass = regpposixcc(pRExC_state, value, listsv);
 	else if (value == '\\') {
 	    if (UTF) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
