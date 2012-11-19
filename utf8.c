@@ -2998,6 +2998,9 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
             {
 		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
 	    }
+	    /* We just stole a reference count. */
+	    if (swash_invlist_unclaimed) swash_invlist_unclaimed = FALSE;
+	    else SvREFCNT_inc_simple_void_NN(swash_invlist);
 	}
 
         if ((int) _invlist_len(swash_invlist) <= invlist_swash_boundary) {
