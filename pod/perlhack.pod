@@ -713,6 +713,9 @@ tested.
 Now that basic require() and subroutines are tested, you can use the
 F<t/test.pl> library.
 
+Note, however, that some test scripts still avoid F<t/test.pl> if they make
+use of features that F<t/test.pl> relies on heavily. 
+
 You can also use certain libraries like Config conditionally, but be
 sure to skip the test gracefully if it's not there.
 
