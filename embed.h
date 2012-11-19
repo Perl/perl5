@@ -27,6 +27,7 @@
 /* Hide global symbols */
 
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
+#define _is_utf8__perl_idstart(a)	Perl__is_utf8__perl_idstart(aTHX_ a)
 #define _to_uni_fold_flags(a,b,c,d)	Perl__to_uni_fold_flags(aTHX_ a,b,c,d)
 #define _to_utf8_fold_flags(a,b,c,d,e)	Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e)
 #define _to_utf8_lower_flags(a,b,c,d,e)	Perl__to_utf8_lower_flags(aTHX_ a,b,c,d,e)
@@ -848,7 +849,6 @@
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define _is_utf8__perl_idstart(a)	Perl__is_utf8__perl_idstart(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
