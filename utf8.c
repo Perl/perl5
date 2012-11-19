@@ -2147,15 +2147,7 @@ Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_CNTRL;
 
-    if (isASCII(*p)) {
-	return isCNTRL_A(*p);
-    }
-
-    /* All controls are in Latin1 */
-    if (! UTF8_IS_DOWNGRADEABLE_START(*p)) {
-	return 0;
-    }
-    return isCNTRL_L1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
+    return isCNTRL_utf8(p);
 }
 
 bool
