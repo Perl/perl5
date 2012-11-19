@@ -1,16 +1,22 @@
 Revision history for Perl module Unicode::Collate.
 
+0.93  Sun Nov 18 18:13:42 2012
+    - DUCET is updated (for Unicode 6.2.0) as Collate/allkeys.txt.
+    ! Please notice that allkeys.txt will be overwritten if you have had
+      other allkeys.txt already.
+    - The default UCA_Version is 26.
+    - Locale/*.pl (except fr.pl) and CJK/Korean.pm are updated.
+    - modified tests: loc_es.t, loc_estr.t, version.t in t.
+
 0.92  Wed Nov 14 20:58:19 2012
     - fix: index() etc. with preprocess/normalization should be always croaked.
     - doc: referred to the latest UTS #10 and updated its section numbers.
     - supported the identical level (see 'identical' in POD).
     - Now UCA_Version 26 (for Unicode 6.2.0) is supported.
+      * But the default UCA_Version is still 24.
     - added ident.t in t.
     - modified tests: cjkrange.t, compatui.t, hangtype.t, index.t,
       overcjk0.t, overcjk1.t, test.t, view.t in t.
-
-    * But the default UCA_Version is still 24.
-     (In the next release, UCA_Version 26 will be the default.)
 
 0.91  Sun Nov  4 17:00:20 2012
     - XSUB: use PERL_NO_GET_CONTEXT (see perlguts)

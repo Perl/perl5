@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.92';
+our $VERSION = '0.93';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -82,9 +82,9 @@ use constant Hangul_SFin   => 0xD7A3;
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 
-sub UCA_Version { "24" }
+sub UCA_Version { "26" }
 
-sub Base_Unicode_Version { "6.1.0" }
+sub Base_Unicode_Version { "6.2.0" }
 
 ######
 
@@ -1203,12 +1203,15 @@ table beforehand.
 
 By default, strings whose weights are equal should be equal,
 even though their code points are not equal.
+Completely ignorable characters are ignored.
 
 If the parameter is made true, a final, tie-breaking level is used.
-If no difference of weights is found after the comparison through all
-the level (independent of the value of C<level>), the comparison with
-code points will be performed. For the tie-breaking comparision,
-the sort key has code points of the original string appended.
+If no difference of weights is found after the comparison through
+all the level specified by C<level>, the comparison with code points
+will be performed.
+For the tie-breaking comparision, the sort key has code points
+of the original string appended.
+Completely ignorable characters are not ignored.
 
 If C<preprocess> and/or C<normalization> is applied, the code points
 of the string after them (in NFD by default) are used.
@@ -1917,8 +1920,8 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied verbatim
-from L<http://www.unicode.org/Public/UCA/6.1.0/allkeys.txt>.
-For this file, Copyright (c) 2001-2011 Unicode, Inc.
+from L<http://www.unicode.org/Public/UCA/6.2.0/allkeys.txt>.
+For this file, Copyright (c) 2001-2012 Unicode, Inc.
 Distributed under the Terms of Use in L<http://www.unicode.org/copyright.html>.
 
 =head1 SEE ALSO
