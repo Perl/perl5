@@ -159,6 +159,7 @@ static const char* const non_utf8_target_but_utf8_required
 	bool throw_away PERL_UNUSED_DECL; \
 	ENTER; save_re_context(); \
 	throw_away = CAT2(is_utf8_,class)((const U8*)" "); \
+        PERL_UNUSED_VAR(throw_away); \
 	LEAVE; } } STMT_END
 
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS(alnum,"a")
