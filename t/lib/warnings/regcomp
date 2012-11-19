@@ -16,12 +16,12 @@
   /%.127s/: Unrecognized escape \\%c passed through	[S_regatom] 
   	$x = '\m' ; /$x/
 
-  POSIX syntax [%c %c] belongs inside character classes	[S_checkposixcc] 
+  POSIX syntax [%c %c] belongs inside character classes	[S_regclass] 
 
 
   Character class [:%.*s:] unknown	[S_regpposixcc]
 
-  Character class syntax [%c %c] belongs inside character classes [S_checkposixcc] 
+  Character class syntax [%c %c] belongs inside character classes [S_regclass] 
   
   /%.127s/: false [] range \"%*.*s\" in regexp [S_regclass]
 
@@ -76,7 +76,7 @@ Unescaped left brace in regex is deprecated, passed through in regex; marked by 
 Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/a\b{ <-- HERE cde/ at - line 7.
 Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/a\B{ <-- HERE cde/ at - line 8.
 ########
-# regcomp.c [S_regpposixcc S_checkposixcc]
+# regcomp.c [S_regpposixcc S_regclass]
 #
 use warnings 'regexp' ;
 $_ = "" ;
@@ -89,7 +89,7 @@ EXPECT
 POSIX syntax [: :] belongs inside character classes in regex; marked by <-- HERE in m/[:alpha:] <-- HERE / at - line 5.
 POSIX syntax [: :] belongs inside character classes in regex; marked by <-- HERE in m/[:zog:] <-- HERE / at - line 6.
 ########
-# regcomp.c [S_checkposixcc]
+# regcomp.c [S_regclass]
 #
 use warnings 'regexp' ;
 $_ = "" ;

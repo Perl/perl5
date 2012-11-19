@@ -11286,36 +11286,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
     return namedclass;
 }
 
-STATIC void
-S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_CHECKPOSIXCC;
-
-    if (POSIXCC(UCHARAT(RExC_parse))) {
-	const char *s = RExC_parse;
-	const char  c = *s++;
-
-	while (isALNUM(*s))
-	    s++;
-	if (*s && c == *s && s[1] == ']') {
-	    ckWARN3reg(s+2,
-		       "POSIX syntax [%c %c] belongs inside character classes",
-		       c, c);
-
-	    /* [[=foo=]] and [[.foo.]] are still future. */
-	    if (POSIXCC_NOTYET(c)) {
-		/* adjust RExC_parse so the error shows after
-		   the class closes */
-		while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse++) != ']')
-		    NOOP;
-		Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
-	    }
-	}
-    }
-}
-
 /* Generate the code to add a full posix character <class> to the bracketed
  * character class given by <node>.  (<node> is needed only under locale rules)
  * destlist     is the inversion list for non-locale rules that this class is
@@ -11578,7 +11548,27 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
 
     if (!SIZE_ONLY && POSIXCC(nextvalue))
-	checkposixcc(pRExC_state);
+    {
+	const char *s = RExC_parse;
+	const char  c = *s++;
+
+	while (isALNUM(*s))
+	    s++;
+	if (*s && c == *s && s[1] == ']') {
+	    ckWARN3reg(s+2,
+		       "POSIX syntax [%c %c] belongs inside character classes",
+		       c, c);
+
+	    /* [[=foo=]] and [[.foo.]] are still future. */
+	    if (POSIXCC_NOTYET(c)) {
+		/* adjust RExC_parse so the error shows after
+		   the class closes */
+		while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse++) != ']')
+		    NOOP;
+		Simple_vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
+	    }
+	}
+    }
 
     /* allow 1st char to be ] (allowing it to be - is dealt with later) */
     if (UCHARAT(RExC_parse) == ']')
