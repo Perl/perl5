@@ -1,3 +1,9 @@
+Version 3.63 Nov 12, 2012
+
+    [SECURITY]
+    - CR escaping for Set-Cookie and P3P headers was improved. There was potential
+      for newline injection in these headers. 
+      (Thanks to anazawa, https://github.com/markstos/CGI.pm/pull/23)
 
 Version 3.62, Nov 9th, 2012
 

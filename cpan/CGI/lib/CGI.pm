@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.62';
+$CGI::VERSION='3.63';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -1497,8 +1497,17 @@ sub header {
                             'EXPIRES','NPH','CHARSET',
                             'ATTACHMENT','P3P'],@p);
 
+    # Since $cookie and $p3p may be array references,
+    # we must stringify them before CR escaping is done.
+    my @cookie;
+    for (ref($cookie) eq 'ARRAY' ? @{$cookie} : $cookie) {
+        my $cs = UNIVERSAL::isa($_,'CGI::Cookie') ? $_->as_string : $_;
+        push(@cookie,$cs) if defined $cs and $cs ne '';
+    }
+    $p3p = join ' ',@$p3p if ref($p3p) eq 'ARRAY';
+
     # CR escaping for values, per RFC 822
-    for my $header ($type,$status,$cookie,$target,$expires,$nph,$charset,$attachment,$p3p,@other) {
+    for my $header ($type,$status,@cookie,$target,$expires,$nph,$charset,$attachment,$p3p,@other) {
         if (defined $header) {
             # From RFC 822:
             # Unfolding  is  accomplished  by regarding   CRLF   immediately
@@ -1542,18 +1551,9 @@ sub header {
 
     push(@header,"Status: $status") if $status;
     push(@header,"Window-Target: $target") if $target;
-    if ($p3p) {
-       $p3p = join ' ',@$p3p if ref($p3p) eq 'ARRAY';
-       push(@header,qq(P3P: policyref="/w3c/p3p.xml", CP="$p3p"));
-    }
+    push(@header,"P3P: policyref=\"/w3c/p3p.xml\", CP=\"$p3p\"") if $p3p;
     # push all the cookies -- there may be several
-    if ($cookie) {
-	my(@cookie) = ref($cookie) && ref($cookie) eq 'ARRAY' ? @{$cookie} : $cookie;
-	for (@cookie) {
-            my $cs = UNIVERSAL::isa($_,'CGI::Cookie') ? $_->as_string : $_;
-	    push(@header,"Set-Cookie: $cs") if $cs ne '';
-	}
-    }
+    push(@header,map {"Set-Cookie: $_"} @cookie);
     # if the user indicates an expiration time, then we need
     # both an Expires and a Date header (so that the browser is
     # uses OUR clock)
