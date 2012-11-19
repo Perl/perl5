@@ -1521,9 +1521,7 @@ Perl_is_uni_blank(pTHX_ UV c)
 bool
 Perl_is_uni_space(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_space(tmpbuf);
+    return isSPACE_uni(c);
 }
 
 bool
@@ -2067,7 +2065,7 @@ Perl_is_utf8_space(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_SPACE;
 
-    return is_utf8_common(p, &PL_utf8_space, "IsXPerlSpace");
+    return isSPACE_utf8(p);
 }
 
 bool

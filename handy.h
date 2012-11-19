@@ -929,7 +929,7 @@ EXTCONST U32 PL_charclass[];
 #define isBLANK_uni(c)          _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
 #define isIDFIRST_uni(c)        _generic_uni(_CC_IDFIRST, is_uni_idfirst, c)
 #define isALPHA_uni(c)          _generic_uni(_CC_ALPHA, is_uni_alpha, c)
-#define isSPACE_uni(c)          _generic_uni(_CC_SPACE, is_uni_space, c)
+#define isSPACE_uni(c)          _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
 #define isVERTWS_uni(c)         _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
 #define isDIGIT_uni(c)          _generic_uni(_CC_DIGIT, is_uni_digit, c)
 #define isUPPER_uni(c)          _generic_uni(_CC_UPPER, is_uni_upper, c)
@@ -945,7 +945,8 @@ EXTCONST U32 PL_charclass[];
 #define isXDIGIT_uni(c)         _generic_uni(_CC_XDIGIT, is_XDIGIT_cp_high, c)
 
 /* Posix and regular space differ only in U+000B, which is in Latin1 */
-#define isPSXSPC_uni(c)         _generic_uni(_CC_PSXSPC, is_uni_space, c)
+#define isPSXSPC_uni(c)         _generic_uni(_CC_PSXSPC,                \
+                                             is_XPERLSPACE_cp_high, c)
 
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
@@ -1001,7 +1002,7 @@ EXTCONST U32 PL_charclass[];
 #define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
 #define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_HORIZWS_high, p)
-#define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_utf8_space, p)
+#define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
 #define isVERTWS_utf8(p)        _generic_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
 #define isDIGIT_utf8(p)         _generic_utf8(_CC_DIGIT, is_utf8_digit, p)
 #define isUPPER_utf8(p)         _generic_utf8(_CC_UPPER, is_utf8_upper, p)
@@ -1021,7 +1022,7 @@ EXTCONST U32 PL_charclass[];
 
 /* Posix and regular space differ only in U+000B, which is in ASCII (and hence
  * Latin1 */
-#define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_utf8_space, p)
+#define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
 
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
