@@ -1400,6 +1400,10 @@ XDIGIT: Hexadecimal digits
 => UTF8 high cp_high :fast
 \p{XDigit}
 
+XPERLSPACE: \p{XPerlSpace}
+=> generic UTF8 high cp_high :fast
+\p{XPerlSpace}
+
 REPLACEMENT: Unicode REPLACEMENT CHARACTER
 => UTF8 :safe
 0xFFFD

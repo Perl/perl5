@@ -164,7 +164,6 @@ static const char* const non_utf8_target_but_utf8_required
 
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS(alnum,"a")
 #define LOAD_UTF8_CHARCLASS_DIGIT() LOAD_UTF8_CHARCLASS(digit,"0")
-#define LOAD_UTF8_CHARCLASS_SPACE() LOAD_UTF8_CHARCLASS(space," ")
 
 #define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */        \
         /* No asserts are done for some of these, in case called on a   */  \
@@ -1713,16 +1712,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	    break;
 	case SPACEU:
-	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_SPACE(),
-		*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, utf8_target),
+	    REXEC_FBC_CSCAN(
+		is_XPERLSPACE_utf8(s),
                 isSPACE_L1((U8) *s)
 	    );
 	    break;
 	case SPACE:
-	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_SPACE(),
-		*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, utf8_target),
+	    REXEC_FBC_CSCAN(
+		is_XPERLSPACE_utf8(s),
                 isSPACE((U8) *s)
 	    );
 	    break;
@@ -1738,16 +1735,14 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    );
 	    break;
 	case NSPACEU:
-	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_SPACE(),
-		!( *s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, utf8_target)),
+	    REXEC_FBC_CSCAN(
+		! is_XPERLSPACE_utf8(s),
                 ! isSPACE_L1((U8) *s)
 	    );
 	    break;
 	case NSPACE:
-	    REXEC_FBC_CSCAN_PRELOAD(
-		LOAD_UTF8_CHARCLASS_SPACE(),
-		!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, utf8_target)),
+	    REXEC_FBC_CSCAN(
+		! is_XPERLSPACE_utf8(s),
                 ! isSPACE((U8) *s)
 	    );
 	    break;
@@ -4331,11 +4326,73 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		  ALNUMA, NALNUMA, isWORDCHAR_A,
 		  alnum, "a");
 
-        CCC_TRY_U(SPACE,  NSPACE,  isSPACE,
-		  SPACEL, NSPACEL, isSPACE_LC, isSPACE_LC_utf8,
-		  SPACEU, NSPACEU, isSPACE_L1,
-		  SPACEA, NSPACEA, isSPACE_A,
-		  space, " ");
+        case SPACEL:
+            PL_reg_flags |= RF_tainted;
+            if (NEXTCHR_IS_EOS) {
+                sayNO;
+            }
+            if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {
+                if (! isSPACE_LC_utf8((U8 *) locinput)) {
+                    sayNO;
+                }
+            }
+            else if (! isSPACE_LC((U8) nextchr)) {
+                    sayNO;
+            }
+            goto increment_locinput;
+
+        case NSPACEL:
+            PL_reg_flags |= RF_tainted;
+            if (NEXTCHR_IS_EOS) {
+                sayNO;
+            }
+            if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {
+                if (isSPACE_LC_utf8((U8 *) locinput)) {
+                    sayNO;
+                }
+            }
+            else if (isSPACE_LC(nextchr)) {
+                    sayNO;
+            }
+            goto increment_locinput;
+
+        case SPACE:
+            if (utf8_target) {
+                goto utf8_space;
+            }
+            /* FALL THROUGH */
+        case SPACEA:
+            if (NEXTCHR_IS_EOS || ! isSPACE_A(nextchr)) {
+                sayNO;
+            }
+            /* Matched a utf8-invariant, so don't have to worry about utf8 */
+            locinput++;
+            break;
+
+        case NSPACE:
+            if (utf8_target) {
+                goto utf8_nspace;
+            }
+            /* FALL THROUGH */
+        case NSPACEA:
+            if (NEXTCHR_IS_EOS || isSPACE_A(nextchr)) {
+                sayNO;
+            }
+            goto increment_locinput;
+
+        case SPACEU:
+          utf8_space:
+            if (NEXTCHR_IS_EOS || ! is_XPERLSPACE(locinput, utf8_target)) {
+                sayNO;
+            }
+            goto increment_locinput;
+
+        case NSPACEU:
+          utf8_nspace:
+            if (NEXTCHR_IS_EOS || is_XPERLSPACE(locinput, utf8_target)) {
+                sayNO;
+            }
+            goto increment_locinput;
 
         CCC_TRY(DIGIT,  NDIGIT,  isDIGIT,
 		DIGITL, NDIGITL, isDIGIT_LC, isDIGIT_LC_utf8,
@@ -6902,10 +6959,8 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 
     utf8_space:
 
-	    LOAD_UTF8_CHARCLASS_SPACE();
-	    while (hardcount < max && scan < loceol &&
-		   (*scan == ' ' ||
-                    swash_fetch(PL_utf8_space,(U8*)scan, utf8_target)))
+	    while (hardcount < max && scan < loceol
+                   && is_XPERLSPACE_utf8((U8*)scan))
             {
 		scan += UTF8SKIP(scan);
 		hardcount++;
@@ -6955,10 +7010,8 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 
     utf8_Nspace:
 
-	    LOAD_UTF8_CHARCLASS_SPACE();
-	    while (hardcount < max && scan < loceol &&
-		   ! (*scan == ' ' ||
-                      swash_fetch(PL_utf8_space,(U8*)scan, utf8_target)))
+	    while (hardcount < max && scan < loceol
+                   && ! is_XPERLSPACE_utf8((U8*)scan))
             {
 		scan += UTF8SKIP(scan);
 		hardcount++;
