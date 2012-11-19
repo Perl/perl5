@@ -368,6 +368,15 @@ Copy-on-write (shared hash key) scalars are no longer marked read-only.
 C<SvREADONLY> returns false on such an SV, but C<SvIsCOW> still returns
 true.
 
+=item *
+
+A new op type, C<OP_PADRANGE> has been introduced. The perl peephole
+optimiser will, where possible, substitute a single padrange op for a
+pushmark followed by one or more pad ops, and possibly also skipping list
+and nextstate ops. In addition, the op can carry out the tasks associated
+with the RHS of a my(...) = @_ assignment, so those ops may be optimised
+away too.
+
 =back
 
 =head1 Selected Bug Fixes
