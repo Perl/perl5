@@ -886,7 +886,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_FREEOP:
 	    ptr = SSPOPPTR;
-	    ASSERT_CURPAD_LEGAL("SAVEt_FREEOP"); /* XXX DAPM tmp */
+	    ASSERT_CURPAD_LEGAL("SAVEt_FREEOP");
 	    op_free((OP*)ptr);
 	    break;
 	case SAVEt_FREEPV:
