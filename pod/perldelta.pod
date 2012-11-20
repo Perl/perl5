@@ -1,9 +1,5 @@
 =encoding utf8
 
-=for todo
-ba593ad davem    clone() wasn't cloning the whole stack
-7dc8663 demerphq Hash Function Change - Murmur hash and true per process...
-
 =head1 NAME
 
 perldelta - what is new for perl v5.17.6
@@ -15,10 +11,6 @@ release.
 
 If you are upgrading from an earlier release such as 5.17.4, first read
 L<perl5175delta>, which describes differences between 5.17.4 and 5.17.5.
-
-=head1 Notice
-
-XXX - NOTICE ABOUT HASH RANDOMIZATION SHOULD BE ADDED
 
 =head1 Core Enhancements
 
@@ -38,8 +30,6 @@ We have switched Perl's hash function to use Murmurhash-32, and added build
 support for several other hash functions.  This new function is expected to
 perform equivalently to the old one for shorter strings and is faster,
 potentially twice as fast, for hashing longer strings.
-
-=head1 Security
 
 =head1 Incompatible Changes
 
@@ -118,7 +108,9 @@ Perl's taint support altogether.  Using the -T or -t command line flags will
 cause a fatal error.  Beware that both core tests as well as many a CPAN
 distribution's tests will fail with this change.  On the upside, it provides
 a small performance benefit due to reduced branching.
-Do not enable this unless you know exactly what you are getting yourself into.
+
+B<Do not enable this unless you know exactly what you are getting yourself
+into.>
 
 =back
 
@@ -168,112 +160,7 @@ are now documented.
 
 =back
 
-=head1 Diagnostics
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
-diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX more tests descriptions!
-
-=item *
-
-XXX
-
-=back
-
 =head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
 
 =head2 Discontinued Platforms
 
@@ -288,11 +175,6 @@ predecessor of Symbian.  The port was last updated in April 2002.
 =back
 
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -438,9 +320,33 @@ becomes empty.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.17.6 represents approximately 5 weeks of development since Perl 5.17.5
+and contains approximately 79,000 lines of changes across 460 files from 30
+authors.
 
-  perl Porting/acknowledgements.pl v5.17.5..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.6:
+
+Alexandr Ciornii, Brian Fraser, Chris 'BinGOs' Williams, Craig A. Berry,
+Dagfinn Ilmari Mannsåker, Daniel Dragan, David Golden, David Mitchell, Dominic
+Hargreaves, Eric Brine, Father Chrysostomos, Florian Ragwitz, Hugo van der
+Sanden, James E Keenan, Jerry D. Hedden, Jesse Luehrs, Karl Williamson, Lukas
+Mai, Nicholas Clark, Paul Johnson, Reini Urban, Ricardo Signes, Ruslan Zakirov,
+Shlomi Fish, Steffen Müller, Steve Hay, Tom Wyant, Tony Cook, Vadim Konovalov,
+Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
