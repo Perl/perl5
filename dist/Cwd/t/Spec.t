@@ -51,14 +51,14 @@ my @tests = (
 
 [ "Unix->case_tolerant()",         '0'  ],
 
-[ "Unix->catfile('a','b','c')",         'a/b/c'  ],
-[ "Unix->catfile('a','b','./c')",       'a/b/c'  ],
-[ "Unix->catfile('./a','b','c')",       'a/b/c'  ],
-[ "Unix->catfile('c')",                 'c'      ],
-[ "Unix->catfile('./c')",               'c'      ],
-[ "Unix->catfile('', 'c')",             '/c'     ],
-[ "Unix->catfile('.', 'c')",            './c'    ],
-[ "Unix->catfile('./', 'c')",           './c'    ],
+[ "Unix->catfile('a','b','c')",         'a/b/c'   ],
+[ "Unix->catfile('a','b','./c')",       'a/b/c'   ],
+[ "Unix->catfile('./a','b','c')",       './a/b/c' ],
+[ "Unix->catfile('c')",                 'c'       ],
+[ "Unix->catfile('./c')",               './c'     ],
+[ "Unix->catfile('', 'c')",             '/c'      ],
+[ "Unix->catfile('.', 'c')",            './c'     ],
+[ "Unix->catfile('./', 'c')",           './c'     ],
 
 [ "Unix->splitpath('file')",            ',,file'            ],
 [ "Unix->splitpath('/d1/d2/d3/')",      ',/d1/d2/d3/,'      ],
@@ -477,11 +477,11 @@ my @tests = (
 
 [ "OS2->catdir('A:/d1','B:/d2','d3','')", 'A:/d1/B:/d2/d3' ],
 
-[ "OS2->catfile('a','b','c')",            'a/b/c'          ],
-[ "OS2->catfile('a','b','./c')",          'a/b/c'  ],
-[ "OS2->catfile('./a','b','c')",          'a/b/c'  ],
-[ "OS2->catfile('c')",                    'c' ],
-[ "OS2->catfile('./c')",                  'c' ],
+[ "OS2->catfile('a','b','c')",            'a/b/c'   ],
+[ "OS2->catfile('a','b','./c')",          'a/b/c'   ],
+[ "OS2->catfile('./a','b','c')",          './a/b/c' ],
+[ "OS2->catfile('c')",                    'c'       ],
+[ "OS2->catfile('./c')",                  './c'     ],
 
 [ "OS2->catdir('/', '../')",              '/'                 ],
 [ "OS2->catdir('/', '..\\')",             '/'                 ],
@@ -679,11 +679,12 @@ my @tests = (
 [ "Epoc->canonpath('/..')",                                   '/..'       ],
 
 [ "Cygwin->case_tolerant()",         '1'  ],
-[ "Cygwin->catfile('a','b','c')",         'a/b/c'  ],
-[ "Cygwin->catfile('a','b','./c')",       'a/b/c'  ],
-[ "Cygwin->catfile('./a','b','c')",       'a/b/c'  ],
-[ "Cygwin->catfile('c')",                 'c' ],
-[ "Cygwin->catfile('./c')",               'c' ],
+
+[ "Cygwin->catfile('a','b','c')",         'a/b/c'   ],
+[ "Cygwin->catfile('a','b','./c')",       'a/b/c'   ],
+[ "Cygwin->catfile('./a','b','c')",       './a/b/c' ],
+[ "Cygwin->catfile('c')",                 'c'       ],
+[ "Cygwin->catfile('./c')",               './c'     ],
 
 [ "Cygwin->splitpath('file')",            ',,file'            ],
 [ "Cygwin->splitpath('/d1/d2/d3/')",      ',/d1/d2/d3/,'      ],

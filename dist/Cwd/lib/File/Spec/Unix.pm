@@ -104,11 +104,10 @@ complete path ending with a filename
 
 sub catfile {
     my $self = shift;
-    my $file = $self->canonpath(pop @_);
-    return $file unless @_;
-    my $dir = $self->catdir(@_);
-    $dir .= "/" unless substr($dir,-1) eq "/";
-    return $dir.$file;
+    my $path = join '/', @_;
+    $path =~ s|/{2,}|/|g;             # xx////xx  -> xx/xx
+    $path =~ s{(?:/\.)+(?:/|\z)}{/}g; # xx/././xx -> xx/xx
+    return $path;
 }
 
 =item curdir
