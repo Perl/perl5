@@ -483,8 +483,6 @@ do_clean_objs(pTHX_ SV *const ref)
 	    }
 	}
     }
-
-    /* XXX Might want to check arrays, etc. */
 }
 
 
