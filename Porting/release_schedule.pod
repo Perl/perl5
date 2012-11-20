@@ -65,8 +65,8 @@ you should reset the version numbers to the next blead series.
   2012-07-20  5.17.2  ✓       Tony Cook
   2012-08-20  5.17.3  ✓       Steve Hay
   2012-09-20  5.17.4  ✓       Florian Ragwitz
-  2012-10-20  5.17.5          Florian Ragwitz
-  2012-11-20  5.17.6          Abigail
+  2012-10-20  5.17.5  ✓       Florian Ragwitz
+  2012-11-20  5.17.6  ✓       Ricardo Signes
   2012-12-18  5.17.7          Dave Rolsky
   2013-01-20  5.17.8          Aaron Crane
   2013-02-20  5.17.9          Chris Williams
