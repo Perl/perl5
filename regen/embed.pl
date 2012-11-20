@@ -92,7 +92,7 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    else {
 		$type = $1 eq 's' ? "STATIC" : "PERL_STATIC_INLINE";
 	    }
-	    warn "$func: i and s flags are mutually exclusive"
+	    warn "$plain_func: i and s flags are mutually exclusive"
 					    if $flags =~ /s/ && $flags =~ /i/;
 	    $retval = "$type $splint_flags$retval";
 	    $func = "S_$plain_func";
