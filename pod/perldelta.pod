@@ -96,6 +96,12 @@ This change was introduced to make perls hashes more robust to algorithmic
 complexity attacks and also because we discovered that it exposes hash
 ordering dependency bugs and make them easier to track down.
 
+Toolchain maintainers might want to invest in additional infrastructure to
+test for things like this. Running tests several times in a row and then
+comparing results will make it easier to spot hash order dependencies in
+code. Author are strongly encouraged not to expose the key order of perls
+hashes to insecure audiences.
+
 =head2 PERL_HASH_SEED enviornment variable now takes a hex value
 
 PERL_HASH_SEED no longer accepts an integer as a parameter, instead the
