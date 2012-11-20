@@ -394,6 +394,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item VMS
+
+Where possible, the case of filenames and command-line arguments is now
+preserved by enabling the CRTL features C<DECC$EFS_CASE_PRESERVE> and
+C<DECC$ARGV_PARSE_STYLE> at start-up time.  The latter only takes effect
+when extended parse is enabled in the process from which Perl is run.
+
 =item WinCE
 
 Building on WinCE is now possible once again, although more work is required
