@@ -362,45 +362,11 @@ struct xpvhv {
  * MURMUR_ROTL32(x,r)      Rotate x left by r bits
  */
 
-/* Convention is to define __BYTE_ORDER == to one of these values */
-#if !defined(__BIG_ENDIAN)
-  #define __BIG_ENDIAN 4321
-#endif
-#if !defined(__LITTLE_ENDIAN)
-  #define __LITTLE_ENDIAN 1234
-#endif
-
-/* I386 */
-#if defined(_M_IX86) || defined(__i386__) || defined(__i386) || defined(i386)
-  #define __BYTE_ORDER __LITTLE_ENDIAN
-  #define MURMUR_UNALIGNED_SAFE
-#endif
-
-/* gcc 'may' define __LITTLE_ENDIAN__ or __BIG_ENDIAN__ to 1 (Note the trailing __),
- * or even _LITTLE_ENDIAN or _BIG_ENDIAN (Note the single _ prefix) */
-#if !defined(__BYTE_ORDER)
-  #if defined(__LITTLE_ENDIAN__) && __LITTLE_ENDIAN__==1 || defined(_LITTLE_ENDIAN) && _LITTLE_ENDIAN==1
-    #define __BYTE_ORDER __LITTLE_ENDIAN
-  #elif defined(__BIG_ENDIAN__) && __BIG_ENDIAN__==1 || defined(_BIG_ENDIAN) && _BIG_ENDIAN==1
-    #define __BYTE_ORDER __BIG_ENDIAN
-  #endif
-#endif
-
-/* gcc (usually) defines xEL/EB macros for ARM and MIPS endianess */
-#if !defined(__BYTE_ORDER)
-  #if defined(__ARMEL__) || defined(__MIPSEL__)
-    #define __BYTE_ORDER __LITTLE_ENDIAN
-  #endif
-  #if defined(__ARMEB__) || defined(__MIPSEB__)
-    #define __BYTE_ORDER __BIG_ENDIAN
-  #endif
-#endif
-
 /* Now find best way we can to READ_UINT32 */
-#if __BYTE_ORDER==__LITTLE_ENDIAN
+#if (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678) && U32SIZE == 4
   /* CPU endian matches murmurhash algorithm, so read 32-bit word directly */
   #define MURMUR_READ_UINT32(ptr)   (*((U32*)(ptr)))
-#elif __BYTE_ORDER==__BIG_ENDIAN
+#elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
   /* TODO: Add additional cases below where a compiler provided bswap32 is available */
   #if defined(__GNUC__) && (__GNUC__>4 || (__GNUC__==4 && __GNUC_MINOR__>=3))
     #define MURMUR_READ_UINT32(ptr)   (__builtin_bswap32(*((U32*)(ptr))))
