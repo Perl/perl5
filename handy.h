@@ -602,11 +602,11 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 
-/* Character class numbers.  These are used in PL_charclass[] and the ones
- * up through the one that corresponds to <_HIGHEST_REGCOMP_DOT_H_SYNC> are
- * used by regcomp.h.  These use names used in l1_char_class_tab.h but their
- * actual definitions are here.  If that has a name not used here, it won't
- * compile. */
+/* Character class numbers.  For internal core Perl use only.  These are used
+ * in PL_charclass[] and the ones up through the one that corresponds to
+ * <_HIGHEST_REGCOMP_DOT_H_SYNC> are used by regcomp.h.  These use names used
+ * in l1_char_class_tab.h but their actual definitions are here.  If that has a
+ * name not used here, it won't compile. */
 #  define _CC_WORDCHAR           0
 #  define _CC_SPACE              1
 #  define _CC_DIGIT              2
@@ -622,15 +622,16 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_XDIGIT            12
 #  define _CC_PSXSPC            13
 #  define _CC_BLANK             14
-#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_BLANK
+#  define _CC_VERTSPACE         15
+#  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 
-#  define _CC_IDFIRST           15
-#  define _CC_CHARNAME_CONT     16
-#  define _CC_NONLATIN1_FOLD    17
-#  define _CC_QUOTEMETA         18
-#  define _CC_NON_FINAL_FOLD    19
-#  define _CC_IS_IN_SOME_FOLD   20
-/* Unused: 21-31
+#  define _CC_IDFIRST           16
+#  define _CC_CHARNAME_CONT     17
+#  define _CC_NONLATIN1_FOLD    18
+#  define _CC_QUOTEMETA         19
+#  define _CC_NON_FINAL_FOLD    20
+#  define _CC_IS_IN_SOME_FOLD   21
+/* Unused: 22-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
@@ -728,8 +729,10 @@ EXTCONST U32 PL_charclass[];
 #   define isALNUMC_L1(c) _generic_isCC(c, _CC_ALNUMC)
 #   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA)
 #   define isBLANK_L1(c)  _generic_isCC(c, _CC_BLANK)
+
 /*  continuation character for legal NAME in \N{NAME} */
 #   define isCHARNAME_CONT(c) _generic_isCC(c, _CC_CHARNAME_CONT)
+
 #   define isCNTRL_L1(c)  _generic_isCC(c, _CC_CNTRL)
 #   define isGRAPH_L1(c)  _generic_isCC(c, _CC_GRAPH)
 #   define isLOWER_L1(c)  _generic_isCC(c, _CC_LOWER)
@@ -910,35 +913,40 @@ EXTCONST U32 PL_charclass[];
 
 #define isPSXSPC_LC(c)		(isSPACE_LC(c) || (c) == '\v')
 
-/* For use in the macros just below.  If the input is Latin1, use the Latin1
- * (_L1) version of the macro; otherwise use the function.  Won't compile if
- * 'c' isn't unsigned, as won't match function prototype. The macros do bounds
- * checking, so have duplicate checks here, so could create versions of the
- * macros that don't, but experiments show that gcc optimizes them out anyway.
- */
-#define generic_uni(macro, function, c) ((c) < 256               \
-                                         ? CAT2(macro, _L1)(c)   \
-                                         : function(c))
-/* Note that all ignore 'use bytes' */
+/* For internal core Perl use only.  If the input is Latin1, use the Latin1
+ * macro; otherwise use the function.  Won't compile if 'c' isn't unsigned, as
+ * won't match function prototype. The macros do bounds checking, so have
+ * duplicate checks here, so could create versions of the macros that don't,
+ * but experiments show that gcc optimizes them out anyway. */
 
-#define isALNUM_uni(c)		generic_uni(isWORDCHAR, is_uni_alnum, c)
-#define isBLANK_uni(c)		generic_uni(isBLANK, is_uni_blank, c)
-#define isIDFIRST_uni(c)        generic_uni(isIDFIRST, is_uni_idfirst, c)
-#define isALPHA_uni(c)		generic_uni(isALPHA, is_uni_alpha, c)
-#define isSPACE_uni(c)		generic_uni(isSPACE, is_uni_space, c)
-#define isDIGIT_uni(c)		generic_uni(isDIGIT, is_uni_digit, c)
-#define isUPPER_uni(c)		generic_uni(isUPPER, is_uni_upper, c)
-#define isLOWER_uni(c)		generic_uni(isLOWER, is_uni_lower, c)
-#define isASCII_uni(c)		isASCII(c)
+/* Note that all ignore 'use bytes' */
+#define _generic_uni(classnum, function, c) ((c) < 256                    \
+                                             ? _generic_isCC(c, classnum) \
+                                             : function(c))
+
+#define isWORDCHAR_uni(c)       _generic_uni(_CC_WORDCHAR, is_uni_alnum, c)
+#define isALNUM_uni(c)          isWORDCHAR_uni(c)
+#define isBLANK_uni(c)          _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
+#define isIDFIRST_uni(c)        _generic_uni(_CC_IDFIRST, is_uni_idfirst, c)
+#define isALPHA_uni(c)          _generic_uni(_CC_ALPHA, is_uni_alpha, c)
+#define isSPACE_uni(c)          _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
+#define isVERTWS_uni(c)         _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
+#define isDIGIT_uni(c)          _generic_uni(_CC_DIGIT, is_uni_digit, c)
+#define isUPPER_uni(c)          _generic_uni(_CC_UPPER, is_uni_upper, c)
+#define isLOWER_uni(c)          _generic_uni(_CC_LOWER, is_uni_lower, c)
+#define isASCII_uni(c)          isASCII(c)
+
 /* All controls are in Latin1 */
-#define isCNTRL_uni(c)		isCNTRL_L1(c)
-#define isGRAPH_uni(c)		generic_uni(isGRAPH, is_uni_graph, c)
-#define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
-#define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
-#define isXDIGIT_uni(c)		generic_uni(isXDIGIT, is_uni_xdigit, c)
+#define isCNTRL_uni(c)          isCNTRL_L1(c)
+
+#define isGRAPH_uni(c)          _generic_uni(_CC_GRAPH, is_uni_graph, c)
+#define isPRINT_uni(c)          _generic_uni(_CC_PRINT, is_uni_print, c)
+#define isPUNCT_uni(c)          _generic_uni(_CC_PUNCT, is_uni_punct, c)
+#define isXDIGIT_uni(c)         _generic_uni(_CC_XDIGIT, is_XDIGIT_cp_high, c)
 
 /* Posix and regular space differ only in U+000B, which is in Latin1 */
-#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
+#define isPSXSPC_uni(c)         _generic_uni(_CC_PSXSPC,                \
+                                             is_XPERLSPACE_cp_high, c)
 
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
@@ -960,23 +968,27 @@ EXTCONST U32 PL_charclass[];
 #define isPSXSPC_LC_uni(c)	(isSPACE_LC_uni(c) ||(c) == '\f')
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
-/* For use in the macros just below.  If the input is ASCII, use the ASCII (_A)
- * version of the macro; if the input is in the upper Latin1 range, use the
- * Latin1 (_L1) version of the macro, after converting from utf8; otherwise use
- * the function.  This relies on the fact that ASCII characters have the same
- * representation whether utf8 or not */
-#define generic_utf8(macro, function, p) (isASCII(*(p))                        \
-                                         ? CAT2(CAT2(macro,_),A)(*(p))         \
-                                         : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
-                                           ? CAT2(macro, _L1)                  \
-                                             (TWO_BYTE_UTF8_TO_UNI(*(p),       \
-                                                                   *((p)+1)))  \
-                                           : function(p))
-
-/* Note that all assume that the utf8 has been validated, and ignore 'use
+/* For internal core Perl use only.  If the input is in the Latin1 range, use
+ * the Latin1 macro 'classnum' on 'p' which is a pointer to a UTF-8 string.
+ * Otherwise use the value given by the 'utf8' parameter.  This relies on the
+ * fact that ASCII characters have the same representation whether utf8 or not.
+ * Note that it assumes that the utf8 has been validated, and ignores 'use
  * bytes' */
+#define _generic_utf8_utf8(classnum, p, utf8) (UTF8_IS_INVARIANT(*(p))         \
+                                         ? _generic_isCC(*(p), classnum)       \
+                                         : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
+                                           ? _generic_isCC(                    \
+                                                   TWO_BYTE_UTF8_TO_UNI(*(p),  \
+                                                                   *((p)+1 )), \
+                                                   classnum)                   \
+                                           : utf8)
+/* Like the above, but calls 'function(p)' to get the utf8 value */
+#define _generic_utf8(classnum, function, p)  \
+                                    _generic_utf8_utf8(classnum, p, function(p))
 
-#define isALNUM_utf8(p)		generic_utf8(isWORDCHAR, is_utf8_alnum, p)
+#define isWORDCHAR_utf8(p)      _generic_utf8(_CC_WORDCHAR, is_utf8_alnum, p)
+#define isALNUM_utf8(p)         isWORDCHAR_utf8(p)  /* back compat */
+
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
  * http://rt.perl.org/rt3/Ticket/Display.html?id=74022 for more detail than you
@@ -984,38 +996,34 @@ EXTCONST U32 PL_charclass[];
  * isIDFIRST_uni() which it hasn't so far.  (In the ASCII range, there isn't a
  * difference.) This used to be not the XID version, but we decided to go with
  * the more modern Unicode definition */
-#define isIDFIRST_utf8(p)       (isASCII(*(p))                                  \
-                                ? isIDFIRST_A(*(p))                             \
-                                : (UTF8_IS_DOWNGRADEABLE_START(*(p)))           \
-                                  ? isIDFIRST_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
-                                                                      *((p)+1)))\
-                                  : Perl__is_utf8__perl_idstart(aTHX_ p))
-#define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
-#define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
-#define isBLANK_utf8(p)		generic_utf8(isBLANK, is_utf8_blank, p)
-#define isSPACE_utf8(p)		generic_utf8(isSPACE, is_utf8_space, p)
-#define isDIGIT_utf8(p)		generic_utf8(isDIGIT, is_utf8_digit, p)
-#define isUPPER_utf8(p)		generic_utf8(isUPPER, is_utf8_upper, p)
-#define isLOWER_utf8(p)		generic_utf8(isLOWER, is_utf8_lower, p)
+#define isIDFIRST_utf8(p)       _generic_utf8(_CC_IDFIRST,               \
+                                              _is_utf8__perl_idstart, p)
+
+#define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
+#define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
+#define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_HORIZWS_high, p)
+#define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
+#define isVERTWS_utf8(p)        _generic_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
+#define isDIGIT_utf8(p)         _generic_utf8(_CC_DIGIT, is_utf8_digit, p)
+#define isUPPER_utf8(p)         _generic_utf8(_CC_UPPER, is_utf8_upper, p)
+#define isLOWER_utf8(p)         _generic_utf8(_CC_LOWER, is_utf8_lower, p)
+
 /* Because ASCII is invariant under utf8, the non-utf8 macro works */
-#define isASCII_utf8(p)		isASCII(*p)
-#define isCNTRL_utf8(p)		generic_utf8(isCNTRL, is_utf8_cntrl, p)
-#define isGRAPH_utf8(p)		generic_utf8(isGRAPH, is_utf8_graph, p)
-#define isPRINT_utf8(p)		generic_utf8(isPRINT, is_utf8_print, p)
-#define isPUNCT_utf8(p)		generic_utf8(isPUNCT, is_utf8_punct, p)
-#define isXDIGIT_utf8(p)	generic_utf8(isXDIGIT, is_utf8_xdigit, p)
+#define isASCII_utf8(p)         isASCII(*p)
+
+#define isCNTRL_utf8(p)         _generic_utf8_utf8(_CC_CNTRL, p, 0)
+#define isGRAPH_utf8(p)         _generic_utf8(_CC_GRAPH, is_utf8_graph, p)
+#define isPRINT_utf8(p)         _generic_utf8(_CC_PRINT, is_utf8_print, p)
+#define isPUNCT_utf8(p)         _generic_utf8(_CC_PUNCT, is_utf8_punct, p)
+#define isXDIGIT_utf8(p)        _generic_utf8(_CC_XDIGIT, is_XDIGIT_high, p)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 
 /* Posix and regular space differ only in U+000B, which is in ASCII (and hence
  * Latin1 */
-#define isPSXSPC_utf8(p)	((isASCII(*(p)))                               \
-                                ? isPSXSPC_A(*(p))                             \
-                                : (UTF8_IS_DOWNGRADEABLE_START(*(p))           \
-				  ? isPSXSPC_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
-                                                                     *((p)+1)))\
-                                  : isSPACE_utf8(p)))
+#define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
+
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 #define isALPHA_LC_utf8(p)	isALPHA_LC_uvchr(valid_utf8_to_uvchr(p,  0))
@@ -1033,12 +1041,14 @@ EXTCONST U32 PL_charclass[];
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 
 /* This conversion works both ways, strangely enough. On EBCDIC platforms,
- * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII */
+ * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII, except that they don't
+ * necessarily mean the same characters, e.g. CTRL-D is 4 on both systems, but
+ * that is EOT on ASCII;  ST on EBCDIC */
 #  define toCTRL(c)    (toUPPER(NATIVE_TO_UNI(c)) ^ 64)
 
 /* Line numbers are unsigned, 32 bits. */
 typedef U32 line_t;
-#define NOLINE ((line_t) 4294967295UL)
+#define NOLINE ((line_t) 4294967295UL)  /* = FFFFFFFF */
 
 /* Helpful alias for version prescan */
 #define is_LAX_VERSION(a,b) \

@@ -5,389 +5,128 @@ use Test::More;
 
 use XS::APItest;
 
-our @blank = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @upper = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @lower = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @alpha = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @digit = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @alnumc = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @alnum = (  # Really is \w
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, # 50 - 5F = P - _
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @idfirst = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, # 50 - 5F = P - _
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @space = ( # includes VT for now
-0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @psxspc = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @ascii = (
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 00 - 0F = C0 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 10 - 1F = C0 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 30 - 3F = 0 - ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 50 - 5F = P - _
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @cntrl = (
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 00 - 0F = C0 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, # 70 - 7F = p - DEL
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 80 - 8F = C1 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @graph = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 30 - 3F = 0 - ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 50 - 5F = P - _
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # A0 - AF = NBSP - MACRON
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @print = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 30 - 3F = 0 - ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 40 - 4F = @ - O
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 50 - 5F = P - _
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 60 - 6F = ` - o
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # A0 - AF = NBSP - MACRON
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # B0 - BF = DEGREE - INVERTED ?
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # C0 - CF = A/GRAVE - I/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # D0 - DF = ETH - SHARP S
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # E0 - EF = a/GRAVE - i/DIARESIS
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # F0 - FF = eth - y/DIARESIS
-);
-
-our @punct = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, # 30 - 3F = 0 - ?
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, # 50 - 5F = P - _
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @xdigit = (
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 00 - 0F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 10 - 1F = C0 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 20 - 2F = SP - /
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, # 30 - 3F = 0 - ?
-0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 50 - 5F = P - _
-0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 70 - 7F = p - DEL
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 80 - 8F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 90 - 9F = C1 controls
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # A0 - AF = NBSP - MACRON
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
-
-our @quotemeta = ( # Certainly isn't a public API member, but tested here
-                    # anyway
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 00 - 0F = C0 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 10 - 1F = C0 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 20 - 2F = SP - /
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, # 30 - 3F = 0 - ?
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 40 - 4F = @ - O
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, # 50 - 5F = P - _
-1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # 60 - 6F = ` - o
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, # 70 - 7F = p - DEL
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 80 - 8F = C1 controls
-1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, # 90 - 9F = C1 controls
-1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, # A0 - AF = NBSP - MACRON
-1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, # B0 - BF = DEGREE - INVERTED ?
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # C0 - CF = A/GRAVE - I/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, # D0 - DF = ETH - SHARP S
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, # E0 - EF = a/GRAVE - i/DIARESIS
-0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, # F0 - FF = eth - y/DIARESIS
-);
+use Unicode::UCD qw(prop_invlist);
 
 sub truth($) {  # Converts values so is() works
-    return (shift) ? 1 : "";
+    return (shift) ? 1 : 0;
 }
+
+my %properties = (
+                   # name => Lookup-property name
+                   alnum => 'Word',
+                   alnumc => 'Alnum',
+                   alpha => 'Alpha',
+                   ascii => 'ASCII',
+                   blank => 'Blank',
+                   cntrl => 'Control',
+                   digit => 'Digit',
+                   graph => 'Graph',
+                   idfirst => '_Perl_IDStart',
+                   lower => 'Lower',
+                   print => 'Print',
+                   psxspc => 'XPosixSpace',
+                   punct => 'XPosixPunct',
+                   quotemeta => '_Perl_Quotemeta',
+                   space => 'XPerlSpace',
+                   vertws => 'VertSpace',
+                   upper => 'Upper',
+                   xdigit => 'XDigit',
+                );
 
 my @warnings;
 local $SIG{__WARN__} = sub { push @warnings, @_ };
 
 use charnames ();
-for my $i (0 .. 255, 0x110000) {
-    foreach my $name (qw(   alnum
-                            alnumc
-                            alpha
-                            ascii
-                            blank
-                            cntrl
-                            digit
-                            graph
-                            idfirst
-                            lower
-                            print
-                            psxspc
-                            punct
-                            quotemeta
-                            space
-                            upper
-                            xdigit
-                        )
-    ) {
+foreach my $name (sort keys %properties) {
+    my $property = $properties{$name};
+    my @invlist = prop_invlist($property, '_perl_core_internal_ok');
+    if (! @invlist) {
+        fail("No inversion list found for $property");
+        next;
+    }
+
+    # Include all the Latin1 code points, plus 0x100.
+    my @code_points = (0 .. 256);
+
+    # Then include the next few boundaries above those from this property
+    my $above_latins = 0;
+    foreach my $range_start (@invlist) {
+        next if $range_start < 257;
+        push @code_points, $range_start - 1, $range_start;
+        $above_latins++;
+        last if $above_latins > 5;
+    }
+
+    # And finally one non-Unicode code point.
+    push @code_points, 0x110000;    # Above Unicode, no prop should match
+
+    for my $i (@code_points) {
         my $function = uc($name);
-        no strict 'refs';
-        my $array = *$name{ARRAY};
-        use strict 'refs';
 
-        my $matches = ($i > 0x10FFFF) ? "" : truth($array->[$i]);
+        my $matches = Unicode::UCD::_search_invlist(\@invlist, $i);
+        if (! defined $matches) {
+            $matches = 0;
+        }
+        else {
+            $matches = truth(! ($matches % 2));
+        }
 
-        my $char_name = charnames::viacode($i) // "Above Unicode";
+        my $ret;
+        my $char_name = charnames::viacode($i) // "No name";
         my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
-        if ($name eq 'quotemeta') {
-            is(eval "test_is${function}($i)", $matches, "is${function}( $display_name )");
+
+        if ($name eq 'quotemeta') { # There is only one macro for this, and is
+                                    # defined only for Latin1 range
+            $ret = truth eval "test_is${function}($i)";
+            if ($@) {
+                fail $@;
+            }
+            else {
+                my $truth = truth($matches && $i < 256);
+                is ($ret, $truth, "is${function}( $display_name ) == $truth");
+            }
             next;
         }
-        is(eval "test_is${function}_A($i)", ($matches && $i < 128), "is${function}_A( $display_name )");
-        is(eval "test_is${function}_L1($i)", $matches, "is${function}_L1( $display_name )");
+        if ($name ne 'vertws') {
+            $ret = truth eval "test_is${function}_A($i)";
+            if ($@) {
+                fail($@);
+            }
+            else {
+                my $truth = truth($matches && $i < 128);
+                is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
+            }
+            $ret = truth eval "test_is${function}_L1($i)";
+            if ($@) {
+                fail($@);
+            }
+            else {
+                my $truth = truth($matches && $i < 256);
+                is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
+            }
+        }
         next if $name eq 'alnumc';
 
-        is(eval "test_is${function}_uni($i)", $matches, "is${function}_uni( $display_name )");
+        $ret = truth eval "test_is${function}_uni($i)";
+        if ($@) {
+            fail($@);
+        }
+        else {
+            is ($ret, $matches, "is${function}_uni( $display_name ) == $matches");
+        }
 
         my $char = chr($i);
         utf8::upgrade($char);
         $char = quotemeta $char if $char eq '\\' || $char eq "'";
-        is(eval "test_is${function}_utf8('$char')", $matches, "is${function}_utf8( $display_name )");
+        $ret = truth eval "test_is${function}_utf8('$char')";
+        if ($@) {
+            fail($@);
+        }
+        else {
+            is ($ret, $matches, "is${function}_utf8( $display_name ) == $matches");
+        }
     }
 }
-
-ok(test_isBLANK_uni(ord("\N{EM SPACE}")), "EM SPACE is blank in isBLANK_uni()");
-ok(test_isBLANK_utf8("\N{EM SPACE}"), "EM SPACE is blank in isBLANK_utf8()");
-
-ok(! test_isBLANK_uni(ord("\N{GREEK DASIA}")), "GREEK DASIA is not a blank in isBLANK_uni()");
-ok(! test_isBLANK_utf8("\N{GREEK DASIA}"), "GREEK DASIA is not a blank in isBLANK_utf8()");
 
 # This is primarily to make sure that no non-Unicode warnings get generated
 is(scalar @warnings, 0, "No warnings were generated " . join ", ", @warnings);

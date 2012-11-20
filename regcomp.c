@@ -7383,8 +7383,8 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
      * And benchmarks show that caching gives better results.  We also test
      * here if the code point is within the bounds of the list.  These tests
      * replace others that would have had to be made anyway to make sure that
-     * the array bounds were not exceeded, and give us extra information at the
-     * same time */
+     * the array bounds were not exceeded, and these give us extra information
+     * at the same time */
     if (cp >= array[mid]) {
         if (cp >= array[highest_element]) {
             return highest_element;
@@ -8252,14 +8252,16 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
 }
 #endif
 
-#if 0
+#ifdef PERL_ARGS_ASSERT__INVLIST_DUMP
 void
-S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
+Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
 {
     /* Dumps out the ranges in an inversion list.  The string 'header'
      * if present is output on a line before the first range */
 
     UV start, end;
+
+    PERL_ARGS_ASSERT__INVLIST_DUMP;
 
     if (header && strlen(header)) {
 	PerlIO_printf(Perl_debug_log, "%s\n", header);
@@ -8269,8 +8271,12 @@ S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
 	if (end == UV_MAX) {
 	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. INFINITY\n", start);
 	}
+	else if (end != start) {
+	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. 0x%04"UVXf"\n",
+		                                 start,         end);
+	}
 	else {
-	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. 0x%04"UVXf"\n", start, end);
+	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf"\n", start);
 	}
     }
 }
@@ -11756,7 +11762,7 @@ parseit:
 		    Safefree(name);
 		}
 		RExC_parse = e + 1;
-		namedclass = ANYOF_MAX;  /* no official name, but it's named */
+		namedclass = ANYOF_UNIPROP;  /* no official name, but it's named */
 
 		/* \p means they want Unicode semantics */
 		RExC_uni_semantics = 1;
@@ -12154,8 +12160,7 @@ parseit:
                     DO_N_POSIX(ret, namedclass, posixes,
                                             PL_PosixXDigit, PL_XPosixXDigit);
 		    break;
-		case ANYOF_MAX:
-		    /* this is to handle \p and \P */
+		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;
 		default:
 		    vFAIL("Invalid [::] class");
@@ -12498,7 +12503,7 @@ parseit:
                     *flagp |= HASWIDTH|SIMPLE;
                     break;
 
-                case ANYOF_MAX:
+                case ANYOF_UNIPROP:
                     break;
 
                 case ANYOF_NBLANK:
@@ -12580,7 +12585,7 @@ parseit:
 
             ret = reg_node(pRExC_state, op);
 
-            if (PL_regkind[op] == POSIXD) {
+            if (PL_regkind[op] == POSIXD || PL_regkind[op] == NPOSIXD) {
                 if (! SIZE_ONLY) {
                     FLAGS(ret) = arg;
                 }
@@ -14092,7 +14097,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
-    else if (k == POSIXD) {
+    else if (k == POSIXD || k == NPOSIXD) {
         U8 index = FLAGS(o) * 2;
         if (index > (sizeof(anyofs) / sizeof(anyofs[0]))) {
             Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);

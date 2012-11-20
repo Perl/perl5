@@ -1515,17 +1515,13 @@ Perl_is_uni_ascii(pTHX_ UV c)
 bool
 Perl_is_uni_blank(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_blank(tmpbuf);
+    return isBLANK_uni(c);
 }
 
 bool
 Perl_is_uni_space(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_space(tmpbuf);
+    return isSPACE_uni(c);
 }
 
 bool
@@ -1585,9 +1581,7 @@ Perl_is_uni_punct(pTHX_ UV c)
 bool
 Perl_is_uni_xdigit(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_xdigit(tmpbuf);
+    return isXDIGIT_uni(c);
 }
 
 UV
@@ -1930,7 +1924,7 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
     return (U32)to_uni_lower(c, tmpbuf, &len);
 }
 
-static bool
+PERL_STATIC_INLINE bool
 S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 		 const char *const swashname)
 {
@@ -2061,7 +2055,7 @@ Perl_is_utf8_blank(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_BLANK;
 
-    return is_utf8_common(p, &PL_utf8_blank, "XPosixBlank");
+    return isBLANK_utf8(p);
 }
 
 bool
@@ -2071,7 +2065,7 @@ Perl_is_utf8_space(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_SPACE;
 
-    return is_utf8_common(p, &PL_utf8_space, "IsXPerlSpace");
+    return isSPACE_utf8(p);
 }
 
 bool
@@ -2147,15 +2141,7 @@ Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_CNTRL;
 
-    if (isASCII(*p)) {
-	return isCNTRL_A(*p);
-    }
-
-    /* All controls are in Latin1 */
-    if (! UTF8_IS_DOWNGRADEABLE_START(*p)) {
-	return 0;
-    }
-    return isCNTRL_L1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
+    return isCNTRL_utf8(p);
 }
 
 bool
@@ -2195,7 +2181,7 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_XDIGIT;
 
-    return is_utf8_common(p, &PL_utf8_xdigit, "IsXDigit");
+    return is_XDIGIT_utf8(p);
 }
 
 bool
@@ -2788,8 +2774,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      * by calling utf8_heavy.pl in the general case.  The returned value may be
      * the swash's inversion list instead if the input parameters allow it.
      * Which is returned should be immaterial to callers, as the only
-     * operations permitted on a swash, swash_fetch() and
-     * _get_swash_invlist(), handle both these transparently.
+     * operations permitted on a swash, swash_fetch(), _get_swash_invlist(),
+     * and swash_to_invlist() handle both these transparently.
      *
      * This interface should only be used by functions that won't destroy or
      * adversely change the swash, as doing so affects all other uses of the
@@ -2894,7 +2880,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	SAVEFREESV(errsv_save);
 	/* If we already have a pointer to the method, no need to use
 	 * call_method() to repeat the lookup.  */
-	if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
+	if (method
+            ? call_sv(MUTABLE_SV(method), G_SCALAR)
 	    : call_sv(newSVpvs_flags("SWASHNEW", SVs_TEMP), G_SCALAR | G_METHOD))
 	{
 	    retval = *PL_stack_sp--;
@@ -3003,6 +2990,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    else SvREFCNT_inc_simple_void_NN(swash_invlist);
 	}
 
+        /* Use the inversion list stand-alone if small enough */
         if ((int) _invlist_len(swash_invlist) <= invlist_swash_boundary) {
 	    SvREFCNT_dec(retval);
 	    if (!swash_invlist_unclaimed)
@@ -3661,7 +3649,8 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     STRLEN lcur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
 
-    /* The string containing the main body of the table */
+    /* The string containing the main body of the table.  This will have its
+     * assertion fail if the swash has been converted to its inversion list */
     SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
 
     SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
@@ -3900,21 +3889,35 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     HV *const hv = MUTABLE_HV(SvRV(swash));
     UV elements = 0;    /* Number of elements in the inversion list */
     U8 empty[] = "";
+    SV** listsvp;
+    SV** typesvp;
+    SV** bitssvp;
+    SV** extssvp;
+    SV** invert_it_svp;
 
-    /* The string containing the main body of the table */
-    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
-    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
-    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
-    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
-    SV** const invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
-
-    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
-    const STRLEN bits  = SvUV(*bitssvp);
-    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    U8* typestr;
+    STRLEN bits;
+    STRLEN octets; /* if bits == 1, then octets == 0 */
     U8 *x, *xend;
     STRLEN xcur;
 
     SV* invlist;
+
+    /* If not a hash, it must be the swash's inversion list instead */
+    if (SvTYPE(hv) != SVt_PVHV) {
+        return (SV*) hv;
+    }
+
+    /* The string containing the main body of the table */
+    listsvp = hv_fetchs(hv, "LIST", FALSE);
+    typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
+    invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
+
+    typestr = (U8*)SvPV_nolen(*typesvp);
+    bits  = SvUV(*bitssvp);
+    octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
     PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
@@ -4426,7 +4429,6 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		f1 = (U8 *) p1;
 		n1 = UTF8SKIP(f1);
 	    }
-
 	    else {
 		/* If in locale matching, we use two sets of rules, depending
 		 * on if the code point is above or below 255.  Here, we test
