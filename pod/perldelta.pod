@@ -1,7 +1,6 @@
 =encoding utf8
 
 =for todo
-284167a smueller Add C define to remove taint support from perl
 ba593ad davem    clone() wasn't cloning the whole stack
 7dc8663 demerphq Hash Function Change - Murmur hash and true per process...
 
@@ -101,6 +100,15 @@ There may well be none in a stable release.
 
 Lists of lexical variable declarations (C<my($x, $y)>) are now optimised
 down to a single op, and are hence faster than before.
+
+=item *
+
+A new C preprocessor define NO_TAINT_SUPPORT was added that, if set, disables
+Perl's taint support altogether. Using the -T or -t command line flags will
+cause a fatal error. Beware that both core tests as well as many a CPAN
+distribution's tests will fail with this change. On the upside, it provides
+a small performance benefit due to reduced branching.
+Do not enable this unless you know exactly what you are getting yourself into.
 
 =back
 
