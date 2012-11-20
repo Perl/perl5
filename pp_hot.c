@@ -394,7 +394,10 @@ PP(pp_padsv)
 		if (!(op->op_private & OPpPAD_STATE))
 		    save_clearsv(padentry);
 	    if (op->op_private & OPpDEREF) {
-		/* TOPs arg is TARG, but TOPs (SP) rmvs a var across save_clearsv */
+		/* TOPs is equivalent to TARG here.  Using TOPs (SP) rather
+		   than TARG reduces the scope of TARG, so it does not
+		   span the call to save_clearsv, resulting in smaller
+		   machine code. */
 		TOPs = vivify_ref(TOPs, op->op_private & OPpDEREF);
 	    }
 	}
