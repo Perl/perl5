@@ -1,4 +1,6 @@
 2.78 Sat Nov 12 2012
+  - Updated for v5.17.6
+
   - Fix hash order dependency bug in deprecated_in().
     Tests would would fail or succeed depending on what order keys()
     would return the version list in. List::Utils::min() considers

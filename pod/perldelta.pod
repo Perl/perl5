@@ -143,6 +143,10 @@ Its SPLICE implementation no longer misbehaves in list context.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.77 to 2.78.
+
+=item *
+
 L<Tie::Hash::NamedCapture> has been upgraded from version 0.08 to 0.09.
 
 =back
