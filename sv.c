@@ -133,10 +133,12 @@ called by visit() for each SV]):
 			dump all remaining SVs (debugging aid)
 
     sv_clean_objs() / do_clean_objs(),do_clean_named_objs(),
-		      do_clean_named_io_objs()
+		      do_clean_named_io_objs(),do_curse()
 			Attempt to free all objects pointed to by RVs,
-			and try to do the same for all objects indirectly
-			referenced by typeglobs too.  Called once from
+			try to do the same for all objects indir-
+			ectly referenced by typeglobs too, and
+			then do a final sweep, cursing any
+			objects that remain.  Called once from
 			perl_destruct(), prior to calling sv_clean_all()
 			below.
 
