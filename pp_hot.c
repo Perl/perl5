@@ -85,9 +85,12 @@ PP(pp_pushmark)
 PP(pp_stringify)
 {
     dVAR; dSP; dTARGET;
-    sv_copypv(TARG,TOPs);
-    SETTARG;
-    RETURN;
+    SV * const sv = TOPs;
+    SETs(TARG);
+    sv_copypv(TARG, sv);
+    SvSETMAGIC(TARG);
+    /* no PUTBACK, SETs doesn't inc/dec SP */
+    return NORMAL;
 }
 
 PP(pp_gv)
@@ -99,14 +102,22 @@ PP(pp_gv)
 
 PP(pp_and)
 {
-    dVAR; dSP;
+    dVAR;
     PERL_ASYNC_CHECK();
-    if (!SvTRUE(TOPs))
-	RETURN;
-    else {
-        if (PL_op->op_type == OP_AND)
-	    --SP;
-	RETURNOP(cLOGOP->op_other);
+    {
+	/* SP is not used to remove a variable that is saved across the
+	  sv_2bool_flags call in SvTRUE_NN, if a RISC/CISC or low/high machine
+	  register or load/store vs direct mem ops macro is introduced, this
+	  should be a define block between direct PL_stack_sp and dSP operations,
+	  presently, using PL_stack_sp is bias towards CISC cpus */
+	SV * const sv = *PL_stack_sp;
+	if (!SvTRUE_NN(sv))
+	    return NORMAL;
+	else {
+	    if (PL_op->op_type == OP_AND)
+		--PL_stack_sp;
+	    return cLOGOP->op_other;
+	}
     }
 }
 

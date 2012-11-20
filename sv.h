@@ -1708,6 +1708,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 
 #define SvTRUE(sv)        ((sv) && (SvGMAGICAL(sv) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
 #define SvTRUE_nomg(sv)   ((sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_NN(sv)              (SvGMAGICAL(sv) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
 #define SvTRUE_common(sv,fallback) (			\
       !SvOK(sv)						\
 	? 0						\
