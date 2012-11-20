@@ -96,6 +96,29 @@ This change was introduced to make perls hashes more robust to algorithmic
 complexity attacks and also because we discovered that it exposes hash
 ordering dependency bugs and make them easier to track down.
 
+=head2 PERL_HASH_SEED enviornment variable now takes a hex value
+
+PERL_HASH_SEED no longer accepts an integer as a parameter, instead the
+value is expected to be a binary string encoded in hex. This is to make
+the infrastructure support hash seeds of arbitrary lengths which might
+exceed that of an integer. (SipHash uses a 16 byte seed).
+
+=head2 Hash::Util::hash_seed() now returns a string
+
+Hash::Util::hash_seed() now returns a string instead of an integer. This
+is to make the infrastructure support hash seeds of arbitrary lengths
+which might exceed that of an integer. (SipHash uses a 16 byte seed).
+
+=head2 Output of PERL_HASH_SEED_DEBUG has been changed
+
+The environment variable PERL_HASH_SEED_DEBUG now shows both the hash
+function perl was built with AND the seed, in hex in use for that process.
+Code parsing this output, should it exist, must change to accomodate the
+new format. Example of the new format:
+
+    $ PERL_HASH_SEED_DEBUG=1 ./perl -e1
+    HASH_FUNCTION = MURMUR3 HASH_SEED = 0x1476bb9f
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.  In
