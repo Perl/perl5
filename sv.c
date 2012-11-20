@@ -6334,6 +6334,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	do {
 	  if ((stash = SvSTASH(sv)) && HvNAME(stash)) {
 	    CV* destructor = NULL;
+	    assert(SvTYPE(stash) == SVt_PVHV);
 	    if (!SvOBJECT(stash)) destructor = (CV *)SvSTASH(stash);
 	    if (!destructor) {
 		GV * const gv =
@@ -6362,6 +6363,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	       )
 	    {
 		SV* const tmpref = newRV(sv);
+		assert(SvTYPE(destructor) == SVt_PVCV);
 		SvREADONLY_on(tmpref); /* DESTROY() could be naughty */
 		ENTER;
 		PUSHSTACKi(PERLSI_DESTROY);
