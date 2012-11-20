@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 172 );
+plan( tests => 176 );
 
 # these shouldn't hang
 {
@@ -978,3 +978,20 @@ is @x, 0, '{sort} returns empty list';
     } 5,1,3,6,0;
     is "@a", "0 1 3 5 6", "padrange and void context";
 }
+
+# Fatal warnings an sort sub returning a non-number
+# We need two evals, because the panic used to happen on scope exit.
+eval { eval { use warnings FATAL => 'all'; () = sort { undef } 1,2 } };
+is $@, "",
+  'no panic/crash with fatal warnings when sort sub returns undef';
+eval { eval { use warnings FATAL => 'all'; () = sort { "no thin" } 1,2 } };
+is $@, "",
+  'no panic/crash with fatal warnings when sort sub returns string';
+sub notdef($$) { undef }
+eval { eval { use warnings FATAL => 'all'; () = sort notdef 1,2 } };
+is $@, "",
+  'no panic/crash with fatal warnings when sort sub($$) returns undef';
+sub yarn($$) { "no thinking aloud" }
+eval { eval { use warnings FATAL => 'all'; () = sort yarn 1,2 } };
+is $@, "",
+  'no panic/crash with fatal warnings when sort sub($$) returns string';
