@@ -41,6 +41,13 @@ restrictions apply to the characters that may be used (you can't define
 a name that has punctuation in it, for example).  See L<charnames/CUSTOM
 ALIASES>.
 
+=head2 New hash function Murmurhash-32 (v3)
+
+We have switched perls hash function to use Murmurhash-32 and added build
+support for several other hash functions. This new function is expected to
+performance equivalent for shorter strings and is faster, potentially
+twice as fast, for hashing longer strings.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -78,6 +85,16 @@ such as in
  my $undraftable = "\N{4F}";    # Syntax error!
 
 or to have commas anywhere in the name.  See L<charnames/CUSTOM ALIASES>
+
+=head2 Per process hash randomization
+
+The seed used by perls hash function is now random. This means that the
+order which keys/values will be returned from functions like keys(),
+values(), and each() will differ from run to run.
+
+This change was introduced to make perls hashes more robust to algorithmic
+complexity attacks and also because we discovered that it exposes hash
+ordering dependency bugs and make them easier to track down.
 
 =head1 Deprecations
 
