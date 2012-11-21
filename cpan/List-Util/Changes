@@ -1,3 +1,8 @@
+1.25_01 -- Wed Nov 21 09:47
+
+  * Fix a hash order dependency bug t/tainted.t
+    (Currently this is a core only version to fix perl5 smokes)
+
 1.25 -- Sat Mar 24 13:10:13 UTC 2012
 
   * Restore back-compat. to perl 5.6 (thanks to Zefram)
