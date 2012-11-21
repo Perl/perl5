@@ -17,6 +17,20 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.6 - Kurt Vonnegut, The Sirens of Titan
+
+L<Announced on 2012-11-20 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-11/msg00760.html>
+
+Beatrice, looking like a gypsy queen, smoldered at the foot of a statue
+of a young physical student. At first glance, the laboratory-gowned
+scientist seemed to be a perfect servant of nothing but truth. At first
+glance, one was convinced that nothing but truth could please him as he
+beamed at his test tube. At first glance, one thought that he was as
+much above the beastly concerns of mankind as the harmoniums in the
+caves of Mercury. There, at first glance, was a young man without
+vanity, without lust — and one accepted at its face value the title Salo
+had engraved on the statue, "Discovery of Atomic Power."
+
 =head2 v5.12.5 - William Shakespeare, Measure for Measure
 
 Announced on 2012-11-10 by Dominic Hargreaves
