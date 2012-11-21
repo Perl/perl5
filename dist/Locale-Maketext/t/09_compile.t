@@ -8,7 +8,7 @@ use Test::More tests => 2;
 use Scalar::Util qw(tainted);
 use Locale::Maketext;
 
-my @ENV_values = map { !/^PERL/ && defined($ENV{$_}) && !ref($ENV{$_}) && $ENV{$_} ? $ENV{$_} : () } keys %ENV;
+my @ENV_values = map { !/^PERL/ && defined($ENV{$_}) && !ref($ENV{$_}) && $ENV{$_} ? $ENV{$_} : () } sort keys %ENV;
 die "No %ENV vars to test?" if !@ENV_values;
 
 my ($tainted_value)= @ENV_values;
