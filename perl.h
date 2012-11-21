@@ -2494,6 +2494,10 @@ typedef AV PAD;
 typedef AV PADNAMELIST;
 typedef SV PADNAME;
 
+#if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
+# define PERL_NEW_COPY_ON_WRITE
+#endif
+
 #if defined(PERL_OLD_COPY_ON_WRITE) || defined(PERL_NEW_COPY_ON_WRITE)
 # if defined(PERL_OLD_COPY_ON_WRITE) && defined(PERL_NEW_COPY_ON_WRITE)
 #  error PERL_OLD_COPY_ON_WRITE and PERL_NEW_COPY_ON_WRITE are exclusive
