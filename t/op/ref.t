@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(229);
+plan(230);
 
 # Test glob operations.
 
@@ -407,6 +407,13 @@ is(
  "aaa\n",
  'DESTROY called on closure variable'
 );
+
+# But cursing objects must not result in double frees
+# This caused "Attempt to free unreferenced scalar" in 5.16.
+fresh_perl_is(
+  'bless \%foo::, bar::; bless \%bar::, foo::; print "ok\n"', "ok\n",
+   { stderr => 1 },
+  'no double free when stashes are blessed into each other');
 
 
 # test if refgen behaves with autoviv magic

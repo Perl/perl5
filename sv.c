@@ -6399,8 +6399,12 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
     }
 
     if (SvOBJECT(sv)) {
-	SvREFCNT_dec(SvSTASH(sv)); /* possibly of changed persuasion */
+	HV * const stash = SvSTASH(sv);
+	/* Curse before freeing the stash, as freeing the stash could cause
+	   a recursive call into S_curse. */
 	SvOBJECT_off(sv);	/* Curse the object. */
+	SvSTASH_set(sv,0);	/* SvREFCNT_dec may try to read this */
+	SvREFCNT_dec(stash); /* possibly of changed persuasion */
 	if (SvTYPE(sv) != SVt_PVIO)
 	    --PL_sv_objcount;/* XXX Might want something more general */
     }
