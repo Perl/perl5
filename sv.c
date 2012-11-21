@@ -4741,7 +4741,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
 	if (IN_PERL_RUNTIME)
-	    Perl_croak_no_modify(aTHX);
+	    Perl_croak_no_modify();
     }
     else
 	if (SvIsCOW(sv)) {
