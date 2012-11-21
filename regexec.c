@@ -4862,6 +4862,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    }
 		    last_pushed_cv = newcv;
 		}
+		else {
+                    /* these assignments are just to silence compiler
+                     * warnings */
+		    multicall_cop = NULL;
+		    newsp = NULL;
+		}
 		last_pad = PL_comppad;
 
 		/* the initial nextstate you would normally execute
