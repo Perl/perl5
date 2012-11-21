@@ -19,6 +19,12 @@ my $shell = $ENV{SHELL} || '';
 SKIP: {
     skip "This test can only be run under bash or zsh"
         unless $shell =~ m{/(?:ba|z)sh$};
+    my $probe = qx{
+        $shell -c 'ulimit -u 1 2>&1 && echo good'
+    };
+    chomp $probe;
+    skip "Can't set ulimit -u on this system: $probe"
+	unless $probe eq 'good';
 
     my $out = qx{
         $shell -c 'ulimit -u 1; exec $^X -e "
