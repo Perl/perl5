@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 140;
+use Test::More tests => 144;
 
 use strict;
 use warnings;
@@ -149,6 +149,11 @@ ok( T_BOOL(52) );
 ok( ! T_BOOL(0) );
 ok( ! T_BOOL('') );
 ok( ! T_BOOL(undef) );
+
+ok( T_BOOL_2(52) );
+ok( ! T_BOOL_2(0) );
+ok( ! T_BOOL_2('') );
+ok( ! T_BOOL_2(undef) );
 
 # T_U_SHORT aka U16
 note("T_U_SHORT");

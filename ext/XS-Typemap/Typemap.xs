@@ -436,6 +436,13 @@ T_BOOL( in )
  OUTPUT:
   RETVAL
 
+bool
+T_BOOL_2( in )
+  bool in
+ CODE:
+ OUTPUT:
+   in
+
 
 ## T_U_INT
 

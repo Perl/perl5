@@ -54,6 +54,7 @@ $VERSION = '0.08';
 	   T_INT
            T_ENUM
            T_BOOL
+           T_BOOL_2
            T_U_INT
            T_SHORT
            T_U_SHORT
