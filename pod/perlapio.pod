@@ -69,55 +69,22 @@ perlapio - perl's IO abstraction interface.
 
 Perl's source code, and extensions that want maximum portability,
 should use the above functions instead of those defined in ANSI C's
-I<stdio.h>.  The perl headers (in particular "perlio.h") will
-C<#define> them to the I/O mechanism selected at Configure time.
+I<stdio.h>.  
 
-The functions are modeled on those in I<stdio.h>, but parameter order
-has been "tidied up a little".
+The functions are modeled on those in I<stdio.h>, but parameter order has been
+"tidied up a little".  C<PerlIO *> takes the place of FILE *. Like FILE * it
+should be treated as opaque (it is probably safe to assume it is a pointer to
+something)..
 
-C<PerlIO *> takes the place of FILE *. Like FILE * it should be
-treated as opaque (it is probably safe to assume it is a pointer to
-something).
-
-There are currently three implementations:
-
-=over 4
-
-=item 1. USE_STDIO
-
-All above are #define'd to stdio functions or are trivial wrapper
-functions which call stdio. In this case I<only> PerlIO * is a FILE *.
-This has been the default implementation since the abstraction was
-introduced in perl5.003_02.
-
-=item 2. USE_SFIO
-
-A "legacy" implementation in terms of the "sfio" library. Used for
-some specialist applications on Unix machines ("sfio" is not widely
-ported away from Unix).  Most of above are #define'd to the sfio
-functions. PerlIO * is in this case Sfio_t *.
-
-=item 3. USE_PERLIO
-
-Introduced just after perl5.7.0, this is a re-implementation of the
-above abstraction which allows perl more control over how IO is done
-as it decouples IO from the way the operating system and C library
-choose to do things. For USE_PERLIO PerlIO * has an extra layer of
-indirection - it is a pointer-to-a-pointer.  This allows the PerlIO *
-to remain with a known value while swapping the implementation around
-underneath I<at run time>. In this case all the above are true (but
+The current system was just after perl5.7.0, this is a re-implementation of the
+abstraction which allows perl more control over how IO is done as it decouples
+IO from the way the operating system and C library choose to do things. C<PerlIO
+*> has an extra layer of indirection - it is a pointer-to-a-pointer.  This
+allows the PerlIO * to remain with a known value while swapping the
+implementation around underneath I<at run time>. All the above are true (but
 very simple) functions which call the underlying implementation.
 
-This is the only implementation for which C<PerlIO_apply_layers()>
-does anything "interesting".
-
-The USE_PERLIO implementation is described in L<perliol>.
-
-=back
-
-Because "perlio.h" is a thin layer (for efficiency) the semantics of
-these functions are somewhat dependent on the underlying implementation.
-Where these variations are understood they are noted below.
+The backend interfaces are described in L<perliol>.
 
 Unless otherwise noted, functions return 0 on success, or a negative
 value (usually C<EOF> which is usually -1) and set C<errno> on error.
@@ -224,13 +191,8 @@ This corresponds to clearerr(), i.e., clears 'error' and (usually)
 =item B<PerlIO_flush(f)>
 
 This corresponds to fflush().  Sends any buffered write data to the
-underlying file.  If called with C<NULL> this may flush all open
-streams (or core dump with some USE_STDIO implementations).  Calling
-on a handle open for read only, or on which last operation was a read
-of some kind may lead to undefined behaviour on some USE_STDIO
-implementations.  The USE_PERLIO (layers) implementation tries to
-behave better: it flushes all open streams when passed C<NULL>, and
-attempts to retain data on read streams either in the buffer or by
+underlying file.  If called with C<NULL> it flushes all open streams when passed
+C<NULL>, and attempts to retain data on read streams either in the buffer or by
 seeking the handle to the current logical position.
 
 =item B<PerlIO_seek(f,offset,whence)>
@@ -257,8 +219,7 @@ Configure value which may not be same as stdio's C<off_t>.
 These correspond (loosely) to fgetpos() and fsetpos(). Rather than
 stdio's Fpos_t they expect a "Perl Scalar Value" to be passed. What is
 stored there should be considered opaque. The layout of the data may
-vary from handle to handle.  When not using stdio or if platform does
-not have the stdio calls then they are implemented in terms of
+vary from handle to handle.  They are implemented in terms of
 PerlIO_tell() and PerlIO_seek().
 
 =item B<PerlIO_rewind(f)>
@@ -293,10 +254,8 @@ it has nothing to do with $| auto-flush.)
 =head2 Co-existence with stdio
 
 There is outline support for co-existence of PerlIO with stdio.
-Obviously if PerlIO is implemented in terms of stdio there is no
-problem. However in other cases then mechanisms must exist to create a
-FILE * which can be passed to library code which is going to use stdio
-calls.
+Mechanisms exist to create a FILE * which can be passed to library code which is
+going to use stdio calls.
 
 The first step is to add this line:
 
@@ -363,7 +322,6 @@ Returns a native FILE * used by a stdio layer. If there is none, it
 will create one with PerlIO_exportFILE. In either case the FILE *
 should be considered as belonging to PerlIO subsystem and should
 only be closed by calling C<PerlIO_close()>.
-
 
 =back
 
@@ -457,9 +415,7 @@ happened to C<read()> (or whatever) last time IO was requested.
 
 =item PerlIO_apply_layers(f,mode,layers)
 
-The new interface to the USE_PERLIO implementation. The layers ":crlf"
-and ":raw" are only ones allowed for other implementations and those
-are silently ignored. (As of perl5.8 ":raw" is deprecated.)  Use
+As of perl5.8 ":raw" is deprecated.  Use
 PerlIO_binmode() below for the portable case.
 
 =item PerlIO_binmode(f,ptype,imode,layers)
@@ -479,8 +435,7 @@ B<ptype> is perl's character for the kind of IO:
 
 B<imode> is C<O_BINARY> or C<O_TEXT>.
 
-B<layers> is a string of layers to apply, only ":crlf" makes sense in
-the non USE_PERLIO case. (As of perl5.8 ":raw" is deprecated in favour
+B<layers> is a string of layers to apply (As of perl5.8 ":raw" is deprecated in favour
 of passing NULL.)
 
 Portable cases are:
