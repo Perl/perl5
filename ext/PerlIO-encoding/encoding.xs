@@ -6,8 +6,6 @@
 
 #define OUR_DEFAULT_FB	"Encode::PERLQQ"
 
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
-
 /* Define an encoding "layer" in the perliol.h sense.
 
    The layer defined here "inherits" in an object-oriented sense from
@@ -635,7 +633,6 @@ PerlIO_funcs PerlIO_encode = {
     PerlIOBuf_get_cnt,
     PerlIOBuf_set_ptrcnt,
 };
-#endif				/* encode layer */
 
 MODULE = PerlIO::encoding PACKAGE = PerlIO::encoding
 
@@ -673,8 +670,6 @@ BOOT:
     SPAGAIN;
     sv_setsv(chk, POPs);
     PUTBACK;
-#ifdef PERLIO_LAYERS
     PerlIO_define_layer(aTHX_ &PerlIO_encode);
-#endif
     POPSTACK;
 }

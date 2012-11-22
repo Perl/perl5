@@ -352,13 +352,6 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 			     * be optimized away on most platforms;
 			     * only Solaris and Linux seem to flush
 			     * on that. --jhi */
-#ifdef USE_SFIO
-			    /* sfio fails to clear error on next
-			       sfwrite, contrary to documentation.
-			       -- Nicholas Clark */
-			    if (PerlIO_seek(that_fp, 0, SEEK_CUR) == -1)
-				PerlIO_clearerr(that_fp);
-#endif
 			    /* On the other hand, do all platforms
 			     * take gracefully to flushing a read-only
 			     * filehandle?  Perhaps we should do
@@ -1133,12 +1126,8 @@ fail_discipline:
 		end = strchr(s+1, ':');
 		if (!end)
 		    end = s+len;
-#ifndef PERLIO_LAYERS
-		Perl_croak(aTHX_ "IO layers (like '%.*s') unavailable", end-s, s);
-#else
 		len -= end-s;
 		s = end;
-#endif
 	    }
 	}
     }

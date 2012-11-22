@@ -42,10 +42,6 @@
 
 /* #include "config.h" */
 
-#if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
-#  define PerlIO FILE
-#endif
-
 #include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
@@ -3049,11 +3045,7 @@ win32_pclose(PerlIO *pf)
         return -1;
     }
 
-#ifdef USE_PERLIO
     PerlIO_close(pf);
-#else
-    fclose(pf);
-#endif
     SvIVX(sv) = 0;
 
     if (win32_waitpid(childpid, &status, 0) == -1)

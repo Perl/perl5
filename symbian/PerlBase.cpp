@@ -150,9 +150,6 @@ void CPerlBase::ConstructL()
                            KPerlConsoleBufferMaxTChars);
         User::LeaveIfNull(iConsoleBuffer);
         iConsoleUsed = 0;
-#ifndef USE_PERLIO
-        iStdioInitFunc = &StdioRewire;
-#endif
     }
     if (iStdioInitFunc)
         iStdioInitFunc(iStdioInitCookie);

@@ -2,7 +2,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#ifdef PERLIO_LAYERS
 
 #include "perliol.h"
 
@@ -368,17 +367,12 @@ PERLIO_FUNCS_DECL(PerlIO_scalar) = {
     PerlIOScalar_set_ptrcnt,
 };
 
-
-#endif /* Layers available */
-
 MODULE = PerlIO::scalar	PACKAGE = PerlIO::scalar
 
 PROTOTYPES: ENABLE
 
 BOOT:
 {
-#ifdef PERLIO_LAYERS
  PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_scalar));
-#endif
 }
 

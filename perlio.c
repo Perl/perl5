@@ -43,11 +43,6 @@
 #endif
 
 #define PERLIO_NOT_STDIO 0
-#if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
-/*
- * #define PerlIO FILE
- */
-#endif
 /*
  * This file provides those parts of PerlIO abstraction
  * which are not #defined in perlio.h.
@@ -130,8 +125,6 @@ extern int   fseeko(FILE *, off_t, int);
 extern off_t ftello(FILE *);
 #endif
 
-#ifndef USE_SFIO
-
 EXTERN_C int perlsio_binmode(FILE *fp, int iotype, int mode);
 
 int
@@ -170,7 +163,6 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 #  endif
 #endif
 }
-#endif /* sfio */
 
 #ifndef O_ACCMODE
 #define O_ACCMODE 3             /* Assume traditional implementation */
@@ -220,226 +212,6 @@ PerlIO_intmode2str(int rawmode, char *mode, int *writing)
     mode[ix] = '\0';
     return ptype;
 }
-
-#ifndef PERLIO_LAYERS
-int
-PerlIO_apply_layers(pTHX_ PerlIO *f, const char *mode, const char *names)
-{
-    if (!names || !*names
-        || strEQ(names, ":crlf")
-        || strEQ(names, ":raw")
-        || strEQ(names, ":bytes")
-       ) {
-	return 0;
-    }
-    Perl_croak(aTHX_ "Cannot apply \"%s\" in non-PerlIO perl", names);
-    /*
-     * NOTREACHED
-     */
-    return -1;
-}
-
-void
-PerlIO_destruct(pTHX)
-{
-}
-
-int
-PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
-{
-#ifdef USE_SFIO
-    PERL_UNUSED_ARG(iotype);
-    PERL_UNUSED_ARG(mode);
-    PERL_UNUSED_ARG(names);
-    return 1;
-#else
-    return perlsio_binmode(fp, iotype, mode);
-#endif
-}
-
-PerlIO *
-PerlIO_fdupopen(pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags)
-{
-#if defined(PERL_MICRO) || defined(__SYMBIAN32__)
-    return NULL;
-#else
-#ifdef PERL_IMPLICIT_SYS
-    return PerlSIO_fdupopen(f);
-#else
-#ifdef WIN32
-    return win32_fdupopen(f);
-#else
-    if (f) {
-	const int fd = PerlLIO_dup(PerlIO_fileno(f));
-	if (fd >= 0) {
-	    char mode[8];
-#ifdef DJGPP
-	    const int omode = djgpp_get_stream_mode(f);
-#else
-	    const int omode = fcntl(fd, F_GETFL);
-#endif
-	    PerlIO_intmode2str(omode,mode,NULL);
-	    /* the r+ is a hack */
-	    return PerlIO_fdopen(fd, mode);
-	}
-	return NULL;
-    }
-    else {
-	SETERRNO(EBADF, SS_IVCHAN);
-    }
-#endif
-    return NULL;
-#endif
-#endif
-}
-
-
-/*
- * De-mux PerlIO_openn() into fdopen, freopen and fopen type entries
- */
-
-PerlIO *
-PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
-	     int imode, int perm, PerlIO *old, int narg, SV **args)
-{
-    if (narg) {
-	if (narg > 1) {
-	    Perl_croak(aTHX_ "More than one argument to open");
-	}
-	if (*args == &PL_sv_undef)
-	    return PerlIO_tmpfile();
-	else {
-	    const char *name = SvPV_nolen_const(*args);
-	    if (*mode == IoTYPE_NUMERIC) {
-		fd = PerlLIO_open3(name, imode, perm);
-		if (fd >= 0)
-		    return PerlIO_fdopen(fd, mode + 1);
-	    }
-	    else if (old) {
-		return PerlIO_reopen(name, mode, old);
-	    }
-	    else {
-		return PerlIO_open(name, mode);
-	    }
-	}
-    }
-    else {
-	return PerlIO_fdopen(fd, (char *) mode);
-    }
-    return NULL;
-}
-
-XS(XS_PerlIO__Layer__find)
-{
-    dXSARGS;
-    if (items < 2)
-	Perl_croak(aTHX_ "Usage class->find(name[,load])");
-    else {
-	const char * const name = SvPV_nolen_const(ST(1));
-	ST(0) = (strEQ(name, "crlf")
-		 || strEQ(name, "raw")) ? &PL_sv_yes : &PL_sv_undef;
-	XSRETURN(1);
-    }
-}
-
-
-void
-Perl_boot_core_PerlIO(pTHX)
-{
-    newXS("PerlIO::Layer::find", XS_PerlIO__Layer__find, __FILE__);
-}
-
-#endif
-
-
-#ifdef PERLIO_IS_STDIO
-
-void
-PerlIO_init(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-    /*
-     * Does nothing (yet) except force this file to be included in perl
-     * binary. That allows this file to force inclusion of other functions
-     * that may be required by loadable extensions e.g. for
-     * FileHandle::tmpfile
-     */
-}
-
-#undef PerlIO_tmpfile
-PerlIO *
-PerlIO_tmpfile(void)
-{
-    return tmpfile();
-}
-
-#else                           /* PERLIO_IS_STDIO */
-
-#ifdef USE_SFIO
-
-#undef HAS_FSETPOS
-#undef HAS_FGETPOS
-
-/*
- * This section is just to make sure these functions get pulled in from
- * libsfio.a
- */
-
-#undef PerlIO_tmpfile
-PerlIO *
-PerlIO_tmpfile(void)
-{
-    return sftmp(0);
-}
-
-void
-PerlIO_init(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-    /*
-     * Force this file to be included in perl binary. Which allows this
-     * file to force inclusion of other functions that may be required by
-     * loadable extensions e.g. for FileHandle::tmpfile
-     */
-
-    /*
-     * Hack sfio does its own 'autoflush' on stdout in common cases. Flush
-     * results in a lot of lseek()s to regular files and lot of small
-     * writes to pipes.
-     */
-    sfset(sfstdout, SF_SHARE, 0);
-}
-
-/* This is not the reverse of PerlIO_exportFILE(), PerlIO_releaseFILE() is. */
-PerlIO *
-PerlIO_importFILE(FILE *stdio, const char *mode)
-{
-    const int fd = fileno(stdio);
-    if (!mode || !*mode) {
-	mode = "r+";
-    }
-    return PerlIO_fdopen(fd, mode);
-}
-
-FILE *
-PerlIO_findFILE(PerlIO *pio)
-{
-    const int fd = PerlIO_fileno(pio);
-    FILE * const f = fdopen(fd, "r+");
-    PerlIO_flush(pio);
-    if (!f && errno == EINVAL)
-	f = fdopen(fd, "w");
-    if (!f && errno == EINVAL)
-	f = fdopen(fd, "r");
-    return f;
-}
-
-
-#else                           /* USE_SFIO */
-/*======================================================================================*/
-/*
- * Implement all the PerlIO interface ourselves.
- */
 
 #include "perliol.h"
 
@@ -5048,9 +4820,6 @@ PerlIO_tmpfile(void)
 #undef HAS_FSETPOS
 #undef HAS_FGETPOS
 
-#endif                          /* USE_SFIO */
-#endif                          /* PERLIO_IS_STDIO */
-
 /*======================================================================================*/
 /*
  * Now some functions in terms of above which may be needed even if we are
@@ -5151,27 +4920,7 @@ PerlIO_getpos(PerlIO *f, SV *pos)
 }
 #endif
 
-#if (defined(PERLIO_IS_STDIO) || !defined(USE_SFIO)) && !defined(HAS_VPRINTF)
 
-int
-vprintf(char *pat, char *args)
-{
-    _doprnt(pat, args, stdout);
-    return 0;                   /* wrong, but perl doesn't use the return
-				 * value */
-}
-
-int
-vfprintf(FILE *fd, char *pat, char *args)
-{
-    _doprnt(pat, args, fd);
-    return 0;                   /* wrong, but perl doesn't use the return
-				 * value */
-}
-
-#endif
-
-#ifndef PerlIO_vsprintf
 int
 PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
@@ -5186,9 +4935,7 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 #endif
     return val;
 }
-#endif
 
-#ifndef PerlIO_sprintf
 int
 PerlIO_sprintf(char *s, int n, const char *fmt, ...)
 {
@@ -5199,7 +4946,6 @@ PerlIO_sprintf(char *s, int n, const char *fmt, ...)
     va_end(ap);
     return result;
 }
-#endif
 
 /*
  * Local variables:

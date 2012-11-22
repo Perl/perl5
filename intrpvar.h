@@ -694,11 +694,9 @@ PERLVAR(I, reentrant_buffer, REENTR *)	/* here we store the _r buffers */
 PERLVAR(I, custom_op_names, HV *)	/* Names of user defined ops */
 PERLVAR(I, custom_op_descs, HV *)	/* Descriptions of user defined ops */
 
-#ifdef PERLIO_LAYERS
 PERLVARI(I, perlio,	PerlIOl *, NULL)
 PERLVARI(I, known_layers, PerlIO_list_t *, NULL)
 PERLVARI(I, def_layerlist, PerlIO_list_t *, NULL)
-#endif
 
 PERLVARI(I, encoding,	SV *,	NULL)	/* character encoding */
 

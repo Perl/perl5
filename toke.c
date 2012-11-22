@@ -7450,7 +7450,6 @@ Perl_yylex(pTHX)
 		    }
 		}
 #endif
-#ifdef PERLIO_LAYERS
 		if (!IN_BYTES) {
 		    if (UTF)
 			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL, ":utf8");
@@ -7474,7 +7473,6 @@ Perl_yylex(pTHX)
 			LEAVE;
 		    }
 		}
-#endif
 #ifdef PERL_MAD
 		if (PL_madskills) {
 		    if (PL_realtokenstart >= 0) {

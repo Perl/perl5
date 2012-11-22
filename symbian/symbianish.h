@@ -152,15 +152,12 @@ pid_t wait(int *status);
 #define PERL_CORE /* for WINS builds under VC */
 #endif
 
-#ifdef USE_PERLIO
 #define PERL_NEED_APPCTX /* need storing the PerlBase* */
 #define PERLIO_STD_SPECIAL
 #define PERLIO_STD_IN(f, b, n)  symbian_read_stdin(f, b, n)
 #define PERLIO_STD_OUT(f, b, n) symbian_write_stdout(f, b, n)
 /* The console (the STD*) streams are seen by Perl in UTF-8. */
 #define PERL_SYMBIAN_CONSOLE_UTF8
-
-#endif
 
 #undef Strerror
 #undef strerror

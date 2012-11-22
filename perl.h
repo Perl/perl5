@@ -1200,12 +1200,6 @@ EXTERN_C int usleep(unsigned int);
 #   include <arpa/inet.h>
 #endif
 
-#if defined(SF_APPEND) && defined(USE_SFIO) && defined(I_SFIO)
-/* <sfio.h> defines SF_APPEND and <sys/stat.h> might define SF_APPEND
- * (the neo-BSD seem to do this).  */
-#   undef SF_APPEND
-#endif
-
 #ifdef I_SYS_STAT
 #   include <sys/stat.h>
 #endif
@@ -3153,15 +3147,7 @@ typedef pthread_key_t	perl_key;
  * out there, Solaris being the most prominent.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
-# if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
-#  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
-# else
-#  ifdef FFLUSH_ALL
-#   define PERL_FLUSHALL_FOR_CHILD	my_fflush_all()
-#  else
-#   define PERL_FLUSHALL_FOR_CHILD	NOOP
-#  endif
-# endif
+# define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
 #endif
 
 #ifndef PERL_WAIT_FOR_CHILDREN
@@ -4092,7 +4078,6 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
-#ifdef USE_PERLIO
 EXTERN_C void PerlIO_teardown(void);
 # ifdef USE_ITHREADS
 #  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
@@ -4105,10 +4090,6 @@ EXTERN_C void PerlIO_teardown(void);
 #  define PERLIO_INIT
 #  define PERLIO_TERM	PerlIO_teardown()
 # endif
-#else
-#  define PERLIO_INIT
-#  define PERLIO_TERM
-#endif
 
 #ifdef MYMALLOC
 #  ifdef MUTEX_INIT_CALLS_MALLOC

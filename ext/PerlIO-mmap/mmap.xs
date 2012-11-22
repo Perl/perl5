@@ -13,7 +13,7 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#if defined(PERLIO_LAYERS) && defined(HAS_MMAP)
+#ifdef HAS_MMAP
 
 #include "perliol.h"
 #include <sys/mman.h>
@@ -313,7 +313,7 @@ PROTOTYPES: DISABLE
 
 BOOT:
 {
-#if defined(PERLIO_LAYERS) && defined(HAS_MMAP)
+#ifdef HAS_MMAP
     PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_mmap));
 #endif
 }

@@ -77,8 +77,6 @@ PERLVARI(G, csighandlerp, Sighandler_t, Perl_csighandler)
 PERLVARI(G, sh_path,	char *, SH_PATH) /* full path of shell */
 #endif
 
-#ifdef USE_PERLIO
-
 #  if defined(USE_ITHREADS)
 PERLVAR(G, perlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 #  endif
@@ -86,7 +84,6 @@ PERLVAR(G, perlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 PERLVARI(G, perlio_fd_refcnt, int *, 0) /* Pointer to array of fd refcounts.  */
 PERLVARI(G, perlio_fd_refcnt_size, int, 0) /* Size of the array */
 PERLVARI(G, perlio_debug_fd, int, 0)	/* the fd to write perlio debug into, 0 means not set yet */
-#endif
 
 #ifdef HAS_MMAP
 PERLVARI(G, mmap_page_size, IV, 0)

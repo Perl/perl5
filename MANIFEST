@@ -4534,7 +4534,6 @@ NetWare/Nwpipe.c		NetWare port
 NetWare/nwpipe.h		NetWare port
 NetWare/nwplglob.c		NetWare port
 NetWare/nwplglob.h		NetWare port
-NetWare/nwstdio.h		NetWare port
 NetWare/NWTInfo.c		NetWare port
 NetWare/nwtinfo.h		NetWare port
 NetWare/NWUtil.c		NetWare port

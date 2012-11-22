@@ -7715,16 +7715,6 @@ Perl_sv_gets(pTHX_ register SV *const sv, register PerlIO *const fp, I32 append)
     STRLEN bpx;
     I32 shortbuffered;
 
-#if defined(VMS) && defined(PERLIO_IS_STDIO)
-    /* An ungetc()d char is handled separately from the regular
-     * buffer, so we getc() it back out and stuff it in the buffer.
-     */
-    i = PerlIO_getc(fp);
-    if (i == EOF) return 0;
-    *(--((*fp)->_ptr)) = (unsigned char) i;
-    (*fp)->_cnt++;
-#endif
-
     /* Here is some breathtakingly efficient cheating */
 
     cnt = PerlIO_get_cnt(fp);			/* get count into register */
@@ -13207,10 +13197,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	param->unreferenced = newAV();
     }
 
-#ifdef PERLIO_LAYERS
     /* Clone PerlIO tables as soon as we can handle general xx_dup() */
     PerlIO_clone(aTHX_ proto_perl, param);
-#endif
 
     PL_envgv		= gv_dup(proto_perl->Ienvgv, param);
     PL_incgv		= gv_dup(proto_perl->Iincgv, param);

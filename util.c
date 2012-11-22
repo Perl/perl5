@@ -26,9 +26,7 @@
 #include "perl.h"
 #include "reentr.h"
 
-#ifdef USE_PERLIO
 #include "perliol.h" /* For PerlIOUnix_refcnt */
-#endif
 
 #ifndef PERL_MICRO
 #include <signal.h>
@@ -1363,17 +1361,10 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 	Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, "PRINT",
 			    G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
-#ifdef USE_SFIO
-	/* SFIO can really mess with your errno */
-	dSAVED_ERRNO;
-#endif
 	PerlIO * const serr = Perl_error_log;
 
 	do_print(msv, serr);
 	(void)PerlIO_flush(serr);
-#ifdef USE_SFIO
-	RESTORE_ERRNO;
-#endif
     }
 }
 
@@ -3072,13 +3063,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     dSAVEDERRNO;
     const int fd = PerlIO_fileno(ptr);
 
-#ifdef USE_PERLIO
     /* Find out whether the refcount is low enough for us to wait for the
        child proc without blocking. */
     const bool should_wait = PerlIOUnix_refcnt(fd) == 1;
-#else
-    const bool should_wait = 1;
-#endif
 
     svp = av_fetch(PL_fdpid,fd,TRUE);
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
@@ -3668,51 +3655,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 I32
 Perl_my_fflush_all(pTHX)
 {
-#if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
     return PerlIO_flush(NULL);
-#else
-# if defined(HAS__FWALK)
-    extern int fflush(FILE *);
-    /* undocumented, unprototyped, but very useful BSDism */
-    extern void _fwalk(int (*)(FILE *));
-    _fwalk(&fflush);
-    return 0;
-# else
-#  if defined(FFLUSH_ALL) && defined(HAS_STDIO_STREAM_ARRAY)
-    long open_max = -1;
-#   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
-    open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
-#   else
-#    if defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
-    open_max = sysconf(_SC_OPEN_MAX);
-#     else
-#      ifdef FOPEN_MAX
-    open_max = FOPEN_MAX;
-#      else
-#       ifdef OPEN_MAX
-    open_max = OPEN_MAX;
-#       else
-#        ifdef _NFILE
-    open_max = _NFILE;
-#        endif
-#       endif
-#      endif
-#     endif
-#    endif
-    if (open_max > 0) {
-      long i;
-      for (i = 0; i < open_max; i++)
-	    if (STDIO_STREAM_ARRAY[i]._file >= 0 &&
-		STDIO_STREAM_ARRAY[i]._file < open_max &&
-		STDIO_STREAM_ARRAY[i]._flag)
-		PerlIO_flush(&STDIO_STREAM_ARRAY[i]);
-      return 0;
-    }
-#  endif
-    SETERRNO(EBADF,RMS_IFI);
-    return EOF;
-# endif
-#endif
 }
 
 void

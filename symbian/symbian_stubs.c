@@ -25,10 +25,6 @@ int setegid(gid_t gid) { return setENOSYS(); }
 int execv(const char* path, char* const argv [])  { return setENOSYS(); }
 int execvp(const char* path, char* const argv []) { return setENOSYS(); }
 
-#ifndef USE_PERLIO
-FILE *popen(const char *command, const char *mode) { return 0; }
-int   pclose(FILE *stream) { return setENOSYS(); }
-#endif
 int   pipe(int fd[2]) { return setENOSYS(); }
 
 int setmode(int fd, long flags) { return -1; }

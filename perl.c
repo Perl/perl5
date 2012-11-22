@@ -819,10 +819,8 @@ perl_destruct(pTHXx)
 
 	DEBUG_P(debprofdump());
 
-#if defined(PERLIO_LAYERS)
 	/* No more IO - including error messages ! */
 	PerlIO_cleanup(aTHX);
-#endif
 
 	CopFILE_free(&PL_compiling);
 
@@ -1214,10 +1212,8 @@ perl_destruct(pTHXx)
 #endif
     PL_sv_count = 0;
 
-#if defined(PERLIO_LAYERS)
     /* No more IO - including error messages ! */
     PerlIO_cleanup(aTHX);
-#endif
 
     /* sv_undef needs to stay immortal until after PerlIO_cleanup
        as currently layers use it rather than NULL as a marker

@@ -12,8 +12,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 
-#ifdef PERLIO_LAYERS
-
 #include "perliol.h"
 
 #define NO_XSLOCKS
@@ -372,6 +370,4 @@ PerlIO_funcs PerlIO_win32 = {
  NULL, /* get_cnt */
  NULL, /* set_ptrcnt */
 };
-
-#endif
 
