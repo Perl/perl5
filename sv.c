@@ -6332,7 +6332,8 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	dSP;
 	HV* stash;
 	do {
-	  if ((stash = SvSTASH(sv)) && HvNAME(stash)) {
+	  stash = SvSTASH(sv);
+	  if (HvNAME(stash)) {
 	    CV* destructor = NULL;
 	    assert(SvTYPE(stash) == SVt_PVHV);
 	    if (!SvOBJECT(stash)) destructor = (CV *)SvSTASH(stash);
