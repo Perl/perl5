@@ -8355,33 +8355,17 @@ static char *int_tovmsspec
   dirend = strrchr(path,'/');
 
   if (dirend == NULL) {
-     char *macro_start;
-     int has_macro;
-
      /* If we get here with no UNIX directory delimiters, then this is
-        not a complete file specification, either garbage a UNIX glob
-	specification that can not be converted to a VMS wildcard, or
-	it a UNIX shell macro.  MakeMaker wants shell macros passed
-	through AS-IS,
-
-	utf8 flag setting needs to be preserved.
+      * not a complete file specification, such as a Unix glob
+      * specification, shell macro, make macro, or even a valid VMS
+      * filespec but with unescaped extended characters.  The safest
+      * thing in all these cases is to pass it through as-is.
       */
-      hasdir = 0;
-
-      has_macro = 0;
-      macro_start = strchr(path,'$');
-      if (macro_start != NULL) {
-          if (macro_start[1] == '(') {
-              has_macro = 1;
-          }
+      my_strlcpy(rslt, path, VMS_MAXRSS);
+      if (vms_debug_fileify) {
+          fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
       }
-      if ((decc_efs_charset == 0) || (has_macro)) {
-          my_strlcpy(rslt, path, VMS_MAXRSS);
-          if (vms_debug_fileify) {
-              fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
-          }
-          return rslt;
-      }
+      return rslt;
   }
   else if (*(dirend+1) == '.') {  /* do we have trailing "/." or "/.." or "/..."? */
     if (!*(dirend+2)) dirend +=2;
