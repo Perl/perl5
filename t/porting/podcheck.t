@@ -1847,7 +1847,9 @@ foreach my $filename (@files) {
     }
 }
 
-if (! ok (keys %known_problems == 0, "The known problems data base includes no references to non-existent files")) {
+if (! $regen
+    && ! ok (keys %known_problems == 0, "The known problems data base includes no references to non-existent files"))
+{
     note("The following files were not found: "
          . join ", ", keys %known_problems);
     note("They will automatically be removed from the db the next time");
