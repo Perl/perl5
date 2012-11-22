@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 77;
+plan tests => 107;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -68,6 +68,45 @@ my @a;
 leak(5, 0, sub {},                 "basic check 1 of leak test infrastructure");
 leak(5, 0, sub {push @a,1;pop @a}, "basic check 2 of leak test infrastructure");
 leak(5, 1, sub {push @a,1;},       "basic check 3 of leak test infrastructure");
+
+# Fatal warnings
+my $f = "use warnings FATAL =>";
+my $all = "$f 'all';";
+$::TODO = 'still leaks';
+eleak(2, 0, "$f 'deprecated'; qq|\\c\{|", 'qq|\c{| with fatal warnings');
+eleak(2, 0, "$f 'syntax'; qq|\\c`|", 'qq|\c`| with fatal warnings');
+eleak(2, 0, "$all /\$\\ /", '/$\ / with fatal warnings');
+eleak(2, 0, "$all s//\\1/", 's//\1/ with fatal warnings');
+eleak(2, 0, "$all qq|\\i|", 'qq|\i| with fatal warnings');
+eleak(2, 0, "$f 'digit'; qq|\\o{9}|", 'qq|\o{9}| with fatal warnings');
+eleak(2, 0, "$f 'misc'; sub foo{} sub foo:lvalue",
+     'ignored :lvalue with fatal warnings');
+eleak(2, 0, "no warnings; use feature ':all'; $f 'misc';
+             my sub foo{} sub foo:lvalue",
+     'ignored mysub :lvalue with fatal warnings');
+eleak(2, 0, "no warnings; use feature ':all'; $all
+             my sub foo{} sub foo:lvalue{}",
+     'fatal mysub redef warning');
+eleak(2, 0, "$all sub foo{} sub foo{}", 'fatal sub redef warning');
+eleak(2, 0, "$all *x=sub {}",
+     'fatal sub redef warning with sub-to-glob assignment');
+eleak(2, 0, "$all *x=sub() {1}",
+     'fatal const sub redef warning with sub-to-glob assignment');
+eleak(2, 0, "$all XS::APItest::newCONSTSUB(\\%main::=>name=>0=>1)",
+     'newXS sub redefinition with fatal warnings');
+eleak(2, 0, "$f 'misc'; my\$a,my\$a", 'double my with fatal warnings');
+eleak(2, 0, "$f 'misc'; our\$a,our\$a", 'double our with fatal warnings');
+eleak(2, 0, "$f 'closure';
+             sub foo { my \$x; format=\n\@\n\$x\n.\n} write; ",
+     'write beyond end of page with fatal warnings');
+eleak(2, 0, "$all /(?{})?/ ", '(?{})? with fatal warnings');
+eleak(2, 0, "$all /(?{})+/ ", '(?{})+ with fatal warnings');
+eleak(2, 0, "$all /[\\i]/ ", 'invalid charclass escape with fatal warns');
+eleak(2, 0, "$all /[:foo:]/ ", '/[:foo:]/ with fatal warnings');
+eleak(2, 0, "$all /[a-\\d]/ ", '[a-\d] char class with fatal warnings');
+eleak(2, 0, "$all v111111111111111111111111111111111111111111111111",
+     'vstring num overflow with fatal warnings');
+undef $::TODO;
 
 eleak(2, 0, 'sub{<*>}');
 
@@ -233,6 +272,16 @@ eleak(2, 0, 'no warnings; 2 2;BEGIN{}',
 }
 eleak(2, 0, "\"\$\0\356\"", 'qq containing $ <null> something');
 eleak(2, 0, 'END OF TERMS AND CONDITIONS', 'END followed by words');
+$::TODO = 'still leaks';
+eleak(2, 0, "qq|\\c|;"x10,     '"too many errors" from qq"\c"');
+eleak(2, 0, "qq|\\N{%}|"x10,   '"too many errors" from qq"\N{%}"');
+eleak(2, 0, "qq|\\o|;"x10,     '"too many errors" from qq"\o"');
+eleak(2, 0, "qq|\\x{|;"x10,    '"too many errors" from qq"\x{"');
+eleak(2, 0, "qq|\\N|;"x10,     '"too many errors" from qq"\N"');
+eleak(2, 0, "qq|\\N{|;"x10,    '"too many errors" from qq"\N{"');
+eleak(2, 0, "qq|\\N{U+GETG}|;"x10,'"too many errors" from qq"\N{U+JUNK}"');
+eleak(2, 0, "qq|\\N{au}|;"x10, '"too many errors" from qq"\N{invalid}"');
+undef $::TODO;
 
 
 # [perl #114764] Attributes leak scalars
