@@ -1219,10 +1219,10 @@ XS(XS_re_regexp_pattern)
     dXSARGS;
     REGEXP *re;
 
+    EXTEND(SP, 2);
+    SP -= items;
     if (items != 1)
 	croak_xs_usage(cv, "sv");
-
-    SP -= items;
 
     /*
        Checks if a reference is a regex or not. If the parameter is
@@ -1275,7 +1275,6 @@ XS(XS_re_regexp_pattern)
 				     (RX_UTF8(re) ? SVf_UTF8 : 0) | SVs_TEMP);
 
             /* return the pattern and the modifiers */
-            EXTEND(SP, 2);
             PUSHs(pattern);
             PUSHs(newSVpvn_flags(reflags, left, SVs_TEMP));
             XSRETURN(2);
@@ -1288,7 +1287,7 @@ XS(XS_re_regexp_pattern)
             pattern = newSVpvn_flags(RX_WRAPPED(re), RX_WRAPLEN(re),
 				     (RX_UTF8(re) ? SVf_UTF8 : 0) | SVs_TEMP);
 #endif
-            XPUSHs(pattern);
+            PUSHs(pattern);
             XSRETURN(1);
         }
     } else {
