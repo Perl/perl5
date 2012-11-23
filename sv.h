@@ -1733,11 +1733,6 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #  define SvPVbytex_nolen(sv) ({SV *_sv = (sv); SvPVbyte_nolen(_sv); })
 #  define SvTRUEx(sv)      ({SV *_sv = (sv); SvTRUE(_sv); })
 #  define SvTRUEx_nomg(sv) ({SV *_sv = (sv); SvTRUE_nomg(_sv); })
-#  define SvPVXtrue(sv)						\
-    ({XPV *nxpv;						\
-     (nxpv = (XPV*)SvANY(sv))					\
-      && (nxpv->xpv_cur > 1					\
-	  || (nxpv->xpv_cur && *(sv)->sv_u.svu_pv != '0'));})
 
 #else /* __GNUC__ */
 
@@ -1756,11 +1751,18 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #  define SvPVbytex_nolen(sv) ((PL_Sv = (sv)), SvPVbyte_nolen(PL_Sv))
 #  define SvTRUEx(sv)      ((PL_Sv = (sv)), SvTRUE(PL_Sv))
 #  define SvTRUEx_nomg(sv) ((PL_Sv = (sv)), SvTRUE_nomg(PL_Sv))
-#  define SvPVXtrue(sv)						\
-    ((PL_Xpv = (XPV*)SvANY(PL_Sv = (sv)))			\
-     && (PL_Xpv->xpv_cur > 1					\
-	 || (PL_Xpv->xpv_cur && *PL_Sv->sv_u.svu_pv != '0')))
 #endif /* __GNU__ */
+
+#define SvPVXtrue(sv)	(					\
+    ((XPV*)SvANY((sv))) 					\
+     && (							\
+	((XPV*)SvANY((sv)))->xpv_cur > 1			\
+	|| (							\
+	    ((XPV*)SvANY((sv)))->xpv_cur			\
+	    && *(sv)->sv_u.svu_pv != '0'				\
+	)							\
+    )								\
+)
 
 #define SvIsCOW(sv)		(SvFLAGS(sv) & SVf_IsCOW)
 #define SvIsCOW_on(sv)		(SvFLAGS(sv) |= SVf_IsCOW)
