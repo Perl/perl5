@@ -615,8 +615,10 @@ regen_headers :
 perly$(O) : perly.c, perly.h, $(h)
 .endif
 
-[.t.lib]vmsfspec.t : [.vms.ext]filespec.t
-	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
+VMSFSPEC_T = [.t.lib]vmsfspec.t
+
+$(VMSFSPEC_T) : [.vms.ext]filespec.t
+	Copy/NoConfirm/Log $(MMS$SOURCE) $(VMSFSPEC_T)
 
 check : test
 	@ Continue
