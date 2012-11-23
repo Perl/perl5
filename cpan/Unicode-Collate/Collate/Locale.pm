@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.93';
+our $VERSION = '0.94';
 
 my $PL_EXT  = '.pl';
 
@@ -28,6 +28,7 @@ my %LocaleFile = map { ($_, $_) } qw(
    $LocaleFile{'zh__gb2312han'}   = 'zh_gb';
    $LocaleFile{'zh__pinyin'}      = 'zh_pin';
    $LocaleFile{'zh__stroke'}      = 'zh_strk';
+   $LocaleFile{'zh__zhuyin'}      = 'zh_zhu';
 
 my %TypeAlias = qw(
     phone     phonebook
@@ -155,11 +156,11 @@ hu		2.0 = 1.8.1 (alt="proposed" type="standard")
 hy		2.0 = 1.8.1
 ig		2.0 = 1.8.1
 is		2.0 = 1.8.1 (type="standard")
-ja		2.0 = 1.8.1 (type="standard")
+ja		22.1 = 2.0 = 1.8.1 (type="standard")
 kk		2.0
 kl		2.0 = 1.8.1 (type="standard")
 kn		2.0 (type="standard")
-ko		2.0 = 1.8.1 (type="standard")
+ko		22.1 = 2.0 = 1.8.1 (type="standard")
 kok		2.0 = 1.8.1
 ln		2.0 (type="standard") = 1.8.1
 lt		2.0
@@ -200,11 +201,12 @@ vi		2.0 = 1.8.1
 wae		2.0
 wo		1.8.1 [currently in /seed]
 yo		2.0 = 1.8.1
-zh		2.0 = 1.8.1 (type="standard")
-zh__big5han	2.0 = 1.8.1 (type="big5han")
-zh__gb2312han	2.0 = 1.8.1 (type="gb2312han")
-zh__pinyin	2.0 (type='pinyin' alt='short')
-zh__stroke	2.0 = 1.9.1 (type='stroke' alt='short')
+zh		22.1 = 2.0 = 1.8.1 (type="standard")
+zh__big5han	22.1 = 2.0 = 1.8.1 (type="big5han")
+zh__gb2312han	22.1 = 2.0 = 1.8.1 (type="gb2312han")
+zh__pinyin	22.1 = 2.0         (type='pinyin' alt='short')
+zh__stroke	22.1 = 2.0 = 1.9.1 (type='stroke' alt='short')
+zh__zhuyin	22.1 = 22          (type='zhuyin' alt='short')
 ----------------------------------------------------------------------------
 
 =head1 NAME
@@ -404,6 +406,7 @@ a combination of return values from C<getlocale> and C<locale_version>.
       zh__gb2312han     Chinese (ideographs: GB-2312 order)
       zh__pinyin        Chinese (ideographs: pinyin order) [3]
       zh__stroke        Chinese (ideographs: stroke order) [3]
+      zh__zhuyin        Chinese (ideographs: zhuyin order) [3]
     --------------------------------------------------------------
 
 Locales according to the default UCA rules include
@@ -434,8 +437,10 @@ and then C<katakana_before_hiragana> has no effect.
 an ideograph is primary (level 1) equal to, and secondary (level 2)
 greater than, the corresponding hangul syllable.
 
-[3] zh__pinyin and zh__stroke: implemented alt='short', where
-a smaller number of ideographs are tailored.
+[3] zh__pinyin, zh__stroke and zh__zhuyin: implemented alt='short',
+where a smaller number of ideographs are tailored.
+
+Note: 'pinyin' is in latin, 'zhuyin' is in bopomofo.
 
 =head1 INSTALL
 

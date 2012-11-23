@@ -1,5 +1,12 @@
 Revision history for Perl module Unicode::Collate.
 
+0.94  Fri Nov 23 18:45:53 2012
+    - U::C::Locale newly supports locale: zh__zhuyin.
+    - added Unicode::Collate::CJK::Zhuyin for zh__zhuyin.
+    - doc: added CAVEAT to CJK/Stroke.pm
+    - modified tests: loc_cjk.t, loc_cjkc.t in t.
+    - added cjk_zy.t, loc_zhzy.t in t.
+
 0.93  Sun Nov 18 18:13:42 2012
     - DUCET is updated (for Unicode 6.2.0) as Collate/allkeys.txt.
     ! Please notice that allkeys.txt will be overwritten if you have had
