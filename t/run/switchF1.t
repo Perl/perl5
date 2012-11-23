@@ -14,10 +14,10 @@ BEGIN {
 print "@F";
 
 __DATA__
-okx1
-okq2
-ok\3
-ok'4
+okx1x- use of alternate delimiter (lower case letter) in -F
+okq2q- use of alternate delimiter (lower case letter) in -F
+ok\3\- use of alternate delimiter (backslash) in -F
+ok'4'- use of alternate delimiter (apostrophe) in -F
 EOT
 
 # 2 of the characters toke.c used to use to quote the split parameter:
@@ -26,6 +26,8 @@ $prog =~ s/QQ/\x01\x80/;
 print F $prog;
 close F or die "Close $file: $!";
 
-print system ($^X, $file) ? "not ok 5\n" : "ok 5\n";
+$count = 5;
+$result = "ok $count - complete test of alternate delimiters in -F\n";
+print system ($^X, $file) ? "not $result" : $result;
 
 unlink $file or die "Unlink $file: $!";
