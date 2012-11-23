@@ -261,6 +261,7 @@ struct xpvhv {
 
 #elif defined(PERL_HASH_FUNC_SUPERFAST)
 #define PERL_HASH_FUNC "SUPERFAST"
+#define PERL_HASH_SEED_BYTES 4
 /* FYI: This is the "Super-Fast" algorithm mentioned by Bob Jenkins in
  * (http://burtleburtle.net/bob/hash/doobs.html)
  * It is by Paul Hsieh (c) 2004 and is analysed here
