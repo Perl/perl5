@@ -3445,6 +3445,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	PERL_CONTEXT *cx;
 	I32 optype;			/* Used by POPEVAL. */
 	SV *namesv;
+        SV *errsv = NULL;
 
 	cx = NULL;
 	namesv = NULL;
@@ -3467,6 +3468,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 	}
 
+	errsv = ERRSV;
 	if (in_require) {
 	    if (!cx) {
 		/* If cx is still NULL, it means that we didn't go in the
@@ -3480,13 +3482,13 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
                            SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			   &PL_sv_undef, 0);
 	    Perl_croak(aTHX_ "%"SVf"Compilation failed in require",
-		       SVfARG(ERRSV
-                                ? ERRSV
+		       SVfARG(errsv
+                                ? errsv
                                 : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
 	}
 	else {
-	    if (!*(SvPVx_nolen_const(ERRSV))) {
-	        sv_setpvs(ERRSV, "Compilation error");
+	    if (!*(SvPV_nolen_const(errsv))) {
+	        sv_setpvs(errsv, "Compilation error");
 	    }
 	}
 	if (gimme != G_ARRAY) PUSHs(&PL_sv_undef);
@@ -5367,8 +5369,10 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    if (SvOK(out)) {
 		status = SvIV(out);
 	    }
-            else if (SvTRUE(ERRSV)) {
-                err = newSVsv(ERRSV);
+            else {
+                SV * const errsv = ERRSV;
+                if (SvTRUE_NN(errsv))
+                    err = newSVsv(errsv);
             }
 	}
 

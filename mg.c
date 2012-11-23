@@ -3139,8 +3139,10 @@ Perl_sighandler(int sig)
     call_sv(MUTABLE_SV(cv), G_DISCARD|G_EVAL);
 
     POPSTACK;
-    if (SvTRUE(ERRSV)) {
-        SvREFCNT_dec(errsv_save);
+    {
+	SV * const errsv = ERRSV;
+	if (SvTRUE_NN(errsv)) {
+	    SvREFCNT_dec(errsv_save);
 #ifndef PERL_MICRO
 	/* Handler "died", for example to get out of a restart-able read().
 	 * Before we re-do that on its behalf re-enable the signal which was
@@ -3148,25 +3150,26 @@ Perl_sighandler(int sig)
 	 */
 #ifdef HAS_SIGPROCMASK
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
-       if (sip || uap)
+	    if (sip || uap)
 #endif
-	{
-	    sigset_t set;
-	    sigemptyset(&set);
-	    sigaddset(&set,sig);
-	    sigprocmask(SIG_UNBLOCK, &set, NULL);
-	}
+	    {
+		sigset_t set;
+		sigemptyset(&set);
+		sigaddset(&set,sig);
+		sigprocmask(SIG_UNBLOCK, &set, NULL);
+	    }
 #else
-	/* Not clear if this will work */
-	(void)rsignal(sig, SIG_IGN);
-	(void)rsignal(sig, PL_csighandlerp);
+	    /* Not clear if this will work */
+	    (void)rsignal(sig, SIG_IGN);
+	    (void)rsignal(sig, PL_csighandlerp);
 #endif
 #endif /* !PERL_MICRO */
-	die_sv(ERRSV);
-    }
-    else {
-        sv_setsv(ERRSV, errsv_save);
-        SvREFCNT_dec(errsv_save);
+	    die_sv(errsv);
+	}
+	else {
+	    sv_setsv(errsv, errsv_save);
+	    SvREFCNT_dec(errsv_save);
+	}
     }
 
 cleanup:

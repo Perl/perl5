@@ -2863,8 +2863,11 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 #endif
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
 			     NULL);
-	    if (!SvTRUE(ERRSV))
-		sv_setsv(ERRSV, errsv_save);
+	    {
+		SV * const errsv = ERRSV;
+		if (!SvTRUE_NN(errsv))
+		    sv_setsv(errsv, errsv_save);
+	    }
 	    LEAVE;
 	}
 	SPAGAIN;
@@ -2887,8 +2890,11 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    retval = *PL_stack_sp--;
 	    SvREFCNT_inc(retval);
 	}
-	if (!SvTRUE(ERRSV))
-	    sv_setsv(ERRSV, errsv_save);
+	{
+	    SV * const errsv = ERRSV;
+	    if (!SvTRUE_NN(errsv))
+		sv_setsv(errsv, errsv_save);
+	}
 	LEAVE;
 	POPSTACK;
 	if (IN_PERL_COMPILETIME) {

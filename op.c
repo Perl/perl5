@@ -7379,14 +7379,13 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    const char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
 	    if (strEQ(s, "BEGIN")) {
-		const char not_safe[] =
-		    "BEGIN not safe after errors--compilation aborted";
 		if (PL_in_eval & EVAL_KEEPERR)
-		    Perl_croak(aTHX_ not_safe);
+		    Perl_croak_nocontext("BEGIN not safe after errors--compilation aborted");
 		else {
+                    SV * const errsv = ERRSV;
 		    /* force display of errors found but not reported */
-		    sv_catpv(ERRSV, not_safe);
-		    Perl_croak(aTHX_ "%"SVf, SVfARG(ERRSV));
+		    sv_catpvs(errsv, "BEGIN not safe after errors--compilation aborted");
+		    Perl_croak_nocontext("%"SVf, SVfARG(errsv));
 		}
 	    }
 	}

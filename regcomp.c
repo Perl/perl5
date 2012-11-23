@@ -5095,10 +5095,14 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	SPAGAIN;
 	qr_ref = POPs;
 	PUTBACK;
-	if (SvTRUE(ERRSV))
 	{
-	    Safefree(pRExC_state->code_blocks);
-	    Perl_croak(aTHX_ "%s", SvPVx_nolen_const(ERRSV));
+	    SV * const errsv = ERRSV;
+	    if (SvTRUE_NN(errsv))
+	    {
+		Safefree(pRExC_state->code_blocks);
+                /* use croak_sv ? */
+		Perl_croak_nocontext("%s", SvPV_nolen_const(errsv));
+	    }
 	}
 	assert(SvROK(qr_ref));
 	qr = SvRV(qr_ref);

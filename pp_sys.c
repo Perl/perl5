@@ -445,17 +445,18 @@ PP(pp_warn)
 	/* well-formed exception supplied */
     }
     else {
-      SvGETMAGIC(ERRSV);
-      if (SvROK(ERRSV)) {
-	if (SvGMAGICAL(ERRSV)) {
+      SV * const errsv = ERRSV;
+      SvGETMAGIC(errsv);
+      if (SvROK(errsv)) {
+	if (SvGMAGICAL(errsv)) {
 	    exsv = sv_newmortal();
-	    sv_setsv_nomg(exsv, ERRSV);
+	    sv_setsv_nomg(exsv, errsv);
 	}
-	else exsv = ERRSV;
+	else exsv = errsv;
       }
-      else if (SvPOKp(ERRSV) ? SvCUR(ERRSV) : SvNIOKp(ERRSV)) {
+      else if (SvPOKp(errsv) ? SvCUR(errsv) : SvNIOKp(errsv)) {
 	exsv = sv_newmortal();
-	sv_setsv_nomg(exsv, ERRSV);
+	sv_setsv_nomg(exsv, errsv);
 	sv_catpvs(exsv, "\t...caught");
       }
       else {
@@ -489,32 +490,35 @@ PP(pp_die)
     if (SvROK(exsv) || (SvPV_const(exsv, len), len)) {
 	/* well-formed exception supplied */
     }
-    else if (SvROK(ERRSV)) {
-	exsv = ERRSV;
-	if (sv_isobject(exsv)) {
-	    HV * const stash = SvSTASH(SvRV(exsv));
-	    GV * const gv = gv_fetchmethod(stash, "PROPAGATE");
-	    if (gv) {
-		SV * const file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
-		SV * const line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
-		EXTEND(SP, 3);
-		PUSHMARK(SP);
-		PUSHs(exsv);
-		PUSHs(file);
-		PUSHs(line);
-		PUTBACK;
-		call_sv(MUTABLE_SV(GvCV(gv)),
-			G_SCALAR|G_EVAL|G_KEEPERR);
-		exsv = sv_mortalcopy(*PL_stack_sp--);
+    else {
+	SV * const errsv = ERRSV;
+	if (SvROK(errsv)) {
+	    exsv = errsv;
+	    if (sv_isobject(exsv)) {
+		HV * const stash = SvSTASH(SvRV(exsv));
+		GV * const gv = gv_fetchmethod(stash, "PROPAGATE");
+		if (gv) {
+		    SV * const file = sv_2mortal(newSVpv(CopFILE(PL_curcop),0));
+		    SV * const line = sv_2mortal(newSVuv(CopLINE(PL_curcop)));
+		    EXTEND(SP, 3);
+		    PUSHMARK(SP);
+		    PUSHs(exsv);
+		    PUSHs(file);
+		    PUSHs(line);
+		    PUTBACK;
+		    call_sv(MUTABLE_SV(GvCV(gv)),
+			    G_SCALAR|G_EVAL|G_KEEPERR);
+		    exsv = sv_mortalcopy(*PL_stack_sp--);
+		}
 	    }
 	}
-    }
-    else if (SvPV_const(ERRSV, len), len) {
-	exsv = sv_mortalcopy(ERRSV);
-	sv_catpvs(exsv, "\t...propagated");
-    }
-    else {
-	exsv = newSVpvs_flags("Died", SVs_TEMP);
+	else if (SvPV_const(errsv, len), len) {
+	    exsv = sv_mortalcopy(errsv);
+	    sv_catpvs(exsv, "\t...propagated");
+	}
+	else {
+	    exsv = newSVpvs_flags("Died", SVs_TEMP);
+	}
     }
     return die_sv(exsv);
 }

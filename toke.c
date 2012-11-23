@@ -9019,6 +9019,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     dVAR; dSP;
     HV * table = GvHV(PL_hintgv);		 /* ^H */
     SV *res;
+    SV *errsv = NULL;
     SV **cvp;
     SV *cv, *typesv;
     const char *why1 = "", *why2 = "", *why3 = "";
@@ -9112,11 +9113,11 @@ now_ok:
     SPAGAIN ;
 
     /* Check the eval first */
-    if (!PL_in_eval && SvTRUE(ERRSV)) {
+    if (!PL_in_eval && ((errsv = ERRSV), SvTRUE_NN(errsv))) {
 	STRLEN errlen;
 	const char * errstr;
-	sv_catpvs(ERRSV, "Propagated");
-	errstr = SvPV_const(ERRSV, errlen);
+	sv_catpvs(errsv, "Propagated");
+	errstr = SvPV_const(errsv, errlen);
 	yyerror_pvn(errstr, errlen, 0); /* Duplicates the message inside eval */
 	(void)POPs;
 	res = SvREFCNT_inc_simple(sv);
@@ -11264,9 +11265,10 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     else
 	qerror(msg);
     if (PL_error_count >= 10) {
-	if (PL_in_eval && SvCUR(ERRSV))
+	SV * errsv;
+	if (PL_in_eval && ((errsv = ERRSV), SvCUR(errsv)))
 	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
-		       SVfARG(ERRSV), OutCopFILE(PL_curcop));
+		       SVfARG(errsv), OutCopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",
             OutCopFILE(PL_curcop));

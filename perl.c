@@ -2905,8 +2905,12 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
         PUTBACK;
     }
 
-    if (croak_on_error && SvTRUE(ERRSV)) {
-	Perl_croak(aTHX_ "%s", SvPVx_nolen_const(ERRSV));
+    /* just check empty string or undef? */
+    if (croak_on_error) {
+	SV * const errsv = ERRSV;
+	if(SvTRUE_NN(errsv))
+	    /* replace with croak_sv? */
+	    Perl_croak_nocontext("%s", SvPV_nolen_const(errsv));
     }
 
     return sv;
