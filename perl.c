@@ -2892,7 +2892,6 @@ SV*
 Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 {
     dVAR;
-    dSP;
     SV* sv = newSVpv(p, 0);
 
     PERL_ARGS_ASSERT_EVAL_PV;
@@ -2900,9 +2899,11 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
     eval_sv(sv, G_SCALAR);
     SvREFCNT_dec(sv);
 
-    SPAGAIN;
-    sv = POPs;
-    PUTBACK;
+    {
+        dSP;
+        sv = POPs;
+        PUTBACK;
+    }
 
     if (croak_on_error && SvTRUE(ERRSV)) {
 	Perl_croak(aTHX_ "%s", SvPVx_nolen_const(ERRSV));
