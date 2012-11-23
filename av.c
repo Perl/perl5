@@ -934,7 +934,6 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
         const MAGIC * const regdata_magic
             = mg_find((const SV *)av, PERL_MAGIC_regdata);
         if (tied_magic || regdata_magic) {
-	    SV * const sv = sv_newmortal();
             MAGIC *mg;
             /* Handle negative array indices 20020222 MJD */
             if (key < 0) {
@@ -948,14 +947,18 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
                 else
                     return FALSE;
             }
-
-            mg_copy(MUTABLE_SV(av), sv, 0, key);
-            mg = mg_find(sv, PERL_MAGIC_tiedelem);
-            if (mg) {
-                magic_existspack(sv, mg);
-                return cBOOL(SvTRUE_nomg(sv));
-            }
-
+	    {
+		SV * const sv = sv_newmortal();
+		mg_copy(MUTABLE_SV(av), sv, 0, key);
+		mg = mg_find(sv, PERL_MAGIC_tiedelem);
+		if (mg) {
+		    magic_existspack(sv, mg);
+		    {
+			I32 retbool = SvTRUE_nomg_NN(sv);
+			return cBOOL(retbool);
+		    }
+		}
+	    }
         }
     }
 
