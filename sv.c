@@ -6333,9 +6333,9 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	HV* stash;
 	do {
 	  stash = SvSTASH(sv);
+	  assert(SvTYPE(stash) == SVt_PVHV);
 	  if (HvNAME(stash)) {
 	    CV* destructor = NULL;
-	    assert(SvTYPE(stash) == SVt_PVHV);
 	    if (!SvOBJECT(stash)) destructor = (CV *)SvSTASH(stash);
 	    if (!destructor) {
 		GV * const gv =
@@ -6345,6 +6345,8 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 		    SvSTASH(stash) =
 			destructor ? (HV *)destructor : ((HV *)0)+1;
 	    }
+	    assert(!destructor || destructor == ((CV *)0)+1
+		|| SvTYPE(destructor) == SVt_PVCV);
 	    if (destructor && destructor != ((CV *)0)+1
 		/* A constant subroutine can have no side effects, so
 		   don't bother calling it.  */
@@ -6364,7 +6366,6 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	       )
 	    {
 		SV* const tmpref = newRV(sv);
-		assert(SvTYPE(destructor) == SVt_PVCV);
 		SvREADONLY_on(tmpref); /* DESTROY() could be naughty */
 		ENTER;
 		PUSHSTACKi(PERLSI_DESTROY);
