@@ -274,7 +274,7 @@ sub embed_h {
 	unless ($flags =~ /[om]/) {
 	    my $args = scalar @args;
 	    if ($flags =~ /n/) {
-		if ($flags =~ /s/) {
+		if ($flags =~ /[si]/) {
 		    $ret = hide($func,"S_$func");
 		}
 		elsif ($flags =~ /p/) {
