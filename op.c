@@ -7464,11 +7464,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		SAVEFREESV(PL_compcv);
 		goto done;
 	    }
-	    if (block
-#ifdef PERL_MAD
-		&& block->op_type != OP_NULL
-#endif
-		) {
+	    else {
 		const line_t oldline = CopLINE(PL_curcop);
 		if (PL_parser && PL_parser->copline != NOLINE) {
                         /* This ensures that warnings are reported at the first
