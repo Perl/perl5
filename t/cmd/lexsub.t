@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 127;
+plan 128;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -599,6 +599,13 @@ not_lexical11();
   my sub x;
   eval 'sub x {3}';
   is x, 3, 'my sub defined inside eval';
+}
+
+{
+  state $w;
+  local $SIG{__WARN__} = sub { $w .= shift };
+  eval q{ my sub george () { 2 } };
+  is $w, undef, 'no double free from constant my subs';
 }
 
 # -------------------- Interactions (and misc tests) -------------------- #
