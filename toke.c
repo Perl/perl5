@@ -8022,6 +8022,9 @@ Perl_yylex(pTHX)
 				  "Experimental \"%s\" subs not enabled",
 				   tmp == KEY_my    ? "my"    :
 				   tmp == KEY_state ? "state" : "our");
+		    Perl_ck_warner_d(aTHX_
+			packWARN(WARN_EXPERIMENTAL__LEXICAL_SUBS),
+			"The lexical_subs feature is experimental");
 		    goto really_sub;
 		}
 		PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);

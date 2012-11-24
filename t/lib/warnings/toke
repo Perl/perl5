@@ -1160,13 +1160,15 @@ sub proto_after_array(@$);
 sub proto_after_hash(%$);
 sub underscore_fail($_$);
 EXPECT
-The lexical_subs feature is experimental at - line 2.
 Prototype after '@' for main::proto_after_array : @$ at - line 3.
 Prototype after '%' for main::proto_after_hash : %$ at - line 7.
 Illegal character after '_' in prototype for main::underscore_fail : $_$ at - line 12.
 Prototype after '@' for main::underscore_after_at : @_ at - line 13.
+The lexical_subs feature is experimental at - line 14.
 Prototype after '@' for hour : @$ at - line 14.
+The lexical_subs feature is experimental at - line 15.
 Prototype after '@' for migh : @$ at - line 15.
+The lexical_subs feature is experimental at - line 17.
 Prototype after '@' for estate : @$ at - line 17.
 Prototype after '@' for hour : @$ at - line 19.
 Prototype after '@' for migh : @$ at - line 20.

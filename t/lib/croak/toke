@@ -25,7 +25,7 @@ Missing name in "our sub" at - line 1.
 use 5.01; use feature 'lexical_subs';
 state sub;
 EXPECT
-The lexical_subs feature is experimental at - line 1.
+The lexical_subs feature is experimental at - line 2.
 Missing name in "state sub" at - line 2.
 ########
 # NAME Unterminated delimiter for here document

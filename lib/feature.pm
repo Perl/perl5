@@ -35,9 +35,6 @@ $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.17"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.18"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
-my %experimental = (
-    lexical_subs => 1,
-);
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x1c000000;
@@ -233,8 +230,8 @@ This feature is available from Perl 5.16 onwards.
 =head2 The 'lexical_subs' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, F<feature.pm> will
-warn when you enable the feature, unless you have explicitly disabled the
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
 warning:
 
     no warnings "experimental::lexical_subs";
@@ -380,11 +377,6 @@ sub __common {
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-	    if ($experimental{$name}) {
-		require warnings;
-		warnings::warnif("experimental::$name",
-				 "The $name feature is experimental");
-	    }
 	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';

@@ -52,6 +52,7 @@ my %feature_bundle = (
 		    evalbytes current_sub fc)],
 );
 
+# not actually used currently
 my @experimental = qw( lexical_subs );
 
 
@@ -175,9 +176,9 @@ for (sort keys %Aliases) {
 	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
 };
 
-print $pm "my \%experimental = (\n";
-print $pm "    $_ => 1,\n", for @experimental;
-print $pm ");\n";
+#print $pm "my \%experimental = (\n";
+#print $pm "    $_ => 1,\n", for @experimental;
+#print $pm ");\n";
 
 print $pm <<EOPM;
 
@@ -544,8 +545,8 @@ This feature is available from Perl 5.16 onwards.
 =head2 The 'lexical_subs' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
-change in future versions of Perl.  For this reason, F<feature.pm> will
-warn when you enable the feature, unless you have explicitly disabled the
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
 warning:
 
     no warnings "experimental::lexical_subs";
@@ -678,11 +679,6 @@ sub __common {
 	if ($import) {
 	    $^H{$feature{$name}} = 1;
 	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-	    if ($experimental{$name}) {
-		require warnings;
-		warnings::warnif("experimental::$name",
-				 "The $name feature is experimental");
-	    }
 	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';

@@ -206,7 +206,7 @@ package main;
   is $y, 44, 'state subs from other packages override all keywords';
 }
 {
-  use warnings;
+  use warnings; no warnings "experimental::lexical_subs";
   state $w ;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 87 squidges
@@ -234,7 +234,7 @@ is &$sub2, 49, 'state sub in closure (2)';
 # But we need to test that state subs actually do persist from one invoca-
 # tion of a named sub to another (i.e., that they are not my subs).
 {
-  use warnings;
+  use warnings; no warnings "experimental::lexical_subs";
   state $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 65 teetet
@@ -287,7 +287,7 @@ sub make_anon_with_state_sub{
 }
 {
   state sub redef {}
-  use warnings;
+  use warnings; no warnings "experimental::lexical_subs";
   state $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval "#line 56 pygpyf\nsub redef {}";
@@ -428,7 +428,7 @@ package main;
   is $y, 44, 'my subs from other packages override all keywords';
 }
 {
-  use warnings;
+  use warnings; no warnings "experimental::lexical_subs";
   my $w ;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 87 squidges
@@ -454,7 +454,7 @@ is &$sub1, 48, 'my sub in closure (1)';
 is &$sub2, 49, 'my sub in closure (2)';
 # Test that they are cloned in named subs.
 {
-  use warnings;
+  use warnings; no warnings "experimental::lexical_subs";
   my $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 65 teetet
@@ -521,7 +521,7 @@ sub make_anon_with_my_sub{
 }
 {
   my sub redef {}
-  use warnings;
+  use warnings; no warnings "experimental::lexical_subs";
   my $w;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval "#line 56 pygpyf\nsub redef {}";
