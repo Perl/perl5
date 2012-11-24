@@ -279,7 +279,7 @@ the "Perl extended UTF-8" (the infamous 'v-strings') will encode into
 five bytes or more.
 
 =cut */
-STATIC STRLEN
+PERL_STATIC_INLINE STRLEN
 S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 {
     dTHX;   /* The function called below requires thread context */
