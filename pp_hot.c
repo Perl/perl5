@@ -1350,6 +1350,9 @@ PP(pp_match)
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
+    /* We need to know this incase we fail out early - pos() must be reset */
+    global = dynpm->op_pmflags & PMf_GLOBAL;
+
     /* PMdf_USED is set after a ?? matches once */
     if (
 #ifdef USE_ITHREADS
@@ -1359,11 +1362,7 @@ PP(pp_match)
 #endif
     ) {
         DEBUG_r(PerlIO_printf(Perl_debug_log, "?? already matched once"));
-      failure:
-
-	if (gimme == G_ARRAY)
-	    RETURN;
-	RETPUSHNO;
+	goto nope;
     }
 
 
@@ -1378,13 +1377,13 @@ PP(pp_match)
 
     if (RX_MINLEN(rx) > (I32)len) {
         DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match\n"));
-	goto failure;
+	goto nope;
     }
 
     truebase = t = s;
 
     /* XXXX What part of this is needed with true \G-support? */
-    if ((global = dynpm->op_pmflags & PMf_GLOBAL)) {
+    if (global) {
 	RX_OFFS(rx)[0].start = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);

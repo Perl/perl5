@@ -5464,6 +5464,7 @@ t/re/pat_special_cc.t		See if special charclasses (\s \w \d) work the same as (\
 t/re/pat_special_cc_thr.t	See if special charclasses (\s \w \d) work the same as (\s and [\s]) under threads
 t/re/pat.t			See if esoteric patterns work
 t/re/pat_thr.t			See if esoteric patterns work in another thread
+t/re/pos.t			Ensure pos() gets set properly after pre-match failures in pp_match
 t/re/qr-72922.t			Test for bug #72922
 t/re/qr_gc.t			See if qr doesn't leak
 t/re/qrstack.t			See if qr expands the stack properly
