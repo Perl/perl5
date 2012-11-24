@@ -6954,7 +6954,10 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
             /* This ensures that warnings are reported at the first
                line of a redefinition, not the last.  */
 	    CopLINE_set(PL_curcop, PL_parser->copline);
+	/* protect against fatal warnings leaking compcv */
+	SAVEFREESV(PL_compcv);
 	report_redefined_cv(namesv, cv, const_svp);
+	SvREFCNT_inc_simple_void_NN(PL_compcv);
 	CopLINE_set(PL_curcop, oldline);
     }
 #ifdef PERL_MAD

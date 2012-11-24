@@ -83,11 +83,11 @@ eleak(2, 0, "$f 'misc'; sub foo{} sub foo:lvalue",
 eleak(2, 0, "no warnings; use feature ':all'; $f 'misc';
              my sub foo{} sub foo:lvalue",
      'ignored mysub :lvalue with fatal warnings');
-$::TODO = 'still leaks';
 eleak(2, 0, "no warnings; use feature ':all'; $all
              my sub foo{} sub foo:lvalue{}",
      'fatal mysub redef warning');
 eleak(2, 0, "$all sub foo{} sub foo{}", 'fatal sub redef warning');
+$::TODO = 'still leaks';
 eleak(2, 0, "$all *x=sub {}",
      'fatal sub redef warning with sub-to-glob assignment');
 eleak(2, 0, "$all *x=sub() {1}",
