@@ -1,3 +1,5 @@
+  - Errno was added in 5.5, not in 5.5.4
+
 2.78 Sat Nov 12 2012
   - Updated for v5.17.6
 

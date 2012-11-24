@@ -555,6 +555,7 @@ my %delta = (
             'CPAN::FirstTime'       => '1.29 ',
             'DB_File'               => '1.60',
             'Data::Dumper'          => '2.09',
+            'Errno'                 => '1.09',
             'ExtUtils::Installed'   => '0.02',
             'ExtUtils::MM_Unix'     => '1.12601 ',
             'ExtUtils::MakeMaker'   => '5.4301',
@@ -603,6 +604,7 @@ my %delta = (
             'DB_File'               => '1.65',
             'Data::Dumper'          => '2.101',
             'Dumpvalue'             => undef,
+            'Errno'                 => '1.111',
             'ExtUtils::Install'     => '1.28',
             'ExtUtils::Liblist'     => '1.25',
             'ExtUtils::MM_Unix'     => '1.12602',
@@ -628,7 +630,6 @@ my %delta = (
         changed => {
             'CPAN::FirstTime'       => '1.36 ',
             'DB_File'               => '1.807',
-            'Errno'                 => '1.111',
             'ExtUtils::Install'     => '1.28 ',
             'ExtUtils::Liblist'     => '1.25 ',
             'ExtUtils::MM_Unix'     => '1.12602 ',
@@ -1174,7 +1175,6 @@ my %delta = (
             'warnings::register'    => '1.00',
         },
         removed => {
-            'Errno'                 => 1,
         }
     },
     5.008 => {
