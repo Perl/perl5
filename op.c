@@ -6912,6 +6912,61 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
     return sv;
 }
 
+static bool
+S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
+			PADNAME * const name, SV ** const const_svp)
+{
+    assert (cv);
+    assert (o || name);
+    assert (const_svp);
+    if ((!block
+#ifdef PERL_MAD
+	 || block->op_type == OP_NULL
+#endif
+	 )) {
+	if (CvFLAGS(PL_compcv)) {
+	    /* might have had built-in attrs applied */
+	    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
+	    if (CvLVALUE(PL_compcv) && ! CvLVALUE(cv) && pureperl
+	     && ckWARN(WARN_MISC))
+	    {
+		/* protect against fatal warnings leaking compcv */
+		SAVEFREESV(PL_compcv);
+		Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
+		SvREFCNT_inc_simple_void_NN(PL_compcv);
+	    }
+	    CvFLAGS(cv) |=
+		(CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS
+		  & ~(CVf_LVALUE * pureperl));
+	}
+	return FALSE;
+    }
+
+    /* redundant check for speed: */
+    if (CvCONST(cv) || ckWARN(WARN_REDEFINE)) {
+	const line_t oldline = CopLINE(PL_curcop);
+	SV *namesv = o
+	    ? cSVOPo->op_sv
+	    : sv_2mortal(newSVpvn_utf8(
+		PadnamePV(name)+1,PadnameLEN(name)-1, PadnameUTF8(name)
+	      ));
+	if (PL_parser && PL_parser->copline != NOLINE)
+            /* This ensures that warnings are reported at the first
+               line of a redefinition, not the last.  */
+	    CopLINE_set(PL_curcop, PL_parser->copline);
+	report_redefined_cv(namesv, cv, const_svp);
+	CopLINE_set(PL_curcop, oldline);
+    }
+#ifdef PERL_MAD
+    if (!PL_minus_c)	/* keep old one around for madskills */
+#endif
+    {
+	/* (PL_madskills unset in used file.) */
+	SvREFCNT_dec(cv);
+    }
+    return TRUE;
+}
+
 CV *
 Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
@@ -7028,53 +7083,13 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             cv_ckproto_len_flags(cv, (GV *)name, ps, ps_len, ps_utf8);
 	/* already defined? */
 	if (exists) {
-	    if ((!block
-#ifdef PERL_MAD
-		 || block->op_type == OP_NULL
-#endif
-		 )) {
-		if (CvFLAGS(compcv)) {
-		    /* might have had built-in attrs applied */
-		    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
-		    if (CvLVALUE(compcv) && ! CvLVALUE(cv) && pureperl
-		     && ckWARN(WARN_MISC))
-		    {
-			/* protect against fatal warnings leaking compcv */
-			SAVEFREESV(PL_compcv);
-			Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
-			SvREFCNT_inc_simple_void_NN(PL_compcv);
-		    }
-		    CvFLAGS(cv) |=
-			(CvFLAGS(compcv) & CVf_BUILTIN_ATTRS
-			  & ~(CVf_LVALUE * pureperl));
-		}
+	    if (S_already_defined(aTHX_ cv, block, NULL, name, &const_sv))
+		cv = NULL;
+	    else {
 		if (attrs) goto attrs;
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(compcv);
 		goto done;
-	    }
-	    else {
-		/* redundant check that avoids creating the extra SV
-		   most of the time: */
-		if (CvCONST(cv) || ckWARN(WARN_REDEFINE)) {
-		    const line_t oldline = CopLINE(PL_curcop);
-		    SV *noamp = sv_2mortal(newSVpvn_utf8(
-				    PadnamePV(name)+1,PadnameLEN(name)-1,
-				     PadnameUTF8(name)
-				));
-		    if (PL_parser && PL_parser->copline != NOLINE)
-			CopLINE_set(PL_curcop, PL_parser->copline);
-		    report_redefined_cv(noamp, cv, &const_sv);
-		    CopLINE_set(PL_curcop, oldline);
-		}
-#ifdef PERL_MAD
-		if (!PL_minus_c)	/* keep old one around for madskills */
-#endif
-		    {
-			/* (PL_madskills unset in used file.) */
-			SvREFCNT_dec(cv);
-		    }
-		cv = NULL;
 	    }
 	}
 	else if (CvDEPTH(outcv) && CvCLONE(compcv)) {
@@ -7439,48 +7454,13 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             cv_ckproto_len_flags(cv, gv, ps, ps_len, ps_utf8);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
-	    if ((!block
-#ifdef PERL_MAD
-		 || block->op_type == OP_NULL
-#endif
-		 )) {
-		if (CvFLAGS(PL_compcv)) {
-		    /* might have had built-in attrs applied */
-		    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
-		    if (CvLVALUE(PL_compcv) && ! CvLVALUE(cv) && pureperl
-		     && ckWARN(WARN_MISC))
-		    {
-			/* protect against fatal warnings leaking compcv */
-			SAVEFREESV(PL_compcv);
-			Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
-			SvREFCNT_inc_simple_void_NN(PL_compcv);
-		    }
-		    CvFLAGS(cv) |=
-			(CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS
-			  & ~(CVf_LVALUE * pureperl));
-		}
+	    if (S_already_defined(aTHX_ cv, block, o, NULL, &const_sv))
+		cv = NULL;
+	    else {
 		if (attrs) goto attrs;
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(PL_compcv);
 		goto done;
-	    }
-	    else {
-		const line_t oldline = CopLINE(PL_curcop);
-		if (PL_parser && PL_parser->copline != NOLINE) {
-                        /* This ensures that warnings are reported at the first
-                           line of a redefinition, not the last.  */
-			CopLINE_set(PL_curcop, PL_parser->copline);
-                }
-		report_redefined_cv(cSVOPo->op_sv, cv, &const_sv);
-		CopLINE_set(PL_curcop, oldline);
-#ifdef PERL_MAD
-		if (!PL_minus_c)	/* keep old one around for madskills */
-#endif
-		    {
-			/* (PL_madskills unset in used file.) */
-			SvREFCNT_dec(cv);
-		    }
-		cv = NULL;
 	    }
 	}
     }
