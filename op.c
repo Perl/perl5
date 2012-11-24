@@ -7056,7 +7056,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    else {
 		/* redundant check that avoids creating the extra SV
 		   most of the time: */
-		if (const_sv || ckWARN(WARN_REDEFINE)) {
+		if (CvCONST(cv) || ckWARN(WARN_REDEFINE)) {
 		    const line_t oldline = CopLINE(PL_curcop);
 		    SV *noamp = sv_2mortal(newSVpvn_utf8(
 				    PadnamePV(name)+1,PadnameLEN(name)-1,

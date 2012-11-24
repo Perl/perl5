@@ -778,6 +778,25 @@ EXPECT
 Constant subroutine main::fred redefined at - line 3.
 ########
 # op.c
+use feature "lexical_subs", "state";
+my sub fred () { 1 }
+sub fred { 2 };
+my sub george { 1 }
+sub george () { 2 } # should *not* produce redef warnings by default
+state sub phred () { 1 }
+sub phred { 2 };
+state sub jorge { 1 }
+sub jorge () { 2 } # should *not* produce redef warnings by default
+EXPECT
+The lexical_subs feature is experimental at - line 2.
+Prototype mismatch: sub fred () vs none at - line 4.
+Constant subroutine fred redefined at - line 4.
+Prototype mismatch: sub george: none vs () at - line 6.
+Prototype mismatch: sub phred () vs none at - line 8.
+Constant subroutine phred redefined at - line 8.
+Prototype mismatch: sub jorge: none vs () at - line 10.
+########
+# op.c
 no warnings 'redefine' ;
 sub fred () { 1 }
 sub fred () { 2 }
