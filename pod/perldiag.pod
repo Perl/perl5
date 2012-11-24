@@ -5655,9 +5655,9 @@ and will be removed in a future version.
 
 =item Using just the first character returned by \N{} in character class
 
-(W) A charnames handler may return a sequence of more than one character.
-Currently all but the first one are discarded when used in a regular
-expression pattern bracketed character class.
+(W regexp) A charnames handler may return a sequence of more than one
+character.  Currently all but the first one are discarded when used in
+a regular expression pattern bracketed character class.
 
 =item Using !~ with %s doesn't make sense
 
