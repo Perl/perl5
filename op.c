@@ -7038,7 +7038,12 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
 		    if (CvLVALUE(compcv) && ! CvLVALUE(cv) && pureperl
 		     && ckWARN(WARN_MISC))
+		    {
+			/* protect against fatal warnings leaking compcv */
+			SAVEFREESV(PL_compcv);
 			Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
+			SvREFCNT_inc_simple_void_NN(PL_compcv);
+		    }
 		    CvFLAGS(cv) |=
 			(CvFLAGS(compcv) & CVf_BUILTIN_ATTRS
 			  & ~(CVf_LVALUE * pureperl));
@@ -7444,7 +7449,12 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
 		    if (CvLVALUE(PL_compcv) && ! CvLVALUE(cv) && pureperl
 		     && ckWARN(WARN_MISC))
+		    {
+			/* protect against fatal warnings leaking compcv */
+			SAVEFREESV(PL_compcv);
 			Perl_warner(aTHX_ packWARN(WARN_MISC), "lvalue attribute ignored after the subroutine has been defined");
+			SvREFCNT_inc_simple_void_NN(PL_compcv);
+		    }
 		    CvFLAGS(cv) |=
 			(CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS
 			  & ~(CVf_LVALUE * pureperl));

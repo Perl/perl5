@@ -78,12 +78,12 @@ eleak(2, 0, "$all /\$\\ /", '/$\ / with fatal warnings');
 eleak(2, 0, "$all s//\\1/", 's//\1/ with fatal warnings');
 eleak(2, 0, "$all qq|\\i|", 'qq|\i| with fatal warnings');
 eleak(2, 0, "$f 'digit'; qq|\\o{9}|", 'qq|\o{9}| with fatal warnings');
-$::TODO = 'still leaks';
 eleak(2, 0, "$f 'misc'; sub foo{} sub foo:lvalue",
      'ignored :lvalue with fatal warnings');
 eleak(2, 0, "no warnings; use feature ':all'; $f 'misc';
              my sub foo{} sub foo:lvalue",
      'ignored mysub :lvalue with fatal warnings');
+$::TODO = 'still leaks';
 eleak(2, 0, "no warnings; use feature ':all'; $all
              my sub foo{} sub foo:lvalue{}",
      'fatal mysub redef warning');
