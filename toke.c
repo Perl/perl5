@@ -2966,6 +2966,9 @@ S_scan_const(pTHX_ char *start)
 	this_utf8  = PL_sublex_info.sub_op->op_private & (PL_lex_repl ? OPpTRANS_FROM_UTF : OPpTRANS_TO_UTF);
     }
 
+    /* Protect sv from errors and fatal warnings. */
+    ENTER_with_name("scan_const");
+    SAVEFREESV(sv);
 
     while (s < send || dorange) {
 
@@ -3037,7 +3040,6 @@ S_scan_const(pTHX_ char *start)
 #endif
 
                 if (min > max) {
-		    SvREFCNT_dec(sv);
 		    Perl_croak(aTHX_
 			       "Invalid range \"%c-%c\" in transliteration operator",
 			       (char)min, (char)max);
@@ -3096,7 +3098,6 @@ S_scan_const(pTHX_ char *start)
 	    /* range begins (ignore - as first or last char) */
 	    else if (*s == '-' && s+1 < send  && s != start) {
 		if (didrange) {
-		    SvREFCNT_dec(sv);
 		    Perl_croak(aTHX_ "Ambiguous range in transliteration operator");
 		}
 		if (has_utf8
@@ -3723,6 +3724,7 @@ S_scan_const(pTHX_ char *start)
 
     /* return the substring (via pl_yylval) only if we parsed anything */
     if (s > PL_bufptr) {
+	SvREFCNT_inc_simple_void_NN(sv);
 	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) ) {
 	    const char *const key = PL_lex_inpat ? "qr" : "q";
 	    const STRLEN keylen = PL_lex_inpat ? 2 : 1;
@@ -3747,8 +3749,8 @@ S_scan_const(pTHX_ char *start)
 				type, typelen);
 	}
 	pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
-    } else
-	SvREFCNT_dec(sv);
+    }
+    LEAVE_with_name("scan_const");
     return s;
 }
 

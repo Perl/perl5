@@ -72,13 +72,13 @@ leak(5, 1, sub {push @a,1;},       "basic check 3 of leak test infrastructure");
 # Fatal warnings
 my $f = "use warnings FATAL =>";
 my $all = "$f 'all';";
-$::TODO = 'still leaks';
 eleak(2, 0, "$f 'deprecated'; qq|\\c\{|", 'qq|\c{| with fatal warnings');
 eleak(2, 0, "$f 'syntax'; qq|\\c`|", 'qq|\c`| with fatal warnings');
 eleak(2, 0, "$all /\$\\ /", '/$\ / with fatal warnings');
 eleak(2, 0, "$all s//\\1/", 's//\1/ with fatal warnings');
 eleak(2, 0, "$all qq|\\i|", 'qq|\i| with fatal warnings');
 eleak(2, 0, "$f 'digit'; qq|\\o{9}|", 'qq|\o{9}| with fatal warnings');
+$::TODO = 'still leaks';
 eleak(2, 0, "$f 'misc'; sub foo{} sub foo:lvalue",
      'ignored :lvalue with fatal warnings');
 eleak(2, 0, "no warnings; use feature ':all'; $f 'misc';
@@ -272,14 +272,16 @@ eleak(2, 0, 'no warnings; 2 2;BEGIN{}',
 }
 eleak(2, 0, "\"\$\0\356\"", 'qq containing $ <null> something');
 eleak(2, 0, 'END OF TERMS AND CONDITIONS', 'END followed by words');
-$::TODO = 'still leaks';
 eleak(2, 0, "qq|\\c|;"x10,     '"too many errors" from qq"\c"');
+$::TODO = 'still leaks';
 eleak(2, 0, "qq|\\N{%}|"x10,   '"too many errors" from qq"\N{%}"');
+undef $::TODO;
 eleak(2, 0, "qq|\\o|;"x10,     '"too many errors" from qq"\o"');
 eleak(2, 0, "qq|\\x{|;"x10,    '"too many errors" from qq"\x{"');
 eleak(2, 0, "qq|\\N|;"x10,     '"too many errors" from qq"\N"');
 eleak(2, 0, "qq|\\N{|;"x10,    '"too many errors" from qq"\N{"');
 eleak(2, 0, "qq|\\N{U+GETG}|;"x10,'"too many errors" from qq"\N{U+JUNK}"');
+$::TODO = 'still leaks';
 eleak(2, 0, "qq|\\N{au}|;"x10, '"too many errors" from qq"\N{invalid}"');
 undef $::TODO;
 
