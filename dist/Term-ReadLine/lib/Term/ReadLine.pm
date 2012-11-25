@@ -238,19 +238,12 @@ sub findConsole {
     } elsif (-e "con" or $^O eq 'MSWin32' or $^O eq 'msys') {
        $console = 'CONIN$';
        $consoleOUT = 'CONOUT$';
-    } else {
+    } elsif ($^O eq 'VMS') {
 	$console = "sys\$command";
-    }
-
-    if (($^O eq 'amigaos') || ($^O eq 'beos') || ($^O eq 'epoc')) {
-	$console = undef;
-    }
-    elsif ($^O eq 'os2') {
-      if ($DB::emacs) {
-	$console = undef;
-      } else {
+    } elsif ($^O eq 'os2' && !$DB::emacs) {
 	$console = "/dev/con";
-      }
+    } else {
+	$console = undef;
     }
 
     $consoleOUT = $console unless defined $consoleOUT;
