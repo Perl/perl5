@@ -4725,6 +4725,9 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_POISON
 			     " PERL_POISON"
 #  endif
+#  ifdef PERL_SAWAMPERSAND
+			     " PERL_SAWAMPERSAND"
+#  endif
 #  ifdef PERL_TRACK_MEMPOOL
 			     " PERL_TRACK_MEMPOOL"
 #  endif
