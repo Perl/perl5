@@ -376,8 +376,11 @@ PP(pp_padrange)
                     | SAVEt_CLEARPADRANGE);
         assert(OPpPADRANGE_COUNTMASK + 1 == (1 <<OPpPADRANGE_COUNTSHIFT));
         assert((payload >> (OPpPADRANGE_COUNTSHIFT+SAVE_TIGHT_SHIFT)) == base);
-        SSCHECK(1);
-        SSPUSHUV(payload);
+        {
+            dSS_ADD;
+            SS_ADD_UV(payload);
+            SS_ADD_END(1);
+        }
 
         for (i = 0; i <count; i++)
             SvPADSTALE_off(*svp++); /* mark lexical as active */

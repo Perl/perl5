@@ -199,10 +199,11 @@ void
 Perl_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type)
 {
     dVAR;
-    SSCHECK(3);
-    SSPUSHPTR(ptr1);
-    SSPUSHPTR(ptr2);
-    SSPUSHUV(type);
+    dSS_ADD;
+    SS_ADD_PTR(ptr1);
+    SS_ADD_PTR(ptr2);
+    SS_ADD_UV(type);
+    SS_ADD_END(3);
 }
 
 SV *
@@ -264,14 +265,15 @@ void
 Perl_save_set_svflags(pTHX_ SV* sv, U32 mask, U32 val)
 {
     dVAR;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_SET_SVFLAGS;
 
-    SSCHECK(4);
-    SSPUSHPTR(sv);
-    SSPUSHINT(mask);
-    SSPUSHINT(val);
-    SSPUSHUV(SAVEt_SET_SVFLAGS);
+    SS_ADD_PTR(sv);
+    SS_ADD_INT(mask);
+    SS_ADD_INT(val);
+    SS_ADD_UV(SAVEt_SET_SVFLAGS);
+    SS_ADD_END(4);
 }
 
 void
@@ -364,22 +366,25 @@ void
 Perl_save_bool(pTHX_ bool *boolp)
 {
     dVAR;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_BOOL;
 
-    SSCHECK(2);
-    SSPUSHPTR(boolp);
-    SSPUSHUV(SAVEt_BOOL | (*boolp << 8));
+    SS_ADD_PTR(boolp);
+    SS_ADD_UV(SAVEt_BOOL | (*boolp << 8));
+    SS_ADD_END(2);
 }
 
 void
 Perl_save_pushi32ptr(pTHX_ const I32 i, void *const ptr, const int type)
 {
     dVAR;
-    SSCHECK(3);
-    SSPUSHINT(i);
-    SSPUSHPTR(ptr);
-    SSPUSHUV(type);
+    dSS_ADD;
+
+    SS_ADD_INT(i);
+    SS_ADD_PTR(ptr);
+    SS_ADD_UV(type);
+    SS_ADD_END(3);
 }
 
 void
@@ -391,9 +396,10 @@ Perl_save_int(pTHX_ int *intp)
     PERL_ARGS_ASSERT_SAVE_INT;
 
     if ((int)(shifted >> SAVE_TIGHT_SHIFT) == *intp) {
-	SSCHECK(2);
-	SSPUSHPTR(intp);
-	SSPUSHUV(SAVEt_INT_SMALL | shifted);
+        dSS_ADD;
+	SS_ADD_PTR(intp);
+	SS_ADD_UV(SAVEt_INT_SMALL | shifted);
+        SS_ADD_END(2);
     } else
 	save_pushi32ptr(*intp, intp, SAVEt_INT);
 }
@@ -402,24 +408,26 @@ void
 Perl_save_I8(pTHX_ I8 *bytep)
 {
     dVAR;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_I8;
 
-    SSCHECK(2);
-    SSPUSHPTR(bytep);
-    SSPUSHUV(SAVEt_I8 | ((UV)*bytep << 8));
+    SS_ADD_PTR(bytep);
+    SS_ADD_UV(SAVEt_I8 | ((UV)*bytep << 8));
+    SS_ADD_END(2);
 }
 
 void
 Perl_save_I16(pTHX_ I16 *intp)
 {
     dVAR;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_I16;
 
-    SSCHECK(2);
-    SSPUSHPTR(intp);
-    SSPUSHUV(SAVEt_I16 | ((UV)*intp << 8));
+    SS_ADD_PTR(intp);
+    SS_ADD_UV(SAVEt_I16 | ((UV)*intp << 8));
+    SS_ADD_END(2);
 }
 
 void
@@ -431,9 +439,10 @@ Perl_save_I32(pTHX_ I32 *intp)
     PERL_ARGS_ASSERT_SAVE_I32;
 
     if ((I32)(shifted >> SAVE_TIGHT_SHIFT) == *intp) {
-	SSCHECK(2);
-	SSPUSHPTR(intp);
-	SSPUSHUV(SAVEt_I32_SMALL | shifted);
+        dSS_ADD;
+	SS_ADD_PTR(intp);
+	SS_ADD_UV(SAVEt_I32_SMALL | shifted);
+        SS_ADD_END(2);
     } else
 	save_pushi32ptr(*intp, intp, SAVEt_I32);
 }
@@ -475,12 +484,14 @@ void
 Perl_save_padsv_and_mortalize(pTHX_ PADOFFSET off)
 {
     dVAR;
-    SSCHECK(4);
+    dSS_ADD;
+
     ASSERT_CURPAD_ACTIVE("save_padsv");
-    SSPUSHPTR(SvREFCNT_inc_simple_NN(PL_curpad[off]));
-    SSPUSHPTR(PL_comppad);
-    SSPUSHLONG((long)off);
-    SSPUSHUV(SAVEt_PADSV_AND_MORTALIZE);
+    SS_ADD_PTR(SvREFCNT_inc_simple_NN(PL_curpad[off]));
+    SS_ADD_PTR(PL_comppad);
+    SS_ADD_LONG((long)off);
+    SS_ADD_UV(SAVEt_PADSV_AND_MORTALIZE);
+    SS_ADD_END(4);
 }
 
 void
@@ -507,9 +518,10 @@ void
 Perl_save_pushptr(pTHX_ void *const ptr, const int type)
 {
     dVAR;
-    SSCHECK(2);
-    SSPUSHPTR(ptr);
-    SSPUSHUV(type);
+    dSS_ADD;
+    SS_ADD_PTR(ptr);
+    SS_ADD_UV(type);
+    SS_ADD_END(2);
 }
 
 void
@@ -523,12 +535,16 @@ Perl_save_clearsv(pTHX_ SV **svp)
 
     ASSERT_CURPAD_ACTIVE("save_clearsv");
     SvPADSTALE_off(*svp); /* mark lexical as active */
-    if ((offset_shifted >> SAVE_TIGHT_SHIFT) != offset)
+    if ((offset_shifted >> SAVE_TIGHT_SHIFT) != offset) {
 	Perl_croak(aTHX_ "panic: pad offset %"UVuf" out of range (%p-%p)",
 		   offset, svp, PL_curpad);
+    }
 
-    SSCHECK(1);
-    SSPUSHUV(offset_shifted | SAVEt_CLEARSV);
+    {
+        dSS_ADD;
+        SS_ADD_UV(offset_shifted | SAVEt_CLEARSV);
+        SS_ADD_END(1);
+    }
 }
 
 void
@@ -571,23 +587,26 @@ void
 Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
 {
     dVAR;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_DESTRUCTOR;
 
-    SSCHECK(3);
-    SSPUSHDPTR(f);
-    SSPUSHPTR(p);
-    SSPUSHUV(SAVEt_DESTRUCTOR);
+    SS_ADD_DPTR(f);
+    SS_ADD_PTR(p);
+    SS_ADD_UV(SAVEt_DESTRUCTOR);
+    SS_ADD_END(3);
 }
 
 void
 Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
 {
     dVAR;
-    SSCHECK(3);
-    SSPUSHDXPTR(f);
-    SSPUSHPTR(p);
-    SSPUSHUV(SAVEt_DESTRUCTOR_X);
+    dSS_ADD;
+
+    SS_ADD_DXPTR(f);
+    SS_ADD_PTR(p);
+    SS_ADD_UV(SAVEt_DESTRUCTOR_X);
+    SS_ADD_END(3);
 }
 
 void
@@ -609,11 +628,12 @@ static void
 S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
 			const int type)
 {
-    SSCHECK(4);
-    SSPUSHPTR(ptr1);
-    SSPUSHINT(i);
-    SSPUSHPTR(ptr2);
-    SSPUSHUV(type);
+    dSS_ADD;
+    SS_ADD_PTR(ptr1);
+    SS_ADD_INT(i);
+    SS_ADD_PTR(ptr2);
+    SS_ADD_UV(type);
+    SS_ADD_END(4);
 }
 
 void
@@ -652,11 +672,14 @@ Perl_save_helem_flags(pTHX_ HV *hv, SV *key, SV **sptr, const U32 flags)
     PERL_ARGS_ASSERT_SAVE_HELEM_FLAGS;
 
     SvGETMAGIC(*sptr);
-    SSCHECK(4);
-    SSPUSHPTR(SvREFCNT_inc_simple(hv));
-    SSPUSHPTR(newSVsv(key));
-    SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHUV(SAVEt_HELEM);
+    {
+        dSS_ADD;
+        SS_ADD_PTR(SvREFCNT_inc_simple(hv));
+        SS_ADD_PTR(newSVsv(key));
+        SS_ADD_PTR(SvREFCNT_inc(*sptr));
+        SS_ADD_UV(SAVEt_HELEM);
+        SS_ADD_END(4);
+    }
     save_scalar_at(sptr, flags);
     if (flags & SAVEf_KEEPOLDELEM)
 	return;

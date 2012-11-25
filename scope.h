@@ -74,8 +74,12 @@
 #define SCOPE_SAVES_SIGNAL_MASK 0
 #endif
 
-#define SSCHECK(need) if (PL_savestack_ix + (I32)(need) > PL_savestack_max) savestack_grow()
-#define SSGROW(need) if (PL_savestack_ix + (I32)(need) > PL_savestack_max) savestack_grow_cnt(need)
+/* the maximum number of entries that might be pushed using the SS_ADD*
+ * macros */
+#define SS_MAXPUSH 4
+
+#define SSCHECK(need) if (PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max) savestack_grow()
+#define SSGROW(need) if (PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max) savestack_grow_cnt(need + SS_MAXPUSH)
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
 #define SSPUSHBOOL(p) (PL_savestack[PL_savestack_ix++].any_bool = (p))
@@ -84,6 +88,40 @@
 #define SSPUSHPTR(p) (PL_savestack[PL_savestack_ix++].any_ptr = (void*)(p))
 #define SSPUSHDPTR(p) (PL_savestack[PL_savestack_ix++].any_dptr = (p))
 #define SSPUSHDXPTR(p) (PL_savestack[PL_savestack_ix++].any_dxptr = (p))
+
+/* SS_ADD*: newer, faster versions of the above. Don't mix the two sets of
+ * macros. These are fast because they save reduce accesses to the PL_
+ * vars and move the size check to the end. Doing the check last means
+ * that values in registers will have been pushed and no longer needed, so
+ * don't need saving around the call to grow. Also, tail-call elimination
+ * of the grow() can be done. These changes reduce the code of something
+ * like save_pushptrptr() to half its former size.
+ * Of course, doing the size check *after* pushing means we must always
+ * ensure there are SS_MAXPUSH free slots on the savestack
+ *
+ * These are for internal core use only and are subject to change */
+
+#define dSS_ADD \
+    I32 ix = PL_savestack_ix;     \
+    ANY *ssp = &PL_savestack[ix];
+
+#define SS_ADD_END(need) \
+    assert((need) <= SS_MAXPUSH);                               \
+    ix += (need);                                               \
+    PL_savestack_ix = ix;                                       \
+    assert(ix <= PL_savestack_max);                             \
+    if ((ix + SS_MAXPUSH) > PL_savestack_max) savestack_grow(); \
+    assert(PL_savestack_ix + SS_MAXPUSH <= PL_savestack_max);
+
+#define SS_ADD_INT(i)   ((ssp++)->any_i32 = (I32)(i))
+#define SS_ADD_LONG(i)  ((ssp++)->any_long = (long)(i))
+#define SS_ADD_BOOL(p)  ((ssp++)->any_bool = (p))
+#define SS_ADD_IV(i)    ((ssp++)->any_iv = (IV)(i))
+#define SS_ADD_UV(u)    ((ssp++)->any_uv = (UV)(u))
+#define SS_ADD_PTR(p)   ((ssp++)->any_ptr = (void*)(p))
+#define SS_ADD_DPTR(p)  ((ssp++)->any_dptr = (p))
+#define SS_ADD_DXPTR(p) ((ssp++)->any_dxptr = (p))
+
 #define SSPOPINT (PL_savestack[--PL_savestack_ix].any_i32)
 #define SSPOPLONG (PL_savestack[--PL_savestack_ix].any_long)
 #define SSPOPBOOL (PL_savestack[--PL_savestack_ix].any_bool)
@@ -92,6 +130,7 @@
 #define SSPOPPTR (PL_savestack[--PL_savestack_ix].any_ptr)
 #define SSPOPDPTR (PL_savestack[--PL_savestack_ix].any_dptr)
 #define SSPOPDXPTR (PL_savestack[--PL_savestack_ix].any_dxptr)
+
 
 /*
 =head1 Callback Functions
@@ -202,10 +241,11 @@ scope has the given name. Name must be a literal string.
 	  save_destructor_x((DESTRUCTORFUNC_t)(f), (void*)(p))
 
 #define SAVESTACK_POS() \
-    STMT_START {				\
-	SSCHECK(2);				\
-	SSPUSHINT(PL_stack_sp - PL_stack_base);	\
-	SSPUSHUV(SAVEt_STACK_POS);		\
+    STMT_START {				   \
+        dSS_ADD;                                   \
+        SS_ADD_INT(PL_stack_sp - PL_stack_base);   \
+        SS_ADD_UV(SAVEt_STACK_POS);                \
+        SS_ADD_END(2);                             \
     } STMT_END
 
 #define SAVEOP()	save_op()
@@ -229,11 +269,12 @@ scope has the given name. Name must be a literal string.
 #define SAVECOMPILEWARNINGS() save_pushptr(PL_compiling.cop_warnings, SAVEt_COMPILE_WARNINGS)
 
 #define SAVESTACK_CXPOS() \
-    STMT_START {                                  \
-        SSCHECK(3);                               \
-        SSPUSHINT(cxstack[cxstack_ix].blk_oldsp); \
-        SSPUSHINT(cxstack_ix);                    \
-        SSPUSHUV(SAVEt_STACK_CXPOS);              \
+    STMT_START {                                   \
+        dSS_ADD;                                   \
+        SS_ADD_INT(cxstack[cxstack_ix].blk_oldsp); \
+        SS_ADD_INT(cxstack_ix);                    \
+        SS_ADD_UV(SAVEt_STACK_CXPOS);              \
+        SS_ADD_END(3);                             \
     } STMT_END
 
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)

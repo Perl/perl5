@@ -3795,13 +3795,14 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	       gain a name somehow before leave_scope. */
 	    if (stype == SVt_PVCV) {
 		/* There is no save_pushptrptrptr.  Creating it for this
-		   one call site would be overkill.  So inline the ss push
+		   one call site would be overkill.  So inline the ss add
 		   routines here. */
-		SSCHECK(4);
-		SSPUSHPTR(dstr);
-		SSPUSHPTR(location);
-		SSPUSHPTR(SvREFCNT_inc(*location));
-		SSPUSHUV(SAVEt_GVSLOT);
+                dSS_ADD;
+		SS_ADD_PTR(dstr);
+		SS_ADD_PTR(location);
+		SS_ADD_PTR(SvREFCNT_inc(*location));
+		SS_ADD_UV(SAVEt_GVSLOT);
+		SS_ADD_END(4);
 	    }
 	    else SAVEGENERICSV(*location);
 	}
