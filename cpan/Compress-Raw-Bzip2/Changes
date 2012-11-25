@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.059 24 November 2012
+
+      * Copy-on-write support
+        [#81352]
+
   2.058 12 November 2012
 
       * No Changes
