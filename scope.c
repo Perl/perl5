@@ -391,17 +391,21 @@ void
 Perl_save_int(pTHX_ int *intp)
 {
     dVAR;
-    const UV shifted = (UV)*intp << SAVE_TIGHT_SHIFT;
+    const int i = *intp;
+    UV type = ((UV)(i << SAVE_TIGHT_SHIFT) | SAVEt_INT_SMALL);
+    int size = 2;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_INT;
 
-    if ((int)(shifted >> SAVE_TIGHT_SHIFT) == *intp) {
-        dSS_ADD;
-	SS_ADD_PTR(intp);
-	SS_ADD_UV(SAVEt_INT_SMALL | shifted);
-        SS_ADD_END(2);
-    } else
-	save_pushi32ptr(*intp, intp, SAVEt_INT);
+    if ((int)(type >> SAVE_TIGHT_SHIFT) != i) {
+        SS_ADD_INT(i);
+        type = SAVEt_INT;
+        size++;
+    }
+    SS_ADD_PTR(intp);
+    SS_ADD_UV(type);
+    SS_ADD_END(size);
 }
 
 void
@@ -434,17 +438,21 @@ void
 Perl_save_I32(pTHX_ I32 *intp)
 {
     dVAR;
-    const UV shifted = (UV)*intp << SAVE_TIGHT_SHIFT;
+    const I32 i = *intp;
+    UV type = ((I32)(i << SAVE_TIGHT_SHIFT) | SAVEt_I32_SMALL);
+    int size = 2;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_I32;
 
-    if ((I32)(shifted >> SAVE_TIGHT_SHIFT) == *intp) {
-        dSS_ADD;
-	SS_ADD_PTR(intp);
-	SS_ADD_UV(SAVEt_I32_SMALL | shifted);
-        SS_ADD_END(2);
-    } else
-	save_pushi32ptr(*intp, intp, SAVEt_I32);
+    if ((I32)(type >> SAVE_TIGHT_SHIFT) != i) {
+        SS_ADD_INT(i);
+        type = SAVEt_I32;
+        size++;
+    }
+    SS_ADD_PTR(intp);
+    SS_ADD_UV(type);
+    SS_ADD_END(size);
 }
 
 /* Cannot use save_sptr() to store a char* since the SV** cast will
