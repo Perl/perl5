@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+5.74  Sat Nov 24 03:10:18 MST 2012
+	- handle wide-string input by converting to bytes first
+		-- viz. use SvPVbyte instead of SvPV in SHA.xs
+		-- thanks to Eric Brine for summary and code
+
 5.73  Wed Oct 31 04:32:44 MST 2012
 	- provided workaround for DEC compiler bug (ref. Makefile.PL)
 

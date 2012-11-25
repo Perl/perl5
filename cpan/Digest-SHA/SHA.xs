@@ -2,6 +2,10 @@
 #include "perl.h"
 #include "XSUB.h"
 
+#ifndef SvPVbyte
+#define SvPVbyte SvPV
+#endif
+
 #include "src/sha.c"
 #include "src/hmac.c"
 
@@ -87,7 +91,7 @@ PPCODE:
 	if ((state = shaopen(ix2alg[ix])) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 0; i < items; i++) {
-		data = (unsigned char *) (SvPV(ST(i), len));
+		data = (unsigned char *) (SvPVbyte(ST(i), len));
 		while (len > MAX_WRITE_SIZE) {
 			shawrite(data, MAX_WRITE_SIZE << 3, state);
 			data += MAX_WRITE_SIZE;
@@ -141,11 +145,11 @@ PREINIT:
 	HMAC *state;
 	char *result;
 PPCODE:
-	key = (unsigned char *) (SvPV(ST(items-1), len));
+	key = (unsigned char *) (SvPVbyte(ST(items-1), len));
 	if ((state = hmacopen(ix2alg[ix], key, len)) == NULL)
 		XSRETURN_UNDEF;
 	for (i = 0; i < items - 1; i++) {
-		data = (unsigned char *) (SvPV(ST(i), len));
+		data = (unsigned char *) (SvPVbyte(ST(i), len));
 		while (len > MAX_WRITE_SIZE) {
 			hmacwrite(data, MAX_WRITE_SIZE << 3, state);
 			data += MAX_WRITE_SIZE;
@@ -193,7 +197,7 @@ PREINIT:
 PPCODE:
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	for (i = 1; i < items; i++) {
-		data = (unsigned char *) (SvPV(ST(i), len));
+		data = (unsigned char *) (SvPVbyte(ST(i), len));
 		while (len > MAX_WRITE_SIZE) {
 			shawrite(data, MAX_WRITE_SIZE << 3, state);
 			data += MAX_WRITE_SIZE;
