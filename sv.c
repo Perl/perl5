@@ -3739,7 +3739,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 static void
 S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 {
-    SV * const sref = SvREFCNT_inc(SvRV(sstr));
+    SV * const sref = SvRV(sstr);
     SV *dref = NULL;
     const int intro = GvINTRO(dstr);
     SV **location;
@@ -3825,7 +3825,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    GvASSUMECV_on(dstr);
 	    if(GvSTASH(dstr)) mro_method_changed_in(GvSTASH(dstr)); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
 	}
-	*location = sref;
+	*location = SvREFCNT_inc_simple_NN(sref);
 	if (import_flag && !(GvFLAGS(dstr) & import_flag)
 	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
 	    GvFLAGS(dstr) |= import_flag;
