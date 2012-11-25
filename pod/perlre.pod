@@ -91,6 +91,9 @@ X</p> X<regex, preserve> X<regexp, preserve>
 Preserve the string matched such that ${^PREMATCH}, ${^MATCH}, and
 ${^POSTMATCH} are available for use after matching.
 
+In Perl 5.18 and higher this is ignored.  ${^PREMATCH}, ${^MATCH}, and
+${^POSTMATCH} will be available after the match regardless of the modifier.
+
 =item g and c
 X</g> X</c>
 
@@ -871,9 +874,11 @@ B<NOTE>: Failed matches in Perl do not reset the match variables,
 which makes it easier to write code that tests for a series of more
 specific cases and remembers the best match.
 
-B<WARNING>: Once Perl sees that you need one of C<$&>, C<$`>, or
+B<WARNING>: If your code is to run on Perl 5.16 or earlier,
+beware that once Perl sees that you need one of C<$&>, C<$`>, or
 C<$'> anywhere in the program, it has to provide them for every
-pattern match.  This may substantially slow your program.  Perl
+pattern match.  This may substantially slow your program.  (In Perl 5.18 a
+more efficient mechanism is used, eliminating any slowdown.)  Perl
 uses the same mechanism to produce C<$1>, C<$2>, etc, so you also pay a
 price for each pattern that contains capturing parentheses.  (To
 avoid this cost while retaining the grouping behaviour, use the
@@ -882,19 +887,17 @@ use C<$&>, C<$`> or C<$'>, then patterns I<without> capturing
 parentheses will not be penalized.  So avoid C<$&>, C<$'>, and C<$`>
 if you can, but if you can't (and some algorithms really appreciate
 them), once you've used them once, use them at will, because you've
-already paid the price.  As of 5.17.4, the presence of each of the three
-variables in a program is recorded separately, and depending on
-circumstances, perl may be able be more efficient knowing that only C<$&>
-rather than all three have been seen, for example.
+already paid the price. 
 X<$&> X<$`> X<$'>
 
-As a workaround for this problem, Perl 5.10.0 introduces C<${^PREMATCH}>,
+As a workaround for this problem, Perl 5.10.0 introduced C<${^PREMATCH}>,
 C<${^MATCH}> and C<${^POSTMATCH}>, which are equivalent to C<$`>, C<$&>
 and C<$'>, B<except> that they are only guaranteed to be defined after a
 successful match that was executed with the C</p> (preserve) modifier.
 The use of these variables incurs no global performance penalty, unlike
 their punctuation char equivalents, however at the trade-off that you
-have to tell perl when you want to use them.
+have to tell perl when you want to use them.  As of Perl 5.18, these three
+variables are equivalent to C<$`>, C<$&> and C<$'>, and C</p> is ignored.
 X</p> X<p modifier>
 
 =head2 Quoting metacharacters
