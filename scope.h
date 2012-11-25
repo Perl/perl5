@@ -8,58 +8,77 @@
  *
  */
 
-#define SAVEt_ITEM		0
-#define SAVEt_SV		1
-#define SAVEt_AV		2
-#define SAVEt_HV		3
-#define SAVEt_INT		4
-#define SAVEt_LONG		5
-#define SAVEt_I32		6
-#define SAVEt_IV		7
-#define SAVEt_SPTR		8
-#define SAVEt_APTR		9
-#define SAVEt_HPTR		10
-#define SAVEt_PPTR		11
-#define SAVEt_NSTAB		12
-#define SAVEt_SVREF		13
-#define SAVEt_GP		14
-#define SAVEt_FREESV		15
-#define SAVEt_FREEOP		16
-#define SAVEt_FREEPV		17
-#define SAVEt_CLEARSV		18
-#define SAVEt_DELETE		19
-#define SAVEt_DESTRUCTOR	20
-#define SAVEt_REGCONTEXT	21
-#define SAVEt_STACK_POS		22
-#define SAVEt_I16		23
-#define SAVEt_AELEM		24
-#define SAVEt_HELEM		25
-#define SAVEt_OP		26
-#define SAVEt_HINTS		27
-#define SAVEt_ALLOC		28
-#define SAVEt_GENERIC_SVREF	29
-#define SAVEt_DESTRUCTOR_X	30
-#define SAVEt_VPTR		31
-#define SAVEt_I8		32
-#define SAVEt_COMPPAD		33
-#define SAVEt_GENERIC_PVREF	34
-#define SAVEt_PADSV_AND_MORTALIZE	35
-#define SAVEt_MORTALIZESV	36
-#define SAVEt_SHARED_PVREF	37
-#define SAVEt_BOOL		38
-#define SAVEt_SET_SVFLAGS	39
-#define SAVEt_SAVESWITCHSTACK	40
-#define SAVEt_RE_STATE		42
-#define SAVEt_COMPILE_WARNINGS	43
-#define SAVEt_STACK_CXPOS	44
-#define SAVEt_PARSER		45
-#define SAVEt_ADELETE		46
-#define SAVEt_I32_SMALL		47
-#define SAVEt_INT_SMALL		48
-#define SAVEt_GVSV		49
-#define SAVEt_FREECOPHH		50
-#define SAVEt_CLEARPADRANGE	51
-#define SAVEt_GVSLOT		52
+/* *** these are ordered by number of of auto-popped args */
+
+/* zero args */
+
+#define SAVEt_ALLOC		0
+#define SAVEt_CLEARPADRANGE	1
+#define SAVEt_CLEARSV		2
+#define SAVEt_REGCONTEXT	3
+#define SAVEt_RE_STATE		4
+
+#define SAVEt_ARG0_MAX		4
+
+/* one arg */
+
+#define SAVEt_BOOL		5
+#define SAVEt_COMPILE_WARNINGS	6
+#define SAVEt_COMPPAD		7
+#define SAVEt_FREECOPHH		8
+#define SAVEt_FREEOP		9
+#define SAVEt_FREEPV		10
+#define SAVEt_FREESV		11
+#define SAVEt_I16		12
+#define SAVEt_I32_SMALL		13
+#define SAVEt_I8		14
+#define SAVEt_INT_SMALL		15
+#define SAVEt_MORTALIZESV	16
+#define SAVEt_NSTAB		17
+#define SAVEt_OP		18
+#define SAVEt_PARSER		19
+#define SAVEt_STACK_POS		20
+
+#define SAVEt_ARG1_MAX		20
+
+/* two args */
+
+#define SAVEt_ADELETE		21
+#define SAVEt_APTR		22
+#define SAVEt_AV		23
+#define SAVEt_DESTRUCTOR	24
+#define SAVEt_DESTRUCTOR_X	25
+#define SAVEt_GENERIC_PVREF	26
+#define SAVEt_GENERIC_SVREF	27
+#define SAVEt_GP		28
+#define SAVEt_GVSV		29
+#define SAVEt_HINTS		30
+#define SAVEt_HPTR		31
+#define SAVEt_HV		32
+#define SAVEt_I32		33
+#define SAVEt_INT		34
+#define SAVEt_ITEM		35
+#define SAVEt_IV		36
+#define SAVEt_LONG		37
+#define SAVEt_PPTR		38
+#define SAVEt_SAVESWITCHSTACK	39
+#define SAVEt_SHARED_PVREF	40
+#define SAVEt_SPTR		41
+#define SAVEt_STACK_CXPOS	42
+#define SAVEt_SV		43
+#define SAVEt_SVREF		44
+#define SAVEt_VPTR		45
+
+#define SAVEt_ARG2_MAX		45
+
+/* three args */
+
+#define SAVEt_AELEM		46
+#define SAVEt_DELETE		47
+#define SAVEt_HELEM		48
+#define SAVEt_PADSV_AND_MORTALIZE 49
+#define SAVEt_SET_SVFLAGS	50
+#define SAVEt_GVSLOT		51
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2
