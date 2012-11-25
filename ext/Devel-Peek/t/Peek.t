@@ -360,7 +360,8 @@ do_test('reference to regexp',
     SUBSTRS = $ADDR
     PPRIVATE = $ADDR
     OFFS = $ADDR
-    QR_ANONCV = 0x0'
+    QR_ANONCV = 0x0(?:
+    SAVED_COPY = 0x0)?'
 ));
 } else {
 do_test('reference to regexp',
@@ -529,12 +530,13 @@ do_test('scalar with pos magic',
         $x,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\($PADMY,SMG,POK,pPOK\\)
+  FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?pPOK\\)
   IV = 0
   NV = 0
   PV = $ADDR ""\\\0
   CUR = 0
-  LEN = \d+
+  LEN = \d+(?:
+  COW_REFCNT = 1)?
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_mglob
     MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
