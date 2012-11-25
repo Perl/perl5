@@ -1350,7 +1350,7 @@ PP(pp_match)
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
-    /* We need to know this incase we fail out early - pos() must be reset */
+    /* We need to know this in case we fail out early - pos() must be reset */
     global = dynpm->op_pmflags & PMf_GLOBAL;
 
     /* PMdf_USED is set after a ?? matches once */
@@ -1364,8 +1364,6 @@ PP(pp_match)
         DEBUG_r(PerlIO_printf(Perl_debug_log, "?? already matched once"));
 	goto nope;
     }
-
-
 
     /* empty pattern special-cased to use last successful pattern if
        possible, except for qr// */
