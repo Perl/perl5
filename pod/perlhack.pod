@@ -381,6 +381,12 @@ extra paren, e.g. "if (a && (b = c)) ..."
 
 "if (!foo) ..." rather than "if (foo == FALSE) ..." etc.
 
+=item *
+
+Do not declare variables using "register".  It may be counterproductive
+with modern compilers, and is deprecated in C++, under which the Perl
+source is regularly compiled.
+
 =back
 
 =head3 Test suite
