@@ -10153,7 +10153,7 @@ Perl_readdir(pTHX_ DIR *dd)
 
         /* In Unix report mode, remove the ".dir;1" from the name */
         /* if it is a real directory. */
-        if (decc_filename_unix_report || decc_efs_charset) {
+        if (decc_filename_unix_report && decc_efs_charset) {
             if (is_dir_ext(e_spec, e_len, vs_spec, vs_len)) {
                 Stat_t statbuf;
                 int ret_sts;
@@ -13181,7 +13181,7 @@ Perl_vms_start_glob
 
                 /* In Unix report mode, remove the ".dir;1" from the name */
                 /* if it is a real directory */
-                if (decc_filename_unix_report || decc_efs_charset) {
+                if (decc_filename_unix_report && decc_efs_charset) {
                     if (is_dir_ext(e_spec, e_len, vs_spec, vs_len)) {
                         Stat_t statbuf;
                         int ret_sts;
