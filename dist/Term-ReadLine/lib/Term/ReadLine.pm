@@ -235,7 +235,7 @@ sub findConsole {
 
     if (-e "/dev/tty" and $^O ne 'MSWin32') {
 	$console = "/dev/tty";
-    } elsif (-e "con" or $^O eq 'MSWin32') {
+    } elsif (-e "con" or $^O eq 'MSWin32' or $^O eq 'msys') {
        $console = 'CONIN$';
        $consoleOUT = 'CONOUT$';
     } else {
