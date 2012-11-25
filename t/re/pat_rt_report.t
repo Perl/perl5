@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 2527;  # Update this when adding/deleting tests.
+plan tests => 2530;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1142,6 +1142,19 @@ EOP
         $pattern = '|||[xyz]';
         ok("blah blah" =~ /$pattern/, $message);
         ok("blah blah" =~ /(?:$pattern)h/, $message);
+    }
+
+    {
+        # [perl #4289] First mention $& after a match
+        fresh_perl_is(
+            '$_ = "abc"; /b/g; $_ = "hello"; print eval q|$&|, "\n"',
+            "b\n", {}, '$& first mentioned after match');
+        fresh_perl_is(
+            '$_ = "abc"; /b/g; $_ = "hello"; print eval q|$`|, "\n"',
+            "a\n", {}, '$` first mentioned after match');
+        fresh_perl_is(
+            '$_ = "abc"; /b/g; $_ = "hello"; print eval q|$\'|,"\n"',
+            "c\n", {}, '$\' first mentioned after match');
     }
 } # End of sub run_tests
 
