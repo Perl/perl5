@@ -6467,13 +6467,26 @@ static char * int_pathify_dirspec_simple(const char * dir, char * buf,
             len += n_len;
             if (e_len > 0) {
                 if (decc_efs_charset) {
-                    buf[len] = '^';
-                    len++;
-                    memcpy(&buf[len], e_spec, e_len);
-                    len += e_len;
-                } else {
-                    set_vaxc_errno(RMS$_DIR);
-                    set_errno(ENOTDIR);
+                    if (e_len == 4 
+                        && (toupper(e_spec[1]) == 'D')
+                        && (toupper(e_spec[2]) == 'I')
+                        && (toupper(e_spec[3]) == 'R')) {
+
+                        /* Corner case: directory spec with invalid version.
+                         * Valid would have followed is_dir path above.
+                         */
+                        SETERRNO(ENOTDIR, RMS$_DIR);
+                        return NULL;
+                    }
+                    else {
+                        buf[len] = '^';
+                        len++;
+                        memcpy(&buf[len], e_spec, e_len);
+                        len += e_len;
+                    }
+                }
+                else {
+                    SETERRNO(ENOTDIR, RMS$_DIR);
                     return NULL;
                 }
             }
