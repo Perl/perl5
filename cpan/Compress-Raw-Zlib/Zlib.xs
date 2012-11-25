@@ -1323,18 +1323,22 @@ inflate (s, buf, output, eof=FALSE)
     uInt	cur_length = 0;
     uInt	prefix_length = 0;
     int	    increment = 0;
-    uLong     bufinc = NO_INIT
+    uLong   bufinc = NO_INIT
+    STRLEN  na = NO_INIT ;
   PREINIT:
 #ifdef UTF8_AVAILABLE    
     bool	out_utf8  = FALSE;
 #endif    
-  CODE:
+  CODE: 
     bufinc = s->bufsize;
     /* If the buffer is a reference, dereference it */
     buf = deRef(buf, "inflate") ;
 
-    if (s->flags & FLAG_CONSUME_INPUT && SvREADONLY(buf))
-        croak("Compress::Raw::Zlib::Inflate::inflate input parameter cannot be read-only when ConsumeInput is specified");
+    if (s->flags & FLAG_CONSUME_INPUT) {
+        if (SvREADONLY(buf))
+            croak("Compress::Raw::Zlib::Inflate::inflate input parameter cannot be read-only when ConsumeInput is specified");
+        SvPV_force(buf, na);
+    }
 #ifdef UTF8_AVAILABLE    
     if (DO_UTF8(buf) && !sv_utf8_downgrade(buf, 1))
          croak("Wide character in Compress::Raw::Zlib::Inflate::inflate input parameter");
