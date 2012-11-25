@@ -78,7 +78,7 @@ bool sv_setsv_cow_hashkey_notcore(void);
 /* A routine to test hv_delayfree_ent
    (which itself is tested by testing on hv_free_ent  */
 
-typedef void (freeent_function)(pTHX_ HV *, register HE *);
+typedef void (freeent_function)(pTHX_ HV *, HE *);
 
 void
 test_freeent(freeent_function *f) {

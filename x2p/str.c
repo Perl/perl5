@@ -12,7 +12,7 @@
 #include "util.h"
 
 void
-str_numset(register STR *str, double num)
+str_numset(STR *str, double num)
 {
     str->str_nval = num;
     str->str_pok = 0;		/* invalidate pointer */
@@ -20,7 +20,7 @@ str_numset(register STR *str, double num)
 }
 
 char *
-str_2ptr(register STR *str)
+str_2ptr(STR *str)
 {
     char *s;
 
@@ -43,7 +43,7 @@ str_2ptr(register STR *str)
 }
 
 void
-str_sset(STR *dstr, register STR *sstr)
+str_sset(STR *dstr, STR *sstr)
 {
     if (!sstr)
 	str_nset(dstr,No,0);
@@ -56,7 +56,7 @@ str_sset(STR *dstr, register STR *sstr)
 }
 
 void
-str_nset(register STR *str, register const char *ptr, register int len)
+str_nset(STR *str, const char *ptr, int len)
 {
     GROWSTR(&(str->str_ptr), &(str->str_len), len + 1);
     memcpy(str->str_ptr,ptr,len);
@@ -67,7 +67,7 @@ str_nset(register STR *str, register const char *ptr, register int len)
 }
 
 void
-str_set(register STR *str, register const char *ptr)
+str_set(STR *str, const char *ptr)
 {
     int len;
 
@@ -82,7 +82,7 @@ str_set(register STR *str, register const char *ptr)
 }
 
 void
-str_ncat(register STR *str, register const char *ptr, register int len)
+str_ncat(STR *str, const char *ptr, int len)
 {
     if (!(str->str_pok))
 	str_2ptr(str);
@@ -95,7 +95,7 @@ str_ncat(register STR *str, register const char *ptr, register int len)
 }
 
 void
-str_scat(STR *dstr, register STR *sstr)
+str_scat(STR *dstr, STR *sstr)
 {
     if (!(sstr->str_pok))
 	str_2ptr(sstr);
@@ -104,7 +104,7 @@ str_scat(STR *dstr, register STR *sstr)
 }
 
 void
-str_cat(register STR *str, register const char *ptr)
+str_cat(STR *str, const char *ptr)
 {
     int len;
 
@@ -141,7 +141,7 @@ str_new(int len)
 /* make str point to what nstr did */
 
 void
-str_free(register STR *str)
+str_free(STR *str)
 {
     if (!str)
 	return;
@@ -155,7 +155,7 @@ str_free(register STR *str)
 }
 
 int
-str_len(register STR *str)
+str_len(STR *str)
 {
     if (!str)
 	return 0;
@@ -168,7 +168,7 @@ str_len(register STR *str)
 }
 
 char *
-str_gets(register STR *str, register FILE *fp)
+str_gets(STR *str, FILE *fp)
 {
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE) && defined(STDIO_CNT_LVALUE)
     /* Here is some breathtakingly efficient cheating */

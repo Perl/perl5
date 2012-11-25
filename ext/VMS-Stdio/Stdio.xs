@@ -291,7 +291,7 @@ vmsopen(spec,...)
 	PROTOTYPE: @
 	CODE:
 	    char *args[8],mode[3] = {'r','\0','\0'}, type = '<';
-	    register int i, myargc;
+	    int i, myargc;
 	    FILE *fp;
             SV *fh;
            PerlIO *pio_fp;

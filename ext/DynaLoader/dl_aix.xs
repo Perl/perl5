@@ -210,7 +210,7 @@ void *dlopen(char *path, int mode)
 {
 	dTHX;
 	dMY_CXT;
-	register ModulePtr mp;
+	ModulePtr mp;
 
 	/*
 	 * Upon the first call register a terminate handler that will
@@ -316,7 +316,7 @@ static void caterr(char *s)
 {
 	dTHX;
 	dMY_CXT;
-	register char *p = s;
+	char *p = s;
 
 	while (*p >= '0' && *p <= '9')
 		p++;
@@ -353,9 +353,9 @@ void *dlsym(void *handle, const char *symbol)
 {
 	dTHX;
 	dMY_CXT;
-	register ModulePtr mp = (ModulePtr)handle;
-	register ExportPtr ep;
-	register int i;
+	ModulePtr mp = (ModulePtr)handle;
+	ExportPtr ep;
+	int i;
 
 	/*
 	 * Could speed up search, but I assume that one assigns
@@ -385,9 +385,9 @@ int dlclose(void *handle)
 {
 	dTHX;
 	dMY_CXT;
-	register ModulePtr mp = (ModulePtr)handle;
+	ModulePtr mp = (ModulePtr)handle;
 	int result;
-	register ModulePtr mp1;
+	ModulePtr mp1;
 
 	if (--mp->refCnt > 0)
 		return 0;
@@ -397,8 +397,8 @@ int dlclose(void *handle)
 		strerrorcpy(dl_errbuf, errno);
 	}
 	if (mp->exports) {
-		register ExportPtr ep;
-		register int i;
+		ExportPtr ep;
+		int i;
 		for (ep = mp->exports, i = mp->nExports; i; i--, ep++)
 			if (ep->name)
 				safefree(ep->name);

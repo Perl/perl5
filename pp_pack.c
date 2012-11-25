@@ -920,7 +920,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
  * returns char pointer to char after match, or NULL
  */
 STATIC const char *
-S_group_end(pTHX_ register const char *patptr, register const char *patend, char ender)
+S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
 {
     PERL_ARGS_ASSERT_GROUP_END;
 
@@ -951,7 +951,7 @@ S_group_end(pTHX_ register const char *patptr, register const char *patend, char
  * Advances char pointer to 1st non-digit char and returns number
  */
 STATIC const char *
-S_get_num(pTHX_ register const char *patptr, I32 *lenptr )
+S_get_num(pTHX_ const char *patptr, I32 *lenptr )
 {
   I32 len = *patptr++ - '0';
 
@@ -2395,7 +2395,7 @@ The engine implementing pack() Perl function.
 */
 
 void
-Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist )
+Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist )
 {
     dVAR;
     tempsym_t sym;

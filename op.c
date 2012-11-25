@@ -3209,7 +3209,7 @@ S_op_integerize(pTHX_ OP *o)
 }
 
 static OP *
-S_fold_constants(pTHX_ register OP *o)
+S_fold_constants(pTHX_ OP *o)
 {
     dVAR;
     OP * VOL curop;
@@ -3359,7 +3359,7 @@ S_fold_constants(pTHX_ register OP *o)
 }
 
 static OP *
-S_gen_constant_list(pTHX_ register OP *o)
+S_gen_constant_list(pTHX_ OP *o)
 {
     dVAR;
     OP *curop;
@@ -5318,7 +5318,7 @@ Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 }
 
 STATIC I32
-S_is_list_assignment(pTHX_ register const OP *o)
+S_is_list_assignment(pTHX_ const OP *o)
 {
     unsigned type;
     U8 flags;
@@ -6979,8 +6979,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     const char *ps;
     STRLEN ps_len = 0; /* init it to avoid false uninit warning from icc */
     U32 ps_utf8 = 0;
-    register CV *cv = NULL;
-    register CV *compcv = PL_compcv;
+    CV *cv = NULL;
+    CV *compcv = PL_compcv;
     SV *const_sv;
     PADNAME *name;
     PADOFFSET pax = o->op_targ;
@@ -8481,7 +8481,7 @@ Perl_ck_exists(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_rvconst(pTHX_ register OP *o)
+Perl_ck_rvconst(pTHX_ OP *o)
 {
     dVAR;
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
@@ -10773,7 +10773,7 @@ S_inplace_aassign(pTHX_ OP *o) {
  * peep() is called */
 
 void
-Perl_rpeep(pTHX_ register OP *o)
+Perl_rpeep(pTHX_ OP *o)
 {
     dVAR;
     OP* oldop = NULL;
@@ -11506,7 +11506,7 @@ Perl_rpeep(pTHX_ register OP *o)
 }
 
 void
-Perl_peep(pTHX_ register OP *o)
+Perl_peep(pTHX_ OP *o)
 {
     CALL_RPEEP(o);
 }

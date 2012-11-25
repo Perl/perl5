@@ -188,10 +188,10 @@ struct xpvhv {
 
 #define PERL_HASH(hash,str,len) \
      STMT_START        { \
-        register const char * const s_PeRlHaSh_tmp = (str); \
-        register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-        register const unsigned char *end_PeRlHaSh = (const unsigned char *)s_PeRlHaSh + len; \
-        register U32 hash_PeRlHaSh = (PERL_HASH_SEED_U16_x(len & 0xff) << 16) + len; \
+        const char * const s_PeRlHaSh_tmp = (str); \
+        const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
+        const unsigned char *end_PeRlHaSh = (const unsigned char *)s_PeRlHaSh + len; \
+        U32 hash_PeRlHaSh = (PERL_HASH_SEED_U16_x(len & 0xff) << 16) + len; \
         while (s_PeRlHaSh < end_PeRlHaSh) { \
             hash_PeRlHaSh ^= PERL_HASH_SEED_U16_x((U8)*s_PeRlHaSh++); \
             hash_PeRlHaSh += BUZZHASH_ROTL32(hash_PeRlHaSh,11); \
@@ -334,12 +334,12 @@ struct xpvhv {
 #endif
 #define PERL_HASH(hash,str,len) \
       STMT_START        { \
-        register const char * const strtmp_PeRlHaSh = (str); \
-        register const unsigned char *str_PeRlHaSh = (const unsigned char *)strtmp_PeRlHaSh; \
-        register U32 len_PeRlHaSh = (len); \
-        register U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
-        register U32 tmp_PeRlHaSh; \
-        register int rem_PeRlHaSh= len_PeRlHaSh & 3; \
+        const char * const strtmp_PeRlHaSh = (str); \
+        const unsigned char *str_PeRlHaSh = (const unsigned char *)strtmp_PeRlHaSh; \
+        U32 len_PeRlHaSh = (len); \
+        U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
+        U32 tmp_PeRlHaSh; \
+        int rem_PeRlHaSh= len_PeRlHaSh & 3; \
         len_PeRlHaSh >>= 2; \
                             \
         for (;len_PeRlHaSh > 0; len_PeRlHaSh--) { \
@@ -513,9 +513,9 @@ struct xpvhv {
 
 #if defined(UNALIGNED_SAFE)
 #define PERL_HASH(hash,str,len) STMT_START { \
-        register const char * const s_PeRlHaSh_tmp = (str); \
-        register const unsigned char *PeRlHaSh_ptr = (const unsigned char *)s_PeRlHaSh_tmp; \
-        register I32 PeRlHaSh_len = len;    \
+        const char * const s_PeRlHaSh_tmp = (str); \
+        const unsigned char *PeRlHaSh_ptr = (const unsigned char *)s_PeRlHaSh_tmp; \
+        I32 PeRlHaSh_len = len;    \
                                             \
         U32 PeRlHaSh_h1 = PERL_HASH_SEED_U32;   \
         U32 PeRlHaSh_k1;                    \
@@ -538,9 +538,9 @@ struct xpvhv {
     } STMT_END
 #else
 #define PERL_HASH(hash,str,len) STMT_START { \
-        register const char * const s_PeRlHaSh_tmp = (str); \
-        register const unsigned char *PeRlHaSh_ptr = (const unsigned char *)s_PeRlHaSh_tmp; \
-        register I32 PeRlHaSh_len = len;    \
+        const char * const s_PeRlHaSh_tmp = (str); \
+        const unsigned char *PeRlHaSh_ptr = (const unsigned char *)s_PeRlHaSh_tmp; \
+        I32 PeRlHaSh_len = len;    \
                                             \
         U32 PeRlHaSh_h1 = PERL_HASH_SEED_U32;   \
         U32 PeRlHaSh_k1;                    \
@@ -602,10 +602,10 @@ struct xpvhv {
 #define PERL_HASH_SEED_BYTES 4
 #define PERL_HASH(hash,str,len) \
      STMT_START        { \
-        register const char * const s_PeRlHaSh_tmp = (str); \
-        register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-        register I32 i_PeRlHaSh = len; \
-        register U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
+        const char * const s_PeRlHaSh_tmp = (str); \
+        const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
+        I32 i_PeRlHaSh = len; \
+        U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
         while (i_PeRlHaSh--) { \
             hash_PeRlHaSh = ((hash_PeRlHaSh << 5) + hash_PeRlHaSh) + *s_PeRlHaSh++; \
         } \
@@ -617,10 +617,10 @@ struct xpvhv {
 #define PERL_HASH_SEED_BYTES 4
 #define PERL_HASH(hash,str,len) \
      STMT_START        { \
-        register const char * const s_PeRlHaSh_tmp = (str); \
-        register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-        register I32 i_PeRlHaSh = len; \
-        register U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
+        const char * const s_PeRlHaSh_tmp = (str); \
+        const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
+        I32 i_PeRlHaSh = len; \
+        U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
         while (i_PeRlHaSh--) { \
             hash_PeRlHaSh = (hash_PeRlHaSh << 6) + (hash_PeRlHaSh << 16) - hash_PeRlHaSh + *s_PeRlHaSh++; \
         } \
@@ -637,10 +637,10 @@ struct xpvhv {
  * (http://burtleburtle.net/bob/hash/doobs.html) */
 #define PERL_HASH(hash,str,len) \
      STMT_START	{ \
-        register const char * const s_PeRlHaSh_tmp = (str); \
-        register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-        register I32 i_PeRlHaSh = len; \
-        register U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
+        const char * const s_PeRlHaSh_tmp = (str); \
+        const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
+        I32 i_PeRlHaSh = len; \
+        U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
 	while (i_PeRlHaSh--) { \
             hash_PeRlHaSh += (U8)*s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \

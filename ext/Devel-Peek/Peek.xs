@@ -23,7 +23,7 @@ DeadCode(pTHX)
     SV* sva;
     SV* sv;
     SV* ret = newRV_noinc((SV*)newAV());
-    register SV* svend;
+    SV* svend;
     int tm = 0, tref = 0, ts = 0, ta = 0, tas = 0;
 
     for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {

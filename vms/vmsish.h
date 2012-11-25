@@ -310,7 +310,7 @@ struct interp_intern {
 #define PERL__TRNENV_JOIN_SEARCHLIST 0x02
 
 /* Handy way to vet calls to VMS system services and RTL routines. */
-#define _ckvmssts(call) STMT_START { register unsigned long int __ckvms_sts; \
+#define _ckvmssts(call) STMT_START { unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
   Perl_croak(aTHX_ "Fatal VMS error (status=%d) at %s, line %d", \
@@ -318,7 +318,7 @@ struct interp_intern {
 
 /* Same thing, but don't call back to Perl's croak(); useful for errors
  * occurring during startup, before Perl's state is initialized */
-#define _ckvmssts_noperl(call) STMT_START { register unsigned long int __ckvms_sts; \
+#define _ckvmssts_noperl(call) STMT_START { unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
   fprintf(stderr,"Fatal VMS error (status=%d) at %s, line %d", \

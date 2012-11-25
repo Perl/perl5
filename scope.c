@@ -348,7 +348,7 @@ Perl_save_hash(pTHX_ GV *gv)
 }
 
 void
-Perl_save_item(pTHX_ register SV *item)
+Perl_save_item(pTHX_ SV *item)
 {
     dVAR;
     SV * const sv = newSVsv(item);

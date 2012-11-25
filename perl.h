@@ -157,7 +157,7 @@
 #  endif
 #endif
 
-#define pVAR    register struct perl_vars* my_vars PERL_UNUSED_DECL
+#define pVAR    struct perl_vars* my_vars PERL_UNUSED_DECL
 
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
@@ -170,7 +170,7 @@
 #    define MULTIPLICITY
 #  endif
 #  define tTHX	PerlInterpreter*
-#  define pTHX  register tTHX my_perl PERL_UNUSED_DECL
+#  define pTHX  tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  define aTHXa(a) aTHX = (tTHX)a
 #  ifdef PERL_GLOBAL_STRUCT
@@ -394,7 +394,7 @@
 #endif
 
 #ifndef pTHXx
-#  define pTHXx		register PerlInterpreter *my_perl
+#  define pTHXx		PerlInterpreter *my_perl
 #  define pTHXx_	pTHXx,
 #  define aTHXx		my_perl
 #  define aTHXx_	aTHXx,
@@ -442,7 +442,7 @@
 #  ifdef __GNUC__
 #    define stringify_immed(s) #s
 #    define stringify(s) stringify_immed(s)
-register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
+struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 

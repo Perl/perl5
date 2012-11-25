@@ -787,7 +787,7 @@ static const char bucket_of[] =
 #  define SBRK_FAILURE_PRICE 50
 #endif 
 
-static void	morecore	(register int bucket);
+static void	morecore	(int bucket);
 #  if defined(DEBUGGING)
 static void	botch		(const char *diag, const char *s, const char *file, int line);
 #  endif
@@ -1675,7 +1675,7 @@ getpages_adjacent(MEM_SIZE require)
  * Allocate more memory to the indicated bucket.
  */
 static void
-morecore(register int bucket)
+morecore(int bucket)
 {
         dVAR;
   	union overhead *ovp;
@@ -2100,7 +2100,7 @@ Perl_realloc(void *mp, size_t nbytes)
 }
 
 Malloc_t
-Perl_calloc(register size_t elements, register size_t size)
+Perl_calloc(size_t elements, size_t size)
 {
     long sz = elements * size;
     Malloc_t p = Perl_malloc(sz);

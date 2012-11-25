@@ -1924,7 +1924,7 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 #define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
 
 static I32
-S_amagic_ncmp(pTHX_ register SV *const a, register SV *const b)
+S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
@@ -1945,7 +1945,7 @@ S_amagic_ncmp(pTHX_ register SV *const a, register SV *const b)
 }
 
 static I32
-S_amagic_i_ncmp(pTHX_ register SV *const a, register SV *const b)
+S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
@@ -1966,7 +1966,7 @@ S_amagic_i_ncmp(pTHX_ register SV *const a, register SV *const b)
 }
 
 static I32
-S_amagic_cmp(pTHX_ register SV *const str1, register SV *const str2)
+S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
@@ -1987,7 +1987,7 @@ S_amagic_cmp(pTHX_ register SV *const str1, register SV *const str2)
 }
 
 static I32
-S_amagic_cmp_locale(pTHX_ register SV *const str1, register SV *const str2)
+S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
 {
     dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);

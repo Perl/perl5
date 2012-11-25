@@ -17,7 +17,7 @@ char *savestr(char *str);
 #endif
 
 STR *
-hfetch(register HASH *tb, char *key)
+hfetch(HASH *tb, char *key)
 {
     char *s;
     int i;
@@ -43,7 +43,7 @@ hfetch(register HASH *tb, char *key)
 }
 
 bool
-hstore(register HASH *tb, char *key, STR *val)
+hstore(HASH *tb, char *key, STR *val)
 {
     char *s;
     int i;
@@ -141,7 +141,7 @@ hnew(void)
 }
 
 int
-hiterinit(register HASH *tb)
+hiterinit(HASH *tb)
 {
     tb->tbl_riter = -1;
     tb->tbl_eiter = (HENT*)NULL;

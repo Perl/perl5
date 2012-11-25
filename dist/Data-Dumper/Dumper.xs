@@ -15,7 +15,7 @@
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen);
-static I32 needs_quote(register const char *s, STRLEN len);
+static I32 needs_quote(const char *s, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
@@ -89,7 +89,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 
 /* does a string need to be protected? */
 static I32
-needs_quote(register const char *s, STRLEN len)
+needs_quote(const char *s, STRLEN len)
 {
     const char *send = s+len;
 TOP:
@@ -117,7 +117,7 @@ TOP:
 
 /* count the number of "'"s and "\"s in string */
 static I32
-num_q(register const char *s, register STRLEN slen)
+num_q(const char *s, STRLEN slen)
 {
     I32 ret = 0;
 
@@ -135,7 +135,7 @@ num_q(register const char *s, register STRLEN slen)
 /* slen number of characters in s will be escaped */
 /* destination must be long enough for additional chars */
 static I32
-esc_q(register char *d, register const char *s, register STRLEN slen)
+esc_q(char *d, const char *s, STRLEN slen)
 {
     I32 ret = 0;
 
@@ -155,7 +155,7 @@ esc_q(register char *d, register const char *s, register STRLEN slen)
 }
 
 static I32
-esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
+esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
 {
     char *r, *rstart;
     const char *s = src;

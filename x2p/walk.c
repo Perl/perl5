@@ -35,12 +35,12 @@ int prewalk ( int numit, int level, int node, int *numericptr );
 STR * walk ( int useval, int level, int node, int *numericptr, int minprec );
 #ifdef NETWARE
 char *savestr(char *str);
-char *cpytill(register char *to, register char *from, register int delim);
+char *cpytill(char *to, char *from, int delim);
 char *instr(char *big, const char *little);
 #endif
 
 STR *
-walk(int useval, int level, register int node, int *numericptr, int minprec)
+walk(int useval, int level, int node, int *numericptr, int minprec)
 {
     int len;
     STR *str;
@@ -1546,7 +1546,7 @@ sub Pick {\n\
 }
 
 static void
-tab(register STR *str, register int lvl)
+tab(STR *str, int lvl)
 {
     while (lvl > 1) {
 	str_cat(str,"\t");
@@ -1557,7 +1557,7 @@ tab(register STR *str, register int lvl)
 }
 
 static void
-fixtab(register STR *str, register int lvl)
+fixtab(STR *str, int lvl)
 {
     char *s;
 
@@ -1575,7 +1575,7 @@ fixtab(register STR *str, register int lvl)
 }
 
 static void
-addsemi(register STR *str)
+addsemi(STR *str)
 {
     char *s;
 
@@ -1587,7 +1587,7 @@ addsemi(register STR *str)
 }
 
 static void
-emit_split(register STR *str, int level)
+emit_split(STR *str, int level)
 {
     int i;
 
@@ -1620,7 +1620,7 @@ emit_split(register STR *str, int level)
 }
 
 int
-prewalk(int numit, int level, register int node, int *numericptr)
+prewalk(int numit, int level, int node, int *numericptr)
 {
     int len;
     int type;
@@ -2037,7 +2037,7 @@ prewalk(int numit, int level, register int node, int *numericptr)
 }
 
 static void
-numericize(register int node)
+numericize(int node)
 {
     int len;
     int type;

@@ -14621,7 +14621,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
  - regnext - dig the "next" pointer out of a node
  */
 regnode *
-Perl_regnext(pTHX_ register regnode *p)
+Perl_regnext(pTHX_ regnode *p)
 {
     dVAR;
     I32 offset;

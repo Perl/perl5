@@ -506,7 +506,7 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix)
  - pregexec - match a regexp against a string
  */
 I32
-Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, register char *strend,
+Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
 	 char *strbeg, I32 minend, SV *screamer, U32 nosave)
 /* stringarg: the point in the string at which to begin matching */
 /* strend:    pointer to null at end of string */
@@ -2076,7 +2076,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
  - regexec_flags - match a regexp against a string
  */
 I32
-Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *strend,
+Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	      char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
 /* stringarg: the point in the string at which to begin matching */
 /* strend:    pointer to null at end of string */
@@ -2092,9 +2092,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 {
     dVAR;
     struct regexp *const prog = ReANY(rx);
-    /*register*/ char *s;
+    char *s;
     regnode *c;
-    /*register*/ char *startpos = stringarg;
+    char *startpos = stringarg;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
@@ -7268,7 +7268,7 @@ create a copy so that changes the caller makes won't change the shared one.
 If <altsvp> is non-null, will return NULL in it, for back-compat.
  */
 SV *
-Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
+Perl_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
     PERL_ARGS_ASSERT_REGCLASS_SWASH;
 
@@ -7281,7 +7281,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 #endif
 
 STATIC SV *
-S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp)
+S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp)
 {
     /* Returns the swash for the input 'node' in the regex 'prog'.
      * If <doinit> is true, will attempt to create the swash if not already
@@ -7385,7 +7385,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bo
  */
 
 STATIC bool
-S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, register const U8* const p, register const bool utf8_target)
+S_reginclass(pTHX_ const regexp * const prog, const regnode * const n, const U8* const p, const bool utf8_target)
 {
     dVAR;
     const char flags = ANYOF_FLAGS(n);
@@ -7630,7 +7630,7 @@ restore_pos(pTHX_ void *arg)
 }
 
 STATIC void
-S_to_utf8_substr(pTHX_ register regexp *prog)
+S_to_utf8_substr(pTHX_ regexp *prog)
 {
     /* Converts substr fields in prog from bytes to UTF-8, calling fbm_compile
      * on the converted value */
@@ -7664,7 +7664,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 }
 
 STATIC bool
-S_to_byte_substr(pTHX_ register regexp *prog)
+S_to_byte_substr(pTHX_ regexp *prog)
 {
     /* Converts substr fields in prog from UTF-8 to bytes, calling fbm_compile
      * on the converted value; returns FALSE if can't be converted. */

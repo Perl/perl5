@@ -2462,7 +2462,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 #endif /* USE_ITHREADS */
 
 PAD **
-Perl_padlist_store(pTHX_ register PADLIST *padlist, I32 key, PAD *val)
+Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
 {
     dVAR;
     PAD **ary;

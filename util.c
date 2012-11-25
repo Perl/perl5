@@ -396,7 +396,7 @@ Free_t   Perl_mfree (Malloc_t where)
 /* copy a string up to some (non-backslashed) delimiter, if any */
 
 char *
-Perl_delimcpy(register char *to, register const char *toend, register const char *from, register const char *fromend, register int delim, I32 *retlen)
+Perl_delimcpy(char *to, const char *toend, const char *from, const char *fromend, int delim, I32 *retlen)
 {
     I32 tolen;
 
@@ -426,7 +426,7 @@ Perl_delimcpy(register char *to, register const char *toend, register const char
 /* This routine was donated by Corey Satten. */
 
 char *
-Perl_instr(register const char *big, register const char *little)
+Perl_instr(const char *big, const char *little)
 {
     I32 first;
 
@@ -487,7 +487,7 @@ Perl_ninstr(const char *big, const char *bigend, const char *little, const char 
 /* reverse of the above--find last substring */
 
 char *
-Perl_rninstr(register const char *big, const char *bigend, const char *little, const char *lend)
+Perl_rninstr(const char *big, const char *bigend, const char *little, const char *lend)
 {
     const char *bigbeg;
     const I32 first = *little;
@@ -638,7 +638,7 @@ then.
 */
 
 char *
-Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *littlestr, U32 flags)
+Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U32 flags)
 {
     unsigned char *s;
     STRLEN l;
@@ -854,7 +854,7 @@ range bytes match only themselves.
 
 
 I32
-Perl_foldEQ(const char *s1, const char *s2, register I32 len)
+Perl_foldEQ(const char *s1, const char *s2, I32 len)
 {
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
@@ -871,7 +871,7 @@ Perl_foldEQ(const char *s1, const char *s2, register I32 len)
     return 1;
 }
 I32
-Perl_foldEQ_latin1(const char *s1, const char *s2, register I32 len)
+Perl_foldEQ_latin1(const char *s1, const char *s2, I32 len)
 {
     /* Compare non-utf8 using Unicode (Latin1) semantics.  Does not work on
      * MICRO_SIGN, LATIN_SMALL_LETTER_SHARP_S, nor
@@ -904,7 +904,7 @@ case-insensitively in the current locale; false otherwise.
 */
 
 I32
-Perl_foldEQ_locale(const char *s1, const char *s2, register I32 len)
+Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 {
     dVAR;
     const U8 *a = (const U8 *)s1;
@@ -965,7 +965,7 @@ the new string can be freed with the C<Safefree()> function.
 */
 
 char *
-Perl_savepvn(pTHX_ const char *pv, register I32 len)
+Perl_savepvn(pTHX_ const char *pv, I32 len)
 {
     char *newaddr;
     PERL_UNUSED_CONTEXT;
@@ -2030,7 +2030,7 @@ Perl_unlnk(pTHX_ const char *f)	/* unlink all versions of a file */
 /* this is a drop-in replacement for bcopy() */
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 char *
-Perl_my_bcopy(register const char *from,register char *to,register I32 len)
+Perl_my_bcopy(const char *from, char *to, I32 len)
 {
     char * const retval = to;
 
@@ -2055,7 +2055,7 @@ Perl_my_bcopy(register const char *from,register char *to,register I32 len)
 /* this is a drop-in replacement for memset() */
 #ifndef HAS_MEMSET
 void *
-Perl_my_memset(register char *loc, register I32 ch, register I32 len)
+Perl_my_memset(char *loc, I32 ch, I32 len)
 {
     char * const retval = loc;
 
@@ -2072,7 +2072,7 @@ Perl_my_memset(register char *loc, register I32 ch, register I32 len)
 /* this is a drop-in replacement for bzero() */
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 char *
-Perl_my_bzero(register char *loc, register I32 len)
+Perl_my_bzero(char *loc, I32 len)
 {
     char * const retval = loc;
 
@@ -2089,7 +2089,7 @@ Perl_my_bzero(register char *loc, register I32 len)
 /* this is a drop-in replacement for memcmp() */
 #if !defined(HAS_MEMCMP) || !defined(HAS_SANE_MEMCMP)
 I32
-Perl_my_memcmp(const char *s1, const char *s2, register I32 len)
+Perl_my_memcmp(const char *s1, const char *s2, I32 len)
 {
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
@@ -2253,14 +2253,14 @@ Perl_my_ntohl(pTHX_ long l)
 
 #define HTOLE(name,type)					\
 	type							\
-	name (register type n)					\
+	name (type n)					        \
 	{							\
 	    union {						\
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    U32 i;					\
-	    U32 s = 0;					\
+	    U32 i;					        \
+	    U32 s = 0;					        \
 	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -2269,14 +2269,14 @@ Perl_my_ntohl(pTHX_ long l)
 
 #define LETOH(name,type)					\
 	type							\
-	name (register type n)					\
+	name (type n)					        \
 	{							\
 	    union {						\
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    U32 i;					\
-	    U32 s = 0;					\
+	    U32 i;					        \
+	    U32 s = 0;					        \
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
@@ -2291,14 +2291,14 @@ Perl_my_ntohl(pTHX_ long l)
 
 #define HTOBE(name,type)					\
 	type							\
-	name (register type n)					\
+	name (type n)					        \
 	{							\
 	    union {						\
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    U32 i;					\
-	    U32 s = 8*(sizeof(u.c)-1);			\
+	    U32 i;					        \
+	    U32 s = 8*(sizeof(u.c)-1);			        \
 	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -2307,14 +2307,14 @@ Perl_my_ntohl(pTHX_ long l)
 
 #define BETOH(name,type)					\
 	type							\
-	name (register type n)					\
+	name (type n)					        \
 	{							\
 	    union {						\
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    U32 i;					\
-	    U32 s = 8*(sizeof(u.c)-1);			\
+	    U32 i;					        \
+	    U32 s = 8*(sizeof(u.c)-1);			        \
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
@@ -2329,7 +2329,7 @@ Perl_my_ntohl(pTHX_ long l)
 
 #define NOT_AVAIL(name,type)                                    \
         type                                                    \
-        name (register type n)                                  \
+        name (type n)                                           \
         {                                                       \
             Perl_croak_nocontext(#name "() not available");     \
             return n; /* not reached */                         \
@@ -3257,7 +3257,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 
 #define PERL_REPEATCPY_LINEAR 4
 void
-Perl_repeatcpy(register char *to, register const char *from, I32 len, register IV count)
+Perl_repeatcpy(char *to, const char *from, I32 len, IV count)
 {
     PERL_ARGS_ASSERT_REPEATCPY;
 
@@ -4121,7 +4121,7 @@ Fill the sv with current working directory
  *     back into. */
 
 int
-Perl_getcwd_sv(pTHX_ register SV *sv)
+Perl_getcwd_sv(pTHX_ SV *sv)
 {
 #ifndef PERL_MICRO
     dVAR;

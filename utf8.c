@@ -4146,7 +4146,7 @@ U32 flags)
 }
 
 bool
-Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
+Perl_check_utf8_print(pTHX_ const U8* s, const STRLEN len)
 {
     /* May change: warns if surrogates, non-character code points, or
      * non-Unicode code points are in s which has length len bytes.  Returns
@@ -4357,7 +4357,7 @@ L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *  FOLDEQ_S2_ALREADY_FOLDED   Similarly.
  */
 I32
-Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2, U32 flags)
+Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2, U32 flags)
 {
     dVAR;
     const U8 *p1  = (const U8*)s1; /* Point to current char */

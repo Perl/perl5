@@ -1475,7 +1475,7 @@ do_spawn3(pTHX_ char *cmd, int execf, int flag)
 
 /* Array spawn/exec.  */
 int
-os2_aspawn_4(pTHX_ SV *really, register SV **args, I32 cnt, int execing)
+os2_aspawn_4(pTHX_ SV *really, SV **args, I32 cnt, int execing)
 {
     SV **argp = (SV **)args;
     SV **last = argp + cnt;
@@ -1518,7 +1518,7 @@ os2_aspawn_4(pTHX_ SV *really, register SV **args, I32 cnt, int execing)
 
 /* Array spawn.  */
 int
-os2_do_aspawn(pTHX_ SV *really, register SV **vmark, register SV **vsp)
+os2_do_aspawn(pTHX_ SV *really, SV **vmark, SV **vsp)
 {
     return os2_aspawn_4(aTHX_ really, vmark + 1, vsp - vmark, ASPAWN_WAIT);
 }

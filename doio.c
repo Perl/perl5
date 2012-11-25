@@ -61,7 +61,7 @@
 #include <signal.h>
 
 bool
-Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
+Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)
 {
@@ -706,7 +706,7 @@ say_false:
 }
 
 PerlIO *
-Perl_nextargv(pTHX_ register GV *gv)
+Perl_nextargv(pTHX_ GV *gv)
 {
     dVAR;
     SV *sv;
@@ -1199,7 +1199,7 @@ my_chsize(int fd, Off_t length)
 #endif /* !HAS_TRUNCATE && !HAS_CHSIZE */
 
 bool
-Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
+Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
 {
     dVAR;
 
@@ -1382,7 +1382,7 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 }
 
 bool
-Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
+Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 	       int fd, int do_report)
 {
     dVAR;
@@ -1571,7 +1571,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 #endif
 
 I32
-Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
+Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 {
     dVAR;
     I32 val;
@@ -1874,7 +1874,7 @@ nothing in the core.
 /* Do the permissions allow some operation?  Assumes statcache already set. */
 #ifndef VMS /* VMS' cando is in vms.c */
 bool
-Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
+Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t *statbufp)
 /* effective is a flag, true for EUID, or for checking if the effective gid
  *  is in the list of groups returned from getgroups().
  */

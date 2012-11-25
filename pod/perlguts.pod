@@ -1554,7 +1554,7 @@ within a C program.  These four are:
     I32  call_sv(SV*, I32);
     I32  call_pv(const char*, I32);
     I32  call_method(const char*, I32);
-    I32  call_argv(const char*, I32, register char**);
+    I32  call_argv(const char*, I32, char**);
 
 The routine most often used is C<call_sv>.  The C<SV*> argument
 contains either the name of the Perl subroutine to be called, or a

@@ -237,7 +237,7 @@ S_adjust_index(pTHX_ AV *av, const MAGIC *mg, I32 *keyp)
 }
 
 SV**
-Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
+Perl_av_fetch(pTHX_ AV *av, I32 key, I32 lval)
 {
     dVAR;
 
@@ -308,7 +308,7 @@ more information on how to use this function on tied arrays.
 */
 
 SV**
-Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
+Perl_av_store(pTHX_ AV *av, I32 key, SV *val)
 {
     dVAR;
     SV** ary;
@@ -397,7 +397,7 @@ Perl equivalent: C<my @new_array = ($scalar1, $scalar2, $scalar3...);>
 */
 
 AV *
-Perl_av_make(pTHX_ register I32 size, register SV **strp)
+Perl_av_make(pTHX_ I32 size, SV **strp)
 {
     AV * const av = MUTABLE_AV(newSV_type(SVt_PVAV));
     /* sv_upgrade does AvREAL_only()  */
@@ -447,7 +447,7 @@ Perl equivalent: C<@myarray = ();>.
 */
 
 void
-Perl_av_clear(pTHX_ register AV *av)
+Perl_av_clear(pTHX_ AV *av)
 {
     dVAR;
     I32 extra;
@@ -510,7 +510,7 @@ be freed.
 */
 
 void
-Perl_av_undef(pTHX_ register AV *av)
+Perl_av_undef(pTHX_ AV *av)
 {
     bool real;
 
@@ -570,7 +570,7 @@ Perl equivalent: C<push @myarray, $elem;>.
 */
 
 void
-Perl_av_push(pTHX_ register AV *av, SV *val)
+Perl_av_push(pTHX_ AV *av, SV *val)
 {             
     dVAR;
     MAGIC *mg;
@@ -601,7 +601,7 @@ Perl equivalent: C<pop(@myarray);>
 */
 
 SV *
-Perl_av_pop(pTHX_ register AV *av)
+Perl_av_pop(pTHX_ AV *av)
 {
     dVAR;
     SV *retval;
@@ -662,7 +662,7 @@ Perl equivalent: C<unshift @myarray, ( (undef) x $n );>
 */
 
 void
-Perl_av_unshift(pTHX_ register AV *av, register I32 num)
+Perl_av_unshift(pTHX_ AV *av, I32 num)
 {
     dVAR;
     I32 i;
@@ -727,7 +727,7 @@ Perl equivalent: C<shift(@myarray);>
 */
 
 SV *
-Perl_av_shift(pTHX_ register AV *av)
+Perl_av_shift(pTHX_ AV *av)
 {
     dVAR;
     SV *retval;
@@ -792,7 +792,7 @@ the same as C<av_clear(av)>.
 =cut
 */
 void
-Perl_av_fill(pTHX_ register AV *av, I32 fill)
+Perl_av_fill(pTHX_ AV *av, I32 fill)
 {
     dVAR;
     MAGIC *mg;

@@ -31,10 +31,10 @@ int oper2(int type, int arg1, int arg2);
 int oper3(int type, int arg1, int arg2, int arg3);
 int oper4(int type, int arg1, int arg2, int arg3, int arg4);
 int oper5(int type, int arg1, int arg2, int arg3, int arg4, int arg5);
-STR *walk(int useval, int level, register int node, int *numericptr, int minprec);
+STR *walk(int useval, int level, int node, int *numericptr, int minprec);
 #ifdef NETWARE
 char *savestr(char *str);
-char *cpy2(register char *to, register char *from, register int delim);
+char *cpy2(char *to, char *from, int delim);
 #endif
 
 #if defined(OS2) || defined(WIN32) || defined(NETWARE)
@@ -61,7 +61,7 @@ usage()
 #endif
 
 int
-main(register int argc, register const char **argv, register const char **env)
+main(int argc, const char **argv, const char **env)
 {
     STR *str;
     int i;
@@ -824,7 +824,7 @@ yylex(void)
 }
 
 char *
-scanpat(register char *s)
+scanpat(char *s)
 {
     char *d;
 
@@ -876,7 +876,7 @@ yyerror(const char *s)
 }
 
 char *
-scannum(register char *s)
+scannum(char *s)
 {
     char *d;
 

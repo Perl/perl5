@@ -2580,7 +2580,7 @@ Approximate Perl equivalent: C<&{"$sub_name"}(@$argv)>.
 */
 
 I32
-Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
+Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
 
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
@@ -4137,7 +4137,7 @@ S_init_predump_symbols(pTHX)
 }
 
 void
-Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
+Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 {
     dVAR;
 
@@ -4185,7 +4185,7 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 }
 
 STATIC void
-S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
+S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 {
     dVAR;
     GV* tmpgv;

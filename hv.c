@@ -337,7 +337,7 @@ Perl_hv_common_key_len(pTHX_ HV *hv, const char *key, I32 klen_i32,
 
 void *
 Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
-	       int flags, int action, SV *val, register U32 hash)
+	       int flags, int action, SV *val, U32 hash)
 {
     dVAR;
     XPVHV* xhv;
@@ -1392,7 +1392,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 
 /* like hv_free_ent, but returns the SV rather than freeing it */
 STATIC SV*
-S_hv_free_ent_ret(pTHX_ HV *hv, register HE *entry)
+S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 {
     dVAR;
     SV *val;
@@ -1416,7 +1416,7 @@ S_hv_free_ent_ret(pTHX_ HV *hv, register HE *entry)
 
 
 void
-Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
+Perl_hv_free_ent(pTHX_ HV *hv, HE *entry)
 {
     dVAR;
     SV *val;
@@ -1431,7 +1431,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 
 
 void
-Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
+Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
 {
     dVAR;
 
@@ -2388,7 +2388,7 @@ C<hv_iterinit>.
 */
 
 char *
-Perl_hv_iterkey(pTHX_ register HE *entry, I32 *retlen)
+Perl_hv_iterkey(pTHX_ HE *entry, I32 *retlen)
 {
     PERL_ARGS_ASSERT_HV_ITERKEY;
 
@@ -2416,7 +2416,7 @@ see C<hv_iterinit>.
 */
 
 SV *
-Perl_hv_iterkeysv(pTHX_ register HE *entry)
+Perl_hv_iterkeysv(pTHX_ HE *entry)
 {
     PERL_ARGS_ASSERT_HV_ITERKEYSV;
 
@@ -2433,7 +2433,7 @@ C<hv_iterkey>.
 */
 
 SV *
-Perl_hv_iterval(pTHX_ HV *hv, register HE *entry)
+Perl_hv_iterval(pTHX_ HV *hv, HE *entry)
 {
     PERL_ARGS_ASSERT_HV_ITERVAL;
 
@@ -2596,7 +2596,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
  * len and hash must both be valid for str.
  */
 HEK *
-Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
+Perl_share_hek(pTHX_ const char *str, I32 len, U32 hash)
 {
     bool is_utf8 = FALSE;
     int flags = 0;
@@ -2628,7 +2628,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 }
 
 STATIC HEK *
-S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
+S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
     dVAR;
     HE *entry;

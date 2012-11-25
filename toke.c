@@ -1735,7 +1735,7 @@ S_incline(pTHX_ const char *s)
 /* skip space before PL_thistoken */
 
 STATIC char *
-S_skipspace0(pTHX_ register char *s)
+S_skipspace0(pTHX_ char *s)
 {
     PERL_ARGS_ASSERT_SKIPSPACE0;
 
@@ -1756,7 +1756,7 @@ S_skipspace0(pTHX_ register char *s)
 /* skip space after PL_thistoken */
 
 STATIC char *
-S_skipspace1(pTHX_ register char *s)
+S_skipspace1(pTHX_ char *s)
 {
     const char *start = s;
     I32 startoff = start - SvPVX(PL_linestr);
@@ -1783,7 +1783,7 @@ S_skipspace1(pTHX_ register char *s)
 }
 
 STATIC char *
-S_skipspace2(pTHX_ register char *s, SV **svp)
+S_skipspace2(pTHX_ char *s, SV **svp)
 {
     char *start;
     const I32 bufptroff = PL_bufptr - SvPVX(PL_linestr);
@@ -1836,7 +1836,7 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
  */
 
 STATIC char *
-S_skipspace(pTHX_ register char *s)
+S_skipspace(pTHX_ char *s)
 {
 #ifdef PERL_MAD
     char *start = s;
@@ -2110,7 +2110,7 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
  */
 
 STATIC char *
-S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow_pack, int allow_initial_tick)
+S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack, int allow_initial_tick)
 {
     dVAR;
     char *s;
@@ -2159,7 +2159,7 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
  */
 
 STATIC void
-S_force_ident(pTHX_ register const char *s, int kind)
+S_force_ident(pTHX_ const char *s, int kind)
 {
     dVAR;
 
@@ -3776,7 +3776,7 @@ S_scan_const(pTHX_ char *start)
 /* This is the one truly awful dwimmer necessary to conflate C and sed. */
 
 STATIC int
-S_intuit_more(pTHX_ register char *s)
+S_intuit_more(pTHX_ char *s)
 {
     dVAR;
 
@@ -4225,7 +4225,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 }
 
 STATIC char *
-S_filter_gets(pTHX_ register SV *sv, STRLEN append)
+S_filter_gets(pTHX_ SV *sv, STRLEN append)
 {
     dVAR;
 
@@ -9152,7 +9152,7 @@ now_ok:
    *slp
    */
 STATIC char *
-S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
+S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
     dVAR;
     char *d = dest;
@@ -9195,7 +9195,7 @@ S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_packag
 }
 
 STATIC char *
-S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRLEN destlen, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck_uni)
 {
     dVAR;
     char *bracket = NULL;
@@ -9779,7 +9779,7 @@ S_scan_trans(pTHX_ char *start)
 */
 
 STATIC char *
-S_scan_heredoc(pTHX_ register char *s)
+S_scan_heredoc(pTHX_ char *s)
 {
     dVAR;
     I32 op_type = OP_SCALAR;
@@ -11002,7 +11002,7 @@ vstring:
 }
 
 STATIC char *
-S_scan_formline(pTHX_ register char *s)
+S_scan_formline(pTHX_ char *s)
 {
     dVAR;
     char *eol;

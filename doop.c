@@ -671,7 +671,7 @@ Perl_do_trans(pTHX_ SV *sv)
 }
 
 void
-Perl_do_join(pTHX_ register SV *sv, SV *delim, register SV **mark, register SV **sp)
+Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 {
     dVAR;
     SV ** const oldmark = mark;
