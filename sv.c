@@ -13057,7 +13057,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_minus_F		= proto_perl->Iminus_F;
     PL_doswitches	= proto_perl->Idoswitches;
     PL_dowarn		= proto_perl->Idowarn;
+#ifdef PERL_SAWAMPERSAND
     PL_sawampersand	= proto_perl->Isawampersand;
+#endif
     PL_unsafe		= proto_perl->Iunsafe;
     PL_perldb		= proto_perl->Iperldb;
     PL_perl_destruct_level = proto_perl->Iperl_destruct_level;

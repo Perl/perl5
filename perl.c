@@ -873,7 +873,9 @@ perl_destruct(pTHXx)
     PL_minus_F      = FALSE;
     PL_doswitches   = FALSE;
     PL_dowarn       = G_WARN_OFF;
+#ifdef PERL_SAWAMPERSAND
     PL_sawampersand = 0;	/* must save all match strings */
+#endif
     PL_unsafe       = FALSE;
 
     Safefree(PL_inplace);

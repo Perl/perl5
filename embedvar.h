@@ -287,7 +287,9 @@
 #define PL_savestack		(vTHX->Isavestack)
 #define PL_savestack_ix		(vTHX->Isavestack_ix)
 #define PL_savestack_max	(vTHX->Isavestack_max)
+#ifndef PL_sawampersand
 #define PL_sawampersand		(vTHX->Isawampersand)
+#endif
 #define PL_scopestack		(vTHX->Iscopestack)
 #define PL_scopestack_ix	(vTHX->Iscopestack_ix)
 #define PL_scopestack_max	(vTHX->Iscopestack_max)

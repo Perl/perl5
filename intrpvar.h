@@ -291,7 +291,9 @@ The C variable which corresponds to Perl's $^W warning variable.
 */
 
 PERLVAR(I, dowarn,	U8)
+#ifdef PERL_SAWAMPERSAND
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */
+#endif
 PERLVAR(I, unsafe,	bool)
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 

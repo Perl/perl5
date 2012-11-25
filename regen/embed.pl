@@ -441,7 +441,13 @@ END
 my $sym;
 
 for $sym (@intrp) {
+    if ($sym eq 'sawampersand') {
+	print $em "#ifndef PL_sawampersand\n";
+    }
     print $em multon($sym,'I','vTHX->');
+    if ($sym eq 'sawampersand') {
+	print $em "#endif\n";
+    }
 }
 
 print $em <<'END';

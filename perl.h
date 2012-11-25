@@ -4912,6 +4912,11 @@ typedef enum {
 #define SAWAMPERSAND_MIDDLE     2   /* saw $& */
 #define SAWAMPERSAND_RIGHT      4   /* saw $' */
 
+#ifndef PERL_SAWAMPERSAND
+# define PL_sawampersand \
+	(SAWAMPERSAND_LEFT|SAWAMPERSAND_MIDDLE|SAWAMPERSAND_RIGHT)
+#endif
+
 /* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))
 #define RsSIMPLE(sv)  (SvOK(sv) && (! SvPOK(sv) || SvCUR(sv)))
