@@ -3741,7 +3741,7 @@ static void
 S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 {
     SV * const sref = SvRV(sstr);
-    SV *dref = NULL;
+    SV *dref;
     const int intro = GvINTRO(dstr);
     SV **location;
     U8 import_flag = 0;
@@ -3789,8 +3789,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    }
 	    SAVEGENERICSV(*location);
 	}
-	else
-	    dref = *location;
+	dref = *location;
 	if (stype == SVt_PVCV && (*location != sref || GvCVGEN(dstr))) {
 	    CV* const cv = MUTABLE_CV(*location);
 	    if (cv) {
@@ -3907,7 +3906,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
         }
 	break;
     }
-    SvREFCNT_dec(dref);
+    if (!intro) SvREFCNT_dec(dref);
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
     return;
