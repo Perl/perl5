@@ -8383,9 +8383,7 @@ static char *int_tovmsspec
   else if (*(dirend+1) == '.') {  /* do we have trailing "/." or "/.." or "/..."? */
     if (!*(dirend+2)) dirend +=2;
     if (*(dirend+2) == '.' && !*(dirend+3)) dirend += 3;
-    if (decc_efs_charset == 0) {
-      if (*(dirend+2) == '.' && *(dirend+3) == '.' && !*(dirend+4)) dirend += 4;
-    }
+    if (*(dirend+2) == '.' && *(dirend+3) == '.' && !*(dirend+4)) dirend += 4;
   }
 
   cp1 = rslt;
