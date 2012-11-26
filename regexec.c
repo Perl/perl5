@@ -168,7 +168,7 @@ static const char* const non_utf8_target_but_utf8_required
 #define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */        \
         /* No asserts are done for some of these, in case called on a   */  \
         /* Unicode version in which they map to nothing */                  \
-	LOAD_UTF8_CHARCLASS(X_regular_begin, HYPHEN_UTF8);                          \
+	LOAD_UTF8_CHARCLASS(X_regular_begin, HYPHEN_UTF8);                  \
 	LOAD_UTF8_CHARCLASS(X_extend, COMBINING_GRAVE_ACCENT_UTF8);         \
 
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
@@ -189,7 +189,7 @@ static const char* const non_utf8_target_but_utf8_required
  * fails, or advance to the next character */
 
 #define _CCC_TRY_CODE(POS_OR_NEG, FUNC, UTF8_TEST, CLASS, STR)                \
-    if (NEXTCHR_IS_EOS) {                                              \
+    if (NEXTCHR_IS_EOS) {                                                     \
 	sayNO;                                                                \
     }                                                                         \
     if (utf8_target && UTF8_IS_CONTINUED(nextchr)) {                          \
@@ -219,8 +219,7 @@ static const char* const non_utf8_target_but_utf8_required
 	_CCC_TRY_CODE(  PLACEHOLDER , FUNC,                                   \
 		          cBOOL(swash_fetch(CAT2(PL_utf8_,CLASS),             \
 			                    (U8*)locinput, TRUE)),            \
-		          CLASS, STR)                                         \
-
+		          CLASS, STR)
 /* Generate the case statements for both locale and non-locale character
  * classes in regmatch for classes that don't have special unicode semantics.
  * Locales don't use an immediate swash, but an intermediary special locale
