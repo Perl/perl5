@@ -987,15 +987,12 @@ perl_destruct(pTHXx)
     /* clear utf8 character classes */
     SvREFCNT_dec(PL_utf8_alnum);
     SvREFCNT_dec(PL_utf8_alpha);
-    SvREFCNT_dec(PL_utf8_blank);
-    SvREFCNT_dec(PL_utf8_space);
     SvREFCNT_dec(PL_utf8_graph);
     SvREFCNT_dec(PL_utf8_digit);
     SvREFCNT_dec(PL_utf8_upper);
     SvREFCNT_dec(PL_utf8_lower);
     SvREFCNT_dec(PL_utf8_print);
     SvREFCNT_dec(PL_utf8_punct);
-    SvREFCNT_dec(PL_utf8_xdigit);
     SvREFCNT_dec(PL_utf8_mark);
     SvREFCNT_dec(PL_utf8_toupper);
     SvREFCNT_dec(PL_utf8_totitle);
@@ -1006,15 +1003,12 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_foldclosures);
     PL_utf8_alnum	= NULL;
     PL_utf8_alpha	= NULL;
-    PL_utf8_blank	= NULL;
-    PL_utf8_space	= NULL;
     PL_utf8_graph	= NULL;
     PL_utf8_digit	= NULL;
     PL_utf8_upper	= NULL;
     PL_utf8_lower	= NULL;
     PL_utf8_print	= NULL;
     PL_utf8_punct	= NULL;
-    PL_utf8_xdigit	= NULL;
     PL_utf8_mark	= NULL;
     PL_utf8_toupper	= NULL;
     PL_utf8_totitle	= NULL;
