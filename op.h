@@ -570,7 +570,8 @@ struct loop {
 #  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && isGV_with_GP(v) \
 				 && GvIN_PAD(v))
-#  define	IS_PADCONST(v)	(v && (SvREADONLY(v) || SvIsCOW(v)))
+#  define	IS_PADCONST(v) \
+	(v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
 				 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
