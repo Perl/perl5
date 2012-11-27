@@ -46,7 +46,7 @@ struct reg_substr_data {
     struct reg_substr_datum data[3];	/* Actual array */
 };
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 #define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is COW from original */
 #else
 #define SV_SAVED_COPY
@@ -495,7 +495,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 
 /* Stuff that needs to be included in the pluggable extension goes below here */
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 #define RX_MATCH_COPY_FREE(rx) \
 	STMT_START {if (RX_SAVED_COPY(rx)) { \
 	    SV_CHECK_THINKFIRST_COW_DROP(RX_SAVED_COPY(rx)); \
@@ -790,7 +790,7 @@ struct re_save_state {
     U32 re_state_regsize;		/* from regexec.c */
     char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     char *re_state_reg_starttry;	/* from regexec.c */
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     SV *re_state_nrs;			/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
 #endif
 };

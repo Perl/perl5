@@ -275,13 +275,15 @@ There is no quantifier C<{,n}>. That's interpreted as a literal string.
    ${^MATCH}      Entire matched string
    ${^POSTMATCH}  Everything after to matched string
 
+Note to those still using Perl 5.16 or earlier:
 The use of C<$`>, C<$&> or C<$'> will slow down B<all> regex use
-within your program. Consult L<perlvar> for C<@->
-to see equivalent expressions that won't cause slow down.
-See also L<Devel::SawAmpersand>. Starting with Perl 5.10, you
+within your program.  Consult L<perlvar> for C<@->
+to see equivalent expressions that won't cause slowdown.
+See also L<Devel::SawAmpersand>.  Starting with Perl 5.10, you
 can also use the equivalent variables C<${^PREMATCH}>, C<${^MATCH}>
 and C<${^POSTMATCH}>, but for them to be defined, you have to
 specify the C</p> (preserve) modifier on your regular expression.
+In Perl 5.18, the use of C<$`>, C<$&> and C<$'> makes no speed difference.
 
    $1, $2 ...  hold the Xth captured expr
    $+    Last parenthesized pattern match

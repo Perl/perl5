@@ -49,7 +49,17 @@ while (my $file = <$fh>) {
 	unless $file eq 'comp/require.t'
 }
 
-# There are regression tests using test.pl that don't want PL_sawampersand set
+# There are regression tests using test.pl that don't want PL_sawampersand
+# set.  Or at least that was the case until PL_sawampersand was disabled
+# and replaced with copy-on-write.
+
+# We still allow PL_sawampersand to be enabled with
+# -Accflags=-DPERL_SAWAMPERSAND, so when that is defined we can still run
+# these tests.  When it is not enabled, PL_sawampersand makes no observable
+# difference so the tests fail.
+
+require Config;
+exit unless "@{[Config::bincompat_options()]}" =~ /\bPERL_SAWAMPERSAND\b/;
 
 # This very much relies on a bug in the regexp implementation, but for now it's
 # the best way to work out whether PL_sawampersand is true.

@@ -5235,6 +5235,13 @@ PERL_CALLCONV short	Perl_my_swap(pTHX_ short s)
 #if defined(NO_MATHOMS)
 /* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
 #endif
+#if defined(PERL_ANY_COW)
+PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_SETSV_COW	\
+	assert(sstr)
+
+#endif
 #if defined(PERL_CORE)
 PERL_CALLCONV void	Perl_opslab_force_free(pTHX_ OPSLAB *slab)
 			__attribute__nonnull__(pTHX_1);
@@ -7510,13 +7517,6 @@ PERL_CALLCONV long	Perl_my_letohl(long n);
 #endif
 #if defined(PERL_NEED_MY_LETOHS)
 PERL_CALLCONV short	Perl_my_letohs(short n);
-#endif
-#if defined(PERL_OLD_COPY_ON_WRITE)
-PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dstr, SV* sstr)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_SETSV_COW	\
-	assert(sstr)
-
 #endif
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);

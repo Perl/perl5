@@ -2494,6 +2494,18 @@ typedef AV PAD;
 typedef AV PADNAMELIST;
 typedef SV PADNAME;
 
+#if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
+# define PERL_NEW_COPY_ON_WRITE
+#endif
+
+#if defined(PERL_OLD_COPY_ON_WRITE) || defined(PERL_NEW_COPY_ON_WRITE)
+# if defined(PERL_OLD_COPY_ON_WRITE) && defined(PERL_NEW_COPY_ON_WRITE)
+#  error PERL_OLD_COPY_ON_WRITE and PERL_NEW_COPY_ON_WRITE are exclusive
+# else
+#  define PERL_ANY_COW
+# endif
+#endif
+
 #include "handy.h"
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)
@@ -4707,8 +4719,14 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
+#  ifdef PERL_NEW_COPY_ON_WRITE
+			     " PERL_NEW_COPY_ON_WRITE"
+#  endif
 #  ifdef PERL_POISON
 			     " PERL_POISON"
+#  endif
+#  ifdef PERL_SAWAMPERSAND
+			     " PERL_SAWAMPERSAND"
 #  endif
 #  ifdef PERL_TRACK_MEMPOOL
 			     " PERL_TRACK_MEMPOOL"
@@ -4896,6 +4914,11 @@ typedef enum {
 #define SAWAMPERSAND_LEFT       1   /* saw $` */
 #define SAWAMPERSAND_MIDDLE     2   /* saw $& */
 #define SAWAMPERSAND_RIGHT      4   /* saw $' */
+
+#ifndef PERL_SAWAMPERSAND
+# define PL_sawampersand \
+	(SAWAMPERSAND_LEFT|SAWAMPERSAND_MIDDLE|SAWAMPERSAND_RIGHT)
+#endif
 
 /* Various states of the input record separator SV (rs) */
 #define RsSNARF(sv)   (! SvOK(sv))

@@ -1638,6 +1638,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	        case '[':
 		    require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
                     break;
+#ifdef PERL_SAWAMPERSAND
 	        case '`':
 		    PL_sawampersand |= SAWAMPERSAND_LEFT;
                     (void)GvSVn(gv);
@@ -1650,6 +1651,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    PL_sawampersand |= SAWAMPERSAND_RIGHT;
                     (void)GvSVn(gv);
                     break;
+#endif
                 }
 	      }
 	    }
@@ -1854,6 +1856,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '&':		/* $& */
 	case '`':		/* $` */
 	case '\'':		/* $' */
+#ifdef PERL_SAWAMPERSAND
 	    if (!(
 		sv_type == SVt_PVAV ||
 		sv_type == SVt_PVHV ||
@@ -1867,6 +1870,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                                 ? SAWAMPERSAND_MIDDLE
                                 : SAWAMPERSAND_RIGHT;
                 }
+#endif
 	    goto magicalize;
 
 	case ':':		/* $: */

@@ -274,8 +274,13 @@ else {
 			 );
 }
 
-unless ($define{'PERL_OLD_COPY_ON_WRITE'}) {
+unless ($define{'PERL_OLD_COPY_ON_WRITE'}
+     || $define{'PERL_NEW_COPY_ON_WRITE'}) {
     ++$skip{Perl_sv_setsv_cow};
+}
+
+unless ($define{PERL_SAW_AMPERSAND}) {
+    ++$skip{PL_sawampersand};
 }
 
 unless ($define{'USE_REENTRANT_API'}) {

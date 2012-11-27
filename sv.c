@@ -1502,7 +1502,10 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 #endif
     }
     else
+    {
+	if (SvIsCOW(sv)) sv_force_normal(sv);
 	s = SvPVX_mutable(sv);
+    }
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	STRLEN minlen = SvCUR(sv);
@@ -3910,6 +3913,19 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
     return;
 }
 
+/* Work around compiler warnings about unsigned >= THRESHOLD when thres-
+   hold is 0. */
+#if SV_COW_THRESHOLD
+# define GE_COW_THRESHOLD(len)		((len) >= SV_COW_THRESHOLD)
+#else
+# define GE_COW_THRESHOLD(len)		1
+#endif
+#if SV_COWBUF_THRESHOLD
+# define GE_COWBUF_THRESHOLD(len)	((len) >= SV_COWBUF_THRESHOLD)
+#else
+# define GE_COWBUF_THRESHOLD(len)	1
+#endif
+
 void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 {
@@ -4175,6 +4191,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
     }
     else if (sflags & SVp_POK) {
         bool isSwipe = 0;
+	const STRLEN cur = SvCUR(sstr);
+	const STRLEN len = SvLEN(sstr);
 
 	/*
 	 * Check to see if we can just swipe the string.  If so, it's a
@@ -4198,12 +4216,19 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	       source scalar is a shared hash key scalar.  */
             (((flags & SV_COW_SHARED_HASH_KEYS)
 	       ? !(sflags & SVf_IsCOW)
+#ifdef PERL_NEW_COPY_ON_WRITE
+		|| (len &&
+		    ((!GE_COWBUF_THRESHOLD(cur) && SvLEN(dstr) > cur)
+		   /* If this is a regular (non-hek) COW, only so many COW
+		      "copies" are possible. */
+		    || CowREFCNT(sstr) == SV_COW_REFCNT_MAX))
+#endif
 	       : 1 /* If making a COW copy is forbidden then the behaviour we
 		       desire is as if the source SV isn't actually already
 		       COW, even if it is.  So we act as if the source flags
 		       are not COW, rather than actually testing them.  */
 	      )
-#ifndef PERL_OLD_COPY_ON_WRITE
+#ifndef PERL_ANY_COW
 	     /* The change that added SV_COW_SHARED_HASH_KEYS makes the logic
 		when PERL_OLD_COPY_ON_WRITE is defined a little wrong.
 		Conceptually PERL_OLD_COPY_ON_WRITE being defined should
@@ -4218,26 +4243,38 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	     )
             &&
             !(isSwipe =
+#ifdef PERL_NEW_COPY_ON_WRITE
+				/* slated for free anyway (and not COW)? */
+                 (sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP &&
+#else
                  (sflags & SVs_TEMP) &&   /* slated for free anyway? */
+#endif
                  !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
 	         (!(flags & SV_NOSTEAL)) &&
 					/* and we're allowed to steal temps */
                  SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
-                 SvLEN(sstr))             /* and really is a string */
-#ifdef PERL_OLD_COPY_ON_WRITE
+                 len)             /* and really is a string */
+#ifdef PERL_ANY_COW
             && ((flags & SV_COW_SHARED_HASH_KEYS)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
+# ifdef PERL_OLD_COPY_ON_WRITE
 		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && SvTYPE(sstr) >= SVt_PVIV))
+		     && SvTYPE(sstr) >= SVt_PVIV
+# else
+		     && !(SvFLAGS(dstr) & SVf_BREAK)
+		     && !(sflags & SVf_IsCOW)
+		     && GE_COW_THRESHOLD(cur) && cur+1 < len
+		     && (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)
+# endif
+		    ))
 		: 1)
 #endif
             ) {
             /* Failed the swipe test, and it's not a shared hash key either.
                Have to copy the string.  */
-	    STRLEN len = SvCUR(sstr);
-            SvGROW(dstr, len + 1);	/* inlined from sv_setpvn */
-            Move(SvPVX_const(sstr),SvPVX(dstr),len,char);
-            SvCUR_set(dstr, len);
+            SvGROW(dstr, cur + 1);	/* inlined from sv_setpvn */
+            Move(SvPVX_const(sstr),SvPVX(dstr),cur,char);
+            SvCUR_set(dstr, cur);
             *SvEND(dstr) = '\0';
         } else {
             /* If PERL_OLD_COPY_ON_WRITE is not defined, then isSwipe will always
@@ -4249,13 +4286,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                 sv_dump(sstr);
                 sv_dump(dstr);
             }
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
             if (!isSwipe) {
                 if (!(sflags & SVf_IsCOW)) {
                     SvIsCOW_on(sstr);
+# ifdef PERL_OLD_COPY_ON_WRITE
                     /* Make the source SV into a loop of 1.
                        (about to become 2) */
                     SV_COW_NEXT_SV_SET(sstr, sstr);
+# else
+		    CowREFCNT(sstr) = 0;
+# endif
                 }
             }
 #endif
@@ -4266,15 +4307,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 
             if (!isSwipe) {
                 /* making another shared SV.  */
-                STRLEN cur = SvCUR(sstr);
-                STRLEN len = SvLEN(sstr);
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
                 if (len) {
+# ifdef PERL_OLD_COPY_ON_WRITE
 		    assert (SvTYPE(dstr) >= SVt_PVIV);
                     /* SvIsCOW_normal */
                     /* splice us in between source and next-after-source.  */
                     SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
                     SV_COW_NEXT_SV_SET(sstr, dstr);
+# else
+		    CowREFCNT(sstr)++;
+# endif
                     SvPV_set(dstr, SvPVX_mutable(sstr));
                 } else
 #endif
@@ -4364,7 +4407,12 @@ Perl_sv_setsv_mg(pTHX_ SV *const dstr, SV *const sstr)
     SvSETMAGIC(dstr);
 }
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
+# ifdef PERL_OLD_COPY_ON_WRITE
+#  define SVt_COW SVt_PVIV
+# else
+#  define SVt_COW SVt_PV
+# endif
 SV *
 Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 {
@@ -4390,14 +4438,16 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     }
     else
 	new_SV(dstr);
-    SvUPGRADE(dstr, SVt_PVIV);
+    SvUPGRADE(dstr, SVt_COW);
 
     assert (SvPOK(sstr));
     assert (SvPOKp(sstr));
+# ifdef PERL_OLD_COPY_ON_WRITE
     assert (!SvIOK(sstr));
     assert (!SvIOKp(sstr));
     assert (!SvNOK(sstr));
     assert (!SvNOKp(sstr));
+# endif
 
     if (SvIsCOW(sstr)) {
 
@@ -4408,21 +4458,34 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 	    new_pv = HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr))));
 	    goto common_exit;
 	}
+# ifdef PERL_OLD_COPY_ON_WRITE
 	SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
+# else
+	assert(SvCUR(sstr)+1 < SvLEN(sstr));
+	assert(CowREFCNT(sstr) < SV_COW_REFCNT_MAX);
+# endif
     } else {
 	assert ((SvFLAGS(sstr) & CAN_COW_MASK) == CAN_COW_FLAGS);
-	SvUPGRADE(sstr, SVt_PVIV);
+	SvUPGRADE(sstr, SVt_COW);
 	SvIsCOW_on(sstr);
 	DEBUG_C(PerlIO_printf(Perl_debug_log,
 			      "Fast copy on write: Converting sstr to COW\n"));
+# ifdef PERL_OLD_COPY_ON_WRITE
 	SV_COW_NEXT_SV_SET(dstr, sstr);
+# else
+	CowREFCNT(sstr) = 0;	
+# endif
     }
+# ifdef PERL_OLD_COPY_ON_WRITE
     SV_COW_NEXT_SV_SET(sstr, dstr);
+# else
+    CowREFCNT(sstr)++;	
+# endif
     new_pv = SvPVX_mutable(sstr);
 
   common_exit:
     SvPV_set(dstr, new_pv);
-    SvFLAGS(dstr) = (SVt_PVIV|SVf_POK|SVp_POK|SVf_IsCOW);
+    SvFLAGS(dstr) = (SVt_COW|SVf_POK|SVp_POK|SVf_IsCOW);
     if (SvUTF8(sstr))
 	SvUTF8_on(dstr);
     SvLEN_set(dstr, len);
@@ -4736,29 +4799,42 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
 
     PERL_ARGS_ASSERT_SV_FORCE_NORMAL_FLAGS;
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     if (SvREADONLY(sv)) {
 	if (IN_PERL_RUNTIME)
 	    Perl_croak_no_modify();
     }
-    else
-	if (SvIsCOW(sv)) {
-	    const char * const pvx = SvPVX_const(sv);
-	    const STRLEN len = SvLEN(sv);
-	    const STRLEN cur = SvCUR(sv);
-	    /* next COW sv in the loop.  If len is 0 then this is a shared-hash
-	       key scalar, so we mustn't attempt to call SV_COW_NEXT_SV(), as
-	       we'll fail an assertion.  */
-	    SV * const next = len ? SV_COW_NEXT_SV(sv) : 0;
+    else if (SvIsCOW(sv)) {
+	const char * const pvx = SvPVX_const(sv);
+	const STRLEN len = SvLEN(sv);
+	const STRLEN cur = SvCUR(sv);
+# ifdef PERL_OLD_COPY_ON_WRITE
+	/* next COW sv in the loop.  If len is 0 then this is a shared-hash
+	   key scalar, so we mustn't attempt to call SV_COW_NEXT_SV(), as
+	   we'll fail an assertion.  */
+	SV * const next = len ? SV_COW_NEXT_SV(sv) : 0;
+# endif
 
-            if (DEBUG_C_TEST) {
+        if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log,
                               "Copy on write: Force normal %ld\n",
                               (long) flags);
                 sv_dump(sv);
-            }
-            SvIsCOW_off(sv);
+        }
+        SvIsCOW_off(sv);
+# ifdef PERL_NEW_COPY_ON_WRITE
+	if (len && CowREFCNT(sv) == 0)
+	    /* We own the buffer ourselves. */
+	    NOOP;
+	else
+# endif
+	{
+		
             /* This SV doesn't own the buffer, so need to Newx() a new one:  */
+# ifdef PERL_NEW_COPY_ON_WRITE
+	    /* Must do this first, since the macro uses SvPVX. */
+	    if (len) CowREFCNT(sv)--;
+# endif
             SvPV_set(sv, NULL);
             SvLEN_set(sv, 0);
             if (flags & SV_COW_DROP_PV) {
@@ -4771,7 +4847,9 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
                 *SvEND(sv) = '\0';
             }
 	    if (len) {
+# ifdef PERL_OLD_COPY_ON_WRITE
 		sv_release_COW(sv, pvx, next);
+# endif
 	    } else {
 		unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
 	    }
@@ -4779,6 +4857,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
                 sv_dump(sv);
             }
 	}
+    }
 #else
     if (SvREADONLY(sv)) {
 	if (IN_PERL_RUNTIME)
@@ -5299,7 +5378,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
     vtable = (vtable_index == magic_vtable_max)
 	? NULL : PL_magic_vtables + vtable_index;
 
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     if (SvIsCOW(sv))
         sv_force_normal_flags(sv, 0);
 #endif
@@ -6185,7 +6264,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			next_sv = target;
 		}
 	    }
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 	    else if (SvPVX_const(sv)
 		     && !(SvTYPE(sv) == SVt_PVIO
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP)))
@@ -6196,12 +6275,23 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			sv_dump(sv);
 		    }
 		    if (SvLEN(sv)) {
+# ifdef PERL_OLD_COPY_ON_WRITE
 			sv_release_COW(sv, SvPVX_const(sv), SV_COW_NEXT_SV(sv));
+# else
+			if (CowREFCNT(sv)) {
+			    CowREFCNT(sv)--;
+			    SvLEN_set(sv, 0);
+			}
+# endif
 		    } else {
 			unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 		    }
 
-		} else if (SvLEN(sv)) {
+		}
+# ifdef PERL_OLD_COPY_ON_WRITE
+		else
+# endif
+		if (SvLEN(sv)) {
 		    Safefree(SvPVX_mutable(sv));
 		}
 	    }
@@ -12708,7 +12798,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_bostr);
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 		new_state->re_state_nrs
 		    = sv_dup(old_state->re_state_nrs, param);
 #endif
@@ -12967,7 +13057,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_minus_F		= proto_perl->Iminus_F;
     PL_doswitches	= proto_perl->Idoswitches;
     PL_dowarn		= proto_perl->Idowarn;
+#ifdef PERL_SAWAMPERSAND
     PL_sawampersand	= proto_perl->Isawampersand;
+#endif
     PL_unsafe		= proto_perl->Iunsafe;
     PL_perldb		= proto_perl->Iperldb;
     PL_perl_destruct_level = proto_perl->Iperl_destruct_level;

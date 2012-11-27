@@ -879,6 +879,9 @@
 #define dump_exec_pos(a,b,c,d,e,f)	S_dump_exec_pos(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
+#  if defined(PERL_ANY_COW)
+#define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
+#  endif
 #  if defined(PERL_IN_DQUOTE_STATIC_C)
 #define grok_bslash_c(a,b,c)	S_grok_bslash_c(aTHX_ a,b,c)
 #define grok_bslash_o(a,b,c,d,e)	S_grok_bslash_o(aTHX_ a,b,c,d,e)
@@ -981,9 +984,6 @@
 #define _to_fold_latin1(a,b,c,d)	Perl__to_fold_latin1(aTHX_ a,b,c,d)
 #define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
 #define is_utf8_X_regular_begin(a)	Perl_is_utf8_X_regular_begin(aTHX_ a)
-#  endif
-#  if defined(PERL_OLD_COPY_ON_WRITE)
-#define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
 #endif
 #ifdef PERL_CORE

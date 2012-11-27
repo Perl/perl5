@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 205 );
+plan( tests => 206 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -881,3 +881,8 @@ $a = "";
 utf8::upgrade $a;
 $_ =~ s/$/$a/;
 is $_, "\xc4\x80", "empty utf8 repl does not result in mangled utf8";
+
+$@ = "\x{30cb}eval 18";
+$@ =~ s/eval \d+/eval 11/;
+is $@, "\x{30cb}eval 11",
+  'loading utf8 tables does not interfere with matches against $@';

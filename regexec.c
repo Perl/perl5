@@ -2635,9 +2635,8 @@ got_it:
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) ) {
 	if (flags & REXEC_COPY_STR) {
-#ifdef PERL_OLD_COPY_ON_WRITE
-	    if ((SvIsCOW(sv)
-		 || (SvFLAGS(sv) & CAN_COW_MASK) == CAN_COW_FLAGS)) {
+#ifdef PERL_ANY_COW
+	    if (SvCANCOW(sv)) {
 		if (DEBUG_C_TEST) {
 		    PerlIO_printf(Perl_debug_log,
 				  "Copy on write: regexp capture, type %d\n",
@@ -2852,7 +2851,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 	    PL_reg_oldsavedlen = prog->sublen;
 	    PL_reg_oldsavedoffset = prog->suboffset;
 	    PL_reg_oldsavedcoffset = prog->suboffset;
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 	    PL_nrs = prog->saved_copy;
 #endif
 	    RXp_MATCH_COPIED_off(prog);
@@ -7617,7 +7616,7 @@ restore_pos(pTHX_ void *arg)
 	    rex->sublen = PL_reg_oldsavedlen;
 	    rex->suboffset = PL_reg_oldsavedoffset;
 	    rex->subcoffset = PL_reg_oldsavedcoffset;
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 	    rex->saved_copy = PL_nrs;
 #endif
 	    RXp_MATCH_COPIED_on(rex);

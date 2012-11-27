@@ -14192,7 +14192,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 	Safefree(r->substrs);
     }
     RX_MATCH_COPY_FREE(rx);
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     SvREFCNT_dec(r->saved_copy);
 #endif
     Safefree(r->offs);
@@ -14275,7 +14275,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 	   anchored or float namesakes, and don't hold a second reference.  */
     }
     RX_MATCH_COPIED_off(ret_x);
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     ret->saved_copy = NULL;
 #endif
     ret->mother_re = ReREFCNT_inc(r->mother_re ? r->mother_re : rx);
@@ -14483,7 +14483,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	ret->subbeg  = SAVEPVN(ret->subbeg, ret->sublen);
     else
 	ret->subbeg = NULL;
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     ret->saved_copy = NULL;
 #endif
 
@@ -14704,7 +14704,7 @@ Perl_save_re_context(pTHX)
     PL_reg_leftiter = 0;
     PL_reg_poscache = NULL;
     PL_reg_poscache_size = 0;
-#ifdef PERL_OLD_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
     PL_nrs = NULL;
 #endif
 
