@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 54);
+BEGIN { require q(./test.pl); } plan(tests => 55);
 
 require mro;
 
@@ -345,4 +345,11 @@ is(eval { MRO_N->testfunc() }, 123);
     undef *fednu::ISA;
     @{*fednu::ISA} = "pyfg";
     ok +fednu->isa("pyfg"), 'autovivifying @ISA via *{@ISA}';
+}
+
+{
+    sub Detached::method;
+    my $h = delete $::{"Detached::"};
+    eval { local *Detached::method };
+    is $@, "", 'localising gv-with-cv belonging to detached package';
 }

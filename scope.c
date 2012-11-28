@@ -285,8 +285,9 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 
     if (empty) {
 	GP *gp = Perl_newGP(aTHX_ gv);
+	HV * const stash = GvSTASH(gv);
 
-	if (GvCVu(gv))
+	if (GvCVu(gv) && stash && HvENAME(stash))
             mro_method_changed_in(GvSTASH(gv)); /* taking a method out of circulation ("local")*/
 	if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
 	    gp->gp_io = newIO();
