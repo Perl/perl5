@@ -286,14 +286,21 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     if (empty) {
 	GP *gp = Perl_newGP(aTHX_ gv);
 	HV * const stash = GvSTASH(gv);
+	bool isa_changed = 0;
 
-	if (GvCVu(gv) && stash && HvENAME(stash))
-            mro_method_changed_in(GvSTASH(gv)); /* taking a method out of circulation ("local")*/
+	if (stash && HvENAME(stash)) {
+	    if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
+		isa_changed = TRUE;
+	    else if (GvCVu(gv))
+		/* taking a method out of circulation ("local")*/
+                mro_method_changed_in(stash);
+	}
 	if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
 	    gp->gp_io = newIO();
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}
 	GvGP_set(gv,gp);
+	if (isa_changed) mro_isa_changed_in(stash);
     }
     else {
 	gp_ref(GvGP(gv));
@@ -860,9 +867,13 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gv = MUTABLE_GV(SSPOPPTR);
 	    gp_free(gv);
 	    GvGP_set(gv, (GP*)ptr);
-            /* putting a method back into circulation ("local")*/
-	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvENAME_get(hv))
+	    if ((hv=GvSTASH(gv)) && HvENAME_get(hv)) {
+	      if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
+		mro_isa_changed_in(hv);
+	      else if (GvCVu(gv))
+                /* putting a method back into circulation ("local")*/	
                 gv_method_changed(gv);
+	    }
 	    SvREFCNT_dec(gv);
 	    break;
 	case SAVEt_FREESV:

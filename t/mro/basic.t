@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 55);
+BEGIN { require q(./test.pl); } plan(tests => 59);
 
 require mro;
 
@@ -352,4 +352,21 @@ is(eval { MRO_N->testfunc() }, 123);
     my $h = delete $::{"Detached::"};
     eval { local *Detached::method };
     is $@, "", 'localising gv-with-cv belonging to detached package';
+}
+
+{
+    # *ISA localisation
+    @il::ISA = "ilsuper";
+    sub ilsuper::can { "puree" }
+    sub il::tomatoes;
+    {
+        local *il::ISA;
+        is +il->can("tomatoes"), \&il::tomatoes, 'local *ISA';
+    }
+    is "il"->can("tomatoes"), "puree", 'local *ISA unwinding';
+    {
+        local *il::ISA = [];
+        is +il->can("tomatoes"), \&il::tomatoes, 'local *ISA = []';
+    }
+    is "il"->can("tomatoes"), "puree", 'local *ISA=[] unwinding';
 }
