@@ -13698,8 +13698,9 @@ END
     }
 
     # Now that have everything added, add in abbreviations after
-    # everything else.
-    foreach my $value (keys %abbreviations) {
+    # everything else.  Sort so results don't change between runs of this
+    # program
+    foreach my $value (sort keys %abbreviations) {
         $perl_charname->add_duplicate($abbreviations{$value}, $value,
                                         Replace => $MULTIPLE_AFTER);
     }
@@ -16090,6 +16091,8 @@ sub make_UCD () {
             }
         }
     }
+    @suppressed = sort @suppressed; # So doesn't change between runs of this
+                                    # program
 
     # Convert the structure below (designed for Name.pm) to a form that UCD
     # wants, so it doesn't have to modify it at all; i.e. so that it includes
@@ -16240,17 +16243,19 @@ sub write_all_tables() {
 
     # For each property ...
     # (sort so that if there is an immutable file name, it has precedence, so
-    # some other property can't come in and take over its file name.  If b's
-    # file name is defined, will return 1, meaning to take it first; don't
-    # care if both defined, as they had better be different anyway.  And the
-    # property named 'Perl' needs to be first (it doesn't have any immutable
-    # file name) because empty properties are defined in terms of it's table
-    # named 'Any'.)
+    # some other property can't come in and take over its file name.  (We
+    # don't care if both defined, as they had better be different anyway.)
+    # The property named 'Perl' needs to be first (it doesn't have any
+    # immutable file name) because empty properties are defined in terms of
+    # it's table named 'Any'.)   We also sort by the property's name.  This is
+    # just for repeatability of the outputs between runs of this program, but
+    # does not affect correctness.
     PROPERTY:
-    foreach my $property (sort { return -1 if $a == $perl;
-                                 return 1 if $b == $perl;
-                                 return defined $b->file
-                                } property_ref('*'))
+    foreach my $property ($perl,
+                          sort { return -1 if defined $a->file;
+                                 return 1 if defined $b->file;
+                                 return $a->name cmp $b->name;
+                                } grep { $_ != $perl } property_ref('*'))
     {
         my $type = $property->type;
 
@@ -16979,8 +16984,10 @@ sub make_property_test_script() {
     # or multiple lines. main::write doesn't count the lines.
     my @output;
 
-    foreach my $property (property_ref('*')) {
-        foreach my $table ($property->tables) {
+    # Sort these so get results in same order on different runs of this
+    # program
+    foreach my $property (sort { $a->name cmp $b->name } property_ref('*')) {
+        foreach my $table (sort { $a->name cmp $b->name } $property->tables) {
 
             # Find code points that match, and don't match this table.
             my $valid = $table->get_valid_code_point;
