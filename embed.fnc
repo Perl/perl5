@@ -22,7 +22,8 @@
 :
 :   b  Binary backward compatibility; function is a macro
 :      but has also Perl_ implementation (which is exported); often
-:      implemented in mathoms.c:
+:      implemented in mathoms.c (whose compilation can be suppressed; see
+:      INSTALL):
 :
 :         add entry to the list of exported symbols;
 :         don't define PERL_ARGS_ASSERT_FOO
