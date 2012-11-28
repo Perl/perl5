@@ -1,6 +1,7 @@
 #!./perl
 
 use strict;
+no strict 'refs'; # we do a lot of this
 use warnings;
 no warnings 'redefine'; # we do a lot of this
 no warnings 'prototype'; # we do a lot of this
@@ -57,6 +58,37 @@ my @testsubs = (
     sub { *{MCTest::Base::} = *{Foo::}; eval { MCTest::Derived->foo(0) }; like($@, qr/locate object method/); },
     sub { *MCTest::Derived::foo = \&MCTest::Base::foo; eval { MCTest::Derived::foo(0,0) }; ok(!$@); undef *MCTest::Derived::foo },
     sub { eval 'package MCTest::Base; sub foo { $_[1]+18 }'; is(MCTest::Derived->foo(0), 18); },
+
+    # Redefining through a glob alias
+    sub { *A = *{'MCTest::Base::foo'}; eval 'sub A { $_[1]+19 }';
+          is(MCTest::Derived->foo(0), 19,
+            'redefining sub through glob alias via decl'); },
+    sub { SKIP: {
+              skip_if_miniperl("no XS"); require XS::APItest;
+              *A = *{'MCTest::Base::foo'};
+              XS::APItest::newCONSTSUB(\%main::, "A", 0, 20);
+              is (MCTest::Derived->foo(0), 20,
+                  'redefining sub through glob alias via newXS');
+        } },
+    sub { undef *{'MCTest::Base::foo'}; *A = *{'MCTest::Base::foo'};
+          eval { no warnings 'once'; local *UNIVERSAL::foo = sub {96};
+                 MCTest::Derived->foo };
+          ()=\&A;
+          eval { MCTest::Derived->foo };
+          like($@, qr/Undefined subroutine/,
+            'redefining sub through glob alias via stub vivification'); },
+    sub { *A = *{'MCTest::Base::foo'};
+          local *A = sub { 21 };
+          is(MCTest::Derived->foo, 21,
+            'redef sub through glob alias via local cv-to-glob assign'); },
+    sub { *A = *{'MCTest::Base::foo'};
+          eval 'sub MCTest::Base::foo { 22 }';
+          { local *A = sub { 23 }; MCTest::Derived->foo }
+          is(MCTest::Derived->foo, 22,
+            'redef sub through glob alias via localisation unwinding'); },
+    sub { *A = *{'MCTest::Base::foo'}; *A = sub { 24 };
+          is(MCTest::Derived->foo(0), 24,
+            'redefining sub through glob alias via cv-to-glob assign'); },
 );
 
 plan(tests => scalar(@testsubs));

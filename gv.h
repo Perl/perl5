@@ -264,6 +264,13 @@ Return the CV from the GV.
 #define gv_autoload4(stash, name, len, method) \
 	gv_autoload_pvn(stash, name, len, !!(method))
 #define newGVgen(pack)  newGVgen_flags(pack, 0)
+#define gv_method_changed(gv)		    \
+    (					     \
+    	assert_(isGV_with_GP(gv))	      \
+	GvREFCNT(gv) > 1		       \
+	    ? (void)++PL_sub_generation		\
+	    : mro_method_changed_in(GvSTASH(gv)) \
+    )
 
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)
