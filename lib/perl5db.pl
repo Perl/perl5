@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_05';
+$VERSION = '1.39_06';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -8755,7 +8755,6 @@ my %_is_in_pods = (map { $_ => 1 }
     apio
     api
     artistic
-    beos
     book
     boot
     bot

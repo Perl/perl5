@@ -3,9 +3,6 @@ AUTHORS			Contact info for contributors
 autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
 av.c			Array value code
 av.h			Array value header
-beos/beos.c		BeOS port
-beos/beosish.h		BeOS port
-beos/nm.c		BeOS port
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
 charclass_invlists.h	Compiled-in inversion lists
@@ -3700,7 +3697,6 @@ ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel-Peek/Peek.xs		Data debugging tool, externals
 ext/Devel-Peek/t/Peek.t		See if Devel::Peek works
 ext/DynaLoader/dl_aix.xs	AIX implementation
-ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dllload.xs	S/390 dllload() style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
@@ -4119,7 +4115,6 @@ hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
 hints/atheos.sh			Hints for named architecture
 hints/aux_3.sh			Hints for named architecture
-hints/beos.sh			Hints for named architecture
 hints/broken-db.msg		Warning message for systems with broken DB library
 hints/bsdos.sh			Hints for named architecture
 hints/catamount.sh		Hints for named architecture
@@ -4878,7 +4873,6 @@ qnx/qnx.c			QNX silent matherr callback
 README				The Instructions
 README.aix			Perl notes for AIX
 README.amiga			Perl notes for AmigaOS
-README.beos			Perl notes for BeOS
 README.bs2000			Perl notes for POSIX-BC BS2000
 README.ce			Perl notes for WinCE
 README.cn			Perl for Simplified Chinese (in EUC-CN)

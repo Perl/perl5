@@ -139,10 +139,6 @@ sub calc_longtable {
 
 	print "\n\nTable:\n";
 
-	foreach my $dir (qw(beos)) {
-		calc_dir($dir);
-	}
-
 	my $configure_size = int ((-s 'Configure') / 1000);
 
 	emit Configure => $configure_size, 1;

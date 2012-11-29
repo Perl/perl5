@@ -55,7 +55,6 @@ $Is_VMS      = $^O eq 'VMS';
 $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
-$Is_BeOS     = $^O eq 'beos';
 
 $PERL = $ENV{PERL}
     || ($Is_NetWare           ? 'perl'   :
@@ -333,7 +332,6 @@ EOF
     ok chmod(0755, $script) or diag $!;
     $_ = $Is_VMS ? `$perl $script` : `$script`;
     s/\.exe//i if $Is_Dos or $Is_Cygwin or $Is_os2;
-    s{./$script}{$script} if $Is_BeOS; # revert BeOS execvp() side-effect
     s{is perl}{is $perl}; # for systems where $^X is only a basename
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
@@ -343,7 +341,6 @@ EOF
     }
     $_ = `$perl $script`;
     s/\.exe//i if $Is_Dos or $Is_os2 or $Is_Cygwin;
-    s{./$perl}{$perl} if $Is_BeOS; # revert BeOS execvp() side-effect
     s{\\}{/}g;
     if ($Is_MSWin32 || $Is_os2) {
 	is uc $_, uc $s1;

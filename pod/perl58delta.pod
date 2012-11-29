@@ -3378,7 +3378,8 @@ The following tests fail on 5.8.0 Perl in BeOS Personal 5.03:
  ext/POSIX/t/sigaction...............FAILED at test 13
  ext/POSIX/t/waitpid.................FAILED at test 1
 
-See L<perlbeos> (README.beos) for more details.
+(B<Note:> more information was available in F<README.beos> until support for
+BeOS was removed in Perl v5.18.0)
 
 =head2 Cygwin "unable to remap"
 

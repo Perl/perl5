@@ -839,7 +839,7 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
 !NO!SUBS!
 
 	case "${osname}${osvers}" in
-	aix*|beos*)
+	aix*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 $(MINIPERL_EXE): $& $(mini_obj)
 	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(mini_obj) $(libs)

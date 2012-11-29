@@ -149,11 +149,9 @@ SKIP: {
     SKIP: {
         # Sfio doesn't report failure when closing a broken pipe
         # that has pending output.  Go figure.
-        # BeOS will not write to broken pipes, either.
         # Nor does POSIX-BC.
         skip "Won't report failure on broken pipe", 1
-          if $Config{d_sfio} || $^O eq 'beos' ||
-             $^O eq 'posix-bc';
+          if $Config{d_sfio} || $^O eq 'posix-bc';
 
         local $SIG{PIPE} = 'IGNORE';
         open NIL, qq{|$Perl -e "exit 0"} or die "open failed: $!";

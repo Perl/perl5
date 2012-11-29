@@ -1641,15 +1641,15 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define S_IRWXO (S_IROTH|S_IWOTH|S_IXOTH)
 #endif
 
-/* BeOS 5.0 and Haiku R1 seem to define S_IREAD and S_IWRITE in <posix/fcntl.h>
+/* Haiku R1 seems to define S_IREAD and S_IWRITE in <posix/fcntl.h>
  * which would get included through <sys/file.h >, but that is 3000
  * lines in the future.  --jhi */
 
-#if !defined(S_IREAD) && !(defined(__BEOS__) || defined(__HAIKU__))
+#if !defined(S_IREAD) && !defined(__HAIKU__)
 #   define S_IREAD S_IRUSR
 #endif
 
-#if !defined(S_IWRITE) && !(defined(__BEOS__) || defined(__HAIKU__))
+#if !defined(S_IWRITE) && !defined(__HAIKU__)
 #   define S_IWRITE S_IWUSR
 #endif
 
@@ -2649,9 +2649,6 @@ typedef SV PADNAME;
 #if defined(__HAIKU__)
 #   include "haiku/haikuish.h"
 #   define ISHISH "haiku"
-#elif defined(__BEOS__)
-#   include "beos/beosish.h"
-#   define ISHISH "beos"
 #endif
 
 #ifndef ISHISH
@@ -5672,10 +5669,9 @@ int flock(int fd, int op);
 #if O_TEXT != O_BINARY
     /* If you have different O_TEXT and O_BINARY and you are a CLRF shop,
      * that is, you are somehow DOSish. */
-#   if defined(__BEOS__) || defined(__HAIKU__) || defined(__VOS__) || \
-	defined(__CYGWIN__)
-    /* BeOS/Haiku has O_TEXT != O_BINARY but O_TEXT and O_BINARY have no effect;
-     * BeOS/Haiku is always UNIXoid (LF), not DOSish (CRLF). */
+#   if defined(__HAIKU__) || defined(__VOS__) || defined(__CYGWIN__)
+    /* Haiku has O_TEXT != O_BINARY but O_TEXT and O_BINARY have no effect;
+     * Haiku is always UNIXoid (LF), not DOSish (CRLF). */
     /* VOS has O_TEXT != O_BINARY, and they have effect,
      * but VOS always uses LF, never CRLF. */
     /* If you have O_TEXT different from your O_BINARY but you still are

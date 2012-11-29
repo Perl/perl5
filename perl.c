@@ -58,10 +58,6 @@ union control_un {
 
 #endif
 
-#ifdef __BEOS__
-#  define HZ 1000000
-#endif
-
 #ifndef HZ
 #  ifdef CLK_TCK
 #    define HZ CLK_TCK
@@ -325,10 +321,9 @@ perl_construct(pTHXx)
 
     /* Use sysconf(_SC_CLK_TCK) if available, if not
      * available or if the sysconf() fails, use the HZ.
-     * BeOS has those, but returns the wrong value.
      * The HZ if not originally defined has been by now
      * been defined as CLK_TCK, if available. */
-#if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK) && !defined(__BEOS__)
+#if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK)
     PL_clocktick = sysconf(_SC_CLK_TCK);
     if (PL_clocktick <= 0)
 #endif
@@ -3492,10 +3487,6 @@ S_minus_v(pTHX)
 	PerlIO_printf(PIO_stdout,
 		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
 		      "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
-#endif
-#ifdef __BEOS__
-	PerlIO_printf(PIO_stdout,
-		      "BeOS port Copyright Tom Spindler, 1997-1999\n");
 #endif
 #ifdef OEMVS
 	PerlIO_printf(PIO_stdout,

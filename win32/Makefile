@@ -1124,7 +1124,6 @@ utils: $(PERLEXE) $(X2P)
 	cd ..\pod
 	copy ..\README.aix      ..\pod\perlaix.pod
 	copy ..\README.amiga    ..\pod\perlamiga.pod
-	copy ..\README.beos     ..\pod\perlbeos.pod
 	copy ..\README.bs2000   ..\pod\perlbs2000.pod
 	copy ..\README.ce       ..\pod\perlce.pod
 	copy ..\README.cn       ..\pod\perlcn.pod
@@ -1249,10 +1248,10 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
 	    perl5177delta.pod perlaix.pod perlamiga.pod perlapi.pod \
-	    perlbeos.pod perlbs2000.pod perlce.pod perlcn.pod \
-	    perlcygwin.pod perldgux.pod perldos.pod perlfreebsd.pod \
-	    perlhaiku.pod perlhpux.pod perlhurd.pod perlintern.pod \
-	    perlirix.pod perljp.pod perlko.pod perllinux.pod perlmacos.pod \
+	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
+	    perldgux.pod perldos.pod perlfreebsd.pod perlhaiku.pod \
+	    perlhpux.pod perlhurd.pod perlintern.pod perlirix.pod \
+	    perljp.pod perlko.pod perllinux.pod perlmacos.pod \
 	    perlmacosx.pod perlmodlib.pod perlnetware.pod perlopenbsd.pod \
 	    perlos2.pod perlos390.pod perlos400.pod perlplan9.pod \
 	    perlqnx.pod perlriscos.pod perlsolaris.pod perlsymbian.pod \

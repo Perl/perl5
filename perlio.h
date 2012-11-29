@@ -64,11 +64,6 @@
  */
 #include <stdio.h>
 
-#ifdef __BEOS__
-int fseeko(FILE *stream, off_t offset, int whence);
-off_t ftello(FILE *stream);
-#endif
-
 #if defined(USE_64_BIT_STDIO) && defined(HAS_FTELLO) && !defined(USE_FTELL64)
 #define ftell ftello
 #endif

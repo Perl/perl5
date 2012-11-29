@@ -318,13 +318,11 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item BeOS
 
-XXX
+Support for BeOS has been removed.
 
 =back
 

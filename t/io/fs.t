@@ -275,7 +275,7 @@ sub check_utime_result {
 		is( $atime, 500000001,          'atime' );
 		is( $mtime, 500000000 + $delta, 'mtime' );
 	    }
-	    elsif ($^O eq 'beos' || $^O eq 'haiku') {
+	    elsif ($^O eq 'haiku') {
             SKIP: {
 		    skip "atime not updated", 1;
 		}

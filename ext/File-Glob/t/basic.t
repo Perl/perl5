@@ -52,7 +52,7 @@ if (GLOB_ERROR) {
 SKIP: {
     my ($name, $home);
     skip $^O, 1 if $^O eq 'MSWin32' || $^O eq 'NetWare' || $^O eq 'VMS'
-	|| $^O eq 'os2' || $^O eq 'beos';
+	|| $^O eq 'os2';
     skip "Can't find user for $>: $@", 1 unless eval {
 	($name, $home) = (getpwuid($>))[0,7];
 	1;
