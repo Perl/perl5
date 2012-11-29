@@ -7798,13 +7798,16 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 	PL_curstash = (HV *)SvREFCNT_inc_simple_NN(stash);
     }
 
+    /* Protect sv against leakage caused by fatal warnings. */
+    if (sv) SAVEFREESV(sv);
+
     /* file becomes the CvFILE. For an XS, it's usually static storage,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
     cv = newXS_len_flags(name, len, const_sv_xsub, file ? file : "", "",
 			 &sv, XS_DYNAMIC_FILENAME | flags);
-    CvXSUBANY(cv).any_ptr = sv;
+    CvXSUBANY(cv).any_ptr = SvREFCNT_inc_simple(sv);
     CvCONST_on(cv);
 
     LEAVE;

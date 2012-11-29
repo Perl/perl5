@@ -91,9 +91,9 @@ eleak(2, 0, "$all *x=sub {}",
      'fatal sub redef warning with sub-to-glob assignment');
 eleak(2, 0, "$all *x=sub() {1}",
      'fatal const sub redef warning with sub-to-glob assignment');
-$::TODO = 'still leaks';
 eleak(2, 0, "$all XS::APItest::newCONSTSUB(\\%main::=>name=>0=>1)",
-     'newXS sub redefinition with fatal warnings');
+     'newCONSTSUB sub redefinition with fatal warnings');
+$::TODO = 'still leaks';
 eleak(2, 0, "$f 'misc'; my\$a,my\$a", 'double my with fatal warnings');
 eleak(2, 0, "$f 'misc'; our\$a,our\$a", 'double our with fatal warnings');
 eleak(2, 0, "$f 'closure';
