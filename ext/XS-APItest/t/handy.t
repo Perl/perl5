@@ -59,6 +59,7 @@ foreach my $name (sort keys %properties) {
 
     # And finally one non-Unicode code point.
     push @code_points, 0x110000;    # Above Unicode, no prop should match
+    no warnings 'non_unicode';
 
     for my $i (@code_points) {
         my $function = uc($name);
