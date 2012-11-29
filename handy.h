@@ -997,7 +997,7 @@ EXTCONST U32 PL_charclass[];
  * difference.) This used to be not the XID version, but we decided to go with
  * the more modern Unicode definition */
 #define isIDFIRST_utf8(p)       _generic_utf8(_CC_IDFIRST,               \
-                                              _is_utf8__perl_idstart, p)
+                                              _is_utf8_perl_idstart, p)
 
 #define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
