@@ -2768,6 +2768,7 @@ PP(pp_goto)
 
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const sv = POPs;
+	SvGETMAGIC(sv);
 
 	/* This egregious kludge implements goto &subroutine */
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
@@ -2951,7 +2952,7 @@ PP(pp_goto)
 	    }
 	}
 	else {
-	    label       = SvPV_const(sv, label_len);
+	    label       = SvPV_nomg_const(sv, label_len);
             label_flags = SvUTF8(sv);
 	}
     }

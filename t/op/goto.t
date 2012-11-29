@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 88;
+plan tests => 89;
 our $TODO;
 
 my $deprecated = 0;
@@ -663,3 +663,9 @@ eval { my $x = "\0"; goto $x };
 like $@, qr/^Can't find label \0 at /, 'goto $x where $x begins with \0';
 eval { goto "\0" };
 like $@, qr/^Can't find label \0 at /, 'goto "\0"';
+
+sub TIESCALAR { bless [pop] }
+sub FETCH     { $_[0][0] }
+tie my $t, "", sub { "cluck up porridge" };
+is eval { sub { goto $t }->() }//$@, 'cluck up porridge',
+  'tied arg returning sub ref';
