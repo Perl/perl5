@@ -214,9 +214,11 @@ Perl_save_scalar(pTHX_ GV *gv)
 
     PERL_ARGS_ASSERT_SAVE_SCALAR;
 
-    PL_localizing = 1;
-    SvGETMAGIC(*sptr);
-    PL_localizing = 0;
+    if (SvGMAGICAL(*sptr)) {
+        PL_localizing = 1;
+        (void)mg_get(*sptr);
+        PL_localizing = 0;
+    }
     save_pushptrptr(SvREFCNT_inc_simple(gv), SvREFCNT_inc(*sptr), SAVEt_SV);
     return save_scalar_at(sptr, SAVEf_SETMAGIC); /* XXX - FIXME - see #60360 */
 }
@@ -808,9 +810,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	switch (type) {
 	case SAVEt_ITEM:			/* normal string */
 	    sv_replace(ARG1_SV, ARG0_SV);
-	    PL_localizing = 2;
-	    SvSETMAGIC(ARG1_SV);
-	    PL_localizing = 0;
+            if (SvSMAGICAL(ARG1_SV)) {
+                PL_localizing = 2;
+                mg_set(ARG1_SV);
+                PL_localizing = 0;
+            }
 	    break;
 
 	    /* This would be a mathom, but Perl_save_svref() calls a static
@@ -828,9 +832,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SV * const sv = *svp;
 	    *svp = ARG0_SV;
 	    SvREFCNT_dec(sv);
-	    PL_localizing = 2;
-	    SvSETMAGIC(ARG0_SV);
-	    PL_localizing = 0;
+            if (SvSMAGICAL(ARG0_SV)) {
+                PL_localizing = 2;
+                mg_set(ARG0_SV);
+                PL_localizing = 0;
+            }
 	    SvREFCNT_dec(ARG0_SV);
 	    SvREFCNT_dec(refsv);
 	    break;
@@ -884,21 +890,21 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_AV:				/* array reference */
 	    SvREFCNT_dec(GvAV(ARG1_GV));
 	    GvAV(ARG1_GV) = ARG0_AV;
-	    if (SvMAGICAL(ARG0_AV)) {
-		PL_localizing = 2;
-		SvSETMAGIC(MUTABLE_SV(ARG0_AV));
-		PL_localizing = 0;
-	    }
+            if (SvSMAGICAL(ARG0_SV)) {
+                PL_localizing = 2;
+                mg_set(ARG0_SV);
+                PL_localizing = 0;
+            }
 	    SvREFCNT_dec(ARG1_GV);
 	    break;
 	case SAVEt_HV:				/* hash reference */
 	    SvREFCNT_dec(GvHV(ARG1_GV));
 	    GvHV(ARG1_GV) = ARG0_HV;
-	    if (SvMAGICAL(ARG0_HV)) {
-		PL_localizing = 2;
-		SvSETMAGIC(MUTABLE_SV(ARG0_HV));
-		PL_localizing = 0;
-	    }
+            if (SvSMAGICAL(ARG0_SV)) {
+                PL_localizing = 2;
+                mg_set(ARG0_SV);
+                PL_localizing = 0;
+            }
 	    SvREFCNT_dec(ARG1_GV);
 	    break;
 	case SAVEt_INT_SMALL:
