@@ -865,14 +865,18 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = MUTABLE_GV(SSPOPPTR);
-	    gp_free(gv);
-	    GvGP_set(gv, (GP*)ptr);
-	    if ((hv=GvSTASH(gv)) && HvENAME_get(hv)) {
+	    {
+             /* possibly taking a method out of circulation */	
+	     const bool had_method = !!GvCVu(gv);
+	     gp_free(gv);
+	     GvGP_set(gv, (GP*)ptr);
+	     if ((hv=GvSTASH(gv)) && HvENAME_get(hv)) {
 	      if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
 		mro_isa_changed_in(hv);
-	      else if (GvCVu(gv))
+	      else if (had_method || GvCVu(gv))
                 /* putting a method back into circulation ("local")*/	
                 gv_method_changed(gv);
+	     }
 	    }
 	    SvREFCNT_dec(gv);
 	    break;

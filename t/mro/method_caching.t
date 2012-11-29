@@ -36,6 +36,16 @@ my @testsubs = (
     sub { is(MCTest::Derived->foo(0), 5); },
     sub { sub FFF { $_[1]+7 }; local *MCTest::Base::foo = *FFF; is(MCTest::Derived->foo(0), 7); },
     sub { is(MCTest::Derived->foo(0), 5); },
+    sub { { local *MCTest::Base::can = sub { "tomatoes" };
+            MCTest::Derived->can(0); }
+          local $::TODO = " ";
+          is(MCTest::Derived->can("isa"), \&UNIVERSAL::isa,
+              'removing method when unwinding local *method=sub{}'); },
+    sub { sub peas { "peas" }
+          { local *MCTest::Base::can = *peas;
+            MCTest::Derived->can(0); }
+          is(MCTest::Derived->can("isa"), \&UNIVERSAL::isa,
+              'removing method when unwinding local *method=*other'); },
     sub { sub DDD { $_[1]+8 }; *MCTest::Base::foo = *DDD; is(MCTest::Derived->foo(0), 8); },
     sub { *ASDF::asdf = sub { $_[1]+9 }; *MCTest::Base::foo = \&ASDF::asdf; is(MCTest::Derived->foo(0), 9); },
     sub { undef *MCTest::Base::foo; eval { MCTest::Derived->foo(0) }; like($@, qr/locate object method/); },
