@@ -626,6 +626,7 @@ Amp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|const U8 flags
 ApPR	|bool	|is_uni_alnum_lc|UV c
 ApPR	|bool	|is_uni_idfirst_lc|UV c
+AMpR	|bool	|_is_uni_perl_idstart|UV c
 ApPR	|bool	|is_uni_alpha_lc|UV c
 ApPR	|bool	|is_uni_ascii_lc|UV c
 ApPR	|bool	|is_uni_space_lc|UV c

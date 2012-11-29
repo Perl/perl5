@@ -1499,6 +1499,14 @@ Perl_is_uni_idfirst(pTHX_ UV c)
 }
 
 bool
+Perl__is_uni_perl_idstart(pTHX_ UV c)
+{
+    U8 tmpbuf[UTF8_MAXBYTES+1];
+    uvchr_to_utf8(tmpbuf, c);
+    return _is_utf8_perl_idstart(tmpbuf);
+}
+
+bool
 Perl_is_uni_alpha(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
