@@ -8008,7 +8008,6 @@ use no flags, say "none".
 EOM
     case "$lddlflags" in
     '') case "$osname" in
-  			beos) dflt='-nostart' ;;
   			haiku) dflt='-shared' ;;
 			hpux) dflt='-b';
 			      case "$gccversion" in
@@ -8131,7 +8130,7 @@ $undef)
 	;;
 *)	case "$useshrplib" in
 	'')	case "$osname" in
-		svr4*|nonstopux|dgux|dynixptx|esix|powerux|beos|haiku|cygwin*)
+		svr4*|nonstopux|dgux|dynixptx|esix|powerux|haiku|cygwin*)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
@@ -8301,9 +8300,6 @@ if "$useshrplib"; then
 		;;
 	next)
 		# next doesn't like the default...
-		;;
-	beos)
-		# beos doesn't like the default, either.
 		;;
 	haiku)
 		# Haiku doesn't like the default, either.
@@ -22452,12 +22448,7 @@ for xxx in $known_extensions ; do
 		;;
 	Socket|socket)
 		case "$d_socket" in
-		true|$define|y)
-		    case "$osname" in
-		    beos) ;; # not unless BONE
-		    *) avail_ext="$avail_ext $xxx" ;;
-		    esac
-		    ;;
+		true|$define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	Sys/Syslog|sys/syslog)
