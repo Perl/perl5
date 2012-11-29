@@ -783,6 +783,23 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvREFCNT_dec(sv);
 	    SvREFCNT_dec(value);
 	    break;
+	case SAVEt_GVSLOT:			/* any slot in GV */
+	    value = MUTABLE_SV(SSPOPPTR);
+	    ptr = SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
+	    hv = GvSTASH(gv);
+	    if (hv && HvENAME(hv) && (
+		    (value && SvTYPE(value) == SVt_PVCV)
+		 || (*(SV **)ptr && SvTYPE(*(SV**)ptr) == SVt_PVCV)
+	       ))
+	    {
+		if ((char *)ptr < (char *)GvGP(gv)
+		 || (char *)ptr > (char *)GvGP(gv) + sizeof(struct gp)
+		 || GvREFCNT(gv) > 1)
+		    PL_sub_generation++;
+		else mro_method_changed_in(hv);
+	    }
+	    goto restore_svp;
 	case SAVEt_AV:				/* array reference */
 	    av = MUTABLE_AV(SSPOPPTR);
 	    gv = MUTABLE_GV(SSPOPPTR);

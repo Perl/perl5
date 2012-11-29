@@ -37,7 +37,6 @@ my @testsubs = (
     sub { is(MCTest::Derived->foo(0), 5); },
     sub { { local *MCTest::Base::can = sub { "tomatoes" };
             MCTest::Derived->can(0); }
-          local $::TODO = " ";
           is(MCTest::Derived->can("isa"), \&UNIVERSAL::isa,
               'removing method when unwinding local *method=sub{}'); },
     sub { sub peas { "peas" }

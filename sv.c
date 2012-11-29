@@ -3787,7 +3787,23 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 		}
 	    }
-	    SAVEGENERICSV(*location);
+	    /* SAVEt_GVSLOT takes more room on the savestack and has more
+	       overhead in leave_scope than SAVEt_GENERIC_SV.  But for CVs
+	       leave_scope needs access to the GV so it can reset method
+	       caches.  We must use SAVEt_GVSLOT whenever the type is
+	       SVt_PVCV, even if the stash is anonymous, as the stash may
+	       gain a name somehow before leave_scope. */
+	    if (stype == SVt_PVCV) {
+		/* There is no save_pushptrptrptr.  Creating it for this
+		   one call site would be overkill.  So inline the ss push
+		   routines here. */
+		SSCHECK(4);
+		SSPUSHPTR(dstr);
+		SSPUSHPTR(location);
+		SSPUSHPTR(SvREFCNT_inc(*location));
+		SSPUSHUV(SAVEt_GVSLOT);
+	    }
+	    else SAVEGENERICSV(*location);
 	}
 	dref = *location;
 	if (stype == SVt_PVCV && (*location != sref || GvCVGEN(dstr))) {
@@ -12609,6 +12625,14 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = svp_dup_inc((SV**)ptr, proto_perl);/* XXXXX */
+	    break;
+        case SAVEt_GVSLOT:		/* any slot in GV */
+	    sv = (const SV *)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = svp_dup_inc((SV**)ptr, proto_perl);/* XXXXX */
+	    sv = (const SV *)POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    break;
         case SAVEt_HV:				/* hash reference */
         case SAVEt_AV:				/* array reference */
