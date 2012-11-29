@@ -11,9 +11,8 @@ BEGIN {
         chdir 't' if -d 't';
         @INC = '../lib';
     }
+    require './test.pl';
 }
-
-require './test.pl';
 
 {
     package MCTest::Base;
