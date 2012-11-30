@@ -285,22 +285,22 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 
     if (empty) {
 	GP *gp = Perl_newGP(aTHX_ gv);
+	HV * const stash = GvSTASH(gv);
+	bool isa_changed = 0;
 
-	if (GvCVu(gv))
-            mro_method_changed_in(GvSTASH(gv)); /* taking a method out of circulation ("local")*/
+	if (stash && HvENAME(stash)) {
+	    if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
+		isa_changed = TRUE;
+	    else if (GvCVu(gv))
+		/* taking a method out of circulation ("local")*/
+                mro_method_changed_in(stash);
+	}
 	if (GvIOp(gv) && (IoFLAGS(GvIOp(gv)) & IOf_ARGV)) {
 	    gp->gp_io = newIO();
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}
-#ifdef PERL_DONT_CREATE_GVSV
-	if (gv == PL_errgv) {
-	    /* We could scatter this logic everywhere by changing the
-	       definition of ERRSV from GvSV() to GvSVn(), but it seems more
-	       efficient to do this check once here.  */
-	    gp->gp_sv = newSV(0);
-	}
-#endif
 	GvGP_set(gv,gp);
+	if (isa_changed) mro_isa_changed_in(stash);
     }
     else {
 	gp_ref(GvGP(gv));
@@ -783,6 +783,23 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvREFCNT_dec(sv);
 	    SvREFCNT_dec(value);
 	    break;
+	case SAVEt_GVSLOT:			/* any slot in GV */
+	    value = MUTABLE_SV(SSPOPPTR);
+	    ptr = SSPOPPTR;
+	    gv = MUTABLE_GV(SSPOPPTR);
+	    hv = GvSTASH(gv);
+	    if (hv && HvENAME(hv) && (
+		    (value && SvTYPE(value) == SVt_PVCV)
+		 || (*(SV **)ptr && SvTYPE(*(SV**)ptr) == SVt_PVCV)
+	       ))
+	    {
+		if ((char *)ptr < (char *)GvGP(gv)
+		 || (char *)ptr > (char *)GvGP(gv) + sizeof(struct gp)
+		 || GvREFCNT(gv) > 1)
+		    PL_sub_generation++;
+		else mro_method_changed_in(hv);
+	    }
+	    goto restore_svp;
 	case SAVEt_AV:				/* array reference */
 	    av = MUTABLE_AV(SSPOPPTR);
 	    gv = MUTABLE_GV(SSPOPPTR);
@@ -865,11 +882,19 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = MUTABLE_GV(SSPOPPTR);
-	    gp_free(gv);
-	    GvGP_set(gv, (GP*)ptr);
-            /* putting a method back into circulation ("local")*/
-	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvENAME_get(hv))
-                mro_method_changed_in(hv);
+	    {
+             /* possibly taking a method out of circulation */	
+	     const bool had_method = !!GvCVu(gv);
+	     gp_free(gv);
+	     GvGP_set(gv, (GP*)ptr);
+	     if ((hv=GvSTASH(gv)) && HvENAME_get(hv)) {
+	      if (GvNAMELEN(gv) == 3 && strnEQ(GvNAME(gv), "ISA", 3))
+		mro_isa_changed_in(hv);
+	      else if (had_method || GvCVu(gv))
+                /* putting a method back into circulation ("local")*/	
+                gv_method_changed(gv);
+	     }
+	    }
 	    SvREFCNT_dec(gv);
 	    break;
 	case SAVEt_FREESV:

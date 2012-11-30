@@ -26,6 +26,8 @@
  *
  * SMP - Oct. 24, 2005
  *
+ * The compilation of this file can be suppressed; see INSTALL
+ *
  */
 
 #include "EXTERN.h"

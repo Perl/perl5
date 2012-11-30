@@ -32,10 +32,13 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
 #define PERL_ARGS_ASSERT_SLAB_FREE	\
 	assert(op)
 
-PERL_CALLCONV bool	Perl__is_utf8__perl_idstart(pTHX_ const U8 *p)
+PERL_CALLCONV bool	Perl__is_uni_perl_idstart(pTHX_ UV c)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT__IS_UTF8__PERL_IDSTART	\
+#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART	\
 	assert(p)
 
 PERL_CALLCONV UV	Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, const U8 flags)

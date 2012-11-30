@@ -22,7 +22,8 @@
 :
 :   b  Binary backward compatibility; function is a macro
 :      but has also Perl_ implementation (which is exported); often
-:      implemented in mathoms.c:
+:      implemented in mathoms.c (whose compilation can be suppressed; see
+:      INSTALL):
 :
 :         add entry to the list of exported symbols;
 :         don't define PERL_ARGS_ASSERT_FOO
@@ -625,6 +626,7 @@ Amp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|const U8 flags
 ApPR	|bool	|is_uni_alnum_lc|UV c
 ApPR	|bool	|is_uni_idfirst_lc|UV c
+AMpR	|bool	|_is_uni_perl_idstart|UV c
 ApPR	|bool	|is_uni_alpha_lc|UV c
 ApPR	|bool	|is_uni_ascii_lc|UV c
 ApPR	|bool	|is_uni_space_lc|UV c
@@ -645,7 +647,7 @@ Anpd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|NULLOK const U8 **ep
 ApR	|bool	|is_utf8_alnum	|NN const U8 *p
 ApR	|bool	|is_utf8_idfirst|NN const U8 *p
 ApR	|bool	|is_utf8_xidfirst|NN const U8 *p
-AMpR	|bool	|_is_utf8__perl_idstart|NN const U8 *p
+AMpR	|bool	|_is_utf8_perl_idstart|NN const U8 *p
 ApR	|bool	|is_utf8_idcont	|NN const U8 *p
 ApR	|bool	|is_utf8_xidcont	|NN const U8 *p
 ApR	|bool	|is_utf8_alpha	|NN const U8 *p

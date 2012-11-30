@@ -7548,7 +7548,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    GvCVGEN(gv) = 0;
 	    if (HvENAME_HEK(GvSTASH(gv)))
 		/* sub Foo::bar { (shift)+1 } */
-		mro_method_changed_in(GvSTASH(gv));
+		gv_method_changed(gv);
 	}
     }
     if (!CvGV(cv)) {
@@ -7872,7 +7872,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                 GvCV_set(gv,cv);
                 GvCVGEN(gv) = 0;
                 if (HvENAME_HEK(GvSTASH(gv)))
-                    mro_method_changed_in(GvSTASH(gv)); /* newXS */
+                    gv_method_changed(gv); /* newXS */
             }
         }
         if (!name)
@@ -7906,7 +7906,7 @@ Perl_newSTUB(pTHX_ GV *gv, bool fake)
     GvCV_set(gv, cv);
     GvCVGEN(gv) = 0;
     if (!fake && HvENAME_HEK(GvSTASH(gv)))
-	mro_method_changed_in(GvSTASH(gv));
+	gv_method_changed(gv);
     CvGV_set(cv, gv);
     CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH_set(cv, PL_curstash);

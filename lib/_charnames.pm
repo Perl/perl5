@@ -7,7 +7,7 @@ package _charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -765,7 +765,9 @@ sub viacode {
   # Here there is no user-defined alias, return any official one.
   return $return if defined $return;
 
-  if (CORE::hex($hex) > 0x10FFFF) {
+  if (CORE::hex($hex) > 0x10FFFF
+      && warnings::enabled('non_unicode'))
+  {
       carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
   }
   return;
