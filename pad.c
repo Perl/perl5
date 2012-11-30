@@ -1968,7 +1968,7 @@ the immediately surrounding code.
 static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
 
 static void
-S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
+S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 {
     dVAR;
     I32 ix;
@@ -2018,6 +2018,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
     ENTER;
     SAVESPTR(PL_compcv);
     PL_compcv = cv;
+    if (newcv) SAVEFREESV(cv); /* in case of fatal warnings */
 
     if (CvHASEVAL(cv))
 	CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
@@ -2112,6 +2113,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside)
 		S_cv_clone(aTHX_ (CV *)ppad[ix], (CV *)PL_curpad[ix], cv);
 	}
 
+    if (newcv) SvREFCNT_inc_simple_void_NN(cv);
     LEAVE;
 }
 
@@ -2119,6 +2121,7 @@ static CV *
 S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 {
     dVAR;
+    const bool newcv = !cv;
 
     assert(!CvUNIQUE(proto));
 
@@ -2144,7 +2147,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
-    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside);
+    if (CvPADLIST(proto)) S_cv_clone_pad(aTHX_ proto, cv, outside, newcv);
 
     DEBUG_Xv(
 	PerlIO_printf(Perl_debug_log, "\nPad CV clone\n");
