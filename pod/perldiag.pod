@@ -3902,12 +3902,12 @@ where the problem was discovered.  See L<perlre>.
 
 =item POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 
-(F regexp) Within regular expression character classes ([]) the syntax
-beginning with "[." and ending with ".]" is reserved for future extensions.
-If you need to represent those character sequences inside a regular
-expression character class, just quote the square brackets with the
-backslash: "\[." and ".\]".  The <-- HERE shows in the regular expression
-about where the problem was discovered.  See L<perlre>.
+(F) Within regular expression character classes ([]) the syntax beginning
+with "[." and ending with ".]" is reserved for future extensions.  If you
+need to represent those character sequences inside a regular expression
+character class, just quote the square brackets with the backslash: "\[."
+and ".\]".  The <-- HERE shows in the regular expression about where the
+problem was discovered.  See L<perlre>.
 
 =item POSIX syntax [= =] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 
