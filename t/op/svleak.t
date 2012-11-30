@@ -98,7 +98,7 @@ eleak(2, 0, "$f 'misc'; our\$a,our\$a", 'double our with fatal warnings');
 $::TODO = 'still leaks';
 eleak(2, 0, "$f 'closure';
              sub foo { my \$x; format=\n\@\n\$x\n.\n} write; ",
-     'write beyond end of page with fatal warnings');
+     'format closing over unavailable var with fatal warnings');
 eleak(2, 0, "$all /(?{})?/ ", '(?{})? with fatal warnings');
 eleak(2, 0, "$all /(?{})+/ ", '(?{})+ with fatal warnings');
 eleak(2, 0, "$all /[\\i]/ ", 'invalid charclass escape with fatal warns');
