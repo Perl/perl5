@@ -4143,7 +4143,7 @@ already been freed.
 
 =item Recompile perl with B<-D>DEBUGGING to use B<-D> switch
 
-(F debugging) You can't use the B<-D> option unless the code to produce
+(S debugging) You can't use the B<-D> option unless the code to produce
 the desired output is compiled into Perl, which entails some overhead,
 which is why it's currently left out of your copy.
 
