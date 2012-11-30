@@ -627,8 +627,12 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
         flags &= ~padadd_UTF8_NAME;
 
     if ((flags & padadd_NO_DUP_CHECK) == 0) {
+	ENTER;
+	SAVEFREESV(namesv); /* in case of fatal warnings */
 	/* check for duplicate declaration */
 	pad_check_dup(namesv, flags & padadd_OUR, ourstash);
+	SvREFCNT_inc_simple_void_NN(namesv);
+	LEAVE;
     }
 
     offset = pad_alloc_name(namesv, flags & ~padadd_UTF8_NAME, typestash, ourstash);
