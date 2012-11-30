@@ -180,14 +180,14 @@ So now this code would be written:
   { use sort qw(defaults _quicksort); # force quicksort
     no sort "stable";      # stability not wanted
     my $current;
-    BEGIN { $current = print sort::current; }
+    BEGIN { $current = sort::current; }
     print "$current\n";
     @a = sort @b;
     # Pragmas go out of scope at the end of the block
   }
   { use sort qw(defaults stable);     # force stability
     my $current;
-    BEGIN { $current = print sort::current; }
+    BEGIN { $current = sort::current; }
     print "$current\n";
     @c = sort @d;
   }
