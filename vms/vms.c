@@ -10103,20 +10103,23 @@ Perl_readdir(pTHX_ DIR *dd)
 
     tmpsts = lib$find_file
 	(&dd->pat, &res, &dd->context, NULL, NULL, &rsts, &flags);
-    if ( tmpsts == RMS$_NMF || dd->context == 0) return NULL;  /* None left. */
+    if (dd->context == 0)
+        tmpsts = RMS$_NMF;  /* None left. (should be set, but make sure) */
+
     if (!(tmpsts & 1)) {
-      set_vaxc_errno(tmpsts);
       switch (tmpsts) {
+        case RMS$_NMF:
+          break;  /* no more files considered success */
         case RMS$_PRV:
-          set_errno(EACCES); break;
+          SETERRNO(EACCES, tmpsts); break;
         case RMS$_DEV:
-          set_errno(ENODEV); break;
+          SETERRNO(ENODEV, tmpsts); break;
         case RMS$_DIR:
-          set_errno(ENOTDIR); break;
+          SETERRNO(ENOTDIR, tmpsts); break;
         case RMS$_FNF: case RMS$_DNF:
-          set_errno(ENOENT); break;
+          SETERRNO(ENOENT, tmpsts); break;
         default:
-          set_errno(EVMSERR);
+          SETERRNO(EVMSERR, tmpsts);
       }
       Safefree(buff);
       return NULL;
