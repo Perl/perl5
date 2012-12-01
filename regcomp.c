@@ -449,7 +449,7 @@ static const scan_data_t zero_scan_data =
     IV len = RExC_end - RExC_precomp;					\
 									\
     if (!SIZE_ONLY)							\
-	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx_sv);			\
+	SAVEFREESV(RExC_rx_sv);						\
     if (len > RegexLengthToShowInErrorMessages) {			\
 	/* chop 10 shorter than the max, to ensure meaning of "..." */	\
 	len = RegexLengthToShowInErrorMessages - 10;			\
@@ -480,7 +480,7 @@ static const scan_data_t zero_scan_data =
  */
 #define	vFAIL(m) STMT_START {				\
     if (!SIZE_ONLY)					\
-	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx_sv);	\
+	SAVEFREESV(RExC_rx_sv);				\
     Simple_vFAIL(m);					\
 } STMT_END
 
@@ -498,7 +498,7 @@ static const scan_data_t zero_scan_data =
  */
 #define	vFAIL2(m,a1) STMT_START {			\
     if (!SIZE_ONLY)					\
-	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx_sv);	\
+	SAVEFREESV(RExC_rx_sv);				\
     Simple_vFAIL2(m, a1);				\
 } STMT_END
 
@@ -517,7 +517,7 @@ static const scan_data_t zero_scan_data =
  */
 #define	vFAIL3(m,a1,a2) STMT_START {			\
     if (!SIZE_ONLY)					\
-	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx_sv);	\
+	SAVEFREESV(RExC_rx_sv);				\
     Simple_vFAIL3(m, a1, a2);				\
 } STMT_END
 
@@ -694,8 +694,6 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
         );                                                           \
     PerlIO_printf(Perl_debug_log,"\n");                              \
 });
-
-static void clear_re(pTHX_ void *r);
 
 /* Mark that we cannot extend a found fixed substring at this point.
    Update the longest found anchored substring and the longest found
@@ -14729,13 +14727,6 @@ Perl_save_re_context(pTHX)
     }
 }
 #endif
-
-static void
-clear_re(pTHX_ void *r)
-{
-    dVAR;
-    ReREFCNT_dec((REGEXP *)r);
-}
 
 #ifdef DEBUGGING
 
