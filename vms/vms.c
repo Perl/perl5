@@ -10176,7 +10176,7 @@ Perl_readdir(pTHX_ DIR *dd)
 
     memcpy(dd->entry.d_name, n_spec, n_len + e_len);
     dd->entry.d_name[n_len + e_len] = '\0';
-    dd->entry.d_namlen = strlen(dd->entry.d_name);
+    dd->entry.d_namlen = n_len + e_len;
 
     /* Convert the filename to UNIX format if needed */
     if (dd->flags & PERL_VMSDIR_M_UNIXSPECS) {
