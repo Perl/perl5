@@ -21,7 +21,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.39';
+$VERSION = '2.40';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -1018,6 +1018,38 @@ compartment:
 
 =for example_testing
         is( $code->(), 42 );
+
+=head1 SECURITY WARNING
+
+B<Do not accept Storable documents from untrusted sources!>
+
+Some features of Storable can lead to security vulnerabilities if you
+accept Storable documents from untrusted sources. Most obviously, the
+optional (off by default) CODE reference serialization feature allows
+transfer of code to the deserializing process. Furthermore, any
+serialized object will cause Storable to helpfully load the module
+corresponding to the class of the object in the deserializing module.
+For manipulated module names, this can load almost arbitrary code.
+Finally, the deserialized object's destructors will be invoked when
+the objects get destroyed in the deserializing process. Maliciously
+crafted Storable documents may put such objects in the value of
+a hash key that is overridden by another key/value pair in the
+same hash, thus causing immediate destructor execution.
+
+In a future version of Storable, we intend to provide options to disable
+loading modules for classes and to disable deserializing objects
+altogether. I<Nonetheless, Storable deserializing documents from
+untrusted sources is expected to have other, yet undiscovered,
+security concerns such as allowing an attacker to cause the deserializer
+to crash hard.>
+
+B<Therefore, let me repeat: Do not accept Storable documents from
+untrusted sources!>
+
+If your application requires accepting data from untrusted sources, you
+are best off with a less powerful and more-likely safe serialization format
+and implementation. If your data is sufficently simple, JSON is a good
+choice and offers maximum interoperability.
 
 =head1 WARNING
 
