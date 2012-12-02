@@ -3938,7 +3938,7 @@ PERL_CALLCONV void	Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flag
 	assert(sv)
 
 PERL_CALLCONV void	Perl_sv_free(pTHX_ SV *const sv);
-PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV *const sv)
+PERL_CALLCONV void	Perl_sv_free2(pTHX_ SV *const sv, const U32 refcnt)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_FREE2	\
 	assert(sv)

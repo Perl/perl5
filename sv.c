@@ -6549,75 +6549,84 @@ Normally called via a wrapper macro C<SvREFCNT_dec>.
 void
 Perl_sv_free(pTHX_ SV *const sv)
 {
-    dVAR;
-    if (!sv)
-	return;
-    if (SvREFCNT(sv) == 0) {
-	if (SvFLAGS(sv) & SVf_BREAK)
-	    /* this SV's refcnt has been artificially decremented to
-	     * trigger cleanup */
-	    return;
-	if (PL_in_clean_all) /* All is fair */
-	    return;
-	if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
-	    /* make sure SvREFCNT(sv)==0 happens very seldom */
-	    SvREFCNT(sv) = (~(U32)0)/2;
-	    return;
-	}
-	if (ckWARN_d(WARN_INTERNAL)) {
-#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-	    Perl_dump_sv_child(aTHX_ sv);
-#else
-  #ifdef DEBUG_LEAKING_SCALARS
-	    sv_dump(sv);
-  #endif
-#ifdef DEBUG_LEAKING_SCALARS_ABORT
-	    if (PL_warnhook == PERL_WARNHOOK_FATAL
-		|| ckDEAD(packWARN(WARN_INTERNAL))) {
-		/* Don't let Perl_warner cause us to escape our fate:  */
-		abort();
-	    }
-#endif
-	    /* This may not return:  */
-	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-                        "Attempt to free unreferenced scalar: SV 0x%"UVxf
-                        pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
-#endif
-	}
-#ifdef DEBUG_LEAKING_SCALARS_ABORT
-	abort();
-#endif
-	return;
-    }
-    if (--(SvREFCNT(sv)) > 0)
-	return;
-    Perl_sv_free2(aTHX_ sv);
+    SvREFCNT_dec(sv);
 }
 
+
+/* Private helper function for SvREFCNT_dec().
+ * Called with rc set to original SvREFCNT(sv), where rc == 0 or 1 */
+
 void
-Perl_sv_free2(pTHX_ SV *const sv)
+Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_SV_FREE2;
 
+    if (rc == 1) {
+        /* normal case */
+        SvREFCNT(sv) = 0;
+
 #ifdef DEBUGGING
-    if (SvTEMP(sv)) {
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
-			 "Attempt to free temp prematurely: SV 0x%"UVxf
-			 pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
-	return;
-    }
+        if (SvTEMP(sv)) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
+                             "Attempt to free temp prematurely: SV 0x%"UVxf
+                             pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
+            return;
+        }
 #endif
-    if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
-	/* make sure SvREFCNT(sv)==0 happens very seldom */
-	SvREFCNT(sv) = (~(U32)0)/2;
-	return;
+        if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
+            /* make sure SvREFCNT(sv)==0 happens very seldom */
+            SvREFCNT(sv) = (~(U32)0)/2;
+            return;
+        }
+        sv_clear(sv);
+        if (! SvREFCNT(sv)) /* may have have been resurrected */
+            del_SV(sv);
+        return;
     }
-    sv_clear(sv);
-    if (! SvREFCNT(sv))
-	del_SV(sv);
+
+    /* handle exceptional cases */
+
+    assert(rc == 0);
+
+    if (SvFLAGS(sv) & SVf_BREAK)
+        /* this SV's refcnt has been artificially decremented to
+         * trigger cleanup */
+        return;
+    if (PL_in_clean_all) /* All is fair */
+        return;
+    if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
+        /* make sure SvREFCNT(sv)==0 happens very seldom */
+        SvREFCNT(sv) = (~(U32)0)/2;
+        return;
+    }
+    if (ckWARN_d(WARN_INTERNAL)) {
+#ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
+        Perl_dump_sv_child(aTHX_ sv);
+#else
+    #ifdef DEBUG_LEAKING_SCALARS
+        sv_dump(sv);
+    #endif
+#ifdef DEBUG_LEAKING_SCALARS_ABORT
+        if (PL_warnhook == PERL_WARNHOOK_FATAL
+            || ckDEAD(packWARN(WARN_INTERNAL))) {
+            /* Don't let Perl_warner cause us to escape our fate:  */
+            abort();
+        }
+#endif
+        /* This may not return:  */
+        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+                    "Attempt to free unreferenced scalar: SV 0x%"UVxf
+                    pTHX__FORMAT, PTR2UV(sv) pTHX__VALUE);
+#endif
+    }
+#ifdef DEBUG_LEAKING_SCALARS_ABORT
+    abort();
+#endif
+
 }
+
 
 /*
 =for apidoc sv_len
