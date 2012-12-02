@@ -5247,7 +5247,6 @@ t/opbasic/cmp.t			See if the various string and numeric compare work
 t/opbasic/concat.t			See if string concatenation works
 t/opbasic/magic_phase.t		See if ${^GLOBAL_PHASE} works
 t/opbasic/qq.t			See if qq works
-t/opbasic/sprintf.t			See if sprintf works
 t/op/bless.t			See if bless works
 t/op/blocks.t			See if BEGIN and friends work
 t/op/bop.t			See if bitops work
@@ -5379,6 +5378,7 @@ t/op/splice.t			See if splice works
 t/op/split.t			See if split works
 t/op/split_unicode.t		Test split /\s/ and Unicode
 t/op/sprintf2.t			See if sprintf works
+t/op/sprintf.t			See if sprintf works
 t/op/srand.t			See if srand works
 t/op/sselect.t			See if 4 argument select works
 t/op/stash.t			See if %:: stashes work

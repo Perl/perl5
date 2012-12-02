@@ -43,7 +43,7 @@ while (<DATA>) {
     if ($Is_VMS_VAX || $Is_Ultrix_VAX) {
 	# VAX DEC C 5.3 at least since there is no
 	# ccflags =~ /float=ieee/ on VAX.
-	# AXP is unaffected whether or not it's using ieee.
+	# AXP is unaffected whether or not it is using ieee.
         $data   =~ s/([eE])96$/${1}26/;      # smaller exponents
         $result =~ s/([eE]\+)102$/${1}32/;   #  "       "
         $data   =~ s/([eE])\-101$/${1}-24/;  # larger exponents
@@ -105,7 +105,7 @@ for ($i = 1; @tests; $i++) {
 	} elsif ($os =~ /\b$^O(?::(\S+))?\b/i) {
 	    my $vsn = defined $1 ? $1 : "0";
 	    # Only compare on the the first pair of digits, as numeric
-	    # compares don't like 2.6.10-3mdksmp or 2.6.8-24.10-default
+	    # compares do not like 2.6.10-3mdksmp or 2.6.8-24.10-default
 	    s/^(\d+(\.\d+)?).*/$1/ for $osv, $vsn;
 	    $skip = $vsn ? ($osv <= $vsn ? 1 : 0) : 1;
 	}
@@ -113,27 +113,27 @@ for ($i = 1; @tests; $i++) {
     }
 
     if ($x eq ">$result<") {
-        print "ok $i\n";
+        print "ok $i - >$result<\n";
     }
     elsif ($skip) {
-	print "ok $i # skip $comment\n";
+	print "ok $i - # skip $comment\n";
     }
     elsif ($y eq ">$result<")	# Some C libraries always give
     {				# three-digit exponent
-		print("ok $i # >$result< $x three-digit exponent accepted\n");
+		print("ok $i - # >$result< $x three-digit exponent accepted\n");
     }
 	elsif ($result =~ /[-+]\d{3}$/ &&
 		   # Suppress tests with modulo of exponent >= 100 on platforms
-		   # which can't handle such magnitudes (or where we can't tell).
+		   # which cannot handle such magnitudes (or where we cannot tell).
 		   ((!eval {require POSIX}) || # Costly: only do this if we must!
 			(length(&POSIX::DBL_MAX) - rindex(&POSIX::DBL_MAX, '+')) == 3))
 	{
-		print("ok $i # >$template< >$data< >$result<",
+		print("ok $i - # >$template< >$data< >$result<",
 			  " Suppressed: exponent out of range?\n");
 	}
     else {
 	$y = ($x eq $y ? "" : " => $y");
-	print("not ok $i >$template< >$data< >$result< $x$y",
+	print("not ok $i - >$template< >$data< >$result< $x$y",
 	    $comment ? " # $comment\n" : "\n");
     }
 }
