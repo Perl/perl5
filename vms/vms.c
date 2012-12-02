@@ -8248,7 +8248,20 @@ int utf8_flag;
    return result;
 }
 
-
+/* A convenience macro for escaping dots that haven't already been
+ * escaped, with guards to avoid checking before the start of the
+ * buffer or advancing beyond the end of it (allowing room for the
+ * NUL terminator).
+ */
+#define VMSEFS_ESCAPE_DOT(vmsefsdot,vmsefsbuf,vmsefsbufsiz) STMT_START { \
+    if ( ((vmsefsdot) > (vmsefsbuf) && *((vmsefsdot) - 1) != '^' \
+          || ((vmsefsdot) == (vmsefsbuf))) \
+         && (vmsefsdot) < (vmsefsbuf) + (vmsefsbufsiz) - 2 \
+       ) { \
+        *((vmsefsdot)++) = '^'; \
+        *((vmsefsdot)++) = '.'; \
+    } \
+} STMT_END
 
 /*{{{ char *tovmsspec[_ts](char *path, char *buf, int * utf8_flag)*/
 static char *int_tovmsspec
@@ -8536,8 +8549,7 @@ static char *int_tovmsspec
         if (decc_efs_charset == 0)
 	  *(cp1++) = '_';  /* fix up syntax - '.' in name not allowed */
 	else {
-	  *(cp1++) = '^';  /* fix up syntax - '.' in name is allowed */
-	  *(cp1++) = '.';
+	  VMSEFS_ESCAPE_DOT(cp1, rslt, VMS_MAXRSS);
 	}
       }
     }
@@ -8547,8 +8559,7 @@ static char *int_tovmsspec
         if (decc_efs_charset == 0)
 	  *(cp1++) = '_';
 	else {
-	  *(cp1++) = '^';
-	  *(cp1++) = '.';
+	  VMSEFS_ESCAPE_DOT(cp1, rslt, VMS_MAXRSS);
 	}
       }
       else                  *(cp1++) =  *cp2;
@@ -8578,8 +8589,7 @@ static char *int_tovmsspec
     case '.':
 	if (((cp2 < lastdot) || (cp2[1] == '\0')) &&
 	    decc_readdir_dropdotnotype) {
-	  *(cp1)++ = '^';
-	  *(cp1)++ = '.';
+	  VMSEFS_ESCAPE_DOT(cp1, rslt, VMS_MAXRSS);
 	  cp2++;
 
 	  /* trailing dot ==> '^..' on VMS */
