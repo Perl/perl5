@@ -5,7 +5,11 @@ BEGIN {
        @INC = '../lib';
 }
 
-# 2s complement assumption. Won't break test, just makes the internals of
+# This file has been placed in t/opbasic to indicate that it should not use
+# functions imported from t/test.pl or Test::More, as those programs/libraries
+# use operators which are what is being tested in this file.
+
+# 2s complement assumption. Will not break test, just makes the internals of
 # the SVs less interesting if were not on 2s complement system.
 my $uv_max = ~0;
 my $uv_maxm1 = ~0 ^ 1;
@@ -55,7 +59,7 @@ print "1..$expect\n";
 my $bad_NaN = 0;
 
 {
-    # gcc's -ffast-math option may stop NaNs working correctly
+    # gcc -ffast-math option may stop NaNs working correctly
     use Config;
     my $ccflags = $Config{ccflags} // '';
     $bad_NaN = 1 if $ccflags =~ /-ffast-math\b/;

@@ -5,7 +5,11 @@ BEGIN {
     @INC = '../lib';
 }
 
-# This ok() function is specially written to avoid any concatenation.
+# ok() functions from other sources (e.g., t/test.pl) may use concatenation,
+# but that is what is being tested in this file.  Hence, we place this file
+# in the directory where do not use t/test.pl, and we write an ok() function
+# specially written to avoid any concatenation.
+
 my $test = 1;
 sub ok {
     my($ok, $name) = @_;

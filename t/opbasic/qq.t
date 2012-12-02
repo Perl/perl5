@@ -5,6 +5,9 @@ BEGIN {
     @INC = '../lib';
 }
 
+# This file uses a specially crafted is() function rather than that found in
+# t/test.pl or Test::More.  Hence, we place this file in directory t/opbasic.
+
 print q(1..28
 );
 
@@ -20,7 +23,7 @@ sub is {
     }
     foreach ($left, $right) {
       # Comment out these regexps to map non-printables to ord if the perl under
-      # test is so broken that it's not helping
+      # test is so broken that it is not helping
       s/([^-+A-Za-z_0-9])/sprintf q{'.chr(%d).'}, ord $1/ge;
       $_ = sprintf q('%s'), $_;
       s/^''\.//;

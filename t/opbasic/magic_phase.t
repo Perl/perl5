@@ -5,8 +5,9 @@ use warnings;
 
 # Test ${^GLOBAL_PHASE}
 #
-# Test::More, test.pl, etc assert plans in END, which happens before global
-# destruction, so we don't want to use those here.
+# Test::More, t/test.pl, etc., assert plans in END, which happens before global
+# destruction. We do not want to use those programs/libraries here, so we
+# place this file in directory t/opbasic.
 
 BEGIN { print "1..7\n" }
 
