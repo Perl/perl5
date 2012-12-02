@@ -5235,7 +5235,6 @@ t/op/alarm.t			See if alarm works
 t/op/anonsub.t			See if anonymous subroutines work
 t/op/append.t			See if . works
 t/op/args.t			See if operations on @_ work
-t/op/arith.t			See if arithmetic works
 t/op/array_base.t		Tests for the remnant of $[
 t/op/array.t			See if array operations work
 t/op/assignwarn.t		See if OP= operators warn correctly for undef targets
@@ -5243,6 +5242,12 @@ t/op/attrhand.t			See if attribute handlers work
 t/op/attrs.t			See if attributes on declarations work
 t/op/auto.t			See if autoincrement et all work
 t/op/avhv.t			See if pseudo-hashes work
+t/opbasic/arith.t			See if arithmetic works
+t/opbasic/cmp.t			See if the various string and numeric compare work
+t/opbasic/concat.t			See if string concatenation works
+t/opbasic/magic_phase.t		See if ${^GLOBAL_PHASE} works
+t/opbasic/qq.t			See if qq works
+t/opbasic/sprintf.t			See if sprintf works
 t/op/bless.t			See if bless works
 t/op/blocks.t			See if BEGIN and friends work
 t/op/bop.t			See if bitops work
@@ -5254,9 +5259,7 @@ t/op/chop.t			See if chop works
 t/op/chr.t			See if chr works
 t/op/closure.t			See if closures work
 t/op/closure_test.pl		Extra file for closure.t
-t/op/cmp.t			See if the various string and numeric compare work
 t/op/concat2.t			Tests too complex for concat.t
-t/op/concat.t			See if string concatenation works
 t/op/cond.t			See if conditional expressions work
 t/op/context.t			See if context propagation works
 t/op/coreamp.t			Test &foo() calls for CORE subs
@@ -5327,7 +5330,6 @@ t/op/lock.t			Tests for lock args & retval (no threads)
 t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
 t/op/magic-27839.t		Test for #27839, skipped for minitest
-t/op/magic_phase.t		See if ${^GLOBAL_PHASE} works
 t/op/magic.t			See if magic variables work
 t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works
@@ -5350,7 +5352,6 @@ t/op/print.t			See if print works
 t/op/protowarn.t		See if the illegalproto warnings work
 t/op/push.t			See if push and pop work
 t/op/pwent.t			See if getpw*() functions work
-t/op/qq.t			See if qq works
 t/op/qr.t			See if qr works
 t/op/quotemeta.t		See if quotemeta works
 t/op/rand.t			See if rand works
@@ -5378,7 +5379,6 @@ t/op/splice.t			See if splice works
 t/op/split.t			See if split works
 t/op/split_unicode.t		Test split /\s/ and Unicode
 t/op/sprintf2.t			See if sprintf works
-t/op/sprintf.t			See if sprintf works
 t/op/srand.t			See if srand works
 t/op/sselect.t			See if 4 argument select works
 t/op/stash.t			See if %:: stashes work

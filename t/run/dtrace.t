@@ -62,7 +62,7 @@ dtrace_like(
     'phase changes of a simple script',
 );
 
-# this code taken from t/op/magic_phase.t which tests all of the
+# this code taken from t/opbasic/magic_phase.t which tests all of the
 # transitions of ${^GLOBAL_PHASE}. instead of printing (which will
 # interact nondeterministically with the DTrace output), we increment
 # an unused variable for side effects

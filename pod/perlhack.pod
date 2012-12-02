@@ -708,19 +708,18 @@ Protocol|http://testanything.org>.
 
 =over 4
 
-=item * F<t/base> and F<t/comp>
+=item * F<t/base>, F<t/comp> and F<t/opbasic>
 
 Since we don't know if require works, or even subroutines, use ad hoc
-tests for these two. Step carefully to avoid using the feature being
-tested.
+tests for these three. Step carefully to avoid using the feature being
+tested.  Tests in F<t/opbasic>, for instance, have been placed there rather
+than in F<t/op> because they test functionality which F<t/test.pl> presumes
+has already been demonstrated to work.
 
 =item * F<t/cmd>, F<t/run>, F<t/io> and F<t/op>
 
 Now that basic require() and subroutines are tested, you can use the
 F<t/test.pl> library.
-
-Note, however, that some test scripts still avoid F<t/test.pl> if they test
-features that F<t/test.pl> relies on heavily. 
 
 You can also use certain libraries like Config conditionally, but be
 sure to skip the test gracefully if it's not there.

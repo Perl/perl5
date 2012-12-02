@@ -430,7 +430,7 @@ unless (@ARGV) {
     # then comp, to validate that require works
     # then run, to validate that -M works
     # then we know we can -MTestInit for everything else, making life simpler
-    foreach my $dir (qw(base comp run cmd io re op uni mro)) {
+    foreach my $dir (qw(base comp run cmd io re opbasic op uni mro)) {
 	_find_tests($dir);
     }
     unless ($::core) {
