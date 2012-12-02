@@ -966,7 +966,6 @@ EXTCONST U32 PL_charclass[];
 #define isPRINT_LC_uvchr(c)	(c < 256 ? isPRINT_LC(c) : is_uni_print_lc(c))
 #define isPUNCT_LC_uvchr(c)	(c < 256 ? isPUNCT_LC(c) : is_uni_punct_lc(c))
 
-#define isPSXSPC_LC_uni(c)	(isSPACE_LC_uni(c) ||(c) == '\f')
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 /* For internal core Perl use only.  If the input is in the Latin1 range, use
