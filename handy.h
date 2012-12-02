@@ -784,7 +784,8 @@ EXTCONST U32 PL_charclass[];
 #   define isPRINT(c)	isprint(c)
 #   define isPSXSPC(c)	isspace(c)
 #   define isPUNCT(c)	ispunct(c)
-#   define isSPACE(c)   (isPSXSPC(c) && (c) != '\v')
+#   define isSPACE(c)   (isPSXSPC(c) /* && (c) != '\v' (Experimentally making
+                                        these macros identical) */)
 #   define isUPPER(c)	isupper(c)
 #   define isXDIGIT(c)	isxdigit(c)
 #   define isWORDCHAR(c) (isalnum(c) || (c) == '_')
