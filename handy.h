@@ -954,17 +954,22 @@ EXTCONST U32 PL_charclass[];
 #define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
 #define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
 
-#define isALNUM_LC_uvchr(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
-#define isIDFIRST_LC_uvchr(c)	(c < 256 ? isIDFIRST_LC(c) : is_uni_idfirst_lc(c))
-#define isALPHA_LC_uvchr(c)	(c < 256 ? isALPHA_LC(c) : is_uni_alpha_lc(c))
-#define isSPACE_LC_uvchr(c)	(c < 256 ? isSPACE_LC(c) : is_uni_space_lc(c))
-#define isDIGIT_LC_uvchr(c)	(c < 256 ? isDIGIT_LC(c) : is_uni_digit_lc(c))
-#define isUPPER_LC_uvchr(c)	(c < 256 ? isUPPER_LC(c) : is_uni_upper_lc(c))
-#define isLOWER_LC_uvchr(c)	(c < 256 ? isLOWER_LC(c) : is_uni_lower_lc(c))
-#define isCNTRL_LC_uvchr(c)	(c < 256 ? isCNTRL_LC(c) : is_uni_cntrl_lc(c))
-#define isGRAPH_LC_uvchr(c)	(c < 256 ? isGRAPH_LC(c) : is_uni_graph_lc(c))
-#define isPRINT_LC_uvchr(c)	(c < 256 ? isPRINT_LC(c) : is_uni_print_lc(c))
-#define isPUNCT_LC_uvchr(c)	(c < 256 ? isPUNCT_LC(c) : is_uni_punct_lc(c))
+#define _gnrc_is_LC_uvchr(latin1, above_latin1, c)                            \
+                        (c < 256 ? latin1(c) : above_latin1(NATIVE_TO_UNI(c)))
+#define isALNUM_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALNUM_LC,              \
+                                                        is_uni_alnum_lc, c)
+#define isIDFIRST_LC_uvchr(c)  _gnrc_is_LC_uvchr(isIDFIRST_LC,                 \
+                                                        is_uni_idfirst_lc, c)
+#define isALPHA_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHA_LC, is_uni_alpha_lc, c)
+#define isSPACE_LC_uvchr(c)  _gnrc_is_LC_uvchr(isSPACE_LC,                     \
+                                                       is_uni_space_lc, c)
+#define isDIGIT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isDIGIT_LC, is_uni_digit_lc, c)
+#define isUPPER_LC_uvchr(c)  _gnrc_is_LC_uvchr(isUPPER_LC, is_uni_upper_lc, c)
+#define isLOWER_LC_uvchr(c)  _gnrc_is_LC_uvchr(isLOWER_LC, is_uni_lower_lc, c)
+#define isCNTRL_LC_uvchr(c)  _gnrc_is_LC_uvchr(isCNTRL_LC, is_uni_cntrl_lc, c)
+#define isGRAPH_LC_uvchr(c)  _gnrc_is_LC_uvchr(isGRAPH_LC, is_uni_graph_lc, c)
+#define isPRINT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPRINT_LC, is_uni_print_lc, c)
+#define isPUNCT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPUNCT_LC, is_uni_punct_lc, c)
 
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
