@@ -10,10 +10,14 @@
 :
 : flags are single letters with following meanings:
 :
-:   A  Member of public API:
+:   A  Available fully everywhere (usually part of the public API):
 :
 :         add entry to the list of exported symbols (unless x or m);
-:         any doc entry goes in perlapi.pod rather than perlintern.pod
+:         any doc entry goes in perlapi.pod rather than perlintern.pod.  If no
+:	     documentation is furnished for this function, and M is also
+:	     specified, the function is not listed as part of the public API.
+:	     If M isn't specified and no documentation is furnished, the
+:	     function is listed in perlapi as existing and being undocumented
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
 :      If the function is only exported for use in a public
