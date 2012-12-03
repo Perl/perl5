@@ -1003,7 +1003,7 @@ EXTCONST U32 PL_charclass[];
 /* space is identical to posix space under locale */
 #define isPSXSPC_LC_uvchr(c) isSPACE_LC_uvchr(c)
 
-#define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
+#define isBLANK_LC_uni(c)	isBLANK_LC_uvchr(UNI_TO_NATIVE(c))
 
 /* For internal core Perl use only.  If the input is in the Latin1 range, use
  * the Latin1 macro 'classnum' on 'p' which is a pointer to a UTF-8 string.
