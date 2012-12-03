@@ -4055,8 +4055,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	    _invlist_union(invlist, other, &invlist);
 	    break;
 	case '!':
-	    _invlist_invert(other);
-	    _invlist_union(invlist, other, &invlist);
+            _invlist_union_maybe_complement_2nd(invlist, other, TRUE, &invlist);
 	    break;
 	case '-':
 	    _invlist_subtract(invlist, other, &invlist);
