@@ -936,6 +936,7 @@ EXTCONST U32 PL_charclass[];
 #define isBLANK_uni(c)          _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
 #define isIDFIRST_uni(c)        _generic_uni(_CC_IDFIRST, _is_uni_perl_idstart, c)
 #define isALPHA_uni(c)          _generic_uni(_CC_ALPHA, is_uni_alpha, c)
+#define isALNUMC_uni(c)     _generic_uni(_CC_ALNUMC, is_uni_alnumc, c)
 #define isSPACE_uni(c)          _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
 #define isVERTWS_uni(c)         _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
 #define isDIGIT_uni(c)          _generic_uni(_CC_DIGIT, is_uni_digit, c)
@@ -968,6 +969,7 @@ EXTCONST U32 PL_charclass[];
 #define isIDFIRST_LC_uvchr(c)  _gnrc_is_LC_uvchr(isIDFIRST_LC,                 \
                                                         is_uni_idfirst_lc, c)
 #define isALPHA_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHA_LC, is_uni_alpha_lc, c)
+#define isALNUMC_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALNUMC_LC, is_uni_alnumc_lc, c)
 #define isSPACE_LC_uvchr(c)  _gnrc_is_LC_uvchr(isSPACE_LC,                     \
                                                        is_XPERLSPACE_cp_high, c)
 #define isDIGIT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isDIGIT_LC, is_uni_digit_lc, c)
@@ -1018,6 +1020,7 @@ EXTCONST U32 PL_charclass[];
 
 #define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
+#define isALNUMC_utf8(p)        _generic_utf8(_CC_ALNUMC, is_utf8_alnumc, p)
 #define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_HORIZWS_high, p)
 #define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
 #define isVERTWS_utf8(p)        _generic_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
