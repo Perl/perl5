@@ -613,7 +613,7 @@ PERLVAR(I, NonL1NonFinalFold,   SV *)
 PERLVAR(I, HasMultiCharFold,   SV *)
 
 /* utf8 character class swashes */
-PERLVAR(I, utf8_alnum,	SV *)
+PERLVAR(I, utf8_alnum,	SV *)   /* Should really be named "utf8_wordchar" */
 PERLVAR(I, utf8_alpha,	SV *)
 PERLVAR(I, utf8_graph,	SV *)
 PERLVAR(I, utf8_digit,	SV *)
