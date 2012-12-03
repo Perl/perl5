@@ -1701,6 +1701,10 @@ PERL_CALLCONV bool	Perl_is_uni_blank(pTHX_ UV c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
+PERL_CALLCONV bool	Perl_is_uni_blank_lc(pTHX_ UV c)
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+
 PERL_CALLCONV bool	Perl_is_uni_cntrl(pTHX_ UV c)
 			__attribute__warn_unused_result__
 			__attribute__pure__;

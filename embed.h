@@ -230,6 +230,7 @@
 #define is_uni_ascii(a)		Perl_is_uni_ascii(aTHX_ a)
 #define is_uni_ascii_lc(a)	Perl_is_uni_ascii_lc(aTHX_ a)
 #define is_uni_blank(a)		Perl_is_uni_blank(aTHX_ a)
+#define is_uni_blank_lc(a)	Perl_is_uni_blank_lc(aTHX_ a)
 #define is_uni_cntrl(a)		Perl_is_uni_cntrl(aTHX_ a)
 #define is_uni_cntrl_lc(a)	Perl_is_uni_cntrl_lc(aTHX_ a)
 #define is_uni_digit(a)		Perl_is_uni_digit(aTHX_ a)

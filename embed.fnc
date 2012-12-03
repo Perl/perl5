@@ -637,6 +637,7 @@ AMpR	|bool	|_is_uni_perl_idstart|UV c
 ApPR	|bool	|is_uni_alpha_lc|UV c
 ApPR	|bool	|is_uni_ascii_lc|UV c
 ApPR	|bool	|is_uni_space_lc|UV c
+AMpPR	|bool	|is_uni_blank_lc|UV c
 ApPR	|bool	|is_uni_cntrl_lc|UV c
 ApPR	|bool	|is_uni_graph_lc|UV c
 ApPR	|bool	|is_uni_digit_lc|UV c
