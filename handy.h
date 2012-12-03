@@ -1028,19 +1028,35 @@ EXTCONST U32 PL_charclass[];
  * Latin1 */
 #define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
 
-#define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isALPHA_LC_utf8(p)	isALPHA_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isBLANK_LC_utf8(p)	isBLANK_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isSPACE_LC_utf8(p)	isSPACE_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isUPPER_LC_utf8(p)	isUPPER_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isLOWER_LC_utf8(p)	isLOWER_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isPRINT_LC_utf8(p)	isPRINT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
-#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+/* For internal core Perl use only.  If the input is in the Latin1 range, use
+ * the macro 'macro' on 'p' which is a pointer to a UTF-8 string.  Otherwise
+ * use the value given by the 'utf8' parameter.  This relies on the fact that
+ * ASCII characters have the same representation whether utf8 or not.  Note
+ * that it assumes that the utf8 has been validated, and ignores 'use bytes' */
+#define _generic_LC_utf8_utf8(macro, p, utf8) \
+                         (UTF8_IS_INVARIANT(*(p))                          \
+                         ? macro(*(p))                                     \
+                         : (UTF8_IS_DOWNGRADEABLE_START(*(p)))             \
+                           ? macro(TWO_BYTE_UTF8_TO_UNI(*(p), *((p)+1)))   \
+                           : utf8)
+
+#define _generic_LC_utf8(macro, utf8_func, p)                              \
+                            _generic_LC_utf8_utf8(macro, p, utf8_func(p))
+
+#define isALNUM_LC_utf8(p)   _generic_LC_utf8(isALNUM_LC, is_utf8_alnum, p)
+#define isIDFIRST_LC_utf8(p) _generic_LC_utf8(isIDFIRST_LC,                \
+                                                    _is_utf8_perl_idstart, p)
+#define isALPHA_LC_utf8(p)   _generic_LC_utf8(isALPHA_LC, is_utf8_alpha, p)
+#define isBLANK_LC_utf8(p)   _generic_LC_utf8(isBLANK_LC, is_HORIZWS_high, p)
+#define isSPACE_LC_utf8(p)   _generic_LC_utf8(isSPACE_LC, is_XPERLSPACE_high, p)
+#define isDIGIT_LC_utf8(p)   _generic_LC_utf8(isDIGIT_LC, is_utf8_digit, p)
+#define isUPPER_LC_utf8(p)   _generic_LC_utf8(isUPPER_LC, is_utf8_upper, p)
+#define isLOWER_LC_utf8(p)   _generic_LC_utf8(isLOWER_LC, is_utf8_lower, p)
+#define isALNUMC_LC_utf8(p)  _generic_LC_utf8(isALNUMC_LC, is_utf8_alnumc, p)
+#define isCNTRL_LC_utf8(p)   _generic_LC_utf8_utf8(isCNTRL_LC, p, 0)
+#define isGRAPH_LC_utf8(p)   _generic_LC_utf8(isGRAPH_LC, is_utf8_graph, p)
+#define isPRINT_LC_utf8(p)   _generic_LC_utf8(isPRINT_LC, is_utf8_print, p)
+#define isPUNCT_LC_utf8(p)   _generic_LC_utf8(isPUNCT_LC, is_utf8_punct, p)
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 
