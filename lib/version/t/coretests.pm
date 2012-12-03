@@ -505,6 +505,7 @@ EOF
     }
 
     {
+        local $Data::Dumper::Sortkeys= 1;
 	# http://rt.cpan.org/Public/Bug/Display.html?id=30004
 	my $v1 = $CLASS->$method("v0.1_1");
 	(my $alpha1 = Dumper($v1)) =~ s/.+'alpha' => ([^,]+),.+/$1/ms;
