@@ -857,34 +857,34 @@ EXTCONST U32 PL_charclass[];
 
 #  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
 
-/* Note that the foo_LC() macros in this case generally are defined only on
- * code points 0-256, and give undefined, unwarned results if called with
- * values outside that range */
+/* Use foo_LC_uvchr() instead  of these for beyond the Latin1 range */
 
-#    define isALNUM_LC(c)   (isalnum((unsigned char)(c)) || (char)(c) == '_')
-#    define isIDFIRST_LC(c) (isalpha((unsigned char)(c)) || (char)(c) == '_')
-#    define isALPHA_LC(c)	isalpha((unsigned char)(c))
+#    define isALNUM_LC(c) (FITS_IN_8_BITS(c)                                \
+                           && (isalnum((unsigned char)(c)) || (char)(c) == '_'))
+#    define isIDFIRST_LC(c) (FITS_IN_8_BITS(c)                                 \
+                           && (isalpha((unsigned char)(c)) || (char)(c) == '_'))
+#    define isALPHA_LC(c)   (FITS_IN_8_BITS(c) && isalpha((unsigned char)(c)))
 #    ifdef HAS_ISASCII
-#	define isASCII_LC(c)	isascii((unsigned char)(c))
+#	define isASCII_LC(c) (FITS_IN_8_BITS(c) && isascii((unsigned char)(c)))
 #    else
-#	define isASCII_LC(c)	isASCII((unsigned char)(c))
+#	define isASCII_LC(c) (FITS_IN_8_BITS(c) && isASCII((unsigned char)(c)))
 #    endif
 #    ifdef HAS_ISBLANK
-#	define isBLANK_LC(c)	isblank((unsigned char)(c))
+#	define isBLANK_LC(c) (FITS_IN_8_BITS(c) && isblank((unsigned char)(c)))
 #    else
-#	define isBLANK_LC(c)	isBLANK((unsigned char)(c))
+#	define isBLANK_LC(c) (FITS_IN_8_BITS(c) && isBLANK((unsigned char)(c)))
 #    endif
-#    define isSPACE_LC(c)	isspace((unsigned char)(c))
-#    define isDIGIT_LC(c)	isdigit((unsigned char)(c))
-#    define isUPPER_LC(c)	isupper((unsigned char)(c))
-#    define isLOWER_LC(c)	islower((unsigned char)(c))
-#    define isALNUMC_LC(c)	isalnum((unsigned char)(c))
-#    define isCNTRL_LC(c)	iscntrl((unsigned char)(c))
-#    define isGRAPH_LC(c)	isgraph((unsigned char)(c))
-#    define isPRINT_LC(c)	isprint((unsigned char)(c))
-#    define isPUNCT_LC(c)	ispunct((unsigned char)(c))
-#    define toUPPER_LC(c)	toupper((unsigned char)(c))
-#    define toLOWER_LC(c)	tolower((unsigned char)(c))
+#    define isSPACE_LC(c)    (FITS_IN_8_BITS(c) && isspace((unsigned char)(c)))
+#    define isDIGIT_LC(c)    (FITS_IN_8_BITS(c) && isdigit((unsigned char)(c)))
+#    define isUPPER_LC(c)    (FITS_IN_8_BITS(c) && isupper((unsigned char)(c)))
+#    define isLOWER_LC(c)    (FITS_IN_8_BITS(c) && islower((unsigned char)(c)))
+#    define isALNUMC_LC(c)   (FITS_IN_8_BITS(c) && isalnum((unsigned char)(c)))
+#    define isCNTRL_LC(c)    (FITS_IN_8_BITS(c) && iscntrl((unsigned char)(c)))
+#    define isGRAPH_LC(c)    (FITS_IN_8_BITS(c) && isgraph((unsigned char)(c)))
+#    define isPRINT_LC(c)    (FITS_IN_8_BITS(c) && isprint((unsigned char)(c)))
+#    define isPUNCT_LC(c)    (FITS_IN_8_BITS(c) && ispunct((unsigned char)(c)))
+#    define toUPPER_LC(c) (FITS_IN_8_BITS(c) ? toupper((unsigned char)(c)) : (c))
+#    define toLOWER_LC(c) (FITS_IN_8_BITS(c) ? tolower((unsigned char)(c)) : (c))
 
 #  else
 
@@ -906,8 +906,8 @@ EXTCONST U32 PL_charclass[];
 #    define isGRAPH_LC(c)	(isascii(c) && isgraph(c))
 #    define isPRINT_LC(c)	(isascii(c) && isprint(c))
 #    define isPUNCT_LC(c)	(isascii(c) && ispunct(c))
-#    define toUPPER_LC(c)	toupper(c)
-#    define toLOWER_LC(c)	tolower(c)
+#    define toUPPER_LC(c)	(isascii(c) ? toupper(c) : (c))
+#    define toLOWER_LC(c)	(isascii(c) ? tolower(c) : (c))
 
 #  endif
 #endif /* USE_NEXT_CTYPE */
