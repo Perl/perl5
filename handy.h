@@ -753,7 +753,7 @@ EXTCONST U32 PL_charclass[];
 	    || NATIVE_TO_UNI((U8) c) == 0xAA \
 	    || NATIVE_TO_UNI((U8) c) == 0xB5 \
 	    || NATIVE_TO_UNI((U8) c) == 0xBA)))
-#   define isCHARNAME_CONT(c) (isALNUM_L1(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
+#   define isCHARNAME_CONT(c) (isWORDCHAR_L1(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
 #endif
 
 /* Macros for backwards compatibility and for completeness when the ASCII and
@@ -834,8 +834,9 @@ EXTCONST U32 PL_charclass[];
 
 #ifdef USE_NEXT_CTYPE
 
-#  define isALNUM_LC(c) \
+#  define isWORDCHAR_LC(c) \
 	(NXIsAlNum((unsigned int)(c)) || (char)(c) == '_')
+#  define isALNUM_LC(c) isWORDCHAR_LC(c)
 #  define isIDFIRST_LC(c) \
 	(NXIsAlpha((unsigned int)(c)) || (char)(c) == '_')
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
@@ -859,8 +860,9 @@ EXTCONST U32 PL_charclass[];
 
 /* Use foo_LC_uvchr() instead  of these for beyond the Latin1 range */
 
-#    define isALNUM_LC(c) (FITS_IN_8_BITS(c)                                \
+#    define isWORDCHAR_LC(c) (FITS_IN_8_BITS(c)                                \
                            && (isalnum((unsigned char)(c)) || (char)(c) == '_'))
+#    define isALNUM_LC(c) isWORDCHAR_LC(c)
 #    define isIDFIRST_LC(c) (FITS_IN_8_BITS(c)                                 \
                            && (isalpha((unsigned char)(c)) || (char)(c) == '_'))
 #    define isALPHA_LC(c)   (FITS_IN_8_BITS(c) && isalpha((unsigned char)(c)))
@@ -888,7 +890,8 @@ EXTCONST U32 PL_charclass[];
 
 #  else
 
-#    define isALNUM_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
+#    define isWORDCHAR_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
+#    define isALNUM_LC(c)	isWORDCHAR_LC(c)
 #    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isASCII_LC(c)	isascii(c)
@@ -956,8 +959,9 @@ EXTCONST U32 PL_charclass[];
 
 #define _gnrc_is_LC_uvchr(latin1, above_latin1, c)                            \
                         (c < 256 ? latin1(c) : above_latin1(NATIVE_TO_UNI(c)))
-#define isALNUM_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALNUM_LC,              \
+#define isWORDCHAR_LC_uvchr(c)  _gnrc_is_LC_uvchr(isWORDCHAR_LC,              \
                                                         is_uni_alnum_lc, c)
+#define isALNUM_LC_uvchr(c)  isWORDCHAR_LC_uvchr(c)
 #define isIDFIRST_LC_uvchr(c)  _gnrc_is_LC_uvchr(isIDFIRST_LC,                 \
                                                         is_uni_idfirst_lc, c)
 #define isALPHA_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHA_LC, is_uni_alpha_lc, c)
@@ -1043,7 +1047,8 @@ EXTCONST U32 PL_charclass[];
 #define _generic_LC_utf8(macro, utf8_func, p)                              \
                             _generic_LC_utf8_utf8(macro, p, utf8_func(p))
 
-#define isALNUM_LC_utf8(p)   _generic_LC_utf8(isALNUM_LC, is_utf8_alnum, p)
+#define isWORDCHAR_LC_utf8(p) _generic_LC_utf8(isWORDCHAR_LC, is_utf8_alnum, p)
+#define isALNUM_LC_utf8(p)   isWORDCHAR_LC_utf8(p)
 #define isIDFIRST_LC_utf8(p) _generic_LC_utf8(isIDFIRST_LC,                \
                                                     _is_utf8_perl_idstart, p)
 #define isALPHA_LC_utf8(p)   _generic_LC_utf8(isALPHA_LC, is_utf8_alpha, p)
