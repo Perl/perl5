@@ -916,7 +916,7 @@ EXTCONST U32 PL_charclass[];
 #    ifdef HAS_ISBLANK
 #	define isBLANK_LC(c)	(isascii(c) && isblank(c))
 #    else
-#	define isBLANK_LC(c)	isBLANK(c)
+#	define isBLANK_LC(c)	isBLANK_A(c)
 #    endif
 #    define isSPACE_LC(c)	(isascii(c) && isspace(c))
 #    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
