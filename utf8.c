@@ -3924,6 +3924,8 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
     SV* invlist;
 
+    PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
+
     /* If not a hash, it must be the swash's inversion list instead */
     if (SvTYPE(hv) != SVt_PVHV) {
         return (SV*) hv;
@@ -3939,8 +3941,6 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     typestr = (U8*)SvPV_nolen(*typesvp);
     bits  = SvUV(*bitssvp);
     octets = bits >> 3; /* if bits == 1, then octets == 0 */
-
-    PERL_ARGS_ASSERT__SWASH_TO_INVLIST;
 
     /* read $swash->{LIST} */
     if (SvPOK(*listsvp)) {
