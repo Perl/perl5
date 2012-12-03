@@ -1844,7 +1844,7 @@ Perl_is_uni_alnumc_lc(pTHX_ UV c)
 bool
 Perl_is_uni_idfirst_lc(pTHX_ UV c)
 {
-    return is_uni_idfirst(c);	/* XXX no locale support yet */
+    return _is_uni_perl_idstart(c);	/* XXX no locale support yet */
 }
 
 bool
