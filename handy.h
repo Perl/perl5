@@ -918,7 +918,7 @@ EXTCONST U32 PL_charclass[];
 #  endif
 #endif /* USE_NEXT_CTYPE */
 
-#define isPSXSPC_LC(c)		(isSPACE_LC(c) || (c) == '\v')
+#define isPSXSPC_LC(c)		isSPACE_LC(c)
 
 /* For internal core Perl use only.  If the input is Latin1, use the Latin1
  * macro; otherwise use the function.  Won't compile if 'c' isn't unsigned, as
@@ -952,7 +952,8 @@ EXTCONST U32 PL_charclass[];
 #define isPUNCT_uni(c)          _generic_uni(_CC_PUNCT, is_uni_punct, c)
 #define isXDIGIT_uni(c)         _generic_uni(_CC_XDIGIT, is_XDIGIT_cp_high, c)
 
-/* Posix and regular space differ only in U+000B, which is in Latin1 */
+/* Posix and regular space differ only the ASCII-range, so uses the same
+ * above-latin1 function */
 #define isPSXSPC_uni(c)         _generic_uni(_CC_PSXSPC,                \
                                              is_XPERLSPACE_cp_high, c)
 
@@ -1040,8 +1041,8 @@ EXTCONST U32 PL_charclass[];
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 
-/* Posix and regular space differ only in U+000B, which is in ASCII (and hence
- * Latin1 */
+/* Posix and regular space differ only in the ASCII range, so uses the same
+ * above-Latin1 function */
 #define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
 
 /* For internal core Perl use only.  If the input is in the Latin1 range, use
@@ -1077,7 +1078,8 @@ EXTCONST U32 PL_charclass[];
 #define isXDIGIT_LC_utf8(p)  _generic_LC_utf8(isXDIGIT_LC, is_XDIGIT_high, p)
 #define isASCII_LC_utf8(p)   isASCII_LC(*p)
 
-#define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
+/* space is identical to posix space under locale */
+#define isPSXSPC_LC_utf8(p)	isSPACE_LC_utf8(p)
 
 /* This conversion works both ways, strangely enough. On EBCDIC platforms,
  * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII, except that they don't
