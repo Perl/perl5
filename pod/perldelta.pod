@@ -129,13 +129,16 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlapi/Character classes>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+There are quite a few macros callable from XS modules that classify
+characters into things like alphabetic, punctuation, etc.  More of these
+are now documented, including ones which work on characters whose code
+points are outside the Latin-1 range.
 
 =back
 

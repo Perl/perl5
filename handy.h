@@ -471,84 +471,188 @@ C<strncmp>).
 /*
 
 =head1 Character classes
-There are three variants for all the functions in this section.  The base ones
-operate using the character set of the platform Perl is running on.  The ones
-with an C<_A> suffix operate on the ASCII character set, and the ones with an
-C<_L1> suffix operate on the full Latin1 character set.  All are unaffected by
-locale and by C<use bytes>.
+This section is about functions (really macros) that classify characters
+into types, such as punctuation versus alphabetic, etc.  Most of these are
+analogous to regular expression character classes.  (See
+L<perlrecharclass/POSIX Character Classes>.)  There are several variants for
+each class.  (Not all macros have all variants; each item below lists the
+ones valid for it.)  None are affected by C<use bytes>, and only the ones
+with C<LC> in the name are affected by the current locale.
 
-For ASCII platforms, the base function with no suffix and the one with the
-C<_A> suffix are identical.  The function with the C<_L1> suffix imposes the
-Latin-1 character set onto the platform.  That is, the code points that are
-ASCII are unaffected, since ASCII is a subset of Latin-1.  But the non-ASCII
-code points are treated as if they are Latin-1 characters.  For example,
-C<isSPACE_L1()> will return true when called with the code point 0xA0, which is
-the Latin-1 NO-BREAK SPACE.
+The base function, e.g., C<isALPHA()>, takes an octet (either a C<char> or a
+C<U8>) as input and returns a boolean as to whether or not the character
+represented by that octet is in the named class based on platform, Unicode, and
+Perl rules.  If the input is a number that doesn't fit in an octet, FALSE is
+always returned.
 
-For EBCDIC platforms, the base function with no suffix and the one with the
-C<_L1> suffix should be identical, since, as of this writing, the EBCDIC code
-pages that Perl knows about all are equivalent to Latin-1.  The function that
-ends in an C<_A> suffix will not return true unless the specified character also
-has an ASCII equivalent.
+Variant C<isFOO_A> (e.g., C<isALPHA_A()>) will return TRUE only if the input is
+also in the ASCII character set.  For ASCII platforms, the base function with
+no suffix and the one with the C<_A> suffix are identical.  On EBCDIC
+platforms, the C<_A> suffix function will not return true unless the specified
+character also has an ASCII equivalent.
+
+Variant C<isFOO_L1> operates on the full Latin1 character set.  For EBCDIC
+platforms, the base function with no suffix and the one with the C<_L1> suffix
+are identical.  For ASCII platforms, the C<_L1> suffix imposes the Latin-1
+character set onto the platform.  That is, the code points that are ASCII are
+unaffected, since ASCII is a subset of Latin-1.  But the non-ASCII code points
+are treated as if they are Latin-1 characters.  For example, C<isSPACE_L1()>
+will return true when called with the code point 0xA0, which is the Latin-1
+NO-BREAK SPACE.
+
+Variant C<isFOO_uni> is like the C<isFOO_L1> variant, but accepts any UV code
+point as input.  If the code point is larger than 255, Unicode rules are used
+to determine if it is in the character class.  For example,
+C<isWORDCHAR(0x100)> returns TRUE, since 0x100 is LATIN CAPITAL LETTER A WITH
+MACRON in Unicode, and is a word character.
+
+Variant C<isFOO_utf8> is like C<isFOO_uni>, but the input is a pointer to a
+(known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>).  The
+classification of just the first character in the string is tested.
+
+Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but uses
+the C library function that gives the named classification instead of
+hard-coded rules.  For example, C<isDIGIT_LC()> returns the result of calling
+C<isdigit()>.  This means that the result is based on the current locale, which
+is what C<LC> in the name stands for.  FALSE is always returned if the input
+won't fit into an octet.
+
+Variant C<isFOO_LC_uvchr> is like C<isFOO_LC>, but is defined on any UV.  It
+returns the same as C<isFOO_LC> for input code points less than 256, and
+returns the hard-coded, not-affected-by-locale, Unicode results for larger ones.
+
+Variant C<isFOO_LC_utf8> is like C<isFOO_LC_uvchr>, but the input is a pointer to a
+(known to be well-formed) UTF-8 encoded string (C<U8*> or C<char*>).  The
+classification of just the first character in the string is tested.
 
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the specified character is an
-alphabetic character in the platform's native character set.
+alphabetic character in the platform's native character set, analogous to
+C<m/[[:alpha:]]/>.
 See the L<top of this section|/Character classes> for an explanation of variants
-C<isALPHA_A> and C<isALPHA_L1>.
+C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uni>, C<isALPHA_utf8>, C<isALPHA_LC>
+C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8>.
 
 =for apidoc Am|bool|isASCII|char ch
 Returns a boolean indicating whether the specified character is one of the 128
-characters in the ASCII character set.  On non-ASCII platforms, it is if this
+characters in the ASCII character set, analogous to C<m/[[:ascii:]]/>.
+On non-ASCII platforms, it is if this
 character corresponds to an ASCII character.  Variants C<isASCII_A()> and
 C<isASCII_L1()> are identical to C<isASCII()>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isASCII_uni>, C<isASCII_utf8>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
+C<isASCII_LC_utf8>.  Note, however, that some platforms do not have the C
+library routine C<isascii()>.  In these cases, the variants whose names contain
+C<LC> are the same as the corresponding ones without.
+
+=for apidoc Am|bool|isBLANK|char ch
+Returns a boolean indicating whether the specified character is a
+character considered to be a blank in the platform's native character set,
+analogous to C<m/[[:blank:]]/>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isBLANK_A>, C<isBLANK_L1>, C<isBLANK_uni>, C<isBLANK_utf8>, C<isBLANK_LC>
+C<isBLANK_LC_uvchr>, and C<isBLANK_LC_utf8>.  Note, however, that some
+platforms do not have the C library routine C<isblank()>.  In these cases, the
+variants whose names contain C<LC> are the same as the corresponding ones
+without.
+
+=for apidoc Am|bool|isCNTRL|char ch
+Returns a boolean indicating whether the specified character is a
+control character in the platform's native character set,
+analogous to C<m/[[:cntrl:]]/>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uni>, C<isCNTRL_utf8>, C<isCNTRL_LC>
+C<isCNTRL_LC_uvchr>, and C<isCNTRL_LC_utf8>.
 
 =for apidoc Am|bool|isDIGIT|char ch
 Returns a boolean indicating whether the specified character is a
-digit in the platform's native character set.
+digit in the platform's native character set, analogous to C<m/[[:digit:]]/>.
 Variants C<isDIGIT_A> and C<isDIGIT_L1> are identical to C<isDIGIT>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isDIGIT_uni>, C<isDIGIT_utf8>, C<isDIGIT_LC> C<isDIGIT_LC_uvchr>, and
+C<isDIGIT_LC_utf8>.
+
+=for apidoc Am|bool|isGRAPH|char ch
+Returns a boolean indicating whether the specified character is a
+graphic character in the platform's native character set, analogous to
+C<m/[[:graph:]]/>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uni>, C<isGRAPH_utf8>, C<isGRAPH_LC>
+C<isGRAPH_LC_uvchr>, and C<isGRAPH_LC_utf8>.
 
 =for apidoc Am|bool|isLOWER|char ch
 Returns a boolean indicating whether the specified character is a
-lowercase character in the platform's native character set.
+lowercase character in the platform's native character set, analogous to
+C<m/[[:lower:]]/>.
 See the L<top of this section|/Character classes> for an explanation of variants
-C<isLOWER_A> and C<isLOWER_L1>.
+C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uni>, C<isLOWER_utf8>, C<isLOWER_LC>
+C<isLOWER_LC_uvchr>, and C<isLOWER_LC_utf8>.
 
 =for apidoc Am|bool|isOCTAL|char ch
 Returns a boolean indicating whether the specified character is an
 octal digit, [0-7] in the platform's native character set.
-Variants C<isOCTAL_A> and C<isOCTAL_L1> are identical to C<isOCTAL>.
+The only two variants are C<isOCTAL_A> and C<isOCTAL_L1>; each is identical to
+C<isOCTAL>.
+
+=for apidoc Am|bool|isPUNCT|char ch
+Returns a boolean indicating whether the specified character is a
+punctuation character in the platform's native character set, analogous to
+C<m/[[:punct:]]/>.  Note that the definition of what is punctuation isn't as
+straightforward as one might desire.  See L<perlrecharclass/POSIX Character
+Classes> for details.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uni>, C<isPUNCT_utf8>, C<isPUNCT_LC>
+C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8>.
 
 =for apidoc Am|bool|isSPACE|char ch
 Returns a boolean indicating whether the specified character is a
-whitespace character in the platform's native character set.  This is the same
-as what C<\s> matches in a regular expression.
+whitespace character in the platform's native character set.  This is analogous
+to what C<m/\s/> and C<m/[[:space:]]/> match in a regular expression.
 See the L<top of this section|/Character classes> for an explanation of variants
-C<isSPACE_A> and C<isSPACE_L1>.
+C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uni>, C<isSPACE_utf8>, C<isSPACE_LC>
+C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
 
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the specified character is an
-uppercase character in the platform's native character set.
+uppercase character in the platform's native character set, analogous to
+C<m/[[:upper:]]/>.
 See the L<top of this section|/Character classes> for an explanation of variants
-C<isUPPER_A> and C<isUPPER_L1>.
+C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uni>, C<isUPPER_utf8>, C<isUPPER_LC>
+C<isUPPER_LC_uvchr>, and C<isUPPER_LC_utf8>.
+
+=for apidoc Am|bool|isPRINT|char ch
+Returns a boolean indicating whether the specified character is a
+printable character in the platform's native character set, analogous to
+C<m/[[:print:]]/>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uni>, C<isPRINT_utf8>, C<isPRINT_LC>
+C<isPRINT_LC_uvchr>, and C<isPRINT_LC_utf8>.
 
 =for apidoc Am|bool|isWORDCHAR|char ch
-Returns a boolean indicating whether the specified character is a
-character that is any of: alphabetic, numeric, or an underscore.  This is the
-same as what C<\w> matches in a regular expression.
-C<isALNUM()> is a synonym provided for backward compatibility.  Note that it
-does not have the standard C language meaning of alphanumeric, since it matches
-an underscore and the standard meaning does not.
+Returns a boolean indicating whether the specified character is a character
+that is a word character, analogous to what C<m/\w/> and C<m/[[:word:]]/> match
+in a regular expression.  A word character is an alphabetic character, a
+decimal digit, a connecting punctuation character (such as an underscore), or
+a "mark" character that attaches to one of those (like some sort of accent).
+C<isALNUM()> is a synonym provided for backward compatibility, even though a
+word character includes more than the standard C language meaning of
+alphanumeric.
 See the L<top of this section|/Character classes> for an explanation of variants
-C<isWORDCHAR_A> and C<isWORDCHAR_L1>.
+C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uni>, C<isWORDCHAR_utf8>,
+C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8>.
 
 =for apidoc Am|bool|isXDIGIT|char ch
 Returns a boolean indicating whether the specified character is a hexadecimal
-digit, [0-9A-Fa-f].  Variants C<isXDIGIT_A()> and C<isXDIGIT_L1()> are
-identical to C<isXDIGIT()>.
+digit.  In the ASCII range these are C<[0-9A-Fa-f]>.  Variants C<isXDIGIT_A()>
+and C<isXDIGIT_L1()> are identical to C<isXDIGIT()>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isXDIGIT_uni>, C<isXDIGIT_utf8>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>, and
+C<isXDIGIT_LC_utf8>.
+
+=head1 Miscellaneous Functions
 
 =for apidoc Am|U8|READ_XDIGIT|char str*
-Returns the value of a hex digit and advances the string pointer.
+Returns the value of an ASCII-range hex digit and advances the string pointer.
 Behaviour is only well defined when isXDIGIT(*str) is true.
 
 =head1 Character case changing
@@ -562,6 +666,9 @@ Converts the specified character to lowercase in the platform's native
 character set, if possible; otherwise returns the input character itself.
 
 =cut
+
+Still undocumented are ALNUMC, PSXSPC, VERTSPACE, and IDFIRST, and the other
+toUPPER etc functions
 
 Note that these macros are repeated in Devel::PPPort, so should also be
 patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
