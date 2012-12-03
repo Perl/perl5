@@ -11848,9 +11848,13 @@ parseit:
 	    default:
 		/* Allow \_ to not give an error */
 		if (!SIZE_ONLY && isALNUM(value) && value != '_') {
+		    SAVEFREESV(RExC_rx_sv);
+		    SAVEFREESV(listsv);
 		    ckWARN2reg(RExC_parse,
 			       "Unrecognized escape \\%c in character class passed through",
 			       (int)value);
+		    ReREFCNT_inc(RExC_rx_sv);
+		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
 	    }
