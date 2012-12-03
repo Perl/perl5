@@ -962,11 +962,11 @@ EXTCONST U32 PL_charclass[];
                                                         is_uni_idfirst_lc, c)
 #define isALPHA_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHA_LC, is_uni_alpha_lc, c)
 #define isSPACE_LC_uvchr(c)  _gnrc_is_LC_uvchr(isSPACE_LC,                     \
-                                                       is_uni_space_lc, c)
+                                                       is_XPERLSPACE_cp_high, c)
 #define isDIGIT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isDIGIT_LC, is_uni_digit_lc, c)
 #define isUPPER_LC_uvchr(c)  _gnrc_is_LC_uvchr(isUPPER_LC, is_uni_upper_lc, c)
 #define isLOWER_LC_uvchr(c)  _gnrc_is_LC_uvchr(isLOWER_LC, is_uni_lower_lc, c)
-#define isCNTRL_LC_uvchr(c)  _gnrc_is_LC_uvchr(isCNTRL_LC, is_uni_cntrl_lc, c)
+#define isCNTRL_LC_uvchr(c)  (c < 256 ? isCNTRL_LC(c) : 0)
 #define isGRAPH_LC_uvchr(c)  _gnrc_is_LC_uvchr(isGRAPH_LC, is_uni_graph_lc, c)
 #define isPRINT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPRINT_LC, is_uni_print_lc, c)
 #define isPUNCT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPUNCT_LC, is_uni_punct_lc, c)
