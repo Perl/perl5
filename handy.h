@@ -339,12 +339,13 @@ string/length pair.
 =cut
 */
 
-/* concatenating with "" ensures that only literal strings are accepted as argument */
+/* concatenating with "" ensures that only literal strings are accepted as
+ * argument */
 #define STR_WITH_LEN(s)  ("" s ""), (sizeof(s)-1)
 
-/* note that STR_WITH_LEN() can't be used as argument to macros or functions that
- * under some configurations might be macros, which means that it requires the full
- * Perl_xxx(aTHX_ ...) form for any API calls where it's used.
+/* note that STR_WITH_LEN() can't be used as argument to macros or functions
+ * that under some configurations might be macros, which means that it requires
+ * the full Perl_xxx(aTHX_ ...) form for any API calls where it's used.
  */
 
 /* STR_WITH_LEN() shortcuts */
@@ -651,7 +652,7 @@ EXTCONST U32 PL_charclass[];
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define _CC_mask(classnum) (1U << (classnum))
 #   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
-                            && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(classnum)))
+                && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(classnum)))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
      * ASCII. */
@@ -709,18 +710,27 @@ EXTCONST U32 PL_charclass[];
 #       define isALNUMC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
 #       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #       define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
-#       define isCNTRL_A(c)  (FITS_IN_8_BITS(c) && ((U8) (c) < ' ' || (c) == 127))
+#       define isCNTRL_A(c) (FITS_IN_8_BITS(c) && ((U8) (c) < ' ' || (c) == 127))
 #       define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
 #       define isGRAPH_A(c)  (isWORDCHAR_A(c) || isPUNCT_A(c))
 #       define isIDFIRST_A(c) (isALPHA_A(c) || (c) == '_')
 #       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
 #       define isPRINT_A(c)  (((c) >= 32 && (c) < 127))
 #       define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
-#       define isPUNCT_A(c)  (((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
-#       define isSPACE_A(c)  ((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
+#       define isPUNCT_A(c)  (((c) >= 33 && (c) <= 47)              \
+                              || ((c) >= 58 && (c) <= 64)           \
+                              || ((c) >= 91 && (c) <= 96)           \
+                              || ((c) >= 123 && (c) <= 126))
+#       define isSPACE_A(c)  ((c) == ' '                            \
+                              || (c) == '\t'                        \
+                              || (c) == '\n'                        \
+                              || (c) =='\r'                         \
+                              || (c) == '\f')
 #       define isUPPER_A(c)  ((c) <= 'Z' && (c) >= 'A')
 #       define isWORDCHAR_A(c) (isALPHA_A(c) || isDIGIT_A(c) || (c) == '_')
-#       define isXDIGIT_A(c)   (isDIGIT_A(c) || ((c) >= 'a' && (c) <= 'f') || ((c) <= 'F' && (c) >= 'A'))
+#       define isXDIGIT_A(c)   (isDIGIT_A(c)                        \
+                                || ((c) >= 'a' && (c) <= 'f')       \
+                                || ((c) <= 'F' && (c) >= 'A'))
 #   endif
 #endif  /* ASCII range definitions */
 
@@ -749,11 +759,17 @@ EXTCONST U32 PL_charclass[];
      * >= AA test to speed up ASCII-only tests at the expense of the others */
 #   define isALPHA_L1(c) (isALPHA(c) || (NATIVE_TO_UNI((U8) c) >= 0xAA \
 	&& ((NATIVE_TO_UNI((U8) c) >= 0xC0 \
-		&& NATIVE_TO_UNI((U8) c) != 0xD7 && NATIVE_TO_UNI((U8) c) != 0xF7) \
+             && NATIVE_TO_UNI((U8) c) != 0xD7 && NATIVE_TO_UNI((U8) c) != 0xF7) \
 	    || NATIVE_TO_UNI((U8) c) == 0xAA \
 	    || NATIVE_TO_UNI((U8) c) == 0xB5 \
 	    || NATIVE_TO_UNI((U8) c) == 0xBA)))
-#   define isCHARNAME_CONT(c) (isWORDCHAR_L1(c) || (c) == ' ' || (c) == '-' || (c) == '(' || (c) == ')' || (c) == ':' || NATIVE_TO_UNI((U8) c) == 0xA0)
+#   define isCHARNAME_CONT(c) (isWORDCHAR_L1(c)                         \
+                               || (c) == ' '                            \
+                               || (c) == '-'                            \
+                               || (c) == '('                            \
+                               || (c) == ')'                            \
+                               || (c) == ':'                            \
+                               || NATIVE_TO_UNI((U8) c) == 0xA0)
 #endif
 
 /* Macros for backwards compatibility and for completeness when the ASCII and
@@ -792,7 +808,7 @@ EXTCONST U32 PL_charclass[];
 #   define toLOWER(c)	tolower(c)
 #   define toUPPER(c)	toupper(c)
 #else /* Not EBCDIC: ASCII-only matching */
-#   define isALNUMC(c)  isALNUMC_A(c)	/* Mnemonic: "C's alnum" = alpha + digit */
+#   define isALNUMC(c)  isALNUMC_A(c) /* Mnemonic: "C's alnum" = alpha + digit */
 #   define isALPHA(c)   isALPHA_A(c)
 #   define isBLANK(c)   isBLANK_A(c)
 #   define isCNTRL(c)   isCNTRL_A(c)
@@ -931,18 +947,18 @@ EXTCONST U32 PL_charclass[];
                                              ? _generic_isCC(c, classnum) \
                                              : function(c))
 
-#define isWORDCHAR_uni(c)       _generic_uni(_CC_WORDCHAR, is_uni_alnum, c)
-#define isALNUM_uni(c)          isWORDCHAR_uni(c)
-#define isBLANK_uni(c)          _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
-#define isIDFIRST_uni(c)        _generic_uni(_CC_IDFIRST, _is_uni_perl_idstart, c)
-#define isALPHA_uni(c)          _generic_uni(_CC_ALPHA, is_uni_alpha, c)
+#define isWORDCHAR_uni(c)   _generic_uni(_CC_WORDCHAR, is_uni_alnum, c)
+#define isALNUM_uni(c)      isWORDCHAR_uni(c)
+#define isBLANK_uni(c)      _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
+#define isIDFIRST_uni(c)    _generic_uni(_CC_IDFIRST, _is_uni_perl_idstart, c)
+#define isALPHA_uni(c)      _generic_uni(_CC_ALPHA, is_uni_alpha, c)
 #define isALNUMC_uni(c)     _generic_uni(_CC_ALNUMC, is_uni_alnumc, c)
-#define isSPACE_uni(c)          _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
-#define isVERTWS_uni(c)         _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
-#define isDIGIT_uni(c)          _generic_uni(_CC_DIGIT, is_uni_digit, c)
-#define isUPPER_uni(c)          _generic_uni(_CC_UPPER, is_uni_upper, c)
-#define isLOWER_uni(c)          _generic_uni(_CC_LOWER, is_uni_lower, c)
-#define isASCII_uni(c)          isASCII(c)
+#define isSPACE_uni(c)      _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
+#define isVERTWS_uni(c)     _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
+#define isDIGIT_uni(c)      _generic_uni(_CC_DIGIT, is_uni_digit, c)
+#define isUPPER_uni(c)      _generic_uni(_CC_UPPER, is_uni_upper, c)
+#define isLOWER_uni(c)      _generic_uni(_CC_LOWER, is_uni_lower, c)
+#define isASCII_uni(c)      isASCII(c)
 
 /* All controls are in Latin1 */
 #define isCNTRL_uni(c)          isCNTRL_L1(c)
@@ -1138,8 +1154,8 @@ The XSUB-writer's interface to the C C<free> function.
 
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
-source, C<dest> is the destination, C<nitems> is the number of items, and C<type> is
-the type.  Can do overlapping moves.  See also C<Copy>.
+source, C<dest> is the destination, C<nitems> is the number of items, and
+C<type> is the type.  Can do overlapping moves.  See also C<Copy>.
 
 =for apidoc Am|void *|MoveD|void* src|void* dest|int nitems|type
 Like C<Move> but returns dest. Useful for encouraging compilers to tail-call
@@ -1147,8 +1163,8 @@ optimise.
 
 =for apidoc Am|void|Copy|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memcpy> function.  The C<src> is the
-source, C<dest> is the destination, C<nitems> is the number of items, and C<type> is
-the type.  May fail on overlapping copies.  See also C<Move>.
+source, C<dest> is the destination, C<nitems> is the number of items, and
+C<type> is the type.  May fail on overlapping copies.  See also C<Move>.
 
 =for apidoc Am|void *|CopyD|void* src|void* dest|int nitems|type
 
