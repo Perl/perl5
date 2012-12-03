@@ -114,22 +114,22 @@ foreach my $name (sort keys %properties) {
         # clearer synonym for ALNUM
         if ($name ne 'vertws') {
             if ($name ne 'alnum') {
-            $ret = truth eval "test_is${function}_A($i)";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches && $i < 128);
-                is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
-            }
-            $ret = truth eval "test_is${function}_L1($i)";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches && $i < 256);
-                is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
-            }
+                $ret = truth eval "test_is${function}_A($i)";
+                if ($@) {
+                    fail($@);
+                }
+                else {
+                    my $truth = truth($matches && $i < 128);
+                    is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
+                }
+                $ret = truth eval "test_is${function}_L1($i)";
+                if ($@) {
+                    fail($@);
+                }
+                else {
+                    my $truth = truth($matches && $i < 256);
+                    is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
+                }
             }
 
             next unless defined $locale;
