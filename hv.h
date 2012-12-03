@@ -143,11 +143,19 @@ struct xpvhv {
 #define PERL_HASH_FUNC_MURMUR3
 #define PERL_HASH_FUNC_SIPHASH
 #define PERL_HASH_FUNC_ONE_AT_A_TIME
+#define PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
 #define PERL_HASH_FUNC_BUZZHASH16
 */
 
-#if !(defined(PERL_HASH_FUNC_SDBM) || defined(PERL_HASH_FUNC_DJB2) || defined(PERL_HASH_FUNC_SUPERFAST) \
-        || defined(PERL_HASH_FUNC_MURMUR3) || defined(PERL_HASH_FUNC_ONE_AT_A_TIME) || defined(PERL_HASH_FUNC_BUZZHASH16))
+#if !( 0 \
+        || defined(PERL_HASH_FUNC_SDBM) \
+        || defined(PERL_HASH_FUNC_DJB2) \
+        || defined(PERL_HASH_FUNC_SUPERFAST) \
+        || defined(PERL_HASH_FUNC_MURMUR3) \
+        || defined(PERL_HASH_FUNC_ONE_AT_A_TIME) \
+        || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_OLD) \
+        || defined(PERL_HASH_FUNC_BUZZHASH16) \
+    )
 #define PERL_HASH_FUNC_MURMUR3
 #endif
 
@@ -627,10 +635,19 @@ struct xpvhv {
         (hash) = hash_PeRlHaSh;\
     } STMT_END
 
-#elif defined(PERL_HASH_FUNC_ONE_AT_A_TIME)
-/* DEFAULT/HISTORIC HASH FUNCTION */
-#define PERL_HASH_FUNC "ONE_AT_A_TIME"
+#elif defined(PERL_HASH_FUNC_ONE_AT_A_TIME) || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_OLD)
+
 #define PERL_HASH_SEED_BYTES 4
+
+#ifdef PERL_HASH_FUNC_ONE_AT_A_TIME
+/* new version, add the length to the seed so that adding characters changes the "seed" being used. */
+#define PERL_HASH_FUNC "ONE_AT_A_TIME"
+#define MIX_SEED_AND_LEN(seed,len) (seed + len)
+#else
+/* old version, just use the seed. - not recommended */
+#define PERL_HASH_FUNC "ONE_AT_A_TIME_OLD"
+#define MIX_SEED_AND_LEN(seed,len) (seed)
+#endif
 
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
  * from requirements by Colin Plumb.
@@ -639,9 +656,9 @@ struct xpvhv {
      STMT_START	{ \
         const char * const s_PeRlHaSh_tmp = (str); \
         const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-        I32 i_PeRlHaSh = len; \
-        U32 hash_PeRlHaSh = PERL_HASH_SEED_U32 ^ len; \
-	while (i_PeRlHaSh--) { \
+        const unsigned char *end_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp + (len); \
+        U32 hash_PeRlHaSh = MIX_SEED_AND_LEN(PERL_HASH_SEED_U32, len); \
+	while (s_PeRlHaSh < end_PeRlHaSh) { \
             hash_PeRlHaSh += (U8)*s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
 	    hash_PeRlHaSh ^= (hash_PeRlHaSh >> 6); \
