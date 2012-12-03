@@ -851,6 +851,7 @@ EXTCONST U32 PL_charclass[];
 #  define isGRAPH_LC(c)		NXIsGraph((unsigned int)(c))
 #  define isPRINT_LC(c)		NXIsPrint((unsigned int)(c))
 #  define isPUNCT_LC(c)		NXIsPunct((unsigned int)(c))
+#  define isXDIGIT_LC(c)        NXIsXDigit((unsigned int)(c))
 #  define toUPPER_LC(c)		NXToUpper((unsigned int)(c))
 #  define toLOWER_LC(c)		NXToLower((unsigned int)(c))
 
@@ -885,6 +886,7 @@ EXTCONST U32 PL_charclass[];
 #    define isGRAPH_LC(c)    (FITS_IN_8_BITS(c) && isgraph((unsigned char)(c)))
 #    define isPRINT_LC(c)    (FITS_IN_8_BITS(c) && isprint((unsigned char)(c)))
 #    define isPUNCT_LC(c)    (FITS_IN_8_BITS(c) && ispunct((unsigned char)(c)))
+#    define isXDIGIT_LC(c)   (FITS_IN_8_BITS(c) && isxdigit((unsigned char)(c)))
 #    define toUPPER_LC(c) (FITS_IN_8_BITS(c) ? toupper((unsigned char)(c)) : (c))
 #    define toLOWER_LC(c) (FITS_IN_8_BITS(c) ? tolower((unsigned char)(c)) : (c))
 
@@ -909,6 +911,7 @@ EXTCONST U32 PL_charclass[];
 #    define isGRAPH_LC(c)	(isascii(c) && isgraph(c))
 #    define isPRINT_LC(c)	(isascii(c) && isprint(c))
 #    define isPUNCT_LC(c)	(isascii(c) && ispunct(c))
+#    define isXDIGIT_LC(c)      (isascii(c) && isxdigit(c))
 #    define toUPPER_LC(c)	(isascii(c) ? toupper(c) : (c))
 #    define toLOWER_LC(c)	(isascii(c) ? tolower(c) : (c))
 
@@ -974,6 +977,12 @@ EXTCONST U32 PL_charclass[];
 #define isGRAPH_LC_uvchr(c)  _gnrc_is_LC_uvchr(isGRAPH_LC, is_uni_graph_lc, c)
 #define isPRINT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPRINT_LC, is_uni_print_lc, c)
 #define isPUNCT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPUNCT_LC, is_uni_punct_lc, c)
+#define isBLANK_LC_uvchr(c)  _gnrc_is_LC_uvchr(isBLANK_LC, is_HORIZWS_cp_high, c)
+#define isXDIGIT_LC_uvchr(c) _gnrc_is_LC_uvchr(isXDIGIT_LC, is_XDIGIT_cp_high, c)
+#define isASCII_LC_uvchr(c)  isASCII_LC(c)
+
+/* space is identical to posix space under locale */
+#define isPSXSPC_LC_uvchr(c) isSPACE_LC_uvchr(c)
 
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
@@ -1062,6 +1071,8 @@ EXTCONST U32 PL_charclass[];
 #define isGRAPH_LC_utf8(p)   _generic_LC_utf8(isGRAPH_LC, is_utf8_graph, p)
 #define isPRINT_LC_utf8(p)   _generic_LC_utf8(isPRINT_LC, is_utf8_print, p)
 #define isPUNCT_LC_utf8(p)   _generic_LC_utf8(isPUNCT_LC, is_utf8_punct, p)
+#define isXDIGIT_LC_utf8(p)  _generic_LC_utf8(isXDIGIT_LC, is_XDIGIT_high, p)
+#define isASCII_LC_utf8(p)   isASCII_LC(*p)
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 
