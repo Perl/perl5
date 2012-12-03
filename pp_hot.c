@@ -1400,10 +1400,13 @@ PP(pp_match)
 	    }
 	}
     }
+#ifdef PERL_SAWAMPERSAND
     if (       RX_NPARENS(rx)
             || PL_sawampersand
             || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
-    ) {
+    )
+#endif
+    {
 	r_flags |= (REXEC_COPY_STR|REXEC_COPY_SKIP_PRE);
         /* in @a =~ /(.)/g, we iterate multiple times, but copy the buffer
          * only on the first iteration. Therefore we need to copy $' as well
@@ -1431,11 +1434,13 @@ PP(pp_match)
 
 	if (!s)
 	    goto nope;
+#ifdef PERL_SAWAMPERSAND
 	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !PL_sawampersand
 	     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
+#endif
     }
     if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
 		     minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
@@ -1537,7 +1542,9 @@ PP(pp_match)
 	RETPUSHYES;
     }
 
+#ifdef PERL_SAWAMPERSAND
 yup:					/* Confirmed by INTUIT */
+#endif
     if (rxtainted)
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
@@ -1569,7 +1576,10 @@ yup:					/* Confirmed by INTUIT */
 	RX_SUBLEN(rx) = strend - truebase;
 	goto gotcha;
     }
-    if (PL_sawampersand || RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) {
+#ifdef PERL_SAWAMPERSAND
+    if (PL_sawampersand || RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
+#endif
+    {
 	I32 off;
 #ifdef PERL_ANY_COW
 	if (SvCANCOW(TARG)) {
@@ -1599,10 +1609,12 @@ yup:					/* Confirmed by INTUIT */
 	off = RX_OFFS(rx)[0].start = s - t;
 	RX_OFFS(rx)[0].end = off + RX_MINLENRET(rx);
     }
+#ifdef PERL_SAWAMPERSAND
     else {			/* startp/endp are used by @- @+. */
 	RX_OFFS(rx)[0].start = s - truebase;
 	RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
     }
+#endif
     /* match via INTUIT shouldn't have any captures. Let @-, @+, $^N know */
     assert(!RX_NPARENS(rx));
     RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
@@ -2222,12 +2234,16 @@ PP(pp_subst)
 	rx = PM_GETRE(pm);
     }
 
+#ifdef PERL_SAWAMPERSAND
     r_flags = (    RX_NPARENS(rx)
                 || PL_sawampersand
                 || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
               )
           ? REXEC_COPY_STR
           : 0;
+#else
+    r_flags = REXEC_COPY_STR;
+#endif
 
     orig = m = s;
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
