@@ -1716,4 +1716,7 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /^\S{11}/a	\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}	n	-	-
 /^\W{11}/a	\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}\x{10FFFF}	n	-	-
 
+# [ perl #114272]
+\Vn	\xFFn/	yT	$&	\xFFn
+
 # vim: softtabstop=0 noexpandtab
