@@ -3871,8 +3871,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
 		{
+		    /* Fatal warnings may leak the regexp without this: */
+		    SAVEFREESV(RExC_rx_sv);
 		    ckWARNreg(RExC_parse,
 			      "Quantifier unexpected on zero-length expression");
+		    ReREFCNT_inc(RExC_rx_sv);
 		}
 
 		min += minnext * mincount;
@@ -4870,13 +4873,18 @@ Perl_reginitcolors(pTHX)
 
 
 #ifdef TRIE_STUDY_OPT
-#define CHECK_RESTUDY_GOTO                                  \
+#define CHECK_RESTUDY_GOTO_butfirst(dOsomething)            \
+    STMT_START {                                            \
         if (                                                \
               (data.flags & SCF_TRIE_RESTUDY)               \
               && ! restudied++                              \
-        )     goto reStudy
+        ) {                                                 \
+            dOsomething;                                    \
+            goto reStudy;                                   \
+        }                                                   \
+    } STMT_END
 #else
-#define CHECK_RESTUDY_GOTO
+#define CHECK_RESTUDY_GOTO_butfirst
 #endif        
 
 /*
@@ -6042,11 +6050,6 @@ reStudy:
             RExC_seen |= REG_TOP_LEVEL_BRANCHES;
         else
             RExC_seen &= ~REG_TOP_LEVEL_BRANCHES;
-        if (data.last_found) {
-            SvREFCNT_dec(data.longest_fixed);
-	    SvREFCNT_dec(data.longest_float);
-	    SvREFCNT_dec(data.last_found);
-	}
 	StructCopy(&zero_scan_data, &data, scan_data_t);
     }
 #else
@@ -6212,6 +6215,10 @@ reStudy:
 	data.longest_float = newSVpvs("");
 	data.last_found = newSVpvs("");
 	data.longest = &(data.longest_fixed);
+	ENTER_with_name("study_chunk");
+	SAVEFREESV(data.longest_fixed);
+	SAVEFREESV(data.longest_float);
+	SAVEFREESV(data.last_found);
 	first = scan;
 	if (!ri->regstclass) {
 	    cl_init(pRExC_state, &ch_class);
@@ -6226,7 +6233,7 @@ reStudy:
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag,0);
 
 
-        CHECK_RESTUDY_GOTO;
+        CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
 
 
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
@@ -6236,7 +6243,6 @@ reStudy:
 	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
 	    r->extflags |= RXf_CHECK_ALL;
 	scan_commit(pRExC_state, &data,&minlen,0);
-	SvREFCNT_dec(data.last_found);
 
 	longest_float_length = CHR_SVLEN(data.longest_float);
 
@@ -6259,10 +6265,10 @@ reStudy:
 	    r->float_max_offset = data.offset_float_max;
 	    if (data.offset_float_max < I32_MAX) /* Don't offset infinity */
 	        r->float_max_offset -= data.lookbehind_float;
+	    SvREFCNT_inc_simple_void_NN(data.longest_float);
 	}
 	else {
 	    r->float_substr = r->float_utf8 = NULL;
-	    SvREFCNT_dec(data.longest_float);
 	    longest_float_length = 0;
 	}
 
@@ -6281,12 +6287,13 @@ reStudy:
                                 data.flags & SF_FIX_BEFORE_MEOL))
         {
 	    r->anchored_offset = data.offset_fixed - data.lookbehind_fixed;
+	    SvREFCNT_inc_simple_void_NN(data.longest_fixed);
 	}
 	else {
 	    r->anchored_substr = r->anchored_utf8 = NULL;
-	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
+	LEAVE_with_name("study_chunk");
 
 	if (ri->regstclass
 	    && (OP(ri->regstclass) == REG_ANY || OP(ri->regstclass) == SANY))
@@ -6361,7 +6368,7 @@ reStudy:
 	minlen = study_chunk(pRExC_state, &scan, &minlen, &fake, scan + RExC_size,
 	    &data, -1, NULL, NULL, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS,0);
         
-        CHECK_RESTUDY_GOTO;
+        CHECK_RESTUDY_GOTO_butfirst(NOOP);
 
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = NULL;
