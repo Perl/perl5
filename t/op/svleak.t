@@ -99,8 +99,8 @@ eleak(2, 0, "$f 'closure';
              sub foo { my \$x; format=\n\@\n\$x\n.\n} write; ",
      'format closing over unavailable var with fatal warnings');
 eleak(2, 0, "$all /(?{})?/ ", '(?{})? with fatal warnings');
-$::TODO = 'still leaks';
 eleak(2, 0, "$all /(?{})+/ ", '(?{})+ with fatal warnings');
+$::TODO = 'still leaks';
 eleak(2, 0, "$all /[\\i]/ ", 'invalid charclass escape with fatal warns');
 eleak(2, 0, "$all /[:foo:]/ ", '/[:foo:]/ with fatal warnings');
 eleak(2, 0, "$all /[a-\\d]/ ", '[a-\d] char class with fatal warnings');

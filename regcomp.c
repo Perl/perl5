@@ -9653,10 +9653,12 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     }
   nest_check:
     if (!SIZE_ONLY && !(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3) {
+	SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
 	ckWARN3reg(RExC_parse,
 		   "%.*s matches null string many times",
 		   (int)(RExC_parse >= origparse ? RExC_parse - origparse : 0),
 		   origparse);
+	ReREFCNT_inc(RExC_rx_sv);
     }
 
     if (RExC_parse < RExC_end && *RExC_parse == '?') {
