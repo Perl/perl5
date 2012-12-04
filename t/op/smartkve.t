@@ -12,7 +12,8 @@ use vars qw($data $array $values $hash $errpat);
 
 plan 'no_plan';
 
-sub j { join(":",@_) }
+sub j { join(":", @_) }
+sub J { join(":", sort @_) }
 
 # NOTE
 #
@@ -118,16 +119,16 @@ is(keys $obj->array     ,3, 'Scalar: keys $obj->array');
 
 # Keys -- list
 
-$h_expect = j(keys %$hash);
+$h_expect = J(keys %$hash);
 $a_expect = j(keys @$array);
 
-is(j(keys $hash)                ,$h_expect, 'List: keys $hash');
-is(j(keys $data->{hash})        ,$h_expect, 'List: keys $data->{hash}');
-is(j(keys CONST_HASH)           ,$h_expect, 'List: keys CONST_HASH');
-is(j(keys CONST_HASH())         ,$h_expect, 'List: keys CONST_HASH()');
-is(j(keys hash_sub)             ,$h_expect, 'List: keys hash_sub');
-is(j(keys hash_sub())           ,$h_expect, 'List: keys hash_sub()');
-is(j(keys $obj->hash)           ,$h_expect, 'List: keys $obj->hash');
+is(J(keys $hash)                ,$h_expect, 'List: keys $hash');
+is(J(keys $data->{hash})        ,$h_expect, 'List: keys $data->{hash}');
+is(J(keys CONST_HASH)           ,$h_expect, 'List: keys CONST_HASH');
+is(J(keys CONST_HASH())         ,$h_expect, 'List: keys CONST_HASH()');
+is(J(keys hash_sub)             ,$h_expect, 'List: keys hash_sub');
+is(J(keys hash_sub())           ,$h_expect, 'List: keys hash_sub()');
+is(J(keys $obj->hash)           ,$h_expect, 'List: keys $obj->hash');
 is(j(keys $array)               ,$a_expect, 'List: keys $array');
 is(j(keys $data->{array})       ,$a_expect, 'List: keys $data->{array}');
 is(j(keys CONST_ARRAY)          ,$a_expect, 'List: keys CONST_ARRAY');
@@ -221,16 +222,16 @@ is(values $obj->array     ,3, 'Scalar: values $obj->array');
 
 # Values -- list
 
-$h_expect = j(values %$hash);
+$h_expect = J(values %$hash);
 $a_expect = j(values @$array);
 
-is(j(values $hash)                ,$h_expect, 'List: values $hash');
-is(j(values $data->{hash})        ,$h_expect, 'List: values $data->{hash}');
-is(j(values CONST_HASH)           ,$h_expect, 'List: values CONST_HASH');
-is(j(values CONST_HASH())         ,$h_expect, 'List: values CONST_HASH()');
-is(j(values hash_sub)             ,$h_expect, 'List: values hash_sub');
-is(j(values hash_sub())           ,$h_expect, 'List: values hash_sub()');
-is(j(values $obj->hash)           ,$h_expect, 'List: values $obj->hash');
+is(J(values $hash)                ,$h_expect, 'List: values $hash');
+is(J(values $data->{hash})        ,$h_expect, 'List: values $data->{hash}');
+is(J(values CONST_HASH)           ,$h_expect, 'List: values CONST_HASH');
+is(J(values CONST_HASH())         ,$h_expect, 'List: values CONST_HASH()');
+is(J(values hash_sub)             ,$h_expect, 'List: values hash_sub');
+is(J(values hash_sub())           ,$h_expect, 'List: values hash_sub()');
+is(J(values $obj->hash)           ,$h_expect, 'List: values $obj->hash');
 is(j(values $array)               ,$a_expect, 'List: values $array');
 is(j(values $data->{array})       ,$a_expect, 'List: values $data->{array}');
 is(j(values CONST_ARRAY)          ,$a_expect, 'List: values CONST_ARRAY');
