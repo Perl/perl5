@@ -2,7 +2,7 @@ package Locale::Codes::Language_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Aug 28 13:59:56 EDT 2012
+#    Generated on: Tue Dec  4 14:05:24 EST 2012
 
 =pod
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.23';
+$VERSION='3.24';
 
 $Locale::Codes::Retired{'language'}{'alpha-2'}{'code'} = {
    q(in) => q(Indonesian),
@@ -195,6 +195,7 @@ $Locale::Codes::Retired{'language'}{'alpha-3'}{'name'} = {
    q(kemezung) => [ q(dmo), q(Kemezung) ],
    q(kenuzi-dongola) => [ q(kzh), q(Kenuzi-Dongola) ],
    q(khumi awa chin) => [ q(cka), q(Khumi Awa Chin) ],
+   q(kol) => [ q(ekl), q(Kol) ],
    q(kolum so dogon) => [ q(dkl), q(Kolum So Dogon) ],
    q(konkani) => [ q(kok), q(Konkani) ],
    q(kumak) => [ q(nee), q(Kumak) ],

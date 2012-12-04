@@ -72,8 +72,9 @@ National Geospatial-Intelligence Agency.
 
 =item B<dom, LOCALE_CODE_DOM>
 
-The IANA is responsible for assigning two-letter (uppercase) top-level
-domain names to each country.
+The IANA is responsible for delegating management of the top level country
+domains.  The country domains are the two-letter (lowercase) codes from ISO 3166
+with a few other additions.
 
 =back
 
@@ -161,6 +162,8 @@ Unfortunately, they do not make the actual ISO available for free,
 so I cannot check the alpha-3 and numerical codes here.
 
 =item B<http://www.iso.org/iso/list-en1-semic-3.txt>
+
+=item B<http://www.iso.org/iso/home/standards/country_codes/iso-3166-1_decoding_table.htm>
 
 The source of ISO 3166-1 two-letter codes used by this
 module.

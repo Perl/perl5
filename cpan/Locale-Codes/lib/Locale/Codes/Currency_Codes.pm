@@ -2,7 +2,7 @@ package Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Aug 28 13:57:46 EDT 2012
+#    Generated on: Tue Dec  4 14:03:16 EST 2012
 
 =pod
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.23';
+$VERSION='3.24';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0180';
 
@@ -542,7 +542,7 @@ $Locale::Codes::Data{'currency'}{'id2names'} = {
       q(Vatu),
       ],
    q(0167) => [
-      q(Bolivar Fuerte),
+      q(Bolivar),
       ],
    q(0168) => [
       q(Dong),
@@ -647,7 +647,7 @@ $Locale::Codes::Data{'currency'}{'alias2id'} = {
       q(0020),
       q(0),
       ],
-   q(bolivar fuerte) => [
+   q(bolivar) => [
       q(0167),
       q(0),
       ],

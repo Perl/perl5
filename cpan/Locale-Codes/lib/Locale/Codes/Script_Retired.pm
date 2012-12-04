@@ -2,7 +2,7 @@ package Locale::Codes::Script_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Aug 28 13:59:56 EDT 2012
+#    Generated on: Tue Dec  4 14:05:24 EST 2012
 
 =pod
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.23';
+$VERSION='3.24';
 
 $Locale::Codes::Retired{'script'}{'alpha'}{'code'} = {
 };
@@ -83,6 +83,7 @@ $Locale::Codes::Retired{'script'}{'alpha'}{'name'} = {
 };
 
 $Locale::Codes::Retired{'script'}{'num'}{'name'} = {
+   q(old hungarian) => [ q(176), q(Old Hungarian) ],
    q(tiruta) => [ q(326), q(Tiruta) ],
 };
 

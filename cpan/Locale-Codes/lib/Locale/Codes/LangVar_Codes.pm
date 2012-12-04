@@ -2,7 +2,7 @@ package Locale::Codes::LangVar_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Aug 28 13:58:24 EDT 2012
+#    Generated on: Tue Dec  4 14:04:12 EST 2012
 
 =pod
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.23';
+$VERSION='3.24';
 
 $Locale::Codes::Data{'langvar'}{'id'} = '0061';
 

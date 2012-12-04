@@ -31,7 +31,7 @@ our($VERSION,%Data,%Retired);
 # $Retired{ TYPE }{ CODESET }{ code }{ CODE } = NAME
 #                            { name }{ NAME } = [CODE,NAME]  (the key is lowercase)
 
-$VERSION='3.23';
+$VERSION='3.24';
 
 #=======================================================================
 #
@@ -486,7 +486,7 @@ sub _delete_alias {
       return 0;
    }
 
-   my $n = $#{ $Data{$type}{'id2names'}{$id} };
+   my $n = $#{ $Data{$type}{'id2names'}{$id} } + 1;
    if ($n == 1) {
       carp "delete_${type}_alias(): only one name defined (use _delete_${type} instead)\n"
         unless ($nowarn);

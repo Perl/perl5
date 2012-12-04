@@ -2,7 +2,7 @@ package Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Aug 28 13:59:56 EDT 2012
+#    Generated on: Tue Dec  4 14:05:24 EST 2012
 
 =pod
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.23';
+$VERSION='3.24';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -100,6 +100,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(belgian franc) => [ q(BEF), q(Belgian Franc) ],
    q(bermudian dollar (customarily known as bermuda dollar)) => [ q(BMD), q(Bermudian Dollar (customarily known as Bermuda Dollar)) ],
    q(bolivar) => [ q(VEB), q(Bolivar) ],
+   q(bolivar fuerte) => [ q(VEF), q(Bolivar Fuerte) ],
    q(bond markets units european composite unit (eurco)) => [ q(XBA), q(Bond Markets Units European Composite Unit (EURCO)) ],
    q(candian dollar) => [ q(CAD), q(Candian Dollar) ],
    q(cedi) => [ q(GHS), q(Cedi) ],
@@ -163,6 +164,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
 };
 
 $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
+   q(bolivar fuerte) => [ q(937), q(Bolivar Fuerte) ],
    q(cedi) => [ q(936), q(Cedi) ],
    q(leu) => [ q(946), q(Leu) ],
    q(metical) => [ q(943), q(Metical) ],

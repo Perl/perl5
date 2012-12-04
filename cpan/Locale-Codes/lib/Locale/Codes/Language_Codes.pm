@@ -2,7 +2,7 @@ package Locale::Codes::Language_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Aug 28 13:56:59 EDT 2012
+#    Generated on: Tue Dec  4 13:56:30 EST 2012
 
 =pod
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.23';
+$VERSION='3.24';
 
 $Locale::Codes::Data{'language'}{'id'} = '7886';
 
@@ -6890,6 +6890,7 @@ $Locale::Codes::Data{'language'}{'id2names'} = {
       q(Standard Estonian),
       ],
    q(2230) => [
+      q(Kol (Bangladesh)),
       q(Kol),
       ],
    q(2231) => [
@@ -37478,6 +37479,10 @@ $Locale::Codes::Data{'language'}{'alias2id'} = {
       q(0),
       ],
    q(kol) => [
+      q(2230),
+      q(0),
+      ],
+   q(kol (bangladesh)) => [
       q(2230),
       q(0),
       ],
