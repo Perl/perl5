@@ -156,7 +156,11 @@ struct xpvhv {
         || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_OLD) \
         || defined(PERL_HASH_FUNC_BUZZHASH16) \
     )
-#define PERL_HASH_FUNC_MURMUR3
+#ifdef U64
+#define PERL_HASH_FUNC_SIPHASH
+#else
+#define PERL_HASH_FUNC_ONE_AT_A_TIME
+#endif
 #endif
 
 #if defined(PERL_HASH_FUNC_BUZZHASH16)
