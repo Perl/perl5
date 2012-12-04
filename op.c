@@ -5596,7 +5596,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			    = MUTABLE_GV(cSVOPx(tmpop)->op_sv);
 			cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
 #endif
-			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
 			tmpop->op_sibling = NULL;	/* don't free split */

@@ -5353,7 +5353,7 @@ PP(pp_split)
 #endif
     else
 	ary = NULL;
-    if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
+    if (ary) {
 	realarray = 1;
 	PUTBACK;
 	av_extend(ary,0);
