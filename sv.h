@@ -286,6 +286,11 @@ and faster.
 =for apidoc Am|void|SvREFCNT_dec|SV* sv
 Decrements the reference count of the given SV.
 
+=for apidoc Am|void|SvREFCNT_dec_NN|SV* sv
+Same as SvREFCNT_dec, but can only be used if you know I<sv>
+is not NULL.  Since we don't have to check the NULLness, it's faster
+and smaller.
+
 =for apidoc Am|svtype|SvTYPE|SV* sv
 Returns the type of the SV.  See C<svtype>.
 
@@ -312,6 +317,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 
 #define SvREFCNT_dec(sv)	S_SvREFCNT_dec(aTHX_ MUTABLE_SV(sv))
+#define SvREFCNT_dec_NN(sv)	S_SvREFCNT_dec_NN(aTHX_ MUTABLE_SV(sv))
 
 #define SVTYPEMASK	0xff
 #define SvTYPE(sv)	((svtype)((sv)->sv_flags & SVTYPEMASK))

@@ -166,7 +166,7 @@ Perl_free_tmps(pTHX)
 #endif
 	if (sv && sv != &PL_sv_undef) {
 	    SvTEMP_off(sv);
-	    SvREFCNT_dec(sv);		/* note, can modify tmps_ix!!! */
+	    SvREFCNT_dec_NN(sv);		/* note, can modify tmps_ix!!! */
 	}
     }
 }
@@ -837,7 +837,7 @@ Perl_leave_scope(pTHX_ I32 base)
                 mg_set(ARG0_SV);
                 PL_localizing = 0;
             }
-	    SvREFCNT_dec(ARG0_SV);
+	    SvREFCNT_dec_NN(ARG0_SV);
 	    SvREFCNT_dec(refsv);
 	    break;
         }
@@ -895,7 +895,7 @@ Perl_leave_scope(pTHX_ I32 base)
                 mg_set(ARG0_SV);
                 PL_localizing = 0;
             }
-	    SvREFCNT_dec(ARG1_GV);
+	    SvREFCNT_dec_NN(ARG1_GV);
 	    break;
 	case SAVEt_HV:				/* hash reference */
 	    SvREFCNT_dec(GvHV(ARG1_GV));
@@ -905,7 +905,7 @@ Perl_leave_scope(pTHX_ I32 base)
                 mg_set(ARG0_SV);
                 PL_localizing = 0;
             }
-	    SvREFCNT_dec(ARG1_GV);
+	    SvREFCNT_dec_NN(ARG1_GV);
 	    break;
 	case SAVEt_INT_SMALL:
 	    *(int*)ARG0_PTR = (int)(uv >> SAVE_TIGHT_SHIFT);
@@ -964,7 +964,7 @@ Perl_leave_scope(pTHX_ I32 base)
                     /* putting a method back into circulation ("local")*/	
                     gv_method_changed(ARG1_GV);
 	    }
-	    SvREFCNT_dec(ARG1_GV);
+	    SvREFCNT_dec_NN(ARG1_GV);
 	    break;
         }
 	case SAVEt_FREESV:
@@ -1073,7 +1073,7 @@ Perl_leave_scope(pTHX_ I32 base)
                     }
                     default:	*svp = newSV(0);		break;
                     }
-                    SvREFCNT_dec(sv);	/* Cast current value to the winds. */
+                    SvREFCNT_dec_NN(sv); /* Cast current value to the winds. */
                     /* preserve pad nature, but also mark as not live
                      * for any closure capturing */
                     SvFLAGS(*svp) |= (SVs_PADMY|SVs_PADSTALE);
