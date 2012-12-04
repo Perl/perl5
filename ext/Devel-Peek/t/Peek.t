@@ -250,6 +250,7 @@ do_test('reference to hash',
     KEYS = 1
     FILL = 1
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = 0x0
     Elt "123" HASH = $ADDR' . $c_pattern,
@@ -401,6 +402,7 @@ do_test('reference to blessed hash',
     KEYS = 0
     FILL = 0
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = 0x0', '',
 	$] > 5.009
@@ -477,6 +479,7 @@ do_test('reference to hash containing Unicode',
     KEYS = 1
     FILL = 1
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = $ADDR
     Elt "\\\214\\\101" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
@@ -508,6 +511,7 @@ do_test('reference to hash containing Unicode',
     KEYS = 1
     FILL = 1
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = $ADDR
     Elt "\\\304\\\200" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
@@ -724,6 +728,7 @@ do_test('blessing to a class with embedded NUL characters',
     KEYS = 0
     FILL = 0
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = 0x0', '',
 	$] > 5.009
@@ -747,6 +752,7 @@ do_test('ENAME on a stash',
     KEYS = 0
     FILL = 0
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = 0x0
     NAME = "RWOM"
@@ -770,6 +776,7 @@ do_test('ENAMEs on a stash',
     KEYS = 0
     FILL = 0
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = 0x0
     NAME = "RWOM"
@@ -795,6 +802,7 @@ do_test('ENAMEs on a stash with no NAME',
     KEYS = 0
     FILL = 0
     MAX = 7
+    ROT = [0-9]+
     RITER = -1
     EITER = 0x0
     NAMECOUNT = -3				# $] > 5.012
