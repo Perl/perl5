@@ -101,6 +101,7 @@ struct xpvhv {
     union _xmgu	xmg_u;
     STRLEN      xhv_keys;       /* total keys, including placeholders */
     STRLEN      xhv_max;        /* subscript of last element of xhv_array */
+    U8          xhv_rot;        /* rotation of hash in bucket lookup */
 };
 
 /* hash a key */
@@ -786,6 +787,7 @@ C<SV*>.
 #define HvARRAY(hv)	((hv)->sv_u.svu_hash)
 #define HvFILL(hv)	Perl_hv_fill(aTHX_ (const HV *)(hv))
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
+#define HvROT(hv)	((XPVHV*)  SvANY(hv))->xhv_rot
 /* This quite intentionally does no flag checking first. That's your
    responsibility.  */
 #define HvAUX(hv)	((struct xpvhv_aux*)&(HvARRAY(hv)[HvMAX(hv)+1]))
@@ -799,6 +801,20 @@ C<SV*>.
 #define HvNAMELEN(hv)   HvNAMELEN_get(hv)
 #define HvENAME(hv)	HvENAME_get(hv)
 #define HvENAMELEN(hv)  HvENAMELEN_get(hv)
+
+/* Find best way to ROTL32 */
+#if defined(_MSC_VER)
+  #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
+  #define HASH_ROTL32(x,r)  _rotl((x),(r))
+#else
+  /* gcc recognises this code and generates a rotate instruction for CPUs with one */
+  #define HASH_ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+#endif
+
+#define HASH_BUCKET_INDEX(hash, size, hv) (HASH_ROTL32(hash,HvROT(hv)) & (I32)(size))
+#define HvBUCKET(hv, hash) HvARRAY(hv)[HASH_BUCKET_INDEX(hash,HvMAX(hv),hv)]
+#define HvBUCKET_IDX(hv, hash) (HASH_BUCKET_INDEX(hash,HvMAX(hv),hv))
+
 
 /* Checking that hv is a valid package stash is the
    caller's responsibility */

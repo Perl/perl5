@@ -1309,6 +1309,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	    HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
 	    HvMAX(sv) = 7; /* (start with 8 buckets) */
+            HvROT(sv) = ((UV)sv >> 3) & 31;
 	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.
@@ -12239,6 +12240,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 			+ (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0),
 			char);
 		    HvARRAY(dstr) = (HE**)darray;
+                    HvROT(dstr)= HvROT(sstr);
 		    while (i <= sxhv->xhv_max) {
 			const HE * const source = HvARRAY(sstr)[i];
 			HvARRAY(dstr)[i] = source

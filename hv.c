@@ -627,7 +627,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else
 #endif
     {
-	entry = (HvARRAY(hv))[hash & (I32) HvMAX(hv)];
+	entry = HvBUCKET(hv, hash);
     }
     for (; entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
@@ -768,7 +768,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HvARRAY(hv) = (HE**)array;
     }
 
-    oentry = &(HvARRAY(hv))[hash & (I32) xhv->xhv_max];
+    assert(HvMAX(hv)==xhv->xhv_max);
+    oentry = &HvBUCKET(hv,hash);
 
     entry = new_HE();
     /* share_hek_flags will do the free for us.  This might be considered
@@ -961,7 +962,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     masked_flags = (k_flags & HVhek_MASK);
 
-    oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
+    oentry = &HvBUCKET(hv,hash);
     entry = *oentry;
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	SV *sv;
@@ -1148,7 +1149,7 @@ S_hsplit(pTHX_ HV *hv)
 	    continue;
 	bep = aep+oldsize;
 	do {
-	    if ((HeHASH(entry) & newsize) != (U32)i) {
+	    if (HASH_BUCKET_INDEX(HeHASH(entry), newsize, hv) != (U32)i) {
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = *bep;
 		*bep = entry;
@@ -1233,7 +1234,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	if (!entry)				/* non-existent */
 	    continue;
 	do {
-	    I32 j = (HeHASH(entry) & newsize);
+	    I32 j = HASH_BUCKET_INDEX(HeHASH(entry),newsize,hv);
 
 	    if (j != i) {
 		j -= i;
@@ -1260,6 +1261,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
     hv_max = HvMAX(ohv);
 
     if (!SvMAGICAL((const SV *)ohv)) {
+        /* Implied HASH_BUCKET_INDEX() dependency here */
 	/* It's an ordinary hash, so copy it fast. AMS 20010804 */
 	STRLEN i;
 	const bool shared = !!HvSHAREKEYS(ohv);
@@ -1267,6 +1269,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	char *a;
 	Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(hv_max+1), char);
 	ents = (HE**)a;
+        HvROT(hv)= HvROT(ohv);
 
 	/* In each bucket... */
 	for (i = 0; i <= hv_max; i++) {
@@ -2551,7 +2554,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
-    oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
+    oentry = &HvBUCKET(PL_strtab, hash);
     if (he) {
 	const HE *const he_he = &(he->shared_he_he);
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
@@ -2633,7 +2636,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     dVAR;
     HE *entry;
     const int flags_masked = flags & HVhek_MASK;
-    const U32 hindex = hash & (I32) HvMAX(PL_strtab);
+    const U32 hindex = HvBUCKET_IDX(PL_strtab, hash);
     XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
     PERL_ARGS_ASSERT_SHARE_HEK_FLAGS;
@@ -2814,7 +2817,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 {
     dVAR;
     HV *hv;
-    U32 placeholders, max;
+    U32 placeholders;
 
     if (flags)
 	Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %"UVxf,
@@ -2824,10 +2827,9 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
        and call ksplit.  But for now we'll make a potentially inefficient
        hash with only 8 entries in its array.  */
     hv = newHV();
-    max = HvMAX(hv);
     if (!HvARRAY(hv)) {
 	char *array;
-	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(max + 1), char);
+	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1), char);
 	HvARRAY(hv) = (HE**)array;
     }
 
@@ -2838,7 +2840,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain, U32 flags)
 #else
 	U32 hash = HEK_HASH(chain->refcounted_he_hek);
 #endif
-	HE **oentry = &((HvARRAY(hv))[hash & max]);
+	HE **oentry = &(HvBUCKET(hv,hash)); /* XXX: why is this one different? */
 	HE *entry = *oentry;
 	SV *value;
 
