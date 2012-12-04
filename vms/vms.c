@@ -8582,7 +8582,8 @@ static char *int_tovmsspec
 	  *(cp1++) = '?';
 	cp2++;
     case ' ':
-	*(cp1)++ = '^';
+	if (cp2 > path && *(cp2-1) != '^') /* not previously escaped */
+	    *(cp1)++ = '^';
 	*(cp1)++ = '_';
 	cp2++;
 	break;
@@ -8666,7 +8667,8 @@ static char *int_tovmsspec
     case '|':
     case '<':
     case '>':
-	*(cp1++) = '^';
+	if (cp2 > path && *(cp2-1) != '^') /* not previously escaped */
+	    *(cp1++) = '^';
 	*(cp1++) = *(cp2++);
 	break;
     case ';':
