@@ -8,7 +8,6 @@
 */
 
 #define PERL_IN_DQUOTE_STATIC_C
-#include "proto.h"
 #include "embed.h"
 
 /*

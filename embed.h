@@ -883,12 +883,6 @@
 #  if defined(PERL_ANY_COW)
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #  endif
-#  if defined(PERL_IN_DQUOTE_STATIC_C)
-#define grok_bslash_c(a,b,c)	S_grok_bslash_c(aTHX_ a,b,c)
-#define grok_bslash_o(a,b,c,d,e)	S_grok_bslash_o(aTHX_ a,b,c,d,e)
-#define grok_bslash_x(a,b,c,d,e)	S_grok_bslash_x(aTHX_ a,b,c,d,e)
-#define regcurly(a)		S_regcurly(aTHX_ a)
-#  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
@@ -951,6 +945,12 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
 #define _core_swash_init(a,b,c,d,e,f,g)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+#define grok_bslash_c(a,b,c)	S_grok_bslash_c(aTHX_ a,b,c)
+#define grok_bslash_o(a,b,c,d,e)	S_grok_bslash_o(aTHX_ a,b,c,d,e)
+#define grok_bslash_x(a,b,c,d,e)	S_grok_bslash_x(aTHX_ a,b,c,d,e)
+#define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)

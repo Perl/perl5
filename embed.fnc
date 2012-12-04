@@ -715,7 +715,7 @@ Ap	|void	|vload_module|U32 flags|NN SV* name|NULLOK SV* ver|NULLOK va_list* args
 p	|OP*	|localize	|NN OP *o|I32 lex
 ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
-#ifdef PERL_IN_DQUOTE_STATIC_C
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 EMsR	|char	|grok_bslash_c	|const char source|const bool utf8|const bool output_warning
 EMsR	|bool	|grok_bslash_o	|NN const char* s|NN UV* uv|NN STRLEN* len|NN const char** error_msg|const bool output_warning
 EMiR	|bool	|grok_bslash_x	|NN const char* s|NN UV* uv|NN STRLEN* len|NN const char** error_msg|const bool output_warning
@@ -1072,7 +1072,7 @@ Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
-#if defined(PERL_IN_DQUOTE_STATIC_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 EiPR	|I32	|regcurly	|NN const char *s
 #endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \

@@ -26,7 +26,6 @@
 #define PERL_IN_DUMP_C
 #include "perl.h"
 #include "regcomp.h"
-#include "proto.h"
 
 
 static const char* const svtypenames[SVt_LAST] = {

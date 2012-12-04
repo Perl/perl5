@@ -126,8 +126,11 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 /* ------------------------------- handy.h ------------------------------- */
 
 /* saves machine code for a common noreturn idiom typically used in Newx*() */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
 static void
 S_croak_memory_wrap(void)
 {
     Perl_croak_nocontext("%s",PL_memory_wrap);
 }
+#pragma clang diagnostic pop
