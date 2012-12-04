@@ -11576,16 +11576,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    ckWARN3reg(s+2,
 		       "POSIX syntax [%c %c] belongs inside character classes",
 		       c, c);
-
-	    /* [[=foo=]] and [[.foo.]] are still future. */
-	    if (POSIXCC_NOTYET(c)) {
-		/* adjust RExC_parse so the error shows after
-		   the class closes */
-		while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse++) != ']')
-		    NOOP;
-		SvREFCNT_dec(listsv);
-		vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
-	    }
 	}
     }
 
