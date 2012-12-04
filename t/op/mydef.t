@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-no warnings 'misc';
+no warnings 'misc', 'deprecated';
 
 $_ = 'global';
 is($_, 'global', '$_ initial value');

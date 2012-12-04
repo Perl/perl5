@@ -124,6 +124,7 @@ $Perl -le "print 'ok'"
 END
 
 {
+    no warnings 'deprecated';
     my $_ = qq($Perl -le "print 'ok'");
     is( readpipe, "ok\n", 'readpipe default argument' );
 }

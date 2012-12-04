@@ -48,6 +48,7 @@ ok(!-d);
 $_ = 'lfrulb';
 
 {
+    no warnings 'deprecated';
     my $_ = 'blurfl';
     ok(mkdir);
     ok(-d);

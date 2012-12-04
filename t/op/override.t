@@ -63,6 +63,7 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 }
 
 {
+    no warnings 'deprecated';
     my $_ = 'bar.pm';
     require;
     is( $r, 'bar.pm' );

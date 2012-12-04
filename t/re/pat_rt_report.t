@@ -915,6 +915,7 @@ sub run_tests {
     {
          my $message = '$REGMARK in replacement; Bug 49190';
          our $REGMARK;
+         no warnings 'deprecated';
          my $_ = "A";
          ok(s/(*:B)A/$REGMARK/, $message);
          is($_, "B", $message);

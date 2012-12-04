@@ -820,6 +820,7 @@ undef $g1;
 $m1 = '$g1';
 $foo =~ s//$m1/ee;
 EXPECT
+Use of my $_ is deprecated at - line 16.
 Use of uninitialized value $_ in pattern match (m//) at - line 5.
 Use of uninitialized value $m1 in regexp compilation at - line 6.
 Use of uninitialized value $_ in pattern match (m//) at - line 6.

@@ -155,7 +155,8 @@ actually causes more problems than it solves.  If you call a function that
 expects to be passed information via C<$_>, it may or may not work,
 depending on how the function is written, there not being any easy way to
 solve this.  Just avoid lexical C<$_>, unless you are feeling particularly
-masochistic.
+masochistic.  For this reason lexical C<$_> is deprecated and will produce
+a warning unless warnings have been disabled.
 
 Mnemonic: underline is understood in certain operations.
 

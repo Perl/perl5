@@ -94,6 +94,7 @@ use Tie::Array;
 
 {
     # Lexical $_.
+    no warnings 'deprecated';
     sub blurp { my $_ = shift; reverse }
 
     is(blurp("foo"), "oof", 'reversal of default variable in function');
