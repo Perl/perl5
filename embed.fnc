@@ -16,6 +16,9 @@
 :         any doc entry goes in perlapi.pod rather than perlintern.pod
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
+:      If the function is only exported for use in a public
+:      macro, see X.
+:
 :   a  Allocates memory a la malloc/calloc.  Also implies "R":
 :
 :         proto.h: add __attribute__malloc__
@@ -110,6 +113,10 @@
 :   X  Explicitly exported:
 :
 :         add entry to the list of exported symbols, unless x or m
+:
+:      This is often used for private functions that are used by public
+:      macros.  In those cases the macros must use the long form of the
+:      name (Perl_blah(aTHX_ ...)).
 :
 :   x  Not exported
 :
