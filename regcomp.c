@@ -11573,9 +11573,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	while (isALNUM(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
+	    SAVEFREESV(RExC_rx_sv);
+	    SAVEFREESV(listsv);
 	    ckWARN3reg(s+2,
 		       "POSIX syntax [%c %c] belongs inside character classes",
 		       c, c);
+	    ReREFCNT_inc(RExC_rx_sv);
+	    SvREFCNT_inc_simple_void_NN(listsv);
 	}
     }
 
