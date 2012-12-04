@@ -17,7 +17,7 @@ eval <<'TEST';
 
 sub splitter {
    my ($coder, $text) = @_;
-
+   $coder->canonical(1);
    for (0 .. length $text) {
       my $a = substr $text, 0, $_;
       my $b = substr $text, $_;
