@@ -102,8 +102,8 @@ eleak(2, 0, "$all /(?{})?/ ", '(?{})? with fatal warnings');
 eleak(2, 0, "$all /(?{})+/ ", '(?{})+ with fatal warnings');
 eleak(2, 0, "$all /[\\i]/ ", 'invalid charclass escape with fatal warns');
 eleak(2, 0, "$all /[:foo:]/ ", '/[:foo:]/ with fatal warnings');
-$::TODO = 'still leaks';
 eleak(2, 0, "$all /[a-\\d]/ ", '[a-\d] char class with fatal warnings');
+$::TODO = 'still leaks';
 eleak(2, 0, "$all v111111111111111111111111111111111111111111111111",
      'vstring num overflow with fatal warnings');
 undef $::TODO;

@@ -11893,9 +11893,13 @@ parseit:
 		    const int w =
 			RExC_parse >= rangebegin ?
 			RExC_parse - rangebegin : 0;
+		    SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
+		    SAVEFREESV(listsv);
 		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
+		    ReREFCNT_inc(RExC_rx_sv);
+		    SvREFCNT_inc_simple_void_NN(listsv);
                     cp_list = add_cp_to_invlist(cp_list, '-');
                     cp_list = add_cp_to_invlist(cp_list, prevvalue);
 		}
