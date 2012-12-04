@@ -651,7 +651,9 @@ dynamically scoped alias to the original, as it would be if it were a
 C<foreach> or under both the original and the current Perl 6 language
 specification.  This bug was fixed in Perl
 5.18.  If you really want a lexical C<$_>,
-specify that explicitly:
+specify that explicitly, but note that C<my $_>
+is now deprecated and will warn unless warnings
+have been disabled:
 
     given(my $_ = EXPR) { ... }
 

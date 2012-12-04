@@ -2968,7 +2968,8 @@ or another C<grep>) actually modifies the element in the original list.
 This is usually something to be avoided when writing clear code.
 
 If C<$_> is lexical in the scope where the C<grep> appears (because it has
-been declared with C<my $_>) then, in addition to being locally aliased to
+been declared with the deprecated C<my $_> construct)
+then, in addition to being locally aliased to
 the list elements, C<$_> keeps being lexical inside the block; i.e., it
 can't be seen from the outside, avoiding any potential side-effects.
 
@@ -3613,7 +3614,8 @@ most cases.  See also L</grep> for an array composed of those items of
 the original list for which the BLOCK or EXPR evaluates to true.
 
 If C<$_> is lexical in the scope where the C<map> appears (because it has
-been declared with C<my $_>), then, in addition to being locally aliased to
+been declared with the deprecated C<my $_> construct),
+then, in addition to being locally aliased to
 the list elements, C<$_> keeps being lexical inside the block; that is, it
 can't be seen from the outside, avoiding any potential side-effects.
 
