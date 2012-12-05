@@ -654,12 +654,6 @@ S_op_destroy(pTHX_ OP *o)
     FreeOp(o);
 }
 
-#ifdef USE_ITHREADS
-#  define forget_pmop(a,b)	S_forget_pmop(aTHX_ a,b)
-#else
-#  define forget_pmop(a,b)	S_forget_pmop(aTHX_ a)
-#endif
-
 /* Destructor */
 
 void
@@ -877,7 +871,7 @@ clear_pmop:
 	if (!(cPMOPo->op_pmflags & PMf_CODELIST_PRIVATE))
 	    op_free(cPMOPo->op_code_list);
 	cPMOPo->op_code_list = NULL;
-	forget_pmop(cPMOPo, 1);
+	forget_pmop(cPMOPo);
 	cPMOPo->op_pmreplrootu.op_pmreplroot = NULL;
         /* we use the same protection as the "SAFE" version of the PM_ macros
          * here since sv_clean_all might release some PMOPs
@@ -920,9 +914,6 @@ S_cop_free(pTHX_ COP* cop)
 
 STATIC void
 S_forget_pmop(pTHX_ PMOP *const o
-#ifdef USE_ITHREADS
-	      , U32 flags
-#endif
 	      )
 {
     HV * const pmstash = PmopSTASH(o);
@@ -955,10 +946,6 @@ S_forget_pmop(pTHX_ PMOP *const o
     }
     if (PL_curpm == o) 
 	PL_curpm = NULL;
-#ifdef USE_ITHREADS
-    if (flags)
-	PmopSTASH_free(o);
-#endif
 }
 
 STATIC void
@@ -974,7 +961,7 @@ S_find_and_forget_pmops(pTHX_ OP *o)
 	    case OP_PUSHRE:
 	    case OP_MATCH:
 	    case OP_QR:
-		forget_pmop((PMOP*)kid, 0);
+		forget_pmop((PMOP*)kid);
 	    }
 	    find_and_forget_pmops(kid);
 	    kid = kid->op_sibling;

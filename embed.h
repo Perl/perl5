@@ -1401,6 +1401,7 @@
 #define find_and_forget_pmops(a)	S_find_and_forget_pmops(aTHX_ a)
 #define fold_constants(a)	S_fold_constants(aTHX_ a)
 #define force_list(a)		S_force_list(aTHX_ a)
+#define forget_pmop(a)		S_forget_pmop(aTHX_ a)
 #define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
 #define inplace_aassign(a)	S_inplace_aassign(aTHX_ a)

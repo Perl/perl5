@@ -7,7 +7,7 @@ BEGIN {
 }
 use strict;
 
-plan tests => 29;
+plan tests => 30;
 
 package aiieee;
 
@@ -102,6 +102,23 @@ package scratch { reset "\0a" }
 is join("-", $scratch::a//'u', do { no strict; ${"scratch::\0foo"} }//'u'),
    "u-u",
    'reset "\0char"';
+
+# This used to crash under threaded builds, because pmops were remembering
+# their stashes by name, rather than by pointer.
+fresh_perl_is( # it crashes more reliably with a smaller script
+  'package bar;
+   sub foo {
+     m??;
+     BEGIN { *baz:: = *bar::; *bar:: = *foo:: }
+     # The name "bar" no langer refers to the same package
+   }
+   undef &foo; # so freeing the op does not remove it from the stash’s list
+   $_ = "";
+   push @_, ($_) x 10000;  # and its memory is scribbled over
+   reset;  # so reset on the original package tries to reset an invalid op
+   print "ok\n";',
+  "ok\n", {},
+  "no crash if package is effectively renamed before op is freed");
 
 
 undef $/;

@@ -845,7 +845,6 @@ perl_destruct(pTHXx)
 	    ary[i] = &PL_sv_undef;
 	}
     }
-    Safefree(PL_stashpad);
 #endif
 
 
@@ -1078,6 +1077,10 @@ perl_destruct(pTHXx)
     /* the 2 is for PL_fdpid and PL_strtab */
     while (sv_clean_all() > 2)
 	;
+
+#ifdef USE_ITHREADS
+    Safefree(PL_stashpad); /* must come after sv_clean_all */
+#endif
 
     AvREAL_off(PL_fdpid);		/* no surviving entries */
     SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */

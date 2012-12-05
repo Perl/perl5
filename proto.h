@@ -4846,15 +4846,6 @@ PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop
 	assert(idop)
 
 #endif
-#if !(defined(USE_ITHREADS))
-#  if defined(PERL_IN_OP_C)
-STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_FORGET_PMOP	\
-	assert(o)
-
-#  endif
-#endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 PERL_CALLCONV char*	Perl_my_bzero(char* loc, I32 len)
 			__attribute__nonnull__(1);
@@ -5769,6 +5760,11 @@ STATIC OP*	S_fold_constants(pTHX_ OP *o)
 	assert(o)
 
 STATIC OP*	S_force_list(pTHX_ OP* arg);
+STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FORGET_PMOP	\
+	assert(o)
+
 STATIC OP*	S_gen_constant_list(pTHX_ OP* o);
 STATIC SV*	S_gv_ename(pTHX_ GV *gv)
 			__attribute__nonnull__(pTHX_1);
@@ -5901,13 +5897,6 @@ STATIC OP*	S_too_many_arguments_sv(pTHX_ OP *o, SV* namesv, U32 flags)
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_SV	\
 	assert(o); assert(namesv)
 
-#  if defined(USE_ITHREADS)
-STATIC void	S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_FORGET_PMOP	\
-	assert(o)
-
-#  endif
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV void	Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv, SV * const *new_const_svp)
