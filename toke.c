@@ -11537,12 +11537,17 @@ vstring, as well as updating the passed in sv.
 
 Function must be called like
 
-	sv = newSV(5);
+	sv = sv_2mortal(newSV(5));
 	s = scan_vstring(s,e,sv);
 
 where s and e are the start and end of the string.
 The sv should already be large enough to store the vstring
 passed in, for performance reasons.
+
+This function may croak if fatal warnings are enabled in the
+calling scope, hence the sv_2mortal in the example (to prevent
+a leak).  Make sure to do SvREFCNT_inc afterwards if you use
+sv_2mortal.
 
 */
 
