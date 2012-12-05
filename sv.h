@@ -757,7 +757,12 @@ C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 Set the value of the NV pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvPV_set|SV* sv|char* val
-Set the value of the PV pointer in sv to val.  See C<SvIV_set>.
+Set the value of the PV pointer in sv to val.  See also C<SvIV_set>.
+
+Beware that the existing pointer may be involved in copy-on-write or other
+mischief, so do C<SvOOK_off(sv)> and use C<sv_force_normal> or
+C<SvPV_force> (or check the SvIsCOW flag) first to make sure this
+modification is safe.
 
 =for apidoc Am|void|SvUV_set|SV* sv|UV val
 Set the value of the UV pointer in sv to val.  See C<SvIV_set>.
