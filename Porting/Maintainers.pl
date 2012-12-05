@@ -1116,7 +1116,7 @@ use File::Glob qw(:case);
 
     'Locale::Maketext' => {
         'MAINTAINER'   => 'ferreira',
-        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.22.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.23.tar.gz',
         'FILES'        => q[dist/Locale-Maketext],
         'EXCLUDED'     => [
             qw(
