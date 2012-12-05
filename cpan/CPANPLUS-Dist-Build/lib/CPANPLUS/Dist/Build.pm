@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.64';
+$VERSION = '0.68';
 
 =pod
 
@@ -320,6 +320,15 @@ sub prepare {
                                 verbose => $verbose )
         ) {
             error( loc( "Build.PL failed: %1", $prep_output ) );
+            if ( $conf->get_conf('cpantest') ) {
+               $status->{stage} = 'prepare';
+               $status->{capture} = $prep_output;
+            }
+            $fail++; last RUN;
+        }
+
+        unless ( BUILD->( $dir ) ) {
+            error( loc( "Build.PL failed to generate a Build script: %1", $prep_output ) );
             if ( $conf->get_conf('cpantest') ) {
                $status->{stage} = 'prepare';
                $status->{capture} = $prep_output;
