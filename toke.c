@@ -10987,7 +10987,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     case 'v':
 vstring:
 		sv = newSV(5); /* preallocate storage space */
+		ENTER_with_name("scan_vstring");
+		SAVEFREESV(sv);
 		s = scan_vstring(s, PL_bufend, sv);
+		SvREFCNT_inc_simple_void_NN(sv);
+		LEAVE_with_name("scan_vstring");
 	break;
     }
 
