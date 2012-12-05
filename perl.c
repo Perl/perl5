@@ -2252,8 +2252,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 
     lex_start(linestr_sv, rsfp, lex_start_flags);
-    if(linestr_sv)
-	SvREFCNT_dec(linestr_sv);
+    SvREFCNT_dec(linestr_sv);
 
     PL_subname = newSVpvs("main");
 

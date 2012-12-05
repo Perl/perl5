@@ -670,8 +670,7 @@ struct block_format {
 
 #define LEAVESUB(sv)							\
     STMT_START {							\
-	if (sv)								\
-	    SvREFCNT_dec(sv);						\
+	SvREFCNT_dec(sv);						\
     } STMT_END
 
 #define POPFORMAT(cx)							\
