@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 107;
+plan tests => 108;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -270,6 +270,7 @@ eleak(2, 0, 'no warnings; 2 2;BEGIN{}',
 }
 eleak(2, 0, "\"\$\0\356\"", 'qq containing $ <null> something');
 eleak(2, 0, 'END OF TERMS AND CONDITIONS', 'END followed by words');
+eleak(2, 0, "+ + +;qq|\\N{a}|"x10,'qq"\N{a}" after errors');
 eleak(2, 0, "qq|\\c|;"x10,     '"too many errors" from qq"\c"');
 $::TODO = 'still leaks';
 eleak(2, 0, "qq|\\N{%}|"x10,   '"too many errors" from qq"\N{%}"');

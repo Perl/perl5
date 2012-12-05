@@ -9011,7 +9011,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
     }
 }
 
-/* Either returns sv, or mortalizes sv and returns a new SV*.
+/* Either returns sv, or mortalizes/frees sv and returns a new SV*.
    Best used as sv=new_constant(..., sv, ...).
    If s, pv are NULL, calls subroutine with one argument,
    and <type> is used with error messages only.
@@ -9033,7 +9033,10 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 
     /* charnames doesn't work well if there have been errors found */
     if (PL_error_count > 0 && strEQ(key,"charnames"))
+    {
+	SvREFCNT_dec_NN(sv);
 	return &PL_sv_undef;
+    }
 
     if (!table
 	|| ! (PL_hints & HINT_LOCALIZE_HH)
