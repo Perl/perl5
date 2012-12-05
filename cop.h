@@ -653,7 +653,7 @@ struct block_format {
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\
 		const SSize_t fill = AvFILLp(cx->blk_sub.argarray);	\
-		SvREFCNT_dec(cx->blk_sub.argarray);			\
+		SvREFCNT_dec_NN(cx->blk_sub.argarray);			\
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
 		AvREIFY_only(cx->blk_sub.argarray);			\
@@ -677,8 +677,9 @@ struct block_format {
 #define POPFORMAT(cx)							\
 	setdefout(cx->blk_format.dfoutgv);				\
 	CvDEPTH(cx->blk_format.cv)--;					\
-	if (!CvDEPTH(cx->blk_format.cv)) SvREFCNT_dec(cx->blk_format.cv); \
-	SvREFCNT_dec(cx->blk_format.dfoutgv);
+	if (!CvDEPTH(cx->blk_format.cv))				\
+	    SvREFCNT_dec_NN(cx->blk_format.cv);				\
+	SvREFCNT_dec_NN(cx->blk_format.dfoutgv);
 
 /* eval context */
 struct block_eval {
@@ -717,7 +718,7 @@ struct block_eval {
 	optype = CxOLD_OP_TYPE(cx);					\
 	PL_eval_root = cx->blk_eval.old_eval_root;			\
 	if (cx->blk_eval.cur_text && SvSCREAM(cx->blk_eval.cur_text))	\
-	    SvREFCNT_dec(cx->blk_eval.cur_text);			\
+	    SvREFCNT_dec_NN(cx->blk_eval.cur_text);			\
 	if (cx->blk_eval.old_namesv)					\
 	    sv_2mortal(cx->blk_eval.old_namesv);			\
     } STMT_END
@@ -783,8 +784,8 @@ struct block_loop {
 
 #define POPLOOP(cx)							\
 	if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {				\
-	    SvREFCNT_dec(cx->blk_loop.state_u.lazysv.cur);		\
-	    SvREFCNT_dec(cx->blk_loop.state_u.lazysv.end);		\
+	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.cur);		\
+	    SvREFCNT_dec_NN(cx->blk_loop.state_u.lazysv.end);		\
 	}								\
 	if (CxTYPE(cx) == CXt_LOOP_FOR)					\
 	    SvREFCNT_dec(cx->blk_loop.state_u.ary.ary);
