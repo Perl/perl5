@@ -4483,16 +4483,12 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
     PERL_ARGS_ASSERT_MAYBERELOCATE;
     assert(len > 0);
 
-	if (len) {
-	    /* I am not convinced that this is valid when PERLLIB_MANGLE is
-	       defined to so something (in os2/os2.c), but the code has been
-	       this way, ignoring any possible changed of length, since
-	       760ac839baf413929cd31cc32ffd6dba6b781a81 (5.003_02) so I'll leave
-	       it be.  */
-	    libdir = newSVpvn(PERLLIB_MANGLE(dir, len), len);
-	} else {
-	    libdir = newSVpv(PERLLIB_MANGLE(dir, 0), 0);
-	}
+    /* I am not convinced that this is valid when PERLLIB_MANGLE is
+       defined to so something (in os2/os2.c), but the code has been
+       this way, ignoring any possible changed of length, since
+       760ac839baf413929cd31cc32ffd6dba6b781a81 (5.003_02) so I'll leave
+       it be.  */
+    libdir = newSVpvn(PERLLIB_MANGLE(dir, len), len);
 
 #ifdef VMS
     {
