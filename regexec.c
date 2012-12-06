@@ -4455,7 +4455,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		if (nextchr == '\r' /* And if it was CR, and the next is LF,
 				       match the LF */
 		    && locinput < PL_regeol
-		    && UCHARAT(locinput) == '\n') locinput++;
+		    && UCHARAT(locinput) == '\n')
+                {
+                    locinput++;
+                }
 	    }
 	    else {
 
@@ -4473,7 +4476,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    char *starting = locinput;
 
 		    /* In case have to backtrack the last prepend */
-		    char *previous_prepend = 0;
+		    char *previous_prepend = NULL;
 
 		    LOAD_UTF8_CHARCLASS_GCB();
 
