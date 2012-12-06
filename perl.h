@@ -5006,8 +5006,14 @@ struct interpreter {
 
 /* Set up PERLVAR macros for populating structs */
 #  define PERLVAR(prefix,var,type) type prefix##var;
+
+/* 'var' is an array of length 'n' */
 #  define PERLVARA(prefix,var,n,type) type prefix##var[n];
+
+/* initialize 'var' to init' */
 #  define PERLVARI(prefix,var,type,init) type prefix##var;
+
+/* like PERLVARI, but make 'var' a const */
 #  define PERLVARIC(prefix,var,type,init) type prefix##var;
 
 struct interpreter {
