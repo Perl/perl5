@@ -13822,12 +13822,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
     /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
     static const char * const anyofs[] = {
-        "\\w",
-        "\\W",
-        "\\s",
-        "\\S",
-        "\\d",
-        "\\D",
+        "[\\w]",
+        "[\\W]",
+        "[\\s]",
+        "[\\S]",
+        "[\\d]",
+        "[\\D]",
         "[:alnum:]",
         "[:^alnum:]",
         "[:alpha:]",
@@ -13851,7 +13851,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         "[:space:]",
         "[:^space:]",
         "[:blank:]",
-        "[:^blank:]"
+        "[:^blank:]",
+        "[\\v]",
+        "[\\V]"
     };
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
