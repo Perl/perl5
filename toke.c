@@ -9030,9 +9030,11 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     const char *why1 = "", *why2 = "", *why3 = "";
 
     PERL_ARGS_ASSERT_NEW_CONSTANT;
+    /* We assume that this is true: */
+    if (*key == 'c') { assert (strEQ(key, "charnames")); }
 
     /* charnames doesn't work well if there have been errors found */
-    if (PL_error_count > 0 && strEQ(key,"charnames"))
+    if (PL_error_count > 0 && *key == 'c')
     {
 	SvREFCNT_dec_NN(sv);
 	return &PL_sv_undef;
@@ -9047,7 +9049,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	
 	/* Here haven't found what we're looking for.  If it is charnames,
 	 * perhaps it needs to be loaded.  Try doing that before giving up */
-	if (strEQ(key,"charnames")) {
+	if (*key == 'c') {
 	    Perl_load_module(aTHX_
 		            0,
 			    newSVpvs("_charnames"),
@@ -9077,7 +9079,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
             why2 = key;
             why3 = "} is not defined";
         report:
-            if (strEQ(key,"charnames")) {
+            if (*key == 'c') {
                 yyerror_pv(Perl_form(aTHX_
                             /* The +3 is for '\N{'; -4 for that, plus '}' */
                             "Unknown charname '%.*s'", (int)typelen - 4, type + 3
