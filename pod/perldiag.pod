@@ -1622,7 +1622,7 @@ it's loaded, etc.
 most likely cause of this error is that you left out a parenthesis inside
 of the C<....> part.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item %s defines neither package nor VERSION--version check failed
@@ -1807,7 +1807,7 @@ pragma is in effect.  See L<perlre/(?{ code })>.
 (F) You used a pattern that nested too many EVAL calls without consuming
 any text.  Restructure the pattern so that text is consumed.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Excessively long <> operator
@@ -1883,7 +1883,7 @@ queue of such routines has been prematurely ended.
 (W regexp) A character class range must start and end at a literal
 character, not another character class like C<\d> or C<[:alpha:]>.  The "-"
 in your false range is interpreted as a literal "-".  Consider quoting the
-"-", "\-".  The <-- HERE shows in the regular expression about where the
+"-", "\-".  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
 =item Fatal VMS error (status=%d) at %s, line %d
@@ -2242,7 +2242,7 @@ encoding is limited to code points no larger than 2147483647 (0x7FFFFFFF).
 text.  You should check the pattern to ensure that recursive patterns
 either consume text or fail.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Initialization of state variables in list context currently forbidden
@@ -2325,7 +2325,7 @@ to use some odd mathematical operation as a version, like 100/9.
 =item Internal disaster in regex; marked by <-- HERE in m/%s/
 
 (P) Something went badly wrong in the regular expression parser.
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Internal inconsistency in tracking vforks
@@ -2340,7 +2340,7 @@ terminate the Perl script and execute the specified command.
 =item Internal urp in regex; marked by <-- HERE in m/%s/
 
 (P) Something went badly awry in the regular expression parser.  The
-<-- HERE shows in the regular expression about where the problem was
+<-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item %s (...) interpreted as function
@@ -2382,7 +2382,7 @@ L<perlfunc/sprintf>.
 didn't correspond to a single character through the conversion
 from the encoding specified by the encoding pragma.
 The escape was replaced with REPLACEMENT CHARACTER (U+FFFD) instead.
-The <-- HERE shows in the regular expression about where the
+The <-- HERE shows whereabouts in the regular expression the
 escape was discovered.
 
 =item Invalid hexadecimal number in \N{U+...}
@@ -2424,7 +2424,7 @@ See also L<perlrun/B<-D>I<letters>>.
 (F) The range specified in a character class had a minimum character
 greater than the maximum character.  One possibility is that you forgot the
 C<{}> from your ending C<\x{}> - C<\x> without the curly braces can go only
-up to C<ff>.  The <-- HERE shows in the regular expression about where the
+up to C<ff>.  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
 =item Invalid range "%s" in transliteration operator
@@ -2738,7 +2738,7 @@ doing it Perl met a malformed Unicode surrogate.
 
 (W regexp) The pattern you've specified would be an infinite loop if the
 regular expression engine didn't specifically check for that.  The <-- HERE
-shows in the regular expression about where the problem was discovered.
+shows whereabouts in the regular expression the problem was discovered.
 See L<perlre>.
 
 =item Maximal count of pending signals (%u) exceeded
@@ -3020,8 +3020,8 @@ greater than or equal to zero.
 =item Nested quantifiers in regex; marked by <-- HERE in m/%s/
 
 (F) You can't quantify a quantifier without intervening parentheses.
-So things like ** or +* or ?* are illegal.  The <-- HERE shows in the
-regular expression about where the problem was discovered.
+So things like ** or +* or ?* are illegal.  The <-- HERE shows
+whereabouts in the regular expression the problem was discovered.
 
 Note that the minimal matching quantifiers, C<*?>, C<+?>, and
 C<??> appear to be nested quantifiers, but aren't.  See L<perlre>.
@@ -3772,7 +3772,7 @@ a detectable way.
 consuming any text.  Restructure the pattern so text is consumed before
 the nesting limit is exceeded.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Parentheses missing around "%s" list
@@ -3881,7 +3881,7 @@ fine from VMS' perspective, it's probably not what you intended.
 =item POSIX class [:%s:] unknown in regex; marked by <-- HERE in m/%s/
 
 (F) The class in the character class [: :] syntax is unknown.  The <-- HERE
-shows in the regular expression about where the problem was discovered.
+shows whereabouts in the regular expression the problem was discovered.
 Note that the POSIX character classes do B<not> have the C<is> prefix
 the corresponding C interfaces have: in other words, it's C<[[:print:]]>,
 not C<isprint>.  See L<perlre>.
@@ -3896,9 +3896,9 @@ the BSD version, which takes a pid.
 (W regexp) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct, for example:
 /[012[:alpha:]345]/.  Note that [= =] and [. .] are not currently
-implemented; they are simply placeholders for future extensions and will
-cause fatal errors.  The <-- HERE shows in the regular expression about
-where the problem was discovered.  See L<perlre>.
+implemented; they are simply placeholders for future extensions and
+will cause fatal errors.  The <-- HERE shows whereabouts in the regular
+expression the problem was discovered.  See L<perlre>.
 
 =item POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 
@@ -3906,7 +3906,7 @@ where the problem was discovered.  See L<perlre>.
 with "[." and ending with ".]" is reserved for future extensions.  If you
 need to represent those character sequences inside a regular expression
 character class, just quote the square brackets with the backslash: "\[."
-and ".\]".  The <-- HERE shows in the regular expression about where the
+and ".\]".  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
 =item POSIX syntax [= =] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
@@ -3915,7 +3915,7 @@ problem was discovered.  See L<perlre>.
 with "[=" and ending with "=]" is reserved for future extensions.  If you
 need to represent those character sequences inside a regular expression
 character class, just quote the square brackets with the backslash: "\[="
-and "=\]".  The <-- HERE shows in the regular expression about where the
+and "=\]".  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
 =item Possible attempt to put comments in qw() list
@@ -4082,14 +4082,14 @@ change when upper cased.
 =item Quantifier follows nothing in regex; marked by <-- HERE in m/%s/
 
 (F) You started a regular expression with a quantifier.  Backslash it if
-you meant it literally.  The <-- HERE shows in the regular expression
-about where the problem was discovered.  See L<perlre>.
+you meant it literally.  The <-- HERE shows whereabouts in the regular
+expression the problem was discovered.  See L<perlre>.
 
 =item Quantifier in {,} bigger than %d in regex; marked by <-- HERE in m/%s/
 
 (F) There is currently a limit to the size of the min and max values of
-the {min,max} construct.  The <-- HERE shows in the regular expression
-about where the problem was discovered.  See L<perlre>.
+the {min,max} construct.  The <-- HERE shows whereabouts in the regular
+expression the problem was discovered.  See L<perlre>.
 
 =item Quantifier unexpected on zero-length expression; marked by <-- HERE in m/%s/
 
@@ -4099,7 +4099,7 @@ quantifier inside the assertion instead.  For example, the way to match
 "abc" provided that it is followed by three repetitions of "xyz" is
 C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Quantifier {n,m} with n > m can't match in regex
@@ -4200,7 +4200,7 @@ not at least seven sets of capturing parentheses in the expression.  If
 you wanted to have the character with ordinal 7 inserted into the regular
 expression, prepend zeroes to make it three digits long: C<\007>
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Reference to nonexistent named group in regex; marked by <-- HERE in m/%s/
@@ -4210,7 +4210,7 @@ expression, but there is no corresponding named capturing parentheses
 such as C<(?'NAME'...)> or C<< (?<NAME>...) >>.  Check if the name has been
 spelled correctly both in the backreference and the declaration.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item Reference to nonexistent or unclosed group in regex; marked by <-- HERE in m/%s/
@@ -4219,7 +4219,7 @@ discovered.
 are not at least seven sets of closed capturing parentheses in the
 expression before where the C<\g{-7}> was located.
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
 =item regexp memory corruption
@@ -4374,19 +4374,19 @@ before now.  Check your control flow.
 =item Sequence (? incomplete in regex; marked by <-- HERE in m/%s/
 
 (F) A regular expression ended with an incomplete extension (?.  The
-<-- HERE shows in the regular expression about where the problem was
+<-- HERE shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
 =item Sequence (?%s...) not implemented in regex; marked by <-- HERE in m/%s/
 
 (F) A proposed regular expression extension has the character reserved
-but has not yet been written.  The <-- HERE shows in the regular
-expression about where the problem was discovered.  See L<perlre>.
+but has not yet been written.  The <-- HERE shows whereabouts in the
+regular expression the problem was discovered.  See L<perlre>.
 
 =item Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/
 
 (F) You used a regular expression extension that doesn't make sense.  The
-<-- HERE shows in the regular expression about where the problem was
+<-- HERE shows whereabouts in the regular expression the problem was
 discovered.  This happens when using the C<(?^...)> construct to tell
 Perl to use the default regular expression modifiers, and you
 redundantly specify a default modifier.  For other
@@ -4674,14 +4674,14 @@ it in clustering parentheses:
 
     (?(condition)(?:this|that|other)|else-clause)
 
-The <-- HERE shows in the regular expression about where the problem
+The <-- HERE shows whereabouts in the regular expression the problem
 was discovered.  See L<perlre>.
 
 =item Switch condition not recognized in regex; marked by <-- HERE in m/%s/
 
 (F) If the argument to the (?(...)if-clause|else-clause) construct is
-a number, it can be only a number.  The <-- HERE shows in the regular
-expression about where the problem was discovered.  See L<perlre>.
+a number, it can be only a number.  The <-- HERE shows whereabouts in
+the regular expression the problem was discovered.  See L<perlre>.
 
 =item switching effective %s is not implemented
 
@@ -5142,7 +5142,7 @@ is not known.  The condition must be one of the following:
  (R&NAME)           true if directly inside named capture
  (DEFINE)           always false; for defining named subpatterns
 
-The <-- HERE shows in the regular expression about where the problem was
+The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
 =item Unknown Unicode option letter '%c'
@@ -5174,7 +5174,7 @@ module first.
 
 (F) The brackets around a character class must match.  If you wish to
 include a closing bracket in a character class, backslash it or put it
-first.  The <-- HERE shows in the regular expression about where the
+first.  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
 =item Unmatched ( in regex; marked by <-- HERE in m/%s/
@@ -5183,8 +5183,8 @@ problem was discovered.  See L<perlre>.
 
 (F) Unbackslashed parentheses must always be balanced in regular
 expressions.  If you're a vi user, the % key is valuable for finding
-the matching parenthesis.  The <-- HERE shows in the regular expression
-about where the problem was discovered.  See L<perlre>.
+the matching parenthesis.  The <-- HERE shows whereabouts in the
+regular expression the problem was discovered.  See L<perlre>.
 
 =item Unmatched right %s bracket
 
@@ -5211,7 +5211,7 @@ to run a compressed script, a binary program, or a directory as a Perl program.
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl inside character classes.  The character was
 understood literally, but this may change in a future version of Perl.
-The <-- HERE shows in the regular expression about where the
+The <-- HERE shows whereabouts in the regular expression the
 escape was discovered.
 
 =item Unrecognized escape \%c passed through
@@ -5224,8 +5224,8 @@ change in a future version of Perl.
 
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl.  The character(s) were understood literally, but
-this may change in a future version of Perl.  The <-- HERE shows in
-the regular expression about where the escape was discovered.
+this may change in a future version of Perl.  The <-- HERE shows
+whereabouts in the regular expression the escape was discovered.
 
 =item Unrecognized signal name "%s"
 
@@ -5369,8 +5369,8 @@ must be written as
 
     if ($string =~ /$pattern/) { ... }
 
-The <-- HERE shows in the regular expression about
-where the problem was discovered.  See L<perlre>.
+The <-- HERE shows whereabouts in the regular expression the problem was
+discovered.  See L<perlre>.
 
 =item Useless localization of %s
 
@@ -5389,8 +5389,8 @@ must be written as
 
     if ($string =~ /$pattern/o) { ... }
 
-The <-- HERE shows in the regular expression about
-where the problem was discovered.  See L<perlre>.
+The <-- HERE shows whereabouts in the regular expression the problem was
+discovered.  See L<perlre>.
 
 =item Useless use of /d modifier in transliteration operator
 
