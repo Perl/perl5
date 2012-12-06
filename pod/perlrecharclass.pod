@@ -140,11 +140,12 @@ Any character not matched by C<\d> is matched by C<\D>.
 =head3 Word characters
 
 A C<\w> matches a single alphanumeric character (an alphabetic character, or a
-decimal digit) or a connecting punctuation character, such as an
-underscore ("_").  It does not match a whole word.  To match a whole
-word, use C<\w+>.  This isn't the same thing as matching an English word, but
-in the ASCII range it is the same as a string of Perl-identifier
-characters.
+decimal digit); or a connecting punctuation character, such as an
+underscore ("_"); or a "mark" character (like some sort of accent) that
+attaches to one of those.  It does not match a whole word.  To match a
+whole word, use C<\w+>.  This isn't the same thing as matching an
+English word, but in the ASCII range it is the same as a string of
+Perl-identifier characters.
 
 =over
 
