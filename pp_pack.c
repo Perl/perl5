@@ -1470,7 +1470,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		if (utf8 && (symptr->flags & FLAG_WAS_UTF8)) {
 		    for (ptr = s+len-1; ptr >= s; ptr--)
 			if (*ptr != 0 && !UTF8_IS_CONTINUATION(*ptr) &&
-			    !is_utf8_space((U8 *) ptr)) break;
+			    !isSPACE_utf8(ptr)) break;
 		    if (ptr >= s) ptr += UTF8SKIP(ptr);
 		    else ptr++;
 		    if (ptr > s+len)

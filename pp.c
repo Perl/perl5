@@ -5380,7 +5380,7 @@ PP(pp_split)
     orig = s;
     if (skipwhite) {
 	if (do_utf8) {
-	    while (*s == ' ' || is_utf8_space((U8*)s))
+	    while (isSPACE_utf8(s))
 		s += UTF8SKIP(s);
 	}
 	else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
@@ -5405,9 +5405,9 @@ PP(pp_split)
 	    m = s;
 	    /* this one uses 'm' and is a negative test */
 	    if (do_utf8) {
-		while (m < strend && !( *m == ' ' || is_utf8_space((U8*)m) )) {
+		while (m < strend && ! isSPACE_utf8(m) ) {
 		    const int t = UTF8SKIP(m);
-		    /* is_utf8_space returns FALSE for malform utf8 */
+		    /* isSPACE_utf8 returns FALSE for malform utf8 */
 		    if (strend - m < t)
 			m = strend;
 		    else
@@ -5444,7 +5444,7 @@ PP(pp_split)
 
 	    /* this one uses 's' and is a positive test */
 	    if (do_utf8) {
-		while (s < strend && ( *s == ' ' || is_utf8_space((U8*)s) ))
+		while (s < strend && isSPACE_utf8(s) )
 	            s +=  UTF8SKIP(s);
 	    }
 	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
