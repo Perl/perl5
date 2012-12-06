@@ -1822,14 +1822,13 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const U8 flags)
     }
 }
 
-/* for now these all assume no locale info available for Unicode > 255; and
- * the corresponding macros in handy.h (like isALNUM_LC_uvchr) should have been
- * called instead, so that these don't get called for < 255 */
-
 bool
 Perl_is_uni_alnum_lc(pTHX_ UV c)
 {
-    return is_uni_alnum(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isALNUM_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_alnum(c);
 }
 
 bool
@@ -1844,79 +1843,118 @@ Perl_is_uni_alnumc_lc(pTHX_ UV c)
 bool
 Perl_is_uni_idfirst_lc(pTHX_ UV c)
 {
-    return _is_uni_perl_idstart(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isIDFIRST_LC(UNI_TO_NATIVE(c));
+    }
+    return _is_uni_perl_idstart(c);
 }
 
 bool
 Perl_is_uni_alpha_lc(pTHX_ UV c)
 {
-    return is_uni_alpha(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isALPHA_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_alpha(c);
 }
 
 bool
 Perl_is_uni_ascii_lc(pTHX_ UV c)
 {
-    return is_uni_ascii(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isASCII_LC(UNI_TO_NATIVE(c));
+    }
+    return 0;
 }
 
 bool
 Perl_is_uni_blank_lc(pTHX_ UV c)
 {
-    return is_uni_blank(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isBLANK_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_blank(c);
 }
 
 bool
 Perl_is_uni_space_lc(pTHX_ UV c)
 {
-    return is_uni_space(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isSPACE_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_space(c);
 }
 
 bool
 Perl_is_uni_digit_lc(pTHX_ UV c)
 {
-    return is_uni_digit(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isDIGIT_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_digit(c);
 }
 
 bool
 Perl_is_uni_upper_lc(pTHX_ UV c)
 {
-    return is_uni_upper(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isUPPER_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_upper(c);
 }
 
 bool
 Perl_is_uni_lower_lc(pTHX_ UV c)
 {
-    return is_uni_lower(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isLOWER_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_lower(c);
 }
 
 bool
 Perl_is_uni_cntrl_lc(pTHX_ UV c)
 {
-    return is_uni_cntrl(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isCNTRL_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_cntrl(c);
 }
 
 bool
 Perl_is_uni_graph_lc(pTHX_ UV c)
 {
-    return is_uni_graph(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isGRAPH_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_graph(c);
 }
 
 bool
 Perl_is_uni_print_lc(pTHX_ UV c)
 {
-    return is_uni_print(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isPRINT_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_print(c);
 }
 
 bool
 Perl_is_uni_punct_lc(pTHX_ UV c)
 {
-    return is_uni_punct(c);	/* XXX no locale support yet */
+    if (c < 256) {
+        return isPUNCT_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_punct(c);
 }
 
 bool
 Perl_is_uni_xdigit_lc(pTHX_ UV c)
 {
-    return is_uni_xdigit(c);	/* XXX no locale support yet */
+    if (c < 256) {
+       return isXDIGIT_LC(UNI_TO_NATIVE(c));
+    }
+    return is_uni_xdigit(c);
 }
 
 U32
