@@ -1386,6 +1386,7 @@ if( ! $opt_X ){ # print XS, unless it is disabled
 warn "Writing $ext$modpname/$modfname.xs\n";
 
 print XS <<"END";
+#define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
