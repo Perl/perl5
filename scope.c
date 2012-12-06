@@ -724,8 +724,9 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
     const UV elems_shifted = elems << SAVE_TIGHT_SHIFT;
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != elems)
-	Perl_croak(aTHX_ "panic: save_alloc elems %"UVuf" out of range (%ld-%ld)",
-		   elems, size, pad);
+	Perl_croak(aTHX_
+            "panic: save_alloc elems %"UVuf" out of range (%"IVdf"-%"IVdf")",
+		   elems, (IV)size, (IV)pad);
 
     SSGROW(elems + 1);
 
