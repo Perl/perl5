@@ -476,6 +476,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * takes on the order of 10 minutes to generate, and is never going to change.
  * The EBCDIC equivalent hasn't been commented out in regcharclass.pl, so it
  * should generate and run the correct stuff */
+/*
+	UTF8_CHAR: Matches utf8 from 1 to 4 bytes
+
+	0x0 - 0x1FFFFF
+*/
 /*** GENERATED CODE ***/
 #define is_UTF8_CHAR_utf8_safe(s,e)                                         \
 ( ((e)-(s) > 3) ?                                                           \
@@ -488,23 +493,17 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 	( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
     : ( 0xF0 == ((U8*)s)[0] ) ?                                             \
 	( ( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBF ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-    : ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF7 ) ?                      \
-	( ( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-    : 0 )                                                                   \
+    : ( ( ( ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF7 ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
 : ((e)-(s) > 2) ?                                                           \
     ( ( ( ((U8*)s)[0] & 0x80 ) == 0x00 ) ? 1                                \
     : ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                      \
 	( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                      \
     : ( 0xE0 == ((U8*)s)[0] ) ?                                             \
 	( ( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-    : ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEF ) ?                      \
-	( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-    : 0 )                                                                   \
+    : ( ( ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEF ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
 : ((e)-(s) > 1) ?                                                           \
     ( ( ( ((U8*)s)[0] & 0x80 ) == 0x00 ) ? 1                                \
-    : ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                      \
-	( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                      \
-    : 0 )                                                                   \
+    : ( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) ? 2 : 0 )\
 : ((e)-(s) > 0) ?                                                           \
     ( ( ((U8*)s)[0] & 0x80 ) == 0x00 )                                      \
 : 0 )

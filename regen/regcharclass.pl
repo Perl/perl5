@@ -237,6 +237,10 @@ sub __clean {
             : \s* \5 \s*
         ([()])
     /$1 ( $2 && $3 ) ? $4 : $5 $6/gx;
+    #$expr=~s/\(\(U8\*\)s\)\[(\d+)\]/S$1/g if length $expr > 8000;
+    #$expr=~s/\s+//g if length $expr > 8000;
+
+    die "Expression too long" if length $expr > 8000;
 
     return $expr;
 }
@@ -1093,7 +1097,7 @@ sub _combine {
 # _render()
 # recursively convert an optree to text with reasonably neat formatting
 sub _render {
-    my ( $self, $op, $combine, $brace, $opts_ref )= @_;
+    my ( $self, $op, $combine, $brace, $opts_ref, $def, $submacros )= @_;
     return 0 if ! defined $op;  # The set is empty
     if ( !ref $op ) {
         return $op;
@@ -1101,10 +1105,10 @@ sub _render {
     my $cond= $self->_cond_as_str( $op, $combine, $opts_ref );
     #no warnings 'recursion';   # This would allow really really inefficient
                                 # code to be generated.  See pod
-    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref );
+    my $yes= $self->_render( $op->{yes}, $combine, 1, $opts_ref, $def, $submacros );
     return $yes if $cond eq '1';
 
-    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref );
+    my $no= $self->_render( $op->{no},   $combine, 0, $opts_ref, $def, $submacros );
     return "( $cond )" if $yes eq '1' and $no eq '0';
     my ( $lb, $rb )= $brace ? ( "( ", " )" ) : ( "", "" );
     return "$lb$cond ? $yes : $no$rb"
@@ -1118,7 +1122,13 @@ sub _render {
         $yes= " " . $yes;
     }
 
-    return "$lb$cond ?$yes$ind: $no$rb";
+    my $str= "$lb$cond ?$yes$ind: $no$rb";
+    if (length $str > 6000) {
+        push @$submacros, sprintf "#define $def\n( %s )", "_part" . (my $yes_idx= 0+@$submacros), $yes;
+        push @$submacros, sprintf "#define $def\n( %s )", "_part" . (my $no_idx= 0+@$submacros), $no;
+        return sprintf "%s%s ? $def : $def%s", $lb, $cond, "_part$yes_idx", "_part$no_idx", $rb;
+    }
+    return $str;
 }
 
 # $expr=render($op,$combine)
@@ -1129,9 +1139,12 @@ sub _render {
 # longer lists such as that resulting from type 'cp' output.
 # Currently only used for type 'cp' macros.
 sub render {
-    my ( $self, $op, $combine, $opts_ref )= @_;
-    my $str= "( " . $self->_render( $op, $combine, 0, $opts_ref ) . " )";
-    return __clean( $str );
+    my ( $self, $op, $combine, $opts_ref, $def_fmt )= @_;
+    
+    my @submacros;
+    my $macro= sprintf "#define $def_fmt\n( %s )", "", $self->_render( $op, $combine, 0, $opts_ref, $def_fmt, \@submacros );
+
+    return join "\n\n", map { "/*** GENERATED CODE ***/\n" . __macro( __clean( $_ ) ) } @submacros, $macro;
 }
 
 # make_macro
@@ -1168,8 +1181,6 @@ sub make_macro {
     } else {
         $method= 'optree';
     }
-    my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
-    my $text= $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts );
     my @args= $type =~ /^cp/ ? 'cp' : 's';
     push @args, "e" if $opts{safe};
     push @args, "is_utf8" if $type eq 'generic';
@@ -1179,8 +1190,9 @@ sub make_macro {
     my $ext= $type     eq 'generic' ? ''          : '_' . lc( $type );
     $ext .= "_safe" if $opts{safe};
     my $argstr= join ",", @args;
-    return "/*** GENERATED CODE ***/\n"
-      . __macro( "#define $pfx$self->{op}$ext($argstr)\n$text" );
+    my $def_fmt="$pfx$self->{op}$ext%s($argstr)";
+    my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
+    return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt );
 }
 
 # if we arent being used as a module (highly likely) then process
