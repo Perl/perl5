@@ -3088,6 +3088,7 @@ Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
     CV* runcv = NULL;	/* initialise to avoid compiler warnings */
     STRLEN len;
     bool need_catch;
+    OP* ret;
 
     PERL_ARGS_ASSERT_SV_COMPILE_2OP_IS_BROKEN;
 
@@ -3182,7 +3183,9 @@ Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
     PERL_UNUSED_VAR(newsp);
     PERL_UNUSED_VAR(optype);
 
-    return PL_eval_start;
+    ret = PL_eval_start;
+    PL_eval_start = NULL;
+    return ret;
 }
 
 
@@ -3903,8 +3906,10 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = NULL;
 
-    if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq))
+    if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq)) {
 	op = DOCATCH(PL_eval_start);
+	PL_eval_start = NULL;
+    }
     else
 	op = PL_op->op_next;
 
@@ -4029,6 +4034,7 @@ PP(pp_entereval)
     PUTBACK;
 
     if (doeval(gimme, NULL, runcv, seq)) {
+	OP *ret;
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_NOSUBS) {
@@ -4037,7 +4043,9 @@ PP(pp_entereval)
 	    char *const safestr = savepvn(tmpbuf, len);
 	    SAVEDELETE(PL_defstash, safestr, len);
 	}
-	return DOCATCH(PL_eval_start);
+	ret = DOCATCH(PL_eval_start);
+	PL_eval_start = NULL;
+	return ret;
     } else {
 	/* We have already left the scope set up earlier thanks to the LEAVE
 	   in doeval().  */
