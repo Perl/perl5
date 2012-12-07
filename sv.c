@@ -7670,7 +7670,7 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     SSize_t bytesread;
     const STRLEN recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
       /* Grab the size of the record we're getting */
-    char *const buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
+    char *buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
 #ifdef VMS
     int fd;
 #endif
@@ -7690,6 +7690,64 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 #endif
     {
 	bytesread = PerlIO_read(fp, buffer, recsize);
+
+	/* At this point, the logic in sv_get() means that sv will
+	   be treated as utf-8 if the handle is utf8.
+	*/
+	if (PerlIO_isutf8(fp) && bytesread > 0) {
+	    char *bend = buffer + bytesread;
+	    char *bufp = buffer;
+	    size_t charcount = 0;
+	    bool charstart = TRUE;
+	    STRLEN skip = 0;
+
+	    while (charcount < recsize) {
+		/* count accumulated characters */
+		while (bufp < bend) {
+		    if (charstart) {
+			skip = UTF8SKIP(bufp);
+		    }
+		    if (bufp + skip > bend) {
+			/* partial at the end */
+			charstart = FALSE;
+			break;
+		    }
+		    else {
+			++charcount;
+			bufp += skip;
+			charstart = TRUE;
+		    }
+		}
+
+		if (!charstart) {
+		    /* read the rest of the current character, and maybe the
+		       beginning of the next, if we need it */
+		    STRLEN readsize = skip - (bend - bufp) + (charcount + 1 < recsize);
+		    STRLEN bufp_offset = bufp - buffer;
+		    SSize_t morebytesread;
+
+		    buffer = SvGROW(sv, append + bytesread + readsize + 1) + append;
+		    bend = buffer + bytesread;
+		    morebytesread = PerlIO_read(fp, bend, readsize);
+		    if (morebytesread <= 0) {
+			/* we're done, if we still have incomplete
+			   characters the check code in sv_gets() will
+			   warn and zero them.
+
+			   FIXME: If we've read more than one lead
+			   character for an incomplete character, push
+			   it back.
+			*/
+			break;
+		    }
+
+		    /* prepare to scan some more */
+		    bytesread += morebytesread;
+		    bend = buffer + bytesread;
+		    bufp = buffer + bufp_offset;
+		}
+	    }
+	}
     }
 
     if (bytesread < 0)
