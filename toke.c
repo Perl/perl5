@@ -9031,6 +9031,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     PERL_ARGS_ASSERT_NEW_CONSTANT;
     /* We assume that this is true: */
     if (*key == 'c') { assert (strEQ(key, "charnames")); }
+    assert(type || s);
 
     /* charnames doesn't work well if there have been errors found */
     if (PL_error_count > 0 && *key == 'c')
@@ -9071,7 +9072,9 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	}
 	if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	    msg = Perl_newSVpvf(aTHX_
-			    "Constant(%s) unknown", (type ? type: "undef"));
+			       "Constant(%.*s) unknown",
+				(int)(type ? typelen : len),
+				(type ? type: s));
 	}
 	else {
             why1 = "$^H{";
@@ -9087,8 +9090,9 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
                 return sv;
             }
             else {
-                msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
-                                (type ? type: "undef"), why1, why2, why3);
+                msg = Perl_newSVpvf(aTHX_ "Constant(%.*s): %s%s%s",
+                                    (int)(type ? typelen : len),
+                                    (type ? type: s), why1, why2, why3);
             }
         }
 	yyerror(SvPVX_const(msg));

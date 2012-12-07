@@ -33,7 +33,7 @@ use overload;
 BEGIN { overload::constant integer => sub {}; undef *^H }
 1
 EXPECT
-Constant(undef) unknown at - line 3, at end of line
+Constant(1) unknown at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME Float constant overloading returning undef
@@ -41,7 +41,7 @@ use overload;
 BEGIN { overload::constant float => sub {}; undef *^H }
 1.1
 EXPECT
-Constant(undef) unknown at - line 3, at end of line
+Constant(1.1) unknown at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME Binary constant overloading returning undef
@@ -49,7 +49,7 @@ use overload;
 BEGIN { overload::constant binary => sub {}; undef *^H }
 0x1
 EXPECT
-Constant(undef) unknown at - line 3, at end of line
+Constant(0x1) unknown at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME String constant overloading returning undef
@@ -84,7 +84,7 @@ use overload;
 BEGIN { overload::constant integer => sub {} }
 1
 EXPECT
-Constant(undef): Call to &{$^H{integer}} did not return a defined value at - line 3, at end of line
+Constant(1): Call to &{$^H{integer}} did not return a defined value at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME Float constant overloading returning undef
@@ -92,7 +92,7 @@ use overload;
 BEGIN { overload::constant float => sub {} }
 1.1
 EXPECT
-Constant(undef): Call to &{$^H{float}} did not return a defined value at - line 3, at end of line
+Constant(1.1): Call to &{$^H{float}} did not return a defined value at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME Binary constant overloading returning undef
@@ -100,7 +100,7 @@ use overload;
 BEGIN { overload::constant binary => sub {} }
 0x1
 EXPECT
-Constant(undef): Call to &{$^H{binary}} did not return a defined value at - line 3, at end of line
+Constant(0x1): Call to &{$^H{binary}} did not return a defined value at - line 3, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME String constant overloading returning undef
