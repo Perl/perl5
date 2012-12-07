@@ -101,6 +101,10 @@ sub check_taint_not ($;$) {
     ok((not is_tainted($_[0])), "verify that isn't tainted$message_tail");
 }
 
+"\tb\t" =~ /^m?(\s)(.*)\1$/;
+check_taint_not   $&, "not tainted outside 'use locale'";
+;
+
 use locale;	# engage locale and therefore locale taint.
 
 check_taint_not   $a;
