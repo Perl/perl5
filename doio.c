@@ -1333,7 +1333,7 @@ I32
 Perl_my_lstat_flags(pTHX_ const U32 flags)
 {
     dVAR;
-    static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
+    static const char* const no_prev_lstat = "The stat preceding -l _ wasn't an lstat";
     dSP;
     const char *file;
     if (PL_op->op_flags & OPf_REF) {

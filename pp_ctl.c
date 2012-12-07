@@ -2692,7 +2692,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 {
     dVAR;
     OP **ops = opstack;
-    static const char too_deep[] = "Target of goto is too deeply nested";
+    static const char* const too_deep = "Target of goto is too deeply nested";
 
     PERL_ARGS_ASSERT_DOFINDLABEL;
 
@@ -2764,7 +2764,7 @@ PP(pp_goto)
     STRLEN label_len = 0;
     U32 label_flags = 0;
     const bool do_dump = (PL_op->op_type == OP_DUMP);
-    static const char must_have_label[] = "goto must have label";
+    static const char* const must_have_label = "goto must have label";
 
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const sv = POPs;

@@ -110,7 +110,7 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nextval		(PL_parser->nextval)
 #endif
 
-static const char ident_too_long[] = "Identifier too long";
+static const char* const ident_too_long = "Identifier too long";
 
 #ifdef PERL_MAD
 #  define CURMAD(slot,sv) if (PL_madskills) { curmad(slot,sv); sv = 0; }
@@ -10646,7 +10646,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     SV *sv = NULL;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
     const char *lastub = NULL;		/* position of last underbar */
-    static char const number_too_long[] = "Number too long";
+    static const char* const number_too_long = "Number too long";
 
     PERL_ARGS_ASSERT_SCAN_NUM;
 
