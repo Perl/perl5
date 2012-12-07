@@ -1133,6 +1133,14 @@ EXTCONST U32 PL_charclass[];
                                            ? function(p)                       \
                                            : 0)
 
+/* NOTE that some of these macros have very similar ones in regcharclass.h.
+ * For example, there is (at the time of this writing) an 'is_SPACE_utf8()'
+ * there, differing in name only by an underscore from the one here
+ * 'isSPACE_utf8().  The difference is that the ones here are probably more
+ * efficient and smaller, using an O(1) array lookup for Latin1-range code
+ * points; the regcharclass.h ones are implemented as a series of
+ * "if-else-if-else ..." */
+
 #define isALNUMC_utf8(p)        _generic_utf8(_CC_ALNUMC, is_utf8_alnumc, p)
 #define isALNUM_utf8(p)         isWORDCHAR_utf8(p)  /* back compat */
 #define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
