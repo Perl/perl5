@@ -713,26 +713,43 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* Character class numbers.  For internal core Perl use only.  These are used
  * in PL_charclass[] and the ones up through the one that corresponds to
  * <_HIGHEST_REGCOMP_DOT_H_SYNC> are used by regcomp.h.  These use names used
- * in l1_char_class_tab.h but their actual definitions are here.  If that has a
- * name not used here, it won't compile. */
-#  define _CC_WORDCHAR           0
-#  define _CC_SPACE              1
-#  define _CC_DIGIT              2
-#  define _CC_ALNUMC             3
-#  define _CC_ALPHA              4
-#  define _CC_ASCII              5
-#  define _CC_CNTRL              6
-#  define _CC_GRAPH              7
-#  define _CC_LOWER              8
-#  define _CC_PRINT              9
-#  define _CC_PUNCT             10
-#  define _CC_UPPER             11
-#  define _CC_XDIGIT            12
-#  define _CC_PSXSPC            13
-#  define _CC_BLANK             14
-#  define _CC_VERTSPACE         15
+ * in l1_char_class_tab.h but their actual definitions are here.  If that file
+ * has a name not used here, it won't compile.
+ *
+ * The first group of these is ordered in what I (khw) estimate to be the
+ * frequency of their use. */
+#  define _CC_WORDCHAR           0      /* \w and [:word:] */
+#  define _CC_DIGIT              1      /* \d and [:digit:] */
+#  define _CC_ALPHA              2      /* [:alpha:] */
+#  define _CC_LOWER              3      /* [:lower:] */
+#  define _CC_UPPER              4      /* [:upper:] */
+#  define _CC_PUNCT              5      /* [:punct:] */
+#  define _CC_PRINT              6      /* [:print:] */
+#  define _CC_ALNUMC             7      /* [:alnum:] */
+#  define _CC_GRAPH              8      /* [:graph:] */
+
+#define _FIRST_NON_SWASH_CC      9
+/* The character classes above are implemented with swashes.  The second group
+ * (just below) contains the ones implemented without.  These are also sorted
+ * in rough order of the frequency of their use, except that \v should be last,
+ * as it isn't a real Posix character class, and some (small) inefficiencies in
+ * regular expression handling would be introduced by putting it in the middle
+ * of those that are.  Also, cntrl and ascii come after the others as it may be
+ * useful to group these which have no members that match above Latin1, (or
+ * above ASCII in the latter case) */
+
+#  define _CC_SPACE              9      /* \s */
+#  define _CC_BLANK             10      /* [:blank:] */
+#  define _CC_XDIGIT            11      /* [:xdigit:] */
+#  define _CC_PSXSPC            12      /* [:space:] */
+#  define _CC_CNTRL             13      /* [:cntrl:] */
+#  define _CC_ASCII             14      /* [:ascii:] */
+#  define _CC_VERTSPACE         15      /* \v */
+
 #  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 
+/* The members of the third group below do not need to be coordinated with data
+ * structures in regcomp.[ch] and regexec.c */
 #  define _CC_IDFIRST           16
 #  define _CC_CHARNAME_CONT     17
 #  define _CC_NONLATIN1_FOLD    18
