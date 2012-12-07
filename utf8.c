@@ -1498,12 +1498,24 @@ Perl_is_uni_alnumc(pTHX_ UV c)
     return is_utf8_alnumc(tmpbuf);
 }
 
+bool    /* Internal function so we can deprecate the external one, and call
+           this one from other deprecated functions in this file */
+S_is_utf8_idfirst(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    if (*p == '_')
+	return TRUE;
+    /* is_utf8_idstart would be more logical. */
+    return is_utf8_common(p, &PL_utf8_idstart, "IdStart");
+}
+
 bool
 Perl_is_uni_idfirst(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_idfirst(tmpbuf);
+    return S_is_utf8_idfirst(aTHX_ tmpbuf);
 }
 
 bool
@@ -1873,7 +1885,7 @@ Perl_is_uni_blank_lc(pTHX_ UV c)
     if (c < 256) {
         return isBLANK_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_blank(c);
+    return isBLANK_uni(c);
 }
 
 bool
@@ -1882,7 +1894,7 @@ Perl_is_uni_space_lc(pTHX_ UV c)
     if (c < 256) {
         return isSPACE_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_space(c);
+    return isSPACE_uni(c);
 }
 
 bool
@@ -1918,7 +1930,7 @@ Perl_is_uni_cntrl_lc(pTHX_ UV c)
     if (c < 256) {
         return isCNTRL_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_cntrl(c);
+    return 0;
 }
 
 bool
@@ -1954,7 +1966,7 @@ Perl_is_uni_xdigit_lc(pTHX_ UV c)
     if (c < 256) {
        return isXDIGIT_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_xdigit(c);
+    return isXDIGIT_uni(c);
 }
 
 U32
@@ -2050,10 +2062,7 @@ Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 
     PERL_ARGS_ASSERT_IS_UTF8_IDFIRST;
 
-    if (*p == '_')
-	return TRUE;
-    /* is_utf8_idstart would be more logical. */
-    return is_utf8_common(p, &PL_utf8_idstart, "IdStart");
+    return S_is_utf8_idfirst(aTHX_ p);
 }
 
 bool

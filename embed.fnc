@@ -602,24 +602,24 @@ pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
-AMpPR	|U32	|to_uni_upper_lc|U32 c
-AMpPR	|U32	|to_uni_title_lc|U32 c
-AMpPR	|U32	|to_uni_lower_lc|U32 c
+ADMpPR	|U32	|to_uni_upper_lc|U32 c
+ADMpPR	|U32	|to_uni_title_lc|U32 c
+ADMpPR	|U32	|to_uni_lower_lc|U32 c
 AMpPR	|bool	|is_uni_alnum	|UV c
 AMpPR	|bool	|is_uni_alnumc	|UV c
 AMpPR	|bool	|is_uni_idfirst	|UV c
 AMpPR	|bool	|is_uni_alpha	|UV c
-AMpPR	|bool	|is_uni_ascii	|UV c
-AMpPR	|bool	|is_uni_blank	|UV c
-AMpPR	|bool	|is_uni_space	|UV c
-AMpPR	|bool	|is_uni_cntrl	|UV c
+ADMpPR	|bool	|is_uni_ascii	|UV c
+ADMpPR	|bool	|is_uni_blank	|UV c
+ADMpPR	|bool	|is_uni_space	|UV c
+ADMpPR	|bool	|is_uni_cntrl	|UV c
 AMpPR	|bool	|is_uni_graph	|UV c
 AMpPR	|bool	|is_uni_digit	|UV c
 AMpPR	|bool	|is_uni_upper	|UV c
 AMpPR	|bool	|is_uni_lower	|UV c
 AMpPR	|bool	|is_uni_print	|UV c
 AMpPR	|bool	|is_uni_punct	|UV c
-AMpPR	|bool	|is_uni_xdigit	|UV c
+ADMpPR	|bool	|is_uni_xdigit	|UV c
 AMp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
 #ifdef PERL_IN_UTF8_C
@@ -638,20 +638,20 @@ AMmp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|const U8 flags
 AMpPR	|bool	|is_uni_alnum_lc|UV c
 AMpPR	|bool	|is_uni_alnumc_lc|UV c
-AMpPR	|bool	|is_uni_idfirst_lc|UV c
+ADMpPR	|bool	|is_uni_idfirst_lc|UV c
 AMpR	|bool	|_is_uni_perl_idstart|UV c
 AMpPR	|bool	|is_uni_alpha_lc|UV c
-AMpPR	|bool	|is_uni_ascii_lc|UV c
-AMpPR	|bool	|is_uni_space_lc|UV c
-AMpPR	|bool	|is_uni_blank_lc|UV c
-AMpPR	|bool	|is_uni_cntrl_lc|UV c
+ADMpPR	|bool	|is_uni_ascii_lc|UV c
+ADMpPR	|bool	|is_uni_space_lc|UV c
+ADMpPR	|bool	|is_uni_blank_lc|UV c
+ADMpPR	|bool	|is_uni_cntrl_lc|UV c
 AMpPR	|bool	|is_uni_graph_lc|UV c
 AMpPR	|bool	|is_uni_digit_lc|UV c
 AMpPR	|bool	|is_uni_upper_lc|UV c
 AMpPR	|bool	|is_uni_lower_lc|UV c
 AMpPR	|bool	|is_uni_print_lc|UV c
 AMpPR	|bool	|is_uni_punct_lc|UV c
-AMpPR	|bool	|is_uni_xdigit_lc|UV c
+ADMpPR	|bool	|is_uni_xdigit_lc|UV c
 Anpd	|bool	|is_ascii_string|NN const U8 *s|STRLEN len
 AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Anpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
@@ -660,26 +660,26 @@ Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NULLOK const U8 **ep
 Anpd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|NULLOK const U8 **ep|NULLOK STRLEN *el
 AMpR	|bool	|is_utf8_alnum	|NN const U8 *p
 AMpR	|bool	|is_utf8_alnumc	|NN const U8 *p
-AMpR	|bool	|is_utf8_idfirst|NN const U8 *p
-AMpR	|bool	|is_utf8_xidfirst|NN const U8 *p
+ADMpR	|bool	|is_utf8_idfirst|NN const U8 *p
+ADMpR	|bool	|is_utf8_xidfirst|NN const U8 *p
 AMpR	|bool	|_is_utf8_perl_idstart|NN const U8 *p
-AMpR	|bool	|is_utf8_idcont	|NN const U8 *p
-AMpR	|bool	|is_utf8_xidcont	|NN const U8 *p
+ADMpR	|bool	|is_utf8_idcont	|NN const U8 *p
+ADMpR	|bool	|is_utf8_xidcont	|NN const U8 *p
 AMpR	|bool	|is_utf8_alpha	|NN const U8 *p
-AMpR	|bool	|is_utf8_ascii	|NN const U8 *p
-AMpR	|bool	|is_utf8_blank	|NN const U8 *p
-AMpR	|bool	|is_utf8_space	|NN const U8 *p
-AMpR	|bool	|is_utf8_perl_space	|NN const U8 *p
-AMpR	|bool	|is_utf8_perl_word	|NN const U8 *p
-AMpR	|bool	|is_utf8_cntrl	|NN const U8 *p
+ADMpR	|bool	|is_utf8_ascii	|NN const U8 *p
+ADMpR	|bool	|is_utf8_blank	|NN const U8 *p
+ADMpR	|bool	|is_utf8_space	|NN const U8 *p
+ADMpR	|bool	|is_utf8_perl_space	|NN const U8 *p
+ADMpR	|bool	|is_utf8_perl_word	|NN const U8 *p
+ADMpR	|bool	|is_utf8_cntrl	|NN const U8 *p
 AMpR	|bool	|is_utf8_digit	|NN const U8 *p
-AMpR	|bool	|is_utf8_posix_digit	|NN const U8 *p
+ADMpR	|bool	|is_utf8_posix_digit	|NN const U8 *p
 AMpR	|bool	|is_utf8_graph	|NN const U8 *p
 AMpR	|bool	|is_utf8_upper	|NN const U8 *p
 AMpR	|bool	|is_utf8_lower	|NN const U8 *p
 AMpR	|bool	|is_utf8_print	|NN const U8 *p
 AMpR	|bool	|is_utf8_punct	|NN const U8 *p
-AMpR	|bool	|is_utf8_xdigit	|NN const U8 *p
+ADMpR	|bool	|is_utf8_xdigit	|NN const U8 *p
 AMpR	|bool	|is_utf8_mark	|NN const U8 *p
 : Used in perly.y
 p	|OP*	|jmaybe		|NN OP *o

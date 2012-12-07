@@ -53,6 +53,41 @@ an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Various XS-callable functions are now deprecated
+
+The following functions will be removed from a future version of Perl,
+and should not be used.  With participating C compilers (e.g., gcc),
+compiling any file that uses any of these will generate a warning.
+These were not intended for public use; there are equivalent, faster,
+macros for most of them.  See L<perlapi/Character classes>:
+C<is_uni_ascii>,
+C<is_uni_ascii_lc>,
+C<is_uni_blank>,
+C<is_uni_blank_lc>,
+C<is_uni_cntrl>,
+C<is_uni_cntrl_lc>,
+C<is_uni_idfirst_lc>,
+C<is_uni_space>,
+C<is_uni_space_lc>,
+C<is_uni_xdigit>,
+C<is_uni_xdigit_lc>,
+C<is_utf8_ascii>,
+C<is_utf8_blank>,
+C<is_utf8_cntrl>,
+C<is_utf8_idcont>,
+C<is_utf8_idfirst>,
+C<is_utf8_perl_space>,
+C<is_utf8_perl_word>,
+C<is_utf8_posix_digit>,
+C<is_utf8_space>,
+C<is_utf8_xdigit>.
+C<is_utf8_xidcont>,
+C<is_utf8_xidfirst>,
+C<to_uni_lower_lc>,
+C<to_uni_title_lc>,
+and
+C<to_uni_upper_lc>.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.

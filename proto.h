@@ -1698,26 +1698,32 @@ PERL_CALLCONV bool	Perl_is_uni_alpha_lc(pTHX_ UV c)
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_ascii(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_ascii_lc(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_blank(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_blank_lc(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_cntrl(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_cntrl_lc(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
@@ -1742,6 +1748,7 @@ PERL_CALLCONV bool	Perl_is_uni_idfirst(pTHX_ UV c)
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_idfirst_lc(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
@@ -1770,10 +1777,12 @@ PERL_CALLCONV bool	Perl_is_uni_punct_lc(pTHX_ UV c)
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_space(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_space_lc(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
@@ -1786,10 +1795,12 @@ PERL_CALLCONV bool	Perl_is_uni_upper_lc(pTHX_ UV c)
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_xdigit(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
 PERL_CALLCONV bool	Perl_is_uni_xdigit_lc(pTHX_ UV c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
@@ -1812,12 +1823,14 @@ PERL_CALLCONV bool	Perl_is_utf8_alpha(pTHX_ const U8 *p)
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_ascii(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_ASCII	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_blank(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_BLANK	\
@@ -1836,6 +1849,7 @@ PERL_CALLCONV STRLEN	Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end)
 	assert(buf); assert(buf_end)
 
 PERL_CALLCONV bool	Perl_is_utf8_cntrl(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_CNTRL	\
@@ -1854,12 +1868,14 @@ PERL_CALLCONV bool	Perl_is_utf8_graph(pTHX_ const U8 *p)
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_idcont(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_IDCONT	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_idfirst(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_IDFIRST	\
@@ -1878,18 +1894,21 @@ PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_perl_space(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_perl_word(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT	\
@@ -1908,6 +1927,7 @@ PERL_CALLCONV bool	Perl_is_utf8_punct(pTHX_ const U8 *p)
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_space(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_SPACE	\
@@ -1935,18 +1955,21 @@ PERL_CALLCONV bool	Perl_is_utf8_upper(pTHX_ const U8 *p)
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_xdigit(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_XDIGIT	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_xidcont(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_XIDCONT	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl_is_utf8_xidfirst(pTHX_ const U8 *p)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_IS_UTF8_XIDFIRST	\
@@ -4463,6 +4486,7 @@ PERL_CALLCONV UV	Perl_to_uni_lower(pTHX_ UV c, U8 *p, STRLEN *lenp)
 	assert(p); assert(lenp)
 
 PERL_CALLCONV U32	Perl_to_uni_lower_lc(pTHX_ U32 c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
@@ -4473,6 +4497,7 @@ PERL_CALLCONV UV	Perl_to_uni_title(pTHX_ UV c, U8 *p, STRLEN *lenp)
 	assert(p); assert(lenp)
 
 PERL_CALLCONV U32	Perl_to_uni_title_lc(pTHX_ U32 c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
@@ -4483,6 +4508,7 @@ PERL_CALLCONV UV	Perl_to_uni_upper(pTHX_ UV c, U8 *p, STRLEN *lenp)
 	assert(p); assert(lenp)
 
 PERL_CALLCONV U32	Perl_to_uni_upper_lc(pTHX_ U32 c)
+			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
