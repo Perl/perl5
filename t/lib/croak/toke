@@ -28,6 +28,50 @@ EXPECT
 The lexical_subs feature is experimental at - line 2.
 Missing name in "state sub" at - line 2.
 ########
+# NAME Integer constant overloading returning undef
+use overload;
+BEGIN { overload::constant integer => sub {} }
+1
+EXPECT
+Constant(undef): Call to &{$^H{integer}} did not return a defined value at - line 3, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME Float constant overloading returning undef
+use overload;
+BEGIN { overload::constant float => sub {} }
+1.1
+EXPECT
+Constant(undef): Call to &{$^H{float}} did not return a defined value at - line 3, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME Binary constant overloading returning undef
+use overload;
+BEGIN { overload::constant binary => sub {} }
+0x1
+EXPECT
+Constant(undef): Call to &{$^H{binary}} did not return a defined value at - line 3, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME String constant overloading returning undef
+use overload;
+BEGIN { overload::constant q => sub {} }
+'1', "1$_", tr"a"", s""a"
+EXPECT
+Constant(q): Call to &{$^H{q}} did not return a defined value at - line 3, near "'1'"
+Constant(qq): Call to &{$^H{q}} did not return a defined value at - line 3, within string
+Constant(tr): Call to &{$^H{q}} did not return a defined value at - line 3, within string
+Constant(s): Call to &{$^H{q}} did not return a defined value at - line 3, within string
+Execution of - aborted due to compilation errors.
+########
+# NAME Regexp constant overloading returning undef
+use overload;
+BEGIN { overload::constant qr => sub {} }
+/a/, m'a'
+EXPECT
+Constant(qq): Call to &{$^H{qr}} did not return a defined value at - line 3, within pattern
+Constant(q): Call to &{$^H{qr}} did not return a defined value at - line 3, within pattern
+Execution of - aborted due to compilation errors.
+########
 # NAME Unterminated delimiter for here document
 <<"foo
 EXPECT
