@@ -178,7 +178,6 @@ struct regnode_2 {
 
 
 #define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
-#define ANYOF_CLASSBITMAP_SIZE	 4	/* up to 32 (8*4) named classes */
 
 /* also used by trie */
 struct regnode_charclass {
@@ -196,7 +195,7 @@ struct regnode_charclass_class {
     U16 next_off;
     U32 arg1;					/* used as ptr in S_regclass */
     char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time */
-    char classflags[ANYOF_CLASSBITMAP_SIZE];	/* and run-time */
+    U32 classflags;	                        /* and run-time */
 };
 
 /* XXX fix this description.
@@ -459,16 +458,18 @@ struct regnode_charclass_class {
 
 #define ANYOF_BIT(c)		(1 << ((c) & 7))
 
-#define ANYOF_CLASS_BYTE(p, c)	(((struct regnode_charclass_class*)(p))->classflags[((c) >> 3) & 3])
-#define ANYOF_CLASS_SET(p, c)	(ANYOF_CLASS_BYTE(p, c) |=  ANYOF_BIT(c))
-#define ANYOF_CLASS_CLEAR(p, c)	(ANYOF_CLASS_BYTE(p, c) &= ~ANYOF_BIT(c))
-#define ANYOF_CLASS_TEST(p, c)	(ANYOF_CLASS_BYTE(p, c) &   ANYOF_BIT(c))
+#define ANYOF_CLASS_SET(p, c)	(((struct regnode_charclass_class*) (p))->classflags |= (1U << (c)))
+#define ANYOF_CLASS_CLEAR(p, c)	(((struct regnode_charclass_class*) (p))->classflags &= ~ (1U <<(c)))
+#define ANYOF_CLASS_TEST(p, c)	(((struct regnode_charclass_class*) (p))->classflags & (1U << (c)))
 
-#define ANYOF_CLASS_ZERO(ret)	Zero(((struct regnode_charclass_class*)(ret))->classflags, ANYOF_CLASSBITMAP_SIZE, char)
-#define ANYOF_CLASS_SETALL(ret)		\
-	memset (((struct regnode_charclass_class*)(ret))->classflags, 255, ANYOF_CLASSBITMAP_SIZE)
+#define ANYOF_CLASS_ZERO(ret)	STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = 0; } STMT_END
+
+/* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
+#define ANYOF_CLASS_SETALL(ret) STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = ((1U << ((ANYOF_MAX) - 1))) - 1; } STMT_END
+
+#define ANYOF_CLASS_OR(source, dest) STMT_START { (dest)->classflags |= source->classflags ; } STMT_END
+
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
-
 #define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)
 #define ANYOF_BITMAP_BYTE(p, c)	(ANYOF_BITMAP(p)[(((U8)(c)) >> 3) & 31])
 #define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
@@ -486,12 +487,9 @@ struct regnode_charclass_class {
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
 
-#if ANYOF_CLASSBITMAP_SIZE != 4
-#   error ANYOF_CLASSBITMAP_SIZE is expected to be 4
-#endif
-#define ANYOF_CLASS_TEST_ANY_SET(p) ((ANYOF_FLAGS(p) & ANYOF_CLASS)         \
-	&& memNE (((struct regnode_charclass_class*)(p))->classflags,	    \
-		    "\0\0\0\0", ANYOF_CLASSBITMAP_SIZE))
+#define ANYOF_CLASS_TEST_ANY_SET(p)                               \
+        ((ANYOF_FLAGS(p) & (ANYOF_CLASS|ANYOF_IS_SYNTHETIC))         \
+	 && (((struct regnode_charclass_class*)(p))->classflags))
 /*#define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
  * */
 

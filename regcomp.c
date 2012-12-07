@@ -992,11 +992,7 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 	    /* OR char bitmap and class bitmap separately */
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
 		cl->bitmap[i] |= or_with->bitmap[i];
-	    if (ANYOF_CLASS_TEST_ANY_SET(or_with)) {
-		for (i = 0; i < ANYOF_CLASSBITMAP_SIZE; i++)
-		    cl->classflags[i] |= or_with->classflags[i];
-		cl->flags |= ANYOF_CLASS;
-	    }
+            ANYOF_CLASS_OR(or_with, cl);
 	}
 	else { /* XXXX: logic is complicated, leave it along for a moment. */
 	    cl_anything(pRExC_state, cl);
