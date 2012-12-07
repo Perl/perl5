@@ -415,24 +415,27 @@ struct regnode_charclass_class {
 #define ANYOF_BLANK    ((_CC_BLANK) * 2)     /* GNU extension: space and tab: non-vertical space */
 #define ANYOF_NBLANK   ((ANYOF_BLANK) + 1)
 
-#define ANYOF_MAX      ((ANYOF_NBLANK) + 1) /* So upper loop limit is written:
-                                               '< ANYOF_MAX' */
-#if (ANYOF_MAX > 32)                        /* Must fit in 32-bit word */
-#   error Problem with handy.h _CC_foo #defines
-#endif
-
 /* pseudo classes below this, not stored in the class bitmap, but used as flags
    during compilation of char classes */
 
-#define ANYOF_VERTWS    ((ANYOF_MAX)+0)
-#define ANYOF_NVERTWS   ((ANYOF_MAX)+1)
+#define ANYOF_VERTWS    ((_CC_VERTSPACE) * 2)
+#define ANYOF_NVERTWS   ((ANYOF_VERTWS)+1)
 
-#if (ANYOF_VERTWS != (_CC_VERTSPACE) * 2) \
-     || (_CC_VERTSPACE != _HIGHEST_REGCOMP_DOT_H_SYNC)
-#   error Problem with handy.h _CC_VERTSPACE #define
+/* It is best if this is the last one, as all above it are stored as bits in a
+ * bitmap, and it isn't part of that bitmap */
+#if _CC_VERTSPACE != _HIGHEST_REGCOMP_DOT_H_SYNC
+#   error Problem with handy.h _HIGHEST_REGCOMP_DOT_H_SYNC #define
 #endif
 
-#define ANYOF_HORIZWS	((ANYOF_MAX)+2)
+#define ANYOF_MAX      (ANYOF_VERTWS) /* So upper loop limit is written:
+                                       *       '< ANYOF_MAX'
+                                       * Hence doesn't include VERTWS, as that
+                                       * is a pseudo class */
+#if (ANYOF_MAX > 32)   /* Must fit in 32-bit word */
+#   error Problem with handy.h _CC_foo #defines
+#endif
+
+#define ANYOF_HORIZWS	((ANYOF_MAX)+2) /* = (ANYOF_NVERTWS + 1) */
 #define ANYOF_NHORIZWS	((ANYOF_MAX)+3)
 
 #define ANYOF_UNIPROP   ((ANYOF_MAX)+4)  /* Used to indicate a Unicode
