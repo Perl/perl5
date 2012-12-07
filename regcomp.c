@@ -12630,7 +12630,7 @@ parseit:
 
         /* If the highest code point is within Latin1, we can use the
          * compiled-in Alphas list, and not have to go out to disk.  This
-         * yields two false positives, the masculine and feminine oridinal
+         * yields two false positives, the masculine and feminine ordinal
          * indicators, which are weeded out below using the
          * IS_IN_SOME_FOLD_L1() macro */
         if (invlist_highest(cp_list) < 256) {
@@ -12672,7 +12672,7 @@ parseit:
                         assert(PL_utf8_tofold); /* Verify that worked */
                     }
                     PL_utf8_foldclosures =
-                                        _swash_inversion_hash(PL_utf8_tofold);
+                                    _swash_inversion_hash(PL_utf8_tofold);
                 }
             }
 
