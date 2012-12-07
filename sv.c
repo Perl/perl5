@@ -7667,8 +7667,8 @@ S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 static char *
 S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 {
-    I32 bytesread;
-    const U32 recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
+    SSize_t bytesread;
+    const STRLEN recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
       /* Grab the size of the record we're getting */
     char *const buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
 #ifdef VMS
