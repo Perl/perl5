@@ -1123,6 +1123,16 @@ EXTCONST U32 PL_charclass[];
 #define _generic_utf8(classnum, function, p)  \
                                     _generic_utf8_utf8(classnum, p, function(p))
 
+/* Like the above, but should be used only when it is known that there are no
+ * characters in the range 128-255 which the class is TRUE for.  Hence it can
+ * skip the tests for this range */
+#define _generic_utf8_no_upper_latin1(classnum, function, p)                   \
+                                         (UTF8_IS_INVARIANT(*(p))              \
+                                         ? _generic_isCC(*(p), classnum)       \
+                                         : (UTF8_IS_ABOVE_LATIN1(*(p)))        \
+                                           ? function(p)                       \
+                                           : 0)
+
 #define isALNUMC_utf8(p)        _generic_utf8(_CC_ALNUMC, is_utf8_alnumc, p)
 #define isALNUM_utf8(p)         isWORDCHAR_utf8(p)  /* back compat */
 #define isALPHA_utf8(p)         _generic_utf8(_CC_ALPHA, is_utf8_alpha, p)
@@ -1131,7 +1141,8 @@ EXTCONST U32 PL_charclass[];
                                              */
 #define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_HORIZWS_high, p)
 #define isCNTRL_utf8(p)         _generic_utf8_utf8(_CC_CNTRL, p, 0)
-#define isDIGIT_utf8(p)         _generic_utf8(_CC_DIGIT, is_utf8_digit, p)
+#define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT,      \
+                                                              is_utf8_digit, p)
 #define isGRAPH_utf8(p)         _generic_utf8(_CC_GRAPH, is_utf8_graph, p)
 #define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
 
@@ -1155,7 +1166,8 @@ EXTCONST U32 PL_charclass[];
 #define isUPPER_utf8(p)         _generic_utf8(_CC_UPPER, is_utf8_upper, p)
 #define isVERTWS_utf8(p)        _generic_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
 #define isWORDCHAR_utf8(p)      _generic_utf8(_CC_WORDCHAR, is_utf8_alnum, p)
-#define isXDIGIT_utf8(p)        _generic_utf8(_CC_XDIGIT, is_XDIGIT_high, p)
+#define isXDIGIT_utf8(p)        _generic_utf8_no_upper_latin1(_CC_XDIGIT,      \
+                                                              is_XDIGIT_high, p)
 
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
