@@ -764,6 +764,29 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * Latin1 range from the ALPHA bit only in two relatively unimportant
  * characters: the masculine and feminine ordinal indicators */
 
+#if defined(PERL_CORE) || defined(PERL_EXT)
+/* An enum version of the character class numbers, to help compilers
+ * optimize */
+typedef enum {
+    _CC_ENUM_ALNUMC         = _CC_ALNUMC,
+    _CC_ENUM_ALPHA          = _CC_ALPHA,
+    _CC_ENUM_DIGIT          = _CC_DIGIT,
+    _CC_ENUM_GRAPH          = _CC_GRAPH,
+    _CC_ENUM_LOWER          = _CC_LOWER,
+    _CC_ENUM_PRINT          = _CC_PRINT,
+    _CC_ENUM_PUNCT          = _CC_PUNCT,
+    _CC_ENUM_UPPER          = _CC_UPPER,
+    _CC_ENUM_WORDCHAR       = _CC_WORDCHAR,
+    _CC_ENUM_SPACE          = _CC_SPACE,
+    _CC_ENUM_BLANK          = _CC_BLANK,
+    _CC_ENUM_XDIGIT         = _CC_XDIGIT,
+    _CC_ENUM_CNTRL          = _CC_CNTRL,
+    _CC_ENUM_PSXSPC         = _CC_PSXSPC,
+    _CC_ENUM_ASCII          = _CC_ASCII,
+    _CC_ENUM_VERTSPACE      = _CC_VERTSPACE
+} _char_class_number;
+#endif
+
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
 #    include "l1_char_class_tab.h"
