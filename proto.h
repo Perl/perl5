@@ -6788,6 +6788,9 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 #define PERL_ARGS_ASSERT_FIND_BYCLASS	\
 	assert(prog); assert(c); assert(s); assert(strend)
 
+STATIC bool	S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
+			__attribute__warn_unused_result__;
+
 PERL_STATIC_INLINE bool	S_is_utf8_X_LVT(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

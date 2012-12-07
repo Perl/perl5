@@ -717,7 +717,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * has a name not used here, it won't compile.
  *
  * The first group of these is ordered in what I (khw) estimate to be the
- * frequency of their use. */
+ * frequency of their use.  This gives a slight edge to exiting a loop earlier
+ * (in reginclass() in regexec.c) */
 #  define _CC_WORDCHAR           0      /* \w and [:word:] */
 #  define _CC_DIGIT              1      /* \d and [:digit:] */
 #  define _CC_ALPHA              2      /* [:alpha:] */

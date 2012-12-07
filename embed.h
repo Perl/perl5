@@ -969,6 +969,7 @@
 #  if defined(PERL_IN_REGEXEC_C)
 #define core_regclass_swash(a,b,c,d)	S_core_regclass_swash(aTHX_ a,b,c,d)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
+#define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define is_utf8_X_LVT(a)	S_is_utf8_X_LVT(aTHX_ a)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
 #define regcppop(a)		S_regcppop(aTHX_ a)

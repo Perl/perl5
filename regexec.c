@@ -496,6 +496,45 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix)
 
 #define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
 
+STATIC bool
+S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
+{
+    /* Returns a boolean as to whether or not 'character' is a member of the
+     * Posix character class given by 'classnum' that should be equivalent to a
+     * value in the typedef '_char_class_number'.
+     *
+     * Ideally this could be replaced by a just an array of function pointers
+     * to the C library functions that implement the macros this calls.
+     * However, to compile, the precise function signatures are required, and
+     * these may vary from platform to to platform.  To avoid having to figure
+     * out what those all are on each platform, I (khw) am using this method,
+     * which adds an extra layer of function call overhead.  But we don't
+     * particularly care about performance with locales anyway. */
+
+    switch ((_char_class_number) classnum) {
+        case _CC_ENUM_ALNUMC:    return isALNUMC_LC(character);
+        case _CC_ENUM_ALPHA:     return isALPHA_LC(character);
+        case _CC_ENUM_DIGIT:     return isDIGIT_LC(character);
+        case _CC_ENUM_GRAPH:     return isGRAPH_LC(character);
+        case _CC_ENUM_LOWER:     return isLOWER_LC(character);
+        case _CC_ENUM_PRINT:     return isPRINT_LC(character);
+        case _CC_ENUM_PUNCT:     return isPUNCT_LC(character);
+        case _CC_ENUM_UPPER:     return isUPPER_LC(character);
+        case _CC_ENUM_WORDCHAR:  return isWORDCHAR_LC(character);
+        case _CC_ENUM_SPACE:     return isSPACE_LC(character);
+        case _CC_ENUM_BLANK:     return isBLANK_LC(character);
+        case _CC_ENUM_XDIGIT:    return isXDIGIT_LC(character);
+        case _CC_ENUM_CNTRL:     return isCNTRL_LC(character);
+        case _CC_ENUM_PSXSPC:    return isPSXSPC_LC(character);
+        case _CC_ENUM_ASCII:     return isASCII_LC(character);
+        default:    /* VERTSPACE should never occur in locales */
+            Perl_croak(aTHX_ "panic: isFOO_lc() has an unexpected character class '%d'", classnum);
+    }
+
+    assert(0); /* NOTREACHED */
+    return FALSE;
+}
+
 /*
  * pregexec and friends
  */
@@ -7419,40 +7458,40 @@ S_reginclass(pTHX_ const regexp * const prog, const regnode * const n, const U8*
 	    {
 		match = TRUE;
 	    }
-	    else if (ANYOF_CLASS_TEST_ANY_SET(n) &&
-		     ((ANYOF_CLASS_TEST(n, ANYOF_ALNUM)   &&  isALNUM_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NALNUM)  && !isALNUM_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_SPACE)   &&  isSPACE_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NSPACE)  && !isSPACE_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_DIGIT)   &&  isDIGIT_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NDIGIT)  && !isDIGIT_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_ALNUMC)  &&  isALNUMC_LC(c)) ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NALNUMC) && !isALNUMC_LC(c)) ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_ALPHA)   &&  isALPHA_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NALPHA)  && !isALPHA_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_ASCII)   &&  isASCII_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NASCII)  && !isASCII_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_CNTRL)   &&  isCNTRL_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NCNTRL)  && !isCNTRL_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_GRAPH)   &&  isGRAPH_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NGRAPH)  && !isGRAPH_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_LOWER)   &&  isLOWER_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NLOWER)  && !isLOWER_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_PRINT)   &&  isPRINT_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NPRINT)  && !isPRINT_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_PUNCT)   &&  isPUNCT_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NPUNCT)  && !isPUNCT_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_UPPER)   &&  isUPPER_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NUPPER)  && !isUPPER_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_XDIGIT)  &&  isXDIGIT(c))    ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NXDIGIT) && !isXDIGIT(c))    ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_PSXSPC)  &&  isPSXSPC(c))    ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NPSXSPC) && !isPSXSPC(c))    ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_BLANK)   &&  isBLANK_LC(c))  ||
-		      (ANYOF_CLASS_TEST(n, ANYOF_NBLANK)  && !isBLANK_LC(c))
-		     ) /* How's that for a conditional? */
-	    ) {
-		match = TRUE;
+	    else if (ANYOF_CLASS_TEST_ANY_SET(n)) {
+
+                /* The data structure is arranged so bits 0, 2, 4, ... are set
+                 * if the class includes the Posix character class given by
+                 * bit/2; and 1, 3, 5, ... are set if the class includes the
+                 * complemented Posix class given by int(bit/2).  So we loop
+                 * through the bits, each time changing whether we complement
+                 * the result or not.  Suppose for the sake of illustration
+                 * that bits 0-3 mean respectively, \w, \W, \s, \S.  If bit 0
+                 * is set, it means there is a match for this ANYOF node if the
+                 * character is in the class given by the expression (0 / 2 = 0
+                 * = \w).  If it is in that class, isFOO_lc() will return 1,
+                 * and since 'to_complement' is 0, the result will stay TRUE,
+                 * and we exit the loop.  Suppose instead that bit 0 is 0, but
+                 * bit 1 is 1.  That means there is a match if the character
+                 * matches \W.  We won't bother to call isFOO_lc() on bit 0,
+                 * but will on bit 1.  On the second iteration 'to_complement'
+                 * will be 1, so the exclusive or will reverse things, so we
+                 * are testing for \W.  On the third iteration, 'to_complement'
+                 * will be 0, and we would be testing for \s; the fourth
+                 * iteration would test for \S, etc. */
+
+                int count = 0;
+                int to_complement = 0;
+                while (count < ANYOF_MAX) {
+                    if (ANYOF_CLASS_TEST(n, count)
+                        && to_complement ^ cBOOL(isFOO_lc(count/2, (U8) c)))
+                    {
+                        match = TRUE;
+                        break;
+                    }
+                    count++;
+                    to_complement ^= 1;
+                }
 	    }
 	}
     }
