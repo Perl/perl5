@@ -30,6 +30,57 @@ Missing name in "state sub" at - line 2.
 ########
 # NAME Integer constant overloading returning undef
 use overload;
+BEGIN { overload::constant integer => sub {}; undef *^H }
+1
+EXPECT
+Constant(undef) unknown at - line 3, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME Float constant overloading returning undef
+use overload;
+BEGIN { overload::constant float => sub {}; undef *^H }
+1.1
+EXPECT
+Constant(undef) unknown at - line 3, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME Binary constant overloading returning undef
+use overload;
+BEGIN { overload::constant binary => sub {}; undef *^H }
+0x1
+EXPECT
+Constant(undef) unknown at - line 3, at end of line
+Execution of - aborted due to compilation errors.
+########
+# NAME String constant overloading returning undef
+use overload;
+BEGIN { overload::constant q => sub {}; undef *^H }
+'1', "1$_", tr"a"", s""a"
+EXPECT
+Constant(q) unknown at - line 3, near "'1'"
+Constant(qq) unknown at - line 3, within string
+Constant(tr) unknown at - line 3, within string
+Constant(s) unknown at - line 3, within string
+Execution of - aborted due to compilation errors.
+########
+# NAME Regexp constant overloading when *^H is undefined
+use overload;
+BEGIN { overload::constant qr => sub {}; undef *^H }
+/a/, m'a'
+EXPECT
+Constant(qq) unknown at - line 3, within pattern
+Constant(q) unknown at - line 3, within pattern
+Execution of - aborted due to compilation errors.
+########
+# NAME \N{...} when charnames fails to load but without an error
+BEGIN { ++$_ for @INC{"charnames.pm","_charnames.pm"} }
+"\N{a}"
+EXPECT
+Constant(\N{a}) unknown at - line 2, within string
+Execution of - aborted due to compilation errors.
+########
+# NAME Integer constant overloading returning undef
+use overload;
 BEGIN { overload::constant integer => sub {} }
 1
 EXPECT
