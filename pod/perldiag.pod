@@ -1504,17 +1504,24 @@ thread has entered cond_wait() and thus relinquished the lock.
 to check the return value of your socket() call?  See
 L<perlfunc/connect>.
 
-=item Constant(%s)%s: %s
+=item Constant(%s): Call to &{$^H{%s}} did not return a defined value
+
+(F) The subroutine registered to handle constant overloading
+(see L<overload>) or a custom charnames handler (see
+L<charnames/CUSTOM TRANSLATORS>) returned an undefined value.
+
+=item Constant(%s): $^H{%s} is not defined
+
+(F) The parser found inconsistencies while attempting to define an
+overloaded constant.  Perhaps you forgot to load the corresponding
+L<overload> pragma?.
+
+=item Constant(%s) unknown
 
 (F) The parser found inconsistencies either while attempting to define
 an overloaded constant, or when trying to find the character name
 specified in the C<\N{...}> escape.  Perhaps you forgot to load the
 corresponding L<overload> pragma?.
-
-=item Constant(%s)%s: %s in regex; marked by <-- HERE in m/%s/
-
-(F) The parser found inconsistencies while attempting to find
-the character name specified in the C<\N{...}> escape.
 
 =item Constant is not %s reference
 
