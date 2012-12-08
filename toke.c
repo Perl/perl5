@@ -9130,11 +9130,11 @@ now_ok:
 	errstr = SvPV_const(errsv, errlen);
 	yyerror_pvn(errstr, errlen, 0); /* Duplicates the message inside eval */
 	(void)POPs;
-	res = SvREFCNT_inc_simple(sv);
+	res = SvREFCNT_inc_simple_NN(sv);
     }
     else {
  	res = POPs;
-	SvREFCNT_inc_simple_void(res);
+	SvREFCNT_inc_simple_void_NN(res);
     }
 
     PUTBACK ;
