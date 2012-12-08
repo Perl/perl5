@@ -24,7 +24,7 @@ for(`find .`) {
     next if /rm -rf/; # Could be an example from perlsec, e.g.
      # Creating one of these special blocks creates SVs, obviously
     next if /(?:END|CHECK|INIT)\s*\{/;
-    next if /^\s*(?:push|unshift|(?:\@r = )?splice|binmode|sleep)/;
+    next if /^[{(]?\s*(?:push|unshift|(?:\@r = )?splice|binmode|sleep)/;
     next if /\bselect(?:\s*|\()[^()]+,/; # 4-arg select hangs
     next if /use parent/;
     my $q = s/[\\']/sprintf "\\%02x", ord $&/gore
@@ -127,11 +127,6 @@ print "LA LA LA\n" while 1;          # loops forever
 prog => 'use Config; CHECK { $Config{awk} }',
 $p->{share_dir} = { dist => [ $p->{share_dir} ] };
 $p->{share_dir} = { dist => $p->{share_dir} };
-{ push (@Bad, $key) }
-( push @hard, $file ), next
-{ push @keep, $_ }
-{ push @$output, $x->{buff} }
-{ push (@values, $value) }
 $resp = [$resp]
 s/a|/push @bar, 1/e;
 $self->{DIR} = [grep $_, split ":", $self->{DIR}];
