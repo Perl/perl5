@@ -25,7 +25,7 @@ for(`find .`) {
      # Creating one of these special blocks creates SVs, obviously
     next if /(?:END|CHECK|INIT)\s*\{/;
     next if /^\s*(?:push|unshift|(?:\@r = )?splice|binmode|sleep)/;
-    next if /\bselect(?:\s*\()[^()]+,/; # 4-arg select hangs
+    next if /\bselect(?:\s*|\()[^()]+,/; # 4-arg select hangs
     next if /use parent/;
     my $q = s/[\\']/sprintf "\\%02x", ord $&/gore
          =~ s/\0/'."\\0".'/grid;
