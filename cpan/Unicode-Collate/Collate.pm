@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.94';
+our $VERSION = '0.95';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -1074,7 +1074,7 @@ If the revision (previously "tracking version") number of UCA is given,
 behavior of that revision is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 
-The following revisions are supported.  The default is 24.
+The following revisions are supported.  The default is 26.
 
      UCA       Unicode Standard         DUCET (@version)
    -------------------------------------------------------
