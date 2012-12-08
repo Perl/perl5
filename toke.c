@@ -9040,12 +9040,13 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	return &PL_sv_undef;
     }
 
+    sv_2mortal(sv);			/* Parent created it permanently */
     if (!table
 	|| ! (PL_hints & HINT_LOCALIZE_HH)
 	|| ! (cvp = hv_fetch(table, key, keylen, FALSE))
 	|| ! SvOK(*cvp))
     {
-	SV *msg;
+	char *msg;
 	
 	/* Here haven't found what we're looking for.  If it is charnames,
 	 * perhaps it needs to be loaded.  Try doing that before giving up */
@@ -9071,7 +9072,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	    }
 	}
 	if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
-	    msg = Perl_newSVpvf(aTHX_
+	    msg = Perl_form(aTHX_
 			       "Constant(%.*s) unknown",
 				(int)(type ? typelen : len),
 				(type ? type: s));
@@ -9082,25 +9083,21 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
             why3 = "} is not defined";
         report:
             if (*key == 'c') {
-                yyerror_pv(Perl_form(aTHX_
+                msg = Perl_form(aTHX_
                             /* The +3 is for '\N{'; -4 for that, plus '}' */
                             "Unknown charname '%.*s'", (int)typelen - 4, type + 3
-                           ),
-                           UTF ? SVf_UTF8 : 0);
-                return sv;
+                      );
             }
             else {
-                msg = Perl_newSVpvf(aTHX_ "Constant(%.*s): %s%s%s",
+                msg = Perl_form(aTHX_ "Constant(%.*s): %s%s%s",
                                     (int)(type ? typelen : len),
                                     (type ? type: s), why1, why2, why3);
             }
         }
-	yyerror(SvPVX_const(msg));
- 	SvREFCNT_dec(msg);
-  	return sv;
+	yyerror_pv(msg, UTF ? SVf_UTF8 : 0);
+  	return SvREFCNT_inc_simple_NN(sv);
     }
 now_ok:
-    sv_2mortal(sv);			/* Parent created it permanently */
     cv = *cvp;
     if (!pv && s)
   	pv = newSVpvn_flags(s, len, SVs_TEMP);
@@ -9150,6 +9147,7 @@ now_ok:
  	why2 = key;
  	why3 = "}} did not return a defined value";
  	sv = res;
+	(void)sv_2mortal(sv);
  	goto report;
     }
 

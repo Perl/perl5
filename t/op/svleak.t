@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 108;
+plan tests => 111;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -121,6 +121,19 @@ sub STORE	{ $_[0]->[$_[1]] = $_[2] }
     tie my @a, 'main';
     leak(5, 0, sub {local $a[0]}, "local \$tied[0]");
 }
+
+# Overloading
+require overload;
+eleak(2, 0, "BEGIN{overload::constant integer=>sub{}} 1,1,1,1,1,1,1,1,1,1",
+     '"too many errors" from constant overloading returning undef');
+# getting this one to leak was complicated; we have to unset LOCALIZE_HH:
+eleak(2, 0, 'BEGIN{overload::constant integer=>sub{}; $^H &= ~ 0x00020000}
+             1,1,1,1,1,1,1,1,1,1',
+     '"too many errors" from constant overloading with $^H sabotaged');
+eleak(2, 0, "BEGIN{overload::constant integer=>sub{}; undef %^H}
+             1,1,1,1,1,1,1,1,1,1",
+     '"too many errors" from constant overloading with %^H undefined');
+
 
 # [perl #74484]  repeated tries leaked SVs on the tmps stack
 
