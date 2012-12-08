@@ -1753,16 +1753,14 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       }
       if((meta = aux->xhv_mro_meta)) {
 	if (meta->mro_linear_all) {
-	    SvREFCNT_dec(MUTABLE_SV(meta->mro_linear_all));
-	    meta->mro_linear_all = NULL;
-	    /* This is just acting as a shortcut pointer.  */
-	    meta->mro_linear_current = NULL;
-	} else if (meta->mro_linear_current) {
+	    SvREFCNT_dec_NN(meta->mro_linear_all);
+	    /* mro_linear_current is just acting as a shortcut pointer,
+	       hence the else.  */
+	}
+	else
 	    /* Only the current MRO is stored, so this owns the data.
 	     */
 	    SvREFCNT_dec(meta->mro_linear_current);
-	    meta->mro_linear_current = NULL;
-	}
 	SvREFCNT_dec(meta->mro_nextmethod);
 	SvREFCNT_dec(meta->isa);
 	Safefree(meta);
