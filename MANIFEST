@@ -4240,6 +4240,7 @@ hints/utekv.sh			Hints for named architecture
 hints/uwin.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
+hv_func.h			Hash value static inline function header
 hv.h				Hash value header
 inline.h			Static inline functions
 inline_invlist.c		Inline functions for handling inversion lists

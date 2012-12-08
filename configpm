@@ -75,7 +75,7 @@ my %Extensions = map {($_,$_)}
 # This is the list from MM_VMS, plus pad.h, parser.h, perlsfio.h utf8.h
 # which it installs. It *doesn't* install perliol.h - FIXME.
 my @header_files = qw(EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h
-		      embed.h embedvar.h form.h gv.h handy.h hv.h intrpvar.h
+		      embed.h embedvar.h form.h gv.h handy.h hv.h hv_func.h intrpvar.h
 		      iperlsys.h keywords.h mg.h nostdio.h op.h opcode.h
 		      pad.h parser.h patchlevel.h perl.h perlio.h perlsdio.h
 		      perlsfio.h perlvars.h perly.h pp.h pp_proto.h proto.h
