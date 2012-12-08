@@ -908,7 +908,7 @@ Perl_nextargv(pTHX_ GV *gv)
 	{
 	    GV * const oldout = MUTABLE_GV(av_pop(PL_argvout_stack));
 	    setdefout(oldout);
-	    SvREFCNT_dec(oldout);
+	    SvREFCNT_dec_NN(oldout);
 	    return NULL;
 	}
 	setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO));
