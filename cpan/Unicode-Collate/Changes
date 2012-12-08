@@ -1,5 +1,12 @@
 Revision history for Perl module Unicode::Collate.
 
+0.95  Sat Dec  8 15:11:09 2012
+    - U::C::Locale newly supports locales: bs_Cyrl, ee.
+    - updated to CLDR 21: uk.
+    - updated to CLDR 22: th, to.
+    - added loc_bscy.t, loc_ee.t in t.
+    - modified tests: loc_th.t, loc_to.t, loc_uk.t in t.
+
 0.94  Fri Nov 23 18:45:53 2012
     - U::C::Locale newly supports locale: zh__zhuyin.
     - added Unicode::Collate::CJK::Zhuyin for zh__zhuyin.

@@ -2011,7 +2011,7 @@ use File::Glob qw(:case);
 
     'Unicode::Collate' => {
         'MAINTAINER'   => 'sadahiro',
-        'DISTRIBUTION' => 'SADAHIRO/Unicode-Collate-0.94.tar.gz',
+        'DISTRIBUTION' => 'SADAHIRO/Unicode-Collate-0.95.tar.gz',
         'FILES'        => q[cpan/Unicode-Collate],
         'EXCLUDED'     => [
             qr{N$},
