@@ -2689,6 +2689,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                         /* include the <}> */
                         e - backslash_ptr + 1);
     if (! SvPOK(res)) {
+        SvREFCNT_dec_NN(res);
         return NULL;
     }
 

@@ -284,18 +284,14 @@ eleak(2, 0, 'no warnings; 2 2;BEGIN{}',
 eleak(2, 0, "\"\$\0\356\"", 'qq containing $ <null> something');
 eleak(2, 0, 'END OF TERMS AND CONDITIONS', 'END followed by words');
 eleak(2, 0, "+ + +;qq|\\N{a}|"x10,'qq"\N{a}" after errors');
+eleak(2, 0, "qq|\\N{%}|",      'qq"\N{%}" (invalid charname)');
+eleak(2, 0, "qq|\\N{au}|;",    'qq"\N{invalid}"');
 eleak(2, 0, "qq|\\c|;"x10,     '"too many errors" from qq"\c"');
-$::TODO = 'still leaks';
-eleak(2, 0, "qq|\\N{%}|"x10,   '"too many errors" from qq"\N{%}"');
-undef $::TODO;
 eleak(2, 0, "qq|\\o|;"x10,     '"too many errors" from qq"\o"');
 eleak(2, 0, "qq|\\x{|;"x10,    '"too many errors" from qq"\x{"');
 eleak(2, 0, "qq|\\N|;"x10,     '"too many errors" from qq"\N"');
 eleak(2, 0, "qq|\\N{|;"x10,    '"too many errors" from qq"\N{"');
 eleak(2, 0, "qq|\\N{U+GETG}|;"x10,'"too many errors" from qq"\N{U+JUNK}"');
-$::TODO = 'still leaks';
-eleak(2, 0, "qq|\\N{au}|;"x10, '"too many errors" from qq"\N{invalid}"');
-undef $::TODO;
 
 
 # [perl #114764] Attributes leak scalars
