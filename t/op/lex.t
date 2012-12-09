@@ -62,7 +62,8 @@ fresh_perl_is(
   'no crash when charnames cannot load and %^H holds string'
 );
 fresh_perl_is(
-  'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"} } "\N{a}"',
+  'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"};
+          $^H{charnames} = \"foo" } "\N{a}"',
   'Constant(\N{a}) unknown at - line 1, within string' . "\n"
  ."Execution of - aborted due to compilation errors.\n",
    { stderr => 1 },
