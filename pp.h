@@ -420,18 +420,17 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 /* No longer used in core. Use AMG_CALLunary instead */
 #define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))
 
-#define tryAMAGICunTARGETlist(meth, shift, jump)		\
+#define tryAMAGICunTARGETlist(meth, jump)			\
     STMT_START {						\
 	dSP;							\
 	SV *tmpsv;						\
-	SV *arg= sp[shift];					\
+	SV *arg= *sp;						\
         int gimme = GIMME_V;                                    \
 	if (SvAMAGIC(arg) &&					\
 	    (tmpsv = amagic_call(arg, &PL_sv_undef, meth,	\
 				 AMGf_want_list | AMGf_noright	\
 				|AMGf_unary))) {		\
 	    SPAGAIN;						\
-	    sp += shift;					\
             if (gimme == G_VOID) {                              \
                 (void)POPs; /* XXX ??? */                       \
             }                                                   \

@@ -367,7 +367,7 @@ PP(pp_glob)
      * is called once and only once */
     if (SvGMAGICAL(TOPs)) TOPs = sv_2mortal(newSVsv(TOPs));
 
-    tryAMAGICunTARGETlist(iter_amg, 0, (PL_op->op_flags & OPf_SPECIAL));
+    tryAMAGICunTARGETlist(iter_amg, (PL_op->op_flags & OPf_SPECIAL));
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	/* call Perl-level glob function instead. Stack args are:
