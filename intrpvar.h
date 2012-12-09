@@ -634,7 +634,7 @@ PERLVAR(I, utf8_charname_continue, SV *)
 PERLVAR(I, last_swash_hv, HV *)
 PERLVAR(I, last_swash_tmps, U8 *)
 PERLVAR(I, last_swash_slen, STRLEN)
-PERLVARA(I, last_swash_key,12, U8)
+PERLVARA(I, last_swash_key,UTF8_MAXBYTES-1, U8)
 PERLVAR(I, last_swash_klen, U8)		/* Only needs to store 0-12  */
 
 #ifdef FCRYPT
