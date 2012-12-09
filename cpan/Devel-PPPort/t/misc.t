@@ -59,6 +59,7 @@ ok(&Devel::PPPort::UNDERBAR(), "Fred");
 
 if ($] >= 5.009002) {
   eval q{
+    no warnings "deprecated";
     my $_ = "Tony";
     ok(&Devel::PPPort::DEFSV(), "Fred");
     ok(&Devel::PPPort::UNDERBAR(), "Tony");
