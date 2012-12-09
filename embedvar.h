@@ -355,6 +355,7 @@
 #define PL_utf8_X_extend	(vTHX->Iutf8_X_extend)
 #define PL_utf8_X_regular_begin	(vTHX->Iutf8_X_regular_begin)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
+#define PL_utf8_alnumc		(vTHX->Iutf8_alnumc)
 #define PL_utf8_alpha		(vTHX->Iutf8_alpha)
 #define PL_utf8_charname_begin	(vTHX->Iutf8_charname_begin)
 #define PL_utf8_charname_continue	(vTHX->Iutf8_charname_continue)

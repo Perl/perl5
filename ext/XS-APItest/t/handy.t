@@ -11,9 +11,25 @@ sub truth($) {  # Converts values so is() works
     return (shift) ? 1 : 0;
 }
 
+require POSIX;
+my $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
+if (defined $locale && $locale eq 'C') {
+    use locale;
+
+    # Some locale implementations don't have the 128-255 characters all
+    # mean nothing.  Skip the locale tests in that situation
+    for my $i (128 .. 255) {
+        if (chr($i) =~ /[[:print:]]/) {
+            undef $locale;
+            last;
+        }
+    }
+}
+
 my %properties = (
                    # name => Lookup-property name
                    alnum => 'Word',
+                   wordchar => 'Word',
                    alnumc => 'Alnum',
                    alpha => 'Alpha',
                    ascii => 'ASCII',
@@ -92,25 +108,42 @@ foreach my $name (sort keys %properties) {
             }
             next;
         }
+
+        # vertws is always all of Unicode; ALNUM_A and ALNUM_L1 are not
+        # defined as they were added later, after WORDCHAR was created to be a
+        # clearer synonym for ALNUM
         if ($name ne 'vertws') {
-            $ret = truth eval "test_is${function}_A($i)";
+            if ($name ne 'alnum') {
+                $ret = truth eval "test_is${function}_A($i)";
+                if ($@) {
+                    fail($@);
+                }
+                else {
+                    my $truth = truth($matches && $i < 128);
+                    is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
+                }
+                $ret = truth eval "test_is${function}_L1($i)";
+                if ($@) {
+                    fail($@);
+                }
+                else {
+                    my $truth = truth($matches && $i < 256);
+                    is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
+                }
+            }
+
+            next unless defined $locale;
+            use locale;
+
+            $ret = truth eval "test_is${function}_LC($i)";
             if ($@) {
                 fail($@);
             }
             else {
                 my $truth = truth($matches && $i < 128);
-                is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
-            }
-            $ret = truth eval "test_is${function}_L1($i)";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $truth = truth($matches && $i < 256);
-                is ($ret, $truth, "is${function}_L1( $display_name ) == $truth");
+                is ($ret, $truth, "is${function}_LC( $display_name ) == $truth");
             }
         }
-        next if $name eq 'alnumc';
 
         $ret = truth eval "test_is${function}_uni($i)";
         if ($@) {
@@ -118,6 +151,19 @@ foreach my $name (sort keys %properties) {
         }
         else {
             is ($ret, $matches, "is${function}_uni( $display_name ) == $matches");
+        }
+
+        if (defined $locale && $name ne 'vertws') {
+            use locale;
+
+            $ret = truth eval "test_is${function}_LC_uvchr('$i')";
+            if ($@) {
+                fail($@);
+            }
+            else {
+                my $truth = truth($matches && ($i < 128 || $i > 255));
+                is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth");
+            }
         }
 
         my $char = chr($i);
@@ -129,6 +175,18 @@ foreach my $name (sort keys %properties) {
         }
         else {
             is ($ret, $matches, "is${function}_utf8( $display_name ) == $matches");
+        }
+
+        next if $name eq 'vertws' || ! defined $locale;
+        use locale;
+
+        $ret = truth eval "test_is${function}_LC_utf8('$char')";
+        if ($@) {
+            fail($@);
+        }
+        else {
+            my $truth = truth($matches && ($i < 128 || $i > 255));
+            is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth");
         }
     }
 }
