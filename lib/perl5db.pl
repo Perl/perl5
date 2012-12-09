@@ -2424,6 +2424,38 @@ sub _DB__at_end_of_every_command {
     return;
 }
 
+sub _DB__handle_watch_expressions
+{
+    my $self = shift;
+
+    if ( $DB::trace & 2 ) {
+        for my $n (0 .. $#DB::to_watch) {
+            $DB::evalarg = $DB::to_watch[$n];
+            local $DB::onetimeDump;    # Tell DB::eval() to not output results
+
+            # Fix context DB::eval() wants to return an array, but
+            # we need a scalar here.
+            my ($val) = join( "', '", DB::eval(@_) );
+            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
+
+            # Did it change?
+            if ( $val ne $DB::old_watch[$n] ) {
+
+                # Yep! Show the difference, and fake an interrupt.
+                $DB::signal = 1;
+                print {$DB::OUT} <<EOP;
+Watchpoint $n:\t$DB::to_watch[$n] changed:
+    old value:\t$DB::old_watch[$n]
+    new value:\t$val
+EOP
+                $DB::old_watch[$n] = $val;
+            } ## end if ($val ne $old_watch...
+        } ## end for my $n (0 ..
+    } ## end if ($trace & 2)
+
+    return;
+}
+
 # 't' is type.
 # 'm' is method.
 # 'v' is the value (i.e: method name or subroutine ref).
@@ -2528,7 +2560,7 @@ sub DB {
     my $was_signal = $signal;
 
     # If we have any watch expressions ...
-    $obj->_DB__handle_watch_expressions(@_);
+    _DB__handle_watch_expressions($obj);
 
 =head2 C<watchfunction()>
 
@@ -3178,38 +3210,6 @@ sub _DB_on_init__initialize_globals
     # If we're in single-step mode, or an interrupt (real or fake)
     # has occurred, turn off non-stop mode.
     $runnonstop = 0 if $single or $signal;
-
-    return;
-}
-
-sub _DB__handle_watch_expressions
-{
-    my $self = shift;
-
-    if ( $trace & 2 ) {
-        for my $n (0 .. $#to_watch) {
-            $evalarg = $to_watch[$n];
-            local $onetimeDump;    # Tell DB::eval() to not output results
-
-            # Fix context DB::eval() wants to return an array, but
-            # we need a scalar here.
-            my ($val) = join( "', '", DB::eval() );
-            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
-
-            # Did it change?
-            if ( $val ne $old_watch[$n] ) {
-
-                # Yep! Show the difference, and fake an interrupt.
-                $signal = 1;
-                print {$OUT} <<EOP;
-Watchpoint $n:\t$to_watch[$n] changed:
-    old value:\t$old_watch[$n]
-    new value:\t$val
-EOP
-                $old_watch[$n] = $val;
-            } ## end if ($val ne $old_watch...
-        } ## end for my $n (0 ..
-    } ## end if ($trace & 2)
 
     return;
 }

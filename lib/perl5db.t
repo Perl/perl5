@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(107);
+plan(108);
 
 my $rc_filename = '.perldb';
 
@@ -2590,6 +2590,34 @@ sub _calc_trace_wrapper
 	    (?:^main::fact.*return\ \$n\ \*\ fact\(\$n\ -\ 1\);.*)
         /msx,
         "Test t expr",
+    );
+}
+
+# Test the w for lexical variables expression.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                # This is to avoid getting the "Debugger program terminated"
+                # junk that interferes with the normal output.
+                'w $exp',
+                'n',
+                'n',
+                'n',
+                'n',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/break-on-dot',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/
+\s+old\ value:\s+'1'\n
+\s+new\ value:\s+'2'\n
+        /msx,
+        "Test w for lexical values.",
     );
 }
 
