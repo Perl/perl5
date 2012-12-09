@@ -1588,14 +1588,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* By this point we should have a stash and a name */
 
     if (!stash) {
-	if (add) {
+	if (add && !PL_in_clean_all) {
+	    SV * const namesv = newSVpvn_flags(name, len, is_utf8);
 	    SV * const err = Perl_mess(aTHX_
 		 "Global symbol \"%s%"SVf"\" requires explicit package name",
 		 (sv_type == SVt_PV ? "$"
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
-		  : ""), SVfARG(newSVpvn_flags(name, len, SVs_TEMP | is_utf8)));
+		  : ""), SVfARG(namesv));
 	    GV *gv;
+	    SvREFCNT_dec_NN(namesv);
 	    if (USE_UTF8_IN_NAMES)
 		SvUTF8_on(err);
 	    qerror(err);

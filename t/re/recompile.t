@@ -61,7 +61,7 @@ sub _comp_n {
     my $status = $?;
 
     my $count = () = $results =~ /Final program:/g;
-    if ($count == $n) {
+    if ($count == $n && !$status) {
 	pass($desc);
     }
     else {
