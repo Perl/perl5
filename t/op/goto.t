@@ -20,7 +20,7 @@ our $foo;
 while ($?) {
     $foo = 1;
   label1:
-    is($deprecated, 1);
+    is($deprecated, 1, "following label1");
     $deprecated = 0;
     $foo = 2;
     goto label2;
@@ -28,19 +28,19 @@ while ($?) {
     $foo = 0;
     goto label4;
   label3:
-    is($deprecated, 1);
+    is($deprecated, 1, "following label3");
     $deprecated = 0;
     $foo = 4;
     goto label4;
 }
-is($deprecated, 0);
+is($deprecated, 0, "after 'while' loop");
 goto label1;
 
 $foo = 3;
 
 label2:
 is($foo, 2, 'escape while loop');
-is($deprecated, 0);
+is($deprecated, 0, "following label2");
 goto label3;
 
 label4:
@@ -183,17 +183,17 @@ ok($ok, 'works correctly in a nested eval string');
 	A: { if ($false) { redo A; B: $ok = 1; redo A; } }
 	goto B unless $count++;
     }
-    is($deprecated, 0);
+    is($deprecated, 0, "before calling sub a()");
     a();
     ok($ok, '#19061 loop label wiped away by goto');
-    is($deprecated, 1);
+    is($deprecated, 1, "after calling sub a()");
     $deprecated = 0;
 
     $ok = 0;
     my $p;
     for ($p=1;$p && goto A;$p=0) { A: $ok = 1 }
     ok($ok, 'weird case of goto and for(;;) loop');
-    is($deprecated, 1);
+    is($deprecated, 1, "following goto and for(;;) loop");
     $deprecated = 0;
 }
 
@@ -503,7 +503,7 @@ TODO: {
     }
 }
 
-is($deprecated, 0);
+is($deprecated, 0, "following TODOed test for #43403");
 
 #74290
 {
