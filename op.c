@@ -800,7 +800,7 @@ Perl_op_clear(pTHX_ OP *o)
 #endif
 	    if (still_valid) {
 		int try_downgrade = SvREFCNT(gv) == 2;
-		SvREFCNT_dec(gv);
+		SvREFCNT_dec_NN(gv);
 		if (try_downgrade)
 		    gv_try_downgrade(gv);
 	    }
@@ -1387,7 +1387,7 @@ Perl_scalarvoid(pTHX_ OP *o)
                                                       PERL_PV_PRETTY_DUMP
                                                       | PERL_PV_ESCAPE_NOCLEAR
                                                       | PERL_PV_ESCAPE_UNI_DETECT));
-			SvREFCNT_dec(dsv);
+			SvREFCNT_dec_NN(dsv);
 		    }
 		}
 		else if (SvOK(sv)) {
@@ -1803,7 +1803,7 @@ S_finalize_op(pTHX_ OP* o)
 	    lexname = newSVpvn_share(key,
 		SvUTF8(sv) ? -(I32)keylen : (I32)keylen,
 		0);
-	    SvREFCNT_dec(sv);
+	    SvREFCNT_dec_NN(sv);
 	    *svp = lexname;
 	}
 
@@ -7286,7 +7286,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    &PadARRAY(PadlistARRAY(CvPADLIST(outcv))[CvDEPTH(outcv)])[pax];
 	if (reusable) cv_clone_into(clonee, *spot);
 	else *spot = cv_clone(clonee);
-	SvREFCNT_dec(clonee);
+	SvREFCNT_dec_NN(clonee);
 	cv = *spot;
 	SvPADMY_on(cv);
     }
@@ -7855,7 +7855,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                                         ),
                                         cv, const_svp);
                 }
-                SvREFCNT_dec(cv);
+                SvREFCNT_dec_NN(cv);
                 cv = NULL;
             }
         }
@@ -9011,7 +9011,7 @@ Perl_ck_glob(pTHX_ OP *o)
     sv_setiv(GvSVn(gv),PL_glob_index++);
 #endif
     op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
-    SvREFCNT_dec(gv); /* newGVOP increased it */
+    SvREFCNT_dec_NN(gv); /* newGVOP increased it */
     scalarkids(o);
     return o;
 }

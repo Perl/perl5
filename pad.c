@@ -196,7 +196,7 @@ sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U3
 		   sv_recode_to_utf8(svrecode, PL_encoding);
 		   pv1      = SvPV_const(svrecode, cur1);
 	      }
-              SvREFCNT_dec(svrecode);
+              SvREFCNT_dec_NN(svrecode);
         }
         if (flags & SVf_UTF8)
             return (bytes_cmp_utf8(
@@ -427,7 +427,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 
 			if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
 			    curpad[ix] = NULL;
-			    SvREFCNT_dec(innercv);
+			    SvREFCNT_dec_NN(innercv);
 			    inner_rc--;
 			}
 
@@ -457,7 +457,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 		    PL_comppad = NULL;
 		    PL_curpad = NULL;
 		}
-		SvREFCNT_dec(sv);
+		SvREFCNT_dec_NN(sv);
 	    }
 	}
 	{
@@ -830,7 +830,7 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     if (CvOUTSIDE(func) && SvTYPE(func) == SVt_PVCV) {
 	assert(!CvWEAKOUTSIDE(func));
 	CvWEAKOUTSIDE_on(func);
-	SvREFCNT_dec(CvOUTSIDE(func));
+	SvREFCNT_dec_NN(CvOUTSIDE(func));
     }
     return ix;
 }
@@ -2164,7 +2164,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	 */
 	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
 	if (const_sv) {
-	    SvREFCNT_dec(cv);
+	    SvREFCNT_dec_NN(cv);
             /* For this calling case, op_const_sv returns a *copy*, which we
                donate to newCONSTSUB. Yes, this is ugly, and should be killed.
                Need to fix how lib/constant.pm works to eliminate this.  */

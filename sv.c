@@ -477,7 +477,7 @@ do_clean_objs(pTHX_ SV *const ref)
 	    } else {
 		SvROK_off(ref);
 		SvRV_set(ref, NULL);
-		SvREFCNT_dec(target);
+		SvREFCNT_dec_NN(target);
 	    }
 	}
     }
@@ -505,27 +505,27 @@ do_clean_named_objs(pTHX_ SV *const sv)
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob SV object:\n "), sv_dump(obj)));
 	GvSV(sv) = NULL;
-	SvREFCNT_dec(obj);
+	SvREFCNT_dec_NN(obj);
     }
     if ( ((obj = MUTABLE_SV(GvAV(sv)) )) && SvOBJECT(obj)) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob AV object:\n "), sv_dump(obj)));
 	GvAV(sv) = NULL;
-	SvREFCNT_dec(obj);
+	SvREFCNT_dec_NN(obj);
     }
     if ( ((obj = MUTABLE_SV(GvHV(sv)) )) && SvOBJECT(obj)) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob HV object:\n "), sv_dump(obj)));
 	GvHV(sv) = NULL;
-	SvREFCNT_dec(obj);
+	SvREFCNT_dec_NN(obj);
     }
     if ( ((obj = MUTABLE_SV(GvCV(sv)) )) && SvOBJECT(obj)) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob CV object:\n "), sv_dump(obj)));
 	GvCV_set(sv, NULL);
-	SvREFCNT_dec(obj);
+	SvREFCNT_dec_NN(obj);
     }
-    SvREFCNT_dec(sv); /* undo the inc above */
+    SvREFCNT_dec_NN(sv); /* undo the inc above */
 }
 
 /* clear any IO slots in a GV which hold objects (except stderr, defout);
@@ -546,9 +546,9 @@ do_clean_named_io_objs(pTHX_ SV *const sv)
 	DEBUG_D((PerlIO_printf(Perl_debug_log,
 		"Cleaning named glob IO object:\n "), sv_dump(obj)));
 	GvIOp(sv) = NULL;
-	SvREFCNT_dec(obj);
+	SvREFCNT_dec_NN(obj);
     }
-    SvREFCNT_dec(sv); /* undo the inc above */
+    SvREFCNT_dec_NN(sv); /* undo the inc above */
 }
 
 /* Void wrapper to pass to visit() */
@@ -607,7 +607,7 @@ do_clean_all(pTHX_ SV *const sv)
     }
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
-    SvREFCNT_dec(sv);
+    SvREFCNT_dec_NN(sv);
 }
 
 /*
@@ -4948,7 +4948,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
 	SvANY(temp) = temp_p;
 	temp->sv_u.svu_rx = (regexp *)temp_p;
 
-	SvREFCNT_dec(temp);
+	SvREFCNT_dec_NN(temp);
     }
     else if (SvVOK(sv)) sv_unmagic(sv, PERL_MAGIC_vstring);
 }
@@ -5539,7 +5539,7 @@ Perl_sv_rvweaken(pTHX_ SV *const sv)
     tsv = SvRV(sv);
     Perl_sv_add_backref(aTHX_ tsv, sv);
     SvWEAKREF_on(sv);
-    SvREFCNT_dec(tsv);
+    SvREFCNT_dec_NN(tsv);
     return sv;
 }
 
@@ -5835,7 +5835,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
     }
     if (is_array) {
 	AvFILLp(av) = -1;
-	SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
+	SvREFCNT_dec_NN(av); /* remove extra count added by sv_add_backref() */
     }
     return;
 }
@@ -6052,7 +6052,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
                     : newSVpvn_flags( "__ANON__", 8, 0 );
     sv_catpvs(gvname, "::__ANON__");
     anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
-    SvREFCNT_dec(gvname);
+    SvREFCNT_dec_NN(gvname);
 
     CvANON_on(cv);
     CvCVGV_RC_on(cv);
@@ -6488,7 +6488,7 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 		    SvRV_set(tmpref, NULL);
 		    SvROK_off(tmpref);
 		}
-		SvREFCNT_dec(tmpref);
+		SvREFCNT_dec_NN(tmpref);
 	    }
 	  }
 	} while (SvOBJECT(sv) && SvSTASH(sv) != stash);
@@ -7379,7 +7379,7 @@ Perl_sv_eq_flags(pTHX_ SV *sv1, SV *sv2, const U32 flags)
 	      }
 	      /* Now both are in UTF-8. */
 	      if (cur1 != cur2) {
-		   SvREFCNT_dec(svrecode);
+		   SvREFCNT_dec_NN(svrecode);
 		   return FALSE;
 	      }
 	 }
@@ -9804,7 +9804,7 @@ Perl_sv_unref_flags(pTHX_ SV *const ref, const U32 flags)
     /* You can't have a || SvREADONLY(target) here, as $a = $$a, where $a was
        assigned to as BEGIN {$a = \"Foo"} will fail.  */
     if (SvREFCNT(target) != 1 || (flags & SV_IMMEDIATE_UNREF))
-	SvREFCNT_dec(target);
+	SvREFCNT_dec_NN(target);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
 	sv_2mortal(target);	/* Schedule for freeing later */
 }
@@ -13848,7 +13848,7 @@ S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 	} while (++svp <= last);
 	AvREAL_off(unreferenced);
     }
-    SvREFCNT_dec(unreferenced);
+    SvREFCNT_dec_NN(unreferenced);
 }
 
 void
@@ -14197,7 +14197,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	Perl_sv_catpvf(aTHX_ name, "{%s}",
 	    pv_pretty(sv, SvPVX_const(keyname), SvCUR(keyname), 32, NULL, NULL,
 		    PERL_PV_PRETTY_DUMP | PERL_PV_ESCAPE_UNI_DETECT ));
-	SvREFCNT_dec(sv);
+	SvREFCNT_dec_NN(sv);
     }
     else if (subscript_type == FUV_SUBSCRIPT_ARRAY) {
 	*SvPVX(name) = '$';

@@ -184,7 +184,7 @@ PP(pp_sassign)
 		*/
 		SvRV_set(right, MUTABLE_SV(newCONSTSUB(GvSTASH(left), NULL,
 						      SvRV(cv))));
-		SvREFCNT_dec(cv);
+		SvREFCNT_dec_NN(cv);
 		LEAVE_with_name("sassign_coderef");
 	    } else {
 		/* What can happen for the corner case *{"BONK"} = \&{"BONK"};
@@ -207,7 +207,7 @@ PP(pp_sassign)
 		assert(CvFLAGS(source) & CVf_CONST);
 
 		SvREFCNT_inc_void(source);
-		SvREFCNT_dec(upgraded);
+		SvREFCNT_dec_NN(upgraded);
 		SvRV_set(right, MUTABLE_SV(source));
 	    }
 	}
@@ -1291,12 +1291,12 @@ PP(pp_qr)
     cvp = &( ReANY((REGEXP *)SvRV(rv))->qr_anoncv);
     if ((cv = *cvp) && CvCLONE(*cvp)) {
 	*cvp = cv_clone(cv);
-	SvREFCNT_dec(cv);
+	SvREFCNT_dec_NN(cv);
     }
 
     if (pkg) {
 	HV *const stash = gv_stashsv(pkg, GV_ADD);
-	SvREFCNT_dec(pkg);
+	SvREFCNT_dec_NN(pkg);
 	(void)sv_bless(rv, stash);
     }
 
@@ -1890,7 +1890,7 @@ PP(pp_helem)
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, NULL, 0);
-	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
+	    SvREFCNT_dec_NN(key2);	/* sv_magic() increments refcount */
 	    LvTARG(lv) = SvREFCNT_inc_simple(hv);
 	    LvTARGLEN(lv) = 1;
 	    PUSHs(lv);
@@ -1964,7 +1964,7 @@ PP(pp_iter)
              * completely new SV for closures/references to work as
              * they used to */
             *itersvp = newSVsv(cur);
-            SvREFCNT_dec(oldsv);
+            SvREFCNT_dec_NN(oldsv);
         }
         if (strEQ(SvPVX_const(cur), max))
             sv_setiv(cur, 0); /* terminate next time */
@@ -1991,7 +1991,7 @@ PP(pp_iter)
 	     * completely new SV for closures/references to work as they
 	     * used to */
 	    *itersvp = newSViv(cur);
-	    SvREFCNT_dec(oldsv);
+	    SvREFCNT_dec_NN(oldsv);
 	}
 
 	if (cur == IV_MAX) {
@@ -2614,7 +2614,7 @@ PP(pp_leavesub)
 		    sv = SvREFCNT_inc(TOPs);	/* FREETMPS could clobber it */
 		    FREETMPS;
 		    *MARK = sv_mortalcopy(sv);
-		    SvREFCNT_dec(sv);
+		    SvREFCNT_dec_NN(sv);
 		}
 	    }
 	    else if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
