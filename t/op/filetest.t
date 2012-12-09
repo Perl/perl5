@@ -11,11 +11,13 @@ BEGIN {
 
 plan(tests => 49 + 27*14);
 
-is(-d 'op', 1);
-is(-f 'TEST', 1);
-isnt(-f 'op', 1);
-isnt(-d 'TEST', 1);
-is(-r 'TEST', 1);
+# Tests presume we are in t/op directory and that file 'TEST' is found
+# therein.
+is(-d 'op', 1, "-d: directory correctly identified");
+is(-f 'TEST', 1, "-f: plain file correctly identified");
+isnt(-f 'op', 1, "-f: directory is not a plain file");
+isnt(-d 'TEST', 1, "-d: plain file is not a directory");
+is(-r 'TEST', 1, "-r: file readable by effective uid/gid not found");
 
 # Make a read only file. This happens to be empty, so we also use it later.
 my $ro_empty_file = tempfile();
@@ -39,7 +41,7 @@ SKIP: {
 	++$restore_root;
     }
 
-    isnt(-w $ro_empty_file, 1);
+    isnt(-w $ro_empty_file, 1, "-w: file writable by effective uid/gid");
 
     if ($restore_root) {
 	# If the previous assignment to $> worked, so should this:
@@ -50,35 +52,36 @@ SKIP: {
 
 # these would fail for the euid 1
 # (unless we have unpacked the source code as uid 1...)
-is(-r 'op', 1);
-is(-w 'op', 1);
-is(-x 'op', 1); # Hohum.  Are directories -x everywhere?
+is(-r 'op', 1, "-r: directory readable by effective uid/gid");
+is(-w 'op', 1, "-w: directory writable by effective uid/gid");
+is(-x 'op', 1, "-x: executable by effective uid/gid"); # Hohum.  Are directories -x everywhere?
 
-is( "@{[grep -r, qw(foo io noo op zoo)]}", "io op" );
+is( "@{[grep -r, qw(foo io noo op zoo)]}", "io op",
+    "-r: found directories readable by effective uid/gid" );
 
 # Test stackability of filetest operators
 
-is(defined( -f -d 'TEST' ), 1);
-isnt(-f -d _, 1);
-isnt(defined( -e 'zoo' ), 1);
-isnt(defined( -e -d 'zoo' ), 1);
-isnt(defined( -f -e 'zoo' ), 1);
-is(-f -e 'TEST', 1);
-is(-e -f 'TEST', 1);
-is(defined(-d -e 'TEST'), 1);
-is(defined(-e -d 'TEST'), 1);
-isnt( -f -d 'op', 1);
-is(-x -d -x 'op', 1);
+is(defined( -f -d 'TEST' ), 1, "-f and -d stackable: plain file found");
+isnt(-f -d _, 1, "-f and -d stackable: no plain file found");
+isnt(defined( -e 'zoo' ), 1, "-e: file does not exist");
+isnt(defined( -e -d 'zoo' ), 1, "-e and -d: neither file nor directory exists");
+isnt(defined( -f -e 'zoo' ), 1, "-f and -e: not a plain file and does not exist");
+is(-f -e 'TEST', 1, "-f and -e: plain file and exists");
+is(-e -f 'TEST', 1, "-e and -f: exists and is plain file");
+is(defined(-d -e 'TEST'), 1, "-d and -e: file at least exists");
+is(defined(-e -d 'TEST'), 1, "-e and -d: file at least exists");
+isnt( -f -d 'op', 1, "-f and -d: directory found but is not a plain file");
+is(-x -d -x 'op', 1, "-x, -d and -x again: directory exists and is executable");
 my ($size) = (stat 'TEST')[7];
 cmp_ok($size, '>', 1, 'TEST is longer than 1 byte');
 is( (-s -f 'TEST'), $size, "-s returns real size" );
-is(-f -s 'TEST', 1);
+is(-f -s 'TEST', 1, "-f and -s: plain file with non-zero size");
 
 # now with an empty file
-is(-f $ro_empty_file, 1);
-is( -s $ro_empty_file, 0 );
-is( -f -s $ro_empty_file, 0 );
-is( -s -f $ro_empty_file, 0 );
+is(-f $ro_empty_file, 1, "-f: plain file found");
+is(-s $ro_empty_file, 0, "-s: file has 0 bytes");
+is(-f -s $ro_empty_file, 0, "-f and -s: plain file with 0 bytes");
+is(-s -f $ro_empty_file, 0, "-s and -f: file with 0 bytes is plain file");
 
 # stacked -l
 eval { -l -e "TEST" };
@@ -115,9 +118,9 @@ SKIP: {
 # test that _ is a bareword after filetest operators
 
 -f 'TEST';
-is(-f _, 1);
+is(-f _, 1, "_ is bareword after filetest operator");
 sub _ { "this is not a file name" }
-is(-f _, 1);
+is(-f _, 1, "_ is bareword after filetest operator");
 
 my $over;
 {
