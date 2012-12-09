@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 111;
+plan tests => 112;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -107,6 +107,10 @@ eleak(2, 0, "$all v111111111111111111111111111111111111111111111111",
      'vstring num overflow with fatal warnings');
 
 eleak(2, 0, 'sub{<*>}');
+# Use a random number of ops, so that the glob op does not reuse the same
+# address each time, giving us false passes.
+leak(2, 0, sub { eval '$x+'x(rand() * 100) . '<*>'; },
+    'freeing partly iterated glob');
 
 eleak(2, 0, 'goto sub {}', 'goto &sub in eval');
 eleak(2, 0, '() = sort { goto sub {} } 1,2', 'goto &sub in sort');
