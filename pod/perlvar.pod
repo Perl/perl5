@@ -1358,7 +1358,7 @@ referenced integer.  So this:
     open my $fh, "<", $myfile or die $!;
     local $_ = <$fh>;
 
-will read a record of no more than 32768 bytes from $fh.  If you're
+will read a record of no more than 32768 characters from $fh.  If you're
 not reading from a record-oriented file (or your OS doesn't have
 record-oriented files), then you'll likely get a full chunk of data
 with every read.  If a record is larger than the record size you've
@@ -1369,13 +1369,6 @@ On VMS only, record reads bypass PerlIO layers and any associated
 buffering,so you must not mix record and non-record reads on the
 same filehandle.  Record mode mixes with line mode only when the
 same buffering layer is in use for both modes.
-
-If you perform a record read on a FILE with an encoding layer such as
-C<:encoding(latin1)> or C<:utf8>, you may get an invalid string as a
-result, may leave the FILE positioned between characters in the stream
-and may not be reading the number of bytes from the underlying file
-that you specified.  This behaviour may change without warning in a
-future version of perl.
 
 You cannot call C<input_record_separator()> on a handle, only as a
 static method.  See L<IO::Handle|IO::Handle>.

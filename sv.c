@@ -7667,29 +7667,111 @@ S_sv_gets_append_to_utf8(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 static char *
 S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 {
-    I32 bytesread;
-    const U32 recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
+    SSize_t bytesread;
+    const STRLEN recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
       /* Grab the size of the record we're getting */
-    char *const buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
-#ifdef VMS
-    int fd;
-#endif
-
+    char *buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
+    
     /* Go yank in */
 #ifdef VMS
-    /* VMS wants read instead of fread, because fread doesn't respect */
-    /* RMS record boundaries. This is not necessarily a good thing to be */
-    /* doing, but we've got no other real choice - except avoid stdio
-       as implementation - perhaps write a :vms layer ?
-    */
+#include <rms.h>
+    int fd;
+    Stat_t st;
+
+    /* With a true, record-oriented file on VMS, we need to use read directly
+     * to ensure that we respect RMS record boundaries.  The user is responsible
+     * for providing a PL_rs value that corresponds to the FAB$W_MRS (maximum
+     * record size) field.  N.B. This is likely to produce invalid results on
+     * varying-width character data when a record ends mid-character.
+     */
     fd = PerlIO_fileno(fp);
-    if (fd != -1) {
+    if (fd != -1
+	&& PerlLIO_fstat(fd, &st) == 0
+	&& (st.st_fab_rfm == FAB$C_VAR
+	    || st.st_fab_rfm == FAB$C_VFC
+	    || st.st_fab_rfm == FAB$C_FIX)) {
+
 	bytesread = PerlLIO_read(fd, buffer, recsize);
     }
-    else /* in-memory file from PerlIO::Scalar */
+    else /* in-memory file from PerlIO::Scalar
+          * or not a record-oriented file
+          */
 #endif
     {
 	bytesread = PerlIO_read(fp, buffer, recsize);
+
+	/* At this point, the logic in sv_get() means that sv will
+	   be treated as utf-8 if the handle is utf8.
+	*/
+	if (PerlIO_isutf8(fp) && bytesread > 0) {
+	    char *bend = buffer + bytesread;
+	    char *bufp = buffer;
+	    size_t charcount = 0;
+	    bool charstart = TRUE;
+	    STRLEN skip = 0;
+
+	    while (charcount < recsize) {
+		/* count accumulated characters */
+		while (bufp < bend) {
+		    if (charstart) {
+			skip = UTF8SKIP(bufp);
+		    }
+		    if (bufp + skip > bend) {
+			/* partial at the end */
+			charstart = FALSE;
+			break;
+		    }
+		    else {
+			++charcount;
+			bufp += skip;
+			charstart = TRUE;
+		    }
+		}
+
+		if (charcount < recsize) {
+		    STRLEN readsize;
+		    STRLEN bufp_offset = bufp - buffer;
+		    SSize_t morebytesread;
+
+		    /* originally I read enough to fill any incomplete
+		       character and the first byte of the next
+		       character if needed, but if there's many
+		       multi-byte encoded characters we're going to be
+		       making a read call for every character beyond
+		       the original read size.
+
+		       So instead, read the rest of the character if
+		       any, and enough bytes to match at least the
+		       start bytes for each character we're going to
+		       read.
+		    */
+		    if (charstart)
+			readsize = recsize - charcount;
+		    else 
+			readsize = skip - (bend - bufp) + recsize - charcount - 1;
+		    buffer = SvGROW(sv, append + bytesread + readsize + 1) + append;
+		    bend = buffer + bytesread;
+		    morebytesread = PerlIO_read(fp, bend, readsize);
+		    if (morebytesread <= 0) {
+			/* we're done, if we still have incomplete
+			   characters the check code in sv_gets() will
+			   warn about them.
+
+			   I'd originally considered doing
+			   PerlIO_ungetc() on all but the lead
+			   character of the incomplete character, but
+			   read() doesn't do that, so I don't.
+			*/
+			break;
+		    }
+
+		    /* prepare to scan some more */
+		    bytesread += morebytesread;
+		    bend = buffer + bytesread;
+		    bufp = buffer + bufp_offset;
+		}
+	    }
+	}
     }
 
     if (bytesread < 0)
