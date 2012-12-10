@@ -457,7 +457,7 @@ struct pmop {
 #  define PmopSTASH_set(o,hv)	\
 	(assert_((o)->op_pmflags & PMf_ONCE)				\
 	 (o)->op_pmstashstartu.op_pmstashoff =				\
-	    (hv) ? alloccopstash(hv) : NULL)
+	    (hv) ? alloccopstash(hv) : 0)
 #else
 #  define PmopSTASH(o)							\
     (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
