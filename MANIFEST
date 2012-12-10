@@ -1085,6 +1085,7 @@ cpan/ExtUtils-MakeMaker/t/installed_file.t			Test for ExtUtils::MakeMaker
 cpan/ExtUtils-MakeMaker/t/INST_PREFIX.t				See if MakeMaker can apply PREFIXs
 cpan/ExtUtils-MakeMaker/t/INST.t				Check MakeMaker INST_* macros
 cpan/ExtUtils-MakeMaker/t/is_of_type.t				Test for ExtUtils::MakeMaker
+cpan/ExtUtils-MakeMaker/t/Liblist_Kid.t				See if ExtUtils::Liblist works
 cpan/ExtUtils-MakeMaker/t/Liblist.t				See if ExtUtils::Liblist works
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/NoXS.pm		MakeMaker test utilities
 cpan/ExtUtils-MakeMaker/t/lib/MakeMaker/Test/Setup/BFD.pm	MakeMaker test utilities

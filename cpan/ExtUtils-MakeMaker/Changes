@@ -1,3 +1,26 @@
+6.65_01
+    New Features
+    * Improvements perlcritic support. (M. Schwern)
+    * Improvements to dynamic linking for gcc (Tobias Leich)
+      [github #43]
+    * Change $(PERL_HDRS) from a hard coded list of headers to
+      reading install directory for available header files. Allows
+      us to work with any version of Perl properly.
+      (Yves Orton, Craig A. Berry) [github #47]
+
+    Doc Fixes
+    * Numerous typo fixes. (Ben Bullock)
+      [github #33] [github #34] [github #35]
+    * Various FAQ and doc improvements (M. Schwern, Ivan Bessarabov)
+      [github #44]
+
+    Bug Fixes
+    * fixes relating to hash ordering (Yves Orton)
+      [github #46] [rt.cpan.org #83441] [rt.perl.org #116857]
+    * fixes to Mksymlists (Ben Bullock, Yves Orton)
+      [github #48] [github #49] [github #51]
+
+
 6.64  Sun Dec 16 18:27:40 PST 2012
     Build Fixes
     * Update the home page in the meta file.  makemaker.org has been

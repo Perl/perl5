@@ -1,3 +1,4 @@
+.perlcriticrc
 bin/instmodsh
 bundled/CPAN-Meta-YAML/CPAN/Meta/YAML.pm
 bundled/CPAN-Meta/CPAN/Meta.pm
@@ -107,6 +108,7 @@ t/liblist/win32/__test.lib
 't/liblist/win32/di r/dir_test.lib'
 t/liblist/win32/dir/dir_test.lib
 t/liblist/win32/double.lib
+t/liblist/win32/imp.dll.a
 t/liblist/win32/lib/CORE/c_test.lib
 t/liblist/win32/lib/CORE/double.lib
 t/liblist/win32/lib__test.lib
@@ -166,6 +168,3 @@ t/WriteEmptyMakefile.t
 t/writemakefile_args.t
 t/xs.t
 TODO
-META.yml                                 Module YAML meta-data (added by MakeMaker)
-META.json                                Module JSON meta-data (added by MakeMaker)
-SIGNATURE                                Public-key signature (added by MakeMaker)

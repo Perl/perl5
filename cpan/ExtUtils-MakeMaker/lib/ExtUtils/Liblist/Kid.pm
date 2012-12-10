@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '6.64';
+our $VERSION = '6.65_01';
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -422,7 +422,8 @@ sub _win32_try_attach_extension {
 sub _win32_lib_extensions {
     my %extensions;
     $extensions{ $Config{'lib_ext'} } = 1 if $Config{'lib_ext'};
-    $extensions{".lib"} = 1;
+    $extensions{".dll.a"} = 1 if $extensions{".a"};
+    $extensions{".lib"}   = 1;
     return [ keys %extensions ];
 }
 

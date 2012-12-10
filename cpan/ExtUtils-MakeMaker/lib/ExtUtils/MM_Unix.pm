@@ -15,8 +15,8 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.64';
-$VERSION = eval $VERSION;
+$VERSION = '6.65_01';
+$VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -1193,7 +1193,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     else {
         warn "Can't find $cmd in PATH, $file unchanged"
             if $Verbose;
-        return undef;
+        return;
     }
     return $shb
 }
@@ -2754,55 +2754,15 @@ MAKE_FRAG
 
     return join "", @m unless $self->needs_linking;
 
-    push @m, q{
-PERL_HDRS = \
-	$(PERL_INC)/EXTERN.h		\
-	$(PERL_INC)/INTERN.h		\
-	$(PERL_INC)/XSUB.h		\
-	$(PERL_INC)/av.h		\
-	$(PERL_INC)/config.h		\
-	$(PERL_INC)/cop.h		\
-	$(PERL_INC)/cv.h		\
-	$(PERL_INC)/dosish.h		\
-	$(PERL_INC)/embed.h		\
-	$(PERL_INC)/embedvar.h		\
-	$(PERL_INC)/fakethr.h		\
-	$(PERL_INC)/form.h		\
-	$(PERL_INC)/gv.h		\
-	$(PERL_INC)/handy.h		\
-	$(PERL_INC)/hv.h		\
-	$(PERL_INC)/intrpvar.h		\
-	$(PERL_INC)/iperlsys.h		\
-	$(PERL_INC)/keywords.h		\
-	$(PERL_INC)/mg.h		\
-	$(PERL_INC)/nostdio.h		\
-	$(PERL_INC)/op.h		\
-	$(PERL_INC)/opcode.h		\
-	$(PERL_INC)/patchlevel.h	\
-	$(PERL_INC)/perl.h		\
-	$(PERL_INC)/perlio.h		\
-	$(PERL_INC)/perlsdio.h		\
-	$(PERL_INC)/perlsfio.h		\
-	$(PERL_INC)/perlvars.h		\
-	$(PERL_INC)/perly.h		\
-	$(PERL_INC)/pp.h		\
-	$(PERL_INC)/pp_proto.h		\
-	$(PERL_INC)/proto.h		\
-	$(PERL_INC)/regcomp.h		\
-	$(PERL_INC)/regexp.h		\
-	$(PERL_INC)/regnodes.h		\
-	$(PERL_INC)/scope.h		\
-	$(PERL_INC)/sv.h		\
-	$(PERL_INC)/thread.h		\
-	$(PERL_INC)/unixish.h		\
-	$(PERL_INC)/util.h
-
-$(OBJECT) : $(PERL_HDRS)
-} if $self->{OBJECT};
+    if ($self->{OBJECT}) {
+        # Need to add an object file dependency on the perl headers.
+        # this is very important for XS modules in perl.git development.
+        push @m, $self->_perl_header_files_fragment("/"); # Directory separator between $(PERL_INC)/header.h
+    }
 
     push @m, join(" ", values %{$self->{XS}})." : \$(XSUBPPDEPS)\n"  if %{$self->{XS}};
 
-    join "\n", @m;
+    return join "\n", @m;
 }
 
 
