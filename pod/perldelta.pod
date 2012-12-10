@@ -37,6 +37,17 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
+=head2 readline() with C<$/ = \N> now reads N characters, not N bytes
+
+Previously, when reading from a stream with I/O layers such as
+C<encoding>, the readline() function, otherwise known as the C<< <> >>
+operator, would read I<N> bytes from the top-most layer. [perl #79960]
+
+Now, I<N> characters are read instead.
+
+There is no change in behaviour when reading from streams with no
+extra layers, since bytes map exactly to characters.
+
 XXX For a release on a stable branch, this section aspires to be:
 
     There are no changes intentionally incompatible with 5.XXX.XXX
