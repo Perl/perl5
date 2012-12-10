@@ -1096,10 +1096,18 @@ PP(pp_aassign)
 		while (relem < lastrelem+odd) {	/* gobble up all the rest */
 		    HE *didstore;
                     assert(*relem);
-		    sv = lval ? sv_mortalcopy(*relem) : *relem;
+		    /* Copy the key if aassign is called in lvalue context,
+		       to avoid having the next op modify our rhs.  Copy
+		       it also if it is gmagical, lest it make the
+		       hv_store_ent call below croak, leaking the value. */
+		    sv = lval || SvGMAGICAL(*relem)
+			 ? sv_mortalcopy(*relem)
+			 : *relem;
 		    relem++;
                     assert(*relem);
-		    tmpstr = sv_mortalcopy( *relem++ ); /* value */
+		    SvGETMAGIC(*relem);
+                    tmpstr = newSV(0);
+		    sv_setsv_nomg(tmpstr,*relem++);	/* value */
 		    if (gimme == G_ARRAY) {
 			if (hv_exists_ent(hash, sv, 0))
 			    /* key overwrites an existing entry */
@@ -1112,8 +1120,10 @@ PP(pp_aassign)
 			}
 		    }
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
-		    if (didstore) SvREFCNT_inc_simple_void_NN(tmpstr);
-                    if (magic) SvSETMAGIC(tmpstr);
+		    if (magic) {
+			if (!didstore) sv_2mortal(tmpstr);
+			SvSETMAGIC(tmpstr);
+                    }
 		    TAINT_NOT;
 		}
 		LEAVE;
