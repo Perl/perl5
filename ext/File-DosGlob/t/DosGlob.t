@@ -14,7 +14,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 20;
+use Test::More tests => 21;
 
 # override it in main::
 use File::DosGlob 'glob';
@@ -134,4 +134,22 @@ if ($cwd =~ /^([a-zA-Z]:)/) {
     ok(@r and !grep !m|^${drive}io/[^/]*\.t$|, @r);
 } else {
     pass();
+}
+
+# Test that our internal data are freed when the caller’s op tree is freed,
+# even if iteration has not finished.
+# Using XS::APItest is the only simple way to test this.  Since this is a
+# core-only module, this should be OK.
+SKIP: {
+    require Config;
+    skip "no XS::APItest"
+     unless eval { require XS::APItest; import XS::APItest "sv_count"; 1 };
+    # Use a random number of ops, so that the glob op does not reuse the
+    # same address each time, giving us false passes.
+    my($count,$count2);
+    eval '$x+'x(rand() * 100) . '<*>';
+    $count = sv_count();
+    eval '$x+'x(rand() * 100) . '<*>';
+    $count2 = sv_count();
+    is $count2, $count, 'no leak when partly iterated caller is freed';
 }

@@ -103,7 +103,7 @@ sub doglob {
 #
 
 # context (keyed by second cxix arg provided by core)
-my %entries;
+our %entries;
 
 sub glob {
     my($pat,$cxix) = ($_[0], _callsite());
