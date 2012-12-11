@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+5.80  Mon Dec 10 14:15:26 MST 2012
+	- obtained noticeable speedup on Intel/gcc
+		-- by setting -O1 and -fomit-frame-pointer
+		-- SHA-1 about 63% faster, SHA-2 improves 11-20%
+
 5.74  Sat Nov 24 03:10:18 MST 2012
 	- handle wide-string input by converting to bytes first
 		-- viz. use SvPVbyte instead of SvPV in SHA.xs

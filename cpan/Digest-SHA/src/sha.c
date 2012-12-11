@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
  *
- * Version: 5.74
- * Sat Nov 24 03:10:18 MST 2012
+ * Version: 5.80
+ * Mon Dec 10 14:15:26 MST 2012
  *
  */
 
@@ -456,7 +456,7 @@ char *shabase64(SHA *s)
 
 	digcpy(s);
 	s->base64[0] = '\0';
-	if (B64LEN(s->digestlen) >= sizeof(s->base64))
+	if (B64LEN((size_t) s->digestlen) >= sizeof(s->base64))
 		return(s->base64);
 	for (n = s->digestlen, q = s->digest; n > 3; n -= 3, q += 3) {
 		encbase64(q, 3, out);

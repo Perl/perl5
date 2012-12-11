@@ -37,6 +37,12 @@ if ($^O eq 'VMS') {
 	}
 }
 
+	# Enhance performance on Intel when using gcc
+
+if ($Config{archname} =~ /^i[3456]86/ && $Config{ccname} eq 'gcc') {
+	push(@extra, OPTIMIZE => '-O1 -fomit-frame-pointer');
+}
+
 my %att = (
 	'NAME'		=> 'Digest::SHA',
 	'VERSION_FROM'	=> $PM,
