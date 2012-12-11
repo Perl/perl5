@@ -1542,7 +1542,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 #endif
 
     switch (flags) {
-	case EXACT: break;
+        case EXACT: break;
 	case EXACTFA:
         case EXACTFU_SS:
         case EXACTFU_TRICKYFOLD:
@@ -2724,6 +2724,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 
             /* XXX I (khw) kind of doubt that this works on platforms where
              * U8_MAX is above 255 because of lots of other assumptions */
+            /* Don't join if the sum can't fit into a single node */
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
             
