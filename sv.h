@@ -2010,7 +2010,8 @@ has been loaded.
 Expands the character buffer in the SV so that it has room for the
 indicated number of bytes (remember to reserve space for an extra trailing
 NUL character).  Calls C<sv_grow> to perform the expansion if necessary.
-Returns a pointer to the character buffer.
+Returns a pointer to the character buffer. SV must be of type >= SVt_PV. One
+alternative is to call C<sv_grow> if you are not sure of the type of SV.
 
 =cut
 */
