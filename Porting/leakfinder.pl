@@ -92,6 +92,7 @@ $got_arrayref ? unshift(@{$args[0]}, $cmd) : unshift(@args, $cmd);
 $h{ []} = 123;
 { $h[++$i] = $_ }
 High resolution alarm, sleep, gettimeofday, interval timers
+if (-d "$directory/$_") { push    @ARGV, "$directory/$_" }
 $i = int($i/2) until defined $self->[$i/2];
 $invmap_ref->[$i] = [ $invmap_ref->[$i] ];
 is(push(@ary,4), 3);
@@ -127,6 +128,7 @@ print "LA LA LA\n" while 1;          # loops forever
 prog => 'use Config; CHECK { $Config{awk} }',
 $p->{share_dir} = { dist => [ $p->{share_dir} ] };
 $p->{share_dir} = { dist => $p->{share_dir} };
+-sleep
 $resp = [$resp]
 s/a|/push @bar, 1/e;
 $self->{DIR} = [grep $_, split ":", $self->{DIR}];
