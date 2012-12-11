@@ -445,7 +445,7 @@ SKIP: {
     ok( eq_hash( \%h, {1 => undef, 3 => 4} ), "correct hash" );
     is( $x, undef, "correct scalar" );
     # this arguable, but this is how it works
-    is( join(':', (%h,$x) = (1,2,3,4,1)), '1::3:4',
+    is( join(':', map $_//'undef', (%h,$x) = (1,2,3,4,1)), '1:undef:3:4',
 	'hash+scalar assignment in list context' );
     ok( eq_hash( \%h, {1 => undef, 3 => 4} ), "correct hash" );
     is( $x, undef, "correct scalar" );
@@ -454,7 +454,7 @@ SKIP: {
 	'hash+hash assignment in scalar context' );
     ok( eq_hash( \%h, {1 => undef, 3 => 4} ), "correct hash" );
     ok( eq_hash( \%x, {} ), "correct hash" );
-    is( join(':', (%h,%x) = (1,2,3,4,1)), '1::3:4',
+    is( join(':', map $_//'undef', (%h,%x) = (1,2,3,4,1)), '1:undef:3:4',
 	'hash+hash assignment in list context' );
     ok( eq_hash( \%h, {1 => undef, 3 => 4} ), "correct hash" );
     ok( eq_hash( \%x, {} ),               "correct hash" );
@@ -463,7 +463,7 @@ SKIP: {
 	'hash+array assignment in scalar context' );
     ok( eq_hash( \%h, {1 => undef, 3 => 4} ), "correct hash" );
     ok( eq_array( \@x, [] ), "correct array" );
-    is( join(':', (%h,@x) = (1,2,3,4,1)), '1::3:4',
+    is( join(':', map $_//'undef', (%h,@x) = (1,2,3,4,1)), '1:undef:3:4',
 	'hash+hash assignment in list context' );
     ok( eq_hash( \%h, {1 => undef, 3 => 4} ), "correct hash" );
     ok( eq_array( \@x, [] ),      "correct array" );
@@ -478,11 +478,12 @@ SKIP: {
         'only assigned elements are returned in list context');
     is( join(':', ($x, $y, %h) = (1,1)), '1:1',
         'only assigned elements are returned in list context');
-    is( join(':', ($x, $y, %h) = (1,1,1)), '1:1:1:',
+    is( join(':', map $_//'undef', ($x, $y, %h) = (1,1,1)), '1:1:1:undef',
         'only assigned elements are returned in list context');
     is( join(':', ($x, $y, %h) = (1,1,1,1)), '1:1:1:1',
         'only assigned elements are returned in list context');
-    is( join(':', ($x, %h, $y) = (1,2,3,4)), '1:2:3:4:',
+    is( join(':', map $_//'undef', ($x, %h, $y) = (1,2,3,4)),
+        '1:2:3:4:undef',
         'only assigned elements are returned in list context');
     is( join(':', ($x, $y, @h) = (1)), '1',
         'only assigned elements are returned in list context');
