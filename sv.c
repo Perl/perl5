@@ -13637,15 +13637,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_HasMultiCharFold= sv_dup_inc(proto_perl->IHasMultiCharFold, param);
 
     /* utf8 character class swashes */
-    PL_utf8_alnum	= sv_dup_inc(proto_perl->Iutf8_alnum, param);
-    PL_utf8_alnumc	= sv_dup_inc(proto_perl->Iutf8_alnumc, param);
-    PL_utf8_alpha	= sv_dup_inc(proto_perl->Iutf8_alpha, param);
-    PL_utf8_graph	= sv_dup_inc(proto_perl->Iutf8_graph, param);
-    PL_utf8_digit	= sv_dup_inc(proto_perl->Iutf8_digit, param);
-    PL_utf8_upper	= sv_dup_inc(proto_perl->Iutf8_upper, param);
-    PL_utf8_lower	= sv_dup_inc(proto_perl->Iutf8_lower, param);
-    PL_utf8_print	= sv_dup_inc(proto_perl->Iutf8_print, param);
-    PL_utf8_punct	= sv_dup_inc(proto_perl->Iutf8_punct, param);
+    for (i = 0; i < POSIX_SWASH_COUNT; i++) {
+        PL_utf8_swash_ptrs[i] = sv_dup_inc(proto_perl->Iutf8_swash_ptrs[i], param);
+    }
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);
     PL_utf8_X_regular_begin	= sv_dup_inc(proto_perl->Iutf8_X_regular_begin, param);
     PL_utf8_X_extend	= sv_dup_inc(proto_perl->Iutf8_X_extend, param);
