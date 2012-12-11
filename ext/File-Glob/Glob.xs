@@ -11,6 +11,7 @@
 typedef struct {
     int		x_GLOB_ERROR;
     HV *	x_GLOB_ENTRIES;
+    Perl_ophook_t	x_GLOB_OLD_OPHOOK;
 } my_cxt_t;
 
 START_MY_CXT
@@ -312,8 +313,6 @@ doglob_iter_wrapper(pTHX_ AV *entries, SV *patsv)
     return FALSE;
 }
 
-static Perl_ophook_t old_ophook;
-
 static void
 glob_ophook(pTHX_ OP *o)
 {
@@ -322,7 +321,7 @@ glob_ophook(pTHX_ OP *o)
      && (o->op_type == OP_GLOB || o->op_type == OP_ENTERSUB))
 	hv_delete(MY_CXT.x_GLOB_ENTRIES, (char *)&o, sizeof(OP *),
 		  G_DISCARD);
-    if (old_ophook) old_ophook(aTHX_ o);
+    if (MY_CXT.x_GLOB_OLD_OPHOOK) MY_CXT.x_GLOB_OLD_OPHOOK(aTHX_ o);
 }
 
 MODULE = File::Glob		PACKAGE = File::Glob
@@ -397,11 +396,9 @@ BOOT:
     {
 	dMY_CXT;
 	MY_CXT.x_GLOB_ENTRIES = NULL;
+	MY_CXT.x_GLOB_OLD_OPHOOK = PL_opfreehook;
+	PL_opfreehook = glob_ophook;
     }  
-    OP_REFCNT_LOCK;
-    old_ophook = PL_opfreehook;
-    PL_opfreehook = glob_ophook;
-    OP_REFCNT_UNLOCK;
 }
 
 INCLUDE: const-xs.inc
