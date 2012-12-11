@@ -32,7 +32,7 @@ our @EXPORT_OK  = qw(
                      bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
                     );
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 require XSLoader;
 XSLoader::load();
 
@@ -525,14 +525,28 @@ Fields are as follows:
     0: Number of keys in the hash
     1: Number of buckets in the hash
     2: Number of used buckets in the hash
-    3: Percent of buckets used
-    4: Percent of keys which are in collision
-    5: Average bucket length
-    6: Standard Deviation of bucket lengths.
+    3: Hash Quality Score
+    4: Percent of buckets used
+    5: Percent of keys which are in collision
+    6: Average bucket length
+    7: Standard Deviation of bucket lengths.
     rest : list of counts, Kth element is the number of buckets
            with K keys in it.
 
 See also bucket_info() and bucket_array().
+
+Note that Hash Quality Score would be 1 for an ideal hash, numbers
+close to and below 1 indicate good hashing, and number significantly
+above indicate a poor score. In practice it should be around 0.95 to 1.05.
+It is defined as:
+
+ $score= sum( $count[$length] * ($length * ($length + 1) / 2) )
+            /
+            ( ( $keys / 2 * $buckets ) *
+              ( $keys + ( 2 * $buckets ) - 1 ) )
+
+The formula is from the Red Dragon book (reformulated to use the data available)
+and is documented at L<http://www.strchr.com/hash_functions>
 
 =item B<bucket_array>
 
@@ -558,13 +572,20 @@ sub bucket_stats {
     my ($hash) = @_;
     my ($keys, $buckets, $used, @length_counts) = bucket_info($hash);
     my $sum;
-    $sum += ($length_counts[$_] * $_) for 0 .. $#length_counts;
+    my $score;
+    for (0 .. $#length_counts) {
+        $sum += ($length_counts[$_] * $_);
+        $score += $length_counts[$_] * ( $_ * ($_ + 1 ) / 2 );
+    }
+    $score = $score /
+             (( $keys / (2 * $buckets )) * ( $keys + ( 2 * $buckets ) - 1 ))
+                 if $keys;
     my $mean= $sum/$buckets;
     $sum= 0;
     $sum += ($length_counts[$_] * (($_-$mean)**2)) for 0 .. $#length_counts;
 
     my $stddev= sqrt($sum/$buckets);
-    return $keys, $buckets, $used, $keys ? ($used/$buckets, ($keys-$used)/$keys, $mean, $stddev, @length_counts) : ();
+    return $keys, $buckets, $used, $keys ? ($score, $used/$buckets, ($keys-$used)/$keys, $mean, $stddev, @length_counts) : ();
 }
 
 =item B<hv_store>
