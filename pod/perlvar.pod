@@ -1352,7 +1352,7 @@ be better for something. :-)
 Setting C<$/> to a reference to an integer, scalar containing an
 integer, or scalar that's convertible to an integer will attempt to
 read records instead of lines, with the maximum record size being the
-referenced integer.  So this:
+referenced integer number of characters.  So this:
 
     local $/ = \32768; # or \"32768", or \$var_containing_32768
     open my $fh, "<", $myfile or die $!;
@@ -1366,7 +1366,7 @@ set, you'll get the record back in pieces.  Trying to set the record
 size to zero or less will cause reading in the (rest of the) whole file.
 
 On VMS only, record reads bypass PerlIO layers and any associated
-buffering,so you must not mix record and non-record reads on the
+buffering, so you must not mix record and non-record reads on the
 same filehandle.  Record mode mixes with line mode only when the
 same buffering layer is in use for both modes.
 
