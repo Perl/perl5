@@ -1086,7 +1086,8 @@ PP(pp_aassign)
                 odd = ((lastrelem - firsthashrelem)&1)? 0 : 1;
                 if ( odd ) {
                     do_oddball(lastrelem, firsthashrelem);
-                    /* we have lelem to reuse, it's not needed anymore */
+                    /* we have firstlelem to reuse, it's not needed anymore
+		     */
                     *(lastrelem+1) = &PL_sv_undef;
                 }
 
@@ -1114,7 +1115,8 @@ PP(pp_aassign)
 			    duplicates += 2;
 			else {
 			    /* copy element back: possibly to an earlier
-			     * stack location if we encountered dups earlier */
+			     * stack location if we encountered dups earlier,
+			     * possibly to a later stack location if odd */
 			    *topelem++ = sv;
 			    *topelem++ = tmpstr;
 			}
@@ -1253,6 +1255,8 @@ PP(pp_aassign)
     }
     else {
 	if (ary || hash)
+	    /* note that in this case *firstlelem may have been overwritten
+	       by sv_undef in the odd hash case */
 	    SP = lastrelem;
 	else {
 	    SP = firstrelem + (lastlelem - firstlelem);
