@@ -381,7 +381,7 @@ S_perl_hash_murmur3(const unsigned char * const seed, const unsigned char *ptr, 
 
     /* Consume enough so that the next data byte is word aligned */
     int i = -(long)ptr & 3;
-    if(i && i <= len) {
+    if(i && (STRLEN)i <= len) {
       MURMUR_DOBYTES(i, h1, carry, bytes_in_carry, ptr, len);
     }
 
