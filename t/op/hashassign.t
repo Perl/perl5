@@ -439,6 +439,7 @@ SKIP: {
 # and duplicates with odd number of elements on RHS
 # (%h, ...) = (1,2,3,4,1);
 {
+    no warnings 'misc'; # suppress oddball warnings
     my (%h, %x, @x, $x);
     is( scalar( (%h,$x) = (1,2,3,4,1)), 5,
 	'hash+scalar assignment in scalar context' );
@@ -478,6 +479,7 @@ SKIP: {
         'only assigned elements are returned in list context');
     is( join(':', ($x, $y, %h) = (1,1)), '1:1',
         'only assigned elements are returned in list context');
+    no warnings 'misc'; # suppress oddball warnings
     is( join(':', map $_//'undef', ($x, $y, %h) = (1,1,1)), '1:1:1:undef',
         'only assigned elements are returned in list context');
     is( join(':', ($x, $y, %h) = (1,1,1,1)), '1:1:1:1',
@@ -526,6 +528,7 @@ SKIP: {
     $_++ foreach ($x,$y,%h,$z) = (0,1);
     ok( eq_array([$x,$y,%h,$z], [1,2,undef]), "only assigned values are returned" );
 
+    no warnings 'misc'; # suppress oddball warnings
     $_++ foreach ($x,$y,%h,$z) = (0,1,2);
     ok( eq_array([$x,$y,%h,$z], [1,2,2,1,undef]), "only assigned values are returned" );
 }
