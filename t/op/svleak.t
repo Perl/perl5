@@ -329,6 +329,7 @@ leak(2, 0, sub {
     eval {%a = ($die_on_fetch, 0)}; # key
     eval {%a = (0, $die_on_fetch)}; # value
     eval {%a = ($die_on_fetch, $die_on_fetch)}; # both
+    eval {%a = ($die_on_fetch)}; # key, odd elements
 }, 'hash assignment does not leak');
 leak(2, 0, sub {
     eval {@a = ($die_on_fetch)};

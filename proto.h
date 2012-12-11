@@ -6158,12 +6158,11 @@ STATIC void	S_save_lines(pTHX_ AV *array, SV *sv)
 
 #endif
 #if defined(PERL_IN_PP_HOT_C)
-STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
+STATIC void	S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_DO_ODDBALL	\
-	assert(hash); assert(relem); assert(firstrelem)
+	assert(oddkey); assert(firstkey)
 
 STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 			__attribute__warn_unused_result__

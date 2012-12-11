@@ -778,7 +778,6 @@ const struct flag_to_name op_sassign_names[] = {
 	{(flag), (name)} \
     }
 
-OP_PRIVATE_ONCE(op_aassign, OPpASSIGN_COMMON, ",COMMON");
 OP_PRIVATE_ONCE(op_leavesub, OPpREFCOUNTED, ",REFCOUNTED");
 OP_PRIVATE_ONCE(op_repeat, OPpREPEAT_DOLIST, ",DOLIST");
 OP_PRIVATE_ONCE(op_reverse, OPpREVERSE_INPLACE, ",INPLACE");
@@ -801,7 +800,6 @@ const struct op_private_by_op op_private_names[] = {
     {OP_LEAVE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
     {OP_LEAVESUBLV, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
     {OP_LEAVEWRITE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
-    {OP_AASSIGN, C_ARRAY_LENGTH(op_aassign_names), op_aassign_names },
     {OP_DIE, C_ARRAY_LENGTH(op_die_names), op_die_names },
     {OP_DELETE, C_ARRAY_LENGTH(op_delete_names), op_delete_names },
     {OP_EXISTS, C_ARRAY_LENGTH(op_exists_names), op_exists_names },
@@ -939,6 +937,12 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
                 sv_catpv(tmpsv, ",FT_STACKING");                        \
             if (oppriv & OPpFT_AFTER_t)                                 \
                 sv_catpv(tmpsv, ",AFTER_t");                            \
+	}                                                               \
+	else if (o->op_type == OP_AASSIGN) {                            \
+	    if (oppriv & OPpASSIGN_COMMON)                              \
+		sv_catpvs(tmpsv, ",COMMON");                            \
+	    if (oppriv & OPpMAYBE_LVSUB)                                \
+		sv_catpvs(tmpsv, ",MAYBE_LVSUB");                       \
 	}                                                               \
 	if (o->op_flags & OPf_MOD && oppriv & OPpLVAL_INTRO)            \
 	    sv_catpv(tmpsv, ",INTRO");                                  \

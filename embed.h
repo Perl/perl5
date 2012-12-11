@@ -1497,7 +1497,7 @@
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_PP_HOT_C)
-#define do_oddball(a,b,c)	S_do_oddball(aTHX_ a,b,c)
+#define do_oddball(a,b)		S_do_oddball(aTHX_ a,b)
 #define method_common(a,b)	S_method_common(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_PP_PACK_C)

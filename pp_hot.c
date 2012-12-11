@@ -950,22 +950,19 @@ PP(pp_rv2av)
 }
 
 STATIC void
-S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
+S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_DO_ODDBALL;
 
-    if (*relem) {
-	SV *tmpstr;
-        const HE *didstore;
-
+    if (*oddkey) {
         if (ckWARN(WARN_MISC)) {
 	    const char *err;
-	    if (relem == firstrelem &&
-		SvROK(*relem) &&
-		(SvTYPE(SvRV(*relem)) == SVt_PVAV ||
-		 SvTYPE(SvRV(*relem)) == SVt_PVHV))
+	    if (oddkey == firstkey &&
+		SvROK(*oddkey) &&
+		(SvTYPE(SvRV(*oddkey)) == SVt_PVAV ||
+		 SvTYPE(SvRV(*oddkey)) == SVt_PVHV))
 	    {
 		err = "Reference found where even-sized list expected";
 	    }
@@ -974,15 +971,6 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), "%s", err);
 	}
 
-        tmpstr = newSV(0);
-        didstore = hv_store_ent(hash,*relem,tmpstr,0);
-        if (SvMAGICAL(hash)) {
-            if (SvSMAGICAL(tmpstr))
-                mg_set(tmpstr);
-            if (!didstore)
-                sv_2mortal(tmpstr);
-        }
-        TAINT_NOT;
     }
 }
 
@@ -1004,11 +992,12 @@ PP(pp_aassign)
     HV *hash;
     I32 i;
     int magic;
-    int duplicates = 0;
-    SV **firsthashrelem = NULL;	/* "= 0" keeps gcc 2.95 quiet  */
+    U32 lval = 0;
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
     gimme = GIMME_V;
+    if (gimme == G_ARRAY)
+        lval = PL_op->op_flags & OPf_MOD || LVRET;
 
     /* If there's a common identifier on both sides we have to take
      * special care that assigning the identifier on the left doesn't
@@ -1086,48 +1075,76 @@ PP(pp_aassign)
 	    break;
 	case SVt_PVHV: {				/* normal hash */
 		SV *tmpstr;
+                int odd;
+                int duplicates = 0;
 		SV** topelem = relem;
+                SV **firsthashrelem = relem;
 
 		hash = MUTABLE_HV(sv);
 		magic = SvMAGICAL(hash) != 0;
+
+                odd = ((lastrelem - firsthashrelem)&1)? 0 : 1;
+                if ( odd ) {
+                    do_oddball(lastrelem, firsthashrelem);
+                    /* we have firstlelem to reuse, it's not needed anymore
+		     */
+                    *(lastrelem+1) = &PL_sv_undef;
+                }
+
 		ENTER;
 		SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
 		hv_clear(hash);
-		firsthashrelem = relem;
-
-		while (relem < lastrelem) {	/* gobble up all the rest */
+		while (relem < lastrelem+odd) {	/* gobble up all the rest */
 		    HE *didstore;
-		    sv = *relem ? *relem : &PL_sv_no;
+                    assert(*relem);
+		    /* Copy the key if aassign is called in lvalue context,
+		       to avoid having the next op modify our rhs.  Copy
+		       it also if it is gmagical, lest it make the
+		       hv_store_ent call below croak, leaking the value. */
+		    sv = lval || SvGMAGICAL(*relem)
+			 ? sv_mortalcopy(*relem)
+			 : *relem;
 		    relem++;
-		    tmpstr = sv_newmortal();
-		    if (*relem)
-			sv_setsv(tmpstr,*relem);	/* value */
-		    relem++;
-		    if (gimme != G_VOID) {
+                    assert(*relem);
+		    SvGETMAGIC(*relem);
+                    tmpstr = newSV(0);
+		    sv_setsv_nomg(tmpstr,*relem++);	/* value */
+		    if (gimme == G_ARRAY) {
 			if (hv_exists_ent(hash, sv, 0))
 			    /* key overwrites an existing entry */
 			    duplicates += 2;
-			else
-			if (gimme == G_ARRAY) {
+			else {
 			    /* copy element back: possibly to an earlier
-			     * stack location if we encountered dups earlier */
+			     * stack location if we encountered dups earlier,
+			     * possibly to a later stack location if odd */
 			    *topelem++ = sv;
 			    *topelem++ = tmpstr;
 			}
 		    }
 		    didstore = hv_store_ent(hash,sv,tmpstr,0);
-		    if (didstore) SvREFCNT_inc_simple_void_NN(tmpstr);
 		    if (magic) {
-			if (SvSMAGICAL(tmpstr))
-			    mg_set(tmpstr);
-		    }
+			if (!didstore) sv_2mortal(tmpstr);
+			SvSETMAGIC(tmpstr);
+                    }
 		    TAINT_NOT;
 		}
-		if (relem == lastrelem) {
-		    do_oddball(hash, relem, firstrelem);
-		    relem++;
-		}
 		LEAVE;
+                if (duplicates && gimme == G_ARRAY) {
+                    /* at this point we have removed the duplicate key/value
+                     * pairs from the stack, but the remaining values may be
+                     * wrong; i.e. with (a 1 a 2 b 3) on the stack we've removed
+                     * the (a 2), but the stack now probably contains
+                     * (a <freed> b 3), because { hv_save(a,1); hv_save(a,2) }
+                     * obliterates the earlier key. So refresh all values. */
+                    lastrelem -= duplicates;
+                    relem = firsthashrelem;
+                    while (relem < lastrelem+odd) {
+                        HE *he;
+                        he = hv_fetch_ent(hash, *relem++, 0, 0);
+                        *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
+                    }
+                }
+                if (odd && gimme == G_ARRAY) lastrelem++;
 	    }
 	    break;
 	default:
@@ -1234,35 +1251,19 @@ PP(pp_aassign)
     else if (gimme == G_SCALAR) {
 	dTARGET;
 	SP = firstrelem;
-	SETi(lastrelem - firstrelem + 1 - duplicates);
+	SETi(lastrelem - firstrelem + 1);
     }
     else {
-	if (ary)
+	if (ary || hash)
+	    /* note that in this case *firstlelem may have been overwritten
+	       by sv_undef in the odd hash case */
 	    SP = lastrelem;
-	else if (hash) {
-	    if (duplicates) {
-		/* at this point we have removed the duplicate key/value
-		 * pairs from the stack, but the remaining values may be
-		 * wrong; i.e. with (a 1 a 2 b 3) on the stack we've removed
-		 * the (a 2), but the stack now probably contains
-		 * (a <freed> b 3), because { hv_save(a,1); hv_save(a,2) }
-		 * obliterates the earlier key. So refresh all values. */
-		lastrelem -= duplicates;
-		relem = firsthashrelem;
-		while (relem < lastrelem) {
-		    HE *he;
-		    sv = *relem++;
-		    he = hv_fetch_ent(hash, sv, 0, 0);
-		    *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
-		}
-	    }
-	    SP = lastrelem;
-	}
-	else
+	else {
 	    SP = firstrelem + (lastlelem - firstlelem);
-	lelem = firstlelem + (relem - firstrelem);
-	while (relem <= SP)
-	    *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
+            lelem = firstlelem + (relem - firstrelem);
+            while (relem <= SP)
+                *relem++ = (lelem <= lastlelem) ? *lelem++ : &PL_sv_undef;
+        }
     }
 
     RETURN;

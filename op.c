@@ -2071,11 +2071,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	/* FALL THROUGH */
     case OP_ASLICE:
     case OP_HSLICE:
-	if (type == OP_LEAVESUBLV)
-	    o->op_private |= OPpMAYBE_LVSUB;
 	localize = 1;
 	/* FALL THROUGH */
     case OP_AASSIGN:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
+	/* FALL THROUGH */
     case OP_NEXTSTATE:
     case OP_DBSTATE:
        PL_modcount = RETURN_UNLIMITED_NUMBER;

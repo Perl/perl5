@@ -1904,7 +1904,7 @@ s	|OP*	|do_smartmatch	|NULLOK HV* seen_this \
 #endif
 
 #if defined(PERL_IN_PP_HOT_C)
-s	|void	|do_oddball	|NN HV *hash|NN SV **relem|NN SV **firstrelem
+s	|void	|do_oddball	|NN SV **oddkey|NN SV **firstkey
 sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 #endif
 
