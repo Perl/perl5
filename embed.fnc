@@ -658,6 +658,8 @@ Anpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 Anpd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NULLOK const U8 **ep
 Anpd	|bool	|is_utf8_string_loclen|NN const U8 *s|STRLEN len|NULLOK const U8 **ep|NULLOK STRLEN *el
+AMpR	|bool	|_is_uni_FOO|const U8 classnum|const UV c
+AMpR	|bool	|_is_utf8_FOO|const U8 classnum|NN const U8 *p
 AMpR	|bool	|is_utf8_alnum	|NN const U8 *p
 AMpR	|bool	|is_utf8_alnumc	|NN const U8 *p
 ADMpR	|bool	|is_utf8_idfirst|NN const U8 *p
