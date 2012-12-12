@@ -3816,51 +3816,51 @@ test_isWORDCHAR_LC_utf8(unsigned char * p)
         RETVAL
 
 bool
-test_isALNUMC_uni(UV ord)
+test_isALPHANUMERIC_uni(UV ord)
     CODE:
-        RETVAL = isALNUMC_uni(ord);
+        RETVAL = isALPHANUMERIC_uni(ord);
     OUTPUT:
         RETVAL
 
 bool
-test_isALNUMC_LC_uvchr(UV ord)
+test_isALPHANUMERIC_LC_uvchr(UV ord)
     CODE:
-        RETVAL = isALNUMC_LC_uvchr(ord);
+        RETVAL = isALPHANUMERIC_LC_uvchr(ord);
     OUTPUT:
         RETVAL
 
 bool
-test_isALNUMC_A(UV ord)
+test_isALPHANUMERIC_A(UV ord)
     CODE:
-        RETVAL = isALNUMC_A(ord);
+        RETVAL = isALPHANUMERIC_A(ord);
     OUTPUT:
         RETVAL
 
 bool
-test_isALNUMC_L1(UV ord)
+test_isALPHANUMERIC_L1(UV ord)
     CODE:
-        RETVAL = isALNUMC_L1(ord);
+        RETVAL = isALPHANUMERIC_L1(ord);
     OUTPUT:
         RETVAL
 
 bool
-test_isALNUMC_LC(UV ord)
+test_isALPHANUMERIC_LC(UV ord)
     CODE:
-        RETVAL = isALNUMC_LC(ord);
+        RETVAL = isALPHANUMERIC_LC(ord);
     OUTPUT:
         RETVAL
 
 bool
-test_isALNUMC_utf8(unsigned char * p)
+test_isALPHANUMERIC_utf8(unsigned char * p)
     CODE:
-        RETVAL = isALNUMC_utf8( p);
+        RETVAL = isALPHANUMERIC_utf8( p);
     OUTPUT:
         RETVAL
 
 bool
-test_isALNUMC_LC_utf8(unsigned char * p)
+test_isALPHANUMERIC_LC_utf8(unsigned char * p)
     CODE:
-        RETVAL = isALNUMC_LC_utf8( p);
+        RETVAL = isALPHANUMERIC_LC_utf8( p);
     OUTPUT:
         RETVAL
 

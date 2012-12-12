@@ -10790,7 +10790,7 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY&& isALNUMC(*p)) {
+			if (!SIZE_ONLY&& isALPHANUMERIC(*p)) {
 			    ckWARN2reg(p + 1, "Unrecognized escape \\%.1s passed through", p);
 			}
 			goto normal_default;
@@ -11245,7 +11245,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 			    break;
 			case 'm':
 			    if (memEQ(posixcc, "alnu", 4)) /* alnum */
-				namedclass = ANYOF_ALNUMC;
+				namedclass = ANYOF_ALPHANUMERIC;
 			    break;
 			case 'r':
 			    if (memEQ(posixcc, "lowe", 4)) /* lower */
@@ -11908,11 +11908,11 @@ parseit:
 	    if (! SIZE_ONLY) {
 		switch ((I32)namedclass) {
 
-		case ANYOF_ALNUMC: /* C's alnum, in contrast to \w */
+		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
 		    break;
-		case ANYOF_NALNUMC:
+		case ANYOF_NALPHANUMERIC:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv,
                         runtime_posix_matches_above_Unicode);
@@ -13820,10 +13820,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
     static const char * const anyofs[] = {
 #if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6 || _CC_ALNUMC != 7 \
-    || _CC_GRAPH != 8 || _CC_SPACE != 9 || _CC_BLANK != 10 \
-    || _CC_XDIGIT != 11 || _CC_PSXSPC != 12 || _CC_CNTRL != 13 \
-    || _CC_ASCII != 14 || _CC_VERTSPACE != 15
+    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6 \
+    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_SPACE != 9 \
+    || _CC_BLANK != 10 || _CC_XDIGIT != 11 || _CC_PSXSPC != 12 \
+    || _CC_CNTRL != 13 || _CC_ASCII != 14 || _CC_VERTSPACE != 15
   #error Need to adjust order of anyofs[]
 #endif
         "[\\w]",

@@ -23,7 +23,7 @@ require 'regen/regen_lib.pl';
 
 my @properties = qw(
     NONLATIN1_FOLD
-    ALNUMC
+    ALPHANUMERIC
     ALPHA
     ASCII
     BLANK
@@ -192,7 +192,7 @@ for my $ord (0..255) {
             $re = qr/[\v\p{Space}]/;
         } elsif ($name eq 'WORDCHAR') {
             $re = qr/\p{XPosixWord}/;
-        } elsif ($name eq 'ALNUMC') {
+        } elsif ($name eq 'ALPHANUMERIC') {
             # Like \w, but no underscore
             $re = qr/\p{Alnum}/;
         } elsif ($name eq 'QUOTEMETA') {

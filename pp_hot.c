@@ -1813,7 +1813,7 @@ Perl_do_readline(pTHX)
 		}
 	    }
 	    for (t1 = SvPVX_const(sv); *t1; t1++)
-		if (!isALNUMC(*t1) &&
+		if (!isALPHANUMERIC(*t1) &&
 		    strchr("$&*(){}[]'\";\\|?<>~`", *t1))
 			break;
 	    if (*t1 && PerlLIO_lstat(SvPVX_const(sv), &PL_statbuf) < 0) {

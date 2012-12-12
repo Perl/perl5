@@ -1848,7 +1848,7 @@ bool
 Perl_is_uni_alnumc_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isALNUMC_LC(UNI_TO_NATIVE(c));
+        return isALPHANUMERIC_LC(UNI_TO_NATIVE(c));
     }
     return is_uni_alnumc(c);
 }

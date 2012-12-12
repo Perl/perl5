@@ -3252,7 +3252,7 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    if ((isALNUMC(*s)))
+		    if ((isALPHANUMERIC(*s)))
 			Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 				       "Unrecognized escape \\%c passed through",
 				       *s);
@@ -9170,8 +9170,11 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
     for (;;) {
 	if (d >= e)
 	    Perl_croak(aTHX_ ident_too_long);
-	if (isALNUM(*s) || (!UTF && isALNUMC_L1(*s)))	/* UTF handled below */
+	if (isALNUM(*s)
+            || (!UTF && isALPHANUMERIC_L1(*s))) /* UTF handled below */
+        {
 	    *d++ = *s++;
+        }
 	else if (allow_package && (*s == '\'') && isIDFIRST_lazy_if(s+1,UTF)) {
 	    *d++ = ':';
 	    *d++ = ':';

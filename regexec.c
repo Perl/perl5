@@ -525,7 +525,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
      * particularly care about performance with locales anyway. */
 
     switch ((_char_class_number) classnum) {
-        case _CC_ENUM_ALNUMC:    return isALNUMC_LC(character);
+        case _CC_ENUM_ALPHANUMERIC: return isALPHANUMERIC_LC(character);
         case _CC_ENUM_ALPHA:     return isALPHA_LC(character);
         case _CC_ENUM_DIGIT:     return isDIGIT_LC(character);
         case _CC_ENUM_GRAPH:     return isGRAPH_LC(character);

@@ -584,7 +584,7 @@ sub Pick {\n\
 		    *t &= 127;
 		    if (isLOWER(*t))
 			*t = toUPPER(*t);
-		    if (!isALNUMC(*t))
+		    if (!isALPHANUMERIC(*t))
 			*t = '_';
 		}
 		if (!strchr(tokenbuf,'_'))
@@ -1112,7 +1112,7 @@ sub Pick {\n\
 		*t &= 127;
 		if (isLOWER(*t))
 		    *t = toUPPER(*t);
-		if (!isALNUMC(*t))
+		if (!isALPHANUMERIC(*t))
 		    *t = '_';
 	    }
 	    if (!strchr(tokenbuf,'_'))
@@ -1149,7 +1149,7 @@ sub Pick {\n\
 		    *t &= 127;
 		    if (isLOWER(*t))
 			*t = toUPPER(*t);
-		    if (!isALNUMC(*t))
+		    if (!isALPHANUMERIC(*t))
 			*t = '_';
 		}
 		if (!strchr(tokenbuf,'_'))
