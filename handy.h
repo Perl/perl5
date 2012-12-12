@@ -935,16 +935,6 @@ EXTCONST U32 PL_charclass[];
                                || NATIVE_TO_UNI((U8) c) == 0xA0)
 #endif
 
-/* Macros for backwards compatibility and for completeness when the ASCII and
- * Latin1 values are identical */
-#define isALNUM(c)      isWORDCHAR(c)
-#define isALNUMU(c)     isWORDCHAR_L1(c)
-#define isALPHAU(c)     isALPHA_L1(c)
-#define isDIGIT_L1(c)   isDIGIT_A(c)
-#define isOCTAL(c)      isOCTAL_A(c)
-#define isOCTAL_L1(c)   isOCTAL_A(c)
-#define isXDIGIT_L1(c)  isXDIGIT_A(c)
-
 /* Macros that differ between EBCDIC and ASCII.  Where C89 defines a function,
  * that is used in the EBCDIC form, because in EBCDIC we do not do locales:
  * therefore can use native functions.  For those where C89 doesn't define a
@@ -1271,6 +1261,16 @@ EXTCONST U32 PL_charclass[];
 #define isUPPER_LC_utf8(p)   _generic_LC_utf8(isUPPER_LC, is_utf8_upper, p)
 #define isWORDCHAR_LC_utf8(p) _generic_LC_utf8(isWORDCHAR_LC, is_utf8_alnum, p)
 #define isXDIGIT_LC_utf8(p)  _generic_LC_utf8(isXDIGIT_LC, is_XDIGIT_high, p)
+
+/* Macros for backwards compatibility and for completeness when the ASCII and
+ * Latin1 values are identical */
+#define isALNUM(c)      isWORDCHAR(c)
+#define isALNUMU(c)     isWORDCHAR_L1(c)
+#define isALPHAU(c)     isALPHA_L1(c)
+#define isDIGIT_L1(c)   isDIGIT_A(c)
+#define isOCTAL(c)      isOCTAL_A(c)
+#define isOCTAL_L1(c)   isOCTAL_A(c)
+#define isXDIGIT_L1(c)  isXDIGIT_A(c)
 
 /* This conversion works both ways, strangely enough. On EBCDIC platforms,
  * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII, except that they don't
