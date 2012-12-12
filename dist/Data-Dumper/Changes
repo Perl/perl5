@@ -6,6 +6,14 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.139 (Dec 12 2012)
+
+Supply an explicit dynamic_config => 0 in META
+
+Properly list BUILD_REQUIRES prereqs (P5-RT#116028)
+
+Some optimizations. Removed useless "register" declarations.
+
 =item 2.136 (Oct 04 2012)
 
 Promote to stable release.
