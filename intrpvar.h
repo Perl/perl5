@@ -8,6 +8,8 @@
  *
  */
 
+#include "handy.h"
+
 /*
 =head1 Per-Interpreter Variables
 */
