@@ -8,6 +8,9 @@
  *
  */
 
+#ifndef HANDY_H /* Guard against nested #inclusion */
+#define HANDY_H
+
 #if !defined(__STDC__)
 #ifdef NULL
 #undef NULL
@@ -1550,6 +1553,8 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #ifdef PERL_CORE
 #  define deprecate(s) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED), "Use of " s " is deprecated")
 #endif
+
+#endif  /* HANDY_H */
 
 /*
  * Local variables:
