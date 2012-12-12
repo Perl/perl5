@@ -29,6 +29,7 @@ MODULE = File::DosGlob		PACKAGE = File::DosGlob
 PROTOTYPES: DISABLE
 
 BOOT:
+{
     MY_CXT_INIT;
     {
 	dMY_CXT;
@@ -36,6 +37,7 @@ BOOT:
 	MY_CXT.x_DG_OLD_OPHOOK = PL_opfreehook;
 	PL_opfreehook = glob_ophook;
     }
+}
 
 SV *
 _callsite(...)
