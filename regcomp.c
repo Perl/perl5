@@ -11373,7 +11373,17 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
  * destlist       is the inversion list for non-locale rules that this class is
  *                to be added to
  * sourcelist     is the ASCII-range inversion list to add under /a rules
- * l1_sourcelist  is the Latin1 range list to use otherwise.
+ * swash          points to the swash that contains the whole inversion list for
+ *                this class.  If NULL, it means that the swash has not been
+ *                computed yet.  This macro does not do the large amount of
+ *                work necessary to compute it, but instead uses the inversion
+ *                list from the next parameter so that all of Latin1 is known
+ *                at compile time, and the rest is deferred until run-time, as
+ *                defined by the final two parameters.  In other words, it may
+ *                be that the swash has already been loaded by the time this
+ *                macro is called, in which case we use it; but if not loaded,
+ *                we don't take the time to compute it now.
+ * l1_sourcelist  is the Latin1 range list.
  * Xpropertyname  is the name to add to <run_time_list> of the property to
  *                specify the code points above Latin1 that will have to be
  *                determined at run-time
@@ -11383,25 +11393,30 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
  * This is essentially DO_POSIX, but we know only the Latin1 values at compile
  * time */
 #define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
-                              l1_sourcelist, Xpropertyname, run_time_list) \
+                       swash, l1_sourcelist, Xpropertyname, run_time_list) \
 	/* First, resolve whether to use the ASCII-only list or the L1     \
 	 * list */	                                                   \
         DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist,      \
                 ((AT_LEAST_ASCII_RESTRICTED) ? sourcelist : l1_sourcelist),\
-                Xpropertyname, run_time_list)
+                swash, Xpropertyname, run_time_list)
 
 #define DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist, sourcelist, \
-                Xpropertyname, run_time_list)                              \
+                swash, Xpropertyname, run_time_list)                       \
     /* If not /a matching, there are going to be code points we will have  \
      * to defer to runtime to look-up */                                   \
-    if (! AT_LEAST_ASCII_RESTRICTED) {                                     \
-        Perl_sv_catpvf(aTHX_ run_time_list, "+utf8::%s\n", Xpropertyname); \
-    }                                                                      \
-    if (LOC) {                                                             \
-        ANYOF_CLASS_SET(node, class);                                      \
-    }                                                                      \
+    if (! AT_LEAST_ASCII_RESTRICTED && swash) {                            \
+            DO_POSIX(node, class, destlist, sourcelist, _swash_to_invlist(swash)); \
+    }                                                                  \
     else {                                                                 \
-        _invlist_union(destlist, sourcelist, &destlist);                   \
+        if (! AT_LEAST_ASCII_RESTRICTED) {                        \
+            Perl_sv_catpvf(aTHX_ run_time_list, "+utf8::%s\n", Xpropertyname); \
+        }                                                                  \
+        if (LOC) {                                                         \
+            ANYOF_CLASS_SET(node, class);                                  \
+        }                                                                  \
+        else {                                                             \
+            _invlist_union(destlist, sourcelist, &destlist);               \
+        }                                                                  \
     }
 
 /* Like DO_POSIX_LATIN1_ONLY_KNOWN, but for the complement.  A combination of
@@ -11910,7 +11925,7 @@ parseit:
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
+                        PL_PosixAlnum, PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], PL_L1PosixAlnum, "XPosixAlnum", listsv);
 		    break;
 		case ANYOF_NALPHANUMERIC:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -11919,7 +11934,7 @@ parseit:
 		    break;
 		case ANYOF_ALPHA:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
+                        PL_PosixAlpha, PL_utf8_swash_ptrs[_CC_ALPHA], PL_L1PosixAlpha, "XPosixAlpha", listsv);
 		    break;
 		case ANYOF_NALPHA:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -12021,7 +12036,7 @@ parseit:
 		     * ASCII, so call the macro that doesn't have to resolve
 		     * them */
 		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                        PL_PosixDigit, "XPosixDigit", listsv);
+                        PL_PosixDigit, PL_utf8_swash_ptrs[_CC_DIGIT], "XPosixDigit", listsv);
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -12030,7 +12045,7 @@ parseit:
 		    break;
 		case ANYOF_GRAPH:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
+                        PL_PosixGraph, PL_utf8_swash_ptrs[_CC_GRAPH], PL_L1PosixGraph, "XPosixGraph", listsv);
 		    break;
 		case ANYOF_NGRAPH:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -12058,20 +12073,23 @@ parseit:
 		    SV* ascii_source;
 		    SV* l1_source;
 		    const char *Xname;
+                    SV* swash;
 
 		    if (FOLD && ! LOC) {
 			ascii_source = PL_PosixAlpha;
 			l1_source = PL_L1Cased;
 			Xname = "Cased";
+                        swash = NULL;
 		    }
 		    else {
 			ascii_source = PL_PosixLower;
 			l1_source = PL_L1PosixLower;
 			Xname = "XPosixLower";
+                        swash = PL_utf8_swash_ptrs[_CC_LOWER];
 		    }
 		    if (namedclass == ANYOF_LOWER) {
 			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, l1_source, Xname, listsv);
+                                    ascii_source, swash, l1_source, Xname, listsv);
 		    }
 		    else {
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
@@ -12082,7 +12100,7 @@ parseit:
 		}
 		case ANYOF_PRINT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
+                        PL_PosixPrint, PL_utf8_swash_ptrs[_CC_PRINT], PL_L1PosixPrint, "XPosixPrint", listsv);
 		    break;
 		case ANYOF_NPRINT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -12091,7 +12109,7 @@ parseit:
 		    break;
 		case ANYOF_PUNCT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
+                        PL_PosixPunct, PL_utf8_swash_ptrs[_CC_PUNCT], PL_L1PosixPunct, "XPosixPunct", listsv);
 		    break;
 		case ANYOF_NPUNCT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -12120,20 +12138,23 @@ parseit:
 		    SV* ascii_source;
 		    SV* l1_source;
 		    const char *Xname;
+                    SV* swash;
 
 		    if (FOLD && ! LOC) {
 			ascii_source = PL_PosixAlpha;
 			l1_source = PL_L1Cased;
 			Xname = "Cased";
+                        swash = NULL;
 		    }
 		    else {
 			ascii_source = PL_PosixUpper;
 			l1_source = PL_L1PosixUpper;
 			Xname = "XPosixUpper";
+                        swash = PL_utf8_swash_ptrs[_CC_UPPER];
 		    }
 		    if (namedclass == ANYOF_UPPER) {
 			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, l1_source, Xname, listsv);
+                                    ascii_source, swash, l1_source, Xname, listsv);
 		    }
 		    else {
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
@@ -12144,7 +12165,7 @@ parseit:
 		}
 		case ANYOF_WORDCHAR:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
+                            PL_PosixWord, PL_utf8_swash_ptrs[_CC_WORDCHAR], PL_L1PosixWord, "XPosixWord", listsv);
 		    break;
 		case ANYOF_NWORDCHAR:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
