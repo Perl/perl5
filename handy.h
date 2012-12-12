@@ -1033,7 +1033,6 @@ EXTCONST U32 PL_charclass[];
 #ifdef USE_NEXT_CTYPE
 
 #  define isALPHANUMERIC_LC(c)	NXIsAlNum((unsigned int)(c))
-#  define isALNUM_LC(c)         isWORDCHAR_LC(c)
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
 #  define isASCII_LC(c)		isASCII((unsigned int)(c))
 #  define isBLANK_LC(c)		isBLANK((unsigned int)(c))
@@ -1057,7 +1056,6 @@ EXTCONST U32 PL_charclass[];
 
 /* Use foo_LC_uvchr() instead  of these for beyond the Latin1 range */
 
-#    define isALNUM_LC(c) isWORDCHAR_LC(c)
 #    define isALPHA_LC(c)   (FITS_IN_8_BITS(c) && isalpha((unsigned char)(c)))
 #    define isALPHANUMERIC_LC(c)   (FITS_IN_8_BITS(c)                          \
                                                && isalnum((unsigned char)(c)))
@@ -1089,7 +1087,6 @@ EXTCONST U32 PL_charclass[];
 
 #  else
 
-#    define isALNUM_LC(c)	isWORDCHAR_LC(c)
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isALPHANUMERIC_LC(c) (isascii(c) && isalnum(c))
 #    define isASCII_LC(c)	isascii(c)
@@ -1130,7 +1127,6 @@ EXTCONST U32 PL_charclass[];
 #define _generic_uni_swash(classnum, c) ((c) < 256                        \
                                              ? _generic_isCC(c, classnum) \
                                              : _is_uni_FOO(classnum, c))
-#define isALNUM_uni(c)      isWORDCHAR_uni(c)
 #define isALPHA_uni(c)      _generic_uni_swash(_CC_ALPHA, c)
 #define isALPHANUMERIC_uni(c) _generic_uni_swash(_CC_ALPHANUMERIC, c)
 #define isASCII_uni(c)      isASCII(c)
@@ -1159,7 +1155,6 @@ EXTCONST U32 PL_charclass[];
 
 #define _gnrc_is_LC_uvchr(latin1, above_latin1, c)                            \
                         (c < 256 ? latin1(c) : above_latin1(NATIVE_TO_UNI(c)))
-#define isALNUM_LC_uvchr(c)  isWORDCHAR_LC_uvchr(c)
 #define isALPHA_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHA_LC, is_uni_alpha_lc, c)
 #define isALPHANUMERIC_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHANUMERIC_LC,      \
                                                          is_uni_alnumc_lc, c)
@@ -1226,7 +1221,6 @@ EXTCONST U32 PL_charclass[];
  * points; the regcharclass.h ones are implemented as a series of
  * "if-else-if-else ..." */
 
-#define isALNUM_utf8(p)         isWORDCHAR_utf8(p)  /* back compat */
 #define isALPHA_utf8(p)         _generic_swash_utf8(_CC_ALPHA, p)
 #define isALPHANUMERIC_utf8(p)  _generic_swash_utf8(_CC_ALPHANUMERIC, p)
 #define isASCII_utf8(p)         isASCII(*p) /* Because ASCII is invariant under
@@ -1281,7 +1275,6 @@ EXTCONST U32 PL_charclass[];
 #define _generic_LC_utf8(macro, utf8_func, p)                              \
                             _generic_LC_utf8_utf8(macro, p, utf8_func(p))
 
-#define isALNUM_LC_utf8(p)   isWORDCHAR_LC_utf8(p)
 #define isALPHANUMERIC_LC_utf8(p)  _generic_LC_utf8(isALPHANUMERIC_LC,       \
                                                           is_utf8_alnumc, p)
 #define isALPHA_LC_utf8(p)   _generic_LC_utf8(isALPHA_LC, is_utf8_alpha, p)
@@ -1304,13 +1297,18 @@ EXTCONST U32 PL_charclass[];
 
 /* Macros for backwards compatibility and for completeness when the ASCII and
  * Latin1 values are identical */
-#define isALNUM(c)      isWORDCHAR(c)
-#define isALNUMU(c)     isWORDCHAR_L1(c)
 #define isALPHAU(c)     isALPHA_L1(c)
 #define isDIGIT_L1(c)   isDIGIT_A(c)
 #define isOCTAL(c)      isOCTAL_A(c)
 #define isOCTAL_L1(c)   isOCTAL_A(c)
 #define isXDIGIT_L1(c)  isXDIGIT_A(c)
+#define isALNUM(c)      isWORDCHAR(c)
+#define isALNUMU(c)     isWORDCHAR_L1(c)
+#define isALNUM_LC(c)   isWORDCHAR_LC(c)
+#define isALNUM_uni(c)  isWORDCHAR_uni(c)
+#define isALNUM_LC_uvchr(c) isWORDCHAR_LC_uvchr(c)
+#define isALNUM_utf8(p) isWORDCHAR_utf8(p)
+#define isALNUM_LC_utf8(p) isWORDCHAR_LC_utf8(p)
 #define isALNUMC_A(c)   isALPHANUMERIC_A(c)      /* Mnemonic: "C's alnum" */
 #define isALNUMC_L1(c)  isALPHANUMERIC_L1(c)
 #define isALNUMC(c)	isALPHANUMERIC(c)
