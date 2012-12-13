@@ -142,7 +142,13 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<GDBM_File> has been upgraded from version 1.14 to 1.15. The undocumented
+optional fifth parameter to C<TIEHASH> has been removed. This was intended
+to provide control of the callback used by C<gdbm*> functions in case of
+fatal errors (such as filesystem problems), but did not work (and could
+never have worked). No code on CPAN even attempted to use it. The callback
+is now always the previous default, C<croak>. Problems on some platforms with
+how the C<C> C<croak> function is called have also been resolved.
 
 =back
 
