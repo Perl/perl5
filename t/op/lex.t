@@ -45,13 +45,16 @@ curr_test(3);
 
 }
 
-fresh_perl_is(
+{
+ delete local $ENV{PERL_UNICODE};
+ fresh_perl_is(
   'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"} } "\N{a}"',
   'Constant(\N{a}) unknown at - line 1, within string' . "\n"
  ."Execution of - aborted due to compilation errors.\n",
    { stderr => 1 },
   'correct output (and no crash) when charnames cannot load for \N{...}'
-);
+ );
+}
 fresh_perl_is(
   'BEGIN{ ++$_ for @INC{"charnames.pm","_charnames.pm"};
           $^H{charnames} = "foo" } "\N{a}"',
