@@ -12084,14 +12084,14 @@ parseit:
 			Xname = swash_property_names[classnum];
                         swash = PL_utf8_swash_ptrs[classnum];
 		    }
-		    if (namedclass == ANYOF_LOWER) {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, swash, l1_source, Xname, listsv);
+		    if (namedclass % 2) {   /* If odd, is the complemented version */
+			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
+                        posixes, ascii_source, l1_source, Xname, listsv,
+                        runtime_posix_matches_above_Unicode);
 		    }
 		    else {
-			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                            posixes, ascii_source, l1_source, Xname, listsv,
-                            runtime_posix_matches_above_Unicode);
+			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
+                                    ascii_source, swash, l1_source, Xname, listsv);
 		    }
 		    break;
 		}
@@ -12131,14 +12131,14 @@ parseit:
 			Xname = swash_property_names[classnum];
                         swash = PL_utf8_swash_ptrs[classnum];
 		    }
-		    if (namedclass == ANYOF_UPPER) {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, swash, l1_source, Xname, listsv);
-		    }
-		    else {
+		    if (namedclass % 2) {   /* If odd, is the complemented version */
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
                         posixes, ascii_source, l1_source, Xname, listsv,
                         runtime_posix_matches_above_Unicode);
+		    }
+		    else {
+			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
+                                    ascii_source, swash, l1_source, Xname, listsv);
 		    }
 		    break;
 		}
