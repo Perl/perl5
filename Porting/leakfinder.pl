@@ -59,11 +59,14 @@ $aliases{$code_point} = [ $aliases{$code_point} ];
 $aliases_maps->[$i] = [ $aliases_maps->[$i] ]
 $allow ? $hash{$acc} = $allow : push @list, $acc;
 /(a*(*MARK:a)b?)(*MARK:x)(*SKIP:a)(?{$count++; push @res,$1})(*FAIL)/g;
+$^A .= new version ~$_ for "\xce", v205, "\xcc";
 A rare race condition that would lead to L<sleep|perlfunc/sleep> taking more
 $args{include_dirs} = [ $args{include_dirs} ] 
 $ARRAY[++$#ARRAY] = $value;
 @a = sort ($b, @a)
 $a = {x => $a};
+$base =~ /^[cwnv]/i or push @tmpl, "$base>", "$base<";
+$base =~ /^[nv]/i or push @formats, "$base>", "$base<";
 BEGIN { unshift(@INC, "./blib") }
 BEGIN { unshift @INC, "lib" }
 BEGIN { unshift(@INC, LIST) }
@@ -82,7 +85,7 @@ do { $tainted_value = shift @ENV_values  } while(!$tainted_value || ref $tainted
 do {$x[$x] = $x;} while ($x++) < 10;
 eval {CHECK {print ":c3"}};
 eval {INIT {print ":i2"}};
-eval { $proto->can($method) } || push @nok, $method
+eval { $proto->can($method) } || push @nok, $method;
 eval { push \@ISA, __FILE__ };
 eval 'v23: $counter++; goto v23 unless $counter == 2';
 eval 'v23 : $counter++; goto v23 unless $counter == 2';
@@ -130,6 +133,8 @@ $p->{share_dir} = { dist => [ $p->{share_dir} ] };
 $p->{share_dir} = { dist => $p->{share_dir} };
 -sleep
 $resp = [$resp]
+$r = eval q[ qr/$r(??{$x})/; ];
+$r = qr/$r(??{$x})/;
 s/a|/push @bar, 1/e;
 $self->{DIR} = [grep $_, split ":", $self->{DIR}];
 $share_dir->{dist} = [ $share_dir->{dist} ];
@@ -151,8 +156,8 @@ weaken($objs[@objs] = $$h{$_} = []);
 while (1) { my $k; }
 while(1) { sleep(1); }
 while($foo--) { print("In thread $thread\n"); }
-"words" =~ /(word|word|word)(?{push \@got, $1})s$/;
-"words" =~ /(word|word|word)(?{push \@got,$1})s$/i;
+"words" =~ /(word|word|word)(?{push @got, $1})s$/;
+"words" =~ /(word|word|word)(?{push @got,$1})s$/i;
 $x->[$j] -= $BASE if $car = (($x->[$j] += $car) >= $BASE) ? 1 : 0; $j++;
 $x->[scalar @$x] = 0;		# avoid || 0 test inside loop
 $z = splice @a, 3, 1, "recordZ";
