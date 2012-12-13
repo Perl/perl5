@@ -25,8 +25,6 @@ typedef datum datum_key_copy;
 
 #define GDBM_BLOCKSIZE 0 /* gdbm defaults to stat blocksize */
 
-typedef void (*FATALFUNC)();
-
 #ifndef GDBM_FAST
 static int
 not_here(char *s)
@@ -70,18 +68,17 @@ MODULE = GDBM_File	PACKAGE = GDBM_File	PREFIX = gdbm_
 INCLUDE: const-xs.inc
 
 GDBM_File
-gdbm_TIEHASH(dbtype, name, read_write, mode, fatal_func = (FATALFUNC)croak_string)
+gdbm_TIEHASH(dbtype, name, read_write, mode)
 	char *		dbtype
 	char *		name
 	int		read_write
 	int		mode
-	FATALFUNC	fatal_func
 	CODE:
 	{
 	    GDBM_FILE  	dbp ;
 
 	    RETVAL = NULL ;
-	    if ((dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode, fatal_func))) {
+	    if ((dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode, croak_string))) {
 	        RETVAL = (GDBM_File)safecalloc(1, sizeof(GDBM_File_type)) ;
 		RETVAL->dbp = dbp ;
 	    }
