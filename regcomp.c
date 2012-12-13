@@ -12063,6 +12063,8 @@ parseit:
 		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
+		case ANYOF_UPPER:
+		case ANYOF_NUPPER:
                 {   /* These require special handling, as they differ under
 		       folding, matching Cased there (which in the ASCII range
 		       is the same as Alpha */
@@ -12111,37 +12113,6 @@ parseit:
                     DO_N_POSIX(ret, namedclass, posixes,
                                             PL_Posix_ptrs[classnum], PL_XPerlSpace);
 		    break;
-		case ANYOF_UPPER:   /* Same as LOWER, above */
-		case ANYOF_NUPPER:
-		{
-		    SV* ascii_source;
-		    SV* l1_source;
-		    const char *Xname;
-                    SV* swash;
-
-		    if (FOLD && ! LOC) {
-			ascii_source = PL_Posix_ptrs[_CC_ALPHA];
-			l1_source = PL_L1Cased;
-			Xname = "Cased";
-                        swash = NULL;
-		    }
-		    else {
-			ascii_source = PL_Posix_ptrs[classnum];
-			l1_source = PL_L1Posix_ptrs[classnum];
-			Xname = swash_property_names[classnum];
-                        swash = PL_utf8_swash_ptrs[classnum];
-		    }
-		    if (namedclass % 2) {   /* If odd, is the complemented version */
-			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                        posixes, ascii_source, l1_source, Xname, listsv,
-                        runtime_posix_matches_above_Unicode);
-		    }
-		    else {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, swash, l1_source, Xname, listsv);
-		    }
-		    break;
-		}
 		case ANYOF_VERTWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
