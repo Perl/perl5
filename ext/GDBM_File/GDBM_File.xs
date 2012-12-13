@@ -58,6 +58,11 @@ output_datum(pTHX_ SV *arg, char *str, int size)
 #define gdbm_setopt(db,optflag,optval,optlen) not_here("gdbm_setopt")
 #endif
 
+static void
+croak_string(const char *message) {
+    Perl_croak_nocontext("%s", message);
+}
+
 #include "const-c.inc"
 
 MODULE = GDBM_File	PACKAGE = GDBM_File	PREFIX = gdbm_
@@ -65,7 +70,7 @@ MODULE = GDBM_File	PACKAGE = GDBM_File	PREFIX = gdbm_
 INCLUDE: const-xs.inc
 
 GDBM_File
-gdbm_TIEHASH(dbtype, name, read_write, mode, fatal_func = (FATALFUNC)croak)
+gdbm_TIEHASH(dbtype, name, read_write, mode, fatal_func = (FATALFUNC)croak_string)
 	char *		dbtype
 	char *		name
 	int		read_write
