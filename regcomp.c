@@ -11925,20 +11925,20 @@ parseit:
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], PL_L1PosixAlnum, "XPosixAlnum", listsv);
+                        PL_PosixAlnum, PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], PL_L1PosixAlnum, swash_property_names[_CC_ALPHANUMERIC], listsv);
 		    break;
 		case ANYOF_NALPHANUMERIC:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv,
+                        PL_PosixAlnum, PL_L1PosixAlnum, swash_property_names[_CC_ALPHANUMERIC], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ALPHA:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_utf8_swash_ptrs[_CC_ALPHA], PL_L1PosixAlpha, "XPosixAlpha", listsv);
+                        PL_PosixAlpha, PL_utf8_swash_ptrs[_CC_ALPHA], PL_L1PosixAlpha, swash_property_names[_CC_ALPHA], listsv);
 		    break;
 		case ANYOF_NALPHA:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv,
+                        PL_PosixAlpha, PL_L1PosixAlpha, swash_property_names[_CC_ALPHA], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ASCII:
@@ -12036,20 +12036,20 @@ parseit:
 		     * ASCII, so call the macro that doesn't have to resolve
 		     * them */
 		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                        PL_PosixDigit, PL_utf8_swash_ptrs[_CC_DIGIT], "XPosixDigit", listsv);
+                        PL_PosixDigit, PL_utf8_swash_ptrs[_CC_DIGIT], swash_property_names[_CC_DIGIT], listsv);
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv,
+                        PL_PosixDigit, PL_PosixDigit, swash_property_names[_CC_DIGIT], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_GRAPH:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_utf8_swash_ptrs[_CC_GRAPH], PL_L1PosixGraph, "XPosixGraph", listsv);
+                        PL_PosixGraph, PL_utf8_swash_ptrs[_CC_GRAPH], PL_L1PosixGraph, swash_property_names[_CC_GRAPH], listsv);
 		    break;
 		case ANYOF_NGRAPH:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv,
+                        PL_PosixGraph, PL_L1PosixGraph, swash_property_names[_CC_GRAPH], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_HORIZWS:
@@ -12084,7 +12084,7 @@ parseit:
 		    else {
 			ascii_source = PL_PosixLower;
 			l1_source = PL_L1PosixLower;
-			Xname = "XPosixLower";
+			Xname = swash_property_names[_CC_LOWER];
                         swash = PL_utf8_swash_ptrs[_CC_LOWER];
 		    }
 		    if (namedclass == ANYOF_LOWER) {
@@ -12100,20 +12100,20 @@ parseit:
 		}
 		case ANYOF_PRINT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_utf8_swash_ptrs[_CC_PRINT], PL_L1PosixPrint, "XPosixPrint", listsv);
+                        PL_PosixPrint, PL_utf8_swash_ptrs[_CC_PRINT], PL_L1PosixPrint, swash_property_names[_CC_PRINT], listsv);
 		    break;
 		case ANYOF_NPRINT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv,
+                        PL_PosixPrint, PL_L1PosixPrint, swash_property_names[_CC_PRINT], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PUNCT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_utf8_swash_ptrs[_CC_PUNCT], PL_L1PosixPunct, "XPosixPunct", listsv);
+                        PL_PosixPunct, PL_utf8_swash_ptrs[_CC_PUNCT], PL_L1PosixPunct, swash_property_names[_CC_PUNCT], listsv);
 		    break;
 		case ANYOF_NPUNCT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv,
+                        PL_PosixPunct, PL_L1PosixPunct, swash_property_names[_CC_PUNCT], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PSXSPC:
@@ -12149,7 +12149,7 @@ parseit:
 		    else {
 			ascii_source = PL_PosixUpper;
 			l1_source = PL_L1PosixUpper;
-			Xname = "XPosixUpper";
+			Xname = swash_property_names[_CC_UPPER];
                         swash = PL_utf8_swash_ptrs[_CC_UPPER];
 		    }
 		    if (namedclass == ANYOF_UPPER) {
@@ -12165,11 +12165,11 @@ parseit:
 		}
 		case ANYOF_WORDCHAR:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_utf8_swash_ptrs[_CC_WORDCHAR], PL_L1PosixWord, "XPosixWord", listsv);
+                            PL_PosixWord, PL_utf8_swash_ptrs[_CC_WORDCHAR], PL_L1PosixWord, swash_property_names[_CC_WORDCHAR], listsv);
 		    break;
 		case ANYOF_NWORDCHAR:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv,
+                            PL_PosixWord, PL_L1PosixWord, swash_property_names[_CC_WORDCHAR], listsv,
                             runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_VERTWS:
