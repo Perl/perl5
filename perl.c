@@ -518,6 +518,7 @@ perl_destruct(pTHXx)
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
     pid_t child;
 #endif
+    int i;
 
     PERL_ARGS_ASSERT_PERL_DESTRUCT;
 #ifndef MULTIPLICITY
@@ -980,15 +981,11 @@ perl_destruct(pTHXx)
     PL_numeric_radix_sv = NULL;
 #endif
 
-    /* clear utf8 character classes */
-    SvREFCNT_dec(PL_utf8_alnum);
-    SvREFCNT_dec(PL_utf8_alpha);
-    SvREFCNT_dec(PL_utf8_graph);
-    SvREFCNT_dec(PL_utf8_digit);
-    SvREFCNT_dec(PL_utf8_upper);
-    SvREFCNT_dec(PL_utf8_lower);
-    SvREFCNT_dec(PL_utf8_print);
-    SvREFCNT_dec(PL_utf8_punct);
+    /* clear character classes  */
+    for (i = 0; i < POSIX_SWASH_COUNT; i++) {
+        SvREFCNT_dec(PL_utf8_swash_ptrs[i]);
+        PL_utf8_swash_ptrs[i] = NULL;
+    }
     SvREFCNT_dec(PL_utf8_mark);
     SvREFCNT_dec(PL_utf8_toupper);
     SvREFCNT_dec(PL_utf8_totitle);
@@ -997,14 +994,6 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_idstart);
     SvREFCNT_dec(PL_utf8_idcont);
     SvREFCNT_dec(PL_utf8_foldclosures);
-    PL_utf8_alnum	= NULL;
-    PL_utf8_alpha	= NULL;
-    PL_utf8_graph	= NULL;
-    PL_utf8_digit	= NULL;
-    PL_utf8_upper	= NULL;
-    PL_utf8_lower	= NULL;
-    PL_utf8_print	= NULL;
-    PL_utf8_punct	= NULL;
     PL_utf8_mark	= NULL;
     PL_utf8_toupper	= NULL;
     PL_utf8_totitle	= NULL;
