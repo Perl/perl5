@@ -1002,6 +1002,10 @@ perl_destruct(pTHXx)
     PL_utf8_idstart	= NULL;
     PL_utf8_idcont	= NULL;
     PL_utf8_foldclosures = NULL;
+    for (i = 0; i < POSIX_CC_COUNT; i++) {
+        SvREFCNT_dec(PL_L1Posix_ptrs[i]);
+        PL_L1Posix_ptrs[i] = NULL;
+    }
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	PerlMemShared_free(PL_compiling.cop_warnings);

@@ -801,6 +801,7 @@ typedef enum {
 #endif
 
 #define POSIX_SWASH_COUNT _FIRST_NON_SWASH_CC
+#define POSIX_CC_COUNT    (_HIGHEST_REGCOMP_DOT_H_SYNC + 1)
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C)
 #   if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \

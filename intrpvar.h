@@ -569,10 +569,8 @@ PERLVAR(I, AboveLatin1,	SV *)
 PERLVAR(I, PerlSpace,	SV *)
 PERLVAR(I, XPerlSpace,	SV *)
 
-PERLVAR(I, L1PosixAlnum,SV *)
 PERLVAR(I, PosixAlnum,	SV *)
 
-PERLVAR(I, L1PosixAlpha,SV *)
 PERLVAR(I, PosixAlpha,	SV *)
 
 PERLVAR(I, PosixBlank,	SV *)
@@ -585,25 +583,19 @@ PERLVAR(I, XPosixCntrl,	SV *)
 
 PERLVAR(I, PosixDigit,	SV *)
 
-PERLVAR(I, L1PosixGraph,SV *)
 PERLVAR(I, PosixGraph,	SV *)
 
-PERLVAR(I, L1PosixLower,SV *)
 PERLVAR(I, PosixLower,	SV *)
 
-PERLVAR(I, L1PosixPrint,SV *)
 PERLVAR(I, PosixPrint,	SV *)
 
-PERLVAR(I, L1PosixPunct,SV *)
 PERLVAR(I, PosixPunct,	SV *)
 
 PERLVAR(I, PosixSpace,	SV *)
 PERLVAR(I, XPosixSpace,	SV *)
 
-PERLVAR(I, L1PosixUpper,SV *)
 PERLVAR(I, PosixUpper,	SV *)
 
-PERLVAR(I, L1PosixWord,	SV *)
 PERLVAR(I, PosixWord,	SV *)
 
 PERLVAR(I, PosixXDigit,	SV *)
@@ -625,6 +617,7 @@ PERLVAR(I, utf8_tofold,	SV *)
 PERLVAR(I, utf8_charname_begin, SV *)
 PERLVAR(I, utf8_charname_continue, SV *)
 PERLVARA(I, utf8_swash_ptrs, POSIX_SWASH_COUNT, SV *)
+PERLVARA(I, L1Posix_ptrs, POSIX_CC_COUNT, SV *)
 PERLVAR(I, last_swash_hv, HV *)
 PERLVAR(I, last_swash_tmps, U8 *)
 PERLVAR(I, last_swash_slen, STRLEN)

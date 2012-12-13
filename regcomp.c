@@ -5334,15 +5334,16 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_ASCII = _new_invlist_C_array(ASCII_invlist);
 	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
 
-	PL_L1PosixAlnum = _new_invlist_C_array(L1PosixAlnum_invlist);
+	PL_L1Posix_ptrs[_CC_ALPHANUMERIC]
+                                = _new_invlist_C_array(L1PosixAlnum_invlist);
 	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
 
-	PL_L1PosixAlpha = _new_invlist_C_array(L1PosixAlpha_invlist);
+	PL_L1Posix_ptrs[_CC_ALPHA]
+                                = _new_invlist_C_array(L1PosixAlpha_invlist);
 	PL_PosixAlpha = _new_invlist_C_array(PosixAlpha_invlist);
 
 	PL_PosixBlank = _new_invlist_C_array(PosixBlank_invlist);
 	PL_XPosixBlank = _new_invlist_C_array(XPosixBlank_invlist);
-
 	PL_L1Cased = _new_invlist_C_array(L1Cased_invlist);
 
 	PL_PosixCntrl = _new_invlist_C_array(PosixCntrl_invlist);
@@ -5350,31 +5351,31 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	PL_PosixDigit = _new_invlist_C_array(PosixDigit_invlist);
 
-	PL_L1PosixGraph = _new_invlist_C_array(L1PosixGraph_invlist);
+	PL_L1Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(L1PosixGraph_invlist);
 	PL_PosixGraph = _new_invlist_C_array(PosixGraph_invlist);
 
-	PL_L1PosixLower = _new_invlist_C_array(L1PosixLower_invlist);
+	PL_L1Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(L1PosixLower_invlist);
 	PL_PosixLower = _new_invlist_C_array(PosixLower_invlist);
 
-	PL_L1PosixPrint = _new_invlist_C_array(L1PosixPrint_invlist);
+	PL_L1Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(L1PosixPrint_invlist);
 	PL_PosixPrint = _new_invlist_C_array(PosixPrint_invlist);
 
-	PL_L1PosixPunct = _new_invlist_C_array(L1PosixPunct_invlist);
+	PL_L1Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(L1PosixPunct_invlist);
 	PL_PosixPunct = _new_invlist_C_array(PosixPunct_invlist);
 
 	PL_PerlSpace = _new_invlist_C_array(PerlSpace_invlist);
 	PL_XPerlSpace = _new_invlist_C_array(XPerlSpace_invlist);
-
 	PL_PosixSpace = _new_invlist_C_array(PosixSpace_invlist);
 	PL_XPosixSpace = _new_invlist_C_array(XPosixSpace_invlist);
 
-	PL_L1PosixUpper = _new_invlist_C_array(L1PosixUpper_invlist);
+	PL_L1Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(L1PosixUpper_invlist);
 	PL_PosixUpper = _new_invlist_C_array(PosixUpper_invlist);
 
 	PL_VertSpace = _new_invlist_C_array(VertSpace_invlist);
 
 	PL_PosixWord = _new_invlist_C_array(PosixWord_invlist);
-	PL_L1PosixWord = _new_invlist_C_array(L1PosixWord_invlist);
+	PL_L1Posix_ptrs[_CC_WORDCHAR]
+                                = _new_invlist_C_array(L1PosixWord_invlist);
 
 	PL_PosixXDigit = _new_invlist_C_array(PosixXDigit_invlist);
 	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
@@ -11925,20 +11926,20 @@ parseit:
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], PL_L1PosixAlnum, swash_property_names[_CC_ALPHANUMERIC], listsv);
+                        PL_PosixAlnum, PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], PL_L1Posix_ptrs[_CC_ALPHANUMERIC], swash_property_names[_CC_ALPHANUMERIC], listsv);
 		    break;
 		case ANYOF_NALPHANUMERIC:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1PosixAlnum, swash_property_names[_CC_ALPHANUMERIC], listsv,
+                        PL_PosixAlnum, PL_L1Posix_ptrs[_CC_ALPHANUMERIC], swash_property_names[_CC_ALPHANUMERIC], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ALPHA:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_utf8_swash_ptrs[_CC_ALPHA], PL_L1PosixAlpha, swash_property_names[_CC_ALPHA], listsv);
+                        PL_PosixAlpha, PL_utf8_swash_ptrs[_CC_ALPHA], PL_L1Posix_ptrs[_CC_ALPHA], swash_property_names[_CC_ALPHA], listsv);
 		    break;
 		case ANYOF_NALPHA:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1PosixAlpha, swash_property_names[_CC_ALPHA], listsv,
+                        PL_PosixAlpha, PL_L1Posix_ptrs[_CC_ALPHA], swash_property_names[_CC_ALPHA], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ASCII:
@@ -12045,11 +12046,11 @@ parseit:
 		    break;
 		case ANYOF_GRAPH:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_utf8_swash_ptrs[_CC_GRAPH], PL_L1PosixGraph, swash_property_names[_CC_GRAPH], listsv);
+                        PL_PosixGraph, PL_utf8_swash_ptrs[_CC_GRAPH], PL_L1Posix_ptrs[_CC_GRAPH], swash_property_names[_CC_GRAPH], listsv);
 		    break;
 		case ANYOF_NGRAPH:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1PosixGraph, swash_property_names[_CC_GRAPH], listsv,
+                        PL_PosixGraph, PL_L1Posix_ptrs[_CC_GRAPH], swash_property_names[_CC_GRAPH], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_HORIZWS:
@@ -12083,7 +12084,7 @@ parseit:
 		    }
 		    else {
 			ascii_source = PL_PosixLower;
-			l1_source = PL_L1PosixLower;
+			l1_source = PL_L1Posix_ptrs[_CC_LOWER];
 			Xname = swash_property_names[_CC_LOWER];
                         swash = PL_utf8_swash_ptrs[_CC_LOWER];
 		    }
@@ -12100,20 +12101,20 @@ parseit:
 		}
 		case ANYOF_PRINT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_utf8_swash_ptrs[_CC_PRINT], PL_L1PosixPrint, swash_property_names[_CC_PRINT], listsv);
+                        PL_PosixPrint, PL_utf8_swash_ptrs[_CC_PRINT], PL_L1Posix_ptrs[_CC_PRINT], swash_property_names[_CC_PRINT], listsv);
 		    break;
 		case ANYOF_NPRINT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1PosixPrint, swash_property_names[_CC_PRINT], listsv,
+                        PL_PosixPrint, PL_L1Posix_ptrs[_CC_PRINT], swash_property_names[_CC_PRINT], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PUNCT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_utf8_swash_ptrs[_CC_PUNCT], PL_L1PosixPunct, swash_property_names[_CC_PUNCT], listsv);
+                        PL_PosixPunct, PL_utf8_swash_ptrs[_CC_PUNCT], PL_L1Posix_ptrs[_CC_PUNCT], swash_property_names[_CC_PUNCT], listsv);
 		    break;
 		case ANYOF_NPUNCT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1PosixPunct, swash_property_names[_CC_PUNCT], listsv,
+                        PL_PosixPunct, PL_L1Posix_ptrs[_CC_PUNCT], swash_property_names[_CC_PUNCT], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PSXSPC:
@@ -12148,7 +12149,7 @@ parseit:
 		    }
 		    else {
 			ascii_source = PL_PosixUpper;
-			l1_source = PL_L1PosixUpper;
+			l1_source = PL_L1Posix_ptrs[_CC_UPPER];
 			Xname = swash_property_names[_CC_UPPER];
                         swash = PL_utf8_swash_ptrs[_CC_UPPER];
 		    }
@@ -12165,11 +12166,11 @@ parseit:
 		}
 		case ANYOF_WORDCHAR:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_utf8_swash_ptrs[_CC_WORDCHAR], PL_L1PosixWord, swash_property_names[_CC_WORDCHAR], listsv);
+                            PL_PosixWord, PL_utf8_swash_ptrs[_CC_WORDCHAR], PL_L1Posix_ptrs[_CC_WORDCHAR], swash_property_names[_CC_WORDCHAR], listsv);
 		    break;
 		case ANYOF_NWORDCHAR:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1PosixWord, swash_property_names[_CC_WORDCHAR], listsv,
+                            PL_PosixWord, PL_L1Posix_ptrs[_CC_WORDCHAR], swash_property_names[_CC_WORDCHAR], listsv,
                             runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_VERTWS:
@@ -12652,7 +12653,7 @@ parseit:
          * indicators, which are weeded out below using the
          * IS_IN_SOME_FOLD_L1() macro */
         if (invlist_highest(cp_list) < 256) {
-            _invlist_intersection(PL_L1PosixAlpha, cp_list, &fold_intersection);
+            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list, &fold_intersection);
         }
         else {
 
