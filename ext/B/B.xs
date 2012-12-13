@@ -1942,7 +1942,7 @@ PadlistARRAYelt(padlist, idx)
 	B::PADLIST	padlist
 	PADOFFSET	idx
     PPCODE:
-    	if (idx >= 0 && PadlistMAX(padlist) >= 0
+	if (PadlistMAX(padlist) >= 0
 	 && idx <= PadlistMAX(padlist))
 	    XPUSHs(make_sv_object(aTHX_
 				  (SV *)PadlistARRAY(padlist)[idx]));
