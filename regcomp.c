@@ -11928,19 +11928,21 @@ parseit:
 		switch ((I32)namedclass) {
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
-		    break;
-		case ANYOF_NALPHANUMERIC:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
 		case ANYOF_ALPHA:
+		case ANYOF_GRAPH:
+		case ANYOF_PRINT:
+		case ANYOF_PUNCT:
+		case ANYOF_WORDCHAR:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
+
+		case ANYOF_NALPHANUMERIC:
 		case ANYOF_NALPHA:
+		case ANYOF_NGRAPH:
+		case ANYOF_NPRINT:
+		case ANYOF_NPUNCT:
+		case ANYOF_NWORDCHAR:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
@@ -12047,15 +12049,6 @@ parseit:
                         PL_Posix_ptrs[classnum], PL_Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
-		case ANYOF_GRAPH:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
-		    break;
-		case ANYOF_NGRAPH:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
 		case ANYOF_HORIZWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
@@ -12102,24 +12095,6 @@ parseit:
 		    }
 		    break;
 		}
-		case ANYOF_PRINT:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
-		    break;
-		case ANYOF_NPRINT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
-		case ANYOF_PUNCT:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
-		    break;
-		case ANYOF_NPUNCT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
 		case ANYOF_PSXSPC:
                     DO_POSIX(ret, namedclass, posixes,
                                             PL_Posix_ptrs[classnum], PL_XPosixSpace);
@@ -12167,15 +12142,6 @@ parseit:
 		    }
 		    break;
 		}
-		case ANYOF_WORDCHAR:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
-		    break;
-		case ANYOF_NWORDCHAR:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
-                            runtime_posix_matches_above_Unicode);
-		    break;
 		case ANYOF_VERTWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
