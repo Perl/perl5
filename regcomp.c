@@ -5341,48 +5341,49 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	PL_L1Posix_ptrs[_CC_ALPHANUMERIC]
                                 = _new_invlist_C_array(L1PosixAlnum_invlist);
-	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
+	PL_Posix_ptrs[_CC_ALPHANUMERIC]
+                                = _new_invlist_C_array(PosixAlnum_invlist);
 
 	PL_L1Posix_ptrs[_CC_ALPHA]
                                 = _new_invlist_C_array(L1PosixAlpha_invlist);
-	PL_PosixAlpha = _new_invlist_C_array(PosixAlpha_invlist);
+	PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PosixAlpha_invlist);
 
-	PL_PosixBlank = _new_invlist_C_array(PosixBlank_invlist);
+	PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PosixBlank_invlist);
 	PL_XPosixBlank = _new_invlist_C_array(XPosixBlank_invlist);
 	PL_L1Cased = _new_invlist_C_array(L1Cased_invlist);
 
-	PL_PosixCntrl = _new_invlist_C_array(PosixCntrl_invlist);
+	PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PosixCntrl_invlist);
 	PL_XPosixCntrl = _new_invlist_C_array(XPosixCntrl_invlist);
 
-	PL_PosixDigit = _new_invlist_C_array(PosixDigit_invlist);
+	PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
 
 	PL_L1Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(L1PosixGraph_invlist);
-	PL_PosixGraph = _new_invlist_C_array(PosixGraph_invlist);
+	PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PosixGraph_invlist);
 
 	PL_L1Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(L1PosixLower_invlist);
-	PL_PosixLower = _new_invlist_C_array(PosixLower_invlist);
+	PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PosixLower_invlist);
 
 	PL_L1Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(L1PosixPrint_invlist);
-	PL_PosixPrint = _new_invlist_C_array(PosixPrint_invlist);
+	PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PosixPrint_invlist);
 
 	PL_L1Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(L1PosixPunct_invlist);
-	PL_PosixPunct = _new_invlist_C_array(PosixPunct_invlist);
+	PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PosixPunct_invlist);
 
-	PL_PerlSpace = _new_invlist_C_array(PerlSpace_invlist);
+	PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PerlSpace_invlist);
 	PL_XPerlSpace = _new_invlist_C_array(XPerlSpace_invlist);
-	PL_PosixSpace = _new_invlist_C_array(PosixSpace_invlist);
+	PL_Posix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(PosixSpace_invlist);
 	PL_XPosixSpace = _new_invlist_C_array(XPosixSpace_invlist);
 
 	PL_L1Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(L1PosixUpper_invlist);
-	PL_PosixUpper = _new_invlist_C_array(PosixUpper_invlist);
+	PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PosixUpper_invlist);
 
 	PL_VertSpace = _new_invlist_C_array(VertSpace_invlist);
 
-	PL_PosixWord = _new_invlist_C_array(PosixWord_invlist);
+	PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PosixWord_invlist);
 	PL_L1Posix_ptrs[_CC_WORDCHAR]
                                 = _new_invlist_C_array(L1PosixWord_invlist);
 
-	PL_PosixXDigit = _new_invlist_C_array(PosixXDigit_invlist);
+	PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PosixXDigit_invlist);
 	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
 
         PL_HasMultiCharFold = _new_invlist_C_array(_Perl_Multi_Char_Folds_invlist);
@@ -11928,20 +11929,20 @@ parseit:
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NALPHANUMERIC:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ALPHA:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NALPHA:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_ASCII:
@@ -11972,7 +11973,7 @@ parseit:
 		case ANYOF_BLANK:
                     if (hasISBLANK || ! LOC) {
                         DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixBlank, PL_XPosixBlank);
+                                            PL_Posix_ptrs[classnum], PL_XPosixBlank);
                     }
                     else { /* There is no isblank() and we are in locale:  We
                               use the ASCII range and the above-Latin1 range
@@ -11992,13 +11993,13 @@ parseit:
                             SvREFCNT_dec(scratch_list);
                         }
                         /* Add the ASCII-range blanks to the running total. */
-                        _invlist_union(posixes, PL_PosixBlank, &posixes);
+                        _invlist_union(posixes, PL_Posix_ptrs[classnum], &posixes);
                     }
 		    break;
 		case ANYOF_NBLANK:
                     if (hasISBLANK || ! LOC) {
                         DO_N_POSIX(ret, namedclass, posixes,
-                                                PL_PosixBlank, PL_XPosixBlank);
+                                                PL_Posix_ptrs[classnum], PL_XPosixBlank);
                     }
                     else { /* There is no isblank() and we are in locale */
                         SV* scratch_list = NULL;
@@ -12020,7 +12021,7 @@ parseit:
 
                         /* Get the list of all non-ASCII-blanks in Latin 1, and
                          * add them to the running total */
-                        _invlist_subtract(PL_Latin1, PL_PosixBlank,
+                        _invlist_subtract(PL_Latin1, PL_Posix_ptrs[classnum],
                                           &scratch_list);
                         _invlist_union(posixes, scratch_list, &posixes);
                         SvREFCNT_dec(scratch_list);
@@ -12028,31 +12029,31 @@ parseit:
 		    break;
 		case ANYOF_CNTRL:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixCntrl, PL_XPosixCntrl);
+                                            PL_Posix_ptrs[classnum], PL_XPosixCntrl);
 		    break;
 		case ANYOF_NCNTRL:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixCntrl, PL_XPosixCntrl);
+                                            PL_Posix_ptrs[classnum], PL_XPosixCntrl);
 		    break;
 		case ANYOF_DIGIT:
 		    /* There are no digits in the Latin1 range outside of
 		     * ASCII, so call the macro that doesn't have to resolve
 		     * them */
 		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                        PL_PosixDigit, PL_utf8_swash_ptrs[classnum], swash_property_names[classnum], listsv);
+                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixDigit, PL_PosixDigit, swash_property_names[classnum], listsv,
+                        PL_Posix_ptrs[classnum], PL_Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_GRAPH:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NGRAPH:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_HORIZWS:
@@ -12079,13 +12080,13 @@ parseit:
                     SV* swash;
 
 		    if (FOLD && ! LOC) {
-			ascii_source = PL_PosixAlpha;
+			ascii_source = PL_Posix_ptrs[_CC_ALPHA];
 			l1_source = PL_L1Cased;
 			Xname = "Cased";
                         swash = NULL;
 		    }
 		    else {
-			ascii_source = PL_PosixLower;
+			ascii_source = PL_Posix_ptrs[classnum];
 			l1_source = PL_L1Posix_ptrs[classnum];
 			Xname = swash_property_names[classnum];
                         swash = PL_utf8_swash_ptrs[classnum];
@@ -12103,37 +12104,37 @@ parseit:
 		}
 		case ANYOF_PRINT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NPRINT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PUNCT:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NPUNCT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_PSXSPC:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixSpace, PL_XPosixSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPosixSpace);
 		    break;
 		case ANYOF_NPSXSPC:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixSpace, PL_XPosixSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPosixSpace);
 		    break;
 		case ANYOF_SPACE:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_PerlSpace, PL_XPerlSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPerlSpace);
 		    break;
 		case ANYOF_NSPACE:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PerlSpace, PL_XPerlSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPerlSpace);
 		    break;
 		case ANYOF_UPPER:   /* Same as LOWER, above */
 		case ANYOF_NUPPER:
@@ -12144,13 +12145,13 @@ parseit:
                     SV* swash;
 
 		    if (FOLD && ! LOC) {
-			ascii_source = PL_PosixAlpha;
+			ascii_source = PL_Posix_ptrs[_CC_ALPHA];
 			l1_source = PL_L1Cased;
 			Xname = "Cased";
                         swash = NULL;
 		    }
 		    else {
-			ascii_source = PL_PosixUpper;
+			ascii_source = PL_Posix_ptrs[classnum];
 			l1_source = PL_L1Posix_ptrs[classnum];
 			Xname = swash_property_names[classnum];
                         swash = PL_utf8_swash_ptrs[classnum];
@@ -12168,11 +12169,11 @@ parseit:
 		}
 		case ANYOF_WORDCHAR:
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                            PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 		case ANYOF_NWORDCHAR:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                            PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                             runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_VERTWS:
@@ -12188,11 +12189,11 @@ parseit:
 		    break;
 		case ANYOF_XDIGIT:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixXDigit, PL_XPosixXDigit);
+                                            PL_Posix_ptrs[classnum], PL_XPosixXDigit);
 		    break;
 		case ANYOF_NXDIGIT:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixXDigit, PL_XPosixXDigit);
+                                            PL_Posix_ptrs[classnum], PL_XPosixXDigit);
 		    break;
 		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;

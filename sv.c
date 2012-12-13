@@ -13587,42 +13587,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Unicode inversion lists */
     PL_ASCII		= sv_dup_inc(proto_perl->IASCII, param);
     PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
-
-    PL_PerlSpace	= sv_dup_inc(proto_perl->IPerlSpace, param);
     PL_XPerlSpace	= sv_dup_inc(proto_perl->IXPerlSpace, param);
-
-    PL_PosixAlnum	= sv_dup_inc(proto_perl->IPosixAlnum, param);
-
-    PL_PosixAlpha	= sv_dup_inc(proto_perl->IPosixAlpha, param);
-
-    PL_PosixBlank	= sv_dup_inc(proto_perl->IPosixBlank, param);
     PL_XPosixBlank	= sv_dup_inc(proto_perl->IXPosixBlank, param);
-
     PL_L1Cased		= sv_dup_inc(proto_perl->IL1Cased, param);
 
-    PL_PosixCntrl	= sv_dup_inc(proto_perl->IPosixCntrl, param);
     PL_XPosixCntrl	= sv_dup_inc(proto_perl->IXPosixCntrl, param);
-
-    PL_PosixDigit	= sv_dup_inc(proto_perl->IPosixDigit, param);
-
-    PL_PosixGraph	= sv_dup_inc(proto_perl->IPosixGraph, param);
-
-    PL_PosixLower	= sv_dup_inc(proto_perl->IPosixLower, param);
-
-    PL_PosixPrint	= sv_dup_inc(proto_perl->IPosixPrint, param);
-
-    PL_PosixPunct	= sv_dup_inc(proto_perl->IPosixPunct, param);
-
-    PL_PosixSpace	= sv_dup_inc(proto_perl->IPosixSpace, param);
     PL_XPosixSpace	= sv_dup_inc(proto_perl->IXPosixSpace, param);
-
-    PL_PosixUpper	= sv_dup_inc(proto_perl->IPosixUpper, param);
-
-    PL_PosixWord	= sv_dup_inc(proto_perl->IPosixWord, param);
-
-    PL_PosixXDigit	= sv_dup_inc(proto_perl->IPosixXDigit, param);
     PL_XPosixXDigit	= sv_dup_inc(proto_perl->IXPosixXDigit, param);
-
     PL_VertSpace	= sv_dup_inc(proto_perl->IVertSpace, param);
 
     PL_NonL1NonFinalFold = sv_dup_inc(proto_perl->INonL1NonFinalFold, param);
@@ -13633,6 +13604,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         PL_utf8_swash_ptrs[i] = sv_dup_inc(proto_perl->Iutf8_swash_ptrs[i], param);
     }
     for (i = 0; i < POSIX_CC_COUNT; i++) {
+        PL_Posix_ptrs[i] = sv_dup_inc(proto_perl->IPosix_ptrs[i], param);
         PL_L1Posix_ptrs[i] = sv_dup_inc(proto_perl->IL1Posix_ptrs[i], param);
     }
     PL_utf8_mark	= sv_dup_inc(proto_perl->Iutf8_mark, param);

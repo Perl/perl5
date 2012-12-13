@@ -1003,6 +1003,9 @@ perl_destruct(pTHXx)
     PL_utf8_idcont	= NULL;
     PL_utf8_foldclosures = NULL;
     for (i = 0; i < POSIX_CC_COUNT; i++) {
+        SvREFCNT_dec(PL_Posix_ptrs[i]);
+        PL_Posix_ptrs[i] = NULL;
+
         SvREFCNT_dec(PL_L1Posix_ptrs[i]);
         PL_L1Posix_ptrs[i] = NULL;
     }
