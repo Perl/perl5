@@ -10,7 +10,7 @@ use File::DosGlob;
 use FindBin;
 use File::Spec::Functions;
 BEGIN {
-    chdir catfile $FindBin::Bin, (updir)x3, 't';
+    chdir catdir $FindBin::Bin, (updir)x3, 't';
     @INC = '../lib';
 }
 
