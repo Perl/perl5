@@ -109,7 +109,7 @@ eleak(2, 0, "$all v111111111111111111111111111111111111111111111111",
 eleak(2, 0, 'sub{<*>}');
 # Use a random number of ops, so that the glob op does not reuse the same
 # address each time, giving us false passes.
-leak(2, 0, sub { eval '$x+'x(rand() * 100) . '<*>'; },
+leak(2, 0, sub { eval '$x+'x(1 + rand() * 100) . '<*>'; },
     'freeing partly iterated glob');
 
 eleak(2, 0, 'goto sub {}', 'goto &sub in eval');

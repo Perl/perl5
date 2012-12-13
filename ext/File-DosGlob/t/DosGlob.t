@@ -147,9 +147,9 @@ SKIP: {
     # Use a random number of ops, so that the glob op does not reuse the
     # same address each time, giving us false passes.
     my($count,$count2);
-    eval '$x+'x(rand() * 100) . '<*>';
+    eval '$x+'x(1+rand() * 100) . '<*>';
     $count = sv_count();
-    eval '$x+'x(rand() * 100) . '<*>';
+    eval '$x+'x(1+rand() * 100) . '<*>';
     $count2 = sv_count();
     is $count2, $count, 'no leak when partly iterated caller is freed';
 }
