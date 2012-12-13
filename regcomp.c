@@ -263,6 +263,11 @@ typedef struct RExC_state_t {
                                      if (! UTF) JMPENV_JUMP(UTF8_LONGJMP); \
                         } STMT_END
 
+/* This converts the named class defined in regcomp.h to its equivalent class
+ * number defined in handy.h. */
+#define namedclass_to_classnum(class)  ((int) ((class) / 2))
+#define classnum_to_namedclass(classnum)  ((classnum) * 2)
+
 /* About scan_data_t.
 
   During optimisation we recurse through the regexp program performing
@@ -11454,10 +11459,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
  * stored in this SV, after a constant heading.  So if the length has been
  * changed since initialization, then there is a run-time definition. */
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
-
-/* This converts the named class defined in regcomp.h to its equivalent class
- * number defined in handy.h. */
-#define namedclass_to_classnum(class)  ((class) / 2)
 
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
