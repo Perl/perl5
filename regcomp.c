@@ -5349,11 +5349,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PosixAlpha_invlist);
 
 	PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PosixBlank_invlist);
-	PL_XPosixBlank = _new_invlist_C_array(XPosixBlank_invlist);
+	PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
 	PL_L1Cased = _new_invlist_C_array(L1Cased_invlist);
 
 	PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PosixCntrl_invlist);
-	PL_XPosixCntrl = _new_invlist_C_array(XPosixCntrl_invlist);
+	PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
 
 	PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
 
@@ -5370,21 +5370,21 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PosixPunct_invlist);
 
 	PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PerlSpace_invlist);
-	PL_XPerlSpace = _new_invlist_C_array(XPerlSpace_invlist);
+	PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
 	PL_Posix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(PosixSpace_invlist);
-	PL_XPosixSpace = _new_invlist_C_array(XPosixSpace_invlist);
+	PL_XPosix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(XPosixSpace_invlist);
 
 	PL_L1Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(L1PosixUpper_invlist);
 	PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PosixUpper_invlist);
 
-	PL_VertSpace = _new_invlist_C_array(VertSpace_invlist);
+        PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
 
 	PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PosixWord_invlist);
 	PL_L1Posix_ptrs[_CC_WORDCHAR]
                                 = _new_invlist_C_array(L1PosixWord_invlist);
 
 	PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PosixXDigit_invlist);
-	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
+	PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
 
         PL_HasMultiCharFold = _new_invlist_C_array(_Perl_Multi_Char_Folds_invlist);
     }
@@ -11975,7 +11975,7 @@ parseit:
 		case ANYOF_BLANK:
                     if (hasISBLANK || ! LOC) {
                         DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixBlank);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
                     }
                     else { /* There is no isblank() and we are in locale:  We
                               use the ASCII range and the above-Latin1 range
@@ -11984,7 +11984,7 @@ parseit:
 
                         /* Include all above-Latin1 blanks */
                         _invlist_intersection(PL_AboveLatin1,
-                                              PL_XPosixBlank,
+                                              PL_XPosix_ptrs[classnum],
                                               &scratch_list);
                         /* Add it to the running total of posix classes */
                         if (! posixes) {
@@ -12001,17 +12001,17 @@ parseit:
 		case ANYOF_NBLANK:
                     if (hasISBLANK || ! LOC) {
                         DO_N_POSIX(ret, namedclass, posixes,
-                                                PL_Posix_ptrs[classnum], PL_XPosixBlank);
+                                                PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
                     }
                     else { /* There is no isblank() and we are in locale */
                         SV* scratch_list = NULL;
 
                         /* Include all above-Latin1 non-blanks */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank,
+                        _invlist_subtract(PL_AboveLatin1, PL_XPosix_ptrs[classnum],
                                           &scratch_list);
 
                         /* Add them to the running total of posix classes */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank,
+                        _invlist_subtract(PL_AboveLatin1, PL_XPosix_ptrs[classnum],
                                           &scratch_list);
                         if (! posixes) {
                             posixes = scratch_list;
@@ -12031,11 +12031,11 @@ parseit:
 		    break;
 		case ANYOF_CNTRL:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixCntrl);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_NCNTRL:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixCntrl);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_DIGIT:
 		    /* There are no digits in the Latin1 range outside of
@@ -12055,11 +12055,11 @@ parseit:
 		     * if these characters had folds other than themselves, as
 		     * cp_list is subject to folding.  It turns out that \h
 		     * is just a synonym for XPosixBlank */
-		    _invlist_union(cp_list, PL_XPosixBlank, &cp_list);
+		    _invlist_union(cp_list, PL_XPosix_ptrs[_CC_BLANK], &cp_list);
 		    break;
 		case ANYOF_NHORIZWS:
                     _invlist_union_complement_2nd(cp_list,
-                                                 PL_XPosixBlank, &cp_list);
+                                                 PL_XPosix_ptrs[_CC_BLANK], &cp_list);
 		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
@@ -12099,38 +12099,39 @@ parseit:
 		}
 		case ANYOF_PSXSPC:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_NPSXSPC:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_SPACE:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPerlSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_NSPACE:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPerlSpace);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_VERTWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
 		     * if these characters had folds other than themselves, as
 		     * cp_list is subject to folding */
-		    _invlist_union(cp_list, PL_VertSpace, &cp_list);
+		    _invlist_union(cp_list, PL_XPosix_ptrs[classnum], &cp_list);
 		    break;
 		case ANYOF_NVERTWS:
                     _invlist_union_complement_2nd(cp_list,
-                                                    PL_VertSpace, &cp_list);
+                                                  PL_XPosix_ptrs[classnum],
+                                                  &cp_list);
 		    break;
 		case ANYOF_XDIGIT:
                     DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixXDigit);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_NXDIGIT:
                     DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosixXDigit);
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;
