@@ -2213,7 +2213,7 @@ Perl_hv_kill_backrefs(pTHX_ HV *hv) {
 	HvAUX(hv)->xhv_backreferences = 0;
 	Perl_sv_kill_backrefs(aTHX_ MUTABLE_SV(hv), av);
 	if (SvTYPE(av) == SVt_PVAV)
-	    SvREFCNT_dec(av);
+	    SvREFCNT_dec_NN(av);
     }
 }
 
