@@ -369,6 +369,10 @@ If you have code like that, simply replace it with
 
     SvUPGRADE(sv);
 
+or to to avoid compiler warnings with older perls, possibly
+
+    (void)SvUPGRADE(sv);
+
 =back
 
 =head1 Selected Bug Fixes
