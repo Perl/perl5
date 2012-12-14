@@ -12030,10 +12030,16 @@ parseit:
                     }
 		    break;
 		case ANYOF_CNTRL:
+		case ANYOF_PSXSPC:
+		case ANYOF_SPACE:
+		case ANYOF_XDIGIT:
                     DO_POSIX(ret, namedclass, posixes,
                                             PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_NCNTRL:
+		case ANYOF_NPSXSPC:
+		case ANYOF_NSPACE:
+		case ANYOF_NXDIGIT:
                     DO_N_POSIX(ret, namedclass, posixes,
                                             PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
@@ -12097,22 +12103,6 @@ parseit:
 		    }
 		    break;
 		}
-		case ANYOF_PSXSPC:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
-		    break;
-		case ANYOF_NPSXSPC:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
-		    break;
-		case ANYOF_SPACE:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
-		    break;
-		case ANYOF_NSPACE:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
-		    break;
 		case ANYOF_VERTWS:
 		    /* For these, we use the cp_list, as /d doesn't make a
 		     * difference in what these match.  There would be problems
@@ -12124,14 +12114,6 @@ parseit:
                     _invlist_union_complement_2nd(cp_list,
                                                   PL_XPosix_ptrs[classnum],
                                                   &cp_list);
-		    break;
-		case ANYOF_XDIGIT:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
-		    break;
-		case ANYOF_NXDIGIT:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;
