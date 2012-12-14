@@ -11937,6 +11937,14 @@ parseit:
                         PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
 
+		case ANYOF_CNTRL:
+		case ANYOF_PSXSPC:
+		case ANYOF_SPACE:
+		case ANYOF_XDIGIT:
+                    DO_POSIX(ret, namedclass, posixes,
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
+		    break;
+
 		case ANYOF_NALPHANUMERIC:
 		case ANYOF_NALPHA:
 		case ANYOF_NGRAPH:
@@ -11947,6 +11955,15 @@ parseit:
                         PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
+
+		case ANYOF_NCNTRL:
+		case ANYOF_NPSXSPC:
+		case ANYOF_NSPACE:
+		case ANYOF_NXDIGIT:
+                    DO_N_POSIX(ret, namedclass, posixes,
+                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
+		    break;
+
 		case ANYOF_ASCII:
 #ifdef HAS_ISASCII
 		    if (LOC) {
@@ -12028,20 +12045,6 @@ parseit:
                         _invlist_union(posixes, scratch_list, &posixes);
                         SvREFCNT_dec(scratch_list);
                     }
-		    break;
-		case ANYOF_CNTRL:
-		case ANYOF_PSXSPC:
-		case ANYOF_SPACE:
-		case ANYOF_XDIGIT:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
-		    break;
-		case ANYOF_NCNTRL:
-		case ANYOF_NPSXSPC:
-		case ANYOF_NSPACE:
-		case ANYOF_NXDIGIT:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
 		    break;
 		case ANYOF_DIGIT:
 		    /* There are no digits in the Latin1 range outside of
