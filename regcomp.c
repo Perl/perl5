@@ -3871,7 +3871,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    SAVEFREESV(RExC_rx_sv);
 		    ckWARNreg(RExC_parse,
 			      "Quantifier unexpected on zero-length expression");
-		    ReREFCNT_inc(RExC_rx_sv);
+		    (void)ReREFCNT_inc(RExC_rx_sv);
 		}
 
 		min += minnext * mincount;
@@ -9654,7 +9654,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		   "%.*s matches null string many times",
 		   (int)(RExC_parse >= origparse ? RExC_parse - origparse : 0),
 		   origparse);
-	ReREFCNT_inc(RExC_rx_sv);
+	(void)ReREFCNT_inc(RExC_rx_sv);
     }
 
     if (RExC_parse < RExC_end && *RExC_parse == '?') {
@@ -11574,7 +11574,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    ckWARN3reg(s+2,
 		       "POSIX syntax [%c %c] belongs inside character classes",
 		       c, c);
-	    ReREFCNT_inc(RExC_rx_sv);
+	    (void)ReREFCNT_inc(RExC_rx_sv);
 	    SvREFCNT_inc_simple_void_NN(listsv);
 	}
     }
@@ -11843,7 +11843,7 @@ parseit:
 		    ckWARN2reg(RExC_parse,
 			       "Unrecognized escape \\%c in character class passed through",
 			       (int)value);
-		    ReREFCNT_inc(RExC_rx_sv);
+		    (void)ReREFCNT_inc(RExC_rx_sv);
 		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
@@ -11894,7 +11894,7 @@ parseit:
 		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
-		    ReREFCNT_inc(RExC_rx_sv);
+		    (void)ReREFCNT_inc(RExC_rx_sv);
 		    SvREFCNT_inc_simple_void_NN(listsv);
                     cp_list = add_cp_to_invlist(cp_list, '-');
                     cp_list = add_cp_to_invlist(cp_list, prevvalue);
