@@ -327,7 +327,8 @@ perform the upgrade if necessary.  See C<svtype>.
    them all by using a consistent macro.  */
 #define SvIS_FREED(sv)	((sv)->sv_flags == SVTYPEMASK)
 
-#define SvUPGRADE(sv, mt) (SvTYPE(sv) >= (mt) || (sv_upgrade(sv, mt), 1))
+#define SvUPGRADE(sv, mt) \
+        STMT_START { if (SvTYPE(sv) < (mt)) sv_upgrade(sv, mt); } STMT_END
 
 #define SVf_IOK		0x00000100  /* has valid public integer value */
 #define SVf_NOK		0x00000200  /* has valid public numeric value */

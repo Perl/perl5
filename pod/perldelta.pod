@@ -353,7 +353,21 @@ well.
 
 =item *
 
-XXX
+SvUPGRADE() is no longer an expression. Originally this macro (and its
+underlying function, sv_upgrade()) were documented as boolean, although
+in reality they always croaked on error and never returned false. In 2005
+the documentation was updated to specify a void return value, but
+SvUPGRADE() was left always returning 1 for backwards compatibility. This
+has now been removed, and SvUPGRADE() is now a statement with no return
+value.
+
+So this is now a syntax error:
+
+    if (!SvUPGRADE(sv)) { croak(...); }
+
+If you have code like that, simply replace it with
+
+    SvUPGRADE(sv);
 
 =back
 
