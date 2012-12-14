@@ -5681,7 +5681,7 @@ Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
         while (isSPACE(*s))
 	    s++;
         if (*s && !isXDIGIT(*s)) {
-            Perl_warn(aTHX_ "perl: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set\n");
+            Perl_warn(aTHX_ "perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set\n");
         }
         /* should we check for unparsed crap? */
     }

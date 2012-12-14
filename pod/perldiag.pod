@@ -3875,6 +3875,12 @@ fix the problem, however, you will get the same error message each
 time you run Perl.  How to really fix the problem can be found in
 L<perllocale> section B<LOCALE PROBLEMS>.
 
+=item perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set
+
+(W) PERL_HASH_SEED should match /^\s*(?:0x)?[0-9a-fA-F]+\s*\z/ but it
+contained a non hex character. This could mean your hash randomization
+is not being set correctly.
+
 =item pid %x not a child
 
 (W exec) A warning peculiar to VMS.  Waitpid() was asked to wait for a
