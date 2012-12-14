@@ -8248,19 +8248,20 @@ int utf8_flag;
    return result;
 }
 
-/* A convenience macro for escaping dots that haven't already been
- * escaped, with guards to avoid checking before the start of the
- * buffer or advancing beyond the end of it (allowing room for the
- * NUL terminator).
+/* A convenience macro for copying dots in filenames and escaping
+ * them when they haven't already been escaped, with guards to
+ * avoid checking before the start of the buffer or advancing
+ * beyond the end of it (allowing room for the NUL terminator).
  */
-#define VMSEFS_ESCAPE_DOT(vmsefsdot,vmsefsbuf,vmsefsbufsiz) STMT_START { \
+#define VMSEFS_DOT_WITH_ESCAPE(vmsefsdot,vmsefsbuf,vmsefsbufsiz) STMT_START { \
     if ( ((vmsefsdot) > (vmsefsbuf) && *((vmsefsdot) - 1) != '^' \
           || ((vmsefsdot) == (vmsefsbuf))) \
-         && (vmsefsdot) < (vmsefsbuf) + (vmsefsbufsiz) - 2 \
+         && (vmsefsdot) < (vmsefsbuf) + (vmsefsbufsiz) - 3 \
        ) { \
         *((vmsefsdot)++) = '^'; \
-        *((vmsefsdot)++) = '.'; \
     } \
+    if ((vmsefsdot) < (vmsefsbuf) + (vmsefsbufsiz) - 2) \
+        *((vmsefsdot)++) = '.'; \
 } STMT_END
 
 /*{{{ char *tovmsspec[_ts](char *path, char *buf, int * utf8_flag)*/
@@ -8546,20 +8547,26 @@ static char *int_tovmsspec
         else cp2 += 3;  /* Trailing '/' was there, so skip it, too */
       }
       else {
-        if (decc_efs_charset == 0)
+        if (decc_efs_charset == 0) {
+	  if (*(cp1-1) == '^')
+	    cp1--;         /* remove the escape, if any */
 	  *(cp1++) = '_';  /* fix up syntax - '.' in name not allowed */
+	}
 	else {
-	  VMSEFS_ESCAPE_DOT(cp1, rslt, VMS_MAXRSS);
+	  VMSEFS_DOT_WITH_ESCAPE(cp1, rslt, VMS_MAXRSS);
 	}
       }
     }
     else {
       if (!infront && *(cp1-1) == '-')  *(cp1++) = '.';
       if (*cp2 == '.') {
-        if (decc_efs_charset == 0)
+        if (decc_efs_charset == 0) {
+	  if (*(cp1-1) == '^')
+	    cp1--;         /* remove the escape, if any */
 	  *(cp1++) = '_';
+	}
 	else {
-	  VMSEFS_ESCAPE_DOT(cp1, rslt, VMS_MAXRSS);
+	  VMSEFS_DOT_WITH_ESCAPE(cp1, rslt, VMS_MAXRSS);
 	}
       }
       else                  *(cp1++) =  *cp2;
@@ -8590,7 +8597,7 @@ static char *int_tovmsspec
     case '.':
 	if (((cp2 < lastdot) || (cp2[1] == '\0')) &&
 	    decc_readdir_dropdotnotype) {
-	  VMSEFS_ESCAPE_DOT(cp1, rslt, VMS_MAXRSS);
+	  VMSEFS_DOT_WITH_ESCAPE(cp1, rslt, VMS_MAXRSS);
 	  cp2++;
 
 	  /* trailing dot ==> '^..' on VMS */
