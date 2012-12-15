@@ -36,6 +36,7 @@ Date::Pcalc
 DateTime
 DB_File(3)
 DBIx::Profile
+Devel::Callsite
 Devel::DProf
 Devel::DTrace::Provider
 Devel::NYTProf
