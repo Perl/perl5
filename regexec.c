@@ -327,6 +327,15 @@ static const char* const non_utf8_target_but_utf8_required
     } \
 } STMT_END 
 
+/* These constants are for finding GCB=LV and GCB=LVT in the CLUMP regnode.
+ * These are for the pre-composed Hangul syllables, which are all in a
+ * contiguous block and arranged there in such a way so as to facilitate
+ * alorithmic determination of their characteristics.  As such, they don't need
+ * a swash, but can be determined by simple arithmetic.  Almost all are
+ * GCB=LVT, but every 28th one is a GCB=LV */
+#define SBASE 0xAC00    /* Start of block */
+#define SCount 11172    /* Length of block */
+#define TCount 28
 
 static void restore_pos(pTHX_ void *arg);
 
@@ -7731,16 +7740,6 @@ S_to_byte_substr(pTHX_ regexp *prog)
 
     return TRUE;
 }
-
-/* These constants are for finding GCB=LV and GCB=LVT.  These are for the
- * pre-composed Hangul syllables, which are all in a contiguous block and
- * arranged there in such a way so as to facilitate alorithmic determination of
- * their characteristics.  As such, they don't need a swash, but can be
- * determined by simple arithmetic.  Almost all are GCB=LVT, but every 28th one
- * is a GCB=LV */
-#define SBASE 0xAC00    /* Start of block */
-#define SCount 11172    /* Length of block */
-#define TCount 28
 
 #if 0   /* This routine is not currently used */
 PERL_STATIC_INLINE bool
