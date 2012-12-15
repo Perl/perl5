@@ -7554,6 +7554,12 @@ PERL_CALLCONV short	Perl_my_letohs(short n);
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
 #endif
+#if defined(TINYMT32)
+PERL_CALLCONV U32	Perl_tinymt32_generate_U32(pTHX);
+PERL_CALLCONV double	Perl_tinymt32_generate_double(pTHX);
+PERL_CALLCONV float	Perl_tinymt32_generate_float(pTHX);
+PERL_CALLCONV void	Perl_tinymt32_init(pTHX_ U32 seed);
+#endif
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f)
 			__attribute__nonnull__(pTHX_1);

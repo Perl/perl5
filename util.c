@@ -5567,6 +5567,131 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
   return opt;
 }
 
+#ifdef TINYMT32
+/*
+
+This is the "Tiny Mersene Twister" random number generator. It is derived from code originally
+published here:
+
+http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/TINYMT/index.html
+http://www.math.sci.hiroshima-u.ac.jp/~m-mat/bin/dl/dl.cgi?TINY:TinyMT-src-1.0.1.tar.gz
+http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/CODES/mt19937ar.c
+
+"The 3-clause BSD License is applied to this software"
+
+opyright (c) 2011 Mutsuo Saito, Makoto Matsumoto, Hiroshima
+University and The University of Tokyo. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of the Hiroshima University nor the names of
+      its contributors may be used to endorse or promote products
+      derived from this software without specific prior written
+      permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+*/
+
+PERL_STATIC_INLINE U32
+S_tinymt32_temper(pTHX) {
+    U32 t0, t1;
+    t0 = PL_random_state.status[3];
+    t1 = PL_random_state.status[0]
+        + (PL_random_state.status[2] >> TINYMT32_SH8);
+    t0 ^= t1;
+    t0 ^= -((I32)(t1 & 1)) & PL_random_state.tmat;
+    return t0;
+}
+
+PERL_STATIC_INLINE void
+S_tinymt32_next_state(pTHX)
+{
+    U32 x;
+    U32 y;
+
+    y = PL_random_state.status[3];
+    x = ( PL_random_state.status[0] & TINYMT32_MASK )
+        ^ PL_random_state.status[1]
+        ^ PL_random_state.status[2];
+    x ^= (x << TINYMT32_SH0);
+    y ^= (y >> TINYMT32_SH0) ^ x;
+    PL_random_state.status[0] = PL_random_state.status[1];
+    PL_random_state.status[1] = PL_random_state.status[2];
+    PL_random_state.status[2] = x ^ (y << TINYMT32_SH1);
+    PL_random_state.status[3] = y;
+    PL_random_state.status[1] ^= -((I32)(y & 1)) & PL_random_state.mat1;
+    PL_random_state.status[2] ^= -((I32)(y & 1)) & PL_random_state.mat2;
+}
+
+void
+Perl_tinymt32_init(pTHX_ U32 seed)
+{
+    int i;
+    /* tinymt32_t * random */
+
+    PL_random_state.status[0] = seed;
+    PL_random_state.status[1] = PL_random_state.mat1;
+    PL_random_state.status[2] = PL_random_state.mat2;
+    PL_random_state.status[3] = PL_random_state.tmat;
+    for (i = 1; i < TINYMT32_MIN_LOOP; i++) {
+        PL_random_state.status[i & 3] ^= i + 1812433253UL
+            * (PL_random_state.status[(i - 1) & 3]
+               ^ (PL_random_state.status[(i - 1) & 3] >> 30));
+    }
+    /* period_certification(PL_random_state); */
+    if ((PL_random_state.status[0] & TINYMT32_MASK) == 0 &&
+        PL_random_state.status[1] == 0 &&
+        PL_random_state.status[2] == 0 &&
+        PL_random_state.status[3] == 0)
+    {
+        PL_random_state.status[0] = 'T';
+        PL_random_state.status[1] = 'I';
+        PL_random_state.status[2] = 'N';
+        PL_random_state.status[3] = 'Y';
+    }
+    for (i = 0; i < TINYMT32_PRE_LOOP; i++) {
+        S_tinymt32_next_state(aTHX);
+    }
+}
+
+U32
+Perl_tinymt32_generate_U32(pTHX) {
+    S_tinymt32_next_state(aTHX);
+    return S_tinymt32_temper(aTHX);
+}
+
+float
+Perl_tinymt32_generate_float(pTHX) {
+    return tinymt32_generate_U32() * TINYMT32_MUL;
+}
+
+double
+Perl_tinymt32_generate_double(pTHX) { /* from Isaku Wada */
+    U32 a= tinymt32_generate_U32() >> 5;
+    U32 b= tinymt32_generate_U32() >> 6;
+    return ( a * 67108864.0 + b ) * ( 1.0 / 9007199254740992.0 );
+}
+#endif
+
 #ifdef VMS
 #  include <starlet.h>
 #endif
@@ -5586,12 +5711,12 @@ Perl_seed(pTHX)
      * value from (tv_sec * SEED_C1 + tv_usec).  The multipliers should
      * probably be bigger too.
      */
-#if RANDBITS > 16
-#  define SEED_C1	1000003
-#define   SEED_C4	73819
+#if defined(PL_RANDOM_STATE_TYPE) || (RANDBITS > 16)
+#   define  SEED_C1	1000003
+#   define  SEED_C4	73819
 #else
-#  define SEED_C1	25747
-#define   SEED_C4	20639
+#   define  SEED_C1	25747
+#   define  SEED_C4	20639
 #endif
 #define   SEED_C2	3
 #define   SEED_C3	269
@@ -5652,6 +5777,7 @@ Perl_seed(pTHX)
     return u;
 }
 
+
 void
 Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
 {
@@ -5688,10 +5814,10 @@ Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
     else
 #endif
     {
-        (void)seedDrand01((Rand_seed_t)seed());
+        _SEED_RAND(seed());
 
         while (seed_buffer < end) {
-            *seed_buffer++ = (unsigned char)(Drand01() * (U8_MAX+1));
+            *seed_buffer++ = (unsigned char)(RAND01() * (U8_MAX+1));
         }
      }
 }

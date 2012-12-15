@@ -798,6 +798,12 @@
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #endif
+#if defined(TINYMT32)
+#define tinymt32_generate_U32()	Perl_tinymt32_generate_U32(aTHX)
+#define tinymt32_generate_double()	Perl_tinymt32_generate_double(aTHX)
+#define tinymt32_generate_float()	Perl_tinymt32_generate_float(aTHX)
+#define tinymt32_init(a)	Perl_tinymt32_init(aTHX_ a)
+#endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif

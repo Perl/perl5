@@ -799,6 +799,10 @@ PERLVARI(I, xmlfp,	PerlIO *, NULL)
 PERLVARI(I, sv_serial,	U32,	0)	/* SV serial number, used in sv.c */
 #endif
 
+#ifdef PL_RANDOM_STATE_TYPE
+PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
+#endif
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

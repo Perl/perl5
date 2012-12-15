@@ -13299,6 +13299,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_last_swash_slen	= 0;
 
     PL_srand_called	= proto_perl->Isrand_called;
+#ifdef PL_random_state
+    Copy(&(proto_perl->Irandom_state), &(PL_random_state), 1, PL_RANDOM_STATE_TYPE);
+#endif
 
     if (flags & CLONEf_COPY_STACKS) {
 	/* next allocation will be PL_tmps_stack[PL_tmps_ix+1] */

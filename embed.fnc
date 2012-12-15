@@ -1523,6 +1523,12 @@ pR	|SV*	|vivify_ref	|NN SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts|NN const char **popt
+#ifdef TINYMT32
+Ap        |float    |tinymt32_generate_float
+Ap        |double   |tinymt32_generate_double
+Ap        |U32      |tinymt32_generate_U32
+Ap        |void     |tinymt32_init        |U32 seed
+#endif
 Ap	|U32	|seed
 : Only used in perl.c
 p        |void        |get_hash_seed        |NN unsigned char *seed_buffer
