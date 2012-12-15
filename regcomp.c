@@ -11933,9 +11933,16 @@ parseit:
 		case ANYOF_PRINT:
 		case ANYOF_PUNCT:
 		case ANYOF_WORDCHAR:
+                    if ( !  PL_utf8_swash_ptrs[classnum]) {
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_Posix_ptrs[classnum], PL_utf8_swash_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
 		    break;
+                    }
+                    if (! PL_XPosix_ptrs[classnum]) {
+                        PL_XPosix_ptrs[classnum]
+                            = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
+                    }
+                    /* FALL THROUGH */
 
 		case ANYOF_CNTRL:
 		case ANYOF_PSXSPC:
@@ -11951,10 +11958,17 @@ parseit:
 		case ANYOF_NPRINT:
 		case ANYOF_NPUNCT:
 		case ANYOF_NWORDCHAR:
+                    if ( !  PL_utf8_swash_ptrs[classnum]) {
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
                         PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
+                    }
+                    if (! PL_XPosix_ptrs[classnum]) {
+                        PL_XPosix_ptrs[classnum]
+                            = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
+                    }
+                    /* FALL THROUGH */
 
 		case ANYOF_NCNTRL:
 		case ANYOF_NPSXSPC:
