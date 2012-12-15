@@ -463,6 +463,11 @@ C<eval '$&'>.  The same applies to C<$'> and C<$`> [perl #4289].
 Two minor bugs involving C<local *ISA> and C<local *Foo::> causing stale
 MRO caches have been fixed.  
 
+=item *
+
+Defining a subroutine when its typeglob has been aliased no longer results
+in stale method caches.  This bug was introduced in Perl 5.10.
+
 =back
 
 =head1 Known Problems
