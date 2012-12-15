@@ -21,11 +21,11 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 $&, $` and $' are no longer slow
 
-[ List each enhancement as a =head2 entry ]
+These three infamous variables have been redeemed and no longer slow down
+your program when used.  Hence, the /p regular expression flag now does
+nothing.
 
 =head1 Security
 
@@ -112,7 +112,11 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Perl has a new copy-on-write mechanism that avoids the need to copy the
+internal string buffer when assigning from one scalar to another.  This
+makes copying large strings appear much faster.  Modifying one of the two
+(or more) strings after an assignment will force a copy internally.  This
+makes it unnecessary to pass strings by reference for efficiency.
 
 =back
 
@@ -375,6 +379,36 @@ or to to avoid compiler warnings with older perls, possibly
 
     (void)SvUPGRADE(sv);
 
+=item *
+
+Perl has a new copy-on-write mechanism that allows any SvPOK scalar to be
+upgraded to a copy-on-write scalar.  A reference count on the string buffer
+is stored in the string buffer itself.
+
+This breaks a few XS modules by allowing copy-on-write scalars to go
+through code paths that never encountered them before.
+
+This behaviour can still be disabled by running F<Configure> with
+B<-Accflags=-DPERL_NO_COW>.  This option will probably be removed in Perl
+5.20.
+
+=item *
+
+Copy-on-write no longer uses the SvFAKE and SvREADONLY flags.  Hence,
+SvREADONLY indicates a true read-only SV.
+
+Use the SvIsCOW macro (as before) to identify a copy-on-write scalar.
+
+=item *
+
+C<PL_sawampersand> is now a constant.  The switch this variable provided
+(to enable/disable the pre-match copy depending on whether C<$&> had been
+seen) has been removed and replaced with copy-on-write, eliminating a few
+bugs.
+
+The previous behaviour can still be enabled by running F<Configure> with
+B<-Accflags=-DPERL_SAWAMPERSAND>.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -417,6 +451,12 @@ were accidentally exempt from default warnings.  This has been corrected.
 Some failed regular expression matches such as C<'f' =~ /../g> were not
 resetting C<pos>.  Also, "match-once" patterns (C<m?...?g>) failed to reset
 it, too, when invoked a second time [perl #23180].
+
+=item *
+
+Accessing C<$&> after a pattern match now works if it had not been seen
+before the match.  I.e., this applies to C<${'&'}> (under C<no strict>) and
+C<eval '$&'>.  The same applies to C<$'> and C<$`> [perl #4289].
 
 =back
 
