@@ -458,6 +458,11 @@ Accessing C<$&> after a pattern match now works if it had not been seen
 before the match.  I.e., this applies to C<${'&'}> (under C<no strict>) and
 C<eval '$&'>.  The same applies to C<$'> and C<$`> [perl #4289].
 
+=item *
+
+Two minor bugs involving C<local *ISA> and C<local *Foo::> causing stale
+MRO caches have been fixed.  
+
 =back
 
 =head1 Known Problems
