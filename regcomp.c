@@ -11302,73 +11302,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
     return namedclass;
 }
 
-/* Generate the code to add a full posix character <class> to the bracketed
- * character class given by <node>.  (<node> is needed only under locale rules)
- * destlist     is the inversion list for non-locale rules that this class is
- *              to be added to
- * sourcelist   is the ASCII-range inversion list to add under /a rules
- * Xsourcelist  is the full Unicode range list to use otherwise. */
-#define DO_POSIX(node, class, destlist, sourcelist, Xsourcelist)           \
-    if (LOC) {                                                             \
-	SV* scratch_list = NULL;                                           \
-                                                                           \
-        /* Set this class in the node for runtime matching */              \
-        ANYOF_CLASS_SET(node, class);                                      \
-                                                                           \
-        /* For above Latin1 code points, we use the full Unicode range */  \
-        _invlist_intersection(PL_AboveLatin1,                              \
-                              Xsourcelist,                                 \
-                              &scratch_list);                              \
-        /* And set the output to it, adding instead if there already is an \
-	 * output.  Checking if <destlist> is NULL first saves an extra    \
-	 * clone.  Its reference count will be decremented at the next     \
-	 * union, etc, or if this is the only instance, at the end of the  \
-	 * routine */                                                      \
-        if (! destlist) {                                                  \
-            destlist = scratch_list;                                       \
-        }                                                                  \
-        else {                                                             \
-            _invlist_union(destlist, scratch_list, &destlist);             \
-            SvREFCNT_dec(scratch_list);                                    \
-        }                                                                  \
-    }                                                                      \
-    else {                                                                 \
-        /* For non-locale, just add it to any existing list */             \
-        _invlist_union(destlist,                                           \
-                       (AT_LEAST_ASCII_RESTRICTED)                         \
-                           ? sourcelist                                    \
-                           : Xsourcelist,                                  \
-                       &destlist);                                         \
-    }
-
-/* Like DO_POSIX, but matches the complement of <sourcelist> and <Xsourcelist>.
- */
-#define DO_N_POSIX(node, class, destlist, sourcelist, Xsourcelist)         \
-    if (LOC) {                                                             \
-        SV* scratch_list = NULL;                                           \
-        ANYOF_CLASS_SET(node, class);					   \
-        _invlist_subtract(PL_AboveLatin1, Xsourcelist, &scratch_list);	   \
-        if (! destlist) {					           \
-            destlist = scratch_list;					   \
-        }                                                                  \
-        else {                                                             \
-            _invlist_union(destlist, scratch_list, &destlist);             \
-            SvREFCNT_dec(scratch_list);                                    \
-        }                                                                  \
-    }                                                                      \
-    else {                                                                 \
-        _invlist_union_complement_2nd(destlist,                            \
-                                    (AT_LEAST_ASCII_RESTRICTED)            \
-                                        ? sourcelist                       \
-                                        : Xsourcelist,                     \
-                                    &destlist);                            \
-        /* Under /d, everything in the upper half of the Latin1 range      \
-         * matches this complement */                                      \
-        if (DEPENDS_SEMANTICS) {                                           \
-            ANYOF_FLAGS(node) |= ANYOF_NON_UTF8_LATIN1_ALL;                \
-        }                                                                  \
-    }
-
 /* Generate the code to add a posix character <class> to the bracketed
  * character class given by <node>.  (<node> is needed only under locale rules)
  * destlist       is the inversion list for non-locale rules that this class is
@@ -11380,9 +11313,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
  *                determined at run-time
  * run_time_list  is a SV* that contains text names of properties that are to
  *                be computed at run time.  This concatenates <Xpropertyname>
- *                to it, appropriately
- * This is essentially DO_POSIX, but we know only the Latin1 values at compile
- * time */
+ *                to it, appropriately */
 #define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
                        l1_sourcelist, Xpropertyname, run_time_list)        \
 	/* First, resolve whether to use the ASCII-only list or the L1     \
@@ -11930,8 +11861,40 @@ parseit:
 		case ANYOF_PSXSPC:
 		case ANYOF_SPACE:
 		case ANYOF_XDIGIT:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
+                do_posix:
+                    if (LOC) {
+                        SV* scratch_list = NULL;
+
+                        /* Set this class in the node for runtime matching */
+                        ANYOF_CLASS_SET(ret, namedclass);
+
+                        /* For above Latin1 code points, we use the full
+                         * Unicode range */
+                        _invlist_intersection(PL_AboveLatin1,
+                                              PL_XPosix_ptrs[classnum],
+                                              &scratch_list);
+                        /* And set the output to it, adding instead if there
+                         * already is an output.  Checking if 'posixes' is NULL
+                         * first saves an extra clone.  Its reference count
+                         * will be decremented at the next union, etc, or if
+                         * this is the only instance, at the end of the routine
+                         * */
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+                    }
+                    else {
+                        /* For non-locale, just add it to any existing list */
+                        _invlist_union(posixes,
+                                       (AT_LEAST_ASCII_RESTRICTED)
+                                           ? PL_Posix_ptrs[classnum]
+                                           : PL_XPosix_ptrs[classnum],
+                                       &posixes);
+                    }
 		    break;
 
 		case ANYOF_NALPHANUMERIC:
@@ -11959,8 +11922,34 @@ parseit:
 		case ANYOF_NPSXSPC:
 		case ANYOF_NSPACE:
 		case ANYOF_NXDIGIT:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
+                do_n_posix:
+                    if (LOC) {
+                        SV* scratch_list = NULL;
+                        ANYOF_CLASS_SET(ret, namedclass);
+                        _invlist_subtract(PL_AboveLatin1,
+                                          PL_XPosix_ptrs[classnum],
+                                          &scratch_list);
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+                    }
+                    else {
+                        _invlist_union_complement_2nd(
+                                                posixes,
+                                                (AT_LEAST_ASCII_RESTRICTED)
+                                                    ? ascii_source
+                                                    : PL_XPosix_ptrs[classnum],
+                                                &posixes);
+                        /* Under /d, everything in the upper half of the Latin1
+                         * range matches this complement */
+                        if (DEPENDS_SEMANTICS) {
+                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
+                    }
 		    break;
 
 		case ANYOF_ASCII:
@@ -11992,8 +11981,7 @@ parseit:
 #ifndef HAS_ISBLANK
 		case ANYOF_BLANK:
                     if (! LOC) {
-                        DO_POSIX(ret, namedclass, posixes,
-                                            PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
+                        goto do_posix;
                     }
                     else { /* There is no isblank() and we are in locale:  We
                               use the ASCII range and the above-Latin1 range
@@ -12018,8 +12006,7 @@ parseit:
 		    break;
 		case ANYOF_NBLANK:
                     if (! LOC) {
-                        DO_N_POSIX(ret, namedclass, posixes,
-                                                PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
+                        goto do_n_posix;
                     }
                     else { /* There is no isblank() and we are in locale */
                         SV* scratch_list = NULL;
