@@ -456,7 +456,8 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv_catpv(t, "VOID");
 	goto finish;
     }
-    else if (sv == (const SV *)0x55555555 || SvTYPE(sv) == 'U') {
+    else if (sv == (const SV *)0x55555555 || ((char)SvTYPE(sv)) == 'U') {
+        /* detect data corruption under memory poisoning */
 	sv_catpv(t, "WILD");
 	goto finish;
     }
