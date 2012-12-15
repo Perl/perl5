@@ -58,6 +58,13 @@ C<use feature>.
 This stops C<use feature ':all'> from warning, but causes
 C<my sub foo; my sub bar> to warn twice.
 
+=head2 Overridden C<glob> is now passed one argument
+
+C<glob> overrides used to be passed a magical undocumented second argument
+that identified the caller.  Nothing on CPAN was using this, and it got in
+the way of a bug fix, so it was removed.  If you really need to identify
+the caller, see L<Devel::Callsite> on CPAN.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.  In
@@ -181,6 +188,20 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.08 to 1.09.  The internal
+cache of file names that it keeps for each caller is now freed when that
+caller is freed.  This means
+C<< use File::DosGlob 'glob'; eval 'scalar <*>' >> no longer leaks memory.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.18 to 1.19.  File::Glob has
+had exactly the same fix as File::DosGlob.  Since it is what Perl's own
+C<glob> operator itself uses (except on VMS), this means
+C<< eval 'scalar <*>' >> no longer leaks.
 
 =item *
 
@@ -448,6 +469,10 @@ bugs.
 
 The previous behaviour can still be enabled by running F<Configure> with
 B<-Accflags=-DPERL_SAWAMPERSAND>.
+
+=item *
+
+PL_glob_index is gone.
 
 =back
 
