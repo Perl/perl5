@@ -412,6 +412,12 @@ frees.
 Constant subroutine redefinition warns by default, but lexical constants
 were accidentally exempt from default warnings.  This has been corrected.
 
+=item *
+
+Some failed regular expression matches such as C<'f' =~ /../g> were not
+resetting C<pos>.  Also, "match-once" patterns (C<m?...?g>) failed to reset
+it, too, when invoked a second time [perl #23180].
+
 =back
 
 =head1 Known Problems
