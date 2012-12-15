@@ -350,7 +350,6 @@
 #define PL_unitcheckav_save	(vTHX->Iunitcheckav_save)
 #define PL_unlockhook		(vTHX->Iunlockhook)
 #define PL_unsafe		(vTHX->Iunsafe)
-#define PL_utf8_X_LVT		(vTHX->Iutf8_X_LVT)
 #define PL_utf8_X_extend	(vTHX->Iutf8_X_extend)
 #define PL_utf8_X_regular_begin	(vTHX->Iutf8_X_regular_begin)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)

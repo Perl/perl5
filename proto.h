@@ -6790,12 +6790,6 @@ STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, cons
 STATIC bool	S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
 			__attribute__warn_unused_result__;
 
-PERL_STATIC_INLINE bool	S_is_utf8_X_LVT(pTHX_ const U8 *p)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_UTF8_X_LVT	\
-	assert(p)
-
 STATIC I32	S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)

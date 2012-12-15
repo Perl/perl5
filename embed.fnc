@@ -2037,8 +2037,6 @@ ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim
 ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp
-:not currently used EiR	|bool	|is_utf8_X_LV		|NN const U8 *p
-EiR	|bool	|is_utf8_X_LVT		|NN const U8 *p
 #ifdef XXX_dmq
 ERsn	|U8*	|reghop4	|NN U8 *s|I32 off|NN const U8 *llim \
 				|NN const U8 *rlim
