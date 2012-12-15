@@ -48,13 +48,15 @@ Now, I<N> characters are read instead.
 There is no change in behaviour when reading from streams with no
 extra layers, since bytes map exactly to characters.
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Lexical subroutine warnings have moved
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+The warning about the use of an experimental feature emitted when lexical
+subroutines (added in 5.17.4) are used now happens when the subroutine
+itself is declared, not when the "lexical_subs" feature is activated via
+C<use feature>.
 
-[ List each incompatible change as a =head2 entry ]
+This stops C<use feature ':all'> from warning, but causes
+C<my sub foo; my sub bar> to warn twice.
 
 =head1 Deprecations
 
