@@ -66,6 +66,42 @@ an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Lexical $_ is now deprecated
+
+Since it was introduced in Perl 5.10, it has caused much confusion with no
+obvious solution:
+
+=over
+
+=item *
+
+Various modules (e.g., List::Util) expect callback routines to use the
+global $_.  C<use List::Util 'first'; my $_; first { $_ == 1 } @list> does
+not work as one would expect.
+
+=item *
+
+A C<my $_> declaration earlier in the same file can cause confusing closure
+warnings.
+
+=item *
+
+The "_" subroutine prototype character allows called subroutines to access
+your lexical $_, so it is not really private after all.
+
+=item *
+
+Nevertheless, subroutines with a "(@)" prototype and methods cannot access
+the caller's lexical $_, unless they are written in XS.
+
+=item *
+
+But even XS routines cannot access a lexical $_ declared, not in the
+calling subroutine, but in an outer scope, iff that subroutine happened not
+to mention $_ or use any operators that default to $_.
+
+=back
+
 =head2 Various XS-callable functions are now deprecated
 
 The following functions will be removed from a future version of Perl,
