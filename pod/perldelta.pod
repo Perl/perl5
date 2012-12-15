@@ -278,7 +278,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Constant(%s): Call to &{$^H{%s}} did not return a defined value|perldiag/Constant(%s): Call to &{$^H{%s}} did not return a defined value>
+
+Constant overloading that returns C<undef> results in this error message.
+For numeric constants, it used to say "Constant(undef)".  "undef" has been
+replaced with the number itself. 
 
 =back
 
