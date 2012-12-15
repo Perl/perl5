@@ -386,7 +386,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<sort {undef} ...> under fatal warnings no longer crashes.  It started
+crashing in Perl 5.16.
 
 =back
 
