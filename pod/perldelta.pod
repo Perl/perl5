@@ -515,6 +515,11 @@ bug was introduced in Perl 5.14.
 Under some circumstances, C<local *method=...> would fail to reset method
 caches upon scope exit.
 
+=item *
+
+C</[.foo.]/> is no longer an error, but produces a warning (as before) and
+is treated as C</[.fo]/> [perl #115818].
+
 =back
 
 =head1 Known Problems
