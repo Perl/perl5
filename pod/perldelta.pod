@@ -520,6 +520,11 @@ caches upon scope exit.
 C</[.foo.]/> is no longer an error, but produces a warning (as before) and
 is treated as C</[.fo]/> [perl #115818].
 
+=item *
+
+C<goto $tied_var> now calls FETCH before deciding what type of goto
+(subroutine or label) this is.
+
 =back
 
 =head1 Known Problems
