@@ -410,6 +410,27 @@ The hash C<%ENV> contains your current environment.  Setting a
 value in C<ENV> changes the environment for any child processes
 you subsequently C<fork()> off.
 
+As of 5.17.3, both keys and values stored in C<%ENV> are stringified.
+
+    my $foo = 1;
+    $ENV{'bar'} = \$foo;
+    if( ref $ENV{'bar'} ) {
+        say "Pre 5.17.3 Behaviour";
+    } else {
+        say "Post 5.17.3 Behaviour";
+    }
+
+Previously, only child processes received stringified values:
+
+    my $foo = 1;
+    $ENV{'bar'} = \$foo;
+
+    # Always printed 'non ref'
+    system($^X,'-e',q/print ( ref $ENV{'bar'}  ? 'ref' : 'non ref' ) /);
+
+This happens because you can't really share arbitrary data structures with
+foreign processes.
+
 =item $SYSTEM_FD_MAX
 
 =item $^F
