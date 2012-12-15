@@ -91,12 +91,6 @@ extern const struct regexp_engine my_reg_engine;
 #include "inline_invlist.c"
 #include "unicode_constants.h"
 
-#ifdef HAS_ISBLANK
-#   define hasISBLANK 1
-#else
-#   define hasISBLANK 0
-#endif
-
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 #define IS_IN_SOME_FOLD_L1(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
@@ -11929,6 +11923,9 @@ parseit:
                     }
                     /* FALL THROUGH */
 
+#ifdef HAS_ISBLANK
+		case ANYOF_BLANK:
+#endif
 		case ANYOF_CNTRL:
 		case ANYOF_PSXSPC:
 		case ANYOF_SPACE:
@@ -11955,6 +11952,9 @@ parseit:
                     }
                     /* FALL THROUGH */
 
+#ifdef HAS_ISBLANK
+		case ANYOF_NBLANK:
+#endif
 		case ANYOF_NCNTRL:
 		case ANYOF_NPSXSPC:
 		case ANYOF_NSPACE:
@@ -11988,8 +11988,10 @@ parseit:
                     }
 #endif
 		    break;
+
+#ifndef HAS_ISBLANK
 		case ANYOF_BLANK:
-                    if (hasISBLANK || ! LOC) {
+                    if (! LOC) {
                         DO_POSIX(ret, namedclass, posixes,
                                             PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
                     }
@@ -12015,7 +12017,7 @@ parseit:
                     }
 		    break;
 		case ANYOF_NBLANK:
-                    if (hasISBLANK || ! LOC) {
+                    if (! LOC) {
                         DO_N_POSIX(ret, namedclass, posixes,
                                                 PL_Posix_ptrs[classnum], PL_XPosix_ptrs[classnum]);
                     }
@@ -12045,6 +12047,7 @@ parseit:
                         SvREFCNT_dec(scratch_list);
                     }
 		    break;
+#endif
 		case ANYOF_DIGIT:
 		    /* There are no digits in the Latin1 range outside of
 		     * ASCII, so call the macro that doesn't have to resolve
