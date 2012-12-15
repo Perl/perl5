@@ -916,13 +916,13 @@ inet_ntop(af, ip_address_sv)
 	  case AF_INET:
 	    if(addrlen != 4)
 		croak("Bad address length for Socket::inet_ntop on AF_INET;"
-		      " got %d, should be 4");
+		      " got %d, should be 4", addrlen);
 	    break;
 #ifdef AF_INET6
 	  case AF_INET6:
 	    if(addrlen != 16)
 		croak("Bad address length for Socket::inet_ntop on AF_INET6;"
-		      " got %d, should be 16");
+		      " got %d, should be 16", addrlen);
 	    break;
 #endif
 	  default:
