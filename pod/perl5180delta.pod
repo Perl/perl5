@@ -534,12 +534,16 @@ in L<perlsub/Lexical Subroutines>.
 
 =head2 Defined values stored in environment are forced to byte strings
 
-A value stored in an environment variable has always been stringified.  In this
-release, it is converted to be only a byte string.  First, it is forced to be
-only a string.  Then if the string is utf8 and the equivalent of
-C<utf8::downgrade()> works, that result is used; otherwise, the equivalent of
-C<utf8::encode()> is used, and a warning is issued about wide characters
-(L</Diagnostics>).
+A value stored in an environment variable has always been stringified when
+inherited by child processes.
+
+In this release, when assigning to C<%ENV>, values are immediately stringified,
+and converted to be only a byte string.
+
+First, it is forced to be a only a string.  Then if the string is utf8 and the
+equivalent of C<utf8::downgrade()> works, that result is used; otherwise, the
+equivalent of C<utf8::encode()> is used, and a warning is issued about wide
+characters (L</Diagnostics>).
 
 =head2 C<require> dies for unreadable files
 
