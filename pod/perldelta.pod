@@ -531,6 +531,11 @@ Renaming packages through glob assignment
 (C<*Foo:: = *Bar::; *Bar:: = *Baz::>) in combination with C<m?...?> and
 C<reset> no longer makes threaded builds crash.
 
+=item *
+
+An earlier release in the 5.17.x series could crash if user code prevented
+_charnames from loading via C<$INC{'_charnames.pm'}++>.
+
 =back
 
 =head1 Known Problems
