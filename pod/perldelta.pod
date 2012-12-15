@@ -402,6 +402,11 @@ frees.  This bug started happening in Perl 5.16.
 Numerous memory leaks have been fixed, mostly involving fatal warnings and
 syntax errors.
 
+=item *
+
+Lexical constants (C<my sub answer () { 42 }>) no longer cause double
+frees.
+
 =back
 
 =head1 Known Problems
