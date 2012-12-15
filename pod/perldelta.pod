@@ -525,6 +525,12 @@ is treated as C</[.fo]/> [perl #115818].
 C<goto $tied_var> now calls FETCH before deciding what type of goto
 (subroutine or label) this is.
 
+=item *
+
+Renaming packages through glob assignment
+(C<*Foo:: = *Bar::; *Bar:: = *Baz::>) in combination with C<m?...?> and
+C<reset> no longer makes threaded builds crash.
+
 =back
 
 =head1 Known Problems
