@@ -474,6 +474,11 @@ Localising a typeglob containing a subroutine when the typeglob's package
 has been deleted from its parent stash no longer produces an error.  This
 bug was introduced in Perl 5.14.
 
+=item *
+
+Under some circumstances, C<local *method=...> would fail to reset method
+caches upon scope exit.
+
 =back
 
 =head1 Known Problems
