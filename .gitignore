@@ -108,6 +108,7 @@ lib/IPC/Cmd/t/src/x.tgz
 lib/mro.pm
 lib/TAP/
 lib/Test/Harness.pm
+lib/File/DosGlob.pm
 t/rantests
 t/tmp*
 t/perl
