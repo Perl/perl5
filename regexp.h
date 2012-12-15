@@ -765,7 +765,6 @@ typedef struct regmatch_slab {
 #define PL_reg_leftiter		PL_reg_state.re_state_reg_leftiter
 #define PL_reg_poscache		PL_reg_state.re_state_reg_poscache
 #define PL_reg_poscache_size	PL_reg_state.re_state_reg_poscache_size
-#define PL_regsize		PL_reg_state.re_state_regsize
 #define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
 #define PL_nrs			PL_reg_state.re_state_nrs
 
@@ -787,7 +786,6 @@ struct re_save_state {
     I32 re_state_reg_oldpos;		/* from regexec.c */
     I32 re_state_reg_maxiter;		/* max wait until caching pos */
     I32 re_state_reg_leftiter;		/* wait until caching pos */
-    U32 re_state_regsize;		/* from regexec.c */
     char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     char *re_state_reg_starttry;	/* from regexec.c */
 #ifdef PERL_ANY_COW

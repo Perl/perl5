@@ -971,8 +971,8 @@
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
-#define regcppop(a)		S_regcppop(aTHX_ a)
-#define regcppush(a,b)		S_regcppush(aTHX_ a,b)
+#define regcppop(a,b)		S_regcppop(aTHX_ a,b)
+#define regcppush(a,b,c)	S_regcppush(aTHX_ a,b,c)
 #define reghop3			S_reghop3
 #define reghopmaybe3		S_reghopmaybe3
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)

@@ -2031,8 +2031,10 @@ ERs	|I32	|regrepeat	|NN const regexp *prog|NN char **startposp|NN const regnode 
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p\
 				|bool const utf8_target
-Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor
-Es	|void	|regcppop	|NN regexp *rex
+Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
+				|U32 maxopenparen
+Es	|void	|regcppop	|NN regexp *rex\
+				|NN U32 *maxopenparen_p
 ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim
 ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \

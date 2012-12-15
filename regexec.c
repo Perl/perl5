@@ -346,11 +346,12 @@ static void restore_pos(pTHX_ void *arg);
  * are needed for the regexp context stack bookkeeping. */
 
 STATIC CHECKPOINT
-S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
+S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
 {
     dVAR;
     const int retval = PL_savestack_ix;
-    const int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
+    const int paren_elems_to_push =
+                (maxopenparen - parenfloor) * REGCP_PAREN_ELEMS;
     const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
     const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
     I32 p;
@@ -365,19 +366,21 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf
 		   " out of range (%lu-%ld)",
-		   total_elems, (unsigned long)PL_regsize, (long)parenfloor);
+		   total_elems,
+                   (unsigned long)maxopenparen,
+                   (long)parenfloor);
 
     SSGROW(total_elems + REGCP_FRAME_ELEMS);
     
     DEBUG_BUFFERS_r(
-	if ((int)PL_regsize > (int)parenfloor)
+	if ((int)maxopenparen > (int)parenfloor)
 	    PerlIO_printf(Perl_debug_log,
 		"rex=0x%"UVxf" offs=0x%"UVxf": saving capture indices:\n",
 		PTR2UV(rex),
 		PTR2UV(rex->offs)
 	    );
     );
-    for (p = parenfloor+1; p <= (I32)PL_regsize;  p++) {
+    for (p = parenfloor+1; p <= (I32)maxopenparen;  p++) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(rex->offs[p].end);
 	SSPUSHINT(rex->offs[p].start);
@@ -391,7 +394,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 	));
     }
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
-    SSPUSHINT(PL_regsize);
+    SSPUSHINT(maxopenparen);
     SSPUSHINT(rex->lastparen);
     SSPUSHINT(rex->lastcloseparen);
     SSPUSHUV(SAVEt_REGCONTEXT | elems_shifted); /* Magic cookie. */
@@ -423,7 +426,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor)
 
 
 STATIC void
-S_regcppop(pTHX_ regexp *rex)
+S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
 {
     dVAR;
     UV i;
@@ -438,7 +441,7 @@ S_regcppop(pTHX_ regexp *rex)
     i >>= SAVE_TIGHT_SHIFT; /* Parentheses elements to pop. */
     rex->lastcloseparen = SSPOPINT;
     rex->lastparen = SSPOPINT;
-    PL_regsize = SSPOPINT;
+    *maxopenparen_p = SSPOPINT;
 
     i -= REGCP_OTHER_ELEMS;
     /* Now restore the parentheses context. */
@@ -450,7 +453,7 @@ S_regcppop(pTHX_ regexp *rex)
 		PTR2UV(rex->offs)
 	    );
     );
-    paren = PL_regsize;
+    paren = *maxopenparen_p;
     for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
 	rex->offs[paren].start_tmp = SSPOPINT;
@@ -479,13 +482,13 @@ S_regcppop(pTHX_ regexp *rex)
      * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
      * --jhi updated by dapm */
     for (i = rex->lastparen + 1; i <= rex->nparens; i++) {
-	if (i > PL_regsize)
+	if (i > *maxopenparen_p)
 	    rex->offs[i].start = -1;
 	rex->offs[i].end = -1;
 	DEBUG_BUFFERS_r( PerlIO_printf(Perl_debug_log,
 	    "    \\%"UVuf": %s   ..-1 undeffing\n",
 	    (UV)i,
-	    (i > PL_regsize) ? "-1" : "  "
+	    (i > *maxopenparen_p) ? "-1" : "  "
 	));
     }
 #endif
@@ -495,11 +498,11 @@ S_regcppop(pTHX_ regexp *rex)
  * but without popping the stack */
 
 STATIC void
-S_regcp_restore(pTHX_ regexp *rex, I32 ix)
+S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p)
 {
     I32 tmpix = PL_savestack_ix;
     PL_savestack_ix = ix;
-    regcppop(rex);
+    regcppop(rex, maxopenparen_p);
     PL_savestack_ix = tmpix;
 }
 
@@ -2910,7 +2913,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     prog->offs[0].start = *startposp - PL_bostr;
     prog->lastparen = 0;
     prog->lastcloseparen = 0;
-    PL_regsize = 0;
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, prog->lastparen should take care of
@@ -3631,6 +3633,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     CV *caller_cv = NULL;	/* who called us */
     CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
     CHECKPOINT runops_cp;	/* savestack position before executing EVAL */
+    U32 maxopenparen = 0;       /* max '(' index seen so far */
 
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
@@ -4846,7 +4849,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		CV *newcv;
 
 		/* save *all* paren positions */
-		regcppush(rex, 0);
+		regcppush(rex, 0, maxopenparen);
 		REGCP_SET(runops_cp);
 
 		/* To not corrupt the existing regex state while executing the
@@ -5020,7 +5023,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		PL_op = oop;
 		PL_curcop = ocurcop;
 		PL_regeol = saved_regeol;
-		S_regcp_restore(aTHX_ rex, runops_cp);
+		S_regcp_restore(aTHX_ rex, runops_cp, &maxopenparen);
 
 		if (logical != 2)
 		    break;
@@ -5037,7 +5040,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    }
 		    else {
 			U32 pm_flags = 0;
-			const I32 osize = PL_regsize;
 
 			if (SvUTF8(ret) && IN_BYTES) {
 			    /* In use 'bytes': make a copy of the octet
@@ -5067,11 +5069,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			       scalar.  */
 			    sv_magic(ret, MUTABLE_SV(re_sv), PERL_MAGIC_qr, 0, 0);
 			}
-			PL_regsize = osize;
 			/* safe to do now that any $1 etc has been
 			 * interpolated into the new pattern string and
 			 * compiled */
-			S_regcp_restore(aTHX_ rex, runops_cp);
+			S_regcp_restore(aTHX_ rex, runops_cp, &maxopenparen);
 		    }
 		    SAVEFREESV(re_sv);
 		    re = ReANY(re_sv);
@@ -5091,13 +5092,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         eval_recurse_doit: /* Share code with GOSUB below this line */                		
 		/* run the pattern returned from (??{...}) */
-		ST.cp = regcppush(rex, 0);	/* Save *all* the positions. */
+
+                /* Save *all* the positions. */
+		ST.cp = regcppush(rex, 0, maxopenparen);
 		REGCP_SET(ST.lastcp);
 		
 		re->lastparen = 0;
 		re->lastcloseparen = 0;
 
-		PL_regsize = 0;
+		maxopenparen = 0;
 
 		/* XXXX This is too dramatic a measure... */
 		PL_reg_maxiter = 0;
@@ -5151,7 +5154,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    rexi = RXi_GET(rex); 
 
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex);
+	    regcppop(rex, &maxopenparen);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
@@ -5164,15 +5167,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case OPEN: /*  (  */
 	    n = ARG(scan);  /* which paren pair */
 	    rex->offs[n].start_tmp = locinput - PL_bostr;
-	    if (n > PL_regsize)
-		PL_regsize = n;
+	    if (n > maxopenparen)
+		maxopenparen = n;
 	    DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
-		"rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf" tmp; regsize=%"UVuf"\n",
+		"rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf" tmp; maxopenparen=%"UVuf"\n",
 		PTR2UV(rex),
 		PTR2UV(rex->offs),
 		(UV)n,
 		(IV)rex->offs[n].start_tmp,
-		(UV)PL_regsize
+		(UV)maxopenparen
 	    ));
             lastopen = n;
 	    break;
@@ -5193,8 +5196,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case CLOSE:  /*  )  */
 	    n = ARG(scan);  /* which paren pair */
 	    CLOSE_CAPTURE;
-	    /*if (n > PL_regsize)
-		PL_regsize = n;*/
 	    if (n > rex->lastparen)
 		rex->lastparen = n;
 	    rex->lastcloseparen = n;
@@ -5214,8 +5215,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         n = ARG(cursor);
                         if ( n <= lastopen ) {
 			    CLOSE_CAPTURE;
-                            /*if (n > PL_regsize)
-                            PL_regsize = n;*/
                             if (n > rex->lastparen)
                                 rex->lastparen = n;
                             rex->lastcloseparen = n;
@@ -5358,7 +5357,7 @@ NULL
 		next += ARG(next);
 
 	    /* XXXX Probably it is better to teach regpush to support
-	       parenfloor > PL_regsize... */
+	       parenfloor > maxopenparen ... */
 	    if (parenfloor > (I32)rex->lastparen)
 		parenfloor = rex->lastparen; /* Pessimization... */
 
@@ -5418,7 +5417,8 @@ NULL
 	    /* First just match a string of min A's. */
 
 	    if (n < min) {
-		ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor);
+		ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
+                                    maxopenparen);
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
 
@@ -5494,7 +5494,8 @@ NULL
 	    if (cur_curlyx->u.curlyx.minmod) {
 		ST.save_curlyx = cur_curlyx;
 		cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
-		ST.cp = regcppush(rex, ST.save_curlyx->u.curlyx.parenfloor);
+		ST.cp = regcppush(rex, ST.save_curlyx->u.curlyx.parenfloor,
+                            maxopenparen);
 		REGCP_SET(ST.lastcp);
 		PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B,
                                     locinput);
@@ -5504,7 +5505,8 @@ NULL
 	    /* Prefer A over B for maximal matching. */
 
 	    if (n < max) { /* More greed allowed? */
-		ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor);
+		ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
+                            maxopenparen);
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
 		PUSH_STATE_GOTO(WHILEM_A_max, A, locinput);
@@ -5531,7 +5533,7 @@ NULL
 	    /* FALL THROUGH */
 	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex);
+	    regcppop(rex, &maxopenparen);
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;
@@ -5539,7 +5541,7 @@ NULL
 
 	case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex);	/* Restore some previous $<digit>s? */
+	    regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 		"%*s  whilem: failed, trying continuation...\n",
 		REPORT_CODE_OFF+depth*2, "")
@@ -5566,7 +5568,7 @@ NULL
 	case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
 	    cur_curlyx = ST.save_curlyx;
 	    REGCP_UNWIND(ST.lastcp);
-	    regcppop(rex);
+	    regcppop(rex, &maxopenparen);
 
 	    if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
 		/* Maximum greed exceeded */
@@ -5589,7 +5591,8 @@ NULL
 	    );
 	    /* Try grabbing another A and see if it helps. */
 	    cur_curlyx->u.curlyx.lastloc = locinput;
-	    ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor);
+	    ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
+                            maxopenparen);
 	    REGCP_SET(ST.lastcp);
 	    PUSH_STATE_GOTO(WHILEM_A_min,
 		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
@@ -5685,8 +5688,8 @@ NULL
 	    /* if paren positive, emulate an OPEN/CLOSE around A */
 	    if (ST.me->flags) {
 		U32 paren = ST.me->flags;
-		if (paren > PL_regsize)
-		    PL_regsize = paren;
+		if (paren > maxopenparen)
+		    maxopenparen = paren;
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    }
 	    ST.A = scan;
@@ -5892,8 +5895,8 @@ NULL
             ST.paren = scan->flags;	/* Which paren to set */
             ST.lastparen      = rex->lastparen;
 	    ST.lastcloseparen = rex->lastcloseparen;
-	    if (ST.paren > PL_regsize)
-		PL_regsize = ST.paren;
+	    if (ST.paren > maxopenparen)
+		maxopenparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
 	    if (cur_eval && cur_eval->u.eval.close_paren &&
@@ -6181,7 +6184,9 @@ NULL
 		PL_reg_flags ^= st->u.eval.toggle_reg_flags; 
 
 		st->u.eval.prev_rex = rex_sv;		/* inner */
-		st->u.eval.cp = regcppush(rex, 0); /* Save *all* the positions. */
+
+                /* Save *all* the positions. */
+		st->u.eval.cp = regcppush(rex, 0, maxopenparen);
 		rex_sv = cur_eval->u.eval.prev_rex;
 		SET_reg_curpm(rex_sv);
 		rex = ReANY(rex_sv);
@@ -6192,7 +6197,8 @@ NULL
 
 		/* Restore parens of the outer rex without popping the
 		 * savestack */
-		S_regcp_restore(aTHX_ rex, cur_eval->u.eval.lastcp);
+		S_regcp_restore(aTHX_ rex, cur_eval->u.eval.lastcp,
+                                        &maxopenparen);
 
 		st->u.eval.prev_eval = cur_eval;
 		cur_eval = cur_eval->u.eval.prev_eval;
