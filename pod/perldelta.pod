@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for to-do
+23b7025ebc definitely needs to be summarised.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
