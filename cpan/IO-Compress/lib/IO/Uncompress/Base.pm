@@ -3,18 +3,18 @@ package IO::Uncompress::Base ;
 
 use strict ;
 use warnings;
-use bytes;
+#use bytes;
 
 our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.058';
+$VERSION = '2.059';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.058 ;
+use IO::Compress::Base::Common 2.059 ;
 
 use IO::File ;
 use Symbol;
@@ -358,7 +358,7 @@ sub checkParams
                     'scan'          => [IO::Compress::Base::Common::Parse_boolean,  0],
                     'inputlength'   => [IO::Compress::Base::Common::Parse_unsigned, undef],
                     'binmodeout'    => [IO::Compress::Base::Common::Parse_boolean,  0],
-                    #'encode'        => [IO::Compress::Base::Common::Parse_any,       undef],
+                   #'decode'        => [IO::Compress::Base::Common::Parse_any,      undef],
 
                    #'consumeinput'  => [IO::Compress::Base::Common::Parse_boolean,  0],
                    
@@ -440,11 +440,13 @@ sub _create
         *$obj->{Buffer} = \$buff ;
     }
 
-    if ($got->parsed('encode')) { 
-        my $want_encoding = $got->getValue('encode');
-        *$obj->{Encoding} = getEncoding($obj, $class, $want_encoding);
-    }
-
+#    if ($got->getValue('decode')) { 
+#        my $want_encoding = $got->getValue('decode');
+#        *$obj->{Encoding} = IO::Compress::Base::Common::getEncoding($obj, $class, $want_encoding);
+#    }
+#    else {
+#        *$obj->{Encoding} = undef;
+#    }
 
     *$obj->{InputLength}       = $got->parsed('inputlength') 
                                     ? $got->getValue('inputlength')
@@ -928,9 +930,12 @@ sub _raw_read
 
         $self->filterUncompressed($buffer, $before_len);
 
-        if (*$self->{Encoding}) {
-            $$buffer = *$self->{Encoding}->decode($$buffer);
-        }
+#        if (*$self->{Encoding}) {
+#            use Encode ;
+#            *$self->{PendingDecode} .= substr($$buffer, $before_len) ;
+#            my $got = *$self->{Encoding}->decode(*$self->{PendingDecode}, Encode::FB_QUIET) ;
+#            substr($$buffer, $before_len) = $got;
+#        }
     }
 
     if ($status == STATUS_ENDSTREAM) {

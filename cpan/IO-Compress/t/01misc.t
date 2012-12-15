@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 150 + $extra ;
+    plan tests => 163 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -153,6 +153,39 @@ sub My::testParseParameters()
         is $got1->getValue('fred'), 0;
     }    
 
+    {
+        # setValue/getValue
+        my $value = 0;
+        my $got1 ;
+        eval { $got1 = ParseParameters(1, {'fred' => [Parse_any, 1]}, fred => $value) } ;
+    
+        ok ! $@;
+        ok $got1->parsed('fred'), "parsed ok" ;
+        is $got1->getValue('fred'), 0;
+        $got1->setValue('fred' => undef);
+        is $got1->getValue('fred'), undef;        
+    }  
+    
+    {
+        # twice
+        my $value = 0;
+        
+        my $got = IO::Compress::Base::Parameters::new();
+
+       
+        ok $got->parse({'fred' => [Parse_any, 1]}, fred => $value) ;
+
+        ok $got->parsed('fred'), "parsed ok" ;
+        is $got->getValue('fred'), 0;
+        
+        ok $got->parse({'fred' => [Parse_any, 1]}, fred => undef) ;  
+        ok $got->parsed('fred'), "parsed ok" ;
+        is $got->getValue('fred'), undef;   
+        
+        ok $got->parse({'fred' => [Parse_any, 1]}, fred => 7) ;  
+        ok $got->parsed('fred'), "parsed ok" ;
+        is $got->getValue('fred'), 7;   
+    }      
 }
 
 

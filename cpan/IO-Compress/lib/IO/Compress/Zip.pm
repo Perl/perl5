@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.058 qw(:Status );
-use IO::Compress::RawDeflate 2.058 ();
-use IO::Compress::Adapter::Deflate 2.058 ;
-use IO::Compress::Adapter::Identity 2.058 ;
-use IO::Compress::Zlib::Extra 2.058 ;
-use IO::Compress::Zip::Constants 2.058 ;
+use IO::Compress::Base::Common  2.059 qw(:Status );
+use IO::Compress::RawDeflate 2.059 ();
+use IO::Compress::Adapter::Deflate 2.059 ;
+use IO::Compress::Adapter::Identity 2.059 ;
+use IO::Compress::Zlib::Extra 2.059 ;
+use IO::Compress::Zip::Constants 2.059 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.058 (); 
+use Compress::Raw::Zlib  2.059 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.058 ; 
+           import  IO::Compress::Adapter::Bzip2 2.059 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.058 ; 
+           import  IO::Compress::Bzip2 2.059 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.058 ; 
+           import  IO::Compress::Adapter::Lzma 2.059 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.058 ; 
+           import  IO::Compress::Lzma 2.059 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.058';
+$VERSION = '2.059';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -250,7 +250,7 @@ sub mkHeader
 #        require Encode ;
 #        $filename = Encode::encode_utf8($filename)
 #            if length $filename ;
-#        $comment = Encode::encode_utf8($filename)
+#        $comment = Encode::encode_utf8($comment)
 #            if length $comment ;
 #    }
 
@@ -322,8 +322,8 @@ sub mkHeader
     $gpFlag |= ZIP_GP_FLAG_LZMA_EOS_PRESENT
         if $method == ZIP_CM_LZMA ;
 
-    #$gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
-        #if  $param->getValue('utf8') && length($filename) + length($comment);
+#    $gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
+#        if  $param->getValue('utf8') && (length($filename) || length($comment));
 
     my $version = $ZIP_CM_MIN_VERSIONS{$method};
     $version = ZIP64_MIN_VERSION
@@ -677,7 +677,7 @@ our %PARAMS = (
             'name'      => [IO::Compress::Base::Common::Parse_any,       ''],
             'filtername'=> [IO::Compress::Base::Common::Parse_code,      undef],
             'canonicalname'=> [IO::Compress::Base::Common::Parse_boolean,   0],
-            #'utf8'      => [IO::Compress::Base::Common::Parse_boolean,   0],
+#            'utf8'      => [IO::Compress::Base::Common::Parse_boolean,   0],
             'time'      => [IO::Compress::Base::Common::Parse_any,       undef],
             'extime'    => [IO::Compress::Base::Common::Parse_any,       undef],
             'exunix2'   => [IO::Compress::Base::Common::Parse_any,       undef], 
@@ -1488,6 +1488,7 @@ the file contains text.
 The default is 0. 
 
 =item C<< ExtraFieldLocal => $data >>
+
 =item C<< ExtraFieldCentral => $data >>
 
 The C<ExtraFieldLocal> option is used to store additional metadata in the

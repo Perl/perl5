@@ -3,18 +3,18 @@ package IO::Uncompress::RawInflate ;
 
 use strict ;
 use warnings;
-use bytes;
+#use bytes;
 
-use Compress::Raw::Zlib  2.058 ;
-use IO::Compress::Base::Common  2.058 qw(:Status );
+use Compress::Raw::Zlib  2.059 ;
+use IO::Compress::Base::Common  2.059 qw(:Status );
 
-use IO::Uncompress::Base  2.058 ;
-use IO::Uncompress::Adapter::Inflate  2.058 ;
+use IO::Uncompress::Base  2.059 ;
+use IO::Uncompress::Adapter::Inflate  2.059 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.058';
+$VERSION = '2.059';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );

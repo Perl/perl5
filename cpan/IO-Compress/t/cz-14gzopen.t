@@ -489,6 +489,9 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     SKIP:
     {
+        skip "Cannot create non-writable file", 3 
+            if $^O eq 'cygwin';
+
         my $lex = new LexFile my $name ;
         writeFile($name, "abc");
         chmod 0444, $name 

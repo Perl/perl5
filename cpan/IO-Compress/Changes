@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.059 10 December 2012
+
+      * IO::Compress::Base
+        Added "Encode" option.
+
   2.058 12 November 2012
 
       * RT# 81119: Latest IO::Compress 2.057 fails tests on 5.8.x

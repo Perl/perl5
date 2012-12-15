@@ -6,7 +6,7 @@ require 5.006 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.058 ;
+use IO::Compress::Base::Common 2.059 ;
 
 use IO::File (); ;
 use Scalar::Util ();
@@ -15,12 +15,12 @@ use Scalar::Util ();
 #require Exporter ;
 use Carp() ;
 use Symbol();
-use bytes;
+#use bytes;
 
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.058';
+$VERSION = '2.059';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -150,7 +150,7 @@ sub getOneShotParams
 our %PARAMS = (
             # Generic Parameters
             'autoclose' => [IO::Compress::Base::Common::Parse_boolean,   0],
-           #'encode'    => [IO::Compress::Base::Common::Parse_any,       undef],
+            'encode'    => [IO::Compress::Base::Common::Parse_any,       undef],
             'strict'    => [IO::Compress::Base::Common::Parse_boolean,   1],
             'append'    => [IO::Compress::Base::Common::Parse_boolean,   0],
             'binmodein' => [IO::Compress::Base::Common::Parse_boolean,   0],
@@ -234,15 +234,18 @@ sub _create
     #if ($outType eq 'filename' && -e $outValue && ! -w _)
     #  { return $obj->saveErrorString(undef, "Output file '$outValue' is not writable" ) }
 
-    if ($got->getValue('encode')) { 
-        my $want_encoding = $got->getValue('encode');
-        *$obj->{Encoding} = getEncoding($obj, $class, $want_encoding);
-    }
-
     $obj->ckParams($got)
         or $obj->croakError("${class}: " . $obj->error());
 
-
+    if ($got->getValue('encode')) { 
+        my $want_encoding = $got->getValue('encode');
+        *$obj->{Encoding} = IO::Compress::Base::Common::getEncoding($obj, $class, $want_encoding);
+        my $x = *$obj->{Encoding}; 
+    }
+    else {
+        *$obj->{Encoding} = undef; 
+    }
+    
     $obj->saveStatus(STATUS_OK) ;
 
     my $status ;
@@ -592,10 +595,6 @@ sub syswrite
         $buffer = \$_[0] ;
     }
 
-    $] >= 5.008 and ( utf8::downgrade($$buffer, 1) 
-        or Carp::croak "Wide character in " .  *$self->{ClassName} . "::write:");
-
-
     if (@_ > 1) {
         my $slen = defined $$buffer ? length($$buffer) : 0;
         my $len = $slen;
@@ -617,10 +616,22 @@ sub syswrite
         $buffer = \substr($$buffer, $offset, $len) ;
     }
 
-    return 0 if ! defined $$buffer || length $$buffer == 0 ;
-
-    if (*$self->{Encoding}) {
+    return 0 if (! defined $$buffer || length $$buffer == 0) && ! *$self->{FlushPending};
+    
+#    *$self->{Pending} .= $$buffer ;
+#    
+#    return length $$buffer
+#        if (length *$self->{Pending} < 1024 * 16 && ! *$self->{FlushPending}) ;
+#
+#    $$buffer = *$self->{Pending} ; 
+#    *$self->{Pending} = '';
+    
+    if (*$self->{Encoding}) {      
         $$buffer = *$self->{Encoding}->encode($$buffer);
+    }
+    else {
+        $] >= 5.008 and ( utf8::downgrade($$buffer, 1) 
+            or Carp::croak "Wide character in " .  *$self->{ClassName} . "::write:");
     }
 
     $self->filterUncompressed($buffer);
@@ -711,12 +722,22 @@ sub _newStream
     my $self = shift ;
     my $got  = shift;
 
+    my $class = ref $self;
+
     $self->_writeTrailer()
         or return 0 ;
 
     $self->ckParams($got)
         or $self->croakError("newStream: $self->{Error}");
 
+    if ($got->getValue('encode')) { 
+        my $want_encoding = $got->getValue('encode');
+        *$self->{Encoding} = IO::Compress::Base::Common::getEncoding($self, $class, $want_encoding);
+    }
+    else {
+        *$self->{Encoding} = undef;
+    }
+    
     *$self->{Compress} = $self->mkComp($got)
         or return 0;
 
@@ -797,6 +818,7 @@ sub close
     untie *$self 
         if $] >= 5.008 ;
 
+    *$self->{FlushPending} = 1 ;
     $self->_writeTrailer()
         or return 0 ;
 
