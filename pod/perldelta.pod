@@ -395,6 +395,11 @@ Stashes blessed into each other
 (C<bless \%Foo::, 'Bar'; bless \%Bar::, 'Foo'>) no longer result in double
 frees.  This bug started happening in Perl 5.16.
 
+=item *
+
+Numerous memory leaks have been fixed, mostly involving fatal warnings and
+syntax errors.
+
 =back
 
 =head1 Known Problems
