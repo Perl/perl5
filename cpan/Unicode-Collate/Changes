@@ -1,5 +1,17 @@
 Revision history for Perl module Unicode::Collate.
 
+0.96  Sat Dec 15 19:43:10 2012
+    - special noncharancter tailorings ('highestFFFF' and 'minimalFFFE')
+      * some locales are modified for 'highestFFFF': as, bn, fa, gu, hi, hy,
+        kn, kok, mr, or, sa, si, si_dict, ta, te, th, ur.
+    - U::C::Locale now allows 'entry' to add or override mappings.
+    - bug fix: using DUCET through XS wrongly prevented completely ignorable
+      characters from tailoring.
+    - modified tests: default.t, loc_as.t, loc_bn.t, loc_fa.t, loc_gu.t,
+      loc_hi.t, loc_hy.t, loc_kn.t, loc_kok.t, loc_mr.t, loc_or.t, loc_sa.t,
+      loc_si.t, loc_sidt.t, loc_ta.t, loc_te.t, loc_test.t, loc_th.t,
+      loc_ur.t, nonchar.t in t.
+
 0.95  Sat Dec  8 15:11:09 2012
     - U::C::Locale newly supports locales: bs_Cyrl, ee.
     - updated to CLDR 21: uk.

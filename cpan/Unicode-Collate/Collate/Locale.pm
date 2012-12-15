@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 
 my $PL_EXT  = '.pl';
 
@@ -110,10 +110,13 @@ sub new {
 
     my $href = _fetchpl($hash{accepted_locale});
     while (my($k,$v) = each %$href) {
-	if (exists $hash{$k}) {
+	if (!exists $hash{$k}) {
+	    $hash{$k} = $v;
+	} elsif ($k eq 'entry') {
+	    $hash{$k} = $v.$hash{$k};
+	} else {
 	    croak "$k is reserved by $hash{locale}, can't be overwritten";
 	}
-	$hash{$k} = $v;
     }
     return $class->SUPER::new(%hash);
 }
@@ -270,6 +273,9 @@ fallback is selected in the following order:
 Tailoring tags provided by C<Unicode::Collate> are allowed as long as
 they are not used for C<locale> support.  Esp. the C<table> tag
 is always untailorable, since it is reserved for DUCET.
+
+However C<entry> is allowed, even if it is used for C<locale> support,
+to add or override mappings.
 
 E.g. a collator for French, which ignores diacritics and case difference
 (i.e. level 1), with reversed case ordering and no normalization.

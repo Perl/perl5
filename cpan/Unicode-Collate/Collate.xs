@@ -624,7 +624,7 @@ varCE (self, vce)
 		d[7] = (U8)(Shift4Wt >> 8);
 		d[8] = (U8)(Shift4Wt & 0xFF);
 	    }
-	} else { /* shift-trimmed */
+	} else { /* shift-trimmed or completely ignorable */
 	    d[7] = d[8] = '\0';
 	}
     }

@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.95';
+our $VERSION = '0.96';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -82,6 +82,10 @@ use constant Hangul_SFin   => 0xD7A3;
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 
+# for highestFFFF and minimalFFFE
+my $HighestVCE = pack(VCE_TEMPLATE, 0, 0xFFFE, 0x20, 0x5, 0xFFFF);
+my $minimalVCE = pack(VCE_TEMPLATE, 0,      1, 0x20, 0x5, 0xFFFE);
+
 sub UCA_Version { "26" }
 
 sub Base_Unicode_Version { "6.2.0" }
@@ -103,7 +107,7 @@ our @ChangeOK = qw/
     alternate backwards level normalization rearrange
     katakana_before_hiragana upper_before_lower ignore_level2
     overrideHangul overrideCJK preprocess UCA_Version
-    hangul_terminator variable identical
+    hangul_terminator variable identical highestFFFF minimalFFFE
   /;
 
 our @ChangeNG = qw/
@@ -496,13 +500,9 @@ sub splitEnt
 	if (_isIllegal($src[$i]) || $vers <= 20 && _isNonchar($src[$i])) {
 	    $src[$i] = undef;
 	} elsif ($ver9) {
-	    $src[$i] = undef if $map->{ $src[$i] } &&
-			     @{ $map->{ $src[$i] } } == 0;
-### begin XS only ###
-	    if ($uXS) {
-		$src[$i] = undef if _ignorable_simple($src[$i]);
-	    }
-### end XS only ###
+	    $src[$i] = undef if $map->{ $src[$i] }
+			   ? @{ $map->{ $src[$i] } } == 0
+			   : _ignorable_simple($src[$i]); ### XS only
 	}
     }
 
@@ -582,8 +582,8 @@ sub splitEnt
 	}
 
 	# skip completely ignorable
-	if ($uXS && $jcps !~ /;/ && _ignorable_simple($jcps) || ### XS only
-	    $map->{$jcps} && @{ $map->{$jcps} } == 0) {
+	if ($map->{$jcps} ? @{ $map->{$jcps} } == 0 :
+	    $uXS && $jcps !~ /;/ && _ignorable_simple($jcps)) { ### XS only
 	    if ($wLen && @buf) {
 		$buf[-1][2] = $i + 1;
 	    }
@@ -624,8 +624,9 @@ sub getWt
     my $uXS  = $self->{__useXS}; ### XS only
 
     return if !defined $u;
-    return map($self->varCE($_), @{ $map->{$u} })
-	if $map->{$u};
+    return $self->varCE($HighestVCE) if $u eq 0xFFFF && $self->{highestFFFF};
+    return $self->varCE($minimalVCE) if $u eq 0xFFFE && $self->{minimalFFFE};
+    return map($self->varCE($_), @{ $map->{$u} }) if $map->{$u};
 ### begin XS only ###
     return map($self->varCE($_), _fetch_simple($u))
 	if $uXS && _exists_simple($u);
@@ -1046,12 +1047,14 @@ with no parameters, the collator should do the default collation.
       backwards => $levelNumber, # or \@levelNumbers
       entry => $element,
       hangul_terminator => $term_primary_weight,
+      highestFFFF => $bool,
       identical => $bool,
       ignoreName => qr/$ignoreName/,
       ignoreChar => qr/$ignoreChar/,
       ignore_level2 => $bool,
       katakana_before_hiragana => $bool,
       level => $collationLevel,
+      minimalFFFE => $bool,
       normalization  => $normalization_form,
       overrideCJK => \&overrideCJK,
       overrideHangul => \&overrideHangul,
@@ -1197,6 +1200,25 @@ automatically terminated with a terminator primary weight.
 These characters may need terminator included in a collation element
 table beforehand.
 
+=item highestFFFF
+
+-- see 5.14 Collation Elements, UTS #35.
+
+If the parameter is made true, C<U+FFFF> has a highest primary weight.
+When a boolean of C<$coll-E<gt>ge($str, "abc")> and
+C<$coll-E<gt>le($str, "abc\x{FFFF}")> is true, it is expected that C<$str>
+begins with C<"abc">, or another primary equivalent.
+C<$str> may be C<"abcd">, C<"abc012">, but should not include C<U+FFFF>
+such as C<"abc\x{FFFF}xyz">.
+
+C<$coll-E<gt>le($str, "abc\x{FFFF}")> works like C<$coll-E<gt>lt($str, "abd")>
+almostly, but the latter has a problem that you should know which letter is
+next to C<c>. For a certain language where C<ch> as the next letter,
+C<"abch"> is greater than C<"abc\x{FFFF}">, but lesser than C<"abd">.
+
+Note: This is equivalent to C<entry =E<gt> 'FFFF ; [.FFFE.0020.0005.FFFF]'>.
+C<entry> allows tailoring of any other character than U+FFFF.
+
 =item identical
 
 -- see A.3 Deterministic Comparison, UTS #10.
@@ -1280,6 +1302,31 @@ When C<variable> is 'blanked' or 'non-ignorable' (other than 'shifted'
 and 'shift-trimmed'), the level 4 may be unreliable.
 
 See also C<identical>.
+
+=item minimalFFFE
+
+-- see 5.14 Collation Elements, UTS #35.
+
+If the parameter is made true, C<U+FFFE> has a minimal primary weight.
+The comparison between C<"$a1\x{FFFE}$a2"> and C<"$b1\x{FFFE}$b2">
+first compares C<$a1> and C<$b1> at level 1, and
+then C<$a2> and C<$b2> at level 1, as followed.
+
+        "ab\x{FFFE}a"
+        "Ab\x{FFFE}a"
+        "ab\x{FFFE}c"
+        "Ab\x{FFFE}c"
+        "ab\x{FFFE}xyz"
+        "abc\x{FFFE}def"
+        "abc\x{FFFE}xYz"
+        "aBc\x{FFFE}xyz"
+        "abcX\x{FFFE}def"
+        "abcx\x{FFFE}xyz"
+        "b\x{FFFE}aaa"
+        "bbb\x{FFFE}a"
+
+Note: This is equivalent to C<entry =E<gt> 'FFFE ; [.0001.0020.0005.FFFE]'>.
+C<entry> allows tailoring of any other character than U+FFFE.
 
 =item normalization
 
