@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 103;
+plan tests => 115;
 
 $FS = ':';
 
@@ -421,4 +421,55 @@ is($cnt, scalar(@ary));
 # [perl #94490] constant folding should not invoke special split " "
 # behaviour.
 @_=split(0||" ","foo  bar");
-is @_, 3, 'split(0||" ") is not treated like split(" ")';
+is @_, 3, 'split(0||" ") is not treated like split(" ")'; #'
+
+{
+    my @results;
+    my $expr;
+    $expr = ' a b c ';
+
+    @results = split /\s/, $expr;
+    is @results, 4,
+        "split on regex of single space metacharacter: captured 4 elements";
+    is $results[0], '',
+        "split on regex of single space metacharacter: first element is empty string";
+
+    @results = split / /, $expr;
+    is @results, 4,
+        "split on regex of single whitespace: captured 4 elements";
+    is $results[0], '',
+        "split on regex of single whitespace: first element is empty string";
+
+    @results = split " ", $expr;
+    is @results, 3,
+        "split on string of single whitespace: captured 3 elements";
+    is $results[0], 'a',
+        "split on string of single whitespace: first element is non-empty";
+
+    $expr = " a \tb c ";
+    @results = split " ", $expr;
+    is @results, 3,
+        "split on string of single whitespace: captured 3 elements";
+    is $results[0], 'a',
+        "split on string of single whitespace: first element is non-empty; multiple contiguous space characters";
+}
+
+TODO: {
+    local $::TODO = 'RT #116086: split "\x20" does not work as documented';
+    my @results;
+    my $expr;
+    $expr = ' a b c ';
+    @results = split "\x20", $expr;
+    is @results, 3,
+        "RT #116086: split on string of single hex-20: captured 3 elements";
+    is $results[0], 'a',
+        "RT #116086: split on string of single hex-20: first element is non-empty";
+
+    $expr = " a \tb c ";
+    @results = split "\x20", $expr;
+    is @results, 3,
+        "RT #116086: split on string of single hex-20: captured 3 elements";
+    is $results[0], 'a',
+        "RT #116086: split on string of single hex-20: first element is non-empty; multiple contiguous space characters";
+}
+
