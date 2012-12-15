@@ -407,6 +407,11 @@ syntax errors.
 Lexical constants (C<my sub answer () { 42 }>) no longer cause double
 frees.
 
+=item *
+
+Constant subroutine redefinition warns by default, but lexical constants
+were accidentally exempt from default warnings.  This has been corrected.
+
 =back
 
 =head1 Known Problems
