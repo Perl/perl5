@@ -468,6 +468,12 @@ MRO caches have been fixed.
 Defining a subroutine when its typeglob has been aliased no longer results
 in stale method caches.  This bug was introduced in Perl 5.10.
 
+=item *
+
+Localising a typeglob containing a subroutine when the typeglob's package
+has been deleted from its parent stash no longer produces an error.  This
+bug was introduced in Perl 5.14.
+
 =back
 
 =head1 Known Problems
