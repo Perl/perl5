@@ -11854,14 +11854,11 @@ parseit:
                     }
                     /* FALL THROUGH */
 
-#ifdef HAS_ISBLANK
 		case ANYOF_BLANK:
-#endif
 		case ANYOF_CNTRL:
 		case ANYOF_PSXSPC:
 		case ANYOF_SPACE:
 		case ANYOF_XDIGIT:
-                do_posix:
                     if (LOC) {
                         SV* scratch_list = NULL;
 
@@ -11884,8 +11881,21 @@ parseit:
                             SvREFCNT_dec(scratch_list);
                         }
 
-                        /* Set this class in the node for runtime matching */
-                        ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                        if (namedclass != ANYOF_BLANK) {
+#endif
+                            /* Set this class in the node for runtime
+                             * matching */
+                            ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                        }
+                        else {
+                            /* No isblank(), use the hard-coded ASCII-range
+                             * blanks, adding them to the running total. */
+
+                            _invlist_union(posixes, ascii_source, &posixes);
+                        }
+#endif
                     }
                     else {
                         /* For non-locale, just add it to any existing list */
@@ -11915,14 +11925,11 @@ parseit:
                     }
                     /* FALL THROUGH */
 
-#ifdef HAS_ISBLANK
 		case ANYOF_NBLANK:
-#endif
 		case ANYOF_NCNTRL:
 		case ANYOF_NPSXSPC:
 		case ANYOF_NSPACE:
 		case ANYOF_NXDIGIT:
-                do_n_posix:
                     if (LOC) {
                         SV* scratch_list = NULL;
                         _invlist_subtract(PL_AboveLatin1,
@@ -11935,7 +11942,22 @@ parseit:
                             _invlist_union(posixes, scratch_list, &posixes);
                             SvREFCNT_dec(scratch_list);
                         }
-                        ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                        if (namedclass != ANYOF_NBLANK) {
+#endif
+                            ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                        }
+                        else {
+                            /* Get the list of all code points in Latin1 that
+                             * are not ASCII blanks, and add them to the
+                             * running total */
+                            _invlist_subtract(PL_Latin1, ascii_source,
+                                              &scratch_list);
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+#endif
                     }
                     else {
                         _invlist_union_complement_2nd(
@@ -11978,63 +12000,6 @@ parseit:
 #endif
 		    break;
 
-#ifndef HAS_ISBLANK
-		case ANYOF_BLANK:
-                    if (! LOC) {
-                        goto do_posix;
-                    }
-                    else { /* There is no isblank() and we are in locale:  We
-                              use the ASCII range and the above-Latin1 range
-                              code points */
-                        SV* scratch_list = NULL;
-
-                        /* Include all above-Latin1 blanks */
-                        _invlist_intersection(PL_AboveLatin1,
-                                              PL_XPosix_ptrs[classnum],
-                                              &scratch_list);
-                        /* Add it to the running total of posix classes */
-                        if (! posixes) {
-                            posixes = scratch_list;
-                        }
-                        else {
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
-                        }
-                        /* Add the ASCII-range blanks to the running total. */
-                        _invlist_union(posixes, PL_Posix_ptrs[classnum], &posixes);
-                    }
-		    break;
-		case ANYOF_NBLANK:
-                    if (! LOC) {
-                        goto do_n_posix;
-                    }
-                    else { /* There is no isblank() and we are in locale */
-                        SV* scratch_list = NULL;
-
-                        /* Include all above-Latin1 non-blanks */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosix_ptrs[classnum],
-                                          &scratch_list);
-
-                        /* Add them to the running total of posix classes */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosix_ptrs[classnum],
-                                          &scratch_list);
-                        if (! posixes) {
-                            posixes = scratch_list;
-                        }
-                        else {
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
-                        }
-
-                        /* Get the list of all non-ASCII-blanks in Latin 1, and
-                         * add them to the running total */
-                        _invlist_subtract(PL_Latin1, PL_Posix_ptrs[classnum],
-                                          &scratch_list);
-                        _invlist_union(posixes, scratch_list, &posixes);
-                        SvREFCNT_dec(scratch_list);
-                    }
-		    break;
-#endif
 		case ANYOF_DIGIT:
 		    /* There are no digits in the Latin1 range outside of
 		     * ASCII, so call the macro that doesn't have to resolve
