@@ -12047,18 +12047,6 @@ parseit:
                         PL_Posix_ptrs[classnum], PL_Posix_ptrs[classnum], swash_property_names[classnum], listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
-		case ANYOF_HORIZWS:
-		    /* For these, we use the cp_list, as /d doesn't make a
-		     * difference in what these match.  There would be problems
-		     * if these characters had folds other than themselves, as
-		     * cp_list is subject to folding.  It turns out that \h
-		     * is just a synonym for XPosixBlank */
-		    _invlist_union(cp_list, PL_XPosix_ptrs[_CC_BLANK], &cp_list);
-		    break;
-		case ANYOF_NHORIZWS:
-                    _invlist_union_complement_2nd(cp_list,
-                                                 PL_XPosix_ptrs[_CC_BLANK], &cp_list);
-		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
 		case ANYOF_UPPER:
@@ -12092,20 +12080,33 @@ parseit:
 		    }
 		    break;
 		}
+		case ANYOF_HORIZWS:
+                    /* For these, we use the cp_list, as neither /d nor /l make
+                     * a difference in what these match.  There would be
+                     * problems if these characters had folds other than
+                     * themselves, as cp_list is subject to folding.
+                     *
+                     * It turns out that \h is just a synonym for XPosixBlank */
+                    classnum = _CC_BLANK;
+		    /* FALL THROUGH */
+
 		case ANYOF_VERTWS:
-		    /* For these, we use the cp_list, as /d doesn't make a
-		     * difference in what these match.  There would be problems
-		     * if these characters had folds other than themselves, as
-		     * cp_list is subject to folding */
 		    _invlist_union(cp_list, PL_XPosix_ptrs[classnum], &cp_list);
 		    break;
+
+		case ANYOF_NHORIZWS:
+                    classnum = _CC_BLANK;
+		    /* FALL THROUGH */
+
 		case ANYOF_NVERTWS:
                     _invlist_union_complement_2nd(cp_list,
                                                   PL_XPosix_ptrs[classnum],
                                                   &cp_list);
 		    break;
+
 		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;
+
 		default:
 		    vFAIL("Invalid [::] class");
 		    break;
