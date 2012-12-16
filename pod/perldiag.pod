@@ -1417,7 +1417,8 @@ another template code following the slash.  See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, may not be portable
 
-=item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
+=item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches 
+succeed
 
 (S utf8, non_unicode) You had a code point above the Unicode maximum
 of U+10FFFF.
@@ -1623,7 +1624,8 @@ a good way to enquire about the features of a package, or whether
 it's loaded, etc.
 
 
-=item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in m/%s/
+=item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in 
+m/%s/
 
 (F) You used something like C<(?(DEFINE)...|..)> which is illegal.  The
 most likely cause of this error is that you left out a parenthesis inside
@@ -1809,7 +1811,8 @@ L<perlre/(?{ code })>.
 assertion, but that construct is only allowed when the C<use re 'eval'>
 pragma is in effect.  See L<perlre/(?{ code })>.
 
-=item EVAL without pos change exceeded limit in regex; marked by <-- HERE in m/%s/
+=item EVAL without pos change exceeded limit in regex; marked by <-- HERE in 
+m/%s/
 
 (F) You used a pattern that nested too many EVAL calls without consuming
 any text.  Restructure the pattern so that text is consumed.
@@ -2078,7 +2081,8 @@ has since been undefined.
 (F) A ()-group started with a count.  A count is supposed to follow
 something: a template character or a ()-group.  See L<perlfunc/pack>.
 
-=item Group name must start with a non-digit word character in regex; marked by <-- HERE in m/%s/
+=item Group name must start with a non-digit word character in regex; marked by 
+<-- HERE in m/%s/
 
 (F) Group names must follow the rules for perl identifiers, meaning
 they must start with a non-digit word character. A common cause of
@@ -2231,7 +2235,8 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
-=item Inconsistent hierarchy during C3 merge of class '%s': merging failed on parent '%s'
+=item Inconsistent hierarchy during C3 merge of class '%s': merging failed on 
+parent '%s'
 
 (F) The method resolution order (MRO) of the given class is not
 C3-consistent, and you have enabled the C3 MRO for this class.  See the C3
@@ -2383,7 +2388,8 @@ the indicated name isn't valid.  See L<charnames/CUSTOM ALIASES>.
 (W printf) Perl does not understand the given format conversion.  See
 L<perlfunc/sprintf>.
 
-=item Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
+=item Invalid escape in the specified encoding in regex; marked by <-- HERE in 
+m/%s/
 
 (W regexp) The numeric escape (for example C<\xHH>) of value < 256
 didn't correspond to a single character through the conversion
@@ -2394,7 +2400,8 @@ escape was discovered.
 
 =item Invalid hexadecimal number in \N{U+...}
 
-=item Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in m/%s/
+=item Invalid hexadecimal number in \N{U+...} in regex; marked by <-- HERE in 
+m/%s/
 
 (F) The character constant represented by C<...> is not a valid hexadecimal
 number.  Either it is empty, or you tried to use a character other than
@@ -2971,7 +2978,8 @@ NOTE: This warning detects symbols that have been used only once so $c, @c,
 the same; if a program uses $c only once but also uses any of the others it
 will not trigger this warning.
 
-=item \N in a character class must be a named character: \N{...} in regex; marked by <-- HERE in m/%s/
+=item \N in a character class must be a named character: \N{...} in regex; 
+marked by <-- HERE in m/%s/
 
 (F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
 character class, for the same reason that C<.> in a character class loses
@@ -3773,7 +3781,8 @@ to even) byte length.
 (F) Parsing code supplied by an extension violated the parser's API in
 a detectable way.
 
-=item Pattern subroutine nesting without pos change exceeded limit in regex; marked by <-- HERE in m/%s/
+=item Pattern subroutine nesting without pos change exceeded limit in regex; 
+marked by <-- HERE in m/%s/
 
 (F) You used a pattern that uses too many nested subpattern calls without
 consuming any text.  Restructure the pattern so text is consumed before
@@ -3806,7 +3815,8 @@ redirected it with select().)
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
 
-=item Perl folding rules are not up-to-date for 0x%x; please use the perlbug utility to report
+=item Perl folding rules are not up-to-date for 0x%x; please use the perlbug 
+utility to report;
 
 (W regex, deprecated) You used a regular expression with
 case-insensitive matching, and there is a bug in Perl in which the
@@ -3875,7 +3885,8 @@ fix the problem, however, you will get the same error message each
 time you run Perl.  How to really fix the problem can be found in
 L<perllocale> section B<LOCALE PROBLEMS>.
 
-=item perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set
+=item perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only 
+partially set
 
 (W) PERL_HASH_SEED should match /^\s*(?:0x)?[0-9a-fA-F]+\s*\z/ but it
 contained a non hex character. This could mean your hash randomization
@@ -3904,7 +3915,8 @@ not C<isprint>.  See L<perlre>.
 (F) Your system has POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
-=item POSIX syntax [%s] belongs inside character classes in regex; marked by <-- HERE in m/%s/
+=item POSIX syntax [%s] belongs inside character classes in regex; marked by 
+<-- HERE in m/%s/
 
 (W regexp) The character class constructs [: :], [= =], and [. .]  go
 I<inside> character classes, the [] are part of the construct, for example:
@@ -3913,7 +3925,8 @@ implemented; they are simply placeholders for future extensions and
 will cause fatal errors.  The <-- HERE shows whereabouts in the regular
 expression the problem was discovered.  See L<perlre>.
 
-=item POSIX syntax [. .] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
+=item POSIX syntax [. .] is reserved for future extensions in regex; marked by 
+<-- HERE in m/%s/
 
 (F) Within regular expression character classes ([]) the syntax beginning
 with "[." and ending with ".]" is reserved for future extensions.  If you
@@ -3922,7 +3935,8 @@ character class, just quote the square brackets with the backslash: "\[."
 and ".\]".  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
 
-=item POSIX syntax [= =] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
+=item POSIX syntax [= =] is reserved for future extensions in regex; marked by 
+<-- HERE in m/%s/
 
 (F) Within regular expression character classes ([]) the syntax beginning
 with "[=" and ending with "=]" is reserved for future extensions.  If you
@@ -4104,7 +4118,8 @@ expression the problem was discovered.  See L<perlre>.
 the {min,max} construct.  The <-- HERE shows whereabouts in the regular
 expression the problem was discovered.  See L<perlre>.
 
-=item Quantifier unexpected on zero-length expression; marked by <-- HERE in m/%s/
+=item Quantifier unexpected on zero-length expression; marked by <-- HERE in 
+m/%s/
 
 (W regexp) You applied a regular expression quantifier in a place where
 it makes no sense, such as on a zero-width assertion.  Try putting the
@@ -4226,7 +4241,8 @@ spelled correctly both in the backreference and the declaration.
 The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
-=item Reference to nonexistent or unclosed group in regex; marked by <-- HERE in m/%s/
+=item Reference to nonexistent or unclosed group in regex; marked by <-- HERE 
+in m/%s/
 
 (F) You used something like C<\g{-7}> in your regular expression, but there
 are not at least seven sets of closed capturing parentheses in the
@@ -4247,7 +4263,8 @@ expression compiler gave it.
 (F syntax, regexp) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
-=item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- HERE in m/%s/
+=item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- 
+HERE in m/%s/
 
 (F) Turning off the given modifier has the side effect of turning on
 another one.  Perl currently doesn't allow this.  Reword the regular
@@ -4678,7 +4695,8 @@ assignment or as a subroutine argument for example).
 (P) Perl tried to force the upgrade of an SV to a type which was actually
 inferior to its current type.
 
-=item Switch (?(condition)... contains too many branches in regex; marked by <-- HERE in m/%s/
+=item Switch (?(condition)... contains too many branches in regex; marked by 
+<-- HERE in m/%s/
 
 (F) A (?(condition)if-clause|else-clause) construct can have at most
 two branches (the if-clause and the else-clause).  If you want one or
@@ -5219,7 +5237,8 @@ subroutine.
 in your Perl script (or eval) near the specified column.  Perhaps you tried 
 to run a compressed script, a binary program, or a directory as a Perl program.
 
-=item Unrecognized escape \%c in character class passed through in regex; marked by <-- HERE in m/%s/
+=item Unrecognized escape \%c in character class passed through in regex; 
+marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl inside character classes.  The character was
@@ -5371,7 +5390,8 @@ arrays.  C<$]> is the Perl version number in decimal.
 the subroutine returned was a temporary scalar about to
 be discarded, so the assignment had no effect.
 
-=item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/
+=item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in 
+m/%s/
 
 (W regexp) You have used an internal modifier such as (?-o) that has no
 meaning unless removed from the entire regexp:
@@ -5678,7 +5698,8 @@ C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
 allow this syntax, but shouldn't have.  It is now deprecated,
 and will be removed in a future version.
 
-=item Using just the first character returned by \N{} in character class in regex; marked by <-- HERE in m/%s/
+=item Using just the first character returned by \N{} in character class in 
+regex; marked by <-- HERE in m/%s/
 
 (W regexp) A charnames handler may return a sequence of more than one
 character.  Currently all but the first one are discarded when used in
@@ -5797,12 +5818,14 @@ are automatically rebound to the current values of such variables.
 (S printf) The %vd (s)printf format does not support version objects
 with alpha parts.
 
-=item Verb pattern '%s' has a mandatory argument in regex; marked by <-- HERE in m/%s/ 
+=item Verb pattern '%s' has a mandatory argument in regex; marked by <-- HERE 
+in m/%s/ 
 
 (F) You used a verb pattern that requires an argument.  Supply an
 argument or check that you are using the right verb.
 
-=item Verb pattern '%s' may not have an argument in regex; marked by <-- HERE in m/%s/ 
+=item Verb pattern '%s' may not have an argument in regex; marked by <-- HERE 
+in m/%s/ 
 
 (F) You used a verb pattern that is not allowed an argument.  Remove the 
 argument or check that you are using the right verb.

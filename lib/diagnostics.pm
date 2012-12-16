@@ -385,7 +385,7 @@ my %msg;
 	    push @headers, $header if defined $header;
 	}
 
-	unless ( s/=item (.*?)\s*\z//) {
+	unless ( s/=item (.*?)\s*\z//s) {
 
 	    if ( s/=head1\sDESCRIPTION//) {
 		$msg{$header = 'DESCRIPTION'} = '';
@@ -400,17 +400,15 @@ my %msg;
 	if( $for_item ) { $header = $for_item; undef $for_item } 
 	else {
 	    $header = $1;
-	    while( $header =~ /[;,]\z/ ) {
-		<POD_DIAG> =~ /^\s*(.*?)\s*\z/;
-		$header .= ' '.$1;
-	    }
+
+	    $header =~ s/\n/ /gs; # Allow multi-line headers
 	}
 
 	# strip formatting directives from =item line
 	$header =~ s/[A-Z]<(.*?)>/$1/g;
 
-	# Since we strip "\.\n" when we search a warning, strip it here as well
-	$header =~ s/\.?$//;
+	# Since we strip "(\.\s*)\n" when we search a warning, strip it here as well
+	$header =~ s/(\.\s*)?$//;
 
         my @toks = split( /(%l?[dxX]|%[ucp]|%(?:\.\d+)?[fs])/, $header );
 	if (@toks > 1) {
@@ -434,12 +432,15 @@ my %msg;
                 }
             }  
             my $lhs = join( '', @toks );
+            $lhs =~ s/(\\\s)+/\\s+/g; # Replace lit space with multi-space match
 	    $transfmt{$header}{pat} =
-              "    s^$lhs\Q$header\Es\n\t&& return 1;\n";
+              "    s^\\s*$lhs\\s*\Q$header\Es\n\t&& return 1;\n";
             $transfmt{$header}{len} = $conlen;
 	} else {
+            my $lhs = "\Q$header\E";
+            $lhs =~ s/(\\\s)+/\\s+/g; # Replace lit space with multi-space match
             $transfmt{$header}{pat} =
-	      "    m^\Q$header\E && return 1;\n";
+	      "    s^\\s*$lhs\\s*\Q$header\E\n\t && return 1;\n";
             $transfmt{$header}{len} = length( $header );
 	} 
 
@@ -589,7 +590,7 @@ sub splainthis {
     local $\;
     local $!;
     ### &finish_compilation unless %msg;
-    s/\.?\n+$//;
+    s/(\.\s*)?\n+$//;
     my $orig = $_;
     # return unless defined;
 
@@ -610,7 +611,7 @@ sub splainthis {
             $_ .= ' at ' . $secs[$i];
 	}
     }
-    
+
     # remove parenthesis occurring at the end of some messages 
     s/^\((.*)\)$/$1/;
 

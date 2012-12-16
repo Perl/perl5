@@ -84,7 +84,19 @@ my $severity_re = qr/ . (?: \| . )* /x; # A severity is a single char, but can
 my @same_descr;
 while (<$diagfh>) {
   if (m/^=item (.*)/) {
-    $cur_entry = $1 =~ s/\s+\z//r;
+    $cur_entry = $1;
+
+    # Allow multi-line headers
+    while (<$diagfh>) {
+      if (/^\s*$/) {
+        last;
+      }
+
+      $cur_entry .= $_;
+    }
+
+    $cur_entry =~ s/\n/ /gs; # Fix multi-line headers if they have \n's
+    $cur_entry =~ s/\s+\z//;
 
     if (exists $entries{$cur_entry} && $entries{$cur_entry}{todo}) {
         TODO: {
@@ -96,7 +108,6 @@ while (<$diagfh>) {
     # overwrites one in DATA.
     $entries{$cur_entry}{todo} = 0;
     $entries{$cur_entry}{line_number} = $.;
-    next;
   }
 
   next if ! defined $cur_entry;
@@ -369,7 +380,8 @@ sub check_message {
           if $entries{$key}{cattodo};
 
         like $entries{$key}{severity}, $qr,
-           "severity is one of $severity for $key";
+          "severity is one of $severity for $key";
+
         is $entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
              . " for $key";
