@@ -262,6 +262,7 @@ Anprd	|void	|croak_no_modify
 Anprd	|void	|croak_xs_usage	|NN const CV *const cv \
 				|NN const char *const params
 npr	|void	|croak_no_mem
+nprX	|void	|croak_popstack
 #if defined(WIN32)
 norx	|void	|win32_croak_not_implemented|NN const char * fname
 #endif

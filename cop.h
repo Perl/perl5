@@ -1134,8 +1134,7 @@ typedef struct stackinfo PERL_SI;
 	    Perl_deb(aTHX_ "pop  STACKINFO %d at %s:%d\n",		\
 		         i, __FILE__, __LINE__);})			\
 	if (!prev) {							\
-	    PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");		\
-	    my_exit(1);							\
+	    Perl_croak_popstack();					\
 	}								\
 	SWITCHSTACK(PL_curstack,prev->si_stack);			\
 	/* don't free prev here, free them all at the END{} */		\

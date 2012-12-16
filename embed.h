@@ -1059,6 +1059,7 @@
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #define croak_no_mem		Perl_croak_no_mem
+#define croak_popstack		Perl_croak_popstack
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define cv_clone_into(a,b)	Perl_cv_clone_into(aTHX_ a,b)
 #define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)

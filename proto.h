@@ -676,6 +676,9 @@ PERL_CALLCONV_NO_RET void	Perl_croak_no_mem(void)
 PERL_CALLCONV_NO_RET void	Perl_croak_no_modify(void)
 			__attribute__noreturn__;
 
+PERL_CALLCONV_NO_RET void	Perl_croak_popstack(void)
+			__attribute__noreturn__;
+
 PERL_CALLCONV_NO_RET void	Perl_croak_sv(pTHX_ SV *baseex)
 			__attribute__noreturn__
 			__attribute__nonnull__(pTHX_1);

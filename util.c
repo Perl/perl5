@@ -1634,6 +1634,15 @@ Perl_croak_no_mem()
     my_exit(1);
 }
 
+/* does not return, used only in POPSTACK */
+void
+Perl_croak_popstack(void)
+{
+    dTHX;
+    PerlIO_printf(Perl_error_log, "panic: POPSTACK\n");
+    my_exit(1);
+}
+
 /*
 =for apidoc Am|void|warn_sv|SV *baseex
 
