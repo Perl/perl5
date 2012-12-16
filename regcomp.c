@@ -11835,6 +11835,17 @@ parseit:
 
 	    if (! SIZE_ONLY) {
                 U8 classnum = namedclass_to_classnum(namedclass);
+
+                /* The ascii range inversion list */
+                SV* ascii_source = PL_Posix_ptrs[classnum];
+
+                /* The full Latin1 range inversion list */
+                SV* l1_source = PL_L1Posix_ptrs[classnum];
+
+                /* The name of the property to use to match the full eXtended
+                 * Unicode range swash fo this character class */
+                const char *Xname = swash_property_names[classnum];
+
 		switch ((I32)namedclass) {
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
@@ -11845,7 +11856,7 @@ parseit:
 		case ANYOF_WORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        ascii_source, l1_source, Xname, listsv);
 		    break;
                     }
                     if (! PL_XPosix_ptrs[classnum]) {
@@ -11901,7 +11912,7 @@ parseit:
                         /* For non-locale, just add it to any existing list */
                         _invlist_union(posixes,
                                        (AT_LEAST_ASCII_RESTRICTED)
-                                           ? PL_Posix_ptrs[classnum]
+                                           ? ascii_source
                                            : PL_XPosix_ptrs[classnum],
                                        &posixes);
                     }
@@ -11915,7 +11926,7 @@ parseit:
 		case ANYOF_NWORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_L1Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        ascii_source, l1_source, Xname, listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
                     }
@@ -12005,11 +12016,11 @@ parseit:
 		     * ASCII, so call the macro that doesn't have to resolve
 		     * them */
 		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], swash_property_names[classnum], listsv);
+                        ascii_source, Xname, listsv);
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_Posix_ptrs[classnum], PL_Posix_ptrs[classnum], swash_property_names[classnum], listsv,
+                        ascii_source, ascii_source, Xname, listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
 		case ANYOF_LOWER:
@@ -12020,9 +12031,6 @@ parseit:
 		       folding, matching Cased there (which in the ASCII range
 		       is the same as Alpha */
 
-		    SV* ascii_source;
-		    SV* l1_source;
-		    const char *Xname;
 
 		    if (FOLD && ! LOC) {
 			ascii_source = PL_Posix_ptrs[_CC_ALPHA];
@@ -12030,9 +12038,6 @@ parseit:
 			Xname = "Cased";
 		    }
 		    else {
-			ascii_source = PL_Posix_ptrs[classnum];
-			l1_source = PL_L1Posix_ptrs[classnum];
-			Xname = swash_property_names[classnum];
 		    }
 		    if (namedclass % 2) {   /* If odd, is the complemented version */
 			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
