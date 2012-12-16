@@ -11846,13 +11846,25 @@ parseit:
                  * Unicode range swash fo this character class */
                 const char *Xname = swash_property_names[classnum];
 
+                /* LOWER and UPPER under fold match ALPHA in the ASCII range,
+                 * and Cased outside it */
+                if (FOLD && ! LOC
+                    && (classnum == _CC_LOWER || classnum == _CC_UPPER))
+                {
+                    ascii_source = PL_Posix_ptrs[_CC_ALPHA];
+                    l1_source = PL_L1Cased;
+                    Xname = "Cased";
+                }
+
 		switch ((I32)namedclass) {
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		case ANYOF_ALPHA:
 		case ANYOF_GRAPH:
+		case ANYOF_LOWER:
 		case ANYOF_PRINT:
 		case ANYOF_PUNCT:
+		case ANYOF_UPPER:
 		case ANYOF_WORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -11921,8 +11933,10 @@ parseit:
 		case ANYOF_NALPHANUMERIC:
 		case ANYOF_NALPHA:
 		case ANYOF_NGRAPH:
+		case ANYOF_NLOWER:
 		case ANYOF_NPRINT:
 		case ANYOF_NPUNCT:
+		case ANYOF_NUPPER:
 		case ANYOF_NWORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
@@ -12023,33 +12037,6 @@ parseit:
                         ascii_source, ascii_source, Xname, listsv,
                         runtime_posix_matches_above_Unicode);
 		    break;
-		case ANYOF_LOWER:
-		case ANYOF_NLOWER:
-		case ANYOF_UPPER:
-		case ANYOF_NUPPER:
-                {   /* These require special handling, as they differ under
-		       folding, matching Cased there (which in the ASCII range
-		       is the same as Alpha */
-
-
-		    if (FOLD && ! LOC) {
-			ascii_source = PL_Posix_ptrs[_CC_ALPHA];
-			l1_source = PL_L1Cased;
-			Xname = "Cased";
-		    }
-		    else {
-		    }
-		    if (namedclass % 2) {   /* If odd, is the complemented version */
-			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                        posixes, ascii_source, l1_source, Xname, listsv,
-                        runtime_posix_matches_above_Unicode);
-		    }
-		    else {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, l1_source, Xname, listsv);
-		    }
-		    break;
-		}
 		case ANYOF_HORIZWS:
                     /* For these, we use the cp_list, as neither /d nor /l make
                      * a difference in what these match.  There would be
