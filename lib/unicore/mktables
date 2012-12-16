@@ -13559,7 +13559,7 @@ sub compile_perl() {
         push @tables_that_may_be_empty, $ri->full_name;
     }
 
-    my $specials_begin = $perl->add_match_table('_X_Special_Begin',
+    my $specials_begin = $perl->add_match_table('_X_Special_Begin_Start',
                                        Perl_Extension => 1,
                                        Fate => $INTERNAL_ONLY,
                                        Initialize => $lv_lvt_v
@@ -13568,9 +13568,9 @@ sub compile_perl() {
                                                    + $ri
                                       );
     $specials_begin->add_comment(join_lines( <<END
-For use in \\X; matches first character of potential multi-character
-sequences that can begin an extended grapheme cluster.  They need special
-handling because of their complicated nature.
+For use in \\X; matches first (perhaps only) character of potential
+multi-character sequences that can begin an extended grapheme cluster.  They
+need special handling because of their complicated nature.
 END
     ));
     my $regular_begin = $perl->add_match_table('_X_Regular_Begin',

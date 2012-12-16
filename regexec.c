@@ -4536,7 +4536,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			&& (locinput >=  PL_regeol
 			    || (! swash_fetch(PL_utf8_X_regular_begin,
 					     (U8*)locinput, utf8_target)
-			         && ! is_GCB_SPECIAL_BEGIN_utf8(locinput)))
+			         && ! is_GCB_SPECIAL_BEGIN_START_utf8(locinput)))
                         )
 		    {
 			locinput = previous_prepend;
@@ -4551,7 +4551,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                     (U8*)locinput, utf8_target)) {
                         locinput += UTF8SKIP(locinput);
                     }
-                    else if (! is_GCB_SPECIAL_BEGIN_utf8(locinput)) {
+                    else if (! is_GCB_SPECIAL_BEGIN_START_utf8(locinput)) {
 
 			/* Here did not match the required 'Begin' in the
 			 * second term.  So just match the very first

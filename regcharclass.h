@@ -508,12 +508,12 @@
 ( ( ( ( ( 0xF0 == ((U8*)s)[0] ) && ( 0x9F == ((U8*)s)[1] ) ) && ( 0x87 == ((U8*)s)[2] ) ) && ( ((U8*)s)[3] >= 0xA6 ) ) ? 4 : 0 )
 
 /*
-	GCB_SPECIAL_BEGIN: Grapheme_Cluster_Break=special_begins
+	GCB_SPECIAL_BEGIN_START: Grapheme_Cluster_Break=special_begin_starts
 
-	\p{_X_Special_Begin}
+	\p{_X_Special_Begin_Start}
 */
 /*** GENERATED CODE ***/
-#define is_GCB_SPECIAL_BEGIN_utf8(s)                                        \
+#define is_GCB_SPECIAL_BEGIN_START_utf8(s)                                  \
 ( ( 0xE1 == ((U8*)s)[0] ) ?                                                 \
     ( ( ( ((U8*)s)[1] & 0xFC ) == 0x84 ) ?                                  \
 	3                                                                   \

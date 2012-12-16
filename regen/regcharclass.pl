@@ -1444,9 +1444,9 @@ GCB_RI: Grapheme_Cluster_Break=RI
 => UTF8 :fast
 \p{_X_RI}
 
-GCB_SPECIAL_BEGIN: Grapheme_Cluster_Break=special_begins
+GCB_SPECIAL_BEGIN_START: Grapheme_Cluster_Break=special_begin_starts
 => UTF8 :fast
-\p{_X_Special_Begin}
+\p{_X_Special_Begin_Start}
 
 GCB_T: Grapheme_Cluster_Break=T
 => UTF8 :fast
