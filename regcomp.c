@@ -11307,21 +11307,12 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
  * destlist       is the inversion list for non-locale rules that this class is
  *                to be added to
  * sourcelist     is the ASCII-range inversion list to add under /a rules
- * l1_sourcelist  is the Latin1 range list.
  * Xpropertyname  is the name to add to <run_time_list> of the property to
  *                specify the code points above Latin1 that will have to be
  *                determined at run-time
  * run_time_list  is a SV* that contains text names of properties that are to
  *                be computed at run time.  This concatenates <Xpropertyname>
  *                to it, appropriately */
-#define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
-                       l1_sourcelist, Xpropertyname, run_time_list)        \
-	/* First, resolve whether to use the ASCII-only list or the L1     \
-	 * list */	                                                   \
-        DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist,      \
-                ((AT_LEAST_ASCII_RESTRICTED) ? sourcelist : l1_sourcelist),\
-                Xpropertyname, run_time_list)
-
 #define DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist, sourcelist, \
                 Xpropertyname, run_time_list)                       \
     /* If not /a matching, there are going to be code points we will have  \
@@ -11867,8 +11858,11 @@ parseit:
 		case ANYOF_UPPER:
 		case ANYOF_WORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        ascii_source, l1_source, Xname, listsv);
+                        /* First, resolve whether to use the ASCII-only list or
+                         * the L1 list */
+                        DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
+                                ((AT_LEAST_ASCII_RESTRICTED) ? ascii_source : l1_source),
+                                Xname, listsv);
 		    break;
                     }
                     if (! PL_XPosix_ptrs[classnum]) {
