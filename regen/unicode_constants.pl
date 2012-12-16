@@ -39,6 +39,9 @@ END
 # white space from the initial token.
 #   string  indicates that the output is to be of the string form
 #           described in the comments above that are placed in the file.
+#   string_skip_ifundef  is the same as 'string', but instead of dying if the
+#           code point doesn't exist, the line is just skipped: no output is
+#           generated for it
 #   first   indicates that the output is to be of the FIRST_BYTE form.
 #   tail    indicates that the output is of the _TAIL form.
 #   native  indicates that the output is the code point, converted to the
@@ -72,6 +75,7 @@ while ( <DATA> ) {
 
     my $name;
     my $cp;
+    my $undef_ok = $desired_name || $flag =~ /skip_if_undef/;
 
     if ($name_or_cp =~ /[^[:xdigit:]]/) {
 
@@ -82,20 +86,23 @@ while ( <DATA> ) {
     }
     else {
         $cp = $name_or_cp;
-        $name = charnames::viacode("0$cp") // ""; # viacode requires a leading
-                                                  # zero to be sure that the
-                                                  # argument is hex
-        die "Unknown code point '$cp' at line $.: $_\n" unless defined $cp;
+        $name = charnames::viacode("0$cp"); # viacode requires a leading zero
+                                            # to be sure that the argument is
+                                            # hex
+        if (! defined $name) {
+            die "Unknown code point '$cp' at line $.: $_\n" unless $undef_ok;
+            $name = "";
+        }
     }
 
-    $name = $desired_name if $name eq "";
+    $name = $desired_name if $name eq "" && $desired_name;
     $name =~ s/ /_/g;   # The macro name can have no blanks in it
 
     my $str = join "", map { sprintf "\\x%02X", $_ }
                        unpack("U0C*", pack("U", hex $cp));
 
     my $suffix = '_UTF8';
-    if (! defined $flag  || $flag eq 'string') {
+    if (! defined $flag  || $flag =~ /^ string (_skip_if_undef)? $/x) {
         $str = "\"$str\"";  # Will be a string constant
     } elsif ($flag eq 'tail') {
             $str =~ s/\\x..//;  # Remove the first byte
