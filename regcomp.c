@@ -11924,6 +11924,10 @@ parseit:
                     }
 		    break;
 
+		case ANYOF_NDIGIT:
+                    l1_source = ascii_source;
+                    /* FALL THROUGH */
+
 		case ANYOF_NALPHANUMERIC:
 		case ANYOF_NALPHA:
 		case ANYOF_NGRAPH:
@@ -12026,11 +12030,7 @@ parseit:
 		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
                         ascii_source, Xname, listsv);
 		    break;
-		case ANYOF_NDIGIT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        ascii_source, ascii_source, Xname, listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
+
 		case ANYOF_HORIZWS:
                     /* For these, we use the cp_list, as neither /d nor /l make
                      * a difference in what these match.  There would be
