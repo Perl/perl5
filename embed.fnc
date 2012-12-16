@@ -1529,6 +1529,10 @@ Ap        |double   |tinymt32_generate_double
 Ap        |U32      |tinymt32_generate_U32
 Ap        |void     |tinymt32_init        |U32 seed
 #endif
+#ifdef WELLRNG512A
+Ap        |double   |wellrng512a_generate_double
+Ap        |void     |wellrng512a_init        |U32 seed
+#endif
 Ap	|U32	|seed
 : Only used in perl.c
 p        |void        |get_hash_seed        |NN unsigned char *seed_buffer

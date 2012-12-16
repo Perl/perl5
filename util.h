@@ -76,11 +76,49 @@ struct TINYMT32_T {
 typedef struct TINYMT32_T tinymt32_t;
 
 #define PL_RANDOM_STATE_TYPE tinymt32_t
-
 #define _SEED_RAND(x) tinymt32_init((U32)x)
 #define RAND01() tinymt32_generate_double()
 
-#else /* dont use tinymt32 */
+#elif defined(WELLRNG512A)
+
+#define WELLRNG_W 32
+#define WELLRNG_R 16
+#define WELLRNG_P 0
+#define WELLRNG_M1 13
+#define WELLRNG_M2 9
+#define WELLRNG_M3 5
+
+#define WELLRNG_K1 15
+#define WELLRNG_K2 14
+
+#define WELLRNG_MAT0POS(t,v)   ( v ^ ( v >> t ) )
+#define WELLRNG_MAT0NEG(t,v)   ( v ^ ( v << ( -(t) ) ) )
+#define WELLRNG_MAT3NEG(t,v)   ( v << ( -(t) ) )
+#define WELLRNG_MAT4NEG(t,b,v) ( v ^ ( ( v << ( -(t) ) ) & b ) )
+
+#define WELLRNG_V0            PL_random_state.STATE[ PL_random_state.state_i                             ]
+#define WELLRNG_VM1           PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_M1) & 0x0000000fU ]
+#define WELLRNG_VM2           PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_M2) & 0x0000000fU ]
+#define WELLRNG_VM3           PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_M3) & 0x0000000fU ]
+#define WELLRNG_VRm1          PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_K1) & 0x0000000fU ]
+#define WELLRNG_VRm2          PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_K2) & 0x0000000fU ]
+#define WELLRNG_newV0         PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_K1) & 0x0000000fU ]
+#define WELLRNG_newV1         PL_random_state.STATE[ PL_random_state.state_i                             ]
+#define WELLRNG_newVRm1       PL_random_state.STATE[(PL_random_state.state_i + WELLRNG_K2) & 0x0000000fU ]
+
+#define WELLRNG_FACT 2.32830643653869628906e-10
+
+struct WELLRNG512A_T {
+    U32 state_i;
+    U32 STATE[WELLRNG_R];
+};
+typedef struct WELLRNG512A_T wellring512a_t;
+
+#define PL_RANDOM_STATE_TYPE wellring512a_t
+#define _SEED_RAND(x) wellrng512a_init((U32)x)
+#define RAND01() wellrng512a_generate_double()
+
+#else /* dont use tinymt32 or wellrng512a */
 
 #define _SEED_RAND(x) (void)seedDrand01((Rand_seed_t)x)
 #define RAND01() Drand01()

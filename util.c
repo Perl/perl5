@@ -5690,6 +5690,65 @@ Perl_tinymt32_generate_double(pTHX) { /* from Isaku Wada */
     U32 b= tinymt32_generate_U32() >> 6;
     return ( a * 67108864.0 + b ) * ( 1.0 / 9007199254740992.0 );
 }
+#elif defined(WELLRNG512A)
+/* This is WellRNG512a obtained from
+ *
+ * http://www.iro.umontreal.ca/~simardr/rng/WELL512a.c
+ *
+ * See also:
+ *
+ * http://www.iro.umontreal.ca/~panneton/WELLRNG.html
+ * http://www.iro.umontreal.ca/~panneton/well/WELL512a.c
+ *
+ * lfsr04.pdf: F. Panneton, P. L'Ecuyer and M. Matsumoto, "Improved Long-Period Generators Based on Linear Recurrences Modulo 2"
+ * http://www.iro.umontreal.ca/~lecuyer/myftp/papers/lfsr04.pdf
+ *
+ * <QUOTE>
+ * In this paper, we propose new generators, with better equidistribution and “bit-mixing”
+ * properties for equivalent period length and speed. Approximately half of the coefficients
+ * of the characteristic polynomial of these generators are nonzero. The state of our new
+ * generators evolves in a more chaotic way than for the Mersenne twister.
+ * </QUOTE>
+ */
+/* ***************************************************************************** */
+/* Copyright:      Francois Panneton and Pierre L'Ecuyer, University of Montreal */
+/*                 Makoto Matsumoto, Hiroshima University                        */
+/* Notice:     This code can be used freely for personal, academic,              */
+/*            or non-commercial purposes. For commercial purposes,               */
+/*            please contact P. L'Ecuyer at: lecuyer@iro.UMontreal.ca            */
+/*                                                                               */
+/*   This code can also be used under the terms of the GNU General Public        */
+/*   License as published by the Free Software Foundation, either version 3      */
+/*   of the License, or any later version. See the GPL licence at URL            */
+/*   http://www.gnu.org/licenses                                                 */
+/* ***************************************************************************** */
+/* Changes made to conform to Perl internals expectations by Yves Orton.         */
+/* Many thanks to the authors for the GPL release of the code                    */
+/* ***************************************************************************** */
+
+void
+Perl_wellrng512a_init(pTHX_ U32 seed) {
+    int j;
+    PL_random_state.state_i = 0;
+    PL_random_state.STATE[0] = seed;
+    for (j = 1; j < WELLRNG_R; j++) {
+        U32 l = PL_random_state.STATE[ j - 1 ];
+        PL_random_state.STATE[j] = ( 1812433253l * ( l ^ ( l >> 30 ) ) + j );
+    }
+}
+
+double
+Perl_wellrng512a_generate_double(pTHX){
+    U32 z0 = WELLRNG_VRm1;
+    U32 z1 = WELLRNG_MAT0NEG(-16, WELLRNG_V0) ^ WELLRNG_MAT0NEG(-15, WELLRNG_VM1);
+    U32 z2 = WELLRNG_MAT0POS( 11, WELLRNG_VM2);
+    WELLRNG_newV1 = z1 ^ z2;
+    WELLRNG_newV0 = WELLRNG_MAT0NEG(-2,  z0) ^ WELLRNG_MAT0NEG(-18, z1)
+                  ^ WELLRNG_MAT3NEG(-28, z2) ^ WELLRNG_MAT4NEG(-5,  0xda442d24U, WELLRNG_newV1);
+    PL_random_state.state_i = (PL_random_state.state_i + 15) & 0x0000000fU;
+    return ((double) PL_random_state.STATE[PL_random_state.state_i]) * WELLRNG_FACT;
+}
+
 #endif
 
 #ifdef VMS

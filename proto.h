@@ -7779,6 +7779,10 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_
 	assert(vbuf)
 
 #endif
+#if defined(WELLRNG512A)
+PERL_CALLCONV double	Perl_wellrng512a_generate_double(pTHX);
+PERL_CALLCONV void	Perl_wellrng512a_init(pTHX_ U32 seed);
+#endif
 #if defined(WIN32)
 PERL_CALLCONV_NO_RET void	win32_croak_not_implemented(const char * fname)
 			__attribute__noreturn__
