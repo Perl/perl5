@@ -349,6 +349,14 @@ L<Coro> version 6.10
 
 =item *
 
+L<Crypt::IDEA> version 1.08
+
+=item *
+
+L<Crypt::Twofish> version 2.15
+
+=item *
+
 L<Data::Dump::Streamer> version 2.34
 
 =item *
