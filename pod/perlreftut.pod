@@ -402,7 +402,7 @@ to push C<Athens> onto an array that doesn't exist, so it helpfully
 makes a new, empty, anonymous array for you, installs it into
 C<%table>, and then pushes C<Athens> onto it.  This is called
 'autovivification'--bringing things to life automatically.  Perl saw
-that they key wasn't in the hash, so it created a new hash entry
+that the key wasn't in the hash, so it created a new hash entry
 automatically. Perl saw that you wanted to use the hash value as an
 array, so it created a new empty array and installed a reference to it
 in the hash automatically.  And as usual, Perl made the array one
