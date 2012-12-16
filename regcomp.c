@@ -11865,9 +11865,6 @@ parseit:
                     if (LOC) {
                         SV* scratch_list = NULL;
 
-                        /* Set this class in the node for runtime matching */
-                        ANYOF_CLASS_SET(ret, namedclass);
-
                         /* For above Latin1 code points, we use the full
                          * Unicode range */
                         _invlist_intersection(PL_AboveLatin1,
@@ -11886,6 +11883,9 @@ parseit:
                             _invlist_union(posixes, scratch_list, &posixes);
                             SvREFCNT_dec(scratch_list);
                         }
+
+                        /* Set this class in the node for runtime matching */
+                        ANYOF_CLASS_SET(ret, namedclass);
                     }
                     else {
                         /* For non-locale, just add it to any existing list */
@@ -11925,7 +11925,6 @@ parseit:
                 do_n_posix:
                     if (LOC) {
                         SV* scratch_list = NULL;
-                        ANYOF_CLASS_SET(ret, namedclass);
                         _invlist_subtract(PL_AboveLatin1,
                                           PL_XPosix_ptrs[classnum],
                                           &scratch_list);
@@ -11936,6 +11935,7 @@ parseit:
                             _invlist_union(posixes, scratch_list, &posixes);
                             SvREFCNT_dec(scratch_list);
                         }
+                        ANYOF_CLASS_SET(ret, namedclass);
                     }
                     else {
                         _invlist_union_complement_2nd(
