@@ -4198,8 +4198,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    U32 fold_utf8_flags;
 
 	    PL_reg_flags |= RF_tainted;
-	    folder = foldEQ_locale;
-	    fold_array = PL_fold_locale;
+            folder = foldEQ_locale;
+            fold_array = PL_fold_locale;
 	    fold_utf8_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_exactf;
 
@@ -4464,7 +4464,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                Begin is:           ( Special_Begin | ! Control )
                Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
                Extend is:          ( Grapheme_Extend | Spacing_Mark )
-               Control is:         [ GCB_Control  CR  LF ]
+               Control is:         [ GCB_Control | CR | LF ]
                Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
 
                If we create a 'Regular_Begin' = Begin - Special_Begin, then
@@ -4506,7 +4506,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		/* Utf8: See if is ( CR LF ); already know that locinput <
 		 * PL_regeol, so locinput+1 is in bounds */
 		if ( nextchr == '\r' && locinput+1 < PL_regeol
-                        && UCHARAT(locinput + 1) == '\n')
+                     && UCHARAT(locinput + 1) == '\n')
                 {
 		    locinput += 2;
 		}

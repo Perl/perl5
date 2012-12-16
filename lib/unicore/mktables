@@ -13516,7 +13516,7 @@ sub compile_perl() {
 
     # All the tables with _X_ in their names are used in defining \X handling,
     # and are based on the Unicode GCB property.  Basically, \X matches:
-    #   CR-LF
+    #   CR LF
     #   | Prepend* Begin Extend*
     #   | .
     # Begin is:           ( Special_Begin | ! Control )
@@ -13524,7 +13524,7 @@ sub compile_perl() {
     #   where Regular_Begin is defined as ( ! Control - Special_Begin )
     # Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
     # Extend is:          ( Grapheme_Extend | Spacing_Mark )
-    # Control is:         [ GCB_Control CR LF ]
+    # Control is:         [ GCB_Control | CR | LF ]
     # Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
 
     foreach my $gcb_name (qw{ L V T LV LVT }) {
