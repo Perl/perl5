@@ -985,6 +985,7 @@ sub run_multiple_progs {
 
     my $tmpfile = tempfile();
 
+  PROGRAM:
     for (@prgs){
 	unless (/\n/) {
 	    print "# From $_\n";
@@ -1011,9 +1012,18 @@ sub run_multiple_progs {
 		$reason{$what} = $temp;
 	    }
 	}
+
 	my $name = '';
 	if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
 	    $name = $1;
+	}
+
+	if ($reason{skip}) {
+	SKIP:
+	  {
+	    skip($name ? "$name - $reason{skip}" : $reason{skip}, 1);
+	  }
+	  next PROGRAM;
 	}
 
 	if ($prog =~ /--FILE--/) {
