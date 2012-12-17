@@ -521,8 +521,9 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
      * However, to compile, the precise function signatures are required, and
      * these may vary from platform to to platform.  To avoid having to figure
      * out what those all are on each platform, I (khw) am using this method,
-     * which adds an extra layer of function call overhead.  But we don't
-     * particularly care about performance with locales anyway. */
+     * which adds an extra layer of function call overhead (unless the C
+     * optimizer strips it away).  But we don't particularly care about
+     * performance with locales anyway. */
 
     switch ((_char_class_number) classnum) {
         case _CC_ENUM_ALPHANUMERIC: return isALPHANUMERIC_LC(character);
@@ -1346,7 +1347,7 @@ STMT_START {                                          \
 #define REXEC_FBC_UTF8_CLASS_SCAN(CoNd)               \
 REXEC_FBC_UTF8_SCAN(                                  \
     if (CoNd) {                                       \
-	if (tmp && (!reginfo || regtry(reginfo, &s)))  \
+	if (tmp && (!reginfo || regtry(reginfo, &s))) \
 	    goto got_it;                              \
 	else                                          \
 	    tmp = doevery;                            \
@@ -4461,15 +4462,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    /* From http://www.unicode.org/reports/tr29 (5.2 version).  An
 	      extended Grapheme Cluster is:
 
-	       CR LF
-	       | Prepend* Begin Extend*
-	       | .
+            CR LF
+            | Prepend* Begin Extend*
+            | .
 
-               Begin is:           ( Special_Begin | ! Control )
-               Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
-               Extend is:          ( Grapheme_Extend | Spacing_Mark )
-               Control is:         [ GCB_Control | CR | LF ]
-               Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
+            Begin is:           ( Special_Begin | ! Control )
+            Special_Begin is:   ( Regional-Indicator+ | Hangul-syllable )
+            Extend is:          ( Grapheme_Extend | Spacing_Mark )
+            Control is:         [ GCB_Control | CR | LF ]
+            Hangul-syllable is: ( T+ | ( L* ( L | ( LVT | ( V | LV ) V* ) T* ) ))
 
                If we create a 'Regular_Begin' = Begin - Special_Begin, then
                we can rewrite
@@ -6962,8 +6963,9 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     case POSIXA:
         if (utf8_target && scan + max < loceol) {
 
-            /* We didn't adjust <loceol> because is UTF-8, but ok to do so,
-             * since here, to match, 1 char == 1 byte */
+            /* We didn't adjust <loceol> at the beginning of this routine
+             * because is UTF-8, but it is actually ok to do so, since here, to
+             * match, 1 char == 1 byte. */
             loceol = scan + max;
         }
         while (scan < loceol && _generic_isCC_A((U8) *scan, FLAGS(p))) {
