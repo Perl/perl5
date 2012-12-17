@@ -9,7 +9,6 @@ BEGIN {
 use strict;
 use warnings;
 use Config;
-use vars qw($TODO);
 
 BEGIN {
     if (! -c "/dev/null") {
@@ -2548,7 +2547,6 @@ sub _calc_trace_wrapper
 }
 
 { # test t expr
-    local $TODO = "t expr is broken";
     my $wrapper = DebugWrap->new(
         {
             cmds =>

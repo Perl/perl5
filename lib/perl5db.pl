@@ -3031,6 +3031,9 @@ any variables we might want to address in the C<DB> package.
 
             }    # PIPE:
 
+            # trace an expression
+            $cmd =~ s/^t\s/\$DB::trace |= 1;\n/;
+
             # Make sure the flag that says "the debugger's running" is
             # still on, to make sure we get control again.
             $evalarg = "\$^D = \$^D | \$DB::db_stop;\n$cmd";
