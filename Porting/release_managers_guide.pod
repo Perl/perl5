@@ -432,15 +432,27 @@ release (so for 5.15.3 this would be 5.15.2).
 
 =head3 Check more build configurations
 
-Check some more build configurations.
+Try running the full test suite against multiple Perl configurations. Here are
+some sets of Configure flags you can try:
 
-    $ sh Configure -Dprefix=/tmp/perl-5.x.y  -Uinstallusrbinperl \
-        -Duseshrplib -Dusesitecustomize
-    $ make
-    $ make test
+=over 4
 
-XXX think of other configurations that need testing.
+=item *
 
+C<-Duseshrplib -Dusesitecustomize>
+
+=item *
+
+C<-Duserelocatableinc>
+
+=item *
+
+C<-Dusethreads>
+
+=back
+
+If you have multiple compilers on your machine, you might also consider
+compiling with C<-Dcc=$other_compiler>.
 
 =head3 update perlport
 
