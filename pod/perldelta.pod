@@ -361,7 +361,8 @@ _charnames from loading via C<$INC{'_charnames.pm'}++>.
 
 =item *
 
-A number of bugs related to hash assignment have been fixed:
+A number of bugs related to assigning a list to hash have been fixed. Many of
+these involve lists with repeated keys like C<(1, 1, 1, 1)>.
 
 =over 8
 
@@ -371,13 +372,13 @@ The expression C<scalar(%h = (1, 1, 1, 1))> now returns C<4>, not C<2>.
 
 =item -
 
-Perl now issues the same warning on C<($s, %h) = (1, {})> as it does for
-C<(%h) = ({})>, "Reference found where even-sized list expected".
+The return value of C<%h = (1, 1, 1)> in list context was wrong. Previously
+this would return C<(1, undef, 1)>, now it returns C<(1, undef)>.
 
 =item -
 
-The return value of C<%h = (1, 1, 1)> in list context was wrong. Previously
-this would return C<(1, undef, 1)>, not it returns C<(1, undef)>.
+Perl now issues the same warning on C<($s, %h) = (1, {})> as it does for
+C<(%h) = ({})>, "Reference found where even-sized list expected".
 
 =item -
 
