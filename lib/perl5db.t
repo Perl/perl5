@@ -9,6 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 use Config;
+use vars qw($TODO);
 
 BEGIN {
     if (! -c "/dev/null") {
@@ -28,7 +29,7 @@ BEGIN {
     }
 }
 
-plan(106);
+plan(107);
 
 my $rc_filename = '.perldb';
 
@@ -2543,6 +2544,30 @@ sub _calc_trace_wrapper
             out\s*\.=main::my_other_func\(3,\ 1200\)\ from
         /msx,
         "Test o PrintRet=0 in void context",
+    );
+}
+
+{ # test t expr
+    local $TODO = "t expr is broken";
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                # This is to avoid getting the "Debugger program terminated"
+                # junk that interferes with the normal output.
+                'o inhibit_exit=0',
+                't fact(3)',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/fact',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/
+	    (?:^main::fact.*return\ \$n\ \*\ fact\(\$n\ -\ 1\);.*)
+        /msx,
+        "Test t expr",
     );
 }
 
