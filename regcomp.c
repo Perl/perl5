@@ -11820,6 +11820,10 @@ parseit:
 
 		switch ((I32)namedclass) {
 
+		case ANYOF_DIGIT:
+                    l1_source = ascii_source;
+                    /* FALL THROUGH */
+
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		case ANYOF_ALPHA:
 		case ANYOF_GRAPH:
@@ -12028,14 +12032,6 @@ parseit:
 #ifdef HAS_ISASCII
                     }
 #endif
-		    break;
-
-		case ANYOF_DIGIT:
-		    /* There are no digits in the Latin1 range outside of
-		     * ASCII, so call the macro that doesn't have to resolve
-		     * them */
-		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                        ascii_source, Xname, listsv);
 		    break;
 
 		case ANYOF_HORIZWS:
