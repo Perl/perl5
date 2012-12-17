@@ -629,13 +629,14 @@ EOA
 	if ((C_ARRAY_LENGTH(values_for_notfound) > 1)
 	    ? hv_exists_ent(${c_subname}_missing, sv, 0) : 0) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
-			  ", used at %" COP_FILE_F " line %d\\n", sv,
-			  COP_FILE(cop), CopLINE(cop));
+			  ", used at %" COP_FILE_F " line %" UVuf "\\n", 
+			  sv, COP_FILE(cop), (UV)CopLINE(cop));
 	} else
 #endif
 	{
 	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro at %"
-			  COP_FILE_F " line %d\\n", sv, COP_FILE(cop), CopLINE(cop));
+			  COP_FILE_F " line %" UVuf "\\n",
+			  sv, COP_FILE(cop), (UV)CopLINE(cop));
 	}
 	croak_sv(sv_2mortal(sv));
 EOC
