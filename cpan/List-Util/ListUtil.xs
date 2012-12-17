@@ -397,6 +397,16 @@ CODE:
     XSRETURN(1);
 }
 
+void
+isdual(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+    if (SvMAGICAL(sv))
+    mg_get(sv);
+    ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
+    XSRETURN(1);
+
 char *
 blessed(sv)
     SV * sv

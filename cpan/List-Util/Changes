@@ -1,3 +1,7 @@
+1.26 -- Sun Dec 16 19:39
+
+  * Merge patch from JDHEDDEN - Add Scalar::Util::isdual() RT#76150
+
 1.25_01 -- Wed Nov 21 09:47
 
   * Fix a hash order dependency bug t/tainted.t

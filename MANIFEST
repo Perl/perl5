@@ -1509,6 +1509,7 @@ cpan/List-Util/t/maxstr.t		List::Util
 cpan/List-Util/t/max.t			List::Util
 cpan/List-Util/t/minstr.t		List::Util
 cpan/List-Util/t/min.t			List::Util
+cpan/List-Util/t/multicall-refcount.t
 cpan/List-Util/t/openhan.t		Scalar::Util
 cpan/List-Util/t/proto.t		Scalar::Util
 cpan/List-Util/t/readonly.t		Scalar::Util
@@ -1517,6 +1518,7 @@ cpan/List-Util/t/refaddr.t		Scalar::Util
 cpan/List-Util/t/reftype.t		Scalar::Util
 cpan/List-Util/t/shuffle.t		List::Util
 cpan/List-Util/t/stack-corruption.t	List::Util
+cpan/List-Util/t/sum0.t
 cpan/List-Util/t/sum.t			List::Util
 cpan/List-Util/t/tainted.t		Scalar::Util
 cpan/List-Util/t/weak.t			Scalar::Util
