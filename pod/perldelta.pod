@@ -25,6 +25,28 @@ nothing.
 
 =head1 Security
 
+=head2 C<Storable> security warning in documentation
+
+The documentation for C<Storable> now includes a section which warns readers
+of the danger of accepting Storable documents from untrusted sources. The
+short version is that deserializing certain types of data can lead to loading
+modules and other code execution. This is documented behavior and wanted
+behavior, but this opens an attack vector for malicious entities.
+
+=head2 C<Locale::Maketext> allowed code injection via a malicious template
+
+If users could provide a translation string to Locale::Maketext, this could be
+used to invoke arbitrary Perl subroutines available in the current process.
+
+This has been fixed, but it is still possible to invoke any method provided by
+C<Locale::Maketext> itself or a subclass that you are using. One of these
+methods in turn will invoke the Perl core's C<sprintf> subroutine.
+
+In summary, allowing users to provide translation strings without auditing
+them is a bad idea.
+
+This vulnerability is documented in CVE-2012-6329.
+
 =head1 Incompatible Changes
 
 =head2 readline() with C<$/ = \N> now reads N characters, not N bytes
