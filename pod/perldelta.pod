@@ -380,6 +380,11 @@ The return value of C<%h = (1, 1, 1)> (in list context was wrong. It would
 return I<just> those items instead of returning an additional C<undef> value
 for the missing value in the assignment.
 
+=item -
+
+A number of additional edge cases in list assignment to hashes were
+corrected. For more details see commit 23b7025ebc.
+
 =back
 
 =back
