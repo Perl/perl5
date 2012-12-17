@@ -60,7 +60,7 @@ lib/ExtUtils/MM_Win95.pm
 lib/ExtUtils/MY.pm
 lib/ExtUtils/testlib.pm
 Makefile.PL
-MANIFEST			This list of files
+MANIFEST
 MANIFEST.SKIP
 my/bundles.pm
 NOTES
@@ -68,6 +68,7 @@ PATCHING
 README
 README.packaging
 t/00compile.t
+t/01perl_bugs.t
 t/arch_check.t
 t/backwards.t
 t/basic.t

@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 
+use lib 't/lib';
 use ExtUtils::MakeMaker;
 
 use Test::More 'no_plan';

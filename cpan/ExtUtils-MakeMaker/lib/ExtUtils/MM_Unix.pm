@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.63_02';
+$VERSION = '6.64';
 $VERSION = eval $VERSION;
 
 require ExtUtils::MM_Any;
@@ -217,7 +217,7 @@ sub cflags {
     ( $name = $self->{NAME} . "_cflags" ) =~ s/:/_/g ;
     if ($prog = $Config{$name}) {
 	# Expand hints for this extension via the shell
-	print STDOUT "Processing $name hint:\n" if $Verbose;
+	print "Processing $name hint:\n" if $Verbose;
 	my(@o)=`cc=\"$cflags{cc}\"
 	  ccflags=\"$cflags{ccflags}\"
 	  optimize=\"$cflags{optimize}\"
@@ -234,9 +234,9 @@ sub cflags {
 	    chomp $line;
 	    if ($line =~ /(.*?)=\s*(.*)\s*$/){
 		$cflags{$1} = $2;
-		print STDOUT "	$1 = $2\n" if $Verbose;
+		print "	$1 = $2\n" if $Verbose;
 	    } else {
-		print STDOUT "Unrecognised result from hint: '$line'\n";
+		print "Unrecognised result from hint: '$line'\n";
 	    }
 	}
     }
@@ -1064,7 +1064,7 @@ WARNING
             }
         }
     }
-    print STDOUT "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
+    print "Unable to find a perl $ver (by these names: @$names, in these dirs: @$dirs)\n";
     0; # false and not empty
 }
 
@@ -1177,7 +1177,7 @@ sub _fixin_replace_shebang {
     my ($does_shbang) = $Config{'sharpbang'} =~ /^\s*\#\!/;
     my ($shb) = "";
     if ($interpreter) {
-        print STDOUT "Changing sharpbang in $file to $interpreter"
+        print "Changing sharpbang in $file to $interpreter"
             if $Verbose;
          # this is probably value-free on DOSISH platforms
         if ($does_shbang) {
@@ -1275,6 +1275,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 
     foreach my $name ($self->lsdir($Curdir)){
 	next if $name =~ /\#/;
+	$name = lc($name) if $Is{VMS};
 	next if $name eq $Curdir or $name eq $Updir or $ignore{$name};
 	next unless $self->libscan($name);
 	if (-d $name){
@@ -1682,7 +1683,7 @@ from the perl source tree.
 		$self->{PERL_ARCHLIB}	   = $lib;
 		$self->{PERL_INC}	   = $inc;
 		$self->{UNINSTALLED_PERL}  = 1;
-		print STDOUT <<EOP;
+		print <<EOP;
 ... Detected uninstalled Perl.  Trying to continue.
 EOP
 	      }
@@ -1701,7 +1702,7 @@ EOP
     $self->{MAN3EXT} ||= $Config{man3ext};
 
     # Get some stuff out of %Config if we haven't yet done so
-    print STDOUT "CONFIG must be an array ref\n"
+    print "CONFIG must be an array ref\n"
         if ($self->{CONFIG} and ref $self->{CONFIG} ne 'ARRAY');
     $self->{CONFIG} = [] unless (ref $self->{CONFIG});
     push(@{$self->{CONFIG}}, @ExtUtils::MakeMaker::Get_from_Config);
@@ -1709,7 +1710,7 @@ EOP
     my(%once_only);
     foreach my $m (@{$self->{CONFIG}}){
         next if $once_only{$m};
-        print STDOUT "CONFIG key '$m' does not exist in Config.pm\n"
+        print "CONFIG key '$m' does not exist in Config.pm\n"
                 unless exists $Config{$m};
         $self->{uc $m} ||= $Config{$m};
         $once_only{$m} = 1;
@@ -1819,11 +1820,11 @@ sub init_lib2arch {
             $self->prefixify($Arch,$ilib,$self->{$Lib});
 
             unless (-d $self->{$Arch}) {
-                print STDOUT "Directory $self->{$Arch} not found\n" 
+                print "Directory $self->{$Arch} not found\n" 
                   if $Verbose;
                 $self->{$Arch} = $self->{$Lib};
             }
-            print STDOUT "Defaulting $Arch to $self->{$Arch}\n" if $Verbose;
+            print "Defaulting $Arch to $self->{$Arch}\n" if $Verbose;
         }
     }
 }
@@ -2423,7 +2424,7 @@ MAP_PRELIBS   = $Config{perllibs} $Config{cryptlib}
           }
         }
 
-	print STDOUT "Warning: $libperl not found
+	print "Warning: $libperl not found
     If you're going to build a static perl binary, make sure perl is installed
     otherwise ignore this warning\n"
 		unless (-f $lperl || defined($self->{PERL_SRC}));
@@ -3004,15 +3005,15 @@ sub prefixify {
 
     $rprefix .= '/' if $sprefix =~ m|/$|;
 
-    print STDERR "  prefixify $var => $path\n" if $Verbose >= 2;
-    print STDERR "    from $sprefix to $rprefix\n" if $Verbose >= 2;
+    warn "  prefixify $var => $path\n" if $Verbose >= 2;
+    warn "    from $sprefix to $rprefix\n" if $Verbose >= 2;
 
     if( $self->{ARGS}{PREFIX} &&
         $path !~ s{^\Q$sprefix\E\b}{$rprefix}s ) 
     {
 
-        print STDERR "    cannot prefix, using default.\n" if $Verbose >= 2;
-        print STDERR "    no default!\n" if !$default && $Verbose >= 2;
+        warn "    cannot prefix, using default.\n" if $Verbose >= 2;
+        warn "    no default!\n" if !$default && $Verbose >= 2;
 
         $path = $self->catdir($rprefix, $default) if $default;
     }

@@ -1,3 +1,46 @@
+6.64  Sun Dec 16 18:27:40 PST 2012
+    Build Fixes
+    * Update the home page in the meta file.  makemaker.org has been
+      unmaintained for a while.
+
+
+6.63_04  Thu Nov 22 13:18:06 PST 2012
+    Test Fixes
+    * Eliminated the problematic and not very useful PASTHRU test
+      on Windows.  A better test will come after stable. [github 41]
+      (Michael G Schwern)
+    * Avoid a new regex warning in 5.17.x in t/MM_OS2.t. (Craig A. Berry)
+
+    VMS Fixes
+    * Better ignore files due to non-case-preserving filesystems.
+      (Craig A. Berry)
+
+
+6.63_03  Thu Nov  1 19:52:30 PDT 2012
+    New Features
+    * Added TEST_REQUIRES keyword to specify prerequisites only needed
+      for testing.  [github 29] (Ricardo Signes)
+
+    Bug Fixes
+    * Update bundled modules: ExtUtils::Install to 1.54, ExtUtils::Manifest
+      to 1.60.
+    * Update CPAN::Meta::YAML to 0.08 for compatibility with older versions
+      of Scalar::Util.
+
+    Misc
+    * Change 'Note' to 'Warning' when libraries aren't found since people
+      often fail to realise that this is the cause of a build failure.
+      [github 20] (Matt Trout)
+
+    Test Fixes
+    * Added an early test to check for a common 5.6 bug where 0.01 is
+      incorrectly stringified to 1.e-02.  [rt.cpan.org 74095]
+
+    Doc Fixes
+    * Clarified NAME. [rt.cpan.org 73361]
+    * SYNOPSIS is a bit more useful.
+
+
 6.63_02  Tue Nov  1 17:02:40 PDT 2011
     Test Fixes
     * Inform BSDPAN (on FreeBSD) to not register modules installed while
