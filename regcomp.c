@@ -11327,35 +11327,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
             _invlist_union(destlist, sourcelist, &destlist);               \
         }                                                                  \
 
-/* Like DO_POSIX_LATIN1_ONLY_KNOWN, but for the complement.  A combination of
- * this and DO_N_POSIX.  Sets <matches_above_unicode> only if it can; unchanged
- * otherwise */
-#define DO_N_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,    \
-       l1_sourcelist, Xpropertyname, run_time_list, matches_above_unicode) \
-    if (AT_LEAST_ASCII_RESTRICTED) {                                       \
-        _invlist_union_complement_2nd(destlist, sourcelist, &destlist);    \
-    }                                                                      \
-    else {                                                                 \
-        Perl_sv_catpvf(aTHX_ run_time_list, "!utf8::%s\n", Xpropertyname); \
-        matches_above_unicode = TRUE;                                      \
-	if (LOC) {                                                         \
-            ANYOF_CLASS_SET(node, namedclass);				   \
-	}                                                                  \
-	else {                                                             \
-            SV* scratch_list = NULL;                                       \
-	    _invlist_subtract(PL_Latin1, l1_sourcelist, &scratch_list);    \
-	    if (! destlist) {                                              \
-		destlist = scratch_list;                                   \
-	    }                                                              \
-	    else {                                                         \
-		_invlist_union(destlist, scratch_list, &destlist);         \
-		SvREFCNT_dec(scratch_list);                                \
-	    }                                                              \
-	    if (DEPENDS_SEMANTICS) {                                       \
-		ANYOF_FLAGS(node) |= ANYOF_NON_UTF8_LATIN1_ALL;            \
-	    }                                                              \
-	}                                                                  \
-    }
 
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
@@ -11937,10 +11908,46 @@ parseit:
 		case ANYOF_NUPPER:
 		case ANYOF_NWORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        ascii_source, l1_source, Xname, listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
+                        if (AT_LEAST_ASCII_RESTRICTED) {
+                            /* Under /a should match everything above ASCII,
+                             * and the complement of the set's ASCII matches */
+                            _invlist_union_complement_2nd(posixes, ascii_source,
+                                                          &posixes);
+                        }
+                        else {
+                            /* Arrange for the unknown matches to be loaded at
+                             * run-time, if needed */
+                            Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n", Xname);
+                            runtime_posix_matches_above_Unicode = TRUE;
+                            if (LOC) {
+                                ANYOF_CLASS_SET(ret, namedclass);
+                            }
+                            else {
+
+                                /* We want to match everything in Latin1,
+                                 * except those things that l1_source matches
+                                 * */
+                                SV* scratch_list = NULL;
+                                _invlist_subtract(PL_Latin1, l1_source,
+                                                  &scratch_list);
+
+                                /* Add the list from this class to the running
+                                 * total */
+                                if (! posixes) {
+                                    posixes = scratch_list;
+                                }
+                                else {
+                                    _invlist_union(posixes, scratch_list,
+                                                   &posixes);
+                                    SvREFCNT_dec(scratch_list);
+                                }
+                                if (DEPENDS_SEMANTICS) {
+                                    ANYOF_FLAGS(ret)
+                                                |= ANYOF_NON_UTF8_LATIN1_ALL;
+                                }
+                            }
+                        }
+                        break;
                     }
                     if (! PL_XPosix_ptrs[classnum]) {
                         PL_XPosix_ptrs[classnum]
