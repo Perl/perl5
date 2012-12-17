@@ -25,6 +25,14 @@ typedef datum datum_key_copy;
 
 #define GDBM_BLOCKSIZE 0 /* gdbm defaults to stat blocksize */
 
+#if defined(GDBM_VERSION_MAJOR) && defined(GDBM_VERSION_MINOR) \
+    && GDBM_VERSION_MAJOR > 1 || \
+    (GDBM_VERSION_MAJOR == 1 && GDBM_VERSION_MINOR >= 9)
+typedef void (*FATALFUNC)(const char *);
+#else
+typedef void (*FATALFUNC)();
+#endif
+
 #ifndef GDBM_FAST
 static int
 not_here(char *s)
@@ -78,7 +86,8 @@ gdbm_TIEHASH(dbtype, name, read_write, mode)
 	    GDBM_FILE  	dbp ;
 
 	    RETVAL = NULL ;
-	    if ((dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode, croak_string))) {
+	    if ((dbp =  gdbm_open(name, GDBM_BLOCKSIZE, read_write, mode,
+	       	     	          (FATALFUNC) croak_string))) {
 	        RETVAL = (GDBM_File)safecalloc(1, sizeof(GDBM_File_type)) ;
 		RETVAL->dbp = dbp ;
 	    }
