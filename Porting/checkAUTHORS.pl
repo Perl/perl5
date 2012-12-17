@@ -337,11 +337,17 @@ sub _raw_address {
         #
         # Try to find the author
         #
-        while (my ($email, $author_name) = each %authors) {
-            if ($name eq $author_name) {
-                $addr = $email;
-                $real_name = $name;
-                last;
+        if (exists $map->{$name}) {
+            $addr = $map->{$name};
+            $real_name = $authors{$addr};
+        }
+        else {
+            while (my ($email, $author_name) = each %authors) {
+                if ($name eq $author_name) {
+                    $addr = $email;
+                    $real_name = $name;
+                    last;
+                }
             }
         }
     }
@@ -555,6 +561,7 @@ blgl\100stacken.kth.se                  blgl\100hagernas.com
 +                                       2bfjdsla52kztwejndzdstsxl9athp\100gmail.com
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
+bulk88\100hotmail.com                   bulk88
 
 chromatic\100wgz.org                    chromatic\100rmci.net
 ckuskie\100cadence.com                  colink\100perldreamer.com
