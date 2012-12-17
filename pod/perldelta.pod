@@ -365,16 +365,16 @@ A number of bugs related to hash assignment have been fixed:
 
 =over 8
 
-=item
+=item -
 
 The expression C<scalar(%h = (1, 1, 1, 1))> now returns C<4>, not C<2>.
 
-=item
+=item -
 
 Perl now issues the same warning on C<($s, %h) = (1, {})> as it does for
 C<(%h) = ({})>, "Reference found where even-sized list expected".
 
-=item
+=item -
 
 The return value of C<%h = (1, 1, 1)> (in list context was wrong. It would
 return I<just> those items instead of returning an additional C<undef> value
