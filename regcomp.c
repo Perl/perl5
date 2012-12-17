@@ -11302,31 +11302,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
     return namedclass;
 }
 
-/* Generate the code to add a posix character <class> to the bracketed
- * character class given by <node>.  (<node> is needed only under locale rules)
- * destlist       is the inversion list for non-locale rules that this class is
- *                to be added to
- * sourcelist     is the ASCII-range inversion list to add under /a rules
- * Xpropertyname  is the name to add to <run_time_list> of the property to
- *                specify the code points above Latin1 that will have to be
- *                determined at run-time
- * run_time_list  is a SV* that contains text names of properties that are to
- *                be computed at run time.  This concatenates <Xpropertyname>
- *                to it, appropriately */
-#define DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist, sourcelist, \
-                Xpropertyname, run_time_list)                       \
-    /* If not /a matching, there are going to be code points we will have  \
-     * to defer to runtime to look-up */                                   \
-        if (! AT_LEAST_ASCII_RESTRICTED) {                        \
-            Perl_sv_catpvf(aTHX_ run_time_list, "+utf8::%s\n", Xpropertyname); \
-        }                                                                  \
-        if (LOC) {                                                         \
-            ANYOF_CLASS_SET(node, class);                                  \
-        }                                                                  \
-        else {                                                             \
-            _invlist_union(destlist, sourcelist, &destlist);               \
-        }                                                                  \
-
 
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
@@ -11833,12 +11808,26 @@ parseit:
 		case ANYOF_UPPER:
 		case ANYOF_WORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
-                        /* First, resolve whether to use the ASCII-only list or
-                         * the L1 list */
-                        DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                                ((AT_LEAST_ASCII_RESTRICTED) ? ascii_source : l1_source),
-                                Xname, listsv);
-		    break;
+
+                        /* If not /a matching, there are code points we don't
+                         * know at compile time.  Arrange for the unknown
+                         * matches to be loaded at run-time, if needed */
+                        if (! AT_LEAST_ASCII_RESTRICTED) {
+                            Perl_sv_catpvf(aTHX_ listsv, "+utf8::%s\n", Xname);
+                        }
+                        if (LOC) {  /* Under locale, set run-time lookup */
+                            ANYOF_CLASS_SET(ret, namedclass);
+                        }
+                        else {
+                            /* Add the current class's code points to the
+                             * running total */
+                            _invlist_union(posixes,
+                                           (AT_LEAST_ASCII_RESTRICTED)
+                                                ? ascii_source
+                                                : l1_source,
+                                           &posixes);
+                        }
+                        break;
                     }
                     if (! PL_XPosix_ptrs[classnum]) {
                         PL_XPosix_ptrs[classnum]
