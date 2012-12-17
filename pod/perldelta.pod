@@ -568,6 +568,29 @@ C<reset> no longer makes threaded builds crash.
 An earlier release in the 5.17.x series could crash if user code prevented
 _charnames from loading via C<$INC{'_charnames.pm'}++>.
 
+=item *
+
+A number of bugs related to hash assignment have been fixed:
+
+=over 8
+
+=item
+
+The expression C<scalar(%h = (1, 1, 1, 1))> now returns C<4>, not C<2>.
+
+=item
+
+Perl now issues the same warning on C<($s, %h) = (1, {})> as it does for
+C<(%h) = ({})>, "Reference found where even-sized list expected".
+
+=item
+
+The return value of C<%h = (1, 1, 1)> (in list context was wrong. It would
+return I<just> those items instead of returning an additional C<undef> value
+for the missing value in the assignment.
+
+=back
+
 =back
 
 =head1 Known Problems
