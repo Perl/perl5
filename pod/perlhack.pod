@@ -1030,13 +1030,6 @@ This is a collection of words of wisdom for a Perl porter; some of it
 is only useful to the pumpkin holder, but most of it applies to anyone
 wanting to go about Perl development.
 
-=item * The perl5-porters FAQ
-
-This should be available from
-http://dev.perl.org/perl5/docs/p5p-faq.html . It contains hints on
-reading perl5-porters, information on how perl5-porters works and how
-Perl development in general works.
-
 =back
 
 =head1 CPAN TESTERS AND PERL SMOKERS
