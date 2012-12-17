@@ -156,7 +156,8 @@ static const char* const non_utf8_target_but_utf8_required
 /* Doesn't do an assert to verify that is correct */
 #define LOAD_UTF8_CHARCLASS_NO_CHECK(class) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { \
-	bool throw_away PERL_UNUSED_DECL; \
+	bool throw_away; \
+        PERL_UNUSED_VAR(throw_away); \
 	ENTER; save_re_context(); \
 	throw_away = CAT2(is_utf8_,class)((const U8*)" "); \
         PERL_UNUSED_VAR(throw_away); \

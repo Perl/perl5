@@ -2867,10 +2867,13 @@ PP(pp_goto)
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvISXSUB(cv)) {
 		OP* const retop = cx->blk_sub.retop;
-		SV **newsp PERL_UNUSED_DECL;
-		I32 gimme PERL_UNUSED_DECL;
+		SV **newsp;
+		I32 gimme;
 		const SSize_t items = AvFILLp(arg) + 1;
 		SV** mark;
+
+                PERL_UNUSED_VAR(newsp);
+                PERL_UNUSED_VAR(gimme);
 
 		/* put GvAV(defgv) back onto stack */
 		EXTEND(SP, items+1); /* @_ could have been extended. */
