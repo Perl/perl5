@@ -151,5 +151,6 @@ SKIP: {
     $count = sv_count();
     eval '$x+'x(1+rand() * 100) . '<*>';
     $count2 = sv_count();
-    is $count2, $count, 'no leak when partly iterated caller is freed';
+    cmp_ok $count2, '<=', $count,
+     'no leak when partly iterated caller is freed';
 }
