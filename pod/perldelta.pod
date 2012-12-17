@@ -376,7 +376,8 @@ C<(%h) = ({})>, "Reference found where even-sized list expected".
 
 =item -
 
-The return value of C<%h = (1, 1, 1)> in list context was wrong.
+The return value of C<%h = (1, 1, 1)> in list context was wrong. Previously
+this would return C<(1, undef, 1)>, not it returns C<(1, undef)>.
 
 =item -
 
