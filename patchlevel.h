@@ -15,7 +15,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	17		/* epoch */
-#define PERL_SUBVERSION	7		/* generation */
+#define PERL_SUBVERSION	8		/* generation */
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
@@ -36,7 +36,7 @@
 */
 #define PERL_API_REVISION	5
 #define PERL_API_VERSION	17
-#define PERL_API_SUBVERSION	7
+#define PERL_API_SUBVERSION	8
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure
