@@ -1,8 +1,5 @@
 =encoding utf8
 
-=for to-do
-23b7025ebc definitely needs to be summarised.
-
 =head1 NAME
 
 perldelta - what is new for perl v5.17.7
