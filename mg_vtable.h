@@ -91,7 +91,7 @@ enum {		/* pass one of these to get_vtbl */
 };
 
 #ifdef DOINIT
-EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
+EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     "arylen",
     "arylen_p",
     "backref",
@@ -123,7 +123,7 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
     "vec"
 };
 #else
-EXTCONST char *PL_magic_vtable_names[magic_vtable_max];
+EXTCONST char * const PL_magic_vtable_names[magic_vtable_max];
 #endif
 
 /* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
