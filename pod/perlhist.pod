@@ -493,6 +493,7 @@ the strings?).
  Florian  5.17.4        2012-Sep-20
  Florian  5.17.5        2012-Oct-20
  Ricardo  5.17.6        2012-Nov-20
+ Dave R   5.17.7        2012-Dec-18
 
 =head2 SELECTED RELEASE SIZES
 
