@@ -2950,34 +2950,6 @@ typedef struct scan_frame {
 
 #define SCAN_COMMIT(s, data, m) scan_commit(s, data, m, is_inf)
 
-#define CASE_SYNST_FNC(nAmE)                                       \
-case nAmE:                                                         \
-    if (flags & SCF_DO_STCLASS_AND) {                              \
-	    for (value = 0; value < 256; value++)                  \
-		if (!is_ ## nAmE ## _cp(value))                       \
-		    ANYOF_BITMAP_CLEAR(data->start_class, value);  \
-    }                                                              \
-    else {                                                         \
-	    for (value = 0; value < 256; value++)                  \
-		if (is_ ## nAmE ## _cp(value))                        \
-		    ANYOF_BITMAP_SET(data->start_class, value);	   \
-    }                                                              \
-    break;                                                         \
-case N ## nAmE:                                                    \
-    if (flags & SCF_DO_STCLASS_AND) {                              \
-	    for (value = 0; value < 256; value++)                   \
-		if (is_ ## nAmE ## _cp(value))                         \
-		    ANYOF_BITMAP_CLEAR(data->start_class, value);   \
-    }                                                               \
-    else {                                                          \
-	    for (value = 0; value < 256; value++)                   \
-		if (!is_ ## nAmE ## _cp(value))                        \
-		    ANYOF_BITMAP_SET(data->start_class, value);	    \
-    }                                                               \
-    break
-
-
-
 STATIC I32
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         I32 *minlenp, I32 *deltap,
@@ -4147,11 +4119,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    min++;
 	    if (flags & SCF_DO_STCLASS) {
+                int loop_max = 256;
 		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
 
 		/* Some of the logic below assumes that switching
 		   locale on will only add false positives. */
 		switch (PL_regkind[OP(scan)]) {
+                    U8 classnum;
+
 		case SANY:
 		default:
 		  do_default:
@@ -4178,200 +4153,75 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			cl_or(pRExC_state, data->start_class,
 			      (struct regnode_charclass_class*)scan);
 		    break;
-		case ALNUM:
+		case POSIXA:
+                    loop_max = 128;
+		case POSIXL:
+		case POSIXD:
+		case POSIXU:
+                    classnum = FLAGS(scan);
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NWORDCHAR);
-                            if (OP(scan) == ALNUMU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isWORDCHAR_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isALNUM(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
+			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum) + 1);
+                            for (value = 0; value < loop_max; value++) {
+                                if (! _generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, UNI_TO_NATIVE(value));
                                 }
                             }
 			}
 		    }
 		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_WORDCHAR);
+			if (data->start_class->flags & ANYOF_LOCALE) {
+			    ANYOF_CLASS_SET(data->start_class, classnum_to_namedclass(classnum));
+                        }
+                        else {
 
 			/* Even if under locale, set the bits for non-locale
 			 * in case it isn't a true locale-node.  This will
 			 * create false positives if it truly is locale */
-                        if (OP(scan) == ALNUMU) {
-                            for (value = 0; value < 256; value++) {
-                                if (isWORDCHAR_L1(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
+                        for (value = 0; value < loop_max; value++) {
+                            if (_generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, UNI_TO_NATIVE(value));
                             }
-                        } else {
-                            for (value = 0; value < 256; value++) {
-                                if (isALNUM(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
+                        }
                         }
 		    }
 		    break;
-		case NALNUM:
+		case NPOSIXA:
+                    loop_max = 128;
+		case NPOSIXL:
+		case NPOSIXU:
+		case NPOSIXD:
+                    classnum = FLAGS(scan);
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_WORDCHAR);
-                            if (OP(scan) == NALNUMU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (isWORDCHAR_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
+			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum));
+                            for (value = 0; value < loop_max; value++) {
+                                if (_generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, UNI_TO_NATIVE(value));
                                 }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (isALNUM(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-			    }
+                            }
 			}
 		    }
 		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NWORDCHAR);
+			if (data->start_class->flags & ANYOF_LOCALE) {
+			    ANYOF_CLASS_SET(data->start_class, classnum_to_namedclass(classnum) + 1);
+                        }
+                        else {
 
 			/* Even if under locale, set the bits for non-locale in
 			 * case it isn't a true locale-node.  This will create
 			 * false positives if it truly is locale */
-			if (OP(scan) == NALNUMU) {
-			    for (value = 0; value < 256; value++) {
-				if (! isWORDCHAR_L1(value)) {
-				    ANYOF_BITMAP_SET(data->start_class, value);
-				}
-			    }
-			} else {
-			    for (value = 0; value < 256; value++) {
-				if (! isALNUM(value)) {
-				    ANYOF_BITMAP_SET(data->start_class, value);
-				}
-			    }
-			}
-		    }
-		    break;
-		case SPACE:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-			    if (OP(scan) == SPACEU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isSPACE_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isSPACE(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            }
-			}
-		    }
-		    else {
-                        if (data->start_class->flags & ANYOF_LOCALE) {
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
-                        }
-                        if (OP(scan) == SPACEU) {
-                            for (value = 0; value < 256; value++) {
-                                if (isSPACE_L1(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
-                        } else {
-                            for (value = 0; value < 256; value++) {
-                                if (isSPACE(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
-			}
-		    }
-		    break;
-		case NSPACE:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-                            if (OP(scan) == NSPACEU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (isSPACE_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (isSPACE(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            }
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-                        if (OP(scan) == NSPACEU) {
-                            for (value = 0; value < 256; value++) {
-                                if (!isSPACE_L1(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
+                        for (value = 0; value < loop_max; value++) {
+                            if (! _generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, UNI_TO_NATIVE(value));
                             }
                         }
-                        else {
-                            for (value = 0; value < 256; value++) {
-                                if (!isSPACE(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
+                        if (PL_regkind[OP(scan)] == NPOSIXD) {
+                            data->start_class->flags |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
                         }
 		    }
 		    break;
-		case DIGIT:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-                            ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NDIGIT);
-			    for (value = 0; value < 256; value++)
-				if (!isDIGIT(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_DIGIT);
-			for (value = 0; value < 256; value++)
-			    if (isDIGIT(value))
-				ANYOF_BITMAP_SET(data->start_class, value);
-		    }
-		    break;
-		case NDIGIT:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE))
-                            ANYOF_CLASS_CLEAR(data->start_class,ANYOF_DIGIT);
-			for (value = 0; value < 256; value++)
-			    if (isDIGIT(value))
-				ANYOF_BITMAP_CLEAR(data->start_class, value);
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NDIGIT);
-			for (value = 0; value < 256; value++)
-			    if (!isDIGIT(value))
-				ANYOF_BITMAP_SET(data->start_class, value);
-		    }
-		    break;
-		CASE_SYNST_FNC(VERTWS);
-		CASE_SYNST_FNC(HORIZWS);
-
 		}
 		if (flags & SCF_DO_STCLASS_OR)
 		    cl_and(data->start_class, and_withp);
@@ -6440,7 +6290,7 @@ reStudy:
             r->extflags |= RXf_NULL;
         else if (PL_regkind[fop] == BOL && OP(NEXTOPER(first)) == END)
             r->extflags |= RXf_START_ONLY;
-        else if (fop == PLUS && OP(NEXTOPER(first)) == SPACE
+        else if (fop == PLUS && PL_regkind[OP(NEXTOPER(first))] == POSIXD && FLAGS(NEXTOPER(first)) == _CC_SPACE
 			     && OP(regnext(first)) == END)
             r->extflags |= RXf_WHITE;    
     }
@@ -9553,6 +9403,16 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, OPFAIL);
                 return ret;
             }
+            else if (max == 0) {
+                if (SIZE_ONLY) {
+                    RExC_size = PREVOPER(RExC_size) - regarglen[(U8)NOTHING];
+                }
+                else {
+                    RExC_emit = orig_emit;
+                }
+                ret = reg_node(pRExC_state, NOTHING);
+                return ret;
+            }
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
@@ -10120,9 +9980,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     I32 flags;
     char *parse_start = RExC_parse;
     U8 op;
+    *flagp = WORST;		/* Tentatively. */
+
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("atom");
-    *flagp = WORST;		/* Tentatively. */
+    int invert = 0;
 
     PERL_ARGS_ASSERT_REGATOM;
 
@@ -10218,6 +10080,7 @@ tryagain:
 	   literal text handling code.
 	*/
 	switch ((U8)*++RExC_parse) {
+            U8 arg;
 	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;
@@ -10258,22 +10121,14 @@ tryagain:
 	    ret = reg_node(pRExC_state, CLUMP);
 	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
-	case 'w':
-	    op = ALNUM + get_regex_charset(RExC_flags);
-            if (op > ALNUMA) {  /* /aa is same as /a */
-                op = ALNUMA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+
 	case 'W':
-	    op = NALNUM + get_regex_charset(RExC_flags);
-            if (op > NALNUMA) { /* /aa is same as /a */
-                op = NALNUMA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+            invert = 1;
+            /* FALLTHROUGH */
+	case 'w':
+            arg = ANYOF_WORDCHAR;
+            goto join_posix;
+
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
@@ -10296,60 +10151,60 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
-	case 's':
-	    op = SPACE + get_regex_charset(RExC_flags);
-            if (op > SPACEA) {  /* /aa is same as /a */
-                op = SPACEA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+
 	case 'S':
-	    op = NSPACE + get_regex_charset(RExC_flags);
-            if (op > NSPACEA) { /* /aa is same as /a */
-                op = NSPACEA;
+            invert = 1;
+            /* FALLTHROUGH */
+	case 's':
+            arg = ANYOF_SPACE;
+
+        join_posix:
+
+	    op = POSIXD + get_regex_charset(RExC_flags);
+            if (op > POSIXA) {  /* /aa is same as /a */
+                op = POSIXA;
+            }
+
+        join_posix_op_known:
+
+            if (invert) {
+                op += NPOSIXD - POSIXD;
             }
 	    ret = reg_node(pRExC_state, op);
+            if (! SIZE_ONLY) {
+                FLAGS(ret) = namedclass_to_classnum(arg);
+            }
+
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'D':
-            op = NDIGIT;
-            goto join_D_and_d;
+            invert = 1;
+            /* FALLTHROUGH */
 	case 'd':
-            op = DIGIT;
-        join_D_and_d:
-            {
-                U8 offset = get_regex_charset(RExC_flags);
-                if (offset == REGEX_UNICODE_CHARSET) {
-                    offset = REGEX_DEPENDS_CHARSET;
-                }
-                else if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
-                    offset = REGEX_ASCII_RESTRICTED_CHARSET;
-                }
-                op += offset;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+            arg = ANYOF_DIGIT;
+            goto join_posix;
+
 	case 'R':
 	    ret = reg_node(pRExC_state, LNBREAK);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
-	case 'h':
-	    ret = reg_node(pRExC_state, HORIZWS);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+
 	case 'H':
-	    ret = reg_node(pRExC_state, NHORIZWS);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
-	case 'v':
-	    ret = reg_node(pRExC_state, VERTWS);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+            invert = 1;
+            /* FALLTHROUGH */
+	case 'h':
+	    arg = ANYOF_BLANK;
+            op = POSIXU;
+            goto join_posix_op_known;
+
 	case 'V':
-	    ret = reg_node(pRExC_state, NVERTWS);
-	    *flagp |= HASWIDTH|SIMPLE;
+            invert = 1;
+            /* FALLTHROUGH */
+	case 'v':
+	    arg = ANYOF_VERTWS;
+            op = POSIXU;
+            goto join_posix_op_known;
+
          finish_meta_pat:	    
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -12314,101 +12169,69 @@ parseit:
         if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like \w or
                                               [:digit:] or \p{foo} */
 
-            /* Certain named classes have equivalents that can appear outside a
-             * character class, e.g. \w, \H.  We use these instead of a
-             * character class. */
+            /* All named classes are mapped into POSIXish nodes, with its FLAG
+             * argument giving which class it is */
             switch ((I32)namedclass) {
-                U8 offset;
-
-                /* The first group is for node types that depend on the charset
-                 * modifier to the regex.  We first calculate the base node
-                 * type, and if it should be inverted */
-
-                case ANYOF_NWORDCHAR:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_WORDCHAR:
-                    op = ALNUM;
-                    goto join_charset_classes;
-
-                case ANYOF_NSPACE:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_SPACE:
-                    op = SPACE;
-                    goto join_charset_classes;
-
-                case ANYOF_NDIGIT:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_DIGIT:
-                    op = DIGIT;
-
-                  join_charset_classes:
-
-                    /* Now that we have the base node type, we take advantage
-                     * of the enum ordering of the charset modifiers to get the
-                     * exact node type,  For example the base SPACE also has
-                     * SPACEL, SPACEU, and SPACEA */
-
-                    offset = get_regex_charset(RExC_flags);
-
-                    /* /aa is the same as /a for these */
-                    if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
-                        offset = REGEX_ASCII_RESTRICTED_CHARSET;
-                    }
-                    else if (op == DIGIT && offset == REGEX_UNICODE_CHARSET) {
-                        offset = REGEX_DEPENDS_CHARSET; /* There is no DIGITU */
-                    }
-
-                    op += offset;
-
-                    /* The number of varieties of each of these is the same,
-                     * hence, so is the delta between the normal and
-                     * complemented nodes */
-                    if (invert) {
-                        op += NALNUM - ALNUM;
-                    }
-                    *flagp |= HASWIDTH|SIMPLE;
-                    break;
-
-                /* The second group doesn't depend of the charset modifiers.
-                 * We just have normal and complemented */
-                case ANYOF_NHORIZWS:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_HORIZWS:
-                  is_horizws:
-                    op = (invert) ? NHORIZWS : HORIZWS;
-                    *flagp |= HASWIDTH|SIMPLE;
-                    break;
-
-                case ANYOF_NVERTWS:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_VERTWS:
-                    op = (invert) ? NVERTWS : VERTWS;
-                    *flagp |= HASWIDTH|SIMPLE;
-                    break;
-
                 case ANYOF_UNIPROP:
                     break;
 
-                case ANYOF_NBLANK:
-                    invert = ! invert;
+                /* These don't depend on the charset modifiers.  They always
+                 * match under /u rules */
+                case ANYOF_NHORIZWS:
+                case ANYOF_HORIZWS:
+                    namedclass = ANYOF_BLANK + namedclass - ANYOF_HORIZWS;
                     /* FALLTHROUGH */
-                case ANYOF_BLANK:
-                    if (AT_LEAST_UNI_SEMANTICS && ! AT_LEAST_ASCII_RESTRICTED) {
-                        goto is_horizws;
+
+                case ANYOF_NVERTWS:
+                case ANYOF_VERTWS:
+                    op = POSIXU;
+                    goto join_posix;
+
+                /* The actual POSIXish node for all the rest depends on the
+                 * charset modifier.  The ones in the first set depend only on
+                 * ASCII or, if available on this platform, locale */
+                case ANYOF_ASCII:
+                case ANYOF_NASCII:
+#ifdef HAS_ISASCII
+                    op = (LOC) ? POSIXL : POSIXA;
+#else
+                    op = POSIXA;
+#endif
+                    goto join_posix;
+
+                case ANYOF_LOWER:
+                case ANYOF_NLOWER:
+                case ANYOF_UPPER:
+                case ANYOF_NUPPER:
+                    /* under /a could be alpha */
+                    if (FOLD) {
+                        if (ASCII_RESTRICTED) {
+                            namedclass = ANYOF_ALPHA + (namedclass % 2);
+                        }
+                        else if (! LOC) {
+                            break;
+                        }
                     }
                     /* FALLTHROUGH */
+
+                /* The rest have more possibilities depending on the charset.  We
+                 * take advantage of the enum ordering of the charset modifiers to
+                 * get the exact node type, */
                 default:
-                    /* A generic posix class.  All the /a ones can be handled
-                     * by the POSIXA opcode.  And all are closed under folding
-                     * in the ASCII range, so FOLD doesn't matter */
-                    if (AT_LEAST_ASCII_RESTRICTED
-                        || (! LOC && namedclass == ANYOF_ASCII))
+                    op = POSIXD + get_regex_charset(RExC_flags);
+                    if (op > POSIXA) { /* /aa is same as /a */
+                        op = POSIXA;
+                    }
+#ifndef HAS_ISBLANK
+                    if (op == POSIXL
+                        && (namedclass == ANYOF_BLANK
+                            || namedclass == ANYOF_NBLANK))
                     {
+                        op = POSIXA;
+                    }
+#endif
+
+                join_posix:
                         /* The odd numbered ones are the complements of the
                          * next-lower even number one */
                         if (namedclass % 2 == 1) {
@@ -12416,8 +12239,6 @@ parseit:
                             namedclass--;
                         }
                         arg = namedclass_to_classnum(namedclass);
-                        op = (invert) ? NPOSIXA : POSIXA;
-                    }
                     break;
             }
         }
@@ -12442,8 +12263,8 @@ parseit:
         else if (! LOC) {   /* locale could vary these */
             if (prevvalue == '0') {
                 if (value == '9') {
-                    op = (invert) ? NDIGITA : DIGITA;
-                    *flagp |= HASWIDTH|SIMPLE;
+                    arg = _CC_DIGIT;
+                    op = POSIXA;
                 }
             }
         }
@@ -12469,6 +12290,11 @@ parseit:
             }
             else {
                 RExC_emit = (regnode *)orig_emit;
+                if (PL_regkind[op] == POSIXD) {
+                    if (invert) {
+                        op += NPOSIXD - POSIXD;
+                    }
+                }
             }
 
             ret = reg_node(pRExC_state, op);

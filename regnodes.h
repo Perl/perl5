@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	121
-#define REGMATCH_STATE_MAX    	161
+#define REGNODE_MAX           	93
+#define REGMATCH_STATE_MAX    	133
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -31,106 +31,78 @@
 #define	SANY                  	19	/* 0x13 Match any one character. */
 #define	CANY                  	20	/* 0x14 Match any one byte. */
 #define	ANYOF                 	21	/* 0x15 Match character in (or not in) this class, single char match only */
-#define	ALNUM                 	22	/* 0x16 Match any alphanumeric character using native charset semantics for non-utf8 */
-#define	ALNUML                	23	/* 0x17 Match any alphanumeric char in locale */
-#define	ALNUMU                	24	/* 0x18 Match any alphanumeric char using Unicode semantics */
-#define	ALNUMA                	25	/* 0x19 Match [A-Za-z_0-9] */
-#define	NALNUM                	26	/* 0x1a Match any non-alphanumeric character using native charset semantics for non-utf8 */
-#define	NALNUML               	27	/* 0x1b Match any non-alphanumeric char in locale */
-#define	NALNUMU               	28	/* 0x1c Match any non-alphanumeric char using Unicode semantics */
-#define	NALNUMA               	29	/* 0x1d Match [^A-Za-z_0-9] */
-#define	SPACE                 	30	/* 0x1e Match any whitespace character using native charset semantics for non-utf8 */
-#define	SPACEL                	31	/* 0x1f Match any whitespace char in locale */
-#define	SPACEU                	32	/* 0x20 Match any whitespace char using Unicode semantics */
-#define	SPACEA                	33	/* 0x21 Match [ \t\n\f\r] */
-#define	NSPACE                	34	/* 0x22 Match any non-whitespace character using native charset semantics for non-utf8 */
-#define	NSPACEL               	35	/* 0x23 Match any non-whitespace char in locale */
-#define	NSPACEU               	36	/* 0x24 Match any non-whitespace char using Unicode semantics */
-#define	NSPACEA               	37	/* 0x25 Match [^ \t\n\f\r] */
-#define	DIGIT                 	38	/* 0x26 Match any numeric character using native charset semantics for non-utf8 */
-#define	DIGITL                	39	/* 0x27 Match any numeric character in locale */
-#define	PLACEHOLDER1          	40	/* 0x28 placeholder for missing DIGITU */
-#define	DIGITA                	41	/* 0x29 Match [0-9] */
-#define	NDIGIT                	42	/* 0x2a Match any non-numeric character using native charset semantics for non-utf8 */
-#define	NDIGITL               	43	/* 0x2b Match any non-numeric character in locale */
-#define	PLACEHOLDER2          	44	/* 0x2c placeholder for missing NDIGITU */
-#define	NDIGITA               	45	/* 0x2d Match [^0-9] */
-#define	POSIXD                	46	/* 0x2e currently unused except as a placeholder */
-#define	POSIXL                	47	/* 0x2f currently unused except as a placeholder */
-#define	POSIXU                	48	/* 0x30 currently unused except as a placeholder */
-#define	POSIXA                	49	/* 0x31 Some [[:class:]] under /a; the FLAGS field gives which one */
-#define	NPOSIXD               	50	/* 0x32 currently unused except as a placeholder */
-#define	NPOSIXL               	51	/* 0x33 currently unused except as a placeholder */
-#define	NPOSIXU               	52	/* 0x34 currently unused except as a placeholder */
-#define	NPOSIXA               	53	/* 0x35 complement of POSIXA, [[:^class:]] */
-#define	CLUMP                 	54	/* 0x36 Match any extended grapheme cluster sequence */
-#define	BRANCH                	55	/* 0x37 Match this alternative, or the next... */
-#define	BACK                  	56	/* 0x38 Match "", "next" ptr points backward. */
-#define	EXACT                 	57	/* 0x39 Match this string (preceded by length). */
-#define	EXACTF                	58	/* 0x3a Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len). */
-#define	EXACTFL               	59	/* 0x3b Match this string (not guaranteed to be folded) using /il rules (w/len). */
-#define	EXACTFU               	60	/* 0x3c Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len). */
-#define	EXACTFA               	61	/* 0x3d Match this string (not guaranteed to be folded) using /iaa rules (w/len). */
-#define	EXACTFU_SS            	62	/* 0x3e Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len). */
-#define	EXACTFU_TRICKYFOLD    	63	/* 0x3f Match this folded UTF-8 string using /iu rules */
-#define	NOTHING               	64	/* 0x40 Match empty string. */
-#define	TAIL                  	65	/* 0x41 Match empty string. Can jump here from outside. */
-#define	STAR                  	66	/* 0x42 Match this (simple) thing 0 or more times. */
-#define	PLUS                  	67	/* 0x43 Match this (simple) thing 1 or more times. */
-#define	CURLY                 	68	/* 0x44 Match this simple thing {n,m} times. */
-#define	CURLYN                	69	/* 0x45 Capture next-after-this simple thing */
-#define	CURLYM                	70	/* 0x46 Capture this medium-complex thing {n,m} times. */
-#define	CURLYX                	71	/* 0x47 Match this complex thing {n,m} times. */
-#define	WHILEM                	72	/* 0x48 Do curly processing and see if rest matches. */
-#define	OPEN                  	73	/* 0x49 Mark this point in input as start of */
-#define	CLOSE                 	74	/* 0x4a Analogous to OPEN. */
-#define	REF                   	75	/* 0x4b Match some already matched string */
-#define	REFF                  	76	/* 0x4c Match already matched string, folded using native charset semantics for non-utf8 */
-#define	REFFL                 	77	/* 0x4d Match already matched string, folded in loc. */
-#define	REFFU                 	78	/* 0x4e Match already matched string, folded using unicode semantics for non-utf8 */
-#define	REFFA                 	79	/* 0x4f Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII */
-#define	NREF                  	80	/* 0x50 Match some already matched string */
-#define	NREFF                 	81	/* 0x51 Match already matched string, folded using native charset semantics for non-utf8 */
-#define	NREFFL                	82	/* 0x52 Match already matched string, folded in loc. */
-#define	NREFFU                	83	/* 0x53 Match already matched string, folded using unicode semantics for non-utf8 */
-#define	NREFFA                	84	/* 0x54 Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII */
-#define	IFMATCH               	85	/* 0x55 Succeeds if the following matches. */
-#define	UNLESSM               	86	/* 0x56 Fails if the following matches. */
-#define	SUSPEND               	87	/* 0x57 "Independent" sub-RE. */
-#define	IFTHEN                	88	/* 0x58 Switch, should be preceded by switcher . */
-#define	GROUPP                	89	/* 0x59 Whether the group matched. */
-#define	LONGJMP               	90	/* 0x5a Jump far away. */
-#define	BRANCHJ               	91	/* 0x5b BRANCH with long offset. */
-#define	EVAL                  	92	/* 0x5c Execute some Perl code. */
-#define	MINMOD                	93	/* 0x5d Next operator is not greedy. */
-#define	LOGICAL               	94	/* 0x5e Next opcode should set the flag only. */
-#define	RENUM                 	95	/* 0x5f Group with independently numbered parens. */
-#define	TRIE                  	96	/* 0x60 Match many EXACT(F[ALU]?)? at once. flags==type */
-#define	TRIEC                 	97	/* 0x61 Same as TRIE, but with embedded charclass data */
-#define	AHOCORASICK           	98	/* 0x62 Aho Corasick stclass. flags==type */
-#define	AHOCORASICKC          	99	/* 0x63 Same as AHOCORASICK, but with embedded charclass data */
-#define	GOSUB                 	100	/* 0x64 recurse to paren arg1 at (signed) ofs arg2 */
-#define	GOSTART               	101	/* 0x65 recurse to start of pattern */
-#define	NGROUPP               	102	/* 0x66 Whether the group matched. */
-#define	INSUBP                	103	/* 0x67 Whether we are in a specific recurse. */
-#define	DEFINEP               	104	/* 0x68 Never execute directly. */
-#define	ENDLIKE               	105	/* 0x69 Used only for the type field of verbs */
-#define	OPFAIL                	106	/* 0x6a Same as (?!) */
-#define	ACCEPT                	107	/* 0x6b Accepts the current matched string. */
-#define	VERB                  	108	/* 0x6c Used only for the type field of verbs */
-#define	PRUNE                 	109	/* 0x6d Pattern fails at this startpoint if no-backtracking through this */
-#define	MARKPOINT             	110	/* 0x6e Push the current location for rollback by cut. */
-#define	SKIP                  	111	/* 0x6f On failure skip forward (to the mark) before retrying */
-#define	COMMIT                	112	/* 0x70 Pattern fails outright if backtracking through this */
-#define	CUTGROUP              	113	/* 0x71 On failure go to the next alternation in the group */
-#define	KEEPS                 	114	/* 0x72 $& begins here. */
-#define	LNBREAK               	115	/* 0x73 generic newline pattern */
-#define	VERTWS                	116	/* 0x74 vertical whitespace         (Perl 6) */
-#define	NVERTWS               	117	/* 0x75 not vertical whitespace     (Perl 6) */
-#define	HORIZWS               	118	/* 0x76 horizontal whitespace       (Perl 6) */
-#define	NHORIZWS              	119	/* 0x77 not horizontal whitespace   (Perl 6) */
-#define	OPTIMIZED             	120	/* 0x78 Placeholder for dump. */
-#define	PSEUDO                	121	/* 0x79 Pseudo opcode for internal use. */
+#define	POSIXD                	22	/* 0x16 Some [[:class:]] under /d; the FLAGS field gives which one */
+#define	POSIXL                	23	/* 0x17 Some [[:class:]] under /l; the FLAGS field gives which one */
+#define	POSIXU                	24	/* 0x18 Some [[:class:]] under /u; the FLAGS field gives which one */
+#define	POSIXA                	25	/* 0x19 Some [[:class:]] under /a; the FLAGS field gives which one */
+#define	NPOSIXD               	26	/* 0x1a complement of POSIXD, [[:^class:]] */
+#define	NPOSIXL               	27	/* 0x1b complement of POSIXL, [[:^class:]] */
+#define	NPOSIXU               	28	/* 0x1c complement of POSIXU, [[:^class:]] */
+#define	NPOSIXA               	29	/* 0x1d complement of POSIXA, [[:^class:]] */
+#define	CLUMP                 	30	/* 0x1e Match any extended grapheme cluster sequence */
+#define	BRANCH                	31	/* 0x1f Match this alternative, or the next... */
+#define	BACK                  	32	/* 0x20 Match "", "next" ptr points backward. */
+#define	EXACT                 	33	/* 0x21 Match this string (preceded by length). */
+#define	EXACTF                	34	/* 0x22 Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len). */
+#define	EXACTFL               	35	/* 0x23 Match this string (not guaranteed to be folded) using /il rules (w/len). */
+#define	EXACTFU               	36	/* 0x24 Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len). */
+#define	EXACTFA               	37	/* 0x25 Match this string (not guaranteed to be folded) using /iaa rules (w/len). */
+#define	EXACTFU_SS            	38	/* 0x26 Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len). */
+#define	EXACTFU_TRICKYFOLD    	39	/* 0x27 Match this folded UTF-8 string using /iu rules */
+#define	NOTHING               	40	/* 0x28 Match empty string. */
+#define	TAIL                  	41	/* 0x29 Match empty string. Can jump here from outside. */
+#define	STAR                  	42	/* 0x2a Match this (simple) thing 0 or more times. */
+#define	PLUS                  	43	/* 0x2b Match this (simple) thing 1 or more times. */
+#define	CURLY                 	44	/* 0x2c Match this simple thing {n,m} times. */
+#define	CURLYN                	45	/* 0x2d Capture next-after-this simple thing */
+#define	CURLYM                	46	/* 0x2e Capture this medium-complex thing {n,m} times. */
+#define	CURLYX                	47	/* 0x2f Match this complex thing {n,m} times. */
+#define	WHILEM                	48	/* 0x30 Do curly processing and see if rest matches. */
+#define	OPEN                  	49	/* 0x31 Mark this point in input as start of */
+#define	CLOSE                 	50	/* 0x32 Analogous to OPEN. */
+#define	REF                   	51	/* 0x33 Match some already matched string */
+#define	REFF                  	52	/* 0x34 Match already matched string, folded using native charset semantics for non-utf8 */
+#define	REFFL                 	53	/* 0x35 Match already matched string, folded in loc. */
+#define	REFFU                 	54	/* 0x36 Match already matched string, folded using unicode semantics for non-utf8 */
+#define	REFFA                 	55	/* 0x37 Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII */
+#define	NREF                  	56	/* 0x38 Match some already matched string */
+#define	NREFF                 	57	/* 0x39 Match already matched string, folded using native charset semantics for non-utf8 */
+#define	NREFFL                	58	/* 0x3a Match already matched string, folded in loc. */
+#define	NREFFU                	59	/* 0x3b Match already matched string, folded using unicode semantics for non-utf8 */
+#define	NREFFA                	60	/* 0x3c Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII */
+#define	IFMATCH               	61	/* 0x3d Succeeds if the following matches. */
+#define	UNLESSM               	62	/* 0x3e Fails if the following matches. */
+#define	SUSPEND               	63	/* 0x3f "Independent" sub-RE. */
+#define	IFTHEN                	64	/* 0x40 Switch, should be preceded by switcher . */
+#define	GROUPP                	65	/* 0x41 Whether the group matched. */
+#define	LONGJMP               	66	/* 0x42 Jump far away. */
+#define	BRANCHJ               	67	/* 0x43 BRANCH with long offset. */
+#define	EVAL                  	68	/* 0x44 Execute some Perl code. */
+#define	MINMOD                	69	/* 0x45 Next operator is not greedy. */
+#define	LOGICAL               	70	/* 0x46 Next opcode should set the flag only. */
+#define	RENUM                 	71	/* 0x47 Group with independently numbered parens. */
+#define	TRIE                  	72	/* 0x48 Match many EXACT(F[ALU]?)? at once. flags==type */
+#define	TRIEC                 	73	/* 0x49 Same as TRIE, but with embedded charclass data */
+#define	AHOCORASICK           	74	/* 0x4a Aho Corasick stclass. flags==type */
+#define	AHOCORASICKC          	75	/* 0x4b Same as AHOCORASICK, but with embedded charclass data */
+#define	GOSUB                 	76	/* 0x4c recurse to paren arg1 at (signed) ofs arg2 */
+#define	GOSTART               	77	/* 0x4d recurse to start of pattern */
+#define	NGROUPP               	78	/* 0x4e Whether the group matched. */
+#define	INSUBP                	79	/* 0x4f Whether we are in a specific recurse. */
+#define	DEFINEP               	80	/* 0x50 Never execute directly. */
+#define	ENDLIKE               	81	/* 0x51 Used only for the type field of verbs */
+#define	OPFAIL                	82	/* 0x52 Same as (?!) */
+#define	ACCEPT                	83	/* 0x53 Accepts the current matched string. */
+#define	VERB                  	84	/* 0x54 Used only for the type field of verbs */
+#define	PRUNE                 	85	/* 0x55 Pattern fails at this startpoint if no-backtracking through this */
+#define	MARKPOINT             	86	/* 0x56 Push the current location for rollback by cut. */
+#define	SKIP                  	87	/* 0x57 On failure skip forward (to the mark) before retrying */
+#define	COMMIT                	88	/* 0x58 Pattern fails outright if backtracking through this */
+#define	CUTGROUP              	89	/* 0x59 On failure go to the next alternation in the group */
+#define	KEEPS                 	90	/* 0x5a $& begins here. */
+#define	LNBREAK               	91	/* 0x5b generic newline pattern */
+#define	OPTIMIZED             	92	/* 0x5c Placeholder for dump. */
+#define	PSEUDO                	93	/* 0x5d Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -201,30 +173,6 @@ EXTCONST U8 PL_regkind[] = {
 	REG_ANY,  	/* SANY                   */
 	REG_ANY,  	/* CANY                   */
 	ANYOF,    	/* ANYOF                  */
-	ALNUM,    	/* ALNUM                  */
-	ALNUM,    	/* ALNUML                 */
-	ALNUM,    	/* ALNUMU                 */
-	ALNUM,    	/* ALNUMA                 */
-	NALNUM,   	/* NALNUM                 */
-	NALNUM,   	/* NALNUML                */
-	NALNUM,   	/* NALNUMU                */
-	NALNUM,   	/* NALNUMA                */
-	SPACE,    	/* SPACE                  */
-	SPACE,    	/* SPACEL                 */
-	SPACE,    	/* SPACEU                 */
-	SPACE,    	/* SPACEA                 */
-	NSPACE,   	/* NSPACE                 */
-	NSPACE,   	/* NSPACEL                */
-	NSPACE,   	/* NSPACEU                */
-	NSPACE,   	/* NSPACEA                */
-	DIGIT,    	/* DIGIT                  */
-	DIGIT,    	/* DIGITL                 */
-	NOTHING,  	/* PLACEHOLDER1           */
-	DIGIT,    	/* DIGITA                 */
-	NDIGIT,   	/* NDIGIT                 */
-	NDIGIT,   	/* NDIGITL                */
-	NOTHING,  	/* PLACEHOLDER2           */
-	NDIGIT,   	/* NDIGITA                */
 	POSIXD,   	/* POSIXD                 */
 	POSIXD,   	/* POSIXL                 */
 	POSIXD,   	/* POSIXU                 */
@@ -295,10 +243,6 @@ EXTCONST U8 PL_regkind[] = {
 	VERB,     	/* CUTGROUP               */
 	KEEPS,    	/* KEEPS                  */
 	LNBREAK,  	/* LNBREAK                */
-	VERTWS,   	/* VERTWS                 */
-	NVERTWS,  	/* NVERTWS                */
-	HORIZWS,  	/* HORIZWS                */
-	NHORIZWS, 	/* NHORIZWS               */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -371,30 +315,6 @@ static const U8 regarglen[] = {
 	0,                                   	/* SANY         */
 	0,                                   	/* CANY         */
 	0,                                   	/* ANYOF        */
-	0,                                   	/* ALNUM        */
-	0,                                   	/* ALNUML       */
-	0,                                   	/* ALNUMU       */
-	0,                                   	/* ALNUMA       */
-	0,                                   	/* NALNUM       */
-	0,                                   	/* NALNUML      */
-	0,                                   	/* NALNUMU      */
-	0,                                   	/* NALNUMA      */
-	0,                                   	/* SPACE        */
-	0,                                   	/* SPACEL       */
-	0,                                   	/* SPACEU       */
-	0,                                   	/* SPACEA       */
-	0,                                   	/* NSPACE       */
-	0,                                   	/* NSPACEL      */
-	0,                                   	/* NSPACEU      */
-	0,                                   	/* NSPACEA      */
-	0,                                   	/* DIGIT        */
-	0,                                   	/* DIGITL       */
-	0,                                   	/* PLACEHOLDER1 */
-	0,                                   	/* DIGITA       */
-	0,                                   	/* NDIGIT       */
-	0,                                   	/* NDIGITL      */
-	0,                                   	/* PLACEHOLDER2 */
-	0,                                   	/* NDIGITA      */
 	0,                                   	/* POSIXD       */
 	0,                                   	/* POSIXL       */
 	0,                                   	/* POSIXU       */
@@ -465,10 +385,6 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
 	0,                                   	/* KEEPS        */
 	0,                                   	/* LNBREAK      */
-	0,                                   	/* VERTWS       */
-	0,                                   	/* NVERTWS      */
-	0,                                   	/* HORIZWS      */
-	0,                                   	/* NHORIZWS     */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -498,30 +414,6 @@ static const char reg_off_by_arg[] = {
 	0,	/* SANY         */
 	0,	/* CANY         */
 	0,	/* ANYOF        */
-	0,	/* ALNUM        */
-	0,	/* ALNUML       */
-	0,	/* ALNUMU       */
-	0,	/* ALNUMA       */
-	0,	/* NALNUM       */
-	0,	/* NALNUML      */
-	0,	/* NALNUMU      */
-	0,	/* NALNUMA      */
-	0,	/* SPACE        */
-	0,	/* SPACEL       */
-	0,	/* SPACEU       */
-	0,	/* SPACEA       */
-	0,	/* NSPACE       */
-	0,	/* NSPACEL      */
-	0,	/* NSPACEU      */
-	0,	/* NSPACEA      */
-	0,	/* DIGIT        */
-	0,	/* DIGITL       */
-	0,	/* PLACEHOLDER1 */
-	0,	/* DIGITA       */
-	0,	/* NDIGIT       */
-	0,	/* NDIGITL      */
-	0,	/* PLACEHOLDER2 */
-	0,	/* NDIGITA      */
 	0,	/* POSIXD       */
 	0,	/* POSIXL       */
 	0,	/* POSIXU       */
@@ -592,10 +484,6 @@ static const char reg_off_by_arg[] = {
 	0,	/* CUTGROUP     */
 	0,	/* KEEPS        */
 	0,	/* LNBREAK      */
-	0,	/* VERTWS       */
-	0,	/* NVERTWS      */
-	0,	/* HORIZWS      */
-	0,	/* NHORIZWS     */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -630,106 +518,78 @@ EXTCONST char * const PL_reg_name[] = {
 	"SANY",                  	/* 0x13 */
 	"CANY",                  	/* 0x14 */
 	"ANYOF",                 	/* 0x15 */
-	"ALNUM",                 	/* 0x16 */
-	"ALNUML",                	/* 0x17 */
-	"ALNUMU",                	/* 0x18 */
-	"ALNUMA",                	/* 0x19 */
-	"NALNUM",                	/* 0x1a */
-	"NALNUML",               	/* 0x1b */
-	"NALNUMU",               	/* 0x1c */
-	"NALNUMA",               	/* 0x1d */
-	"SPACE",                 	/* 0x1e */
-	"SPACEL",                	/* 0x1f */
-	"SPACEU",                	/* 0x20 */
-	"SPACEA",                	/* 0x21 */
-	"NSPACE",                	/* 0x22 */
-	"NSPACEL",               	/* 0x23 */
-	"NSPACEU",               	/* 0x24 */
-	"NSPACEA",               	/* 0x25 */
-	"DIGIT",                 	/* 0x26 */
-	"DIGITL",                	/* 0x27 */
-	"PLACEHOLDER1",          	/* 0x28 */
-	"DIGITA",                	/* 0x29 */
-	"NDIGIT",                	/* 0x2a */
-	"NDIGITL",               	/* 0x2b */
-	"PLACEHOLDER2",          	/* 0x2c */
-	"NDIGITA",               	/* 0x2d */
-	"POSIXD",                	/* 0x2e */
-	"POSIXL",                	/* 0x2f */
-	"POSIXU",                	/* 0x30 */
-	"POSIXA",                	/* 0x31 */
-	"NPOSIXD",               	/* 0x32 */
-	"NPOSIXL",               	/* 0x33 */
-	"NPOSIXU",               	/* 0x34 */
-	"NPOSIXA",               	/* 0x35 */
-	"CLUMP",                 	/* 0x36 */
-	"BRANCH",                	/* 0x37 */
-	"BACK",                  	/* 0x38 */
-	"EXACT",                 	/* 0x39 */
-	"EXACTF",                	/* 0x3a */
-	"EXACTFL",               	/* 0x3b */
-	"EXACTFU",               	/* 0x3c */
-	"EXACTFA",               	/* 0x3d */
-	"EXACTFU_SS",            	/* 0x3e */
-	"EXACTFU_TRICKYFOLD",    	/* 0x3f */
-	"NOTHING",               	/* 0x40 */
-	"TAIL",                  	/* 0x41 */
-	"STAR",                  	/* 0x42 */
-	"PLUS",                  	/* 0x43 */
-	"CURLY",                 	/* 0x44 */
-	"CURLYN",                	/* 0x45 */
-	"CURLYM",                	/* 0x46 */
-	"CURLYX",                	/* 0x47 */
-	"WHILEM",                	/* 0x48 */
-	"OPEN",                  	/* 0x49 */
-	"CLOSE",                 	/* 0x4a */
-	"REF",                   	/* 0x4b */
-	"REFF",                  	/* 0x4c */
-	"REFFL",                 	/* 0x4d */
-	"REFFU",                 	/* 0x4e */
-	"REFFA",                 	/* 0x4f */
-	"NREF",                  	/* 0x50 */
-	"NREFF",                 	/* 0x51 */
-	"NREFFL",                	/* 0x52 */
-	"NREFFU",                	/* 0x53 */
-	"NREFFA",                	/* 0x54 */
-	"IFMATCH",               	/* 0x55 */
-	"UNLESSM",               	/* 0x56 */
-	"SUSPEND",               	/* 0x57 */
-	"IFTHEN",                	/* 0x58 */
-	"GROUPP",                	/* 0x59 */
-	"LONGJMP",               	/* 0x5a */
-	"BRANCHJ",               	/* 0x5b */
-	"EVAL",                  	/* 0x5c */
-	"MINMOD",                	/* 0x5d */
-	"LOGICAL",               	/* 0x5e */
-	"RENUM",                 	/* 0x5f */
-	"TRIE",                  	/* 0x60 */
-	"TRIEC",                 	/* 0x61 */
-	"AHOCORASICK",           	/* 0x62 */
-	"AHOCORASICKC",          	/* 0x63 */
-	"GOSUB",                 	/* 0x64 */
-	"GOSTART",               	/* 0x65 */
-	"NGROUPP",               	/* 0x66 */
-	"INSUBP",                	/* 0x67 */
-	"DEFINEP",               	/* 0x68 */
-	"ENDLIKE",               	/* 0x69 */
-	"OPFAIL",                	/* 0x6a */
-	"ACCEPT",                	/* 0x6b */
-	"VERB",                  	/* 0x6c */
-	"PRUNE",                 	/* 0x6d */
-	"MARKPOINT",             	/* 0x6e */
-	"SKIP",                  	/* 0x6f */
-	"COMMIT",                	/* 0x70 */
-	"CUTGROUP",              	/* 0x71 */
-	"KEEPS",                 	/* 0x72 */
-	"LNBREAK",               	/* 0x73 */
-	"VERTWS",                	/* 0x74 */
-	"NVERTWS",               	/* 0x75 */
-	"HORIZWS",               	/* 0x76 */
-	"NHORIZWS",              	/* 0x77 */
-	"OPTIMIZED",             	/* 0x78 */
-	"PSEUDO",                	/* 0x79 */
+	"POSIXD",                	/* 0x16 */
+	"POSIXL",                	/* 0x17 */
+	"POSIXU",                	/* 0x18 */
+	"POSIXA",                	/* 0x19 */
+	"NPOSIXD",               	/* 0x1a */
+	"NPOSIXL",               	/* 0x1b */
+	"NPOSIXU",               	/* 0x1c */
+	"NPOSIXA",               	/* 0x1d */
+	"CLUMP",                 	/* 0x1e */
+	"BRANCH",                	/* 0x1f */
+	"BACK",                  	/* 0x20 */
+	"EXACT",                 	/* 0x21 */
+	"EXACTF",                	/* 0x22 */
+	"EXACTFL",               	/* 0x23 */
+	"EXACTFU",               	/* 0x24 */
+	"EXACTFA",               	/* 0x25 */
+	"EXACTFU_SS",            	/* 0x26 */
+	"EXACTFU_TRICKYFOLD",    	/* 0x27 */
+	"NOTHING",               	/* 0x28 */
+	"TAIL",                  	/* 0x29 */
+	"STAR",                  	/* 0x2a */
+	"PLUS",                  	/* 0x2b */
+	"CURLY",                 	/* 0x2c */
+	"CURLYN",                	/* 0x2d */
+	"CURLYM",                	/* 0x2e */
+	"CURLYX",                	/* 0x2f */
+	"WHILEM",                	/* 0x30 */
+	"OPEN",                  	/* 0x31 */
+	"CLOSE",                 	/* 0x32 */
+	"REF",                   	/* 0x33 */
+	"REFF",                  	/* 0x34 */
+	"REFFL",                 	/* 0x35 */
+	"REFFU",                 	/* 0x36 */
+	"REFFA",                 	/* 0x37 */
+	"NREF",                  	/* 0x38 */
+	"NREFF",                 	/* 0x39 */
+	"NREFFL",                	/* 0x3a */
+	"NREFFU",                	/* 0x3b */
+	"NREFFA",                	/* 0x3c */
+	"IFMATCH",               	/* 0x3d */
+	"UNLESSM",               	/* 0x3e */
+	"SUSPEND",               	/* 0x3f */
+	"IFTHEN",                	/* 0x40 */
+	"GROUPP",                	/* 0x41 */
+	"LONGJMP",               	/* 0x42 */
+	"BRANCHJ",               	/* 0x43 */
+	"EVAL",                  	/* 0x44 */
+	"MINMOD",                	/* 0x45 */
+	"LOGICAL",               	/* 0x46 */
+	"RENUM",                 	/* 0x47 */
+	"TRIE",                  	/* 0x48 */
+	"TRIEC",                 	/* 0x49 */
+	"AHOCORASICK",           	/* 0x4a */
+	"AHOCORASICKC",          	/* 0x4b */
+	"GOSUB",                 	/* 0x4c */
+	"GOSTART",               	/* 0x4d */
+	"NGROUPP",               	/* 0x4e */
+	"INSUBP",                	/* 0x4f */
+	"DEFINEP",               	/* 0x50 */
+	"ENDLIKE",               	/* 0x51 */
+	"OPFAIL",                	/* 0x52 */
+	"ACCEPT",                	/* 0x53 */
+	"VERB",                  	/* 0x54 */
+	"PRUNE",                 	/* 0x55 */
+	"MARKPOINT",             	/* 0x56 */
+	"SKIP",                  	/* 0x57 */
+	"COMMIT",                	/* 0x58 */
+	"CUTGROUP",              	/* 0x59 */
+	"KEEPS",                 	/* 0x5a */
+	"LNBREAK",               	/* 0x5b */
+	"OPTIMIZED",             	/* 0x5c */
+	"PSEUDO",                	/* 0x5d */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -834,7 +694,7 @@ EXTCONST U8 PL_varies[] __attribute__deprecated__ = {
 EXTCONST U8 PL_varies_bitmask[];
 #else
 EXTCONST U8 PL_varies_bitmask[] = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC0, 0x01, 0xFC, 0xF9, 0x9F, 0x09, 0x00, 0x00, 0x00, 0x00
+    0x00, 0x00, 0x00, 0xC0, 0x01, 0xFC, 0xF9, 0x9F, 0x09, 0x00, 0x00, 0x00
 };
 #endif /* DOINIT */
 
@@ -846,11 +706,8 @@ EXTCONST U8 PL_varies_bitmask[] = {
 EXTCONST U8 PL_simple[] __attribute__deprecated__;
 #else
 EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
-    REG_ANY, SANY, CANY, ANYOF, ALNUM, ALNUML, ALNUMU, ALNUMA, NALNUM,
-    NALNUML, NALNUMU, NALNUMA, SPACE, SPACEL, SPACEU, SPACEA, NSPACE,
-    NSPACEL, NSPACEU, NSPACEA, DIGIT, DIGITL, DIGITA, NDIGIT, NDIGITL,
-    NDIGITA, POSIXD, POSIXL, POSIXU, POSIXA, NPOSIXD, NPOSIXL, NPOSIXU,
-    NPOSIXA, VERTWS, NVERTWS, HORIZWS, NHORIZWS,
+    REG_ANY, SANY, CANY, ANYOF, POSIXD, POSIXL, POSIXU, POSIXA, NPOSIXD,
+    NPOSIXL, NPOSIXU, NPOSIXA,
     0
 };
 #endif /* DOINIT */
@@ -859,7 +716,7 @@ EXTCONST U8 PL_simple[] __attribute__deprecated__ = {
 EXTCONST U8 PL_simple_bitmask[];
 #else
 EXTCONST U8 PL_simple_bitmask[] = {
-    0x00, 0x00, 0xFC, 0xFF, 0xFF, 0xEE, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00
+    0x00, 0x00, 0xFC, 0x3F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 #endif /* DOINIT */
 

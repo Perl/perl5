@@ -36,8 +36,7 @@ SEOL        EOL,        no        ; Same, assuming singleline.
 # modifiers have to ordered thusly: /d, /l, /u, /a, /aa.  This is because code
 # in regcomp.c uses the enum value of the modifier as an offset from the /d
 # version.  The complements must come after the non-complements.
-# BOUND, ALNUM, SPACE, DIGIT, and their complements are affected, as well as
-# EXACTF.
+# BOUND, POSIX and their complements are affected, as well as EXACTF.
 BOUND       BOUND,      no        ; Match "" at any word boundary using native charset semantics for non-utf8
 BOUNDL      BOUND,      no        ; Match "" at any locale word boundary
 BOUNDU      BOUND,      no        ; Match "" at any word boundary using Unicode semantics
@@ -56,44 +55,16 @@ SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
 ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
 
-# Order (within each group) of the below is important.  See ordering comment
-# above.  The PLACEHOLDERn ones are wasting a value.  Right now, we have plenty
-# to spare, but these would be obvious candidates if ever we ran out of node
-# types in a U8.
-ALNUM       ALNUM,      no 0 S    ; Match any alphanumeric character using native charset semantics for non-utf8
-ALNUML      ALNUM,      no 0 S    ; Match any alphanumeric char in locale
-ALNUMU      ALNUM,      no 0 S    ; Match any alphanumeric char using Unicode semantics
-ALNUMA      ALNUM,      no 0 S    ; Match [A-Za-z_0-9]
-NALNUM      NALNUM,     no 0 S    ; Match any non-alphanumeric character using native charset semantics for non-utf8
-NALNUML     NALNUM,     no 0 S    ; Match any non-alphanumeric char in locale
-NALNUMU     NALNUM,     no 0 S    ; Match any non-alphanumeric char using Unicode semantics
-NALNUMA     NALNUM,     no 0 S    ; Match [^A-Za-z_0-9]
-SPACE       SPACE,      no 0 S    ; Match any whitespace character using native charset semantics for non-utf8
-SPACEL      SPACE,      no 0 S    ; Match any whitespace char in locale
-SPACEU      SPACE,      no 0 S    ; Match any whitespace char using Unicode semantics
-SPACEA      SPACE,      no 0 S    ; Match [ \t\n\f\r]
-NSPACE      NSPACE,     no 0 S    ; Match any non-whitespace character using native charset semantics for non-utf8
-NSPACEL     NSPACE,     no 0 S    ; Match any non-whitespace char in locale
-NSPACEU     NSPACE,     no 0 S    ; Match any non-whitespace char using Unicode semantics
-NSPACEA     NSPACE,     no 0 S    ; Match [^ \t\n\f\r]
-DIGIT       DIGIT,      no 0 S    ; Match any numeric character using native charset semantics for non-utf8
-DIGITL      DIGIT,      no 0 S    ; Match any numeric character in locale
-PLACEHOLDER1 NOTHING,   no        ; placeholder for missing DIGITU
-DIGITA      DIGIT,      no 0 S    ; Match [0-9]
-NDIGIT      NDIGIT,     no 0 S    ; Match any non-numeric character using native charset semantics for non-utf8
-NDIGITL     NDIGIT,     no 0 S    ; Match any non-numeric character in locale
-PLACEHOLDER2 NOTHING,   no        ; placeholder for missing NDIGITU
-NDIGITA     NDIGIT,     no 0 S    ; Match [^0-9]
-
-POSIXD      POSIXD,     none 0 S   ; currently unused except as a placeholder
-POSIXL      POSIXD,     none 0 S   ; currently unused except as a placeholder
-POSIXU      POSIXD,     none 0 S   ; currently unused except as a placeholder
+# Order of the below is important.  See ordering comment above.
+POSIXD      POSIXD,     none 0 S   ; Some [[:class:]] under /d; the FLAGS field gives which one
+POSIXL      POSIXD,     none 0 S   ; Some [[:class:]] under /l; the FLAGS field gives which one
+POSIXU      POSIXD,     none 0 S   ; Some [[:class:]] under /u; the FLAGS field gives which one
 POSIXA      POSIXD,     none 0 S   ; Some [[:class:]] under /a; the FLAGS field gives which one
-NPOSIXD     NPOSIXD,    none 0 S   ; currently unused except as a placeholder
-NPOSIXL     NPOSIXD,    none 0 S   ; currently unused except as a placeholder
-NPOSIXU     NPOSIXD,    none 0 S   ; currently unused except as a placeholder
+NPOSIXD     NPOSIXD,    none 0 S   ; complement of POSIXD, [[:^class:]]
+NPOSIXL     NPOSIXD,    none 0 S   ; complement of POSIXL, [[:^class:]]
+NPOSIXU     NPOSIXD,    none 0 S   ; complement of POSIXU, [[:^class:]]
 NPOSIXA     NPOSIXD,    none 0 S   ; complement of POSIXA, [[:^class:]]
-# End of order is important (within groups)
+# End of order is important
 
 CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
@@ -236,13 +207,6 @@ KEEPS       KEEPS,      no        ; $& begins here.
 
 #*New charclass like patterns
 LNBREAK     LNBREAK,    none      ; generic newline pattern
-
-# regcomp.c expects the node number of the complement to be one greater than
-# the non-complement
-VERTWS      VERTWS,     none 0 S  ; vertical whitespace         (Perl 6)
-NVERTWS     NVERTWS,    none 0 S  ; not vertical whitespace     (Perl 6)
-HORIZWS     HORIZWS,    none 0 S  ; horizontal whitespace       (Perl 6)
-NHORIZWS    NHORIZWS,   none 0 S  ; not horizontal whitespace   (Perl 6)
 
 # NEW STUFF SOMEWHERE ABOVE THIS LINE
 
