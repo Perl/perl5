@@ -390,6 +390,11 @@ corrected. For more details see commit 23b7025ebc.
 
 =back
 
+=head1 Known Problems
+
+There may be a failure in the F<t/op/require_errors.t> test if you run the
+test suite as the root user.
+
 =head1 Acknowledgements
 
 Perl 5.17.7 represents approximately 4 weeks of development since Perl 5.17.6
