@@ -1,0 +1,460 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5177delta - what is new for perl v5.17.7
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.17.6 release and the 5.17.7
+release.
+
+If you are upgrading from an earlier release such as 5.17.5, first read
+L<perl5176delta>, which describes differences between 5.17.5 and 5.17.6.
+
+=head1 Core Enhancements
+
+=head2 $&, $` and $' are no longer slow
+
+These three infamous variables have been redeemed and no longer slow down
+your program when used.  Hence, the /p regular expression flag now does
+nothing.
+
+=head1 Security
+
+=head2 C<Storable> security warning in documentation
+
+The documentation for C<Storable> now includes a section which warns readers
+of the danger of accepting Storable documents from untrusted sources. The
+short version is that deserializing certain types of data can lead to loading
+modules and other code execution. This is documented behavior and wanted
+behavior, but this opens an attack vector for malicious entities.
+
+=head2 C<Locale::Maketext> allowed code injection via a malicious template
+
+If users could provide a translation string to Locale::Maketext, this could be
+used to invoke arbitrary Perl subroutines available in the current process.
+
+This has been fixed, but it is still possible to invoke any method provided by
+C<Locale::Maketext> itself or a subclass that you are using. One of these
+methods in turn will invoke the Perl core's C<sprintf> subroutine.
+
+In summary, allowing users to provide translation strings without auditing
+them is a bad idea.
+
+This vulnerability is documented in CVE-2012-6329.
+
+=head1 Incompatible Changes
+
+=head2 readline() with C<$/ = \N> now reads N characters, not N bytes
+
+Previously, when reading from a stream with I/O layers such as
+C<encoding>, the readline() function, otherwise known as the C<< <> >>
+operator, would read I<N> bytes from the top-most layer. [perl #79960]
+
+Now, I<N> characters are read instead.
+
+There is no change in behaviour when reading from streams with no
+extra layers, since bytes map exactly to characters.
+
+=head2 Lexical subroutine warnings have moved
+
+The warning about the use of an experimental feature emitted when lexical
+subroutines (added in 5.17.4) are used now happens when the subroutine
+itself is declared, not when the "lexical_subs" feature is activated via
+C<use feature>.
+
+This stops C<use feature ':all'> from warning, but causes
+C<my sub foo; my sub bar> to warn twice.
+
+=head2 Overridden C<glob> is now passed one argument
+
+C<glob> overrides used to be passed a magical undocumented second argument
+that identified the caller.  Nothing on CPAN was using this, and it got in
+the way of a bug fix, so it was removed.  If you really need to identify
+the caller, see L<Devel::Callsite> on CPAN.
+
+=head1 Deprecations
+
+=head2 Lexical $_ is now deprecated
+
+Since it was introduced in Perl 5.10, it has caused much confusion with no
+obvious solution:
+
+=over
+
+=item *
+
+Various modules (e.g., List::Util) expect callback routines to use the
+global $_.  C<use List::Util 'first'; my $_; first { $_ == 1 } @list> does
+not work as one would expect.
+
+=item *
+
+A C<my $_> declaration earlier in the same file can cause confusing closure
+warnings.
+
+=item *
+
+The "_" subroutine prototype character allows called subroutines to access
+your lexical $_, so it is not really private after all.
+
+=item *
+
+Nevertheless, subroutines with a "(@)" prototype and methods cannot access
+the caller's lexical $_, unless they are written in XS.
+
+=item *
+
+But even XS routines cannot access a lexical $_ declared, not in the
+calling subroutine, but in an outer scope, iff that subroutine happened not
+to mention $_ or use any operators that default to $_.
+
+=back
+
+=head2 Various XS-callable functions are now deprecated
+
+The following functions will be removed from a future version of Perl,
+and should not be used.  With participating C compilers (e.g., gcc),
+compiling any file that uses any of these will generate a warning.
+These were not intended for public use; there are equivalent, faster,
+macros for most of them.  See L<perlapi/Character classes>:
+C<is_uni_ascii>, C<is_uni_ascii_lc>, C<is_uni_blank>, C<is_uni_blank_lc>,
+C<is_uni_cntrl>, C<is_uni_cntrl_lc>, C<is_uni_idfirst_lc>, C<is_uni_space>,
+C<is_uni_space_lc>, C<is_uni_xdigit>, C<is_uni_xdigit_lc>, C<is_utf8_ascii>,
+C<is_utf8_blank>, C<is_utf8_cntrl>, C<is_utf8_idcont>, C<is_utf8_idfirst>,
+C<is_utf8_perl_space>, C<is_utf8_perl_word>, C<is_utf8_posix_digit>,
+C<is_utf8_space>, C<is_utf8_xdigit>. C<is_utf8_xidcont>, C<is_utf8_xidfirst>,
+C<to_uni_lower_lc>, C<to_uni_title_lc>, and C<to_uni_upper_lc>.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Perl has a new copy-on-write mechanism that avoids the need to copy the
+internal string buffer when assigning from one scalar to another.  This
+makes copying large strings appear much faster.  Modifying one of the two
+(or more) strings after an assignment will force a copy internally.  This
+makes it unnecessary to pass strings by reference for efficiency.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.08 to 1.09.  The internal
+cache of file names that it keeps for each caller is now freed when that
+caller is freed.  This means
+C<< use File::DosGlob 'glob'; eval 'scalar <*>' >> no longer leaks memory.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.18 to 1.19.  File::Glob has
+had exactly the same fix as File::DosGlob.  Since it is what Perl's own
+C<glob> operator itself uses (except on VMS), this means
+C<< eval 'scalar <*>' >> no longer leaks.
+
+=item *
+
+L<GDBM_File> has been upgraded from version 1.14 to 1.15. The undocumented
+optional fifth parameter to C<TIEHASH> has been removed. This was intended
+to provide control of the callback used by C<gdbm*> functions in case of
+fatal errors (such as filesystem problems), but did not work (and could
+never have worked). No code on CPAN even attempted to use it. The callback
+is now always the previous default, C<croak>. Problems on some platforms with
+how the C<C> C<croak> function is called have also been resolved.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.78 to 2.79.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlapi/Character classes>
+
+=over 4
+
+=item *
+
+There are quite a few macros callable from XS modules that classify
+characters into things like alphabetic, punctuation, etc.  More of these
+are now documented, including ones which work on characters whose code
+points are outside the Latin-1 range.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Constant(%s): Call to &{$^H{%s}} did not return a defined value|perldiag/Constant(%s): Call to &{$^H{%s}} did not return a defined value>
+
+Constant overloading that returns C<undef> results in this error message.
+For numeric constants, it used to say "Constant(undef)".  "undef" has been
+replaced with the number itself.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+SvUPGRADE() is no longer an expression. Originally this macro (and its
+underlying function, sv_upgrade()) were documented as boolean, although
+in reality they always croaked on error and never returned false. In 2005
+the documentation was updated to specify a void return value, but
+SvUPGRADE() was left always returning 1 for backwards compatibility. This
+has now been removed, and SvUPGRADE() is now a statement with no return
+value.
+
+So this is now a syntax error:
+
+    if (!SvUPGRADE(sv)) { croak(...); }
+
+If you have code like that, simply replace it with
+
+    SvUPGRADE(sv);
+
+or to to avoid compiler warnings with older perls, possibly
+
+    (void)SvUPGRADE(sv);
+
+=item *
+
+Perl has a new copy-on-write mechanism that allows any SvPOK scalar to be
+upgraded to a copy-on-write scalar.  A reference count on the string buffer
+is stored in the string buffer itself.
+
+This breaks a few XS modules by allowing copy-on-write scalars to go
+through code paths that never encountered them before.
+
+This behaviour can still be disabled by running F<Configure> with
+B<-Accflags=-DPERL_NO_COW>.  This option will probably be removed in Perl
+5.20.
+
+=item *
+
+Copy-on-write no longer uses the SvFAKE and SvREADONLY flags.  Hence,
+SvREADONLY indicates a true read-only SV.
+
+Use the SvIsCOW macro (as before) to identify a copy-on-write scalar.
+
+=item *
+
+C<PL_sawampersand> is now a constant.  The switch this variable provided
+(to enable/disable the pre-match copy depending on whether C<$&> had been
+seen) has been removed and replaced with copy-on-write, eliminating a few
+bugs.
+
+The previous behaviour can still be enabled by running F<Configure> with
+B<-Accflags=-DPERL_SAWAMPERSAND>.
+
+=item *
+
+PL_glob_index is gone.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<sort {undef} ...> under fatal warnings no longer crashes.  It started
+crashing in Perl 5.16.
+
+=item *
+
+Stashes blessed into each other
+(C<bless \%Foo::, 'Bar'; bless \%Bar::, 'Foo'>) no longer result in double
+frees.  This bug started happening in Perl 5.16.
+
+=item *
+
+Numerous memory leaks have been fixed, mostly involving fatal warnings and
+syntax errors.
+
+=item *
+
+Lexical constants (C<my sub answer () { 42 }>) no longer cause double
+frees.
+
+=item *
+
+Constant subroutine redefinition warns by default, but lexical constants
+were accidentally exempt from default warnings.  This has been corrected.
+
+=item *
+
+Some failed regular expression matches such as C<'f' =~ /../g> were not
+resetting C<pos>.  Also, "match-once" patterns (C<m?...?g>) failed to reset
+it, too, when invoked a second time [perl #23180].
+
+=item *
+
+Accessing C<$&> after a pattern match now works if it had not been seen
+before the match.  I.e., this applies to C<${'&'}> (under C<no strict>) and
+C<eval '$&'>.  The same applies to C<$'> and C<$`> [perl #4289].
+
+=item *
+
+Several bugs involving C<local *ISA> and C<local *Foo::> causing stale
+MRO caches have been fixed.  
+
+=item *
+
+Defining a subroutine when its typeglob has been aliased no longer results
+in stale method caches.  This bug was introduced in Perl 5.10.
+
+=item *
+
+Localising a typeglob containing a subroutine when the typeglob's package
+has been deleted from its parent stash no longer produces an error.  This
+bug was introduced in Perl 5.14.
+
+=item *
+
+Under some circumstances, C<local *method=...> would fail to reset method
+caches upon scope exit.
+
+=item *
+
+C</[.foo.]/> is no longer an error, but produces a warning (as before) and
+is treated as C</[.fo]/> [perl #115818].
+
+=item *
+
+C<goto $tied_var> now calls FETCH before deciding what type of goto
+(subroutine or label) this is.
+
+=item *
+
+Renaming packages through glob assignment
+(C<*Foo:: = *Bar::; *Bar:: = *Baz::>) in combination with C<m?...?> and
+C<reset> no longer makes threaded builds crash.
+
+=item *
+
+An earlier release in the 5.17.x series could crash if user code prevented
+_charnames from loading via C<$INC{'_charnames.pm'}++>.
+
+=item *
+
+A number of bugs related to assigning a list to hash have been fixed. Many of
+these involve lists with repeated keys like C<(1, 1, 1, 1)>.
+
+=over 8
+
+=item -
+
+The expression C<scalar(%h = (1, 1, 1, 1))> now returns C<4>, not C<2>.
+
+=item -
+
+The return value of C<%h = (1, 1, 1)> in list context was wrong. Previously
+this would return C<(1, undef, 1)>, now it returns C<(1, undef)>.
+
+=item -
+
+Perl now issues the same warning on C<($s, %h) = (1, {})> as it does for
+C<(%h) = ({})>, "Reference found where even-sized list expected".
+
+=item -
+
+A number of additional edge cases in list assignment to hashes were
+corrected. For more details see commit 23b7025ebc.
+
+=back
+
+=back
+
+=head1 Known Problems
+
+There may be a failure in the F<t/op/require_errors.t> test if you run the
+test suite as the root user.
+
+=head1 Acknowledgements
+
+Perl 5.17.7 represents approximately 4 weeks of development since Perl 5.17.6
+and contains approximately 30,000 lines of changes across 490 files from 26
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.7:
+
+Alexandr Ciornii, Bob Ernst, Brian Carlson, Chris 'BinGOs' Williams, Craig A.
+Berry, Daniel Dragan, Dave Rolsky, David Mitchell, Father Chrysostomos, Hugo
+van der Sanden, James E Keenan, Joel Berger, Karl Williamson, Lukas Mai, Martin
+Hasch, Matthew Horsfall, Nicholas Clark, Ricardo Signes, Ruslan Zakirov, Sergey
+Alekseev, Steffen Müller, Sullivan Beck, Sven Strickroth, Sébastien
+Aperghis-Tramoni, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+http://rt.perl.org/perlbug/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
