@@ -89,13 +89,18 @@ SKIP: {
         qr<^\QCan't locate $mod_file:>,
         "special error message if the file exists but can't be opened";
 
-    my $file = File::Spec::Functions::catfile(Cwd::getcwd(), $mod_file);
-    eval {
-        require($file);
-    };
-    like $@,
-        qr<^\QCan't locate $file:>,
-        "...even if we use a full path";
+    SKIP: {
+        skip "Can't make the path absolute", 1
+            if !defined(Cwd::getcwd());
+
+        my $file = File::Spec::Functions::catfile(Cwd::getcwd(), $mod_file);
+        eval {
+            require($file);
+        };
+        like $@,
+            qr<^\QCan't locate $file:>,
+            "...even if we use a full path";
+    }
 
     # switch uid back (may not be implemented)
     eval { $> = $olduid; };
