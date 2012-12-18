@@ -798,11 +798,19 @@
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #endif
-#if defined(TINYMT32)
+#if defined(PERL_RNG_FREEBSD_DRAND48)
+#define freebsd_drand48_generate_double()	Perl_freebsd_drand48_generate_double(aTHX)
+#define freebsd_drand48_init(a)	Perl_freebsd_drand48_init(aTHX_ a)
+#endif
+#if defined(PERL_RNG_TINYMT32)
 #define tinymt32_generate_U32()	Perl_tinymt32_generate_U32(aTHX)
 #define tinymt32_generate_double()	Perl_tinymt32_generate_double(aTHX)
 #define tinymt32_generate_float()	Perl_tinymt32_generate_float(aTHX)
 #define tinymt32_init(a)	Perl_tinymt32_init(aTHX_ a)
+#endif
+#if defined(PERL_RNG_WELLRNG512A)
+#define wellrng512a_generate_double()	Perl_wellrng512a_generate_double(aTHX)
+#define wellrng512a_init(a)	Perl_wellrng512a_init(aTHX_ a)
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
@@ -853,10 +861,6 @@
 #define PerlIO_tell(a)		Perl_PerlIO_tell(aTHX_ a)
 #define PerlIO_unread(a,b,c)	Perl_PerlIO_unread(aTHX_ a,b,c)
 #define PerlIO_write(a,b,c)	Perl_PerlIO_write(aTHX_ a,b,c)
-#endif
-#if defined(WELLRNG512A)
-#define wellrng512a_generate_double()	Perl_wellrng512a_generate_double(aTHX)
-#define wellrng512a_init(a)	Perl_wellrng512a_init(aTHX_ a)
 #endif
 #if defined(WIN32) || defined(__SYMBIAN32__) || defined(VMS)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)

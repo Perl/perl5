@@ -7551,14 +7551,22 @@ PERL_CALLCONV long	Perl_my_letohl(long n);
 #if defined(PERL_NEED_MY_LETOHS)
 PERL_CALLCONV short	Perl_my_letohs(short n);
 #endif
-#if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
-STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
+#if defined(PERL_RNG_FREEBSD_DRAND48)
+PERL_CALLCONV double	Perl_freebsd_drand48_generate_double(pTHX);
+PERL_CALLCONV void	Perl_freebsd_drand48_init(pTHX_ U32 seed);
 #endif
-#if defined(TINYMT32)
+#if defined(PERL_RNG_TINYMT32)
 PERL_CALLCONV U32	Perl_tinymt32_generate_U32(pTHX);
 PERL_CALLCONV double	Perl_tinymt32_generate_double(pTHX);
 PERL_CALLCONV float	Perl_tinymt32_generate_float(pTHX);
 PERL_CALLCONV void	Perl_tinymt32_init(pTHX_ U32 seed);
+#endif
+#if defined(PERL_RNG_WELLRNG512A)
+PERL_CALLCONV double	Perl_wellrng512a_generate_double(pTHX);
+PERL_CALLCONV void	Perl_wellrng512a_init(pTHX_ U32 seed);
+#endif
+#if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
+STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f)
@@ -7778,10 +7786,6 @@ PERL_CALLCONV SSize_t	Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_
 #define PERL_ARGS_ASSERT_PERLIO_WRITE	\
 	assert(vbuf)
 
-#endif
-#if defined(WELLRNG512A)
-PERL_CALLCONV double	Perl_wellrng512a_generate_double(pTHX);
-PERL_CALLCONV void	Perl_wellrng512a_init(pTHX_ U32 seed);
 #endif
 #if defined(WIN32)
 PERL_CALLCONV_NO_RET void	win32_croak_not_implemented(const char * fname)

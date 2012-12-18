@@ -52,7 +52,8 @@ This is a synonym for (! foldEQ_locale())
 #define ibcmp(s1, s2, len)         cBOOL(! foldEQ(s1, s2, len))
 #define ibcmp_locale(s1, s2, len)  cBOOL(! foldEQ_locale(s1, s2, len))
 
-#ifdef TINYMT32
+#ifdef PERL_RNG_TINYMT32
+/* see copyright in util.c */
 
 #define TINYMT32_MEXP 127
 #define TINYMT32_SH0 1
@@ -79,8 +80,8 @@ typedef struct TINYMT32_T tinymt32_t;
 #define _SEED_RAND(x) tinymt32_init((U32)x)
 #define RAND01() tinymt32_generate_double()
 
-#elif defined(WELLRNG512A)
-
+#elif defined(PERL_RNG_WELLRNG512A)
+/* see copyright in util.c */
 #define WELLRNG_W 32
 #define WELLRNG_R 16
 #define WELLRNG_P 0
@@ -117,6 +118,29 @@ typedef struct WELLRNG512A_T wellring512a_t;
 #define PL_RANDOM_STATE_TYPE wellring512a_t
 #define _SEED_RAND(x) wellrng512a_init((U32)x)
 #define RAND01() wellrng512a_generate_double()
+
+#elif defined(PERL_RNG_FREEBSD_DRAND48)
+/* see copyright in util.c */
+#include <math.h>
+#include <stdlib.h>
+
+#define FREEBSD_DRAND48_SEED_0   (0x330e)
+#define FREEBSD_DRAND48_SEED_1   (0xabcd)
+#define FREEBSD_DRAND48_SEED_2   (0x1234)
+#define FREEBSD_DRAND48_MULT_0   (0xe66d)
+#define FREEBSD_DRAND48_MULT_1   (0xdeec)
+#define FREEBSD_DRAND48_MULT_2   (0x0005)
+#define FREEBSD_DRAND48_ADD      (0x000b)
+
+struct FREEBSD_DRAND48_T {
+    U16 seed[3];
+};
+
+typedef struct FREEBSD_DRAND48_T freebsd_drand48_t;
+
+#define PL_RANDOM_STATE_TYPE freebsd_drand48_t
+#define _SEED_RAND(x) freebsd_drand48_init((U32)x)
+#define RAND01() freebsd_drand48_generate_double()
 
 #else /* dont use tinymt32 or wellrng512a */
 

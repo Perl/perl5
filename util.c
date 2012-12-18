@@ -5567,7 +5567,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
   return opt;
 }
 
-#ifdef TINYMT32
+#ifdef PERL_RNG_TINYMT32
 /*
 
 This is the "Tiny Mersene Twister" random number generator. It is derived from code originally
@@ -5690,7 +5690,7 @@ Perl_tinymt32_generate_double(pTHX) { /* from Isaku Wada */
     U32 b= tinymt32_generate_U32() >> 6;
     return ( a * 67108864.0 + b ) * ( 1.0 / 9007199254740992.0 );
 }
-#elif defined(WELLRNG512A)
+#elif defined(PERL_RNG_WELLRNG512A)
 /* This is WellRNG512a obtained from
  *
  * http://www.iro.umontreal.ca/~simardr/rng/WELL512a.c
@@ -5747,6 +5747,66 @@ Perl_wellrng512a_generate_double(pTHX){
                   ^ WELLRNG_MAT3NEG(-28, z2) ^ WELLRNG_MAT4NEG(-5,  0xda442d24U, WELLRNG_newV1);
     PL_random_state.state_i = (PL_random_state.state_i + 15) & 0x0000000fU;
     return ((double) PL_random_state.STATE[PL_random_state.state_i]) * WELLRNG_FACT;
+}
+#elif defined(PERL_RNG_FREEBSD_DRAND48)
+
+/*
+* Copyright (c) 1993 Martin Birgmeier
+* All rights reserved.
+*
+* You may redistribute unmodified or modified versions of this source
+* code provided that the above copyright notice and this and the
+* following conditions are retained.
+*
+* This software is provided ``as is'', and comes with no warranties
+* of any kind. I shall in no event be liable for anything that happens
+* to anyone/anything when using this software.
+*/
+
+unsigned short _rand48_mult[3] = {
+                FREEBSD_DRAND48_MULT_0,
+                FREEBSD_DRAND48_MULT_1,
+                FREEBSD_DRAND48_MULT_2
+};
+unsigned short _rand48_add = FREEBSD_DRAND48_ADD;
+
+void
+Perl_freebsd_drand48_init(pTHX_ U32 seed)
+{
+    PL_random_state.seed[0] = FREEBSD_DRAND48_SEED_0;
+    PL_random_state.seed[1] = (U16) seed;
+    PL_random_state.seed[2] = (U16) (seed >> 16);
+    /* I don't know why we do this. The vars should be initialized already... Yves */
+    _rand48_mult[0] = FREEBSD_DRAND48_MULT_0;
+    _rand48_mult[1] = FREEBSD_DRAND48_MULT_1;
+    _rand48_mult[2] = FREEBSD_DRAND48_MULT_2;
+    _rand48_add = FREEBSD_DRAND48_ADD;
+}
+
+double
+Perl_freebsd_drand48_generate_double(pTHX)
+{
+    U32 accu;
+    U16 temp[2];
+
+    accu = (U32) _rand48_mult[0] * (U32) PL_random_state.seed[0]
+         + (U32) _rand48_add;
+    temp[0] = (U16) accu;        /* lower 16 bits */
+    accu >>= sizeof(U16) * 8;
+    accu += (U32) _rand48_mult[0] * (U32) PL_random_state.seed[1]
+          + (U32) _rand48_mult[1] * (U32) PL_random_state.seed[0];
+    temp[1] = (U16) accu;        /* middle 16 bits */
+    accu >>= sizeof(U16) * 8;
+    accu += _rand48_mult[0] * PL_random_state.seed[2]
+          + _rand48_mult[1] * PL_random_state.seed[1]
+          + _rand48_mult[2] * PL_random_state.seed[0];
+    PL_random_state.seed[0] = temp[0];
+    PL_random_state.seed[1] = temp[1];
+    PL_random_state.seed[2] = (U16) accu;
+
+    return ldexp((double) PL_random_state.seed[0], -48) +
+           ldexp((double) PL_random_state.seed[1], -32) +
+           ldexp((double) PL_random_state.seed[2], -16);
 }
 
 #endif

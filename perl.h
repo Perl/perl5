@@ -11,7 +11,7 @@
 #ifndef H_PERL
 #define H_PERL 1
 
-#define WELLRNG512A
+#define PERL_RNG_FREEBSD_DRAND48
 
 #ifdef PERL_FOR_X2P
 /*

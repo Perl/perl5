@@ -1523,15 +1523,19 @@ pR	|SV*	|vivify_ref	|NN SV* sv|U32 to_what
 p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 : Used in locale.c and perl.c
 p	|U32	|parse_unicode_opts|NN const char **popt
-#ifdef TINYMT32
+#ifdef PERL_RNG_TINYMT32
 Ap        |float    |tinymt32_generate_float
 Ap        |double   |tinymt32_generate_double
 Ap        |U32      |tinymt32_generate_U32
 Ap        |void     |tinymt32_init        |U32 seed
 #endif
-#ifdef WELLRNG512A
+#ifdef PERL_RNG_WELLRNG512A
 Ap        |double   |wellrng512a_generate_double
 Ap        |void     |wellrng512a_init        |U32 seed
+#endif
+#ifdef PERL_RNG_FREEBSD_DRAND48
+Ap        |double   |freebsd_drand48_generate_double
+Ap        |void     |freebsd_drand48_init        |U32 seed
 #endif
 Ap	|U32	|seed
 : Only used in perl.c
