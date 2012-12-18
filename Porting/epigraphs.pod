@@ -17,6 +17,23 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.7 - R. Scott Bakker, The Darkness That Comes Before
+
+L<Announced on 2012-12-18 by Dave Rolsky|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-12/msg00679.html>
+
+No thought.
+  The boy extinguished. Only a place.
+  This place.
+  Motionless, the Pragma sat facing him, the bare soles of his feet flat against each other, his dark frock scored by the shadows of deep folds, his eyes as empty as the child they watched.
+  A place without breath or sound. A place of sight alone. A place without before or after . . . almost.
+  For the first lances of sunlight careered over the glacier, as ponderous as great tree limbs in the wind. Shadows hardened and light gleamed across the Pragma’s ancient skull.
+  The old man’s left hand forsook his right sleeve, bearing a watery knife. And like a rope in water, his arm pitched outward, fingertips trailing across the blade as the knife swung languidly into the air, the sun skating and the dark shrine plunging across its mirror back . . .
+  And the place where Kellhus had once existed extended an open hand—the blond hairs like luminous filaments against tanned skin—and grasped the knife from stunned space.
+  The slap of pommel against palm triggered the collapse of place into little boy. The pale stench of his body. Breath, sound, and lurching thoughts.
+  I have been legion . . .
+  In his periphery, he could see the spike of the sun ease from the mountain. He felt drunk with exhaustion. In the recoil of his trance, it seemed all he could hear were the twigs arching and bobbing in the wind, pulled by leaves like a million sails no bigger than his hand. Cause everywhere, but amid countless minute happenings—diffuse, useless.
+  Now I understand.
+
 =head2 v5.17.6 - Kurt Vonnegut, The Sirens of Titan
 
 L<Announced on 2012-11-20 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-11/msg00760.html>
