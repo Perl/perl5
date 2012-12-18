@@ -6411,7 +6411,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 #endif
 	    if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
 		/* make sure SvREFCNT(sv)==0 happens very seldom */
-		SvREFCNT(sv) = (~(U32)0)/2;
+		SvREFCNT(sv) = SvREFCNT_IMMORTAL;
 		continue;
 	    }
 	    break;
@@ -6577,7 +6577,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
 #endif
         if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
             /* make sure SvREFCNT(sv)==0 happens very seldom */
-            SvREFCNT(sv) = (~(U32)0)/2;
+            SvREFCNT(sv) = SvREFCNT_IMMORTAL;
             return;
         }
         sv_clear(sv);
@@ -6598,7 +6598,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
         return;
     if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
         /* make sure SvREFCNT(sv)==0 happens very seldom */
-        SvREFCNT(sv) = (~(U32)0)/2;
+        SvREFCNT(sv) = SvREFCNT_IMMORTAL;
         return;
     }
     if (ckWARN_d(WARN_INTERNAL)) {
@@ -13913,18 +13913,18 @@ Perl_clone_params_new(PerlInterpreter *const from, PerlInterpreter *const to)
 void
 Perl_init_constants(pTHX)
 {
-    SvREFCNT(&PL_sv_undef)	= (~(U32)0)/2;
+    SvREFCNT(&PL_sv_undef)	= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_undef)	= SVf_READONLY|SVt_NULL;
     SvANY(&PL_sv_undef)		= NULL;
 
     SvANY(&PL_sv_no)		= new_XPVNV();
-    SvREFCNT(&PL_sv_no)		= (~(U32)0)/2;
+    SvREFCNT(&PL_sv_no)		= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_no)		= SVt_PVNV|SVf_READONLY
 				  |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK;
 
     SvANY(&PL_sv_yes)		= new_XPVNV();
-    SvREFCNT(&PL_sv_yes)	= (~(U32)0)/2;
+    SvREFCNT(&PL_sv_yes)	= SvREFCNT_IMMORTAL;
     SvFLAGS(&PL_sv_yes)		= SVt_PVNV|SVf_READONLY
 				  |SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK;

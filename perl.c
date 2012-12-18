@@ -241,7 +241,7 @@ perl_construct(pTHXx)
     init_constants();
 
     SvREADONLY_on(&PL_sv_placeholder);
-    SvREFCNT(&PL_sv_placeholder) = (~(U32)0)/2;
+    SvREFCNT(&PL_sv_placeholder) = SvREFCNT_IMMORTAL;
 
     PL_sighandlerp = (Sighandler_t) Perl_sighandler;
 #ifdef PERL_USES_PL_PIDSTATUS
