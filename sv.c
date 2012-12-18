@@ -13299,7 +13299,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_last_swash_slen	= 0;
 
     PL_srand_called	= proto_perl->Isrand_called;
-#ifdef PL_random_state
+#ifdef PL_RANDOM_STATE_TYPE
     Copy(&(proto_perl->Irandom_state), &(PL_random_state), 1, PL_RANDOM_STATE_TYPE);
 #endif
 
