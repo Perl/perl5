@@ -171,6 +171,10 @@ never have worked). No code on CPAN even attempted to use it. The callback
 is now always the previous default, C<croak>. Problems on some platforms with
 how the C<C> C<croak> function is called have also been resolved.
 
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.78 to 2.79.
+
 =back
 
 =head1 Documentation
