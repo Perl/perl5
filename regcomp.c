@@ -11695,7 +11695,15 @@ parseit:
 		case ANYOF_PSXSPC:
 		case ANYOF_SPACE:
 		case ANYOF_XDIGIT:
-                    if (LOC) {
+                    if (! LOC) {
+                        /* For non-locale, just add it to any existing list */
+                        _invlist_union(posixes,
+                                       (AT_LEAST_ASCII_RESTRICTED)
+                                           ? ascii_source
+                                           : PL_XPosix_ptrs[classnum],
+                                       &posixes);
+                    }
+                    else {  /* Locale */
                         SV* scratch_list = NULL;
 
                         /* For above Latin1 code points, we use the full
@@ -11732,14 +11740,6 @@ parseit:
                             _invlist_union(posixes, ascii_source, &posixes);
                         }
 #endif
-                    }
-                    else {
-                        /* For non-locale, just add it to any existing list */
-                        _invlist_union(posixes,
-                                       (AT_LEAST_ASCII_RESTRICTED)
-                                           ? ascii_source
-                                           : PL_XPosix_ptrs[classnum],
-                                       &posixes);
                     }
 		    break;
 
@@ -11808,7 +11808,20 @@ parseit:
 		case ANYOF_NPSXSPC:
 		case ANYOF_NSPACE:
 		case ANYOF_NXDIGIT:
-                    if (LOC) {
+                    if (! LOC) {
+                        _invlist_union_complement_2nd(
+                                                posixes,
+                                                (AT_LEAST_ASCII_RESTRICTED)
+                                                    ? ascii_source
+                                                    : PL_XPosix_ptrs[classnum],
+                                                &posixes);
+                        /* Under /d, everything in the upper half of the Latin1
+                         * range matches this complement */
+                        if (DEPENDS_SEMANTICS) {
+                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
+                    }
+                    else {  /* Locale */
                         SV* scratch_list = NULL;
                         _invlist_subtract(PL_AboveLatin1,
                                           PL_XPosix_ptrs[classnum],
@@ -11836,19 +11849,6 @@ parseit:
                             SvREFCNT_dec(scratch_list);
                         }
 #endif
-                    }
-                    else {
-                        _invlist_union_complement_2nd(
-                                                posixes,
-                                                (AT_LEAST_ASCII_RESTRICTED)
-                                                    ? ascii_source
-                                                    : PL_XPosix_ptrs[classnum],
-                                                &posixes);
-                        /* Under /d, everything in the upper half of the Latin1
-                         * range matches this complement */
-                        if (DEPENDS_SEMANTICS) {
-                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
-                        }
                     }
 		    break;
 
