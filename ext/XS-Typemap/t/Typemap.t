@@ -150,10 +150,14 @@ ok( ! T_BOOL(0) );
 ok( ! T_BOOL('') );
 ok( ! T_BOOL(undef) );
 
-ok( T_BOOL_2(52) );
-ok( ! T_BOOL_2(0) );
-ok( ! T_BOOL_2('') );
-ok( ! T_BOOL_2(undef) );
+{
+  # these attempt to modify a read-only value
+  local $TODO = "attempts to modify a read-only value should crash";
+  ok( !eval { T_BOOL_2(52); 1 } );
+  ok( !eval { T_BOOL_2(0); 1 } );
+  ok( !eval { T_BOOL_2(''); 1 } );
+  ok( !eval { T_BOOL_2(undef); 1 } );
+}
 
 # T_U_SHORT aka U16
 note("T_U_SHORT");
