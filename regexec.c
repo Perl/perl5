@@ -145,36 +145,46 @@ static const char* const non_utf8_target_but_utf8_required
     SET_nextchr
 
 
-/* these are unrolled below in the CCC_TRY_XXX defined */
-#define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
-    if (!CAT2(PL_utf8_,class)) { \
-	bool ok; \
-	ENTER; save_re_context(); \
-	ok=CAT2(is_utf8_,class)((const U8*)str); \
-        PERL_UNUSED_VAR(ok); \
-	assert(ok); assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
-/* Doesn't do an assert to verify that is correct */
-#define LOAD_UTF8_CHARCLASS_NO_CHECK(class) STMT_START { \
-    if (!CAT2(PL_utf8_,class)) { \
-	bool throw_away; \
-        PERL_UNUSED_VAR(throw_away); \
-	ENTER; save_re_context(); \
-	throw_away = CAT2(is_utf8_,class)((const U8*)" "); \
-        PERL_UNUSED_VAR(throw_away); \
-	LEAVE; } } STMT_END
+#define LOAD_UTF8_CHARCLASS(swash_ptr, property_name) STMT_START {            \
+        if (!swash_ptr) {                                                     \
+            U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;                       \
+            ENTER; save_re_context();                                         \
+            swash_ptr = _core_swash_init("utf8", property_name, &PL_sv_undef, \
+                                         1, 0, NULL, &flags);                 \
+            assert(swash_ptr);                                                \
+        }                                                                     \
+    } STMT_END
 
-#define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS(alnum,"a")
-#define LOAD_UTF8_CHARCLASS_DIGIT() LOAD_UTF8_CHARCLASS(digit,"0")
+/* If in debug mode, we test that a known character properly matches */
+#ifdef DEBUGGING
+#   define LOAD_UTF8_CHARCLASS_DEBUG_TEST(swash_ptr,                          \
+                                          property_name,                      \
+                                          utf8_char_in_property)              \
+        LOAD_UTF8_CHARCLASS(swash_ptr, property_name);                        \
+        assert(swash_fetch(swash_ptr, (U8 *) utf8_char_in_property, TRUE));
+#else
+#   define LOAD_UTF8_CHARCLASS_DEBUG_TEST(swash_ptr,                          \
+                                          property_name,                      \
+                                          utf8_char_in_property)              \
+        LOAD_UTF8_CHARCLASS(swash_ptr, property_name)
+#endif
 
-#define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */        \
-        /* No asserts are done for some of these, in case called on a   */  \
-        /* Unicode version in which they map to nothing */                  \
-	LOAD_UTF8_CHARCLASS(X_regular_begin, HYPHEN_UTF8);                  \
-	LOAD_UTF8_CHARCLASS(X_extend, COMBINING_GRAVE_ACCENT_UTF8);         \
+#define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS_DEBUG_TEST(           \
+                                        PL_utf8_swash_ptrs[_CC_WORDCHAR],     \
+                                        swash_property_names[_CC_WORDCHAR],   \
+                                        GREEK_SMALL_LETTER_IOTA_UTF8)
+
+#define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */          \
+    STMT_START {                                                              \
+	LOAD_UTF8_CHARCLASS_DEBUG_TEST(PL_utf8_X_regular_begin,               \
+                                       "_X_regular_begin",                    \
+                                       GREEK_SMALL_LETTER_IOTA_UTF8);         \
+	LOAD_UTF8_CHARCLASS_DEBUG_TEST(PL_utf8_X_extend,                      \
+                                       "_X_extend",                           \
+                                       COMBINING_GRAVE_ACCENT_UTF8);          \
+    } STMT_END
 
 #define PLACEHOLDER	/* Something for the preprocessor to grab onto */
-
-
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
