@@ -315,7 +315,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The core typemap now handles OUTPUT bool parameters correctly. [perl
+#115796]
 
 =back
 
