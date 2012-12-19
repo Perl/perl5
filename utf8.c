@@ -901,11 +901,12 @@ C<*retlen> will be set to the length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
 enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
-NULL) to -1.  If those warnings are off, the computed value if well-defined (or
-the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
-is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
-next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
+NULL) to -1.  If those warnings are off, the computed value, if well-defined
+(or the Unicode REPLACEMENT CHARACTER if not), is silently returned, and
+C<*retlen> is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is
+the next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is
+returned.
 
 =cut
 */
