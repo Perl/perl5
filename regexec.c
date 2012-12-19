@@ -1634,7 +1634,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case BOUND:
         FBC_BOUND(isWORDCHAR,
                   isALNUM_uni(tmp),
-                  cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+                  cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case BOUNDA:
         FBC_BOUND_NOLOAD(isWORDCHAR_A,
@@ -1644,7 +1644,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case NBOUND:
         FBC_NBOUND(isWORDCHAR,
                    isALNUM_uni(tmp),
-                   cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case NBOUNDA:
         FBC_NBOUND_NOLOAD(isWORDCHAR_A,
@@ -1654,12 +1654,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case BOUNDU:
         FBC_BOUND(isWORDCHAR_L1,
                   isALNUM_uni(tmp),
-                  cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+                  cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case NBOUNDU:
         FBC_NBOUND(isWORDCHAR_L1,
                    isALNUM_uni(tmp),
-                   cBOOL(swash_fetch(PL_utf8_alnum, (U8*)s, utf8_target)));
+                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case LNBREAK:
         REXEC_FBC_CSCAN(is_LNBREAK_utf8_safe(s, strend),
@@ -4219,7 +4219,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         n = 0;
                     else {
                         LOAD_UTF8_CHARCLASS_ALNUM();
-                        n = swash_fetch(PL_utf8_alnum, (U8*)locinput,
+                        n = swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)locinput,
                                                                 utf8_target);
                     }
 		}

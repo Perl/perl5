@@ -829,16 +829,6 @@ static const char* const swash_property_names[] = {
 };
 #endif
 
-#define PL_utf8_alnum   PL_utf8_swash_ptrs[_CC_WORDCHAR]
-#define PL_utf8_alnumc	PL_utf8_swash_ptrs[_CC_ALPHANUMERIC]
-#define PL_utf8_alpha	PL_utf8_swash_ptrs[_CC_ALPHA]
-#define PL_utf8_graph	PL_utf8_swash_ptrs[_CC_GRAPH]
-#define PL_utf8_digit	PL_utf8_swash_ptrs[_CC_DIGIT]
-#define PL_utf8_upper	PL_utf8_swash_ptrs[_CC_UPPER]
-#define PL_utf8_lower	PL_utf8_swash_ptrs[_CC_LOWER]
-#define PL_utf8_print	PL_utf8_swash_ptrs[_CC_PRINT]
-#define PL_utf8_punct	PL_utf8_swash_ptrs[_CC_PUNCT]
-
 #  ifdef DOINIT
 EXTCONST  U32 PL_charclass[] = {
 #    include "l1_char_class_tab.h"

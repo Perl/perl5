@@ -2063,7 +2063,7 @@ Perl_is_utf8_alnum(pTHX_ const U8 *p)
     /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
      * descendant of isalnum(3), in other words, it doesn't
      * contain the '_'. --jhi */
-    return is_utf8_common(p, &PL_utf8_alnum, "IsWord");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_WORDCHAR], "IsWord");
 }
 
 bool
@@ -2073,7 +2073,7 @@ Perl_is_utf8_alnumc(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_ALNUMC;
 
-    return is_utf8_common(p, &PL_utf8_alnumc, "IsAlnum");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], "IsAlnum");
 }
 
 bool
@@ -2136,7 +2136,7 @@ Perl_is_utf8_alpha(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_ALPHA;
 
-    return is_utf8_common(p, &PL_utf8_alpha, "IsAlpha");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_ALPHA], "IsAlpha");
 }
 
 bool
@@ -2202,7 +2202,7 @@ Perl_is_utf8_digit(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_DIGIT;
 
-    return is_utf8_common(p, &PL_utf8_digit, "IsDigit");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_DIGIT], "IsDigit");
 }
 
 bool
@@ -2224,7 +2224,7 @@ Perl_is_utf8_upper(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_UPPER;
 
-    return is_utf8_common(p, &PL_utf8_upper, "IsUppercase");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_UPPER], "IsUppercase");
 }
 
 bool
@@ -2234,7 +2234,7 @@ Perl_is_utf8_lower(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_LOWER;
 
-    return is_utf8_common(p, &PL_utf8_lower, "IsLowercase");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_LOWER], "IsLowercase");
 }
 
 bool
@@ -2254,7 +2254,7 @@ Perl_is_utf8_graph(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_GRAPH;
 
-    return is_utf8_common(p, &PL_utf8_graph, "IsGraph");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_GRAPH], "IsGraph");
 }
 
 bool
@@ -2264,7 +2264,7 @@ Perl_is_utf8_print(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_PRINT;
 
-    return is_utf8_common(p, &PL_utf8_print, "IsPrint");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_PRINT], "IsPrint");
 }
 
 bool
@@ -2274,7 +2274,7 @@ Perl_is_utf8_punct(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_PUNCT;
 
-    return is_utf8_common(p, &PL_utf8_punct, "IsPunct");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_PUNCT], "IsPunct");
 }
 
 bool
