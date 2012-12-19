@@ -1329,9 +1329,9 @@ STMT_START {                                              \
 
 #define REXEC_FBC_UTF8_SCAN(CoDe)                     \
 STMT_START {                                          \
-    while (s < strend && s + (uskip = UTF8SKIP(s)) <= strend) {     \
+    while (s < strend) {                              \
 	CoDe                                          \
-	s += uskip;                                   \
+	s += UTF8SKIP(s);                             \
     }                                                 \
 } STMT_END
 
@@ -5982,7 +5982,7 @@ NULL
 		else if (utf8_target) {
 		    int m = ST.max - ST.min;
 		    for (ST.maxpos = locinput;
-			 m >0 && ST.maxpos + UTF8SKIP(ST.maxpos) <= PL_regeol; m--)
+			 m >0 && ST.maxpos < PL_regeol; m--)
 			ST.maxpos += UTF8SKIP(ST.maxpos);
 		}
 		else {
@@ -6758,11 +6758,11 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
                 /* When both target and pattern are UTF-8, we have to do
                  * string EQ */
                 while (hardcount < max
-                       && scan + (scan_char_len = UTF8SKIP(scan)) <= loceol
-                       && scan_char_len <= STR_LEN(p)
+                       && scan < loceol
+                       && (scan_char_len = UTF8SKIP(scan)) <= STR_LEN(p)
                        && memEQ(scan, STRING(p), scan_char_len))
                 {
-                    scan += scan_char_len;
+                    scan += UTF8SKIP(scan);
                     hardcount++;
                 }
             }
@@ -6874,12 +6874,11 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     }
     case ANYOF:
 	if (utf8_target) {
-	    STRLEN inclasslen;
 	    while (hardcount < max
-                   && scan + (inclasslen = UTF8SKIP(scan)) <= loceol
+                   && scan < loceol
 		   && reginclass(prog, p, (U8*)scan, utf8_target))
 	    {
-		scan += inclasslen;
+		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
 	} else {
