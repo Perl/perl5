@@ -4066,9 +4066,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                      * is an invariant, but there are tests in the test suite
                      * dealing with (??{...}) which violate this) */
 		    while (s < e) {
-			if (l >= PL_regeol)
-			     sayNO;
-                        if (UTF8_IS_ABOVE_LATIN1(* (U8*) l)) {
+			if (l >= PL_regeol || UTF8_IS_ABOVE_LATIN1(* (U8*) l)) {
                             sayNO;
                         }
                         if (UTF8_IS_INVARIANT(*(U8*)l)) {
@@ -4109,17 +4107,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    }
 		}
 		locinput = l;
-		break;
 	    }
-	    /* The target and the pattern have the same utf8ness. */
-	    /* Inline the first character, for speed. */
-	    if (UCHARAT(s) != nextchr)
-		sayNO;
-	    if (PL_regeol - locinput < ln)
-		sayNO;
-	    if (ln > 1 && memNE(s, locinput, ln))
-		sayNO;
-	    locinput += ln;
+            else {
+                /* The target and the pattern have the same utf8ness. */
+                /* Inline the first character, for speed. */
+                if (PL_regeol - locinput < ln
+                    || UCHARAT(s) != nextchr
+                    || (ln > 1 && memNE(s, locinput, ln)))
+                {
+                    sayNO;
+                }
+                locinput += ln;
+            }
 	    break;
 	    }
 
