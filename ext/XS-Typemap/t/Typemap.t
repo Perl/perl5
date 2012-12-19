@@ -152,7 +152,6 @@ ok( ! T_BOOL(undef) );
 
 {
   # these attempt to modify a read-only value
-  local $TODO = "attempts to modify a read-only value should crash";
   ok( !eval { T_BOOL_2(52); 1 } );
   ok( !eval { T_BOOL_2(0); 1 } );
   ok( !eval { T_BOOL_2(''); 1 } );
@@ -160,7 +159,6 @@ ok( ! T_BOOL(undef) );
 }
 
 {
-    local $TODO = "Output parameters for T_BOOL don't work";
     my ($in, $out);
     $in = 1;
     T_BOOL_OUT($out, $in);
