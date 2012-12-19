@@ -160,11 +160,13 @@ ok( ! T_BOOL(undef) );
 }
 
 {
+    local $TODO = "Output parameters for T_BOOL don't work";
     my ($in, $out);
     $in = 1;
     T_BOOL_OUT($out, $in);
     ok($out, "T_BOOL_OUT, true in");
     $in = 0;
+    $out = 1;
     T_BOOL_OUT($out, $in);
     ok(!$out, "T_BOOL_OUT, false in");
 }
