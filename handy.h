@@ -722,11 +722,12 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
 
-/* Character class numbers.  For internal core Perl use only.  These are used
- * in PL_charclass[] and the ones up through the one that corresponds to
- * <_HIGHEST_REGCOMP_DOT_H_SYNC> are used by regcomp.h.  These use names used
- * in l1_char_class_tab.h but their actual definitions are here.  If that file
- * has a name not used here, it won't compile.
+/* Character class numbers.  For internal core Perl use only.  The ones less
+ * than 32 are used in PL_charclass[] and the ones up through the one that
+ * corresponds to <_HIGHEST_REGCOMP_DOT_H_SYNC> are used by regcomp.h and
+ * related files.  PL_charclass ones use names used in l1_char_class_tab.h but
+ * their actual definitions are here.  If that file has a name not used here,
+ * it won't compile.
  *
  * The first group of these is ordered in what I (khw) estimate to be the
  * frequency of their use.  This gives a slight edge to exiting a loop earlier
@@ -775,7 +776,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
  * is used only for optimization (as of this writing), and differs in the
  * Latin1 range from the ALPHA bit only in two relatively unimportant
- * characters: the masculine and feminine ordinal indicators */
+ * characters: the masculine and feminine ordinal indicators, so removing it
+ * would just cause /i regexes which match them to run less efficiently */
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
 /* An enum version of the character class numbers, to help compilers
@@ -1120,8 +1122,8 @@ EXTCONST U32 PL_charclass[];
 #define isPSXSPC_LC(c)		isSPACE_LC(c)
 
 /* For internal core Perl use only.  If the input is Latin1, use the Latin1
- * macro; otherwise use the function.  Won't compile if 'c' isn't unsigned, as
- * won't match function prototype. The macros do bounds checking, so have
+ * macro; otherwise use the function 'above_latin1'.  Won't compile if 'c' isn't unsigned, as
+ * won't match above_latin1 prototype. The macros do bounds checking, so have
  * duplicate checks here, so could create versions of the macros that don't,
  * but experiments show that gcc optimizes them out anyway. */
 
@@ -1188,7 +1190,10 @@ EXTCONST U32 PL_charclass[];
 
 #define isBLANK_LC_uni(c)	isBLANK_LC_uvchr(UNI_TO_NATIVE(c))
 
-/* For internal core Perl use only.  If the input is in the Latin1 range, use
+/* Everything whose name begins with an underscore is for internal core Perl
+ * use only. */
+
+/* If the input is in the Latin1 range, use
  * the Latin1 macro 'classnum' on 'p' which is a pointer to a UTF-8 string.
  * Otherwise use the value given by the 'utf8' parameter.  This relies on the
  * fact that ASCII characters have the same representation whether utf8 or not.
