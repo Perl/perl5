@@ -443,6 +443,14 @@ T_BOOL_2( in )
  OUTPUT:
    in
 
+void
+T_BOOL_OUT( out, in )
+  bool out
+  bool in
+ CODE:
+ out = in;
+ OUTPUT:
+   out
 
 ## T_U_INT
 
