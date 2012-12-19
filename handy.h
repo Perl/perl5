@@ -1126,31 +1126,31 @@ EXTCONST U32 PL_charclass[];
  * but experiments show that gcc optimizes them out anyway. */
 
 /* Note that all ignore 'use bytes' */
-#define _generic_uni(classnum, function, c) ((c) < 256                    \
-                                             ? _generic_isCC(c, classnum) \
-                                             : function(c))
-#define _generic_uni_swash(classnum, c) ((c) < 256                        \
-                                             ? _generic_isCC(c, classnum) \
+#define _generic_uni(classnum, above_latin1, c) ((c) < 256                    \
+                                             ? _generic_isCC(c, classnum)     \
+                                             : above_latin1(c))
+#define _generic_swash_uni(classnum, c) ((c) < 256                            \
+                                             ? _generic_isCC(c, classnum)     \
                                              : _is_uni_FOO(classnum, c))
-#define isALPHA_uni(c)      _generic_uni_swash(_CC_ALPHA, c)
-#define isALPHANUMERIC_uni(c) _generic_uni_swash(_CC_ALPHANUMERIC, c)
+#define isALPHA_uni(c)      _generic_swash_uni(_CC_ALPHA, c)
+#define isALPHANUMERIC_uni(c) _generic_swash_uni(_CC_ALPHANUMERIC, c)
 #define isASCII_uni(c)      isASCII(c)
 #define isBLANK_uni(c)      _generic_uni(_CC_BLANK, is_HORIZWS_cp_high, c)
 #define isCNTRL_uni(c)      isCNTRL_L1(c) /* All controls are in Latin1 */
-#define isDIGIT_uni(c)      _generic_uni_swash(_CC_DIGIT, c)
-#define isGRAPH_uni(c)      _generic_uni_swash(_CC_GRAPH, c)
+#define isDIGIT_uni(c)      _generic_swash_uni(_CC_DIGIT, c)
+#define isGRAPH_uni(c)      _generic_swash_uni(_CC_GRAPH, c)
 #define isIDFIRST_uni(c)    _generic_uni(_CC_IDFIRST, _is_uni_perl_idstart, c)
-#define isLOWER_uni(c)      _generic_uni_swash(_CC_LOWER, c)
-#define isPRINT_uni(c)      _generic_uni_swash(_CC_PRINT, c)
+#define isLOWER_uni(c)      _generic_swash_uni(_CC_LOWER, c)
+#define isPRINT_uni(c)      _generic_swash_uni(_CC_PRINT, c)
 
 /* Posix and regular space are identical above Latin1 */
 #define isPSXSPC_uni(c)     _generic_uni(_CC_PSXSPC, is_XPERLSPACE_cp_high, c)
 
-#define isPUNCT_uni(c)      _generic_uni_swash(_CC_PUNCT, c)
+#define isPUNCT_uni(c)      _generic_swash_uni(_CC_PUNCT, c)
 #define isSPACE_uni(c)      _generic_uni(_CC_SPACE, is_XPERLSPACE_cp_high, c)
-#define isUPPER_uni(c)      _generic_uni_swash(_CC_UPPER, c)
+#define isUPPER_uni(c)      _generic_swash_uni(_CC_UPPER, c)
 #define isVERTWS_uni(c)     _generic_uni(_CC_VERTSPACE, is_VERTWS_cp_high, c)
-#define isWORDCHAR_uni(c)   _generic_uni_swash(_CC_WORDCHAR, c)
+#define isWORDCHAR_uni(c)   _generic_swash_uni(_CC_WORDCHAR, c)
 #define isXDIGIT_uni(c)     _generic_uni(_CC_XDIGIT, is_XDIGIT_cp_high, c)
 
 #define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
@@ -1158,29 +1158,32 @@ EXTCONST U32 PL_charclass[];
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 
-#define _gnrc_is_LC_uvchr(latin1, above_latin1, c)                            \
-                        (c < 256 ? latin1(c) : above_latin1(NATIVE_TO_UNI(c)))
-#define isALPHA_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHA_LC, is_uni_alpha_lc, c)
-#define isALPHANUMERIC_LC_uvchr(c)  _gnrc_is_LC_uvchr(isALPHANUMERIC_LC,      \
-                                                         is_uni_alnumc_lc, c)
+#define _generic_LC_uvchr(latin1, above_latin1, c)                            \
+                                    (c < 256 ? latin1(c) : above_latin1(c))
+#define _generic_LC_swash_uvchr(latin1, classnum, c)                          \
+                            (c < 256 ? latin1(c) : _is_uni_FOO(classnum, c))
+
+#define isALPHA_LC_uvchr(c)  _generic_LC_swash_uvchr(isALPHA_LC, _CC_ALPHA, c)
+#define isALPHANUMERIC_LC_uvchr(c)  _generic_LC_swash_uvchr(isALPHANUMERIC_LC, \
+                                                         _CC_ALPHANUMERIC, c)
 #define isASCII_LC_uvchr(c)  isASCII_LC(c)
-#define isBLANK_LC_uvchr(c)  _gnrc_is_LC_uvchr(isBLANK_LC, is_HORIZWS_cp_high, c)
+#define isBLANK_LC_uvchr(c)  _generic_LC_uvchr(isBLANK_LC, is_HORIZWS_cp_high, c)
 #define isCNTRL_LC_uvchr(c)  (c < 256 ? isCNTRL_LC(c) : 0)
-#define isDIGIT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isDIGIT_LC, is_uni_digit_lc, c)
-#define isGRAPH_LC_uvchr(c)  _gnrc_is_LC_uvchr(isGRAPH_LC, is_uni_graph_lc, c)
-#define isIDFIRST_LC_uvchr(c)  _gnrc_is_LC_uvchr(isIDFIRST_LC,                 \
-                                                          is_uni_idfirst_lc, c)
-#define isLOWER_LC_uvchr(c)  _gnrc_is_LC_uvchr(isLOWER_LC, is_uni_lower_lc, c)
-#define isPRINT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPRINT_LC, is_uni_print_lc, c)
+#define isDIGIT_LC_uvchr(c)  _generic_LC_swash_uvchr(isDIGIT_LC, _CC_DIGIT, c)
+#define isGRAPH_LC_uvchr(c)  _generic_LC_swash_uvchr(isGRAPH_LC, _CC_GRAPH, c)
+#define isIDFIRST_LC_uvchr(c)  _generic_LC_uvchr(isIDFIRST_LC,                 \
+                                                  _is_uni_perl_idstart, c)
+#define isLOWER_LC_uvchr(c)  _generic_LC_swash_uvchr(isLOWER_LC, _CC_LOWER, c)
+#define isPRINT_LC_uvchr(c)  _generic_LC_swash_uvchr(isPRINT_LC, _CC_PRINT, c)
 #define isPSXSPC_LC_uvchr(c) isSPACE_LC_uvchr(c) /* space is identical to posix
                                                     space under locale */
-#define isPUNCT_LC_uvchr(c)  _gnrc_is_LC_uvchr(isPUNCT_LC, is_uni_punct_lc, c)
-#define isSPACE_LC_uvchr(c)  _gnrc_is_LC_uvchr(isSPACE_LC,                     \
+#define isPUNCT_LC_uvchr(c)  _generic_LC_swash_uvchr(isPUNCT_LC, _CC_PUNCT, c)
+#define isSPACE_LC_uvchr(c)  _generic_LC_uvchr(isSPACE_LC,                     \
                                                     is_XPERLSPACE_cp_high, c)
-#define isUPPER_LC_uvchr(c)  _gnrc_is_LC_uvchr(isUPPER_LC, is_uni_upper_lc, c)
-#define isWORDCHAR_LC_uvchr(c)  _gnrc_is_LC_uvchr(isWORDCHAR_LC,              \
-                                                           is_uni_alnum_lc, c)
-#define isXDIGIT_LC_uvchr(c) _gnrc_is_LC_uvchr(isXDIGIT_LC, is_XDIGIT_cp_high, c)
+#define isUPPER_LC_uvchr(c)  _generic_LC_swash_uvchr(isUPPER_LC, _CC_UPPER, c)
+#define isWORDCHAR_LC_uvchr(c)  _generic_LC_swash_uvchr(isWORDCHAR_LC,              \
+                                                           _CC_WORDCHAR, c)
+#define isXDIGIT_LC_uvchr(c) _generic_LC_uvchr(isXDIGIT_LC, is_XDIGIT_cp_high, c)
 
 
 #define isBLANK_LC_uni(c)	isBLANK_LC_uvchr(UNI_TO_NATIVE(c))
@@ -1191,7 +1194,7 @@ EXTCONST U32 PL_charclass[];
  * fact that ASCII characters have the same representation whether utf8 or not.
  * Note that it assumes that the utf8 has been validated, and ignores 'use
  * bytes' */
-#define _generic_utf8_utf8(classnum, p, utf8) (UTF8_IS_INVARIANT(*(p))         \
+#define _generic_utf8(classnum, p, utf8) (UTF8_IS_INVARIANT(*(p))              \
                                          ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? _generic_isCC(                    \
@@ -1199,23 +1202,23 @@ EXTCONST U32 PL_charclass[];
                                                                    *((p)+1 )), \
                                                    classnum)                   \
                                            : utf8)
-/* Like the above, but calls 'function(p)' to get the utf8 value */
-#define _generic_utf8(classnum, function, p)  \
-                                    _generic_utf8_utf8(classnum, p, function(p))
-
-/* Like the above, but passes classnum to _isFOO_utf8() */
+/* Like the above, but calls 'above_latin1(p)' to get the utf8 value.  'above_latin1'
+ * can be a macro */
+#define _generic_func_utf8(classnum, above_latin1, p)  \
+                                    _generic_utf8(classnum, p, above_latin1(p))
+/* Like the above, but passes classnum to _isFOO_utf8(), instead of having a
+ * 'above_latin1' parameter */
 #define _generic_swash_utf8(classnum, p)  \
-                      _generic_utf8_utf8(classnum, p, _is_utf8_FOO(classnum, p))
-
+                      _generic_utf8(classnum, p, _is_utf8_FOO(classnum, p))
 
 /* Like the above, but should be used only when it is known that there are no
  * characters in the range 128-255 which the class is TRUE for.  Hence it can
- * skip the tests for this range */
-#define _generic_utf8_no_upper_latin1(classnum, function, p)                   \
+ * skip the tests for this range.  'above_latin1' should include its arguments */
+#define _generic_utf8_no_upper_latin1(classnum, p, above_latin1)                   \
                                          (UTF8_IS_INVARIANT(*(p))              \
                                          ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_ABOVE_LATIN1(*(p)))        \
-                                           ? function(p)                       \
+                                           ? above_latin1                          \
                                            : 0)
 
 /* NOTE that some of these macros have very similar ones in regcharclass.h.
@@ -1231,12 +1234,12 @@ EXTCONST U32 PL_charclass[];
 #define isASCII_utf8(p)         isASCII(*p) /* Because ASCII is invariant under
                                                utf8, the non-utf8 macro works
                                              */
-#define isBLANK_utf8(p)         _generic_utf8(_CC_BLANK, is_HORIZWS_high, p)
-#define isCNTRL_utf8(p)         _generic_utf8_utf8(_CC_CNTRL, p, 0)
-#define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT,      \
-                                                              is_utf8_digit, p)
+#define isBLANK_utf8(p)         _generic_func_utf8(_CC_BLANK, is_HORIZWS_high, p)
+#define isCNTRL_utf8(p)         _generic_utf8(_CC_CNTRL, p, 0)
+#define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT, p,   \
+                                                  _is_utf8_FOO(_CC_DIGIT, p))
 #define isGRAPH_utf8(p)         _generic_swash_utf8(_CC_GRAPH, p)
-#define isIDCONT_utf8(p)        _generic_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
+#define isIDCONT_utf8(p)        _generic_func_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -1244,22 +1247,22 @@ EXTCONST U32 PL_charclass[];
  * ever wanted to know about.  (In the ASCII range, there isn't a difference.)
  * This used to be not the XID version, but we decided to go with the more
  * modern Unicode definition */
-#define isIDFIRST_utf8(p)       _generic_utf8(_CC_IDFIRST,               \
+#define isIDFIRST_utf8(p)       _generic_func_utf8(_CC_IDFIRST,               \
                                                 _is_utf8_perl_idstart, p)
 
 #define isLOWER_utf8(p)         _generic_swash_utf8(_CC_LOWER, p)
 #define isPRINT_utf8(p)         _generic_swash_utf8(_CC_PRINT, p)
 
 /* Posix and regular space are identical above Latin1 */
-#define isPSXSPC_utf8(p)        _generic_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
+#define isPSXSPC_utf8(p)        _generic_func_utf8(_CC_PSXSPC, is_XPERLSPACE_high, p)
 
 #define isPUNCT_utf8(p)         _generic_swash_utf8(_CC_PUNCT, p)
-#define isSPACE_utf8(p)         _generic_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
+#define isSPACE_utf8(p)         _generic_func_utf8(_CC_SPACE, is_XPERLSPACE_high, p)
 #define isUPPER_utf8(p)         _generic_swash_utf8(_CC_UPPER, p)
-#define isVERTWS_utf8(p)        _generic_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
+#define isVERTWS_utf8(p)        _generic_func_utf8(_CC_VERTSPACE, is_VERTWS_high, p)
 #define isWORDCHAR_utf8(p)      _generic_swash_utf8(_CC_WORDCHAR, p)
-#define isXDIGIT_utf8(p)        _generic_utf8_no_upper_latin1(_CC_XDIGIT,      \
-                                                              is_XDIGIT_high, p)
+#define isXDIGIT_utf8(p)        _generic_utf8_no_upper_latin1(_CC_XDIGIT, p,   \
+                                                          is_XDIGIT_high(p))
 
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
@@ -1270,35 +1273,37 @@ EXTCONST U32 PL_charclass[];
  * use the value given by the 'utf8' parameter.  This relies on the fact that
  * ASCII characters have the same representation whether utf8 or not.  Note
  * that it assumes that the utf8 has been validated, and ignores 'use bytes' */
-#define _generic_LC_utf8_utf8(macro, p, utf8) \
+#define _generic_LC_utf8(macro, p, utf8)                                   \
                          (UTF8_IS_INVARIANT(*(p))                          \
                          ? macro(*(p))                                     \
                          : (UTF8_IS_DOWNGRADEABLE_START(*(p)))             \
                            ? macro(TWO_BYTE_UTF8_TO_UNI(*(p), *((p)+1)))   \
                            : utf8)
 
-#define _generic_LC_utf8(macro, utf8_func, p)                              \
-                            _generic_LC_utf8_utf8(macro, p, utf8_func(p))
+#define _generic_LC_swash_utf8(macro, classnum, p)                         \
+                    _generic_LC_utf8(macro, p, _is_utf8_FOO(classnum, p))
+#define _generic_LC_func_utf8(macro, above_latin1, p)                         \
+                    _generic_LC_utf8(macro, p, above_latin1(p))
 
-#define isALPHANUMERIC_LC_utf8(p)  _generic_LC_utf8(isALPHANUMERIC_LC,       \
-                                                          is_utf8_alnumc, p)
-#define isALPHA_LC_utf8(p)   _generic_LC_utf8(isALPHA_LC, is_utf8_alpha, p)
+#define isALPHANUMERIC_LC_utf8(p)  _generic_LC_swash_utf8(isALPHANUMERIC_LC,  \
+                                                      _CC_ALPHANUMERIC, p)
+#define isALPHA_LC_utf8(p)   _generic_LC_swash_utf8(isALPHA_LC, _CC_ALPHA, p)
 #define isASCII_LC_utf8(p)   isASCII_LC(*p)
-#define isBLANK_LC_utf8(p)   _generic_LC_utf8(isBLANK_LC, is_HORIZWS_high, p)
-#define isCNTRL_LC_utf8(p)   _generic_LC_utf8_utf8(isCNTRL_LC, p, 0)
-#define isDIGIT_LC_utf8(p)   _generic_LC_utf8(isDIGIT_LC, is_utf8_digit, p)
-#define isGRAPH_LC_utf8(p)   _generic_LC_utf8(isGRAPH_LC, is_utf8_graph, p)
-#define isIDFIRST_LC_utf8(p) _generic_LC_utf8(isIDFIRST_LC,                \
-                                                 _is_utf8_perl_idstart, p)
-#define isLOWER_LC_utf8(p)   _generic_LC_utf8(isLOWER_LC, is_utf8_lower, p)
-#define isPRINT_LC_utf8(p)   _generic_LC_utf8(isPRINT_LC, is_utf8_print, p)
+#define isBLANK_LC_utf8(p)   _generic_LC_func_utf8(isBLANK_LC, is_HORIZWS_high, p)
+#define isCNTRL_LC_utf8(p)   _generic_LC_utf8(isCNTRL_LC, p, 0)
+#define isDIGIT_LC_utf8(p)   _generic_LC_swash_utf8(isDIGIT_LC, _CC_DIGIT, p)
+#define isGRAPH_LC_utf8(p)   _generic_LC_swash_utf8(isGRAPH_LC, _CC_GRAPH, p)
+#define isIDFIRST_LC_utf8(p) _generic_LC_func_utf8(isIDFIRST_LC, _is_utf8_perl_idstart, p)
+#define isLOWER_LC_utf8(p)   _generic_LC_swash_utf8(isLOWER_LC, _CC_LOWER, p)
+#define isPRINT_LC_utf8(p)   _generic_LC_swash_utf8(isPRINT_LC, _CC_PRINT, p)
 #define isPSXSPC_LC_utf8(p)  isSPACE_LC_utf8(p) /* space is identical to posix
                                                    space under locale */
-#define isPUNCT_LC_utf8(p)   _generic_LC_utf8(isPUNCT_LC, is_utf8_punct, p)
-#define isSPACE_LC_utf8(p)   _generic_LC_utf8(isSPACE_LC, is_XPERLSPACE_high, p)
-#define isUPPER_LC_utf8(p)   _generic_LC_utf8(isUPPER_LC, is_utf8_upper, p)
-#define isWORDCHAR_LC_utf8(p) _generic_LC_utf8(isWORDCHAR_LC, is_utf8_alnum, p)
-#define isXDIGIT_LC_utf8(p)  _generic_LC_utf8(isXDIGIT_LC, is_XDIGIT_high, p)
+#define isPUNCT_LC_utf8(p)   _generic_LC_swash_utf8(isPUNCT_LC, _CC_PUNCT, p)
+#define isSPACE_LC_utf8(p)   _generic_LC_func_utf8(isSPACE_LC, is_XPERLSPACE_high, p)
+#define isUPPER_LC_utf8(p)   _generic_LC_swash_utf8(isUPPER_LC, _CC_UPPER, p)
+#define isWORDCHAR_LC_utf8(p) _generic_LC_swash_utf8(isWORDCHAR_LC,           \
+                                                            _CC_WORDCHAR, p)
+#define isXDIGIT_LC_utf8(p)  _generic_LC_func_utf8(isXDIGIT_LC, is_XDIGIT_high, p)
 
 /* Macros for backwards compatibility and for completeness when the ASCII and
  * Latin1 values are identical */
