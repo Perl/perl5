@@ -2297,26 +2297,6 @@ Perl_is_utf8_mark(pTHX_ const U8 *p)
     return is_utf8_common(p, &PL_utf8_mark, "IsM");
 }
 
-bool
-Perl_is_utf8_X_regular_begin(pTHX_ const U8 *p)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_IS_UTF8_X_REGULAR_BEGIN;
-
-    return is_utf8_common(p, &PL_utf8_X_regular_begin, "_X_Regular_Begin");
-}
-
-bool
-Perl_is_utf8_X_extend(pTHX_ const U8 *p)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_IS_UTF8_X_EXTEND;
-
-    return is_utf8_common(p, &PL_utf8_X_extend, "_X_Extend");
-}
-
 /*
 =for apidoc to_utf8_case
 
