@@ -4279,13 +4279,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	        if (!reginclass(rex, scan, (U8*)locinput, utf8_target))
 		    sayNO;
 		locinput += UTF8SKIP(locinput);
-		break;
 	    }
 	    else {
 		if (!REGINCLASS(rex, scan, (U8*)locinput))
 		    sayNO;
 		locinput++;
-		break;
 	    }
 	    break;
 
