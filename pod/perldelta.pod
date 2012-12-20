@@ -53,6 +53,38 @@ an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Various XS-callable functions are now deprecated
+
+All the functions used to classify characters will be removed from a
+future version of Perl, and should not be used.  With participating C
+compilers (e.g., gcc), compiling any file that uses any of these will
+generate a warning.  These were not intended for public use; there are
+equivalent, faster, macros for most of them.
+See L<perlapi/Character classes>.  The complete list (including some
+that were deprecated in 5.17.7) is:
+C<is_uni_alnum>, C<is_uni_alnumc>, C<is_uni_alnumc_lc>,
+C<is_uni_alnum_lc>, C<is_uni_alpha>, C<is_uni_alpha_lc>,
+C<is_uni_ascii>, C<is_uni_ascii_lc>, C<is_uni_blank>,
+C<is_uni_blank_lc>, C<is_uni_cntrl>, C<is_uni_cntrl_lc>,
+C<is_uni_digit>, C<is_uni_digit_lc>, C<is_uni_graph>,
+C<is_uni_graph_lc>, C<is_uni_idfirst>, C<is_uni_idfirst_lc>,
+C<is_uni_lower>, C<is_uni_lower_lc>, C<is_uni_print>,
+C<is_uni_print_lc>, C<is_uni_punct>, C<is_uni_punct_lc>,
+C<is_uni_space>, C<is_uni_space_lc>, C<is_uni_upper>,
+C<is_uni_upper_lc>, C<is_uni_xdigit>, C<is_uni_xdigit_lc>,
+C<is_utf8_alnum>, C<is_utf8_alnumc>, C<is_utf8_alpha>,
+C<is_utf8_ascii>, C<is_utf8_blank>, C<is_utf8_char>,
+C<is_utf8_cntrl>, C<is_utf8_digit>, C<is_utf8_graph>,
+C<is_utf8_idcont>, C<is_utf8_idfirst>, C<is_utf8_lower>,
+C<is_utf8_mark>, C<is_utf8_perl_space>, C<is_utf8_perl_word>,
+C<is_utf8_posix_digit>, C<is_utf8_print>, C<is_utf8_punct>,
+C<is_utf8_space>, C<is_utf8_upper>, C<is_utf8_xdigit>,
+C<is_utf8_xidcont>, C<is_utf8_xidfirst>.
+
+In addition these three functions that have never worked properly are
+deprecated:
+C<to_uni_lower_lc>, C<to_uni_title_lc>, and C<to_uni_upper_lc>.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.
