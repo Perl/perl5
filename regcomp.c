@@ -6905,7 +6905,6 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * should eventually be made public */
 
 /* The header definitions are in F<inline_invlist.c> */
-
 #define TO_INTERNAL_SIZE(x) ((x + HEADER_LENGTH) * sizeof(UV))
 #define FROM_INTERNAL_SIZE(x) ((x / sizeof(UV)) - HEADER_LENGTH)
 
@@ -10170,6 +10169,7 @@ tryagain:
             if (invert) {
                 op += NPOSIXD - POSIXD;
             }
+
 	    ret = reg_node(pRExC_state, op);
             if (! SIZE_ONLY) {
                 FLAGS(ret) = namedclass_to_classnum(arg);
@@ -10177,6 +10177,7 @@ tryagain:
 
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
+
 	case 'D':
             invert = 1;
             /* FALLTHROUGH */
@@ -12232,13 +12233,13 @@ parseit:
 #endif
 
                 join_posix:
-                        /* The odd numbered ones are the complements of the
-                         * next-lower even number one */
-                        if (namedclass % 2 == 1) {
-                            invert = ! invert;
-                            namedclass--;
-                        }
-                        arg = namedclass_to_classnum(namedclass);
+                    /* The odd numbered ones are the complements of the
+                     * next-lower even number one */
+                    if (namedclass % 2 == 1) {
+                        invert = ! invert;
+                        namedclass--;
+                    }
+                    arg = namedclass_to_classnum(namedclass);
                     break;
             }
         }
