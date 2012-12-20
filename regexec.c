@@ -6762,7 +6762,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
                        && (scan_char_len = UTF8SKIP(scan)) <= STR_LEN(p)
                        && memEQ(scan, STRING(p), scan_char_len))
                 {
-                    scan += UTF8SKIP(scan);
+                    scan += scan_char_len;
                     hardcount++;
                 }
             }
