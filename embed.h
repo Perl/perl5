@@ -30,6 +30,7 @@
 #define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
 #define _is_utf8_FOO(a,b)	Perl__is_utf8_FOO(aTHX_ a,b)
+#define _is_utf8_mark(a)	Perl__is_utf8_mark(aTHX_ a)
 #define _is_utf8_perl_idstart(a)	Perl__is_utf8_perl_idstart(aTHX_ a)
 #define _to_uni_fold_flags(a,b,c,d)	Perl__to_uni_fold_flags(aTHX_ a,b,c,d)
 #define _to_utf8_fold_flags(a,b,c,d,e)	Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e)

@@ -2288,13 +2288,24 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 }
 
 bool
+Perl__is_utf8_mark(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT__IS_UTF8_MARK;
+
+    return is_utf8_common(p, &PL_utf8_mark, "IsM");
+}
+
+
+bool
 Perl_is_utf8_mark(pTHX_ const U8 *p)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_MARK;
 
-    return is_utf8_common(p, &PL_utf8_mark, "IsM");
+    return _is_utf8_mark(p);
 }
 
 /*

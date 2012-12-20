@@ -44,6 +44,12 @@ PERL_CALLCONV bool	Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
 #define PERL_ARGS_ASSERT__IS_UTF8_FOO	\
 	assert(p)
 
+PERL_CALLCONV bool	Perl__is_utf8_mark(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_UTF8_MARK	\
+	assert(p)
+
 PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

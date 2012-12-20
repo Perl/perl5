@@ -681,6 +681,7 @@ AMpR	|bool	|is_utf8_print	|NN const U8 *p
 AMpR	|bool	|is_utf8_punct	|NN const U8 *p
 ADMpR	|bool	|is_utf8_xdigit	|NN const U8 *p
 AMpR	|bool	|is_utf8_mark	|NN const U8 *p
+AMpR	|bool	|_is_utf8_mark	|NN const U8 *p
 : Used in perly.y
 p	|OP*	|jmaybe		|NN OP *o
 : Used in pp.c 
