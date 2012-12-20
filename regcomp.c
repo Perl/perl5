@@ -10151,33 +10151,6 @@ tryagain:
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 
-	case 'S':
-            invert = 1;
-            /* FALLTHROUGH */
-	case 's':
-            arg = ANYOF_SPACE;
-
-        join_posix:
-
-	    op = POSIXD + get_regex_charset(RExC_flags);
-            if (op > POSIXA) {  /* /aa is same as /a */
-                op = POSIXA;
-            }
-
-        join_posix_op_known:
-
-            if (invert) {
-                op += NPOSIXD - POSIXD;
-            }
-
-	    ret = reg_node(pRExC_state, op);
-            if (! SIZE_ONLY) {
-                FLAGS(ret) = namedclass_to_classnum(arg);
-            }
-
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
-
 	case 'D':
             invert = 1;
             /* FALLTHROUGH */
@@ -10205,6 +10178,33 @@ tryagain:
 	    arg = ANYOF_VERTWS;
             op = POSIXU;
             goto join_posix_op_known;
+
+	case 'S':
+            invert = 1;
+            /* FALLTHROUGH */
+	case 's':
+            arg = ANYOF_SPACE;
+
+        join_posix:
+
+	    op = POSIXD + get_regex_charset(RExC_flags);
+            if (op > POSIXA) {  /* /aa is same as /a */
+                op = POSIXA;
+            }
+
+        join_posix_op_known:
+
+            if (invert) {
+                op += NPOSIXD - POSIXD;
+            }
+
+	    ret = reg_node(pRExC_state, op);
+            if (! SIZE_ONLY) {
+                FLAGS(ret) = namedclass_to_classnum(arg);
+            }
+
+	    *flagp |= HASWIDTH|SIMPLE;
+            /* FALL THROUGH */
 
          finish_meta_pat:	    
 	    nextchar(pRExC_state);
