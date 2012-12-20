@@ -244,7 +244,7 @@ struct p5rx {
 Returns the value of the object's reference count.
 
 =for apidoc Am|SV*|SvREFCNT_inc|SV* sv
-Increments the reference count of the given SV.
+Increments the reference count of the given SV, returning the SV.
 
 All of the following SvREFCNT_inc* macros are optimized versions of
 SvREFCNT_inc, and can be replaced with SvREFCNT_inc.
