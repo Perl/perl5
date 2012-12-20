@@ -315,8 +315,14 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-The core typemap now handles OUTPUT bool parameters correctly. [perl
-#115796]
+A bug in the core typemap caused any C types that map to the T_BOOL core
+typemap entry to not be set, updated, or modified when the T_BOOL variable was
+used in an OUTPUT: section with an exception for RETVAL. T_BOOL in an INPUT:
+section was not affected. Using a T_BOOL return type for an XSUB (RETVAL)
+was not affected. A side effect of fixing this bug is, if a T_BOOL is specified
+in the OUTPUT: section (which previous did nothing to the SV), and a read only
+SV (literal) is passed to the XSUB, croaks like "Modification of a read-only
+value attempted" will happen. [perl #115796]
 
 =back
 
