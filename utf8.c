@@ -3976,7 +3976,8 @@ SV*
 Perl__swash_to_invlist(pTHX_ SV* const swash)
 {
 
-   /* Subject to change or removal.  For use only in one place in regcomp.c */
+   /* Subject to change or removal.  For use only in one place in regcomp.c.
+    * Ownership is given to one reference count in the returned SV* */
 
     U8 *l, *lend;
     char *loc;
@@ -4002,7 +4003,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
     /* If not a hash, it must be the swash's inversion list instead */
     if (SvTYPE(hv) != SVt_PVHV) {
-        return (SV*) hv;
+        return SvREFCNT_inc_simple_NN((SV*) hv);
     }
 
     /* The string containing the main body of the table */
