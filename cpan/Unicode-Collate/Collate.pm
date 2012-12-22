@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.96';
+our $VERSION = '0.97';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -502,7 +502,7 @@ sub splitEnt
 	} elsif ($ver9) {
 	    $src[$i] = undef if $map->{ $src[$i] }
 			   ? @{ $map->{ $src[$i] } } == 0
-			   : _ignorable_simple($src[$i]); ### XS only
+			   : $uXS && _ignorable_simple($src[$i]); ### XS only
 	}
     }
 
@@ -1217,7 +1217,7 @@ next to C<c>. For a certain language where C<ch> as the next letter,
 C<"abch"> is greater than C<"abc\x{FFFF}">, but lesser than C<"abd">.
 
 Note: This is equivalent to C<entry =E<gt> 'FFFF ; [.FFFE.0020.0005.FFFF]'>.
-C<entry> allows tailoring of any other character than U+FFFF.
+Any other character than C<U+FFFF> can be tailored by C<entry>.
 
 =item identical
 
@@ -1326,7 +1326,7 @@ then C<$a2> and C<$b2> at level 1, as followed.
         "bbb\x{FFFE}a"
 
 Note: This is equivalent to C<entry =E<gt> 'FFFE ; [.0001.0020.0005.FFFE]'>.
-C<entry> allows tailoring of any other character than U+FFFE.
+Any other character than C<U+FFFE> can be tailored by C<entry>.
 
 =item normalization
 

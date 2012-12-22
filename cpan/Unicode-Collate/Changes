@@ -1,5 +1,11 @@
 Revision history for Perl module Unicode::Collate.
 
+0.97  Sat Dec 22 14:25:50 2012
+    - bug fix: XS of 0.96 (if UCA_Version is 9 to 11) wrongly referred to
+      DUCET for completely ignorable characters, even though the collator
+      don't use DUCET.
+    - separated t/notable.t from t/test.t.
+
 0.96  Sat Dec 15 19:43:10 2012
     - special noncharancter tailorings ('highestFFFF' and 'minimalFFFE')
       * some locales are modified for 'highestFFFF': as, bn, fa, gu, hi, hy,

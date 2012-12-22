@@ -2919,6 +2919,7 @@ cpan/Unicode-Collate/t/loc_zh.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_zhzy.t
 cpan/Unicode-Collate/t/nonchar.t			Unicode::Collate
 cpan/Unicode-Collate/t/normal.t			Unicode::Collate
+cpan/Unicode-Collate/t/notable.t
 cpan/Unicode-Collate/t/overcjk0.t		Unicode::Collate
 cpan/Unicode-Collate/t/overcjk1.t		Unicode::Collate
 cpan/Unicode-Collate/t/override.t		Unicode::Collate
