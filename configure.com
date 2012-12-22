@@ -5642,7 +5642,7 @@ $ THEN
 $   d_nv_preserves_uv = "define"
 $   echo "Your NVs can preserve all ''nv_preserves_uv_bits' bits of your UVs."
 $ ELSE
-$   d_nv_preserves_uv = "undef""
+$   d_nv_preserves_uv = "undef"
 $   echo "Your NVs can preserve only ''nv_preserves_uv_bits' bits of your UVs."	
 $ ENDIF
 $!
