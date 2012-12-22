@@ -14413,8 +14413,10 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 			break;
 		}
 		else {
+		    SV * const  opsv = cSVOPx_sv(kid);
+		    const IV  opsviv = SvIV(opsv);
 		    SV * const * const svp = av_fetch(MUTABLE_AV(sv),
-			negate ? - SvIV(cSVOPx_sv(kid)) : SvIV(cSVOPx_sv(kid)),
+			negate ? - opsviv : opsviv,
 			FALSE);
 		    if (!svp || *svp != uninit_sv)
 			break;
