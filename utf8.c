@@ -1479,6 +1479,14 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
     return utf16_to_utf8(p, d, bytelen, newlen);
 }
 
+bool
+Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
+{
+    U8 tmpbuf[UTF8_MAXBYTES+1];
+    uvchr_to_utf8(tmpbuf, c);
+    return _is_utf8_FOO(classnum, tmpbuf);
+}
+
 /* for now these are all defined (inefficiently) in terms of the utf8 versions.
  * Note that the macros in handy.h that call these short-circuit calling them
  * for Latin-1 range inputs */
@@ -1488,7 +1496,7 @@ Perl_is_uni_alnum(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_alnum(tmpbuf);
+    return _is_utf8_FOO(_CC_WORDCHAR, tmpbuf);
 }
 
 bool
@@ -1496,7 +1504,7 @@ Perl_is_uni_alnumc(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_alnumc(tmpbuf);
+    return _is_utf8_FOO(_CC_ALPHANUMERIC, tmpbuf);
 }
 
 bool    /* Internal function so we can deprecate the external one, and call
@@ -1532,7 +1540,7 @@ Perl_is_uni_alpha(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_alpha(tmpbuf);
+    return _is_utf8_FOO(_CC_ALPHA, tmpbuf);
 }
 
 bool
@@ -1558,7 +1566,7 @@ Perl_is_uni_digit(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_digit(tmpbuf);
+    return _is_utf8_FOO(_CC_DIGIT, tmpbuf);
 }
 
 bool
@@ -1566,7 +1574,7 @@ Perl_is_uni_upper(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_upper(tmpbuf);
+    return _is_utf8_FOO(_CC_UPPER, tmpbuf);
 }
 
 bool
@@ -1574,7 +1582,7 @@ Perl_is_uni_lower(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_lower(tmpbuf);
+    return _is_utf8_FOO(_CC_LOWER, tmpbuf);
 }
 
 bool
@@ -1588,7 +1596,7 @@ Perl_is_uni_graph(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_graph(tmpbuf);
+    return _is_utf8_FOO(_CC_GRAPH, tmpbuf);
 }
 
 bool
@@ -1596,7 +1604,7 @@ Perl_is_uni_print(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_print(tmpbuf);
+    return _is_utf8_FOO(_CC_PRINT, tmpbuf);
 }
 
 bool
@@ -1604,7 +1612,7 @@ Perl_is_uni_punct(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
     uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_punct(tmpbuf);
+    return _is_utf8_FOO(_CC_PUNCT, tmpbuf);
 }
 
 bool
@@ -1841,16 +1849,16 @@ Perl_is_uni_alnum_lc(pTHX_ UV c)
     if (c < 256) {
         return isALNUM_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_alnum(c);
+    return _is_uni_FOO(_CC_WORDCHAR, c);
 }
 
 bool
 Perl_is_uni_alnumc_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isALNUMC_LC(UNI_TO_NATIVE(c));
+        return isALPHANUMERIC_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_alnumc(c);
+    return _is_uni_FOO(_CC_ALPHANUMERIC, c);
 }
 
 bool
@@ -1868,7 +1876,7 @@ Perl_is_uni_alpha_lc(pTHX_ UV c)
     if (c < 256) {
         return isALPHA_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_alpha(c);
+    return _is_uni_FOO(_CC_ALPHA, c);
 }
 
 bool
@@ -1904,7 +1912,7 @@ Perl_is_uni_digit_lc(pTHX_ UV c)
     if (c < 256) {
         return isDIGIT_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_digit(c);
+    return _is_uni_FOO(_CC_DIGIT, c);
 }
 
 bool
@@ -1913,7 +1921,7 @@ Perl_is_uni_upper_lc(pTHX_ UV c)
     if (c < 256) {
         return isUPPER_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_upper(c);
+    return _is_uni_FOO(_CC_UPPER, c);
 }
 
 bool
@@ -1922,7 +1930,7 @@ Perl_is_uni_lower_lc(pTHX_ UV c)
     if (c < 256) {
         return isLOWER_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_lower(c);
+    return _is_uni_FOO(_CC_LOWER, c);
 }
 
 bool
@@ -1940,7 +1948,7 @@ Perl_is_uni_graph_lc(pTHX_ UV c)
     if (c < 256) {
         return isGRAPH_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_graph(c);
+    return _is_uni_FOO(_CC_GRAPH, c);
 }
 
 bool
@@ -1949,7 +1957,7 @@ Perl_is_uni_print_lc(pTHX_ UV c)
     if (c < 256) {
         return isPRINT_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_print(c);
+    return _is_uni_FOO(_CC_PRINT, c);
 }
 
 bool
@@ -1958,7 +1966,7 @@ Perl_is_uni_punct_lc(pTHX_ UV c)
     if (c < 256) {
         return isPUNCT_LC(UNI_TO_NATIVE(c));
     }
-    return is_uni_punct(c);
+    return _is_uni_FOO(_CC_PUNCT, c);
 }
 
 bool
@@ -2034,6 +2042,18 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 }
 
 bool
+Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT__IS_UTF8_FOO;
+
+    assert(classnum < _FIRST_NON_SWASH_CC);
+
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[classnum], swash_property_names[classnum]);
+}
+
+bool
 Perl_is_utf8_alnum(pTHX_ const U8 *p)
 {
     dVAR;
@@ -2043,7 +2063,7 @@ Perl_is_utf8_alnum(pTHX_ const U8 *p)
     /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
      * descendant of isalnum(3), in other words, it doesn't
      * contain the '_'. --jhi */
-    return is_utf8_common(p, &PL_utf8_alnum, "IsWord");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_WORDCHAR], "IsWord");
 }
 
 bool
@@ -2053,7 +2073,7 @@ Perl_is_utf8_alnumc(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_ALNUMC;
 
-    return is_utf8_common(p, &PL_utf8_alnumc, "IsAlnum");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_ALPHANUMERIC], "IsAlnum");
 }
 
 bool
@@ -2116,7 +2136,7 @@ Perl_is_utf8_alpha(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_ALPHA;
 
-    return is_utf8_common(p, &PL_utf8_alpha, "IsAlpha");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_ALPHA], "IsAlpha");
 }
 
 bool
@@ -2182,7 +2202,7 @@ Perl_is_utf8_digit(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_DIGIT;
 
-    return is_utf8_common(p, &PL_utf8_digit, "IsDigit");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_DIGIT], "IsDigit");
 }
 
 bool
@@ -2204,7 +2224,7 @@ Perl_is_utf8_upper(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_UPPER;
 
-    return is_utf8_common(p, &PL_utf8_upper, "IsUppercase");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_UPPER], "IsUppercase");
 }
 
 bool
@@ -2214,7 +2234,7 @@ Perl_is_utf8_lower(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_LOWER;
 
-    return is_utf8_common(p, &PL_utf8_lower, "IsLowercase");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_LOWER], "IsLowercase");
 }
 
 bool
@@ -2234,7 +2254,7 @@ Perl_is_utf8_graph(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_GRAPH;
 
-    return is_utf8_common(p, &PL_utf8_graph, "IsGraph");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_GRAPH], "IsGraph");
 }
 
 bool
@@ -2244,7 +2264,7 @@ Perl_is_utf8_print(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_PRINT;
 
-    return is_utf8_common(p, &PL_utf8_print, "IsPrint");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_PRINT], "IsPrint");
 }
 
 bool
@@ -2254,7 +2274,7 @@ Perl_is_utf8_punct(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_PUNCT;
 
-    return is_utf8_common(p, &PL_utf8_punct, "IsPunct");
+    return is_utf8_common(p, &PL_utf8_swash_ptrs[_CC_PUNCT], "IsPunct");
 }
 
 bool
@@ -2268,33 +2288,24 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 }
 
 bool
+Perl__is_utf8_mark(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT__IS_UTF8_MARK;
+
+    return is_utf8_common(p, &PL_utf8_mark, "IsM");
+}
+
+
+bool
 Perl_is_utf8_mark(pTHX_ const U8 *p)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_MARK;
 
-    return is_utf8_common(p, &PL_utf8_mark, "IsM");
-}
-
-bool
-Perl_is_utf8_X_regular_begin(pTHX_ const U8 *p)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_IS_UTF8_X_REGULAR_BEGIN;
-
-    return is_utf8_common(p, &PL_utf8_X_regular_begin, "_X_Regular_Begin");
-}
-
-bool
-Perl_is_utf8_X_extend(pTHX_ const U8 *p)
-{
-    dVAR;
-
-    PERL_ARGS_ASSERT_IS_UTF8_X_EXTEND;
-
-    return is_utf8_common(p, &PL_utf8_X_extend, "_X_Extend");
+    return _is_utf8_mark(p);
 }
 
 /*

@@ -91,12 +91,6 @@ extern const struct regexp_engine my_reg_engine;
 #include "inline_invlist.c"
 #include "unicode_constants.h"
 
-#ifdef HAS_ISBLANK
-#   define hasISBLANK 1
-#else
-#   define hasISBLANK 0
-#endif
-
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 #define IS_IN_SOME_FOLD_L1(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
@@ -262,6 +256,11 @@ typedef struct RExC_state_t {
 #define REQUIRE_UTF8	STMT_START {                                       \
                                      if (! UTF) JMPENV_JUMP(UTF8_LONGJMP); \
                         } STMT_END
+
+/* This converts the named class defined in regcomp.h to its equivalent class
+ * number defined in handy.h. */
+#define namedclass_to_classnum(class)  ((int) ((class) / 2))
+#define classnum_to_namedclass(classnum)  ((classnum) * 2)
 
 /* About scan_data_t.
 
@@ -1542,7 +1541,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 #endif
 
     switch (flags) {
-	case EXACT: break;
+        case EXACT: break;
 	case EXACTFA:
         case EXACTFU_SS:
         case EXACTFU_TRICKYFOLD:
@@ -2724,6 +2723,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 
             /* XXX I (khw) kind of doubt that this works on platforms where
              * U8_MAX is above 255 because of lots of other assumptions */
+            /* Don't join if the sum can't fit into a single node */
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
             
@@ -2949,34 +2949,6 @@ typedef struct scan_frame {
 
 
 #define SCAN_COMMIT(s, data, m) scan_commit(s, data, m, is_inf)
-
-#define CASE_SYNST_FNC(nAmE)                                       \
-case nAmE:                                                         \
-    if (flags & SCF_DO_STCLASS_AND) {                              \
-	    for (value = 0; value < 256; value++)                  \
-		if (!is_ ## nAmE ## _cp(value))                       \
-		    ANYOF_BITMAP_CLEAR(data->start_class, value);  \
-    }                                                              \
-    else {                                                         \
-	    for (value = 0; value < 256; value++)                  \
-		if (is_ ## nAmE ## _cp(value))                        \
-		    ANYOF_BITMAP_SET(data->start_class, value);	   \
-    }                                                              \
-    break;                                                         \
-case N ## nAmE:                                                    \
-    if (flags & SCF_DO_STCLASS_AND) {                              \
-	    for (value = 0; value < 256; value++)                   \
-		if (is_ ## nAmE ## _cp(value))                         \
-		    ANYOF_BITMAP_CLEAR(data->start_class, value);   \
-    }                                                               \
-    else {                                                          \
-	    for (value = 0; value < 256; value++)                   \
-		if (!is_ ## nAmE ## _cp(value))                        \
-		    ANYOF_BITMAP_SET(data->start_class, value);	    \
-    }                                                               \
-    break
-
-
 
 STATIC I32
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
@@ -4147,11 +4119,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    min++;
 	    if (flags & SCF_DO_STCLASS) {
+                int loop_max = 256;
 		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
 
 		/* Some of the logic below assumes that switching
 		   locale on will only add false positives. */
 		switch (PL_regkind[OP(scan)]) {
+                    U8 classnum;
+
 		case SANY:
 		default:
 		  do_default:
@@ -4178,200 +4153,75 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			cl_or(pRExC_state, data->start_class,
 			      (struct regnode_charclass_class*)scan);
 		    break;
-		case ALNUM:
+		case POSIXA:
+                    loop_max = 128;
+		case POSIXL:
+		case POSIXD:
+		case POSIXU:
+                    classnum = FLAGS(scan);
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NWORDCHAR);
-                            if (OP(scan) == ALNUMU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isWORDCHAR_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isALNUM(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
+			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum) + 1);
+                            for (value = 0; value < loop_max; value++) {
+                                if (! _generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, UNI_TO_NATIVE(value));
                                 }
                             }
 			}
 		    }
 		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_WORDCHAR);
+			if (data->start_class->flags & ANYOF_LOCALE) {
+			    ANYOF_CLASS_SET(data->start_class, classnum_to_namedclass(classnum));
+                        }
+                        else {
 
 			/* Even if under locale, set the bits for non-locale
 			 * in case it isn't a true locale-node.  This will
 			 * create false positives if it truly is locale */
-                        if (OP(scan) == ALNUMU) {
-                            for (value = 0; value < 256; value++) {
-                                if (isWORDCHAR_L1(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
+                        for (value = 0; value < loop_max; value++) {
+                            if (_generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, UNI_TO_NATIVE(value));
                             }
-                        } else {
-                            for (value = 0; value < 256; value++) {
-                                if (isALNUM(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
+                        }
                         }
 		    }
 		    break;
-		case NALNUM:
+		case NPOSIXA:
+                    loop_max = 128;
+		case NPOSIXL:
+		case NPOSIXU:
+		case NPOSIXD:
+                    classnum = FLAGS(scan);
 		    if (flags & SCF_DO_STCLASS_AND) {
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_WORDCHAR);
-                            if (OP(scan) == NALNUMU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (isWORDCHAR_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
+			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum));
+                            for (value = 0; value < loop_max; value++) {
+                                if (_generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, UNI_TO_NATIVE(value));
                                 }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (isALNUM(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-			    }
+                            }
 			}
 		    }
 		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NWORDCHAR);
+			if (data->start_class->flags & ANYOF_LOCALE) {
+			    ANYOF_CLASS_SET(data->start_class, classnum_to_namedclass(classnum) + 1);
+                        }
+                        else {
 
 			/* Even if under locale, set the bits for non-locale in
 			 * case it isn't a true locale-node.  This will create
 			 * false positives if it truly is locale */
-			if (OP(scan) == NALNUMU) {
-			    for (value = 0; value < 256; value++) {
-				if (! isWORDCHAR_L1(value)) {
-				    ANYOF_BITMAP_SET(data->start_class, value);
-				}
-			    }
-			} else {
-			    for (value = 0; value < 256; value++) {
-				if (! isALNUM(value)) {
-				    ANYOF_BITMAP_SET(data->start_class, value);
-				}
-			    }
-			}
-		    }
-		    break;
-		case SPACE:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NSPACE);
-			    if (OP(scan) == SPACEU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isSPACE_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (!isSPACE(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            }
-			}
-		    }
-		    else {
-                        if (data->start_class->flags & ANYOF_LOCALE) {
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_SPACE);
-                        }
-                        if (OP(scan) == SPACEU) {
-                            for (value = 0; value < 256; value++) {
-                                if (isSPACE_L1(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
-                        } else {
-                            for (value = 0; value < 256; value++) {
-                                if (isSPACE(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
-			}
-		    }
-		    break;
-		case NSPACE:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-			    ANYOF_CLASS_CLEAR(data->start_class,ANYOF_SPACE);
-                            if (OP(scan) == NSPACEU) {
-                                for (value = 0; value < 256; value++) {
-                                    if (isSPACE_L1(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            } else {
-                                for (value = 0; value < 256; value++) {
-                                    if (isSPACE(value)) {
-                                        ANYOF_BITMAP_CLEAR(data->start_class, value);
-                                    }
-                                }
-                            }
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NSPACE);
-                        if (OP(scan) == NSPACEU) {
-                            for (value = 0; value < 256; value++) {
-                                if (!isSPACE_L1(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
+                        for (value = 0; value < loop_max; value++) {
+                            if (! _generic_isCC(UNI_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, UNI_TO_NATIVE(value));
                             }
                         }
-                        else {
-                            for (value = 0; value < 256; value++) {
-                                if (!isSPACE(value)) {
-                                    ANYOF_BITMAP_SET(data->start_class, value);
-                                }
-                            }
+                        if (PL_regkind[OP(scan)] == NPOSIXD) {
+                            data->start_class->flags |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
                         }
 		    }
 		    break;
-		case DIGIT:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE)) {
-                            ANYOF_CLASS_CLEAR(data->start_class,ANYOF_NDIGIT);
-			    for (value = 0; value < 256; value++)
-				if (!isDIGIT(value))
-				    ANYOF_BITMAP_CLEAR(data->start_class, value);
-			}
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_DIGIT);
-			for (value = 0; value < 256; value++)
-			    if (isDIGIT(value))
-				ANYOF_BITMAP_SET(data->start_class, value);
-		    }
-		    break;
-		case NDIGIT:
-		    if (flags & SCF_DO_STCLASS_AND) {
-			if (!(data->start_class->flags & ANYOF_LOCALE))
-                            ANYOF_CLASS_CLEAR(data->start_class,ANYOF_DIGIT);
-			for (value = 0; value < 256; value++)
-			    if (isDIGIT(value))
-				ANYOF_BITMAP_CLEAR(data->start_class, value);
-		    }
-		    else {
-			if (data->start_class->flags & ANYOF_LOCALE)
-			    ANYOF_CLASS_SET(data->start_class,ANYOF_NDIGIT);
-			for (value = 0; value < 256; value++)
-			    if (!isDIGIT(value))
-				ANYOF_BITMAP_SET(data->start_class, value);
-		    }
-		    break;
-		CASE_SYNST_FNC(VERTWS);
-		CASE_SYNST_FNC(HORIZWS);
-
 		}
 		if (flags & SCF_DO_STCLASS_OR)
 		    cl_and(data->start_class, and_withp);
@@ -5333,50 +5183,52 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_ASCII = _new_invlist_C_array(ASCII_invlist);
 	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
 
-	PL_L1PosixAlnum = _new_invlist_C_array(L1PosixAlnum_invlist);
-	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
+	PL_L1Posix_ptrs[_CC_ALPHANUMERIC]
+                                = _new_invlist_C_array(L1PosixAlnum_invlist);
+	PL_Posix_ptrs[_CC_ALPHANUMERIC]
+                                = _new_invlist_C_array(PosixAlnum_invlist);
 
-	PL_L1PosixAlpha = _new_invlist_C_array(L1PosixAlpha_invlist);
-	PL_PosixAlpha = _new_invlist_C_array(PosixAlpha_invlist);
+	PL_L1Posix_ptrs[_CC_ALPHA]
+                                = _new_invlist_C_array(L1PosixAlpha_invlist);
+	PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PosixAlpha_invlist);
 
-	PL_PosixBlank = _new_invlist_C_array(PosixBlank_invlist);
-	PL_XPosixBlank = _new_invlist_C_array(XPosixBlank_invlist);
-
+	PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PosixBlank_invlist);
+	PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
 	PL_L1Cased = _new_invlist_C_array(L1Cased_invlist);
 
-	PL_PosixCntrl = _new_invlist_C_array(PosixCntrl_invlist);
-	PL_XPosixCntrl = _new_invlist_C_array(XPosixCntrl_invlist);
+	PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PosixCntrl_invlist);
+	PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
 
-	PL_PosixDigit = _new_invlist_C_array(PosixDigit_invlist);
+	PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
 
-	PL_L1PosixGraph = _new_invlist_C_array(L1PosixGraph_invlist);
-	PL_PosixGraph = _new_invlist_C_array(PosixGraph_invlist);
+	PL_L1Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(L1PosixGraph_invlist);
+	PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PosixGraph_invlist);
 
-	PL_L1PosixLower = _new_invlist_C_array(L1PosixLower_invlist);
-	PL_PosixLower = _new_invlist_C_array(PosixLower_invlist);
+	PL_L1Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(L1PosixLower_invlist);
+	PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PosixLower_invlist);
 
-	PL_L1PosixPrint = _new_invlist_C_array(L1PosixPrint_invlist);
-	PL_PosixPrint = _new_invlist_C_array(PosixPrint_invlist);
+	PL_L1Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(L1PosixPrint_invlist);
+	PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PosixPrint_invlist);
 
-	PL_L1PosixPunct = _new_invlist_C_array(L1PosixPunct_invlist);
-	PL_PosixPunct = _new_invlist_C_array(PosixPunct_invlist);
+	PL_L1Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(L1PosixPunct_invlist);
+	PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PosixPunct_invlist);
 
-	PL_PerlSpace = _new_invlist_C_array(PerlSpace_invlist);
-	PL_XPerlSpace = _new_invlist_C_array(XPerlSpace_invlist);
+	PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PerlSpace_invlist);
+	PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
+	PL_Posix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(PosixSpace_invlist);
+	PL_XPosix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(XPosixSpace_invlist);
 
-	PL_PosixSpace = _new_invlist_C_array(PosixSpace_invlist);
-	PL_XPosixSpace = _new_invlist_C_array(XPosixSpace_invlist);
+	PL_L1Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(L1PosixUpper_invlist);
+	PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PosixUpper_invlist);
 
-	PL_L1PosixUpper = _new_invlist_C_array(L1PosixUpper_invlist);
-	PL_PosixUpper = _new_invlist_C_array(PosixUpper_invlist);
+        PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
 
-	PL_VertSpace = _new_invlist_C_array(VertSpace_invlist);
+	PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PosixWord_invlist);
+	PL_L1Posix_ptrs[_CC_WORDCHAR]
+                                = _new_invlist_C_array(L1PosixWord_invlist);
 
-	PL_PosixWord = _new_invlist_C_array(PosixWord_invlist);
-	PL_L1PosixWord = _new_invlist_C_array(L1PosixWord_invlist);
-
-	PL_PosixXDigit = _new_invlist_C_array(PosixXDigit_invlist);
-	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
+	PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PosixXDigit_invlist);
+	PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
 
         PL_HasMultiCharFold = _new_invlist_C_array(_Perl_Multi_Char_Folds_invlist);
     }
@@ -6438,7 +6290,7 @@ reStudy:
             r->extflags |= RXf_NULL;
         else if (PL_regkind[fop] == BOL && OP(NEXTOPER(first)) == END)
             r->extflags |= RXf_START_ONLY;
-        else if (fop == PLUS && OP(NEXTOPER(first)) == SPACE
+        else if (fop == PLUS && PL_regkind[OP(NEXTOPER(first))] == POSIXD && FLAGS(NEXTOPER(first)) == _CC_SPACE
 			     && OP(regnext(first)) == END)
             r->extflags |= RXf_WHITE;    
     }
@@ -7053,7 +6905,6 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * should eventually be made public */
 
 /* The header definitions are in F<inline_invlist.c> */
-
 #define TO_INTERNAL_SIZE(x) ((x + HEADER_LENGTH) * sizeof(UV))
 #define FROM_INTERNAL_SIZE(x) ((x / sizeof(UV)) - HEADER_LENGTH)
 
@@ -9551,6 +9402,16 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, OPFAIL);
                 return ret;
             }
+            else if (max == 0) {
+                if (SIZE_ONLY) {
+                    RExC_size = PREVOPER(RExC_size) - regarglen[(U8)NOTHING];
+                }
+                else {
+                    RExC_emit = orig_emit;
+                }
+                ret = reg_node(pRExC_state, NOTHING);
+                return ret;
+            }
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
@@ -10118,9 +9979,11 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     I32 flags;
     char *parse_start = RExC_parse;
     U8 op;
+    *flagp = WORST;		/* Tentatively. */
+
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("atom");
-    *flagp = WORST;		/* Tentatively. */
+    int invert = 0;
 
     PERL_ARGS_ASSERT_REGATOM;
 
@@ -10216,6 +10079,7 @@ tryagain:
 	   literal text handling code.
 	*/
 	switch ((U8)*++RExC_parse) {
+            U8 arg;
 	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;
@@ -10256,22 +10120,14 @@ tryagain:
 	    ret = reg_node(pRExC_state, CLUMP);
 	    *flagp |= HASWIDTH;
 	    goto finish_meta_pat;
-	case 'w':
-	    op = ALNUM + get_regex_charset(RExC_flags);
-            if (op > ALNUMA) {  /* /aa is same as /a */
-                op = ALNUMA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+
 	case 'W':
-	    op = NALNUM + get_regex_charset(RExC_flags);
-            if (op > NALNUMA) { /* /aa is same as /a */
-                op = NALNUMA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+            invert = 1;
+            /* FALLTHROUGH */
+	case 'w':
+            arg = ANYOF_WORDCHAR;
+            goto join_posix;
+
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
@@ -10294,60 +10150,62 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
-	case 's':
-	    op = SPACE + get_regex_charset(RExC_flags);
-            if (op > SPACEA) {  /* /aa is same as /a */
-                op = SPACEA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
-	case 'S':
-	    op = NSPACE + get_regex_charset(RExC_flags);
-            if (op > NSPACEA) { /* /aa is same as /a */
-                op = NSPACEA;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+
 	case 'D':
-            op = NDIGIT;
-            goto join_D_and_d;
+            invert = 1;
+            /* FALLTHROUGH */
 	case 'd':
-            op = DIGIT;
-        join_D_and_d:
-            {
-                U8 offset = get_regex_charset(RExC_flags);
-                if (offset == REGEX_UNICODE_CHARSET) {
-                    offset = REGEX_DEPENDS_CHARSET;
-                }
-                else if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
-                    offset = REGEX_ASCII_RESTRICTED_CHARSET;
-                }
-                op += offset;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+            arg = ANYOF_DIGIT;
+            goto join_posix;
+
 	case 'R':
 	    ret = reg_node(pRExC_state, LNBREAK);
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
-	case 'h':
-	    ret = reg_node(pRExC_state, HORIZWS);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+
 	case 'H':
-	    ret = reg_node(pRExC_state, NHORIZWS);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
-	case 'v':
-	    ret = reg_node(pRExC_state, VERTWS);
-	    *flagp |= HASWIDTH|SIMPLE;
-	    goto finish_meta_pat;
+            invert = 1;
+            /* FALLTHROUGH */
+	case 'h':
+	    arg = ANYOF_BLANK;
+            op = POSIXU;
+            goto join_posix_op_known;
+
 	case 'V':
-	    ret = reg_node(pRExC_state, NVERTWS);
+            invert = 1;
+            /* FALLTHROUGH */
+	case 'v':
+	    arg = ANYOF_VERTWS;
+            op = POSIXU;
+            goto join_posix_op_known;
+
+	case 'S':
+            invert = 1;
+            /* FALLTHROUGH */
+	case 's':
+            arg = ANYOF_SPACE;
+
+        join_posix:
+
+	    op = POSIXD + get_regex_charset(RExC_flags);
+            if (op > POSIXA) {  /* /aa is same as /a */
+                op = POSIXA;
+            }
+
+        join_posix_op_known:
+
+            if (invert) {
+                op += NPOSIXD - POSIXD;
+            }
+
+	    ret = reg_node(pRExC_state, op);
+            if (! SIZE_ONLY) {
+                FLAGS(ret) = namedclass_to_classnum(arg);
+            }
+
 	    *flagp |= HASWIDTH|SIMPLE;
+            /* FALL THROUGH */
+
          finish_meta_pat:	    
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
@@ -10789,7 +10647,7 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
-			if (!SIZE_ONLY&& isALNUMC(*p)) {
+			if (!SIZE_ONLY&& isALPHANUMERIC(*p)) {
 			    ckWARN2reg(p + 1, "Unrecognized escape \\%.1s passed through", p);
 			}
 			goto normal_default;
@@ -11244,7 +11102,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 			    break;
 			case 'm':
 			    if (memEQ(posixcc, "alnu", 4)) /* alnum */
-				namedclass = ANYOF_ALNUMC;
+				namedclass = ANYOF_ALPHANUMERIC;
 			    break;
 			case 'r':
 			    if (memEQ(posixcc, "lowe", 4)) /* lower */
@@ -11300,147 +11158,11 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
     return namedclass;
 }
 
-/* Generate the code to add a full posix character <class> to the bracketed
- * character class given by <node>.  (<node> is needed only under locale rules)
- * destlist     is the inversion list for non-locale rules that this class is
- *              to be added to
- * sourcelist   is the ASCII-range inversion list to add under /a rules
- * Xsourcelist  is the full Unicode range list to use otherwise. */
-#define DO_POSIX(node, class, destlist, sourcelist, Xsourcelist)           \
-    if (LOC) {                                                             \
-	SV* scratch_list = NULL;                                           \
-                                                                           \
-        /* Set this class in the node for runtime matching */              \
-        ANYOF_CLASS_SET(node, class);                                      \
-                                                                           \
-        /* For above Latin1 code points, we use the full Unicode range */  \
-        _invlist_intersection(PL_AboveLatin1,                              \
-                              Xsourcelist,                                 \
-                              &scratch_list);                              \
-        /* And set the output to it, adding instead if there already is an \
-	 * output.  Checking if <destlist> is NULL first saves an extra    \
-	 * clone.  Its reference count will be decremented at the next     \
-	 * union, etc, or if this is the only instance, at the end of the  \
-	 * routine */                                                      \
-        if (! destlist) {                                                  \
-            destlist = scratch_list;                                       \
-        }                                                                  \
-        else {                                                             \
-            _invlist_union(destlist, scratch_list, &destlist);             \
-            SvREFCNT_dec(scratch_list);                                    \
-        }                                                                  \
-    }                                                                      \
-    else {                                                                 \
-        /* For non-locale, just add it to any existing list */             \
-        _invlist_union(destlist,                                           \
-                       (AT_LEAST_ASCII_RESTRICTED)                         \
-                           ? sourcelist                                    \
-                           : Xsourcelist,                                  \
-                       &destlist);                                         \
-    }
-
-/* Like DO_POSIX, but matches the complement of <sourcelist> and <Xsourcelist>.
- */
-#define DO_N_POSIX(node, class, destlist, sourcelist, Xsourcelist)         \
-    if (LOC) {                                                             \
-        SV* scratch_list = NULL;                                           \
-        ANYOF_CLASS_SET(node, class);					   \
-        _invlist_subtract(PL_AboveLatin1, Xsourcelist, &scratch_list);	   \
-        if (! destlist) {					           \
-            destlist = scratch_list;					   \
-        }                                                                  \
-        else {                                                             \
-            _invlist_union(destlist, scratch_list, &destlist);             \
-            SvREFCNT_dec(scratch_list);                                    \
-        }                                                                  \
-    }                                                                      \
-    else {                                                                 \
-        _invlist_union_complement_2nd(destlist,                            \
-                                    (AT_LEAST_ASCII_RESTRICTED)            \
-                                        ? sourcelist                       \
-                                        : Xsourcelist,                     \
-                                    &destlist);                            \
-        /* Under /d, everything in the upper half of the Latin1 range      \
-         * matches this complement */                                      \
-        if (DEPENDS_SEMANTICS) {                                           \
-            ANYOF_FLAGS(node) |= ANYOF_NON_UTF8_LATIN1_ALL;                \
-        }                                                                  \
-    }
-
-/* Generate the code to add a posix character <class> to the bracketed
- * character class given by <node>.  (<node> is needed only under locale rules)
- * destlist       is the inversion list for non-locale rules that this class is
- *                to be added to
- * sourcelist     is the ASCII-range inversion list to add under /a rules
- * l1_sourcelist  is the Latin1 range list to use otherwise.
- * Xpropertyname  is the name to add to <run_time_list> of the property to
- *                specify the code points above Latin1 that will have to be
- *                determined at run-time
- * run_time_list  is a SV* that contains text names of properties that are to
- *                be computed at run time.  This concatenates <Xpropertyname>
- *                to it, appropriately
- * This is essentially DO_POSIX, but we know only the Latin1 values at compile
- * time */
-#define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
-                              l1_sourcelist, Xpropertyname, run_time_list) \
-	/* First, resolve whether to use the ASCII-only list or the L1     \
-	 * list */	                                                   \
-        DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist,      \
-                ((AT_LEAST_ASCII_RESTRICTED) ? sourcelist : l1_sourcelist),\
-                Xpropertyname, run_time_list)
-
-#define DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist, sourcelist, \
-                Xpropertyname, run_time_list)                              \
-    /* If not /a matching, there are going to be code points we will have  \
-     * to defer to runtime to look-up */                                   \
-    if (! AT_LEAST_ASCII_RESTRICTED) {                                     \
-        Perl_sv_catpvf(aTHX_ run_time_list, "+utf8::%s\n", Xpropertyname); \
-    }                                                                      \
-    if (LOC) {                                                             \
-        ANYOF_CLASS_SET(node, class);                                      \
-    }                                                                      \
-    else {                                                                 \
-        _invlist_union(destlist, sourcelist, &destlist);                   \
-    }
-
-/* Like DO_POSIX_LATIN1_ONLY_KNOWN, but for the complement.  A combination of
- * this and DO_N_POSIX.  Sets <matches_above_unicode> only if it can; unchanged
- * otherwise */
-#define DO_N_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,    \
-       l1_sourcelist, Xpropertyname, run_time_list, matches_above_unicode) \
-    if (AT_LEAST_ASCII_RESTRICTED) {                                       \
-        _invlist_union_complement_2nd(destlist, sourcelist, &destlist);    \
-    }                                                                      \
-    else {                                                                 \
-        Perl_sv_catpvf(aTHX_ run_time_list, "!utf8::%s\n", Xpropertyname); \
-        matches_above_unicode = TRUE;                                      \
-	if (LOC) {                                                         \
-            ANYOF_CLASS_SET(node, namedclass);				   \
-	}                                                                  \
-	else {                                                             \
-            SV* scratch_list = NULL;                                       \
-	    _invlist_subtract(PL_Latin1, l1_sourcelist, &scratch_list);    \
-	    if (! destlist) {                                              \
-		destlist = scratch_list;                                   \
-	    }                                                              \
-	    else {                                                         \
-		_invlist_union(destlist, scratch_list, &destlist);         \
-		SvREFCNT_dec(scratch_list);                                \
-	    }                                                              \
-	    if (DEPENDS_SEMANTICS) {                                       \
-		ANYOF_FLAGS(node) |= ANYOF_NON_UTF8_LATIN1_ALL;            \
-	    }                                                              \
-	}                                                                  \
-    }
 
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
  * changed since initialization, then there is a run-time definition. */
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
-
-/* This converts the named class defined in regcomp.h to its equivalent class
- * number defined in handy.h. */
-#define namedclass_to_classnum(class)  ((class) / 2)
 
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
@@ -11905,26 +11627,232 @@ parseit:
 	    }
 
 	    if (! SIZE_ONLY) {
+                U8 classnum = namedclass_to_classnum(namedclass);
+
+                /* The ascii range inversion list */
+                SV* ascii_source = PL_Posix_ptrs[classnum];
+
+                /* The full Latin1 range inversion list */
+                SV* l1_source = PL_L1Posix_ptrs[classnum];
+
+                /* The name of the property to use to match the full eXtended
+                 * Unicode range swash fo this character class */
+                const char *Xname = swash_property_names[classnum];
+
+                /* LOWER and UPPER under fold match ALPHA in the ASCII range,
+                 * and Cased outside it */
+                if (FOLD && ! LOC
+                    && (classnum == _CC_LOWER || classnum == _CC_UPPER))
+                {
+                    ascii_source = PL_Posix_ptrs[_CC_ALPHA];
+                    l1_source = PL_L1Cased;
+                    Xname = "Cased";
+                }
+
 		switch ((I32)namedclass) {
 
-		case ANYOF_ALNUMC: /* C's alnum, in contrast to \w */
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
-		    break;
-		case ANYOF_NALNUMC:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
+		case ANYOF_DIGIT:
+                    l1_source = ascii_source;
+                    /* FALL THROUGH */
+
+		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		case ANYOF_ALPHA:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
+		case ANYOF_GRAPH:
+		case ANYOF_LOWER:
+		case ANYOF_PRINT:
+		case ANYOF_PUNCT:
+		case ANYOF_UPPER:
+		case ANYOF_WORDCHAR:
+                    if ( !  PL_utf8_swash_ptrs[classnum]) {
+
+                        /* If not /a matching, there are code points we don't
+                         * know at compile time.  Arrange for the unknown
+                         * matches to be loaded at run-time, if needed */
+                        if (! AT_LEAST_ASCII_RESTRICTED) {
+                            Perl_sv_catpvf(aTHX_ listsv, "+utf8::%s\n", Xname);
+                        }
+                        if (LOC) {  /* Under locale, set run-time lookup */
+                            ANYOF_CLASS_SET(ret, namedclass);
+                        }
+                        else {
+                            /* Add the current class's code points to the
+                             * running total */
+                            _invlist_union(posixes,
+                                           (AT_LEAST_ASCII_RESTRICTED)
+                                                ? ascii_source
+                                                : l1_source,
+                                           &posixes);
+                        }
+                        break;
+                    }
+                    if (! PL_XPosix_ptrs[classnum]) {
+                        PL_XPosix_ptrs[classnum]
+                            = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
+                    }
+                    /* FALL THROUGH */
+
+		case ANYOF_BLANK:
+		case ANYOF_CNTRL:
+		case ANYOF_PSXSPC:
+		case ANYOF_SPACE:
+		case ANYOF_XDIGIT:
+                    if (! LOC) {
+                        /* For non-locale, just add it to any existing list */
+                        _invlist_union(posixes,
+                                       (AT_LEAST_ASCII_RESTRICTED)
+                                           ? ascii_source
+                                           : PL_XPosix_ptrs[classnum],
+                                       &posixes);
+                    }
+                    else {  /* Locale */
+                        SV* scratch_list = NULL;
+
+                        /* For above Latin1 code points, we use the full
+                         * Unicode range */
+                        _invlist_intersection(PL_AboveLatin1,
+                                              PL_XPosix_ptrs[classnum],
+                                              &scratch_list);
+                        /* And set the output to it, adding instead if there
+                         * already is an output.  Checking if 'posixes' is NULL
+                         * first saves an extra clone.  Its reference count
+                         * will be decremented at the next union, etc, or if
+                         * this is the only instance, at the end of the routine
+                         * */
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+
+#ifndef HAS_ISBLANK
+                        if (namedclass != ANYOF_BLANK) {
+#endif
+                            /* Set this class in the node for runtime
+                             * matching */
+                            ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                        }
+                        else {
+                            /* No isblank(), use the hard-coded ASCII-range
+                             * blanks, adding them to the running total. */
+
+                            _invlist_union(posixes, ascii_source, &posixes);
+                        }
+#endif
+                    }
 		    break;
+
+		case ANYOF_NDIGIT:
+                    l1_source = ascii_source;
+                    /* FALL THROUGH */
+
+		case ANYOF_NALPHANUMERIC:
 		case ANYOF_NALPHA:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv,
-                        runtime_posix_matches_above_Unicode);
+		case ANYOF_NGRAPH:
+		case ANYOF_NLOWER:
+		case ANYOF_NPRINT:
+		case ANYOF_NPUNCT:
+		case ANYOF_NUPPER:
+		case ANYOF_NWORDCHAR:
+                    if ( !  PL_utf8_swash_ptrs[classnum]) {
+                        if (AT_LEAST_ASCII_RESTRICTED) {
+                            /* Under /a should match everything above ASCII,
+                             * and the complement of the set's ASCII matches */
+                            _invlist_union_complement_2nd(posixes, ascii_source,
+                                                          &posixes);
+                        }
+                        else {
+                            /* Arrange for the unknown matches to be loaded at
+                             * run-time, if needed */
+                            Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n", Xname);
+                            runtime_posix_matches_above_Unicode = TRUE;
+                            if (LOC) {
+                                ANYOF_CLASS_SET(ret, namedclass);
+                            }
+                            else {
+
+                                /* We want to match everything in Latin1,
+                                 * except those things that l1_source matches
+                                 * */
+                                SV* scratch_list = NULL;
+                                _invlist_subtract(PL_Latin1, l1_source,
+                                                  &scratch_list);
+
+                                /* Add the list from this class to the running
+                                 * total */
+                                if (! posixes) {
+                                    posixes = scratch_list;
+                                }
+                                else {
+                                    _invlist_union(posixes, scratch_list,
+                                                   &posixes);
+                                    SvREFCNT_dec(scratch_list);
+                                }
+                                if (DEPENDS_SEMANTICS) {
+                                    ANYOF_FLAGS(ret)
+                                                |= ANYOF_NON_UTF8_LATIN1_ALL;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    if (! PL_XPosix_ptrs[classnum]) {
+                        PL_XPosix_ptrs[classnum]
+                            = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
+                    }
+                    /* FALL THROUGH */
+
+		case ANYOF_NBLANK:
+		case ANYOF_NCNTRL:
+		case ANYOF_NPSXSPC:
+		case ANYOF_NSPACE:
+		case ANYOF_NXDIGIT:
+                    if (! LOC) {
+                        _invlist_union_complement_2nd(
+                                                posixes,
+                                                (AT_LEAST_ASCII_RESTRICTED)
+                                                    ? ascii_source
+                                                    : PL_XPosix_ptrs[classnum],
+                                                &posixes);
+                        /* Under /d, everything in the upper half of the Latin1
+                         * range matches this complement */
+                        if (DEPENDS_SEMANTICS) {
+                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
+                    }
+                    else {  /* Locale */
+                        SV* scratch_list = NULL;
+                        _invlist_subtract(PL_AboveLatin1,
+                                          PL_XPosix_ptrs[classnum],
+                                          &scratch_list);
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+#ifndef HAS_ISBLANK
+                        if (namedclass != ANYOF_NBLANK) {
+#endif
+                            ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                        }
+                        else {
+                            /* Get the list of all code points in Latin1 that
+                             * are not ASCII blanks, and add them to the
+                             * running total */
+                            _invlist_subtract(PL_Latin1, ascii_source,
+                                              &scratch_list);
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec(scratch_list);
+                        }
+#endif
+                    }
 		    break;
+
 		case ANYOF_ASCII:
 #ifdef HAS_ISASCII
 		    if (LOC) {
@@ -11950,227 +11878,34 @@ parseit:
                     }
 #endif
 		    break;
-		case ANYOF_BLANK:
-                    if (hasISBLANK || ! LOC) {
-                        DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixBlank, PL_XPosixBlank);
-                    }
-                    else { /* There is no isblank() and we are in locale:  We
-                              use the ASCII range and the above-Latin1 range
-                              code points */
-                        SV* scratch_list = NULL;
 
-                        /* Include all above-Latin1 blanks */
-                        _invlist_intersection(PL_AboveLatin1,
-                                              PL_XPosixBlank,
-                                              &scratch_list);
-                        /* Add it to the running total of posix classes */
-                        if (! posixes) {
-                            posixes = scratch_list;
-                        }
-                        else {
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
-                        }
-                        /* Add the ASCII-range blanks to the running total. */
-                        _invlist_union(posixes, PL_PosixBlank, &posixes);
-                    }
-		    break;
-		case ANYOF_NBLANK:
-                    if (hasISBLANK || ! LOC) {
-                        DO_N_POSIX(ret, namedclass, posixes,
-                                                PL_PosixBlank, PL_XPosixBlank);
-                    }
-                    else { /* There is no isblank() and we are in locale */
-                        SV* scratch_list = NULL;
-
-                        /* Include all above-Latin1 non-blanks */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank,
-                                          &scratch_list);
-
-                        /* Add them to the running total of posix classes */
-                        _invlist_subtract(PL_AboveLatin1, PL_XPosixBlank,
-                                          &scratch_list);
-                        if (! posixes) {
-                            posixes = scratch_list;
-                        }
-                        else {
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
-                        }
-
-                        /* Get the list of all non-ASCII-blanks in Latin 1, and
-                         * add them to the running total */
-                        _invlist_subtract(PL_Latin1, PL_PosixBlank,
-                                          &scratch_list);
-                        _invlist_union(posixes, scratch_list, &posixes);
-                        SvREFCNT_dec(scratch_list);
-                    }
-		    break;
-		case ANYOF_CNTRL:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixCntrl, PL_XPosixCntrl);
-		    break;
-		case ANYOF_NCNTRL:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixCntrl, PL_XPosixCntrl);
-		    break;
-		case ANYOF_DIGIT:
-		    /* There are no digits in the Latin1 range outside of
-		     * ASCII, so call the macro that doesn't have to resolve
-		     * them */
-		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, posixes,
-                        PL_PosixDigit, "XPosixDigit", listsv);
-		    break;
-		case ANYOF_NDIGIT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
-		case ANYOF_GRAPH:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
-		    break;
-		case ANYOF_NGRAPH:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
 		case ANYOF_HORIZWS:
-		    /* For these, we use the cp_list, as /d doesn't make a
-		     * difference in what these match.  There would be problems
-		     * if these characters had folds other than themselves, as
-		     * cp_list is subject to folding.  It turns out that \h
-		     * is just a synonym for XPosixBlank */
-		    _invlist_union(cp_list, PL_XPosixBlank, &cp_list);
-		    break;
-		case ANYOF_NHORIZWS:
-                    _invlist_union_complement_2nd(cp_list,
-                                                 PL_XPosixBlank, &cp_list);
-		    break;
-		case ANYOF_LOWER:
-		case ANYOF_NLOWER:
-                {   /* These require special handling, as they differ under
-		       folding, matching Cased there (which in the ASCII range
-		       is the same as Alpha */
+                    /* For these, we use the cp_list, as neither /d nor /l make
+                     * a difference in what these match.  There would be
+                     * problems if these characters had folds other than
+                     * themselves, as cp_list is subject to folding.
+                     *
+                     * It turns out that \h is just a synonym for XPosixBlank */
+                    classnum = _CC_BLANK;
+		    /* FALL THROUGH */
 
-		    SV* ascii_source;
-		    SV* l1_source;
-		    const char *Xname;
-
-		    if (FOLD && ! LOC) {
-			ascii_source = PL_PosixAlpha;
-			l1_source = PL_L1Cased;
-			Xname = "Cased";
-		    }
-		    else {
-			ascii_source = PL_PosixLower;
-			l1_source = PL_L1PosixLower;
-			Xname = "XPosixLower";
-		    }
-		    if (namedclass == ANYOF_LOWER) {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, l1_source, Xname, listsv);
-		    }
-		    else {
-			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                            posixes, ascii_source, l1_source, Xname, listsv,
-                            runtime_posix_matches_above_Unicode);
-		    }
-		    break;
-		}
-		case ANYOF_PRINT:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
-		    break;
-		case ANYOF_NPRINT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
-		case ANYOF_PUNCT:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
-		    break;
-		case ANYOF_NPUNCT:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv,
-                        runtime_posix_matches_above_Unicode);
-		    break;
-		case ANYOF_PSXSPC:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixSpace, PL_XPosixSpace);
-		    break;
-		case ANYOF_NPSXSPC:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixSpace, PL_XPosixSpace);
-		    break;
-		case ANYOF_SPACE:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_PerlSpace, PL_XPerlSpace);
-		    break;
-		case ANYOF_NSPACE:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PerlSpace, PL_XPerlSpace);
-		    break;
-		case ANYOF_UPPER:   /* Same as LOWER, above */
-		case ANYOF_NUPPER:
-		{
-		    SV* ascii_source;
-		    SV* l1_source;
-		    const char *Xname;
-
-		    if (FOLD && ! LOC) {
-			ascii_source = PL_PosixAlpha;
-			l1_source = PL_L1Cased;
-			Xname = "Cased";
-		    }
-		    else {
-			ascii_source = PL_PosixUpper;
-			l1_source = PL_L1PosixUpper;
-			Xname = "XPosixUpper";
-		    }
-		    if (namedclass == ANYOF_UPPER) {
-			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                                    ascii_source, l1_source, Xname, listsv);
-		    }
-		    else {
-			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
-                        posixes, ascii_source, l1_source, Xname, listsv,
-                        runtime_posix_matches_above_Unicode);
-		    }
-		    break;
-		}
-		case ANYOF_WORDCHAR:
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
-		    break;
-		case ANYOF_NWORDCHAR:
-		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, posixes,
-                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv,
-                            runtime_posix_matches_above_Unicode);
-		    break;
 		case ANYOF_VERTWS:
-		    /* For these, we use the cp_list, as /d doesn't make a
-		     * difference in what these match.  There would be problems
-		     * if these characters had folds other than themselves, as
-		     * cp_list is subject to folding */
-		    _invlist_union(cp_list, PL_VertSpace, &cp_list);
+		    _invlist_union(cp_list, PL_XPosix_ptrs[classnum], &cp_list);
 		    break;
+
+		case ANYOF_NHORIZWS:
+                    classnum = _CC_BLANK;
+		    /* FALL THROUGH */
+
 		case ANYOF_NVERTWS:
                     _invlist_union_complement_2nd(cp_list,
-                                                    PL_VertSpace, &cp_list);
+                                                  PL_XPosix_ptrs[classnum],
+                                                  &cp_list);
 		    break;
-		case ANYOF_XDIGIT:
-                    DO_POSIX(ret, namedclass, posixes,
-                                            PL_PosixXDigit, PL_XPosixXDigit);
-		    break;
-		case ANYOF_NXDIGIT:
-                    DO_N_POSIX(ret, namedclass, posixes,
-                                            PL_PosixXDigit, PL_XPosixXDigit);
-		    break;
+
 		case ANYOF_UNIPROP: /* this is to handle \p and \P */
 		    break;
+
 		default:
 		    vFAIL("Invalid [::] class");
 		    break;
@@ -12435,110 +12170,76 @@ parseit:
         if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like \w or
                                               [:digit:] or \p{foo} */
 
-            /* Certain named classes have equivalents that can appear outside a
-             * character class, e.g. \w, \H.  We use these instead of a
-             * character class. */
+            /* All named classes are mapped into POSIXish nodes, with its FLAG
+             * argument giving which class it is */
             switch ((I32)namedclass) {
-                U8 offset;
-
-                /* The first group is for node types that depend on the charset
-                 * modifier to the regex.  We first calculate the base node
-                 * type, and if it should be inverted */
-
-                case ANYOF_NWORDCHAR:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_WORDCHAR:
-                    op = ALNUM;
-                    goto join_charset_classes;
-
-                case ANYOF_NSPACE:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_SPACE:
-                    op = SPACE;
-                    goto join_charset_classes;
-
-                case ANYOF_NDIGIT:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_DIGIT:
-                    op = DIGIT;
-
-                  join_charset_classes:
-
-                    /* Now that we have the base node type, we take advantage
-                     * of the enum ordering of the charset modifiers to get the
-                     * exact node type,  For example the base SPACE also has
-                     * SPACEL, SPACEU, and SPACEA */
-
-                    offset = get_regex_charset(RExC_flags);
-
-                    /* /aa is the same as /a for these */
-                    if (offset == REGEX_ASCII_MORE_RESTRICTED_CHARSET) {
-                        offset = REGEX_ASCII_RESTRICTED_CHARSET;
-                    }
-                    else if (op == DIGIT && offset == REGEX_UNICODE_CHARSET) {
-                        offset = REGEX_DEPENDS_CHARSET; /* There is no DIGITU */
-                    }
-
-                    op += offset;
-
-                    /* The number of varieties of each of these is the same,
-                     * hence, so is the delta between the normal and
-                     * complemented nodes */
-                    if (invert) {
-                        op += NALNUM - ALNUM;
-                    }
-                    *flagp |= HASWIDTH|SIMPLE;
-                    break;
-
-                /* The second group doesn't depend of the charset modifiers.
-                 * We just have normal and complemented */
-                case ANYOF_NHORIZWS:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_HORIZWS:
-                  is_horizws:
-                    op = (invert) ? NHORIZWS : HORIZWS;
-                    *flagp |= HASWIDTH|SIMPLE;
-                    break;
-
-                case ANYOF_NVERTWS:
-                    invert = ! invert;
-                    /* FALLTHROUGH */
-                case ANYOF_VERTWS:
-                    op = (invert) ? NVERTWS : VERTWS;
-                    *flagp |= HASWIDTH|SIMPLE;
-                    break;
-
                 case ANYOF_UNIPROP:
                     break;
 
-                case ANYOF_NBLANK:
-                    invert = ! invert;
+                /* These don't depend on the charset modifiers.  They always
+                 * match under /u rules */
+                case ANYOF_NHORIZWS:
+                case ANYOF_HORIZWS:
+                    namedclass = ANYOF_BLANK + namedclass - ANYOF_HORIZWS;
                     /* FALLTHROUGH */
-                case ANYOF_BLANK:
-                    if (AT_LEAST_UNI_SEMANTICS && ! AT_LEAST_ASCII_RESTRICTED) {
-                        goto is_horizws;
-                    }
-                    /* FALLTHROUGH */
-                default:
-                    /* A generic posix class.  All the /a ones can be handled
-                     * by the POSIXA opcode.  And all are closed under folding
-                     * in the ASCII range, so FOLD doesn't matter */
-                    if (AT_LEAST_ASCII_RESTRICTED
-                        || (! LOC && namedclass == ANYOF_ASCII))
-                    {
-                        /* The odd numbered ones are the complements of the
-                         * next-lower even number one */
-                        if (namedclass % 2 == 1) {
-                            invert = ! invert;
-                            namedclass--;
+
+                case ANYOF_NVERTWS:
+                case ANYOF_VERTWS:
+                    op = POSIXU;
+                    goto join_posix;
+
+                /* The actual POSIXish node for all the rest depends on the
+                 * charset modifier.  The ones in the first set depend only on
+                 * ASCII or, if available on this platform, locale */
+                case ANYOF_ASCII:
+                case ANYOF_NASCII:
+#ifdef HAS_ISASCII
+                    op = (LOC) ? POSIXL : POSIXA;
+#else
+                    op = POSIXA;
+#endif
+                    goto join_posix;
+
+                case ANYOF_LOWER:
+                case ANYOF_NLOWER:
+                case ANYOF_UPPER:
+                case ANYOF_NUPPER:
+                    /* under /a could be alpha */
+                    if (FOLD) {
+                        if (ASCII_RESTRICTED) {
+                            namedclass = ANYOF_ALPHA + (namedclass % 2);
                         }
-                        arg = namedclass_to_classnum(namedclass);
-                        op = (invert) ? NPOSIXA : POSIXA;
+                        else if (! LOC) {
+                            break;
+                        }
                     }
+                    /* FALLTHROUGH */
+
+                /* The rest have more possibilities depending on the charset.  We
+                 * take advantage of the enum ordering of the charset modifiers to
+                 * get the exact node type, */
+                default:
+                    op = POSIXD + get_regex_charset(RExC_flags);
+                    if (op > POSIXA) { /* /aa is same as /a */
+                        op = POSIXA;
+                    }
+#ifndef HAS_ISBLANK
+                    if (op == POSIXL
+                        && (namedclass == ANYOF_BLANK
+                            || namedclass == ANYOF_NBLANK))
+                    {
+                        op = POSIXA;
+                    }
+#endif
+
+                join_posix:
+                    /* The odd numbered ones are the complements of the
+                     * next-lower even number one */
+                    if (namedclass % 2 == 1) {
+                        invert = ! invert;
+                        namedclass--;
+                    }
+                    arg = namedclass_to_classnum(namedclass);
                     break;
             }
         }
@@ -12563,8 +12264,8 @@ parseit:
         else if (! LOC) {   /* locale could vary these */
             if (prevvalue == '0') {
                 if (value == '9') {
-                    op = (invert) ? NDIGITA : DIGITA;
-                    *flagp |= HASWIDTH|SIMPLE;
+                    arg = _CC_DIGIT;
+                    op = POSIXA;
                 }
             }
         }
@@ -12590,6 +12291,11 @@ parseit:
             }
             else {
                 RExC_emit = (regnode *)orig_emit;
+                if (PL_regkind[op] == POSIXD) {
+                    if (invert) {
+                        op += NPOSIXD - POSIXD;
+                    }
+                }
             }
 
             ret = reg_node(pRExC_state, op);
@@ -12630,7 +12336,7 @@ parseit:
          * indicators, which are weeded out below using the
          * IS_IN_SOME_FOLD_L1() macro */
         if (invlist_highest(cp_list) < 256) {
-            _invlist_intersection(PL_L1PosixAlpha, cp_list, &fold_intersection);
+            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list, &fold_intersection);
         }
         else {
 
@@ -13819,10 +13525,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
     static const char * const anyofs[] = {
 #if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6 || _CC_ALNUMC != 7 \
-    || _CC_GRAPH != 8 || _CC_SPACE != 9 || _CC_BLANK != 10 \
-    || _CC_XDIGIT != 11 || _CC_PSXSPC != 12 || _CC_CNTRL != 13 \
-    || _CC_ASCII != 14 || _CC_VERTSPACE != 15
+    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6 \
+    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_SPACE != 9 \
+    || _CC_BLANK != 10 || _CC_XDIGIT != 11 || _CC_PSXSPC != 12 \
+    || _CC_CNTRL != 13 || _CC_ASCII != 14 || _CC_VERTSPACE != 15
   #error Need to adjust order of anyofs[]
 #endif
         "[\\w]",

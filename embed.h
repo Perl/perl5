@@ -27,7 +27,10 @@
 /* Hide global symbols */
 
 #define Gv_AMupdate(a,b)	Perl_Gv_AMupdate(aTHX_ a,b)
+#define _is_uni_FOO(a,b)	Perl__is_uni_FOO(aTHX_ a,b)
 #define _is_uni_perl_idstart(a)	Perl__is_uni_perl_idstart(aTHX_ a)
+#define _is_utf8_FOO(a,b)	Perl__is_utf8_FOO(aTHX_ a,b)
+#define _is_utf8_mark(a)	Perl__is_utf8_mark(aTHX_ a)
 #define _is_utf8_perl_idstart(a)	Perl__is_utf8_perl_idstart(aTHX_ a)
 #define _to_uni_fold_flags(a,b,c,d)	Perl__to_uni_fold_flags(aTHX_ a,b,c,d)
 #define _to_utf8_fold_flags(a,b,c,d,e)	Perl__to_utf8_fold_flags(aTHX_ a,b,c,d,e)
@@ -970,6 +973,7 @@
 #define core_regclass_swash(a,b,c,d)	S_core_regclass_swash(aTHX_ a,b,c,d)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
+#define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
 #define regcppop(a,b)		S_regcppop(aTHX_ a,b)
 #define regcppush(a,b,c)	S_regcppush(aTHX_ a,b,c)
@@ -987,8 +991,6 @@
 #  endif
 #  if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _to_fold_latin1(a,b,c,d)	Perl__to_fold_latin1(aTHX_ a,b,c,d)
-#define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
-#define is_utf8_X_regular_begin(a)	Perl_is_utf8_X_regular_begin(aTHX_ a)
 #  endif
 #endif
 #ifdef PERL_CORE

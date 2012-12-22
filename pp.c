@@ -3757,7 +3757,7 @@ PP(pp_uc)
 	    STRLEN u;
 	    STRLEN ulen;
 	    UV uv;
-	    if (in_iota_subscript && ! is_utf8_mark(s)) {
+	    if (in_iota_subscript && ! _is_utf8_mark(s)) {
 
 		/* A non-mark.  Time to output the iota subscript */
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399

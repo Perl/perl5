@@ -389,8 +389,8 @@ struct regnode_charclass_class {
 #define ANYOF_NSPACE   ((ANYOF_SPACE) + 1)
 #define ANYOF_DIGIT    ((_CC_DIGIT) * 2)     /* \d */
 #define ANYOF_NDIGIT   ((ANYOF_DIGIT) + 1)
-#define ANYOF_ALNUMC   ((_CC_ALNUMC) * 2)    /* [[:alnum:]] isalnum(3), utf8::IsAlnum, ALNUMC */
-#define ANYOF_NALNUMC  ((ANYOF_ALNUMC) + 1)
+#define ANYOF_ALPHANUMERIC   ((_CC_ALPHANUMERIC) * 2)    /* [[:alnum:]] isalnum(3), utf8::IsAlnum */
+#define ANYOF_NALPHANUMERIC  ((ANYOF_ALPHANUMERIC) + 1)
 #define ANYOF_ALPHA    ((_CC_ALPHA) * 2)
 #define ANYOF_NALPHA   ((ANYOF_ALPHA) + 1)
 #define ANYOF_ASCII    ((_CC_ASCII) * 2)

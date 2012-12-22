@@ -3252,7 +3252,7 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    if ((isALNUMC(*s)))
+		    if ((isALPHANUMERIC(*s)))
 			Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 				       "Unrecognized escape \\%c passed through",
 				       *s);
@@ -8076,7 +8076,7 @@ Perl_yylex(pTHX)
 		for (d = s; isALNUM_lazy_if(d,UTF);) {
 		    d += UTF ? UTF8SKIP(d) : 1;
                     if (UTF) {
-                        while (UTF8_IS_CONTINUED(*d) && is_utf8_mark((U8*)d)) {
+                        while (UTF8_IS_CONTINUED(*d) && _is_utf8_mark((U8*)d)) {
                             d += UTF ? UTF8SKIP(d) : 1;
                         }
                     }
@@ -9170,8 +9170,11 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
     for (;;) {
 	if (d >= e)
 	    Perl_croak(aTHX_ ident_too_long);
-	if (isALNUM(*s) || (!UTF && isALNUMC_L1(*s)))	/* UTF handled below */
+	if (isALNUM(*s)
+            || (!UTF && isALPHANUMERIC_L1(*s))) /* UTF handled below */
+        {
 	    *d++ = *s++;
+        }
 	else if (allow_package && (*s == '\'') && isIDFIRST_lazy_if(s+1,UTF)) {
 	    *d++ = ':';
 	    *d++ = ':';
@@ -9184,7 +9187,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 	else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 	    char *t = s + UTF8SKIP(s);
 	    size_t len;
-	    while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
+	    while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
 		t += UTF8SKIP(t);
 	    len = t - s;
 	    if (d + len > e)
@@ -9238,7 +9241,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	    }
 	    else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 		char *t = s + UTF8SKIP(s);
-		while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
+		while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
 		    t += UTF8SKIP(t);
 		if (d + (t - s) > e)
 		    Perl_croak(aTHX_ ident_too_long);
@@ -9301,7 +9304,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		char *end = s;
 		while ((end < send && isALNUM_lazy_if(end,UTF)) || *end == ':') {
 		    end += UTF8SKIP(end);
-		    while (end < send && UTF8_IS_CONTINUED(*end) && is_utf8_mark((U8*)end))
+		    while (end < send && UTF8_IS_CONTINUED(*end) && _is_utf8_mark((U8*)end))
 			end += UTF8SKIP(end);
 		}
 		Copy(s, d, end - s, char);
