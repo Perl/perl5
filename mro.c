@@ -131,7 +131,7 @@ Perl_mro_register(pTHX_ const struct mro_alg *mro) {
     if (!Perl_hv_common(aTHX_ PL_registered_mros, NULL,
 			mro->name, mro->length, mro->kflags,
 			HV_FETCH_ISSTORE, wrapper, mro->hash)) {
-	SvREFCNT_dec(wrapper);
+	SvREFCNT_dec_NN(wrapper);
 	Perl_croak(aTHX_ "panic: hv_store() failed in mro_register() "
 		   "for '%.*s' %d", (int) mro->length, mro->name, mro->kflags);
     }
