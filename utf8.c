@@ -2028,16 +2028,26 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     /* The API should have included a length for the UTF-8 character in <p>,
-     * but it doesn't.  We therefor assume that p has been validated at least
+     * but it doesn't.  We therefore assume that p has been validated at least
      * as far as there being enough bytes available in it to accommodate the
      * character without reading beyond the end, and pass that number on to the
      * validating routine */
-    if (!is_utf8_char_buf(p, p + UTF8SKIP(p)))
-	return FALSE;
+    if (! is_utf8_char_buf(p, p + UTF8SKIP(p))) {
+        if (ckWARN_d(WARN_UTF8)) {
+            Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED,WARN_UTF8),
+		    "It is deprecated to pass malformed UTF-8 to character classification macros, for \"%s\"", swashname);
+            if (ckWARN(WARN_UTF8)) {    /* This will output details as to the
+                                           what the malformation is */
+                utf8_to_uvchr_buf(p, p + UTF8SKIP(p), NULL);
+            }
+        }
+        return FALSE;
+    }
     if (!*swash) {
         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
         *swash = _core_swash_init("utf8", swashname, &PL_sv_undef, 1, 0, NULL, &flags);
     }
+
     return swash_fetch(*swash, p, TRUE) != 0;
 }
 

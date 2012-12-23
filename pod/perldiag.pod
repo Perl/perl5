@@ -2517,6 +2517,17 @@ with 'useperlio'.
 (F) Your machine doesn't implement the sockatmark() functionality,
 neither as a system call nor an ioctl call (SIOCATMARK).
 
+=item It is deprecated to pass malformed UTF-8 to character classification macros, for "%s"
+
+(D deprecated, utf8) This message indicates a bug either in the Perl
+core or in XS code.  Such code was trying to find out if a character,
+allegedly stored internally encoded as UTF-8, was of a given type, such
+as being punctuation or a digit.  But the character was not encoded in
+legal UTF-8.  The C<%s> is replaced by a string that can be used by
+knowledgeable people to determine what the type being checked against
+was.  If C<utf8> warnings are enabled, a further message is raised,
+giving details of the malformation.
+
 =item $* is no longer supported
 
 (D deprecated, syntax) The special variable C<$*>, deprecated in older
