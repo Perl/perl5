@@ -9981,9 +9981,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     U8 op;
     int invert = 0;
 
+    GET_RE_DEBUG_FLAGS_DECL;
+
     *flagp = WORST;		/* Tentatively. */
 
-    GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("atom");
 
     PERL_ARGS_ASSERT_REGATOM;
