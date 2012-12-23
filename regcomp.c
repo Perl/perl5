@@ -2442,7 +2442,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     RExC_rxi->data->data[ data_slot + TRIE_WORDS_OFFSET ] = (void*)trie_words;
     RExC_rxi->data->data[ data_slot + 3 ] = (void*)revcharmap;
 #else
-    SvREFCNT_dec(revcharmap);
+    SvREFCNT_dec_NN(revcharmap);
 #endif
     return trie->jump 
            ? MADE_JUMP_TRIE 
@@ -4412,7 +4412,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         if (RExC_rx->minlen<*minnextp)
                             RExC_rx->minlen=*minnextp;
                         SCAN_COMMIT(pRExC_state, &data_fake, minnextp);
-                        SvREFCNT_dec(data_fake.last_found);
+                        SvREFCNT_dec_NN(data_fake.last_found);
                         
                         if ( data_fake.minlen_fixed != minlenp ) 
                         {
@@ -4943,7 +4943,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	 * handling */
 	PL_reg_state.re_reparsing = TRUE;
 	eval_sv(sv, G_SCALAR);
-	SvREFCNT_dec(sv);
+	SvREFCNT_dec_NN(sv);
 	SPAGAIN;
 	qr_ref = POPs;
 	PUTBACK;
@@ -4989,7 +4989,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 	if (!r2->num_code_blocks) /* we guessed wrong */
 	{
-	    SvREFCNT_dec(qr);
+	    SvREFCNT_dec_NN(qr);
 	    return 1;
 	}
 
@@ -5038,7 +5038,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	r1->code_blocks = new_block;
     }
 
-    SvREFCNT_dec(qr);
+    SvREFCNT_dec_NN(qr);
     return 1;
 }
 
@@ -6434,7 +6434,7 @@ Perl_reg_named_buff_exists(pTHX_ REGEXP * const r, SV * const key,
         } else {
 	    SV *sv = CALLREG_NAMED_BUFF_FETCH(r, key, flags);
             if (sv) {
-		SvREFCNT_dec(sv);
+		SvREFCNT_dec_NN(sv);
                 return TRUE;
             } else {
                 return FALSE;
@@ -6511,7 +6511,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
             av = MUTABLE_AV(SvRV(ret));
             length = av_len(av);
-	    SvREFCNT_dec(ret);
+	    SvREFCNT_dec_NN(ret);
             return newSViv(length + 1);
         } else {
             Perl_croak(aTHX_ "panic: Unknown flags %d in named_buff_scalar", (int)flags);
@@ -7437,7 +7437,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
     if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
 	if (*output == a) {
             if (a != NULL) {
-                SvREFCNT_dec(a);
+                SvREFCNT_dec_NN(a);
             }
 	}
 	if (*output != b) {
@@ -7450,14 +7450,14 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
     }
     else if ((len_b = _invlist_len(b)) == 0) {
 	if (*output == b) {
-	    SvREFCNT_dec(b);
+	    SvREFCNT_dec_NN(b);
 	}
 
         /* The complement of an empty list is a list that has everything in it,
          * so the union with <a> includes everything too */
         if (complement_b) {
             if (a == *output) {
-                SvREFCNT_dec(a);
+                SvREFCNT_dec_NN(a);
             }
             *output = _new_invlist(1);
             _append_range_to_invlist(*output, 0, UV_MAX);
@@ -7613,7 +7613,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 
     /*  We may be removing a reference to one of the inputs */
     if (a == *output || b == *output) {
-	SvREFCNT_dec(*output);
+	SvREFCNT_dec_NN(*output);
     }
 
     /* If we've changed b, restore it */
@@ -7681,7 +7681,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
                 *i = invlist_clone(a);
 
                 if (*i == b) {
-                    SvREFCNT_dec(b);
+                    SvREFCNT_dec_NN(b);
                 }
             }
             /* else *i is already 'a' */
@@ -7691,10 +7691,10 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
         /* Here, 'a' or 'b' is empty and not using the complement of 'b'.  The
          * intersection must be empty */
 	if (*i == a) {
-	    SvREFCNT_dec(a);
+	    SvREFCNT_dec_NN(a);
 	}
 	else if (*i == b) {
-	    SvREFCNT_dec(b);
+	    SvREFCNT_dec_NN(b);
 	}
 	*i = _new_invlist(0);
 	return;
@@ -7834,7 +7834,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 
     /*  We may be removing a reference to one of the inputs */
     if (a == *i || b == *i) {
-	SvREFCNT_dec(*i);
+	SvREFCNT_dec_NN(*i);
     }
 
     /* If we've changed b, restore it */
@@ -7883,7 +7883,7 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     _invlist_union(invlist, range_invlist, &invlist);
 
     /* The temporary can be freed */
-    SvREFCNT_dec(range_invlist);
+    SvREFCNT_dec_NN(range_invlist);
 
     return invlist;
 }
@@ -8509,7 +8509,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 #ifdef DEBUGGING
 			/* Yes this does cause a memory leak in debugging Perls */
                         if (!av_store(RExC_paren_name_list, RExC_npar, SvREFCNT_inc(svname)))
-                            SvREFCNT_dec(svname);
+                            SvREFCNT_dec_NN(svname);
 #endif
 
                         /*sv_dump(sv_dat);*/
@@ -10752,7 +10752,7 @@ tryagain:
                                                            &PL_sv_undef, 1, 0);
                                         PL_utf8_foldable =
                                                     _get_swash_invlist(swash);
-                                        SvREFCNT_dec(swash);
+                                        SvREFCNT_dec_NN(swash);
                                     }
                                     if (_invlist_contains_cp(PL_utf8_foldable,
                                                              ender))
@@ -11428,7 +11428,7 @@ parseit:
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
                     if (swash) {
-                        SvREFCNT_dec(swash);
+                        SvREFCNT_dec_NN(swash);
                     }
                     swash = _core_swash_init("utf8", name, &PL_sv_undef,
                                              1, /* binary */
@@ -11438,7 +11438,7 @@ parseit:
                                             );
                     if (! swash || ! (invlist = _get_swash_invlist(swash))) {
                         if (swash) {
-                            SvREFCNT_dec(swash);
+                            SvREFCNT_dec_NN(swash);
                             swash = NULL;
                         }
 
@@ -11477,7 +11477,7 @@ parseit:
                             /* The swash can't be used as-is, because we've
 			     * inverted things; delay removing it to here after
 			     * have copied its invlist above */
-                            SvREFCNT_dec(swash);
+                            SvREFCNT_dec_NN(swash);
                             swash = NULL;
                         }
                         else {
@@ -11725,7 +11725,7 @@ parseit:
                         }
                         else {
                             _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
+                            SvREFCNT_dec_NN(scratch_list);
                         }
 
 #ifndef HAS_ISBLANK
@@ -11790,7 +11790,7 @@ parseit:
                                 else {
                                     _invlist_union(posixes, scratch_list,
                                                    &posixes);
-                                    SvREFCNT_dec(scratch_list);
+                                    SvREFCNT_dec_NN(scratch_list);
                                 }
                                 if (DEPENDS_SEMANTICS) {
                                     ANYOF_FLAGS(ret)
@@ -11834,7 +11834,7 @@ parseit:
                         }
                         else {
                             _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
+                            SvREFCNT_dec_NN(scratch_list);
                         }
 #ifndef HAS_ISBLANK
                         if (namedclass != ANYOF_NBLANK) {
@@ -11849,7 +11849,7 @@ parseit:
                             _invlist_subtract(PL_Latin1, ascii_source,
                                               &scratch_list);
                             _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec(scratch_list);
+                            SvREFCNT_dec_NN(scratch_list);
                         }
 #endif
                     }
@@ -12157,8 +12157,8 @@ parseit:
 	RExC_parse = save_parse;
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
-        SvREFCNT_dec(multi_char_matches);
-        SvREFCNT_dec(listsv);
+        SvREFCNT_dec_NN(multi_char_matches);
+        SvREFCNT_dec_NN(listsv);
         return ret;
     }
 
@@ -12315,7 +12315,7 @@ parseit:
             RExC_parse = (char *) cur_parse;
 
             SvREFCNT_dec(posixes);
-            SvREFCNT_dec(listsv);
+            SvREFCNT_dec_NN(listsv);
             SvREFCNT_dec(cp_list);
             return ret;
         }
@@ -12349,7 +12349,7 @@ parseit:
                 SV* swash = swash_init("utf8", "_Perl_Any_Folds",
                                        &PL_sv_undef, 1, 0);
                 PL_utf8_foldable = _get_swash_invlist(swash);
-                SvREFCNT_dec(swash);
+                SvREFCNT_dec_NN(swash);
             }
 
             /* This is a hash that for a particular fold gives all characters
@@ -12551,7 +12551,7 @@ parseit:
                 }
             }
 	}
-	SvREFCNT_dec(fold_intersection);
+	SvREFCNT_dec_NN(fold_intersection);
     }
 
     /* And combine the result (if any) with any inversion list from posix
@@ -12562,7 +12562,7 @@ parseit:
         if (! DEPENDS_SEMANTICS) {
             if (cp_list) {
                 _invlist_union(cp_list, posixes, &cp_list);
-                SvREFCNT_dec(posixes);
+                SvREFCNT_dec_NN(posixes);
             }
             else {
                 cp_list = posixes;
@@ -12580,7 +12580,7 @@ parseit:
                               &posixes);
             if (cp_list) {
                 _invlist_union(cp_list, posixes, &cp_list);
-                SvREFCNT_dec(posixes);
+                SvREFCNT_dec_NN(posixes);
             }
             else {
                 cp_list = posixes;
@@ -12589,7 +12589,7 @@ parseit:
             if (depends_list) {
                 _invlist_union(depends_list, nonascii_but_latin1_properties,
                                &depends_list);
-                SvREFCNT_dec(nonascii_but_latin1_properties);
+                SvREFCNT_dec_NN(nonascii_but_latin1_properties);
             }
             else {
                 depends_list = nonascii_but_latin1_properties;
@@ -12631,7 +12631,7 @@ parseit:
             }
 
             _invlist_union(properties, cp_list, &cp_list);
-            SvREFCNT_dec(properties);
+            SvREFCNT_dec_NN(properties);
         }
         else {
             cp_list = properties;
@@ -12664,7 +12664,7 @@ parseit:
 
         /* Any swash can't be used as-is, because we've inverted things */
         if (swash) {
-            SvREFCNT_dec(swash);
+            SvREFCNT_dec_NN(swash);
             swash = NULL;
         }
 
@@ -12758,7 +12758,7 @@ parseit:
                             SV* swash = swash_init("utf8", "_Perl_Any_Folds",
                                                 &PL_sv_undef, 1, 0);
                             PL_utf8_foldable = _get_swash_invlist(swash);
-                            SvREFCNT_dec(swash);
+                            SvREFCNT_dec_NN(swash);
                         }
                         if (_invlist_contains_cp(PL_utf8_foldable, value)) {
                             op = EXACT;
@@ -12801,8 +12801,8 @@ parseit:
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value);
             }
 
-            SvREFCNT_dec(cp_list);
-            SvREFCNT_dec(listsv);
+            SvREFCNT_dec_NN(cp_list);
+            SvREFCNT_dec_NN(listsv);
             return ret;
         }
     }
@@ -12856,7 +12856,7 @@ parseit:
 
 	/* If have completely emptied it, remove it completely */
 	if (_invlist_len(cp_list) == 0) {
-	    SvREFCNT_dec(cp_list);
+	    SvREFCNT_dec_NN(cp_list);
 	    cp_list = NULL;
 	}
     }
@@ -12871,7 +12871,7 @@ parseit:
     if (depends_list) {
 	if (cp_list) {
 	    _invlist_union(cp_list, depends_list, &cp_list);
-	    SvREFCNT_dec(depends_list);
+	    SvREFCNT_dec_NN(depends_list);
 	}
 	else {
 	    cp_list = depends_list;
@@ -12881,7 +12881,7 @@ parseit:
     /* If there is a swash and more than one element, we can't use the swash in
      * the optimization below. */
     if (swash && element_count > 1) {
-	SvREFCNT_dec(swash);
+	SvREFCNT_dec_NN(swash);
 	swash = NULL;
     }
 
@@ -12889,7 +12889,7 @@ parseit:
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
-	SvREFCNT_dec(listsv);
+	SvREFCNT_dec_NN(listsv);
     }
     else {
 	/* av[0] stores the character class description in its textual form:
@@ -12907,10 +12907,10 @@ parseit:
 
 	av_store(av, 0, (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
 			? listsv
-			: (SvREFCNT_dec(listsv), &PL_sv_undef));
+			: (SvREFCNT_dec_NN(listsv), &PL_sv_undef));
 	if (swash) {
 	    av_store(av, 1, swash);
-	    SvREFCNT_dec(cp_list);
+	    SvREFCNT_dec_NN(cp_list);
 	}
 	else {
 	    av_store(av, 1, NULL);
@@ -13817,7 +13817,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 		    Safefree(origs);
 		}
-		SvREFCNT_dec(lv);
+		SvREFCNT_dec_NN(lv);
 	    }
 	}
 
@@ -13961,7 +13961,7 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 	    ret_x->sv_u.svu_rx = temp->sv_any;
 	    temp->sv_any = NULL;
 	    SvFLAGS(temp) = (SvFLAGS(temp) & ~SVTYPEMASK) | SVt_NULL;
-	    SvREFCNT_dec(temp);
+	    SvREFCNT_dec_NN(temp);
 	    /* SvCUR still resides in the xpvlv struct, so the regexp copy-
 	       ing below will not set it. */
 	    SvCUR_set(ret_x, SvCUR(rx));
