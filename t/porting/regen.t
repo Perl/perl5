@@ -16,7 +16,7 @@ if ( $^O eq "VMS" ) {
   skip_all( "- regen.pl needs porting." );
 }
 
-my $in_regen_pl = 22; # I can't see a clean way to calculate this automatically.
+my $in_regen_pl = 23; # I can't see a clean way to calculate this automatically.
 my @files = qw(perly.act perly.h perly.tab keywords.c keywords.h uconfig.h);
 my @progs = qw(Porting/makemeta regen/regcharclass.pl regen/mk_PL_charclass.pl);
 

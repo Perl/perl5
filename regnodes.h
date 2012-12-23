@@ -58,7 +58,7 @@
 #define	CURLYM                	46	/* 0x2e Capture this medium-complex thing {n,m} times. */
 #define	CURLYX                	47	/* 0x2f Match this complex thing {n,m} times. */
 #define	WHILEM                	48	/* 0x30 Do curly processing and see if rest matches. */
-#define	OPEN                  	49	/* 0x31 Mark this point in input as start of */
+#define	OPEN                  	49	/* 0x31 Mark this point in input as start of #n. */
 #define	CLOSE                 	50	/* 0x32 Analogous to OPEN. */
 #define	REF                   	51	/* 0x33 Match some already matched string */
 #define	REFF                  	52	/* 0x34 Match already matched string, folded using native charset semantics for non-utf8 */
@@ -73,7 +73,7 @@
 #define	IFMATCH               	61	/* 0x3d Succeeds if the following matches. */
 #define	UNLESSM               	62	/* 0x3e Fails if the following matches. */
 #define	SUSPEND               	63	/* 0x3f "Independent" sub-RE. */
-#define	IFTHEN                	64	/* 0x40 Switch, should be preceded by switcher . */
+#define	IFTHEN                	64	/* 0x40 Switch, should be preceded by switcher. */
 #define	GROUPP                	65	/* 0x41 Whether the group matched. */
 #define	LONGJMP               	66	/* 0x42 Jump far away. */
 #define	BRANCHJ               	67	/* 0x43 BRANCH with long offset. */

@@ -2,7 +2,9 @@
 #
 # File has two sections, divided by a line of dashes '-'. 
 #
-# Empty rows after #-comment are removed from input are ignored
+# Lines beginning with # are ignored, except for those that start with #*
+# which are included in pod/perldebguts.pod.  # within a line may be part
+# of a description.
 #
 # First section is for regops, second section is for regmatch-states
 #
@@ -14,7 +16,6 @@
 #
 #
 # run perl regen.pl after editing this file
-# Also update perlredebguts.pod
 
 
 
@@ -70,24 +71,26 @@ CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 
 #* Alternation
 
-# BRANCH        The set of branches constituting a single choice are hooked
-#               together with their "next" pointers, since precedence prevents
-#               anything being concatenated to any individual branch.  The
-#               "next" pointer of the last BRANCH in a choice points to the
-#               thing following the whole choice.  This is also where the
-#               final "next" pointer of each individual branch points; each
-#               branch starts with the operand node of a BRANCH node.
-#
+#* BRANCH        The set of branches constituting a single choice are
+#*               hooked together with their "next" pointers, since
+#*               precedence prevents anything being concatenated to
+#*               any individual branch.  The "next" pointer of the last
+#*               BRANCH in a choice points to the thing following the
+#*               whole choice.  This is also where the final "next"
+#*               pointer of each individual branch points; each branch
+#*               starts with the operand node of a BRANCH node.
+#*
 BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
 
 #*Back pointer
 
-# BACK          Normal "next" pointers all implicitly point forward; BACK
-#               exists to make loop structures possible.
-# not used
+#* BACK          Normal "next" pointers all implicitly point forward;
+#*               BACK exists to make loop structures possible.
+#* not used
 BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
 
-#*Literals - NOTE the relative ordering of these types is important do not change it
+#*Literals
+# NOTE: the relative ordering of these types is important do not change it
 
 EXACT       EXACT,      str       ; Match this string (preceded by length).
 EXACTF      EXACT,      str       ; Match this non-UTF-8 string (not guaranteed to be folded) using /id rules (w/len).
@@ -100,16 +103,16 @@ EXACTFU_TRICKYFOLD EXACT,  str	  ; Match this folded UTF-8 string using /iu rule
 #*Do nothing types
 
 NOTHING     NOTHING,    no        ; Match empty string.
-# A variant of above which delimits a group, thus stops optimizations
+#*A variant of above which delimits a group, thus stops optimizations
 TAIL        NOTHING,    no        ; Match empty string. Can jump here from outside.
 
 #*Loops
 
-# STAR,PLUS    '?', and complex '*' and '+', are implemented as circular
-#               BRANCH structures using BACK.  Simple cases (one character
-#               per match) are implemented with STAR and PLUS for speed
-#               and to minimize recursive plunges.
-#
+#* STAR,PLUS    '?', and complex '*' and '+', are implemented as
+#*               circular BRANCH structures using BACK.  Simple cases
+#*               (one character per match) are implemented with STAR
+#*               and PLUS for speed and to minimize recursive plunges.
+#*
 STAR        STAR,       node 0 V  ; Match this (simple) thing 0 or more times.
 PLUS        PLUS,       node 0 V  ; Match this (simple) thing 1 or more times.
 
@@ -118,12 +121,12 @@ CURLYN      CURLY,      no 2 V    ; Capture next-after-this simple thing
 CURLYM      CURLY,      no 2 V    ; Capture this medium-complex thing {n,m} times. 
 CURLYX      CURLY,      sv 2 V    ; Match this complex thing {n,m} times.
 
-# This terminator creates a loop structure for CURLYX
+#*This terminator creates a loop structure for CURLYX
 WHILEM      WHILEM,     no 0 V    ; Do curly processing and see if rest matches.
 
 #*Buffer related
 
-# OPEN,CLOSE,GROUPP     ...are numbered at compile time.
+#*OPEN,CLOSE,GROUPP     ...are numbered at compile time.
 OPEN        OPEN,       num 1     ; Mark this point in input as start of #n.
 CLOSE       CLOSE,      num 1     ; Analogous to OPEN.
 
@@ -136,7 +139,8 @@ REFFL       REF,        num 1 V   ; Match already matched string, folded in loc.
 REFFU       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8
 REFFA       REF,        num 1 V   ; Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII
 
-#*Named references.  Code in regcomp.c assumes that these all are after the numbered references
+#*Named references.  Code in regcomp.c assumes that these all are after
+#*the numbered references
 NREF        REF,        no-sv 1 V ; Match some already matched string
 NREFF       REF,        no-sv 1 V ; Match already matched string, folded using native charset semantics for non-utf8
 NREFFL      REF,        no-sv 1 V ; Match already matched string, folded in loc.
@@ -146,7 +150,7 @@ NREFFA      REF,        num   1 V ; Match already matched string, folded using u
 IFMATCH     BRANCHJ,    off 1 . 2 ; Succeeds if the following matches.
 UNLESSM     BRANCHJ,    off 1 . 2 ; Fails if the following matches.
 SUSPEND     BRANCHJ,    off 1 V 1 ; "Independent" sub-RE.
-IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher .
+IFTHEN      BRANCHJ,    off 1 V 1 ; Switch, should be preceded by switcher.
 GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
 #*Support for long RE
@@ -163,13 +167,14 @@ EVAL        EVAL,       evl 1     ; Execute some Perl code.
 MINMOD      MINMOD,     no        ; Next operator is not greedy.
 LOGICAL     LOGICAL,    no        ; Next opcode should set the flag only.
 
-# This is not used yet
+#*This is not used yet
 RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 
 #*Trie Related
 
-# Behave the same as A|LIST|OF|WORDS would. The '..C' variants have  
-# inline charclass data (ascii only), the 'C' store it in the structure.
+#* Behave the same as A|LIST|OF|WORDS would. The '..C' variants
+#* have inline charclass data (ascii only), the 'C' store it in the
+#* structure.
 # NOTE: the relative order of the TRIE-like regops  is significant
 
 TRIE        TRIE,       trie 1    ; Match many EXACT(F[ALU]?)? at once. flags==type
@@ -214,20 +219,20 @@ LNBREAK     LNBREAK,    none      ; generic newline pattern
 
 #*SPECIAL  REGOPS
 
-# This is not really a node, but an optimized away piece of a "long" node.
-# To simplify debugging output, we mark it as if it were a node
+#* This is not really a node, but an optimized away piece of a "long"
+#* node.  To simplify debugging output, we mark it as if it were a node
 OPTIMIZED   NOTHING,    off       ; Placeholder for dump.
 
-# Special opcode with the property that no opcode in a compiled program
-# will ever be of this type. Thus it can be used as a flag value that
-# no other opcode has been seen. END is used similarly, in that an END
-# node cant be optimized. So END implies "unoptimizable" and PSEUDO mean
-# "not seen anything to optimize yet".
+#* Special opcode with the property that no opcode in a compiled program
+#* will ever be of this type. Thus it can be used as a flag value that
+#* no other opcode has been seen. END is used similarly, in that an END
+#* node cant be optimized. So END implies "unoptimizable" and PSEUDO
+#* mean "not seen anything to optimize yet".
 PSEUDO      PSEUDO,     off       ; Pseudo opcode for internal use.
 
 -------------------------------------------------------------------------------
 # Format for second section:
-# REGOP \t typelist [ \t typelist] [# Comment]
+# REGOP \t typelist [ \t typelist]
 # typelist= namelist
 #         = namelist:FAIL
 #         = name:count

@@ -221,7 +221,7 @@ pod/perlce.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlclib.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	25
 pod/perldbmfilter.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	68
+pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	34
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldiag.pod	=item type mismatch	1

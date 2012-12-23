@@ -2,12 +2,16 @@
 # 
 # Regenerate (overwriting only if changed):
 #
+#    pod/perldebguts.pod
 #    regnodes.h
 #
 # from information stored in
 #
 #    regcomp.sym
 #    regexp.h
+#
+# pod/perldebguts.pod is not completely regenerated.  Only the table of
+# regexp nodes is replaced; other parts remain unchanged.
 #
 # Accepts the standard regen_lib -q and -v args.
 #
@@ -22,11 +26,15 @@ use strict;
 open DESC, 'regcomp.sym';
 
 my $ind = 0;
-my (@name,@rest,@type,@code,@args,@flags,@longj);
-my ($desc,$lastregop);
+my (@name,@rest,@type,@code,@args,@flags,@longj,@cmnt);
+my ($longest_name_length,$desc,$lastregop) = 0;
 while (<DESC>) {
-    s/#.*$//;
-    next if /^\s*$/;
+    # Special pod comments
+    if (/^#\* ?/) { $cmnt[$ind] .= "# $'"; }
+    # Truly blank lines possibly surrounding pod comments
+    elsif (/^\s*$/) { $cmnt[$ind] .= "\n" }
+
+    next if /^(?:#|\s*$)/;
     chomp; # No \z in 5.004
     s/\s*$//;
     if (/^-+\s*$/) {
@@ -37,6 +45,8 @@ while (<DESC>) {
         ($name[$ind], $desc, $rest[$ind]) = /^(\S+)\s+([^\t]+?)\s*;\s*(.*)/;
         ($type[$ind], $code[$ind], $args[$ind], $flags[$ind], $longj[$ind])
           = split /[,\s]\s*/, $desc;
+        $longest_name_length = length $name[$ind]
+          if length $name[$ind] > $longest_name_length;
         ++$ind;
     } else {
         my ($type,@lists)=split /\s+/, $_;
@@ -328,3 +338,51 @@ print $out process_flags('S', 'simple', <<'EOC');
 EOC
 
 read_only_bottom_close_and_rename($out);
+
+my $guts = open_new('pod/perldebguts.pod', '>');
+
+my $code;
+my $name_fmt = '<' x ($longest_name_length-1);
+my $descr_fmt = '<' x (58-$longest_name_length);
+eval <<EOD;
+format GuTS =
+ ^*~~
+ \$cmnt[\$_]
+ ^<<<<<<<<<<<<<<<<< ^<<<<<<<<< ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<~~
+ \$name[\$_], \$code,  \$rest[\$_]
+.
+EOD
+
+select +(select($guts), do {
+    $~ = "GuTS";
+
+    open my $oldguts, "pod/perldebguts.pod"
+        or die "$0 cannot open pod/perldebguts.pod for reading: $!";
+    while(<$oldguts>) {
+        print;
+        last if /=for regcomp.pl begin/;
+    }
+
+    print <<'end';
+
+ # TYPE arg-description [num-args] [longjump-len] DESCRIPTION
+end
+    for (0..$lastregop-1) {
+        $code = "$code[$_] ".($args[$_]||"");
+        $code .= " $longj[$_]" if $longj[$_];
+        if ($cmnt[$_] ||= "") {
+            # Trim multiple blanks
+            $cmnt[$_] =~ s/^\n\n+/\n/; $cmnt[$_] =~ s/\n\n+$/\n\n/
+        }
+        write;
+    }
+    print "\n";
+
+    while(<$oldguts>) {
+        last if /=for regcomp.pl end/;
+    }
+    do { print } while <$oldguts>;
+
+})[0];
+
+close_and_rename($guts);
