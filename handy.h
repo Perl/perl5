@@ -679,8 +679,8 @@ character set, if possible; otherwise returns the input character itself.
 
 =cut
 
-Still undocumented are , PSXSPC, VERTSPACE, and IDFIRST, and the other
-toUPPER etc functions
+XXX Still undocumented are PSXSPC, VERTSPACE, and IDFIRST IDCONT, and the
+other toUPPER etc functions
 
 Note that these macros are repeated in Devel::PPPort, so should also be
 patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
@@ -1109,6 +1109,10 @@ EXTCONST U32 PL_charclass[];
 #  endif
 #endif /* USE_NEXT_CTYPE */
 
+#define isIDCONT(c)             isWORDCHAR(c)
+#define isIDCONT_A(c)           isWORDCHAR_A(c)
+#define isIDCONT_L1(c)	        isWORDCHAR_L1(c)
+#define isIDCONT_LC(c)	        isWORDCHAR_LC(c)
 #define isPSXSPC_LC(c)		isSPACE_LC(c)
 
 /* For internal core Perl use only.  If the input is Latin1, use the Latin1
@@ -1131,6 +1135,7 @@ EXTCONST U32 PL_charclass[];
 #define isCNTRL_uni(c)      isCNTRL_L1(c) /* All controls are in Latin1 */
 #define isDIGIT_uni(c)      _generic_swash_uni(_CC_DIGIT, c)
 #define isGRAPH_uni(c)      _generic_swash_uni(_CC_GRAPH, c)
+#define isIDCONT_uni(c)     _generic_uni(_CC_WORDCHAR, _is_uni_perl_idcont, c)
 #define isIDFIRST_uni(c)    _generic_uni(_CC_IDFIRST, _is_uni_perl_idstart, c)
 #define isLOWER_uni(c)      _generic_swash_uni(_CC_LOWER, c)
 #define isPRINT_uni(c)      _generic_swash_uni(_CC_PRINT, c)
@@ -1163,6 +1168,8 @@ EXTCONST U32 PL_charclass[];
 #define isCNTRL_LC_uvchr(c)  (c < 256 ? isCNTRL_LC(c) : 0)
 #define isDIGIT_LC_uvchr(c)  _generic_LC_swash_uvchr(isDIGIT_LC, _CC_DIGIT, c)
 #define isGRAPH_LC_uvchr(c)  _generic_LC_swash_uvchr(isGRAPH_LC, _CC_GRAPH, c)
+#define isIDCONT_LC_uvchr(c)  _generic_LC_uvchr(isIDCONT_LC,                  \
+                                                  _is_uni_perl_idcont, c)
 #define isIDFIRST_LC_uvchr(c)  _generic_LC_uvchr(isIDFIRST_LC,                 \
                                                   _is_uni_perl_idstart, c)
 #define isLOWER_LC_uvchr(c)  _generic_LC_swash_uvchr(isLOWER_LC, _CC_LOWER, c)
@@ -1234,7 +1241,8 @@ EXTCONST U32 PL_charclass[];
 #define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT, p,   \
                                                   _is_utf8_FOO(_CC_DIGIT, p))
 #define isGRAPH_utf8(p)         _generic_swash_utf8(_CC_GRAPH, p)
-#define isIDCONT_utf8(p)        _generic_func_utf8(_CC_WORDCHAR, is_utf8_xidcont, p)
+#define isIDCONT_utf8(p)        _generic_func_utf8(_CC_WORDCHAR,              \
+                                                  _is_utf8_perl_idstart, p)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
@@ -1288,6 +1296,7 @@ EXTCONST U32 PL_charclass[];
 #define isCNTRL_LC_utf8(p)   _generic_LC_utf8(isCNTRL_LC, p, 0)
 #define isDIGIT_LC_utf8(p)   _generic_LC_swash_utf8(isDIGIT_LC, _CC_DIGIT, p)
 #define isGRAPH_LC_utf8(p)   _generic_LC_swash_utf8(isGRAPH_LC, _CC_GRAPH, p)
+#define isIDCONT_LC_utf8(p) _generic_LC_func_utf8(isIDCONT_LC, _is_utf8_perl_idcont, p)
 #define isIDFIRST_LC_utf8(p) _generic_LC_func_utf8(isIDFIRST_LC, _is_utf8_perl_idstart, p)
 #define isLOWER_LC_utf8(p)   _generic_LC_swash_utf8(isLOWER_LC, _CC_LOWER, p)
 #define isPRINT_LC_utf8(p)   _generic_LC_swash_utf8(isPRINT_LC, _CC_PRINT, p)

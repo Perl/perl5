@@ -663,6 +663,7 @@ PERLVAR(I, utf8_idstart, SV *)
 PERLVAR(I, utf8_idcont,	SV *)
 PERLVAR(I, utf8_xidstart, SV *)
 PERLVAR(I, utf8_perl_idstart, SV *)
+PERLVAR(I, utf8_perl_idcont, SV *)
 PERLVAR(I, utf8_xidcont, SV *)
 
 PERLVAR(I, sort_RealCmp, SVCOMPARE_t)

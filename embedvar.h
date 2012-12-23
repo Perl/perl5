@@ -334,6 +334,7 @@
 #define PL_utf8_idcont		(vTHX->Iutf8_idcont)
 #define PL_utf8_idstart		(vTHX->Iutf8_idstart)
 #define PL_utf8_mark		(vTHX->Iutf8_mark)
+#define PL_utf8_perl_idcont	(vTHX->Iutf8_perl_idcont)
 #define PL_utf8_perl_idstart	(vTHX->Iutf8_perl_idstart)
 #define PL_utf8_swash_ptrs	(vTHX->Iutf8_swash_ptrs)
 #define PL_utf8_tofold		(vTHX->Iutf8_tofold)

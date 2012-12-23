@@ -637,6 +637,7 @@ AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|const U8 flags
 ADMpPR	|bool	|is_uni_alnum_lc|UV c
 ADMpPR	|bool	|is_uni_alnumc_lc|UV c
 ADMpPR	|bool	|is_uni_idfirst_lc|UV c
+AMpR	|bool	|_is_uni_perl_idcont|UV c
 AMpR	|bool	|_is_uni_perl_idstart|UV c
 ADMpPR	|bool	|is_uni_alpha_lc|UV c
 ADMpPR	|bool	|is_uni_ascii_lc|UV c
@@ -662,6 +663,7 @@ ADMpR	|bool	|is_utf8_alnum	|NN const U8 *p
 ADMpR	|bool	|is_utf8_alnumc	|NN const U8 *p
 ADMpR	|bool	|is_utf8_idfirst|NN const U8 *p
 ADMpR	|bool	|is_utf8_xidfirst|NN const U8 *p
+AMpR	|bool	|_is_utf8_perl_idcont|NN const U8 *p
 AMpR	|bool	|_is_utf8_perl_idstart|NN const U8 *p
 ADMpR	|bool	|is_utf8_idcont	|NN const U8 *p
 ADMpR	|bool	|is_utf8_xidcont	|NN const U8 *p

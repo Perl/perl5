@@ -35,6 +35,9 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
 PERL_CALLCONV bool	Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV bool	Perl__is_uni_perl_idcont(pTHX_ UV c)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV bool	Perl__is_uni_perl_idstart(pTHX_ UV c)
 			__attribute__warn_unused_result__;
 
@@ -48,6 +51,12 @@ PERL_CALLCONV bool	Perl__is_utf8_mark(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__IS_UTF8_MARK	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT	\
 	assert(p)
 
 PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)

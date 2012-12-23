@@ -1528,6 +1528,14 @@ Perl_is_uni_idfirst(pTHX_ UV c)
 }
 
 bool
+Perl__is_uni_perl_idcont(pTHX_ UV c)
+{
+    U8 tmpbuf[UTF8_MAXBYTES+1];
+    uvchr_to_utf8(tmpbuf, c);
+    return _is_utf8_perl_idcont(tmpbuf);
+}
+
+bool
 Perl__is_uni_perl_idstart(pTHX_ UV c)
 {
     U8 tmpbuf[UTF8_MAXBYTES+1];
@@ -2118,6 +2126,17 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 
     return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart");
 }
+
+bool
+Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
+
+    return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont");
+}
+
 
 bool
 Perl_is_utf8_idcont(pTHX_ const U8 *p)

@@ -3998,6 +3998,55 @@ test_isIDFIRST_LC_utf8(unsigned char * p)
         RETVAL
 
 bool
+test_isIDCONT_uni(UV ord)
+    CODE:
+        RETVAL = isIDCONT_uni(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDCONT_LC_uvchr(UV ord)
+    CODE:
+        RETVAL = isIDCONT_LC_uvchr(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDCONT_A(UV ord)
+    CODE:
+        RETVAL = isIDCONT_A(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDCONT_L1(UV ord)
+    CODE:
+        RETVAL = isIDCONT_L1(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDCONT_LC(UV ord)
+    CODE:
+        RETVAL = isIDCONT_LC(ord);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDCONT_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isIDCONT_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
+test_isIDCONT_LC_utf8(unsigned char * p)
+    CODE:
+        RETVAL = isIDCONT_LC_utf8( p);
+    OUTPUT:
+        RETVAL
+
+bool
 test_isSPACE_uni(UV ord)
     CODE:
         RETVAL = isSPACE_uni(ord);
