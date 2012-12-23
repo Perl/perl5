@@ -3181,7 +3181,7 @@ cleanup:
     /* pop any of SAVEFREESV, SAVEDESTRUCTOR_X and "save in progress" */
     PL_savestack_ix = old_ss_ix;
     if (flags & 8)
-	SvREFCNT_dec(sv);
+	SvREFCNT_dec_NN(sv);
     PL_op = myop;			/* Apparently not needed... */
 
     PL_Sv = tSv;			/* Restore global temporaries. */
@@ -3247,7 +3247,7 @@ S_restore_magic(pTHX_ const void *p)
 	    SvTEMP_off(sv);
 	}
 	else
-	    SvREFCNT_dec(sv); /* undo the inc in S_save_magic() */
+	    SvREFCNT_dec_NN(sv); /* undo the inc in S_save_magic() */
     }
 }
 
