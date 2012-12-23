@@ -3115,7 +3115,7 @@ extern const float _float_constants[];
 		else afloat = (float) anv;
 }
 #else /* __VOS__ */
-# if defined(VMS) && !defined(__IEEE_FP)
+# if defined(VMS) && !defined(_IEEE_FP)
 		/* IEEE fp overflow shenanigans are unavailable on VAX and optional
 		 * on Alpha; fake it if we don't have them.
 		 */
@@ -3154,7 +3154,7 @@ extern const double _double_constants[];
 		else adouble = (double) anv;
 }
 #else /* __VOS__ */
-# if defined(VMS) && !defined(__IEEE_FP)
+# if defined(VMS) && !defined(_IEEE_FP)
 		/* IEEE fp overflow shenanigans are unavailable on VAX and optional
 		 * on Alpha; fake it if we don't have them.
 		 */

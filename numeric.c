@@ -803,7 +803,7 @@ S_mulexp10(NV value, I32 exponent)
      * a hammer.  Therefore we need to catch potential overflows before
      * it's too late. */
 
-#if ((defined(VMS) && !defined(__IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
+#if ((defined(VMS) && !defined(_IEEE_FP)) || defined(_UNICOS)) && defined(NV_MAX_10_EXP)
     STMT_START {
 	const NV exp_v = log10(value);
 	if (exponent >= NV_MAX_10_EXP || exponent + exp_v >= NV_MAX_10_EXP)
