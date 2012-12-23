@@ -132,7 +132,7 @@ foreach my $name (sort keys %properties) {
                 }
             }
 
-            next unless defined $locale;
+            if (defined $locale) {
             use locale;
 
             $ret = truth eval "test_is${function}_LC($i)";
@@ -142,6 +142,7 @@ foreach my $name (sort keys %properties) {
             else {
                 my $truth = truth($matches && $i < 128);
                 is ($ret, $truth, "is${function}_LC( $display_name ) == $truth");
+            }
             }
         }
 
@@ -177,7 +178,7 @@ foreach my $name (sort keys %properties) {
             is ($ret, $matches, "is${function}_utf8( $display_name ) == $matches");
         }
 
-        next if $name eq 'vertws' || ! defined $locale;
+        if ($name ne 'vertws' && defined $locale) {
         use locale;
 
         $ret = truth eval "test_is${function}_LC_utf8('$char')";
@@ -187,6 +188,7 @@ foreach my $name (sort keys %properties) {
         else {
             my $truth = truth($matches && ($i < 128 || $i > 255));
             is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth");
+        }
         }
     }
 }
