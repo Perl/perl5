@@ -1377,7 +1377,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	    else {
 		(void)hv_common(hv, heksv, HeKEY(entry), HeKLEN(entry),
 				 HeKFLAGS(entry), HV_FETCH_ISSTORE|HV_FETCH_JUST_SV, sv, HeHASH(entry));
-		SvREFCNT_dec(heksv);
+		SvREFCNT_dec_NN(heksv);
 	    }
 	}
 	HvRITER_set(ohv, riter);
@@ -1399,8 +1399,6 @@ S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 
     PERL_ARGS_ASSERT_HV_FREE_ENT_RET;
 
-    if (!entry)
-	return NULL;
     val = HeVAL(entry);
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
@@ -1481,14 +1479,15 @@ Perl_hv_clear(pTHX_ HV *hv)
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */
 		if (HeVAL(entry) != &PL_sv_placeholder) {
-		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))
-		     && !SvIsCOW(HeVAL(entry))) {
-			SV* const keysv = hv_iterkeysv(entry);
-			Perl_croak(aTHX_
-				   "Attempt to delete readonly key '%"SVf"' from a restricted hash",
-				   (void*)keysv);
+		    if (HeVAL(entry)) {
+			if (SvREADONLY(HeVAL(entry)) && !SvIsCOW(HeVAL(entry))) {
+			    SV* const keysv = hv_iterkeysv(entry);
+			    Perl_croak_nocontext(
+				"Attempt to delete readonly key '%"SVf"' from a restricted hash",
+				(void*)keysv);
+			}
+			SvREFCNT_dec_NN(HeVAL(entry));
 		    }
-		    SvREFCNT_dec(HeVAL(entry));
 		    HeVAL(entry) = &PL_sv_placeholder;
 		    HvPLACEHOLDERS(hv)++;
 		}
