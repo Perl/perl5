@@ -174,7 +174,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* Use UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed.  Masking with 0xfe allows low bit to be 0 or 1; thus this
  * matches 0xc[23]. */
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)c & 0xfe) == 0xc2)
+#define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)(c) & 0xfe) == 0xc2)
 
 #define UTF8_IS_ABOVE_LATIN1(c)	((U8)(c) >= 0xc4)
 
