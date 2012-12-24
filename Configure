@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sun Aug 26 14:33:39 CEST 2012 [metaconfig 3.5 PL0]
+# Generated on Mon Dec 24 10:05:48 CET 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -19429,9 +19429,9 @@ echo "Checking to see how many bits your $randfunc() function produces..." >&4
 #endif
 int main()
 {
-	register int i;
-	register unsigned long tmp;
-	register unsigned long max = 0L;
+	int i;
+	unsigned long tmp;
+	unsigned long max = 0L;
 
 	for (i = 1000; i; i--) {
 		tmp = (unsigned long) $randfunc();
