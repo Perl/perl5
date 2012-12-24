@@ -655,10 +655,12 @@ Tells an SV that it is an integer and disables all other OK bits.
 Tells an SV that it is an unsigned integer and disables all other OK bits.
 
 =for apidoc Am|bool|SvIOK_UV|SV* sv
-Returns a boolean indicating whether the SV contains an unsigned integer.
+Returns a boolean indicating whether the SV contains an unsigned integer
+that is too large to store as an IV.
 
 =for apidoc Am|bool|SvUOK|SV* sv
-Returns a boolean indicating whether the SV contains an unsigned integer.
+Returns a boolean indicating whether the SV contains an unsigned integer
+that is too large to store as an IV.
 
 =for apidoc Am|bool|SvIOK_notUV|SV* sv
 Returns a boolean indicating whether the SV contains a signed integer.
