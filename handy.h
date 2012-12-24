@@ -619,10 +619,33 @@ C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8>.
 =for apidoc Am|bool|isSPACE|char ch
 Returns a boolean indicating whether the specified character is a
 whitespace character in the platform's native character set.  This is analogous
-to what C<m/\s/> and C<m/[[:space:]]/> match in a regular expression.
+to what C<m/\s/> matches in a regular expression.  Starting in Perl 5.18
+(experimentally), this also matches what C<m/[[:space:]]/> does.
+("Experimentally" means that this change may be backed out in 5.20 or 5.22 if
+field experience indicates that it was unwise.)  Prior to 5.18, only the
+locale forms of this macro (the ones with C<LC> in their names) matched
+precisely what C<m/[[:space:]]/> does.  In those releases, the only difference,
+in the non-locale variants, was that C<isSPACE()> did not match a vertical tab.
+(See L</isPSXSPC> for a macro that matches a vertical tab in all releases.)
 See the L<top of this section|/Character classes> for an explanation of variants
 C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uni>, C<isSPACE_utf8>, C<isSPACE_LC>
 C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
+
+=for apidoc Am|bool|isPSXSPC|char ch
+(short for Posix Space)
+Starting in 5.18, this is identical (experimentally) in all its forms to the
+corresponding C<isSPACE()> macros.  ("Experimentally" means that this change
+may be backed out in 5.20 or 5.22 if field experience indicates that it
+was unwise.)
+The locale forms of this macro are identical to their corresponding
+C<isSPACE()> forms in all Perl releases.  In releases prior to 5.18, the
+non-locale forms differ from their C<isSPACE()> forms only in that the
+C<isSPACE()> forms don't match a Vertical Tab, and the C<isPSXSPC()> forms do.
+Otherwise they are identical.  Thus this macro is analogous to what
+C<m/[[:space:]]/> matches in a regular expression.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uni>, C<isPSXSPC_utf8>, C<isPSXSPC_LC>
+C<isPSXSPC_LC_uvchr>, and C<isPSXSPC_LC_utf8>.
 
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the specified character is an
@@ -679,7 +702,7 @@ character set, if possible; otherwise returns the input character itself.
 
 =cut
 
-XXX Still undocumented are PSXSPC, VERTSPACE, and IDFIRST IDCONT, and the
+XXX Still undocumented are VERTSPACE, and IDFIRST IDCONT, and the
 other toUPPER etc functions
 
 Note that these macros are repeated in Devel::PPPort, so should also be
