@@ -652,7 +652,7 @@ Unsets the IV status of an SV.
 Tells an SV that it is an integer and disables all other OK bits.
 
 =for apidoc Am|void|SvIOK_only_UV|SV* sv
-Tells and SV that it is an unsigned integer and disables all other OK bits.
+Tells an SV that it is an unsigned integer and disables all other OK bits.
 
 =for apidoc Am|bool|SvIOK_UV|SV* sv
 Returns a boolean indicating whether the SV contains an unsigned integer.
@@ -1535,7 +1535,7 @@ Like C<SvUV> but doesn't process magic.
 
 =for apidoc Am|UV|SvUVx|SV* sv
 Coerces the given SV to an unsigned integer and
-returns it.  Guarantees to C<sv> only once.  Only
+returns it.  Guarantees to evaluate C<sv> only once.  Only
 use this if C<sv> is an expression with side effects,
 otherwise use the more efficient C<SvUV>.
 
