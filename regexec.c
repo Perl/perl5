@@ -575,7 +575,7 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
 
 /* A failure to find a constant substring means that there is no need to make
    an expensive call to REx engine, thus we celebrate a failure.  Similarly,
-   finding a substring too deep into the string means that less calls to
+   finding a substring too deep into the string means that fewer calls to
    regtry() should be needed.
 
    REx compiler's optimizer found 4 possible hints:
@@ -637,7 +637,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 			      "String too short... [re_intuit_start]\n"));
 	goto fail;
     }
-                
+
     /* XXX we need to pass strbeg as a separate arg: the following is
      * guesswork and can be wrong... */
     if (sv && SvPOK(sv)) {
@@ -2169,8 +2169,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            was from this regex we don't want a subsequent partially
            successful match to clobber the old results.
            So when we detect this possibility we add a swap buffer
-           to the re, and switch the buffer each match. If we fail
-           we switch it back, otherwise we leave it swapped.
+           to the re, and switch the buffer each match. If we fail,
+           we switch it back; otherwise we leave it swapped.
         */
         swap = prog->offs;
         /* do we need a save destructor here for eval dies? */
