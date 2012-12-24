@@ -9402,7 +9402,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, OPFAIL);
                 return ret;
             }
-            else if (max == 0) {
+            else if (max == 0) {    /* replace {0} with a nothing node */
                 if (SIZE_ONLY) {
                     RExC_size = PREVOPER(RExC_size) - regarglen[(U8)NOTHING];
                 }
