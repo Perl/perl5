@@ -375,11 +375,12 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
  */
 #ifdef EBCDIC /* Both versions assume well-formed UTF8 */
-#   define UTF8_IS_SUPER(s)  (NATIVE_TO_I8(*(s)) >= 0xF9                       \
-      && (NATIVE_TO_I8(*(s)) > 0xF9) || (NATIVE_TO_I8(*((s)) + 1 >= 0xA2)))
+#   define UTF8_IS_SUPER(s)  (NATIVE_TO_I8(* (U8*) (s)) >= 0xF9                 \
+                              && (NATIVE_TO_I8(* (U8*) (s)) > 0xF9              \
+                                  || (NATIVE_TO_I8(* (U8*) ((s)) + 1 >= 0xA2))))
 #else
-#   define UTF8_IS_SUPER(s)  (*(s) >= 0xF4                                      \
-					&& (*(s) > 0xF4 || (*((s) + 1) >= 0x90)))
+#   define UTF8_IS_SUPER(s) (*(U8*) (s) >= 0xF4                                 \
+                            && (*(U8*) (s) > 0xF4 || (*((U8*) (s) + 1) >= 0x90)))
 #endif
 
 /* These are now machine generated, and the 'given' clause is no longer
