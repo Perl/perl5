@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(108);
+plan(109);
 
 my $rc_filename = '.perldb';
 
