@@ -575,6 +575,7 @@ typedef struct {
     SV *sv;
     char *ganch;
     char *cutpoint;
+    bool is_utf8_pat;
 } regmatch_info;
  
 
@@ -646,9 +647,7 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_eval;
 	    struct regmatch_state *prev_curlyx;
 	    REGEXP	*prev_rex;
-	    U32		toggle_reg_flags; /* what bits in PL_reg_flags to
-					    flip when transitioning between
-					    inner and outer rexen */
+	    bool	saved_utf8_pat; /* saved copy of is_utf8_pat */
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
 	    U32        close_paren; /* which close bracket is our end */

@@ -96,10 +96,6 @@ static const char* const non_utf8_target_but_utf8_required
 #define RF_tainted	1	/* tainted information used? e.g. locale */
 #define RF_warned	2		/* warned about big count? */
 
-#define RF_utf8		8		/* Pattern contains multibyte chars? */
-
-#define UTF_PATTERN ((PL_reg_flags & RF_utf8) != 0)
-
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 
 #ifndef STATIC
@@ -611,6 +607,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
+    bool is_utf8_pat;
 #ifdef DEBUGGING
     const char * const i_strpos = strpos;
 #endif
@@ -622,10 +619,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 
     RX_MATCH_UTF8_set(rx,utf8_target);
 
-    if (RX_UTF8(rx))
-	PL_reg_flags |= RF_utf8;
-    else
-	PL_reg_flags &= ~RF_utf8;
+    is_utf8_pat = cBOOL(RX_UTF8(rx));
 
     DEBUG_EXECUTE_r( 
         debug_start_match(rx, utf8_target, strpos, strend,
@@ -1129,7 +1123,8 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
                                       (IV)start_shift, (IV)(check_at - strbeg), (IV)(s - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
 
 	t = s;
-        s = find_byclass(prog, progi->regstclass, checked_upto, endpos, NULL);
+        s = find_byclass(prog, progi->regstclass, checked_upto, endpos,
+                            NULL, is_utf8_pat);
 	if (s) {
 	    checked_upto = s;
 	} else {
@@ -1437,7 +1432,7 @@ if ((!reginfo || regtry(reginfo, &s))) \
 
 STATIC char *
 S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, 
-    const char *strend, regmatch_info *reginfo)
+    const char *strend, regmatch_info *reginfo, bool is_utf8_pat)
 {
     dVAR;
     const I32 doevery = (prog->intflags & PREGf_SKIP) == 0;
@@ -1483,7 +1478,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
 
     case EXACTFA:
-        if (UTF_PATTERN || utf8_target) {
+        if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
             goto do_exactf_utf8;
         }
@@ -1503,7 +1498,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
     case EXACTFL:
-        if (UTF_PATTERN || utf8_target) {
+        if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
             goto do_exactf_utf8;
         }
@@ -1512,15 +1507,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
     case EXACTFU_SS:
-        if (UTF_PATTERN) {
+        if (is_utf8_pat) {
             utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
         }
         goto do_exactf_utf8;
 
     case EXACTFU_TRICKYFOLD:
     case EXACTFU:
-        if (UTF_PATTERN || utf8_target) {
-            utf8_fold_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
+        if (is_utf8_pat || utf8_target) {
+            utf8_fold_flags = is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
             goto do_exactf_utf8;
         }
 
@@ -1576,7 +1571,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         pat_string = STRING(c);
         ln  = STR_LEN(c);	/* length to match in octets/bytes */
         pat_end = pat_string + ln;
-        lnc = (UTF_PATTERN)     /* length to match in characters */
+        lnc = is_utf8_pat       /* length to match in characters */
                 ? utf8_length((U8 *) pat_string, (U8 *) pat_end)
                 : ln;
 
@@ -1612,7 +1607,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         while (s <= e) {
             char *my_strend= (char *)strend;
             if (foldEQ_utf8_flags(s, &my_strend, 0,  utf8_target,
-                  pat_string, NULL, ln, cBOOL(UTF_PATTERN), utf8_fold_flags)
+                  pat_string, NULL, ln, is_utf8_pat, utf8_fold_flags)
                 && (!reginfo || regtry(reginfo, &s)) )
             {
                 goto got_it;
@@ -2114,9 +2109,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     PL_reg_state.re_state_eval_setup_done = FALSE;
     PL_reg_maxiter = 0;
 
-    if (RX_UTF8(rx))
-	PL_reg_flags |= RF_utf8;
-
+    reginfo.is_utf8_pat = cBOOL(RX_UTF8(rx));
     /* Mark beginning of line for ^ and lookbehind. */
     reginfo.bol = startpos; /* XXX not used ??? */
     PL_bostr  = strbeg;
@@ -2291,7 +2284,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* Messy cases:  unanchored match. */
     if ((prog->anchored_substr || prog->anchored_utf8) && prog->intflags & PREGf_SKIP) {
 	/* we have /x+whatever/ */
-	/* it must be a one character string (XXXX Except UTF_PATTERN?) */
+	/* it must be a one character string (XXXX Except is_utf8_pat?) */
 	char ch;
 #ifdef DEBUGGING
 	int did_match = 0;
@@ -2461,7 +2454,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 		     quoted, (int)(strend - s));
 	    }
 	});
-        if (find_byclass(prog, c, s, strend, &reginfo))
+        if (find_byclass(prog, c, s, strend, &reginfo, reginfo.is_utf8_pat))
 	    goto got_it;
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Contradicts stclass... [regexec_flags]\n"));
     }
@@ -3238,7 +3231,8 @@ S_clear_backtrack_stack(pTHX_ void *p)
     }
 }
 static bool
-S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p, U8* c1_utf8, int *c2p, U8* c2_utf8)
+S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
+        U8* c1_utf8, int *c2p, U8* c2_utf8, bool is_utf8_pat)
 {
     /* This function determines if there are one or two characters that match
      * the first character of the passed-in EXACTish node <text_node>, and if
@@ -3310,7 +3304,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p, U8* c
          * character.  If both the pat and the target are UTF-8, we can just
          * copy the input to the output, avoiding finding the code point of
          * that character */
-        if (! UTF_PATTERN) {
+        if (!is_utf8_pat) {
             c2 = c1 = *pat;
         }
         else if (utf8_target) {
@@ -3323,10 +3317,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p, U8* c
         }
     }
     else /* an EXACTFish node */
-         if ((UTF_PATTERN
+         if ((is_utf8_pat
                     && is_MULTI_CHAR_FOLD_utf8_safe(pat,
                                                     pat + STR_LEN(text_node)))
-             || (! UTF_PATTERN
+             || (!is_utf8_pat
                     && is_MULTI_CHAR_FOLD_latin1_safe(pat,
                                                     pat + STR_LEN(text_node))))
     {
@@ -3336,7 +3330,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p, U8* c
         use_chrtest_void = TRUE;
     }
     else { /* an EXACTFish node which doesn't begin with a multi-char fold */
-        c1 = (UTF_PATTERN) ? valid_utf8_to_uvchr(pat, NULL) : *pat;
+        c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
         if (c1 > 256) {
             /* Load the folds hash, if not already done */
             SV** listp;
@@ -3564,6 +3558,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
     _char_class_number classnum;
+    bool is_utf8_pat = reginfo->is_utf8_pat;
 
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
@@ -4052,7 +4047,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case EXACT: {            /*  /abc/        */
 	    char *s = STRING(scan);
 	    ln = STR_LEN(scan);
-	    if (utf8_target != UTF_PATTERN) {
+	    if (utf8_target != is_utf8_pat) {
 		/* The target and the pattern have differing utf8ness. */
 		char *l = locinput;
 		const char * const e = s + ln;
@@ -4141,7 +4136,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case EXACTFU:            /*  /abc/iu      */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
-	    fold_utf8_flags = (UTF_PATTERN) ? FOLDEQ_S1_ALREADY_FOLDED : 0;
+	    fold_utf8_flags = is_utf8_pat ? FOLDEQ_S1_ALREADY_FOLDED : 0;
 	    goto do_exactf;
 
 	case EXACTFA:            /*  /abc/iaa     */
@@ -4159,13 +4154,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 
-	    if (utf8_target || UTF_PATTERN || state_num == EXACTFU_SS) {
+	    if (utf8_target || is_utf8_pat || state_num == EXACTFU_SS) {
 	      /* Either target or the pattern are utf8, or has the issue where
 	       * the fold lengths may differ. */
 		const char * const l = locinput;
 		char *e = PL_regeol;
 
-		if (! foldEQ_utf8_flags(s, 0,  ln, cBOOL(UTF_PATTERN),
+		if (! foldEQ_utf8_flags(s, 0,  ln, is_utf8_pat,
 			                l, &e, 0,  utf8_target, fold_utf8_flags))
 		{
 		    sayNO;
@@ -5117,12 +5112,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		/* XXXX This is too dramatic a measure... */
 		PL_reg_maxiter = 0;
 
-		ST.toggle_reg_flags = PL_reg_flags;
-		if (RX_UTF8(re_sv))
-		    PL_reg_flags |= RF_utf8;
-		else
-		    PL_reg_flags &= ~RF_utf8;
-		ST.toggle_reg_flags ^= PL_reg_flags; /* diff of old and new */
+		ST.saved_utf8_pat = is_utf8_pat;
+		is_utf8_pat = cBOOL(RX_UTF8(re_sv));
 
 		ST.prev_rex = rex_sv;
 		ST.prev_curlyx = cur_curlyx;
@@ -5141,7 +5132,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
-	    PL_reg_flags ^= ST.toggle_reg_flags; 
+            is_utf8_pat = ST.saved_utf8_pat;
 	    rex_sv = ST.prev_rex;
 	    SET_reg_curpm(rex_sv);
 	    rex = ReANY(rex_sv);
@@ -5159,7 +5150,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
-	    PL_reg_flags ^= ST.toggle_reg_flags; 
+            is_utf8_pat = ST.saved_utf8_pat;
 	    rex_sv = ST.prev_rex;
 	    SET_reg_curpm(rex_sv);
 	    rex = ReANY(rex_sv);
@@ -5783,7 +5774,8 @@ NULL
 	             */
 		    if (PL_regkind[OP(text_node)] == EXACT) {
                         if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
-                           text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8))
+                           text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
+                           is_utf8_pat))
                         {
                             sayNO;
                         }
@@ -5959,7 +5951,8 @@ NULL
                         if this changes back then the macro for IS_TEXT and 
                         friends need to change. */
                         if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
-                           text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8))
+                           text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
+                           is_utf8_pat))
                         {
                             sayNO;
                         }
@@ -5972,7 +5965,9 @@ NULL
 	    if (minmod) {
                 char *li = locinput;
 		minmod = 0;
-		if (ST.min && regrepeat(rex, &li, ST.A, ST.min, depth) < ST.min)
+		if (ST.min &&
+                        regrepeat(rex, &li, ST.A, ST.min, depth, is_utf8_pat)
+                            < ST.min)
 		    sayNO;
                 SET_locinput(li);
 		ST.count = ST.min;
@@ -6008,7 +6003,8 @@ NULL
                 /* avoid taking address of locinput, so it can remain
                  * a register var */
                 char *li = locinput;
-		ST.count = regrepeat(rex, &li, ST.A, ST.max, depth);
+		ST.count = regrepeat(rex, &li, ST.A, ST.max, depth,
+                                        is_utf8_pat);
 		if (ST.count < ST.min)
 		    sayNO;
                 SET_locinput(li);
@@ -6092,7 +6088,7 @@ NULL
                      * locinput matches */
                     char *li = ST.oldloc;
 		    ST.count += n;
-		    if (regrepeat(rex, &li, ST.A, n, depth) < n)
+		    if (regrepeat(rex, &li, ST.A, n, depth, is_utf8_pat) < n)
 			sayNO;
                     assert(n == REG_INFTY || locinput == li);
 		}
@@ -6116,7 +6112,7 @@ NULL
 	    /* failed -- move forward one */
             {
                 char *li = locinput;
-                if (!regrepeat(rex, &li, ST.A, 1, depth)) {
+                if (!regrepeat(rex, &li, ST.A, 1, depth, is_utf8_pat)) {
                     sayNO;
                 }
                 locinput = li;
@@ -6191,9 +6187,8 @@ NULL
 	    fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
-		st->u.eval.toggle_reg_flags
-			    = cur_eval->u.eval.toggle_reg_flags;
-		PL_reg_flags ^= st->u.eval.toggle_reg_flags; 
+                st->u.eval.saved_utf8_pat = is_utf8_pat;
+		is_utf8_pat = cur_eval->u.eval.saved_utf8_pat;
 
 		st->u.eval.prev_rex = rex_sv;		/* inner */
 
@@ -6644,7 +6639,8 @@ no_silent:
  * depth     - (for debugging) backtracking depth.
  */
 STATIC I32
-S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 max, int depth)
+S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p,
+                I32 max, int depth, bool is_utf8_pat)
 {
     dVAR;
     char *scan;     /* Pointer to current position in target string */
@@ -6723,7 +6719,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
         }
 	break;
     case EXACT:
-        assert(STR_LEN(p) == (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1);
+        assert(STR_LEN(p) == is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
 	c = (U8)*STRING(p);
 
@@ -6731,7 +6727,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
          * under UTF-8, or both target and pattern aren't UTF-8.  Note that we
          * can use UTF8_IS_INVARIANT() even if the pattern isn't UTF-8, as it's
          * true iff it doesn't matter if the argument is in UTF-8 or not */
-        if (UTF8_IS_INVARIANT(c) || (! utf8_target && ! UTF_PATTERN)) {
+        if (UTF8_IS_INVARIANT(c) || (! utf8_target && ! is_utf8_pat)) {
             if (utf8_target && scan + max < loceol) {
                 /* We didn't adjust <loceol> because is UTF-8, but ok to do so,
                  * since here, to match at all, 1 char == 1 byte */
@@ -6741,7 +6737,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
 		scan++;
 	    }
 	}
-	else if (UTF_PATTERN) {
+	else if (is_utf8_pat) {
             if (utf8_target) {
                 STRLEN scan_char_len;
 
@@ -6803,23 +6799,25 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 ma
     case EXACTFU_SS:
     case EXACTFU_TRICKYFOLD:
     case EXACTFU:
-	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
+	utf8_flags = is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
     do_exactf: {
         int c1, c2;
         U8 c1_utf8[UTF8_MAXBYTES+1], c2_utf8[UTF8_MAXBYTES+1];
 
-        assert(STR_LEN(p) == (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1);
+        assert(STR_LEN(p) == is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
-        if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8)) {
+        if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8,
+                                        is_utf8_pat))
+        {
             if (c1 == CHRTEST_VOID) {
                 /* Use full Unicode fold matching */
                 char *tmpeol = PL_regeol;
-                STRLEN pat_len = (UTF_PATTERN) ? UTF8SKIP(STRING(p)) : 1;
+                STRLEN pat_len = is_utf8_pat ? UTF8SKIP(STRING(p)) : 1;
                 while (hardcount < max
                         && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,
                                              STRING(p), NULL, pat_len,
-                                             cBOOL(UTF_PATTERN), utf8_flags))
+                                             is_utf8_pat, utf8_flags))
                 {
                     scan = tmpeol;
                     tmpeol = PL_regeol;

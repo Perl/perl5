@@ -6834,7 +6834,7 @@ STATIC SV*	S_core_regclass_swash(pTHX_ const regexp *prog, const struct regnode 
 #define PERL_ARGS_ASSERT_CORE_REGCLASS_SWASH	\
 	assert(node)
 
-STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo)
+STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo, bool is_utf_pat)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -6899,7 +6899,7 @@ STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *pro
 #define PERL_ARGS_ASSERT_REGMATCH	\
 	assert(reginfo); assert(startpos); assert(prog)
 
-STATIC I32	S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 max, int depth)
+STATIC I32	S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 max, int depth, bool is_utf8_pat)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

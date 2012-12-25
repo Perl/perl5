@@ -2032,7 +2032,9 @@ Es	|U8	|regtail_study	|NN struct RExC_state_t *pRExC_state \
 ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
-ERs	|I32	|regrepeat	|NN const regexp *prog|NN char **startposp|NN const regnode *p|I32 max|int depth
+ERs	|I32	|regrepeat	|NN const regexp *prog|NN char **startposp \
+				|NN const regnode *p|I32 max|int depth \
+				|bool is_utf8_pat
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p\
 				|bool const utf8_target
@@ -2049,7 +2051,10 @@ ERsn	|U8*	|reghop4	|NN U8 *s|I32 off|NN const U8 *llim \
 				|NN const U8 *rlim
 #endif
 ERsn	|U8*	|reghopmaybe3	|NN U8 *s|I32 off|NN const U8 *lim
-ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|NULLOK regmatch_info *reginfo
+ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c \
+				|NN char *s|NN const char *strend \
+				|NULLOK regmatch_info *reginfo \
+				|bool is_utf_pat
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|bool	|to_byte_substr	|NN regexp * prog
 ERs	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
