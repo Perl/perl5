@@ -12702,12 +12702,12 @@ parseit:
         && ! (ANYOF_FLAGS(ret) & ANYOF_CLASS)
         && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
-       UV start, end;
-       U8 op = END;  /* The optimzation node-type */
+        UV start, end;
+        U8 op = END;  /* The optimzation node-type */
         const char * cur_parse= RExC_parse;
 
-       invlist_iterinit(cp_list);
-       if (! invlist_iternext(cp_list, &start, &end)) {
+        invlist_iterinit(cp_list);
+        if (! invlist_iternext(cp_list, &start, &end)) {
 
             /* Here, the list is empty.  This happens, for example, when a
              * Unicode property is the only thing in the character class, and
