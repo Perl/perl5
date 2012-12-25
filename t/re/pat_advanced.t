@@ -2206,6 +2206,8 @@ EOP
             my $p = qr/^[\x{FFFF_FFFF}]$/;
             ok(chr(0xFFFF_FFFF) =~ $p,
                     "chr(0xFFFF_FFFF) can match itself in a [class]");
+            ok(chr(0xFFFF_FFFF) =~ $p, # Tests any caching
+                    "chr(0xFFFF_FFFF) can match itself in a [class] subsequently");
         }
         else {
             no warnings 'overflow';
@@ -2217,6 +2219,8 @@ EOP
             my $p = qr/^[\x{FFFF_FFFF_FFFF_FFFF}]$/;
             ok(chr(0xFFFF_FFFF_FFFF_FFFF) =~ $p,
                     "chr(0xFFFF_FFFF_FFFF_FFFF) can match itself in a [class]");
+            ok(chr(0xFFFF_FFFF_FFFF_FFFF) =~ $p, # Tests any caching
+                    "chr(0xFFFF_FFFF_FFFF_FFFF) can match itself in a [class] subsequently");
 
             # This test is because something was declared as 32 bits, but
             # should have been cast to 64; only a problem where
