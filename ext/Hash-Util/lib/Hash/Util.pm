@@ -28,8 +28,8 @@ our @EXPORT_OK  = qw(
                      lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
 
-                     hash_seed hash_value bucket_stats bucket_info bucket_array
-                     hv_store
+                     hash_seed hash_value hv_store
+                     bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
                     );
 our $VERSION = '0.13';
@@ -73,7 +73,8 @@ Hash::Util - A selection of general-utility hash subroutines
                      lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
 
-                     hash_seed hv_store
+                     hash_seed hash_value hv_store
+                     bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
                    );
 
@@ -101,6 +102,8 @@ Hash::Util - A selection of general-utility hash subroutines
   unlock_hash(%hash);
 
   my $hashes_are_randomised = hash_seed() != 0;
+
+  my $int_hash_value = hash_value( 'string' );
 
 =head1 DESCRIPTION
 
@@ -206,7 +209,7 @@ Returns a reference to %hash
 
 
 sub lock_ref_keys_plus {
-    my ($hash,@keys)=@_;
+    my ($hash,@keys) = @_;
     my @delete;
     Internals::hv_clear_placeholders(%$hash);
     foreach my $key (@keys) {
@@ -477,7 +480,7 @@ Perl has been built with. Possible sizes may be but are not limited to
 
     my $hash_value = hash_value($string);
 
-hash_value() returns the current perls internal hash value for a given
+hash_value() returns the current perl's internal hash value for a given
 string.
 
 Returns a 32 bit integer representing the hash value of the string passed
@@ -496,7 +499,7 @@ know it. See also L<perlrun/PERL_HASH_SEED_DEBUG>.
 
 Return a set of basic information about a hash.
 
-    my ($keys, $buckets, $used, @length_counts)= bucket_info($hash);
+    my ($keys, $buckets, $used, @length_counts) = bucket_info($hash);
 
 Fields are as follows:
 
@@ -513,7 +516,7 @@ See also bucket_stats() and bucket_array().
 Returns a list of statistics about a hash.
 
     my ($keys, buckets, $used, $utilization_ratio, $collision_pct,
-        $mean, $stddev, @length_counts)= bucket_info($hashref);
+        $mean, $stddev, @length_counts) = bucket_info($hashref);
 
 
 Fields are as follows:
@@ -540,10 +543,10 @@ of the array is either an integer K, in which case it represents K empty buckets
 a reference to another array which contains the keys that are in that bucket.
 
 B<Note that the information returned by bucket_array is sensitive information>:
-by knowing it one can directly attack perls hash function which in turn may allow
+by knowing it one can directly attack perl's hash function which in turn may allow
 one to craft a denial-of-service attack against Perl code, even remotely,
 see L<perlsec/"Algorithmic Complexity Attacks"> for more information.
-B<Do not disclose the outputof this function> to people who don't need to
+B<Do not disclose the output of this function> to people who don't need to
 know it. See also L<perlrun/PERL_HASH_SEED_DEBUG>. This function is provided strictly
 for  debugging and diagnostics purposes only, it is hard to imagine a reason why it
 would be used in production code.
@@ -552,8 +555,8 @@ would be used in production code.
 
 
 sub bucket_stats {
-    my ($hash)= @_;
-    my ($keys, $buckets, $used, @length_counts)= bucket_info($hash);
+    my ($hash) = @_;
+    my ($keys, $buckets, $used, @length_counts) = bucket_info($hash);
     my $sum;
     $sum += ($length_counts[$_] * $_) for 0 .. $#length_counts;
     my $mean= $sum/$buckets;
