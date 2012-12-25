@@ -2084,12 +2084,11 @@ the pattern is marked as tainted. This means that subsequent usage, such
 as /x$r/, will set PL_tainted using TAINT_set, and thus RXf_TAINTED,
 on the new pattern too.
 
-During execution of a pattern, locale-variant ops such as ALNUML set the
-local flag RF_tainted. At the end of execution, the engine sets the
-RXf_TAINTED_SEEN on the pattern if RF_tainted got set, or clears it
-otherwise.
+At the start of execution of a pattern, the RXf_TAINTED_SEEN flag on the
+regex is cleared; during execution, locale-variant ops such as ALNUML may
+set RXf_TAINTED_SEEN.
 
-In addition, RXf_TAINTED_SEEN is used post-execution by the get magic code
+RXf_TAINTED_SEEN is used post-execution by the get magic code
 of $1 et al to indicate whether the returned value should be tainted.
 It is the responsibility of the caller of the pattern (i.e. pp_match,
 pp_subst etc) to set this flag for any other circumstances where $1 needs

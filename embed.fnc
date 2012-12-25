@@ -2032,11 +2032,11 @@ Es	|U8	|regtail_study	|NN struct RExC_state_t *pRExC_state \
 ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
-ERs	|I32	|regrepeat	|NN const regexp *prog|NN char **startposp \
+ERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN const regnode *p|I32 max|int depth \
 				|bool is_utf8_pat
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
-ERs	|bool	|reginclass	|NULLOK const regexp * const prog|NN const regnode * const n|NN const U8 * const p\
+ERs	|bool	|reginclass	|NULLOK regexp * const prog|NN const regnode * const n|NN const U8 * const p\
 				|bool const utf8_target
 Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
 				|U32 maxopenparen

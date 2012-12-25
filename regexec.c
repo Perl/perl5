@@ -93,8 +93,6 @@ static const char* const non_utf8_target_but_utf8_required
 #include "inline_invlist.c"
 #include "unicode_constants.h"
 
-#define RF_tainted	1	/* tainted information used? e.g. locale */
-
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 
 #ifndef STATIC
@@ -1616,13 +1614,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
     }
     case BOUNDL:
-        PL_reg_flags |= RF_tainted;
+        RXp_MATCH_TAINTED_on(prog);
         FBC_BOUND(isALNUM_LC,
                   isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)),
                   isALNUM_LC_utf8((U8*)s));
         break;
     case NBOUNDL:
-        PL_reg_flags |= RF_tainted;
+        RXp_MATCH_TAINTED_on(prog);
         FBC_NBOUND(isALNUM_LC,
                    isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)),
                    isALNUM_LC_utf8((U8*)s));
@@ -1671,7 +1669,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* FALLTHROUGH */
 
     case POSIXL:
-        PL_reg_flags |= RF_tainted;
+        RXp_MATCH_TAINTED_on(prog);
         REXEC_FBC_CSCAN(to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s)),
                         to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
         break;
@@ -2104,7 +2102,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	Perl_croak(aTHX_ "corrupted regexp program");
     }
 
-    PL_reg_flags = 0;
+    RX_MATCH_TAINTED_off(rx);
     PL_reg_state.re_state_eval_setup_done = FALSE;
     PL_reg_maxiter = 0;
 
@@ -2590,7 +2588,6 @@ got_it:
 	    );
     );
     Safefree(swap);
-    RX_MATCH_TAINTED_set(rx, PL_reg_flags & RF_tainted);
 
     if (PL_reg_state.re_state_eval_setup_done)
 	restore_pos(aTHX_ prog);
@@ -4125,7 +4122,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    const char * s;
 	    U32 fold_utf8_flags;
 
-	    PL_reg_flags |= RF_tainted;
+            RX_MATCH_TAINTED_on(reginfo->prog);
             folder = foldEQ_locale;
             fold_array = PL_fold_locale;
 	    fold_utf8_flags = FOLDEQ_UTF8_LOCALE;
@@ -4189,7 +4186,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	 * have to set the FLAGS fields of these */
 	case BOUNDL:  /*  /\b/l  */
 	case NBOUNDL: /*  /\B/l  */
-	    PL_reg_flags |= RF_tainted;
+            RX_MATCH_TAINTED_on(reginfo->prog);
 	    /* FALL THROUGH */
 	case BOUND:   /*  /\b/   */
 	case BOUNDU:  /*  /\b/u  */
@@ -4296,7 +4293,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             /* The locale hasn't influenced the outcome before this, so defer
              * tainting until now */
-            PL_reg_flags |= RF_tainted;
+            RX_MATCH_TAINTED_on(reginfo->prog);
 
             /* Use isFOO_lc() for characters within Latin1.  (Note that
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
@@ -4670,7 +4667,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    const U8 *fold_array;
 	    UV utf8_fold_flags;
 
-	    PL_reg_flags |= RF_tainted;
+            RX_MATCH_TAINTED_on(reginfo->prog);
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    type = REFFL;
@@ -4715,7 +4712,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    goto do_nref_ref_common;
 
 	case REFFL:  /*  /\1/il  */
-	    PL_reg_flags |= RF_tainted;
+            RX_MATCH_TAINTED_on(reginfo->prog);
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
@@ -6639,7 +6636,7 @@ no_silent:
  * depth     - (for debugging) backtracking depth.
  */
 STATIC I32
-S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p,
+S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                 I32 max, int depth, bool is_utf8_pat)
 {
     dVAR;
@@ -6788,7 +6785,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p,
 	goto do_exactf;
 
     case EXACTFL:
-	PL_reg_flags |= RF_tainted;
+        RXp_MATCH_TAINTED_on(prog);
 	utf8_flags = FOLDEQ_UTF8_LOCALE;
 	goto do_exactf;
 
@@ -6882,7 +6879,7 @@ S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
     case POSIXL:
-	PL_reg_flags |= RF_tainted;
+        RXp_MATCH_TAINTED_on(prog);
 	if (! utf8_target) {
 	    while (scan < loceol && to_complement ^ cBOOL(isFOO_lc(FLAGS(p),
                                                                    *scan)))
@@ -7269,7 +7266,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
  */
 
 STATIC bool
-S_reginclass(pTHX_ const regexp * const prog, const regnode * const n, const U8* const p, const bool utf8_target)
+S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const p, const bool utf8_target)
 {
     dVAR;
     const char flags = ANYOF_FLAGS(n);
@@ -7302,7 +7299,7 @@ S_reginclass(pTHX_ const regexp * const prog, const regnode * const n, const U8*
 	    match = TRUE;
 	}
 	else if (flags & ANYOF_LOCALE) {
-	    PL_reg_flags |= RF_tainted;
+	    RXp_MATCH_TAINTED_on(prog);
 
 	    if ((flags & ANYOF_LOC_FOLD)
 		 && ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))

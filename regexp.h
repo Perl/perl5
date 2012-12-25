@@ -438,16 +438,22 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #if NO_TAINT_SUPPORT
 #   define RX_ISTAINTED(prog)    0
 #   define RX_TAINT_on(prog)     NOOP
+#   define RXp_MATCH_TAINTED(prog) 0
+#   define RX_MATCH_TAINTED(prog)  0
+#   define RXp_MATCH_TAINTED_on(prog) NOOP
+#   define RX_MATCH_TAINTED_on(prog)  NOOP
+#   define RX_MATCH_TAINTED_off(prog) NOOP
 #else
 #   define RX_ISTAINTED(prog)    (RX_EXTFLAGS(prog) & RXf_TAINTED)
 #   define RX_TAINT_on(prog)     (RX_EXTFLAGS(prog) |= RXf_TAINTED)
+#   define RXp_MATCH_TAINTED(prog)    (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
+#   define RX_MATCH_TAINTED(prog)     (RX_EXTFLAGS(prog)  & RXf_TAINTED_SEEN)
+#   define RXp_MATCH_TAINTED_on(prog) (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
+#   define RX_MATCH_TAINTED_on(prog)  (RX_EXTFLAGS(prog)  |= RXf_TAINTED_SEEN)
+#   define RX_MATCH_TAINTED_off(prog) (RX_EXTFLAGS(prog)  &= ~RXf_TAINTED_SEEN)
 #endif
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
-#define RXp_MATCH_TAINTED(prog)	(RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
-#define RX_MATCH_TAINTED(prog)	(RX_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_on(prog) (RX_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_off(prog) (RX_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_set(prog, t) ((t) \
 				       ? RX_MATCH_TAINTED_on(prog) \
 				       : RX_MATCH_TAINTED_off(prog))

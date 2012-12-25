@@ -6884,7 +6884,7 @@ STATIC U8*	S_reghopmaybe3(U8 *s, I32 off, const U8 *lim)
 #define PERL_ARGS_ASSERT_REGHOPMAYBE3	\
 	assert(s); assert(lim)
 
-STATIC bool	S_reginclass(pTHX_ const regexp * const prog, const regnode * const n, const U8 * const p, bool const utf8_target)
+STATIC bool	S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8 * const p, bool const utf8_target)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -6899,7 +6899,7 @@ STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *pro
 #define PERL_ARGS_ASSERT_REGMATCH	\
 	assert(reginfo); assert(startpos); assert(prog)
 
-STATIC I32	S_regrepeat(pTHX_ const regexp *prog, char **startposp, const regnode *p, I32 max, int depth, bool is_utf8_pat)
+STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, I32 max, int depth, bool is_utf8_pat)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
