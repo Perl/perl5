@@ -622,9 +622,11 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 
     RX_MATCH_UTF8_set(rx,utf8_target);
 
-    if (RX_UTF8(rx)) {
+    if (RX_UTF8(rx))
 	PL_reg_flags |= RF_utf8;
-    }
+    else
+	PL_reg_flags &= ~RF_utf8;
+
     DEBUG_EXECUTE_r( 
         debug_start_match(rx, utf8_target, strpos, strend,
             sv ? "Guessing start of match in sv for"

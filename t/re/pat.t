@@ -19,7 +19,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 465;  # Update this when adding/deleting tests.
+plan tests => 466;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1298,6 +1298,21 @@ EOP
             like($utf8_char, qr/^$utf8_char?$/, "my \$c = \"$display\"; utf8::upgrade(\$c); my \$p = \"$display\"; utf8::upgrade(\$p); \"\$c\" =~ /^\$p?\$/");
         }
     }
+
+    {
+	# #116148: Pattern utf8ness sticks around globally
+	# the utf8 in the first match was sticking around for the second
+	# match
+
+	use feature 'unicode_strings';
+
+	my $x = "\x{263a}";
+	$x =~ /$x/;
+
+	my $text = "Perl";
+	ok("Perl" =~ /P.*$/i, '#116148');
+    }
+
 
 } # End of sub run_tests
 
