@@ -755,7 +755,6 @@ typedef struct regmatch_slab {
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
 
-#define PL_reg_flags		PL_reg_state.re_state_reg_flags
 #define PL_bostr		PL_reg_state.re_state_bostr
 #define PL_regeol		PL_reg_state.re_state_regeol
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
@@ -775,7 +774,6 @@ typedef struct regmatch_slab {
 #define PL_nrs			PL_reg_state.re_state_nrs
 
 struct re_save_state {
-    U32 re_state_reg_flags;		/* from regexec.c */
     bool re_state_eval_setup_done;	/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
     bool re_reparsing;			/* runtime (?{}) fed back into parser */
