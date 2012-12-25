@@ -576,6 +576,7 @@ typedef struct {
     char *ganch;
     char *cutpoint;
     bool is_utf8_pat;
+    bool warned; /* we have issued a recursion warning; no need for more */
 } regmatch_info;
  
 

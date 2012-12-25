@@ -94,7 +94,6 @@ static const char* const non_utf8_target_but_utf8_required
 #include "unicode_constants.h"
 
 #define RF_tainted	1	/* tainted information used? e.g. locale */
-#define RF_warned	2		/* warned about big count? */
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 
@@ -2110,6 +2109,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     PL_reg_maxiter = 0;
 
     reginfo.is_utf8_pat = cBOOL(RX_UTF8(rx));
+    reginfo.warned = FALSE;
     /* Mark beginning of line for ^ and lookbehind. */
     reginfo.bol = startpos; /* XXX not used ??? */
     PL_bostr  = strbeg;
@@ -5552,9 +5552,9 @@ NULL
 	  do_whilem_B_max:
 	    if (cur_curlyx->u.curlyx.count >= REG_INFTY
 		&& ckWARN(WARN_REGEXP)
-		&& !(PL_reg_flags & RF_warned))
+		&& !reginfo->warned)
 	    {
-		PL_reg_flags |= RF_warned;
+                reginfo->warned	= TRUE;
 		Perl_warner(aTHX_ packWARN(WARN_REGEXP),
 		     "Complex regular subexpression recursion limit (%d) "
 		     "exceeded",
@@ -5577,9 +5577,9 @@ NULL
 		/* Maximum greed exceeded */
 		if (cur_curlyx->u.curlyx.count >= REG_INFTY
 		    && ckWARN(WARN_REGEXP)
-		    && !(PL_reg_flags & RF_warned))
+                    && !reginfo->warned)
 		{
-		    PL_reg_flags |= RF_warned;
+                    reginfo->warned	= TRUE;
 		    Perl_warner(aTHX_ packWARN(WARN_REGEXP),
 			"Complex regular subexpression recursion "
 			"limit (%d) exceeded",
