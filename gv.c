@@ -1500,7 +1500,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
     if (!stash) {
     no_stash:
-	if (len && isIDFIRST_lazy(name)) {
+	if (len && isIDFIRST_lazy_if(name, is_utf8)) {
 	    bool global = FALSE;
 
 	    switch (len) {
