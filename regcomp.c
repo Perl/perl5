@@ -7231,9 +7231,7 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
 	return -1;
     }
 
-    /* If the code point is before the first element, return failure.  (We
-     * can't combine this with the test above, because we can't get the array
-     * unless we know the list is non-empty) */
+    /* (We can't get the array unless we know the list is non-empty) */
     array = invlist_array(invlist);
 
     mid = invlist_previous_index(invlist);
