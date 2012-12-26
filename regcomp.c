@@ -8259,6 +8259,7 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
 #undef INVLIST_ZERO_OFFSET
 #undef INVLIST_ITER_OFFSET
 #undef INVLIST_VERSION_ID
+#undef INVLIST_PREVIOUS_INDEX_OFFSET
 
 /* End of inversion list object */
 
