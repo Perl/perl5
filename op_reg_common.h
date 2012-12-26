@@ -37,7 +37,7 @@
  * using an enum, for reasons of compactness and to ensure that the options are
  * mutually exclusive */
 /* Make sure to update ext/re/re.pm and regcomp.sym (as these are used as
- * offsets for various node types, like SPACE vs SPACEL, etc) when changing
+ * offsets for various node types, like POSIXD vs POSIXL, etc) when changing
  * this! */
 typedef enum {
     REGEX_DEPENDS_CHARSET = 0,

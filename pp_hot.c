@@ -2085,7 +2085,7 @@ as /x$r/, will set PL_tainted using TAINT_set, and thus RXf_TAINTED,
 on the new pattern too.
 
 At the start of execution of a pattern, the RXf_TAINTED_SEEN flag on the
-regex is cleared; during execution, locale-variant ops such as ALNUML may
+regex is cleared; during execution, locale-variant ops such as POSIXL may
 set RXf_TAINTED_SEEN.
 
 RXf_TAINTED_SEEN is used post-execution by the get magic code
