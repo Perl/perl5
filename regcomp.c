@@ -8056,7 +8056,7 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
 
     if (*pos >= len) {
-	*pos = UV_MAX;	/* Force iternit() to be required next time */
+	*pos = UV_MAX;	/* Force iterinit() to be required next time */
 	return FALSE;
     }
 
