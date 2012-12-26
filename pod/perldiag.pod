@@ -2131,9 +2131,9 @@ about 250 characters for simple names, and somewhat more for compound
 names (like C<$A::B>).  You've exceeded Perl's limits.  Future versions
 of Perl are likely to eliminate these arbitrary limitations.
 
-=item Ignoring zero length \N{} in character class
+=item Ignoring zero length \N{} in character class in regex; marked by <-- HERE in m/%s/
 
-(W) Named Unicode character escapes C<(\N{...})> may return a zero-length
+(W regexp) Named Unicode character escapes C<(\N{...})> may return a zero-length
 sequence.  When such an escape is used in a character class its
 behaviour is not well defined.  Check that the correct escape has
 been used, and the correct charname handler is in scope.
@@ -3826,10 +3826,10 @@ redirected it with select().)
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
 
-=item Perl folding rules are not up-to-date for 0x%x; please use the perlbug 
-utility to report;
+=item Perl folding rules are not up-to-date for 0x%X; please use the perlbug 
+utility to report; in regex; marked by <-- HERE in m/%s/
 
-(W regex, deprecated) You used a regular expression with
+(W regexp, deprecated) You used a regular expression with
 case-insensitive matching, and there is a bug in Perl in which the
 built-in regular expression folding rules are not accurate.  This may
 lead to incorrect results.  Please report this as a bug using the
@@ -3926,7 +3926,7 @@ not C<isprint>.  See L<perlre>.
 (F) Your system has POSIX getpgrp(), which takes no argument, unlike
 the BSD version, which takes a pid.
 
-=item POSIX syntax [%s] belongs inside character classes in regex; marked by 
+=item POSIX syntax [%c %c] belongs inside character classes in regex; marked by 
 <-- HERE in m/%s/
 
 (W regexp) The character class constructs [: :], [= =], and [. .]  go
@@ -4129,8 +4129,8 @@ expression the problem was discovered.  See L<perlre>.
 the {min,max} construct.  The <-- HERE shows whereabouts in the regular
 expression the problem was discovered.  See L<perlre>.
 
-=item Quantifier unexpected on zero-length expression; marked by <-- HERE in 
-m/%s/
+=item Quantifier unexpected on zero-length expression in regex; marked by <-- 
+HERE in m/%s/
 
 (W regexp) You applied a regular expression quantifier in a place where
 it makes no sense, such as on a zero-width assertion.  Try putting the
@@ -4141,7 +4141,7 @@ C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
 
-=item Quantifier {n,m} with n > m can't match in regex
+=item Quantifier {n,m} with n > m can't match in regex; marked by <-- HERE in m/%s/
 
 (W regexp) Minima should be less than or equal to maxima.  If you really
 want your regexp to match something 0 times, just put {0}.
@@ -5068,11 +5068,12 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
-=item Unescaped left brace in regex is deprecated, passed through
+=item Unescaped left brace in regex is deprecated, passed through in regex; 
+marked by <-- HERE in m/%s/
 
-(D) You used a literal C<"{"> character in a regular expression pattern.
-You should change to use C<"\{"> instead, because a future version of
-Perl (tentatively v5.20) will consider this to be a syntax error.  If
+(D deprecated, regexp) You used a literal C<"{"> character in a regular 
+expression pattern. You should change to use C<"\{"> instead, because a future 
+version of Perl (tentatively v5.20) will consider this to be a syntax error.  If
 the pattern delimiters are also braces, any matching right brace
 (C<"}">) should also be escaped to avoid confusing the parser, for
 example,

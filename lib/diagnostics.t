@@ -107,7 +107,7 @@ like $warning,
 # ; at end of entry in perldiag.pod
 seek STDERR, 0,0;
 $warning = '';
-warn "Perl folding rules are not up-to-date for 0xa; please use the perlbug utility to report;";
+warn "Perl folding rules are not up-to-date for 0xA; please use the perlbug utility to report; in regex; marked by <-- HERE in m/\ <-- HERE q/";
 like $warning,
     qr/regular expression folding rules/s,
     '; works at the end of entries in perldiag.pod';

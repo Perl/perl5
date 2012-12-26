@@ -51,6 +51,7 @@ while (<$func_fh>) {
 
 close $func_fh;
 
+my $regcomp_re = "(?<routine>(?:ckWARN(?:\\d+)?reg\\w*|vWARN\\d+))";
 my $function_re = join '|', @functions;
 my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?\b';
 my $source_msg_re =
@@ -62,6 +63,7 @@ my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
    $regcomp_fail_re = qr/$regcomp_fail_re\([^"]*$text_re/;
+my $regcomp_call_re = qr/$regcomp_re.*?$text_re/;
 
 my %entries;
 
@@ -249,7 +251,7 @@ sub check_file {
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
-    if (m/$source_msg_re(?:_nocontext)?\s*\(/) {
+    if (m/(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
       while (not m/\);$/) {
         my $nextline = <$codefh>;
         # Means we fell off the end of the file.  Not terribly surprising;
@@ -280,9 +282,9 @@ sub check_file {
     # The %"foo" thing needs to happen *before* this regex.
     # diag($_);
     # DIE is just return Perl_die
-    my ($name, $category);
+    my ($name, $category, $routine);
     if (/$source_msg_call_re/) {
-      ($name, $category) = ($+{'text'}, $+{'category'});
+      ($name, $category, $routine) = ($+{'text'}, $+{'category'}, $+{'routine'});
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
       $category && $category =~ s/\).*//s;
@@ -297,14 +299,25 @@ sub check_file {
       $name .=
         " in regex" . ("; marked by <-- HERE in" x /vFAIL/) . " m/%s/";
     }
+    elsif (/$regcomp_call_re/) {
+      # vWARN/ckWARNreg("foo") -> "foo in regex; marked by <-- HERE in m/%s/
+      ($name, $category, $routine) = ($+{'text'}, undef, $+{'routine'});
+      $name .= " in regex; marked by <-- HERE in m/%s/";
+      $category = 'WARN_REGEXP';
+      if ($routine =~ /dep/) {
+        $category .= ',WARN_DEPRECATED';
+      }
+    }
     else {
       next;
     }
 
-    my $severity = !$+{routine}                 ? '[PFX]'
-                 :  $+{routine} =~ /warn.*_d\z/ ? '[DS]'
-                 :  $+{routine} =~ /warn/       ? '[WDS]'
-                 :                                '[PFX]';
+    my $severity = !$routine                   ? '[PFX]'
+                 :  $routine =~ /warn.*_d\z/   ? '[DS]'
+                 :  $routine =~ /warn/         ? '[WDS]'
+                 :  $routine =~ /ckWARN\d*reg/ ? '[WDS]'
+                 :  $routine =~ /vWARN\d/      ? '[WDS]'
+                 :                             '[PFX]';
     my $categories;
     if (defined $category) {
       $category =~ s/__/::/g;
@@ -349,6 +362,18 @@ sub check_message {
     my($name,$codefn,$severity,$categories,$partial) = @_;
     my $key = $name =~ y/\n/ /r;
     my $ret;
+
+    # Try to reduce printf() formats to simplest forms
+    # Really this should be matching %s, etc like diagnostics.pm does
+
+    # Kill flags
+    $key =~ s/%[#0\-+]/%/g;
+
+    # Kill width
+    $key =~ s/\%(\d+|\*)/%/g;
+
+    # Kill precision
+    $key =~ s/\%\.(\d+|\*)/%/g;
 
     if (exists $entries{$key}) {
       $ret = 1;
@@ -603,6 +628,9 @@ Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
+Useless (%s%c) - %suse /%c modifier in regex; marked by <-- HERE in m/%s/
+Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
+Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
