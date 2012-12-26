@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -191,6 +191,7 @@ ext/devel-peek/peek.pm	Verbatim line length including indents exceeds 79 by	2
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
 ext/file-glob/glob.pm	Verbatim line length including indents exceeds 79 by	15
 ext/hash-util-fieldhash/lib/hash/util/fieldhash.pm	Verbatim line length including indents exceeds 79 by	2
+ext/hash-util/lib/hash/util.pm	Pod NAME already used	1
 ext/i18n-langinfo/langinfo.pm	Verbatim line length including indents exceeds 79 by	1
 ext/pod-html/bin/pod2html	Pod NAME already used	1
 ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
@@ -318,6 +319,7 @@ lib/extutils/xssymset.pm	Verbatim line length including indents exceeds 79 by	1
 lib/file/basename.pm	Verbatim line length including indents exceeds 79 by	2
 lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 lib/getopt/std.pm	Verbatim line length including indents exceeds 79 by	1
+lib/hash/util.pm	Pod NAME already used	1
 lib/integer.pm	Verbatim line length including indents exceeds 79 by	1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/perl5db.pl	Verbatim line length including indents exceeds 79 by	1

@@ -499,7 +499,8 @@ know it. See also L<perlrun/PERL_HASH_SEED_DEBUG>.
 
 Return a set of basic information about a hash.
 
-    my ($keys, $buckets, $used, @length_counts)= bucket_info($hash);
+    my ($keys, $buckets, $used, @length_counts) =
+        bucket_info($hash);
 
 Fields are as follows:
 
