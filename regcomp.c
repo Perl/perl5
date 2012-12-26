@@ -7023,7 +7023,9 @@ S_invlist_max(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
-    return FROM_INTERNAL_SIZE(SvLEN(invlist));
+    return SvLEN(invlist) == 0  /* This happens under _new_invlist_C_array */
+           ? _invlist_len(invlist)
+           : FROM_INTERNAL_SIZE(SvLEN(invlist));
 }
 
 PERL_STATIC_INLINE UV*
