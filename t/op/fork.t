@@ -31,7 +31,7 @@ SKIP: {
             print((() = fork) == 1 ? q[ok] : q[not ok])
         "'
     };
-    is($out, "ok");
+    is($out, "ok", "bash/zsh-only test for 'fork' returning undef on failure");
 }
 
 done_testing();
