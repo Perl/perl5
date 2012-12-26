@@ -32,7 +32,7 @@ our @EXPORT_OK  = qw(
                      bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
                     );
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 require XSLoader;
 XSLoader::load();
 
@@ -499,7 +499,7 @@ know it. See also L<perlrun/PERL_HASH_SEED_DEBUG>.
 
 Return a set of basic information about a hash.
 
-    my ($keys, $buckets, $used, @length_counts) = bucket_info($hash);
+    my ($keys, $buckets, $used, @length_counts)= bucket_info($hash);
 
 Fields are as follows:
 
