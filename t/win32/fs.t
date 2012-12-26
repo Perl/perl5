@@ -8,7 +8,10 @@ BEGIN {
     die $@ if $@ and !is_miniperl();
 }
 
-plan tests => 4;
+use Config;
+use Cwd;
+
+plan tests => 5;
 
 my $tmpfile1 = tempfile();
 my $tmpfile2 = tempfile();
@@ -26,3 +29,14 @@ close $fh;
 ok(!link($tmpfile1, $tmpfile2),
    "Cannot link to existing file");
 is(0+$!, &Errno::EEXIST, "check for EEXIST");
+
+# RT #45331
+SKIP: {
+    local $TODO = "-d on //?/C:/ fails";
+    # get the current drive letter and make a //?/C:/ path
+    my $cwd = getcwd();
+    my $drive = ($cwd =~ /^(\w:)/)
+	or skip "cwd isn't on a drive", 1;
+    my $ntdrive = "//?/\U$drive/";
+    ok(-d, "-d on //?/C:/ type path");
+}
