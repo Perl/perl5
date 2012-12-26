@@ -587,7 +587,6 @@ switching effective uid is not implemented
 System V IPC is not implemented on this machine
 -T and -B not implemented on filehandles
 Terminating on signal SIG%s(%d)
-The crypt() function is unimplemented due to excessive paranoia.
 The crypt() function is not implemented on NetWare
 The flock() function is not implemented on NetWare
 The rewinddir() function is not implemented on NetWare
