@@ -1169,6 +1169,7 @@ cpan/HTTP-Tiny/lib/HTTP/Tiny.pm
 cpan/HTTP-Tiny/t/000_load.t
 cpan/HTTP-Tiny/t/001_api.t
 cpan/HTTP-Tiny/t/002_croakage.t
+cpan/HTTP-Tiny/t/003_agent.t
 cpan/HTTP-Tiny/t/00-compile.t
 cpan/HTTP-Tiny/t/010_url.t
 cpan/HTTP-Tiny/t/020_headers.t

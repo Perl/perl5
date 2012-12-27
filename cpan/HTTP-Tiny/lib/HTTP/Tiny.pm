@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.024'; # VERSION
+our $VERSION = '0.025'; # VERSION
 
 use Carp ();
 
@@ -21,13 +21,20 @@ BEGIN {
 
 sub new {
     my($class, %args) = @_;
-    (my $agent = $class) =~ s{::}{-}g;
+
+    (my $default_agent = $class) =~ s{::}{-}g;
+    $default_agent .= "/" . ($class->VERSION || 0);
+
     my $self = {
-        agent        => $agent . "/" . ($class->VERSION || 0),
+        agent        => $default_agent,
         max_redirect => 5,
         timeout      => 60,
         verify_SSL   => $args{verify_SSL} || $args{verify_ssl} || 0, # no verification by default
     };
+
+    $args{agent} .= $default_agent
+        if defined $args{agent} && $args{agent} =~ / $/;
+
     for my $key ( @attributes ) {
         $self->{$key} = $args{$key} if exists $args{$key}
     }
@@ -922,7 +929,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.024
+version 0.025
 
 =head1 SYNOPSIS
 
@@ -965,7 +972,7 @@ This constructor returns a new HTTP::Tiny object.  Valid attributes include:
 
 C<agent>
 
-A user-agent string (defaults to 'HTTP::Tiny/$VERSION')
+A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> ends in a space character, the default user-agent string is appended.
 
 =item *
 
