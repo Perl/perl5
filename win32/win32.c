@@ -1519,10 +1519,16 @@ win32_stat(const char *path, Stat_t *sbuf)
 	 * sbuf->st_*time (but note that's not available on the
 	 * Windows of 1995) */
 	DWORD r = GetFileAttributesA(path);
-	if (r != 0xffffffff && (r & FILE_ATTRIBUTE_DIRECTORY)) {
+	if (r != 0xffffffff) {
 	    /* sbuf may still contain old garbage since stat() failed */
 	    Zero(sbuf, 1, Stat_t);
-	    sbuf->st_mode = S_IFDIR | S_IREAD;
+	    if (r & FILE_ATTRIBUTE_DIRECTORY) {
+	        sbuf->st_mode = S_IFDIR | S_IREAD;
+	    }
+	    else {
+	        sbuf->st_mode = S_IFREG | S_IREAD;
+	    }
+	    /* else if (r & FILE_ATTRIBUTE */
 	    errno = 0;
 	    if (!(r & FILE_ATTRIBUTE_READONLY))
 		sbuf->st_mode |= S_IWRITE | S_IEXEC;

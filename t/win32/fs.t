@@ -69,10 +69,9 @@ SKIP: {
     my @stat = stat($filepath);
     my @ntstat = stat($ntfilepath);
     
-    local $TODO = "-f on \\\\?\\UNC\\server\\share\\filename fails";
     ok(-f $ntfilepath, "[perl #45331] -f should pass on $ntfilepath");
 
-    $TODO = "stat()[2] (mode) on \\\\?\\UNC\\server\\share\\filename fails";
+    local $TODO = "stat()[2] (mode) on \\\\?\\UNC\\server\\share\\filename fails";
     is($ntstat[2], $stat[2], "[perl #45331] file mode on $ntfilepath");
 
     $TODO = "stat()[3] (nlink) on \\\\?\\UNC\\server\\share\\filename fails";
