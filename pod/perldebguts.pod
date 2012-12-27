@@ -583,6 +583,7 @@ will be lost.
  ANYOF_WARN_SUPER   sv         Match character in (or not in) this
                                class, warn (if enabled) upon matching a
                                char above Unicode max;
+ ANYOF_SYNTHETIC    sv         Synthetic start class
 
  POSIXD             none       Some [[:class:]] under /d; the FLAGS
                                field gives which one

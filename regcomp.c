@@ -6152,7 +6152,7 @@ reStudy:
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
-	    data.start_class->flags |= ANYOF_IS_SYNTHETIC;
+	    OP(data.start_class) = ANYOF_SYNTHETIC;
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -6224,7 +6224,7 @@ reStudy:
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
-	    data.start_class->flags |= ANYOF_IS_SYNTHETIC;
+	    OP(data.start_class) = ANYOF_SYNTHETIC;
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);

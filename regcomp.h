@@ -319,8 +319,7 @@ struct regnode_charclass_class {
  * to match everything above.  If flags need to be added that are applicable to
  * the synthetic start class only, with some work, they could be put in the
  * next-node field, or in an unused bit of the classflags field.  This could be
- * done with the current EOS flag, and a new node type created that is just for
- * the ssc, freeing up that bit */
+ * done with the current EOS flag, freeing up that bit */
 
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
@@ -343,15 +342,6 @@ struct regnode_charclass_class {
 /* EOS, meaning that it can match an empty string too, is used for the
  * synthetic start class only. */
 #define ANYOF_EOS		0x10
-
-/* ? Is this node the synthetic start class (ssc).  This bit is shared with
- * ANYOF_EOS, as the latter is used only for the ssc, and then not used by
- * regexec.c.  And, the code is structured so that if it is set, the ssc is
- * not used, so it is guaranteed to be 0 for the ssc by the time regexec.c
- * gets executed, and 0 for a non-ssc ANYOF node, as it only ever gets set for
- * a potential ssc candidate.  Thus setting it to 1 after it has been
- * determined that the ssc will be used is not ambiguous */
-#define ANYOF_IS_SYNTHETIC	ANYOF_EOS
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_NONBITMAP_NON_UTF8 0x20

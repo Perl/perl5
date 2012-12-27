@@ -56,6 +56,7 @@ SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
 ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
 ANYOF_WARN_SUPER ANYOF, sv 0 S    ; Match character in (or not in) this class, warn (if enabled) upon matching a char above Unicode max;
+ANYOF_SYNTHETIC ANYOF,  sv 0 S    ; Synthetic start class
 
 # Order of the below is important.  See ordering comment above.
 POSIXD      POSIXD,     none 0 S   ; Some [[:class:]] under /d; the FLAGS field gives which one
