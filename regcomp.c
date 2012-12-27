@@ -756,8 +756,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
     ANYOF_BITMAP_SETALL(cl);
-    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL
-		|ANYOF_NON_UTF8_LATIN1_ALL;
+    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
