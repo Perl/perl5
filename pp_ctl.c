@@ -3889,7 +3889,12 @@ PP(pp_require)
 
 			memcpy(tmp, dir, dirlen);
 			tmp +=dirlen;
-			*tmp++ = '/';
+
+			/* Avoid '<dir>//<file>' */
+			if (!dirlen || *(tmp-1) != '/') {
+			    *tmp++ = '/';
+			}
+
 			/* name came from an SV, so it will have a '\0' at the
 			   end that we can copy as part of this memcpy().  */
 			memcpy(tmp, name, len + 1);

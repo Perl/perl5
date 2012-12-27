@@ -5540,6 +5540,7 @@ t/run/cloexec.t			Test close-on-exec.
 t/run/dtrace.pl			For dtrace.t
 t/run/dtrace.t			Test for DTrace probes
 t/run/exit.t			Test perl's exit status.
+t/run/flib/broken.pm		Bad .pm file for switchM.t
 t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/locale.t		Tests related to locale handling
 t/run/mad.t			Test vs MAD environment
@@ -5555,6 +5556,7 @@ t/run/switches.t		Tests for the other switches (-0, -l, -c, -s, -M, -m, -V, -v, 
 t/run/switchF1.t		Pathological tests for the -F switch
 t/run/switchF.t			Test the -F switch
 t/run/switchI.t			Test the -I switch
+t/run/switchM.t			Test the -M switch
 t/run/switchn.t			Test the -n switch
 t/run/switchp.t			Test the -p switch
 t/run/switcht.t			Test the -t switch
