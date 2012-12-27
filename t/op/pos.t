@@ -10,31 +10,31 @@ plan tests => 12;
 
 $x='banana';
 $x=~/.a/g;
-is(pos($x), 2);
+is(pos($x), 2, "matching, pos() leaves off at offset 2");
 
 $x=~/.z/gc;
-is(pos($x), 2);
+is(pos($x), 2, "not matching, pos() remains at offset 2");
 
 sub f { my $p=$_[0]; return $p }
 
 $x=~/.a/g;
-is(f(pos($x)), 4);
+is(f(pos($x)), 4, "matching again, pos() next leaves off at offset 4");
 
 # Is pos() set inside //g? (bug id 19990615.008)
 $x = "test string?"; $x =~ s/\w/pos($x)/eg;
-is($x, "0123 5678910?");
+is($x, "0123 5678910?", "pos() set inside //g");
 
 $x = "123 56"; $x =~ / /g;
-is(pos($x), 4);
+is(pos($x), 4, "matching, pos() leaves off at offset 4");
 { local $x }
-is(pos($x), 4);
+is(pos($x), 4, "value of pos() unaffected by intermediate localization");
 
 # Explicit test that triggers the utf8_mg_len_cache_update() code path in
 # Perl_sv_pos_b2u().
 
 $x = "\x{100}BC";
 $x =~ m/.*/g;
-is(pos $x, 3);
+is(pos $x, 3, "utf8_mg_len_cache_update() test");
 
 
 my $destroyed;
