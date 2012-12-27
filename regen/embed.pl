@@ -76,6 +76,9 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	my @names_of_nn;
 	my $func;
 
+	if (! $can_ignore && $retval eq 'void') {
+	    warn "It is nonsensical to require the return value of a void function ($plain_func) to be checked";
+	}
 	my $splint_flags = "";
 	if ( $SPLINT && !$commented_out ) {
 	    $splint_flags .= '/*@noreturn@*/ ' if $never_returns;
