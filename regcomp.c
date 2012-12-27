@@ -816,7 +816,7 @@ S_cl_and(struct regnode_charclass_class *cl,
 {
     PERL_ARGS_ASSERT_CL_AND;
 
-    assert(and_with->type == ANYOF);
+    assert(PL_regkind[and_with->type] == ANYOF);
 
     /* I (khw) am not sure all these restrictions are necessary XXX */
     if (!(ANYOF_CLASS_TEST_ANY_SET(and_with))
@@ -12680,7 +12680,7 @@ parseit:
         }
 
         if (warn_super) {
-            ANYOF_FLAGS(ret) |= ANYOF_WARN_SUPER;
+            OP(ret) = ANYOF_WARN_SUPER;
         }
     }
 

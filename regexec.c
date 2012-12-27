@@ -1457,6 +1457,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     /* We know what class it must start with. */
     switch (OP(c)) {
     case ANYOF:
+    case ANYOF_WARN_SUPER:
         if (utf8_target) {
             REXEC_FBC_UTF8_CLASS_SCAN(
                       reginclass(prog, c, (U8*)s, utf8_target));
@@ -4266,6 +4267,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
 	case ANYOF:  /*  /[abc]/       */
+	case ANYOF_WARN_SUPER:
             if (NEXTCHR_IS_EOS)
                 sayNO;
 	    if (utf8_target) {
@@ -6858,6 +6860,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	break;
     }
     case ANYOF:
+    case ANYOF_WARN_SUPER:
 	if (utf8_target) {
 	    while (hardcount < max
                    && scan < loceol
@@ -7384,7 +7387,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 
         if (UNICODE_IS_SUPER(c)
-            && (flags & ANYOF_WARN_SUPER)
+            && OP(n) == ANYOF_WARN_SUPER
             && ckWARN_d(WARN_NON_UNICODE))
         {
             Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),

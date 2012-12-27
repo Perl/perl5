@@ -340,10 +340,6 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS	 ANYOF_LOCALE
 #define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
 
-/* Should this character class warn if matched against a character above
- * Unicode */
-#define ANYOF_WARN_SUPER        0x08
-
 /* EOS, meaning that it can match an empty string too, is used for the
  * synthetic start class only. */
 #define ANYOF_EOS		0x10

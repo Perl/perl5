@@ -580,6 +580,9 @@ will be lost.
  CANY               no         Match any one byte.
  ANYOF              sv         Match character in (or not in) this
                                class, single char match only
+ ANYOF_WARN_SUPER   sv         Match character in (or not in) this
+                               class, warn (if enabled) upon matching a
+                               char above Unicode max;
 
  POSIXD             none       Some [[:class:]] under /d; the FLAGS
                                field gives which one
