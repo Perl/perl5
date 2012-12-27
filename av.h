@@ -47,7 +47,7 @@ Null AV pointer.
 =head1 Array Manipulation Functions
 
 =for apidoc Am|int|AvFILL|AV* av
-Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
+Same as C<av_top()>.  Deprecated, use C<av_top()> instead.
 
 =cut
 */

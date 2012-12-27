@@ -374,7 +374,9 @@ well.
 
 =item *
 
-XXX
+A synonym for the misleadingly named C<av_len()> has been created:
+C<av_top()>.  Both of these return the number of the highest index in
+the array, not the number of elements it contains.
 
 =back
 

@@ -759,12 +759,18 @@ Perl_av_shift(pTHX_ AV *av)
 }
 
 /*
-=for apidoc av_len
+=for apidoc av_top
 
 Returns the highest index in the array.  The number of elements in the
-array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
+array is C<av_top(av) + 1>.  Returns -1 if the array is empty.
 
 The Perl equivalent for this is C<$#myarray>.
+
+=for apidoc av_len
+
+Same as L</av_top>.  Returns the highest index in the array.  Note that the
+return value is +1 what its name implies it returns; and hence differs in
+meaning from what the similarly named L</sv_len> returns.
 
 =cut
 */
@@ -772,7 +778,21 @@ The Perl equivalent for this is C<$#myarray>.
 I32
 Perl_av_len(pTHX_ AV *av)
 {
+    /* If change this, must change identical Perl_av_top() just below */
+
     PERL_ARGS_ASSERT_AV_LEN;
+    assert(SvTYPE(av) == SVt_PVAV);
+
+    return AvFILL(av);
+}
+
+I32
+Perl_av_top(pTHX_ AV *av)
+{
+    /* So short, that it is just a duplicate of Perl_av_len().  Must keep them
+     * in sync */
+
+    PERL_ARGS_ASSERT_AV_TOP;
     assert(SvTYPE(av) == SVt_PVAV);
 
     return AvFILL(av);

@@ -11478,7 +11478,6 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         no_close:
         FAIL("Syntax error in (?[...])");
     }
-#define av_top(a) av_len(a) /* XXX Temporary */
 
     /* Pass 2 only after this.  Everything in this construct is a
      * metacharacter.  Operands begin with either a '\' (for an escape

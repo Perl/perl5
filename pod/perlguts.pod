@@ -351,11 +351,11 @@ to these new elements.
 
 Here are some other functions:
 
-    I32   av_len(AV*);
+    I32   av_top(AV*);
     SV**  av_fetch(AV*, I32 key, I32 lval);
     SV**  av_store(AV*, I32 key, SV* val);
 
-The C<av_len> function returns the highest index value in an array (just
+The C<av_top> function returns the highest index value in an array (just
 like $#array in Perl).  If the array is empty, -1 is returned.  The
 C<av_fetch> function returns the value at index C<key>, but if C<lval>
 is non-zero, then C<av_fetch> will store an undef value at that index.
