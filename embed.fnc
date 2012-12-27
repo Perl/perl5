@@ -1411,10 +1411,12 @@ EiMR	|IV	|invlist_previous_index|NN SV* const invlist
 EiM	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EiMR	|SV*	|invlist_clone	|NN SV* const invlist
+EiMR	|bool	|invlist_is_iterating|NN SV* const invlist
 EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
 EiMR	|UV*	|get_invlist_version_id_addr	|NN SV* invlist
 EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
+EsM	|void	|invlist_iterfinish|NN SV* invlist
 EiMR	|UV	|invlist_highest|NN SV* const invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)

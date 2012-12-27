@@ -6509,6 +6509,17 @@ PERL_STATIC_INLINE UV	S_invlist_highest(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_HIGHEST	\
 	assert(invlist)
 
+PERL_STATIC_INLINE bool	S_invlist_is_iterating(pTHX_ SV* const invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_IS_ITERATING	\
+	assert(invlist)
+
+STATIC void	S_invlist_iterfinish(pTHX_ SV* invlist)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_ITERFINISH	\
+	assert(invlist)
+
 PERL_STATIC_INLINE void	S_invlist_iterinit(pTHX_ SV* invlist)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_ITERINIT	\

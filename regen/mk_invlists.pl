@@ -57,6 +57,10 @@ sub output_invlist ($$) {
     print $out_fh "\nstatic UV ${name}_invlist[] = {\n";
 
     print $out_fh "\t", scalar @$invlist, ",\t/* Number of elements */\n";
+
+    # This should be UV_MAX, but I (khw) am not confident that the suffixes
+    # for specifying the constant are portable, e.g.  'ull' on a 32 bit
+    # machine that is configured to use 64 bits; might need a Configure probe
     print $out_fh "\t0,\t/* Current iteration position */\n";
     print $out_fh "\t0,\t/* Cache of previous search index result */\n";
     print $out_fh "\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */\n";

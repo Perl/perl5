@@ -7096,6 +7096,13 @@ S__new_invlist_C_array(pTHX_ UV* list)
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
 
+    /* Initialize the iteration pointer.
+     * XXX This could be done at compile time in charclass_invlists.h, but I
+     * (khw) am not confident that the suffixes for specifying the C constant
+     * UV_MAX are portable, e.g.  'ull' on a 32 bit machine that is configured
+     * to use 64 bits; might need a Configure probe */
+    invlist_iterfinish(invlist);
+
     return invlist;
 }
 
@@ -7613,6 +7620,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 
     /*  We may be removing a reference to one of the inputs */
     if (a == *output || b == *output) {
+        assert(! invlist_is_iterating(*output));
 	SvREFCNT_dec_NN(*output);
     }
 
@@ -7834,6 +7842,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 
     /*  We may be removing a reference to one of the inputs */
     if (a == *i || b == *i) {
+        assert(! invlist_is_iterating(*i));
 	SvREFCNT_dec_NN(*i);
     }
 
@@ -7906,6 +7915,8 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
     UV* len_pos = _get_invlist_len_addr(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_INVERT;
+
+    assert(! invlist_is_iterating(invlist));
 
     /* The inverse of matching nothing is matching everything */
     if (*len_pos == 0) {
@@ -8012,6 +8023,22 @@ S_invlist_iterinit(pTHX_ SV* invlist)	/* Initialize iterator for invlist */
     *get_invlist_iter_addr(invlist) = 0;
 }
 
+PERL_STATIC_INLINE void
+S_invlist_iterfinish(pTHX_ SV* invlist)
+{
+    /* Terminate iterator for invlist.  This is to catch development errors.
+     * Any iteration that is interrupted before completed should call this
+     * function.  Functions that add code points anywhere else but to the end
+     * of an inversion list assert that they are not in the middle of an
+     * iteration.  If they were, the addition would make the iteration
+     * problematical: if the iteration hadn't reached the place where things
+     * were being added, it would be ok */
+
+    PERL_ARGS_ASSERT_INVLIST_ITERFINISH;
+
+    *get_invlist_iter_addr(invlist) = UV_MAX;
+}
+
 STATIC bool
 S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
 {
@@ -8045,6 +8072,14 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
     }
 
     return TRUE;
+}
+
+PERL_STATIC_INLINE bool
+S_invlist_is_iterating(pTHX_ SV* const invlist)
+{
+    PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
+
+    return *(get_invlist_iter_addr(invlist)) < UV_MAX;
 }
 
 PERL_STATIC_INLINE UV
@@ -8090,6 +8125,8 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT__INVLIST_CONTENTS;
 
+    assert(! invlist_is_iterating(invlist));
+
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
 	if (end == UV_MAX) {
@@ -8122,6 +8159,11 @@ Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
     if (header && strlen(header)) {
 	PerlIO_printf(Perl_debug_log, "%s\n", header);
     }
+    if (invlist_is_iterating(invlist)) {
+        PerlIO_printf(Perl_debug_log, "Can't dump because is in middle of iterating\n");
+        return;
+    }
+
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
 	if (end == UV_MAX) {
@@ -12788,6 +12830,7 @@ parseit:
                 RExC_naughty++;
             }
         }
+        invlist_iterfinish(cp_list);
 
         if (op != END) {
             RExC_parse = (char *)orig_parse;
@@ -12847,6 +12890,7 @@ parseit:
 		}
 	    }
 	}
+	invlist_iterfinish(cp_list);
 
         /* Done with loop; remove any code points that are in the bitmap from
          * <cp_list> */
