@@ -749,6 +749,17 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
     DEBUG_STUDYDATA("commit: ",data,0);
 }
 
+/* These macros set, clear and test whether the synthetic start class ('ssc',
+ * given by the parameter) matches an empty string (EOS).  This uses the
+ * 'next_off' field in the node, to save a bit in the flags field.  The ssc
+ * stands alone, so there is never a next_off, so this field is otherwise
+ * unused.  The EOS information is used only for compilation, but theoretically
+ * it could be passed on to the execution code.  This could be used to store
+ * more than one bit of information, but only this one is currently used. */
+#define SET_SSC_EOS(node)   STMT_START { (node)->next_off = TRUE; } STMT_END
+#define CLEAR_SSC_EOS(node) STMT_START { (node)->next_off = FALSE; } STMT_END
+#define TEST_SSC_EOS(node)  cBOOL((node)->next_off)
+
 /* Can match anything (initialization) */
 STATIC void
 S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
@@ -756,7 +767,8 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
     ANYOF_BITMAP_SETALL(cl);
-    cl->flags = ANYOF_EOS|ANYOF_UNICODE_ALL;
+    cl->flags = ANYOF_UNICODE_ALL;
+    SET_SSC_EOS(cl);
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -3140,7 +3152,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			StructCopy(&accum, data->start_class,
 				   struct regnode_charclass_class);
 			flags |= SCF_DO_STCLASS_OR;
-			data->start_class->flags |= ANYOF_EOS;
+                        SET_SSC_EOS(data->start_class);
 		    }
 		}
 
@@ -3576,7 +3588,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			}
 		    }
 		}
-		data->start_class->flags &= ~ANYOF_EOS;
+                CLEAR_SSC_EOS(data->start_class);
 		if (uc < 0x100)
 		  data->start_class->flags &= ~ANYOF_UNICODE_ALL;
 	    }
@@ -3586,7 +3598,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		else
 		    data->start_class->flags |= ANYOF_UNICODE_ALL;
-		data->start_class->flags &= ~ANYOF_EOS;
+                CLEAR_SSC_EOS(data->start_class);
 		cl_and(data->start_class, and_withp);
 	    }
 	    flags &= ~SCF_DO_STCLASS;
@@ -3635,7 +3647,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		ANYOF_BITMAP_ZERO(data->start_class);
 		if (compat) {
 		    ANYOF_BITMAP_SET(data->start_class, uc);
-		    data->start_class->flags &= ~ANYOF_EOS;
+                    CLEAR_SSC_EOS(data->start_class);
 		    if (OP(scan) == EXACTFL) {
 			/* XXX This set is probably no longer necessary, and
 			 * probably wrong as LOCALE now is on in the initial
@@ -3702,7 +3714,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			    }
                         }
 		    }
-		    data->start_class->flags &= ~ANYOF_EOS;
+                    CLEAR_SSC_EOS(data->start_class);
 		}
 		cl_and(data->start_class, and_withp);
 	    }
@@ -3819,7 +3831,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			StructCopy(&this_class, data->start_class,
 				   struct regnode_charclass_class);
 			flags |= SCF_DO_STCLASS_OR;
-			data->start_class->flags |= ANYOF_EOS;
+                        SET_SSC_EOS(data->start_class);
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
@@ -4085,7 +4097,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	else if (OP(scan) == LNBREAK) {
 	    if (flags & SCF_DO_STCLASS) {
 		int value = 0;
-		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
+                CLEAR_SSC_EOS(data->start_class); /* No match on empty */
     	        if (flags & SCF_DO_STCLASS_AND) {
                     for (value = 0; value < 256; value++)
                         if (!is_VERTWS_cp(value))
@@ -4119,7 +4131,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    min++;
 	    if (flags & SCF_DO_STCLASS) {
                 int loop_max = 256;
-		data->start_class->flags &= ~ANYOF_EOS;	/* No match on empty */
+                CLEAR_SSC_EOS(data->start_class); /* No match on empty */
 
 		/* Some of the logic below assumes that switching
 		   locale on will only add false positives. */
@@ -4323,11 +4335,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			cl_init(pRExC_state, data->start_class);
 		    }  else {
 			/* AND before and after: combine and continue */
-			const int was = (data->start_class->flags & ANYOF_EOS);
+			const int was = TEST_SSC_EOS(data->start_class);
 
 			cl_and(data->start_class, &intrnl);
 			if (was)
-			    data->start_class->flags |= ANYOF_EOS;
+                            SET_SSC_EOS(data->start_class);
 		    }
                 }
 	    }
@@ -4395,11 +4407,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 *minnextp += min;
 
                 if (f & SCF_DO_STCLASS_AND) {
-                    const int was = (data->start_class->flags & ANYOF_EOS);
+                    const int was = TEST_SSC_EOS(data.start_class);
 
                     cl_and(data->start_class, &intrnl);
                     if (was)
-                        data->start_class->flags |= ANYOF_EOS;
+                        SET_SSC_EOS(data->start_class);
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -4602,7 +4614,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     StructCopy(&accum, data->start_class,
                                struct regnode_charclass_class);
                     flags |= SCF_DO_STCLASS_OR;
-                    data->start_class->flags |= ANYOF_EOS;
+                    SET_SSC_EOS(data->start_class);
                 }
             }
             scan= tail;
@@ -6148,7 +6160,7 @@ reStudy:
 
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
-	    && !(data.start_class->flags & ANYOF_EOS)
+	    && ! TEST_SSC_EOS(data.start_class)
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
@@ -6220,7 +6232,7 @@ reStudy:
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = NULL;
 
-	if (!(data.start_class->flags & ANYOF_EOS)
+	if (! TEST_SSC_EOS(data.start_class)
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");

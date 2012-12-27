@@ -306,20 +306,16 @@ struct regnode_charclass_class {
  * ANYOF_NONBITMAP_NON_UTF8 bit is also set. */
 #define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
 
-/* Flags for node->flags of ANYOF.  These are in short supply, so some games
- * are done to share them, as described below.  The ANYOF_LOCALE and
+/* Flags for node->flags of ANYOF.  These are in short supply, but there is one
+ * currently available.  If more than this are needed, the ANYOF_LOCALE and
  * ANYOF_CLASS bits could be shared, making a space penalty for all locale nodes.
- * An option would be to push them into new nodes.  E.g. there could be an
- * ANYOF_LOCALE node that would be in place of the flag of the same name.  But
- * there are better options.  The UNICODE_ALL bit could be freed up by
- * resorting to creating a swash containing everything above 255.  This
- * introduces a performance penalty.  Better would be to split it off into a
- * separate node, which actually would improve performance by allowing adding a
- * case statement to regexec.c use the bit map for code points under 256, and
- * to match everything above.  If flags need to be added that are applicable to
- * the synthetic start class only, with some work, they could be put in the
- * next-node field, or in an unused bit of the classflags field.  This could be
- * done with the current EOS flag, freeing up that bit */
+ * Also, the UNICODE_ALL bit could be freed up by resorting to creating a swash
+ * containing everything above 255.  This introduces a performance penalty.
+ * Better would be to split it off into a separate node, which actually would
+ * improve performance a bit by allowing regexec.c to test for a UTF-8
+ * character being above 255 without having to call a function nor calculate
+ * its code point value.  However, this solution might need to have a second
+ * node type, ANYOF_SYNTHETIC_ABOVE_LATIN1_ALL */
 
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
@@ -339,9 +335,7 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS	         0x08
 #define ANYOF_LARGE       ANYOF_CLASS   /* Same; name retained for back compat */
 
-/* EOS, meaning that it can match an empty string too, is used for the
- * synthetic start class only. */
-#define ANYOF_EOS		0x10
+/* Unused: 0x10.  When using, be sure to change ANYOF_FLAGS_ALL below */
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_NONBITMAP_NON_UTF8 0x20
@@ -353,7 +347,7 @@ struct regnode_charclass_class {
  * in utf8. */
 #define ANYOF_NON_UTF8_LATIN1_ALL 0x80
 
-#define ANYOF_FLAGS_ALL		0xff
+#define ANYOF_FLAGS_ALL		(0xff & ~0x10)
 
 /* These are the flags that ANYOF_INVERT being set or not doesn't affect
  * whether they are operative or not.  e.g., the node still has LOCALE
@@ -362,7 +356,6 @@ struct regnode_charclass_class {
 #define INVERSION_UNAFFECTED_FLAGS (ANYOF_LOCALE                        \
 	                           |ANYOF_LOC_FOLD                      \
 	                           |ANYOF_CLASS                         \
-	                           |ANYOF_EOS                           \
 	                           |ANYOF_NONBITMAP_NON_UTF8)
 
 /* Character classes for node->classflags of ANYOF */
