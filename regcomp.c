@@ -11459,7 +11459,11 @@ parseit:
 		    if (UCHARAT(RExC_parse) == '^') {
 			 RExC_parse++;
 			 n--;
-			 value = value == 'p' ? 'P' : 'p'; /* toggle */
+                         /* toggle.  (The rhs xor gets the single bit that
+                          * differs between P and p; the other xor inverts just
+                          * that bit) */
+                         value ^= 'P' ^ 'p';
+
 			 while (isSPACE(UCHARAT(RExC_parse))) {
 			      RExC_parse++;
 			      n--;
