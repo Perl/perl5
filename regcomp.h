@@ -320,7 +320,7 @@ struct regnode_charclass_class {
  * the synthetic start class only, with some work, they could be put in the
  * next-node field, or in an unused bit of the classflags field.  This could be
  * done with the current EOS flag, and a new node type created that is just for
- * the scc, freeing up that bit */
+ * the ssc, freeing up that bit */
 
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
@@ -328,7 +328,7 @@ struct regnode_charclass_class {
  * time.  However under locale, the actual folding varies depending on
  * what the locale is at the time of execution, so it has to be deferred until
  * then */
-#define ANYOF_LOC_FOLD 0x02
+#define ANYOF_LOC_FOLD           0x02
 
 #define ANYOF_INVERT		 0x04
 
@@ -338,7 +338,7 @@ struct regnode_charclass_class {
  * at compile-time.  Could be shared with ANYOF_LOCALE, forcing all locale
  * nodes to be large */
 #define ANYOF_CLASS	         0x08
-#define ANYOF_LARGE      ANYOF_CLASS    /* Same; name retained for back compat */
+#define ANYOF_LARGE       ANYOF_CLASS   /* Same; name retained for back compat */
 
 /* EOS, meaning that it can match an empty string too, is used for the
  * synthetic start class only. */
