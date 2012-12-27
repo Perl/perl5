@@ -1719,4 +1719,6 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 # [ perl #114272]
 \Vn	\xFFn/	y	$&	\xFFn
 
+/(?l:a?\w)/	b	y	$&	b
+
 # vim: softtabstop=0 noexpandtab
