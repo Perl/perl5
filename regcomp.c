@@ -4140,8 +4140,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		case SANY:
 		default:
-		  do_default:
-		    /* Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d", OP(scan)); */
+#ifdef DEBUGGING
+                   Perl_croak(aTHX_ "panic: unexpected simple REx opcode %d", OP(scan));
+#endif
+                 do_default:
 		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
 			cl_anything(pRExC_state, data->start_class);
 		    break;
