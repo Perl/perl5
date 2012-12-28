@@ -74,10 +74,9 @@ SKIP: {
     local $TODO = "stat()[2] (mode) on \\\\?\\UNC\\server\\share\\filename fails";
     is($ntstat[2], $stat[2], "[perl #45331] file mode on $ntfilepath");
 
-    $TODO = "stat()[3] (nlink) on \\\\?\\UNC\\server\\share\\filename fails";
+    undef $TODO;
     is($ntstat[3], $stat[3], "[perl #45331] file nlink $ntfilepath");
 
-    $TODO = "stat()[7] (size) on \\\\?\\UNC\\server\\share\\filename fails";
     is($ntstat[7], $stat[7], "[perl #45331] file size on $ntfilepath");
 
     $TODO = "stat()[8] (atime) on \\\\?\\UNC\\server\\share\\filename fails";

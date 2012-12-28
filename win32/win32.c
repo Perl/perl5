@@ -1451,6 +1451,8 @@ win32_stat(const char *path, Stat_t *sbuf)
     GV          *gv_sloppy = gv_fetchpvs("\027IN32_SLOPPY_STAT",
                                          GV_NOTQUAL, SVt_PV);
     BOOL        sloppy = gv_sloppy && SvTRUE(GvSV(gv_sloppy));
+    BY_HANDLE_FILE_INFORMATION bhi;
+    BOOL        good_bhi = FALSE;
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -1498,9 +1500,10 @@ win32_stat(const char *path, Stat_t *sbuf)
         /* This also gives us an opportunity to determine the number of links.   */
         HANDLE handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
         if (handle != INVALID_HANDLE_VALUE) {
-            BY_HANDLE_FILE_INFORMATION bhi;
-            if (GetFileInformationByHandle(handle, &bhi))
+	    if (GetFileInformationByHandle(handle, &bhi)) {
                 nlink = bhi.nNumberOfLinks;
+		good_bhi = TRUE;
+	    }
             CloseHandle(handle);
         }
     }
@@ -1532,6 +1535,10 @@ win32_stat(const char *path, Stat_t *sbuf)
 	    errno = 0;
 	    if (!(r & FILE_ATTRIBUTE_READONLY))
 		sbuf->st_mode |= S_IWRITE | S_IEXEC;
+	    if (good_bhi) {
+	        sbuf->st_size = (unsigned __int64)bhi.nFileSizeHigh << 32 | bhi.nFileSizeLow;
+	        sbuf->st_nlink = nlink;
+	    }
 	    return 0;
 	}
     }
