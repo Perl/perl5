@@ -4168,6 +4168,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    break;
 		case POSIXA:
                     loop_max = 128;
+                    /* FALL THROUGH */
 		case POSIXL:
 		case POSIXD:
 		case POSIXU:
@@ -4201,6 +4202,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    break;
 		case NPOSIXA:
                     loop_max = 128;
+                    /* FALL THROUGH */
 		case NPOSIXL:
 		case NPOSIXU:
 		case NPOSIXD:
