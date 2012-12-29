@@ -19614,7 +19614,13 @@ EOCP
                 set tryp
                 if eval $compile; then
                     $rm -f tryp.out
-                    $cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
+                    # Copy the .c file to the remote host ($to is an ssh-alike if targethost is set)
+                    if $test "X$targethost" != X; then
+                        $to tryp.c
+                        $run ./tryp \< tryp.c 2>/dev/null > tryp.out
+                    else
+                        $cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
+                    fi
                     if cmp tryp.c tryp.out >/dev/null 2>&1; then
                        $cat >&4 <<EOM
 fflush(NULL) seems to behave okay with input streams.
@@ -19678,7 +19684,12 @@ EOCP
 	set tryp
 	if eval $compile; then
 	    $rm -f tryp.out
-	    $cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
+            if $test "X$targethost" != X; then
+                $to tryp.c
+                $run ./tryp \< tryp.c 2>/dev/null > tryp.out
+            else
+                $cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
+            fi
 	    if cmp tryp.c tryp.out >/dev/null 2>&1; then
 	       $cat >&4 <<EOM
 Good, at least fflush(stdin) seems to behave okay when stdin is a pipe.
