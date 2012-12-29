@@ -2871,6 +2871,15 @@ $define|true|[yY]*)
 	case "$croak" in
 	y) echo "Cannot continue, aborting." >&4; exit 1 ;;
 	esac
+    ;;
+*)
+    usecrosscompile='undef'
+    ;;
+esac
+
+: Define -Dtargethost=somecomputer to run compiled tests on another machine
+case "$usecrosscompile" in
+$define|true|[yY]*) echo "Using targethost $targethost." >&4
 	case "$src" in
 	/*) run=$src/Cross/run
 	    targetmkdir=$src/Cross/mkdir
