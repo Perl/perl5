@@ -12934,7 +12934,7 @@ EOCP
 		echo "$startsh" >mtry
 		echo "$run ./try >try.out 2>try.ret 4>try.err || exit 4" >>mtry
 		chmod +x mtry
-		./mtry >/dev/null 2>&1
+		$run ./mtry >/dev/null 2>&1
 		case $? in
 		0) eagain=`$cat try.out`;;
 		1) echo "Could not perform non-blocking setting!";;
