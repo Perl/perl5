@@ -2878,8 +2878,13 @@ $define|true|[yY]*)
 esac
 
 : Define -Dtargethost=somecomputer to run compiled tests on another machine
-case "$usecrosscompile" in
-$define|true|[yY]*) echo "Using targethost $targethost." >&4
+case "$targethost" in
+    '') echo "No targethost for running compiler tests against defined, running locally" >&4
+        run=''
+        to=:
+        from=:
+        ;;
+    *) echo "Using targethost $targethost." >&4
 	case "$src" in
 	/*) run=$src/Cross/run
 	    targetmkdir=$src/Cross/mkdir
