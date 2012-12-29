@@ -120,9 +120,6 @@ unless(defined $makecmd and $makecmd =~ /^MAKE=(.*)$/) {
 # names, but neither did what it replaced. Once there is a use case that needs
 # it, please supply patches. Until then, I'm sticking to KISS
 my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
-# Using an array of 0 or 1 elements makes the subsequent code simpler.
-my @run = $Config{run};
-@run = () if not defined $run[0] or $run[0] eq '';
 
 
 if ($target eq '') {
@@ -464,8 +461,8 @@ EOM
 	}
 	push @args, @$pass_through;
 	_quote_args(\@args) if $is_VMS;
-	print join(' ', @run, $perl, @args), "\n";
-	my $code = system @run, $perl, @args;
+	print join(' ', $perl, @args), "\n";
+	my $code = system $perl, @args;
 	warn "$code from $ext_dir\'s Makefile.PL" if $code;
 
 	# Right. The reason for this little hack is that we're sitting inside
@@ -521,11 +518,11 @@ EOS
 	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
 	my @args = ('config', @$pass_through);
-	system(@run, @make, @args) and print "@run @make @args failed, continuing anyway...\n";
+	system(@make, @args) and print "@make @args failed, continuing anyway...\n";
     }
     my @targ = ($target, @$pass_through);
-    print "Making $target in $ext_dir\n@run @make @targ\n";
-    my $code = system(@run, @make, @targ);
+    print "Making $target in $ext_dir\n@make @targ\n";
+    my $code = system(@make, @targ);
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
 
     chdir $return_dir || die "Cannot cd to $return_dir: $!";

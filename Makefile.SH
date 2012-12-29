@@ -302,7 +302,7 @@ STATIC_LDFLAGS = $static_ldflags
 LDLIBPTH = $ldlibpth
 
 # Sometimes running an executable is an adventure.
-RUN = $run
+RUN =
 
 # These variables may need to be manually set for non-Unix systems.
 AR = $full_ar
