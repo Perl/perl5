@@ -14,8 +14,8 @@ is(not(), 1);
 is(not(), not(0));
 
 # test not(..) and !
-is(! 1, not 1);
-is(! 0, not 0);
+is(! 1, (not 1));
+is(! 0, (not 0));
 is(! (0, 0), not(0, 0));
 
 # test the return of !
