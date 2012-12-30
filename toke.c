@@ -544,7 +544,7 @@ S_no_op(pTHX_ const char *const what, char *s)
 		    "\t(Missing semicolon on previous line?)\n");
 	else if (PL_oldoldbufptr && isIDFIRST_lazy_if(PL_oldoldbufptr,UTF)) {
 	    const char *t;
-	    for (t = PL_oldoldbufptr; (isALNUM_lazy_if(t,UTF) || *t == ':');
+	    for (t = PL_oldoldbufptr; (isWORDCHAR_lazy_if(t,UTF) || *t == ':');
                                                             t += UTF ? UTF8SKIP(t) : 1)
 		NOOP;
 	    if (t < PL_bufptr && isSPACE(*t))
@@ -1891,7 +1891,7 @@ S_check_uni(pTHX)
     while (isSPACE(*PL_last_uni))
 	PL_last_uni++;
     s = PL_last_uni;
-    while (isALNUM_lazy_if(s,UTF) || *s == '-')
+    while (isWORDCHAR_lazy_if(s,UTF) || *s == '-')
 	s++;
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
@@ -3173,7 +3173,7 @@ S_scan_const(pTHX_ char *start)
 	   (@foo, @::foo, @'foo, @{foo}, @$foo, @+, @-)
 	   */
 	else if (*s == '@' && s[1]) {
-	    if (isALNUM_lazy_if(s+1,UTF))
+	    if (isWORDCHAR_lazy_if(s+1,UTF))
 		break;
 	    if (strchr(":'{$", s[1]))
 		break;
@@ -3834,7 +3834,7 @@ S_intuit_more(pTHX_ char *s)
 	    case '&':
 	    case '$':
 		weight -= seen[un_char] * 10;
-		if (isALNUM_lazy_if(s+1,UTF)) {
+		if (isWORDCHAR_lazy_if(s+1,UTF)) {
 		    int len;
 		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
 		    len = (int)strlen(tmpbuf);
@@ -6031,12 +6031,12 @@ Perl_yylex(pTHX)
 		    }
 		    else
 			/* skip plain q word */
-			while (t < PL_bufend && isALNUM_lazy_if(t,UTF))
+			while (t < PL_bufend && isWORDCHAR_lazy_if(t,UTF))
 			     t += UTF8SKIP(t);
 		}
-		else if (isALNUM_lazy_if(t,UTF)) {
+		else if (isWORDCHAR_lazy_if(t,UTF)) {
 		    t += UTF8SKIP(t);
-		    while (t < PL_bufend && isALNUM_lazy_if(t,UTF))
+		    while (t < PL_bufend && isWORDCHAR_lazy_if(t,UTF))
 			 t += UTF8SKIP(t);
 		}
 		while (t < PL_bufend && isSPACE(*t))
@@ -6411,7 +6411,7 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_SYNTAX)) {
 			char *t = s+1;
 
-			while (isSPACE(*t) || isALNUM_lazy_if(t,UTF) || *t == '$')
+			while (isSPACE(*t) || isWORDCHAR_lazy_if(t,UTF) || *t == '$')
 			    t++;
 			if (*t++ == ',') {
 			    PL_bufptr = PEEKSPACE(PL_bufptr); /* XXX can realloc */
@@ -6522,7 +6522,7 @@ Perl_yylex(pTHX)
 	    if (*s == '[' || *s == '{') {
 		if (ckWARN(WARN_SYNTAX)) {
 		    const char *t = s + 1;
-		    while (*t && (isALNUM_lazy_if(t,UTF) || strchr(" \t$#+-'\"", *t)))
+		    while (*t && (isWORDCHAR_lazy_if(t,UTF) || strchr(" \t$#+-'\"", *t)))
 			t += UTF ? UTF8SKIP(t) : 1;
 		    if (*t == '}' || *t == ']') {
 			t++;
@@ -6590,7 +6590,7 @@ Perl_yylex(pTHX)
 	     if (PL_oldoldbufptr == PL_last_uni
 	      && (*PL_last_uni != 's' || s - PL_last_uni < 5
 	          || memNE(PL_last_uni, "study", 5)
-	          || isALNUM_lazy_if(PL_last_uni+5,UTF)
+	          || isWORDCHAR_lazy_if(PL_last_uni+5,UTF)
 	      ))
 	         check_uni();
 	     if (*s == '?')
@@ -8073,7 +8073,7 @@ Perl_yylex(pTHX)
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 		const char *t;
-		for (d = s; isALNUM_lazy_if(d,UTF);) {
+		for (d = s; isWORDCHAR_lazy_if(d,UTF);) {
 		    d += UTF ? UTF8SKIP(d) : 1;
                     if (UTF) {
                         while (UTF8_IS_CONTINUED(*d) && _is_utf8_mark((U8*)d)) {
@@ -8994,7 +8994,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
     if (isIDFIRST_lazy_if(s,UTF)) {
 	const char * const w = s;
         s += UTF ? UTF8SKIP(s) : 1;
-	while (isALNUM_lazy_if(s,UTF))
+	while (isWORDCHAR_lazy_if(s,UTF))
 	    s += UTF ? UTF8SKIP(s) : 1;
 	while (s < PL_bufend && isSPACE(*s))
 	    s++;
@@ -9261,7 +9261,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	return s;
     }
     if (*s == '$' && s[1] &&
-	(isALNUM_lazy_if(s+1,UTF) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
+	(isWORDCHAR_lazy_if(s+1,UTF) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
     {
 	return s;
     }
@@ -9302,7 +9302,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	    d += UTF8SKIP(d);
 	    if (UTF) {
 		char *end = s;
-		while ((end < send && isALNUM_lazy_if(end,UTF)) || *end == ':') {
+		while ((end < send && isWORDCHAR_lazy_if(end,UTF)) || *end == ':') {
 		    end += UTF8SKIP(end);
 		    while (end < send && UTF8_IS_CONTINUED(*end) && _is_utf8_mark((U8*)end))
 			end += UTF8SKIP(end);
@@ -9397,7 +9397,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
     STRLEN charlen = UTF ? UTF8SKIP(*s) : 1;
 
     if ( charlen != 1 || ! strchr(valid_flags, c) ) {
-        if (isALNUM_lazy_if(*s, UTF)) {
+        if (isWORDCHAR_lazy_if(*s, UTF)) {
             yyerror_pv(Perl_form(aTHX_ "Unknown regexp modifier \"/%.*s\"", (int)charlen, *s),
                        UTF ? SVf_UTF8 : 0);
             (*s) += charlen;
@@ -9832,9 +9832,9 @@ S_scan_heredoc(pTHX_ char *s)
 	    s++, term = '\'';
 	else
 	    term = '"';
-	if (!isALNUM_lazy_if(s,UTF))
+	if (!isWORDCHAR_lazy_if(s,UTF))
 	    deprecate("bare << to mean <<\"\"");
-	for (; isALNUM_lazy_if(s,UTF); s++) {
+	for (; isWORDCHAR_lazy_if(s,UTF); s++) {
 	    if (d < e)
 		*d++ = *s;
 	}
@@ -10142,7 +10142,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     if (*d == '$' && d[1]) d++;
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
-    while (*d && (isALNUM_lazy_if(d,UTF) || *d == '\'' || *d == ':'))
+    while (*d && (isWORDCHAR_lazy_if(d,UTF) || *d == '\'' || *d == ':'))
 	d += UTF ? UTF8SKIP(d) : 1;
 
     /* If we've tried to read what we allow filehandles to look like, and
