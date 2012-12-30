@@ -1692,6 +1692,22 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
 
+PERL_STATIC_INLINE bool	S_isALNUM_lazy(pTHX_ const char* p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_ISALNUM_LAZY	\
+	assert(p)
+
+PERL_STATIC_INLINE bool	S_isIDFIRST_lazy(pTHX_ const char* p)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_ISIDFIRST_LAZY	\
+	assert(p)
+
 PERL_CALLCONV bool	Perl_is_ascii_string(const U8 *s, STRLEN len)
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_ASCII_STRING	\

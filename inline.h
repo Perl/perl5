@@ -138,3 +138,24 @@ S_croak_memory_wrap(void)
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+
+/* ------------------------------- utf8.h ------------------------------- */
+
+/* These exist only to replace the macros they formerly were so that their use
+ * can be deprecated */
+
+PERL_STATIC_INLINE bool
+S_isIDFIRST_lazy(pTHX_ const char* p)
+{
+    PERL_ARGS_ASSERT_ISIDFIRST_LAZY;
+
+    return isIDFIRST_lazy_if(p,1);
+}
+
+PERL_STATIC_INLINE bool
+S_isALNUM_lazy(pTHX_ const char* p)
+{
+    PERL_ARGS_ASSERT_ISALNUM_LAZY;
+
+    return isALNUM_lazy_if(p,1);
+}

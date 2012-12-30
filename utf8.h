@@ -298,9 +298,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 				 : isWORDCHAR_utf8((const U8*)p))
 #define isALNUM_lazy_if(p,UTF)   isWORDCHAR_lazy_if(p,UTF)
 
-#define isIDFIRST_lazy(p)	isIDFIRST_lazy_if(p,1)
-#define isALNUM_lazy(p)		isALNUM_lazy_if(p,1)
-
 #define UTF8_MAXLEN UTF8_MAXBYTES
 
 /* A Unicode character can fold to up to 3 characters */
