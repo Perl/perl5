@@ -2141,6 +2141,14 @@ EOP
         ok(! $failed, "Matched multi-char fold across EXACTFish node boundaries; if failed, was at count $failed");
     }
 
+    {
+        local $::TODO = "Under /i loading the :lower: swash breaks later :lowers:";
+        fresh_perl_is('print eval "\"\x{101}\" =~ /[[:lower:]]/", "\n"; print eval "\"\x{100}\" =~ /[[:lower:]]/i", "\n";',
+                      "1\n1",   # Both re's should match
+                      "",
+                      "get [:lower:] swash in first eval; test under /i in second");
+    }
+
     #
     # Keep the following tests last -- they may crash perl
     #
