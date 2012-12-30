@@ -6799,11 +6799,11 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 	if (UTF)
 	    do {
 		RExC_parse += UTF8SKIP(RExC_parse);
-	    } while (isALNUM_utf8((U8*)RExC_parse));
+	    } while (isWORDCHAR_utf8((U8*)RExC_parse));
 	else
 	    do {
 		RExC_parse++;
-	    } while (isALNUM(*RExC_parse));
+	    } while (isWORDCHAR(*RExC_parse));
     } else {
 	RExC_parse++; /* so the <- from the vFAIL is after the offending character */
         vFAIL("Group name must start with a non-digit word character");
@@ -11352,7 +11352,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	const char *s = RExC_parse;
 	const char  c = *s++;
 
-	while (isALNUM(*s))
+	while (isWORDCHAR(*s))
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
 	    SAVEFREESV(RExC_rx_sv);
@@ -11627,7 +11627,7 @@ parseit:
 		}
 	    default:
 		/* Allow \_ to not give an error */
-		if (!SIZE_ONLY && isALNUM(value) && value != '_') {
+		if (!SIZE_ONLY && isWORDCHAR(value) && value != '_') {
 		    SAVEFREESV(RExC_rx_sv);
 		    SAVEFREESV(listsv);
 		    ckWARN2reg(RExC_parse,

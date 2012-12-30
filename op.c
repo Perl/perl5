@@ -3121,10 +3121,10 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 
 	    while (1) {
 		if (*s && strchr("@$%*", *s) && *++s
-		       && (isALNUM(*s) || UTF8_IS_CONTINUED(*s))) {
+		       && (isWORDCHAR(*s) || UTF8_IS_CONTINUED(*s))) {
 		    s++;
 		    sigil = TRUE;
-		    while (*s && (isALNUM(*s) || UTF8_IS_CONTINUED(*s)))
+		    while (*s && (isWORDCHAR(*s) || UTF8_IS_CONTINUED(*s)))
 			s++;
 		    while (*s && (strchr(", \t\n", *s)))
 			s++;

@@ -103,7 +103,7 @@ TOP:
     }
     if (isIDFIRST(*s)) {
 	while (++s<send)
-	    if (!isALNUM(*s)) {
+	    if (!isWORDCHAR(*s)) {
 		if (*s == ':')
 		    goto TOP;
 		else

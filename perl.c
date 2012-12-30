@@ -3035,7 +3035,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 	/* if adding extra options, remember to update DEBUG_MASK */
 	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAqMB";
 
-	for (; isALNUM(**s); (*s)++) {
+	for (; isWORDCHAR(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);
 	    if (d)
 		i |= 1 << (d - debopts);
@@ -3046,7 +3046,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
     }
     else if (isDIGIT(**s)) {
 	i = atoi(*s);
-	for (; isALNUM(**s); (*s)++) ;
+	for (; isWORDCHAR(**s); (*s)++) ;
     }
     else if (givehelp) {
       const char *const *p = usage_msgd;
@@ -3140,7 +3140,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	s++;
 
         /* -dt indicates to the debugger that threads will be used */
-	if (*s == 't' && !isALNUM(s[1])) {
+	if (*s == 't' && !isWORDCHAR(s[1])) {
 	    ++s;
 	    my_setenv("PERL5DB_THREADED", "1");
 	}
@@ -3163,7 +3163,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    end = s + strlen(s);
 
 	    /* We now allow -d:Module=Foo,Bar and -d:-Module */
-	    while(isALNUM(*s) || *s==':') ++s;
+	    while(isWORDCHAR(*s) || *s==':') ++s;
 	    if (*s != '=')
 		sv_catpvn(sv, start, end - start);
 	    else {
@@ -3191,7 +3191,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING),
 	           "Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)\n");
-	for (s++; isALNUM(*s); s++) ;
+	for (s++; isWORDCHAR(*s); s++) ;
 #endif
 	return s;
     }	
@@ -3284,7 +3284,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    sv = newSVpvn(use,4);
 	    start = s;
 	    /* We allow -M'Module qw(Foo Bar)'	*/
-	    while(isALNUM(*s) || *s==':') {
+	    while(isWORDCHAR(*s) || *s==':') {
 		if( *s++ == ':' ) {
 		    if( *s == ':' ) 
 			s++;

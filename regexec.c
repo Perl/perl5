@@ -1619,19 +1619,19 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     }
     case BOUNDL:
         RXp_MATCH_TAINTED_on(prog);
-        FBC_BOUND(isALNUM_LC,
-                  isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)),
-                  isALNUM_LC_utf8((U8*)s));
+        FBC_BOUND(isWORDCHAR_LC,
+                  isWORDCHAR_LC_uvchr(UNI_TO_NATIVE(tmp)),
+                  isWORDCHAR_LC_utf8((U8*)s));
         break;
     case NBOUNDL:
         RXp_MATCH_TAINTED_on(prog);
-        FBC_NBOUND(isALNUM_LC,
-                   isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp)),
-                   isALNUM_LC_utf8((U8*)s));
+        FBC_NBOUND(isWORDCHAR_LC,
+                   isWORDCHAR_LC_uvchr(UNI_TO_NATIVE(tmp)),
+                   isWORDCHAR_LC_utf8((U8*)s));
         break;
     case BOUND:
         FBC_BOUND(isWORDCHAR,
-                  isALNUM_uni(tmp),
+                  isWORDCHAR_uni(tmp),
                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case BOUNDA:
@@ -1641,7 +1641,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
     case NBOUND:
         FBC_NBOUND(isWORDCHAR,
-                   isALNUM_uni(tmp),
+                   isWORDCHAR_uni(tmp),
                    cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case NBOUNDA:
@@ -1651,12 +1651,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
     case BOUNDU:
         FBC_BOUND(isWORDCHAR_L1,
-                  isALNUM_uni(tmp),
+                  isWORDCHAR_uni(tmp),
                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case NBOUNDU:
         FBC_NBOUND(isWORDCHAR_L1,
-                   isALNUM_uni(tmp),
+                   isWORDCHAR_uni(tmp),
                    cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case LNBREAK:
@@ -4211,7 +4211,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, uniflags);
 		}
 		if (FLAGS(scan) != REGEX_LOCALE_CHARSET) {
-		    ln = isALNUM_uni(ln);
+		    ln = isWORDCHAR_uni(ln);
                     if (NEXTCHR_IS_EOS)
                         n = 0;
                     else {
@@ -4221,8 +4221,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
 		}
 		else {
-		    ln = isALNUM_LC_uvchr(UNI_TO_NATIVE(ln));
-		    n = NEXTCHR_IS_EOS ? 0 : isALNUM_LC_utf8((U8*)locinput);
+		    ln = isWORDCHAR_LC_uvchr(UNI_TO_NATIVE(ln));
+		    n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_LC_utf8((U8*)locinput);
 		}
 	    }
 	    else {
@@ -4246,12 +4246,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_L1(nextchr);
 			break;
 		    case REGEX_LOCALE_CHARSET:
-			ln = isALNUM_LC(ln);
-			n = NEXTCHR_IS_EOS ? 0 : isALNUM_LC(nextchr);
+			ln = isWORDCHAR_LC(ln);
+			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_LC(nextchr);
 			break;
 		    case REGEX_DEPENDS_CHARSET:
-			ln = isALNUM(ln);
-			n = NEXTCHR_IS_EOS ? 0 : isALNUM(nextchr);
+			ln = isWORDCHAR(ln);
+			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR(nextchr);
 			break;
 		    case REGEX_ASCII_RESTRICTED_CHARSET:
 		    case REGEX_ASCII_MORE_RESTRICTED_CHARSET:

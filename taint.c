@@ -158,9 +158,9 @@ Perl_taint_env(pTHX)
 	const char *t = SvPV_const(*svp, len);
 	const char * const e = t + len;
 	TAINT_set(was_tainted);
-	if (t < e && isALNUM(*t))
+	if (t < e && isWORDCHAR(*t))
 	    t++;
-	while (t < e && (isALNUM(*t) || strchr("-_.+", *t)))
+	while (t < e && (isWORDCHAR(*t) || strchr("-_.+", *t)))
 	    t++;
 	if (t < e) {
 	    TAINT;

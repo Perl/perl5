@@ -13,7 +13,7 @@
 	(*(f) == '/'							\
 	 || (strchr(f,':')						\
 	     || ((*(f) == '[' || *(f) == '<')				\
-		 && (isALNUM((f)[1]) || strchr("$-_]>",(f)[1])))))
+		 && (isWORDCHAR((f)[1]) || strchr("$-_]>",(f)[1])))))
 
 #else		/* !VMS */
 #  if defined(WIN32) || defined(__CYGWIN__)

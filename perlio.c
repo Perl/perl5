@@ -1005,7 +1005,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		}
 		do {
 		    e++;
-		} while (isALNUM(*e));
+		} while (isWORDCHAR(*e));
 		llen = e - s;
 		if (*e == '(') {
 		    int nesting = 1;

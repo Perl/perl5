@@ -68,7 +68,7 @@ S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warn
 	else {
 	    U8 clearer[3];
 	    U8 i = 0;
-	    if (! isALNUM(result)) {
+	    if (! isWORDCHAR(result)) {
 		clearer[i++] = '\\';
 	    }
 	    clearer[i++] = result;

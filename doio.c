@@ -1499,7 +1499,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	goto doshell;
 
     s = cmd;
-    while (isALNUM(*s))
+    while (isWORDCHAR(*s))
 	s++;	/* catch VAR=val gizmo */
     if (*s == '=')
 	goto doshell;

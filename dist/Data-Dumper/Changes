@@ -6,6 +6,10 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
+=item 2.140 (Dec 30 2012)
+
+Change call of isALNUM to equivalent but more clearly named isWORDCHAR
+
 =item 2.139 (Dec 12 2012)
 
 Supply an explicit dynamic_config => 0 in META

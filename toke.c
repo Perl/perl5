@@ -3881,7 +3881,7 @@ S_intuit_more(pTHX_ char *s)
 		    weight -= 5;	/* cope with negative subscript */
 		break;
 	    default:
-		if (!isALNUM(last_un_char)
+		if (!isWORDCHAR(last_un_char)
 		    && !(last_un_char == '$' || last_un_char == '@'
 			 || last_un_char == '&')
 		    && isALPHA(*s) && s[1] && isALPHA(s[1])) {
@@ -5485,7 +5485,7 @@ Perl_yylex(pTHX)
 	}
 	goto retry;
     case '-':
-	if (s[1] && isALPHA(s[1]) && !isALNUM(s[2])) {
+	if (s[1] && isALPHA(s[1]) && !isWORDCHAR(s[2])) {
 	    I32 ftst = 0;
 	    char tmp;
 
@@ -5990,9 +5990,9 @@ Perl_yylex(pTHX)
 		}
 		else if (*s == 'q') {
 		    if (++t < PL_bufend
-			&& (!isALNUM(*t)
+			&& (!isWORDCHAR(*t)
 			    || ((*t == 'q' || *t == 'x') && ++t < PL_bufend
-				&& !isALNUM(*t))))
+				&& !isWORDCHAR(*t))))
 		    {
 			/* skip q//-like construct */
 			const char *tmps;
@@ -6273,8 +6273,8 @@ Perl_yylex(pTHX)
 
 		    if (*t == '/' || *t == '?' ||
 			((*t == 'm' || *t == 's' || *t == 'y')
-			 && !isALNUM(t[1])) ||
-			(*t == 't' && t[1] == 'r' && !isALNUM(t[2])))
+			 && !isWORDCHAR(t[1])) ||
+			(*t == 't' && t[1] == 'r' && !isWORDCHAR(t[2])))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "!=~ should be !~");
 		}
@@ -9170,7 +9170,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
     for (;;) {
 	if (d >= e)
 	    Perl_croak(aTHX_ ident_too_long);
-	if (isALNUM(*s)
+	if (isWORDCHAR(*s)
             || (!UTF && isALPHANUMERIC_L1(*s))) /* UTF handled below */
         {
 	    *d++ = *s++;
@@ -9184,7 +9184,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
-	else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
+	else if (UTF && UTF8_IS_START(*s) && isWORDCHAR_utf8((U8*)s)) {
 	    char *t = s + UTF8SKIP(s);
 	    size_t len;
 	    while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
@@ -9228,7 +9228,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	for (;;) {
 	    if (d >= e)
 		Perl_croak(aTHX_ ident_too_long);
-	    if (isALNUM(*s))	/* UTF handled below */
+	    if (isWORDCHAR(*s))	/* UTF handled below */
 		*d++ = *s++;
 	    else if (*s == '\'' && isIDFIRST_lazy_if(s+1,UTF)) {
 		*d++ = ':';
@@ -9239,7 +9239,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		*d++ = *s++;
 		*d++ = *s++;
 	    }
-	    else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
+	    else if (UTF && UTF8_IS_START(*s) && isWORDCHAR_utf8((U8*)s)) {
 		char *t = s + UTF8SKIP(s);
 		while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
 		    t += UTF8SKIP(t);
@@ -9312,7 +9312,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		s = end;
 	    }
 	    else {
-		while ((isALNUM(*s) || *s == ':') && d < e)
+		while ((isWORDCHAR(*s) || *s == ':') && d < e)
 		    *d++ = *s++;
 		if (d >= e)
 		    Perl_croak(aTHX_ ident_too_long);
@@ -9338,11 +9338,11 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	}
 	/* Handle extended ${^Foo} variables
 	 * 1999-02-27 mjd-perl-patch@plover.com */
-	else if (!isALNUM(*d) && !isPRINT(*d) /* isCTRL(d) */
-		 && isALNUM(*s))
+	else if (!isWORDCHAR(*d) && !isPRINT(*d) /* isCTRL(d) */
+		 && isWORDCHAR(*s))
 	{
 	    d++;
-	    while (isALNUM(*s) && d < e) {
+	    while (isWORDCHAR(*s) && d < e) {
 		*d++ = *s++;
 	    }
 	    if (d >= e)
