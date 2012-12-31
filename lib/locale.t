@@ -775,11 +775,11 @@ foreach $Locale (@Locale) {
 
     debug "# Neoalpha = ", join("",@Neoalpha), "\n";
 
-    my $first_Neoalpha_test_number =  $locales_test_number;
-    my $final_Neoalpha_test_number =  $first_Neoalpha_test_number + 4;
+    my $first_Neoalpha_test_number =  $locales_test_number + 1;
+    my $final_Neoalpha_test_number =  $first_Neoalpha_test_number + 3;
     if (@Neoalpha == 0) {
 	# If we have no Neoalphas the remaining tests are no-ops.
-	debug "# no Neoalpha, skipping tests $locales_test_number..$final_Neoalpha_test_number for locale '$Locale'\n";
+	debug "# no Neoalpha, skipping tests $first_Neoalpha_test_number..$final_Neoalpha_test_number for locale '$Locale'\n";
 	foreach ($locales_test_number+1..$final_Neoalpha_test_number) {
 	    push @{$Okay{$_}}, $Locale;
             $locales_test_number++;
