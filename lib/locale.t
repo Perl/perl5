@@ -678,10 +678,12 @@ my @Neoalpha;   # Alnums that aren't in the C locale.
 my %test_names;
 
 sub tryneoalpha {
-    my ($Locale, $i, $test) = @_;
+    my ($Locale, $i, $test, $message) = @_;
+    $message //= "";
+    $message = "  ($message)" if $message;
     unless ($test) {
 	$Problem{$i}{$Locale} = 1;
-	debug "# failed $i with locale '$Locale'\n";
+	debug "# failed $i with locale '$Locale'$message\n";
     } else {
 	push @{$Okay{$i}}, $Locale;
     }
