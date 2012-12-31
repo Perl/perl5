@@ -11924,9 +11924,6 @@ parseit:
 #endif
                         _invlist_union_complement_2nd(posixes,
                                                     PL_ASCII, &posixes);
-                        if (DEPENDS_SEMANTICS) {
-                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
-                        }
 #ifdef HAS_ISASCII
                     }
 #endif
