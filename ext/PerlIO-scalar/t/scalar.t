@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 92;
+use Test::More tests => 101;
 
 my $fh;
 my $var = "aaa\n";
@@ -386,6 +386,7 @@ SKIP: {
 }
 
 # [perl #109828] PerlIO::scalar does not handle UTF-8
+my $byte_warning = "Strings with code points over 0xFF may not be mapped into in-memory file handles\n";
 {
     use Errno qw(EINVAL);
     my @warnings;
@@ -399,8 +400,8 @@ SKIP: {
     $! = 0;
     ok(!open(my $fh, "<", \$content), "non byte open should fail (and warn)");
     is(0+$!, EINVAL, "check \$! is updated even when we warn");
-    my $warning = "Strings with code points over 0xFF may not be mapped into in-memory file handles\n";
-    is_deeply(\@warnings, [ $warning ], "should have warned");
+    is_deeply(\@warnings, [ $byte_warning ], "should have warned");
+
     @warnings = ();
     $content = "12\xA1";
     utf8::upgrade($content);
@@ -410,4 +411,33 @@ SKIP: {
     is($tmp, "12\xA1", "check we got the expected bytes");
     close $fh;
     is_deeply(\@warnings, [], "should be no more warnings");
+}
+{ # changes after open
+    my $content = "abc";
+    ok(open(my $fh, "<", \$content), "open a scalar");
+    my $tmp;
+    is(read($fh, $tmp, 1), 1, "basic read");
+    seek($fh, 1, SEEK_SET);
+    $content = "\xA1\xA2\xA3";
+    utf8::upgrade($content);
+    is(read($fh, $tmp, 1), 1, "read from post-open upgraded scalar");
+    local $TODO = "read doesn't handle a post open non-byte scalar";
+    is($tmp, "\xA2", "check we read the correct value");
+    seek($fh, 1, SEEK_SET);
+    $content = "\x{101}\x{102}\x{103}";
+
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, "@_" };
+
+    $! = 0;
+    is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
+    is(0+$!, EINVAL, "check errno set correctly");
+    {
+        local $TODO;
+	is_deeply(\@warnings, [], "should be no warning (yet)");
+    }
+    use warnings "utf8";
+    seek($fh, 1, SEEK_SET);
+    is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
+    is_deeply(\@warnings, [ $byte_warning ], "check warning");
 }
