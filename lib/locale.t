@@ -787,7 +787,7 @@ foreach $Locale (@Locale) {
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
     $message = "";
     $locales_test_number++;
-    $test_names{$locales_test_number} = 'TODO Verify that /[[:lower:]]/i matches sieved uppercase characters.';
+    $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i matches sieved uppercase characters.';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
     tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
@@ -818,8 +818,8 @@ foreach $Locale (@Locale) {
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
     $message = "";
     $locales_test_number++;
-    $test_names{$locales_test_number} = 'TODO Verify that /[[:upper:]]/i matches sieved lowercase characters.';
-    $message = 'TODO Failed for ' . join ", ", @fold_failures if @fold_failures;
+    $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/i matches sieved lowercase characters.';
+    $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
     tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
     {   # Find the alphabetic characters that are not considered alphabetics

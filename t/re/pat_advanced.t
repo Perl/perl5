@@ -2142,7 +2142,6 @@ EOP
     }
 
     {
-        local $::TODO = "Under /i loading the :lower: swash breaks later :lowers:";
         fresh_perl_is('print eval "\"\x{101}\" =~ /[[:lower:]]/", "\n"; print eval "\"\x{100}\" =~ /[[:lower:]]/i", "\n";',
                       "1\n1",   # Both re's should match
                       "",
