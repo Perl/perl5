@@ -5,6 +5,8 @@
 # without using 'eval' as much as possible, which might cloud the issue,  the
 # crucial parts of the code are duplicated in a block for each pragma.
 
+# To make a TODO test, add the string 'TODO' to its %test_names value
+
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
@@ -1309,7 +1311,12 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
 	print "not ";
     }
     print "ok $_";
-    print " $test_names{$_}" if defined $test_names{$_};
+    if (defined $test_names{$_}) {
+        # If TODO is in the test name, make it thus
+        my $todo = $test_names{$_} =~ s/TODO\s*//;
+        print " $test_names{$_}";
+        print " # TODO" if $todo;
+    }
     print "\n";
 }
 
