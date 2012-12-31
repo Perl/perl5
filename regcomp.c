@@ -11696,6 +11696,45 @@ parseit:
 
 	    if (! SIZE_ONLY) {
                 U8 classnum = namedclass_to_classnum(namedclass);
+                if (namedclass >= ANYOF_MAX) {  /* If a special class */
+                    if (namedclass != ANYOF_UNIPROP) { /* UNIPROP = \p and \P */
+
+                        /* Here, should be \h, \H, \v, or \V.  Neither /d nor
+                         * /l make a difference in what these match.  There
+                         * would be problems if these characters had folds
+                         * other than themselves, as cp_list is subject to
+                         * folding. */
+                        if (classnum != _CC_VERTSPACE) {
+                            assert(   namedclass == ANYOF_HORIZWS
+                                   || namedclass == ANYOF_NHORIZWS);
+
+                            /* It turns out that \h is just a synonym for
+                             * XPosixBlank */
+                            classnum = _CC_BLANK;
+                        }
+
+                        _invlist_union_maybe_complement_2nd(
+                                cp_list,
+                                PL_XPosix_ptrs[classnum],
+                                namedclass % 2,  /* Complement if odd
+                                                    (NHORIZWS, NVERTWS) */
+                                &cp_list);
+                    }
+                }
+                else if (classnum == _CC_ASCII) {
+#ifdef HAS_ISASCII
+                    if (LOC) {
+                        ANYOF_CLASS_SET(ret, namedclass);
+                    }
+                    else
+#endif  /* Not isascii(); just use the hard-coded definition for it */
+                        _invlist_union_maybe_complement_2nd(
+                                posixes,
+                                PL_ASCII,
+                                namedclass % 2, /* Complement if odd (NASCII) */
+                                &posixes);
+                }
+                else {  /* Garden variety class */
 
                 /* The ascii range inversion list */
                 SV* ascii_source = PL_Posix_ptrs[classnum];
@@ -11703,22 +11742,17 @@ parseit:
                 /* The full Latin1 range inversion list */
                 SV* l1_source = PL_L1Posix_ptrs[classnum];
 
+                if (classnum < _FIRST_NON_SWASH_CC) {
+
+                    /* Here, the class has a swash, which may or not already be
+                     * loaded */
+
                 /* The name of the property to use to match the full eXtended
                  * Unicode range swash fo this character class */
                 const char *Xname = swash_property_names[classnum];
 
-		switch ((I32)namedclass) {
-		case ANYOF_DIGIT:
-		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
-		case ANYOF_ALPHA:
-		case ANYOF_CASED:
-		case ANYOF_GRAPH:
-		case ANYOF_LOWER:
-		case ANYOF_PRINT:
-		case ANYOF_PUNCT:
-		case ANYOF_UPPER:
-		case ANYOF_WORDCHAR:
                     if ( !  PL_utf8_swash_ptrs[classnum]) {
+                        if (namedclass % 2 == 0) {
 
                         /* If not /a matching, there are code points we don't
                          * know at compile time.  Arrange for the unknown
@@ -11738,19 +11772,61 @@ parseit:
                                                 : l1_source,
                                            &posixes);
                         }
-                        break;
+                        }
+                        else {
+                            if (AT_LEAST_ASCII_RESTRICTED) {
+                                /* Under /a should match everything above ASCII,
+                                 * and the complement of the set's ASCII matches */
+                                _invlist_union_complement_2nd(posixes, ascii_source,
+                                                              &posixes);
+                            }
+                            else {
+                                /* Arrange for the unknown matches to be loaded at
+                                 * run-time, if needed */
+                                Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n", Xname);
+                                runtime_posix_matches_above_Unicode = TRUE;
+                                if (LOC) {
+                                    ANYOF_CLASS_SET(ret, namedclass);
+                                }
+                                else {
+
+                                    /* We want to match everything in Latin1,
+                                     * except those things that l1_source matches
+                                     * */
+                                    SV* scratch_list = NULL;
+                                    _invlist_subtract(PL_Latin1, l1_source,
+                                                      &scratch_list);
+
+                                    /* Add the list from this class to the running
+                                     * total */
+                                    if (! posixes) {
+                                        posixes = scratch_list;
+                                    }
+                                    else {
+                                        _invlist_union(posixes, scratch_list,
+                                                       &posixes);
+                                        SvREFCNT_dec_NN(scratch_list);
+                                    }
+                                    if (DEPENDS_SEMANTICS) {
+                                        ANYOF_FLAGS(ret)
+                                                    |= ANYOF_NON_UTF8_LATIN1_ALL;
+                                    }
+                                }
+                            }
+                        }
+                        goto namedclass_done;
                     }
                     if (! PL_XPosix_ptrs[classnum]) {
                         PL_XPosix_ptrs[classnum]
                             = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
                     }
-                    /* FALL THROUGH */
+                }
 
-		case ANYOF_BLANK:
-		case ANYOF_CNTRL:
-		case ANYOF_PSXSPC:
-		case ANYOF_SPACE:
-		case ANYOF_XDIGIT:
+                /* Here there is an inversion list already loaded for the
+                 * entire class */
+
+                if (namedclass % 2 == 0) {  /* A non-complemented class, like
+                                               ANYOF_PUNCT */
                     if (! LOC) {
                         /* For non-locale, just add it to any existing list */
                         _invlist_union(posixes,
@@ -11797,71 +11873,8 @@ parseit:
                         }
 #endif
                     }
-		    break;
-
-		case ANYOF_NDIGIT:
-
-		case ANYOF_NALPHANUMERIC:
-		case ANYOF_NALPHA:
-		case ANYOF_NGRAPH:
-		case ANYOF_NLOWER:
-		case ANYOF_NPRINT:
-		case ANYOF_NPUNCT:
-		case ANYOF_NUPPER:
-		case ANYOF_NWORDCHAR:
-                    if ( !  PL_utf8_swash_ptrs[classnum]) {
-                        if (AT_LEAST_ASCII_RESTRICTED) {
-                            /* Under /a should match everything above ASCII,
-                             * and the complement of the set's ASCII matches */
-                            _invlist_union_complement_2nd(posixes, ascii_source,
-                                                          &posixes);
-                        }
-                        else {
-                            /* Arrange for the unknown matches to be loaded at
-                             * run-time, if needed */
-                            Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n", Xname);
-                            runtime_posix_matches_above_Unicode = TRUE;
-                            if (LOC) {
-                                ANYOF_CLASS_SET(ret, namedclass);
-                            }
-                            else {
-
-                                /* We want to match everything in Latin1,
-                                 * except those things that l1_source matches
-                                 * */
-                                SV* scratch_list = NULL;
-                                _invlist_subtract(PL_Latin1, l1_source,
-                                                  &scratch_list);
-
-                                /* Add the list from this class to the running
-                                 * total */
-                                if (! posixes) {
-                                    posixes = scratch_list;
-                                }
-                                else {
-                                    _invlist_union(posixes, scratch_list,
-                                                   &posixes);
-                                    SvREFCNT_dec_NN(scratch_list);
-                                }
-                                if (DEPENDS_SEMANTICS) {
-                                    ANYOF_FLAGS(ret)
-                                                |= ANYOF_NON_UTF8_LATIN1_ALL;
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    if (! PL_XPosix_ptrs[classnum]) {
-                        PL_XPosix_ptrs[classnum]
-                            = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
-                    }
-                    /* FALL THROUGH */
-
-		case ANYOF_NBLANK:
-		case ANYOF_NCNTRL:
-		case ANYOF_NPSXSPC:
-		case ANYOF_NSPACE:
-		case ANYOF_NXDIGIT:
+                }
+                else {  /* A complemented class, like ANYOF_NPUNCT */
                     if (! LOC) {
                         _invlist_union_complement_2nd(
                                                 posixes,
@@ -11904,50 +11917,9 @@ parseit:
                         }
 #endif
                     }
-		    break;
-
-		case ANYOF_ASCII:
-		case ANYOF_NASCII:
-#ifdef HAS_ISASCII
-		    if (LOC) {
-			ANYOF_CLASS_SET(ret, namedclass);
-		    }
-                    else
-#endif  /* Not isascii(); just use the hard-coded definition for it */
-                        _invlist_union_maybe_complement_2nd(
-                                posixes,
-                                PL_ASCII,
-                                namedclass % 2, /* Complement if odd (NASCII) */
-                                &posixes);
-		    break;
-		case ANYOF_HORIZWS:
-		case ANYOF_NHORIZWS:
-                    /* For these, we use the cp_list, as neither /d nor /l make
-                     * a difference in what these match.  There would be
-                     * problems if these characters had folds other than
-                     * themselves, as cp_list is subject to folding.
-                     *
-                     * It turns out that \h is just a synonym for XPosixBlank */
-                    classnum = _CC_BLANK;
-		    /* FALL THROUGH */
-		case ANYOF_VERTWS:
-		case ANYOF_NVERTWS:
-                   _invlist_union_maybe_complement_2nd(
-                                cp_list,
-                                PL_XPosix_ptrs[classnum],
-                                namedclass % 2,  /* Complement if odd
-                                                    (NHORIZWS, NVERTWS) */
-                                &cp_list);
-		    break;
-
-		case ANYOF_UNIPROP: /* this is to handle \p and \P */
-		    break;
-
-		default:
-		    vFAIL("Invalid [::] class");
-		    break;
 		}
-
+	    }
+          namedclass_done:
 		continue;   /* Go get next character */
 	    }
 	} /* end of namedclass \blah */

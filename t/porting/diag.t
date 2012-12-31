@@ -520,7 +520,6 @@ Illegal pattern in regex; marked by <-- HERE in m/%s/
 Infinite recursion in regex
 internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
-Invalid [::] class in regex; marked by <-- HERE in m/%s/
 Invalid [] range "%*.*s" in regex; marked by <-- HERE in m/%s/
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
