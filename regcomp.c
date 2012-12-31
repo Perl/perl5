@@ -5209,7 +5209,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PosixBlank_invlist);
 	PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
-	PL_L1Cased = _new_invlist_C_array(L1Cased_invlist);
+
+        /* Cased is the same as Alpha in the ASCII range */
+	PL_L1Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(L1Cased_invlist);
+	PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PosixAlpha_invlist);
 
 	PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PosixCntrl_invlist);
 	PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
@@ -11166,9 +11169,9 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 			    break;
 			case 'r':
 			    if (memEQ(posixcc, "lowe", 4)) /* lower */
-				namedclass = ANYOF_LOWER;
+				namedclass = (FOLD) ? ANYOF_CASED : ANYOF_LOWER;
 			    else if (memEQ(posixcc, "uppe", 4)) /* upper */
-				namedclass = ANYOF_UPPER;
+				namedclass = (FOLD) ? ANYOF_CASED : ANYOF_UPPER;
 			    break;
 			case 't':
 			    if (memEQ(posixcc, "digi", 4)) /* digit */
@@ -11703,16 +11706,6 @@ parseit:
                  * Unicode range swash fo this character class */
                 const char *Xname = swash_property_names[classnum];
 
-                /* LOWER and UPPER under fold match ALPHA in the ASCII range,
-                 * and Cased outside it */
-                if (FOLD && ! LOC
-                    && (classnum == _CC_LOWER || classnum == _CC_UPPER))
-                {
-                    ascii_source = PL_Posix_ptrs[_CC_ALPHA];
-                    l1_source = PL_L1Cased;
-                    Xname = "Cased";
-                }
-
 		switch ((I32)namedclass) {
 
 		case ANYOF_DIGIT:
@@ -11721,6 +11714,7 @@ parseit:
 
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		case ANYOF_ALPHA:
+		case ANYOF_CASED:
 		case ANYOF_GRAPH:
 		case ANYOF_LOWER:
 		case ANYOF_PRINT:
@@ -12264,6 +12258,7 @@ parseit:
 #endif
                     goto join_posix;
 
+                case ANYOF_NCASED:
                 case ANYOF_LOWER:
                 case ANYOF_NLOWER:
                 case ANYOF_UPPER:
@@ -13591,10 +13586,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
     static const char * const anyofs[] = {
 #if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6 \
-    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_SPACE != 9 \
-    || _CC_BLANK != 10 || _CC_XDIGIT != 11 || _CC_PSXSPC != 12 \
-    || _CC_CNTRL != 13 || _CC_ASCII != 14 || _CC_VERTSPACE != 15
+    || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
+    || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9            \
+    || _CC_SPACE != 10 || _CC_BLANK != 11 || _CC_XDIGIT != 12               \
+    || _CC_PSXSPC != 13 || _CC_CNTRL != 14 || _CC_ASCII != 15               \
+    || _CC_VERTSPACE != 16
   #error Need to adjust order of anyofs[]
 #endif
         "[\\w]",
@@ -13615,6 +13611,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         "[:^alnum:]",
         "[:graph:]",
         "[:^graph:]",
+        "[:cased:]",
+        "[:^cased:]",
         "[\\s]",
         "[\\S]",
         "[:blank:]",

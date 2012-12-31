@@ -27,6 +27,7 @@ my @properties = qw(
     ALPHA
     ASCII
     BLANK
+    CASED
     CHARNAME_CONT
     CNTRL
     DIGIT

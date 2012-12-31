@@ -566,8 +566,6 @@ PERLVAR(I, ASCII,	SV *)
 PERLVAR(I, Latin1,	SV *)
 PERLVAR(I, AboveLatin1,	SV *)
 
-PERLVAR(I, L1Cased,	SV *)
-
 PERLVAR(I, NonL1NonFinalFold,   SV *)
 PERLVAR(I, HasMultiCharFold,   SV *)
 

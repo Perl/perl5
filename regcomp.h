@@ -370,6 +370,9 @@ struct regnode_charclass_class {
 #define ANYOF_NASCII   ((ANYOF_ASCII) + 1)
 #define ANYOF_BLANK    ((_CC_BLANK) * 2)     /* GNU extension: space and tab: non-vertical space */
 #define ANYOF_NBLANK   ((ANYOF_BLANK) + 1)
+#define ANYOF_CASED    ((_CC_CASED) * 2)    /* Pseudo class for [:lower:] or
+                                               [:upper:] under /i */
+#define ANYOF_NCASED   ((ANYOF_CASED) + 1)
 #define ANYOF_CNTRL    ((_CC_CNTRL) * 2)
 #define ANYOF_NCNTRL   ((ANYOF_CNTRL) + 1)
 #define ANYOF_DIGIT    ((_CC_DIGIT) * 2)     /* \d */

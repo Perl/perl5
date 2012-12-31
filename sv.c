@@ -13587,7 +13587,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Unicode inversion lists */
     PL_ASCII		= sv_dup_inc(proto_perl->IASCII, param);
     PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
-    PL_L1Cased		= sv_dup_inc(proto_perl->IL1Cased, param);
 
     PL_NonL1NonFinalFold = sv_dup_inc(proto_perl->INonL1NonFinalFold, param);
     PL_HasMultiCharFold= sv_dup_inc(proto_perl->IHasMultiCharFold, param);

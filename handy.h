@@ -764,8 +764,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_PRINT              6      /* [:print:] */
 #  define _CC_ALPHANUMERIC       7      /* [:alnum:] */
 #  define _CC_GRAPH              8      /* [:graph:] */
+#  define _CC_CASED              9      /* [:lower:] and [:upper:] under /i */
 
-#define _FIRST_NON_SWASH_CC      9
+#define _FIRST_NON_SWASH_CC     10
 /* The character classes above are implemented with swashes.  The second group
  * (just below) contains the ones implemented without.  These are also sorted
  * in rough order of the frequency of their use, except that \v should be last,
@@ -775,25 +776,25 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * useful to group these which have no members that match above Latin1, (or
  * above ASCII in the latter case) */
 
-#  define _CC_SPACE              9      /* \s */
-#  define _CC_BLANK             10      /* [:blank:] */
-#  define _CC_XDIGIT            11      /* [:xdigit:] */
-#  define _CC_PSXSPC            12      /* [:space:] */
-#  define _CC_CNTRL             13      /* [:cntrl:] */
-#  define _CC_ASCII             14      /* [:ascii:] */
-#  define _CC_VERTSPACE         15      /* \v */
+#  define _CC_SPACE             10      /* \s */
+#  define _CC_BLANK             11      /* [:blank:] */
+#  define _CC_XDIGIT            12      /* [:xdigit:] */
+#  define _CC_PSXSPC            13      /* [:space:] */
+#  define _CC_CNTRL             14      /* [:cntrl:] */
+#  define _CC_ASCII             15      /* [:ascii:] */
+#  define _CC_VERTSPACE         16      /* \v */
 
 #  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 
 /* The members of the third group below do not need to be coordinated with data
  * structures in regcomp.[ch] and regexec.c */
-#  define _CC_IDFIRST           16
-#  define _CC_CHARNAME_CONT     17
-#  define _CC_NONLATIN1_FOLD    18
-#  define _CC_QUOTEMETA         19
-#  define _CC_NON_FINAL_FOLD    20
-#  define _CC_IS_IN_SOME_FOLD   21
-/* Unused: 22-31
+#  define _CC_IDFIRST           17
+#  define _CC_CHARNAME_CONT     18
+#  define _CC_NONLATIN1_FOLD    19
+#  define _CC_QUOTEMETA         20
+#  define _CC_NON_FINAL_FOLD    21
+#  define _CC_IS_IN_SOME_FOLD   22
+/* Unused: 23-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
@@ -810,6 +811,7 @@ typedef enum {
     _CC_ENUM_ALPHANUMERIC   = _CC_ALPHANUMERIC,
     _CC_ENUM_ASCII          = _CC_ASCII,
     _CC_ENUM_BLANK          = _CC_BLANK,
+    _CC_ENUM_CASED          = _CC_CASED,
     _CC_ENUM_CNTRL          = _CC_CNTRL,
     _CC_ENUM_DIGIT          = _CC_DIGIT,
     _CC_ENUM_GRAPH          = _CC_GRAPH,
@@ -830,8 +832,8 @@ typedef enum {
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #   if _CC_WORDCHAR != 0 || _CC_DIGIT != 1 || _CC_ALPHA != 2 || _CC_LOWER != 3 \
-       || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6 \
-       || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8
+       || _CC_UPPER != 4 || _CC_PUNCT != 5 || _CC_PRINT != 6                   \
+       || _CC_ALPHANUMERIC != 7 || _CC_GRAPH != 8 || _CC_CASED != 9
       #error Need to adjust order of swash_property_names[]
 #   endif
 
@@ -848,7 +850,8 @@ static const char* const swash_property_names[] = {
     "XPosixPunct",
     "XPosixPrint",
     "XPosixAlnum",
-    "XPosixGraph"
+    "XPosixGraph",
+    "Cased"
 };
 #endif
 

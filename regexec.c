@@ -438,6 +438,8 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
         case _CC_ENUM_ALPHA:     return isALPHA_LC(character);
         case _CC_ENUM_ASCII:     return isASCII_LC(character);
         case _CC_ENUM_BLANK:     return isBLANK_LC(character);
+        case _CC_ENUM_CASED:     return isLOWER_LC(character)
+                                        || isUPPER_LC(character);
         case _CC_ENUM_CNTRL:     return isCNTRL_LC(character);
         case _CC_ENUM_DIGIT:     return isDIGIT_LC(character);
         case _CC_ENUM_GRAPH:     return isGRAPH_LC(character);
@@ -7330,7 +7332,17 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                  * will be 1, so the exclusive or will reverse things, so we
                  * are testing for \W.  On the third iteration, 'to_complement'
                  * will be 0, and we would be testing for \s; the fourth
-                 * iteration would test for \S, etc. */
+                 * iteration would test for \S, etc.
+                 *
+                 * Note that this code assumes that all the classes are closed
+                 * under folding.  For example, if a character matches \w, then
+                 * its fold does too; and vice versa.  This should be true for
+                 * any well-behaved locale for all the currently defined Posix
+                 * classes, except for :lower: and :upper:, which are handled
+                 * by the pseudo-class :cased: which matches if either of the
+                 * other two does.  To get rid of this assumption, an outer
+                 * loop could be used below to iterate over both the source
+                 * character, and its fold (if different) */
 
                 int count = 0;
                 int to_complement = 0;
