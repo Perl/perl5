@@ -668,7 +668,7 @@ $r = \$x
     write ff;
     my $r2 = $r;
     isnt($r1, $r2,
-	 "don't copy a stale lexical; crate a fresh undef one instead");
+	 "don't copy a stale lexical; create a fresh undef one instead");
 }
 
 # [perl #63540] Don’t treat sub { if(){.....}; "constant" } as a constant
