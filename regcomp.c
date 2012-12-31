@@ -11920,8 +11920,8 @@ parseit:
                                 namedclass % 2, /* Complement if odd (NASCII) */
                                 &posixes);
 		    break;
-
 		case ANYOF_HORIZWS:
+		case ANYOF_NHORIZWS:
                     /* For these, we use the cp_list, as neither /d nor /l make
                      * a difference in what these match.  There would be
                      * problems if these characters had folds other than
@@ -11930,19 +11930,14 @@ parseit:
                      * It turns out that \h is just a synonym for XPosixBlank */
                     classnum = _CC_BLANK;
 		    /* FALL THROUGH */
-
 		case ANYOF_VERTWS:
-		    _invlist_union(cp_list, PL_XPosix_ptrs[classnum], &cp_list);
-		    break;
-
-		case ANYOF_NHORIZWS:
-                    classnum = _CC_BLANK;
-		    /* FALL THROUGH */
-
 		case ANYOF_NVERTWS:
-                    _invlist_union_complement_2nd(cp_list,
-                                                  PL_XPosix_ptrs[classnum],
-                                                  &cp_list);
+                   _invlist_union_maybe_complement_2nd(
+                                cp_list,
+                                PL_XPosix_ptrs[classnum],
+                                namedclass % 2,  /* Complement if odd
+                                                    (NHORIZWS, NVERTWS) */
+                                &cp_list);
 		    break;
 
 		case ANYOF_UNIPROP: /* this is to handle \p and \P */
