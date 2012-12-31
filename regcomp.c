@@ -11907,26 +11907,18 @@ parseit:
 		    break;
 
 		case ANYOF_ASCII:
+		case ANYOF_NASCII:
 #ifdef HAS_ISASCII
 		    if (LOC) {
 			ANYOF_CLASS_SET(ret, namedclass);
 		    }
                     else
 #endif  /* Not isascii(); just use the hard-coded definition for it */
-                        _invlist_union(posixes, PL_ASCII, &posixes);
-		    break;
-		case ANYOF_NASCII:
-#ifdef HAS_ISASCII
-		    if (LOC) {
-			ANYOF_CLASS_SET(ret, namedclass);
-		    }
-                    else {
-#endif
-                        _invlist_union_complement_2nd(posixes,
-                                                    PL_ASCII, &posixes);
-#ifdef HAS_ISASCII
-                    }
-#endif
+                        _invlist_union_maybe_complement_2nd(
+                                posixes,
+                                PL_ASCII,
+                                namedclass % 2, /* Complement if odd (NASCII) */
+                                &posixes);
 		    break;
 
 		case ANYOF_HORIZWS:
