@@ -763,38 +763,53 @@ foreach $Locale (@Locale) {
     debug "# BoThCaSe = ", join("", sort keys %BoThCaSe), "\n";
 
     my @failures;
+    my @fold_failures;
     foreach my $x (sort keys %UPPER) {
         my $ok;
+        my $fold_ok;
         if ($is_utf8_locale) {
             use locale ':not_characters';
             $ok = $x =~ /[[:upper:]]/;
+            $fold_ok = $x =~ /[[:lower:]]/i;
         }
         else {
             use locale;
             $ok = $x =~ /[[:upper:]]/;
+            $fold_ok = $x =~ /[[:lower:]]/i;
         }
         push @failures, $x unless $ok;
+        push @fold_failures, $x unless $fold_ok;
     }
     my $message = "";
     $locales_test_number++;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/ matches sieved uppercase characters.';
     $message = 'Failed for ' . join ", ", @failures if @failures;
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
+    $message = "";
+    $locales_test_number++;
+    $test_names{$locales_test_number} = 'TODO Verify that /[[:lower:]]/i matches sieved uppercase characters.';
+    $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
+    tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
     $message = "";
     undef @failures;
+    undef @fold_failures;
 
     foreach my $x (sort keys %lower) {
         my $ok;
+        my $fold_ok;
         if ($is_utf8_locale) {
             use locale ':not_characters';
             $ok = $x =~ /[[:lower:]]/;
+            $fold_ok = $x =~ /[[:upper:]]/i;
         }
         else {
             use locale;
             $ok = $x =~ /[[:lower:]]/;
+            $fold_ok = $x =~ /[[:upper:]]/i;
         }
         push @failures, $x unless $ok;
+        push @fold_failures, $x unless $fold_ok;
     }
 
     $locales_test_number++;
@@ -802,6 +817,10 @@ foreach $Locale (@Locale) {
     $message = 'Failed for ' . join ", ", @failures if @failures;
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
     $message = "";
+    $locales_test_number++;
+    $test_names{$locales_test_number} = 'TODO Verify that /[[:upper:]]/i matches sieved lowercase characters.';
+    $message = 'TODO Failed for ' . join ", ", @fold_failures if @fold_failures;
+    tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
     {   # Find the alphabetic characters that are not considered alphabetics
         # in the default (C) locale.
