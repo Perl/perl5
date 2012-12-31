@@ -11736,190 +11736,211 @@ parseit:
                 }
                 else {  /* Garden variety class */
 
-                /* The ascii range inversion list */
-                SV* ascii_source = PL_Posix_ptrs[classnum];
+                    /* The ascii range inversion list */
+                    SV* ascii_source = PL_Posix_ptrs[classnum];
 
-                /* The full Latin1 range inversion list */
-                SV* l1_source = PL_L1Posix_ptrs[classnum];
+                    /* The full Latin1 range inversion list */
+                    SV* l1_source = PL_L1Posix_ptrs[classnum];
 
-                if (classnum < _FIRST_NON_SWASH_CC) {
+                    /* This code is structured into two major clauses.  The
+                     * first is for classes whose complete definitions may not
+                     * already be known.  It not, the Latin1 definition
+                     * (guaranteed to already known) is used plus code is
+                     * generated to load the rest at run-time (only if needed).
+                     * If the complete definition is known, it drops down to
+                     * the second clause, where the complete definition is
+                     * known */
 
-                    /* Here, the class has a swash, which may or not already be
-                     * loaded */
+                    if (classnum < _FIRST_NON_SWASH_CC) {
 
-                /* The name of the property to use to match the full eXtended
-                 * Unicode range swash fo this character class */
-                const char *Xname = swash_property_names[classnum];
+                        /* Here, the class has a swash, which may or not
+                         * already be loaded */
 
-                    if ( !  PL_utf8_swash_ptrs[classnum]) {
-                        if (namedclass % 2 == 0) {
+                        /* The name of the property to use to match the full
+                         * eXtended Unicode range swash for this character
+                         * class */
+                        const char *Xname = swash_property_names[classnum];
 
-                        /* If not /a matching, there are code points we don't
-                         * know at compile time.  Arrange for the unknown
-                         * matches to be loaded at run-time, if needed */
-                        if (! AT_LEAST_ASCII_RESTRICTED) {
-                            Perl_sv_catpvf(aTHX_ listsv, "+utf8::%s\n", Xname);
-                        }
-                        if (LOC) {  /* Under locale, set run-time lookup */
-                            ANYOF_CLASS_SET(ret, namedclass);
-                        }
-                        else {
-                            /* Add the current class's code points to the
-                             * running total */
-                            _invlist_union(posixes,
-                                           (AT_LEAST_ASCII_RESTRICTED)
-                                                ? ascii_source
-                                                : l1_source,
-                                           &posixes);
-                        }
-                        }
-                        else {
-                            if (AT_LEAST_ASCII_RESTRICTED) {
-                                /* Under /a should match everything above ASCII,
-                                 * and the complement of the set's ASCII matches */
-                                _invlist_union_complement_2nd(posixes, ascii_source,
-                                                              &posixes);
-                            }
-                            else {
-                                /* Arrange for the unknown matches to be loaded at
-                                 * run-time, if needed */
-                                Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n", Xname);
-                                runtime_posix_matches_above_Unicode = TRUE;
-                                if (LOC) {
+                        if ( !  PL_utf8_swash_ptrs[classnum]) {
+                            if (namedclass % 2 == 0) { /* A non-complemented
+                                                          class */
+                                /* If not /a matching, there are code points we
+                                 * don't know at compile time.  Arrange for the
+                                 * unknown matches to be loaded at run-time, if
+                                 * needed */
+                                if (! AT_LEAST_ASCII_RESTRICTED) {
+                                    Perl_sv_catpvf(aTHX_ listsv, "+utf8::%s\n",
+                                                                 Xname);
+                                }
+                                if (LOC) {  /* Under locale, set run-time
+                                               lookup */
                                     ANYOF_CLASS_SET(ret, namedclass);
                                 }
                                 else {
-
-                                    /* We want to match everything in Latin1,
-                                     * except those things that l1_source matches
-                                     * */
-                                    SV* scratch_list = NULL;
-                                    _invlist_subtract(PL_Latin1, l1_source,
-                                                      &scratch_list);
-
-                                    /* Add the list from this class to the running
-                                     * total */
-                                    if (! posixes) {
-                                        posixes = scratch_list;
+                                    /* Add the current class's code points to
+                                     * the running total */
+                                    _invlist_union(posixes,
+                                                   (AT_LEAST_ASCII_RESTRICTED)
+                                                        ? ascii_source
+                                                        : l1_source,
+                                                   &posixes);
+                                }
+                            }
+                            else {  /* A complemented class */
+                                if (AT_LEAST_ASCII_RESTRICTED) {
+                                    /* Under /a should match everything above
+                                     * ASCII, plus the complement of the set's
+                                     * ASCII matches */
+                                    _invlist_union_complement_2nd(posixes,
+                                                                  ascii_source,
+                                                                  &posixes);
+                                }
+                                else {
+                                    /* Arrange for the unknown matches to be
+                                     * loaded at run-time, if needed */
+                                    Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n",
+                                                                 Xname);
+                                    runtime_posix_matches_above_Unicode = TRUE;
+                                    if (LOC) {
+                                        ANYOF_CLASS_SET(ret, namedclass);
                                     }
                                     else {
-                                        _invlist_union(posixes, scratch_list,
-                                                       &posixes);
-                                        SvREFCNT_dec_NN(scratch_list);
-                                    }
-                                    if (DEPENDS_SEMANTICS) {
-                                        ANYOF_FLAGS(ret)
-                                                    |= ANYOF_NON_UTF8_LATIN1_ALL;
+
+                                        /* We want to match everything in
+                                         * Latin1, except those things that
+                                         * l1_source matches */
+                                        SV* scratch_list = NULL;
+                                        _invlist_subtract(PL_Latin1, l1_source,
+                                                          &scratch_list);
+
+                                        /* Add the list from this class to the
+                                         * running total */
+                                        if (! posixes) {
+                                            posixes = scratch_list;
+                                        }
+                                        else {
+                                            _invlist_union(posixes,
+                                                           scratch_list,
+                                                           &posixes);
+                                            SvREFCNT_dec_NN(scratch_list);
+                                        }
+                                        if (DEPENDS_SEMANTICS) {
+                                            ANYOF_FLAGS(ret)
+                                                  |= ANYOF_NON_UTF8_LATIN1_ALL;
+                                        }
                                     }
                                 }
                             }
+                            goto namedclass_done;
                         }
-                        goto namedclass_done;
-                    }
-                    if (! PL_XPosix_ptrs[classnum]) {
-                        PL_XPosix_ptrs[classnum]
-                            = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
-                    }
-                }
 
-                /* Here there is an inversion list already loaded for the
-                 * entire class */
-
-                if (namedclass % 2 == 0) {  /* A non-complemented class, like
-                                               ANYOF_PUNCT */
-                    if (! LOC) {
-                        /* For non-locale, just add it to any existing list */
-                        _invlist_union(posixes,
-                                       (AT_LEAST_ASCII_RESTRICTED)
-                                           ? ascii_source
-                                           : PL_XPosix_ptrs[classnum],
-                                       &posixes);
-                    }
-                    else {  /* Locale */
-                        SV* scratch_list = NULL;
-
-                        /* For above Latin1 code points, we use the full
-                         * Unicode range */
-                        _invlist_intersection(PL_AboveLatin1,
-                                              PL_XPosix_ptrs[classnum],
-                                              &scratch_list);
-                        /* And set the output to it, adding instead if there
-                         * already is an output.  Checking if 'posixes' is NULL
-                         * first saves an extra clone.  Its reference count
-                         * will be decremented at the next union, etc, or if
-                         * this is the only instance, at the end of the routine
-                         * */
-                        if (! posixes) {
-                            posixes = scratch_list;
+                        /* Here, there is a swash loaded for the class.  If no
+                         * inversion list for it yet, get it */
+                        if (! PL_XPosix_ptrs[classnum]) {
+                            PL_XPosix_ptrs[classnum]
+                             = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
                         }
-                        else {
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec_NN(scratch_list);
+                    }
+
+                    /* Here there is an inversion list already loaded for the
+                     * entire class */
+
+                    if (namedclass % 2 == 0) {  /* A non-complemented class,
+                                                   like ANYOF_PUNCT */
+                        if (! LOC) {
+                            /* For non-locale, just add it to any existing list
+                             * */
+                            _invlist_union(posixes,
+                                           (AT_LEAST_ASCII_RESTRICTED)
+                                               ? ascii_source
+                                               : PL_XPosix_ptrs[classnum],
+                                           &posixes);
                         }
+                        else {  /* Locale */
+                            SV* scratch_list = NULL;
+
+                            /* For above Latin1 code points, we use the full
+                             * Unicode range */
+                            _invlist_intersection(PL_AboveLatin1,
+                                                  PL_XPosix_ptrs[classnum],
+                                                  &scratch_list);
+                            /* And set the output to it, adding instead if
+                             * there already is an output.  Checking if
+                             * 'posixes' is NULL first saves an extra clone.
+                             * Its reference count will be decremented at the
+                             * next union, etc, or if this is the only
+                             * instance, at the end of the routine */
+                            if (! posixes) {
+                                posixes = scratch_list;
+                            }
+                            else {
+                                _invlist_union(posixes, scratch_list, &posixes);
+                                SvREFCNT_dec_NN(scratch_list);
+                            }
 
 #ifndef HAS_ISBLANK
-                        if (namedclass != ANYOF_BLANK) {
+                            if (namedclass != ANYOF_BLANK) {
 #endif
-                            /* Set this class in the node for runtime
-                             * matching */
-                            ANYOF_CLASS_SET(ret, namedclass);
+                                /* Set this class in the node for runtime
+                                 * matching */
+                                ANYOF_CLASS_SET(ret, namedclass);
 #ifndef HAS_ISBLANK
-                        }
-                        else {
-                            /* No isblank(), use the hard-coded ASCII-range
-                             * blanks, adding them to the running total. */
+                            }
+                            else {
+                                /* No isblank(), use the hard-coded ASCII-range
+                                 * blanks, adding them to the running total. */
 
-                            _invlist_union(posixes, ascii_source, &posixes);
-                        }
+                                _invlist_union(posixes, ascii_source, &posixes);
+                            }
 #endif
+                        }
                     }
-                }
-                else {  /* A complemented class, like ANYOF_NPUNCT */
-                    if (! LOC) {
-                        _invlist_union_complement_2nd(
+                    else {  /* A complemented class, like ANYOF_NPUNCT */
+                        if (! LOC) {
+                            _invlist_union_complement_2nd(
                                                 posixes,
                                                 (AT_LEAST_ASCII_RESTRICTED)
                                                     ? ascii_source
                                                     : PL_XPosix_ptrs[classnum],
                                                 &posixes);
-                        /* Under /d, everything in the upper half of the Latin1
-                         * range matches this complement */
-                        if (DEPENDS_SEMANTICS) {
-                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                            /* Under /d, everything in the upper half of the
+                             * Latin1 range matches this complement */
+                            if (DEPENDS_SEMANTICS) {
+                                ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                            }
                         }
-                    }
-                    else {  /* Locale */
-                        SV* scratch_list = NULL;
-                        _invlist_subtract(PL_AboveLatin1,
-                                          PL_XPosix_ptrs[classnum],
-                                          &scratch_list);
-                        if (! posixes) {
-                            posixes = scratch_list;
-                        }
-                        else {
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec_NN(scratch_list);
-                        }
-#ifndef HAS_ISBLANK
-                        if (namedclass != ANYOF_NBLANK) {
-#endif
-                            ANYOF_CLASS_SET(ret, namedclass);
-#ifndef HAS_ISBLANK
-                        }
-                        else {
-                            /* Get the list of all code points in Latin1 that
-                             * are not ASCII blanks, and add them to the
-                             * running total */
-                            _invlist_subtract(PL_Latin1, ascii_source,
+                        else {  /* Locale */
+                            SV* scratch_list = NULL;
+                            _invlist_subtract(PL_AboveLatin1,
+                                              PL_XPosix_ptrs[classnum],
                                               &scratch_list);
-                            _invlist_union(posixes, scratch_list, &posixes);
-                            SvREFCNT_dec_NN(scratch_list);
-                        }
+                            if (! posixes) {
+                                posixes = scratch_list;
+                            }
+                            else {
+                                _invlist_union(posixes, scratch_list, &posixes);
+                                SvREFCNT_dec_NN(scratch_list);
+                            }
+#ifndef HAS_ISBLANK
+                            if (namedclass != ANYOF_NBLANK) {
 #endif
+                                ANYOF_CLASS_SET(ret, namedclass);
+#ifndef HAS_ISBLANK
+                            }
+                            else {
+                                /* Get the list of all code points in Latin1
+                                 * that are not ASCII blanks, and add them to
+                                 * the running total */
+                                _invlist_subtract(PL_Latin1, ascii_source,
+                                                  &scratch_list);
+                                _invlist_union(posixes, scratch_list, &posixes);
+                                SvREFCNT_dec_NN(scratch_list);
+                            }
+#endif
+                        }
                     }
-		}
-	    }
-          namedclass_done:
+                }
+              namedclass_done:
 		continue;   /* Go get next character */
 	    }
 	} /* end of namedclass \blah */
