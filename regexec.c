@@ -436,19 +436,19 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
     switch ((_char_class_number) classnum) {
         case _CC_ENUM_ALPHANUMERIC: return isALPHANUMERIC_LC(character);
         case _CC_ENUM_ALPHA:     return isALPHA_LC(character);
+        case _CC_ENUM_ASCII:     return isASCII_LC(character);
+        case _CC_ENUM_BLANK:     return isBLANK_LC(character);
+        case _CC_ENUM_CNTRL:     return isCNTRL_LC(character);
         case _CC_ENUM_DIGIT:     return isDIGIT_LC(character);
         case _CC_ENUM_GRAPH:     return isGRAPH_LC(character);
         case _CC_ENUM_LOWER:     return isLOWER_LC(character);
         case _CC_ENUM_PRINT:     return isPRINT_LC(character);
+        case _CC_ENUM_PSXSPC:    return isPSXSPC_LC(character);
         case _CC_ENUM_PUNCT:     return isPUNCT_LC(character);
+        case _CC_ENUM_SPACE:     return isSPACE_LC(character);
         case _CC_ENUM_UPPER:     return isUPPER_LC(character);
         case _CC_ENUM_WORDCHAR:  return isWORDCHAR_LC(character);
-        case _CC_ENUM_SPACE:     return isSPACE_LC(character);
-        case _CC_ENUM_BLANK:     return isBLANK_LC(character);
         case _CC_ENUM_XDIGIT:    return isXDIGIT_LC(character);
-        case _CC_ENUM_CNTRL:     return isCNTRL_LC(character);
-        case _CC_ENUM_PSXSPC:    return isPSXSPC_LC(character);
-        case _CC_ENUM_ASCII:     return isASCII_LC(character);
         default:    /* VERTSPACE should never occur in locales */
             Perl_croak(aTHX_ "panic: isFOO_lc() has an unexpected character class '%d'", classnum);
     }

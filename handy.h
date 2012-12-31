@@ -806,22 +806,22 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 /* An enum version of the character class numbers, to help compilers
  * optimize */
 typedef enum {
-    _CC_ENUM_ALPHANUMERIC   = _CC_ALPHANUMERIC,
     _CC_ENUM_ALPHA          = _CC_ALPHA,
+    _CC_ENUM_ALPHANUMERIC   = _CC_ALPHANUMERIC,
+    _CC_ENUM_ASCII          = _CC_ASCII,
+    _CC_ENUM_BLANK          = _CC_BLANK,
+    _CC_ENUM_CNTRL          = _CC_CNTRL,
     _CC_ENUM_DIGIT          = _CC_DIGIT,
     _CC_ENUM_GRAPH          = _CC_GRAPH,
     _CC_ENUM_LOWER          = _CC_LOWER,
     _CC_ENUM_PRINT          = _CC_PRINT,
-    _CC_ENUM_PUNCT          = _CC_PUNCT,
-    _CC_ENUM_UPPER          = _CC_UPPER,
-    _CC_ENUM_WORDCHAR       = _CC_WORDCHAR,
-    _CC_ENUM_SPACE          = _CC_SPACE,
-    _CC_ENUM_BLANK          = _CC_BLANK,
-    _CC_ENUM_XDIGIT         = _CC_XDIGIT,
-    _CC_ENUM_CNTRL          = _CC_CNTRL,
     _CC_ENUM_PSXSPC         = _CC_PSXSPC,
-    _CC_ENUM_ASCII          = _CC_ASCII,
-    _CC_ENUM_VERTSPACE      = _CC_VERTSPACE
+    _CC_ENUM_PUNCT          = _CC_PUNCT,
+    _CC_ENUM_SPACE          = _CC_SPACE,
+    _CC_ENUM_UPPER          = _CC_UPPER,
+    _CC_ENUM_VERTSPACE      = _CC_VERTSPACE,
+    _CC_ENUM_WORDCHAR       = _CC_WORDCHAR,
+    _CC_ENUM_XDIGIT         = _CC_XDIGIT
 } _char_class_number;
 #endif
 
