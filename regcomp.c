@@ -5218,6 +5218,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
 
 	PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
+	PL_L1Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
 
 	PL_L1Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(L1PosixGraph_invlist);
 	PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PosixGraph_invlist);
@@ -11707,11 +11708,7 @@ parseit:
                 const char *Xname = swash_property_names[classnum];
 
 		switch ((I32)namedclass) {
-
 		case ANYOF_DIGIT:
-                    l1_source = ascii_source;
-                    /* FALL THROUGH */
-
 		case ANYOF_ALPHANUMERIC: /* C's alnum, in contrast to \w */
 		case ANYOF_ALPHA:
 		case ANYOF_CASED:
@@ -11803,8 +11800,6 @@ parseit:
 		    break;
 
 		case ANYOF_NDIGIT:
-                    l1_source = ascii_source;
-                    /* FALL THROUGH */
 
 		case ANYOF_NALPHANUMERIC:
 		case ANYOF_NALPHA:
