@@ -10099,7 +10099,8 @@ tryagain:
     case '[':
     {
 	char * const oregcomp_parse = ++RExC_parse;
-        ret = regclass(pRExC_state, flagp,depth+1);
+        ret = regclass(pRExC_state, flagp,depth+1,
+                       FALSE /* means parse the whole char class */ );
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
@@ -10287,32 +10288,15 @@ tryagain:
 	case 'p':
 	case 'P':
 	    {
-		char* const oldregxend = RExC_end;
 #ifdef DEBUGGING
 		char* parse_start = RExC_parse - 2;
 #endif
 
-		if (RExC_parse[1] == '{') {
-		  /* a lovely hack--pretend we saw [\pX] instead */
-		    RExC_end = strchr(RExC_parse, '}');
-		    if (!RExC_end) {
-		        const U8 c = (U8)*RExC_parse;
-			RExC_parse += 2;
-			RExC_end = oldregxend;
-			vFAIL2("Missing right brace on \\%c{}", c);
-		    }
-		    RExC_end++;
-		}
-		else {
-		    RExC_end = RExC_parse + 2;
-		    if (RExC_end > oldregxend)
-			RExC_end = oldregxend;
-		}
 		RExC_parse--;
 
-                ret = regclass(pRExC_state, flagp,depth+1);
+                ret = regclass(pRExC_state, flagp,depth+1,
+                               TRUE /* means just parse this element */ );
 
-		RExC_end = oldregxend;
 		RExC_parse--;
 
 		Set_Node_Offset(ret, parse_start + 2);
@@ -11239,7 +11223,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
 
 STATIC regnode *
-S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
+S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1)
 {
     /* parse a bracketed class specification.  Most of these will produce an ANYOF node;
      * but something like [a] will produce an EXACT node; [aA], an EXACTFish
@@ -11283,6 +11267,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     AV * multi_char_matches = NULL; /* Code points that fold to more than one
                                        character; used under /i */
     UV n;
+    char * stop_ptr = RExC_end;    /* where to stop parsing */
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
@@ -11375,12 +11360,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	}
     }
 
+    /* If the caller wants us to just parse a single element, accomplish this
+     * by faking the loop ending condition */
+    if (stop_at_1 && RExC_end > RExC_parse) {
+        stop_ptr = RExC_parse + 1;
+    }
+
     /* allow 1st char to be ] (allowing it to be - is dealt with later) */
     if (UCHARAT(RExC_parse) == ']')
 	goto charclassloop;
 
 parseit:
-    while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
+    while (RExC_parse < stop_ptr && UCHARAT(RExC_parse) != ']') {
 
     charclassloop:
 

@@ -6639,7 +6639,7 @@ STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, 
 #define PERL_ARGS_ASSERT_REGBRANCH	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
+STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGCLASS	\
