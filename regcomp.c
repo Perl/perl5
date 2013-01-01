@@ -11653,30 +11653,29 @@ parseit:
 	    literal_endpoint++;
 #endif
 
-            /* What matches in a locale is not known until runtime.  This
-             * includes what the Posix classes (like \w, [:space:]) match.
-             * Room must be reserved (one time per class) to store such
-             * classes, either if Perl is compiled so that locale nodes always
-             * should have this space, or if there is such class info to be
-             * stored.  The space will contain a bit for each named class that
-             * is to be matched against.  This isn't needed for \p{} and
-             * pseudo-classes, as they are not affected by locale, and hence
-             * are dealt with separately */
-	    if (LOC
-                && ! need_class
-                && (ANYOF_LOCALE == ANYOF_CLASS
-                    || (namedclass > OOB_NAMEDCLASS && namedclass < ANYOF_MAX)))
-            {
-		need_class = 1;
-		if (SIZE_ONLY) {
-		    RExC_size += ANYOF_CLASS_SKIP - ANYOF_SKIP;
-		}
-		else {
-		    RExC_emit += ANYOF_CLASS_SKIP - ANYOF_SKIP;
-		    ANYOF_CLASS_ZERO(ret);
-		}
-		ANYOF_FLAGS(ret) |= ANYOF_CLASS;
-	    }
+        /* What matches in a locale is not known until runtime.  This includes
+         * what the Posix classes (like \w, [:space:]) match.  Room must be
+         * reserved (one time per class) to store such classes, either if Perl
+         * is compiled so that locale nodes always should have this space, or
+         * if there is such class info to be stored.  The space will contain a
+         * bit for each named class that is to be matched against.  This isn't
+         * needed for \p{} and pseudo-classes, as they are not affected by
+         * locale, and hence are dealt with separately */
+        if (LOC
+            && ! need_class
+            && (ANYOF_LOCALE == ANYOF_CLASS
+                || (namedclass > OOB_NAMEDCLASS && namedclass < ANYOF_MAX)))
+        {
+            need_class = 1;
+            if (SIZE_ONLY) {
+                RExC_size += ANYOF_CLASS_SKIP - ANYOF_SKIP;
+            }
+            else {
+                RExC_emit += ANYOF_CLASS_SKIP - ANYOF_SKIP;
+                ANYOF_CLASS_ZERO(ret);
+            }
+            ANYOF_FLAGS(ret) |= ANYOF_CLASS;
+        }
 
 	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
 
