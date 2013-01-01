@@ -794,7 +794,7 @@ S_cl_is_anything(const struct regnode_charclass_class *cl)
 
     PERL_ARGS_ASSERT_CL_IS_ANYTHING;
 
-    for (value = 0; value <= ANYOF_MAX; value += 2)
+    for (value = 0; value < ANYOF_MAX; value += 2)
 	if (ANYOF_CLASS_TEST(cl, value) && ANYOF_CLASS_TEST(cl, value + 1))
 	    return 1;
     if (!(cl->flags & ANYOF_UNICODE_ALL))
