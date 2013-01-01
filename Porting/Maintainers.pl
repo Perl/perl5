@@ -1680,8 +1680,16 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Term-ANSIColor],
         'EXCLUDED'     => [
             qr{^tests/},
-            qw( t/pod-spelling.t
+            qr{^examples/},
+            qr{^t/data/},
+            qw( t/aliases-env.t
+                t/critic.t
+                t/minimum-version.t
+                t/pod-spelling.t
+                t/pod-coverage.t
                 t/pod.t
+                t/strict.t
+                t/synopsis.t
                 ),
         ],
         'UPSTREAM' => 'cpan',
