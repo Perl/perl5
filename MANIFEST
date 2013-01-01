@@ -2257,9 +2257,12 @@ cpan/Sys-Syslog/win32/Win32.pm		Sys::Syslog extension Win32 related file
 cpan/Term-ANSIColor/ANSIColor.pm	Perl module supporting termcap usage
 cpan/Term-ANSIColor/ChangeLog		Term::ANSIColor
 cpan/Term-ANSIColor/README		Term::ANSIColor
+cpan/Term-ANSIColor/t/aliases-func.t
+cpan/Term-ANSIColor/t/basic256.t
 cpan/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
 cpan/Term-ANSIColor/t/eval.t
 cpan/Term-ANSIColor/t/stringify.t		Tests for Term::ANSIColor
+cpan/Term-ANSIColor/t/taint.t
 cpan/Term-Cap/Cap.pm			Perl module supporting termcap usage
 cpan/Term-Cap/test.pl			See if Term::Cap works
 cpan/Term-UI/lib/Term/UI/History.pm	Term::UI
