@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 
@@ -277,7 +277,7 @@ you're twisted enough, you can change C<"\N{LATIN CAPITAL LETTER A}"> to
 mean C<"B">, etc.
 
 Aliases must begin with a character that is alphabetic.  After that, each may
-contain any combination of word (C<\w>) characters, SPACE, (U+0020),
+contain any combination of word (C<\w>) characters, SPACE (U+0020),
 HYPHEN-MINUS (U+002D), LEFT PARENTHESIS (U+0028), RIGHT PARENTHESIS (U+0029),
 and NO-BREAK SPACE (U+00A0).  These last three should never have been allowed
 in names, and are retained for backwards compatibility only; they may be
@@ -285,8 +285,8 @@ deprecated and removed in future releases of Perl, so don't use them for new
 names.  (More precisely, the first character of a name you specify must be
 something that matches all of C<\p{ID_Start}>, C<\p{Alphabetic}>, and
 C<\p{Gc=Letter}>.  This makes sure it is what any reasonable person would view
-as an alphabetic character.  And, the other characters that match C<\w> must
-also match C<\p{ID_Continue}>.)  Starting with Perl v5.18, any Unicode
+as an alphabetic character.  And, the continuation characters that match C<\w>
+must also match C<\p{ID_Continue}>.)  Starting with Perl v5.18, any Unicode
 characters meeting the above criteria may be used; prior to that only
 Latin1-range characters were acceptable.
 

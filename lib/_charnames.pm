@@ -7,7 +7,7 @@ package _charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
