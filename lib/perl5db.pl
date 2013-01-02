@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_06';
+$VERSION = '1.39_07';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -2099,7 +2099,7 @@ sub _DB__handle_forward_slash_command {
                 # Oops. Bad pattern. No biscuit.
                 # Print the eval error and go back for more
                 # commands.
-                print $OUT "$@";
+                print {$OUT} "$@";
                 next CMD;
             }
             $obj->pat($inpat);
@@ -2123,7 +2123,9 @@ sub _DB__handle_forward_slash_command {
                 ++$start;
 
                 # Wrap if we pass the last line.
-                $start = 1 if ($start > $max);
+                if ($start > $max) {
+                    $start = 1;
+                }
 
                 # Stop if we have gotten back to this line again,
                 last if ($start == $end);
@@ -2135,11 +2137,11 @@ sub _DB__handle_forward_slash_command {
                 if ($dbline[$start] =~ m/$pat/i) {
                     if ($slave_editor) {
                         # Handle proper escaping in the slave.
-                        print $OUT "\032\032$filename:$start:0\n";
+                        print {$OUT} "\032\032$filename:$start:0\n";
                     }
                     else {
                         # Just print the line normally.
-                        print $OUT "$start:\t",$dbline[$start],"\n";
+                        print {$OUT} "$start:\t",$dbline[$start],"\n";
                     }
                     # And quit since we found something.
                     last;
@@ -2422,6 +2424,38 @@ sub _DB__at_end_of_every_command {
     return;
 }
 
+sub _DB__handle_watch_expressions
+{
+    my $self = shift;
+
+    if ( $DB::trace & 2 ) {
+        for my $n (0 .. $#DB::to_watch) {
+            $DB::evalarg = $DB::to_watch[$n];
+            local $DB::onetimeDump;    # Tell DB::eval() to not output results
+
+            # Fix context DB::eval() wants to return an array, but
+            # we need a scalar here.
+            my ($val) = join( "', '", DB::eval(@_) );
+            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
+
+            # Did it change?
+            if ( $val ne $DB::old_watch[$n] ) {
+
+                # Yep! Show the difference, and fake an interrupt.
+                $DB::signal = 1;
+                print {$DB::OUT} <<EOP;
+Watchpoint $n:\t$DB::to_watch[$n] changed:
+    old value:\t$DB::old_watch[$n]
+    new value:\t$val
+EOP
+                $DB::old_watch[$n] = $val;
+            } ## end if ($val ne $old_watch...
+        } ## end for my $n (0 ..
+    } ## end if ($trace & 2)
+
+    return;
+}
+
 # 't' is type.
 # 'm' is method.
 # 'v' is the value (i.e: method name or subroutine ref).
@@ -2526,7 +2560,7 @@ sub DB {
     my $was_signal = $signal;
 
     # If we have any watch expressions ...
-    $obj->_DB__handle_watch_expressions(@_);
+    _DB__handle_watch_expressions($obj);
 
 =head2 C<watchfunction()>
 
@@ -3176,38 +3210,6 @@ sub _DB_on_init__initialize_globals
     # If we're in single-step mode, or an interrupt (real or fake)
     # has occurred, turn off non-stop mode.
     $runnonstop = 0 if $single or $signal;
-
-    return;
-}
-
-sub _DB__handle_watch_expressions
-{
-    my $self = shift;
-
-    if ( $trace & 2 ) {
-        for my $n (0 .. $#to_watch) {
-            $evalarg = $to_watch[$n];
-            local $onetimeDump;    # Tell DB::eval() to not output results
-
-            # Fix context DB::eval() wants to return an array, but
-            # we need a scalar here.
-            my ($val) = join( "', '", DB::eval() );
-            $val = ( ( defined $val ) ? "'$val'" : 'undef' );
-
-            # Did it change?
-            if ( $val ne $old_watch[$n] ) {
-
-                # Yep! Show the difference, and fake an interrupt.
-                $signal = 1;
-                print {$OUT} <<EOP;
-Watchpoint $n:\t$to_watch[$n] changed:
-    old value:\t$old_watch[$n]
-    new value:\t$val
-EOP
-                $old_watch[$n] = $val;
-            } ## end if ($val ne $old_watch...
-        } ## end for my $n (0 ..
-    } ## end if ($trace & 2)
 
     return;
 }
@@ -5436,189 +5438,263 @@ later.
 
 =cut
 
-sub cmd_l {
-    my $current_line = $line;
-    my $cmd  = shift;
-    my $line = shift;
+sub _min {
+    my $min = shift;
+    foreach my $v (@_) {
+        if ($min > $v) {
+            $min = $v;
+        }
+    }
+    return $min;
+}
+
+sub _max {
+    my $max = shift;
+    foreach my $v (@_) {
+        if ($max < $v) {
+            $max = $v;
+        }
+    }
+    return $max;
+}
+
+sub _minify_to_max {
+    my $ref = shift;
+
+    $$ref = _min($$ref, $max);
+
+    return;
+}
+
+sub _cmd_l_handle_var_name {
+    my $var_name = shift;
+
+    $evalarg = $var_name;
+
+    my ($s) = DB::eval();
+
+    # Ooops. Bad scalar.
+    if ($@) {
+        print {$OUT} "Error: $@\n";
+        next CMD;
+    }
+
+    # Good scalar. If it's a reference, find what it points to.
+    $s = CvGV_name($s);
+    print {$OUT} "Interpreted as: $1 $s\n";
+    $line = "$1 $s";
+
+    # Call self recursively to really do the command.
+    return _cmd_l_main( $s );
+}
+
+sub _cmd_l_handle_subname {
+
+    my $s = $subname;
+
+    # De-Perl4.
+    $subname =~ s/\'/::/;
+
+    # Put it in this package unless it starts with ::.
+    $subname = $package . "::" . $subname unless $subname =~ /::/;
+
+    # Put it in CORE::GLOBAL if t doesn't start with :: and
+    # it doesn't live in this package and it lives in CORE::GLOBAL.
+    $subname = "CORE::GLOBAL::$s"
+    if not defined &$subname
+        and $s !~ /::/
+        and defined &{"CORE::GLOBAL::$s"};
+
+    # Put leading '::' names into 'main::'.
+    $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
+
+    # Get name:start-stop from find_sub, and break this up at
+    # colons.
+    my @pieces = split( /:/, find_sub($subname) || $sub{$subname} );
+
+    # Pull off start-stop.
+    my $subrange = pop @pieces;
+
+    # If the name contained colons, the split broke it up.
+    # Put it back together.
+    $file = join( ':', @pieces );
+
+    # If we're not in that file, switch over to it.
+    if ( $file ne $filename ) {
+        if (! $slave_editor) {
+            print {$OUT} "Switching to file '$file'.\n";
+        }
+
+        # Switch debugger's magic structures.
+        *dbline   = $main::{ '_<' . $file };
+        $max      = $#dbline;
+        $filename = $file;
+    } ## end if ($file ne $filename)
+
+    # Subrange is 'start-stop'. If this is less than a window full,
+    # swap it to 'start+', which will list a window from the start point.
+    if ($subrange) {
+        if ( eval($subrange) < -$window ) {
+            $subrange =~ s/-.*/+/;
+        }
+
+        # Call self recursively to list the range.
+        return _cmd_l_main( $subrange );
+    } ## end if ($subrange)
+
+    # Couldn't find it.
+    else {
+        print {$OUT} "Subroutine $subname not found.\n";
+        return;
+    }
+}
+
+sub _cmd_l_empty {
+    # Compute new range to list.
+    $incr = $window - 1;
+
+    # Recurse to do it.
+    return _cmd_l_main( $start . '-' . ( $start + $incr ) );
+}
+
+sub _cmd_l_plus {
+    my ($new_start, $new_incr) = @_;
+
+    # Don't reset start for 'l +nnn'.
+    $start = $new_start if $new_start;
+
+    # Increment for list. Use window size if not specified.
+    # (Allows 'l +' to work.)
+    $incr = $new_incr || ($window - 1);
+
+    # Create a line range we'll understand, and recurse to do it.
+    return _cmd_l_main( $start . '-' . ( $start + $incr ) );
+}
+
+sub _cmd_l_calc_initial_end_and_i {
+    my ($spec, $start_match, $end_match) = @_;
+
+    # Determine end point; use end of file if not specified.
+    my $end = ( !defined $start_match ) ? $max :
+    ( $end_match ? $end_match : $start_match );
+
+    # Go on to the end, and then stop.
+    _minify_to_max(\$end);
+
+    # Determine start line.
+    my $i = $start_match;
+
+    if ($i eq '.') {
+        $i = $spec;
+    }
+
+    $i = _max($i, 1);
+
+    $incr = $end - $i;
+
+    return ($end, $i);
+}
+
+sub _cmd_l_range {
+    my ($spec, $current_line, $start_match, $end_match) = @_;
+
+    my ($end, $i) =
+        _cmd_l_calc_initial_end_and_i($spec, $start_match, $end_match);
+
+    # If we're running under a slave editor, force it to show the lines.
+    if ($slave_editor) {
+        print {$OUT} "\032\032$filename:$i:0\n";
+        $i = $end;
+    }
+    # We're doing it ourselves. We want to show the line and special
+    # markers for:
+    # - the current line in execution
+    # - whether a line is breakable or not
+    # - whether a line has a break or not
+    # - whether a line has an action or not
+    else {
+        I_TO_END:
+        for ( ; $i <= $end ; $i++ ) {
+
+            # Check for breakpoints and actions.
+            my ( $stop, $action );
+            if ($dbline{$i}) {
+                ( $stop, $action ) = split( /\0/, $dbline{$i} );
+            }
+
+            # ==> if this is the current line in execution,
+            # : if it's breakable.
+            my $arrow =
+            ( $i == $current_line and $filename eq $filename_ini )
+            ? '==>'
+            : ( $dbline[$i] + 0 ? ':' : ' ' );
+
+            # Add break and action indicators.
+            $arrow .= 'b' if $stop;
+            $arrow .= 'a' if $action;
+
+            # Print the line.
+            print {$OUT} "$i$arrow\t", $dbline[$i];
+
+            # Move on to the next line. Drop out on an interrupt.
+            if ($signal) {
+                $i++;
+                last I_TO_END;
+            }
+        } ## end for (; $i <= $end ; $i++)
+
+        # Line the prompt up; print a newline if the last line listed
+        # didn't have a newline.
+        if ($dbline[ $i - 1 ] !~ /\n\z/) {
+            print {$OUT} "\n";
+        }
+    } ## end else [ if ($slave_editor)
+
+    # Save the point we last listed to in case another relative 'l'
+    # command is desired. Don't let it run off the end.
+    $start = $i;
+    _minify_to_max(\$start);
+
+    return;
+}
+
+sub _cmd_l_main {
+    my $spec = shift;
 
     # If this is '-something', delete any spaces after the dash.
-    $line =~ s/^-\s*$/-/;
+    $spec =~ s/\A-\s*\z/-/;
 
     # If the line is '$something', assume this is a scalar containing a
     # line number.
-    if ( $line =~ /^(\$.*)/s ) {
-
-        # Set up for DB::eval() - evaluate in *user* context.
-        $evalarg = $1;
-        # $evalarg = $2;
-        my ($s) = DB::eval();
-
-        # Ooops. Bad scalar.
-        if ($@) {
-            print {$OUT} "Error: $@\n";
-            next CMD;
-        }
-
-        # Good scalar. If it's a reference, find what it points to.
-        $s = CvGV_name($s);
-        print {$OUT} "Interpreted as: $1 $s\n";
-        $line = "$1 $s";
-
-        # Call self recursively to really do the command.
-        cmd_l( 'l', $s );
-    } ## end if ($line =~ /^(\$.*)/s)
-
+    # Set up for DB::eval() - evaluate in *user* context.
+    if ( my ($var_name) = $spec =~ /\A(\$.*)/s ) {
+        return _cmd_l_handle_var_name($var_name);
+    }
     # l name. Try to find a sub by that name.
-    elsif ( ($subname) = $line =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
-        my $s = $subname;
-
-        # De-Perl4.
-        $subname =~ s/\'/::/;
-
-        # Put it in this package unless it starts with ::.
-        $subname = $package . "::" . $subname unless $subname =~ /::/;
-
-        # Put it in CORE::GLOBAL if t doesn't start with :: and
-        # it doesn't live in this package and it lives in CORE::GLOBAL.
-        $subname = "CORE::GLOBAL::$s"
-          if not defined &$subname
-          and $s !~ /::/
-          and defined &{"CORE::GLOBAL::$s"};
-
-        # Put leading '::' names into 'main::'.
-        $subname = "main" . $subname if substr( $subname, 0, 2 ) eq "::";
-
-        # Get name:start-stop from find_sub, and break this up at
-        # colons.
-        my @pieces = split( /:/, find_sub($subname) || $sub{$subname} );
-
-        # Pull off start-stop.
-        my $subrange = pop @pieces;
-
-        # If the name contained colons, the split broke it up.
-        # Put it back together.
-        $file = join( ':', @pieces );
-
-        # If we're not in that file, switch over to it.
-        if ( $file ne $filename ) {
-            print $OUT "Switching to file '$file'.\n"
-              unless $slave_editor;
-
-            # Switch debugger's magic structures.
-            *dbline   = $main::{ '_<' . $file };
-            $max      = $#dbline;
-            $filename = $file;
-        } ## end if ($file ne $filename)
-
-        # Subrange is 'start-stop'. If this is less than a window full,
-        # swap it to 'start+', which will list a window from the start point.
-        if ($subrange) {
-            if ( eval($subrange) < -$window ) {
-                $subrange =~ s/-.*/+/;
-            }
-
-            # Call self recursively to list the range.
-            $line = $subrange;
-            cmd_l( 'l', $subrange );
-        } ## end if ($subrange)
-
-        # Couldn't find it.
-        else {
-            print $OUT "Subroutine $subname not found.\n";
-        }
-    } ## end elsif ($line =~ /^([\':A-Za-z_][\':\w]*(\[.*\])?)/s)
-
+    elsif ( ($subname) = $spec =~ /\A([\':A-Za-z_][\':\w]*(?:\[.*\])?)/s ) {
+        return _cmd_l_handle_subname();
+    }
     # Bare 'l' command.
-    elsif ( $line !~ /\S/ ) {
-
-        # Compute new range to list.
-        $incr = $window - 1;
-        $line = $start . '-' . ( $start + $incr );
-
-        # Recurse to do it.
-        cmd_l( 'l', $line );
+    elsif ( $spec !~ /\S/ ) {
+        return _cmd_l_empty();
+    }
+    # l [start]+number_of_lines
+    elsif ( my ($new_start, $new_incr) = $spec =~ /\A(\d*)\+(\d*)\z/ ) {
+        return _cmd_l_plus($new_start, $new_incr);
+    }
+    # l start-stop or l start,stop
+    elsif (my ($s, $e) = $spec =~ /^(?:(-?[\d\$\.]+)(?:[-,]([\d\$\.]+))?)?/ ) {
+        return _cmd_l_range($spec, $line, $s, $e);
     }
 
-    # l [start]+number_of_lines
-    elsif ( my ($new_start, $new_incr) = $line =~ /\A(\d*)\+(\d*)\z/ ) {
-
-        # Don't reset start for 'l +nnn'.
-        $start = $new_start if $new_start;
-
-        # Increment for list. Use window size if not specified.
-        # (Allows 'l +' to work.)
-        $incr = $new_incr;
-        $incr = $window - 1 unless $incr;
-
-        # Create a line range we'll understand, and recurse to do it.
-        $line = $start . '-' . ( $start + $incr );
-        cmd_l( 'l', $line );
-    } ## end elsif ($line =~ /^(\d*)\+(\d*)$/)
-
-    # l start-stop or l start,stop
-    elsif ( $line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/ ) {
-
-        # Determine end point; use end of file if not specified.
-        my $end = ( !defined $2 ) ? $max : ( $4 ? $4 : $2 );
-
-        # Go on to the end, and then stop.
-        $end = $max if $end > $max;
-
-        # Determine start line.
-        my $i    = $2;
-        $i    = $line if $i eq '.';
-        $i    = 1 if $i < 1;
-        $incr = $end - $i;
-
-        # If we're running under a slave editor, force it to show the lines.
-        if ($slave_editor) {
-            print $OUT "\032\032$filename:$i:0\n";
-            $i = $end;
-        }
-
-        # We're doing it ourselves. We want to show the line and special
-        # markers for:
-        # - the current line in execution
-        # - whether a line is breakable or not
-        # - whether a line has a break or not
-        # - whether a line has an action or not
-        else {
-            for ( ; $i <= $end ; $i++ ) {
-
-                # Check for breakpoints and actions.
-                my ( $stop, $action );
-                ( $stop, $action ) = split( /\0/, $dbline{$i} )
-                  if $dbline{$i};
-
-                # ==> if this is the current line in execution,
-                # : if it's breakable.
-                my $arrow =
-                  ( $i == $current_line and $filename eq $filename_ini )
-                  ? '==>'
-                  : ( $dbline[$i] + 0 ? ':' : ' ' );
-
-                # Add break and action indicators.
-                $arrow .= 'b' if $stop;
-                $arrow .= 'a' if $action;
-
-                # Print the line.
-                print $OUT "$i$arrow\t", $dbline[$i];
-
-                # Move on to the next line. Drop out on an interrupt.
-                $i++, last if $signal;
-            } ## end for (; $i <= $end ; $i++)
-
-            # Line the prompt up; print a newline if the last line listed
-            # didn't have a newline.
-            print $OUT "\n" unless $dbline[ $i - 1 ] =~ /\n$/;
-        } ## end else [ if ($slave_editor)
-
-        # Save the point we last listed to in case another relative 'l'
-        # command is desired. Don't let it run off the end.
-        $start = $i;
-        $start = $max if $start > $max;
-    } ## end elsif ($line =~ /^((-?[\d\$\.]+)([-,]([\d\$\.]+))?)?/)
+    return;
 } ## end sub cmd_l
+
+sub cmd_l {
+    my (undef, $line) = @_;
+
+    return _cmd_l_main($line);
+}
 
 =head3 C<cmd_L> - list breakpoints, actions, and watch expressions (command)
 
@@ -5635,9 +5711,7 @@ Watchpoints are simpler: we just list the entries in C<@to_watch>.
 
 =cut
 
-sub cmd_L {
-    my $cmd = shift;
-
+sub _cmd_L_calc_arg {
     # If no argument, list everything. Pre-5.8.0 version always lists
     # everything
     my $arg = shift || 'abw';
@@ -5646,65 +5720,123 @@ sub cmd_L {
         $arg = 'abw';
     }
 
-    # See what is wanted.
-    my $action_wanted = ( $arg =~ /a/ ) ? 1 : 0;
-    my $break_wanted  = ( $arg =~ /b/ ) ? 1 : 0;
-    my $watch_wanted  = ( $arg =~ /w/ ) ? 1 : 0;
+    return $arg;
+}
+
+sub _cmd_L_calc_wanted_flags {
+    my $arg = _cmd_L_calc_arg(shift);
+
+    return (map { index($arg, $_) >= 0 ? 1 : 0 } qw(a b w));
+}
+
+
+sub _cmd_L_handle_breakpoints {
+    my ($handle_db_line) = @_;
+
+    BREAKPOINTS_SCAN:
+    # Look in all the files with breakpoints...
+    for my $file ( keys %had_breakpoints ) {
+
+        # Temporary switch to this file.
+        local *dbline = $main::{ '_<' . $file };
+
+        # Set up to look through the whole file.
+        $max = $#dbline;
+        my $was;    # Flag: did we print something
+        # in this file?
+
+        # For each line in the file ...
+        for my $i (1 .. $max) {
+
+            # We've got something on this line.
+            if ( defined $dbline{$i} ) {
+
+                # Print the header if we haven't.
+                if (not $was++) {
+                    print {$OUT} "$file:\n";
+                }
+
+                # Print the line.
+                print {$OUT} " $i:\t", $dbline[$i];
+
+                $handle_db_line->($dbline{$i});
+
+                # Quit if the user hit interrupt.
+                if ($signal) {
+                    last BREAKPOINTS_SCAN;
+                }
+            } ## end if (defined $dbline{$i...
+        } ## end for my $i (1 .. $max)
+    } ## end for my $file (keys %had_breakpoints)
+
+    return;
+}
+
+sub _cmd_L_handle_postponed_breakpoints {
+    my ($handle_db_line) = @_;
+
+    print {$OUT} "Postponed breakpoints in files:\n";
+
+    POSTPONED_SCANS:
+    for my $file ( keys %postponed_file ) {
+        my $db = $postponed_file{$file};
+        print {$OUT} " $file:\n";
+        for my $line ( sort { $a <=> $b } keys %$db ) {
+            print {$OUT} "  $line:\n";
+
+            $handle_db_line->($db->{$line});
+
+            if ($signal) {
+                last POSTPONED_SCANS;
+            }
+        }
+        if ($signal) {
+            last POSTPONED_SCANS;
+        }
+    }
+
+    return;
+}
+
+
+sub cmd_L {
+    my $cmd = shift;
+
+    my ($action_wanted, $break_wanted, $watch_wanted) =
+        _cmd_L_calc_wanted_flags(shift);
+
+    my $handle_db_line = sub {
+        my ($l) = @_;
+
+        my ( $stop, $action ) = split( /\0/, $l );
+
+        if ($stop and $break_wanted) {
+            print {$OUT} "    break if (", $stop, ")\n"
+        }
+
+        if ($action && $action_wanted) {
+            print {$OUT} "    action:  ", $action, "\n"
+        }
+
+        return;
+    };
 
     # Breaks and actions are found together, so we look in the same place
     # for both.
     if ( $break_wanted or $action_wanted ) {
-
-        # Look in all the files with breakpoints...
-        for my $file ( keys %had_breakpoints ) {
-
-            # Temporary switch to this file.
-            local *dbline = $main::{ '_<' . $file };
-
-            # Set up to look through the whole file.
-            $max = $#dbline;
-            my $was;    # Flag: did we print something
-                        # in this file?
-
-            # For each line in the file ...
-            for my $i (1 .. $max) {
-
-                # We've got something on this line.
-                if ( defined $dbline{$i} ) {
-
-                    # Print the header if we haven't.
-                    print $OUT "$file:\n" unless $was++;
-
-                    # Print the line.
-                    print $OUT " $i:\t", $dbline[$i];
-
-                    # Pull out the condition and the action.
-                    my ( $stop, $action ) = split( /\0/, $dbline{$i} );
-
-                    # Print the break if there is one and it's wanted.
-                    print $OUT "   break if (", $stop, ")\n"
-                      if $stop
-                      and $break_wanted;
-
-                    # Print the action if there is one and it's wanted.
-                    print $OUT "   action:  ", $action, "\n"
-                      if $action
-                      and $action_wanted;
-
-                    # Quit if the user hit interrupt.
-                    last if $signal;
-                } ## end if (defined $dbline{$i...
-            } ## end for my $i (1 .. $max)
-        } ## end for my $file (keys %had_breakpoints)
-    } ## end if ($break_wanted or $action_wanted)
+        _cmd_L_handle_breakpoints($handle_db_line);
+    }
 
     # Look for breaks in not-yet-compiled subs:
     if ( %postponed and $break_wanted ) {
-        print $OUT "Postponed breakpoints in subroutines:\n";
+        print {$OUT} "Postponed breakpoints in subroutines:\n";
         my $subname;
+        SUBS_SCAN:
         for $subname ( keys %postponed ) {
-            print $OUT " $subname\t$postponed{$subname}\n";
-            last if $signal;
+            print {$OUT} " $subname\t$postponed{$subname}\n";
+            if ($signal) {
+                last SUBS_SCAN;
+            }
         }
     } ## end if (%postponed and $break_wanted)
 
@@ -5715,24 +5847,9 @@ sub cmd_L {
 
     # If there are any, list them.
     if ( @have and ( $break_wanted or $action_wanted ) ) {
-        print $OUT "Postponed breakpoints in files:\n";
-        for my $file ( keys %postponed_file ) {
-            my $db = $postponed_file{$file};
-            print $OUT " $file:\n";
-            for my $line ( sort { $a <=> $b } keys %$db ) {
-                print $OUT "  $line:\n";
-                my ( $stop, $action ) = split( /\0/, $$db{$line} );
-                print $OUT "    break if (", $stop, ")\n"
-                  if $stop
-                  and $break_wanted;
-                print $OUT "    action:  ", $action, "\n"
-                  if $action
-                  and $action_wanted;
-                last if $signal;
-            } ## end for $line (sort { $a <=>...
-            last if $signal;
-        } ## end for $file (keys %postponed_file)
+        _cmd_L_handle_postponed_breakpoints($handle_db_line);
     } ## end if (@have and ($break_wanted...
+
     if ( %break_on_load and $break_wanted ) {
         print {$OUT} "Breakpoints on load:\n";
         BREAK_ON_LOAD: for my $filename ( keys %break_on_load ) {
@@ -5740,6 +5857,7 @@ sub cmd_L {
             last BREAK_ON_LOAD if $signal;
         }
     } ## end if (%break_on_load and...
+
     if ($watch_wanted and ( $trace & 2 )) {
         print {$OUT} "Watch-expressions:\n" if @to_watch;
         TO_WATCH: for my $expr (@to_watch) {
@@ -5747,6 +5865,8 @@ sub cmd_L {
             last TO_WATCH if $signal;
         }
     }
+
+    return;
 } ## end sub cmd_L
 
 =head3 C<cmd_M> - list modules (command)
@@ -6343,6 +6463,51 @@ stack frame. Each has the following keys and values:
 
 =cut
 
+sub _dump_trace_calc_saved_single_arg
+{
+    my ($nothard, $arg) = @_;
+
+    my $type;
+    if ( not defined $arg ) {    # undefined parameter
+        return "undef";
+    }
+
+    elsif ( $nothard and tied $arg ) {    # tied parameter
+        return "tied";
+    }
+    elsif ( $nothard and $type = ref $arg ) {    # reference
+        return "ref($type)";
+    }
+    else {                                       # can be stringified
+        local $_ =
+        "$arg";    # Safe to stringify now - should not call f().
+
+        # Backslash any single-quotes or backslashes.
+        s/([\'\\])/\\$1/g;
+
+        # Single-quote it unless it's a number or a colon-separated
+        # name.
+        s/(.*)/'$1'/s
+        unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
+
+        # Turn high-bit characters into meta-whatever.
+        s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
+
+        # Turn control characters into ^-whatever.
+        s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
+
+        return $_;
+    }
+}
+
+sub _dump_trace_calc_save_args {
+    my ($nothard) = @_;
+
+    return [
+        map { _dump_trace_calc_saved_single_arg($nothard, $_) } @args
+    ];
+}
+
 sub dump_trace {
 
     # How many levels to skip.
@@ -6362,7 +6527,7 @@ sub dump_trace {
     # These variables are used to capture output from caller();
     my ( $p, $file, $line, $sub, $h, $context );
 
-    my ( $e, $r, @a, @sub, $args );
+    my ( $e, $r, @sub, $args );
 
     # XXX Okay... why'd we do that?
     my $nothard = not $frame & 8;
@@ -6387,40 +6552,7 @@ sub dump_trace {
     {
 
         # Go through the arguments and save them for later.
-        @a = ();
-        for my $arg (@args) {
-            my $type;
-            if ( not defined $arg ) {    # undefined parameter
-                push @a, "undef";
-            }
-
-            elsif ( $nothard and tied $arg ) {    # tied parameter
-                push @a, "tied";
-            }
-            elsif ( $nothard and $type = ref $arg ) {    # reference
-                push @a, "ref($type)";
-            }
-            else {                                       # can be stringified
-                local $_ =
-                  "$arg";    # Safe to stringify now - should not call f().
-
-                # Backslash any single-quotes or backslashes.
-                s/([\'\\])/\\$1/g;
-
-                # Single-quote it unless it's a number or a colon-separated
-                # name.
-                s/(.*)/'$1'/s
-                  unless /^(?: -?[\d.]+ | \*[\w:]* )$/x;
-
-                # Turn high-bit characters into meta-whatever.
-                s/([\200-\377])/sprintf("M-%c",ord($1)&0177)/eg;
-
-                # Turn control characters into ^-whatever.
-                s/([\0-\37\177])/sprintf("^%c",ord($1)^64)/eg;
-
-                push( @a, $_ );
-            } ## end else [ if (not defined $arg)
-        } ## end for $arg (@args)
+        my $save_args = _dump_trace_calc_save_args($nothard);
 
         # If context is true, this is array (@)context.
         # If context is false, this is scalar ($) context.
@@ -6430,7 +6562,7 @@ sub dump_trace {
 
         # if the sub has args ($h true), make an anonymous array of the
         # dumped args.
-        $args = $h ? [@a] : undef;
+        $args = $h ? $save_args : undef;
 
         # remove trailing newline-whitespace-semicolon-end of line sequence
         # from the eval text, if any.
@@ -9701,46 +9833,50 @@ variable via C<DB::set_list>.
 
     # The breakpoint was inside an eval. This is a little
     # more difficult. XXX and I don't understand it.
-    for (@hard) {
+    foreach my $hard_file (@hard) {
         # Get over to the eval in question.
-        *dbline = $main::{ '_<' . $_ };
-        my ( $quoted, $sub, %subs, $line ) = quotemeta $_;
-        for $sub ( keys %sub ) {
-            next unless $sub{$sub} =~ /^$quoted:(\d+)-(\d+)$/;
-            $subs{$sub} = [ $1, $2 ];
+        *dbline = $main::{ '_<' . $hard_file };
+        my $quoted = quotemeta $hard_file;
+        my %subs;
+        for my $sub ( keys %sub ) {
+            if (my ($n1, $n2) = $sub{$sub} =~ /\A$quoted:(\d+)-(\d+)\z/) {
+                $subs{$sub} = [ $n1, $n2 ];
+            }
         }
         unless (%subs) {
-            print $OUT
-              "No subroutines in $_, ignoring breakpoints.\n";
+            print {$OUT}
+            "No subroutines in $hard_file, ignoring breakpoints.\n";
             next;
         }
-      LINES: for $line ( keys %dbline ) {
+        LINES: foreach my $line ( keys %dbline ) {
 
             # One breakpoint per sub only:
-            my ( $offset, $sub, $found );
-          SUBS: for $sub ( keys %subs ) {
+            my ( $offset, $found );
+            SUBS: foreach my $sub ( keys %subs ) {
                 if (
-                    $subs{$sub}->[1] >=
-                    $line    # Not after the subroutine
+                    $subs{$sub}->[1] >= $line    # Not after the subroutine
                     and (
                         not defined $offset    # Not caught
-                        or $offset < 0
+                            or $offset < 0
                     )
-                  )
+                )
                 {                              # or badly caught
                     $found  = $sub;
                     $offset = $line - $subs{$sub}->[0];
-                    $offset = "+$offset", last SUBS
-                      if $offset >= 0;
+                    if ($offset >= 0) {
+                        $offset = "+$offset";
+                        last SUBS;
+                    }
                 } ## end if ($subs{$sub}->[1] >=...
             } ## end for $sub (keys %subs)
             if ( defined $offset ) {
                 $postponed{$found} =
-                  "break $offset if $dbline{$line}";
+                "break $offset if $dbline{$line}";
             }
             else {
-                print $OUT
-"Breakpoint in $_:$line ignored: after all the subroutines.\n";
+                print {$OUT}
+                ("Breakpoint in ${hard_file}:$line ignored:"
+                . " after all the subroutines.\n");
             }
         } ## end for $line (keys %dbline)
     } ## end for (@hard)

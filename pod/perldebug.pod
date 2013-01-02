@@ -842,6 +842,19 @@ Rudimentary per-package memory usage dump.  Calculates total
 size of strings found in variables in the package.  This does not
 include lexicals in a module's file scope, or lost in closures.
 
+=item C<HistFile>
+X<debugger option, history, HistFile>
+
+The path of the file from which the history (assuming a usable
+Term::ReadLine backend) will be read on the debugger's startup, and to which
+it will be saved on shutdown (for persistence across sessions). Similar in
+concept to Bash's C<.bash_history> file.
+
+=item C<HistSize>
+X<debugger option, history, HistSize>
+
+The count of the saved lines in the history (assuming C<HistFile> above).
+
 =back
 
 After the rc file is read, the debugger reads the C<$ENV{PERLDB_OPTS}>
