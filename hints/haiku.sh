@@ -35,3 +35,10 @@ ld='gcc'
 case "$ldlibpthname" in
 '') ldlibpthname=LIBRARY_PATH ;;
 esac
+
+# as of alpha 4.1 (at the latest) some symbols are versioned,
+# confusing the nm lookup
+case "$usenm" in
+'') usenm='undef' ;;
+esac
+
