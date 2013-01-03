@@ -385,7 +385,7 @@ foreach my $file (@corefiles) {
     # on dynamically-loadable libraries. So we do it for all.
     if (copy_if_diff($file,"$installarchlib/CORE/$file")) {
 	if ($file =~ /\.(\Q$so\E|\Q$dlext\E)$/) {
-	    strip("-S", "$installarchlib/CORE/$file") if $^O =~ /^(rhapsody|darwin)$/;
+	    strip("-S", "$installarchlib/CORE/$file") if $^O eq 'darwin';
 	    chmod(0555, "$installarchlib/CORE/$file");
 	} else {
 	    chmod(0444, "$installarchlib/CORE/$file");
@@ -777,7 +777,7 @@ sub installlib {
 	    # on dynamically-loaded libraries.
             if (copy_if_diff($_, "$installlib/$name")) {
                 strip("-S", "$installlib/$name")
-                    if $^O =~ /^(rhapsody|darwin)$/ and /\.(?:so|$dlext|a)$/;
+                    if $^O eq 'darwin' and /\.(?:so|$dlext|a)$/;
                 chmod(/\.(so|$dlext)$/ ? 0555 : 0444, "$installlib/$name");
             }
 	}

@@ -18708,7 +18708,7 @@ eval $setvar
 
 : Check if is a multiplatform env
 case "$osname" in
-next|rhapsody|darwin) multiarch="$define" ;;
+next|darwin) multiarch="$define" ;;
 esac
 case "$multiarch" in
 ''|[nN]*) multiarch="$undef" ;;

@@ -53,7 +53,7 @@ true)
 		-compatibility_version 1 -current_version $patchlevel \
 		-prebind -seg1addr 0x27000000 -install_name \$(shrpdir)/\$@"
 		;;
-	rhapsody*|darwin*)
+	darwin*)
 		shrpldflags="${ldflags} -dynamiclib \
                             -compatibility_version \
 				${api_revision}.${api_version}.${api_subversion} \

@@ -38,7 +38,6 @@ $Is_Solaris = $^O eq 'solaris';
 $Is_VMS     = $^O eq 'VMS';
 $Is_DGUX    = $^O eq 'dgux';
 $Is_MPRAS   = $^O =~ /svr4/ && -f '/etc/.relid';
-$Is_Rhapsody= $^O eq 'rhapsody';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare;
 
@@ -344,7 +343,7 @@ SKIP: {
 SKIP: {
     skip "These tests require a TTY", 4 if $ENV{PERL_SKIP_TTY_TEST};
 
-    my $TTY = $Is_Rhapsody ? "/dev/ttyp0" : "/dev/tty";
+    my $TTY = "/dev/tty";
 
     SKIP: {
         skip "Test uses unixisms", 2 if $Is_MSWin32 || $Is_NetWare;

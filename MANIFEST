@@ -4179,7 +4179,6 @@ hints/posix-bc.sh		Hints for named architecture
 hints/powerux.sh		Hints for named architecture
 hints/qnx.sh			Hints for named architecture
 hints/README.hints		Notes about hints
-hints/rhapsody.sh		Hints for named architecture
 hints/riscos.sh			Hints for named architecture
 hints/sco_2_3_0.sh		Hints for named architecture
 hints/sco_2_3_1.sh		Hints for named architecture
