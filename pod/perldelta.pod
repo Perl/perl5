@@ -314,9 +314,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Perl can now be built using Microsoft's Visual C++ 2012 compiler by specifying
+CCTYPE=MSVC110 (or MSVC110FREE if you are using the free Express edition for
+Windows Desktop) in F<win32/Makefile>.
 
 =back
 

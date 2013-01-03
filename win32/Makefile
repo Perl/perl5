@@ -103,24 +103,28 @@ USE_LARGE_FILES	= define
 #
 # Visual C++ 6.x (aka Visual C++ 98)
 CCTYPE		= MSVC60
+# Visual C++ .NET 2002/2003 (aka Visual C++ 7.x) (full version)
+#CCTYPE		= MSVC70
 # Visual C++ Toolkit 2003 (aka Visual C++ 7.x) (free command-line tools)
 #CCTYPE		= MSVC70FREE
-# Visual C++ .NET 2003 (aka Visual C++ 7.x) (full version)
-#CCTYPE		= MSVC70
 # Windows Server 2003 SP1 Platform SDK (April 2005)
 #CCTYPE		= SDK2003SP1
-# Visual C++ 2005 Express Edition (aka Visual C++ 8.x) (free version)
-#CCTYPE		= MSVC80FREE
 # Visual C++ 2005 (aka Visual C++ 8.x) (full version)
 #CCTYPE		= MSVC80
-# Visual C++ 2008 Express Edition (aka Visual C++ 9.x) (free version)
-#CCTYPE		= MSVC90FREE
+# Visual C++ 2005 Express Edition (aka Visual C++ 8.x) (free version)
+#CCTYPE		= MSVC80FREE
 # Visual C++ 2008 (aka Visual C++ 9.x) (full version)
 #CCTYPE		= MSVC90
-# Visual C++ 2010 Express Edition (aka Visual C++ 10.x) (free version)
-#CCTYPE		= MSVC100FREE
+# Visual C++ 2008 Express Edition (aka Visual C++ 9.x) (free version)
+#CCTYPE		= MSVC90FREE
 # Visual C++ 2010 (aka Visual C++ 10.x) (full version)
 #CCTYPE		= MSVC100
+# Visual C++ 2010 Express Edition (aka Visual C++ 10.x) (free version)
+#CCTYPE		= MSVC100FREE
+# Visual C++ 2012 (aka Visual C++ 11.x) (full version)
+#CCTYPE		= MSVC110
+# Visual C++ 2012 Express Edition (aka Visual C++ 11.x) (free version)
+#CCTYPE		= MSVC110FREE
 
 #
 # uncomment next line if you want debug version of perl (big,slow)
@@ -322,6 +326,15 @@ USE_64_BIT_INT	= define
 CCTYPE		= SDK2003SP1
 !ENDIF
 
+# Most relevant compiler-specific options fall into two groups:
+# either pre-MSVC80 or MSVC80 onwards, so define a macro for this.
+!IF "$(CCTYPE)" == "MSVC60" || \
+    "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+PREMSVC80	= define
+!ELSE
+PREMSVC80	= undef
+!ENDIF
+
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
 !IF "$(ARCHITECTURE)" == "AMD64"
 ARCHITECTURE	= x64
@@ -354,14 +367,9 @@ ARCHNAME	= $(ARCHNAME)-64int
 !ENDIF
 !ENDIF
 
-# Visual C++ 98, .NET 2003, 2005/2008/2010 specific.
-# VC++ 6/7/8/9/10.x can load DLLs on demand.  Makes the test suite run
-# in about 10% less time.  (The free version of 7.x can't do this, but the free
-# versions of 8/9/10.x can.)
-!IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"     || \
-    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE" || \
-    "$(CCTYPE)" == "MSVC100" || "$(CCTYPE)" == "MSVC100FREE"
+# All but the free version of VC++ 7.x can load DLLs on demand.  Makes the test
+# suite run in about 10% less time.
+!IF "$(CCTYPE)" != "MSVC70FREE"
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll delayimp.lib
 !ENDIF
 
@@ -445,11 +453,9 @@ DEFINES		= $(DEFINES) -DWIN64 -DCONSERVATIVE
 OPTIMIZE	= $(OPTIMIZE) -fp:precise
 !ENDIF
 
-# For now, silence VC++ 8/9/10.x's warnings about "unsafe" CRT functions
+# For now, silence warnings from VC++ 8.x onwards about "unsafe" CRT functions
 # and POSIX CRT function names being deprecated.
-!IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE" || \
-    "$(CCTYPE)" == "MSVC100" || "$(CCTYPE)" == "MSVC100FREE"
+!IF "$(PREMSVC80)" == "undef"
 DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 !ENDIF
 
@@ -462,8 +468,7 @@ DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
 # Perl itself with e.g. VC6 but later installs an XS module using VC8
 # the time_t types will still be compatible.
 !IF "$(WIN64)" == "undef"
-!  IF "$(CCTYPE)" == "MSVC60" || \
-      "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC70FREE"
+!  IF "$(PREMSVC80)" == "define"
 BUILDOPT	= $(BUILDOPT) -D_USE_32BIT_TIME_T
 !  ENDIF
 !ENDIF
@@ -497,9 +502,7 @@ EXEOUT_FLAG	= -Fe
 
 CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
 
-!IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE" || \
-    "$(CCTYPE)" == "MSVC90" || "$(CCTYPE)" == "MSVC90FREE" || \
-    "$(CCTYPE)" == "MSVC100" || "$(CCTYPE)" == "MSVC100FREE"
+!IF "$(PREMSVC80)" == "undef"
 LINK_FLAGS	= $(LINK_FLAGS) "/manifestdependency:type='Win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'"
 !ELSE
 RSC_FLAGS	= -DINCLUDE_MANIFEST
