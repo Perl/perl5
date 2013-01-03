@@ -4851,8 +4851,9 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state, OP *expr,
 	}
 	/* TODO ideally should handle [..], (#..), /#.../x to reduce false
 	 * positives here */
-	if (pat[s] == '(' && pat[s+1] == '?' &&
-	    (pat[s+2] == '{' || (pat[s+2] == '?' && pat[s+3] == '{'))
+	if (pat[s] == '(' && s+2 <= plen && pat[s+1] == '?' &&
+	    (pat[s+2] == '{'
+                || (s + 2 <= plen && pat[s+2] == '?' && pat[s+3] == '{'))
 	)
 	    return 1;
     }
