@@ -586,7 +586,7 @@ this once globally in their F<~/.gitconfig> by doing something like:
   % git config --global user.name "Ævar Arnfjörð Bjarmason"
   % git config --global user.email avarab@gmail.com
 
-However if you'd like to override that just for perl then execute then
+However, if you'd like to override that just for perl, 
 execute something like the following in F<perl>:
 
   % git config user.email avar@cpan.org
