@@ -985,34 +985,33 @@ Level 1 - Basic Unicode Support
  RL1.6   Line Boundaries                  - MISSING       [8][9]
  RL1.7   Supplementary Code Points        - done          [10]
 
- [1]  \x{...}
- [2]  \p{...} \P{...}
- [3]  supports not only minimal list, but all Unicode character
-      properties (see Unicode Character Properties above)
- [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
- [5]  can use regular expression look-ahead [a] or
-      user-defined character properties [b] to emulate set
-      operations
- [6]  \b \B
- [7]  note that Perl does Full case-folding in matching (but with
-      bugs), not Simple: for example U+1F88 is equivalent to
-      U+1F00 U+03B9, instead of just U+1F80.  This difference
-      matters mainly for certain Greek capital letters with certain
-      modifiers: the Full case-folding decomposes the letter,
-      while the Simple case-folding would map it to a single
-      character.
- [8]  should do ^ and $ also on U+000B (\v in C), FF (\f), CR
-      (\r), CRLF (\r\n), NEL (U+0085), LS (U+2028), and PS
-      (U+2029); should also affect <>, $., and script line
-      numbers; should not split lines within CRLF [c] (i.e. there
-      is no empty line between \r and \n)
- [9]  Linebreaking conformant with UAX#14 "Unicode Line Breaking
-      Algorithm" is available through the Unicode::LineBreaking
-      module.
- [10] UTF-8/UTF-EBDDIC used in Perl allows not only U+10000 to
-      U+10FFFF but also beyond U+10FFFF
+=over 4
 
-[a] You can mimic class subtraction using lookahead.
+=item [1]
+
+\x{...}
+
+=item [2]
+
+\p{...} \P{...}
+
+=item [3]
+
+supports not only minimal list, but all Unicode character properties (see Unicode Character Properties above)
+
+=item [4]
+
+\d \D \s \S \w \W \X [:prop:] [:^prop:]
+
+=item [5]
+
+ Can use the following to emulate set operations:
+
+=over 4
+
+=item * Regular expression look-ahead
+
+You can mimic class subtraction using lookahead.
 For example, what UTS#18 might write as
 
     [{Block=Greek}-[{UNASSIGNED}]]
@@ -1028,13 +1027,43 @@ But in this particular example, you probably really want
 
 which will match assigned characters known to be part of the Greek script.
 
-Also see the L<Unicode::Regex::Set> module; it does implement the full
-UTS#18 grouping, intersection, union, and removal (subtraction) syntax.
+=item * CPAN module L<Unicode::Regex::Set>
 
-[b] '+' for union, '-' for removal (set-difference), '&' for intersection
-(see L</"User-Defined Character Properties">)
+It does implement the full UTS#18 grouping, intersection, union, and
+removal (subtraction) syntax.
 
-[c] Try the C<:crlf> layer (see L<PerlIO>).
+=item * L</"User-Defined Character Properties">
+
+'+' for union, '-' for removal (set-difference), '&' for intersection
+
+=back
+
+=item [6]
+
+\b \B
+
+=item [7]
+
+Note that Perl does Full case-folding in matching (but with bugs), not Simple: for example U+1F88 is equivalent to U+1F00 U+03B9, instead of just U+1F80.  This difference matters mainly for certain Greek capital letters with certain modifiers: the Full case-folding decomposes the letter, while the Simple case-folding would map it to a single character.
+
+=item [8]
+
+Should do ^ and $ also on U+000B (\v in C), FF (\f), CR (\r), CRLF
+(\r\n), NEL (U+0085), LS (U+2028), and PS (U+2029); should also affect
+<>, $., and script line numbers; should not split lines within CRLF
+(i.e. there is no empty line between \r and \n).  For CRLF, try the
+C<:crlf> layer (see L<PerlIO>).
+
+=item [9]
+
+Linebreaking conformant with UAX#14 "Unicode Line Breaking Algorithm" is available through the Unicode::LineBreaking module.
+
+=item [10]
+
+UTF-8/UTF-EBDDIC used in Perl allows not only U+10000 to
+U+10FFFF but also beyond U+10FFFF
+
+=back
 
 =item *
 
