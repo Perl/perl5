@@ -160,7 +160,7 @@ sub alias (@) # Set up a single alias
       $value = CORE::hex $1;
     }
     if ($value =~ $decimal_qr) {
-        no warnings qw(non_unicode surrogate nonchar); # Allow any non-malformed
+        no warnings qw(non_unicode surrogate nonchar); # Allow any of these
         $^H{charnames_ord_aliases}{$name} = pack("U", $value);
 
         # Use a canonical form.
@@ -218,7 +218,7 @@ sub alias_file ($)  # Reads a file containing alias definitions
     $file = "unicore/${arg}_alias.pl";
   }
   else {
-    croak "Charnames alias files can only have identifier characters";
+    croak "Charnames alias file names can only have identifier characters";
   }
   if (my @alias = do $file) {
     @alias == 1 && !defined $alias[0] and

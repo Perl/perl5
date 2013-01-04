@@ -218,7 +218,7 @@ use charnames ":full", ":alias" => "xy 7-";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS regex
-Charnames alias files can only have identifier characters at
+Charnames alias file names can only have identifier characters at
 ########
 # NAME alias with non_absolute (existing) file name (which it should /not/ use)
 use warnings;
