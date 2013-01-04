@@ -214,7 +214,7 @@ sub alias_file ($)  # Reads a file containing alias definitions
   if (-f $arg && File::Spec->file_name_is_absolute ($arg)) {
     $file = $arg;
   }
-  elsif ($arg =~ m/^\w+$/) {
+  elsif ($arg =~ m/ ^ \p{_Perl_IDStart} \p{_Perl_IDCont}* $/x) {
     $file = "unicore/${arg}_alias.pl";
   }
   else {
