@@ -214,6 +214,8 @@ targetmkdir=''
 targetport=''
 to=''
 usecrosscompile=''
+hostperl=''
+hostgenerate=''
 extern_C=''
 mistrustnm=''
 usedevel=''
@@ -2871,6 +2873,20 @@ $define|true|[yY]*)
 	case "$croak" in
 	y) echo "Cannot continue, aborting." >&4; exit 1 ;;
 	esac
+    : compile a host miniperl and generate_uudmap, unless we got passed them
+    if $test "X$hostperl" = X; then
+      echo "Building host miniperl and generate_uudmap binaries" >&4
+      cd ..
+      test -d host || mkdir host
+      cd host && rm -rf ./*
+      ../Configure -des -Dusedevel -Dmksymlinks
+      make miniperl
+      make generate_uudmap
+      hostperl=host/miniperl
+      hostgenerate=host/generate_uudmap
+      cd ..
+      cd UU
+    fi
     ;;
 *)
     usecrosscompile='undef'
@@ -23407,6 +23423,8 @@ html1dir='$html1dir'
 html1direxp='$html1direxp'
 html3dir='$html3dir'
 html3direxp='$html3direxp'
+hostgenerate='$hostgenerate'
+hostperl='$hostperl'
 i16size='$i16size'
 i16type='$i16type'
 i32size='$i32size'
