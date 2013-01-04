@@ -4031,6 +4031,7 @@ hints/irix_6_1.sh		Hints for named architecture
 hints/irix_6.sh			Hints for named architecture
 hints/isc_2.sh			Hints for named architecture
 hints/isc.sh			Hints for named architecture
+hints/linux-android.sh		Hints for named architecture
 hints/linux.sh			Hints for named architecture
 hints/lynxos.sh			Hints for named architecture
 hints/midnightbsd.sh		Hints for named architecture
