@@ -284,7 +284,7 @@ to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
 =for apidoc Am|void|SvREFCNT_dec|SV* sv
-Decrements the reference count of the given SV. I<sv> may be be NULL.
+Decrements the reference count of the given SV. I<sv> may be NULL.
 
 =for apidoc Am|void|SvREFCNT_dec_NN|SV* sv
 Same as SvREFCNT_dec, but can only be used if you know I<sv>
