@@ -62,12 +62,13 @@ EOE
 
 {
 
-    use charnames ':full', ":alias" => { mychar1 => "0xE8000",
-                                         mychar2 => 983040,  # U+F0000
-                                         mychar3 => "U+100000",
-                                         myctrl => 0x80,
-                                         mylarge => "U+111000",
-                                       };
+    use charnames ":alias" => { mychar1 => "0xE8000",
+                                mychar2 => 983040,  # U+F0000
+                                mychar3 => "U+100000",
+                                myctrl => 0x80,
+                                mylarge => "U+111000",
+                              };
+    is ("\N{PILE OF POO}", chr(0x1F4A9), "Verify :alias alone implies :full");
     is ("\N{mychar1}", chr(0xE8000), "Verify that can define hex alias");
     is (charnames::viacode(0xE8000), "mychar1", "And that can get the alias back");
     is ("\N{mychar2}", chr(0xF0000), "Verify that can define decimal alias");

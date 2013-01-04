@@ -612,6 +612,7 @@ sub import
         ref $alias eq "HASH" or
           croak "Only HASH reference supported as argument to :alias";
         alias ($alias);
+        $promote = 1;
         next;
       }
       if ($alias =~ m{:(\w+)$}) {
@@ -620,7 +621,7 @@ sub import
         alias_file ($1) and $promote = 1;
         next;
       }
-      alias_file ($alias);
+      alias_file ($alias) and $promote = 1;
       next;
     }
     if (substr($arg, 0, 1) eq ':'
