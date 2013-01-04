@@ -10,8 +10,6 @@ END {
 
 use strict;
 use Cwd;
-use File::Spec;
-use File::Spec::Functions;
 use Test::More tests => 1;
 
 SKIP: {

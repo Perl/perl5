@@ -10,7 +10,6 @@ END {
 
 use strict;
 use Cwd;
-use File::Spec;
 use File::Spec::Functions;
 use Test::More tests => 1;
 
@@ -19,11 +18,14 @@ SKIP: {
     skip "$output", 1 if $output;
     
     my ($v, $d) = splitpath(cwd(), 1);
-    my $relcwd = substr($d, length(File::Spec->rootdir()));
+    my @dirs = splitdir($d);
+    shift @dirs if $dirs[0] eq '';
+    my $relcwd = join '/', @dirs;
         
     convert_n_test("crossref", "cross references", 
-     "--podpath=". catdir($relcwd, 't') . ":" . catdir($relcwd, 'testdir/test.lib'),
-     "--podroot=$v". File::Spec->rootdir,
+     "--podpath=". File::Spec::Unix->catdir($relcwd, 't') . ":"
+                 . File::Spec::Unix->catdir($relcwd, 'testdir/test.lib'),
+     "--podroot=". catpath($v, '/', ''),
      "--quiet",
     );
 }
