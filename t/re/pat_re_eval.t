@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 459;  # Update this when adding/deleting tests.
+plan tests => 463;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1004,7 +1004,42 @@ sub run_tests {
 	}
     }
 
+    #  [perl #115080]
+    #  Ensure that ?pat? matches exactly once, even when the run-time
+    #  pattern changes, and even when the presence of run-time (?{}) affects
+    #  how and when patterns are recompiled
 
+    {
+	my $m;
+
+	$m = '';
+	for (qw(a a a)) {
+	    $m .= $_ if m?$_?;
+	}
+	is($m, 'a', '?pat? with a,a,a');
+
+	$m = '';
+	for (qw(a b c)) {
+	    $m .= $_ if m?$_?;
+	}
+	is($m, 'a', '?pat? with a,b,c');
+
+	use re 'eval';
+
+	$m = '';
+	for (qw(a a a)) {
+	my $e = qq[(??{"$_"})];
+	    $m .= $_ if m?$e?;
+	}
+	is($m, 'a', '?pat? with (??{a,a,a})');
+
+	$m = '';
+	for (qw(a b c)) {
+	my $e = qq[(??{"$_"})];
+	    $m .= $_ if m?$e?;
+	}
+	is($m, 'a', '?pat? with (??{a,b,c})');
+    }
 
 
 } # End of sub run_tests

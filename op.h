@@ -412,7 +412,7 @@ struct pmop {
  * OP_MATCH and OP_QR */
 #define PMf_ONCE	(1<<(PMf_BASE_SHIFT+1))
 
-/* PMf_ONCE has matched successfully.  Not used under threading. */
+/* PMf_ONCE, i.e. ?pat?, has matched successfully.  Not used under threading. */
 #define PMf_USED        (1<<(PMf_BASE_SHIFT+3))
 
 /* subst replacement is constant */

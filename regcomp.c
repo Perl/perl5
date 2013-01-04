@@ -6350,6 +6350,14 @@ reStudy:
         PerlIO_printf(Perl_debug_log, "\n");
     });
 #endif
+
+#ifdef USE_ITHREADS
+    /* under ithreads the ?pat? PMf_USED flag on the pmop is simulated
+     * by setting the regexp SV to readonly-only instead. If the
+     * pattern's been recompiled, the USEDness should remain. */
+    if (old_re && SvREADONLY(old_re))
+        SvREADONLY_on(rx);
+#endif
     return rx;
 }
 
