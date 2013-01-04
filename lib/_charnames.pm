@@ -173,10 +173,23 @@ sub alias (@) # Set up a single alias
                        \p{_Perl_Charname_Begin}
                        \p{_Perl_Charname_Continue}*
                        $ /x) {
+
           push @errors, $name;
         }
         else {
           $^H{charnames_name_aliases}{$name} = $value;
+
+          if (warnings::enabled('deprecated')) {
+            if ($name =~ / ( .* \s ) ( \s* ) $ /x) {
+              carp "Trailing white-space in a charnames alias definition is deprecated; marked by <-- HERE in '$1 <-- HERE " . $2 . "'";
+            }
+
+            # Use '+' instead of '*' in this regex, because any trailing
+            # blanks have already been warned about.
+            if ($name =~ / ( .*? \s{2} ) ( .+ ) /x) {
+              carp "A sequence of multiple spaces in a charnames alias definition is deprecated; marked by <-- HERE in '$1 <-- HERE " . $2 . "'";
+            }
+          }
         }
     }
   }

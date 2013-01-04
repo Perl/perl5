@@ -2724,7 +2724,13 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
             if (! isCHARNAME_CONT(*s)) {
                 goto bad_charname;
             }
+	    if (*s == ' ' && *(s-1) == ' ' && ckWARN(WARN_DEPRECATED)) {
+                Perl_warn(aTHX_ "A sequence of multiple spaces in a charnames alias definition is deprecated");
+            }
             s++;
+        }
+        if (*(s-1) == ' ' && ckWARN(WARN_DEPRECATED)) {
+            Perl_warn(aTHX_ "Trailing white-space in a charnames alias definition is deprecated");
         }
     }
     else {
@@ -2761,6 +2767,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 if (! isCHARNAME_CONT(*s)) {
                     goto bad_charname;
                 }
+                if (*s == ' ' && *(s-1) == ' ' && ckWARN(WARN_DEPRECATED)) {
+                    Perl_warn(aTHX_ "A sequence of multiple spaces in a charnames alias definition is deprecated");
+                }
                 s++;
             }
             else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
@@ -2784,6 +2793,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 }
                 s += UTF8SKIP(s);
             }
+        }
+        if (*(s-1) == ' ' && ckWARN(WARN_DEPRECATED)) {
+            Perl_warn(aTHX_ "Trailing white-space in a charnames alias definition is deprecated");
         }
     }
 

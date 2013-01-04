@@ -1014,6 +1014,34 @@ sub run_tests {
         ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/, 'Verify that long string works';
         ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/i, 'Verify under folding that long string works';
 
+        undef $w;
+        eval q [is("\N{TOO  MANY SPACES}", "TOO  MANY SPACES", "Multiple spaces in character name works")];
+        like ($w, qr/A sequence of multiple spaces in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
+        eval q [use utf8; is("\N{TOO  MANY SPACES}", "TOO  MANY SPACES", "Same under 'use utf8': they work")];
+        like ($w, qr/A sequence of multiple spaces in a charnames alias definition is deprecated/, "... but return a deprecation warning");
+        {
+            no warnings 'deprecated';
+            undef $w;
+            eval q ["\N{TOO  MANY SPACES}"];
+            ok (! defined $w, "... and no warning if warnings are off");
+            eval q [use utf8; "\N{TOO  MANY SPACES}"];
+            ok (! defined $w, "... same under 'use utf8'");
+        }
+
+        undef $w;
+        eval q [is("\N{TRAILING SPACE }", "TRAILING SPACE ", "Trailing space in character name works")];
+        like ($w, qr/Trailing white-space in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
+        eval q [use utf8; is("\N{TRAILING SPACE }", "TRAILING SPACE ", "Same under 'use utf8': they work")];
+        like ($w, qr/Trailing white-space in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
+        {
+            no warnings 'deprecated';
+            undef $w;
+            eval q ["\N{TRAILING SPACE }"];
+            ok (! defined $w, "... and no warning if warnings are off");
+            eval q [use utf8; "\N{TRAILING SPACE }"];
+            ok (! defined $w, "... same under 'use utf8'");
+        }
+
         # If remove the limitation in regcomp code these should work
         # differently
         undef $w;
