@@ -1,8 +1,9 @@
 #!/usr/bin/perl -w
 #
-# text-options.t -- Additional tests for Pod::Text options.
+# Additional tests for Pod::Text options.
 #
-# Copyright 2002, 2004, 2006, 2008, 2009, 2012 Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2008, 2009, 2012, 2013
+#     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -18,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 19;
+use Test::More tests => 34;
 BEGIN { use_ok ('Pod::Text') }
 
 # Redirect stderr to a file.
@@ -53,7 +54,8 @@ while (<DATA>) {
     isa_ok ($parser, 'Pod::Text', 'Parser object');
     open (OUT, "> out$$.tmp") or die "Cannot create out$$.tmp: $!\n";
     stderr_save;
-    $parser->parse_from_file ("tmp$$.pod", \*OUT);
+    eval { $parser->parse_from_file ("tmp$$.pod", \*OUT) };
+    my $exception = $@;
     stderr_restore;
     close OUT;
     open (TMP, "out$$.tmp") or die "Cannot open out$$.tmp: $!\n";
@@ -79,6 +81,10 @@ while (<DATA>) {
     close ERR;
     $errors =~ s/\Qtmp$$.pod/tmp.pod/g;
     1 while unlink ("out$$.err");
+    if ($exception) {
+        $exception =~ s/ at .*//;
+        $errors .= "EXCEPTION: $exception";
+    }
     $expected = '';
     while (<DATA>) {
         last if $_ eq "###\n";
@@ -253,4 +259,95 @@ Bar.
 NEXT
 ###
 tmp.pod around line 7: You forgot a '=back' before '=head1'
+###
+
+###
+nourls 1
+###
+=head1 URL suppression
+
+L<anchor|http://www.example.com/>
+###
+URL suppression
+    anchor
+
+###
+###
+
+###
+errors stderr
+###
+=over 4
+
+=item Foo
+
+Bar.
+
+=head1 NEXT
+###
+    Foo Bar.
+
+NEXT
+###
+tmp.pod around line 7: You forgot a '=back' before '=head1'
+###
+
+###
+errors die
+###
+=over 4
+
+=item Foo
+
+Bar.
+
+=head1 NEXT
+###
+    Foo Bar.
+
+NEXT
+###
+tmp.pod around line 7: You forgot a '=back' before '=head1'
+EXCEPTION: POD document had syntax errors
+###
+
+###
+errors pod
+###
+=over 4
+
+=item Foo
+
+Bar.
+
+=head1 NEXT
+###
+    Foo Bar.
+
+NEXT
+POD ERRORS
+    Hey! The above document had some coding errors, which are explained
+    below:
+
+    Around line 7:
+        You forgot a '=back' before '=head1'
+
+###
+###
+
+###
+errors none
+###
+=over 4
+
+=item Foo
+
+Bar.
+
+=head1 NEXT
+###
+    Foo Bar.
+
+NEXT
+###
 ###

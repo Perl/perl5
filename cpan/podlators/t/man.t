@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-# man.t -- Additional specialized tests for Pod::Man.
+# Additional specialized tests for Pod::Man.
 #
-# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012
+# Copyright 2002, 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2012, 2013
 #     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 33;
+use Test::More tests => 35;
 BEGIN { use_ok ('Pod::Man') }
 
 # Test whether we can use binmode to set encoding.
@@ -499,7 +499,7 @@ This is a L<link|http://www.example.com/> to a URL.
 ###
 .SH "LINK TO URL"
 .IX Header "LINK TO URL"
-This is a link <http://www.example.com/> to a \s-1URL\s0.
+This is a link <http://www.example.com/> to a \s-1URL.\s0
 ###
 
 ###
@@ -549,4 +549,38 @@ L<[perl #12345]|https://rt.cpan.org/12345>
 .SH "RT LINK"
 .IX Header "RT LINK"
 [perl #12345] <https://rt.cpan.org/12345>
+###
+
+###
+=head1 Multiline XZ<><>
+
+Something something X<this   is
+one index term>
+###
+.SH "Multiline X<>"
+.IX Header "Multiline X<>"
+Something something
+.IX Xref "this is one index term"
+###
+
+###
+=head1 Uppercase License
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+###
+.SH "Uppercase License"
+.IX Header "Uppercase License"
+\&\s-1THE SOFTWARE IS PROVIDED \*(L"AS IS\*(R", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\s0
 ###
