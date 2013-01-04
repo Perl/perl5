@@ -1015,16 +1015,16 @@ Level 1 - Basic Unicode Support
 [a] You can mimic class subtraction using lookahead.
 For example, what UTS#18 might write as
 
-    [{Greek}-[{UNASSIGNED}]]
+    [{Block=Greek}-[{UNASSIGNED}]]
 
 in Perl can be written as:
 
-    (?!\p{Unassigned})\p{InGreekAndCoptic}
-    (?=\p{Assigned})\p{InGreekAndCoptic}
+    (?!\p{Unassigned})\p{Block=Greek}
+    (?=\p{Assigned})\p{Block=Greek}
 
 But in this particular example, you probably really want
 
-    \p{GreekAndCoptic}
+    \p{Greek}
 
 which will match assigned characters known to be part of the Greek script.
 
