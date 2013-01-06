@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.16;
+$VERSION = 1.17;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -696,6 +696,7 @@ sub _unixify {
     $full_path = File::Spec::Unix->catfile(File::Spec::Unix->catdir(@dirs),
                                            $file);
     $full_path =~ s|^\/|| if $^O eq 'MSWin32'; # C:/foo works, /C:/foo doesn't
+    $full_path =~ s/\^\././g if $^O eq 'VMS'; # unescape dots
     return $full_path;
 }
 
