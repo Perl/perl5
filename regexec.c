@@ -144,6 +144,7 @@ static const char* const non_utf8_target_but_utf8_required
             ENTER; save_re_context();                                         \
             swash_ptr = _core_swash_init("utf8", property_name, &PL_sv_undef, \
                                          1, 0, NULL, &flags);                 \
+            LEAVE;                                                            \
             assert(swash_ptr);                                                \
         }                                                                     \
     } STMT_END
