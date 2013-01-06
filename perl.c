@@ -3649,6 +3649,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     int fdscript = -1;
     PerlIO *rsfp = NULL;
     dVAR;
+    Stat_t tmpstatbuf;
 
     PERL_ARGS_ASSERT_OPEN_SCRIPT;
 
@@ -3758,6 +3759,13 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     /* ensure close-on-exec */
     fcntl(PerlIO_fileno(rsfp), F_SETFD, 1);
 #endif
+
+    if (PerlLIO_fstat(PerlIO_fileno(rsfp), &tmpstatbuf) >= 0
+        && S_ISDIR(tmpstatbuf.st_mode))
+        Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+            CopFILE(PL_curcop),
+            strerror(EISDIR));
+
     return rsfp;
 }
 
