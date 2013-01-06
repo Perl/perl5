@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 114);
+plan(tests => 115);
 
 use Config;
 
@@ -105,6 +105,17 @@ SWTEST
 	&& $r !~ /\bblock 5\b/,
 	'-c'
     );
+}
+
+{
+    my $tempdir = tempfile;
+    mkdir $tempdir, 0700 or die "Can't mkdir '$tempdir': $!";
+    like(
+        runperl( switches => [ '-c' ], args  => [ $tempdir ], stderr => 1),
+        qr/Can't open perl script.*$tempdir.*Is a directory/s,
+        "RT \#61362: Cannot syntax-check a directory"
+    );
+    rmdir $tempdir or die "Can't rmdir '$tempdir': $!";
 }
 
 # Tests for -l
