@@ -205,11 +205,13 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
  *	    fail instead of warn or be silent.  For example, it requires
  *	    exactly 2 digits following the \x (when there are no braces).
  *	    3 digits could be a mistake, so is forbidden in this mode.
+ *      silence_non_portable is true if to suppress warnings about the code
+ *          point returned being too large to fit on all platforms.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
     STRLEN numbers_len;
-    I32 flags = 0;
+    I32 flags = PERL_SCAN_DISALLOW_PREFIX;
 
     PERL_ARGS_ASSERT_GROK_BSLASH_X;
 
@@ -225,7 +227,6 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     if (**s != '{') {
         STRLEN len = (strict) ? 3 : 2;
 
-	flags |= PERL_SCAN_DISALLOW_PREFIX;
 	*uv = grok_hex(*s, &len, &flags, NULL);
 	*s += len;
         if (strict && len != 2) {
@@ -266,7 +267,7 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
         return TRUE;
     }
 
-    flags |= PERL_SCAN_ALLOW_UNDERSCORES|PERL_SCAN_DISALLOW_PREFIX;
+    flags |= PERL_SCAN_ALLOW_UNDERSCORES;
 
     *uv = grok_hex(*s, &numbers_len, &flags, NULL);
     /* Note that if has non-hex, will ignore everything starting with that up
