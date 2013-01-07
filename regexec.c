@@ -4307,13 +4307,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
              * wouldn't be invariant) */
             if (UTF8_IS_INVARIANT(nextchr) || ! utf8_target) {
-                if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan), nextchr)))) {
+                if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan), (U8) nextchr)))) {
                     sayNO;
                 }
             }
             else if (UTF8_IS_DOWNGRADEABLE_START(nextchr)) {
                 if (! (to_complement ^ cBOOL(isFOO_lc(FLAGS(scan),
-                                        TWO_BYTE_UTF8_TO_UNI(nextchr,
+                                        (U8) TWO_BYTE_UTF8_TO_UNI(nextchr,
                                                             *(locinput + 1))))))
                 {
                     sayNO;
