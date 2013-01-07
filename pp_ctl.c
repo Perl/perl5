@@ -3905,7 +3905,7 @@ PP(pp_require)
 		    if (tryrsfp) {
 			if (tryname[0] == '.' && tryname[1] == '/') {
 			    ++tryname;
-			    while (*++tryname == '/');
+			    while (*++tryname == '/') {}
 			}
 			break;
 		    }
