@@ -162,12 +162,12 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
             return FALSE;
         }
         else if (output_warning) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
-	/* diag_listed_as: Non-octal character '%c'.  Resolved as "%s" */
-		       "Non-octal character '%c'.  Resolved as \"\\o{%.*s}\"",
-		       *(*s + numbers_len),
-		       (int) numbers_len,
-		       *s);
+            Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
+            /* diag_listed_as: Non-octal character '%c'.  Resolved as "%s" */
+                        "Non-octal character '%c'.  Resolved as \"\\o{%.*s}\"",
+                        *(*s + numbers_len),
+                        (int) numbers_len,
+                        *s);
         }
     }
 
