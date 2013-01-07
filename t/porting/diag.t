@@ -640,3 +640,6 @@ Operation "%s" returns its argument for non-Unicode code point 0x%X
 Operation "%s" returns its argument for UTF-16 surrogate U+%X
 Unicode surrogate U+%X is illegal in UTF-8
 UTF-16 surrogate U+%X
+Non-octal character in regex; marked by <-- HERE in m/%s/
+Non-hex character in regex; marked by <-- HERE in m/%s/
+Use \\x{...} for more than two hex characters in regex; marked by <-- HERE in m/%s/

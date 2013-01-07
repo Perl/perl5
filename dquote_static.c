@@ -86,7 +86,8 @@ S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warn
 
 STATIC bool
 S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
-                      const bool output_warning)
+                      const bool output_warning, const bool strict,
+                      const bool UTF)
 {
 
 /*  Documentation to be supplied when interface nailed down finally
@@ -107,6 +108,9 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
  *	    function succeeds
  *	output_warning says whether to output any warning messages, or suppress
  *	    them
+ *	strict is true if this should fail instead of warn if there are
+ *	    non-octal digits within the braces
+ *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
     STRLEN numbers_len;
@@ -150,13 +154,21 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
     /* Note that if has non-octal, will ignore everything starting with that up
      * to the '}' */
 
-    if (output_warning && numbers_len != (STRLEN) (e - *s)) {
+    if (numbers_len != (STRLEN) (e - *s)) {
+        if (strict) {
+            *s += numbers_len;
+            *s += (UTF) ? UTF8SKIP(*s) : (STRLEN) 1;
+            *error_msg = "Non-octal character";
+            return FALSE;
+        }
+        else if (output_warning) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
 	/* diag_listed_as: Non-octal character '%c'.  Resolved as "%s" */
 		       "Non-octal character '%c'.  Resolved as \"\\o{%.*s}\"",
 		       *(*s + numbers_len),
 		       (int) numbers_len,
 		       *s);
+        }
     }
 
     /* Return past the '}' */
@@ -167,7 +179,8 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
 
 PERL_STATIC_INLINE bool
 S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
-                      const bool output_warning)
+                      const bool output_warning, const bool strict,
+                      const bool UTF)
 {
 
 /*  Documentation to be supplied when interface nailed down finally
@@ -188,11 +201,15 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
  *	    function succeeds
  *	output_warning says whether to output any warning messages, or suppress
  *	    them
+ *	strict is true if anything out of the ordinary should cause this to
+ *	    fail instead of warn or be silent.  For example, it requires
+ *	    exactly 2 digits following the \x (when there are no braces).
+ *	    3 digits could be a mistake, so is forbidden in this mode.
+ *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
     STRLEN numbers_len;
-    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-		| PERL_SCAN_DISALLOW_PREFIX;
+    I32 flags = 0;
 
     PERL_ARGS_ASSERT_GROK_BSLASH_X;
 
@@ -201,11 +218,26 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     assert(**s == 'x');
     (*s)++;
 
+    if (strict) {
+        flags |= PERL_SCAN_SILENT_ILLDIGIT;
+    }
+
     if (**s != '{') {
-       I32 flags = PERL_SCAN_DISALLOW_PREFIX;
-       STRLEN len = 2;
+        STRLEN len = (strict) ? 3 : 2;
+
+	flags |= PERL_SCAN_DISALLOW_PREFIX;
 	*uv = grok_hex(*s, &len, &flags, NULL);
 	*s += len;
+        if (strict && len != 2) {
+            if (len < 2) {
+                *s += (UTF) ? UTF8SKIP(*s) : 1;
+                *error_msg = "Non-hex character";
+            }
+            else {
+                *error_msg = "Use \\x{...} for more than two hex characters";
+            }
+            return FALSE;
+        }
 	return TRUE;
     }
 
@@ -225,9 +257,27 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     (*s)++;    /* Point to expected first digit (could be first byte of utf8
                   sequence if not a digit) */
     numbers_len = e - *s;
+    if (numbers_len == 0) {
+        if (strict) {
+            (*s)++;    /* Move past the } */
+            *error_msg = "Number with no digits";
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    flags |= PERL_SCAN_ALLOW_UNDERSCORES|PERL_SCAN_DISALLOW_PREFIX;
+
     *uv = grok_hex(*s, &numbers_len, &flags, NULL);
     /* Note that if has non-hex, will ignore everything starting with that up
      * to the '}' */
+
+    if (strict && numbers_len != (STRLEN) (e - *s)) {
+        *s += numbers_len;
+        *s += (UTF) ? UTF8SKIP(*s) : 1;
+        *error_msg = "Non-hex character";
+        return FALSE;
+    }
 
     /* Return past the '}' */
     *s = e + 1;

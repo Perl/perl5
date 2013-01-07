@@ -738,10 +738,12 @@ Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV
 EMsR	|char	|grok_bslash_c	|const char source|const bool utf8|const bool output_warning
 EMsR	|bool	|grok_bslash_o	|NN char** s|NN UV* uv \
 				|NN const char** error_msg   \
-				|const bool output_warning
+				|const bool output_warning   \
+				|const bool strict|const bool utf8
 EMiR	|bool	|grok_bslash_x	|NN char** s|NN UV* uv \
 				|NN const char** error_msg   \
-				|const bool output_warning
+				|const bool output_warning   \
+				|const bool strict|const bool utf8
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep

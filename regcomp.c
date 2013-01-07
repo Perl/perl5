@@ -10618,7 +10618,9 @@ tryagain:
 			    bool valid = grok_bslash_o(&p,
 						       &result,
 						       &error_msg,
-						       TRUE); /* out warnings */
+						       TRUE, /* out warnings */
+                                                       FALSE, /* not strict */
+                                                       UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
 						   to exact spot of failure */
@@ -10644,7 +10646,9 @@ tryagain:
 			    bool valid = grok_bslash_x(&p,
 						       &result,
 						       &error_msg,
-						       TRUE); /* out warnings */
+						       TRUE, /* out warnings */
+                                                       FALSE, /* not strict */
+                                                       UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
 						   to exact spot of failure */
@@ -11568,7 +11572,9 @@ parseit:
 		    bool valid = grok_bslash_o(&RExC_parse,
 					       &value,
 					       &error_msg,
-					       SIZE_ONLY);
+					       SIZE_ONLY,
+                                               FALSE, /* Not strict */
+                                               UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
 		    }
@@ -11584,7 +11590,9 @@ parseit:
 		    bool valid = grok_bslash_x(&RExC_parse,
 					       &value,
 					       &error_msg,
-					       1);
+					       TRUE, /* Output warnings */
+                                               FALSE, /* Not strict */
+                                               UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
 		    }
