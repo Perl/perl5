@@ -130,6 +130,9 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
     e = strchr(*s, '}');
     if (!e) {
         (*s)++;  /* Move past the '{' */
+        while (isOCTAL(**s)) { /* Position beyond the legal digits */
+            (*s)++;
+        }
         *error_msg = "Missing right brace on \\o{";
 	return FALSE;
     }
@@ -209,6 +212,9 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     e = strchr(*s, '}');
     if (!e) {
         (*s)++;  /* Move past the '{' */
+        while (isXDIGIT(**s)) { /* Position beyond the legal digits */
+            (*s)++;
+        }
         /* XXX The corresponding message above for \o is just '\\o{'; other
          * messages for other constructs include the '}', so are inconsistent.
          */

@@ -89,13 +89,17 @@ my @death =
 
  'my $m = "\\\"; $m =~ $m', => 'Trailing \ in regex m/\/',
 
- '/\x{1/' => 'Missing right brace on \x{} in regex; marked by {#} in m/\x{{#}1/',
+ '/\x{1/' => 'Missing right brace on \x{} in regex; marked by {#} in m/\x{1{#}/',
+ '/\x{X/' => 'Missing right brace on \x{} in regex; marked by {#} in m/\x{{#}X/',
 
  '/[\x{X]/' => 'Missing right brace on \x{} in regex; marked by {#} in m/[\x{{#}X]/',
+ '/[\x{A]/' => 'Missing right brace on \x{} in regex; marked by {#} in m/[\x{A{#}]/',
 
- '/\o{1/' => 'Missing right brace on \o{ in regex; marked by {#} in m/\o{{#}1/',
+ '/\o{1/' => 'Missing right brace on \o{ in regex; marked by {#} in m/\o{1{#}/',
+ '/\o{X/' => 'Missing right brace on \o{ in regex; marked by {#} in m/\o{{#}X/',
 
  '/[\o{X]/' => 'Missing right brace on \o{ in regex; marked by {#} in m/[\o{{#}X]/',
+ '/[\o{7]/' => 'Missing right brace on \o{ in regex; marked by {#} in m/[\o{7{#}]/',
 
  '/[[:barf:]]/' => 'POSIX class [:barf:] unknown in regex; marked by {#} in m/[[:barf:]{#}]/',
 
