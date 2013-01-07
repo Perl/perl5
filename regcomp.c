@@ -10845,7 +10845,7 @@ tryagain:
 			len += foldlen - 1;
                     }
                     else {
-                        *(s++) = ender;
+                        *(s++) = (char) ender;
                         maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
                     }
 		}
