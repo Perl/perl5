@@ -492,7 +492,9 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
                 swash_property_names[classnum], &PL_sv_undef, 1, 0, NULL, &flags);
         }
 
-        return swash_fetch(PL_utf8_swash_ptrs[classnum], (U8 *) character, TRUE);
+        return cBOOL(swash_fetch(PL_utf8_swash_ptrs[classnum], (U8 *)
+                                 character,
+                                 TRUE /* is UTF */ ));
     }
 
     switch ((_char_class_number) classnum) {
