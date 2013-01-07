@@ -87,6 +87,7 @@ S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warn
 STATIC bool
 S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
                       const bool output_warning, const bool strict,
+                      const bool silence_non_portable,
                       const bool UTF)
 {
 
@@ -110,6 +111,8 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
  *	    them
  *	strict is true if this should fail instead of warn if there are
  *	    non-octal digits within the braces
+ *      silence_non_portable is true if to suppress warnings about the code
+ *          point returned being too large to fit on all platforms.
  *	UTF is true iff the string *s is encoded in UTF-8.
  */
     char* e;
@@ -150,6 +153,10 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
 	return FALSE;
     }
 
+    if (silence_non_portable) {
+        flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+    }
+
     *uv = grok_oct(*s, &numbers_len, &flags, NULL);
     /* Note that if has non-octal, will ignore everything starting with that up
      * to the '}' */
@@ -180,6 +187,7 @@ S_grok_bslash_o(pTHX_ char **s, UV *uv, const char** error_msg,
 PERL_STATIC_INLINE bool
 S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
                       const bool output_warning, const bool strict,
+                      const bool silence_non_portable,
                       const bool UTF)
 {
 
@@ -268,6 +276,9 @@ S_grok_bslash_x(pTHX_ char **s, UV *uv, const char** error_msg,
     }
 
     flags |= PERL_SCAN_ALLOW_UNDERSCORES;
+    if (silence_non_portable) {
+        flags |= PERL_SCAN_SILENT_NON_PORTABLE;
+    }
 
     *uv = grok_hex(*s, &numbers_len, &flags, NULL);
     /* Note that if has non-hex, will ignore everything starting with that up

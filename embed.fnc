@@ -736,14 +736,18 @@ ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 EMsR	|char	|grok_bslash_c	|const char source|const bool utf8|const bool output_warning
-EMsR	|bool	|grok_bslash_o	|NN char** s|NN UV* uv \
-				|NN const char** error_msg   \
-				|const bool output_warning   \
-				|const bool strict|const bool utf8
-EMiR	|bool	|grok_bslash_x	|NN char** s|NN UV* uv \
-				|NN const char** error_msg   \
-				|const bool output_warning   \
-				|const bool strict|const bool utf8
+EMsR	|bool	|grok_bslash_o	|NN char** s|NN UV* uv           \
+				|NN const char** error_msg       \
+				|const bool output_warning       \
+				|const bool strict               \
+				|const bool silence_non_portable \
+				|const bool utf8
+EMiR	|bool	|grok_bslash_x	|NN char** s|NN UV* uv           \
+				|NN const char** error_msg       \
+				|const bool output_warning       \
+				|const bool strict               \
+				|const bool silence_non_portable \
+				|const bool utf8
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep

@@ -3292,6 +3292,8 @@ S_scan_const(pTHX_ char *start)
 		    bool valid = grok_bslash_o(&s, &uv, &error,
                                                TRUE, /* Output warning */
                                                FALSE, /* Not strict */
+                                               TRUE, /* Output warnings for
+                                                         non-portables */
                                                UTF);
 		    if (! valid) {
 			yyerror(error);
@@ -3308,6 +3310,8 @@ S_scan_const(pTHX_ char *start)
 		    bool valid = grok_bslash_x(&s, &uv, &error,
                                                TRUE, /* Output warning */
                                                FALSE, /* Not strict */
+                                               TRUE,  /* Output warnings for
+                                                         non-portables */
                                                UTF);
 		    if (! valid) {
 			yyerror(error);

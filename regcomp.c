@@ -10620,6 +10620,9 @@ tryagain:
 						       &error_msg,
 						       TRUE, /* out warnings */
                                                        FALSE, /* not strict */
+                                                       TRUE, /* Output warnings
+                                                                for non-
+                                                                portables */
                                                        UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
@@ -10645,6 +10648,9 @@ tryagain:
 						       &error_msg,
 						       TRUE, /* out warnings */
                                                        FALSE, /* not strict */
+                                                       TRUE, /* Output warnings
+                                                                for non-
+                                                                portables */
                                                        UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
@@ -11568,6 +11574,8 @@ parseit:
 					       &error_msg,
 					       SIZE_ONLY,
                                                FALSE, /* Not strict */
+                                               TRUE, /* Output warnings for
+                                                         non-portables */
                                                UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
@@ -11586,6 +11594,8 @@ parseit:
 					       &error_msg,
 					       TRUE, /* Output warnings */
                                                FALSE, /* Not strict */
+                                               TRUE, /* Output warnings for
+                                                         non-portables */
                                                UTF);
 		    if (! valid) {
 			vFAIL(error_msg);

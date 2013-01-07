@@ -6756,7 +6756,7 @@ PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name,
 STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warning)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool utf8)
+STATIC bool	S_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -6764,7 +6764,7 @@ STATIC bool	S_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, cons
 #define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
 	assert(s); assert(uv); assert(error_msg)
 
-PERL_STATIC_INLINE bool	S_grok_bslash_x(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool utf8)
+PERL_STATIC_INLINE bool	S_grok_bslash_x(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
