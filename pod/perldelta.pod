@@ -367,6 +367,12 @@ in the OUTPUT: section (which previous did nothing to the SV), and a read only
 SV (literal) is passed to the XSUB, croaks like "Modification of a read-only
 value attempted" will happen. [perl #115796]
 
+=item *
+
+On many platforms, providing a directory name as the script name caused perl
+to do nothing and report success.  It should now universally report an error
+and exit nonzero. [perl #61362]
+
 =back
 
 =head1 Known Problems
