@@ -3287,11 +3287,10 @@ S_scan_const(pTHX_ char *start)
 	    /* eg. \o{24} indicates the octal constant \024 */
 	    case 'o':
 		{
-		    STRLEN len;
 		    const char* error;
 
-		    bool valid = grok_bslash_o(s, &uv, &len, &error, 1);
-		    s += len;
+		    bool valid = grok_bslash_o(&s, &uv, &error,
+                                               TRUE); /* Output warning */
 		    if (! valid) {
 			yyerror(error);
 			continue;
@@ -3302,11 +3301,10 @@ S_scan_const(pTHX_ char *start)
 	    /* eg. \x24 indicates the hex constant 0x24 */
 	    case 'x':
 		{
-		    STRLEN len;
 		    const char* error;
 
-		    bool valid = grok_bslash_x(s, &uv, &len, &error, 1);
-		    s += len;
+		    bool valid = grok_bslash_x(&s, &uv, &error,
+                                               TRUE); /* Output warning */
 		    if (! valid) {
 			yyerror(error);
 			continue;

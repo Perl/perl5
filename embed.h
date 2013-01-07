@@ -959,8 +959,8 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #define grok_bslash_c(a,b,c)	S_grok_bslash_c(aTHX_ a,b,c)
-#define grok_bslash_o(a,b,c,d,e)	S_grok_bslash_o(aTHX_ a,b,c,d,e)
-#define grok_bslash_x(a,b,c,d,e)	S_grok_bslash_x(aTHX_ a,b,c,d,e)
+#define grok_bslash_o(a,b,c,d)	S_grok_bslash_o(aTHX_ a,b,c,d)
+#define grok_bslash_x(a,b,c,d)	S_grok_bslash_x(aTHX_ a,b,c,d)
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)

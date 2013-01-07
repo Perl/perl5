@@ -10612,16 +10612,13 @@ tryagain:
 			break;
 		    case 'o':
 			{
-			    STRLEN brace_len = len;
 			    UV result;
 			    const char* error_msg;
 
-			    bool valid = grok_bslash_o(p,
+			    bool valid = grok_bslash_o(&p,
 						       &result,
-						       &brace_len,
 						       &error_msg,
-						       1);
-			    p += brace_len;
+						       TRUE); /* out warnings */
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
 						   to exact spot of failure */
@@ -10641,16 +10638,13 @@ tryagain:
 			}
 		    case 'x':
 			{
-			    STRLEN brace_len = len;
 			    UV result;
 			    const char* error_msg;
 
-			    bool valid = grok_bslash_x(p,
+			    bool valid = grok_bslash_x(&p,
 						       &result,
-						       &brace_len,
 						       &error_msg,
-						       1);
-			    p += brace_len;
+						       TRUE); /* out warnings */
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
 						   to exact spot of failure */
@@ -11571,12 +11565,10 @@ parseit:
 		RExC_parse--;	/* function expects to be pointed at the 'o' */
 		{
 		    const char* error_msg;
-		    bool valid = grok_bslash_o(RExC_parse,
+		    bool valid = grok_bslash_o(&RExC_parse,
 					       &value,
-					       &numlen,
 					       &error_msg,
 					       SIZE_ONLY);
-		    RExC_parse += numlen;
 		    if (! valid) {
 			vFAIL(error_msg);
 		    }
@@ -11589,12 +11581,10 @@ parseit:
 		RExC_parse--;	/* function expects to be pointed at the 'x' */
 		{
 		    const char* error_msg;
-		    bool valid = grok_bslash_x(RExC_parse,
+		    bool valid = grok_bslash_x(&RExC_parse,
 					       &value,
-					       &numlen,
 					       &error_msg,
 					       1);
-		    RExC_parse += numlen;
 		    if (! valid) {
 			vFAIL(error_msg);
 		    }
