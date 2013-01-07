@@ -10626,10 +10626,7 @@ tryagain:
 						   to exact spot of failure */
 				vFAIL(error_msg);
 			    }
-			    else
-			    {
-				ender = result;
-			    }
+                            ender = result;
 			    if (PL_encoding && ender < 0x100) {
 				goto recode_encoding;
 			    }
@@ -10654,9 +10651,8 @@ tryagain:
 						   to exact spot of failure */
 				vFAIL(error_msg);
 			    }
-			    else {
-				ender = result;
-			    }
+                            ender = result;
+
 			    if (PL_encoding && ender < 0x100) {
 				goto recode_encoding;
 			    }
