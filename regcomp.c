@@ -11724,8 +11724,9 @@ parseit:
                         _invlist_union_maybe_complement_2nd(
                                 cp_list,
                                 PL_XPosix_ptrs[classnum],
-                                namedclass % 2,  /* Complement if odd
-                                                    (NHORIZWS, NVERTWS) */
+                                cBOOL(namedclass % 2), /* Complement if odd
+                                                          (NHORIZWS, NVERTWS)
+                                                        */
                                 &cp_list);
                     }
                 }
@@ -11739,7 +11740,8 @@ parseit:
                         _invlist_union_maybe_complement_2nd(
                                 posixes,
                                 PL_ASCII,
-                                namedclass % 2, /* Complement if odd (NASCII) */
+                                cBOOL(namedclass % 2), /* Complement if odd
+                                                          (NASCII) */
                                 &posixes);
                 }
                 else {  /* Garden variety class */
