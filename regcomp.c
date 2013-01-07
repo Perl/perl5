@@ -7425,7 +7425,7 @@ void
 Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
 {
     /* Take the union of two inversion lists and point <output> to it.  *output
-     * should be defined upon input, and if it points to one of the two lists,
+     * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented.  The first list,
      * <a>, may be NULL, in which case a copy of the second list is returned.
      * If <complement_b> is TRUE, the union is taken of the complement
@@ -7665,7 +7665,7 @@ void
 Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** i)
 {
     /* Take the intersection of two inversion lists and point <i> to it.  *i
-     * should be defined upon input, and if it points to one of the two lists,
+     * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented.
      * If <complement_b> is TRUE, the result will be the intersection of <a>
      * and the complement (or inversion) of <b> instead of <b> directly.
@@ -11356,8 +11356,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
 
-    if (!SIZE_ONLY && POSIXCC(nextvalue))
-    {
+    /* Check that they didn't say [:posix:] instead of [[:posix:]] */
+    if (!SIZE_ONLY && POSIXCC(nextvalue)) {
 	const char *s = RExC_parse;
 	const char  c = *s++;
 
@@ -11447,7 +11447,7 @@ parseit:
 		{
 		char *e;
 
-                /* This routine will handle any undefined properties */
+                /* We will handle any undefined properties ourselves */
                 U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF;
 
 		if (RExC_parse >= RExC_end)
@@ -11647,7 +11647,7 @@ parseit:
 		}
 		break;
 	    }
-	} /* end of \blah */
+	} /* end of handling backslash escape sequences */
 #ifdef EBCDIC
 	else
 	    literal_endpoint++;
