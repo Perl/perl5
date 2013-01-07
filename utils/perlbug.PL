@@ -357,8 +357,8 @@ note to $thanksaddress instead of a bug report, please run 'perlthanks'.
 Please do not use $0 to send test messages, test whether perl
 works, or to report bugs in perl modules from CPAN.
 
-For help using perl, try posting to the Usenet newsgroup 
-comp.lang.perl.misc.
+Suggestions for how to find help using Perl can be found at
+http://perldoc.perl.org/perlcommunity.html
 EOF
 	}
     }
