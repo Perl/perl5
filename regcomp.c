@@ -11311,10 +11311,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool st
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state, ANYOF, 0);
 
-    if (!SIZE_ONLY) {
-	ANYOF_FLAGS(ret) = 0;
-    }
-
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
         invert = TRUE;
@@ -11326,6 +11322,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool st
 	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
     }
     else {
+        ANYOF_FLAGS(ret) = 0;
+
  	RExC_emit += ANYOF_SKIP;
 	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
