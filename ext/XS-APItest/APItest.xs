@@ -3466,7 +3466,6 @@ AUTOLOAD(...)
   INIT:
     SV* comms;
     SV* class_and_method;
-    SV* tmp;
   CODE:
     class_and_method = GvSV(CvGV(cv));
     comms = get_sv("main::the_method", 1);
