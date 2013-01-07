@@ -1488,3 +1488,7 @@ MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
 &regcharclass_multi_char_folds::multi_char_folds(0)
 # 0 => Latin1-only
+
+PATWS: pattern white space
+=> generic cp : fast safe
+\p{PatWS}
