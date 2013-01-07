@@ -6126,8 +6126,8 @@ reStudy:
                                     data.offset_float_min,
                                     data.minlen_float,
                                     longest_float_length,
-                                    data.flags & SF_FL_BEFORE_EOL,
-                                    data.flags & SF_FL_BEFORE_MEOL))
+                                    cBOOL(data.flags & SF_FL_BEFORE_EOL),
+                                    cBOOL(data.flags & SF_FL_BEFORE_MEOL)))
         {
 	    r->float_min_offset = data.offset_float_min - data.lookbehind_float;
 	    r->float_max_offset = data.offset_float_max;
@@ -6151,8 +6151,8 @@ reStudy:
                                 data.offset_fixed,
                                 data.minlen_fixed,
                                 longest_fixed_length,
-                                data.flags & SF_FIX_BEFORE_EOL,
-                                data.flags & SF_FIX_BEFORE_MEOL))
+                                cBOOL(data.flags & SF_FIX_BEFORE_EOL),
+                                cBOOL(data.flags & SF_FIX_BEFORE_MEOL)))
         {
 	    r->anchored_offset = data.offset_fixed - data.lookbehind_fixed;
 	    SvREFCNT_inc_simple_void_NN(data.longest_fixed);
