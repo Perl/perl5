@@ -3,7 +3,7 @@
  * Created : 22nd January 1996
  * Version : 2.000
  *
- *   Copyright (c) 1995-2012 Paul Marquess. All rights reserved.
+ *   Copyright (c) 1995-2013 Paul Marquess. All rights reserved.
  *   This program is free software; you can redistribute it and/or
  *   modify it under the same terms as Perl itself.
  *
@@ -432,7 +432,7 @@ DispStream(s, message)
 
 #define EnDis(f) (s->flags & f ? "Enabled" : "Disabled")
 
-    printf("DispStream 0x%p", s) ;
+    printf("DispStream %p", s) ;
     if (message)
         printf("- %s \n", message) ;
     printf("\n") ;
@@ -441,22 +441,23 @@ DispStream(s, message)
         printf("    stream pointer is NULL\n");
     }
     else     {
-        printf("    stream           0x%p\n", &(s->stream));
-        printf("           zalloc    0x%p\n", s->stream.zalloc);
-        printf("           zfree     0x%p\n", s->stream.zfree);
-        printf("           opaque    0x%p\n", s->stream.opaque);
+        printf("    stream           %p\n", &(s->stream));
+        printf("           zalloc    %p\n", s->stream.zalloc);
+        printf("           zfree     %p\n", s->stream.zfree);
+        printf("           opaque    %p\n", s->stream.opaque);
+        printf("           state     %p\n", s->stream.state);
         if (s->stream.msg)
             printf("           msg       %s\n", s->stream.msg);
         else
             printf("           msg       \n");
-        printf("           next_in   0x%p", s->stream.next_in);
+        printf("           next_in   %p", s->stream.next_in);
         if (s->stream.next_in){
             printf(" =>");
             DispHex(s->stream.next_in, 4);
         }
         printf("\n");
 
-        printf("           next_out  0x%p", s->stream.next_out);
+        printf("           next_out  %p", s->stream.next_out);
         if (s->stream.next_out){
             printf(" =>");
             DispHex(s->stream.next_out, 4);
@@ -469,7 +470,7 @@ DispStream(s, message)
         printf("           total_out %ld\n",  s->stream.total_out);
         printf("           adler     %ld\n",  s->stream.adler    );
         printf("    bufsize          %ld\n",  s->bufsize);
-        printf("    dictionary       0x%p\n", s->dictionary);
+        printf("    dictionary       %p\n",   s->dictionary);
         printf("    dict_adler       0x%ld\n",s->dict_adler);
         printf("    zip_mode         %d\n",   s->zip_mode);
         printf("    crc32            0x%x\n", (unsigned)s->crc32);
@@ -483,7 +484,7 @@ DispStream(s, message)
 
 
 #ifdef MAGIC_APPEND
-        printf("    window           0x%p\n", s->window);
+        printf("    window           %p\n", s->window);
 #endif
         printf("\n");
 
@@ -791,8 +792,10 @@ _deflateInit(flags,level, method, windowBits, memLevel, strategy, bufsize, dicti
         err = deflateInit2(&(s->stream), level, 
 			   method, windowBits, memLevel, strategy);
 
-        if (trace) 
-            warn(" _deflateInit2 returned %d\n", err);
+        if (trace) {
+            warn(" _deflateInit2 returned %d (state %p)\n", err, s);
+            DispStream(s, "INIT");
+        }
 
 	/* Check if a dictionary has been specified */
 	SvGETMAGIC(dictionary);
@@ -802,6 +805,8 @@ _deflateInit(flags,level, method, windowBits, memLevel, strategy, bufsize, dicti
                 croak("Wide character in Compress::Raw::Zlib::Deflate::new dicrionary parameter");
 #endif         
 	    err = deflateSetDictionary(&(s->stream), (const Bytef*) SvPVX(dictionary), SvCUR(dictionary)) ;
+        if (trace) 
+            warn("deflateSetDictionary returned %d\n", err);
 	    s->dict_adler = s->stream.adler ;
 	}
 
@@ -868,7 +873,7 @@ _inflateInit(flags, windowBits, bufsize, dictionary)
             }
         }
         else
-#endif   
+#endif
             /* Dictionary specified - take a copy for use in inflate */
 	    s->dictionary = newSVsv(dictionary) ;
 	}
@@ -1005,7 +1010,20 @@ deflate (s, buf, output)
             bufinc *= 2 ;
         }
 
+        if (trace) {
+          printf("DEFLATE Avail In %d, Out %d\n", s->stream.avail_in, s->stream.avail_out); 
+          DispStream(s, "BEFORE");
+          /* Perl_sv_dump(output); */
+        }
+
         RETVAL = deflate(&(s->stream), Z_NO_FLUSH);
+    
+        if (trace) {
+            printf("DEFLATE returned %d %s, avail in %d, out %d\n", RETVAL,
+           GetErrorString(RETVAL), s->stream.avail_in, s->stream.avail_out); 
+            DispStream(s, "AFTER");
+        }
+
         if (RETVAL != Z_OK) 
             break;
     }
@@ -1027,6 +1045,8 @@ void
 DESTROY(s)
     Compress::Raw::Zlib::deflateStream	s
   CODE:
+    if (trace)
+        printf("Compress::Raw::Zlib::deflateStream::DESTROY %p\n", s);
     deflateEnd(&s->stream) ;
     if (s->dictionary)
 	SvREFCNT_dec(s->dictionary) ;
@@ -1108,8 +1128,20 @@ flush(s, output, f=Z_FINISH)
         
         availableout = s->stream.avail_out ;
         
+        if (trace) {
+          printf("flush (%d) DEFLATE Avail In %d, Out %d\n", f, s->stream.avail_in, s->stream.avail_out); 
+          DispStream(s, "BEFORE");
+          /* Perl_sv_dump(output); */
+        }
+
         RETVAL = deflate(&(s->stream), f);
     
+        if (trace) {
+            printf("flush DEFLATE returned %d %s, avail in %d, out %d\n", RETVAL,
+            GetErrorString(RETVAL), s->stream.avail_in, s->stream.avail_out); 
+            DispStream(s, "AFTER");
+        }
+
         /* Ignore the second of two consecutive flushes: */
         if (availableout == s->stream.avail_out && RETVAL == Z_BUF_ERROR) 
             RETVAL = Z_OK; 

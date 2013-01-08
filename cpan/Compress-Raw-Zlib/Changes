@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.060 7 January 2013
+
+      * Mention SimpleZip in POD
+
   2.059 24 November 2012
 
       * Copy-on-write support
