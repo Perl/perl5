@@ -1,10 +1,19 @@
 CHANGES
 -------
 
+  2.060 7 January 2013
+
+      * Updated POD
+        RT# 82138: Example code not clear - gunzip() takes filenames!
+
+      * IO::Compress::Base
+        Remove the flush call when opening a filehandle. 
+
   2.059 10 December 2012
 
       * IO::Compress::Base
         Added "Encode" option.
+        Fixes the encoding half of RT# 42656. Decode is still TODO
 
   2.058 12 November 2012
 
