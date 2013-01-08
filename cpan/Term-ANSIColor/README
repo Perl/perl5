@@ -1,4 +1,4 @@
-                       Term::ANSIColor version 4.01
+                       Term::ANSIColor version 4.02
               (A simple ANSI text attribute control module)
 
   This program is free software; you may redistribute it and/or modify it
@@ -117,15 +117,13 @@ SUPPORT
 
   For bug tracking, this package uses the CPAN bug tracker at:
 
-      https://rt.cpan.org/
-
-  Look for the Term-ANSIColor distribution.
+      https://rt.cpan.org/Public/Dist/Display.html?Name=Term-ANSIColor
 
   I welcome bug reports and patches for this package at rra@stanford.edu
-  or via the CPAN bug tracker at <http://rt.cpan.org/>.  However, please
-  be aware that I tend to be extremely busy and work projects often take
-  priority.  I'll save your mail and get to it as soon as I can, but it
-  may take me a couple of months.
+  or via the CPAN bug tracker.  However, please be aware that I tend to be
+  extremely busy and work projects often take priority.  I'll save your
+  mail and get to it as soon as I can, but it may take me a couple of
+  months.
 
 SOURCE REPOSITORY
 
@@ -218,6 +216,9 @@ THANKS
   To BlueT - Matthew Lien - 練喆明 for quick testing of 4.00 and reporting
   a problem with skipping one of the tests.
 
+  To David Cantrell for testing with Perl 5.6.2 and debugging why a test
+  case didn't work with its version of Exporter.
+
   To Larry Wall, as always, for Perl.
 
 LICENSE
@@ -227,7 +228,7 @@ LICENSE
 
     Copyright 1996 Zenin
     Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009,
-        2010, 2011, 2012 Russ Allbery <rra@stanford.edu>
+        2010, 2011, 2012, 2013 Russ Allbery <rra@stanford.edu>
     Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
 
     This program is free software; you may redistribute it and/or modify

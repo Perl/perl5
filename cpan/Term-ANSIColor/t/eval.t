@@ -23,7 +23,7 @@ use Test::More tests => 5;
 BEGIN {
     delete $ENV{ANSI_COLORS_ALIASES};
     delete $ENV{ANSI_COLORS_DISABLED};
-    use_ok('Term::ANSIColor', qw/:constants/);
+    use_ok('Term::ANSIColor', qw(:constants));
 }
 
 # Ensure that using a constant doesn't leak anything in $@.

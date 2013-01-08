@@ -1,7 +1,7 @@
 # Term::ANSIColor -- Color screen output using ANSI escape sequences.
 #
 # Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-#     2011, 2012 Russ Allbery <rra@stanford.edu>
+#     2011, 2012, 2013 Russ Allbery <rra@stanford.edu>
 # Copyright 1996 Zenin
 # Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
 #
@@ -40,7 +40,7 @@ our $AUTOLOAD;
 # against circular module loading (not that we load any modules, but
 # consistency is good).
 BEGIN {
-    $VERSION = '4.01';
+    $VERSION = '4.02';
 
     # All of the basic supported constants, used in %EXPORT_TAGS.
     my @colorlist = qw(

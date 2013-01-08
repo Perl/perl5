@@ -3,7 +3,7 @@
 # Tests for 256-color support.
 #
 # Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
-# Copyright 2012 Russ Allbery <rra@stanford.edu>
+# Copyright 2012, 2013 Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -17,7 +17,7 @@ use Test::More tests => 92;
 BEGIN {
     delete $ENV{ANSI_COLORS_ALIASES};
     delete $ENV{ANSI_COLORS_DISABLED};
-    use_ok('Term::ANSIColor', qw(color uncolor colorvalid :constants256));
+    use_ok('Term::ANSIColor', qw(:constants256 color uncolor colorvalid));
 }
 
 # Test basic 256-color codes.
