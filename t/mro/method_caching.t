@@ -72,7 +72,9 @@ my @testsubs = (
           is(MCTest::Derived->foo(0), 19,
             'redefining sub through glob alias via decl'); },
     sub { SKIP: {
-              skip_if_miniperl("no XS"); require XS::APItest;
+              skip_if_miniperl("no XS");
+              eval { require XS::APItest; }
+                or skip "XS::APItest not available", 1;
               *A = *{'MCTest::Base::foo'};
               XS::APItest::newCONSTSUB(\%main::, "A", 0, 20);
               is (MCTest::Derived->foo(0), 20,
