@@ -166,13 +166,13 @@ EOFCODE
 	    eval $code;
 	}
 	chomp( my $err = $@ );
-	if ($result eq 'c') {
-	    if ($err !~ m!^\Q$expect!) { print "not ok $test$todo (compile) $input => '$err'\n"; next TEST }
-	    last;  # no need to study a syntax error
-	}
-	elsif ( $skip ) {
+	if ( $skip ) {
 	    print "ok $test # skipped", length($reason) ? " $reason" : '', "\n";
 	    next TEST;
+	}
+	elsif ($result eq 'c') {
+	    if ($err !~ m!^\Q$expect!) { print "not ok $test$todo (compile) $input => '$err'\n"; next TEST }
+	    last;  # no need to study a syntax error
 	}
 	elsif ( $todo_qr ) {
 	    print "not ok $test # TODO", length($reason) ? " - $reason" : '', "\n";
