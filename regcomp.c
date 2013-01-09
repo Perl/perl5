@@ -7906,7 +7906,7 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     /* If comes after the final entry, can just append it to the end */
     if (len == 0
 	|| start >= invlist_array(invlist)
-				    [_invlist_len(invlist) - 1])
+				    [len - 1])
     {
 	_append_range_to_invlist(invlist, start, end);
 	return invlist;
