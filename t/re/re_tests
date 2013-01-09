@@ -618,7 +618,6 @@ $(?<=^(a))	a	y	$1	a
 [a[:xyz:]	-	c	-	POSIX class [:xyz:] unknown
 [a[:]b[:c]	abc	y	$&	abc
 ([a[:xyz:]b]+)	-	c	-	POSIX class [:xyz:] unknown
-[a[:]b[:c]	abc	y	$&	abc
 ([[:alpha:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
 ([[:alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy
 ([[:ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  ${nulnul}
