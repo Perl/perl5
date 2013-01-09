@@ -10,7 +10,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests => 16;
+plan tests => 18;
 
 SKIP: {
 skip "no perlio in this build", 4 unless $Config::Config{useperlio};
@@ -428,6 +428,22 @@ EOT_EOT
 # -        <0> padhv[%j:909,910] vM/LVINTRO ->3
 # 3        <;> nextstate(main 910 optree_misc.t:372) v:>,<,%,{ ->4
 # 4        <$> const(IV 1) s ->5
+EONT_EONT
+
+
+checkOptree ( name      => 'm?x?',
+	      code	=> sub { m?x?; },
+	      strip_open_hints => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 914 optree_misc.t:434) v:{ ->2
+# 2        </> match(/"x"/) /RTIME ->3
+EOT_EOT
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 914 optree_misc.t:434) v:{ ->2
+# 2        </> match(/"x"/) /RTIME ->3
 EONT_EONT
 
 

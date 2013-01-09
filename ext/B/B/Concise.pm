@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.94";
+our $VERSION   = "0.95";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -824,6 +824,7 @@ sub concise_op {
     $h{arg} = "";
     $h{svclass} = $h{svaddr} = $h{svval} = "";
     if ($h{class} eq "PMOP") {
+	my $extra = '';
 	my $precomp = $op->precomp;
 	if (defined $precomp) {
 	    $precomp = cstring($precomp); # Escape literal control sequences
@@ -831,25 +832,30 @@ sub concise_op {
 	} else {
 	    $precomp = "";
 	}
-	my $pmreplroot = $op->pmreplroot;
-	my $pmreplstart;
-	if (ref($pmreplroot) eq "B::GV") {
+	if ($op->name eq 'subst') {
+	    if (class($op->pmreplstart) ne "NULL") {
+		undef $lastnext;
+		$extra = " replstart->" . seq($op->pmreplstart);
+	    }
+	}
+	elsif ($op->name eq 'pushre') {
 	    # with C<@stash_array = split(/pat/, str);>,
 	    #  *stash_array is stored in /pat/'s pmreplroot.
-	    $h{arg} = "($precomp => \@" . $pmreplroot->NAME . ")";
-	} elsif (!ref($pmreplroot) and $pmreplroot) {
-	    # same as the last case, except the value is actually a
-	    # pad offset for where the GV is kept (this happens under
-	    # ithreads)
-	    my $gv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$pmreplroot];
-	    $h{arg} = "($precomp => \@" . $gv->NAME . ")";
-	} elsif ($ {$op->pmreplstart}) {
-	    undef $lastnext;
-	    $pmreplstart = "replstart->" . seq($op->pmreplstart);
-	    $h{arg} = "(" . join(" ", $precomp, $pmreplstart) . ")";
-	} else {
-	    $h{arg} = "($precomp)";
+	    my $gv = $op->pmreplroot;
+	    if (!ref($gv)) {
+		# threaded: the value is actually a pad offset for where
+		# the GV is kept (op_pmtargetoff)
+		if ($gv) {
+		    $gv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$gv]->NAME;
+		}
+	    }
+	    else {
+		# unthreaded: its a GV (if it exists)
+		$gv = (ref($gv) eq "B::GV") ? $gv->NAME : undef;
+	    }
+	    $extra = " => \@$gv" if $gv;
 	}
+	$h{arg} = "($precomp$extra)";
     } elsif ($h{class} eq "PVOP" and $h{name} !~ '^transr?\z') {
 	$h{arg} = '("' . $op->pv . '")';
 	$h{svval} = '"' . $op->pv . '"';

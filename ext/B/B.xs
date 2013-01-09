@@ -661,8 +661,7 @@ struct OP_methods {
     STR_WITH_LEN("first"),   OPp,    offsetof(struct unop, op_first),     /* 5*/
     STR_WITH_LEN("last"),    OPp,    offsetof(struct binop, op_last),    /* 6*/
     STR_WITH_LEN("other"),   OPp,    offsetof(struct logop, op_other),   /* 7*/
-    STR_WITH_LEN("pmreplstart"), OPp,
-	     offsetof(struct pmop,   op_pmstashstartu.op_pmreplstart),   /* 8*/
+    STR_WITH_LEN("pmreplstart"), 0, -1,                                  /* 8*/
     STR_WITH_LEN("redoop"),  OPp,    offsetof(struct loop, op_redoop),   /* 9*/
     STR_WITH_LEN("nextop"),  OPp,    offsetof(struct loop, op_nextop),   /*10*/
     STR_WITH_LEN("lastop"),  OPp,    offsetof(struct loop, op_lastop),   /*11*/
@@ -1011,6 +1010,13 @@ next(o)
 	offset = op_methods[ix].offset;
 	if (offset < 0) {
 	    switch (ix) {
+	    case 8: /* pmreplstart */
+		ret = make_op_object(aTHX_
+				cPMOPo->op_type == OP_SUBST
+				    ?  cPMOPo->op_pmstashstartu.op_pmreplstart
+				    : NULL
+		      );
+		break;
 #ifdef USE_ITHREADS
 	    case 21: /* filegv */
 		ret = make_sv_object(aTHX_ (SV *)CopFILEGV((COP*)o));
