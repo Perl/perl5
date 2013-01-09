@@ -582,8 +582,8 @@ x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^(\(+)?blah(?(1)(\)))$	blah	y	($2)	()
 ^(\(+)?blah(?(1)(\)))$	blah)	n	-	-
 ^(\(+)?blah(?(1)(\)))$	(blah	n	-	-
-(?(1?)a|b)	a	c	-	Switch condition not recognized
-(?(1)a|b|c)	a	c	-	Switch (?(condition)... contains too many branches
+(?(1?)a|b)	-	c	-	Switch condition not recognized
+(?(1)a|b|c)	-	c	-	Switch (?(condition)... contains too many branches
 (?(?{0})a|b)	a	n	-	-
 (?(?{0})b|a)	a	y	$&	a
 (?(?{1})b|a)	a	n	-	-
@@ -617,7 +617,7 @@ $(?<=^(a))	a	y	$1	a
 [a[:xyz:	-	c	-	Unmatched [
 [a[:xyz:]	-	c	-	POSIX class [:xyz:] unknown
 [a[:]b[:c]	abc	y	$&	abc
-([a[:xyz:]b]+)	pbaq	c	-	POSIX class [:xyz:] unknown
+([a[:xyz:]b]+)	-	c	-	POSIX class [:xyz:] unknown
 [a[:]b[:c]	abc	y	$&	abc
 ([[:alpha:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
 ([[:alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy
@@ -997,8 +997,8 @@ a(b)??	abc	y	<$1>	<>	# undef [perl #16773]
 ^.{2,3}?((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
 ^(?:f|o|b){2,3}?((?:b|a|r)+?)\1\z	foobarbar	y	$1	bar
 .*a(?!(b|cd)*e).*f	......abef	n	-	-	# [perl #23030]
-x(?#	x	c	-	Sequence (?#... not terminated
-:x(?#:	x	c	-	Sequence (?#... not terminated
+x(?#	-	c	-	Sequence (?#... not terminated
+:x(?#:	-	c	-	Sequence (?#... not terminated
 (WORDS|WORD)S	WORDS	y	$1	WORD
 (X.|WORDS|X.|WORD)S	WORDS	y	$1	WORD
 (WORDS|WORLD|WORD)S	WORDS	y	$1	WORD
@@ -1083,9 +1083,9 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 (?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	yM	$+{m}	ew	miniperl cannot load Tie::Hash::NamedCapture
 (?P<n>foo)|(?P<n>bar)|(?P<n>baz)	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 (?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
-(?P<=n>foo|bar|baz)	snofooewa	c	-	Group name must start with a non-digit word character
-(?P<!n>foo|bar|baz)	snofooewa	c	-	Group name must start with a non-digit word character
-(?PX<n>foo|bar|baz)	snofooewa	c	-	Sequence (?PX<...) not recognized
+(?P<=n>foo|bar|baz)	-	c	-	Group name must start with a non-digit word character
+(?P<!n>foo|bar|baz)	-	c	-	Group name must start with a non-digit word character
+(?PX<n>foo|bar|baz)	-	c	-	Sequence (?PX<...) not recognized
 /(?'n'foo|bar|baz)/	snofooewa	y	$1	foo
 /(?'n'foo|bar|baz)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	yM	$+{n}	foo	miniperl cannot load Tie::Hash::NamedCapture
@@ -1263,30 +1263,30 @@ a*(*F)	aaaab	n	-	-
 /(?<_>foo) \k<_>/	..foo foo..	yM	$+{_}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?'_0_'foo) \k'_0_'/	..foo foo..	yM	$+{_0_}	foo	miniperl cannot load Tie::Hash::NamedCapture
 /(?<_0_>foo) \k<_0_>/	..foo foo..	yM	$+{_0_}	foo	miniperl cannot load Tie::Hash::NamedCapture
-/(?'0'foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?<0>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?'12'foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?<12>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?'1a'foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?<1a>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?''foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/(?<>foo) bar/	..foo bar..	c	-	Group name must start with a non-digit word character
-/foo \k'n'/	foo foo	c	-	Reference to nonexistent named group
-/foo \k<n>/	foo foo	c	-	Reference to nonexistent named group
-/foo \k'a1'/	foo foo	c	-	Reference to nonexistent named group
-/foo \k<a1>/	foo foo	c	-	Reference to nonexistent named group
-/foo \k'_'/	foo foo	c	-	Reference to nonexistent named group
-/foo \k<_>/	foo foo	c	-	Reference to nonexistent named group
-/foo \k'_0_'/	foo foo	c	-	Reference to nonexistent named group
-/foo \k<_0_>/	foo foo	c	-	Reference to nonexistent named group
-/foo \k'0'/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k<0>/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k'12'/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k<12>/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k'1a'/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k<1a>/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k''/	foo foo	c	-	Group name must start with a non-digit word character
-/foo \k<>/	foo foo	c	-	Group name must start with a non-digit word character
+/(?'0'foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?<0>foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?'12'foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?<12>foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?'1a'foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?<1a>foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?''foo) bar/	-	c	-	Group name must start with a non-digit word character
+/(?<>foo) bar/	-	c	-	Group name must start with a non-digit word character
+/foo \k'n'/	-	c	-	Reference to nonexistent named group
+/foo \k<n>/	-	c	-	Reference to nonexistent named group
+/foo \k'a1'/	-	c	-	Reference to nonexistent named group
+/foo \k<a1>/	-	c	-	Reference to nonexistent named group
+/foo \k'_'/	-	c	-	Reference to nonexistent named group
+/foo \k<_>/	-	c	-	Reference to nonexistent named group
+/foo \k'_0_'/	-	c	-	Reference to nonexistent named group
+/foo \k<_0_>/	-	c	-	Reference to nonexistent named group
+/foo \k'0'/	-	c	-	Group name must start with a non-digit word character
+/foo \k<0>/	-	c	-	Group name must start with a non-digit word character
+/foo \k'12'/	-	c	-	Group name must start with a non-digit word character
+/foo \k<12>/	-	c	-	Group name must start with a non-digit word character
+/foo \k'1a'/	-	c	-	Group name must start with a non-digit word character
+/foo \k<1a>/	-	c	-	Group name must start with a non-digit word character
+/foo \k''/	-	c	-	Group name must start with a non-digit word character
+/foo \k<>/	-	c	-	Group name must start with a non-digit word character
 /(?<as>as) (\w+) \k<as> (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
 
 # \g{...} with a name as the argument 
