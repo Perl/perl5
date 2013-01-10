@@ -11113,7 +11113,8 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 
     if (value == '[' && RExC_parse + 1 < RExC_end &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
-	POSIXCC(UCHARAT(RExC_parse))) {
+	POSIXCC(UCHARAT(RExC_parse)))
+    {
 	const char c = UCHARAT(RExC_parse);
 	char* const s = RExC_parse++;
 
@@ -11137,7 +11138,9 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 		    /* Initially switch on the length of the name.  */
 		    switch (skip) {
 		    case 4:
-			if (memEQ(posixcc, "word", 4)) /* this is not POSIX, this is the Perl \w */
+                        if (memEQ(posixcc, "word", 4)) /* this is not POSIX,
+                                                          this is the Perl \w
+                                                        */
 			    namedclass = ANYOF_WORDCHAR;
 			break;
 		    case 5:
@@ -11239,12 +11242,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool stop_at_1, bool allow_multi_folds,
                  const bool silence_non_portable)
 {
-    /* parse a bracketed class specification.  Most of these will produce an ANYOF node;
-     * but something like [a] will produce an EXACT node; [aA], an EXACTFish
-     * node; [[:ascii:]], a POSIXA node; etc.  It is more complex under /i with
-     * multi-character folds: it will be rewritten following the paradigm of
-     * this example, where the <multi-fold>s are characters which fold to
-     * multiple character sequences:
+    /* parse a bracketed class specification.  Most of these will produce an
+     * ANYOF node; but something like [a] will produce an EXACT node; [aA], an
+     * EXACTFish node; [[:ascii:]], a POSIXA node; etc.  It is more complex
+     * under /i with multi-character folds: it will be rewritten following the
+     * paradigm of this example, where the <multi-fold>s are characters which
+     * fold to multiple character sequences:
      *      /[abc\x{multi-fold1}def\x{multi-fold2}ghi]/i
      * gets effectively rewritten as:
      *      /(?:\x{multi-fold1}|\x{multi-fold2}|[abcdefghi]/i
@@ -11377,7 +11380,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         stop_ptr = RExC_parse + 1;
     }
 
-    /* allow 1st char to be ] (allowing it to be - is dealt with later) */
+    /* allow 1st char to be ']' (allowing it to be '-' is dealt with later) */
     if (UCHARAT(RExC_parse) == ']')
 	goto charclassloop;
 
@@ -11409,7 +11412,7 @@ parseit:
         {
             namedclass = regpposixcc(pRExC_state, value, listsv);
         }
-	else if (value == '\\') {
+        else if (value == '\\') {
 	    if (UTF) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
@@ -11568,7 +11571,8 @@ parseit:
 		    Safefree(name);
 		}
 		RExC_parse = e + 1;
-		namedclass = ANYOF_UNIPROP;  /* no official name, but it's named */
+                namedclass = ANYOF_UNIPROP;  /* no official name, but it's
+                                                named */
 
 		/* \p means they want Unicode semantics */
 		RExC_uni_semantics = 1;
@@ -11588,7 +11592,8 @@ parseit:
 		    bool valid = grok_bslash_o(&RExC_parse,
 					       &value,
 					       &error_msg,
-					       SIZE_ONLY,
+                                               SIZE_ONLY,   /* warnings in pass
+                                                               1 only */
                                                FALSE, /* Not strict */
                                                silence_non_portable,
                                                UTF);
@@ -11611,7 +11616,7 @@ parseit:
                                                FALSE, /* Not strict */
                                                silence_non_portable,
                                                UTF);
-		    if (! valid) {
+                    if (! valid) {
 			vFAIL(error_msg);
 		    }
 		}
@@ -11627,7 +11632,7 @@ parseit:
 		    /* Take 1-3 octal digits */
 		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
 		    numlen = 3;
-		    value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
+                    value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
 		    if (PL_encoding && value < 0x100)
 			goto recode_encoding;
@@ -11645,8 +11650,8 @@ parseit:
 	    default:
 		/* Allow \_ to not give an error */
 		if (!SIZE_ONLY && isWORDCHAR(value) && value != '_') {
-		    SAVEFREESV(RExC_rx_sv);
 		    SAVEFREESV(listsv);
+		    SAVEFREESV(RExC_rx_sv);
 		    ckWARN2reg(RExC_parse,
 			       "Unrecognized escape \\%c in character class passed through",
 			       (int)value);
@@ -11654,12 +11659,14 @@ parseit:
 		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
-	    }
+	    }   /* End of switch on char following backslash */
 	} /* end of handling backslash escape sequences */
 #ifdef EBCDIC
-	else
-	    literal_endpoint++;
+        else
+            literal_endpoint++;
 #endif
+
+        /* Here, we have the current token in 'value' */
 
         /* What matches in a locale is not known until runtime.  This includes
          * what the Posix classes (like \w, [:space:]) match.  Room must be
@@ -11695,8 +11702,8 @@ parseit:
 		    const int w =
 			RExC_parse >= rangebegin ?
 			RExC_parse - rangebegin : 0;
+		    SAVEFREESV(listsv); /* in case of fatal warnings */
 		    SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
-		    SAVEFREESV(listsv);
 		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
@@ -11963,6 +11970,13 @@ parseit:
 	    }
 	} /* end of namedclass \blah */
 
+        /* Here, we have a single value.  If 'range' is set, it is the ending
+         * of a range--check its validity.  Later, we will handle each
+         * individual code point in the range.  If 'range' isn't set, this
+         * could be the beginning of a range, so check for that by looking
+         * ahead to see if the next character to be processed is the range
+         * indicator--the minus sign */
+
 	if (range) {
 	    if (prevvalue > value) /* b-a */ {
 		const int w = RExC_parse - rangebegin;
@@ -11977,6 +11991,9 @@ parseit:
 		&& RExC_parse[1] != ']')
 	    {
 		RExC_parse++;
+
+                /* If the '-' is at the end of the class (just before the ']',
+                 * it is a literal minus; otherwise it is a range */
 
 		/* a bad range like \w-, [:word:]- ? */
 		if (namedclass > OOB_NAMEDCLASS) {
@@ -12264,9 +12281,9 @@ parseit:
                     }
                     /* FALLTHROUGH */
 
-                /* The rest have more possibilities depending on the charset.  We
-                 * take advantage of the enum ordering of the charset modifiers to
-                 * get the exact node type, */
+                /* The rest have more possibilities depending on the charset.
+                 * We take advantage of the enum ordering of the charset
+                 * modifiers to get the exact node type, */
                 default:
                     op = POSIXD + get_regex_charset(RExC_flags);
                     if (op > POSIXA) { /* /aa is same as /a */
@@ -12385,7 +12402,8 @@ parseit:
          * indicators, which are weeded out below using the
          * IS_IN_SOME_FOLD_L1() macro */
         if (invlist_highest(cp_list) < 256) {
-            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list, &fold_intersection);
+            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list,
+                                                           &fold_intersection);
         }
         else {
 
