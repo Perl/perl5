@@ -937,6 +937,7 @@
 #define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
 #define regclass(a,b,c,d,e,f)	S_regclass(aTHX_ a,b,c,d,e,f)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
+#define regpatws		S_regpatws
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regpposixcc(a,b,c)	S_regpposixcc(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)

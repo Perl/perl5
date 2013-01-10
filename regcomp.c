@@ -11093,6 +11093,40 @@ S_regwhite( RExC_state_t *pRExC_state, char *p )
     return p;
 }
 
+STATIC char *
+S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
+{
+    /* Returns the next non-pattern-white space, non-comment character (the
+     * latter only if 'recognize_comment is true) in the string p, which is
+     * ended by RExC_end.  If there is no line break ending a comment,
+     * RExC_seen has added the REG_SEEN_RUN_ON_COMMENT flag; */
+    const char *e = RExC_end;
+
+    PERL_ARGS_ASSERT_REGPATWS;
+
+    while (p < e) {
+        STRLEN len;
+	if ((len = is_PATWS_safe(p, e, UTF))) {
+	    p += len;
+        }
+	else if (recognize_comment && *p == '#') {
+            bool ended = 0;
+	    do {
+                p++;
+                if (is_LNBREAK_safe(p, e, UTF)) {
+		    ended = 1;
+		    break;
+		}
+	    } while (p < e);
+	    if (!ended)
+	        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
+	}
+	else
+	    break;
+    }
+    return p;
+}
+
 /* Parse POSIX character classes: [[:foo:]], [[=foo=]], [[.foo.]].
    Character classes ([:foo:]) can also be negated ([:^foo:]).
    Returns a named class id (ANYOF_XXX) if successful, -1 otherwise.
