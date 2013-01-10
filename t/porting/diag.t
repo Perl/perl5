@@ -631,6 +631,7 @@ Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
 Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
 Unmatched '%c' in POSIX class in regex; marked by <-- HERE in m/%s/
 Unmatched '[' in POSIX class in regex; marked by <-- HERE in m/%s/
+Property '%s' is unknown in regex; marked by <-- HERE in m/%s/
 Need exactly 3 octal digits in regex; marked by <-- HERE in m/%s/
 Unrecognized escape \%c in character class in regex; marked by <-- HERE in m/%s/
 

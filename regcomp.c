@@ -10108,7 +10108,8 @@ tryagain:
         ret = regclass(pRExC_state, flagp,depth+1,
                        FALSE, /* means parse the whole char class */
                        TRUE, /* allow multi-char folds */
-                       FALSE); /* don't silence non-portable warnings. */
+                       FALSE, /* don't silence non-portable warnings. */
+                       NULL);
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
@@ -10305,9 +10306,10 @@ tryagain:
                 ret = regclass(pRExC_state, flagp,depth+1,
                                TRUE, /* means just parse this element */
                                FALSE, /* don't allow multi-char folds */
-                               FALSE); /* don't silence non-portable warnings.
+                               FALSE, /* don't silence non-portable warnings.
                                          It would be a bug if these returned
                                          non-portables */
+                               NULL);
 
 		RExC_parse--;
 
@@ -11291,7 +11293,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                  const bool stop_at_1, bool allow_multi_folds,
-                 const bool silence_non_portable)
+                 const bool silence_non_portable, SV** ret_invlist)
 {
     /* parse a bracketed class specification.  Most of these will produce an
      * ANYOF node; but something like [a] will produce an EXACT node; [aA], an
@@ -11607,8 +11609,13 @@ parseit:
                         }
 
                         /* Here didn't find it.  It could be a user-defined
-                         * property that will be available at run-time.  Add it
-                         * to the list to look up then */
+                         * property that will be available at run-time.  If we
+                         * accept only compile-time properties, is an error;
+                         * otherwise add it to the list for run-time look up */
+                        if (ret_invlist) {
+                            RExC_parse = e + 1;
+                            vFAIL3("Property '%.*s' is unknown", (int) n, name);
+                        }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n",
                                         (value == 'p' ? '+' : '!'),
                                         name);
@@ -11889,6 +11896,18 @@ parseit:
                          * class */
                         const char *Xname = swash_property_names[classnum];
 
+                        /* If returning the inversion list, we can't defer
+                         * getting this until runtime */
+                        if (ret_invlist && !  PL_utf8_swash_ptrs[classnum]) {
+                            PL_utf8_swash_ptrs[classnum] =
+                                _core_swash_init("utf8", Xname, &PL_sv_undef,
+                                             1, /* binary */
+                                             0, /* not tr/// */
+                                             NULL, /* No inversion list */
+                                             NULL  /* No flags */
+                                            );
+                            assert(PL_utf8_swash_ptrs[classnum]);
+                        }
                         if ( !  PL_utf8_swash_ptrs[classnum]) {
                             if (namedclass % 2 == 0) { /* A non-complemented
                                                           class */
@@ -12350,7 +12369,7 @@ parseit:
     /* If the character class contains only a single element, it may be
      * optimizable into another node type which is smaller and runs faster.
      * Check if this is the case for this class */
-    if (element_count == 1) {
+    if (element_count == 1 && ! ret_invlist) {
         U8 op = END;
         U8 arg = 0;
 
@@ -12857,6 +12876,19 @@ parseit:
 
 	/* Clear the invert flag since have just done it here */
 	invert = FALSE;
+    }
+
+    if (ret_invlist) {
+        *ret_invlist = cp_list;
+
+        /* Discard the generated node */
+        if (SIZE_ONLY) {
+            RExC_size = orig_size;
+        }
+        else {
+            RExC_emit = orig_emit;
+        }
+        return END;
     }
 
     /* If we didn't do folding, it's because some information isn't available

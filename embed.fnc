@@ -1962,7 +1962,8 @@ Es	|STRLEN	|reguni		|NN const struct RExC_state_t *pRExC_state \
 Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth|const bool stop_at_1 \
 				|bool allow_multi_fold                        \
-				|const bool silence_non_portable
+				|const bool silence_non_portable	      \
+				|NULLOK SV** ret_invlist
 Es	|regnode*|reg_node	|NN struct RExC_state_t *pRExC_state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *pRExC_state \
