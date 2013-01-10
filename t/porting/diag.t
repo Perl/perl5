@@ -629,6 +629,8 @@ Wrong syntax (suid) fd script name "%s"
 Useless (%s%c) - %suse /%c modifier in regex; marked by <-- HERE in m/%s/
 Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
 Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
+Unmatched '%c' in POSIX class in regex; marked by <-- HERE in m/%s/
+Unmatched '[' in POSIX class in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed

@@ -11138,7 +11138,8 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
 
 PERL_STATIC_INLINE I32
-S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
+S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
+                    const bool strict)
 {
     dVAR;
     I32 namedclass = OOB_NAMEDCLASS;
@@ -11154,9 +11155,20 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 
 	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
 	    RExC_parse++;
-	if (RExC_parse == RExC_end)
+	if (RExC_parse == RExC_end) {
+            if (strict) {
+
+                /* Try to give a better location for the error (than the end of
+                 * the string) by looking for the matching ']' */
+                RExC_parse = s;
+                while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
+                    RExC_parse++;
+                }
+                vFAIL2("Unmatched '%c' in POSIX class", c);
+            }
 	    /* Grandfather lone [:, [=, [. */
 	    RExC_parse = s;
+        }
 	else {
 	    const char* const t = RExC_parse++; /* skip over the c */
 	    assert(*t == c);
@@ -11257,6 +11269,11 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 	    } else {
 		/* Maternal grandfather:
 		 * "[:" ending in ":" but not in ":]" */
+                if (strict) {
+                    vFAIL("Unmatched '[' in POSIX class");
+                }
+
+                /* Grandfather lone [:, [=, [. */
 		RExC_parse = s;
 	    }
 	}
@@ -11444,7 +11461,7 @@ parseit:
             && RExC_parse < RExC_end
             && POSIXCC(UCHARAT(RExC_parse)))
         {
-            namedclass = regpposixcc(pRExC_state, value, listsv);
+            namedclass = regpposixcc(pRExC_state, value, listsv, FALSE);
         }
         else if (value == '\\') {
 	    if (UTF) {
