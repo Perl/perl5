@@ -10107,7 +10107,8 @@ tryagain:
 	char * const oregcomp_parse = ++RExC_parse;
         ret = regclass(pRExC_state, flagp,depth+1,
                        FALSE, /* means parse the whole char class */
-                       TRUE); /* allow multi-char folds */
+                       TRUE, /* allow multi-char folds */
+                       FALSE); /* don't silence non-portable warnings. */
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
@@ -10303,7 +10304,10 @@ tryagain:
 
                 ret = regclass(pRExC_state, flagp,depth+1,
                                TRUE, /* means just parse this element */
-                               FALSE); /* don't allow multi-char folds */
+                               FALSE, /* don't allow multi-char folds */
+                               FALSE); /* don't silence non-portable warnings.
+                                         It would be a bug if these returned
+                                         non-portables */
 
 		RExC_parse--;
 
@@ -11232,7 +11236,8 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
-                 const bool stop_at_1, bool allow_multi_folds)
+                 const bool stop_at_1, bool allow_multi_folds,
+                 const bool silence_non_portable)
 {
     /* parse a bracketed class specification.  Most of these will produce an ANYOF node;
      * but something like [a] will produce an EXACT node; [aA], an EXACTFish
@@ -11585,8 +11590,7 @@ parseit:
 					       &error_msg,
 					       SIZE_ONLY,
                                                FALSE, /* Not strict */
-                                               TRUE, /* Output warnings for
-                                                         non-portables */
+                                               silence_non_portable,
                                                UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
@@ -11605,8 +11609,7 @@ parseit:
 					       &error_msg,
 					       TRUE, /* Output warnings */
                                                FALSE, /* Not strict */
-                                               TRUE, /* Output warnings for
-                                                         non-portables */
+                                               silence_non_portable,
                                                UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
