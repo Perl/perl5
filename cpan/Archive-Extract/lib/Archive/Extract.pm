@@ -16,6 +16,7 @@ use Locale::Maketext::Simple    Style => 'gettext';
 ### solaris has silly /bin/tar output ###
 use constant ON_SOLARIS     => $^O eq 'solaris' ? 1 : 0;
 use constant ON_NETBSD      => $^O eq 'netbsd' ? 1 : 0;
+use constant ON_OPENBSD     => $^O eq 'openbsd' ? 1 : 0;
 use constant ON_FREEBSD     => $^O eq 'freebsd' ? 1 : 0;
 use constant ON_LINUX       => $^O eq 'linux' ? 1 : 0;
 use constant FILE_EXISTS    => sub { -e $_[0] ? 1 : 0 };
@@ -46,7 +47,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.60';
+$VERSION            = '0.62';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -139,6 +140,10 @@ CMD: for my $pgm (qw[tar unzip gzip bunzip2 uncompress unlzma unxz]) {
       my $opt = ON_VMS ? '"-Z"' : '-Z';
       ($PROGRAMS->{$pgm}) = grep { scalar run(command=> [ $_, $opt, '-1' ]) } can_run($pgm);
       next CMD;
+    }
+    if ( $pgm eq 'tar' and ON_OPENBSD ) {
+      # try gtar first
+      next CMD if $PROGRAMS->{$pgm} = can_run('gtar');
     }
     $PROGRAMS->{$pgm} = can_run($pgm);
 }
@@ -654,7 +659,7 @@ sub have_old_bunzip2 {
         ### check for /bin/tar ###
         ### check for /bin/gzip if we need it ###
         ### if any of the binaries are not available, return NA
-        {   my $diag =  not $self->bin_tar ?
+        {   my $diag =  !$self->bin_tar ?
                             loc("No '%1' program found", '/bin/tar') :
                         $self->is_tgz && !$self->bin_gzip ?
                             loc("No '%1' program found", '/bin/gzip') :
@@ -1662,7 +1667,7 @@ thread safe. See C<rt.cpan.org> bug C<#45671> for details.
 
 =head1 BUG REPORTS
 
-Please report bugs or other issues to E<lt>bug-archive-extract@rt.cpan.org<gt>.
+Please report bugs or other issues to E<lt>bug-archive-extract@rt.cpan.orgE<gt>.
 
 =head1 AUTHOR
 
