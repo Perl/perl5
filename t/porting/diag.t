@@ -631,6 +631,8 @@ Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
 Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
 Unmatched '%c' in POSIX class in regex; marked by <-- HERE in m/%s/
 Unmatched '[' in POSIX class in regex; marked by <-- HERE in m/%s/
+Need exactly 3 octal digits in regex; marked by <-- HERE in m/%s/
+Unrecognized escape \%c in character class in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
@@ -645,3 +647,4 @@ UTF-16 surrogate U+%X
 Non-octal character in regex; marked by <-- HERE in m/%s/
 Non-hex character in regex; marked by <-- HERE in m/%s/
 Use \\x{...} for more than two hex characters in regex; marked by <-- HERE in m/%s/
+False [] range "%s" in regex; marked by <-- HERE in m/%s/

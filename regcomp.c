@@ -11335,6 +11335,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                        character; used under /i */
     UV n;
     char * stop_ptr = RExC_end;    /* where to stop parsing */
+    const bool strict = FALSE;
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
@@ -11461,7 +11462,7 @@ parseit:
             && RExC_parse < RExC_end
             && POSIXCC(UCHARAT(RExC_parse)))
         {
-            namedclass = regpposixcc(pRExC_state, value, listsv, FALSE);
+            namedclass = regpposixcc(pRExC_state, value, listsv, strict);
         }
         else if (value == '\\') {
 	    if (UTF) {
@@ -11645,7 +11646,7 @@ parseit:
 					       &error_msg,
                                                SIZE_ONLY,   /* warnings in pass
                                                                1 only */
-                                               FALSE, /* Not strict */
+                                               strict,
                                                silence_non_portable,
                                                UTF);
 		    if (! valid) {
@@ -11664,7 +11665,7 @@ parseit:
 					       &value,
 					       &error_msg,
 					       TRUE, /* Output warnings */
-                                               FALSE, /* Not strict */
+                                               strict,
                                                silence_non_portable,
                                                UTF);
                     if (! valid) {
@@ -11682,9 +11683,15 @@ parseit:
 		{
 		    /* Take 1-3 octal digits */
 		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
-		    numlen = 3;
+                    numlen = (strict) ? 4 : 3;
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
+                    if (strict) {
+                        if (numlen != 3) {
+                            RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                            vFAIL("Need exactly 3 octal digits");
+                        }
+                    }
 		    if (PL_encoding && value < 0x100)
 			goto recode_encoding;
 		    break;
@@ -11693,19 +11700,31 @@ parseit:
 		if (! RExC_override_recoding) {
 		    SV* enc = PL_encoding;
 		    value = reg_recode((const char)(U8)value, &enc);
-		    if (!enc && SIZE_ONLY)
-			ckWARNreg(RExC_parse,
+		    if (!enc) {
+                        if (strict) {
+                            vFAIL("Invalid escape in the specified encoding");
+                        }
+                        else if (SIZE_ONLY) {
+                            ckWARNreg(RExC_parse,
 				  "Invalid escape in the specified encoding");
+                        }
+                    }
 		    break;
 		}
 	    default:
 		/* Allow \_ to not give an error */
 		if (!SIZE_ONLY && isWORDCHAR(value) && value != '_') {
 		    SAVEFREESV(listsv);
+                    if (strict) {
+                        vFAIL2("Unrecognized escape \\%c in character class",
+                               (int)value);
+                    }
+                    else {
 		    SAVEFREESV(RExC_rx_sv);
 		    ckWARN2reg(RExC_parse,
 			       "Unrecognized escape \\%c in character class passed through",
 			       (int)value);
+                    }
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
@@ -11754,6 +11773,10 @@ parseit:
 			RExC_parse >= rangebegin ?
 			RExC_parse - rangebegin : 0;
 		    SAVEFREESV(listsv); /* in case of fatal warnings */
+                    if (strict) {
+                        vFAIL4("False [] range \"%*.*s\"", w, w, rangebegin);
+                    }
+                    else {
 		    SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
 		    ckWARN4reg(RExC_parse,
 			       "False [] range \"%*.*s\"",
@@ -11762,6 +11785,7 @@ parseit:
 		    SvREFCNT_inc_simple_void_NN(listsv);
                     cp_list = add_cp_to_invlist(cp_list, '-');
                     cp_list = add_cp_to_invlist(cp_list, prevvalue);
+                    }
 		}
 
 		range = 0; /* this was not a true range */
@@ -12048,13 +12072,19 @@ parseit:
 
 		/* a bad range like \w-, [:word:]- ? */
 		if (namedclass > OOB_NAMEDCLASS) {
-		    if (ckWARN(WARN_REGEXP)) {
+		    if (strict || ckWARN(WARN_REGEXP)) {
 			const int w =
 			    RExC_parse >= rangebegin ?
 			    RExC_parse - rangebegin : 0;
+                        if (strict) {
+                            vFAIL4("False [] range \"%*.*s\"",
+                                   w, w, rangebegin);
+                        }
+                        else {
 			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
 			       w, w, rangebegin);
+                        }
 		    }
                     if (!SIZE_ONLY) {
                         cp_list = add_cp_to_invlist(cp_list, '-');
