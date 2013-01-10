@@ -529,6 +529,12 @@ static const scan_data_t zero_scan_data =
 	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
+#define	vFAIL4(m,a1,a2,a3) STMT_START {			\
+    if (!SIZE_ONLY)					\
+	SAVEFREESV(RExC_rx_sv);				\
+    Simple_vFAIL4(m, a1, a2, a3);			\
+} STMT_END
+
 #define	ckWARNreg(loc,m) STMT_START {					\
     const IV offset = loc - RExC_precomp;				\
     Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
