@@ -10106,7 +10106,8 @@ tryagain:
     {
 	char * const oregcomp_parse = ++RExC_parse;
         ret = regclass(pRExC_state, flagp,depth+1,
-                       FALSE /* means parse the whole char class */ );
+                       FALSE, /* means parse the whole char class */
+                       TRUE); /* allow multi-char folds */
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
@@ -10301,7 +10302,8 @@ tryagain:
 		RExC_parse--;
 
                 ret = regclass(pRExC_state, flagp,depth+1,
-                               TRUE /* means just parse this element */ );
+                               TRUE, /* means just parse this element */
+                               FALSE); /* don't allow multi-char folds */
 
 		RExC_parse--;
 
@@ -11229,7 +11231,8 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
 
 STATIC regnode *
-S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1)
+S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
+                 const bool stop_at_1, bool allow_multi_folds)
 {
     /* parse a bracketed class specification.  Most of these will produce an ANYOF node;
      * but something like [a] will produce an EXACT node; [aA], an EXACTFish
@@ -11325,6 +11328,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool st
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
 	RExC_parse++;
         invert = TRUE;
+        allow_multi_folds = FALSE;
         RExC_naughty++;
     }
 
@@ -12009,7 +12013,7 @@ parseit:
          *  "ss"  =~ /^[^\xDF]+$/i => N
          *
          * See [perl #89750] */
-        if (FOLD && ! invert && value == prevvalue) {
+        if (FOLD && allow_multi_folds && value == prevvalue) {
             if (value == LATIN_SMALL_LETTER_SHARP_S
                 || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
                                                         value)))
