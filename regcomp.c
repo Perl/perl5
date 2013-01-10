@@ -11336,6 +11336,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     UV n;
     char * stop_ptr = RExC_end;    /* where to stop parsing */
     const bool strict = FALSE;
+    const bool skip_white = FALSE;
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
@@ -11385,13 +11386,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state, ANYOF, 0);
 
-    if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
-	RExC_parse++;
-        invert = TRUE;
-        allow_multi_folds = FALSE;
-        RExC_naughty++;
-    }
-
     if (SIZE_ONLY) {
 	RExC_size += ANYOF_SKIP;
 	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
@@ -11407,6 +11401,21 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	initial_listsv_len = SvCUR(listsv);
     }
 
+    if (skip_white) {
+        RExC_parse = regpatws(pRExC_state, RExC_parse,
+                              FALSE /* means don't recognize comments */);
+    }
+
+    if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
+	RExC_parse++;
+        invert = TRUE;
+        allow_multi_folds = FALSE;
+        RExC_naughty++;
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                  FALSE /* means don't recognize comments */);
+        }
+    }
 
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
     if (!SIZE_ONLY && RExC_parse < RExC_end && POSIXCC(UCHARAT(RExC_parse))) {
@@ -11437,7 +11446,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	goto charclassloop;
 
 parseit:
-    while (RExC_parse < stop_ptr && UCHARAT(RExC_parse) != ']') {
+    while (1) {
+        if  (RExC_parse >= stop_ptr) {
+            break;
+        }
+
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                  FALSE /* means don't recognize comments */);
+        }
+
+        if  (UCHARAT(RExC_parse) == ']') {
+            break;
+        }
 
     charclassloop:
 
@@ -11473,12 +11494,19 @@ parseit:
 	    }
 	    else
 		value = UCHARAT(RExC_parse++);
+
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will
 	     * be a problem later if we want switch on Unicode.
 	     * A similar issue a little bit later when switching on
 	     * namedclass. --jhi */
-	    switch ((I32)value) {
+
+            /* If the \ is escaping white space when white space is being
+             * skipped, it means that that white space is wanted literally, and
+             * is already in 'value'.  Otherwise, need to translate the escape
+             * into what it signifies. */
+            if (! skip_white || ! is_PATWS_cp(value)) switch ((I32)value) {
+
 	    case 'w':	namedclass = ANYOF_WORDCHAR;	break;
 	    case 'W':	namedclass = ANYOF_NWORDCHAR;	break;
 	    case 's':	namedclass = ANYOF_SPACE;	break;
@@ -12049,8 +12077,13 @@ parseit:
          * of a range--check its validity.  Later, we will handle each
          * individual code point in the range.  If 'range' isn't set, this
          * could be the beginning of a range, so check for that by looking
-         * ahead to see if the next character to be processed is the range
+         * ahead to see if the next real character to be processed is the range
          * indicator--the minus sign */
+
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                FALSE /* means don't recognize comments */);
+        }
 
 	if (range) {
 	    if (prevvalue > value) /* b-a */ {
@@ -12061,14 +12094,21 @@ parseit:
 	}
 	else {
             prevvalue = value; /* save the beginning of the potential range */
-	    if (RExC_parse+1 < RExC_end
-		&& *RExC_parse == '-'
-		&& RExC_parse[1] != ']')
-	    {
-		RExC_parse++;
+            if (! stop_at_1     /* Can't be a range if parsing just one thing */
+                && *RExC_parse == '-')
+            {
+                char* next_char_ptr = RExC_parse + 1;
+                if (skip_white) {   /* Get the next real char after the '-' */
+                    next_char_ptr = regpatws(pRExC_state,
+                                             RExC_parse + 1,
+                                             FALSE); /* means don't recognize
+                                                        comments */
+                }
 
                 /* If the '-' is at the end of the class (just before the ']',
                  * it is a literal minus; otherwise it is a range */
+                if (next_char_ptr < RExC_end && *next_char_ptr != ']') {
+                    RExC_parse = next_char_ptr;
 
 		/* a bad range like \w-, [:word:]- ? */
 		if (namedclass > OOB_NAMEDCLASS) {
@@ -12093,6 +12133,7 @@ parseit:
 		} else
 		    range = 1;	/* yeah, it's a range! */
 		continue;	/* but do it the next time */
+                }
 	    }
 	}
 
