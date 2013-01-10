@@ -11755,10 +11755,10 @@ parseit:
                                (int)value);
                     }
                     else {
-		    SAVEFREESV(RExC_rx_sv);
-		    ckWARN2reg(RExC_parse,
-			       "Unrecognized escape \\%c in character class passed through",
-			       (int)value);
+                        SAVEFREESV(RExC_rx_sv);
+                        ckWARN2reg(RExC_parse,
+                            "Unrecognized escape \\%c in character class passed through",
+                            (int)value);
                     }
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		    SvREFCNT_inc_simple_void_NN(listsv);
@@ -11812,14 +11812,14 @@ parseit:
                         vFAIL4("False [] range \"%*.*s\"", w, w, rangebegin);
                     }
                     else {
-		    SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
-		    ckWARN4reg(RExC_parse,
-			       "False [] range \"%*.*s\"",
-			       w, w, rangebegin);
-		    (void)ReREFCNT_inc(RExC_rx_sv);
-		    SvREFCNT_inc_simple_void_NN(listsv);
-                    cp_list = add_cp_to_invlist(cp_list, '-');
-                    cp_list = add_cp_to_invlist(cp_list, prevvalue);
+                        SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
+                        ckWARN4reg(RExC_parse,
+                                "False [] range \"%*.*s\"",
+                                w, w, rangebegin);
+                        (void)ReREFCNT_inc(RExC_rx_sv);
+                        SvREFCNT_inc_simple_void_NN(listsv);
+                        cp_list = add_cp_to_invlist(cp_list, '-');
+                        cp_list = add_cp_to_invlist(cp_list, prevvalue);
                     }
 		}
 
@@ -12129,29 +12129,29 @@ parseit:
                 if (next_char_ptr < RExC_end && *next_char_ptr != ']') {
                     RExC_parse = next_char_ptr;
 
-		/* a bad range like \w-, [:word:]- ? */
-		if (namedclass > OOB_NAMEDCLASS) {
-		    if (strict || ckWARN(WARN_REGEXP)) {
-			const int w =
-			    RExC_parse >= rangebegin ?
-			    RExC_parse - rangebegin : 0;
-                        if (strict) {
-                            vFAIL4("False [] range \"%*.*s\"",
-                                   w, w, rangebegin);
+                    /* a bad range like \w-, [:word:]- ? */
+                    if (namedclass > OOB_NAMEDCLASS) {
+                        if (strict || ckWARN(WARN_REGEXP)) {
+                            const int w =
+                                RExC_parse >= rangebegin ?
+                                RExC_parse - rangebegin : 0;
+                            if (strict) {
+                                vFAIL4("False [] range \"%*.*s\"",
+                                    w, w, rangebegin);
+                            }
+                            else {
+                                vWARN4(RExC_parse,
+                                    "False [] range \"%*.*s\"",
+                                    w, w, rangebegin);
+                            }
                         }
-                        else {
-			vWARN4(RExC_parse,
-			       "False [] range \"%*.*s\"",
-			       w, w, rangebegin);
+                        if (!SIZE_ONLY) {
+                            cp_list = add_cp_to_invlist(cp_list, '-');
                         }
-		    }
-                    if (!SIZE_ONLY) {
-                        cp_list = add_cp_to_invlist(cp_list, '-');
-                    }
-                    element_count++;
-		} else
-		    range = 1;	/* yeah, it's a range! */
-		continue;	/* but do it the next time */
+                        element_count++;
+                    } else
+                        range = 1;	/* yeah, it's a range! */
+                    continue;	/* but do it the next time */
                 }
 	    }
 	}
