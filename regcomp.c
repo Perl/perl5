@@ -7646,15 +7646,15 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 	}
     }
 
+    /* If we've changed b, restore it */
+    if (complement_b) {
+        array_b[0] = 1;
+    }
+
     /*  We may be removing a reference to one of the inputs */
     if (a == *output || b == *output) {
         assert(! invlist_is_iterating(*output));
 	SvREFCNT_dec_NN(*output);
-    }
-
-    /* If we've changed b, restore it */
-    if (complement_b) {
-        array_b[0] = 1;
     }
 
     *output = u;
@@ -7868,15 +7868,15 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 	}
     }
 
+    /* If we've changed b, restore it */
+    if (complement_b) {
+        array_b[0] = 1;
+    }
+
     /*  We may be removing a reference to one of the inputs */
     if (a == *i || b == *i) {
         assert(! invlist_is_iterating(*i));
 	SvREFCNT_dec_NN(*i);
-    }
-
-    /* If we've changed b, restore it */
-    if (complement_b) {
-        array_b[0] = 1;
     }
 
     *i = r;
