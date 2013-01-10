@@ -1,3 +1,5 @@
+  XXX Note that t/re/reg_mesg.t might be a better place for these
+
   regcomp.c	AOK
 
   Quantifier unexpected on zero-length expression [S_study_chunk] 
