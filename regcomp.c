@@ -11247,7 +11247,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool st
      * compile time */
 
     dVAR;
-    UV nextvalue;
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
     IV range = 0;
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
@@ -11338,10 +11337,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool st
 	initial_listsv_len = SvCUR(listsv);
     }
 
-    nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
 
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
-    if (!SIZE_ONLY && POSIXCC(nextvalue)) {
+    if (!SIZE_ONLY && RExC_parse < RExC_end && POSIXCC(UCHARAT(RExC_parse))) {
 	const char *s = RExC_parse;
 	const char  c = *s++;
 
@@ -11390,9 +11388,12 @@ parseit:
 	else
 	    value = UCHARAT(RExC_parse++);
 
-	nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
-	if (value == '[' && POSIXCC(nextvalue))
-	    namedclass = regpposixcc(pRExC_state, value, listsv);
+        if (value == '['
+            && RExC_parse < RExC_end
+            && POSIXCC(UCHARAT(RExC_parse)))
+        {
+            namedclass = regpposixcc(pRExC_state, value, listsv);
+        }
 	else if (value == '\\') {
 	    if (UTF) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
