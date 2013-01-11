@@ -167,7 +167,7 @@ EOFCODE
 	}
 	chomp( my $err = $@ );
 	if ( $skip ) {
-	    print "ok $test # skipped", length($reason) ? " $reason" : '', "\n";
+	    print "ok $test # skipped", length($reason) ? ".  $reason" : '', "\n";
 	    next TEST;
 	}
 	elsif ($result eq 'c') {
