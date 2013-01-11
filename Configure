@@ -2879,7 +2879,20 @@ esac
 
 : Define -Dtargethost=somecomputer to run compiled tests on another machine
 case "$targethost" in
-    '') echo "No targethost for running compiler tests against defined, running locally" >&4
+    '') echo "Checking for cross-compile" >&4
+    case "$usecrosscompile$multiarch" in
+       *$define*) echo "Skipping the rest of Configure as no targethost was defined when cross-compiling" >&4
+         if [ -f Makefile ]; then
+           echo " "
+           echo "Now you must ensure config.sh, config.h and the generated headers exist and run a $make."
+         else
+           echo "Configure done."
+         fi
+       exit 0
+       ;;
+    esac
+    ;;
+     *) echo "No targethost for running compiler tests against defined, running locally" >&4
         run=''
         to=:
         from=:
