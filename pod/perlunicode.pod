@@ -808,7 +808,9 @@ L<perlrecharclass/POSIX Character Classes>.
 =head2 User-Defined Character Properties
 
 You can define your own binary character properties by defining subroutines
-whose names begin with "In" or "Is".  The subroutines can be defined in any
+whose names begin with "In" or "Is".  (The experimental feature
+L<perlre/(?[ ])> provides an alternative which allows more complex
+definitions.)  The subroutines can be defined in any
 package.  The user-defined properties can be used in the regular expression
 C<\p> and C<\P> constructs; if you are using a user-defined property from a
 package other than the one you are in, you must specify its package in the
@@ -979,7 +981,7 @@ Level 1 - Basic Unicode Support
  RL1.1   Hex Notation                     - done          [1]
  RL1.2   Properties                       - done          [2][3]
  RL1.2a  Compatibility Properties         - done          [4]
- RL1.3   Subtraction and Intersection     - MISSING       [5]
+ RL1.3   Subtraction and Intersection     - experimental  [5]
  RL1.4   Simple Word Boundaries           - done          [6]
  RL1.5   Simple Loose Matches             - done          [7]
  RL1.6   Line Boundaries                  - MISSING       [8][9]
@@ -1005,7 +1007,9 @@ supports not only minimal list, but all Unicode character properties (see Unicod
 
 =item [5]
 
- Can use the following to emulate set operations:
+The experimental feature in v5.18 "(?[...])" accomplishes this.  See
+L<perlre/(?[ ])>.  If you don't want to use an experimental feature,
+you can use one of the following:
 
 =over 4
 

@@ -631,9 +631,21 @@ Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
 Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
 Unmatched '%c' in POSIX class in regex; marked by <-- HERE in m/%s/
 Unmatched '[' in POSIX class in regex; marked by <-- HERE in m/%s/
+(?[...]) not valid in locale in regex; marked by <-- HERE in m/%s/
+The regex_sets feature is experimental
+Syntax error in (?[...]) in regex m/%s/
+Unexpected character in regex; marked by <-- HERE in m/%s/
+Unexpected binary operator '%c' with no preceding operand in regex; marked by <-- HERE in m/%s/
+Unexpected '(' with no preceding operator in regex; marked by <-- HERE in m/%s/
+Unexpected ')' in regex; marked by <-- HERE in m/%s/
+Operand with no preceding operator in regex; marked by <-- HERE in m/%s/
 Property '%s' is unknown in regex; marked by <-- HERE in m/%s/
 Need exactly 3 octal digits in regex; marked by <-- HERE in m/%s/
 Unrecognized escape \%c in character class in regex; marked by <-- HERE in m/%s/
+Incomplete expression within '(?[ ])' in regex; marked by <-- HERE in m/%s/
+Non-octal character in regex; marked by <-- HERE in m/%s/
+Non-hex character in regex; marked by <-- HERE in m/%s/
+Use \\x{...} for more than two hex characters in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
@@ -645,7 +657,4 @@ Operation "%s" returns its argument for non-Unicode code point 0x%X
 Operation "%s" returns its argument for UTF-16 surrogate U+%X
 Unicode surrogate U+%X is illegal in UTF-8
 UTF-16 surrogate U+%X
-Non-octal character in regex; marked by <-- HERE in m/%s/
-Non-hex character in regex; marked by <-- HERE in m/%s/
-Use \\x{...} for more than two hex characters in regex; marked by <-- HERE in m/%s/
 False [] range "%s" in regex; marked by <-- HERE in m/%s/

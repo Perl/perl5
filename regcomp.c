@@ -8906,6 +8906,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    vFAIL2("Unknown switch condition (?(%.2s", RExC_parse);
 		}
 	    }
+	    case '[':           /* (?[ ... ]) */
+                return handle_sets(pRExC_state, flagp, depth, oregcomp_parse);
             case 0:
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
@@ -11284,6 +11286,441 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
     return namedclass;
 }
 
+STATIC bool
+S_could_it_be_POSIX(pTHX_ RExC_state_t *pRExC_state)
+{
+    /* This applies some heuristics at the current parse position (which should
+     * be at a '[') to see if what follows might be intended to be a [:posix:]
+     * class.  It returns true if it really is a posix class, of course, but it
+     * also can return true if it thinks that what was intended was a posix
+     * class that didn't quite make it.
+     *
+     * It will return true for
+     *      [:alphanumerics:
+     *      [:alphanumerics]  (as long as the ] isn't followed immediately by a
+     *                         ')' indicating the end of the (?[
+     *      [:any garbage including %^&$ punctuation:]
+     *
+     * This is designed to be called only from S_handle_sets; it could be
+     * easily adapted to be called from the spot at the beginning of regclass()
+     * that checks to see in a normal bracketed class if the surrounding []
+     * have been omitted ([:word:] instead of [[:word:]]).  But doing so would
+     * change long-standing behavior, so I (khw) didn't do that */
+    char* p = RExC_parse + 1;
+    char first_char = *p;
+
+    PERL_ARGS_ASSERT_COULD_IT_BE_POSIX;
+
+    assert(*(p - 1) == '[');
+
+    if (! POSIXCC(first_char)) {
+        return FALSE;
+    }
+
+    p++;
+    while (p < RExC_end && isWORDCHAR(*p)) p++;
+
+    if (p >= RExC_end) {
+        return FALSE;
+    }
+
+    if (p - RExC_parse > 2    /* Got at least 1 word character */
+        && (*p == first_char
+            || (*p == ']' && p + 1 < RExC_end && *(p + 1) != ')')))
+    {
+        return TRUE;
+    }
+
+    p = (char *) memchr(RExC_parse, ']', RExC_end - RExC_parse);
+
+    return (p
+            && p - RExC_parse > 2 /* [:] evaluates to colon;
+                                      [::] is a bad posix class. */
+            && first_char == *(p - 1));
+}
+
+STATIC regnode *
+S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
+                   char * const oregcomp_parse)
+{
+    /* Handle the (?[...]) construct to do set operations */
+
+    U8 curchar;
+    UV start, end;	/* End points of code point ranges */
+    SV* result_string;
+    char *save_end, *save_parse;
+    SV* final;
+    STRLEN len;
+    regnode* node;
+    AV* stack;
+    const bool save_fold = FOLD;
+
+    GET_RE_DEBUG_FLAGS_DECL;
+
+    PERL_ARGS_ASSERT_HANDLE_SETS;
+
+    if (LOC) {
+        vFAIL("(?[...]) not valid in locale");
+    }
+    RExC_uni_semantics = 1;
+
+    /* This will return only an ANYOF regnode, or (unlikely) something smaller
+     * (such as EXACT).  Thus we can skip most everything if just sizing.  We
+     * call regclass to handle '[]' so as to not have to reinvent its parsing
+     * rules here (throwing away the size it computes each time).  And, we exit
+     * upon an unescaped ']' that isn't one ending a regclass.  To do both
+     * these things, we need to realize that something preceded by a backslash
+     * is escaped, so we have to keep track of backslashes */
+    if (SIZE_ONLY) {
+
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__REGEX_SETS),
+            "The regex_sets feature is experimental" REPORT_LOCATION,
+            (int) (RExC_parse - RExC_precomp) , RExC_precomp, RExC_parse);
+
+        while (RExC_parse < RExC_end) {
+            SV* current = NULL;
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                TRUE); /* means recognize comments */
+            switch (*RExC_parse) {
+                default:
+                    break;
+                case '\\':
+                    /* Skip the next byte.  This would have to change to skip
+                     * the next character if we were to recognize and handle
+                     * specific non-ASCIIs */
+                    RExC_parse++;
+                    break;
+                case '[':
+                {
+                    /* If this looks like it is a [:posix:] class, leave the
+                     * parse pointer at the '[' to fool regclass() into
+                     * thinking it is part of a '[[:posix]]'.  That function
+                     * will use strict checking to force a syntax error if it
+                     * doesn't work out to a legitimate class */
+                    bool is_posix_class = could_it_be_POSIX(pRExC_state);
+                    if (! is_posix_class) {
+                        RExC_parse++;
+                    }
+
+                    (void) regclass(pRExC_state, flagp,depth+1,
+                                    is_posix_class, /* parse the whole char
+                                                       class only if not a
+                                                       posix class */
+                                    FALSE, /* don't allow multi-char folds */
+                                    TRUE, /* silence non-portable warnings. */
+                                    &current);
+                    /* function call leaves parse pointing to the ']', except
+                     * if we faked it */
+                    if (is_posix_class) {
+                        RExC_parse--;
+                    }
+
+                    SvREFCNT_dec(current);   /* In case it returned something */
+                    break;
+                }
+
+                case ']':
+                    RExC_parse++;
+                    if (RExC_parse < RExC_end
+                        && *RExC_parse == ')')
+                    {
+                        node = reganode(pRExC_state, ANYOF, 0);
+                        RExC_size += ANYOF_SKIP;
+                        nextchar(pRExC_state);
+                        Set_Node_Length(node,
+                                RExC_parse - oregcomp_parse + 1); /* MJD */
+                        return node;
+                    }
+                    goto no_close;
+            }
+            RExC_parse++;
+        }
+
+        no_close:
+        FAIL("Syntax error in (?[...])");
+    }
+#define av_top(a) av_len(a) /* XXX Temporary */
+
+    /* Pass 2 only after this.  Everything in this construct is a
+     * metacharacter.  Operands begin with either a '\' (for an escape
+     * sequence), or a '[' for a bracketed character class.  Any other
+     * character should be an operator, or parenthesis for grouping.  Both
+     * types of operands are handled by calling regclass() to parse them.  It
+     * is called with a parameter to indicate to return the computed inversion
+     * list.  The parsing here is implemented via a stack.  Each entry on the
+     * stack is a single character representing one of the operators, or the
+     * '('; or else a pointer to an operand inversion list. */
+
+#define IS_OPERAND(a)  (! SvIOK(a))
+
+    /* The stack starts empty.  It is a syntax error if the first thing parsed
+     * is a binary operator; everything else is pushed on the stack.  When an
+     * operand is parsed, the top of the stack is examined.  If it is a binary
+     * operator, the item before it should be an operand, and both are replaced
+     * by the result of doing that operation on the new operand and the one on
+     * the stack.   Thus a sequence of binary operands is reduced to a single
+     * one before the next one is parsed.
+     *
+     * A unary operator may immediately follow a binary in the input, for
+     * example
+     *      [a] + ! [b]
+     * When an operand is parsed and the top of the stack is a unary operator,
+     * the operation is performed, and then the stack is rechecked to see if
+     * this new operand is part of a binary operation; if so, it is handled as
+     * above.
+     *
+     * A '(' is simply pushed on the stack; it is valid only if the stack is
+     * empty, or the top element of the stack is an operator (for which the
+     * parenthesized expression will become an operand).  By the time the
+     * corresponding ')' is parsed everything in between should have been
+     * parsed and evaluated to a single operand (or else is a syntax error),
+     * and is handled as a regular operand */
+
+    stack = newAV();
+
+    while (RExC_parse < RExC_end) {
+        I32 top_index = av_top(stack);
+        SV** top_ptr;
+        SV* current = NULL;
+
+        /* Skip white space */
+        RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                TRUE); /* means recognize comments */
+        if (RExC_parse >= RExC_end
+            || (curchar = UCHARAT(RExC_parse)) == ']')
+        {   /* Exit loop at the end */
+            break;
+        }
+
+        switch (curchar) {
+
+            default:
+                RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                vFAIL("Unexpected character");
+
+            case '\\':
+                (void) regclass(pRExC_state, flagp,depth+1,
+                                TRUE, /* means parse just the next thing */
+                                FALSE, /* don't allow multi-char folds */
+                                FALSE, /* don't silence non-portable warnings.
+                                        */
+                                &current);
+                /* regclass() will return with parsing just the \ sequence,
+                 * leaving the parse pointer at the next thing to parse */
+                RExC_parse--;
+                goto handle_operand;
+
+            case '[':   /* Is a bracketed character class */
+            {
+                bool is_posix_class = could_it_be_POSIX(pRExC_state);
+
+                if (! is_posix_class) {
+                    RExC_parse++;
+                }
+
+                (void) regclass(pRExC_state, flagp,depth+1,
+                                is_posix_class, /* parse the whole char class
+                                                   only if not a posix class */
+                                FALSE, /* don't allow multi-char folds */
+                                FALSE, /* don't silence non-portable warnings.
+                                        */
+                                &current);
+                /* function call leaves parse pointing to the ']', except if we
+                 * faked it */
+                if (is_posix_class) {
+                    RExC_parse--;
+                }
+
+                goto handle_operand;
+            }
+
+            case '&':
+            case '|':
+            case '+':
+            case '-':
+            case '^':
+                if (top_index < 0
+                    || ( ! (top_ptr = av_fetch(stack, top_index, FALSE)))
+                    || ! IS_OPERAND(*top_ptr))
+                {
+                    RExC_parse++;
+                    vFAIL2("Unexpected binary operator '%c' with no preceding operand", curchar);
+                }
+                av_push(stack, newSVuv(curchar));
+                break;
+
+            case '!':
+                av_push(stack, newSVuv(curchar));
+                break;
+
+            case '(':
+                if (top_index >= 0) {
+                    top_ptr = av_fetch(stack, top_index, FALSE);
+                    assert(top_ptr);
+                    if (IS_OPERAND(*top_ptr)) {
+                        RExC_parse++;
+                        vFAIL("Unexpected '(' with no preceding operator");
+                    }
+                }
+                av_push(stack, newSVuv(curchar));
+                break;
+
+            case ')':
+            {
+                SV* lparen;
+                if (top_index < 1
+                    || ! (current = av_pop(stack))
+                    || ! IS_OPERAND(current)
+                    || ! (lparen = av_pop(stack))
+                    || IS_OPERAND(lparen)
+                    || SvUV(lparen) != '(')
+                {
+                    RExC_parse++;
+                    vFAIL("Unexpected ')'");
+                }
+                top_index -= 2;
+                SvREFCNT_dec_NN(lparen);
+
+                /* FALL THROUGH */
+            }
+
+              handle_operand:
+
+                /* Here, we have an operand to process, in 'current' */
+
+                if (top_index < 0) {    /* Just push if stack is empty */
+                    av_push(stack, current);
+                }
+                else {
+                    SV* top = av_pop(stack);
+                    char current_operator;
+
+                    if (IS_OPERAND(top)) {
+                        vFAIL("Operand with no preceding operator");
+                    }
+                    current_operator = (char) SvUV(top);
+                    switch (current_operator) {
+                        case '(':   /* Push the '(' back on followed by the new
+                                       operand */
+                            av_push(stack, top);
+                            av_push(stack, current);
+                            SvREFCNT_inc(top);  /* Counters the '_dec' done
+                                                   just after the 'break', so
+                                                   it doesn't get wrongly freed
+                                                 */
+                            break;
+
+                        case '!':
+                            _invlist_invert(current);
+
+                            /* Unlike binary operators, the top of the stack,
+                             * now that this unary one has been popped off, may
+                             * legally be an operator, and we now have operand
+                             * for it. */
+                            top_index--;
+                            SvREFCNT_dec_NN(top);
+                            goto handle_operand;
+
+                        case '&':
+                            _invlist_intersection(av_pop(stack),
+                                                   current,
+                                                   &current);
+                            av_push(stack, current);
+                            break;
+
+                        case '|':
+                        case '+':
+                            _invlist_union(av_pop(stack), current, &current);
+                            av_push(stack, current);
+                            break;
+
+                        case '-':
+                            _invlist_subtract(av_pop(stack), current, &current);
+                            av_push(stack, current);
+                            break;
+
+                        case '^':   /* The union minus the intersection */
+                        {
+                            SV* i = NULL;
+                            SV* u = NULL;
+                            SV* element;
+
+                            element = av_pop(stack);
+                            _invlist_union(element, current, &u);
+                            _invlist_intersection(element, current, &i);
+                            _invlist_subtract(u, i, &current);
+                            av_push(stack, current);
+                            SvREFCNT_dec_NN(i);
+                            SvREFCNT_dec_NN(u);
+                            SvREFCNT_dec_NN(element);
+                            break;
+                        }
+
+                        default:
+                            Perl_croak(aTHX_ "panic: Unexpected item on '(?[ ])' stack");
+                }
+                SvREFCNT_dec_NN(top);
+            }
+        }
+
+        RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+    }
+
+    if (av_top(stack) < 0   /* Was empty */
+        || ((final = av_pop(stack)) == NULL)
+        || ! IS_OPERAND(final)
+        || av_top(stack) >= 0)  /* More left on stack */
+    {
+        vFAIL("Incomplete expression within '(?[ ])'");
+    }
+
+    invlist_iterinit(final);
+
+    /* Here, 'final' is the resultant inversion list of evaluating the
+     * expression.  Feed it to regclass() to generate the real resultant node.
+     * regclass() is expecting a string of ranges and individual code points */
+    result_string = newSVpvs("");
+    while (invlist_iternext(final, &start, &end)) {
+        if (start == end) {
+            Perl_sv_catpvf(aTHX_ result_string, "\\x{%"UVXf"}", start);
+        }
+        else {
+            Perl_sv_catpvf(aTHX_ result_string, "\\x{%"UVXf"}-\\x{%"UVXf"}",
+                                                     start,          end);
+        }
+    }
+
+    save_parse = RExC_parse;
+    RExC_parse = SvPV(result_string, len);
+    save_end = RExC_end;
+    RExC_end = RExC_parse + len;
+
+    /* We turn off folding around the call, as the class we have constructed
+     * already has all folding taken into consideration, and we don't want
+     * regclass() to add to that */
+    RExC_flags &= ~RXf_PMf_FOLD;
+    node = regclass(pRExC_state, flagp,depth+1,
+                    FALSE, /* means parse the whole char class */
+                    FALSE, /* don't allow multi-char folds */
+                    TRUE, /* silence non-portable warnings.  The above may very
+                             well have generated non-portable code points, but
+                             they're valid on this machine */
+                    NULL);
+    if (save_fold) {
+        RExC_flags |= RXf_PMf_FOLD;
+    }
+    RExC_parse = save_parse + 1;
+    RExC_end = save_end;
+    SvREFCNT_dec_NN(final);
+    SvREFCNT_dec_NN(result_string);
+    SvREFCNT_dec_NN(stack);
+
+    nextchar(pRExC_state);
+    Set_Node_Length(node, RExC_parse - oregcomp_parse + 1); /* MJD */
+    return node;
+}
+#undef IS_OPERAND
 
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
@@ -11337,8 +11774,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                        character; used under /i */
     UV n;
     char * stop_ptr = RExC_end;    /* where to stop parsing */
-    const bool strict = FALSE;
-    const bool skip_white = FALSE;
+    const bool skip_white = cBOOL(ret_invlist);
+    const bool strict = cBOOL(ret_invlist);
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the

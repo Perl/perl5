@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Regular Expression Set Operations
+
+This is an experimental feature to allow matching against the the union,
+intersection, etc., of sets of code points, similar to
+L<Unicode::Regex::Set>.  It can also be used to extend C</x> processing
+to [bracketed] character classes, and as a replacement of user-defined
+properties, allowing more complex expressions than they do.  See
+L<perlre/(?[ ])>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
