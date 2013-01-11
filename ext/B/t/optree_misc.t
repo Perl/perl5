@@ -437,12 +437,12 @@ checkOptree ( name      => 'm?x?',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 914 optree_misc.t:434) v:{ ->2
+# 1        <;> nextstate(main 914 optree_misc.t:434) v:>,<,%,{ ->2
 # 2        </> match(/"x"/) /RTIME ->3
 EOT_EOT
 # 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 914 optree_misc.t:434) v:{ ->2
+# 1        <;> nextstate(main 914 optree_misc.t:434) v:>,<,%,{ ->2
 # 2        </> match(/"x"/) /RTIME ->3
 EONT_EONT
 
