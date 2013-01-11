@@ -6456,6 +6456,11 @@ PERL_STATIC_INLINE U8	S_compute_EXACTish(pTHX_ struct RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
 	assert(pRExC_state)
 
+STATIC bool	S_could_it_be_POSIX(pTHX_ struct RExC_state_t *pRExC_state)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_COULD_IT_BE_POSIX	\
+	assert(pRExC_state)
+
 PERL_STATIC_INLINE UV*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6485,6 +6490,13 @@ STATIC bool	S_grok_bslash_N(pTHX_ struct RExC_state_t *pRExC_state, regnode** no
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
 	assert(pRExC_state); assert(flagp)
+
+STATIC regnode*	S_handle_sets(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth, char * const oregcomp_parse)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_HANDLE_SETS	\
+	assert(pRExC_state); assert(flagp); assert(oregcomp_parse)
 
 PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
@@ -6639,7 +6651,7 @@ STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, 
 #define PERL_ARGS_ASSERT_REGBRANCH	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
+STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1, bool allow_multi_fold, const bool silence_non_portable, SV** ret_invlist)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGCLASS	\
@@ -6651,13 +6663,20 @@ STATIC void	S_reginsert(pTHX_ struct RExC_state_t *pRExC_state, U8 op, regnode *
 #define PERL_ARGS_ASSERT_REGINSERT	\
 	assert(pRExC_state); assert(opnd)
 
+STATIC char *	S_regpatws(struct RExC_state_t *pRExC_state, char *p, const bool recognize_comment)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+#define PERL_ARGS_ASSERT_REGPATWS	\
+	assert(pRExC_state); assert(p)
+
 STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)
 
-PERL_STATIC_INLINE I32	S_regpposixcc(pTHX_ struct RExC_state_t *pRExC_state, I32 value, SV *free_me)
+PERL_STATIC_INLINE I32	S_regpposixcc(pTHX_ struct RExC_state_t *pRExC_state, I32 value, SV *free_me, const bool strict)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REGPPOSIXCC	\
 	assert(pRExC_state)
@@ -6756,23 +6775,21 @@ PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name,
 STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warning)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_grok_bslash_o(pTHX_ const char* s, UV* uv, STRLEN* len, const char** error_msg, const bool output_warning)
+STATIC bool	S_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_O	\
-	assert(s); assert(uv); assert(len); assert(error_msg)
+	assert(s); assert(uv); assert(error_msg)
 
-PERL_STATIC_INLINE bool	S_grok_bslash_x(pTHX_ const char* s, UV* uv, STRLEN* len, const char** error_msg, const bool output_warning)
+PERL_STATIC_INLINE bool	S_grok_bslash_x(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_X	\
-	assert(s); assert(uv); assert(len); assert(error_msg)
+	assert(s); assert(uv); assert(error_msg)
 
 PERL_STATIC_INLINE I32	S_regcurly(pTHX_ const char *s)
 			__attribute__warn_unused_result__

@@ -5492,6 +5492,8 @@ t/re/regexp.t			See if regular expressions work
 t/re/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/re/regexp_unicode_prop.t	See if unicode properties work in regular expressions as expected
 t/re/regexp_unicode_prop_thr.t	See if unicode properties work in regular expressions as expected under threads
+t/re/regex_sets_compat.t	Test (?[ ]) is compatible with old [ ]
+t/re/regex_sets.t		Test (?[ ])
 t/re/reg_fold.t			See if case folding works properly
 t/re/reg_mesg.t			See if one can get regular expression errors
 t/re/reg_namedcapture.t		Make sure glob assignment doesn't break named capture

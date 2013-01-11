@@ -736,8 +736,18 @@ ApdR	|I32	|looks_like_number|NN SV *const sv
 Apd	|UV	|grok_bin	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 EMsR	|char	|grok_bslash_c	|const char source|const bool utf8|const bool output_warning
-EMsR	|bool	|grok_bslash_o	|NN const char* s|NN UV* uv|NN STRLEN* len|NN const char** error_msg|const bool output_warning
-EMiR	|bool	|grok_bslash_x	|NN const char* s|NN UV* uv|NN STRLEN* len|NN const char** error_msg|const bool output_warning
+EMsR	|bool	|grok_bslash_o	|NN char** s|NN UV* uv           \
+				|NN const char** error_msg       \
+				|const bool output_warning       \
+				|const bool strict               \
+				|const bool silence_non_portable \
+				|const bool utf8
+EMiR	|bool	|grok_bslash_x	|NN char** s|NN UV* uv           \
+				|NN const char** error_msg       \
+				|const bool output_warning       \
+				|const bool strict               \
+				|const bool silence_non_portable \
+				|const bool utf8
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
@@ -1950,7 +1960,14 @@ Es	|regnode*|regbranch	|NN struct RExC_state_t *pRExC_state \
 Es	|STRLEN	|reguni		|NN const struct RExC_state_t *pRExC_state \
 				|UV uv|NN char *s
 Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state \
-				|NN I32 *flagp|U32 depth
+				|NN I32 *flagp|U32 depth|const bool stop_at_1 \
+				|bool allow_multi_fold                        \
+				|const bool silence_non_portable	      \
+				|NULLOK SV** ret_invlist
+Es	|bool|could_it_be_POSIX	|NN struct RExC_state_t *pRExC_state
+Es	|regnode*|handle_sets	|NN struct RExC_state_t *pRExC_state \
+				|NN I32 *flagp|U32 depth \
+				|NN char * const oregcomp_parse
 Es	|regnode*|reg_node	|NN struct RExC_state_t *pRExC_state|U8 op
 Es	|UV	|reg_recode	|const char value|NN SV **encp
 Es	|regnode*|regpiece	|NN struct RExC_state_t *pRExC_state \
@@ -1970,6 +1987,8 @@ Es	|U32	|join_exact	|NN struct RExC_state_t *pRExC_state \
 				|U32 flags|NULLOK regnode *val|U32 depth
 EsRn	|char *	|regwhite	|NN struct RExC_state_t *pRExC_state \
 				|NN char *p
+EsRn	|char *	|regpatws	|NN struct RExC_state_t *pRExC_state \
+				|NN char *p|const bool recognize_comment
 Ei	|void   |alloc_maybe_populate_EXACT|NN struct RExC_state_t *pRExC_state \
 				|NN regnode *node|NN I32 *flagp|STRLEN len \
 				|UV code_point
@@ -2000,7 +2019,7 @@ EsRn	|U32	|add_data	|NN struct RExC_state_t *pRExC_state|U32 n \
 				|NN const char *s
 rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
 Ei	|I32	|regpposixcc	|NN struct RExC_state_t *pRExC_state \
-				|I32 value|NULLOK SV *free_me
+				|I32 value|NULLOK SV *free_me|const bool strict
 Es	|I32	|make_trie	|NN struct RExC_state_t *pRExC_state \
 				|NN regnode *startbranch|NN regnode *first \
 				|NN regnode *last|NN regnode *tail \

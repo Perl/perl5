@@ -529,6 +529,12 @@ static const scan_data_t zero_scan_data =
 	    (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
 
+#define	vFAIL4(m,a1,a2,a3) STMT_START {			\
+    if (!SIZE_ONLY)					\
+	SAVEFREESV(RExC_rx_sv);				\
+    Simple_vFAIL4(m, a1, a2, a3);			\
+} STMT_END
+
 #define	ckWARNreg(loc,m) STMT_START {					\
     const IV offset = loc - RExC_precomp;				\
     Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
@@ -8900,6 +8906,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    vFAIL2("Unknown switch condition (?(%.2s", RExC_parse);
 		}
 	    }
+	    case '[':           /* (?[ ... ]) */
+                return handle_sets(pRExC_state, flagp, depth, oregcomp_parse);
             case 0:
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
@@ -10099,7 +10107,11 @@ tryagain:
     case '[':
     {
 	char * const oregcomp_parse = ++RExC_parse;
-        ret = regclass(pRExC_state, flagp,depth+1);
+        ret = regclass(pRExC_state, flagp,depth+1,
+                       FALSE, /* means parse the whole char class */
+                       TRUE, /* allow multi-char folds */
+                       FALSE, /* don't silence non-portable warnings. */
+                       NULL);
 	if (*RExC_parse != ']') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
@@ -10287,32 +10299,20 @@ tryagain:
 	case 'p':
 	case 'P':
 	    {
-		char* const oldregxend = RExC_end;
 #ifdef DEBUGGING
 		char* parse_start = RExC_parse - 2;
 #endif
 
-		if (RExC_parse[1] == '{') {
-		  /* a lovely hack--pretend we saw [\pX] instead */
-		    RExC_end = strchr(RExC_parse, '}');
-		    if (!RExC_end) {
-		        const U8 c = (U8)*RExC_parse;
-			RExC_parse += 2;
-			RExC_end = oldregxend;
-			vFAIL2("Missing right brace on \\%c{}", c);
-		    }
-		    RExC_end++;
-		}
-		else {
-		    RExC_end = RExC_parse + 2;
-		    if (RExC_end > oldregxend)
-			RExC_end = oldregxend;
-		}
 		RExC_parse--;
 
-                ret = regclass(pRExC_state, flagp,depth+1);
+                ret = regclass(pRExC_state, flagp,depth+1,
+                               TRUE, /* means just parse this element */
+                               FALSE, /* don't allow multi-char folds */
+                               FALSE, /* don't silence non-portable warnings.
+                                         It would be a bug if these returned
+                                         non-portables */
+                               NULL);
 
-		RExC_end = oldregxend;
 		RExC_parse--;
 
 		Set_Node_Offset(ret, parse_start + 2);
@@ -10628,25 +10628,24 @@ tryagain:
 			break;
 		    case 'o':
 			{
-			    STRLEN brace_len = len;
 			    UV result;
 			    const char* error_msg;
 
-			    bool valid = grok_bslash_o(p,
+			    bool valid = grok_bslash_o(&p,
 						       &result,
-						       &brace_len,
 						       &error_msg,
-						       1);
-			    p += brace_len;
+						       TRUE, /* out warnings */
+                                                       FALSE, /* not strict */
+                                                       TRUE, /* Output warnings
+                                                                for non-
+                                                                portables */
+                                                       UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
 						   to exact spot of failure */
 				vFAIL(error_msg);
 			    }
-			    else
-			    {
-				ender = result;
-			    }
+                            ender = result;
 			    if (PL_encoding && ender < 0x100) {
 				goto recode_encoding;
 			    }
@@ -10657,24 +10656,25 @@ tryagain:
 			}
 		    case 'x':
 			{
-			    STRLEN brace_len = len;
 			    UV result;
 			    const char* error_msg;
 
-			    bool valid = grok_bslash_x(p,
+			    bool valid = grok_bslash_x(&p,
 						       &result,
-						       &brace_len,
 						       &error_msg,
-						       1);
-			    p += brace_len;
+						       TRUE, /* out warnings */
+                                                       FALSE, /* not strict */
+                                                       TRUE, /* Output warnings
+                                                                for non-
+                                                                portables */
+                                                       UTF);
 			    if (! valid) {
 				RExC_parse = p;	/* going to die anyway; point
 						   to exact spot of failure */
 				vFAIL(error_msg);
 			    }
-			    else {
-				ender = result;
-			    }
+                            ender = result;
+
 			    if (PL_encoding && ender < 0x100) {
 				goto recode_encoding;
 			    }
@@ -11097,6 +11097,40 @@ S_regwhite( RExC_state_t *pRExC_state, char *p )
     return p;
 }
 
+STATIC char *
+S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
+{
+    /* Returns the next non-pattern-white space, non-comment character (the
+     * latter only if 'recognize_comment is true) in the string p, which is
+     * ended by RExC_end.  If there is no line break ending a comment,
+     * RExC_seen has added the REG_SEEN_RUN_ON_COMMENT flag; */
+    const char *e = RExC_end;
+
+    PERL_ARGS_ASSERT_REGPATWS;
+
+    while (p < e) {
+        STRLEN len;
+	if ((len = is_PATWS_safe(p, e, UTF))) {
+	    p += len;
+        }
+	else if (recognize_comment && *p == '#') {
+            bool ended = 0;
+	    do {
+                p++;
+                if (is_LNBREAK_safe(p, e, UTF)) {
+		    ended = 1;
+		    break;
+		}
+	    } while (p < e);
+	    if (!ended)
+	        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
+	}
+	else
+	    break;
+    }
+    return p;
+}
+
 /* Parse POSIX character classes: [[:foo:]], [[=foo=]], [[.foo.]].
    Character classes ([:foo:]) can also be negated ([:^foo:]).
    Returns a named class id (ANYOF_XXX) if successful, -1 otherwise.
@@ -11108,7 +11142,8 @@ S_regwhite( RExC_state_t *pRExC_state, char *p )
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
 
 PERL_STATIC_INLINE I32
-S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
+S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
+                    const bool strict)
 {
     dVAR;
     I32 namedclass = OOB_NAMEDCLASS;
@@ -11117,15 +11152,27 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 
     if (value == '[' && RExC_parse + 1 < RExC_end &&
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
-	POSIXCC(UCHARAT(RExC_parse))) {
+	POSIXCC(UCHARAT(RExC_parse)))
+    {
 	const char c = UCHARAT(RExC_parse);
 	char* const s = RExC_parse++;
 
 	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
 	    RExC_parse++;
-	if (RExC_parse == RExC_end)
+	if (RExC_parse == RExC_end) {
+            if (strict) {
+
+                /* Try to give a better location for the error (than the end of
+                 * the string) by looking for the matching ']' */
+                RExC_parse = s;
+                while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
+                    RExC_parse++;
+                }
+                vFAIL2("Unmatched '%c' in POSIX class", c);
+            }
 	    /* Grandfather lone [:, [=, [. */
 	    RExC_parse = s;
+        }
 	else {
 	    const char* const t = RExC_parse++; /* skip over the c */
 	    assert(*t == c);
@@ -11141,7 +11188,9 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 		    /* Initially switch on the length of the name.  */
 		    switch (skip) {
 		    case 4:
-			if (memEQ(posixcc, "word", 4)) /* this is not POSIX, this is the Perl \w */
+                        if (memEQ(posixcc, "word", 4)) /* this is not POSIX,
+                                                          this is the Perl \w
+                                                        */
 			    namedclass = ANYOF_WORDCHAR;
 			break;
 		    case 5:
@@ -11224,6 +11273,11 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 	    } else {
 		/* Maternal grandfather:
 		 * "[:" ending in ":" but not in ":]" */
+                if (strict) {
+                    vFAIL("Unmatched '[' in POSIX class");
+                }
+
+                /* Grandfather lone [:, [=, [. */
 		RExC_parse = s;
 	    }
 	}
@@ -11232,6 +11286,441 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
     return namedclass;
 }
 
+STATIC bool
+S_could_it_be_POSIX(pTHX_ RExC_state_t *pRExC_state)
+{
+    /* This applies some heuristics at the current parse position (which should
+     * be at a '[') to see if what follows might be intended to be a [:posix:]
+     * class.  It returns true if it really is a posix class, of course, but it
+     * also can return true if it thinks that what was intended was a posix
+     * class that didn't quite make it.
+     *
+     * It will return true for
+     *      [:alphanumerics:
+     *      [:alphanumerics]  (as long as the ] isn't followed immediately by a
+     *                         ')' indicating the end of the (?[
+     *      [:any garbage including %^&$ punctuation:]
+     *
+     * This is designed to be called only from S_handle_sets; it could be
+     * easily adapted to be called from the spot at the beginning of regclass()
+     * that checks to see in a normal bracketed class if the surrounding []
+     * have been omitted ([:word:] instead of [[:word:]]).  But doing so would
+     * change long-standing behavior, so I (khw) didn't do that */
+    char* p = RExC_parse + 1;
+    char first_char = *p;
+
+    PERL_ARGS_ASSERT_COULD_IT_BE_POSIX;
+
+    assert(*(p - 1) == '[');
+
+    if (! POSIXCC(first_char)) {
+        return FALSE;
+    }
+
+    p++;
+    while (p < RExC_end && isWORDCHAR(*p)) p++;
+
+    if (p >= RExC_end) {
+        return FALSE;
+    }
+
+    if (p - RExC_parse > 2    /* Got at least 1 word character */
+        && (*p == first_char
+            || (*p == ']' && p + 1 < RExC_end && *(p + 1) != ')')))
+    {
+        return TRUE;
+    }
+
+    p = (char *) memchr(RExC_parse, ']', RExC_end - RExC_parse);
+
+    return (p
+            && p - RExC_parse > 2 /* [:] evaluates to colon;
+                                      [::] is a bad posix class. */
+            && first_char == *(p - 1));
+}
+
+STATIC regnode *
+S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
+                   char * const oregcomp_parse)
+{
+    /* Handle the (?[...]) construct to do set operations */
+
+    U8 curchar;
+    UV start, end;	/* End points of code point ranges */
+    SV* result_string;
+    char *save_end, *save_parse;
+    SV* final;
+    STRLEN len;
+    regnode* node;
+    AV* stack;
+    const bool save_fold = FOLD;
+
+    GET_RE_DEBUG_FLAGS_DECL;
+
+    PERL_ARGS_ASSERT_HANDLE_SETS;
+
+    if (LOC) {
+        vFAIL("(?[...]) not valid in locale");
+    }
+    RExC_uni_semantics = 1;
+
+    /* This will return only an ANYOF regnode, or (unlikely) something smaller
+     * (such as EXACT).  Thus we can skip most everything if just sizing.  We
+     * call regclass to handle '[]' so as to not have to reinvent its parsing
+     * rules here (throwing away the size it computes each time).  And, we exit
+     * upon an unescaped ']' that isn't one ending a regclass.  To do both
+     * these things, we need to realize that something preceded by a backslash
+     * is escaped, so we have to keep track of backslashes */
+    if (SIZE_ONLY) {
+
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__REGEX_SETS),
+            "The regex_sets feature is experimental" REPORT_LOCATION,
+            (int) (RExC_parse - RExC_precomp) , RExC_precomp, RExC_parse);
+
+        while (RExC_parse < RExC_end) {
+            SV* current = NULL;
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                TRUE); /* means recognize comments */
+            switch (*RExC_parse) {
+                default:
+                    break;
+                case '\\':
+                    /* Skip the next byte.  This would have to change to skip
+                     * the next character if we were to recognize and handle
+                     * specific non-ASCIIs */
+                    RExC_parse++;
+                    break;
+                case '[':
+                {
+                    /* If this looks like it is a [:posix:] class, leave the
+                     * parse pointer at the '[' to fool regclass() into
+                     * thinking it is part of a '[[:posix]]'.  That function
+                     * will use strict checking to force a syntax error if it
+                     * doesn't work out to a legitimate class */
+                    bool is_posix_class = could_it_be_POSIX(pRExC_state);
+                    if (! is_posix_class) {
+                        RExC_parse++;
+                    }
+
+                    (void) regclass(pRExC_state, flagp,depth+1,
+                                    is_posix_class, /* parse the whole char
+                                                       class only if not a
+                                                       posix class */
+                                    FALSE, /* don't allow multi-char folds */
+                                    TRUE, /* silence non-portable warnings. */
+                                    &current);
+                    /* function call leaves parse pointing to the ']', except
+                     * if we faked it */
+                    if (is_posix_class) {
+                        RExC_parse--;
+                    }
+
+                    SvREFCNT_dec(current);   /* In case it returned something */
+                    break;
+                }
+
+                case ']':
+                    RExC_parse++;
+                    if (RExC_parse < RExC_end
+                        && *RExC_parse == ')')
+                    {
+                        node = reganode(pRExC_state, ANYOF, 0);
+                        RExC_size += ANYOF_SKIP;
+                        nextchar(pRExC_state);
+                        Set_Node_Length(node,
+                                RExC_parse - oregcomp_parse + 1); /* MJD */
+                        return node;
+                    }
+                    goto no_close;
+            }
+            RExC_parse++;
+        }
+
+        no_close:
+        FAIL("Syntax error in (?[...])");
+    }
+#define av_top(a) av_len(a) /* XXX Temporary */
+
+    /* Pass 2 only after this.  Everything in this construct is a
+     * metacharacter.  Operands begin with either a '\' (for an escape
+     * sequence), or a '[' for a bracketed character class.  Any other
+     * character should be an operator, or parenthesis for grouping.  Both
+     * types of operands are handled by calling regclass() to parse them.  It
+     * is called with a parameter to indicate to return the computed inversion
+     * list.  The parsing here is implemented via a stack.  Each entry on the
+     * stack is a single character representing one of the operators, or the
+     * '('; or else a pointer to an operand inversion list. */
+
+#define IS_OPERAND(a)  (! SvIOK(a))
+
+    /* The stack starts empty.  It is a syntax error if the first thing parsed
+     * is a binary operator; everything else is pushed on the stack.  When an
+     * operand is parsed, the top of the stack is examined.  If it is a binary
+     * operator, the item before it should be an operand, and both are replaced
+     * by the result of doing that operation on the new operand and the one on
+     * the stack.   Thus a sequence of binary operands is reduced to a single
+     * one before the next one is parsed.
+     *
+     * A unary operator may immediately follow a binary in the input, for
+     * example
+     *      [a] + ! [b]
+     * When an operand is parsed and the top of the stack is a unary operator,
+     * the operation is performed, and then the stack is rechecked to see if
+     * this new operand is part of a binary operation; if so, it is handled as
+     * above.
+     *
+     * A '(' is simply pushed on the stack; it is valid only if the stack is
+     * empty, or the top element of the stack is an operator (for which the
+     * parenthesized expression will become an operand).  By the time the
+     * corresponding ')' is parsed everything in between should have been
+     * parsed and evaluated to a single operand (or else is a syntax error),
+     * and is handled as a regular operand */
+
+    stack = newAV();
+
+    while (RExC_parse < RExC_end) {
+        I32 top_index = av_top(stack);
+        SV** top_ptr;
+        SV* current = NULL;
+
+        /* Skip white space */
+        RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                TRUE); /* means recognize comments */
+        if (RExC_parse >= RExC_end
+            || (curchar = UCHARAT(RExC_parse)) == ']')
+        {   /* Exit loop at the end */
+            break;
+        }
+
+        switch (curchar) {
+
+            default:
+                RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                vFAIL("Unexpected character");
+
+            case '\\':
+                (void) regclass(pRExC_state, flagp,depth+1,
+                                TRUE, /* means parse just the next thing */
+                                FALSE, /* don't allow multi-char folds */
+                                FALSE, /* don't silence non-portable warnings.
+                                        */
+                                &current);
+                /* regclass() will return with parsing just the \ sequence,
+                 * leaving the parse pointer at the next thing to parse */
+                RExC_parse--;
+                goto handle_operand;
+
+            case '[':   /* Is a bracketed character class */
+            {
+                bool is_posix_class = could_it_be_POSIX(pRExC_state);
+
+                if (! is_posix_class) {
+                    RExC_parse++;
+                }
+
+                (void) regclass(pRExC_state, flagp,depth+1,
+                                is_posix_class, /* parse the whole char class
+                                                   only if not a posix class */
+                                FALSE, /* don't allow multi-char folds */
+                                FALSE, /* don't silence non-portable warnings.
+                                        */
+                                &current);
+                /* function call leaves parse pointing to the ']', except if we
+                 * faked it */
+                if (is_posix_class) {
+                    RExC_parse--;
+                }
+
+                goto handle_operand;
+            }
+
+            case '&':
+            case '|':
+            case '+':
+            case '-':
+            case '^':
+                if (top_index < 0
+                    || ( ! (top_ptr = av_fetch(stack, top_index, FALSE)))
+                    || ! IS_OPERAND(*top_ptr))
+                {
+                    RExC_parse++;
+                    vFAIL2("Unexpected binary operator '%c' with no preceding operand", curchar);
+                }
+                av_push(stack, newSVuv(curchar));
+                break;
+
+            case '!':
+                av_push(stack, newSVuv(curchar));
+                break;
+
+            case '(':
+                if (top_index >= 0) {
+                    top_ptr = av_fetch(stack, top_index, FALSE);
+                    assert(top_ptr);
+                    if (IS_OPERAND(*top_ptr)) {
+                        RExC_parse++;
+                        vFAIL("Unexpected '(' with no preceding operator");
+                    }
+                }
+                av_push(stack, newSVuv(curchar));
+                break;
+
+            case ')':
+            {
+                SV* lparen;
+                if (top_index < 1
+                    || ! (current = av_pop(stack))
+                    || ! IS_OPERAND(current)
+                    || ! (lparen = av_pop(stack))
+                    || IS_OPERAND(lparen)
+                    || SvUV(lparen) != '(')
+                {
+                    RExC_parse++;
+                    vFAIL("Unexpected ')'");
+                }
+                top_index -= 2;
+                SvREFCNT_dec_NN(lparen);
+
+                /* FALL THROUGH */
+            }
+
+              handle_operand:
+
+                /* Here, we have an operand to process, in 'current' */
+
+                if (top_index < 0) {    /* Just push if stack is empty */
+                    av_push(stack, current);
+                }
+                else {
+                    SV* top = av_pop(stack);
+                    char current_operator;
+
+                    if (IS_OPERAND(top)) {
+                        vFAIL("Operand with no preceding operator");
+                    }
+                    current_operator = (char) SvUV(top);
+                    switch (current_operator) {
+                        case '(':   /* Push the '(' back on followed by the new
+                                       operand */
+                            av_push(stack, top);
+                            av_push(stack, current);
+                            SvREFCNT_inc(top);  /* Counters the '_dec' done
+                                                   just after the 'break', so
+                                                   it doesn't get wrongly freed
+                                                 */
+                            break;
+
+                        case '!':
+                            _invlist_invert(current);
+
+                            /* Unlike binary operators, the top of the stack,
+                             * now that this unary one has been popped off, may
+                             * legally be an operator, and we now have operand
+                             * for it. */
+                            top_index--;
+                            SvREFCNT_dec_NN(top);
+                            goto handle_operand;
+
+                        case '&':
+                            _invlist_intersection(av_pop(stack),
+                                                   current,
+                                                   &current);
+                            av_push(stack, current);
+                            break;
+
+                        case '|':
+                        case '+':
+                            _invlist_union(av_pop(stack), current, &current);
+                            av_push(stack, current);
+                            break;
+
+                        case '-':
+                            _invlist_subtract(av_pop(stack), current, &current);
+                            av_push(stack, current);
+                            break;
+
+                        case '^':   /* The union minus the intersection */
+                        {
+                            SV* i = NULL;
+                            SV* u = NULL;
+                            SV* element;
+
+                            element = av_pop(stack);
+                            _invlist_union(element, current, &u);
+                            _invlist_intersection(element, current, &i);
+                            _invlist_subtract(u, i, &current);
+                            av_push(stack, current);
+                            SvREFCNT_dec_NN(i);
+                            SvREFCNT_dec_NN(u);
+                            SvREFCNT_dec_NN(element);
+                            break;
+                        }
+
+                        default:
+                            Perl_croak(aTHX_ "panic: Unexpected item on '(?[ ])' stack");
+                }
+                SvREFCNT_dec_NN(top);
+            }
+        }
+
+        RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+    }
+
+    if (av_top(stack) < 0   /* Was empty */
+        || ((final = av_pop(stack)) == NULL)
+        || ! IS_OPERAND(final)
+        || av_top(stack) >= 0)  /* More left on stack */
+    {
+        vFAIL("Incomplete expression within '(?[ ])'");
+    }
+
+    invlist_iterinit(final);
+
+    /* Here, 'final' is the resultant inversion list of evaluating the
+     * expression.  Feed it to regclass() to generate the real resultant node.
+     * regclass() is expecting a string of ranges and individual code points */
+    result_string = newSVpvs("");
+    while (invlist_iternext(final, &start, &end)) {
+        if (start == end) {
+            Perl_sv_catpvf(aTHX_ result_string, "\\x{%"UVXf"}", start);
+        }
+        else {
+            Perl_sv_catpvf(aTHX_ result_string, "\\x{%"UVXf"}-\\x{%"UVXf"}",
+                                                     start,          end);
+        }
+    }
+
+    save_parse = RExC_parse;
+    RExC_parse = SvPV(result_string, len);
+    save_end = RExC_end;
+    RExC_end = RExC_parse + len;
+
+    /* We turn off folding around the call, as the class we have constructed
+     * already has all folding taken into consideration, and we don't want
+     * regclass() to add to that */
+    RExC_flags &= ~RXf_PMf_FOLD;
+    node = regclass(pRExC_state, flagp,depth+1,
+                    FALSE, /* means parse the whole char class */
+                    FALSE, /* don't allow multi-char folds */
+                    TRUE, /* silence non-portable warnings.  The above may very
+                             well have generated non-portable code points, but
+                             they're valid on this machine */
+                    NULL);
+    if (save_fold) {
+        RExC_flags |= RXf_PMf_FOLD;
+    }
+    RExC_parse = save_parse + 1;
+    RExC_end = save_end;
+    SvREFCNT_dec_NN(final);
+    SvREFCNT_dec_NN(result_string);
+    SvREFCNT_dec_NN(stack);
+
+    nextchar(pRExC_state);
+    Set_Node_Length(node, RExC_parse - oregcomp_parse + 1); /* MJD */
+    return node;
+}
+#undef IS_OPERAND
 
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
@@ -11239,14 +11728,16 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me)
 #define HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION (SvCUR(listsv) != initial_listsv_len)
 
 STATIC regnode *
-S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
+S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
+                 const bool stop_at_1, bool allow_multi_folds,
+                 const bool silence_non_portable, SV** ret_invlist)
 {
-    /* parse a bracketed class specification.  Most of these will produce an ANYOF node;
-     * but something like [a] will produce an EXACT node; [aA], an EXACTFish
-     * node; [[:ascii:]], a POSIXA node; etc.  It is more complex under /i with
-     * multi-character folds: it will be rewritten following the paradigm of
-     * this example, where the <multi-fold>s are characters which fold to
-     * multiple character sequences:
+    /* parse a bracketed class specification.  Most of these will produce an
+     * ANYOF node; but something like [a] will produce an EXACT node; [aA], an
+     * EXACTFish node; [[:ascii:]], a POSIXA node; etc.  It is more complex
+     * under /i with multi-character folds: it will be rewritten following the
+     * paradigm of this example, where the <multi-fold>s are characters which
+     * fold to multiple character sequences:
      *      /[abc\x{multi-fold1}def\x{multi-fold2}ghi]/i
      * gets effectively rewritten as:
      *      /(?:\x{multi-fold1}|\x{multi-fold2}|[abcdefghi]/i
@@ -11263,7 +11754,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
      * compile time */
 
     dVAR;
-    UV nextvalue;
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
     IV range = 0;
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
@@ -11283,6 +11773,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     AV * multi_char_matches = NULL; /* Code points that fold to more than one
                                        character; used under /i */
     UV n;
+    char * stop_ptr = RExC_end;    /* where to stop parsing */
+    const bool skip_white = cBOOL(ret_invlist);
+    const bool strict = cBOOL(ret_invlist);
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
@@ -11332,21 +11825,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state, ANYOF, 0);
 
-    if (!SIZE_ONLY) {
-	ANYOF_FLAGS(ret) = 0;
-    }
-
-    if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
-	RExC_parse++;
-        invert = TRUE;
-        RExC_naughty++;
-    }
-
     if (SIZE_ONLY) {
 	RExC_size += ANYOF_SKIP;
 	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
     }
     else {
+        ANYOF_FLAGS(ret) = 0;
+
  	RExC_emit += ANYOF_SKIP;
 	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
@@ -11355,10 +11840,24 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	initial_listsv_len = SvCUR(listsv);
     }
 
-    nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
+    if (skip_white) {
+        RExC_parse = regpatws(pRExC_state, RExC_parse,
+                              FALSE /* means don't recognize comments */);
+    }
+
+    if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
+	RExC_parse++;
+        invert = TRUE;
+        allow_multi_folds = FALSE;
+        RExC_naughty++;
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                  FALSE /* means don't recognize comments */);
+        }
+    }
 
     /* Check that they didn't say [:posix:] instead of [[:posix:]] */
-    if (!SIZE_ONLY && POSIXCC(nextvalue)) {
+    if (!SIZE_ONLY && RExC_parse < RExC_end && POSIXCC(UCHARAT(RExC_parse))) {
 	const char *s = RExC_parse;
 	const char  c = *s++;
 
@@ -11375,12 +11874,30 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	}
     }
 
-    /* allow 1st char to be ] (allowing it to be - is dealt with later) */
+    /* If the caller wants us to just parse a single element, accomplish this
+     * by faking the loop ending condition */
+    if (stop_at_1 && RExC_end > RExC_parse) {
+        stop_ptr = RExC_parse + 1;
+    }
+
+    /* allow 1st char to be ']' (allowing it to be '-' is dealt with later) */
     if (UCHARAT(RExC_parse) == ']')
 	goto charclassloop;
 
 parseit:
-    while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
+    while (1) {
+        if  (RExC_parse >= stop_ptr) {
+            break;
+        }
+
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                  FALSE /* means don't recognize comments */);
+        }
+
+        if  (UCHARAT(RExC_parse) == ']') {
+            break;
+        }
 
     charclassloop:
 
@@ -11401,10 +11918,13 @@ parseit:
 	else
 	    value = UCHARAT(RExC_parse++);
 
-	nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
-	if (value == '[' && POSIXCC(nextvalue))
-	    namedclass = regpposixcc(pRExC_state, value, listsv);
-	else if (value == '\\') {
+        if (value == '['
+            && RExC_parse < RExC_end
+            && POSIXCC(UCHARAT(RExC_parse)))
+        {
+            namedclass = regpposixcc(pRExC_state, value, listsv, strict);
+        }
+        else if (value == '\\') {
 	    if (UTF) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
@@ -11413,12 +11933,19 @@ parseit:
 	    }
 	    else
 		value = UCHARAT(RExC_parse++);
+
 	    /* Some compilers cannot handle switching on 64-bit integer
 	     * values, therefore value cannot be an UV.  Yes, this will
 	     * be a problem later if we want switch on Unicode.
 	     * A similar issue a little bit later when switching on
 	     * namedclass. --jhi */
-	    switch ((I32)value) {
+
+            /* If the \ is escaping white space when white space is being
+             * skipped, it means that that white space is wanted literally, and
+             * is already in 'value'.  Otherwise, need to translate the escape
+             * into what it signifies. */
+            if (! skip_white || ! is_PATWS_cp(value)) switch ((I32)value) {
+
 	    case 'w':	namedclass = ANYOF_WORDCHAR;	break;
 	    case 'W':	namedclass = ANYOF_NWORDCHAR;	break;
 	    case 's':	namedclass = ANYOF_SPACE;	break;
@@ -11519,8 +12046,13 @@ parseit:
                         }
 
                         /* Here didn't find it.  It could be a user-defined
-                         * property that will be available at run-time.  Add it
-                         * to the list to look up then */
+                         * property that will be available at run-time.  If we
+                         * accept only compile-time properties, is an error;
+                         * otherwise add it to the list for run-time look up */
+                        if (ret_invlist) {
+                            RExC_parse = e + 1;
+                            vFAIL3("Property '%.*s' is unknown", (int) n, name);
+                        }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n",
                                         (value == 'p' ? '+' : '!'),
                                         name);
@@ -11563,7 +12095,8 @@ parseit:
 		    Safefree(name);
 		}
 		RExC_parse = e + 1;
-		namedclass = ANYOF_UNIPROP;  /* no official name, but it's named */
+                namedclass = ANYOF_UNIPROP;  /* no official name, but it's
+                                                named */
 
 		/* \p means they want Unicode semantics */
 		RExC_uni_semantics = 1;
@@ -11580,12 +12113,14 @@ parseit:
 		RExC_parse--;	/* function expects to be pointed at the 'o' */
 		{
 		    const char* error_msg;
-		    bool valid = grok_bslash_o(RExC_parse,
+		    bool valid = grok_bslash_o(&RExC_parse,
 					       &value,
-					       &numlen,
 					       &error_msg,
-					       SIZE_ONLY);
-		    RExC_parse += numlen;
+                                               SIZE_ONLY,   /* warnings in pass
+                                                               1 only */
+                                               strict,
+                                               silence_non_portable,
+                                               UTF);
 		    if (! valid) {
 			vFAIL(error_msg);
 		    }
@@ -11598,13 +12133,14 @@ parseit:
 		RExC_parse--;	/* function expects to be pointed at the 'x' */
 		{
 		    const char* error_msg;
-		    bool valid = grok_bslash_x(RExC_parse,
+		    bool valid = grok_bslash_x(&RExC_parse,
 					       &value,
-					       &numlen,
 					       &error_msg,
-					       1);
-		    RExC_parse += numlen;
-		    if (! valid) {
+					       TRUE, /* Output warnings */
+                                               strict,
+                                               silence_non_portable,
+                                               UTF);
+                    if (! valid) {
 			vFAIL(error_msg);
 		    }
 		}
@@ -11619,9 +12155,15 @@ parseit:
 		{
 		    /* Take 1-3 octal digits */
 		    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
-		    numlen = 3;
-		    value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
+                    numlen = (strict) ? 4 : 3;
+                    value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
+                    if (strict) {
+                        if (numlen != 3) {
+                            RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                            vFAIL("Need exactly 3 octal digits");
+                        }
+                    }
 		    if (PL_encoding && value < 0x100)
 			goto recode_encoding;
 		    break;
@@ -11630,29 +12172,43 @@ parseit:
 		if (! RExC_override_recoding) {
 		    SV* enc = PL_encoding;
 		    value = reg_recode((const char)(U8)value, &enc);
-		    if (!enc && SIZE_ONLY)
-			ckWARNreg(RExC_parse,
+		    if (!enc) {
+                        if (strict) {
+                            vFAIL("Invalid escape in the specified encoding");
+                        }
+                        else if (SIZE_ONLY) {
+                            ckWARNreg(RExC_parse,
 				  "Invalid escape in the specified encoding");
+                        }
+                    }
 		    break;
 		}
 	    default:
 		/* Allow \_ to not give an error */
 		if (!SIZE_ONLY && isWORDCHAR(value) && value != '_') {
-		    SAVEFREESV(RExC_rx_sv);
 		    SAVEFREESV(listsv);
-		    ckWARN2reg(RExC_parse,
-			       "Unrecognized escape \\%c in character class passed through",
-			       (int)value);
+                    if (strict) {
+                        vFAIL2("Unrecognized escape \\%c in character class",
+                               (int)value);
+                    }
+                    else {
+                        SAVEFREESV(RExC_rx_sv);
+                        ckWARN2reg(RExC_parse,
+                            "Unrecognized escape \\%c in character class passed through",
+                            (int)value);
+                    }
 		    (void)ReREFCNT_inc(RExC_rx_sv);
 		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
-	    }
+	    }   /* End of switch on char following backslash */
 	} /* end of handling backslash escape sequences */
 #ifdef EBCDIC
-	else
-	    literal_endpoint++;
+        else
+            literal_endpoint++;
 #endif
+
+        /* Here, we have the current token in 'value' */
 
         /* What matches in a locale is not known until runtime.  This includes
          * what the Posix classes (like \w, [:space:]) match.  Room must be
@@ -11688,15 +12244,20 @@ parseit:
 		    const int w =
 			RExC_parse >= rangebegin ?
 			RExC_parse - rangebegin : 0;
-		    SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
-		    SAVEFREESV(listsv);
-		    ckWARN4reg(RExC_parse,
-			       "False [] range \"%*.*s\"",
-			       w, w, rangebegin);
-		    (void)ReREFCNT_inc(RExC_rx_sv);
-		    SvREFCNT_inc_simple_void_NN(listsv);
-                    cp_list = add_cp_to_invlist(cp_list, '-');
-                    cp_list = add_cp_to_invlist(cp_list, prevvalue);
+		    SAVEFREESV(listsv); /* in case of fatal warnings */
+                    if (strict) {
+                        vFAIL4("False [] range \"%*.*s\"", w, w, rangebegin);
+                    }
+                    else {
+                        SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
+                        ckWARN4reg(RExC_parse,
+                                "False [] range \"%*.*s\"",
+                                w, w, rangebegin);
+                        (void)ReREFCNT_inc(RExC_rx_sv);
+                        SvREFCNT_inc_simple_void_NN(listsv);
+                        cp_list = add_cp_to_invlist(cp_list, '-');
+                        cp_list = add_cp_to_invlist(cp_list, prevvalue);
+                    }
 		}
 
 		range = 0; /* this was not a true range */
@@ -11772,6 +12333,18 @@ parseit:
                          * class */
                         const char *Xname = swash_property_names[classnum];
 
+                        /* If returning the inversion list, we can't defer
+                         * getting this until runtime */
+                        if (ret_invlist && !  PL_utf8_swash_ptrs[classnum]) {
+                            PL_utf8_swash_ptrs[classnum] =
+                                _core_swash_init("utf8", Xname, &PL_sv_undef,
+                                             1, /* binary */
+                                             0, /* not tr/// */
+                                             NULL, /* No inversion list */
+                                             NULL  /* No flags */
+                                            );
+                            assert(PL_utf8_swash_ptrs[classnum]);
+                        }
                         if ( !  PL_utf8_swash_ptrs[classnum]) {
                             if (namedclass % 2 == 0) { /* A non-complemented
                                                           class */
@@ -11956,6 +12529,18 @@ parseit:
 	    }
 	} /* end of namedclass \blah */
 
+        /* Here, we have a single value.  If 'range' is set, it is the ending
+         * of a range--check its validity.  Later, we will handle each
+         * individual code point in the range.  If 'range' isn't set, this
+         * could be the beginning of a range, so check for that by looking
+         * ahead to see if the next real character to be processed is the range
+         * indicator--the minus sign */
+
+        if (skip_white) {
+            RExC_parse = regpatws(pRExC_state, RExC_parse,
+                                FALSE /* means don't recognize comments */);
+        }
+
 	if (range) {
 	    if (prevvalue > value) /* b-a */ {
 		const int w = RExC_parse - rangebegin;
@@ -11965,29 +12550,46 @@ parseit:
 	}
 	else {
             prevvalue = value; /* save the beginning of the potential range */
-	    if (RExC_parse+1 < RExC_end
-		&& *RExC_parse == '-'
-		&& RExC_parse[1] != ']')
-	    {
-		RExC_parse++;
+            if (! stop_at_1     /* Can't be a range if parsing just one thing */
+                && *RExC_parse == '-')
+            {
+                char* next_char_ptr = RExC_parse + 1;
+                if (skip_white) {   /* Get the next real char after the '-' */
+                    next_char_ptr = regpatws(pRExC_state,
+                                             RExC_parse + 1,
+                                             FALSE); /* means don't recognize
+                                                        comments */
+                }
 
-		/* a bad range like \w-, [:word:]- ? */
-		if (namedclass > OOB_NAMEDCLASS) {
-		    if (ckWARN(WARN_REGEXP)) {
-			const int w =
-			    RExC_parse >= rangebegin ?
-			    RExC_parse - rangebegin : 0;
-			vWARN4(RExC_parse,
-			       "False [] range \"%*.*s\"",
-			       w, w, rangebegin);
-		    }
-                    if (!SIZE_ONLY) {
-                        cp_list = add_cp_to_invlist(cp_list, '-');
-                    }
-                    element_count++;
-		} else
-		    range = 1;	/* yeah, it's a range! */
-		continue;	/* but do it the next time */
+                /* If the '-' is at the end of the class (just before the ']',
+                 * it is a literal minus; otherwise it is a range */
+                if (next_char_ptr < RExC_end && *next_char_ptr != ']') {
+                    RExC_parse = next_char_ptr;
+
+                    /* a bad range like \w-, [:word:]- ? */
+                    if (namedclass > OOB_NAMEDCLASS) {
+                        if (strict || ckWARN(WARN_REGEXP)) {
+                            const int w =
+                                RExC_parse >= rangebegin ?
+                                RExC_parse - rangebegin : 0;
+                            if (strict) {
+                                vFAIL4("False [] range \"%*.*s\"",
+                                    w, w, rangebegin);
+                            }
+                            else {
+                                vWARN4(RExC_parse,
+                                    "False [] range \"%*.*s\"",
+                                    w, w, rangebegin);
+                            }
+                        }
+                        if (!SIZE_ONLY) {
+                            cp_list = add_cp_to_invlist(cp_list, '-');
+                        }
+                        element_count++;
+                    } else
+                        range = 1;	/* yeah, it's a range! */
+                    continue;	/* but do it the next time */
+                }
 	    }
 	}
 
@@ -12009,7 +12611,7 @@ parseit:
          *  "ss"  =~ /^[^\xDF]+$/i => N
          *
          * See [perl #89750] */
-        if (FOLD && ! invert && value == prevvalue) {
+        if (FOLD && allow_multi_folds && value == prevvalue) {
             if (value == LATIN_SMALL_LETTER_SHARP_S
                 || (value > 255 && _invlist_contains_cp(PL_HasMultiCharFold,
                                                         value)))
@@ -12204,7 +12806,7 @@ parseit:
     /* If the character class contains only a single element, it may be
      * optimizable into another node type which is smaller and runs faster.
      * Check if this is the case for this class */
-    if (element_count == 1) {
+    if (element_count == 1 && ! ret_invlist) {
         U8 op = END;
         U8 arg = 0;
 
@@ -12257,9 +12859,9 @@ parseit:
                     }
                     /* FALLTHROUGH */
 
-                /* The rest have more possibilities depending on the charset.  We
-                 * take advantage of the enum ordering of the charset modifiers to
-                 * get the exact node type, */
+                /* The rest have more possibilities depending on the charset.
+                 * We take advantage of the enum ordering of the charset
+                 * modifiers to get the exact node type, */
                 default:
                     op = POSIXD + get_regex_charset(RExC_flags);
                     if (op > POSIXA) { /* /aa is same as /a */
@@ -12378,7 +12980,8 @@ parseit:
          * indicators, which are weeded out below using the
          * IS_IN_SOME_FOLD_L1() macro */
         if (invlist_highest(cp_list) < 256) {
-            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list, &fold_intersection);
+            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list,
+                                                           &fold_intersection);
         }
         else {
 
@@ -12710,6 +13313,19 @@ parseit:
 
 	/* Clear the invert flag since have just done it here */
 	invert = FALSE;
+    }
+
+    if (ret_invlist) {
+        *ret_invlist = cp_list;
+
+        /* Discard the generated node */
+        if (SIZE_ONLY) {
+            RExC_size = orig_size;
+        }
+        else {
+            RExC_emit = orig_emit;
+        }
+        return END;
     }
 
     /* If we didn't do folding, it's because some information isn't available

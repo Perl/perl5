@@ -905,11 +905,13 @@
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
 #define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
+#define could_it_be_POSIX(a)	S_could_it_be_POSIX(aTHX_ a)
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
 #define get_invlist_previous_index_addr(a)	S_get_invlist_previous_index_addr(aTHX_ a)
 #define get_invlist_version_id_addr(a)	S_get_invlist_version_id_addr(aTHX_ a)
 #define get_invlist_zero_addr(a)	S_get_invlist_zero_addr(aTHX_ a)
 #define grok_bslash_N(a,b,c,d,e,f)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f)
+#define handle_sets(a,b,c,d)	S_handle_sets(aTHX_ a,b,c,d)
 #define invlist_array(a)	S_invlist_array(aTHX_ a)
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
@@ -935,10 +937,11 @@
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b,c)		S_regatom(aTHX_ a,b,c)
 #define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
-#define regclass(a,b,c)		S_regclass(aTHX_ a,b,c)
+#define regclass(a,b,c,d,e,f,g)	S_regclass(aTHX_ a,b,c,d,e,f,g)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
+#define regpatws		S_regpatws
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
-#define regpposixcc(a,b,c)	S_regpposixcc(aTHX_ a,b,c)
+#define regpposixcc(a,b,c,d)	S_regpposixcc(aTHX_ a,b,c,d)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regwhite		S_regwhite
@@ -959,8 +962,8 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #define grok_bslash_c(a,b,c)	S_grok_bslash_c(aTHX_ a,b,c)
-#define grok_bslash_o(a,b,c,d,e)	S_grok_bslash_o(aTHX_ a,b,c,d,e)
-#define grok_bslash_x(a,b,c,d,e)	S_grok_bslash_x(aTHX_ a,b,c,d,e)
+#define grok_bslash_o(a,b,c,d,e,f,g)	S_grok_bslash_o(aTHX_ a,b,c,d,e,f,g)
+#define grok_bslash_x(a,b,c,d,e,f,g)	S_grok_bslash_x(aTHX_ a,b,c,d,e,f,g)
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
