@@ -27,6 +27,10 @@ use feature 'fc';
 
 my $debug = 0;
 
+# Certain tests have been shown to be problematical for a few locales.  Don't
+# fail them unless at least this percentage of the tested locales fail.
+my $acceptable_fold_failure_percentage = 5;
+
 use Dumpvalue;
 
 my $dumper = Dumpvalue->new(
@@ -692,6 +696,8 @@ sub tryneoalpha {
 my $first_locales_test_number = $final_without_setlocale + 1;
 my $locales_test_number;
 my $not_necessarily_a_problem_test_number;
+my $first_casing_test_number;
+my $final_casing_test_number;
 my %setlocale_failed;   # List of locales that setlocale() didn't work on
 
 foreach $Locale (@Locale) {
@@ -782,11 +788,14 @@ foreach $Locale (@Locale) {
     }
     my $message = "";
     $locales_test_number++;
+    $first_casing_test_number = $locales_test_number;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/ matches sieved uppercase characters.';
     $message = 'Failed for ' . join ", ", @failures if @failures;
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
+
     $message = "";
     $locales_test_number++;
+
     $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i matches sieved uppercase characters.';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
     tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
@@ -818,6 +827,7 @@ foreach $Locale (@Locale) {
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
     $message = "";
     $locales_test_number++;
+    $final_casing_test_number = $locales_test_number;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/i matches sieved lowercase characters.';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
     tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
@@ -1370,6 +1380,18 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
 	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
+        if ($Okay{$_} && ($_ >= $first_casing_test_number
+                          && $_ <= $final_casing_test_number))
+        {
+            my $percent_fail = int(.5 + (100 * scalar(keys $Problem{$_})
+                                             / scalar(@{$Okay{$_}})));
+            if ($percent_fail < $acceptable_fold_failure_percentage) {
+                $test_names{$_} .= 'TODO';
+                print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
+                print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
+                print "# problem is not likely to be Perl's\n";
+            }
+        }
 	print "not ";
     }
     print "ok $_";
