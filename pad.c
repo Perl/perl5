@@ -1714,13 +1714,21 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 
     ASSERT_CURPAD_ACTIVE("pad_tidy");
 
-    /* If this CV has had any 'eval-capable' ops planted in it
-     * (ie it contains eval '...', //ee, /$var/ or /(?{..})/), Then any
-     * anon prototypes in the chain of CVs should be marked as cloneable,
-     * so that for example the eval's CV in C<< sub { eval '$x' } >> gets
-     * the right CvOUTSIDE.
-     * If running with -d, *any* sub may potentially have an eval
-     * executed within it.
+    /* If this CV has had any 'eval-capable' ops planted in it:
+     * i.e. it contains any of:
+     *
+     *     * eval '...',
+     *     * //ee,
+     *     * use re 'eval'; /$var/
+     *     * /(?{..})/),
+     *
+     * Then any anon prototypes in the chain of CVs should be marked as
+     * cloneable, so that for example the eval's CV in
+     *
+     *    sub { eval '$x' }
+     *
+     * gets the right CvOUTSIDE.  If running with -d, *any* sub may
+     * potentially have an eval executed within it.
      */
 
     if (PL_cv_has_eval || PL_perldb) {
