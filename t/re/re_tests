@@ -108,7 +108,7 @@ a[b-d]e	ace	y	$&	ace
 a[b-d]	aac	y	$&	ac
 a[-b]	a-	y	$&	a-
 a[b-]	a-	y	$&	a-
-a[b-a]	-	c	-	Invalid [] range \"b-a\"
+a[b-a]	-	c	-	Invalid [] range
 a[]b	-	c	-	Unmatched [
 a[	-	c	-	Unmatched [
 a]	a]	y	$&	a]
@@ -352,7 +352,7 @@ a[-]?c	ac	y	$&	ac
 'a[b-d]'i	AAC	y	$&	AC
 'a[-b]'i	A-	y	$&	A-
 'a[b-]'i	A-	y	$&	A-
-'a[b-a]'i	-	c	-	Invalid [] range \"b-a\"
+'a[b-a]'i	-	c	-	Invalid [] range
 'a[]b'i	-	c	-	Unmatched [
 'a['i	-	c	-	Unmatched [
 'a]'i	A]	y	$&	A]
@@ -876,12 +876,18 @@ foo.bart	foo.bart	y	-	-
 .[X](.+)+[X][X]	bbbbXXXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	n	-	-
 .[X][X](.+)+[X]	bbbbXXXaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	n	-	-
 tt+$	xxxtt	y	-	-
-([a-\d]+)	za-9z	y	$1	a-9
-([\d-z]+)	a0-za	y	$1	0-z
-([\d-\s]+)	a0- z	y	$1	0- 
-([a-[:digit:]]+)	za-9z	y	$1	a-9
-([[:digit:]-z]+)	=0-z=	y	$1	0-z
-([[:digit:]-[:alpha:]]+)	=0-z=	y	$1	0-z
+([a-\d]+)	za-9z	Sy	$1	a-9
+([a-\d]+)	-	sc	-	False [] range
+([\d-z]+)	a0-za	Sy	$1	0-z
+([\d-z]+)	-	sc	$1	False [] range
+([\d-\s]+)	a0- z	Sy	$1	0- 
+([\d-\s]+)	-	sc	$1	False [] range
+([a-[:digit:]]+)	za-9z	Sy	$1	a-9
+([a-[:digit:]]+)	-	sc	-	False [] range
+([[:digit:]-z]+)	=0-z=	Sy	$1	0-z
+([[:digit:]-z]+)	-	sc	c	False [] range
+([[:digit:]-[:alpha:]]+)	=0-z=	Sy	$1	0-z
+([[:digit:]-[:alpha:]]+)	-	sc	-	False [] range
 \GX.*X	aaaXbX	n	-	-
 (\d+\.\d+)	3.1415926	y	$1	3.1415926
 (\ba.{0,10}br)	have a web browser	y	$1	a web br
@@ -1434,7 +1440,8 @@ abc\N	abc\n	n
 # and bypasses the lexer.
 /\N{U+}/	-	c	-	Invalid hexadecimal number
 # Below currently gives a misleading message
-/[\N{U+}]/	-	c	-	Unmatched
+/[\N{U+}]/	-	Sc	-	Unmatched
+/[\N{U+}]/	-	sc	-	Syntax error in (?[...])
 /abc\N{def/	-	c	-	Missing right brace
 /\N{U+4AG3}/	-	c	-	Illegal hexadecimal digit
 /[\N{U+4AG3}]/	-	c	-	Illegal hexadecimal digit
@@ -1482,14 +1489,18 @@ a\97	a97	y	$&	a97
 
 
 # The below was inserting a NULL into the character class.
-[\8\9]	\000	n	-	-
-[\8\9]	8	y	$&	8
-[\8\9]	9	y	$&	9
+[\8\9]	\000	Sn	-	-
+[\8\9]	-	sc	$&	Unrecognized escape \\8 in character class
+[\8\9]	8	Sy	$&	8
+[\8\9]	9	Sy	$&	9
 
 # Verify that reads 1-3 octal digits, and that \_ works in char class
-[\0]	\000	y	$&	\000
-[\07]	\007	y	$&	\007
-[\07]	7\000	n	-	-
+[\0]	\000	Sy	$&	\000
+[\0]	-	sc	-	Need exactly 3 octal digits
+[\07]	\007	Sy	$&	\007
+[\07]	-	sc	-	Need exactly 3 octal digits
+[\07]	7\000	Sn	-	-
+[\07]	-	sc	-	Need exactly 3 octal digits
 [\006]	\006	y	$&	\006
 [\006]	6\000	n	-	-
 [\0005]	\0005	y	$&	\000
@@ -1531,7 +1542,7 @@ a\97	a97	y	$&	a97
 # Normally 1E9E generates a multi-char fold, but not in inverted class;
 # See [perl #89750].  This makes sure that the simple fold gets generated
 # in that case, to DF.
-/[^\x{1E9E}]/i	\x{DF}	n	-	-
+/[^\x{1E9E}]/i	\x{DF}	Sn	-	-
 
 # RT #96354
 /^.*\d\H/	X1	n	-	-
@@ -1543,7 +1554,7 @@ a\97	a97	y	$&	a97
 /^\p{L}/	\x{3400}	y	$&	\x{3400}
 
 # RT #89774
-/[s\xDF]a/ui	ssa	y	$&	ssa
+/[s\xDF]a/ui	ssa	Sy	$&	ssa
 /[s\xDF]a/ui	sa	y	$&	sa
 
 # RT #99928
