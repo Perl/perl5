@@ -110,9 +110,13 @@ SWTEST
 {
     my $tempdir = tempfile;
     mkdir $tempdir, 0700 or die "Can't mkdir '$tempdir': $!";
+
+    # Win32 won't let us open the directory, so we never get to die with
+    # EISDIR, which happens after open.
+    my $error = $^O eq 'MSWin32' ? 'Permission denied' : 'Is a directory';
     like(
         runperl( switches => [ '-c' ], args  => [ $tempdir ], stderr => 1),
-        qr/Can't open perl script.*$tempdir.*Is a directory/s,
+        qr/Can't open perl script.*$tempdir.*$error/s,
         "RT \#61362: Cannot syntax-check a directory"
     );
     rmdir $tempdir or die "Can't rmdir '$tempdir': $!";
