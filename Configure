@@ -2881,7 +2881,7 @@ esac
 case "$targethost" in
     '') echo "Checking for cross-compile" >&4
     case "$usecrosscompile$multiarch" in
-       *$define*) echo "Skipping the rest of Configure as no targethost was defined when cross-compiling" >&4
+       *$define*) echo "Skipping the try tests in the rest of Configure as no targethost was defined when cross-compiling" >&4
          if [ -f Makefile ]; then
            echo " "
            echo "Now you must ensure config.sh, config.h and the generated headers exist and run a $make."
@@ -2890,13 +2890,13 @@ case "$targethost" in
          fi
        exit 0
        ;;
-    esac
-    ;;
      *) echo "No targethost for running compiler tests against defined, running locally" >&4
         run=''
         to=:
         from=:
         ;;
+    esac
+    ;;
     *) echo "Using targethost $targethost." >&4
 	case "$src" in
 	/*) run=$src/Cross/run
