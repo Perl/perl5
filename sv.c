@@ -6409,7 +6409,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		continue;
 	    }
 #endif
-	    if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
+	    if (SvIMMORTAL(sv)) {
 		/* make sure SvREFCNT(sv)==0 happens very seldom */
 		SvREFCNT(sv) = SvREFCNT_IMMORTAL;
 		continue;
@@ -6575,7 +6575,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
             return;
         }
 #endif
-        if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
+        if (SvIMMORTAL(sv)) {
             /* make sure SvREFCNT(sv)==0 happens very seldom */
             SvREFCNT(sv) = SvREFCNT_IMMORTAL;
             return;
@@ -6596,7 +6596,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
         return;
     if (PL_in_clean_all) /* All is fair */
         return;
-    if (SvREADONLY(sv) && SvIMMORTAL(sv)) {
+    if (SvIMMORTAL(sv)) {
         /* make sure SvREFCNT(sv)==0 happens very seldom */
         SvREFCNT(sv) = SvREFCNT_IMMORTAL;
         return;
@@ -8572,7 +8572,7 @@ Perl_sv_2mortal(pTHX_ SV *const sv)
     dVAR;
     if (!sv)
 	return NULL;
-    if (SvREADONLY(sv) && SvIMMORTAL(sv))
+    if (SvIMMORTAL(sv))
 	return sv;
     PUSH_EXTEND_MORTAL__SV_C(sv);
     SvTEMP_on(sv);
