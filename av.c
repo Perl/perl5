@@ -592,8 +592,9 @@ Perl_av_push(pTHX_ AV *av, SV *val)
 /*
 =for apidoc av_pop
 
-Pops an SV off the end of the array.  Returns C<&PL_sv_undef> if the array
-is empty.
+Removes one SV from the end of the array, reducing its size by one and
+returning the SV (transferring control of one reference count) to the
+caller.  Returns C<&PL_sv_undef> if the array is empty.
 
 Perl equivalent: C<pop(@myarray);>
 
