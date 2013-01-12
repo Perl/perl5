@@ -1756,7 +1756,7 @@ We can extend this by
 
  /(?[ ( \p{Thai} + \p{Lao} ) & \p{Digit} ])/
 
-This matches digits that are in either the Thai or Laotion scripts.
+This matches digits that are in either the Thai or Laotian scripts.
 
 Notice the white space in these examples.  This construct always has
 L</C<E<sol>x>> turned on.
