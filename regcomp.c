@@ -10056,7 +10056,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
     dVAR;
     regnode *ret = NULL;
-    I32 flags;
+    I32 flags = 0;
     char *parse_start = RExC_parse;
     U8 op;
     int invert = 0;
