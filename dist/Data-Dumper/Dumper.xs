@@ -344,7 +344,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	{
 	    dSP; ENTER; SAVETMPS; PUSHMARK(sp);
 	    XPUSHs(val); PUTBACK;
-	    i = perl_call_method(SvPVX_const(freezer), G_EVAL|G_VOID);
+	    i = perl_call_method(SvPVX_const(freezer), G_EVAL|G_VOID|G_DISCARD);
 	    SPAGAIN;
 	    if (SvTRUE(ERRSV))
 		warn("WARNING(Freezer method call failed): %"SVf"", ERRSV);

@@ -25,6 +25,11 @@ ok($dumped_foo,
 like($dumped_foo, qr/frozed/, 
      "Dumped string has the key added by Freezer.");
 
+# test that list-context freeze return doesn't contain the freezer's return
+# value; RT #116364
+like(join(" ", Dumper($foo)), qr/\A\$VAR1 = /,
+     "Dumped list doesn't begin with Freezer's return value");
+
 # run the same tests with useperl.  this always worked
 {
     local $Data::Dumper::Useperl = 1;
@@ -34,6 +39,8 @@ like($dumped_foo, qr/frozed/,
        "Use of freezer sub which returns non-ref worked with useperl");
     like($dumped_foo, qr/frozed/, 
          "Dumped string has the key added by Freezer with useperl.");
+    like(join(" ", Dumper($foo)), qr/\A\$VAR1 = /,
+         "Dumped list doesn't begin with Freezer's return value with useperl");
 }
 
 # test for warning when an object doesn't have a freeze()
