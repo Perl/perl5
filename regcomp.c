@@ -10700,7 +10700,8 @@ tryagain:
 			    }
 			    p += numlen;
 			}
-			else {
+                        else {  /* Not to be treated as an octal constant, go
+                                   find backref */
 			    --p;
 			    goto loopdone;
 			}
@@ -11729,8 +11730,13 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
-                 const bool stop_at_1, bool allow_multi_folds,
-                 const bool silence_non_portable, SV** ret_invlist)
+                 const bool stop_at_1,  /* Just parse the next thing, don't
+                                           look for a full character class */
+                 bool allow_multi_folds,
+                 const bool silence_non_portable,   /* Don't output warnings
+                                                       about too large
+                                                       characters */
+                 SV** ret_invlist)  /* Return an inversion list, not a node */
 {
     /* parse a bracketed class specification.  Most of these will produce an
      * ANYOF node; but something like [a] will produce an EXACT node; [aA], an
@@ -11774,8 +11780,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                        character; used under /i */
     UV n;
     char * stop_ptr = RExC_end;    /* where to stop parsing */
-    const bool skip_white = cBOOL(ret_invlist);
-    const bool strict = cBOOL(ret_invlist);
+    const bool skip_white = cBOOL(ret_invlist); /* ignore unescaped white
+                                                   space? */
+    const bool strict = cBOOL(ret_invlist); /* Apply strict parsing rules? */
 
     /* Unicode properties are stored in a swash; this holds the current one
      * being parsed.  If this swash is the only above-latin1 component of the
@@ -12241,9 +12248,9 @@ parseit:
 	     * the 'a' in the examples */
 	    if (range) {
 		if (!SIZE_ONLY) {
-		    const int w =
-			RExC_parse >= rangebegin ?
-			RExC_parse - rangebegin : 0;
+		    const int w = (RExC_parse >= rangebegin)
+                                  ? RExC_parse - rangebegin
+                                  : 0;
 		    SAVEFREESV(listsv); /* in case of fatal warnings */
                     if (strict) {
                         vFAIL4("False [] range \"%*.*s\"", w, w, rangebegin);
