@@ -51,7 +51,8 @@
 :      Should always be combined with "X" to be usable from dynamically
 :      loaded extensions.
 :
-:   f  Function takes printf style format string, varargs:
+:   f  Function takes printf style format string, varargs (hence any entry that
+:      would otherwise go in embed.h is suppressed):
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
