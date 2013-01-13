@@ -12203,8 +12203,8 @@ parseit:
                         ckWARN2reg(RExC_parse,
                             "Unrecognized escape \\%c in character class passed through",
                             (int)value);
+                        (void)ReREFCNT_inc(RExC_rx_sv);
                     }
-		    (void)ReREFCNT_inc(RExC_rx_sv);
 		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
@@ -12261,10 +12261,10 @@ parseit:
                                 "False [] range \"%*.*s\"",
                                 w, w, rangebegin);
                         (void)ReREFCNT_inc(RExC_rx_sv);
-                        SvREFCNT_inc_simple_void_NN(listsv);
                         cp_list = add_cp_to_invlist(cp_list, '-');
                         cp_list = add_cp_to_invlist(cp_list, prevvalue);
                     }
+                    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 
 		range = 0; /* this was not a true range */
