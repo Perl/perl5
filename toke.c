@@ -3277,10 +3277,16 @@ S_scan_const(pTHX_ char *start)
 	    case '0': case '1': case '2': case '3':
 	    case '4': case '5': case '6': case '7':
 		{
-                    I32 flags = 0;
+                    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
                     STRLEN len = 3;
 		    uv = NATIVE_TO_UNI(grok_oct(s, &len, &flags, NULL));
 		    s += len;
+                    if (len < 3 && s < send && isDIGIT(*s)
+                        && ckWARN(WARN_MISC))
+                    {
+                        Perl_warner(aTHX_ packWARN(WARN_MISC),
+                                    "%s", form_short_octal_warning(s, len));
+                    }
 		}
 		goto NUM_ESCAPE_INSERT;
 

@@ -165,6 +165,10 @@ my @warning = (
     'm/[\pM-x]/' => 'False [] range "\pM-" in regex; marked by {#} in m/[\pM-{#}x]/',
     "m'\\y'"     => 'Unrecognized escape \y passed through in regex; marked by {#} in m/\y{#}/',
     '/x{3,1}/'   => 'Quantifier {n,m} with n > m can\'t match in regex; marked by {#} in m/x{3,1}{#}/',
+    '/\08/' => '\'\08\' resolved to \'\o{0}8\' in regex; marked by {#} in m/\08{#}/',
+    '/\018/' => '\'\018\' resolved to \'\o{1}8\' in regex; marked by {#} in m/\018{#}/',
+    '/[\08]/' => '\'\08\' resolved to \'\o{0}8\' in regex; marked by {#} in m/[\08{#}]/',
+    '/[\018]/' => '\'\018\' resolved to \'\o{1}8\' in regex; marked by {#} in m/[\018{#}]/',
     '/(?[ \t ])/' => 'The regex_sets feature is experimental in regex; marked by {#} in m/(?[{#} \t ])/',
 );
 

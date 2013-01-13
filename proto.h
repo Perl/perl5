@@ -6788,6 +6788,13 @@ PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name,
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
+STATIC char*	S_form_short_octal_warning(pTHX_ const char * const s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__pure__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FORM_SHORT_OCTAL_WARNING	\
+	assert(s)
+
 STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warning)
 			__attribute__warn_unused_result__;
 

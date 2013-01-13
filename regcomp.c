@@ -535,6 +535,13 @@ static const scan_data_t zero_scan_data =
     Simple_vFAIL4(m, a1, a2, a3);			\
 } STMT_END
 
+/* m is not necessarily a "literal string", in this macro */
+#define reg_warn_non_literal_string(loc, m) STMT_START {                \
+    const IV offset = loc - RExC_precomp;                               \
+    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s" REPORT_LOCATION,      \
+            m, (int)offset, RExC_precomp, RExC_precomp + offset);       \
+} STMT_END
+
 #define	ckWARNreg(loc,m) STMT_START {					\
     const IV offset = loc - RExC_precomp;				\
     Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP), m REPORT_LOCATION,	\
@@ -10700,6 +10707,15 @@ tryagain:
 				REQUIRE_UTF8;
 			    }
 			    p += numlen;
+                            if (SIZE_ONLY   /* like \08, \178 */
+                                && numlen < 3
+                                && p < RExC_end
+                                && isDIGIT(*p) && ckWARN(WARN_REGEXP))
+                            {
+				reg_warn_non_literal_string(
+                                         p + 1,
+                                         form_short_octal_warning(p, numlen));
+                            }
 			}
                         else {  /* Not to be treated as an octal constant, go
                                    find backref */
@@ -12166,11 +12182,25 @@ parseit:
                     numlen = (strict) ? 4 : 3;
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
-                    if (strict) {
-                        if (numlen != 3) {
+                    if (numlen != 3) {
+                        SAVEFREESV(listsv); /* In case warnings are fatalized */
+                        if (strict) {
                             RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
                             vFAIL("Need exactly 3 octal digits");
                         }
+                        else if (! SIZE_ONLY /* like \08, \178 */
+                                 && numlen < 3
+                                 && RExC_parse < RExC_end
+                                 && isDIGIT(*RExC_parse)
+                                 && ckWARN(WARN_REGEXP))
+                        {
+                            SAVEFREESV(RExC_rx_sv);
+                            reg_warn_non_literal_string(
+                                 RExC_parse + 1,
+                                 form_short_octal_warning(RExC_parse, numlen));
+                            (void)ReREFCNT_inc(RExC_rx_sv);
+                        }
+                        SvREFCNT_inc_simple_void_NN(listsv);
                     }
 		    if (PL_encoding && value < 0x100)
 			goto recode_encoding;

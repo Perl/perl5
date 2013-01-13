@@ -210,7 +210,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
+L<'%s' resolved to '\o{%s}%d'|perldiag/"'%s' resolved to '\o{%s}%d'">
+
+=item *
+
 XXX L<message|perldiag/"message">
+
 
 =back
 

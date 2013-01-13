@@ -4313,6 +4313,15 @@ terminates.  You might use ^# instead.  See L<perlform>.
 search list.  So the additional elements in the replacement list
 are meaningless.
 
+=item '%s' resolved to '\o{%s}%d'
+
+(W misc, regexp)  You wrote something like C<\08>, or C<\179> in a
+double-quotish string.  All but the last digit is treated as a single
+character, specified in octal.  The last digit is the next character in
+the string.  To tell Perl that this is indeed what you want, you can use
+the C<\o{ }> syntax, or use exactly three digits to specify the octal
+for the character.
+
 =item Reversed %s= operator
 
 (W syntax) You wrote your assignment operator backwards.  The = must

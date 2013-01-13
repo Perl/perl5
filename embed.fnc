@@ -751,6 +751,8 @@ EMiR	|bool	|grok_bslash_x	|NN char** s|NN UV* uv           \
 				|const bool strict               \
 				|const bool silence_non_portable \
 				|const bool utf8
+EMsPR	|char*|form_short_octal_warning|NN const char * const s  \
+				|const STRLEN len
 #endif
 Apd	|UV	|grok_hex	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 Apd	|int	|grok_number	|NN const char *pv|STRLEN len|NULLOK UV *valuep
