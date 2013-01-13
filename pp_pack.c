@@ -1190,8 +1190,10 @@ first_symbol(const char *pat, const char *patend) {
 =for apidoc unpackstring
 
 The engine implementing unpack() Perl function. C<unpackstring> puts the
-extracted list items on the stack and returns the number of elements.
+extracted list items on the @_ stack and returns the number of elements.
 Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
+Unlike L</call_pv>, do not do a C<PUSHMARK>. This function takes no parameters
+on the @_ stack.
 
 =cut */
 
