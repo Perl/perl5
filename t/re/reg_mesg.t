@@ -177,8 +177,8 @@ while (my ($regex, $expect) = splice @death, 0, 2) {
     warning_is(sub {
 		   $_ = "x";
 		   eval $regex;
-		   like($@, qr/\Q$expect/);
-	       }, undef, "$regex died without any other warnings");
+		   like($@, qr/\Q$expect/, $regex);
+	       }, undef, "... and died without any other warnings");
 }
 
 while (my ($regex, $expect) = splice @warning, 0, 2) {
@@ -187,7 +187,7 @@ while (my ($regex, $expect) = splice @warning, 0, 2) {
 		     $_ = "x";
 		     eval $regex;
 		     is($@, '', "$regex did not die");
-		 }, qr/\Q$expect/);
+		 }, qr/\Q$expect/, "... and gave expected warning");
 }
 
 done_testing();
