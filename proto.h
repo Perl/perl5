@@ -657,7 +657,7 @@ PERL_CALLCONV SV *	Perl_core_prototype(pTHX_ SV *sv, const char *name, const int
 #define PERL_ARGS_ASSERT_CORE_PROTOTYPE	\
 	assert(name)
 
-PERL_CALLCONV OP *	Perl_coresub_op(pTHX_ SV *coreargssv, const int code, const int opnum)
+PERL_CALLCONV OP *	Perl_coresub_op(pTHX_ SV *const coreargssv, const int code, const int opnum)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CORESUB_OP	\
 	assert(coreargssv)

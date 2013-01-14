@@ -288,7 +288,7 @@ Afnp	|int	|printf_nocontext|NN const char *format|...
 p	|SV *	|core_prototype	|NULLOK SV *sv|NN const char *name \
 				|const int code|NULLOK int * const opnum
 : Used in gv.c
-p	|OP *	|coresub_op	|NN SV *coreargssv|const int code \
+p	|OP *	|coresub_op	|NN SV *const coreargssv|const int code \
 				|const int opnum
 : Used in sv.c
 p	|void	|cv_ckproto_len_flags	|NN const CV* cv|NULLOK const GV* gv\
