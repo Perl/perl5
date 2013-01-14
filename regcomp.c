@@ -10656,7 +10656,8 @@ tryagain:
 			}
 		    case 'x':
 			{
-			    UV result;
+                            UV result = UV_MAX; /* initialize to erroneous
+                                                   value */
 			    const char* error_msg;
 
 			    bool valid = grok_bslash_x(&p,
