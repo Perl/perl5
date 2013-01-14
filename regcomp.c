@@ -8854,14 +8854,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '@':           /* (?@...) */
 		vFAIL2("Sequence (?%c...) not implemented", (int)paren);
 		break;
-	    case '#':           /* (?#...) */
-		while (*RExC_parse && *RExC_parse != ')')
-		    RExC_parse++;
-		if (*RExC_parse != ')')
-		    FAIL("Sequence (?#... not terminated");
-		nextchar(pRExC_state);
-		*flagp = TRYAGAIN;
-		return NULL;
 	    case '0' :           /* (?0) */
 	    case 'R' :           /* (?R) */
 		if (*RExC_parse != ')')
