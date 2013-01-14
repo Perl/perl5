@@ -1268,7 +1268,7 @@ EXTCONST U32 PL_charclass[];
                                                   _is_utf8_FOO(_CC_DIGIT, p))
 #define isGRAPH_utf8(p)         _generic_swash_utf8(_CC_GRAPH, p)
 #define isIDCONT_utf8(p)        _generic_func_utf8(_CC_WORDCHAR,              \
-                                                  _is_utf8_perl_idstart, p)
+                                                  _is_utf8_perl_idcont, p)
 
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See

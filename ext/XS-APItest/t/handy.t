@@ -77,6 +77,10 @@ foreach my $name (sort keys %properties) {
     # This makes sure we are using the Perl definition of idfirst and idcont,
     # and not the Unicode.  There are a few differences.
     push @code_points, ord "\N{ESTIMATED SYMBOL}" if $name =~ /^id(first|cont)/;
+    if ($name eq "idcont") {    # And some that are continuation but not start
+        push @code_points, ord("\N{GREEK ANO TELEIA}"),
+                           ord("\N{COMBINING GRAVE ACCENT}");
+    }
 
     # And finally one non-Unicode code point.
     push @code_points, 0x110000;    # Above Unicode, no prop should match
