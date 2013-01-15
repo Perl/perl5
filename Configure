@@ -2917,10 +2917,6 @@ case "\$cwd" in
 esac
 exe=\$1
 shift
-if $test ! -f \$exe.xok; then
-  $to \$exe
-  $touch \$exe.xok
-fi
 $targetrun -l $targetuser $targethost "cd \$cwd && ./\$exe \$@"
 EOF
 	    ;;
