@@ -2290,13 +2290,6 @@ PERL_CALLCONV int	Perl_magic_regdatum_get(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_REGDATUM_GET	\
 	assert(sv); assert(mg)
 
-PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
-			__attribute__noreturn__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET	\
-	assert(sv); assert(mg)
-
 PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -4960,6 +4953,15 @@ PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_UTILIZE	\
 	assert(idop)
+
+#endif
+#if !(defined(_MSC_VER))
+PERL_CALLCONV_NO_RET int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__noreturn__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET	\
+	assert(sv); assert(mg)
 
 #endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
@@ -7898,6 +7900,14 @@ PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DO_SPAWN_NOWAIT	\
 	assert(cmd)
+
+#endif
+#if defined(_MSC_VER)
+PERL_CALLCONV int	Perl_magic_regdatum_set(pTHX_ SV* sv, MAGIC* mg)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET	\
+	assert(sv); assert(mg)
 
 #endif
 #ifdef PERL_CORE
