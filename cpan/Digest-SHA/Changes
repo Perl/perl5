@@ -1,5 +1,11 @@
 Revision history for Perl extension Digest::SHA.
 
+5.81  Mon Jan 14 05:17:08 MST 2013
+	- corrected load subroutine (SHA.pm) to prevent double-free
+		-- Bug #82655: Security issue - segfault
+		-- thanks to Victor Efimov and Nicholas Clark
+			for technical expertise and suggestions
+
 5.80  Mon Dec 10 14:15:26 MST 2012
 	- obtained noticeable speedup on Intel/gcc
 		-- by setting -O1 and -fomit-frame-pointer

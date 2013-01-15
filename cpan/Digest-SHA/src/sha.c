@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
  *
- * Version: 5.80
- * Mon Dec 10 14:15:26 MST 2012
+ * Version: 5.81
+ * Mon Jan 14 05:17:08 MST 2013
  *
  */
 
@@ -272,7 +272,7 @@ void sharewind(SHA *s)
 /* shaopen: creates a new digest object */
 SHA *shaopen(int alg)
 {
-	SHA *s;
+	SHA *s = NULL;
 
 	if (alg != SHA1 && alg != SHA224 && alg != SHA256 &&
 		alg != SHA384    && alg != SHA512 &&
