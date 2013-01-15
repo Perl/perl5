@@ -210,6 +210,7 @@ run=''
 targetarch=''
 targetdir=''
 targethost=''
+targetport=''
 to=''
 sysroot=''
 usecrosscompile=''
@@ -2899,6 +2900,11 @@ $define|true|[yY]*)
              echo "Guessing targetuser $targetuser." >&4
              ;;
 	esac
+	case "$targetport" in
+	'')  targetport=22
+             echo "Guessing targetport $targetport." >&4
+             ;;
+	esac
 	case "$targetfrom" in
 	scp)	q=-q ;;
 	*)	q='' ;;
@@ -2919,7 +2925,8 @@ case "\$cwd" in
 esac
 exe=\$1
 shift
-$targetrun -l $targetuser $targethost "cd \$cwd && ./\$exe \$@"
+$to \$exe
+$targetrun -p $targetport -l $targetuser $targethost "cd \$cwd && ./\$exe \$@"
 EOF
 	    ;;
 	*)  echo "Unknown targetrun '$targetrun'" >&4
@@ -2930,7 +2937,7 @@ EOF
 	*/Cross/mkdir)
 	    cat >$targetmkdir <<EOF
 #!/bin/sh
-$targetrun -l $targetuser $targethost "mkdir -p \$@"
+$targetrun -p $targetport -l $targetuser $targethost "mkdir -p \$@"
 EOF
 	    $chmod a+rx $targetmkdir
 	    ;;
@@ -2947,11 +2954,11 @@ do
   case "\$f" in
   /*)
     $targetmkdir \`dirname \$f\`
-    $targetto $q \$f $targetuser@$targethost:\$f            || exit 1
+    $targetto -P $targetport $q \$f $targetuser@$targethost:\$f            || exit 1
     ;;
   *)
     $targetmkdir $targetdir/\`dirname \$f\`
-    $targetto $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
+    $targetto -P $targetport $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
     ;;
   esac
 done
@@ -2987,7 +2994,7 @@ EOF
 for f in \$@
 do
   $rm -f \$f
-  $targetfrom $q $targetuser@$targethost:$targetdir/\$f . || exit 1
+  $targetfrom -P $targetport $q $targetuser@$targethost:$targetdir/\$f . || exit 1
 done
 exit 0
 EOF
@@ -23741,6 +23748,7 @@ tar='$tar'
 targetarch='$targetarch'
 targetdir='$targetdir'
 targethost='$targethost'
+targetport='$targetport'
 tbl='$tbl'
 tee='$tee'
 test='$test'
