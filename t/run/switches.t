@@ -114,6 +114,10 @@ SWTEST
     # Win32 won't let us open the directory, so we never get to die with
     # EISDIR, which happens after open.
     my $error = $^O eq 'MSWin32' ? 'Permission denied' : 'Is a directory';
+
+    $ENV{'LC_ALL'} = 'C'; # Keep the test simple: expect English
+    $ENV{LANGUAGE} = 'C';
+
     like(
         runperl( switches => [ '-c' ], args  => [ $tempdir ], stderr => 1),
         qr/Can't open perl script.*$tempdir.*$error/s,
