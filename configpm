@@ -148,76 +148,6 @@ die "Can't automatically determine name for Config_heavy.pl from '$Config_PM'"
 my $config_txt;
 my $heavy_txt;
 
-my $from = $^O eq 'VMS' ? 'PERLSHR image' : 'binary (from libperl)';
-my $env_cygwin = $^O eq 'cygwin'
-    ? 'push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $ENV{CYGWIN};' . "\n" : "";
-$heavy_txt .= sprintf <<'ENDOFBEG', $^O, $^O, $from, $^O, $env_cygwin;
-# This file was created by configpm when Perl was built. Any changes
-# made to this file will be lost the next time perl is built.
-
-package Config;
-use strict;
-use warnings;
-use vars '%%Config';
-
-sub bincompat_options {
-    return split ' ', (Internals::V())[0];
-}
-
-sub non_bincompat_options {
-    return split ' ', (Internals::V())[1];
-}
-
-sub compile_date {
-    return (Internals::V())[2]
-}
-
-sub local_patches {
-    my (undef, undef, undef, @patches) = Internals::V();
-    return @patches;
-}
-
-sub _V {
-    die "Perl lib was built for '%s' but is being run on '$^O'"
-        unless "%s" eq $^O;
-
-    my ($bincompat, $non_bincompat, $date, @patches) = Internals::V();
-
-    my $opts = join ' ', sort split ' ', "$bincompat $non_bincompat";
-
-    # wrap at 76 columns.
-
-    $opts =~ s/(?=.{53})(.{1,53}) /$1\n                        /mg;
-
-    print Config::myconfig();
-    print "\nCharacteristics of this %s: \n";
-
-    print "  Compile-time options: $opts\n";
-
-    if (@patches) {
-        print "  Locally applied patches:\n";
-        print "\t$_\n" foreach @patches;
-    }
-
-    print "  Built under %s\n";
-
-    print "  $date\n" if defined $date;
-
-    my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %%ENV;
-%s
-    if (@env) {
-        print "  \%%ENV:\n";
-        print "    $_\n" foreach @env;
-    }
-    print "  \@INC:\n";
-    print "    $_\n" foreach @INC;
-}
-
-sub header_files {
-ENDOFBEG
-
-$heavy_txt .= $header_files . "\n}\n\n";
-
 my $export_funcs = <<'EOT';
 my %Export_Cache = (myconfig => 1, config_sh => 1, config_vars => 1,
 		    config_re => 1, compile_date => 1, local_patches => 1,
@@ -523,6 +453,78 @@ sub relocate_inc {
   $libdir;
 }
 EOT
+
+my $osname = fetch_string({}, 'osname');
+my $from = $osname eq 'VMS' ? 'PERLSHR image' : 'binary (from libperl)';
+my $env_cygwin = $osname eq 'cygwin'
+    ? 'push @env, "CYGWIN=\"$ENV{CYGWIN}\"" if $ENV{CYGWIN};' . "\n" : "";
+
+$heavy_txt .= sprintf <<'ENDOFBEG', $osname, $osname, $from, $osname, $env_cygwin;
+# This file was created by configpm when Perl was built. Any changes
+# made to this file will be lost the next time perl is built.
+
+package Config;
+use strict;
+use warnings;
+use vars '%%Config';
+
+sub bincompat_options {
+    return split ' ', (Internals::V())[0];
+}
+
+sub non_bincompat_options {
+    return split ' ', (Internals::V())[1];
+}
+
+sub compile_date {
+    return (Internals::V())[2]
+}
+
+sub local_patches {
+    my (undef, undef, undef, @patches) = Internals::V();
+    return @patches;
+}
+
+sub _V {
+    die "Perl lib was built for '%s' but is being run on '$^O'"
+        unless "%s" eq $^O;
+
+    my ($bincompat, $non_bincompat, $date, @patches) = Internals::V();
+
+    my $opts = join ' ', sort split ' ', "$bincompat $non_bincompat";
+
+    # wrap at 76 columns.
+
+    $opts =~ s/(?=.{53})(.{1,53}) /$1\n                        /mg;
+
+    print Config::myconfig();
+    print "\nCharacteristics of this %s: \n";
+
+    print "  Compile-time options: $opts\n";
+
+    if (@patches) {
+        print "  Locally applied patches:\n";
+        print "\t$_\n" foreach @patches;
+    }
+
+    print "  Built under %s\n";
+
+    print "  $date\n" if defined $date;
+
+    my @env = map { "$_=\"$ENV{$_}\"" } sort grep {/^PERL/} keys %%ENV;
+%s
+    if (@env) {
+        print "  \%%ENV:\n";
+        print "    $_\n" foreach @env;
+    }
+    print "  \@INC:\n";
+    print "    $_\n" foreach @INC;
+}
+
+sub header_files {
+ENDOFBEG
+
+$heavy_txt .= $header_files . "\n}\n\n";
 
 if (%need_relocation) {
   my $relocations_in_common;
