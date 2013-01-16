@@ -1082,6 +1082,14 @@ sub run_tests {
         eval "q(W) =~ /\\N{$name}/";
         ok ! $w, 'Verify that latin1 letter in name doesnt give warning';
 
+        # This tests the code path that restarts the parse when the recursive
+        # call to S_reg() from within S_grok_bslash_N() discovers that the
+        # pattern needs to be recalculated as UTF-8.  use eval to avoid
+        # needing literal Unicode in this source file:
+        my $r = eval "qr/\\N{\x{100}\x{100}}/";
+        isnt $r, undef, "Generated regex for multi-char UTF-8 charname"
+	    or diag($@);
+        ok "\x{100}\x{100}" =~ $r, "which matches";
     }
 
     {
