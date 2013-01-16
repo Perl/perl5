@@ -938,4 +938,38 @@ unless ($Config{useithreads}) {
     close OUT;
 }
 
+do_test('UTF-8 in a regular expression',
+        qr/\x{100}/,
+'SV = IV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(ROK\)
+  RV = $ADDR
+  SV = REGEXP\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(OBJECT,FAKE,UTF8\)
+    PV = $ADDR "\(\?\^u:\\\\\\\\x\{100\}\)" \[UTF8 "\(\?\^u:\\\\\\\\x\{100\}\)"\]
+    CUR = 13
+    STASH = $ADDR	"Regexp"
+    EXTFLAGS = 0x680040 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
+    INTFLAGS = 0x0
+    NPARENS = 0
+    LASTPAREN = 0
+    LASTCLOSEPAREN = 0
+    MINLEN = 1
+    MINLENRET = 1
+    GOFS = 0
+    PRE_PREFIX = 5
+    SUBLEN = 0
+    SUBOFFSET = 0
+    SUBCOFFSET = 0
+    SUBBEG = 0x0
+    ENGINE = $ADDR
+    MOTHER_RE = $ADDR
+    PAREN_NAMES = 0x0
+    SUBSTRS = $ADDR
+    PPRIVATE = $ADDR
+    OFFS = $ADDR
+    QR_ANONCV = 0x0
+');
+
 done_testing();
