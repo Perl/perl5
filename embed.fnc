@@ -784,6 +784,8 @@ p	|int	|magic_getvec	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_nextpack	|NN SV *sv|NN MAGIC *mg|NN SV *key
 p	|U32	|magic_regdata_cnt|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_regdatum_get|NN SV* sv|NN MAGIC* mg
+:removing noreturn to silence a warning for this function resulted in no
+:change to the interpreter DLL image under VS 2003 -O1 -GL 32 bits
 #ifdef _MSC_VER
 p	|int	|magic_regdatum_set|NN SV* sv|NN MAGIC* mg
 #else
