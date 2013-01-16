@@ -895,7 +895,7 @@ inet_ntop(af, ip_address_sv)
 	SV *	ip_address_sv
 	CODE:
 #ifdef HAS_INETNTOP
-	STRLEN addrlen, struct_size;
+	STRLEN addrlen;
 #ifdef AF_INET6
 	struct in6_addr addr;
 	char str[INET6_ADDRSTRLEN];
@@ -910,19 +910,17 @@ inet_ntop(af, ip_address_sv)
 
 	ip_address = SvPV(ip_address_sv, addrlen);
 
-	struct_size = sizeof(addr);
-
 	switch(af) {
 	  case AF_INET:
 	    if(addrlen != 4)
 		croak("Bad address length for Socket::inet_ntop on AF_INET;"
-		      " got %d, should be 4", addrlen);
+		      " got %"UVuf", should be 4", (UV)addrlen);
 	    break;
 #ifdef AF_INET6
 	  case AF_INET6:
 	    if(addrlen != 16)
 		croak("Bad address length for Socket::inet_ntop on AF_INET6;"
-		      " got %d, should be 16", addrlen);
+		      " got %"UVuf", should be 16", (UV)addrlen);
 	    break;
 #endif
 	  default:
@@ -935,7 +933,13 @@ inet_ntop(af, ip_address_sv)
 		      "Socket::inet_ntop", af);
 	}
 
-	Copy(ip_address, &addr, sizeof addr, char);
+	if(addrlen < sizeof(addr)) {
+	    Copy(ip_address, &addr, addrlen, char);
+	    Zero(((char*)&addr) + addrlen, sizeof(addr) - addrlen, char);
+	}
+	else {
+	    Copy(ip_address, &addr, sizeof addr, char);
+	}
 	inet_ntop(af, &addr, str, sizeof str);
 
 	ST(0) = sv_2mortal(newSVpvn(str, strlen(str)));

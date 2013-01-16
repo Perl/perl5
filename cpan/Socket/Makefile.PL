@@ -13,7 +13,7 @@ my $seq = 0;
 sub check_for
 {
     my %args = @_;
-    return if exists $Config{$args{confkey}};
+    return if defined $Config{$args{confkey}};
 
     require ExtUtils::CBuilder;
     $cb ||= ExtUtils::CBuilder->new( quiet => 1 );
