@@ -2192,7 +2192,7 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    SSize_t avail = PerlIO_get_cnt(f);
 	    SSize_t take = 0;
 	    if (avail > 0)
-		take = ((SSize_t)count < avail) ? (SSize_t)count : avail;
+		take = (((SSize_t) count >= 0) && ((SSize_t)count < avail)) ? (SSize_t)count : avail;
 	    if (take > 0) {
 		STDCHAR *ptr = PerlIO_get_ptr(f);
 		Copy(ptr, buf, take, STDCHAR);
@@ -4125,7 +4125,7 @@ PerlIOBuf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	     */
 	    b->posn -= b->bufsiz;
 	}
-	if (avail > (SSize_t) count) {
+	if ((SSize_t) count >= 0 && avail > (SSize_t) count) {
 	    /*
 	     * If we have space for more than count, just move count
 	     */
@@ -4175,7 +4175,7 @@ PerlIOBuf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
     }
     while (count > 0) {
 	SSize_t avail = b->bufsiz - (b->ptr - b->buf);
-	if ((SSize_t) count < avail)
+	if ((SSize_t) count >= 0 && (SSize_t) count < avail)
 	    avail = count;
 	if (flushptr > buf && flushptr <= buf + avail)
 	    avail = flushptr - buf;
@@ -4450,7 +4450,7 @@ PerlIOPending_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
     SSize_t avail = PerlIO_get_cnt(f);
     SSize_t got = 0;
-    if ((SSize_t)count < avail)
+    if ((SSize_t) count >= 0 && (SSize_t)count < avail)
 	avail = count;
     if (avail > 0)
 	got = PerlIOBuf_read(aTHX_ f, vbuf, avail);
