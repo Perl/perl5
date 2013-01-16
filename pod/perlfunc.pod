@@ -3361,7 +3361,7 @@ X<length> X<size>
 
 =item length
 
-=for Pod::Functions return the number of bytes in a string
+=for Pod::Functions return the number of characters in a string
 
 Returns the length in I<characters> of the value of EXPR.  If EXPR is
 omitted, returns the length of C<$_>.  If EXPR is undefined, returns
