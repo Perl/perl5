@@ -144,7 +144,7 @@ Note the gaps before several of the byte entries above marked by '*'.  These are
 caused by legal UTF-8 avoiding non-shortest encodings: it is technically
 possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
-(and that is what Perl does).
+(and that is what Perl does).  The non-shortest ones are called 'overlongs'.
 
  */
 
@@ -166,33 +166,59 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 */
 
+/* Is the representation of the Unicode code point 'c' the same regardless of
+ * being encoded in UTF-8 or not? */
 #define UNI_IS_INVARIANT(c)		(((UV)c) <  0x80)
-#define UTF8_IS_START(c)		(((U8)c) >= 0xc2)
-#define UTF8_IS_CONTINUATION(c)		((((U8)c) & 0xC0) == 0x80)
+
+/* Is the UTF8-encoded byte 'c' part of a variant sequence in UTF-8?  This is
+ * the inverse of UTF8_IS_INVARIANT */
 #define UTF8_IS_CONTINUED(c) 		(((U8)c) &  0x80)
 
-/* Use UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
- * be well-formed.  Masking with 0xfe allows low bit to be 0 or 1; thus this
- * matches 0xc[23]. */
+/* Is the byte 'c' the first byte of a multi-byte UTF8-8 encoded sequence?
+ * This doesn't catch invariants (they are single-byte).  It also excludes the
+ * illegal overlong sequences that begin with C0 and C1. */
+#define UTF8_IS_START(c)		(((U8)c) >= 0xc2)
+
+/* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
+ * first byte thereof?  */
+#define UTF8_IS_CONTINUATION(c)		((((U8)c) & 0xC0) == 0x80)
+
+/* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
+ * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
+ * be well-formed.  Masking with 0xfe allows the low bit to be 0 or 1; thus
+ * this matches 0xc[23]. */
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(((U8)(c) & 0xfe) == 0xc2)
 
+/* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
+ * represent a code point > 255? */
 #define UTF8_IS_ABOVE_LATIN1(c)	((U8)(c) >= 0xc4)
 
+/* This defines the 1-bits that are to be in the first byte of a multi-byte
+ * UTF-8 encoded character that give the number of bytes that comprise the
+ * character.
+ * */
 #define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFE << (7-(len))))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
  * Doesn't work on an invariant byte */
 #define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
+/* This defines the bits that are to be in the continuation bytes of a multi-byte
+ * UTF-8 encoded character that indicate it is a continuation byte. */
 #define UTF_CONTINUATION_MARK		0x80
+
+/* This is the number of low-order bits a continuation byte in a UTF-8 encoded
+ * sequence contributes to the specification of the code point.  In the bit
+ * maps above, you see that the first 2 bits are a constant '10', leaving 6 of
+ * real information */
 #define UTF_ACCUMULATION_SHIFT		6
 
 /* 2**UTF_ACCUMULATION_SHIFT - 1 */
 #define UTF_CONTINUATION_MASK		((U8)0x3f)
 
-/* This sets the UTF_CONTINUATION_MASK in the upper bits of a word.  If a value
- * is anded with it, and the result is non-zero, then using the original value
- * in UTF8_ACCUMULATE will overflow, shifting bits off the left */
+/* If a value is anded with this, and the result is non-zero, then using the
+ * original value in UTF8_ACCUMULATE will overflow, shifting bits off the left
+ * */
 #define UTF_ACCUMULATION_OVERFLOW_MASK					\
     (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS)           \
            - UTF_ACCUMULATION_SHIFT))
@@ -260,9 +286,16 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 		    UTF8_ACCUMULATE((NATIVE_TO_UTF(HI) & UTF_START_MASK(2)), \
 				     NATIVE_TO_UTF(LO))
 
+/* How many bytes in the UTF-8 encoded character whose first (perhaps only)
+ * byte is pointed to by 's' */
 #define UTF8SKIP(s) PL_utf8skip[*(const U8*)(s)]
 
+/* Is the byte 'c' the same character when encoded in UTF-8 as when not.  This
+ * works on both UTF-8 encoded strings and non-encoded, as it returns TRUE in
+ * each for the exact same set of bit patterns.  (And it works on any byte in a
+ * UTF-8 encoded string) */
 #define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_UTF(c))
+
 #define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE8_TO_UNI(c))
 
 #define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */

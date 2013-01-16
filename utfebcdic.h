@@ -564,7 +564,9 @@ END_EXTERN_C
 
 #define UNI_IS_INVARIANT(c)		((c) <  0xA0)
 
-/* UTF-EBCDIC semantic macros - transform back into I8 and then compare */
+/* UTF-EBCDIC semantic macros - transform back into I8 and then compare
+ * Comments as to the meaning of each are given at their corresponding utf8.h
+ * definitions */
 
 #define UTF8_IS_START(c)		(NATIVE_TO_UTF(c) >= 0xC5 && NATIVE_TO_UTF(c) != 0xE0)
 #define UTF8_IS_CONTINUATION(c)		((NATIVE_TO_UTF(c) & 0xE0) == 0xA0)
