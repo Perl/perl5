@@ -2043,7 +2043,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
     if (! is_utf8_char_buf(p, p + UTF8SKIP(p))) {
         if (ckWARN_d(WARN_UTF8)) {
             Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED,WARN_UTF8),
-		    "It is deprecated to pass malformed UTF-8 to character classification macros, for \"%s\"", swashname);
+		    "Passing malformed UTF-8 to \"%s\" is deprecated", swashname);
             if (ckWARN(WARN_UTF8)) {    /* This will output details as to the
                                            what the malformation is */
                 utf8_to_uvchr_buf(p, p + UTF8SKIP(p), NULL);
