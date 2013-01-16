@@ -10325,17 +10325,17 @@ STATIC char *
 S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
 {
     dVAR;
-    SV *sv;				/* scalar value: string */
-    const char *tmps;			/* temp string, used for delimiter matching */
+    SV *sv;			/* scalar value: string */
+    const char *tmps;		/* temp string, used for delimiter matching */
     char *s = start;		/* current position in the buffer */
     char term;			/* terminating character */
     char *to;			/* current position in the sv's data */
-    I32 brackets = 1;			/* bracket nesting level */
-    bool has_utf8 = FALSE;		/* is there any utf8 content? */
-    I32 termcode;			/* terminating char. code */
-    U8 termstr[UTF8_MAXBYTES];		/* terminating string */
-    STRLEN termlen;			/* length of terminating string */
-    int last_off = 0;			/* last position for nesting bracket */
+    I32 brackets = 1;		/* bracket nesting level */
+    bool has_utf8 = FALSE;	/* is there any utf8 content? */
+    I32 termcode;		/* terminating char. code */
+    U8 termstr[UTF8_MAXBYTES];	/* terminating string */
+    STRLEN termlen;		/* length of terminating string */
+    int last_off = 0;		/* last position for nesting bracket */
 #ifdef PERL_MAD
     int stuffstart;
     char *tstart;
