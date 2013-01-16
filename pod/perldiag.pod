@@ -3795,6 +3795,19 @@ to even) byte length.
 
 (P) The lexer got into a bad state while processing a case modifier.
 
+=item Parentheses missing around "%s" list
+
+(W parenthesis) You said something like
+
+    my $foo, $bar = @_;
+
+when you meant
+
+    my ($foo, $bar) = @_;
+
+Remember that "my", "our", "local" and "state" bind tighter than comma.
+
+
 =item Parsing code internal error (%s)
 
 (F) Parsing code supplied by an extension violated the parser's API in
@@ -3809,18 +3822,6 @@ the nesting limit is exceeded.
 
 The <-- HERE shows whereabouts in the regular expression the problem was
 discovered.
-
-=item Parentheses missing around "%s" list
-
-(W parenthesis) You said something like
-
-    my $foo, $bar = @_;
-
-when you meant
-
-    my ($foo, $bar) = @_;
-
-Remember that "my", "our", "local" and "state" bind tighter than comma.
 
 =item C<-p> destination: %s
 
