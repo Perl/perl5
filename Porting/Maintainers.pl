@@ -1727,7 +1727,7 @@ use File::Glob qw(:case);
 
     'Test' => {
         'MAINTAINER'   => 'jesse',
-        'DISTRIBUTION' => 'JESSE/Test-1.25_02.tar.gz',
+        'DISTRIBUTION' => 'JESSE/Test-1.26.tar.gz',
         'FILES'        => q[cpan/Test],
         'UPSTREAM'     => 'cpan',
     },
