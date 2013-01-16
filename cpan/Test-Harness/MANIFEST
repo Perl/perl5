@@ -76,7 +76,7 @@ t/aggregator.t
 t/bailout.t
 t/base.t
 t/callbacks.t
-t/compat/env.opts.t
+t/compat/env_opts.t
 t/compat/env.t
 t/compat/failure.t
 t/compat/inc-propagation.t
