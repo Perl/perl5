@@ -269,34 +269,29 @@ static int S_safe_year(Year year)
 
 
 static void S_copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
-    if( src == NULL ) {
-        memset(dest, 0, sizeof(*dest));
-    }
-    else {
-#       ifdef USE_TM64
-            dest->tm_sec        = src->tm_sec;
-            dest->tm_min        = src->tm_min;
-            dest->tm_hour       = src->tm_hour;
-            dest->tm_mday       = src->tm_mday;
-            dest->tm_mon        = src->tm_mon;
-            dest->tm_year       = (Year)src->tm_year;
-            dest->tm_wday       = src->tm_wday;
-            dest->tm_yday       = src->tm_yday;
-            dest->tm_isdst      = src->tm_isdst;
+#ifdef USE_TM64
+    dest->tm_sec        = src->tm_sec;
+    dest->tm_min        = src->tm_min;
+    dest->tm_hour       = src->tm_hour;
+    dest->tm_mday       = src->tm_mday;
+    dest->tm_mon        = src->tm_mon;
+    dest->tm_year       = (Year)src->tm_year;
+    dest->tm_wday       = src->tm_wday;
+    dest->tm_yday       = src->tm_yday;
+    dest->tm_isdst      = src->tm_isdst;
 
-#           ifdef HAS_TM_TM_GMTOFF
-                dest->tm_gmtoff  = src->tm_gmtoff;
-#           endif
+#  ifdef HAS_TM_TM_GMTOFF
+    dest->tm_gmtoff     = src->tm_gmtoff;
+#  endif
 
-#           ifdef HAS_TM_TM_ZONE
-                dest->tm_zone  = src->tm_zone;
-#           endif
+#  ifdef HAS_TM_TM_ZONE
+    dest->tm_zone       = src->tm_zone;
+#  endif
 
-#       else
-            /* They're the same type */
-            memcpy(dest, src, sizeof(*dest));
-#       endif
-    }
+#else
+    /* They're the same type */
+    memcpy(dest, src, sizeof(*dest));
+#endif
 }
 
 
