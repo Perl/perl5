@@ -3831,16 +3831,16 @@ S_intuit_more(pTHX_ char *s)
 	return FALSE;
     else {
         /* this is terrifying, and it works */
-	int weight = 2;		/* let's weigh the evidence */
+	int weight;
 	char seen[256];
-	unsigned char un_char = 255, last_un_char;
 	const char * const send = strchr(s,']');
+	unsigned char un_char, last_un_char;
 	char tmpbuf[sizeof PL_tokenbuf * 4];
 
 	if (!send)		/* has to be an expression */
 	    return TRUE;
+	weight = 2;		/* let's weigh the evidence */
 
-	Zero(seen,256,char);
 	if (*s == '$')
 	    weight -= 3;
 	else if (isDIGIT(*s)) {
@@ -3851,6 +3851,8 @@ S_intuit_more(pTHX_ char *s)
 	    else
 		weight -= 100;
 	}
+	Zero(seen,256,char);
+	un_char = 255;
 	for (; s < send; s++) {
 	    last_un_char = un_char;
 	    un_char = (unsigned char)*s;
