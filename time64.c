@@ -269,6 +269,8 @@ static int S_safe_year(Year year)
 
 
 static void S_copy_little_tm_to_big_TM(const struct tm *src, struct TM *dest) {
+    assert(src);
+    assert(dest);
 #ifdef USE_TM64
     dest->tm_sec        = src->tm_sec;
     dest->tm_min        = src->tm_min;
