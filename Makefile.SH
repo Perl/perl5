@@ -307,6 +307,7 @@ RUN =
 # When cross-compiling we want to use a (mini)perl built for the host, not the target
 HOST_PERL = $hostperl
 HOST_GENERATE = $hostgenerate
+SYSTEM_PERL = $perl
 
 # These variables may need to be manually set for non-Unix systems.
 AR = $full_ar
@@ -321,10 +322,26 @@ PATH_SEP = $p_
 MINIPERL_EXE = miniperl\$(EXE_EXT)
 MINIPERL = \$(LDLIBPTH) ./miniperl\$(EXE_EXT) -Ilib
 
+!GROK!THIS!
+
+case "$usecrosscompile$perl" in
+define?*)
+	$spitshell >>$Makefile <<!GROK!THIS!
 # Macros to invoke a copy of our fully operational perl during the build.
 PERL_EXE = perl\$(EXE_EXT)
-RUN_PERL = \$(LDLIBPTH) \$(RUN) ./perl\$(EXE_EXT)
+RUN_PERL = \$(LDLIBPTH) \$(RUN) $perl\$(EXE_EXT)
+!GROK!THIS!
+	;;
+*)
+	$spitshell >>$Makefile <<!GROK!THIS!
+# Macros to invoke a copy of our fully operational perl during the build.
+PERL_EXE = perl\$(EXE_EXT)
+RUN_PERL = \$(LDLIBPTH) \$(RUN) ./perl\$(EXE_EXT) -Ilib
+!GROK!THIS!
+	;;
+esac
 
+$spitshell >>$Makefile <<!GROK!THIS!
 # Macros to run our tests
 RUN_TESTS = \$(LDLIBPTH) ./runtests
 
@@ -1005,7 +1022,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
 pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
-	$(RUN_PERL) -f -Ilib pod/buildtoc -q
+	$(RUN_PERL) -f pod/buildtoc -q
 
 pod/perlapi.pod: pod/perlintern.pod
 
@@ -1029,13 +1046,13 @@ extra.pods: $(MINIPERL_EXE)
 	done
 
 extras.make: $(PERL_EXE)
-	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -MCPAN -e '@ARGV&&make(@ARGV)' `cat extras.lst`
 
 extras.test: $(PERL_EXE)
-	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -MCPAN -e '@ARGV&&test(@ARGV)' `cat extras.lst`
 
 extras.install: $(PERL_EXE)
-	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
+	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
@@ -1142,10 +1159,10 @@ regen_headers regen-headers:	FORCE
 regen_meta regen-meta:  META.yml META.json
 
 META.yml:   FORCE
-	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta -y
+	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) Porting/makemeta -y
 
 META.json:   FORCE
-	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta -j
+	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) Porting/makemeta -j
 
 
 regen_all regen-all: regen regen_meta
@@ -1190,7 +1207,7 @@ $spitshell >>$Makefile <<'!NO!SUBS!'
 
 .PHONY: printconfig
 printconfig:
-	@eval `$(RUN_PERL) -Ilib -V:$(CONFIGVAR)`; echo $$$(CONFIGVAR)
+	@eval `$(RUN_PERL) -V:$(CONFIGVAR)`; echo $$$(CONFIGVAR)
 
 .PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
 	realclean _realcleaner clobber _clobber \
@@ -1443,28 +1460,28 @@ test_porting test-porting: test_prep
 .PHONY: ok okfile oknack okfilenack nok nokfile noknack nokfilenack
 
 ok:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -ok -s '(UNINSTALLED)'
+	$(RUN_PERL) utils/perlbug -ok -s '(UNINSTALLED)'
 
 okfile:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
+	$(RUN_PERL) utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok
 
 oknack:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -A
+	$(RUN_PERL) utils/perlbug -ok -s '(UNINSTALLED)' -A
 
 okfilenack:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok -A
+	$(RUN_PERL) utils/perlbug -ok -s '(UNINSTALLED)' -F perl.ok -A
 
 nok:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -nok -s '(UNINSTALLED)'
+	$(RUN_PERL) utils/perlbug -nok -s '(UNINSTALLED)'
 
 nokfile:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok
+	$(RUN_PERL) utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok
 
 noknack:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -A
+	$(RUN_PERL) utils/perlbug -nok -s '(UNINSTALLED)' -A
 
 nokfilenack:	utilities
-	$(RUN_PERL) -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok -A
+	$(RUN_PERL) utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok -A
 
 .PHONY: clist hlist
 
