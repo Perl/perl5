@@ -11267,8 +11267,7 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
 
 PERL_STATIC_INLINE I32
-S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
-                    const bool strict)
+S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 {
     dVAR;
     I32 namedclass = OOB_NAMEDCLASS;
@@ -11392,7 +11391,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
 		       the class closes */
 		    while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse) != ']')
 			RExC_parse++;
-		    SvREFCNT_dec(free_me);
 		    vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 		}
 	    } else {
@@ -12058,8 +12056,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
 	}
-	listsv = newSVpvs("# comment\n");
+	listsv = newSVpvs_flags("# comment\n", SVs_TEMP);
 	initial_listsv_len = SvCUR(listsv);
+        SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
     }
 
     if (skip_white) {
@@ -12087,12 +12086,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
 	    SAVEFREESV(RExC_rx_sv);
-	    SAVEFREESV(listsv);
 	    ckWARN3reg(s+2,
 		       "POSIX syntax [%c %c] belongs inside character classes",
 		       c, c);
 	    (void)ReREFCNT_inc(RExC_rx_sv);
-	    SvREFCNT_inc_simple_void_NN(listsv);
 	}
     }
 
@@ -12144,7 +12141,7 @@ parseit:
             && RExC_parse < RExC_end
             && POSIXCC(UCHARAT(RExC_parse)))
         {
-            namedclass = regpposixcc(pRExC_state, value, listsv, strict);
+            namedclass = regpposixcc(pRExC_state, value, strict);
         }
         else if (value == '\\') {
 	    if (UTF) {
@@ -12382,7 +12379,6 @@ parseit:
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
                     if (numlen != 3) {
-                        SAVEFREESV(listsv); /* In case warnings are fatalized */
                         if (strict) {
                             RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
                             vFAIL("Need exactly 3 octal digits");
@@ -12399,7 +12395,6 @@ parseit:
                                  form_short_octal_warning(RExC_parse, numlen));
                             (void)ReREFCNT_inc(RExC_rx_sv);
                         }
-                        SvREFCNT_inc_simple_void_NN(listsv);
                     }
 		    if (PL_encoding && value < 0x100)
 			goto recode_encoding;
@@ -12423,7 +12418,6 @@ parseit:
 	    default:
 		/* Allow \_ to not give an error */
 		if (!SIZE_ONLY && isWORDCHAR(value) && value != '_') {
-		    SAVEFREESV(listsv);
                     if (strict) {
                         vFAIL2("Unrecognized escape \\%c in character class",
                                (int)value);
@@ -12435,7 +12429,6 @@ parseit:
                             (int)value);
                         (void)ReREFCNT_inc(RExC_rx_sv);
                     }
-		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
 	    }   /* End of switch on char following backslash */
@@ -12481,7 +12474,6 @@ parseit:
 		    const int w = (RExC_parse >= rangebegin)
                                   ? RExC_parse - rangebegin
                                   : 0;
-		    SAVEFREESV(listsv); /* in case of fatal warnings */
                     if (strict) {
                         vFAIL4("False [] range \"%*.*s\"", w, w, rangebegin);
                     }
@@ -12494,7 +12486,6 @@ parseit:
                         cp_list = add_cp_to_invlist(cp_list, '-');
                         cp_list = add_cp_to_invlist(cp_list, prevvalue);
                     }
-                    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 
 		range = 0; /* this was not a true range */
@@ -13036,7 +13027,6 @@ parseit:
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
         SvREFCNT_dec_NN(multi_char_matches);
-        SvREFCNT_dec_NN(listsv);
         return ret;
     }
 
@@ -13194,7 +13184,6 @@ parseit:
             RExC_parse = (char *) cur_parse;
 
             SvREFCNT_dec(posixes);
-            SvREFCNT_dec_NN(listsv);
             SvREFCNT_dec(cp_list);
             return ret;
         }
@@ -13696,7 +13685,6 @@ parseit:
             }
 
             SvREFCNT_dec_NN(cp_list);
-            SvREFCNT_dec_NN(listsv);
             return ret;
         }
     }
@@ -13784,7 +13772,6 @@ parseit:
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
-	SvREFCNT_dec_NN(listsv);
     }
     else {
 	/* av[0] stores the character class description in its textual form:
@@ -13801,8 +13788,7 @@ parseit:
 	SV *rv;
 
 	av_store(av, 0, (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
-			? listsv
-			: (SvREFCNT_dec_NN(listsv), &PL_sv_undef));
+			? SvREFCNT_inc(listsv) : &PL_sv_undef);
 	if (swash) {
 	    av_store(av, 1, swash);
 	    SvREFCNT_dec_NN(cp_list);

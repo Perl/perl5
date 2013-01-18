@@ -2037,7 +2037,7 @@ EsRn	|U32	|add_data	|NN struct RExC_state_t *pRExC_state|U32 n \
 				|NN const char *s
 rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
 Ei	|I32	|regpposixcc	|NN struct RExC_state_t *pRExC_state \
-				|I32 value|NULLOK SV *free_me|const bool strict
+				|I32 value|const bool strict
 Es	|I32	|make_trie	|NN struct RExC_state_t *pRExC_state \
 				|NN regnode *startbranch|NN regnode *first \
 				|NN regnode *last|NN regnode *tail \
