@@ -1,5 +1,7 @@
 # set -x
 
+userelocatableinc='define'
+
 # Having fun with the dlopen check.. :(
 #d_dlopen='define'
 #d_dlerror='define'
