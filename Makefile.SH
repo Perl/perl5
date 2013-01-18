@@ -1065,20 +1065,52 @@ no_install no-install: install-notify
 install: install-all
 !NO!SUBS!
 
+
 for name in all notify silent strip verbose; do
     flags="--$name";
-    $spitshell >>$Makefile <<EOT
+    if test "X$hostperl" != X; then
+        $spitshell >>$Makefile <<EOT
+
+install_$name install-$name: \$(INSTALL_DEPENDENCE) installperl all installman
+	\$(HOST_PERL) installperl --destdir=\$(DESTDIR) ${flags%--all} \$(INSTALLFLAGS) \$(STRIPFLAGS)
+	\$(HOST_PERL) installman --destdir=\$(DESTDIR) ${flags%--all}
+EOT
+    else
+        $spitshell >>$Makefile <<EOT
 
 install_$name install-$name: \$(INSTALL_DEPENDENCE) installperl all installman
 	\$(RUN_PERL) installperl --destdir=\$(DESTDIR) ${flags%--all} \$(INSTALLFLAGS) \$(STRIPFLAGS)
 	\$(RUN_PERL) installman --destdir=\$(DESTDIR) ${flags%--all}
 EOT
+    fi
 
     test $name = notify || echo '	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib -MCPAN -e '\''@ARGV&&install(@ARGV)'\'' `cat extras.lst`' >>$Makefile
 done
 
-$spitshell >>$Makefile <<'!NO!SUBS!'
+if test "X$hostperl" != X; then
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+install.perl:	$(INSTALL_DEPENDENCE) installperl
+	$(HOST_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
+	-@test ! -s extras.lst || $(MAKE) extras.install
 
+install.man:	all installman
+	$(HOST_PERL) installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
+
+# XXX Experimental. Hardwired values, but useful for testing.
+# Eventually Configure could ask for some of these values.
+install.html: all installhtml
+	-@test -f README.vms && cd vms && $(LNS) ../README.vms README_vms.pod && cd ..
+	$(HOST_PERL) installhtml   \
+      --podroot=. --podpath=. --recurse  \
+      --htmldir=$(privlib)/html   \
+      --htmlroot=$(privlib)/html  \
+      --splithead=pod/perlipc     \
+      --splititem=pod/perlfunc    \
+      --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \
+      --verbose
+!NO!SUBS!
+else
+	$spitshell >>$Makefile <<'!NO!SUBS!'
 install.perl:	$(INSTALL_DEPENDENCE) installperl
 	$(RUN_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
 	-@test ! -s extras.lst || PATH="`pwd`:\${PATH}" PERL5LIB="`pwd`/lib" \$(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
@@ -1098,7 +1130,10 @@ install.html: all installhtml
       --splititem=pod/perlfunc    \
       --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \
       --verbose
+!NO!SUBS!
+fi
 
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 # I now supply perly.c with the kits, so the following section is
 # used only if you force bison to run by saying
