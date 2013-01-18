@@ -13518,7 +13518,7 @@ parseit:
         else {
             RExC_emit = orig_emit;
         }
-        return END;
+        return orig_emit;
     }
 
     /* If we didn't do folding, it's because some information isn't available
