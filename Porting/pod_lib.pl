@@ -1,7 +1,6 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Digest::MD5 'md5';
 use File::Find;
 
 =head1 NAME
@@ -61,6 +60,17 @@ Prints C<ABORTED> to STDERR.
 =back
 
 =cut
+
+# In some situations, eg cross-compiling, we get run with miniperl, so we can't use Digest::MD5
+my $has_md5;
+BEGIN {
+    use Carp;
+    $has_md5 = eval { require Digest::MD5; Digest::MD5->import('md5');  1; };
+}
+
+
+# make it clearer when we haven't run to completion, as we can be quite
+# noisy when things are working ok
 
 sub my_die {
     print STDERR "$0: ", @_;
@@ -365,6 +375,8 @@ my %state = (
     sub is_duplicate_pod {
         my $file = shift;
         local $_;
+
+        return if !$has_md5;
 
         # Initialise the list of possible source files on the first call.
         unless (%Lengths) {
