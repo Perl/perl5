@@ -1113,6 +1113,21 @@ It has been proposed that octal constants be specifiable through the syntax
 C<0oddddd>, parallel to the existing construct to specify hex constants
 C<0xddddd>
 
+=head2 Revisit the regex super-linear cache code
+
+Perl executes regexes using the traditional backtracking algorithm, which
+makes it possible to implement a variety of powerful pattern-matching
+features (like embedded code blocks), at the cost of taking exponential time
+to run on some pathological patterns.  The exponential-time problem is
+mitigated by the I<super-linear cache>, which detects when we're processing
+such a pathological pattern, and does some additional bookkeeping to avoid
+much of the work.  However, that code has bit-rotted a little; some patterns
+don't make as much use of it as they should.  The proposal is to analyse
+where the current cache code has problems, and extend it to cover those cases.
+
+See also
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-01/msg00339.html>
+
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
