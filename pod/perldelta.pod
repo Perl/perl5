@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.17.8
 
 =head1 DESCRIPTION
@@ -15,17 +12,7 @@ release.
 If you are upgrading from an earlier release such as 5.17.6, first read
 L<perl5177delta>, which describes differences between 5.17.6 and 5.17.7.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 Regular Expression Set Operations
 
@@ -36,31 +23,19 @@ to [bracketed] character classes, and as a replacement of user-defined
 properties, allowing more complex expressions than they do.  See
 L<perlre/(?[ ])>.
 
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
-=head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.  In
-particular, deprecated modules should be listed here even if they are listed as
-an updated module in the L</Modules and Pragmata> section.
+=head2 Deprecated modules
 
-[ List each deprecation as a =head2 entry ]
+The Pod::LaTeX module is now deprecated, and due to be moved out of the Perl
+core in 5.20.  Until then, using the core-installed version will produce a
+warning.  You can suppress the warning by installing the module from CPAN.
+
+=head2 User-defined charnames with surprising whitespace
+
+A user-defined character name with trailing or multiple spaces in a row is
+likely a typo.  This now generates a warning when defined, on the assumption
+that uses of it will be unlikely to include the excess whitespace.
 
 =head2 Various XS-callable functions are now deprecated
 
@@ -122,89 +97,52 @@ allow us to change the behavior in future Perl versions so that the
 backslashes do have an effect, and without fear that we are silently
 breaking any existing code.
 
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
+=head2 Selected Updates to Modules and Pragmata
 
 =over 4
 
 =item *
 
-XXX
+Several modules have had their version number changed to one with no
+underscore, since such version numbers are usually interpreted to mean
+"development-only version".  No other changes have been made in these cases.
+The affected modules are:
+
+=over 4
+
+=item *
+
+L<I18N::Langinfo> was 0.08_02 and is now 0.09
+
+=item *
+
+L<I18N::LangTags::List> was 0.35_01 and is now 0.39
+
+=item *
+
+L<IO> was 1.25_08 and is now 1.26
+
+=item *
+
+L<Safe> was 2.33_01 and is now 2.34
+
+=item *
+
+L<Test> was 1.25_02 and is now 1.26.
 
 =back
 
-=head2 Updated Modules and Pragmata
+=item *
 
-=over 4
+L<Digest::SHA> has been upgraded from version 5.80 to 5.81.  This fixes a
+double-free bug, which might have caused vulnerabilities in some cases.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
+L<Socket> has been upgraded from 2.006_001 to 2.009.  This fixes an
+uninitialized memory read.
 
 =back
 
@@ -214,23 +152,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
 
 =head3 New Warnings
 
@@ -242,98 +164,34 @@ L<'%s' resolved to '\o{%s}%d'|perldiag/"'%s' resolved to '\o{%s}%d'">
 
 =item *
 
-XXX L<message|perldiag/"message">
-
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
+L<'Trailing white-space in a charnames alias definition is deprecated'|perldiag/"Trailing white-space in a charnames alias definition is deprecated">
 
 =item *
 
-XXX Describe change here
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
-
-=over 4
+L<'A sequence of multiple spaces in a charnames alias definition is deprecated'|perldiag/"A sequence of multiple spaces in a charnames alias definition is deprecated">
 
 =item *
 
-XXX
-
-=back
-
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
-=over 4
-
-=item *
-
-XXX
+L<'Passing malformed UTF-8 to "%s" is deprecated'|perldiag/"Passing malformed UTF-8 to "%s" is deprecated">
 
 =back
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Many more of the core's tests now have descriptions.
+
+=item *
+
+Thread stress-tests now adapt to the speed of the machine running the tests,
+thus reducing the incidence of false failures.
 
 =back
 
 =head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
 
 =head2 Discontinued Platforms
 
@@ -347,11 +205,6 @@ Support for Rhapsody has been removed.
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
 =item Windows
@@ -360,15 +213,13 @@ Perl can now be built using Microsoft's Visual C++ 2012 compiler by specifying
 CCTYPE=MSVC110 (or MSVC110FREE if you are using the free Express edition for
 Windows Desktop) in F<win32/Makefile>.
 
+=item Haiku
+
+Perl should now work out of the box on Haiku R1 Alpha 4.
+
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
 
 =over 4
 
@@ -381,11 +232,6 @@ the array, not the number of elements it contains.
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -410,30 +256,45 @@ and exit nonzero. [perl #61362]
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Perl 5.17.7 introduced a new internal copy-on-write mechanism, in the
+interests of speed.  An flaw in the implementation means that some regexp
+matches which previously completed very fast, without invoking the full
+regexp engine, now run much slower than before.  We expect this performance
+problem to be resolved before 5.18.0 is released.
 
 =back
 
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
-
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.17.8 represents approximately 5 weeks of development since Perl 5.17.7
+and contains approximately 18,000 lines of changes across 280 files from 24
+authors.
 
-  perl Porting/acknowledgements.pl v5.17.7..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.8:
+
+Aaron Crane, Andy Dougherty, Augustina Blair, Chris 'BinGOs' Williams, Craig
+A. Berry, Daniel Dragan, Dave Rolsky, David Mitchell, Eric Brine, Father
+Chrysostomos, H.Merijn Brand, James E Keenan, Jerry D. Hedden, Jesse Luehrs,
+Karl Williamson, Matthew Horsfall, Nicholas Clark, Renee Baecker, Ricardo
+Signes, Shlomi Fish, Steffen Müller, Steve Hay, Steven Schubiger, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
