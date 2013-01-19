@@ -1,10 +1,10 @@
 package constant;
-use 5.005;
+use 5.008;
 use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.24';
+$VERSION = '1.25';
 
 #=======================================================================
 
@@ -17,10 +17,9 @@ my %forced_into_main = map +($_, 1),
 
 my %forbidden = (%keywords, %forced_into_main);
 
-my $str_end = $] >= 5.006 ? "\\z" : "\\Z";
-my $normal_constant_name = qr/^_?[^\W_0-9]\w*$str_end/;
-my $tolerable = qr/^[A-Za-z_]\w*$str_end/;
-my $boolean = qr/^[01]?$str_end/;
+my $normal_constant_name = qr/^_?[^\W_0-9]\w*\z/;
+my $tolerable = qr/^[A-Za-z_]\w*\z/;
+my $boolean = qr/^[01]?\z/;
 
 BEGIN {
     # We'd like to do use constant _CAN_PCS => $] > 5.009002
