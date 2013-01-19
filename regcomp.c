@@ -255,7 +255,6 @@ typedef struct RExC_state_t {
 /* If not already in utf8, do a longjmp back to the beginning */
 #define UTF8_LONGJMP 42 /* Choose a value not likely to ever conflict */
 #define REQUIRE_UTF8	STMT_START {                                       \
-                                     if (! UTF) JMPENV_JUMP(UTF8_LONGJMP); \
                                      if (!UTF) {                           \
                                          *flagp = RESTART_UTF8;            \
                                          return NULL;                      \
@@ -5774,6 +5773,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
     }
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
+        if (flags & RESTART_UTF8)
+            JMPENV_JUMP(UTF8_LONGJMP);
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
     }
     if (code_blocksv)
