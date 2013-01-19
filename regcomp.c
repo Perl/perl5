@@ -9634,7 +9634,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 }
 
 STATIC bool
-S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I32 *flagp, U32 depth, bool in_char_class)
+S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I32 *flagp, U32 depth, bool in_char_class,
+        const bool strict   /* Apply stricter parsing rules? */
+    )
 {
    
  /* This is expected to be called by a parser routine that has recognized '\N'
@@ -9749,9 +9751,14 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 	}
         else if (in_char_class) {
             if (SIZE_ONLY && in_char_class) {
-                ckWARNreg(RExC_parse,
-                        "Ignoring zero length \\N{} in character class"
-                );
+                if (strict) {
+                    RExC_parse++;   /* Position after the "}" */
+                    vFAIL("Zero length \\N{}");
+                }
+                else {
+                    ckWARNreg(RExC_parse,
+                              "Ignoring zero length \\N{} in character class");
+                }
             }
             ret = FALSE;
 	}
@@ -9803,7 +9810,13 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 	}
 
         if (in_char_class && has_multiple_chars) {
-	    ckWARNreg(endchar, "Using just the first character returned by \\N{} in character class");
+            if (strict) {
+                RExC_parse = endbrace;
+                vFAIL("\\N{} in character class restricted to one character");
+            }
+            else {
+                ckWARNreg(endchar, "Using just the first character returned by \\N{} in character class");
+            }
         }
 
         RExC_parse = endbrace + 1;
@@ -10339,7 +10352,8 @@ tryagain:
              * special treatment for quantifiers is not needed for such single
              * character sequences */
             ++RExC_parse;
-            if (! grok_bslash_N(pRExC_state, &ret, NULL, flagp, depth, FALSE)) {
+            if (! grok_bslash_N(pRExC_state, &ret, NULL, flagp, depth, FALSE,
+                                FALSE /* not strict */ )) {
                 RExC_parse--;
                 goto defchar;
             }
@@ -10603,7 +10617,8 @@ tryagain:
                          * */
                         RExC_parse = p + 1;
                         if (! grok_bslash_N(pRExC_state, NULL, &ender,
-                                            flagp, depth, FALSE))
+                                            flagp, depth, FALSE,
+                                            FALSE /* not strict */ ))
                         {
                             RExC_parse = p = oldp;
                             goto loopdone;
@@ -11988,7 +12003,8 @@ parseit:
                     from earlier versions, OTOH that behaviour was broken
                     as well. */
                     if (! grok_bslash_N(pRExC_state, NULL, &value, flagp, depth,
-                                      TRUE /* => charclass */))
+                                      TRUE, /* => charclass */
+                                      strict))
                     {
                         goto parseit;
                     }

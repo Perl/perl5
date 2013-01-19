@@ -1014,6 +1014,9 @@ sub run_tests {
         ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/, 'Verify that long string works';
         ok "\N{LONG-STR}" =~ /^\N{LONG-STR}$/i, 'Verify under folding that long string works';
 
+        eval '/(?[[\N{EMPTY-STR}]])/';
+        ok $@ && $@ =~ /Zero length \\N\{}/;
+
         undef $w;
         eval q [is("\N{TOO  MANY SPACES}", "TOO  MANY SPACES", "Multiple spaces in character name works")];
         like ($w, qr/A sequence of multiple spaces in a charnames alias definition is deprecated/, "... but returns a deprecation warning");

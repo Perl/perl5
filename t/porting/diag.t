@@ -658,3 +658,5 @@ Operation "%s" returns its argument for UTF-16 surrogate U+%X
 Unicode surrogate U+%X is illegal in UTF-8
 UTF-16 surrogate U+%X
 False [] range "%s" in regex; marked by <-- HERE in m/%s/
+\N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
+Zero length \N{} in regex; marked by <-- HERE in m/%s/

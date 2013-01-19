@@ -147,7 +147,9 @@ my @death =
  'm/(?[[\w-x]])/' => 'False [] range "\w-" in regex; marked by {#} in m/(?[[\w-{#}x]])/',
  'm/(?[[a-\pM]])/' => 'False [] range "a-\pM" in regex; marked by {#} in m/(?[[a-\pM{#}]])/',
  'm/(?[[\pM-x]])/' => 'False [] range "\pM-" in regex; marked by {#} in m/(?[[\pM-{#}x]])/',
+ 'm/(?[[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} in character class restricted to one character in regex; marked by {#} in m/(?[[\N{U+100.300{#}}]])/',
 );
+# Tests involving a user-defined charnames translator are in pat_advanced.t
 
 ##
 ## Key-value pairs of code/error of code that should have non-fatal warnings.
