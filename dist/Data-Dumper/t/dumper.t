@@ -505,7 +505,7 @@ EOT
   $dogs[2] = \%kennel;
   $mutts = \%kennel;
   $mutts = $mutts;         # avoid warning
-  
+
 ############# 85
 ##
   $WANT = <<'EOT';
@@ -533,7 +533,7 @@ EOT
 	   $d->Dumpxs;
 	  );
   }
-  
+
 ############# 91
 ##
   $WANT = <<'EOT';
@@ -544,7 +544,7 @@ EOT
 
   TEST q($d->Dump);
   TEST q($d->Dumpxs) if $XS;
-  
+
 ############# 97
 ##
   $WANT = <<'EOT';
@@ -560,7 +560,7 @@ EOT
 #%mutts = %kennels;
 EOT
 
-  
+
   TEST q($d->Reset; $d->Dump);
   if ($XS) {
     TEST q($d->Reset; $d->Dumpxs);
@@ -593,7 +593,7 @@ EOT
 	   $d->Dumpxs;
 	  );
   }
-  
+
 ############# 109
 ##
   TEST q($d->Reset->Dump);
@@ -625,7 +625,7 @@ EOT
   if ($XS) {
     TEST q($d->Reset->Dumpxs);
   }
-  
+
 }
 
 {
@@ -925,7 +925,7 @@ TEST q(Data::Dumper->new([$c])->Dumpxs;)
   local $Data::Dumper::Sortkeys = \&sort205;
   sub sort205 {
     my $hash = shift;
-    return [ 
+    return [
       $hash eq $c ? (sort { $a <=> $b } keys %$hash)
 		  : (reverse sort keys %$hash)
     ];

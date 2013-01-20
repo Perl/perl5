@@ -1,0 +1,128 @@
+#!./perl -w
+# t/sparseseen.t - Test Sparseseen()
+
+BEGIN {
+    if ($ENV{PERL_CORE}){
+        require Config; import Config;
+        no warnings 'once';
+        if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
+            print "1..0 # Skip: Data::Dumper was not built\n";
+            exit 0;
+        }
+    }
+}
+
+use strict;
+
+use Data::Dumper;
+use Test::More tests =>  8;
+use lib qw( ./t/lib );
+use Testing qw( _dumptostr );
+
+my %d = (
+    delta   => 'd',
+    beta    => 'b',
+    gamma   => 'c',
+    alpha   => 'a',
+);
+
+{
+    my ($obj, %dumps, $sparseseen, $starting);
+
+    note("\$Data::Dumper::Sparseseen and Sparseseen() set to true value");
+    note("XS implementation");
+    $Data::Dumper::Useperl = 0;
+
+    $starting = $Data::Dumper::Sparseseen;
+    $sparseseen = 1;
+    local $Data::Dumper::Sparseseen = $sparseseen;
+    $obj = Data::Dumper->new( [ \%d ] );
+    $dumps{'ddssone'} = _dumptostr($obj);
+    local $Data::Dumper::Sparseseen = $starting;
+
+    $obj = Data::Dumper->new( [ \%d ] );
+    $obj->Sparseseen($sparseseen);
+    $dumps{'objssone'} = _dumptostr($obj);
+
+    is($dumps{'ddssone'}, $dumps{'objssone'},
+        "\$Data::Dumper::Sparseseen = 1 and Sparseseen(1) are equivalent");
+    %dumps = ();
+
+    $sparseseen = 0;
+    local $Data::Dumper::Sparseseen = $sparseseen;
+    $obj = Data::Dumper->new( [ \%d ] );
+    $dumps{'ddsszero'} = _dumptostr($obj);
+    local $Data::Dumper::Sparseseen = $starting;
+
+    $obj = Data::Dumper->new( [ \%d ] );
+    $obj->Sparseseen($sparseseen);
+    $dumps{'objsszero'} = _dumptostr($obj);
+
+    is($dumps{'ddsszero'}, $dumps{'objsszero'},
+        "\$Data::Dumper::Sparseseen = 0 and Sparseseen(0) are equivalent");
+
+    $sparseseen = undef;
+    local $Data::Dumper::Sparseseen = $sparseseen;
+    $obj = Data::Dumper->new( [ \%d ] );
+    $dumps{'ddssundef'} = _dumptostr($obj);
+    local $Data::Dumper::Sparseseen = $starting;
+
+    $obj = Data::Dumper->new( [ \%d ] );
+    $obj->Sparseseen($sparseseen);
+    $dumps{'objssundef'} = _dumptostr($obj);
+
+    is($dumps{'ddssundef'}, $dumps{'objssundef'},
+        "\$Data::Dumper::Sparseseen = undef and Sparseseen(undef) are equivalent");
+    is($dumps{'ddsszero'}, $dumps{'objssundef'},
+        "\$Data::Dumper::Sparseseen = undef and = 0 are equivalent");
+    %dumps = ();
+
+    note("Perl implementation");
+    $Data::Dumper::Useperl = 1;
+
+    $starting = $Data::Dumper::Sparseseen;
+    $sparseseen = 1;
+    local $Data::Dumper::Sparseseen = $sparseseen;
+    $obj = Data::Dumper->new( [ \%d ] );
+    $dumps{'ddssone'} = _dumptostr($obj);
+    local $Data::Dumper::Sparseseen = $starting;
+
+    $obj = Data::Dumper->new( [ \%d ] );
+    $obj->Sparseseen($sparseseen);
+    $dumps{'objssone'} = _dumptostr($obj);
+
+    is($dumps{'ddssone'}, $dumps{'objssone'},
+        "\$Data::Dumper::Sparseseen = 1 and Sparseseen(1) are equivalent");
+    %dumps = ();
+
+    $sparseseen = 0;
+    local $Data::Dumper::Sparseseen = $sparseseen;
+    $obj = Data::Dumper->new( [ \%d ] );
+    $dumps{'ddsszero'} = _dumptostr($obj);
+    local $Data::Dumper::Sparseseen = $starting;
+
+    $obj = Data::Dumper->new( [ \%d ] );
+    $obj->Sparseseen($sparseseen);
+    $dumps{'objsszero'} = _dumptostr($obj);
+
+    is($dumps{'ddsszero'}, $dumps{'objsszero'},
+        "\$Data::Dumper::Sparseseen = 0 and Sparseseen(0) are equivalent");
+
+    $sparseseen = undef;
+    local $Data::Dumper::Sparseseen = $sparseseen;
+    $obj = Data::Dumper->new( [ \%d ] );
+    $dumps{'ddssundef'} = _dumptostr($obj);
+    local $Data::Dumper::Sparseseen = $starting;
+
+    $obj = Data::Dumper->new( [ \%d ] );
+    $obj->Sparseseen($sparseseen);
+    $dumps{'objssundef'} = _dumptostr($obj);
+
+    is($dumps{'ddssundef'}, $dumps{'objssundef'},
+        "\$Data::Dumper::Sparseseen = undef and Sparseseen(undef) are equivalent");
+    is($dumps{'ddsszero'}, $dumps{'objssundef'},
+        "\$Data::Dumper::Sparseseen = undef and = 0 are equivalent");
+    %dumps = ();
+
+}
+

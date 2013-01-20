@@ -3121,15 +3121,29 @@ dist/Data-Dumper/Changes	Data pretty printer, changelog
 dist/Data-Dumper/Dumper.pm	Data pretty printer, module
 dist/Data-Dumper/Dumper.xs	Data pretty printer, externals
 dist/Data-Dumper/t/bless.t	See if Data::Dumper works
+dist/Data-Dumper/t/bless_var_method.t	See if Data::Dumper::Bless works
 dist/Data-Dumper/t/bugs.t	See if Data::Dumper works
+dist/Data-Dumper/t/deparse.t	See if Data::Dumper::Deparse works
 dist/Data-Dumper/t/dumper.t	See if Data::Dumper works
-dist/Data-Dumper/t/freezer.t	See if $Data::Dumper::Freezer works
+dist/Data-Dumper/t/dumpperl.t	See if Data::Dumper::Dumpperl works
+dist/Data-Dumper/t/freezer.t	See if Data::Dumper::Freezer works
+dist/Data-Dumper/t/indent.t	See if Data::Dumper::Indent works
+dist/Data-Dumper/t/lib/Testing.pm	Functions used in testing Data-Dumper
+dist/Data-Dumper/t/misc.t	Miscellaneous tests for Data-Dumper
+dist/Data-Dumper/t/names.t	See if Data::Dumper::Names works
 dist/Data-Dumper/Todo		Data pretty printer, futures
 dist/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
 dist/Data-Dumper/t/perl-74170.t	Regression test for stack reallocation
+dist/Data-Dumper/t/purity_deepcopy_maxdepth.t	See if three Data::Dumper functions work
 dist/Data-Dumper/t/qr.t		See if Data::Dumper works with qr|/|
+dist/Data-Dumper/t/quotekeys.t	See if Data::Dumper::Quotekeys works
+dist/Data-Dumper/t/seen.t	See if Data::Dumper::Seen works
+dist/Data-Dumper/t/sortkeys.t	See if Data::Dumper::Sortkeys works
+dist/Data-Dumper/t/sparseseen.t	See if Data::Dumper::Sparseseen works
 dist/Data-Dumper/t/terse.t	See if Data::Dumper terse option works
+dist/Data-Dumper/t/toaster.t	See if Data::Dumper::Toaster works
+dist/Data-Dumper/t/values.t	See if Data::Dumper::Values works
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
 dist/Dumpvalue/lib/Dumpvalue.pm	Screen dump of perl values
