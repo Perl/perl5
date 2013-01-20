@@ -17,6 +17,27 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.8 - Iain Pears, An Instance of the Fingerpost
+
+L<Announced on 2013-01-20 by Aaron Crane|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-01/msg00518.html>
+
+I must here declare myself as someone who does not for a moment subscribe to
+the general view that a willingness to perform oneself is detrimental to the
+dignity of experimental philosophy. There is, after all, a clear distinction
+between labour carried out for financial reward, and that done for the
+improvement of mankind: to put it another way, Lower as a philosopher was
+fully my equal even if he fell away when he became the practising physician.
+I think ridiculous of certain professors of anatomy, who find it beneath
+them to pick up the knife themselves, but merely comment while hired hands
+do the cutting. Sylvius would never have dreamt of sitting on a dais reading
+from an authority while others cut E<0x2014> when he taught, the knife was
+in his hand and the blood spattered his coat. Boyle also did not scruple to
+perform his own experiments and, on one occasion in my presence, even showed
+himself willing to anatomise a rat with his very own hands. Nor was he less
+a gentleman when he had finished. Indeed, in my opinion, his stature was all
+the greater, for in Boyle wealth, humility and curiosity mingled, and the
+world is richer for it.
+
 =head2 v5.17.7 - R. Scott Bakker, The Darkness That Comes Before
 
 L<Announced on 2012-12-18 by Dave Rolsky|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2012-12/msg00679.html>
