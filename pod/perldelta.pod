@@ -266,6 +266,11 @@ matches which previously completed very fast, without invoking the full
 regexp engine, now run much slower than before.  We expect this performance
 problem to be resolved before 5.18.0 is released.
 
+=item *
+
+The C<POSIX> module may yield test failures when building on a ZFS
+filesystem under FreeBSD.
+
 =back
 
 =head1 Acknowledgements
