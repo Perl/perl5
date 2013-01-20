@@ -909,7 +909,7 @@ X</p> X<p modifier>
 Backslashed metacharacters in Perl are alphanumeric, such as C<\b>,
 C<\w>, C<\n>.  Unlike some other regular expression languages, there
 are no backslashed symbols that aren't alphanumeric.  So anything
-that looks like \\, \(, \), \<, \>, \{, or \} is always
+that looks like \\, \(, \), \[, \], \{, or \} is always
 interpreted as a literal character, not a metacharacter.  This was
 once used in a common idiom to disable or quote the special meanings
 of regular expression metacharacters in a string that you want to
