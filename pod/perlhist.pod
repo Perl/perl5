@@ -31,8 +31,8 @@ Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
 Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
-Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook
-and Dominic Hargreaves.
+Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
+Dominic Hargreaves, and Aaron Crane.
 
 =head2 PUMPKIN?
 
@@ -494,6 +494,7 @@ the strings?).
  Florian  5.17.5        2012-Oct-20
  Ricardo  5.17.6        2012-Nov-20
  Dave R   5.17.7        2012-Dec-18
+ Aaron    5.17.8        2013-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
