@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.79';
+$VERSION = '2.80';
 
 my $dumpinc = 0;
 sub import {
@@ -224,6 +224,7 @@ sub changes_between {
     5.017005 => '2012-10-20',
     5.017006 => '2012-11-20',
     5.017007 => '2012-12-18',
+    5.017008 => '2013-01-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -7503,7 +7504,7 @@ my %delta = (
             'Locale::Maketext'      => '1.23',
             'Locale::Script'        => '3.24',
             'Module::CoreList'      => '2.79',
-            'Module::CoreList::TieHashDelta'=> '2.78',
+            'Module::CoreList::TieHashDelta'=> '2.79',
             'POSIX'                 => '1.32',
             'Scalar::Util'          => '1.26',
             'Socket'                => '2.006_001',
@@ -7521,6 +7522,90 @@ my %delta = (
             'mro'                   => '1.10',
             'sigtrap'               => '1.07',
             'sort'                  => '2.02',
+        },
+        removed => {
+        }
+    },
+    5.017008 => {
+        delta_from => 5.017007,
+        changed => {
+            'Archive::Extract'      => '0.62',
+            'B'                     => '1.42',
+            'B::Concise'            => '0.95',
+            'Compress::Raw::Bzip2'  => '2.060',
+            'Compress::Raw::Zlib'   => '2.060',
+            'Compress::Zlib'        => '2.060',
+            'Cwd'                   => '3.40',
+            'Data::Dumper'          => '2.141',
+            'Digest::SHA'           => '5.81',
+            'ExtUtils::Install'     => '1.59',
+            'File::Fetch'           => '0.38',
+            'File::Path'            => '2.09',
+            'File::Spec'            => '3.40',
+            'File::Spec::Cygwin'    => '3.40',
+            'File::Spec::Epoc'      => '3.40',
+            'File::Spec::Functions' => '3.40',
+            'File::Spec::Mac'       => '3.40',
+            'File::Spec::OS2'       => '3.40',
+            'File::Spec::Unix'      => '3.40',
+            'File::Spec::VMS'       => '3.40',
+            'File::Spec::Win32'     => '3.40',
+            'HTTP::Tiny'            => '0.025',
+            'Hash::Util'            => '0.14',
+            'I18N::LangTags'        => '0.39',
+            'I18N::LangTags::List'  => '0.39',
+            'I18N::Langinfo'        => '0.09',
+            'IO'                    => '1.26',
+            'IO::Compress::Adapter::Bzip2'=> '2.060',
+            'IO::Compress::Adapter::Deflate'=> '2.060',
+            'IO::Compress::Adapter::Identity'=> '2.060',
+            'IO::Compress::Base'    => '2.060',
+            'IO::Compress::Base::Common'=> '2.060',
+            'IO::Compress::Bzip2'   => '2.060',
+            'IO::Compress::Deflate' => '2.060',
+            'IO::Compress::Gzip'    => '2.060',
+            'IO::Compress::Gzip::Constants'=> '2.060',
+            'IO::Compress::RawDeflate'=> '2.060',
+            'IO::Compress::Zip'     => '2.060',
+            'IO::Compress::Zip::Constants'=> '2.060',
+            'IO::Compress::Zlib::Constants'=> '2.060',
+            'IO::Compress::Zlib::Extra'=> '2.060',
+            'IO::Uncompress::Adapter::Bunzip2'=> '2.060',
+            'IO::Uncompress::Adapter::Identity'=> '2.060',
+            'IO::Uncompress::Adapter::Inflate'=> '2.060',
+            'IO::Uncompress::AnyInflate'=> '2.060',
+            'IO::Uncompress::AnyUncompress'=> '2.060',
+            'IO::Uncompress::Base'  => '2.060',
+            'IO::Uncompress::Bunzip2'=> '2.060',
+            'IO::Uncompress::Gunzip'=> '2.060',
+            'IO::Uncompress::Inflate'=> '2.060',
+            'IO::Uncompress::RawInflate'=> '2.060',
+            'IO::Uncompress::Unzip' => '2.060',
+            'List::Util'            => '1.27',
+            'List::Util::XS'        => '1.27',
+            'Module::CoreList'      => '2.80',
+            'Module::CoreList::TieHashDelta'=> '2.80',
+            'Pod::Html'             => '1.17',
+            'Pod::LaTeX'            => '0.61',
+            'Pod::Man'              => '2.27',
+            'Pod::Text'             => '3.17',
+            'Pod::Text::Color'      => '2.07',
+            'Pod::Text::Overstrike' => '2.05',
+            'Pod::Text::Termcap'    => '2.07',
+            'Safe'                  => '2.34',
+            'Scalar::Util'          => '1.27',
+            'Socket'                => '2.009',
+            'Term::ANSIColor'       => '4.02',
+            'Test'                  => '1.26',
+            'Unicode::Collate'      => '0.97',
+            'XS::APItest'           => '0.51',
+            'XS::Typemap'           => '0.10',
+            '_charnames'            => '1.35',
+            'charnames'             => '1.35',
+            'constant'              => '1.25',
+            'diagnostics'           => '1.31',
+            'threads::shared'       => '1.43',
+            'warnings'              => '1.16',
         },
         removed => {
         }
@@ -7703,6 +7788,9 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.017006 => {
     },
     5.017007 => {
+    },
+    5.017008 => {
+        'Pod::LaTeX'            => '1',
     },
 );
 

@@ -141,6 +141,10 @@ double-free bug, which might have caused vulnerabilities in some cases.
 
 =item *
 
+L<Module::CoreList> has been upgraded from 2.79 to 2.80.
+
+=item *
+
 L<Socket> has been upgraded from 2.006_001 to 2.009.  This fixes an
 uninitialized memory read.
 
