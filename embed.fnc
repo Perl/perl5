@@ -1113,7 +1113,8 @@ Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-EiPR	|I32	|regcurly	|NN const char *s
+EiPR	|I32	|regcurly	|NN const char *s                   \
+				|const bool rbrace_must_be_escaped
 #endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg|I32 minend \
@@ -2197,7 +2198,8 @@ s	|char*	|scan_ident	|NN char *s|NN const char *send|NN char *dest \
 sR	|char*	|scan_inputsymbol|NN char *start
 sR	|char*	|scan_pat	|NN char *start|I32 type
 sR	|char*	|scan_str	|NN char *start|int keep_quoted \
-				|int keep_delims|int re_reparse
+				|int keep_delims|int re_reparse \
+				|bool deprecate_escaped_matching
 sR	|char*	|scan_subst	|NN char *start
 sR	|char*	|scan_trans	|NN char *start
 s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \

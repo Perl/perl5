@@ -794,7 +794,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_QUOTEMETA         20
 #  define _CC_NON_FINAL_FOLD    21
 #  define _CC_IS_IN_SOME_FOLD   22
-/* Unused: 23-31
+#  define _CC_BACKSLASH_FOO_LBRACE_IS_META 31 /* temp, see mk_PL_charclass.pl */
+/* Unused: 23-30
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it

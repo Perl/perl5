@@ -3248,7 +3248,7 @@ S_scan_const(pTHX_ char *start)
 	    else if (PL_lex_inpat
 		    && (*s != 'N'
 			|| s[1] != '{'
-			|| regcurly(s + 1)))
+			|| regcurly(s + 1, FALSE)))
 	    {
 		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
 		goto default_action;
@@ -3818,7 +3818,7 @@ S_intuit_more(pTHX_ char *s)
 
     /* In a pattern, so maybe we have {n,m}. */
     if (*s == '{') {
-	if (regcurly(s)) {
+	if (regcurly(s, FALSE)) {
 	    return FALSE;
 	}
 	return TRUE;
@@ -5772,7 +5772,7 @@ Perl_yylex(pTHX)
 		}
 		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
-		    d = scan_str(d,TRUE,TRUE,FALSE);
+		    d = scan_str(d,TRUE,TRUE,FALSE, FALSE);
 		    if (!d) {
 			/* MUST advance bufptr here to avoid bogus
 			   "at end of line" context messages from yyerror().
@@ -6677,7 +6677,7 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6692,7 +6692,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6715,7 +6715,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '`':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
@@ -8174,7 +8174,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_PIPE_OP,XTERM);
 
 	case KEY_q:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_CONST;
@@ -8185,7 +8185,7 @@ Perl_yylex(pTHX)
 
 	case KEY_qw: {
 	    OP *words = NULL;
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    PL_expect = XOPERATOR;
@@ -8235,7 +8235,7 @@ Perl_yylex(pTHX)
 	}
 
 	case KEY_qq:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_STRINGIFY;
@@ -8248,7 +8248,7 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_qx:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 	    if (!s)
 		missingterm(NULL);
 	    readpipe_override();
@@ -8569,7 +8569,7 @@ Perl_yylex(pTHX)
 		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
                     STRLEN tmplen;
 
-		    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+		    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
 		    /* strip spaces and check for bad characters */
@@ -9508,7 +9508,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
 {
     dVAR;
     PMOP *pm;
-    char *s = scan_str(start,!!PL_madskills,FALSE, PL_reg_state.re_reparsing);
+    char *s = scan_str(start,!!PL_madskills,FALSE, PL_reg_state.re_reparsing,
+                       TRUE /* look for escaped bracketed metas */ );
     const char * const valid_flags =
 	(const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
     char charset = '\0';    /* character set modifier */
@@ -9611,7 +9612,8 @@ S_scan_subst(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE,
+                 TRUE /* look for escaped bracketed metas */ );
 
     if (!s)
 	Perl_croak(aTHX_ "Substitution pattern not terminated");
@@ -9629,7 +9631,7 @@ S_scan_subst(pTHX_ char *start)
 #endif
 
     first_start = PL_multi_start;
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -9715,7 +9717,7 @@ S_scan_trans(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
     if (!s)
 	Perl_croak(aTHX_ "Transliteration pattern not terminated");
 
@@ -9731,7 +9733,7 @@ S_scan_trans(pTHX_ char *start)
     }
 #endif
 
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -10180,7 +10182,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	pl_yylval.ival = OP_GLOB;
-	s = scan_str(start,!!PL_madskills,FALSE,FALSE);
+	s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
 	return s;
@@ -10322,7 +10324,11 @@ intro_sym:
 */
 
 STATIC char *
-S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
+S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
+        bool deprecate_escaped_meta /* Should we issue a deprecation warning
+                                       for certain paired metacharacters that
+                                       appear escaped within it */
+    )
 {
     dVAR;
     SV *sv;			/* scalar value: string */
@@ -10336,6 +10342,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
     U8 termstr[UTF8_MAXBYTES];	/* terminating string */
     STRLEN termlen;		/* length of terminating string */
     int last_off = 0;		/* last position for nesting bracket */
+    char *escaped_open = NULL;
 #ifdef PERL_MAD
     int stuffstart;
     char *tstart;
@@ -10381,6 +10388,18 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
 	termcode = termstr[0] = term = tmps[5];
 
     PL_multi_close = term;
+
+    /* A warning is raised if the input parameter requires it for escaped (by a
+     * backslash) paired metacharacters {} [] and () when the delimiters are
+     * those same characters, and the backslash is ineffective.  This doesn't
+     * happen for <>, as they aren't metas. */
+    if (deprecate_escaped_meta
+        && (PL_multi_open == PL_multi_close
+            || ! ckWARN_d(WARN_DEPRECATED)
+            || PL_multi_open == '<'))
+    {
+        deprecate_escaped_meta = FALSE;
+    }
 
     /* create a new SV to hold the contents.  79 is the SV's initial length.
        What a random number. */
@@ -10520,7 +10539,44 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse)
 		if (*s == '\\' && s+1 < PL_bufend) {
 		    if (!keep_quoted &&
 			((s[1] == PL_multi_open) || (s[1] == PL_multi_close)))
+                    {
 			s++;
+
+                        /* Here, 'deprecate_escaped_meta' is true iff the
+                         * delimiters are paired metacharacters, and 's' points
+                         * to an occurrence of one of them within the string,
+                         * which was preceded by a backslash.  If this is a
+                         * context where the delimiter is also a metacharacter,
+                         * the backslash is useless, and deprecated.  () and []
+                         * are meta in any context. {} are meta only when
+                         * appearing in a quantifier or in things like '\p{'.
+                         * They also aren't meta unless there is a matching
+                         * closed, escaped char later on within the string.
+                         * If 's' points to an open, set a flag; if to a close,
+                         * test that flag, and raise a warning if it was set */
+
+			if (deprecate_escaped_meta) {
+                            if (*s == PL_multi_open) {
+                                if (*s != '{') {
+                                    escaped_open = s;
+                                }
+                                else if (regcurly(s,
+                                                  TRUE /* Look for a closing
+                                                          '\}' */)
+                                         || (s - start > 2  /* Look for e.g.
+                                                               '\x{' */
+                                             && _generic_isCC(*(s-2), _CC_BACKSLASH_FOO_LBRACE_IS_META)))
+                                {
+                                    escaped_open = s;
+                                }
+                            }
+                            else if (escaped_open) {
+                                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                                    "Useless use of '\\'; doesn't escape metacharacter '%c'", PL_multi_open);
+                                escaped_open = NULL;
+                            }
+                        }
+                    }
 		    else
 			*to++ = *s++;
 		}

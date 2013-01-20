@@ -94,6 +94,34 @@ In addition these three functions that have never worked properly are
 deprecated:
 C<to_uni_lower_lc>, C<to_uni_title_lc>, and C<to_uni_upper_lc>.
 
+=head2 Certain rare uses of backslashes within regexes are now deprectated
+
+There are three pairs of characters that Perl recognizes as
+metacharacters in regular expression patterns: C<{}>, C<[]>, and C<()>.
+These can be used as well to delimit patterns, as in:
+
+ m{foo}
+ s(foo)(bar)
+
+Since they are metacharacters, they have special meaning to regular
+expression patterns, and it turns out that you can't turn off that
+special meaning by the normal means of preceding them with a backslash,
+if you use them, paired, within a pattern delimitted by them.  For
+example, in
+
+ m{foo\{1,3\}}
+
+the backslashes do not change the behavior, and this matches
+S<C<"f o">> followed by one to three more occurrences of C<"o">.
+
+Usages like this, where they are interpreted as metacharacters, are
+exceedingly rare; we think there are none, for example, in all of CPAN.
+Hence, this deprecation should affect very little code.  It does give
+notice, however, that any such code needs to change, which will in turn
+allow us to change the behavior in future Perl versions so that the
+backslashes do have an effect, and without fear that we are silently
+breaking any existing code.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.

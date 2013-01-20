@@ -1730,5 +1730,6 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 \Vn	\xFFn/	y	$&	\xFFn
 
 /(?l:a?\w)/	b	y	$&	b
+m?^xy\?$?	xy?	y	$&	xy?
 
 # vim: softtabstop=0 noexpandtab

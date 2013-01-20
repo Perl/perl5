@@ -214,7 +214,7 @@ typedef struct RExC_state_t {
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
-	((*s) == '{' && regcurly(s)))
+	((*s) == '{' && regcurly(s, FALSE)))
 
 #ifdef SPSTART
 #undef SPSTART		/* dratted cpp namespace... */
@@ -9441,7 +9441,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     op = *RExC_parse;
 
-    if (op == '{' && regcurly(RExC_parse)) {
+    if (op == '{' && regcurly(RExC_parse, FALSE)) {
 	maxpos = NULL;
 #ifdef RE_TRACK_PATTERN_OFFSETS
         parse_start = RExC_parse; /* MJD */
@@ -9705,7 +9705,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 
     /* Disambiguate between \N meaning a named character versus \N meaning
      * [^\n].  The former is assumed when it can't be the latter. */
-    if (*p != '{' || regcurly(p)) {
+    if (*p != '{' || regcurly(p, FALSE)) {
 	RExC_parse = p;
 	if (! node_p) {
 	    /* no bare \N in a charclass */
@@ -10166,7 +10166,7 @@ tryagain:
 				/* Supposed to be caught earlier. */
 	break;
     case '{':
-	if (!regcurly(RExC_parse)) {
+	if (!regcurly(RExC_parse, FALSE)) {
 	    RExC_parse++;
 	    goto defchar;
 	}

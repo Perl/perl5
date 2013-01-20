@@ -5456,6 +5456,31 @@ discovered.  See L<perlre>.
 same length as the replacelist.  See L<perlop> for more information
 about the /d modifier.
 
+=item Useless use of '\'; doesn't escape metacharacter '%c'
+
+(D deprecated) You wrote a regular expression pattern something like
+one of these:
+
+ m{ \x\{FF\} }x
+ m{foo\{1,3\}}
+ qr(foo\(bar\))
+ s[foo\[a-z\]bar][baz]
+
+The interior braces, square brackets, and parentheses are treated as
+metacharacters even though they are backslashed; instead write:
+
+ m{ \x{FF} }x
+ m{foo{1,3}}
+ qr(foo(bar))
+ s[foo[a-z]bar][baz]
+
+The backslashes have no effect when a regular expression pattern is
+delimitted by C<{}>, C<[]>, or C<()>, which ordinarily are
+metacharacters, and the delimiters are also used, paired, within the
+interior of the pattern.  It is planned that a future Perl release will
+change the meaning of constructs like these so that the backslashes
+will have an effect, so remove them from your code.
+
 =item Useless use of \E
 
 (W misc) You have a \E in a double-quotish string without a C<\U>,

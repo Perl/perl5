@@ -15,7 +15,11 @@
     Pulled from regcomp.c.
  */
 PERL_STATIC_INLINE I32
-S_regcurly(pTHX_ const char *s)
+S_regcurly(pTHX_ const char *s,
+           const bool rbrace_must_be_escaped /* Should the terminating '} be
+                                                preceded by a backslash?  This
+                                                is an abnormal case */
+    )
 {
     PERL_ARGS_ASSERT_REGCURLY;
 
@@ -30,9 +34,10 @@ S_regcurly(pTHX_ const char *s)
 	while (isDIGIT(*s))
 	    s++;
     }
-    if (*s != '}')
-	return FALSE;
-    return TRUE;
+
+    return (rbrace_must_be_escaped)
+           ? *s == '\\' && *(s+1) == '}'
+           : *s == '}';
 }
 
 /* XXX Add documentation after final interface and behavior is decided */

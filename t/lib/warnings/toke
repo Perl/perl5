@@ -1306,3 +1306,30 @@ sub { # do not actually call require
   require a::b + 1; # ambiguity warnings.
 }
 EXPECT
+########
+# toke.c
+# [perl #XXX] Erroneous ambiguity warnings
+print "aa" =~ m{^a\{1,2\}$}, "\n";
+print "aa" =~ m{^a\x\{61\}$}, "\n";
+print "aa" =~ m{^a{1,2}$}, "\n";
+print "aq" =~ m[^a\[a-z\]$], "\n";
+print "aq" =~ m(^a\(q\)$), "\n";
+no warnings 'deprecated';
+print "aa" =~ m{^a\{1,2\}$}, "\n";
+print "aa" =~ m{^a\x\{61\}$}, "\n";
+print "aq" =~ m[^a\[a-z\]$], "\n";
+print "aq" =~ m(^a\(q\)$), "\n";
+EXPECT
+Useless use of '\'; doesn't escape metacharacter '{' at - line 3.
+Useless use of '\'; doesn't escape metacharacter '{' at - line 4.
+Useless use of '\'; doesn't escape metacharacter '[' at - line 6.
+Useless use of '\'; doesn't escape metacharacter '(' at - line 7.
+1
+1
+1
+1
+q
+1
+1
+1
+q
