@@ -1308,7 +1308,7 @@ sub { # do not actually call require
 EXPECT
 ########
 # toke.c
-# [perl #XXX] Erroneous ambiguity warnings
+# [perl #113094]
 print "aa" =~ m{^a\{1,2\}$}, "\n";
 print "aa" =~ m{^a\x\{61\}$}, "\n";
 print "aa" =~ m{^a{1,2}$}, "\n";
