@@ -15,7 +15,6 @@ no_index:
     - cpan
     - dist/Attribute-Handlers
     - dist/autouse
-    - dist/B-Lint
     - dist/base
     - dist/bignum
     - dist/Carp
@@ -30,7 +29,6 @@ no_index:
     - dist/ExtUtils-Install
     - dist/ExtUtils-Manifest
     - dist/ExtUtils-ParseXS
-    - dist/File-CheckTree
     - dist/Filter-Simple
     - dist/I18N-Collate
     - dist/I18N-LangTags

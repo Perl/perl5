@@ -303,9 +303,9 @@ use File::Glob qw(:case);
     'B::Lint' => {
         'MAINTAINER'   => 'jjore',
         'DISTRIBUTION' => 'FLORA/B-Lint-1.14.tar.gz',
-        'FILES'        => q[dist/B-Lint],
+        'FILES'        => q[cpan/B-Lint],
         'EXCLUDED'     => ['t/test.pl'],
-        'UPSTREAM'     => 'blead',
+        'UPSTREAM'     => 'cpan',
     },
 
     'base' => {
@@ -798,9 +798,9 @@ use File::Glob qw(:case);
     'File::CheckTree' => {
         'MAINTAINER'   => 'p5p',
         'DISTRIBUTION' => 'FLORA/File-CheckTree-4.41.tar.gz',
-        'FILES'        => q[dist/File-CheckTree],
+        'FILES'        => q[cpan/File-CheckTree],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
-        'UPSTREAM'     => 'blead',
+        'UPSTREAM'     => 'cpan',
     },
 
     'File::DosGlob' => {
