@@ -4,7 +4,7 @@ use strict;
 use File::Spec;
 use vars qw($VERSION);
 
-$VERSION = '0.04';
+$VERSION = "0.9134";
 
 sub setup {
   my $conf = shift;

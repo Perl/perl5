@@ -13,6 +13,9 @@ use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 use version;
 
+use vars qw[$VERSION];
+$VERSION = "0.9134";
+
 $Params::Check::VERBOSE = 1;
 
 ### for the version ###

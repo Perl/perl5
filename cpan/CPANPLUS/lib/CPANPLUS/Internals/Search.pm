@@ -13,6 +13,9 @@ use File::Spec;
 use Params::Check               qw[check allow];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
+use vars qw[$VERSION];
+$VERSION = "0.9134";
+
 $Params::Check::VERBOSE = 1;
 
 =pod

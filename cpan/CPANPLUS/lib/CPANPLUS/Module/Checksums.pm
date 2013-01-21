@@ -1,8 +1,7 @@
 package CPANPLUS::Module::Checksums;
 
 use strict;
-use vars qw[@ISA];
-
+use vars qw[@ISA $VERSION];
 
 use CPANPLUS::Error;
 use CPANPLUS::Internals::Constants;
@@ -16,6 +15,7 @@ use Module::Load::Conditional   qw[can_load];
 $Params::Check::VERBOSE = 1;
 
 @ISA = qw[ CPANPLUS::Module::Signature ];
+$VERSION = "0.9134";
 
 =head1 NAME
 

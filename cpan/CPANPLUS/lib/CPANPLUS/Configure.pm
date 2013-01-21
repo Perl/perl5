@@ -20,7 +20,7 @@ local $Params::Check::VERBOSE = 1;
 
 ### require, avoid circular use ###
 require CPANPLUS::Internals;
-$VERSION = $CPANPLUS::Internals::VERSION = $CPANPLUS::Internals::VERSION;
+$VERSION = "0.9134";
 
 ### can't use O::A as we're using our own AUTOLOAD to get to
 ### the config options.

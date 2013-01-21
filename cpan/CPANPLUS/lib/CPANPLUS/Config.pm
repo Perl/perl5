@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use base 'Object::Accessor';
-
 use base 'CPANPLUS::Internals::Utils';
 
 use Config;
@@ -20,6 +19,8 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 use Module::Load::Conditional   qw[check_install];
 use version;
 
+use vars qw[$VERSION];
+$VERSION = "0.9134";
 
 =pod
 

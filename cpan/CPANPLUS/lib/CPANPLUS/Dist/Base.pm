@@ -4,8 +4,7 @@ use strict;
 
 use base    qw[CPANPLUS::Dist];
 use vars    qw[$VERSION];
-$VERSION =  $CPANPLUS::Internals::VERSION = $CPANPLUS::Internals::VERSION;
-
+$VERSION = "0.9134";
 
 =head1 NAME
 

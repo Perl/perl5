@@ -9,17 +9,14 @@ use CPANPLUS::Module::Fake;
 use CPANPLUS::Module::Author::Fake;
 use CPANPLUS::Internals::Constants;
 
-
 use Params::Check               qw[check];
 use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
-
-use Data::Dumper;
-$Data::Dumper::Indent = 1;
+use vars qw[@ISA $VERSION];
+$VERSION = "0.9134";
 
 require Tie::Hash;
-use vars qw[@ISA];
 push @ISA, 'Tie::StdHash';
 
 
