@@ -252,8 +252,6 @@ typedef struct RExC_state_t {
 #define PAREN_SET(u8str,paren) PBYTE(u8str,paren) |= PBITVAL(paren)
 #define PAREN_UNSET(u8str,paren) PBYTE(u8str,paren) &= (~PBITVAL(paren))
 
-/* If not already in utf8, do a longjmp back to the beginning */
-#define UTF8_LONGJMP 42 /* Choose a value not likely to ever conflict */
 #define REQUIRE_UTF8	STMT_START {                                       \
                                      if (!UTF) {                           \
                                          *flagp = RESTART_UTF8;            \
@@ -5222,13 +5220,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 sawlookahead = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
-    bool used_setjump = FALSE;
     regex_charset initial_charset = get_regex_charset(orig_rx_flags);
     bool code_is_utf8 = 0;
     bool VOL recompile = 0;
     bool runtime_code = 0;
     U8 jump_ret = 0;
-    dJMPENV;
     scan_data_t data;
     RExC_state_t RExC_state;
     RExC_state_t * const pRExC_state = &RExC_state;
@@ -5578,13 +5574,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_contains_locale = 0;
     pRExC_state->runtime_code_qr = NULL;
 
-    /****************** LONG JUMP TARGET HERE***********************/
-    /* Longjmp back to here if have to switch in midstream to utf8 */
-    if (! RExC_orig_utf8) {
-	JMPENV_PUSH(jump_ret);
-	used_setjump = TRUE;
-    }
-
+  redo_first_pass:
     if (jump_ret == 0) {    /* First time through */
 	xend = exp + plen;
 
@@ -5601,13 +5591,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	int n=0;
 	STRLEN s = 0, d = 0;
 	bool do_end = 0;
-
-        /* If the cause for the longjmp was other than changing to utf8, pop
-         * our own setjmp, and longjmp to the correct handler */
-	if (jump_ret != UTF8_LONGJMP) {
-	    JMPENV_POP;
-	    JMPENV_JUMP(jump_ret);
-	}
 
 	GET_RE_DEBUG_FLAGS;
 
@@ -5674,9 +5657,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
 					    exp, plen);
 	if (!runtime_code) {
-	    if (used_setjump) {
-		JMPENV_POP;
-	    }
 	    Safefree(pRExC_state->code_blocks);
 	    return old_re;
 	}
@@ -5717,7 +5697,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
-	     JMPENV_JUMP(UTF8_LONGJMP);
+            jump_ret = 42;
+            goto redo_first_pass;
 	}
     }
     assert(!pRExC_state->runtime_code_qr);
@@ -5765,7 +5746,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        pRExC_state->code_blocks.  We cannot SAVEFREEPV it now, as we may
        need it to survive as long as the regexp (qr/(?{})/).
        We must check that code_blocksv is not already set, because we may
-       have longjmped back. */
+       have jumped back to restart the sizing pass. */
     if (pRExC_state->code_blocks && !code_blocksv) {
 	code_blocksv = newSV_type(SVt_PV);
 	SAVEFREESV(code_blocksv);
@@ -5773,17 +5754,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
     }
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
-        if (flags & RESTART_UTF8)
-            JMPENV_JUMP(UTF8_LONGJMP);
+        if (flags & RESTART_UTF8) {
+            jump_ret = 42;
+            goto redo_first_pass;
+        }
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
     }
     if (code_blocksv)
 	SvLEN_set(code_blocksv,0); /* no you can't have it, sv_clear */
-
-    /* Here, finished first pass.  Get rid of any added setjmp */
-    if (used_setjump) {
-	JMPENV_POP;
-    }
 
     DEBUG_PARSE_r({
         PerlIO_printf(Perl_debug_log, 
