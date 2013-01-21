@@ -1,4 +1,5 @@
 package CPANPLUS::Shell::Default;
+use deprecate;
 
 use strict;
 
@@ -26,7 +27,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.9134";
+    $VERSION = "0.9135";
 }
 
 load CPANPLUS::Shell;

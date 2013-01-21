@@ -1,4 +1,5 @@
 package CPANPLUS::Internals;
+use deprecate;
 
 ### we /need/ perl5.6.1 or higher -- we use coderefs in @INC,
 ### and 5.6.0 is just too buggy
@@ -39,7 +40,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 =pod
 

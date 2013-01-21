@@ -1,4 +1,5 @@
 package CPANPLUS::Selfupdate;
+use deprecate;
 
 use strict;
 use Params::Check               qw[check];
@@ -10,7 +11,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 use CPANPLUS::Internals::Constants;
 
 use vars qw[$VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 $Params::Check::VERBOSE = 1;
 

@@ -1,4 +1,5 @@
 package CPANPLUS::Internals::Source::SQLite::Tie;
+use deprecate;
 
 use strict;
 use warnings;
@@ -14,7 +15,7 @@ use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 use vars qw[@ISA $VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 require Tie::Hash;
 push @ISA, 'Tie::StdHash';

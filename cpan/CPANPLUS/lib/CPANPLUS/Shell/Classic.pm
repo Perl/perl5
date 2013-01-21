@@ -5,6 +5,7 @@
 ##################################################
 
 package CPANPLUS::Shell::Classic;
+use deprecate;
 
 use strict;
 
@@ -30,7 +31,7 @@ $Params::Check::ALLOW_UNKNOWN = 1;
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.9134";
+    $VERSION = "0.9135";
 }
 
 load CPANPLUS::Shell;

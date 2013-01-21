@@ -1,4 +1,5 @@
 package CPANPLUS::Internals::Extract;
+use deprecate;
 
 use strict;
 
@@ -14,7 +15,7 @@ use Module::Load::Conditional   qw[can_load check_install];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 use vars qw[$VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 local $Params::Check::VERBOSE = 1;
 

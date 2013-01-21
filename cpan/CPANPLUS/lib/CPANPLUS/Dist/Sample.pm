@@ -1,7 +1,8 @@
 package CPANPLUS::Dist::Sample;
+use deprecate;
 
 use vars qw[$VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 =pod
 

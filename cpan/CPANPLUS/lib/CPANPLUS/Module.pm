@@ -1,8 +1,9 @@
 package CPANPLUS::Module;
+use deprecate;
 
 use strict;
 use vars qw[@ISA $VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 use CPANPLUS::Dist;
 use CPANPLUS::Error;

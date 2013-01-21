@@ -1,8 +1,9 @@
 package CPANPLUS::Configure::Setup;
+use deprecate;
 
 use strict;
 use vars    qw[@ISA $VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 use base    qw[CPANPLUS::Internals::Utils];
 use base    qw[Object::Accessor];

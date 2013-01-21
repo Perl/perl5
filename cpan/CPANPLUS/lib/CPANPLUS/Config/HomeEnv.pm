@@ -1,10 +1,11 @@
 package CPANPLUS::Config::HomeEnv;
+use deprecate;
 
 use strict;
 use File::Spec;
 use vars qw($VERSION);
 
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 sub setup {
   my $conf = shift;

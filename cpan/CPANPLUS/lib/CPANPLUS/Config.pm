@@ -1,4 +1,5 @@
 package CPANPLUS::Config;
+use deprecate;
 
 use strict;
 use warnings;
@@ -20,7 +21,7 @@ use Module::Load::Conditional   qw[check_install];
 use version;
 
 use vars qw[$VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 =pod
 

@@ -1,4 +1,5 @@
 package CPANPLUS::Shell::Default::Plugins::Remote;
+use deprecate;
 
 use strict;
 
@@ -8,7 +9,7 @@ use CPANPLUS::Error             qw[error msg];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 use vars qw[$VERSION];
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 
 =head1 NAME
 

@@ -1,4 +1,5 @@
 package CPANPLUS::Internals::Constants;
+use deprecate;
 
 use strict;
 
@@ -13,7 +14,7 @@ use vars    qw[$VERSION @ISA @EXPORT];
 
 use Package::Constants;
 
-$VERSION = "0.9134";
+$VERSION = "0.9135";
 @ISA        = qw[Exporter];
 @EXPORT     = Package::Constants->list( __PACKAGE__ );
 
