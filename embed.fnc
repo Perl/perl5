@@ -1106,7 +1106,7 @@ Ap	|REGEXP*|pregcomp	|NN SV * const pattern|const U32 flags
 p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|int pat_count|NULLOK OP *expr \
 				|NN const regexp_engine* eng \
-				|NULLOK REGEXP *VOL old_re \
+				|NULLOK REGEXP *old_re \
 				|NULLOK bool *is_bare_re \
 				|U32 rx_flags|U32 pm_flags
 Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 orig_rx_flags
