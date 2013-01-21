@@ -5584,12 +5584,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (0) {
       redo_first_pass:
         {
-	U8 *src, *dst;
+        U8 *const src = (U8*)exp;
+        U8 *dst;
 	int n=0;
 	STRLEN s = 0, d = 0;
 	bool do_end = 0;
-
-	GET_RE_DEBUG_FLAGS;
 
         /* It's possible to write a regexp in ascii that represents Unicode
         codepoints outside of the byte range, such as via \x{100}. If we
@@ -5606,7 +5605,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	 * recalculate the indices.
 	 * This is essentially an unrolled Perl_bytes_to_utf8() */
 
-	src = (U8*)SvPV_nomg(pat, plen);
 	Newx(dst, plen * 2 + 1, U8);
 
 	while (s < plen) {

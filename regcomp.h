@@ -829,11 +829,9 @@ re.pm, especially to the documentation.
     if (re_debug_flags & RE_DEBUG_EXTRA_GPOS) x )
 
 /* initialization */
-/* get_sv() can return NULL during global destruction.  re_debug_flags can get
- * clobbered by a longjmp, so must be initialized */
+/* get_sv() can return NULL during global destruction. */
 #define GET_RE_DEBUG_FLAGS DEBUG_r({ \
         SV * re_debug_flags_sv = NULL; \
-        re_debug_flags = 0;            \
         re_debug_flags_sv = get_sv(RE_DEBUG_FLAGS, 1); \
         if (re_debug_flags_sv) { \
             if (!SvIOK(re_debug_flags_sv)) \
