@@ -1748,10 +1748,6 @@ use File::Glob qw(:case);
                 t/lib/if.pm
                 ),
         ],
-        'MAP'        => {
-            ''                    => 'cpan/Test-Harness/',
-            't/compat/env.opts.t' => 'cpan/Test-Harness/t/compat/env_opts.t'
-        },
         'UPSTREAM'   => 'cpan',
     },
 
