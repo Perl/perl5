@@ -152,7 +152,7 @@ my @death =
 # Tests involving a user-defined charnames translator are in pat_advanced.t
 
 ##
-## Key-value pairs of code/error of code that should have non-fatal warnings.
+## Key-value pairs of code/error of code that should have non-fatal regexp warnings.
 ##
 my @warning = (
     'm/\b*/' => '\b* matches null string many times in regex; marked by {#} in m/\b*{#}/',
@@ -171,6 +171,9 @@ my @warning = (
     '/\018/' => '\'\018\' resolved to \'\o{1}8\' in regex; marked by {#} in m/\018{#}/',
     '/[\08]/' => '\'\08\' resolved to \'\o{0}8\' in regex; marked by {#} in m/[\08{#}]/',
     '/[\018]/' => '\'\018\' resolved to \'\o{1}8\' in regex; marked by {#} in m/[\018{#}]/',
+);
+
+my @experimental_regex_sets = (
     '/(?[ \t ])/' => 'The regex_sets feature is experimental in regex; marked by {#} in m/(?[{#} \t ])/',
 );
 
@@ -187,13 +190,25 @@ while (my ($regex, $expect) = splice @death, 0, 2) {
 	       }, undef, "... and died without any other warnings");
 }
 
-while (my ($regex, $expect) = splice @warning, 0, 2) {
+foreach my $ref (\@warning, \@experimental_regex_sets) {
+    my $warning_type = ($ref == \@warning)
+                       ? 'regexp'
+                       : 'experimental::regex_sets';
+while (my ($regex, $expect) = splice @$ref, 0, 2) {
     my $expect = fixup_expect($expect);
-    warning_like(sub {
+    if (warning_like(sub {
 		     $_ = "x";
 		     eval $regex;
 		     is($@, '', "$regex did not die");
-		 }, qr/\Q$expect/, "... and gave expected warning");
+		 }, qr/\Q$expect/, "... and gave expected warning")
+    ) {
+
+            ok (capture_warnings(sub {
+                                    eval "no warnings '$warning_type'; $regex;" }
+                                ) == 0,
+                "... and turning off '$warning_type' warnings suppressed it");
+    }
+}
 }
 
 done_testing();
