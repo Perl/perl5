@@ -22,7 +22,7 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 		show_results process_options files_to_modules
 		finish_tap_output
 		reload_manifest);
-$VERSION = 0.08;
+$VERSION = 0.09;
 
 require Exporter;
 
@@ -349,7 +349,7 @@ sub maintainers_files {
 
 sub duplicated_maintainers {
     maintainers_files();
-    for my $f (keys %files) {
+    for my $f (sort keys %files) {
         cmp_ok($files{$f}, '<=', 1, "File $f appears $files{$f} times in Maintainers.pl");
     }
 }
@@ -371,7 +371,7 @@ sub missing_maintainers {
 
 sub superfluous_maintainers {
     maintainers_files();
-    for my $f (keys %files) {
+    for my $f (sort keys %files) {
         ok($MANIFEST{$f}, "File $f has a maintainer and is in MANIFEST");
     }
 }
