@@ -16,9 +16,10 @@ use warnings;
 use version;
 use Config;
 use strict;
+require './test.pl';
 
 my @tests = ();
-my ($i, $template, $data, $result, $comment, $w, $x, $evalData, $n, $p);
+my ($template, $data, $result, $comment, $w, $x, $evalData, $n, $p);
 
 my $Is_VMS_VAX = 0;
 # We use HW_MODEL since ARCH_NAME was not in VMS V5.*
@@ -55,7 +56,7 @@ while (<DATA>) {
     push @tests, [$template, $evalData, $result, $comment, $data];
 }
 
-print '1..', scalar @tests, "\n";
+plan(scalar @tests);
 
 $SIG{__WARN__} = sub {
     if ($_[0] =~ /^Invalid conversion/) {
@@ -71,8 +72,8 @@ $SIG{__WARN__} = sub {
     }
 };
 
-for ($i = 1; @tests; $i++) {
-    ($template, $evalData, $result, $comment, $data) = @{shift @tests};
+for (@tests) {
+    ($template, $evalData, $result, $comment, $data) = @$_;
     $w = undef;
     $x = sprintf($template, @$evalData);
     $x = ">$x<" if defined $x;
@@ -113,14 +114,14 @@ for ($i = 1; @tests; $i++) {
     }
 
     if ($x eq ">$result<") {
-        print "ok $i - >$result<\n";
+        ok(1, ">$result<");
     }
     elsif ($skip) {
-	print "ok $i - # skip $comment\n";
+        ok(1, "skip $comment");
     }
     elsif ($y eq ">$result<")	# Some C libraries always give
     {				# three-digit exponent
-		print("ok $i - # >$result< $x three-digit exponent accepted\n");
+		ok(1, ">$result< $x three-digit exponent accepted");
     }
 	elsif ($result =~ /[-+]\d{3}$/ &&
 		   # Suppress tests with modulo of exponent >= 100 on platforms
@@ -128,13 +129,12 @@ for ($i = 1; @tests; $i++) {
 		   ((!eval {require POSIX}) || # Costly: only do this if we must!
 			(length(&POSIX::DBL_MAX) - rindex(&POSIX::DBL_MAX, '+')) == 3))
 	{
-		print("ok $i - # >$template< >$data< >$result<",
-			  " Suppressed: exponent out of range?\n");
+        ok(1,
+         ">$template< >$data< >$result< Suppressed: exponent out of range?\n");
 	}
     else {
-	$y = ($x eq $y ? "" : " => $y");
-	print("not ok $i - >$template< >$data< >$result< $x$y",
-	    $comment ? " # $comment\n" : "\n");
+        $y = ($x eq $y ? "" : " => $y");
+        ok(0, ">$template< >$data< >$result< $x$y $comment");
     }
 }
 
