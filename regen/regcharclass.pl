@@ -576,10 +576,10 @@ sub generic_optree {
         $else= __cond_join( "!( is_utf8 )", $latin1, $else );
     }
     if ($opt{type} eq 'generic') {
-    my $low= $self->make_trie( 'low', $opt{max_depth} );
-    if ( $low ) {
-        $else= $self->_optree( $low, $test_type, $opt{ret_type}, $else, 0 );
-    }
+        my $low= $self->make_trie( 'low', $opt{max_depth} );
+        if ( $low ) {
+            $else= $self->_optree( $low, $test_type, $opt{ret_type}, $else, 0 );
+        }
     }
 
     return $else;
