@@ -106,7 +106,7 @@ my @death =
  '/[[=barf=]]/' => 'POSIX syntax [= =] is reserved for future extensions in regex; marked by {#} in m/[[=barf=]{#}]/',
 
  '/[[.barf.]]/' => 'POSIX syntax [. .] is reserved for future extensions in regex; marked by {#} in m/[[.barf.]{#}]/',
-  
+
  '/[z-a]/' => 'Invalid [] range "z-a" in regex; marked by {#} in m/[z-a{#}]/',
 
  '/\p/' => 'Empty \p{} in regex; marked by {#} in m/\p{#}/',
@@ -194,21 +194,21 @@ foreach my $ref (\@warning, \@experimental_regex_sets) {
     my $warning_type = ($ref == \@warning)
                        ? 'regexp'
                        : 'experimental::regex_sets';
-while (my ($regex, $expect) = splice @$ref, 0, 2) {
-    my $expect = fixup_expect($expect);
-    if (warning_like(sub {
-		     $_ = "x";
-		     eval $regex;
-		     is($@, '', "$regex did not die");
-		 }, qr/\Q$expect/, "... and gave expected warning")
-    ) {
+    while (my ($regex, $expect) = splice @$ref, 0, 2) {
+        my $expect = fixup_expect($expect);
+        if (warning_like(sub {
+                        $_ = "x";
+                        eval $regex;
+                        is($@, '', "$regex did not die");
+                    }, qr/\Q$expect/, "... and gave expected warning")
+        ) {
 
             ok (capture_warnings(sub {
                                     eval "no warnings '$warning_type'; $regex;" }
                                 ) == 0,
                 "... and turning off '$warning_type' warnings suppressed it");
+        }
     }
-}
 }
 
 done_testing();
