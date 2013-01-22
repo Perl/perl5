@@ -1,5 +1,7 @@
 package Term::UI;
 
+use if $] > 5.017, 'deprecate';
+
 use Carp;
 use Params::Check qw[check allow];
 use Term::ReadLine;
@@ -11,7 +13,7 @@ use strict;
 BEGIN {
     use vars        qw[$VERSION $AUTOREPLY $VERBOSE $INVALID];
     $VERBOSE    =   1;
-    $VERSION    =   '0.32';
+    $VERSION    =   '0.34';
     $INVALID    =   loc('Invalid selection, please try again: ');
 }
 
