@@ -165,6 +165,13 @@ my @death =
  'm/(?[[a-\pM]])/' => 'False [] range "a-\pM" in regex; marked by {#} in m/(?[[a-\pM{#}]])/',
  'm/(?[[\pM-x]])/' => 'False [] range "\pM-" in regex; marked by {#} in m/(?[[\pM-{#}x]])/',
  'm/(?[[\N{LATIN CAPITAL LETTER A WITH MACRON AND GRAVE}]])/' => '\N{} in character class restricted to one character in regex; marked by {#} in m/(?[[\N{U+100.300{#}}]])/',
+ 'm/\o{/' => 'Missing right brace on \o{ in regex; marked by {#} in m/\o{{#}/',
+ 'm/\o/' => 'Missing braces on \o{} in regex; marked by {#} in m/\o{#}/',
+ 'm/\o{}/' => 'Number with no digits in regex; marked by {#} in m/\o{}{#}/',
+ 'm/[\o{]/' => 'Missing right brace on \o{ in regex; marked by {#} in m/[\o{{#}]/',
+ 'm/[\o]/' => 'Missing braces on \o{} in regex; marked by {#} in m/[\o{#}]/',
+ 'm/[\o{}]/' => 'Number with no digits in regex; marked by {#} in m/[\o{}{#}]/',
+ 'm/(?^-i:foo)/' => 'Sequence (?^-...) not recognized in regex; marked by {#} in m/(?^-{#}i:foo)/',
 );
 # Tests involving a user-defined charnames translator are in pat_advanced.t
 
@@ -191,10 +198,64 @@ my @warning = (
     '/\018/' => '\'\018\' resolved to \'\o{1}8\' in regex; marked by {#} in m/\018{#}/',
     '/[\08]/' => '\'\08\' resolved to \'\o{0}8\' in regex; marked by {#} in m/[\08{#}]/',
     '/[\018]/' => '\'\018\' resolved to \'\o{1}8\' in regex; marked by {#} in m/[\018{#}]/',
+    '/\87/' => 'Unrecognized escape \8 passed through in regex; marked by {#} in m/\8{#}7/',
+    '/a\87/' => 'Unrecognized escape \8 passed through in regex; marked by {#} in m/a\8{#}7/',
+    '/a\97/' => 'Unrecognized escape \9 passed through in regex; marked by {#} in m/a\9{#}7/',
+    '/(?=a)*/' => '(?=a)* matches null string many times in regex; marked by {#} in m/(?=a)*{#}/',
+    'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through in regex; marked by {#} in m/a\m{#}/',
+    '/\q/' => 'Unrecognized escape \q passed through in regex; marked by {#} in m/\q{#}/',
+    '/\q{/' => 'Unrecognized escape \q{ passed through in regex; marked by {#} in m/\q{{#}/',
+    '/(?=a){1,3}/' => 'Quantifier unexpected on zero-length expression in regex; marked by {#} in m/(?=a){1,3}{#}/',
+    '/\_/' => "",
+    '/[\_\0]/' => "",
+    '/[\07]/' => "",
+    '/[\006]/' => "",
+    '/[\0005]/' => "",
+    '/[\8\9]/' => ['Unrecognized escape \8 in character class passed through in regex; marked by {#} in m/[\8{#}\9]/',
+                   'Unrecognized escape \9 in character class passed through in regex; marked by {#} in m/[\8\9{#}]/',
+                  ],
+    '/[:alpha:]/' => 'POSIX syntax [: :] belongs inside character classes in regex; marked by {#} in m/[:alpha:]{#}/',
+    '/[:zog:]/' => 'POSIX syntax [: :] belongs inside character classes in regex; marked by {#} in m/[:zog:]{#}/',
+    '/[.zog.]/' => 'POSIX syntax [. .] belongs inside character classes in regex; marked by {#} in m/[.zog.]{#}/',
+    '/[a-b]/' => "",
+    '/[a-\d]/' => 'False [] range "a-\d" in regex; marked by {#} in m/[a-\d{#}]/',
+    '/[\d-b]/' => 'False [] range "\d-" in regex; marked by {#} in m/[\d-{#}b]/',
+    '/[\s-\d]/' => 'False [] range "\s-" in regex; marked by {#} in m/[\s-{#}\d]/',
+    '/[\d-\s]/' => 'False [] range "\d-" in regex; marked by {#} in m/[\d-{#}\s]/',
+    '/[a-[:digit:]]/' => 'False [] range "a-[:digit:]" in regex; marked by {#} in m/[a-[:digit:]{#}]/',
+    '/[[:digit:]-b]/' => 'False [] range "[:digit:]-" in regex; marked by {#} in m/[[:digit:]-{#}b]/',
+    '/[[:alpha:]-[:digit:]]/' => 'False [] range "[:alpha:]-" in regex; marked by {#} in m/[[:alpha:]-{#}[:digit:]]/',
+    '/[[:digit:]-[:alpha:]]/' => 'False [] range "[:digit:]-" in regex; marked by {#} in m/[[:digit:]-{#}[:alpha:]]/',
+    '/[a\zb]/' => 'Unrecognized escape \z in character class passed through in regex; marked by {#} in m/[a\z{#}b]/',
+    '/(?c)/' => 'Useless (?c) - use /gc modifier in regex; marked by {#} in m/(?c{#})/',
+    '/(?-c)/' => 'Useless (?-c) - don\'t use /gc modifier in regex; marked by {#} in m/(?-c{#})/',
+    '/(?g)/' => 'Useless (?g) - use /g modifier in regex; marked by {#} in m/(?g{#})/',
+    '/(?-g)/' => 'Useless (?-g) - don\'t use /g modifier in regex; marked by {#} in m/(?-g{#})/',
+    '/(?o)/' => 'Useless (?o) - use /o modifier in regex; marked by {#} in m/(?o{#})/',
+    '/(?-o)/' => 'Useless (?-o) - don\'t use /o modifier in regex; marked by {#} in m/(?-o{#})/',
+    '/(?g-o)/' => [ 'Useless (?g) - use /g modifier in regex; marked by {#} in m/(?g{#}-o)/',
+                    'Useless (?-o) - don\'t use /o modifier in regex; marked by {#} in m/(?g-o{#})/',
+                  ],
+    '/(?g-c)/' => [ 'Useless (?g) - use /g modifier in regex; marked by {#} in m/(?g{#}-c)/',
+                    'Useless (?-c) - don\'t use /gc modifier in regex; marked by {#} in m/(?g-c{#})/',
+                  ],
+      # (?c) means (?g) error won't be thrown
+     '/(?o-cg)/' => [ 'Useless (?o) - use /o modifier in regex; marked by {#} in m/(?o{#}-cg)/',
+                      'Useless (?-c) - don\'t use /gc modifier in regex; marked by {#} in m/(?o-c{#}g)/',
+                    ],
+    '/(?ogc)/' => [ 'Useless (?o) - use /o modifier in regex; marked by {#} in m/(?o{#}gc)/',
+                    'Useless (?g) - use /g modifier in regex; marked by {#} in m/(?og{#}c)/',
+                    'Useless (?c) - use /gc modifier in regex; marked by {#} in m/(?ogc{#})/',
+                  ],
 );
 
 my @experimental_regex_sets = (
     '/(?[ \t ])/' => 'The regex_sets feature is experimental in regex; marked by {#} in m/(?[{#} \t ])/',
+);
+
+my @deprecated = (
+    '/a\b{cde/' => '"\b{" is deprecated; use "\b\{" instead in regex; marked by {#} in m/a\{#}b{cde/',
+    '/a\B{cde/' => '"\B{" is deprecated; use "\B\{" instead in regex; marked by {#} in m/a\{#}B{cde/',
 );
 
 while (my ($regex, $expect) = splice @death, 0, 2) {
@@ -210,10 +271,12 @@ while (my ($regex, $expect) = splice @death, 0, 2) {
 	       }, undef, "... and died without any other warnings");
 }
 
-foreach my $ref (\@warning, \@experimental_regex_sets) {
+foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
     my $warning_type = ($ref == \@warning)
                        ? 'regexp'
-                       : 'experimental::regex_sets';
+                       : ($ref == \@deprecated)
+                         ? 'deprecated'
+                         : 'experimental::regex_sets';
     while (my ($regex, $expect) = splice @$ref, 0, 2) {
         my @expect = fixup_expect($expect);
         {
