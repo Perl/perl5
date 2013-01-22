@@ -15,12 +15,29 @@ use strict;
 ## arrays below. The {#} is a meta-marker -- it marks where the marker should
 ## go.
 ##
+## Returns empty string if that is what is expected.  Otherwise, handles
+## either a scalar, turning it into a single element array; or a ref to an
+## array, adjusting each element.  If called in array context, returns an
+## array, otherwise the join of all elements
+
 sub fixup_expect {
-    my $expect = shift;
-    $expect =~ s/{\#}/<-- HERE/;
-    $expect =~ s/{\#}/ <-- HERE /;
-    $expect .= " at ";
-    return $expect;
+    my $expect_ref = shift;
+    return if $expect_ref eq "";
+
+    my @expect;
+    if (ref $expect_ref) {
+        @expect = @$expect_ref;
+    }
+    else {
+        @expect = $expect_ref;
+    }
+
+    foreach my $element (@expect) {
+        $element =~ s/{\#}/<-- HERE/;
+        $element =~ s/{\#}/ <-- HERE /;
+        $element .= " at ";
+    }
+    return wantarray ? @expect : join "", @expect;
 }
 
 my $inf_m1 = ($Config::Config{reg_infty} || 32767) - 1;
@@ -151,6 +168,9 @@ my @death =
 );
 # Tests involving a user-defined charnames translator are in pat_advanced.t
 
+# In the following arrays of warnings, the value can be an array of things to
+# expect.  If the empty string, it means no warning should be raised.
+
 ##
 ## Key-value pairs of code/error of code that should have non-fatal regexp warnings.
 ##
@@ -195,18 +215,35 @@ foreach my $ref (\@warning, \@experimental_regex_sets) {
                        ? 'regexp'
                        : 'experimental::regex_sets';
     while (my ($regex, $expect) = splice @$ref, 0, 2) {
-        my $expect = fixup_expect($expect);
-        if (warning_like(sub {
-                        $_ = "x";
-                        eval $regex;
-                        is($@, '', "$regex did not die");
-                    }, qr/\Q$expect/, "... and gave expected warning")
-        ) {
-
-            ok (capture_warnings(sub {
+        my @expect = fixup_expect($expect);
+        {
+            $_ = "x";
+            no warnings;
+            eval $regex;
+        }
+        if (is($@, "", "$regex did not die")) {
+            my @got = capture_warnings(sub {
+                                    $_ = "x";
+                                    eval $regex });
+            my $count = @expect;
+            if (! is(scalar @got, scalar @expect, "... and gave expected number ($count) of warnings")) {
+                if (@got < @expect) {
+                    $count = @got;
+                    note "Expected warnings not gotten:\n\t" . join "\n\t", @expect[$count .. $#expect];
+                }
+                else {
+                    note "Unexpected warnings gotten:\n\t" . join("\n\t", @got[$count .. $#got]);
+                }
+            }
+            foreach my $i (0 .. $count - 1) {
+                if (like($got[$i], qr/\Q$expect[$i]/, "... and gave expected warning[$i]")) {
+                    ok (0 == capture_warnings(sub {
+                                    $_ = "x";
                                     eval "no warnings '$warning_type'; $regex;" }
-                                ) == 0,
-                "... and turning off '$warning_type' warnings suppressed it");
+                                ),
+                    "... and turning off '$warning_type' warnings suppressed it");
+                }
+            }
         }
     }
 }
