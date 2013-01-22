@@ -548,6 +548,12 @@ static const scan_data_t zero_scan_data =
 	    (int)offset, RExC_precomp, RExC_precomp + offset);		\
 } STMT_END
 
+#define	vWARN_dep(loc, m) STMT_START {				        \
+    const IV offset = loc - RExC_precomp;				\
+    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED), m REPORT_LOCATION,	\
+	    (int)offset, RExC_precomp, RExC_precomp + offset);	        \
+} STMT_END
+
 #define	ckWARNdep(loc,m) STMT_START {				        \
     const IV offset = loc - RExC_precomp;				\
     Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),	                \
