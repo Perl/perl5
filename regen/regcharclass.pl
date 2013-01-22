@@ -1497,5 +1497,5 @@ MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 # 0 => Latin1-only
 
 PATWS: pattern white space
-=> generic cp : fast safe
+=> generic generic_non_low cp : fast safe
 \p{PatWS}
