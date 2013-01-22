@@ -575,9 +575,11 @@ sub generic_optree {
     } elsif ( $latin1 ) {
         $else= __cond_join( "!( is_utf8 )", $latin1, $else );
     }
+    if ($opt{type} eq 'generic') {
     my $low= $self->make_trie( 'low', $opt{max_depth} );
     if ( $low ) {
         $else= $self->_optree( $low, $test_type, $opt{ret_type}, $else, 0 );
+    }
     }
 
     return $else;
@@ -598,7 +600,7 @@ sub length_optree {
 
     my ( @size, $method );
 
-    if ( $type eq 'generic' ) {
+    if ( $type =~ /generic/ ) {
         $method= 'generic_optree';
         my %sizes= (
             %{ $self->{size}{low}    || {} },
@@ -1176,18 +1178,19 @@ sub make_macro {
     my $method;
     if ( $opts{safe} ) {
         $method= 'length_optree';
-    } elsif ( $type eq 'generic' ) {
+    } elsif ( $type =~ /generic/ ) {
         $method= 'generic_optree';
     } else {
         $method= 'optree';
     }
     my @args= $type =~ /^cp/ ? 'cp' : 's';
     push @args, "e" if $opts{safe};
-    push @args, "is_utf8" if $type eq 'generic';
+    push @args, "is_utf8" if $type =~ /generic/;
     push @args, "len" if $ret_type eq 'both';
     my $pfx= $ret_type eq 'both'    ? 'what_len_' : 
              $ret_type eq 'cp'      ? 'what_'     : 'is_';
-    my $ext= $type     eq 'generic' ? ''          : '_' . lc( $type );
+    my $ext= $type     =~ /generic/ ? ''          : '_' . lc( $type );
+    $ext .= '_non_low' if $type eq 'generic_non_low';
     $ext .= "_safe" if $opts{safe};
     my $argstr= join ",", @args;
     my $def_fmt="$pfx$self->{op}$ext%s($argstr)";
@@ -1340,6 +1343,10 @@ if ( !caller ) {
 #   generic     generate a macro whose name is 'is_BASE".  It has a 2nd,
 #               boolean, parameter which indicates if the first one points to
 #               a UTF-8 string or not.  Thus it works in all circumstances.
+#   generic_non_low generate a macro whose name is 'is_BASE_non_low".  It has
+#               a 2nd, boolean, parameter which indicates if the first one
+#               points to a UTF-8 string or not.  It excludes any ASCII-range
+#               matches, but otherwise it works in all circumstances.
 #   cp          generate a macro whose name is 'is_BASE_cp' and defines a
 #               class that returns true if the UV parameter is a member of the
 #               class; false if not.
