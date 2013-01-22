@@ -53,6 +53,21 @@ an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Five additional characters should be escaped in patterns with C</x>
+
+When a regular expression pattern is compiled with C</x>, Perl treats 6
+characters as white space to ignore, such as SPACE and TAB.  However,
+Unicode recommends 11 characters be treated thusly.  In preparation to
+conforming with this in a future Perl version, in the meantime, use of
+any of the missing characters will raise a deprecation warning, unless
+turned off.  The five characters are:
+U+0085 NEXT LINE,
+U+200E LEFT-TO-RIGHT MARK,
+U+200F RIGHT-TO-LEFT MARK,
+U+2028 LINE SEPARATOR,
+and
+U+2029 PARAGRAPH SEPARATOR.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.
