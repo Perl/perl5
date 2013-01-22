@@ -548,6 +548,13 @@ static const scan_data_t zero_scan_data =
 	    (int)offset, RExC_precomp, RExC_precomp + offset);		\
 } STMT_END
 
+#define	ckWARNdep(loc,m) STMT_START {				        \
+    const IV offset = loc - RExC_precomp;				\
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),	                \
+	    m REPORT_LOCATION,						\
+	    (int)offset, RExC_precomp, RExC_precomp + offset);		\
+} STMT_END
+
 #define	ckWARNregdep(loc,m) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
     Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
@@ -10251,7 +10258,7 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNregdep(RExC_parse, "\"\\b{\" is deprecated; use \"\\b\\{\" instead");
+		ckWARNdep(RExC_parse, "\"\\b{\" is deprecated; use \"\\b\\{\" instead");
 	    }
 	    goto finish_meta_pat;
 	case 'B':
@@ -10265,7 +10272,7 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNregdep(RExC_parse, "\"\\B{\" is deprecated; use \"\\B\\{\" instead");
+		ckWARNdep(RExC_parse, "\"\\B{\" is deprecated; use \"\\B\\{\" instead");
 	    }
 	    goto finish_meta_pat;
 
