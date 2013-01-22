@@ -16,7 +16,7 @@ L<perl5177delta>, which describes differences between 5.17.6 and 5.17.7.
 
 =head2 Regular Expression Set Operations
 
-This is an experimental feature to allow matching against the the union,
+This is an experimental feature to allow matching against the union,
 intersection, etc., of sets of code points, similar to
 L<Unicode::Regex::Set>.  It can also be used to extend C</x> processing
 to [bracketed] character classes, and as a replacement of user-defined
