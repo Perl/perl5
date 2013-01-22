@@ -10781,9 +10781,10 @@ tryagain:
 			    ckWARN3reg(p + len, "Unrecognized escape \\%.*s passed through", len, p);
 			}
 			goto normal_default;
-		    }
+		    } /* End of switch on '\' */
 		    break;
-		default:
+		default:    /* A literal character */
+
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
 			STRLEN numlen;
