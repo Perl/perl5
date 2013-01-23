@@ -1145,7 +1145,7 @@ use File::Glob qw(:case);
 
     'Log::Message::Simple' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Log-Message-Simple-0.08.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Log-Message-Simple-0.10.tar.gz',
         'FILES'        => q[cpan/Log-Message-Simple],
         'UPSTREAM'     => 'cpan',
     },
