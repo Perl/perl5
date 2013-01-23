@@ -1,5 +1,8 @@
 #!./perl -p
 
+# This test file does not use test.pl because of the involved way in which it
+# generates its TAP output.
+
 BEGIN {
     print "1..3\n";
     *ARGV = *DATA;
