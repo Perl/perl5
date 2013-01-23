@@ -69,6 +69,8 @@ SKIP: {
     my @stat = stat($filepath);
     my @ntstat = stat($ntfilepath);
     
+    note "Direct: @stat\n";
+    note "NTpath: @ntstat\n";
     ok(-f $ntfilepath, "[perl #45331] -f should pass on $ntfilepath");
 
     local $TODO = "stat()[2] (mode) on \\\\?\\UNC\\server\\share\\filename fails";

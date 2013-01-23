@@ -1438,6 +1438,17 @@ win32_kill(int pid, int sig)
     return -1;
 }
 
+#ifdef __GNUC__
+#define Const64(x) x##LL
+#else
+#define Const64(x) x##i64
+#endif
+/* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
+#define EPOCH_BIAS  Const64(116444736000000000)
+
+#define FILETIME_TO_EPOCH(ft) (((((unsigned __int64)ft.dwHighDateTime << 32) | ft.dwLowDateTime) - EPOCH_BIAS) / Const64(10000000))
+
+
 DllExport int
 win32_stat(const char *path, Stat_t *sbuf)
 {
@@ -1538,6 +1549,9 @@ win32_stat(const char *path, Stat_t *sbuf)
 	    if (good_bhi) {
 	        sbuf->st_size = (unsigned __int64)bhi.nFileSizeHigh << 32 | bhi.nFileSizeLow;
 	        sbuf->st_nlink = nlink;
+		sbuf->st_mtime = FILETIME_TO_EPOCH(bhi.ftLastWriteTime);
+		sbuf->st_atime = FILETIME_TO_EPOCH(bhi.ftLastAccessTime);
+		sbuf->st_ctime = FILETIME_TO_EPOCH(bhi.ftCreationTime);
 	    }
 	    return 0;
 	}
@@ -2014,14 +2028,6 @@ typedef union {
     unsigned __int64	ft_i64;
     FILETIME		ft_val;
 } FT_t;
-
-#ifdef __GNUC__
-#define Const64(x) x##LL
-#else
-#define Const64(x) x##i64
-#endif
-/* Number of 100 nanosecond units from 1/1/1601 to 1/1/1970 */
-#define EPOCH_BIAS  Const64(116444736000000000)
 
 /* NOTE: This does not compute the timezone info (doing so can be expensive,
  * and appears to be unsupported even by glibc) */
