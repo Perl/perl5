@@ -1336,7 +1336,7 @@ use File::Glob qw(:case);
 
     'Object::Accessor' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Object-Accessor-0.44.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Object-Accessor-0.46.tar.gz',
         'FILES'        => q[cpan/Object-Accessor],
         'UPSTREAM'     => 'cpan',
     },

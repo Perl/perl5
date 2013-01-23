@@ -1,4 +1,5 @@
 package Object::Accessor;
+use if $] > 5.017, 'deprecate';
 
 use strict;
 use Carp            qw[carp croak];
@@ -9,7 +10,7 @@ use Params::Check   qw[allow];
 ### disable string overloading for callbacks
 require overload;
 
-$VERSION    = '0.44';
+$VERSION    = '0.46';
 $FATAL      = 0;
 $DEBUG      = 0;
 
