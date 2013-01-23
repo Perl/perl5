@@ -5,9 +5,12 @@ perlopentut - tutorial on opening things in Perl
 =head1 DESCRIPTION
 
 Perl has two simple, built-in ways to open files: the shell way for
-convenience, and the C way for precision.  The shell way also has 2- and
-3-argument forms, which have different semantics for handling the filename.
-The choice is yours.
+convenience, and the C way for precision.  The shell way has 2- and
+3-argument forms, which have different semantics for handling the open mode
+and filename.  The 3-argument form should always be used because the
+legacy form can lead to insecure code if the filename contains one of the
+special characters that control the mode.  Therefore the tutorial won't
+show examples of the 2-argument form which should be avoided.
 
 =head1 Open E<agrave> la shell
 
@@ -19,7 +22,7 @@ from the shell:
     $ myprogram    <  inputfile
     $ myprogram    >  outputfile
     $ myprogram    >> outputfile
-    $ myprogram    |  otherprogram 
+    $ myprogram    |  otherprogram
     $ otherprogram |  myprogram
 
 And here are some more advanced examples:
@@ -35,78 +38,45 @@ virtually the same syntax as the shell.
 
 =head2 Simple Opens
 
-The C<open> function takes two arguments: the first is a filehandle,
-and the second is a single string comprising both what to open and how
-to open it.  C<open> returns true when it works, and when it fails,
-returns a false value and sets the special variable C<$!> to reflect
-the system error.  If the filehandle was previously opened, it will
-be implicitly closed first.
+The C<open> function takes three arguments: the first is a filehandle,
+the second defines the mode and the third what to open.  C<open> returns true
+when it works or returns a false value when it fails and sets the special
+variable C<$!> to reflect the system error.  If the filehandle was previously
+opened, it will be implicitly closed first.
 
 For example:
 
-    open(INFO,      "datafile") || die("can't open datafile: $!");
-    open(INFO,   "<  datafile") || die("can't open datafile: $!");
-    open(RESULTS,">  runstats") || die("can't open runstats: $!");
-    open(LOG,    ">> logfile ") || die("can't open logfile:  $!");
-
-If you prefer the low-punctuation version, you could write that this way:
-
-    open INFO,   "<  datafile"  or die "can't open datafile: $!";
-    open RESULTS,">  runstats"  or die "can't open runstats: $!";
-    open LOG,    ">> logfile "  or die "can't open logfile:  $!";
-
-A few things to notice.  First, the leading C<< < >> is optional.
-If omitted, Perl assumes that you want to open the file for reading.
-
-Note also that the first example uses the C<||> logical operator, and the
-second uses C<or>, which has lower precedence.  Using C<||> in the latter
-examples would effectively mean
-
-    open INFO, ( "<  datafile"  || die "can't open datafile: $!" );
-
-which is definitely not what you want.
+    open(my $info,    '<',  'datafile') or die("can't open datafile: $!");
+    open(my $results, '>',  'runstats') or die("can't open runstats: $!");
+    open(my $log,     '>>', 'logfile ') or die("can't open logfile:  $!");
 
 The other important thing to notice is that, just as in the shell,
-any whitespace before or after the filename is ignored.  This is good,
-because you wouldn't want these to do different things:
-
-    open INFO,   "<datafile"   
-    open INFO,   "< datafile" 
-    open INFO,   "<  datafile"
+any whitespace before or after the filename is ignored.
 
 Ignoring surrounding whitespace also helps for when you read a filename
 in from a different file, and forget to trim it before opening:
 
-    $filename = <INFO>;         # oops, \n still there
-    open(EXTRA, "< $filename") || die "can't open $filename: $!";
+    $filename = <$info>;            # oops, \n still there
+    open(my $extra, '<', $filename)
+        or die "can't open $filename: $!";
 
 This is not a bug, but a feature.  Because C<open> mimics the shell in
 its style of using redirection arrows to specify how to open the file, it
 also does so with respect to extra whitespace around the filename itself
-as well.  For accessing files with naughty names, see 
+as well.  For accessing files with naughty names, see
 L<"Dispelling the Dweomer">.
-
-There is also a 3-argument version of C<open>, which lets you put the
-special redirection characters into their own argument:
-
-    open( INFO, ">", $datafile ) || die "Can't create $datafile: $!";
-
-In this case, the filename to open is the actual string in C<$datafile>,
-so you don't have to worry about C<$datafile> containing characters
-that might influence the open mode, or whitespace at the beginning of
-the filename that would be absorbed in the 2-argument version.  Also,
-any reduction of unnecessary string interpolation is a good thing.
 
 =head2 Indirect Filehandles
 
 C<open>'s first argument can be a reference to a filehandle.  As of
-perl 5.6.0, if the argument is uninitialized, Perl will automatically
+Perl 5.6.0, if the argument is uninitialized, Perl will automatically
 create a filehandle and put a reference to it in the first argument,
 like so:
 
-    open( my $in, $infile )   or die "Couldn't read $infile: $!";
+    open( my $in, '<', $infile )
+        or die "Couldn't read $infile: $!";
     while ( <$in> ) {
-	# do something with $_
+	    # do something with $_
     }
     close $in;
 
@@ -120,8 +90,8 @@ Another convenient behavior is that an indirect filehandle automatically
 closes when there are no more references to it:
 
     sub firstline {
-	open( my $in, shift ) && return scalar <$in>;
-	# no close() required
+	    open( my $in, '<', shift ) && return scalar <$in>;
+	    # no close() required
     }
 
 Indirect filehandles also make it easy to pass filehandles to and return
@@ -136,9 +106,9 @@ filehandles from subroutines:
     use Carp;
     sub open_or_throw {
         my ($mode, $filename) = @_;
-        open my $h, $mode, $filename
+        open my $fh, $mode, $filename
             or croak "Could not open '$filename': $!";
-        return $h;
+        return $fh;
     }
 
 =head2 Pipe Opens
@@ -146,26 +116,30 @@ filehandles from subroutines:
 In C, when you want to open a file using the standard I/O library,
 you use the C<fopen> function, but when opening a pipe, you use the
 C<popen> function.  But in the shell, you just use a different redirection
-character.  That's also the case for Perl.  The C<open> call 
-remains the same--just its argument differs.  
+character.  That's also the case for Perl.  The C<open> call
+remains the same--just its argument differs.
 
 If the leading character is a pipe symbol, C<open> starts up a new
 command and opens a write-only filehandle leading into that command.
 This lets you write into that handle and have what you write show up on
 that command's standard input.  For example:
 
-    open(PRINTER, "| lpr -Plp1")    || die "can't run lpr: $!";
-    print PRINTER "stuff\n";
-    close(PRINTER)                  || die "can't close lpr: $!";
+    open(my $printer, '|-', 'lpr', '-Plp1')
+        or die "can't run lpr: $!";
+    print $printer "stuff\n";
+    close($printer)
+        or die "can't close lpr: $!";
 
 If the trailing character is a pipe, you start up a new command and open a
 read-only filehandle leading out of that command.  This lets whatever that
 command writes to its standard output show up on your handle for reading.
 For example:
 
-    open(NET, "netstat -i -n |")    || die "can't fork netstat: $!";
-    while (<NET>) { }               # do something with input
-    close(NET)                      || die "can't close netstat: $!";
+    open(my $net, '-|', 'netstat', '-i', '-n')
+        or die "can't fork netstat: $!";
+    while (<$net>) { } # do something with input
+    close($net)
+        or die "can't close netstat: $!";
 
 What happens if you try to open a pipe to or from a non-existent
 command?  If possible, Perl will detect the failure and set C<$!> as
@@ -179,7 +153,7 @@ capture STDERR from an external command?"> to see how to cope with
 this.  There's also an explanation in L<perlipc>.
 
 If you would like to open a bidirectional pipe, the IPC::Open2
-library will handle this for you.  Check out 
+library will handle this for you.  Check out
 L<perlipc/"Bidirectional Communication with Another Process">
 
 perl-5.6.x introduced a version of piped open that executes a process
@@ -195,8 +169,7 @@ fortune cookie as uppercase:
     my $collection = shift(@ARGV);
     open my $fortune, '-|', 'fortune', $collection
         or die "Could not find fortune - $!";
-    while (<$fortune>)
-    {
+    while (<$fortune>) {
         print uc($_);
     }
     close($fortune);
@@ -220,27 +193,27 @@ access the standard output.
 If minus can be used as the default input or default output, what happens
 if you open a pipe into or out of minus?  What's the default command it
 would run?  The same script as you're currently running!  This is actually
-a stealth C<fork> hidden inside an C<open> call.  See 
+a stealth C<fork> hidden inside an C<open> call.  See
 L<perlipc/"Safe Pipe Opens"> for details.
 
 =head2 Mixing Reads and Writes
 
 It is possible to specify both read and write access.  All you do is
-add a "+" symbol in front of the redirection.  But as in the shell,
+add a "+" symbol in front of the mode.  But as in the shell,
 using a less-than on a file never creates a new file; it only opens an
 existing one.  On the other hand, using a greater-than always clobbers
 (truncates to zero length) an existing file, or creates a brand-new one
 if there isn't an old one.  Adding a "+" for read-write doesn't affect
 whether it only works on existing files or always clobbers existing ones.
 
-    open(WTMP, "+< /usr/adm/wtmp") 
-        || die "can't open /usr/adm/wtmp: $!";
+    open(my $wtmp, '+<', '/usr/adm/wtmp')
+        or die "can't open /usr/adm/wtmp: $!";
 
-    open(SCREEN, "+> lkscreen")
-        || die "can't open lkscreen: $!";
+    open(my $screen, '+>', 'lkscreen')
+        or die "can't open lkscreen: $!";
 
-    open(LOGFILE, "+>> /var/log/applog")
-        || die "can't open /var/log/applog: $!";
+    open(my $logfile, '+>>', '/var/log/applog')
+        or die "can't open /var/log/applog: $!";
 
 The first one won't create a new file, and the second one will always
 clobber an old one.  The third one will create a new file if necessary
@@ -262,14 +235,14 @@ on the end:
     $ perl -i.orig -pe 's/\bfoo\b/bar/g' *.[Cchy]
 
 This is a short cut for some renaming games that are really
-the best way to update textfiles.  See the second question in 
+the best way to update textfiles.  See the second question in
 L<perlfaq5> for more details.
 
-=head2 Filters 
+=head2 Filters
 
 One of the most common uses for C<open> is one you never
 even notice.  When you process the ARGV filehandle using
-C<< <ARGV> >>, Perl actually does an implicit open 
+C<< <ARGV> >>, Perl actually does an implicit open
 on each file in @ARGV.  Thus a program called like this:
 
     $ myprogram file1 file2 file3
@@ -279,7 +252,7 @@ using a construct no more complex than:
 
     while (<>) {
         # do something with $_
-    } 
+    }
 
 If @ARGV is empty when the loop first begins, Perl pretends you've opened
 up minus, that is, the standard input.  In fact, $ARGV, the currently
@@ -294,17 +267,17 @@ simple ones by hand, the Getopts modules are good for this:
     use Getopt::Std;
 
     # -v, -D, -o ARG, sets $opt_v, $opt_D, $opt_o
-    getopts("vDo:");            
+    getopts("vDo:");
 
     # -v, -D, -o ARG, sets $args{v}, $args{D}, $args{o}
-    getopts("vDo:", \%args);    
+    getopts("vDo:", \%args);
 
 Or the standard Getopt::Long module to permit named arguments:
 
     use Getopt::Long;
     GetOptions( "verbose"  => \$verbose,        # --verbose
                 "Debug"    => \$debug,          # --Debug
-                "output=s" => \$output );       
+                "output=s" => \$output );
 	    # --output=somestring or --output somestring
 
 Another reason for preprocessing arguments is to make an empty
@@ -329,8 +302,8 @@ Here's an example:
                     ? '< /etc/passwd'
                     : 'ypcat passwd |';
 
-    open(PWD, $pwdinfo)                 
-                or die "can't open $pwdinfo: $!";
+    open(PWD, $pwdinfo)
+        or die "can't open $pwdinfo: $!";
 
 This sort of thing also comes into play in filter processing.  Because
 C<< <ARGV> >> processing employs the normal, shell-style Perl C<open>,
@@ -367,7 +340,7 @@ If you want the convenience of the shell, then Perl's C<open> is
 definitely the way to go.  On the other hand, if you want finer precision
 than C's simplistic fopen(3S) provides you should look to Perl's
 C<sysopen>, which is a direct hook into the open(2) system call.
-That does mean it's a bit more involved, but that's the price of 
+That does mean it's a bit more involved, but that's the price of
 precision.
 
 C<sysopen> takes 3 (or 4) arguments.
@@ -406,31 +379,31 @@ Perl release 5.6 the C<O_LARGEFILE> flag, if available, is automatically
 added to the sysopen() flags because large files are the default.)
 
 Here's how to use C<sysopen> to emulate the simple C<open> calls we had
-before.  We'll omit the C<|| die $!> checks for clarity, but make sure
+before.  We'll omit the C<or die $!> checks for clarity, but make sure
 you always check the return values in real code.  These aren't quite
 the same, since C<open> will trim leading and trailing whitespace,
 but you'll get the idea.
 
 To open a file for reading:
 
-    open(FH, "< $path");
-    sysopen(FH, $path, O_RDONLY);
+    open(my $fh, '<', $path);
+    sysopen(my $fh, $path, O_RDONLY);
 
 To open a file for writing, creating a new file if needed or else truncating
 an old file:
 
-    open(FH, "> $path");
-    sysopen(FH, $path, O_WRONLY | O_TRUNC | O_CREAT);
+    open(my $fh, '>', $path);
+    sysopen(my $fh, $path, O_WRONLY | O_TRUNC | O_CREAT);
 
 To open a file for appending, creating one if necessary:
 
-    open(FH, ">> $path");
-    sysopen(FH, $path, O_WRONLY | O_APPEND | O_CREAT);
+    open(my $fh, '>>', $path);
+    sysopen(my $fh, $path, O_WRONLY | O_APPEND | O_CREAT);
 
 To open a file for update, where the file must already exist:
 
-    open(FH, "+< $path");
-    sysopen(FH, $path, O_RDWR);
+    open(my $fh, '+<', $path);
+    sysopen(my $fh, $path, O_RDWR);
 
 And here are things you can do with C<sysopen> that you cannot do with
 a regular C<open>.  As you'll see, it's just a matter of controlling the
@@ -439,23 +412,23 @@ flags in the third argument.
 To open a file for writing, creating a new file which must not previously
 exist:
 
-    sysopen(FH, $path, O_WRONLY | O_EXCL | O_CREAT);
+    sysopen(my $fh, $path, O_WRONLY | O_EXCL | O_CREAT);
 
 To open a file for appending, where that file must already exist:
 
-    sysopen(FH, $path, O_WRONLY | O_APPEND);
+    sysopen(my $fh, $path, O_WRONLY | O_APPEND);
 
 To open a file for update, creating a new file if necessary:
 
-    sysopen(FH, $path, O_RDWR | O_CREAT);
+    sysopen(my $fh, $path, O_RDWR | O_CREAT);
 
 To open a file for update, where that file must not already exist:
 
-    sysopen(FH, $path, O_RDWR | O_EXCL | O_CREAT);
+    sysopen(my $fh, $path, O_RDWR | O_EXCL | O_CREAT);
 
 To open a file without blocking, creating one if necessary:
 
-    sysopen(FH, $path, O_WRONLY | O_NONBLOCK | O_CREAT);
+    sysopen(my $fh, $path, O_WRONLY | O_NONBLOCK | O_CREAT);
 
 =head2 Permissions E<agrave> la mode
 
@@ -493,16 +466,16 @@ The same is essentially true in Perl: a filename that begins with an
 ampersand is treated instead as a file descriptor if a number, or as a
 filehandle if a string.
 
-    open(SAVEOUT, ">&SAVEERR") || die "couldn't dup SAVEERR: $!";
-    open(MHCONTEXT, "<&4")     || die "couldn't dup fd4: $!";
+    open(my $saveout,   '>&', $saverr)
+        or die "couldn't dup saveerr: $!";
+    open(my $mhcontext, '<&', '4')
+        or die "couldn't dup fd4: $!";
 
 That means that if a function is expecting a filename, but you don't
 want to give it a filename because you already have the file open, you
-can just pass the filehandle with a leading ampersand.  It's best to
-use a fully qualified handle though, just in case the function happens
-to be in a different package:
+can just pass the indirect filehandle.
 
-    somefunction("&main::LOGFILE");
+    somefunction($logfile);
 
 This way if somefunction() is planning on opening its argument, it can
 just use the already opened handle.  This differs from passing a handle,
@@ -515,9 +488,9 @@ proper filehandle in the native Perl sense.  You'll have to use fileno()
 to pull out the proper descriptor number, assuming you can:
 
     use IO::Socket;
-    $handle = IO::Socket::INET->new("www.perl.com:80");
-    $fd = $handle->fileno;
-    somefunction("&$fd");  # not an indirect function call
+    my $handle = IO::Socket::INET->new("www.perl.com:80");
+    my $fd = $handle->fileno;
+    somefunction("&$fd"); # not an indirect function call
 
 It can be easier (and certainly will be faster) just to use real
 filehandles though:
@@ -536,7 +509,8 @@ parsimonious of systems resources, although this is less a concern
 these days.  Here's an example of that:
 
     $fd = $ENV{"MHCONTEXTFD"};
-    open(MHCONTEXT, "<&=$fd")   or die "couldn't fdopen $fd: $!";
+    open(my $mhcontext, '<&=', $fd)
+        or die "couldn't fdopen $fd: $!";
 
 If you're using magic C<< <ARGV> >>, you could even pass in as a
 command line argument in @ARGV something like C<"<&=$MHCONTEXTFD">,
@@ -558,7 +532,8 @@ filename that starts with whitespace.  Trailing whitespace is protected
 by appending an ASCII NUL byte (C<"\0">) at the end of the string.
 
     $file =~ s#^(\s)#./$1#;
-    open(FH, "< $file\0")   || die "can't open $file: $!";
+    open(my $fh, '<', "$file\0")
+        or die "can't open $file: $!";
 
 This assumes, of course, that your system considers dot the current
 working directory, slash the directory separator, and disallows ASCII
@@ -571,16 +546,16 @@ use a slash.  Maybe C<sysopen> isn't such a bad idea after all.
 If you want to use C<< <ARGV> >> processing in a totally boring
 and non-magical way, you could do this first:
 
-    #   "Sam sat on the ground and put his head in his hands.  
-    #   'I wish I had never come here, and I don't want to see 
+    #   "Sam sat on the ground and put his head in his hands.
+    #   'I wish I had never come here, and I don't want to see
     #   no more magic,' he said, and fell silent."
-    for (@ARGV) { 
+    for (@ARGV) {
         s#^([^./])#./$1#;
         $_ .= "\0";
-    } 
-    while (<>) {  
+    }
+    while (<>) {
         # now process $_
-    } 
+    }
 
 But be warned that users will not appreciate being unable to use "-"
 to mean standard input, per the standard convention.
@@ -598,29 +573,31 @@ from it.  But what was the name of the file, rather than the handle?
 If you aren't running with C<strict refs>, or if you've turned them off
 temporarily, then all you have to do is this:
 
-    open($path, "< $path") || die "can't open $path: $!";
+    open($path '<', $path)
+        or die "can't open $path: $!";
     while (<$path>) {
         # whatever
-    } 
+    }
 
 Since you're using the pathname of the file as its handle,
 you'll get warnings more like
 
     Some warning at scriptname line 29, </etc/motd> line 7.
 
+TODO: move to perlhysterical
 =head2 Single Argument Open
 
 Remember how we said that Perl's open took two arguments?  That was a
 passive prevarication.  You see, it can also take just one argument.
 If and only if the variable is a global variable, not a lexical, you
-can pass C<open> just one argument, the filehandle, and it will 
+can pass C<open> just one argument, the filehandle, and it will
 get the path from the global scalar variable of the same name.
 
     $FILE = "/etc/motd";
     open FILE or die "can't open $FILE: $!";
     while (<FILE>) {
         # whatever
-    } 
+    }
 
 Why is this here?  Someone has to cater to the hysterical porpoises.
 It's something that's been in Perl since the very beginning, if not
@@ -631,7 +608,7 @@ before.
 One clever move with STDOUT is to explicitly close it when you're done
 with the program.
 
-    END { close(STDOUT) || die "can't close stdout: $!" }
+    END { close(STDOUT) or die "can't close stdout: $!" }
 
 If you don't do this, and your program fills up the disk partition due
 to a command line redirection, it won't report the error exit with a
@@ -640,11 +617,11 @@ failure status.
 You don't have to accept the STDIN and STDOUT you were given.  You are
 welcome to reopen them if you'd like.
 
-    open(STDIN, "< datafile")
-	|| die "can't open datafile: $!";
+    open(STDIN, '<', 'datafile')
+	    or die "can't open datafile: $!";
 
-    open(STDOUT, "> output")
-	|| die "can't open output: $!";
+    open(STDOUT, '>', 'output')
+	    or die "can't open output: $!";
 
 And then these can be accessed directly or passed on to subprocesses.
 This makes it look as though the program were initially invoked
@@ -653,10 +630,10 @@ with those redirections from the command line.
 It's probably more interesting to connect these to pipes.  For example:
 
     $pager = $ENV{PAGER} || "(less || more)";
-    open(STDOUT, "| $pager")
-	|| die "can't fork a pager: $!";
+    open(STDOUT, '|-', $pager)
+	    or die "can't fork a pager: $!";
 
-This makes it appear as though your program were called with its stdout
+This makes it appear as though your program were called with its STDOUT
 already piped into your pager.  You can also use this kind of thing
 in conjunction with an implicit fork to yourself.  You might do this
 if you would rather handle the post processing in your own program,
@@ -665,18 +642,20 @@ just in a different process:
     head(100);
     while (<>) {
         print;
-    } 
+    }
 
     sub head {
         my $lines = shift || 20;
         return if $pid = open(STDOUT, "|-");       # return if parent
-        die "cannot fork: $!" unless defined $pid;
+        die "cannot fork: $!"
+            unless defined $pid;
         while (<STDIN>) {
-            last if --$lines < 0;
+            last
+                if --$lines < 0;
             print;
-        } 
+        }
         exit;
-    } 
+    }
 
 This technique can be applied to repeatedly push as many filters on your
 output stream as you wish.
@@ -694,7 +673,7 @@ just in case.
 
     if (-l $file || ! -f _) {
         print "$file is not a plain file\n";
-    } 
+    }
 
 What other kinds of files are there than, well, files?  Directories,
 symbolic links, named pipes, Unix-domain sockets, and block and character
@@ -704,14 +683,15 @@ Not all plain files are text files.  That's why there are separate C<-f>
 and C<-T> file tests.
 
 To open a directory, you should use the C<opendir> function, then
-process it with C<readdir>, carefully restoring the directory 
+process it with C<readdir>, carefully restoring the directory
 name if necessary:
 
-    opendir(DIR, $dirname) or die "can't opendir $dirname: $!";
-    while (defined($file = readdir(DIR))) {
+    opendir(my $dh, $dirname)
+        or die "can't opendir $dirname: $!";
+    while (defined($file = readdir($dh))) {
         # do something with "$dirname/$file"
     }
-    closedir(DIR);
+    closedir($dh);
 
 If you want to process directories recursively, it's better to use the
 File::Find module.  For example, this prints out all files recursively
@@ -719,11 +699,11 @@ and adds a slash to their names if the file is a directory.
 
     @ARGV = qw(.) unless @ARGV;
     use File::Find;
-    find sub { print $File::Find::name, -d && '/', "\n" }, @ARGV;
+    find(sub { print $File::Find::name, -d && '/', "\n" }, @ARGV);
 
 This finds all bogus symbolic links beneath a particular directory:
 
-    find sub { print "$File::Find::name\n" if -l && !-e }, $dir;
+    find(sub { print "$File::Find::name\n" if -l && !-e }, $dir);
 
 As you see, with symbolic links, you can just pretend that it is
 what it points to.  Or, if you want to know I<what> it points to, then
@@ -734,8 +714,8 @@ C<readlink> is called for:
             print "$file points to $whither\n";
         } else {
             print "$file points nowhere: $!\n";
-        } 
-    } 
+        }
+    }
 
 =head2 Opening Named Pipes
 
@@ -752,24 +732,24 @@ typically used for modems, mice, and some kinds of printers.  This is
 described in L<perlfaq8/"How do I read and write the serial port?">
 It's often enough to open them carefully:
 
-    sysopen(TTYIN, "/dev/ttyS1", O_RDWR | O_NDELAY | O_NOCTTY)
+    sysopen(my $ttyin, "/dev/ttyS1", O_RDWR | O_NDELAY | O_NOCTTY)
 		# (O_NOCTTY no longer needed on POSIX systems)
         or die "can't open /dev/ttyS1: $!";
-    open(TTYOUT, "+>&TTYIN")
-        or die "can't dup TTYIN: $!";
+    open(my $ttyout, '+>&', $ttyin)
+        or die "can't dup /dev/ttyS1: $!";
 
-    $ofh = select(TTYOUT); $| = 1; select($ofh);
+    $ofh = select($ttyout); $| = 1; select($ofh);
 
-    print TTYOUT "+++at\015";
-    $answer = <TTYIN>;
+    print $ttyout "+++at\015";
+    $answer = <$ttyin>;
 
 With descriptors that you haven't opened using C<sysopen>, such as
 sockets, you can set them to be non-blocking using C<fcntl>:
 
     use Fcntl;
-    my $old_flags = fcntl($handle, F_GETFL, 0) 
+    my $old_flags = fcntl($handle, F_GETFL, 0)
         or die "can't get flags: $!";
-    fcntl($handle, F_SETFL, $old_flags | O_NONBLOCK) 
+    fcntl($handle, F_SETFL, $old_flags | O_NONBLOCK)
         or die "can't set non blocking: $!";
 
 Rather than losing yourself in a morass of twisting, turning C<ioctl>s,
@@ -784,19 +764,19 @@ Check out Term::ReadKey and Term::ReadLine.
 =head2 Opening Sockets
 
 What else can you open?  To open a connection using sockets, you won't use
-one of Perl's two open functions.  See 
-L<perlipc/"Sockets: Client/Server Communication"> for that.  Here's an 
-example.  Once you have it, you can use FH as a bidirectional filehandle.
+one of Perl's two open functions.  See
+L<perlipc/"Sockets: Client/Server Communication"> for that.  Here's an
+example.  Once you have it, you can use $sock as a bidirectional filehandle.
 
     use IO::Socket;
-    local *FH = IO::Socket::INET->new("www.perl.com:80");
+    my $sock = IO::Socket::INET->new("www.perl.com:80");
 
 For opening up a URL, the LWP modules from CPAN are just what
 the doctor ordered.  There's no filehandle interface, but
 it's still easy to get the contents of a document:
 
     use LWP::Simple;
-    $doc = get('http://www.cpan.org/');
+    my $doc = get('http://www.cpan.org/');
 
 =head2 Binary Files
 
@@ -814,14 +794,14 @@ handles before doing regular I/O on them:
 
     binmode(STDIN);
     binmode(STDOUT);
-    while (<STDIN>) { print } 
+    while (<STDIN>) { print }
 
 Passing C<sysopen> a non-standard flag option will also open the file in
 binary mode on those systems that support it.  This is the equivalent of
 opening the file normally, then calling C<binmode> on the handle.
 
-    sysopen(BINDAT, "records.data", O_RDWR | O_BINARY)
-        || die "can't open records.data: $!";
+    sysopen(my $bindat, "records.data", O_RDWR | O_BINARY)
+        or die "can't open records.data: $!";
 
 Now you can use C<read> and C<print> on that handle without worrying
 about the non-standard system I/O library breaking your data.  It's not
@@ -832,9 +812,9 @@ On systems with exotic I/O systems, it turns out that, astonishingly
 enough, even unbuffered I/O using C<sysread> and C<syswrite> might do
 sneaky data mutilation behind your back.
 
-    while (sysread(WHENCE, $buf, 1024)) {
-        syswrite(WHITHER, $buf, length($buf));
-    } 
+    while (sysread($whence, $buf, 1024)) {
+        syswrite($whither, $buf, length($buf));
+    }
 
 Depending on the vicissitudes of your runtime system, even these calls
 may need C<binmode> or C<O_BINARY> first.  Systems known to be free of
@@ -877,13 +857,15 @@ for reading:
 
     use 5.004;
     use Fcntl qw(:DEFAULT :flock);
-    open(FH, "< filename")  or die "can't open filename: $!";
-    flock(FH, LOCK_SH) 	    or die "can't lock filename: $!";
-    # now read from FH
+    open(my $fh, '<', 'filename')
+        or die "can't open filename: $!";
+    flock($fh, LOCK_SH)
+        or die "can't lock filename: $!";
+    # now read from $fh
 
 You can get a non-blocking lock by using C<LOCK_NB>.
 
-    flock(FH, LOCK_SH | LOCK_NB)
+    flock(my $fh, LOCK_SH | LOCK_NB)
         or die "can't lock filename: $!";
 
 This can be useful for producing more user-friendly behaviour by warning
@@ -891,14 +873,16 @@ if you're going to be blocking:
 
     use 5.004;
     use Fcntl qw(:DEFAULT :flock);
-    open(FH, "< filename")  or die "can't open filename: $!";
-    unless (flock(FH, LOCK_SH | LOCK_NB)) {
-	$| = 1;
-	print "Waiting for lock...";
-	flock(FH, LOCK_SH)  or die "can't lock filename: $!";
-	print "got it.\n"
-    } 
-    # now read from FH
+    open(my $fh, '<', 'filename')
+        or die "can't open filename: $!";
+    unless (flock($fh, LOCK_SH | LOCK_NB)) {
+	    $| = 1;
+	    print "Waiting for lock...";
+	    flock($fh, LOCK_SH)
+            or die "can't lock filename: $!";
+	    print "got it.\n"
+    }
+    # now read from $fh
 
 To get an exclusive lock, typically used for writing, you have to be
 careful.  We C<sysopen> the file so it can be locked before it gets
@@ -906,13 +890,13 @@ emptied.  You can get a nonblocking version using C<LOCK_EX | LOCK_NB>.
 
     use 5.004;
     use Fcntl qw(:DEFAULT :flock);
-    sysopen(FH, "filename", O_WRONLY | O_CREAT)
+    sysopen(my $fh, "filename", O_WRONLY | O_CREAT)
         or die "can't open filename: $!";
-    flock(FH, LOCK_EX)
+    flock($fh, LOCK_EX)
         or die "can't lock filename: $!";
-    truncate(FH, 0)
+    truncate($fh, 0)
         or die "can't truncate filename: $!";
-    # now write to FH
+    # now write to $fh
 
 Finally, due to the uncounted millions who cannot be dissuaded from
 wasting cycles on useless vanity devices called hit counters, here's
@@ -920,22 +904,22 @@ how to increment a number in a file safely:
 
     use Fcntl qw(:DEFAULT :flock);
 
-    sysopen(FH, "numfile", O_RDWR | O_CREAT)
+    sysopen(my $fh, 'numfile', O_RDWR | O_CREAT)
         or die "can't open numfile: $!";
-    # autoflush FH
-    $ofh = select(FH); $| = 1; select ($ofh);
-    flock(FH, LOCK_EX)
+    # autoflush $fh
+    $ofh = select($fh); $| = 1; select ($ofh);
+    flock($fh, LOCK_EX)
         or die "can't write-lock numfile: $!";
 
-    $num = <FH> || 0;
-    seek(FH, 0, 0)
+    $num = <$fh> || 0;
+    seek($fh, 0, 0)
         or die "can't rewind numfile : $!";
-    print FH $num+1, "\n"
+    print $fh $num+1, "\n"
         or die "can't write numfile: $!";
 
-    truncate(FH, tell(FH))
+    truncate($fh, tell($fh))
         or die "can't truncate numfile: $!";
-    close(FH)
+    close($fh)
         or die "can't close numfile: $!";
 
 =head2 IO Layers
@@ -974,7 +958,7 @@ The two-argument form of C<binmode> is being used, for example
 For more detailed discussion about PerlIO see L<PerlIO>;
 for more detailed discussion about Unicode and I/O see L<perluniintro>.
 
-=head1 SEE ALSO 
+=head1 SEE ALSO
 
 The C<open> and C<sysopen> functions in perlfunc(1);
 the system open(2), dup(2), fopen(3), and fdopen(3) manpages;
@@ -982,7 +966,7 @@ the POSIX documentation.
 
 =head1 AUTHOR and COPYRIGHT
 
-Copyright 1998 Tom Christiansen.  
+Copyright 1998 Tom Christiansen.
 
 This documentation is free; you can redistribute it and/or modify it
 under the same terms as Perl itself.
