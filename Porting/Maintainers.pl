@@ -1748,6 +1748,7 @@ use File::Glob qw(:case);
                 t/lib/if.pm
                 ),
         ],
+        'CUSTOMIZED' => [ 't/source.t' ],
         'UPSTREAM'   => 'cpan',
     },
 
