@@ -447,7 +447,6 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     seek($fh, 1, SEEK_SET);
     ok((print $fh "A"), "print to an upgraded byte string");
     seek($fh, 1, SEEK_SET);
-    local $TODO = "write to utf8 flagged strings is broken";
     is($content, "\xA1A\xA3", "check result");
 
     $content = "\x{101}\x{102}\x{103}";
