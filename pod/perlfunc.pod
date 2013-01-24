@@ -7205,10 +7205,10 @@ bits), but you can override this to use instead one of the standard C types,
 as supported by the compiler used to build Perl:
 
    hh          interpret integer as C type "char" or "unsigned
-	       char" on Perl 5.14 or later
+               char" on Perl 5.14 or later
    h           interpret integer as C type "short" or
                "unsigned short"
-   j	       interpret integer as C type "intmax_t" on Perl
+   j           interpret integer as C type "intmax_t" on Perl
                5.14 or later, and only with a C99 compiler
                (unportable)
    l           interpret integer as C type "long" or
@@ -7216,9 +7216,9 @@ as supported by the compiler used to build Perl:
    q, L, or ll interpret integer as C type "long long",
                "unsigned long long", or "quad" (typically
                64-bit integers)
-   t	       interpret integer as C type "ptrdiff_t" on Perl
+   t           interpret integer as C type "ptrdiff_t" on Perl
                5.14 or later
-   z	       interpret integer as C type "size_t" on Perl 5.14
+   z           interpret integer as C type "size_t" on Perl 5.14
                or later
 
 As of 5.14, none of these raises an exception if they are not supported on
@@ -7255,7 +7255,7 @@ floating-point size to use on your platform via L<Config>:
 
     use Config;
     if ($Config{uselongdouble} eq "define") {
-	print "long doubles by default\n";
+        print "long doubles by default\n";
     }
 
 It can also be that long doubles and doubles are the same thing:
