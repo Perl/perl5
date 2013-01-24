@@ -7112,7 +7112,7 @@ or from a specified argument (e.g., with C<*2$>):
  printf "<%s>", "a";       # prints "<a>"
  printf "<%6s>", "a";      # prints "<     a>"
  printf "<%*s>", 6, "a";   # prints "<     a>"
- printf "<%*2$s>", "a", 6; # prints "<     a>"
+ printf '<%*2$s>', "a", 6; # prints "<     a>"
  printf "<%2s>", "long";   # prints "<long>" (does not truncate)
 
 If a field width obtained through C<*> is negative, it has the same
@@ -7192,7 +7192,7 @@ You cannot currently get the precision from a specified number,
 but it is intended that this will be possible in the future, for
 example using C<.*2$>:
 
-  printf "<%.*2$x>", 1, 6;   # INVALID, but in future will print
+  printf '<%.*2$x>', 1, 6;   # INVALID, but in future will print
                              # "<000001>"
 
 =item size
@@ -7286,7 +7286,7 @@ So:
 uses C<$a> for the width, C<$b> for the precision, and C<$c>
 as the value to format; while:
 
-  printf "<%*1$.*s>", $a, $b;
+  printf '<%*1$.*s>', $a, $b;
 
 would use C<$a> for the width and precision, and C<$b> as the
 value to format.
