@@ -4,12 +4,14 @@ use strict;
 use vars qw($VERSION $FORCE_SEARCH_ALL_PATHS);
 use Module::Pluggable::Object;
 
+use if $] > 5.017, 'deprecate';
+
 # ObQuote:
 # Bob Porter: Looks like you've been missing a lot of work lately. 
 # Peter Gibbons: I wouldn't say I've been missing it, Bob! 
 
 
-$VERSION = '4.5'; # core release only!
+$VERSION = '4.6'; # core release only!
 $FORCE_SEARCH_ALL_PATHS = 0;
 
 sub import {

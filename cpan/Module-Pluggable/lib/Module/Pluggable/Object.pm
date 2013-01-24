@@ -8,7 +8,9 @@ use Carp qw(croak carp confess);
 use Devel::InnerPackage;
 use vars qw($VERSION);
 
-$VERSION = '4.5';
+use if $] > 5.017, 'deprecate';
+
+$VERSION = '4.6';
 
 
 sub new {
