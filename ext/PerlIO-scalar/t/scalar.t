@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 82;
+use Test::More tests => 92;
 
 my $fh;
 my $var = "aaa\n";
@@ -383,4 +383,39 @@ SKIP: {
   close $fh;
   close FILE;
   is $content, "Foo-Bar\n", 'duping via >&=';
+}
+
+# [perl #109828] PerlIO::scalar does not handle UTF-8
+{
+    use Errno qw(EINVAL);
+    my $todo = "open doesn't know about UTf-8 scalars";
+    local $TODO = $todo;
+    my @warnings;
+    local $SIG{__WARN__} = sub { push @warnings, "@_" };
+    my $content = "12\x{101}";
+    $! = 0;
+    ok(!open(my $fh, "<", \$content), "non-byte open should fail");
+    is(0+$!, EINVAL, "check \$! is updated");
+    undef $TODO;
+    is_deeply(\@warnings, [], "should be no warnings (yet)");
+    use warnings "utf8";
+    $TODO = $todo;
+    $! = 0;
+    ok(!open(my $fh, "<", \$content), "non byte open should fail (and warn)");
+    is(0+$!, EINVAL, "check \$! is updated even when we warn");
+    $TODO = $todo;
+    my $warning = "Strings with code points over 0xFF may not be mapped into in-memory file handles\n";
+    is_deeply(\@warnings, [ $warning ], "should have warned");
+    @warnings = ();
+    $content = "12\xA1";
+    utf8::upgrade($content);
+    undef $TODO;
+    ok(open(my $fh, "<", \$content), "open upgraded scalar");
+    $TODO = $todo;
+    my $tmp;
+    is(read($fh, $tmp, 4), 3, "read should get the downgraded bytes");
+    is($tmp, "12\xA1", "check we got the expected bytes");
+    close $fh;
+    undef $TODO;
+    is_deeply(\@warnings, [], "should be no more warnings");
 }
