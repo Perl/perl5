@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
  *
- * Version: 5.81
- * Mon Jan 14 05:17:08 MST 2013
+ * Version: 5.82
+ * Thu Jan 24 04:54:12 MST 2013
  *
  */
 
@@ -86,7 +86,7 @@ static W32 H0256[8] =			/* SHA-256 initial hash value */
 static void sha1(SHA *s, UCHR *block)		/* SHA-1 transform */
 {
 	W32 a, b, c, d, e;
-	SHA_STO_CLASS W32 W[16];
+	W32 W[16];
 	W32 *wp = W;
 	W32 *H = (W32 *) s->H;
 
@@ -153,7 +153,7 @@ static void sha1(SHA *s, UCHR *block)		/* SHA-1 transform */
 static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 {
 	W32 a, b, c, d, e, f, g, h, T1;
-	SHA_STO_CLASS W32 W[16];
+	W32 W[16];
 	W32 *kp = K256;
 	W32 *wp = W;
 	W32 *H = (W32 *) s->H;

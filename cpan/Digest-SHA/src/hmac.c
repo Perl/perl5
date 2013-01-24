@@ -3,10 +3,10 @@
  *
  * Ref: FIPS PUB 198 The Keyed-Hash Message Authentication Code
  *
- * Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
  *
- * Version: 5.81
- * Mon Jan 14 05:17:08 MST 2013
+ * Version: 5.82
+ * Thu Jan 24 04:54:12 MST 2013
  *
  */
 

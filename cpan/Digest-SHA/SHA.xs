@@ -2,8 +2,14 @@
 #include "perl.h"
 #include "XSUB.h"
 
-#ifndef SvPVbyte
-#define SvPVbyte SvPV
+#ifdef SvPVbyte
+	#if PERL_REVISION == 5 && PERL_VERSION < 8
+		#undef SvPVbyte
+		#define SvPVbyte(sv, lp) \
+			(sv_utf8_downgrade((sv), 0), SvPV((sv), (lp)))
+	#endif
+#else
+	#define SvPVbyte SvPV
 #endif
 
 #include "src/sha.c"

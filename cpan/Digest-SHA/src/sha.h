@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
  *
- * Version: 5.81
- * Mon Jan 14 05:17:08 MST 2013
+ * Version: 5.82
+ * Thu Jan 24 04:54:12 MST 2013
  *
  */
 
@@ -100,22 +100,6 @@
 			(SHA64) b[2] << 40 | (SHA64) b[3] << 32 |	\
 			(SHA64) b[4] << 24 | (SHA64) b[5] << 16 |	\
 			(SHA64) b[6] <<  8 | (SHA64) b[7]; }
-#endif
-
-/*
- * SHA_STO_CLASS: default to auto storage class for message schedule
- * arrays inside transform routines.  Note that redefining this to
- * static might improve performance on some platforms (e.g. Intel).
- */
-
-#if !defined(SHA_STO_CLASS)
-	#define SHA_STO_CLASS	auto
-#endif
-
-/* Override use of static arrays if compiling for thread-safety */
-#ifdef SHA_THREAD_SAFE
-	#undef  SHA_STO_CLASS
-	#define SHA_STO_CLASS	auto
 #endif
 
 /* Configure memory management and I/O for Perl or standalone C */

@@ -1,5 +1,22 @@
 Revision history for Perl extension Digest::SHA.
 
+5.82  Thu Jan 24 04:54:12 MST 2013
+	- introduced workaround to SvPVbyte bug in Perl 5.6
+		-- module behavior now consistent under all Perls 5.6+
+			-- ref: new test script t/unicode.t
+		-- SHA routines now always croak on wide chars (5.6+)
+	- removed "static" message schedules from C code
+		-- default "auto" is now just as fast
+		-- thread-safe option (-t) no longer necessary
+			-- still allowed, but ignored
+		-- simplifies source and header files
+			-- eliminates SHA_STO_CLASS and SHA_THREAD_SAFE
+			-- ref. Bug #82784
+		-- thanks to Steve Hay for initial patch
+	- provided documentation to describe Unicode handling
+		-- ref: Bug #82378
+	- updated documentation of NIST statement on SHA-1
+
 5.81  Mon Jan 14 05:17:08 MST 2013
 	- corrected load subroutine (SHA.pm) to prevent double-free
 		-- Bug #82655: Security issue - segfault
