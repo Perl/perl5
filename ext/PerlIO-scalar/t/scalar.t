@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 101;
+use Test::More tests => 108;
 
 my $fh;
 my $var = "aaa\n";
@@ -435,5 +435,29 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     use warnings "utf8";
     seek($fh, 1, SEEK_SET);
     is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
+    is_deeply(\@warnings, [ $byte_warning ], "check warning");
+
+    select $fh; # make sure print fails rather tha buffers
+    $| = 1;
+    select STDERR;
+    no warnings "utf8";
+    @warnings = ();
+    $content = "\xA1\xA2\xA3";
+    utf8::upgrade($content);
+    seek($fh, 1, SEEK_SET);
+    ok((print $fh "A"), "print to an upgraded byte string");
+    seek($fh, 1, SEEK_SET);
+    local $TODO = "write to utf8 flagged strings is broken";
+    is($content, "\xA1A\xA3", "check result");
+
+    $content = "\x{101}\x{102}\x{103}";
+    $! = 0;
+    ok(!(print $fh "B"), "write to an non-downgradable SV");
+    is(0+$!, EINVAL, "check errno set");
+
+    is_deeply(\@warnings, [], "should be no warning");
+
+    use warnings "utf8";
+    ok(!(print $fh "B"), "write to an non-downgradable SV (and warn)");
     is_deeply(\@warnings, [ $byte_warning ], "check warning");
 }
