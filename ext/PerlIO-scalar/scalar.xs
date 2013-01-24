@@ -52,6 +52,14 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	sv_force_normal(s->var);
 	SvCUR_set(s->var, 0);
     }
+    if (SvUTF8(s->var) && !sv_utf8_downgrade(s->var, TRUE)) {
+	if (ckWARN(WARN_UTF8))
+	    Perl_warner(aTHX_ packWARN(WARN_UTF8), "Strings with code points over 0xFF may not be mapped into in-memory file handles\n");
+	SETERRNO(EINVAL, SS_IVCHAN);
+	SvREFCNT_dec(s->var);
+	s->var = Nullsv;
+	return -1;
+    }
     if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
     {
 	sv_force_normal(s->var);
