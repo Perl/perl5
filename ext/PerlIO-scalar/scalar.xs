@@ -6,6 +6,9 @@
 
 #include "perliol.h"
 
+static const char code_point_warning[] =
+ "Strings with code points over 0xFF may not be mapped into in-memory file handles\n";
+
 typedef struct {
     struct _PerlIO base;	/* Base "class" info */
     SV *var;
@@ -54,7 +57,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     }
     if (SvUTF8(s->var) && !sv_utf8_downgrade(s->var, TRUE)) {
 	if (ckWARN(WARN_UTF8))
-	    Perl_warner(aTHX_ packWARN(WARN_UTF8), "Strings with code points over 0xFF may not be mapped into in-memory file handles\n");
+	    Perl_warner(aTHX_ packWARN(WARN_UTF8), code_point_warning);
 	SETERRNO(EINVAL, SS_IVCHAN);
 	SvREFCNT_dec(s->var);
 	s->var = Nullsv;
@@ -151,6 +154,17 @@ PerlIOScalar_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	STRLEN len;
 	I32 got;
 	p = SvPV(sv, len);
+	if (SvUTF8(sv)) {
+	    if (sv_utf8_downgrade(sv, TRUE)) {
+	        p = SvPV_nomg(sv, len);
+	    }
+	    else {
+	        if (ckWARN(WARN_UTF8))
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8), code_point_warning);
+	        SETERRNO(EINVAL, SS_IVCHAN);
+	        return -1;
+	    }
+	}
 	got = len - (STRLEN)(s->posn);
 	if (got <= 0)
 	    return 0;

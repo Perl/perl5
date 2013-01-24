@@ -414,14 +414,13 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
 }
 { # changes after open
     my $content = "abc";
-    ok(open(my $fh, "<", \$content), "open a scalar");
+    ok(open(my $fh, "+<", \$content), "open a scalar");
     my $tmp;
     is(read($fh, $tmp, 1), 1, "basic read");
     seek($fh, 1, SEEK_SET);
     $content = "\xA1\xA2\xA3";
     utf8::upgrade($content);
     is(read($fh, $tmp, 1), 1, "read from post-open upgraded scalar");
-    local $TODO = "read doesn't handle a post open non-byte scalar";
     is($tmp, "\xA2", "check we read the correct value");
     seek($fh, 1, SEEK_SET);
     $content = "\x{101}\x{102}\x{103}";
@@ -432,10 +431,7 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     $! = 0;
     is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
     is(0+$!, EINVAL, "check errno set correctly");
-    {
-        local $TODO;
-	is_deeply(\@warnings, [], "should be no warning (yet)");
-    }
+    is_deeply(\@warnings, [], "should be no warning (yet)");
     use warnings "utf8";
     seek($fh, 1, SEEK_SET);
     is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
