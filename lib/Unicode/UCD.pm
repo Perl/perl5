@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 
 require Exporter;
 
@@ -1006,12 +1006,12 @@ dotless lowercase i:
 
 =over
 
-=item B<*> If you use this C<I> mapping
+=item Z<>B<*> If you use this C<I> mapping
 
 the result is case-insensitive,
 but dotless and dotted I's are not distinguished
 
-=item B<*> If you exclude this C<I> mapping
+=item Z<>B<*> If you exclude this C<I> mapping
 
 the result is not fully case-insensitive, but
 dotless and dotted I's are distinguished

@@ -43,7 +43,7 @@ Perl usage.
 B<NOTE:> The binaries that are built will run on all Win32 versions.
 They do not depend on your host system (WinXP/Win2K/Win7) or your
 Cygwin configuration (binary/text mounts, cvgserver).
-The only dependencies come from hard-coded pathnames like C</usr/local>.
+The only dependencies come from hard-coded pathnames like F</usr/local>.
 However, your host system and Cygwin configuration will affect Perl's
 runtime behavior (see L</"TEST">).
 

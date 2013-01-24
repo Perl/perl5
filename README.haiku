@@ -45,7 +45,7 @@ Haiku yet.
 =item *
 
 A subtest of the F<ext/Sys/Syslog/t/syslog.t> test fails. This is due to Haiku
-not implementing C</dev/log> support yet.
+not implementing F</dev/log> support yet.
 
 =item *
 

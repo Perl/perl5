@@ -658,7 +658,7 @@ array.  The array will grow automatically to accommodate the addition.  You
 must then use C<av_store> to assign values to these new elements.
 
 Perl equivalent: C<unshift @myarray, ( (undef) x $n );>
-    
+
 =cut
 */
 

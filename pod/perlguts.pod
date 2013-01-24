@@ -1536,7 +1536,7 @@ But it also puts the same information in certain fields of the XSUB itself:
     const char *subname = SvPVX(cv);
     STRLEN name_length  = SvCUR(cv); /* in bytes */
     U32 is_utf8         = SvUTF8(cv);
-    
+
 C<SvPVX(cv)> contains just the sub name itself, not including the package.
 For an AUTOLOAD routine in UNIVERSAL or one of its superclasses,
 C<CvSTASH(cv)> returns NULL during a method call on a nonexistent package.

@@ -1050,7 +1050,7 @@ This code
 
     use warnings;
     my $undef;
-    
+
     if ($undef == 3) {
     } elsif ($undef == 0) {
     }
@@ -1073,7 +1073,7 @@ most common and the most confusing). Ideally this code
 
     use warnings;
     my $undef;
-    
+
     my $a = $undef + 1;
     my $b
       = $undef

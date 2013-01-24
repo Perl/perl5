@@ -671,7 +671,7 @@ Something like this will reproduce the error:
 
 =item Can't chdir to %s
 
-(F) You called C<perl -x/foo/bar>, but C</foo/bar> is not a directory
+(F) You called C<perl -x/foo/bar>, but F</foo/bar> is not a directory
 that you can chdir to, possibly because it doesn't exist.
 
 =item Can't check filesystem of script "%s" for nosuid

@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -1231,7 +1231,7 @@ Put this in F<symbolic.pm> in your Perl library directory:
 
 This module is very unusual as overloaded modules go: it does not
 provide any usual overloaded operators, instead it provides an
-implementation for L<C<nomethod>>.  In this example the C<nomethod>
+implementation for L</C<nomethod>>.  In this example the C<nomethod>
 subroutine returns an object which encapsulates operations done over
 the objects: C<< symbolic->new(3) >> contains C<['n', 3]>, C<< 2 +
 symbolic->new(3) >> contains C<['+', 2, ['n', 3]]>.

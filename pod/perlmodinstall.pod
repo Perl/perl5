@@ -53,7 +53,7 @@ module into your system's repository of Perl modules, but you can
 install modules into any directory you wish.  For instance, where I
 say C<perl Makefile.PL>, you can substitute C<perl Makefile.PL
 PREFIX=/my/perl_directory> to install the modules into
-C</my/perl_directory>.  Then you can use the modules from your Perl
+F</my/perl_directory>.  Then you can use the modules from your Perl
 programs with C<use lib "/my/perl_directory/lib/site_perl";> or
 sometimes just C<use "/my/perl_directory";>.  If you're on a system
 that requires superuser/root access to install modules into the

@@ -291,9 +291,9 @@ module.  Examples:
   =encoding utf8
 
   =encoding koi8-r
-  
+
   =encoding ShiftJIS
-  
+
   =encoding big5
 
 =back

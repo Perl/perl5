@@ -4688,7 +4688,7 @@ an explicit repeat count for pack, the packed string is adjusted to that
 length.  For example:
 
  This code:                             gives this result:
- 
+
  unpack("W/a", "\004Gurusamy")          ("Guru")
  unpack("a3/A A*", "007 Bond  J ")      (" Bond", "J")
  unpack("a3 x2 /A A*", "007: Bond, J.") ("Bond, J", ".")
@@ -6616,32 +6616,32 @@ Examples:
 
     # sort lexically
     @articles = sort @files;
-    
+
     # same thing, but with explicit sort routine
     @articles = sort {$a cmp $b} @files;
-    
+
     # now case-insensitively
     @articles = sort {fc($a) cmp fc($b)} @files;
-    
+
     # same thing in reversed order
     @articles = sort {$b cmp $a} @files;
-    
+
     # sort numerically ascending
     @articles = sort {$a <=> $b} @files;
-    
+
     # sort numerically descending
     @articles = sort {$b <=> $a} @files;
-    
+
     # this sorts the %age hash by value instead of key
     # using an in-line function
     @eldest = sort { $age{$b} <=> $age{$a} } keys %age;
-    
+
     # sort using explicit subroutine name
     sub byage {
         $age{$a} <=> $age{$b};  # presuming numeric
     }
     @sortedclass = sort byage @class;
-    
+
     sub backwards { $b cmp $a }
     @harry  = qw(dog cat x Cain Abel);
     @george = qw(gone chased yz Punished Axed);
@@ -6692,11 +6692,11 @@ Examples:
                                              # not set here    
     package main;
     @new = sort other::backwards @old;
-    
+
     # guarantee stability, regardless of algorithm
     use sort 'stable';
     @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;
-    
+
     # force use of mergesort (not portable outside Perl 5.8)
     use sort '_mergesort';  # note discouraging _
     @new = sort { substr($a, 3, 5) cmp substr($b, 3, 5) } @old;

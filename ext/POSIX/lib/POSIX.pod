@@ -412,7 +412,7 @@ Retrieves the value of a configurable limit on a file or directory.  This
 uses file descriptors such as those obtained by calling C<POSIX::open>.
 
 The following will determine the maximum length of the longest allowable
-pathname on the filesystem which holds C</var/foo>.
+pathname on the filesystem which holds F</var/foo>.
 
 	$fd = POSIX::open( "/var/foo", &POSIX::O_RDONLY );
 	$path_max = POSIX::fpathconf( $fd, &POSIX::_PC_PATH_MAX );

@@ -1,7 +1,7 @@
 package bignum;
 use 5.006;
 
-$VERSION = '0.31';
+$VERSION = '0.32';
 use Exporter;
 @ISA 		= qw( bigint );
 @EXPORT_OK	= qw( PI e bexp bpi hex oct ); 
@@ -619,7 +619,7 @@ The following modules are currently used by bignum:
 =head1 EXAMPLES
 
 Some cool command line examples to impress the Python crowd ;)
- 
+
 	perl -Mbignum -le 'print sqrt(33)'
 	perl -Mbignum -le 'print 2*255'
 	perl -Mbignum -le 'print 4.5+2*255'

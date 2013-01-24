@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -164,7 +164,6 @@ dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/extutils-parsexs/lib/perlxs.pod	Verbatim line length including indents exceeds 79 by	1
 dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 79 by	10
 dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
-dist/locale-maketext/lib/locale/maketext.pod	No items in =over / =back list	1
 dist/locale-maketext/lib/locale/maketext/tpj13.pod	No items in =over / =back list	3
 dist/math-bigint/lib/math/bigfloat.pm	Apparent broken link	1
 dist/math-bigint/lib/math/bigint.pm	Apparent broken link	1

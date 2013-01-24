@@ -70,7 +70,7 @@ Alternatively, put this as the first line of your script:
 
     #!/usr/bin/env perl
 
-... and run the script as C</path/to/script.pl>.  Of course, it'll need
+... and run the script as F</path/to/script.pl>.  Of course, it'll need
 to be executable first, so C<chmod 755 script.pl> (under Unix).
 
 (This start line assumes you have the B<env> program.  You can also put

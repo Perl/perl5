@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_07';
+$VERSION = '1.39_08';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1513,7 +1513,7 @@ We then determine what the console should be on various systems:
         undef $console;
     }
 
-=item * Unix - use C</dev/tty>.
+=item * Unix - use F</dev/tty>.
 
 =cut
 

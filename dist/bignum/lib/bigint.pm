@@ -1,7 +1,7 @@
 package bigint;
 use 5.006;
 
-$VERSION = '0.31';
+$VERSION = '0.32';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( PI e bpi bexp hex oct );
@@ -367,7 +367,7 @@ return value of subroutines:
 
     sub three_integer { use integer; return 3.2; } 
     sub three_bigint { use bigint; return 3.2; }
- 
+
     print three_integer(), " ", three_bigint(),"\n";	# prints "3.2 3"
 
 =head2 Options
@@ -654,7 +654,7 @@ The following modules are currently used by bigint:
 
 Some cool command line examples to impress the Python crowd ;) You might want
 to compare them to the results under -Mbignum or -Mbigrat:
- 
+
 	perl -Mbigint -le 'print sqrt(33)'
 	perl -Mbigint -le 'print 2*255'
 	perl -Mbigint -le 'print 4.5+2*255'

@@ -7,7 +7,7 @@ Porting/acknowledgements.pl - Generate perldelta acknowledgements text
 =head1 SYNOPSIS
 
   perl Porting/acknowledgements.pl v5.15.0..HEAD
-  
+
 =head1 DESCRIPTION
 
 This generates the text which goes in the Acknowledgements section in

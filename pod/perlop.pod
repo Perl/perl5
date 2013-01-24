@@ -561,7 +561,7 @@ the table is sorted on the right operand instead of on the left.
                 like: exists HASH->{Any}
 
  Right operand is CODE:
-   
+
  Left      Right      Description and pseudocode                               
  ===============================================================
  ARRAY     CODE       sub returns true on all ARRAY elements[1]
@@ -2139,7 +2139,7 @@ X<qx> X<`> X<``> X<backtick>
 =item `STRING`
 
 A string which is (possibly) interpolated and then executed as a
-system command with C</bin/sh> or its equivalent.  Shell wildcards,
+system command with F</bin/sh> or its equivalent.  Shell wildcards,
 pipes, and redirections will be honored.  The collected standard
 output of the command is returned; standard error is unaffected.  In
 scalar context, it comes back as a single (potentially multi-line)
