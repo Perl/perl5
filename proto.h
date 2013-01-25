@@ -1549,7 +1549,7 @@ PERL_CALLCONV STRLEN	Perl_hv_fill(pTHX_ HV const *const hv)
 #define PERL_ARGS_ASSERT_HV_FILL	\
 	assert(hv)
 
-PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV *hv, HE *entryK)
+PERL_CALLCONV void	Perl_hv_free_ent(pTHX_ HV *hv, HE *entry)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_FREE_ENT	\
 	assert(hv)
@@ -5708,7 +5708,7 @@ STATIC struct xpvhv_aux*	S_hv_auxinit(HV *hv)
 	assert(hv)
 
 STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
-STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entryK)
+STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_FREE_ENT_RET	\
 	assert(hv)
