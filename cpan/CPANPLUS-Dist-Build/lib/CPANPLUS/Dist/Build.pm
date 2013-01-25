@@ -1,5 +1,7 @@
 package CPANPLUS::Dist::Build;
 
+use if $] > 5.017, 'deprecate';
+
 use strict;
 use warnings;
 use vars    qw[@ISA $STATUS $VERSION];
@@ -30,7 +32,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.68';
+$VERSION = '0.70';
 
 =pod
 
