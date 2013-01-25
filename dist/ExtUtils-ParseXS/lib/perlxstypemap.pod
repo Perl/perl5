@@ -226,11 +226,12 @@ return values.
 
 I<$type> - the raw C type of the parameter, any C<:> replaced with
 C<_>.
+e.g. for a type of C<Foo::Bar>, I<$type> is C<Foo__Bar>
 
 =item *
 
 I<$ntype> - the supplied type with C<*> replaced with C<Ptr>.
-e.g. for a type of C<Foo::Bar>, I<$ntype> is C<Foo::Bar>
+e.g. for a type of C<Foo*>, I<$ntype> is C<FooPtr>
 
 =item *
 
