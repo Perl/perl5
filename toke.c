@@ -9196,7 +9196,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 
     for (;;) {
 	if (d >= e)
-	    Perl_croak(aTHX_ ident_too_long);
+	    Perl_croak(aTHX_ "%s", ident_too_long);
 	if (isWORDCHAR(*s)
             || (!UTF && isALPHANUMERIC_L1(*s))) /* UTF handled below */
         {
@@ -9218,7 +9218,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 		t += UTF8SKIP(t);
 	    len = t - s;
 	    if (d + len > e)
-		Perl_croak(aTHX_ ident_too_long);
+		Perl_croak(aTHX_ "%s", ident_too_long);
 	    Copy(s, d, len, char);
 	    d += len;
 	    s = t;
@@ -9247,14 +9247,14 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     if (isDIGIT(*s)) {
 	while (isDIGIT(*s)) {
 	    if (d >= e)
-		Perl_croak(aTHX_ ident_too_long);
+		Perl_croak(aTHX_ "%s", ident_too_long);
 	    *d++ = *s++;
 	}
     }
     else {
 	for (;;) {
 	    if (d >= e)
-		Perl_croak(aTHX_ ident_too_long);
+		Perl_croak(aTHX_ "%s", ident_too_long);
 	    if (isWORDCHAR(*s))	/* UTF handled below */
 		*d++ = *s++;
 	    else if (*s == '\'' && isIDFIRST_lazy_if(s+1,UTF)) {
@@ -9271,7 +9271,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
 		    t += UTF8SKIP(t);
 		if (d + (t - s) > e)
-		    Perl_croak(aTHX_ ident_too_long);
+		    Perl_croak(aTHX_ "%s", ident_too_long);
 		Copy(s, d, t - s, char);
 		d += t - s;
 		s = t;
@@ -9342,7 +9342,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		while ((isWORDCHAR(*s) || *s == ':') && d < e)
 		    *d++ = *s++;
 		if (d >= e)
-		    Perl_croak(aTHX_ ident_too_long);
+		    Perl_croak(aTHX_ "%s", ident_too_long);
 	    }
 	    *d = '\0';
 	    while (s < send && SPACE_OR_TAB(*s))
@@ -9373,7 +9373,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		*d++ = *s++;
 	    }
 	    if (d >= e)
-		Perl_croak(aTHX_ ident_too_long);
+		Perl_croak(aTHX_ "%s", ident_too_long);
 	    *d = '\0';
 	}
 	if (*s == '}') {
@@ -10942,7 +10942,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    else {
 	        /* check for end of fixed-length buffer */
 		if (d >= e)
-		    Perl_croak(aTHX_ number_too_long);
+		    Perl_croak(aTHX_ "%s", number_too_long);
 		/* if we're ok, copy the character */
 		*d++ = *s++;
 	    }
@@ -10972,7 +10972,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    for (; isDIGIT(*s) || *s == '_'; s++) {
 	        /* fixed length buffer check */
 		if (d >= e)
-		    Perl_croak(aTHX_ number_too_long);
+		    Perl_croak(aTHX_ "%s", number_too_long);
 		if (*s == '_') {
 		   if (lastub && s == lastub + 1)
 		       Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -11024,7 +11024,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    while (isDIGIT(*s) || *s == '_') {
 	        if (isDIGIT(*s)) {
 		    if (d >= e)
-		        Perl_croak(aTHX_ number_too_long);
+		        Perl_croak(aTHX_ "%s", number_too_long);
 		    *d++ = *s++;
 		}
 		else {
