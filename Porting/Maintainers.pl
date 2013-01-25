@@ -302,7 +302,7 @@ use File::Glob qw(:case);
 
     'B::Lint' => {
         'MAINTAINER'   => 'jjore',
-        'DISTRIBUTION' => 'FLORA/B-Lint-1.14.tar.gz',
+        'DISTRIBUTION' => 'RJBS/B-Lint-1.16.tar.gz',
         'FILES'        => q[cpan/B-Lint],
         'EXCLUDED'     => ['t/test.pl'],
         'UPSTREAM'     => 'cpan',
