@@ -138,11 +138,11 @@ main(int argc, char **argv, char **env)
     environ = env;
 #endif
 
+    PERL_SYS_TERM();
+
 #ifdef PERL_GLOBAL_STRUCT
     free_global_struct(plvarsp);
 #endif /* PERL_GLOBAL_STRUCT */
-
-    PERL_SYS_TERM();
 
     exit(exitstatus);
     return exitstatus;

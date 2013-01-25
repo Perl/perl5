@@ -530,7 +530,8 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
     # is mentioned in perlvar.h and globvar.sym, and always exported.
     delete $skip{PL_sh_path};
     ++$export{Perl_GetVars};
-    try_symbols(qw(PL_Vars PL_VarsPtr)) unless $ARGS{CCTYPE} eq 'GCC';
+    try_symbols(qw(PL_Vars PL_VarsPtr))
+      unless $ARGS{CCTYPE} eq 'GCC' || $define{PERL_GLOBAL_STRUCT_PRIVATE};
 } else {
     ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
 }
