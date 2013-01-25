@@ -111,7 +111,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<PerlIO::scalar> has been upgraded from version 0.15 to 0.16.
+
+The buffer scalar supplied may now only contain code pounts 0xFF or
+lower. [perl #109828]
 
 =back
 
