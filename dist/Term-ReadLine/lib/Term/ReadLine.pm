@@ -337,7 +337,7 @@ if ($which) {
 } elsif (defined $which and $which ne '') {	# Defined but false
   # Do nothing fancy
 } else {
-  eval "use Term::ReadLine::Gnu; 1" or eval "use Term::ReadLine::Perl; 1";
+  eval "use Term::ReadLine::Gnu; 1" or eval "use Term::ReadLine::EditLine; 1" or eval "use Term::ReadLine::Perl; 1";
 }
 
 #require FileHandle;
@@ -347,6 +347,8 @@ if ($which) {
 our @ISA;
 if (defined &Term::ReadLine::Gnu::readline) {
   @ISA = qw(Term::ReadLine::Gnu Term::ReadLine::Stub);
+} elsif (defined &Term::ReadLine::EditLine::readline) {
+  @ISA = qw(Term::ReadLine::EditLine Term::ReadLine::Stub);
 } elsif (defined &Term::ReadLine::Perl::readline) {
   @ISA = qw(Term::ReadLine::Perl Term::ReadLine::Stub);
 } elsif (defined $which && defined &{"Term::ReadLine::$which\::readline"}) {
