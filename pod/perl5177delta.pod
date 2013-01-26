@@ -365,23 +365,23 @@ _charnames from loading via C<$INC{'_charnames.pm'}++>.
 A number of bugs related to assigning a list to hash have been fixed. Many of
 these involve lists with repeated keys like C<(1, 1, 1, 1)>.
 
-=over 8
+=over 4
 
-=item -
+=item *
 
 The expression C<scalar(%h = (1, 1, 1, 1))> now returns C<4>, not C<2>.
 
-=item -
+=item *
 
 The return value of C<%h = (1, 1, 1)> in list context was wrong. Previously
 this would return C<(1, undef, 1)>, now it returns C<(1, undef)>.
 
-=item -
+=item *
 
 Perl now issues the same warning on C<($s, %h) = (1, {})> as it does for
 C<(%h) = ({})>, "Reference found where even-sized list expected".
 
-=item -
+=item *
 
 A number of additional edge cases in list assignment to hashes were
 corrected. For more details see commit 23b7025ebc.
