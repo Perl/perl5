@@ -39,6 +39,28 @@ documentation.  This would be a good way to learn more about Perl.
 
 =head1 Tasks that only need Perl knowledge
 
+=head2 Classify bug tickets by type
+
+Known bugs in Perl are tracked by L<https://rt.perl.org/rt3> (which also
+includes Perl 6).  A summary can be found at
+L<https://rt.perl.org/rt3/NoAuth/perl5/Overview.html>.
+It shows bugs classified by "type".  However, the type of many of the
+bugs is "unknown".  This greatly lowers the chances of them getting
+fixed, as the number of open bugs is overwhelming -- too many to wade
+through for someone to try to find the bugs in the parts of
+Perl that s/he knows well enough to try to fix.  This task involves
+going through these bugs and classifying them into one or more types.
+
+=head2 Ongoing: investigate new bug reports
+
+When a bug report is filed, it would be very helpful to have someone do
+a quick investigation to see if it is a real problem, and to reply to
+the poster about it, asking for example code that reproduces the
+problem.  Such code should be added to the test suite as TODO tests, and
+the ticket should be classified by type.  To get started on this task,
+look at the tickets that are marked as "New Issues" in
+L<https://rt.perl.org/rt3/NoAuth/perl5/Overview.html>.
+
 =head2 Migrate t/ from custom TAP generation
 
 Many tests below F<t/> still generate TAP by "hand", rather than using library
@@ -171,6 +193,12 @@ whole category.
 
 Many diagnostic messages are not currently documented.  The list is at the end
 of t/porting/diag.t.
+
+=head2 Write TODO tests for open bugs
+
+Sometimes bugs get fixed as a side effect of something else, and
+the bug remains open because no one realizes that it has been fixed.
+Ideally, every open bug should have a TODO test in the core test suite.
 
 =head1 Tasks that need a little sysadmin-type knowledge
 
