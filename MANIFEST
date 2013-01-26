@@ -279,6 +279,11 @@ cpan/Compress-Raw-Zlib/zlib-src/zlib.h		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/zutil.c		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/zutil.h		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Zlib.xs			Compress::Raw::Zlib
+cpan/Config-Perl-V/t/00_pod.t			Config::Perl::V
+cpan/Config-Perl-V/t/01_pod.t			Config::Perl::V
+cpan/Config-Perl-V/t/10_base.t			Config::Perl::V
+cpan/Config-Perl-V/t/20_plv.t			Config::Perl::V
+cpan/Config-Perl-V/V.pm				Config::Perl::V
 cpan/CPAN/Changes				CPAN.pm Changes file
 cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm
