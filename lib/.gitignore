@@ -112,6 +112,8 @@
 /Compress
 /Config.pm
 /Config.pod
+/Config/Perl
+/Config/Perl/V.pm
 /Config_git.pl
 /Config_heavy.pl
 /Cwd.pm
