@@ -104,6 +104,7 @@ SKIP: {
 	# So the kill() must not be done with this config in order to
 	# finish the test.
 	# For others (darwin & freebsd), let the test fail without crashing.
+	# the test passes at least from freebsd 8.1
 	my $todo = $^O eq 'netbsd' && $Config{osvers}=~/^1\.6/;
 	my $why_todo = "# TODO $^O $Config{osvers} seems to lose blocked signals";
 	if (!$todo) { 
@@ -114,7 +115,7 @@ SKIP: {
 	}
 	sleep 1;
 
-	$todo = 1 if ($^O eq 'freebsd')
+	$todo = 1 if ($^O eq 'freebsd' && $Config{osvers} < 8)
 		  || ($^O eq 'darwin' && $Config{osvers} < '6.6');
 	printf "%s 11 - masked SIGINT received %s\n",
 	    $sigint_called ? "ok" : "not ok",
