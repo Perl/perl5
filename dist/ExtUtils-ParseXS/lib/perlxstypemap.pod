@@ -16,10 +16,10 @@ Perl XS' attempt at a solution to this is the concept of typemaps.
 At an abstract level, a Perl XS typemap is nothing but a recipe for
 converting from a certain Perl data structure to a certain C
 data structure and vice versa.  Since there can be C types that
-are sufficiently similar to warrant converting with the same logic,
-XS typemaps are represented by a unique identifier, henceforth
-called an   <XS type> in this document.  You can then tell the XS
-compiler that multiple C types are to be mapped with the same
+are sufficiently similar to one another to warrant converting with
+the same logic, XS typemaps are represented by a unique identifier,
+henceforth called an B<XS type> in this document.  You can then tell
+the XS compiler that multiple C types are to be mapped with the same
 XS typemap.
 
 In your XS code, when you define an argument with a C type or when
