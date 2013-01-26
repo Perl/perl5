@@ -1,15 +1,15 @@
-name: perl
-version: 5.017009
-abstract: The Perl 5 language interpreter
-author: perl5-porters@perl.org
+---
+abstract: 'The Perl 5 language interpreter'
+author:
+  - perl5-porters@perl.org
+build_requires: {}
+dynamic_config: 1
+generated_by: 'CPAN::Meta version 2.120921, CPAN::Meta::Converter version 2.120921'
 license: perl
-resources:
-  homepage: http://www.perl.org/
-  bugtracker: http://rt.perl.org/perlbug/
-  license: http://dev.perl.org/licenses/
-  repository: http://perl5.git.perl.org/
-distribution_type: core
-generated_by: Porting/makemeta
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: perl
 no_index:
   directory:
     - cpan
@@ -113,3 +113,9 @@ no_index:
     - Porting/Maintainers.pm
     - Porting/perldelta_template.pod
     - TestInit.pm
+resources:
+  bugtracker: http://rt.perl.org/perlbug/
+  homepage: http://www.perl.org/
+  license: http://dev.perl.org/licenses/
+  repository: http://perl5.git.perl.org/
+version: 5.017009

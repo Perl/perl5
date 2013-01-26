@@ -4512,6 +4512,7 @@ MANIFEST			This list of files
 mathoms.c			A home for binary-compatible code artifacts
 metaconfig.h			Control file for the metaconfig process
 metaconfig.SH			Control file for the metaconfig process
+META.json			Distribution meta-data in JSON
 META.yml			Distribution meta-data in YAML
 mg.c				Magic code
 mg.h				Magic header
