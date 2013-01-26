@@ -333,7 +333,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+-DPERL_GLOBAL_STRUCT builds now free the global struct B<after>
+they've finished using it.
 
 =back
 
