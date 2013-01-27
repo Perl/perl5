@@ -83,7 +83,7 @@ in question from CPAN.
 
 =item L<CPANPLUS::Configure>
 
-=item L<CPANPLUS::Configure::Setup>
+=item C<CPANPLUS::Configure::Setup>
 
 =item L<CPANPLUS::Dist>
 
@@ -103,9 +103,9 @@ in question from CPAN.
 
 =item L<CPANPLUS::Internals>
 
-=item L<CPANPLUS::Internals::Constants>
+=item C<CPANPLUS::Internals::Constants>
 
-=item L<CPANPLUS::Internals::Constants::Report>
+=item C<CPANPLUS::Internals::Constants::Report>
 
 =item L<CPANPLUS::Internals::Extract>
 
@@ -121,11 +121,11 @@ in question from CPAN.
 
 =item L<CPANPLUS::Internals::Source::SQLite>
 
-=item L<CPANPLUS::Internals::Source::SQLite::Tie>
+=item C<CPANPLUS::Internals::Source::SQLite::Tie>
 
 =item L<CPANPLUS::Internals::Utils>
 
-=item L<CPANPLUS::Internals::Utils::Autoflush>
+=item C<CPANPLUS::Internals::Utils::Autoflush>
 
 =item L<CPANPLUS::Module>
 
@@ -137,7 +137,7 @@ in question from CPAN.
 
 =item L<CPANPLUS::Module::Fake>
 
-=item L<CPANPLUS::Module::Signature>
+=item C<CPANPLUS::Module::Signature>
 
 =item L<CPANPLUS::Selfupdate>
 
@@ -189,7 +189,7 @@ will remain available with the applicable CPAN distribution.
 
 Included with L<CPANPLUS>.
 
-=item L<cpanp-run-perl>
+=item C<cpanp-run-perl>
 
 Included with L<CPANPLUS>.
 
