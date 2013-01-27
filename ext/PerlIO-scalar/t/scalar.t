@@ -406,6 +406,7 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     $content = "12\xA1";
     utf8::upgrade($content);
     ok(open(my $fh, "<", \$content), "open upgraded scalar");
+    binmode $fh;
     my $tmp;
     is(read($fh, $tmp, 4), 3, "read should get the downgraded bytes");
     is($tmp, "12\xA1", "check we got the expected bytes");
@@ -415,6 +416,7 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
 { # changes after open
     my $content = "abc";
     ok(open(my $fh, "+<", \$content), "open a scalar");
+    binmode $fh;
     my $tmp;
     is(read($fh, $tmp, 1), 1, "basic read");
     seek($fh, 1, SEEK_SET);
