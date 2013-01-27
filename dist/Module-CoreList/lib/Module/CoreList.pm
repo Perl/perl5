@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.80';
+$VERSION = '2.81';
 
 my $dumpinc = 0;
 sub import {
@@ -7791,6 +7791,64 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.017008 => {
         'Pod::LaTeX'            => '1',
+    },
+    5.017009 => {
+        'Archive::Extract'      => '1',
+        'B::Lint'               => '1',
+        'B::Lint::Debug'        => '1',
+        'CPANPLUS'              => '1',
+        'CPANPLUS::Backend'     => '1',
+        'CPANPLUS::Backend::RV' => '1',
+        'CPANPLUS::Config'      => '1',
+        'CPANPLUS::Config::HomeEnv'=> '1',
+        'CPANPLUS::Configure'   => '1',
+        'CPANPLUS::Configure::Setup'=> '1',
+        'CPANPLUS::Dist'        => '1',
+        'CPANPLUS::Dist::Autobundle'=> '1',
+        'CPANPLUS::Dist::Base'  => '1',
+        'CPANPLUS::Dist::Build' => '1',
+        'CPANPLUS::Dist::Build::Constants'=> '1',
+        'CPANPLUS::Dist::MM'    => '1',
+        'CPANPLUS::Dist::Sample'=> '1',
+        'CPANPLUS::Error'       => '1',
+        'CPANPLUS::Internals'   => '1',
+        'CPANPLUS::Internals::Constants'=> '1',
+        'CPANPLUS::Internals::Constants::Report'=> '1',
+        'CPANPLUS::Internals::Extract'=> '1',
+        'CPANPLUS::Internals::Fetch'=> '1',
+        'CPANPLUS::Internals::Report'=> '1',
+        'CPANPLUS::Internals::Search'=> '1',
+        'CPANPLUS::Internals::Source'=> '1',
+        'CPANPLUS::Internals::Source::Memory'=> '1',
+        'CPANPLUS::Internals::Source::SQLite'=> '1',
+        'CPANPLUS::Internals::Source::SQLite::Tie'=> '1',
+        'CPANPLUS::Internals::Utils'=> '1',
+        'CPANPLUS::Internals::Utils::Autoflush'=> '1',
+        'CPANPLUS::Module'      => '1',
+        'CPANPLUS::Module::Author'=> '1',
+        'CPANPLUS::Module::Author::Fake'=> '1',
+        'CPANPLUS::Module::Checksums'=> '1',
+        'CPANPLUS::Module::Fake'=> '1',
+        'CPANPLUS::Module::Signature'=> '1',
+        'CPANPLUS::Selfupdate'  => '1',
+        'CPANPLUS::Shell'       => '1',
+        'CPANPLUS::Shell::Classic'=> '1',
+        'CPANPLUS::Shell::Default'=> '1',
+        'CPANPLUS::Shell::Default::Plugins::CustomSource'=> '1',
+        'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
+        'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
+        'Devel::InnerPackage'   => '1',
+        'Log::Message'          => '1',
+        'Log::Message::Config'  => '1',
+        'Log::Message::Handlers'=> '1',
+        'Log::Message::Item'    => '1',
+        'Log::Message::Simple'  => '1',
+        'Module::Pluggable'     => '1',
+        'Module::Pluggable::Object'=> '1',
+        'Object::Accessor'      => '1',
+        'Pod::LaTeX'            => '1',
+        'Term::UI'              => '1',
+        'Term::UI::History'     => '1',
     },
 );
 
