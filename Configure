@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Dec 24 10:05:48 CET 2012 [metaconfig 3.5 PL0]
+# Generated on Mon Jan 28 08:54:06 CET 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -8835,9 +8835,13 @@ your organization...
 EOM
 cont=x
 while test "$cont"; do
+	case "$MAILDOMAIN" in
+	'') maildomain="$myhostname$mydomain";;
+	*)  maildomain="$MAILDOMAIN";;
+	esac
 	case "$cf_email" in
-	'') dflt="$cf_by@$myhostname$mydomain";;
-	*) dflt="$cf_email";;
+	'') dflt="$cf_by@$maildomain";;
+	*)  dflt="$cf_email";;
 	esac
 	rp='What is your e-mail address?'
 	. ./myread
