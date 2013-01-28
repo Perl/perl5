@@ -297,108 +297,22 @@ a general-purpose programming language. It's widely used for everything
 from quick "one-liners" to full-scale application development.
 
 The language is intended to be practical (easy to use, efficient,
-complete) rather than beautiful (tiny, elegant, minimal).
+complete) rather than beautiful (tiny, elegant, minimal).  It combines
+(in the author's opinion, anyway) some of the best features of B<sed>,
+B<awk>, and B<sh>,  making it familiar and easy to use for Unix users to
+whip up quick solutions to annoying problems.  Its general-purpose
+programming facilities support procedural, functional, and
+object-oriented programming paradigms, making Perl a comfortable
+language for the long haul on major projects, whatever your bent.
 
-Perl combines (in the author's opinion, anyway) some of the best
-features of C, B<sed>, B<awk>, and B<sh>, so people familiar with
-those languages should have little difficulty with it.  (Language
-historians will also note some vestiges of B<csh>, Pascal, and even
-BASIC-PLUS.)  Expression syntax corresponds closely to C
-expression syntax.  Unlike most Unix utilities, Perl does not
-arbitrarily limit the size of your data--if you've got the memory,
-Perl can slurp in your whole file as a single string.  Recursion is of
-unlimited depth.  And the tables used by hashes (sometimes called
-"associative arrays") grow as necessary to prevent degraded
-performance.  Perl can use sophisticated pattern matching techniques to
-scan large amounts of data quickly.  Although optimized for
-scanning text, Perl also has many excellent tools for slicing
-and dicing binary data.
-
-But wait, there's more...
-
-Begun in 1993 (see L<perlhist>), Perl version 5 is nearly a complete
-rewrite that provides the following additional benefits:
-
-=over 4
-
-=item *
-
-modularity and reusability using innumerable modules 
-
-Described in L<perlmod>, L<perlmodlib>, and L<perlmodinstall>.
-
-=item *
-
-embeddable and extensible 
-
-Described in L<perlembed>, L<perlxstut>, L<perlxs>, L<perlxstypemap>,
-L<perlcall>, L<perlguts>, and L<xsubpp>.
-
-=item *
-
-roll-your-own magic variables (including multiple simultaneous DBM
-implementations)
-
-Described in L<perltie> and L<AnyDBM_File>.
-
-=item *
-
-subroutines can now be overridden, autoloaded, and prototyped
-
-Described in L<perlsub>.
-
-=item *
-
-arbitrarily nested data structures and anonymous functions
-
-Described in L<perlreftut>, L<perlref>, L<perldsc>, and L<perllol>.
-
-=item *
-
-object-oriented programming
-
-Described in L<perlobj> and L<perlootut>.
-
-=item *
-
-support for light-weight processes (threads)
-
-Described in L<perlthrtut> and L<threads>.
-
-=item *
-
-support for Unicode, internationalization, and localization
-
-Described in L<perluniintro>, L<perllocale> and L<Locale::Maketext>.
-
-=item *
-
-lexical scoping
-
-Described in L<perlsub>.
-
-=item *
-
-regular expression enhancements
-
-Described in L<perlre>, with additional examples in L<perlop>.
-
-=item *
-
-enhanced debugger and interactive Perl environment,
-with integrated editor support
-
-Described in L<perldebtut>, L<perldebug> and L<perldebguts>.
-
-=item *
-
-POSIX 1003.1 compliant library
-
-Described in L<POSIX>.
-
-=back
-
-Okay, that's I<definitely> enough hype.
+Perl's roots in text processing haven't been forgotten over the years.
+It still boasts some of the most powerful regular expressions to be
+found anywhere, and its support for Unicode text is world-class.  It
+handles all kinds of structured text, too, through an extensive
+collection of extensions.  Those libraries, collected in the CPAN,
+provide ready-made solutions to an astounding array of problems.  When
+they haven't set the standard themselves, they steal from the best
+-- just like Perl itself.
 
 =head1 AVAILABILITY
 
