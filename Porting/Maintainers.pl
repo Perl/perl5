@@ -2067,7 +2067,7 @@ use File::Glob qw(:case);
 
     'Win32API::File' => {
         'MAINTAINER'   => 'chorny',
-        'DISTRIBUTION' => 'CHORNY/Win32API-File-0.1200.tar.gz',
+        'DISTRIBUTION' => 'CHORNY/Win32API-File-0.1201.tar.gz',
         'FILES'        => q[cpan/Win32API-File],
         'EXCLUDED'     => [
             qr{^ex/},
