@@ -68,10 +68,9 @@ L<"Dispelling the Dweomer">.
 
 =head2 Indirect Filehandles
 
-C<open>'s first argument can be a reference to a filehandle.  As of
-Perl 5.6.0, if the argument is uninitialized, Perl will automatically
-create a filehandle and put a reference to it in the first argument,
-like so:
+C<open>'s first argument can be a reference to a filehandle. If the argument
+is uninitialized, Perl will automatically create a filehandle and put a
+reference to it in the first argument, like so:
 
     open( my $in, '<', $infile )
         or die "Couldn't read $infile: $!";
@@ -113,14 +112,11 @@ filehandles from subroutines:
 
 =head2 Pipe Opens
 
-In C, when you want to open a file using the standard I/O library,
-you use the C<fopen> function, but when opening a pipe, you use the
-C<popen> function.  But in the shell, you just use a different redirection
-character.  That's also the case for Perl.  The C<open> call
-remains the same--just its argument differs.
+To get a pipe to a program, either reading or writing, you can use the dash
+character in front of or after the pipe character as the mode argument.
 
-If the leading character is a pipe symbol, C<open> starts up a new
-command and opens a write-only filehandle leading into that command.
+If the mode character is a pipe symbol followed by a dash, C<open> starts up
+a new command and opens a write-only filehandle leading into that command.
 This lets you write into that handle and have what you write show up on
 that command's standard input.  For example:
 
@@ -130,9 +126,9 @@ that command's standard input.  For example:
     close($printer)
         or die "can't close lpr: $!";
 
-If the trailing character is a pipe, you start up a new command and open a
-read-only filehandle leading out of that command.  This lets whatever that
-command writes to its standard output show up on your handle for reading.
+If the dash character is ahead of the pipe, you start up a new command and
+open a read-only filehandle leading out of that command. This lets whatever
+that command writes to its standard output show up on your handle for reading.
 For example:
 
     open(my $net, '-|', 'netstat', '-i', '-n')
@@ -156,31 +152,24 @@ If you would like to open a bidirectional pipe, the IPC::Open2
 library will handle this for you.  Check out
 L<perlipc/"Bidirectional Communication with Another Process">
 
-perl-5.6.x introduced a version of piped open that executes a process
-based on its command line arguments without relying on the shell. (Similar
-to the C<system(@LIST)> notation.) This is safer and faster than executing
-a single argument pipe-command, but does not allow special shell
-constructs. (It is also not supported on Microsoft Windows, Mac OS Classic
-or RISC OS.)
+If you already have a shell snippet you can put it into the third argument
+without splitting the command and its parameters. This will invoke the shell
+if shell metacharacters are found which is unsafer, slower and foremost less
+portable than using the list notation but allows special shell constructs.
+It is not supported on Microsoft Windows and RISC OS.
 
-Here's an example of C<open '-|'>, which prints a random Unix
-fortune cookie as uppercase:
+Here's an example of C<open '-|'>, which reads the contents of a gzipped tar
+file into an array:
 
-    my $collection = shift(@ARGV);
-    open my $fortune, '-|', 'fortune', $collection
-        or die "Could not find fortune - $!";
-    while (<$fortune>) {
-        print uc($_);
+    my $file = shift(@ARGV);
+    open(my $fh, '-|', "zcat ${file} | tar xfv -")
+        or die "Could not get contents of compressed file: $!";
+    my @filenames;
+    while (<$fh>) {
+        chomp;                  # remove line-feed
+        push @filenames, $_;
     }
-    close($fortune);
-
-And this C<open '|-'> pipes into lpr:
-
-    open my $printer, '|-', 'lpr', '-Plp1'
-        or die "can't run lpr: $!";
-    print {$printer} "stuff\n";
-    close($printer)
-        or die "can't close lpr: $!";
+    close($fh);
 
 =head2 The Minus File
 
@@ -374,9 +363,9 @@ Less common flags that are sometimes available on some operating
 systems include C<O_BINARY>, C<O_TEXT>, C<O_SHLOCK>, C<O_EXLOCK>,
 C<O_DEFER>, C<O_SYNC>, C<O_ASYNC>, C<O_DSYNC>, C<O_RSYNC>,
 C<O_NOCTTY>, C<O_NDELAY> and C<O_LARGEFILE>.  Consult your open(2)
-manpage or its local equivalent for details.  (Note: starting from
-Perl release 5.6 the C<O_LARGEFILE> flag, if available, is automatically
-added to the sysopen() flags because large files are the default.)
+manpage or its local equivalent for details.
+(Note: the C<O_LARGEFILE> flag, if available, is automatically added to
+the sysopen() flags because large files are the default.)
 
 Here's how to use C<sysopen> to emulate the simple C<open> calls we had
 before.  We'll omit the C<or die $!> checks for clarity, but make sure
