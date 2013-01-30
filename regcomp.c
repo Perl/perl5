@@ -8318,6 +8318,201 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
 
 /* End of inversion list object */
 
+STATIC void
+S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
+{
+    /* This parses the flags that are in either the '(?foo)' or '(?foo:bar)'
+     * constructs, and updates RExC_flags with them.  On input, RExC_parse
+     * should point to the first flag; it is updated on output to point to the
+     * final ')' or ':'.  There needs to be at least one flag, or this will
+     * abort */
+
+    /* for (?g), (?gc), and (?o) warnings; warning
+       about (?c) will warn about (?g) -- japhy    */
+
+#define WASTED_O  0x01
+#define WASTED_G  0x02
+#define WASTED_C  0x04
+#define WASTED_GC (0x02|0x04)
+    I32 wastedflags = 0x00;
+    U32 posflags = 0, negflags = 0;
+    U32 *flagsp = &posflags;
+    char has_charset_modifier = '\0';
+    regex_charset cs;
+    bool has_use_defaults = FALSE;
+    const char* const seqstart = RExC_parse - 1; /* Point to the '?' */
+
+    PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS;
+
+    /* '^' as an initial flag sets certain defaults */
+    if (UCHARAT(RExC_parse) == '^') {
+        RExC_parse++;
+        has_use_defaults = TRUE;
+        STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
+        set_regex_charset(&RExC_flags, (RExC_utf8 || RExC_uni_semantics)
+                                        ? REGEX_UNICODE_CHARSET
+                                        : REGEX_DEPENDS_CHARSET);
+    }
+
+    cs = get_regex_charset(RExC_flags);
+    if (cs == REGEX_DEPENDS_CHARSET
+        && (RExC_utf8 || RExC_uni_semantics))
+    {
+        cs = REGEX_UNICODE_CHARSET;
+    }
+
+    while (*RExC_parse) {
+        /* && strchr("iogcmsx", *RExC_parse) */
+        /* (?g), (?gc) and (?o) are useless here
+           and must be globally applied -- japhy */
+        switch (*RExC_parse) {
+
+            /* Code for the imsx flags */
+            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
+
+            case LOCALE_PAT_MOD:
+                if (has_charset_modifier) {
+                    goto excess_modifier;
+                }
+                else if (flagsp == &negflags) {
+                    goto neg_modifier;
+                }
+                cs = REGEX_LOCALE_CHARSET;
+                has_charset_modifier = LOCALE_PAT_MOD;
+                RExC_contains_locale = 1;
+                break;
+            case UNICODE_PAT_MOD:
+                if (has_charset_modifier) {
+                    goto excess_modifier;
+                }
+                else if (flagsp == &negflags) {
+                    goto neg_modifier;
+                }
+                cs = REGEX_UNICODE_CHARSET;
+                has_charset_modifier = UNICODE_PAT_MOD;
+                break;
+            case ASCII_RESTRICT_PAT_MOD:
+                if (flagsp == &negflags) {
+                    goto neg_modifier;
+                }
+                if (has_charset_modifier) {
+                    if (cs != REGEX_ASCII_RESTRICTED_CHARSET) {
+                        goto excess_modifier;
+                    }
+                    /* Doubled modifier implies more restricted */
+                    cs = REGEX_ASCII_MORE_RESTRICTED_CHARSET;
+                }
+                else {
+                    cs = REGEX_ASCII_RESTRICTED_CHARSET;
+                }
+                has_charset_modifier = ASCII_RESTRICT_PAT_MOD;
+                break;
+            case DEPENDS_PAT_MOD:
+                if (has_use_defaults) {
+                    goto fail_modifiers;
+                }
+                else if (flagsp == &negflags) {
+                    goto neg_modifier;
+                }
+                else if (has_charset_modifier) {
+                    goto excess_modifier;
+                }
+
+                /* The dual charset means unicode semantics if the
+                 * pattern (or target, not known until runtime) are
+                 * utf8, or something in the pattern indicates unicode
+                 * semantics */
+                cs = (RExC_utf8 || RExC_uni_semantics)
+                     ? REGEX_UNICODE_CHARSET
+                     : REGEX_DEPENDS_CHARSET;
+                has_charset_modifier = DEPENDS_PAT_MOD;
+                break;
+            excess_modifier:
+                RExC_parse++;
+                if (has_charset_modifier == ASCII_RESTRICT_PAT_MOD) {
+                    vFAIL2("Regexp modifier \"%c\" may appear a maximum of twice", ASCII_RESTRICT_PAT_MOD);
+                }
+                else if (has_charset_modifier == *(RExC_parse - 1)) {
+                    vFAIL2("Regexp modifier \"%c\" may not appear twice", *(RExC_parse - 1));
+                }
+                else {
+                    vFAIL3("Regexp modifiers \"%c\" and \"%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
+                }
+                /*NOTREACHED*/
+            neg_modifier:
+                RExC_parse++;
+                vFAIL2("Regexp modifier \"%c\" may not appear after the \"-\"", *(RExC_parse - 1));
+                /*NOTREACHED*/
+            case ONCE_PAT_MOD: /* 'o' */
+            case GLOBAL_PAT_MOD: /* 'g' */
+                if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+                    const I32 wflagbit = *RExC_parse == 'o' ? WASTED_O : WASTED_G;
+                    if (! (wastedflags & wflagbit) ) {
+                        wastedflags |= wflagbit;
+                        vWARN5(
+                            RExC_parse + 1,
+                            "Useless (%s%c) - %suse /%c modifier",
+                            flagsp == &negflags ? "?-" : "?",
+                            *RExC_parse,
+                            flagsp == &negflags ? "don't " : "",
+                            *RExC_parse
+                        );
+                    }
+                }
+                break;
+
+            case CONTINUE_PAT_MOD: /* 'c' */
+                if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+                    if (! (wastedflags & WASTED_C) ) {
+                        wastedflags |= WASTED_GC;
+                        vWARN3(
+                            RExC_parse + 1,
+                            "Useless (%sc) - %suse /gc modifier",
+                            flagsp == &negflags ? "?-" : "?",
+                            flagsp == &negflags ? "don't " : ""
+                        );
+                    }
+                }
+                break;
+            case KEEPCOPY_PAT_MOD: /* 'p' */
+                if (flagsp == &negflags) {
+                    if (SIZE_ONLY)
+                        ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
+                } else {
+                    *flagsp |= RXf_PMf_KEEPCOPY;
+                }
+                break;
+            case '-':
+                /* A flag is a default iff it is following a minus, so
+                 * if there is a minus, it means will be trying to
+                 * re-specify a default which is an error */
+                if (has_use_defaults || flagsp == &negflags) {
+    fail_modifiers:
+                    RExC_parse++;
+                    vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
+                    /*NOTREACHED*/
+                }
+                flagsp = &negflags;
+                wastedflags = 0;  /* reset so (?g-c) warns twice */
+                break;
+            case ':':
+            case ')':
+                RExC_flags |= posflags;
+                RExC_flags &= ~negflags;
+                set_regex_charset(&RExC_flags, cs);
+                return;
+                /*NOTREACHED*/
+            default:
+                RExC_parse++;
+                vFAIL3("Sequence (%.*s...) not recognized",
+                       RExC_parse-seqstart, seqstart);
+                /*NOTREACHED*/
+        }
+
+        ++RExC_parse;
+    }
+}
+
 /*
  - reg - regular expression, i.e. main body or parenthesized thing
  *
@@ -8350,15 +8545,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     bool is_open = 0;
     I32 freeze_paren = 0;
     I32 after_freeze = 0;
-
-    /* for (?g), (?gc), and (?o) warnings; warning
-       about (?c) will warn about (?g) -- japhy    */
-
-#define WASTED_O  0x01
-#define WASTED_G  0x02
-#define WASTED_C  0x04
-#define WASTED_GC (0x02|0x04)
-    I32 wastedflags = 0x00;
 
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
@@ -8481,7 +8667,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
-            bool has_use_defaults = FALSE;
 
 	    RExC_parse++;
 	    paren = *RExC_parse++;
@@ -8932,183 +9117,23 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
                 break;
-            case DEFAULT_PAT_MOD:   /* Use default flags with the exceptions
-				       that follow */
-                has_use_defaults = TRUE;
-                STD_PMMOD_FLAGS_CLEAR(&RExC_flags);
-		set_regex_charset(&RExC_flags, (RExC_utf8 || RExC_uni_semantics)
-						? REGEX_UNICODE_CHARSET
-						: REGEX_DEPENDS_CHARSET);
-                goto parse_flags;
-	    default:
+	    default: /* e.g., (?i) */
 	        --RExC_parse;
-	        parse_flags:      /* (?i) */  
-	    {
-                U32 posflags = 0, negflags = 0;
-	        U32 *flagsp = &posflags;
-                char has_charset_modifier = '\0';
-		regex_charset cs = get_regex_charset(RExC_flags);
-		if (cs == REGEX_DEPENDS_CHARSET
-		    && (RExC_utf8 || RExC_uni_semantics))
-		{
-		    cs = REGEX_UNICODE_CHARSET;
-		}
-
-		while (*RExC_parse) {
-		    /* && strchr("iogcmsx", *RExC_parse) */
-		    /* (?g), (?gc) and (?o) are useless here
-		       and must be globally applied -- japhy */
-                    switch (*RExC_parse) {
-	            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
-                    case LOCALE_PAT_MOD:
-                        if (has_charset_modifier) {
-			    goto excess_modifier;
-			}
-			else if (flagsp == &negflags) {
-                            goto neg_modifier;
-                        }
-			cs = REGEX_LOCALE_CHARSET;
-                        has_charset_modifier = LOCALE_PAT_MOD;
-			RExC_contains_locale = 1;
-                        break;
-                    case UNICODE_PAT_MOD:
-                        if (has_charset_modifier) {
-			    goto excess_modifier;
-			}
-			else if (flagsp == &negflags) {
-                            goto neg_modifier;
-                        }
-			cs = REGEX_UNICODE_CHARSET;
-                        has_charset_modifier = UNICODE_PAT_MOD;
-                        break;
-                    case ASCII_RESTRICT_PAT_MOD:
-                        if (flagsp == &negflags) {
-                            goto neg_modifier;
-                        }
-                        if (has_charset_modifier) {
-                            if (cs != REGEX_ASCII_RESTRICTED_CHARSET) {
-                                goto excess_modifier;
-                            }
-			    /* Doubled modifier implies more restricted */
-                            cs = REGEX_ASCII_MORE_RESTRICTED_CHARSET;
-                        }
-			else {
-			    cs = REGEX_ASCII_RESTRICTED_CHARSET;
-			}
-                        has_charset_modifier = ASCII_RESTRICT_PAT_MOD;
-                        break;
-                    case DEPENDS_PAT_MOD:
-                        if (has_use_defaults) {
-                            goto fail_modifiers;
-			}
-			else if (flagsp == &negflags) {
-                            goto neg_modifier;
-			}
-			else if (has_charset_modifier) {
-			    goto excess_modifier;
-                        }
-
-			/* The dual charset means unicode semantics if the
-			 * pattern (or target, not known until runtime) are
-			 * utf8, or something in the pattern indicates unicode
-			 * semantics */
-			cs = (RExC_utf8 || RExC_uni_semantics)
-			     ? REGEX_UNICODE_CHARSET
-			     : REGEX_DEPENDS_CHARSET;
-                        has_charset_modifier = DEPENDS_PAT_MOD;
-                        break;
-		    excess_modifier:
-			RExC_parse++;
-			if (has_charset_modifier == ASCII_RESTRICT_PAT_MOD) {
-			    vFAIL2("Regexp modifier \"%c\" may appear a maximum of twice", ASCII_RESTRICT_PAT_MOD);
-			}
-			else if (has_charset_modifier == *(RExC_parse - 1)) {
-			    vFAIL2("Regexp modifier \"%c\" may not appear twice", *(RExC_parse - 1));
-			}
-			else {
-			    vFAIL3("Regexp modifiers \"%c\" and \"%c\" are mutually exclusive", has_charset_modifier, *(RExC_parse - 1));
-			}
-			/*NOTREACHED*/
-		    neg_modifier:
-			RExC_parse++;
-			vFAIL2("Regexp modifier \"%c\" may not appear after the \"-\"", *(RExC_parse - 1));
-			/*NOTREACHED*/
-                    case ONCE_PAT_MOD: /* 'o' */
-                    case GLOBAL_PAT_MOD: /* 'g' */
-			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
-			    const I32 wflagbit = *RExC_parse == 'o' ? WASTED_O : WASTED_G;
-			    if (! (wastedflags & wflagbit) ) {
-				wastedflags |= wflagbit;
-				vWARN5(
-				    RExC_parse + 1,
-				    "Useless (%s%c) - %suse /%c modifier",
-				    flagsp == &negflags ? "?-" : "?",
-				    *RExC_parse,
-				    flagsp == &negflags ? "don't " : "",
-				    *RExC_parse
-				);
-			    }
-			}
-			break;
-		        
-		    case CONTINUE_PAT_MOD: /* 'c' */
-			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
-			    if (! (wastedflags & WASTED_C) ) {
-				wastedflags |= WASTED_GC;
-				vWARN3(
-				    RExC_parse + 1,
-				    "Useless (%sc) - %suse /gc modifier",
-				    flagsp == &negflags ? "?-" : "?",
-				    flagsp == &negflags ? "don't " : ""
-				);
-			    }
-			}
-			break;
-	            case KEEPCOPY_PAT_MOD: /* 'p' */
-                        if (flagsp == &negflags) {
-                            if (SIZE_ONLY)
-                                ckWARNreg(RExC_parse + 1,"Useless use of (?-p)");
-                        } else {
-                            *flagsp |= RXf_PMf_KEEPCOPY;
-                        }
-	                break;
-                    case '-':
-                        /* A flag is a default iff it is following a minus, so
-                         * if there is a minus, it means will be trying to
-                         * re-specify a default which is an error */
-                        if (has_use_defaults || flagsp == &negflags) {
-            fail_modifiers:
-                            RExC_parse++;
-		            vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
-		            /*NOTREACHED*/
-		        }
-			flagsp = &negflags;
-		        wastedflags = 0;  /* reset so (?g-c) warns twice */
-		        break;
-                    case ':':
-		        paren = ':';
-		        /*FALLTHROUGH*/
-                    case ')':
-                        RExC_flags |= posflags;
-                        RExC_flags &= ~negflags;
-			set_regex_charset(&RExC_flags, cs);
-                        nextchar(pRExC_state);
-		        if (paren != ':') {
-		            *flagp = TRYAGAIN;
-		            return NULL;
-		        } else {
-                            ret = NULL;
-		            goto parse_rest;
-		        }
-		        /*NOTREACHED*/
-                    default:
-		        RExC_parse++;
-		        vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
-		        /*NOTREACHED*/
-                    }                           
-		    ++RExC_parse;
-		}
-	    }} /* one for the default block, one for the switch */
+              parse_flags:
+		parse_lparen_question_flags(pRExC_state);
+                if (UCHARAT(RExC_parse) == ':') {
+                    paren = ':';
+                }
+                nextchar(pRExC_state);
+                if (paren != ':') {
+                    *flagp = TRYAGAIN;
+                    return NULL;
+                } else {
+                    ret = NULL;
+                    goto parse_rest;
+                }
+                break;
+            } /* end switch */
 	}
 	else {                  /* (...) */
 	  capturing_parens:
