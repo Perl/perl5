@@ -251,7 +251,9 @@ cribbed.
 
 =item *
 
-XXX
+L<Config::Perl::V> version 0.16 has been added as a dual-lifed module.
+It provides structured data retrieval of C<perl -V> output including
+information only known to the C<perl> binary and not available via L<Config>.
 
 =back
 
