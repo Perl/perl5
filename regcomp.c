@@ -9092,11 +9092,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         RExC_flags |= posflags;
                         RExC_flags &= ~negflags;
 			set_regex_charset(&RExC_flags, cs);
-                        if (paren != ':') {
-                            oregflags |= posflags;
-                            oregflags &= ~negflags;
-			    set_regex_charset(&oregflags, cs);
-                        }
                         nextchar(pRExC_state);
 		        if (paren != ':') {
 		            *flagp = TRYAGAIN;
