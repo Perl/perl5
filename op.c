@@ -4563,7 +4563,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		o->op_next = leaveop->op_first->op_sibling;
 		/* skip leave */
 		assert(leaveop->op_flags & OPf_KIDS);
-		assert(leaveop->op_last->op_next = (OP*)leaveop);
+		assert(leaveop->op_last->op_next == (OP*)leaveop);
 		leaveop->op_next = NULL; /* stop on last op */
 		op_null((OP*)leaveop);
 	    }
