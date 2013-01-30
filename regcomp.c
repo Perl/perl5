@@ -9110,7 +9110,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		}
 	    }
 	    case '[':           /* (?[ ... ]) */
-                return handle_sets(pRExC_state, flagp, depth, oregcomp_parse);
+                return handle_regex_sets(pRExC_state, flagp, depth,
+                                         oregcomp_parse);
             case 0:
 		RExC_parse--; /* for vFAIL to print correctly */
                 vFAIL("Sequence (? incomplete");
@@ -11363,7 +11364,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
 }
 
 STATIC bool
-S_could_it_be_POSIX(pTHX_ RExC_state_t *pRExC_state)
+S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
 {
     /* This applies some heuristics at the current parse position (which should
      * be at a '[') to see if what follows might be intended to be a [:posix:]
@@ -11377,7 +11378,7 @@ S_could_it_be_POSIX(pTHX_ RExC_state_t *pRExC_state)
      *                         ')' indicating the end of the (?[
      *      [:any garbage including %^&$ punctuation:]
      *
-     * This is designed to be called only from S_handle_sets; it could be
+     * This is designed to be called only from S_handle_regex_sets; it could be
      * easily adapted to be called from the spot at the beginning of regclass()
      * that checks to see in a normal bracketed class if the surrounding []
      * have been omitted ([:word:] instead of [[:word:]]).  But doing so would
@@ -11385,7 +11386,7 @@ S_could_it_be_POSIX(pTHX_ RExC_state_t *pRExC_state)
     char* p = RExC_parse + 1;
     char first_char = *p;
 
-    PERL_ARGS_ASSERT_COULD_IT_BE_POSIX;
+    PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS;
 
     assert(*(p - 1) == '[');
 
@@ -11416,7 +11417,7 @@ S_could_it_be_POSIX(pTHX_ RExC_state_t *pRExC_state)
 }
 
 STATIC regnode *
-S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
+S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                    char * const oregcomp_parse)
 {
     /* Handle the (?[...]) construct to do set operations */
@@ -11433,7 +11434,7 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     GET_RE_DEBUG_FLAGS_DECL;
 
-    PERL_ARGS_ASSERT_HANDLE_SETS;
+    PERL_ARGS_ASSERT_HANDLE_REGEX_SETS;
 
     if (LOC) {
         vFAIL("(?[...]) not valid in locale");
@@ -11462,19 +11463,23 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 default:
                     break;
                 case '\\':
-                    /* Skip the next byte.  This would have to change to skip
-                     * the next character if we were to recognize and handle
-                     * specific non-ASCIIs */
+                    /* Skip the next byte (which could cause us to end up in
+                     * the middle of a UTF-8 character, but since none of those
+                     * are confusable with anything we currently handle in this
+                     * switch (invariants all), it's safe.  We'll just hit the
+                     * default: case next time and keep on incrementing until
+                     * we find one of the invariants we do handle. */
                     RExC_parse++;
                     break;
                 case '[':
                 {
                     /* If this looks like it is a [:posix:] class, leave the
                      * parse pointer at the '[' to fool regclass() into
-                     * thinking it is part of a '[[:posix]]'.  That function
+                     * thinking it is part of a '[[:posix:]]'.  That function
                      * will use strict checking to force a syntax error if it
                      * doesn't work out to a legitimate class */
-                    bool is_posix_class = could_it_be_POSIX(pRExC_state);
+                    bool is_posix_class
+                                    = could_it_be_a_POSIX_class(pRExC_state);
                     if (! is_posix_class) {
                         RExC_parse++;
                     }
@@ -11546,11 +11551,11 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * above.
      *
      * A '(' is simply pushed on the stack; it is valid only if the stack is
-     * empty, or the top element of the stack is an operator (for which the
-     * parenthesized expression will become an operand).  By the time the
-     * corresponding ')' is parsed everything in between should have been
-     * parsed and evaluated to a single operand (or else is a syntax error),
-     * and is handled as a regular operand */
+     * empty, or the top element of the stack is an operator or another '('
+     * (for which the parenthesized expression will become an operand).  By the
+     * time the corresponding ')' is parsed everything in between should have
+     * been parsed and evaluated to a single operand (or else is a syntax
+     * error), and is handled as a regular operand */
 
     stack = newAV();
 
@@ -11562,9 +11567,10 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         /* Skip white space */
         RExC_parse = regpatws(pRExC_state, RExC_parse,
                                 TRUE); /* means recognize comments */
-        if (RExC_parse >= RExC_end
-            || (curchar = UCHARAT(RExC_parse)) == ']')
-        {   /* Exit loop at the end */
+        if (RExC_parse >= RExC_end) {
+            Perl_croak(aTHX_ "panic: Read past end of '(?[ ])'");
+        }
+        if ((curchar = UCHARAT(RExC_parse)) == ']') {
             break;
         }
 
@@ -11588,7 +11594,7 @@ S_handle_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
             case '[':   /* Is a bracketed character class */
             {
-                bool is_posix_class = could_it_be_POSIX(pRExC_state);
+                bool is_posix_class = could_it_be_a_POSIX_class(pRExC_state);
 
                 if (! is_posix_class) {
                     RExC_parse++;
