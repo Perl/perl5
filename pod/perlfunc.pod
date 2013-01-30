@@ -8090,6 +8090,8 @@ A class implementing an ordinary array should have the following methods:
     UNSHIFT this, LIST
     SPLICE this, offset, length, LIST
     EXTEND this, count
+    DELETE this, key
+    EXISTS this, key
     DESTROY this
     UNTIE this
 
