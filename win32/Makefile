@@ -520,6 +520,9 @@ o = .obj
 .c$(o):
 	$(CC) -c -I$(<D) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
 
+.c.i:
+	$(CC) -c -I$(<D) $(CFLAGS_O) -P $(OBJOUT_FLAG)$@ $<
+
 .y.c:
 	$(NOOP)
 

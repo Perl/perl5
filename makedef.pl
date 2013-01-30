@@ -87,9 +87,12 @@ process_cc_flags(@Config{qw(ccflags optimize)})
 # the user might have chosen to disable because the canned configs are
 # minimal configs that don't include any of those options.
 
-my @options = sort(Config::bincompat_options(), Config::non_bincompat_options());
-print STDERR "Options: (@options)\n" unless $ARGS{PLATFORM} eq 'test';
-$define{$_} = 1 foreach @options;
+#don't use the host Perl's -V defines for the WinCE Perl
+if($ARGS{PLATFORM} ne 'wince') {
+    my @options = sort(Config::bincompat_options(), Config::non_bincompat_options());
+    print STDERR "Options: (@options)\n" unless $ARGS{PLATFORM} eq 'test';
+    $define{$_} = 1 foreach @options;
+}
 
 my %exportperlmalloc =
     (
@@ -101,7 +104,8 @@ my %exportperlmalloc =
 
 my $exportperlmalloc = $ARGS{PLATFORM} eq 'os2';
 
-open(CFG, '<', 'config.h') || die "Cannot open config.h: $!\n";
+my $config_h = $ARGS{PLATFORM} eq 'wince' ? 'xconfig.h' : 'config.h';
+open(CFG, '<', $config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
                                            |SPRINTF_RETURNS_STRLEN
@@ -809,6 +813,10 @@ if ($ARGS{PLATFORM} eq 'win32') {
 				 win32_get_childenv
 				 win32_spawnvp
 		 ));
+}
+
+if ($ARGS{PLATFORM} eq 'wince') {
+    ++$skip{'win32_isatty'}; # commit 4342f4d6df is win32-only
 }
 
 if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {

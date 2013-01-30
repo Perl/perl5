@@ -2778,12 +2778,6 @@ getcwd(char *buf, size_t size)
   return xcegetcwd(buf, size);
 }
 
-int
-isnan(double d)
-{
-  return _isnan(d);
-}
-
 
 DllExport PerlIO*
 win32_popenlist(const char *mode, IV narg, SV **args)

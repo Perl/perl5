@@ -1,4 +1,5 @@
 /config.h
+/xconfig.h
 /config.w32
 /perl.base
 bin/*.bat
