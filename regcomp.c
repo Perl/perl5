@@ -8487,10 +8487,7 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
                  * if there is a minus, it means will be trying to
                  * re-specify a default which is an error */
                 if (has_use_defaults || flagsp == &negflags) {
-    fail_modifiers:
-                    RExC_parse++;
-                    vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
-                    /*NOTREACHED*/
+                    goto fail_modifiers;
                 }
                 flagsp = &negflags;
                 wastedflags = 0;  /* reset so (?g-c) warns twice */
@@ -8503,6 +8500,7 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
                 return;
                 /*NOTREACHED*/
             default:
+            fail_modifiers:
                 RExC_parse++;
                 vFAIL3("Sequence (%.*s...) not recognized",
                        RExC_parse-seqstart, seqstart);
