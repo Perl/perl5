@@ -7437,7 +7437,6 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
     dVAR;
     STRLEN cur1, cur2;
     const char *pv1, *pv2;
-    char *tpv = NULL;
     I32  cmp;
     SV *svrecode = NULL;
 
@@ -7501,8 +7500,6 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
     }
 
     SvREFCNT_dec(svrecode);
-    if (tpv)
-	Safefree(tpv);
 
     return cmp;
 }
