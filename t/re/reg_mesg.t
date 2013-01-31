@@ -254,8 +254,8 @@ my @experimental_regex_sets = (
 );
 
 my @deprecated = (
-    '/a\b{cde/' => '"\b{" is deprecated; use "\b\{" instead {#} m/a\{#}b{cde/',
-    '/a\B{cde/' => '"\B{" is deprecated; use "\B\{" instead {#} m/a\{#}B{cde/',
+    '/a\b{cde/' => '"\b{" is deprecated; use "\b\{" or "\b[{]" instead {#} m/a\{#}b{cde/',
+    '/a\B{cde/' => '"\B{" is deprecated; use "\B\{" or "\B[{]" instead {#} m/a\{#}B{cde/',
     'use utf8; /(?x)\\/' => 'Escape literal pattern white space under /x {#} m/(?x)\{#}\/',
 );
 

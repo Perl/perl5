@@ -10264,7 +10264,7 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNdep(RExC_parse, "\"\\b{\" is deprecated; use \"\\b\\{\" instead");
+		ckWARNdep(RExC_parse, "\"\\b{\" is deprecated; use \"\\b\\{\" or \"\\b[{]\" instead");
 	    }
 	    goto finish_meta_pat;
 	case 'B':
@@ -10278,7 +10278,7 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNdep(RExC_parse, "\"\\B{\" is deprecated; use \"\\B\\{\" instead");
+		ckWARNdep(RExC_parse, "\"\\B{\" is deprecated; use \"\\B\\{\" or \"\\B[{]\" instead");
 	    }
 	    goto finish_meta_pat;
 
