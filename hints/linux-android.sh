@@ -2,9 +2,8 @@
 
 userelocatableinc='define'
 
-# Having fun with the dlopen check.. :(
-#d_dlopen='define'
-#d_dlerror='define'
+# On Android the shell is /system/bin/sh:
+targetsh='/system/bin/sh'
 
 
 case "$src" in
