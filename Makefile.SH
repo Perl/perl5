@@ -1420,12 +1420,68 @@ _test:
 # Architecture-neutral stuff:
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
+!NO!SUBS!
 
+case "$targethost" in
+'') $spitshell >>$Makefile <<'!NO!SUBS!'
 test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
 	$(dynamic_ext) $(TEST_PERL_DLL) runtests x2p/s2p x2p/find2perl \
 	$(generated_pods)
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 
+!NO!SUBS!
+;;
+*) $spitshell >>$Makefile <<!GROK!THIS!
+test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE) \
+	\$(dynamic_ext) \$(TEST_PERL_DLL) runtests x2p/s2p x2p/find2perl \
+	\$(generated_pods)
+	$to libperl.*
+	$to t/*
+	$to lib/*
+	$to TestInit.pm
+	$to win32/FindExt.pm
+	$to regen/*
+	$to pod/*
+	$to MANIFEST
+	$to Porting/*
+	$to cpan/*/t
+	$to dist/*/t
+	$to ext/*/t
+	$to cpan/Term-Cap/test.pl
+	$to cpan/Pod-Usage/*
+	$to cpan/Pod-Parser/*
+	$to cpan/IO-Compress/*
+	$to cpan/HTTP-Tiny/lib/*
+	$to cpan/Filter-Util-Call/filter-util.pl
+	$to cpan/Digest-MD5/*
+	$to cpan/Digest-SHA/*
+	$to cpan/Test-Simple/*
+	$to cpan/Pod-Parser/lib/*
+	$to cpan/Test-Harness/*
+	$to cpan/Scalar-List-Utils/*
+	$to ext/IPC-Open3/*
+	$to ext/Tie-Memoize/*
+	$to ext/POSIX/*
+	$to dist/IO/*
+# --- These three are needed by ExtUtils::MM_Unix to verify PERL_CORE
+	$to config_h.SH
+	$to perl.h
+	$to cflags
+# --- For Module::Build
+	$to cpan/Module-Build/lib/*
+	$to *.h
+# --- For t/x2p/s2p.t
+	$to x2p
+# --- For lib/diagnostics.t with -Duseshrplib
+	$to \$(PERL_EXE)
+	cd t && (rm -f \$(PERL_EXE); \$(LNS) ../\$(PERL_EXE) \$(PERL_EXE)) && cd ..
+	$to t/\$(PERL_EXE)
+
+!GROK!THIS!
+;;
+esac
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
 test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
 	$(MINIPERL) make_ext.pl $(dynamic_ext_re) MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
