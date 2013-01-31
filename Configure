@@ -217,6 +217,7 @@ usecrosscompile=''
 hostperl=''
 hostgenerate=''
 hostosname=''
+targetsh=''
 extern_C=''
 mistrustnm=''
 usedevel=''
@@ -1438,6 +1439,10 @@ EOM
 	exit 1
 	;;
 esac
+
+: When cross-compiling we need to separate the sh-to-run-Configure-with from the sh-to-use-in-Perl
+: default both to the same thing, cross-compilers can then set targetsh differently if they like
+targetsh=$sh
 
 : see if sh knows # comments
 if `$sh -c '#' >/dev/null 2>&1`; then
@@ -23817,6 +23822,7 @@ targetdir='$targetdir'
 targethost='$targethost'
 targetmkdir='$targetmkdir'
 targetport='$targetport'
+targetsh='$targetsh'
 tbl='$tbl'
 tee='$tee'
 test='$test'
