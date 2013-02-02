@@ -108,11 +108,11 @@ bisect.pl - use git bisect to pinpoint changes
     .../Porting/bisect.pl -e 'my $a := 2;'
     # When did this stop being an error?
     .../Porting/bisect.pl --expect-fail -e '1 // 2'
-    # When did this stop matching?
+    # When were all lines matching this pattern removed from all files?
     .../Porting/bisect.pl --match '\b(?:PL_)hash_seed_set\b'
-    # When did this start matching?
+    # When was some line matching this pattern added to some file?
     .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
-    # When did this test program stop working?
+    # When did this test program stop exiting 0?
     .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
     # When did this test start failing?
     .../Porting/bisect.pl -- ./perl -Ilib t/TEST op/sort.t
