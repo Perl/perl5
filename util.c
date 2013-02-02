@@ -2798,6 +2798,9 @@ Perl_atfork_lock(void)
    dVAR;
 #if defined(USE_ITHREADS)
     /* locks must be held in locking order (if any) */
+#  ifdef USE_PERLIO
+    MUTEX_LOCK(&PL_perlio_mutex);
+#  endif
 #  ifdef MYMALLOC
     MUTEX_LOCK(&PL_malloc_mutex);
 #  endif
@@ -2812,6 +2815,9 @@ Perl_atfork_unlock(void)
     dVAR;
 #if defined(USE_ITHREADS)
     /* locks must be released in same order as in atfork_lock() */
+#  ifdef USE_PERLIO
+    MUTEX_UNLOCK(&PL_perlio_mutex);
+#  endif
 #  ifdef MYMALLOC
     MUTEX_UNLOCK(&PL_malloc_mutex);
 #  endif
