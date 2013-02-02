@@ -513,8 +513,6 @@ fsync(arg)
 
 SV *
 _create_getline_subs(const char *code)
-    PREINIT:
-	SV *ret;
     CODE:
 	OP *(*io_old_ck_lineseq)(pTHX_ OP *) = PL_check[OP_LINESEQ];
 	PL_check[OP_LINESEQ] = io_ck_lineseq;
