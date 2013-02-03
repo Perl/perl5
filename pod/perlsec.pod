@@ -93,7 +93,7 @@ The keys of a hash are B<never> tainted.
 For example:
 
     $arg = shift;		# $arg is tainted
-    $hid = $arg, 'bar';		# $hid is also tainted
+    $hid = $arg . 'bar';	# $hid is also tainted
     $line = <>;			# Tainted
     $line = <STDIN>;		# Also tainted
     open FOO, "/home/me/bar" or die $!;
