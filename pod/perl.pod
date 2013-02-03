@@ -299,7 +299,7 @@ from quick "one-liners" to full-scale application development.
 The language is intended to be practical (easy to use, efficient,
 complete) rather than beautiful (tiny, elegant, minimal).  It combines
 (in the author's opinion, anyway) some of the best features of B<sed>,
-B<awk>, and B<sh>,  making it familiar and easy to use for Unix users to
+B<awk>, and B<sh>, making it familiar and easy to use for Unix users to
 whip up quick solutions to annoying problems.  Its general-purpose
 programming facilities support procedural, functional, and
 object-oriented programming paradigms, making Perl a comfortable
