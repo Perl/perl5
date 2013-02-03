@@ -431,7 +431,7 @@ Visual Perl is a Visual Studio.NET plug-in from ActiveState.
 
 L<http://www.zeusedit.com/lookmain.html>
 
-Zeus for Window is another Win32 multi-language editor/IDE
+Zeus for Windows is another Win32 multi-language editor/IDE
 that comes with support for Perl.
 
 =back
