@@ -1979,6 +1979,7 @@ Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state \
 				|NULLOK SV** ret_invlist
 Es	|bool|could_it_be_a_POSIX_class|NN struct RExC_state_t *pRExC_state
 Es	|regnode*|handle_regex_sets|NN struct RExC_state_t *pRExC_state \
+				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
 				|NN char * const oregcomp_parse
 Es	|void|parse_lparen_question_flags|NN struct RExC_state_t *pRExC_state

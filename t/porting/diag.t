@@ -660,3 +660,4 @@ UTF-16 surrogate U+%X
 False [] range "%s" in regex; marked by <-- HERE in m/%s/
 \N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
 Zero length \N{} in regex; marked by <-- HERE in m/%s/
+Expecting '(?flags:(?[...' in regex; marked by <-- HERE in m/%s/

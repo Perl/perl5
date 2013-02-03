@@ -9110,7 +9110,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		}
 	    }
 	    case '[':           /* (?[ ... ]) */
-                return handle_regex_sets(pRExC_state, flagp, depth,
+                return handle_regex_sets(pRExC_state, NULL, flagp, depth,
                                          oregcomp_parse);
             case 0:
 		RExC_parse--; /* for vFAIL to print correctly */
@@ -11417,7 +11417,7 @@ S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
 }
 
 STATIC regnode *
-S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
+S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *flagp, U32 depth,
                    char * const oregcomp_parse)
 {
     /* Handle the (?[...]) construct to do set operations */
@@ -11575,6 +11575,72 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         }
 
         switch (curchar) {
+
+            case '?':
+                if (av_top(stack) >= 0   /* This makes sure that we can
+                                               safely subtract 1 from
+                                               RExC_parse in the next clause.
+                                               If we have something on the
+                                               stack, we have parsed something
+                                             */
+                    && UCHARAT(RExC_parse - 1) == '('
+                    && RExC_parse < RExC_end)
+                {
+                    /* If is a '(?', could be an embedded '(?flags:(?[...])'.
+                     * This happens when we have some thing like
+                     *
+                     *   my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
+                     *   ...
+                     *   qr/(?[ \p{Digit} & $thai_or_lao ])/;
+                     *
+                     * Here we would be handling the interpolated
+                     * '$thai_or_lao'.  We handle this by a recursive call to
+                     * ourselves which returns the inversion list the
+                     * interpolated expression evaluates to.  We use the flags
+                     * from the interpolated pattern. */
+                    U32 save_flags = RExC_flags;
+                    const char * const save_parse = ++RExC_parse;
+
+                    parse_lparen_question_flags(pRExC_state);
+
+                    if (RExC_parse == save_parse  /* Makes sure there was at
+                                                     least one flag (or this
+                                                     embedding wasn't compiled)
+                                                   */
+                        || RExC_parse >= RExC_end - 4
+                        || UCHARAT(RExC_parse) != ':'
+                        || UCHARAT(++RExC_parse) != '('
+                        || UCHARAT(++RExC_parse) != '?'
+                        || UCHARAT(++RExC_parse) != '[')
+                    {
+
+                        /* In combination with the above, this moves the
+                         * pointer to the point just after the first erroneous
+                         * character (or if there are no flags, to where they
+                         * should have been) */
+                        if (RExC_parse >= RExC_end - 4) {
+                            RExC_parse = RExC_end;
+                        }
+                        else if (RExC_parse != save_parse) {
+                            RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
+                        }
+                        vFAIL("Expecting '(?flags:(?[...'");
+                    }
+                    RExC_parse++;
+                    (void) handle_regex_sets(pRExC_state, &current, flagp,
+                                                    depth+1, oregcomp_parse);
+
+                    /* Here, 'current' contains the embedded expression's
+                     * inversion list, and RExC_parse points to the trailing
+                     * ']'; the next character should be the ')' which will be
+                     * paired with the '(' that has been put on the stack, so
+                     * the whole embedded expression reduces to '(operand)' */
+                    RExC_parse++;
+
+                    RExC_flags = save_flags;
+                    goto handle_operand;
+                }
+                /* FALL THROUGH */
 
             default:
                 RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
@@ -11756,11 +11822,16 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         vFAIL("Incomplete expression within '(?[ ])'");
     }
 
-    invlist_iterinit(final);
+    /* Here, 'final' is the resultant inversion list from evaluating the
+     * expression.  Return it if so requested */
+    if (return_invlist) {
+        *return_invlist = final;
+        return END;
+    }
 
-    /* Here, 'final' is the resultant inversion list of evaluating the
-     * expression.  Feed it to regclass() to generate the real resultant node.
-     * regclass() is expecting a string of ranges and individual code points */
+    /* Otherwise generate a resultant node, based on 'final'.  regclass() is
+     * expecting a string of ranges and individual code points */
+    invlist_iterinit(final);
     result_string = newSVpvs("");
     while (invlist_iternext(final, &start, &end)) {
         if (start == end) {

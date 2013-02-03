@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Interpolations now Accepted in Regular Expression Set Operations
+
+Perl v5.17.8 introduced L<regular expression set operations|perlre/(?[ ])>.
+They have now been expanded to allow the interpolation of a
+previously-compiled set into a bigger set, like this:
+
+ my $thai_or_lao = '\p{Thai} + \p{Lao}';
+ ...
+ qr/(?[ \p{Digit} & $thai_or_lao ])/;
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

@@ -6516,10 +6516,10 @@ STATIC bool	S_grok_bslash_N(pTHX_ struct RExC_state_t *pRExC_state, regnode** no
 #define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_handle_regex_sets(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth, char * const oregcomp_parse)
+STATIC regnode*	S_handle_regex_sets(pTHX_ struct RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_5);
 #define PERL_ARGS_ASSERT_HANDLE_REGEX_SETS	\
 	assert(pRExC_state); assert(flagp); assert(oregcomp_parse)
 

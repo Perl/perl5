@@ -1893,6 +1893,32 @@ construct.  There must not be any space between any of the characters
 that form the initial C<(?[>.  Nor may there be space between the
 closing C<])> characters.
 
+Just as in all regular expressions, the pattern can can be built up by
+including variables that are interpolated at regex compilation time.
+Care must be taken to ensure that you are getting what you expect.  For
+example:
+
+ my $thai_or_lao = '\p{Thai} + \p{Lao}';
+ ...
+ qr/(?[ \p{Digit} & $thai_or_lao ])/;
+
+compiles to
+
+ qr/(?[ \p{Digit} & \p{Thai} + \p{Lao} ])/;
+
+But this does not have the effect that someone reading the code would
+likely expect, as the intersection applies just to C<\p{Thai}>,
+excluding the Laotian.  Pitfalls like this can be avoided by
+parenthesizing the component pieces:
+
+ my $thai_or_lao = '( \p{Thai} + \p{Lao} )';
+
+Or you can make the components into instances of this construct by
+compiling them:
+
+ my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
+
+which causes the parenthesization to be done automatically for you.
 
 Due to the way that Perl parses things, your parentheses and brackets
 may need to be balanced, even including comments.  If you run into any
