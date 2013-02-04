@@ -33,7 +33,7 @@ Perl v5.17.8 introduced L<regular expression set operations|perlre/(?[ ])>.
 They have now been expanded to allow the interpolation of a
 previously-compiled set into a bigger set, like this:
 
- my $thai_or_lao = '\p{Thai} + \p{Lao}';
+ my $thai_or_lao = qr/\p{Thai} + \p{Lao}/;
  ...
  qr/(?[ \p{Digit} & $thai_or_lao ])/;
 
