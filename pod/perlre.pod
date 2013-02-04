@@ -1913,12 +1913,20 @@ parenthesizing the component pieces:
 
  my $thai_or_lao = '( \p{Thai} + \p{Lao} )';
 
-Or you can make the components into instances of this construct by
-compiling them:
+But any modifiers will still apply to all the components:
+
+ my $lower = '\p{Lower} + \p{Digit}';
+ qr/(?[ \p{Greek} & $lower ])/i;
+
+matches upper case things.  You can avoid surprises by making the
+components into instances of this construct by compiling them:
 
  my $thai_or_lao = qr/(?[ \p{Thai} + \p{Lao} ])/;
+ my $lower = qr/(?[ \p{Lower} + \p{Digit} ])/;
 
-which causes the parenthesization to be done automatically for you.
+When these are embedded in another pattern, what they match does not
+change, regardless of parenthesization or what modifiers are in effect
+in that outer pattern.
 
 Due to the way that Perl parses things, your parentheses and brackets
 may need to be balanced, even including comments.  If you run into any
