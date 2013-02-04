@@ -10882,6 +10882,7 @@ chmod +x varargs
 : now check which varargs header should be included
 echo " "
 i_varhdr=''
+val=""
 case "$valstd" in
 "$define")
 	if `./varargs I_STDARG`; then
@@ -10898,6 +10899,15 @@ case "$valstd" in
 esac
 case "$val" in
 '')
+	echo " "
+	echo "*** WHOA THERE!!! ***" >&4
+	echo "    Your C compiler \"$cc\" doesn't seem to support stdarg or varargs!" >&4
+	case "$knowitall" in
+	'')
+	echo "    I'm giving up; maybe you can try again with a different compiler?" >&4
+		exit 1
+		;;
+	esac
 echo "I could not find the definition for va_dcl... You have problems..." >&4
 	val="$undef"; set i_stdarg; eval $setvar
 	val="$undef"; set i_varargs; eval $setvar
