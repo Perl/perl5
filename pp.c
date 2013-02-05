@@ -240,7 +240,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		    else {
 			const char * const name = CopSTASHPV(PL_curcop);
 			gv = newGVgen_flags(name,
-                                        HvNAMEUTF8(CopSTASH(PL_curcop)) ? SVf_UTF8 : 0 );
+                                HvNAMEUTF8(CopSTASH(PL_curcop)) ? SVf_UTF8 : 0 );
 		    }
 		    prepare_SV_for_RV(sv);
 		    SvRV_set(sv, MUTABLE_SV(gv));
@@ -425,7 +425,7 @@ PP(pp_pos)
     dVAR; dSP; dPOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
-	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));/* Not TARG RT#67838 */
 	sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
 	LvTYPE(ret) = '.';
 	LvTARG(ret) = SvREFCNT_inc_simple(sv);
@@ -455,7 +455,8 @@ PP(pp_rv2cv)
     HV *stash_unused;
     const I32 flags = (PL_op->op_flags & OPf_SPECIAL)
 	? GV_ADDMG
-	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT)) == OPpMAY_RETURN_CONSTANT)
+	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT))
+                                                    == OPpMAY_RETURN_CONSTANT)
 	    ? GV_ADD|GV_NOEXPAND
 	    : GV_ADD;
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
@@ -2243,7 +2244,8 @@ PP(pp_negate)
 	    if (SvIsUV(sv)) {
 		if (SvIVX(sv) == IV_MIN) {
 		    /* 2s complement assumption. */
-		    SETi(SvIVX(sv));	/* special case: -((UV)IV_MAX+1) == IV_MIN */
+                    SETi(SvIVX(sv));	/* special case: -((UV)IV_MAX+1) ==
+                                           IV_MIN */
 		    RETURN;
 		}
 		else if (SvUVX(sv) <= IV_MAX) {
@@ -3546,10 +3548,10 @@ PP(pp_ucfirst)
                      * replace just the first character in place. */
 		    inplace = FALSE;
 
-		    /* If the result won't fit in a byte, the entire result will
-		     * have to be in UTF-8.  Assume worst case sizing in
-		     * conversion. (all latin1 characters occupy at most two bytes
-		     * in utf8) */
+                    /* If the result won't fit in a byte, the entire result
+                     * will have to be in UTF-8.  Assume worst case sizing in
+                     * conversion. (all latin1 characters occupy at most two
+                     * bytes in utf8) */
 		    if (title_ord > 255) {
 			doing_utf8 = TRUE;
 			convert_source_to_utf8 = TRUE;
@@ -3830,7 +3832,9 @@ PP(pp_uc)
 	    else {
 		for (; s < send; d++, s++) {
 		    *d = toUPPER_LATIN1_MOD(*s);
-		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) continue;
+		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
+                        continue;
+                    }
 
 		    /* The mainstream case is the tight loop above.  To avoid
 		     * extra tests in that, all three characters that require
@@ -4208,21 +4212,19 @@ PP(pp_fc)
                 *d = toLOWER(*s);
         }
         else {
-            /* For ASCII and the Latin-1 range, there's only two troublesome folds,
-            * \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full casefolding
-            * becomes 'ss', and \x{B5} (\N{MICRO SIGN}), which under any fold becomes
-            * \x{3BC} (\N{GREEK SMALL LETTER MU}) -- For the rest, the casefold is
-            * their lowercase.
-            */
+            /* For ASCII and the Latin-1 range, there's only two troublesome
+             * folds, \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
+             * casefolding becomes 'ss', and \x{B5} (\N{MICRO SIGN}), which
+             * under any fold becomes \x{3BC} (\N{GREEK SMALL LETTER MU}) --
+             * For the rest, the casefold is their lowercase.  */
             for (; s < send; d++, s++) {
                 if (*s == MICRO_SIGN) {
-                    /* \N{MICRO SIGN}'s casefold is \N{GREEK SMALL LETTER MU}, which
-                    * is outside of the latin-1 range. There's a couple of ways to
-                    * deal with this -- khw discusses them in pp_lc/uc, so go there :)
-                    * What we do here is upgrade what we had already casefolded,
-                    * then enter an inner loop that appends the rest of the characters
-                    * as UTF-8.
-                    */
+                    /* \N{MICRO SIGN}'s casefold is \N{GREEK SMALL LETTER MU},
+                     * which is outside of the latin-1 range. There's a couple
+                     * of ways to deal with this -- khw discusses them in
+                     * pp_lc/uc, so go there :) What we do here is upgrade what
+                     * we had already casefolded, then enter an inner loop that
+                     * appends the rest of the characters as UTF-8. */
                     len = d - (U8*)SvPVX_const(dest);
                     SvCUR_set(dest, len);
                     len = sv_utf8_upgrade_flags_grow(dest,
@@ -4238,7 +4240,9 @@ PP(pp_fc)
                         STRLEN ulen;
                         UV fc = _to_uni_fold_flags(*s, tmpbuf, &ulen, flags);
                         if UNI_IS_INVARIANT(fc) {
-                            if ( full_folding && *s == LATIN_SMALL_LETTER_SHARP_S) {
+                            if (full_folding
+                                && *s == LATIN_SMALL_LETTER_SHARP_S)
+                            {
                                 *d++ = 's';
                                 *d++ = 's';
                             }
@@ -4253,9 +4257,8 @@ PP(pp_fc)
                     break;
                 }
                 else if (full_folding && *s == LATIN_SMALL_LETTER_SHARP_S) {
-                    /* Under full casefolding, LATIN SMALL LETTER SHARP S becomes "ss",
-                    * which may require growing the SV.
-                    */
+                    /* Under full casefolding, LATIN SMALL LETTER SHARP S
+                     * becomes "ss", which may require growing the SV. */
                     if (SvLEN(dest) < ++min) {
                         const UV o = d - (U8*)SvPVX_const(dest);
                         SvGROW(dest, min);
@@ -4264,7 +4267,8 @@ PP(pp_fc)
                     *(d)++ = 's';
                     *d = 's';
                 }
-                else { /* If it's not one of those two, the fold is their lower case */
+                else { /* If it's not one of those two, the fold is their lower
+                          case */
                     *d = toLOWER_LATIN1(*s);
                 }
              }
@@ -4378,7 +4382,9 @@ PP(pp_rkeys)
 	return (SvTYPE(sv) == SVt_PVHV) ? Perl_do_kv(aTHX) : Perl_pp_akeys(aTHX);
     }
     else {
-	return (SvTYPE(sv) == SVt_PVHV) ? Perl_pp_each(aTHX) : Perl_pp_aeach(aTHX);
+	return (SvTYPE(sv) == SVt_PVHV)
+               ? Perl_pp_each(aTHX)
+               : Perl_pp_aeach(aTHX);
     }
 }
 
@@ -5314,7 +5320,9 @@ PP(pp_split)
     SV *dstr;
     const char *m;
     I32 iters = 0;
-    const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (STRLEN)(strend - s);
+    const STRLEN slen = do_utf8
+                        ? utf8_length((U8*)s, (U8*)strend)
+                        : (STRLEN)(strend - s);
     I32 maxiters = slen + 10;
     I32 trailing_empty = 0;
     const char *orig;
@@ -5369,7 +5377,7 @@ PP(pp_split)
 		AvREAL_on(ary);
 		AvREIFY_off(ary);
 		for (i = AvFILLp(ary); i >= 0; i--)
-		    AvARRAY(ary)[i] = &PL_sv_undef;	/* don't free mere refs */
+		    AvARRAY(ary)[i] = &PL_sv_undef; /* don't free mere refs */
 	    }
 	    /* temporarily switch stacks */
 	    SAVESWITCHSTACK(PL_curstack, ary);
@@ -5414,7 +5422,8 @@ PP(pp_split)
 			m += t;
 		}
 	    }
-	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
+	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET)
+            {
 	        while (m < strend && !isSPACE_LC(*m))
 		    ++m;
             } else {
@@ -5447,7 +5456,8 @@ PP(pp_split)
 		while (s < strend && isSPACE_utf8(s) )
 	            s +=  UTF8SKIP(s);
 	    }
-	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
+	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET)
+            {
 	        while (s < strend && isSPACE_LC(*s))
 		    ++s;
             } else {
@@ -5559,7 +5569,7 @@ PP(pp_split)
 			trailing_empty = 0;
 		} else {
 		    dstr = newSVpvn_flags(s, m-s,
-					  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+					 (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 		    XPUSHs(dstr);
 		}
 		/* The rx->minlen is in characters but we want to step
@@ -5583,7 +5593,7 @@ PP(pp_split)
 			trailing_empty = 0;
 		} else {
 		    dstr = newSVpvn_flags(s, m-s,
-					  (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
+					 (do_utf8 ? SVf_UTF8 : 0) | make_mortal);
 		    XPUSHs(dstr);
 		}
 		/* The rx->minlen is in characters but we want to step
@@ -5601,7 +5611,7 @@ PP(pp_split)
 	{
 	    I32 rex_return;
 	    PUTBACK;
-	    rex_return = CALLREGEXEC(rx, (char*)s, (char*)strend, (char*)orig, 1 ,
+	    rex_return = CALLREGEXEC(rx, (char*)s, (char*)strend, (char*)orig, 1,
 				     sv, NULL, 0);
 	    SPAGAIN;
 	    if (rex_return == 0)
