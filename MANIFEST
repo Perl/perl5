@@ -1929,6 +1929,17 @@ cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
 cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
 cpan/Perl-OSType/t/00-compile.t			Perl::OSType
 cpan/Perl-OSType/t/OSType.t			Perl::OSType
+cpan/Pod-Checker/lib/Pod/Checker.pm
+cpan/Pod-Checker/scripts/podchecker.PL
+cpan/Pod-Checker/t/pod/contains_bad_pod.xr
+cpan/Pod-Checker/t/pod/empty.xr
+cpan/Pod-Checker/t/pod/podchkenc.t
+cpan/Pod-Checker/t/pod/podchkenc.xr
+cpan/Pod-Checker/t/pod/poderrs.t
+cpan/Pod-Checker/t/pod/poderrs.xr
+cpan/Pod-Checker/t/pod/selfcheck.t
+cpan/Pod-Checker/t/pod/testcmp.pl
+cpan/Pod-Checker/t/pod/testpchk.pl
 cpan/Pod-Escapes/ChangeLog		ChangeLog for Pod::Escapes
 cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/README			README for Pod::Escapes
@@ -1974,16 +1985,12 @@ cpan/podlators/t/text-perlio.t			podlators test
 cpan/podlators/t/text.t				podlators test
 cpan/podlators/t/text-utf8.t			podlators test
 cpan/podlators/VERSION				podlators distribution version
-cpan/Pod-Parser/lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 cpan/Pod-Parser/lib/Pod/Find.pm			find POD documents in directory trees
 cpan/Pod-Parser/lib/Pod/InputObjects.pm		Pod-Parser - define objects for input streams
 cpan/Pod-Parser/lib/Pod/Parser.pm		Pod-Parser - define base class for parsing POD
 cpan/Pod-Parser/lib/Pod/ParseUtils.pm		Pod-Parser - pod utility functions
 cpan/Pod-Parser/lib/Pod/PlainText.pm		Convert POD data to formatted ASCII text
 cpan/Pod-Parser/lib/Pod/Select.pm		Pod-Parser - select portions of POD docs
-cpan/Pod-Parser/lib/Pod/Usage.pm		Pod-Parser - print usage messages
-cpan/Pod-Parser/scripts/pod2usage.PL	Pod-Parser - print usage messages from POD docs
-cpan/Pod-Parser/scripts/podchecker.PL	Pod-Parser - Pod::Checker::podchecker() CLI
 cpan/Pod-Parser/scripts/podselect.PL	Pod-Parser - Pod::Select::podselect() CLI
 cpan/Pod-Parser/t/pod/contains_bad_pod.xr	Pod-Parser test file
 cpan/Pod-Parser/t/pod/contains_pod.t		Pod-Parser test
@@ -2010,14 +2017,6 @@ cpan/Pod-Parser/t/pod/nested_seqs.t		Test nested interior sequences
 cpan/Pod-Parser/t/pod/nested_seqs.xr		Expected results for nested_seqs.t
 cpan/Pod-Parser/t/pod/oneline_cmds.t		Test single paragraph ==cmds
 cpan/Pod-Parser/t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
-cpan/Pod-Parser/t/pod/p2u_data.pl		Test Pod::Usage
-cpan/Pod-Parser/t/pod/pod2usage2.t		Test Pod::Usage
-cpan/Pod-Parser/t/pod/pod2usage.t		Test Pod::Usage
-cpan/Pod-Parser/t/pod/pod2usage.xr		Expected results for pod2usage.t
-cpan/Pod-Parser/t/pod/podchkenc.t		Validate =encoding support
-cpan/Pod-Parser/t/pod/podchkenc.xr		Expected results for the above
-cpan/Pod-Parser/t/pod/poderrs.t			Test POD errors
-cpan/Pod-Parser/t/pod/poderrs.xr		Expected results for poderrs.t
 cpan/Pod-Parser/t/pod/podselect.t		Test Pod::Select
 cpan/Pod-Parser/t/pod/podselect.xr		Expected results for podselect.t
 cpan/Pod-Parser/t/pod/selfcheck.t
@@ -2028,8 +2027,6 @@ cpan/Pod-Parser/t/pod/testp2pt.pl		Module to test Pod::PlainText for a given fil
 cpan/Pod-Parser/t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 cpan/Pod-Parser/t/pod/testpods/lib/Pod/Stuff.pm	Sample data for t/pod/find.t
 cpan/Pod-Parser/t/pod/twice.t			Test Pod::Parser
-cpan/Pod-Parser/t/pod/usage2.pod		Test POD for pod2usage tests
-cpan/Pod-Parser/t/pod/usage.pod			Test POD for pod2usage tests
 cpan/Pod-Perldoc/corpus/no-head.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/corpus/perlfunc.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/corpus/utf8.pod		test file for Pod-Perldoc
@@ -2237,6 +2234,16 @@ cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml20.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
+cpan/Pod-Usage/lib/Pod/Usage.pm
+cpan/Pod-Usage/scripts/pod2usage.PL
+cpan/Pod-Usage/t/pod/p2u_data.pl
+cpan/Pod-Usage/t/pod/pod2usage2.t
+cpan/Pod-Usage/t/pod/pod2usage.t
+cpan/Pod-Usage/t/pod/pod2usage.xr
+cpan/Pod-Usage/t/pod/testcmp.pl
+cpan/Pod-Usage/t/pod/testp2pt.pl
+cpan/Pod-Usage/t/pod/usage2.pod
+cpan/Pod-Usage/t/pod/usage.pod
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
 cpan/Socket/Socket.xs			Socket extension external subroutines

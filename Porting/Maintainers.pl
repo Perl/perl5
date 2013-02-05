@@ -1503,6 +1503,13 @@ use File::Glob qw(:case);
         'UPSTREAM'   => undef,
     },
 
+    'Pod::Checker' => {
+        'MAINTAINER' => 'marekr',
+        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.60.tar.gz',
+        'FILES'        => q[cpan/Pod-Checker],
+        'UPSTREAM'     => 'cpan',
+    },
+
     'Pod::Escapes' => {
         'MAINTAINER'   => 'arandal',
         'DISTRIBUTION' => 'SBURKE/Pod-Escapes-1.04.tar.gz',
@@ -1532,7 +1539,7 @@ use File::Glob qw(:case);
 
     'Pod::Parser' => {
         'MAINTAINER' => 'marekr',
-        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.51.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.60.tar.gz',
         'FILES'        => q[cpan/Pod-Parser],
         'UPSTREAM'     => 'cpan',
     },
@@ -1554,6 +1561,13 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'arandal',
         'DISTRIBUTION' => 'DWHEELER/Pod-Simple-3.23.tar.gz',
         'FILES'        => q[cpan/Pod-Simple],
+        'UPSTREAM'     => 'cpan',
+    },
+
+    'Pod::Usage' => {
+        'MAINTAINER' => 'marekr',
+        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.61.tar.gz',
+        'FILES'        => q[cpan/Pod-Usage],
         'UPSTREAM'     => 'cpan',
     },
 

@@ -4,7 +4,8 @@ NAME
 
 SYNOPSIS
     pod2usage   [-help] [-man] [-exit *exitval*] [-output *outfile*]
-                [-verbose *level*] [-pathlist *dirlist*] *file*
+                [-verbose *level*] [-pathlist *dirlist*] [-formatter
+                *module*] *file*
 
 OPTIONS AND ARGUMENTS
     -help   Print a brief help message and exit.
@@ -31,6 +32,11 @@ OPTIONS AND ARGUMENTS
             if it was not supplied with an absolute path. Each directory
             path in the given list should be separated by a ':' on Unix (';'
             on MSWin32 and DOS).
+
+    -formatter *module*
+            Which text formatter to use. Default is the Pod::Text manpage,
+            or for very old Perl versions the Pod::PlainText manpage. An
+            alternative would be e.g. the Pod::Text::Termcap manpage.
 
     *file*  The pathname of a file containing pod documentation to be output
             in usage message format (defaults to standard input).
