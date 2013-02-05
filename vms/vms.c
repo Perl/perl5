@@ -6957,7 +6957,13 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   if (dirend == NULL) dirend = strrchr(spec,'>');
   if (dirend == NULL) dirend = strchr(spec,':');
   if (dirend == NULL) {
-    strcpy(rslt,spec);
+    while (*cp2) {
+        if (*cp2 == '^')
+            cp2++;
+        else 
+            *(cp1++) = *(cp2++);
+    }
+    *cp1 = '\0';    
     if (vms_debug_fileify) {
         fprintf(stderr, "int_tounixspec: rslt = %s\n", rslt);
     }
