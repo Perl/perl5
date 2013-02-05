@@ -15,10 +15,10 @@ my $opts = {
 my $file = shift;
 die "Must specify META.yml or META.json" unless $file and defined $opts->{$file};
 
-my $status = _determine_status();
+my ($vers, $stat ) = _determine_status();
 
 my $distmeta = {
-  'version' => $],
+  'version' => $vers,
   'name' => 'perl',
   'author' => [
     'perl5-porters@perl.org'
@@ -27,7 +27,7 @@ my $distmeta = {
     'perl_5'
   ],
   'abstract' => 'The Perl 5 language interpreter',
-  'release_status' => $status,
+  'release_status' => $stat,
   'dynamic_config' => 1,
   'resources' => {
     'repository' => {
@@ -95,6 +95,7 @@ sub _determine_status {
   my $patchlevel_h = 'patchlevel.h';
   return unless -e $patchlevel_h;
   my $status = '';
+  my $version = '';
   {
     my %defines;
     open my $fh, '<', $patchlevel_h;
@@ -114,6 +115,13 @@ sub _determine_status {
     unless ( $status ) {
       $status = $defines{PERL_VERSION} % 2 ? 'unstable' : 'stable';
     }
+    if ( my @wotsits = grep { defined $defines{$_} } qw(PERL_REVISION PERL_VERSION PERL_SUBVERSION) ) {
+      $version = sprintf '%d.%03d%03d', map { $defines{$_} } @wotsits;
+    }
+    else {
+      # Well, you never know
+      $version = sprintf '5.%03d_%02d', map { $defines{$_} } qw(PATCHLEVEL SUBVERSION);
+    }
   }
-  return $status;
+  return ( $version, $status );
 }
