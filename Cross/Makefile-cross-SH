@@ -772,10 +772,10 @@ extras.install: perl$(EXE_EXT)
 	no-install install.perl install.man install.html
 
 META.yml:	Porting/makemeta Porting/Maintainers.pl Porting/Maintainers.pm
-	$(LDLIBPTH) ./miniperl -Ilib Porting/makemeta META.yml
+	$(LDLIBPTH) ./miniperl -Ilib Porting/makemeta -y
 
 META.json:	Porting/makemeta Porting/Maintainers.pl Porting/Maintainers.pm
-	$(LDLIBPTH) ./miniperl -Ilib Porting/makemeta META.json
+	$(LDLIBPTH) ./miniperl -Ilib Porting/makemeta -j
 
 install-strip:
 	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"

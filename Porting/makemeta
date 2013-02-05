@@ -6,14 +6,26 @@
 
 use strict;
 use warnings;
+use Getopt::Std;
 
 my $opts = {
   'META.yml'  => { version => '1.4' },
   'META.json' => { version => '2' },
 };
 
-my $file = shift;
-die "Must specify META.yml or META.json" unless $file and defined $opts->{$file};
+my %switches;
+getopts('byj', \%switches);
+
+my @metafiles;
+if ( $switches{y} ) {
+  push @metafiles, 'META.yml';
+}
+elsif ( $switches{j} ) {
+  push @metafiles, 'META.json';
+}
+else {
+  push @metafiles, keys %$opts;
+}
 
 my ($vers, $stat ) = _determine_status();
 
@@ -86,9 +98,11 @@ $distmeta->{no_index}->{file} = \@files;
 $distmeta->{no_index}->{directory} = \@dirs;
 
 my $meta = CPAN::Meta->create( $distmeta );
-my $fh = open_new($file);
-print $fh $meta->as_string( $opts->{$file} );
-close_and_rename($fh);
+foreach my $file ( @metafiles ) {
+  my $fh = open_new($file);
+  print $fh $meta->as_string( $opts->{$file} );
+  close_and_rename($fh);
+}
 exit 0;
 
 sub _determine_status {

@@ -699,6 +699,13 @@ Be sure to commit your change:
 
     $ git commit -m 'bump version to RCnnn' patchlevel.h
 
+=head3 run makemeta to update META files
+
+    $ perl Porting/makemeta
+
+Be sure to commit any changes (if applicable):
+
+    $ git commit -m 'Update META files' META.*
 
 =head3 build, test and check a fresh perl
 

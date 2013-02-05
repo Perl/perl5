@@ -1190,10 +1190,10 @@ regen_headers regen-headers:	FORCE
 regen_meta regen-meta:  META.yml META.json
 
 META.yml:   FORCE
-	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta META.yml
+	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta -y
 
 META.json:   FORCE
-	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta META.json
+	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta -j
 
 
 regen_all regen-all: regen regen_meta

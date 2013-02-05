@@ -48,6 +48,6 @@ foreach (@progs, 'regen.pl') {
   system "$^X $_ --tap";
 }
 
-foreach ( 'META.yml', 'META.json' ) {
+foreach ( '-y', '-j' ) {
   system "$^X Porting/makemeta --tap $_";
 }
