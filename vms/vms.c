@@ -267,7 +267,6 @@ static int vms_posix_exit = 0;
 
 /* bug workarounds if needed */
 int decc_bug_devnull = 1;
-int decc_dir_barename = 0;
 int vms_bug_stat_filename = 0;
 
 static int vms_debug_on_exception = 0;
@@ -14043,17 +14042,6 @@ vmsperl_set_features(void)
           decc_bug_devnull = 1;
        else
 	  decc_bug_devnull = 0;
-    }
-
-    /* UNIX directory names with no paths are broken in a lot of places */
-    decc_dir_barename = 1;
-    status = simple_trnlnm("DECC_DIR_BARENAME", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
-      val_str[0] = _toupper(val_str[0]);
-      if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
-	decc_dir_barename = 1;
-      else
-	decc_dir_barename = 0;
     }
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
