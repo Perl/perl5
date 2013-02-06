@@ -8499,7 +8499,7 @@ static char *int_tovmsspec
     }
     PerlMem_free(trndev);
   }
-  else {
+  else if (hasdir) {
     *(cp1++) = '[';
     if (*cp2 == '.') {
       if (*(cp2+1) == '/' || *(cp2+1) == '\0') {
@@ -8524,18 +8524,21 @@ static char *int_tovmsspec
     }
     else *(cp1++) = '.';
   }
+  else {
+    *(cp1++) = *cp2;
+  }
   for (; cp2 < dirend; cp2++) {
     if (*cp2 == '/') {
       if (*(cp2-1) == '/') continue;
-      if (*(cp1-1) != '.') *(cp1++) = '.';
+      if (cp1 > rslt && *(cp1-1) != '.') *(cp1++) = '.';
       infront = 0;
     }
     else if (!infront && *cp2 == '.') {
       if (cp2+1 == dirend || *(cp2+1) == '\0') { cp2++; break; }
       else if (*(cp2+1) == '/') cp2++;   /* skip over "./" - it's redundant */
       else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) {
-        if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; /* handle "../" */
-        else if (*(cp1-2) == '[') *(cp1-1) = '-';
+        if (cp1 > rslt && (*(cp1-1) == '-' || *(cp1-1) == '[')) *(cp1++) = '-'; /* handle "../" */
+        else if (cp1 > rslt + 1 && *(cp1-2) == '[') *(cp1-1) = '-';
         else {
           *(cp1++) = '-';
         }
@@ -8544,7 +8547,7 @@ static char *int_tovmsspec
       }
       else if ( *(cp2+1) == '.' && *(cp2+2) == '.' &&
                 (*(cp2+3) == '/' || *(cp2+3) == '\0') ) {
-        if (*(cp1-1) != '.') *(cp1++) = '.'; /* May already have 1 from '/' */
+        if (cp1 > rslt && *(cp1-1) != '.') *(cp1++) = '.'; /* May already have 1 from '/' */
         *(cp1++) = '.'; *(cp1++) = '.'; /* ".../" --> "..." */
         if (!*(cp2+3)) { 
           *(cp1++) = '.';  /* Simulate trailing '/' */
@@ -8554,7 +8557,7 @@ static char *int_tovmsspec
       }
       else {
         if (decc_efs_charset == 0) {
-	  if (*(cp1-1) == '^')
+	  if (cp1 > rslt && *(cp1-1) == '^')
 	    cp1--;         /* remove the escape, if any */
 	  *(cp1++) = '_';  /* fix up syntax - '.' in name not allowed */
 	}
@@ -8564,10 +8567,10 @@ static char *int_tovmsspec
       }
     }
     else {
-      if (!infront && *(cp1-1) == '-')  *(cp1++) = '.';
+      if (!infront && cp1 > rslt && *(cp1-1) == '-')  *(cp1++) = '.';
       if (*cp2 == '.') {
         if (decc_efs_charset == 0) {
-	  if (*(cp1-1) == '^')
+	  if (cp1 > rslt && *(cp1-1) == '^')
 	    cp1--;         /* remove the escape, if any */
 	  *(cp1++) = '_';
 	}
@@ -8579,7 +8582,7 @@ static char *int_tovmsspec
       infront = 1;
     }
   }
-  if (*(cp1-1) == '.') cp1--; /* Unix spec ending in '/' ==> trailing '.' */
+  if (cp1 > rslt && *(cp1-1) == '.') cp1--; /* Unix spec ending in '/' ==> trailing '.' */
   if (hasdir) *(cp1++) = ']';
   if (*cp2) cp2++;  /* check in case we ended with trailing '..' */
   /* fixme for ODS5 */
