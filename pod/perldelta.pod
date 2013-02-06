@@ -273,6 +273,13 @@ information only known to the C<perl> binary and not available via L<Config>.
 
 =item *
 
+L<Benchmark> has been upgraded from version 1.13 to 1.14.
+
+The "too few iterations" message is now a warning on STDERR
+instead of being output on STDOUT.
+
+=item *
+
 L<PerlIO::scalar> has been upgraded from version 0.15 to 0.16.
 
 The buffer scalar supplied may now only contain code pounts 0xFF or
