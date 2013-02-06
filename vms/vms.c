@@ -8388,17 +8388,20 @@ static char *int_tovmsspec
   dirend = strrchr(path,'/');
 
   if (dirend == NULL) {
-     /* If we get here with no UNIX directory delimiters, then this is
-      * not a complete file specification, such as a Unix glob
-      * specification, shell macro, make macro, or even a valid VMS
-      * filespec but with unescaped extended characters.  The safest
-      * thing in all these cases is to pass it through as-is.
+     /* If we get here with no Unix directory delimiters, then this is an
+      * ambiguous file specification, such as a Unix glob specification, a
+      * shell or make macro, or a filespec that would be valid except for
+      * unescaped extended characters.  The safest thing if it's a macro
+      * is to pass it through as-is.
       */
-      my_strlcpy(rslt, path, VMS_MAXRSS);
-      if (vms_debug_fileify) {
-          fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+      if (strstr(path, "$(")) {
+          my_strlcpy(rslt, path, VMS_MAXRSS);
+          if (vms_debug_fileify) {
+              fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
+          }
+          return rslt;
       }
-      return rslt;
+      hasdir = 0;
   }
   else if (*(dirend+1) == '.') {  /* do we have trailing "/." or "/.." or "/..."? */
     if (!*(dirend+2)) dirend +=2;
