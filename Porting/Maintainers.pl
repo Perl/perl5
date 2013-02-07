@@ -805,7 +805,7 @@ use File::Glob qw(:case);
 
     'File::CheckTree' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/File-CheckTree-4.41.tar.gz',
+        'DISTRIBUTION' => 'RJBS/File-CheckTree-4.42.tar.gz',
         'FILES'        => q[cpan/File-CheckTree],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
         'UPSTREAM'     => 'cpan',

@@ -7,7 +7,9 @@ use File::Spec;
 use warnings;
 use strict;
 
-our $VERSION = '4.41';
+use if $] > 5.017, 'deprecate';
+
+our $VERSION = '4.42';
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(validate);
 
