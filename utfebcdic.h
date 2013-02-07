@@ -541,8 +541,6 @@ END_EXTERN_C
         Unicode                             Bit pattern 1st Byte 2nd Byte 3rd Byte 4th Byte 5th Byte 6th Byte 7th byte
     U+0000..U+007F                     000000000xxxxxxx 0xxxxxxx
     U+0080..U+009F                     00000000100xxxxx 100xxxxx
-    U+00A0..U+00FF                     00000000yyyxxxxx 11000yyy 101xxxxx
-
     U+00A0..U+03FF                     000000yyyyyxxxxx 110yyyyy 101xxxxx
     U+0400..U+3FFF                     00zzzzyyyyyxxxxx 1110zzzz 101yyyyy 101xxxxx
     U+4000..U+3FFFF                 0wwwzzzzzyyyyyxxxxx 11110www 101zzzzz 101yyyyy 101xxxxx

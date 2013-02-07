@@ -1,5 +1,11 @@
 /*    utf8.h
  *
+ * This file contains definitions for use with the UTF-8 encoding.  It
+ * actually also works with the variant UTF-8 encoding called UTF-EBCDIC, and
+ * hides almost all of the differences between these from the caller.  In other
+ * words, someone should #include this file, and if the code is being compiled
+ * on an EBCDIC platform, things should mostly just work.
+ *
  *    Copyright (C) 2000, 2001, 2002, 2005, 2006, 2007, 2009,
  *    2010, 2011 by Larry Wall and others
  *
