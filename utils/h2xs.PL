@@ -1917,7 +1917,7 @@ elsif ( $compat_version < 5.006002 )
   $prereq_pm .= q%'Test'        =>  0, %;
 }
 
-if ( $compat_version < 5.006 and !$opt_X and $use_xsloader)
+if (!$opt_X and $use_xsloader)
 {
   $prereq_pm .= q%'XSLoader'    =>  0, %;
 }
