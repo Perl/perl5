@@ -1840,7 +1840,7 @@ use File::Glob qw(:case);
 
     'Text::Soundex' => {
         'MAINTAINER'   => 'markm',
-        'DISTRIBUTION' => 'MARKM/Text-Soundex-3.03.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Text-Soundex-3.04.tar.gz',
         'FILES'        => q[cpan/Text-Soundex],
         'MAP'          => {
             '' => 'cpan/Text-Soundex/',
