@@ -527,12 +527,17 @@ END_EXTERN_C
 #define NATIVE_UTF8_TO_I8(ch) (ch)      PL_e2utf[(U8)(ch)]
 #define I8_TO_NATIVE_UTF8(ch) (ch)      PL_utf2e[(U8)(ch)]
 
-/* Transform in wide UV char space */
-#define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_ASCII(ch))
-#define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : ASCII_TO_NATIVE(ch))
+/* Transforms in wide UV chars */
+#define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_LATIN1(ch))
+#define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : LATIN1_TO_NATIVE(ch))
+
 /* Transform in invariant..byte space */
-#define NATIVE_TO_NEED(enc,ch)   ((enc) ? UTF_TO_NATIVE(NATIVE_TO_ASCII(ch)) : (ch))
-#define ASCII_TO_NEED(enc,ch)    ((enc) ? UTF_TO_NATIVE(ch) : ASCII_TO_NATIVE(ch))
+#define NATIVE_TO_NEED(enc,ch)   ((enc)                                     \
+                                  ? I8_TO_NATIVE_UTF8(NATIVE_TO_LATIN1(ch)) \
+                                  : (ch))
+#define ASCII_TO_NEED(enc,ch)    ((enc)                   \
+                                  ? I8_TO_NATIVE_UTF8(ch) \
+                                  : LATIN1_TO_NATIVE(ch))
 
 /*
   The following table is adapted from tr16, it shows I8 encoding of Unicode code points.
@@ -565,11 +570,13 @@ END_EXTERN_C
  * Comments as to the meaning of each are given at their corresponding utf8.h
  * definitions */
 
-#define UTF8_IS_START(c)		(NATIVE_TO_UTF(c) >= 0xC5 && NATIVE_TO_UTF(c) != 0xE0)
-#define UTF8_IS_CONTINUATION(c)		((NATIVE_TO_UTF(c) & 0xE0) == 0xA0)
-#define UTF8_IS_CONTINUED(c) 		(NATIVE_TO_UTF(c) >= 0xA0)
-#define UTF8_IS_DOWNGRADEABLE_START(c)	(NATIVE_TO_UTF(c) >= 0xC5 && NATIVE_TO_UTF(c) <= 0xC7)
-#define UTF8_IS_ABOVE_LATIN1(c)	(NATIVE_TO_I8(c) >= 0xC8)
+#define UTF8_IS_START(c)		(NATIVE_UTF8_TO_I8(c) >= 0xC5     \
+                                         && NATIVE_UTF8_TO_I8(c) != 0xE0)
+#define UTF8_IS_CONTINUATION(c)		((NATIVE_UTF8_TO_I8(c) & 0xE0) == 0xA0)
+#define UTF8_IS_CONTINUED(c) 		(NATIVE_UTF8_TO_I8(c) >= 0xA0)
+#define UTF8_IS_DOWNGRADEABLE_START(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC5     \
+                                         && NATIVE_UTF8_TO_I8(c) <= 0xC7)
+#define UTF8_IS_ABOVE_LATIN1(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC8)
 
 #define UTF_START_MARK(len) (((len) >  7) ? 0xFF : ((U8)(0xFE << (7-(len)))))
 #define UTF_START_MASK(len) (((len) >= 6) ? 0x01 : (0x1F >> ((len)-2)))

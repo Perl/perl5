@@ -4133,7 +4133,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    while (t < tend) {
 		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, flags);
 		t += ulen;
-		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {
+		if (t < tend && NATIVE_UTF8_TO_I8(*t) == 0xff) {
 		    t++;
 		    cp[2*i+1] = utf8n_to_uvuni(t, tend-t, &ulen, flags);
 		    t += ulen;
@@ -4151,7 +4151,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		    t = uvuni_to_utf8(tmpbuf,nextmin);
 		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    if (diff > 1) {
-			U8  range_mark = UTF_TO_NATIVE(0xff);
+			U8  range_mark = I8_TO_NATIVE_UTF8(0xff);
 			t = uvuni_to_utf8(tmpbuf, val - 1);
 			sv_catpvn(transv, (char *)&range_mark, 1);
 			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
@@ -4164,7 +4164,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    t = uvuni_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    {
-		U8 range_mark = UTF_TO_NATIVE(0xff);
+		U8 range_mark = I8_TO_NATIVE_UTF8(0xff);
 		sv_catpvn(transv, (char *)&range_mark, 1);
 	    }
 	    t = uvuni_to_utf8(tmpbuf, 0x7fffffff);
@@ -4190,7 +4190,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    if (tfirst > tlast) {
 		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, flags);
 		t += ulen;
-		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {	/* illegal utf8 val indicates range */
+		if (t < tend && NATIVE_UTF8_TO_I8(*t) == 0xff) {	/* illegal utf8 val indicates range */
 		    t++;
 		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, flags);
 		    t += ulen;
@@ -4204,7 +4204,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (r < rend) {
 		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, flags);
 		    r += ulen;
-		    if (r < rend && NATIVE_TO_UTF(*r) == 0xff) {	/* illegal utf8 val indicates range */
+		    if (r < rend && NATIVE_UTF8_TO_I8(*r) == 0xff) {	/* illegal utf8 val indicates range */
 			r++;
 			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, flags);
 			r += ulen;

@@ -182,7 +182,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	}
     }
     if (UNI_IS_INVARIANT(uv)) {
-	*d++ = (U8)UTF_TO_NATIVE(uv);
+	*d++ = (U8) I8_TO_NATIVE_UTF8(uv);
 	return d;
     }
 #if defined(EBCDIC)
@@ -190,10 +190,10 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	STRLEN len  = UNISKIP(uv);
 	U8 *p = d+len-1;
 	while (p > d) {
-	    *p-- = (U8)UTF_TO_NATIVE((uv & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK);
+	    *p-- = (U8) I8_TO_NATIVE_UTF8((uv & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK);
 	    uv >>= UTF_ACCUMULATION_SHIFT;
 	}
-	*p = (U8)UTF_TO_NATIVE((uv & UTF_START_MASK(len)) | UTF_START_MARK(len));
+	*p = (U8) I8_TO_NATIVE_UTF8((uv & UTF_START_MASK(len)) | UTF_START_MARK(len));
 	return d+len;
     }
 #else /* Non loop style */
@@ -623,7 +623,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
     /* An invariant is trivially well-formed */
     if (UTF8_IS_INVARIANT(uv)) {
-	return (UV) (NATIVE_TO_UTF(*s));
+	return (UV) (NATIVE_UTF8_TO_I8(*s));
     }
 
     /* A continuation character can't start a valid sequence */
@@ -643,7 +643,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     }
 
 #ifdef EBCDIC
-    uv = NATIVE_TO_UTF(uv);
+    uv = NATIVE_UTF8_TO_I8(uv);
 #endif
 
     /* Here is not a continuation byte, nor an invariant.  The only thing left
@@ -1013,7 +1013,7 @@ Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
     UV expectlen = UTF8SKIP(s);
     const U8* send = s + expectlen;
-    UV uv = NATIVE_TO_UTF(*s);
+    UV uv = NATIVE_UTF8_TO_I8(*s);
 
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI;
 
@@ -3231,12 +3231,12 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
        * In both UTF-8 and UTF-8-MOD that happens to be UTF_CONTINUATION_MARK
        */
 	needents = UTF_CONTINUATION_MARK;
-	off      = NATIVE_TO_UTF(ptr[klen]);
+	off      = NATIVE_UTF8_TO_I8(ptr[klen]);
     }
     else {
       /* If char is encoded then swatch is for the prefix */
 	needents = (1 << UTF_ACCUMULATION_SHIFT);
-	off      = NATIVE_TO_UTF(ptr[klen]) & UTF_CONTINUATION_MASK;
+	off      = NATIVE_UTF8_TO_I8(ptr[klen]) & UTF_CONTINUATION_MASK;
     }
 
     /*

@@ -3105,7 +3105,7 @@ S_scan_const(pTHX_ char *start)
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = (char)UTF_TO_NATIVE(0xff);
+		    *c = (char)I8_TO_NATIVE_UTF8(0xff);
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
@@ -3217,7 +3217,7 @@ S_scan_const(pTHX_ char *start)
 		    && !native_range
 #endif
 		    ) {
-		    *d++ = (char)UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
+		    *d++ = (char)I8_TO_NATIVE_UTF8(0xff);	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}
