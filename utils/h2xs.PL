@@ -1929,11 +1929,10 @@ use ExtUtils::MakeMaker;
 # the contents of the Makefile that is written.
 WriteMakefile(
     NAME              => '$module',
-    VERSION_FROM      => '$modpmname', # finds \$VERSION
+    VERSION_FROM      => '$modpmname', # finds \$VERSION, requires EU::MM from perl >= 5.5
     PREREQ_PM         => {$prereq_pm}, # e.g., Module::Name => 1.1
-    (\$] >= 5.005 ?     ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM  => '$modpmname', # retrieve abstract from module
-       AUTHOR         => '$author <$email>') : ()),
+    ABSTRACT_FROM     => '$modpmname', # retrieve abstract from module
+    AUTHOR            => '$author <$email>',
 END
 if (!$opt_X) { # print C stuff, unless XS is disabled
   $opt_F = '' unless defined $opt_F;
