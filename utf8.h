@@ -105,14 +105,20 @@ END_EXTERN_C
 #include "regcharclass.h"
 #include "unicode_constants.h"
 
-/* Native character to iso-8859-1 */
-#define NATIVE_TO_ASCII(ch)      (ch)
-#define ASCII_TO_NATIVE(ch)      (ch)
-/* Transform after encoding */
-#define NATIVE_TO_UTF(ch)        (ch)
-#define NATIVE_TO_I8(ch) NATIVE_TO_UTF(ch)	/* a clearer synonym */
-#define UTF_TO_NATIVE(ch)        (ch)
-#define I8_TO_NATIVE(ch) UTF_TO_NATIVE(ch)
+/* Native character to/from iso-8859-1.  Are the identity functions on ASCII
+ * platforms */
+#define NATIVE_TO_LATIN1(ch)     (ch)
+#define LATIN1_TO_NATIVE(ch)     (ch)
+
+/* I8 is an intermediate version of UTF-8 used only in UTF-EBCDIC.  We thus
+ * consider it to be identical to UTF-8 on ASCII platforms.  Strictly speaking
+ * UTF-8 and UTF-EBCDIC are two different things, but we often conflate them
+ * because they are 8-bit encodings that serve the same purpose in Perl, and
+ * rarely do we need to distinguish them.  The term "NATIVE_UTF8" applies to
+ * whichever one is applicable on the current platform */
+#define NATIVE_UTF8_TO_I8(ch) (ch)
+#define I8_TO_NATIVE_UTF8(ch) (ch)
+
 /* Transforms in wide UV chars */
 #define UNI_TO_NATIVE(ch)        (ch)
 #define NATIVE_TO_UNI(ch)        (ch)
@@ -273,7 +279,17 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * this level; the macros that some of these call may have different
  * definitions in the two encodings */
 
-#define NATIVE8_TO_UNI(ch)     NATIVE_TO_ASCII(ch)	/* a clearer synonym */
+/* In domain restricted to ASCII, these may make more sense to the reader than
+ * the ones with Latin1 in the name */
+#define NATIVE_TO_ASCII(ch)      NATIVE_TO_LATIN1(ch)
+#define ASCII_TO_NATIVE(ch)      LATIN1_TO_NATIVE(ch)
+
+/* More or less misleadingly-named defines, retained for back compat */
+#define NATIVE_TO_UTF(ch)        NATIVE_UTF8_TO_I8(ch)
+#define NATIVE_TO_I8(ch)         NATIVE_UTF8_TO_I8(ch)
+#define UTF_TO_NATIVE(ch)        I8_TO_NATIVE_UTF8(ch)
+#define I8_TO_NATIVE(ch)         I8_TO_NATIVE_UTF8(ch)
+#define NATIVE8_TO_UNI(ch)       NATIVE_TO_LATIN1(ch)
 
 /* Adds a UTF8 continuation byte 'new' of information to a running total code
  * point 'old' of all the continuation bytes so far.  This is designed to be
