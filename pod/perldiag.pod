@@ -20,7 +20,7 @@ The majority of messages from the first three classifications above
 
 If a message can be controlled by the C<warnings> pragma, its warning
 category is included with the classification letter in the description
-below.
+below.  E.g. C<(W closed)> means a warning in the C<closed> category.
 
 Optional warnings are enabled by using the C<warnings> pragma or the B<-w>
 and B<-W> switches.  Warnings may be captured by setting C<$SIG{__WARN__}>
