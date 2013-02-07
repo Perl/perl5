@@ -12,6 +12,17 @@
  * Each section names the header file that the functions "belong" to.
  */
 
+/* ------------------------------- av.h ------------------------------- */
+
+PERL_STATIC_INLINE I32
+S_av_top_index(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_AV_TOP_INDEX;
+    assert(SvTYPE(av) == SVt_PVAV);
+
+    return AvFILL(av);
+}
+
 /* ------------------------------- cv.h ------------------------------- */
 
 PERL_STATIC_INLINE I32 *

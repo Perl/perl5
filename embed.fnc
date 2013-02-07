@@ -219,7 +219,7 @@ Apd	|void	|av_push	|NN AV *av|NN SV *val
 EXp	|void	|av_reify	|NN AV *av
 ApdR	|SV*	|av_shift	|NN AV *av
 Apd	|SV**	|av_store	|NN AV *av|I32 key|NULLOK SV *val
-ApdR	|I32	|av_top_index   |NN AV *av
+AidR	|I32	|av_top_index	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
 ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NN AV *av|I32 num

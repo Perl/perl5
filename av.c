@@ -778,24 +778,9 @@ meaning from what the similarly named L</sv_len> returns.
 I32
 Perl_av_len(pTHX_ AV *av)
 {
-    /* If change this, must change identical Perl_av_top_index() just below */
-
     PERL_ARGS_ASSERT_AV_LEN;
-    assert(SvTYPE(av) == SVt_PVAV);
 
-    return AvFILL(av);
-}
-
-I32
-Perl_av_top_index(pTHX_ AV *av)
-{
-    /* So short, that it is just a duplicate of Perl_av_len().  Must keep them
-     * in sync */
-
-    PERL_ARGS_ASSERT_AV_TOP_INDEX;
-    assert(SvTYPE(av) == SVt_PVAV);
-
-    return AvFILL(av);
+    return av_top_index(av);
 }
 
 /*
