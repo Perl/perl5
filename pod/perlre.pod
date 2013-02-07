@@ -958,9 +958,40 @@ expressions, and 2) whenever you see one, you should stop and
 X<(?#)>
 
 A comment.  The text is ignored.  If the C</x> modifier enables
-whitespace formatting, a simple C<#> will suffice.  Note that Perl closes
-the comment as soon as it sees a C<)>, so there is no way to put a literal
-C<)> in the comment.
+whitespace formatting, a simple C<#> will suffice.  Note that the rules
+for how this construct works are somewhat arcane, the following points
+should be kept in mind:
+
+=over 4
+
+=item *
+
+Perl closes the comment as soon as it sees a C<)>, so there is no way to
+put a literal C<)> in the comment.
+
+=item *
+
+Normal interpolation rules DO NOT apply inside of this construct. For
+instance you cannot terminate it using a variable that should be
+interpolated.
+
+=item *
+
+You cannot place this construct just anywhere. In particular you cannot put
+it in between a matching construct and its quantifier, nor in between the
+characters that make up any regex meta-sequence. Prior to 5.18 this was
+not the case, however the behavior was buggy and inconsistent and was
+removed. For example the following patterns used to be legal, and buggy,
+but no longer are allowed.
+
+    /((?#blah)?i:foo)/
+    /abc(?#blah){1,2}/
+    /abc (?#blah) (?#blah) {1,2}/
+
+The second two examples will as of 5.18 will produce "Quantifier follows
+nothing" errors during regex compilation.
+
+=back
 
 =item C<(?adlupimsx-imsx)>
 

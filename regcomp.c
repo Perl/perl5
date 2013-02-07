@@ -720,6 +720,9 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,"\n");                              \
 });
 
+/* see nextchar_heavy() for an explanation of this macro */
+#define nextchar(pRExC_state) ( (RExC_flags & RXf_PMf_EXTENDED) ? nextchar_heavy(pRExC_state) : RExC_parse++ )
+
 /* Mark that we cannot extend a found fixed substring at this point.
    Update the longest found anchored substring and the longest found
    floating substrings if needed. */
@@ -8644,6 +8647,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		vFAIL2("Sequence (?%c...) not implemented", (int)paren);
 		break;
 	    case '#':           /* (?#...) */
+                DEBUG_PARSE("reg#");
+
 		while (*RExC_parse && *RExC_parse != ')')
 		    RExC_parse++;
 		if (*RExC_parse != ')')
@@ -10155,8 +10160,9 @@ tryagain:
     }
     case '(':
 	nextchar(pRExC_state);
-        ret = reg(pRExC_state, 1, &flags,depth+1);
+        ret = reg(pRExC_state, 1, &flags, depth+1);
 	if (ret == NULL) {
+                DEBUG_PARSE("atm0");
 		if (flags & TRYAGAIN) {
 		    if (RExC_parse == RExC_end) {
 			 /* Make parent create an empty node if needed. */
@@ -10175,7 +10181,7 @@ tryagain:
 	    *flagp |= TRYAGAIN;
 	    return NULL;
 	}
-	vFAIL("Internal urp");
+        vFAIL("Internal urp");
 				/* Supposed to be caught earlier. */
 	break;
     case '{':
@@ -10188,7 +10194,7 @@ tryagain:
     case '+':
     case '*':
 	RExC_parse++;
-	vFAIL("Quantifier follows nothing");
+        vFAIL("Quantifier follows nothing");
 	break;
     case '\\':
 	/* Special Escapes
@@ -13704,13 +13710,15 @@ S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
         return 1;
 }
 
-/* nextchar()
+
+/* nextchar_heavy()
 
    Advances the parse position, and optionally absorbs
    "whitespace" from the inputstream.
 
-   Without /x "whitespace" means (?#...) style comments only,
-   with /x this means (?#...) and # comments and whitespace proper.
+   Only to be used under RExC_flags & RXf_PMf_EXTENDED, call via nextchar() macro.
+
+   Strips # comments and whitespace proper.
 
    Returns the RExC_parse point from BEFORE the scan occurs.
 
@@ -13718,36 +13726,23 @@ S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
 */
 
 STATIC char*
-S_nextchar(pTHX_ RExC_state_t *pRExC_state)
+S_nextchar_heavy(pTHX_ RExC_state_t *pRExC_state)
 {
     char* const retval = RExC_parse++;
 
-    PERL_ARGS_ASSERT_NEXTCHAR;
+    PERL_ARGS_ASSERT_NEXTCHAR_HEAVY;
+
+    assert(RExC_flags & RXf_PMf_EXTENDED);
 
     for (;;) {
-	if (RExC_end - RExC_parse >= 3
-	    && *RExC_parse == '('
-	    && RExC_parse[1] == '?'
-	    && RExC_parse[2] == '#')
-	{
-	    while (*RExC_parse != ')') {
-		if (RExC_parse == RExC_end)
-		    FAIL("Sequence (?#... not terminated");
-		RExC_parse++;
-	    }
-	    RExC_parse++;
-	    continue;
-	}
-	if (RExC_flags & RXf_PMf_EXTENDED) {
-	    if (isSPACE(*RExC_parse)) {
-		RExC_parse++;
-		continue;
-	    }
-	    else if (*RExC_parse == '#') {
-	        if ( reg_skipcomment( pRExC_state ) )
-	            continue;
-	    }
-	}
+        if (isSPACE(*RExC_parse)) {
+            RExC_parse++;
+            continue;
+        }
+        else if (*RExC_parse == '#') {
+            if ( reg_skipcomment( pRExC_state ) )
+                continue;
+        }
 	return retval;
     }
 }

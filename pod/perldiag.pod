@@ -2380,7 +2380,8 @@ terminate the Perl script and execute the specified command.
 
 (P) Something went badly awry in the regular expression parser.  The
 <-- HERE shows whereabouts in the regular expression the problem was
-discovered.
+discovered. If you see this error please report the full output to the
+perl porters mailing list using perlbug.
 
 =item %s (...) interpreted as function
 
@@ -4152,8 +4153,12 @@ change when upper cased.
 
 =item Quantifier follows nothing in regex; marked by <-- HERE in m/%s/
 
-(F) You started a regular expression with a quantifier.  Backslash it if
-you meant it literally.  The <-- HERE shows whereabouts in the regular
+(F) You started a regular expression with a quantifier, or othewise used
+a quantifier on a construct that matches nothing.  Constructs known to
+produce this warning include C<m/(?i)/> and C<m/(?# comment)/>. Backslash
+the quantifier if you meant it literally, or in the case of
+C<(?#comment)>, put the comment block after the quantifier.
+The <-- HERE shows whereabouts in the regular
 expression the problem was discovered.  See L<perlre>.
 
 =item Quantifier in {,} bigger than %d in regex; marked by <-- HERE in m/%s/

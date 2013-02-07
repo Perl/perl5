@@ -2007,7 +2007,7 @@ Ei	|void   |alloc_maybe_populate_EXACT|NN struct RExC_state_t *pRExC_state \
 				|NN regnode *node|NN I32 *flagp|STRLEN len \
 				|UV code_point
 Ei	|U8   |compute_EXACTish|NN struct RExC_state_t *pRExC_state
-Es	|char *	|nextchar	|NN struct RExC_state_t *pRExC_state
+Es        |char *        |nextchar_heavy        |NN struct RExC_state_t *pRExC_state
 Es	|bool	|reg_skipcomment|NN struct RExC_state_t *pRExC_state
 Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data|NN I32 *minlenp \

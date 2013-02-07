@@ -6621,9 +6621,9 @@ STATIC void	S_make_trie_failtable(pTHX_ struct RExC_state_t *pRExC_state, regnod
 #define PERL_ARGS_ASSERT_MAKE_TRIE_FAILTABLE	\
 	assert(pRExC_state); assert(source); assert(stclass)
 
-STATIC char *	S_nextchar(pTHX_ struct RExC_state_t *pRExC_state)
+STATIC char *	S_nextchar_heavy(pTHX_ struct RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_NEXTCHAR	\
+#define PERL_ARGS_ASSERT_NEXTCHAR_HEAVY	\
 	assert(pRExC_state)
 
 PERL_STATIC_NO_RET void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
