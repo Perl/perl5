@@ -743,7 +743,7 @@ if ($define{'USE_PERLIO'}) {
     foreach (@$embed) {
 	my ($flags, $retval, $func, @args) = @$_;
 	next unless $func;
-	if ($flags =~ /[AX]/ && $flags !~ /[xm]/ || $flags =~ /b/) {
+	if ($flags =~ /[AX]/ && $flags !~ /[xmi]/ || $flags =~ /b/) {
 	    # public API, so export
 
 	    # If a function is defined twice, for example before and after
