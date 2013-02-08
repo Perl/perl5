@@ -16,6 +16,7 @@ $| = 1;
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.');
+    require Config; import Config;
     require './test.pl';
 }
 
@@ -516,24 +517,52 @@ sub run_tests {
         is(qr/(?u)\b\v$/, '(?^:(?u)\b\v$)', 'Verify (?u) compiles');
 
         my $dual = qr/\b\v$/;
-        use locale;
-        my $locale = qr/\b\v$/;
-        is($locale,    '(?^l:\b\v$)', 'Verify has l modifier when compiled under use locale');
-        no locale;
+        my $locale;
+
+      SKIP: {
+            skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
+
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $locale = qr/\b\v$/;
+            is($locale,    '(?^l:\b\v$)', 'Verify has l modifier when compiled under use locale');
+            no locale;
+        }
 
         use feature 'unicode_strings';
         my $unicode = qr/\b\v$/;
         is($unicode,    '(?^u:\b\v$)', 'Verify has u modifier when compiled under unicode_strings');
         is(qr/abc$dual/,    '(?^u:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
-        is(qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings');
+
+      SKIP: {
+            skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
+
+            is(qr/abc$locale/,    '(?^u:abc(?^l:\b\v$))', 'Verify retains l when interpolated under unicode_strings');
+        }
 
         no feature 'unicode_strings';
-        is(qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings');
+      SKIP: {
+            skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
+
+            is(qr/abc$locale/,    '(?^:abc(?^l:\b\v$))', 'Verify retains l when interpolated outside locale and unicode strings');
+        }
+
         is(qr/def$unicode/,    '(?^:def(?^u:\b\v$))', 'Verify retains u when interpolated outside locale and unicode strings');
 
-        use locale;
-        is(qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
-        is(qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale');
+      SKIP: {
+            skip 'No locale testing without d_setlocale', 2 if(!$Config{d_setlocale});
+
+             BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            is(qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
+            is(qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale');
+        }
     }
 
     {

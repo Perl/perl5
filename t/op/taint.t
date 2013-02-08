@@ -296,25 +296,43 @@ my $TEST = 'TEST';
     is($res, 1,        "$desc: res value");
     is($one, 'a',      "$desc: \$1 value");
 
-    $desc = "match with pattern tainted via locale";
+  SKIP: {
+        skip 'No locale testing without d_setlocale', 10 if(!$Config{d_setlocale});
 
-    $s = 'abcd';
-    { use locale; $res = $s =~ /(\w+)/; $one = $1; }
-    isnt_tainted($s,   "$desc: s not tainted");
-    isnt_tainted($res, "$desc: res not tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($res, 1,        "$desc: res value");
-    is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "match with pattern tainted via locale";
 
-    $desc = "match /g with pattern tainted via locale";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ /(\w+)/; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        isnt_tainted($res, "$desc: res not tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 1,        "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
 
-    $s = 'abcd';
-    { use locale; $res = $s =~ /(\w)/g; $one = $1; }
-    isnt_tainted($s,   "$desc: s not tainted");
-    isnt_tainted($res, "$desc: res not tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($res, 1,        "$desc: res value");
-    is($one, 'a',      "$desc: \$1 value");
+        $desc = "match /g with pattern tainted via locale";
+
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ /(\w)/g; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        isnt_tainted($res, "$desc: res not tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 1,        "$desc: res value");
+        is($one, 'a',      "$desc: \$1 value");
+    }
 
     $desc = "match with pattern tainted, list cxt";
 
@@ -339,27 +357,45 @@ my $TEST = 'TEST';
     is($res2,'b',      "$desc: res2 value");
     is($one, 'd',      "$desc: \$1 value");
 
-    $desc = "match with pattern tainted via locale, list cxt";
+  SKIP: {
+        skip 'No locale testing without d_setlocale', 12 if(!$Config{d_setlocale});
 
-    $s = 'abcd';
-    { use locale; ($res) = $s =~ /(\w+)/; $one = $1; }
-    isnt_tainted($s,   "$desc: s not tainted");
-    is_tainted($res,   "$desc: res tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($res, 'abcd',   "$desc: res value");
-    is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "match with pattern tainted via locale, list cxt";
 
-    $desc = "match /g with pattern tainted via locale, list cxt";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            ($res) = $s =~ /(\w+)/; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 'abcd',   "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
 
-    $s = 'abcd';
-    { use locale; ($res, $res2) = $s =~ /(\w)/g; $one = $1; }
-    isnt_tainted($s,   "$desc: s not tainted");
-    is_tainted($res,   "$desc: res tainted");
-    is_tainted($res2,  "$desc: res2 tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($res, 'a',      "$desc: res value");
-    is($res2,'b',      "$desc: res2 value");
-    is($one, 'd',      "$desc: \$1 value");
+        $desc = "match /g with pattern tainted via locale, list cxt";
+
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            ($res, $res2) = $s =~ /(\w)/g; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($res2,  "$desc: res2 tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 'a',      "$desc: res value");
+        is($res2,'b',      "$desc: res2 value");
+        is($one, 'd',      "$desc: \$1 value");
+    }
 
     $desc = "substitution with string tainted";
 
@@ -481,38 +517,63 @@ my $TEST = 'TEST';
     is($res, 'xyz',    "$desc: res value");
     is($one, 'abcd',   "$desc: \$1 value");
 
-    $desc = "substitution with pattern tainted via locale";
+  SKIP: {
+        skip 'No locale testing without d_setlocale', 18 if(!$Config{d_setlocale});
 
-    $s = 'abcd';
-    { use locale;  $res = $s =~ s/(\w+)/xyz/; $one = $1; }
-    is_tainted($s,     "$desc: s tainted");
-    isnt_tainted($res, "$desc: res not tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($s,  'xyz',     "$desc: s value");
-    is($res, 1,        "$desc: res value");
-    is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "substitution with pattern tainted via locale";
 
-    $desc = "substitution /g with pattern tainted via locale";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ s/(\w+)/xyz/; $one = $1;
+        }
+        is_tainted($s,     "$desc: s tainted");
+        isnt_tainted($res, "$desc: res not tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($s,  'xyz',     "$desc: s value");
+        is($res, 1,        "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
 
-    $s = 'abcd';
-    { use locale;  $res = $s =~ s/(\w)/x/g; $one = $1; }
-    is_tainted($s,     "$desc: s tainted");
-    is_tainted($res,   "$desc: res tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($s,  'xxxx',    "$desc: s value");
-    is($res, 4,        "$desc: res value");
-    is($one, 'd',      "$desc: \$1 value");
+        $desc = "substitution /g with pattern tainted via locale";
 
-    $desc = "substitution /r with pattern tainted via locale";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ s/(\w)/x/g; $one = $1;
+        }
+        is_tainted($s,     "$desc: s tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($s,  'xxxx',    "$desc: s value");
+        is($res, 4,        "$desc: res value");
+        is($one, 'd',      "$desc: \$1 value");
 
-    $s = 'abcd';
-    { use locale;  $res = $s =~ s/(\w+)/xyz/r; $one = $1; }
-    isnt_tainted($s,   "$desc: s not tainted");
-    is_tainted($res,   "$desc: res tainted");
-    is_tainted($one,   "$desc: \$1 tainted");
-    is($s,  'abcd',    "$desc: s value");
-    is($res, 'xyz',    "$desc: res value");
-    is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "substitution /r with pattern tainted via locale";
+
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ s/(\w+)/xyz/r; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($s,  'abcd',    "$desc: s value");
+        is($res, 'xyz',    "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
+    }
 
     $desc = "substitution with replacement tainted";
 
@@ -652,25 +713,43 @@ my $TEST = 'TEST';
 	is($res, 1,        "$desc: res value");
 	is($one, 'a',      "$desc: \$1 value");
 
-	$desc = "use re 'taint': match with pattern tainted via locale";
+  SKIP: {
+        skip 'No locale testing without d_setlocale', 10 if(!$Config{d_setlocale});
 
-	$s = 'abcd';
-	{ use locale; $res = $s =~ /(\w+)/; $one = $1; }
-	isnt_tainted($s,   "$desc: s not tainted");
-	isnt_tainted($res, "$desc: res not tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($res, 1,        "$desc: res value");
-	is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "use re 'taint': match with pattern tainted via locale";
 
-	$desc = "use re 'taint': match /g with pattern tainted via locale";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ /(\w+)/; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        isnt_tainted($res, "$desc: res not tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 1,        "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
 
-	$s = 'abcd';
-	{ use locale; $res = $s =~ /(\w)/g; $one = $1; }
-	isnt_tainted($s,   "$desc: s not tainted");
-	isnt_tainted($res, "$desc: res not tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($res, 1,        "$desc: res value");
-	is($one, 'a',      "$desc: \$1 value");
+        $desc = "use re 'taint': match /g with pattern tainted via locale";
+
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ /(\w)/g; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        isnt_tainted($res, "$desc: res not tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 1,        "$desc: res value");
+        is($one, 'a',      "$desc: \$1 value");
+    }
 
 	$desc = "use re 'taint': match with pattern tainted, list cxt";
 
@@ -695,27 +774,45 @@ my $TEST = 'TEST';
 	is($res2,'b',      "$desc: res2 value");
 	is($one, 'd',      "$desc: \$1 value");
 
-	$desc = "use re 'taint': match with pattern tainted via locale, list cxt";
+  SKIP: {
+        skip 'No locale testing without d_setlocale', 12 if(!$Config{d_setlocale});
 
-	$s = 'abcd';
-	{ use locale; ($res) = $s =~ /(\w+)/; $one = $1; }
-	isnt_tainted($s,   "$desc: s not tainted");
-	is_tainted($res,   "$desc: res tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($res, 'abcd',   "$desc: res value");
-	is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "use re 'taint': match with pattern tainted via locale, list cxt";
 
-	$desc = "use re 'taint': match /g with pattern tainted via locale, list cxt";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            ($res) = $s =~ /(\w+)/; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 'abcd',   "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
 
-	$s = 'abcd';
-	{ use locale; ($res, $res2) = $s =~ /(\w)/g; $one = $1; }
-	isnt_tainted($s,   "$desc: s not tainted");
-	is_tainted($res,   "$desc: res tainted");
-	is_tainted($res2,  "$desc: res2 tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($res, 'a',      "$desc: res value");
-	is($res2,'b',      "$desc: res2 value");
-	is($one, 'd',      "$desc: \$1 value");
+        $desc = "use re 'taint': match /g with pattern tainted via locale, list cxt";
+
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            ($res, $res2) = $s =~ /(\w)/g; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($res2,  "$desc: res2 tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($res, 'a',      "$desc: res value");
+        is($res2,'b',      "$desc: res2 value");
+        is($one, 'd',      "$desc: \$1 value");
+    }
 
 	$desc = "use re 'taint': substitution with string tainted";
 
@@ -838,38 +935,63 @@ my $TEST = 'TEST';
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
 
-	$desc = "use re 'taint': substitution with pattern tainted via locale";
+  SKIP: {
+        skip 'No locale testing without d_setlocale', 18 if(!$Config{d_setlocale});
 
-	$s = 'abcd';
-	{ use locale;  $res = $s =~ s/(\w+)/xyz/; $one = $1; }
-	is_tainted($s,     "$desc: s tainted");
-	isnt_tainted($res, "$desc: res not tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($s,  'xyz',     "$desc: s value");
-	is($res, 1,        "$desc: res value");
-	is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "use re 'taint': substitution with pattern tainted via locale";
 
-	$desc = "use re 'taint': substitution /g with pattern tainted via locale";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ s/(\w+)/xyz/; $one = $1;
+        }
+        is_tainted($s,     "$desc: s tainted");
+        isnt_tainted($res, "$desc: res not tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($s,  'xyz',     "$desc: s value");
+        is($res, 1,        "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
 
-	$s = 'abcd';
-	{ use locale;  $res = $s =~ s/(\w)/x/g; $one = $1; }
-	is_tainted($s,     "$desc: s tainted");
-	is_tainted($res,   "$desc: res tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($s,  'xxxx',    "$desc: s value");
-	is($res, 4,        "$desc: res value");
-	is($one, 'd',      "$desc: \$1 value");
+        $desc = "use re 'taint': substitution /g with pattern tainted via locale";
 
-	$desc = "use re 'taint': substitution /r with pattern tainted via locale";
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ s/(\w)/x/g; $one = $1;
+        }
+        is_tainted($s,     "$desc: s tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($s,  'xxxx',    "$desc: s value");
+        is($res, 4,        "$desc: res value");
+        is($one, 'd',      "$desc: \$1 value");
 
-	$s = 'abcd';
-	{ use locale;  $res = $s =~ s/(\w+)/xyz/r; $one = $1; }
-	isnt_tainted($s,   "$desc: s not tainted");
-	is_tainted($res,   "$desc: res tainted");
-	is_tainted($one,   "$desc: \$1 tainted");
-	is($s,  'abcd',    "$desc: s value");
-	is($res, 'xyz',    "$desc: res value");
-	is($one, 'abcd',   "$desc: \$1 value");
+        $desc = "use re 'taint': substitution /r with pattern tainted via locale";
+
+        $s = 'abcd';
+        {
+            BEGIN {
+                if($Config{d_setlocale}) {
+                    require locale; import locale;
+                }
+            }
+            $res = $s =~ s/(\w+)/xyz/r; $one = $1;
+        }
+        isnt_tainted($s,   "$desc: s not tainted");
+        is_tainted($res,   "$desc: res tainted");
+        is_tainted($one,   "$desc: \$1 tainted");
+        is($s,  'abcd',    "$desc: s value");
+        is($res, 'xyz',    "$desc: res value");
+        is($one, 'abcd',   "$desc: \$1 value");
+    }
 
 	$desc = "use re 'taint': substitution with replacement tainted";
 
@@ -2188,9 +2310,15 @@ pass("no death when TARG of ref is tainted");
     isnt_tainted $$, "PID not tainted when read in tainted expression";
 }
 
-{
+SKIP: {
+    skip 'No locale testing without d_setlocale', 4 if(!$Config{d_setlocale});
+
     use feature 'fc';
-    use locale;
+    BEGIN {
+        if($Config{d_setlocale}) {
+            require locale; import locale;
+        }
+    }
     my ($latin1, $utf8) = ("\xDF") x 2;
     utf8::downgrade($latin1);
     utf8::upgrade($utf8);

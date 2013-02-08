@@ -6,6 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    require Config; import Config;
     skip_all_if_miniperl("no dynamic loading on miniperl, no Encode nor POSIX");
 }
 
@@ -405,18 +406,20 @@ sub pairs (@) {
 }
 
 my @charsets = qw(d u a aa);
-my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
-if ($current_locale eq 'C') {
-    use locale;
+if($Config{d_setlocale}) {
+    my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
+    if ($current_locale eq 'C') {
+        require locale; import locale;
 
-    # Some locale implementations don't have the range 128-255 characters all
-    # mean nothing.  Skip the locale tests in that situation.
-    for my $i (128 .. 255) {
-        my $char = chr($i);
-        goto bad_locale if uc($char) ne $char || lc($char) ne $char;
+        # Some locale implementations don't have the range 128-255 characters all
+        # mean nothing.  Skip the locale tests in that situation.
+        for my $i (128 .. 255) {
+            my $char = chr($i);
+            goto bad_locale if uc($char) ne $char || lc($char) ne $char;
+        }
+        push @charsets, 'l';
+      bad_locale:
     }
-    push @charsets, 'l';
-bad_locale:
 }
 
 # Finally ready to do the tests

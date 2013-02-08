@@ -3,6 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require Config; import Config;
     require './test.pl';
 }
 
@@ -35,11 +36,11 @@ $testcases{'[:space:]'} = $testcases{'\s'};
 $testcases{'[:word:]'} = $testcases{'\w'};
 
 my @charsets = qw(a d u aa);
-if (! is_miniperl()) {
+if (! is_miniperl() && $Config{d_setlocale}) {
     require POSIX;
     my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
     if ($current_locale eq 'C') {
-        use locale;
+        require locale; import locale;
 
         # Some locale implementations don't have the 128-255 characters all
         # mean nothing.  Skip the locale tests in that situation

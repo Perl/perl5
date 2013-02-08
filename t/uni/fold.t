@@ -7,6 +7,7 @@ use warnings;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require Config; import Config;
     require './test.pl';
 }
 
@@ -426,8 +427,13 @@ foreach my $test_ref (@CF) {
         utf8::downgrade($latin1); #No-op, but doesn't hurt
         utf8::upgrade($utf8);
         is(fc($latin1), fc($utf8), "fc() gives the same results for \\x{$_} in Latin-1 and UTF-8 under unicode_strings");
-        {
-            use locale;
+        SKIP: {
+              skip 'No locale testing without d_setlocale', 2 if(!$Config{d_setlocale});
+              BEGIN {
+                  if($Config{d_setlocale}) {
+                      require locale; import locale;
+                  }
+              }
             is(fc($latin1), lc($latin1), "use locale; fc(qq{\\x{$_}}), lc(qq{\\x{$_}}) when qq{\\x{$_}} is in latin-1");
             is(fc($utf8), lc($utf8), "use locale; fc(qq{\\x{$_}}), lc(qq{\\x{$_}}) when qq{\\x{$_}} is in latin-1");
         }

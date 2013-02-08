@@ -2,6 +2,7 @@
 
 use strict;
 use Test::More;
+use Config;
 
 use XS::APItest;
 
@@ -11,17 +12,24 @@ sub truth($) {  # Converts values so is() works
     return (shift) ? 1 : 0;
 }
 
-require POSIX;
-my $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
-if (defined $locale && $locale eq 'C') {
-    use locale;
+my $locale;
+if($Config{d_setlocale}) {
+    require POSIX;
+    $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
+    if (defined $locale && $locale eq 'C') {
+        BEGIN {
+            if($Config{d_setlocale}) {
+                require locale; import locale; # make \w work right in non-ASCII lands
+            }
+        }
 
-    # Some locale implementations don't have the 128-255 characters all
-    # mean nothing.  Skip the locale tests in that situation
-    for my $i (128 .. 255) {
-        if (chr($i) =~ /[[:print:]]/) {
-            undef $locale;
-            last;
+        # Some locale implementations don't have the 128-255 characters all
+        # mean nothing.  Skip the locale tests in that situation
+        for my $i (128 .. 255) {
+            if (chr($i) =~ /[[:print:]]/) {
+                undef $locale;
+                last;
+            }
         }
     }
 }
@@ -138,7 +146,7 @@ foreach my $name (sort keys %properties) {
             }
 
             if (defined $locale) {
-                use locale;
+                require locale; import locale;
 
                 $ret = truth eval "test_is${function}_LC($i)";
                 if ($@) {
@@ -160,7 +168,7 @@ foreach my $name (sort keys %properties) {
         }
 
         if (defined $locale && $name ne 'vertws') {
-            use locale;
+            require locale; import locale;
 
             $ret = truth eval "test_is${function}_LC_uvchr('$i')";
             if ($@) {
@@ -184,7 +192,7 @@ foreach my $name (sort keys %properties) {
         }
 
         if ($name ne 'vertws' && defined $locale) {
-            use locale;
+            require locale; import locale;
 
             $ret = truth eval "test_is${function}_LC_utf8('$char')";
             if ($@) {
