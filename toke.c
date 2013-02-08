@@ -3762,7 +3762,7 @@ S_scan_const(pTHX_ char *start)
 		*d++ = ASCII_TO_NEED(has_utf8,'\033');
 		break;
 	    case 'a':
-		*d++ = ASCII_TO_NEED(has_utf8,'\007');
+		*d++ = NATIVE_TO_NEED(has_utf8,'\a');
 		break;
 	    } /* end switch */
 
