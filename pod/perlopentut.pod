@@ -4,45 +4,18 @@ perlopentut - tutorial on opening things in Perl
 
 =head1 DESCRIPTION
 
-Perl has two simple, built-in ways to open files: the shell way for
-convenience, and the C way for precision.  The shell way has 2- and
-3-argument forms, which have different semantics for handling the open mode
-and filename.  The 3-argument form should always be used because the
-legacy form can lead to insecure code if the filename contains one of the
-special characters that control the mode.  Therefore the tutorial won't
-show examples of the 2-argument form which should be avoided.
-
-=head1 Open E<agrave> la shell
-
-Perl's C<open> function was designed to mimic the way command-line
-redirection in the shell works.  Here are some basic examples
-from the shell:
-
-    $ myprogram file1 file2 file3
-    $ myprogram    <  inputfile
-    $ myprogram    >  outputfile
-    $ myprogram    >> outputfile
-    $ myprogram    |  otherprogram
-    $ otherprogram |  myprogram
-
-And here are some more advanced examples:
-
-    $ otherprogram      | myprogram f1 - f2
-    $ otherprogram 2>&1 | myprogram -
-    $ myprogram     <&3
-    $ myprogram     >&4
-
-Programmers accustomed to constructs like those above can take comfort
-in learning that Perl directly supports these familiar constructs using
-virtually the same syntax as the shell.
+Perl has a number of ways to open handles to files and external programs. If
+you are familiar with shell programming, much of Perl's syntax will be
+familiar.
 
 =head2 Simple Opens
 
-The C<open> function takes three arguments: the first is a filehandle,
-the second defines the mode and the third what to open.  C<open> returns true
-when it works or returns a false value when it fails and sets the special
-variable C<$!> to reflect the system error.  If the filehandle was previously
-opened, it will be implicitly closed first.
+The C<open> function takes three arguments: the first is a filehandle, the
+second defines the mode and the third tells Perl what to open. The C<open>
+builtin returns true when it succeeds and returns a false value when it
+fails. When it fails, it also sets the special variable C<$!> to the value of
+the system error for the failure. If the filehandle was previously opened, it
+will be implicitly closed first.
 
 For example:
 
