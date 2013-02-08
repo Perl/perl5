@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 
 require Exporter;
 
@@ -3540,7 +3540,8 @@ sub UnicodeVersion {
 The difference between a block and a script is that scripts are closer
 to the linguistic notion of a set of code points required to present
 languages, while block is more of an artifact of the Unicode code point
-numbering and separation into blocks of (mostly) 256 code points.
+numbering and separation into blocks of consecutive code points (so far the
+size of a block is some multiple of 16, like 128 or 256).
 
 For example the Latin B<script> is spread over several B<blocks>, such
 as C<Basic Latin>, C<Latin 1 Supplement>, C<Latin Extended-A>, and
