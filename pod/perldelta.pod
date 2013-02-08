@@ -280,6 +280,13 @@ instead of being output on STDOUT.
 
 =item *
 
+L<File::Temp> has been upgraded from version 0.22 to 0.22_90
+
+Fixes various bugs involving directory removal.  Defers unlinking tempfiles if
+the initial unlink fails, which fixes problems on NFS.
+
+=item *
+
 L<PerlIO::scalar> has been upgraded from version 0.15 to 0.16.
 
 The buffer scalar supplied may now only contain code pounts 0xFF or

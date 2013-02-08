@@ -1162,6 +1162,7 @@ cpan/File-Temp/t/lock.t		See if File::Temp works
 cpan/File-Temp/t/mktemp.t	See if File::Temp works
 cpan/File-Temp/t/object.t	See if File::Temp works
 cpan/File-Temp/t/posix.t	See if File::Temp works
+cpan/File-Temp/t/rmtree.t	See if File::Temp works
 cpan/File-Temp/t/security.t	See if File::Temp works
 cpan/File-Temp/t/seekable.t	See if File::Temp works
 cpan/File-Temp/t/tempfile.t	See if File::Temp works
