@@ -48,7 +48,7 @@ reference to it in the first argument, like so:
     open( my $in, '<', $infile )
         or die "Couldn't read $infile: $!";
     while ( <$in> ) {
-	    # do something with $_
+        # do something with $_
     }
     close $in;
 
@@ -62,8 +62,8 @@ Another convenient behavior is that an indirect filehandle automatically
 closes when there are no more references to it:
 
     sub firstline {
-	    open( my $in, '<', shift ) && return scalar <$in>;
-	    # no close() required
+        open( my $in, '<', shift ) && return scalar <$in>;
+        # no close() required
     }
 
 Indirect filehandles also make it easy to pass filehandles to and return
@@ -240,7 +240,7 @@ Or the standard Getopt::Long module to permit named arguments:
     GetOptions( "verbose"  => \$verbose,        # --verbose
                 "Debug"    => \$debug,          # --Debug
                 "output=s" => \$output );
-	    # --output=somestring or --output somestring
+        # --output=somestring or --output somestring
 
 Another reason for preprocessing arguments is to make an empty
 argument list default to all files:
@@ -580,10 +580,10 @@ You don't have to accept the STDIN and STDOUT you were given.  You are
 welcome to reopen them if you'd like.
 
     open(STDIN, '<', 'datafile')
-	    or die "can't open datafile: $!";
+        or die "can't open datafile: $!";
 
     open(STDOUT, '>', 'output')
-	    or die "can't open output: $!";
+        or die "can't open output: $!";
 
 And then these can be accessed directly or passed on to subprocesses.
 This makes it look as though the program were initially invoked
@@ -593,7 +593,7 @@ It's probably more interesting to connect these to pipes.  For example:
 
     $pager = $ENV{PAGER} || "(less || more)";
     open(STDOUT, '|-', $pager)
-	    or die "can't fork a pager: $!";
+        or die "can't fork a pager: $!";
 
 This makes it appear as though your program were called with its STDOUT
 already piped into your pager.  You can also use this kind of thing
@@ -695,7 +695,7 @@ described in L<perlfaq8/"How do I read and write the serial port?">
 It's often enough to open them carefully:
 
     sysopen(my $ttyin, "/dev/ttyS1", O_RDWR | O_NDELAY | O_NOCTTY)
-		# (O_NOCTTY no longer needed on POSIX systems)
+        # (O_NOCTTY no longer needed on POSIX systems)
         or die "can't open /dev/ttyS1: $!";
     open(my $ttyout, '+>&', $ttyin)
         or die "can't dup /dev/ttyS1: $!";
@@ -838,11 +838,11 @@ if you're going to be blocking:
     open(my $fh, '<', 'filename')
         or die "can't open filename: $!";
     unless (flock($fh, LOCK_SH | LOCK_NB)) {
-	    $| = 1;
-	    print "Waiting for lock...";
-	    flock($fh, LOCK_SH)
+        $| = 1;
+        print "Waiting for lock...";
+        flock($fh, LOCK_SH)
             or die "can't lock filename: $!";
-	    print "got it.\n"
+        print "got it.\n"
     }
     # now read from $fh
 
