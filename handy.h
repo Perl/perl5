@@ -850,7 +850,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || !(((WIDEST_UTYPE)(c)) & ~0xFF))
 
 #ifdef EBCDIC
-#   define isASCII(c)    (FITS_IN_8_BITS(c) && (NATIVE_TO_UNI((U8) (c)) < 128))
+#   define isASCII(c)    (FITS_IN_8_BITS(c)                      \
+                         && (NATIVE_TO_LATIN1((U8) (c)) < 128))
 #else
 #   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
 #endif
@@ -989,7 +990,7 @@ EXTCONST U32 PL_charclass[];
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define _CC_mask(classnum) (1U << (classnum))
 #   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
-                && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(classnum)))
+                && (PL_charclass[(U8) NATIVE_TO_LATIN1(c)] & _CC_mask(classnum)))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
      * ASCII. */
@@ -998,7 +999,7 @@ EXTCONST U32 PL_charclass[];
     /* The _A version makes sure that both the desired bit and the ASCII bit
      * are present */
 #   define _generic_isCC_A(c, classnum) (FITS_IN_8_BITS(c) \
-        && ((PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask_A(classnum)) \
+        && ((PL_charclass[(U8) NATIVE_TO_LATIN1(c)] & _CC_mask_A(classnum)) \
                                 == _CC_mask_A(classnum)))
 
 #   define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
@@ -1019,7 +1020,7 @@ EXTCONST U32 PL_charclass[];
 
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
+#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_LATIN1(c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
 
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #   define _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
@@ -1094,19 +1095,19 @@ EXTCONST U32 PL_charclass[];
        * for backwards compatibility */
     /* ALPHAU includes Unicode semantics for latin1 characters.  It has an extra
      * >= AA test to speed up ASCII-only tests at the expense of the others */
-#   define isALPHA_L1(c) (isALPHA(c) || (NATIVE_TO_UNI((U8) c) >= 0xAA \
-	&& ((NATIVE_TO_UNI((U8) c) >= 0xC0 \
-             && NATIVE_TO_UNI((U8) c) != 0xD7 && NATIVE_TO_UNI((U8) c) != 0xF7) \
-	    || NATIVE_TO_UNI((U8) c) == 0xAA \
-	    || NATIVE_TO_UNI((U8) c) == 0xB5 \
-	    || NATIVE_TO_UNI((U8) c) == 0xBA)))
+#   define isALPHA_L1(c) (isALPHA(c) || (NATIVE_TO_LATIN1((U8) c) >= 0xAA \
+	&& ((NATIVE_TO_LATIN1((U8) c) >= 0xC0 \
+             && NATIVE_TO_LATIN1((U8) c) != 0xD7 && NATIVE_TO_LATIN1((U8) c) != 0xF7) \
+	    || NATIVE_TO_LATIN1((U8) c) == 0xAA \
+	    || NATIVE_TO_LATIN1((U8) c) == 0xB5 \
+	    || NATIVE_TO_LATIN1((U8) c) == 0xBA)))
 #   define isCHARNAME_CONT(c) (isWORDCHAR_L1(c)                         \
                                || (c) == ' '                            \
                                || (c) == '-'                            \
                                || (c) == '('                            \
                                || (c) == ')'                            \
                                || (c) == ':'                            \
-                               || NATIVE_TO_UNI((U8) c) == 0xA0)
+                               || NATIVE_TO_LATIN1((U8) c) == 0xA0)
 #endif
 
 /* Macros that differ between EBCDIC and ASCII.  Where C89 defines a function,
@@ -1118,7 +1119,7 @@ EXTCONST U32 PL_charclass[];
 #ifdef EBCDIC
 #   define isALPHA(c)	isalpha(c)
 #   define isALPHANUMERIC(c)	isalnum(c)
-#   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_UNI(c) == 0xA0)
+#   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_LATIN1(c) == 0xA0)
 #   define isCNTRL(c)	iscntrl(c)
 #   define isDIGIT(c)	isdigit(c)
 #   define isGRAPH(c)	isgraph(c)
@@ -1175,19 +1176,18 @@ EXTCONST U32 PL_charclass[];
 /* Use table lookup for speed; return error character for input
  * out-of-range */
 #define toLOWER_LATIN1(c)    ((! FITS_IN_8_BITS(c))                        \
-                             ? (c)                                           \
-                             : UNI_TO_NATIVE(PL_latin1_lc[                 \
-                                               NATIVE_TO_UNI( (U8) (c)) ]))
+                             ? (c)                                         \
+                             : LATIN1_TO_NATIVE(PL_latin1_lc[              \
+                                            NATIVE_TO_LATIN1( (U8) (c)) ]))
 #define toLOWER_L1(c)    toLOWER_LATIN1(c)  /* Synonym for consistency */
 
 /* Modified uc.  Is correct uc except for three non-ascii chars which are
  * all mapped to one of them, and these need special handling; error
  * character for input out-of-range */
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
-                               ? (c)                                         \
-                               : UNI_TO_NATIVE(PL_mod_latin1_uc[           \
-                                               NATIVE_TO_UNI( (U8) (c)) ]))
-
+                               ? (c)                                       \
+                               : LATIN1_TO_NATIVE(PL_mod_latin1_uc[        \
+                                            NATIVE_TO_LATIN1( (U8) (c)) ]))
 #ifdef USE_NEXT_CTYPE
 
 #  define isALPHANUMERIC_LC(c)	NXIsAlNum((unsigned int)(c))
@@ -1498,7 +1498,7 @@ EXTCONST U32 PL_charclass[];
  * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII, except that they don't
  * necessarily mean the same characters, e.g. CTRL-D is 4 on both systems, but
  * that is EOT on ASCII;  ST on EBCDIC */
-#  define toCTRL(c)    (toUPPER(NATIVE_TO_UNI(c)) ^ 64)
+#  define toCTRL(c)    (toUPPER(NATIVE_TO_LATIN1(c)) ^ 64)
 
 /* Line numbers are unsigned, 32 bits. */
 typedef U32 line_t;

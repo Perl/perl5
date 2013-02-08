@@ -1413,7 +1413,7 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	p += 2;
 	if (uv < 0x80) {
 #ifdef EBCDIC
-	    *d++ = UNI_TO_NATIVE(uv);
+	    *d++ = LATIN1_TO_NATIVE(uv);
 #else
 	    *d++ = (U8)uv;
 #endif
@@ -4610,7 +4610,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		    to_utf8_fold(p1, foldbuf1, &n1);
 		}
 		else {  /* Not utf8, get utf8 fold */
-		    to_uni_fold(NATIVE_TO_UNI(*p1), foldbuf1, &n1);
+		    to_uni_fold(NATIVE_TO_LATIN1(*p1), foldbuf1, &n1);
 		}
 		f1 = foldbuf1;
 	    }
@@ -4655,7 +4655,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		    to_utf8_fold(p2, foldbuf2, &n2);
 		}
 		else {
-		    to_uni_fold(NATIVE_TO_UNI(*p2), foldbuf2, &n2);
+		    to_uni_fold(NATIVE_TO_LATIN1(*p2), foldbuf2, &n2);
 		}
 		f2 = foldbuf2;
 	    }
