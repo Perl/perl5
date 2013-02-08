@@ -227,6 +227,10 @@ PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, I32 key, SV *val)
 #define PERL_ARGS_ASSERT_AV_STORE	\
 	assert(av)
 
+/* PERL_CALLCONV I32	Perl_av_tindex(pTHX_ AV *av)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1); */
+
 PERL_STATIC_INLINE I32	S_av_top_index(pTHX_ AV *av)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

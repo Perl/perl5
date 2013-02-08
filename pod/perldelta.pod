@@ -494,6 +494,12 @@ well.
 
 =item *
 
+Synonyms for the misleadingly named C<av_len()> has been created:
+C<av_top_index()> and C<av_tindex>.  All three of these return the
+number of the highest index in the array, not the number of elements it
+contains.  (The name C<av_top> which was introduced in Perl v.5.17.8 has
+been removed.)
+
 XXX
 
 =back

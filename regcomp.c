@@ -11560,7 +11560,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
     stack = newAV();
 
     while (RExC_parse < RExC_end) {
-        I32 top_index = av_top_index(stack);
+        I32 top_index = av_tindex(stack);
         SV** top_ptr;
         SV* current = NULL;
 
@@ -11577,7 +11577,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
         switch (curchar) {
 
             case '?':
-                if (av_top_index(stack) >= 0   /* This makes sure that we can
+                if (av_tindex(stack) >= 0   /* This makes sure that we can
                                                safely subtract 1 from
                                                RExC_parse in the next clause.
                                                If we have something on the
@@ -11814,10 +11814,10 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
         RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
     }
 
-    if (av_top_index(stack) < 0   /* Was empty */
+    if (av_tindex(stack) < 0   /* Was empty */
         || ((final = av_pop(stack)) == NULL)
         || ! IS_OPERAND(final)
-        || av_top_index(stack) >= 0)  /* More left on stack */
+        || av_tindex(stack) >= 0)  /* More left on stack */
     {
         vFAIL("Incomplete expression within '(?[ ])'");
     }

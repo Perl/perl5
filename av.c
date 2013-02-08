@@ -766,6 +766,8 @@ array is C<av_top_index(av) + 1>.  Returns -1 if the array is empty.
 
 The Perl equivalent for this is C<$#myarray>.
 
+(A slightly shorter form is C<av_tindex>.)
+
 =for apidoc av_len
 
 Same as L</av_top_index>.  Returns the highest index in the array.  Note that the
