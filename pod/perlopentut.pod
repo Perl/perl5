@@ -19,9 +19,12 @@ will be implicitly closed first.
 
 For example:
 
-    open(my $info,    '<',  'datafile') or die("can't open datafile: $!");
-    open(my $results, '>',  'runstats') or die("can't open runstats: $!");
-    open(my $log,     '>>', 'logfile ') or die("can't open logfile:  $!");
+    open(my $info,    '<',  'datafile')
+        or die("can't open datafile: $!");
+    open(my $results, '>',  'runstats')
+        or die("can't open runstats: $!");
+    open(my $log,     '>>', 'logfile ')
+        or die("can't open logfile:  $!");
 
 The other important thing to notice is that, just as in the shell,
 any whitespace before or after the filename is ignored.
