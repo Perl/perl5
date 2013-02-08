@@ -546,7 +546,6 @@ you'll get warnings more like
 
     Some warning at scriptname line 29, </etc/motd> line 7.
 
-TODO: move to perlhysterical
 =head2 Single Argument Open
 
 Remember how we said that Perl's open took two arguments?  That was a
