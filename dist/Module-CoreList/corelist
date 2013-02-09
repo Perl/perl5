@@ -14,6 +14,7 @@ See L<Module::CoreList> for one.
     corelist [-a|-d] <ModuleName> | /<ModuleRegex>/ [<ModuleVersion>] ...
     corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleRegex>/ ] ...
     corelist [-r <PerlVersion>] ...
+    corelist --feature <FeatureName> [<FeatureName>] ...
     corelist --diff PerlVersion PerlVersion
 
 =head1 OPTIONS
@@ -111,6 +112,10 @@ lists all of the perl releases and when they were released
 
 If you pass a perl version you get the release date for that version only.
 
+=item --feature, -f
+
+lists the first version bundle of each named feature given
+
 =back
 
 As a special case, if you specify the module name C<Unicode>, you'll get
@@ -130,7 +135,7 @@ my %Opts;
 
 GetOptions(
     \%Opts,
-    qw[ help|?! man! r|release:s v|version:s a! d diff|D ]
+    qw[ help|?! man! r|release:s v|version:s a! d diff|D feature|f ]
 );
 
 pod2usage(1) if $Opts{help};
@@ -211,6 +216,47 @@ if ($Opts{diff}) {
               :                          $diff->{right};
 
         printf "%-35s %10s %10s\n", $lib, $was, $now;
+    }
+    exit(0);
+}
+
+if ($Opts{feature}) {
+    die "\nprovide at least one feature name to --feature\n"
+        unless @ARGV;
+
+    no warnings 'once';
+    require feature;
+
+    my %feature2version;
+    my @bundles =  map { $_->[0] }
+                  sort { $b->[1] <=> $a->[1] }
+                   map { [$_, numify_version($_)] }
+                  grep { not /[^0-9.]/ }
+                  keys %feature::feature_bundle;
+
+    for my $version (@bundles) {
+        $feature2version{$_} = $version =~ /^\d\.\d+$/ ? "$version.0" : $version
+            for @{ $feature::feature_bundle{$version} };
+    }
+
+    # allow internal feature names, just in case someone gives us __SUB__
+    # instead of current_sub.
+    while (my ($name, $internal) = each %feature::feature) {
+        $internal =~ s/^feature_//;
+        $feature2version{$internal} = $feature2version{$name}
+            if $feature2version{$name};
+    }
+
+    my $when = maxstr(values %Module::CoreList::released);
+    print "\n","Data for $when\n";
+
+    for my $feature (@ARGV) {
+        print "feature \"$feature\" ",
+            exists $feature2version{$feature}
+                ? "was first released with the perl "
+                  . format_perl_version(numify_version($feature2version{$feature}))
+                  . " feature bundle\n"
+                : "doesn't exist (or so I think)\n";
     }
     exit(0);
 }
