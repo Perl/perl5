@@ -6957,10 +6957,9 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   if (dirend == NULL) dirend = strchr(spec,':');
   if (dirend == NULL) {
     while (*cp2) {
-        if (*cp2 == '^')
-            cp2++;
-        else 
-            *(cp1++) = *(cp2++);
+        int outchars_added;
+        cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added);
+        cp1 += outchars_added;
     }
     *cp1 = '\0';    
     if (vms_debug_fileify) {
@@ -7056,9 +7055,9 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       *(cp1++) = '/';
     }
     if ((*cp2 == '^')) {
-	/* EFS file escape, pass the next character as is */
-	/* Fix me: HEX encoding for Unicode not implemented */
-	cp2++;
+        int outchars_added;
+        cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added);
+        cp1 += outchars_added;
     }
     else if ( *cp2 == '.') {
       if (*(cp2+1) == '.' && *(cp2+2) == '.') {
@@ -7118,8 +7117,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   }
   /* Translate the rest of the filename. */
   while (*cp2) {
-      int dot_seen;
-      dot_seen = 0;
+      int dot_seen = 0, outchars_added;
       switch(*cp2) {
       /* Fixme - for compatibility with the CRTL we should be removing */
       /* spaces from the file specifications, but this may show that */
@@ -7129,16 +7127,8 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
           *(cp1++) = '?';
           break;
       case '^':
-          /* Fix me hex expansions not implemented */
-          cp2++;  /* '^.' --> '.' and other. */
-          if (*cp2) {
-              if (*cp2 == '_') {
-                  cp2++;
-                  *(cp1++) = ' ';
-              } else {
-                  *(cp1++) = *(cp2++);
-              }
-          }
+          cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added);
+          cp1 += outchars_added;
           break;
       case ';':
           if (decc_filename_unix_no_version) {
