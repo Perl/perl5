@@ -221,6 +221,9 @@ if ($Opts{diff}) {
 }
 
 if ($Opts{feature}) {
+    die "\n--feature is only available with perl v5.9.5 or greater\n"
+      if $] < 5.009005;
+
     die "\nprovide at least one feature name to --feature\n"
         unless @ARGV;
 
