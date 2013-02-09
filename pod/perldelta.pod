@@ -388,13 +388,14 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<corelist>
 
 =over 4
 
 =item *
 
-XXX
+Added C<--feature> switch which lists the first version bundle of each
+named feature given.
 
 =back
 
