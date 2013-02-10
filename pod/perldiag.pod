@@ -3862,7 +3862,7 @@ that a method requires a package that has not been loaded.
 =item Perl folding rules are not up-to-date for 0x%X; please use the perlbug 
 utility to report; in regex; marked by <-- HERE in m/%s/
 
-(W regexp, deprecated) You used a regular expression with
+(D regexp, deprecated) You used a regular expression with
 case-insensitive matching, and there is a bug in Perl in which the
 built-in regular expression folding rules are not accurate.  This may
 lead to incorrect results.  Please report this as a bug using the

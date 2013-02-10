@@ -312,10 +312,17 @@ sub check_file {
       next;
     }
 
+    # Try to guess what the severity should be.  In the case of
+    # Perl_ck_warner and other _ck_ functions, we can tell whether it is
+    # a severe/default warning or no by the _d suffix.  In the case of
+    # other warn functions we cannot tell, because Perl_warner may be pre-
+    # ceded by if(ckWARN) or if(ckWARN_d).
     my $severity = !$routine                   ? '[PFX]'
                  :  $routine =~ /warn.*_d\z/   ? '[DS]'
+                 :  $routine =~ /ck_warn/      ?  'W'
                  :  $routine =~ /warn/         ? '[WDS]'
-                 :  $routine =~ /ckWARN\d*reg/ ? '[WDS]'
+                 :  $routine =~ /ckWARN.*dep/  ?  'D'
+                 :  $routine =~ /ckWARN\d*reg/ ?  'W'
                  :  $routine =~ /vWARN\d/      ? '[WDS]'
                  :                             '[PFX]';
     my $categories;
@@ -405,7 +412,9 @@ sub check_message {
           if $entries{$key}{cattodo};
 
         like $entries{$key}{severity}, $qr,
-          "severity is one of $severity for $key";
+          $severity =~ /\[/
+            ? "severity is one of $severity for $key"
+            : "severity is $severity for $key";
 
         is $entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
