@@ -112,6 +112,11 @@ PERL_CALLCONV SV *	Perl_amagic_deref_call(pTHX_ SV *ref, int method)
 	assert(ref)
 
 PERL_CALLCONV bool	Perl_amagic_is_enabled(pTHX_ int method);
+PERL_STATIC_INLINE void	S_append_utf8_from_native_byte(const U8 byte, U8** dest)
+			__attribute__nonnull__(2);
+#define PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE	\
+	assert(dest)
+
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

@@ -2316,6 +2316,8 @@ iR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * con
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
 #endif
 
+AiMn	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
+
 Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \
 				|const I32 flags

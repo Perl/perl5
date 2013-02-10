@@ -1376,13 +1376,8 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
     dst = d;
 
     while (s < send) {
-        const UV uv = NATIVE_TO_ASCII(*s++);
-        if (UNI_IS_INVARIANT(uv))
-            *d++ = (U8)UTF_TO_NATIVE(uv);
-        else {
-            *d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
-            *d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
-        }
+        append_utf8_from_native_byte(*s, &d);
+        s++;
     }
     *d = '\0';
     *len = d-dst;

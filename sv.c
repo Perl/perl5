@@ -3422,13 +3422,8 @@ must_be_utf8:
 		}
 
 		while (t < e) {
-		    const UV uv = NATIVE8_TO_UNI(*t++);
-		    if (UNI_IS_INVARIANT(uv))
-			*d++ = (U8)UNI_TO_NATIVE(uv);
-		    else {
-			*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
-			*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
-		    }
+                    append_utf8_from_native_byte(*t, &d);
+                    t++;
 		}
 		*d = '\0';
 		SvPV_free(sv); /* No longer using pre-existing string */
@@ -5200,13 +5195,8 @@ Perl_sv_catpvn_flags(pTHX_ SV *const dsv, const char *sstr, const STRLEN slen, c
 	d = (U8 *)SvPVX(dsv) + dlen;
 
 	while (sstr < send) {
-	    const UV uv = NATIVE_TO_ASCII((U8)*sstr++);
-	    if (UNI_IS_INVARIANT(uv))
-		*d++ = (U8)UTF_TO_NATIVE(uv);
-	    else {
-		*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
-		*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
-	    }
+            append_utf8_from_native_byte(*sstr, &d);
+	    sstr++;
 	}
 	SvCUR_set(dsv, d-(const U8 *)SvPVX(dsv));
     }

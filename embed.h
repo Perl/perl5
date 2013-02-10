@@ -41,6 +41,7 @@
 #define _to_utf8_upper_flags(a,b,c,d,e)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e)
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
+#define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
 #define atfork_lock		Perl_atfork_lock
 #define atfork_unlock		Perl_atfork_unlock

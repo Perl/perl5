@@ -357,24 +357,12 @@ S_bytes_to_uni(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
     if (UNLIKELY(needs_swap)) {
         const U8 *p = start + len;
         while (p-- > start) {
-            const UV uv = NATIVE_TO_ASCII(*p);
-            if (UNI_IS_INVARIANT(uv))
-                *dest++ = (char)(U8)UTF_TO_NATIVE(uv);
-            else {
-                *dest++ = (char)(U8)UTF8_EIGHT_BIT_HI(uv);
-                *dest++ = (char)(U8)UTF8_EIGHT_BIT_LO(uv);
-            }
+            append_utf8_from_native_byte(*p, (U8 **) & dest);
         }
     } else {
         const U8 * const end = start + len;
         while (start < end) {
-            const UV uv = NATIVE_TO_ASCII(*start);
-            if (UNI_IS_INVARIANT(uv))
-                *dest++ = (char)(U8)UTF_TO_NATIVE(uv);
-            else {
-                *dest++ = (char)(U8)UTF8_EIGHT_BIT_HI(uv);
-                *dest++ = (char)(U8)UTF8_EIGHT_BIT_LO(uv);
-            }
+            append_utf8_from_native_byte(*start, (U8 **) & dest);
             start++;
         }
     }

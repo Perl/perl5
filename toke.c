@@ -3176,13 +3176,7 @@ S_scan_const(pTHX_ char *start)
 		    for (i = min; i <= max; i++)
 #ifdef EBCDIC
                         if (has_utf8) {
-                            const U8 ch = (U8)NATIVE_TO_UTF(i);
-                            if (UNI_IS_INVARIANT(ch))
-                                *d++ = (U8)i;
-                            else {
-                                *d++ = (U8)UTF8_EIGHT_BIT_HI(ch);
-                                *d++ = (U8)UTF8_EIGHT_BIT_LO(ch);
-                            }
+                            append_utf8_from_native_byte(i, &d);
                         }
                         else
 #endif

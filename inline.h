@@ -203,8 +203,26 @@ S_croak_memory_wrap(void)
 
 /* ------------------------------- utf8.h ------------------------------- */
 
-/* These exist only to replace the macros they formerly were so that their use
- * can be deprecated */
+PERL_STATIC_INLINE void
+S_append_utf8_from_native_byte(const U8 byte, U8** dest)
+{
+    /* Takes an input 'byte' (Latin1 or EBCDIC) and appends it to the UTF-8
+     * encoded string at '*dest', updating '*dest' to include it */
+
+    const U8 uv = NATIVE_TO_LATIN1(byte);
+
+    PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE;
+
+    if (UNI_IS_INVARIANT(uv))
+        *(*dest)++ = UNI_TO_NATIVE(uv);
+    else {
+        *(*dest)++ = UTF8_EIGHT_BIT_HI(uv);
+        *(*dest)++ = UTF8_EIGHT_BIT_LO(uv);
+    }
+}
+
+/* These two exist only to replace the macros they formerly were so that their
+ * use can be deprecated */
 
 PERL_STATIC_INLINE bool
 S_isIDFIRST_lazy(pTHX_ const char* p)
