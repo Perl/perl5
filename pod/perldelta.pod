@@ -412,7 +412,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Both C<META.yml> and C<META.json> files are now included in the distribution.
 
 =back
 
