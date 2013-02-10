@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.16";
+$VERSION     = "0.17";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -303,14 +303,18 @@ sub myconfig
 	#y $pv = qx[$^X -e"sub Config::myconfig{};" -V];
 	my $pv = qx[$^X -V];
 	   $pv =~ s{.*?\n\n}{}s;
-	   $pv =~ s{\n(?:  \s+|\t\s*)}{ }g;
+	   $pv =~ s{\n(?:  \s+|\t\s*)}{\0}g;
 
-	#print $pv;
+	# print STDERR $pv;
 
-	$pv =~ m{^\s+Built under (.*)}m                and $build->{osname} = $1;
-	$pv =~ m{^\s+Compiled at (.*)}m                and $build->{stamp}  = $1;
-	$pv =~ m{^\s+Locally applied patches:\s+(.*)}m and $build->{patches} = [ split m/\s+/, $1 ];
-	$pv =~ m{^\s+Compile-time options:\s+(.*)}m    and map { $build->{options}{$_} = 1 } split m/\s+/, $1;
+	$pv =~ m{^\s+Built under\s+(.*)}m
+	    and $build->{osname}  = $1;
+	$pv =~ m{^\s+Compiled at\s+(.*)}m
+	    and $build->{stamp}   = $1;
+	$pv =~ m{^\s+Locally applied patches:(?:\s+|\0)(.*)}m
+	    and $build->{patches} = [ split m/\0+/, $1 ];
+	$pv =~ m{^\s+Compile-time options:(?:\s+|\0)(.*)}m
+	    and map { $build->{options}{$_} = 1 } split m/\s+|\0/ => $1;
 	}
 
     my @KEYS = keys %ENV;
