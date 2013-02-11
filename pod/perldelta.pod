@@ -323,13 +323,15 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlopentut>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The L<perlopentut> document has been revised and updated to focus on moderl
+Perl best practices. In particular, it now focuses on three-argument open and
+uses lexical filehandles instead of barewords.
 
 =back
 
