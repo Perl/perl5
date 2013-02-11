@@ -299,6 +299,30 @@ you can fetch URLs before processing them:
 It's not for nothing that this is called magic C<< <ARGV> >>.
 Pretty nifty, eh?
 
+=head1 Open E<agrave> la shell
+
+Perl's C<open> function was designed to mimic the way command-line
+redirection in the shell works.  Here are some basic examples
+from the shell:
+
+    $ myprogram file1 file2 file3
+    $ myprogram    <  inputfile
+    $ myprogram    >  outputfile
+    $ myprogram    >> outputfile
+    $ myprogram    |  otherprogram
+    $ otherprogram |  myprogram
+
+And here are some more advanced examples:
+
+    $ otherprogram      | myprogram f1 - f2
+    $ otherprogram 2>&1 | myprogram -
+    $ myprogram     <&3
+    $ myprogram     >&4
+
+Programmers accustomed to constructs like those above can take comfort
+in learning that Perl directly supports these familiar constructs using
+virtually the same syntax as the shell.
+
 =head1 Open E<agrave> la C
 
 If you want the convenience of the shell, then Perl's C<open> is
