@@ -6743,7 +6743,7 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-PERL_STATIC_INLINE UV*	S__get_invlist_len_addr(pTHX_ SV* invlist)
+PERL_STATIC_INLINE STRLEN*	S__get_invlist_len_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__GET_INVLIST_LEN_ADDR	\
