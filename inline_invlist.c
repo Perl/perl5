@@ -20,20 +20,21 @@
  * insert that at this location.  Then, if an auxiliary program doesn't change
  * correspondingly, it will be discovered immediately */
 #define INVLIST_VERSION_ID_OFFSET 3
-#define INVLIST_VERSION_ID 290655244
+#define INVLIST_VERSION_ID 1039476070
+
+#define INVLIST_ZERO_OFFSET 4	/* 0 or 1 */
+/* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
+ * contains the code point U+00000, and begins at element [0] in the array,
+ * which always contains 0.  If 1, the inversion list doesn't contain U+0000,
+ * and it begins at element [1].  Inverting an inversion list consists of
+ * adding or removing the 0 at the beginning of it.  By reserving a space for
+ * that 0, inversion can be made very fast: we just flip this UV */
 
 /* For safety, when adding new elements, remember to #undef them at the end of
  * the inversion list code section */
 
-#define INVLIST_ZERO_OFFSET 4	/* 0 or 1; must be last element in header */
-/* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
- * contains the code point U+00000, and begins here.  If 1, the inversion list
- * doesn't contain U+0000, and it begins at the next UV in the array.
- * Inverting an inversion list consists of adding or removing the 0 at the
- * beginning of it.  By reserving a space for that 0, inversion can be made
- * very fast */
-
-#define HEADER_LENGTH (INVLIST_ZERO_OFFSET + 1)
+#define HEADER_LENGTH (INVLIST_ZERO_OFFSET + 2) /* includes 1 for the constant
+                                                   0 element */
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
  * etc */

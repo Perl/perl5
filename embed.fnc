@@ -1085,7 +1085,7 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #ifdef PERL_IN_REGCOMP_C
 EMsR	|SV*	|_new_invlist_C_array|NN UV* list
-: Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|bool complement_b
+: Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
@@ -1446,9 +1446,13 @@ EiMR	|UV	|invlist_highest|NN SV* const invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
-EXpM	|void	|_invlist_intersection_maybe_complement_2nd|NULLOK SV* const a|NN SV* const b|bool complement_b|NN SV** i
+EXpM	|void	|_invlist_intersection_maybe_complement_2nd \
+		|NULLOK SV* const a|NN SV* const b          \
+		|const bool complement_b|NN SV** i
 EXmM	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
-EXpM	|void	|_invlist_union_maybe_complement_2nd|NULLOK SV* const a|NN SV* const b|bool complement_b|NN SV** output
+EXpM	|void	|_invlist_union_maybe_complement_2nd        \
+		|NULLOK SV* const a|NN SV* const b          \
+		|const bool complement_b|NN SV** output
 EXmM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
 EXpM	|void	|_invlist_invert|NN SV* const invlist
 EXpM	|void	|_invlist_invert_prop|NN SV* const invlist
