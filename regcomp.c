@@ -7124,7 +7124,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     *get_invlist_previous_index_addr(new_list) = 0;
     *get_invlist_version_id_addr(new_list) = INVLIST_VERSION_ID;
 #if HEADER_LENGTH != 5
-#   error Need to regenerate VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
+#   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
 #endif
 
     return new_list;
@@ -7593,7 +7593,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 	}
 	else {
 	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
-	    cp= array_b[i_b++];
+	    cp = array_b[i_b++];
 	}
 
 	/* Here, have chosen which of the two inputs to look at.  Only output
