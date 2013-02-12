@@ -2117,6 +2117,8 @@ at L<http://www.cpan.org/src>
 
 =item Dragonfly BSD
 
+=item Midnight BSD
+
 =item QNX Neutrino RTOS (6.5.0)
 
 =item MirOS BSD
