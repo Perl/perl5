@@ -1924,7 +1924,7 @@ per-subroutine or recursive stage, like this:
     static void my_peep(pTHX_ OP *o)
     {
         /* custom per-subroutine optimisation goes here */
-        prev_peepp(o);
+        prev_peepp(aTHX_ o);
         /* custom per-subroutine optimisation may also go here */
     }
     BOOT:
@@ -1938,7 +1938,7 @@ per-subroutine or recursive stage, like this:
         for(; o; o = o->op_next) {
             /* custom per-op optimisation goes here */
         }
-        prev_rpeepp(orig_o);
+        prev_rpeepp(aTHX_ orig_o);
     }
     BOOT:
         prev_rpeepp = PL_rpeepp;
