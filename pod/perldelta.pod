@@ -280,6 +280,15 @@ instead of being output on STDOUT.
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.141 to 2.142.
+
+Additional tests were added in order to improve statement, branch, condition
+and subroutine coverage.  On the basis of the coverage analysis, some of the
+internals of Dumper.pm were refactored.  Almost all methods are now
+documented.
+
+=item *
+
 L<File::Temp> has been upgraded from version 0.22 to 0.22_90
 
 Fixes various bugs involving directory removal.  Defers unlinking tempfiles if
