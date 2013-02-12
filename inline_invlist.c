@@ -9,20 +9,16 @@
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 
 #define INVLIST_LEN_OFFSET 0	/* Number of elements in the inversion list */
-#define INVLIST_ITER_OFFSET 1	/* Current iteration position */
-#define INVLIST_PREVIOUS_INDEX_OFFSET 2  /* Place to cache index of previous
-                                            result */
 
 /* This is a combination of a version and data structure type, so that one
  * being passed in can be validated to be an inversion list of the correct
  * vintage.  When the structure of the header is changed, a new random number
- * in the range 2**31-1 should be generated and the new() method changed to
- * insert that at this location.  Then, if an auxiliary program doesn't change
- * correspondingly, it will be discovered immediately */
-#define INVLIST_VERSION_ID_OFFSET 3
-#define INVLIST_VERSION_ID 1039476070
+ * in the range 2**31-1 should be generated.  Then, if an auxiliary program
+ * doesn't change correspondingly, it will be discovered immediately */
+#define INVLIST_VERSION_ID_OFFSET 1
+#define INVLIST_VERSION_ID 1511554547
 
-#define INVLIST_ZERO_OFFSET 4	/* 0 or 1 */
+#define INVLIST_ZERO_OFFSET 2	/* 0 or 1 */
 /* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
  * contains the code point U+00000, and begins at element [0] in the array,
  * which always contains 0.  If 1, the inversion list doesn't contain U+0000,

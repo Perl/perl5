@@ -6480,7 +6480,7 @@ STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ struct RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS	\
 	assert(pRExC_state)
 
-PERL_STATIC_INLINE UV*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
+PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\

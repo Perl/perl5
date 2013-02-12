@@ -11,9 +11,7 @@
 
 static UV Latin1_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -26,9 +24,7 @@ static UV Latin1_invlist[] = {
 
 static UV AboveLatin1_invlist[] = {
 	1,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -41,9 +37,7 @@ static UV AboveLatin1_invlist[] = {
 
 static UV ASCII_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -56,9 +50,7 @@ static UV ASCII_invlist[] = {
 
 static UV L1Cased_invlist[] = {
 	16,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -86,9 +78,7 @@ static UV L1Cased_invlist[] = {
 
 static UV VertSpace_invlist[] = {
 	6,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -106,9 +96,7 @@ static UV VertSpace_invlist[] = {
 
 static UV PerlSpace_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -124,9 +112,7 @@ static UV PerlSpace_invlist[] = {
 
 static UV XPerlSpace_invlist[] = {
 	22,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -160,9 +146,7 @@ static UV XPerlSpace_invlist[] = {
 
 static UV PosixAlnum_invlist[] = {
 	6,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -180,9 +164,7 @@ static UV PosixAlnum_invlist[] = {
 
 static UV L1PosixAlnum_invlist[] = {
 	18,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -212,9 +194,7 @@ static UV L1PosixAlnum_invlist[] = {
 
 static UV PosixAlpha_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -230,9 +210,7 @@ static UV PosixAlpha_invlist[] = {
 
 static UV L1PosixAlpha_invlist[] = {
 	16,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -260,9 +238,7 @@ static UV L1PosixAlpha_invlist[] = {
 
 static UV PosixBlank_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -278,9 +254,7 @@ static UV PosixBlank_invlist[] = {
 
 static UV XPosixBlank_invlist[] = {
 	18,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -310,9 +284,7 @@ static UV XPosixBlank_invlist[] = {
 
 static UV PosixCntrl_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -327,9 +299,7 @@ static UV PosixCntrl_invlist[] = {
 
 static UV XPosixCntrl_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	0,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -344,9 +314,7 @@ static UV XPosixCntrl_invlist[] = {
 
 static UV PosixDigit_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -360,9 +328,7 @@ static UV PosixDigit_invlist[] = {
 
 static UV PosixGraph_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -376,9 +342,7 @@ static UV PosixGraph_invlist[] = {
 
 static UV L1PosixGraph_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -394,9 +358,7 @@ static UV L1PosixGraph_invlist[] = {
 
 static UV PosixLower_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -410,9 +372,7 @@ static UV PosixLower_invlist[] = {
 
 static UV L1PosixLower_invlist[] = {
 	12,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -436,9 +396,7 @@ static UV L1PosixLower_invlist[] = {
 
 static UV PosixPrint_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -452,9 +410,7 @@ static UV PosixPrint_invlist[] = {
 
 static UV L1PosixPrint_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -470,9 +426,7 @@ static UV L1PosixPrint_invlist[] = {
 
 static UV PosixPunct_invlist[] = {
 	8,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -492,9 +446,7 @@ static UV PosixPunct_invlist[] = {
 
 static UV L1PosixPunct_invlist[] = {
 	20,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -526,9 +478,7 @@ static UV L1PosixPunct_invlist[] = {
 
 static UV PosixSpace_invlist[] = {
 	4,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -544,9 +494,7 @@ static UV PosixSpace_invlist[] = {
 
 static UV XPosixSpace_invlist[] = {
 	22,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -580,9 +528,7 @@ static UV XPosixSpace_invlist[] = {
 
 static UV PosixUpper_invlist[] = {
 	2,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -596,9 +542,7 @@ static UV PosixUpper_invlist[] = {
 
 static UV L1PosixUpper_invlist[] = {
 	6,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -616,9 +560,7 @@ static UV L1PosixUpper_invlist[] = {
 
 static UV PosixWord_invlist[] = {
 	8,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -638,9 +580,7 @@ static UV PosixWord_invlist[] = {
 
 static UV L1PosixWord_invlist[] = {
 	20,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -672,9 +612,7 @@ static UV L1PosixWord_invlist[] = {
 
 static UV PosixXDigit_invlist[] = {
 	6,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -692,9 +630,7 @@ static UV PosixXDigit_invlist[] = {
 
 static UV XPosixXDigit_invlist[] = {
 	12,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -716,9 +652,7 @@ static UV XPosixXDigit_invlist[] = {
 
 static UV NonL1_Perl_Non_Final_Folds_invlist[] = {
 	44,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,
@@ -772,9 +706,7 @@ static UV NonL1_Perl_Non_Final_Folds_invlist[] = {
 
 static UV _Perl_Multi_Char_Folds_invlist[] = {
 	58,	/* Number of elements */
-	0,	/* Current iteration position */
-	0,	/* Cache of previous search index result */
-	1039476070, /* Version and data structure type */
+	1511554547, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
 	0,

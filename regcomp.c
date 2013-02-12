@@ -7144,7 +7144,7 @@ S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
 
-    return (IV *) (SvPVX(invlist) + (INVLIST_PREVIOUS_INDEX_OFFSET * sizeof (UV)));
+    return &(((XPVLV*) SvANY(invlist))->xiv_u.xivu_iv);
 }
 
 PERL_STATIC_INLINE IV
@@ -7216,7 +7216,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     invlist_set_len(new_list, 0);
 
     /* Force iterinit() to be used to get iteration to work */
-    *get_invlist_iter_addr(new_list) = UV_MAX;
+    *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
 
     /* This should force a segfault if a method doesn't initialize this
      * properly */
@@ -7225,7 +7225,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     *(zero_addr + 1) = 0;
 
     *get_invlist_previous_index_addr(new_list) = 0;
-#if HEADER_LENGTH != 6
+#if HEADER_LENGTH != 4
 #   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
 #endif
 
@@ -7254,12 +7254,9 @@ S__new_invlist_C_array(pTHX_ UV* list)
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
     invlist_set_len(invlist, list[INVLIST_LEN_OFFSET]);
+    invlist_set_previous_index(invlist, 0);
 
-    /* Initialize the iteration pointer.
-     * XXX This could be done at compile time in charclass_invlists.h, but I
-     * (khw) am not confident that the suffixes for specifying the C constant
-     * UV_MAX are portable, e.g.  'ull' on a 32 bit machine that is configured
-     * to use 64 bits; might need a Configure probe */
+    /* Initialize the iteration pointer. */
     invlist_iterfinish(invlist);
 
     return invlist;
@@ -8131,7 +8128,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
     return new_invlist;
 }
 
-PERL_STATIC_INLINE UV*
+PERL_STATIC_INLINE STRLEN*
 S_get_invlist_iter_addr(pTHX_ SV* invlist)
 {
     /* Return the address of the UV that contains the current iteration
@@ -8139,7 +8136,7 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
 
-    return (UV *) (SvPVX(invlist) + (INVLIST_ITER_OFFSET * sizeof (UV)));
+    return &(LvTARGOFF(invlist));
 }
 
 PERL_STATIC_INLINE void
@@ -8163,7 +8160,7 @@ S_invlist_iterfinish(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_INVLIST_ITERFINISH;
 
-    *get_invlist_iter_addr(invlist) = UV_MAX;
+    *get_invlist_iter_addr(invlist) = (STRLEN) UV_MAX;
 }
 
 STATIC bool
@@ -8176,14 +8173,14 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
      * <*start> and <*end> are unchanged, and the next call to this function
      * will start over at the beginning of the list */
 
-    UV* pos = get_invlist_iter_addr(invlist);
+    STRLEN* pos = get_invlist_iter_addr(invlist);
     UV len = _invlist_len(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
 
     if (*pos >= len) {
-	*pos = UV_MAX;	/* Force iterinit() to be required next time */
+	*pos = (STRLEN) UV_MAX;	/* Force iterinit() to be required next time */
 	return FALSE;
     }
 
@@ -8206,7 +8203,7 @@ S_invlist_is_iterating(pTHX_ SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
 
-    return *(get_invlist_iter_addr(invlist)) < UV_MAX;
+    return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
 }
 
 PERL_STATIC_INLINE UV
@@ -8376,9 +8373,7 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 #undef FROM_INTERNAL_SIZE
 #undef INVLIST_LEN_OFFSET
 #undef INVLIST_ZERO_OFFSET
-#undef INVLIST_ITER_OFFSET
 #undef INVLIST_VERSION_ID
-#undef INVLIST_PREVIOUS_INDEX_OFFSET
 
 /* End of inversion list object */
 
