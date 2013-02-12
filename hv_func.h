@@ -11,6 +11,7 @@
 
 #ifndef PERL_SEEN_HV_FUNC_H /* compile once */
 #define PERL_SEEN_HV_FUNC_H
+#define PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
 
 #if !( 0 \
         || defined(PERL_HASH_FUNC_SDBM) \
