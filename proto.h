@@ -6486,16 +6486,16 @@ PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
 	assert(invlist)
 
+PERL_STATIC_INLINE UV*	S_get_invlist_offset_addr(pTHX_ SV* invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR	\
+	assert(invlist)
+
 PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
-	assert(invlist)
-
-PERL_STATIC_INLINE UV*	S_get_invlist_zero_addr(pTHX_ SV* invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR	\
 	assert(invlist)
 
 STATIC bool	S_grok_bslash_N(pTHX_ struct RExC_state_t *pRExC_state, regnode** nodep, UV *valuep, I32 *flagp, U32 depth, bool in_char_class, const bool strict)
