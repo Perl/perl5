@@ -2812,7 +2812,7 @@ a new string which is UTF-8 encoded, and then combine them.
 
 =head1 Custom Operators
 
-Custom operator support is a new experimental feature that allows you to
+Custom operator support is an experimental feature that allows you to
 define your own ops. This is primarily to allow the building of
 interpreters for other languages in the Perl core, but it also allows
 optimizations through the creation of "macro-ops" (ops which perform the
