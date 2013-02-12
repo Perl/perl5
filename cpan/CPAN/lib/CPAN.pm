@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.99_51';
+$CPAN::VERSION = '2.00';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -2499,7 +2499,7 @@ CPAN mantra. See below under I<Processing Instructions>.
 
 =item match [hash]
 
-A hashref with one or more of the keys C<distribution>, C<modules>,
+A hashref with one or more of the keys C<distribution>, C<module>,
 C<perl>, C<perlconfig>, and C<env> that specify whether a document is
 targeted at a specific CPAN distribution or installation.
 Keys prefixed with C<not_> negates the corresponding match.

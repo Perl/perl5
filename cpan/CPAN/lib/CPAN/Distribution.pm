@@ -8,7 +8,7 @@ use CPAN::InfoObj;
 use File::Path ();
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "1.9602";
+$VERSION = "2.00";
 
 # Accessors
 sub cpan_comment {
@@ -2657,8 +2657,31 @@ sub unsat_prereq {
         # one and is deprecated
 
         if ( $available_file ) {
-            if  ( $inst_file && $available_file eq $inst_file && $nmo->inst_deprecated ) {
-                # continue installing as a prereq
+            my $fulfills_all_version_rqs = $self->_fulfills_all_version_rqs
+                (
+                 $need_module,
+                 $available_file,
+                 $available_version,
+                 $need_version,
+                );
+            if (0) {
+            } elsif  ( $inst_file
+                       && $available_file eq $inst_file
+                       && $nmo->inst_deprecated
+                     ) {
+                # continue installing as a prereq. we really want that
+                # because the deprecated module may spit out warnings
+                # and third party did not know until today. Only one
+                # exception is OK, because CPANPLUS is special after
+                # all:
+                if ( $fulfills_all_version_rqs and
+                     $nmo->id =~ /^CPANPLUS(?:::Dist::Build)$/
+                   ) {
+                    # here we have an available version that is good
+                    # enough although deprecated (preventing circular
+                    # loop CPANPLUS => CPANPLUS::Dist::Build RT#83042)
+                    next NEED;
+                }
             } elsif ($self->{reqtype} =~ /^(r|c)$/ && exists $prereq_pm->{requires}{$need_module} && $nmo && !$inst_file) {
                 # continue installing as a prereq; this may be a
                 # distro we already used when it was a build_requires
@@ -2674,9 +2697,7 @@ sub unsat_prereq {
                 }
             }
             else {
-                next NEED if $self->_fulfills_all_version_rqs(
-                    $need_module,$available_file,$available_version,$need_version
-                );
+                next NEED if $fulfills_all_version_rqs;
             }
         }
 

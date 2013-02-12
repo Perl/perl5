@@ -1,3 +1,16 @@
+2013-02-06  k  <k@k83.linux.bogus>
+
+	* release 2.00-TRIAL
+
+	* import App::Cpan 0.60_02 from brian d foy
+
+	* RT#82589 doc fix thanks to Zefram
+
+	* several portability fixes for 5.6.2
+
+	* RT#83042 workaround for current circular dependency in CPANPLUS and
+	CPANPLUS::Dist::Build
+
 2012-10-16  Andreas Koenig  <andreas.koenig.7os6VVqR@franz.ak.mind.de>
 
 	* release 1.99_51

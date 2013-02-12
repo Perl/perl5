@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5303";
+$VERSION = "5.5304";
 
 =head1 NAME
 
@@ -1393,6 +1393,8 @@ sub _do_pick_mirrors {
     my $_conf = 'n';
     if ( $CPAN::META->has_usable("Net::Ping") && Net::Ping->VERSION gt '2.13') {
         $_conf = prompt($prompts{auto_pick}, "yes");
+    } else {
+        prompt("Autoselection disabled due to Net::Ping missing or insufficient. Please press ENTER");
     }
     my @old_list = @{ $CPAN::Config->{urllist} };
     if ( $_conf =~ /^y/i ) {
