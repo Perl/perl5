@@ -6416,7 +6416,7 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
-STATIC SV*	S__new_invlist_C_array(pTHX_ UV* list)
+STATIC SV*	S__new_invlist_C_array(pTHX_ const UV* const list)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY	\

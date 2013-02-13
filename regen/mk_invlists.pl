@@ -15,7 +15,7 @@ require 'regen/regen_lib.pl';
 # in the headers is used to minimize the possibility of things getting
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
-my $VERSION_DATA_STRUCTURE_TYPE = 1511554547;
+my $VERSION_DATA_STRUCTURE_TYPE = 1826693541;
 
 my $out_fh = open_new('charclass_invlists.h', '>',
 		      {style => '*', by => $0,
@@ -45,7 +45,7 @@ sub output_invlist ($$) {
     }
 
     print $out_fh "\n#ifndef PERL_IN_XSUB_RE\n" unless exists $include_in_ext_re{$name};
-    print $out_fh "\nstatic UV ${name}_invlist[] = {\n";
+    print $out_fh "\nstatic const UV ${name}_invlist[] = {\n";
 
     print $out_fh "\t$count,\t/* Number of elements */\n";
     print $out_fh "\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */\n";
