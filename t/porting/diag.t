@@ -193,10 +193,12 @@ my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 
 open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
 while (my $file = <$fh>) {
-    next if $file =~ m!\A(?:ext|dist|cpan|lib|t)/!;
     chomp $file;
     $file =~ s/\s+.*//;
-    next unless $file =~ /\.(?:c|cpp|h|y)\z/ or $file =~ /^perly\./;
+    next unless $file =~ /\.(?:c|cpp|h|xs|y)\z/ or $file =~ /^perly\./;
+    # OS/2 extensions have never been migrated to ext/, hence the special case:
+    next if $file =~ m!\A(?:ext|dist|cpan|lib|t|os2/OS2)/!
+            && $file !~ m!\Aext/DynaLoader/!;
     check_file($file);
 }
 close $fh or die $!;

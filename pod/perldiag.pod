@@ -998,6 +998,15 @@ e.g. open(FH, ">:nosuchlayer", "somefile").
 (F) List assignment to %ENV is not supported on some systems, notably
 VMS.
 
+=item Can't make loaded symbols global on this platform while loading %s
+
+(W) A module passed the flag 0x01 to DynaLoader::dl_load_file() to request
+that symbols from the stated file are made available globally within the
+process, but that functionality is not available on this platform.  Whilst
+the module likely will still work, this may prevent the perl interpreter
+from loading other XS-based extensions which need to link directly to
+functions defined in the C or XS code in the stated file.
+
 =item Can't modify %s in %s
 
 (F) You aren't allowed to assign to the item indicated, or otherwise try
