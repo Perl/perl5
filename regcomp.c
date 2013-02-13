@@ -7025,10 +7025,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 /* This section of code defines the inversion list object and its methods.  The
  * interfaces are highly subject to change, so as much as possible is static to
- * this file.  An inversion list is here implemented as a malloc'd C UV array
- * with some added info that is placed as UVs at the beginning in a header
- * portion.  Currently it is a SVt_PVLV, with some of the header fields from
- * that repurposed for uses here.
+ * this file.  An inversion list is here implemented as a malloc'd C UV array.
+ * Currently it is a SVt_PVLV, with some of the header fields from that
+ * repurposed for uses here.
  *
  * An inversion list for Unicode is an array of code points, sorted by ordinal
  * number.  The zeroth element is the first code point in the list.  The 1th
@@ -7068,8 +7067,13 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * should eventually be made public */
 
 /* The header definitions are in F<inline_invlist.c> */
-#define TO_INTERNAL_SIZE(x) (((x) + HEADER_LENGTH) * sizeof(UV))
-#define FROM_INTERNAL_SIZE(x) (((x)/ sizeof(UV)) - HEADER_LENGTH)
+
+/* This converts to/from our UVs to what the SV code is expecting: bytes.  The
+ * first element is always a 0, which may or may not currently be in the list.
+ * Just assume the worst case, that it isn't, and so the length of the list
+ * passed in has to add 1 to account for it */
+#define TO_INTERNAL_SIZE(x) (((x) + 1) * sizeof(UV))
+#define FROM_INTERNAL_SIZE(x) (((x)/ sizeof(UV)) - 1)
 
 #define INVLIST_INITIAL_LEN 10
 
@@ -7081,20 +7085,22 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
      * array begins depends on whether the list has the code point U+0000 in it
      * or not.  The other parameter tells it whether the code that follows this
      * call is about to put a 0 in the inversion list or not.  The first
-     * element is either the final part of the header reserved for 0, if TRUE,
-     * or the first element of the non-heading part, if FALSE */
+     * element is either the element reserved for 0, if TRUE, or the element
+     * after it, if FALSE */
 
-    UV* offset = get_invlist_offset_addr(invlist);
+    U8* offset = get_invlist_offset_addr(invlist);
+    UV* zero_addr = (UV *) SvPVX(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT;
 
     /* Must be empty */
     assert(! *_get_invlist_len_addr(invlist));
 
+    *zero_addr = 0;
+
     /* 1^1 = 0; 1^0 = 1 */
     *offset = 1 ^ will_have_0;
-    *(offset + 1) = 0;
-    return (UV *) (1 + offset + *offset);
+    return zero_addr + *offset;
 }
 
 PERL_STATIC_INLINE UV*
@@ -7112,13 +7118,12 @@ S_invlist_array(pTHX_ SV* const invlist)
     assert(*get_invlist_offset_addr(invlist) == 0
 	   || *get_invlist_offset_addr(invlist) == 1);
 
-    /* The array begins either at the header element reserved for zero or the
-     * element after that.  The reserved element is 1 past the offset_addr
-     * element; the latter contains 0 or 1 to indicate how much additionally to
-     * add */
-    assert(0 == *(1 + get_invlist_offset_addr(invlist)));
-    return (UV *) (1 + get_invlist_offset_addr(invlist)
-		   + *get_invlist_offset_addr(invlist));
+    /* The very first element always contains zero, The array begins either
+     * there, or if the inversion list is offset, at the element after it.
+     * The offset header field determines which; it contains 0 or 1 to indicate
+     * how much additionally to add */
+    assert(0 == *(SvPVX(invlist)));
+    return ((UV *) SvPVX(invlist) + *get_invlist_offset_addr(invlist));
 }
 
 PERL_STATIC_INLINE void
@@ -7182,15 +7187,15 @@ S_invlist_max(pTHX_ SV* const invlist)
            : FROM_INTERNAL_SIZE(SvLEN(invlist));
 }
 
-PERL_STATIC_INLINE UV*
+PERL_STATIC_INLINE U8*
 S_get_invlist_offset_addr(pTHX_ SV* invlist)
 {
-    /* Return the address of the UV that says whether the inversion list is
+    /* Return the address of the field that says whether the inversion list is
      * offset (it contains 1) or not (contains 0) */
 
     PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR;
 
-    return (UV *) (SvPVX(invlist) + (INVLIST_OFFSET_OFFSET * sizeof (UV)));
+    return (U8*) &(LvFLAGS(invlist));
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -7203,7 +7208,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * system default is used instead */
 
     SV* new_list;
-    UV* offset_addr;
+    U8* offset_addr;
 
     if (initial_size < 0) {
 	initial_size = INVLIST_INITIAL_LEN;
@@ -7219,13 +7224,13 @@ Perl__new_invlist(pTHX_ IV initial_size)
     *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
 
     /* This should force a segfault if a method doesn't initialize this
-     * properly */
+     * properly.  XXX Although now that the max is currently just 255, it might
+     * not segfault. */
     offset_addr = get_invlist_offset_addr(new_list);
-    *offset_addr = (unsigned) UV_MAX;
-    *(offset_addr + 1) = 0;
+    *offset_addr = (U8) UV_MAX;
 
     *get_invlist_previous_index_addr(new_list) = 0;
-#if HEADER_LENGTH != 4
+#if HEADER_LENGTH != 3
 #   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
 #endif
 
@@ -7242,18 +7247,32 @@ S__new_invlist_C_array(pTHX_ UV* list)
      * should not be used in the wrong hands */
 
     SV* invlist = newSV_type(SVt_PVLV);
+    STRLEN length = (STRLEN) list[INVLIST_LEN_OFFSET];
+    U8 offset = (U8) list[INVLIST_OFFSET_OFFSET];
 
     PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
-
-    SvPV_set(invlist, (char *) list);
-    SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
-			       shouldn't touch it */
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(_invlist_len(invlist)));
 
     if (list[INVLIST_VERSION_ID_OFFSET] != INVLIST_VERSION_ID) {
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
-    invlist_set_len(invlist, list[INVLIST_LEN_OFFSET]);
+
+    /* The generated array passed in includes header elements that aren't part
+     * of the list proper, so start it just after them */
+    SvPV_set(invlist, (char *) (list + HEADER_LENGTH));
+
+    SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
+			       shouldn't touch it */
+    /* The 'length' passed to us is the number of elements in the inversion
+     * list.  If the list doesn't include the always present 0 element, the
+     * length should be adjusted upwards to include it.  The TO_INTERNAL_SIZE
+     * macro returns a worst case scenario, always making that adjustment, even
+     * if not needed.  To get the precise size, then, we have to subtract 1
+     * when that adjustment wasn't needed.  That happens when the offset was 0;
+     * the exclusive-or flips the 0 to 1, and vice versa */
+    SvCUR_set(invlist, TO_INTERNAL_SIZE(length - (offset ^ 1)));
+
+    invlist_set_len(invlist, length);
+    *(get_invlist_offset_addr(invlist)) = offset;
     invlist_set_previous_index(invlist, 0);
 
     /* Initialize the iteration pointer. */
@@ -8123,6 +8142,8 @@ S_invlist_clone(pTHX_ SV* const invlist)
 
     SvCUR_set(new_invlist, length); /* This isn't done automatically */
     invlist_set_len(new_invlist, _invlist_len(invlist));
+    *(get_invlist_offset_addr(new_invlist))
+                                = *(get_invlist_offset_addr(invlist));
     Copy(SvPVX(invlist), SvPVX(new_invlist), length, char);
 
     return new_invlist;

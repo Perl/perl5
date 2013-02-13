@@ -6486,7 +6486,7 @@ PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
 	assert(invlist)
 
-PERL_STATIC_INLINE UV*	S_get_invlist_offset_addr(pTHX_ SV* invlist)
+PERL_STATIC_INLINE U8*	S_get_invlist_offset_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR	\

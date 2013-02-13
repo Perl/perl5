@@ -1428,7 +1428,7 @@ EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EiMR	|UV*|get_invlist_offset_addr|NN SV* invlist
+EiMR	|U8*	|get_invlist_offset_addr|NN SV* invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len
 EiMR	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
