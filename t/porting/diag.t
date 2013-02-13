@@ -191,19 +191,15 @@ my $specialformats =
  join '|', sort { length $b cmp length $a } keys %specialformats;
 my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 
-# Recursively descend looking for source files.
-my @todo = sort <*>;
-while (@todo) {
-  my $todo = shift @todo;
-  next if $todo ~~ ['t', 'lib', 'ext', 'dist', 'cpan'];
-  # opmini.c is just a copy of op.c, so there's no need to check again.
-  next if $todo eq 'opmini.c';
-  if (-d $todo) {
-    unshift @todo, sort glob "$todo/*";
-  } elsif ($todo =~ m/\.[ch]$/) {
-    check_file($todo);
-  }
+open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
+while (my $file = <$fh>) {
+    next if $file =~ m!\A(?:ext|dist|cpan|lib|t)/!;
+    chomp $file;
+    $file =~ s/\s+.*//;
+    next unless $file =~ /\.(?:c|h)\z/;
+    check_file($file);
 }
+close $fh or die $!;
 
 # Standardize messages with variants into the form that appears
 # in perldiag.pod -- useful for things without a diag_listed_as annotation
