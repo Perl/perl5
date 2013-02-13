@@ -7225,7 +7225,6 @@ Perl__new_invlist(pTHX_ IV initial_size)
     *(zero_addr + 1) = 0;
 
     *get_invlist_previous_index_addr(new_list) = 0;
-    *get_invlist_version_id_addr(new_list) = INVLIST_VERSION_ID;
 #if HEADER_LENGTH != 6
 #   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
 #endif
@@ -7251,7 +7250,7 @@ S__new_invlist_C_array(pTHX_ UV* list)
 			       shouldn't touch it */
     SvCUR_set(invlist, TO_INTERNAL_SIZE(_invlist_len(invlist)));
 
-    if (*get_invlist_version_id_addr(invlist) != INVLIST_VERSION_ID) {
+    if (list[INVLIST_VERSION_ID_OFFSET] != INVLIST_VERSION_ID) {
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
     invlist_set_len(invlist, list[INVLIST_LEN_OFFSET]);
@@ -8141,16 +8140,6 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
     PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
 
     return (UV *) (SvPVX(invlist) + (INVLIST_ITER_OFFSET * sizeof (UV)));
-}
-
-PERL_STATIC_INLINE UV*
-S_get_invlist_version_id_addr(pTHX_ SV* invlist)
-{
-    /* Return the address of the UV that contains the version id. */
-
-    PERL_ARGS_ASSERT_GET_INVLIST_VERSION_ID_ADDR;
-
-    return (UV *) (SvPVX(invlist) + (INVLIST_VERSION_ID_OFFSET * sizeof (UV)));
 }
 
 PERL_STATIC_INLINE void
