@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Test::More tests => 70;
+use Test::More tests => 76;
 
 use XS::APItest;
 
@@ -177,5 +177,33 @@ eval 'sub foo($@) { $foo_got = [ @_ ]; return "z"; }
 is $@, "";
 is_deeply $foo_got, [ 2, qw(a b c) ], 'undef clears call checkers';
 is $foo_ret, "z";
+
+my %got;
+
+sub g {
+    my $name = shift;
+    my $sub = sub ($\@) {
+	$got{$name} = [ @_ ];
+	return $name;
+    };
+    cv_set_call_checker_scalars($sub);
+    return $sub;
+}
+
+BEGIN {
+    *whack = g("whack");
+    *glurp = g("glurp");
+}
+
+%got = ();
+my $whack_ret = whack(@b, @c);
+is $@, "";
+is_deeply $got{whack}, [ 2, 3 ];
+is $whack_ret, "whack";
+
+my $glurp_ret = glurp(@b, @c);
+is $@, "";
+is_deeply $got{glurp}, [ 2, 3 ];
+is $glurp_ret, "glurp";
 
 1;
