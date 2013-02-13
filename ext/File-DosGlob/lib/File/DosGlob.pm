@@ -6,7 +6,7 @@
 
 package File::DosGlob;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 use strict;
 use warnings;
 
@@ -62,6 +62,13 @@ sub doglob {
 	opendir(D, $head) or next OUTER;
 	my @leaves = readdir D;
 	closedir D;
+
+	# VMS-format filespecs, especially if they contain extended characters,
+	# are unlikely to match patterns correctly, so Unixify them.
+	if ($^O eq 'VMS') {
+	    require VMS::Filespec;
+	    @leaves = map {$_ =~ s/\.$//; VMS::Filespec::unixify($_)} @leaves;
+        }
 	$head = '' if $head eq '.';
 	$head .= $sepchr unless $head eq '' or substr($head,-1) eq $sepchr;
 
