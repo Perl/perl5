@@ -196,7 +196,7 @@ while (my $file = <$fh>) {
     next if $file =~ m!\A(?:ext|dist|cpan|lib|t)/!;
     chomp $file;
     $file =~ s/\s+.*//;
-    next unless $file =~ /\.(?:c|h)\z/;
+    next unless $file =~ /\.(?:c|cpp|h|y)\z/ or $file =~ /^perly\./;
     check_file($file);
 }
 close $fh or die $!;
@@ -555,6 +555,7 @@ Not an XSUB reference
 Operator or semicolon missing before %c%s
 Pattern subroutine nesting without pos change exceeded limit in regex
 Perl %s required--this is only %s, stopped
+PerlApp::TextQuery: no arguments, please
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
