@@ -1707,7 +1707,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                                           regardless of encoding */
             if (OP( noper ) == EXACTFU_SS) {
                 /* false positives are ok, so just set this */
-                TRIE_BITMAP_SET(trie,0xDF);
+                TRIE_BITMAP_SET(trie, LATIN_SMALL_LETTER_SHARP_S);
             }
         }
         for ( ; uc < e ; uc += len ) {
@@ -11111,8 +11111,7 @@ tryagain:
                         REGC((char)ender, s++);
                     }
                 }
-                else /* FOLD */
-                     if (! ( UTF
+                else /* FOLD */ if (! ( UTF
                         /* See comments for join_exact() as to why we fold this
                          * non-UTF at compile time */
                         || (node_type == EXACTFU
@@ -11144,7 +11143,7 @@ tryagain:
                      * utf8.  If we start to fold non-UTF patterns, be sure to
                      * update join_exact() */
                     if (LOC && ender < 256) {
-                        if (UNI_IS_INVARIANT(ender)) {
+                        if (NATIVE_IS_INVARIANT(ender)) {
                             *s = (U8) ender;
                             foldlen = 1;
                         } else {
