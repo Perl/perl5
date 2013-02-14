@@ -3469,13 +3469,13 @@ must_be_utf8:
 
 		e--;
 		while (e >= t) {
-		    const U8 ch = NATIVE8_TO_UNI(*e--);
-		    if (UNI_IS_INVARIANT(ch)) {
-			*d-- = UNI_TO_NATIVE(ch);
+		    if (NATIVE_IS_INVARIANT(*e)) {
+			*d-- = *e;
 		    } else {
-			*d-- = (U8)UTF8_EIGHT_BIT_LO(ch);
-			*d-- = (U8)UTF8_EIGHT_BIT_HI(ch);
+			*d-- = UTF8_EIGHT_BIT_LO(*e);
+			*d-- = UTF8_EIGHT_BIT_HI(*e);
 		    }
+                    e--;
 		}
 	    }
 
