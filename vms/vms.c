@@ -6850,7 +6850,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   const char *cp2;
   int dirlen;
   unsigned short int trnlnm_iter_count;
-  int cmp_rslt;
+  int cmp_rslt, outchars_added;
   if (utf8_fl != NULL)
     *utf8_fl = 0;
 
@@ -6941,23 +6941,30 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       }
     }
   }
-  /* This is already UNIX or at least nothing VMS understands */
+
+  cp1 = rslt;
+  cp2 = spec;
+
+  /* This is already UNIX or at least nothing VMS understands,
+   * so all we can reasonably do is unescape extended chars.
+   */
   if (cmp_rslt) {
-    my_strlcpy(rslt, spec, VMS_MAXRSS);
+    while (*cp2) {
+        cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added);
+        cp1 += outchars_added;
+    }
+    *cp1 = '\0';    
     if (vms_debug_fileify) {
         fprintf(stderr, "int_tounixspec: rslt = %s\n", rslt);
     }
     return rslt;
   }
 
-  cp1 = rslt;
-  cp2 = spec;
   dirend = strrchr(spec,']');
   if (dirend == NULL) dirend = strrchr(spec,'>');
   if (dirend == NULL) dirend = strchr(spec,':');
   if (dirend == NULL) {
     while (*cp2) {
-        int outchars_added;
         cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added);
         cp1 += outchars_added;
     }
@@ -7055,7 +7062,6 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       *(cp1++) = '/';
     }
     if ((*cp2 == '^')) {
-        int outchars_added;
         cp2 += copy_expand_vms_filename_escape(cp1, cp2, &outchars_added);
         cp1 += outchars_added;
     }
@@ -7117,7 +7123,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   }
   /* Translate the rest of the filename. */
   while (*cp2) {
-      int dot_seen = 0, outchars_added;
+      int dot_seen = 0;
       switch(*cp2) {
       /* Fixme - for compatibility with the CRTL we should be removing */
       /* spaces from the file specifications, but this may show that */
