@@ -136,7 +136,7 @@ END_EXTERN_C
    U+0800..U+0FFF	E0      * A0..BF    80..BF
    U+1000..U+CFFF       E1..EC    80..BF    80..BF
    U+D000..U+D7FF       ED        80..9F    80..BF
-   U+D800..U+DFFF       +++++++ utf16 surrogates, not legal utf8 +++++++
+   U+D800..U+DFFF       ED        A0..BF    80..BF  (surrogates)
    U+E000..U+FFFF       EE..EF    80..BF    80..BF
   U+10000..U+3FFFF	F0      * 90..BF    80..BF    80..BF
   U+40000..U+FFFFF	F1..F3    80..BF    80..BF    80..BF
@@ -144,7 +144,7 @@ END_EXTERN_C
     Below are non-Unicode code points
  U+110000..U+13FFFF	F4        90..BF    80..BF    80..BF
  U+110000..U+1FFFFF	F5..F7    80..BF    80..BF    80..BF
- U+200000:              F8..    * 88..BF    80..BF    80..BF    80..BF
+ U+200000..:            F8..    * 88..BF    80..BF    80..BF    80..BF
 
 Note the gaps before several of the byte entries above marked by '*'.  These are
 caused by legal UTF-8 avoiding non-shortest encodings: it is technically
@@ -275,6 +275,9 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define NATIVE8_TO_UNI(ch)     NATIVE_TO_ASCII(ch)	/* a clearer synonym */
 
+/* Adds a UTF8 continuation byte 'new' of information to a running total code
+ * point 'old' of all the continuation bytes so far.  This is designed to be
+ * used in a loop to convert from UTF-8 to the code point represented */
 #define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT)     \
                                         | (((U8)new) & UTF_CONTINUATION_MASK))
 

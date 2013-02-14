@@ -2863,7 +2863,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 
   In patterns:
     expand:
-      \N{ABC}  => \N{U+41.42.43}
+      \N{FOO}  => \N{U+hex_for_character_FOO}
+      (if FOO expands to multiple characters, expands to \N{U+xx.XX.yy ...})
 
     pass through:
 	all other \-char, including \N and \N{ apart from \N{ABC}

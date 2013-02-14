@@ -15299,8 +15299,11 @@ S_put_byte(pTHX_ SV *sv, int c)
 
        EO, or Eight Ones, is an 8-bit EBCDIC character code represented as all
        ones (binary 1111 1111, hexadecimal FF). It is similar, but not
-       identical, to the ASCII delete (DEL) or rubout control character.
-       ) So the old condition can be simplified to !isPRINT(c)  */
+       identical, to the ASCII delete (DEL) or rubout control character. ...
+       it is typically mapped to hexadecimal code 9F, in order to provide a
+       unique character mapping in both directions)
+
+       So the old condition can be simplified to !isPRINT(c)  */
     if (!isPRINT(c)) {
 	if (c < 256) {
 	    Perl_sv_catpvf(aTHX_ sv, "\\x%02x", c);

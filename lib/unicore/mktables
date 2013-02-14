@@ -2042,10 +2042,10 @@ package Input_file;
 # basically be a while(next_line()) {...} loop.
 #
 # You can also set up handlers to
-#   1) call before the first line is read for pre processing
+#   1) call before the first line is read, for pre processing
 #   2) call to adjust each line of the input before the main handler gets them
 #   3) call upon EOF before the main handler exits its loop
-#   4) call at the end for post processing
+#   4) call at the end, for post processing
 #
 # $_ is used to store the input line, and is to be filtered by the
 # each_line_handler()s.  So, if the format of the line is not in the desired
