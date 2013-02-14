@@ -569,16 +569,18 @@ After perl is installed, you may later wish to add modules (e.g. from
 CPAN) or scripts.  Configure will set up the following directories to
 be used for installing those add-on modules and scripts.
 
-    Configure variable	Default value
-    $siteprefixexp	$prefixexp
-    $sitebinexp		$siteprefixexp/bin
-    $sitescriptexp	$siteprefixexp/bin
-    $sitelibexp		$siteprefixexp/lib/perl5/site_perl/$version
-    $sitearchexp	$siteprefixexp/lib/perl5/site_perl/$version/$archname
-    $siteman1direxp	$siteprefixexp/man/man1
-    $siteman3direxp	$siteprefixexp/man/man3
-    $sitehtml1direxp	(none)
-    $sitehtml3direxp	(none)
+   Configure        Default
+   variable          value
+ $siteprefixexp    $prefixexp
+ $sitebinexp       $siteprefixexp/bin
+ $sitescriptexp    $siteprefixexp/bin
+ $sitelibexp       $siteprefixexp/lib/perl5/site_perl/$version
+ $sitearchexp
+               $siteprefixexp/lib/perl5/site_perl/$version/$archname
+ $siteman1direxp   $siteprefixexp/man/man1
+ $siteman3direxp   $siteprefixexp/man/man3
+ $sitehtml1direxp  (none)
+ $sitehtml3direxp  (none)
 
 By default, ExtUtils::MakeMaker will install architecture-independent
 modules into $sitelib and architecture-dependent modules into $sitearch.
@@ -589,49 +591,51 @@ Lastly, if you are building a binary distribution of perl for
 distribution, Configure can optionally set up the following directories
 for you to use to distribute add-on modules.
 
-    Configure variable	Default value
-    $vendorprefixexp	(none)
-    (The next ones are set only if vendorprefix is set.)
-    $vendorbinexp	$vendorprefixexp/bin
-    $vendorscriptexp	$vendorprefixexp/bin
-    $vendorlibexp
-	$vendorprefixexp/lib/perl5/vendor_perl/$version
-    $vendorarchexp
-	$vendorprefixexp/lib/perl5/vendor_perl/$version/$archname
-    $vendorman1direxp	$vendorprefixexp/man/man1
-    $vendorman3direxp	$vendorprefixexp/man/man3
-    $vendorhtml1direxp	(none)
-    $vendorhtml3direxp	(none)
+   Configure          Default
+   variable            value
+ $vendorprefixexp    (none)
+
+ (The next ones are set only if vendorprefix is set.)
+
+ $vendorbinexp       $vendorprefixexp/bin
+ $vendorscriptexp    $vendorprefixexp/bin
+ $vendorlibexp       $vendorprefixexp/lib/perl5/vendor_perl/$version
+ $vendorarchexp
+           $vendorprefixexp/lib/perl5/vendor_perl/$version/$archname
+ $vendorman1direxp   $vendorprefixexp/man/man1
+ $vendorman3direxp   $vendorprefixexp/man/man3
+ $vendorhtml1direxp  (none)
+ $vendorhtml3direxp  (none)
 
 These are normally empty, but may be set as needed.  For example,
 a vendor might choose the following settings:
 
-    $prefix		/usr
-    $siteprefix		/usr/local
-    $vendorprefix	/usr
+ $prefix           /usr
+ $siteprefix       /usr/local
+ $vendorprefix     /usr
 
 This would have the effect of setting the following:
 
-    $binexp		/usr/bin
-    $scriptdirexp	/usr/bin
-    $privlibexp		/usr/lib/perl5/$version
-    $archlibexp 	/usr/lib/perl5/$version/$archname
-    $man1direxp		/usr/man/man1
-    $man3direxp		/usr/man/man3
+ $binexp           /usr/bin
+ $scriptdirexp     /usr/bin
+ $privlibexp       /usr/lib/perl5/$version
+ $archlibexp       /usr/lib/perl5/$version/$archname
+ $man1direxp       /usr/man/man1
+ $man3direxp       /usr/man/man3
 
-    $sitebinexp		/usr/local/bin
-    $sitescriptexp	/usr/local/bin
-    $sitelibexp		/usr/local/lib/perl5/site_perl/$version
-    $sitearchexp	/usr/local/lib/perl5/site_perl/$version/$archname
-    $siteman1direxp	/usr/local/man/man1
-    $siteman3direxp	/usr/local/man/man3
+ $sitebinexp       /usr/local/bin
+ $sitescriptexp    /usr/local/bin
+ $sitelibexp       /usr/local/lib/perl5/site_perl/$version
+ $sitearchexp      /usr/local/lib/perl5/site_perl/$version/$archname
+ $siteman1direxp   /usr/local/man/man1
+ $siteman3direxp   /usr/local/man/man3
 
-    $vendorbinexp	/usr/bin
-    $vendorscriptexp	/usr/bin
-    $vendorlibexp	/usr/lib/perl5/vendor_perl/$version
-    $vendorarchexp	/usr/lib/perl5/vendor_perl/$version/$archname
-    $vendorman1direxp	/usr/man/man1
-    $vendorman3direxp	/usr/man/man3
+ $vendorbinexp     /usr/bin
+ $vendorscriptexp  /usr/bin
+ $vendorlibexp     /usr/lib/perl5/vendor_perl/$version
+ $vendorarchexp    /usr/lib/perl5/vendor_perl/$version/$archname
+ $vendorman1direxp /usr/man/man1
+ $vendorman3direxp /usr/man/man3
 
 Note how in this example, the vendor-supplied directories are in the
 /usr hierarchy, while the directories reserved for the end user are in
@@ -650,7 +654,7 @@ are stored locally on your own disk and use $vendorprefix for
 site-specific files that are stored elsewhere on your organization's
 network.  One way to do that would be something like
 
-	sh Configure -Dsiteprefix=/usr/local -Dvendorprefix=/usr/share/perl
+ sh Configure -Dsiteprefix=/usr/local -Dvendorprefix=/usr/share/perl
 
 =item otherlibdirs
 
@@ -932,7 +936,7 @@ much, much more slowly than a standard perl.
 
 =head2 DTrace support
 
-On platforms where DTrace is available, it may be enabled by 
+On platforms where DTrace is available, it may be enabled by
 using the -Dusedtrace option to Configure. DTrace probes are available for
 subroutine entry (sub-entry) and subroutine exit (sub-exit). Here's a
 simple D script that uses them:
@@ -1039,10 +1043,11 @@ BerkeleyDB shared libraries.
 It is possible to specify this from the command line (all on one
 line):
 
-    sh Configure -de \
-        -Dlocincpth='/usr/local/BerkeleyDB.4.7/include /usr/local/include' \
-        -Dloclibpth='/usr/local/BerkeleyDB.4.7/lib /usr/local/lib' \
-        -Aldflags='-R/usr/local/BerkeleyDB.4.7/lib'
+ sh Configure -de \
+    -Dlocincpth='/usr/local/BerkeleyDB.4.7/include             \
+                                           /usr/local/include' \
+    -Dloclibpth='/usr/local/BerkeleyDB.4.7/lib /usr/local/lib' \
+    -Aldflags='-R/usr/local/BerkeleyDB.4.7/lib'
 
 locincpth is a space-separated list of include directories to search.
 Configure will automatically add the appropriate -I directives.
@@ -2095,11 +2100,13 @@ make install will install the following:
 
     scripts
 
-	cppstdin	This is used by the deprecated switch perl -P, if
-			your cc -E can't read from stdin.
-	c2ph, pstruct	Scripts for handling C structures in header files.
+	cppstdin	This is used by the deprecated switch perl -P,
+			if your cc -E can't read from stdin.
+	c2ph, pstruct	Scripts for handling C structures in header
+                        files.
 	config_data	Manage Module::Build-like module configuration.
-	corelist	Shows versions of modules that come with different
+	corelist	Shows versions of modules that come with
+                        different
 			versions of perl.
 	cpan		The CPAN shell.
 	cpan2dist	The CPANPLUS distribution creator.
@@ -2107,7 +2114,8 @@ make install will install the following:
 	cpanp-run-perl	A helper for cpanp.
 	enc2xs		Encoding module generator.
 	find2perl	find-to-perl translator.
-	h2ph		Extract constants and simple macros from C headers.
+	h2ph		Extract constants and simple macros from C
+                        headers.
 	h2xs		Converts C .h header files to Perl extensions.
 	instmodsh	A shell to examine installed modules.
 	libnetcfg	Configure libnet.
@@ -2133,7 +2141,7 @@ make install will install the following:
 	shasum		A tool to print or check SHA checksums.
 	splain		Describe Perl warnings and errors.
 	xsubpp		Compiler to convert Perl XS code into C code.
-	zipdetails		display the internal structure of zip files
+	zipdetails	display the internal structure of zip files
 
     library files
 
@@ -2544,7 +2552,8 @@ need to run a Perl program is
 it's a minimal set) and if you want to find out all the files you can
 use something like the below
 
-   strace perl -le 'do "x.pl"' 2>&1 | perl -nle '/^open\(\"(.+?)"/ && print $1'
+ strace perl -le 'do "x.pl"' 2>&1 \
+                             | perl -nle '/^open\(\"(.+?)"/ && print $1'
 
 (The 'strace' is Linux-specific, other similar utilities include 'truss'
 and 'ktrace'.)
