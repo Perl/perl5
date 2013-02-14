@@ -2834,7 +2834,7 @@ tree using a C<CHECK> block and the C<B::Generate> module, or by adding
 a custom peephole optimizer with the C<optimize> module.
 
 When you do this, you replace ordinary Perl ops with custom ops by
-creating ops with the type C<OP_CUSTOM> and the C<pp_addr> of your own
+creating ops with the type C<OP_CUSTOM> and the C<op_ppaddr> of your own
 PP function. This should be defined in XS code, and should look like
 the PP ops in C<pp_*.c>. You are responsible for ensuring that your op
 takes the appropriate number of values from the stack, and you are
