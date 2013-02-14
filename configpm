@@ -228,7 +228,7 @@ EOT
 
 my %export_ok = eval $export_funcs or die;
 
-$config_txt .= sprintf << 'EOT', $export_funcs;
+$config_txt .= sprintf << 'EOT', $], $export_funcs;
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
 
@@ -239,7 +239,9 @@ $config_txt .= sprintf << 'EOT', $export_funcs;
 package Config;
 use strict;
 use warnings;
-use vars '%%Config';
+use vars '%%Config', '$VERSION';
+
+$VERSION = "%s";
 
 # Skip @Config::EXPORT because it only contains %%Config, which we special
 # case below as it's not a function. @Config::EXPORT won't change in the
