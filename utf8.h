@@ -328,16 +328,21 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* The macros in the next sets are used to generate the two utf8 or utfebcdic
  * bytes from an ordinal that is known to fit into two bytes; it must be less
  * than 0x3FF to work across both encodings. */
-/* Nocast allows these to be used in the case label of a switch statement */
-#define UTF8_TWO_BYTE_HI_nocast(c)	NATIVE_TO_I8(((c)                       \
+/* Nocast allows these to be used in the case label of a switch statement;
+ * however this doesn't won't work for ebcdic, and should be avoided.  Use
+ * regen/unicode_constants instead */
+#define UTF8_TWO_BYTE_HI_nocast(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_UNI(c)     \
                         >> UTF_ACCUMULATION_SHIFT) | (0xFF & UTF_START_MARK(2)))
-#define UTF8_TWO_BYTE_LO_nocast(c)  NATIVE_TO_I8(((c) & UTF_CONTINUATION_MASK)  \
-                                    | UTF_CONTINUATION_MARK)
+#define UTF8_TWO_BYTE_LO_nocast(c)  I8_TO_NATIVE_UTF8((NATIVE_TO_UNI(c)         \
+                                                  & UTF_CONTINUATION_MASK)      \
+                                                | UTF_CONTINUATION_MARK)
 
 #define UTF8_TWO_BYTE_HI(c)	((U8) (UTF8_TWO_BYTE_HI_nocast(c)))
 #define UTF8_TWO_BYTE_LO(c)	((U8) (UTF8_TWO_BYTE_LO_nocast(c)))
 
-/* This name is used when the source is a single byte */
+/* This name is used when the source is a single byte.  For EBCDIC these could
+ * be more efficiently written; the reason is that things above 0xFF have to be
+ * special-cased, which is done by the EBCDIC version of NATIVE_TO_UNI() */
 #define UTF8_EIGHT_BIT_HI(c)	UTF8_TWO_BYTE_HI((U8)(c))
 #define UTF8_EIGHT_BIT_LO(c)	UTF8_TWO_BYTE_LO((U8)(c))
 
