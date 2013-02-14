@@ -13,10 +13,13 @@
 # Updated Thu May 30 10:50:22 EDT 1996 by <doughera@lafayette.edu>
 
 # Updated Fri Jun 21 11:07:54 EDT 1996
-# NDBM support for ELF renabled by <kjahds@kjahds.com>
+# NDBM support for ELF re-enabled by <kjahds@kjahds.com>
 
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
+
+# No version of Linux needs libutil for perl.
+i_libutil='undef'
 
 # Debian and Red Hat, and perhaps other vendors, provide both runtime and
 # development packages for some libraries.  The runtime packages contain shared
@@ -54,6 +57,9 @@ set `echo X "$libswanted "| sed -e 's/ bsd / /' -e 's/ net / /' -e 's/ bind / /'
 shift
 libswanted="$*"
 
+# Debian 4.0 puts ndbm in the -lgdbm_compat library.
+libswanted="$libswanted gdbm_compat"
+
 # If you have glibc, then report the version for ./myconfig bug reporting.
 # (Configure doesn't need to know the specific version since it just uses
 # gcc to load the library for all tests.)
@@ -84,6 +90,11 @@ esac
 # Check if we're about to use Intel's ICC compiler
 case "`${cc:-cc} -V 2>&1`" in
 *"Intel(R) C++ Compiler"*|*"Intel(R) C Compiler"*)
+    # record the version, formats:
+    # icc (ICC) 10.1 20080801
+    # icpc (ICC) 10.1 20080801
+    # followed by a copyright on the second line
+    ccversion=`${cc:-cc} --version | sed -n -e 's/^icp\?c \((ICC) \)\?//p'`
     # This is needed for Configure's prototype checks to work correctly
     # The -mp flag is needed to pass various floating point related tests
     # The -no-gcc flag is needed otherwise, icc pretends (poorly) to be gcc
@@ -140,6 +151,34 @@ case "$optimize" in
             esac
         ;;
     esac
+    ;;
+esac
+
+# Ubuntu 11.04 (and later, presumably) doesn't keep most libraries
+# (such as -lm) in /lib or /usr/lib.  So we have to ask gcc to tell us
+# where to look.  We don't want gcc's own libraries, however, so we
+# filter those out.
+# This could be conditional on Unbuntu, but other distributions may
+# follow suit, and this scheme seems to work even on rather old gcc's.
+# This unconditionally uses gcc because even if the user is using another
+# compiler, we still need to find the math library and friends, and I don't
+# know how other compilers will cope with that situation.
+# Morever, if the user has their own gcc earlier in $PATH than the system gcc,
+# we don't want its libraries. So we try to prefer the system gcc
+# Still, as an escape hatch, allow Configure command line overrides to
+# plibpth to bypass this check.
+if [ -x /usr/bin/gcc ] ; then
+    gcc=/usr/bin/gcc
+else
+    gcc=gcc
+fi
+
+case "$plibpth" in
+'') plibpth=`LANG=C LC_ALL=C $gcc -print-search-dirs | grep libraries |
+	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
+    set X $plibpth # Collapse all entries on one line
+    shift
+    plibpth="$*"
     ;;
 esac
 
@@ -328,7 +367,7 @@ fi
 cat > UU/usethreads.cbu <<'EOCBU'
 case "$usethreads" in
 $define|true|[yY]*)
-        ccflags="-D_REENTRANT -D_GNU_SOURCE -DTHREADS_HAVE_PIDS $ccflags"
+        ccflags="-D_REENTRANT -D_GNU_SOURCE $ccflags"
         if echo $libswanted | grep -v pthread >/dev/null
         then
             set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
@@ -373,16 +412,6 @@ $define|true|[yY]*)
     shift
     libswanted="$*"
     ;;
-esac
-
-# If we are using g++ we must use nm and force ourselves to use
-# the /usr/lib/libc.a (resetting the libc below to an empty string
-# makes Configure to look for the right one) because the symbol
-# scanning tricks of Configure will crash and burn horribly.
-case "$cc" in
-*g++*) usenm=true
-       libc=''
-       ;;
 esac
 
 # If using g++, the Configure scan for dlopen() and (especially)
