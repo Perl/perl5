@@ -9986,12 +9986,12 @@ Perl_opendir(pTHX_ const char *name)
     dd->context = 0;
     dd->count = 0;
     dd->flags = 0;
-    /* By saying we always want the result of readdir() in unix format, we 
-     * are really saying we want all the escapes removed.  Otherwise the caller,
-     * having no way to know whether it's already in VMS format, might send it
-     * through tovmsspec again, thus double escaping.
+    /* By saying we want the result of readdir() in unix format, we are really
+     * saying we want all the escapes removed, translating characters that
+     * must be escaped in a VMS-format name to their unescaped form, which is
+     * presumably allowed in a Unix-format name.
      */
-    dd->flags = PERL_VMSDIR_M_UNIXSPECS;
+    dd->flags = decc_filename_unix_report ? PERL_VMSDIR_M_UNIXSPECS : 0;
     dd->pat.dsc$a_pointer = dd->pattern;
     dd->pat.dsc$w_length = strlen(dd->pattern);
     dd->pat.dsc$b_dtype = DSC$K_DTYPE_T;
