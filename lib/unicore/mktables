@@ -36,6 +36,8 @@ use re "/aa";
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
+sub NON_ASCII_PLATFORM { ord("A") != 65 }
+
 ##########################################################################
 #
 # mktables -- create the runtime Perl Unicode files (lib/unicore/.../*.pl),
@@ -893,7 +895,9 @@ my %global_to_output_map = (
     Unicode_1_Name => $INTERNAL_MAP,
 
     Present_In => 0,                # Suppress, as easily computed from Age
-    Block => 0,                     # Suppress, as Blocks.txt is retained.
+    Block => (NON_ASCII_PLATFORM) ? 1 : 0,  # Suppress, as Blocks.txt is
+                                            # retained, but needed for
+                                            # non-ASCII
 
     # Suppress, as mapping can be found instead from the
     # Perl_Decomposition_Mapping file
@@ -2037,9 +2041,13 @@ package Input_file;
 # the file, returning only significant input lines.
 #
 # Each object gets a handler which processes the body of the file, and is
-# called by run().  Most should use the generic, default handler, which has
-# code scrubbed to handle things you might not expect.  A handler should
-# basically be a while(next_line()) {...} loop.
+# called by run().  All character property files must use the generic,
+# default handler, which has code scrubbed to handle things you might not
+# expect, including automatic EBCDIC handling.  For files that don't deal with
+# mapping code points to a property value, such as test files,
+# PropertyAliases, PropValueAliases, and named sequences, you can override the
+# handler to be a custom one.  Such a handler should basically be a
+# while(next_line()) {...} loop.
 #
 # You can also set up handlers to
 #   1) call before the first line is read, for pre processing
@@ -2168,6 +2176,10 @@ sub trace { return main::trace(@_); }
     # cache of lines added virtually to the file, internal
     main::set_access('added_lines', \%added_lines);
 
+    my %remapped_lines;
+    # cache of lines added virtually to the file, internal
+    main::set_access('remapped_lines', \%remapped_lines);
+
     my %errors;
     # cache of errors found, internal
     main::set_access('errors', \%errors);
@@ -2175,6 +2187,9 @@ sub trace { return main::trace(@_); }
     my %missings;
     # storage of '@missing' defaults lines
     main::set_access('missings', \%missings);
+
+    sub _next_line;
+    sub _next_line_with_remapped_range;
 
     sub new {
         my $class = shift;
@@ -2189,6 +2204,7 @@ sub trace { return main::trace(@_); }
         $has_missings_defaults{$addr} = $NO_DEFAULTS;
         $handle{$addr} = undef;
         $added_lines{$addr} = [ ];
+        $remapped_lines{$addr} = [ ];
         $each_line_handler{$addr} = [ ];
         $errors{$addr} = { };
         $missings{$addr} = [ ];
@@ -2247,6 +2263,14 @@ sub trace { return main::trace(@_); }
         if ($skip{$addr}) {
             $optional{$addr} = 1;
             $skipped_files{$file{$addr}} = $skip{$addr}
+        }
+
+        {   # On non-ascii platforms, we use a special handler
+            no strict;
+            no warnings 'once';
+            *next_line = (main::NON_ASCII_PLATFORM)
+                         ? *_next_line_with_remapped_range
+                         : *_next_line;
         }
 
         return $self;
@@ -2438,7 +2462,7 @@ END
         return;
     }
 
-    sub next_line {
+    sub _next_line {
         # Sets $_ to be the next logical input line, if any.  Returns non-zero
         # if such a line exists.  'logical' means that any lines that have
         # been added via insert_lines() will be returned in $_ before the file
@@ -2593,6 +2617,98 @@ END
         # Return failure -- no more lines.
         return 0;
 
+    }
+
+    sub _next_line_with_remapped_range {
+        my $self = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        # like _next_line(), but for use on non-ASCII platforms.  It sets $_
+        # to be the next logical input line, if any.  Returns non-zero if such
+        # a line exists.  'logical' means that any lines that have been added
+        # via insert_lines() will be returned in $_ before the file is read
+        # again.
+        #
+        # The difference from _next_line() is that this remaps the Unicode
+        # code points in the input to those of the native platform.  Each
+        # input line contains a single code point, or a single contiguous
+        # range of them  This routine splits each range into its individual
+        # code points and caches them.  It returns the cached values,
+        # translated into their native equivalents, one at a time, for each
+        # call, before reading the next line.  Since native values can only be
+        # a single byte wide, no translation is needed for code points above
+        # 0xFF, and ranges that are entirely above that number are not split.
+        # If an input line contains the range 254-1000, it would be split into
+        # three elements: 254, 255, and 256-1000.  (The downstream table
+        # insertion code will sort and coalesce the individual code points
+        # into appropriate ranges.)
+
+        my $addr = do { no overloading; pack 'J', $self; };
+
+        while (1) {
+
+            # Look in cache before reading the next line.  Return any cached
+            # value, translated
+            my $inserted = shift @{$remapped_lines{$addr}};
+            if (defined $inserted) {
+                trace $inserted if main::DEBUG && $to_trace;
+                $_ = $inserted =~ s/^ ( \d+ ) /sprintf("%04X", utf8::unicode_to_native($1))/xer;
+                trace $_ if main::DEBUG && $to_trace;
+                return 1;
+            }
+
+            # Get the next line.
+            return 0 unless _next_line($self);
+
+            # If there is a special handler for it, return the line,
+            # untranslated.  This should happen only for files that are
+            # special, not being code-point related, such as property names.
+            return 1 if $handler{$addr}
+                                    != \&main::process_generic_property_file;
+
+            my ($range, $property_name, $map, @remainder)
+                = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
+
+            if (@remainder
+                || ! defined $property_name
+                || $range !~ /^ ($code_point_re) (?:\.\. ($code_point_re) )? $/x)
+            {
+                Carp::my_carp_bug("Unrecognized input line '$_'.  Ignored");
+            }
+
+            my $low = hex $1;
+            my $high = (defined $2) ? hex $2 : $low;
+
+            # If the input maps the range to another code point, remap the
+            # target if it is between 0 and 255.
+            my $tail;
+            if (defined $map) {
+                $map =~ s/\b 00 ( [0-9A-F]{2} ) \b/sprintf("%04X", utf8::unicode_to_native(hex $1))/gxe;
+                $tail = "$property_name; $map";
+                $_ = "$range; $tail";
+            }
+            else {
+                $tail = $property_name;
+            }
+
+            # If entire range is above 255, just return it, unchanged (except
+            # any mapped-to code point, already changed above)
+            return 1 if $low > 255;
+
+            # Cache an entry for every code point < 255.  For those in the
+            # range above 255, return a dummy entry for just that portion of
+            # the range.  Note that this will be out-of-order, but that is not
+            # a problem.
+            foreach my $code_point ($low .. $high) {
+                if ($code_point > 255) {
+                    $_ = sprintf "%04X..%04X; $tail", $code_point, $high;
+                    return 1;
+                }
+                push @{$remapped_lines{$addr}}, "$code_point; $tail";
+            }
+        } # End of looping through lines.
+
+        # NOTREACHED
     }
 
 #   Not currently used, not fully tested.
@@ -12841,7 +12957,15 @@ sub compile_perl() {
     # Very early releases didn't have blocks, so initialize ASCII ourselves if
     # necessary
     if ($ASCII->is_empty) {
-        $ASCII->add_range(0, 127);
+        if (! NON_ASCII_PLATFORM) {
+            $ASCII->add_range(0, 127);
+        }
+        else {
+            for my $i (0 .. 127) {
+                $ASCII->add_range(utf8::unicode_to_native($i),
+                                  utf8::unicode_to_native($i));
+            }
+        }
     }
 
     # Get the best available case definitions.  Early Unicode versions didn't
@@ -12859,8 +12983,8 @@ sub compile_perl() {
 
         # There are quite a few code points in Lower, that aren't in gc=lc,
         # and not all are in all releases.
-        foreach my $code_point (    0x00AA,
-                                    0x00BA,
+        foreach my $code_point (    utf8::unicode_to_native(0xAA),
+                                    utf8::unicode_to_native(0xBA),
                                     0x02B0 .. 0x02B8,
                                     0x02C0 .. 0x02C1,
                                     0x02E0 .. 0x02E4,
@@ -13015,9 +13139,10 @@ sub compile_perl() {
 
             # In earlier versions of the standard, instead of the above two
             # properties , just the following characters were used:
-            $perl_case_ignorable +=  0x0027  # APOSTROPHE
-                                +   0x00AD  # SOFT HYPHEN (SHY)
-                                +   0x2019; # RIGHT SINGLE QUOTATION MARK
+            $perl_case_ignorable +=
+                            ord("'")
+                        +   utf8::unicode_to_native(0xAD)  # SOFT HYPHEN (SHY)
+                        +   0x2019; # RIGHT SINGLE QUOTATION MARK
         }
     }
 
@@ -13166,7 +13291,7 @@ sub compile_perl() {
                                 # break control, and was listed as
                                 # Space_Separator in early releases
                                 Initialize => $gc->table('Space_Separator')
-                                            +   0x0009  # TAB
+                                            +   ord("\t")
                                             -   0x200B, # ZWSP
                                 );
     $Blank->add_alias('HorizSpace');        # Another name for it.
@@ -13178,14 +13303,15 @@ sub compile_perl() {
 
     my $VertSpace = $perl->add_match_table('VertSpace',
                             Description => '\v',
-                            Initialize => $gc->table('Line_Separator')
-                                        + $gc->table('Paragraph_Separator')
-                                        + 0x000A  # LINE FEED
-                                        + 0x000B  # VERTICAL TAB
-                                        + 0x000C  # FORM FEED
-                                        + 0x000D  # CARRIAGE RETURN
-                                        + 0x0085, # NEL
-                            );
+                            Initialize =>
+                               $gc->table('Line_Separator')
+                             + $gc->table('Paragraph_Separator')
+                             + utf8::unicode_to_native(0x0A)  # LINE FEED
+                             + utf8::unicode_to_native(0x0B)  # VERTICAL TAB
+                             + ord("\f")
+                             + utf8::unicode_to_native(0x0D)  # CARRIAGE RETURN
+                             + utf8::unicode_to_native(0x85)  # NEL
+                    );
     # No Posix equivalent for vertical space
 
     my $Space = $perl->add_match_table('Space',
@@ -13201,8 +13327,9 @@ sub compile_perl() {
     # Perl's traditional space doesn't include Vertical Tab prior to v5.18
     my $XPerlSpace = $perl->add_match_table('XPerlSpace',
                                   Description => '\s, including beyond ASCII',
-                                  #Initialize => $Space - 0x000B,
                                   Initialize => $Space,
+                                  #Initialize => $Space
+                                  # - utf8::unicode_to_native(0x0B]
                                 );
     $XPerlSpace->add_alias('SpacePerl');    # A pre-existing synonym
     my $PerlSpace = $perl->add_match_table('PerlSpace',
@@ -13281,9 +13408,9 @@ sub compile_perl() {
         $Xdigit->set_equivalent_to($Hex->table('Y'), Related => 1);
     }
     else {
-        # (Have to use hex instead of e.g. '0', because could be running on an
-        # non-ASCII machine, and we want the Unicode (ASCII) values)
-        $Xdigit->initialize([ 0x30..0x39, 0x41..0x46, 0x61..0x66,
+        $Xdigit->initialize([ ord('0') .. ord('9'),
+                              ord('A') .. ord('F'),
+                              ord('a') .. ord('f'),
                               0xFF10..0xFF19, 0xFF21..0xFF26, 0xFF41..0xFF46]);
         $Xdigit->add_description('[0-9A-Fa-f] and corresponding fullwidth versions, like U+FF10: FULLWIDTH DIGIT ZERO');
     }
@@ -13335,8 +13462,8 @@ sub compile_perl() {
 
         # This list came from 3.2 Soft_Dotted; all of these code points are in
         # all releases
-        $CanonDCIJ->initialize([ 0x0069,
-                                 0x006A,
+        $CanonDCIJ->initialize([ ord('i'),
+                                 ord('j'),
                                  0x012F,
                                  0x0268,
                                  0x0456,
@@ -13438,7 +13565,7 @@ sub compile_perl() {
                     + $gc->table('Mn')
                     + $gc->table('Mc')
                     + $gc->table('Nd')
-                    + 0x00B7
+                    + utf8::unicode_to_native(0xB7)
                     ;
         if (defined (my $pc = $gc->table('Pc'))) {
             $perl_xidc += $pc;
@@ -13482,11 +13609,11 @@ sub compile_perl() {
                         Perl_Extension => 1,
                         Fate => $INTERNAL_ONLY,
                         Initialize => $perl_xidc
-                                    + 0x0020        # SPACE
-                                    + 0x0028        # (
-                                    + 0x0029        # )
-                                    + 0x002D        # -
-                                    + 0x00A0        # NBSP
+                                    + ord(" ")
+                                    + ord("(")
+                                    + ord(")")
+                                    + ord("-")
+                                    + utf8::unicode_to_native(0xA0) # NBSP
                         );
 
     # These two tables are for matching \X, which is based on the 'extended'
@@ -17874,7 +18001,6 @@ sub Expect($$$$) {
     my $warning_type = shift;   # Type of warning message, like 'deprecated'
                                 # or empty if none
     my $line   = (caller)[2];
-    $ord = ord(latin1_to_native(chr($ord)));
 
     # Convert the code point to hex form
     my $string = sprintf "\"\\x{%04X}\"", $ord;
@@ -17943,12 +18069,12 @@ sub Error($) {
 }
 
 # GCBTest.txt character that separates grapheme clusters
-my $breakable_utf8 = my $breakable = chr(0xF7);
+my $breakable_utf8 = my $breakable = chr(utf8::unicode_to_native(0xF7));
 utf8::upgrade($breakable_utf8);
 
 # GCBTest.txt character that indicates that the adjoining code points are part
 # of the same grapheme cluster
-my $nobreak_utf8 = my $nobreak = chr(0xD7);
+my $nobreak_utf8 = my $nobreak = chr(utf8::unicode_to_native(0xD7));
 utf8::upgrade($nobreak_utf8);
 
 sub Test_X($) {
