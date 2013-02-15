@@ -1155,8 +1155,8 @@ cpan/File-Fetch/t/null_subclass.t
 cpan/File-Path/lib/File/Path.pm		Do things like 'mkdir -p' and 'rm -r'
 cpan/File-Path/t/Path.t			See if File::Path works
 cpan/File-Path/t/taint.t		See if File::Path works with -T
+cpan/File-Temp/lib/File/Temp.pm	create safe temporary files and file handles
 cpan/File-Temp/t/cmp.t		See if File::Temp works
-cpan/File-Temp/Temp.pm		create safe temporary files and file handles
 cpan/File-Temp/t/fork.t		See if File::Temp works
 cpan/File-Temp/t/lock.t		See if File::Temp works
 cpan/File-Temp/t/mktemp.t	See if File::Temp works
