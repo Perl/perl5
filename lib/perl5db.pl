@@ -1472,6 +1472,15 @@ use vars qw($lineinfo $doccmd);
 
 our ($runnonstop);
 
+# Local autoflush to avoid rt#116769,
+# as calling IO::File methods causes an unresolvable loop
+# that results in debugger failure.
+sub _autoflush {
+    my $o = select($_[0]);
+    $|++;
+    select($o);
+}
+
 if ($notty) {
     $runnonstop = 1;
     share($runnonstop);
@@ -1655,7 +1664,7 @@ and if we can.
     } ## end elsif (from if(defined $remoteport))
 
     # Unbuffer DB::OUT. We need to see responses right away.
-    $OUT->autoflush(1);
+    _autoflush($OUT);
 
     # Line info goes to debugger output unless pointed elsewhere.
     # Pointing elsewhere makes it possible for slave editors to
@@ -2324,7 +2333,7 @@ sub _DB__handle_run_command_in_pager_command {
         if $pager =~ /^\|/
         && ( "" eq $SIG{PIPE} || "DEFAULT" eq $SIG{PIPE} );
 
-        OUT->autoflush(1);
+        _autoflush(\*OUT);
         # Save current filehandle, and put it back.
         $obj->selected(scalar( select(OUT) ));
         # Don't put it back if pager was a pipe.
@@ -6757,7 +6766,7 @@ sub setterm {
             open( OUT, ">$o" ) or die "Cannot open TTY '$o' for write: $!";
             $IN  = \*IN;
             $OUT = \*OUT;
-            $OUT->autoflush(1);
+            _autoflush($OUT);
         } ## end if ($tty)
 
         # We don't have a TTY - try to find one via Term::Rendezvous.
@@ -7592,7 +7601,7 @@ sub reset_IN_OUT {
     }
 
     # Unbuffer the output filehandle.
-    $OUT->autoflush(1);
+    _autoflush($OUT);
 
     # Point LINEINFO to the same output filehandle if it was there before.
     $LINEINFO = $OUT if $switch_li;
@@ -7870,7 +7879,7 @@ sub LineInfo {
         open ($new_lineinfo_fh , $stream )
             or _db_warn("Cannot open '$stream' for write");
         $LINEINFO = $new_lineinfo_fh;
-        $LINEINFO->autoflush(1);
+        _autoflush($LINEINFO);
     }
 
     return $lineinfo;
