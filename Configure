@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Jan 28 08:54:06 CET 2013 [metaconfig 3.5 PL0]
+# Generated on Fri Feb 15 14:51:06 CET 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -330,9 +330,9 @@ archlib=''
 archlibexp=''
 d_archlib=''
 installarchlib=''
-use_versioned_archname=''
 archname=''
 myarchname=''
+useversionedarchname=''
 d_atolf=''
 d_atoll=''
 baserev=''
@@ -6020,19 +6020,17 @@ rp='What is your architecture name'
 archname="$ans"
 
 : optionally add api version to the architecture for versioned archlibs
-case "$use_versioned_archname" in
-$define|true|[yY]*)     dflt='y';;
-*)                      dflt='n';;
+case "$useversionedarchname" in
+$define|true|[yY]*) dflt='y';;
+*)                  dflt='n';;
 esac
 rp='Add the Perl API version to your archname?'
 . ./myread
 case "$ans" in
-y|Y)	val="$define" ;;
-*)      val="$undef" ;;
+y|Y)	useversionedarchname="$define" ;;
+*)      useversionedarchname="$undef" ;;
 esac
-set use_versioned_archname
-eval $setvar
-case "$use_versioned_archname" in
+case "$useversionedarchname" in
 $define)
         case "$archname" in
         *-$api_versionstring)
@@ -23888,7 +23886,7 @@ usesitecustomize='$usesitecustomize'
 usesocks='$usesocks'
 usethreads='$usethreads'
 usevendorprefix='$usevendorprefix'
-use_versioned_archname='$use_versioned_archname'
+useversionedarchname='$useversionedarchname'
 usevfork='$usevfork'
 usrinc='$usrinc'
 uuname='$uuname'
