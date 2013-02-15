@@ -103,8 +103,8 @@ use File::Glob qw(:case);
 @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore
     ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
-    CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS dist.ini
-    GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
+    CHANGELOG ChangeLog Changelog CHANGES Changes COPYING Copying CREDITS
+    dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
     MANIFEST MANIFEST.SKIP META.yml MYMETA.yml META.json MYMETA.json
     NEW NOTES perlcritic.rc ppport.h README README.PATCHING SIGNATURE
     THANKS TODO Todo VERSION WHATSNEW CONTRIBUTING
@@ -391,6 +391,7 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'hmbrand',
         'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.17.tgz',
         'FILES'        => q[cpan/Config-Perl-V],
+        'EXCLUDED'     => ['examples/show-v.pl'],
         'UPSTREAM'     => 'cpan',
     },
 
