@@ -929,7 +929,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|usecxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
 $   config_symbols4 ="|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols|useversionedarchname"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2377,6 +2377,27 @@ $   IF (ans.NES.archname) !.AND.knowitall
 $   THEN
 $     echo4 "I'll go with ''archname' anyway..."
 $   ENDIF
+$ ENDIF
+$!
+$ bool_dflt = "n"
+$ if f$type(useversionedarchname) .nes. ""
+$ then
+$   if useversionedarchname .or. useversionedarchname .eqs. "define" then bool_dflt = "y"
+$ endif
+$ rp = "Add the Perl API version to your archname? [''bool_dflt'] "
+$ GOSUB myread
+$ IF ans
+$ THEN
+$   useversionedarchname = "define"
+$   IF F$LOCATE("-''version'", archname) .EQ. F$LENGTH(archname)
+$   THEN
+$     archname = "''archname'-''version'"
+$     echo4 "...setting architecture name to ''archname'."
+$   ELSE
+$     echo4 "...and architecture name already has -''version'."
+$   ENDIF
+$ ELSE
+$   useversionedarchname = "undef"
 $ ENDIF
 $!
 $ IF usethreads .OR. usethreads .EQS. "define"
@@ -6692,6 +6713,7 @@ $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"
 $ WC "usethreadupcalls='" + usethreadupcalls + "'"	! VMS-specific
 $ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
+$ WC "useversionedarchname='" + useversionedarchname + "'"
 $ WC "usevfork='true'"
 $ WC "usevmsdebug='" + usevmsdebug + "'"     ! VMS-specific
 $ WC "uvoformat='" + uvoformat + "'"
