@@ -139,6 +139,7 @@
 /* Top-level choice of what kind of thing yyparse was called to parse */
 grammar	:	GRAMPROG
 			{
+			  PL_hints |= PL_e_script ? DEFAULT_CLI_HINTS : DEFAULT_PROGRAM_HINTS;
 			  PL_parser->expect = XSTATE;
 			}
 		remember stmtseq

@@ -4923,6 +4923,15 @@ typedef enum {
 #define RsPARA(sv)    (SvPOK(sv) && ! SvCUR(sv))
 #define RsRECORD(sv)  (SvROK(sv) && (SvIV(SvRV(sv)) > 0))
 
+/* which hints are in $^H by default */
+#define DEFAULT_CLI_HINTS 0
+#ifdef STRICTPERL
+#   define DEFAULT_PROGRAM_HINTS \
+               HINT_STRICT_REFS | HINT_STRICT_VARS | HINT_STRICT_SUBS
+#else
+#   define DEFAULT_PROGRAM_HINTS 0
+#endif
+
 /* A struct for keeping various DEBUGGING related stuff,
  * neatly packed.  Currently only scratch variables for
  * constructing debug output are included.  Needed always,

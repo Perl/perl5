@@ -994,6 +994,21 @@ perl.gcov: perl.config.gcov
 	$(MAKE) PERL_SUFFIX=.gcov PERL_PROFILE_LDFLAGS='' perl
 	@echo "Now you may run perl.gcov and then run gcov some.c."
 
+# strictperl, which enables all of the 'use strict' features by default
+# don't let a rebuilt perly$(OBJ_EXT) or LIBPERL leak out to other targets
+strictperl$(EXE_EXT): strictperl.c strictperl.really
+	-@rm -f perly$(OBJ_EXT)
+	-@rm -f $(LIBPERL)
+
+# rebuild the parser with -DSTRICTPERL
+strictperl.c: perly.c
+	$(CCCMD) $(PLDLFLAGS) -DSTRICTPERL perly.c -o perly$(OBJ_EXT)
+
+# let Make rebuild $(LIBPERL) with the rebuilt parser
+strictperl.really: $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
+	-@rm -f miniperl.xok
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o strictperl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+
 # Microperl.  This is just a convenience thing if one happens to
 # build also the full Perl and therefore the real big Makefile:
 # usually one should manually explicitly issue the below command.
