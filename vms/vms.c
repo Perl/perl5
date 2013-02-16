@@ -13898,6 +13898,19 @@ set_feature_default(const char *name, int value)
 {
     int status;
     int index;
+    char val_str[10];
+
+    /* If the feature has been explicitly disabled in the environment,
+     * then don't enable it here.
+     */
+    if (value > 0) {
+        status = simple_trnlnm(name, val_str, sizeof(val_str));
+        if ($VMS_STATUS_SUCCESS(status)) {
+            val_str[0] = _toupper(val_str[0]);
+            if (val_str[0] == 'D' || val_str[0] == '0' || val_str[0] == 'F')
+	        return 0;
+        }
+    }
 
     index = decc$feature_get_index(name);
 
