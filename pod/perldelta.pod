@@ -332,13 +332,13 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlsec>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+A syntax error was fixed in one of illustrative examples.
 
 =back
 
@@ -384,7 +384,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The warnings for \b{ and \B{ were added in the 5.17 series; they are a
+deprecation warning which should be turned off by that category.  One
+should not have to turn off regular regexp warnings as well to get rid
+of these.
 
 =back
 
@@ -439,6 +442,10 @@ INSTALL_BASE.
 
 =item *
 
+Configure will honour the external C<MAILDOMAIN> environment variable, if set.
+
+=item *
+
 Both C<META.yml> and C<META.json> files are now included in the distribution.
 
 =back
@@ -457,7 +464,11 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+Enable perl core tests to pass when locale support is not available.
+
+use L<locale> - this will now die if $Config{d_setlocale} is not true.
+All tests that use L<locale> will skip if $Config{d_setlocale} is not true.
+This enables us to pass tests on Android which uses ICU instead of locales.
 
 =back
 
@@ -545,6 +556,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 -DPERL_GLOBAL_STRUCT builds now free the global struct B<after>
 they've finished using it.
+
+=item *
+
+A trailing '/' on a path in @INC will no longer have an additional '/' appended.
 
 =back
 
