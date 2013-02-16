@@ -425,11 +425,11 @@ foreach $k (sort keys  %list) {
 }
 
 print $pm "  );\n\n" ;
-print $pm '$NONE     = "', ('\0' x $warn_size) , "\";\n" ;
-print $pm '$DEFAULT  = "', mkHex($warn_size, map $_ * 2, @def),
+print $pm 'our $NONE     = "', ('\0' x $warn_size) , "\";\n" ;
+print $pm 'our $DEFAULT  = "', mkHex($warn_size, map $_ * 2, @def),
 			   '", # [', mkRange(@def), "]\n" ;
-print $pm '$LAST_BIT = ' . "$index ;\n" ;
-print $pm '$BYTES    = ' . "$warn_size ;\n" ;
+print $pm 'our $LAST_BIT = ' . "$index ;\n" ;
+print $pm 'our $BYTES    = ' . "$warn_size ;\n" ;
 while (<DATA>) {
     print $pm $_ ;
 }
@@ -439,7 +439,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -600,7 +600,7 @@ See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
 
 KEYWORDS
 
-$All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
+our $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 
 sub Croaker
 {

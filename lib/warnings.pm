@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -347,12 +347,12 @@ our %DeadBits = (
     'void'		=> "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x08\x00\x00", # [45]
   );
 
-$NONE     = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
-$DEFAULT  = "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00\x05", # [2,52,53,4,22,23,25]
-$LAST_BIT = 108 ;
-$BYTES    = 14 ;
+our $NONE     = "\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+our $DEFAULT  = "\x10\x01\x00\x00\x00\x50\x04\x00\x00\x00\x00\x00\x00\x05", # [2,52,53,4,22,23,25]
+our $LAST_BIT = 108 ;
+our $BYTES    = 14 ;
 
-$All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
+our $All = "" ; vec($All, $Offsets{'all'}, 2) = 3 ;
 
 sub Croaker
 {
