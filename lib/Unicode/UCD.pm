@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 
 require Exporter;
 
@@ -104,8 +104,16 @@ a decimal or a hexadecimal scalar designating a Unicode code point, or C<U+>
 followed by hexadecimals designating a Unicode code point.  In other words, if
 you want a code point to be interpreted as a hexadecimal number, you must
 prefix it with either C<0x> or C<U+>, because a string like e.g. C<123> will be
-interpreted as a decimal code point.  Note that the largest code point in
-Unicode is U+10FFFF.
+interpreted as a decimal code point.
+
+Examples:
+
+    223     # Decimal 223
+    0223    # Hexadecimal 223 (= 547 decimal)
+    0xDF    # Hexadecimal DF (= 223 decimal
+    U+DF    # Hexadecimal DF
+
+Note that the largest code point in Unicode is U+10FFFF.
 
 =cut
 
