@@ -53,6 +53,13 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
+=head2 C<$ENV{foo} = undef> no longer deletes value from environ
+
+5.17.3 Introduced a change where assiging C<undef> to an C<%ENV> key was equivalent
+to C<delete $ENV{foo}>.
+
+This release reverts that change.
+
 [ List each incompatible change as a =head2 entry ]
 
 =head1 Deprecations

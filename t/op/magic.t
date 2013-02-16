@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 178);
+    plan (tests => 179);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -647,8 +647,12 @@ SKIP: {
 	}
 
 	$ENV{__NoNeSuCh} = 'foo';
+	$ENV{__NoNeSuCh2} = 'foo';
 	$0 = 'bar';
 	env_is(__NoNeSuCh => 'foo', 'setting $0 does not break %ENV');
+
+	$ENV{__NoNeSuCh2} = undef;
+	env_is(__NoNeSuCh2 => '', 'setting a key as undef does not delete it');
 
 	# stringify a glob
 	$ENV{foo} = *TODO;

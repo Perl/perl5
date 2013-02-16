@@ -1101,7 +1101,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     STRLEN len = 0, klen;
     const char * const key = MgPV_const(mg,klen);
-    const char *s = NULL;
+    const char *s = "";
 
     PERL_ARGS_ASSERT_MAGIC_SETENV;
 
