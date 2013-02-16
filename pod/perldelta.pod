@@ -515,9 +515,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+The character set for Extended Filename Syntax (EFS) is now enabled by default on
+VMS.  Among other things, this provides better handling of dots in directory names,
+multiple dots in filenames,and spaces in filenames.  To obtain the old behavior,
+set the logical name C<DECC$EFS_CHARSET> to C<DISABLE>.
 
 =back
 
