@@ -372,7 +372,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+Strings with code points over 0xFF may not be mapped into in-memory file handles
 
 =back
 
@@ -418,6 +418,24 @@ L</Platform Support> section, instead.
 [ List changes as a =item entry ].
 
 =over 4
+
+=item *
+
+Added C<useversionedarchname> option to Configure
+
+When set, it includes 'api_versionstring' in 'archname'. E.g.
+x86_64-linux-5.13.6-thread-multi.  It is unset by default.
+
+This feature was requested by Tim Bunce, who observed that
+INSTALL_BASE creates a library structure that does not
+differentiate by perl version.  Instead, it places architecture
+specific files in "$install_base/lib/perl5/$archname".  This makes
+it difficult to use a common INSTALL_BASE library path with
+multiple versions of perl.
+
+By setting -Duseversionedarchname, the $archname will be
+distinct for architecture *and* API version, allowing mixed use of
+INSTALL_BASE.
 
 =item *
 
