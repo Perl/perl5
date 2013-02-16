@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.35';
+our $VERSION = '1.36';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 
@@ -357,7 +357,7 @@ C<string_vianame> returns C<undef> instead of it being a syntax error.
 =head1 charnames::vianame(I<name>)
 
 This is similar to C<string_vianame>.  The main difference is that under most
-circumstances, vianame returns an ordinal code
+circumstances, C<vianame> returns an ordinal code
 point, whereas C<string_vianame> returns a string.  For example,
 
    printf "U+%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
