@@ -3562,11 +3562,13 @@ S_scan_const(pTHX_ char *start)
 			    has_utf8 = TRUE;
 			}
 
-			/* Add the string to the output */
+                        /* Add the (Unicode) code point to the output. */
 			if (UNI_IS_INVARIANT(uv)) {
-			    *d++ = (char) uv;
+			    *d++ = (char) LATIN1_TO_NATIVE(uv);
 			}
-			else d = (char*)uvuni_to_utf8((U8*)d, uv);
+			else {
+                            d = (char*) uvoffuni_to_utf8_flags((U8*)d, uv, 0);
+                        }
 		    }
 		}
 		else /* Here is \N{NAME} but not \N{U+...}. */
@@ -3626,19 +3628,16 @@ S_scan_const(pTHX_ char *start)
                                 char hex_string[2 * UTF8_MAXBYTES + 5];
 
                                 /* Get the first character of the result. */
-                                U32 uv = utf8n_to_uvuni((U8 *) str,
+                                U32 uv = utf8n_to_uvchr((U8 *) str,
                                                         len,
                                                         &char_length,
                                                         UTF8_ALLOW_ANYUV);
                                 /* Convert first code point to hex, including
-                                 * the boiler plate before it.  For all these,
-                                 * we convert to native format so that
-                                 * downstream code can continue to assume the
-                                 * input is native */
+                                 * the boiler plate before it. */
                                 output_length =
                                     my_snprintf(hex_string, sizeof(hex_string),
-                                            "\\N{U+%X",
-                                            (unsigned int) UNI_TO_NATIVE(uv));
+                                                "\\N{U+%X",
+                                                (unsigned int) uv);
 
                                 /* Make sure there is enough space to hold it */
                                 d = off + SvGROW(sv, off
@@ -3653,15 +3652,15 @@ S_scan_const(pTHX_ char *start)
                                 * its ordinal in hex */
                                 while ((str += char_length) < str_end) {
                                     const STRLEN off = d - SvPVX_const(sv);
-                                    U32 uv = utf8n_to_uvuni((U8 *) str,
+                                    U32 uv = utf8n_to_uvchr((U8 *) str,
                                                             str_end - str,
                                                             &char_length,
                                                             UTF8_ALLOW_ANYUV);
                                     output_length =
                                         my_snprintf(hex_string,
-                                            sizeof(hex_string),
-                                            ".%X",
-                                            (unsigned int) UNI_TO_NATIVE(uv));
+                                                    sizeof(hex_string),
+                                                    ".%X",
+                                                    (unsigned int) uv);
 
                                     d = off + SvGROW(sv, off
                                                         + output_length
