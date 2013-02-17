@@ -7,7 +7,7 @@ package _charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.36';
+our $VERSION = '1.37';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -786,7 +786,7 @@ sub viacode {
   }
   return;
 
-} # _viacode
+} # viacode
 
 1;
 
