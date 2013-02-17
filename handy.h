@@ -1361,9 +1361,9 @@ EXTCONST U32 PL_charclass[];
                                          ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? _generic_isCC(                    \
-                                                   TWO_BYTE_UTF8_TO_UNI(*(p),  \
+                                                TWO_BYTE_UTF8_TO_NATIVE(*(p),  \
                                                                    *((p)+1 )), \
-                                                   classnum)                   \
+                                                classnum)                      \
                                            : utf8)
 /* Like the above, but calls 'above_latin1(p)' to get the utf8 value.  'above_latin1'
  * can be a macro */
@@ -1438,11 +1438,11 @@ EXTCONST U32 PL_charclass[];
  * use the value given by the 'utf8' parameter.  This relies on the fact that
  * ASCII characters have the same representation whether utf8 or not.  Note
  * that it assumes that the utf8 has been validated, and ignores 'use bytes' */
-#define _generic_LC_utf8(macro, p, utf8)                                   \
-                         (UTF8_IS_INVARIANT(*(p))                          \
-                         ? macro(*(p))                                     \
-                         : (UTF8_IS_DOWNGRADEABLE_START(*(p)))             \
-                           ? macro(TWO_BYTE_UTF8_TO_UNI(*(p), *((p)+1)))   \
+#define _generic_LC_utf8(macro, p, utf8)                                    \
+                         (UTF8_IS_INVARIANT(*(p))                           \
+                         ? macro(*(p))                                      \
+                         : (UTF8_IS_DOWNGRADEABLE_START(*(p)))              \
+                           ? macro(TWO_BYTE_UTF8_TO_NATIVE(*(p), *((p)+1))) \
                            : utf8)
 
 #define _generic_LC_swash_utf8(macro, classnum, p)                         \

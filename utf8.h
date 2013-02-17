@@ -302,14 +302,17 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
                                                && ( (e) - (s) > 1)             \
                                                && UTF8_IS_CONTINUATION(*((s)+1)))
 
-/* Convert a two (not one) byte utf8 character to a unicode code point value.
+/* Convert a two (not one) byte utf8 character to a native code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
  * known that the two bytes are legal: 1) two-byte start, and 2) continuation.
  * Note that the result can be larger than 255 if the input character is not
  * downgradable */
-#define TWO_BYTE_UTF8_TO_UNI(HI, LO) \
-		    UTF8_ACCUMULATE((NATIVE_TO_UTF(HI) & UTF_START_MASK(2)), \
-				     NATIVE_TO_UTF(LO))
+#define TWO_BYTE_UTF8_TO_NATIVE(HI, LO) \
+     UNI_TO_NATIVE(UTF8_ACCUMULATE((NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), \
+                                   NATIVE_UTF8_TO_I8(LO)))
+
+/* Should never be used, and be deprecated */
+#define TWO_BYTE_UTF8_TO_UNI(HI, LO) NATIVE_TO_UNI(TWO_BYTE_UTF8_TO_NATIVE(HI, LO))
 
 /* How many bytes in the UTF-8 encoded character whose first (perhaps only)
  * byte is pointed to by 's' */

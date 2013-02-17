@@ -11284,8 +11284,8 @@ tryagain:
                             /* No Latin1 characters participate in multi-char
                              * folds under /l */
                             if (LOC
-                                || ! IS_NON_FINAL_FOLD(TWO_BYTE_UTF8_TO_UNI(
-                                                                *s, *(s+1))))
+                                || ! IS_NON_FINAL_FOLD(TWO_BYTE_UTF8_TO_NATIVE(
+                                                                  *s, *(s+1))))
                             {
                                 break;
                             }
