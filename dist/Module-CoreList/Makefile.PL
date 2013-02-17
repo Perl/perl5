@@ -1,5 +1,5 @@
 use ExtUtils::MakeMaker;
-
+our @extra;
 push @extra, 'INSTALLDIRS' => 'perl' if $] >= 5.008009 and $] < 5.012;
 
 

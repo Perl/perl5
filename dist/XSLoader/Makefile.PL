@@ -5,12 +5,13 @@
 # - Fill in your dependencies in PREREQ_PM
 # Alternatively, you can say the hell with this and use h2xs.
 
+use strict;
 use ExtUtils::MakeMaker;
 eval 'use ExtUtils::MakeMaker::Coverage';
 
-$PACKAGE = 'XSLoader';
-($PACKAGE_FILE = $PACKAGE) =~ s|::|/|g;
-$LAST_API_CHANGE = 0;
+our $PACKAGE = 'XSLoader';
+(our $PACKAGE_FILE = $PACKAGE) =~ s|::|/|g;
+our $LAST_API_CHANGE = 0;
 
 eval "require $PACKAGE";
 

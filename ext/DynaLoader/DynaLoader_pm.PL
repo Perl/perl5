@@ -1,4 +1,6 @@
 use Config;
+use strict;
+our @dl_library_path;
 
 sub to_string {
     my ($value) = @_;
@@ -85,7 +87,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.18';
+    $VERSION = '1.19';
 }
 
 use Config;
