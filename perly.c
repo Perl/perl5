@@ -342,9 +342,12 @@ Perl_yyparse (pTHX_ int gramtype)
 	parser->yychar = yylex();
 #endif
 
+/* perly.tab is shipped based on an ASCII system; if it were to be regenerated
+ * on a platform that doesn't use ASCII, this translation back would need to be
+ * removed */
 #  ifdef EBCDIC
 	if (parser->yychar >= 0 && parser->yychar < 255) {
-	    parser->yychar = NATIVE_TO_ASCII(parser->yychar);
+	    parser->yychar = NATIVE_TO_LATIN1(parser->yychar);
 	}
 #  endif
     }

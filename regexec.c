@@ -1629,13 +1629,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case BOUNDL:
         RXp_MATCH_TAINTED_on(prog);
         FBC_BOUND(isWORDCHAR_LC,
-                  isWORDCHAR_LC_uvchr(UNI_TO_NATIVE(tmp)),
+                  isWORDCHAR_LC_uvchr(tmp),
                   isWORDCHAR_LC_utf8((U8*)s));
         break;
     case NBOUNDL:
         RXp_MATCH_TAINTED_on(prog);
         FBC_NBOUND(isWORDCHAR_LC,
-                   isWORDCHAR_LC_uvchr(UNI_TO_NATIVE(tmp)),
+                   isWORDCHAR_LC_uvchr(tmp),
                    isWORDCHAR_LC_utf8((U8*)s));
         break;
     case BOUND:
@@ -4305,7 +4305,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     }
 		}
 		else {
-		    ln = isWORDCHAR_LC_uvchr(UNI_TO_NATIVE(ln));
+		    ln = isWORDCHAR_LC_uvchr(ln);
 		    n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_LC_utf8((U8*)locinput);
 		}
 	    }

@@ -1407,11 +1407,7 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
 	p += 2;
 	if (uv < 0x80) {
-#ifdef EBCDIC
-	    *d++ = LATIN1_TO_NATIVE(uv);
-#else
 	    *d++ = (U8)uv;
-#endif
 	    continue;
 	}
 	if (uv < 0x800) {
@@ -1645,8 +1641,8 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 
     assert(S_or_s == 'S' || S_or_s == 's');
 
-    if (UNI_IS_INVARIANT(converted)) { /* No difference between the two for
-					  characters in this range */
+    if (NATIVE_IS_INVARIANT(converted)) { /* No difference between the two for
+					     characters in this range */
 	*p = (U8) converted;
 	*lenp = 1;
 	return converted;
@@ -1746,7 +1742,7 @@ S_to_lower_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp)
     U8 converted = toLOWER_LATIN1(c);
 
     if (p != NULL) {
-	if (UNI_IS_INVARIANT(converted)) {
+	if (NATIVE_IS_INVARIANT(converted)) {
 	    *p = converted;
 	    *lenp = 1;
 	}
@@ -1816,7 +1812,7 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
 	converted = toLOWER_LATIN1(c);
     }
 
-    if (UNI_IS_INVARIANT(converted)) {
+    if (NATIVE_IS_INVARIANT(converted)) {
 	*p = (U8) converted;
 	*lenp = 1;
     }
@@ -1869,7 +1865,7 @@ bool
 Perl_is_uni_alnum_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isALNUM_LC(UNI_TO_NATIVE(c));
+        return isALNUM_LC(c);
     }
     return _is_uni_FOO(_CC_WORDCHAR, c);
 }
@@ -1878,7 +1874,7 @@ bool
 Perl_is_uni_alnumc_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isALPHANUMERIC_LC(UNI_TO_NATIVE(c));
+        return isALPHANUMERIC_LC(c);
     }
     return _is_uni_FOO(_CC_ALPHANUMERIC, c);
 }
@@ -1887,7 +1883,7 @@ bool
 Perl_is_uni_idfirst_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isIDFIRST_LC(UNI_TO_NATIVE(c));
+        return isIDFIRST_LC(c);
     }
     return _is_uni_perl_idstart(c);
 }
@@ -1896,7 +1892,7 @@ bool
 Perl_is_uni_alpha_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isALPHA_LC(UNI_TO_NATIVE(c));
+        return isALPHA_LC(c);
     }
     return _is_uni_FOO(_CC_ALPHA, c);
 }
@@ -1905,7 +1901,7 @@ bool
 Perl_is_uni_ascii_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isASCII_LC(UNI_TO_NATIVE(c));
+        return isASCII_LC(c);
     }
     return 0;
 }
@@ -1914,7 +1910,7 @@ bool
 Perl_is_uni_blank_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isBLANK_LC(UNI_TO_NATIVE(c));
+        return isBLANK_LC(c);
     }
     return isBLANK_uni(c);
 }
@@ -1923,7 +1919,7 @@ bool
 Perl_is_uni_space_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isSPACE_LC(UNI_TO_NATIVE(c));
+        return isSPACE_LC(c);
     }
     return isSPACE_uni(c);
 }
@@ -1932,7 +1928,7 @@ bool
 Perl_is_uni_digit_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isDIGIT_LC(UNI_TO_NATIVE(c));
+        return isDIGIT_LC(c);
     }
     return _is_uni_FOO(_CC_DIGIT, c);
 }
@@ -1941,7 +1937,7 @@ bool
 Perl_is_uni_upper_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isUPPER_LC(UNI_TO_NATIVE(c));
+        return isUPPER_LC(c);
     }
     return _is_uni_FOO(_CC_UPPER, c);
 }
@@ -1950,7 +1946,7 @@ bool
 Perl_is_uni_lower_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isLOWER_LC(UNI_TO_NATIVE(c));
+        return isLOWER_LC(c);
     }
     return _is_uni_FOO(_CC_LOWER, c);
 }
@@ -1959,7 +1955,7 @@ bool
 Perl_is_uni_cntrl_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isCNTRL_LC(UNI_TO_NATIVE(c));
+        return isCNTRL_LC(c);
     }
     return 0;
 }
@@ -1968,7 +1964,7 @@ bool
 Perl_is_uni_graph_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isGRAPH_LC(UNI_TO_NATIVE(c));
+        return isGRAPH_LC(c);
     }
     return _is_uni_FOO(_CC_GRAPH, c);
 }
@@ -1977,7 +1973,7 @@ bool
 Perl_is_uni_print_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isPRINT_LC(UNI_TO_NATIVE(c));
+        return isPRINT_LC(c);
     }
     return _is_uni_FOO(_CC_PRINT, c);
 }
@@ -1986,7 +1982,7 @@ bool
 Perl_is_uni_punct_lc(pTHX_ UV c)
 {
     if (c < 256) {
-        return isPUNCT_LC(UNI_TO_NATIVE(c));
+        return isPUNCT_LC(c);
     }
     return _is_uni_FOO(_CC_PUNCT, c);
 }
@@ -1995,7 +1991,7 @@ bool
 Perl_is_uni_xdigit_lc(pTHX_ UV c)
 {
     if (c < 256) {
-       return isXDIGIT_LC(UNI_TO_NATIVE(c));
+       return isXDIGIT_LC(c);
     }
     return isXDIGIT_uni(c);
 }
@@ -2382,13 +2378,8 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 			SV **swashp, const char *normal, const char *special)
 {
     dVAR;
-    U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
-    const UV uv0 = valid_utf8_to_uvchr(p, NULL);
-    /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
-     * are necessary in EBCDIC, they are redundant no-ops
-     * in ASCII-ish platforms, and hopefully optimized away. */
-    const UV uv1 = NATIVE_TO_UNI(uv0);
+    const UV uv1 = valid_utf8_to_uvchr(p, NULL);
 
     PERL_ARGS_ASSERT_TO_UTF8_CASE;
 
@@ -2414,8 +2405,6 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 	 * be given */
     }
 
-    uvuni_to_utf8(tmpbuf, uv1);
-
     if (!*swashp) /* load on-demand */
          *swashp = _core_swash_init("utf8", normal, &PL_sv_undef, 4, 0, NULL, NULL);
 
@@ -2426,56 +2415,26 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 	 SV **svp;
 
 	 if (hv &&
-	     (svp = hv_fetch(hv, (const char*)tmpbuf, UNISKIP(uv1), FALSE)) &&
+	     (svp = hv_fetch(hv, (const char*)p, UNISKIP(uv1), FALSE)) &&
 	     (*svp)) {
 	     const char *s;
 
 	      s = SvPV_const(*svp, len);
 	      if (len == 1)
+                  /* EIGHTBIT */
 		   len = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s)) - ustrp;
 	      else {
-#ifdef EBCDIC
-		   /* If we have EBCDIC we need to remap the characters
-		    * since any characters in the low 256 are Unicode
-		    * code points, not EBCDIC. */
-		   U8 *t = (U8*)s, *tend = t + len, *d;
-		
-		   d = tmpbuf;
-		   if (SvUTF8(*svp)) {
-			STRLEN tlen = 0;
-			
-			while (t < tend) {
-			     const UV c = utf8_to_uvchr_buf(t, tend, &tlen);
-			     if (tlen > 0) {
-				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
-				  t += tlen;
-			     }
-			     else
-				  break;
-			}
-		   }
-		   else {
-			while (t < tend) {
-			     d = uvchr_to_utf8(d, UNI_TO_NATIVE(*t));
-			     t++;
-			}
-		   }
-		   len = d - tmpbuf;
-		   Copy(tmpbuf, ustrp, len, U8);
-#else
 		   Copy(s, ustrp, len, U8);
-#endif
 	      }
 	 }
     }
 
     if (!len && *swashp) {
-	const UV uv2 = swash_fetch(*swashp, tmpbuf, TRUE /* => is utf8 */);
+	const UV uv2 = swash_fetch(*swashp, p, TRUE /* => is utf8 */);
 
 	 if (uv2) {
 	      /* It was "normal" (a single character mapping). */
-	      const UV uv3 = UNI_TO_NATIVE(uv2);
-	      len = uvchr_to_utf8(ustrp, uv3) - ustrp;
+	      len = uvchr_to_utf8(ustrp, uv2) - ustrp;
 	 }
     }
 
@@ -2496,7 +2455,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     if (lenp)
 	 *lenp = len;
 
-    return uv0;
+    return uv1;
 
 }
 
@@ -3195,7 +3154,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     U32 bit;
     SV *swatch;
     U8 tmputf8[2];
-    const UV c = NATIVE_TO_ASCII(*ptr);
+    const UV c = *ptr;
 
     PERL_ARGS_ASSERT_SWASH_FETCH;
 
@@ -3209,7 +3168,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     }
 
     /* Convert to utf8 if not already */
-    if (!do_utf8 && !UNI_IS_INVARIANT(c)) {
+    if (!do_utf8 && !NATIVE_IS_INVARIANT(c)) {
 	tmputf8[0] = (U8)UTF8_EIGHT_BIT_HI(c);
 	tmputf8[1] = (U8)UTF8_EIGHT_BIT_LO(c);
 	ptr = tmputf8;
@@ -4605,7 +4564,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		    to_utf8_fold(p1, foldbuf1, &n1);
 		}
 		else {  /* Not utf8, get utf8 fold */
-		    to_uni_fold(NATIVE_TO_LATIN1(*p1), foldbuf1, &n1);
+		    to_uni_fold(*p1, foldbuf1, &n1);
 		}
 		f1 = foldbuf1;
 	    }
@@ -4650,7 +4609,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		    to_utf8_fold(p2, foldbuf2, &n2);
 		}
 		else {
-		    to_uni_fold(NATIVE_TO_LATIN1(*p2), foldbuf2, &n2);
+		    to_uni_fold(*p2, foldbuf2, &n2);
 		}
 		f2 = foldbuf2;
 	    }

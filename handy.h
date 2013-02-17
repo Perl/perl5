@@ -990,7 +990,7 @@ EXTCONST U32 PL_charclass[];
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define _CC_mask(classnum) (1U << (classnum))
 #   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
-                && (PL_charclass[(U8) NATIVE_TO_LATIN1(c)] & _CC_mask(classnum)))
+                && (PL_charclass[(U8) (c)] & _CC_mask(classnum)))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
      * ASCII. */
@@ -999,7 +999,7 @@ EXTCONST U32 PL_charclass[];
     /* The _A version makes sure that both the desired bit and the ASCII bit
      * are present */
 #   define _generic_isCC_A(c, classnum) (FITS_IN_8_BITS(c) \
-        && ((PL_charclass[(U8) NATIVE_TO_LATIN1(c)] & _CC_mask_A(classnum)) \
+        && ((PL_charclass[(U8) (c)] & _CC_mask_A(classnum)) \
                                 == _CC_mask_A(classnum)))
 
 #   define isALPHA_A(c)  _generic_isCC_A(c, _CC_ALPHA)
@@ -1020,7 +1020,7 @@ EXTCONST U32 PL_charclass[];
 
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_LATIN1(c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
+#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
 
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)
 #   define _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
@@ -1177,8 +1177,7 @@ EXTCONST U32 PL_charclass[];
  * out-of-range */
 #define toLOWER_LATIN1(c)    ((! FITS_IN_8_BITS(c))                        \
                              ? (c)                                         \
-                             : LATIN1_TO_NATIVE(PL_latin1_lc[              \
-                                            NATIVE_TO_LATIN1( (U8) (c)) ]))
+                             : PL_latin1_lc[ (U8) (c) ])
 #define toLOWER_L1(c)    toLOWER_LATIN1(c)  /* Synonym for consistency */
 
 /* Modified uc.  Is correct uc except for three non-ascii chars which are
@@ -1186,8 +1185,7 @@ EXTCONST U32 PL_charclass[];
  * character for input out-of-range */
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
                                ? (c)                                       \
-                               : LATIN1_TO_NATIVE(PL_mod_latin1_uc[        \
-                                            NATIVE_TO_LATIN1( (U8) (c)) ]))
+                               : PL_mod_latin1_uc[ (U8) (c) ])
 #ifdef USE_NEXT_CTYPE
 
 #  define isALPHANUMERIC_LC(c)	NXIsAlNum((unsigned int)(c))
