@@ -1,6 +1,8 @@
 package utf8;
 use strict;
 use warnings;
+use re "/aa";  # So we won't even try to look at above Latin1, potentially
+               # resulting in a recursive call
 
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
