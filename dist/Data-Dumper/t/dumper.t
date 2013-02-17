@@ -1510,9 +1510,16 @@ VSTRINGS_CORRECT
     \v65.66.6_7,
     \~v190.189.188
   );
-  TEST q(Data::Dumper->Dump(\@::_v, [qw(a b c d)])), 'vstrings';
-  TEST q(Data::Dumper->Dumpxs(\@::_v, [qw(a b c d)])), 'xs vstrings'
-    if $XS;
+  if ($] >= 5.010) {
+    TEST q(Data::Dumper->Dump(\@::_v, [qw(a b c d)])), 'vstrings';
+    TEST q(Data::Dumper->Dumpxs(\@::_v, [qw(a b c d)])), 'xs vstrings'
+      if $XS;
+  }
+  else { # Skip tests before 5.10. vstrings considered funny before
+    SKIP_TEST "vstrings considered funny before 5.10.0";
+    SKIP_TEST "vstrings considered funny before 5.10.0 (XS)"
+      if $XS;
+  }
 }
 
 ############# 384
