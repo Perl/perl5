@@ -576,27 +576,20 @@ compiler. If you need to install your software on a system without a
 compiler, or if having I<any> dependencies is a problem, then C<Moose>
 may not be right for you.
 
-=head3 Mouse
+=head3 Moo
 
 If you try C<Moose> and find that one of these issues is preventing you
-from using C<Moose>, we encourage you to consider L<Mouse> next.
-C<Mouse> implements a subset of C<Moose>'s functionality in a simpler
-package. For all features that it does implement, the end-user API is
-I<identical> to C<Moose>, meaning you can switch from C<Mouse> to
+from using C<Moose>, we encourage you to consider L<Moo> next.
+C<Moo> implements a subset of C<Moose>'s functionality in a simpler
+package. For most features that it does implement, the end-user API is
+I<identical> to C<Moose>, meaning you can switch from C<Moo> to
 C<Moose> quite easily.
 
-C<Mouse> does not implement most of C<Moose>'s introspection API, so
-it's often faster when loading your modules. Additionally, all of its
-I<required> dependencies ship with the Perl core, and it can run
-without a compiler. If you do have a compiler, C<Mouse> will use it to
-compile some of its code for a speed boost.
+C<Moo> does not implement most of C<Moose>'s introspection API, so it's often
+faster when loading your modules. Additionally, none of its dependencies
+require XS, so it can be installed on machines without a compiler.
 
-Finally, it ships with a C<Mouse::Tiny> module that takes most of
-C<Mouse>'s features and bundles them up in a single module file. You
-can copy this module file into your application's library directory for
-easy bundling.
-
-The C<Moose> authors hope that one day C<Mouse> can be made obsolete by
+The C<Moose> authors hope that one day C<Moo> can be made obsolete by
 improving C<Moose> enough, but for now it provides a worthwhile
 alternative to C<Moose>.
 
@@ -683,8 +676,8 @@ Here's a brief recap of the options we covered:
 =item * L<Moose>
 
 C<Moose> is the maximal option. It has a lot of features, a big
-ecosystem, and a thriving user base. We also covered L<Mouse> briefly.
-C<Mouse> is C<Moose> lite, and a reasonable alternative when Moose
+ecosystem, and a thriving user base. We also covered L<Moo> briefly.
+C<Moo> is C<Moose> lite, and a reasonable alternative when Moose
 doesn't work for your application.
 
 =item * L<Class::Accessor>
