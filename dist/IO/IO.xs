@@ -327,14 +327,38 @@ MODULE = IO	PACKAGE = IO::Handle	PREFIX = f
 int
 ungetc(handle, c)
 	InputStream	handle
-	int		c
+	SV *	        c
     CODE:
-	if (handle)
+	if (handle) {
 #ifdef PerlIO
-	    RETVAL = PerlIO_ungetc(handle, c);
+            UV v;
+
+            if ((SvIOK_notUV(c) && SvIV(c) < 0) || (SvNOK(c) && SvNV(c) < 0.0))
+                croak("Negative character number in ungetc()");
+
+            v = SvUV(c);
+            if (NATIVE_IS_INVARIANT(v) || (v <= 0xFF && !PerlIO_isutf8(handle)))
+                RETVAL = PerlIO_ungetc(handle, (int)v);
+            else {
+                U8 buf[UTF8_MAXBYTES + 1], *end;
+                Size_t len;
+
+                if (!PerlIO_isutf8(handle))
+                    croak("Wide character number in ungetc()");
+
+                /* This doesn't warn for non-chars, surrogate, and
+                 * above-Unicodes */
+                end = uvchr_to_utf8_flags(buf, v, 0);
+                len = end - buf;
+                if (PerlIO_unread(handle, &buf, len) == len)
+                    XSRETURN_UV(v);
+                else
+                    RETVAL = EOF;
+            }
 #else
-	    RETVAL = ungetc(c, handle);
+            RETVAL = ungetc((int)SvIV(c), handle);
 #endif
+        }
 	else {
 	    RETVAL = -1;
 	    errno = EINVAL;
