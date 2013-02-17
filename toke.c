@@ -3371,7 +3371,7 @@ S_scan_const(pTHX_ char *start)
 		{
                     I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
                     STRLEN len = 3;
-		    uv = NATIVE_TO_UNI(grok_oct(s, &len, &flags, NULL));
+		    uv = grok_oct(s, &len, &flags, NULL);
 		    s += len;
                     if (len < 3 && s < send && isDIGIT(*s)
                         && ckWARN(WARN_MISC))
@@ -3423,9 +3423,8 @@ S_scan_const(pTHX_ char *start)
 		 * UTF-8 sequence they can end up as, except if they force us
 		 * to recode the rest of the string into utf8 */
 		
-		/* Here uv is the ordinal of the next character being added in
-		 * unicode (converted from native). */
-		if (!UNI_IS_INVARIANT(uv)) {
+		/* Here uv is the ordinal of the next character being added */
+		if (!NATIVE_IS_INVARIANT(uv)) {
 		    if (!has_utf8 && uv > 255) {
 			/* Might need to recode whatever we have accumulated so
 			 * far if it contains any chars variant in utf8 or
