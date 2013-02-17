@@ -1,4 +1,6 @@
 package Symbol;
+use strict;
+no strict 'refs';
 
 =head1 NAME
 
@@ -81,11 +83,11 @@ you reload the C<Foo> module afterwards.
 BEGIN { require 5.005; }
 
 require Exporter;
-@ISA = qw(Exporter);
-@EXPORT = qw(gensym ungensym qualify qualify_to_ref);
-@EXPORT_OK = qw(delete_package geniosym);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(gensym ungensym qualify qualify_to_ref);
+our @EXPORT_OK = qw(delete_package geniosym);
 
-$VERSION = '1.07';
+our $VERSION = '1.08';
 
 my $genpkg = "Symbol::";
 my $genseq = 0;
