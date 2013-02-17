@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -577,7 +577,7 @@ sub warnif
 
 # These are not part of any public interface, so we can delete them to save
 # space.
-delete $warnings::{$_} foreach qw(NORMAL FATAL MESSAGE);
+delete @warnings::{qw(NORMAL FATAL MESSAGE)};
 
 1;
 
