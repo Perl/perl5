@@ -1,8 +1,10 @@
 package utf8;
+use strict;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
+our ( $AUTOLOAD, %enc );
 
 sub import {
     $^H |= $utf8::hint_bits;
