@@ -1,8 +1,9 @@
 #!/usr/local/bin/perl
-
+use strict;
 use Config;
 use File::Basename qw(&basename &dirname);
 use Cwd;
+my ( $origdir, $file );
 
 # List explicitly here the variables you want Configure to
 # generate.  Metaconfig only looks for shell variables, so you
