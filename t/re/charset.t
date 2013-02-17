@@ -3,12 +3,12 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config; import Config;
     require './test.pl';
 }
 
 use strict;
 use warnings;
+use Config;
 
 plan('no_plan');
 
@@ -40,7 +40,10 @@ if (! is_miniperl() && $Config{d_setlocale}) {
     require POSIX;
     my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
     if ($current_locale eq 'C') {
-        require locale; import locale;
+
+        # test for d_setlocale is repeated here because this one is compile
+        # time, and the one above is run time
+        use if $Config{d_setlocale}, 'locale';
 
         # Some locale implementations don't have the 128-255 characters all
         # mean nothing.  Skip the locale tests in that situation
