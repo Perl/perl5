@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.47 2012/08/15 05:36:16 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.48 2013/02/18 02:23:56 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.47 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.48 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -62,7 +62,8 @@ eval {
 
 sub encodings {
     my %enc;
-    if ( @_ and $_[1] eq ":all" ) {
+    my $arg  = $_[1] || '';
+    if ( $arg eq ":all" ) {
         %enc = ( %Encoding, %ExtModule );
     }
     else {
@@ -145,7 +146,7 @@ sub clone_encoding($) {
 sub encode($$;$) {
     my ( $name, $string, $check ) = @_;
     return undef unless defined $string;
-    $string .= '' if ref $string;    # stringify;
+    $string .= '';    # stringify;
     $check ||= 0;
     unless ( defined $name ) {
         require Carp;
@@ -165,7 +166,7 @@ sub encode($$;$) {
 sub decode($$;$) {
     my ( $name, $octets, $check ) = @_;
     return undef unless defined $octets;
-    $octets .= '' if ref $octets;
+    $octets .= '';
     $check ||= 0;
     my $enc = find_encoding($name);
     unless ( defined $enc ) {
@@ -797,7 +798,7 @@ constants via C<use Encode qw(:fallback_all)>.
   Encode::LEAVE_SRC
 
 If the C<Encode::LEAVE_SRC> bit is I<not> set but I<CHECK> is set, then the
-second argument to encode() or decode() will be overwritten in place.
+source string to encode() or decode() will be overwritten in place.
 If you're not interested in this, then bitwise-OR it with the bitmask.
 
 =head2 coderef for CHECK

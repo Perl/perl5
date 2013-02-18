@@ -1,8 +1,33 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.47 2012/08/15 05:36:16 dankogai Exp dankogai $
+# $Id: Changes,v 2.48 2013/02/18 02:23:56 dankogai Exp dankogai $
 #
-$Revision: 2.47 $ $Date: 2012/08/15 05:36:16 $
+$Revision: 2.48 $ $Date: 2013/02/18 02:23:56 $
+! encoding.pm 
+  t/Mod_EUCJP.pm t/enc_data.t t/enc_eucjp.t t/enc_module.t t/enc_utf8.t
+  t/encoding.t t/jperl.t
+  [PATCH] Deprecate encoding.pm
+  https://rt.cpan.org/Ticket/Display.html?id=81255
+! Encode/Supported.pod
+  Fixed: Pod errors
+  https://rt.cpan.org/Ticket/Display.html?id=81426
+! Encode.pm t/Encode.t
+  [PATCH] Fix for shared hash key scalars
+  https://rt.cpan.org/Ticket/Display.html?id=80608
+! Encode.pm
+  Fixed: Uninitialized value warning from Encode->encodings()
+  https://rt.cpan.org/Ticket/Display.html?id=80181
+! Makefile.PL
+  Install to 'site' instead of 'perl' when perl version is 5.11+
+  https://rt.cpan.org/Ticket/Display.html?id=78917
+! Encode/Makefile_PL.e2x
+  find enc2xs.bat if it works on windows.
+  https://github.com/dankogai/p5-encode/pull/7
+! t/piconv.t
+  Fix finding piconv in t/piconv.t
+  https://github.com/dankogai/p5-encode/pull/6
+
+2.47 2012/08/15 05:36:16
 ! Encode.pm
   POD Fixes: Copyright and mail address
 ! Makefile.PL

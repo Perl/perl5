@@ -15,6 +15,7 @@ plan 3;
 
 SKIP: {
 skip_if_miniperl("no dynamic loading on miniperl, no Encode", 1);
+skip('encoding pragma is deprecated', 1) if $] >= 5.017009;
 fresh_perl_is <<'end', "ok\n", {},
     use encoding 'utf8';
     map { "a" . $a } ((1)x5000);
