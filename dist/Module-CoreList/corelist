@@ -16,6 +16,7 @@ See L<Module::CoreList> for one.
     corelist [-r <PerlVersion>] ...
     corelist --feature <FeatureName> [<FeatureName>] ...
     corelist --diff PerlVersion PerlVersion
+    corelist --upstream <ModuleName>
 
 =head1 OPTIONS
 
@@ -116,6 +117,11 @@ If you pass a perl version you get the release date for that version only.
 
 lists the first version bundle of each named feature given
 
+=item --upstream, -u
+
+Shows if the given module is primarily maintained in perl core or on CPAN
+and bug tracker URL.
+
 =back
 
 As a special case, if you specify the module name C<Unicode>, you'll get
@@ -135,7 +141,7 @@ my %Opts;
 
 GetOptions(
     \%Opts,
-    qw[ help|?! man! r|release:s v|version:s a! d diff|D feature|f ]
+    qw[ help|?! man! r|release:s v|version:s a! d diff|D feature|f u|upstream ]
 );
 
 pod2usage(1) if $Opts{help};
@@ -333,13 +339,24 @@ sub module_version {
         $msg .= " was ";
         $msg .= "first " unless $ver;
         $msg .= "released with perl " . format_perl_version($ret);
-        $msg .= ( $rem ? ',' : ' and' ) . " deprecated in " . format_perl_version($deprecated) if $deprecated;
+        $msg .= ( $rem ? ',' : ' and' ) . " deprecated (will be CPAN-only) in " . format_perl_version($deprecated) if $deprecated;
         $msg .= " and removed from " . format_perl_version($rem) if $rem;
     } else {
         $msg .= " was not in CORE (or so I think)";
     }
 
     print $msg,"\n";
+
+    if( defined $ret and exists $Opts{u} ) {
+        my $upsream = $Module::CoreList::upstream{$mod};
+        $upsream = 'undef' unless $upsream;
+        print "upstream: $upsream\n";
+        if ( $upsream ne 'blead' ) {
+            my $bugtracker = $Module::CoreList::bug_tracker{$mod};
+            $bugtracker = 'unknown' unless $bugtracker;
+            print "bug tracker: $bugtracker\n";
+        }
+    }
 
     if(defined $ret and exists $Opts{a} and $Opts{a}){
         display_a($mod);
