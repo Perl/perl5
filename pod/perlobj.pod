@@ -685,7 +685,7 @@ thing as well:
 =head3 Indirect Object Syntax
 X<indirect object>
 
-B<Outside of the file handle case, use of this syntax is discouraged,
+B<Outside of the file handle case, use of this syntax is discouraged
 as it can confuse the Perl interpreter. See below for more details.>
 
 Perl suports another method invocation syntax called "indirect object"
@@ -911,7 +911,7 @@ then the error will change the value of C<$@>.
 Because C<DESTROY> methods can be called at any time, you should
 localize any global variables you might update in your C<DESTROY>. In
 particular, if you use C<eval {}> you should localize C<$@>, and if you
-use C<system> or backticks, you should localize C<$?>.
+use C<system> or backticks you should localize C<$?>.
 
 If you define an C<AUTOLOAD> in your class, then Perl will call your
 C<AUTOLOAD> to handle the C<DESTROY> method. You can prevent this by
