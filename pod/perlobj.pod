@@ -632,7 +632,7 @@ call. That's a mouthful, so let's look at some code:
   $file->${ \'save' };
   $file->${ returns_scalar_ref() };
   $file->${ \( returns_scalar() ) };
-  $file->${ returns_sub_ref() };
+  $file->${ returns_ref_to_sub_ref() };
 
 This works if the dereference produces a string I<or> a subroutine
 reference.
