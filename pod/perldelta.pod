@@ -536,6 +536,12 @@ VMS.  Among other things, this provides better handling of dots in directory nam
 multiple dots in filenames,and spaces in filenames.  To obtain the old behavior,
 set the logical name C<DECC$EFS_CHARSET> to C<DISABLE>.
 
+=item MidnightBSD
+
+C<libc_r> was removed from recent versions of MidnightBSD and older versions
+work better with C<pthread>. Threading is now enabled using C<pthread> which
+corrects build errors with threading enabled on 0.4-CURRENT.
+
 =back
 
 =head1 Internal Changes
