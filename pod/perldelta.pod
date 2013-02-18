@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.17.9
 
 =head1 DESCRIPTION
@@ -63,12 +60,6 @@ This release reverts that change.
 [ List each incompatible change as a =head2 entry ]
 
 =head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.  In
-particular, deprecated modules should be listed here even if they are listed as
-an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
 
 =head2 Deprecated pragma
 
@@ -462,6 +453,10 @@ INSTALL_BASE.
 =item *
 
 Configure will honour the external C<MAILDOMAIN> environment variable, if set.
+
+=item *
+
+C<installman> no longer ignores the silent option
 
 =item *
 
