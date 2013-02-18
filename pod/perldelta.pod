@@ -419,6 +419,11 @@ Use L<XXX> with program names to get proper documentation linking. ]
 Added C<--feature> switch which lists the first version bundle of each
 named feature given.
 
+=item *
+
+Added C<--upstream> switch which shows if the given module
+is primarily maintained in perl core or on CPAN and bug tracker URL.
+
 =back
 
 =head1 Configuration and Compilation
