@@ -3101,9 +3101,13 @@ case "$config_sh" in
 '')
 myuname=`$uname -a 2>/dev/null`
 $test -z "$myuname" && myuname=`hostname 2>/dev/null`
+# Downcase everything to avoid ambiguity.
+# Remove slashes and single quotes so we can use parts of this in 
+# directory and file names.
+# Remove newlines so myuname is sane to use elsewhere.
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
 # because the A-Z/a-z are not consecutive.
-myuname=`echo $myuname | $sed -e 's/^[^=]*=//' -e "s,['/],,g" | \
+myuname=`echo $myuname | $sed -e "s,['/],,g" | \
 	./tr '[A-Z]' '[a-z]' | $tr $trnl ' '`
 newmyuname="$myuname"
 dflt=n
