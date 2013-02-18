@@ -70,6 +70,18 @@ an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Deprecated pragma
+
+=over
+
+=item L<encoding>
+
+This module is deprecated under perl 5.18.  It uses a mechanism provided by
+perl that is deprecated under 5.18 and higher, and may be removed in a
+future version.
+
+=back
+
 =head2 Deprecated Modules
 
 The following modules will be removed from the core distribution in a
