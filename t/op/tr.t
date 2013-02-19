@@ -512,6 +512,7 @@ SKIP: {
 eval q{ $a ~= tr/a/b/; };
 ok 1;
 SKIP: {
+    no warnings "deprecated";
     skip "no encoding", 1 unless eval { require encoding; 1 };
     eval q{ use encoding "utf8"; $a ~= tr/a/b/; };
     ok 1;

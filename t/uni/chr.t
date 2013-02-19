@@ -9,6 +9,7 @@ BEGIN {
 
 use strict;
 plan (tests => 8);
+no warnings 'deprecated';
 use encoding 'johab';
 
 ok(chr(0x7f) eq "\x7f");
