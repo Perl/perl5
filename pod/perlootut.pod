@@ -10,7 +10,13 @@ perlootut - Object-Oriented Programming in Perl Tutorial
 
 =head1 DATE
 
-This document was created in February, 2011.
+This document was created in February, 2011, and the last major
+revision was in February, 2013.
+
+If you are reading this in the future then it's possible that the state
+of the art has changed. We recommend you start by reading the perlootut
+document in the latest stable release of Perl, rather than this
+version.
 
 =head1 DESCRIPTION
 
