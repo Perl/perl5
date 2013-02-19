@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '3.01';
+our $VERSION = '3.02';
 $VERSION = eval $VERSION;
 
 use threads::shared 1.21;
@@ -13,7 +13,7 @@ use Scalar::Util 1.10 qw(looks_like_number blessed reftype refaddr);
 our @CARP_NOT = ("threads::shared");
 
 # Predeclarations for internal functions
-my ($validate_count, $validate_index);
+my ($validate_count, $validate_index, $validate_timeout);
 
 # Create a new queue possibly pre-populated with items
 sub new
@@ -101,6 +101,32 @@ sub dequeue_nb
         push(@items, shift(@$queue));
     }
     return @items;
+}
+
+# Return items from the head of a queue, blocking if needed up to a timeout
+sub dequeue_timed
+{
+    my $self = shift;
+    lock(%$self);
+    my $queue = $$self{'queue'};
+
+    # Timeout may be relative or absolute
+    my $timeout = @_ ? $validate_timeout->(shift) : -1;
+    # Convert to an absolute time for use with cond_timedwait()
+    if ($timeout < 32000000) {   # More than one year
+        $timeout += time();
+    }
+
+    my $count = @_ ? $validate_count->(shift) : 1;
+
+    # Wait for requisite number of items, or until timeout
+    while ((@$queue < $count) && ! $$self{'ENDED'}) {
+        last if (! cond_timedwait(%$self, $timeout));
+    }
+    cond_signal(%$self) if ((@$queue > $count) || $$self{'ENDED'});
+
+    # Get whatever we need off the queue if available
+    return $self->dequeue_nb($count);
 }
 
 # Return an item without removing it from a queue
@@ -232,6 +258,23 @@ $validate_count = sub {
     return $count;
 };
 
+# Check value of the requested timeout
+$validate_timeout = sub {
+    my $timeout = shift;
+
+    if (! defined($timeout) ||
+        ! looks_like_number($timeout))
+    {
+        require Carp;
+        my ($method) = (caller(1))[3];
+        $method =~ s/Thread::Queue:://;
+        $timeout = 'undef' if (! defined($timeout));
+        Carp::croak("Invalid 'timeout' argument ($timeout) to '$method' method");
+    }
+
+    return $timeout;
+};
+
 1;
 
 =head1 NAME
@@ -240,7 +283,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 3.01
+This document describes Thread::Queue version 3.02
 
 =head1 SYNOPSIS
 
@@ -277,6 +320,11 @@ This document describes Thread::Queue version 3.01
 
     # Non-blocking dequeue
     if (defined(my $item = $q->dequeue_nb())) {
+        # Work on $item
+    }
+
+    # Blocking dequeue with 5-second timeout
+    if (defined(my $item = $q->dequeue_timed(5))) {
         # Work on $item
     }
 
@@ -380,6 +428,27 @@ queue, and returns them.  If the queue contains fewer than the requested
 number of items, then it immediately (i.e., non-blocking) returns whatever
 items there are on the queue.  If the queue is empty, then C<undef> is
 returned.
+
+=item ->dequeue_timed(TIMEOUT)
+
+=item ->dequeue_timed(TIMEOUT, COUNT)
+
+Removes the requested number of items (default is 1) from the head of the
+queue, and returns them.  If the queue contains fewer than the requested
+number of items, then the thread will be blocked until the requisite number of
+items are available, or until the timeout is reached.  If the timeout is
+reached, it returns whatever items there are on the queue, or C<undef> if the
+queue is empty.
+
+The timeout may be a number of seconds relative to the current time (e.g., 5
+seconds from when the call is made), or may be an absolute timeout in I<epoch>
+seconds the same as would be used with
+L<cond_timedwait()|threads::shared/"cond_timedwait VARIABLE, ABS_TIMEOUT">.
+Fractional seconds (e.g., 2.5 seconds) are also supported (to the extent of
+the underlying implementation).
+
+If C<TIMEOUT> is missing, c<undef>, or less than or equal to 0, then this call
+behaves the same as C<dequeue_nb>.
 
 =item ->pending()
 

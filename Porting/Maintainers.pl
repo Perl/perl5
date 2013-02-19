@@ -1872,7 +1872,7 @@ use File::Glob qw(:case);
 
     'Thread::Queue' => {
         'MAINTAINER'   => 'jdhedden',
-        'DISTRIBUTION' => 'JDHEDDEN/Thread-Queue-3.01.tar.gz',
+        'DISTRIBUTION' => 'JDHEDDEN/Thread-Queue-3.02.tar.gz',
         'FILES'        => q[dist/Thread-Queue],
         'EXCLUDED'     => [
             qr{^examples/},
