@@ -452,7 +452,7 @@ unless ($define{PERL_MAD}) {
 unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_interp_size
-		    PL_interp_size_5_16_0
+		    PL_interp_size_5_18_0
 			 );
 }
 

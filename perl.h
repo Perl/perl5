@@ -5027,8 +5027,8 @@ EXTCONST U16 PL_interp_size
 /* This will be useful for subsequent releases, because this has to be the
    same in your libperl as in main(), else you have a mismatch and must abort.
 */
-EXTCONST U16 PL_interp_size_5_16_0
-  INIT(PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_16_0_INTERP_MEMBER));
+EXTCONST U16 PL_interp_size_5_18_0
+  INIT(PERL_INTERPRETER_SIZE_UPTO_MEMBER(PERL_LAST_5_18_0_INTERP_MEMBER));
 
 
 #  ifdef PERL_GLOBAL_STRUCT

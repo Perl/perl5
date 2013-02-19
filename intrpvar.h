@@ -722,11 +722,11 @@ PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 /* Hook for File::Glob */
 PERLVARI(I, globhook,	globhook_t, NULL)
 
-/* The last unconditional member of the interpreter structure when 5.10.0 was
+/* The last unconditional member of the interpreter structure when 5.18.0 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#define PERL_LAST_5_16_0_INTERP_MEMBER	Iglobhook
+#define PERL_LAST_5_18_0_INTERP_MEMBER	Iglobhook
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(I, my_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
