@@ -8,7 +8,7 @@ package Win32;
     require DynaLoader;
 
     @ISA = qw|Exporter DynaLoader|;
-    $VERSION = '0.45';
+    $VERSION = '0.46';
     $XS_VERSION = $VERSION;
     $VERSION = eval $VERSION;
 
@@ -292,7 +292,7 @@ sub GetOSDisplayName {
 		$desc =~ s/^\s*//;
 		s/(200.)/$name Server $1/;
 	    }
-	    s/^Windows (200[38])/Windows Server $1/;
+	    s/^Windows (20(03|08|12))/Windows Server $1/;
 	}
     }
     $name .= " $desc" if length $desc;
@@ -460,8 +460,16 @@ sub _GetOSName {
 		    $desc = "R2";
 		}
 	    }
+	    elsif ($minor == 2) {
+	    if ($producttype == VER_NT_WORKSTATION) {
+	        $os = "8";
+	    }
+	    else {
+	        $os = "2012";
+	    }
+	    }
 
-            if ($productinfo == PRODUCT_ULTIMATE) {
+        if ($productinfo == PRODUCT_ULTIMATE) {
 		$desc .= " Ultimate";
 	    }
             elsif ($productinfo == PRODUCT_HOME_PREMIUM) {
@@ -970,6 +978,8 @@ Currently known values for ID MAJOR and MINOR are as follows:
     Windows Server 2008      2      6       0
     Windows 7                2      6       1
     Windows Server 2008 R2   2      6       1
+    Windows 8                2      6       2
+    Windows Server 2012      2      6       2
 
 On Windows NT 4 SP6 and later this function returns the following
 additional values: SPMAJOR, SPMINOR, SUITEMASK, PRODUCTTYPE.
@@ -983,6 +993,10 @@ identical; the PRODUCTTYPE field must be used to differentiate between
 them.
 
 The version numbers for Windows 7 and Windows Server 2008 R2 are
+identical; the PRODUCTTYPE field must be used to differentiate between
+them.
+
+The version numbers for Windows 8 and Windows Server 2012 are
 identical; the PRODUCTTYPE field must be used to differentiate between
 them.
 
@@ -1016,9 +1030,9 @@ constants.
 PRODUCTTYPE provides additional information about the system.  It should
 be one of the following integer values:
 
-    1 - Workstation (NT 4, 2000 Pro, XP Home, XP Pro, Vista)
+    1 - Workstation (NT 4, 2000 Pro, XP Home, XP Pro, Vista, etc)
     2 - Domaincontroller
-    3 - Server (2000 Server, Server 2003, Server 2008)
+    3 - Server (2000 Server, Server 2003, Server 2008, etc)
 
 Note that a server that is also a domain controller is reported as
 PRODUCTTYPE 2 (Domaincontroller) and not PRODUCTTYPE 3 (Server).

@@ -1,5 +1,9 @@
 Revision history for the Perl extension Win32.
 
+0.46    [2013-02-19]
+        - add Win2012/Win8 detection (thanks to Michiel Beijen) [rt#82572]
+          [perl#116352]
+
 0.45	[2012-08-07]
 	- add Win32::GetACP(), Win32::GetConsoleCP(),
 	  Win32::GetConsoleOutputCP(), Win32::GetOEMCP(), Win32::SetConsoleCP()
