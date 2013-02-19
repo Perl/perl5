@@ -589,6 +589,15 @@ they've finished using it.
 
 A trailing '/' on a path in @INC will no longer have an additional '/' appended.
 
+=item *
+
+The C<:crlf> layer now works when unread data doesn't fit into its own
+buffer. [perl #112244].
+
+=item *
+
+C<ungetc()> now handles UTF-8 encoded data. [perl #116322].
+
 =back
 
 =head1 Known Problems
