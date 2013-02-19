@@ -411,14 +411,16 @@ if($Config{d_setlocale}) {
     if ($current_locale eq 'C') {
         require locale; import locale;
 
-        # Some locale implementations don't have the range 128-255 characters all
-        # mean nothing.  Skip the locale tests in that situation.
+        # Some implementations don't have the 128-255 range characters all
+        # mean nothing under the C locale (an example being VMS).  This is
+        # legal, but since we don't know what the right answers should be,
+        # skip the locale tests in that situation.
         for my $i (128 .. 255) {
             my $char = chr($i);
-            goto bad_locale if uc($char) ne $char || lc($char) ne $char;
+            goto untestable_locale if uc($char) ne $char || lc($char) ne $char;
         }
         push @charsets, 'l';
-      bad_locale:
+      untestable_locale:
     }
 }
 
