@@ -596,6 +596,15 @@ often faster when loading your modules. Additionally, none of its
 dependencies require XS, so it can be installed on machines without a
 compiler.
 
+One of C<Moo>'s most compelling features is its interoperability with
+C<Moose>. When someone tries to use C<Moose>'s introspection API on a
+C<Moo> class or role, it is transparently inflated into a C<Moose>
+class or role. This makes it easier to incorporate C<Moo>-using code
+into a C<Moose> code base and vice versa.
+
+For example, a C<Moose> class can subclass a C<Moo> class using
+C<extends> or consume a C<Moo> role using C<with>.
+
 The C<Moose> authors hope that one day C<Moo> can be made obsolete by
 improving C<Moose> enough, but for now it provides a worthwhile
 alternative to C<Moose>.
