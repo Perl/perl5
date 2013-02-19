@@ -119,7 +119,6 @@ struct reg_code_block {
 	/* during matching */						\
 	U32 lastparen;			/* last open paren matched */	\
 	U32 lastcloseparen;		/* last close paren matched */	\
-	regexp_paren_pair *swap;	/* Unused: 5.10.1 and later */	\
 	/* Array of offsets for (@-) and (@+) */			\
 	regexp_paren_pair *offs;					\
 	/* saved or original string so \digit works forever. */		\

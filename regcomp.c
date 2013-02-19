@@ -14986,10 +14986,6 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
     npar = r->nparens+1;
     Newx(ret->offs, npar, regexp_paren_pair);
     Copy(r->offs, ret->offs, npar, regexp_paren_pair);
-    if(ret->swap) {
-        /* no need to copy these */
-        Newx(ret->swap, npar, regexp_paren_pair);
-    }
 
     if (ret->substrs) {
 	/* Do it this way to avoid reading from *r after the StructCopy().
