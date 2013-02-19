@@ -801,11 +801,7 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 #define assert_not_ROK(sv)	assert_(!SvROK(sv) || !SvRV(sv))
 #define assert_not_glob(sv)	assert_(!isGV_with_GP(sv))
 
-#define SvOK(sv)		((SvTYPE(sv) == SVt_BIND)		\
-				 ? (SvFLAGS(SvRV(sv)) & SVf_OK		\
-					|| isREGEXP(SvRV(sv)))		\
-				 : (SvFLAGS(sv) & SVf_OK		\
-					 || isREGEXP(sv)))
+#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK || isREGEXP(sv))
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\
