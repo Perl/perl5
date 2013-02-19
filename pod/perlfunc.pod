@@ -1558,11 +1558,12 @@ file as a Perl script.
 
     do 'stat.pl';
 
-is just like
+is largely like
 
     eval `cat stat.pl`;
 
-except that it's more efficient and concise, keeps track of the current
+except that it's more concise, runs no external processes, keeps track of
+the current
 filename for error messages, searches the C<@INC> directories, and updates
 C<%INC> if the file is found.  See L<perlvar/@INC> and L<perlvar/%INC> for
 these variables.  It also differs in that code evaluated with C<do FILENAME>
