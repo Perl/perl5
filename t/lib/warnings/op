@@ -1,8 +1,5 @@
   op.c		AOK
 
-     Use of my $_ is deprecated
-	my $_ ;
-
      Found = in conditional, should be ==
 	1 if $a = 1 ;
 
@@ -106,17 +103,6 @@
     oops: oopsHV		[oopsHV]	TODO
     
 __END__
-# op.c
-use warnings 'deprecated' ;
-my $_;
-CORE::state $_;
-no warnings 'deprecated' ;
-my $_;
-CORE::state $_;
-EXPECT
-Use of my $_ is deprecated at - line 3.
-Use of state $_ is deprecated at - line 4.
-########
 # op.c
 use warnings 'syntax' ;
 1 if $a = 1 ;

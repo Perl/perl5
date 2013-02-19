@@ -578,13 +578,6 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 			      PL_parser->in_my == KEY_state ? "state" : "my"), flags & SVf_UTF8);
 	}
     }
-    else if (len == 2 && name[1] == '_' && !is_our)
-	/* diag_listed_as: Use of my $_ is deprecated */
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			      "Use of %s $_ is deprecated",
-			       PL_parser->in_my == KEY_state
-				 ? "state"
-				 : "my");
 
     /* allocate a spare slot and store the name in that slot */
 
