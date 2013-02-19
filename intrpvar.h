@@ -162,6 +162,7 @@ PERLVAR(I, regdummy,	regnode)	/* from regcomp.c */
 PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
 
+PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 
@@ -297,7 +298,10 @@ PERLVAR(I, dowarn,	U8)
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */
 #endif
 PERLVAR(I, unsafe,	bool)
-PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
+
+/* Space for U16 (or U8 if PERL_SAWAMPERSAND is defined)  */
+
+PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
 
 PERLVAR(I, inplace,	char *)
 PERLVAR(I, e_script,	SV *)
@@ -718,13 +722,11 @@ PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 /* Hook for File::Glob */
 PERLVARI(I, globhook,	globhook_t, NULL)
 
-PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
-
 /* The last unconditional member of the interpreter structure when 5.10.0 was
    released. The offset of the end of this is baked into a global variable in 
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#define PERL_LAST_5_16_0_INTERP_MEMBER	Ireentrant_retint
+#define PERL_LAST_5_16_0_INTERP_MEMBER	Iglobhook
 
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(I, my_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
