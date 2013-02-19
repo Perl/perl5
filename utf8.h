@@ -349,6 +349,10 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_EIGHT_BIT_HI(c)	UTF8_TWO_BYTE_HI((U8)(c))
 #define UTF8_EIGHT_BIT_LO(c)	UTF8_TWO_BYTE_LO((U8)(c))
 
+/* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
+ * as it is only in overlongs. */
+#define ILLEGAL_UTF8_BYTE   I8_TO_NATIVE_UTF8(0xC1)
+
 /*
  * 'UTF' is whether or not p is encoded in UTF8.  The names 'foo_lazy_if' stem
  * from an earlier version of these macros in which they didn't call the

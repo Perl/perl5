@@ -3104,7 +3104,7 @@ S_scan_const(pTHX_ char *start)
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = (char)I8_TO_NATIVE_UTF8(0xff);
+		    *c = (char) ILLEGAL_UTF8_BYTE;
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
@@ -3185,7 +3185,7 @@ S_scan_const(pTHX_ char *start)
                 if (uvmax) {
                     d = (char*)uvchr_to_utf8((U8*)d, 0x100);
                     if (uvmax > 0x101)
-                        *d++ = (char)UTF_TO_NATIVE(0xff);
+                        *d++ = (char) ILLEGAL_UTF8_BYTE;
                     if (uvmax > 0x100)
                         d = (char*)uvchr_to_utf8((U8*)d, uvmax);
                 }
@@ -3210,7 +3210,7 @@ S_scan_const(pTHX_ char *start)
 		    && !native_range
 #endif
 		    ) {
-		    *d++ = (char)I8_TO_NATIVE_UTF8(0xff);	/* use illegal utf8 byte--see pmtrans */
+		    *d++ = (char) ILLEGAL_UTF8_BYTE;	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}
