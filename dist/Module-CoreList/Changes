@@ -1,3 +1,8 @@
+2.82 Wed Feb 20 2013
+  - --feature switch added
+  - --upstream switch added
+  - Updated for v5.17.9
+
 2.81 Sun Jan 27 2013
   - Add modules deprecated with v5.17.9
 
