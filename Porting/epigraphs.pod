@@ -17,6 +17,28 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.9 - Douglas Adams, The Hitch-Hikers Guide to the Galaxy
+
+L<Announced on 2013-02-20 by Chris 'BinGOs' Williams|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-02/msg01146.html>
+
+Vogon poetry is of course, the third worst in the universe.
+The second worst is that of the Azgoths of Kria. During a
+recitation by their poet master Grunthos the Flatulent of
+his poem 'Ode To A Small Lump of Green Putty I Found In My
+Armpit One Midsummer Morning' four of his audience died
+of internal haemorrhaging and the president of the
+Mid-Galactic Arts Nobbling Council survived by gnawing one
+of his own legs off. Grunthos is reported to have been
+'disappointed' by the poem's reception, and was about to
+embark on a reading of his twelve-book epic entitled
+'My Favourite Bathtime Gurgles' when his own major intestine,
+in a desperate attempt to save life and civilisation,
+leapt straight up through his neck and throttled his brain.
+
+The very worst poetry of all perished along with its creator
+Paula Nancy Millstone Jennings of Greenbridge, Essex, England,
+in the destruction of the planet Earth.
+
 =head2 v5.17.8 - Iain Pears, An Instance of the Fingerpost
 
 L<Announced on 2013-01-20 by Aaron Crane|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-01/msg00518.html>
