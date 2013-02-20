@@ -979,9 +979,13 @@ X<PERL5LIB>
 
 A list of directories in which to look for Perl library
 files before looking in the standard library and the current
-directory.  Any architecture-specific directories under the specified
-locations are automatically included if they exist, with this lookup
-done at interpreter startup time.
+directory.  Any architecture-specific and version-specific directories,
+such as F<version/archname/>, F<version/>, or F<archname/> under the
+specified locations are automatically included if they exist, with this
+lookup done at interpreter startup time.  In addition, any directories
+matching the entries in C<$Config{inc_version_list}> are added.
+(These typically would be for older compatible perl versions installed
+in the same directory tree.)
 
 If PERL5LIB is not defined, PERLLIB is used.  Directories are separated
 (like in PATH) by a colon on Unixish platforms and by a semicolon on
