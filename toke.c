@@ -3163,11 +3163,11 @@ S_scan_const(pTHX_ char *start)
 		    if (isLOWER_A(min)) {
 			for (i = min; i <= max; i++)
 			    if (isLOWER_A(i))
-				*d++ = NATIVE_TO_NEED(has_utf8,i);
+				*d++ = i;
 		    } else {
 			for (i = min; i <= max; i++)
 			    if (isUPPER_A(i))
-				*d++ = NATIVE_TO_NEED(has_utf8,i);
+				*d++ = i;
 		    }
 		}
 		else
@@ -3342,7 +3342,7 @@ S_scan_const(pTHX_ char *start)
 			|| s[1] != '{'
 			|| regcurly(s + 1, FALSE)))
 	    {
-		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
+		*d++ = '\\';
 		goto default_action;
 	    }
 
@@ -3736,25 +3736,25 @@ S_scan_const(pTHX_ char *start)
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
 	    case 'b':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\b');
+		*d++ = '\b';
 		break;
 	    case 'n':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\n');
+		*d++ = '\n';
 		break;
 	    case 'r':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\r');
+		*d++ = '\r';
 		break;
 	    case 'f':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\f');
+		*d++ = '\f';
 		break;
 	    case 't':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\t');
+		*d++ = '\t';
 		break;
 	    case 'e':
-		*d++ = ASCII_TO_NEED(has_utf8,'\033');
+		*d++ = ASCII_TO_NATIVE('\033');
 		break;
 	    case 'a':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\a');
+		*d++ = '\a';
 		break;
 	    } /* end switch */
 
