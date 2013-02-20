@@ -49,6 +49,8 @@ This release reverts that change.
 
 =head1 Deprecations
 
+The premature deprecation of lexical $_ in 5.17.7 has been reverted.
+
 =head2 Deprecated pragma
 
 =over
