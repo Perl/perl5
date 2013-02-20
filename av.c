@@ -119,10 +119,6 @@ Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp,
 #endif
 
 	    if (*allocp) {
-#if !defined(STRANGE_MALLOC) && !defined(MYMALLOC)
-		MEM_SIZE bytes;
-		IV itmp;
-#endif
 
 #ifdef Perl_safesysmalloc_size
 		/* Whilst it would be quite possible to move this logic around
@@ -147,24 +143,7 @@ Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp,
 		newmax = key + *maxp / 5;
 	      resize:
 		MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
-#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 		Renew(*allocp,newmax+1, SV*);
-#else
-		bytes = (newmax + 1) * sizeof(const SV *);
-#define MALLOC_OVERHEAD 16
-		itmp = MALLOC_OVERHEAD;
-		while ((MEM_SIZE)(itmp - MALLOC_OVERHEAD) < bytes)
-		    itmp += itmp;
-		itmp -= MALLOC_OVERHEAD;
-		itmp /= sizeof(const SV *);
-		assert(itmp > newmax);
-		newmax = itmp - 1;
-		assert(newmax >= *maxp);
-		Newx(ary, newmax+1, SV*);
-		Copy(*allocp, ary, *maxp+1, SV*);
-		Safefree(*allocp);
-		*allocp = ary;
-#endif
 #ifdef Perl_safesysmalloc_size
 	      resized:
 #endif

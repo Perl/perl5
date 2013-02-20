@@ -1109,7 +1109,6 @@ S_hsplit(pTHX_ HV *hv)
     }
 	       
     PL_nomemok = TRUE;
-#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	  + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
     if (!a) {
@@ -1119,19 +1118,6 @@ S_hsplit(pTHX_ HV *hv)
     if (SvOOK(hv)) {
 	Move(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
     }
-#else
-    Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-	+ (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
-    if (!a) {
-      PL_nomemok = FALSE;
-      return;
-    }
-    Copy(HvARRAY(hv), a, oldsize * sizeof(HE*), char);
-    if (SvOOK(hv)) {
-	Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
-    }
-    Safefree(HvARRAY(hv));
-#endif
 
     PL_nomemok = FALSE;
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
@@ -1191,7 +1177,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     a = (char *) HvARRAY(hv);
     if (a) {
 	PL_nomemok = TRUE;
-#if defined(STRANGE_MALLOC) || defined(MYMALLOC)
 	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	      + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
 	if (!a) {
@@ -1201,19 +1186,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	if (SvOOK(hv)) {
 	    Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
 	}
-#else
-	Newx(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-	    + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
-	if (!a) {
-	  PL_nomemok = FALSE;
-	  return;
-	}
-	Copy(HvARRAY(hv), a, oldsize * sizeof(HE*), char);
-	if (SvOOK(hv)) {
-	    Copy(HvAUX(hv), &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
-	}
-	Safefree(HvARRAY(hv));
-#endif
 	PL_nomemok = FALSE;
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
     }
