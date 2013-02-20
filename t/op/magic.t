@@ -647,10 +647,10 @@ SKIP: {
 	}
 
 	$ENV{__NoNeSuCh} = 'foo';
-	$ENV{__NoNeSuCh2} = 'foo';
 	$0 = 'bar';
 	env_is(__NoNeSuCh => 'foo', 'setting $0 does not break %ENV');
 
+	$ENV{__NoNeSuCh2} = 'foo';
 	$ENV{__NoNeSuCh2} = undef;
 	env_is(__NoNeSuCh2 => '', 'setting a key as undef does not delete it');
 
