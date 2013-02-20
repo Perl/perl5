@@ -72,7 +72,7 @@ sub env_is {
 	require Win32;
 	my $cp = Win32::GetConsoleOutputCP();
 	Win32::SetConsoleOutputCP(Win32::GetACP());
-        (my $set = `set $key`) =~ s/\r\n$/\n/;
+        (my $set = `set $key 2>nul`) =~ s/\r\n$/\n/;
 	Win32::SetConsoleOutputCP($cp);
         like $set, qr/^(?:\Q$key\E=)?\Q$val\E$/, $desc;
     } elsif ($Is_VMS) {
