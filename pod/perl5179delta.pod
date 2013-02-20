@@ -1,0 +1,670 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5179delta - what is new for perl v5.17.9
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.17.8 release and the 5.17.9
+release.
+
+If you are upgrading from an earlier release such as 5.17.7, first read
+L<perl5178delta>, which describes differences between 5.17.7 and 5.17.8.
+
+=head1 Core Enhancements
+
+=head2 Interpolations now Accepted in Regular Expression Set Operations
+
+Perl v5.17.8 introduced L<regular expression set operations|perlre/(?[ ])>.
+They have now been expanded to allow the interpolation of a
+previously-compiled set into a bigger set, like this:
+
+ my $thai_or_lao = qr/\p{Thai} + \p{Lao}/;
+ ...
+ qr/(?[ \p{Digit} & $thai_or_lao ])/;
+
+=head1 Incompatible Changes
+
+=head2 C<$ENV{foo} = undef> no longer deletes value from environ
+
+5.17.3 Introduced a change where assiging C<undef> to an C<%ENV> key was equivalent
+to C<delete $ENV{foo}>.
+
+This release reverts that change.
+
+=head1 Deprecations
+
+The deprecation of lexical C<$_> in 5.17.7 has been commuted.  The feature
+is now marked experimental.
+
+=head2 Deprecated pragma
+
+=over
+
+=item L<encoding>
+
+This module is deprecated under perl 5.18.  It uses a mechanism provided by
+perl that is deprecated under 5.18 and higher, and may be removed in a
+future version.
+
+=back
+
+=head2 Deprecated Modules
+
+The following modules will be removed from the core distribution in a
+future release, and should be installed from CPAN instead. Distributions
+on CPAN which require these should add them to their prerequisites. The
+core versions of these modules C<warnings> will issue a deprecation warning.
+
+You can silence these deprecation warnings by installing the modules
+in question from CPAN.
+
+=over
+
+=item L<Archive::Extract>
+
+=item L<B::Lint>
+
+=item L<B::Lint::Debug>
+
+=item L<CPANPLUS>
+
+=item L<CPANPLUS::Backend>
+
+=item L<CPANPLUS::Backend::RV>
+
+=item L<CPANPLUS::Config>
+
+=item L<CPANPLUS::Config::HomeEnv>
+
+=item L<CPANPLUS::Configure>
+
+=item C<CPANPLUS::Configure::Setup>
+
+=item L<CPANPLUS::Dist>
+
+=item L<CPANPLUS::Dist::Autobundle>
+
+=item L<CPANPLUS::Dist::Base>
+
+=item L<CPANPLUS::Dist::Build>
+
+=item L<CPANPLUS::Dist::Build::Constants>
+
+=item L<CPANPLUS::Dist::MM>
+
+=item L<CPANPLUS::Dist::Sample>
+
+=item L<CPANPLUS::Error>
+
+=item L<CPANPLUS::Internals>
+
+=item C<CPANPLUS::Internals::Constants>
+
+=item C<CPANPLUS::Internals::Constants::Report>
+
+=item L<CPANPLUS::Internals::Extract>
+
+=item L<CPANPLUS::Internals::Fetch>
+
+=item L<CPANPLUS::Internals::Report>
+
+=item L<CPANPLUS::Internals::Search>
+
+=item L<CPANPLUS::Internals::Source>
+
+=item L<CPANPLUS::Internals::Source::Memory>
+
+=item L<CPANPLUS::Internals::Source::SQLite>
+
+=item C<CPANPLUS::Internals::Source::SQLite::Tie>
+
+=item L<CPANPLUS::Internals::Utils>
+
+=item C<CPANPLUS::Internals::Utils::Autoflush>
+
+=item L<CPANPLUS::Module>
+
+=item L<CPANPLUS::Module::Author>
+
+=item L<CPANPLUS::Module::Author::Fake>
+
+=item L<CPANPLUS::Module::Checksums>
+
+=item L<CPANPLUS::Module::Fake>
+
+=item C<CPANPLUS::Module::Signature>
+
+=item L<CPANPLUS::Selfupdate>
+
+=item L<CPANPLUS::Shell>
+
+=item L<CPANPLUS::Shell::Classic>
+
+=item L<CPANPLUS::Shell::Default>
+
+=item L<CPANPLUS::Shell::Default::Plugins::CustomSource>
+
+=item L<CPANPLUS::Shell::Default::Plugins::Remote>
+
+=item L<CPANPLUS::Shell::Default::Plugins::Source>
+
+=item L<Devel::InnerPackage>
+
+=item L<Log::Message>
+
+=item L<Log::Message::Config>
+
+=item L<Log::Message::Handlers>
+
+=item L<Log::Message::Item>
+
+=item L<Log::Message::Simple>
+
+=item L<Module::Pluggable>
+
+=item L<Module::Pluggable::Object>
+
+=item L<Object::Accessor>
+
+=item L<Term::UI>
+
+=item L<Term::UI::History>
+
+=back
+
+=head3 Deprecated Utilities
+
+The following utilities will be removed from the core distribution in a
+future release as their associated modules have been deprecated. They
+will remain available with the applicable CPAN distribution.
+
+=over
+
+=item L<cpanp>
+
+Included with L<CPANPLUS>.
+
+=item C<cpanp-run-perl>
+
+Included with L<CPANPLUS>.
+
+=item L<cpan2dist>
+
+Included with L<CPANPLUS>.
+
+=item L<pod2latex>
+
+The L<Pod::LaTeX> module was deprecated with 5.17.8.
+
+=back
+
+=head2 Five additional characters should be escaped in patterns with C</x>
+
+When a regular expression pattern is compiled with C</x>, Perl treats 6
+characters as white space to ignore, such as SPACE and TAB.  However,
+Unicode recommends 11 characters be treated thusly.  In preparation to
+conforming with this in a future Perl version, in the meantime, use of
+any of the missing characters will raise a deprecation warning, unless
+turned off.  The five characters are:
+U+0085 NEXT LINE,
+U+200E LEFT-TO-RIGHT MARK,
+U+200F RIGHT-TO-LEFT MARK,
+U+2028 LINE SEPARATOR,
+and
+U+2029 PARAGRAPH SEPARATOR.
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Config::Perl::V> version 0.16 has been added as a dual-lifed module.
+It provides structured data retrieval of C<perl -V> output including
+information only known to the C<perl> binary and not available via L<Config>.
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Extract> has been upgraded from version 0.62 to 0.68.
+
+NOTE: L<Archive::Extract> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 0.93 to 0.94.
+
+=item *
+
+L<B::Lint> has been upgraded from version 1.14 to 1.17.
+
+NOTE: L<B::Lint> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.13 to 1.14.
+
+The "too few iterations" message is now a warning on STDERR
+instead of being output on STDOUT.
+
+=item *
+
+L<bignum> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<CPAN> has been upgraded from version 1.99_51 to 2.00.
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9133 to 0.9135.
+
+NOTE: L<CPANPLUS> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.68 to 0.70.
+
+NOTE: L<CPANPLUS::Dist::Build> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.141 to 2.142.
+
+Additional tests were added in order to improve statement, branch, condition
+and subroutine coverage.  On the basis of the coverage analysis, some of the
+internals of Dumper.pm were refactored.  Almost all methods are now
+documented.
+
+=item *
+
+L<DBM_Filter> has been upgraded from version 0.04 to 0.05.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.81 to 5.82.
+
+=item *
+
+L<Encode> has been upgraded from version 2.47 to 2.48.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<File::CheckTree> has been upgraded from version 4.41 to 4.42.
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.22 to 0.22_90
+
+Fixes various bugs involving directory removal.  Defers unlinking tempfiles if
+the initial unlink fails, which fixes problems on NFS.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.88 to 0.89.
+
+=item *
+
+L<IO> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Log::Message> has been upgraded from version 0.04 to 0.06.
+
+NOTE: L<Log::Message> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Log::Message::Simple> has been upgraded from version 0.08 to 0.10.
+
+NOTE: L<Log::Message::Simple> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.998 to 1.999.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.80 to 2.82.
+
+=item *
+
+L<Module::Load> has been upgraded from version 0.22 to 0.24.
+
+=item *
+
+L<Module::Pluggable> has been upgraded from version 4.5 to 4.6.
+
+NOTE: L<Module::Pluggable> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Object::Accessor> has been upgraded from version 0.44 to 0.46.
+
+NOTE: L<Object::Accessor> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<overload> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.15 to 0.16.
+
+The buffer scalar supplied may now only contain code pounts 0xFF or
+lower. [perl #109828]
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.51 to 1.60.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.51 to 1.60.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.17 to 3.19.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.51 to 1.61.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<Term::UI> has been upgraded from version 0.32 to 0.34.
+
+NOTE: L<Term::UI> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.25_01 to 3.26.
+
+=item *
+
+L<Text::Soundex> has been upgraded from version 3.03_01 to 3.04.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.01 to 3.02.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.47 to 0.50.
+
+=item *
+
+L<warnings> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Win32> has been upgraded from version 0.45 to 0.46.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1200 to 0.1201.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlsec>
+
+=over 4
+
+=item *
+
+A syntax error was fixed in one of illustrative examples.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+Strings with code points over 0xFF may not be mapped into in-memory file handles
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The warnings for \b{ and \B{ were added in the 5.17 series; they are a
+deprecation warning which should be turned off by that category.  One
+should not have to turn off regular regexp warnings as well to get rid
+of these.
+
+=back
+
+=head1 Utility Changes
+
+=head3 L<corelist>
+
+=over 4
+
+=item *
+
+Added C<--feature> switch which lists the first version bundle of each
+named feature given.
+
+=item *
+
+Added C<--upstream> switch which shows if the given module
+is primarily maintained in perl core or on CPAN and bug tracker URL.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Added C<useversionedarchname> option to Configure
+
+When set, it includes 'api_versionstring' in 'archname'. E.g.
+x86_64-linux-5.13.6-thread-multi.  It is unset by default.
+
+This feature was requested by Tim Bunce, who observed that
+INSTALL_BASE creates a library structure that does not
+differentiate by perl version.  Instead, it places architecture
+specific files in "$install_base/lib/perl5/$archname".  This makes
+it difficult to use a common INSTALL_BASE library path with
+multiple versions of perl.
+
+By setting -Duseversionedarchname, the $archname will be
+distinct for architecture *and* API version, allowing mixed use of
+INSTALL_BASE.
+
+=item *
+
+Configure will honour the external C<MAILDOMAIN> environment variable, if set.
+
+=item *
+
+C<installman> no longer ignores the silent option
+
+=item *
+
+Both C<META.yml> and C<META.json> files are now included in the distribution.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+Enable perl core tests to pass when locale support is not available.
+
+use L<locale> - this will now die if $Config{d_setlocale} is not true.
+All tests that use L<locale> will skip if $Config{d_setlocale} is not true.
+This enables us to pass tests on Android which uses ICU instead of locales.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+The character set for Extended Filename Syntax (EFS) is now enabled by default on
+VMS.  Among other things, this provides better handling of dots in directory names,
+multiple dots in filenames,and spaces in filenames.  To obtain the old behavior,
+set the logical name C<DECC$EFS_CHARSET> to C<DISABLE>.
+
+=item MidnightBSD
+
+C<libc_r> was removed from recent versions of MidnightBSD and older versions
+work better with C<pthread>. Threading is now enabled using C<pthread> which
+corrects build errors with threading enabled on 0.4-CURRENT.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Synonyms for the misleadingly named C<av_len()> has been created:
+C<av_top_index()> and C<av_tindex>.  All three of these return the
+number of the highest index in the array, not the number of elements it
+contains.  (The name C<av_top> which was introduced in Perl v.5.17.8 has
+been removed.)
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+-DPERL_GLOBAL_STRUCT builds now free the global struct B<after>
+they've finished using it.
+
+=item *
+
+A trailing '/' on a path in @INC will no longer have an additional '/' appended.
+
+=item *
+
+The C<:crlf> layer now works when unread data doesn't fit into its own
+buffer. [perl #112244].
+
+=item *
+
+C<ungetc()> now handles UTF-8 encoded data. [perl #116322].
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.17.9 represents approximately 4 weeks of development since Perl 5.17.8
+and contains approximately 42,000 lines of changes across 510 files from 35
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.9:
+
+Aaron Crane, Alan Haggai Alavi, Alexandr Ciornii, Andy Dougherty, Brad
+Gilbert, Chris 'BinGOs' Williams, Christian Hansen, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Daniel Dragan, Dave Rolsky, David Golden, David Mitchell,
+Father Chrysostomos, H.Merijn Brand, James E Keenan, Jan Dubois, Jerry D.
+Hedden, Jess Robinson, Karl Williamson, Kent Fredric, Leon Timmermans, Lucas
+Holt, Matthew Horsfall, Nicholas Clark, Peter Martini, Rafael Garcia-Suarez,
+Ricardo Signes, Smylers, Steffen Müller, Steve Hay, Thomas Sibley, Tobias
+Leich, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+http://rt.perl.org/perlbug/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
