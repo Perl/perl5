@@ -217,16 +217,6 @@ U+2029 PARAGRAPH SEPARATOR.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Modules and Pragmata
 
 =over 4
@@ -245,10 +235,46 @@ information only known to the C<perl> binary and not available via L<Config>.
 
 =item *
 
+L<Archive::Extract> has been upgraded from version 0.62 to 0.68.
+
+NOTE: L<Archive::Extract> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 0.93 to 0.94.
+
+=item *
+
+L<B::Lint> has been upgraded from version 1.14 to 1.17.
+
+NOTE: L<B::Lint> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
 L<Benchmark> has been upgraded from version 1.13 to 1.14.
 
 The "too few iterations" message is now a warning on STDERR
 instead of being output on STDOUT.
+
+=item *
+
+L<bignum> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<CPAN> has been upgraded from version 1.99_51 to 2.00.
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9133 to 0.9135.
+
+NOTE: L<CPANPLUS> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.68 to 0.70.
+
+NOTE: L<CPANPLUS::Dist::Build> is deprecated and may be removed from a future version of Perl.
 
 =item *
 
@@ -261,6 +287,30 @@ documented.
 
 =item *
 
+L<DBM_Filter> has been upgraded from version 0.04 to 0.05.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.81 to 5.82.
+
+=item *
+
+L<Encode> has been upgraded from version 2.47 to 2.48.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<File::CheckTree> has been upgraded from version 4.41 to 4.42.
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
 L<File::Temp> has been upgraded from version 0.22 to 0.22_90
 
 Fixes various bugs involving directory removal.  Defers unlinking tempfiles if
@@ -268,10 +318,116 @@ the initial unlink fails, which fixes problems on NFS.
 
 =item *
 
+L<Filter::Simple> has been upgraded from version 0.88 to 0.89.
+
+=item *
+
+L<IO> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Log::Message> has been upgraded from version 0.04 to 0.06.
+
+NOTE: L<Log::Message> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Log::Message::Simple> has been upgraded from version 0.08 to 0.10.
+
+NOTE: L<Log::Message::Simple> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.998 to 1.999.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.80 to 2.82.
+
+=item *
+
+L<Module::Load> has been upgraded from version 0.22 to 0.24.
+
+=item *
+
+L<Module::Pluggable> has been upgraded from version 4.5 to 4.6.
+
+NOTE: L<Module::Pluggable> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Object::Accessor> has been upgraded from version 0.44 to 0.46.
+
+NOTE: L<Object::Accessor> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<overload> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
 L<PerlIO::scalar> has been upgraded from version 0.15 to 0.16.
 
 The buffer scalar supplied may now only contain code pounts 0xFF or
 lower. [perl #109828]
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.51 to 1.60.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.51 to 1.60.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.17 to 3.19.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.51 to 1.61.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<Term::UI> has been upgraded from version 0.32 to 0.34.
+
+NOTE: L<Term::UI> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.25_01 to 3.26.
+
+=item *
+
+L<Text::Soundex> has been upgraded from version 3.03_01 to 3.04.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.01 to 3.02.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.47 to 0.50.
+
+=item *
+
+L<warnings> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Win32> has been upgraded from version 0.45 to 0.46.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1200 to 0.1201.
 
 =back
 
@@ -457,7 +613,7 @@ Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.17.9:
 
-!, Aaron Crane, Alan Haggai Alavi, Alexandr Ciornii, Andy Dougherty, Brad
+Aaron Crane, Alan Haggai Alavi, Alexandr Ciornii, Andy Dougherty, Brad
 Gilbert, Chris 'BinGOs' Williams, Christian Hansen, Craig A. Berry, Dagfinn
 Ilmari Mannsåker, Daniel Dragan, Dave Rolsky, David Golden, David Mitchell,
 Father Chrysostomos, H.Merijn Brand, James E Keenan, Jan Dubois, Jerry D.
