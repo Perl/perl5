@@ -50,7 +50,7 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 # platforms
 
 my ($osmajmin) = $Config{osvers} =~ /^(\d+\.\d+)/;
-if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O =~ /freebsd/ || 
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O =~ /freebsd/ || $^O eq 'midnightbsd' ||
      ($^O eq 'solaris' && $Config{osvers} eq '2.8') ||
      ($^O eq 'darwin' && $osmajmin < 9) ||
     ((int($]*1000) & 1) == 0)
