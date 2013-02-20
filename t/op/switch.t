@@ -55,7 +55,7 @@ given("inside") { check_outside1() }
 sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 
 {
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     my $_ = "outside";
     given("inside") { check_outside2() }
     sub check_outside2 {
@@ -398,7 +398,7 @@ sub check_outside1 { is($_, "inside", "\$_ is not lexically scoped") }
 
 # Make sure it still works with a lexical $_:
 {
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     my $_;
     my $test = "explicit comparison with lexical \$_";
     my $twenty_five = 25;
@@ -699,7 +699,7 @@ my $f = tie my $v, "FetchCounter";
 
 {
     my $first = 1;
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     my $_;
     for (1, "two") {
 	when ("two") {
@@ -718,7 +718,7 @@ my $f = tie my $v, "FetchCounter";
 
 {
     my $first = 1;
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     my $_;
     for $_ (1, "two") {
 	when ("two") {
@@ -737,7 +737,7 @@ my $f = tie my $v, "FetchCounter";
 
 {
     my $first = 1;
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     for my $_ (1, "two") {
 	when ("two") {
 	    is($first, 0, "Lexical loop: second");
@@ -1371,7 +1371,7 @@ unreified_check(undef,"");
 
 {
     sub f1 {
-	no warnings 'deprecated';
+	no warnings 'experimental::lexical_topic';
 	my $_;
 	given(3) {
 	    return sub { $_ } # close over lexical $_
@@ -1385,7 +1385,7 @@ unreified_check(undef,"");
     sub DESTROY { $d++ };
 
     sub f2 {
-	no warnings 'deprecated';
+	no warnings 'experimental::lexical_topic';
 	my $_ = 5;
 	given(bless [7]) {
 	    ::is($_->[0], 7, "is [7]");

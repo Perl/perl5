@@ -48,7 +48,7 @@ ok(!-d);
 $_ = 'lfrulb';
 
 {
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     my $_ = 'blurfl';
     ok(mkdir);
     ok(-d);

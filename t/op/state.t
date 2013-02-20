@@ -211,7 +211,7 @@ my $first  = $stones [0];
 my $First  = ucfirst $first;
 $_ = "bambam";
 foreach my $flint (@stones) {
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     state $_ = $flint;
     is $_, $first, 'state $_';
     ok /$first/, '/.../ binds to $_';

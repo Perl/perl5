@@ -86,7 +86,7 @@ sub test_proto {
     # works in all cases.
     undef $_;
     {
-      no warnings 'deprecated';
+      no warnings 'experimental::lexical_topic';
       my $_ = $in;
       is &{"CORE::$o"}(), $out, "&$o with no args uses lexical \$_";
     }
@@ -94,7 +94,7 @@ sub test_proto {
     my $r;
     $r = sub {
       if($_[0]) {
-        no warnings 'deprecated';
+        no warnings 'experimental::lexical_topic';
         my $_ = $in;
         is &{"CORE::$o"}(), $out,
            "&$o with no args uses the right lexical \$_ under recursion";
@@ -104,7 +104,7 @@ sub test_proto {
       }
     };
     &$r(0);
-    no warnings 'deprecated';
+    no warnings 'experimental::lexical_topic';
     my $_ = $in;
     eval {
        is "CORE::$o"->(), $out, "&$o with the right lexical \$_ in an eval"
@@ -1016,7 +1016,7 @@ like $@, qr'^Undefined format "STDOUT" called',
   my $warnings;
   local $SIG{__WARN__} = sub { ++$warnings };
 
-  no warnings 'deprecated';
+  no warnings 'experimental::lexical_topic';
   my $_ = 'Phoo';
   ok &mymkdir(), '&mkdir';
   like <*>, qr/^phoo(.DIR)?\z/i, 'mkdir works with implicit $_';
