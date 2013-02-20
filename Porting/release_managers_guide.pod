@@ -1063,8 +1063,7 @@ Run the C<git add> commands it outputs to add new and modified files.
 =item *
 
 Verify that the build still works, by running C<./Configure> and
-C<make test_porting>. (On Win32, run C<nmake> and
-C<nmake test TEST_FILES="porting\*.t ..\lib\diagnostics.t">.)
+C<make test_porting>. (On Win32 use the appropriate make utility).
 
 =item *
 
