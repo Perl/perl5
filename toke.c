@@ -3158,15 +3158,15 @@ S_scan_const(pTHX_ char *start)
 
 #ifdef EBCDIC
 		if (literal_endpoint == 2 &&
-		    ((isLOWER(min) && isLOWER(max)) ||
-		     (isUPPER(min) && isUPPER(max)))) {
-		    if (isLOWER(min)) {
+		    ((isLOWER_A(min) && isLOWER_A(max)) ||
+		     (isUPPER_A(min) && isUPPER_A(max)))) {
+		    if (isLOWER_A(min)) {
 			for (i = min; i <= max; i++)
-			    if (isLOWER(i))
+			    if (isLOWER_A(i))
 				*d++ = NATIVE_TO_NEED(has_utf8,i);
 		    } else {
 			for (i = min; i <= max; i++)
-			    if (isUPPER(i))
+			    if (isUPPER_A(i))
 				*d++ = NATIVE_TO_NEED(has_utf8,i);
 		    }
 		}
