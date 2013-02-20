@@ -14,12 +14,6 @@ L<perl5178delta>, which describes differences between 5.17.7 and 5.17.8.
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
-
 =head2 Interpolations now Accepted in Regular Expression Set Operations
 
 Perl v5.17.8 introduced L<regular expression set operations|perlre/(?[ ])>.
@@ -29,14 +23,6 @@ previously-compiled set into a bigger set, like this:
  my $thai_or_lao = qr/\p{Thai} + \p{Lao}/;
  ...
  qr/(?[ \p{Digit} & $thai_or_lao ])/;
-
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
@@ -288,28 +274,7 @@ lower. [perl #109828]
 
 =back
 
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -454,8 +419,6 @@ C<av_top_index()> and C<av_tindex>.  All three of these return the
 number of the highest index in the array, not the number of elements it
 contains.  (The name C<av_top> which was introduced in Perl v.5.17.8 has
 been removed.)
-
-XXX
 
 =back
 
