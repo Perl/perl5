@@ -447,27 +447,36 @@ C<ungetc()> now handles UTF-8 encoded data. [perl #116322].
 
 =back
 
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.17.9 represents approximately 4 weeks of development since Perl 5.17.8
+and contains approximately 42,000 lines of changes across 510 files from 35
+authors.
 
-  perl Porting/acknowledgements.pl v5.17.8..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.9:
+
+!, Aaron Crane, Alan Haggai Alavi, Alexandr Ciornii, Andy Dougherty, Brad
+Gilbert, Chris 'BinGOs' Williams, Christian Hansen, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Daniel Dragan, Dave Rolsky, David Golden, David Mitchell,
+Father Chrysostomos, H.Merijn Brand, James E Keenan, Jan Dubois, Jerry D.
+Hedden, Jess Robinson, Karl Williamson, Kent Fredric, Leon Timmermans, Lucas
+Holt, Matthew Horsfall, Nicholas Clark, Peter Martini, Rafael Garcia-Suarez,
+Ricardo Signes, Smylers, Steffen Müller, Steve Hay, Thomas Sibley, Tobias
+Leich, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
