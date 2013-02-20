@@ -89,6 +89,8 @@ my $tree = {
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::regex_sets' =>
                                     [ 5.017, DEFAULT_ON ],
+                                'experimental::lexical_topic' =>
+                                    [ 5.017, DEFAULT_ON ],
                         }],
 
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
