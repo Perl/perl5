@@ -1213,6 +1213,21 @@ Perl_sv_mortalcopy(pTHX_ SV *const oldstr)
     return Perl_sv_mortalcopy_flags(aTHX_ oldstr, SV_GMAGIC);
 }
 
+UV      /* Made into a function, so can be deprecated */
+NATIVE_TO_NEED(const UV enc, const UV ch)
+{
+    PERL_UNUSED_ARG(enc);
+    return ch;
+}
+
+UV      /* Made into a function, so can be deprecated */
+ASCII_TO_NEED(const UV enc, const UV ch)
+{
+    PERL_UNUSED_ARG(enc);
+    return ch;
+}
+
+
 END_EXTERN_C
 
 #endif /* NO_MATHOMS */

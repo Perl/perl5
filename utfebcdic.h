@@ -531,14 +531,6 @@ END_EXTERN_C
 #define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_LATIN1(ch))
 #define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : LATIN1_TO_NATIVE(ch))
 
-/* Transform in invariant..byte space */
-#define NATIVE_TO_NEED(enc,ch)   ((enc)                                     \
-                                  ? I8_TO_NATIVE_UTF8(NATIVE_TO_LATIN1(ch)) \
-                                  : (ch))
-#define ASCII_TO_NEED(enc,ch)    ((enc)                   \
-                                  ? I8_TO_NATIVE_UTF8(ch) \
-                                  : LATIN1_TO_NATIVE(ch))
-
 /*
   The following table is adapted from tr16, it shows I8 encoding of Unicode code points.
 

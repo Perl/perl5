@@ -17,10 +17,20 @@
  */
 
 START_EXTERN_C
+PERL_CALLCONV UV	ASCII_TO_NEED(const UV enc, const UV ch)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__
+			__attribute__pure__;
+
 PERL_CALLCONV int	Perl_Gv_AMupdate(pTHX_ HV* stash, bool destructing)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_AMUPDATE	\
 	assert(stash)
+
+PERL_CALLCONV UV	NATIVE_TO_NEED(const UV enc, const UV ch)
+			__attribute__deprecated__
+			__attribute__warn_unused_result__
+			__attribute__pure__;
 
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)

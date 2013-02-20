@@ -122,9 +122,6 @@ END_EXTERN_C
 /* Transforms in wide UV chars */
 #define UNI_TO_NATIVE(ch)        (ch)
 #define NATIVE_TO_UNI(ch)        (ch)
-/* Transforms in invariant space */
-#define NATIVE_TO_NEED(enc,ch)   (ch)
-#define ASCII_TO_NEED(enc,ch)    (ch)
 
 /* As there are no translations, avoid the function wrapper */
 #define utf8n_to_uvchr utf8n_to_uvuni
