@@ -796,6 +796,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
     if ( DO_HSPLIT(xhv) ) {
+        const STRLEN oldsize = xhv->xhv_max + 1;
+
         /* This logic was in S_hsplit, but as the shared string table can't
            contain placeholders, and we are the only other caller of S_hsplit,
            it could only trigger from this callsite. So move it here.  */
@@ -806,7 +808,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                readonly flag, because Storable always pre-splits the hash.  */
             hv_clear_placeholders(hv);
         }
-        hsplit(hv);
+        hsplit(hv, oldsize, oldsize * 2);
     }
 
     if (return_svp) {
@@ -1095,13 +1097,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 }
 
 STATIC void
-S_hsplit(pTHX_ HV *hv)
+S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 {
     dVAR;
-    XPVHV* const xhv = (XPVHV*)SvANY(hv);
-    const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
-    I32 newsize = oldsize * 2;
-    I32 i;
+    STRLEN i;
     char *a = (char*) HvARRAY(hv);
     HE **aep;
 
@@ -1123,7 +1122,7 @@ S_hsplit(pTHX_ HV *hv)
 
     PL_nomemok = FALSE;
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
-    xhv->xhv_max = --newsize;	/* HvMAX(hv) = --newsize */
+    HvMAX(hv) = --newsize;
     HvARRAY(hv) = (HE**) a;
     aep = (HE**)a;
 
@@ -2672,7 +2671,8 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!next) {			/* initial entry? */
 	} else if ( DO_HSPLIT(xhv) ) {
-            hsplit(PL_strtab);
+            const STRLEN oldsize = xhv->xhv_max + 1;
+            hsplit(PL_strtab, oldsize, oldsize * 2);
 	}
     }
 

@@ -1375,7 +1375,7 @@
 #  if defined(PERL_IN_HV_C)
 #define clear_placeholders(a,b)	S_clear_placeholders(aTHX_ a,b)
 #define hfreeentries(a)		S_hfreeentries(aTHX_ a)
-#define hsplit(a)		S_hsplit(aTHX_ a)
+#define hsplit(a,b,c)		S_hsplit(aTHX_ a,b,c)
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #define hv_free_ent_ret(a,b)	S_hv_free_ent_ret(aTHX_ a,b)
