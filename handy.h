@@ -1028,33 +1028,30 @@ EXTCONST U32 PL_charclass[];
 #   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
                                             _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
 #else   /* No perl.h. */
+#   define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
+#   define isIDFIRST_A(c) (isALPHA_A(c) || (c) == '_')
+#   define isWORDCHAR_A(c) (isALPHANUMERIC_A(c) || (c) == '_')
+#   define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
 #   ifdef EBCDIC
 #       define isALPHA_A(c)    (isASCII(c) && isALPHA(c))
 #       define isALPHANUMERIC_A(c) (isASCII(c) && isALPHANUMERIC(c))
-#       define isBLANK_A(c)    (isASCII(c) && isBLANK(c))
 #       define isCNTRL_A(c)    (isASCII(c) && isCNTRL(c))
 #       define isDIGIT_A(c)    (isASCII(c) && isDIGIT(c))
 #       define isGRAPH_A(c)    (isASCII(c) && isGRAPH(c))
-#       define isIDFIRST_A(c)  (isASCII(c) && isIDFIRST(c))
 #       define isLOWER_A(c)    (isASCII(c) && isLOWER(c))
 #       define isPRINT_A(c)    (isASCII(c) && isPRINT(c))
-#       define isPSXSPC_A(c)   (isASCII(c) && isPSXSPC(c))
 #       define isPUNCT_A(c)    (isASCII(c) && isPUNCT(c))
 #       define isSPACE_A(c)    (isASCII(c) && isSPACE(c))
 #       define isUPPER_A(c)    (isASCII(c) && isUPPER(c))
-#       define isWORDCHAR_A(c) (isASCII(c) && isWORDCHAR(c))
 #       define isXDIGIT_A(c)   (isASCII(c) && isXDIGIT(c))
 #   else   /* ASCII platform, no perl.h */
 #       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #       define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
-#       define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
 #       define isCNTRL_A(c) (FITS_IN_8_BITS(c) && ((U8) (c) < ' ' || (c) == 127))
 #       define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
 #       define isGRAPH_A(c)  (isWORDCHAR_A(c) || isPUNCT_A(c))
-#       define isIDFIRST_A(c) (isALPHA_A(c) || (c) == '_')
 #       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
 #       define isPRINT_A(c)  (((c) >= 32 && (c) < 127))
-#       define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
 #       define isPUNCT_A(c)  (((c) >= 33 && (c) <= 47)              \
                               || ((c) >= 58 && (c) <= 64)           \
                               || ((c) >= 91 && (c) <= 96)           \
@@ -1065,7 +1062,6 @@ EXTCONST U32 PL_charclass[];
                               || (c) =='\r'                         \
                               || (c) == '\f')
 #       define isUPPER_A(c)  ((c) <= 'Z' && (c) >= 'A')
-#       define isWORDCHAR_A(c) (isALPHA_A(c) || isDIGIT_A(c) || (c) == '_')
 #       define isXDIGIT_A(c)   (isDIGIT_A(c)                        \
                                 || ((c) >= 'a' && (c) <= 'f')       \
                                 || ((c) <= 'F' && (c) >= 'A'))
