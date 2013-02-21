@@ -1157,9 +1157,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     XPVHV* xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     I32 newsize;
-    I32 i;
     char *a;
-    HE **aep;
 
     PERL_ARGS_ASSERT_HV_KSPLIT;
 
@@ -1175,51 +1173,12 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	return;					/* overflow detection */
 
     a = (char *) HvARRAY(hv);
-    if (!a) {
+    if (a) {
+        hsplit(hv, oldsize, newsize);
+    } else {
         Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
         xhv->xhv_max = --newsize;
         HvARRAY(hv) = (HE **) a;
-        return;
-    }
-
-    {
-	PL_nomemok = TRUE;
-	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-	      + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
-	if (!a) {
-	  PL_nomemok = FALSE;
-	  return;
-	}
-	if (SvOOK(hv)) {
-	    Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
-	}
-	PL_nomemok = FALSE;
-	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
-    }
-    xhv->xhv_max = --newsize; 	/* HvMAX(hv) = --newsize */
-    HvARRAY(hv) = (HE **) a;
-    if (!xhv->xhv_keys /* !HvTOTALKEYS(hv) */)	/* skip rest if no entries */
-	return;
-
-    aep = (HE**)a;
-    for (i=0; i<oldsize; i++) {
-	HE **oentry = aep + i;
-	HE *entry = aep[i];
-
-	if (!entry)				/* non-existent */
-	    continue;
-	do {
-	    I32 j = (HeHASH(entry) & newsize);
-
-	    if (j != i) {
-		*oentry = HeNEXT(entry);
-		HeNEXT(entry) = aep[j];
-		aep[j] = entry;
-	    }
-	    else
-		oentry = &HeNEXT(entry);
-	    entry = *oentry;
-	} while (entry);
     }
 }
 
