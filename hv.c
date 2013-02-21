@@ -1124,8 +1124,11 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
     HvMAX(hv) = --newsize;
     HvARRAY(hv) = (HE**) a;
-    aep = (HE**)a;
 
+    if (!HvTOTALKEYS(hv))       /* skip rest if no entries */
+        return;
+
+    aep = (HE**)a;
     for (i=0; i<oldsize; i++) {
 	HE **oentry = aep + i;
 	HE *entry = aep[i];
@@ -1144,9 +1147,6 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 	    }
 	    entry = *oentry;
 	} while (entry);
-	/* I think we don't actually need to keep track of the longest length,
-	   merely flag if anything is too long. But for the moment while
-	   developing this code I'll track it.  */
     }
 }
 
