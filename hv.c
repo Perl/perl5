@@ -796,6 +796,16 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
     if ( DO_HSPLIT(xhv) ) {
+        /* This logic was in S_hsplit, but as the shared string table can't
+           contain placeholders, and we are the only other caller of S_hsplit,
+           it could only trigger from this callsite. So move it here.  */
+        if (HvPLACEHOLDERS_get(hv) && !SvREADONLY(hv)) {
+            /* Can make this clear any placeholders first for non-restricted
+               hashes, even though Storable rebuilds restricted hashes by
+               putting in all the placeholders (first) before turning on the
+               readonly flag, because Storable always pre-splits the hash.  */
+            hv_clear_placeholders(hv);
+        }
         hsplit(hv);
     }
 
@@ -1100,14 +1110,6 @@ S_hsplit(pTHX_ HV *hv)
     /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
       (void*)hv, (int) oldsize);*/
 
-    if (HvPLACEHOLDERS_get(hv) && !SvREADONLY(hv)) {
-      /* Can make this clear any placeholders first for non-restricted hashes,
-	 even though Storable rebuilds restricted hashes by putting in all the
-	 placeholders (first) before turning on the readonly flag, because
-	 Storable always pre-splits the hash.  */
-      hv_clear_placeholders(hv);
-    }
-	       
     PL_nomemok = TRUE;
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	  + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
