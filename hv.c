@@ -1100,7 +1100,7 @@ STATIC void
 S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 {
     dVAR;
-    STRLEN i;
+    STRLEN i = 0;
     char *a = (char*) HvARRAY(hv);
     HE **aep;
 
@@ -1129,7 +1129,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
         return;
 
     aep = (HE**)a;
-    for (i=0; i<oldsize; i++) {
+    do {
 	HE **oentry = aep + i;
 	HE *entry = aep[i];
 
@@ -1147,7 +1147,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 	    }
 	    entry = *oentry;
 	} while (entry);
-    }
+    } while (i++ < oldsize);
 }
 
 void
