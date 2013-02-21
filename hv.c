@@ -1127,19 +1127,18 @@ S_hsplit(pTHX_ HV *hv)
     HvARRAY(hv) = (HE**) a;
     aep = (HE**)a;
 
-    for (i=0; i<oldsize; i++,aep++) {
-	HE **oentry = aep;
-	HE *entry = *aep;
-	HE **bep;
+    for (i=0; i<oldsize; i++) {
+	HE **oentry = aep + i;
+	HE *entry = aep[i];
 
 	if (!entry)				/* non-existent */
 	    continue;
-	bep = aep+oldsize;
 	do {
-	    if ((HeHASH(entry) & newsize) != (U32)i) {
+            U32 j = (HeHASH(entry) & newsize);
+	    if (j != (U32)i) {
 		*oentry = HeNEXT(entry);
-		HeNEXT(entry) = *bep;
-		*bep = entry;
+                HeNEXT(entry) = aep[j];
+                aep[j] = entry;
 	    }
 	    else {
 		oentry = &HeNEXT(entry);
@@ -1200,9 +1199,9 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	return;
 
     aep = (HE**)a;
-    for (i=0; i<oldsize; i++,aep++) {
-	HE **oentry = aep;
-	HE *entry = *aep;
+    for (i=0; i<oldsize; i++) {
+	HE **oentry = aep + i;
+	HE *entry = aep[i];
 
 	if (!entry)				/* non-existent */
 	    continue;
@@ -1210,7 +1209,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	    I32 j = (HeHASH(entry) & newsize);
 
 	    if (j != i) {
-		j -= i;
 		*oentry = HeNEXT(entry);
 		HeNEXT(entry) = aep[j];
 		aep[j] = entry;
