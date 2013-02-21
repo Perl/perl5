@@ -439,7 +439,7 @@ LINK_DBG	= -debug -opt:ref,icf
 #LINK_DBG	= $(LINK_DBG) -debugtype:both
 !  IF "$(WIN64)" == "define"
 # enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
-OPTIMIZE	= $(OPTIMIZE) -Ox -GL
+OPTIMIZE	= $(OPTIMIZE) -O1 -GL
 LINK_DBG	= $(LINK_DBG) -ltcg
 !  ELSE
 # -O1 yields smaller code, which turns out to be faster than -O2 on x86
