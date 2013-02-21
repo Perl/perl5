@@ -850,8 +850,15 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || !(((WIDEST_UTYPE)(c)) & ~0xFF))
 
 #ifdef EBCDIC
-#   define isASCII(c)    (FITS_IN_8_BITS(c)                      \
-                         && (NATIVE_TO_LATIN1((U8) (c)) < 128))
+#   ifndef _ALL_SOURCE
+        /* This returns the wrong results on at least z/OS unless this is
+         * defined. */
+#       error   _ALL_SOURCE should probably be defined
+#   endif
+
+    /* We could be called without perl.h, in which case NATIVE_TO_ASCII() is
+     * likely not defined, and so we use the native function */
+#   define isASCII(c)    isascii(c)
 #else
 #   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
 #endif
@@ -1033,17 +1040,19 @@ EXTCONST U32 PL_charclass[];
 #   define isWORDCHAR_A(c) (isALPHANUMERIC_A(c) || (c) == '_')
 #   define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
 #   ifdef EBCDIC
-#       define isALPHA_A(c)    (isASCII(c) && isALPHA(c))
-#       define isALPHANUMERIC_A(c) (isASCII(c) && isALPHANUMERIC(c))
-#       define isCNTRL_A(c)    (isASCII(c) && isCNTRL(c))
-#       define isDIGIT_A(c)    (isASCII(c) && isDIGIT(c))
-#       define isGRAPH_A(c)    (isASCII(c) && isGRAPH(c))
-#       define isLOWER_A(c)    (isASCII(c) && isLOWER(c))
-#       define isPRINT_A(c)    (isASCII(c) && isPRINT(c))
-#       define isPUNCT_A(c)    (isASCII(c) && isPUNCT(c))
-#       define isSPACE_A(c)    (isASCII(c) && isSPACE(c))
-#       define isUPPER_A(c)    (isASCII(c) && isUPPER(c))
-#       define isXDIGIT_A(c)   (isASCII(c) && isXDIGIT(c))
+        /* We could be called without perl.h, so the native functions are the
+         * easiest to code these in. */
+#       define isALPHA_A(c)    (isASCII(c) && isalpha(c))
+#       define isALPHANUMERIC_A(c) (isASCII(c) && isalnum(c))
+#       define isCNTRL_A(c)    (isASCII(c) && iscntrl(c))
+#       define isDIGIT_A(c)    (isASCII(c) && isdigit(c))
+#       define isGRAPH_A(c)    (isASCII(c) && isgraph(c))
+#       define isLOWER_A(c)    (isASCII(c) && islower(c))
+#       define isPRINT_A(c)    (isASCII(c) && isprint(c))
+#       define isPUNCT_A(c)    (isASCII(c) && ispunct(c))
+#       define isSPACE_A(c)    (isASCII(c) && isspace(c))
+#       define isUPPER_A(c)    (isASCII(c) && isupper(c))
+#       define isXDIGIT_A(c)   (isASCII(c) && isxdigit(c))
 #   else   /* ASCII platform, no perl.h */
 #       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #       define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
