@@ -1176,7 +1176,14 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	return;					/* overflow detection */
 
     a = (char *) HvARRAY(hv);
-    if (a) {
+    if (!a) {
+        Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+        xhv->xhv_max = --newsize;
+        HvARRAY(hv) = (HE **) a;
+        return;
+    }
+
+    {
 	PL_nomemok = TRUE;
 	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	      + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
@@ -1189,9 +1196,6 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	}
 	PL_nomemok = FALSE;
 	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
-    }
-    else {
-	Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
     }
     xhv->xhv_max = --newsize; 	/* HvMAX(hv) = --newsize */
     HvARRAY(hv) = (HE **) a;
