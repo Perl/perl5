@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(111);
+plan(113);
 
 my $rc_filename = '.perldb';
 
@@ -99,6 +99,13 @@ EOF
     my $output = runperl( switches => [ '-d' ], prog => 'print q{success}' );
     is( $?, 0, '[perl #116769] frame=2 does not crash debugger, exit == 0' );
     like( $output, 'success' , '[perl #116769] code is run' );
+}
+# [ perl #116771] autotrace
+{
+    local $ENV{PERLDB_OPTS} = "autotrace nonstop";
+    my $output = runperl( switches => [ '-d' ], prog => 'print q{success}' );
+    is( $?, 0, '[perl #116771] autotrace does not crash debugger, exit == 0' );
+    like( $output, 'success' , '[perl #116771] code is run' );
 }
 
 {
