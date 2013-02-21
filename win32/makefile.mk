@@ -492,7 +492,8 @@ LIBC	= msvcrt.lib
 OPTIMIZE	= -Od -MD -Zi -DDEBUGGING
 LINK_DBG	= -debug
 .ELSE
-OPTIMIZE	= -MD -Zi -DNDEBUG
+# -O1 yields smaller code, which turns out to be faster than -O2 on x86 and x64
+OPTIMIZE	= -O1 -MD -Zi -DNDEBUG
 # we enable debug symbols in release builds also
 LINK_DBG	= -debug -opt:ref,icf
 # you may want to enable this if you want COFF symbols in the executables
@@ -503,12 +504,8 @@ LINK_DBG	= -debug -opt:ref,icf
 #LINK_DBG	= $(LINK_DBG) -debugtype:both
 .IF "$(WIN64)" == "define"
 # enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
-OPTIMIZE	+= -O1 -GL
+OPTIMIZE	+= -GL
 LINK_DBG	+= -ltcg
-.ELSE
-# -O1 yields smaller code, which turns out to be faster than -O2 on x86
-OPTIMIZE	+= -O1
-#OPTIMIZE	+= -O2
 .ENDIF
 .ENDIF
 
