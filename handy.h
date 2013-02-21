@@ -1047,15 +1047,12 @@ EXTCONST U32 PL_charclass[];
 #   else   /* ASCII platform, no perl.h */
 #       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #       define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
-#       define isCNTRL_A(c) (FITS_IN_8_BITS(c) && ((U8) (c) < ' ' || (c) == 127))
+#       define isCNTRL_A(c)  (isASCII(c) && ! isPRINT_A(c))
 #       define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
-#       define isGRAPH_A(c)  (isWORDCHAR_A(c) || isPUNCT_A(c))
+#       define isGRAPH_A(c)  (isPRINT_A(c) && (c) ! = ' ')
 #       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
 #       define isPRINT_A(c)  (((c) >= 32 && (c) < 127))
-#       define isPUNCT_A(c)  (((c) >= 33 && (c) <= 47)              \
-                              || ((c) >= 58 && (c) <= 64)           \
-                              || ((c) >= 91 && (c) <= 96)           \
-                              || ((c) >= 123 && (c) <= 126))
+#       define isPUNCT_A(c)  (isGRAPH_A(c) && ! isALPHANUMERIC(c))
 #       define isSPACE_A(c)  ((c) == ' '                            \
                               || (c) == '\t'                        \
                               || (c) == '\n'                        \
