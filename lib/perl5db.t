@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(109);
+plan(111);
 
 my $rc_filename = '.perldb';
 
@@ -92,6 +92,13 @@ EOF
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-66110');
     like($output, "All tests successful.", "[perl #66110]");
+}
+# [ perl #116769] Frame=2
+{
+    local $ENV{PERLDB_OPTS} = "frame=2 nonstop";
+    my $output = runperl( switches => [ '-d' ], prog => 'print q{success}' );
+    is( $?, 0, '[perl #116769] frame=2 does not crash debugger, exit == 0' );
+    like( $output, 'success' , '[perl #116769] code is run' );
 }
 
 {
