@@ -798,17 +798,23 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     if ( DO_HSPLIT(xhv) ) {
         const STRLEN oldsize = xhv->xhv_max + 1;
 
-        /* This logic was in S_hsplit, but as the shared string table can't
-           contain placeholders, and we are the only other caller of S_hsplit,
-           it could only trigger from this callsite. So move it here.  */
-        if (HvPLACEHOLDERS_get(hv) && !SvREADONLY(hv)) {
-            /* Can make this clear any placeholders first for non-restricted
-               hashes, even though Storable rebuilds restricted hashes by
+        if (HvPLACEHOLDERS_get(hv) /* hash has placeholders  */
+            && !SvREADONLY(hv) /* but is not a restricted hash */) {
+            /* If this hash previously was a "restricted hash" and had
+               placeholders, but the "restricted" flag has been turned off,
+               then the placeholders no longer serve any useful purpose.
+               However, they have the downsides of taking up RAM, and adding
+               extra steps when finding used values. It's safe to clear them
+               at this point, even though Storable rebuilds restricted hashes by
                putting in all the placeholders (first) before turning on the
-               readonly flag, because Storable always pre-splits the hash.  */
+               readonly flag, because Storable always pre-splits the hash.
+               If we're lucky, then we may clear sufficient placeholders to
+               avoid needing to split the hash at all.  */
             hv_clear_placeholders(hv);
-        }
-        hsplit(hv, oldsize, oldsize * 2);
+            if (DO_HSPLIT(xhv))
+                hsplit(hv, oldsize, oldsize * 2);
+        } else
+            hsplit(hv, oldsize, oldsize * 2);
     }
 
     if (return_svp) {
