@@ -5421,6 +5421,13 @@ before the C<use feature> declaration that permits use of this feature).
 We expect to resolve this before the lexical-subroutine feature is no longer
 considered experimental.
 
+=item *
+
+Lexical C<state> subroutines are not deparsed at all at the moment.
+
+We expect to resolve this before the lexical-subroutine feature is no longer
+considered experimental.
+
 =back
 
 =head1 AUTHOR
