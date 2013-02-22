@@ -797,8 +797,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
     if ( DO_HSPLIT(xhv) ) {
         const STRLEN oldsize = xhv->xhv_max + 1;
+        const U32 items = (U32)HvPLACEHOLDERS_get(hv);
 
-        if (HvPLACEHOLDERS_get(hv) /* hash has placeholders  */
+        if (items /* hash has placeholders  */
             && !SvREADONLY(hv) /* but is not a restricted hash */) {
             /* If this hash previously was a "restricted hash" and had
                placeholders, but the "restricted" flag has been turned off,
@@ -810,7 +811,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                readonly flag, because Storable always pre-splits the hash.
                If we're lucky, then we may clear sufficient placeholders to
                avoid needing to split the hash at all.  */
-            hv_clear_placeholders(hv);
+            clear_placeholders(hv, items);
             if (DO_HSPLIT(xhv))
                 hsplit(hv, oldsize, oldsize * 2);
         } else
