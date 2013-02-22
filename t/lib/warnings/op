@@ -13,9 +13,6 @@
 	$a ;
 	"abc"
 
-     Useless use of sort in scalar context
-	my $x = sort (2,1,3);
-
      Applying %s to %s will act on scalar(%s)
 	my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;
 	@a =~ /abc/ ;
@@ -270,14 +267,6 @@ Useless use of subroutine prototype in void context at - line 54.
 Useless use of smart match in void context at - line 55.
 Useless use of numeric comparison (<=>) in void context at - line 56.
 Useless use of __SUB__ in void context at - line 58.
-########
-# op.c
-use warnings 'void' ; close STDIN ;
-my $x = sort (2,1,3);
-no warnings 'void' ;
-$x = sort (2,1,3);
-EXPECT
-Useless use of sort in scalar context at - line 3.
 ########
 # op.c
 no warnings 'void' ; close STDIN ;

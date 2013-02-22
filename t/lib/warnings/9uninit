@@ -1932,13 +1932,6 @@ Use of uninitialized value in addition (+) at - line 4.
 ########
 use warnings 'uninitialized';
 my $v;
-my @emptya;
-$v = 1 + sort @emptya;
-EXPECT
-Use of uninitialized value in addition (+) at - line 4.
-########
-use warnings 'uninitialized';
-my $v;
 my $zero = 0; $v = 1 + caller($zero);
 EXPECT
 Use of uninitialized value in addition (+) at - line 3.

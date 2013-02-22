@@ -1166,7 +1166,9 @@ Perl_scalar(pTHX_ OP *o)
 	kid = cLISTOPo->op_first;
 	goto do_kids;
     case OP_SORT:
-	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
+        /* We used to produce this warn here. Now that we return the number
+         * of elements I have commented it out. At some point we could remove the comment. */
+        /* Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context"); */
 	break;
     }
     return o;
