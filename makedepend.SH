@@ -135,7 +135,7 @@ for file in `$cat .clist`; do
       $sed -n <$file \
 	-e "/^${filebase}_init(/q" \
 	-e '/^#line/d' \
-	-e '/^#/{' \
+	-e '/^[	 ]*#/{' \
 	-e 's|/\*.*$||' \
 	-e 's|\\$||' \
 	-e p \
