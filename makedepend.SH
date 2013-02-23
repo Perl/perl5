@@ -131,7 +131,7 @@ for file in `$cat .clist`; do
     *)   finc= ;;
     esac
     $echo "Finding dependencies for $filebase$_o."
-    ( $echo "#line 1 \"$file\""; \
+    ( $echo "#line 2 \"$file\""; \
       $sed -n <$file \
 	-e "/^${filebase}_init(/q" \
 	-e '/^#line/d' \
