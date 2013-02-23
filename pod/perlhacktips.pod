@@ -277,11 +277,9 @@ This is transparent for the most part, but because the character sets
 differ, you shouldn't use numeric (decimal, octal, nor hex) constants
 to refer to characters. You can safely say 'A', but not 0x41. You can
 safely say '\n', but not \012. If a character doesn't have a trivial
-input form, you can create a #define for it in both C<utfebcdic.h> and
-C<utf8.h>, so that it resolves to different values depending on the
-character set being used. (There are three different EBCDIC character
-sets defined in C<utfebcdic.h>, so it might be best to insert the
-#define three times in that file.)
+input form, you should add it to the list in
+F<regen/unicode_constants.pl>, and have Perl create #defines for you,
+based on the current platform.
 
 Also, the range 'A' - 'Z' in ASCII is an unbroken sequence of 26 upper
 case alphabetic characters. That is not true in EBCDIC. Nor for 'a' to
