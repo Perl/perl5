@@ -1041,7 +1041,8 @@ EXTCONST U32 PL_charclass[];
 #   define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
 #   ifdef EBCDIC
         /* We could be called without perl.h, so the native functions are the
-         * easiest to code these in. */
+         * easiest to code these in.  They likely will return false for all
+         * non-ASCII values, but this makes sure */
 #       define isALPHA_A(c)    (isASCII(c) && isalpha(c))
 #       define isALPHANUMERIC_A(c) (isASCII(c) && isalnum(c))
 #       define isCNTRL_A(c)    (isASCII(c) && iscntrl(c))
@@ -1112,32 +1113,6 @@ EXTCONST U32 PL_charclass[];
                                || NATIVE_TO_LATIN1((U8) c) == 0xA0)
 #endif
 
-/* Macros that differ between EBCDIC and ASCII.  Where C89 defines a function,
- * that is used in the EBCDIC form, because in EBCDIC we do not do locales:
- * therefore can use native functions.  For those where C89 doesn't define a
- * function, use our function, assuming that the EBCDIC code page is isomorphic
- * with Latin1, which the three currently recognized by Perl are.  Some libc's
- * have an isblank(), but it's not guaranteed. */
-#ifdef EBCDIC
-#   define isALPHA(c)	isalpha(c)
-#   define isALPHANUMERIC(c)	isalnum(c)
-#   define isBLANK(c)	((c) == ' ' || (c) == '\t' || NATIVE_TO_LATIN1(c) == 0xA0)
-#   define isCNTRL(c)	iscntrl(c)
-#   define isDIGIT(c)	isdigit(c)
-#   define isGRAPH(c)	isgraph(c)
-#   define isIDFIRST(c) (isALPHA(c) || (c) == '_')
-#   define isLOWER(c)	islower(c)
-#   define isPRINT(c)	isprint(c)
-#   define isPSXSPC(c)	isspace(c)
-#   define isPUNCT(c)	ispunct(c)
-#   define isSPACE(c)   (isPSXSPC(c) /* && (c) != '\v' (Experimentally making
-                                        these macros identical) */)
-#   define isUPPER(c)	isupper(c)
-#   define isXDIGIT(c)	isxdigit(c)
-#   define isWORDCHAR(c) (isalnum(c) || (c) == '_')
-#   define toLOWER(c)	tolower(c)
-#   define toUPPER(c)	toupper(c)
-#else /* Not EBCDIC: ASCII-only matching */
 #   define isALPHANUMERIC(c)  isALPHANUMERIC_A(c)
 #   define isALPHA(c)   isALPHA_A(c)
 #   define isBLANK(c)   isBLANK_A(c)
@@ -1161,7 +1136,6 @@ EXTCONST U32 PL_charclass[];
        work because the _MOD does not apply in the ASCII range) */
 #   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
 #   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
-#endif
 
 /* In the ASCII range, these are equivalent to what they're here defined to be.
  * But by creating these definitions, other code doesn't have to be aware of
