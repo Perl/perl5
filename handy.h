@@ -1113,29 +1113,29 @@ EXTCONST U32 PL_charclass[];
                                || NATIVE_TO_LATIN1((U8) c) == 0xA0)
 #endif
 
-#   define isALPHANUMERIC(c)  isALPHANUMERIC_A(c)
-#   define isALPHA(c)   isALPHA_A(c)
-#   define isBLANK(c)   isBLANK_A(c)
-#   define isCNTRL(c)   isCNTRL_A(c)
-#   define isDIGIT(c)   isDIGIT_A(c)
-#   define isGRAPH(c)   isGRAPH_A(c)
-#   define isIDFIRST(c) isIDFIRST_A(c)
-#   define isLOWER(c)   isLOWER_A(c)
-#   define isPRINT(c)   isPRINT_A(c)
-#   define isPSXSPC(c)	isPSXSPC_A(c)
-#   define isPUNCT(c)   isPUNCT_A(c)
-#   define isSPACE(c)   isSPACE_A(c)
-#   define isUPPER(c)   isUPPER_A(c)
-#   define isWORDCHAR(c) isWORDCHAR_A(c)
-#   define isXDIGIT(c)  isXDIGIT_A(c)
+#define isALPHANUMERIC(c)  isALPHANUMERIC_A(c)
+#define isALPHA(c)   isALPHA_A(c)
+#define isBLANK(c)   isBLANK_A(c)
+#define isCNTRL(c)   isCNTRL_A(c)
+#define isDIGIT(c)   isDIGIT_A(c)
+#define isGRAPH(c)   isGRAPH_A(c)
+#define isIDFIRST(c) isIDFIRST_A(c)
+#define isLOWER(c)   isLOWER_A(c)
+#define isPRINT(c)   isPRINT_A(c)
+#define isPSXSPC(c)  isPSXSPC_A(c)
+#define isPUNCT(c)   isPUNCT_A(c)
+#define isSPACE(c)   isSPACE_A(c)
+#define isUPPER(c)   isUPPER_A(c)
+#define isWORDCHAR(c) isWORDCHAR_A(c)
+#define isXDIGIT(c)  isXDIGIT_A(c)
 
-    /* ASCII casing.  These could also be written as
-	#define toLOWER(c) (isASCII(c) ? toLOWER_LATIN1(c) : (c))
-	#define toUPPER(c) (isASCII(c) ? toUPPER_LATIN1_MOD(c) : (c))
-       which uses table lookup and mask instead of subtraction.  (This would
-       work because the _MOD does not apply in the ASCII range) */
-#   define toLOWER(c)	(isUPPER(c) ? (c) + ('a' - 'A') : (c))
-#   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
+/* ASCII casing.  These could also be written as
+    #define toLOWER(c) (isASCII(c) ? toLOWER_LATIN1(c) : (c))
+    #define toUPPER(c) (isASCII(c) ? toUPPER_LATIN1_MOD(c) : (c))
+   which uses table lookup and mask instead of subtraction.  (This would
+   work because the _MOD does not apply in the ASCII range) */
+#define toLOWER(c)  (isUPPER(c) ? (c) + ('a' - 'A') : (c))
+#define toUPPER(c)  (isLOWER(c) ? (c) - ('a' - 'A') : (c))
 
 /* In the ASCII range, these are equivalent to what they're here defined to be.
  * But by creating these definitions, other code doesn't have to be aware of
