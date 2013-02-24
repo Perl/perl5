@@ -2422,7 +2422,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 	      s = SvPV_const(*svp, len);
 	      if (len == 1)
                   /* EIGHTBIT */
-		   len = uvuni_to_utf8(ustrp, NATIVE_TO_UNI(*(U8*)s)) - ustrp;
+		   len = uvchr_to_utf8(ustrp, *(U8*)s) - ustrp;
 	      else {
 		   Copy(s, ustrp, len, U8);
 	      }
@@ -3216,10 +3216,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	/* If not cached, generate it via swatch_get */
 	if (!svp || !SvPOK(*svp)
 		 || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
-	    /* We use utf8n_to_uvuni() as we want an index into
-	       Unicode tables, not a native character number.
-	     */
-	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0,
+	    const UV code_point = utf8n_to_uvchr(ptr, UTF8_MAXBYTES, 0,
 					   ckWARN(WARN_UTF8) ?
 					   0 : UTF8_ALLOW_ANY);
 	    swatch = swatch_get(swash,
@@ -3904,7 +3901,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 
 	    /* The key is the inverse mapping */
 	    char key[UTF8_MAXBYTES+1];
-	    char* key_end = (char *) uvuni_to_utf8((U8*) key, val);
+	    char* key_end = (char *) uvchr_to_utf8((U8*) key, val);
 	    STRLEN key_len = key_end - key;
 
 	    /* Get the list for the map */

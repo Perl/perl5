@@ -1443,7 +1443,7 @@ and would end up looking like:
    8: EXACT <baz>(10)
   10: END(0)
 
-    d = uvuni_to_utf8_flags(d, uv, 0);
+    d = uvchr_to_utf8_flags(d, uv, 0);
 
 is the recommended Unicode-aware way of saying
 
@@ -1455,7 +1455,7 @@ is the recommended Unicode-aware way of saying
 	if (UTF) {							   \
             SV *zlopp = newSV(7); /* XXX: optimize me */                   \
 	    unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);	   \
-            unsigned const char *const kapow = uvuni_to_utf8(flrbbbbb, val); \
+            unsigned const char *const kapow = uvchr_to_utf8(flrbbbbb, val); \
 	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \
 	    SvPOK_on(zlopp);						   \
 	    SvUTF8_on(zlopp);						   \
@@ -1470,12 +1470,12 @@ is the recommended Unicode-aware way of saying
     wordlen++;                                                                          \
     if ( UTF ) {                                                                        \
         /* if it is UTF then it is either already folded, or does not need folding */   \
-        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
+        uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
     }                                                                                   \
     else if (folder == PL_fold_latin1) {                                                \
         /* if we use this folder we have to obey unicode rules on latin-1 data */       \
         if ( foldlen > 0 ) {                                                            \
-           uvc = utf8n_to_uvuni( (const U8*) scan, UTF8_MAXLEN, &len, uniflags );       \
+           uvc = utf8n_to_uvchr( (const U8*) scan, UTF8_MAXLEN, &len, uniflags );       \
            foldlen -= len;                                                              \
            scan += len;                                                                 \
            len = 0;                                                                     \

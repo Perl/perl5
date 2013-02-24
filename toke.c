@@ -1053,7 +1053,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 		    ENTER;
 		    SAVESPTR(PL_warnhook);
 		    PL_warnhook = PERL_WARNHOOK_FATAL;
-		    utf8n_to_uvuni((U8*)p, e-p, NULL, 0);
+		    utf8n_to_uvchr((U8*)p, e-p, NULL, 0);
 		    LEAVE;
 		}
 	    }
@@ -1437,13 +1437,13 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 		bufend = PL_parser->bufend;
 	    }
 	}
-	unichar = utf8n_to_uvuni((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
+	unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
 	if (retlen == (STRLEN)-1) {
 	    /* malformed UTF-8 */
 	    ENTER;
 	    SAVESPTR(PL_warnhook);
 	    PL_warnhook = PERL_WARNHOOK_FATAL;
-	    utf8n_to_uvuni((U8*)s, bufend-s, NULL, 0);
+	    utf8n_to_uvchr((U8*)s, bufend-s, NULL, 0);
 	    LEAVE;
 	}
 	return unichar;
@@ -2761,7 +2761,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     {
         /* If warnings are on, this will print a more detailed analysis of what
          * is wrong than the error message below */
-        utf8n_to_uvuni(first_bad_char_loc,
+        utf8n_to_uvchr(first_bad_char_loc,
                        e - ((char *) first_bad_char_loc),
                        NULL, 0);
 
@@ -2903,7 +2903,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         if (! is_utf8_string_loc((U8 *) str, len, &first_bad_char_loc)) {
             /* If warnings are on, this will print a more detailed analysis of
              * what is wrong than the error message below */
-            utf8n_to_uvuni(first_bad_char_loc,
+            utf8n_to_uvchr(first_bad_char_loc,
                            (char *) first_bad_char_loc - str,
                            NULL, 0);
 
@@ -3442,7 +3442,7 @@ S_scan_const(pTHX_ char *start)
                     }
 
                     if (has_utf8) {
-		        d = (char*)uvuni_to_utf8((U8*)d, uv);
+		        d = (char*)uvchr_to_utf8((U8*)d, uv);
 			if (PL_lex_inwhat == OP_TRANS &&
 			    PL_sublex_info.sub_op) {
 			    PL_sublex_info.sub_op->op_private |=

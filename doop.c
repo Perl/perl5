@@ -361,7 +361,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 	if (uv < none) {
 	    s += UTF8SKIP(s);
 	    matches++;
-	    d = uvuni_to_utf8(d, uv);
+	    d = uvchr_to_utf8(d, uv);
 	}
 	else if (uv == none) {
 	    const int i = UTF8SKIP(s);
@@ -372,7 +372,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 	else if (uv == extra) {
 	    s += UTF8SKIP(s);
 	    matches++;
-	    d = uvuni_to_utf8(d, final);
+	    d = uvchr_to_utf8(d, final);
 	}
 	else
 	    s += UTF8SKIP(s);
@@ -532,7 +532,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 		matches++;
 		s += UTF8SKIP(s);
 		if (uv != puv) {
-		    d = uvuni_to_utf8(d, uv);
+		    d = uvchr_to_utf8(d, uv);
 		    puv = uv;
 		}
 		continue;
@@ -550,13 +550,13 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 		if (havefinal) {
 		    s += UTF8SKIP(s);
 		    if (puv != final) {
-			d = uvuni_to_utf8(d, final);
+			d = uvchr_to_utf8(d, final);
 			puv = final;
 		    }
 		}
 		else {
 		    STRLEN len;
-		    uv = utf8n_to_uvuni(s, send - s, &len, UTF8_ALLOW_DEFAULT);
+		    uv = utf8n_to_uvchr(s, send - s, &len, UTF8_ALLOW_DEFAULT);
 		    if (uv != puv) {
 			Move(s, d, len, U8);
 			d += len;
@@ -585,7 +585,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 	    if (uv < none) {
 		matches++;
 		s += UTF8SKIP(s);
-		d = uvuni_to_utf8(d, uv);
+		d = uvchr_to_utf8(d, uv);
 		continue;
 	    }
 	    else if (uv == none) {	/* "none" is unmapped character */
@@ -598,7 +598,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 	    else if (uv == extra && !del) {
 		matches++;
 		s += UTF8SKIP(s);
-		d = uvuni_to_utf8(d, final);
+		d = uvchr_to_utf8(d, final);
 		continue;
 	    }
 	    matches++;			/* "none+1" is delete character */

@@ -319,7 +319,7 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 	    const int flags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 	    for (ptr = *s; ptr < from; ptr += UTF8SKIP(ptr)) {
 		if (ptr >= end) break;
-		utf8n_to_uvuni((U8 *) ptr, end-ptr, &retlen, flags);
+		utf8n_to_uvchr((U8 *) ptr, end-ptr, &retlen, flags);
 	    }
 	    if (from > end) from = end;
 	}
@@ -1316,10 +1316,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    len = UTF8SKIP(result);
 		    if (!uni_to_bytes(aTHX_ &ptr, strend,
 				      (char *) &result[1], len-1, 'U')) break;
-		    auv = utf8n_to_uvuni(result, len, &retlen, UTF8_ALLOW_DEFAULT);
+		    auv = utf8n_to_uvchr(result, len, &retlen, UTF8_ALLOW_DEFAULT);
 		    s = ptr;
 		} else {
-		    auv = utf8n_to_uvuni((U8*)s, strend - s, &retlen, UTF8_ALLOW_DEFAULT);
+		    auv = utf8n_to_uvchr((U8*)s, strend - s, &retlen, UTF8_ALLOW_DEFAULT);
 		    if (retlen == (STRLEN) -1 || retlen == 0)
 			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
 		    s += retlen;
@@ -2585,8 +2585,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
 		    }
-		    cur = (char *) uvuni_to_utf8_flags((U8 *) cur,
-						       NATIVE_TO_UNI(auv),
+		    cur = (char *) uvchr_to_utf8_flags((U8 *) cur,
+						       auv,
 						       warn_utf8 ?
 						       0 : UNICODE_ALLOW_ANY);
 		} else {
@@ -2639,7 +2639,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		auv = SvUV(fromstr);
 		if (utf8) {
 		    U8 buffer[UTF8_MAXLEN], *endb;
-		    endb = uvuni_to_utf8_flags(buffer, auv,
+		    endb = uvchr_to_utf8_flags(buffer, auv,
 					       warn_utf8 ?
 					       0 : UNICODE_ALLOW_ANY);
 		    if (cur+(endb-buffer)*UTF8_EXPAND >= end) {
@@ -2657,7 +2657,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 			GROWING(0, cat, start, cur, len+UTF8_MAXLEN);
 			end = start+SvLEN(cat)-UTF8_MAXLEN;
 		    }
-		    cur = (char *) uvuni_to_utf8_flags((U8 *) cur, auv,
+		    cur = (char *) uvchr_to_utf8_flags((U8 *) cur, auv,
 						       warn_utf8 ?
 						       0 : UNICODE_ALLOW_ANY);
 		}

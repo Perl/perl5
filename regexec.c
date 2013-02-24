@@ -1238,7 +1238,7 @@ STMT_START {                               \
     switch (trie_type) {                                                            \
     case trie_utf8_fold:                                                            \
         if ( foldlen>0 ) {                                                          \
-            uvc = utf8n_to_uvuni( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
+            uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
             foldlen -= len;                                                         \
             uscan += len;                                                           \
             len=0;                                                                  \
@@ -1252,7 +1252,7 @@ STMT_START {                               \
         break;                                                                      \
     case trie_latin_utf8_fold:                                                      \
         if ( foldlen>0 ) {                                                          \
-            uvc = utf8n_to_uvuni( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
+            uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
             foldlen -= len;                                                         \
             uscan += len;                                                           \
             len=0;                                                                  \
@@ -1265,7 +1265,7 @@ STMT_START {                               \
         }                                                                           \
         break;                                                                      \
     case trie_utf8:                                                                 \
-        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags );        \
+        uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags );        \
         break;                                                                      \
     case trie_plain:                                                                \
         uvc = (UV)*uc;                                                              \
@@ -4050,7 +4050,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		    while (chars) {
 			if (utf8_target) {
-			    uvc = utf8n_to_uvuni((U8*)uc, UTF8_MAXLEN, &len,
+			    uvc = utf8n_to_uvchr((U8*)uc, UTF8_MAXLEN, &len,
 						    uniflags);
 			    uc += len;
 			}
@@ -4063,7 +4063,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			while (foldlen) {
 			    if (!--chars)
 				break;
-			    uvc = utf8n_to_uvuni(uscan, UTF8_MAXLEN, &len,
+			    uvc = utf8n_to_uvchr(uscan, UTF8_MAXLEN, &len,
 					    uniflags);
 			    uscan += len;
 			    foldlen -= len;
