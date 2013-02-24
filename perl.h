@@ -4305,7 +4305,6 @@ EXTCONST  unsigned char PL_fold_latin1[] = {
 	248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,
 	255 /* y with diaeresis */
 };
-#endif  /* !EBCDIC, but still in DOINIT */
 
 /* If these tables are accessed through ebcdic, the access will be converted to
  * latin1 first */
@@ -4380,13 +4379,14 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
 	240-32,	241-32,	242-32,	243-32,	244-32,	245-32,	246-32,	247,
 	248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,	255
 };
+#endif  /* !EBCDIC, but still in DOINIT */
 #else	/* ! DOINIT */
-#ifndef EBCDIC
+#   ifndef EBCDIC
 EXTCONST unsigned char PL_fold[];
 EXTCONST unsigned char PL_fold_latin1[];
-#endif
 EXTCONST unsigned char PL_mod_latin1_uc[];
 EXTCONST unsigned char PL_latin1_lc[];
+#   endif
 #endif
 
 #ifndef PERL_GLOBAL_STRUCT /* or perlvars.h */
