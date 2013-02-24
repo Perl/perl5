@@ -1728,8 +1728,8 @@ sub ord_latin1_to_native {
     # equivalent value.  Anything above latin1 is itself.
 
     my $ord = shift;
-    return $ord if $ord > 255;
-    return ord latin1_to_native(chr $ord);
+    return $ord if ord('^') == 94;   # ASCII, Latin1
+    return utf8::unicode_to_native($ord);
 }
 
 sub ord_native_to_latin1 {
@@ -1737,8 +1737,8 @@ sub ord_native_to_latin1 {
     # Anything above latin1 is itself.
 
     my $ord = shift;
-    return $ord if $ord > 255;
-    return ord native_to_latin1(chr $ord);
+    return $ord if ord('^') == 94;   # ASCII, Latin1
+    return utf8::native_to_unicode($ord);
 }
 
 1;
