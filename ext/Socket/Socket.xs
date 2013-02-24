@@ -557,17 +557,21 @@ unpack_sockaddr_un(sun_sv)
 	STRLEN sockaddrlen;
 	char * sun_ad = SvPVbyte(sun_sv,sockaddrlen);
 	int addr_len;
-#   ifndef __linux__
+#   ifdef __linux__
 	/* On Linux sockaddrlen on sockets returned by accept, recvfrom,
 	   getpeername and getsockname is not equal to sizeof(addr). */
-	if (sockaddrlen != sizeof(addr)) {
-	    croak("Bad arg length for %s, length is %d, should be %d",
-			"Socket::unpack_sockaddr_un",
-			sockaddrlen, sizeof(addr));
+	if (sockaddrlen < sizeof(addr)) {
+	  Copy(sun_ad, &addr, sockaddrlen, char);
+	  Zero(((char*)&addr) + sockaddrlen, sizeof(addr) - sockaddrlen, char);
+	} else {
+	  Copy(sun_ad, &addr, sizeof(addr), char);
 	}
+#   else
+	if (sockaddrlen != sizeof(addr))
+		croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
+		      "Socket::unpack_sockaddr_un", (UV)sockaddrlen, (UV)sizeof(addr));
+	Copy(sun_ad, &addr, sizeof(addr), char);
 #   endif
-
-	Copy( sun_ad, &addr, sizeof addr, char );
 
 	if ( addr.sun_family != AF_UNIX ) {
 	    croak("Bad address family for %s, got %d, should be %d",
