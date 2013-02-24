@@ -721,7 +721,8 @@ This is a synonym for C<\p{Present_In=*}>
 
 =item B<C<\p{PerlSpace}>>
 
-This is the same as C<\s>, restricted to ASCII, namely C<S<[ \f\n\r\t]>>.
+This is the same as C<\s>, restricted to ASCII, namely C<S<[ \f\n\r\t]>>
+and starting in Perl v5.18, experimentally, a vertical tab.
 
 Mnemonic: Perl's (original) space
 

@@ -13209,7 +13209,7 @@ sub compile_perl() {
     # No Posix equivalent for vertical space
 
     my $Space = $perl->add_match_table('Space',
-                Description => '\s including beyond ASCII plus vertical tab',
+                Description => '\s including beyond ASCII and vertical tab',
                 Initialize => $Blank + $VertSpace,
     );
     $Space->add_alias('XPosixSpace');
@@ -13218,7 +13218,7 @@ sub compile_perl() {
                             Initialize => $Space & $ASCII,
                             );
 
-    # Perl's traditional space doesn't include Vertical Tab
+    # Perl's traditional space doesn't include Vertical Tab prior to v5.18
     my $XPerlSpace = $perl->add_match_table('XPerlSpace',
                                   Description => '\s, including beyond ASCII',
                                   #Initialize => $Space - 0x000B,
