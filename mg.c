@@ -1704,7 +1704,7 @@ Returns the SV (if any) returned by the method, or NULL on failure.
 */
 
 SV*
-Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
+Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags,
 		    U32 argc, ...)
 {
     dVAR;
@@ -1745,10 +1745,10 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     }
     PUTBACK;
     if (flags & G_DISCARD) {
-	call_method(meth, G_SCALAR|G_DISCARD|G_METHOD_NAMED);
+	call_sv(meth, G_SCALAR|G_DISCARD|G_METHOD_NAMED);
     }
     else {
-	if (call_method(meth, G_SCALAR|G_METHOD_NAMED))
+	if (call_sv(meth, G_SCALAR|G_METHOD_NAMED))
 	    ret = *PL_stack_sp--;
     }
     POPSTACK;
@@ -1758,11 +1758,10 @@ Perl_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
     return ret;
 }
 
-
 /* wrapper for magic_methcall that creates the first arg */
 
 STATIC SV*
-S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
+S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags,
     int n, SV *val)
 {
     dVAR;
@@ -1788,7 +1787,7 @@ S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, const char *meth, U32 flags,
 }
 
 STATIC int
-S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, const char *meth)
+S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, SV *meth)
 {
     dVAR;
     SV* ret;
@@ -1808,7 +1807,7 @@ Perl_magic_getpack(pTHX_ SV *sv, MAGIC *mg)
 
     if (mg->mg_type == PERL_MAGIC_tiedelem)
 	mg->mg_flags |= MGf_GSKIP;
-    magic_methpack(sv,mg,"FETCH");
+    magic_methpack(sv,mg,SV_CONST(FETCH));
     return 0;
 }
 
@@ -1840,7 +1839,7 @@ Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
     else
 	val = sv;
 
-    magic_methcall1(sv, mg, "STORE", G_DISCARD, 2, val);
+    magic_methcall1(sv, mg, SV_CONST(STORE), G_DISCARD, 2, val);
     return 0;
 }
 
@@ -1850,7 +1849,7 @@ Perl_magic_clearpack(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_CLEARPACK;
 
     if (mg->mg_type == PERL_MAGIC_tiedscalar) return 0;
-    return magic_methpack(sv,mg,"DELETE");
+    return magic_methpack(sv,mg,SV_CONST(DELETE));
 }
 
 
@@ -1863,7 +1862,7 @@ Perl_magic_sizepack(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_SIZEPACK;
 
-    retsv = magic_methcall1(sv, mg, "FETCHSIZE", 0, 1, NULL);
+    retsv = magic_methcall1(sv, mg, SV_CONST(FETCHSIZE), 0, 1, NULL);
     if (retsv) {
 	retval = SvIV(retsv)-1;
 	if (retval < -1)
@@ -1879,7 +1878,7 @@ Perl_magic_wipepack(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_WIPEPACK;
 
-    Perl_magic_methcall(aTHX_ sv, mg, "CLEAR", G_DISCARD, 0);
+    Perl_magic_methcall(aTHX_ sv, mg, SV_CONST(CLEAR), G_DISCARD, 0);
     return 0;
 }
 
@@ -1891,8 +1890,8 @@ Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 
     PERL_ARGS_ASSERT_MAGIC_NEXTPACK;
 
-    ret = SvOK(key) ? Perl_magic_methcall(aTHX_ sv, mg, "NEXTKEY", 0, 1, key)
-	: Perl_magic_methcall(aTHX_ sv, mg, "FIRSTKEY", 0, 0);
+    ret = SvOK(key) ? Perl_magic_methcall(aTHX_ sv, mg, SV_CONST(NEXTKEY), 0, 1, key)
+	: Perl_magic_methcall(aTHX_ sv, mg, SV_CONST(FIRSTKEY), 0, 0);
     if (ret)
 	sv_setsv(key,ret);
     return 0;
@@ -1903,7 +1902,7 @@ Perl_magic_existspack(pTHX_ SV *sv, const MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_EXISTSPACK;
 
-    return magic_methpack(sv,mg,"EXISTS");
+    return magic_methpack(sv,mg,SV_CONST(EXISTS));
 }
 
 SV *
@@ -1929,7 +1928,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
     }
    
     /* there is a SCALAR method that we can call */
-    retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(hv), mg, "SCALAR", 0, 0);
+    retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(hv), mg, SV_CONST(SCALAR), 0, 0);
     if (!retval)
 	retval = &PL_sv_undef;
     return retval;

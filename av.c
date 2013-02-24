@@ -76,7 +76,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
     if (mg) {
 	SV *arg1 = sv_newmortal();
 	sv_setiv(arg1, (IV)(key + 1));
-	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "EXTEND", G_DISCARD, 1,
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(EXTEND), G_DISCARD, 1,
 			    arg1);
 	return;
     }
@@ -561,7 +561,7 @@ Perl_av_push(pTHX_ AV *av, SV *val)
 	Perl_croak_no_modify();
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "PUSH", G_DISCARD, 1,
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(PUSH), G_DISCARD, 1,
 			    val);
 	return;
     }
@@ -593,7 +593,7 @@ Perl_av_pop(pTHX_ AV *av)
     if (SvREADONLY(av))
 	Perl_croak_no_modify();
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "POP", 0, 0);
+	retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(POP), 0, 0);
 	if (retval)
 	    retval = newSVsv(retval);
 	return retval;
@@ -655,7 +655,7 @@ Perl_av_unshift(pTHX_ AV *av, I32 num)
 	Perl_croak_no_modify();
 
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "UNSHIFT",
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(UNSHIFT),
 			    G_DISCARD | G_UNDEF_FILL, num);
 	return;
     }
@@ -719,7 +719,7 @@ Perl_av_shift(pTHX_ AV *av)
     if (SvREADONLY(av))
 	Perl_croak_no_modify();
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
-	retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "SHIFT", 0, 0);
+	retval = Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(SHIFT), 0, 0);
 	if (retval)
 	    retval = newSVsv(retval);
 	return retval;
@@ -792,7 +792,7 @@ Perl_av_fill(pTHX_ AV *av, I32 fill)
     if ((mg = SvTIED_mg((const SV *)av, PERL_MAGIC_tied))) {
 	SV *arg1 = sv_newmortal();
 	sv_setiv(arg1, (IV)(fill + 1));
-	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, "STORESIZE", G_DISCARD,
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(av), mg, SV_CONST(STORESIZE), G_DISCARD,
 			    1, arg1);
 	return;
     }
