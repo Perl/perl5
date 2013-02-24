@@ -43,7 +43,7 @@
  *	first byte of the final form of a variant will always have its upper
  *	bit set (at least in the encodings that Perl recognizes, and probably
  *	all).  But note that the upper bit of some invariants is also 1.
- * 
+ *
  * If you're starting from Unicode, skip step 1.  For UTF-EBCDIC to straight
  * EBCDIC, reverse the steps.
  *
@@ -51,19 +51,19 @@
  * equivalents have ordinal numbers less than 160, that is the same characters
  * that are expressible in ASCII, plus the C1 controls.  So there are 160
  * invariants instead of the 128 in UTF-8.  (My guess is that this is because
- * the C1 control NEL (and maybe others) is important in IBM.) 
+ * the C1 control NEL (and maybe others) is important in IBM.)
  *
  * The purpose of Step 3 is to make the encoding be invariant for the chosen
  * characters.  This messes up the convenient patterns found in step 2, so
  * generally, one has to undo step 3 into a temporary to use them.  However,
  * a "shadow", or parallel table, PL_utf8skip, has been constructed so that for
- * each byte, it says how long the sequence is if that byte were to begin it 
+ * each byte, it says how long the sequence is if that byte were to begin it
  *
  * There are actually 3 slightly different UTF-EBCDIC encodings in this file,
  * one for each of the code pages recognized by Perl.  That means that there
  * are actually three different sets of tables, one for each code page.  (If
  * Perl is compiled on platforms using another EBCDIC code page, it may not
- * compile, or Perl may silently mistake it for one of the three.)  
+ * compile, or Perl may silently mistake it for one of the three.)
  *
  * EBCDIC characters above 0xFF are the same as Unicode in Perl's
  * implementation of all 3 encodings, so for those Step 1 is trivial.
