@@ -71,7 +71,7 @@ sub multi_char_folds ($) {
         # for ascii chars in EXACTFA (and EXACTFL) nodes.  But I (khw) doubt
         # that there will ever be such a fold created by Unicode, so the code
         # isn't there to occupy space and time; instead there is this check.
-        die sprintf("regcomp.c can't cope with a latin1 multi-char fold (found in the fold of U+%X", $cp_ref->[$i]) if grep { $_ < 256 && chr($_) !~ /[[:ascii:]]/ } @{$folds_ref->[$i]};
+        die sprintf("regcomp.c can't cope with a latin1 multi-char fold (found in the fold of 0x%X", $cp_ref->[$i]) if grep { $_ < 256 && chr($_) !~ /[[:ascii:]]/ } @{$folds_ref->[$i]};
 
         # Create a line that looks like "\x{foo}\x{bar}\x{baz}" of the code
         # points that make up the fold.

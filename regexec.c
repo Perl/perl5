@@ -5908,7 +5908,7 @@ NULL
                         /* simulate B failing */
                         DEBUG_OPTIMISE_r(
                             PerlIO_printf(Perl_debug_log,
-                                "%*s  CURLYM Fast bail next target=U+%"UVXf" c1=U+%"UVXf" c2=U+%"UVXf"\n",
+                                "%*s  CURLYM Fast bail next target=0x%"UVXf" c1=0x%"UVXf" c2=0x%"UVXf"\n",
                                 (int)(REPORT_CODE_OFF+(depth*2)),"",
                                 valid_utf8_to_uvchr((U8 *) locinput, NULL),
                                 valid_utf8_to_uvchr(ST.c1_utf8, NULL),
@@ -5922,7 +5922,7 @@ NULL
                     /* simulate B failing */
                     DEBUG_OPTIMISE_r(
                         PerlIO_printf(Perl_debug_log,
-                            "%*s  CURLYM Fast bail next target=U+%X c1=U+%X c2=U+%X\n",
+                            "%*s  CURLYM Fast bail next target=0x%X c1=0x%X c2=0x%X\n",
                             (int)(REPORT_CODE_OFF+(depth*2)),"",
                             (int) nextchr, ST.c1, ST.c2)
                     );
