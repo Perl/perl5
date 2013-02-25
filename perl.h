@@ -530,64 +530,6 @@ struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   define VOL
 #endif
 
-/* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
- * you get a perl without taint support, but doubtlessly with a lesser
- * degree of support. Do not do so unless you know exactly what it means
- * technically, have a good reason to do so, and know exactly how the
- * perl will be used. perls with -DSILENT_NO_TAINT_SUPPORT are considered
- * a potential security risk due to flat out ignoring the security-relevant
- * taint flags. This being said, a perl without taint support compiled in
- * has marginal run-time performance benefits.
- * SILENT_NO_TAINT_SUPPORT implies NO_TAINT_SUPPORT.
- * SILENT_NO_TAINT_SUPPORT is the same as NO_TAINT_SUPPORT except it
- * silently ignores -t/-T instead of throwing an exception.
- *
- * DANGER! Using NO_TAINT_SUPPORT or SILENT_NO_TAINT_SUPPORT
- *         voids your nonexistent warranty!
- */
-#if SILENT_NO_TAINT_SUPPORT && !defined(NO_TAINT_SUPPORT)
-#  define NO_TAINT_SUPPORT 1
-#endif
-
-/* NO_TAINT_SUPPORT can be set to transform virtually all taint-related
- * operations into no-ops for a very modest speed-up. Enable only if you
- * know what you're doing: tests and CPAN modules' tests are bound to fail.
- */
-#if NO_TAINT_SUPPORT
-#   define TAINT		NOOP
-#   define TAINT_NOT		NOOP
-#   define TAINT_IF(c)		NOOP
-#   define TAINT_ENV()		NOOP
-#   define TAINT_PROPER(s)	NOOP
-#   define TAINT_set(s)		NOOP
-#   define TAINT_get		0
-#   define TAINTING_get		0
-#   define TAINTING_set(s)	NOOP
-#   define TAINT_WARN_get       0
-#   define TAINT_WARN_set(s)    NOOP
-#else
-#   define TAINT		(PL_tainted = TRUE)
-#   define TAINT_NOT	(PL_tainted = FALSE)
-#   define TAINT_IF(c)	if (c) { PL_tainted = TRUE; }
-#   define TAINT_ENV()	if (PL_tainting) { taint_env(); }
-#   define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(NULL, s); }
-#   define TAINT_set(s)		(PL_tainted = (s))
-#   define TAINT_get		(PL_tainted)
-#   define TAINTING_get		(PL_tainting)
-#   define TAINTING_set(s)	(PL_tainting = (s))
-#   define TAINT_WARN_get       (PL_taint_warn)
-#   define TAINT_WARN_set(s)    (PL_taint_warn = (s))
-#endif
-
-/* flags used internally only within pp_subst and pp_substcont */
-#ifdef PERL_CORE
-#  define SUBST_TAINT_STR      1	/* string tainted */
-#  define SUBST_TAINT_PAT      2	/* pattern tainted */
-#  define SUBST_TAINT_REPL     4	/* replacement tainted */
-#  define SUBST_TAINT_RETAINT  8	/* use re'taint' in scope */
-#  define SUBST_TAINT_BOOLRET 16	/* return is boolean (don't taint) */
-#endif
-
 /* XXX All process group stuff is handled in pp_sys.c.  Should these
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
 */
@@ -1074,30 +1016,18 @@ EXTERN_C int usleep(unsigned int);
 #  define CHECK_MALLOC_TOO_LATE_FOR(ch)				\
 	CHECK_MALLOC_TOO_LATE_FOR_(MALLOC_TOO_LATE_FOR(ch))
 #  define panic_write2(s)		write(2, s, strlen(s))
-#  define CHECK_MALLOC_TAINT(newval)				\
-	CHECK_MALLOC_TOO_LATE_FOR_(				\
-		if (newval) {					\
-		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
-		  exit(1); })
-#  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
-	if (doing_taint(argc,argv,env)) {			\
-		MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
-    }} STMT_END;
 #else  /* MYMALLOC */
 #  define safemalloc  safesysmalloc
 #  define safecalloc  safesyscalloc
 #  define saferealloc safesysrealloc
 #  define safefree    safesysfree
 #  define CHECK_MALLOC_TOO_LATE_FOR(ch)		((void)0)
-#  define CHECK_MALLOC_TAINT(newval)		((void)0)
-#  define MALLOC_CHECK_TAINT(argc,argv,env)
 #endif /* MYMALLOC */
 
 /* diag_listed_as: "-T" is on the #! line, it must also be used on the command line */
 #define TOO_LATE_FOR_(ch,what)	Perl_croak(aTHX_ "\"-%c\" is on the #! line, it must also be used on the command line%s", (char)(ch), what)
 #define TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, "")
 #define MALLOC_TOO_LATE_FOR(ch)	TOO_LATE_FOR_(ch, " with $ENV{PERL_MALLOC_OPT}")
-#define MALLOC_CHECK_TAINT2(argc,argv)	MALLOC_CHECK_TAINT(argc,argv,NULL)
 
 #if !defined(HAS_STRCHR) && defined(HAS_INDEX) && !defined(strchr)
 #define strchr index
@@ -4884,7 +4814,7 @@ typedef enum {
 #define HINT_LEXICAL_IO_IN	0x00040000 /* ${^OPEN} is set for input */
 #define HINT_LEXICAL_IO_OUT	0x00080000 /* ${^OPEN} is set for output */
 
-#define HINT_RE_TAINT		0x00100000 /* re pragma */
+#define HINT_RE_TAINT		0x00100000 /* re pragma; backcompat only! */
 #define HINT_RE_EVAL		0x00200000 /* re pragma */
 
 #define HINT_FILETEST_ACCESS	0x00400000 /* filetest pragma */

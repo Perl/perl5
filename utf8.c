@@ -2556,6 +2556,8 @@ The character at C<p> is assumed by this routine to be well-formed.
 
 /* Not currently externally documented, and subject to change:
  * <flags> is set iff locale semantics are to be used for code points < 256
+ *
+ * FIXME let's kill the following. But it's API-ish...
  * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
  *		 were used in the calculation; otherwise unchanged. */
 
@@ -2563,6 +2565,7 @@ UV
 Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags, bool* tainted_ptr)
 {
     dVAR;
+    PERL_UNUSED_ARG(tainted_ptr);
 
     UV result;
 
@@ -2605,9 +2608,6 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2630,6 +2630,8 @@ The character at C<p> is assumed by this routine to be well-formed.
  * <flags> is set iff locale semantics are to be used for code points < 256
  *	   Since titlecase is not defined in POSIX, uppercase is used instead
  *	   for these/
+ *
+ * FIXME let's kill the following. But it's API-ish...
  * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
  *		 were used in the calculation; otherwise unchanged. */
 
@@ -2637,6 +2639,7 @@ UV
 Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags, bool* tainted_ptr)
 {
     dVAR;
+    PERL_UNUSED_ARG(tainted_ptr);
 
     UV result;
 
@@ -2679,9 +2682,6 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2702,6 +2702,8 @@ The character at C<p> is assumed by this routine to be well-formed.
 
 /* Not currently externally documented, and subject to change:
  * <flags> is set iff locale semantics are to be used for code points < 256
+ *
+ * FIXME let's kill the following. But it's API-ish...
  * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
  *		 were used in the calculation; otherwise unchanged. */
 
@@ -2709,6 +2711,7 @@ UV
 Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags, bool* tainted_ptr)
 {
     UV result;
+    PERL_UNUSED_ARG(tainted_ptr);
 
     dVAR;
 
@@ -2752,9 +2755,6 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2783,6 +2783,8 @@ The character at C<p> is assumed by this routine to be well-formed.
  *			      otherwise simple folds
  *      bit FOLD_FLAGS_NOMIX_ASCII is set iff folds of non-ASCII to ASCII are
  *			      prohibited
+ *
+ * FIXME let's kill the following. But it's API-ish...
  * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
  *		 were used in the calculation; otherwise unchanged. */
 
@@ -2790,6 +2792,7 @@ UV
 Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, bool* tainted_ptr)
 {
     dVAR;
+    PERL_UNUSED_ARG(tainted_ptr);
 
     UV result;
 
@@ -2871,9 +2874,6 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2981,14 +2981,11 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    GvSV(PL_errgv) = NULL;
 	    /* It is assumed that callers of this routine are not passing in
 	     * any user derived data.  */
-	    /* Need to do this after save_re_context() as it will set
+	    /* FIXME: Align the following with reality!
+             * Need to do this after save_re_context() as it will set
 	     * PL_tainted to 1 while saving $1 etc (see the code after getrx:
 	     * in Perl_magic_get).  Even line to create errsv_save can turn on
 	     * PL_tainted.  */
-#ifndef NO_TAINT_SUPPORT
-	    SAVEBOOL(TAINT_get);
-	    TAINT_NOT;
-#endif
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
 			     NULL);
 	    {

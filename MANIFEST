@@ -3789,7 +3789,6 @@ ext/File-Glob/t/case.t		See if File::Glob works
 ext/File-Glob/t/global.t	See if File::Glob works
 ext/File-Glob/TODO		File::Glob extension todo list
 ext/File-Glob/t/rt114984.t	See if File::Glob works
-ext/File-Glob/t/taint.t		See if File::Glob works
 ext/GDBM_File/GDBM_File.pm	GDBM extension Perl module
 ext/GDBM_File/GDBM_File.xs	GDBM extension external subroutines
 ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
@@ -3938,7 +3937,6 @@ ext/POSIX/t/posix.t		See if POSIX works
 ext/POSIX/t/sigaction.t		See if POSIX::sigaction works
 ext/POSIX/t/sigset.t		See if POSIX::SigSet works
 ext/POSIX/t/sysconf.t		See if POSIX works
-ext/POSIX/t/taint.t		See if POSIX works with taint
 ext/POSIX/t/termios.t		See if POSIX works
 ext/POSIX/t/time.t		See if POSIX time-related functions work
 ext/POSIX/t/unimplemented.t	Test the diagnostics for unimplemented functions
@@ -5434,7 +5432,6 @@ t/op/svleak.t			See if stuff leaks SVs
 t/op/switch.t			See if switches (given/when) work
 t/op/symbolcache.t		See if undef/delete works on stashes with functions
 t/op/sysio.t			See if sysread and syswrite work
-t/op/taint.t			See if tainting works
 t/op/threads_create.pl		Ancillary file for t/op/threads.t
 t/op/threads-dirh.t		Test interaction of threads and dir handles
 t/op/threads.t			Misc. tests for perl features with threads
@@ -5535,7 +5532,6 @@ t/re/re_tests			Regular expressions for regexp.t
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/subst_amp.t		See if $&-related substitution works
 t/re/subst.t			See if substitution works
-t/re/substT.t			See if substitution works with -T
 t/re/subst_wamp.t		See if substitution works with $& present
 t/re/uniprops.t			Test unicode \p{} regex constructs
 t/run/cloexec.t			Test close-on-exec.
@@ -5561,7 +5557,6 @@ t/run/switchI.t			Test the -I switch
 t/run/switchM.t			Test the -M switch
 t/run/switchn.t			Test the -n switch
 t/run/switchp.t			Test the -p switch
-t/run/switcht.t			Test the -t switch
 t/run/switchx2.aux		Data for switchx.t
 t/run/switchx3.aux		Data for switchx.t
 t/run/switchx.aux		Data for switchx.t

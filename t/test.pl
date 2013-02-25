@@ -656,44 +656,7 @@ sub runperl {
     my $runperl = &_create_runperl;
     my $result;
 
-    my $tainted = ${^TAINT};
-    my %args = @_;
-    exists $args{switches} && grep m/^-T$/, @{$args{switches}} and $tainted = $tainted + 1;
-
-    if ($tainted) {
-	# We will assume that if you're running under -T, you really mean to
-	# run a fresh perl, so we'll brute force launder everything for you
-	my $sep;
-
-	if (! eval {require Config; 1}) {
-	    warn "test.pl had problems loading Config: $@";
-	    $sep = ':';
-	} else {
-	    $sep = $Config::Config{path_sep};
-	}
-
-	my @keys = grep {exists $ENV{$_}} qw(CDPATH IFS ENV BASH_ENV);
-	local @ENV{@keys} = ();
-	# Untaint, plus take out . and empty string:
-	local $ENV{'DCL$PATH'} = $1 if $is_vms && exists($ENV{'DCL$PATH'}) && ($ENV{'DCL$PATH'} =~ /(.*)/s);
-	$ENV{PATH} =~ /(.*)/s;
-	local $ENV{PATH} =
-	    join $sep, grep { $_ ne "" and $_ ne "." and -d $_ and
-		($is_mswin or $is_vms or !(stat && (stat _)[2]&0022)) }
-		    split quotemeta ($sep), $1;
-	if ($is_cygwin) {   # Must have /bin under Cygwin
-	    if (length $ENV{PATH}) {
-		$ENV{PATH} = $ENV{PATH} . $sep;
-	    }
-	    $ENV{PATH} = $ENV{PATH} . '/bin';
-	}
-	$runperl =~ /(.*)/s;
-	$runperl = $1;
-
-	$result = `$runperl`;
-    } else {
-	$result = `$runperl`;
-    }
+    $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
     return $result;
 }

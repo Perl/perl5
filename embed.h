@@ -1468,7 +1468,6 @@
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
 #define incpush(a,b,c)		S_incpush(aTHX_ a,b,c)
 #define incpush_use_sep(a,b,c)	S_incpush_use_sep(aTHX_ a,b,c)
-#define init_ids()		S_init_ids(aTHX)
 #define init_interp()		S_init_interp(aTHX)
 #define init_main_stash()	S_init_main_stash(aTHX)
 #define init_perllib()		S_init_perllib(aTHX)

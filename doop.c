@@ -707,9 +707,6 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     /* sv_setpv retains old UTF8ness [perl #24846] */
     SvUTF8_off(sv);
 
-    if (TAINTING_get && SvMAGICAL(sv))
-	SvTAINTED_off(sv);
-
     if (items-- > 0) {
 	if (*mark)
 	    sv_catsv(sv, *mark);
@@ -735,25 +732,15 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
     dVAR;
     STRLEN patlen;
     const char * const pat = SvPV_const(*sarg, patlen);
-    bool do_taint = FALSE;
+    bool do_taint = FALSE; /* FIXME should go away later */
 
     PERL_ARGS_ASSERT_DO_SPRINTF;
 
-    if (SvTAINTED(*sarg))
-	TAINT_PROPER(
-		(PL_op && PL_op->op_type < OP_max)
-		    ? (PL_op->op_type == OP_PRTF)
-			? "printf"
-			: PL_op_name[PL_op->op_type]
-		    : "(unknown)"
-	);
     SvUTF8_off(sv);
     if (DO_UTF8(*sarg))
         SvUTF8_on(sv);
     sv_vsetpvfn(sv, pat, patlen, NULL, sarg + 1, len - 1, &do_taint);
     SvSETMAGIC(sv);
-    if (do_taint)
-	SvTAINTED_on(sv);
 }
 
 /* currently converts input to bytes if possible, but doesn't sweat failure */
@@ -1221,7 +1208,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	}
     }
 finish:
-    SvTAINT(sv);
+    assert(1); /* NOOP */
 }
 
 OP *

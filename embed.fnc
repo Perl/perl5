@@ -1853,7 +1853,6 @@ s	|SV*	|mayberelocate	|NN const char *const dir|STRLEN len \
 				|U32 flags
 s	|void	|incpush_use_sep|NN const char *p|STRLEN len|U32 flags
 s	|void	|init_interp
-s	|void	|init_ids
 s	|void	|init_main_stash
 s	|void	|init_perllib
 s	|void	|init_postdump_symbols|int argc|NN char **argv|NULLOK char **env

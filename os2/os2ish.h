@@ -225,7 +225,6 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
 
 #  define PERL_SYS_INIT3_BODY(argcp, argvp, envp)	\
   { void *xreg[2];				\
-    MALLOC_CHECK_TAINT(*argcp, *argvp, *envp)	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
     Perl_OS2_init3(*envp, xreg, 0);		\

@@ -604,7 +604,7 @@ struct xpvio {
 #define IOf_START	2	/* check for null ARGV and substitute '-' */
 #define IOf_FLUSH	4	/* this fp wants a flush after write op */
 #define IOf_DIDTOP	8	/* just did top of form */
-#define IOf_UNTAINT	16	/* consider this fp (and its data) "safe" */
+/* #define IOf_UNTAINT 	16 */	/* consider this fp (and its data) "safe"; Removed with taint support. */
 #define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
 #define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge)
 				   Also, when this is set, SvPVX() is valid */
@@ -1425,47 +1425,27 @@ sv_force_normal does nothing.
 
 /*
 =for apidoc Am|bool|SvTAINTED|SV* sv
-Checks to see if an SV is tainted.  Returns TRUE if it is, FALSE if
-not.
+Always returns FALSE since taint support was removed from Perl.
 
 =for apidoc Am|void|SvTAINTED_on|SV* sv
-Marks an SV as tainted if tainting is enabled.
+A no-op since taint support was removed from Perl.
 
 =for apidoc Am|void|SvTAINTED_off|SV* sv
-Untaints an SV.  Be I<very> careful with this routine, as it short-circuits
-some of Perl's fundamental security features.  XS module authors should not
-use this function unless they fully understand all the implications of
-unconditionally untainting the value. Untainting should be done in the
-standard perl fashion, via a carefully crafted regexp, rather than directly
-untainting variables.
+A no-op since taint support was removed from Perl.
 
 =for apidoc Am|void|SvTAINT|SV* sv
-Taints an SV if tainting is enabled, and if some input to the current
-expression is tainted--usually a variable, but possibly also implicit
-inputs such as locale settings.  C<SvTAINT> propagates that taintedness to
-the outputs of an expression in a pessimistic fashion; i.e., without paying
-attention to precisely which outputs are influenced by which inputs.
+A no-op since taint support was removed from Perl.
 
 =cut
 */
 
-#define sv_taint(sv)	  sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0)
+#define sv_taint(sv)	  NOOP
 
-#if NO_TAINT_SUPPORT
-#   define SvTAINTED(sv) 0
-#else
-#   define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
-#endif
-#define SvTAINTED_on(sv)  STMT_START{ if(TAINTING_get){sv_taint(sv);}   }STMT_END
-#define SvTAINTED_off(sv) STMT_START{ if(TAINTING_get){sv_untaint(sv);} }STMT_END
+#define SvTAINTED(sv) 0
+#define SvTAINTED_on(sv)  NOOP
+#define SvTAINTED_off(sv) NOOP
 
-#define SvTAINT(sv)			\
-    STMT_START {			\
-	if (TAINTING_get) {		\
-	    if (TAINT_get)		\
-		SvTAINTED_on(sv);	\
-	}				\
-    } STMT_END
+#define SvTAINT(sv) NOOP
 
 /*
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len

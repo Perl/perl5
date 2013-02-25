@@ -301,7 +301,6 @@ PP(pp_backtick)
     const I32 gimme = GIMME_V;
     const char *mode = "r";
 
-    TAINT_PROPER("``");
     if (PL_op->op_private & OPpOPEN_IN_RAW)
 	mode = "rb";
     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
@@ -326,7 +325,6 @@ PP(pp_backtick)
 		NOOP;
 	    LEAVE_with_name("backtick");
 	    XPUSHs(TARG);
-	    SvTAINTED_on(TARG);
 	}
 	else {
 	    for (;;) {
@@ -339,11 +337,9 @@ PP(pp_backtick)
 		if (SvLEN(sv) - SvCUR(sv) > 20) {
 		    SvPV_shrink_to_cur(sv);
 		}
-		SvTAINTED_on(sv);
 	    }
 	}
 	STATUS_NATIVE_CHILD_SET(PerlProc_pclose(fp));
-	TAINT;		/* "I believe that this is not gratuitous!" */
     }
     else {
 	STATUS_NATIVE_CHILD_SET(-1);
@@ -386,17 +382,6 @@ PP(pp_glob)
      * perl was built with PERL_EXTERNAL_GLOB */
 
     ENTER_with_name("glob");
-
-#ifndef VMS
-    if (TAINTING_get) {
-	/*
-	 * The external globbing program may use things we can't control,
-	 * so for security reasons we must assume the worst.
-	 */
-	TAINT;
-	taint_proper(PL_no_security, "glob");
-    }
-#endif /* !VMS */
 
     SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
     PL_last_in_gv = gv;
@@ -611,7 +596,6 @@ PP(pp_open)
 
     if ((io = GvIOp(gv))) {
 	const MAGIC *mg;
-	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
 	if (IoDIRP(io))
 	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
@@ -778,7 +762,6 @@ PP(pp_umask)
     }
     else
 	anum = PerlLIO_umask(POPi);
-    TAINT_PROPER("umask");
     XPUSHi(anum);
 #else
     /* Only DIE if trying to restrict permissions on "user" (self).
@@ -1311,7 +1294,6 @@ PP(pp_getc)
 	SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
     }
-    TAINT;
     sv_setpvs(TARG, " ");
     *SvPVX(TARG) = PerlIO_getc(IoIFP(GvIOp(gv))); /* should never be EOF */
     if (PerlIO_isutf8(IoIFP(GvIOp(gv)))) {
@@ -1696,9 +1678,6 @@ PP(pp_sysread)
 	if (fp_utf8)
 	    SvUTF8_on(bufsv);
 	SvSETMAGIC(bufsv);
-	/* This should not be marked tainted if the fp is marked clean */
-	if (!(IoFLAGS(io) & IOf_UNTAINT))
-	    SvTAINTED_on(bufsv);
 	SP = ORIGMARK;
 	sv_setpvn(TARG, namebuf, bufsize);
 	PUSHs(TARG);
@@ -1827,9 +1806,6 @@ PP(pp_sysread)
 	sv_catsv_nomg(bufsv, read_target);
     }
     SvSETMAGIC(bufsv);
-    /* This should not be marked tainted if the fp is marked clean */
-    if (!(IoFLAGS(io) & IOf_UNTAINT))
-	SvTAINTED_on(bufsv);
     SP = ORIGMARK;
     PUSHi(count);
     RETURN;
@@ -2215,7 +2191,6 @@ PP(pp_truncate)
 	    else {
 		PerlIO *fp;
 	    do_ftruncate_io:
-		TAINT_PROPER("truncate");
 		if (!(fp = IoIFP(io))) {
 		    result = 0;
 		}
@@ -2236,7 +2211,6 @@ PP(pp_truncate)
 	}
 	else {
 	    const char * const name = SvPV_nomg_const_nolen(sv);
-	    TAINT_PROPER("truncate");
 #ifdef HAS_TRUNCATE
 	    if (truncate(name, len) < 0)
 	        result = 0;
@@ -2296,8 +2270,6 @@ PP(pp_ioctl)
 	retval = SvIV(argsv);
 	s = INT2PTR(char*,retval);		/* ouch */
     }
-
-    TAINT_PROPER(PL_op_desc[optype]);
 
     if (optype == OP_IOCTL)
 #ifdef HAS_IOCTL
@@ -2389,7 +2361,6 @@ PP(pp_socket)
     if (IoIFP(io))
 	do_close(gv, FALSE);
 
-    TAINT_PROPER("socket");
     fd = PerlSock_socket(domain, type, protocol);
     if (fd < 0)
 	RETPUSHUNDEF;
@@ -2436,7 +2407,6 @@ PP(pp_sockpair)
     if (!io1 || !io2)
 	RETPUSHUNDEF;
 
-    TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
 	RETPUSHUNDEF;
     IoIFP(io1) = PerlIO_fdopen(fd[0], "r"SOCKET_OPEN_MODE);
@@ -2482,7 +2452,6 @@ PP(pp_bind)
 	goto nuts;
 
     addr = SvPV_const(addrsv, len);
-    TAINT_PROPER(PL_op_desc[op_type]);
     if ((op_type == OP_BIND
 	 ? PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len)
 	 : PerlSock_connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len))
@@ -2806,7 +2775,6 @@ PP(pp_stat)
             goto do_fstat_have_io; 
         }
         
-	SvTAINTED_off(PL_statname); /* previous tainting irrelevant */
 	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
@@ -3480,12 +3448,10 @@ PP(pp_chdir)
         }
         else {
             PUSHi(0);
-            TAINT_PROPER("chdir");
             RETURN;
         }
     }
 
-    TAINT_PROPER("chdir");
     if (gv) {
 #ifdef HAS_FCHDIR
 	IO* const io = GvIO(gv);
@@ -3535,7 +3501,6 @@ PP(pp_chroot)
 #ifdef HAS_CHROOT
     dVAR; dSP; dTARGET;
     char * const tmps = POPpx;
-    TAINT_PROPER("chroot");
     PUSHi( chroot(tmps) >= 0 );
     RETURN;
 #else
@@ -3549,7 +3514,6 @@ PP(pp_rename)
     int anum;
     const char * const tmps2 = POPpconstx;
     const char * const tmps = SvPV_nolen_const(TOPs);
-    TAINT_PROPER("rename");
 #ifdef HAS_RENAME
     anum = PerlLIO_rename(tmps, tmps2);
 #else
@@ -3587,7 +3551,6 @@ PP(pp_link)
     {
 	const char * const tmps2 = POPpconstx;
 	const char * const tmps = SvPV_nolen_const(TOPs);
-	TAINT_PROPER(PL_op_desc[op_type]);
 	result =
 #  if defined(HAS_LINK)
 #    if defined(HAS_SYMLINK)
@@ -3627,9 +3590,6 @@ PP(pp_readlink)
     char buf[MAXPATHLEN];
     int len;
 
-#ifndef INCOMPLETE_TAINTS
-    TAINT;
-#endif
     tmps = POPpconstx;
     len = readlink(tmps, buf, sizeof(buf) - 1);
     if (len < 0)
@@ -3763,7 +3723,6 @@ PP(pp_mkdir)
 
     TRIMSLASHES(tmps,len,copy);
 
-    TAINT_PROPER("mkdir");
 #ifdef HAS_MKDIR
     SETi( PerlDir_mkdir(tmps, mode) >= 0 );
 #else
@@ -3788,7 +3747,6 @@ PP(pp_rmdir)
     bool copy = FALSE;
 
     TRIMSLASHES(tmps,len,copy);
-    TAINT_PROPER("rmdir");
 #ifdef HAS_RMDIR
     SETi( PerlDir_rmdir(tmps) >= 0 );
 #else
@@ -3863,10 +3821,6 @@ PP(pp_readdir)
         sv = newSVpvn(dp->d_name, dp->d_namlen);
 #else
         sv = newSVpv(dp->d_name, 0);
-#endif
-#ifndef INCOMPLETE_TAINTS
-        if (!(IoFLAGS(io) & IOf_UNTAINT))
-            SvTAINTED_on(sv);
 #endif
         mXPUSHs(sv);
     } while (gimme == G_ARRAY);
@@ -4129,16 +4083,6 @@ PP(pp_system)
     I32 value;
     int result;
 
-    if (TAINTING_get) {
-	TAINT_ENV();
-	while (++MARK <= SP) {
-	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
-	    if (TAINT_get)
-		break;
-	}
-	MARK = ORIGMARK;
-	TAINT_PROPER("system");
-    }
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
     {
@@ -4276,16 +4220,6 @@ PP(pp_exec)
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
-    if (TAINTING_get) {
-	TAINT_ENV();
-	while (++MARK <= SP) {
-	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
-	    if (TAINT_get)
-		break;
-	}
-	MARK = ORIGMARK;
-	TAINT_PROPER("exec");
-    }
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
@@ -4356,7 +4290,6 @@ PP(pp_setpgrp)
 	XPUSHi(-1);
     }
 
-    TAINT_PROPER("setpgrp");
 #ifdef BSD_SETPGRP
     SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
 #else
@@ -4399,7 +4332,6 @@ PP(pp_setpriority)
     const int niceval = POPi;
     const int who = POPi;
     const int which = TOPi;
-    TAINT_PROPER("setpriority");
     SETi( setpriority(PRIORITY_WHICH_T(which), who, niceval) >= 0 );
     RETURN;
 #else
@@ -5247,12 +5179,6 @@ PP(pp_gpwent)
 	    sv_setpv(sv, pwent->pw_passwd);
 #   endif
 
-#   ifndef INCOMPLETE_TAINTS
-	/* passwd is tainted because user himself can diddle with it.
-	 * admittedly not much and in a very limited way, but nevertheless. */
-	SvTAINTED_on(sv);
-#   endif
-
 #   if Uid_t_sign <= 0
 	mPUSHi(pwent->pw_uid);
 #   else
@@ -5302,18 +5228,9 @@ PP(pp_gpwent)
 #   else
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   endif
-#   ifndef INCOMPLETE_TAINTS
-	/* pw_gecos is tainted because user himself can diddle with it. */
-	SvTAINTED_on(sv);
-#   endif
 
 	mPUSHs(newSVpv(pwent->pw_dir, 0));
-
 	PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_shell, 0)));
-#   ifndef INCOMPLETE_TAINTS
-	/* pw_shell is tainted because user himself can diddle with it. */
-	SvTAINTED_on(sv);
-#   endif
 
 #   ifdef PWEXPIRE
 	mPUSHi(pwent->pw_expire);
@@ -5425,17 +5342,6 @@ PP(pp_syscall)
     unsigned long a[20];
     I32 i = 0;
     IV retval = -1;
-
-    if (TAINTING_get) {
-	while (++MARK <= SP) {
-	    if (SvTAINTED(*MARK)) {
-		TAINT;
-		break;
-	    }
-	}
-	MARK = ORIGMARK;
-	TAINT_PROPER("syscall");
-    }
 
     /* This probably won't work on machines where sizeof(long) != sizeof(int)
      * or where sizeof(long) != sizeof(char*).  But such machines will

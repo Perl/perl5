@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 179);
+    plan (tests => 177);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -39,9 +39,8 @@ BEGIN {
 }
 
 # This must be in a separate BEGIN block, as the mere mention of ${^TAINT}
-# will invalidate the test for it.
+# used to invalidate the test for it.
 BEGIN {
-    $ENV{PATH} = '/bin' if ${^TAINT};
     $SIG{__WARN__} = sub { die "Dying on warning: ", @_ };
 }
 
@@ -486,11 +485,6 @@ is $^S, 0;
 eval { is $^S,1 };
 eval " BEGIN { ok ! defined \$^S } ";
 is $^S, 0;
-
-my $taint = ${^TAINT};
-is ${^TAINT}, $taint;
-eval { ${^TAINT} = 1 };
-is ${^TAINT}, $taint;
 
 # 5.6.1 had a bug: @+ and @- were not properly interpolated
 # into double-quoted strings

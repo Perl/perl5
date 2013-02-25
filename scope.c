@@ -765,9 +765,6 @@ Perl_leave_scope(pTHX_ I32 base)
 {
     dVAR;
 
-    /* Localise the effects of the TAINT_NOT inside the loop.  */
-    bool was = TAINT_get;
-
     ANY arg0, arg1, arg2;
 
     /* these initialisations are logically unnecessary, but they shut up
@@ -786,8 +783,6 @@ Perl_leave_scope(pTHX_ I32 base)
 
         SV *refsv;
         SV **svp;
-
-	TAINT_NOT;
 
         {
             I32 ix = PL_savestack_ix - 1;
@@ -916,16 +911,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    *(bool*)ARG0_PTR = cBOOL(uv >> 8);
-#if !NO_TAINT_SUPPORT
-	    if (ARG0_PTR == &(TAINT_get)) {
-		/* If we don't update <was>, to reflect what was saved on the
-		 * stack for PL_tainted, then we will overwrite this attempt to
-		 * restore it when we exit this routine.  Note that this won't
-		 * work if this value was saved in a wider-than necessary type,
-		 * such as I32 */
-		was = *(bool*)ARG0_PTR;
-	    }
-#endif
 	    break;
 	case SAVEt_I32_SMALL:
 	    *(I32*)ARG0_PTR = (I32)(uv >> SAVE_TIGHT_SHIFT);
@@ -1244,8 +1229,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u", type);
 	}
     }
-
-    TAINT_set(was);
 
     PERL_ASYNC_CHECK();
 }

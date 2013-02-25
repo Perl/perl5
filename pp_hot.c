@@ -49,7 +49,6 @@ PP(pp_nextstate)
 {
     dVAR;
     PL_curcop = (COP*)PL_op;
-    TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
     PERL_ASYNC_CHECK();
@@ -133,8 +132,6 @@ PP(pp_sassign)
 	SV * const temp = left;
 	left = right; right = temp;
     }
-    if (TAINTING_get && TAINT_get && !SvTAINTED(right))
-	TAINT_NOT;
     if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
 	SV * const cv = SvRV(right);
 	const U32 cv_type = SvTYPE(cv);
@@ -239,7 +236,6 @@ PP(pp_unstack)
 {
     dVAR;
     PERL_ASYNC_CHECK();
-    TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
@@ -1018,8 +1014,6 @@ PP(pp_aassign)
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
 	    if ((sv = *relem)) {
-		TAINT_NOT;	/* Each item is independent */
-
 		/* Dear TODO test in t/op/sort.t, I love you.
 		   (It's relying on a panic, not a "semi-panic" from newSVsv()
 		   and then an assertion failure below.)  */
@@ -1042,7 +1036,6 @@ PP(pp_aassign)
     hash = NULL;
 
     while (lelem <= lastlelem) {
-	TAINT_NOT;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
@@ -1067,7 +1060,6 @@ PP(pp_aassign)
 		    if (SvSMAGICAL(sv))
 			mg_set(sv);
 		}
-		TAINT_NOT;
 	    }
 	    if (PL_delaymagic & DM_ARRAY_ISA)
 		SvSETMAGIC(MUTABLE_SV(ary));
@@ -1126,7 +1118,6 @@ PP(pp_aassign)
 			if (!didstore) sv_2mortal(tmpstr);
 			SvSETMAGIC(tmpstr);
                     }
-		    TAINT_NOT;
 		}
 		LEAVE;
                 if (duplicates && gimme == G_ARRAY) {
@@ -1173,6 +1164,7 @@ PP(pp_aassign)
     }
     if (PL_delaymagic & ~DM_DELAY) {
 	/* Will be used to set PL_tainting below */
+        /* FIXME review and kill later. */
 	UV tmp_uid  = PerlProc_getuid();
 	UV tmp_euid = PerlProc_geteuid();
 	UV tmp_gid  = PerlProc_getgid();
@@ -1242,7 +1234,6 @@ PP(pp_aassign)
 	    tmp_gid  = PerlProc_getgid();
 	    tmp_egid = PerlProc_getegid();
 	}
-	TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
     }
     PL_delaymagic = 0;
 
@@ -1301,10 +1292,6 @@ PP(pp_qr)
 	(void)sv_bless(rv, stash);
     }
 
-    if (RX_ISTAINTED(rx)) {
-        SvTAINTED_on(rv);
-        SvTAINTED_on(SvRV(rv));
-    }
     XPUSHs(rv);
     RETURN;
 }
@@ -1321,7 +1308,6 @@ PP(pp_match)
     U8 r_flags = REXEC_CHECKED;
     const char *truebase;			/* Start of string  */
     REGEXP *rx = PM_GETRE(pm);
-    bool rxtainted;
     const I32 gimme = GIMME;
     STRLEN len;
     I32 minmatch = 0;
@@ -1348,9 +1334,6 @@ PP(pp_match)
     if (!s)
 	DIE(aTHX_ "panic: pp_match");
     strend = s + len;
-    rxtainted = (RX_ISTAINTED(rx) ||
-		 (TAINT_get && (pm->op_pmflags & PMf_RETAINT)));
-    TAINT_NOT;
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
@@ -1460,9 +1443,6 @@ PP(pp_match)
     }
 
   gotcha:
-    if (rxtainted)
-	RX_MATCH_TAINTED_on(rx);
-    TAINT_IF(RX_MATCH_TAINTED(rx));
     if (gimme == G_ARRAY) {
 	const I32 nparens = RX_NPARENS(rx);
 	I32 i = (global && !nparens) ? 1 : 0;
@@ -1549,9 +1529,6 @@ PP(pp_match)
 #ifdef PERL_SAWAMPERSAND
 yup:					/* Confirmed by INTUIT */
 #endif
-    if (rxtainted)
-	RX_MATCH_TAINTED_on(rx);
-    TAINT_IF(RX_MATCH_TAINTED(rx));
     PL_curpm = pm;
     if (dynpm->op_pmflags & PMf_ONCE) {
 #ifdef USE_ITHREADS
@@ -1674,7 +1651,6 @@ Perl_do_readline(pTHX)
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
-			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
 			sv_setpvs(GvSVn(PL_last_in_gv), "-");
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
@@ -1751,13 +1727,6 @@ Perl_do_readline(pTHX)
 	offset = 0;
     }
 
-    /* This should not be marked tainted if the fp is marked clean */
-#define MAYBE_TAINT_LINE(io, sv) \
-    if (!(IoFLAGS(io) & IOf_UNTAINT)) { \
-	TAINT;				\
-	SvTAINTED_on(sv);		\
-    }
-
 /* delay EOF state for a snarfed empty file */
 #define SNARF_EOF(gimme,rs,io,sv) \
     (gimme != G_SCALAR || SvCUR(sv)					\
@@ -1793,10 +1762,8 @@ Perl_do_readline(pTHX)
 		SPAGAIN;
 		PUSHTARG;
 	    }
-	    MAYBE_TAINT_LINE(io, sv);
 	    RETURN;
 	}
-	MAYBE_TAINT_LINE(io, sv);
 	IoLINES(io)++;
 	IoFLAGS(io) |= IOf_NOLINE;
 	SvSETMAGIC(sv);
@@ -2067,77 +2034,6 @@ PP(pp_iter)
     RETPUSHYES;
 }
 
-/*
-A description of how taint works in pattern matching and substitution.
-
-This is all conditional on NO_TAINT_SUPPORT not being defined. Under
-NO_TAINT_SUPPORT, taint-related operations should become no-ops.
-
-While the pattern is being assembled/concatenated and then compiled,
-PL_tainted will get set (via TAINT_set) if any component of the pattern
-is tainted, e.g. /.*$tainted/.  At the end of pattern compilation,
-the RXf_TAINTED flag is set on the pattern if PL_tainted is set (via
-TAINT_get).
-
-When the pattern is copied, e.g. $r = qr/..../, the SV holding the ref to
-the pattern is marked as tainted. This means that subsequent usage, such
-as /x$r/, will set PL_tainted using TAINT_set, and thus RXf_TAINTED,
-on the new pattern too.
-
-At the start of execution of a pattern, the RXf_TAINTED_SEEN flag on the
-regex is cleared; during execution, locale-variant ops such as POSIXL may
-set RXf_TAINTED_SEEN.
-
-RXf_TAINTED_SEEN is used post-execution by the get magic code
-of $1 et al to indicate whether the returned value should be tainted.
-It is the responsibility of the caller of the pattern (i.e. pp_match,
-pp_subst etc) to set this flag for any other circumstances where $1 needs
-to be tainted.
-
-The taint behaviour of pp_subst (and pp_substcont) is quite complex.
-
-There are three possible sources of taint
-    * the source string
-    * the pattern (both compile- and run-time, RXf_TAINTED / RXf_TAINTED_SEEN)
-    * the replacement string (or expression under /e)
-    
-There are four destinations of taint and they are affected by the sources
-according to the rules below:
-
-    * the return value (not including /r):
-	tainted by the source string and pattern, but only for the
-	number-of-iterations case; boolean returns aren't tainted;
-    * the modified string (or modified copy under /r):
-	tainted by the source string, pattern, and replacement strings;
-    * $1 et al:
-	tainted by the pattern, and under 'use re "taint"', by the source
-	string too;
-    * PL_taint - i.e. whether subsequent code (e.g. in a /e block) is tainted:
-	should always be unset before executing subsequent code.
-
-The overall action of pp_subst is:
-
-    * at the start, set bits in rxtainted indicating the taint status of
-	the various sources.
-
-    * After each pattern execution, update the SUBST_TAINT_PAT bit in
-	rxtainted if RXf_TAINTED_SEEN has been set, to indicate that the
-	pattern has subsequently become tainted via locale ops.
-
-    * If control is being passed to pp_substcont to execute a /e block,
-	save rxtainted in the CXt_SUBST block, for future use by
-	pp_substcont.
-
-    * Whenever control is being returned to perl code (either by falling
-	off the "end" of pp_subst/pp_substcont, or by entering a /e block),
-	use the flag bits in rxtainted to make all the appropriate types of
-	destination taint visible; e.g. set RXf_TAINTED_SEEN so that $1
-	et al will appear tainted.
-
-pp_match is just a simpler version of the above.
-
-*/
-
 PP(pp_subst)
 {
     dVAR; dSP; dTARG;
@@ -2153,8 +2049,6 @@ PP(pp_subst)
     I32 maxiters;
     I32 i;
     bool once;
-    U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
-			See "how taint works" above */
     char *orig;
     U8 r_flags;
     REGEXP *rx = PM_GETRE(pm);
@@ -2207,17 +2101,6 @@ PP(pp_subst)
 
     /* only replace once? */
     once = !(rpm->op_pmflags & PMf_GLOBAL);
-
-    /* See "how taint works" above */
-    if (TAINTING_get) {
-	rxtainted  = (
-	    (SvTAINTED(TARG) ? SUBST_TAINT_STR : 0)
-	  | (RX_ISTAINTED(rx) ? SUBST_TAINT_PAT : 0)
-	  | ((pm->op_pmflags & PMf_RETAINT) ? SUBST_TAINT_RETAINT : 0)
-	  | ((once && !(rpm->op_pmflags & PMf_NONDESTRUCT))
-		? SUBST_TAINT_BOOLRET : 0));
-	TAINT_NOT;
-    }
 
     RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
 
@@ -2292,9 +2175,6 @@ PP(pp_subst)
 	    c = SvPV_const(dstr, clen);
 	    doutf8 = DO_UTF8(dstr);
 	}
-
-	if (SvTAINTED(dstr))
-	    rxtainted |= SUBST_TAINT_REPL;
     }
     else {
 	c = NULL;
@@ -2327,8 +2207,6 @@ PP(pp_subst)
 	}
 	d = s;
 	if (once) {
-	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
-		rxtainted |= SUBST_TAINT_PAT;
 	    m = orig + RX_OFFS(rx)[0].start;
 	    d = orig + RX_OFFS(rx)[0].end;
 	    s = orig;
@@ -2368,8 +2246,6 @@ PP(pp_subst)
 	    do {
 		if (iters++ > maxiters)
 		    DIE(aTHX_ "Substitution loop");
-		if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
-		    rxtainted |= SUBST_TAINT_PAT;
 		m = RX_OFFS(rx)[0].start + orig;
 		if ((i = m - s)) {
 		    if (s != d)
@@ -2413,8 +2289,6 @@ PP(pp_subst)
 #ifdef PERL_ANY_COW
       have_a_cow:
 #endif
-	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
-	    rxtainted |= SUBST_TAINT_PAT;
 	repl = dstr;
 	dstr = newSVpvn_flags(m, s-m, SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
 	if (!c) {
@@ -2423,7 +2297,7 @@ PP(pp_subst)
 	    /* note that a whole bunch of local vars are saved here for
 	     * use by pp_substcont: here's a list of them in case you're
 	     * searching for places in this sub that uses a particular var:
-	     * iters maxiters r_flags oldsave rxtainted orig dstr targ
+	     * iters maxiters r_flags oldsave orig dstr targ
 	     * s m strend rx once */
 	    PUSHSUBST(cx);
 	    RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
@@ -2433,8 +2307,6 @@ PP(pp_subst)
 	do {
 	    if (iters++ > maxiters)
 		DIE(aTHX_ "Substitution loop");
-	    if (RX_MATCH_TAINTED(rx))
-		rxtainted |= SUBST_TAINT_PAT;
 	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
 		m = s;
 		s = orig;
@@ -2460,8 +2332,6 @@ PP(pp_subst)
 		    sv_catsv(dstr, nsv);
 		}
 		else sv_catsv(dstr, repl);
-		if (SvTAINTED(repl))
-		    rxtainted |= SUBST_TAINT_REPL;
 	    }
 	    if (once)
 		break;
@@ -2504,29 +2374,7 @@ PP(pp_subst)
 	(void)SvPOK_only_UTF8(TARG);
     }
 
-    /* See "how taint works" above */
-    if (TAINTING_get) {
-	if ((rxtainted & SUBST_TAINT_PAT) ||
-	    ((rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT)) ==
-				(SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
-	)
-	    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
-
-	if (!(rxtainted & SUBST_TAINT_BOOLRET)
-	    && (rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
-	)
-	    SvTAINTED_on(TOPs);  /* taint return value */
-	else
-	    SvTAINTED_off(TOPs);  /* may have got tainted earlier */
-
-	/* needed for mg_set below */
-	TAINT_set(
-	  cBOOL(rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL))
-        );
-	SvTAINT(TARG);
-    }
-    SvSETMAGIC(TARG); /* PL_tainted must be correctly set for this mg_set */
-    TAINT_NOT;
+    SvSETMAGIC(TARG);
     LEAVE_SCOPE(oldsave);
     RETURN;
 }
@@ -2599,7 +2447,6 @@ PP(pp_leavesub)
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
 
-    TAINT_NOT;
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
 	if (MARK <= SP) {
@@ -2635,7 +2482,6 @@ PP(pp_leavesub)
 	    if (!SvTEMP(*MARK) || SvREFCNT(*MARK) != 1
 		 || SvMAGICAL(*MARK)) {
 		*MARK = sv_mortalcopy(*MARK);
-		TAINT_NOT;	/* Each item is independent */
 	    }
 	}
     }

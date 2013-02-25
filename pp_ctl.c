@@ -66,10 +66,10 @@ PP(pp_wantarray)
     }
 }
 
+/* FIXME can go away with taint gone? */
 PP(pp_regcreset)
 {
     dVAR;
-    TAINT_NOT;
     return NORMAL;
 }
 
@@ -129,17 +129,12 @@ PP(pp_regcomp)
 	   some day. */
 	if (pm->op_type == OP_MATCH) {
 	    SV *lhs;
-	    const bool was_tainted = TAINT_get;
 	    if (pm->op_flags & OPf_STACKED)
 		lhs = args[-1];
 	    else if (pm->op_private & OPpTARGET_MY)
 		lhs = PAD_SV(pm->op_targ);
 	    else lhs = DEFSV;
 	    SvGETMAGIC(lhs);
-	    /* Restore the previous value of PL_tainted (which may have been
-	       modified by get-magic), to avoid incorrectly setting the
-	       RXf_TAINTED flag with RX_TAINT_on further down. */
-	    TAINT_set(was_tainted);
 	}
 	tmp = reg_temp_copy(NULL, new_re);
 	ReREFCNT_dec(new_re);
@@ -149,13 +144,6 @@ PP(pp_regcomp)
 	ReREFCNT_dec(re);
 	PM_SETRE(pm, new_re);
     }
-
-#ifndef INCOMPLETE_TAINTS
-    if (TAINTING_get && TAINT_get) {
-	SvTAINTED_on((SV*)new_re);
-        RX_TAINT_on(new_re);
-    }
-#endif
 
 #if !defined(USE_ITHREADS)
     /* can't change the optree at runtime either */
@@ -205,9 +193,6 @@ PP(pp_substcont)
 
 	SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
 
-    	/* See "how taint works" above pp_subst() */
-	if (SvTAINTED(TOPs))
-	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
 	/* XXX: adjust for positive offsets of \G for instance s/(.)\G//g with positive pos() */
 	s -= RX_GOFS(rx);
@@ -227,8 +212,6 @@ PP(pp_substcont)
 		 else
 		      sv_catpvn_nomg(dstr, s, cx->sb_strend - s);
 	    }
-	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
-		cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
 	    if (pm->op_pmflags & PMf_NONDESTRUCT) {
 		PUSHs(dstr);
@@ -250,36 +233,12 @@ PP(pp_substcont)
 		    SvUTF8_on(targ);
 		SvPV_set(dstr, NULL);
 
-		PL_tainted = 0;
 		mPUSHi(saviters - 1);
 
 		(void)SvPOK_only_UTF8(targ);
 	    }
 
-	    /* update the taint state of various various variables in
-	     * preparation for final exit.
-	     * See "how taint works" above pp_subst() */
-	    if (TAINTING_get) {
-		if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
-		    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
-				    == (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
-		)
-		    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
-
-		if (!(cx->sb_rxtainted & SUBST_TAINT_BOOLRET)
-		    && (cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
-		)
-		    SvTAINTED_on(TOPs);  /* taint return value */
-		/* needed for mg_set below */
-		TAINT_set(
-                    cBOOL(cx->sb_rxtainted &
-			  (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL))
-                );
-		SvTAINT(TARG);
-	    }
-	    /* PL_tainted must be correctly set for this mg_set */
 	    SvSETMAGIC(TARG);
-	    TAINT_NOT;
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
@@ -320,25 +279,6 @@ PP(pp_substcont)
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
-    /* update the taint state of various various variables in preparation
-     * for calling the code block.
-     * See "how taint works" above pp_subst() */
-    if (TAINTING_get) {
-	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
-	    cx->sb_rxtainted |= SUBST_TAINT_PAT;
-
-	if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
-	    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
-			    == (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
-	)
-	    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
-
-	if (cx->sb_iters > 1 && (cx->sb_rxtainted & 
-			(SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL)))
-	    SvTAINTED_on((pm->op_pmflags & PMf_NONDESTRUCT)
-			 ? cx->sb_dstr : cx->sb_targ);
-	TAINT_NOT;
-    }
     rxres_save(&cx->sb_rxres, rx);
     PL_curpm = pm;
     RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
@@ -489,8 +429,6 @@ PP(pp_formline)
 
 
     SvPV_force(PL_formtarget, len);
-    if (SvTAINTED(tmpForm) || SvTAINTED(formsv))
-	SvTAINTED_on(PL_formtarget);
     if (DO_UTF8(PL_formtarget))
 	targ_is_utf8 = TRUE;
     linemax = (SvCUR(formsv) * (IN_BYTES ? 1 : 3) + 1);
@@ -559,8 +497,6 @@ PP(pp_formline)
 		sv = &PL_sv_no;
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Not enough format arguments");
 	    }
-	    if (SvTAINTED(sv))
-		SvTAINTED_on(PL_formtarget);
 	    break;
 
 	case FF_CHECKNL:
@@ -1953,7 +1889,6 @@ PP(pp_dbstate)
 {
     dVAR;
     PL_curcop = (COP*)PL_op;
-    TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
     FREETMPS;
 
@@ -2042,7 +1977,6 @@ S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 fla
 		*++newsp = *MARK;
 	    else {
 		*++newsp = sv_mortalcopy(*MARK);
-		TAINT_NOT;	/* Each item is independent */
 	    }
 	}
 	/* When this function was called with MARK == newsp, we reach this
@@ -2083,7 +2017,6 @@ PP(pp_leave)
 
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -2245,7 +2178,6 @@ PP(pp_leaveloop)
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0);
     PUTBACK;
 
@@ -2446,7 +2378,6 @@ PP(pp_return)
 	DIE(aTHX_ "panic: return, type=%u", (unsigned) CxTYPE(cx));
     }
 
-    TAINT_NOT;
     if (lval) S_return_lvalues(aTHX_ MARK, SP, newsp, gimme, cx, newpm);
     else {
       if (gimme == G_SCALAR) {
@@ -2484,7 +2415,6 @@ PP(pp_return)
 	    *++newsp = popsub2 && SvTEMP(*MARK) && SvREFCNT(*MARK) == 1
 			       && !SvGMAGICAL(*MARK)
 			? *MARK : sv_mortalcopy(*MARK);
-	    TAINT_NOT;		/* Each item is independent */
 	}
       }
       PL_stack_sp = newsp;
@@ -2523,8 +2453,6 @@ PP(pp_leavesublv)
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
-
-    TAINT_NOT;
 
     S_return_lvalues(aTHX_ newsp, SP, newsp, gimme, cx, newpm);
 
@@ -2620,7 +2548,6 @@ PP(pp_last)
 	DIE(aTHX_ "panic: last, type=%u", (unsigned) CxTYPE(cx));
     }
 
-    TAINT_NOT;
     PL_stack_sp = adjust_stack_on_leave(newsp, PL_stack_sp, MARK, gimme,
 				pop2 == CXt_SUB ? SVs_TEMP : 0);
 
@@ -3671,7 +3598,6 @@ PP(pp_require)
     name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
-    TAINT_PROPER("require");
 
 
 #ifdef VMS
@@ -3904,7 +3830,6 @@ PP(pp_require)
 		    }
 #  endif
 #endif
-		    TAINT_PROPER("require");
 		    tryname = SvPVX_const(namesv);
 		    tryrsfp = doopen_pm(namesv);
 		    if (tryrsfp) {
@@ -4098,9 +4023,6 @@ PP(pp_entereval)
 	lex_flags |= LEX_START_COPIED;
     }
 
-    TAINT_IF(SvTAINTED(sv));
-    TAINT_PROPER("eval");
-
     ENTER_with_name("eval");
     lex_start(sv, NULL, lex_flags | (PL_op->op_private & OPpEVAL_UNICODE
 			   ? LEX_IGNORE_UTF8_HINTS
@@ -4197,7 +4119,6 @@ PP(pp_leaveeval)
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave((gimme == G_VOID) ? SP : newsp, SP, newsp,
 				gimme, SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
@@ -4296,7 +4217,6 @@ PP(pp_leavetry)
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4342,7 +4262,6 @@ PP(pp_leavegiven)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
@@ -4920,7 +4839,6 @@ PP(pp_leavewhen)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;   /* pop $1 et al */
 

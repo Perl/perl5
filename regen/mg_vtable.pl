@@ -77,7 +77,7 @@ my %mg =
      sigelem => { char => 's', vtable => 'sigelem',
 		  desc => '%SIG hash element' },
      taint => { char => 't', vtable => 'taint', value_magic => 1,
-		desc => 'Taintedness' },
+               desc => 'Taintedness' },
      uvar => { char => 'U', vtable => 'uvar',
 	       desc => 'Available for use by extensions' },
      uvar_elem => { char => 'u', desc => 'Reserved for use by extensions',

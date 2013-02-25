@@ -723,9 +723,6 @@ sub eval {
         local $osingle = $single;
         local $od      = $^D;
 
-        # Untaint the incoming eval() argument.
-        { ($evalarg) = $evalarg =~ /(.*)/s; }
-
         # $usercontext built in DB::DB near the comment
         # "set up the context for DB::eval ..."
         # Evaluate and save any results.
@@ -1343,11 +1340,6 @@ if (not defined &get_fork_TTY)       # only if no routine exists
         *get_fork_TTY = \&macosx_get_fork_TTY;   # use the Mac OS X version
     }
 } ## end if (not defined &get_fork_TTY...
-
-# untaint $^O, which may have been tainted by the last statement.
-# see bug [perl #24674]
-$^O =~ m/^(.*)\z/;
-$^O = $1;
 
 # Here begin the unreadable code.  It needs fixing.
 
@@ -9728,9 +9720,6 @@ sub restart {
     for (@ini_INC) {
         push @flags, '-I', $_;
     }
-
-    # Turn on taint if it was on before.
-    push @flags, '-T' if ${^TAINT};
 
     # Arrange for setting the old INC:
     # Save the current @init_INC in the environment.

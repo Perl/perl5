@@ -43,8 +43,8 @@ for(qw< CHILD_ERROR_NATIVE ENCODING UTF8CACHE WARNING_BITS >) {
  ok !defined(${"foo::$name"}), "\$foo::^$_";
 }
 
-use tests 6; # read-only ${^LETTERS}
-for(qw< MATCH PREMATCH POSTMATCH TAINT UNICODE UTF8LOCALE >) {
+use tests 5; # read-only ${^LETTERS}
+for(qw< MATCH PREMATCH POSTMATCH UNICODE UTF8LOCALE >) {
  ok eval { ${"foo::" . s/./"qq|\\c$&|"/ere} = 'prile' }, "\$foo::^$_";
 }
 

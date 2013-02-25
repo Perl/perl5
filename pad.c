@@ -1675,14 +1675,12 @@ S_pad_reset(pTHX)
 	    )
     );
 
-    if (!TAINTING_get) {	/* Can't mix tainted and non-tainted temporaries. */
-        I32 po;
-	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
-	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po]))
-		SvPADTMP_off(PL_curpad[po]);
-	}
-	PL_padix = PL_padix_floor;
+    I32 po;
+    for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
+        if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po]))
+            SvPADTMP_off(PL_curpad[po]);
     }
+    PL_padix = PL_padix_floor;
 #endif
     PL_pad_reset_pending = FALSE;
 }

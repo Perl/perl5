@@ -131,12 +131,6 @@ do_aspawn (pTHX_ SV *really,SV **mark,SV **sp)
             *a++ = "";
     *a = NULL;
 
-    if (argv[0][0] != '/' && argv[0][0] != '\\'
-        && !(argv[0][0] && argv[0][1] == ':'
-        && (argv[0][2] == '/' || argv[0][2] != '\\'))
-     ) /* will swawnvp use PATH? */
-         TAINT_ENV();	/* testing IFS here is overkill, probably */
-
     if (really && *(tmps = SvPV(really, n_a)))
         rc=spawnvp (P_WAIT,tmps,argv);
     else
@@ -352,9 +346,6 @@ XS(dos_GetCwd)
         ST(0)=sv_newmortal ();
         if (getcwd (tmp,PATH_MAX+1)!=NULL)
             sv_setpv ((SV*)ST(0),tmp);
-#ifndef INCOMPLETE_TAINTS
-	SvTAINTED_on(ST(0));
-#endif
     }
     XSRETURN (1);
 }
@@ -377,9 +368,6 @@ XS(XS_Cwd_sys_cwd)
 	RETVAL = getcwd(p, MAXPATHLEN);
 	ST(0) = sv_newmortal();
 	sv_setpv((SV*)ST(0), RETVAL);
-#ifndef INCOMPLETE_TAINTS
-	SvTAINTED_on(ST(0));
-#endif
     }
     XSRETURN(1);
 }

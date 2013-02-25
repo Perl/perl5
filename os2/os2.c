@@ -1007,11 +1007,6 @@ do_spawn_ve(pTHX_ SV *really, U32 flag, U32 execf, char *inicmd, U32 addflag)
 	/* We should check PERL_SH* and PERLLIB_* as well? */
 	if (!really || pass >= 2)
 	    real_name = PL_Argv[0];
-	if (real_name[0] != '/' && real_name[0] != '\\'
-	    && !(real_name[0] && real_name[1] == ':' 
-		 && (real_name[2] == '/' || real_name[2] != '\\'))
-	    ) /* will spawnvp use PATH? */
-	    TAINT_ENV();	/* testing IFS here is overkill, probably */
 
       reread:
 	force_shell = 0;
@@ -1568,10 +1563,6 @@ my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args)
     /* `this' is what we use in the parent, `that' in the child. */
     this = (*mode == 'w');
     that = !this;
-    if (TAINTING_get) {
-	taint_env();
-	taint_proper("Insecure %s%s", "EXEC");
-    }
     if (pipe(p) < 0)
 	return NULL;
     /* Now we need to spawn the child. */
@@ -3461,9 +3452,6 @@ XS(XS_Cwd_sys_cwd)
 	RETVAL = _getcwd2(p, MAXPATHLEN);
 	ST(0) = sv_newmortal();
 	sv_setpv(ST(0), RETVAL);
-#ifndef INCOMPLETE_TAINTS
-	SvTAINTED_on(ST(0));
-#endif
     }
     XSRETURN(1);
 }
@@ -3595,10 +3583,6 @@ XS(XS_Cwd_sys_abspath)
 	    *t = 0;
 	    SvCUR_set(sv, t - SvPVX(sv));
 	}
-#ifndef INCOMPLETE_TAINTS
-	if (!items)
-	    SvTAINTED_on(ST(0));
-#endif
     }
     XSRETURN(1);
 }

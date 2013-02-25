@@ -35,7 +35,6 @@ struct magic {
     char*	mg_ptr;
 };
 
-#define MGf_TAINTEDDIR 1        /* PERL_MAGIC_envelem only */
 #define MGf_MINMATCH   1        /* PERL_MAGIC_regex_global only */
 #define MGf_REFCOUNTED 2
 #define MGf_GSKIP      4	/* skip further GETs until after next SET */
@@ -43,9 +42,10 @@ struct magic {
 #define MGf_DUP     0x10 	/* has an svt_dup   MGVTBL entry */
 #define MGf_LOCAL   0x20	/* has an svt_local MGVTBL entry */
 
-#define MgTAINTEDDIR(mg)	(mg->mg_flags & MGf_TAINTEDDIR)
-#define MgTAINTEDDIR_on(mg)	(mg->mg_flags |= MGf_TAINTEDDIR)
-#define MgTAINTEDDIR_off(mg)	(mg->mg_flags &= ~MGf_TAINTEDDIR)
+/* backcompat only */
+#define MgTAINTEDDIR(mg)	NOOP
+#define MgTAINTEDDIR_on(mg)	NOOP
+#define MgTAINTEDDIR_off(mg)	NOOP
 
 #define MgPV(mg,lp)		((((int)(lp = (mg)->mg_len)) == HEf_SVKEY) ?   \
 				 SvPV(MUTABLE_SV((mg)->mg_ptr),lp) :	\

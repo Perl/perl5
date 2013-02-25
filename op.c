@@ -2827,7 +2827,7 @@ Perl_op_scope(pTHX_ OP *o)
 {
     dVAR;
     if (o) {
-	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT || TAINTING_get) {
+	if (o->op_flags & OPf_PARENS || PERLDB_NOOPT) {
 	    o = op_prepend_elem(OP_LINESEQ, newOP(OP_ENTER, 0), o);
 	    o->op_type = OP_LEAVE;
 	    o->op_ppaddr = PL_ppaddr[OP_LEAVE];
@@ -4412,8 +4412,6 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     pmop->op_flags = (U8)flags;
     pmop->op_private = (U8)(0 | (flags >> 8));
 
-    if (PL_hints & HINT_RE_TAINT)
-	pmop->op_pmflags |= PMf_RETAINT;
     if (IN_LOCALE_COMPILETIME) {
 	set_regex_charset(&(pmop->op_pmflags), REGEX_LOCALE_CHARSET);
     }
@@ -4670,11 +4668,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
 	/* the OP_REGCMAYBE is a placeholder in the non-threaded case
 	 * to allow its op_next to be pointed past the regcomp and
-	 * preceding stacking ops;
-	 * OP_REGCRESET is there to reset taint before executing the
-	 * stacking ops */
-	if (pm->op_pmflags & PMf_KEEP || TAINTING_get)
-	    expr = newUNOP((TAINTING_get ? OP_REGCRESET : OP_REGCMAYBE),0,expr);
+	 * preceding stacking ops; */
+	if (pm->op_pmflags & PMf_KEEP)
+	    expr = newUNOP(OP_REGCMAYBE,0,expr);
 
 	if (pm->op_pmflags & PMf_HAS_CV) {
 	    /* we have a runtime qr with literal code. This means
@@ -9079,9 +9075,7 @@ Perl_ck_index(pTHX_ OP *o)
 	if (kid)
 	    kid = kid->op_sibling;			/* get past "big" */
 	if (kid && kid->op_type == OP_CONST) {
-	    const bool save_taint = TAINT_get; /* accepted unused var warning if NO_TAINT_SUPPORT */
 	    fbm_compile(((SVOP*)kid)->op_sv, 0);
-	    TAINT_set(save_taint);
 	}
     }
     return ck_fun(o);

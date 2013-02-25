@@ -876,7 +876,6 @@ struct block {
 struct subst {
     U8		sbu_type;	/* what kind of context this is */
     U8		sbu_rflags;
-    U16		sbu_rxtainted;	/* matches struct block */
     I32		sbu_iters;
     I32		sbu_maxiters;
     I32		sbu_oldsave;
@@ -893,7 +892,6 @@ struct subst {
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
 #define sb_rflags	cx_u.cx_subst.sbu_rflags
 #define sb_oldsave	cx_u.cx_subst.sbu_oldsave
-#define sb_rxtainted	cx_u.cx_subst.sbu_rxtainted
 #define sb_orig		cx_u.cx_subst.sbu_orig
 #define sb_dstr		cx_u.cx_subst.sbu_dstr
 #define sb_targ		cx_u.cx_subst.sbu_targ
@@ -909,7 +907,6 @@ struct subst {
 	cx->sb_maxiters		= maxiters,				\
 	cx->sb_rflags		= r_flags,				\
 	cx->sb_oldsave		= oldsave,				\
-	cx->sb_rxtainted	= rxtainted,				\
 	cx->sb_orig		= orig,					\
 	cx->sb_dstr		= dstr,					\
 	cx->sb_targ		= targ,					\

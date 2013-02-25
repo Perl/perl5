@@ -503,8 +503,6 @@ foreach ($oc, $on, $pp) {
 
 #	Also suspicious: 4-arg substr, sprintf, uc/lc (POK_only), reverse, pack.
 
-#	substr/vec: doing TAINT_off()???
-
 # pp_hot.c
 #	readline - unknown whether it is safe
 #	match subst not OK (dTARG)

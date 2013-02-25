@@ -414,10 +414,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 /* Copy and tainted info */
 #define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+16))
 
-/* during execution: pattern temporarily tainted by executing locale ops;
- * post-execution: $1 et al are tainted */
+/* Both just for backcompat */
 #define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+17))
-/* this pattern was tainted during compilation */
 #define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+18))
 
 /* Flags indicating special patterns */
@@ -434,28 +432,17 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
  *
  */
 
-#if NO_TAINT_SUPPORT
-#   define RX_ISTAINTED(prog)    0
-#   define RX_TAINT_on(prog)     NOOP
-#   define RXp_MATCH_TAINTED(prog) 0
-#   define RX_MATCH_TAINTED(prog)  0
-#   define RXp_MATCH_TAINTED_on(prog) NOOP
-#   define RX_MATCH_TAINTED_on(prog)  NOOP
-#   define RX_MATCH_TAINTED_off(prog) NOOP
-#else
-#   define RX_ISTAINTED(prog)    (RX_EXTFLAGS(prog) & RXf_TAINTED)
-#   define RX_TAINT_on(prog)     (RX_EXTFLAGS(prog) |= RXf_TAINTED)
-#   define RXp_MATCH_TAINTED(prog)    (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
-#   define RX_MATCH_TAINTED(prog)     (RX_EXTFLAGS(prog)  & RXf_TAINTED_SEEN)
-#   define RXp_MATCH_TAINTED_on(prog) (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
-#   define RX_MATCH_TAINTED_on(prog)  (RX_EXTFLAGS(prog)  |= RXf_TAINTED_SEEN)
-#   define RX_MATCH_TAINTED_off(prog) (RX_EXTFLAGS(prog)  &= ~RXf_TAINTED_SEEN)
-#endif
+/* Only here for backcompat - taint support was removed. */
+#define RX_ISTAINTED(prog)    0
+#define RX_TAINT_on(prog)     NOOP
+#define RXp_MATCH_TAINTED(prog) 0
+#define RX_MATCH_TAINTED(prog)  0
+#define RXp_MATCH_TAINTED_on(prog) NOOP
+#define RX_MATCH_TAINTED_on(prog)  NOOP
+#define RX_MATCH_TAINTED_off(prog) NOOP
+#define RX_MATCH_TAINTED_set(prog, t) NOOP
 
 #define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
-#define RX_MATCH_TAINTED_set(prog, t) ((t) \
-				       ? RX_MATCH_TAINTED_on(prog) \
-				       : RX_MATCH_TAINTED_off(prog))
 
 #define RXp_MATCH_COPIED(prog)		(RXp_EXTFLAGS(prog) & RXf_COPY_DONE)
 #define RX_MATCH_COPIED(prog)		(RX_EXTFLAGS(prog) & RXf_COPY_DONE)

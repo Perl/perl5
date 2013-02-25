@@ -12,7 +12,6 @@ our @EXPORT_OK   = ('regmust',
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
 
 my %bitmask = (
-    taint   => 0x00100000, # HINT_RE_TAINT
     eval    => 0x00200000, # HINT_RE_EVAL
 );
 
@@ -133,6 +132,8 @@ sub bits {
 	    setcolor() if $s =~/color/i;
 	    _load_unload($on);
 	    last;
+        } elsif ($s eq 'taint') {
+            # ignore
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
 	} elsif ($EXPORT_OK{$s}) {
@@ -230,6 +231,9 @@ re - Perl pragma to alter regular expression behaviour
 
 =head1 SYNOPSIS
 
+    # NOTE: taint support was removed from perl. The following is
+    #       temporarily treated as a no-op until it is also removed.
+    
     use re 'taint';
     ($x) = ($^X =~ /^(.*)$/s);     # $x is tainted here
 
@@ -275,17 +279,7 @@ re - Perl pragma to alter regular expression behaviour
     }                                    # it but no hassle with blessed
                                          # re's.
 
-(We use $^X in these examples because it's tainted by default.)
-
 =head1 DESCRIPTION
-
-=head2 'taint' mode
-
-When C<use re 'taint'> is in effect, and a tainted string is the target
-of a regexp, the regexp memories (or values returned by the m// operator
-in list context) are tainted.  This feature is useful when regexp operations
-on tainted data aren't meant to extract safe substrings, but to perform
-other transformations.
 
 =head2 'eval' mode
 
@@ -294,9 +288,7 @@ C<(?{ ... })> zero-width assertions and C<(??{ ... })> postponed
 subexpressions that are derived from variable interpolation, rather than
 appearing literally within the regexp.  That is normally disallowed, since
 it is a
-potential security risk.  Note that this pragma is ignored when the regular
-expression is obtained from tainted data, i.e.  evaluation is always
-disallowed with tainted regular expressions.  See L<perlre/(?{ code })> 
+potential security risk.  See L<perlre/(?{ code })> 
 and L<perlre/(??{ code })>.
 
 For the purpose of this pragma, interpolation of precompiled regular

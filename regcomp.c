@@ -5681,9 +5681,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_pm_flags = pm_flags;
 
     if (runtime_code) {
-	if (TAINTING_get && TAINT_get)
-	    Perl_croak(aTHX_ "Eval-group in insecure regular expression");
-
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
@@ -6669,14 +6666,8 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     assert(s >= rx->subbeg);
     assert(rx->sublen >= (s - rx->subbeg) + i );
     if (i >= 0) {
-#if NO_TAINT_SUPPORT
         sv_setpvn(sv, s, i);
-#else
-        const int oldtainted = TAINT_get;
-        TAINT_NOT;
-        sv_setpvn(sv, s, i);
-        TAINT_set(oldtainted);
-#endif
+
         if ( (rx->extflags & RXf_CANY_SEEN)
             ? (RXp_MATCH_UTF8(rx)
                         && (!i || is_utf8_string((U8*)s, i)))
@@ -6686,25 +6677,6 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         }
         else
             SvUTF8_off(sv);
-        if (TAINTING_get) {
-            if (RXp_MATCH_TAINTED(rx)) {
-                if (SvTYPE(sv) >= SVt_PVMG) {
-                    MAGIC* const mg = SvMAGIC(sv);
-                    MAGIC* mgt;
-                    TAINT;
-                    SvMAGIC_set(sv, mg->mg_moremagic);
-                    SvTAINT(sv);
-                    if ((mgt = SvMAGIC(sv))) {
-                        mg->mg_moremagic = mgt;
-                        SvMAGIC_set(sv, mg);
-                    }
-                } else {
-                    TAINT;
-                    SvTAINT(sv);
-                }
-            } else 
-                SvTAINTED_off(sv);
-        }
     } else {
       ret_undef:
         sv_setsv(sv,&PL_sv_undef);

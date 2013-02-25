@@ -2497,10 +2497,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
     PERL_FLUSHALL_FOR_CHILD;
     This = (*mode == 'w');
     that = !This;
-    if (TAINTING_get) {
-	taint_env();
-	taint_proper("Insecure %s%s", "EXEC");
-    }
     if (PerlProc_pipe(p) < 0)
 	return NULL;
     /* Try for another pipe pair for error return */
@@ -2643,10 +2639,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #endif
     This = (*mode == 'w');
     that = !This;
-    if (doexec && TAINTING_get) {
-	taint_env();
-	taint_proper("Insecure %s%s", "EXEC");
-    }
     if (PerlProc_pipe(p) < 0)
 	return NULL;
     if (doexec && PerlProc_pipe(pp) >= 0)
@@ -4114,9 +4106,6 @@ Perl_getcwd_sv(pTHX_ SV *sv)
 {
 #ifndef PERL_MICRO
     dVAR;
-#ifndef INCOMPLETE_TAINTS
-    SvTAINTED_on(sv);
-#endif
 
     PERL_ARGS_ASSERT_GETCWD_SV;
 
@@ -6366,7 +6355,6 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     dVAR;
     SV * const dbsv = GvSVn(PL_DBsub);
-    const bool save_taint = TAINT_get; /* Accepted unused var warning under NO_TAINT_SUPPORT */
 
     /* When we are called from pp_goto (svp is null),
      * we do not care about using dbsv to call CV;
@@ -6375,7 +6363,6 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 
     PERL_ARGS_ASSERT_GET_DB_SUB;
 
-    TAINT_set(FALSE);
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
 	GV *gv = CvGV(cv);
@@ -6416,7 +6403,6 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 	(void)SvIOK_on(dbsv);
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
-    TAINT_IF(save_taint);
 }
 
 int

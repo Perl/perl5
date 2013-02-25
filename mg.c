@@ -192,8 +192,7 @@ Perl_mg_get(pTHX_ SV *sv)
 
 	if (!(mg->mg_flags & MGf_GSKIP) && vtbl && vtbl->svt_get) {
 
-	    /* taint's mg get is so dumb it doesn't need flag saving */
-	    if (!saved && mg->mg_type != PERL_MAGIC_taint) {
+	    if (!saved) {
 		save_magic(mgs_ix, sv);
 		saved = TRUE;
 	    }
@@ -478,8 +477,8 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 =for apidoc mg_localize
 
 Copy some of the magic from an existing SV to new localized version of that
-SV. Container magic (eg %ENV, $1, tie) gets copied, value magic doesn't (eg
-taint, pos).
+SV. Container magic (eg %ENV, $1, tie) gets copied, value magic doesn't (eg.
+pos).
 
 If setmagic is false then no set magic will be called on the new (empty) SV.
 This typically means that assignment will soon follow (e.g. 'local $x = $y'),
@@ -743,8 +742,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\001':		/* ^A */
 	if (SvOK(PL_bodytarget)) sv_copypv(sv, PL_bodytarget);
 	else sv_setsv(sv, &PL_sv_undef);
-	if (SvTAINTED(PL_bodytarget))
-	    SvTAINTED_on(sv);
 	break;
     case '\003':		/* ^C, ^CHILD_ERROR_NATIVE */
 	if (nextchar == '\0') {
@@ -840,7 +837,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\017':		/* ^O & ^OPEN */
 	if (nextchar == '\0') {
 	    sv_setpv(sv, PL_osname);
-	    SvTAINTED_off(sv);
 	}
 	else if (strEQ(remaining, "PEN")) {
 	    Perl_emulate_cop_io(aTHX_ &PL_compiling, sv);
@@ -876,10 +872,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             sv_setiv(sv, (IV)PL_basetime);
 #endif
         }
-	else if (strEQ(remaining, "AINT"))
-            sv_setiv(sv, TAINTING_get
-		    ? (TAINT_WARN_get || PL_unsafe ? -1 : 1)
-		    : 0);
+       else if (strEQ(remaining, "AINT")) /* legacy support accessing $^TAINT */
+            sv_setiv(sv, 0);
         break;
     case '\025':		/* $^UNICODE, $^UTF8LOCALE, $^UTF8CACHE */
 	if (strEQ(remaining, "NICODE"))
@@ -1025,8 +1019,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    if (isGV(mg->mg_obj) || SvIV(mg->mg_obj) != pid) {
 		/* never set manually, or at least not since last fork */
 		sv_setiv(sv, pid);
-		/* never unsafe, even if reading in a tainted expression */
-		SvTAINTED_off(sv);
 	    }
 	    /* else a value has been assigned manually, so do nothing */
 	}
@@ -1129,68 +1121,6 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    s = SvOK(*valp) ? SvPV_const(*valp, len) : "";
     }
 #endif
-
-#if !defined(OS2) && !defined(AMIGAOS) && !defined(WIN32) && !defined(MSDOS)
-			    /* And you'll never guess what the dog had */
-			    /*   in its mouth... */
-    if (TAINTING_get) {
-	MgTAINTEDDIR_off(mg);
-#ifdef VMS
-	if (s && klen == 8 && strEQ(key, "DCL$PATH")) {
-	    char pathbuf[256], eltbuf[256], *cp, *elt;
-	    int i = 0, j = 0;
-
-	    my_strlcpy(eltbuf, s, sizeof(eltbuf));
-	    elt = eltbuf;
-	    do {          /* DCL$PATH may be a search list */
-		while (1) {   /* as may dev portion of any element */
-		    if ( ((cp = strchr(elt,'[')) || (cp = strchr(elt,'<'))) ) {
-			if ( *(cp+1) == '.' || *(cp+1) == '-' ||
-			     cando_by_name(S_IWUSR,0,elt) ) {
-			    MgTAINTEDDIR_on(mg);
-			    return 0;
-			}
-		    }
-		    if ((cp = strchr(elt, ':')) != NULL)
-			*cp = '\0';
-		    if (my_trnlnm(elt, eltbuf, j++))
-			elt = eltbuf;
-		    else
-			break;
-		}
-		j = 0;
-	    } while (my_trnlnm(s, pathbuf, i++) && (elt = pathbuf));
-	}
-#endif /* VMS */
-	if (s && klen == 4 && strEQ(key,"PATH")) {
-	    const char * const strend = s + len;
-
-	    while (s < strend) {
-		char tmpbuf[256];
-		Stat_t st;
-		I32 i;
-#ifdef VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
-		const char path_sep = '|';
-#else
-		const char path_sep = ':';
-#endif
-		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
-			     s, strend, path_sep, &i);
-		s++;
-		if (i >= (I32)sizeof tmpbuf   /* too long -- assume the worst */
-#ifdef VMS
-		      || !strchr(tmpbuf, ':') /* no colon thus no device name -- assume relative path */
-#else
-		      || *tmpbuf != '/'       /* no starting slash -- assume relative path */
-#endif
-		      || (PerlLIO_stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
-		    MgTAINTEDDIR_on(mg);
-		    return 0;
-		}
-	    }
-	}
-    }
-#endif /* neither OS2 nor AMIGAOS nor WIN32 nor MSDOS */
 
     return 0;
 }
@@ -1827,20 +1757,9 @@ Perl_magic_setpack(pTHX_ SV *sv, MAGIC *mg)
      * STORE() is not $val, but rather a PVLV (the sv in this call), whose
      * public flags indicate its value based on copying from $val. Doing
      * mg_set() on the PVLV temporarily does SvMAGICAL_off(), then calls us.
-     * So STORE()'s $_[2] arg is a temporarily disarmed PVLV. This goes
-     * wrong if $val happened to be tainted, as sv hasn't got magic
-     * enabled, even though taint magic is in the chain. In which case,
-     * fake up a temporary tainted value (this is easier than temporarily
-     * re-enabling magic on sv). */
+     * So STORE()'s $_[2] arg is a temporarily disarmed PVLV. */
 
-    if (TAINTING_get && (tmg = mg_find(sv, PERL_MAGIC_taint))
-	&& (tmg->mg_len & 1))
-    {
-	val = sv_mortalcopy(sv);
-	SvTAINTED_on(val);
-    }
-    else
-	val = sv;
+    val = sv;
 
     magic_methcall1(sv, mg, "STORE", G_DISCARD, 2, val);
     return 0;
@@ -2213,31 +2132,21 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+/* FIXME remove later */
 int
 Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR;
-
-    PERL_ARGS_ASSERT_MAGIC_GETTAINT;
     PERL_UNUSED_ARG(sv);
-
-    TAINT_IF((PL_localizing != 1) && (mg->mg_len & 1));
+    PERL_UNUSED_ARG(mg);
     return 0;
 }
 
+/* FIXME remove later */
 int
 Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
-    dVAR;
-
-    PERL_ARGS_ASSERT_MAGIC_SETTAINT;
     PERL_UNUSED_ARG(sv);
-
-    /* update taint status */
-    if (TAINT_get)
-	mg->mg_len |= 1;
-    else
-	mg->mg_len &= ~1;
+    PERL_UNUSED_ARG(mg);
     return 0;
 }
 
@@ -2494,12 +2403,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	/* mg_set() has temporarily made sv non-magical */
-	if (TAINTING_get) {
-	    if ((tmg = mg_find(sv,PERL_MAGIC_taint)) && tmg->mg_len & 1)
-		SvTAINTED_on(PL_bodytarget);
-	    else
-		SvTAINTED_off(PL_bodytarget);
-	}
 	break;
     case '\003':	/* ^C */
 	PL_minus_c = cBOOL(SvIV(sv));
@@ -2561,7 +2464,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    Safefree(PL_osname);
 	    PL_osname = NULL;
 	    if (SvOK(sv)) {
-		TAINT_PROPER("assigning to $^O");
 		PL_osname = savesvpv(sv);
 	    }
 	}

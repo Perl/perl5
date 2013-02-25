@@ -1,4 +1,4 @@
-#!./perl -Tw
+#!./perl -w
 
 # Uncomment this for testing, but don't leave it in for "production", as
 # we've not yet verified that use works.

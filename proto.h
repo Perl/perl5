@@ -6074,7 +6074,6 @@ STATIC void	S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 #define PERL_ARGS_ASSERT_INCPUSH_USE_SEP	\
 	assert(p)
 
-STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_main_stash(pTHX);
 STATIC void	S_init_perllib(pTHX);

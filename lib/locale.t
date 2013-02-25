@@ -1,4 +1,4 @@
-#!./perl -wT
+#!./perl -w
 
 # This tests plain 'use locale' and adorned 'use locale ":not_characters"'
 # Because these pragmas are compile time, and I (khw) am trying to test

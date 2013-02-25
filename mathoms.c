@@ -128,7 +128,8 @@ Perl_sv_unref(pTHX_ SV *sv)
 /*
 =for apidoc sv_taint
 
-Taint an SV. Use C<SvTAINTED_on> instead.
+Used to taint an SV.
+Now a no-op since taint support was removed.
 
 =cut
 */
@@ -136,9 +137,7 @@ Taint an SV. Use C<SvTAINTED_on> instead.
 void
 Perl_sv_taint(pTHX_ SV *sv)
 {
-    PERL_ARGS_ASSERT_SV_TAINT;
-
-    sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
+    PERL_UNUSED_VAR(sv);
 }
 
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();

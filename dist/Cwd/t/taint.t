@@ -1,4 +1,4 @@
-#!./perl -Tw
+#!./perl -w
 # Testing Cwd under taint mode.
 
 use strict;

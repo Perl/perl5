@@ -1,4 +1,4 @@
-#!./perl -Tw
+#!./perl -w
 # Testing File::Spec under taint mode.
 
 use strict;

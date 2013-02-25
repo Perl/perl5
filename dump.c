@@ -581,8 +581,6 @@ Perl_sv_peek(pTHX_ SV *sv)
   finish:
     while (unref--)
 	sv_catpv(t, ")");
-    if (TAINTING_get && SvTAINTED(sv))
-	sv_catpv(t, " [tainted]");
     return SvPV_nolen(t);
 }
 
@@ -636,7 +634,7 @@ const struct flag_to_name pmflags_flags_names[] = {
     {PMf_KEEP, ",KEEP"},
     {PMf_GLOBAL, ",GLOBAL"},
     {PMf_CONTINUE, ",CONTINUE"},
-    {PMf_RETAINT, ",RETAINT"},
+    {PMf_RETAINT, ",RETAINT"}, /* backcompat */
     {PMf_EVAL, ",EVAL"},
     {PMf_NONDESTRUCT, ",NONDESTRUCT"},
     {PMf_HAS_CV, ",HAS_CV"},
@@ -664,8 +662,6 @@ S_pm_description(pTHX_ const PMOP *pm)
 #endif
 
     if (regex) {
-        if (RX_ISTAINTED(regex))
-            sv_catpv(desc, ",TAINTED");
         if (RX_CHECK_SUBSTR(regex)) {
             if (!(RX_EXTFLAGS(regex) & RXf_NOSCAN))
                 sv_catpv(desc, ",SCANFIRST");
@@ -1242,9 +1238,6 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 
         if (mg->mg_flags) {
             Perl_dump_indent(aTHX_ level, file, "    MG_FLAGS = 0x%02X\n", mg->mg_flags);
-	    if (mg->mg_type == PERL_MAGIC_envelem &&
-		mg->mg_flags & MGf_TAINTEDDIR)
-	        Perl_dump_indent(aTHX_ level, file, "      TAINTEDDIR\n");
 	    if (mg->mg_type == PERL_MAGIC_regex_global &&
 		mg->mg_flags & MGf_MINMATCH)
 	        Perl_dump_indent(aTHX_ level, file, "      MINMATCH\n");
@@ -1459,8 +1452,8 @@ const struct flag_to_name regexp_flags_names[] = {
     {RXf_USE_INTUIT_ML,   "USE_INTUIT_ML,"},
     {RXf_INTUIT_TAIL,     "INTUIT_TAIL,"},
     {RXf_COPY_DONE,       "COPY_DONE,"},
-    {RXf_TAINTED_SEEN,    "TAINTED_SEEN,"},
-    {RXf_TAINTED,         "TAINTED,"},
+    {RXf_TAINTED_SEEN,    "TAINTED_SEEN,"}, /* backcompat */
+    {RXf_TAINTED,         "TAINTED,"}, /* backcompat */
     {RXf_START_ONLY,      "START_ONLY,"},
     {RXf_WHITE,           "WHITE,"},
     {RXf_NULL,            "NULL,"},
@@ -2192,7 +2185,6 @@ Perl_runops_debug(pTHX)
     } while ((PL_op = PL_op->op_ppaddr(aTHX)));
     DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
 
-    TAINT_NOT;
     return 0;
 }
 

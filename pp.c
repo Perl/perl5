@@ -3096,7 +3096,6 @@ PP(pp_substr)
 	tmps += byte_pos;
 
 	if (rvalue) {
-	    SvTAINTED_off(TARG);			/* decontaminate */
 	    SvUTF8_off(TARG);			/* decontaminate */
 	    sv_setpvn(TARG, tmps, byte_len);
 #ifdef USE_LOCALE_COLLATE
@@ -3153,7 +3152,6 @@ PP(pp_vec)
     }
     else {
 	dTARGET;
-	SvTAINTED_off(TARG);		/* decontaminate */
 	ret = TARG;
     }
 
@@ -3282,9 +3280,7 @@ PP(pp_index)
 PP(pp_sprintf)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    SvTAINTED_off(TARG);
     do_sprintf(TARG, SP-MARK, MARK+1);
-    TAINT_IF(SvTAINTED(TARG));
     SP = ORIGMARK;
     PUSHTARG;
     RETURN;
@@ -3464,7 +3460,7 @@ PP(pp_ucfirst)
     STRLEN tculen;  /* tculen is the byte length of the freshly titlecased (or
 		     * lowercased) character stored in tmpbuf.  May be either
 		     * UTF-8 or not, but in either case is the number of bytes */
-    bool tainted = FALSE;
+    bool tainted = FALSE; /* FIXME should go away later */
 
     SvGETMAGIC(source);
     if (SvOK(source)) {
@@ -3631,18 +3627,9 @@ PP(pp_ucfirst)
 	    Copy(tmpbuf, d, tculen, U8);
 	    SvCUR_set(dest, need - 1);
 	}
-
-	if (tainted) {
-	    TAINT;
-	    SvTAINTED_on(dest);
-	}
     }
     else {  /* Neither source nor dest are in or need to be UTF-8 */
 	if (slen) {
-	    if (IN_LOCALE_RUNTIME) {
-		TAINT;
-		SvTAINTED_on(dest);
-	    }
 	    if (inplace) {  /* in-place, only need to change the 1st char */
 		*d = *tmpbuf;
 	    }
@@ -3670,8 +3657,6 @@ PP(pp_ucfirst)
 	    SvCUR_set(dest, need - 1);
 	}
     }
-    if (dest != source && SvTAINTED(source))
-	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -3741,7 +3726,7 @@ PP(pp_uc)
     if (DO_UTF8(source)) {
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES+1];
-	bool tainted = FALSE;
+	bool tainted = FALSE; /* FIXME should go away later */
 
 	/* All occurrences of these are to be moved to follow any other marks.
 	 * This is context-dependent.  We may not be passed enough context to
@@ -3806,10 +3791,6 @@ PP(pp_uc)
 	*d = '\0';
 
 	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
-	if (tainted) {
-	    TAINT;
-	    SvTAINTED_on(dest);
-	}
     }
     else {	/* Not UTF-8 */
 	if (len) {
@@ -3819,8 +3800,6 @@ PP(pp_uc)
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
 	    if (IN_LOCALE_RUNTIME) {
-		TAINT;
-		SvTAINTED_on(dest);
 		for (; s < send; d++, s++)
 		    *d = toUPPER_LC(*s);
 	    }
@@ -3918,8 +3897,6 @@ PP(pp_uc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     } /* End of isn't utf8 */
-    if (dest != source && SvTAINTED(source))
-	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -3980,7 +3957,7 @@ PP(pp_lc)
     if (DO_UTF8(source)) {
 	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-	bool tainted = FALSE;
+	bool tainted = FALSE; /* FIXME should go away later */
 
 	while (s < send) {
 	    const STRLEN u = UTF8SKIP(s);
@@ -4017,10 +3994,6 @@ PP(pp_lc)
 	SvUTF8_on(dest);
 	*d = '\0';
 	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
-	if (tainted) {
-	    TAINT;
-	    SvTAINTED_on(dest);
-	}
     } else {	/* Not utf8 */
 	if (len) {
 	    const U8 *const send = s + len;
@@ -4029,8 +4002,6 @@ PP(pp_lc)
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
 	    if (IN_LOCALE_RUNTIME) {
-		TAINT;
-		SvTAINTED_on(dest);
 		for (; s < send; d++, s++)
 		    *d = toLOWER_LC(*s);
 	    }
@@ -4050,8 +4021,6 @@ PP(pp_lc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     }
-    if (dest != source && SvTAINTED(source))
-	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -4174,7 +4143,7 @@ PP(pp_fc)
 
     send = s + len;
     if (DO_UTF8(source)) { /* UTF-8 flagged string. */
-        bool tainted = FALSE;
+        bool tainted = FALSE; /* FIXME should go away later */
         while (s < send) {
             const STRLEN u = UTF8SKIP(s);
             STRLEN ulen;
@@ -4192,18 +4161,12 @@ PP(pp_fc)
             s += u;
         }
         SvUTF8_on(dest);
-	if (tainted) {
-	    TAINT;
-	    SvTAINTED_on(dest);
-	}
     } /* Unflagged string */
     else if (len) {
         /* For locale, bytes, and nothing, the behavior is supposed to be the
          * same as lc().
          */
         if ( IN_LOCALE_RUNTIME ) { /* Under locale */
-            TAINT;
-            SvTAINTED_on(dest);
             for (; s < send; d++, s++)
                 *d = toLOWER_LC(*s);
         }
@@ -4277,8 +4240,6 @@ PP(pp_fc)
     *d = '\0';
     SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 
-    if (SvTAINTED(source))
-	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -5345,9 +5306,6 @@ PP(pp_split)
 	DIE(aTHX_ "panic: pp_split, pm=%p, s=%p", pm, s);
     rx = PM_GETRE(pm);
 
-    TAINT_IF(get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET &&
-	     (RX_EXTFLAGS(rx) & RXf_WHITE || skipwhite));
-
     RX_MATCH_UTF8_set(rx, do_utf8);
 
 #ifdef USE_ITHREADS
@@ -5616,7 +5574,6 @@ PP(pp_split)
 	    SPAGAIN;
 	    if (rex_return == 0)
 		break;
-	    TAINT_IF(RX_MATCH_TAINTED(rx));
             /* we never pass the REXEC_COPY_STR flag, so it should
              * never get copied */
             assert(!RX_MATCH_COPIED(rx));

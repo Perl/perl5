@@ -526,20 +526,16 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    bool needs_store;
 	    hv_magic_check (hv, &needs_copy, &needs_store);
 	    if (needs_copy) {
-		const bool save_taint = TAINT_get; /* Unused var warning under NO_TAINT_SUPPORT */
 		if (keysv || is_utf8) {
 		    if (!keysv) {
 			keysv = newSVpvn_utf8(key, klen, TRUE);
 		    }
-		    if (TAINTING_get)
-			TAINT_set(SvTAINTED(keysv));
 		    keysv = sv_2mortal(newSVsv(keysv));
 		    mg_copy(MUTABLE_SV(hv), val, (char*)keysv, HEf_SVKEY);
 		} else {
 		    mg_copy(MUTABLE_SV(hv), val, key, klen);
 		}
 
-		TAINT_IF(save_taint);
 		if (!needs_store) {
 		    if (flags & HVhek_FREEKEY)
 			Safefree(key);
@@ -715,7 +711,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	const char * const env = PerlEnv_ENVgetenv_len(key,&len);
 	if (env) {
 	    sv = newSVpvn(env,len);
-	    SvTAINTED_on(sv);
 	    return hv_common(hv, keysv, key, klen, flags,
 			     HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY|return_svp,
 			     sv, hash);

@@ -65,8 +65,6 @@ XS(haiku_debug_printf)
 
     sv = newSV(0);
 
-    if (SvTAINTED(MARK[1]))
-	TAINT_PROPER("debug_printf");
     do_sprintf(sv, SP - MARK, MARK + 1);
 
     haiku_do_debug_printf(sv, &debug_printf);
@@ -88,8 +86,6 @@ XS(haiku_ktrace_printf)
 
     sv = newSV(0);
 
-    if (SvTAINTED(MARK[1]))
-	TAINT_PROPER("ktrace_printf");
     do_sprintf(sv, SP - MARK, MARK + 1);
 
     haiku_do_debug_printf(sv, &ktrace_printf);
@@ -111,8 +107,6 @@ XS(haiku_debugger)
 
     sv = newSV(0);
 
-    if (SvTAINTED(MARK[1]))
-	TAINT_PROPER("debugger");
     do_sprintf(sv, SP - MARK, MARK + 1);
 
     haiku_do_debug_printf(sv, &haiku_do_debugger);

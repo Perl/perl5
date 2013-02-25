@@ -43,7 +43,6 @@ Perl_runops_standard(pTHX)
         OP_ENTRY_PROBE(OP_NAME(op));
     }
 
-    TAINT_NOT;
     return 0;
 }
 

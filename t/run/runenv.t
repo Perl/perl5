@@ -12,7 +12,7 @@ BEGIN {
     skip_all_without_config('d_fork');
 }
 
-plan tests => 94;
+plan tests => 93;
 
 my $STDOUT = tempfile();
 my $STDERR = tempfile();
@@ -83,12 +83,7 @@ sub try {
 #  PERL5OPT    Command-line options (switches).  Switches in
 #                    this variable are taken as if they were on
 #                    every Perl command line.  Only the -[DIMUdmtw]
-#                    switches are allowed.  When running taint
-#                    checks (because the program was running setuid
-#                    or setgid, or the -T switch was used), this
-#                    variable is ignored.  If PERL5OPT begins with
-#                    -T, tainting will be enabled, and any
-#                    subsequent options ignored.
+#                    switches are allowed. 
 
 try({PERL5OPT => '-w'}, ['-e', 'print $::x'],
     "", 
@@ -156,11 +151,6 @@ try({PERL5OPT => '-I./ -MOooof'},
 try({PERL5OPT => '-w -w'},
     ['-e', 'print $ENV{PERL5OPT}'],
     '-w -w',
-    '');
-
-try({PERL5OPT => '-t'},
-    ['-e', 'print ${^TAINT}'],
-    '-1',
     '');
 
 try({PERL5OPT => '-W'},

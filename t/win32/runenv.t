@@ -14,10 +14,10 @@ BEGIN {
     require Win32;
     ($::os_id, $::os_major) = ( Win32::GetOSVersion() )[ 4, 1 ];
     if ($::os_id == 2 and $::os_major == 6) {    # Vista, Server 2008 (incl R2), 7
-	$::tests = 43;
+	$::tests = 42;
     }
     else {
-	$::tests = 40;
+	$::tests = 39;
     }
 
     require './test.pl';
@@ -80,12 +80,7 @@ sub try {
 #  PERL5OPT    Command-line options (switches).  Switches in
 #                    this variable are taken as if they were on
 #                    every Perl command line.  Only the -[DIMUdmtw]
-#                    switches are allowed.  When running taint
-#                    checks (because the program was running setuid
-#                    or setgid, or the -T switch was used), this
-#                    variable is ignored.  If PERL5OPT begins with
-#                    -T, tainting will be enabled, and any
-#                    subsequent options ignored.
+#                    switches are allowed.
 
 try({PERL5OPT => '-w'}, ['-e', '"print $::x"'],
     "", 
@@ -148,11 +143,6 @@ try({PERL5OPT => '-I. -MOooof'},
 try({PERL5OPT => '-w -w'},
     ['-e', '"print $ENV{PERL5OPT}"'],
     '-w -w',
-    '');
-
-try({PERL5OPT => '-t'},
-    ['-e', '"print ${^TAINT}"'],
-    '-1',
     '');
 
 try({PERL5OPT => '-W'},
