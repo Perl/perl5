@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 
 require Exporter;
 
@@ -617,7 +617,7 @@ sub _charblocks {
         if ($v_unicode_version lt v2.0.0) {
             my $subrange = [ 0, 0x10FFFF, 'No_Block' ];
             push @BLOCKS, $subrange;
-            push @{$BLOCKS{$3}}, $subrange;
+            push @{$BLOCKS{'No_Block'}}, $subrange;
         }
         elsif (openunicode(\$BLOCKSFH, "Blocks.txt")) {
 	    local $_;
