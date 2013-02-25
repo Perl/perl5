@@ -1226,8 +1226,8 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
                               ? (utf8_target ? trie_utf8 : trie_plain) \
                               : (utf8_target ? trie_utf8_fold : trie_latin_utf8_fold))
 
-#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len,          \
-uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                               \
+#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
+STMT_START {                               \
     STRLEN skiplen;                                                                 \
     switch (trie_type) {                                                            \
     case trie_utf8_fold:                                                            \
