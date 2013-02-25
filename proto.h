@@ -4543,7 +4543,7 @@ PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s)
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)
 
-PERL_CALLCONV OP *	Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv, const MAGIC *const mg, const U32 flags, U32 argc, ...)
+PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, const MAGIC *const mg, const U32 flags, U32 argc, ...)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)

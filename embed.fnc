@@ -1960,7 +1960,7 @@ sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
 s	|SV *	|space_join_names_mortal|NN char *const *array
 #endif
-p	|OP *	|tied_method|NN const char *const methname|NN SV **sp \
+p	|OP *	|tied_method|NN SV *methname|NN SV **sp \
 				|NN SV *const sv|NN const MAGIC *const mg \
 				|const U32 flags|U32 argc|...
 

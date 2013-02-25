@@ -783,7 +783,7 @@ PP(pp_print)
 	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
 	    ++SP;
 	}
-	return Perl_tied_method(aTHX_ "PRINT", mark - 1, MUTABLE_SV(io),
+	return Perl_tied_method(aTHX_ SV_CONST(PRINT), mark - 1, MUTABLE_SV(io),
 				mg,
 				(G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK
 				 | (PL_op->op_type == OP_SAY
@@ -1658,7 +1658,7 @@ Perl_do_readline(pTHX)
     if (io) {
 	const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    Perl_tied_method(aTHX_ "READLINE", SP, MUTABLE_SV(io), mg, gimme, 0);
+	    Perl_tied_method(aTHX_ SV_CONST(READLINE), SP, MUTABLE_SV(io), mg, gimme, 0);
 	    if (gimme == G_SCALAR) {
 		SPAGAIN;
 		SvSetSV_nosteal(TARG, TOPs);

@@ -528,7 +528,7 @@ PP(pp_die)
 /* I/O. */
 
 OP *
-Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
+Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
 		 const MAGIC *const mg, const U32 flags, U32 argc, ...)
 {
     SV **orig_sp = sp;
@@ -572,7 +572,7 @@ Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
 	SAVEGENERICSV(PL_ors_sv);
 	PL_ors_sv = newSVpvs("\n");
     }
-    ret_args = call_method(methname, flags & G_WANT);
+    ret_args = call_sv(methname, (flags & G_WANT)|G_METHOD_NAMED);
     SPAGAIN;
     orig_sp = sp;
     POPSTACK;
@@ -623,7 +623,7 @@ PP(pp_open)
 	if (mg) {
 	    /* Method's args are same as ours ... */
 	    /* ... except handle is replaced by the object */
-	    return Perl_tied_method(aTHX_ "OPEN", mark - 1, MUTABLE_SV(io), mg,
+	    return Perl_tied_method(aTHX_ SV_CONST(OPEN), mark - 1, MUTABLE_SV(io), mg,
 				    G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
 				    sp - mark);
 	}
@@ -662,7 +662,7 @@ PP(pp_close)
 	if (io) {
 	    const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	    if (mg) {
-		return tied_method0("CLOSE", SP, MUTABLE_SV(io), mg);
+		return tied_method0(SV_CONST(CLOSE), SP, MUTABLE_SV(io), mg);
 	    }
 	}
     }
@@ -745,7 +745,7 @@ PP(pp_fileno)
     if (io
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
     {
-	return tied_method0("FILENO", SP, MUTABLE_SV(io), mg);
+	return tied_method0(SV_CONST(FILENO), SP, MUTABLE_SV(io), mg);
     }
 
     if (!io || !(fp = IoIFP(io))) {
@@ -816,7 +816,7 @@ PP(pp_binmode)
 	       function, which I don't think that the optimiser will be able to
 	       figure out. Although, as it's a static function, in theory it
 	       could.  */
-	    return Perl_tied_method(aTHX_ "BINMODE", SP, MUTABLE_SV(io), mg,
+	    return Perl_tied_method(aTHX_ SV_CONST(BINMODE), SP, MUTABLE_SV(io), mg,
 				    G_SCALAR|TIED_METHOD_MORTALIZE_NOT_NEEDED,
 				    discp ? 1 : 0, discp);
 	}
@@ -1298,7 +1298,7 @@ PP(pp_getc)
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    const U32 gimme = GIMME_V;
-	    Perl_tied_method(aTHX_ "GETC", SP, MUTABLE_SV(io), mg, gimme, 0);
+	    Perl_tied_method(aTHX_ SV_CONST(GETC), SP, MUTABLE_SV(io), mg, gimme, 0);
 	    if (gimme == G_SCALAR) {
 		SPAGAIN;
 		SvSetMagicSV_nosteal(TARG, TOPs);
@@ -1535,7 +1535,7 @@ PP(pp_prtf)
 		Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
 		++SP;
 	    }
-	    return Perl_tied_method(aTHX_ "PRINTF", mark - 1, MUTABLE_SV(io),
+	    return Perl_tied_method(aTHX_ SV_CONST(PRINTF), mark - 1, MUTABLE_SV(io),
 				    mg,
 				    G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
 				    sp - mark);
@@ -1624,7 +1624,7 @@ PP(pp_sysread)
     {
 	const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    return Perl_tied_method(aTHX_ "READ", mark - 1, MUTABLE_SV(io), mg,
+	    return Perl_tied_method(aTHX_ SV_CONST(READ), mark - 1, MUTABLE_SV(io), mg,
 				    G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
 				    sp - mark);
 	}
@@ -1862,7 +1862,7 @@ PP(pp_syswrite)
 		PUTBACK;
 	    }
 
-	    return Perl_tied_method(aTHX_ "WRITE", mark - 1, MUTABLE_SV(io), mg,
+	    return Perl_tied_method(aTHX_ SV_CONST(WRITE), mark - 1, MUTABLE_SV(io), mg,
 				    G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
 				    sp - mark);
 	}
@@ -2075,7 +2075,7 @@ PP(pp_eof)
 	RETPUSHNO;
 
     if ((io = GvIO(gv)) && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) {
-	return tied_method1("EOF", SP, MUTABLE_SV(io), mg, newSVuv(which));
+	return tied_method1(SV_CONST(EOF), SP, MUTABLE_SV(io), mg, newSVuv(which));
     }
 
     if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
@@ -2115,7 +2115,7 @@ PP(pp_tell)
     if (io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
-	    return tied_method0("TELL", SP, MUTABLE_SV(io), mg);
+	    return tied_method0(SV_CONST(TELL), SP, MUTABLE_SV(io), mg);
 	}
     }
     else if (!gv) {
@@ -2155,7 +2155,7 @@ PP(pp_sysseek)
 	    SV *const offset_sv = newSViv(offset);
 #endif
 
-	    return tied_method2("SEEK", SP, MUTABLE_SV(io), mg, offset_sv,
+	    return tied_method2(SV_CONST(SEEK), SP, MUTABLE_SV(io), mg, offset_sv,
 				newSViv(whence));
 	}
     }

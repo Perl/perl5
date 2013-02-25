@@ -4902,7 +4902,7 @@ PP(pp_splice)
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-	return Perl_tied_method(aTHX_ "SPLICE", mark - 1, MUTABLE_SV(ary), mg,
+	return Perl_tied_method(aTHX_ SV_CONST(SPLICE), mark - 1, MUTABLE_SV(ary), mg,
 				    GIMME_V | TIED_METHOD_ARGUMENTS_ON_STACK,
 				    sp - mark);
     }
@@ -5100,7 +5100,7 @@ PP(pp_push)
 	PUSHMARK(MARK);
 	PUTBACK;
 	ENTER_with_name("call_PUSH");
-	call_method("PUSH",G_SCALAR|G_DISCARD|G_METHOD_NAMED);
+	call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
 	LEAVE_with_name("call_PUSH");
 	SPAGAIN;
     }
