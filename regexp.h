@@ -776,6 +776,10 @@ struct re_save_state {
     bool re_state_eval_setup_done;	/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
     bool re_reparsing;			/* runtime (?{}) fed back into parser */
+    /* Space for U8 */
+    I32 re_state_reg_oldpos;		/* from regexec.c */
+    I32 re_state_reg_maxiter;		/* max wait until caching pos */
+    I32 re_state_reg_leftiter;		/* wait until caching pos */
     char *re_state_bostr;
     char *re_state_regeol;		/* End of input, for $ check. */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
@@ -786,9 +790,6 @@ struct re_save_state {
     STRLEN re_state_reg_oldsavedoffset;	/* old offset of saved substr during match */
     STRLEN re_state_reg_oldsavedcoffset;/* old coffset of saved substr during match */
     STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
-    I32 re_state_reg_oldpos;		/* from regexec.c */
-    I32 re_state_reg_maxiter;		/* max wait until caching pos */
-    I32 re_state_reg_leftiter;		/* wait until caching pos */
     char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     char *re_state_reg_starttry;	/* from regexec.c */
 #ifdef PERL_ANY_COW
