@@ -5701,7 +5701,7 @@ STATIC void	S_hfreeentries(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HFREEENTRIES	\
 	assert(hv)
 
-STATIC void	S_hsplit(pTHX_ HV *hv)
+STATIC void	S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HSPLIT	\
 	assert(hv)
