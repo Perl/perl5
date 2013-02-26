@@ -6,7 +6,7 @@ Changes - public release history for Data::Dumper
 
 =over 8
 
-=item 2.142 (Feb 26 2013)
+=item 2.143 (Feb 26 2013)
 
 Address vstring related test failures on 5.8: Skip tests for
 obscure case.
