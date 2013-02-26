@@ -125,7 +125,6 @@ END_EXTERN_C
 
 /* As there are no translations, avoid the function wrapper */
 #define utf8n_to_uvchr utf8n_to_uvuni
-#define valid_utf8_to_uvchr valid_utf8_to_uvuni
 #define uvchr_to_utf8  uvuni_to_utf8
 
 /*
