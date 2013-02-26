@@ -521,7 +521,7 @@ output doesn't wind up on the user's terminal.
         open(STDOUT, "> /dev/null")     || die "can't write to /dev/null: $!";
         defined(my $pid = fork())       || die "can't fork: $!";
         exit if $pid;                   # non-zero now means I am the parent
-        (setsid() != -1)                || die "Can't start a new session: $!" 
+        (setsid() != -1)                || die "Can't start a new session: $!";
         open(STDERR, ">&STDOUT")        || die "can't dup stdout: $!";
     }
 
