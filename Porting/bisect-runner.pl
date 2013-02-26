@@ -1659,6 +1659,33 @@ index 53649d5..0635a6e 100755
 EOPATCH
     }
 
+    if ($major == 4 && extract_from_file('Configure', qr/^d_gethbynam=/)) {
+        # Fixes a bug introduced in 4599a1dedd47b916
+        apply_commit('3cbc818d1d0ac470');
+    }
+
+    if ($major == 4 && extract_from_file('Configure',
+                                         qr/gethbadd_addr_type=`echo \$gethbadd_addr_type/)) {
+        # Fixes a bug introduced in 3fd537d4b944bc7a
+        apply_commit('6ff9219da6cf8cfd');
+    }
+
+    if ($major == 4 && extract_from_file('Configure',
+                                         qr/^pthreads_created_joinable=/)) {
+        # Fix for bug introduced in 52e1cb5ebf5e5a8c
+        # Part of commit ce637636a41b2fef
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      $code =~ s{^pthreads_created_joinable=''}
+                                {d_pthreads_created_joinable=''}ms
+                                    or die_255("Substitution failed");
+                      $code =~ s{^pthreads_created_joinable='\$pthreads_created_joinable'}
+                                {d_pthreads_created_joinable='\$d_pthreads_created_joinable'}ms
+                           or die_255("Substitution failed");
+                      return $code;
+                  });
+    }
+
     if ($major < 5 && extract_from_file('Configure',
                                         qr!if \$cc \$ccflags try\.c -o try >/dev/null 2>&1; then!)) {
         # Analogous to the more general fix of dfe9444ca7881e71
