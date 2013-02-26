@@ -3769,7 +3769,9 @@ S_scan_const(pTHX_ char *start)
 	     * routine that does the conversion checks for errors like
 	     * malformed utf8 */
 
-	    const UV nextuv   = (this_utf8) ? utf8n_to_uvchr((U8*)s, send - s, &len, 0) : (UV) ((U8) *s);
+	    const UV nextuv   = (this_utf8)
+                                ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
+                                : (UV) ((U8) *s);
 	    const STRLEN need = UNISKIP(NATIVE_TO_UNI(nextuv));
 	    if (!has_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
