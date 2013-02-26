@@ -623,7 +623,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
     /* An invariant is trivially well-formed */
     if (UTF8_IS_INVARIANT(uv)) {
-	return (UV) (NATIVE_UTF8_TO_I8(*s));
+	return uv;
     }
 
     /* A continuation character can't start a valid sequence */
