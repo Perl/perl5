@@ -184,7 +184,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
     }
 #if defined(EBCDIC)
     else {
-	STRLEN len  = UNISKIP(uv);
+	STRLEN len  = OFFUNISKIP(uv);
 	U8 *p = d+len-1;
 	while (p > d) {
 	    *p-- = (U8) I8_TO_NATIVE_UTF8((uv & UTF_CONTINUATION_MASK) | UTF_CONTINUATION_MARK);
@@ -772,7 +772,7 @@ Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 fla
 #endif
 
     if (do_overlong_test
-	&& expectlen > (STRLEN)UNISKIP(uv)
+	&& expectlen > (STRLEN) OFFUNISKIP(uv)
 	&& ! (flags & UTF8_ALLOW_LONG))
     {
 	/* The overlong malformation has lower precedence than the others.
@@ -780,7 +780,7 @@ Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 fla
 	 * value, instead of the replacement character.  This is because this
 	 * value is actually well-defined. */
 	if (! (flags & UTF8_CHECK_ONLY)) {
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (%d byte%s, need %d, after start byte 0x%02x)", malformed_text, (int)expectlen, expectlen == 1 ? "": "s", UNISKIP(uv), *s0));
+	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (%d byte%s, need %d, after start byte 0x%02x)", malformed_text, (int)expectlen, expectlen == 1 ? "": "s", OFFUNISKIP(uv), *s0));
 	}
 	goto malformed;
     }

@@ -701,7 +701,8 @@ END_EXTERN_C
 
  */
 
-#define UNISKIP(uv) ( (uv) < 0xA0           ? 1 : \
+/* Input is a true Unicode (not-native) code point */
+#define OFFUNISKIP(uv) ( (uv) < 0xA0        ? 1 : \
 		      (uv) < 0x400          ? 2 : \
 		      (uv) < 0x4000         ? 3 : \
 		      (uv) < 0x40000        ? 4 : \

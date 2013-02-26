@@ -231,7 +231,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
            - UTF_ACCUMULATION_SHIFT))
 
 #ifdef HAS_QUAD
-#define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
+/* Input is a true Unicode (not-native) code point */
+#define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
 		      (uv) < 0x800          ? 2 : \
 		      (uv) < 0x10000        ? 3 : \
 		      (uv) < 0x200000       ? 4 : \
@@ -240,7 +241,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
                       (uv) < UTF8_QUAD_MAX ? 7 : 13 )
 #else
 /* No, I'm not even going to *TRY* putting #ifdef inside a #define */
-#define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
+#define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
 		      (uv) < 0x800          ? 2 : \
 		      (uv) < 0x10000        ? 3 : \
 		      (uv) < 0x200000       ? 4 : \
@@ -296,6 +297,15 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e) (UTF8_IS_DOWNGRADEABLE_START(*s) \
                                                && ( (e) - (s) > 1)             \
                                                && UTF8_IS_CONTINUATION(*((s)+1)))
+
+/* Number of bytes a code point occupies in UTF-8. */
+#define NATIVE_SKIP(uv) OFFUNISKIP(NATIVE_TO_UNI(uv))
+
+/* Most code which says UNISKIP is really thinking in terms of native code
+ * points (0-255) plus all those beyond.  This is an imprecise term, but having
+ * it means existing code continues to work.  For precision, use NATIVE_SKIP
+ * and OFFUNISKIP */
+#define UNISKIP(uv)   NATIVE_SKIP(uv)
 
 /* Convert a two (not one) byte utf8 character to a native code point value.
  * Needs just one iteration of accumulate.  Should not be used unless it is
