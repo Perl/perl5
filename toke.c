@@ -8587,8 +8587,8 @@ Perl_yylex(pTHX)
                     PERL_UNUSED_VAR(tboffset);
 #else
 		    if (have_name)
-			(void) force_word(PL_oldbufptr + tboffset, WORD,
-					  FALSE, TRUE, TRUE);
+			(void) force_word(tmpbuf, WORD,
+					  FALSE, TRUE, FALSE);
 #endif
 		    PREBLOCK(FORMAT);
 		}
