@@ -1026,7 +1026,8 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
-/* Like L</utf8_to_uvuni_buf>(), but should only be called when it is known that
+/* DEPRECATED!
+ * Like L</utf8_to_uvuni_buf>(), but should only be called when it is known that
  * there are no malformations in the input UTF-8 string C<s>.  Surrogates,
  * non-character code points, and non-Unicode code points are allowed */
 
@@ -1068,7 +1069,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
-    return valid_utf8_to_uvuni(s, retlen);
+    return NATIVE_TO_UNI(valid_utf8_to_uvchr(s, retlen));
 }
 
 /*
