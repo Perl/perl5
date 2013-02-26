@@ -503,6 +503,10 @@ EXTCONST unsigned char PL_fold[] = { /* fast EBCDIC case folding table, 'A' =>
 };
 #endif          /* 037 */
 
+/* Since the EBCDIC code pages are isomorphic to Latin1, that table is merely a
+ * duplicate */
+EXTCONST unsigned char * PL_fold_latin1 = PL_fold;
+
 #else
 EXTCONST unsigned char PL_utf8skip[];
 EXTCONST unsigned char PL_e2utf[];
@@ -510,11 +514,8 @@ EXTCONST unsigned char PL_utf2e[];
 EXTCONST unsigned char PL_e2a[];
 EXTCONST unsigned char PL_a2e[];
 EXTCONST unsigned char PL_fold[];
+EXTCONST unsigned char * PL_fold_latin1;
 #endif
-
-/* Since the EBCDIC code pages are isomorphic to Latin1, that table is merely a
- * duplicate */
-EXTCONST unsigned char * PL_fold_latin1 = PL_fold;
 
 END_EXTERN_C
 

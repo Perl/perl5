@@ -4510,8 +4510,10 @@ EXTCONST  unsigned char PL_mod_latin1_uc[] = {
 	248-32,	249-32,	250-32,	251-32,	252-32,	253-32,	254-32,	255
 };
 #else	/* ! DOINIT */
+#ifndef EBCDIC
 EXTCONST unsigned char PL_fold[];
 EXTCONST unsigned char PL_fold_latin1[];
+#endif
 EXTCONST unsigned char PL_mod_latin1_uc[];
 EXTCONST unsigned char PL_latin1_lc[];
 #endif
