@@ -83,16 +83,17 @@ sub plugins {
     if (defined $self->{'instantiate'}) {
         my $method = $self->{'instantiate'};
         my @objs   = ();
-        foreach my $package (keys %plugins) {
-			next unless $package->can($method);
+        foreach my $package (sort keys %plugins) {
+            next unless $package->can($method);
             my $obj = eval { $package->$method(@_) };
-	        $self->{'on_instantiate_error'}->($package, $@) if $@;
+            $self->{'on_instantiate_error'}->($package, $@) if $@;
             push @objs, $obj if $obj;           
         }
         return @objs;
     } else { 
         # no? just return the names
-        return keys %plugins;
+        my @objs= sort keys %plugins;
+        return @objs;
     }
 }
 
