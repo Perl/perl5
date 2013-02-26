@@ -2192,7 +2192,7 @@ s	|void	|force_next	|I32 type
 s	|char*	|force_version	|NN char *s|int guessing
 s	|char*	|force_strict_version	|NN char *s
 s	|char*	|force_word	|NN char *start|int token|int check_keyword \
-				|int allow_pack|int allow_tick
+				|int allow_pack
 s	|SV*	|tokeq		|NN SV *sv
 s	|void	|readpipe_override|
 sR	|char*	|scan_const	|NN char *start
