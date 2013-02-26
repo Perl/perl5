@@ -166,9 +166,10 @@ for file in `$cat .clist`; do
 	-e p \
 	-e '}' ) >UU/$file.c
 
-    if [ "$osname" = os390 -a "$file" = perly.c ]; then
-        $echo '#endif' >>UU/$file.c
-    fi
+    # We're not sure why this was there; the #endif is extraneous on modern z/OS
+    #if [ "$osname" = os390 -a "$file" = perly.c ]; then
+    #   $echo '#endif' >>UU/$file.c
+    #fi
 
     if [ "$osname" = os390 ]; then
         $cppstdin $finc -I. $cppflags $cppminus <UU/$file.c |
