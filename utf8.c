@@ -293,7 +293,7 @@ S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 
     PERL_ARGS_ASSERT_IS_UTF8_CHAR_SLOW;
 
-    utf8n_to_uvuni(s, len, &actual_len, UTF8_CHECK_ONLY);
+    utf8n_to_uvchr(s, len, &actual_len, UTF8_CHECK_ONLY);
 
     return (actual_len == (STRLEN) -1) ? 0 : actual_len;
 }
