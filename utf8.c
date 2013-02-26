@@ -996,12 +996,13 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 /*
 =for apidoc utf8_to_uvuni_buf
 
-Returns the Unicode code point of the first character in the string C<s> which
+Only in very rare circumstances should code need to be dealing in the Unicode
+code point.  Use L</utf8_to_uvchr_buf> instead.
+
+Returns the Unicode (not-native) code point of the first character in the
+string C<s> which
 is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
 C<retlen> will be set to the length, in bytes, of that character.
-
-This function should only be used when the returned UV is considered
-an index into the Unicode semantic tables (e.g. swashes).
 
 If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
 enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
@@ -1046,12 +1047,11 @@ Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-This function should only be used when the returned UV is considered
-an index into the Unicode semantic tables (e.g. swashes).
-
 Some, but not all, UTF-8 malformations are detected, and in fact, some
 malformed input could cause reading beyond the end of the input buffer, which
-is why this function is deprecated.  Use L</utf8_to_uvuni_buf> instead.
+is one reason why this function is deprecated.  The other is that only in
+extremely limited circumstances should the Unicode versus native code point be
+of any interest to you.  Use L</utf8_to_uvchr_buf> instead.
 
 If C<s> points to one of the detected malformations, and UTF8 warnings are
 enabled, zero is returned and C<*retlen> is set (if C<retlen> doesn't point to
