@@ -44,7 +44,6 @@
 #define to_utf8_title(a,b,c) _to_utf8_title_flags(a,b,c,0, NULL)
 
 /* Source backward compatibility. */
-#define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
 #define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
 
 #define foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
@@ -125,7 +124,7 @@ END_EXTERN_C
 
 /* As there are no translations, avoid the function wrapper */
 #define utf8n_to_uvchr utf8n_to_uvuni
-#define uvchr_to_utf8  uvuni_to_utf8
+#define uvchr_to_utf8(a,b) uvuni_to_utf8_flags(a,b,0)
 
 /*
 

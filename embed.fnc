@@ -1562,7 +1562,7 @@ Apd	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
 Apdbm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
 #endif
 
-Apbm	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
+Ap	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
 Ap	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags

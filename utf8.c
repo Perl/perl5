@@ -89,7 +89,9 @@ Perl_is_ascii_string(const U8 *s, STRLEN len)
 /*
 =for apidoc uvuni_to_utf8_flags
 
-Adds the UTF-8 representation of the Unicode code point C<uv> to the end
+THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+
+It adds the UTF-8 representation of the Unicode code point C<uv> to the end
 of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
@@ -98,13 +100,9 @@ end of the new character. In other words,
 
 or, in most cases,
 
-    d = uvuni_to_utf8(d, uv);
-
-(which is equivalent to)
-
     d = uvuni_to_utf8_flags(d, uv, 0);
 
-This is the recommended Unicode-aware way of saying
+This is the Unicode-aware way of saying
 
     *(d++) = uv;
 
