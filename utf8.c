@@ -642,12 +642,12 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	goto malformed;
     }
 
+    /* Here is not a continuation byte, nor an invariant.  The only thing left
+     * is a start byte (possibly for an overlong) */
+
 #ifdef EBCDIC
     uv = NATIVE_UTF8_TO_I8(uv);
 #endif
-
-    /* Here is not a continuation byte, nor an invariant.  The only thing left
-     * is a start byte (possibly for an overlong) */
 
     /* Remove the leading bits that indicate the number of bytes in the
      * character's whole UTF-8 sequence, leaving just the bits that are part of
