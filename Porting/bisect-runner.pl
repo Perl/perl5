@@ -967,7 +967,7 @@ sub apply_patch {
     my ($patch, $what, $files) = @_;
     $what = 'patch' unless defined $what;
     unless (defined $files) {
-        $patch =~ m!^--- a/(\S+)\n\+\+\+ b/\1!sm;
+        $patch =~ m!^--- [ab]/(\S+)\n\+\+\+ [ba]/\1!sm;
         $files = " $1";
     }
     my $patch_to_use = placate_patch_prog($patch);
