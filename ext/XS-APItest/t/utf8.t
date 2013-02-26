@@ -24,7 +24,7 @@ foreach ([0, '', '', 'empty'],
     is(bytes_cmp_utf8($right, $left), -$expect, "$desc reversed");
 }
 
-# Test uft8n_to_uvuni().  These provide essentially complete code coverage.
+# Test uft8n_to_uvchr().  These provide essentially complete code coverage.
 
 # Copied from utf8.h
 my $UTF8_ALLOW_EMPTY            = 0x0001;
@@ -89,7 +89,7 @@ foreach my $test (
 
     # Test what happens when this malformation is not allowed
     undef @warnings;
-    my $ret_ref = test_utf8n_to_uvuni($bytes, $length, 0);
+    my $ret_ref = test_utf8n_to_uvchr($bytes, $length, 0);
     is($ret_ref->[0], 0, "$testname: disallowed: Returns 0");
     is($ret_ref->[1], $expected_len, "$testname: disallowed: Returns expected length");
     if (is(scalar @warnings, 1, "$testname: disallowed: Got a single warning ")) {
@@ -104,7 +104,7 @@ foreach my $test (
     {   # Next test when disallowed, and warnings are off.
         undef @warnings;
         no warnings 'utf8';
-        my $ret_ref = test_utf8n_to_uvuni($bytes, $length, 0);
+        my $ret_ref = test_utf8n_to_uvchr($bytes, $length, 0);
         is($ret_ref->[0], 0, "$testname: disallowed: no warnings 'utf8': Returns 0");
         is($ret_ref->[1], $expected_len, "$testname: disallowed: no warnings 'utf8': Returns expected length");
         if (!is(scalar @warnings, 0, "$testname: disallowed: no warnings 'utf8': no warnings generated")) {
@@ -114,7 +114,7 @@ foreach my $test (
 
     # Test with CHECK_ONLY
     undef @warnings;
-    $ret_ref = test_utf8n_to_uvuni($bytes, $length, $UTF8_CHECK_ONLY);
+    $ret_ref = test_utf8n_to_uvchr($bytes, $length, $UTF8_CHECK_ONLY);
     is($ret_ref->[0], 0, "$testname: CHECK_ONLY: Returns 0");
     is($ret_ref->[1], -1, "$testname: CHECK_ONLY: returns expected length");
     if (! is(scalar @warnings, 0, "$testname: CHECK_ONLY: no warnings generated")) {
@@ -125,7 +125,7 @@ foreach my $test (
 
     # Test when the malformation is allowed
     undef @warnings;
-    $ret_ref = test_utf8n_to_uvuni($bytes, $length, $allow_flags);
+    $ret_ref = test_utf8n_to_uvchr($bytes, $length, $allow_flags);
     is($ret_ref->[0], $allowed_uv, "$testname: allowed: Returns expected uv");
     is($ret_ref->[1], $expected_len, "$testname: allowed: Returns expected length");
     if (!is(scalar @warnings, 0, "$testname: allowed: no warnings generated"))
@@ -224,8 +224,8 @@ foreach my $test (@tests) {
 
                 undef @warnings;
                 my $ret_ref;
-                #note __LINE__ . ": $eval_warn; \$ret_ref = test_utf8n_to_uvuni('$bytes', $length, $warn_flag|$disallow_flag)";
-                my $eval_text = "$eval_warn; \$ret_ref = test_utf8n_to_uvuni('$bytes', $length, $warn_flag|$disallow_flag)";
+                #note __LINE__ . ": $eval_warn; \$ret_ref = test_utf8n_to_uvchr('$bytes', $length, $warn_flag|$disallow_flag)";
+                my $eval_text = "$eval_warn; \$ret_ref = test_utf8n_to_uvchr('$bytes', $length, $warn_flag|$disallow_flag)";
                 eval "$eval_text";
                 if (! ok ("$@ eq ''", "$this_name: eval succeeded")) {
                     note "\$!='$!'; eval'd=\"$eval_text\"";
@@ -276,7 +276,7 @@ foreach my $test (@tests) {
                 # $disallow_flag is set
                 if ($disallowed) {
                     undef @warnings;
-                    $ret_ref = test_utf8n_to_uvuni($bytes, $length, $disallow_flag|$UTF8_CHECK_ONLY);
+                    $ret_ref = test_utf8n_to_uvchr($bytes, $length, $disallow_flag|$UTF8_CHECK_ONLY);
                     is($ret_ref->[0], 0, "$this_name, CHECK_ONLY: Returns 0");
                     is($ret_ref->[1], -1, "$this_name: CHECK_ONLY: returns expected length");
                     if (! is(scalar @warnings, 0, "$this_name, CHECK_ONLY: no warnings generated")) {

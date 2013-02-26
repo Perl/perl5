@@ -148,8 +148,8 @@ bitflip_key(pTHX_ IV action, SV *field) {
 		const char *const end = p + len;
 		while (p < end) {
 		    STRLEN len;
-		    UV chr = utf8_to_uvuni_buf((U8 *)p, (U8 *) end, &len);
-		    new_p = (char *)uvuni_to_utf8((U8 *)new_p, chr ^ 32);
+		    UV chr = utf8_to_uvchr_buf((U8 *)p, (U8 *) end, &len);
+		    new_p = (char *)uvchr_to_utf8((U8 *)new_p, chr ^ 32);
 		    p += len;
 		}
 		SvUTF8_on(newkey);
@@ -1151,7 +1151,7 @@ bytes_cmp_utf8(bytes, utf8)
 	RETVAL
 
 AV *
-test_utf8n_to_uvuni(s, len, flags)
+test_utf8n_to_uvchr(s, len, flags)
 
         SV *s
         SV *len
@@ -1162,7 +1162,7 @@ test_utf8n_to_uvuni(s, len, flags)
         STRLEN slen;
 
     CODE:
-        /* Call utf8n_to_uvuni() with the inputs.  It always asks for the
+        /* Call utf8n_to_uvchr() with the inputs.  It always asks for the
          * actual length to be returned
          *
          * Length to assume <s> is; not checked, so could have buffer overflow
@@ -1171,7 +1171,7 @@ test_utf8n_to_uvuni(s, len, flags)
         sv_2mortal((SV*)RETVAL);
 
         ret
-         = utf8n_to_uvuni((U8*) SvPV(s, slen), SvUV(len), &retlen, SvUV(flags));
+         = utf8n_to_uvchr((U8*) SvPV(s, slen), SvUV(len), &retlen, SvUV(flags));
 
         /* Returns the return value in [0]; <retlen> in [1] */
         av_push(RETVAL, newSVuv(ret));
