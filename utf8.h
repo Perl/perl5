@@ -123,8 +123,8 @@ END_EXTERN_C
 #define NATIVE_TO_UNI(ch)        (ch)
 
 /* As there are no translations, avoid the function wrapper */
-#define utf8n_to_uvchr utf8n_to_uvuni
-#define uvchr_to_utf8(a,b) uvuni_to_utf8_flags(a,b,0)
+#define utf8n_to_uvchr utf8n_to_uvoffuni
+#define uvchr_to_utf8(a,b) uvoffuni_to_utf8_flags(a,b,0)
 
 /*
 

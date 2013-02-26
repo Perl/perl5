@@ -87,7 +87,7 @@ Perl_is_ascii_string(const U8 *s, STRLEN len)
 }
 
 /*
-=for apidoc uvuni_to_utf8_flags
+=for apidoc uvoffuni_to_utf8_flags
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
 
@@ -96,11 +96,11 @@ of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
-    d = uvuni_to_utf8_flags(d, uv, flags);
+    d = uvoffuni_to_utf8_flags(d, uv, flags);
 
 or, in most cases,
 
-    d = uvuni_to_utf8_flags(d, uv, 0);
+    d = uvoffuni_to_utf8_flags(d, uv, 0);
 
 This is the Unicode-aware way of saying
 
@@ -137,9 +137,9 @@ DISALLOW flags.
 */
 
 U8 *
-Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
+Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
-    PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS;
+    PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
 
     /* The first problematic code point is the first surrogate */
     if (uv >= UNICODE_SURROGATE_FIRST
@@ -475,10 +475,13 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
 /*
 
-=for apidoc utf8n_to_uvuni
+=for apidoc utf8n_to_uvoffuni
+
+THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
 
 Bottom level UTF-8 decode routine.
-Returns the code point value of the first character in the string C<s>,
+Returns the official Unicode (not native) code point value of the first
+character in the string C<s>,
 which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding, and no longer than
 C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
 the length, in bytes, of that character.
@@ -553,7 +556,7 @@ Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
 */
 
 UV
-Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
     dVAR;
     const U8 * const s0 = s;
@@ -571,7 +574,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 
     const char* const malformed_text = "Malformed UTF-8 character";
 
-    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
+    PERL_ARGS_ASSERT_UTF8N_TO_UVOFFUNI;
 
     /* The order of malformation tests here is important.  We should consume as
      * few bytes as possible in order to not skip any valid character.  This is
@@ -905,7 +908,7 @@ NULL) to -1.  If those warnings are off, the computed value, if well-defined
 (or the Unicode REPLACEMENT CHARACTER if not), is silently returned, and
 C<*retlen> is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is
 the next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is
+See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is
 returned.
 
 =cut
@@ -978,7 +981,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
+See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -1008,7 +1011,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
+See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -1021,7 +1024,7 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     assert(send > s);
 
     /* Call the low level routine asking for checks */
-    return Perl_utf8n_to_uvuni(aTHX_ s, send -s, retlen,
+    return Perl_utf8n_to_uvoffuni(aTHX_ s, send -s, retlen,
 			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
@@ -1057,7 +1060,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
+See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -4191,7 +4194,7 @@ Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 {
     PERL_ARGS_ASSERT_UVCHR_TO_UTF8;
 
-    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
+    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
 }
 
 U8 *
@@ -4199,7 +4202,7 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     PERL_ARGS_ASSERT_UVCHR_TO_UTF8_FLAGS;
 
-    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
+    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
 }
 
 /*
@@ -4210,7 +4213,7 @@ C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-C<length> and C<flags> are the same as L</utf8n_to_uvuni>().
+C<length> and C<flags> are the same as L</utf8n_to_uvoffuni>().
 
 =cut
 */
@@ -4221,7 +4224,7 @@ UV
 Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen,
 U32 flags)
 {
-    const UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
+    const UV uv = Perl_utf8n_to_uvoffuni(aTHX_ s, curlen, retlen, flags);
 
     PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
 
