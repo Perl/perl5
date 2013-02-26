@@ -179,7 +179,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	}
     }
     if (UNI_IS_INVARIANT(uv)) {
-	*d++ = (U8) I8_TO_NATIVE_UTF8(uv);
+	*d++ = (U8) LATIN1_TO_NATIVE(uv);
 	return d;
     }
 #if defined(EBCDIC)
