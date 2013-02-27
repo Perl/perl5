@@ -403,17 +403,37 @@ PP(pp_padsv)
 	    PUSHs(TARG);
 	    PUTBACK; /* no pop/push after this, TOPs ok */
 	}
-	if (op->op_flags & OPf_MOD) {
-	    if (op->op_private & OPpLVAL_INTRO)
-		if (!(op->op_private & OPpPAD_STATE))
-		    save_clearsv(padentry);
-	    if (op->op_private & OPpDEREF) {
-		/* TOPs is equivalent to TARG here.  Using TOPs (SP) rather
-		   than TARG reduces the scope of TARG, so it does not
-		   span the call to save_clearsv, resulting in smaller
-		   machine code. */
-		TOPs = vivify_ref(TOPs, op->op_private & OPpDEREF);
-	    }
+
+        /* The following used to be conditional on having OPf_MOD */
+        assert(op->op_flags & OPf_MOD);
+        if (op->op_private & OPpLVAL_INTRO)
+            if (!(op->op_private & OPpPAD_STATE))
+                save_clearsv(padentry);
+        if (op->op_private & OPpDEREF) {
+            /* TOPs is equivalent to TARG here.  Using TOPs (SP) rather
+               than TARG reduces the scope of TARG, so it does not
+               span the call to save_clearsv, resulting in smaller
+               machine code. */
+            TOPs = vivify_ref(TOPs, op->op_private & OPpDEREF);
+        }
+	return op->op_next;
+    }
+}
+
+PP(pp_padsv_nolv)
+{
+    dVAR; dSP;
+    EXTEND(SP, 1);
+    {
+	OP * const op = PL_op;
+        assert(!(op->op_flags & OPf_MOD));
+	/* access PL_curpad once */
+	SV ** const padentry = &(PAD_SVl(op->op_targ));
+	{
+	    dTARG;
+	    TARG = *padentry;
+	    PUSHs(TARG);
+	    PUTBACK; /* no pop/push after this, TOPs ok */
 	}
 	return op->op_next;
     }

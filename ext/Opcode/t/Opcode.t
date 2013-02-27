@@ -70,7 +70,7 @@ is($@, '');
 
 is(opdesc("gv"), "glob value");
 my @desc = opdesc(':_tst_','stub');
-is_deeply(\@desc, ['private variable', 'private array', 'private hash', 'stub']);
+is_deeply(\@desc, ['priv. var, maybe lvalue', 'private array', 'private hash', 'stub']);
 isnt(opcodes(), 0);
 
 # --- invert_opset

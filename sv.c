@@ -14170,7 +14170,7 @@ to issue a "Use of uninitialized value" warning.
 If match is true, only return a name if its value matches uninit_sv.
 So roughly speaking, if a unary operator (such as OP_COS) generates a
 warning, then following the direct child of the op may yield an
-OP_PADSV or OP_GV that gives the name of the undefined variable.  On the
+OP_PADSV(_NOLV) or OP_GV that gives the name of the undefined variable.  On the
 other hand, with OP_ADD there are two branches to follow, so we only print
 the variable name if we get an exact match.
 
@@ -14268,6 +14268,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	return find_uninit_var(cUNOPx(obase)->op_first, uninit_sv, 1);
 
     case OP_PADSV:
+    case OP_PADSV_NOLV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
 	    break;
 	return varname(NULL, '$', obase->op_targ,

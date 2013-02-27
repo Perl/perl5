@@ -525,6 +525,7 @@ EXTCONST char* const PL_op_name[] = {
 	"introcv",
 	"clonecv",
 	"padrange",
+	"padsv_nolv",
 	"freed",
 };
 #endif
@@ -542,7 +543,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"scalar variable",
 	"glob value",
 	"glob elem",
-	"private variable",
+	"priv. var, maybe lvalue",
 	"private array",
 	"private hash",
 	"private value",
@@ -910,6 +911,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"private subroutine",
 	"private subroutine",
 	"list of private variables",
+	"priv. var, not lvalue",
 	"freed op",
 };
 #endif
@@ -1309,6 +1311,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_introcv,
 	Perl_pp_clonecv,
 	Perl_pp_padrange,
+	Perl_pp_padsv_nolv,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1336,7 +1339,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* gvsv */
 	Perl_ck_null,		/* gv */
 	Perl_ck_null,		/* gelem */
-	Perl_ck_null,		/* padsv */
+	Perl_ck_padsv,		/* padsv */
 	Perl_ck_null,		/* padav */
 	Perl_ck_null,		/* padhv */
 	Perl_ck_null,		/* padany */
@@ -1704,6 +1707,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* introcv */
 	Perl_ck_null,		/* clonecv */
 	Perl_ck_null,		/* padrange */
+	Perl_ck_padsv,		/* padsv_nolv */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2093,6 +2097,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* introcv */
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
+	0x00000044,	/* padsv_nolv */
 };
 #endif
 

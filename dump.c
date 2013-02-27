@@ -2240,6 +2240,7 @@ Perl_debop(pTHX_ const OP *o)
         int count;
 
     case OP_PADSV:
+    case OP_PADSV_NOLV:
     case OP_PADAV:
     case OP_PADHV:
         count = 1;

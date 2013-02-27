@@ -51,7 +51,8 @@ const		constant item		ck_svconst	s$
 gvsv		scalar variable		ck_null		ds$	
 gv		glob value		ck_null		ds$	
 gelem		glob elem		ck_null		d2	S S
-padsv		private variable	ck_null		ds0
+# See also padsv_nolv further down
+padsv		priv. var, maybe lvalue	ck_padsv		ds0
 padav		private array		ck_null		d0
 padhv		private hash		ck_null		d0
 padany		private value		ck_null		d0
@@ -551,3 +552,4 @@ padcv		private subroutine	ck_null		d0
 introcv		private subroutine	ck_null		d0
 clonecv		private subroutine	ck_null		d0
 padrange	list of private variables	ck_null		d0
+padsv_nolv	priv. var, not lvalue	ck_padsv		ds0

@@ -1240,6 +1240,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_GV:
     case OP_SMARTMATCH:
     case OP_PADSV:
+    case OP_PADSV_NOLV:
     case OP_PADAV:
     case OP_PADHV:
     case OP_PADANY:
@@ -1811,7 +1812,9 @@ S_finalize_op(pTHX_ OP* o)
 	    break;
 
 	rop = (UNOP*)((BINOP*)o)->op_first;
-	if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
+	if (rop->op_type != OP_RV2HV ||
+            (rop->op_first->op_type != OP_PADSV &&
+             rop->op_first->op_type != OP_PADSV_NOLV))
 	    break;
 	lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
 	if (!SvPAD_TYPED(lexname))
@@ -1847,13 +1850,14 @@ S_finalize_op(pTHX_ OP* o)
 	rop = (UNOP*)((LISTOP*)o)->op_last;
 	if (rop->op_type != OP_RV2HV)
 	    break;
-	if (rop->op_first->op_type == OP_PADSV)
+	if (rop->op_first->op_type == OP_PADSV || rop->op_first->op_type == OP_PADSV_NOLV)
 	    /* @$hash{qw(keys here)} */
 	    rop = (UNOP*)rop->op_first;
 	else {
 	    /* @{$hash}{qw(keys here)} */
 	    if (rop->op_first->op_type == OP_SCOPE
-		&& cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
+		&& (cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV ||
+		    cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV_NOLV))
 		{
 		    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
 		}
@@ -2117,6 +2121,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    o->op_private |= OPpMAYBE_LVSUB;
 	/* FALL THROUGH */
     case OP_PADSV:
+    case OP_PADSV_NOLV:
 	PL_modcount++;
 	if (!type) /* local() */
 	    Perl_croak(aTHX_ "Can't localize lexical variable %"SVf,
@@ -2357,11 +2362,17 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	doref(cUNOPo->op_first, o->op_type, set_op_ref);
 	/* FALL THROUGH */
     case OP_PADSV:
+    case OP_PADSV_NOLV:
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
 	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
 			      : type == OP_RV2HV ? OPpDEREF_HV
 			      : OPpDEREF_SV);
 	    o->op_flags |= OPf_MOD;
+            /* Convert to lvalue-handling OP_PADSV if necessary */
+            if (o->op_type == OP_PADSV_NOLV) {
+                o->op_type = OP_PADSV;
+                o->op_ppaddr = PL_ppaddr[OP_PADSV];
+            }
 	}
 	break;
 
@@ -2486,6 +2497,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 	return;
 
     assert(target->op_type == OP_PADSV ||
+           target->op_type == OP_PADSV_NOLV ||
 	   target->op_type == OP_PADHV ||
 	   target->op_type == OP_PADAV);
 
@@ -2624,6 +2636,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	return o;
     }
     else if (type != OP_PADSV &&
+	     type != OP_PADSV_NOLV &&
 	     type != OP_PADAV &&
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
@@ -2678,7 +2691,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
     rops = NULL;
     o = my_kid(o, attrs, &rops);
     if (rops) {
-	if (maybe_scalar && o->op_type == OP_PADSV) {
+	if (maybe_scalar && (o->op_type == OP_PADSV || o->op_type == OP_PADSV_NOLV)) {
 	    o = scalar(op_append_list(OP_LIST, rops, o));
 	    o->op_private |= OPpLVAL_INTRO;
 	}
@@ -4775,6 +4788,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		   && cUNOPx(curop)->op_first
 		   && cUNOPx(curop)->op_first->op_type == OP_GV )
 		|| curop->op_type == OP_PADSV
+		|| curop->op_type == OP_PADSV_NOLV
 		|| curop->op_type == OP_PADAV
 		|| curop->op_type == OP_PADHV
 		|| curop->op_type == OP_PADANY) {
@@ -5375,6 +5389,7 @@ S_aassign_common_vars(pTHX_ OP* o)
 		GvASSIGN_GENERATION_set(gv, PL_generation);
 	    }
 	    else if (curop->op_type == OP_PADSV ||
+		curop->op_type == OP_PADSV_NOLV ||
 		curop->op_type == OP_PADAV ||
 		curop->op_type == OP_PADHV ||
 		curop->op_type == OP_PADANY)
@@ -5486,6 +5501,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    maybe_common_vars = FALSE;
 	    while (lop) {
 		if (lop->op_type == OP_PADSV ||
+		    lop->op_type == OP_PADSV_NOLV ||
 		    lop->op_type == OP_PADAV ||
 		    lop->op_type == OP_PADHV ||
 		    lop->op_type == OP_PADANY) {
@@ -5518,11 +5534,12 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	}
 	else if ((left->op_private & OPpLVAL_INTRO)
 		&& (   left->op_type == OP_PADSV
+		    || left->op_type == OP_PADSV_NOLV
 		    || left->op_type == OP_PADAV
 		    || left->op_type == OP_PADHV
 		    || left->op_type == OP_PADANY))
 	{
-	    if (left->op_type == OP_PADSV) maybe_common_vars = FALSE;
+	    if (left->op_type == OP_PADSV || left->op_type == OP_PADSV_NOLV) maybe_common_vars = FALSE;
 	    if (left->op_private & OPpPAD_STATE) {
 		/* All single variable list context state assignments, hence
 		   state ($a) = ...
@@ -5856,8 +5873,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		    && (( o2 = o2->op_sibling)) )
 	    )
 		o2 = other;
-	    if ((o2->op_type == OP_PADSV || o2->op_type == OP_PADAV
-			|| o2->op_type == OP_PADHV)
+	    if ((o2->op_type == OP_PADSV || o2->op_type == OP_PADSV_NOLV
+                        || o2->op_type == OP_PADAV || o2->op_type == OP_PADHV)
 		&& o2->op_private & OPpLVAL_INTRO
 		&& !(o2->op_private & OPpPAD_STATE))
 	    {
@@ -6364,7 +6381,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	     && cGVOPx_gv(cUNOPx(sv)->op_first) == PL_defgv)
 		iterpflags |= OPpITER_DEF;
 	}
-	else if (sv->op_type == OP_PADSV) { /* private variable */
+	else if (sv->op_type == OP_PADSV || sv->op_type == OP_PADSV_NOLV) { /* private variable */
 	    iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
 	    padoff = sv->op_targ;
 	    if (PL_madskills)
@@ -6832,7 +6849,7 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
  * cv && CvCLONE(cv) && !CvCONST(cv)
  *
  * 	examine the clone prototype, and if contains only a single
- * 	OP_CONST referencing a pad const, or a single PADSV referencing
+ * 	OP_CONST referencing a pad const, or a single PADSV(_NOLV) referencing
  * 	an outer lexical, return a non-zero value to indicate the CV is
  * 	a candidate for "constizing" at clone time
  *
@@ -6840,7 +6857,7 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
  *
  *	We have just cloned an anon prototype that was marked as a const
  *	candidate. Try to grab the current value, and in the case of
- *	PADSV, ignore it if it has multiple references. In this case we
+ *	PADSV(_NOLV), ignore it if it has multiple references. In this case we
  *	return a newly created *copy* of the value.
  */
 
@@ -6883,7 +6900,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    if (!sv)
 		return NULL;
 	}
-	else if (cv && type == OP_PADSV) {
+	else if (cv && (type == OP_PADSV || type == OP_PADSV_NOLV)) {
 	    if (CvCONST(cv)) { /* newly cloned anon */
 		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
 		/* the candidate should have 1 ref from this pad and 1 ref
@@ -8037,6 +8054,7 @@ Perl_oopsAV(pTHX_ OP *o)
 
     switch (o->op_type) {
     case OP_PADSV:
+    case OP_PADSV_NOLV:
 	o->op_type = OP_PADAV;
 	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return ref(o, OP_RV2AV);
@@ -8063,6 +8081,7 @@ Perl_oopsHV(pTHX_ OP *o)
 
     switch (o->op_type) {
     case OP_PADSV:
+    case OP_PADSV_NOLV:
     case OP_PADAV:
 	o->op_type = OP_PADHV;
 	o->op_ppaddr = PL_ppaddr[OP_PADHV];
@@ -8819,7 +8838,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			     * else already - NI-S 1999/05/07
 			     */
 			    priv = OPpDEREF;
-			    if (kid->op_type == OP_PADSV) {
+			    if (kid->op_type == OP_PADSV || kid->op_type == OP_PADSV_NOLV) {
 				SV *const namesv
 				    = PAD_COMPNAME_SV(kid->op_targ);
 				name = SvPV_const(namesv, len);
@@ -9242,7 +9261,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 	OP * const kkid = kid->op_sibling;
 
 	/* Can just relocate the target. */
-	if (kkid && kkid->op_type == OP_PADSV
+	if (kkid && (kkid->op_type == OP_PADSV || kkid->op_type == OP_PADSV_NOLV)
 	    && !(kkid->op_private & OPpLVAL_INTRO))
 	{
 	    kid->op_targ = kkid->op_targ;
@@ -9261,14 +9280,16 @@ Perl_ck_sassign(pTHX_ OP *o)
 	/* For state variable assignment, kkid is a list op whose op_last
 	   is a padsv. */
 	if ((kkid->op_type == OP_PADSV ||
+             kkid->op_type == OP_PADSV_NOLV ||
 	     (kkid->op_type == OP_LIST &&
-	      (kkid = cLISTOPx(kkid)->op_last)->op_type == OP_PADSV
+	      ( (kkid = cLISTOPx(kkid)->op_last)->op_type == OP_PADSV ||
+	        (kkid = cLISTOPx(kkid)->op_last)->op_type == OP_PADSV_NOLV )
 	     )
 	    )
 		&& (kkid->op_private & OPpLVAL_INTRO)
 		&& SvPAD_STATE(*av_fetch(PL_comppad_name, kkid->op_targ, FALSE))) {
 	    const PADOFFSET target = kkid->op_targ;
-	    OP *const other = newOP(OP_PADSV,
+	    OP *const other = newOP(kkid->op_flags & OPf_MOD ? OP_PADSV : OP_PADSV_NOLV,
 				    kkid->op_flags
 				    | ((kkid->op_private & ~OPpLVAL_INTRO) << 8));
 	    OP *const first = newOP(OP_NULL, 0);
@@ -9672,7 +9693,7 @@ S_simplify_sort(pTHX_ OP *o)
 	if (!ckWARN(WARN_SYNTAX)) return;
 	kid = kBINOP->op_first;
 	do {
-	    if (kid->op_type == OP_PADSV) {
+	    if (kid->op_type == OP_PADSV || kid->op_type == OP_PADSV_NOLV) {
 		SV * const name = AvARRAY(PL_comppad_name)[kid->op_targ];
 		if (SvCUR(name) == 2 && *SvPVX(name) == '$'
 		 && (SvPVX(name)[1] == 'a' || SvPVX(name)[1] == 'b'))
@@ -10153,6 +10174,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		    case '$':
 			if (o3->op_type == OP_RV2SV ||
 				o3->op_type == OP_PADSV ||
+				o3->op_type == OP_PADSV_NOLV ||
 				o3->op_type == OP_HELEM ||
 				o3->op_type == OP_AELEM)
 			    goto wrapref;
@@ -10614,6 +10636,25 @@ Perl_ck_each(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_padsv(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_PADSV;
+
+    if (o->op_flags & OPf_MOD) {
+        /* Need to have lvalue check */
+        o->op_type = OP_PADSV;
+        o->op_ppaddr = PL_ppaddr[OP_PADSV];
+    }
+    else {
+        /* Can use faster version */
+        o->op_type = OP_PADSV_NOLV;
+        o->op_ppaddr = PL_ppaddr[OP_PADSV_NOLV];
+    }
+
+    return o;
+}
+
+OP *
 Perl_ck_length(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_LENGTH;
@@ -10970,6 +11011,7 @@ Perl_rpeep(pTHX_ OP *o)
                     continue;
 
                 if ((     p->op_type != OP_PADSV
+                       && p->op_type != OP_PADSV_NOLV
                        && p->op_type != OP_PADAV
                        && p->op_type != OP_PADHV
                     )
@@ -11013,6 +11055,7 @@ Perl_rpeep(pTHX_ OP *o)
 
                 /* for AV, HV, only when we're not flattening */
                 if (   p->op_type != OP_PADSV
+                    && p->op_type != OP_PADSV_NOLV
                     && gimme != OPf_WANT_VOID
                     && !(p->op_flags & OPf_REF)
                 )
@@ -11092,6 +11135,7 @@ Perl_rpeep(pTHX_ OP *o)
 
                     while (    ((p = followop->op_next))
                             && (  p->op_type == OP_PADSV
+                               || p->op_type == OP_PADSV_NOLV
                                || p->op_type == OP_PADAV
                                || p->op_type == OP_PADHV)
                             && (p->op_flags & OPf_WANT) == OPf_WANT_VOID
@@ -11489,6 +11533,12 @@ Perl_rpeep(pTHX_ OP *o)
 		cpeep(aTHX_ o, oldop);
 	    break;
 	}
+        case OP_PADSV: {
+            if (!(o->op_flags & OPf_MOD)) {
+                o->op_type = OP_PADSV_NOLV;
+                o->op_ppaddr = PL_ppaddr[OP_PADSV_NOLV];
+            }
+        }
 	    
 	}
 	oldoldop = oldop;

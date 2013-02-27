@@ -595,7 +595,7 @@ our %priv; # used to display each opcode's BASEOP.op_private values
 
 $priv{$_}{128} = "LVINTRO"
   for ("pos", "substr", "vec", "threadsv", "gvsv", "rv2sv", "rv2hv", "rv2gv",
-       "rv2av", "rv2arylen", "aelem", "helem", "aslice", "hslice", "padsv",
+       "rv2av", "rv2arylen", "aelem", "helem", "aslice", "hslice", "padsv", "padsv_nolv",
        "padav", "padhv", "enteriter", "entersub", "padrange", "pushmark");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
@@ -611,8 +611,8 @@ $priv{"repeat"}{64} = "DOLIST";
 $priv{"leaveloop"}{64} = "CONT";
 $priv{$_}{4} = "DREFed" for (qw(rv2sv rv2av rv2hv));
 @{$priv{$_}}{32,64,96} = ("DREFAV", "DREFHV", "DREFSV")
-  for (qw(rv2gv rv2sv padsv aelem helem));
-$priv{$_}{16} = "STATE" for ("padav", "padhv", "padsv");
+  for (qw(rv2gv rv2sv padsv padsv_nolv aelem helem));
+$priv{$_}{16} = "STATE" for (qw(padav padhv padsv padsv_nolv));
 @{$priv{rv2gv}}{4,16} = qw "NOINIT FAKE";
 @{$priv{"entersub"}}{1,4,16,32,64} = qw( INARGS TARG DBG DEREF );
 @{$priv{rv2cv}}{1,8,128} = ("CONST","AMPER","NO()");
