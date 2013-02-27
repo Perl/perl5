@@ -45,7 +45,7 @@ PERLVAR(I, stack_max,	SV **)
 
 PERLVAR(I, scopestack,	I32 *)		/* scopes we've ENTERed */
 /* name of the scopes we've ENTERed. Only used with -DDEBUGGING, but needs to be
-   present always, as -DDEUBGGING must be binary compatible with non.  */
+   present always, as -DDEBUGGING must be binary compatible with non.  */
 PERLVARI(I, scopestack_name, const char * *, NULL)
 PERLVAR(I, scopestack_ix, I32)
 PERLVAR(I, scopestack_max, I32)
@@ -382,8 +382,8 @@ PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 PERLVAR(I, forkprocess,	int)		/* so do_open |- can return proc# */
 
 /* memory management */
-PERLVAR(I, sv_count,	I32)		/* how many SV* are currently allocated */
-PERLVAR(I, sv_objcount,	I32)		/* how many objects are currently allocated */
+PERLVAR(I, sv_count,	IV)		/* how many SV* are currently allocated */
+PERLVAR(I, sv_objcount,	IV)		/* how many objects are currently allocated */
 PERLVAR(I, sv_root,	SV *)		/* storage for SVs belonging to interp */
 PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
 
