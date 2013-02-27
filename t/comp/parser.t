@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..155\n";
+print "1..156\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -459,6 +459,16 @@ $test
 .
 {
     local $~ = "one";
+    write();
+}
+
+$test++;
+format ::two =
+ok @<< - format ::foo still works
+$test
+.
+{
+    local $~ = "two";
     write();
 }
 
