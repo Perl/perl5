@@ -158,21 +158,21 @@ for file in `$cat .clist`; do
     # and the next char isn't a '*'; then things that start with '/**', but the
     # next char isn't a '/'.  (Subsequent lines of the comment are irrelevant
     # and get dropped.)
-    ( $echo "#line 2 \"$file\""; \
-      $sed -n <$file \
-	-e "/^${filebase}_init(/q" \
-        -e ': testcont'               \
-	-e '/^[	 ]*#/s|/\*.*\*/||'    \
-        -e '/\\$/{'                   \
-            -e 'N'                    \
-            -e 'b testcont'           \
-        -e '}'                        \
-	-e 's/\\\n/ /g'                            \
-	-e '/^#line/d' \
-	-e '/^[ 	]*#/{' \
-	    -e 's|[ 	]*/\*[^*].*$||'             \
-	    -e 's|[ 	]*/\*\*[^/].*$||'             \
-	-e p \
+    ( $echo "#line 2 \"$file\"";                               \
+      $sed -n <$file                                           \
+	-e "/^${filebase}_init(/q"                             \
+        -e ': testcont'                                        \
+	-e '/^[ 	]*#/s|[ 	]*/\*..*\*/[ 	]*| |' \
+        -e '/\\$/{'                                            \
+            -e 'N'                                             \
+            -e 'b testcont'                                    \
+        -e '}'                                                 \
+	-e 's/\\\n/ /g'                                        \
+	-e '/^#line/d'                                         \
+	-e '/^[ 	]*#/{'                                 \
+	    -e 's|[ 	]*/\*[^*].*$||'                        \
+	    -e 's|[ 	]*/\*\*[^/].*$||'                      \
+	    -e p                                               \
 	-e '}' ) >UU/$file.c
 
     # We're not sure why this was there; the #endif is extraneous on modern z/OS
