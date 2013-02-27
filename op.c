@@ -8269,6 +8269,8 @@ Perl_ck_spair(pTHX_ OP *o)
 #endif
 	kUNOP->op_first = newop;
     }
+    /* transforms OP_REFGEN into OP_SREFGEN, OP_CHOP into OP_SCHOP,
+     * and OP_CHOMP into OP_SCHOMP */
     o->op_ppaddr = PL_ppaddr[++o->op_type];
     return ck_fun(o);
 }
