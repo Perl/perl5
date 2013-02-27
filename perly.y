@@ -1215,6 +1215,17 @@ term	:	termbinop
 			  TOKEN_GETMAD($4,$$,';');
 			  TOKEN_GETMAD($5,$$,'}');
 			}
+	|	hsh '{' expr ';' '}'                 /* %hash{@keys} */
+			{ $$ = op_prepend_elem(OP_KVHSLICE,
+				newOP(OP_PUSHMARK, 0),
+				    newLISTOP(OP_KVHSLICE, 0,
+					list($3),
+					ref($1, OP_KVHSLICE)));
+			    PL_parser->expect = XOPERATOR;
+			  TOKEN_GETMAD($2,$$,'{');
+			  TOKEN_GETMAD($4,$$,';');
+			  TOKEN_GETMAD($5,$$,'}');
+			}
 	|	THING	%prec '('
 			{ $$ = $1; }
 	|	amper                                /* &foo; */

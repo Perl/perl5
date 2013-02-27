@@ -3567,11 +3567,14 @@ sub slice {
     } else {
 	$list = $self->elem_or_slice_single_index($kid);
     }
-    return "\@" . $array . $left . $list . $right;
+    my $lead = '@';
+    $lead = '%' if $op->name =~ /^kv/i;
+    return $lead . $array . $left . $list . $right;
 }
 
-sub pp_aslice { maybe_local(@_, slice(@_, "[", "]", "rv2av", "padav")) }
-sub pp_hslice { maybe_local(@_, slice(@_, "{", "}", "rv2hv", "padhv")) }
+sub pp_aslice   { maybe_local(@_, slice(@_, "[", "]", "rv2av", "padav")) }
+sub pp_hslice   { maybe_local(@_, slice(@_, "{", "}", "rv2hv", "padhv")) }
+sub pp_kvhslice {                 slice(@_, "{", "}", "rv2hv", "padhv")  }
 
 sub pp_lslice {
     my $self = shift;

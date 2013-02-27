@@ -1278,6 +1278,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_ASLICE:
     case OP_HELEM:
     case OP_HSLICE:
+    case OP_KVHSLICE:
     case OP_UNPACK:
     case OP_PACK:
     case OP_JOIN:
@@ -2061,6 +2062,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_DBSTATE:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
+    case OP_KVHSLICE:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
+        goto nomod;
     case OP_AV2ARYLEN:
 	PL_hints |= HINT_BLOCK_SCOPE;
 	if (type == OP_LEAVESUBLV)
@@ -5349,7 +5354,7 @@ S_is_list_assignment(pTHX_ const OP *o)
 
     if (type == OP_LIST || flags & OPf_PARENS ||
 	type == OP_RV2AV || type == OP_RV2HV ||
-	type == OP_ASLICE || type == OP_HSLICE)
+	type == OP_ASLICE || type == OP_HSLICE || type == OP_KVHSLICE)
 	return TRUE;
 
     if (type == OP_PADAV || type == OP_PADHV)
@@ -6557,7 +6562,8 @@ S_ref_array_or_hash(pTHX_ OP *cond)
 
     else if(cond
     && (cond->op_type == OP_ASLICE
-    ||  cond->op_type == OP_HSLICE)) {
+    ||  cond->op_type == OP_HSLICE
+    ||  cond->op_type == OP_KVHSLICE)) {
 
 	/* anonlist now needs a list from this op, was previously used in
 	 * scalar context */
@@ -8296,6 +8302,9 @@ Perl_ck_delete(pTHX_ OP *o)
 	    /* FALL THROUGH */
 	case OP_HELEM:
 	    break;
+	case OP_KVHSLICE:
+	    Perl_croak(aTHX_ "%s argument is key/value hash slice, use hash slice",
+		  OP_DESC(o));
 	default:
 	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or slice",
 		  OP_DESC(o));
