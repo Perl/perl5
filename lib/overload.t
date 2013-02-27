@@ -202,7 +202,7 @@ is($b, "89");
 is(ref $a, "Oscalar");
 is($copies, 1);
 
-eval q[package Oscalar; use overload ('+=' => sub {$ {$_[0]} += 3*"$_[1]";
+eval q[package Oscalar; use overload ('+=' => sub {$ {$_[0]} += 3*$_[1];
 						   $_[0] } ) ];
 $c=new Oscalar;			# Cause rehash
 

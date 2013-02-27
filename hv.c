@@ -796,7 +796,26 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
     if ( DO_HSPLIT(xhv) ) {
-        hsplit(hv);
+        const STRLEN oldsize = xhv->xhv_max + 1;
+        const U32 items = (U32)HvPLACEHOLDERS_get(hv);
+
+        if (items /* hash has placeholders  */
+            && !SvREADONLY(hv) /* but is not a restricted hash */) {
+            /* If this hash previously was a "restricted hash" and had
+               placeholders, but the "restricted" flag has been turned off,
+               then the placeholders no longer serve any useful purpose.
+               However, they have the downsides of taking up RAM, and adding
+               extra steps when finding used values. It's safe to clear them
+               at this point, even though Storable rebuilds restricted hashes by
+               putting in all the placeholders (first) before turning on the
+               readonly flag, because Storable always pre-splits the hash.
+               If we're lucky, then we may clear sufficient placeholders to
+               avoid needing to split the hash at all.  */
+            clear_placeholders(hv, items);
+            if (DO_HSPLIT(xhv))
+                hsplit(hv, oldsize, oldsize * 2);
+        } else
+            hsplit(hv, oldsize, oldsize * 2);
     }
 
     if (return_svp) {
@@ -1085,13 +1104,10 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 }
 
 STATIC void
-S_hsplit(pTHX_ HV *hv)
+S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 {
     dVAR;
-    XPVHV* const xhv = (XPVHV*)SvANY(hv);
-    const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
-    I32 newsize = oldsize * 2;
-    I32 i;
+    STRLEN i = 0;
     char *a = (char*) HvARRAY(hv);
     HE **aep;
 
@@ -1100,14 +1116,6 @@ S_hsplit(pTHX_ HV *hv)
     /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
       (void*)hv, (int) oldsize);*/
 
-    if (HvPLACEHOLDERS_get(hv) && !SvREADONLY(hv)) {
-      /* Can make this clear any placeholders first for non-restricted hashes,
-	 even though Storable rebuilds restricted hashes by putting in all the
-	 placeholders (first) before turning on the readonly flag, because
-	 Storable always pre-splits the hash.  */
-      hv_clear_placeholders(hv);
-    }
-	       
     PL_nomemok = TRUE;
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
 	  + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
@@ -1121,33 +1129,32 @@ S_hsplit(pTHX_ HV *hv)
 
     PL_nomemok = FALSE;
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
-    xhv->xhv_max = --newsize;	/* HvMAX(hv) = --newsize */
+    HvMAX(hv) = --newsize;
     HvARRAY(hv) = (HE**) a;
-    aep = (HE**)a;
 
-    for (i=0; i<oldsize; i++,aep++) {
-	HE **oentry = aep;
-	HE *entry = *aep;
-	HE **bep;
+    if (!HvTOTALKEYS(hv))       /* skip rest if no entries */
+        return;
+
+    aep = (HE**)a;
+    do {
+	HE **oentry = aep + i;
+	HE *entry = aep[i];
 
 	if (!entry)				/* non-existent */
 	    continue;
-	bep = aep+oldsize;
 	do {
-	    if ((HeHASH(entry) & newsize) != (U32)i) {
+            U32 j = (HeHASH(entry) & newsize);
+	    if (j != (U32)i) {
 		*oentry = HeNEXT(entry);
-		HeNEXT(entry) = *bep;
-		*bep = entry;
+                HeNEXT(entry) = aep[j];
+                aep[j] = entry;
 	    }
 	    else {
 		oentry = &HeNEXT(entry);
 	    }
 	    entry = *oentry;
 	} while (entry);
-	/* I think we don't actually need to keep track of the longest length,
-	   merely flag if anything is too long. But for the moment while
-	   developing this code I'll track it.  */
-    }
+    } while (i++ < oldsize);
 }
 
 void
@@ -1157,9 +1164,7 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     XPVHV* xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     I32 newsize;
-    I32 i;
     char *a;
-    HE **aep;
 
     PERL_ARGS_ASSERT_HV_KSPLIT;
 
@@ -1176,47 +1181,11 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 
     a = (char *) HvARRAY(hv);
     if (a) {
-	PL_nomemok = TRUE;
-	Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-	      + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
-	if (!a) {
-	  PL_nomemok = FALSE;
-	  return;
-	}
-	if (SvOOK(hv)) {
-	    Copy(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
-	}
-	PL_nomemok = FALSE;
-	Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char); /* zero 2nd half*/
-    }
-    else {
-	Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
-    }
-    xhv->xhv_max = --newsize; 	/* HvMAX(hv) = --newsize */
-    HvARRAY(hv) = (HE **) a;
-    if (!xhv->xhv_keys /* !HvTOTALKEYS(hv) */)	/* skip rest if no entries */
-	return;
-
-    aep = (HE**)a;
-    for (i=0; i<oldsize; i++,aep++) {
-	HE **oentry = aep;
-	HE *entry = *aep;
-
-	if (!entry)				/* non-existent */
-	    continue;
-	do {
-	    I32 j = (HeHASH(entry) & newsize);
-
-	    if (j != i) {
-		j -= i;
-		*oentry = HeNEXT(entry);
-		HeNEXT(entry) = aep[j];
-		aep[j] = entry;
-	    }
-	    else
-		oentry = &HeNEXT(entry);
-	    entry = *oentry;
-	} while (entry);
+        hsplit(hv, oldsize, newsize);
+    } else {
+        Newxz(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize), char);
+        xhv->xhv_max = --newsize;
+        HvARRAY(hv) = (HE **) a;
     }
 }
 
@@ -2668,7 +2637,8 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!next) {			/* initial entry? */
 	} else if ( DO_HSPLIT(xhv) ) {
-            hsplit(PL_strtab);
+            const STRLEN oldsize = xhv->xhv_max + 1;
+            hsplit(PL_strtab, oldsize, oldsize * 2);
 	}
     }
 

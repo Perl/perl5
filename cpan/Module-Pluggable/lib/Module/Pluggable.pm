@@ -11,7 +11,7 @@ use if $] > 5.017, 'deprecate';
 # Peter Gibbons: I wouldn't say I've been missing it, Bob! 
 
 
-$VERSION = '4.6'; # core release only!
+$VERSION = '4.7';
 $FORCE_SEARCH_ALL_PATHS = 0;
 
 sub import {

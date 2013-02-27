@@ -90,7 +90,7 @@ Perl_is_ascii_string(const U8 *s, STRLEN len)
 /*
 =for apidoc uvuni_to_utf8_flags
 
-Adds the UTF-8 representation of the code point C<uv> to the end
+Adds the UTF-8 representation of the Unicode code point C<uv> to the end
 of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
@@ -109,6 +109,10 @@ This is the recommended Unicode-aware way of saying
 
     *(d++) = uv;
 
+where uv is a code point expressed in Latin-1 or above, not the platform's
+native character set.  B<Almost all code should instead use L</uvchr_to_utf8>
+or L</uvchr_to_utf8_flags>>.
+
 This function will convert to UTF-8 (and not warn) even code points that aren't
 legal Unicode or are problematic, unless C<flags> contains one or more of the
 following flags:
@@ -119,8 +123,9 @@ UNICODE_DISALLOW_SURROGATE is set, the function will fail and return NULL.
 If both flags are set, the function will both warn and return NULL.
 
 The UNICODE_WARN_NONCHAR and UNICODE_DISALLOW_NONCHAR flags correspondingly
-affect how the function handles a Unicode non-character.  And, likewise for the
-UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags, and code points that are
+affect how the function handles a Unicode non-character.  And likewise, the
+UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags, affect the handling of
+code points that are
 above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
 even less portable) can be warned and/or disallowed even if other above-Unicode
 code points are accepted by the UNICODE_WARN_FE_FF and UNICODE_DISALLOW_FE_FF
@@ -258,7 +263,7 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	return d;
     }
 #endif
-#endif /* Loop style */
+#endif /* Non loop style */
 }
 
 /*
@@ -275,7 +280,7 @@ or less you should use the IS_UTF8_CHAR(), for lengths of five or more
 you should use the _slow().  In practice this means that the _slow()
 will be used very rarely, since the maximum Unicode code point (as of
 Unicode 4.1) is U+10FFFF, which encodes in UTF-8 to four bytes.  Only
-the "Perl extended UTF-8" (the infamous 'v-strings') will encode into
+the "Perl extended UTF-8" (e.g, the infamous 'v-strings') will encode into
 five bytes or more.
 
 =cut */

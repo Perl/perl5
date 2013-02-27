@@ -12874,7 +12874,7 @@ parseit:
 #ifndef EBCDIC
             cp_list = _add_range_to_invlist(cp_list, prevvalue, value);
 #else
-            UV* this_range = _new_invlist(1);
+            SV* this_range = _new_invlist(1);
             _append_range_to_invlist(this_range, prevvalue, value);
 
             /* In EBCDIC, the ranges 'A-Z' and 'a-z' are each not contiguous.
@@ -12889,8 +12889,8 @@ parseit:
                 && (prevvalue >= 'a' && value <= 'z')
                     || (prevvalue >= 'A' && value <= 'Z'))
             {
-                _invlist_intersection(this_range, PL_ASCII, &this_range, );
-                _invlist_intersection(this_range, PL_Alpha, &this_range, );
+                _invlist_intersection(this_range, PL_Posix_ptrs[_CC_ALPHA],
+                                      &this_range);
             }
             _invlist_union(cp_list, this_range, &cp_list);
             literal_endpoint = 0;
@@ -15299,8 +15299,11 @@ S_put_byte(pTHX_ SV *sv, int c)
 
        EO, or Eight Ones, is an 8-bit EBCDIC character code represented as all
        ones (binary 1111 1111, hexadecimal FF). It is similar, but not
-       identical, to the ASCII delete (DEL) or rubout control character.
-       ) So the old condition can be simplified to !isPRINT(c)  */
+       identical, to the ASCII delete (DEL) or rubout control character. ...
+       it is typically mapped to hexadecimal code 9F, in order to provide a
+       unique character mapping in both directions)
+
+       So the old condition can be simplified to !isPRINT(c)  */
     if (!isPRINT(c)) {
 	if (c < 256) {
 	    Perl_sv_catpvf(aTHX_ sv, "\\x%02x", c);

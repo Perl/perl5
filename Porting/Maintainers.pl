@@ -532,7 +532,7 @@ use File::Glob qw(:case);
 
     'Data::Dumper' => {
         'MAINTAINER' => 'p5p',    # Not gsar. Not ilyam. Not really smueller
-        'DISTRIBUTION' => 'SMUELLER/Data-Dumper-2.139.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/Data-Dumper-2.143.tar.gz',
         'FILES'        => q[dist/Data-Dumper],
         'UPSTREAM'     => 'blead',
     },
@@ -1271,7 +1271,7 @@ use File::Glob qw(:case);
 
     'Module::CoreList' => {
         'MAINTAINER'   => 'bingos',
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-2.80.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-2.82.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
         'UPSTREAM'     => 'blead',
     },
@@ -1310,7 +1310,7 @@ use File::Glob qw(:case);
 
     'Module::Pluggable' => {
         'MAINTAINER'   => 'simonw',
-        'DISTRIBUTION' => 'SIMONW/Module-Pluggable-4.6.tar.gz',
+        'DISTRIBUTION' => 'SIMONW/Module-Pluggable-4.7.tar.gz',
         'FILES'        => q[cpan/Module-Pluggable],
         'UPSTREAM'     => 'cpan',
         'CUSTOMIZED'   => ['Makefile.PL'],
@@ -2075,7 +2075,7 @@ use File::Glob qw(:case);
 
     'Win32' => {
         'MAINTAINER'   => 'jand',
-        'DISTRIBUTION' => "JDB/Win32-0.46.tar.gz",
+        'DISTRIBUTION' => "JDB/Win32-0.47.tar.gz",
         'FILES'        => q[cpan/Win32],
         'UPSTREAM'     => 'cpan',
     },

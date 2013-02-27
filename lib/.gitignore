@@ -287,7 +287,6 @@
 /Module/Pluggable.pm
 /NDBM_File.pm
 /NEXT.pm
-/Net
 /Net/Cmd.pm
 /Net/Config.pm
 /Net/Domain.pm
