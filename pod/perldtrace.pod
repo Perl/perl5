@@ -74,7 +74,7 @@ I<caller> from a DTrace action.
 
     :*perl*::sub-entry {
         printf("%s::%s entered at %s line %d\n",
-               copyinstr(arg3), copyinstr(arg0), copyinstr(arg1), arg0);
+               copyinstr(arg3), copyinstr(arg0), copyinstr(arg1), arg2);
     }
 
 =item sub-return(SUBNAME, FILE, LINE, PACKAGE)
@@ -86,7 +86,7 @@ from a DTrace action.
 
     :*perl*::sub-return {
         printf("%s::%s returned at %s line %d\n",
-               copyinstr(arg3), copyinstr(arg0), copyinstr(arg1), arg0);
+               copyinstr(arg3), copyinstr(arg0), copyinstr(arg1), arg2);
     }
 
 =item phase-change(NEWPHASE, OLDPHASE)
