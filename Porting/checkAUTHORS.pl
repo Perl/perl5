@@ -862,6 +862,7 @@ simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100othersideofthe.earth.li
 +                                       simon\100cozens.net
 +                                       simon\100netthink.co.uk
+lanningswho.int                         lannings\100gmail.com
 slaven\100rezic.de                      slaven.rezic\100berlin.de
 +                                       srezic\100iconmobile.com
 +                                       srezic\100cpan.org
