@@ -1023,7 +1023,7 @@ EXTCONST U32 PL_charclass[];
 #   define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
 #   define isWORDCHAR_A(c) _generic_isCC_A(c, _CC_WORDCHAR)
 #   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT)
-#   define isIDFIRST_A(c) _generic_isCC_A(c, ( _CC_IDFIRST))
+#   define isIDFIRST_A(c) _generic_isCC_A(c, _CC_IDFIRST)
 
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
