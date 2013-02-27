@@ -8280,6 +8280,11 @@ Perl_ck_spair(pTHX_ OP *o)
 		    type == OP_PADAV || type == OP_PADHV ||
 		    type == OP_RV2AV || type == OP_RV2HV)
 		return o;
+            if (type == OP_PADSV_NOLV) {
+                /* revert the work that could have been done by ck_padsv */
+                newop->op_type = OP_PADSV;
+                newop->op_ppaddr = PL_ppaddr[OP_PADSV];
+            }
 	}
 #ifdef PERL_MAD
 	op_getmad(kUNOP->op_first,newop,'K');
