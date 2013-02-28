@@ -6257,6 +6257,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		PL_last_in_gv = NULL;
 	    else if ((const GV *)sv == PL_statgv)
 		PL_statgv = NULL;
+            else if ((const GV *)sv == PL_stderrgv)
+                PL_stderrgv = NULL;
 	case SVt_PVMG:
 	case SVt_PVNV:
 	case SVt_PVIV:

@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 57 );
+plan( tests => 58 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -60,6 +60,13 @@ package main;
     local $ENV{PERL_DESTRUCT_LEVEL} = 2;
     fresh_perl_is(
 		  'package A; sub a { // }; %::=""',
+		  '',
+		  '',
+		  );
+    # Variant of the above which creates an object that persists until global
+    # destruction.
+    fresh_perl_is(
+		  'use Exporter; package A; sub a { // }; %::=""',
 		  '',
 		  '',
 		  );
