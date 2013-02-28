@@ -157,7 +157,8 @@ for file in `$cat .clist`; do
     # end of line (including preceding white space) things that start with '/*'
     # and the next char isn't a '*'; then things that start with '/**', but the
     # next char isn't a '/'.  (Subsequent lines of the comment are irrelevant
-    # and get dropped.)
+    # and get dropped.)  At the end, we unjoin very long lines to avoid
+    # preprocessor limitations
     ( $echo "#line 2 \"$file\"";                               \
       $sed -n <$file                                           \
 	-e "/^${filebase}_init(/q"                             \
@@ -167,11 +168,12 @@ for file in `$cat .clist`; do
             -e 'N'                                             \
             -e 'b testcont'                                    \
         -e '}'                                                 \
-	-e 's/\\\n/ /g'                                        \
+	-e 's/\\\n//g'                                         \
 	-e '/^#line/d'                                         \
 	-e '/^[ 	]*#/{'                                 \
 	    -e 's|[ 	]*/\*[^*].*$||'                        \
 	    -e 's|[ 	]*/\*\*[^/].*$||'                      \
+            -e 's/.\{255\}/&\\\n/g'                           \
 	    -e p                                               \
 	-e '}' ) >UU/$file.c
 
