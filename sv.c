@@ -6513,8 +6513,6 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	SvOBJECT_off(sv);	/* Curse the object. */
 	SvSTASH_set(sv,0);	/* SvREFCNT_dec may try to read this */
 	SvREFCNT_dec(stash); /* possibly of changed persuasion */
-	if (SvTYPE(sv) != SVt_PVIO)
-	    --PL_sv_objcount;/* XXX Might want something more general */
     }
     return TRUE;
 }
@@ -9694,14 +9692,10 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 	if (SvREADONLY(tmpRef) && !SvIsCOW(tmpRef))
 	    Perl_croak_no_modify();
 	if (SvOBJECT(tmpRef)) {
-	    if (SvTYPE(tmpRef) != SVt_PVIO)
-		--PL_sv_objcount;
 	    SvREFCNT_dec(SvSTASH(tmpRef));
 	}
     }
     SvOBJECT_on(tmpRef);
-    if (SvTYPE(tmpRef) != SVt_PVIO)
-	++PL_sv_objcount;
     SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH_set(tmpRef, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
 
@@ -12437,9 +12431,6 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	}
     }
 
-    if (SvOBJECT(dstr) && SvTYPE(dstr) != SVt_PVIO)
-	++PL_sv_objcount;
-
     return dstr;
  }
 
@@ -13136,7 +13127,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Zero(&PL_body_roots, 1, PL_body_roots);
     
     PL_sv_count		= 0;
-    PL_sv_objcount	= 0;
     PL_sv_root		= NULL;
     PL_sv_arenaroot	= NULL;
 

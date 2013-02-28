@@ -383,7 +383,9 @@ PERLVAR(I, forkprocess,	int)		/* so do_open |- can return proc# */
 
 /* memory management */
 PERLVAR(I, sv_count,	IV)		/* how many SV* are currently allocated */
-PERLVAR(I, sv_objcount,	IV)		/* how many objects are currently allocated */
+PERLVAR(I, sv_objcount,	IV)		/* DEPRECATED AND UNMAINTAINED.
+                                         * Will be removed in Perl 5.20.
+                                         * Used to be: how many objects are currently allocated. */
 PERLVAR(I, sv_root,	SV *)		/* storage for SVs belonging to interp */
 PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
 
