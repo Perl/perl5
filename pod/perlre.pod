@@ -642,8 +642,7 @@ X<\g> X<\k> X<\K> X<backreference>
   \g{name}  [5]  Named backreference
   \k<name>  [5]  Named backreference
   \K        [6]  Keep the stuff left of the \K, don't include it in $&
-  \N        [7]  Any character but \n (experimental).  Not affected by
-                   /s modifier
+  \N        [7]  Any character but \n.  Not affected by /s modifier
   \v        [3]  Vertical whitespace
   \V        [3]  Not vertical whitespace
   \h        [3]  Horizontal whitespace

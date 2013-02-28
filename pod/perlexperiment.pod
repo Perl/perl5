@@ -232,15 +232,6 @@ See also: L<perlre/"Special Backtracking Control Verbs">
 
 =item Code expressions, conditional expressions, and independent expressions in regexes
 
-=item The C<\N> regex character class
-
-The C<\N> character class, not to be confused with the named character
-sequence C<\N{NAME}>, denotes any non-newline character in a regular
-expression.
-
-Introduced in: Perl 5.12
-
-See also: 
 
 =item gv_try_downgrade
 
@@ -273,7 +264,13 @@ They are also awarded +5 Stability and +3 Charisma.
 
 =over 8
 
-=item (none yet identified)
+=item The C<\N> regex character class
+
+The C<\N> character class, not to be confused with the named character
+sequence C<\N{NAME}>, denotes any non-newline character in a regular
+expression.
+
+Introduced in: Perl 5.12
 
 =back
 

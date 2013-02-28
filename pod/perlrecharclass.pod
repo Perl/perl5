@@ -29,7 +29,7 @@ the most well-known character class. By default, a dot matches any
 character, except for the newline. That default can be changed to
 add matching the newline by using the I<single line> modifier: either
 for the entire regular expression with the C</s> modifier, or
-locally with C<(?s)>.  (The experimental C<\N> backslash sequence, described
+locally with C<(?s)>.  (The C<\N> backslash sequence, described
 below, matches any character except newline without regard to the
 I<single line> modifier.)
 
@@ -74,7 +74,7 @@ character classes, see L<perlrebackslash>.)
 
 =head3 \N
 
-C<\N> is new in 5.12, and is experimental.  It, like the dot, matches any
+C<\N>, available starting in v5.12, like the dot, matches any
 character that is not a newline. The difference is that C<\N> is not influenced
 by the I<single line> regular expression modifier (see L</The dot> above).  Note
 that the form C<\N{...}> may mean something completely different.  When the
