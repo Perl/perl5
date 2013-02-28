@@ -12,6 +12,9 @@
     This Pod document is a paragraph in Arabic from &#34;The Five Pillars of
     Islam&#34; as CP-1256.
   </Para>
+  <encoding start_line="11">
+    cp1256
+  </encoding>
   <Para start_line="13">
     &#1608;&#1593;&#1606; &#1593;&#1605;&#1575;&#1585;&#1577; &#1576;&#1606;
     &#1581;&#1586;&#1605; &#1602;&#1575;&#1604; &#1602;&#1575;&#1604;

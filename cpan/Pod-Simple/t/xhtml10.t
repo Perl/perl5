@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use lib '../lib';
-use Test::More tests => 58;
+use Test::More tests => 60;
 #use Test::More 'no_plan';
 
 use_ok('Pod::Simple::XHTML') or exit;
@@ -23,7 +23,7 @@ for my $spec (
     [ 'fo$bar' => 'fo-bar', 'fo-bar' ],
     [ 'f12'    => 'f12',    'f12'    ],
     [ '13'     => 'pod13',  'pod13'  ],
-    [ '**.:'   => 'pod-.:', 'pod-.:' ],
+    [ '**.:'   => 'pod', 'pod' ],
 ) {
     is $parser->idify( $spec->[0] ), $spec->[1],
         qq{ID for "$spec->[0]" should be "$spec->[1]"};
@@ -97,6 +97,22 @@ is $results, <<'EOF', 'Should have both and the index';
 <h1 id="Bar">Bar</h1>
 
 EOF
+
+initialize($parser, $results);
+ok $parser->parse_string_document( "=head1 Foo C<Bar>\n\n=head1 C<Baz>" ),
+    'Parse two headers with C<> formatting';
+is $results, <<'EOF', 'Should have the index';
+<ul id="index">
+  <li><a href="#Foo-Bar">Foo Bar</a></li>
+  <li><a href="#Baz">Baz</a></li>
+</ul>
+
+<h1 id="Foo-Bar">Foo <code>Bar</code></h1>
+
+<h1 id="Baz"><code>Baz</code></h1>
+
+EOF
+
 initialize($parser, $results);
 ok $parser->parse_string_document( "=head1 Foo\n\n=head1 Bar\n\n=head1 Baz" ),
     'Parse three headers';

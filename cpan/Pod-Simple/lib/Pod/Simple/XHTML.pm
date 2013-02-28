@@ -45,7 +45,7 @@ declare the output character set as UTF-8 before parsing, like so:
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.23';
+$VERSION = '3.26';
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
@@ -342,15 +342,19 @@ sub accept_targets_as_html {
 }
 
 sub handle_text {
-    if ($_[0]{'in_code'} && @{$_[0]{'in_code'}}) {
-	return $_[0]->handle_code( $_[1], $_[0]{'in_code'}[-1] );
-    }
     # escape special characters in HTML (<, >, &, etc)
     my $text = $_[0]->__in_literal_xhtml_region
         ? $_[1]
         : $_[0]->encode_entities( $_[1] );
 
-    $_[0]{'scratch'} .= $text;
+    if ($_[0]{'in_code'} && @{$_[0]{'in_code'}}) {
+        # Intentionally use the raw text in $_[1], even if we're not in a
+        # literal xhtml region, since handle_code calls encode_entities.
+        $_[0]->handle_code( $_[1], $_[0]{'in_code'}[-1] );
+    } else {
+        $_[0]{'scratch'} .= $text;
+    }
+
     $_[0]{htext} .= $text if $_[0]{'in_head'};
 }
 
@@ -733,6 +737,11 @@ underscores (_), colons (:), and periods (.).
 
 =item *
 
+The final character can't be a hyphen, colon, or period. URLs ending with these
+characters, while allowed by XHTML, can be awkward to extract from plain text.
+
+=item *
+
 Each id must be unique within the document.
 
 =back
@@ -754,6 +763,7 @@ sub idify {
         s/^([^a-zA-Z]+)$/pod$1/; # Prepend "pod" if no valid chars.
         s/^[^a-zA-Z]+//;         # First char must be a letter.
         s/[^-a-zA-Z0-9_:.]+/-/g; # All other chars must be valid.
+        s/[-:.]+$//;             # Strip trailing punctuation.
     }
     return $t if $not_unique;
     my $i = '';
@@ -798,7 +808,7 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
 to clone L<git://github.com/theory/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to

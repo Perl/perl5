@@ -91,7 +91,9 @@ ok( $x->_out("\n=over\n\n=item Foo\n\n Stuff\n\tSnork\n=cut\n\nCrunk\nZorp\n\n=i
 
 
 print "#\n# Test for mixed =item blocks...\n";
-ok( $x->_out("\n=over\n\n=item Foo\n\nStuff\n\n=item 2.\n\nBar I<baz>!\n\nQuux\n\n=item *\n\nThwoong\n\n=back\n\n"),
+ok( $x->_out(
+  sub { $_[0]->no_errata_section(1) }, # We know this will complain
+  "\n=over\n\n=item Foo\n\nStuff\n\n=item 2.\n\nBar I<baz>!\n\nQuux\n\n=item *\n\nThwoong\n\n=back\n\n"),
     qq{<Document><over-text indent="4"><item-text>Foo</item-text><Para>Stuff</Para>}
   . qq{<item-text>2.</item-text><Para>Bar <I>baz</I>!</Para><Para>Quux</Para>}
   . qq{<item-text>*</item-text><Para>Thwoong</Para></over-text></Document>}

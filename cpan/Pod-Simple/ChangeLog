@@ -1,6 +1,74 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2013-02-27   David E. Wheeler <david@justatheory.org>
+	* Release 3.26
+
+	Fixed another test script to skip all tests when Encode is not
+	installed.
+
+	Added 'encoding()' and 'detected_encoding()' to return the current
+	encoding and the encoding actually to decode the input file. The
+	value from "=encoding" is also now kept in the output tree. Patch
+	from Patrice Dumas (RT #74390).
+
+2013-02-16   David E. Wheeler <david@justatheory.org>
+	* Release 3.25
+
+	Improved the warning when "=item" types mismatch within one
+	"=over"/"=back" block.
+
+2013-02-14   David E. Wheeler <david@justatheory.org>
+	* Release 3.24
+
+	Fixed corner case bug for unlikely scenario in which non-UTF-8
+	text could be parsed as UTF-8. Grant McLean.
+
+	XHTML IDs can no longer end with punctuation. Thanks to Smylers
+	for the patch.
+
+	Fixed test failure on Perl 5.6.2.
+
+	Changed the default installation location from "perl" to "site" on
+	5.12 and higher, since as of that version of Perl, dual-life
+	modules no longer need to be installed in "perl" to replace
+	in-core versions. Patch from tzccinct.
+
+	Fixed hash order dependency test failures on Perl 5.17. Thanks to
+	Yves Orton for the patch.
+
+	Inlined the code that tries to guess a Pod file's encoding. This
+	reduces the time Pod::Simple takes to build the core Perl
+	documentation by 15-20%. Thanks to Dagfinn Ilmari Mannsåker for
+	the patch!
+
+	Added a warning when "=item" types mismatch within one
+	"=over"/"=back" block. Marc Green/Google Summer of Code, with
+	assist from RJBS.
+
+	Fixed regression introduced in 3.22 in which "C< >" tags were
+	incorrectly treated as verbatim text in table of contents items
+	emitted by Pod::Simple::XHTML. Thanks to Randy Stauner for the
+	report and to Thomas Sibley for the fix!
+
+	Loosened up the matching of "L< >" tags for man pages so that they
+	allow names with dots, underscores, and any other chararacters
+	other than "/", just so long as they end in '[(][-a-zA-Z0-9]+[)]'.
+	Thanks to Dave Rolsky and Kevin Ryde for the reports (RT #82975 &
+	RT #82972).
+
+	Fixed inverted mapping of "keyboard" to "kbd" in
+	Pod::Simple::HTML. Thanks to Robert Boisvert for the bug report
+	(RT #79201).
+
+	Added two new Tagmap entries to Pod::Simple::HTML: "preformat"
+	maps to "pre", and "teletype" maps to "tt". Suggested by Robert
+	Boisvert (RT #79201).
+
+	"X< >" tags are now ignored by the pull parser when it searches
+	for titles, as is any trailing whitespace. Thanks to Patrice Dumas
+	for the report (RT #74389).
+
 2012-08-14   David E. Wheeler <david@justatheory.org>
 	* Release 3.23
 

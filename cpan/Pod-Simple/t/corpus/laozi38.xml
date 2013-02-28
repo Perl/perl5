@@ -1,4 +1,7 @@
 <Document start_line="1">
+  <encoding start_line="1">
+    big5
+  </encoding>
   <head1 start_line="3">
     &#32769;&#23376;&#36947;&#24503;&#32147; &#19977;&#21313;&#20843;&#31456;
     -- Big5 (Chinese) encoding test

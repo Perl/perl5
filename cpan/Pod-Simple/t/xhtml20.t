@@ -12,7 +12,7 @@ BEGIN {
 
     sub handle_code {
 	my($self, $code, $kind) = @_;
-	$code = "${kind}[$code]";
+	$code = $kind . "[$code]";
 	$self->SUPER::handle_code($code);
     }
 

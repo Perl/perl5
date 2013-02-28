@@ -2116,6 +2116,10 @@ cpan/Pod-Simple/t/corpus/encwarn01.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn01.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn02.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn02.xml			Pod::Simple test file
+cpan/Pod-Simple/t/corpus/encwarn03.txt
+cpan/Pod-Simple/t/corpus/encwarn03.xml
+cpan/Pod-Simple/t/corpus/encwarn04.txt
+cpan/Pod-Simple/t/corpus/encwarn04.xml
 cpan/Pod-Simple/t/corpus/fet_cont.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_cont.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_dup.txt			Pod::Simple test file
@@ -2154,9 +2158,11 @@ cpan/Pod-Simple/t/corpus.t				Pod::Simple test file
 cpan/Pod-Simple/t/corpus/thai_iso11.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/thai_iso11.xml			Pod::Simple test file
 cpan/Pod-Simple/t/emptylists.t				Pod::Simple test file
+cpan/Pod-Simple/t/enc-chars.t
 cpan/Pod-Simple/t/encod01.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod02.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod03.t				Pod::Simple test file
+cpan/Pod-Simple/t/encod04.t
 cpan/Pod-Simple/t/end_over.t				Pod::Simple test file
 cpan/Pod-Simple/t/eol2.t				Pod::Simple test file
 cpan/Pod-Simple/t/eol.t					Pod::Simple test file
@@ -2234,6 +2240,7 @@ cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml20.t				Pod::Simple test file
+cpan/Pod-Simple/t/xhtml-bkb.t
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Pod-Usage/lib/Pod/Usage.pm
 cpan/Pod-Usage/scripts/pod2usage.PL

@@ -1,4 +1,7 @@
 <Document start_line="5">
+  <encoding start_line="5">
+    koi8-r
+  </encoding>
   <head1 start_line="7">
     NAME
   </head1>
@@ -12,6 +15,9 @@
   <head1 start_line="11">
     TEXT
   </head1>
+  <encoding start_line="13">
+    Shift-JIS
+  </encoding>
   <Para start_line="15">
     (This is a test Pod pocument in KOI8-R.)
   </Para>

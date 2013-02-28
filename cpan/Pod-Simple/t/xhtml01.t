@@ -23,7 +23,7 @@ my $MANURL = "http://man.he.net/man";
 
 initialize($parser, $results);
 $parser->parse_string_document( "=head1 Poit!" );
-is($results, qq{<h1 id="Poit-">Poit!</h1>\n\n}, "head1 level output");
+is($results, qq{<h1 id="Poit">Poit!</h1>\n\n}, "head1 level output");
 
 initialize($parser, $results);
 $parser->parse_string_document( "=head2 Yada Yada Operator
@@ -31,21 +31,25 @@ X<...> X<... operator> X<yada yada operator>" );
 is($results, qq{<h2 id="Yada-Yada-Operator">Yada Yada Operator   </h2>\n\n}, "head ID with X<>");
 
 initialize($parser, $results);
+$parser->parse_string_document( "=head2 Platforms with no supporting programmers:");
+is($results, qq{<h2 id="Platforms-with-no-supporting-programmers">Platforms with no supporting programmers:</h2>\n\n}, "head ID ending in colon");
+
+initialize($parser, $results);
 $parser->html_h_level(2);
 $parser->parse_string_document( "=head1 Poit!" );
-is($results, qq{<h2 id="Poit-">Poit!</h2>\n\n}, "head1 level output h_level 2");
+is($results, qq{<h2 id="Poit">Poit!</h2>\n\n}, "head1 level output h_level 2");
 
 initialize($parser, $results);
 $parser->parse_string_document( "=head2 I think so Brain." );
-is($results, qq{<h2 id="I-think-so-Brain.">I think so Brain.</h2>\n\n}, "head2 level output");
+is($results, qq{<h2 id="I-think-so-Brain">I think so Brain.</h2>\n\n}, "head2 level output");
 
 initialize($parser, $results);
 $parser->parse_string_document( "=head3 I say, Brain..." );
-is($results, qq{<h3 id="I-say-Brain...">I say, Brain...</h3>\n\n}, "head3 level output");
+is($results, qq{<h3 id="I-say-Brain">I say, Brain...</h3>\n\n}, "head3 level output");
 
 initialize($parser, $results);
 $parser->parse_string_document( "=head4 Zort & Zog!" );
-is($results, qq{<h4 id="Zort-Zog-">Zort &amp; Zog!</h4>\n\n}, "head4 level output");
+is($results, qq{<h4 id="Zort-Zog">Zort &amp; Zog!</h4>\n\n}, "head4 level output");
 
 sub x ($;&) {
   my $code = $_[1];

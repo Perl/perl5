@@ -289,6 +289,16 @@ I<Example:>
 
   die "too many errors\n" if $parser->any_errata_seen();
 
+=item C<< $parser->detected_encoding() >>X<detected_encoding>
+
+Return the encoding corresponding to C<< =encoding >>, but only if the
+encoding was recognized and handled.
+
+=item C<< $parser->encoding() >>X<encoding>
+
+Return encoding of the document, even if the encoding is not correctly
+handled.
+
 =item C<< $parser->parse_from_file( $source, $to ) >>X<parse_from_file>
 
 Parses from C<$source> file to C<$to> file. Similar to L<<
@@ -373,7 +383,7 @@ pod-people@perl.org mail list. Send an empty email to
 pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
-L<http://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
+L<https://github.com/theory/pod-simple/>. Feel free to fork and contribute, or
 to clone L<git://github.com/theory/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to

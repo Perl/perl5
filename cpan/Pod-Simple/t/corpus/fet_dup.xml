@@ -1,4 +1,7 @@
 <Document start_line="5">
+  <encoding start_line="5">
+    koi8-r
+  </encoding>
   <head1 start_line="7">
     NAME
   </head1>
@@ -103,6 +106,9 @@
 	    &#1042;&#1089;&#1090;&#1072;&#1074;&#1072;&#1083;&#1072;
     &#1074;&#1076;&#1088;&#1091;&#1075;&#1079;&#1072;&#1088;&#1103;.
   </VerbatimFormatted>
+  <encoding start_line="44">
+    koi8-r
+  </encoding>
   <VerbatimFormatted start_line="46" xml:space="preserve">
       &#1048; &#1074; &#1101;&#1090;&#1091;
     &#1082;&#1088;&#1072;&#1089;&#1086;&#1090;&#1091;
