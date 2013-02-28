@@ -53,6 +53,12 @@ an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 PL_sv_objcount
+
+This interpreter-global variable used to track the total number of
+Perl objects in the interpreter. It is no longer maintained and will
+be removed altogether in Perl 5.20.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here.
