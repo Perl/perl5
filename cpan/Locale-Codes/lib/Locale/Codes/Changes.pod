@@ -22,13 +22,25 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.24  (planned 2012-12-01; sbeck)
+=head1 VERSION 3.28  (planned 2013-12-01; sbeck)
+
+=head1 VERSION 3.27  (planned 2013-09-01; sbeck)
+
+=head1 VERSION 3.26  (planned 2013-06-01; sbeck)
+
+=head1 VERSION 3.25  (2013-03-01; sbeck)
+
+NEW CODE(s)
 
 =head1 VERSION 3.24  (2012-12-03; sbeck)
 
 NEW CODE(s)
 
 =over 4
+
+=item B<Syria alias>
+
+Syria added as an alias.  RT 82747
 
 =item B<FIPS-10 country codes deprecated>
 
@@ -617,7 +629,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2012 Sullivan Beck
+   Copyright (c) 2010-2013 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

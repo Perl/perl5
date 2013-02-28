@@ -2,7 +2,7 @@ package Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Dec  4 14:03:16 EST 2012
+#    Generated on: Wed Feb 27 10:04:26 EST 2013
 
 =pod
 
@@ -25,7 +25,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 
    Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2012 Sullivan Beck
+   Copyright (c) 2010-2013 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.24';
+$VERSION='3.25';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0180';
 
@@ -2011,7 +2011,7 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0092),
          q(0),
          ],
-      q(ZMK) => [
+      q(ZMW) => [
          q(0170),
          q(0),
          ],
@@ -2533,10 +2533,6 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          q(0169),
          q(0),
          ],
-      q(894) => [
-         q(0170),
-         q(0),
-         ],
       q(901) => [
          q(0149),
          q(0),
@@ -2651,6 +2647,10 @@ $Locale::Codes::Data{'currency'}{'code2id'} = {
          ],
       q(965) => [
          q(0105),
+         q(0),
+         ],
+      q(967) => [
+         q(0170),
          q(0),
          ],
       q(968) => [
@@ -2911,7 +2911,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0167) => q(VEF),
       q(0168) => q(VND),
       q(0169) => q(YER),
-      q(0170) => q(ZMK),
+      q(0170) => q(ZMW),
       q(0171) => q(ZWL),
       q(0172) => q(XBA),
       q(0173) => q(XBB),
@@ -3092,7 +3092,7 @@ $Locale::Codes::Data{'currency'}{'id2code'} = {
       q(0167) => q(937),
       q(0168) => q(704),
       q(0169) => q(886),
-      q(0170) => q(894),
+      q(0170) => q(967),
       q(0171) => q(932),
       q(0172) => q(955),
       q(0173) => q(956),

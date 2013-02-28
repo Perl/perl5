@@ -2,7 +2,7 @@ package Locale::Codes::LangExt_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Dec  4 14:04:05 EST 2012
+#    Generated on: Wed Feb 27 10:04:32 EST 2013
 
 =pod
 
@@ -25,7 +25,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 
    Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2012 Sullivan Beck
+   Copyright (c) 2010-2013 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.24';
+$VERSION='3.25';
 
 $Locale::Codes::Data{'langext'}{'id'} = '0228';
 
