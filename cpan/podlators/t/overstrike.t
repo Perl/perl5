@@ -2,7 +2,8 @@
 #
 # overstrike.t -- Additional specialized tests for Pod::Text::Overstrike.
 #
-# Copyright 2002, 2004, 2006, 2009, 2012 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2004, 2006, 2009, 2012, 2013
+#     Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -81,7 +82,7 @@ A
 
 B
 
-=item 1
+=item 1Z<>
 
 C
 

@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 25;
+use Test::More tests => 28;
 BEGIN { use_ok ('Pod::Man') }
 
 # Redirect stderr to a file.
@@ -261,4 +261,26 @@ Bar.
 .SH "NEXT"
 .IX Header "NEXT"
 ###
+###
+
+###
+errors none
+###
+=over 4
+
+=item foo
+
+Not a bullet.
+
+=item *
+
+Also not a bullet.
+
+=back
+###
+.IP "foo" 4
+.IX Item "foo"
+Not a bullet.
+.IP "*" 4
+Also not a bullet.
 ###

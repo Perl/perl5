@@ -19,7 +19,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 35;
+use Test::More tests => 34;
 BEGIN { use_ok ('Pod::Man') }
 
 # Test whether we can use binmode to set encoding.
@@ -116,26 +116,6 @@ A bullet.
 Another bullet.
 .IP "\(bu" 4
 Also a bullet.
-###
-
-###
-=over 4
-
-=item foo
-
-Not a bullet.
-
-=item *
-
-Also not a bullet.
-
-=back
-###
-.IP "foo" 4
-.IX Item "foo"
-Not a bullet.
-.IP "*" 4
-Also not a bullet.
 ###
 
 ###
