@@ -3,8 +3,20 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.41';
+$VERSION = '3.44';
+my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
+
+unless (defined &canonpath) {
+  eval {
+    if ( $] >= 5.006 ) {
+	require XSLoader;
+	XSLoader::load("Cwd", $xs_version);
+    } else {
+	require Cwd;
+    }
+  };
+}
 
 =head1 NAME
 
@@ -40,7 +52,7 @@ actually traverse the filesystem cleaning up paths like this.
 
 =cut
 
-sub canonpath {
+sub _pp_canonpath {
     my ($self,$path) = @_;
     return unless defined $path;
     
@@ -69,6 +81,7 @@ sub canonpath {
     $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
     return "$node$path";
 }
+*canonpath = \&_pp_canonpath unless defined &canonpath;
 
 =item catdir()
 
@@ -80,11 +93,12 @@ trailing slash :-)
 
 =cut
 
-sub catdir {
+sub _pp_catdir {
     my $self = shift;
 
     $self->canonpath(join('/', @_, '')); # '' because need a trailing '/'
 }
+*catdir = \&_pp_catdir unless defined &catdir;
 
 =item catfile
 
@@ -93,7 +107,7 @@ complete path ending with a filename
 
 =cut
 
-sub catfile {
+sub _pp_catfile {
     my $self = shift;
     my $file = $self->canonpath(pop @_);
     return $file unless @_;
@@ -101,6 +115,7 @@ sub catfile {
     $dir .= "/" unless substr($dir,-1) eq "/";
     return $dir.$file;
 }
+*catfile = \&_pp_catfile unless defined &catfile;
 
 =item curdir
 
@@ -109,6 +124,7 @@ Returns a string representation of the current directory.  "." on UNIX.
 =cut
 
 sub curdir { '.' }
+use constant _fn_curdir => ".";
 
 =item devnull
 
@@ -117,6 +133,7 @@ Returns a string representation of the null device. "/dev/null" on UNIX.
 =cut
 
 sub devnull { '/dev/null' }
+use constant _fn_devnull => "/dev/null";
 
 =item rootdir
 
@@ -125,6 +142,7 @@ Returns a string representation of the root directory.  "/" on UNIX.
 =cut
 
 sub rootdir { '/' }
+use constant _fn_rootdir => "/";
 
 =item tmpdir
 
@@ -191,6 +209,7 @@ Returns a string representation of the parent directory.  ".." on UNIX.
 =cut
 
 sub updir { '..' }
+use constant _fn_updir => "..";
 
 =item no_upwards
 
@@ -212,6 +231,7 @@ is not or is significant when comparing file specifications.
 =cut
 
 sub case_tolerant { 0 }
+use constant _fn_case_tolerant => 0;
 
 =item file_name_is_absolute
 

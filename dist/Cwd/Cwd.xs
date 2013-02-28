@@ -396,10 +396,148 @@ int Perl_getcwd_sv(pTHX_ SV *sv)
 
 #endif
 
+#if defined(START_MY_CXT) && defined(MY_CXT_CLONE)
+# define USE_MY_CXT 1
+#else
+# define USE_MY_CXT 0
+#endif
+
+#if USE_MY_CXT
+# define MY_CXT_KEY "Cwd::_guts"XS_VERSION
+typedef struct {
+    SV *empty_string_sv, *slash_string_sv;
+} my_cxt_t;
+START_MY_CXT
+# define dUSE_MY_CXT dMY_CXT
+# define EMPTY_STRING_SV MY_CXT.empty_string_sv
+# define SLASH_STRING_SV MY_CXT.slash_string_sv
+# define POPULATE_MY_CXT do { \
+	MY_CXT.empty_string_sv = newSVpvs(""); \
+	MY_CXT.slash_string_sv = newSVpvs("/"); \
+    } while(0)
+#else
+# define dUSE_MY_CXT dNOOP
+# define EMPTY_STRING_SV sv_2mortal(newSVpvs(""))
+# define SLASH_STRING_SV sv_2mortal(newSVpvs("/"))
+#endif
+
+#define invocant_is_unix(i) THX_invocant_is_unix(aTHX_ i)
+static
+bool
+THX_invocant_is_unix(pTHX_ SV *invocant)
+{
+    /*
+     * This is used to enable optimisations that avoid method calls
+     * by knowing how they would resolve.  False negatives, disabling
+     * the optimisation where it would actually behave correctly, are
+     * acceptable.
+     */
+    return SvPOK(invocant) && SvCUR(invocant) == 16 &&
+	!memcmp(SvPVX(invocant), "File::Spec::Unix", 16);
+}
+
+#define unix_canonpath(p) THX_unix_canonpath(aTHX_ p)
+static
+SV *
+THX_unix_canonpath(pTHX_ SV *path)
+{
+    SV *retval;
+    char const *p, *pe, *q;
+    STRLEN l;
+    char *o;
+    STRLEN plen;
+    SvGETMAGIC(path);
+    if(!SvOK(path)) return &PL_sv_undef;
+    p = SvPV_nomg(path, plen);
+    if(plen == 0) return newSVpvs("");
+    pe = p + plen;
+    retval = newSV(plen);
+#ifdef SvUTF8
+    if(SvUTF8(path)) SvUTF8_on(retval);
+#endif
+    o = SvPVX(retval);
+    if(DOUBLE_SLASHES_SPECIAL && p[0] == '/' && p[1] == '/' && p[2] != '/') {
+	q = memchr(p+2, '/', pe-(p+2));
+	if(!q) q = pe;
+	l = q - p;
+	memcpy(o, p, l);
+	p = q;
+	o += l;
+    }
+    /*
+     * The transformations performed here are:
+     *   . squeeze multiple slashes
+     *   . eliminate "." segments, except one if that's all there is
+     *   . eliminate leading ".." segments
+     *   . eliminate trailing slash, unless it's all there is
+     */
+    if(p[0] == '/') {
+	*o++ = '/';
+	while(1) {
+	    do { p++; } while(p[0] == '/');
+	    if(p[0] == '.' && p[1] == '.' && (p+2 == pe || p[2] == '/')) {
+		p++;
+		/* advance past second "." next time round loop */
+	    } else if(p[0] == '.' && (p+1 == pe || p[1] == '/')) {
+		/* advance past "." next time round loop */
+	    } else {
+		break;
+	    }
+	}
+    } else if(p[0] == '.' && p[1] == '/') {
+	do {
+	    p++;
+	    do { p++; } while(p[0] == '/');
+	} while(p[0] == '.' && p[1] == '/');
+	if(p == pe) *o++ = '.';
+    }
+    if(p == pe) goto end;
+    while(1) {
+	q = memchr(p, '/', pe-p);
+	if(!q) q = pe;
+	l = q - p;
+	memcpy(o, p, l);
+	p = q;
+	o += l;
+	if(p == pe) goto end;
+	while(1) {
+	    do { p++; } while(p[0] == '/');
+	    if(p == pe) goto end;
+	    if(p[0] != '.') break;
+	    if(p+1 == pe) goto end;
+	    if(p[1] != '/') break;
+	    p++;
+	}
+	*o++ = '/';
+    }
+    end: ;
+    *o = 0;
+    SvPOK_on(retval);
+    SvCUR_set(retval, o - SvPVX(retval));
+    return retval;
+}
 
 MODULE = Cwd		PACKAGE = Cwd
 
 PROTOTYPES: DISABLE
+
+BOOT:
+#if USE_MY_CXT
+{
+    MY_CXT_INIT;
+    POPULATE_MY_CXT;
+}
+#endif
+
+#if USE_MY_CXT
+
+void
+CLONE(...)
+CODE:
+	PERL_UNUSED_VAR(items);
+	{ MY_CXT_CLONE; POPULATE_MY_CXT; }
+
+#endif
 
 void
 getcwd(...)
@@ -485,3 +623,146 @@ PPCODE:
 }
 
 #endif
+
+MODULE = Cwd		PACKAGE = File::Spec::Unix
+
+SV *
+canonpath(SV *self, SV *path = &PL_sv_undef, ...)
+CODE:
+    PERL_UNUSED_VAR(self);
+    RETVAL = unix_canonpath(path);
+OUTPUT:
+    RETVAL
+
+SV *
+_fn_canonpath(SV *path = &PL_sv_undef, ...)
+CODE:
+    RETVAL = unix_canonpath(path);
+OUTPUT:
+    RETVAL
+
+SV *
+catdir(SV *self, ...)
+PREINIT:
+    dUSE_MY_CXT;
+    SV *joined;
+CODE:
+    EXTEND(SP, items+1);
+    ST(items) = EMPTY_STRING_SV;
+    joined = sv_newmortal();
+    do_join(joined, SLASH_STRING_SV, &ST(0), &ST(items));
+    if(invocant_is_unix(self)) {
+	RETVAL = unix_canonpath(joined);
+    } else {
+	ENTER;
+	PUSHMARK(SP);
+	EXTEND(SP, 2);
+	PUSHs(self);
+	PUSHs(joined);
+	PUTBACK;
+	call_method("canonpath", G_SCALAR);
+	SPAGAIN;
+	RETVAL = POPs;
+	LEAVE;
+	SvREFCNT_inc(RETVAL);
+    }
+OUTPUT:
+    RETVAL
+
+SV *
+_fn_catdir(...)
+PREINIT:
+    dUSE_MY_CXT;
+    SV *joined;
+CODE:
+    EXTEND(SP, items+1);
+    ST(items) = EMPTY_STRING_SV;
+    joined = sv_newmortal();
+    do_join(joined, SLASH_STRING_SV, &ST(-1), &ST(items));
+    RETVAL = unix_canonpath(joined);
+OUTPUT:
+    RETVAL
+
+SV *
+catfile(SV *self, ...)
+PREINIT:
+    dUSE_MY_CXT;
+CODE:
+    if(invocant_is_unix(self)) {
+	if(items == 1) {
+	    RETVAL = &PL_sv_undef;
+	} else {
+	    SV *file = unix_canonpath(ST(items-1));
+	    if(items == 2) {
+		RETVAL = file;
+	    } else {
+		SV *dir = sv_newmortal();
+		sv_2mortal(file);
+		ST(items-1) = EMPTY_STRING_SV;
+		do_join(dir, SLASH_STRING_SV, &ST(0), &ST(items-1));
+		RETVAL = unix_canonpath(dir);
+		if(SvCUR(RETVAL) == 0 || SvPVX(RETVAL)[SvCUR(RETVAL)-1] != '/')
+		    sv_catsv(RETVAL, SLASH_STRING_SV);
+		sv_catsv(RETVAL, file);
+	    }
+	}
+    } else {
+	SV *file, *dir;
+	ENTER;
+	PUSHMARK(SP);
+	EXTEND(SP, 2);
+	PUSHs(self);
+	PUSHs(items == 1 ? &PL_sv_undef : ST(items-1));
+	PUTBACK;
+	call_method("canonpath", G_SCALAR);
+	SPAGAIN;
+	file = POPs;
+	LEAVE;
+	if(items <= 2) {
+	    RETVAL = SvREFCNT_inc(file);
+	} else {
+	    char const *pv;
+	    STRLEN len;
+	    bool need_slash;
+	    SP--;
+	    ENTER;
+	    PUSHMARK(&ST(-1));
+	    PUTBACK;
+	    call_method("catdir", G_SCALAR);
+	    SPAGAIN;
+	    dir = POPs;
+	    LEAVE;
+	    pv = SvPV(dir, len);
+	    need_slash = len == 0 || pv[len-1] != '/';
+	    RETVAL = newSVsv(dir);
+	    if(need_slash) sv_catsv(RETVAL, SLASH_STRING_SV);
+	    sv_catsv(RETVAL, file);
+	}
+    }
+OUTPUT:
+    RETVAL
+
+SV *
+_fn_catfile(...)
+PREINIT:
+    dUSE_MY_CXT;
+CODE:
+    if(items == 0) {
+	RETVAL = &PL_sv_undef;
+    } else {
+	SV *file = unix_canonpath(ST(items-1));
+	if(items == 1) {
+	    RETVAL = file;
+	} else {
+	    SV *dir = sv_newmortal();
+	    sv_2mortal(file);
+	    ST(items-1) = EMPTY_STRING_SV;
+	    do_join(dir, SLASH_STRING_SV, &ST(-1), &ST(items-1));
+	    RETVAL = unix_canonpath(dir);
+	    if(SvCUR(RETVAL) == 0 || SvPVX(RETVAL)[SvCUR(RETVAL)-1] != '/')
+		sv_catsv(RETVAL, SLASH_STRING_SV);
+	    sv_catsv(RETVAL, file);
+	}
+    }
+OUTPUT:
+    RETVAL

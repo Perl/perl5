@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.41';
+$VERSION = '3.44';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -242,16 +242,18 @@ sub _vms_efs {
 
 
 # If loading the XS stuff doesn't work, we can fall back to pure perl
-eval {
-  if ( $] >= 5.006 ) {
-    require XSLoader;
-    XSLoader::load( __PACKAGE__, $xs_version);
-  } else {
-    require DynaLoader;
-    push @ISA, 'DynaLoader';
-    __PACKAGE__->bootstrap( $xs_version );
-  }
-};
+unless (defined &getcwd) {
+  eval {
+    if ( $] >= 5.006 ) {
+      require XSLoader;
+      XSLoader::load( __PACKAGE__, $xs_version);
+    } else {
+      require DynaLoader;
+      push @ISA, 'DynaLoader';
+      __PACKAGE__->bootstrap( $xs_version );
+    }
+  };
+}
 
 # Big nasty table of function aliases
 my %METHOD_MAP =
