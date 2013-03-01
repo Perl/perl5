@@ -321,8 +321,8 @@ struct interp_intern {
 #define _ckvmssts_noperl(call) STMT_START { unsigned long int __ckvms_sts; \
   if (!((__ckvms_sts=(call))&1)) { \
   set_errno(EVMSERR); set_vaxc_errno(__ckvms_sts); \
-  fprintf(stderr,"Fatal VMS error (status=%d) at %s, line %d", \
-  __ckvms_sts,__FILE__,__LINE__); lib$signal(__ckvms_sts); } } STMT_END
+  (void)fprintf(stderr,"Fatal VMS error (status=%d) at %s, line %d", \
+  __ckvms_sts,__FILE__,__LINE__); (void)lib$signal(__ckvms_sts); } } STMT_END
 
 #ifdef VMS_DO_SOCKETS
 #define PERL_SOCK_SYSREAD_IS_RECV
