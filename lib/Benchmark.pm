@@ -440,7 +440,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.14;
+$VERSION = 1.15;
 
 # --- ':hireswallclock' special handling
 
@@ -836,7 +836,7 @@ sub timethis{
     # A conservative warning to spot very silly tests.
     # Don't assume that your benchmark is ok simply because
     # you don't get this warning!
-    warn "            (warning: too few iterations for a reliable count)\n"
+    print "            (warning: too few iterations for a reliable count)\n"
 	if     $n < $Min_Count
 	    || ($t->real < 1 && $n < 1000)
 	    || $t->cpu_a < $Min_CPU;
