@@ -348,11 +348,14 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF8_TWO_BYTE_HI(c)	((U8) (UTF8_TWO_BYTE_HI_nocast(c)))
 #define UTF8_TWO_BYTE_LO(c)	((U8) (UTF8_TWO_BYTE_LO_nocast(c)))
 
-/* This name is used when the source is a single byte.  For EBCDIC these could
- * be more efficiently written; the reason is that things above 0xFF have to be
- * special-cased, which is done by the EBCDIC version of NATIVE_TO_UNI() */
-#define UTF8_EIGHT_BIT_HI(c)	UTF8_TWO_BYTE_HI((U8)(c))
-#define UTF8_EIGHT_BIT_LO(c)	UTF8_TWO_BYTE_LO((U8)(c))
+/* This name is used when the source is a single byte (input not checked).
+ * These expand identically to the TWO_BYTE versions on ASCII platforms, but
+ * use to/from LATIN1 instead of UNI, which on EBCDIC eliminates tests */
+#define UTF8_EIGHT_BIT_HI(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_LATIN1(c)          \
+                        >> UTF_ACCUMULATION_SHIFT) | (0xFF & UTF_START_MARK(2)))
+#define UTF8_EIGHT_BIT_LO(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_LATIN1(c)          \
+                                                  & UTF_CONTINUATION_MASK)      \
+                                                | UTF_CONTINUATION_MARK)
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
  * as it is only in overlongs. */
