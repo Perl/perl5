@@ -267,6 +267,9 @@ SKIP: {
           if $^O eq "MSWin32";
     skip "Copy maps POSIX permissions to VOS permissions.", $skips
           if $^O eq "vos";
+    skip "There be dragons here with DragonflyBSD.", $skips
+         if $^O eq 'dragonfly';
+
 
     # Just a sub to get better failure messages.
     sub __ ($) {
