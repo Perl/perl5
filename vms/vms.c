@@ -1817,7 +1817,8 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
     char *vmsname;
     char *rslt;
     unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
-    unsigned long int cxt = 0, aclsts, fndsts, rmsts = -1;
+    unsigned long int cxt = 0, aclsts, fndsts;
+    int rmsts = -1;
     struct dsc$descriptor_s fildsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
     struct myacedef {
       unsigned char myace$b_length;
