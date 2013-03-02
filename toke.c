@@ -5815,6 +5815,9 @@ Perl_yylex(pTHX)
 	    PREREF('%');
 	}
 	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
+	    if (*s == '[')
+		PL_tokenbuf[0] = '@';
+
 	    /* Warn about % where they meant $. */
 	    if (*s == '[' || *s == '{') {
 		if (ckWARN(WARN_SYNTAX)) {

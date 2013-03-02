@@ -1204,6 +1204,15 @@ term	:	termbinop
 			  TOKEN_GETMAD($2,$$,'[');
 			  TOKEN_GETMAD($4,$$,']');
 			}
+	|	hsh '[' expr ']'                     /* array key/value slice */
+			{ $$ = op_prepend_elem(OP_KVASLICE,
+				newOP(OP_PUSHMARK, 0),
+				    newLISTOP(OP_KVASLICE, 0,
+					list($3),
+					ref(oopsAV($1), OP_KVASLICE)));
+			  TOKEN_GETMAD($2,$$,'[');
+			  TOKEN_GETMAD($4,$$,']');
+			}
 	|	ary '{' expr ';' '}'                 /* @hash{@keys} */
 			{ $$ = op_prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),

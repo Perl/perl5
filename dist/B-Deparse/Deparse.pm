@@ -3573,6 +3573,7 @@ sub slice {
 }
 
 sub pp_aslice   { maybe_local(@_, slice(@_, "[", "]", "rv2av", "padav")) }
+sub pp_kvaslice {                 slice(@_, "[", "]", "rv2av", "padav")  }
 sub pp_hslice   { maybe_local(@_, slice(@_, "{", "}", "rv2hv", "padhv")) }
 sub pp_kvhslice {                 slice(@_, "{", "}", "rv2hv", "padhv")  }
 

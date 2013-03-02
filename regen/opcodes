@@ -217,6 +217,7 @@ aelemfast	constant array element	ck_null		s$	A S
 aelemfast_lex	constant lexical array element	ck_null		d0	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
+kvaslice	index/value array slice	ck_null		m@	A L
 
 aeach		each on array		ck_each		%	A
 akeys		keys on array		ck_each		t%	A

@@ -280,6 +280,7 @@ EXTCONST char* const PL_op_name[] = {
 	"aelemfast_lex",
 	"aelem",
 	"aslice",
+	"kvaslice",
 	"aeach",
 	"akeys",
 	"avalues",
@@ -666,6 +667,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"constant lexical array element",
 	"array element",
 	"array slice",
+	"index/value array slice",
 	"each on array",
 	"keys on array",
 	"values on array",
@@ -1066,6 +1068,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
 	Perl_pp_aelem,
 	Perl_pp_aslice,
+	Perl_pp_kvaslice,
 	Perl_pp_aeach,
 	Perl_pp_akeys,
 	Perl_pp_avalues,	/* implemented by Perl_pp_akeys */
@@ -1462,6 +1465,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* aelemfast_lex */
 	Perl_ck_null,		/* aelem */
 	Perl_ck_null,		/* aslice */
+	Perl_ck_null,		/* kvaslice */
 	Perl_ck_each,		/* aeach */
 	Perl_ck_each,		/* akeys */
 	Perl_ck_each,		/* avalues */
@@ -1852,6 +1856,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00013040,	/* aelemfast_lex */
 	0x00013204,	/* aelem */
 	0x00023401,	/* aslice */
+	0x00023401,	/* kvaslice */
 	0x00003b00,	/* aeach */
 	0x00003b08,	/* akeys */
 	0x00003b08,	/* avalues */

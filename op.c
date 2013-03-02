@@ -1276,6 +1276,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_AELEMFAST:
     case OP_AELEMFAST_LEX:
     case OP_ASLICE:
+    case OP_KVASLICE:
     case OP_HELEM:
     case OP_HSLICE:
     case OP_KVHSLICE:
@@ -2063,6 +2064,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
     case OP_KVHSLICE:
+    case OP_KVASLICE:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
         goto nomod;
@@ -5354,7 +5356,8 @@ S_is_list_assignment(pTHX_ const OP *o)
 
     if (type == OP_LIST || flags & OPf_PARENS ||
 	type == OP_RV2AV || type == OP_RV2HV ||
-	type == OP_ASLICE || type == OP_HSLICE || type == OP_KVHSLICE)
+	type == OP_ASLICE || type == OP_HSLICE ||
+        type == OP_KVASLICE || type == OP_KVHSLICE)
 	return TRUE;
 
     if (type == OP_PADAV || type == OP_PADHV)
@@ -6562,6 +6565,7 @@ S_ref_array_or_hash(pTHX_ OP *cond)
 
     else if(cond
     && (cond->op_type == OP_ASLICE
+    ||  cond->op_type == OP_KVASLICE
     ||  cond->op_type == OP_HSLICE
     ||  cond->op_type == OP_KVHSLICE)) {
 
@@ -8044,11 +8048,13 @@ Perl_oopsAV(pTHX_ OP *o)
 
     switch (o->op_type) {
     case OP_PADSV:
+    case OP_PADHV:
 	o->op_type = OP_PADAV;
 	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return ref(o, OP_RV2AV);
 
     case OP_RV2SV:
+    case OP_RV2HV:
 	o->op_type = OP_RV2AV;
 	o->op_ppaddr = PL_ppaddr[OP_RV2AV];
 	ref(o, OP_RV2AV);
@@ -8302,6 +8308,9 @@ Perl_ck_delete(pTHX_ OP *o)
 	    /* FALL THROUGH */
 	case OP_HELEM:
 	    break;
+	case OP_KVASLICE:
+	    Perl_croak(aTHX_ "%s argument is index/value array slice, use array slice",
+		  OP_DESC(o));
 	case OP_KVHSLICE:
 	    Perl_croak(aTHX_ "%s argument is key/value hash slice, use hash slice",
 		  OP_DESC(o));
