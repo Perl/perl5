@@ -2927,6 +2927,7 @@ dist/Cwd/lib/File/Spec.pm		portable operations on file names
 dist/Cwd/lib/File/Spec/Unix.pm		portable operations on Unix file names
 dist/Cwd/lib/File/Spec/VMS.pm		portable operations on VMS file names
 dist/Cwd/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
+dist/Cwd/Makefile.PL			makefile writer for Cwd
 dist/Cwd/t/crossplatform.t		See if File::Spec works crossplatform
 dist/Cwd/t/cwd.t			See if Cwd works
 dist/Cwd/t/Functions.t			See if File::Spec::Functions works
