@@ -2102,16 +2102,18 @@ int
 Perl_my_chdir(pTHX_ const char *dir)
 {
   STRLEN dirlen = strlen(dir);
+  const char *dir1 = dir;
 
   /* zero length string sometimes gives ACCVIO */
-  if (dirlen == 0) return -1;
-  const char *dir1;
+  if (dirlen == 0) {
+    SETERRNO(EINVAL, SS$_BADPARAM);
+    return -1;
+  }
 
   /* Perl is passing the output of the DCL SHOW DEFAULT with leading spaces.
    * This does not work if DECC$EFS_CHARSET is active.  Hack it here
    * so that existing scripts do not need to be changed.
    */
-  dir1 = dir;
   while ((dirlen > 0) && (*dir1 == ' ')) {
     dir1++;
     dirlen--;
