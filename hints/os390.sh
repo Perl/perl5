@@ -222,7 +222,7 @@ gconvert_preference=sprintf
 cat >config.arch<<'__CONFIG_ARCH__'
 # The '-W 0,float(ieee)' cannot be used during Configure as ldflags.
 
-ccflags="$ccflags -W 0,float(ieee)"
+ccflags="$ccflags -W 0,float(ieee) -W 0,LANGLVL(LONGLONG)"
 
 __CONFIG_ARCH__
 
