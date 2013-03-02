@@ -723,7 +723,9 @@ END_EXTERN_C
                                          && NATIVE_UTF8_TO_I8(c) <= 0xC7)
 #define UTF8_IS_ABOVE_LATIN1(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC8)
 
-#define UTF_START_MARK(len) (((len) >  7) ? 0xFF : ((U8)(0xFE << (7-(len)))))
+/* Can't exceed 7 on EBCDIC platforms */
+#define UTF_START_MARK(len) (0xFF & (0xFE << (7-(len))))
+
 #define UTF_START_MASK(len) (((len) >= 6) ? 0x01 : (0x1F >> ((len)-2)))
 #define UTF_CONTINUATION_MARK		0xA0
 #define UTF_CONTINUATION_MASK		((U8)0x1f)
