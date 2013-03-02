@@ -1,6 +1,7 @@
 package base;
 
-use strict 'vars';
+use strict;
+no strict 'refs';
 use vars qw($VERSION);
 $VERSION = '2.18';
 $VERSION = eval $VERSION;
