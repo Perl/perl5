@@ -14,7 +14,7 @@ $_ = 'a:b:c';
 
 ($a,$b,$c) = split($FS,$_);
 
-is(join(';',$a,$b,$c), 'a;b;c');
+is(join(';',$a,$b,$c), 'a;b;c', 'Split a simple string into scalars.');
 
 @ary = split(/:b:/);
 $cnt = split(/:b:/);
@@ -53,18 +53,18 @@ is($cnt, scalar(@ary));
 
 # Can we say how many fields to split to?
 $_ = join(':', split(' ','1 2 3 4 5 6', 3));
-is($_, '1:2:3 4 5 6');
+is($_, '1:2:3 4 5 6', "Split into a specified number of fields, defined by a literal");
 @ary = split(' ','1 2 3 4 5 6', 3);
 $cnt = split(' ','1 2 3 4 5 6', 3);
-is($cnt, scalar(@ary));
+is($cnt, scalar(@ary), "Check element count from previous test");
 
 # Can we do it as a variable?
 $x = 4;
 $_ = join(':', split(' ','1 2 3 4 5 6', $x));
-is($_, '1:2:3:4 5 6');
+is($_, '1:2:3:4 5 6', "Split into a specified number of fields, defined by a scalar variable");
 @ary = split(' ','1 2 3 4 5 6', $x);
 $cnt = split(' ','1 2 3 4 5 6', $x);
-is($cnt, scalar(@ary));
+is($cnt, scalar(@ary), "Check element count from previous test");
 
 # Does the 999 suppress null field chopping?
 $_ = join(':', split(/:/,'1:2:3:4:5:6:::', 999));
@@ -76,7 +76,7 @@ is($cnt, scalar(@ary));
 # Splitting without pattern
 $_ = "1 2 3 4";
 $_ = join(':', split);
-is($_ , '1:2:3:4');
+is($_ , '1:2:3:4', "Split and join without specifying a split pattern");
 
 # Does assignment to a list imply split to one more field than that?
 $foo = runperl( switches => ['-Dt'], stderr => 1, prog => '($a,$b)=split;' );
@@ -85,7 +85,7 @@ ok($foo =~ /DEBUGGING/ || $foo =~ /const\n?\Q(IV(3))\E/);
 # Can we say how many fields to split to when assigning to a list?
 ($a,$b) = split(' ','1 2 3 4 5 6', 2);
 $_ = join(':',$a,$b);
-is($_, '1:2 3 4 5 6');
+is($_, '1:2 3 4 5 6', "Storing split output into list of scalars");
 
 # do subpatterns generate additional fields (without trailing nulls)?
 $_ = join '|', split(/,|(-)/, "1-10,20,,,");
