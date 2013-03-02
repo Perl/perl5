@@ -73,6 +73,7 @@ print OUT <<'EOT';
 # Generated from DynaLoader_pm.PL
 
 package DynaLoader;
+no strict;
 
 #   And Gandalf said: 'Many folk like to know beforehand what is to
 #   be set on the table; but those who have laboured to prepare the
