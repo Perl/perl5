@@ -719,8 +719,14 @@ END_EXTERN_C
                                          && NATIVE_UTF8_TO_I8(c) != 0xE0)
 #define UTF8_IS_CONTINUATION(c)		((NATIVE_UTF8_TO_I8(c) & 0xE0) == 0xA0)
 #define UTF8_IS_CONTINUED(c) 		(NATIVE_UTF8_TO_I8(c) >= 0xA0)
+
 #define UTF8_IS_DOWNGRADEABLE_START(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC5     \
                                          && NATIVE_UTF8_TO_I8(c) <= 0xC7)
+/* Saying it this way adds a runtime test, but removes 2 run-time lookups */
+/*#define UTF8_IS_DOWNGRADEABLE_START(c)	((c) == I8_TO_NATIVE_UTF8(0xC5)     \
+                                         || (c) == I8_TO_NATIVE_UTF8(0xC6)  \
+                                         || (c) == I8_TO_NATIVE_UTF8(0xC7))
+*/
 #define UTF8_IS_ABOVE_LATIN1(c)	(NATIVE_UTF8_TO_I8(c) >= 0xC8)
 
 /* Can't exceed 7 on EBCDIC platforms */
