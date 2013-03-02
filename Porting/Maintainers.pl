@@ -666,7 +666,7 @@ use File::Glob qw(:case);
 
     'Env' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/Env-1.03.tar.gz',
+        'DISTRIBUTION' => 'FLORA/Env-1.04.tar.gz',
         'FILES'        => q[dist/Env],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
         'UPSTREAM'     => 'blead',
