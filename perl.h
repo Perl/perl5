@@ -2494,9 +2494,11 @@ typedef AV PAD;
 typedef AV PADNAMELIST;
 typedef SV PADNAME;
 
-#if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
-# define PERL_NEW_COPY_ON_WRITE
-#endif
+/* XXX for 5.18, disable the COW by default
+ * #if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
+ * # define PERL_NEW_COPY_ON_WRITE
+ * #endif
+ */
 
 #if defined(PERL_OLD_COPY_ON_WRITE) || defined(PERL_NEW_COPY_ON_WRITE)
 # if defined(PERL_OLD_COPY_ON_WRITE) && defined(PERL_NEW_COPY_ON_WRITE)
@@ -2504,6 +2506,8 @@ typedef SV PADNAME;
 # else
 #  define PERL_ANY_COW
 # endif
+#else
+# define PERL_SAWAMPERSAND
 #endif
 
 #include "handy.h"

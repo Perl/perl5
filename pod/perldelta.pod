@@ -304,7 +304,19 @@ well.
 
 =item *
 
-XXX
+The new copy-on-write mechanism that was introduced in 5.17.7 has now been
+disabled by default, since it was felt that there were two many rough
+edges for the 5.18 release. It is expected that it will be enabled by
+default for 5.20.
+
+This change also re-enables PL_sawampersand by default.
+
+It can be enabled in a perl build by running F<Configure> with
+B<-Accflags=-DPERL_NEW_COPY_ON_WRITE>, and we would encourage XS authors to
+try their code with such an enabled perl, and provide feedback.
+XXX need blurb, e.g. a reference to a new section in perlguts or perlxs
+explaining how XS authors should handle COW strings.
+
 
 =back
 
