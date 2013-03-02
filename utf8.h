@@ -26,6 +26,9 @@
 #    define USE_UTF8_IN_NAMES (PL_hints & HINT_UTF8)
 #endif
 
+#include "regcharclass.h"
+#include "unicode_constants.h"
+
 /* For to_utf8_fold_flags, q.v. */
 #define FOLD_FLAGS_LOCALE 0x1
 #define FOLD_FLAGS_FULL   0x2
@@ -100,9 +103,6 @@ EXTCONST unsigned char PL_utf8skip[];
 #endif
 
 END_EXTERN_C
-
-#include "regcharclass.h"
-#include "unicode_constants.h"
 
 /* Native character to/from iso-8859-1.  Are the identity functions on ASCII
  * platforms */
