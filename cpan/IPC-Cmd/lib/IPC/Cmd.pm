@@ -17,7 +17,7 @@ BEGIN {
                         $INSTANCES $ALLOW_NULL_ARGS
                     ];
 
-    $VERSION        = '0.78';
+    $VERSION        = '0.80';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -212,7 +212,6 @@ sub can_run {
         return $command if scalar $syms->getsym( uc $command );
     }
 
-    require Config;
     require File::Spec;
     require ExtUtils::MakeMaker;
 
@@ -223,7 +222,7 @@ sub can_run {
 
     } else {
         for my $dir (
-            (split /\Q$Config::Config{path_sep}\E/, $ENV{PATH}),
+            File::Spec->path,
             File::Spec->curdir
         ) {
             next if ! $dir || ! -d $dir;
@@ -1883,7 +1882,7 @@ special characters are escaped and passed as arguments instead of retaining
 their special meaning.
 
 However, if the command contained arguments that contained whitespace,
-stringifying the command would loose the significance of the whitespace.
+stringifying the command would lose the significance of the whitespace.
 Therefore, C<IPC::Cmd> will quote any arguments containing whitespace in your
 command if the command is passed as an arrayref and contains special characters.
 
