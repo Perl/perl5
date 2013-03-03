@@ -6206,9 +6206,20 @@ $ WC "d_sched_yield='" + d_sched_yield + "'"
 $ WC "d_scm_rights='undef'"
 $ WC "d_seekdir='define'"
 $ WC "d_select='" + d_select + "'"
-$ WC "d_sem='undef'"
-$ WC "d_semctl_semid_ds='undef'"
-$ WC "d_semctl_semun='undef'"
+$ IF ("''F$EXTRACT(1,3, F$GETSYI(""VERSION""))'".GES."8.4")
+$ THEN
+$   WC "d_sem='define'"
+$   WC "d_semctl_semid_ds='define'"
+$   WC "d_semctl_semun='define'"
+$   WC "d_semget='define'"
+$   WC "d_semop='define'"
+$ ELSE
+$   WC "d_sem='undef'"
+$   WC "d_semctl_semid_ds='undef'"
+$   WC "d_semctl_semun='undef'"
+$   WC "d_semget='undef'"
+$   WC "d_semop='undef'"
+$ ENDIF
 $ WC "d_sendmsg='undef'"
 $ WC "d_setegid='undef'"
 $ WC "d_setenv='" + d_setenv + "'"
