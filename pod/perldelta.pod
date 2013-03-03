@@ -305,7 +305,7 @@ well.
 =item *
 
 The new copy-on-write mechanism that was introduced in 5.17.7 has now been
-disabled by default, since it was felt that there were two many rough
+disabled by default, since it was felt that there were too many rough
 edges for the 5.18 release. It is expected that it will be enabled by
 default for 5.20.
 
