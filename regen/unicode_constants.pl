@@ -29,11 +29,11 @@ END
 
 # The data are at the end of this file.  A blank line is output as-is.
 # Otherwise, each line represents one #define, and begins with either a
-# Unicode character name with the blanks in it squeezed out or replaced by
+# Unicode character name with the blanks and dashes in it squeezed out or replaced by
 # underscores; or it may be a hexadecimal Unicode code point.  In the latter
 # case, the name will be looked-up to use as the name of the macro.  In either
-# case, the macro name will have suffixes as listed above, and all blanks will
-# be replaced by underscores.
+# case, the macro name will have suffixes as listed above, and all blanks and
+# dashes will be replaced by underscores.
 #
 # Each line may optionally have one of the following flags on it, separated by
 # white space from the initial token.
@@ -96,7 +96,7 @@ while ( <DATA> ) {
     }
 
     $name = $desired_name if $name eq "" && $desired_name;
-    $name =~ s/ /_/g;   # The macro name can have no blanks in it
+    $name =~ s/[- ]/_/g;   # The macro name can have no blanks nor dashes
 
     my $str = join "", map { sprintf "\\x%02X", $_ }
                        unpack("U0C*", pack("U", hex $cp));
