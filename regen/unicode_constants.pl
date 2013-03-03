@@ -152,7 +152,7 @@ U+03C5 string
 U+2010 string
 U+D800 first FIRST_SURROGATE
 
-U+007F native
+DEL native
 U+00DF native
 U+00E5 native
 U+00C5 native

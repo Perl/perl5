@@ -18,7 +18,7 @@
 #endif
 #include "util.h"
 #include "../unicode_constants.h"
-#define DELETE_CHAR DELETE_NATIVE
+#define DELETE_CHAR DEL_NATIVE
 
 const char *filename;
 const char *myname;
