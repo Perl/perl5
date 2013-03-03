@@ -440,7 +440,6 @@ CODE:
     if (src == &PL_sv_undef || SvROK(src)) src = sv_2mortal(newSV(0));
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
-    dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
     check = SvROK(check_sv) ? ENCODE_PERLQQ|ENCODE_LEAVE_SRC : SvIV(check_sv);
     /* 
      * PerlIO check -- we assume the object is of PerlIO if renewed
@@ -471,6 +470,7 @@ CODE:
     }
     }
 
+    dst = sv_2mortal(newSV(slen>0?slen:1)); /* newSV() abhors 0 -- inaba */
     s = process_utf8(aTHX_ dst, s, e, check_sv, 0, strict_utf8(aTHX_ obj), renewed);
 
     /* Clear out translated part of source unless asked not to */
@@ -482,7 +482,7 @@ CODE:
     SvCUR_set(src, slen);
     }
     SvUTF8_on(dst);
-    ST(0) = sv_2mortal(dst);
+    ST(0) = dst;
     XSRETURN(1);
 }
 
@@ -504,7 +504,7 @@ CODE:
     if (src == &PL_sv_undef || SvROK(src)) src = sv_2mortal(newSV(0));
     s = (U8 *) SvPV(src, slen);
     e = (U8 *) SvEND(src);
-    dst = newSV(slen>0?slen:1); /* newSV() abhors 0 -- inaba */
+    dst = sv_2mortal(newSV(slen>0?slen:1)); /* newSV() abhors 0 -- inaba */
     if (SvUTF8(src)) {
     /* Already encoded */
     if (strict_utf8(aTHX_ obj)) {
@@ -543,7 +543,7 @@ CODE:
     }
     SvPOK_only(dst);
     SvUTF8_off(dst);
-    ST(0) = sv_2mortal(dst);
+    ST(0) = dst;
     XSRETURN(1);
 }
 
