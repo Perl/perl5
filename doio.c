@@ -2155,6 +2155,7 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
     PERL_UNUSED_ARG(mark);
     /* diag_listed_as: msg%s not implemented */
     Perl_croak(aTHX_ "msgsnd not implemented");
+    return -1;
 #endif
 }
 
@@ -2197,6 +2198,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     PERL_UNUSED_ARG(mark);
     /* diag_listed_as: msg%s not implemented */
     Perl_croak(aTHX_ "msgrcv not implemented");
+    return -1;
 #endif
 }
 
@@ -2313,6 +2315,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 #else
     /* diag_listed_as: shm%s not implemented */
     Perl_croak(aTHX_ "shm I/O not implemented");
+    return -1;
 #endif
 }
 
