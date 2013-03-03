@@ -73,11 +73,11 @@ unless ($version) { die <<EOF; }
 Could not find a version of bison in your path. Please install bison.
 EOF
 
-unless ($version =~ /\b(1\.875[a-z]?|2\.[013456])\b/) { die <<EOF; }
+unless ($version =~ /\b(1\.875[a-z]?|2\.[0134567])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
-2.0, 2.1, 2.3, 2.4 or 2.5 is required.  Try installing
-    http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz
+2.0, 2.1, 2.3-2.7 is required.  Try installing
+    http://ftp.gnu.org/gnu/bison/bison-2.7.tar.gz
 or similar.  Your bison identifies itself as:
 
 $version
