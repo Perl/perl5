@@ -23,9 +23,17 @@ No changes since 5.14.0.
 
 =head1 Security
 
-This release contains a number of minor security fixes. These are
-included mainly to allow the test suite to pass cleanly with the clang
-compiler's address sanitizer facility.
+This release contains one major and a number of minor security fixes.
+These latter are included mainly to allow the test suite to pass cleanly
+with the clang compiler's address sanitizer facility.
+
+=head2 CVE-2013-1667: memory exhaustion with arbitrary hash keys
+
+With a carefully crafted set of hash keys (for example arguments on a
+URL), it is possible to cause a hash to consume a large amount of memory
+and CPU, and thus possibly to achieve a Denial-of-Service.
+
+This problem has been fixed.
 
 =head2 [perl #111594] Socket::unpack_sockaddr_un heap-buffer-overflow
 
@@ -59,6 +67,13 @@ This problem has been fixed.
 
 The statement C<local $[;>, when preceded by an eval, and when not part of
 an assignment, could crash. Fairly harmless.
+
+This problem has been fixed.
+
+=head2 wrap-around with IO on long strings
+
+Reading or writing strings greater than 2**31 bytes in size could segfault
+due to integer wraparound.
 
 This problem has been fixed.
 
