@@ -159,4 +159,3 @@ D800 first FIRST_SURROGATE
 00C5 native
 00FF native
 00B5 native
-0085 native
