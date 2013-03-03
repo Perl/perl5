@@ -28,9 +28,11 @@ print $out_fh <<END;
 END
 
 # The data are at the end of this file.  A blank line is output as-is.
-# Otherwise, each line represents one #define, and begins with either a
-# Unicode character name with the blanks and dashes in it squeezed out or replaced by
-# underscores; or it may be a hexadecimal Unicode code point.  In the latter
+# Comments (lines whose first non-blank is a '#') are converted to C-style,
+# though empty comments are converted to blank lines.  Otherwise, each line
+# represents one #define, and begins with either a Unicode character name with
+# the blanks and dashes in it squeezed out or replaced by underscores; or it
+# may be a hexadecimal Unicode code point.  In the latter
 # case, the name will be looked-up to use as the name of the macro.  In either
 # case, the macro name will have suffixes as listed above, and all blanks and
 # dashes will be replaced by underscores.
@@ -55,12 +57,21 @@ END
 # having to figure things out.
 
 while ( <DATA> ) {
-    if ($_ !~ /\S/) {
-        print $out_fh "\n";
+    chomp;
+
+    # Convert any '#' comments to /* ... */; empty lines and comments are
+    # output as blank lines
+    if ($_ =~ m/ ^ \s* (?: \# ( .* ) )? $ /x) {
+        my $comment_body = $1 // "";
+        if ($comment_body ne "") {
+            print $out_fh "/* $comment_body */\n";
+        }
+        else {
+            print $out_fh "\n";
+        }
         next;
     }
 
-    chomp;
     unless ($_ =~ m/ ^ ( [^\ ]* )           # Name or code point token
                        (?: [\ ]+ ( [^ ]* ) )?  # optional flag
                        (?: [\ ]+ ( .* ) )?  # name if unnamed; flag is required
