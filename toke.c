@@ -6900,6 +6900,11 @@ Perl_yylex(pTHX)
 		    gv = gv_fetchsv(sv, GV_NOADD_NOINIT | SvUTF8(sv),
 				    SVt_PVCV);
 		    off = 0;
+		    if (!gv) {
+			sv_free(sv);
+			sv = NULL;
+			goto just_a_word;
+		    }
 		}
 		else {
 		    rv2cv_op = newOP(OP_PADANY, 0);

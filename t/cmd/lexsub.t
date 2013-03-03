@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 128;
+BEGIN{plan 133;}
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -94,6 +94,19 @@ sub bar::c { 43 }
   package bar;
   my $y = if if if;
   is $y, 42, 'our subs from other packages override all keywords';
+}
+# Make sure errors don't pollute the stash (see RT 116981)
+{
+  eval "our sub ln99{!} ln99(1)";
+  eval "ln99(1)";
+  like $@, "Undefined subroutine &main::ln99 called", "Bad definitions do not pollute the stash";
+  isnt $::{ln99}, -1, "No placeholder was entered";
+  our sub ln103;
+  is $::{ln103}, -1, "Placeholder was entered";
+  eval "our sub ln103{!} ln103(1)";
+  eval "ln103(1)";
+  like $@, "Undefined subroutine &main::ln103 called", "Bad definitions do not pollute the stash";
+  isnt $::{ln103}, -1, "Placeholder was removed";
 }
 
 # -------------------- state -------------------- #
