@@ -279,7 +279,7 @@ unless ($define{'PERL_OLD_COPY_ON_WRITE'}
     ++$skip{Perl_sv_setsv_cow};
 }
 
-unless ($define{PERL_SAW_AMPERSAND}) {
+unless ($define{PERL_SAWAMPERSAND}) {
     ++$skip{PL_sawampersand};
 }
 
