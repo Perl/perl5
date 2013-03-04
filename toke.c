@@ -5264,7 +5264,7 @@ Perl_yylex(pTHX)
 	     * check if it in fact is. */
 	    if (bof && PL_rsfp &&
 		     (*s == 0 ||
-		      *(U8*)s == 0xEF ||
+		      *(U8*)s == BOM_UTF8_FIRST_BYTE ||
 		      *(U8*)s >= 0xFE ||
 		      s[1] == 0)) {
 		Off_t offset = (IV)PerlIO_tell(PL_rsfp);
@@ -11539,12 +11539,14 @@ S_swallow_bom(pTHX_ U8 *s)
 #endif
 	}
 	break;
-    case 0xEF:
-	if (slen > 2 && s[1] == 0xBB && s[2] == 0xBF) {
-	    if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
-	    s += 3;                      /* UTF-8 */
-	}
-	break;
+    case BOM_UTF8_FIRST_BYTE: {
+        const STRLEN len = sizeof(BOM_UTF8_TAIL) - 1; /* Exclude trailing NUL */
+        if (slen > len && memEQ(s+1, BOM_UTF8_TAIL, len)) {
+            if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
+            s += len + 1;                      /* UTF-8 */
+        }
+        break;
+    }
     case 0:
 	if (slen > 3) {
 	     if (s[1] == 0) {
@@ -11567,14 +11569,6 @@ S_swallow_bom(pTHX_ U8 *s)
 #endif
 	     }
 	}
-#ifdef EBCDIC
-    case 0xDD:
-        if (slen > 3 && s[1] == 0x73 && s[2] == 0x66 && s[3] == 0x73) {
-            if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
-            s += 4;                      /* UTF-8 */
-        }
-        break;
-#endif
 
     default:
 	 if (slen > 3 && s[1] == 0 && s[2] != 0 && s[3] == 0) {
