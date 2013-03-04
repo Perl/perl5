@@ -8865,17 +8865,9 @@ Perl_yylex(pTHX)
 	    FUN0(OP_WANTARRAY);
 
 	case KEY_write:
-#ifdef EBCDIC
-	{
-	    char ctl_l[2];
-	    ctl_l[0] = toCTRL('L');
-	    ctl_l[1] = '\0';
-	    gv_fetchpvn_flags(ctl_l, 1, GV_ADD|GV_NOTQUAL, SVt_PV);
-	}
-#else
-	    /* Make sure $^L is defined */
-	    gv_fetchpvs("\f", GV_ADD|GV_NOTQUAL, SVt_PV);
-#endif
+            /* Make sure $^L is defined. 0x0C is CTRL-L on ASCII platforms, and
+             * we use the same number on EBCDIC */
+	    gv_fetchpvs("\x0C", GV_ADD|GV_NOTQUAL, SVt_PV);
 	    UNI(OP_ENTERWRITE);
 
 	case KEY_x:
