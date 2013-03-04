@@ -701,10 +701,11 @@ Be sure to commit your change:
 
 =head3 run makemeta to update META files
 
-    $ perl Porting/makemeta
+    $ ./perl -Ilib Porting/makemeta
 
 Be sure to commit any changes (if applicable):
 
+    $ git status   # any changes?
     $ git commit -m 'Update META files' META.*
 
 =head3 build, test and check a fresh perl
