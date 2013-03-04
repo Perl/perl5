@@ -157,6 +157,8 @@ U+1E9E string
 
 U+2010 string
 U+D800 first FIRST_SURROGATE
+BOM first
+BOM tail
 
 DEL native
 U+00DF native

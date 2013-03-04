@@ -37,6 +37,8 @@
 
 #define HYPHEN_UTF8  "\xE2\x80\x90"    /* U+2010 */
 #define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xED    /* U+D800 */
+#define BOM_UTF8_FIRST_BYTE  0xEF    /* U+FEFF */
+#define BOM_UTF8_TAIL  "\xBB\xBF"    /* U+FEFF */
 
 #define DEL_NATIVE  0x7F    /* U+007F */
 #define LATIN_SMALL_LETTER_SHARP_S_NATIVE  0xDF    /* U+00DF */
