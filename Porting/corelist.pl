@@ -194,7 +194,8 @@ while ( my ( $module, $file ) = each %module_to_file ) {
 
     # Like it or lump it, this has to be Unix format.
     my $meta_YAML_path = "authors/id/$dist";
-    $meta_YAML_path =~ s/(?:tar\.gz|tar\.bz2|zip|tgz)$/meta/ or die "$meta_YAML_path";
+    $meta_YAML_path =~ s/(?:tar\.gz|tar\.bz2|zip|tgz)$/meta/
+	or die "ERROR: bad meta YAML path: '$meta_YAML_path'";
     my $meta_YAML_url = 'http://ftp.funet.fi/pub/CPAN/' . $meta_YAML_path;
 
     if ( -e "$cpan/$meta_YAML_path" ) {
