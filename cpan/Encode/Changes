@@ -1,8 +1,13 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.48 2013/02/18 02:23:56 dankogai Exp dankogai $
+# $Id: Changes,v 2.49 2013/03/05 03:12:49 dankogai Exp dankogai $
 #
-$Revision: 2.48 $ $Date: 2013/02/18 02:23:56 $
+$Revision: 2.49 $ $Date: 2013/03/05 03:12:49 $
+! Encode.xs
+  Addressed: Encoding objects leak memory if decoding fails
+  https://github.com/dankogai/p5-encode/issues/8
+
+2.48 2013/02/18 02:23:56
 ! encoding.pm 
   t/Mod_EUCJP.pm t/enc_data.t t/enc_eucjp.t t/enc_module.t t/enc_utf8.t
   t/encoding.t t/jperl.t

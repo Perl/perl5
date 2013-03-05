@@ -1,5 +1,5 @@
 #
-# $Id: piconv.t,v 0.4 2013/02/18 02:23:56 dankogai Exp dankogai $
+# $Id: piconv.t,v 0.4 2013/02/18 02:23:56 dankogai Exp $
 #
 
 BEGIN {
