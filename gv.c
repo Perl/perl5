@@ -1598,7 +1598,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		  : ""), SVfARG(namesv));
 	    GV *gv;
 	    SvREFCNT_dec_NN(namesv);
-	    if (USE_UTF8_IN_NAMES)
+	    if (is_utf8)
 		SvUTF8_on(err);
 	    qerror(err);
 	    gv = gv_fetchpvs("<none>::", GV_ADDMULTI, SVt_PVHV);

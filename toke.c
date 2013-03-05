@@ -5025,7 +5025,7 @@ Perl_yylex(pTHX)
 #endif
     switch (*s) {
     default:
-	if (isIDFIRST_lazy_if(s,UTF))
+	if (UTF ? isIDFIRST_utf8((U8*)s) : isALNUMC(*s))
 	    goto keylookup;
 	{
         SV *dsv = newSVpvs_flags("", SVs_TEMP);
@@ -8109,7 +8109,7 @@ Perl_yylex(pTHX)
 		for (d = s; isWORDCHAR_lazy_if(d,UTF);) {
 		    d += UTF ? UTF8SKIP(d) : 1;
                     if (UTF) {
-                        while (UTF8_IS_CONTINUED(*d) && _is_utf8_mark((U8*)d)) {
+                        while (isIDCONT_utf8((U8*)d)) {
                             d += UTF ? UTF8SKIP(d) : 1;
                         }
                     }
@@ -9196,17 +9196,25 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool 
     for (;;) {
         if (*d >= e)
             Perl_croak(aTHX_ "%s", ident_too_long);
-        if (isWORDCHAR(**s)) /* UTF handled below */
-            *(*d)++ = *(*s)++;
-        else if (is_utf8 && UTF8_IS_START(**s) && isWORDCHAR_utf8((U8*)*s)) {
+        if (is_utf8 && isIDFIRST_utf8((U8*)*s)) {
+             /* The UTF-8 case must come first, otherwise things
+             * like c\N{COMBINING TILDE} would start failing, as the
+             * isWORDCHAR_A case below would gobble the 'c' up.
+             */
+
             char *t = *s + UTF8SKIP(*s);
-            while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
+            while (isIDCONT_utf8((U8*)t))
                 t += UTF8SKIP(t);
             if (*d + (t - *s) > e)
                 Perl_croak(aTHX_ "%s", ident_too_long);
             Copy(*s, *d, t - *s, char);
             *d += t - *s;
             *s = t;
+        }
+        else if ( isWORDCHAR_A(**s) ) {
+            do {
+                *(*d)++ = *(*s)++;
+            } while isWORDCHAR_A(**s);
         }
         else if (allow_package && **s == '\'' && isIDFIRST_lazy_if(*s+1,is_utf8)) {
             *(*d)++ = ':';
@@ -9279,7 +9287,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	return s;
     }
     if (*s == '$' && s[1] &&
-	(isWORDCHAR_lazy_if(s+1,is_utf8) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
+	(isIDFIRST_lazy_if(s+1,is_utf8) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
     {
 	return s;
     }
@@ -9287,7 +9295,14 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	bracket = s;
 	s++;
     }
-    if (s < send) {
+
+#define VALID_LEN_ONE_IDENT(d, u)     (isPUNCT_A((U8)*(d))     \
+                                        || isCNTRL_A((U8)*(d)) \
+                                        || isDIGIT_A((U8)*(d)) \
+                                        || (!(u) && !UTF8_IS_INVARIANT((U8)*(d))))
+    if (s < send
+        && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(s, is_utf8)))
+    {
         if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
             STRLEN i;

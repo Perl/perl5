@@ -37,6 +37,13 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
+=head2 Explicit rules for variable names and identifiers
+
+Due to an oversight, length-one variable names in 5.16 were completely
+unrestricted, and opened the door to several kinds of insanity.  As of
+5.18, these now follow the rules of other identifiers, in addition
+to accepting characters that match the \p{POSIX_Punct} property.
+
 There are no longer any differences in the parsing of identifiers specified
 as $... or ${...}; previously, they were dealt with in different parts of
 the core, and so had slightly different behavior. For instance,

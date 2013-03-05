@@ -24,8 +24,9 @@ containing letters, underscores, and digits.  In some cases, it may
 be a chain of identifiers, separated by C<::> (or by the slightly
 archaic C<'>); all but the last are interpreted as names of packages,
 to locate the namespace in which to look up the final identifier
-(see L<perlmod/Packages> for details).  It's possible to substitute
-for a simple identifier, an expression that produces a reference
+(see L<perlmod/Packages> for details).  For a more in-depth discussion
+on identifiers, see L<Identifier parsing>.  It's possible to
+substitute for a simple identifier, an expression that produces a reference
 to the value at runtime.   This is described in more detail below
 and in L<perlref>.
 X<identifier>
@@ -103,6 +104,105 @@ a control character) are limited to one character, e.g.,  C<$%> or
 C<$$>.  (Most of these one character names have a predefined
 significance to Perl.  For instance, C<$$> is the current process
 id.)
+
+=head2 Identifier parsing
+X<identifiers>
+
+Up until Perl 5.18, the actual rules of what a valid identifier
+was were a bit fuzzy.  However, in general, anything defined here should
+work on previous versions of Perl, while the opposite -- edge cases
+that work in previous versions, but aren't defined here -- probably
+won't work on newer versions.
+As an important side note, please note that the following only applies
+to bareword identifiers as found in Perl source code, not identifiers
+introduced through symbolic references, which have much fewer
+restrictions.
+If working under the effect of the C<use utf8;> pragma, the following
+rules apply:
+
+    / (?[ ( \p{Word} & \p{XID_Start} ) + [_] ]) \p{XID_Continue}* /x
+
+If not under C<use utf8>, the source is treated as ASCII + 128 extra
+controls, and identifiers should match
+
+    / (?aa) (?!\d) \w+ /x
+
+That is, any word character in the ASCII range, as long as the first
+character is not a digit.
+
+There are two package separators in Perl: A double colon (C<::>) and a single
+quote (C<'>).  Normal identifiers can start or end with a double colon, and
+can contain several parts delimited by double colons.
+Single quotes have similar rules, but with the exception that they are not
+legal at the end of an identifier: That is, C<$'foo> and C<$foo'bar> are
+legal, but C<$foo'bar'> are not.
+
+
+Finally, if the identifier is preceded by a sigil --
+More so, normal identifiers can start or end with any number
+of double colons (::), and can contain several parts delimited
+by double colons.
+And additionally, if the identifier is preceded by a sigil --
+that is, if the identifier is part of a variable name -- it
+may optionally be enclosed in braces.
+
+While you can mix double colons with singles quotes, the quotes must come
+after the colons: C<$::::'foo> and C<$foo::'bar> are legal, but C<$::'::foo>
+and C<$foo'::bar> are not.
+
+Put together, a grammar to match a basic identifier becomes
+
+ /
+  (?(DEFINE)
+      (?<variable>
+          (?&sigil)
+          (?:
+                  (?&normal_identifier)
+              |   \{ \s* (?&normal_identifier) \s* \}
+          )
+      )
+      (?<normal_identifier>
+          (?: :: )* '?
+           (?&basic_identifier)
+           (?: (?= (?: :: )+ '? | (?: :: )* ' ) (?&normal_identifier) )?
+          (?: :: )*
+      )
+      (?<basic_identifier>
+        # is use utf8 on?
+          (?(?{ (caller(0))[8] & $utf8::hint_bits })
+              (?&Perl_XIDS) \p{XID_Continue}*
+            | (?aa) (?!\d) \w+
+          )
+      )
+      (?<sigil> [&*\$\@\%])
+      (?<Perl_XIDS> (?[ ( \p{Word} & \p{XID_Start} ) + [_] ]) )
+  )
+ /x
+
+Meanwhile, special identifiers don't follow the above rules; For the most
+part, all of the identifiers in this category have a special meaning given
+by Perl.  Because they have special parsing rules, these generally can't be
+fully-qualified.  They come in four forms:
+
+=over
+
+=item A sigil, followed solely by digits matching \p{POSIX_Digit}, like C<$0>,
+C<$1>, or C<$10000>.
+
+=item A sigil, followed by either a caret and a single POSIX uppercase letter,
+like C<$^V> or C<$^W>, or a sigil followed by a literal control character
+matching the C<\p{POSIX_Cntrl}> property. Due to a historical oddity, if not
+running under C<use utf8>, the 128 extra controls in the C<[0x80-0xff]> range
+may also be used in length one variables.
+
+=item Similar to the above, a sigil, followed by bareword text in brackets,
+where the first character is either a caret followed by an uppercase letter,
+or a literal control, like C<${^GLOBAL_PHASE}> or C<${\7LOBAL_PHASE}>.
+
+=item A sigil followed by a single character matching the C<\p{POSIX_Punct}>
+property, like C<$!> or C<%+>.
+
+=back
 
 =head2 Context
 X<context> X<scalar context> X<list context>
