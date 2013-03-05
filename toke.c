@@ -9188,6 +9188,46 @@ now_ok:
     return res;
 }
 
+PERL_STATIC_INLINE void
+S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8) {
+    dVAR;
+    PERL_ARGS_ASSERT_PARSE_IDENT;
+
+    for (;;) {
+        if (*d >= e)
+            Perl_croak(aTHX_ "%s", ident_too_long);
+        if (isWORDCHAR(**s)) /* UTF handled below */
+            *(*d)++ = *(*s)++;
+        else if (is_utf8 && UTF8_IS_START(**s) && isWORDCHAR_utf8((U8*)*s)) {
+            char *t = *s + UTF8SKIP(*s);
+            while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
+                t += UTF8SKIP(t);
+            if (*d + (t - *s) > e)
+                Perl_croak(aTHX_ "%s", ident_too_long);
+            Copy(*s, *d, t - *s, char);
+            *d += t - *s;
+            *s = t;
+        }
+        else if (allow_package && **s == '\'' && isIDFIRST_lazy_if(*s+1,is_utf8)) {
+            *(*d)++ = ':';
+            *(*d)++ = ':';
+            (*s)++;
+        }
+        else if (allow_package && **s == ':' && (*s)[1] == ':'
+           /* Disallow things like Foo::$bar. For the curious, this is
+            * the code path that triggers the "Bad name after" warning
+            * when looking for barewords.
+            */
+           && (*s)[2] != '$') {
+            *(*d)++ = *(*s)++;
+            *(*d)++ = *(*s)++;
+        }
+        else
+            break;
+    }
+    return;
+}
+
 /* Returns a NUL terminated string, with the length of the string written to
    *slp
    */
@@ -9197,44 +9237,14 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
     dVAR;
     char *d = dest;
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
+    bool is_utf8 = cBOOL(UTF);
 
     PERL_ARGS_ASSERT_SCAN_WORD;
 
-    for (;;) {
-	if (d >= e)
-	    Perl_croak(aTHX_ "%s", ident_too_long);
-	if (isWORDCHAR(*s)
-            || (!UTF && isALPHANUMERIC_L1(*s))) /* UTF handled below */
-        {
-	    *d++ = *s++;
-        }
-	else if (allow_package && (*s == '\'') && isIDFIRST_lazy_if(s+1,UTF)) {
-	    *d++ = ':';
-	    *d++ = ':';
-	    s++;
-	}
-	else if (allow_package && (s[0] == ':') && (s[1] == ':') && (s[2] != '$')) {
-	    *d++ = *s++;
-	    *d++ = *s++;
-	}
-	else if (UTF && UTF8_IS_START(*s) && isWORDCHAR_utf8((U8*)s)) {
-	    char *t = s + UTF8SKIP(s);
-	    size_t len;
-	    while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
-		t += UTF8SKIP(t);
-	    len = t - s;
-	    if (d + len > e)
-		Perl_croak(aTHX_ "%s", ident_too_long);
-	    Copy(s, d, len, char);
-	    d += len;
-	    s = t;
-	}
-	else {
-	    *d = '\0';
-	    *slp = d - dest;
-	    return s;
-	}
-    }
+    parse_ident(&s, &d, e, allow_package, is_utf8);
+    *d = '\0';
+    *slp = d - dest;
+    return s;
 }
 
 STATIC char *
@@ -9245,6 +9255,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     char funny = *s++;
     char *d = dest;
     char * const e = d + destlen - 3;    /* two-character token, ending NUL */
+    bool is_utf8 = cBOOL(UTF);
 
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
@@ -9258,33 +9269,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	}
     }
     else {
-	for (;;) {
-	    if (d >= e)
-		Perl_croak(aTHX_ "%s", ident_too_long);
-	    if (isWORDCHAR(*s))	/* UTF handled below */
-		*d++ = *s++;
-	    else if (*s == '\'' && isIDFIRST_lazy_if(s+1,UTF)) {
-		*d++ = ':';
-		*d++ = ':';
-		s++;
-	    }
-	    else if (*s == ':' && s[1] == ':') {
-		*d++ = *s++;
-		*d++ = *s++;
-	    }
-	    else if (UTF && UTF8_IS_START(*s) && isWORDCHAR_utf8((U8*)s)) {
-		char *t = s + UTF8SKIP(s);
-		while (UTF8_IS_CONTINUED(*t) && _is_utf8_mark((U8*)t))
-		    t += UTF8SKIP(t);
-		if (d + (t - s) > e)
-		    Perl_croak(aTHX_ "%s", ident_too_long);
-		Copy(s, d, t - s, char);
-		d += t - s;
-		s = t;
-	    }
-	    else
-		break;
-	}
+        parse_ident(&s, &d, e, 1, is_utf8);
     }
     *d = '\0';
     d = dest;
@@ -9294,7 +9279,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	return s;
     }
     if (*s == '$' && s[1] &&
-	(isWORDCHAR_lazy_if(s+1,UTF) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
+	(isWORDCHAR_lazy_if(s+1,is_utf8) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
     {
 	return s;
     }
@@ -9303,7 +9288,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	s++;
     }
     if (s < send) {
-        if (UTF) {
+        if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
             STRLEN i;
             d[skip] = '\0';
@@ -9331,25 +9316,9 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		}
 	    }
 	}
-	if (isIDFIRST_lazy_if(d,UTF)) {
-	    d += UTF8SKIP(d);
-	    if (UTF) {
-		char *end = s;
-		while ((end < send && isWORDCHAR_lazy_if(end,UTF)) || *end == ':') {
-		    end += UTF8SKIP(end);
-		    while (end < send && UTF8_IS_CONTINUED(*end) && _is_utf8_mark((U8*)end))
-			end += UTF8SKIP(end);
-		}
-		Copy(s, d, end - s, char);
-		d += end - s;
-		s = end;
-	    }
-	    else {
-		while ((isWORDCHAR(*s) || *s == ':') && d < e)
-		    *d++ = *s++;
-		if (d >= e)
-		    Perl_croak(aTHX_ "%s", ident_too_long);
-	    }
+	if (isIDFIRST_lazy_if(d,is_utf8)) {
+        d += is_utf8 ? UTF8SKIP(d) : 1;
+        parse_ident(&s, &d, e, 1, is_utf8);
 	    *d = '\0';
 	    while (s < send && SPACE_OR_TAB(*s))
 		s++;
@@ -9391,10 +9360,10 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	    if (PL_lex_state == LEX_NORMAL) {
 		if (ckWARN(WARN_AMBIGUOUS) &&
 		    (keyword(dest, d - dest, 0)
-		     || get_cvn_flags(dest, d - dest, UTF ? SVf_UTF8 : 0)))
+		     || get_cvn_flags(dest, d - dest, is_utf8 ? SVf_UTF8 : 0)))
 		{
                     SV *tmp = newSVpvn_flags( dest, d - dest,
-                                            SVs_TEMP | (UTF ? SVf_UTF8 : 0) );
+                                            SVs_TEMP | (is_utf8 ? SVf_UTF8 : 0) );
 		    if (funny == '#')
 			funny = '@';
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),

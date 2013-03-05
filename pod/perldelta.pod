@@ -37,11 +37,11 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+There are no longer any differences in the parsing of identifiers specified
+as $... or ${...}; previously, they were dealt with in different parts of
+the core, and so had slightly different behavior. For instance,
+C<${foo:bar}> was a legal variable name.  Since they are now both parsed
+by the same code, that is no longer the case.
 
 [ List each incompatible change as a =head2 entry ]
 
