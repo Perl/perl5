@@ -8105,15 +8105,9 @@ Perl_yylex(pTHX)
 	case KEY_open:
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
-		const char *t;
-		for (d = s; isWORDCHAR_lazy_if(d,UTF);) {
-		    d += UTF ? UTF8SKIP(d) : 1;
-                    if (UTF) {
-                        while (isIDCONT_utf8((U8*)d)) {
-                            d += UTF ? UTF8SKIP(d) : 1;
-                        }
-                    }
-                }
+          const char *t;
+          d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE,
+              &len);
 		for (t=d; isSPACE(*t);)
 		    t++;
 		if ( *t && strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
