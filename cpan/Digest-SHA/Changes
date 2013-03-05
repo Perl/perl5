@@ -1,5 +1,13 @@
 Revision history for Perl extension Digest::SHA.
 
+5.83  Mon Mar  4 08:12:00 MST 2013
+	- removed code for standalone C operation (no longer used)
+		-- eliminates need for external symbols
+		-- consolidates SHA and HMAC code
+		-- reduces size of object files
+		-- thanks to Marc Lehmann for suggestions
+	- tweaked Makefile.PL to show dependencies of SHA.c
+
 5.82  Thu Jan 24 04:54:12 MST 2013
 	- introduced workaround to SvPVbyte bug in Perl 5.6
 		-- module behavior now consistent under all Perls 5.6+

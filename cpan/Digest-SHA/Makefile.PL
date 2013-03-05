@@ -11,7 +11,7 @@ my %opts;
 getopts('tx', \%opts);	# -t is no longer used, but allow it anyway
 
 my @defines;
-push(@defines, '-DSHA_PERL_MODULE') if $] >= 5.004;
+push(@defines, '-DSHA_PerlIO') if $] >= 5.004;
 push(@defines, '-DNO_SHA_384_512')  if $opts{'x'};
 my $define = join(' ', @defines);
 
@@ -33,6 +33,10 @@ if ($Config{archname} =~ /^i[3456]86/ && $Config{ccname} eq 'gcc') {
 	push(@extra, OPTIMIZE => '-O1 -fomit-frame-pointer');
 }
 
+my @srcs = map { "src/$_" } qw(sha.c sha64bit.c);
+my @hdrs = map { "src/$_" } qw(sha.h sha64bit.h);
+my $deps = join(' ', @srcs, @hdrs);
+
 my %att = (
 	'NAME'		=> 'Digest::SHA',
 	'VERSION_FROM'	=> $PM,
@@ -41,6 +45,7 @@ my %att = (
 	'INC'		=> '-I.',
 	'EXE_FILES'	=> [ 'shasum' ],
 	'INSTALLDIRS'	=> ($] >= 5.010 and $] < 5.011) ? 'perl' : 'site',
+	'depend'	=> { 'SHA.c' => $deps },
 	@extra,
 );
 

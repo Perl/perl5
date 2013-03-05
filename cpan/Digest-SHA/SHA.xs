@@ -13,7 +13,6 @@
 #endif
 
 #include "src/sha.c"
-#include "src/hmac.c"
 
 static int ix2alg[] =
 	{1,1,1,224,224,224,256,256,256,384,384,384,512,512,512,
@@ -22,9 +21,6 @@ static int ix2alg[] =
 MODULE = Digest::SHA		PACKAGE = Digest::SHA
 
 PROTOTYPES: ENABLE
-
-#include "src/sha.h"
-#include "src/hmac.h"
 
 #ifndef INT2PTR
 #define INT2PTR(p, i) (p) (i)

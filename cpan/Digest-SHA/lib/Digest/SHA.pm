@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.82';
+$VERSION = '5.83';
 
 require Exporter;
 require DynaLoader;
@@ -331,17 +331,17 @@ contain wide characters, namely, characters whose ordinal values are
 greater than 255.  This can cause problems for digest algorithms such
 as SHA that are specified to operate on sequences of bytes.
 
-The rule by which Digest::SHA handles a Unicode string is easy to
-state, but potentially confusing to grasp: the string is interpreted
-as a sequence of bytes, where each byte is equal to the ordinal value
-(viz. code point) of its corresponding Unicode character.  That way,
-the Unicode version of the string 'abc' has exactly the same digest
-value as the ordinary string 'abc'.
+The rule by which Digest::SHA handles a Unicode string is easy
+to state, but potentially confusing to grasp: the string is interpreted
+as a sequence of byte values, where each byte value is equal to the
+ordinal value (viz. code point) of its corresponding Unicode character.
+That way, the Unicode string 'abc' has exactly the same digest value as
+the ordinary string 'abc'.
 
-Since a wide character does not fit into a byte, the Digest::SHA routines
-croak if they encounter one.  Whereas if a Unicode string contains no
-wide characters, the module accepts it quite happily.  The following
-code illustrates the two cases:
+Since a wide character does not fit into a byte, the Digest::SHA
+routines croak if they encounter one.  Whereas if a Unicode string
+contains no wide characters, the module accepts it quite happily.
+The following code illustrates the two cases:
 
 	$str1 = pack('U*', (0..255));
 	print sha1_hex($str1);		# ok
@@ -351,7 +351,8 @@ code illustrates the two cases:
 
 Be aware that the digest routines silently convert UTF-8 input into its
 equivalent byte sequence in the native encoding (cf. utf8::downgrade).
-This side effect only influences the way Perl stores data internally.
+This side effect influences only the way Perl stores the data internally,
+but otherwise leaves the actual value of the data intact.
 
 =head1 NIST STATEMENT ON SHA-1
 

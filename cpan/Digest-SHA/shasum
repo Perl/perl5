@@ -4,8 +4,8 @@
 	##
 	## Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.82
-	## Thu Jan 24 04:54:12 MST 2013
+	## Version: 5.83
+	## Mon Mar  4 08:12:00 MST 2013
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum.
 	## Add an "-a" option for algorithm selection, a "-p"
@@ -97,7 +97,7 @@ use strict;
 use Fcntl;
 use Getopt::Long;
 
-my $VERSION = "5.82";
+my $VERSION = "5.83";
 
 
 	## Try to use Digest::SHA.  If not installed, use the slower
