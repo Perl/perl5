@@ -730,7 +730,8 @@ Only use when you are sure SvNOK is true.  See also C<SvNV()>.
 
 =for apidoc Am|char*|SvPVX|SV* sv
 Returns a pointer to the physical string in the SV.  The SV must contain a
-string.
+string. Prior to 5.9.3 it is not safe to execute this macro unless the SV's
+type >= SVt_PV.
 
 This is also used to store the name of an autoloaded subroutine in an XS
 AUTOLOAD routine.  See L<perlguts/Autoloading with XSUBs>.
