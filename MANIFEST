@@ -5050,11 +5050,9 @@ t/bigmem/read.t			Check read() handles large offsets
 t/bigmem/vec.t			Check vec() handles large offsets
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
-t/cmd/lexsub.t			See if lexical subroutines work
 t/cmd/mod.t			See if statement modifiers work
 t/cmd/subval.t			See if subroutine values work
 t/cmd/switch.t			See if switch optimizations work
-t/cmd/while.t			See if while loops work
 t/comp/bproto.t			See if builtins conform to their prototypes
 t/comp/cmdopt.t			See if command optimization works
 t/comp/colon.t			See if colons are parsed correctly
@@ -5336,6 +5334,7 @@ t/op/filetest.t			See if file tests work
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/fork.t			See if fork works
+t/op/for.t			See if for loops work
 t/op/fresh_perl_utf8.t		UTF8 tests for pads and gvs
 t/op/getpid.t			See if $$ and getppid work with threads
 t/op/getppid.t			See if getppid works
@@ -5365,6 +5364,7 @@ t/op/lc.t			See if lc, uc, lcfirst, ucfirst, quotemeta work
 t/op/leaky-magic.t		See whether vars' magic leaks into packages
 t/op/length.t			See if length works
 t/op/lex_assign.t		See if ops involving lexicals or pad temps work
+t/op/lexsub.t			See if lexical subroutines work
 t/op/lex.t			Tests too complex for t/base/lex.t
 t/op/lfs.t			See if large files work for perlio
 t/op/list.t			See if array lists work
@@ -5465,6 +5465,7 @@ t/op/vec.t			See if vectors work
 t/op/ver.t			See if v-strings and the %v format flag work
 t/op/wantarray.t		See if wantarray works
 t/op/warn.t			See if warn works
+t/op/while.t			See if while loops work
 t/op/write.t			See if write works (formats work)
 t/op/yadayada.t			See if ... works
 t/perl.supp			Perl valgrind suppressions
