@@ -3329,8 +3329,8 @@ typedef pthread_key_t	perl_key;
 #else
 #  define EXPECT(expr,val)                  (expr)
 #endif
-#define LIKELY(cond)                        EXPECT(cond,1)
-#define UNLIKELY(cond)                      EXPECT(cond,0)
+#define LIKELY(cond)                        EXPECT(cBOOL(cond),TRUE)
+#define UNLIKELY(cond)                      EXPECT(cBOOL(cond),FALSE)
 #ifdef HAS_BUILTIN_CHOOSE_EXPR
 /* placeholder */
 #endif
