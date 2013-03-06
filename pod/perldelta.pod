@@ -38,6 +38,11 @@ due to integer wraparound.
 
 This problem has been fixed.
 
+=head2 memory leak in Encode
+
+The UTF-8 encoding implementation in Encode.xs had a memory leak which has been
+fixed.
+
 =head1 Incompatible Changes
 
 There are no changes intentionally incompatible with 5.16.0. If any
@@ -55,11 +60,15 @@ There have been no deprecations since 5.16.0.
 
 =item *
 
-L<XS::APItest> has been upgraded from version 0.38 to version 0.39.
+L<Encode> has been upgraded from version 2.44 to version 2.44_01.
 
 =item *
 
 L<Module::CoreList> has been upgraded from version 2.76 to version 2.76_01.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 0.38 to version 0.39.
 
 =back
 
