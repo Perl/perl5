@@ -568,9 +568,9 @@ struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #else
 #   define TAINT		(PL_tainted = TRUE)
 #   define TAINT_NOT	(PL_tainted = FALSE)
-#   define TAINT_IF(c)	if (c) { PL_tainted = TRUE; }
-#   define TAINT_ENV()	if (PL_tainting) { taint_env(); }
-#   define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(NULL, s); }
+#   define TAINT_IF(c)	if (UNLIKELY(c)) { PL_tainted = TRUE; }
+#   define TAINT_ENV()	if (UNLIKELY(PL_tainting)) { taint_env(); }
+#   define TAINT_PROPER(s)	if (UNLIKELY(PL_tainting)) { taint_proper(NULL, s); }
 #   define TAINT_set(s)		(PL_tainted = (s))
 #   define TAINT_get		(PL_tainted)
 #   define TAINTING_get		(PL_tainting)

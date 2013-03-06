@@ -1246,12 +1246,12 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	assert(!SvPAD_TYPED(sv));
 	break;
     default:
-	if (old_type_details->cant_upgrade)
+	if (UNLIKELY(old_type_details->cant_upgrade))
 	    Perl_croak(aTHX_ "Can't upgrade %s (%" UVuf ") to %" UVuf,
 		       sv_reftype(sv, 0), (UV) old_type, (UV) new_type);
     }
 
-    if (old_type > new_type)
+    if (UNLIKELY(old_type > new_type))
 	Perl_croak(aTHX_ "sv_upgrade from type %d down to type %d",
 		(int)old_type, (int)new_type);
 
@@ -1386,7 +1386,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	    SvNV_set(sv, 0);
 #endif
 
-	if (new_type == SVt_PVIO) {
+	if (UNLIKELY(new_type == SVt_PVIO)) {
 	    IO * const io = MUTABLE_IO(sv);
 	    GV *iogv = gv_fetchpvs("IO::File::", GV_ADD, SVt_PVHV);
 
@@ -1399,7 +1399,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
 	    IoPAGE_LEN(sv) = 60;
 	}
-	if (new_type == SVt_REGEXP)
+	if (UNLIKELY(new_type == SVt_REGEXP))
 	    sv->sv_u.svu_rx = (regexp *)new_body;
 	else if (old_type < SVt_PV) {
 	    /* referant will be NULL unless the old type was SVt_IV emulating

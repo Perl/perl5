@@ -278,15 +278,15 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 =cut
 */
 
-#define EXTEND(p,n)	(void)(PL_stack_max - p < (int)(n) &&		\
+#define EXTEND(p,n)    (void)(UNLIKELY(PL_stack_max - p < (int)(n)) &&         \
 			    (sp = stack_grow(sp,p, (int) (n))))
 
 /* Same thing, but update mark register too. */
-#define MEXTEND(p,n)	STMT_START {if (PL_stack_max - p < (int)(n)) {	\
-			    const int markoff = mark - PL_stack_base;	\
-			    sp = stack_grow(sp,p,(int) (n));		\
-			    mark = PL_stack_base + markoff;		\
-			} } STMT_END
+#define MEXTEND(p,n)   STMT_START {if (UNLIKELY(PL_stack_max - p < (int)(n))) {\
+                           const int markoff = mark - PL_stack_base;           \
+                           sp = stack_grow(sp,p,(int) (n));                    \
+                           mark = PL_stack_base + markoff;                     \
+                       } } STMT_END
 
 #define PUSHs(s)	(*++sp = (s))
 #define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
@@ -388,7 +388,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define EXTEND_MORTAL(n) \
     STMT_START {							\
-	if (PL_tmps_ix + (n) >= PL_tmps_max)				\
+	if (UNLIKELY(PL_tmps_ix + (n) >= PL_tmps_max))			\
 	    tmps_grow(n);						\
     } STMT_END
 
