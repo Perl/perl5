@@ -2803,13 +2803,13 @@ PP(pp_goto)
 	    SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
 	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
-	    if (cxix < 0)
-	    {
-		SvREFCNT_dec(cv);
-		DIE(aTHX_ "Can't goto subroutine outside a subroutine");
-	    }
-	    if (cxix < cxstack_ix)
+	    if (cxix < cxstack_ix) {
+                if (cxix < 0) {
+                    SvREFCNT_dec(cv);
+                    DIE(aTHX_ "Can't goto subroutine outside a subroutine");
+                }
 		dounwind(cxix);
+            }
 	    TOPBLOCK(cx);
 	    SPAGAIN;
 	    /* ban goto in eval: see <20050521150056.GC20213@iabyn.com> */
