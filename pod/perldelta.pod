@@ -57,6 +57,10 @@ There have been no deprecations since 5.16.0.
 
 L<XS::APItest> has been upgraded from version 0.38 to version 0.39.
 
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.76 to version 2.76_01.
+
 =back
 
 =head1 Known Problems
