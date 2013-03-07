@@ -709,7 +709,7 @@ END_EXTERN_C
 		      (uv) < 0x400000       ? 5 : \
 		      (uv) < 0x4000000      ? 6 : 7 )
 
-#define UNI_IS_INVARIANT(c)		((c) <  0xA0)
+#define UNI_IS_INVARIANT(c)		(((UV)(c)) <  0xA0)
 
 /* UTF-EBCDIC semantic macros - transform back into I8 and then compare
  * Comments as to the meaning of each are given at their corresponding utf8.h
