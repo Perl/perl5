@@ -4,6 +4,7 @@ use strict;
 use ExtUtils::MakeMaker;
 use Getopt::Std;
 use Config qw(%Config);
+use File::Spec;
 
 my $PM = 'lib/Digest/SHA.pm';
 
@@ -33,8 +34,8 @@ if ($Config{archname} =~ /^i[3456]86/ && $Config{ccname} eq 'gcc') {
 	push(@extra, OPTIMIZE => '-O1 -fomit-frame-pointer');
 }
 
-my @srcs = map { "src/$_" } qw(sha.c sha64bit.c);
-my @hdrs = map { "src/$_" } qw(sha.h sha64bit.h);
+my @srcs = map { File::Spec->catfile('src', $_) } qw(sha.c sha64bit.c);
+my @hdrs = map { File::Spec->catfile('src', $_) } qw(sha.h sha64bit.h);
 my $deps = join(' ', @srcs, @hdrs);
 
 my %att = (
