@@ -89,8 +89,8 @@ name so people don’t realize they are using a program.
 
 =item architecture
 
-The kind of X<architecture>computer you’re working on, where one “kind” of
-computer means all those computers sharing a compatible machine language.
+The kind of X<architecture>computer you’re working on, where one “kind of
+computer” means all those computers sharing a compatible machine language.
 Since Perl programs are (typically) simple text files, not executable
 images, a Perl program is much less sensitive to the architecture it’s
 running on than programs in other languages, such as C, that are B<compiled>
@@ -1495,7 +1495,7 @@ it’s just a fancy form of quoting.
 =item hexadecimal
 
 A X<hexadecimals>number in base 16, “hex” for short. The digits for 10
-through 16 are customarily represented by the letters C<a> through C<f>.
+through 15 are customarily represented by the letters C<a> through C<f>.
 Hexadecimal constants in Perl start with C<0x>. See also the C<hex>
 function in Camel chapter 27, “Functions”.
 
