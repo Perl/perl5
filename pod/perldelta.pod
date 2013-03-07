@@ -110,7 +110,7 @@ L</Security> (version numbers have not changed):
 
 L<Encode> has been upgraded from version 2.42_01 to version 2.42_02.
 
-L<Module::CoreList> has been updated to version 2.49_05 to add data for
+L<Module::CoreList> has been updated to version 2.49_06 to add data for
 this release.
 
 =head2 Removed Modules and Pragmata
