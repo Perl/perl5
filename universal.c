@@ -490,7 +490,7 @@ XS(XS_version_new)
 {
     dVAR;
     dXSARGS;
-    if (items > 3)
+    if (items > 3 || items < 1)
 	croak_xs_usage(cv, "class, version");
     SP -= items;
     {
