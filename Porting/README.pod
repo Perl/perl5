@@ -16,9 +16,7 @@ text.
 Program to prepare dual-life distributions for insertion into the Perl 5
 F<lib/> and F<t/> directories.  Now thought to be largely superseded.
 
-=head2 F<bisect-example.sh>
-
-=head2 F<bisect-runner.pl> and F<bisect.pl>
+=head2 F<bisect-example.sh>, F<bisect-runner.pl> and F<bisect.pl>
 
 Use C<git bisect> to pinpoint changes.
 
