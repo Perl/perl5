@@ -4888,6 +4888,7 @@ Porting/pod_lib.pl		Code for handling generated pods
 Porting/pod_rules.pl		generate lists of pod files for Makefiles
 Porting/podtidy			Reformat pod using Pod::Tidy
 Porting/pumpkin.pod		Guidelines and hints for Perl maintainers
+Porting/README.pod			Outline of contents of Porting directory
 Porting/README.y2038		Perl notes for the 2038 fix
 Porting/release_announcement_template.txt
 Porting/release_managers_guide.pod	Release Manager's Guide
