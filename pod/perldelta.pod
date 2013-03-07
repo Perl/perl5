@@ -19,9 +19,9 @@ No changes since 5.14.0.
 
 =head1 Security
 
-This release contains one major and a number of minor security fixes.
-The latter are included mainly to allow the test suite to pass cleanly
-with the clang compiler's address sanitizer facility.
+This release contains one major, and medium, and a number of minor
+security fixes.  The latter are included mainly to allow the test suite to
+pass cleanly with the clang compiler's address sanitizer facility.
 
 =head2 CVE-2013-1667: memory exhaustion with arbitrary hash keys
 
@@ -30,6 +30,11 @@ URL), it is possible to cause a hash to consume a large amount of memory
 and CPU, and thus possibly to achieve a Denial-of-Service.
 
 This problem has been fixed.
+
+=head2 memory leak in Encode
+
+The UTF-8 encoding implementation in Encode.xs had a memory leak which has been
+fixed.
 
 =head2 [perl #111594] Socket::unpack_sockaddr_un heap-buffer-overflow
 
@@ -102,6 +107,8 @@ L</Security> (version numbers have not changed):
 =item List::Util
 
 =back
+
+L<Encode> has been upgraded from version 2.42_01 to version 2.42_02.
 
 L<Module::CoreList> has been updated to version 2.49_05 to add data for
 this release.
