@@ -12,6 +12,10 @@
 #  define DD_USE_OLD_ID_FORMAT
 #endif
 
+#ifndef isWORDCHAR
+#   define isWORDCHAR(c) isALNUM(c)
+#endif
+
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen);
