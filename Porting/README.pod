@@ -91,11 +91,13 @@ F<config_h.SH> after metaconfig.
 
 =head2 F<config.sh>
 
-This file was produced by running the F<Configure> script. It holds all the
-definitions figured out by F<Configure>.  Should you modify one of these
-values, do not forget to propagate your changes by running C<Configure -der>.
-You may instead choose to run each of the F<.SH> files by yourself, or
-C<Configure -S>.
+This file is a sample F<config.sh> file.  F<config.sh> is normally
+produced by running the F<Configure> script. It holds all the definitions
+figured out by F<Configure>.  If you are unable to successfully run
+F<Configure> on your system, copy this sample file to F<config.sh>
+at the top of the perl source tree and edit it to suit your system.
+Then propagate those values by running C<Configure -S>.  This sample
+file is normally updated each time F<Configure> is updated.
 
 =head2 F<core-cpan-diff>
 
@@ -176,6 +178,7 @@ This script creates a tag for every p4raw-id.
 
 This file is built by F<metaconfig>. This file contains a description of all
 the shell variables whose value is determined by the Configure script. 
+It later gets incorporated into the pod for F<Config.pm>.
 
 =head2 F<how_to_write_a_perldelta.pod> 
 
@@ -280,6 +283,8 @@ Applies F<podtidy> to a file.
 =head2 F<pumpkin.pod>
 
 Pumpkin - Notes on handling the Perl Patch Pumpkin And Porting Perl.
+Many of these are out of date or superceded by other documents in 
+this directory.
 
 =head2 F<README.y2038>
 
