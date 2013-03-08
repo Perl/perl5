@@ -495,10 +495,26 @@ sub _optree {
     # can return the "else" value.
     return $else if !@conds;
 
+    # Assuming Perl is being released from an ASCII platform, the below makes
+    # it work for non-UTF-8 out-of-the box when porting to non-ASCII, by
+    # adding a translation back to ASCII.  This is the wrong thing to do for
+    # UTF-EBCDIC, as that is different from UTF-8.  But the intent here is
+    # that this regen should be run on the target system, which will omit the
+    # translation, and generate the correct UTF-EBCDIC.  On ASCII systems, the
+    # translation macros expand to just their argument, so there is no harm
+    # done nor performance penalty by including them.
+    my $test;
+    if ($test_type =~ /^cp/) {
+        $test = "cp";
+        $test = "NATIVE_TO_UNI($test)" if ASCII_PLATFORM;
+    }
+    else {
+        $test = "((U8*)s)[$depth]";
+        $test = "NATIVE_TO_LATIN1($test)" if ASCII_PLATFORM;
+    }
 
-    my $test= $test_type =~ /^cp/ ? "cp" : "((U8*)s)[$depth]";
-    # first we loop over the possible keys/conditions and find out what they look like
-    # we group conditions with the same optree together.
+    # first we loop over the possible keys/conditions and find out what they
+    # look like we group conditions with the same optree together.
     my %dmp_res;
     my @res_order;
     local $Data::Dumper::Sortkeys=1;
