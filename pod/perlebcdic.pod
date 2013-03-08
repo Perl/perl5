@@ -77,7 +77,7 @@ identification numbers (CCSID numbers) or code page numbers.
 Perl can be compiled on platforms that run any of three commonly used EBCDIC
 character sets, listed below.
 
-=head2 The 13 variant characters
+=head3 The 13 variant characters
 
 Among IBM EBCDIC character code sets there are 13 characters that
 are often mapped to different integer values.  Those characters
@@ -92,7 +92,9 @@ one of the three Perl knows about, Perl will either fail to compile, or
 mistakenly and silently choose one of the three.
 They are:
 
-=head2 0037
+=over
+
+=item B<0037>
 
 Character code set ID 0037 is a mapping of the ASCII plus Latin-1
 characters (i.e. ISO 8859-1) to an EBCDIC set.  0037 is used
@@ -100,17 +102,19 @@ in North American English locales on the OS/400 operating system
 that runs on AS/400 computers.  CCSID 0037 differs from ISO 8859-1
 in 237 places, in other words they agree on only 19 code point values.
 
-=head2 1047
+=item B<1047>
 
 Character code set ID 1047 is also a mapping of the ASCII plus
 Latin-1 characters (i.e. ISO 8859-1) to an EBCDIC set.  1047 is
 used under Unix System Services for OS/390 or z/OS, and OpenEdition
 for VM/ESA.  CCSID 1047 differs from CCSID 0037 in eight places.
 
-=head2 POSIX-BC
+=item B<POSIX-BC>
 
 The EBCDIC code page in use on Siemens' BS2000 system is distinct from
 1047 and 0037.  It is identified below as the POSIX-BC set.
+
+=back
 
 =head2 Unicode code points versus EBCDIC code points
 
@@ -682,6 +686,11 @@ code page you can use the Config module like so:
     $is_ebcdic = $Config{'ebcdic'} eq 'define';
 
 =head1 CONVERSIONS
+
+=head2 C<utf8::unicode_to_native()> and C<utf8::native_to_unicode()>
+
+These functions take an input numeric code point in one encoding and
+return what its equivalent value is in the other.
 
 =head2 tr///
 
