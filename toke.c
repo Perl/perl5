@@ -3986,11 +3986,6 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 			return 0;
 		}
     }
-    s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-    /* start is the beginning of the possible filehandle/object,
-     * and s is the end of it
-     * tmpbuf is a copy of it
-     */
 
     if (*start == '$') {
 	if (cv || PL_last_lop_op == OP_PRINT || PL_last_lop_op == OP_SAY ||
@@ -4007,6 +4002,13 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	PL_expect = XREF;
 	return *s == '(' ? FUNCMETH : METHOD;
     }
+
+    s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
+    /* start is the beginning of the possible filehandle/object,
+     * and s is the end of it
+     * tmpbuf is a copy of it (but with single quotes as double colons)
+     */
+
     if (!keyword(tmpbuf, len, 0)) {
 	if (len > 2 && tmpbuf[len - 2] == ':' && tmpbuf[len - 1] == ':') {
 	    len -= 2;
