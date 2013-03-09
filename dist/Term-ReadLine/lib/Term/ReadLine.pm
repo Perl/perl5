@@ -117,7 +117,7 @@ C<readline> method).
 =item C<event_loop>
 
 Registers call-backs to wait for user input (i.e., during C<readline>
-method).  This supercedes tkRunning.
+method).  This supersedes tkRunning.
 
 The first call-back registered is the call back for waiting.  It is
 expected that the callback will call the current event loop until

@@ -283,7 +283,7 @@ Applies F<podtidy> to a file.
 =head2 F<pumpkin.pod>
 
 Pumpkin - Notes on handling the Perl Patch Pumpkin And Porting Perl.
-Many of these are out of date or superceded by other documents in 
+Many of these are out of date or superseded by other documents in 
 this directory.
 
 =head2 F<README.y2038>
