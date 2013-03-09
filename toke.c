@@ -9320,12 +9320,12 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	   s++;
     }
 
-#define VALID_LEN_ONE_IDENT(d, u)     (isPUNCT_A((U8)*(d))     \
-                                        || isCNTRL_A((U8)*(d)) \
-                                        || isDIGIT_A((U8)*(d)) \
-                                        || (!(u) && !UTF8_IS_INVARIANT((U8)*(d))))
+#define VALID_LEN_ONE_IDENT(d, u)     (isPUNCT_A((U8)(d))     \
+                                        || isCNTRL_A((U8)(d)) \
+                                        || isDIGIT_A((U8)(d)) \
+                                        || (!(u) && !UTF8_IS_INVARIANT((U8)(d))))
     if (s < send
-        && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(s, is_utf8)))
+        && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
     {
         if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
