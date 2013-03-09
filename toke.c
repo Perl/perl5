@@ -9281,7 +9281,11 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	return s;
     }
     if (*s == '$' && s[1] &&
-	(isIDFIRST_lazy_if(s+1,is_utf8) || s[1] == '$' || s[1] == '{' || strnEQ(s+1,"::",2)) )
+      (isIDFIRST_lazy_if(s+1,is_utf8)
+         || isDIGIT_A((U8)s[1])
+         || s[1] == '$'
+         || s[1] == '{'
+         || strnEQ(s+1,"::",2)) )
     {
 	return s;
     }

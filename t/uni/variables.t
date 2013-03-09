@@ -12,7 +12,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 65850);
+plan (tests => 65856);
 
 # ${single:colon} should not be valid syntax
 {
@@ -167,4 +167,37 @@ for my $i (0x100..0xffff) {
            "\\x{$esc} isn't XIDS, illegal as a length-1 variable",
           )
    }
+}
+
+{
+    # Bleadperl v5.17.9-109-g3283393 breaks ZEFRAM/Module-Runtime-0.013.tar.gz
+    # https://rt.perl.org/rt3/Public/Bug/Display.html?id=117101
+    no strict;
+
+    local $@;
+    eval <<'EOP';
+    q{$} =~ /(.)/;
+    is($$1, $$, q{$$1 parses as ${$1}});
+
+    $doof = "test";
+    $test = "Got here";
+    $::{+$$} = *doof;
+
+    is( $$$$1, $test, q{$$$$1 parses as ${${${$1}}}} );
+EOP
+    is($@, '', q{$$1 parses correctly});
+
+    for my $chr ( q{@}, "\N{U+FF10}", "\N{U+0300}" ) {
+        my $esc = sprintf("\\x{%x}", ord $chr);
+        local $@;
+        eval <<"    EOP";
+            \$$chr = q{\$};
+            \$\$$chr;
+    EOP
+
+        like($@,
+             qr/syntax error|Unrecognized character/,
+             qq{\$\$$esc is a syntax error}
+        );
+    }
 }
