@@ -164,6 +164,10 @@ bison (Loc.U):
 	full pathname (if any) of the bison program.  After Configure runs,
 	the value is reset to a plain "bison" and is not useful.
 
+bootstrap_charset (ebcdic.U):
+	This variable conditionally defines BOOTSTRAP_CHARSET if
+	this system uses non-ASCII encoding.
+
 byacc (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the byacc program.  After Configure runs,
