@@ -2676,7 +2676,12 @@
  *     This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
  */
+/* BOOTSTRAP_CHARSET:
+ *     This symbol, if defined, indicates that this system uses
+ *	BOOTSTRAP_CHARSET
+ */
 /*#define	EBCDIC 		/ **/
+/*#define	BOOTSTRAP_CHARSET	/ **/
 
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
@@ -4746,6 +4751,6 @@
 #endif
 
 /* Generated from:
- * 698ca4e70ddc9d59faa4a988e8f518b575093890d4f78e8f50272e904ac03693 config_h.SH
- * 0b6320512dbf7572c05acf6d6add343230d232f287d02f6d32a7a32edadd97b9 uconfig.sh
+ * b1b92e181a028e2513e7dbdbd34635c03c0fe82f5e8bbd12e21ed36fc88f91b3 config_h.SH
+ * 6075986ce77cfbce5db9b3b166eff3cbbcdd86773430ccf51391da95b06f51af uconfig.sh
  * ex: set ro: */

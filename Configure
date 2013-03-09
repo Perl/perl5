@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sat Mar  9 17:50:01 CET 2013 [metaconfig 3.5 PL0]
+# Generated on Sat Mar  9 20:33:06 CET 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -10883,7 +10883,7 @@ chmod +x varargs
 : now check which varargs header should be included
 echo " "
 i_varhdr=''
-val=""
+val=''
 case "$valstd" in
 "$define")
 	if `./varargs I_STDARG`; then
@@ -20362,6 +20362,7 @@ EOCP
 	$rm_try
 	;;
 *)	echo "You don't have <stdarg.h>, not checking for va_copy()." >&4
+	need_va_copy="$undef"
 	;;
 esac
 
