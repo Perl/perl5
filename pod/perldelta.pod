@@ -182,16 +182,17 @@ None.
 =head1 Acknowledgements
 
 Perl 5.14.4 represents approximately 5 months of development since Perl 5.14.3
-and contains approximately 1,100 lines of changes across 44 files from 11
+and contains approximately 1,700 lines of changes across 49 files from 12
 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.14.4:
 
-Andy Dougherty, Chris 'BinGOs' Williams, Craig A. Berry, Dave Rolsky, David
-Mitchell, Dominic Hargreaves, Father Chrysostomos, Florian Ragwitz, Reini
-Urban, Ricardo Signes, Yves Orton.
+Andy Dougherty, Chris 'BinGOs' Williams, Christian Hansen, Craig A. Berry,
+Dave Rolsky, David Mitchell, Dominic Hargreaves, Father Chrysostomos,
+Florian Ragwitz, Reini Urban, Ricardo Signes, Yves Orton.
+
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history. In particular, it does not include the names of
