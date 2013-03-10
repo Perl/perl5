@@ -4,7 +4,6 @@ use strict;
 use ExtUtils::MakeMaker;
 use Getopt::Std;
 use Config qw(%Config);
-use File::Spec;
 
 my $PM = 'lib/Digest/SHA.pm';
 
@@ -34,10 +33,6 @@ if ($Config{archname} =~ /^i[3456]86/ && $Config{ccname} eq 'gcc') {
 	push(@extra, OPTIMIZE => '-O1 -fomit-frame-pointer');
 }
 
-my @srcs = map { File::Spec->catfile('src', $_) } qw(sha.c sha64bit.c);
-my @hdrs = map { File::Spec->catfile('src', $_) } qw(sha.h sha64bit.h);
-my $deps = join(' ', @srcs, @hdrs);
-
 my %att = (
 	'NAME'		=> 'Digest::SHA',
 	'VERSION_FROM'	=> $PM,
@@ -46,7 +41,6 @@ my %att = (
 	'INC'		=> '-I.',
 	'EXE_FILES'	=> [ 'shasum' ],
 	'INSTALLDIRS'	=> ($] >= 5.010 and $] < 5.011) ? 'perl' : 'site',
-	'depend'	=> { 'SHA.c' => $deps },
 	@extra,
 );
 
