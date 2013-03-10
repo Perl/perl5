@@ -6756,6 +6756,7 @@ my %delta = (
     5.016002 => {
         delta_from => 5.016001,
         changed => {
+            'Module::CoreList'      => '2.76',
         },
         removed => {
         }
