@@ -467,6 +467,9 @@ the strings?).
  Florian  5.14.2-RC1    2011-Sep-19
           5.14.2        2011-Sep-26
  Dominic  5.14.3        2012-Oct-12
+ David M  5.14.4-RC1    2013-Mar-05
+ David M  5.14.4-RC2    2013-Mar-07
+ David M  5.14.4        2013-Mar-10
 
  David G  5.15.0        2011-Jun-20     The 5.15 development track
  Zefram   5.15.1        2011-Jul-20
