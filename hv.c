@@ -1844,6 +1844,11 @@ Perl_hv_fill(pTHX_ HV const *const hv)
 
     PERL_ARGS_ASSERT_HV_FILL;
 
+    /* No keys implies no buckets used.
+       One key can only possibly mean one bucket used.  */
+    if (HvTOTALKEYS(hv) < 2)
+        return HvTOTALKEYS(hv);
+
     if (ents) {
 	HE *const *const last = ents + HvMAX(hv);
 	count = last + 1 - ents;
