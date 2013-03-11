@@ -1803,7 +1803,30 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  KEYS = %"IVdf"\n", (IV)HvUSEDKEYS(sv));
-	Perl_dump_indent(aTHX_ level, file, "  FILL = %"IVdf"\n", (IV)HvFILL(sv));
+        {
+            STRLEN count = 0;
+            HE **ents = HvARRAY(sv);
+
+            if (ents) {
+                HE *const *const last = ents + HvMAX(sv);
+                count = last + 1 - ents;
+                
+                do {
+                    if (!*ents)
+                        --count;
+                } while (++ents <= last);
+            }
+
+            if (SvOOK(sv)) {
+                struct xpvhv_aux *const aux = HvAUX(sv);
+                Perl_dump_indent(aTHX_ level, file, "  FILL = %"UVuf
+                                 " (cached = %"UVuf")\n",
+                                 (UV)count, (UV)aux->xhv_fill_lazy);
+            } else {
+                Perl_dump_indent(aTHX_ level, file, "  FILL = %"UVuf"\n",
+                                 (UV)count);
+            }
+        }
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)HvMAX(sv));
         if (SvOOK(sv)) {
 	    Perl_dump_indent(aTHX_ level, file, "  RITER = %"IVdf"\n", (IV)HvRITER_get(sv));

@@ -117,6 +117,7 @@ struct xpvhv_aux {
     U32         xhv_last_rand;  /* last random value for hash traversal,
                                    used to detect each() after insert for warnings */
 #endif
+    U32         xhv_fill_lazy;
 };
 
 /* hash structure: */
@@ -239,7 +240,7 @@ C<SV*>.
 #  define Nullhv Null(HV*)
 #endif
 #define HvARRAY(hv)	((hv)->sv_u.svu_hash)
-#define HvFILL(hv)	Perl_hv_fill(aTHX_ (const HV *)(hv))
+#define HvFILL(hv)	Perl_hv_fill(aTHX_ MUTABLE_HV(hv))
 #define HvMAX(hv)	((XPVHV*)  SvANY(hv))->xhv_max
 /* This quite intentionally does no flag checking first. That's your
    responsibility.  */

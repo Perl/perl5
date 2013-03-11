@@ -736,7 +736,7 @@ do_test('ENAME on a stash',
     NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR
     KEYS = 0
-    FILL = 0
+    FILL = 0 \(cached = 0\)
     MAX = 7
     RITER = -1
     EITER = 0x0
@@ -760,7 +760,7 @@ do_test('ENAMEs on a stash',
     NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR
     KEYS = 0
-    FILL = 0
+    FILL = 0 \(cached = 0\)
     MAX = 7
     RITER = -1
     EITER = 0x0
@@ -786,13 +786,125 @@ do_test('ENAMEs on a stash with no NAME',
     NV = $FLOAT					# $] < 5.009
     ARRAY = $ADDR
     KEYS = 0
-    FILL = 0
+    FILL = 0 \(cached = 0\)
     MAX = 7
     RITER = -1
     EITER = 0x0
     RAND = $ADDR
     NAMECOUNT = -3				# $] > 5.012
     ENAME = "RWOM", "KLANK"			# $] > 5.012
+');
+
+my %small = ("Perl", "Rules", "Beer", "Foamy");
+my $b = %small;
+do_test('small hash',
+        \%small,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(PADMY,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR  \\(0:[67],.*\\)
+    hash quality = [0-9.]+%
+    KEYS = 2
+    FILL = [12]
+    MAX = 7
+(?:    Elt "(?:Perl|Beer)" HASH = $ADDR
+    SV = PV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(POK,pPOK\\)
+      PV = $ADDR "(?:Rules|Foamy)"\\\0
+      CUR = \d+
+      LEN = \d+
+){2}');
+
+$b = keys %small;
+
+do_test('small hash after keys',
+        \%small,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR  \\(0:[67],.*\\)
+    hash quality = [0-9.]+%
+    KEYS = 2
+    FILL = [12] \\(cached = 0\\)
+    MAX = 7
+    RITER = -1
+    EITER = 0x0
+    RAND = $ADDR
+(?:    Elt "(?:Perl|Beer)" HASH = $ADDR
+    SV = PV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(POK,pPOK\\)
+      PV = $ADDR "(?:Rules|Foamy)"\\\0
+      CUR = \d+
+      LEN = \d+
+){2}');
+
+$b = %small;
+
+do_test('small hash after keys and scalar',
+        \%small,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR  \\(0:[67],.*\\)
+    hash quality = [0-9.]+%
+    KEYS = 2
+    FILL = ([12]) \\(cached = \1\\)
+    MAX = 7
+    RITER = -1
+    EITER = 0x0
+    RAND = $ADDR
+(?:    Elt "(?:Perl|Beer)" HASH = $ADDR
+    SV = PV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(POK,pPOK\\)
+      PV = $ADDR "(?:Rules|Foamy)"\\\0
+      CUR = \d+
+      LEN = \d+
+){2}');
+
+# This should immediately start with the FILL cached correctly.
+my %large = (0..1999);
+$b = %large;
+do_test('large hash',
+        \%large,
+'SV = $RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVHV\\($ADDR\\) at $ADDR
+    REFCNT = 2
+    FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
+    IV = 1					# $] < 5.009
+    NV = $FLOAT					# $] < 5.009
+    ARRAY = $ADDR  \\(0:\d+,.*\\)
+    hash quality = \d+\\.\d+%
+    KEYS = 1000
+    FILL = (\d+) \\(cached = \1\\)
+    MAX = 1023
+    RITER = -1
+    EITER = 0x0
+    RAND = $ADDR
+    Elt .*
 ');
 
 SKIP: {

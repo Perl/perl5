@@ -460,6 +460,13 @@ The debugger's C<man> command been fixed. It was broken in the v5.18.0
 release. The C<man> command is aliased to the names C<doc> and C<perldoc> -
 all now work again.
 
+=item *
+
+Evaluating large hashes in scalar context is now much faster, as the number
+of used chains in the hash is now cached for larger hashes. Smaller hashes
+continue not to store it and calculate it when needed, as this saves one IV.
+That would be 1 IV overhead for every object built from a hash. [RT #114576]
+
 =back
 
 =head1 Known Problems

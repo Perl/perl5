@@ -1548,7 +1548,7 @@ PERL_CALLCONV void	Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len,
 #define PERL_ARGS_ASSERT_HV_FETCH_ENT	\
 	assert(keysv)
 
-PERL_CALLCONV STRLEN	Perl_hv_fill(pTHX_ HV const *const hv)
+PERL_CALLCONV STRLEN	Perl_hv_fill(pTHX_ HV *const hv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_FILL	\
 	assert(hv)
