@@ -17,7 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.16.3 - Devo, Freedom of Choice
+
+L<Announced on 2013-03-11 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00414.html>
+
+  A victim of collision on the open sea
+  Nobody ever said that life was free
+  Sink, swim, go down with the ship
+  But use your freedom of choice
+
 =head2 v5.14.4 - Arthur C. Clarke, The Nine Billion Names of God
+
+L<Announced on 2013-03-11 by Dave Mitchell|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00393.html>
 
 He began to sing, but gave it up after a while. This vast arena of
 mountains, gleaming like whitely hooded ghosts on every side, did not
