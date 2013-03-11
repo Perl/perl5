@@ -5607,6 +5607,16 @@ my %delta = (
         removed => {
         }
     },
+    5.014004 => {
+        delta_from => 5.014003,
+        changed => {
+            'Encode'                => '2.42_02',
+            'IPC::Open3'            => '1.0901',
+            'Module::CoreList'      => '2.49_06',
+        },
+        removed => {
+        }
+    },
     5.015 => {
         delta_from => 5.014001,
         changed => {
@@ -8022,6 +8032,9 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'Pod::LaTeX'            => '1',
         'Term::UI'              => '1',
         'Term::UI::History'     => '1',
+    },
+    5.014003 => {
+	'Shell'                 => '1',
     },
 );
 
