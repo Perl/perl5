@@ -17,6 +17,25 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.14.4 - Arthur C. Clarke, The Nine Billion Names of God
+
+He began to sing, but gave it up after a while. This vast arena of
+mountains, gleaming like whitely hooded ghosts on every side, did not
+encourage such ebullience. Presently George glanced at his watch.
+
+'Should be there in an hour,' he called back over his shoulder to
+Chuck.  Then he added, in an afterthought: 'Wonder if the computer's
+finished its run. It was due about now.'
+
+Chuck didn't reply, so George swung round in his saddle. He could just
+see Chuck's face, a while oval turned towards the sky.
+
+'Look,' whispered Chuck, and George lifted his eyes to heaven. (There
+is always a last time for everything.)
+
+Overhead, without any fuss, the stars were going out.
+
+
 =head2 v5.17.9 - Douglas Adams, The Hitch-Hikers Guide to the Galaxy
 
 L<Announced on 2013-02-20 by Chris 'BinGOs' Williams|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-02/msg01146.html>
