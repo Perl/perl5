@@ -485,6 +485,7 @@ the strings?).
  Ricardo  5.16.1        2012-Aug-08
  Ricardo  5.16.2        2012-Nov-01
  Ricardo  5.16.3-RC1    2013-Mar-06
+ Ricardo  5.16.3        2013-Mar-11
 
  Zefram   5.17.0        2012-May-26     The 5.17 development track
  Jesse L  5.17.1        2012-Jun-20

@@ -64,7 +64,7 @@ L<Encode> has been upgraded from version 2.44 to version 2.44_01.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.76 to version 2.76_01.
+L<Module::CoreList> has been upgraded from version 2.76 to version 2.76_02.
 
 =item *
 
