@@ -394,7 +394,7 @@ Perl_save_int(pTHX_ int *intp)
 {
     dVAR;
     const int i = *intp;
-    UV type = ((UV)(i << SAVE_TIGHT_SHIFT) | SAVEt_INT_SMALL);
+    UV type = ((UV)((UV)i << SAVE_TIGHT_SHIFT) | SAVEt_INT_SMALL);
     int size = 2;
     dSS_ADD;
 
@@ -441,7 +441,7 @@ Perl_save_I32(pTHX_ I32 *intp)
 {
     dVAR;
     const I32 i = *intp;
-    UV type = ((I32)(i << SAVE_TIGHT_SHIFT) | SAVEt_I32_SMALL);
+    UV type = ((I32)((U32)i << SAVE_TIGHT_SHIFT) | SAVEt_I32_SMALL);
     int size = 2;
     dSS_ADD;
 

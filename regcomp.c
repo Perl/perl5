@@ -749,7 +749,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
 	    data->offset_float_min = l ? data->last_start_min : data->pos_min;
 	    data->offset_float_max = (l
 				      ? data->last_start_max
-				      : data->pos_min + data->pos_delta);
+				      : (data->pos_delta == I32_MAX ? I32_MAX : data->pos_min + data->pos_delta));
 	    if (is_inf || (U32)data->offset_float_max > (U32)I32_MAX)
 		data->offset_float_max = I32_MAX;
 	    if (data->flags & SF_BEFORE_EOL)
@@ -3126,10 +3126,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 					  stopparen, recursed, NULL, f,depth+1);
 		    if (min1 > minnext)
 			min1 = minnext;
-		    if (max1 < minnext + deltanext)
-			max1 = minnext + deltanext;
-		    if (deltanext == I32_MAX)
+		    if (deltanext == I32_MAX) {
 			is_inf = is_inf_internal = 1;
+			max1 = I32_MAX;
+		    } else if (max1 < minnext + deltanext)
+			max1 = minnext + deltanext;
 		    scan = next;
 		    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 			pars++;
@@ -3152,12 +3153,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    min1 = 0;
 		if (flags & SCF_DO_SUBSTR) {
 		    data->pos_min += min1;
-		    data->pos_delta += max1 - min1;
+		    if (data->pos_delta >= I32_MAX - (max1 - min1))
+		        data->pos_delta = I32_MAX;
+		    else
+		        data->pos_delta += max1 - min1;
 		    if (max1 != min1 || is_inf)
 			data->longest = &(data->longest_float);
 		}
 		min += min1;
-		delta += max1 - min1;
+		if (delta == I32_MAX || I32_MAX - delta - (max1 - min1) < 0)
+		    delta = I32_MAX;
+		else
+		    delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
 		    cl_or(pRExC_state, data->start_class, &accum);
 		    if (min1) {
@@ -3886,11 +3893,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 
 		min += minnext * mincount;
-		is_inf_internal |= ((maxcount == REG_INFTY
-				     && (minnext + deltanext) > 0)
-				    || deltanext == I32_MAX);
+		is_inf_internal |= deltanext == I32_MAX
+				     || (maxcount == REG_INFTY && minnext + deltanext > 0);
 		is_inf |= is_inf_internal;
-		delta += (minnext + deltanext) * maxcount - minnext * mincount;
+		if (is_inf)
+		    delta = I32_MAX;
+		else
+		    delta += (minnext + deltanext) * maxcount - minnext * mincount;
 
 		/* Try powerful optimization CURLYX => CURLYN. */
 		if (  OP(oscan) == CURLYX && data
@@ -4075,7 +4084,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		    /* It is counted once already... */
 		    data->pos_min += minnext * (mincount - counted);
-		    data->pos_delta += - counted * deltanext +
+#if 0
+PerlIO_printf(Perl_debug_log, "counted=%d deltanext=%d I32_MAX=%d minnext=%d maxcount=%d mincount=%d\n",
+    counted, deltanext, I32_MAX, minnext, maxcount, mincount);
+if (deltanext != I32_MAX)
+PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount, I32_MAX - data->pos_delta);
+#endif
+		    if (deltanext == I32_MAX || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= I32_MAX - data->pos_delta)
+		        data->pos_delta = I32_MAX;
+		    else
+		        data->pos_delta += - counted * deltanext +
 			(minnext + deltanext) * maxcount - minnext * mincount;
 		    if (mincount != maxcount) {
 			 /* Cannot extend fixed substrings found inside
@@ -4593,10 +4611,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     
                     if (min1 > (I32)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
-                    if (max1 < (I32)(minnext + deltanext + trie->maxlen))
-                        max1 = minnext + deltanext + trie->maxlen;
-                    if (deltanext == I32_MAX)
+                    if (deltanext == I32_MAX) {
                         is_inf = is_inf_internal = 1;
+                        max1 = I32_MAX;
+                    } else if (max1 < (I32)(minnext + deltanext + trie->maxlen))
+                        max1 = minnext + deltanext + trie->maxlen;
                     
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
                         pars++;
