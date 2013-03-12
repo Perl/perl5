@@ -372,7 +372,7 @@ __DATA__
 # List of mappings. First entry the "correct" email address, as appears
 # in the AUTHORS file. Second is any "alias" mapped to it.
 #
-# If the "correct" email address is a '+', the entry above is reused;
+# If the "correct" email address is a '+', the entry above it is reused;
 # this for addresses with more than one alias.
 #
 # Note that all entries are in lowercase. Further, no '@' signs should
