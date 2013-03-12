@@ -531,7 +531,7 @@ do_test('scalar with pos magic',
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\($PADMY,SMG,POK,(?:IsCOW,)?pPOK\\)
-  IV = 0
+  IV = \d+
   NV = 0
   PV = $ADDR ""\\\0
   CUR = 0
