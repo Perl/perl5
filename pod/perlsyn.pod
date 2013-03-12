@@ -954,7 +954,7 @@ A smart match that uses an explicit C<~~> operator, such as C<EXPR ~~ EXPR>.
 
 =item 4.
 
-A boolean comparison operator such as C<$_ E<lt> 10> or C<$x eq "abc"> The
+A boolean comparison operator such as C<$_ E<lt> 10> or C<$x eq "abc">.  The
 relational operators that this applies to are the six numeric comparisons
 (C<< < >>, C<< > >>, C<< <= >>, C<< >= >>, C<< == >>, and C<< != >>), and
 the six string comparisons (C<lt>, C<gt>, C<le>, C<ge>, C<eq>, and C<ne>).
