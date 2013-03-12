@@ -2807,19 +2807,14 @@ try_autoload:
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
-	    if (items > AvMAX(av) + 1) {
-		SV **ary = AvALLOC(av);
-		if (AvARRAY(av) != ary) {
-		    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-		    AvARRAY(av) = ary;
-		}
-		if (items > AvMAX(av) + 1) {
-		    AvMAX(av) = items - 1;
-		    Renew(ary,items,SV*);
-		    AvALLOC(av) = ary;
-		    AvARRAY(av) = ary;
-		}
-	    }
+	    if (items - 1 > AvMAX(av)) {
+                SV **ary = AvALLOC(av);
+                AvMAX(av) = items - 1;
+                Renew(ary, items, SV*);
+                AvALLOC(av) = ary;
+                AvARRAY(av) = ary;
+            }
+
 	    Copy(MARK,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
 	
