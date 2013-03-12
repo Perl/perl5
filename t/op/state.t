@@ -9,7 +9,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 131;
+plan tests => 132;
 
 # Before loading feature.pm, test it with CORE::
 ok eval 'CORE::state $x = 1;', 'CORE::state outside of feature.pm scope';
@@ -402,6 +402,17 @@ foreach my $forbidden (<DATA>) {
     ok !@warnings, "suppress warnings part 3 [@warnings]";
 
 
+}
+
+
+# [perl #117095] state var initialisation getting skipped
+# the 'if 0' code below causes a call to op_free at compile-time,
+# which used to inadvertently mark the state var as initialised.
+
+{
+    state $f = 1;
+    foo($f) if 0; # this calls op_free on padmy($f)
+    ok(defined $f, 'state init not skipped');
 }
 
 
