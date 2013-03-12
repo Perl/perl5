@@ -415,11 +415,6 @@ But the ordinals of characters differ between ASCII, EBCDIC, and
 the UTF- encodings, and a string encoded in UTF-EBCDIC may occupy more bytes
 than in UTF-8.
 
-Also, on some EBCDIC machines, functions that are documented as operating on
-US-ASCII (or Basic Latin in Unicode terminology) may in fact operate on all
-256 characters in the EBCDIC range, not just the subset corresponding to
-US-ASCII.
-
 The listing below is alphabetical, case insensitive.
 
 _EOB_

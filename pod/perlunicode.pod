@@ -98,13 +98,8 @@ while C<use locale ':not_characters'> effectively also selects
 C<use feature 'unicode_strings'> in its scope; see L<perllocale>.)
 Otherwise, Perl uses the platform's native
 byte semantics for characters whose code points are less than 256, and
-Unicode semantics for those greater than 255.  On EBCDIC platforms, this
-is almost seamless, as the EBCDIC code pages that Perl handles are
-equivalent to Unicode's first 256 code points.  (The exception is that
-EBCDIC regular expression case-insensitive matching rules are not as
-as robust as Unicode's.)   But on ASCII platforms, Perl uses US-ASCII
-(or Basic Latin in Unicode terminology) byte semantics, meaning that characters
-whose ordinal numbers are in the range 128 - 255 are undefined except for their
+Unicode semantics for those greater than 255.  That means that non-ASCII
+characters are undefined except for their
 ordinal numbers.  This means that none have case (upper and lower), nor are any
 a member of character classes, like C<[:alpha:]> or C<\w>.  (But all do belong
 to the C<\W> class or the Perl regular expression extension C<[:^alpha:]>.)

@@ -272,14 +272,6 @@ presenting another potential security issue.  See
 L<http://unicode.org/reports/tr36> for a detailed discussion of Unicode
 security issues.
 
-On the EBCDIC platforms that Perl handles, the native character set is
-equivalent to Latin-1.  Thus this modifier changes behavior only when
-the C<"/i"> modifier is also specified, and it turns out it affects only
-two characters, giving them full Unicode semantics: the C<MICRO SIGN>
-will match the Greek capital and small letters C<MU>, otherwise not; and
-the C<LATIN CAPITAL LETTER SHARP S> will match any of C<SS>, C<Ss>,
-C<sS>, and C<ss>, otherwise not.
-
 This modifier may be specified to be the default by C<use feature
 'unicode_strings>, C<use locale ':not_characters'>, or
 C<L<use 5.012|perlfunc/use VERSION>> (or higher),
@@ -326,8 +318,8 @@ results.  See L<perlunicode/The "Unicode Bug">.  The Unicode Bug has
 become rather infamous, leading to yet another (printable) name for this
 modifier, "Dodgy".
 
-On ASCII platforms, the native rules are ASCII, and on EBCDIC platforms
-(at least the ones that Perl handles), they are Latin-1.
+Unless the pattern or string are encoded in UTF-8, only ASCII characters
+can match positively.
 
 Here are some examples of how that works on an ASCII platform:
 

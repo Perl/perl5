@@ -489,19 +489,15 @@ Perl rules.  If the input is a number that doesn't fit in an octet, FALSE is
 always returned.
 
 Variant C<isFOO_A> (e.g., C<isALPHA_A()>) will return TRUE only if the input is
-also in the ASCII character set.  For ASCII platforms, the base function with
-no suffix and the one with the C<_A> suffix are identical.  On EBCDIC
-platforms, the C<_A> suffix function will not return true unless the specified
-character also has an ASCII equivalent.
+also in the ASCII character set.  The base function with no suffix and the one
+with the C<_A> suffix are identical.
 
-Variant C<isFOO_L1> operates on the full Latin1 character set.  For EBCDIC
-platforms, the base function with no suffix and the one with the C<_L1> suffix
-are identical.  For ASCII platforms, the C<_L1> suffix imposes the Latin-1
-character set onto the platform.  That is, the code points that are ASCII are
-unaffected, since ASCII is a subset of Latin-1.  But the non-ASCII code points
-are treated as if they are Latin-1 characters.  For example, C<isSPACE_L1()>
-will return true when called with the code point 0xA0, which is the Latin-1
-NO-BREAK SPACE.
+Variant C<isFOO_L1> imposes the Latin-1 (or EBCDIC equivlalent) character set
+onto the platform.  That is, the code points that are ASCII are unaffected,
+since ASCII is a subset of Latin-1.  But the non-ASCII code points are treated
+as if they are Latin-1 characters.  For example, C<isWORDCHAR_L1()> will return
+true when called with the code point 0xDF, which is a word character in both
+ASCII and EBCDIC (though it represent different characters in each).
 
 Variant C<isFOO_uni> is like the C<isFOO_L1> variant, but accepts any UV code
 point as input.  If the code point is larger than 255, Unicode rules are used

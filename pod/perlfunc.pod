@@ -3287,18 +3287,8 @@ What gets returned depends on several factors:
 
 =item If C<use bytes> is in effect:
 
-=over
-
-=item On EBCDIC platforms
-
-The results are what the C language system call C<tolower()> returns.
-
-=item On ASCII platforms
-
 The results follow ASCII semantics.  Only characters C<A-Z> change, to C<a-z>
 respectively.
-
-=back
 
 =item Otherwise, if C<use locale> (but not C<use locale ':not_characters'>) is in effect:
 
@@ -3326,18 +3316,8 @@ Unicode semantics are used for the case change.
 
 =item Otherwise:
 
-=over
-
-=item On EBCDIC platforms
-
-The results are what the C language system call C<tolower()> returns.
-
-=item On ASCII platforms
-
 ASCII semantics are used for the case change.  The lowercase of any character
 outside the ASCII range is the character itself.
-
-=back
 
 =back
 

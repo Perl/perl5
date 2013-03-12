@@ -174,7 +174,7 @@ are generally used to add auxiliary markings to letters.
 C<\w> matches the platform's native underscore character plus whatever
 the locale considers to be alphanumeric.
 
-=item if Unicode rules are in effect or if on an EBCDIC platform ...
+=item if Unicode rules are in effect ...
 
 C<\w> matches exactly what C<\p{Word}> matches.
 
@@ -232,7 +232,7 @@ in the table below.
 
 C<\s> matches whatever the locale considers to be whitespace.
 
-=item if Unicode rules are in effect or if on an EBCDIC platform ...
+=item if Unicode rules are in effect ...
 
 C<\s> matches exactly the characters shown with an "s" column in the
 table below.
@@ -289,8 +289,8 @@ C<\s>, C<\h> and C<\v> as of Unicode 6.0.
 
 The first column gives the Unicode code point of the character (in hex format),
 the second column gives the (Unicode) name. The third column indicates
-by which class(es) the character is matched (assuming no locale or EBCDIC code
-page is in effect that changes the C<\s> matching).
+by which class(es) the character is matched (assuming no locale is in
+effect that changes the C<\s> matching).
 
  0x0009        CHARACTER TABULATION   h s
  0x000a              LINE FEED (LF)    vs
@@ -732,10 +732,6 @@ the terminal somehow: for example, newline and backspace are control characters.
 In the ASCII range, characters whose code points are between 0 and 31 inclusive,
 plus 127 (C<DEL>) are control characters.
 
-On EBCDIC platforms, it is likely that the code page will define C<[[:cntrl:]]>
-to be the EBCDIC equivalents of the ASCII controls, plus the controls
-that in Unicode have code points from 128 through 159.
-
 =item [3]
 
 Any character that is I<graphical>, that is, visible. This class consists
@@ -815,7 +811,7 @@ The POSIX class matches according to the locale, except that
 C<word> uses the platform's native underscore character, no matter what
 the locale is.
 
-=item if Unicode rules are in effect or if on an EBCDIC platform ...
+=item if Unicode rules are in effect ...
 
 The POSIX class matches the same as the Full-range counterpart.
 
@@ -834,7 +830,7 @@ L<perlre/Which character set modifier is in effect?>.
 
 It is proposed to change this behavior in a future release of Perl so that
 whether or not Unicode rules are in effect would not change the
-behavior:  Outside of locale or an EBCDIC code page, the POSIX classes
+behavior:  Outside of locale, the POSIX classes
 would behave like their ASCII-range counterparts.  If you wish to
 comment on this proposal, send email to C<perl5-porters@perl.org>.
 
