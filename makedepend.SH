@@ -153,11 +153,11 @@ for file in `$cat .clist`; do
     ( $echo "#line 2 \"$file\""; \
       $sed -n <$file \
 	-e "/^${filebase}_init(/q" \
-        -e ': testcontinuation'       \
+        -e ': testcont'               \
 	-e '/^[	 ]*#/s|/\*.*\*/||'    \
         -e '/\\$/{'                   \
             -e 'N'                    \
-            -e 'b testcontinuation'   \
+            -e 'b testcont'           \
         -e '}'                        \
         -e 's/\\\n/ /g'               \
 	-e '/^#line/d' \
