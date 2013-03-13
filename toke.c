@@ -3159,15 +3159,11 @@ S_scan_const(pTHX_ char *start)
 #ifdef EBCDIC
 		if (literal_endpoint == 2 &&
 		    ((isLOWER_A(min) && isLOWER_A(max)) ||
-		     (isUPPER_A(min) && isUPPER_A(max)))) {
-		    if (isLOWER_A(min)) {
-			for (i = min; i <= max; i++)
-			    if (isLOWER_A(i))
-				*d++ = i;
-		    } else {
-			for (i = min; i <= max; i++)
-			    if (isUPPER_A(i))
-				*d++ = i;
+		     (isUPPER_A(min) && isUPPER_A(max))))
+                {
+                    for (i = min; i <= max; i++) {
+                        if (isALPHA_A(i))
+                            *d++ = i;
 		    }
 		}
 		else
