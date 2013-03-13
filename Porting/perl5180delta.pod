@@ -2,18 +2,15 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
-perl5180delta - what is new for perl v5.tXXX.cXXX
+perl5180delta - what is new for perl v5.18.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.sXXX.bXXX release and the 5.tXXX.cXXX
+This document describes differences between the 5.16.0 release and the 5.18.0
 release.
 
-If you are upgrading from an earlier release such as 5.rXXX.aXXX, first read
-L<perl5XXXdelta>, which describes differences between 5.rXXX.aXXX and 5.sXXX.bXXX.
+If you are upgrading from an earlier release such as 5.14.0, first read
+L<perl5140delta>, which describes differences between 5.12.0 and 5.14.0.
 
 =head1 Notice
 
@@ -37,13 +34,22 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 qw(...) can no longer be used as parentheses
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+C<qw> lists used to fool the parser into thinking they were always
+surrounded by parentheses.  This permitted some surprising constructions
+such as C<foreach $x qw(a b c) {...}>, which should really be written
+C<foreach $x (qw(a b c)) {...}>.  These would sometimes get the lexer into
+the wrong state, so they didn't fully work, and the similar C<foreach qw(a
+b c) {...}> that one might expect to be permitted never worked at all.
 
-[ List each incompatible change as a =head2 entry ]
+This side effect of C<qw> has now been abolished.  It has been deprecated
+since Perl 5.13.11.  It is now necessary to use real parentheses
+everywhere that the grammar calls for them.
+
+=head2 C<\s> in regular expressions now matches a Vertical Tab
+
+[ XXX ]
 
 =head1 Deprecations
 
@@ -64,7 +70,12 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Filetest ops manage the stack in a fractionally more efficient manner.
+
+=item *
+
+Globs used in a numeric context are now numerified directly in most cases,
+rather than being numerified via stringification.
 
 =back
 
@@ -102,11 +113,12 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =head2 Removed Modules and Pragmata
 
-=over 4
+=over 
 
 =item *
 
-XXX
+L<Version::Requirements> has been removed from the core distribution.  It is
+available under a different name: L<CPAN::Meta::Requirements>.
 
 =back
 
@@ -125,21 +137,39 @@ XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
+=head3 L<perldata>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Now explicitly documents the behaviour of hash initializer lists that
+contain duplicate keys.
 
 =back
 
-=head1 Diagnostics
+=head3 L<perldiag>
+
+=over 4
+
+=item *
+
+The explanation of symbolic references being prevented by "strict refs"
+now doesn't assume that the reader knows what symbolic references are.
+
+=back
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+The return value of C<pipe> is now documented.
+
+=back
+
+=head3 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
@@ -235,7 +265,10 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The test suite now has a section for tests that require very large amounts
+of memory.  These tests won't run by default; they can be enabled by
+setting the C<PERL_TEST_MEMORY> environment variable to the number of
+gibibytes of memory that may be safely used.
 
 =back
 
@@ -282,25 +315,57 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item clang++
 
-XXX
+There is now a workaround for a compiler bug that prevented compiling
+with clang++ since Perl 5.15.7 [perl #112786].
+
+=item C++
+
+When compiling the Perl core as C++ (which is only semi-supported), the
+mathom functions are now compiled as C<extern "C">, to ensure proper
+binary compatibility.  (However, binary compatibility isn't generally
+guaranteed anyway in the situations where this would matter.)
+
+=item VMS
+
+It should now be possible to compile Perl as C++ on VMS.
 
 =back
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
-=over 4
+=over
 
 =item *
 
-XXX
+The C<CV *> typemap entry now supports C<&{}> overloading and typeglobs,
+just like C<&{...}> [perl #96872].
+
+=item *
+
+The C<SVf_AMAGIC> flag to indicate overloading is now on the stash, not the
+object.  It is now set automatically whenever a method or @ISA changes, so
+its meaning has changed, too.  It now means "potentially overloaded".  When
+the overload table is calculated, the flag is automatically turned off if
+there is no overloading, so there should be no noticeable slowdown.
+
+The staleness of the overload tables is now checked when overload methods
+are invoked, rather than during C<bless>.
+
+"A" magic is gone.  The changes to the handling of the C<SVf_AMAGIC> flag
+eliminate the need for it.
+
+C<PL_amagic_generation> has been removed as no longer necessary.  For XS
+modules, it is now a macro alias to C<PL_na>.
+
+The fallback overload setting is now stored in a stash entry separate from
+overloadedness itself.
+
+=item *
+
+The character-processing code has been cleaned up in places.  The changes
+should be operationally invisible.
 
 =back
 
@@ -315,7 +380,120 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<goto ''> now looks for an empty label, producing the "goto must have
+label" error message, instead of exiting the program [perl #111794].
+
+=item *
+
+C<goto "\0"> now dies with "Can't find label" instead of "goto must have
+label".
+
+=item *
+
+The C function C<hv_store> used to result in crashes when used on C<%^H>
+[perl #111000].
+
+=item *
+
+A call checker attached to a closure prototype via C<cv_set_call_checker>
+is now copied to closures cloned from it.  So C<cv_set_call_checker> now
+works inside an attribute handler for a closure.
+
+=item *
+
+Writing to C<$^N> used to have no effect.  Now it croaks with "Modification
+of a read-only value" by default, but that can be overridden by a custom
+regular expression engine, as with C<$1> [perl #112184].
+
+=item *
+
+C<undef> on a control character glob (C<undef *^H>) no longer emits an
+erroneous warning about ambiguity [perl #112456].
+
+=item *
+
+For efficiency's sake, many operators and built-in functions return the
+same scalar each time.  Lvalue subroutines and subroutines in the CORE::
+namespace were allowing this implementation detail to leak through.
+C<print &CORE::uc("a"), &CORE::uc("b")> used to print "BB".  The same thing
+would happen with an lvalue subroutine returning the return value of C<uc>.
+Now the value is copied in such cases.
+
+=item *
+
+C<method {}> syntax with an empty block or a block returning an empty list
+used to crash or use some random value left on the stack as its invocant.
+Now it produces an error.
+
+=item *
+
+C<vec> now works with extremely large offsets (E<gt>2 GB) [perl #111730].
+
+=item *
+
+Changes to overload settings now take effect immediately, as do changes to
+inheritance that affect overloading.  They used to take effect only after
+C<bless>.
+
+Objects that were created before a class had any overloading used to remain
+non-overloaded even if the class gained overloading through C<use overload>
+or @ISA changes, and even after C<bless>.  This has been fixed
+[perl #112708].
+
+=item *
+
+Classes with overloading can now inherit fallback values.
+
+=item *
+
+Overloading was not respecting a fallback value of 0 if there were
+overloaded objects on both sides of an assignment operator like C<+=>
+[perl #111856].
+
+=item *
+
+C<pos> now croaks with hash and array arguments, instead of producing
+erroneous warnings.
+
+=item *
+
+C<while(each %h)> now implies C<while(defined($_ = each %h))>, like
+C<readline> and C<readdir>.
+
+=item *
+
+Subs in the CORE:: namespace no longer crash after C<undef *_> when called
+with no argument list (C<&CORE::time> with no parentheses).
+
+=item *
+
+Unicode 6.1 published an incorrect alias for one of the
+Canonical_Combining_Class property's values (which range between 0 and
+254).  The alias C<CCC133> should have been C<CCC132>.  Perl now
+overrides the data file furnished by Unicode to give the correct value.
+
+=item *
+
+C<unpack> no longer produces the "'/' must follow a numeric type in unpack"
+error when it is the data that are at fault [perl #60204].
+
+=item *
+
+C<join> and C<"@array"> now call FETCH only once on a tied C<$">
+[perl #8931].
+
+=item *
+
+Some subroutine calls generated by compiling core ops affected by a
+C<CORE::GLOBAL> override had op checking performed twice.  The checking
+is always idempotent for pure Perl code, but the double checking can
+matter when custom call checkers are involved.
+
+=item *
+
+A race condition used to exist around fork that could cause a signal sent to
+the parent to be handled by both parent and child. Signals are now blocked
+briefly around fork to prevent this from happening [perl #82580].
 
 =back
 
@@ -331,50 +509,9 @@ platform specific bugs also go here.
 
 =item *
 
-=item *
-
-The following CPAN modules have test failures with perl 5.18.  Patches have
-been submitted for all of these, so hopefully there will be new releases
-soon:
-
-=over
-
-=item *
-
-L<B::Hooks::Parser> version 0.11
-
-=item *
-
-L<Coro> version 6.10
-
-=item *
-
-L<Crypt::IDEA> version 1.08
-
-=item *
-
-L<Crypt::Twofish> version 2.15
-
-=item *
-
-L<Data::Dump::Streamer> version 2.34
-
-=item *
-
-L<Devel::LexAlias> version 0.04
-
-=item *
-
-L<Lexical::Var> version 0.007
+XXX
 
 =back
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
