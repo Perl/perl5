@@ -27,7 +27,7 @@ if($Config{d_setlocale}) {
         # Some locale implementations don't have the 128-255 characters all
         # mean nothing.  Skip the locale tests in that situation
         for my $i (128 .. 255) {
-            if (chr($i) =~ /[[:print:]]/) {
+            if (chr(utf8::unicode_to_native($i)) =~ /[[:print:]]/) {
                 undef $locale;
                 last;
             }
@@ -136,7 +136,7 @@ foreach my $name (sort keys %properties) {
                     fail($@);
                 }
                 else {
-                    my $truth = truth($matches && $i < 128);
+                    my $truth = truth($matches && utf8::native_to_unicode($i) < 128);
                     is ($ret, $truth, "is${function}_A( $display_name ) == $truth");
                 }
                 $ret = truth eval "test_is${function}_L1($i)";
@@ -157,7 +157,7 @@ foreach my $name (sort keys %properties) {
                     fail($@);
                 }
                 else {
-                    my $truth = truth($matches && $i < 128);
+                    my $truth = truth($matches && utf8::native_to_unicode($i) < 128);
                     is ($ret, $truth, "is${function}_LC( $display_name ) == $truth (C locale)");
                 }
             }
@@ -195,7 +195,7 @@ foreach my $name (sort keys %properties) {
                 fail($@);
             }
             else {
-                my $truth = truth($matches && ($i < 128 || $i > 255));
+                my $truth = truth($matches && (utf8::native_to_unicode($i) < 128 || $i > 255));
                 is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth (C locale)");
             }
         }
@@ -233,7 +233,7 @@ foreach my $name (sort keys %properties) {
                 fail($@);
             }
             else {
-                my $truth = truth($matches && ($i < 128 || $i > 255));
+                my $truth = truth($matches && (utf8::native_to_unicode($i) < 128 || $i > 255));
                 is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth (C locale)");
             }
         }
