@@ -748,8 +748,11 @@ EOT
 	if (defined $failure) {
 	    print "${te}$failure\n";
 	    $::bad_files = $::bad_files + 1;
-	    if ($test =~ /^base/) {
-		die "Failed a basic test ($test) -- cannot continue.\n";
+	    if ($test =~ /^base/ && ! defined &DynaLoader::boot_DynaLoader) {
+		# Die if running under minitest (no DynaLoader).  Otherwise
+		# keep going, as  we know that Perl basically works, or we
+		# would not have been able to actually compile it all the way.
+		die "Failed a basic test ($test) under minitest -- cannot continue.\n";
 	    }
 	    $failed_tests{$test} = 1;
 	}
