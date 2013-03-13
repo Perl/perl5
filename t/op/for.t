@@ -7,7 +7,6 @@ BEGIN {
 plan(104);
 
 # A lot of tests to check that reversed for works.
-# my $test = 0;
 
 @array = ('A', 'B', 'C');
 for (@array) {
