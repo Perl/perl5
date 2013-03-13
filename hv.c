@@ -3122,12 +3122,12 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
 	const char *keyend = keypv + keylen, *p;
 	STRLEN nonascii_count = 0;
 	for (p = keypv; p != keyend; p++) {
-	    U8 c = (U8)*p;
-	    if (c & 0x80) {
-		if (!((c & 0xfe) == 0xc2 && ++p != keyend &&
-			    (((U8)*p) & 0xc0) == 0x80))
+	    if (! UTF8_IS_INVARIANT(*p)) {
+		if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, keyend)) {
 		    goto canonicalised_key;
+                }
 		nonascii_count++;
+                p++;
 	    }
 	}
 	if (nonascii_count) {
@@ -3139,8 +3139,13 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
 	    keypv = q;
 	    for (; p != keyend; p++, q++) {
 		U8 c = (U8)*p;
-		*q = (char)
-		    ((c & 0x80) ? ((c & 0x03) << 6) | (((U8)*++p) & 0x3f) : c);
+                if (UTF8_IS_INVARIANT(c)) {
+                    *q = (char) c;
+                }
+                else {
+                    p++;
+                    *q = (char) TWO_BYTE_UTF8_TO_NATIVE(c, *p);
+                }
 	    }
 	}
 	flags &= ~REFCOUNTED_HE_KEY_UTF8;
@@ -3292,12 +3297,12 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
 	const char *keyend = keypv + keylen, *p;
 	STRLEN nonascii_count = 0;
 	for (p = keypv; p != keyend; p++) {
-	    U8 c = (U8)*p;
-	    if (c & 0x80) {
-		if (!((c & 0xfe) == 0xc2 && ++p != keyend &&
-			    (((U8)*p) & 0xc0) == 0x80))
+	    if (! UTF8_IS_INVARIANT(*p)) {
+		if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(p, keyend)) {
 		    goto canonicalised_key;
+                }
 		nonascii_count++;
+                p++;
 	    }
 	}
 	if (nonascii_count) {
@@ -3309,8 +3314,13 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
 	    keypv = q;
 	    for (; p != keyend; p++, q++) {
 		U8 c = (U8)*p;
-		*q = (char)
-		    ((c & 0x80) ? ((c & 0x03) << 6) | (((U8)*++p) & 0x3f) : c);
+                if (UTF8_IS_INVARIANT(c)) {
+                    *q = (char) c;
+                }
+                else {
+                    p++;
+                    *q = (char) TWO_BYTE_UTF8_TO_NATIVE(c, *p);
+                }
 	    }
 	}
 	flags &= ~REFCOUNTED_HE_KEY_UTF8;
