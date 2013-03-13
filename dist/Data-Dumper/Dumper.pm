@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.157'; # Don't forget to set version and release
+    $VERSION = '2.158'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -36,6 +36,8 @@ BEGIN {
     }
     or $Useperl = 1;
 }
+
+my $IS_ASCII  = ord 'A' ==  65;
 
 # module vars and their defaults
 $Indent     = 2         unless defined $Indent;
@@ -222,8 +224,11 @@ sub DESTROY {}
 
 sub Dump {
     return &Dumpxs
-    unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl}) ||
-           $Data::Dumper::Deparse || (ref($_[0]) && $_[0]->{deparse});
+    unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl})
+        || $Data::Dumper::Deparse || (ref($_[0]) && $_[0]->{deparse})
+
+            # Use pure perl version on earlier releases on EBCDIC platforms
+        || (! $IS_ASCII && $] lt 5.021_010);
     return &Dumpperl;
 }
 
@@ -724,41 +729,71 @@ my %esc = (
     "\e" => "\\e",
 );
 
+my $low_controls = ($IS_ASCII)
+
+                   # This includes \177, because traditionally it has been
+                   # output as octal, even though it isn't really a "low"
+                   # control
+                   ? qr/[\0-\x1f\177]/
+
+                     # EBCDIC low controls.
+                   : qr/[\0-\x3f]/;
+
 # put a string value in double quotes
 sub qquote {
   local($_) = shift;
   s/([\\\"\@\$])/\\$1/g;
-  my $bytes; { use bytes; $bytes = length }
-  s/([[:^ascii:]])/'\x{'.sprintf("%x",ord($1)).'}'/ge if $bytes > length;
-  return qq("$_") unless
-    /[^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~]/;  # fast exit
 
-  my $high = shift || "";
+  # This efficiently changes the high ordinal characters to \x{} if the utf8
+  # flag is on.  On ASCII platforms, the high ordinals are all the
+  # non-ASCII's.  On EBCDIC platforms, we don't include in these the non-ASCII
+  # controls whose ordinals are less than SPACE, excluded below by the range
+  # \0-\x3f.  On ASCII platforms this range just compiles as part of :ascii:.
+  # On EBCDIC platforms, there is just one outlier high ordinal control, and
+  # it gets output as \x{}.
+  my $bytes; { use bytes; $bytes = length }
+  s/([^[:ascii:]\0-\x3f])/sprintf("\\x{%x}",ord($1))/ge
+    if $bytes > length
+
+       # The above doesn't get the EBCDIC outlier high ordinal control when
+       # the string is UTF-8 but there are no UTF-8 variant characters in it.
+       # We want that to come out as \x{} anyway.  We need is_utf8() to do
+       # this.
+       || (! $IS_ASCII && $] ge 5.008_001 && utf8::is_utf8($_));
+
+  return qq("$_") if / ^ [[:print:]]* $ /x;    # fast exit
+
+  # Here, there is at least one non-printable to output.  First, translate the
+  # escapes.
   s/([\a\b\t\n\f\r\e])/$esc{$1}/g;
 
-  if (ord('^')==94)  { # ascii
-    # no need for 3 digits in escape for these
-    s/([\0-\037])(?!\d)/'\\'.sprintf('%o',ord($1))/eg;
-    s/([\0-\037\177])/'\\'.sprintf('%03o',ord($1))/eg;
+  # no need for 3 digits in escape for octals not followed by a digit.
+  s/($low_controls)(?!\d)/'\\'.sprintf('%o',ord($1))/eg;
+
+  # But otherwise use 3 digits
+  s/($low_controls)/'\\'.sprintf('%03o',ord($1))/eg;
+
     # all but last branch below not supported --BEHAVIOR SUBJECT TO CHANGE--
-    if ($high eq "iso8859") {
-      s/([\200-\240])/'\\'.sprintf('%o',ord($1))/eg;
+  my $high = shift || "";
+    if ($high eq "iso8859") {   # Doesn't escape the Latin1 printables
+      if ($IS_ASCII) {
+        s/([\200-\240])/'\\'.sprintf('%o',ord($1))/eg;
+      }
+      elsif ($] ge 5.007_003) {
+        my $high_control = utf8::unicode_to_native(0x9F);
+        s/$high_control/sprintf('\\%o',ord($1))/eg;
+      }
     } elsif ($high eq "utf8") {
+#     Some discussion of what to do here is in
+#       https://rt.perl.org/Ticket/Display.html?id=113088
 #     use utf8;
 #     $str =~ s/([^\040-\176])/sprintf "\\x{%04x}", ord($1)/ge;
     } elsif ($high eq "8bit") {
         # leave it as it is
     } else {
-      s/([\200-\377])/'\\'.sprintf('%03o',ord($1))/eg;
-      s/([^\040-\176])/sprintf "\\x{%04x}", ord($1)/ge;
+      s/([[:^ascii:]])/'\\'.sprintf('%03o',ord($1))/eg;
+      #s/([^\040-\176])/sprintf "\\x{%04x}", ord($1)/ge;
     }
-  }
-  else { # ebcdic
-      s{([^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~])(?!\d)}
-       {my $v = ord($1); '\\'.sprintf(($v <= 037 ? '%o' : '%03o'), $v)}eg;
-      s{([^ !"\#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~])}
-       {'\\'.sprintf('%03o',ord($1))}eg;
-  }
 
   return qq("$_");
 }
@@ -1419,7 +1454,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.157  (January 29 2014)
+Version 2.158  (March 13 2015)
 
 =head1 SEE ALSO
 
