@@ -3137,6 +3137,18 @@ again.
     ();
 } ## end sub DB
 
+# Because DB::Obj is used above,
+#
+#   my $obj = DB::Obj->new(
+#
+# The following package declaraton must come before that,
+# or else runtime errors will occur with
+#
+#   PERLDB_OPTS="autotrace nonstop"
+#
+# ( rt#116771 )
+BEGIN {
+
 package DB::Obj;
 
 sub new {
@@ -3950,6 +3962,8 @@ sub _handle_special_char_cmd_wrapper_commands {
 
     return;
 }
+
+} ## end DB::Obj
 
 package DB;
 
