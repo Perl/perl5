@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 # I'm assuming that you're running this on some kind of ASCII system, but
-# it will generate EDCDIC too. (TODO)
+# it will generate EBCDIC too. (TODO)
 use strict;
 use Encode;
 
