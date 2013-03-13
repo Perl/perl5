@@ -230,7 +230,7 @@ using C<is_utf8_string()> to determine if it is Unicode.
 
 If PERL_PV_ESCAPE_ALL is set then all input chars will be output
 using C<\x01F1> style escapes, otherwise if PERL_PV_ESCAPE_NONASCII is set, only
-chars above 127 will be escaped using this style; otherwise, only chars above
+non-ASCII chars will be escaped using this style; otherwise, only chars above
 255 will be so escaped; other non printable chars will use octal or
 common escaped patterns like C<\n>. Otherwise, if PERL_PV_ESCAPE_NOBACKSLASH
 then all chars below 255 will be treated as printable and
@@ -284,7 +284,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
         
         if ( ( u > 255 )
 	  || (flags & PERL_PV_ESCAPE_ALL)
-	  || (( u > 127 ) && (flags & PERL_PV_ESCAPE_NONASCII)))
+	  || (( ! isASCII(u) ) && (flags & PERL_PV_ESCAPE_NONASCII)))
 	{
             if (flags & PERL_PV_ESCAPE_FIRSTCHAR) 
                 chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
@@ -335,12 +335,12 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             sv_catpvn(dsv, octbuf, chsize);
             wrote += chsize;
 	} else {
-	    /* If PERL_PV_ESCAPE_NOBACKSLASH is set then bytes in the range
-	       128-255 can be appended raw to the dsv. If dsv happens to be
+	    /* If PERL_PV_ESCAPE_NOBACKSLASH is set then non-ASCII bytes
+	       can be appended raw to the dsv. If dsv happens to be
 	       UTF-8 then we need catpvf to upgrade them for us.
 	       Or add a new API call sv_catpvc(). Think about that name, and
 	       how to keep it clear that it's unlike the s of catpvs, which is
-	       really an array octets, not a string.  */
+	       really an array of octets, not a string.  */
             Perl_sv_catpvf( aTHX_ dsv, "%c", c);
 	    wrote++;
 	}
@@ -2597,64 +2597,15 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 	else
 	    c = (*pv & 255);
 
-	switch (c) {
-	case 0x00:
-	case 0x01:
-	case 0x02:
-	case 0x03:
-	case 0x04:
-	case 0x05:
-	case 0x06:
-	case 0x07:
-	case 0x08:
-	case 0x0b:
-	case 0x0c:
-	case 0x0e:
-	case 0x0f:
-	case 0x10:
-	case 0x11:
-	case 0x12:
-	case 0x13:
-	case 0x14:
-	case 0x15:
-	case 0x16:
-	case 0x17:
-	case 0x18:
-	case 0x19:
-	case 0x1a:
-	case 0x1b:
-	case 0x1c:
-	case 0x1d:
-	case 0x1e:
-	case 0x1f:
-	case 0x7f:
-	case 0x80:
-	case 0x81:
-	case 0x82:
-	case 0x83:
-	case 0x84:
-	case 0x86:
-	case 0x87:
-	case 0x88:
-	case 0x89:
-	case 0x90:
-	case 0x91:
-	case 0x92:
-	case 0x93:
-	case 0x94:
-	case 0x95:
-	case 0x96:
-	case 0x97:
-	case 0x98:
-	case 0x99:
-	case 0x9a:
-	case 0x9b:
-	case 0x9c:
-	case 0x9d:
-	case 0x9e:
-	case 0x9f:
+        if (isCNTRL_L1(c)
+            && c != '\t'
+            && c != '\n'
+            && c != '\r'
+            && c != LATIN1_TO_NATIVE(0x85))
+        {
 	    Perl_sv_catpvf(aTHX_ dsv, "STUPIDXML(#x%X)", c);
-	    break;
+        }
+        else switch (c) {
 	case '<':
 	    sv_catpvs(dsv, "&lt;");
 	    break;
@@ -2669,7 +2620,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 	    break;
 	default:
 	    if (c < 0xD800) {
-		if (c < 32 || c > 127) {
+		if (! isPRINT(c)) {
 		    Perl_sv_catpvf(aTHX_ dsv, "&#x%X;", c);
 		}
 		else {
