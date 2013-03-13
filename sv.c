@@ -1749,10 +1749,12 @@ S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
 	  const char * const end = s + SvCUR(sv);
 	  for ( ; s < end && d < limit; s++ ) {
 	       int ch = *s & 0xFF;
-	       if (ch & 128 && !isPRINT_LC(ch)) {
+	       if (! isASCII(ch) && !isPRINT_LC(ch)) {
 		    *d++ = 'M';
 		    *d++ = '-';
-		    ch &= 127;
+
+                    /* Map to ASCII "equivalent" of Latin1 */
+		    ch = LATIN1_TO_NATIVE(NATIVE_TO_LATIN1(ch) & 127);
 	       }
 	       if (ch == '\n') {
 		    *d++ = '\\';
