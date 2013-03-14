@@ -861,7 +861,7 @@ use File::Glob qw(:case);
 
     'File::Temp' => {
         'MAINTAINER'   => 'tjenness',
-        'DISTRIBUTION' => 'TJENNESS/File-Temp-0.22_90.tar.gz',
+        'DISTRIBUTION' => 'TJENNESS/File-Temp-0.23.tar.gz',
         'FILES'        => q[cpan/File-Temp],
         'EXCLUDED'     => [
             qw( misc/benchmark.pl

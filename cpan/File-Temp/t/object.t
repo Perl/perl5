@@ -2,7 +2,7 @@
 # Test for File::Temp - OO interface
 
 use strict;
-use Test::More tests => 33;
+use Test::More tests => 35;
 use File::Spec;
 
 # Will need to check that all files were unlinked correctly
@@ -56,6 +56,15 @@ my $dirname = "$tdir"; # Stringify overload
 ok( -d $dirname, "Directory $tdir exists");
 undef $tdir;
 ok( !-d $dirname, "Directory should now be gone");
+
+# with template
+$tdir = File::Temp->newdir( TEMPLATE => 'helloXXXXX' );
+like( "$tdir", qr/hello/, "Directory with TEMPLATE" );
+undef $tdir;
+
+$tdir = File::Temp->newdir( 'helloXXXXX' );
+like( "$tdir", qr/hello/, "Directory with leading template" );
+undef $tdir;
 
 # Quick basic tempfile test
 my $qfh = File::Temp->new();
@@ -119,6 +128,7 @@ print "# TEMPFILE: Created $fh\n";
 ok( (-f "$fh"), "File $fh exists? [from leading template]" );
 like( "$fh", qr/hello/, "saw template" );
 push(@files, "$fh");
+
 
 
 # Create a temporary file that should stay around after

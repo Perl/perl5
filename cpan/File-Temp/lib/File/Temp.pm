@@ -148,6 +148,7 @@ use File::Path qw/ rmtree /;
 use Fcntl 1.03;
 use IO::Seekable;               # For SEEK_*
 use Errno;
+use Scalar::Util 'refaddr';
 require VMS::Stdio if $^O eq 'VMS';
 
 # pre-emptively load Carp::Heavy. If we don't when we run out of file
@@ -162,7 +163,8 @@ require Symbol if $] < 5.006;
 
 ### For the OO interface
 use base qw/ IO::Handle IO::Seekable /;
-use overload '""' => "STRINGIFY", fallback => 1;
+use overload '""' => "STRINGIFY", '0+' => "NUMIFY",
+  fallback => 1;
 
 # use 'our' on v5.6.0
 use vars qw($VERSION @EXPORT_OK %EXPORT_TAGS $DEBUG $KEEP_ALL);
@@ -205,7 +207,7 @@ Exporter::export_tags('POSIX','mktemp','seekable');
 
 # Version number
 
-$VERSION = '0.22_90';
+$VERSION = '0.23';
 
 # This is a list of characters that can be used in random filenames
 
@@ -802,7 +804,7 @@ sub _is_verysafe {
 
 sub _can_unlink_opened_file {
 
-  if ($^O eq 'MSWin32' || $^O eq 'os2' || $^O eq 'VMS' || $^O eq 'dos' || $^O eq 'MacOS') {
+  if (grep { $^O eq $_ } qw/MSWin32 os2 VMS dos MacOS haiku/) {
     return 0;
   } else {
     return 1;
@@ -924,8 +926,9 @@ sub _can_do_level {
       if (defined $cwd_to_remove) {
         # We do need to clean up the current directory, and everything
         # else is done, so get out of there and remove it.
-        my $root = File::Spec->rootdir;
-        chdir $root or die "cannot chdir to $root: $!";
+        chdir $cwd_to_remove or die "cannot chdir to $cwd_to_remove: $!";
+        my $updir = File::Spec->updir;
+        chdir $updir or die "cannot chdir to $updir: $!";
         eval { rmtree($cwd_to_remove, $DEBUG, 0); };
         warn $@ if ($@ && $^W);
       }
@@ -996,6 +999,24 @@ sub _can_do_level {
 
 }
 
+# normalize argument keys to upper case and do consistent handling
+# of leading template vs TEMPLATE
+sub _parse_args {
+  my $leading_template = (scalar(@_) % 2 == 1 ? shift(@_) : '' );
+  my %args = @_;
+  %args = map { uc($_), $args{$_} } keys %args;
+
+  # template (store it in an array so that it will
+  # disappear from the arg list of tempfile)
+  my @template = (
+    exists $args{TEMPLATE}  ? $args{TEMPLATE} :
+    $leading_template       ? $leading_template : ()
+  );
+  delete $args{TEMPLATE};
+
+  return( \@template, \%args );
+}
+
 =head1 OBJECT-ORIENTED INTERFACE
 
 This is the primary interface for interacting with
@@ -1004,11 +1025,17 @@ when the object is constructed and the file can be removed when the
 object is no longer required.
 
 Note that there is no method to obtain the filehandle from the
-C<File::Temp> object. The object itself acts as a filehandle. Also,
-the object is configured such that it stringifies to the name of the
-temporary file, and can be compared to a filename directly. The object
+C<File::Temp> object. The object itself acts as a filehandle.  The object
 isa C<IO::Handle> and isa C<IO::Seekable> so all those methods are
 available.
+
+Also, the object is configured such that it stringifies to the name of the
+temporary file and so can be compared to a filename directly.  It numifies
+to the C<refaddr> the same as other handles and so can be compared to other
+handles with C<==>.
+
+    $fh eq $filename       # as a string
+    $fh != \*STDOUT        # as a number
 
 =over 4
 
@@ -1042,28 +1069,17 @@ sub new {
   my $proto = shift;
   my $class = ref($proto) || $proto;
 
-  # read arguments and convert keys to upper case
-  my $leading_template = (scalar(@_) % 2 == 1 ? shift(@_) : '' );
-  my %args = @_;
-  %args = map { uc($_), $args{$_} } keys %args;
+  my ($maybe_template, $args) = _parse_args(@_);
 
   # see if they are unlinking (defaulting to yes)
-  my $unlink = (exists $args{UNLINK} ? $args{UNLINK} : 1 );
-  delete $args{UNLINK};
-
-  # template (store it in an array so that it will
-  # disappear from the arg list of tempfile)
-  my @template = (
-    exists $args{TEMPLATE}  ? $args{TEMPLATE} :
-    $leading_template       ? $leading_template : ()
-  );
-  delete $args{TEMPLATE};
+  my $unlink = (exists $args->{UNLINK} ? $args->{UNLINK} : 1 );
+  delete $args->{UNLINK};
 
   # Protect OPEN
-  delete $args{OPEN};
+  delete $args->{OPEN};
 
   # Open the file and retain file handle and file name
-  my ($fh, $path) = tempfile( @template, %args );
+  my ($fh, $path) = tempfile( @$maybe_template, %$args );
 
   print "Tmp: $fh - $path\n" if $DEBUG;
 
@@ -1074,7 +1090,7 @@ sub new {
   $FILES_CREATED_BY_OBJECT{$$}{$path} = 1;
 
   # Store unlink information in hash slot (plus other constructor info)
-  %{*$fh} = %args;
+  %{*$fh} = %$args;
 
   # create the object
   bless $fh, $class;
@@ -1098,25 +1114,21 @@ created with this method default to CLEANUP => 1.
 
   $dir = File::Temp->newdir( $template, %options );
 
+A template may be specified either with a leading template or
+with a TEMPLATE argument.
+
 =cut
 
 sub newdir {
   my $self = shift;
 
-  # need to handle args as in tempdir because we have to force CLEANUP
-  # default without passing CLEANUP to tempdir
-  my $template = (scalar(@_) % 2 == 1 ? shift(@_) : undef );
-  my %options = @_;
-  my $cleanup = (exists $options{CLEANUP} ? $options{CLEANUP} : 1 );
+  my ($maybe_template, $args) = _parse_args(@_);
 
-  delete $options{CLEANUP};
+  # handle CLEANUP without passing CLEANUP to tempdir
+  my $cleanup = (exists $args->{CLEANUP} ? $args->{CLEANUP} : 1 );
+  delete $args->{CLEANUP};
 
-  my $tempdir;
-  if (defined $template) {
-    $tempdir = tempdir( $template, %options );
-  } else {
-    $tempdir = tempdir( %options );
-  }
+  my $tempdir = tempdir( @$maybe_template, %$args);
 
   # get a safe absolute path for cleanup, just like
   # happens in _deferred_unlink
@@ -1150,6 +1162,13 @@ sub filename {
 sub STRINGIFY {
   my $self = shift;
   return $self->filename;
+}
+
+# For reference, can't use '0+'=>\&Scalar::Util::refaddr directly because
+# refaddr() demands one parameter only, whereas overload.pm calls with three
+# even for unary operations like '0+'.
+sub NUMIFY {
+  return refaddr($_[0]);
 }
 
 =item B<dirname>
@@ -1356,10 +1375,11 @@ sub tempfile {
                 );
 
   # Check to see whether we have an odd or even number of arguments
-  my $template = (scalar(@_) % 2 == 1 ? shift(@_) : undef);
+  my ($maybe_template, $args) = _parse_args(@_);
+  my $template = @$maybe_template ? $maybe_template->[0] : undef;
 
   # Read the options and merge with defaults
-  %options = (%options, @_)  if @_;
+  %options = (%options, %$args);
 
   # First decision is whether or not to open the file
   if (! $options{"OPEN"}) {
@@ -1547,10 +1567,11 @@ sub tempdir  {
                 );
 
   # Check to see whether we have an odd or even number of arguments
-  my $template = (scalar(@_) % 2 == 1 ? shift(@_) : undef );
+  my ($maybe_template, $args) = _parse_args(@_);
+  my $template = @$maybe_template ? $maybe_template->[0] : undef;
 
   # Read the options and merge with defaults
-  %options = (%options, @_)  if @_;
+  %options = (%options, %$args);
 
   # Modify or generate the template
 
@@ -2466,7 +2487,9 @@ package File::Temp::Dir;
 
 use File::Path qw/ rmtree /;
 use strict;
-use overload '""' => "STRINGIFY", fallback => 1;
+use overload '""' => "STRINGIFY",
+  '0+' => \&File::Temp::NUMIFY,
+  fallback => 1;
 
 # private class specifically to support tempdir objects
 # created by File::Temp->newdir

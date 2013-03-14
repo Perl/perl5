@@ -2,7 +2,7 @@
 # Test for File::Temp - tempfile function
 
 use strict;
-use Test::More tests => 24;
+use Test::More tests => 28;
 use File::Spec;
 use Cwd qw/ cwd /;
 
@@ -67,6 +67,16 @@ print "# TEMPDIR: $tempdir\n";
 ok( (-d $tempdir), "Local tempdir exists" );
 push(@dirs, File::Spec->rel2abs($tempdir));
 
+my $tempdir2 = tempdir( TEMPLATE => "customXXXXX",
+		       DIR => File::Spec->curdir,
+		       CLEANUP => 1,
+		     );
+
+print "# TEMPDIR2: $tempdir2\n";
+
+like( $tempdir2, qr/custom/, "tempdir with TEMPLATE" );
+push(@dirs, File::Spec->rel2abs($tempdir));
+
 # Create file in the temp dir
 ($fh, $tempfile) = tempfile(
 			    DIR => $tempdir,
@@ -114,6 +124,19 @@ print "# TEMPFILE: Created $tempfile\n";
 ok( (-f $tempfile), "Local tempfile in tempdir with .dat extension exists" );
 push(@files, File::Spec->rel2abs($tempfile));
 
+
+# and another (with TEMPLATE)
+
+($fh, $tempfile) = tempfile( TEMPLATE => 'goodbyeXXXXXXX',
+			    DIR => $tempdir,
+			    UNLINK => 1,
+			    SUFFIX => '.dat',
+			   );
+
+print "# TEMPFILE: Created $tempfile\n";
+
+ok( (-f $tempfile), "Local tempfile in tempdir with TEMPLATE" );
+push(@files, File::Spec->rel2abs($tempfile));
 
 # Create a temporary file that should stay around after
 # it has been closed
