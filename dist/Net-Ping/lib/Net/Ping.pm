@@ -16,7 +16,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.38";
+$VERSION = "2.39";
 
 sub SOL_IP { 0; };
 sub IP_TOS { 1; };
@@ -1374,6 +1374,8 @@ sub close
     delete $self->{"syn"};
   } elsif ($self->{"proto"} eq "tcp") {
     # The connection will already be closed
+  } elsif ($self->{"proto"} eq "external") {
+    # Nothing to close
   } else {
     $self->{"fh"}->close();
   }
