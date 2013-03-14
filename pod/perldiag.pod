@@ -1731,7 +1731,7 @@ See Server error.
 =item %s does not define %s::VERSION--version check failed
 
 (F) You said something like "use Module 42" but the Module did not
-define a C<$VERSION.>
+define a C<$VERSION>.
 
 =item '/' does not take a repeat count
 
