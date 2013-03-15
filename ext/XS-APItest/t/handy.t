@@ -115,7 +115,7 @@ foreach my $name (sort keys %properties) {
 
         my $ret;
         my $char_name = charnames::viacode($i) // "No name";
-        my $display_name = sprintf "\\N{U+%02X, %s}", $i, $char_name;
+        my $display_name = sprintf "\\x{%02X, %s}", $i, $char_name;
 
         if ($name eq 'quotemeta') { # There is only one macro for this, and is
                                     # defined only for Latin1 range
