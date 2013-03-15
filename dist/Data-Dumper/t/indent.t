@@ -100,3 +100,11 @@ like($dumpstr{ar_indent_3},
 is(scalar(split("\n" => $dumpstr{ar_indent_2})) + 2,
     scalar(split("\n" => $dumpstr{ar_indent_3})),
     "Indent(3) runs 2 lines longer than Indent(2)");
+
+__END__
+is($dumpstr{noindent}, $dumpstr{indent_0},
+    "absence of Indent is same as Indent(0)");
+isnt($dumpstr{noindent}, $dumpstr{indent_1},
+    "absence of Indent is different from Indent(1)");
+print STDERR $dumpstr{indent_0};
+print STDERR $dumpstr{ar_indent_3};

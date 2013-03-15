@@ -7,16 +7,18 @@ BEGIN {
     require Config; import Config;
     no warnings 'once';
     if ($Config{'extensions'} !~ /\bData\/Dumper\b/) {
-        print "1..0 # Skip: Data::Dumper was not built\n";
-        exit 0;
+	print "1..0 # Skip: Data::Dumper was not built\n";
+	exit 0;
     }
 }
 
 use strict;
-use Test::More tests =>  8;
+use Test::More tests =>  7;
 use Data::Dumper;
 use lib qw( ./t/lib );
 use Testing qw( _dumptostr );
+
+local $Data::Dumper::Useperl = 1;
 
 {
     local $Data::Dumper::Freezer = 'freeze';
@@ -33,7 +35,6 @@ use Testing qw( _dumptostr );
              "Dumped list doesn't begin with Freezer's return value with useperl");
     }
 
-
     # test for warning when an object does not have a freeze()
     {
         my $warned = 0;
@@ -42,7 +43,6 @@ use Testing qw( _dumptostr );
         my $dumped_bar = Dumper($bar);
         is($warned, 0, "A missing freeze() shouldn't warn.");
     }
-
 
     # a freeze() which die()s should still trigger the warning
     {
@@ -53,23 +53,6 @@ use Testing qw( _dumptostr );
         is($warned, 1, "A freeze() which die()s should warn.");
     }
 
-}
-
-{
-    my ($obj, %dumps);
-    my $foo = Test1->new("foo");
-
-    local $Data::Dumper::Freezer = 'freeze';
-    $obj = Data::Dumper->new( [ $foo ] );
-    $dumps{'ddftrue'} = _dumptostr($obj);
-    local $Data::Dumper::Freezer = '';
-
-    $obj = Data::Dumper->new( [ $foo ] );
-    $obj->Freezer('freeze');
-    $dumps{'objset'} = _dumptostr($obj);
-
-    is($dumps{'ddftrue'}, $dumps{'objset'},
-        "\$Data::Dumper::Freezer and Freezer() are equivalent");
 }
 
 {
