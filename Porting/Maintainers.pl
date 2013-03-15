@@ -1330,7 +1330,7 @@ use File::Glob qw(:case);
 
     'Net::Ping' => {
         'MAINTAINER'   => 'smpeters',
-        'DISTRIBUTION' => 'SMPETERS/Net-Ping-2.39.tar.gz',
+        'DISTRIBUTION' => 'SMPETERS/Net-Ping-2.40.tar.gz',
         'FILES'        => q[dist/Net-Ping],
         'UPSTREAM'     => 'blead',
     },
