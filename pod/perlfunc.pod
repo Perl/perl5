@@ -3187,24 +3187,29 @@ Sends a signal to a list of processes.  Returns the number of
 processes successfully signaled (which is not necessarily the
 same as the number actually killed).
 
-    $cnt = kill 1, $child1, $child2;
-    kill 9, @goners;
+    $cnt = kill 'HUP', $child1, $child2;
+    kill 'KILL', @goners;
 
-If SIGNAL is zero, no signal is sent to the process, but C<kill>
-checks whether it's I<possible> to send a signal to it (that
-means, to be brief, that the process is owned by the same user, or we are
+SIGNAL may be either a signal name (a string) or a signal number.  A signal
+name may start with a C<SIG> prefix, i.e. C<FOO> and C<SIGFOO> refer to the
+same signal.  The string form of SIGNAL is recommended for portability because
+the same signal may have different numbers in different operating systems.
+
+A list of signal names supported by the current platform can be found in
+C<$Config{sig_name}>, which is provided by the C<Config> module. See L<Config>
+for more details.
+
+A negative signal name is the same as a negative signal number, killing process
+groups instead of processes.  For example, C<kill '-KILL', $pgrp> and
+C<kill -9, $pgrp> will send C<SIGKILL> to the entire process group specified. That
+means you usually want to use positive not negative signals.
+
+If SIGNAL is either the number 0 or the string C<ZERO>, no signal is sent to
+the process, but C<kill> checks whether it's I<possible> to send a signal to it
+(that means, to be brief, that the process is owned by the same user, or we are
 the super-user).  This is useful to check that a child process is still
 alive (even if only as a zombie) and hasn't changed its UID.  See
 L<perlport> for notes on the portability of this construct.
-
-Unlike in the shell, if SIGNAL is negative, it kills process groups instead
-of processes.  That means you usually
-want to use positive not negative signals.
-
-You may also use a signal name in quotes.  A negative signal name is the
-same as a negative signal number, killing process groups instead of processes.
-For example, C<kill -KILL, $pgrp> will send C<SIGKILL> to the entire process
-group specified.
 
 The behavior of kill when a I<PROCESS> number is zero or negative depends on
 the operating system.  For example, on POSIX-conforming systems, zero will
