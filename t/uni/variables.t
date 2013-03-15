@@ -12,7 +12,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 65856);
+plan (tests => 65869);
 
 # ${single:colon} should not be valid syntax
 {
@@ -199,5 +199,31 @@ EOP
              qr/syntax error|Unrecognized character/,
              qq{\$\$$esc is a syntax error}
         );
+    }
+}
+
+{
+    # bleadperl v5.17.9-109-g3283393 breaks JEREMY/File-Signature-1.009.tar.gz
+    # https://rt.perl.org/rt3/Ticket/Display.html?id=117145
+    local $@;
+    my $var = 10;
+    eval ' ${  var  }';
+
+    is(
+        $@,
+        '',
+        '${  var  } works under strict'
+    );
+
+    {
+        no strict;
+        for my $var ( '$', "\7LOBAL_PHASE", "^GLOBAL_PHASE", "^V" ) {
+            eval "\${ $var}";
+            is($@, '', "\${ $var} works" );
+            eval "\${$var }";
+            is($@, '', "\${$var } works" );
+            eval "\${ $var }";
+            is($@, '', "\${ $var } works" );
+        }
     }
 }

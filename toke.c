@@ -9292,6 +9292,8 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     if (*s == '{') {
 	bracket = s;
 	s++;
+	while (s < send && SPACE_OR_TAB(*s))
+	   s++;
     }
 
 #define VALID_LEN_ONE_IDENT(d, u)     (isPUNCT_A((U8)*(d))     \
@@ -9320,15 +9322,6 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     else if (ck_uni && !bracket)
 	check_uni();
     if (bracket) {
-	if (isSPACE(s[-1])) {
-	    while (s < send) {
-		const char ch = *s++;
-		if (!SPACE_OR_TAB(ch)) {
-		    *d = ch;
-		    break;
-		}
-	    }
-	}
 	if (isIDFIRST_lazy_if(d,is_utf8)) {
         d += is_utf8 ? UTF8SKIP(d) : 1;
         parse_ident(&s, &d, e, 1, is_utf8);
@@ -9364,6 +9357,10 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 		Perl_croak(aTHX_ "%s", ident_too_long);
 	    *d = '\0';
 	}
+
+        while (s < send && SPACE_OR_TAB(*s))
+	    s++;
+
 	if (*s == '}') {
 	    s++;
 	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
