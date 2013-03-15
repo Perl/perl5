@@ -137,7 +137,7 @@ static const char* const ident_too_long = "Identifier too long";
  * 1999-02-27 mjd-perl-patch@plover.com */
 #define isCONTROLVAR(x) (isUPPER(x) || strchr("[\\]^_?", (x)))
 
-#define SPACE_OR_TAB(c) ((c)==' '||(c)=='\t')
+#define SPACE_OR_TAB(c) isBLANK_A(c)
 
 /* LEX_* are values for PL_lex_state, the state of the lexer.
  * They are arranged oddly so that the guard on the switch statement
