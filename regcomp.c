@@ -1041,8 +1041,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
                     255, which means that the union with cl should just be
                     what cl has in it, so can ignore this flag
             ANYOF_NON_UTF8_LATIN1_ALL and inverted means if not utf8 and ord
-                    is 127-255 to match them, but then invert that, so the
-                    union with cl should just be what cl has in it, so can
+                    is (ASCII) 127-255 to match them, but then invert that, so
+                    the union with cl should just be what cl has in it, so can
                     ignore this flag
          */
     } else {    /* 'or_with' is not inverted */
@@ -4276,8 +4276,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum) + 1);
                             for (value = 0; value < loop_max; value++) {
-                                if (! _generic_isCC(value, classnum)) {
-                                    ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                if (! _generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, LATIN1_TO_NATIVE(value));
                                 }
                             }
 			}
@@ -4292,8 +4292,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			 * in case it isn't a true locale-node.  This will
 			 * create false positives if it truly is locale */
                         for (value = 0; value < loop_max; value++) {
-                            if (_generic_isCC(value, classnum)) {
-                                ANYOF_BITMAP_SET(data->start_class, value);
+                            if (_generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, LATIN1_TO_NATIVE(value));
                             }
                         }
                         }
@@ -4310,8 +4310,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum));
                             for (value = 0; value < loop_max; value++) {
-                                if (_generic_isCC(value, classnum)) {
-                                    ANYOF_BITMAP_CLEAR(data->start_class, value);
+                                if (_generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, LATIN1_TO_NATIVE(value));
                                 }
                             }
 			}
@@ -4326,8 +4326,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			 * case it isn't a true locale-node.  This will create
 			 * false positives if it truly is locale */
                         for (value = 0; value < loop_max; value++) {
-                            if (! _generic_isCC(value, classnum)) {
-                                ANYOF_BITMAP_SET(data->start_class, value);
+                            if (! _generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, LATIN1_TO_NATIVE(value));
                             }
                         }
                         if (PL_regkind[OP(scan)] == NPOSIXD) {
