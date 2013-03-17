@@ -786,8 +786,20 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else                                       /* gotta do the real thing */
 	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
-    HeNEXT(entry) = *oentry;
-    *oentry = entry;
+
+    /* This logic semi-randomizes the insert order in a bucket.
+     * Either we insert into the top, or the slot below the top,
+     * making it harder to see if there is a collision.
+     */
+    PL_hash_rand_bits += (PTRV)entry ^ hash; /* we don't bother to use ptr_hash here */
+    PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+    if ( !*oentry || (PL_hash_rand_bits & 1) ) {
+        HeNEXT(entry) = *oentry;
+        *oentry = entry;
+    } else {
+        HeNEXT(entry) = HeNEXT(*oentry);
+        HeNEXT(*oentry) = entry;
+    }
 
     if (val == &PL_sv_placeholder)
 	HvPLACEHOLDERS(hv)++;
@@ -1123,8 +1135,20 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
       PL_nomemok = FALSE;
       return;
     }
+    /* the idea of this is that we create a "random" value by hashing the address of
+     * the array, we then use the low bit to decide if we insert at the top, or insert
+     * second from top. After each such insert we rotate the hashed value. So we can
+     * use the same hashed value over and over, and in normal build environments use
+     * very few ops to do so. ROTL32() should produce a single machine operation. */
+    PL_hash_rand_bits += ptr_hash((PTRV)a);
+    PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
+
     if (SvOOK(hv)) {
-	Move(&a[oldsize * sizeof(HE*)], &a[newsize * sizeof(HE*)], 1, struct xpvhv_aux);
+        struct xpvhv_aux *const dest
+            = (struct xpvhv_aux*) &a[newsize * sizeof(HE*)];
+        Move(&a[oldsize * sizeof(HE*)], dest, 1, struct xpvhv_aux);
+        /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
+        dest->xhv_rand = (U32)PL_hash_rand_bits;
     }
 
     PL_nomemok = FALSE;
@@ -1146,8 +1170,18 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
             U32 j = (HeHASH(entry) & newsize);
 	    if (j != (U32)i) {
 		*oentry = HeNEXT(entry);
-                HeNEXT(entry) = aep[j];
-                aep[j] = entry;
+                /* if the target cell is empty insert to top, otherwise
+                 * rotate the bucket rand 1 bit, and use the new low bit
+                 * to decide if we insert at top, or next from top.
+                 * IOW, we rotate only if we are dealing with colliding
+                 * elements. */
+                if (!aep[j] || ((PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1)) & 1)) {
+                    HeNEXT(entry) = aep[j];
+                    aep[j] = entry;
+                } else {
+                    HeNEXT(entry)= HeNEXT(aep[j]);
+                    HeNEXT(aep[j])= entry;
+                }
 	    }
 	    else {
 		oentry = &HeNEXT(entry);
