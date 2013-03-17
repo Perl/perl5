@@ -789,8 +789,11 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     /* This logic semi-randomizes the insert order in a bucket.
      * Either we insert into the top, or the slot below the top,
-     * making it harder to see if there is a collision.
+     * making it harder to see if there is a collision. We also
+     * reset the iterator randomizer if there is one.
      */
+    if (SvOOK(hv))
+        HvAUX(hv)->xhv_rand= (U32)PL_hash_rand_bits;
     PL_hash_rand_bits += (PTRV)entry ^ hash; /* we don't bother to use ptr_hash here */
     PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
     if ( !*oentry || (PL_hash_rand_bits & 1) ) {
