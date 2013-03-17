@@ -305,7 +305,7 @@ RUN = $run
 
 # These variables may need to be manually set for non-Unix systems.
 AR = $full_ar
-HOST_EXE_EXT = 
+HOST_EXE_EXT = $_exe
 EXE_EXT = $_exe
 LIB_EXT = $_a
 OBJ_EXT = $_o
