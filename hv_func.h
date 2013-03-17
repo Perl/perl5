@@ -127,15 +127,35 @@
   #define UNALIGNED_SAFE
 #endif
 
-/* Find best way to ROTL32 */
+#ifdef HAS_QUAD
+#ifndef U64TYPE
+/* This probably isn't going to work, but failing with a compiler error due to
+   lack of uint64_t is no worse than failing right now with an #error.  */
+#define U64TYPE uint64_t
+#endif
+#endif
+
+/* Find best way to ROTL32/ROTL64 */
 #if defined(_MSC_VER)
   #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
   #define ROTL32(x,r)  _rotl(x,r)
+  #ifdef HAS_QUAD
+    #define ROTL64(x,r)  _rotl64(x,r)
+  #endif
 #else
   /* gcc recognises this code and generates a rotate instruction for CPUs with one */
   #define ROTL32(x,r)  (((U32)x << r) | ((U32)x >> (32 - r)))
+  #ifdef HAS_QUAD
+    #define ROTL64(x,r)  (((U64TYPE)x << r) | ((U64TYPE)x >> (64 - r)))
+  #endif
 #endif
 
+
+#ifdef UV_IS_QUAD
+#define ROTL_UV(x,r) ROTL64(x,r)
+#else
+#define ROTL_UV(x,r) ROTL32(x,r)
+#endif
 
 /* This is SipHash by Jean-Philippe Aumasson and Daniel J. Bernstein.
  * The authors claim it is relatively secure compared to the alternatives
@@ -152,15 +172,6 @@
  */
 
 #ifdef HAS_QUAD
-
-#ifndef U64TYPE
-/* This probably isn't going to work, but failing with a compiler error due to
-   lack of uint64_t is no worse than failing right now with an #error.  */
-#define U64TYPE uint64_t
-#endif
-
-
-#define ROTL64(x,b) (U64TYPE)( ((x) << (b)) | ( (x) >> (64 - (b))) )
 
 #define U8TO64_LE(p) \
   (((U64TYPE)((p)[0])      ) | \
