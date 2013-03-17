@@ -3489,7 +3489,7 @@ S_minus_v(pTHX)
 #endif
 #ifdef __VOS__
 	PerlIO_printf(PIO_stdout,
-		      "Stratus VOS port by Paul.Green@stratus.com, 1997-2002\n");
+		      "Stratus OpenVOS port by Paul.Green@stratus.com, 1997-2013\n");
 #endif
 #ifdef POSIX_BC
 	PerlIO_printf(PIO_stdout,
