@@ -2467,7 +2467,7 @@ character (U+FFFD).
 
 (S debugging) Perl was called with invalid debugger flags.  Call perl
 with the B<-D> option with no flags to see the list of acceptable values.
-See also L<perlrun/B<-D>I<letters>>.
+See also L<perlrun/-Dletters>.
 
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
 
