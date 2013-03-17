@@ -175,8 +175,7 @@ for my $ord (0..255) {
             # Here, isn't an _L1.  If its _A, it's automatically false for
             # non-ascii.  The only current ones (besides ASCII) without a
             # suffix are valid over the whole range.
-            next if $name =~ s/_A$// && $ord >= 128;
-
+            next if $name =~ s/_A$// && $char !~ /\p{ASCII}/;
         }
         my $re;
         if ($name eq 'PUNCT') {;
@@ -226,79 +225,6 @@ for my $ord (0..255) {
     #print __LINE__, " $ord $char $bits[$ord]\n";
 }
 
-# Names of C0 controls
-my @C0 = qw (
-                NUL
-                SOH
-                STX
-                ETX
-                EOT
-                ENQ
-                ACK
-                BEL
-                BS
-                HT
-                LF
-                VT
-                FF
-                CR
-                SO
-                SI
-                DLE
-                DC1
-                DC2
-                DC3
-                DC4
-                NAK
-                SYN
-                ETB
-                CAN
-                EOM
-                SUB
-                ESC
-                FS
-                GS
-                RS
-                US
-            );
-
-# Names of C1 controls, plus the adjacent DEL
-my @C1 = qw(
-                DEL
-                PAD
-                HOP
-                BPH
-                NBH
-                IND
-                NEL
-                SSA
-                ESA
-                HTS
-                HTJ
-                VTS
-                PLD
-                PLU
-                RI 
-                SS2
-                SS3
-                DCS
-                PU1
-                PU2
-                STS
-                CCH
-                MW 
-                SPA
-                EPA
-                SOS
-                SGC
-                SCI
-                CSI
-                ST 
-                OSC
-                PM 
-                APC
-            );
-
 my $out_fh = open_new('l1_char_class_tab.h', '>',
 		      {style => '*', by => $0,
                       from => "property definitions"});
@@ -306,17 +232,57 @@ my $out_fh = open_new('l1_char_class_tab.h', '>',
 # Output the table using fairly short names for each char.
 for my $ord (0..255) {
     my $name;
-    if ($ord < 32) {    # A C0 control
-        $name = $C0[$ord];
-    } elsif ($ord > 32 && $ord < 127) { # Graphic
-        $name = "'" . chr($ord) . "'";
-    } elsif ($ord >= 127 && $ord <= 0x9f) {
-        $name = $C1[$ord - 127];    # A C1 control + DEL
-    } else {    # SPACE, or, if Latin1, shorten the name */
+    my $char = chr $ord;
+    if ($char =~ /\p{PosixGraph}/) {
+        my $quote = $char eq "'" ? '"' : "'";
+        $name = $quote . chr($ord) . $quote;
+    }
+    elsif ($char =~ /\p{XPosixGraph}/) {
         use charnames();
         $name = charnames::viacode($ord);
         $name =~ s/LATIN CAPITAL LETTER //
-        || $name =~ s/LATIN SMALL LETTER (.*)/\L$1/;
+                or $name =~ s/LATIN SMALL LETTER (.*)/\L$1/
+                or $name =~ s/ SIGN\b//
+                or $name =~ s/EXCLAMATION MARK/'!'/
+                or $name =~ s/QUESTION MARK/'?'/
+                or $name =~ s/QUOTATION MARK/QUOTE/
+                or $name =~ s/ INDICATOR//;
+        $name =~ s/\bWITH\b/\L$&/;
+        $name =~ s/\bONE\b/1/;
+        $name =~ s/\b(TWO|HALF)\b/2/;
+        $name =~ s/\bTHREE\b/3/;
+        $name =~ s/\b QUARTER S? \b/4/x;
+        $name =~ s/VULGAR FRACTION (.) (.)/$1\/$2/;
+        $name =~ s/\bTILDE\b/'~'/i
+                or $name =~ s/\bCIRCUMFLEX\b/'^'/i
+                or $name =~ s/\bSTROKE\b/'\/'/i
+                or $name =~ s/ ABOVE\b//i;
+    }
+    else {
+        use Unicode::UCD qw(prop_invmap);
+        my ($list_ref, $map_ref, $format) = prop_invmap("Name_Alias");
+        if ($format !~ /^s/) {
+            use Carp;
+            carp "Unexpected format '$format' for 'Name_Alias";
+            last;
+        }
+        my $which = Unicode::UCD::search_invlist($list_ref, $ord);
+        if (! defined $which) {
+            use Carp;
+            carp "No name found for code pont $ord";
+        }
+        else {
+            my $map = $map_ref->[$which];
+            if (! ref $map) {
+                $name = $map;
+            }
+            else {
+                # Just pick the first abbreviation if more than one
+                my @names = grep { $_ =~ /abbreviation/ } @$map;
+                $name = $names[0];
+            }
+            $name =~ s/:.*//;
+        }
     }
     printf $out_fh "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord];
 }
