@@ -154,6 +154,7 @@
 #define PL_gensym		(vTHX->Igensym)
 #define PL_globalstash		(vTHX->Iglobalstash)
 #define PL_globhook		(vTHX->Iglobhook)
+#define PL_hash_rand_bits	(vTHX->Ihash_rand_bits)
 #define PL_hintgv		(vTHX->Ihintgv)
 #define PL_hints		(vTHX->Ihints)
 #define PL_hv_fetch_ent_mh	(vTHX->Ihv_fetch_ent_mh)

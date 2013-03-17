@@ -1757,27 +1757,66 @@ Perl_hv_fill(pTHX_ HV const *const hv)
     return count;
 }
 
+/* hash a pointer to a U32 - Used in the hash traversal randomization
+ * and bucket order randomization code
+ *
+ * this code was derived from Sereal, which was derived from autobox.
+ */
+
+PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
+#if PTRSIZE == 8
+    /*
+     * This is one of Thomas Wang's hash functions for 64-bit integers from:
+     * http://www.concentric.net/~Ttwang/tech/inthash.htm
+     */
+    u = (~u) + (u << 18);
+    u = u ^ (u >> 31);
+    u = u * 21;
+    u = u ^ (u >> 11);
+    u = u + (u << 6);
+    u = u ^ (u >> 22);
+#else
+    /*
+     * This is one of Bob Jenkins' hash functions for 32-bit integers
+     * from: http://burtleburtle.net/bob/hash/integer.html
+     */
+    u = (u + 0x7ed55d16) + (u << 12);
+    u = (u ^ 0xc761c23c) ^ (u >> 19);
+    u = (u + 0x165667b1) + (u << 5);
+    u = (u + 0xd3a2646c) ^ (u << 9);
+    u = (u + 0xfd7046c5) + (u << 3);
+    u = (u ^ 0xb55a4f09) ^ (u >> 16);
+#endif
+    return (U32)u;
+}
+
+
 static struct xpvhv_aux*
-S_hv_auxinit(HV *hv) {
+S_hv_auxinit(pTHX_ HV *hv) {
     struct xpvhv_aux *iter;
     char *array;
 
     PERL_ARGS_ASSERT_HV_AUXINIT;
 
-    if (!HvARRAY(hv)) {
-	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
-	    + sizeof(struct xpvhv_aux), char);
-    } else {
-	array = (char *) HvARRAY(hv);
-	Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
-	      + sizeof(struct xpvhv_aux), char);
+    if (!SvOOK(hv)) {
+        if (!HvARRAY(hv)) {
+            Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
+                + sizeof(struct xpvhv_aux), char);
+        } else {
+            array = (char *) HvARRAY(hv);
+            Renew(array, PERL_HV_ARRAY_ALLOC_BYTES(HvMAX(hv) + 1)
+                  + sizeof(struct xpvhv_aux), char);
+        }
+        HvARRAY(hv) = (HE**)array;
+        SvOOK_on(hv);
+        PL_hash_rand_bits += ptr_hash((PTRV)array);
+        PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
     }
-    HvARRAY(hv) = (HE**) array;
-    SvOOK_on(hv);
     iter = HvAUX(hv);
 
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+    iter->xhv_rand = (U32)PL_hash_rand_bits;
     iter->xhv_name_u.xhvnameu_name = 0;
     iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
@@ -2292,7 +2331,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 		iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
 		break;
 	    }
-	    entry = (HvARRAY(hv))[iter->xhv_riter];
+            entry = (HvARRAY(hv))[(iter->xhv_riter ^ iter->xhv_rand) & xhv->xhv_max];
 
 	    if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
 		/* If we have an entry, but it's a placeholder, don't count it.

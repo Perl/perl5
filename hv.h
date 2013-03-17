@@ -92,6 +92,7 @@ struct xpvhv_aux {
     I32		xhv_name_count;
     struct mro_meta *xhv_mro_meta;
     HV *	xhv_super;	/* SUPER method cache */
+    U32         xhv_rand;       /* random value for hash traversal */
 };
 
 /* hash structure: */

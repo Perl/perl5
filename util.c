@@ -5681,12 +5681,23 @@ Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
     else
 #endif
     {
+        unsigned char *ptr= seed_buffer;
         (void)seedDrand01((Rand_seed_t)seed());
 
-        while (seed_buffer < end) {
-            *seed_buffer++ = (unsigned char)(Drand01() * (U8_MAX+1));
+        while (ptr < end) {
+            *ptr++ = (unsigned char)(Drand01() * (U8_MAX+1));
         }
-     }
+    }
+    {   /* initialize PL_hash_rand_bits from the hash seed.
+         * This value is highly volatile, it is updated every
+         * hash insert, and is used as part of hash bucket chain
+         * randomization and hash iterator randomization. */
+        unsigned long i;
+        PL_hash_rand_bits= 0;
+        for( i = 0; i < sizeof(UV) ; i++ ) {
+            PL_hash_rand_bits = (PL_hash_rand_bits << 8) | seed_buffer[i % PERL_HASH_SEED_BYTES];
+        }
+    }
 }
 
 #ifdef PERL_GLOBAL_STRUCT

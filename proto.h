@@ -5706,8 +5706,8 @@ STATIC void	S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 #define PERL_ARGS_ASSERT_HSPLIT	\
 	assert(hv)
 
-STATIC struct xpvhv_aux*	S_hv_auxinit(HV *hv)
-			__attribute__nonnull__(1);
+STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv)
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_HV_AUXINIT	\
 	assert(hv)
 
@@ -5736,6 +5736,7 @@ STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+STATIC U32	S_ptr_hash(PTRV u);
 STATIC SV *	S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REFCOUNTED_HE_VALUE	\
