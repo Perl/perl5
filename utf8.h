@@ -289,9 +289,13 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* Adds a UTF8 continuation byte 'new' of information to a running total code
  * point 'old' of all the continuation bytes so far.  This is designed to be
- * used in a loop to convert from UTF-8 to the code point represented */
-#define UTF8_ACCUMULATE(old, new)	(((old) << UTF_ACCUMULATION_SHIFT)     \
-                                        | (((U8)new) & UTF_CONTINUATION_MASK))
+ * used in a loop to convert from UTF-8 to the code point represented.  Note
+ * that this is asymmetric on EBCDIC platforms, in that the 'new' parameter is
+ * the UTF-EBCDIC byte, whereas the 'old' parameter is a Unicode (not EBCDIC)
+ * code point in process of being generated */
+#define UTF8_ACCUMULATE(old, new) (((old) << UTF_ACCUMULATION_SHIFT)           \
+                                   | ((NATIVE_UTF8_TO_I8((U8)new))             \
+                                       & UTF_CONTINUATION_MASK))
 
 /* This works in the face of malformed UTF-8. */
 #define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e) (UTF8_IS_DOWNGRADEABLE_START(*s) \
@@ -314,7 +318,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * downgradable */
 #define TWO_BYTE_UTF8_TO_NATIVE(HI, LO) \
      UNI_TO_NATIVE(UTF8_ACCUMULATE((NATIVE_UTF8_TO_I8(HI) & UTF_START_MASK(2)), \
-                                   NATIVE_UTF8_TO_I8(LO)))
+                                   (LO)))
 
 /* Should never be used, and be deprecated */
 #define TWO_BYTE_UTF8_TO_UNI(HI, LO) NATIVE_TO_UNI(TWO_BYTE_UTF8_TO_NATIVE(HI, LO))
