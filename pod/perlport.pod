@@ -1195,12 +1195,12 @@ trailing apostrophe.  Although an extended file name is limited
 to 255 characters, a path name is still limited to 256
 characters.
 
-The value of C<$^O> on VOS is "VOS".  To determine the
+The value of C<$^O> on VOS is "vos".  To determine the
 architecture that you are running on without resorting to loading
 all of C<%Config> you can examine the content of the @INC array
 like so:
 
-    if ($^O =~ /VOS/) {
+    if ($^O =~ /vos/) {
         print "I'm on a Stratus box!\n";
     } else {
         print "I'm not on a Stratus box!\n";
@@ -1219,14 +1219,18 @@ F<README.vos> (installed as L<perlvos>)
 
 The VOS mailing list.
 
-There is no specific mailing list for Perl on VOS.  You can post
-comments to the comp.sys.stratus newsgroup, or use the contact
-information located in the distribution files on the Stratus
-Anonymous FTP site.
+There is no specific mailing list for Perl on VOS.  You can contact
+the Stratus Technologies Customer Assistance Center (CAC) for your
+region, or you can use the contact information located in the
+distribution files on the Stratus Anonymous FTP site.
 
 =item *
 
-VOS Perl on the web at L<http://ftp.stratus.com/pub/vos/posix/posix.html>
+Stratus Technologies on the web at L<http://www.stratus.com>
+
+=item *
+
+VOS Open-Source Software on the web at L<http://ftp.stratus.com/pub/vos/vos.html>
 
 =back
 
@@ -1908,7 +1912,7 @@ Not implemented. (S<Plan 9>)
 
 =item shmwrite
 
-Not implemented. (Win32, VMS, S<RISC OS>, VOS)
+Not implemented. (Win32, VMS, S<RISC OS>)
 
 =item sleep
 
@@ -1924,8 +1928,6 @@ be implemented even in Unix platforms.
 =item socketpair
 
 Not implemented. (S<RISC OS>)
-
-Available on OpenVOS Release 17.0 or later. (VOS)
 
 Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
@@ -2123,6 +2125,8 @@ at L<http://www.cpan.org/src>
 
 =item MirOS BSD
 
+=item Stratus OpenVOS (17.0 or later)
+
 Caveats:
 
 =over
@@ -2213,7 +2217,7 @@ available at L<http://www.cpan.org/src/>
         UNICOS
         UNICOS/mk
         UTS
-        VOS
+        VOS / OpenVOS
         Win95/98/ME/2K/XP 2)
         WinCE
         z/OS            (formerly OS/390)
