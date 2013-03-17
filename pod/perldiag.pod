@@ -5667,6 +5667,12 @@ or if you meant this
 
 You need to add either braces or blanks to disambiguate.
 
+=item Use of each() on hash after insertion without resetting hash iterator results in undefined behavior
+
+(S internal) The behavior of C<each()> after insertion is undefined, it may
+skip items, or visit items more than once. Consider using C<keys()> instead
+of C<each()>.
+
 =item Useless assignment to a temporary
 
 (W misc) You assigned to an lvalue subroutine, but what

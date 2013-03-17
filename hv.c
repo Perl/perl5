@@ -1611,6 +1611,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 	}
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+        iter->xhv_last_rand = iter->xhv_rand;
     }
 
     if (!((XPVHV*)SvANY(hv))->xhv_keys)
@@ -1848,12 +1849,15 @@ S_hv_auxinit(pTHX_ HV *hv) {
         SvOOK_on(hv);
         PL_hash_rand_bits += ptr_hash((PTRV)array);
         PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
+        iter = HvAUX(hv);
+        iter->xhv_rand = (U32)PL_hash_rand_bits;
+    } else {
+        iter = HvAUX(hv);
     }
-    iter = HvAUX(hv);
 
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
-    iter->xhv_rand = (U32)PL_hash_rand_bits;
+    iter->xhv_last_rand = iter->xhv_rand;
     iter->xhv_name_u.xhvnameu_name = 0;
     iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
@@ -1896,6 +1900,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	}
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
+        iter->xhv_last_rand = iter->xhv_rand;
     } else {
 	hv_auxinit(hv);
     }
@@ -2355,6 +2360,15 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             }
 	}
     }
+    if (iter->xhv_last_rand != iter->xhv_rand) {
+        if (iter->xhv_riter != -1) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+                             "Use of each() on hash after insertion without resetting hash iterator results in undefined behavior"
+                             pTHX__FORMAT
+                             pTHX__VALUE);
+        }
+        iter->xhv_last_rand = iter->xhv_rand;
+    }
 
     /* Skip the entire loop if the hash is empty.   */
     if ((flags & HV_ITERNEXT_WANTPLACEHOLDERS)
@@ -2366,6 +2380,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
 		/* There is no next one.  End of the hash.  */
 		iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
+                iter->xhv_last_rand = iter->xhv_rand;
 		break;
 	    }
             entry = (HvARRAY(hv))[(iter->xhv_riter ^ iter->xhv_rand) & xhv->xhv_max];
@@ -2381,7 +2396,10 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	       or if we run through it and find only placeholders.  */
 	}
     }
-    else iter->xhv_riter = -1;
+    else {
+        iter->xhv_riter = -1;
+        iter->xhv_last_rand = iter->xhv_rand;
+    }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
 	HvLAZYDEL_off(hv);

@@ -93,6 +93,8 @@ struct xpvhv_aux {
     struct mro_meta *xhv_mro_meta;
     HV *	xhv_super;	/* SUPER method cache */
     U32         xhv_rand;       /* random value for hash traversal */
+    U32         xhv_last_rand;  /* last random value for hash traversal,
+                                   used to detect each() after insert for warnings */
 };
 
 /* hash structure: */
