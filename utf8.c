@@ -936,7 +936,7 @@ Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
     UV expectlen = UTF8SKIP(s);
     const U8* send = s + expectlen;
-    UV uv = NATIVE_UTF8_TO_I8(*s);
+    UV uv = *s;
 
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
 
@@ -946,8 +946,12 @@ Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 
     /* An invariant is trivially returned */
     if (expectlen == 1) {
-        return LATIN1_TO_NATIVE(uv);
+	return uv;
     }
+
+#ifdef EBCDIC
+    uv = NATIVE_UTF8_TO_I8(uv);
+#endif
 
     /* Remove the leading bits that indicate the number of bytes, leaving just
      * the bits that are part of the value */
