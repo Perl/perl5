@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.25';
+$VERSION = '1.26';
 
 #=======================================================================
 
@@ -370,9 +370,6 @@ C<< CONSTANT => 'value' >>.
 =head1 SEE ALSO
 
 L<Readonly> - Facility for creating read-only scalars, arrays, hashes.
-
-L<Const> - Facility for creating read-only variables. Similar to C<Readonly>,
-but uses C<SvREADONLY> instead of C<tie>.
 
 L<Attribute::Constant> - Make read-only variables via attribute
 
