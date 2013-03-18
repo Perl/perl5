@@ -176,9 +176,8 @@ dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
 dist/locale-maketext/lib/locale/maketext/tpj13.pod	No items in =over / =back list	3
 dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 79 by	77
 dist/math-bigint/lib/math/bigint/calcemu.pm	empty section in previous paragraph	3
-dist/math-bigrat/lib/math/bigrat.pm	Apparent broken link	3
-dist/math-bigrat/lib/math/bigrat.pm	Apparent internal link is missing its forward slash	1
 dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 79 by	7
+dist/math-bigrat/lib/math/bigrat.pm	unresolved internal link	1
 dist/module-corelist/blib/script/corelist	Verbatim line length including indents exceeds 79 by	1
 dist/module-corelist/lib/module/corelist.pod	Verbatim line length including indents exceeds 79 by	4
 dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 79 by	2
