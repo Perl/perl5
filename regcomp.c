@@ -5315,8 +5315,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	int ncode = 0;
 
 	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
-	    if (o->op_type == OP_CONST && SvUTF8(cSVOPo_sv))
-		code_is_utf8 = 1;
+	    if (o->op_type == OP_CONST) {
+                /* skip if we have SVs as well as OPs. In this case,
+                 * a) we decide utf8 based on SVs not OPs;
+                 * b) the current pad may not match that which the ops
+                 *    were compiled in, so, so on threaded builds,
+                 *    cSVOPo_sv would look in the wrong pad */
+                if (!pat_count && SvUTF8(cSVOPo_sv))
+                    code_is_utf8 = 1;
+            }
 	    else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
 		/* count of DO blocks */
 		ncode++;

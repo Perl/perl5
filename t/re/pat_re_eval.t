@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 463;  # Update this when adding/deleting tests.
+plan tests => 464;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1040,6 +1040,23 @@ sub run_tests {
 	}
 	is($m, 'a', '?pat? with (??{a,b,c})');
     }
+
+    {
+	# this code won't actually fail, but it used to fail valgrind,
+	# so its here just to make sure valgrind doesn't fail again
+	# While examining the ops of the secret anon sub wrapped around
+	# the qr//, the pad of the sub was in scope, so cSVOPo_sv
+	# got the const from the wrong pad. By having lots of $s's
+	# (aka gvsv(*s), this forces the targs of the consts which have
+	# been moved to the pad, to have high indices.
+
+	sub {
+	    local our $s = "abc";
+	    my $qr = qr/^(?{1})$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s/;
+	}->();
+	pass("cSVOPo_sv");
+    }
+
 
 
 } # End of sub run_tests
