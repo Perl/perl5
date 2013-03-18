@@ -293,7 +293,6 @@ porting/release_schedule.pod	There is no NAME	1
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
-utils/libnetcfg	Apparent broken link	1
 utils/pod2html	Pod NAME already used	1
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
