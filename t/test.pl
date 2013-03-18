@@ -284,7 +284,9 @@ sub display {
                     if ($z =~ /[[:^print:]]/) {
 
                         # Use octal for characters traditionally expressed as
-                        # such: the low controls
+                        # such: the low controls, which on EBCDIC aren't
+                        # necessarily the same ones as on ASCII platforms, but
+                        # are small ordinals, nonetheless
                         if ($c <= 037) {
                             $z = sprintf "\\%03o", $c;
                         } else {
