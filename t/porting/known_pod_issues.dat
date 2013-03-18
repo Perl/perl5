@@ -165,7 +165,6 @@ YAML
 YAML::Syck
 YAML::Tiny
 dist/bignum/lib/bignum.pm	Apparent broken link	1
-dist/bignum/lib/bigrat.pm	Apparent broken link	1
 dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 79 by	1
 dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 79 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
