@@ -18,10 +18,14 @@ Apache::MP3
 Array::Base
 Attribute::Constant
 basename(1)
+Benchmark::Perl::Formance
 ByteLoader
 bzip2(1)
+Carp::Always
 Carp::Assert
+Carp::Clan
 chcp(1)
+Class::Accessor
 Class::C3
 Class::ISA
 Class::PseudoHash
@@ -59,6 +63,7 @@ getpriority(2)
 HTTP::Lite
 inetd(8)
 IPC::Run
+IPC::Signal
 kill(3)
 langinfo(3)
 Lingua::KO::Hangul::Util
@@ -78,9 +83,13 @@ Module::CPANTS::Analyse
 Module::Find
 Module::Info
 Module::Starter
+Moo
+Moose
 MRO::Compat
 nl_langinfo(3)
 Number::Format
+Object::InsideOut
+Object::Tiny
 open(2)
 OS2::Proc
 OS2::WinObject
@@ -110,7 +119,9 @@ pstruct
 ptar(1)
 ptargrep(1)
 pwd_mkdb(8)
+Readonly
 recvmsg(3)
+Role::Tiny
 s2p
 Scalar::Readonly
 Semi::Semicolons
@@ -156,8 +167,6 @@ YAML::Tiny
 dist/bignum/lib/bigint.pm	Apparent broken link	1
 dist/bignum/lib/bignum.pm	Apparent broken link	1
 dist/bignum/lib/bigrat.pm	Apparent broken link	1
-dist/carp/lib/carp.pm	Apparent broken link	2
-dist/constant/lib/constant.pm	Apparent broken link	1
 dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 79 by	1
 dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 79 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
@@ -240,7 +249,6 @@ pod/perlhurd.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlintern.pod	? Should you be using L<...> instead of	5
 pod/perlinterp.pod	? Should you be using L<...> instead of	1
 pod/perliol.pod	Verbatim line length including indents exceeds 79 by	8
-pod/perlipc.pod	Apparent broken link	1
 pod/perlipc.pod	Verbatim line length including indents exceeds 79 by	19
 pod/perlirix.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perllol.pod	Verbatim line length including indents exceeds 79 by	4
@@ -251,9 +259,7 @@ pod/perlmodstyle.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlmroapi.pod	? Should you be using L<...> instead of	1
 pod/perlnetware.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perlnewmod.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlobj.pod	Apparent broken link	1
 pod/perlootut.pod	? Should you be using F<...> or maybe L<...> instead of	1
-pod/perlootut.pod	Apparent internal link is missing its forward slash	16
 pod/perlos2.pod	? Should you be using L<...> instead of	2
 pod/perlos2.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perlos390.pod	Verbatim line length including indents exceeds 79 by	11
@@ -288,7 +294,6 @@ porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exce
 porting/pumpkin.pod	Verbatim line length including indents exceeds 79 by	9
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
 porting/release_schedule.pod	There is no NAME	1
-porting/todo.pod	Apparent broken link	1
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
