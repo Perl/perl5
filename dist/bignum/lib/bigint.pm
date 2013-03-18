@@ -1,7 +1,7 @@
 package bigint;
 use 5.006;
 
-$VERSION = '0.32';
+$VERSION = '0.33';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( PI e bpi bexp hex oct );
@@ -676,7 +676,7 @@ Especially L<bigrat> as in C<perl -Mbigrat -le 'print 1/3+1/4'> and
 L<bignum> as in C<perl -Mbignum -le 'print sqrt(2)'>.
 
 L<Math::BigInt>, L<Math::BigRat> and L<Math::Big> as well
-as L<Math::BigInt::BitVect>, L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
+as L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
 
 =head1 AUTHORS
 

@@ -164,7 +164,6 @@ Win32::Locale
 YAML
 YAML::Syck
 YAML::Tiny
-dist/bignum/lib/bigint.pm	Apparent broken link	1
 dist/bignum/lib/bignum.pm	Apparent broken link	1
 dist/bignum/lib/bigrat.pm	Apparent broken link	1
 dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 79 by	1
