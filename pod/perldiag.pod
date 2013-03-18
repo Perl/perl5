@@ -1596,6 +1596,13 @@ valid magic number.
 
 (P) The malloc package that comes with Perl had an internal failure.
 
+=item Corrupted regexp opcode %d > %d
+
+(F)
+This is either an error in Perl, or, if you're using one, your
+L<custom regular expression engine|perlreapi>.  If not the latter,
+report the problem through the L<perlbug> utility.
+
 =item Count after length/code in unpack
 
 (F) You had an unpack template indicating a counted-length string, but
@@ -1783,7 +1790,7 @@ it's ugly.  Your code will be interpreted as an attempt to call a method
 named "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
-=item Empty %s
+=item Empty \%c{} in regex; marked by <-- HERE in m/%s/
 
 (F) C<\p> and C<\P> are used to introduce a named Unicode property, as
 described in L<perlunicode> and L<perlre>.  You used C<\p> or C<\P> in
@@ -1897,6 +1904,17 @@ as a goto, or a loop control statement.
 
 (W exiting) You are exiting a substitution by unconventional means, such
 as a return, a goto, or a loop control statement.
+
+=item Expecting close bracket in regex; marked by <-- HERE in m/%s/
+
+(F)
+You wrote something like
+
+ (?13
+
+to denote a capturing group of the form
+L<C<(?I<PARNO>)>|perlre/(?PARNO) (?-PARNO) (?+PARNO) (?R) (?0)>,
+but omitted the C<")">.
 
 =item Experimental "%s" subs not enabled
 
@@ -2242,6 +2260,17 @@ two from 1 to 32 (or 64, if your platform supports that).
 (W digit) You may have tried to use an 8 or 9 in an octal number.
 Interpretation of the octal number stopped before the 8 or 9.
 
+=item Illegal pattern in regex; marked by <-- HERE in m/%s/
+
+(F)
+You wrote something like
+
+ (?+foo)
+
+The C<"+"> is valid only when followed by digits, indicating a
+capturing group.  See
+L<C<(?I<PARNO>)>|perlre/(?PARNO) (?-PARNO) (?+PARNO) (?R) (?0)>.
+
 =item Illegal switch in PERL5OPT: -%c
 
 (X) The PERL5OPT environment variable may only be used to set the
@@ -2415,6 +2444,18 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 
 (F) The indicated attributes for a subroutine or variable were not
 recognized by Perl or by a user-supplied handler.  See L<attributes>.
+
+=item Invalid [] range "%*.*s" in regex; marked by <-- HERE in m/%s/
+
+(F)
+You wrote something like
+
+ [z-a]
+
+in a regular expression pattern.  Ranges must be specified with the
+lowest code point first.  Instead write
+
+ [a-z]
 
 =item Invalid character in \N{...}; marked by <-- HERE in \N{%s}
 
@@ -5755,6 +5796,12 @@ about.
 
 This is not very useful, and perl currently optimizes this away.
 
+=item Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
+
+(W regexp)
+The C<p> modifier cannot be turned off once set.  Trying to do so is
+futile.
+
 =item Useless use of %s with no values
 
 (W syntax) You used the push() or unshift() function with no arguments
@@ -5763,6 +5810,20 @@ usually have any effect on the array, so is completely useless.  It's
 possible in principle that push(@tied_array) could have some effect
 if the array is tied to a class which implements a PUSH method.  If so,
 you can write it as C<push(@tied_array,())> to avoid this warning.
+
+=item Useless (%s%c) - %suse /%c modifier in regex; marked by <-- HERE in m/%s/
+
+(W regexp)
+The C</g> and C</o> regular expression modifiers are global and can't be
+turned off once set; hence things like C<(?g)> or C<(?-o:)> do nothing.
+
+=item Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
+
+(W regexp)
+The C</c> regular expression modifier is global, can't be turned off
+once set, and doesn't do anything without the C</g> modifier being
+specified as well; hence things like C<(?c)> or C<(?-c:)> do nothing,
+nor do thing like C<(?gc)> nor C<(?-gc:)> .
 
 =item "use" not allowed in expression
 

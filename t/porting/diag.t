@@ -490,18 +490,15 @@ chown not implemented!
 clear %s
 Code missing after '/' in pack
 Code missing after '/' in unpack
-Corrupted regexp opcode %d > %d
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
 '/' does not take a repeat count in %s
 Don't know how to get file name
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
-Empty \%c{} in regex; marked by <-- HERE in m/%s/
 Error reading "%s": %s
 execl not implemented!
 EVAL without pos change exceeded limit in regex
-Expecting close bracket in regex; marked by <-- HERE in m/%s/
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
@@ -523,11 +520,9 @@ Illegal binary digit '%c' ignored
 Illegal character %sin prototype for %s : %s
 Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
-Illegal pattern in regex; marked by <-- HERE in m/%s/
 Infinite recursion in regex
 internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
-Invalid [] range "%*.*s" in regex; marked by <-- HERE in m/%s/
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
@@ -634,9 +629,6 @@ Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
-Useless (%s%c) - %suse /%c modifier in regex; marked by <-- HERE in m/%s/
-Useless (%sc) - %suse /gc modifier in regex; marked by <-- HERE in m/%s/
-Useless use of (?-p) in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
