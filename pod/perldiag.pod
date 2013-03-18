@@ -789,7 +789,7 @@ is no builtin with the name C<word>.
 (F) You used C<\p{}> or C<\P{}> but the character property by that name
 could not be found.  Maybe you misspelled the name of the property?
 See L<perluniprops/Properties accessible through \p{} and \P{}>
-for a complete list of available properties.
+for a complete list of available official properties.
 
 =item Can't find label %s
 
@@ -3875,7 +3875,7 @@ utility to report; in regex; marked by <-- HERE in m/%s/
 case-insensitive matching, and there is a bug in Perl in which the
 built-in regular expression folding rules are not accurate.  This may
 lead to incorrect results.  Please report this as a bug using the
-"perlbug" utility.  (This message is marked deprecated, so that it by
+L<perlbug> utility.  (This message is marked deprecated, so that it by
 default will be turned-on.)
 
 =item Perl_my_%s() not available
@@ -5980,9 +5980,9 @@ before now.  Check your control flow.
 
 =item %s "\x%X" does not map to Unicode
 
-(F) When reading in different encodings Perl tries to map everything
+(F) When reading in different encodings, Perl tries to map everything
 into Unicode characters.  The bytes you read in are not legal in
-this encoding, for example
+this encoding.  For example
 
     utf8 "\xE4" does not map to Unicode
 
