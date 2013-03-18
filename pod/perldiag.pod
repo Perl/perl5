@@ -2271,6 +2271,14 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
+=item Incomplete expression within '(?[ ])' in regex; marked by <-- HERE in m/%s/
+
+(F)
+There was a syntax error within the C<(?[ ])>.  This can happen if the
+expression inside the construct was completely empty, or if there are
+too many or few operands for the number of operators.  Perl is not smart
+enough to give you a more precise indication as to what is wrong.
+
 =item Inconsistent hierarchy during C3 merge of class '%s': merging failed on 
 parent '%s'
 
@@ -3053,6 +3061,25 @@ C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
     /\N {SPACE}/x;	# Wrong!
     /\N{SPACE}/x;	# ok
 
+=item Need exactly 3 octal digits in regex; marked by <-- HERE in m/%s/
+
+(F) Within S<C<(?[   ])>>, all constants interpreted as octal need to be
+exactly 3 digits long.  This helps catch some ambiguities.  If your
+constant is too short, add leading zeros, like
+
+ (?[ [ \078 ] ])     # Syntax error!
+ (?[ [ \0078 ] ])    # Works
+ (?[ [ \007 8 ] ])   # Clearer
+
+The maximum number this construct can express is C<\777>.  If you
+need a larger one, you need to use L<\o{}|perlrebackslash/Octal escapes>
+instead.  If you meant two separate things, you need to separate them
+
+ (?[ [ \7776 ] ])        # Syntax error!
+ (?[ [ \o{7776} ] ])     # One meaning
+ (?[ [ \777 6 ] ])       # Another meaning
+ (?[ [ \777 \006 ] ])    # Still another
+
 =item Negative '/' count in unpack
 
 (F) The length count obtained from a length/code unpack operation was
@@ -3317,17 +3344,42 @@ to UTC.  If it's not, define the logical name
 F<SYS$TIMEZONE_DIFFERENTIAL> to translate to the number of seconds which
 need to be added to UTC to get local time.
 
+=item Non-hex character in regex; marked by <-- HERE in m/%s/
+
+(F)
+In a regular expression, there was a non-hexadecimal character where
+a hex one was expected, like
+
+ (?[ [ \xDG ] ])
+ (?[ [ \x{DEKA} ] ])
+
 =item Non-octal character '%c'.  Resolved as "%s"
 
 (W digit) In parsing an octal numeric constant, a character was
 unexpectedly encountered that isn't octal.  The resulting value
 is as indicated.
 
+=item Non-octal character in regex; marked by <-- HERE in m/%s/
+
+(F)
+In a regular expression, there was a non-octal character where
+an octal one was expected, like
+
+ (?[ [ \o{1278} ] ])
+
 =item Non-string passed as bitmask
 
 (W misc) A number has been passed as a bitmask argument to select().
 Use the vec() function to construct the file descriptor bitmasks for
 select.  See L<perlfunc/select>.
+
+=item (?[...]) not valid in locale in regex; marked by <-- HERE in m/%s/
+
+(F)
+C<(?[...])> cannot be used within the scope of a C<S<use locale>> or
+with an C</l> regular expression modifier, as that would require
+deferring to run-time the calculation of what it should evaluate to, and
+it is regex compile-time only.
 
 =item Null filename used
 
@@ -3448,6 +3500,16 @@ and is deprecated.
 a symbol (glob or scalar) that already holds a filehandle.
 Although legal, this idiom might render your code confusing
 and is deprecated.
+
+=item Operand with no preceding operator in regex; marked by <-- HERE in m/%s/
+
+(F)
+You wrote something like
+
+ (?[ \p{Digit} \p{Thai} ])
+
+There are two operands, but no operator giving how you want to combine
+them.
 
 =item Operation "%s": no method found, %s
 
@@ -4119,6 +4181,17 @@ applications die in silence.  It is considered a feature of the OS/2
 port.  One can easily disable this by appropriate sighandlers, see
 L<perlipc/"Signals">.  See also "Process terminated by SIGTERM/SIGINT"
 in L<perlos2>.
+
+=item Property '%s' is unknown in regex; marked by <-- HERE in m/%s/
+
+(F)
+The named property which you specified via C<\p> or C<\P> is not one
+known to Perl.  Perhaps you misspelled the name?  See
+L<perluniprops/Properties accessible through \p{} and \P{}>
+for a complete list of available official properties.  If it is a
+L<user-defined property|perlunicode/User-Defined Character Properties>
+it must have been defined by the time the regular expression is
+compiled.
 
 =item Prototype after '%c' for %s : %s
 
@@ -4826,6 +4899,12 @@ or "my $var" or "our $var".
 
 (W unopened) You tried to read from a filehandle that was never opened.
 
+=item Syntax error in (?[...]) in regex m/%s/
+
+(F)
+Perl could not figure out what you meant inside this construct; this
+notifies you that it is giving up trying.
+
 =item System V %s is not implemented on this machine
 
 (F) You tried to do something with a function beginning with "sem",
@@ -4892,6 +4971,18 @@ change or be removed in a future Perl version:
     no warnings "experimental::lexical_subs";
     use feature "lexical_subs";
     my sub foo { ... }
+
+=item The regex_sets feature is experimental
+
+(S experimental::regex_sets) This warning is emitted if you
+use the syntax S<C<(?[   ])>> in a regular expression.
+The details of this feature are subject to change.
+if you want to use it, but know that in doing so you
+are taking the risk of using an experimental feature which may
+change in a future Perl version, you can do this to silence the
+warning:
+
+    no warnings "experimental::regex_sets";
 
 =item The %s function is unimplemented
 
@@ -5132,6 +5223,53 @@ Check the #! line, or manually feed your script into Perl yourself.
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
 
+=item Unexpected '(' with no preceding operator in regex; marked by <-- HERE in m/%s/
+
+(F)
+You had something like this:
+
+ (?[ \p{Digit} ( \p{Lao} + \p{Thai} ) ])
+
+There should be an operator before the C<"(">, as there's no indication
+as to how the digits are to be combined with the characters in the Lao
+and Thai scripts.
+
+=item Unexpected ')' in regex; marked by <-- HERE in m/%s/
+
+(F)
+You had something like this:
+
+ (?[ ( \p{Digit} + ) ])
+
+The C<")"> is out-of-place.  Something apparently was supposed to be
+combined with the digits, or the C<"+"> shouldn't be there, or something
+like that.  Perl can't figure out what was intended.
+
+=item Unexpected binary operator '%c' with no preceding operand in regex; marked by <-- HERE in m/%s/
+
+(F)
+You had something like this:
+
+ (?[ | \p{Digit} ])
+
+where the C<"|"> is a binary operator with an operand on the right, but
+no operand on the left.
+
+=item Unexpected character in regex; marked by <-- HERE in m/%s/
+
+(F)
+You had something like this:
+
+ (?[ z ])
+
+Within C<(?[ ])>, no literal characters are allowed unless they are
+within an inner pair of square brackets, like
+
+ (?[ [ z ] ])
+
+Another possibility is that you forgot a backslash.  Perl isn't smart
+enough to figure out what you really meant.
+
 =item Unexpected constant lvalue entersub entry via type/targ %d:%d
 
 (P) When compiling a subroutine call in lvalue context, Perl failed an
@@ -5260,12 +5398,33 @@ Note that if you want to enable a warnings category registered by a
 module (e.g. C<use warnings 'File::Find'>), you must have loaded this
 module first.
 
+=item Unmatched '%c' in POSIX class in regex; marked by <-- HERE in m/%s/
+
+You had something like this:
+
+ (?[ [:alnum] ])
+
+There should be a second C<":">, like this:
+
+ (?[ [:alnum:] ])
+
 =item Unmatched [ in regex; marked by <-- HERE in m/%s/
 
 (F) The brackets around a character class must match.  If you wish to
 include a closing bracket in a character class, backslash it or put it
 first.  The <-- HERE shows whereabouts in the regular expression the
 problem was discovered.  See L<perlre>.
+
+=item Unmatched '[' in POSIX class in regex; marked by <-- HERE in m/%s/
+
+(F)
+You had something like this:
+
+ (?[ [:digit: ])
+
+That should be written:
+
+ (?[ [:digit:] ])
 
 =item Unmatched ( in regex; marked by <-- HERE in m/%s/
 
@@ -5295,6 +5454,13 @@ subroutine.
 (F) The Perl parser has no idea what to do with the specified character
 in your Perl script (or eval) near the specified column.  Perhaps you tried 
 to run a compressed script, a binary program, or a directory as a Perl program.
+
+=item Unrecognized escape \%c in character class in regex; marked by <-- HERE in m/%s/
+
+(F)
+You used a backslash-character combination which is not recognized by
+Perl inside character classes.  This is a fatal error when the character
+class is used within C<(?[ ])>.
 
 =item Unrecognized escape \%c in character class passed through in regex; 
 marked by <-- HERE in m/%s/
@@ -5442,6 +5608,23 @@ See L<Win32> for more information.
 
 You probably meant to use C<$]> instead.  C<$[> is the base for indexing
 arrays.  C<$]> is the Perl version number in decimal.
+
+=item Use \\x{...} for more than two hex characters in regex; marked by <-- HERE in m/%s/
+
+(F)
+In a regular expression, you said something like
+
+ (?[ [ \xBEEF ] ])
+
+Perl isn't sure if you meant this
+
+ (?[ [ \x{BEEF} ] ])
+
+or if you meant this
+
+ (?[ [ \x{BE} E F ] ])
+
+You need to add either braces or blanks to disambiguate.
 
 =item Useless assignment to a temporary
 
