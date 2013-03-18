@@ -174,10 +174,7 @@ dist/extutils-parsexs/lib/perlxs.pod	Verbatim line length including indents exce
 dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 79 by	10
 dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
 dist/locale-maketext/lib/locale/maketext/tpj13.pod	No items in =over / =back list	3
-dist/math-bigint/lib/math/bigfloat.pm	Apparent broken link	1
-dist/math-bigint/lib/math/bigint.pm	Apparent broken link	1
 dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 79 by	77
-dist/math-bigint/lib/math/bigint/calcemu.pm	Apparent broken link	1
 dist/math-bigint/lib/math/bigint/calcemu.pm	empty section in previous paragraph	3
 dist/math-bigrat/lib/math/bigrat.pm	Apparent broken link	3
 dist/math-bigrat/lib/math/bigrat.pm	Apparent internal link is missing its forward slash	1
