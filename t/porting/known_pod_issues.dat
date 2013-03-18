@@ -196,7 +196,6 @@ ext/i18n-langinfo/langinfo.pm	Verbatim line length including indents exceeds 79 
 ext/pod-html/bin/pod2html	Pod NAME already used	1
 ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
 ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
-ext/pod-html/testdir/perlvar-copy.pod	Apparent broken link	2
 ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
 ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 79 by	13
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
