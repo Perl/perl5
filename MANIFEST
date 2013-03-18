@@ -4439,7 +4439,6 @@ perliol.h			PerlIO Layer definition
 perlio.sym			Symbols for PerlIO abstraction
 perlsdio.h			Fake stdio using perlio
 perlsfio.h			Prototype sfio mapping for PerlIO
-perlsh				A poor man's perl shell
 perlvars.h			Global variables
 perly.act			parser actions; derived from perly.y
 perly.c				parser code (NOT derived from perly.y)
