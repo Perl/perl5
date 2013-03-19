@@ -3191,7 +3191,7 @@ same as the number actually killed).
     kill 'KILL', @goners;
 
 SIGNAL may be either a signal name (a string) or a signal number.  A signal
-name may start with a C<SIG> prefix, i.e. C<FOO> and C<SIGFOO> refer to the
+name may start with a C<SIG> prefix, thus C<FOO> and C<SIGFOO> refer to the
 same signal.  The string form of SIGNAL is recommended for portability because
 the same signal may have different numbers in different operating systems.
 
@@ -3204,7 +3204,8 @@ groups instead of processes.  For example, C<kill '-KILL', $pgrp> and
 C<kill -9, $pgrp> will send C<SIGKILL> to the entire process group specified. That
 means you usually want to use positive not negative signals.
 
-If SIGNAL is either the number 0 or the string C<ZERO>, no signal is sent to
+If SIGNAL is either the number 0 or the string C<ZERO> (or C<SIGZZERO>),
+no signal is sent to
 the process, but C<kill> checks whether it's I<possible> to send a signal to it
 (that means, to be brief, that the process is owned by the same user, or we are
 the super-user).  This is useful to check that a child process is still
