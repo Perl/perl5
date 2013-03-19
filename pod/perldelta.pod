@@ -344,7 +344,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fix two crashes in the debugger when using Frame=2 or autotrace.  These are
+[perl #116769] and [perl #116771].
 
 =back
 
