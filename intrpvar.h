@@ -300,6 +300,8 @@ PERLVAR(I, perldb,	U32)
 
 PERLVAR(I, signals,	U32)	/* Using which pre-5.8 signals */
 
+PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
+
 /* pseudo environmental stuff */
 PERLVAR(I, origargc,	int)
 PERLVAR(I, origargv,	char **)
@@ -324,8 +326,6 @@ PERLVAR(I, minus_a,	bool)
 PERLVAR(I, minus_F,	bool)
 PERLVAR(I, doswitches,	bool)
 PERLVAR(I, minus_E,	bool)
-
-PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
 
 PERLVAR(I, inplace,	char *)
 PERLVAR(I, e_script,	SV *)
@@ -400,9 +400,6 @@ PERLVAR(I, unitcheckav,	AV *)		/* names of UNITCHECK subroutines */
 PERLVAR(I, checkav,	AV *)		/* names of CHECK subroutines */
 PERLVAR(I, initav,	AV *)		/* names of INIT subroutines */
 
-/* funky return mechanisms */
-PERLVAR(I, forkprocess,	int)		/* so do_open |- can return proc# */
-
 /* subprocess state */
 PERLVAR(I, fdpid,	AV *)		/* keep fd-to-pid mappings for my_popen */
 
@@ -431,6 +428,9 @@ PERLVAR(I, Cmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVAR(I, preambleav,	AV *)
 PERLVAR(I, mess_sv,	SV *)
 PERLVAR(I, ors_sv,	SV *)		/* output record separator $\ */
+
+/* funky return mechanisms */
+PERLVAR(I, forkprocess,	int)		/* so do_open |- can return proc# */
 
 /* statics moved here for shared library purposes */
 PERLVARI(I, gensym,	I32,	0)	/* next symbol for getsym() to define */
@@ -495,6 +495,9 @@ PERLVAR(I, delaymagic_gid,	Gid_t)	/* current real group id, only for delaymagic 
 PERLVAR(I, delaymagic_egid,	Gid_t)	/* current effective group id, only for delaymagic */
 PERLVARI(I, an,		U32,	0)	/* malloc sequence number */
 
+/* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
+PERLVARI(I, breakable_sub_gen, U32, 0)
+
 #ifdef DEBUGGING
     /* exercise wrap-around */
     #define PERL_COP_SEQMAX (U32_MAX-50)
@@ -516,6 +519,8 @@ PERLVAR(I, sighandlerp,	Sighandler_t)
 
 PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
+PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
+
 PERLVARI(I, maxo,	int,	MAXO)	/* maximum number of ops */
 
 PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
@@ -531,11 +536,6 @@ PERLVAR(I, padix,	I32)		/* max used index in current "register" pad */
 PERLVAR(I, padix_floor,	I32)		/* how low may inner block reset padix */
 
 PERLVAR(I, hints,	U32)		/* pragma-tic compile-time flags */
-
-PERLVAR(I, debug,	VOL U32)	/* flags given to -D switch */
-
-/* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
-PERLVARI(I, breakable_sub_gen, U32, 0)
 
 #ifdef USE_LOCALE_COLLATE
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
@@ -553,7 +553,17 @@ PERLVAR(I, sawampersand, U8)		/* must save all match strings */
 PERLVAR(I, unsafe,	bool)
 PERLVAR(I, colorset,	bool)		/* from regcomp.c */
 
-/* SPARE 2/3 bytes depending on PERL_SAWAMPERSAND */
+/* current phase the interpreter is in
+   for ordering this structure to remove holes, we're assuming that this is 4
+   bytes.  */
+PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
+
+PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
+
+/* This value may be set when embedding for full cleanup  */
+/* 0=none, 1=full, 2=full with checks */
+/* mod_perl is special, and also assigns a meaning -1 */
+PERLVARI(I, perl_destruct_level, signed char,	0)
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -598,19 +608,12 @@ PERLVAR(I, last_swash_klen, U8)		/* Only needs to store 0-12  */
 
 #ifdef FCRYPT
 PERLVARI(I, cryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */
+#else
+/* One byte hole in the interpreter structure.  */
 #endif
 
 PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
 PERLVAR(I, srand_called, bool)
-PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
-
-/* This value may be set when embedding for full cleanup  */
-/* 0=none, 1=full, 2=full with checks */
-/* mod_perl is special, and also assigns a meaning -1 */
-PERLVARI(I, perl_destruct_level, signed char,	0)
-
-/* current phase the interpreter is in */
-PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
