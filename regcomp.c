@@ -231,8 +231,9 @@ typedef struct RExC_state_t {
  * REGNODE_SIMPLE */
 #define	SIMPLE		0x02
 #define	SPSTART		0x04	/* Starts with * or + */
-#define TRYAGAIN	0x08	/* Weeded out a declaration. */
-#define POSTPONED	0x10    /* (?1),(?&name), (??{...}) or similar */
+#define POSTPONED	0x08    /* (?1),(?&name), (??{...}) or similar */
+#define TRYAGAIN	0x10	/* Weeded out a declaration. */
+#define RESTART_UTF8    0x20    /* Restart, need to calcuate sizes as UTF-8 */
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
 
@@ -251,10 +252,11 @@ typedef struct RExC_state_t {
 #define PAREN_SET(u8str,paren) PBYTE(u8str,paren) |= PBITVAL(paren)
 #define PAREN_UNSET(u8str,paren) PBYTE(u8str,paren) &= (~PBITVAL(paren))
 
-/* If not already in utf8, do a longjmp back to the beginning */
-#define UTF8_LONGJMP 42 /* Choose a value not likely to ever conflict */
 #define REQUIRE_UTF8	STMT_START {                                       \
-                                     if (! UTF) JMPENV_JUMP(UTF8_LONGJMP); \
+                                     if (!UTF) {                           \
+                                         *flagp = RESTART_UTF8;            \
+                                         return NULL;                      \
+                                     }                                     \
                         } STMT_END
 
 /* This converts the named class defined in regcomp.h to its equivalent class
@@ -5196,7 +5198,7 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest, SV** rx_utf8, S
 
 REGEXP *
 Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
-		    OP *expr, const regexp_engine* eng, REGEXP *VOL old_re,
+		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
 		     bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
 {
     dVAR;
@@ -5204,32 +5206,29 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     struct regexp *r;
     regexp_internal *ri;
     STRLEN plen;
-    char  * VOL exp;
+    char *exp;
     char* xend;
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
     U32 rx_flags;
-    SV * VOL pat;
-    SV * VOL code_blocksv = NULL;
+    SV *pat;
+    SV *code_blocksv = NULL;
 
     /* these are all flags - maybe they should be turned
      * into a single int with different bit masks */
     I32 sawlookahead = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
-    bool used_setjump = FALSE;
     regex_charset initial_charset = get_regex_charset(orig_rx_flags);
     bool code_is_utf8 = 0;
-    bool VOL recompile = 0;
+    bool recompile = 0;
     bool runtime_code = 0;
-    U8 jump_ret = 0;
-    dJMPENV;
     scan_data_t data;
     RExC_state_t RExC_state;
     RExC_state_t * const pRExC_state = &RExC_state;
 #ifdef TRIE_STUDY_OPT    
-    int restudied;
+    int restudied = 0;
     RExC_state_t copyRExC_state;
 #endif    
     GET_RE_DEBUG_FLAGS_DECL;
@@ -5554,6 +5553,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     exp = SvPV_nomg(pat, plen);
+    xend = exp + plen;
 
     if (!eng->op_comp) {
 	if ((SvUTF8(pat) && IN_BYTES)
@@ -5574,38 +5574,21 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_contains_locale = 0;
     pRExC_state->runtime_code_qr = NULL;
 
-    /****************** LONG JUMP TARGET HERE***********************/
-    /* Longjmp back to here if have to switch in midstream to utf8 */
-    if (! RExC_orig_utf8) {
-	JMPENV_PUSH(jump_ret);
-	used_setjump = TRUE;
-    }
-
-    if (jump_ret == 0) {    /* First time through */
-	xend = exp + plen;
-
-        DEBUG_COMPILE_r({
+    DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, RExC_utf8,
-                dsv, exp, plen, 60);
+            RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, 60);
             PerlIO_printf(Perl_debug_log, "%sCompiling REx%s %s\n",
-                           PL_colors[4],PL_colors[5],s);
+                          PL_colors[4],PL_colors[5],s);
         });
-    }
-    else {  /* longjumped back */
-	U8 *src, *dst;
+
+    if (0) {
+      redo_first_pass:
+        {
+        U8 *const src = (U8*)exp;
+        U8 *dst;
 	int n=0;
 	STRLEN s = 0, d = 0;
 	bool do_end = 0;
-
-        /* If the cause for the longjmp was other than changing to utf8, pop
-         * our own setjmp, and longjmp to the correct handler */
-	if (jump_ret != UTF8_LONGJMP) {
-	    JMPENV_POP;
-	    JMPENV_JUMP(jump_ret);
-	}
-
-	GET_RE_DEBUG_FLAGS;
 
         /* It's possible to write a regexp in ascii that represents Unicode
         codepoints outside of the byte range, such as via \x{100}. If we
@@ -5622,7 +5605,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	 * recalculate the indices.
 	 * This is essentially an unrolled Perl_bytes_to_utf8() */
 
-	src = (U8*)SvPV_nomg(pat, plen);
 	Newx(dst, plen * 2 + 1, U8);
 
 	while (s < plen) {
@@ -5655,6 +5637,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	xend = exp + plen;
 	SAVEFREEPV(exp);
 	RExC_orig_utf8 = RExC_utf8 = 1;
+        }
     }
 
     /* return old regex if pattern hasn't changed */
@@ -5670,9 +5653,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
 					    exp, plen);
 	if (!runtime_code) {
-	    if (used_setjump) {
-		JMPENV_POP;
-	    }
 	    Safefree(pRExC_state->code_blocks);
 	    return old_re;
 	}
@@ -5685,10 +5665,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     )
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
 			    exp, plen);
-
-#ifdef TRIE_STUDY_OPT
-    restudied = 0;
-#endif
 
     rx_flags = orig_rx_flags;
 
@@ -5713,7 +5689,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
-	     JMPENV_JUMP(UTF8_LONGJMP);
+            goto redo_first_pass;
 	}
     }
     assert(!pRExC_state->runtime_code_qr);
@@ -5761,7 +5737,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
        pRExC_state->code_blocks.  We cannot SAVEFREEPV it now, as we may
        need it to survive as long as the regexp (qr/(?{})/).
        We must check that code_blocksv is not already set, because we may
-       have longjmped back. */
+       have jumped back to restart the sizing pass. */
     if (pRExC_state->code_blocks && !code_blocksv) {
 	code_blocksv = newSV_type(SVt_PV);
 	SAVEFREESV(code_blocksv);
@@ -5769,16 +5745,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
     }
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
-	RExC_precomp = NULL;
-	return(NULL);
+        if (flags & RESTART_UTF8) {
+            goto redo_first_pass;
+        }
+        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
     }
     if (code_blocksv)
 	SvLEN_set(code_blocksv,0); /* no you can't have it, sv_clear */
-
-    /* Here, finished first pass.  Get rid of any added setjmp */
-    if (used_setjump) {
-	JMPENV_POP;
-    }
 
     DEBUG_PARSE_r({
         PerlIO_printf(Perl_debug_log, 
@@ -5945,7 +5918,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	ReREFCNT_dec(rx);   
-	return(NULL);
+        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#X", flags);
     }
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
@@ -8555,6 +8528,11 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
 #define REGTAIL_STUDY(x,y,z) regtail((x),(y),(z),depth+1)
 #endif
 
+/* Returns NULL, setting *flagp to TRYAGAIN at the end of (?) that only sets
+   flags. Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan
+   needs to be restarted.
+   Otherwise would only return NULL if regbranch() returns NULL, which
+   cannot happen.  */
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
@@ -8854,14 +8832,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '@':           /* (?@...) */
 		vFAIL2("Sequence (?%c...) not implemented", (int)paren);
 		break;
-	    case '#':           /* (?#...) */
-		while (*RExC_parse && *RExC_parse != ')')
-		    RExC_parse++;
-		if (*RExC_parse != ')')
-		    FAIL("Sequence (?#... not terminated");
-		nextchar(pRExC_state);
-		*flagp = TRYAGAIN;
-		return NULL;
 	    case '0' :           /* (?0) */
 	    case 'R' :           /* (?R) */
 		if (*RExC_parse != ')')
@@ -9027,11 +8997,18 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			|| RExC_parse[1] == '<'
 			|| RExC_parse[1] == '{') { /* Lookahead or eval. */
 			I32 flag;
+                        regnode *tail;
 
 			ret = reg_node(pRExC_state, LOGICAL);
 			if (!SIZE_ONLY)
 			    ret->flags = 1;
-                        REGTAIL(pRExC_state, ret, reg(pRExC_state, 1, &flag,depth+1));
+                        
+                        tail = reg(pRExC_state, 1, &flag, depth+1);
+                        if (flag & RESTART_UTF8) {
+                            *flagp = RESTART_UTF8;
+                            return NULL;
+                        }
+                        REGTAIL(pRExC_state, ret, tail);
 			goto insert_if;
 		    }
 		}
@@ -9099,9 +9076,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		  insert_if:
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
-		    if (br == NULL)
-			br = reganode(pRExC_state, LONGJMP, 0);
-		    else
+		    if (br == NULL) {
+                        if (flags & RESTART_UTF8) {
+                            *flagp = RESTART_UTF8;
+                            return NULL;
+                        }
+                        FAIL2("panic: regbranch returned NULL, flags=%#X",
+                              flags);
+                    } else
                         REGTAIL(pRExC_state, br, reganode(pRExC_state, LONGJMP, 0));
 		    c = *nextchar(pRExC_state);
 		    if (flags&HASWIDTH)
@@ -9110,7 +9092,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		        if (is_define) 
 		            vFAIL("(?(DEFINE)....) does not allow branches");
 			lastbr = reganode(pRExC_state, IFTHEN, 0); /* Fake one for optimizer. */
-                        regbranch(pRExC_state, &flags, 1,depth+1);
+                        if (!regbranch(pRExC_state, &flags, 1,depth+1)) {
+                            if (flags & RESTART_UTF8) {
+                                *flagp = RESTART_UTF8;
+                                return NULL;
+                            }
+                            FAIL2("panic: regbranch returned NULL, flags=%#X",
+                                  flags);
+                        }
                         REGTAIL(pRExC_state, ret, lastbr);
 		 	if (flags&HASWIDTH)
 			    *flagp |= HASWIDTH;
@@ -9192,8 +9181,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
     /*     branch_len = (paren != 0); */
 
-    if (br == NULL)
-	return(NULL);
+    if (br == NULL) {
+        if (flags & RESTART_UTF8) {
+            *flagp = RESTART_UTF8;
+            return NULL;
+        }
+        FAIL2("panic: regbranch returned NULL, flags=%#X", flags);
+    }
     if (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
 	    reginsert(pRExC_state, BRANCHJ, br, depth+1);
@@ -9232,8 +9226,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         }
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
-	if (br == NULL)
-	    return(NULL);
+	if (br == NULL) {
+            if (flags & RESTART_UTF8) {
+                *flagp = RESTART_UTF8;
+                return NULL;
+            }
+            FAIL2("panic: regbranch returned NULL, flags=%#X", flags);
+        }
         REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
 	lastbr = br;
 	*flagp |= flags & (SPSTART | HASWIDTH | POSTPONED);
@@ -9390,6 +9389,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
  - regbranch - one alternative of an | operator
  *
  * Implements the concatenation operator.
+ *
+ * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs to be
+ * restarted.
  */
 STATIC regnode *
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
@@ -9429,7 +9431,11 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 	if (latest == NULL) {
 	    if (flags & TRYAGAIN)
 		continue;
-	    return(NULL);
+            if (flags & RESTART_UTF8) {
+                *flagp = RESTART_UTF8;
+                return NULL;
+            }
+            FAIL2("panic: regpiece returned NULL, flags=%#X", flags);
 	}
 	else if (ret == NULL)
 	    ret = latest;
@@ -9463,6 +9469,11 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
  * both the endmarker for their branch list and the body of the last branch.
  * It might seem that this node could be dispensed with entirely, but the
  * endmarker role is not redundant.
+ *
+ * Returns NULL, setting *flagp to TRYAGAIN if regatom() returns NULL with
+ * TRYAGAIN.
+ * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs to be
+ * restarted.
  */
 STATIC regnode *
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
@@ -9491,8 +9502,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     ret = regatom(pRExC_state, &flags,depth+1);
     if (ret == NULL) {
-	if (flags & TRYAGAIN)
-	    *flagp |= TRYAGAIN;
+	if (flags & (TRYAGAIN|RESTART_UTF8))
+	    *flagp |= flags & (TRYAGAIN|RESTART_UTF8);
+        else
+            FAIL2("panic: regatom returned NULL, flags=%#X", flags);
 	return(NULL);
     }
 
@@ -9722,7 +9735,10 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 
    The function raises an error (via vFAIL), and doesn't return for various
    syntax errors.  Otherwise it returns TRUE and sets <node_p> or <valuep> on
-   success; it returns FALSE otherwise.
+   success; it returns FALSE otherwise. Returns FALSE, setting *flagp to
+   RESTART_UTF8 if the sizing scan needs to be restarted. Such a restart is
+   only possible if node_p is non-NULL.
+
 
    If <valuep> is non-null, it means the caller can accept an input sequence
    consisting of a just a single code point; <*valuep> is set to that value
@@ -9926,7 +9942,14 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
 	/* The values are Unicode, and therefore not subject to recoding */
 	RExC_override_recoding = 1;
 
-	*node_p = reg(pRExC_state, 1, &flags, depth+1);
+	if (!(*node_p = reg(pRExC_state, 1, &flags, depth+1))) {
+            if (flags & RESTART_UTF8) {
+                *flagp = RESTART_UTF8;
+                return FALSE;
+            }
+            FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#X",
+                  flags);
+        } 
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 
 	RExC_parse = endbrace;
@@ -10126,6 +10149,12 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
    escape sequences, with the one for handling literal escapes requiring
    a dummy entry for all of the special escapes that are actually handled
    by the other.
+
+   Returns NULL, setting *flagp to TRYAGAIN if reg() returns NULL with
+   TRYAGAIN.  
+   Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs to be
+   restarted.
+   Otherwise does not return NULL.
 */
 
 STATIC regnode *
@@ -10193,6 +10222,12 @@ tryagain:
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched [");
 	}
+        if (ret == NULL) {
+            if (*flagp & RESTART_UTF8)
+                return NULL;
+            FAIL2("panic: regclass returned NULL to regatom, flags=%#X",
+                  *flagp);
+        }
 	nextchar(pRExC_state);
         Set_Node_Length(ret, RExC_parse - oregcomp_parse + 1); /* MJD */
 	break;
@@ -10209,7 +10244,11 @@ tryagain:
 		    }
 		    goto tryagain;
 		}
-		return(NULL);
+                if (flags & RESTART_UTF8) {
+                    *flagp = RESTART_UTF8;
+                    return NULL;
+                }
+                FAIL2("panic: reg returned NULL to regatom, flags=%#X", flags);
 	}
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 	break;
@@ -10401,6 +10440,11 @@ tryagain:
                                          It would be a bug if these returned
                                          non-portables */
                                NULL);
+                /* regclass() can only return RESTART_UTF8 if multi-char folds
+                   are allowed.  */
+                if (!ret)
+                    FAIL2("panic: regclass returned NULL to regatom, flags=%#X",
+                          *flagp);
 
 		RExC_parse--;
 
@@ -10423,6 +10467,8 @@ tryagain:
             ++RExC_parse;
             if (! grok_bslash_N(pRExC_state, &ret, NULL, flagp, depth, FALSE,
                                 FALSE /* not strict */ )) {
+                if (*flagp & RESTART_UTF8)
+                    return NULL;
                 RExC_parse--;
                 goto defchar;
             }
@@ -10689,6 +10735,8 @@ tryagain:
                                             flagp, depth, FALSE,
                                             FALSE /* not strict */ ))
                         {
+                            if (*flagp & RESTART_UTF8)
+                                FAIL("panic: grok_bslash_N set RESTART_UTF8");
                             RExC_parse = p = oldp;
                             goto loopdone;
                         }
@@ -11247,8 +11295,7 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 #define POSIXCC(c) (POSIXCC_DONE(c) || POSIXCC_NOTYET(c))
 
 PERL_STATIC_INLINE I32
-S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
-                    const bool strict)
+S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 {
     dVAR;
     I32 namedclass = OOB_NAMEDCLASS;
@@ -11372,7 +11419,6 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, SV *free_me,
 		       the class closes */
 		    while (UCHARAT(RExC_parse) && UCHARAT(RExC_parse) != ']')
 			RExC_parse++;
-		    SvREFCNT_dec(free_me);
 		    vFAIL3("POSIX syntax [%c %c] is reserved for future extensions", c, c);
 		}
 	    } else {
@@ -11512,13 +11558,18 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                         RExC_parse++;
                     }
 
-                    (void) regclass(pRExC_state, flagp,depth+1,
-                                    is_posix_class, /* parse the whole char
-                                                       class only if not a
-                                                       posix class */
-                                    FALSE, /* don't allow multi-char folds */
-                                    TRUE, /* silence non-portable warnings. */
-                                    &current);
+                    /* regclass() can only return RESTART_UTF8 if multi-char
+                       folds are allowed.  */
+                    if (!regclass(pRExC_state, flagp,depth+1,
+                                  is_posix_class, /* parse the whole char
+                                                     class only if not a
+                                                     posix class */
+                                  FALSE, /* don't allow multi-char folds */
+                                  TRUE, /* silence non-portable warnings. */
+                                  &current))
+                        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X",
+                              *flagp);
+
                     /* function call leaves parse pointing to the ']', except
                      * if we faked it */
                     if (is_posix_class) {
@@ -11675,12 +11726,15 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                 vFAIL("Unexpected character");
 
             case '\\':
-                (void) regclass(pRExC_state, flagp,depth+1,
-                                TRUE, /* means parse just the next thing */
-                                FALSE, /* don't allow multi-char folds */
-                                FALSE, /* don't silence non-portable warnings.
-                                        */
-                                &current);
+                /* regclass() can only return RESTART_UTF8 if multi-char
+                   folds are allowed.  */
+                if (!regclass(pRExC_state, flagp,depth+1,
+                              TRUE, /* means parse just the next thing */
+                              FALSE, /* don't allow multi-char folds */
+                              FALSE, /* don't silence non-portable warnings.  */
+                              &current))
+                    FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X",
+                          *flagp);
                 /* regclass() will return with parsing just the \ sequence,
                  * leaving the parse pointer at the next thing to parse */
                 RExC_parse--;
@@ -11694,13 +11748,16 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                     RExC_parse++;
                 }
 
-                (void) regclass(pRExC_state, flagp,depth+1,
-                                is_posix_class, /* parse the whole char class
-                                                   only if not a posix class */
-                                FALSE, /* don't allow multi-char folds */
-                                FALSE, /* don't silence non-portable warnings.
-                                        */
-                                &current);
+                /* regclass() can only return RESTART_UTF8 if multi-char
+                   folds are allowed.  */
+                if(!regclass(pRExC_state, flagp,depth+1,
+                             is_posix_class, /* parse the whole char class
+                                                only if not a posix class */
+                             FALSE, /* don't allow multi-char folds */
+                             FALSE, /* don't silence non-portable warnings.  */
+                             &current))
+                    FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X",
+                          *flagp);
                 /* function call leaves parse pointing to the ']', except if we
                  * faked it */
                 if (is_posix_class) {
@@ -11880,6 +11937,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
      * already has all folding taken into consideration, and we don't want
      * regclass() to add to that */
     RExC_flags &= ~RXf_PMf_FOLD;
+    /* regclass() can only return RESTART_UTF8 if multi-char folds are allowed.
+     */
     node = regclass(pRExC_state, flagp,depth+1,
                     FALSE, /* means parse the whole char class */
                     FALSE, /* don't allow multi-char folds */
@@ -11887,6 +11946,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                              well have generated non-portable code points, but
                              they're valid on this machine */
                     NULL);
+    if (!node)
+        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X", flagp);
     if (save_fold) {
         RExC_flags |= RXf_PMf_FOLD;
     }
@@ -11936,7 +11997,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * corresponding bit set if that character is in the list.  For characters
      * above 255, a range list or swash is used.  There are extra bits for \w,
      * etc. in locale ANYOFs, as what these match is not determinable at
-     * compile time */
+     * compile time
+     *
+     * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs
+     * to be restarted.  This can only happen if ret_invlist is non-NULL.
+     */
 
     dVAR;
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
@@ -12022,8 +12087,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	if (LOC) {
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
 	}
-	listsv = newSVpvs("# comment\n");
+	listsv = newSVpvs_flags("# comment\n", SVs_TEMP);
 	initial_listsv_len = SvCUR(listsv);
+        SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
     }
 
     if (skip_white) {
@@ -12051,12 +12117,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 	    s++;
 	if (*s && c == *s && s[1] == ']') {
 	    SAVEFREESV(RExC_rx_sv);
-	    SAVEFREESV(listsv);
 	    ckWARN3reg(s+2,
 		       "POSIX syntax [%c %c] belongs inside character classes",
 		       c, c);
 	    (void)ReREFCNT_inc(RExC_rx_sv);
-	    SvREFCNT_inc_simple_void_NN(listsv);
 	}
     }
 
@@ -12108,7 +12172,7 @@ parseit:
             && RExC_parse < RExC_end
             && POSIXCC(UCHARAT(RExC_parse)))
         {
-            namedclass = regpposixcc(pRExC_state, value, listsv, strict);
+            namedclass = regpposixcc(pRExC_state, value, strict);
         }
         else if (value == '\\') {
 	    if (UTF) {
@@ -12153,6 +12217,8 @@ parseit:
                                       TRUE, /* => charclass */
                                       strict))
                     {
+                        if (*flagp & RESTART_UTF8)
+                            FAIL("panic: grok_bslash_N set RESTART_UTF8");
                         goto parseit;
                     }
                 }
@@ -12346,7 +12412,6 @@ parseit:
                     value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
                     if (numlen != 3) {
-                        SAVEFREESV(listsv); /* In case warnings are fatalized */
                         if (strict) {
                             RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
                             vFAIL("Need exactly 3 octal digits");
@@ -12363,7 +12428,6 @@ parseit:
                                  form_short_octal_warning(RExC_parse, numlen));
                             (void)ReREFCNT_inc(RExC_rx_sv);
                         }
-                        SvREFCNT_inc_simple_void_NN(listsv);
                     }
 		    if (PL_encoding && value < 0x100)
 			goto recode_encoding;
@@ -12387,7 +12451,6 @@ parseit:
 	    default:
 		/* Allow \_ to not give an error */
 		if (!SIZE_ONLY && isWORDCHAR(value) && value != '_') {
-		    SAVEFREESV(listsv);
                     if (strict) {
                         vFAIL2("Unrecognized escape \\%c in character class",
                                (int)value);
@@ -12399,7 +12462,6 @@ parseit:
                             (int)value);
                         (void)ReREFCNT_inc(RExC_rx_sv);
                     }
-		    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 		break;
 	    }   /* End of switch on char following backslash */
@@ -12445,7 +12507,6 @@ parseit:
 		    const int w = (RExC_parse >= rangebegin)
                                   ? RExC_parse - rangebegin
                                   : 0;
-		    SAVEFREESV(listsv); /* in case of fatal warnings */
                     if (strict) {
                         vFAIL4("False [] range \"%*.*s\"", w, w, rangebegin);
                     }
@@ -12458,7 +12519,6 @@ parseit:
                         cp_list = add_cp_to_invlist(cp_list, '-');
                         cp_list = add_cp_to_invlist(cp_list, prevvalue);
                     }
-                    SvREFCNT_inc_simple_void_NN(listsv);
 		}
 
 		range = 0; /* this was not a true range */
@@ -12994,13 +13054,12 @@ parseit:
 
 	ret = reg(pRExC_state, 1, &reg_flags, depth+1);
 
-	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED);
+	*flagp |= reg_flags&(HASWIDTH|SIMPLE|SPSTART|POSTPONED|RESTART_UTF8);
 
 	RExC_parse = save_parse;
 	RExC_end = save_end;
 	RExC_in_multi_char_class = 0;
         SvREFCNT_dec_NN(multi_char_matches);
-        SvREFCNT_dec_NN(listsv);
         return ret;
     }
 
@@ -13158,7 +13217,6 @@ parseit:
             RExC_parse = (char *) cur_parse;
 
             SvREFCNT_dec(posixes);
-            SvREFCNT_dec_NN(listsv);
             SvREFCNT_dec(cp_list);
             return ret;
         }
@@ -13526,7 +13584,7 @@ parseit:
         else {
             RExC_emit = orig_emit;
         }
-        return END;
+        return orig_emit;
     }
 
     /* If we didn't do folding, it's because some information isn't available
@@ -13660,7 +13718,6 @@ parseit:
             }
 
             SvREFCNT_dec_NN(cp_list);
-            SvREFCNT_dec_NN(listsv);
             return ret;
         }
     }
@@ -13748,7 +13805,6 @@ parseit:
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
-	SvREFCNT_dec_NN(listsv);
     }
     else {
 	/* av[0] stores the character class description in its textual form:
@@ -13765,8 +13821,7 @@ parseit:
 	SV *rv;
 
 	av_store(av, 0, (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
-			? listsv
-			: (SvREFCNT_dec_NN(listsv), &PL_sv_undef));
+			? SvREFCNT_inc(listsv) : &PL_sv_undef);
 	if (swash) {
 	    av_store(av, 1, swash);
 	    SvREFCNT_dec_NN(cp_list);

@@ -386,6 +386,52 @@ A grammar form might be something like this:
     piece : _piece
           | _piece quant
 
+=head3 Parsing complications
+
+The implication of the above description is that a pattern containing nested
+parentheses will result in a call graph which cycles through C<reg()>,
+C<regbranch()>, C<regpiece()>, C<regatom()>, C<reg()>, C<regbranch()> I<etc>
+multiple times, until the deepest level of nesting is reached. All the above
+routines return a pointer to a C<regnode>, which is usually the last regnode
+added to the program. However, one complication is that reg() returns NULL
+for parsing C<(?:)> syntax for embedded modifiers, setting the flag
+C<TRYAGAIN>. The C<TRYAGAIN> propagates upwards until it is captured, in
+some cases by by C<regatom()>, but otherwise unconditionally by
+C<regbranch()>. Hence it will never be returned by C<regbranch()> to
+C<reg()>. This flag permits patterns such as C<(?i)+> to be detected as
+errors (I<Quantifier follows nothing in regex; marked by <-- HERE in m/(?i)+
+<-- HERE />).
+
+Another complication is that the representation used for the program differs
+if it needs to store Unicode, but it's not always possible to know for sure
+whether it does until midway through parsing. The Unicode representation for
+the program is larger, and cannot be matched as efficiently. (See L</Unicode
+and Localisation Support> below for more details as to why.)  If the pattern
+contains literal Unicode, it's obvious that the program needs to store
+Unicode. Otherwise, the parser optimistically assumes that the more
+efficient representation can be used, and starts sizing on this basis.
+However, if it then encounters something in the pattern which must be stored
+as Unicode, such as an C<\x{...}> escape sequence representing a character
+literal, then this means that all previously calculated sizes need to be
+redone, using values appropriate for the Unicode representation. Currently,
+all regular expression constructions which can trigger this are parsed by code
+in C<regatom()>.
+
+To avoid wasted work when a restart is needed, the sizing pass is abandoned
+- C<regatom()> immediately returns NULL, setting the flag C<RESTART_UTF8>.
+(This action is encapsulated using the macro C<REQUIRE_UTF8>.) This restart
+request is propagated up the call chain in a similar fashion, until it is
+"caught" in C<Perl_re_op_compile()>, which marks the pattern as containing
+Unicode, and restarts the sizing pass. It is also possible for constructions
+within run-time code blocks to turn out to need Unicode representation.,
+which is signalled by C<S_compile_runtime_code()> returning false to
+C<Perl_re_op_compile()>.
+
+The restart was previously implemented using a C<longjmp> in C<regatom()>
+back to a C<setjmp> in C<Perl_re_op_compile()>, but this proved to be
+problematic as the latter is a large function containing many automatic
+variables, which interact badly with the emergent control flow of C<setjmp>.
+
 =head3 Debug Output
 
 In the 5.9.x development version of perl you can C<< use re Debug => 'PARSE' >>
