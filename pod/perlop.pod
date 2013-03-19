@@ -1659,10 +1659,10 @@ Options (specified by the following modifiers) are:
     o	Compile pattern only once.
     a   ASCII-restrict: Use ASCII for \d, \s, \w; specifying two
         a's further restricts /i matching so that no ASCII
-        character will match a non-ASCII one
-    l   Use the locale
-    u   Use Unicode rules
-    d   Use Unicode or native charset, as in 5.12 and earlier
+        character will match a non-ASCII one.
+    l   Use the locale.
+    u   Use Unicode rules.
+    d   Use Unicode or native charset, as in 5.12 and earlier.
 
 If a precompiled pattern is embedded in a larger pattern then the effect
 of "msixpluad" will be propagated appropriately.  The effect the "o"
@@ -2654,7 +2654,7 @@ expansions.
 
 Let it be stressed that I<whatever falls between C<\Q> and C<\E>>
 is interpolated in the usual way.  Something like C<"\Q\\E"> has
-no C<\E> inside.  instead, it has C<\Q>, C<\\>, and C<E>, so the
+no C<\E> inside.  Instead, it has C<\Q>, C<\\>, and C<E>, so the
 result is the same as for C<"\\\\E">.  As a general rule, backslashes
 between C<\Q> and C<\E> may lead to counterintuitive results.  So,
 C<"\Q\t\E"> is converted to C<quotemeta("\t")>, which is the same

@@ -669,7 +669,7 @@ is valid and matches '0', '1', any alphabetic character, and the percent sign.
 Perl recognizes the following POSIX character classes:
 
  alpha  Any alphabetical character ("[A-Za-z]").
- alnum  Any alphanumeric character. ("[A-Za-z0-9]")
+ alnum  Any alphanumeric character ("[A-Za-z0-9]").
  ascii  Any character in the ASCII character set.
  blank  A GNU extension, equal to a space or a horizontal tab ("\t").
  cntrl  Any control character.  See Note [2] below.

@@ -3316,7 +3316,7 @@ many) where the 255/256 boundary would otherwise be crossed.
 
 Unicode semantics are used for the case change.
 
-=item Otherwise, if C<use feature 'unicode_strings'> or C<use locale ':not_characters'>) is in effect:
+=item Otherwise, if C<use feature 'unicode_strings'> or C<use locale ':not_characters'> is in effect:
 
 Unicode semantics are used for the case change.
 

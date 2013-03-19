@@ -400,7 +400,7 @@ however you like.  Not very convenient, but doable.
 =head2 Accessing Formatting Internals
 X<format, internals>
 
-For low-level access to the formatting mechanism.  you may use formline()
+For low-level access to the formatting mechanism, you may use formline()
 and access C<$^A> (the $ACCUMULATOR variable) directly.
 
 For example:
