@@ -2610,10 +2610,15 @@ PerlIOUnix_oflags(const char *mode)
 	oflags &= ~O_BINARY;
 	mode++;
     }
-    /*
-     * Always open in binary mode
-     */
-    oflags |= O_BINARY;
+    else {
+#ifdef PERLIO_USING_CRLF
+	/*
+	 * If neither "t" nor "b" was specified, open the file
+	 * in O_BINARY mode.
+	 */
+	oflags |= O_BINARY;
+#endif
+    }
     if (*mode || oflags == -1) {
 	SETERRNO(EINVAL, LIB_INVARG);
 	oflags = -1;
