@@ -1628,13 +1628,24 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	if (add) {
 	    GvMULTI_on(gv);
 	    gv_init_svtype(gv, sv_type);
+            /* You reach this path once the typeglob has already been created,
+               either by the same or a different sigil.  If this path didn't
+               exist, then (say) referencing $! first, and %! second would
+               mean that %! was not handled correctly.  */
 	    if (len == 1 && stash == PL_defstash) {
 	      if (sv_type == SVt_PVHV || sv_type == SVt_PVGV) {
 	        if (*name == '!')
 		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
 		else if (*name == '-' || *name == '+')
 		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
-	      }
+              } else if (sv_type == SVt_PV) {
+                  if (*name == '*' || *name == '#') {
+                      /* diag_listed_as: $* is no longer supported */
+                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
+                                                       WARN_SYNTAX),
+                                       "$%c is no longer supported", *name);
+                  }
+              }
 	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
                 switch (*name) {
 	        case '[':

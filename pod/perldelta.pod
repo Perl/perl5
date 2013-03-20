@@ -198,13 +198,19 @@ XXX L<message|perldiag/"message">
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+L<$* is no longer supported|perldiag/"$* is no longer supported">
+
+The warning that use of C<$*> and C<$#> is no longer supported is now
+generated for every location that references them.  Previously it would fail
+to be generated if another variable using the same typeglob was seen first
+(e.g. C<@*> before C<$*>), and would not be generated for the second and
+subsequent uses.  (It's hard to fix the failure to generate warnings at all
+without also generating them every time, and warning every time is
+consistent with the warnings that C<$[> used to generate.)
 
 =back
 
