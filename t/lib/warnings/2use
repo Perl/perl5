@@ -365,7 +365,7 @@ $*;
 use warnings "void";
 $#;
 EXPECT
-$* is no longer supported at - line 3.
+$* is no longer supported, and will become a syntax error at - line 3.
 $# is no longer supported at - line 5.
 Useless use of a variable in void context at - line 5.
 ########
@@ -375,5 +375,5 @@ $*;
 no warnings "void";
 $#;
 EXPECT
-$* is no longer supported at - line 3.
+$* is no longer supported, and will become a syntax error at - line 3.
 $# is no longer supported at - line 5.

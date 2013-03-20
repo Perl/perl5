@@ -202,7 +202,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-L<$* is no longer supported|perldiag/"$* is no longer supported">
+L<$* is no longer supported, and will become a syntax error|perldiag/"$* is no longer supported, and will become a syntax error">
 
 The warning that use of C<$*> and C<$#> is no longer supported is now
 generated for every location that references them.  Previously it would fail
