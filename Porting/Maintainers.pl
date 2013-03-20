@@ -1461,9 +1461,9 @@ use File::Glob qw(:case);
 
     'Perl::OSType' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.002.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.003.tar.gz',
         'FILES'        => q[cpan/Perl-OSType],
-        'EXCLUDED'     => [qr/^xt/],
+        'EXCLUDED'     => [qr/^xt/, qr{^t/00-}],
         'UPSTREAM'     => 'cpan',
     },
 

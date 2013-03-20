@@ -115,6 +115,12 @@ This reverts (for now) a change in 1.14 whereby the "too few iterations"
 message became a warning on STDERR instead of being output on STDOUT. It's
 now on STDOUT again.
 
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.002 to 1.003.
+
+This fixes a bug detecting the VOS operating system.
+
 =back
 
 =head2 Removed Modules and Pragmata

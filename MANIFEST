@@ -1925,7 +1925,6 @@ cpan/perlfaq/lib/perlglossary.pod	Perl Glossary
 cpan/PerlIO-via-QuotedPrint/lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
 cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
-cpan/Perl-OSType/t/00-compile.t			Perl::OSType
 cpan/Perl-OSType/t/OSType.t			Perl::OSType
 cpan/Pod-Checker/lib/Pod/Checker.pm
 cpan/Pod-Checker/scripts/podchecker.PL
