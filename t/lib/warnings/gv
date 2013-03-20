@@ -63,6 +63,46 @@ $# is no longer supported at - line 2.
 $* is no longer supported at - line 3.
 ########
 # gv.c
+$a = ${#};
+$a = ${*};
+no warnings 'deprecated' ;
+$a = ${#};
+$a = ${*};
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported at - line 3.
+########
+# gv.c
+$a = $#;
+$a = $*;
+no warnings 'deprecated' ;
+$a = $#;
+$a = $*;
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported at - line 3.
+########
+# gv.c
+$# = $a;
+$* = $a;
+no warnings 'deprecated' ;
+$# = $a;
+$* = $a;
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported at - line 3.
+########
+# gv.c
+$a = \$#;
+$a = \$*;
+no warnings 'deprecated' ;
+$a = \$#;
+$a = \$*;
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported at - line 3.
+########
+# gv.c
 use warnings 'syntax' ;
 use utf8;
 use open qw( :utf8 :std );
