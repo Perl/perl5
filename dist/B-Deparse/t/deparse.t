@@ -211,11 +211,11 @@ like($a, qr/-e syntax OK/,
     "Deparse does not hang when traversing stash circularities");
 
 # [perl #93990]
-@* = ();
-is($deparse->coderef2text(sub{ print "@{*}" }),
+@] = ();
+is($deparse->coderef2text(sub{ print "@{]}" }),
 q<{
-    print "@{*}";
-}>, 'curly around to interpolate "@{*}"');
+    print "@{]}";
+}>, 'curly around to interpolate "@{]}"');
 is($deparse->coderef2text(sub{ print "@{-}" }),
 q<{
     print "@-";
