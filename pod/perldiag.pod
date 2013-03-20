@@ -5673,6 +5673,8 @@ instead of:
 
     <<"foo"
 
+=item Unterminated \g... pattern in regex; marked by <-- HERE in m/%s/
+
 =item Unterminated \g{...} pattern in regex; marked by <-- HERE in m/%s/
 
 (F) You missed a close brace on a \g{..} pattern (group reference) in

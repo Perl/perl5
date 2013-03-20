@@ -104,6 +104,7 @@ my @death =
 
  '/(x)\2/' => 'Reference to nonexistent group {#} m/(x)\2{#}/',
 
+ '/\g/' => 'Unterminated \g... pattern {#} m/\g{#}/',
  '/\g{1/' => 'Unterminated \g{...} pattern {#} m/\g{1{#}/',
 
  'my $m = "\\\"; $m =~ $m', => 'Trailing \ in regex m/\/',

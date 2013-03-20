@@ -10673,8 +10673,14 @@ tryagain:
 		        goto parse_named_seq;
 		}   }
 		num = atoi(RExC_parse);
-		if (isg && num == 0)
-		    vFAIL("Reference to invalid group 0");
+		if (isg && num == 0) {
+	            if (*RExC_parse == '0') {
+                        vFAIL("Reference to invalid group 0");
+                    }
+                    else {
+	                vFAIL("Unterminated \\g... pattern");
+                    }
+                }
                 if (isrel) {
                     num = RExC_npar - num;
                     if (num < 1)
@@ -10687,8 +10693,6 @@ tryagain:
 		    char * const parse_start = RExC_parse - 1; /* MJD */
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
-	            if (parse_start == RExC_parse - 1) 
-	                vFAIL("Unterminated \\g... pattern");
                     if (hasbrace) {
                         if (*RExC_parse != '}') 
                             vFAIL("Unterminated \\g{...} pattern");

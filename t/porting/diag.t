@@ -603,7 +603,6 @@ Unknown Unicode option value %d
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
-Unterminated \g... pattern in regex; marked by <-- HERE in m/%s/
 Usage: CODE(0x%x)(%s)
 Usage: %s(%s)
 Usage: %s::%s(%s)
