@@ -8400,7 +8400,7 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
 #define WASTED_O  0x01
 #define WASTED_G  0x02
 #define WASTED_C  0x04
-#define WASTED_GC (0x02|0x04)
+#define WASTED_GC (WASTED_G|WASTED_C)
     I32 wastedflags = 0x00;
     U32 posflags = 0, negflags = 0;
     U32 *flagsp = &posflags;
