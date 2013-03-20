@@ -2618,6 +2618,13 @@ modifiers.  You can enable C</m> for a lexical scope (even a whole file)
 with C<use re '/m'>.  (In older versions: when C<$*> was set to a true value
 then all regular expressions behaved as if they were written using C</m>.)
 
+=item %c* is deprecated, and will become a syntax error
+
+(D deprecated, syntax) The punctuation variables C<@*>, C<&*>, C<**> and
+C<%*> will be removed soon.  In future such code will fail to compile with a
+syntax error.  Removing these variables along with C<$*> will permit future
+syntax additions.
+
 =item $# is no longer supported
 
 (D deprecated, syntax) The special variable C<$#>, deprecated in older

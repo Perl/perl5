@@ -192,7 +192,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L%c* is deprecated, and will become a syntax error|perldiag/"%c* is deprecated, and will become a syntax error">
+
+Use of C<@*>, C<&*>, C<**> or C<%*> is now deprecated, and will generate a
+compile time warning, enabled by default.  In future such code will fail to
+compile with a syntax error.  Removing these variables, along with C<$*>,
+will permit future syntax additions.
 
 =back
 

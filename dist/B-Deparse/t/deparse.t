@@ -1053,10 +1053,15 @@ print $_;
 ####
 # $#- $#+ $#{%} etc.
 my @x;
-@x = ($#{`}, $#{~}, $#{!}, $#{@}, $#{$}, $#{%}, $#{^}, $#{&}, $#{*});
+@x = ($#{`}, $#{~}, $#{!}, $#{@}, $#{$}, $#{%}, $#{^}, $#{&});
 @x = ($#{(}, $#{)}, $#{[}, $#{{}, $#{]}, $#{}}, $#{'}, $#{"}, $#{,});
 @x = ($#{<}, $#{.}, $#{>}, $#{/}, $#{?}, $#{=}, $#+, $#{\}, $#{|}, $#-);
 @x = ($#{;}, $#{:});
+####
+# $#{*}
+# It's a known TODO that warnings are deparsed as bits, not textually.
+no warnings;
+() = $#{*};
 ####
 # ${#} interpolated
 # It's a known TODO that warnings are deparsed as bits, not textually.
