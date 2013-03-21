@@ -53,16 +53,6 @@ be removed altogether in Perl 5.20.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Modules and Pragmata
 
 =over 4
@@ -179,7 +169,7 @@ L<Math::BigInt> has been upgraded from version 1.998 to 1.999.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.80 to 2.82.
+L<Module::CoreList> has been upgraded from version 2.80 to 2.85.
 
 =item *
 
