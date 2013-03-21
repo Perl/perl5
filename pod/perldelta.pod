@@ -192,19 +192,30 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L%c* is deprecated, and will become a syntax error|perldiag/"%c* is deprecated, and will become a syntax error">
+
+Use of C<@*>, C<&*>, C<**> or C<%*> is now deprecated, and will generate a
+compile time warning, enabled by default.  In future such code will fail to
+compile with a syntax error.  Removing these variables, along with C<$*>,
+will permit future syntax additions.
 
 =back
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+L<$* is no longer supported, and will become a syntax error|perldiag/"$* is no longer supported, and will become a syntax error">
+
+The warning that use of C<$*> and C<$#> is no longer supported is now
+generated for every location that references them.  Previously it would fail
+to be generated if another variable using the same typeglob was seen first
+(e.g. C<@*> before C<$*>), and would not be generated for the second and
+subsequent uses.  (It's hard to fix the failure to generate warnings at all
+without also generating them every time, and warning every time is
+consistent with the warnings that C<$[> used to generate.)
 
 =back
 

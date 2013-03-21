@@ -60,7 +60,75 @@ $a = ${"#"};
 $a = ${"*"};
 EXPECT
 $# is no longer supported at - line 2.
-$* is no longer supported at - line 3.
+$* is no longer supported, and will become a syntax error at - line 3.
+########
+# gv.c
+$a = ${#};
+$a = ${*};
+no warnings 'deprecated' ;
+$a = ${#};
+$a = ${*};
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported, and will become a syntax error at - line 3.
+########
+# gv.c
+$a = $#;
+$a = $*;
+$# = $a;
+$* = $a;
+$a = \$#;
+$a = \$*;
+no warnings 'deprecated' ;
+$a = $#;
+$a = $*;
+$# = $a;
+$* = $a;
+$a = \$#;
+$a = \$*;
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported, and will become a syntax error at - line 3.
+$# is no longer supported at - line 4.
+$* is no longer supported, and will become a syntax error at - line 5.
+$# is no longer supported at - line 6.
+$* is no longer supported, and will become a syntax error at - line 7.
+########
+# gv.c
+@a = @#;
+@a = @*;
+$a = $#;
+$a = $*;
+EXPECT
+@* is deprecated, and will become a syntax error at - line 3.
+$# is no longer supported at - line 4.
+$* is no longer supported, and will become a syntax error at - line 5.
+########
+# gv.c
+$a = $#;
+$a = $*;
+@a = @#;
+@a = @*;
+EXPECT
+$# is no longer supported at - line 2.
+$* is no longer supported, and will become a syntax error at - line 3.
+@* is deprecated, and will become a syntax error at - line 5.
+########
+# gv.c
+$a = \@*;
+$a = \&*;
+$a = \**;
+$a = \%*;
+no warnings 'deprecated' ;
+$a = \@*;
+$a = \&*;
+$a = \**;
+$a = \%*;
+EXPECT
+@* is deprecated, and will become a syntax error at - line 2.
+&* is deprecated, and will become a syntax error at - line 3.
+** is deprecated, and will become a syntax error at - line 4.
+%* is deprecated, and will become a syntax error at - line 5.
 ########
 # gv.c
 use warnings 'syntax' ;

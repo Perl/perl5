@@ -172,7 +172,7 @@ $dummy  = %$var3        ; check_count '%{}';
 $dummy  = keys $var3    ; check_count 'keys hashref';
 {
     no strict 'refs';
-    tie my $var4 => 'main', **;
+    tie my $var4 => 'main', *];
     $dummy  = *$var4        ; check_count '*{}';
 }
 
