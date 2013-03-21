@@ -9,14 +9,15 @@ use vars qw(@ISA @EXPORT $VERSION
             $max_datasize $pingstring $hires $source_verify $syn_forking);
 use Fcntl qw( F_GETFL F_SETFL O_NONBLOCK );
 use Socket qw( SOCK_DGRAM SOCK_STREAM SOCK_RAW PF_INET SOL_SOCKET SO_ERROR IPPROTO_IP IP_TOS IP_TTL
-               inet_aton inet_ntop AF_INET sockaddr_in );
+               inet_aton getnameinfo NI_NUMERICHOST sockaddr_in );
 use POSIX qw( ENOTCONN ECONNREFUSED ECONNRESET EINPROGRESS EWOULDBLOCK EAGAIN WNOHANG );
 use FileHandle;
 use Carp;
+use Time::HiRes;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.40";
+$VERSION = "2.41";
 
 # Constants
 
@@ -312,13 +313,12 @@ sub retrans
 # Description: allows the module to use milliseconds as returned by
 # the Time::HiRes module
 
-$hires = 0;
+$hires = 1;
 sub hires
 {
   my $self = shift;
   $hires = 1 unless defined
     ($hires = ((defined $self) && (ref $self)) ? shift() : $self);
-  require Time::HiRes if $hires;
 }
 
 sub time
@@ -400,7 +400,7 @@ sub ping
     croak("Unknown protocol \"$self->{proto}\" in ping()");
   }
 
-  return wantarray ? ($ret, &time() - $ping_time, inet_ntop(AF_INET, $ip)) : $ret;
+  return wantarray ? ($ret, &time() - $ping_time, $self->ntop($ip)) : $ret;
 }
 
 # Uses Net::Ping::External to do an external ping.
@@ -501,7 +501,7 @@ sub ping_icmp
       $self->{"from_subcode"} = $from_subcode;
       next if ($from_pid != $self->{"pid"});
       next if ($from_seq != $self->{"seq"});
-      if (! $source_verify || (inet_ntop(AF_INET, $from_ip) eq inet_ntop(AF_INET, $ip))) { # Does the packet check out?
+      if (! $source_verify || ($self->ntop($from_ip) eq $self->ntop($ip))) { # Does the packet check out?
         if ($from_type == ICMP_ECHOREPLY) {
           $ret = 1;
 	        $done = 1;
@@ -523,7 +523,7 @@ sub icmp_result {
   my ($self) = @_;
   my $ip = $self->{"from_ip"} || "";
   $ip = "\0\0\0\0" unless 4 == length $ip;
-  return (inet_ntop(AF_INET, $ip),($self->{"from_type"} || 0), ($self->{"from_subcode"} || 0));
+  return ($self->ntop($ip),($self->{"from_type"} || 0), ($self->{"from_subcode"} || 0));
 }
 
 # Description:  Do a checksum on the message.  Basically sum all of
@@ -1260,7 +1260,7 @@ sub ack
           }
           # Everything passed okay, return the answer
           return wantarray ?
-            ($entry->[0], &time() - $entry->[3], inet_ntop(AF_INET, $entry->[1]))
+            ($entry->[0], &time() - $entry->[3], $self->ntop($entry->[1]))
             : $entry->[0];
         } else {
           warn "Corrupted SYN entry: unknown fd [$fd] ready!";
@@ -1296,7 +1296,7 @@ sub ack_unfork {
     # Host passed as arg
     if (my $entry = $self->{"good"}->{$host}) {
       delete $self->{"good"}->{$host};
-      return ($entry->[0], &time() - $entry->[3], inet_ntop(AF_INET, $entry->[1]));
+      return ($entry->[0], &time() - $entry->[3], $self->ntop($entry->[1]));
     }
   }
 
@@ -1340,7 +1340,7 @@ sub ack_unfork {
               # And wait for the next winner
               next;
             }
-            return ($entry->[0], &time() - $entry->[3], inet_ntop(AF_INET, $entry->[1]));
+            return ($entry->[0], &time() - $entry->[3], $self->ntop($entry->[1]));
           }
         } else {
           # Should never happen
@@ -1403,6 +1403,23 @@ sub port_number {
    return $self->{port_num};
 }
 
+sub ntop {
+    my($self, $ip) = @_;
+
+    # Vista doesn't define a inet_ntop.  It has InetNtop instead.
+    # Not following ANSI... priceless.  getnameinfo() is defined
+    # for Windows 2000 and later, so that may be the choice.
+
+    # Any port will work, even undef, but this will work for now.
+    # Socket warns when undef is passed in, but it still works.
+    my $port = getservbyname('echo', 'udp');
+    my $sockaddr = sockaddr_in $port, $ip;
+    my ($error, $address) = getnameinfo($sockaddr, NI_NUMERICHOST);
+    if($error) {
+      croak $error;
+    }
+    return $address;
+}
 
 1;
 __END__
