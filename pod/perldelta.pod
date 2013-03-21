@@ -12,10 +12,6 @@ release.
 If you are upgrading from an earlier release such as 5.17.8, first read
 L<perl5179delta>, which describes differences between 5.17.8 and 5.17.9.
 
-=head1 Notice
-
-=head1 Core Enhancements
-
 =head1 Security
 
 =head2 Hash iteration randomized per hash variable
@@ -48,8 +44,6 @@ by the same code, that is no longer the case.
 This interpreter-global variable used to track the total number of
 Perl objects in the interpreter. It is no longer maintained and will
 be removed altogether in Perl 5.20.
-
-=head1 Performance Enhancements
 
 =head1 Modules and Pragmata
 
@@ -295,7 +289,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L%c* is deprecated, and will become a syntax error|perldiag/"%c* is deprecated, and will become a syntax error">
+L<%c* is deprecated, and will become a syntax error|perldiag/"%c* is deprecated, and will become a syntax error">
 
 Use of C<@*>, C<&*>, C<**> or C<%*> is now deprecated, and will generate a
 compile time warning, enabled by default.  In future such code will fail to
