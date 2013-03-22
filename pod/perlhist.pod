@@ -501,6 +501,7 @@ the strings?).
  Dave R   5.17.7        2012-Dec-18
  Aaron    5.17.8        2013-Jan-20
  BinGOs   5.17.9        2013-Feb-20
+ Max M    5.17.10       2013-Mar-21
 
 =head2 SELECTED RELEASE SIZES
 
