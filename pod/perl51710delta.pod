@@ -1,0 +1,416 @@
+=encoding utf8
+
+=head1 NAME
+
+perl51710delta - what is new for perl v5.17.10
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.17.9 release and the 5.17.10
+release.
+
+If you are upgrading from an earlier release such as 5.17.8, first read
+L<perl5179delta>, which describes differences between 5.17.8 and 5.17.9.
+
+=head1 Security
+
+=head2 Hash iteration randomized per hash variable
+
+Every hash has its own iteration order, which
+should make it much more difficult to determine what the current hash
+seed is.
+
+=head1 Incompatible Changes
+
+=head2 Explicit rules for variable names and identifiers
+
+Due to an oversight, length-one variable names in 5.16 were completely
+unrestricted, and opened the door to several kinds of insanity.  As of
+5.18, these now follow the rules of other identifiers, in addition
+to accepting characters that match the \p{POSIX_Punct} property.
+
+There are no longer any differences in the parsing of identifiers specified
+as $... or ${...}; previously, they were dealt with in different parts of
+the core, and so had slightly different behavior. For instance,
+C<${foo:bar}> was a legal variable name.  Since they are now both parsed
+by the same code, that is no longer the case.
+
+[ List each incompatible change as a =head2 entry ]
+
+=head1 Deprecations
+
+=head2 PL_sv_objcount
+
+This interpreter-global variable used to track the total number of
+Perl objects in the interpreter. It is no longer maintained and will
+be removed altogether in Perl 5.20.
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Config::Perl::V> 0.17 has been added to the Perl core.
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Extract> has been upgraded from version 0.62 to 0.68.
+
+NOTE: L<Archive::Extract> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 0.93 to 0.94.
+
+=item *
+
+L<B::Lint> has been upgraded from version 1.14 to 1.17.
+
+NOTE: L<B::Lint> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.14 to 1.15.
+
+This reverts (for now) a change in 1.14 whereby the "too few iterations"
+message became a warning on STDERR instead of being output on STDOUT. It's
+now on STDOUT again.
+
+=item *
+
+L<bignum> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<CPAN> has been upgraded from version 1.99_51 to 2.00.
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9133 to 0.9135.
+
+NOTE: L<CPANPLUS> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.68 to 0.70.
+
+NOTE: L<CPANPLUS::Dist::Build> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.141 to 2.142.
+
+=item *
+
+L<DBM_Filter> has been upgraded from version 0.04 to 0.05.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.81 to 5.82.
+
+=item *
+
+L<Encode> has been upgraded from version 2.47 to 2.48.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<File::CheckTree> has been upgraded from version 4.41 to 4.42.
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.22 to 0.22_90.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.88 to 0.89.
+
+=item *
+
+L<IO> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Log::Message> has been upgraded from version 0.04 to 0.06.
+
+NOTE: L<Log::Message> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Log::Message::Simple> has been upgraded from version 0.08 to 0.10.
+
+NOTE: L<Log::Message::Simple> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.998 to 1.999.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.80 to 2.85.
+
+=item *
+
+L<Module::Load> has been upgraded from version 0.22 to 0.24.
+
+=item *
+
+L<Module::Pluggable> has been upgraded from version 4.5 to 4.6.
+
+NOTE: L<Module::Pluggable> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.39 to 2.41.
+
+This fixes some test failures on Windows.
+
+=item *
+
+L<Object::Accessor> has been upgraded from version 0.44 to 0.46.
+
+NOTE: L<Object::Accessor> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<overload> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.002 to 1.003.
+
+This fixes a bug detecting the VOS operating system.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.15 to 0.16.
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.51 to 1.60.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.51 to 1.60.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.17 to 3.19.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.51 to 1.61.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<Term::UI> has been upgraded from version 0.32 to 0.34.
+
+NOTE: L<Term::UI> is deprecated and may be removed from a future version of Perl.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.25_01 to 3.26.
+
+=item *
+
+L<Text::Soundex> has been upgraded from version 3.03_01 to 3.04.
+
+=item *
+
+L<Thread::Queue> has been upgraded from version 3.01 to 3.02.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.47 to 0.50.
+
+=item *
+
+L<warnings> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Win32> has been upgraded from version 0.45 to 0.46.
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1200 to 0.1201.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlrebackslash/\N>
+
+=over 4
+
+=item *
+
+This feature is no longer experimental.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<%c* is deprecated, and will become a syntax error|perldiag/"%c* is deprecated, and will become a syntax error">
+
+Use of C<@*>, C<&*>, C<**> or C<%*> is now deprecated, and will generate a
+compile time warning, enabled by default.  In future such code will fail to
+compile with a syntax error.  Removing these variables, along with C<$*>,
+will permit future syntax additions.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<$* is no longer supported, and will become a syntax error|perldiag/"$* is no longer supported, and will become a syntax error">
+
+The warning that use of C<$*> and C<$#> is no longer supported is now
+generated for every location that references them.  Previously it would fail
+to be generated if another variable using the same typeglob was seen first
+(e.g. C<@*> before C<$*>), and would not be generated for the second and
+subsequent uses.  (It's hard to fix the failure to generate warnings at all
+without also generating them every time, and warning every time is
+consistent with the warnings that C<$[> used to generate.)
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The new copy-on-write mechanism that was introduced in 5.17.7 has now been
+disabled by default, since it was felt that there were too many rough
+edges for the 5.18 release. It is expected that it will be enabled by
+default for 5.20.
+
+This change also re-enables PL_sawampersand by default.
+
+It can be enabled in a perl build by running F<Configure> with
+B<-Accflags=-DPERL_NEW_COPY_ON_WRITE>, and we would encourage XS authors to
+try their code with such an enabled perl, and provide feedback.
+XXX need blurb, e.g. a reference to a new section in perlguts or perlxs
+explaining how XS authors should handle COW strings.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Fix two crashes in the debugger when using Frame=2 or autotrace.  These are
+[perl #116769] and [perl #116771].
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.17.10 represents approximately 4 weeks of development since Perl 5.17.9
+and contains approximately 77,000 lines of changes across 440 files from 42
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.10:
+
+Aaron Crane, Aaron Trevena, Andrew Tam, Andy Dougherty, Anton Nikishaev, Brad
+Gilbert, Brian Fraser, Charlie Gonzalez, Chris 'BinGOs' Williams, Craig A.
+Berry, Daniel Dragan, David Golden, David Mitchell, Dominic Hargreaves, Florian
+Ragwitz, George Greer, H.Merijn Brand, James E Keenan, Jasmine Ahuja, John
+Goodyear, John Peacock, Karl Williamson, Kent Fredric, Lukas Mai, Max
+Maischein, Nicholas Clark, Patrik Hägglund, Paul Green, Peter Martini, Rafael
+Garcia-Suarez, Renee Baecker, Ricardo Signes, Ruslan Zakirov, Salvador
+Fandiño, Scott Lanning, Shirakata Kentaro, Steffen Müller, Steve Hay, Steve
+Peters, Sullivan Beck, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+http://rt.perl.org/perlbug/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
