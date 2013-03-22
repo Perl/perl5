@@ -124,13 +124,6 @@ Generates a list of the module changes for the Perl you are currently
 building.  Also generates a diff between the corelist sections of two
 F<perldelta*> files.
 
-=head2 F<curliff.pl>
-
-Convert certain files in the Perl distribution that need to be in CR-LF format
-to CR-LF, or back to LF format (with the -r option).  The CR-LF format is NOT
-to be used for checking in files to the Perforce repository, but it IS to be
-used when making Perl snapshots or releases.
-
 =head2 F<epigraphs.pod>
 
 List of Perl release epigraphs.

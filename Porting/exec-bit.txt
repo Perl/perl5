@@ -45,7 +45,6 @@ Porting/config_h.pl
 Porting/corecpan.pl
 Porting/corelist-perldelta.pl
 Porting/corelist.pl
-Porting/curliff.pl
 Porting/expand-macro.pl
 Porting/findrfuncs
 Porting/makerel
