@@ -28,22 +28,22 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
 
 =head1 SYNOPSIS
 
-    use utf8;
-    no utf8;
+ use utf8;
+ no utf8;
 
-    # Convert the internal representation of a Perl scalar to/from UTF-8.
+ # Convert the internal representation of a Perl scalar to/from UTF-8.
 
-    $num_octets = utf8::upgrade($string);
-    $success    = utf8::downgrade($string[, FAIL_OK]);
+ $num_octets = utf8::upgrade($string);
+ $success    = utf8::downgrade($string[, FAIL_OK]);
 
-    # Change each character of a Perl scalar to/from a series of
-    # characters that represent the UTF-8 bytes of each original character.
+ # Change each character of a Perl scalar to/from a series of
+ # characters that represent the UTF-8 bytes of each original character.
 
-    utf8::encode($string);  # "\x{100}"  becomes "\xc4\x80"
-    utf8::decode($string);  # "\xc4\x80" becomes "\x{100}"
+ utf8::encode($string);  # "\x{100}"  becomes "\xc4\x80"
+ utf8::decode($string);  # "\xc4\x80" becomes "\x{100}"
 
-    $flag = utf8::is_utf8(STRING); # since Perl 5.8.1
-    $flag = utf8::valid(STRING);
+ $flag = utf8::is_utf8(STRING); # since Perl 5.8.1
+ $flag = utf8::valid(STRING);
 
 =head1 DESCRIPTION
 
@@ -143,8 +143,9 @@ replaced with a sequence of one or more characters that represent the
 individual I<UTF-X> bytes of the character.  The UTF8 flag is turned off.
 Returns nothing.
 
-    my $a = "\x{100}"; # $a contains one character, with ord 0x100
-    utf8::encode($a);  # $a contains two characters, with ords 0xc4 and 0x80
+ my $a = "\x{100}"; # $a contains one character, with ord 0x100
+ utf8::encode($a);  # $a contains two characters, with ords 0xc4 and
+                    # 0x80
 
 B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
@@ -160,7 +161,8 @@ turned on only if the source string contains multiple-byte I<UTF-X>
 characters.  If I<$string> is invalid as I<UTF-X>, returns false;
 otherwise returns true.
 
-    my $a = "\xc4\x80"; # $a contains two characters, with ords 0xc4 and 0x80
+    my $a = "\xc4\x80"; # $a contains two characters, with ords
+                        # 0xc4 and 0x80
     utf8::decode($a);   # $a contains one character, with ord 0x100
 
 B<Note that this function does not handle arbitrary encodings.>
