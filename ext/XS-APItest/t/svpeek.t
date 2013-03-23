@@ -44,7 +44,7 @@ like (DPeek ($1), qr'^PVMG\("',			' $1');
   is (DPeek (\@INC),	'\AV()',		'\@INC');
   is (DPeek (\%INC),	'\HV()',		'\%INC');
   is (DPeek (*STDOUT),	'GV()',			'*STDOUT');
-  is (DPeek (sub {}),	'\CV("__ANON__")',	'sub {}');
+  is (DPeek (sub {}),	'\CV(__ANON__)',	'sub {}');
 
 { our ($VAR, @VAR, %VAR);
   open VAR, "<", $^X or die "Can't open $^X: $!";
@@ -67,18 +67,18 @@ like (DPeek ($1), qr'^PVMG\("',			' $1');
   is (DPeek ($VAR), 'PVIV("a\n\342\202\254"\0) [UTF8 "a\n\x{20ac}"]',
 					' $VAR "a\x0a\x{20ac}"');
   $VAR = sub { "VAR" };
-  is (DPeek ($VAR),	'\CV("__ANON__")',	' $VAR sub { "VAR" }');
-  is (DPeek (\$VAR),	'\\\CV("__ANON__")',	'\$VAR sub { "VAR" }');
+  is (DPeek ($VAR),	'\CV(__ANON__)',	' $VAR sub { "VAR" }');
+  is (DPeek (\$VAR),	'\\\CV(__ANON__)',	'\$VAR sub { "VAR" }');
   $VAR = 0;
 
-  is (DPeek (\&VAR),	'\CV("VAR")',		'\&VAR');
+  is (DPeek (\&VAR),	'\CV(VAR)',		'\&VAR');
   is (DPeek ( *VAR),	'GV()',			' *VAR');
 
   is (DPeek (*VAR{GLOB}),	'\GV()',	' *VAR{GLOB}');
 like (DPeek (*VAR{SCALAR}), qr'\\PV(IV|MG)\(0\)',' *VAR{SCALAR}');
   is (DPeek (*VAR{ARRAY}),	'\AV()',	' *VAR{ARRAY}');
   is (DPeek (*VAR{HASH}),	'\HV()',	' *VAR{HASH}');
-  is (DPeek (*VAR{CODE}),	'\CV("VAR")',	' *VAR{CODE}');
+  is (DPeek (*VAR{CODE}),	'\CV(VAR)',	' *VAR{CODE}');
   is (DPeek (*VAR{IO}),		'\IO()',	' *VAR{IO}');
   is (DPeek (*VAR{FORMAT}),$]<5.008?'SV_UNDEF':'\FM()',' *VAR{FORMAT}');
   }
