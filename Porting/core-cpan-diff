@@ -226,6 +226,7 @@ sub do_compare {
     }
 
     my %ignorable = map { ( $_ => 1 ) } @Maintainers::IGNORABLE;
+    my %wanted_upstream = map { ( $_ => 1 ) } @$wanted_upstreams;
 
     my %seen_dist;
     for my $module (@$modules) {
@@ -247,7 +248,7 @@ sub do_compare {
         }
 
         my $upstream = $m->{UPSTREAM};
-        next if @$wanted_upstreams and !( $upstream ~~ $wanted_upstreams );
+        next if @$wanted_upstreams and !$wanted_upstream{$upstream};
 
         print $outfh "\n$module - "
           . $Maintainers::Modules{$module}->{DISTRIBUTION} . "\n";
@@ -477,6 +478,7 @@ sub do_crosscheck {
         $distros{ distro_base($short_distro) }{$distro} = 1;
     }
 
+    my %wanted_upstream = map { ( $_ => 1 ) } @$wanted_upstreams;
     for my $module (@$modules) {
         my $m = $Maintainers::Modules{$module}
           or die "ERROR: No such module in Maintainers.pl: '$module'\n";
@@ -495,7 +497,7 @@ sub do_crosscheck {
         die "ERROR: $module has no DISTRIBUTION entry\n" unless defined $pdist;
 
         my $upstream = $m->{UPSTREAM};
-        next if @$wanted_upstreams and !( $upstream ~~ $wanted_upstreams );
+        next if @$wanted_upstreams and !$wanted_upstream{$upstream};
 
         my $cdist = $modules{$module};
         ( my $short_pdist = $pdist ) =~ s{^.*/}{};
@@ -578,8 +580,9 @@ sub get_map {
 sub cpan_to_perl {
     my ( $excluded, $map, $customized, $cpan_file ) = @_;
 
+    my %customized = map { ( $_ => 1 ) } @$customized;
     for my $exclude (@$excluded) {
-        next if $exclude ~~ $customized;
+        next if $customized{$exclude};
 
         # may be a simple string to match exactly, or a pattern
         if ( ref $exclude ) {
