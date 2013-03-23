@@ -5719,6 +5719,8 @@ extern void moncontrol(int);
 #define PERL_PV_ESCAPE_NOCLEAR      0x4000
 #define PERL_PV_ESCAPE_RE           0x8000
 
+#define PERL_PV_ESCAPE_DWIM         0x10000
+
 #define PERL_PV_PRETTY_NOCLEAR      PERL_PV_ESCAPE_NOCLEAR
 
 /* used by pv_display in dump.c*/

@@ -6,6 +6,11 @@ BEGIN {
         print "1..0 # Skip: Devel::Peek was not built\n";
         exit 0;
     }
+    {
+    package t;
+       my $core = !!$ENV{PERL_CORE};
+       require($core ? '../../t/test.pl' : './t/test.pl');
+    }
 }
 
 use Test::More;
@@ -1261,5 +1266,282 @@ do_test('UTF-8 in a regular expression',
   my $ref = \%hash;
   is(Devel::Peek::SvREFCNT(%hash), $base_count + 1, "SvREFCNT on non-scalar");
 }
+
+{
+# utf8 tests
+use utf8;
+
+sub _dump {
+   open(OUT,">peek$$") or die $!;
+   open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
+   Dump($_[1]);
+   open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
+   close(OUT);
+   open(IN, "peek$$") or die $!;
+   my $dump = do { local $/; <IN> };
+   close(IN);
+   return $dump;
+}
+
+sub _get_coderef {
+   my $x = $_[0];
+   utf8::upgrade($x);
+   eval "sub $x {}; 1" or die $@;
+   return *{$x}{CODE};
+}
+
+like(
+   _dump(_get_coderef("\x{df}::\xdf")),
+   qr/GVGV::GV = 0x[[:xdigit:]]+\s+\Q"\xdf" :: "\xdf"/,
+   "GVGV's are correctly escaped for latin1 :: latin1",
+);
+
+like(
+   _dump(_get_coderef("\x{30cd}::\x{30cd}")),
+   qr/GVGV::GV = 0x[[:xdigit:]]+\s+\Q"\x{30cd}" :: "\x{30cd}"/,
+   "GVGV's are correctly escaped for UTF8 :: UTF8",
+);
+
+like(
+   _dump(_get_coderef("\x{df}::\x{30cd}")),
+   qr/GVGV::GV = 0x[[:xdigit:]]+\s+\Q"\xdf" :: "\x{30cd}"/,
+   "GVGV's are correctly escaped for latin1 :: UTF8",
+);
+
+like(
+   _dump(_get_coderef("\x{30cd}::\x{df}")),
+   qr/GVGV::GV = 0x[[:xdigit:]]+\s+\Q"\x{30cd}" :: "\xdf"/,
+   "GVGV's are correctly escaped for UTF8 :: latin1",
+);
+
+like(
+   _dump(_get_coderef("\x{30cb}::\x{df}::\x{30cd}")),
+   qr/GVGV::GV = 0x[[:xdigit:]]+\s+\Q"\x{30cb}::\x{df}" :: "\x{30cd}"/,
+   "GVGV's are correctly escaped for UTF8 :: latin 1 :: UTF8",
+);
+
+my $dump = _dump(*{"\x{30cb}::\x{df}::\x{30dc}"});
+
+like(
+   $dump,
+   qr/NAME = \Q"\x{30dc}"/,
+   "NAME is correctly escaped for UTF8 globs",
+);
+
+like(
+   $dump,
+   qr/GvSTASH = 0x[[:xdigit:]]+\s+\Q"\x{30cb}::\x{df}"/,
+   "GvSTASH is correctly escaped for UTF8 globs"
+);
+
+like(
+   $dump,
+   qr/EGV = 0x[[:xdigit:]]+\s+\Q"\x{30dc}"/,
+   "EGV is correctly escaped for UTF8 globs"
+);
+
+$dump = _dump(*{"\x{df}::\x{30cc}"});
+
+like(
+   $dump,
+   qr/NAME = \Q"\x{30cc}"/,
+   "NAME is correctly escaped for UTF8 globs with latin1 stashes",
+);
+
+like(
+   $dump,
+   qr/GvSTASH = 0x[[:xdigit:]]+\s+\Q"\xdf"/,
+   "GvSTASH is correctly escaped for UTF8 globs with latin1 stashes"
+);
+
+like(
+   $dump,
+   qr/EGV = 0x[[:xdigit:]]+\s+\Q"\x{30cc}"/,
+   "EGV is correctly escaped for UTF8 globs with latin1 stashes"
+);
+
+like(
+   _dump(bless {}, "\0::\1::\x{30cd}"),
+   qr/STASH = 0x[[:xdigit:]]+\s+\Q"\0::\x{01}::\x{30cd}"/,
+   "STASH for blessed hashrefs is correct"
+);
+
+BEGIN { $::{doof} = "\0\1\x{30cd}" }
+like(
+   _dump(\&doof),
+   qr/PROTOTYPE = \Q"\0\x{01}\x{30cd}"/,
+   "PROTOTYPE is escaped correctly"
+);
+
+{
+    my $coderef = eval <<"EOP";
+    use feature 'lexical_subs';
+    no warnings 'experimental::lexical_subs';
+    my sub bar (\$\x{30cd}) {1}; \\&bar
+EOP
+    like(
+       _dump($coderef),
+       qr/PROTOTYPE = "\$\Q\x{30cd}"/,
+       "PROTOTYPE works on lexical subs"
+    )
+}
+
+{
+   local $::TODO = "OUTSIDE currently broken in blead";
+sub get_outside {
+   eval "sub $_[0] { my \$x; \$x++; return sub { \$x } } $_[0]()";
+   
+}
+sub food { my $x; return sub { $x } }
+like(
+    _dump(food()),
+    qr/OUTSIDE = 0x[[:xdigit:]]+\s+\Q(basic)/,
+    'OUTSIDE works'
+);
+
+like(
+    _dump(get_outside("\x{30ce}")),
+    qr/OUTSIDE = 0x[[:xdigit:]]+\s+\Q(\x{30ce})/,
+    'OUTSIDE + UTF8 works'
+);
+}
+
+# TODO AUTOLOAD = stashname, which requires using a XS autoload
+# and calling Dump() on the cv
+
+
+
+sub test_utf8_stashes {
+   my ($stash_name, $test) = @_;
+
+   $dump = _dump(\%{"${stash_name}::"});
+
+   my $format = utf8::is_utf8($stash_name) ? '\x{%2x}' : '\x%2x';
+   $escaped_stash_name = join "", map {
+         $_ eq ':' ? $_ : sprintf $format, ord $_
+   } split //, $stash_name;
+
+   like(
+      $dump,
+      qr/\QNAME = "$escaped_stash_name"/,
+      "NAME is correct escaped for $test"
+   );
+
+   like(
+      $dump,
+      qr/\QENAME = "$escaped_stash_name"/,
+      "ENAME is correct escaped for $test"
+   );
+}
+
+for my $test (
+  [ "\x{30cd}", "UTF8 stashes" ],
+   [ "\x{df}", "latin 1 stashes" ],
+   [ "\x{df}::\x{30cd}", "latin1 + UTF8 stashes" ],
+   [ "\x{30cd}::\x{df}", "UTF8 + latin1 stashes" ],
+) {
+   test_utf8_stashes(@$test);
+}
+
+}
+
+sub test_DumpProg {
+    my ($prog, $expected, $name, $test) = @_;
+    $test ||= 'like';
+
+    my $u = 'use Devel::Peek "DumpProg"; DumpProg();';
+
+    # Interface between Test::Builder & test.pl
+    my $builder = Test::More->builder();
+    t::curr_test($builder->current_test() + 1);
+
+    utf8::encode($prog);
+    
+    if ( $test eq 'is' ) {
+        t::fresh_perl_is($prog . $u, $expected, undef, $name)
+    }
+    else {
+        t::fresh_perl_like($prog . $u, $expected, undef, $name)
+    }
+
+    $builder->current_test(t::curr_test() - 1);
+}
+
+my $threads = $Config{'useithreads'};
+
+for my $test (
+[
+    "package test;",
+    qr/PACKAGE = "test"/,
+    "DumpProg() + package declaration"
+],
+[
+    "use utf8; package \x{30cd};",
+    qr/PACKAGE = "\\x\Q{30cd}"/,
+    "DumpProg() + UTF8 package declaration"
+],
+[
+    "use utf8; sub \x{30cc}::\x{30cd} {1}; \x{30cc}::\x{30cd};",
+    ($threads ? qr/PADIX = \d+/ : qr/GV = \Q\x{30cc}::\x{30cd}\E/)
+],
+[
+    "use utf8; \x{30cc}: { last \x{30cc} }",
+    qr/LABEL = \Q"\x{30cc}"/
+],
+)
+{
+   test_DumpProg(@$test);
+}
+
+my $e = <<'EODUMP';
+dumpindent is 4 at - line 1.
+{
+1   TYPE = leave  ===> NULL
+    TARG = 1
+    FLAGS = (VOID,KIDS,PARENS,SLABBED)
+    PRIVATE = (REFCOUNTED)
+    REFCNT = 1
+    {
+2       TYPE = enter  ===> 3
+        FLAGS = (UNKNOWN,SLABBED)
+    }
+    {
+3       TYPE = nextstate  ===> 4
+        FLAGS = (VOID,SLABBED)
+        LINE = 1
+        PACKAGE = "t"
+    }
+    {
+5       TYPE = entersub  ===> 1
+        TARG = TARGS_REPLACE
+        FLAGS = (VOID,KIDS,STACKED,SLABBED)
+        PRIVATE = (HASTARG)
+        {
+6           TYPE = null  ===> (5)
+              (was list)
+            FLAGS = (UNKNOWN,KIDS,SLABBED)
+            {
+4               TYPE = pushmark  ===> 7
+                FLAGS = (SCALAR,SLABBED)
+            }
+            {
+8               TYPE = null  ===> (6)
+                  (was rv2cv)
+                FLAGS = (SCALAR,KIDS,SLABBED)
+                {
+7                   TYPE = gv  ===> 5
+                    FLAGS = (SCALAR,SLABBED)
+                    GV_OR_PADIX
+                }
+            }
+        }
+    }
+}
+EODUMP
+
+$e =~ s/TARGS_REPLACE/$threads ? 3 : 1/e;
+$e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg"/e;
+
+test_DumpProg("package t;", $e, "DumpProg() has no 'Attempt to free X prematurely' warning", "is" );
 
 done_testing();
