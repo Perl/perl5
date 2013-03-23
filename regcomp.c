@@ -11947,7 +11947,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                              they're valid on this machine */
                     NULL);
     if (!node)
-        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X", flagp);
+        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf,
+                    PTR2UV(flagp));
     if (save_fold) {
         RExC_flags |= RXf_PMf_FOLD;
     }
