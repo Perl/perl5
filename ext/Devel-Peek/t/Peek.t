@@ -969,7 +969,8 @@ do_test('UTF-8 in a regular expression',
     SUBSTRS = $ADDR
     PPRIVATE = $ADDR
     OFFS = $ADDR
-    QR_ANONCV = 0x0
+    QR_ANONCV = 0x0(?:
+    SAVED_COPY = 0x0)?
 ');
 
 done_testing();
