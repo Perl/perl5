@@ -155,8 +155,10 @@ actually causes more problems than it solves.  If you call a function that
 expects to be passed information via C<$_>, it may or may not work,
 depending on how the function is written, there not being any easy way to
 solve this.  Just avoid lexical C<$_>, unless you are feeling particularly
-masochistic.  For this reason lexical C<$_> is deprecated and will produce
-a warning unless warnings have been disabled.
+masochistic.  For this reason lexical C<$_> is still experimental and will
+produce a warning unless warnings have been disabled.  As with other
+experimental features, the behavior of lexical C<$_> is subject to change
+without notice, including change into a fatal error.
 
 Mnemonic: underline is understood in certain operations.
 
