@@ -1430,17 +1430,22 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
 	    continue;
 	}
-	if (uv >= 0xd800 && uv <= 0xdbff) {	/* surrogates */
+#define FIRST_HIGH_SURROGATE UNICODE_SURROGATE_FIRST
+#define LAST_HIGH_SURROGATE  0xDBFF
+#define FIRST_LOW_SURROGATE  0xDC00
+#define LAST_LOW_SURROGATE   UNICODE_SURROGATE_LAST
+	if (uv >= FIRST_HIGH_SURROGATE && uv <= LAST_HIGH_SURROGATE) {
 	    if (p >= pend) {
 		Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	    } else {
 		UV low = (p[0] << 8) + p[1];
 		p += 2;
-		if (low < 0xdc00 || low > 0xdfff)
+		if (low < FIRST_LOW_SURROGATE || low > LAST_LOW_SURROGATE)
 		    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
-		uv = ((uv - 0xd800) << 10) + (low - 0xdc00) + 0x10000;
+		uv = ((uv - FIRST_HIGH_SURROGATE) << 10)
+                                       + (low - FIRST_LOW_SURROGATE) + 0x10000;
 	    }
-	} else if (uv >= 0xdc00 && uv <= 0xdfff) {
+	} else if (uv >= FIRST_LOW_SURROGATE && uv <= LAST_LOW_SURROGATE) {
 	    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	}
 	if (uv < 0x10000) {
