@@ -17,6 +17,22 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.17.10 - Vernor Vinge, A Fire Upon The Deep
+
+L<Announced on 2013-03-22 by Max Maischein|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00908.html>
+
+The archive informed the automation. Data structures were built, recipes
+followed.  A local network was built, faster than anything on Straum, but surely
+safe. Nodes were added, modified by other recipes. The archive was a friendly
+place, with hierarchies of translation keys that led them along. Straum itself
+would be famous for this.
+
+Six months passed. A year.
+
+The omniscient view. Not self-aware really. Self-awareness is much over-rated. 
+Most automation works far better as a part of a whole, and even if human-
+powerful, it does not need to self-know. 
+
 =head2 v5.16.3 - Devo, Freedom of Choice
 
 L<Announced on 2013-03-11 by Ricardo Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00414.html>
