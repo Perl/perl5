@@ -1638,7 +1638,7 @@ sub populate_char_info ($) {
 ## This 'require' doesn't necessarily work in miniperl, and even if it does,
 ## the native perl version of it (which is what would operate under miniperl)
 ## is extremely slow, as it does a string eval every call.
-#my $has_fast_scalar_util = $ !~ /miniperl/
+#my $has_fast_scalar_util = $^X !~ /miniperl/
 #                            && defined eval "require Scalar::Util";
 #
 #sub objaddr($) {
@@ -9859,7 +9859,7 @@ sub output_perl_charnames_line ($$) {
         # These are used to indicate, for example, that the mapping for a
         # range has a non-default type.
         #
-        # This loops through the file, calling it's next_line() method, and
+        # This loops through the file, calling its next_line() method, and
         # then taking the map and adding it to the property's table.
         # Complications arise because any number of properties can be in the
         # file, in any order, interspersed in any way.  The first time a
