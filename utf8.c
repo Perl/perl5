@@ -1410,13 +1410,13 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
     while (p < pend) {
 	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
 	p += 2;
-	if (uv < 0x80) {
-	    *d++ = (U8)uv;
+	if (UNI_IS_INVARIANT(uv)) {
+	    *d++ = LATIN1_TO_NATIVE((U8) uv);
 	    continue;
 	}
-	if (uv < 0x800) {
-	    *d++ = (U8)(( uv >>  6)         | 0xc0);
-	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
+	if (uv <= MAX_UTF8_TWO_BYTE) {
+	    *d++ = UTF8_TWO_BYTE_HI(UNI_TO_NATIVE(uv));
+	    *d++ = UTF8_TWO_BYTE_LO(UNI_TO_NATIVE(uv));
 	    continue;
 	}
 #define FIRST_HIGH_SURROGATE UNICODE_SURROGATE_FIRST
@@ -1437,6 +1437,9 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	} else if (uv >= FIRST_LOW_SURROGATE && uv <= LAST_LOW_SURROGATE) {
 	    Perl_croak(aTHX_ "Malformed UTF-16 surrogate");
 	}
+#ifdef EBCDIC
+        d = uvoffuni_to_utf8_flags(d, uv, 0);
+#else
 	if (uv < 0x10000) {
 	    *d++ = (U8)(( uv >> 12)         | 0xe0);
 	    *d++ = (U8)(((uv >>  6) & 0x3f) | 0x80);
@@ -1450,6 +1453,7 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	    *d++ = (U8)(( uv        & 0x3f) | 0x80);
 	    continue;
 	}
+#endif
     }
     *newlen = d - dstart;
     return d;
