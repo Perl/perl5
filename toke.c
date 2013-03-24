@@ -5814,6 +5814,27 @@ Perl_yylex(pTHX)
 	if (!PL_tokenbuf[1]) {
 	    PREREF('%');
 	}
+	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
+	    /* Warn about % where they meant $. */
+	    if (*s == '[' || *s == '{') {
+		if (ckWARN(WARN_SYNTAX)) {
+		    const char *t = s + 1;
+		    while (*t && (isWORDCHAR_lazy_if(t,UTF) || strchr(" \t$#+-'\"", *t)))
+			t += UTF ? UTF8SKIP(t) : 1;
+		    if (*t == '}' || *t == ']') {
+			t++;
+			PL_bufptr = PEEKSPACE(PL_bufptr); /* XXX can realloc */
+       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			    "Scalar value %"SVf" better written as $%"SVf,
+			    SVfARG(newSVpvn_flags(PL_bufptr, (STRLEN)(t-PL_bufptr),
+                                                SVs_TEMP | (UTF ? SVf_UTF8 : 0 ))),
+                            SVfARG(newSVpvn_flags(PL_bufptr+1, (STRLEN)(t-PL_bufptr-1),
+                                                SVs_TEMP | (UTF ? SVf_UTF8 : 0 ))));
+		    }
+		}
+	    }
+	}
 	PL_expect = XOPERATOR;
 	force_ident_maybe_lex('%');
 	TERM('%');
