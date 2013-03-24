@@ -802,6 +802,15 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
     PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
     if (SvOOK(hv)) {
+        /* Currently this makes various tests warn in annoying ways.
+         * So Silenced for now. - Yves | bogus end of comment =>* /
+        if (HvAUX(hv)->xhv_riter != -1) {
+            Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+                             "[TESTING] Inserting into a hash during each() traversal results in undefined behavior"
+                             pTHX__FORMAT
+                             pTHX__VALUE);
+        }
+        */
         HvAUX(hv)->xhv_rand= (U32)PL_hash_rand_bits;
     }
 

@@ -359,6 +359,8 @@ sub check_file {
     # inside an #if 0 block.
     next if $name eq 'SKIPME';
 
+    next if $name=~/\[TESTING\]/; # ignore these as they are works in progress
+
     check_message(standardize($name),$codefn,$severity,$categories);
   }
 }
