@@ -750,6 +750,8 @@ END_EXTERN_C
  * character occupies 5 bytes, therefore this number is 15 */
 #define UTF8_MAXBYTES_CASE	15
 
+#define MAX_UTF8_TWO_BYTE 0x3FF
+
 /*
  * Local variables:
  * c-indentation-style: bsd
