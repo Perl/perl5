@@ -2150,8 +2150,11 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
     CvSTART(cv)		= CvSTART(proto);
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
-    if (SvPOK(proto))
+    if (SvPOK(proto)) {
 	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
+        if (SvUTF8(proto))
+           SvUTF8_on(MUTABLE_SV(cv));
+    }
     if (SvMAGIC(proto))
 	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 

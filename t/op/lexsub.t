@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 136;
+plan 137;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -428,6 +428,10 @@ package main;
   my sub me ($);
   is prototype eval{\&me}, '$', 'my sub with proto';
   is prototype "me", undef, 'prototype "..." ignores my subs';
+
+  my $coderef = eval "my sub foo (\$\x{30cd}) {1}; \\&foo";
+  my $proto = prototype $coderef;
+  ok(utf8::is_utf8($proto), "my sub with UTF8 proto maintains the UTF8ness");
 }
 {
   my sub if() { 44 }
