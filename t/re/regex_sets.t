@@ -9,6 +9,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.','../ext/re');
     require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
     skip_all_without_unicode_tables();
 }
 
@@ -24,10 +25,10 @@ like("a", qr/(?[ [a]      # This is a comment
                     ])/, 'Can ignore a comment');
 like("a", qr/(?[ [a]      # [[:notaclass:]]
                     ])/, 'A comment isn\'t parsed');
-unlike("\x85", qr/(?[ \t ])/, 'NEL is white space');
-unlike("\x85", qr/(?[ [\t] ])/, '... including within nested []');
-like("\x85", qr/(?[ \t + \ ])/, 'can escape NEL to match');
-like("\x85", qr/(?[ [\] ])/, '... including within nested []');
+unlike(uni_to_native("\x85"), qr/(?[ \t ])/, 'NEL is white space');
+unlike(uni_to_native("\x85"), qr/(?[ [\t] ])/, '... including within nested []');
+like(uni_to_native("\x85"), qr/(?[ \t + \ ])/, 'can escape NEL to match');
+like(uni_to_native("\x85"), qr/(?[ [\] ])/, '... including within nested []');
 like("\t", qr/(?[ \t + \ ])/, 'can do basic union');
 like("\cK", qr/(?[ \s ])/, '\s matches \cK');
 unlike("\cK", qr/(?[ \s - \cK ])/, 'can do basic subtraction');
