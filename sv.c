@@ -7674,7 +7674,6 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 #include <rms.h>
     int fd;
     Stat_t st;
-    dSAVE_ERRNO;
 
     /* With a true, record-oriented file on VMS, we need to use read directly
      * to ensure that we respect RMS record boundaries.  The user is responsible
@@ -7689,8 +7688,6 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 	    || st.st_fab_rfm == FAB$C_VFC
 	    || st.st_fab_rfm == FAB$C_FIX)) {
 
-	/* fstat does the equivalent of SETERRNO(EVMSERR, RMS$_IOP) on PPFs. */
-	RESTORE_ERRNO;
 	bytesread = PerlLIO_read(fd, buffer, recsize);
     }
     else /* in-memory file from PerlIO::Scalar
