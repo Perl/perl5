@@ -656,9 +656,9 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"FOLD",             /* 0x00000004 */
 	"EXTENDED",         /* 0x00000008 */
 	"KEEPCOPY",         /* 0x00000010 */
-	"CHARSET",          /* 0x000000e0 */
-	"CHARSET",          /* 0x000000e0 */
-	"CHARSET",          /* 0x000000e0 */
+	"CHARSET0",         /* 0x00000020 : "CHARSET" - 0x000000e0 */
+	"CHARSET1",         /* 0x00000040 : "CHARSET" - 0x000000e0 */
+	"CHARSET2",         /* 0x00000080 : "CHARSET" - 0x000000e0 */
 	"UNUSED_BIT_8",     /* 0x00000100 */
 	"ANCH_BOL",         /* 0x00000200 */
 	"ANCH_MBOL",        /* 0x00000400 */

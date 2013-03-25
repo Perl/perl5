@@ -266,7 +266,8 @@ foreach my $file ("op_reg_common.h", "regexp.h") {
         if (s/ \# \s* define \s+ ( _? RXf_ \w+ ) \s+ //xi) {
             chomp;
             my $define = $1;
-            s: / \s* \* .*? \* \s* / : :x;    # Replace comments by a blank
+            my $orig= $_;
+            s{ /\* .*? \*/ }{ }x;    # Replace comments by a blank
 
             # Replace any prior defined symbols by their values
             foreach my $key (keys %definitions) {
@@ -282,7 +283,12 @@ foreach my $file ("op_reg_common.h", "regexp.h") {
 
             next unless $_ =~ /<</; # Bit defines use left shift
             if($val & $newval) {
-                die sprintf "Both $define and $reverse{$newval} use %08X", $newval;
+                my @names=($define, $reverse{$newval});
+                s/PMf_// for @names;
+                if ($names[0] ne $names[1]) {
+                    die sprintf "ERROR: both $define and $reverse{$newval} use 0x%08X (%s:%s)", $newval, $orig, $_;
+                }
+                next;
             }
             $val|=$newval;
             $rxfv{$define}= $newval;
@@ -292,9 +298,11 @@ foreach my $file ("op_reg_common.h", "regexp.h") {
 }
 my %vrxf=reverse %rxfv;
 printf $out "\t/* Bits in extflags defined: %s */\n", unpack 'B*', pack 'N', $val;
+my %multibits;
 for (0..31) {
     my $power_of_2 = 2**$_;
     my $n=$vrxf{$power_of_2};
+    my $extra = "";
     if (! $n) {
 
         # Here, there was no name that matched exactly the bit.  It could be
@@ -309,16 +317,17 @@ for (0..31) {
             # that name, and all the bits it matches
             foreach my $name (keys %rxfv) {
                 if ($rxfv{$name} & $power_of_2) {
-                    $n = $name;
-                    $power_of_2 = $rxfv{$name};
+                    $n = $name . ( $multibits{$name}++ );
+                    $extra= sprintf qq{ : "%s" - 0x%08x}, $name, $rxfv{$name}
+                        if $power_of_2 != $rxfv{$name};
                     last;
                 }
             }
         }
     }
-    $n=~s/^RXf_(PMf_)?//;
-    printf $out qq(\t%-20s/* 0x%08x */\n), 
-        qq("$n",),$power_of_2;
+    s/\bRXf_(PMf_)?// for $n, $extra;
+    printf $out qq(\t%-20s/* 0x%08x%s */\n),
+        qq("$n",),$power_of_2, $extra;
 }  
  
 print $out <<EOP;
