@@ -4592,6 +4592,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	U32 rx_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
 	regexp_engine const *eng = current_re_engine();
 
+        if (o->op_flags & OPf_SPECIAL)
+            rx_flags |= RXf_SPLIT;
+
 	if (!has_code || !eng->op_comp) {
 	    /* compile-time simple constant pattern */
 
@@ -4667,6 +4670,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    /* don't free op_code_list; its ops are embedded elsewhere too */
 	    pm->op_pmflags |= PMf_CODELIST_PRIVATE;
 	}
+
+        if (o->op_flags & OPf_SPECIAL)
+            pm->op_pmflags |= PMf_SPLIT;
 
 	/* the OP_REGCMAYBE is a placeholder in the non-threaded case
 	 * to allow its op_next to be pointed past the regcomp and
@@ -9755,15 +9761,10 @@ Perl_ck_split(pTHX_ OP *o)
 	cLISTOPo->op_last = kid; /* There was only one element previously */
     }
 
-    if (kid->op_type == OP_CONST && !(kid->op_private & OPpCONST_FOLDED)) {
-	SV * const sv = kSVOP->op_sv;
-	if (SvPOK(sv) && SvCUR(sv) == 1 && *SvPVX(sv) == ' ')
-	    o->op_flags |= OPf_SPECIAL;
-    }
     if (kid->op_type != OP_MATCH || kid->op_flags & OPf_STACKED) {
 	OP * const sibl = kid->op_sibling;
 	kid->op_sibling = 0;
-	kid = pmruntime( newPMOP(OP_MATCH, 0), kid, 0, 0);
+        kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0, 0); /* OPf_SPECIAL is used to trigger split " " behavior */
 	if (cLISTOPo->op_first == cLISTOPo->op_last)
 	    cLISTOPo->op_last = kid;
 	cLISTOPo->op_first = kid;

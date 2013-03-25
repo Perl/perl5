@@ -5313,7 +5313,6 @@ PP(pp_split)
     STRLEN len;
     const char *s = SvPV_const(sv, len);
     const bool do_utf8 = DO_UTF8(sv);
-    const bool skipwhite = PL_op->op_flags & OPf_SPECIAL;
     const char *strend = s + len;
     PMOP *pm;
     REGEXP *rx;
@@ -5346,7 +5345,7 @@ PP(pp_split)
     rx = PM_GETRE(pm);
 
     TAINT_IF(get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET &&
-	     (RX_EXTFLAGS(rx) & RXf_WHITE || skipwhite));
+             (RX_EXTFLAGS(rx) & (RXf_WHITE | RXf_SKIPWHITE)));
 
     RX_MATCH_UTF8_set(rx, do_utf8);
 
@@ -5386,7 +5385,7 @@ PP(pp_split)
     }
     base = SP - PL_stack_base;
     orig = s;
-    if (skipwhite) {
+    if (RX_EXTFLAGS(rx) & RXf_SKIPWHITE) {
 	if (do_utf8) {
 	    while (isSPACE_utf8(s))
 		s += UTF8SKIP(s);
@@ -5408,7 +5407,7 @@ PP(pp_split)
 
     if (!limit)
 	limit = maxiters + 2;
-    if (RX_EXTFLAGS(rx) & RXf_WHITE || skipwhite) {
+    if (RX_EXTFLAGS(rx) & RXf_WHITE) {
 	while (--limit) {
 	    m = s;
 	    /* this one uses 'm' and is a negative test */

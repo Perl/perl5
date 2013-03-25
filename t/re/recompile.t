@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 36;
+plan tests => 38;
 
 my $results = runperl(
 			switches => [ '-Dr' ],
@@ -186,4 +186,10 @@ my $x = qr/(?{1})/;
 my $y = '(?{1})';
 BEGIN { $^H |= 0x00200000 } # lightweight "use re 'eval'"
 "a" =~ qr/a$x$_/ for $y, $y, $y;
+CODE
+
+comp_n(6, <<'CODE', 'embedded code qr');
+my $x = qr/a/i;
+my $y = qr/a/;
+"a" =~ qr/a$_/ for $x, $y, $x, $y;
 CODE

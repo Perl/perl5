@@ -83,7 +83,7 @@ PP(pp_regcomp)
     REGEXP *re = NULL;
     REGEXP *new_re;
     const regexp_engine *eng;
-    bool is_bare_re;
+    bool is_bare_re= FALSE;
 
     if (PL_op->op_flags & OPf_STACKED) {
 	dMARK;
@@ -107,14 +107,27 @@ PP(pp_regcomp)
     assert (re != (REGEXP*) &PL_sv_undef);
     eng = re ? RX_ENGINE(re) : current_re_engine();
 
+    /*
+     In the below logic: these are basically the same - check if this regcomp is part of a split.
+
+    (PL_op->op_pmflags & PMf_split )
+    (PL_op->op_next->op_type == OP_PUSHRE)
+
+    We could add a new mask for this and copy the PMf_split, if we did
+    some bit definition fiddling first.
+
+    For now we leave this
+    */
+
     new_re = (eng->op_comp
 		    ? eng->op_comp
 		    : &Perl_re_op_compile
 	    )(aTHX_ args, nargs, pm->op_code_list, eng, re,
 		&is_bare_re,
-		(pm->op_pmflags & RXf_PMf_COMPILETIME),
+                (pm->op_pmflags & RXf_PMf_FLAGCOPYMASK),
 		pm->op_pmflags |
 		    (PL_op->op_flags & OPf_SPECIAL ? PMf_USE_RE_EVAL : 0));
+
     if (pm->op_pmflags & PMf_HAS_CV)
 	ReANY(new_re)->qr_anoncv
 			= (CV*) SvREFCNT_inc(PAD_SV(PL_op->op_targ));
@@ -145,10 +158,12 @@ PP(pp_regcomp)
 	ReREFCNT_dec(new_re);
 	new_re = tmp;
     }
+
     if (re != new_re) {
 	ReREFCNT_dec(re);
 	PM_SETRE(pm, new_re);
     }
+
 
 #ifndef INCOMPLETE_TAINTS
     if (TAINTING_get && TAINT_get) {

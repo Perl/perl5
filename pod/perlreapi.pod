@@ -223,11 +223,13 @@ Perl's engine sets this flag on empty patterns, this optimization
 makes C<split //> much faster than it would otherwise be.  It's even
 faster than C<unpack>.
 
-=item RXf_MODIFIES_VARS
+=item RXf_NO_INPLACE_SUBST
 
 Added in perl 5.18.0, this flag indicates that a regular expression might
-assign to non-magical variables (such as $REGMARK and $REGERROR) during
-matching.  C<s///> will skip certain optimisations when this is set.
+perform an operation that would interfere with inplace substituion. For
+instance it might contain lookbehind, or assign to non-magical variables
+(such as $REGMARK and $REGERROR) during matching.  C<s///> will skip
+certain optimisations when this is set.
 
 =back
 

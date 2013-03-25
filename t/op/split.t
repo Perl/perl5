@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 115;
+plan tests => 118;
 
 $FS = ':';
 
@@ -418,16 +418,22 @@ is($cnt, scalar(@ary));
     is "@PATH", "Font GlyphNames", "hybrid scalar-and-array context";
 }
 
-# [perl #94490] constant folding should not invoke special split " "
-# behaviour.
-@_=split(0||" ","foo  bar");
-is @_, 3, 'split(0||" ") is not treated like split(" ")'; #'
-
 {
     my @results;
-    my $expr;
-    $expr = ' a b c ';
+    my $expr= "foo  bar";
+    my $cond;
 
+    @results= split(0||" ", $expr);
+    is @results, 2, 'split(0||" ") is treated like split(" ")'; #'
+
+    $cond= 0;
+    @results= split $cond ? " " : qr/ /, $expr;
+    is @results, 3, 'split($cond ? " " : qr/ /, $expr) works as expected (like qr/ /)';
+    $cond= 1;
+    @results= split $cond ? " " : qr/ /, $expr;
+    is @results, 2, 'split($cond ? " " : qr/ /, $expr) works as expected (like " ")';
+
+    $expr = ' a b c ';
     @results = split /\s/, $expr;
     is @results, 4,
         "split on regex of single space metacharacter: captured 4 elements";
@@ -452,10 +458,19 @@ is @_, 3, 'split(0||" ") is not treated like split(" ")'; #'
         "split on string of single whitespace: captured 3 elements";
     is $results[0], 'a',
         "split on string of single whitespace: first element is non-empty; multiple contiguous space characters";
+
+    my @seq;
+    for my $cond (0,1,0,1,0) {
+        $expr = "  foo  ";
+        @results = split $cond ? qr/ / : " ", $expr;
+        push @seq, scalar(@results) . ":" . $results[-1];
+    }
+    is join(" ", @seq), "1:foo 3:foo 1:foo 3:foo 1:foo",
+        qq{split(\$cond ? qr/ / : " ", "$exp") behaves as expected over repeated similar patterns};
 }
 
-TODO: {
-    local $::TODO = 'RT #116086: split "\x20" does not work as documented';
+{
+    # 'RT #116086: split "\x20" does not work as documented';
     my @results;
     my $expr;
     $expr = ' a b c ';
