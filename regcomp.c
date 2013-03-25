@@ -5358,10 +5358,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    }
 	}
 
-            /* process args, concat them if there are multiple ones,
-             * and find any code block indexes */
+        /* process args, concat them if there are multiple ones,
+         * and find any code block indexes */
 
-            if (pat_count > 1) {
+        if (pat_count > 1) {
 	    if (pRExC_state->num_code_blocks) {
 		o = cLISTOPx(expr)->op_first;
 		assert(   o->op_type == OP_PUSHMARK
@@ -5385,110 +5385,110 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    }
 	    if (utf8)
 		SvUTF8_on(pat);
+        }
+
+        for (svp = patternp; svp < patternp + pat_count; svp++) {
+            SV *sv, *msv = *svp;
+            SV *rx  = NULL;
+            bool code = 0;
+            /* we make the assumption here that each op in the list of
+             * op_siblings maps to one SV pushed onto the stack,
+             * except for code blocks, with have both an OP_NULL and
+             * and OP_CONST.
+             * This allows us to match up the list of SVs against the
+             * list of OPs to find the next code block.
+             *
+             * Note that       PUSHMARK PADSV PADSV ..
+             * is optimised to
+             *                 PADRANGE NULL  NULL  ..
+             * so the alignment still works. */
+            if (o) {
+                if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+                    assert(n < pRExC_state->num_code_blocks);
+                    pRExC_state->code_blocks[n].start = SvCUR(pat);
+                    pRExC_state->code_blocks[n].block = o;
+                    pRExC_state->code_blocks[n].src_regex = NULL;
+                    n++;
+                    code = 1;
+                    o = o->op_sibling; /* skip CONST */
+                    assert(o);
+                }
+                o = o->op_sibling;;
             }
 
-	    for (svp = patternp; svp < patternp + pat_count; svp++) {
-		SV *sv, *msv = *svp;
-		SV *rx  = NULL;
-		bool code = 0;
-                /* we make the assumption here that each op in the list of
-                 * op_siblings maps to one SV pushed onto the stack,
-                 * except for code blocks, with have both an OP_NULL and
-                 * and OP_CONST.
-                 * This allows us to match up the list of SVs against the
-                 * list of OPs to find the next code block.
-                 *
-                 * Note that       PUSHMARK PADSV PADSV ..
-                 * is optimised to
-                 *                 PADRANGE NULL  NULL  ..
-                 * so the alignment still works. */
-		if (o) {
-		    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
-			assert(n < pRExC_state->num_code_blocks);
-			pRExC_state->code_blocks[n].start = SvCUR(pat);
-			pRExC_state->code_blocks[n].block = o;
-			pRExC_state->code_blocks[n].src_regex = NULL;
-			n++;
-			code = 1;
-			o = o->op_sibling; /* skip CONST */
-			assert(o);
-		    }
-		    o = o->op_sibling;;
-		}
-
-                /* try concatenation overload ... */
-		if (pat && (SvAMAGIC(pat) || SvAMAGIC(msv)) &&
-			(sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
-		{
-		    sv_setsv(pat, sv);
-		    /* overloading involved: all bets are off over literal
-		     * code. Pretend we haven't seen it */
-		    pRExC_state->num_code_blocks -= n;
-		    n = 0;
-		}
-		else  {
-                    /* ... or failing that, try "" overload */
-                    while (SvAMAGIC(msv)
-                            && (sv = AMG_CALLunary(msv, string_amg))
-                            && sv != msv
-                            &&  !(   SvROK(msv)
-                                  && SvROK(sv)
-                                  && SvRV(msv) == SvRV(sv))
-                    ) {
-                        msv = sv;
-                        SvGETMAGIC(msv);
-                    }
-                    if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
-                        msv = SvRV(msv);
-                    if (pat) {
+            /* try concatenation overload ... */
+            if (pat && (SvAMAGIC(pat) || SvAMAGIC(msv)) &&
+                    (sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
+            {
+                sv_setsv(pat, sv);
+                /* overloading involved: all bets are off over literal
+                 * code. Pretend we haven't seen it */
+                pRExC_state->num_code_blocks -= n;
+                n = 0;
+            }
+            else  {
+                /* ... or failing that, try "" overload */
+                while (SvAMAGIC(msv)
+                        && (sv = AMG_CALLunary(msv, string_amg))
+                        && sv != msv
+                        &&  !(   SvROK(msv)
+                              && SvROK(sv)
+                              && SvRV(msv) == SvRV(sv))
+                ) {
+                    msv = sv;
+                    SvGETMAGIC(msv);
+                }
+                if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
+                    msv = SvRV(msv);
+                if (pat) {
                     orig_patlen = SvCUR(pat);
                     sv_catsv_nomg(pat, msv);
                     rx = msv;
-                    }
-                    else
-                        pat = msv;
-                    if (code)
-                        pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
                 }
+                else
+                    pat = msv;
+                if (code)
+                    pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
+            }
 
-		/* extract any code blocks within any embedded qr//'s */
-		if (rx && SvTYPE(rx) == SVt_REGEXP
-		    && RX_ENGINE((REGEXP*)rx)->op_comp)
-		{
+            /* extract any code blocks within any embedded qr//'s */
+            if (rx && SvTYPE(rx) == SVt_REGEXP
+                && RX_ENGINE((REGEXP*)rx)->op_comp)
+            {
 
-		    RXi_GET_DECL(ReANY((REGEXP *)rx), ri);
-		    if (ri->num_code_blocks) {
-			int i;
-			/* the presence of an embedded qr// with code means
-			 * we should always recompile: the text of the
-			 * qr// may not have changed, but it may be a
-			 * different closure than last time */
-			recompile = 1;
-			Renew(pRExC_state->code_blocks,
-			    pRExC_state->num_code_blocks + ri->num_code_blocks,
-			    struct reg_code_block);
-			pRExC_state->num_code_blocks += ri->num_code_blocks;
-			for (i=0; i < ri->num_code_blocks; i++) {
-			    struct reg_code_block *src, *dst;
-			    STRLEN offset =  orig_patlen
-				+ ReANY((REGEXP *)rx)->pre_prefix;
-			    assert(n < pRExC_state->num_code_blocks);
-			    src = &ri->code_blocks[i];
-			    dst = &pRExC_state->code_blocks[n];
-			    dst->start	    = src->start + offset;
-			    dst->end	    = src->end   + offset;
-			    dst->block	    = src->block;
-			    dst->src_regex  = (REGEXP*) SvREFCNT_inc( (SV*)
-						    src->src_regex
-							? src->src_regex
-							: (REGEXP*)rx);
-			    n++;
-			}
-		    }
-		}
-	    }
-            if (pat_count > 1)
-                SvSETMAGIC(pat);
+                RXi_GET_DECL(ReANY((REGEXP *)rx), ri);
+                if (ri->num_code_blocks) {
+                    int i;
+                    /* the presence of an embedded qr// with code means
+                     * we should always recompile: the text of the
+                     * qr// may not have changed, but it may be a
+                     * different closure than last time */
+                    recompile = 1;
+                    Renew(pRExC_state->code_blocks,
+                        pRExC_state->num_code_blocks + ri->num_code_blocks,
+                        struct reg_code_block);
+                    pRExC_state->num_code_blocks += ri->num_code_blocks;
+                    for (i=0; i < ri->num_code_blocks; i++) {
+                        struct reg_code_block *src, *dst;
+                        STRLEN offset =  orig_patlen
+                            + ReANY((REGEXP *)rx)->pre_prefix;
+                        assert(n < pRExC_state->num_code_blocks);
+                        src = &ri->code_blocks[i];
+                        dst = &pRExC_state->code_blocks[n];
+                        dst->start	    = src->start + offset;
+                        dst->end	    = src->end   + offset;
+                        dst->block	    = src->block;
+                        dst->src_regex  = (REGEXP*) SvREFCNT_inc( (SV*)
+                                                src->src_regex
+                                                    ? src->src_regex
+                                                    : (REGEXP*)rx);
+                        n++;
+                    }
+                }
+            }
+        }
+        if (pat_count > 1)
+            SvSETMAGIC(pat);
 
 	/* handle bare (possibly after overloading) regex: foo =~ $re */
 	{
