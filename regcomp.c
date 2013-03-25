@@ -5339,7 +5339,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SV **svp;
         OP *o = NULL;
         int n = 0;
-        bool utf8 = 0;
         STRLEN orig_patlen = 0;
 
 	/* apply magic and RE overloading to each arg */
@@ -5381,10 +5380,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	     * literal code block */
 	    for (svp = patternp; svp < patternp + pat_count; svp++) {
 		if (SvUTF8(*svp))
-		    utf8 = 1;
+                    SvUTF8_on(pat);
 	    }
-	    if (utf8)
-		SvUTF8_on(pat);
         }
 
         for (svp = patternp; svp < patternp + pat_count; svp++) {
