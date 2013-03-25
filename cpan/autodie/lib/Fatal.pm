@@ -859,6 +859,7 @@ sub _one_invocation {
 
     my $code = qq[
         no warnings qw(unopened uninitialized numeric);
+        no if \$\] >= 5.017011, warnings => "experimental::smartmatch";
 
         if (wantarray) {
             my \@results = $call(@argv);
