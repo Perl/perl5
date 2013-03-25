@@ -5711,6 +5711,9 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMPARE)
 		TOKEN(0);
 	    s += 2;
+            Perl_ck_warner_d(aTHX_
+                packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
+                "Smartmatch is experimental");
 	    Eop(OP_SMARTMATCH);
 	}
 	s++;
@@ -7935,6 +7938,9 @@ Perl_yylex(pTHX)
 
 	case KEY_given:
 	    pl_yylval.ival = CopLINE(PL_curcop);
+            Perl_ck_warner_d(aTHX_
+                packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
+                "given is experimental");
 	    OPERATOR(GIVEN);
 
 	case KEY_glob:
@@ -8791,6 +8797,9 @@ Perl_yylex(pTHX)
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_NONEXPR)
 		return REPORT(0);
 	    pl_yylval.ival = CopLINE(PL_curcop);
+            Perl_ck_warner_d(aTHX_
+                packWARN(WARN_EXPERIMENTAL__SMARTMATCH),
+                "when is experimental");
 	    OPERATOR(WHEN);
 
 	case KEY_while:

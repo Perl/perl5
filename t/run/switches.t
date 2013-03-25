@@ -404,12 +404,12 @@ is( $r, "Hello, world!\n", "-E say" );
 
 
 $r = runperl(
-    switches	=> [ '-E', '"undef ~~ undef and say q(Hello, world!)"']
+    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; undef ~~ undef and say q(Hello, world!)"']
 );
 is( $r, "Hello, world!\n", "-E ~~" );
 
 $r = runperl(
-    switches	=> [ '-E', '"given(undef) {when(undef) { say q(Hello, world!)"}}']
+    switches	=> [ '-E', '"no warnings q{experimental::smartmatch}; given(undef) {when(undef) { say q(Hello, world!)"}}']
 );
 is( $r, "Hello, world!\n", "-E given" );
 

@@ -168,7 +168,7 @@ Using an array as a reference is deprecated at - line 9.
 Using an array as a reference is deprecated at - line 10.
 ########
 # op.c
-use warnings 'void' ; close STDIN ;
+use warnings 'void' ; no warnings 'experimental::smartmatch'; close STDIN ;
 #line 2
 1 x 3 ;			# OP_REPEAT (folded)
 (1) x 3 ;		# OP_REPEAT

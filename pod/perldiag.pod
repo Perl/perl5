@@ -2074,6 +2074,13 @@ C<getpwnam> operator returned an invalid UIC.
 forget to check the return value of your socket() call?  See
 L<perlfunc/getsockopt>.
 
+=item given is experimental
+
+(S experimental::smartmatch) C<given> depends on both a lexical C<$_> and
+smartmatch, both of which are experimental, so its behavior may change or
+even be removed in any future release of perl.
+See the explanation under L<perlsyn/Experimental Details on given and when>.
+
 =item Global symbol "%s" requires explicit package name
 
 (F) You've said "use strict" or "use strict vars", which indicates 
@@ -4733,6 +4740,15 @@ a compilation error, but could not be found, so it was leaked instead.
 it can reliably handle and C<sleep> probably slept for less time than
 requested.
 
+=item Smartmatch is experimental
+
+(S experimental::smartmatch) This warning is emitted if you
+use the smartmatch (C<~~>) operator.  This is currently an experimental
+feature, and its details are subject to change in future releases of
+Perl.  Particularly, its current behavior is noticed for being
+unnecessarily complex and unintuitive, and is very likely to be
+overhauled.
+
 =item Smart matching a non-overloaded object breaks encapsulation
 
 (F) You should not use the C<~~> operator on an object that does not
@@ -6215,6 +6231,14 @@ but in actual fact, you got
     rand(+5);
 
 So put in parentheses to say what you really mean.
+
+=item when is experimental
+
+(S experimental::smartmatch) C<when> depends on smartmatch, which is
+experimental.  Additionally, it has several special cases that may
+not be immediately obvious, and their behavior may change or
+even be removed in any future release of perl.
+See the explanation under L<perlsyn/Experimental Details on given and when>.
 
 =item Wide character in %s
 

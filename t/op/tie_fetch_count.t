@@ -151,7 +151,10 @@ $dummy  = -e -e -e $var ; check_count '-e -e';
 $_ = "foo";
 $dummy  =  $var =~ m/ / ; check_count 'm//';
 $dummy  =  $var =~ s/ //; check_count 's///';
-$dummy  =  $var ~~    1 ; check_count '~~';
+{
+    no warnings 'experimental::smartmatch';
+    $dummy  =  $var ~~    1 ; check_count '~~';
+}
 $dummy  =  $var =~ y/ //; check_count 'y///';
            $var = \1;
 $dummy  =  $var =~y/ /-/; check_count '$ref =~ y///';

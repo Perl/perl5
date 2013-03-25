@@ -1957,7 +1957,7 @@ $v = 1 + prototype $fn;
 EXPECT
 Use of uninitialized value in addition (+) at - line 4.
 ########
-use warnings 'uninitialized';
+use warnings 'uninitialized'; no warnings 'experimental::smartmatch';
 my $v;
 my $fn = sub {};
 $v = 1 + (1 ~~ $fn);

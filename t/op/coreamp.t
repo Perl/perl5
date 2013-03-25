@@ -14,6 +14,8 @@ BEGIN {
     $^P |= 0x100;
 }
 
+no warnings 'experimental::smartmatch';
+
 sub lis($$;$) {
   &is(map(@$_ ? "[@{[map $_//'~~u~~', @$_]}]" : 'nought', @_[0,1]), $_[2]);
 }

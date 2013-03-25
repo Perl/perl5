@@ -2259,6 +2259,7 @@ end
 {
     # Taintedness of values returned from given()
     use feature 'switch';
+    no warnings 'experimental::smartmatch';
 
     my @descriptions = ('when', 'given end', 'default');
 
@@ -2294,8 +2295,11 @@ end
 
 # Tainted values with smartmatch
 # [perl #93590] S_do_smartmatch stealing its own string buffers
+{
+no warnings 'experimental::smartmatch';
 ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
 ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
+}
 
 # Tainted values and ref()
 for(1,2) {
