@@ -53,7 +53,7 @@ for my $f ( @programs ) {
   $f =~ s/\.\z// if $^O eq 'VMS';
   next if $f =~ $not_installed;
   my $bn = basename($f);
-  if(qr/\A(?i:$bn)\z/ ~~ %dist_dir_exe) {
+  if(grep { /\A(?i:$bn)\z/ } keys %dist_dir_exe) {
     ok( -f "$dist_dir_exe{lc $bn}$ext", "$f$ext");
   } else {
     ok( -f catfile('..', 'utils', "$bn$ext"), "$f$ext" );
