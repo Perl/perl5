@@ -33,4 +33,24 @@ no  warnings 'syntax';
     is $1, $TAG, "void context //g against overloaded object";
 }
 
+{
+    # an overloaded stringify returning itself shouldn't loop indefinitely
+
+
+    {
+	package Self;
+	use overload q{""} => sub {
+		    return shift;
+		},
+	    fallback => 1;
+    }
+
+    my $obj = bless [], 'Self';
+    my $r = qr/$obj/;
+    pass("self object, 1 arg");
+    $r = qr/foo$obj/;
+    pass("self object, 2 args");
+}
+
+
 done_testing();

@@ -5212,7 +5212,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 flags;
     I32 minlen = 0;
     U32 rx_flags;
-    SV *pat;
+    SV *pat = NULL;
     SV *code_blocksv = NULL;
 
     /* these are all flags - maybe they should be turned
@@ -5337,6 +5337,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	/* handle a list of SVs */
 
 	SV **svp;
+        OP *o = NULL;
+        int n = 0;
+        bool utf8 = 0;
+        STRLEN orig_patlen = 0;
 
 	/* apply magic and RE overloading to each arg */
 	for (svp = patternp; svp < patternp + pat_count; svp++) {
@@ -5354,14 +5358,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    }
 	}
 
-	if (pat_count > 1) {
-	    /* concat multiple args and find any code block indexes */
+            /* process args, concat them if there are multiple ones,
+             * and find any code block indexes */
 
-	    OP *o = NULL;
-	    int n = 0;
-	    bool utf8 = 0;
-            STRLEN orig_patlen = 0;
-
+            if (pat_count > 1) {
 	    if (pRExC_state->num_code_blocks) {
 		o = cLISTOPx(expr)->op_first;
 		assert(   o->op_type == OP_PUSHMARK
@@ -5385,10 +5385,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    }
 	    if (utf8)
 		SvUTF8_on(pat);
+            }
 
 	    for (svp = patternp; svp < patternp + pat_count; svp++) {
 		SV *sv, *msv = *svp;
-		SV *rx;
+		SV *rx  = NULL;
 		bool code = 0;
                 /* we make the assumption here that each op in the list of
                  * op_siblings maps to one SV pushed onto the stack,
@@ -5415,7 +5416,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    o = o->op_sibling;;
 		}
 
-		if ((SvAMAGIC(pat) || SvAMAGIC(msv)) &&
+                /* try concatenation overload ... */
+		if (pat && (SvAMAGIC(pat) || SvAMAGIC(msv)) &&
 			(sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
 		{
 		    sv_setsv(pat, sv);
@@ -5423,10 +5425,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		     * code. Pretend we haven't seen it */
 		    pRExC_state->num_code_blocks -= n;
 		    n = 0;
-                    rx = NULL;
-
 		}
 		else  {
+                    /* ... or failing that, try "" overload */
                     while (SvAMAGIC(msv)
                             && (sv = AMG_CALLunary(msv, string_amg))
                             && sv != msv
@@ -5439,9 +5440,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                     }
                     if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
                         msv = SvRV(msv);
+                    if (pat) {
                     orig_patlen = SvCUR(pat);
                     sv_catsv_nomg(pat, msv);
                     rx = msv;
+                    }
+                    else
+                        pat = msv;
                     if (code)
                         pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
                 }
@@ -5482,21 +5487,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    }
 		}
 	    }
-	    SvSETMAGIC(pat);
-	}
-	else {
-            SV *sv;
-	    pat = *patternp;
-            while (SvAMAGIC(pat)
-                    && (sv = AMG_CALLunary(pat, string_amg))
-                    && sv != pat)
-            {
-                pat = sv;
-                SvGETMAGIC(pat);
-            }
-        }
+            if (pat_count > 1)
+                SvSETMAGIC(pat);
 
-	/* handle bare regex: foo =~ $re */
+	/* handle bare (possibly after overloading) regex: foo =~ $re */
 	{
 	    SV *re = pat;
 	    if (SvROK(re))
