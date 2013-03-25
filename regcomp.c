@@ -6321,27 +6321,20 @@ reStudy:
     else
         RXp_PAREN_NAMES(r) = NULL;
 
-#ifdef STUPID_PATTERN_CHECKS            
-    if (RX_PRELEN(rx) == 0)
-        r->extflags |= RXf_NULL;
-    if (RX_PRELEN(rx) == 3 && memEQ("\\s+", RX_PRECOMP(rx), 3))
-        r->extflags |= RXf_WHITE;
-    else if (RX_PRELEN(rx) == 1 && RXp_PRECOMP(rx)[0] == '^')
-        r->extflags |= RXf_START_ONLY;
-#else
     {
         regnode *first = ri->program + 1;
         U8 fop = OP(first);
+        regnode *next = NEXTOPER(first);
+        U8 nop = OP(next);
 
-        if (PL_regkind[fop] == NOTHING && OP(NEXTOPER(first)) == END)
+
+        if (PL_regkind[fop] == NOTHING && nop == END)
             r->extflags |= RXf_NULL;
-        else if (PL_regkind[fop] == BOL && OP(NEXTOPER(first)) == END)
+        else if (PL_regkind[fop] == BOL && nop == END)
             r->extflags |= RXf_START_ONLY;
-        else if (fop == PLUS && PL_regkind[OP(NEXTOPER(first))] == POSIXD && FLAGS(NEXTOPER(first)) == _CC_SPACE
-			     && OP(regnext(first)) == END)
-            r->extflags |= RXf_WHITE;    
+        else if (fop == PLUS && PL_regkind[nop] == POSIXD && FLAGS(next) == _CC_SPACE && OP(regnext(first)) == END)
+            r->extflags |= RXf_WHITE;
     }
-#endif
 #ifdef DEBUGGING
     if (RExC_paren_names) {
         ri->name_list_idx = add_data( pRExC_state, 1, "a" );
