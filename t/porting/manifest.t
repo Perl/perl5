@@ -72,6 +72,7 @@ close $m or die $!;
 
 # Test that MANIFEST is properly sorted
 SKIP: {
+    skip("Sorting order is different under EBCDIC", 1) if $::IS_EBCDIC || $::IS_EBCDIC;
     skip("'Porting/manisort' not found", 1) if (! -f 'Porting/manisort');
 
     my $result = runperl('progfile' => 'Porting/manisort',

@@ -6,6 +6,11 @@ use Text::Tabs;
 use Text::Wrap;
 use Getopt::Long;
 
+if (ord("A") == 193) {
+    print "1..0 # EBCDIC sort order is different\n";
+    exit;
+}
+
 # Generate the sections of files listed in %Targets from pod/perl.pod
 # Mostly these are rules in Makefiles
 #
