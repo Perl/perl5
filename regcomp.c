@@ -1792,7 +1792,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		    if ( !UTF ) {
 			/* store first byte of utf8 representation of
 			   variant codepoints */
-			if (! NATIVE_IS_INVARIANT(uvc)) {
+			if (! UVCHR_IS_INVARIANT(uvc)) {
 			    TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
 			}
 		    }
@@ -4976,7 +4976,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     Newx(dst, *plen_p * 2 + 1, U8);
 
     while (s < *plen_p) {
-        if (NATIVE_IS_INVARIANT(src[s]))
+        if (NATIVE_BYTE_IS_INVARIANT(src[s]))
             dst[d]   = src[s];
         else {
             dst[d++] = UTF8_EIGHT_BIT_HI(src[s]);
@@ -11186,7 +11186,7 @@ tryagain:
                      * utf8.  If we start to fold non-UTF patterns, be sure to
                      * update join_exact() */
                     if (LOC && ender < 256) {
-                        if (NATIVE_IS_INVARIANT(ender)) {
+                        if (UVCHR_IS_INVARIANT(ender)) {
                             *s = (U8) ender;
                             foldlen = 1;
                         } else {

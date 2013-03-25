@@ -338,7 +338,12 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * UTF-8 encoded string) */
 #define UTF8_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_UTF8_TO_I8(c))
 
-#define NATIVE_IS_INVARIANT(c)		UNI_IS_INVARIANT(NATIVE_TO_LATIN1(c))
+/* Like the above, but its name implies a non-UTF8 input, and is implemented
+ * differently (for no particular reason) */
+#define NATIVE_BYTE_IS_INVARIANT(c)	UNI_IS_INVARIANT(NATIVE_TO_LATIN1(c))
+
+/* Like the above, but accepts any UV as input */
+#define UVCHR_IS_INVARIANT(uv)          UNI_IS_INVARIANT(NATIVE_TO_UNI(uv))
 
 #define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */
 

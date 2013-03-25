@@ -1693,7 +1693,7 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 
     assert(S_or_s == 'S' || S_or_s == 's');
 
-    if (NATIVE_IS_INVARIANT(converted)) { /* No difference between the two for
+    if (UVCHR_IS_INVARIANT(converted)) { /* No difference between the two for
 					     characters in this range */
 	*p = (U8) converted;
 	*lenp = 1;
@@ -1794,7 +1794,7 @@ S_to_lower_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp)
     U8 converted = toLOWER_LATIN1(c);
 
     if (p != NULL) {
-	if (NATIVE_IS_INVARIANT(converted)) {
+	if (NATIVE_BYTE_IS_INVARIANT(converted)) {
 	    *p = converted;
 	    *lenp = 1;
 	}
@@ -1864,7 +1864,7 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
 	converted = toLOWER_LATIN1(c);
     }
 
-    if (NATIVE_IS_INVARIANT(converted)) {
+    if (UVCHR_IS_INVARIANT(converted)) {
 	*p = (U8) converted;
 	*lenp = 1;
     }

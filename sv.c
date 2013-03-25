@@ -3316,7 +3316,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
 
 	while (t < e) {
 	    const U8 ch = *t++;
-	    if (NATIVE_IS_INVARIANT(ch)) continue;
+	    if (NATIVE_BYTE_IS_INVARIANT(ch)) continue;
 
 	    t--;    /* t already incremented; re-point to first variant */
 	    two_byte_count = 1;
@@ -3451,7 +3451,7 @@ must_be_utf8:
 
 		while (d < e) {
 		    const U8 chr = *d++;
-		    if (! NATIVE_IS_INVARIANT(chr)) two_byte_count++;
+		    if (! NATIVE_BYTE_IS_INVARIANT(chr)) two_byte_count++;
 		}
 
 		/* The string will expand by just the number of bytes that
@@ -3471,7 +3471,7 @@ must_be_utf8:
 
 		e--;
 		while (e >= t) {
-		    if (NATIVE_IS_INVARIANT(*e)) {
+		    if (NATIVE_BYTE_IS_INVARIANT(*e)) {
 			*d-- = *e;
 		    } else {
 			*d-- = UTF8_EIGHT_BIT_LO(*e);
@@ -10879,7 +10879,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		goto unknown;
 	    uv = (args) ? va_arg(*args, int) : SvIV(argsv);
 	    if ((uv > 255 ||
-		 (!NATIVE_IS_INVARIANT(uv) && SvUTF8(sv)))
+		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;

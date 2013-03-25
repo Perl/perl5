@@ -258,7 +258,7 @@ S_append_utf8_from_native_byte(const U8 byte, U8** dest)
 
     PERL_ARGS_ASSERT_APPEND_UTF8_FROM_NATIVE_BYTE;
 
-    if (NATIVE_IS_INVARIANT(byte))
+    if (NATIVE_BYTE_IS_INVARIANT(byte))
         *(*dest)++ = byte;
     else {
         *(*dest)++ = UTF8_EIGHT_BIT_HI(byte);

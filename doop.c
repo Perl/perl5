@@ -331,7 +331,7 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
-	    hibit = !NATIVE_IS_INVARIANT(ch);
+	    hibit = !NATIVE_BYTE_IS_INVARIANT(ch);
 	    if (hibit) {
 		s = bytes_to_utf8(s, &len);
 		break;
@@ -432,7 +432,7 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
-	    hibit = !NATIVE_IS_INVARIANT(ch);
+	    hibit = !NATIVE_BYTE_IS_INVARIANT(ch);
 	    if (hibit) {
 		start = s = bytes_to_utf8(s, &len);
 		break;
@@ -487,7 +487,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
-	    hibit = !NATIVE_IS_INVARIANT(ch);
+	    hibit = !NATIVE_BYTE_IS_INVARIANT(ch);
 	    if (hibit) {
 		s = bytes_to_utf8(s, &len);
 		break;

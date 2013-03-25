@@ -3463,7 +3463,7 @@ S_scan_const(pTHX_ char *start)
 		 * to recode the rest of the string into utf8 */
 		
 		/* Here uv is the ordinal of the next character being added */
-		if (!NATIVE_IS_INVARIANT(uv)) {
+		if (!UVCHR_IS_INVARIANT(uv)) {
 		    if (!has_utf8 && uv > 255) {
 			/* Might need to recode whatever we have accumulated so
 			 * far if it contains any chars variant in utf8 or
@@ -3797,7 +3797,7 @@ S_scan_const(pTHX_ char *start)
     default_action:
 	/* If we started with encoded form, or already know we want it,
 	   then encode the next character */
-	if (! NATIVE_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
+	if (! NATIVE_BYTE_IS_INVARIANT((U8)(*s)) && (this_utf8 || has_utf8)) {
 	    STRLEN len  = 1;
 
 
@@ -11886,7 +11886,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 	    /* Append native character for the rev point */
 	    tmpend = uvchr_to_utf8(tmpbuf, rev);
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-	    if (!NATIVE_IS_INVARIANT(rev))
+	    if (!UVCHR_IS_INVARIANT(rev))
 		 SvUTF8_on(sv);
 	    if (pos + 1 < e && *pos == '.' && isDIGIT(pos[1]))
 		 s = ++pos;

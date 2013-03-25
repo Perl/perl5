@@ -2003,7 +2003,7 @@ marked_upgrade(pTHX_ SV *sv, tempsym_t *sym_ptr) {
     from_start = SvPVX_const(sv);
     from_end = from_start + SvCUR(sv);
     for (from_ptr = from_start; from_ptr < from_end; from_ptr++)
-	if (!NATIVE_IS_INVARIANT(*from_ptr)) break;
+	if (!NATIVE_BYTE_IS_INVARIANT(*from_ptr)) break;
     if (from_ptr == from_end) {
 	/* Simple case: no character needs to be changed */
 	SvUTF8_on(sv);

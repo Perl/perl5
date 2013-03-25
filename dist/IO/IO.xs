@@ -337,7 +337,7 @@ ungetc(handle, c)
                 croak("Negative character number in ungetc()");
 
             v = SvUV(c);
-            if (NATIVE_IS_INVARIANT(v) || (v <= 0xFF && !PerlIO_isutf8(handle)))
+            if (UVCHR_IS_INVARIANT(v) || (v <= 0xFF && !PerlIO_isutf8(handle)))
                 RETVAL = PerlIO_ungetc(handle, (int)v);
             else {
                 U8 buf[UTF8_MAXBYTES + 1], *end;

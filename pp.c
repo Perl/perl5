@@ -4244,7 +4244,7 @@ PP(pp_fc)
                     for (; s < send; s++) {
                         STRLEN ulen;
                         UV fc = _to_uni_fold_flags(*s, tmpbuf, &ulen, flags);
-                        if NATIVE_IS_INVARIANT(fc) {
+                        if UVCHR_IS_INVARIANT(fc) {
                             if (full_folding
                                 && *s == LATIN_SMALL_LETTER_SHARP_S)
                             {
