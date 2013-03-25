@@ -308,6 +308,8 @@ perl_construct(pTHXx)
     HvSHAREKEYS_off(PL_strtab);			/* mandatory */
     hv_ksplit(PL_strtab, 512);
 
+    Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
+
 #if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
     _dyld_lookup_and_bind
 	("__environ", (unsigned long *) &environ_pointer, NULL);
@@ -1080,6 +1082,12 @@ perl_destruct(pTHXx)
 #ifdef HAVE_INTERP_INTERN
     sys_intern_clear();
 #endif
+
+    /* constant strings */
+    for (i = 0; i < SV_CONSTS_COUNT; i++) {
+        SvREFCNT_dec(PL_sv_consts[i]);
+        PL_sv_consts[i] = NULL;
+    }
 
     /* Destruct the global string table. */
     {

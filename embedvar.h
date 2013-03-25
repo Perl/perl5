@@ -301,6 +301,7 @@
 #define PL_subline		(vTHX->Isubline)
 #define PL_subname		(vTHX->Isubname)
 #define PL_sv_arenaroot		(vTHX->Isv_arenaroot)
+#define PL_sv_consts		(vTHX->Isv_consts)
 #define PL_sv_count		(vTHX->Isv_count)
 #define PL_sv_no		(vTHX->Isv_no)
 #define PL_sv_objcount		(vTHX->Isv_objcount)

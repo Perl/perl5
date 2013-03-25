@@ -13388,6 +13388,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     hv_ksplit(PL_strtab, HvTOTALKEYS(proto_perl->Istrtab));
     ptr_table_store(PL_ptr_table, proto_perl->Istrtab, PL_strtab);
 
+    Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
+
     /* This PV will be free'd special way so must set it same way op.c does */
     PL_compiling.cop_file    = savesharedpv(PL_compiling.cop_file);
     ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_file, PL_compiling.cop_file);
