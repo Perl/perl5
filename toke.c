@@ -9960,7 +9960,7 @@ S_scan_heredoc(pTHX_ char *s)
 	bufend = SvEND(linestr);
 	d = s;
 	while (s < bufend &&
-	  (*s != '\n' || memNE(s,PL_tokenbuf,len)) ) {
+          memNE(s,PL_tokenbuf,len) ) {
 	    if (*s++ == '\n')
 		++shared->herelines;
 	}
