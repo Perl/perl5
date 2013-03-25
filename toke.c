@@ -9959,12 +9959,12 @@ S_scan_heredoc(pTHX_ char *s)
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
-	while (s < bufend &&
+	while (s < bufend - len + 1 &&
           memNE(s,PL_tokenbuf,len) ) {
 	    if (*s++ == '\n')
 		++shared->herelines;
 	}
-	if (s >= bufend) {
+	if (s >= bufend - len + 1) {
 	    goto interminable;
 	}
 	sv_setpvn(tmpstr,d+1,s-d);
