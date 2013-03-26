@@ -169,7 +169,15 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Smartmatch is experimental|perldiag/"Smartmatch is experimental">
+
+=item *
+
+L<given is experimental|perldiag/"given is experimental">
+
+=item *
+
+L<when is experimental|perldiag/"when is experimental">
 
 =back
 
