@@ -95,7 +95,7 @@ C<no utf8;>.
 
 The following functions are defined in the C<utf8::> package by the
 Perl core.  You do not need to say C<use utf8> to use these and in fact
-you should not say that  unless you really want to have UTF-8 source code.
+you should not say that unless you really want to have UTF-8 source code.
 
 =over 4
 
