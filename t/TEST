@@ -665,7 +665,10 @@ EOT
 		}
 	    }
 	}
+	my  @junk = <$results>;  # dump remaining output to prevent SIGPIPE
+				 # (so far happens only on os390)
 	close $results;
+	undef @junk;
 
 	if (not defined $failure) {
 	    $failure = 'FAILED--no leader found' unless $seen_leader;
