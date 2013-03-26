@@ -680,6 +680,31 @@ See the L<top of this section|/Character classes> for an explanation of variants
 C<isXDIGIT_uni>, C<isXDIGIT_utf8>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>, and
 C<isXDIGIT_LC_utf8>.
 
+=for apidoc Am|bool|isIDFIRST|char ch
+Returns a boolean indicating whether the specified character can be the first
+character of an identifier.  This is very close to, but not quite the same as
+the official Unicode property C<XID_Start>.  The difference is that this
+returns true only if the input character also matches L</isWORDCHAR>.
+See the L<top of this section|/Character classes> for an explanation of variants
+C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uni>, C<isIDFIRST_utf8>,
+C<isIDFIRST_LC>, C<isIDFIRST_LC_uvchr>, and C<isIDFIRST_LC_utf8>.
+
+=for apidoc Am|bool|isIDCONT|char ch
+Returns a boolean indicating whether the specified character can be the
+second or succeeding character of an identifier.  This is very close to, but
+not quite the same as the official Unicode property C<XID_Continue>.  The
+difference is that this returns true only if the input character also matches
+L</isWORDCHAR>.  See the L<top of this section|/Character classes> for an
+explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uni>,
+C<isIDCONT_utf8>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
+C<isIDCONT_LC_utf8>.
+
+=for apidoc Am|bool|isVERTWS|char ch
+Returns a boolean indicating whether the specified character is considered
+to be vertical white space, such as C<"\n"> or C<"\f">.  See the L<top of this
+section|/Character classes> for an explanation of variants
+C<isVERTWS_uni>, and C<isVERTWS_utf8>.
+
 =head1 Miscellaneous Functions
 
 =for apidoc Am|U8|READ_XDIGIT|char str*
@@ -698,8 +723,7 @@ character set, if possible; otherwise returns the input character itself.
 
 =cut
 
-XXX Still undocumented are VERTSPACE, and IDFIRST IDCONT, and the
-other toUPPER etc functions
+XXX Still undocumented the other toUPPER etc functions
 
 Note that these macros are repeated in Devel::PPPort, so should also be
 patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
