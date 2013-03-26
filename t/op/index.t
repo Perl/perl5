@@ -93,8 +93,8 @@ is(rindex($a, "foo",    ), 0);
 {
     my $search;
     my $text;
-    $search = latin1_to_native("foo \xc9 bar");
-    $text = latin1_to_native("a\xa3\xa3a $search    $search quux");
+    $search = "foo " . latin1_to_native("\xc9") . " bar";
+    $text = "a" . latin1_to_native("\xa3\xa3") . "a $search    $search quux";
 
     my $text_utf8 = $text;
     utf8::upgrade($text_utf8);
@@ -130,13 +130,13 @@ is(rindex($a, "foo",    ), 0);
 }
 
 SKIP: {
-    skip "UTF-EBCDIC is limited to 0x7fffffff", 3 if ord("A") == 193;
+    skip "UTF-EBCDIC is limited to 0x7fffffff", 3 if $::IS_EBCDIC;
 
-    my $a = "\x{80000000}";
+    my $a = eval q{"\x{80000000}"};
     my $s = $a.'defxyz';
     is(index($s, 'def'), 1, "0x80000000 is a single character");
 
-    my $b = "\x{fffffffd}";
+    my $b = eval q{"\x{fffffffd}"};
     my $t = $b.'pqrxyz';
     is(index($t, 'pqr'), 1, "0xfffffffd is a single character");
 
