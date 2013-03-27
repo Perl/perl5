@@ -47,7 +47,12 @@ like (DPeek ($1), qr'^PVMG\("',			' $1');
   is (DPeek (sub {}),	'\CV(__ANON__)',	'sub {}');
 
 { our ($VAR, @VAR, %VAR);
+if ($^O eq 'vos') {
+  # VOS uses .pm as a required executable suffix
+  open VAR, "<", "$^X.pm" or die "Can't open $^X.pm: $!";
+} else {
   open VAR, "<", $^X or die "Can't open $^X: $!";
+}
   sub VAR {}
   format VAR =
 .
