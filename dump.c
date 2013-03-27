@@ -2095,25 +2095,22 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
       dumpregexp:
 	{
 	    struct regexp * const r = ReANY((REGEXP*)sv);
-            flags = r->compflags;
-            sv_setpv(d,"");
-            append_flags(d, flags, regexp_flags_names);
-            if (*(SvEND(d) - 1) == ',') {
-                SvCUR_set(d, SvCUR(d) - 1);
-                SvPVX(d)[SvCUR(d)] = '\0';
-            }
+#define SV_SET_STRINGIFY_REGEXP_FLAGS(d,flags) STMT_START { \
+            sv_setpv(d,"");                                 \
+            append_flags(d, flags, regexp_flags_names);     \
+            if (SvCUR(d) > 0 && *(SvEND(d) - 1) == ',') {       \
+                SvCUR_set(d, SvCUR(d) - 1);                 \
+                SvPVX(d)[SvCUR(d)] = '\0';                  \
+            }                                               \
+} STMT_END
+            SV_SET_STRINGIFY_REGEXP_FLAGS(d,r->compflags);
             Perl_dump_indent(aTHX_ level, file, "  COMPFLAGS = 0x%"UVxf" (%s)\n",
                                 (UV)(r->compflags), SvPVX_const(d));
 
-            flags = r->extflags;
-	    sv_setpv(d,"");
-	    append_flags(d, flags, regexp_flags_names);
-	    if (*(SvEND(d) - 1) == ',') {
-		SvCUR_set(d, SvCUR(d) - 1);
-		SvPVX(d)[SvCUR(d)] = '\0';
-	    }
+            SV_SET_STRINGIFY_REGEXP_FLAGS(d,r->extflags);
 	    Perl_dump_indent(aTHX_ level, file, "  EXTFLAGS = 0x%"UVxf" (%s)\n",
                                 (UV)(r->extflags), SvPVX_const(d));
+#undef SV_SET_STRINGIFY_REGEXP_FLAGS
 
 	    Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%"UVxf"\n",
 				(UV)(r->intflags));
