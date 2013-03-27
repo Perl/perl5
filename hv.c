@@ -1236,6 +1236,21 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
     }
 }
 
+/* IMO this should also handle cases where hv_max is smaller than hv_keys
+ * as tied hashes could play silly buggers and mess us around. We will
+ * do the right thing during hv_store() afterwards, but still - Yves */
+#define HV_SET_MAX_ADJUSTED_FOR_KEYS(hv,hv_max,hv_keys) STMT_START {\
+    /* Can we use fewer buckets? (hv_max is always 2^n-1) */        \
+    if (hv_max < PERL_HASH_DEFAULT_HvMAX) {                         \
+        hv_max = PERL_HASH_DEFAULT_HvMAX;                           \
+    } else {                                                        \
+        while (hv_max > PERL_HASH_DEFAULT_HvMAX && hv_max + 1 >= hv_keys * 2) \
+            hv_max = hv_max / 2;                                    \
+    }                                                               \
+    HvMAX(hv) = hv_max;                                             \
+} STMT_END
+
+
 HV *
 Perl_newHVhv(pTHX_ HV *ohv)
 {
@@ -1297,12 +1312,9 @@ Perl_newHVhv(pTHX_ HV *ohv)
 	HE *entry;
 	const I32 riter = HvRITER_get(ohv);
 	HE * const eiter = HvEITER_get(ohv);
-	STRLEN hv_fill = HvFILL(ohv);
+        STRLEN hv_keys = HvTOTALKEYS(ohv);
 
-	/* Can we use fewer buckets? (hv_max is always 2^n-1) */
-	while (hv_max && hv_max + 1 >= hv_fill * 2)
-	    hv_max = hv_max / 2;
-	HvMAX(hv) = hv_max;
+        HV_SET_MAX_ADJUSTED_FOR_KEYS(hv,hv_max,hv_keys);
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
@@ -1341,7 +1353,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 
     if (ohv) {
 	STRLEN hv_max = HvMAX(ohv);
-	STRLEN hv_fill = HvFILL(ohv);
+        STRLEN hv_keys = HvTOTALKEYS(ohv);
 	HE *entry;
 	const I32 riter = HvRITER_get(ohv);
 	HE * const eiter = HvEITER_get(ohv);
@@ -1349,9 +1361,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	ENTER;
 	SAVEFREESV(hv);
 
-	while (hv_max && hv_max + 1 >= hv_fill * 2)
-	    hv_max = hv_max / 2;
-	HvMAX(hv) = hv_max;
+        HV_SET_MAX_ADJUSTED_FOR_KEYS(hv,hv_max,hv_keys);
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
@@ -1377,6 +1387,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
     hv_magic(hv, NULL, PERL_MAGIC_hints);
     return hv;
 }
+#undef HV_SET_MAX_ADJUSTED_FOR_KEYS
 
 /* like hv_free_ent, but returns the SV rather than freeing it */
 STATIC SV*
@@ -1760,7 +1771,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     }
     if (!SvOOK(hv)) {
 	Safefree(HvARRAY(hv));
-	xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
+        xhv->xhv_max = PERL_HASH_DEFAULT_HvMAX;        /* HvMAX(hv) = 7 (it's a normal hash) */
 	HvARRAY(hv) = 0;
     }
     /* if we're freeing the HV, the SvMAGIC field has been reused for

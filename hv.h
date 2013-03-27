@@ -208,6 +208,8 @@ C<SV*>.
 =cut
 */
 
+#define PERL_HASH_DEFAULT_HvMAX 7
+
 /* these hash entry flags ride on hent_klen (for use only in magic/tied HVs) */
 #define HEf_SVKEY	-2	/* hent_key is an SV* */
 
