@@ -342,7 +342,11 @@ EOF
     if ($Is_MSWin32 || $Is_os2) {
 	is uc $_, uc $s1;
     } else {
-	is $_, $s1;
+  SKIP:
+     {
+	  skip "# TODO: Hit bug posix-2058; exec does not setup argv[0] correctly." if ($^O eq "vos");
+	  is $_, $s1;
+     }
     }
     $_ = `$perl $script`;
     s/\.exe//i if $Is_Dos or $Is_os2 or $Is_Cygwin;
