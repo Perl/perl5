@@ -134,22 +134,6 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 }
 #endif
 
-/* ------------------------------- handy.h ------------------------------- */
-
-/* saves machine code for a common noreturn idiom typically used in Newx*() */
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
-#endif
-static void
-S_croak_memory_wrap(void)
-{
-    Perl_croak_nocontext("%s",PL_memory_wrap);
-}
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
-
 /* ------------------------------- utf8.h ------------------------------- */
 
 /* These exist only to replace the macros they formerly were so that their use
