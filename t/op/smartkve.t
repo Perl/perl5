@@ -162,7 +162,7 @@ ok(!defined $empty->{hash}      ,   'Vivify: $empty->{hash} is undef');
 # Keys -- lvalue
 $_{foo} = "bar";
 keys \%_ = 65;
-is scalar %_, '1/128', 'keys $hashref as lvalue';
+is Hash::Util::old_scalar(%_), '1/128', 'keys $hashref as lvalue';
 eval 'keys \@_ = 65';
 like $@, qr/Can't modify keys on reference in scalar assignment/,
   'keys $arrayref as lvalue dies';

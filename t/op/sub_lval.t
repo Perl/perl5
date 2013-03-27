@@ -512,7 +512,7 @@ is("@p", "1 8");
 sub keeze : lvalue { keys %__ }
 %__ = ("a","b");
 keeze = 64;
-is scalar %__, '1/64', 'keys assignment through lvalue sub';
+is Hash::Util::HvMAX(%__), 63, 'keys assignment through lvalue sub';
 
 # Bug 20001223.002: split thought that the list had only one element
 @ary = qw(4 5 6);

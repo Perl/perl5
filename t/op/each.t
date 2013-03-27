@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-
+BEGIN { *old_scalar = \&Hash::Util::old_scalar; }
 plan tests => 59;
 
 $h{'abc'} = 'ABC';
@@ -60,19 +60,19 @@ is ($i, 30, "each count");
 @keys = ('blurfl', keys(%h), 'dyick');
 is ($#keys, 31, "added a key");
 
-$size = ((split('/',scalar %h))[1]);
+$size = ((split('/',old_scalar %h))[1]);
 keys %h = $size * 5;
-$newsize = ((split('/',scalar %h))[1]);
+$newsize = ((split('/',old_scalar %h))[1]);
 is ($newsize, $size * 8, "resize");
 keys %h = 1;
-$size = ((split('/',scalar %h))[1]);
+$size = ((split('/',old_scalar %h))[1]);
 is ($size, $newsize, "same size");
 %h = (1,1);
-$size = ((split('/',scalar %h))[1]);
+$size = ((split('/',old_scalar %h))[1]);
 is ($size, $newsize, "still same size");
 undef %h;
 %h = (1,1);
-$size = ((split('/',scalar %h))[1]);
+$size = ((split('/',old_scalar %h))[1]);
 is ($size, 8, "size 8");
 
 # test scalar each
@@ -98,11 +98,11 @@ $total = 0;
 $total += $key while $key = each %hash;
 is ($total, 100, "test values keys resets iterator");
 
-$size = (split('/', scalar %hash))[1];
+$size = (split('/', old_scalar %hash))[1];
 keys(%hash) = $size / 2;
-is ($size, (split('/', scalar %hash))[1]);
+is ($size, (split('/', old_scalar %hash))[1]);
 keys(%hash) = $size + 100;
-isnt ($size, (split('/', scalar %hash))[1]);
+isnt ($size, (split('/', old_scalar %hash))[1]);
 
 is (keys(%hash), 10, "keys (%hash)");
 
@@ -215,8 +215,8 @@ for my $k (qw(each keys values)) {
     isnt($v1,$v2,"if(%foo) didnt mess with each (value)");
     is($rest,3,"Got the expect number of keys");
     my $hsv=1 && %foo;
-    like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
-    my @arr=%foo&&%foo;
+    is($hsv,$count,"Got number of keys from %foo in scalar assignment context");
+    my @arr= %foo && %foo;
     is(@arr,10,"Got expected number of elements in list context");
 }    
 {
@@ -234,7 +234,7 @@ for my $k (qw(each keys values)) {
     isnt($v1,$v2,"if(%foo) didnt mess with each (value)");
     is($rest,3,"Got the expect number of keys");
     my $hsv=1 && %foo;
-    like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+    is($hsv,$count,"Got number of keys from %foo in scalar assignment context");
     my @arr=%foo&&%foo;
     is(@arr,10,"Got expected number of elements in list context");
 }    

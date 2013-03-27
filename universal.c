@@ -1313,6 +1313,60 @@ XS(XS_re_regexp_pattern)
     /* NOT-REACHED */
 }
 
+XS(XS_Hash_Util_HvMAX)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1 || !SvROK(ST(0))) {
+        croak_xs_usage(cv, "hv");
+    } else {
+        HV * const hv = (HV*)SvRV(ST(0));
+        MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_tied);
+        if (mg)
+            XSRETURN_UNDEF;
+
+        XSRETURN_UV(HvMAX(hv));
+    }
+}
+
+XS(XS_Hash_Util_HvFILL)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1 || !SvROK(ST(0))) {
+        croak_xs_usage(cv, "hv");
+    } else {
+        HV * const hv = (HV*)SvRV(ST(0));
+        MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_tied);
+        if (mg)
+            XSRETURN_UNDEF;
+
+        XSRETURN_UV(HvFILL(hv));
+    }
+
+}
+
+XS(XS_Hash_Util_old_scalar)
+{
+    dVAR;
+    dXSARGS;
+    if (items != 1 || !SvROK(ST(0))) {
+        croak_xs_usage(cv, "hv");
+    } else {
+        HV * const hv = (HV*)SvRV(ST(0));
+        MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_tied);
+        if (mg)
+            return magic_scalarpack(hv, mg);
+        ST(0) = sv_newmortal();
+        if (HvTOTALKEYS((const HV *)hv))
+            Perl_sv_setpvf(aTHX_ ST(0), "%ld/%ld", (long)HvFILL(hv), (long)HvMAX(hv) + 1);
+        else
+            sv_setiv(ST(0), 0);
+
+        XSRETURN(1);
+    }
+}
+
 struct xsub_details {
     const char *name;
     XSUBADDR_t xsub;
@@ -1369,6 +1423,9 @@ const struct xsub_details details[] = {
     {"re::regnames", XS_re_regnames, ";$"},
     {"re::regnames_count", XS_re_regnames_count, ""},
     {"re::regexp_pattern", XS_re_regexp_pattern, "$"},
+    {"Hash::Util::HvFILL", XS_Hash_Util_HvFILL, "\\%"},
+    {"Hash::Util::HvMAX", XS_Hash_Util_HvMAX, "\\%"},
+    {"Hash::Util::old_scalar", XS_Hash_Util_old_scalar, "\\%"}
 };
 
 void

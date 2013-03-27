@@ -98,7 +98,7 @@ use Scalar::Util qw( weaken);
 
     $x = %h;
     is( $counter, 1, "hash in scalar context doesn't trigger");
-    like( $x, qr!^\d+/\d+$!, "correct result");
+    is( $x, 1, "correct result");
 
     (@x) = %h;
     is( $counter, 1, "hash in list context doesn't trigger");

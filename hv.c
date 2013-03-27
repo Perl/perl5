@@ -892,11 +892,7 @@ Perl_hv_scalar(pTHX_ HV *hv)
     }
 
     sv = sv_newmortal();
-    if (HvTOTALKEYS((const HV *)hv)) 
-        Perl_sv_setpvf(aTHX_ sv, "%ld/%ld",
-                (long)HvFILL(hv), (long)HvMAX(hv) + 1);
-    else
-        sv_setiv(sv, 0);
+    sv_setiv(sv, (IV)HvTOTALKEYS((const HV*)hv));
     
     return sv;
 }
