@@ -249,6 +249,10 @@ sub check_utime_result {
 	skip "filesystem atime/mtime granularity too low", 2
 	    unless $accurate_timestamps;
 
+     if ($^O eq 'vos') {
+	    skip ("# TODO - hit VOS bug posix-2055 - access time does not follow POSIX rules for an open file.", 2);
+     }
+
 	print "# atime - $atime  mtime - $mtime  delta - $delta\n";
 	if($atime == 500000000 && $mtime == 500000000 + $delta) {
 	    pass('atime');
@@ -370,11 +374,6 @@ SKIP: {
 	close (FH); open (FH, ">>$tmpfile") or die "Can't reopen $tmpfile";
     }
 
-    SKIP: {
-        if ($^O eq 'vos') {
-	    skip ("# TODO - hit VOS bug posix-973 - cannot resize an open file below the current file pos.", 6);
-	}
-
 	is(-s $tmpfile, 200, "fh resize to 200 working (filename check)");
 
 	ok(truncate(FH, 0), "fh resize to zero");
@@ -415,7 +414,6 @@ SKIP: {
 	eval "truncate $n, 0; 1" or die;
 	ok !-z $n, 'truncate(word) does not fall back to file name';
 	unlink $n;
-    }
 }
 
 # check if rename() can be used to just change case of filename
