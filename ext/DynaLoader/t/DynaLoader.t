@@ -112,7 +112,7 @@ SKIP: {
     # (not at least by that name) that the dl_findfile()
     # could find.
     skip "dl_findfile test not appropriate on $^O", 1
-	if $^O =~ /(win32|vms|openbsd|cygwin)/i;
+	if $^O =~ /(win32|vms|openbsd|cygwin|vos)/i;
     # Play safe and only try this test if this system
     # looks pretty much Unix-like.
     skip "dl_findfile test not appropriate on $^O", 1
