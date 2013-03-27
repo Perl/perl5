@@ -2,7 +2,13 @@ use strict;
 use warnings;
 use Encode ();
 
-use Test::More tests => 77;
+use Test::More;
+if (ord("A") != 65) {
+    plan skip_all => "Painful to port to non-ASCII";
+}
+else {
+    plan tests => 77;
+}
 
 use XS::APItest qw( fetch_pad_names pad_scalar );
 
