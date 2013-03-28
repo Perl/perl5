@@ -5214,6 +5214,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     U32 rx_flags;
     SV *pat = NULL;
     SV *code_blocksv = NULL;
+    SV** new_patternp = patternp;
 
     /* these are all flags - maybe they should be turned
      * into a single int with different bit masks */
@@ -5221,7 +5222,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 sawplus = 0;
     I32 sawopen = 0;
     regex_charset initial_charset = get_regex_charset(orig_rx_flags);
-    bool code_is_utf8 = 0;
     bool recompile = 0;
     bool runtime_code = 0;
     scan_data_t data;
@@ -5308,33 +5308,56 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (expr && (expr->op_type == OP_LIST ||
 		(expr->op_type == OP_NULL && expr->op_targ == OP_LIST))) {
-
-	/* is the source UTF8, and how many code blocks are there? */
+	/* allocate code_blocks if needed */
 	OP *o;
 	int ncode = 0;
 
-	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
-	    if (o->op_type == OP_CONST) {
-                /* skip if we have SVs as well as OPs. In this case,
-                 * a) we decide utf8 based on SVs not OPs;
-                 * b) the current pad may not match that which the ops
-                 *    were compiled in, so, so on threaded builds,
-                 *    cSVOPo_sv would look in the wrong pad */
-                if (!pat_count && SvUTF8(cSVOPo_sv))
-                    code_is_utf8 = 1;
-            }
-	    else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
-		/* count of DO blocks */
-		ncode++;
-	}
+	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling)
+	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
+		ncode++; /* count of DO blocks */
 	if (ncode) {
 	    pRExC_state->num_code_blocks = ncode;
 	    Newx(pRExC_state->code_blocks, ncode, struct reg_code_block);
 	}
     }
 
-    if (pat_count) {
-	/* handle a list of SVs */
+    if (!pat_count) {
+        /* compile-time pattern with just OP_CONSTs and DO blocks */
+
+        int n;
+        OP *o;
+
+        /* find how many CONSTs there are */
+        assert(expr);
+        n = 0;
+        if (expr->op_type == OP_CONST)
+            n = 1;
+        else
+            for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+                if (o->op_type == OP_CONST)
+                    n++;
+            }
+
+        /* fake up an SV array */
+
+        assert(!new_patternp);
+        Newx(new_patternp, n, SV*);
+        SAVEFREEPV(new_patternp);
+        pat_count = n;
+
+        n = 0;
+        if (expr->op_type == OP_CONST)
+            new_patternp[n] = cSVOPx_sv(expr);
+        else
+            for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+                if (o->op_type == OP_CONST)
+                    new_patternp[n++] = cSVOPo_sv;
+            }
+
+    }
+
+    {
+	/* concat args, handling magic, overloading etc */
 
 	SV **svp;
         OP *o = NULL;
@@ -5342,7 +5365,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         STRLEN orig_patlen = 0;
 
 	/* apply magic and RE overloading to each arg */
-	for (svp = patternp; svp < patternp + pat_count; svp++) {
+	for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
 	    SV *rx = *svp;
 	    SvGETMAGIC(rx);
 	    if (SvROK(rx) && SvAMAGIC(rx)) {
@@ -5357,17 +5380,19 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    }
 	}
 
-        /* process args, concat them if there are multiple ones,
-         * and find any code block indexes */
-
-        if (pat_count > 1) {
-	    if (pRExC_state->num_code_blocks) {
-		o = cLISTOPx(expr)->op_first;
-		assert(   o->op_type == OP_PUSHMARK
+        if (pRExC_state->num_code_blocks) {
+            if (expr->op_type == OP_CONST)
+                o = expr;
+            else {
+                o = cLISTOPx(expr)->op_first;
+                assert(   o->op_type == OP_PUSHMARK
                        || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)
                        || o->op_type == OP_PADRANGE);
-		o = o->op_sibling;
-	    }
+                o = o->op_sibling;
+            }
+        }
+
+        if (pat_count > 1) {
 
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
@@ -5378,13 +5403,17 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	     * overloading but not concat overloading; but the main effect
 	     * in this obscure case is to need a 'use re eval' for a
 	     * literal code block */
-	    for (svp = patternp; svp < patternp + pat_count; svp++) {
+	    for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
 		if (SvUTF8(*svp))
                     SvUTF8_on(pat);
 	    }
         }
 
-        for (svp = patternp; svp < patternp + pat_count; svp++) {
+        /* process args, concat them if there are multiple ones,
+         * and find any code block indexes */
+
+
+        for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
             SV *sv, *msv = *svp;
             SV *rx  = NULL;
             bool code = 0;
@@ -5402,7 +5431,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (o) {
                 if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
                     assert(n < pRExC_state->num_code_blocks);
-                    pRExC_state->code_blocks[n].start = SvCUR(pat);
+                    pRExC_state->code_blocks[n].start = pat ? SvCUR(pat) : 0;
                     pRExC_state->code_blocks[n].block = o;
                     pRExC_state->code_blocks[n].src_regex = NULL;
                     n++;
@@ -5500,61 +5529,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		return (REGEXP*)re;
 	    }
 	}
-    }
-    else {
-	/* not a list of SVs, so must be a list of OPs */
-        int i = -1;
-        bool is_code = 0;
-        OP *o;
-        OP *ofirst, *olast;
-
-        assert(expr);
-
-        if (expr->op_type == OP_LIST) {
-            ofirst = cLISTOPx(expr)->op_first;
-            olast = cLISTOPx(expr)->op_last;
-            pat = newSVpvn("", 0);
-            SAVEFREESV(pat);
-            if (code_is_utf8)
-                SvUTF8_on(pat);
-        }
-        else {
-            assert(expr->op_type == OP_CONST);
-            ofirst = olast = expr;
-            pat = NULL;
-        }
-
-        /* given a list of CONSTs and DO blocks in expr, append all
-         * the CONSTs to pat, and record the start and end of each
-         * code block in code_blocks[] (each DO{} op is followed by an
-         * OP_CONST containing the corresponding literal '(?{...})
-         * text)
-         */
-        o = ofirst;
-        while (1) {
-            if (o->op_type == OP_CONST) {
-                if (pat) {
-                    sv_catsv(pat, cSVOPo_sv);
-                    if (is_code) {
-                        pRExC_state->code_blocks[i].end = SvCUR(pat)-1;
-                        is_code = 0;
-                    }
-                }
-                else {
-                    pat = cSVOPx_sv(expr);
-                }
-            }
-            else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
-                assert(i+1 < pRExC_state->num_code_blocks);
-                pRExC_state->code_blocks[++i].start = SvCUR(pat);
-                pRExC_state->code_blocks[i].block = o;
-                pRExC_state->code_blocks[i].src_regex = NULL;
-                is_code = 1;
-            }
-            if (o == olast)
-                break;
-            o = o->op_sibling;
-        }
     }
 
     exp = SvPV_nomg(pat, plen);
