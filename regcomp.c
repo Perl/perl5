@@ -5338,8 +5338,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	SV **svp;
 
-        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-            "Compiling List of SVs %d elements%s\n",pat_count, orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 	/* apply magic and RE overloading to each arg */
 	for (svp = patternp; svp < patternp + pat_count; svp++) {
 	    SV *rx = *svp;
@@ -5508,9 +5506,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    *is_bare_re = TRUE;
 		SvREFCNT_inc(re);
 		Safefree(pRExC_state->code_blocks);
-                DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-                    "Precompiled pattern%s\n", orig_rx_flags & RXf_SPLIT ? " for split" : ""));
-
 		return (REGEXP*)re;
 	    }
 	}
@@ -5522,9 +5517,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	    int i = -1;
 	    bool is_code = 0;
 	    OP *o;
-
-            DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-                "Compiling OP_LIST%s\n", orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
@@ -5556,8 +5548,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	}
 	else {
 	    assert(expr->op_type == OP_CONST);
-            DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-                "Compiling OP_CONST%s\n", orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 	    pat = cSVOPx_sv(expr);
 	}
     }
