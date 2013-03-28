@@ -755,7 +755,8 @@ if ($define{'USE_PERLIO'}) {
 	    # within the block, as the *first* definition may have flags which
 	    # mean "don't export"
 	    next if $seen{$func}++;
-	    $func = "Perl_$func" if $flags =~ /[pbX]/;
+	    # Should we also skip adding the Perl_ prefix if $flags =~ /o/ ?
+	    $func = "Perl_$func" if ($flags =~ /[pbX]/ && $func !~ /^Perl_/); 
 	    ++$export{$func} unless exists $skip{$func};
 	}
     }
