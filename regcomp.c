@@ -5503,58 +5503,58 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     else {
 	/* not a list of SVs, so must be a list of OPs */
-	    int i = -1;
-	    bool is_code = 0;
-	    OP *o;
-            OP *ofirst, *olast;
+        int i = -1;
+        bool is_code = 0;
+        OP *o;
+        OP *ofirst, *olast;
 
-            assert(expr);
+        assert(expr);
 
-            if (expr->op_type == OP_LIST) {
-                ofirst = cLISTOPx(expr)->op_first;
-                olast = cLISTOPx(expr)->op_last;
-                pat = newSVpvn("", 0);
-                SAVEFREESV(pat);
-                if (code_is_utf8)
-                    SvUTF8_on(pat);
-            }
-            else {
-                assert(expr->op_type == OP_CONST);
-                ofirst = olast = expr;
-                pat = NULL;
-            }
+        if (expr->op_type == OP_LIST) {
+            ofirst = cLISTOPx(expr)->op_first;
+            olast = cLISTOPx(expr)->op_last;
+            pat = newSVpvn("", 0);
+            SAVEFREESV(pat);
+            if (code_is_utf8)
+                SvUTF8_on(pat);
+        }
+        else {
+            assert(expr->op_type == OP_CONST);
+            ofirst = olast = expr;
+            pat = NULL;
+        }
 
-	    /* given a list of CONSTs and DO blocks in expr, append all
-	     * the CONSTs to pat, and record the start and end of each
-	     * code block in code_blocks[] (each DO{} op is followed by an
-	     * OP_CONST containing the corresponding literal '(?{...})
-	     * text)
-	     */
-            o = ofirst;
-            while (1) {
-		if (o->op_type == OP_CONST) {
-                    if (pat) {
-                        sv_catsv(pat, cSVOPo_sv);
-                        if (is_code) {
-                            pRExC_state->code_blocks[i].end = SvCUR(pat)-1;
-                            is_code = 0;
-                        }
+        /* given a list of CONSTs and DO blocks in expr, append all
+         * the CONSTs to pat, and record the start and end of each
+         * code block in code_blocks[] (each DO{} op is followed by an
+         * OP_CONST containing the corresponding literal '(?{...})
+         * text)
+         */
+        o = ofirst;
+        while (1) {
+            if (o->op_type == OP_CONST) {
+                if (pat) {
+                    sv_catsv(pat, cSVOPo_sv);
+                    if (is_code) {
+                        pRExC_state->code_blocks[i].end = SvCUR(pat)-1;
+                        is_code = 0;
                     }
-                    else {
-                        pat = cSVOPx_sv(expr);
-                    }
-		}
-		else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
-		    assert(i+1 < pRExC_state->num_code_blocks);
-		    pRExC_state->code_blocks[++i].start = SvCUR(pat);
-		    pRExC_state->code_blocks[i].block = o;
-		    pRExC_state->code_blocks[i].src_regex = NULL;
-		    is_code = 1;
-		}
-                if (o == olast)
-                    break;
-                o = o->op_sibling;
-	    }
+                }
+                else {
+                    pat = cSVOPx_sv(expr);
+                }
+            }
+            else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+                assert(i+1 < pRExC_state->num_code_blocks);
+                pRExC_state->code_blocks[++i].start = SvCUR(pat);
+                pRExC_state->code_blocks[i].block = o;
+                pRExC_state->code_blocks[i].src_regex = NULL;
+                is_code = 1;
+            }
+            if (o == olast)
+                break;
+            o = o->op_sibling;
+        }
     }
 
     exp = SvPV_nomg(pat, plen);
