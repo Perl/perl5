@@ -6842,7 +6842,10 @@ instead treated as if it were C</\s+/>; in particular, this means that
 I<any> contiguous whitespace (not just a single space character) is used as
 a separator.  However, this special treatment can be avoided by specifying
 the pattern S<C</ />> instead of the string S<C<" ">>, thereby allowing
-only a single space character to be a separator.
+only a single space character to be a separator. In earlier Perl's this
+special case was restricted to the use of a plain S<C<" ">> as the
+pattern argument to split, in Perl 5.18.0 and later this special case is
+triggered by any expression which evaluates as the simple string S<C<" ">>.
 
 If omitted, PATTERN defaults to a single space, S<C<" ">>, triggering
 the previously described I<awk> emulation.
