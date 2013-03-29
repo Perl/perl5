@@ -699,12 +699,6 @@ explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uni>,
 C<isIDCONT_utf8>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
 C<isIDCONT_LC_utf8>.
 
-=for apidoc Am|bool|isVERTWS|char ch
-Returns a boolean indicating whether the specified character is considered
-to be vertical white space, such as C<"\n"> or C<"\f">.  See the L<top of this
-section|/Character classes> for an explanation of variants
-C<isVERTWS_uni>, and C<isVERTWS_utf8>.
-
 =head1 Miscellaneous Functions
 
 =for apidoc Am|U8|READ_XDIGIT|char str*
