@@ -3118,8 +3118,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 /* Note:
  * Returns the value of property/mapping C<swash> for the first character
  * of the string C<ptr>. If C<do_utf8> is true, the string C<ptr> is
- * assumed to be in utf8. If C<do_utf8> is false, the string C<ptr> is
- * assumed to be in native 8-bit encoding. Caches the swatch in C<swash>.
+ * assumed to be in well-formed utf8. If C<do_utf8> is false, the string C<ptr>
+ * is assumed to be in native 8-bit encoding. Caches the swatch in C<swash>.
  *
  * A "swash" is a hash which contains initially the keys/values set up by
  * SWASHNEW.  The purpose is to be able to completely represent a Unicode
@@ -3224,9 +3224,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	/* If not cached, generate it via swatch_get */
 	if (!svp || !SvPOK(*svp)
 		 || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
-	    const UV code_point = utf8n_to_uvchr(ptr, UTF8_MAXBYTES, 0,
-					   ckWARN(WARN_UTF8) ?
-					   0 : UTF8_ALLOW_ANY);
+            const UV code_point = valid_utf8_to_uvchr(ptr, NULL);
 	    swatch = swatch_get(swash,
 		    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
 				(klen) ? (code_point & ~((UV)needents - 1)) : 0,
