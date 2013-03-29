@@ -3161,8 +3161,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     const U8 *tmps = NULL;
     U32 bit;
     SV *swatch;
-    U8 tmputf8[2];
-    const UV c = *ptr;
+    const U8 c = *ptr;
 
     PERL_ARGS_ASSERT_SWASH_FETCH;
 
@@ -3175,28 +3174,58 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
                                      : c);
     }
 
-    /* Convert to utf8 if not already */
-    if (!do_utf8 && !NATIVE_IS_INVARIANT(c)) {
-	tmputf8[0] = (U8)UTF8_EIGHT_BIT_HI(c);
-	tmputf8[1] = (U8)UTF8_EIGHT_BIT_LO(c);
-	ptr = tmputf8;
+    /* We store the values in a "swatch" which is a vec() value in a swash
+     * hash.  Code points 0-255 are a single vec() stored with key length
+     * (klen) 0.  All other code points have a UTF-8 representation
+     * 0xAA..0xYY,0xZZ.  A vec() is constructed containing all of them which
+     * share 0xAA..0xYY, which is the key in the hash to that vec.  So the key
+     * length for them is the length of the encoded char - 1.  ptr[klen] is the
+     * final byte in the sequence representing the character */
+    if (!do_utf8 || UTF8_IS_INVARIANT(c)) {
+        klen = 0;
+	needents = 256;
+        off = c;
     }
-    /* Given a UTF-X encoded char 0xAA..0xYY,0xZZ
-     * then the "swatch" is a vec() for all the chars which start
-     * with 0xAA..0xYY
-     * So the key in the hash (klen) is length of encoded char -1
-     */
-    klen = UTF8SKIP(ptr) - 1;
-
-    if (klen == 0) {
-      /* If char is invariant then swatch is for all the invariant chars
-       * In both UTF-8 and UTF-8-MOD that happens to be UTF_CONTINUATION_MARK
-       */
-	needents = UTF_CONTINUATION_MARK;
-	off      = NATIVE_UTF8_TO_I8(ptr[klen]);
+    else if (UTF8_IS_DOWNGRADEABLE_START(c)) {
+        klen = 0;
+	needents = 256;
+        off = TWO_BYTE_UTF8_TO_NATIVE(c, *(ptr + 1));
     }
     else {
-      /* If char is encoded then swatch is for the prefix */
+        klen = UTF8SKIP(ptr) - 1;
+
+        /* Each vec() stores 2**UTF_ACCUMULATION_SHIFT values.  The offset into
+         * the vec is the final byte in the sequence.  (In EBCDIC this is
+         * converted to I8 to get consecutive values.)  To help you visualize
+         * all this:
+         *                       Straight 1047   After final byte
+         *             UTF-8      UTF-EBCDIC     I8 transform
+         *  U+0400:  \xD0\x80    \xB8\x41\x41    \xB8\x41\xA0
+         *  U+0401:  \xD0\x81    \xB8\x41\x42    \xB8\x41\xA1
+         *    ...
+         *  U+0409:  \xD0\x89    \xB8\x41\x4A    \xB8\x41\xA9
+         *  U+040A:  \xD0\x8A    \xB8\x41\x51    \xB8\x41\xAA
+         *    ...
+         *  U+0412:  \xD0\x92    \xB8\x41\x59    \xB8\x41\xB2
+         *  U+0413:  \xD0\x93    \xB8\x41\x62    \xB8\x41\xB3
+         *    ...
+         *  U+041B:  \xD0\x9B    \xB8\x41\x6A    \xB8\x41\xBB
+         *  U+041C:  \xD0\x9C    \xB8\x41\x70    \xB8\x41\xBC
+         *    ...
+         *  U+041F:  \xD0\x9F    \xB8\x41\x73    \xB8\x41\xBF
+         *  U+0420:  \xD0\xA0    \xB8\x42\x41    \xB8\x42\x41
+         *
+         * (There are no discontinuities in the elided (...) entries.)
+         * The UTF-8 key for these 33 code points is '\xD0' (which also is the
+         * key for the next 31, up through U+043F, whose UTF-8 final byte is
+         * \xBF).  Thus in UTF-8, each key is for a vec() for 64 code points.
+         * The final UTF-8 byte, which ranges between \x80 and \xBF, is an
+         * index into the vec() swatch (after subtracting 0x80, which we
+         * actually do with an '&').
+         * In UTF-EBCDIC, each key is for a 32 code point vec().  The first 32
+         * code points above have key '\xB8\x41'. The final UTF-EBCDIC byte has
+         * dicontinuities which go away by transforming it into I8, and we
+         * effectively subtract 0xA0 to get the index. */
 	needents = (1 << UTF_ACCUMULATION_SHIFT);
 	off      = NATIVE_UTF8_TO_I8(ptr[klen]) & UTF_CONTINUATION_MASK;
     }
@@ -3223,12 +3252,18 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 
 	/* If not cached, generate it via swatch_get */
 	if (!svp || !SvPOK(*svp)
-		 || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
-            const UV code_point = valid_utf8_to_uvchr(ptr, NULL);
-	    swatch = swatch_get(swash,
-		    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
-				(klen) ? (code_point & ~((UV)needents - 1)) : 0,
-				needents);
+		 || !(tmps = (const U8*)SvPV_const(*svp, slen)))
+        {
+            if (klen) {
+                const UV code_point = valid_utf8_to_uvchr(ptr, NULL);
+                swatch = swatch_get(swash,
+                                    code_point & ~((UV)needents - 1),
+				    needents);
+            }
+            else {  /* For the first 256 code points, the swatch has a key of
+                       length 0 */
+                swatch = swatch_get(swash, 0, needents);
+            }
 
 	    if (IN_PERL_COMPILETIME)
 		CopHINTS_set(PL_curcop, PL_hints);
