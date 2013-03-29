@@ -8,9 +8,6 @@
  *
  */
 
-#ifdef STRUCT_MGVTBL_DEFINITION
-STRUCT_MGVTBL_DEFINITION;
-#else
 struct mgvtbl {
     int		(*svt_get)	(pTHX_ SV *sv, MAGIC* mg);
     int		(*svt_set)	(pTHX_ SV *sv, MAGIC* mg);
@@ -22,7 +19,6 @@ struct mgvtbl {
     int		(*svt_dup)	(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
     int		(*svt_local)(pTHX_ SV *nsv, MAGIC *mg);
 };
-#endif
 
 struct magic {
     MAGIC*	mg_moremagic;
