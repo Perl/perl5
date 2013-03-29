@@ -1650,11 +1650,16 @@ this a syntax error.  When called in scalar context, returns only the key
 (not the value) in a hash, or the index in an array.
 
 Hash entries are returned in an apparently random order.  The actual random
-order is subject to change in future versions of Perl, but it is
-guaranteed to be in the same order as either the C<keys> or C<values>
-function would produce on the same (unmodified) hash.  Since Perl
-5.8.2 the ordering can be different even between different runs of Perl
-for security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
+order is specific to a given hash; the exact same series of operations
+on two hashes may result in a different order for each hash. Any insertion
+into the hash may change the order, as will any deletion, with the exception
+that the most recent key returned by C<each> or C<keys> may be deleted
+without changing the order. So long as a given hash is unmodified you may
+rely on C<keys>, C<values> and C<each> to repeatedly return the same order
+as each other. See L<perlsec/"Algorithmic Complexity Attacks"> for
+details on why hash order is randomized. Aside from the guarantees
+provided here the exact details of Perl's hash algorithm and the hash
+traversal order are subject to change in any release of Perl.
 
 After C<each> has returned all entries from the hash or array, the next
 call to C<each> returns the empty list in list context and C<undef> in
@@ -3106,13 +3111,17 @@ named hash, or in Perl 5.12 or later only, the indices of an array.  Perl
 releases prior to 5.12 will produce a syntax error if you try to use an
 array argument.  In scalar context, returns the number of keys or indices.
 
-The keys of a hash are returned in an apparently random order.  The actual
-random order is subject to change in future versions of Perl, but it
-is guaranteed to be the same order as either the C<values> or C<each>
-function produces (given that the hash has not been modified).  Since
-Perl 5.8.1 the ordering can be different even between different runs of
-Perl for security reasons (see L<perlsec/"Algorithmic Complexity
-Attacks">).
+Hash entries are returned in an apparently random order.  The actual random
+order is specific to a given hash; the exact same series of operations
+on two hashes may result in a different order for each hash. Any insertion
+into the hash may change the order, as will any deletion, with the exception
+that the most recent key returned by C<each> or C<keys> may be deleted
+without changing the order. So long as a given hash is unmodified you may
+rely on C<keys>, C<values> and C<each> to repeatedly return the same order
+as each other. See L<perlsec/"Algorithmic Complexity Attacks"> for
+details on why hash order is randomized. Aside from the guarantees
+provided here the exact details of Perl's hash algorithm and the hash
+traversal order are subject to change in any release of Perl.
 
 As a side effect, calling keys() resets the internal iterator of the HASH or
 ARRAY (see L</each>).  In particular, calling keys() in void context resets
@@ -8618,12 +8627,17 @@ hash.  In Perl 5.12 or later only, will also return a list of the values of
 an array; prior to that release, attempting to use an array argument will
 produce a syntax error.  In scalar context, returns the number of values.
 
-When called on a hash, the values are returned in an apparently random
-order.  The actual random order is subject to change in future versions of
-Perl, but it is guaranteed to be the same order as either the C<keys> or
-C<each> function would produce on the same (unmodified) hash.  Since Perl
-5.8.1 the ordering is different even between different runs of Perl for
-security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
+Hash entries are returned in an apparently random order.  The actual random
+order is specific to a given hash; the exact same series of operations
+on two hashes may result in a different order for each hash. Any insertion
+into the hash may change the order, as will any deletion, with the exception
+that the most recent key returned by C<each> or C<keys> may be deleted
+without changing the order. So long as a given hash is unmodified you may
+rely on C<keys>, C<values> and C<each> to repeatedly return the same order
+as each other. See L<perlsec/"Algorithmic Complexity Attacks"> for
+details on why hash order is randomized. Aside from the guarantees
+provided here the exact details of Perl's hash algorithm and the hash
+traversal order are subject to change in any release of Perl.
 
 As a side effect, calling values() resets the HASH or ARRAY's internal
 iterator, see L</each>.  (In particular, calling values() in void context
