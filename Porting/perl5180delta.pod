@@ -18,6 +18,15 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
+=head2 Regular Expression Set Operations
+
+This is an experimental feature to allow matching against the union,
+intersection, etc., of sets of code points, similar to
+L<Unicode::Regex::Set>.  It can also be used to extend C</x> processing
+to [bracketed] character classes, and as a replacement of user-defined
+properties, allowing more complex expressions than they do.  See
+L<perlre/(?[ ])>.
+
 =head2 Character name aliases may now include non-Latin1-range characters
 
 It is possible to define your own names for characters for use in
@@ -472,6 +481,78 @@ These changes will be replaced by the final version of Unicode 6.2 before
 
 =head1 Deprecations
 
+=head2 Deprecated modules
+
+The Pod::LaTeX module is now deprecated, and due to be moved out of the Perl
+core in 5.20.  Until then, using the core-installed version will produce a
+warning.  You can suppress the warning by installing the module from CPAN.
+
+=head2 User-defined charnames with surprising whitespace
+
+A user-defined character name with trailing or multiple spaces in a row is
+likely a typo.  This now generates a warning when defined, on the assumption
+that uses of it will be unlikely to include the excess whitespace.
+
+=head2 Various XS-callable functions are now deprecated
+
+All the functions used to classify characters will be removed from a
+future version of Perl, and should not be used.  With participating C
+compilers (e.g., gcc), compiling any file that uses any of these will
+generate a warning.  These were not intended for public use; there are
+equivalent, faster, macros for most of them.
+See L<perlapi/Character classes>.  The complete list (including some
+that were deprecated in 5.17.7) is:
+C<is_uni_alnum>, C<is_uni_alnumc>, C<is_uni_alnumc_lc>,
+C<is_uni_alnum_lc>, C<is_uni_alpha>, C<is_uni_alpha_lc>,
+C<is_uni_ascii>, C<is_uni_ascii_lc>, C<is_uni_blank>,
+C<is_uni_blank_lc>, C<is_uni_cntrl>, C<is_uni_cntrl_lc>,
+C<is_uni_digit>, C<is_uni_digit_lc>, C<is_uni_graph>,
+C<is_uni_graph_lc>, C<is_uni_idfirst>, C<is_uni_idfirst_lc>,
+C<is_uni_lower>, C<is_uni_lower_lc>, C<is_uni_print>,
+C<is_uni_print_lc>, C<is_uni_punct>, C<is_uni_punct_lc>,
+C<is_uni_space>, C<is_uni_space_lc>, C<is_uni_upper>,
+C<is_uni_upper_lc>, C<is_uni_xdigit>, C<is_uni_xdigit_lc>,
+C<is_utf8_alnum>, C<is_utf8_alnumc>, C<is_utf8_alpha>,
+C<is_utf8_ascii>, C<is_utf8_blank>, C<is_utf8_char>,
+C<is_utf8_cntrl>, C<is_utf8_digit>, C<is_utf8_graph>,
+C<is_utf8_idcont>, C<is_utf8_idfirst>, C<is_utf8_lower>,
+C<is_utf8_mark>, C<is_utf8_perl_space>, C<is_utf8_perl_word>,
+C<is_utf8_posix_digit>, C<is_utf8_print>, C<is_utf8_punct>,
+C<is_utf8_space>, C<is_utf8_upper>, C<is_utf8_xdigit>,
+C<is_utf8_xidcont>, C<is_utf8_xidfirst>.
+
+In addition these three functions that have never worked properly are
+deprecated:
+C<to_uni_lower_lc>, C<to_uni_title_lc>, and C<to_uni_upper_lc>.
+
+=head2 Certain rare uses of backslashes within regexes are now deprectated
+
+There are three pairs of characters that Perl recognizes as
+metacharacters in regular expression patterns: C<{}>, C<[]>, and C<()>.
+These can be used as well to delimit patterns, as in:
+
+ m{foo}
+ s(foo)(bar)
+
+Since they are metacharacters, they have special meaning to regular
+expression patterns, and it turns out that you can't turn off that
+special meaning by the normal means of preceding them with a backslash,
+if you use them, paired, within a pattern delimitted by them.  For
+example, in
+
+ m{foo\{1,3\}}
+
+the backslashes do not change the behavior, and this matches
+S<C<"f o">> followed by one to three more occurrences of C<"o">.
+
+Usages like this, where they are interpreted as metacharacters, are
+exceedingly rare; we think there are none, for example, in all of CPAN.
+Hence, this deprecation should affect very little code.  It does give
+notice, however, that any such code needs to change, which will in turn
+allow us to change the behavior in future Perl versions so that the
+backslashes do have an effect, and without fear that we are silently
+breaking any existing code.
+
 =head2 Various XS-callable functions are now deprecated
 
 The following functions will be removed from a future version of Perl,
@@ -486,7 +567,6 @@ C<is_utf8_blank>, C<is_utf8_cntrl>, C<is_utf8_idcont>, C<is_utf8_idfirst>,
 C<is_utf8_perl_space>, C<is_utf8_perl_word>, C<is_utf8_posix_digit>,
 C<is_utf8_space>, C<is_utf8_xdigit>. C<is_utf8_xidcont>, C<is_utf8_xidfirst>,
 C<to_uni_lower_lc>, C<to_uni_title_lc>, and C<to_uni_upper_lc>.
-
 
 =head1 Performance Enhancements
 
@@ -771,6 +851,23 @@ as an empty string [perl #113576].
 
 =item *
 
+L<'%s' resolved to '\o{%s}%d'|perldiag/"'%s' resolved to '\o{%s}%d'">
+
+=item *
+
+L<'Trailing white-space in a charnames alias definition is deprecated'|perldiag/"Trailing white-space in a charnames alias definition is deprecated">
+
+=item *
+
+L<'A sequence of multiple spaces in a charnames alias definition is deprecated'|perldiag/"A sequence of multiple spaces in a charnames alias definition is deprecated">
+
+=item *
+
+L<'Passing malformed UTF-8 to "%s" is deprecated'|perldiag/"Passing malformed UTF-8 to "%s" is deprecated">
+
+
+=item *
+
 L<Experimental "%s" subs not enabled|perldiag/"Experimental "%s" subs not enabled">
 
 (F) To use lexical subs, you must first enable them:
@@ -1042,6 +1139,10 @@ Support code relating to EPOC has been removed.  EPOC was a family of
 operating systems developed by Psion for mobile devices.  It was the
 predecessor of Symbian.  The port was last updated in April 2002.
 
+=item Rhapsody
+
+Support for Rhapsody has been removed.
+
 =back
 
 =head2 Platform-Specific Notes
@@ -1076,6 +1177,16 @@ when extended parse is enabled in the process from which Perl is run.
 
 Building on WinCE is now possible once again, although more work is required
 to fully restore a clean build.
+
+=item Windows
+
+Perl can now be built using Microsoft's Visual C++ 2012 compiler by specifying
+CCTYPE=MSVC110 (or MSVC110FREE if you are using the free Express edition for
+Windows Desktop) in F<win32/Makefile>.
+
+=item Haiku
+
+Perl should now work out of the box on Haiku R1 Alpha 4.
 
 =item Win32
 
@@ -1167,6 +1278,12 @@ that assume C99 [perl #113778].
 =head1 Internal Changes
 
 =over
+
+=item *
+
+A synonym for the misleadingly named C<av_len()> has been created:
+C<av_top()>.  Both of these return the number of the highest index in
+the array, not the number of elements it contains.
 
 =item *
 
@@ -1406,6 +1523,23 @@ and PERL_DEBUG_READONLY_OPS, has been retired.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+A bug in the core typemap caused any C types that map to the T_BOOL core
+typemap entry to not be set, updated, or modified when the T_BOOL variable was
+used in an OUTPUT: section with an exception for RETVAL. T_BOOL in an INPUT:
+section was not affected. Using a T_BOOL return type for an XSUB (RETVAL)
+was not affected. A side effect of fixing this bug is, if a T_BOOL is specified
+in the OUTPUT: section (which previous did nothing to the SV), and a read only
+SV (literal) is passed to the XSUB, croaks like "Modification of a read-only
+value attempted" will happen. [perl #115796]
+
+=item *
+
+On many platforms, providing a directory name as the script name caused perl
+to do nothing and report success.  It should now universally report an error
+and exit nonzero. [perl #61362]
 
 =item *
 
