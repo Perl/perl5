@@ -18,16 +18,13 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 Latest Unicode 6.2 beta is included
+=head2 Upgrade to Unicode 6.2
 
-This is supposed to be the final data for 6.2, unless glitches are
-found.  The earlier experimental 6.2 beta data has been reverted, and
-this used instead.  Not all the changes that were proposed for 6.2 and
-that were in the earlier beta versions are actually going into 6.2.  In
-particular, there are no changes from 6.1 in the General_Category of any
-characters.  6.2 does revise the C<\X> handling for the REGIONAL
-INDICATOR characters that were added in Unicode 6.0.  Perl now for the
-first time fully handles this revision.
+Perl now supports the final version of Unicode 6.2.  Earlier releases in
+the 5.17 series supported Unicode 6.2 beta versions.  There were no
+substantive changes in the final Unicode 6.2 version from the most
+recent beta, included in Perl 5.17.4.  A list of changes from Unicode
+6.1 is at L<http://www.unicode.org/versions/Unicode6.2.0>.
 
 =head2 New DTrace probes
 
@@ -103,7 +100,6 @@ name.
 
 See L<perlsub/Lexical Subroutines>.
 
-
 =head2 Computed Labels
 
 The loop controls C<next>, C<last> and C<redo>, and the special C<dump>
@@ -138,13 +134,41 @@ C<pack> with constant arguments is now constant folded in most cases
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 Avoid calling memset with a negative count
 
-[ List each security issue as a =head2 entry ]
+Poorly written perl code that allows an attacker to specify the count to perl's
+C<x> string repeat operator can already cause a memory exhaustion
+denial-of-service attack. A flaw in versions of perl before 5.15.5 can escalate
+that into a heap buffer overrun; coupled with versions of glibc before 2.16, it
+possibly allows the execution of arbitrary code.
+
+The flaw addressed to this commit has been assigned identifier CVE-2012-5195.
 
 =head1 Incompatible Changes
+
+=head2 New Restrictions in Multi-Character Case-Insensitive Matching in Regular Expression Bracketed Character Classes
+
+Unicode has now withdrawn their previous recommendation for regular
+expressions to automatically handle cases where a single character can
+match multiple characters case-insensitively; for example, the letter
+LATIN SMALL LETTER SHARP S and the sequence C<ss>.  This is because
+it turns out to be impracticable to do this correctly in all
+circumstances.  Because Perl has tried to do this as best it can, it
+will continue to do so.  (We are considering an option to turn it off.)
+However, a new restriction is being added on such matches when they
+occur in [bracketed] character classes.  People were specifying
+things such as C</[\0-\xff]/i>, and being surprised that it matches the
+two character sequence C<ss> (since LATIN SMALL LETTER SHARP S occurs in
+this range).  This behavior is also inconsistent with the using a
+property instead of a range:  C<\p{Block=Latin1}> also includes LATIN
+SMALL LETTER SHARP S, but C</[\p{Block=Latin1}]/i> does not match C<ss>.
+The new rule is that for there to be a multi-character case-insensitive
+match within a bracketed character class, the character must be
+explicitly listed, and not as an end point of a range.  This more
+closely obeys the Principle of Least Astonishment.  See
+L<perlrecharclass/Bracketed Character Classes>.  Note that a bug [perl
+#89774], now fixed as part of this change, prevented the previous
+behavior from working fully.
 
 =head2 Here-doc parsing
 
@@ -359,7 +383,6 @@ is now roughly equivalent to
    /(x)(.*)$/
 
 etc.
-
 
 =item *
 
@@ -672,6 +695,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+The error produced when a module cannot be loaded now includes a hint that
+the module may need to be installed: "Can't locate hopping.pm in @INC (you
+may need to install the hopping module) (@INC contains: ...)"
+
+=item *
+
 L<vector argument not supported with alpha versions|perldiag/vector argument not supported with alpha versions>
 
 This warning was not suppressable, even with C<no warnings>.  Now it is
@@ -718,20 +747,13 @@ sort block no longer causes the $a or $b to be ignored [perl #86136].
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
+=head3 L<h2xs>
 
 =over 4
 
 =item *
 
-XXX
+F<h2xs> no longer produces invalid code for empty defines.  [perl #20636]
 
 =back
 
@@ -821,6 +843,10 @@ IBM ended service on in March 2002. 2.4.0 ended service in June 2003, and
 was superseded by Z/VM. The current version of Z/VM is V6.2.0, and scheduled
 for end of service on 2015/04/30.
 
+=item MPE/IX
+
+Support for MPE/IX has been removed.
+
 =back
 
 =head2 Platform-Specific Notes
@@ -852,6 +878,10 @@ main thread) in threaded debugging builds on Win32 and possibly other platforms
 
 A rare race condition that would lead to L<sleep|perlfunc/sleep> taking more
 time than requested, and possibly even hanging, has been fixed [perl #33096].
+
+=item Win32
+
+The option to build without USE_SOCKETS_AS_HANDLES has been removed.
 
 =item Solaris
 
@@ -933,6 +963,58 @@ that assume C99 [perl #113778].
 
 =item *
 
+Case-insensitive matching inside a [bracketed] character class with a
+multi-character fold, no longer excludes one of the possibilities in the
+circumstances that it used to. [perl #89774].
+
+=item *
+
+C<PL_formfeed> has been removed.
+
+=item *
+
+The regular expression engine no longer reads one byte past the end of the
+target string.  While for all internally well-formed scalars this should
+never have been a problem, this change facilitates clever tricks with
+string buffers in CPAN modules.  [perl #73542]
+
+=item *
+
+Inside a BEGIN block, C<PL_compcv> now points to the currently-compiling
+subroutine, rather than the BEGIN block itself.
+
+=item *
+
+C<mg_length> has been deprecated.
+
+=item *
+
+C<sv_len> now always returns a byte count and C<sv_len_utf8> a character
+count.  Previously, C<sv_len> and C<sv_len_utf8> were both buggy and would
+sometimes returns bytes and sometimes characters.  C<sv_len_utf8> no longer
+assumes that its argument is in UTF8.  Neither of these creates UTF8 caches
+for tied or overloaded values or for non-PVs any more.
+
+=item *
+
+C<sv_mortalcopy> now copies string buffers of shared hash key scalars when
+called from XS modules [perl #79824].
+
+=item *
+
+C<RXf_SPLIT> and C<RXf_SKIPWHITE> are no longer used.  They are now
+#defined as 0.
+
+=item *
+
+The new C<RXf_MODIFIES_VARS> flag can be set by custom regular expression
+engines to indicate that the execution of the regular expression may cause
+variables to be modified.  This lets C<s///> know to skip certain
+optimisations.  Perl's own regular expression engine sets this flag for the
+special backtracking verbs that set $REGMARK and $REGERROR.
+
+=item *
+
 The APIs for accessing lexical pads have changed considerably.
 
 C<PADLIST>s are now longer C<AV>s, but their own type instead. C<PADLIST>s now
@@ -955,7 +1037,6 @@ L<perlreapi/Numbered capture callbacks>.
 C<PL_sawampersand> was previously a boolean indicating that any of
 C<$`, $&, $&> had been seen; it now contains three one-bit flags
 indicating the presence of each of the variables individually.
-
 
 =item *
 
@@ -1041,6 +1122,181 @@ and PERL_DEBUG_READONLY_OPS, has been retired.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+A bug, case-insensitive regex with UTF8-flagged strings, introduced
+earlier in the 5.17 series has been fixed.  [perl #114982]
+
+=item *
+
+Attributes applied to lexical variables no longer leak memory.
+[perl #114764]
+
+=item *
+
+C<dump>, C<goto>, C<last>, C<next>, C<redo> or C<require> followed by a
+bareword (or version) and then an infix operator is no longer a syntax
+error.  It used to be for those infix operators (like C<+>) that have a
+different meaning where a term is expected.  [perl #105924]
+
+=item *
+
+C<require a::b . 1> and C<require a::b + 1> no longer produce erroneous
+ambiguity warnings.  [perl #107002]
+
+=item *
+
+Class method calls are now allowed on any string, and not just strings
+beginning with an alphanumeric character.  [perl #105922]
+
+=item *
+
+An empty pattern created with C<qr//> used in C<m///> no longer triggers
+the "empty pattern reuses last pattern" behaviour.  [perl #96230]
+
+=item *
+
+Tying a hash during iteration no longer results in a memory leak.
+
+=item *
+
+Freeing a tied hash during iteration no longer results in a memory leak.
+
+=item *
+
+List assignment to a tied array or hash that dies on STORE no longer
+results in a memory leak.
+
+=item *
+
+If the hint hash (C<%^H>) is tied, compile-time scope entry (which copies
+the hint hash) no longer leaks memory if FETCH dies.  [perl #107000]
+
+=item *
+
+Constant folding no longer inappropriately triggers the special
+C<split " "> behaviour.  [perl #94490]
+
+=item *
+
+C<defined scalar(@array)>, C<defined do { &foo }>, and similar constructs
+now treat the argument to C<defined> as a simple scalar.  [perl #97466]
+
+=item *
+
+Running a custom debugging that defines no C<*DB::DB> glob or provides a
+subroutine stub for C<&DB::DB> no longer results in a crash, but an error
+instead.  [perl #114990]
+
+=item *
+
+C<reset ""> now matches its documentation.  C<reset> only resets C<m?...?>
+patterns when called with no argument.  An empty string for an argument now
+does nothing.  (It used to be treated as no argument.)  [perl #97958]
+
+=item *
+
+C<printf> with an argument returning an empty list no longer reads past the
+end of the stack, resulting in erratic behaviour.  [perl #77094]
+
+=item *
+
+C<--subname> no longer produces erroneous ambiguity warnings.
+[perl #77240]
+
+=item *
+
+C<v10> is now allowed as a label or package name.  This was inadvertently
+broken when v-strings were added in Perl 5.6.  [perl #56880]
+
+=item *
+
+A regression introduced in 5.17.2 has been fixed, which made C</[\@\\]||/>
+result in a "panic" error.  [perl #115050]
+
+=item *
+
+C<length>, C<pos>, C<substr> and C<sprintf> could be confused by ties,
+overloading, references and typeglobs if the stringification of such
+changed the internal representation to or from UTF8.  [perl #114410]
+
+=item *
+
+utf8::encode now calls FETCH and STORE on tied variables.  utf8::decode now
+calls STORE (it was already calling FETCH).
+
+=item *
+
+C<$tied =~ s/$non_utf8/$utf8/> no longer loops infinitely if the tied
+variable returns a Latin-1 string, shared hash key scalar, or reference or
+typeglob that stringifies as ASCII or Latin-1.  This is a regression from
+5.12.x.
+
+=item *
+
+C<s///> without /e is now better at detecting when it needs to forego
+certain optimisations, fixing some buggy cases:
+
+=over
+
+=item *
+
+Match variables in certain constructs (C<&&>, C<||>, C<..> and others) in
+the replacement part; e.g., C<s/(.)/$l{$a||$1}/g>.  [perl #26986]
+
+=item *
+
+Aliases to match variables in the replacement.
+
+=item *
+
+$REGERROR or $REGMARK in the replacement.  [perl #49190]
+
+=item *
+
+An empty pattern (C<s//$foo/>) that causes the last-successful pattern to
+be used, when that pattern contains code blocks that modify the variables
+in the replacement.
+
+=back
+
+=item *
+
+The taintedness of the replacement string no longer affects the taintedness
+of the return value of C<s///e>.
+
+=item *
+
+The C<$|> autoflush variable is created on-the-fly when needed.  If this
+happened (e.g., if it was mentioned in a module or eval) when the
+currently-selected filehandle was a typeglob with an empty IO slot, it used
+to crash.  [perl #115206]
+
+=item *
+
+Line numbers at the end of a string eval are no longer off by one.
+[perl #114658]
+
+=item *
+
+@INC filters (subroutines returned by subroutines in @INC) that set $_ to a
+copy-on-write scalar no longer cause the parser to modify that string
+buffer in place.
+
+=item *
+
+C<length($object)> no longer returns the undefined value if the object has
+string overloading that returns undef.  [perl #115260]
+
+=item *
+
+The use of C<PL_stashcache>, the stash name lookup cache for method calls, has
+been restored,
+
+Commit da6b625f78f5f133 in August 2011 inadvertently broke the code that looks
+up values in C<PL_stashcache>. As it's a only cache, quite correctly everything
+carried on working without it.
 
 =item *
 
@@ -1168,7 +1424,6 @@ Method calls on packages whose names end in ::SUPER are no longer treated
 as SUPER method calls, resulting in failure to find the method.
 Furthermore, defining subroutines in such packages no longer causes them to
 be found by SUPER method calls on the containing package [perl #114924].
-
 
 =item *
 
