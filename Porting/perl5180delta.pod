@@ -18,6 +18,23 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
+=head2 Character name aliases may now include non-Latin1-range characters
+
+It is possible to define your own names for characters for use in
+C<\N{...}>, C<charnames::vianame()>, etc.  These names can now be
+comprised of characters from the whole Unicode range.  This allows for
+names to be in your native language, and not just English.  Certain
+restrictions apply to the characters that may be used (you can't define
+a name that has punctuation in it, for example).  See L<charnames/CUSTOM
+ALIASES>.
+
+=head2 New hash function Murmurhash-32 (v3)
+
+We have switched Perl's hash function to use Murmurhash-32, and added build
+support for several other hash functions.  This new function is expected to
+perform equivalently to the old one for shorter strings and is faster,
+potentially twice as fast, for hashing longer strings.
+
 =head2 Upgrade to Unicode 6.2
 
 Perl now supports the final version of Unicode 6.2.  Earlier releases in
@@ -133,6 +150,65 @@ C<pack> with constant arguments is now constant folded in most cases
 [perl #113470].
 
 =head1 Security
+
+=head2 An unknown character name in C<\N{...}> is now a syntax error
+
+Previously, it warned, and the Unicode REPLACEMENT CHARACTER was
+substituted.  Unicode now recommends that this situation be a syntax
+error.  Also, the previous behavior led to some confusing warnings and
+behaviors, and since the REPLACEMENT CHARACTER has no use other than as
+a stand-in for some unknown character, any code that has this problem is
+buggy.
+
+=head2 Formerly deprecated characters in C<\N{}> character name aliases are now errors.
+
+Since v5.12.0, it has been deprecated to use certain characters in
+user-defined C<\N{...}> character names.  These now cause a syntax
+error.  For example, it is now an error to begin a name with a digit,
+such as in
+
+ my $undraftable = "\N{4F}";    # Syntax error!
+
+or to have commas anywhere in the name.  See L<charnames/CUSTOM ALIASES>
+
+=head2 Per process hash randomization
+
+The seed used by Perl's hash function is now random.  This means that the
+order which keys/values will be returned from functions like C<keys()>,
+C<values()>, and C<each()> will differ from run to run.
+
+This change was introduced to make Perl's hashes more robust to algorithmic
+complexity attacks, and also because we discovered that it exposes hash
+ordering dependency bugs and makes them easier to track down.
+
+Toolchain maintainers might want to invest in additional infrastructure to
+test for things like this.  Running tests several times in a row and then
+comparing results will make it easier to spot hash order dependencies in
+code.  Authors are strongly encouraged not to expose the key order of
+Perl's hashes to insecure audiences.
+
+=head2 PERL_HASH_SEED enviornment variable now takes a hex value
+
+PERL_HASH_SEED no longer accepts an integer as a parameter, instead the
+value is expected to be a binary string encoded in hex.  This is to make
+the infrastructure support hash seeds of arbitrary lengths which might
+exceed that of an integer.  (SipHash uses a 16 byte seed).
+
+=head2 Hash::Util::hash_seed() now returns a string
+
+Hash::Util::hash_seed() now returns a string instead of an integer.  This
+is to make the infrastructure support hash seeds of arbitrary lengths
+which might exceed that of an integer.  (SipHash uses a 16 byte seed).
+
+=head2 Output of PERL_HASH_SEED_DEBUG has been changed
+
+The environment variable PERL_HASH_SEED_DEBUG now shows both the hash
+function perl was built with AND the seed, in hex in use for that process.
+Code parsing this output, should it exist, must change to accomodate the
+new format.  Example of the new format:
+
+    $ PERL_HASH_SEED_DEBUG=1 ./perl -e1
+    HASH_FUNCTION = MURMUR3 HASH_SEED = 0x1476bb9f
 
 =head2 Avoid calling memset with a negative count
 
@@ -314,16 +390,25 @@ XXX Any deprecated features, syntax, modules etc. should be listed here.  In
 particular, deprecated modules should be listed here even if they are listed as
 an updated module in the L</Modules and Pragmata> section.
 
-[ List each deprecation as a =head2 entry ]
-
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
 =over 4
+
+=item *
+
+Lists of lexical variable declarations (C<my($x, $y)>) are now optimised
+down to a single op, and are hence faster than before.
+
+=item *
+
+A new C preprocessor define NO_TAINT_SUPPORT was added that, if set, disables
+Perl's taint support altogether.  Using the -T or -t command line flags will
+cause a fatal error.  Beware that both core tests as well as many a CPAN
+distribution's tests will fail with this change.  On the upside, it provides
+a small performance benefit due to reduced branching.
+
+B<Do not enable this unless you know exactly what you are getting yourself
+into.>
 
 =item *
 
@@ -847,6 +932,12 @@ for end of service on 2015/04/30.
 
 Support for MPE/IX has been removed.
 
+=item EPOC
+
+Support code relating to EPOC has been removed.  EPOC was a family of
+operating systems developed by Psion for mobile devices.  It was the
+predecessor of Symbian.  The port was last updated in April 2002.
+
 =back
 
 =head2 Platform-Specific Notes
@@ -869,6 +960,18 @@ When compiling the Perl core as C++ (which is only semi-supported), the
 mathom functions are now compiled as C<extern "C">, to ensure proper
 binary compatibility.  (However, binary compatibility isn't generally
 guaranteed anyway in the situations where this would matter.)
+
+=item VMS
+
+Where possible, the case of filenames and command-line arguments is now
+preserved by enabling the CRTL features C<DECC$EFS_CASE_PRESERVE> and
+C<DECC$ARGV_PARSE_STYLE> at start-up time.  The latter only takes effect
+when extended parse is enabled in the process from which Perl is run.
+
+=item WinCE
+
+Building on WinCE is now possible once again, although more work is required
+to fully restore a clean build.
 
 =item Win32
 
@@ -960,6 +1063,27 @@ that assume C99 [perl #113778].
 =head1 Internal Changes
 
 =over
+
+=item *
+
+The private Perl_croak_no_modify has had its context parameter removed.  It is
+now has a void prototype.  Users of the public API croak_no_modify remain
+unaffected.
+
+=item *
+
+Copy-on-write (shared hash key) scalars are no longer marked read-only.
+C<SvREADONLY> returns false on such an SV, but C<SvIsCOW> still returns
+true.
+
+=item *
+
+A new op type, C<OP_PADRANGE> has been introduced.  The perl peephole
+optimiser will, where possible, substitute a single padrange op for a
+pushmark followed by one or more pad ops, and possibly also skipping list
+and nextstate ops.  In addition, the op can carry out the tasks associated
+with the RHS of a my(...) = @_ assignment, so those ops may be optimised
+away too.
 
 =item *
 
@@ -2166,6 +2290,99 @@ C<\p{}> and C<\P{}>.  There remains a bug, [perl #114148], for the very
 few properties in Unicode that match just a single code point.  The
 warning is not generated if they are matched against an above-Unicode
 code point.
+
+=item *
+
+Uninitialized warnings mentioning hash elements would only mention the
+element name if it was not in the first bucket of the hash, due to an
+off-by-one error.
+
+=item *
+
+A regular expression optimizer bug could cause multiline "^" to behave
+incorrectly in the presence of line breaks, such that
+C<"/\n\n" =~ m#\A(?:^/$)#im> would not match [perl #115242].
+
+=item *
+
+Failed C<fork> in list context no longer currupts the stack.
+C<@a = (1, 2, fork, 3)> used to gobble up the 2 and assign C<(1, undef, 3)>
+if the C<fork> call failed.
+
+=item *
+
+Numerous memory leaks have been fixed, mostly involving tied variables that
+die, regular expression character classes and code blocks, and syntax
+errors.
+
+=item *
+
+Assigning a regular expression (C<${qr//}>) to a variable that happens to
+hold a floating point number no longer causes assertion failures on
+debugging builds.
+
+=item *
+
+Assigning a regular expression to a scalar containing a number no longer
+causes subsequent nummification to produce random numbers.
+
+=item *
+
+Assigning a regular expression to a magic variable no longer wipes away the
+magic.  This is a regression from 5.10.
+
+=item *
+
+Assigning a regular expression to a blessed scalar no longer results in
+crashes.  This is also a regression from 5.10.
+
+=item *
+
+Regular expression can now be assigned to tied hash and array elements with
+flattening into strings.
+
+=item *
+
+Nummifying a regular expression no longer results in an uninitialized
+warning.
+
+=item *
+
+Negative array indices no longer cause EXISTS methods of tied variables to
+be ignored.  This is a regression from 5.12.
+
+=item *
+
+Negative array indices no longer result in crashes on arrays tied to
+non-objects.
+
+=item *
+
+C<$x = "(?{})"; /a++(?{})+$x/x> no longer erroneous produces an error (just
+a warning, as expected).  This was broken in 5.17.1.
+
+=item *
+
+C<$byte_overload .= $utf8> no longer results in doubly-encoded UTF8 if the
+left-hand scalar happened to have produced a UTF8 string the last time
+overloading was invoked.
+
+=item *
+
+C<goto &sub> now uses the current value of @_, instead of using the array
+the subroutine was originally called with.  This means
+C<local @_ = (...); goto &sub> now works [perl #43077].
+
+=item *
+
+If a debugger is invoked recursively, it no longer stomps on its own
+lexical variables.  Formerly under recursion all calls would share the same
+set of lexical variables [perl #115742].
+
+=item *
+
+C<*_{ARRAY}> returned from a subroutine no longer spontaneously
+becomes empty.
 
 =back
 
