@@ -160,6 +160,12 @@ C<pack> with constant arguments is now constant folded in most cases
 
 =head1 Security
 
+=head2 Hash iteration randomized per hash variable
+
+Every hash has its own iteration order, which
+should make it much more difficult to determine what the current hash
+seed is.
+
 =head2 C<Storable> security warning in documentation
 
 The documentation for C<Storable> now includes a section which warns readers
@@ -252,6 +258,19 @@ possibly allows the execution of arbitrary code.
 The flaw addressed to this commit has been assigned identifier CVE-2012-5195.
 
 =head1 Incompatible Changes
+
+=head2 Explicit rules for variable names and identifiers
+
+Due to an oversight, length-one variable names in 5.16 were completely
+unrestricted, and opened the door to several kinds of insanity.  As of
+5.18, these now follow the rules of other identifiers, in addition
+to accepting characters that match the \p{POSIX_Punct} property.
+
+There are no longer any differences in the parsing of identifiers specified
+as $... or ${...}; previously, they were dealt with in different parts of
+the core, and so had slightly different behavior. For instance,
+C<${foo:bar}> was a legal variable name.  Since they are now both parsed
+by the same code, that is no longer the case.
 
 =head2 Lexical $_ is now deprecated
 
@@ -639,6 +658,12 @@ The L<Pod::LaTeX> module was deprecated with 5.17.8.
 
 =back
 
+=head2 PL_sv_objcount
+
+This interpreter-global variable used to track the total number of
+Perl objects in the interpreter. It is no longer maintained and will
+be removed altogether in Perl 5.20.
+
 =head2 Five additional characters should be escaped in patterns with C</x>
 
 When a regular expression pattern is compiled with C</x>, Perl treats 6
@@ -1020,6 +1045,15 @@ as an empty string [perl #113576].
 
 =item *
 
+L<%c* is deprecated, and will become a syntax error|perldiag/"%c* is deprecated, and will become a syntax error">
+
+Use of C<@*>, C<&*>, C<**> or C<%*> is now deprecated, and will generate a
+compile time warning, enabled by default.  In future such code will fail to
+compile with a syntax error.  Removing these variables, along with C<$*>,
+will permit future syntax additions.
+
+=item *
+
 XXX: This needs more detail.
 
 Strings with code points over 0xFF may not be mapped into in-memory file
@@ -1145,6 +1179,18 @@ the command line [perl #113410].
 =head2 Changes to Existing Diagnostics
 
 =over 4
+
+=item *
+
+L<$* is no longer supported, and will become a syntax error|perldiag/"$* is no longer supported, and will become a syntax error">
+
+The warning that use of C<$*> and C<$#> is no longer supported is now
+generated for every location that references them.  Previously it would fail
+to be generated if another variable using the same typeglob was seen first
+(e.g. C<@*> before C<$*>), and would not be generated for the second and
+subsequent uses.  (It's hard to fix the failure to generate warnings at all
+without also generating them every time, and warning every time is
+consistent with the warnings that C<$[> used to generate.)
 
 =item *
 
