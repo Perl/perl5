@@ -33,7 +33,7 @@ $x = join '', map {chr $_} (0..1023);
 is($x, ${thaw freeze \$x});
 
 # Char in the range 127-255 (probably) in utf8
-$x = chr (175) . chr (256);
+$x = chr(utf8::unicode_to_native(175)) . chr (256);
 chop $x;
 is($x, ${thaw freeze \$x});
 
