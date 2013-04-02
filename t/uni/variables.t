@@ -72,6 +72,7 @@ for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
 # Checking if the Latin-1 range behaves as expected, and that the behavior is the
 # same whenever under strict or not.
 for ( 0x80..0xff ) {
+    $_ = utf8::unicode_to_native($_);
     no warnings 'closure';
     my $chr = chr;
     my $esc = sprintf("%X", ord $chr);
