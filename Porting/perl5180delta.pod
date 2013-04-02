@@ -12,11 +12,65 @@ release.
 If you are upgrading from an earlier release such as 5.16.0, first read
 L<perl5160delta>, which describes differences between 5.14.0 and 5.16.0.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
+
+=head2 Hash overhaul
+
+Changes to the implementation of hashes in perl 5.18.0 will be one of the most
+visible changes to the behavior of existing code.  For the most part, these
+changes will be visible as two distinct hash variables now providing their
+contents in a different variable where it was previously identical.  When
+encountering these changes, the key to cleaning up from them is to accept that
+B<hashes are unordered collections> and to act accordingly.
+
+=head3 Hash randomization
+
+The seed used by Perl's hash function is now random.  This means that the
+order which keys/values will be returned from functions like C<keys()>,
+C<values()>, and C<each()> will differ from run to run.
+
+This change was introduced to make Perl's hashes more robust to algorithmic
+complexity attacks, and also because we discovered that it exposes hash
+ordering dependency bugs and makes them easier to track down.
+
+Toolchain maintainers might want to invest in additional infrastructure to
+test for things like this.  Running tests several times in a row and then
+comparing results will make it easier to spot hash order dependencies in
+code.  Authors are strongly encouraged not to expose the key order of
+Perl's hashes to insecure audiences.
+
+Further, every hash has its own iteration order, which should make it much
+more difficult to determine what the current hash seed is.
+
+=head3 New hash function: Murmurhash-32
+
+We have switched Perl's hash function to use Murmurhash-32, and added build
+support for several other hash functions.  This new function is expected to
+perform equivalently to the old one for shorter strings and is faster for
+hashing longer strings.
+
+=head3 PERL_HASH_SEED enviornment variable now takes a hex value
+
+PERL_HASH_SEED no longer accepts an integer as a parameter, instead the
+value is expected to be a binary string encoded in hex.  This is to make
+the infrastructure support hash seeds of arbitrary lengths which might
+exceed that of an integer.  (SipHash uses a 16 byte seed).
+
+=head3 Hash::Util::hash_seed() now returns a string
+
+Hash::Util::hash_seed() now returns a string instead of an integer.  This
+is to make the infrastructure support hash seeds of arbitrary lengths
+which might exceed that of an integer.  (SipHash uses a 16 byte seed).
+
+=head3 Output of PERL_HASH_SEED_DEBUG has been changed
+
+The environment variable PERL_HASH_SEED_DEBUG now shows both the hash
+function perl was built with AND the seed, in hex in use for that process.
+Code parsing this output, should it exist, must change to accomodate the
+new format.  Example of the new format:
+
+    $ PERL_HASH_SEED_DEBUG=1 ./perl -e1
+    HASH_FUNCTION = MURMUR3 HASH_SEED = 0x1476bb9f
 
 =head2 Regular Expression Set Operations
 
@@ -36,13 +90,6 @@ names to be in your native language, and not just English.  Certain
 restrictions apply to the characters that may be used (you can't define
 a name that has punctuation in it, for example).  See L<charnames/CUSTOM
 ALIASES>.
-
-=head2 New hash function Murmurhash-32 (v3)
-
-We have switched Perl's hash function to use Murmurhash-32, and added build
-support for several other hash functions.  This new function is expected to
-perform equivalently to the old one for shorter strings and is faster,
-potentially twice as fast, for hashing longer strings.
 
 =head2 Upgrade to Unicode 6.2
 
@@ -160,12 +207,6 @@ C<pack> with constant arguments is now constant folded in most cases
 
 =head1 Security
 
-=head2 Hash iteration randomized per hash variable
-
-Every hash has its own iteration order, which
-should make it much more difficult to determine what the current hash
-seed is.
-
 =head2 C<Storable> security warning in documentation
 
 The documentation for C<Storable> now includes a section which warns readers
@@ -208,45 +249,6 @@ such as in
 
 or to have commas anywhere in the name.  See L<charnames/CUSTOM ALIASES>
 
-=head2 Per process hash randomization
-
-The seed used by Perl's hash function is now random.  This means that the
-order which keys/values will be returned from functions like C<keys()>,
-C<values()>, and C<each()> will differ from run to run.
-
-This change was introduced to make Perl's hashes more robust to algorithmic
-complexity attacks, and also because we discovered that it exposes hash
-ordering dependency bugs and makes them easier to track down.
-
-Toolchain maintainers might want to invest in additional infrastructure to
-test for things like this.  Running tests several times in a row and then
-comparing results will make it easier to spot hash order dependencies in
-code.  Authors are strongly encouraged not to expose the key order of
-Perl's hashes to insecure audiences.
-
-=head2 PERL_HASH_SEED enviornment variable now takes a hex value
-
-PERL_HASH_SEED no longer accepts an integer as a parameter, instead the
-value is expected to be a binary string encoded in hex.  This is to make
-the infrastructure support hash seeds of arbitrary lengths which might
-exceed that of an integer.  (SipHash uses a 16 byte seed).
-
-=head2 Hash::Util::hash_seed() now returns a string
-
-Hash::Util::hash_seed() now returns a string instead of an integer.  This
-is to make the infrastructure support hash seeds of arbitrary lengths
-which might exceed that of an integer.  (SipHash uses a 16 byte seed).
-
-=head2 Output of PERL_HASH_SEED_DEBUG has been changed
-
-The environment variable PERL_HASH_SEED_DEBUG now shows both the hash
-function perl was built with AND the seed, in hex in use for that process.
-Code parsing this output, should it exist, must change to accomodate the
-new format.  Example of the new format:
-
-    $ PERL_HASH_SEED_DEBUG=1 ./perl -e1
-    HASH_FUNCTION = MURMUR3 HASH_SEED = 0x1476bb9f
-
 =head2 Avoid calling memset with a negative count
 
 Poorly written perl code that allows an attacker to specify the count to perl's
@@ -258,6 +260,11 @@ possibly allows the execution of arbitrary code.
 The flaw addressed to this commit has been assigned identifier CVE-2012-5195.
 
 =head1 Incompatible Changes
+
+=head2 See also: hash overhaul
+
+Some of the changes in the L<hash overhaul|/"Hash overhaul"> are not fully
+compatible with previous versions of perl.  Please read that section.
 
 =head2 Explicit rules for variable names and identifiers
 
