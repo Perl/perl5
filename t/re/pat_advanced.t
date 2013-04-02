@@ -114,12 +114,13 @@ sub run_tests {
     {
         my $message = 'bug id 20001008.001';
 
-        my @x = ("stra\337e 138", "stra\337e 138");
+        my $strasse = "stra" . uni_to_native("\337") . "e";
+        my @x = ("$strasse 138", "$strasse 138");
         for (@x) {
             ok(s/(\d+)\s*([\w\-]+)/$1 . uc $2/e, $message);
             ok(my ($latin) = /^(.+)(?:\s+\d)/, $message);
-            is($latin, "stra\337e", $message);
-	    ok($latin =~ s/stra\337e/straße/, $message);
+            is($latin, $strasse, $message);
+	    ok($latin =~ s/$strasse/straße/, $message);
             #
             # Previous code follows, but outcommented - there were no tests.
             #
@@ -638,14 +639,10 @@ sub run_tests {
         # More whitespace: U+0085, U+2028, U+2029\n";
 
         # U+0085, U+00A0 need to be forced to be Unicode, the \x{100} does that.
-      SKIP: {
-          skip "EBCDIC platform", 4 if $::IS_EBCDIC;
-          # Do \x{0015} and \x{0041} match \s in EBCDIC?
-          ok "<\x{100}\x{0085}>" =~ /<\x{100}\s>/, '\x{0085} in \s';
-          ok        "<\x{0085}>" =~        /<\v>/, '\x{0085} in \v';
-          ok "<\x{100}\x{00A0}>" =~ /<\x{100}\s>/, '\x{00A0} in \s';
-          ok        "<\x{00A0}>" =~        /<\h>/, '\x{00A0} in \h';
-        }
+        ok "<\x{100}" . uni_to_native("\x{0085}") . ">" =~ /<\x{100}\s>/, '\x{0085} in \s';
+        ok        "<" . uni_to_native("\x{0085}") . ">" =~        /<\v>/, '\x{0085} in \v';
+        ok "<\x{100}" . uni_to_native("\x{00A0}") . ">" =~ /<\x{100}\s>/, '\x{00A0} in \s';
+        ok        "<" . uni_to_native("\x{00A0}") . ">" =~        /<\h>/, '\x{00A0} in \h';
         my @h = map {sprintf "%05x" => $_} 0x01680, 0x02000 .. 0x0200A,
                                            0x0202F, 0x0205F, 0x03000;
         my @v = map {sprintf "%05x" => $_} 0x02028, 0x02029;
@@ -1123,7 +1120,7 @@ sub run_tests {
         ok $@ && $@ =~ /Invalid character/, 'Verify that leading digit in name gives error';
         eval 'q() =~ /\N{COM,MA}/';
         ok $@ && $@ =~ /Invalid character/, 'Verify that comma in name gives error';
-        $name = "A\x{D7}O";
+        $name = "A" . uni_to_native("\x{D7}") . "O";
         eval "q(W) =~ /\\N{$name}/";
         ok $@ && $@ =~ /Invalid character/, 'Verify that latin1 symbol in name gives error';
         my $utf8_name = "7 CITIES OF GOLD";
@@ -1134,7 +1131,7 @@ sub run_tests {
         utf8::upgrade($utf8_name);
         eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
         ok $@ && $@ =~ /Invalid character/, 'Verify that ASCII symbol in utf8 name gives error';
-        $utf8_name = "A HOUSE \xF7 AGAINST ITSELF";
+        $utf8_name = "A HOUSE " . uni_to_native("\xF7") . " AGAINST ITSELF";
         utf8::upgrade($utf8_name);
         eval "use utf8; q(W) =~ /\\N{$utf8_name}/";
         ok $@ && $@ =~ /Invalid character/, 'Verify that latin1 symbol in utf8 name gives error';
@@ -1146,7 +1143,7 @@ sub run_tests {
         ok $@ && $@ =~ /Invalid character/, 'Verify that above Latin1 symbol in utf8 name gives error';
 
         undef $w;
-        $name = "A\x{D1}O";
+        $name = "A" . uni_to_native("\x{D1}") . "O";
         eval "q(W) =~ /\\N{$name}/";
         ok ! $w, 'Verify that latin1 letter in name doesnt give warning';
 
@@ -1224,10 +1221,10 @@ sub run_tests {
 
     {
         my @ary = (
-            pack('U', 0x00F1),            # n-tilde
-            '_'.pack('U', 0x00F1),        # _ + n-tilde
+            pack('U', 0x00F1), # n-tilde
+            '_'.pack('U', 0x00F1), # _ + n-tilde
             'c'.pack('U', 0x0327),        # c + cedilla
-            pack('U*', 0x00F1, 0x0327),   # n-tilde + cedilla
+            pack('U*', 0x00F1, 0x0327),# n-tilde + cedilla
             pack('U', 0x0391),            # ALPHA
             pack('U', 0x0391).'2',        # ALPHA + 2
             pack('U', 0x0391).'_',        # ALPHA + _
@@ -1280,7 +1277,7 @@ sub run_tests {
 
         # \c\ followed by other characters
         for my $c ("z", "\0", "!", chr(254), chr(256)) {
-            my $targ = "a\034$c";
+            my $targ = "a" . uni_to_native("\034") . "$c";
             my $reg  = "a\\c\\$c";
             ok eval ("qq/$targ/ =~ /$reg/"), "\\c\\ in pattern";
         }
@@ -1550,27 +1547,27 @@ sub run_tests {
         ok "a" =~ /\p{PosixLower}/,  "a =~ PosixLower";
         ok "a" =~ /\p{PosixLower}/i,  "a =~ PosixLower under /i";
 
-        ok "\xC0" =~ /\p{XPosixUpper}/,  "\\xC0 =~ XPosixUpper";
-        ok "\xC0" =~ /\p{XPosixUpper}/i,  "\\xC0 =~ XPosixUpper under /i";
-        ok "\xC0" !~ /\p{XPosixLower}/,  "\\xC0 !~ XPosixLower";
-        ok "\xC0" =~ /\p{XPosixLower}/i,  "\\xC0 =~ XPosixLower under /i";
-        ok "\xE0" !~ /\p{XPosixUpper}/,  "\\xE0 !~ XPosixUpper";
-        ok "\xE0" =~ /\p{XPosixUpper}/i,  "\\xE0 =~ XPosixUpper under /i";
-        ok "\xE0" =~ /\p{XPosixLower}/,  "\\xE0 =~ XPosixLower";
-        ok "\xE0" =~ /\p{XPosixLower}/i,  "\\xE0 =~ XPosixLower under /i";
+        ok uni_to_native("\xC0") =~ /\p{XPosixUpper}/,  "\\xC0 =~ XPosixUpper";
+        ok uni_to_native("\xC0") =~ /\p{XPosixUpper}/i,  "\\xC0 =~ XPosixUpper under /i";
+        ok uni_to_native("\xC0") !~ /\p{XPosixLower}/,  "\\xC0 !~ XPosixLower";
+        ok uni_to_native("\xC0") =~ /\p{XPosixLower}/i,  "\\xC0 =~ XPosixLower under /i";
+        ok uni_to_native("\xE0") !~ /\p{XPosixUpper}/,  "\\xE0 !~ XPosixUpper";
+        ok uni_to_native("\xE0") =~ /\p{XPosixUpper}/i,  "\\xE0 =~ XPosixUpper under /i";
+        ok uni_to_native("\xE0") =~ /\p{XPosixLower}/,  "\\xE0 =~ XPosixLower";
+        ok uni_to_native("\xE0") =~ /\p{XPosixLower}/i,  "\\xE0 =~ XPosixLower under /i";
 
-        ok "\xC0" =~ /\p{UppercaseLetter}/,  "\\xC0 =~ UppercaseLetter";
-        ok "\xC0" =~ /\p{UppercaseLetter}/i,  "\\xC0 =~ UppercaseLetter under /i";
-        ok "\xC0" !~ /\p{LowercaseLetter}/,  "\\xC0 !~ LowercaseLetter";
-        ok "\xC0" =~ /\p{LowercaseLetter}/i,  "\\xC0 =~ LowercaseLetter under /i";
-        ok "\xC0" !~ /\p{TitlecaseLetter}/,  "\\xC0 !~ TitlecaseLetter";
-        ok "\xC0" =~ /\p{TitlecaseLetter}/i,  "\\xC0 =~ TitlecaseLetter under /i";
-        ok "\xE0" !~ /\p{UppercaseLetter}/,  "\\xE0 !~ UppercaseLetter";
-        ok "\xE0" =~ /\p{UppercaseLetter}/i,  "\\xE0 =~ UppercaseLetter under /i";
-        ok "\xE0" =~ /\p{LowercaseLetter}/,  "\\xE0 =~ LowercaseLetter";
-        ok "\xE0" =~ /\p{LowercaseLetter}/i,  "\\xE0 =~ LowercaseLetter under /i";
-        ok "\xE0" !~ /\p{TitlecaseLetter}/,  "\\xE0 !~ TitlecaseLetter";
-        ok "\xE0" =~ /\p{TitlecaseLetter}/i,  "\\xE0 =~ TitlecaseLetter under /i";
+        ok uni_to_native("\xC0") =~ /\p{UppercaseLetter}/,  "\\xC0 =~ UppercaseLetter";
+        ok uni_to_native("\xC0") =~ /\p{UppercaseLetter}/i,  "\\xC0 =~ UppercaseLetter under /i";
+        ok uni_to_native("\xC0") !~ /\p{LowercaseLetter}/,  "\\xC0 !~ LowercaseLetter";
+        ok uni_to_native("\xC0") =~ /\p{LowercaseLetter}/i,  "\\xC0 =~ LowercaseLetter under /i";
+        ok uni_to_native("\xC0") !~ /\p{TitlecaseLetter}/,  "\\xC0 !~ TitlecaseLetter";
+        ok uni_to_native("\xC0") =~ /\p{TitlecaseLetter}/i,  "\\xC0 =~ TitlecaseLetter under /i";
+        ok uni_to_native("\xE0") !~ /\p{UppercaseLetter}/,  "\\xE0 !~ UppercaseLetter";
+        ok uni_to_native("\xE0") =~ /\p{UppercaseLetter}/i,  "\\xE0 =~ UppercaseLetter under /i";
+        ok uni_to_native("\xE0") =~ /\p{LowercaseLetter}/,  "\\xE0 =~ LowercaseLetter";
+        ok uni_to_native("\xE0") =~ /\p{LowercaseLetter}/i,  "\\xE0 =~ LowercaseLetter under /i";
+        ok uni_to_native("\xE0") !~ /\p{TitlecaseLetter}/,  "\\xE0 !~ TitlecaseLetter";
+        ok uni_to_native("\xE0") =~ /\p{TitlecaseLetter}/i,  "\\xE0 =~ TitlecaseLetter under /i";
         ok "\x{1C5}" !~ /\p{UppercaseLetter}/,  "\\x{1C5} !~ UppercaseLetter";
         ok "\x{1C5}" =~ /\p{UppercaseLetter}/i,  "\\x{1C5} =~ UppercaseLetter under /i";
         ok "\x{1C5}" !~ /\p{LowercaseLetter}/,  "\\x{1C5} !~ LowercaseLetter";
@@ -1644,13 +1641,17 @@ sub run_tests {
 
     {
         # Various whitespace special patterns
-        my @h = map {chr $_}   0x09,   0x20,   0xa0, 0x1680, 0x2000,
+        my @h = map {chr utf8::unicode_to_native($_) }
+                             0x09,   0x20,   0xa0,   0x1680, 0x2000,
                              0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006,
                              0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f,
                              0x3000;
-        my @v = map {chr $_}   0x0a,   0x0b,   0x0c,   0x0d,   0x85, 0x2028,
+        my @v = map {chr utf8::unicode_to_native($_) }
+                             0x0a,   0x0b,   0x0c,   0x0d,   0x85, 0x2028,
                              0x2029;
-        my @lb = ("\x0D\x0A", map {chr $_} 0x0A .. 0x0D, 0x85, 0x2028, 0x2029);
+        my @lb = (uni_to_native("\x0D\x0A"),
+                             map {chr utf8::unicode_to_native($_) }
+                                  0x0A .. 0x0D, 0x85, 0x2028, 0x2029);
         foreach my $t ([\@h,  qr/\h/, qr/\h+/],
                        [\@v,  qr/\v/, qr/\v+/],
                        [\@lb, qr/\R/, qr/\R+/],) {
@@ -1675,9 +1676,9 @@ sub run_tests {
         # Test that \xDF matches properly. this is pretty hacky stuff,
         # but its actually needed. The malarky with '-' is to prevent
         # compilation caching from playing any role in the test.
-        my @df = (chr (0xDF), '-', chr (0xDF));
+        my @df = (chr utf8::unicode_to_native(0xDF), '-', chr utf8::unicode_to_native(0xDF));
         utf8::upgrade ($df [2]);
-        my @strs = ('ss', 'sS', 'Ss', 'SS', chr (0xDF));
+        my @strs = ('ss', 'sS', 'Ss', 'SS', chr utf8::unicode_to_native(0xDF));
         my @ss = map {("$_", "$_")} @strs;
         utf8::upgrade ($ss [$_ * 2 + 1]) for 0 .. $#strs;
 
@@ -1687,21 +1688,38 @@ sub run_tests {
                 my $str = $ss [$ssi];
                 my $utf_df = ($dfi > 1) ? 'utf8' : '';
                 my $utf_ss = ($ssi % 2) ? 'utf8' : '';
-                (my $sstr = $str) =~ s/\xDF/\\xDF/;
+                my $sstr;   # We hard-code the ebcdic value below to avoid
+                            # perturbing the test
+                ($sstr = $str) =~ s/\xDF/\\xDF/ if $::IS_ASCII;
+                ($sstr = $str) =~ s/\x59/\\x59/ if $::IS_EBCDIC;
 
                 if ($utf_df || $utf_ss || length ($ss [$ssi]) == 1) {
                     my $ret = $str =~ /$pat/i;
                     next if $pat eq '-';
-                    ok $ret, "\"$sstr\" =~ /\\xDF/i " .
+                    if ($::IS_ASCII) {
+                        ok $ret, "\"$sstr\" =~ /\\xDF/i " .
                              "(str is @{[$utf_ss||'latin']}, pat is " .
                              "@{[$utf_df||'latin']})";
+                    }
+                    else {
+                        ok $ret, "\"$sstr\" =~ /\\x59/i " .
+                             "(str is @{[$utf_ss||'latin']}, pat is " .
+                             "@{[$utf_df||'latin']})";
+                    }
                 }
                 else {
                     my $ret = $str !~ /$pat/i;
                     next if $pat eq '-';
-                    ok $ret, "\"$sstr\" !~ /\\xDF/i " .
+                    if ($::IS_EBCDIC) {
+                        ok $ret, "\"$sstr\" !~ /\\x59/i " .
                              "(str is @{[$utf_ss||'latin']}, pat is " .
                              "@{[$utf_df||'latin']})";
+                    }
+                    else {
+                        ok $ret, "\"$sstr\" !~ /\\xDF/i " .
+                             "(str is @{[$utf_ss||'latin']}, pat is " .
+                             "@{[$utf_df||'latin']})";
+                    }
                 }
             }
         }
@@ -1746,7 +1764,7 @@ sub run_tests {
     {
         # length() on captures, the numbered ones end up in Perl_magic_len
         no warnings 'deprecated', 'experimental::lexical_topic';
-        my $_ = "aoeu \xe6var ook";
+        my $_ = "aoeu " . uni_to_native("\xe6") . "var ook";
         /^ \w+ \s (?<eek>\S+)/x;
 
         is(length $`,      0, q[length $`]);
@@ -1825,7 +1843,8 @@ EOP
 
     {
 # more TRIE/AHOCORASICK problems with mixed utf8 / latin-1 and case folding
-    for my $chr (160 .. 255) {
+    for my $ord (160 .. 255) {
+        my $chr = utf8::unicode_to_native($ord);
         my $chr_byte = chr($chr);
         my $chr_utf8 = chr($chr); utf8::upgrade($chr_utf8);
         my $rx = qr{$chr_byte|X}i;
@@ -2199,9 +2218,10 @@ EOP
     ok 'foo/file.fob' =~ m,^(?=[^\.])[^/]*/(?=[^\.])[^/]*\.fo[^/]$,;
 
     {   # This was failing unless an explicit /d was added
-        my $p = qr/[\xE0_]/i;
+        my $E0 = uni_to_native("\xE0");
+        my $p = qr/[_$E0]/i;
         utf8::upgrade($p);
-        like("\xC0", qr/$p/, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
+        like(uni_to_native("\xC0"), qr/$p/, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
     }
 
     ok "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/,
@@ -2415,13 +2435,15 @@ EOP
     sub Is_32_Bit_Super { return "110000\tFFFFFFFF\n" }
     sub Is_Portable_Super { return '!utf8::Any' }   # Matches beyond 32 bits
 
+  SKIP:
     {   # Assertion was failing on on 64-bit platforms; just didn't work on 32.
+        skip("EBCDIC only goes to 31 bits", 4) if $::IS_EBCDIC;
         no warnings qw(non_unicode portable);
         use Config;
 
         # We use 'ok' instead of 'like' because the warnings are lexically
         # scoped, and want to turn them off, so have to do the match in this
-        # scope
+        # scope.   (EBCDIC platforms can't handle above 2**32 - 1
         if ($Config{uvsize} < 8) {
             ok(chr(0xFFFF_FFFE) =~ /\p{Is_32_Bit_Super}/,
                             "chr(0xFFFF_FFFE) can match a Unicode property");
@@ -2455,7 +2477,7 @@ EOP
 
     { # [perl #112530], the code below caused a panic
         sub InFoo { "a\tb\n9\ta\n" }
-        like("\n", qr/\p{InFoo}/,
+        like(chr(0xA), qr/\p{InFoo}/,
                             "Overlapping ranges in user-defined properties");
     }
 
