@@ -9,8 +9,8 @@ perl5180delta - what is new for perl v5.18.0
 This document describes differences between the 5.16.0 release and the 5.18.0
 release.
 
-If you are upgrading from an earlier release such as 5.14.0, first read
-L<perl5140delta>, which describes differences between 5.12.0 and 5.14.0.
+If you are upgrading from an earlier release such as 5.16.0, first read
+L<perl5160delta>, which describes differences between 5.14.0 and 5.16.0.
 
 =head1 Notice
 
