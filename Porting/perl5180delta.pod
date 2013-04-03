@@ -129,7 +129,7 @@ string eval [perl #65838].
 
 Newly-added experimental features will now require this incantation:
 
-    no warnings "experimental:feature_name";
+    no warnings "experimental::feature_name";
     use feature "feature_name";  # would warn without the prev line
 
 There is a new warnings category, called "experimental", containing
@@ -137,13 +137,13 @@ warnings that the L<feature> pragma emits when enabling experimental
 features.
 
 Newly-added experimental features will also be given special warning IDs,
-which consist of "experimental:" followed by the name of the feature.  (The
+which consist of "experimental::" followed by the name of the feature.  (The
 plan is to extend this mechanism eventually to all warnings, to allow them
 to be enabled or disabled individually, and not just by category.)
 
 By saying
 
-    no warnings "experimental:feature_name";
+    no warnings "experimental::feature_name";
 
 you are taking responsibility for any breakage that future changes to, or
 removal of, the feature may cause.
@@ -154,7 +154,7 @@ This new feature is still considered experimental.  To enable it, use the
 mechanism described above:
 
     use 5.018;
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature "lexical_subs";
 
 You can now declare subroutines with C<state sub foo>, C<my sub foo>, and
@@ -1088,7 +1088,7 @@ L<Experimental "%s" subs not enabled|perldiag/"Experimental "%s" subs not enable
 
 (F) To use lexical subs, you must first enable them:
 
-    no warnings 'experimental:lexical_subs';
+    no warnings 'experimental::lexical_subs';
     use feature 'lexical_subs';
     my sub foo { ... }
 
@@ -1144,7 +1144,7 @@ to use the feature, but know that in doing so you are taking the risk
 of using an experimental feature which may change or be removed in a
 future Perl version:
 
-    no warnings "experimental:lexical_subs";
+    no warnings "experimental::lexical_subs";
     use feature "lexical_subs";
 
 =item *
