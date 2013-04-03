@@ -14,6 +14,33 @@ L<perl5160delta>, which describes differences between 5.14.0 and 5.16.0.
 
 =head1 Core Enhancements
 
+=head2 New mechanism for experimental features
+
+Newly-added experimental features will now require this incantation:
+
+    no warnings "experimental::feature_name";
+    use feature "feature_name";  # would warn without the prev line
+
+There is a new warnings category, called "experimental", containing
+warnings that the L<feature> pragma emits when enabling experimental
+features.
+
+Newly-added experimental features will also be given special warning IDs,
+which consist of "experimental::" followed by the name of the feature.  (The
+plan is to extend this mechanism eventually to all warnings, to allow them
+to be enabled or disabled individually, and not just by category.)
+
+By saying
+
+    no warnings "experimental::feature_name";
+
+you are taking responsibility for any breakage that future changes to, or
+removal of, the feature may cause.
+
+Existing experimental features may begin emitting these warnings, too.  Please
+consult L<perlexperiment> for information on which features are considered
+experimental.
+
 =head2 Hash overhaul
 
 Changes to the implementation of hashes in perl 5.18.0 will be one of the most
@@ -72,14 +99,13 @@ new format.  Example of the new format:
     $ PERL_HASH_SEED_DEBUG=1 ./perl -e1
     HASH_FUNCTION = MURMUR3 HASH_SEED = 0x1476bb9f
 
-=head2 Regular Expression Set Operations
+=head2 Upgrade to Unicode 6.2
 
-This is an experimental feature to allow matching against the union,
-intersection, etc., of sets of code points, similar to
-L<Unicode::Regex::Set>.  It can also be used to extend C</x> processing
-to [bracketed] character classes, and as a replacement of user-defined
-properties, allowing more complex expressions than they do.  See
-L<perlre/(?[ ])>.
+Perl now supports the final version of Unicode 6.2.  Earlier releases in
+the 5.17 series supported Unicode 6.2 beta versions.  There were no
+substantive changes in the final Unicode 6.2 version from the most
+recent beta, included in Perl 5.17.4.  A list of changes from Unicode
+6.1 is at L<http://www.unicode.org/versions/Unicode6.2.0>.
 
 =head2 Character name aliases may now include non-Latin1-range characters
 
@@ -90,14 +116,6 @@ names to be in your native language, and not just English.  Certain
 restrictions apply to the characters that may be used (you can't define
 a name that has punctuation in it, for example).  See L<charnames/CUSTOM
 ALIASES>.
-
-=head2 Upgrade to Unicode 6.2
-
-Perl now supports the final version of Unicode 6.2.  Earlier releases in
-the 5.17 series supported Unicode 6.2 beta versions.  There were no
-substantive changes in the final Unicode 6.2 version from the most
-recent beta, included in Perl 5.17.4.  A list of changes from Unicode
-6.1 is at L<http://www.unicode.org/versions/Unicode6.2.0>.
 
 =head2 New DTrace probes
 
@@ -119,39 +137,18 @@ This new variable provides access to the filehandle that was last read.
 This is the handle used by C<$.> and by C<tell> and C<eof> without
 arguments.
 
-=head2 Looser here-doc parsing
+=head2 Regular Expression Set Operations
 
-Here-doc terminators no longer require a terminating newline character when
-they occur at the end of a file.  This was already the case at the end of a
-string eval [perl #65838].
-
-=head2 New mechanism for experimental features
-
-Newly-added experimental features will now require this incantation:
-
-    no warnings "experimental::feature_name";
-    use feature "feature_name";  # would warn without the prev line
-
-There is a new warnings category, called "experimental", containing
-warnings that the L<feature> pragma emits when enabling experimental
-features.
-
-Newly-added experimental features will also be given special warning IDs,
-which consist of "experimental::" followed by the name of the feature.  (The
-plan is to extend this mechanism eventually to all warnings, to allow them
-to be enabled or disabled individually, and not just by category.)
-
-By saying
-
-    no warnings "experimental::feature_name";
-
-you are taking responsibility for any breakage that future changes to, or
-removal of, the feature may cause.
+This is an B<experimental> feature to allow matching against the union,
+intersection, etc., of sets of code points, similar to
+L<Unicode::Regex::Set>.  It can also be used to extend C</x> processing
+to [bracketed] character classes, and as a replacement of user-defined
+properties, allowing more complex expressions than they do.  See
+L<perlre/(?[ ])>.
 
 =head2 Lexical subroutines
 
-This new feature is still considered experimental.  To enable it, use the
-mechanism described above:
+This new feature is still considered B<experimental>.  To enable it:
 
     use 5.018;
     no warnings "experimental::lexical_subs";
@@ -171,7 +168,7 @@ C<my sub>.
 C<our sub> declares a lexical alias to the package subroutine of the same
 name.
 
-See L<perlsub/Lexical Subroutines>.
+For more information, see L<perlsub/Lexical Subroutines>.
 
 =head2 Computed Labels
 
@@ -199,11 +196,6 @@ process group instead of a single process.  It has also allowed signal
 names.  But it did not behave consistently, because negative signal names
 were treated as 0.  Now negative signals names like C<-INT> are supported
 and treated the same way as -2 [perl #112990].
-
-=head2 C<pack> is now constant folded.
-
-C<pack> with constant arguments is now constant folded in most cases
-[perl #113470].
 
 =head1 Security
 
@@ -786,6 +778,11 @@ a small performance benefit due to reduced branching.
 
 B<Do not enable this unless you know exactly what you are getting yourself
 into.>
+
+=item *
+
+C<pack> with constant arguments is now constant folded in most cases
+[perl #113470].
 
 =item *
 
@@ -1802,6 +1799,12 @@ and PERL_DEBUG_READONLY_OPS, has been retired.
 =head1 Selected Bug Fixes
 
 =over 4
+
+=item *
+
+Here-doc terminators no longer require a terminating newline character when
+they occur at the end of a file.  This was already the case at the end of a
+string eval [perl #65838].
 
 =item *
 
