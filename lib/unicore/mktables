@@ -11487,7 +11487,6 @@ sub filter_old_style_case_folding {
     # Create the map for simple only if are going to output it, for otherwise
     # it takes no part in anything we do.
     my $to_output_simple;
-    my $all_folds;
 
     sub setup_case_folding($) {
         # Read in the case foldings in CaseFolding.txt.  This handles both
@@ -11499,12 +11498,6 @@ sub filter_old_style_case_folding {
         if (! $to_output_simple) {
             property_ref('Case_Folding')->set_proxy_for('Simple_Case_Folding');
         }
-
-        $all_folds = $perl->add_match_table("_Perl_Any_Folds",
-                           Perl_Extension => 1,
-                           Fate => $INTERNAL_ONLY,
-                           Description => "Code points that particpate in some fold",
-                           );
 
         # If we ever wanted to show that these tables were combined, a new
         # property method could be created, like set_combined_props()
@@ -11556,21 +11549,8 @@ END
         # so that _swash_inversion_hash() is able to construct closures
         # without having to worry about F mappings.
         if ($type eq 'C' || $type eq 'F' || $type eq 'I' || $type eq 'S') {
-            my $from = hex $range;  # Assumes range is single
-            $all_folds->add_range($from, $from);
             $_ = "$range; Case_Folding; "
                  . "$CMD_DELIM$REPLACE_CMD=$MULTIPLE_BEFORE$CMD_DELIM$map";
-
-            if ($type eq 'F') {
-                my @string = split " ", $map;
-                for my $i (0 .. @string  - 1 -1) {
-                    my $decimal = hex $string[$i];
-                    $all_folds->add_range($decimal, $decimal);
-                }
-            }
-            else {
-                $all_folds->add_range(hex $map, hex $map);
-            }
         }
         else {
             $_ = "";
@@ -13320,6 +13300,18 @@ sub compile_perl() {
         $PosixXDigit->add_alias('Ascii_Hex_Digit');
     }
     $PosixXDigit->add_description('[0-9A-Fa-f]');
+
+    my $any_folds = $perl->add_match_table("_Perl_Any_Folds",
+                    Description => "Code points that particpate in some fold",
+                    );
+    #
+    foreach my $range (property_ref('Case_Folding')->ranges) {
+        $any_folds->add_range($range->start, $range->end);
+        foreach my $hex_code_point (split " ", $range->value) {
+            my $code_point = hex $hex_code_point;
+            $any_folds->add_range($code_point, $code_point);
+        }
+    }
 
     my $dt = property_ref('Decomposition_Type');
     $dt->add_match_table('Non_Canon', Full_Name => 'Non_Canonical',
