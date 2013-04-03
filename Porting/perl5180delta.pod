@@ -221,6 +221,24 @@ them is a bad idea.
 
 This vulnerability is documented in CVE-2012-6329.
 
+=head2 Avoid calling memset with a negative count
+
+Poorly written perl code that allows an attacker to specify the count to perl's
+C<x> string repeat operator can already cause a memory exhaustion
+denial-of-service attack. A flaw in versions of perl before 5.15.5 can escalate
+that into a heap buffer overrun; coupled with versions of glibc before 2.16, it
+possibly allows the execution of arbitrary code.
+
+The flaw addressed to this commit has been assigned identifier CVE-2012-5195
+and was researched by Tim Brown.
+
+=head1 Incompatible Changes
+
+=head2 See also: hash overhaul
+
+Some of the changes in the L<hash overhaul|/"Hash overhaul"> are not fully
+compatible with previous versions of perl.  Please read that section.
+
 =head2 An unknown character name in C<\N{...}> is now a syntax error
 
 Previously, it warned, and the Unicode REPLACEMENT CHARACTER was
@@ -241,99 +259,13 @@ such as in
 
 or to have commas anywhere in the name.  See L<charnames/CUSTOM ALIASES>
 
-=head2 Avoid calling memset with a negative count
+=head2 C<\N{BELL}> now refers to U+1F514 instead of U+0007
 
-Poorly written perl code that allows an attacker to specify the count to perl's
-C<x> string repeat operator can already cause a memory exhaustion
-denial-of-service attack. A flaw in versions of perl before 5.15.5 can escalate
-that into a heap buffer overrun; coupled with versions of glibc before 2.16, it
-possibly allows the execution of arbitrary code.
-
-The flaw addressed to this commit has been assigned identifier CVE-2012-5195.
-
-=head1 Incompatible Changes
-
-=head2 See also: hash overhaul
-
-Some of the changes in the L<hash overhaul|/"Hash overhaul"> are not fully
-compatible with previous versions of perl.  Please read that section.
-
-=head2 Explicit rules for variable names and identifiers
-
-Due to an oversight, length-one variable names in 5.16 were completely
-unrestricted, and opened the door to several kinds of insanity.  As of
-5.18, these now follow the rules of other identifiers, in addition
-to accepting characters that match the \p{POSIX_Punct} property.
-
-There are no longer any differences in the parsing of identifiers specified
-as $... or ${...}; previously, they were dealt with in different parts of
-the core, and so had slightly different behavior. For instance,
-C<${foo:bar}> was a legal variable name.  Since they are now both parsed
-by the same code, that is no longer the case.
-
-=head2 Lexical $_ is now deprecated
-
-Since it was introduced in Perl 5.10, it has caused much confusion with no
-obvious solution:
-
-=over
-
-=item *
-
-Various modules (e.g., List::Util) expect callback routines to use the
-global $_.  C<use List::Util 'first'; my $_; first { $_ == 1 } @list> does
-not work as one would expect.
-
-=item *
-
-A C<my $_> declaration earlier in the same file can cause confusing closure
-warnings.
-
-=item *
-
-The "_" subroutine prototype character allows called subroutines to access
-your lexical $_, so it is not really private after all.
-
-=item *
-
-Nevertheless, subroutines with a "(@)" prototype and methods cannot access
-the caller's lexical $_, unless they are written in XS.
-
-=item *
-
-But even XS routines cannot access a lexical $_ declared, not in the
-calling subroutine, but in an outer scope, iff that subroutine happened not
-to mention $_ or use any operators that default to $_.
-
-=back
-
-=head2 readline() with C<$/ = \N> now reads N characters, not N bytes
-
-Previously, when reading from a stream with I/O layers such as
-C<encoding>, the readline() function, otherwise known as the C<< <> >>
-operator, would read I<N> bytes from the top-most layer. [perl #79960]
-
-Now, I<N> characters are read instead.
-
-There is no change in behaviour when reading from streams with no
-extra layers, since bytes map exactly to characters.
-
-=head2 Lexical subroutine warnings have moved
-
-The warning about the use of an experimental feature emitted when lexical
-subroutines (added in 5.17.4) are used now happens when the subroutine
-itself is declared, not when the "lexical_subs" feature is activated via
-C<use feature>.
-
-This stops C<use feature ':all'> from warning, but causes
-C<my sub foo; my sub bar> to warn twice.
-
-=head2 Overridden C<glob> is now passed one argument
-
-C<glob> overrides used to be passed a magical undocumented second argument
-that identified the caller.  Nothing on CPAN was using this, and it got in
-the way of a bug fix, so it was removed.  If you really need to identify
-the caller, see L<Devel::Callsite> on CPAN.
+Unicode 6.0 reused the name "BELL" for a different code point than it
+traditionally had meant.  Since Perl v5.14, use of this name still
+referred to U+0007, but would raise a deprecation warning.  Now, "BELL"
+refers to U+1F514, and the name for U+0007 is "ALERT".  All the
+functions in L<charnames> have been correspondingly updated.
 
 =head2 New Restrictions in Multi-Character Case-Insensitive Matching in Regular Expression Bracketed Character Classes
 
@@ -359,12 +291,31 @@ L<perlrecharclass/Bracketed Character Classes>.  Note that a bug [perl
 #89774], now fixed as part of this change, prevented the previous
 behavior from working fully.
 
-=head2 Here-doc parsing
+=head2 Explicit rules for variable names and identifiers
 
-The body of a here-document inside a quote-like operator now always begins
-on the line after the "<<foo" marker.  Previously, it was documented to
-begin on the line following the containing quote-like operator, but that
-was only sometimes the case [perl #114040].
+Due to an oversight, length-one variable names in 5.16 were completely
+unrestricted, and opened the door to several kinds of insanity.  As of
+5.18, these now follow the rules of other identifiers, in addition
+to accepting characters that match the C<\p{POSIX_Punct}> property.
+
+There are no longer any differences in the parsing of identifiers
+specified as C<$...> or C<${...};> previously, they were dealt with in
+different parts of the core, and so had slightly different behavior. For
+instance, C<${foo:bar}> was a legal variable name.  Since they are now
+both parsed by the same code, that is no longer the case.
+
+=head2 C<\s> in regular expressions now matches a Vertical Tab
+
+No one could recall why C<\s> didn't match C<\cK>, the vertical tab.
+Now it does.  Given the extreme rarity of that character, very little
+breakage is expected.
+
+=head2 C</(?{})/> and C</(??{})/> have been heavily reworked
+
+The implementation of this feature has been almost completely rewritten.
+Although its main intent is to fix bugs, some behaviors, especially
+related to the scope of lexical variables, will have changed.  This is
+described more fully in the L</Selected Bug Fixes> section.
 
 =head2 Stricter parsing of substitution replacement
 
@@ -374,6 +325,106 @@ this:
     %_=(_,"Just another ");
     $_="Perl hacker,\n";
     s//_}->{_/e;print
+
+=head2 C<given> now aliases the global C<$_>
+
+Instead of assigning to an implicit lexical C<$_>, C<given> now makes the
+global C<$_> an alias for its argument, just like C<foreach>.  However, it
+still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
+C<foreach>) [perl #114020].
+
+=head2 Lexical $_ is now experimental
+
+Since it was introduced in Perl 5.10, it has caused much confusion with no
+obvious solution:
+
+=over
+
+=item *
+
+Various modules (e.g., List::Util) expect callback routines to use the
+global C<$_>.  C<use List::Util 'first'; my $_; first { $_ == 1 } @list>
+does not work as one would expect.
+
+=item *
+
+A C<my $_> declaration earlier in the same file can cause confusing closure
+warnings.
+
+=item *
+
+The "_" subroutine prototype character allows called subroutines to access
+your lexical C<$_>, so it is not really private after all.
+
+=item *
+
+Nevertheless, subroutines with a "(@)" prototype and methods cannot access
+the caller's lexical C<$_>, unless they are written in XS.
+
+=item *
+
+But even XS routines cannot access a lexical C<$_> declared, not in the
+calling subroutine, but in an outer scope, iff that subroutine happened not
+to mention C<$_> or use any operators that default to C<$_>.
+
+=back
+
+It is our hope that lexical C<$_> can be rehabilitated, but this may
+cause changes in its behavior.  Please use it with caution until it
+becomes stable.
+
+=head2 readline() with C<$/ = \N> now reads N characters, not N bytes
+
+Previously, when reading from a stream with I/O layers such as
+C<encoding>, the readline() function, otherwise known as the C<< <> >>
+operator, would read I<N> bytes from the top-most layer. [perl #79960]
+
+Now, I<N> characters are read instead.
+
+There is no change in behaviour when reading from streams with no
+extra layers, since bytes map exactly to characters.
+
+=head2 Overridden C<glob> is now passed one argument
+
+C<glob> overrides used to be passed a magical undocumented second argument
+that identified the caller.  Nothing on CPAN was using this, and it got in
+the way of a bug fix, so it was removed.  If you really need to identify
+the caller, see L<Devel::Callsite> on CPAN.
+
+=head2 Here-doc parsing
+
+The body of a here-document inside a quote-like operator now always begins
+on the line after the "<<foo" marker.  Previously, it was documented to
+begin on the line following the containing quote-like operator, but that
+was only sometimes the case [perl #114040].
+
+=head2 Alphanumeric operators must now be separated from the closing
+delimiter of regular expressions
+
+You may no longer write something like:
+
+ m/a/and 1
+
+Instead you must write
+
+ m/a/ and 1
+
+with whitespace separating the operator from the closing delimiter of
+the regular expression.  Not having whitespace has resulted in a
+deprecation warning since Perl v5.14.0.
+
+=head2 qw(...) can no longer be used as parentheses
+
+C<qw> lists used to fool the parser into thinking they were always
+surrounded by parentheses.  This permitted some surprising constructions
+such as C<foreach $x qw(a b c) {...}>, which should really be written
+C<foreach $x (qw(a b c)) {...}>.  These would sometimes get the lexer into
+the wrong state, so they didn't fully work, and the similar C<foreach qw(a
+b c) {...}> that one might expect to be permitted never worked at all.
+
+This side effect of C<qw> has now been abolished.  It has been deprecated
+since Perl 5.13.11.  It is now necessary to use real parentheses
+everywhere that the grammar calls for them.
 
 =head2 Interaction of lexical and default warnings
 
@@ -404,14 +455,6 @@ C<our sub { ... }>.  These are now disallowed outside of the "lexical_subs"
 feature.  Under the "lexical_subs" feature they have new meanings described
 in L<perlsub/Lexical Subroutines>.
 
-=head2 C<gv_fetchmeth_*> and SUPER
-
-The various C<gv_fetchmeth_*> XS functions used to treat a package whose
-named ended with ::SUPER specially.  A method lookup on the Foo::SUPER
-package would be treated as a SUPER method lookup on the Foo package.  This
-is no longer the case.  To do a SUPER lookup, pass the Foo stash and the
-GV_SUPER flag.
-
 =head2 Defined values stored in environment are forced to byte strings
 
 A value stored in an environment variable has always been stringified.  In this
@@ -421,81 +464,19 @@ C<utf8::downgrade()> works, that result is used; otherwise, the equivalent of
 C<utf8::encode()> is used, and a warning is issued about wide characters
 (L</Diagnostics>).
 
-=head2 C<given> now aliases the global C<$_>
-
-Instead of assigning to an implicit lexical C<$_>, C<given> now makes the
-global C<$_> an alias for its argument, just like C<foreach>.  However, it
-still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
-C<foreach>) [perl #114020].
-
-=head2 qw(...) can no longer be used as parentheses
-
-C<qw> lists used to fool the parser into thinking they were always
-surrounded by parentheses.  This permitted some surprising constructions
-such as C<foreach $x qw(a b c) {...}>, which should really be written
-C<foreach $x (qw(a b c)) {...}>.  These would sometimes get the lexer into
-the wrong state, so they didn't fully work, and the similar C<foreach qw(a
-b c) {...}> that one might expect to be permitted never worked at all.
-
-This side effect of C<qw> has now been abolished.  It has been deprecated
-since Perl 5.13.11.  It is now necessary to use real parentheses
-everywhere that the grammar calls for them.
-
-=head2 C<\s> in regular expressions now matches a Vertical Tab
-
-[ XXX ]
-
-=head2 C</(?{})/> and C</(??{})/> have been heavily reworked
-
-The implementation of this feature has been almost completely rewritten.
-Although its main intent is to fix bugs, some behaviors, especially
-related to the scope of lexical variables, will have changed.  This is
-described more fully in the L</Selected Bug Fixes> section.
-
-=head2 C<\N{BELL}> now refers to U+1F514 instead of U+0007
-
-Unicode 6.0 reused the name "BELL" for a different code point than it
-traditionally had meant.  Since Perl v5.14, use of this name still
-referred to U+0007, but would raise a deprecation warning.  Now, "BELL"
-refers to U+1F514, and the name for U+0007 is "ALERT".  All the
-functions in L<charnames> have been correspondingly updated.
-
-=head2 Alphanumeric operators must now be separated from the closing
-delimiter of regular expressions
-
-You may no longer write something like:
-
- m/a/and 1
-
-Instead you must write
-
- m/a/ and 1
-
-with whitespace separating the operator from the closing delimiter of
-the regular expression.  Not having whitespace has resulted in a
-deprecation warning since Perl v5.14.0.
-
 =head2 C<require> dies for unreadable files
 
 When C<require> encounters an unreadable file, it now dies.  It used to
-ignore the file and continue searching the directories in @INC
+ignore the file and continue searching the directories in C<@INC>
 [perl #113422].
 
-=head2 Upgrade to the Unicode 6.2 beta
+=head2 C<gv_fetchmeth_*> and SUPER
 
-Unicode 6.2 is proposing some changes that may very well break some CPAN
-modules.  The timing of this nicely coincides with Perl's being early in the
-release cycle.  This commit takes the current beta 6.2, adds the proposed
-changes that aren't yet in it, and subtracts the changes that would affect \X
-processing, as those turn out to have errors, and may have to be rethought.
-Unicode has been notified of these problems.
-
-This will allow us to gather data as to whether or not the proposed changes
-cause us problems.  These will be presented to Unicode to aid in their final
-decision as to whether or not to go forward with the changes.
-
-These changes will be replaced by the final version of Unicode 6.2 before
-5.18.0 is released.
+The various C<gv_fetchmeth_*> XS functions used to treat a package whose
+named ended with ::SUPER specially.  A method lookup on the Foo::SUPER
+package would be treated as a SUPER method lookup on the Foo package.  This
+is no longer the case.  To do a SUPER lookup, pass the Foo stash and the
+GV_SUPER flag.
 
 =head1 Deprecations
 
