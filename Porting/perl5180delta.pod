@@ -645,15 +645,16 @@ breaking any existing code.
 =item *
 
 Lists of lexical variable declarations (C<my($x, $y)>) are now optimised
-down to a single op, and are hence faster than before.
+down to a single op and are hence faster than before.
 
 =item *
 
-A new C preprocessor define NO_TAINT_SUPPORT was added that, if set, disables
-Perl's taint support altogether.  Using the -T or -t command line flags will
-cause a fatal error.  Beware that both core tests as well as many a CPAN
-distribution's tests will fail with this change.  On the upside, it provides
-a small performance benefit due to reduced branching.
+A new C preprocessor define C<NO_TAINT_SUPPORT> was added that, if set,
+disables Perl's taint support altogether.  Using the -T or -t command
+line flags will cause a fatal error.  Beware that both core tests as
+well as many a CPAN distribution's tests will fail with this change.  On
+the upside, it provides a small performance benefit due to reduced
+branching.
 
 B<Do not enable this unless you know exactly what you are getting yourself
 into.>
@@ -666,7 +667,7 @@ C<pack> with constant arguments is now constant folded in most cases
 =item *
 
 Speed up in regular expression matching against Unicode properties.  The
-largest gain is for C<\X>, the Unicode "extended grapheme cluster".  The
+largest gain is for C<\X>, the Unicode "extended grapheme cluster."  The
 gain for it is about 35% - 40%.  Bracketed character classes, e.g.,
 C<[0-9\x{100}]> containing code points above 255 are also now faster.
 
@@ -677,8 +678,8 @@ inline functions. This should speed things up slightly on non-GCC platforms.
 
 =item *
 
-Apply the optimisation of hashes in boolean context, such as in C<if> or C<and>,
-to constructs in non-void context.
+Apply the optimisation of hashes in boolean context, such as in C<if> or
+C<and>, to constructs in non-void context.
 
 =item *
 
@@ -687,48 +688,11 @@ C<%hash ? ... : ...>, and C<sub { %hash || ... }>.
 
 =item *
 
-When making a copy of the string being matched against (so that $1, $& et al
-continue to show the correct value even if the original string is subsequently
-modified), only copy that substring of the original string needed for the
-capture variables, rather than copying the whole string.
-
-This is a big win for code like
-
-    $&;
-    $_ = 'x' x 1_000_000;
-    1 while /(.)/;
-
-Also, when pessimizing if the code contains C<$`>, C<$&> or C<$'>, record the
-presence of each variable separately, so that the determination of the substring
-range is based on each variable separately. So performance-wise,
-
-   $&; /x/
-
-is now roughly equivalent to
-
-   /(x)/
-
-whereas previously it was like
-
-   /^(.*)(x)(.*)$/
-
-and
-
-   $&; $'; /x/
-
-is now roughly equivalent to
-
-   /(x)(.*)$/
-
-etc.
-
-=item *
-
 Filetest ops manage the stack in a fractionally more efficient manner.
 
 =item *
 
-Globs used in a numeric context are now numerified directly in most cases,
+Globs used in a numeric context are now numified directly in most cases,
 rather than being numerified via stringification.
 
 =item *
@@ -740,16 +704,6 @@ around the left operand.
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
 
 =head2 New Modules and Pragmata
 
@@ -764,6 +718,13 @@ information only known to the C<perl> binary and not available via L<Config>.
 =back
 
 =head2 Updated Modules and Pragmata
+
+This is only an overview of selected module updates.  For a complete
+list of updates, run:
+
+  $ corelist --diff 5.14.0 5.16.0
+
+You can substitute your favorite version in place of 5.14.0, too.
 
 =over 4
 
@@ -786,18 +747,17 @@ available under a different name: L<CPAN::Meta::Requirements>.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
+
+=head3 L<perlcheat>
+
+=over 4
+
+=item *
+
+L<perlcheat> has been reorganized, and a few new sections were added.
+
+=back
 
 =head3 L<perldata>
 
@@ -821,6 +781,16 @@ now doesn't assume that the reader knows what symbolic references are.
 
 =back
 
+=head3 L<perlfaq>
+
+=over 4
+
+=item *
+
+L<perlfaq> has been synchronized with version 5.0150040 from CPAN.
+
+=back
+
 =head3 L<perlfunc>
 
 =over 4
@@ -832,26 +802,6 @@ The return value of C<pipe> is now documented.
 =item *
 
 Clarified documentation of C<our>.
-
-=back
-
-=head3 L<perlfaq>
-
-=over 4
-
-=item *
-
-L<perlfaq> has been synchronized with version 5.0150040 from CPAN.
-
-=back
-
-=head3 L<perlcheat>
-
-=over 4
-
-=item *
-
-L<perlcheat> has been reorganized, and a few new sections were added.
 
 =back
 
@@ -992,8 +942,8 @@ The second situation is caused by an eval accessing a variable that has
 gone out of scope, for example,
 
     sub f {
-	my sub a {...}
-	sub { eval '\&a' }
+        my sub a {...}
+        sub { eval '\&a' }
     }
     f()->();
 
@@ -1077,10 +1027,9 @@ consistent with the warnings that C<$[> used to generate.)
 
 =item *
 
-The warnings for \b{ and \B{ were added in the 5.17 series; they are a
-deprecation warning which should be turned off by that category.  One
-should not have to turn off regular regexp warnings as well to get rid
-of these.
+The warnings for C<\b{> and C<\B{> were added.  They are a deprecation
+warning which should be turned off by that category.  One should not
+have to turn off regular regexp warnings as well to get rid of these.
 
 =item *
 
@@ -1156,13 +1105,6 @@ F<h2xs> no longer produces invalid code for empty defines.  [perl #20636]
 
 =head1 Configuration and Compilation
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
 =over 4
 
 =item *
@@ -1211,14 +1153,6 @@ accepts the default value.  This helps B<perldoc> when handling ANSI escapes
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
@@ -1231,26 +1165,6 @@ gibibytes of memory that may be safely used.
 =back
 
 =head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
 
 =head2 Discontinued Platforms
 
