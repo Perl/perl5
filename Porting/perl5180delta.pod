@@ -1202,91 +1202,116 @@ Support for Rhapsody has been removed.
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
+=head3 AIX
 
-=over 4
+Configure now always adds C<-qlanglvl=extc99> to the CC flags on AIX when
+using xlC.  This will make it easier to compile a number of XS-based modules
+that assume C99 [perl #113778].
 
-=item clang++
+=head3 clang++
 
 There is now a workaround for a compiler bug that prevented compiling
 with clang++ since Perl 5.15.7 [perl #112786].
 
-=item C++
+=head3 C++
 
 When compiling the Perl core as C++ (which is only semi-supported), the
 mathom functions are now compiled as C<extern "C">, to ensure proper
 binary compatibility.  (However, binary compatibility isn't generally
 guaranteed anyway in the situations where this would matter.)
 
-=item VMS
+=head3 Darwin
+
+Stop hardcoding an alignment on 8 byte boundaries to fix builds using
+-Dusemorebits.
+
+=head3 Haiku
+
+Perl should now work out of the box on Haiku R1 Alpha 4.
+
+=head3 MidnightBSD
+
+C<libc_r> was removed from recent versions of MidnightBSD and older versions
+work better with C<pthread>. Threading is now enabled using C<pthread> which
+corrects build errors with threading enabled on 0.4-CURRENT.
+
+=head3 Solaris
+
+In Configure, avoid running sed commands with flags not supported on Solaris.
+
+=head3 VMS
+
+=over
+
+=item *
 
 Where possible, the case of filenames and command-line arguments is now
 preserved by enabling the CRTL features C<DECC$EFS_CASE_PRESERVE> and
 C<DECC$ARGV_PARSE_STYLE> at start-up time.  The latter only takes effect
 when extended parse is enabled in the process from which Perl is run.
 
-=item VMS
+=item *
 
 The character set for Extended Filename Syntax (EFS) is now enabled by default
 on VMS.  Among other things, this provides better handling of dots in directory
 names, multiple dots in filenames,and spaces in filenames.  To obtain the old
 behavior, set the logical name C<DECC$EFS_CHARSET> to C<DISABLE>.
 
-=item MidnightBSD
+=item *
 
-C<libc_r> was removed from recent versions of MidnightBSD and older versions
-work better with C<pthread>. Threading is now enabled using C<pthread> which
-corrects build errors with threading enabled on 0.4-CURRENT.
+Fix linking on builds configured with -Dusemymalloc=y.
 
-=item WinCE
+=item *
 
-Building on WinCE is now possible once again, although more work is required
-to fully restore a clean build.
+It should now be possible to compile Perl as C++ on VMS.
 
-=item Windows
+=item *
+
+All C header files from the top-level directory of the distribution are now
+installed on VMS, providing consistency with a long-standing practice on other
+platforms. Previously only a subset were installed, which broke non-core
+extension builds for extensions that depended on the missing include files.
+
+=item *
+
+Quotes are now removed from the command verb (but not the parameters) for
+commands spawned via C<system>, backticks, or a piped C<open>.  Previously,
+quotes on the verb were passed through to DCL, which would fail to recognize
+the command.  Also, if the verb is actually a path to an image or command
+procedure on an ODS-5 volume, quoting it now allows the path to contain spaces.
+
+=item *
+
+The B<a2p> build has been fixed for the HP C++ compiler on OpenVMS.
+
+=back
+
+=head3 Win32
+
+=over
+
+=item *
 
 Perl can now be built using Microsoft's Visual C++ 2012 compiler by specifying
 CCTYPE=MSVC110 (or MSVC110FREE if you are using the free Express edition for
 Windows Desktop) in F<win32/Makefile>.
 
-=item Haiku
+=item *
 
-Perl should now work out of the box on Haiku R1 Alpha 4.
+The option to build without USE_SOCKETS_AS_HANDLES has been removed.
 
-=item Win32
+=item *
 
 Fixed a problem where perl could crash while cleaning up threads (including the
 main thread) in threaded debugging builds on Win32 and possibly other platforms
 [perl #114496].
 
+=item *
+
 A rare race condition that would lead to L<sleep|perlfunc/sleep> taking more
 time than requested, and possibly even hanging, has been fixed [perl #33096].
 
-=item Win32
-
-The option to build without USE_SOCKETS_AS_HANDLES has been removed.
-
-=item Solaris
-
-In Configure, avoid running sed commands with flags not supported on Solaris.
-
-=item Darwin
-
-Stop hardcoding an alignment on 8 byte boundaries to fix builds using
--Dusemorebits.
-
-=item VMS
-
-Fix linking on builds configured with -Dusemymalloc=y.
-
-=item VMS
-
-It should now be possible to compile Perl as C++ on VMS.
-
-=item Win32
+=item *
 
 C<link> on Win32 now attempts to set C<$!> to more appropriate values
 based on the Win32 API error code. [perl #112272]
@@ -1298,50 +1323,30 @@ outside of the current ANSI codepage (e.g. see the item about Unicode in
 C<%ENV> in L<http://perl5.git.perl.org/perl.git/blob/HEAD:/Porting/todo.pod>).
 [perl #113536]
 
-=item Win32
+=item *
 
 Building perl with some Windows compilers used to fail due to a problem
 with miniperl's C<glob> operator (which uses the C<perlglob> program)
 deleting the PATH environment variable [perl #113798].
 
-=item Win32
+=item *
 
-A new makefile option, USE_64_BIT_INT, has been added to the Windows makefiles.
-Set this to "define" when building a 32-bit perl if you want it to use 64-bit
-integers.
+A new makefile option, USE_64_BIT_INT, has been added to the Windows
+makefiles.  Set this to "define" when building a 32-bit perl if you want
+it to use 64-bit integers.
 
-Machine code size reductions, already made to the DLLs of XS modules in Perl
-5.17.2, have now been extended to the perl DLL itself.
+Machine code size reductions, already made to the DLLs of XS modules in
+Perl 5.17.2, have now been extended to the perl DLL itself.
 
-Building with VC++ 6.0 was inadvertently broken in Perl 5.17.2 but has now been
-fixed again.
-
-=item VMS
-
-All C header files from the top-level directory of the distribution are now
-installed on VMS, providing consistency with a long-standing practice on other
-platforms. Previously only a subset were installed, which broke non-core
-extension builds for extensions that depended on the missing include files.
-
-=item VMS
-
-Quotes are now removed from the command verb (but not the parameters) for
-commands spawned via C<system>, backticks, or a piped C<open>.  Previously,
-quotes on the verb were passed through to DCL, which would fail to recognize
-the command.  Also, if the verb is actually a path to an image or command
-procedure on an ODS-5 volume, quoting it now allows the path to contain spaces.
-
-=item VMS
-
-The B<a2p> build has been fixed for the HP C++ compiler on OpenVMS.
-
-=item AIX
-
-Configure now always adds C<-qlanglvl=extc99> to the CC flags on AIX when
-using xlC.  This will make it easier to compile a number of XS-based modules
-that assume C99 [perl #113778].
+Building with VC++ 6.0 was inadvertently broken in Perl 5.17.2 but has
+now been fixed again.
 
 =back
+
+=head3 WinCE
+
+Building on WinCE is now possible once again, although more work is required
+to fully restore a clean build.
 
 =head1 Internal Changes
 
@@ -1395,16 +1400,6 @@ Copy-on-write no longer uses the SvFAKE and SvREADONLY flags.  Hence,
 SvREADONLY indicates a true read-only SV.
 
 Use the SvIsCOW macro (as before) to identify a copy-on-write scalar.
-
-=item *
-
-C<PL_sawampersand> is now a constant.  The switch this variable provided
-(to enable/disable the pre-match copy depending on whether C<$&> had been
-seen) has been removed and replaced with copy-on-write, eliminating a few
-bugs.
-
-The previous behaviour can still be enabled by running F<Configure> with
-B<-Accflags=-DPERL_SAWAMPERSAND>.
 
 =item *
 
@@ -1487,11 +1482,12 @@ special backtracking verbs that set $REGMARK and $REGERROR.
 
 The APIs for accessing lexical pads have changed considerably.
 
-C<PADLIST>s are now longer C<AV>s, but their own type instead. C<PADLIST>s now
-contain a C<PAD> and a C<PADNAMELIST> of C<PADNAME>s, rather than C<AV>s for the
-pad and the list of pad names.  C<PAD>s, C<PADNAMELIST>s, and C<PADNAME>s are to
-be accessed as such through the newly added pad API instead of the plain C<AV>
-and C<SV> APIs.  See L<perlapi> for details.
+C<PADLIST>s are now longer C<AV>s, but their own type instead.
+C<PADLIST>s now contain a C<PAD> and a C<PADNAMELIST> of C<PADNAME>s,
+rather than C<AV>s for the pad and the list of pad names.  C<PAD>s,
+C<PADNAMELIST>s, and C<PADNAME>s are to be accessed as such through the
+newly added pad API instead of the plain C<AV> and C<SV> APIs.  See
+L<perlapi> for details.
 
 =item *
 
@@ -1606,7 +1602,8 @@ they've finished using it.
 
 =item *
 
-A trailing '/' on a path in @INC will no longer have an additional '/' appended.
+A trailing '/' on a path in @INC will no longer have an additional '/'
+appended.
 
 =item *
 
@@ -1636,8 +1633,8 @@ and exit nonzero. [perl #61362]
 
 =item *
 
-C<sort {undef} ...> under fatal warnings no longer crashes.  It started
-crashing in Perl 5.16.
+C<sort {undef} ...> under fatal warnings no longer crashes.  It had
+begun crashing in Perl 5.16.
 
 =item *
 
@@ -1649,16 +1646,6 @@ frees.  This bug started happening in Perl 5.16.
 
 Numerous memory leaks have been fixed, mostly involving fatal warnings and
 syntax errors.
-
-=item *
-
-Lexical constants (C<my sub answer () { 42 }>) no longer cause double
-frees.
-
-=item *
-
-Constant subroutine redefinition warns by default, but lexical constants
-were accidentally exempt from default warnings.  This has been corrected.
 
 =item *
 
@@ -1711,11 +1698,6 @@ C<reset> no longer makes threaded builds crash.
 
 =item *
 
-An earlier release in the 5.17.x series could crash if user code prevented
-_charnames from loading via C<$INC{'_charnames.pm'}++>.
-
-=item *
-
 A number of bugs related to assigning a list to hash have been fixed. Many of
 these involve lists with repeated keys like C<(1, 1, 1, 1)>.
 
@@ -1741,11 +1723,6 @@ A number of additional edge cases in list assignment to hashes were
 corrected. For more details see commit 23b7025ebc.
 
 =back
-
-=item *
-
-A bug, case-insensitive regex with UTF8-flagged strings, introduced
-earlier in the 5.17 series has been fixed.  [perl #114982]
 
 =item *
 
@@ -1831,11 +1808,6 @@ broken when v-strings were added in Perl 5.6.  [perl #56880]
 
 =item *
 
-A regression introduced in 5.17.2 has been fixed, which made C</[\@\\]||/>
-result in a "panic" error.  [perl #115050]
-
-=item *
-
 C<length>, C<pos>, C<substr> and C<sprintf> could be confused by ties,
 overloading, references and typeglobs if the stringification of such
 changed the internal representation to or from UTF8.  [perl #114410]
@@ -1870,7 +1842,7 @@ Aliases to match variables in the replacement.
 
 =item *
 
-$REGERROR or $REGMARK in the replacement.  [perl #49190]
+C<$REGERROR> or C<$REGMARK> in the replacement.  [perl #49190]
 
 =item *
 
@@ -1997,9 +1969,10 @@ might attempt to allocate more memory.
 
 =item *
 
-In a regular expression, if something is quantified with C<{n,m}>
-where C<S<n E<gt> m>>, it can't possibly match.  Previously this was a fatal error,
-but now is merely a warning (and that something won't match).  [perl #82954].
+In a regular expression, if something is quantified with C<{n,m}> where
+C<S<n E<gt> m>>, it can't possibly match.  Previously this was a fatal
+error, but now is merely a warning (and that something won't match).
+[perl #82954].
 
 =item *
 
@@ -2020,12 +1993,6 @@ It used to output the format itself (%vd) when passed an alpha version, and
 also emit an "Invalid conversion in printf" warning.  It no longer does,
 but produces the empty string in the output.  It also no longer leaks
 memory in this case.
-
-=item *
-
-A bug fix in an earlier 5.17.x release caused C<no a a 3> (a syntax error)
-to result in a bad read or assertion failure, because an op was being freed
-twice.
 
 =item *
 
@@ -2157,18 +2124,8 @@ Formats are no longer created after compilation errors.
 
 =item *
 
-Some format syntax errors started causing crashes in Perl 5.17.2, but have now
-been fixed.
-
-=item *
-
 Under debugging builds, the B<-DA> command line option started crashing in Perl
 5.16.0.  It has been fixed [perl #114368].
-
-=item *
-
-Scope::Escape compatibility, which was broken in Perl 5.17.2, has been restored
-[perl #113872].
 
 =item *
 
@@ -2195,23 +2152,8 @@ thread-safe on VMS.
 
 =item *
 
-The C<re_compile()> API function, the entry point for perl's regex compiler,
-was accidentally changed in Perl 5.17.1 to operate on the current engine.  This
-has now been restored to its former core-engine-specific state [perl #114302].
-
-=item *
-
-Perl 5.17.1 introduced a memory leak into the re-use of run-time regexes where
-the pattern hasn't changed (i.e. C</$unchanging/>).  This has now been fixed.
-
-=item *
-
 A bug in the compilation of a C</(?{})/> expression which affected the TryCatch
 test suite has been fixed [perl #114242].
-
-=item *
-
-Formats no longer leak.  They started leaking in Perl 5.17.2.
 
 =item *
 
@@ -2304,13 +2246,6 @@ C<readline> and C<readdir>.
 
 Subs in the CORE:: namespace no longer crash after C<undef *_> when called
 with no argument list (C<&CORE::time> with no parentheses).
-
-=item *
-
-Unicode 6.1 published an incorrect alias for one of the
-Canonical_Combining_Class property's values (which range between 0 and
-254).  The alias C<CCC133> should have been C<CCC132>.  Perl now
-overrides the data file furnished by Unicode to give the correct value.
 
 =item *
 
@@ -2679,11 +2614,6 @@ C<< sub foo { while (0) { ... } } >> now return the same thing [perl #73618].
 
 =item *
 
-Fixed the debugger C<l> and C<M> commands, and other debugger
-functionality which was broken in 5.17.0 [perl #113918].
-
-=item *
-
 String negation now behaves the same under C<use integer;> as it does
 without [perl #113012].
 
@@ -2853,11 +2783,6 @@ non-objects.
 
 =item *
 
-C<$x = "(?{})"; /a++(?{})+$x/x> no longer erroneous produces an error (just
-a warning, as expected).  This was broken in 5.17.1.
-
-=item *
-
 C<$byte_overload .= $utf8> no longer results in doubly-encoded UTF8 if the
 left-hand scalar happened to have produced a UTF8 string the last time
 overloading was invoked.
@@ -2883,17 +2808,11 @@ becomes empty.
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+XXX: the imperfect behavior of the ** deprecation
 
 =back
 
