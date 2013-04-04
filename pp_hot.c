@@ -322,7 +322,7 @@ PP(pp_concat)
  * I suspect that the mg_get is no longer needed, but while padav
  * differs, it can't share this function */
 
-void
+STATIC void
 S_pushav(pTHX_ AV* const av)
 {
     dSP;

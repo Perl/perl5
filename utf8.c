@@ -1512,8 +1512,10 @@ Perl_is_uni_alnumc(pTHX_ UV c)
     return _is_utf8_FOO(_CC_ALPHANUMERIC, tmpbuf);
 }
 
-bool    /* Internal function so we can deprecate the external one, and call
-           this one from other deprecated functions in this file */
+/* Internal function so we can deprecate the external one, and call
+   this one from other deprecated functions in this file */
+
+PERL_STATIC_INLINE bool
 S_is_utf8_idfirst(pTHX_ const U8 *p)
 {
     dVAR;
