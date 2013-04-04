@@ -186,7 +186,7 @@ empty string.
 =head2 More CORE:: subs
 
 Several more built-in functions have been added as subroutines to the
-CORE:: namespace, namely, those non-overridable keywords that can be
+CORE:: namespace - namely, those non-overridable keywords that can be
 implemented without custom parsers: C<defined>, C<delete>, C<exists>,
 C<glob>, C<pos>, C<protoytpe>, C<scalar>, C<split>, C<study>, and C<undef>.
 
