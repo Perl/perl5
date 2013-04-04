@@ -2805,7 +2805,7 @@ C<"/\n\n" =~ m#\A(?:^/$)#im> would not match [perl #115242].
 
 =item *
 
-Failed C<fork> in list context no longer currupts the stack.
+Failed C<fork> in list context no longer corrupts the stack.
 C<@a = (1, 2, fork, 3)> used to gobble up the 2 and assign C<(1, undef, 3)>
 if the C<fork> call failed.
 
