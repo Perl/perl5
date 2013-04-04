@@ -649,10 +649,22 @@ Platforms with out support infrastructure
 Both Windows CE and z/OS have been historically under-maintained, and are
 currently neither successfully building nor regularly being smoke tested.
 Efforts are underway to change this situation, but it should not be taken for
-granted that the platforms are safe and supported.  If you have an interest in
-these platforms and you can lend your time, expertise, or hardware to help
-support these platforms, please let the perl development effort know by
-emailing C<perl5-porters@perl.org>.
+granted that the platforms are safe and supported.  If they do not become
+buildable and regularly smoked, support for them may be actively removed in
+future releases.  If you have an interest in these platforms and you can lend
+your time, expertise, or hardware to help support these platforms, please let
+the perl development effort know by emailing C<perl5-porters@perl.org>.
+
+Some platforms that appear otherwise entirely dead are also on the short list
+for removal between now and 5.20.0:
+
+=over
+
+=item DG/UX
+
+=item NeXT
+
+=back
 
 =item *
 
@@ -671,6 +683,10 @@ thus Unicode IO, making it rather handicapped.
 
 PerlIO supports a C<stdio> layer if stdio use is desired, and similarly a
 sfio layer could be produced.
+
+=item *
+
+C<microperl>, long broken and of unclear present purpose, will be removed.
 
 =item *
 
