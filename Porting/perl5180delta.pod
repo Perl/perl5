@@ -123,11 +123,17 @@ The following new DTrace probes have been added:
 
 =over 4
 
-=item C<op-entry>
+=item *
 
-=item C<loading-file>
+C<op-entry>
 
-=item C<loaded-file>
+=item *
+
+C<loading-file>
+
+=item *
+
+C<loaded-file>
 
 =back
 
