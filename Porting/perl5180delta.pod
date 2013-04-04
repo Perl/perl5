@@ -2361,7 +2361,7 @@ braces: this now works:
 
     /(?{  $x='{'  })/
 
-This means that this error message is longer generated:
+This means that this error message is no longer generated:
 
     Sequence (?{...}) not terminated or not {}-balanced in regex
 
