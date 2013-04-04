@@ -1504,7 +1504,7 @@ away too.
 =item *
 
 Case-insensitive matching inside a [bracketed] character class with a
-multi-character fold, no longer excludes one of the possibilities in the
+multi-character fold no longer excludes one of the possibilities in the
 circumstances that it used to. [perl #89774].
 
 =item *
