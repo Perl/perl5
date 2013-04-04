@@ -305,7 +305,7 @@ unrestricted, and opened the door to several kinds of insanity.  As of
 to accepting characters that match the C<\p{POSIX_Punct}> property.
 
 There are no longer any differences in the parsing of identifiers
-specified as C<$...> or C<${...};> previously, they were dealt with in
+specified as C<$...> or C<${...}>; previously, they were dealt with in
 different parts of the core, and so had slightly different behavior. For
 instance, C<${foo:bar}> was a legal variable name.  Since they are now
 both parsed by the same code, that is no longer the case.
