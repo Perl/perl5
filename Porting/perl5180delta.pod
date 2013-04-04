@@ -150,7 +150,7 @@ intersection, etc., of sets of code points, similar to
 L<Unicode::Regex::Set>.  It can also be used to extend C</x> processing
 to [bracketed] character classes, and as a replacement of user-defined
 properties, allowing more complex expressions than they do.  See
-L<perlre/(?[ ])>.
+L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =head2 Lexical subroutines
 
