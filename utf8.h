@@ -202,12 +202,12 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 /* This defines the 1-bits that are to be in the first byte of a multi-byte
  * UTF-8 encoded character that give the number of bytes that comprise the
- * character.
- * */
+ * character. 'len' is the number of bytes in the multi-byte sequence. */
 #define UTF_START_MARK(len) (((len) >  7) ? 0xFF : (0xFF & (0xFE << (7-(len)))))
 
 /* Masks out the initial one bits in a start byte, leaving the real data ones.
- * Doesn't work on an invariant byte */
+ * Doesn't work on an invariant byte.  'len' is the number of bytes in the
+ * multi-byte sequence that comprises the character. */
 #define UTF_START_MASK(len) (((len) >= 7) ? 0x00 : (0x1F >> ((len)-2)))
 
 /* This defines the bits that are to be in the continuation bytes of a multi-byte
