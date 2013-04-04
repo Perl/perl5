@@ -638,6 +638,52 @@ allow us to change the behavior in future Perl versions so that the
 backslashes do have an effect, and without fear that we are silently
 breaking any existing code.
 
+=head1 Future Deprecations
+
+=over
+
+=item *
+
+Platforms with out support infrastructure
+
+Both Windows CE and z/OS have been historically under-maintained, and are
+currently neither successfully building nor regularly being smoke tested.
+Efforts are underway to change this situation, but it should not be taken for
+granted that the platforms are safe and supported.  If you have an interest in
+these platforms and you can lend your time, expertise, or hardware to help
+support these platforms, please let the perl development effort know by
+emailing C<perl5-porters@perl.org>.
+
+=item *
+
+Swapping of $< and $>
+
+For more information about this future deprecation, see L<the relevant RT
+ticket|https://rt.perl.org/rt3/Ticket/Display.html?id=96212>.
+
+=item *
+
+sfio, stdio
+
+Perl supports being built without PerlIO proper, using a stdio or sfio
+wrapper instead.  A perl build like this will not support IO layers and
+thus Unicode IO, making it rather handicapped.
+
+PerlIO supports a C<stdio> layer if stdio use is desired, and similarly a
+sfio layer could be produced.
+
+=item *
+
+Revamping C<< "\Q" >> semantics in double-quotish strings when combined with
+other escapes.
+
+There are several bugs and inconsistencies involving combinations
+of C<\Q> and escapes like C<\x>, C<\L>, etc., within a C<\Q...\E> pair.
+These need to be fixed, and doing so will necessarily change current
+behavior.  The changes have not yet been settled.
+
+=back
+
 =head1 Performance Enhancements
 
 =over 4
