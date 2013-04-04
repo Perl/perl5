@@ -277,7 +277,7 @@ functions in L<charnames> have been correspondingly updated.
 
 Unicode has now withdrawn their previous recommendation for regular
 expressions to automatically handle cases where a single character can
-match multiple characters case-insensitively; for example, the letter
+match multiple characters case-insensitively, for example the letter
 LATIN SMALL LETTER SHARP S and the sequence C<ss>.  This is because
 it turns out to be impracticable to do this correctly in all
 circumstances.  Because Perl has tried to do this as best it can, it
