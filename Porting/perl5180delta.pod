@@ -938,6 +938,16 @@ non-magical variables, and then in Perl 5.14 for magical (e.g., tied)
 variables.  It has now been restored.  In the mean time, undef was treated
 as an empty string [perl #113576].
 
+=item *
+
+L<Experimental "%s" subs not enabled|perldiag/"Experimental "%s" subs not enabled">
+
+To use lexical subs, you must first enable them:
+
+    no warnings 'experimental::lexical_subs';
+    use feature 'lexical_subs';
+    my sub foo { ... }
+
 =back
 
 =head3 New Warnings
@@ -975,16 +985,6 @@ L<'A sequence of multiple spaces in a charnames alias definition is deprecated'|
 =item *
 
 L<'Passing malformed UTF-8 to "%s" is deprecated'|perldiag/"Passing malformed UTF-8 to "%s" is deprecated">
-
-=item *
-
-L<Experimental "%s" subs not enabled|perldiag/"Experimental "%s" subs not enabled">
-
-(F) To use lexical subs, you must first enable them:
-
-    no warnings 'experimental::lexical_subs';
-    use feature 'lexical_subs';
-    my sub foo { ... }
 
 =item *
 
