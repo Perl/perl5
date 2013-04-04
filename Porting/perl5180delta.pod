@@ -1242,7 +1242,7 @@ gibibytes of memory that may be safely used.
 
 BeOS was an operating system for personal computers developed by Be Inc,
 initially for their BeBox hardware. The OS Haiku was written as an open
-source replacement/continuation for BeOS, and its perl port is current and
+source replacement for/continuation of BeOS, and its perl port is current and
 actively maintained.
 
 =item UTS Global
