@@ -2710,7 +2710,7 @@ perl 5.10.0, if the format referenced lexical variables from the outer sub.
 
 =item *
 
-Using a C<format> defined inside a closures, which format references
+Using a C<format> defined inside a closure, which format references
 lexical variables from outside, never really worked unless the C<write>
 call was directly inside the closure.  In 5.10.0 it even started crashing.
 Now the copy of that closure nearest the top of the call stack is used to
