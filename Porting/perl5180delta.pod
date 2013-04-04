@@ -93,7 +93,7 @@ which might exceed that of an integer.  (SipHash uses a 16 byte seed).
 
 The environment variable PERL_HASH_SEED_DEBUG now makes perl show both the
 hash function perl was built with AND the seed, in hex, in use for that
-process. Code parsing this output, should it exist, must change to accomodate
+process. Code parsing this output, should it exist, must change to accommodate
 the new format.  Example of the new format:
 
     $ PERL_HASH_SEED_DEBUG=1 ./perl -e1
