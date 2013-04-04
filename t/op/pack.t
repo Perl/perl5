@@ -2,7 +2,7 @@
 
 BEGIN {
     chdir 't' if -d 't';
-    require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
     set_up_inc(qw '../lib ../dist/Math-BigInt/lib');
 }
 
@@ -18,7 +18,6 @@ use strict;
 use warnings qw(FATAL all);
 use Config;
 
-my $Is_EBCDIC = (defined $Config{ebcdic} && $Config{ebcdic} eq 'define');
 my $Perl = which_perl();
 my @valid_errors = (qr/^Invalid type '\w'/);
 
@@ -122,7 +121,7 @@ sub list_eq ($$) {
 
 {
     my $sum = 129; # ASCII
-    $sum = 103 if $Is_EBCDIC;
+    $sum = 103 if $::IS_EBCDIC;
 
     my $x;
     is( ($x = unpack("%32B*", "Now is the time for all good blurfl")), $sum );
@@ -867,7 +866,7 @@ SKIP: {
   foreach (
            ['a/a*/a*', '212ab345678901234567','ab3456789012'],
            ['a/a*/a*', '3012ab345678901234567', 'ab3456789012'],
-           ['a/a*/b*', '212ab', $Is_EBCDIC ? '100000010100' : '100001100100'],
+           ['a/a*/b*', '212ab', $::IS_EBCDIC ? '100000010100' : '100001100100'],
   )
   {
     my ($pat, $in, $expect) = @$_;
@@ -915,15 +914,14 @@ EOP
 }
 
 
-SKIP: {
-    skip("(EBCDIC and) version strings are bad idea", 2) if $Is_EBCDIC;
-
-    is("1.20.300.4000", sprintf "%vd", pack("U*",1,20,300,4000));
-    is("1.20.300.4000", sprintf "%vd", pack("  U*",1,20,300,4000));
+{
+    is("1.20.300.4000", sprintf "%vd", pack("U*",utf8::native_to_unicode(1),utf8::native_to_unicode(20),300,4000));
+    is("1.20.300.4000", sprintf "%vd", pack("  U*",utf8::native_to_unicode(1),utf8::native_to_unicode(20),300,4000));
 }
-isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",1,20,300,4000));
+isnt(v1.20.300.4000, sprintf "%vd", pack("C0U*",utf8::native_to_unicode(1),utf8::native_to_unicode(20),300,4000));
 
-my $rslt = $Is_EBCDIC ? "156 67" : "199 162";
+my $rslt = join " ", map { ord } split "", byte_utf8a_to_utf8n("\xc7\xa2");
+# The ASCII UTF-8 of U+1E2 is "\xc7\xa2"
 is(join(" ", unpack("U0 C*", chr(0x1e2))), $rslt);
 
 # does pack U create Unicode?
@@ -940,19 +938,26 @@ is("@{[unpack('U*', pack('U*', 100, 200))]}", "100 200");
 
 
 SKIP: {
-    skip "Not for EBCDIC", 4 if $Is_EBCDIC;
+    skip "Two of these still fail on EBCDIC; investigate in v5.23", 3 if $::IS_EBCDIC;
 
     # does pack U0C create Unicode?
-    is("@{[pack('U0C*', 100, 195, 136)]}", v100.v200);
+    my $cp202 = chr(202);
+    utf8::upgrade $cp202;
+    my @bytes202;
+    {   # This is portable across character sets
+        use bytes;
+        @bytes202 = map { ord } split "", $cp202;
+    }
+    is("@{[pack('U0C*', 100, @bytes202)]}", v100.v202);
 
     # does pack C0U create characters?
-    is("@{[pack('C0U*', 100, 200)]}", pack("C*", 100, 195, 136));
+    is("@{[pack('C0U*', 100, 202)]}", pack("C*", 100, @bytes202));
 
     # does unpack U0U on byte data warn?
     {
 	use warnings qw(NONFATAL all);;
 
-        my $bad = pack("U0C", 255);
+        my $bad = pack("U0C", 202);
         local $SIG{__WARN__} = sub { $@ = "@_" };
         my @null = unpack('U0U', $bad);
         like($@, qr/^Malformed UTF-8 character /);
@@ -1507,7 +1512,10 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     local $SIG{__WARN__} = sub {
         $warning = $_[0];
     };
-    my $out = pack("u99", "foo" x 99);
+
+    # This test is looking for the encoding of the bit pattern "\x66\x6f\x6f",
+    # which is ASCII "foo"
+    my $out = pack("u99", native_to_uni("foo") x 99);
     like($warning, qr/Field too wide in 'u' format in pack at /,
          "Warn about too wide uuencode");
     is($out, ("_" . "9F]O" x 21 . "\n") x 4 . "M" . "9F]O" x 15 . "\n",
@@ -1522,34 +1530,29 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is($x[1], $y[1], "checksum advance ok");
 
     # verify that the checksum is not overflowed with C0
-    if (ord('A') == 193) {
-	is(unpack("C0%128U", "/bcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
-    } else {
-	is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
-    }
+    is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
 }
 
+my $U_1FFC_utf8 = byte_utf8a_to_utf8n("\341\277\274");
+my $first_byte = ord uni_to_native("\341");
 {
     # U0 and C0 must be scoped
-    my (@x) = unpack("a(U0)U", "b\341\277\274");
+    my (@x) = unpack("a(U0)U", "b$U_1FFC_utf8");
     is($x[0], 'b', 'before scope');
     is($x[1], 8188, 'after scope');
 
-    is(pack("a(U0)U", "b", 8188), "b\341\277\274");
+    is(pack("a(U0)U", "b", 8188), "b$U_1FFC_utf8");
 }
 
+SKIP:
 {
     # counted length prefixes shouldn't change C0/U0 mode
     # (note the length is actually 0 in this test)
-    if (ord('A') == 193) {
-	is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,0');
-	is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,0');
-    } else {
-	is(join(',', unpack("aC/UU",   "b\0\341\277\274")), 'b,8188');
-	is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,8188');
-	is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,225');
-	is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,225');
-    }
+    is(join(',', unpack("aC/UU",   "b\0$U_1FFC_utf8")), 'b,8188');
+    is(join(',', unpack("aC/CU",   "b\0$U_1FFC_utf8")), 'b,8188');
+    skip "These two still fail on EBCDIC; investigate in v5.23", 2 if $::IS_EBCDIC;
+    is(join(',', unpack("aU0C/UU", "b\0$U_1FFC_utf8")), "b,$first_byte");
+    is(join(',', unpack("aU0C/CU", "b\0$U_1FFC_utf8")), "b,$first_byte");
 }
 
 {
@@ -1784,19 +1787,19 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
     is(pack("A*", $high), "\xfeb");
     is(pack("Z*", $high), "\xfeb\x00");
 
-    utf8::upgrade($high = "\xc3\xbeb");
-    is(pack("U0a2", $high), "\xfe");
-    is(pack("U0A2", $high), "\xfe");
-    is(pack("U0Z1", $high), "\x00");
-    is(pack("U0a3", $high), "\xfeb");
-    is(pack("U0A3", $high), "\xfeb");
-    is(pack("U0Z3", $high), "\xfe\x00");
-    is(pack("U0a6", $high), "\xfeb\x00\x00\x00");
-    is(pack("U0A6", $high), "\xfeb   ");
-    is(pack("U0Z6", $high), "\xfeb\x00\x00\x00");
-    is(pack("U0a*", $high), "\xfeb");
-    is(pack("U0A*", $high), "\xfeb");
-    is(pack("U0Z*", $high), "\xfeb\x00");
+    utf8::upgrade($high = byte_utf8a_to_utf8n("\xc3\xbe") . "b");
+    is(pack("U0a2", $high), uni_to_native("\xfe"));
+    is(pack("U0A2", $high), uni_to_native("\xfe"));
+    is(pack("U0Z1", $high), uni_to_native("\x00"));
+    is(pack("U0a3", $high), uni_to_native("\xfe") . "b");
+    is(pack("U0A3", $high), uni_to_native("\xfe") . "b");
+    is(pack("U0Z3", $high), uni_to_native("\xfe\x00"));
+    is(pack("U0a6", $high), uni_to_native("\xfe") . "b" . uni_to_native("\x00\x00\x00"));
+    is(pack("U0A6", $high), uni_to_native("\xfe") . "b   ");
+    is(pack("U0Z6", $high), uni_to_native("\xfe") . "b" . uni_to_native("\x00\x00\x00"));
+    is(pack("U0a*", $high), uni_to_native("\xfe") . "b");
+    is(pack("U0A*", $high), uni_to_native("\xfe") . "b");
+    is(pack("U0Z*", $high), uni_to_native("\xfe") . "b" . uni_to_native("\x00"));
 }
 {
     # pack /
@@ -1825,9 +1828,9 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 }
 {
     # unpack("A*", $unicode) strips general unicode spaces
-    is(unpack("A*", "ab \n\xa0 \0"), "ab \n\xa0",
+    is(unpack("A*", "ab \n" . uni_to_native("\xa0") . " \0"), "ab \n" . uni_to_native("\xa0"),
        'normal A* strip leaves \xa0');
-    is(unpack("U0C0A*", "ab \n\xa0 \0"), "ab \n\xa0",
+    is(unpack("U0C0A*", "ab \n" . uni_to_native("\xa0") . " \0"), "ab \n" . uni_to_native("\xa0"),
        'normal A* strip leaves \xa0 even if it got upgraded for technical reasons');
     is(unpack("A*", pack("a*(U0U)a*", "ab \n", 0xa0, " \0")), "ab",
        'upgraded strings A* removes \xa0');
@@ -1988,7 +1991,8 @@ is(unpack('c'), 65, "one-arg unpack (change #18751)"); # defaulting to $_
 }
 {
     #50256
-    my ($v) = split //, unpack ('(B)*', 'ab');
+    # This test is for the bit pattern "\x61\x62", which is ASCII "ab"
+    my ($v) = split //, unpack ('(B)*', native_to_uni('ab'));
     is($v, 0); # Doesn't SEGV :-)
 }
 {
