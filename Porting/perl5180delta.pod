@@ -46,7 +46,7 @@ experimental.
 Changes to the implementation of hashes in perl 5.18.0 will be one of the most
 visible changes to the behavior of existing code.  For the most part, these
 changes will be visible as two distinct hash variables now providing their
-contents in a different variable where it was previously identical.  When
+contents in a different order where it was previously identical.  When
 encountering these changes, the key to cleaning up from them is to accept that
 B<hashes are unordered collections> and to act accordingly.
 
