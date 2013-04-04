@@ -9047,7 +9047,9 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
     }
 }
 
-/* Either returns sv, or mortalizes/frees sv and returns a new SV*.
+/* S_new_constant(): do any overload::constant lookup.
+
+   Either returns sv, or mortalizes/frees sv and returns a new SV*.
    Best used as sv=new_constant(..., sv, ...).
    If s, pv are NULL, calls subroutine with one argument,
    and <type> is used with error messages only.
@@ -9502,8 +9504,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
 {
     dVAR;
     PMOP *pm;
-    char *s = scan_str(start,!!PL_madskills,FALSE, PL_reg_state.re_reparsing,
-                       TRUE /* look for escaped bracketed metas */ );
+    char *s;
     const char * const valid_flags =
 	(const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
     char charset = '\0';    /* character set modifier */
@@ -9513,8 +9514,13 @@ S_scan_pat(pTHX_ char *start, I32 type)
 
     PERL_ARGS_ASSERT_SCAN_PAT;
 
+    assert (!(!!(PL_reg_state.re_reparsing ^ !!(PL_in_eval & EVAL_RE_REPARSING))));
+    s = scan_str(start,!!PL_madskills,FALSE, (PL_in_eval & EVAL_RE_REPARSING),
+                       TRUE /* look for escaped bracketed metas */ );
+
     /* this was only needed for the initial scan_str; set it to false
      * so that any (?{}) code blocks etc are parsed normally */
+    PL_in_eval &= ~EVAL_RE_REPARSING;
     PL_reg_state.re_reparsing = FALSE;
     if (!s) {
 	const char * const delimiter = skipspace(start);

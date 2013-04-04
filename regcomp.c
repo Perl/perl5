@@ -5003,11 +5003,11 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 	SAVETMPS;
 	save_re_context();
 	PUSHSTACKi(PERLSI_REQUIRE);
-	/* this causes the toker to collapse \\ into \ when parsing
-	 * qr''; normally only q'' does this. It also alters hints
-	 * handling */
+        /* G_RE_REPARSING causes the toker to collapse \\ into \ when
+         * parsing qr''; normally only q'' does this. It also alters
+         * hints handling */
 	PL_reg_state.re_reparsing = TRUE;
-	eval_sv(sv, G_SCALAR);
+	eval_sv(sv, G_SCALAR|G_RE_REPARSING);
 	SvREFCNT_dec_NN(sv);
 	SPAGAIN;
 	qr_ref = POPs;
@@ -5634,6 +5634,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * from the compile flags.
      */
 
+    assert (!(!!(PL_reg_state.re_reparsing ^ !!(PL_in_eval & EVAL_RE_REPARSING))));
     if (   old_re
         && !recompile
         && !!RX_UTF8(old_re) == !!RExC_utf8
@@ -5653,7 +5654,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     else if ((pm_flags & PMf_USE_RE_EVAL)
 		/* this second condition covers the non-regex literal case,
 		 * i.e.  $foo =~ '(?{})'. */
-		|| ( !PL_reg_state.re_reparsing && IN_PERL_COMPILETIME
+		|| ( !(PL_in_eval & EVAL_RE_REPARSING) && IN_PERL_COMPILETIME
 		    && (PL_hints & HINT_RE_EVAL))
     )
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,

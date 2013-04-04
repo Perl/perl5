@@ -3358,7 +3358,9 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 
     PL_in_eval = (in_require
 		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
-		  : EVAL_INEVAL);
+		  : (EVAL_INEVAL |
+                        ((PL_op->op_private & OPpEVAL_RE_REPARSING)
+                            ? EVAL_RE_REPARSING : 0)));
 
     PUSHMARK(SP);
 
