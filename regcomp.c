@@ -5006,7 +5006,6 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
         /* G_RE_REPARSING causes the toker to collapse \\ into \ when
          * parsing qr''; normally only q'' does this. It also alters
          * hints handling */
-	PL_reg_state.re_reparsing = TRUE;
 	eval_sv(sv, G_SCALAR|G_RE_REPARSING);
 	SvREFCNT_dec_NN(sv);
 	SPAGAIN;
@@ -5634,7 +5633,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * from the compile flags.
      */
 
-    assert (!(!!(PL_reg_state.re_reparsing ^ !!(PL_in_eval & EVAL_RE_REPARSING))));
     if (   old_re
         && !recompile
         && !!RX_UTF8(old_re) == !!RExC_utf8

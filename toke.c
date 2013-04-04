@@ -9514,14 +9514,12 @@ S_scan_pat(pTHX_ char *start, I32 type)
 
     PERL_ARGS_ASSERT_SCAN_PAT;
 
-    assert (!(!!(PL_reg_state.re_reparsing ^ !!(PL_in_eval & EVAL_RE_REPARSING))));
     s = scan_str(start,!!PL_madskills,FALSE, (PL_in_eval & EVAL_RE_REPARSING),
                        TRUE /* look for escaped bracketed metas */ );
 
     /* this was only needed for the initial scan_str; set it to false
      * so that any (?{}) code blocks etc are parsed normally */
     PL_in_eval &= ~EVAL_RE_REPARSING;
-    PL_reg_state.re_reparsing = FALSE;
     if (!s) {
 	const char * const delimiter = skipspace(start);
 	Perl_croak(aTHX_

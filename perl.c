@@ -2808,7 +2808,6 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     myop.op_flags |= OP_GIMME_REVERSE(flags);
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
-    assert (! (!!(PL_reg_state.re_reparsing ^ !!(flags & G_RE_REPARSING))));
 
     if (flags & G_RE_REPARSING)
 	myop.op_private = (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);

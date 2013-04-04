@@ -776,7 +776,6 @@ typedef struct regmatch_slab {
 struct re_save_state {
     bool re_state_eval_setup_done;	/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
-    bool re_reparsing;			/* runtime (?{}) fed back into parser */
     /* Space for U8 */
     I32 re_state_reg_oldpos;		/* from regexec.c */
     I32 re_state_reg_maxiter;		/* max wait until caching pos */

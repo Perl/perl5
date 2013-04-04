@@ -4878,7 +4878,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 */
 		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
 
-		PL_reg_state.re_reparsing = FALSE;
                 PL_in_eval &= ~EVAL_RE_REPARSING;
 
 		if (!caller_cv)
