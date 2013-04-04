@@ -286,7 +286,7 @@ However, a new restriction is being added on such matches when they
 occur in [bracketed] character classes.  People were specifying
 things such as C</[\0-\xff]/i>, and being surprised that it matches the
 two character sequence C<ss> (since LATIN SMALL LETTER SHARP S occurs in
-this range).  This behavior is also inconsistent with the using a
+this range).  This behavior is also inconsistent with using a
 property instead of a range:  C<\p{Block=Latin1}> also includes LATIN
 SMALL LETTER SHARP S, but C</[\p{Block=Latin1}]/i> does not match C<ss>.
 The new rule is that for there to be a multi-character case-insensitive
