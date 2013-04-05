@@ -339,7 +339,7 @@ global C<$_> an alias for its argument, just like C<foreach>.  However, it
 still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
 C<foreach>) [perl #114020].
 
-=head2 Lexical $_ is now experimental
+=head2 Lexical C<$_> is now experimental
 
 Since it was introduced in Perl 5.10, it has caused much confusion with no
 obvious solution:
