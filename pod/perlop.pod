@@ -1408,7 +1408,7 @@ table:
    \c?      chr(127)
 
 In other words, it's the character whose code point has had 64 xor'd with
-its uppercase.  C<\c?> is DELETE because C<ord("@") ^ 64> is 127, and
+its uppercase.  C<\c?> is DELETE because C<ord("?") ^ 64> is 127, and
 C<\c@> is NULL because the ord of "@" is 64, so xor'ing 64 itself produces 0.
 
 Also, C<\c\I<X>> yields C< chr(28) . "I<X>"> for any I<X>, but cannot come at the
