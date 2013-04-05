@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 91 );
+    plan( tests => 92 );
 }
 
 my @c;
@@ -297,6 +297,14 @@ is eval "s//<<END/e;\nfoo\nEND\n(caller 0)[6]",
  is $w, 1, 'value from (caller 0)[9] (bitmask) works in ${^WARNING_BITS}';
 }
 
+# This was fixed with commit d4d03940c58a0177, which fixed bug #78742
+fresh_perl_is <<'END', "__ANON__::doof\n", {},
+package foo;
+BEGIN {undef %foo::}
+sub doof { caller(0) }
+print +(doof())[3];
+END
+    "caller should not SEGV when the current package is undefined";
 $::testing_caller = 1;
 
 do './op/caller.pl' or die $@;
