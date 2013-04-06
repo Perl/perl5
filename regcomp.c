@@ -13191,6 +13191,8 @@ parseit:
                 && (prevvalue >= 'a' && value <= 'z')
                     || (prevvalue >= 'A' && value <= 'Z'))
             {
+                _invlist_intersection(this_range, PL_ASCII,
+                                      &this_range);
                 _invlist_intersection(this_range, PL_Posix_ptrs[_CC_ALPHA],
                                       &this_range);
             }
