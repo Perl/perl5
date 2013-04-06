@@ -1268,14 +1268,14 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 
     /* ensure valid UTF-8 and chars < 256 before updating string */
     while (s < send) {
-        U8 c = *s++;
-
-        if (!UTF8_IS_INVARIANT(c) &&
-            (!UTF8_IS_DOWNGRADEABLE_START(c) || (s >= send)
-	     || !(c = *s++) || !UTF8_IS_CONTINUATION(c))) {
-            *len = ((STRLEN) -1);
-            return 0;
+        if (! UTF8_IS_INVARIANT(*s)) {
+            if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
+                *len = ((STRLEN) -1);
+                return 0;
+            }
+            s++;
         }
+        s++;
     }
 
     d = s = save;
@@ -1319,14 +1319,14 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 
     /* ensure valid UTF-8 and chars < 256 before converting string */
     for (send = s + *len; s < send;) {
-        U8 c = *s++;
-	if (!UTF8_IS_INVARIANT(c)) {
-	    if (UTF8_IS_DOWNGRADEABLE_START(c) && s < send &&
-                (c = *s++) && UTF8_IS_CONTINUATION(c))
-		count++;
-	    else
+        if (! UTF8_IS_INVARIANT(*s)) {
+            if (! UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, send)) {
                 return (U8 *)start;
+            }
+            count++;
+            s++;
 	}
+        s++;
     }
 
     *is_utf8 = FALSE;
