@@ -1335,9 +1335,10 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
     s = start; start = d;
     while (s < send) {
 	U8 c = *s++;
-	if (!UTF8_IS_INVARIANT(c)) {
+	if (! UTF8_IS_INVARIANT(c)) {
 	    /* Then it is two-byte encoded */
-	    c = TWO_BYTE_UTF8_TO_NATIVE(c, *s++);
+	    c = TWO_BYTE_UTF8_TO_NATIVE(c, *s);
+            s++;
 	}
 	*d++ = c;
     }
