@@ -1280,9 +1280,13 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 
     d = s = save;
     while (s < send) {
-        STRLEN ulen;
-        *d++ = (U8)utf8_to_uvchr_buf(s, send, &ulen);
-        s += ulen;
+	U8 c = *s++;
+	if (! UTF8_IS_INVARIANT(c)) {
+	    /* Then it is two-byte encoded */
+	    c = TWO_BYTE_UTF8_TO_NATIVE(c, *s);
+            s++;
+	}
+	*d++ = c;
     }
     *d = '\0';
     *len = d - save;
