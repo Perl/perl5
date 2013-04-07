@@ -2838,7 +2838,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
                     OP(scan) = EXACTFU_SS;
                     s += 2;
                 }
-                else if (len == 6   /* len is the same in both ASCII and EBCDIC for these */
+                else if (len == 6   /* len is the same in both ASCII and EBCDIC
+                                       for these */
                          && (memEQ(s, GREEK_SMALL_LETTER_IOTA_UTF8
                                       COMBINING_DIAERESIS_UTF8
                                       COMBINING_ACUTE_ACCENT_UTF8,
