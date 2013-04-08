@@ -425,10 +425,25 @@ EXPECT
 # toke.c
 use warnings 'ambiguous' ;
 $a = ${time} ;
+$a = @{time} ;
+$a = $#{time} ; # This one is special cased in toke.c
+$a = %{time} ;
+$a = *{time} ;
+$a = defined &{time} ; # To avoid calling &::time
 no warnings 'ambiguous' ;
 $a = ${time} ;
+$a = @{time} ;
+$a = $#{time} ; # This one is special cased in toke.c
+$a = %{time} ;
+$a = *{time} ;
+$a = defined &{time} ; # To avoid calling &::time
 EXPECT
 Ambiguous use of ${time} resolved to $time at - line 3.
+Ambiguous use of @{time} resolved to @time at - line 4.
+Ambiguous use of @{time} resolved to @time at - line 5.
+Ambiguous use of %{time} resolved to %time at - line 6.
+Ambiguous use of *{time} resolved to *time at - line 7.
+Ambiguous use of &{time} resolved to &time at - line 8.
 ########
 # toke.c
 use warnings 'ambiguous' ;
