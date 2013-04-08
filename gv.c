@@ -1646,23 +1646,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
 		else if (*name == '-' || *name == '+')
 		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
-              } else if (sv_type == SVt_PV && *name == '#') {
-                  Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
-                                                   WARN_SYNTAX),
-                                   "$# is no longer supported");
-              }
-              if (*name == '*') {
-                  if (sv_type == SVt_PV)
+              } else if (sv_type == SVt_PV) {
+                  if (*name == '*') {
                       Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
                                                        WARN_SYNTAX),
                                        "$* is no longer supported, and will become a syntax error");
-                  else
-                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-                                       "%c* is deprecated, and will become a syntax error",
-                                       sv_type == SVt_PVAV ? '@'
-                                       : sv_type == SVt_PVCV ? '&'
-                                       : sv_type == SVt_PVHV ? '%'
-                                       : '*');
+                  } else if (*name == '#') {
+                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
+                                                       WARN_SYNTAX),
+                                       "$# is no longer supported");
+                  }
               }
 	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
                 switch (*name) {
@@ -1955,14 +1948,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    if (sv_type == SVt_PV)
 		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 				 "$* is no longer supported, and will become a syntax error");
-            else {
-		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-                                 "%c* is deprecated, and will become a syntax error",
-                                 sv_type == SVt_PVAV ? '@'
-                                 : sv_type == SVt_PVCV ? '&'
-                                 : sv_type == SVt_PVHV ? '%'
-                                 : '*');
-            }
 	    break;
 	case '#':		/* $# */
 	    if (sv_type == SVt_PV)
