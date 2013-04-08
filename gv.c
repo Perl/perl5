@@ -1647,14 +1647,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		else if (*name == '-' || *name == '+')
 		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
               } else if (sv_type == SVt_PV) {
-                  if (*name == '*') {
+                  if (*name == '*' || *name == '#') {
+                      /* diag_listed_as: $* is no longer supported */
                       Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
                                                        WARN_SYNTAX),
-                                       "$* is no longer supported, and will become a syntax error");
-                  } else if (*name == '#') {
-                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
-                                                       WARN_SYNTAX),
-                                       "$# is no longer supported");
+                                       "$%c is no longer supported", *name);
                   }
               }
 	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
@@ -1945,14 +1942,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             break;
 	}
 	case '*':		/* $* */
-	    if (sv_type == SVt_PV)
-		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-				 "$* is no longer supported, and will become a syntax error");
-	    break;
 	case '#':		/* $# */
 	    if (sv_type == SVt_PV)
+		/* diag_listed_as: $* is no longer supported */
 		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
-				 "$# is no longer supported");
+				 "$%c is no longer supported", *name);
 	    break;
 	case '\010':	/* $^H */
 	    {

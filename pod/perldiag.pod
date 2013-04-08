@@ -2630,16 +2630,12 @@ with 'useperlio'.
 (F) Your machine doesn't implement the sockatmark() functionality,
 neither as a system call nor an ioctl call (SIOCATMARK).
 
-=item $* is no longer supported, and will become a syntax error
+=item $* is no longer supported
 
-(D deprecated, syntax) The special variable C<$*>, which has had no
-effect since v5.10.0, will be removed soon.  Currently code which mentions
-this variable compiles with this warning, but the variable is no longer
-magical, hence reads and writes have no side effects.  In future such code
-will fail to compile with a syntax error.
-
-Prior to v5.10.0 the use of C<$*> enabled or disabled multi-line matching
-within a string.
+(D deprecated, syntax) The special variable C<$*>, deprecated in older
+perls, has been removed as of 5.9.0 and is no longer supported.  In
+previous versions of perl the use of C<$*> enabled or disabled multi-line
+matching within a string.
 
 Instead of using C<$*> you should use the C</m> (and maybe C</s>) regexp
 modifiers.  You can enable C</m> for a lexical scope (even a whole file)
