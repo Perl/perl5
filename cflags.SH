@@ -306,7 +306,7 @@ for file do
     cppflags=`echo $cppflags|sed 's/-Wdeclaration-after-statement/ /'`
 
     case "$cc" in
-    *clang)
+    *clang*)
       # clang complains a lot about -Wunused-value which are not fixable
       warn="$warn -Wno-unused-value"
       ;;
