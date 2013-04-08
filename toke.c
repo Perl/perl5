@@ -9300,6 +9300,8 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     *d = '\0';
     d = dest;
     if (*d) {
+        /* Either a digit variable, or parse_ident() found an identifier
+           (anything valid as a bareword), so job done and return.  */
 	if (PL_lex_state != LEX_NORMAL)
 	    PL_lex_state = LEX_INTERPENDMAYBE;
 	return s;
@@ -9311,8 +9313,12 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
          || s[1] == '{'
          || strnEQ(s+1,"::",2)) )
     {
+        /* Dereferencing a value in a scalar variable.
+           The alternatives are different syntaxes for a scalar variable.
+           Using ' as a leading package separator isn't allowed. :: is.   */
 	return s;
     }
+    /* Handle the opening { of @{...}, &{...}, *{...}, %{...}, ${...}  */
     if (*s == '{') {
 	bracket = s;
 	s++;
@@ -9339,20 +9345,29 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
             d[1] = '\0';
         }
     }
+    /* Convert $^F, ${^F} and the ^F of ${^FOO} to control characters */
     if (*d == '^' && *s && isCONTROLVAR(*s)) {
 	*d = toCTRL(*s);
 	s++;
     }
+    /* Warn about ambiguous code after unary operators if {...} notation isn't
+       used.  There's no difference in ambiguity; it's merely a heuristic
+       about when not to warn.  */
     else if (ck_uni && !bracket)
 	check_uni();
     if (bracket) {
+        /* If we were processing {...} notation then...  */
 	if (isIDFIRST_lazy_if(d,is_utf8)) {
+            /* if it starts as a valid identifier, assume that it is one.
+               (the later check for } being at the expected point will trap
+               cases where this doesn't pan out.)  */
         d += is_utf8 ? UTF8SKIP(d) : 1;
         parse_ident(&s, &d, e, 1, is_utf8);
 	    *d = '\0';
 	    while (s < send && SPACE_OR_TAB(*s))
 		s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
+                /* ${foo[0]} and ${foo{bar}} notation.  */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
 		    const char * const brack =
 			(const char *)
@@ -9385,6 +9400,8 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
         while (s < send && SPACE_OR_TAB(*s))
 	    s++;
 
+        /* Expect to find a closing } after consuming any trailing whitespace.
+         */
 	if (*s == '}') {
 	    s++;
 	    if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
@@ -9407,6 +9424,8 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	    }
 	}
 	else {
+            /* Didn't find the closing } at the point we expected, so restore
+               state such that the next thing to process is the opening { and */
 	    s = bracket;		/* let the parser handle it */
 	    *dest = '\0';
 	}
