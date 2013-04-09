@@ -5652,8 +5652,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     else if ((pm_flags & PMf_USE_RE_EVAL)
 		/* this second condition covers the non-regex literal case,
 		 * i.e.  $foo =~ '(?{})'. */
-		|| ( !(PL_in_eval & EVAL_RE_REPARSING) && IN_PERL_COMPILETIME
-		    && (PL_hints & HINT_RE_EVAL))
+		|| (IN_PERL_COMPILETIME && (PL_hints & HINT_RE_EVAL))
     )
 	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
 			    exp, plen);

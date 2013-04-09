@@ -71,7 +71,7 @@ typedef struct yy_parser {
     char	multi_open;	/* delimiter of said string */
     char	multi_close;	/* delimiter of said string */
     bool	preambled;
-    /*** 8-bit hole ***/
+    bool        lex_re_reparsing; /* we're doing G_RE_REPARSING */
     I32		lex_allbrackets;/* (), [], {}, ?: bracket count */
     SUBLEXINFO	sublex_info;
     LEXSHARED	*lex_shared;

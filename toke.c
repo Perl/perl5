@@ -2525,6 +2525,7 @@ S_sublex_push(pTHX)
     SAVEGENERICPV(PL_lex_brackstack);
     SAVEGENERICPV(PL_lex_casestack);
     SAVEGENERICPV(PL_parser->lex_shared);
+    SAVEBOOL(PL_parser->lex_re_reparsing);
 
     /* The here-doc parser needs to be able to peek into outer lexing
        scopes to find the body of the here-doc.  So we put PL_linestr and
@@ -2567,6 +2568,9 @@ S_sublex_push(pTHX)
 	PL_lex_inpat = PL_sublex_info.sub_op;
     else
 	PL_lex_inpat = NULL;
+
+    PL_parser->lex_re_reparsing = cBOOL(PL_in_eval & EVAL_RE_REPARSING);
+    PL_in_eval &= ~EVAL_RE_REPARSING;
 
     return '(';
 }
@@ -9517,9 +9521,6 @@ S_scan_pat(pTHX_ char *start, I32 type)
     s = scan_str(start,!!PL_madskills,FALSE, (PL_in_eval & EVAL_RE_REPARSING),
                        TRUE /* look for escaped bracketed metas */ );
 
-    /* this was only needed for the initial scan_str; set it to false
-     * so that any (?{}) code blocks etc are parsed normally */
-    PL_in_eval &= ~EVAL_RE_REPARSING;
     if (!s) {
 	const char * const delimiter = skipspace(start);
 	Perl_croak(aTHX_
