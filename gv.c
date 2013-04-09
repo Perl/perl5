@@ -1631,134 +1631,15 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
     return TRUE;
 }
 
-GV *
-Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
-		       const svtype sv_type)
+/* magicalize_gv() gets called by gv_fetchpvn_flags when creating a new GV */
+PERL_STATIC_INLINE GV*
+S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
+               bool addmg, const svtype sv_type)
 {
-    dVAR;
-    const char *name = nambeg;
-    GV *gv = NULL;
-    GV**gvp;
-    STRLEN len;
-    HV *stash = NULL;
-    const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
-    const I32 no_expand = flags & GV_NOEXPAND;
-    const I32 add = flags & ~GV_NOADD_MASK;
-    const U32 is_utf8 = flags & SVf_UTF8;
-    bool addmg = !!(flags & GV_ADDMG);
-    const char *const name_end = nambeg + full_len;
-    U32 faking_it;
     SSize_t paren;
 
-    PERL_ARGS_ASSERT_GV_FETCHPVN_FLAGS;
-
-     /* If we have GV_NOTQUAL, the caller promised that
-      * there is no stash, so we can skip the check.
-      * Similarly if full_len is 0, since then we're
-      * dealing with something like *{""} or ""->foo()
-      */
-    if ((flags & GV_NOTQUAL) || !full_len) {
-        len = full_len;
-    }
-    else if (parse_gv_stash_name(&stash, &gv, &name, &len, nambeg, full_len, is_utf8, add)) {
-        if (name == name_end) return gv;
-    }
-    else {
-        return NULL;
-    }
-
-    if (!stash && !find_default_stash(&stash, name, len, is_utf8, add, sv_type)) {
-        return NULL;
-    }
+    PERL_ARGS_ASSERT_MAGICALIZE_GV;
     
-    /* By this point we should have a stash and a name */
-    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -len : len,add);
-    if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
-	if (addmg) gv = (GV *)newSV(0);
-	else return NULL;
-    }
-    else gv = *gvp, addmg = 0;
-    /* From this point on, addmg means gv has not been inserted in the
-       symtab yet. */
-
-    if (SvTYPE(gv) == SVt_PVGV) {
-	if (add) {
-	    GvMULTI_on(gv);
-	    gv_init_svtype(gv, sv_type);
-            /* You reach this path once the typeglob has already been created,
-               either by the same or a different sigil.  If this path didn't
-               exist, then (say) referencing $! first, and %! second would
-               mean that %! was not handled correctly.  */
-	    if (len == 1 && stash == PL_defstash) {
-	      if (sv_type == SVt_PVHV || sv_type == SVt_PVGV) {
-	        if (*name == '!')
-		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
-		else if (*name == '-' || *name == '+')
-		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
-              } else if (sv_type == SVt_PV) {
-                  if (*name == '*' || *name == '#') {
-                      /* diag_listed_as: $* is no longer supported */
-                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
-                                                       WARN_SYNTAX),
-                                       "$%c is no longer supported", *name);
-                  }
-              }
-	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
-                switch (*name) {
-	        case '[':
-		    require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
-                    break;
-#ifdef PERL_SAWAMPERSAND
-	        case '`':
-		    PL_sawampersand |= SAWAMPERSAND_LEFT;
-                    (void)GvSVn(gv);
-                    break;
-	        case '&':
-		    PL_sawampersand |= SAWAMPERSAND_MIDDLE;
-                    (void)GvSVn(gv);
-                    break;
-	        case '\'':
-		    PL_sawampersand |= SAWAMPERSAND_RIGHT;
-                    (void)GvSVn(gv);
-                    break;
-#endif
-                }
-	      }
-	    }
-	    else if (len == 3 && sv_type == SVt_PVAV
-	          && strnEQ(name, "ISA", 3)
-	          && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
-		gv_magicalize_isa(gv);
-	}
-	return gv;
-    } else if (no_init) {
-	assert(!addmg);
-	return gv;
-    } else if (no_expand && SvROK(gv)) {
-	assert(!addmg);
-	return gv;
-    }
-
-    /* Adding a new symbol.
-       Unless of course there was already something non-GV here, in which case
-       we want to behave as if there was always a GV here, containing some sort
-       of subroutine.
-       Otherwise we run the risk of creating things like GvIO, which can cause
-       subtle bugs. eg the one that tripped up SQL::Translator  */
-
-    faking_it = SvOK(gv);
-
-    if (add & GV_ADDWARN)
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-		"Had to create %"UTF8f" unexpectedly",
-		 UTF8fARG(is_utf8, name_end-nambeg, nambeg));
-    gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
-
-    if ( isIDFIRST_lazy_if(name, is_utf8)
-                && ! (isLEXWARN_on ? ckWARN(WARN_ONCE) : (PL_dowarn & G_WARN_ON ) ) )
-        GvMULTI_on(gv) ;
-
-    /* set up magic where warranted */
     if (stash != PL_defstash) { /* not the main stash */
 	/* We only have to check for three names here: EXPORT, ISA
 	   and VERSION. All the others apply only to the main stash or to
@@ -2118,6 +1999,139 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    (void)hv_store(stash,name,len,(SV *)gv,0);
 	else SvREFCNT_dec_NN(gv), gv = NULL;
     }
+    
+    return gv;
+}
+
+GV *
+Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
+		       const svtype sv_type)
+{
+    dVAR;
+    const char *name = nambeg;
+    GV *gv = NULL;
+    GV**gvp;
+    STRLEN len;
+    HV *stash = NULL;
+    const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
+    const I32 no_expand = flags & GV_NOEXPAND;
+    const I32 add = flags & ~GV_NOADD_MASK;
+    const U32 is_utf8 = flags & SVf_UTF8;
+    bool addmg = !!(flags & GV_ADDMG);
+    const char *const name_end = nambeg + full_len;
+    U32 faking_it;
+
+    PERL_ARGS_ASSERT_GV_FETCHPVN_FLAGS;
+
+     /* If we have GV_NOTQUAL, the caller promised that
+      * there is no stash, so we can skip the check.
+      * Similarly if full_len is 0, since then we're
+      * dealing with something like *{""} or ""->foo()
+      */
+    if ((flags & GV_NOTQUAL) || !full_len) {
+        len = full_len;
+    }
+    else if (parse_gv_stash_name(&stash, &gv, &name, &len, nambeg, full_len, is_utf8, add)) {
+        if (name == name_end) return gv;
+    }
+    else {
+        return NULL;
+    }
+
+    if (!stash && !find_default_stash(&stash, name, len, is_utf8, add, sv_type)) {
+        return NULL;
+    }
+    
+    /* By this point we should have a stash and a name */
+    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -len : len,add);
+    if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
+	if (addmg) gv = (GV *)newSV(0);
+	else return NULL;
+    }
+    else gv = *gvp, addmg = 0;
+    /* From this point on, addmg means gv has not been inserted in the
+       symtab yet. */
+
+    if (SvTYPE(gv) == SVt_PVGV) {
+	if (add) {
+	    GvMULTI_on(gv);
+	    gv_init_svtype(gv, sv_type);
+            /* You reach this path once the typeglob has already been created,
+               either by the same or a different sigil.  If this path didn't
+               exist, then (say) referencing $! first, and %! second would
+               mean that %! was not handled correctly.  */
+	    if (len == 1 && stash == PL_defstash) {
+	      if (sv_type == SVt_PVHV || sv_type == SVt_PVGV) {
+	        if (*name == '!')
+		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
+		else if (*name == '-' || *name == '+')
+		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
+              } else if (sv_type == SVt_PV) {
+                  if (*name == '*' || *name == '#') {
+                      /* diag_listed_as: $* is no longer supported */
+                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
+                                                       WARN_SYNTAX),
+                                       "$%c is no longer supported", *name);
+                  }
+              }
+	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
+                switch (*name) {
+	        case '[':
+		    require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
+                    break;
+#ifdef PERL_SAWAMPERSAND
+	        case '`':
+		    PL_sawampersand |= SAWAMPERSAND_LEFT;
+                    (void)GvSVn(gv);
+                    break;
+	        case '&':
+		    PL_sawampersand |= SAWAMPERSAND_MIDDLE;
+                    (void)GvSVn(gv);
+                    break;
+	        case '\'':
+		    PL_sawampersand |= SAWAMPERSAND_RIGHT;
+                    (void)GvSVn(gv);
+                    break;
+#endif
+                }
+	      }
+	    }
+	    else if (len == 3 && sv_type == SVt_PVAV
+	          && strnEQ(name, "ISA", 3)
+	          && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
+		gv_magicalize_isa(gv);
+	}
+	return gv;
+    } else if (no_init) {
+	assert(!addmg);
+	return gv;
+    } else if (no_expand && SvROK(gv)) {
+	assert(!addmg);
+	return gv;
+    }
+
+    /* Adding a new symbol.
+       Unless of course there was already something non-GV here, in which case
+       we want to behave as if there was always a GV here, containing some sort
+       of subroutine.
+       Otherwise we run the risk of creating things like GvIO, which can cause
+       subtle bugs. eg the one that tripped up SQL::Translator  */
+
+    faking_it = SvOK(gv);
+
+    if (add & GV_ADDWARN)
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+		"Had to create %"UTF8f" unexpectedly",
+		 UTF8fARG(is_utf8, name_end-nambeg, nambeg));
+    gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
+
+    if ( isIDFIRST_lazy_if(name, is_utf8)
+                && ! (isLEXWARN_on ? ckWARN(WARN_ONCE) : (PL_dowarn & G_WARN_ON ) ) )
+        GvMULTI_on(gv) ;
+
+    /* set up magic where warranted */
+    gv = magicalize_gv(gv, stash, name, len, addmg, sv_type);
+    
     if (gv) gv_init_svtype(gv, faking_it ? SVt_PVCV : sv_type);
     return gv;
 }
