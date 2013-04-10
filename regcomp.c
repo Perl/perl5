@@ -4877,18 +4877,11 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
  * False positives are allowed */
 
 static bool
-S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state, OP *expr,
-		    U32 pm_flags, char *pat, STRLEN plen)
+S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
+		    char *pat, STRLEN plen)
 {
     int n = 0;
     STRLEN s;
-
-    /* avoid infinitely recursing when we recompile the pattern parcelled up
-     * as qr'...'. A single constant qr// string can't have have any
-     * run-time component in it, and thus, no runtime code. (A non-qr
-     * string, however, can, e.g. $x =~ '(?{})') */
-    if  ((pm_flags & PMf_IS_QR) && expr && expr->op_type == OP_CONST)
-	return 0;
 
     for (s = 0; s < plen; s++) {
 	if (n < pRExC_state->num_code_blocks
@@ -5626,6 +5619,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
     }
 
+    if ((pm_flags & PMf_USE_RE_EVAL)
+		/* this second condition covers the non-regex literal case,
+		 * i.e.  $foo =~ '(?{})'. */
+		|| (IN_PERL_COMPILETIME && (PL_hints & HINT_RE_EVAL))
+    )
+	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, exp, plen);
+
     /* return old regex if pattern hasn't changed */
     /* XXX: note in the below we have to check the flags as well as the pattern.
      *
@@ -5639,23 +5639,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         && ( RX_COMPFLAGS(old_re) == ( orig_rx_flags & RXf_PMf_FLAGCOPYMASK ) )
 	&& RX_PRECOMP(old_re)
 	&& RX_PRELEN(old_re) == plen
-        && memEQ(RX_PRECOMP(old_re), exp, plen))
+        && memEQ(RX_PRECOMP(old_re), exp, plen)
+	&& !runtime_code /* with runtime code, always recompile */ )
     {
-	/* with runtime code, always recompile */
-	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
-					    exp, plen);
-	if (!runtime_code) {
-	    Safefree(pRExC_state->code_blocks);
-	    return old_re;
-	}
+        Safefree(pRExC_state->code_blocks);
+        return old_re;
     }
-    else if ((pm_flags & PMf_USE_RE_EVAL)
-		/* this second condition covers the non-regex literal case,
-		 * i.e.  $foo =~ '(?{})'. */
-		|| (IN_PERL_COMPILETIME && (PL_hints & HINT_RE_EVAL))
-    )
-	runtime_code = S_has_runtime_code(aTHX_ pRExC_state, expr, pm_flags,
-			    exp, plen);
 
     rx_flags = orig_rx_flags;
 

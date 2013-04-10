@@ -3755,7 +3755,9 @@ S_scan_const(pTHX_ char *start)
     /* return the substring (via pl_yylval) only if we parsed anything */
     if (s > PL_bufptr) {
 	SvREFCNT_inc_simple_void_NN(sv);
-	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) ) {
+	if (   (PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ))
+            && ! PL_parser->lex_re_reparsing)
+        {
 	    const char *const key = PL_lex_inpat ? "qr" : "q";
 	    const STRLEN keylen = PL_lex_inpat ? 2 : 1;
 	    const char *type;

@@ -85,6 +85,19 @@ no  warnings 'syntax';
 
     }
 
+    {
+	# returns a string
+
+	package OL_STR;
+	use overload q{""} => sub {
+		my $re = shift;
+		return qq/(?{ \$OL_STR::count++ })$$re/;
+	    },
+	fallback => 1;
+
+    }
+
+
     my $qr;
 
     $::CONST_QR_CLASS = 'OL_QR';
@@ -98,6 +111,68 @@ no  warnings 'syntax';
     $qr = eval q{ qr/^foo$(?{ $OL_QR::count++ })/; };
     ok("foo" =~ $qr, "compile-time, OL_QR, multiple constant segments");
     is($OL_QR::count, 2, "qr2 flag");
+
+
+    # test /foo.../ when foo is given string overloading,
+    # for various permutations of '...'
+
+    $::CONST_QR_CLASS = 'OL_STR';
+
+    for my $has_re_eval (0, 1) {
+	for my $has_qr (0, 1) {
+	    for my $has_code (0, 1) {
+		for my $has_runtime (0, 1) {
+		    for my $has_runtime_code (0, 1) {
+			if ($has_runtime_code) {
+			    next unless $has_runtime;
+			}
+			note( "re_eval=$has_re_eval "
+			    . "qr=$has_qr "
+			    . "code=$has_code "
+			    . "runtime=$has_runtime "
+			    . "runtime_code=$has_runtime_code");
+			my $eval = '';
+			$eval .= q{use re 'eval'; } if $has_re_eval;
+			$eval .= q{$match = $str =~ };
+			$eval .= q{qr} if $has_qr;
+			$eval .= q{/^abc};
+			$eval .= q{(?{$blocks++})} if $has_code;
+			$eval .= q{$runtime} if $has_runtime;
+			$eval .= q{/; 1;};
+
+			my $runtime = q{def};
+			$runtime .= q{(?{$run_blocks++})} if $has_runtime_code;
+
+			my $blocks = 0;
+			my $run_blocks = 0;
+			my $match;
+			my $str = "abc";
+			$str .= "def" if $runtime;
+
+			my $result = eval $eval;
+			my $err = $@;
+			$result = $result ? 1 : 0;
+
+			if (!$has_re_eval) {
+			    is($result, 0, "EVAL: $eval");
+			    like($err, qr/Eval-group not allowed at runtime/,
+				"\$\@:   $eval");
+			    next;
+			}
+
+			is($result, 1, "EVAL: $eval");
+			diag("\$@=[$err]") unless $result;
+
+			is($match, 1, "MATCH: $eval");
+			is($blocks, $has_code, "blocks");
+			is($run_blocks, $has_runtime_code, "run_blocks");
+
+		    }
+		}
+	    }
+	}
+    }
+
 
     undef $::CONST_QR_CLASS;
 }
