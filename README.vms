@@ -389,28 +389,20 @@ throw a /FORCE switch on the MMS or MMK command.
 
 =back
 
-Copy PERL_SETUP.COM to a place accessible to your perl users.  
+Installation will copy F<PERL_SETUP.COM> to the root of your installation
+tree.  If you want to give everyone on the system  access to Perl (and you
+have, for example, installed to F<dsa0:[utils.perl_root]>) then add a line
+that reads:
 
-For example:
+    $ @dsa0:[utils.perl_root]perl_setup
 
-    COPY PERL_SETUP.COM SYS$STARTUP:>
-
-If you want to have everyone on the system have access to perl
-then add a line that reads
-
-    $ @sys$startup:perl_setup
-
-to F<SYS$MANAGER:SYLOGIN.COM>.
+to F<SYS$MANAGER:SYLOGIN.COM>.  Or for your own use only, simply place
+that line in F<SYS$LOGIN:LOGIN.COM>.
 
 Two alternatives to the foreign symbol would be to install PERL into 
 DCLTABLES.EXE (Check out the section "Installing Perl into DCLTABLES 
 (optional)" for more information), or put the image in a 
 directory that's in your DCL$PATH.
-
-An alternative to having F<PERL_SETUP.COM> define the PERLSHR logical name
-is to simply copy it into the system shareable library directory with:
-
-    copy perl_root:[000000]perlshr.exe sys$share:
 
 See also the "INSTALLing images (optional)" section.
 
