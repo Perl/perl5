@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -1674,6 +1674,10 @@ coincides with the current one.
 =item *
 
 Barewords are not covered by overloaded string constants.
+
+=item *
+
+The range operator C<..> cannot be overloaded.
 
 =back
 

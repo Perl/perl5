@@ -1,7 +1,7 @@
 package bigint;
 use 5.006;
 
-$VERSION = '0.33';
+$VERSION = '0.34';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( PI e bpi bexp hex oct );
@@ -328,8 +328,8 @@ bigint - Transparent BigInteger support for Perl
 
 =head1 DESCRIPTION
 
-All operators (including basic math operations) are overloaded. Integer
-constants are created as proper BigInts.
+All operators (including basic math operations) except the range operator C<..>
+are overloaded. Integer constants are created as proper BigInts.
 
 Floating point constants are truncated to integer. All parts and results of
 expressions are also truncated.
@@ -607,6 +607,20 @@ This method only works on Perl v5.9.4 or later.
 =head1 CAVEATS
 
 =over 2
+
+=item ranges
+
+Perl does not allow overloading of ranges, so you can neither safely use
+ranges with bigint endpoints, nor is the iterator variable a bigint.
+
+	use 5.010;
+	for my $i (12..13) {
+	  for my $j (20..21) {
+	    say $i ** $j;  # produces a floating-point number,
+	                   # not a big integer
+	  }
+	}
+
 
 =item in_effect()
 
