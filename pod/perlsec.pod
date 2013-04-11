@@ -486,12 +486,12 @@ hash function we believe that discovery attacks on the hash seed
 are very unlikely.  This traversal randomization cannot be disabled,
 and is unaffected by the value of PERL_HASH_SEED.
 
-In addition to these measure as Perl 5.18.0 the source code includes
+In addition to these measures, as of Perl 5.18.0 the source code includes
 multiple hash algorithms to choose from.  While we believe that the
 default perl hash is robust to attack we have included the hash function
-Siphash which at the time of release of Perl 5.18.0 is believed to be
-of cyptographic strength as a fallback option. This is not the default
-as it is much slower than the default hash.
+Siphash as a fallback option; at the time of release of Perl 5.18.0 Siphash
+is believed to be of cryptographic strength.  This is not the default as it
+is much slower than the default hash.
 
 B<Perl has never guaranteed any ordering of the hash keys>, and the
 ordering has already changed several times during the lifetime of
