@@ -2808,8 +2808,9 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     myop.op_flags |= OP_GIMME_REVERSE(flags);
     if (flags & G_KEEPERR)
 	myop.op_flags |= OPf_SPECIAL;
-    if (PL_reg_state.re_reparsing)
-	myop.op_private = OPpEVAL_COPHH;
+
+    if (flags & G_RE_REPARSING)
+	myop.op_private = (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);
 
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
      * before a PUSHEVAL, which corrupts the stack after a croak */

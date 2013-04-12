@@ -3358,7 +3358,9 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 
     PL_in_eval = (in_require
 		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
-		  : EVAL_INEVAL);
+		  : (EVAL_INEVAL |
+                        ((PL_op->op_private & OPpEVAL_RE_REPARSING)
+                            ? EVAL_RE_REPARSING : 0)));
 
     PUSHMARK(SP);
 
@@ -3420,6 +3422,15 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     else {
 	PL_hints = saveop->op_private & OPpEVAL_COPHH
 		     ? oldcurcop->cop_hints : saveop->op_targ;
+
+        /* making 'use re eval' not be in scope when compiling the
+         * qr/mabye_has_runtime_code_block/ ensures that we don't get
+         * infinite recursion when S_has_runtime_code() gives a false
+         * positive: the second time round, HINT_RE_EVAL isn't set so we
+         * don't bother calling S_has_runtime_code() */
+        if (PL_in_eval & EVAL_RE_REPARSING)
+            PL_hints &= ~HINT_RE_EVAL;
+
 	if (hh) {
 	    /* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
 	    SvREFCNT_dec(GvHV(PL_hintgv));

@@ -1048,6 +1048,7 @@ L<perlcall>.
 				   Perl_magic_methcall().  */
 #define G_WRITING_TO_STDERR 1024 /* Perl_write_to_stderr() is calling
 				    Perl_magic_methcall().  */
+#define G_RE_REPARSING 0x800     /* compiling a run-time /(?{..})/ */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
@@ -1055,6 +1056,7 @@ L<perlcall>.
 #define EVAL_WARNONLY	2	/* used by yywarn() when calling yyerror() */
 #define EVAL_KEEPERR	4	/* set by Perl_call_sv if G_KEEPERR */
 #define EVAL_INREQUIRE	8	/* The code is being required. */
+#define EVAL_RE_REPARSING 0x10	/* eval_sv() called with G_RE_REPARSING */
 
 /* Support for switching (stack and block) contexts.
  * This ensures magic doesn't invalidate local stack and cx pointers.

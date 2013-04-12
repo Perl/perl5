@@ -308,6 +308,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpEVAL_UNICODE		4
 #define OPpEVAL_BYTES		8
 #define OPpEVAL_COPHH		16	/* Construct %^H from cop hints */
+#define OPpEVAL_RE_REPARSING	32	/* eval_sv(..., G_RE_REPARSING) */
     
 /* Private for OP_CALLER, OP_WANTARRAY and OP_RUNCV */
 #define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */
