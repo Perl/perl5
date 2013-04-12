@@ -1380,15 +1380,6 @@ my($a, $b, $c) = @_;
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
 # TODO unimplemented in B::Deparse; RT #116553
 # lexical subroutine
-
-# XXX remove this __WARN__ once the ops are correctly implemented
-BEGIN {
-    $SIG{__WARN__} = sub {
-	return if $_[0] =~ /unexpected OP_(CLONE|INTRO|PAD)CV/;
-	print STDERR @_;
-    }
-}
-
 use feature 'lexical_subs';
 no warnings "experimental::lexical_subs";
 my sub f {}
