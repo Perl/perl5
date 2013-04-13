@@ -9344,10 +9344,17 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	   s++;
     }
 
-#define VALID_LEN_ONE_IDENT(d, u)     (isPUNCT_A((U8)(d))     \
-                                        || isCNTRL_A((U8)(d)) \
-                                        || isDIGIT_A((U8)(d)) \
-                                        || (!(u) && !UTF8_IS_INVARIANT((U8)(d))))
+/*  \c?, \c\, \c^, \c_, and \cA..\cZ minus the ones that have traditionally
+ *  been matched by \s on ASCII platforms, are the legal control char names
+ *  here, that is \c? plus 1-32 minus the \s ones. */
+#define VALID_LEN_ONE_IDENT(d, u) (isPUNCT_A((U8)(d))                       \
+                                   || isDIGIT_A((U8)(d))                    \
+                                   || (!(u) && !isASCII((U8)(d)))           \
+                                   || ((((U8)(d)) < 32)                     \
+                                       && (((((U8)(d)) >= 14)               \
+                                           || (((U8)(d)) <= 8 && (d) != 0) \
+                                           || (((U8)(d)) == 13))))          \
+                                   || (((U8)(d)) == toCTRL('?')))
     if (s < send
         && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
     {
