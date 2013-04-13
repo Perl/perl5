@@ -41,6 +41,8 @@
 #define BOM_UTF8_TAIL  "\xBB\xBF"    /* U+FEFF */
 
 #define DEL_NATIVE  0x7F    /* U+007F */
+#define CR_NATIVE  0x0D    /* U+000D */
+#define LF_NATIVE  0x0A    /* U+000A */
 #define LATIN_SMALL_LETTER_SHARP_S_NATIVE  0xDF    /* U+00DF */
 #define LATIN_SMALL_LETTER_A_WITH_RING_ABOVE_NATIVE  0xE5    /* U+00E5 */
 #define LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE_NATIVE  0xC5    /* U+00C5 */

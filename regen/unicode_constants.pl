@@ -161,6 +161,8 @@ BOM first
 BOM tail
 
 DEL native
+CR  native
+LF  native
 U+00DF native
 U+00E5 native
 U+00C5 native
