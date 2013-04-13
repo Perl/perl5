@@ -412,7 +412,7 @@ use File::Glob qw(:case);
 
     'CPAN' => {
         'MAINTAINER'   => 'andk',
-        'DISTRIBUTION' => 'ANDK/CPAN-2.00-TRIAL.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.00.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},

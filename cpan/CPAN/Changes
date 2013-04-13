@@ -1,3 +1,11 @@
+2013-04-12  Andreas Koenig  <k@UX31A>
+
+	* release 2.00 (at Lancester #QA2013)
+
+	* Removed the trial status for the release in the Makefile.PL
+
+	* Merge with App::Cpan 0.61 (just a version number change)
+
 2013-02-06  k  <k@k83.linux.bogus>
 
 	* release 2.00-TRIAL

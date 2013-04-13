@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 
 use App::Cpan '1.60_02';
-$VERSION = '1.60_02';
+$VERSION = '1.61';
 
 my $rc = App::Cpan->run( @ARGV );
 
