@@ -39,7 +39,7 @@ WriteMakefile(
   ( $PERL_CORE
     ? ()
     : (
-      INSTALLDIRS => 'perl',
+      INSTALLDIRS => ($] < 5.011 ? 'perl' : 'site'),
       clean       => {FILES => 'typemap'},
     )
   ),

@@ -13,6 +13,7 @@ WriteMakefile
         'List::Util' => 0,
     },
     'EXE_FILES' => [ _scripts() ],
+    'INSTALLDIRS' => ($] < 5.011 ? 'perl' : 'site'),
     'PL_FILES' => {},
     LICENSE => 'perl',
     @extra,
