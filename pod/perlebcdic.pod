@@ -789,7 +789,7 @@ in the ASCII table is that they can "literally" be constructed
 as control characters in perl, e.g. C<(chr(0)> eq C<\c@>)>
 C<(chr(1)> eq C<\cA>)>, and so on.  Perl on EBCDIC platforms has been
 ported to take C<\c@> to chr(0) and C<\cA> to chr(1), etc. as well, but the
-thirty three characters that result depend on which code page you are
+characters that result depend on which code page you are
 using.  The table below uses the standard acronyms for the controls.
 The POSIX-BC and 1047 sets are
 identical throughout this range and differ from the 0037 set at only
@@ -799,10 +799,12 @@ platforms and cannot be generated as a C<"\c.letter."> control character on
 0037 platforms.  Note also that C<\c\> cannot be the final element in a string
 or regex, as it will absorb the terminator.   But C<\c\I<X>> is a C<FILE
 SEPARATOR> concatenated with I<X> for all I<X>.
+The outlier C<\c?> on ASCII, which yields a non-C0 control C<DEL>,
+yields the outlier control C<APC> on EBCDIC, the one that isn't in the
+block of contiguous controls.
 
  chr   ord   8859-1    0037    1047 && POSIX-BC
  -----------------------------------------------------------------------
- \c?   127   <DEL>       "            "
  \c@     0   <NUL>     <NUL>        <NUL>
  \cA     1   <SOH>     <SOH>        <SOH>
  \cB     2   <STX>     <STX>        <STX>
@@ -835,6 +837,12 @@ SEPARATOR> concatenated with I<X> for all I<X>.
  \c]    29   <GS>      <GS>         <GS>
  \c^    30   <RS>      <RS>         <RS>
  \c_    31   <US>      <US>         <US>
+ \c?    *    <DEL>     <APC>        <APC>
+
+C<*> Note: C<\c?> maps to ordinal 127 (C<DEL>) on ASCII platforms, but
+since ordinal 127 is a not a control character on EBCDIC machines,
+C<\c?> instead maps to C<APC>, which is 255 in 0037 and 1047, and 95 in
+POSIX-BC.
 
 =head1 FUNCTION DIFFERENCES
 

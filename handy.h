@@ -1633,11 +1633,23 @@ EXTCONST U32 PL_charclass[];
 #define isALNUMC_utf8(p) isALPHANUMERIC_utf8(p)
 #define isALNUMC_LC_utf8(p) isALPHANUMERIC_LC_utf8(p)
 
-/* This conversion works both ways, strangely enough. On EBCDIC platforms,
- * CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII, except that they don't
- * necessarily mean the same characters, e.g. CTRL-D is 4 on both systems, but
- * that is EOT on ASCII;  ST on EBCDIC */
-#  define toCTRL(c)    (toUPPER(NATIVE_TO_LATIN1(c)) ^ 64)
+/* On EBCDIC platforms, CTRL-@ is 0, CTRL-A is 1, etc, just like on ASCII,
+ * except that they don't necessarily mean the same characters, e.g. CTRL-D is
+ * 4 on both systems, but that is EOT on ASCII;  ST on EBCDIC.
+ * '?' is special-cased on EBCDIC to APC, which is the control there that is
+ * the outlier from the block that contains the other controls, just like
+ * toCTRL('?') on ASCII yields DEL, the control that is the outlier from the C0
+ * block.  If it weren't special cased, it would yield a non-control.
+ * The conversion works both ways, so CTRL('D') is 4, and CTRL(4) is D, etc. */
+#ifndef EBCDIC
+#  define toCTRL(c)    (toUPPER(c) ^ 64)
+#else
+#  define toCTRL(c)    ((c) == '?'                               \
+                        ? LATIN1_TO_NATIVE(0x9F)                 \
+                        : (c) == LATIN1_TO_NATIVE(0x9F)          \
+                          ? '?'                                  \
+                          : (NATIVE_TO_LATIN1(toUPPER(c)) ^ 64))
+#endif
 
 /* Line numbers are unsigned, 32 bits. */
 typedef U32 line_t;
