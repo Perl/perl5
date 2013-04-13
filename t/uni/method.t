@@ -7,7 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib ../cpan/parent/lib);
-    require "./test.pl";
+    require "./test.pl"; require './charset_tools.pl';
 }
 
 use strict;
@@ -184,12 +184,21 @@ ok(ฟọ::バッズ->new, 'parent using -norequire, in a UTF-8 package.');
 ok(ฟọ::バッズ->nèw, 'Also works with UTF-8 methods');
 ok(ฟọ::バッズ->ニュー, 'Even methods from an UTF-8 parent');
 
-BEGIN {no strict 'refs'; ++${"\xff::foo"} } # autovivify the package
+BEGIN {no strict 'refs';
+       ++${"\xff::foo"} if $::IS_ASCII;
+       ++${"\xdf::foo"} if $::IS_EBCDIC;
+       } # autovivify the package
 package ÿ {                                 # without UTF8
  sub AUTOLOAD {
-  ::is our $AUTOLOAD,
+  if ($::IS_ASCII) {
+    ::is our $AUTOLOAD,
       "\xff::\x{100}", '$AUTOLOAD made from Latin1 package + UTF8 sub';
- }
+  }
+  else {
+    ::is our $AUTOLOAD,
+      "\xdf::\x{100}", '$AUTOLOAD made from Latin1 package + UTF8 sub';
+    }
+  }
 }
 ÿ->${\"\x{100}"};
 
