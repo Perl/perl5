@@ -24,8 +24,6 @@ use Config;
 use File::Path 'rmtree';
 use Cwd;
 
-skip_all("we don't test this on Win32") if $^O eq "MSWin32";
-
 plan(tests => 1);
 
 ok(try_compile_and_link(<<'CODE'));
@@ -43,7 +41,7 @@ CODE
 sub try_compile_and_link {
     my ($c, %args) = @_;
 
-    my $ld_exeext = ($^O eq 'cygwin' ||
+    my $ld_exeext = ($^O eq 'cygwin' || $^O eq 'MSWin32' ||
                  $^O eq 'os2' && $Config{ldflags} =~ /-Zexe\b/) ? '.exe' :
                 (($^O eq 'vos') ? $Config{exe_ext} : '');
     my $VERBOSE = 0;
@@ -71,9 +69,22 @@ sub try_compile_and_link {
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir"
 	 . ' -DPERL_NO_INLINE_FUNCTIONS';
 
-	my $errornull = $VERBOSE ? '' : "2>/dev/null";
+	if ($^O eq "MSWin32") {
+	    $ccflags .= " -I../win32 -I../win32/include";
+	}
 
-        my $cccmd = "$Config{'cc'} -o $tmp $ccflags $tmp.c $errornull";
+	my $null = File::Spec->devnull;
+
+	my $errornull = $VERBOSE ? '' : ">$null 2>$null";
+
+	my $out_opt = "-o";
+	if ($^O eq "MSWin32" && $Config{cc} =~ /\bcl\b/i) {
+	    $out_opt = "/Fe";
+	}
+
+	my $tmp_exe = "$tmp$ld_exeext";
+
+        my $cccmd = "$Config{'cc'} $out_opt$tmp_exe $ccflags $tmp.c $errornull";
 
 	if ($^O eq 'VMS') {
             $cccmd = "$Config{'cc'} /include=($COREincdir) $tmp.c";
@@ -92,7 +103,6 @@ sub try_compile_and_link {
         }
         else
         {
-	    my $tmp_exe = "$tmp$ld_exeext";
 	    printf "cccmd = $cccmd\n" if $VERBOSE;
 	    my $res = system($cccmd);
 	    $ok = defined($res) && $res == 0 && -s $tmp_exe && -x _;
