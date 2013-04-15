@@ -4873,6 +4873,62 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
                                 NULL, NULL, rx_flags, 0);
 }
 
+
+/* upgrade pattern pat_p of length plen_p to UTF8, and if there are code
+ * blocks, recalculate the indices. Update pat_p and plen_p in-place to
+ * point to the realloced string and length.
+ *
+ * This is essentially a copy of Perl_bytes_to_utf8() with the code index
+ * stuff added */
+
+static void
+S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
+		    char **pat_p, STRLEN *plen_p)
+{
+    U8 *const src = (U8*)*pat_p;
+    U8 *dst;
+    int n=0;
+    STRLEN s = 0, d = 0;
+    bool do_end = 0;
+    GET_RE_DEBUG_FLAGS_DECL;
+
+    DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+        "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
+
+    Newx(dst, *plen_p * 2 + 1, U8);
+
+    while (s < *plen_p) {
+        const UV uv = NATIVE_TO_ASCII(src[s]);
+        if (UNI_IS_INVARIANT(uv))
+            dst[d]   = (U8)UTF_TO_NATIVE(uv);
+        else {
+            dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
+            dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
+        }
+        if (n < pRExC_state->num_code_blocks) {
+            if (!do_end && pRExC_state->code_blocks[n].start == s) {
+                pRExC_state->code_blocks[n].start = d;
+                assert(dst[d] == '(');
+                do_end = 1;
+            }
+            else if (do_end && pRExC_state->code_blocks[n].end == s) {
+                pRExC_state->code_blocks[n].end = d;
+                assert(dst[d] == ')');
+                do_end = 0;
+                n++;
+            }
+        }
+        s++;
+        d++;
+    }
+    dst[d] = '\0';
+    *plen_p = d;
+    *pat_p = (char*) dst;
+    SAVEFREEPV(*pat_p);
+    RExC_orig_utf8 = RExC_utf8 = 1;
+}
+
+
 /* see if there are any run-time code blocks in the pattern.
  * False positives are allowed */
 
@@ -5562,13 +5618,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     if (0) {
       redo_first_pass:
-        {
-        U8 *const src = (U8*)exp;
-        U8 *dst;
-	int n=0;
-	STRLEN s = 0, d = 0;
-	bool do_end = 0;
-
         /* It's possible to write a regexp in ascii that represents Unicode
         codepoints outside of the byte range, such as via \x{100}. If we
         detect such a sequence we have to convert the entire pattern to utf8
@@ -5577,46 +5626,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         at least some part of the pattern, and therefore must convert the whole
         thing.
         -- dmq */
-        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
 
-	/* upgrade pattern to UTF8, and if there are code blocks,
-	 * recalculate the indices.
-	 * This is essentially an unrolled Perl_bytes_to_utf8() */
-
-	Newx(dst, plen * 2 + 1, U8);
-
-	while (s < plen) {
-	    const UV uv = NATIVE_TO_ASCII(src[s]);
-	    if (UNI_IS_INVARIANT(uv))
-		dst[d]   = (U8)UTF_TO_NATIVE(uv);
-	    else {
-		dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
-		dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
-	    }
-	    if (n < pRExC_state->num_code_blocks) {
-		if (!do_end && pRExC_state->code_blocks[n].start == s) {
-		    pRExC_state->code_blocks[n].start = d;
-		    assert(dst[d] == '(');
-		    do_end = 1;
-		}
-		else if (do_end && pRExC_state->code_blocks[n].end == s) {
-		    pRExC_state->code_blocks[n].end = d;
-		    assert(dst[d] == ')');
-		    do_end = 0;
-		    n++;
-		}
-	    }
-	    s++;
-	    d++;
-	}
-	dst[d] = '\0';
-	plen = d;
-	exp = (char*) dst;
-	xend = exp + plen;
-	SAVEFREEPV(exp);
-	RExC_orig_utf8 = RExC_utf8 = 1;
-        }
+        S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
+        xend = exp + plen;
     }
 
     if ((pm_flags & PMf_USE_RE_EVAL)
