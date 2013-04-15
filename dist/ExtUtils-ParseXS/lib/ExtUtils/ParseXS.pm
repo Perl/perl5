@@ -4,7 +4,7 @@ use strict;
 use 5.006001;
 use Cwd;
 use Config;
-use Exporter;
+use Exporter 'import';
 use File::Basename;
 use File::Spec;
 use Symbol;
@@ -40,7 +40,6 @@ use ExtUtils::ParseXS::Utilities qw(
   report_typemap_failure
 );
 
-our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(
   process_file
   report_error_count
