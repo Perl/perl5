@@ -156,18 +156,20 @@ sub process_file {
     "|$END)\\s*:";
 
   our ($C_group_rex, $C_arg);
-  # Group in C (no support for comments or literals)
-  $C_group_rex = qr/ [({\[]
-               (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
-               [)}\]] /x;
-  # Chunk in C without comma at toplevel (no comments):
-  $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
-         |   (??{ $C_group_rex })
-         |   " (?: (?> [^\\"]+ )
-           |   \\.
-           )* "        # String literal
-                |   ' (?: (?> [^\\']+ ) | \\. )* ' # Char literal
-         )* /xs;
+  if (not defined $C_group_rex) {
+    # Group in C (no support for comments or literals)
+    $C_group_rex = qr/ [({\[]
+                 (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
+                 [)}\]] /x;
+    # Chunk in C without comma at toplevel (no comments):
+    $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
+           |   (??{ $C_group_rex })
+           |   " (?: (?> [^\\"]+ )
+             |   \\.
+             )* "        # String literal
+                  |   ' (?: (?> [^\\']+ ) | \\. )* ' # Char literal
+           )* /xs;
+  }
 
   # Since at this point we're ready to begin printing to the output file and
   # reading from the input file, I want to get as much data as possible into
