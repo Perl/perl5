@@ -5444,20 +5444,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
 
         if (pat_count > 1) {
-
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
-
-	    /* determine if the pattern is going to be utf8 (needed
-	     * in advance to align code block indices correctly).
-	     * XXX This could fail to be detected for an arg with
-	     * overloading but not concat overloading; but the main effect
-	     * in this obscure case is to need a 'use re eval' for a
-	     * literal code block */
-	    for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
-		if (SvUTF8(*svp))
-                    SvUTF8_on(pat);
-	    }
         }
 
         /* process args, concat them if there are multiple ones,
@@ -5518,8 +5506,20 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
                     msv = SvRV(msv);
                 if (pat) {
-                    orig_patlen = SvCUR(pat);
-                    sv_catsv_nomg(pat, msv);
+                    /* this is a partially unrolled
+                     *     sv_catsv_nomg(pat, msv);
+                     * that allows us to adjust code block indices if
+                     * needed */
+                    STRLEN slen, dlen;
+                    char *dst = SvPV_force_nomg(pat, dlen);
+                    const char *src = SvPV_flags_const(msv, slen, 0);
+                    orig_patlen = dlen;
+                    if (SvUTF8(msv) && !SvUTF8(pat)) {
+                        S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &dst, &dlen);
+                        sv_setpvn(pat, dst, dlen);
+                        SvUTF8_on(pat);
+                    }
+                    sv_catpvn_nomg(pat, src, slen);
                     rx = msv;
                 }
                 else

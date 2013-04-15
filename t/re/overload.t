@@ -97,6 +97,18 @@ no  warnings 'syntax';
 
     }
 
+    {
+	# returns chr(str)
+
+	package OL_CHR;
+	use overload q{""} => sub {
+		my $chr = shift;
+		return chr($$chr);
+	    },
+	fallback => 1;
+
+    }
+
 
     my $qr;
 
@@ -173,6 +185,18 @@ no  warnings 'syntax';
 	}
     }
 
+    # if the pattern gets (undetectably in advance) upgraded to utf8
+    # while being concatenated, it could mess up the alignment of the code
+    # blocks, giving rise to 'Eval-group not allowed at runtime' errs.
+
+    $::CONST_QR_CLASS = 'OL_CHR';
+
+    {
+	my $count = 0;
+	is(eval q{ "\x80\x{100}" =~ /128(?{ $count++ })256/ }, 1,
+	    "OL_CHR eval + match");
+	is($count, 1, "OL_CHR count");
+    }
 
     undef $::CONST_QR_CLASS;
 }
