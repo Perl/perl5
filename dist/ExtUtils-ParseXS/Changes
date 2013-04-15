@@ -1,5 +1,13 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.18_02 - Mon Apr 15 07:30:00 CET 2013
+  - ExtUtils::ParseXS no longer uses global state (if using OO
+    interface).
+  - New "real" OO interface.
+
+3.18_01 - Thu Apr 11 19:17:00 CET 2013
+  - ExtUtils::Typemaps gains a clone method.
+
 3.18 - Mon Nov 19 07:35:00 CET 2012
   - Restore portability to Perl 5.6, which was lost at EU-PXS 3.00.
   - [perl #112776] avoid warning on an initialized non-parameter
