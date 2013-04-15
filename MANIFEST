@@ -3038,6 +3038,7 @@ dist/ExtUtils-ParseXS/t/512-t-file.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/513-t-merge.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/514-t-embed.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/515-t-cmd.t				ExtUtils::Typemaps tests
+dist/ExtUtils-ParseXS/t/516-t-clone.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/600-t-compat.t				ExtUtils::Typemaps tests
 dist/ExtUtils-ParseXS/t/data/b.typemap				ExtUtils::Typemaps test data
 dist/ExtUtils-ParseXS/t/data/combined.typemap			ExtUtils::Typemaps test data
