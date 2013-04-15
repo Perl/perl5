@@ -16,7 +16,6 @@ else {
 my ($source_file, $obj_file, $lib_file, $module);
 
 require_ok( 'ExtUtils::ParseXS' );
-ExtUtils::ParseXS->import('process_file');
 
 chdir 't' or die "Can't chdir to t/, $!";
 
@@ -27,7 +26,7 @@ use Carp; $SIG{__WARN__} = \&Carp::cluck;
 $source_file = 'XSUsage.c';
 
 # Try sending to file
-process_file(filename => 'XSUsage.xs', output => $source_file);
+ExtUtils::ParseXS->process_file(filename => 'XSUsage.xs', output => $source_file);
 ok -e $source_file, "Create an output file";
 
 # TEST doesn't like extraneous output

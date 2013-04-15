@@ -3,12 +3,6 @@ use 5.006;
 use strict;
 eval {
   require ExtUtils::ParseXS;
-  ExtUtils::ParseXS->import(
-    qw(
-      process_file
-      report_error_count
-    )
-  );
   1;
 }
 or do {
@@ -53,8 +47,9 @@ if ($args{v}) {
 
 $args{filename} = shift @ARGV;
 
-process_file(%args);
-exit( report_error_count() ? 1 : 0 );
+my $pxs = ExtUtils::ParseXS->new;
+$pxs->process_file(%args);
+exit( $pxs->report_error_count() ? 1 : 0 );
 
 __END__
 

@@ -16,6 +16,7 @@ BEGIN {
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
 use ExtUtils::ParseXS::Utilities $VERSION;
+use ExtUtils::ParseXS::Eval $VERSION;
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 use ExtUtils::ParseXS::Utilities qw(
@@ -45,20 +46,45 @@ our @EXPORT_OK = qw(
   report_error_count
 );
 
-# The scalars in the line below remain as 'our' variables because pulling
-# them into $self led to build problems.  In most cases, strings being
-# 'eval'-ed contain the variables' names hard-coded.
-our (
-  $Package, $func_name, $Full_func_name, $pname, $ALIAS,
-);
+our ($C_group_rex, $C_arg);
+BEGIN {
+  # Group in C (no support for comments or literals)
+  $C_group_rex = qr/ [({\[]
+               (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
+               [)}\]] /x;
+  # Chunk in C without comma at toplevel (no comments):
+  $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
+         |   (??{ $C_group_rex })
+         |   " (?: (?> [^\\"]+ )
+           |   \\.
+           )* "        # String literal
+                |   ' (?: (?> [^\\']+ ) | \\. )* ' # Char literal
+         )* /xs;
+}
 
-our $self = bless {} => __PACKAGE__;
+sub new {
+  return bless {} => shift;
+}
+
+our $Singleton = __PACKAGE__->new;
 
 sub process_file {
+  my $self;
+  # Allow for $package->process_file(%hash), $obj->process_file, and process_file()
+  if (@_ % 2) {
+    my $invocant = shift;
+    if (ref($invocant)) {
+      $self = $invocant;
+    }
+    else {
+      $self = $invocant->new;
+    }
+  }
+  else {
+    $self = $Singleton;
+  }
 
-  # Allow for $package->process_file(%hash) in the future
-  my ($pkg, %options) = @_ % 2 ? @_ : (__PACKAGE__, @_);
-
+  my %options = @_;
   $self->{ProtoUsed} = exists $options{prototypes};
 
   # Set defaults.
@@ -154,22 +180,6 @@ sub process_file {
     join('|' => @ExtUtils::ParseXS::Constants::XSKeywords) .
     "|$END)\\s*:";
 
-  our ($C_group_rex, $C_arg);
-  if (not defined $C_group_rex) {
-    # Group in C (no support for comments or literals)
-    $C_group_rex = qr/ [({\[]
-                 (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
-                 [)}\]] /x;
-    # Chunk in C without comma at toplevel (no comments):
-    $C_arg = qr/ (?: (?> [^()\[\]{},"']+ )
-           |   (??{ $C_group_rex })
-           |   " (?: (?> [^\\"]+ )
-             |   \\.
-             )* "        # String literal
-                  |   ' (?: (?> [^\\']+ ) | \\. )* ' # Char literal
-           )* /xs;
-  }
-
   # Since at this point we're ready to begin printing to the output file and
   # reading from the input file, I want to get as much data as possible into
   # the proto-object $self.  That means assigning to $self and elements of
@@ -235,7 +245,7 @@ EOM
       die ("Error: Unterminated pod in $self->{filename}, line $podstartline\n")
         unless $self->{lastline};
     }
-    last if ($Package, $self->{Prefix}) =
+    last if ($self->{Package}, $self->{Prefix}) =
       /^MODULE\s*=\s*[\w:]+(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/;
 
     print $_;
@@ -344,23 +354,23 @@ EOM
       unless $func_header =~ /^(?:([\w:]*)::)?(\w+)\s*\(\s*(.*?)\s*\)\s*(const)?\s*(;\s*)?$/s;
 
     my ($class, $orig_args);
-    ($class, $func_name, $orig_args) =  ($1, $2, $3);
+    ($class, $self->{func_name}, $orig_args) =  ($1, $2, $3);
     $class = "$4 $class" if $4;
-    ($pname = $func_name) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
+    ($self->{pname} = $self->{func_name}) =~ s/^($self->{Prefix})?/$self->{Packprefix}/;
     my $clean_func_name;
-    ($clean_func_name = $func_name) =~ s/^$self->{Prefix}//;
-    $Full_func_name = "$self->{Packid}_$clean_func_name";
+    ($clean_func_name = $self->{func_name}) =~ s/^$self->{Prefix}//;
+    $self->{Full_func_name} = "$self->{Packid}_$clean_func_name";
     if ($Is_VMS) {
-      $Full_func_name = $SymSet->addsym($Full_func_name);
+      $self->{Full_func_name} = $SymSet->addsym( $self->{Full_func_name} );
     }
 
     # Check for duplicate function definition
     for my $tmp (@{ $self->{XSStack} }) {
-      next unless defined $tmp->{functions}{$Full_func_name};
+      next unless defined $tmp->{functions}{ $self->{Full_func_name} };
       Warn( $self, "Warning: duplicate function definition '$clean_func_name' detected");
       last;
     }
-    $self->{XSStack}->[$XSS_work_idx]{functions}{$Full_func_name}++;
+    $self->{XSStack}->[$XSS_work_idx]{functions}{ $self->{Full_func_name} }++;
     %{ $self->{XsubAliases} }     = ();
     %{ $self->{XsubAliasValues} } = ();
     %{ $self->{Interfaces} }      = ();
@@ -375,8 +385,10 @@ EOM
     my $only_C_inlist_ref = {};        # Not in the signature of Perl function
     if ($self->{argtypes} and $orig_args =~ /\S/) {
       my $args = "$orig_args ,";
+      use re 'eval';
       if ($args =~ /^( (??{ $C_arg }) , )* $ /x) {
         @args = ($args =~ /\G ( (??{ $C_arg }) ) , /xg);
+        no re 'eval';
         for ( @args ) {
           s/^\s+//;
           s/\s+$//;
@@ -417,6 +429,7 @@ EOM
         }
       }
       else {
+        no re 'eval';
         @args = split(/\s*,\s*/, $orig_args);
         Warn( $self, "Warning: cannot parse argument list '$orig_args', fallback to split");
       }
@@ -436,7 +449,7 @@ EOM
       }
     }
     if (defined($class)) {
-      my $arg0 = ((defined($static) or $func_name eq 'new')
+      my $arg0 = ((defined($static) or $self->{func_name} eq 'new')
           ? "CLASS" : "THIS");
       unshift(@args, $arg0);
     }
@@ -482,20 +495,7 @@ EOM
     my $EXPLICIT_RETURN = ($CODE &&
             ("@{ $self->{line} }" =~ /(\bST\s*\([^;]*=) | (\bXST_m\w+\s*\()/x ));
 
-    # The $ALIAS which follows is only explicitly called within the scope of
-    # process_file().  In principle, it ought to be a lexical, i.e., 'my
-    # $ALIAS' like the other nearby variables.  However, implementing that
-    # change produced a slight difference in the resulting .c output in at
-    # least two distributions:  B/BD/BDFOY/Crypt-Rijndael and
-    # G/GF/GFUJI/Hash-FieldHash.  The difference is, arguably, an improvement
-    # in the resulting C code.  Example:
-    # 388c388
-    # <                       GvNAME(CvGV(cv)),
-    # ---
-    # >                       "Crypt::Rijndael::encrypt",
-    # But at this point we're committed to generating the *same* C code that
-    # the current version of ParseXS.pm does.  So we're declaring it as 'our'.
-    $ALIAS  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
+    $self->{ALIAS}  = grep(/^\s*ALIAS\s*:/,  @{ $self->{line} });
 
     my $INTERFACE  = grep(/^\s*INTERFACE\s*:/,  @{ $self->{line} });
 
@@ -506,12 +506,12 @@ EOM
     # print function header
     print Q(<<"EOF");
 #$externC
-#XS_EUPXS(XS_${Full_func_name}); /* prototype to pass -Wmissing-prototypes */
-#XS_EUPXS(XS_${Full_func_name})
+#XS_EUPXS(XS_$self->{Full_func_name}); /* prototype to pass -Wmissing-prototypes */
+#XS_EUPXS(XS_$self->{Full_func_name})
 #[[
 #    dVAR; dXSARGS;
 EOF
-    print Q(<<"EOF") if $ALIAS;
+    print Q(<<"EOF") if $self->{ALIAS};
 #    dXSI32;
 EOF
     print Q(<<"EOF") if $INTERFACE;
@@ -581,10 +581,10 @@ EOF
 EOF
 
       if (!$self->{thisdone} && defined($class)) {
-        if (defined($static) or $func_name eq 'new') {
+        if (defined($static) or $self->{func_name} eq 'new') {
           print "\tchar *";
           $self->{var_types}->{"CLASS"} = "char *";
-          generate_init( {
+          $self->generate_init( {
             type          => "char *",
             num           => 1,
             var           => "CLASS",
@@ -594,7 +594,7 @@ EOF
         else {
           print "\t$class *";
           $self->{var_types}->{"THIS"} = "$class *";
-          generate_init( {
+          $self->generate_init( {
             type          => "$class *",
             num           => 1,
             var           => "THIS",
@@ -609,7 +609,7 @@ EOF
       my ($wantRETVAL);
       # do code
       if (/^\s*NOT_IMPLEMENTED_YET/) {
-        print "\n\tPerl_croak(aTHX_ \"$pname: not implemented yet\");\n";
+        print "\n\tPerl_croak(aTHX_ \"$self->{pname}: not implemented yet\");\n";
         $_ = '';
       }
       else {
@@ -645,7 +645,7 @@ EOF
             $self->{have_CODE_with_RETVAL} = 1;
           }
         }
-        elsif (defined($class) and $func_name eq "DESTROY") {
+        elsif (defined($class) and $self->{func_name} eq "DESTROY") {
           print "\n\t";
           print "delete THIS;\n";
         }
@@ -656,25 +656,25 @@ EOF
             $wantRETVAL = 1;
           }
           if (defined($static)) {
-            if ($func_name eq 'new') {
-              $func_name = "$class";
+            if ($self->{func_name} eq 'new') {
+              $self->{func_name} = "$class";
             }
             else {
               print "${class}::";
             }
           }
           elsif (defined($class)) {
-            if ($func_name eq 'new') {
-              $func_name .= " $class";
+            if ($self->{func_name} eq 'new') {
+              $self->{func_name} .= " $class";
             }
             else {
               print "THIS->";
             }
           }
-          $func_name =~ s/^\Q$args{'s'}//
+          $self->{func_name} =~ s/^\Q$args{'s'}//
             if exists $args{'s'};
-          $func_name = 'XSFUNCTION' if $self->{interface};
-          print "$func_name($self->{func_args});\n";
+          $self->{func_name} = 'XSFUNCTION' if $self->{interface};
+          print "$self->{func_name}($self->{func_args});\n";
         }
       }
 
@@ -692,7 +692,7 @@ EOF
         $self->Warn("Warning: Found a 'CODE' section which seems to be using 'RETVAL' but no 'OUTPUT' section.");
       }
 
-      generate_output( {
+      $self->generate_output( {
         type        => $self->{var_types}->{$_},
         num         => $self->{args_match}->{$_},
         var         => $_,
@@ -708,39 +708,37 @@ EOF
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
         my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
         my $t = $self->{optimize} && $outputmap && $outputmap->targetable;
-        # Although the '$var' declared in the next line is never explicitly
-        # used within this 'elsif' block, commenting it out leads to
-        # disaster, starting with the first 'eval qq' inside the 'elsif' block
-        # below.
-        # It appears that this is related to the fact that at this point the
-        # value of $t is a reference to an array whose [2] element includes
-        # '$var' as a substring:
-        # <i> <> <(IV)$var>
         my $var = 'RETVAL';
         my $type = $self->{ret_type};
 
         if ($t and not $t->{with_size} and $t->{type} eq 'p') {
           # PUSHp corresponds to setpvn.  Treat setpv directly
-          my $what = eval qq("$t->{what}");
-          warn $@ if $@;
+          my $what = $self->eval_output_typemap_code(
+            qq("$t->{what}"),
+            {var => $var, type => $self->{ret_type}}
+          );
 
           print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
           $prepush_done = 1;
         }
         elsif ($t) {
-          my $what = eval qq("$t->{what}");
-          warn $@ if $@;
+          my $what = $self->eval_output_typemap_code(
+            qq("$t->{what}"),
+            {var => $var, type => $self->{ret_type}}
+          );
 
           my $tsize = $t->{what_size};
           $tsize = '' unless defined $tsize;
-          $tsize = eval qq("$tsize");
-          warn $@ if $@;
+          $tsize = $self->eval_output_typemap_code(
+            qq("$tsize"),
+            {var => $var, type => $self->{ret_type}}
+          );
           print "\tXSprePUSH; PUSH$t->{type}($what$tsize);\n";
           $prepush_done = 1;
         }
         else {
           # RETVAL almost never needs SvSETMAGIC()
-          generate_output( {
+          $self->generate_output( {
             type        => $self->{ret_type},
             num         => 0,
             var         => 'RETVAL',
@@ -756,7 +754,7 @@ EOF
       print "\tXSprePUSH;" if $c and not $prepush_done;
       print "\tEXTEND(SP,$c);\n" if $c;
       $xsreturn += $c;
-      generate_output( {
+      $self->generate_output( {
         type        => $self->{var_types}->{$_},
         num         => $num++,
         var         => $_,
@@ -844,37 +842,37 @@ EOF
     }
 
     if (%{ $self->{XsubAliases} }) {
-      $self->{XsubAliases}->{$pname} = 0
-        unless defined $self->{XsubAliases}->{$pname};
+      $self->{XsubAliases}->{ $self->{pname} } = 0
+        unless defined $self->{XsubAliases}->{ $self->{pname} };
       while ( my ($xname, $value) = each %{ $self->{XsubAliases} }) {
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = $self->{newXS}(\"$xname\", XS_$Full_func_name, file$self->{proto});
+#        cv = $self->{newXS}(\"$xname\", XS_$self->{Full_func_name}, file$self->{proto});
 #        XSANY.any_i32 = $value;
 EOF
       }
     }
     elsif (@{ $self->{Attributes} }) {
       push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = $self->{newXS}(\"$pname\", XS_$Full_func_name, file$self->{proto});
-#        apply_attrs_string("$Package", cv, "@{ $self->{Attributes} }", 0);
+#        cv = $self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}, file$self->{proto});
+#        apply_attrs_string("$self->{Package}", cv, "@{ $self->{Attributes} }", 0);
 EOF
     }
     elsif ($self->{interface}) {
       while ( my ($yname, $value) = each %{ $self->{Interfaces} }) {
-        $yname = "$Package\::$yname" unless $yname =~ /::/;
+        $yname = "$self->{Package}\::$yname" unless $yname =~ /::/;
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
-#        cv = $self->{newXS}(\"$yname\", XS_$Full_func_name, file$self->{proto});
+#        cv = $self->{newXS}(\"$yname\", XS_$self->{Full_func_name}, file$self->{proto});
 #        $self->{interface_macro_set}(cv,$value);
 EOF
       }
     }
     elsif($self->{newXS} eq 'newXS'){ # work around P5NCI's empty newXS macro
       push(@{ $self->{InitFileCode} },
-       "        $self->{newXS}(\"$pname\", XS_$Full_func_name, file$self->{proto});\n");
+       "        $self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}, file$self->{proto});\n");
     }
     else {
       push(@{ $self->{InitFileCode} },
-       "        (void)$self->{newXS}(\"$pname\", XS_$Full_func_name, file$self->{proto});\n");
+       "        (void)$self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}, file$self->{proto});\n");
     }
   } # END 'PARAGRAPH' 'while' loop
 
@@ -889,10 +887,10 @@ EOF
 #
 EOF
     unshift(@{ $self->{InitFileCode} }, <<"MAKE_FETCHMETHOD_WORK");
-    /* Making a sub named "${Package}::()" allows the package */
+    /* Making a sub named "$self->{Package}::()" allows the package */
     /* to be findable via fetchmethod(), and causes */
-    /* overload::Overloaded("${Package}") to return true. */
-    (void)$self->{newXS}("${Package}::()", XS_$self->{Packid}_nil, file$self->{proto});
+    /* overload::Overloaded("$self->{Package}") to return true. */
+    (void)$self->{newXS}("$self->{Package}::()", XS_$self->{Packid}_nil, file$self->{proto});
 MAKE_FETCHMETHOD_WORK
   }
 
@@ -917,9 +915,9 @@ EOF
   #Under 5.8.x and lower, newXS is declared in proto.h as expecting a non-const
   #file name argument. If the wrong qualifier is used, it causes breakage with
   #C++ compilers and warnings with recent gcc.
-  #-Wall: if there is no $Full_func_name there are no xsubs in this .xs
+  #-Wall: if there is no $self->{Full_func_name} there are no xsubs in this .xs
   #so 'file' is unused
-  print Q(<<"EOF") if $Full_func_name;
+  print Q(<<"EOF") if $self->{Full_func_name};
 ##if (PERL_REVISION == 5 && PERL_VERSION < 9)
 #    char* file = __FILE__;
 ##else
@@ -957,7 +955,7 @@ EOF
 #    /* mentioned above, and looks in the SV* slot of it for */
 #    /* the "fallback" status. */
 #    sv_setsv(
-#        get_sv( "${Package}::()", TRUE ),
+#        get_sv( "$self->{Package}::()", TRUE ),
 #        $self->{Fallback}
 #    );
 EOF
@@ -999,7 +997,14 @@ EOF
   return 1;
 }
 
-sub report_error_count { $self->{errors} }
+sub report_error_count {
+  if (@_) {
+    return $_[0]->{errors}||0;
+  }
+  else {
+    return $Singleton->{errors}||0;
+  }
+}
 
 # Input:  ($self, $_, @{ $self->{line} }) == unparsed input.
 # Output: ($_, @{ $self->{line} }) == (rest of line, following lines).
@@ -1137,7 +1142,7 @@ sub INPUT_handler {
       }
     }
     elsif ($var_init =~ /\S/) {
-      output_init( {
+      $self->output_init( {
         type          => $var_type,
         num           => $self->{var_num},
         var           => $var_name,
@@ -1146,7 +1151,7 @@ sub INPUT_handler {
       } );
     }
     elsif ($self->{var_num}) {
-      generate_init( {
+      $self->generate_init( {
         type          => $var_type,
         num           => $self->{var_num},
         var           => $var_name,
@@ -1189,7 +1194,7 @@ sub OUTPUT_handler {
       print "\tSvSETMAGIC(ST(" , $self->{var_num} - 1 , "));\n" if $self->{DoSetMagic};
     }
     else {
-      generate_output( {
+      $self->generate_output( {
         type        => $self->{var_types}->{$outarg},
         num         => $self->{var_num},
         var         => $outarg,
@@ -1330,9 +1335,9 @@ sub OVERLOAD_handler {
     trim_whitespace($_);
     while ( s/^\s*([\w:"\\)\+\-\*\/\%\<\>\.\&\|\^\!\~\{\}\=]+)\s*//) {
       $self->{Overload} = 1 unless $self->{Overload};
-      my $overload = "$Package\::(".$1;
+      my $overload = "$self->{Package}\::(".$1;
       push(@{ $self->{InitFileCode} },
-       "        (void)$self->{newXS}(\"$overload\", XS_$Full_func_name, file$self->{proto});\n");
+       "        (void)$self->{newXS}(\"$overload\", XS_$self->{Full_func_name}, file$self->{proto});\n");
     }
   }
 }
@@ -1686,12 +1691,12 @@ sub fetch_para {
   if ($self->{lastline} =~
       /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
     my $Module = $1;
-    $Package = defined($2) ? $2 : ''; # keep -w happy
+    $self->{Package} = defined($2) ? $2 : ''; # keep -w happy
     $self->{Prefix}  = defined($3) ? $3 : ''; # keep -w happy
     $self->{Prefix} = quotemeta $self->{Prefix};
     ($self->{Module_cname} = $Module) =~ s/\W/_/g;
-    ($self->{Packid} = $Package) =~ tr/:/_/;
-    $self->{Packprefix} = $Package;
+    ($self->{Packid} = $self->{Package}) =~ tr/:/_/;
+    $self->{Packprefix} = $self->{Package};
     $self->{Packprefix} .= "::" if $self->{Packprefix} ne "";
     $self->{lastline} = "";
   }
@@ -1761,7 +1766,9 @@ sub fetch_para {
 }
 
 sub output_init {
+  my $self = shift;
   my $argsref = shift;
+
   my ($type, $num, $var, $init, $printed_name) = (
     $argsref->{type},
     $argsref->{num},
@@ -1769,20 +1776,22 @@ sub output_init {
     $argsref->{init},
     $argsref->{printed_name}
   );
-  my $arg = $num ? "ST(" . ($num - 1) . ")" : "/* not a parameter */";
+  # local assign for efficiently passing in to eval_input_typemap_code
+  local $argsref->{arg} = $num
+                          ? "ST(" . ($num-1) . ")"
+                          : "/* not a parameter */";
 
   if (  $init =~ /^=/  ) {
     if ($printed_name) {
-      eval qq/print " $init\\n"/;
+      $self->eval_input_typemap_code(qq/print " $init\\n"/, $argsref);
     }
     else {
-      eval qq/print "\\t$var $init\\n"/;
+      $self->eval_input_typemap_code(qq/print "\\t$var $init\\n"/, $argsref);
     }
-    warn $@ if $@;
   }
   else {
     if (  $init =~ s/^\+//  &&  $num  ) {
-      generate_init( {
+      $self->generate_init( {
         type          => $type,
         num           => $num,
         var           => $var,
@@ -1794,26 +1803,27 @@ sub output_init {
       $init =~ s/^;//;
     }
     else {
-      eval qq/print "\\t$var;\\n"/;
-      warn $@ if $@;
+      $self->eval_input_typemap_code(qq/print "\\t$var;\\n"/, $argsref);
       $init =~ s/^;//;
     }
-    $self->{deferred} .= eval qq/"\\n\\t$init\\n"/;
-    warn $@ if $@;
+    $self->{deferred}
+      .= $self->eval_input_typemap_code(qq/"\\n\\t$init\\n"/, $argsref);
   }
 }
 
 sub generate_init {
+  my $self = shift;
   my $argsref = shift;
+
   my ($type, $num, $var, $printed_name) = (
     $argsref->{type},
     $argsref->{num},
     $argsref->{var},
     $argsref->{printed_name},
   );
+
   my $arg = "ST(" . ($num - 1) . ")";
-  my ($argoff, $ntype);
-  $argoff = $num - 1;
+  my $argoff = $num - 1;
 
   my $typemaps = $self->{typemap};
 
@@ -1821,12 +1831,12 @@ sub generate_init {
   $self->report_typemap_failure($typemaps, $type), return
     unless $typemaps->get_typemap(ctype => $type);
 
-  ($ntype = $type) =~ s/\s*\*/Ptr/g;
-  my $subtype;
-  ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+  (my $ntype = $type) =~ s/\s*\*/Ptr/g;
+  (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+
   my $typem = $typemaps->get_typemap(ctype => $type);
   my $xstype = $typem->xstype;
-  $xstype =~ s/OBJ$/REF/ if $func_name =~ /DESTROY$/;
+  $xstype =~ s/OBJ$/REF/ if $self->{func_name} =~ /DESTROY$/;
   if ($xstype eq 'T_PV' and exists $self->{lengthof}->{$var}) {
     print "\t$var" unless $printed_name;
     print " = ($type)SvPV($arg, STRLEN_length_of_$var);\n";
@@ -1861,6 +1871,18 @@ sub generate_init {
   if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
     $self->{ScopeThisXSUB} = 1;
   }
+
+  my $eval_vars = {
+    var           => $var,
+    printed_name  => $printed_name,
+    type          => $type,
+    ntype         => $ntype,
+    subtype       => $subtype,
+    num           => $num,
+    arg           => $arg,
+    argoff        => $argoff,
+  };
+
   if (defined($self->{defaults}->{$var})) {
     $expr =~ s/(\t+)/$1    /g;
     $expr =~ s/        /\t/g;
@@ -1868,37 +1890,40 @@ sub generate_init {
       print ";\n";
     }
     else {
-      eval qq/print "\\t$var;\\n"/;
-      warn $@ if $@;
+      $self->eval_input_typemap_code(qq/print "\\t$var;\\n"/, $eval_vars);
     }
     if ($self->{defaults}->{$var} eq 'NO_INIT') {
-      $self->{deferred} .= eval qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/;
+      $self->{deferred} .= $self->eval_input_typemap_code(
+        qq/"\\n\\tif (items >= $num) {\\n$expr;\\n\\t}\\n"/,
+        $eval_vars
+      );
     }
     else {
-      $self->{deferred} .= eval qq/"\\n\\tif (items < $num)\\n\\t    $var = $self->{defaults}->{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/;
+      $self->{deferred} .= $self->eval_input_typemap_code(
+        qq/"\\n\\tif (items < $num)\\n\\t    $var = $self->{defaults}->{$var};\\n\\telse {\\n$expr;\\n\\t}\\n"/,
+        $eval_vars
+      );
     }
-    warn $@ if $@;
   }
   elsif ($self->{ScopeThisXSUB} or $expr !~ /^\s*\$var =/) {
     if ($printed_name) {
       print ";\n";
     }
     else {
-      eval qq/print "\\t$var;\\n"/;
-      warn $@ if $@;
+      $self->eval_input_typemap_code(qq/print "\\t$var;\\n"/, $eval_vars);
     }
-    $self->{deferred} .= eval qq/"\\n$expr;\\n"/;
-    warn $@ if $@;
+    $self->{deferred}
+      .= $self->eval_input_typemap_code(qq/"\\n$expr;\\n"/, $eval_vars);
   }
   else {
     die "panic: do not know how to handle this branch for function pointers"
       if $printed_name;
-    eval qq/print "$expr;\\n"/;
-    warn $@ if $@;
+    $self->eval_input_typemap_code(qq/print "$expr;\\n"/, $eval_vars);
   }
 }
 
 sub generate_output {
+  my $self = shift;
   my $argsref = shift;
   my ($type, $num, $var, $do_setmagic, $do_push) = (
     $argsref->{type},
@@ -1908,11 +1933,12 @@ sub generate_output {
     $argsref->{do_push}
   );
   my $arg = "ST(" . ($num - ($num != 0)) . ")";
-  my $ntype;
 
   my $typemaps = $self->{typemap};
 
   $type = tidy_type($type);
+  local $argsref->{type} = $type;
+
   if ($type =~ /^array\(([^,]*),(.*)\)/) {
     print "\t$arg = sv_newmortal();\n";
     print "\tsv_setpvn($arg, (char *)$var, $2 * sizeof($1));\n";
@@ -1925,11 +1951,11 @@ sub generate_output {
     my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
     $self->blurt("Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
       unless $outputmap;
-    ($ntype = $type) =~ s/\s*\*/Ptr/g;
+    (my $ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
-    my $subtype;
-    ($subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+    (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
 
+    my $eval_vars = {%$argsref, subtype => $subtype, ntype => $ntype, arg => $arg};
     my $expr = $outputmap->cleaned_code;
     if ($expr =~ /DO_ARRAY_ELEM/) {
       my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
@@ -1944,24 +1970,21 @@ sub generate_output {
       $subexpr =~ s/\$var/${var}\[ix_$var]/g;
       $subexpr =~ s/\n\t/\n\t\t/g;
       $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
-      eval "print qq\a$expr\a";
-      warn $@ if $@;
+      $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
       print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
     }
     elsif ($var eq 'RETVAL') {
       if ($expr =~ /^\t\$arg = new/) {
         # We expect that $arg has refcnt 1, so we need to
         # mortalize it.
-        eval "print qq\a$expr\a";
-        warn $@ if $@;
+        $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
         print "\tsv_2mortal(ST($num));\n";
         print "\tSvSETMAGIC(ST($num));\n" if $do_setmagic;
       }
       elsif ($expr =~ /^\s*\$arg\s*=/) {
         # We expect that $arg has refcnt >=1, so we need
         # to mortalize it!
-        eval "print qq\a$expr\a";
-        warn $@ if $@;
+        $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
         print "\tsv_2mortal(ST(0));\n";
         print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
       }
@@ -1971,24 +1994,35 @@ sub generate_output {
         # coincidence, something like $arg = &sv_undef
         # works too.
         print "\tST(0) = sv_newmortal();\n";
-        eval "print qq\a$expr\a";
-        warn $@ if $@;
+        $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
         # new mortals don't have set magic
       }
     }
     elsif ($do_push) {
       print "\tPUSHs(sv_newmortal());\n";
-      $arg = "ST($num)";
-      eval "print qq\a$expr\a";
-      warn $@ if $@;
+      local $eval_vars->{arg} = "ST($num)";
+      $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
       print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     }
     elsif ($arg =~ /^ST\(\d+\)$/) {
-      eval "print qq\a$expr\a";
-      warn $@ if $@;
+      $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
       print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
     }
   }
+}
+
+
+# Just delegates to a clean package.
+# Shim to evaluate Perl code in the right variable context
+# for typemap code (having things such as $ALIAS set up).
+sub eval_output_typemap_code {
+  my ($self, $code, $other) = @_;
+  return ExtUtils::ParseXS::Eval::eval_output_typemap_code($self, $code, $other);
+}
+
+sub eval_input_typemap_code {
+  my ($self, $code, $other) = @_;
+  return ExtUtils::ParseXS::Eval::eval_input_typemap_code($self, $code, $other);
 }
 
 1;

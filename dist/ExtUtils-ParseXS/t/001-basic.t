@@ -9,7 +9,6 @@ use ExtUtils::CBuilder;
 my ($source_file, $obj_file, $lib_file);
 
 require_ok( 'ExtUtils::ParseXS' );
-ExtUtils::ParseXS->import('process_file');
 
 chdir 't' or die "Can't chdir to t/, $!";
 
@@ -17,15 +16,16 @@ use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
 #########################
 
+my $pxs = ExtUtils::ParseXS->new;
 # Try sending to filehandle
 tie *FH, 'Foo';
-process_file( filename => 'XSTest.xs', output => \*FH, prototypes => 1 );
+$pxs->process_file( filename => 'XSTest.xs', output => \*FH, prototypes => 1 );
 like tied(*FH)->content, '/is_even/', "Test that output contains some text";
 
 $source_file = 'XSTest.c';
 
 # Try sending to file
-process_file(filename => 'XSTest.xs', output => $source_file, prototypes => 0);
+$pxs->process_file(filename => 'XSTest.xs', output => $source_file, prototypes => 0);
 ok -e $source_file, "Create an output file";
 
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
