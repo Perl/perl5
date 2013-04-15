@@ -5255,7 +5255,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     regexp_internal *ri;
     STRLEN plen;
     char *exp;
-    char* xend;
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
@@ -5588,7 +5587,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
     exp = SvPV_nomg(pat, plen);
-    xend = exp + plen;
 
     if (!eng->op_comp) {
 	if ((SvUTF8(pat) && IN_BYTES)
@@ -5628,7 +5626,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         -- dmq */
 
         S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
-        xend = exp + plen;
     }
 
     if ((pm_flags & PMf_USE_RE_EVAL)
@@ -5698,7 +5695,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* First pass: determine size, legality. */
     RExC_parse = exp;
     RExC_start = exp;
-    RExC_end = xend;
+    RExC_end = exp + plen;
     RExC_naughty = 0;
     RExC_npar = 1;
     RExC_nestroot = 0;
@@ -5901,7 +5898,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_flags = rx_flags;	/* don't let top level (?i) bleed */
     RExC_pm_flags = pm_flags;
     RExC_parse = exp;
-    RExC_end = xend;
+    RExC_end = exp + plen;
     RExC_naughty = 0;
     RExC_npar = 1;
     RExC_emit_start = ri->program;
