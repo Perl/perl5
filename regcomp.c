@@ -5104,7 +5104,7 @@ STATIC bool
 S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest, SV** rx_utf8, SV** rx_substr, I32* rx_end_shift, I32 lookbehind, I32 offset, I32 *minlen, STRLEN longest_length, bool eol, bool meol)
 {
     /* This is the common code for setting up the floating and fixed length
-     * string data extracted from Perlre_op_compile() below.  Returns a boolean
+     * string data extracted from Perl_re_op_compile() below.  Returns a boolean
      * as to whether succeeded or not */
 
     I32 t,ml;
