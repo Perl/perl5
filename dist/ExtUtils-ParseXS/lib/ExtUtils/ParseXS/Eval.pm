@@ -17,7 +17,7 @@ ExtUtils::ParseXS::Eval - Clean package to evaluate code in
 
 =head1 SUBROUTINES
 
-=head2 eval_output_typemap_code
+=head2 $pxs->eval_output_typemap_code($typemapcode, $other_hashref)
 
 Sets up various bits of previously global state
 (formerly ExtUtils::ParseXS package variables)
@@ -25,6 +25,15 @@ for eval'ing output typemap code that may refer to these
 variables.
 
 Warns the contents of C<$@> if any.
+
+Not all these variables are necessarily considered "public" wrt. use in
+typemaps, so beware. Variables set up from the ExtUtils::ParseXS object:
+
+  $Package $Alias $func_name $Full_func_name $pname
+
+Variables set up from C<$other_hashref>:
+
+  $var $type $ntype $subtype $arg
 
 =cut
 
@@ -42,7 +51,7 @@ sub eval_output_typemap_code {
   return $rv;
 }
 
-=head2 eval_input_typemap_code
+=head2 $pxs->eval_input_typemap_code($typemapcode, $other_hashref)
 
 Sets up various bits of previously global state
 (formerly ExtUtils::ParseXS package variables)
@@ -50,6 +59,15 @@ for eval'ing output typemap code that may refer to these
 variables.
 
 Warns the contents of C<$@> if any.
+
+Not all these variables are necessarily considered "public" wrt. use in
+typemaps, so beware. Variables set up from the ExtUtils::ParseXS object:
+
+  $Package $Alias $func_name $Full_func_name $pname
+
+Variables set up from C<$other_hashref>:
+
+  $var $type $ntype $subtype $num $init $printed_name $arg $argoff
 
 =cut
 
