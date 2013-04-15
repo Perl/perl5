@@ -50,10 +50,14 @@ SKIP: {
     is($new->sockdomain(), $d, 'domain match');
   SKIP: {
       skip "no Socket::SO_PROTOCOL", 1 if !defined(eval { Socket::SO_PROTOCOL });
+      skip "SO_PROTOCOL defined but not implemented", 1
+         if !defined $new->sockopt(Socket::SO_PROTOCOL);
       is($new->protocol(), $p, 'protocol match');
     }
   SKIP: {
       skip "no Socket::SO_TYPE", 1 if !defined(eval { Socket::SO_TYPE });
+      skip "SO_TYPE defined but not implemented", 1
+         if !defined $new->sockopt(Socket::SO_TYPE);
       is($new->socktype(), $s, 'type match');
     }
 
@@ -82,10 +86,14 @@ SKIP: {
     is($new->sockdomain(), $d, 'domain match');
     SKIP: {
       skip "no Socket::SO_PROTOCOL", 1 if !defined(eval { Socket::SO_PROTOCOL });
+      skip "SO_PROTOCOL defined but not implemented", 1
+         if !defined $new->sockopt(Socket::SO_PROTOCOL);
       is($new->protocol(), $p, 'protocol match');
     }
     SKIP: {
       skip "no Socket::SO_TYPE", 1 if !defined(eval { Socket::SO_TYPE });
+      skip "SO_TYPE defined but not implemented", 1
+         if !defined $new->sockopt(Socket::SO_TYPE);
       is($new->socktype(), $s, 'type match');
     }
 }
