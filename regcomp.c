@@ -5614,19 +5614,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                           PL_colors[4],PL_colors[5],s);
         });
 
-    if (0) {
-      redo_first_pass:
-        /* It's possible to write a regexp in ascii that represents Unicode
-        codepoints outside of the byte range, such as via \x{100}. If we
-        detect such a sequence we have to convert the entire pattern to utf8
-        and then recompile, as our sizing calculation will have been based
-        on 1 byte == 1 character, but we will need to use utf8 to encode
-        at least some part of the pattern, and therefore must convert the whole
-        thing.
-        -- dmq */
-
-        S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
-    }
+  redo_first_pass:
+    /* we jump here if we upgrade the pattern to utf8 and have to
+     * recompile */
 
     if ((pm_flags & PMf_USE_RE_EVAL)
 		/* this second condition covers the non-regex literal case,
@@ -5678,6 +5668,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
+            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
             goto redo_first_pass;
 	}
     }
@@ -5734,7 +5725,16 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
     }
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
+        /* It's possible to write a regexp in ascii that represents Unicode
+        codepoints outside of the byte range, such as via \x{100}. If we
+        detect such a sequence we have to convert the entire pattern to utf8
+        and then recompile, as our sizing calculation will have been based
+        on 1 byte == 1 character, but we will need to use utf8 to encode
+        at least some part of the pattern, and therefore must convert the whole
+        thing.
+        -- dmq */
         if (flags & RESTART_UTF8) {
+            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
             goto redo_first_pass;
         }
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
