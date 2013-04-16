@@ -5563,50 +5563,50 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     }
 
-        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-            "Assembling pattern from %d elements%s\n", pat_count,
-                orig_rx_flags & RXf_SPLIT ? " for split" : ""));
+    DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+        "Assembling pattern from %d elements%s\n", pat_count,
+            orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
-        /* set expr to the first arg op */
+    /* set expr to the first arg op */
 
-        if (pRExC_state->num_code_blocks
-             && expr->op_type != OP_CONST)
-        {
-                expr = cLISTOPx(expr)->op_first;
-                assert(   expr->op_type == OP_PUSHMARK
-                       || (expr->op_type == OP_NULL && expr->op_targ == OP_PUSHMARK)
-                       || expr->op_type == OP_PADRANGE);
-                expr = expr->op_sibling;
+    if (pRExC_state->num_code_blocks
+         && expr->op_type != OP_CONST)
+    {
+            expr = cLISTOPx(expr)->op_first;
+            assert(   expr->op_type == OP_PUSHMARK
+                   || (expr->op_type == OP_NULL && expr->op_targ == OP_PUSHMARK)
+                   || expr->op_type == OP_PADRANGE);
+            expr = expr->op_sibling;
+    }
+
+    if (pat_count > 1) {
+        pat = newSVpvn("", 0);
+        SAVEFREESV(pat);
+    }
+
+    pat = S_concat_pat(aTHX_ pRExC_state, pat, new_patternp, pat_count,
+                        expr, &recompile);
+
+    if (pat_count > 1)
+        SvSETMAGIC(pat);
+
+    /* handle bare (possibly after overloading) regex: foo =~ $re */
+    {
+        SV *re = pat;
+        if (SvROK(re))
+            re = SvRV(re);
+        if (SvTYPE(re) == SVt_REGEXP) {
+            if (is_bare_re)
+                *is_bare_re = TRUE;
+            SvREFCNT_inc(re);
+            Safefree(pRExC_state->code_blocks);
+            DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+                "Precompiled pattern%s\n",
+                    orig_rx_flags & RXf_SPLIT ? " for split" : ""));
+
+            return (REGEXP*)re;
         }
-
-        if (pat_count > 1) {
-	    pat = newSVpvn("", 0);
-	    SAVEFREESV(pat);
-        }
-
-        pat = S_concat_pat(aTHX_ pRExC_state, pat, new_patternp, pat_count,
-                            expr, &recompile);
-
-        if (pat_count > 1)
-            SvSETMAGIC(pat);
-
-	/* handle bare (possibly after overloading) regex: foo =~ $re */
-	{
-	    SV *re = pat;
-	    if (SvROK(re))
-		re = SvRV(re);
-	    if (SvTYPE(re) == SVt_REGEXP) {
-		if (is_bare_re)
-		    *is_bare_re = TRUE;
-		SvREFCNT_inc(re);
-		Safefree(pRExC_state->code_blocks);
-                DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-                    "Precompiled pattern%s\n",
-                        orig_rx_flags & RXf_SPLIT ? " for split" : ""));
-
-		return (REGEXP*)re;
-	    }
-	}
+    }
 
     exp = SvPV_nomg(pat, plen);
 
