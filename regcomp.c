@@ -4986,6 +4986,20 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             oplist = oplist->op_sibling;;
         }
 
+	/* apply magic and QR overloading to arg */
+
+        SvGETMAGIC(msv);
+        if (SvROK(msv) && SvAMAGIC(msv)) {
+            SV *sv = AMG_CALLunary(msv, regexp_amg);
+            if (sv) {
+                if (SvROK(sv))
+                    sv = SvRV(sv);
+                if (SvTYPE(sv) != SVt_REGEXP)
+                    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
+                msv = sv;
+            }
+        }
+
         /* try concatenation overload ... */
         if (pat && (SvAMAGIC(pat) || SvAMAGIC(msv)) &&
                 (sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
@@ -5552,28 +5566,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     {
 	/* concat args, handling magic, overloading etc */
 
-	SV **svp;
         OP *o = NULL;
 
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
             "Assembling pattern from %d elements%s\n", pat_count,
                 orig_rx_flags & RXf_SPLIT ? " for split" : ""));
-
-	/* apply magic and RE overloading to each arg */
-	for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
-	    SV *rx = *svp;
-	    SvGETMAGIC(rx);
-	    if (SvROK(rx) && SvAMAGIC(rx)) {
-		SV *sv = AMG_CALLunary(rx, regexp_amg);
-		if (sv) {
-		    if (SvROK(sv))
-			sv = SvRV(sv);
-		    if (SvTYPE(sv) != SVt_REGEXP)
-			Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
-		    *svp = sv;
-		}
-	    }
-	}
 
         if (pRExC_state->num_code_blocks) {
             if (expr->op_type == OP_CONST)
