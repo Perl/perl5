@@ -5563,25 +5563,20 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     }
 
-    {
-	/* concat args, handling magic, overloading etc */
-
-        OP *o = NULL;
-
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
             "Assembling pattern from %d elements%s\n", pat_count,
                 orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
-        if (pRExC_state->num_code_blocks) {
-            if (expr->op_type == OP_CONST)
-                o = expr;
-            else {
-                o = cLISTOPx(expr)->op_first;
-                assert(   o->op_type == OP_PUSHMARK
-                       || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)
-                       || o->op_type == OP_PADRANGE);
-                o = o->op_sibling;
-            }
+        /* set expr to the first arg op */
+
+        if (pRExC_state->num_code_blocks
+             && expr->op_type != OP_CONST)
+        {
+                expr = cLISTOPx(expr)->op_first;
+                assert(   expr->op_type == OP_PUSHMARK
+                       || (expr->op_type == OP_NULL && expr->op_targ == OP_PUSHMARK)
+                       || expr->op_type == OP_PADRANGE);
+                expr = expr->op_sibling;
         }
 
         if (pat_count > 1) {
@@ -5590,7 +5585,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
 
         pat = S_concat_pat(aTHX_ pRExC_state, pat, new_patternp, pat_count,
-                            o, &recompile);
+                            expr, &recompile);
 
         if (pat_count > 1)
             SvSETMAGIC(pat);
@@ -5612,7 +5607,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		return (REGEXP*)re;
 	    }
 	}
-    }
 
     exp = SvPV_nomg(pat, plen);
 
