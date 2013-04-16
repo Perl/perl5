@@ -3,6 +3,7 @@
 # The tests are in a separate file 't/re/re_tests'.
 # Each line in that file is a separate test.
 # There are five columns, separated by tabs.
+# An optional sixth column is used to give a reason, only when skipping tests
 #
 # Column 1 contains the pattern, optionally enclosed in C<''>.
 # Modifiers can be put after the closing C<'>.
@@ -47,6 +48,9 @@
 #
 # Note that columns 2,3 and 5 are all enclosed in double quotes and then
 # evalled; so something like a\"\x{100}$1 has length 3+length($1).
+#
+# \x... and \o{...} constants are automatically converted to the native
+# character set if necessary.  \[0-7] constants aren't
 
 my ($file, $iters);
 BEGIN {
@@ -69,6 +73,24 @@ BEGIN {
 sub _comment {
     return map { /^#/ ? "$_\n" : "# $_\n" }
            map { split /\n/ } @_;
+}
+
+sub convert_from_ascii {
+    my $string = shift;
+
+    #my $save = $string;
+    # Convert \x{...}, \o{...}
+    $string =~ s/ (?<! \\ ) \\x\{ ( .*? ) } / "\\x{" . sprintf("%X", utf8::unicode_to_native(hex $1)) .  "}" /gex;
+    $string =~ s/ (?<! \\ ) \\o\{ ( .*? ) } / "\\o{" . sprintf("%o", utf8::unicode_to_native(oct $1)) .  "}" /gex;
+
+    # Convert \xAB
+    $string =~ s/ (?<! \\ ) \\x ( [A-Fa-f0-9]{2} ) / "\\x" . sprintf("%02X", utf8::unicode_to_native(hex $1)) /gex;
+
+    # Convert \xA
+    $string =~ s/ (?<! \\ ) \\x ( [A-Fa-f0-9] ) (?! [A-Fa-f0-9] ) / "\\x" . sprintf("%X", utf8::unicode_to_native(hex $1)) /gex;
+
+    #print STDERR __LINE__, ": $save\n$string\n" if $save ne $string;
+    return $string;
 }
 
 use strict;
@@ -113,13 +135,20 @@ foreach (@tests) {
     }
     $reason = '' unless defined $reason;
     my $input = join(':',$pat,$subject,$result,$repl,$expect);
+
     # the double '' below keeps simple syntax highlighters from going crazy
     $pat = "'$pat'" unless $pat =~ /^[:''\/]/; 
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g unless $regex_sets;
+    $pat = convert_from_ascii($pat) if ord("A") != 65;
+
+    $subject = convert_from_ascii($subject) if ord("A") != 65;
     $subject = eval qq("$subject"); die $@ if $@;
+
+    $expect = convert_from_ascii($expect) if ord("A") != 65;
     $expect  = eval qq("$expect"); die $@ if $@;
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
+
     my $todo_qr = $qr_embed_thr && ($result =~ s/t//);
     my $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     ++$skip if $result =~ s/M// && !defined &DynaLoader::boot_DynaLoader;
