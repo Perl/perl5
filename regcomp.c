@@ -4932,31 +4932,89 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
 
 /* S_concat_pat(): concatenate a list of args to the pattern string pat,
  * while recording any code block indices, and handling overloading,
- * nested qr// objects etc.
- * Returns pat (or the first arg, if pat was null , i.e. there is only
- * one arg).
+ * nested qr// objects etc.  If pat is null, it will allocate a new
+ * string, or just return the first arg, if there's only one.
+ *
+ * Returns the malloced/updated pat.
  * patternp and pat_count is the array of SVs to be concatted;
  * oplist is the optional list of ops that generated the SVs;
  * recompile_p is a pointer to a boolean that will be set if
  *   the regex will need to be recompiled.
+ * delim, if non-null is an SV that will be inserted between each element
  */
 
 static SV*
 S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 SV *pat, SV ** const patternp, int pat_count,
-                OP *oplist, bool *recompile_p)
+                OP *oplist, bool *recompile_p, SV *delim)
 {
     SV **svp;
     int n = 0;
+    bool use_delim = FALSE;
+    bool alloced = FALSE;
 
-    assert(!pat || pat_count > 1);
+    /* if we know we have at least two args, create an empty string,
+     * then concatenate args to that. For no args, return an empty string */
+    if (!pat && pat_count != 1) {
+        pat = newSVpvn("", 0);
+        SAVEFREESV(pat);
+        alloced = TRUE;
+    }
 
     for (svp = patternp; svp < patternp + pat_count; svp++) {
         SV *sv;
         SV *rx  = NULL;
         STRLEN orig_patlen = 0;
         bool code = 0;
-        SV *msv = *svp;
+        SV *msv = use_delim ? delim : *svp;
+
+        /* if we've got a delimiter, we go round the loop twice for each
+         * svp slot (except the last), using the delimiter the second
+         * time round */
+        if (use_delim) {
+            svp--;
+            use_delim = FALSE;
+        }
+        else if (delim)
+            use_delim = TRUE;
+
+        if (SvTYPE(msv) == SVt_PVAV) {
+            /* we've encountered an interpolated array within
+             * the pattern, e.g. /...@a..../. Expand the list of elements,
+             * then recursively append elements.
+             * The code in this block is based on S_pushav() */
+
+            AV *const av = (AV*)msv;
+            const I32 maxarg = AvFILL(av) + 1;
+            SV **array;
+
+            if (oplist) {
+                assert(oplist->op_type == OP_PADAV
+                    || oplist->op_type == OP_RV2AV); 
+                oplist = oplist->op_sibling;;
+            }
+
+            if (SvRMAGICAL(av)) {
+                U32 i;
+
+                Newx(array, maxarg, SV*);
+                SAVEFREEPV(array);
+                for (i=0; i < (U32)maxarg; i++) {
+                    SV ** const svp = av_fetch(av, i, FALSE);
+                    array[i] = svp ? *svp : &PL_sv_undef;
+                }
+            }
+            else
+                array = AvARRAY(av);
+
+            pat = S_concat_pat(aTHX_ pRExC_state, pat,
+                                array, maxarg, NULL, recompile_p,
+                                /* $" */
+                                GvSV((gv_fetchpvs("\"", GV_ADDMULTI, SVt_PV))));
+
+            continue;
+        }
+
 
         /* we make the assumption here that each op in the list of
          * op_siblings maps to one SV pushed onto the stack,
@@ -5024,6 +5082,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             }
             if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
                 msv = SvRV(msv);
+
             if (pat) {
                 /* this is a partially unrolled
                  *     sv_catsv_nomg(pat, msv);
@@ -5043,6 +5102,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             }
             else
                 pat = msv;
+
             if (code)
                 pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
         }
@@ -5084,6 +5144,10 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             }
         }
     }
+    /* avoid calling magic multiple times on a single element e.g. =~ $qr */
+    if (alloced)
+        SvSETMAGIC(pat);
+
     return pat;
 }
 
@@ -5419,7 +5483,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 flags;
     I32 minlen = 0;
     U32 rx_flags;
-    SV *pat = NULL;
+    SV *pat;
     SV *code_blocksv = NULL;
     SV** new_patternp = patternp;
 
@@ -5579,16 +5643,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             expr = expr->op_sibling;
     }
 
-    if (pat_count > 1) {
-        pat = newSVpvn("", 0);
-        SAVEFREESV(pat);
-    }
-
-    pat = S_concat_pat(aTHX_ pRExC_state, pat, new_patternp, pat_count,
-                        expr, &recompile);
-
-    if (pat_count > 1)
-        SvSETMAGIC(pat);
+    pat = S_concat_pat(aTHX_ pRExC_state, NULL, new_patternp, pat_count,
+                        expr, &recompile, NULL);
 
     /* handle bare (possibly after overloading) regex: foo =~ $re */
     {

@@ -202,4 +202,23 @@ no  warnings 'syntax';
 }
 
 
+{
+    # [perl #115004]
+    # array interpolation within patterns should handle qr overloading
+    # (like it does for scalar vars)
+
+    {
+	package P115004;
+	use overload 'qr' => sub { return  qr/a/ };
+    }
+
+    my $o = bless [], 'P115004';
+    my @a = ($o);
+
+    ok("a" =~ /^$o$/, "qr overloading with scalar var interpolation");
+    ok("a" =~ /^@a$/, "qr overloading with array var interpolation");
+
+}
+
+
 done_testing();
