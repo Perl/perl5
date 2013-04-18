@@ -630,7 +630,7 @@ $(?<=^(a))	a	y	$1	a
 ([[:alpha:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
 ([[:alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy
 ([[:ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  ${nulnul}
-([[:cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${nulnul}
+([[:cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	ya	$1	${nulnul}	ff is a control on EBCDIC (non-POSIX-BC), so this fails under /u rules
 ([[:digit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	01
 ([[:graph:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--
 ([[:lower:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	cd
@@ -1482,10 +1482,26 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # Verify works in single quotish context; regex compiler delivers slightly different msg
 # \N{U+BEEF.BEAD} succeeds here, because can't completely hide it from the outside.
 \N{U+0xBEEF}	-	c	-	Invalid hexadecimal number
-\c`	-	c	-	\"\\c`\" is more clearly written simply as \"\\ \"
-\c1	-	c	-	\"\\c1\" is more clearly written simply as \"q\"
-\cA	\001	y	$&	\1
-
+\c`	-	ac	-	\"\\c`\" is more clearly written simply as \"\\ \"
+\c1	-	ac	-	\"\\c1\" is more clearly written simply as \"q\"
+\c@	\0	y	$&	\0
+\cA	\001	y	$&	\001
+\cB	\002	y	$&	\002
+\cC	\003	y	$&	\003
+\cI	\011	y	$&	\011
+\cJ	\012	y	$&	\012
+\cR	\022	y	$&	\022
+\cS	\023	y	$&	\023
+\cX	\030	y	$&	\030
+\cY	\031	y	$&	\031
+\cZ	\032	y	$&	\032
+\c[	\033	y	$&	\033
+\c\X	\034X	y	$&	\034X
+\c]	\035	y	$&	\035
+\c^	\036	y	$&	\036
+\c_	\037	y	$&	\037
+\c?	\177	ay	$&	\177
+\c?	\x9F	ey	$&	\x9F		\c? is APC on EBCDIC
 \400	\x{100}	y	$&	\x{100}
 \600	\x{180}	y	$&	\x{180}
 \777	\x{1FF}	y	$&	\x{1FF}
@@ -1532,18 +1548,18 @@ a(.)\g{4294967296}	x	c	-	Reference to nonexistent group in regex
 a(.)\g{4294967297}	x	c	-	Reference to nonexistent group in regex
 a(.)\g{4294967298}	x	c	-	Reference to nonexistent group in regex
 
-(.)\2147483648	b\o{214}7483648	y	$1	b
-(.)\2147483649	b\o{214}7483649	y	$1	b
-(.)\2147483650	b\o{214}7483650	y	$1	b
-(.)\4294967296	b\o{42}94967296	y	$1	b
-(.)\4294967297	b\o{42}94967297	y	$1	b
-(.)\4294967298	b\o{42}94967298	y	$1	b
-a(.)\2147483648	ab\o{214}7483648	y	$1	b
-a(.)\2147483649	ab\o{214}7483649	y	$1	b
-a(.)\2147483650	ab\o{214}7483650	y	$1	b
-a(.)\4294967296	ab\o{42}94967296	y	$1	b
-a(.)\4294967297	ab\o{42}94967297	y	$1	b
-a(.)\4294967298	ab\o{42}94967298	y	$1	b
+(.)\2147483648	b\o{214}7483648	ya	$1	b	\d not converted to native; \o{} is
+(.)\2147483649	b\o{214}7483649	ya	$1	b	\d not converted to native; \o{} is
+(.)\2147483650	b\o{214}7483650	ya	$1	b	\d not converted to native; \o{} is
+(.)\4294967296	b\o{42}94967296	ya	$1	b	\d not converted to native; \o{} is
+(.)\4294967297	b\o{42}94967297	ya	$1	b	\d not converted to native; \o{} is
+(.)\4294967298	b\o{42}94967298	ya	$1	b	\d not converted to native; \o{} is
+a(.)\2147483648	ab\o{214}7483648	ya	$1	b	\d not converted to native; \o{} is
+a(.)\2147483649	ab\o{214}7483649	ya	$1	b	\d not converted to native; \o{} is
+a(.)\2147483650	ab\o{214}7483650	ya	$1	b	\d not converted to native; \o{} is
+a(.)\4294967296	ab\o{42}94967296	ya	$1	b	\d not converted to native; \o{} is
+a(.)\4294967297	ab\o{42}94967297	ya	$1	b	\d not converted to native; \o{} is
+a(.)\4294967298	ab\o{42}94967298	ya	$1	b	\d not converted to native; \o{} is
 
 # The below was inserting a NULL into the character class.
 [\8\9]	\000	Sn	-	-
