@@ -4883,7 +4883,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 
 static void
 S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
-		    char **pat_p, STRLEN *plen_p)
+		    char **pat_p, STRLEN *plen_p, int num_code_blocks)
 {
     U8 *const src = (U8*)*pat_p;
     U8 *dst;
@@ -4905,7 +4905,7 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
             dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
             dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
         }
-        if (n < pRExC_state->num_code_blocks) {
+        if (n < num_code_blocks) {
             if (!do_end && pRExC_state->code_blocks[n].start == s) {
                 pRExC_state->code_blocks[n].start = d;
                 assert(dst[d] == '(');
@@ -5034,7 +5034,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 const char *src = SvPV_flags_const(msv, slen, 0);
                 orig_patlen = dlen;
                 if (SvUTF8(msv) && !SvUTF8(pat)) {
-                    S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &dst, &dlen);
+                    S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &dst, &dlen, n);
                     sv_setpvn(pat, dst, dlen);
                     SvUTF8_on(pat);
                 }
@@ -5690,7 +5690,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
-            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
+            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
+                                    pRExC_state->num_code_blocks);
             goto redo_first_pass;
 	}
     }
@@ -5756,7 +5757,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         thing.
         -- dmq */
         if (flags & RESTART_UTF8) {
-            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen);
+            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
+                                    pRExC_state->num_code_blocks);
             goto redo_first_pass;
         }
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
