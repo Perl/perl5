@@ -21,6 +21,8 @@
 #	t	test exposes a bug with threading, TODO if qr_embed_thr
 #       s       test should only be run for regex_sets_compat.t
 #       S       test should not be run for regex_sets_compat.t
+#       a       test should only be run on ASCII platforms
+#       e       test should only be run on EBCDIC platforms
 #
 # Columns 4 and 5 are used only if column 3 contains C<y> or C<c>.
 #
@@ -157,6 +159,14 @@ foreach (@tests) {
             $skip++;
             $reason = "Test not valid for $0";
         }
+    }
+    if ($result =~ s/a// && ord("A") != 65) {
+        $skip++;
+        $reason = "Test is only valid for ASCII platforms.  $reason";
+    }
+    if ($result =~ s/e// && ord("A") != 193) {
+        $skip++;
+        $reason = "Test is only valid for EBCDIC platforms.  $reason";
     }
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
