@@ -1,4 +1,19 @@
-6.65_01
+6.66 Fri Apr 19 17:53:13 BST 2013
+    No changes from 6.65_03
+
+6.65_03 Mon Apr 15 13:44:24 BST 2013
+    Test Fixes
+    * Use File::Temp in parse_* tests to resolve race conditions
+      on 64bit Windows
+      (bingos)
+
+6.65_02 Sun Apr 14 10:56:41 BST 2013
+    Test Fixes
+    * t/xs.t is now running tests against the XS build.
+      (Michael G Schwern) (Leon Timmermans)
+
+
+6.65_01 Tue Mar 19 00:06:17 CET 2013
     New Features
     * Improvements perlcritic support. (M. Schwern)
     * Improvements to dynamic linking for gcc (Tobias Leich)

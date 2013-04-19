@@ -10,7 +10,7 @@ use Config;
 
 our @ISA = qw(Exporter);
 our @EXPORT = qw(&Mksymlists);
-our $VERSION = '6.65_01';
+our $VERSION = '6.66';
 
 sub Mksymlists {
     my(%spec) = @_;
@@ -114,7 +114,7 @@ sub _print_imports {
     my ($def, $data)= @_;
     my $imports= $data->{IMPORTS}
         or return;
-    if (keys %$imports) {
+    if ( keys %$imports ) {
         print $def "IMPORTS\n";
         foreach my $name (sort keys %$imports) {
             print $def "  $name=$imports->{$name}\n";
