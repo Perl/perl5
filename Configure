@@ -832,6 +832,7 @@ d_semctl_semun=''
 d_union_semun=''
 d_unordered=''
 d_unsetenv=''
+d_useshellcmds=''
 d_usleep=''
 d_usleepproto=''
 d_ustat=''
@@ -19081,6 +19082,28 @@ eval $inlibc
 set unsetenv d_unsetenv
 eval $inlibc
 
+: determine whether the target system requires us to spawn a sub-shell
+: in order to get some common shell commands like echo, test, etc.
+$cat << EOM
+
+By default, Perl will only create a shell subprocess for system(),
+backticks etc, if you use shell metacharacters in your shell command. Some
+operating systems (eg Android) do not install the separate echo and test
+binaries, so we can force it to always spawn a shell using this variable.
+Set this to 'y' to always create a shell subprocess.
+
+EOM
+
+dflt='n'
+rp='Always use a shell subprocess?'
+. ./myread
+case "$ans" in
+y|Y)    val="$define" ;;
+*)      val="$undef"  ;;
+esac
+set d_useshellcmds
+eval $setvar
+
 : see if usleep exists
 set usleep d_usleep
 eval $inlibc
@@ -23360,6 +23383,7 @@ d_uname='$d_uname'
 d_union_semun='$d_union_semun'
 d_unordered='$d_unordered'
 d_unsetenv='$d_unsetenv'
+d_useshellcmds='$d_useshellcmds'
 d_usleep='$d_usleep'
 d_usleepproto='$d_usleepproto'
 d_ustat='$d_ustat'
