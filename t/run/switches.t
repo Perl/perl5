@@ -7,6 +7,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require Config; import Config;
 }
 
 BEGIN { require "./test.pl"; }
@@ -111,6 +112,7 @@ SWTEST
 
 SKIP: {
     skip "no POSIX on miniperl", 1, unless $INC{"POSIX.pm"};
+    skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
 
     my $tempdir = tempfile;
     mkdir $tempdir, 0700 or die "Can't mkdir '$tempdir': $!";
