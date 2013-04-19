@@ -97,7 +97,9 @@ TODO:
 	# of a reliable way to probe for this, so for now, just skip the
 	# tests on production releases
 	skip("some OSes hang here", 3) if (int($]*1000) & 1) == 0;
-
+    
+  TODO: {
+	local $::TODO = "Issues on Android" if $^O =~ /android/;
 	my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
 	POSIX::sigaction(&POSIX::SIGALRM, $action);
 	eval {
@@ -109,6 +111,7 @@ TODO:
 	} for 1..2;
 	is $gotit, 0, 'Received both signals';
     }
+}
 }
 
 SKIP: {
