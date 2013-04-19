@@ -68,7 +68,7 @@ character classes, see L<perlrebackslash>.)
  \H             Match a character that isn't horizontal whitespace.
  \v             Match a vertical whitespace character.
  \V             Match a character that isn't vertical whitespace.
- \N             Match a character that isn't a newline.  Experimental.
+ \N             Match a character that isn't a newline.
  \pP, \p{Prop}  Match a character that has the given Unicode property.
  \PP, \P{Prop}  Match a character that doesn't have the Unicode property
 

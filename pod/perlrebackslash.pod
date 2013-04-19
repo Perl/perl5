@@ -85,7 +85,7 @@ as C<Not in [].>
  \l                Lowercase next character.  Not in [].
  \L                Lowercase till \E.  Not in [].
  \n                (Logical) newline character.
- \N                Any character but newline.  Experimental.  Not in [].
+ \N                Any character but newline.  Not in [].
  \N{}              Named or numbered (Unicode) character or sequence.
  \o{}              Octal escape sequence.
  \p{}, \pP         Character with the given Unicode property.
