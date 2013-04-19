@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # quote() - Creates a shell literal
-# Usage:  echo "...$( quote "..." )..."
+# Usage:  echo "...` quote "..." `..."
 quote() {
 	case "$1" in
 	'') echo "''" ;;
@@ -37,6 +37,7 @@ case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
 
+pwd="`pwd`"
 linklibperl='$(LIBPERL)'
 linklibperl_nonshr=''
 shrpldflags='$(LDDLFLAGS)'
@@ -48,8 +49,8 @@ true)
 	# Prefix all runs of 'miniperl' and 'perl' with
 	# $ldlibpth so that ./perl finds *this* shared libperl.
 	case "$LD_LIBRARY_PATH" in
-	'')  ldlibpth="LD_LIBRARY_PATH=$( quote "`pwd`" )" ;;
-	*)   ldlibpth="LD_LIBRARY_PATH=$( quote "`pwd`" ):$( quote "$LD_LIBRARY_PATH" )" ;;
+	'')  ldlibpth="LD_LIBRARY_PATH=` quote "$pwd" `" ;;
+	*)   ldlibpth="LD_LIBRARY_PATH=` quote "$pwd" `:` quote "$LD_LIBRARY_PATH" `" ;;
 	esac
 
 	pldlflags="$cccdlflags"
@@ -131,8 +132,8 @@ true)
 		eval "ldlibpthval=\"\$$ldlibpthname\""
 
 		case "$ldlibpthval" in
-		'')  ldlibpth="$ldlibpthname=$( quote "`pwd`" )" ;;
-		*)   ldlibpth="$ldlibpthname=$( quote "`pwd`" ):$( quote "$ldlibpthval" )" ;;
+		'')  ldlibpth="$ldlibpthname=` quote "$pwd" `" ;;
+		*)   ldlibpth="$ldlibpthname=` quote "$pwd" `:` quote "$ldlibpthval" `" ;;
 		esac
 
 		;;
