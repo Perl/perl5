@@ -13188,8 +13188,8 @@ parseit:
              * included.  literal_endpoint==2 means both ends of the range used
              * a literal character, not \x{foo} */
 	    if (literal_endpoint == 2
-                && (prevvalue >= 'a' && value <= 'z')
-                    || (prevvalue >= 'A' && value <= 'Z'))
+                && ((prevvalue >= 'a' && value <= 'z')
+                    || (prevvalue >= 'A' && value <= 'Z')))
             {
                 _invlist_intersection(this_range, PL_ASCII,
                                       &this_range);
