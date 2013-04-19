@@ -96,6 +96,11 @@ XXX
 
 =item *
 
+Fixed the merge of ExtUtils-MakeMaker 6.65_01 to remove an excluded
+file.  This was causing a test failure on Win32 [perl #117477]
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 =back
