@@ -1997,18 +1997,21 @@ foreach my $ord (78, 163, 256) {
 }
 
 {
-    # 59998
-    sub cr { my $x = crypt($_[0], $_[1]); $x }
-    sub co { my $x = ~$_[0]; $x }
-    my ($a, $b);
-    $a = cr('hello', 'foo' . $TAINT);
-    $b = cr('hello', 'foo');
-    is_tainted($a,  "tainted crypt");
-    isnt_tainted($b, "untainted crypt");
-    $a = co('foo' . $TAINT);
-    $b = co('foo');
-    is_tainted($a,  "tainted complement");
-    isnt_tainted($b, "untainted complement");
+  SKIP: {
+      skip 'No crypt function, skipping crypt tests', 4 if(!$Config{d_crypt});
+      # 59998
+      sub cr { my $x = crypt($_[0], $_[1]); $x }
+      sub co { my $x = ~$_[0]; $x }
+      my ($a, $b);
+      $a = cr('hello', 'foo' . $TAINT);
+      $b = cr('hello', 'foo');
+      is_tainted($a,  "tainted crypt");
+      isnt_tainted($b, "untainted crypt");
+      $a = co('foo' . $TAINT);
+      $b = co('foo');
+      is_tainted($a,  "tainted complement");
+      isnt_tainted($b, "untainted complement");
+    }
 }
 
 {
