@@ -5,6 +5,13 @@ userelocatableinc='define'
 # On Android the shell is /system/bin/sh:
 targetsh='/system/bin/sh'
 
+# Down with locales!
+# https://github.com/android/platform_bionic/blob/master/libc/CAVEATS
+d_locconv='undef'
+d_setlocale='undef'
+d_setlocale_r='undef'
+i_locale='undef'
+
 
 case "$src" in
     /*) run=$src/Cross/run
