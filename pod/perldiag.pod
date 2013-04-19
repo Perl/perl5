@@ -1311,11 +1311,12 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 =item Character following "\c" must be ASCII
 
 (F)(W deprecated, syntax) In C<\cI<X>>, I<X> must be an ASCII character.
-It is planned to make this fatal in all instances in Perl 5.18.  In the
+It is planned to make this fatal in all instances in Perl v5.20.  In the
 cases where it isn't fatal, the character this evaluates to is
 derived by exclusive or'ing the code point of this character with 0x40.
 
-Note that non-alphabetic ASCII characters are discouraged here as well.
+Note that non-alphabetic ASCII characters are discouraged here as well,
+and using non-printable ones will be deprecated starting in v5.18.
 
 =item Character in 'C' format wrapped in pack
 
@@ -1400,7 +1401,7 @@ uses the character values modulus 256 instead, as if you had provided:
 (D deprecated, syntax) The C<\cI<X>> construct is intended to be a way
 to specify non-printable characters.  You used it with a "{" which
 evaluates to ";", which is printable.  It is planned to remove the
-ability to specify a semi-colon this way in Perl 5.18.  Just use a
+ability to specify a semi-colon this way in Perl 5.20.  Just use a
 semi-colon or a backslash-semi-colon without the "\c".
 
 =item "\c%c" is more clearly written simply as "%s"
