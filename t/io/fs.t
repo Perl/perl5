@@ -16,10 +16,15 @@ if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
 elsif ($^O eq 'VMS') {
     $wd = `show default`;
 }
+elsif ($ENV{PWD}) {
+    $wd = $ENV{PWD};
+}
 else {
     $wd = `pwd`;
 }
 chomp($wd);
+
+die "Can't get current working directory" if(!$wd);
 
 my $has_link            = $Config{d_link};
 my $accurate_timestamps =
@@ -307,7 +312,7 @@ is(unlink('b'), 1, "unlink b");
 is($ino, undef, "ino of unlinked file b should be undef");
 unlink 'c';
 
-chdir $wd || die "Can't cd back to $wd";
+chdir $wd || die "Can't cd back to '$wd' ($!)";
 
 # Yet another way to look for links (perhaps those that cannot be
 # created by perl?).  Hopefully there is an ls utility in your
