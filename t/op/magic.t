@@ -174,6 +174,7 @@ END
     close CMDPIPE;
     $? >>= 8 if $^O eq 'VMS'; # POSIX status hiding in 2nd byte
     my $todo = ($^O eq 'os2' ? ' # TODO: EMX v0.9d_fix4 bug: wrong nibble? ' : '');
+    $todo = ($Config{usecrosscompile} ? '# TODO: Not sure whats going on here when cross-compiling' : '');
     print $? & 0xFF ? "ok $tn[4]$todo\n" : "not ok $tn[4]$todo\n";
 
     open(CMDPIPE, "|-", $PERL);
