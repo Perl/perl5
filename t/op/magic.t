@@ -106,7 +106,7 @@ else              { is `echo \$FOO`, "hi there\n"; }
 unlink_all 'ajslkdfpqjsjfk';
 $! = 0;
 open(FOO,'ajslkdfpqjsjfk');
-isnt($!, 0);
+isnt($!, 0, "Unlinked file can't be opened");
 close FOO; # just mention it, squelch used-only-once
 
 SKIP: {
