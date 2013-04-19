@@ -30,6 +30,7 @@ from=$from-$targetfrom
 cat >$run <<EOF
 #!/bin/sh
 doexit="echo \\\$?"
+env=''
 case "\$1" in
 -cwd)
   shift
@@ -37,28 +38,35 @@ case "\$1" in
   shift
   ;;
 esac
+case "\$1" in
+-env)
+  shift
+  env=\$1
+  shift
+  ;;
+esac
 case "\$cwd" in
 '') cwd=$targetdir ;;
 esac
+case "\$env" in
+'') env="echo "
+esac
 exe=\$1
 shift
+args=\$@
 $to \$exe > /dev/null 2>&1
 
 # send copy results to /dev/null as otherwise it outputs speed stats which gets in our way.
-foo=\`adb -s $targethost shell "sh -c '(cd \$cwd && \$exe \$@ > \$exe.stdout) ; \$doexit '"\`
+# sometimes there is no $?, I dunno why? we then get Cross/run-adb-shell: line 39: exit: XX: numeric argument required
+foo=\`adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args > \$exe.stdout) ; \$doexit '"\`
 # We get back Ok\r\n on android for some reason, grrr:
 $from \$exe.stdout
 result=\`cat \$exe.stdout\`
 rm \$exe.stdout
 foo=\`echo \$foo | sed -e 's|\r||g'\`
 # Also, adb doesn't exit with the commands exit code, like ssh does, double-grr
-echo \$result
+echo "\$result"
 exit \$foo
-# if test "X\$doexit" != X; then
-#  exit \$foo
-#else
-#  echo \$foo
-#fi
 
 EOF
 chmod a+rx $run
