@@ -15,7 +15,7 @@ L<perl51710delta>, which describes differences between 5.17.9 and 5.17.10.
 =head1 Incompatible Changes
 
 Although no major incompatibilities have been introduced, the "switch" family
-of features have been marked experimental and will not emit warnings.  These
+of features have been marked experimental and will now emit warnings.  These
 are:  the C<~~> operator, C<given>, and C<when>.
 
 =head1 Modules and Pragmata
