@@ -52,6 +52,10 @@ ExtUtils::CBuilder has been upgraded from version 0.280209 to 0.280210.
 
 =item *
 
+ExtUtils::MakeMaker has been upgraded from version 6.65_01 to 6.66.
+
+=item *
+
 IO has been upgraded from version 1.27 to 1.28.
 
 =item *
