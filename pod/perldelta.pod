@@ -31,7 +31,40 @@ file.  This was causing a test failure on Win32 [perl #117477]
 
 =item *
 
+B::Deparse has been upgraded from version 1.19 to 1.20, adding stub deparsing
+for lexical subroutines.
+
+=item *
+
+bigint has been upgraded from version 0.33 to 0.34.
+
+=item *
+
 CPAN has been upgraded from its trial 2.00 release to its final 2.00 release.
+
+=item *
+
+Exporter has been upgraded from version 5.67 to 5.68.
+
+=item *
+
+ExtUtils::CBuilder has been upgraded from version 0.280209 to 0.280210.
+
+=item *
+
+IO has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+overload has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+Storable has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+warnings has been upgraded from version 1.17 to 1.18.
 
 =back
 
