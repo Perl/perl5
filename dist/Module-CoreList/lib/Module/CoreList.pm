@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.86';
+$VERSION = '2.87';
 
 my $dumpinc = 0;
 sub import {
@@ -229,6 +229,7 @@ sub changes_between {
     5.014004 => '2013-03-10',
     5.016003 => '2013-03-11',
     5.017010 => '2013-03-21',
+    5.017011 => '2013-04-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -7927,6 +7928,53 @@ my %delta = (
         removed => {
         }
     },
+    5.017011 => {
+        delta_from => 5.017010,
+        changed => {
+            'App::Cpan'             => '1.61',
+            'B::Deparse'            => '1.20',
+            'Exporter'              => '5.68',
+            'Exporter::Heavy'       => '5.68',
+            'ExtUtils::CBuilder'    => '0.280210',
+            'ExtUtils::Command::MM' => '6.66',
+            'ExtUtils::Liblist'     => '6.66',
+            'ExtUtils::Liblist::Kid'=> '6.66',
+            'ExtUtils::MM'          => '6.66',
+            'ExtUtils::MM_AIX'      => '6.66',
+            'ExtUtils::MM_Any'      => '6.66',
+            'ExtUtils::MM_BeOS'     => '6.66',
+            'ExtUtils::MM_Cygwin'   => '6.66',
+            'ExtUtils::MM_DOS'      => '6.66',
+            'ExtUtils::MM_Darwin'   => '6.66',
+            'ExtUtils::MM_MacOS'    => '6.66',
+            'ExtUtils::MM_NW5'      => '6.66',
+            'ExtUtils::MM_OS2'      => '6.66',
+            'ExtUtils::MM_QNX'      => '6.66',
+            'ExtUtils::MM_UWIN'     => '6.66',
+            'ExtUtils::MM_Unix'     => '6.66',
+            'ExtUtils::MM_VMS'      => '6.66',
+            'ExtUtils::MM_VOS'      => '6.66',
+            'ExtUtils::MM_Win32'    => '6.66',
+            'ExtUtils::MM_Win95'    => '6.66',
+            'ExtUtils::MY'          => '6.66',
+            'ExtUtils::MakeMaker'   => '6.66',
+            'ExtUtils::MakeMaker::Config'=> '6.66',
+            'ExtUtils::Mkbootstrap' => '6.66',
+            'ExtUtils::Mksymlists'  => '6.66',
+            'ExtUtils::testlib'     => '6.66',
+            'File::Glob'            => '1.20',
+            'IO'                    => '1.28',
+            'Module::CoreList'      => '2.87',
+            'Module::CoreList::TieHashDelta'=> '2.87',
+            'Storable'              => '2.41',
+            'bigint'                => '0.34',
+            'mro'                   => '1.11',
+            'overload'              => '1.22',
+            'warnings'              => '1.18',
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %delta) {
@@ -8173,6 +8221,10 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.016003 => {
     },
     5.017010 => {
+    },
+    5.017011 => {
+    },
+    5.017011 => {
     },
 );
 
@@ -8942,7 +8994,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
     'File::Spec::Unix'      => undef,
     'File::Spec::VMS'       => undef,
     'File::Spec::Win32'     => undef,
-    'File::Temp'            => undef,
+    'File::Temp'            => 'https://rt.cpan.org/Public/Dist/Display.html?Name=File-Temp',
     'Filter::Simple'        => undef,
     'Filter::Util::Call'    => undef,
     'Getopt::Long'          => undef,
