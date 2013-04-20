@@ -4873,6 +4873,286 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
                                 NULL, NULL, rx_flags, 0);
 }
 
+
+/* upgrade pattern pat_p of length plen_p to UTF8, and if there are code
+ * blocks, recalculate the indices. Update pat_p and plen_p in-place to
+ * point to the realloced string and length.
+ *
+ * This is essentially a copy of Perl_bytes_to_utf8() with the code index
+ * stuff added */
+
+static void
+S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
+		    char **pat_p, STRLEN *plen_p, int num_code_blocks)
+{
+    U8 *const src = (U8*)*pat_p;
+    U8 *dst;
+    int n=0;
+    STRLEN s = 0, d = 0;
+    bool do_end = 0;
+    GET_RE_DEBUG_FLAGS_DECL;
+
+    DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+        "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
+
+    Newx(dst, *plen_p * 2 + 1, U8);
+
+    while (s < *plen_p) {
+        const UV uv = NATIVE_TO_ASCII(src[s]);
+        if (UNI_IS_INVARIANT(uv))
+            dst[d]   = (U8)UTF_TO_NATIVE(uv);
+        else {
+            dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
+            dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
+        }
+        if (n < num_code_blocks) {
+            if (!do_end && pRExC_state->code_blocks[n].start == s) {
+                pRExC_state->code_blocks[n].start = d;
+                assert(dst[d] == '(');
+                do_end = 1;
+            }
+            else if (do_end && pRExC_state->code_blocks[n].end == s) {
+                pRExC_state->code_blocks[n].end = d;
+                assert(dst[d] == ')');
+                do_end = 0;
+                n++;
+            }
+        }
+        s++;
+        d++;
+    }
+    dst[d] = '\0';
+    *plen_p = d;
+    *pat_p = (char*) dst;
+    SAVEFREEPV(*pat_p);
+    RExC_orig_utf8 = RExC_utf8 = 1;
+}
+
+
+
+/* S_concat_pat(): concatenate a list of args to the pattern string pat,
+ * while recording any code block indices, and handling overloading,
+ * nested qr// objects etc.  If pat is null, it will allocate a new
+ * string, or just return the first arg, if there's only one.
+ *
+ * Returns the malloced/updated pat.
+ * patternp and pat_count is the array of SVs to be concatted;
+ * oplist is the optional list of ops that generated the SVs;
+ * recompile_p is a pointer to a boolean that will be set if
+ *   the regex will need to be recompiled.
+ * delim, if non-null is an SV that will be inserted between each element
+ */
+
+static SV*
+S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
+                SV *pat, SV ** const patternp, int pat_count,
+                OP *oplist, bool *recompile_p, SV *delim)
+{
+    SV **svp;
+    int n = 0;
+    bool use_delim = FALSE;
+    bool alloced = FALSE;
+
+    /* if we know we have at least two args, create an empty string,
+     * then concatenate args to that. For no args, return an empty string */
+    if (!pat && pat_count != 1) {
+        pat = newSVpvn("", 0);
+        SAVEFREESV(pat);
+        alloced = TRUE;
+    }
+
+    for (svp = patternp; svp < patternp + pat_count; svp++) {
+        SV *sv;
+        SV *rx  = NULL;
+        STRLEN orig_patlen = 0;
+        bool code = 0;
+        SV *msv = use_delim ? delim : *svp;
+
+        /* if we've got a delimiter, we go round the loop twice for each
+         * svp slot (except the last), using the delimiter the second
+         * time round */
+        if (use_delim) {
+            svp--;
+            use_delim = FALSE;
+        }
+        else if (delim)
+            use_delim = TRUE;
+
+        if (SvTYPE(msv) == SVt_PVAV) {
+            /* we've encountered an interpolated array within
+             * the pattern, e.g. /...@a..../. Expand the list of elements,
+             * then recursively append elements.
+             * The code in this block is based on S_pushav() */
+
+            AV *const av = (AV*)msv;
+            const I32 maxarg = AvFILL(av) + 1;
+            SV **array;
+
+            if (oplist) {
+                assert(oplist->op_type == OP_PADAV
+                    || oplist->op_type == OP_RV2AV); 
+                oplist = oplist->op_sibling;;
+            }
+
+            if (SvRMAGICAL(av)) {
+                U32 i;
+
+                Newx(array, maxarg, SV*);
+                SAVEFREEPV(array);
+                for (i=0; i < (U32)maxarg; i++) {
+                    SV ** const svp = av_fetch(av, i, FALSE);
+                    array[i] = svp ? *svp : &PL_sv_undef;
+                }
+            }
+            else
+                array = AvARRAY(av);
+
+            pat = S_concat_pat(aTHX_ pRExC_state, pat,
+                                array, maxarg, NULL, recompile_p,
+                                /* $" */
+                                GvSV((gv_fetchpvs("\"", GV_ADDMULTI, SVt_PV))));
+
+            continue;
+        }
+
+
+        /* we make the assumption here that each op in the list of
+         * op_siblings maps to one SV pushed onto the stack,
+         * except for code blocks, with have both an OP_NULL and
+         * and OP_CONST.
+         * This allows us to match up the list of SVs against the
+         * list of OPs to find the next code block.
+         *
+         * Note that       PUSHMARK PADSV PADSV ..
+         * is optimised to
+         *                 PADRANGE PADSV  PADSV  ..
+         * so the alignment still works. */
+
+        if (oplist) {
+            if (oplist->op_type == OP_NULL
+                && (oplist->op_flags & OPf_SPECIAL))
+            {
+                assert(n < pRExC_state->num_code_blocks);
+                pRExC_state->code_blocks[n].start = pat ? SvCUR(pat) : 0;
+                pRExC_state->code_blocks[n].block = oplist;
+                pRExC_state->code_blocks[n].src_regex = NULL;
+                n++;
+                code = 1;
+                oplist = oplist->op_sibling; /* skip CONST */
+                assert(oplist);
+            }
+            oplist = oplist->op_sibling;;
+        }
+
+	/* apply magic and QR overloading to arg */
+
+        SvGETMAGIC(msv);
+        if (SvROK(msv) && SvAMAGIC(msv)) {
+            SV *sv = AMG_CALLunary(msv, regexp_amg);
+            if (sv) {
+                if (SvROK(sv))
+                    sv = SvRV(sv);
+                if (SvTYPE(sv) != SVt_REGEXP)
+                    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
+                msv = sv;
+            }
+        }
+
+        /* try concatenation overload ... */
+        if (pat && (SvAMAGIC(pat) || SvAMAGIC(msv)) &&
+                (sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
+        {
+            sv_setsv(pat, sv);
+            /* overloading involved: all bets are off over literal
+             * code. Pretend we haven't seen it */
+            pRExC_state->num_code_blocks -= n;
+            n = 0;
+        }
+        else  {
+            /* ... or failing that, try "" overload */
+            while (SvAMAGIC(msv)
+                    && (sv = AMG_CALLunary(msv, string_amg))
+                    && sv != msv
+                    &&  !(   SvROK(msv)
+                          && SvROK(sv)
+                          && SvRV(msv) == SvRV(sv))
+            ) {
+                msv = sv;
+                SvGETMAGIC(msv);
+            }
+            if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
+                msv = SvRV(msv);
+
+            if (pat) {
+                /* this is a partially unrolled
+                 *     sv_catsv_nomg(pat, msv);
+                 * that allows us to adjust code block indices if
+                 * needed */
+                STRLEN slen, dlen;
+                char *dst = SvPV_force_nomg(pat, dlen);
+                const char *src = SvPV_flags_const(msv, slen, 0);
+                orig_patlen = dlen;
+                if (SvUTF8(msv) && !SvUTF8(pat)) {
+                    S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &dst, &dlen, n);
+                    sv_setpvn(pat, dst, dlen);
+                    SvUTF8_on(pat);
+                }
+                sv_catpvn_nomg(pat, src, slen);
+                rx = msv;
+            }
+            else
+                pat = msv;
+
+            if (code)
+                pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
+        }
+
+        /* extract any code blocks within any embedded qr//'s */
+        if (rx && SvTYPE(rx) == SVt_REGEXP
+            && RX_ENGINE((REGEXP*)rx)->op_comp)
+        {
+
+            RXi_GET_DECL(ReANY((REGEXP *)rx), ri);
+            if (ri->num_code_blocks) {
+                int i;
+                /* the presence of an embedded qr// with code means
+                 * we should always recompile: the text of the
+                 * qr// may not have changed, but it may be a
+                 * different closure than last time */
+                *recompile_p = 1;
+                Renew(pRExC_state->code_blocks,
+                    pRExC_state->num_code_blocks + ri->num_code_blocks,
+                    struct reg_code_block);
+                pRExC_state->num_code_blocks += ri->num_code_blocks;
+
+                for (i=0; i < ri->num_code_blocks; i++) {
+                    struct reg_code_block *src, *dst;
+                    STRLEN offset =  orig_patlen
+                        + ReANY((REGEXP *)rx)->pre_prefix;
+                    assert(n < pRExC_state->num_code_blocks);
+                    src = &ri->code_blocks[i];
+                    dst = &pRExC_state->code_blocks[n];
+                    dst->start	    = src->start + offset;
+                    dst->end	    = src->end   + offset;
+                    dst->block	    = src->block;
+                    dst->src_regex  = (REGEXP*) SvREFCNT_inc( (SV*)
+                                            src->src_regex
+                                                ? src->src_regex
+                                                : (REGEXP*)rx);
+                    n++;
+                }
+            }
+        }
+    }
+    /* avoid calling magic multiple times on a single element e.g. =~ $qr */
+    if (alloced)
+        SvSETMAGIC(pat);
+
+    return pat;
+}
+
+
+
 /* see if there are any run-time code blocks in the pattern.
  * False positives are allowed */
 
@@ -5199,12 +5479,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     regexp_internal *ri;
     STRLEN plen;
     char *exp;
-    char* xend;
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
     U32 rx_flags;
-    SV *pat = NULL;
+    SV *pat;
     SV *code_blocksv = NULL;
     SV** new_patternp = patternp;
 
@@ -5348,191 +5627,44 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     }
 
+    DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+        "Assembling pattern from %d elements%s\n", pat_count,
+            orig_rx_flags & RXf_SPLIT ? " for split" : ""));
+
+    /* set expr to the first arg op */
+
+    if (pRExC_state->num_code_blocks
+         && expr->op_type != OP_CONST)
     {
-	/* concat args, handling magic, overloading etc */
+            expr = cLISTOPx(expr)->op_first;
+            assert(   expr->op_type == OP_PUSHMARK
+                   || (expr->op_type == OP_NULL && expr->op_targ == OP_PUSHMARK)
+                   || expr->op_type == OP_PADRANGE);
+            expr = expr->op_sibling;
+    }
 
-	SV **svp;
-        OP *o = NULL;
-        int n = 0;
-        STRLEN orig_patlen = 0;
+    pat = S_concat_pat(aTHX_ pRExC_state, NULL, new_patternp, pat_count,
+                        expr, &recompile, NULL);
 
-        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-            "Assembling pattern from %d elements%s\n", pat_count,
-                orig_rx_flags & RXf_SPLIT ? " for split" : ""));
+    /* handle bare (possibly after overloading) regex: foo =~ $re */
+    {
+        SV *re = pat;
+        if (SvROK(re))
+            re = SvRV(re);
+        if (SvTYPE(re) == SVt_REGEXP) {
+            if (is_bare_re)
+                *is_bare_re = TRUE;
+            SvREFCNT_inc(re);
+            Safefree(pRExC_state->code_blocks);
+            DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
+                "Precompiled pattern%s\n",
+                    orig_rx_flags & RXf_SPLIT ? " for split" : ""));
 
-	/* apply magic and RE overloading to each arg */
-	for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
-	    SV *rx = *svp;
-	    SvGETMAGIC(rx);
-	    if (SvROK(rx) && SvAMAGIC(rx)) {
-		SV *sv = AMG_CALLunary(rx, regexp_amg);
-		if (sv) {
-		    if (SvROK(sv))
-			sv = SvRV(sv);
-		    if (SvTYPE(sv) != SVt_REGEXP)
-			Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
-		    *svp = sv;
-		}
-	    }
-	}
-
-        if (pRExC_state->num_code_blocks) {
-            if (expr->op_type == OP_CONST)
-                o = expr;
-            else {
-                o = cLISTOPx(expr)->op_first;
-                assert(   o->op_type == OP_PUSHMARK
-                       || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)
-                       || o->op_type == OP_PADRANGE);
-                o = o->op_sibling;
-            }
+            return (REGEXP*)re;
         }
-
-        if (pat_count > 1) {
-
-	    pat = newSVpvn("", 0);
-	    SAVEFREESV(pat);
-
-	    /* determine if the pattern is going to be utf8 (needed
-	     * in advance to align code block indices correctly).
-	     * XXX This could fail to be detected for an arg with
-	     * overloading but not concat overloading; but the main effect
-	     * in this obscure case is to need a 'use re eval' for a
-	     * literal code block */
-	    for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
-		if (SvUTF8(*svp))
-                    SvUTF8_on(pat);
-	    }
-        }
-
-        /* process args, concat them if there are multiple ones,
-         * and find any code block indexes */
-
-
-        for (svp = new_patternp; svp < new_patternp + pat_count; svp++) {
-            SV *sv, *msv = *svp;
-            SV *rx  = NULL;
-            bool code = 0;
-            /* we make the assumption here that each op in the list of
-             * op_siblings maps to one SV pushed onto the stack,
-             * except for code blocks, with have both an OP_NULL and
-             * and OP_CONST.
-             * This allows us to match up the list of SVs against the
-             * list of OPs to find the next code block.
-             *
-             * Note that       PUSHMARK PADSV PADSV ..
-             * is optimised to
-             *                 PADRANGE NULL  NULL  ..
-             * so the alignment still works. */
-            if (o) {
-                if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
-                    assert(n < pRExC_state->num_code_blocks);
-                    pRExC_state->code_blocks[n].start = pat ? SvCUR(pat) : 0;
-                    pRExC_state->code_blocks[n].block = o;
-                    pRExC_state->code_blocks[n].src_regex = NULL;
-                    n++;
-                    code = 1;
-                    o = o->op_sibling; /* skip CONST */
-                    assert(o);
-                }
-                o = o->op_sibling;;
-            }
-
-            /* try concatenation overload ... */
-            if (pat && (SvAMAGIC(pat) || SvAMAGIC(msv)) &&
-                    (sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
-            {
-                sv_setsv(pat, sv);
-                /* overloading involved: all bets are off over literal
-                 * code. Pretend we haven't seen it */
-                pRExC_state->num_code_blocks -= n;
-                n = 0;
-            }
-            else  {
-                /* ... or failing that, try "" overload */
-                while (SvAMAGIC(msv)
-                        && (sv = AMG_CALLunary(msv, string_amg))
-                        && sv != msv
-                        &&  !(   SvROK(msv)
-                              && SvROK(sv)
-                              && SvRV(msv) == SvRV(sv))
-                ) {
-                    msv = sv;
-                    SvGETMAGIC(msv);
-                }
-                if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP)
-                    msv = SvRV(msv);
-                if (pat) {
-                    orig_patlen = SvCUR(pat);
-                    sv_catsv_nomg(pat, msv);
-                    rx = msv;
-                }
-                else
-                    pat = msv;
-                if (code)
-                    pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
-            }
-
-            /* extract any code blocks within any embedded qr//'s */
-            if (rx && SvTYPE(rx) == SVt_REGEXP
-                && RX_ENGINE((REGEXP*)rx)->op_comp)
-            {
-
-                RXi_GET_DECL(ReANY((REGEXP *)rx), ri);
-                if (ri->num_code_blocks) {
-                    int i;
-                    /* the presence of an embedded qr// with code means
-                     * we should always recompile: the text of the
-                     * qr// may not have changed, but it may be a
-                     * different closure than last time */
-                    recompile = 1;
-                    Renew(pRExC_state->code_blocks,
-                        pRExC_state->num_code_blocks + ri->num_code_blocks,
-                        struct reg_code_block);
-                    pRExC_state->num_code_blocks += ri->num_code_blocks;
-                    for (i=0; i < ri->num_code_blocks; i++) {
-                        struct reg_code_block *src, *dst;
-                        STRLEN offset =  orig_patlen
-                            + ReANY((REGEXP *)rx)->pre_prefix;
-                        assert(n < pRExC_state->num_code_blocks);
-                        src = &ri->code_blocks[i];
-                        dst = &pRExC_state->code_blocks[n];
-                        dst->start	    = src->start + offset;
-                        dst->end	    = src->end   + offset;
-                        dst->block	    = src->block;
-                        dst->src_regex  = (REGEXP*) SvREFCNT_inc( (SV*)
-                                                src->src_regex
-                                                    ? src->src_regex
-                                                    : (REGEXP*)rx);
-                        n++;
-                    }
-                }
-            }
-        }
-        if (pat_count > 1)
-            SvSETMAGIC(pat);
-
-	/* handle bare (possibly after overloading) regex: foo =~ $re */
-	{
-	    SV *re = pat;
-	    if (SvROK(re))
-		re = SvRV(re);
-	    if (SvTYPE(re) == SVt_REGEXP) {
-		if (is_bare_re)
-		    *is_bare_re = TRUE;
-		SvREFCNT_inc(re);
-		Safefree(pRExC_state->code_blocks);
-                DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-                    "Precompiled pattern%s\n",
-                        orig_rx_flags & RXf_SPLIT ? " for split" : ""));
-
-		return (REGEXP*)re;
-	    }
-	}
     }
 
     exp = SvPV_nomg(pat, plen);
-    xend = exp + plen;
 
     if (!eng->op_comp) {
 	if ((SvUTF8(pat) && IN_BYTES)
@@ -5560,64 +5692,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                           PL_colors[4],PL_colors[5],s);
         });
 
-    if (0) {
-      redo_first_pass:
-        {
-        U8 *const src = (U8*)exp;
-        U8 *dst;
-	int n=0;
-	STRLEN s = 0, d = 0;
-	bool do_end = 0;
-
-        /* It's possible to write a regexp in ascii that represents Unicode
-        codepoints outside of the byte range, such as via \x{100}. If we
-        detect such a sequence we have to convert the entire pattern to utf8
-        and then recompile, as our sizing calculation will have been based
-        on 1 byte == 1 character, but we will need to use utf8 to encode
-        at least some part of the pattern, and therefore must convert the whole
-        thing.
-        -- dmq */
-        DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
-	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
-
-	/* upgrade pattern to UTF8, and if there are code blocks,
-	 * recalculate the indices.
-	 * This is essentially an unrolled Perl_bytes_to_utf8() */
-
-	Newx(dst, plen * 2 + 1, U8);
-
-	while (s < plen) {
-	    const UV uv = NATIVE_TO_ASCII(src[s]);
-	    if (UNI_IS_INVARIANT(uv))
-		dst[d]   = (U8)UTF_TO_NATIVE(uv);
-	    else {
-		dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
-		dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
-	    }
-	    if (n < pRExC_state->num_code_blocks) {
-		if (!do_end && pRExC_state->code_blocks[n].start == s) {
-		    pRExC_state->code_blocks[n].start = d;
-		    assert(dst[d] == '(');
-		    do_end = 1;
-		}
-		else if (do_end && pRExC_state->code_blocks[n].end == s) {
-		    pRExC_state->code_blocks[n].end = d;
-		    assert(dst[d] == ')');
-		    do_end = 0;
-		    n++;
-		}
-	    }
-	    s++;
-	    d++;
-	}
-	dst[d] = '\0';
-	plen = d;
-	exp = (char*) dst;
-	xend = exp + plen;
-	SAVEFREEPV(exp);
-	RExC_orig_utf8 = RExC_utf8 = 1;
-        }
-    }
+  redo_first_pass:
+    /* we jump here if we upgrade the pattern to utf8 and have to
+     * recompile */
 
     if ((pm_flags & PMf_USE_RE_EVAL)
 		/* this second condition covers the non-regex literal case,
@@ -5669,6 +5746,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	if (!S_compile_runtime_code(aTHX_ pRExC_state, exp, plen)) {
 	    /* whoops, we have a non-utf8 pattern, whilst run-time code
 	     * got compiled as utf8. Try again with a utf8 pattern */
+            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
+                                    pRExC_state->num_code_blocks);
             goto redo_first_pass;
 	}
     }
@@ -5686,7 +5765,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* First pass: determine size, legality. */
     RExC_parse = exp;
     RExC_start = exp;
-    RExC_end = xend;
+    RExC_end = exp + plen;
     RExC_naughty = 0;
     RExC_npar = 1;
     RExC_nestroot = 0;
@@ -5725,7 +5804,17 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	SvLEN_set(code_blocksv, 1); /*sufficient to make sv_clear free it*/
     }
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
+        /* It's possible to write a regexp in ascii that represents Unicode
+        codepoints outside of the byte range, such as via \x{100}. If we
+        detect such a sequence we have to convert the entire pattern to utf8
+        and then recompile, as our sizing calculation will have been based
+        on 1 byte == 1 character, but we will need to use utf8 to encode
+        at least some part of the pattern, and therefore must convert the whole
+        thing.
+        -- dmq */
         if (flags & RESTART_UTF8) {
+            S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &exp, &plen,
+                                    pRExC_state->num_code_blocks);
             goto redo_first_pass;
         }
         Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
@@ -5889,7 +5978,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_flags = rx_flags;	/* don't let top level (?i) bleed */
     RExC_pm_flags = pm_flags;
     RExC_parse = exp;
-    RExC_end = xend;
+    RExC_end = exp + plen;
     RExC_naughty = 0;
     RExC_npar = 1;
     RExC_emit_start = ri->program;

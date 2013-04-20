@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 464;  # Update this when adding/deleting tests.
+plan tests => 519;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1057,6 +1057,124 @@ sub run_tests {
 	pass("cSVOPo_sv");
     }
 
+    # [perl #115004]
+    # code blocks in qr objects that are interpolated in arrays need
+    # handling the same as if they were interpolated from scalar vars
+    # (before this code would need 'use re "eval"')
+
+    {
+	use Tie::Array;
+
+	use vars '@global';
+	local @global;
+	my @array;
+	my @refs = (0, \@array, 2);
+	my @tied;
+	tie @tied, 'Tie::StdArray';
+	{
+	    my $bb = 'B';
+	    my $dd = 'D';
+	    @array = ('A', qr/(??{$bb})/, 'C', qr/(??{$dd})/, 'E');
+	    @tied  = @array;
+	    @global = @array;
+	}
+	my $bb = 'X';
+	my $dd = 'Y';
+	ok("A B C D E=" =~ /@array/, 'bare interpolated array match');
+	ok("A B C D E=" =~ qr/@array/, 'qr bare interpolated array match');
+	ok("A B C D E=" =~ /@global/, 'bare interpolated global array match');
+	ok("A B C D E=" =~ qr/@global/,
+				    'qr bare interpolated global array match');
+	ok("A B C D E=" =~ /@{$refs[1]}/, 'bare interpolated ref array match');
+	ok("A B C D E=" =~ qr/@{$refs[1]}/,
+					'qr bare interpolated ref array match');
+	ok("A B C D E=" =~ /@tied/,  'bare interpolated tied array match');
+	ok("A B C D E=" =~ qr/@tied/,  'qr bare interpolated tied array match');
+	ok("aA B C D E=" =~ /^a@array=$/, 'interpolated array match');
+	ok("aA B C D E=" =~ qr/^a@array=$/, 'qr interpolated array match');
+	ok("aA B C D E=" =~ /^a@global=$/, 'interpolated global array match');
+	ok("aA B C D E=" =~ qr/^a@global=$/,
+					'qr interpolated global array match');
+	ok("aA B C D E=" =~ /^a@{$refs[1]}=$/, 'interpolated ref array match');
+	ok("aA B C D E=" =~ qr/^a@{$refs[1]}=$/,
+					    'qr interpolated ref array match');
+	ok("aA B C D E=" =~ /^a@tied=$/,  'interpolated tied array match');
+	ok("aA B C D E=" =~ qr/^a@tied=$/,  'qr interpolated tied array match');
+
+	{
+	    local $" = '-';
+	    ok("aA-B-C-D-E=" =~ /^a@{array}=$/,
+			'interpolated array match with local sep');
+	    ok("aA-B-C-D-E=" =~ qr/^a@{array}=$/,
+			'qr interpolated array match with local sep');
+	    ok("aA-B-C-D-E=" =~ /^a@{global}=$/,
+			'interpolated global array match with local sep');
+	    ok("aA-B-C-D-E=" =~ qr/^a@{global}=$/,
+			'qr interpolated global array match with local sep');
+	    ok("aA-B-C-D-E=" =~ /^a@{tied}=$/,
+			'interpolated tied array match with local sep');
+	    ok("aA-B-C-D-E=" =~ qr/^a@{tied}=$/,
+			'qr interpolated tied array match with local sep');
+	}
+
+	# but don't handle the array ourselves in the presence of \Q etc
+
+	@array  = ('A', '(?{})');
+	@global = @array;
+	@tied   = @array;
+	ok("aA (?{})=" =~ /^a\Q@{array}\E=$/,
+				'interpolated array match with \Q');
+	ok("aA (?{})=" =~ qr/^a\Q@{array}\E=$/,
+				'qr interpolated array match with \Q');
+	ok("aA (?{})=" =~ /^a\Q@{global}\E=$/,
+				'interpolated global array match with \Q');
+	ok("aA (?{})=" =~ qr/^a\Q@{global}\E=$/,
+				'qr interpolated global array match with \Q');
+	ok("aA (?{})=" =~ /^a\Q@{$refs[1]}\E=$/,
+				'interpolated ref array match with \Q');
+	ok("aA (?{})=" =~ qr/^a\Q@{$refs[1]}\E=$/,
+				'qr interpolated ref array match with \Q');
+	ok("aA (?{})=" =~ /^a\Q@{tied}\E=$/,
+				'interpolated tied array match with \Q');
+	ok("aA (?{})=" =~ qr/^a\Q@{tied}\E=$/,
+				'qr interpolated tied array match with \Q');
+
+	# and check it works with an empty array
+
+	@array = ();
+	@global = ();
+	@tied = ();
+	ok("a=" =~ /^a@array=$/, 'empty array match');
+	ok("a=" =~ qr/^a@array=$/, 'qr empty array match');
+	ok("a=" =~ /^a@global=$/, 'empty global array match');
+	ok("a=" =~ qr/^a@global=$/, 'qr empty global array match');
+	ok("a=" =~ /^a@tied=$/,  'empty tied array match');
+	ok("a=" =~ qr/^a@tied=$/,  'qr empty tied array match');
+	ok("a=" =~ /^a\Q@{array}\E=$/, 'empty array match with \Q');
+	ok("a=" =~ /^a\Q@{array}\E=$/, 'empty array match with \Q');
+	ok("a=" =~ qr/^a\Q@{global}\E=$/,
+				    'qr empty global array match with \Q');
+	ok("a=" =~ /^a\Q@{tied}\E=$/, 'empty tied array match with \Q');
+	ok("a=" =~ qr/^a\Q@{tied}\E=$/, 'qr empty tied array match with \Q');
+
+	# NB: these below are empty patterns, so they happen to use the
+	# successful match from the line above
+
+	ok("a=" =~ /@array/, 'empty array pattern');
+	ok("a=" =~ qr/@array/, 'qr empty array pattern');
+	ok("a=" =~ /@global/, 'empty global array pattern');
+	ok("a=" =~ qr/@global/, 'qr empty global array pattern');
+	ok("a=" =~ /@tied/, 'empty tied pattern');
+	ok("a=" =~ qr/@tied/, 'qr empty tied pattern');
+	ok("a=" =~ /\Q@array\E/, 'empty array pattern with \Q');
+	ok("a=" =~ qr/\Q@array\E/, 'qr empty array pattern with \Q');
+	ok("a=" =~ /\Q@global\E/, 'empty global array pattern with \Q');
+	ok("a=" =~ qr/\Q@global\E/, 'qr empty global array pattern with \Q');
+	ok("a=" =~ /\Q@tied\E/, 'empty tied pattern with \Q');
+	ok("a=" =~ qr/\Q@tied\E/, 'qr empty tied pattern with \Q');
+	ok("a=" =~ //, 'completely empty pattern');
+	ok("a=" =~ qr//, 'qr completely empty pattern');
+    }
 
 
 } # End of sub run_tests

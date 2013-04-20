@@ -4545,11 +4545,21 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
     LINKLIST(expr);
 
-    /* fix up DO blocks; treat each one as a separate little sub */
+    /* fix up DO blocks; treat each one as a separate little sub;
+     * also, mark any arrays as LIST/REF */
 
     if (expr->op_type == OP_LIST) {
 	OP *o;
 	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+
+            if (o->op_type == OP_PADAV || o->op_type == OP_RV2AV) {
+                assert( !(o->op_flags  & OPf_WANT));
+                /* push the array rather than its contents. The regex
+                 * engine will retrieve and join the elements later */
+                o->op_flags |= (OPf_WANT_LIST | OPf_REF);
+                continue;
+            }
+
 	    if (!(o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)))
 		continue;
 	    o->op_next = NULL; /* undo temporary hack from above */
@@ -4582,6 +4592,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		/* runtime finalizes as part of finalizing whole tree */
 		finalize_optree(o);
 	}
+    }
+    else if (expr->op_type == OP_PADAV || expr->op_type == OP_RV2AV) {
+        assert( !(expr->op_flags  & OPf_WANT));
+        /* push the array rather than its contents. The regex
+         * engine will retrieve and join the elements later */
+        expr->op_flags |= (OPf_WANT_LIST | OPf_REF);
     }
 
     PL_hints |= HINT_BLOCK_SCOPE;
