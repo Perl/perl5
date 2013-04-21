@@ -484,6 +484,13 @@ package would be treated as a SUPER method lookup on the Foo package.  This
 is no longer the case.  To do a SUPER lookup, pass the Foo stash and the
 GV_SUPER flag.
 
+=item C<split>'s first argument is more consistently interpreted
+
+After some changes earlier in 5.17, C<split>'s behavior has been
+simplified: if the PATTERN argument evaluates to a literal string
+containing one space, it is treated the way that a I<literal> string
+containing one space once was.
+
 =head1 Deprecations
 
 =head2 Deprecated modules
