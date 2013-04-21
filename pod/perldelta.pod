@@ -31,7 +31,44 @@ file.  This was causing a test failure on Win32 [perl #117477]
 
 =item *
 
+B::Deparse has been upgraded from version 1.19 to 1.20, adding stub deparsing
+for lexical subroutines.
+
+=item *
+
+bigint has been upgraded from version 0.33 to 0.34.
+
+=item *
+
 CPAN has been upgraded from its trial 2.00 release to its final 2.00 release.
+
+=item *
+
+Exporter has been upgraded from version 5.67 to 5.68.
+
+=item *
+
+ExtUtils::CBuilder has been upgraded from version 0.280209 to 0.280210.
+
+=item *
+
+ExtUtils::MakeMaker has been upgraded from version 6.65_01 to 6.66.
+
+=item *
+
+IO has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+overload has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+Storable has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+warnings has been upgraded from version 1.17 to 1.18.
 
 =back
 
@@ -106,9 +143,30 @@ construct were incorrectly interpreted. [perl #116823]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.17.11 represents approximately 4 weeks of development since Perl 5.17.10
+and contains approximately 3,800 lines of changes across 130 files from 17
+authors.
 
-  perl Porting/acknowledgements.pl v5.17.10..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.17.11:
+
+Aaron Crane, Andy Dougherty, Brian Fraser, Chris 'BinGOs' Williams, Craig A.
+Berry, David Mitchell, François Perrad, James E Keenan, Jan Dubois, Karl
+Williamson, Leon Timmermans, Max Maischein, Moritz Lenz, Nicholas Clark,
+Ricardo Signes, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
