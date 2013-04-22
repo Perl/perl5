@@ -9370,7 +9370,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	}
 	/* Handle extended ${^Foo} variables
 	 * 1999-02-27 mjd-perl-patch@plover.com */
-	else if (!isWORDCHAR(*d) && !isPRINT(*d) /* isCTRL(d) */
+	else if (! isPRINT(*d) /* isCNTRL(d), plus all non-ASCII */
 		 && isWORDCHAR(*s))
 	{
 	    d++;
