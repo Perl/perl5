@@ -76,7 +76,7 @@ This for the most part is beyond the scope of Perl
 
 =item Category LC_COLLATE: Collation
 
-This indicates the ordering of letters for comparision and sorting.
+This indicates the ordering of letters for comparison and sorting.
 In Latin alphabets, for example, "b", generally follows "a".
 
 =item Category LC_CTYPE: Character Types
