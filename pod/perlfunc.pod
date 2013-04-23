@@ -5356,7 +5356,7 @@ This protects against those locales where characters such as C<"|"> are
 considered to be word characters.
 
 Otherwise, Perl quotes non-ASCII characters using an adaptation from
-Unicode (see L<http://www.unicode.org/reports/tr31/>.)
+Unicode (see L<http://www.unicode.org/reports/tr31/>).
 The only code points that are quoted are those that have any of the
 Unicode properties:  Pattern_Syntax, Pattern_White_Space, White_Space,
 Default_Ignorable_Code_Point, or General_Category=Control.

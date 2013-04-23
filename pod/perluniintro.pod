@@ -137,7 +137,7 @@ forms>, of which I<UTF-8> is perhaps the most popular.  UTF-8 is a
 variable length encoding that encodes Unicode characters as 1 to 6
 bytes.  Other encodings
 include UTF-16 and UTF-32 and their big- and little-endian variants
-(UTF-8 is byte-order independent) The ISO/IEC 10646 defines the UCS-2
+(UTF-8 is byte-order independent).  The ISO/IEC 10646 defines the UCS-2
 and UCS-4 encoding forms.
 
 For more information about encodings--for instance, to learn what

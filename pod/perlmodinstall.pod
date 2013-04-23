@@ -117,7 +117,7 @@ that includes the module.  Again, you'll probably need to be root.
 
 =item *
 
-B<If you're running ActivePerl (Win95/98/2K/NT/XP, Linux, Solaris)>
+B<If you're running ActivePerl (Win95/98/2K/NT/XP, Linux, Solaris),>
 
 First, type C<ppm> from a shell and see whether ActiveState's PPM
 repository has your module.  If so, you can install it with C<ppm> and
