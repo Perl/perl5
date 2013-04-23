@@ -8748,8 +8748,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    }
 	    nextchar(pRExC_state);
 	    return ret;
-        } else 
-	if (*RExC_parse == '?') { /* (?...) */
+        }
+        else if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
             if (has_intervening_patws && SIZE_ONLY) {
