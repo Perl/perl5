@@ -2308,6 +2308,26 @@ would otherwise result in the same message being repeated.
 Failure of user callbacks dispatched using the C<G_KEEPERR> flag could
 also result in this warning.  See L<perlcall/G_KEEPERR>.
 
+=item In '(*VERB...)', splitting the initial '(*' is deprecated in regex; marked by <-- HERE in m/%s/
+
+(D regexp, deprecated)
+The two-character sequence C<"(*"> in this context in a regular
+expression pattern should be an indivisible token, with nothing
+intervening between the C<"("> and the C<"*">, but you separated them.
+Due to an accident of implementation, this prohibition was not enforced,
+but we do plan to forbid it in a future Perl version.  This message
+serves as giving you fair warning of this pending change.
+
+=item In '(?...)', splitting the initial '(?' is deprecated in regex; marked by <-- HERE in m/%s/
+
+(D regexp, deprecated)
+The two-character sequence C<"(?"> in this context in a regular
+expression pattern should be an indivisible token, with nothing
+intervening between the C<"("> and the C<"?">, but you separated them.
+Due to an accident of implementation, this prohibition was not enforced,
+but we do plan to forbid it in a future Perl version.  This message
+serves as giving you fair warning of this pending change.
+
 =item Incomplete expression within '(?[ ])' in regex; marked by <-- HERE in m/%s/
 
 (F)

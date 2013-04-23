@@ -8601,7 +8601,10 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
    cannot happen.  */
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
-    /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
+    /* paren: Parenthesized? 0=top; 1,2=inside '(': changed to letter.
+     * 2 is like 1, but indicates that nextchar() has been called to advance
+     * RExC_parse beyond the '('.  Things like '(?' are indivisible tokens, and
+     * this flag alerts us to the need to check for that */
 {
     dVAR;
     regnode *ret;		/* Will be the head of the group. */
@@ -8629,6 +8632,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
+
+        /* Under /x, space and comments can be gobbled up between the '(' and
+         * here (if paren ==2).  The forms '(*VERB' and '(?...' disallow such
+         * intervening space, as the sequence is a token, and a token should be
+         * indivisible */
+        bool has_intervening_patws = paren == 2 && *(RExC_parse - 1) != '(';
+
         if ( *RExC_parse == '*') { /* (*VERB:ARG) */
 	    char *start_verb = RExC_parse;
 	    STRLEN verb_len = 0;
@@ -8636,6 +8646,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    unsigned char op = 0;
 	    int argok = 1;
 	    int internal_argval = 0; /* internal_argval is only useful if !argok */
+
+            if (has_intervening_patws && SIZE_ONLY) {
+                ckWARNregdep(RExC_parse + 1, "In '(*VERB...)', splitting the initial '(*' is deprecated");
+            }
 	    while ( *RExC_parse && *RExC_parse != ')' ) {
 	        if ( *RExC_parse == ':' ) {
 	            start_arg = RExC_parse + 1;
@@ -8737,6 +8751,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
+            if (has_intervening_patws && SIZE_ONLY) {
+                ckWARNregdep(RExC_parse + 1, "In '(?...)', splitting the initial '(?' is deprecated");
+            }
 
 	    RExC_parse++;
 	    paren = *RExC_parse++;
@@ -9322,7 +9339,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	case ':':
 	    ender = reg_node(pRExC_state, TAIL);
 	    break;
-	case 1:
+	case 1: case 2:
 	    ender = reganode(pRExC_state, CLOSE, parno);
 	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
@@ -10312,7 +10329,7 @@ tryagain:
     }
     case '(':
 	nextchar(pRExC_state);
-        ret = reg(pRExC_state, 1, &flags,depth+1);
+        ret = reg(pRExC_state, 2, &flags,depth+1);
 	if (ret == NULL) {
 		if (flags & TRYAGAIN) {
 		    if (RExC_parse == RExC_end) {
