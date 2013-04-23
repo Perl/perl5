@@ -246,7 +246,7 @@ sub _loose_name ($) {
                                                     # minus
 
                             # Remove underscores between digits.
-                            $part =~ s/( ?<= [0-9] ) _ (?= [0-9] ) //xg;
+                            $part =~ s/(?<= [0-9] ) _ (?= [0-9] ) //xg;
 
                             # No leading zeros (but don't make a single '0'
                             # into a null string)
