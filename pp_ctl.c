@@ -1653,6 +1653,11 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    sv_setsv(ERRSV, exceptsv);
 	}
 
+	if (in_eval & EVAL_KEEPERR) {
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+			   SVfARG(exceptsv));
+	}
+
 	while ((cxix = dopoptoeval(cxstack_ix)) < 0
 	       && PL_curstackinfo->si_prev)
 	{
@@ -1711,13 +1716,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 			   SVfARG(exceptsv ? exceptsv : newSVpvs_flags("Unknown error\n",
                                                                     SVs_TEMP)));
 	    }
-	    if (in_eval & EVAL_KEEPERR) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
-			       SVfARG(exceptsv));
-	    }
-	    else {
+	    if (!(in_eval & EVAL_KEEPERR))
 		sv_setsv(ERRSV, exceptsv);
-	    }
 	    PL_restartjmpenv = restartjmpenv;
 	    PL_restartop = restartop;
 	    JMPENV_JUMP(3);
