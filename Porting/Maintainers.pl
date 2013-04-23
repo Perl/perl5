@@ -205,6 +205,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Archive-Extract],
         'UPSTREAM'     => 'cpan',
         'BUGS'         => 'bug-archive-extract@rt.cpan.org',
+        'DEPRECATED'   => '5.017009',
     },
 
     'Archive::Tar' => {
@@ -307,6 +308,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/B-Lint],
         'EXCLUDED'     => ['t/test.pl'],
         'UPSTREAM'     => 'cpan',
+        'DEPRECATED'   => '5.017009',
     },
 
     'base' => {
@@ -479,6 +481,7 @@ use File::Glob qw(:case);
         'CUSTOMIZED' => ['Makefile.PL'],
         'UPSTREAM'   => 'cpan',
         'BUGS'       => 'bug-cpanplus@rt.cpan.org',
+        'DEPRECATED' => '5.017009',
     },
 
     'CPANPLUS::Dist::Build' => {
@@ -492,6 +495,7 @@ use File::Glob qw(:case);
                 ),
         ],
         'UPSTREAM' => 'cpan',
+        'DEPRECATED' => '5.017009',
     },
 
     'CPAN::Meta' => {
@@ -1151,6 +1155,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'BINGOS/Log-Message-0.06.tar.gz',
         'FILES'        => q[cpan/Log-Message],
         'UPSTREAM'     => 'cpan',
+        'DEPRECATED'   => '5.017009',
     },
 
     'Log::Message::Simple' => {
@@ -1158,6 +1163,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'BINGOS/Log-Message-Simple-0.10.tar.gz',
         'FILES'        => q[cpan/Log-Message-Simple],
         'UPSTREAM'     => 'cpan',
+        'DEPRECATED'   => '5.017009',
     },
 
     'mad' => {
@@ -1315,6 +1321,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Module-Pluggable],
         'UPSTREAM'     => 'cpan',
         'CUSTOMIZED'   => ['Makefile.PL'],
+        'DEPRECATED'   => '5.017009',
     },
 
     'mro' => {
@@ -1353,6 +1360,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'BINGOS/Object-Accessor-0.46.tar.gz',
         'FILES'        => q[cpan/Object-Accessor],
         'UPSTREAM'     => 'cpan',
+        'DEPRECATED'   => '5.017009',
     },
 
     'ODBM_File' => {
@@ -1541,6 +1549,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Pod-LaTeX],
         'EXCLUDED'     => ['t/require.t'],
         'UPSTREAM'     => undef,
+        'DEPRECATED'   => '5.017008',
     },
 
     'Pod::Parser' => {
@@ -1751,6 +1760,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'BINGOS/Term-UI-0.34.tar.gz',
         'FILES'        => q[cpan/Term-UI],
         'UPSTREAM'     => 'cpan',
+        'DEPRECATED'   => '5.017009',
     },
 
     'Test' => {
