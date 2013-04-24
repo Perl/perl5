@@ -150,28 +150,50 @@ macros, which have similar arguments to Zero():
 
 =head2 Character Class Tests
 
-There are two types of character class tests that Perl implements: one
-type deals in C<char>s and are thus B<not> Unicode aware (and hence
-deprecated unless you B<know> you should use them) and the other type
-deal in C<UV>s and know about Unicode properties. In the following
-table, C<c> is a C<char>, and C<u> is a Unicode codepoint.
+There are several types of character class tests that Perl implements.
+The only ones described here are those that directly correspond to C
+library functions that operate on 8-bit characters, but there are
+equivalents that operate on wide characters, and UTF-8 encoded strings.
+All are more fully described in L<perlapi/Character classes> and
+L<perlapi/Character case changing>.
 
-    Instead Of:                 Use:            But better use:
+The C library routines listed in the table below return values based on
+the current locale.  Use the entries in the final column for that
+functionality.  The other two columns always assume a POSIX (or C)
+locale.  The entries in the ASCII column are only meaningful for ASCII
+inputs, returning FALSE for anything else.  Use these only when you
+B<know> that is what you want.  The entries in the Latin1 column assume
+that the non-ASCII 8-bit characters are as Unicode defines, them, the
+same as ISO-8859-1, often called Latin 1.
 
-    isalnum(c)                  isALNUM(c)      isALNUM_uni(u)
-    isalpha(c)                  isALPHA(c)      isALPHA_uni(u)
-    iscntrl(c)                  isCNTRL(c)      isCNTRL_uni(u)
-    isdigit(c)                  isDIGIT(c)      isDIGIT_uni(u)
-    isgraph(c)                  isGRAPH(c)      isGRAPH_uni(u)
-    islower(c)                  isLOWER(c)      isLOWER_uni(u)
-    isprint(c)                  isPRINT(c)      isPRINT_uni(u)
-    ispunct(c)                  isPUNCT(c)      isPUNCT_uni(u)
-    isspace(c)                  isSPACE(c)      isSPACE_uni(u)
-    isupper(c)                  isUPPER(c)      isUPPER_uni(u)
-    isxdigit(c)                 isXDIGIT(c)     isXDIGIT_uni(u)
+ Instead Of:  Use for ASCII:   Use for Latin1:      Use for locale:
 
-    tolower(c)                  toLOWER(c)      toLOWER_uni(u)
-    toupper(c)                  toUPPER(c)      toUPPER_uni(u)
+ isalnum(c)  isALPHANUMERIC(c) isALPHANUMERIC_L1(c) isALPHANUMERIC_LC(c)
+ isalpha(c)  isALPHA(c)        isALPHA_L1(c)        isALPHA_LC(u )
+ isascii(c)  isASCII(c)                             isASCII_LC(c)
+ isblank(c)  isBLANK(c)        isBLANK_L1(c)        isBLANK_LC(c)
+ iscntrl(c)  isCNTRL(c)        isCNTRL_L1(c)        isCNTRL_LC(c)
+ isdigit(c)  isDIGIT(c)        isDIGIT_L1(c)        isDIGIT_LC(c)
+ isgraph(c)  isGRAPH(c)        isGRAPH_L1(c)        isGRAPH_LC(c)
+ islower(c)  isLOWER(c)        isLOWER_L1(c)        isLOWER_LC(c)
+ isprint(c)  isPRINT(c)        isPRINT_L1(c)        isPRINT_LC(c)
+ ispunct(c)  isPUNCT(c)        isPUNCT_L1(c)        isPUNCT_LC(c)
+ isspace(c)  isSPACE(c)        isSPACE_L1(c)        isSPACE_LC(c)
+ isupper(c)  isUPPER(c)        isUPPER_L1(c)        isUPPER_LC(c)
+ isxdigit(c) isXDIGIT(c)       isXDIGIT_L1(c)       isXDIGIT_LC(c)
+
+ tolower(c)  toLOWER(c)        toLOWER_L1(c)        toLOWER_LC(c)
+ toupper(c)  toUPPER(c)                             toUPPER_LC(c)
+
+To emphasize that you are operating only on ASCII characters, you can
+append C<_A> to each of the macros in the ASCII column: C<isALPHA_A>,
+C<isDIGIT_A>, and so on.
+
+(There is no entry in the Latin1 column for C<isascii> even though there
+is an C<isASCII_L1>, which is identical to C<isASCII>;  the
+latter name is clearer.  There is no entry in the Latin1 column for
+C<toupper> because the result can be non-Latin1.  You have to use
+C<toUPPER_uni>, as described in L<perlapi/Character case changing>.)
 
 =head2 F<stdlib.h> functions
 
