@@ -196,7 +196,7 @@ ok($@ =~ $errpat,
   'Errors: keys qr/foo/ throws error'
 );
 
-eval "keys $hash qw/fo bar/";
+eval q"keys $hash qw/fo bar/";
 ok($@ =~ qr/syntax error/,
   'Errors: keys $hash, @stuff throws error'
 ) or print "# Got: $@";
@@ -300,7 +300,7 @@ ok($@ =~ $errpat,
   'Errors: values qr/foo/ throws error'
 );
 
-eval "values $hash qw/fo bar/";
+eval q"values $hash qw/fo bar/";
 ok($@ =~ qr/syntax error/,
   'Errors: values $hash, @stuff throws error'
 ) or print "# Got: $@";
@@ -409,7 +409,7 @@ ok($@ =~ $errpat,
   'Errors: each qr/foo/ throws error'
 );
 
-eval "each $hash qw/foo bar/";
+eval q"each $hash qw/foo bar/";
 ok($@ =~ qr/syntax error/,
   'Errors: each $hash, @stuff throws error'
 ) or print "# Got: $@";
