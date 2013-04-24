@@ -278,6 +278,9 @@ $$ = $pid; # Tests below use $$
     if ($^O eq 'qnx') {
 	chomp($wd = `/usr/bin/fullpath -t`);
     }
+    elsif($^O =~ /android/) {
+        chomp($wd = `sh -c 'pwd'`);
+    }
     elsif($Is_Cygwin || $is_abs) {
        # Cygwin turns the symlink into the real file
        chomp($wd = `pwd`);
