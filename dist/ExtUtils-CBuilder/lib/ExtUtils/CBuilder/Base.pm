@@ -6,13 +6,11 @@ use File::Basename;
 use Cwd ();
 use Config;
 use Text::ParseWords;
-use IO::File;
-use Data::Dumper;$Data::Dumper::Indent=1;
 use IPC::Cmd qw(can_run);
 use File::Temp qw(tempfile);
 
 use vars qw($VERSION);
-$VERSION = '0.280209';
+$VERSION = '0.280210';
 
 # More details about C/C++ compilers:
 # http://developers.sun.com/sunstudio/documentation/product/compiler.jsp
