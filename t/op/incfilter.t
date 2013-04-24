@@ -74,7 +74,12 @@ if ($^O eq 'VMS') {
     $fail_arg = '"fail"';
 }
 else {
-    $echo_command = 'echo';
+    if ($^O =~ /android/) {
+        $echo_command = q{sh -c 'echo $@' -- };
+    }
+    else {
+        $echo_command = 'echo';
+    }
     $pass_arg = 'pass';
     $fail_arg = 'fail';
 }
