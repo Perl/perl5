@@ -37,6 +37,7 @@ $Is_OS2     = $^O eq 'os2';
 $Is_Solaris = $^O eq 'solaris';
 $Is_VMS     = $^O eq 'VMS';
 $Is_MPRAS   = $^O =~ /svr4/ && -f '/etc/.relid';
+$Is_Android = $^O =~ /android/;
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare;
 
@@ -250,7 +251,7 @@ SKIP: {
       if $Is_VMS;
 
     delete $ENV{CLICOLOR_FORCE};
-    my $LS  = $Config{d_readlink} ? "ls -lL" : "ls -l";
+    my $LS  = $Config{d_readlink} && !$Is_Android ? "ls -lL" : "ls -l";
     my $CMD = "$LS /dev 2>/dev/null";
     my $DEV = qx($CMD);
 
