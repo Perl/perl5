@@ -1438,8 +1438,14 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 	switch (CxTYPE(cx)) {
 	default:
 	    continue;
-	case CXt_EVAL:
 	case CXt_SUB:
+            /* in sub foo { /(?{...})/ }, foo ends up on the CX stack
+             * twice; the first for the normal foo() call, and the second
+             * for a faked up re-entry into the sub to execute the
+             * code block. Hide this faked entry from the world. */
+            if (cx->cx_type & CXp_SUB_RE_FAKE)
+                continue;
+	case CXt_EVAL:
 	case CXt_FORMAT:
 	    DEBUG_l( Perl_deb(aTHX_ "(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));
 	    return i;

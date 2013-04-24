@@ -9,7 +9,7 @@ BEGIN {
     skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
-plan 34;
+plan 45;
 
 fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
@@ -131,11 +131,11 @@ CODE
 
 fresh_perl_is <<'CODE',
     my $a=4; my $b=5;
-    sub f { print ((caller(0))[3], "-", (caller(1))[3], "\n") };
+    sub f { print ((caller(0))[3], "-", (caller(1))[3], "-\n") };
     "a" =~ /(?{f()})a/;
     print $a,$b;
 CODE
-    "main::f-(unknown)\n45",
+    "main::f--\n45",
     { stderr => 1 }, 'sub f {caller} /(?{f()})/';
 
 
@@ -281,4 +281,67 @@ pass "undef *_ in a re-eval does not cause a double free";
     $w = '';
     $l = __LINE__; "4" =~ /^$c/x or warn "foo";
     like($w, qr/foo.+line $l/, 'curcop 4');
+}
+
+# [perl #113928] caller behaving unexpectedly in re-evals
+#
+#   /(?{...})/ should be in the same caller scope as the surrounding code;
+# qr/(?{...})/ should be in an anon sub
+
+{
+
+    my $l;
+
+    sub callers {
+	my @c;
+	my $stack = '';
+	my $i = 1;
+	while (@c = caller($i++)) {
+	    $stack .= "($c[3]:" . ($c[2] - $l) . ')';
+	}
+	$stack;
+    }
+
+    $l = __LINE__;
+    my $c;
+    is (callers(), '', 'callers() null');
+    "" =~ /(?{ $c = callers() })/;
+    is ($c, '', 'callers() //');
+
+    $l = __LINE__;
+    sub m1 { "" =~ /(?{ $c = callers() })/; }
+    m1();
+    is ($c, '(main::m1:2)', 'callers() m1');
+
+    $l = __LINE__;
+    my $r1 = qr/(?{ $c = callers() })/;
+    "" =~ /$r1/;
+    is ($c, '(main::__ANON__:2)', 'callers() r1');
+
+    $l = __LINE__;
+    sub r1 { "" =~ /$r1/; }
+    r1();
+    is ($c, '(main::__ANON__:1)(main::r1:2)', 'callers() r1/r1');
+
+    $l = __LINE__;
+    sub c2 { $c = callers() }
+    my $r2 = qr/(?{ c2 })/;
+    "" =~ /$r2/;
+    is ($c, '(main::c2:2)(main::__ANON__:3)', 'callers() r2/c2');
+    sub r2 { "" =~ /$r2/; }
+    r2();
+    is ($c, '(main::c2:2)(main::__ANON__:5)(main::r2:6)', 'callers() r2/r2/c2');
+
+    $l = __LINE__;
+    sub c3 { $c = callers() }
+    my $r3 = qr/(?{ c3 })/;
+    my $c1;
+    "ABC" =~ /A(?{ $c1 = callers() })B${r3}C/;
+    is ($c, '(main::c3:2)(main::__ANON__:4)', 'callers() r3/c3');
+    is ($c1,'', 'callers() r3/c3 part 2');
+    sub r3 { "ABC" =~ /A(?{ $c1 = callers() })B${r3}C/; }
+    r3();
+    is ($c, '(main::c3:2)(main::__ANON__:7)(main::r3:8)', 'callers() r3/r3/c3');
+    is ($c1,'(main::r3:8)', 'callers() r3/r3/c3 part 2');
+
 }
