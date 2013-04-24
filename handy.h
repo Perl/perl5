@@ -702,11 +702,13 @@ Behaviour is only well defined when isXDIGIT(*str) is true.
 
 =for apidoc Am|char|toUPPER|char ch
 Converts the specified character to uppercase, if possible; otherwise returns
-the input character itself.
+the input character itself.  Only ASCII characters are changed.  Variant
+C<toUPPER_A> is equivalent.
 
 =for apidoc Am|char|toLOWER|char ch
 Converts the specified character to lowercase, if possible; otherwise returns
-the input character itself.
+the input character itself.  Only ASCII characters are changed.  Variant
+C<toLOWER_A> is equivalent.
 
 =cut
 
@@ -1046,6 +1048,8 @@ EXTCONST U32 PL_charclass[];
 #   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
 #endif
 
+#define toLOWER_A(c) toLOWER(c)
+#define toUPPER_A(c) toUPPER(c)
 
 /* Use table lookup for speed; return error character for input
  * out-of-range */
@@ -1053,6 +1057,8 @@ EXTCONST U32 PL_charclass[];
                              ? UNI_TO_NATIVE(PL_latin1_lc[                 \
                                                NATIVE_TO_UNI( (U8) (c)) ]) \
                              : UNICODE_REPLACEMENT)
+#define toLOWER_L1(c)    toLOWER_LATIN1(c)  /* Synonym for consistency */
+
 /* Modified uc.  Is correct uc except for three non-ascii chars which are
  * all mapped to one of them, and these need special handling; error
  * character for input out-of-range */
