@@ -3285,6 +3285,8 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 		    *db_seqp = cx->blk_oldcop->cop_seq;
 		    continue;
 		}
+                if (cx->cx_type & CXp_SUB_RE)
+                    continue;
 	    }
 	    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
 		cv = cx->blk_eval.cv;

@@ -9,7 +9,7 @@ BEGIN {
     skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
-plan 45;
+plan 48;
 
 fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
@@ -344,4 +344,27 @@ pass "undef *_ in a re-eval does not cause a double free";
     is ($c, '(main::c3:2)(main::__ANON__:7)(main::r3:8)', 'callers() r3/r3/c3');
     is ($c1,'(main::r3:8)', 'callers() r3/r3/c3 part 2');
 
+}
+
+# [perl #113928] caller behaving unexpectedly in re-evals
+#
+# make sure __SUB__ within a code block returns something safe.
+# NB waht it actually returns is subject to change
+
+{
+
+    my $s;
+
+    sub f1 { /(?{ $s = CORE::__SUB__; })/ }
+    f1();
+    is ($s, \&f1, '__SUB__ direct');
+
+    my $r = qr/(?{ $s = CORE::__SUB__; })/;
+    sub f2 { "" =~ $r }
+    f2();
+    is ($s, \&f2, '__SUB__ qr');
+
+    sub f3 { "AB" =~ /A${r}B/ }
+    f3();
+    is ($s, \&f3, '__SUB__ qr multi');
 }

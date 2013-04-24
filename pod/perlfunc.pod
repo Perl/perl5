@@ -7618,8 +7618,11 @@ X<__SUB__>
 
 =for Pod::Functions +current_sub the current subroutine, or C<undef> if not in a subroutine
 
-A special token that returns the a reference to the current subroutine, or
+A special token that returns a reference to the current subroutine, or
 C<undef> outside of a subroutine.
+
+The behaviour of C<__SUB__> within a regex code block (such as C</(?{...})/>)
+is subject to change.
 
 This token is only available under C<use v5.16> or the "current_sub"
 feature.  See L<feature>.

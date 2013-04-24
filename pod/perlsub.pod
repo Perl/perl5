@@ -232,6 +232,9 @@ your subroutine's name.
       return($x * __SUB__->( $x - 1 ) );
     };
 
+The behaviour of C<__SUB__> within a regex code block (such as C</(?{...})/>)
+is subject to change.
+
 Subroutines whose names are in all upper case are reserved to the Perl
 core, as are modules whose names are in all lower case.  A subroutine in
 all capitals is a loosely-held convention meaning it will be called
