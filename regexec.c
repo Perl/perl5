@@ -4911,12 +4911,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 * points to newcv's pad. */
 		if (newcv != last_pushed_cv || PL_comppad != last_pad)
 		{
-		    I32 depth = (newcv == caller_cv) ? 0 : 1;
+                    U8 flags = (CXp_SUB_RE |
+                                ((newcv == caller_cv) ? CXp_SUB_RE_FAKE : 0));
 		    if (last_pushed_cv) {
-			CHANGE_MULTICALL_WITHDEPTH(newcv, depth);
+			CHANGE_MULTICALL_FLAGS(newcv, flags);
 		    }
 		    else {
-			PUSH_MULTICALL_WITHDEPTH(newcv, depth);
+			PUSH_MULTICALL_FLAGS(newcv, flags);
 		    }
 		    last_pushed_cv = newcv;
 		}

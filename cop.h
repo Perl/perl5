@@ -968,6 +968,8 @@ struct context {
 
 /* private flags for CXt_SUB and CXt_FORMAT */
 #define CXp_HASARGS	0x20
+#define CXp_SUB_RE	0x40    /* code called within regex, i.e. (?{}) */
+#define CXp_SUB_RE_FAKE	0x80    /* fake sub CX for (?{}) in current scope */
 
 /* private flags for CXt_EVAL */
 #define CXp_REAL	0x20	/* truly eval'', not a lookalike */
@@ -1182,12 +1184,12 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
     U8 hasargs = 0		/* used by PUSHSUB */
 
 #define PUSH_MULTICALL(the_cv) \
-    PUSH_MULTICALL_WITHDEPTH(the_cv, 1);
+    PUSH_MULTICALL_FLAGS(the_cv, 0)
 
-/* Like PUSH_MULTICALL, but allows you to specify the CvDEPTH increment,
- * rather than the default of 1 (this isn't part of the public API) */
+/* Like PUSH_MULTICALL, but allows you to specify extra flags
+ * for the CX stack entry (this isn't part of the public API) */
 
-#define PUSH_MULTICALL_WITHDEPTH(the_cv, depth) \
+#define PUSH_MULTICALL_FLAGS(the_cv, flags) \
     STMT_START {							\
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
@@ -1197,9 +1199,10 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	SAVETMPS; SAVEVPTR(PL_op);					\
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_SORT);					\
-	PUSHBLOCK(cx, CXt_SUB|CXp_MULTICALL, PL_stack_sp);		\
+	PUSHBLOCK(cx, (CXt_SUB|CXp_MULTICALL|flags), PL_stack_sp);	\
 	PUSHSUB(cx);							\
-	CvDEPTH(cv) += depth;						\
+        if (!(flags & CXp_SUB_RE_FAKE))                                 \
+            CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
 	    PERL_STACK_OVERFLOW_CHECK();				\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
@@ -1232,7 +1235,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 /* Change the CV of an already-pushed MULTICALL CxSUB block.
  * (this isn't part of the public API) */
 
-#define CHANGE_MULTICALL_WITHDEPTH(the_cv, depth) \
+#define CHANGE_MULTICALL_FLAGS(the_cv, flags) \
     STMT_START {							\
 	CV * const _nOnclAshIngNamE_ = the_cv;				\
 	CV * const cv = _nOnclAshIngNamE_;				\
@@ -1242,9 +1245,10 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 	if (! ((CvDEPTH(multicall_cv) = cx->blk_sub.olddepth)) ) {	\
 		LEAVESUB(multicall_cv);					\
 	}								\
-	cx->cx_type &= ~CXp_HASARGS;					\
+	cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
 	PUSHSUB(cx);							\
-	CvDEPTH(cv) += depth;						\
+        if (!(flags & CXp_SUB_RE_FAKE))                                 \
+            CvDEPTH(cv)++;						\
 	if (CvDEPTH(cv) >= 2) {						\
 	    PERL_STACK_OVERFLOW_CHECK();				\
 	    Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));			\
