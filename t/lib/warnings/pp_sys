@@ -806,6 +806,17 @@ Opening filehandle ＦＯＯ also as a directory at - line 9.
 Opening filehandle $ｆｏｏ also as a directory at - line 10.
 ########
 # pp_sys.c [pp_*dir]
+use Config ;
+BEGIN {
+    if ( ! $Config{d_telldir}) {
+        print <<EOM ;
+SKIPPED
+# telldir not present
+EOM
+        exit
+    }
+}
+#line 2
 use warnings 'io';
 opendir FOO, ".";
 opendir $foo, ".";
@@ -838,6 +849,17 @@ closedir() attempted on invalid dirhandle $foo at - line 18.
 ########
 
 # pp_sys.c [pp_*dir]
+use Config ;
+BEGIN {
+    if ( ! $Config{d_telldir}) {
+        print <<EOM ;
+SKIPPED
+# telldir not present
+EOM
+        exit
+    }
+}
+#line 3
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'io';
