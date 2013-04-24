@@ -497,7 +497,7 @@ if (my $pid = fork) {
 }
 else {
     $SIG{TERM} = sub { print "2\n" };
-    sleep 3;
+    sleep 10;
     print "3\n";
 }
 EXPECT
