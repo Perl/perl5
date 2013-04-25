@@ -1307,6 +1307,7 @@ EXTCONST U32 PL_charclass[];
 #define isXDIGIT_utf8(p)        _generic_utf8_no_upper_latin1(_CC_XDIGIT, p,   \
                                                           is_XDIGIT_high(p))
 
+#define toFOLD_utf8(p,s,l)	to_utf8_fold(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
