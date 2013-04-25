@@ -700,19 +700,112 @@ Behaviour is only well defined when isXDIGIT(*str) is true.
 
 =head1 Character case changing
 
-=for apidoc Am|char|toUPPER|char ch
-Converts the specified character to uppercase, if possible; otherwise returns
-the input character itself.  Only ASCII characters are changed.  Variant
+=for apidoc Am|U8|toUPPER|U8 ch
+Converts the specified character to uppercase.  If the input is anything but an
+ASCII lowercase character, that input character itself is returned.  Variant
 C<toUPPER_A> is equivalent.
 
-=for apidoc Am|char|toLOWER|char ch
-Converts the specified character to lowercase, if possible; otherwise returns
-the input character itself.  Only ASCII characters are changed.  Variant
+=for apidoc Am|UV|toUPPER_uni|UV cp|U8* s|STRLEN* lenp
+Converts the Unicode code point C<cp> to its uppercase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the uppercase version may be longer than the original character.
+
+The first code point of the uppercased version is returned
+(but note, as explained just above, that there may be more.)
+
+=for apidoc Am|UV|toUPPER_utf8|U8* p|U8* s|STRLEN* lenp
+Converts the UTF-8 encoded character at C<p> to its uppercase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the uppercase version may be longer than the original character.
+
+The first code point of the uppercased version is returned
+(but note, as explained just above, that there may be more.)
+
+The input character at C<p> is assumed to be well-formed.
+
+=for apidoc Am|UV|toFOLD_uni|UV cp|U8* s|STRLEN* lenp
+Converts the Unicode code point C<cp> to its foldcase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the foldcase version may be longer than the original character.
+
+The first code point of the foldcased version is returned
+(but note, as explained just above, that there may be more.)
+
+=for apidoc Am|UV|toFOLD_utf8|U8* p|U8* s|STRLEN* lenp
+Converts the UTF-8 encoded character at C<p> to its foldcase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the foldcase version may be longer than the original character.
+
+The first code point of the foldcased version is returned
+(but note, as explained just above, that there may be more.)
+
+The input character at C<p> is assumed to be well-formed.
+
+=for apidoc Am|U8|toLOWER|U8 ch
+Converts the specified character to lowercase.  If the input is anything but an
+ASCII uppercase character, that input character itself is returned.  Variant
 C<toLOWER_A> is equivalent.
+
+=for apidoc Am|U8|toLOWER_L1|U8 ch
+Converts the specified Latin1 character to lowercase.  The results are undefined if
+the input doesn't fit in a byte.
+
+=for apidoc Am|U8|toLOWER_LC|U8 ch
+Converts the specified character to lowercase using the current locale's rules,
+if possible; otherwise returns the input character itself.
+
+=for apidoc Am|UV|toLOWER_uni|UV cp|U8* s|STRLEN* lenp
+Converts the Unicode code point C<cp> to its lowercase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the lowercase version may be longer than the original character.
+
+The first code point of the lowercased version is returned
+(but note, as explained just above, that there may be more.)
+
+=for apidoc Am|UV|toLOWER_utf8|U8* p|U8* s|STRLEN* lenp
+Converts the UTF-8 encoded character at C<p> to its lowercase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the lowercase version may be longer than the original character.
+
+The first code point of the lowercased version is returned
+(but note, as explained just above, that there may be more.)
+
+The input character at C<p> is assumed to be well-formed.
+
+=for apidoc Am|U8|toLOWER_LC|U8 ch
+Converts the specified character to lowercase using the current locale's rules,
+if possible; otherwise returns the input character itself.
+
+=for apidoc Am|UV|toTITLE_uni|UV cp|U8* s|STRLEN* lenp
+Converts the Unicode code point C<cp> to its titlecase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the titlecase version may be longer than the original character.
+
+The first code point of the titlecased version is returned
+(but note, as explained just above, that there may be more.)
+
+=for apidoc Am|UV|toTITLE_utf8|U8* p|U8* s|STRLEN* lenp
+Converts the UTF-8 encoded character at C<p> to its titlecase version, and
+stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
+that the buffer pointed to by C<s> needs to be at least C<UTF8_MAXBYTES_CASE+1>
+bytes since the titlecase version may be longer than the original character.
+
+The first code point of the titlecased version is returned
+(but note, as explained just above, that there may be more.)
+
+The input character at C<p> is assumed to be well-formed.
 
 =cut
 
-XXX Still undocumented isVERTWS_uni and _utf8, and the other toUPPER etc functions
+XXX Still undocumented isVERTWS_uni and _utf8; it's unclear what their names
+really should be.  Also toUPPER_LC, which is subject to change.
 
 Note that these macros are repeated in Devel::PPPort, so should also be
 patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc

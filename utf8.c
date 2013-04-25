@@ -2549,15 +2549,7 @@ bad_crossing:
 /*
 =for apidoc to_utf8_upper
 
-Convert the UTF-8 encoded character at C<p> to its uppercase version and
-store that in UTF-8 in C<ustrp> and its length in bytes in C<lenp>.  Note
-that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
-the uppercase version may be longer than the original character.
-
-The first character of the uppercased version is returned
-(but note, as explained above, that there may be more.)
-
-The character at C<p> is assumed by this routine to be well-formed.
+Instead use L</toUPPER_utf8>.
 
 =cut */
 
@@ -2621,15 +2613,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 /*
 =for apidoc to_utf8_title
 
-Convert the UTF-8 encoded character at C<p> to its titlecase version and
-store that in UTF-8 in C<ustrp> and its length in bytes in C<lenp>.  Note
-that the C<ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
-titlecase version may be longer than the original character.
-
-The first character of the titlecased version is returned
-(but note, as explained above, that there may be more.)
-
-The character at C<p> is assumed by this routine to be well-formed.
+Instead use L</toTITLE_utf8>.
 
 =cut */
 
@@ -2695,15 +2679,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 /*
 =for apidoc to_utf8_lower
 
-Convert the UTF-8 encoded character at C<p> to its lowercase version and
-store that in UTF-8 in ustrp and its length in bytes in C<lenp>.  Note
-that the C<ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
-lowercase version may be longer than the original character.
-
-The first character of the lowercased version is returned
-(but note, as explained above, that there may be more.)
-
-The character at C<p> is assumed by this routine to be well-formed.
+Instead use L</toLOWER_utf8>.
 
 =cut */
 
@@ -2768,16 +2744,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 /*
 =for apidoc to_utf8_fold
 
-Convert the UTF-8 encoded character at C<p> to its foldcase version and
-store that in UTF-8 in C<ustrp> and its length in bytes in C<lenp>.  Note
-that the C<ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
-foldcase version may be longer than the original character (up to
-three characters).
-
-The first character of the foldcased version is returned
-(but note, as explained above, that there may be more.)
-
-The character at C<p> is assumed by this routine to be well-formed.
+Instead use L</toFOLD_utf8>.
 
 =cut */
 
