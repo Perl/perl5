@@ -2776,7 +2776,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 
     if (UTF8_IS_INVARIANT(*p)) {
 	if (flags & FOLD_FLAGS_LOCALE) {
-	    result = toLOWER_LC(*p);
+	    result = toFOLD_LC(*p);
 	}
 	else {
 	    return _to_fold_latin1(*p, ustrp, lenp,
@@ -2785,7 +2785,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags & FOLD_FLAGS_LOCALE) {
-	    result = toLOWER_LC(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
+	    result = toFOLD_LC(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
 	}
 	else {
 	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
@@ -4580,8 +4580,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 			return 0;
 		    }
 		    n1 = 1;
-		    *foldbuf1 = toLOWER(*p1);   /* Folds in the ASCII range are
-						   just lowercased */
+		    *foldbuf1 = toFOLD(*p1);
 		}
 		else if (u1) {
 		    to_utf8_fold(p1, foldbuf1, &n1);
@@ -4628,7 +4627,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 			return 0;
 		    }
 		    n2 = 1;
-		    *foldbuf2 = toLOWER(*p2);
+		    *foldbuf2 = toFOLD(*p2);
 		}
 		else if (u2) {
 		    to_utf8_fold(p2, foldbuf2, &n2);

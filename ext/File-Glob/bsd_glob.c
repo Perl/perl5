@@ -617,12 +617,12 @@ ci_compare(const void *p, const void *q)
 	const char *qq = *(const char **)q;
 	int ci;
 	while (*pp && *qq) {
-		if (toLOWER(*pp) != toLOWER(*qq))
+		if (toFOLD(*pp) != toFOLD(*qq))
 			break;
 		++pp;
 		++qq;
 	}
-	ci = toLOWER(*pp) - toLOWER(*qq);
+	ci = toFOLD(*pp) - toFOLD(*qq);
 	if (ci == 0)
 		return compare(p, q);
 	return ci;

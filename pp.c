@@ -4198,18 +4198,15 @@ PP(pp_fc)
 	}
     } /* Unflagged string */
     else if (len) {
-        /* For locale, bytes, and nothing, the behavior is supposed to be the
-         * same as lc().
-         */
         if ( IN_LOCALE_RUNTIME ) { /* Under locale */
             TAINT;
             SvTAINTED_on(dest);
             for (; s < send; d++, s++)
-                *d = toLOWER_LC(*s);
+                *d = toFOLD_LC(*s);
         }
         else if ( !IN_UNI_8_BIT ) { /* Under nothing, or bytes */
             for (; s < send; d++, s++)
-                *d = toLOWER(*s);
+                *d = toFOLD(*s);
         }
         else {
             /* For ASCII and the Latin-1 range, there's only two troublesome
