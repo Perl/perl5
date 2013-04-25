@@ -88,6 +88,7 @@ like($@, 'propagated', '... and appends a phrase');
 # [perl #36470] got uninit warning if $@ was undef
 
 {
+    use warnings "uninitialized";
     my $ok = 1;
     local $SIG{__DIE__};
     local $SIG{__WARN__} = sub { $ok = 0 };

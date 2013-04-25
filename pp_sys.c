@@ -493,6 +493,7 @@ PP(pp_die)
     }
     else {
 	SV * const errsv = ERRSV;
+	SvGETMAGIC(errsv);
 	if (SvROK(errsv)) {
 	    exsv = errsv;
 	    if (sv_isobject(exsv)) {
@@ -513,7 +514,7 @@ PP(pp_die)
 		}
 	    }
 	}
-	else if (SvPV_const(errsv, len), len) {
+	else if (SvPOK(errsv) && SvCUR(errsv)) {
 	    exsv = sv_mortalcopy(errsv);
 	    sv_catpvs(exsv, "\t...propagated");
 	}
