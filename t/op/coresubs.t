@@ -136,7 +136,6 @@ is runperl(prog => '@ISA=CORE; print main->uc, qq-\n-'), "MAIN\n",
  'inherted method calls autovivify coresubs';
 
 { # RT #117607
-  local $TODO = "\\&CORE::lc crashes in error context";
   $tests++;
   like runperl(prog => '$foo/; \&CORE::lc', stderr => 1),
     qr/^syntax error/, "RT #117607: \\&CORE::foo doesn't crash in error context";
