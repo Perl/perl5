@@ -4214,7 +4214,7 @@ PP(pp_fc)
         else {
             /* For ASCII and the Latin-1 range, there's only two troublesome
              * folds, \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
-             * casefolding becomes 'ss', and \x{B5} (\N{MICRO SIGN}), which
+             * casefolding becomes 'ss'; and \x{B5} (\N{MICRO SIGN}), which
              * under any fold becomes \x{3BC} (\N{GREEK SMALL LETTER MU}) --
              * For the rest, the casefold is their lowercase.  */
             for (; s < send; d++, s++) {
