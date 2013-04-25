@@ -12,7 +12,7 @@ use Config;
 plan tests => 29;
 $| = 1;
 
-watchdog(15);
+watchdog(25);
 
 $SIG{ALRM} = sub {
     die "Alarm!\n";
