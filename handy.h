@@ -725,6 +725,12 @@ The first code point of the uppercased version is returned
 
 The input character at C<p> is assumed to be well-formed.
 
+=for apidoc Am|U8|toFOLD|U8 ch
+Converts the specified character to foldcase.  If the input is anything but an
+ASCII uppercase character, that input character itself is returned.  Variant
+C<toFOLD_A> is equivalent.  (There is no equivalent C<to_FOLD_L1> for the full
+Latin1 range, as the full generality of L</toFOLD_uni> is needed there.)
+
 =for apidoc Am|UV|toFOLD_uni|UV cp|U8* s|STRLEN* lenp
 Converts the Unicode code point C<cp> to its foldcase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
@@ -782,6 +788,13 @@ The input character at C<p> is assumed to be well-formed.
 Converts the specified character to lowercase using the current locale's rules,
 if possible; otherwise returns the input character itself.
 
+=for apidoc Am|U8|toTITLE|U8 ch
+Converts the specified character to titlecase.  If the input is anything but an
+ASCII lowercase character, that input character itself is returned.  Variant
+C<toTITLE_A> is equivalent.  (There is no C<toTITLE_L1> for the full Latin1 range,
+as the full generality of L</toTITLE_uni> is needed there.  Titlecase is not a
+concept used in locale handling, so there is no functionality for that.)
+
 =for apidoc Am|UV|toTITLE_uni|UV cp|U8* s|STRLEN* lenp
 Converts the Unicode code point C<cp> to its titlecase version, and
 stores that in UTF-8 in C<s>, and its length in bytes in C<lenp>.  Note
@@ -805,7 +818,7 @@ The input character at C<p> is assumed to be well-formed.
 =cut
 
 XXX Still undocumented isVERTWS_uni and _utf8; it's unclear what their names
-really should be.  Also toUPPER_LC, which is subject to change.
+really should be.  Also toUPPER_LC and toFOLD_LC, which are subject to change.
 
 Note that these macros are repeated in Devel::PPPort, so should also be
 patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
@@ -1141,8 +1154,17 @@ EXTCONST U32 PL_charclass[];
 #   define toUPPER(c)	(isLOWER(c) ? (c) - ('a' - 'A') : (c))
 #endif
 
+/* In the ASCII range, these are equivalent to what they're here defined to be.
+ * But by creating these definitions, other code doesn't have to be aware of
+ * this detail */
+#define toFOLD(c)    toLOWER(c)
+#define toFOLD_LC(c) toLOWER_LC(c)
+#define toTITLE(c)   toUPPER(c)
+
 #define toLOWER_A(c) toLOWER(c)
 #define toUPPER_A(c) toUPPER(c)
+#define toFOLD_A(c)  toFOLD(c)
+#define toTITLE_A(c) toTITLE(c)
 
 /* Use table lookup for speed; return error character for input
  * out-of-range */
