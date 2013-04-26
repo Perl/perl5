@@ -135,6 +135,12 @@ is runperl(prog => 'print CORE->lc, qq-\n-'), "core\n",
 is runperl(prog => '@ISA=CORE; print main->uc, qq-\n-'), "MAIN\n",
  'inherted method calls autovivify coresubs';
 
+{ # RT #117607
+  $tests++;
+  like runperl(prog => '$foo/; \&CORE::lc', stderr => 1),
+    qr/^syntax error/, "RT #117607: \\&CORE::foo doesn't crash in error context";
+}
+
 $tests++;
 ok eval { *CORE::exit = \42 },
   '[rt.cpan.org #74289] *CORE::foo is not accidentally made read-only';

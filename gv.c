@@ -450,7 +450,6 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     static const char file[] = __FILE__;
     CV *cv, *oldcompcv = NULL;
     int opnum = 0;
-    SV *opnumsv;
     bool ampable = TRUE; /* &{}-able */
     COP *oldcurcop = NULL;
     yy_parser *oldparser = NULL;
@@ -536,8 +535,13 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     if (stash)
 	(void)hv_store(stash,name,len,(SV *)gv,0);
     if (ampable) {
+#ifdef DEBUGGING
+        CV *orig_cv = cv;
+#endif
 	CvLVALUE_on(cv);
-	newATTRSUB_flags(
+        /* newATTRSUB will free the CV and return NULL if we're still
+           compiling after a syntax error */
+	if ((cv = newATTRSUB_flags(
 		   oldsavestack_ix, (OP *)gv,
 	           NULL,NULL,
 	           coresub_op(
@@ -547,21 +551,25 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	             code, opnum
 	           ),
 	           1
-	);
-	assert(GvCV(gv) == cv);
-	if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS
-	 && opnum != OP_UNDEF)
-	    CvLVALUE_off(cv); /* Now *that* was a neat trick. */
+               )) != NULL) {
+            assert(GvCV(gv) == orig_cv);
+            if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS
+                && opnum != OP_UNDEF)
+                CvLVALUE_off(cv); /* Now *that* was a neat trick. */
+        }
 	LEAVE;
 	PL_parser = oldparser;
 	PL_curcop = oldcurcop;
 	PL_compcv = oldcompcv;
     }
-    opnumsv = opnum ? newSVuv((UV)opnum) : (SV *)NULL;
-    cv_set_call_checker(
-       cv, Perl_ck_entersub_args_core, opnumsv ? opnumsv : (SV *)cv
-    );
-    SvREFCNT_dec(opnumsv);
+    if (cv) {
+        SV *opnumsv = opnum ? newSVuv((UV)opnum) : (SV *)NULL;
+        cv_set_call_checker(
+          cv, Perl_ck_entersub_args_core, opnumsv ? opnumsv : (SV *)cv
+        );
+        SvREFCNT_dec(opnumsv);
+    }
+
     return gv;
 }
 
