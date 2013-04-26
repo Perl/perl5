@@ -429,14 +429,20 @@ sub syslog {
         $buf = $message;
     }
     else {
+        require Config;
         my $whoami = $ident;
         $whoami .= "[$$]" if $options{pid};
 
         $sum = $numpri + $numfac;
-        my $oldlocale = setlocale(LC_TIME);
-        setlocale(LC_TIME, 'C');
+        my $oldlocale;
+        if ( $Config::Config{d_setlocale} ) {
+            $oldlocale = setlocale(LC_TIME);
+            setlocale(LC_TIME, 'C');
+        }
         my $timestamp = strftime "%b %d %H:%M:%S", localtime;
-        setlocale(LC_TIME, $oldlocale);
+        if ( $Config::Config{d_setlocale} ) {
+            setlocale(LC_TIME, $oldlocale);
+        }
 
         # construct the stream that will be transmitted
         $buf = "<$sum>$timestamp $whoami: $message";
