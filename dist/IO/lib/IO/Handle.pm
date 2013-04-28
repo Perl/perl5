@@ -139,9 +139,12 @@ guaranteed.
 
 =item $io->write ( BUF, LEN [, OFFSET ] )
 
-This C<write> is like C<write> found in C, that is it is the
+This C<write> is somewhat like C<write> found in C, in that it is the
 opposite of read. The wrapper for the perl C<write> function is
-called C<format_write>.
+called C<format_write>. However, whilst the C C<write> function returns
+the number of bytes written, this C<write> function simply returns true
+if successful (like C<print>). A more C-like C<write> is C<syswrite>
+(see above).
 
 =item $io->error
 
