@@ -33,13 +33,6 @@
 #include "perl.h"
 #include "inline_invlist.c"
 
-#ifndef EBCDIC
-/* Separate prototypes needed because in ASCII systems these are
- * usually macros but they still are compiled as code, too. */
-PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags);
-PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
-#endif
-
 static const char unees[] =
     "Malformed UTF-8 character (unexpected end of string)";
 
@@ -90,48 +83,14 @@ Perl_is_ascii_string(const U8 *s, STRLEN len)
 =for apidoc uvoffuni_to_utf8_flags
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+Instead, B<Almost all code should use L</uvchr_to_utf8> or
+L</uvchr_to_utf8_flags>>.
 
-It adds the UTF-8 representation of the Unicode code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
+This function is like them, but the input is a strict Unicode
+(as opposed to native) code point.  Only in very rare circumstances should code
+not be using the native code point.
 
-    d = uvoffuni_to_utf8_flags(d, uv, flags);
-
-or, in most cases,
-
-    d = uvoffuni_to_utf8_flags(d, uv, 0);
-
-This is the Unicode-aware way of saying
-
-    *(d++) = uv;
-
-where uv is a code point expressed in Latin-1 or above, not the platform's
-native character set.  B<Almost all code should instead use L</uvchr_to_utf8>
-or L</uvchr_to_utf8_flags>>.
-
-This function will convert to UTF-8 (and not warn) even code points that aren't
-legal Unicode or are problematic, unless C<flags> contains one or more of the
-following flags:
-
-If C<uv> is a Unicode surrogate code point and UNICODE_WARN_SURROGATE is set,
-the function will raise a warning, provided UTF8 warnings are enabled.  If instead
-UNICODE_DISALLOW_SURROGATE is set, the function will fail and return NULL.
-If both flags are set, the function will both warn and return NULL.
-
-The UNICODE_WARN_NONCHAR and UNICODE_DISALLOW_NONCHAR flags correspondingly
-affect how the function handles a Unicode non-character.  And likewise, the
-UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags, affect the handling of
-code points that are
-above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
-even less portable) can be warned and/or disallowed even if other above-Unicode
-code points are accepted, by the UNICODE_WARN_FE_FF and UNICODE_DISALLOW_FE_FF
-flags.
-
-And finally, the flag UNICODE_WARN_ILLEGAL_INTERCHANGE selects all four of the
-above WARN flags; and UNICODE_DISALLOW_ILLEGAL_INTERCHANGE selects all four
-DISALLOW flags.
-
+For details, see the description for L</uvchr_to_utf8_flags>>.
 
 =cut
 */
@@ -276,26 +235,71 @@ is the recommended wide native character-aware way of saying
 
     *(d++) = uv;
 
+This function accepts any UV as input.  To forbid or warn on non-Unicode code
+points, or those that may be problematic, see L</uvchr_to_utf8_flags>.
+
 =cut
 */
 
-/* On ASCII machines this is normally a macro but we want a
-   real function in case XS code wants it
-*/
+/* This is also a macro */
+PERL_CALLCONV U8*       Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
+
 U8 *
 Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 {
-    PERL_ARGS_ASSERT_UVCHR_TO_UTF8;
-
-    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
+    return uvchr_to_utf8(d, uv);
 }
+
+/*
+=for apidoc uvchr_to_utf8_flags
+
+Adds the UTF-8 representation of the native code point C<uv> to the end
+of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8_flags(d, uv, flags);
+
+or, in most cases,
+
+    d = uvchr_to_utf8_flags(d, uv, 0);
+
+This is the Unicode-aware way of saying
+
+    *(d++) = uv;
+
+This function will convert to UTF-8 (and not warn) even code points that aren't
+legal Unicode or are problematic, unless C<flags> contains one or more of the
+following flags:
+
+If C<uv> is a Unicode surrogate code point and UNICODE_WARN_SURROGATE is set,
+the function will raise a warning, provided UTF8 warnings are enabled.  If instead
+UNICODE_DISALLOW_SURROGATE is set, the function will fail and return NULL.
+If both flags are set, the function will both warn and return NULL.
+
+The UNICODE_WARN_NONCHAR and UNICODE_DISALLOW_NONCHAR flags correspondingly
+affect how the function handles a Unicode non-character.  And likewise, the
+UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags, affect the handling of
+code points that are
+above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
+even less portable) can be warned and/or disallowed even if other above-Unicode
+code points are accepted, by the UNICODE_WARN_FE_FF and UNICODE_DISALLOW_FE_FF
+flags.
+
+And finally, the flag UNICODE_WARN_ILLEGAL_INTERCHANGE selects all four of the
+above WARN flags; and UNICODE_DISALLOW_ILLEGAL_INTERCHANGE selects all four
+DISALLOW flags.
+
+=cut
+*/
+
+/* This is also a macro */
+PERL_CALLCONV U8*       Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
 
 U8 *
 Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
-    PERL_ARGS_ASSERT_UVCHR_TO_UTF8_FLAGS;
-
-    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
+    return uvchr_to_utf8_flags(d, uv, flags);
 }
 
 /*
@@ -510,13 +514,13 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 
 /*
 
-=for apidoc utf8n_to_uvoffuni
+=for apidoc utf8n_to_uvchr
 
 THIS FUNCTION SHOULD BE USED IN ONLY VERY SPECIALIZED CIRCUMSTANCES.
+Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
 
 Bottom level UTF-8 decode routine.
-Returns the official Unicode (not native) code point value of the first
-character in the string C<s>,
+Returns the native code point value of the first character in the string C<s>,
 which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding, and no longer than
 C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
 the length, in bytes, of that character.
@@ -585,13 +589,11 @@ All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
 warn.
 
-Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
-
 =cut
 */
 
 UV
-Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
     dVAR;
     const U8 * const s0 = s;
@@ -609,7 +611,7 @@ Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 fla
 
     const char* const malformed_text = "Malformed UTF-8 character";
 
-    PERL_ARGS_ASSERT_UTF8N_TO_UVOFFUNI;
+    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
 
     /* The order of malformation tests here is important.  We should consume as
      * few bytes as possible in order to not skip any valid character.  This is
@@ -658,7 +660,7 @@ Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 fla
 
     /* An invariant is trivially well-formed */
     if (UTF8_IS_INVARIANT(uv)) {
-	return NATIVE_TO_LATIN1(uv);
+	return uv;
     }
 
     /* A continuation character can't start a valid sequence */
@@ -861,7 +863,9 @@ Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 fla
 	}
 
 	if (sv) {
-	    outlier_ret = uv;
+            outlier_ret = uv;   /* Note we don't bother to convert to native,
+                                   as all the outlier code points are the same
+                                   in both ASCII and EBCDIC */
 	    goto do_warn;
 	}
 
@@ -869,7 +873,7 @@ Perl_utf8n_to_uvoffuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 fla
 	 * to return it */
     }
 
-    return uv;
+    return UNI_TO_NATIVE(uv);
 
     /* There are three cases which get to beyond this point.  In all 3 cases:
      * <sv>	    if not null points to a string to print as a warning.
@@ -943,7 +947,7 @@ NULL) to -1.  If those warnings are off, the computed value, if well-defined
 (or the Unicode REPLACEMENT CHARACTER if not), is silently returned, and
 C<*retlen> is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is
 the next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is
+See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is
 returned.
 
 =cut
@@ -953,8 +957,6 @@ returned.
 UV
 Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 {
-    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
-
     assert(s < send);
 
     return utf8n_to_uvchr(s, send - s, retlen,
@@ -1020,7 +1022,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is returned.
+See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -1036,8 +1038,9 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 /*
 =for apidoc utf8_to_uvuni_buf
 
-Only in very rare circumstances should code need to be dealing in the Unicode
-code point.  Use L</utf8_to_uvchr_buf> instead.
+Only in very rare circumstances should code need to be dealing in Unicode
+(as opposed to native) code points.  In those few cases, use
+C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|/utf8_to_uvchr_buf>> instead.
 
 Returns the Unicode (not-native) code point of the first character in the
 string C<s> which
@@ -1050,7 +1053,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is returned.
+See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -1063,8 +1066,8 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     assert(send > s);
 
     /* Call the low level routine asking for checks */
-    return Perl_utf8n_to_uvoffuni(aTHX_ s, send -s, retlen,
-			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    return NATIVE_TO_UNI(Perl_utf8n_to_uvchr(aTHX_ s, send -s, retlen,
+			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY));
 }
 
 /* DEPRECATED!
@@ -1091,7 +1094,7 @@ Some, but not all, UTF-8 malformations are detected, and in fact, some
 malformed input could cause reading beyond the end of the input buffer, which
 is one reason why this function is deprecated.  The other is that only in
 extremely limited circumstances should the Unicode versus native code point be
-of any interest to you.  Use L</utf8_to_uvchr_buf> instead.
+of any interest to you.  See L</utf8_to_uvuni_buf> for alternatives.
 
 If C<s> points to one of the detected malformations, and UTF8 warnings are
 enabled, zero is returned and C<*retlen> is set (if C<retlen> doesn't point to
@@ -1099,7 +1102,7 @@ NULL) to -1.  If those warnings are off, the computed value if well-defined (or
 the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
 is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
 next possible position in C<s> that could begin a non-malformed character.
-See L</utf8n_to_uvoffuni> for details on when the REPLACEMENT CHARACTER is returned.
+See L</utf8n_to_uvchr> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -4248,32 +4251,6 @@ Perl__get_swash_invlist(pTHX_ SV* const swash)
     }
 
     return *ptr;
-}
-
-/*
-=for apidoc utf8n_to_uvchr
-
-Returns the native character value of the first character in the string
-C<s>
-which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
-length, in bytes, of that character.
-
-C<length> and C<flags> are the same as L</utf8n_to_uvoffuni>().
-
-=cut
-*/
-/* On ASCII machines this is normally a macro but we want
-   a real function in case XS code wants it
-*/
-UV
-Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen,
-U32 flags)
-{
-    const UV uv = Perl_utf8n_to_uvoffuni(aTHX_ s, curlen, retlen, flags);
-
-    PERL_ARGS_ASSERT_UTF8N_TO_UVCHR;
-
-    return UNI_TO_NATIVE(uv);
 }
 
 bool
