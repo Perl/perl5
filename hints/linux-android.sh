@@ -65,11 +65,12 @@ $to \$exe > /dev/null 2>&1
 
 # send copy results to /dev/null as otherwise it outputs speed stats which gets in our way.
 # sometimes there is no $?, I dunno why? we then get Cross/run-adb-shell: line 39: exit: XX: numeric argument required
-foo=\`adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args > \$exe.stdout) ; \$doexit '"\`
+foo=\`adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args) > $targetdir/output.stdout ; \$doexit '"\`
 # We get back Ok\r\n on android for some reason, grrr:
-$from \$exe.stdout
-result=\`cat \$exe.stdout\`
-rm \$exe.stdout
+$from output.stdout
+result=\`cat output.stdout\`
+rm output.stdout
+result=\`echo \$result | sed -e 's|\r||g'\`
 foo=\`echo \$foo | sed -e 's|\r||g'\`
 # Also, adb doesn't exit with the commands exit code, like ssh does, double-grr
 echo "\$result"
