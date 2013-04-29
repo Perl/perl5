@@ -125,8 +125,7 @@ if (@ARGV) {
     #     ]
     # };
 
-    # but for now, run all directories in sequence. In particular, it would be
-    # nice to get the tests in t/op/*.t able to run in parallel.
+    # but for now, run all directories in sequence.
 
     unless (@tests) {
 	my @seq = <base/*.t>;
