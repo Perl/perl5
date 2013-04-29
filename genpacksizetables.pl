@@ -88,7 +88,7 @@ __DATA__
 #Symbol	unpredictable
 #		nocsum	size
 c			char
-C	*		unsigned char
+C			unsigned char
 W	*		unsigned char
 U	*		char
 s!			short
