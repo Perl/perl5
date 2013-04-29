@@ -1254,7 +1254,7 @@ realclean:	_realcleaner _mopup
 	@echo "Note that '$(MAKE) realclean' does not delete config.sh or Policy.sh"
 
 _clobber:
-	-@rm -f Cross/run-* Cross/to-* Cross/from-*
+	-@rm -f Cross/run-* Cross/to-* Cross/from-* Cross/mkdir
 	-rm -rf host
 	rm -f t/test_state
 	rm -f config.sh cppstdin Policy.sh extras.lst
