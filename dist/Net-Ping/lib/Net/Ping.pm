@@ -17,7 +17,7 @@ use Time::HiRes;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.42";
+$VERSION = "2.43";
 
 # Constants
 
@@ -135,7 +135,7 @@ sub new
   $self->{"seq"} = 0;                         # For counting packets
   if ($self->{"proto"} eq "udp")              # Open a socket
   {
-    $self->{"proto_num"} = (getprotobyname('udp'))[2] ||
+    $self->{"proto_num"} = eval { (getprotobyname('udp'))[2] } ||
       croak("Can't udp protocol by name");
     $self->{"port_num"} = (getservbyname('echo', 'udp'))[2] ||
       croak("Can't get udp echo port by name");
@@ -155,7 +155,7 @@ sub new
   elsif ($self->{"proto"} eq "icmp")
   {
     croak("icmp ping requires root privilege") if ($> and $^O ne 'VMS' and $^O ne 'cygwin');
-    $self->{"proto_num"} = (getprotobyname('icmp'))[2] ||
+    $self->{"proto_num"} = eval { (getprotobyname('icmp'))[2] } ||
       croak("Can't get icmp protocol by name");
     $self->{"pid"} = $$ & 0xffff;           # Save lower 16 bits of pid
     $self->{"fh"} = FileHandle->new();
@@ -176,7 +176,7 @@ sub new
   }
   elsif ($self->{"proto"} eq "tcp" || $self->{"proto"} eq "stream")
   {
-    $self->{"proto_num"} = (getprotobyname('tcp'))[2] ||
+    $self->{"proto_num"} = eval { (getprotobyname('tcp'))[2] } ||
       croak("Can't get tcp protocol by name");
     $self->{"port_num"} = (getservbyname('echo', 'tcp'))[2] ||
       croak("Can't get tcp echo port by name");
@@ -184,7 +184,7 @@ sub new
   }
   elsif ($self->{"proto"} eq "syn")
   {
-    $self->{"proto_num"} = (getprotobyname('tcp'))[2] ||
+    $self->{"proto_num"} = eval { (getprotobyname('tcp'))[2] } ||
       croak("Can't get tcp protocol by name");
     $self->{"port_num"} = (getservbyname('echo', 'tcp'))[2] ||
       croak("Can't get tcp echo port by name");
