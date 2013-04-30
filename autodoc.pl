@@ -382,8 +382,9 @@ foreach (sort keys %missing) {
 # walk table providing an array of components in each line to
 # subroutine, printing the result
 
-# List of funcs in the public API that aren't also marked as experimental.
-my @missing_api = grep $funcflags{$_}{flags} =~ /A/ && $funcflags{$_}{flags} !~ /M/ && !$docs{api}{$_}, keys %funcflags;
+# List of funcs in the public API that aren't also marked as experimental nor
+# deprecated.
+my @missing_api = grep $funcflags{$_}{flags} =~ /A/ && $funcflags{$_}{flags} !~ /[MD]/ && !$docs{api}{$_}, keys %funcflags;
 output('perlapi', <<'_EOB_', $docs{api}, \@missing_api, <<'_EOE_');
 =head1 NAME
 
