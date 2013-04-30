@@ -113,6 +113,7 @@ DOC:
 	    if ($docref and %$docref) {
 		$embed_where = $docref->{flags} =~ /A/ ? 'api' : 'guts';
 		$embed_may_change = $docref->{flags} =~ /M/;
+                $flags .= 'D' if $docref->{flags} =~ /D/;
 	    } else {
 		$missing{$name} = $file;
 	    }
@@ -171,8 +172,15 @@ sub docout ($$$) { # output the docs for one function
     my($flags, $docs, $ret, $file, @args) = @$docref;
     $name =~ s/\s*$//;
 
-    $docs .= "NOTE: this function is experimental and may change or be
+    if ($flags =~ /D/) {
+        $docs = "\n\nDEPRECATED!  It is planned to remove this function from a
+future release of Perl.  Do not use it for new code; remove it from
+existing code.\n\n$docs";
+    }
+    else {
+        $docs .= "NOTE: this function is experimental and may change or be
 removed without notice.\n\n" if $flags =~ /x/;
+    }
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
 	if $flags =~ /p/;
     $docs .= "NOTE: this function must be explicitly called as Perl_$name with an aTHX_ parameter.\n\n"

@@ -338,8 +338,6 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 /*
 =for apidoc is_utf8_char
 
-DEPRECATED!
-
 Tests if some arbitrary number of bytes begins in a valid UTF-8
 character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC machines)
 character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
@@ -946,8 +944,6 @@ Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 /*
 =for apidoc utf8_to_uvchr
 
-DEPRECATED!
-
 Returns the native code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
@@ -1046,8 +1042,6 @@ Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 
 /*
 =for apidoc utf8_to_uvuni
-
-DEPRECATED!
 
 Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
