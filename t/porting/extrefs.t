@@ -26,6 +26,8 @@ use Cwd;
 
 plan(tests => 1);
 
+my $VERBOSE = grep {$_ eq '-v'} @ARGV;
+
 ok(try_compile_and_link(<<'CODE'));
 #include "EXTERN.h"
 #include "perl.h"
@@ -44,7 +46,6 @@ sub try_compile_and_link {
     my $ld_exeext = ($^O eq 'cygwin' || $^O eq 'MSWin32' ||
                  $^O eq 'os2' && $Config{ldflags} =~ /-Zexe\b/) ? '.exe' :
                 (($^O eq 'vos') ? $Config{exe_ext} : '');
-    my $VERBOSE = 0;
 
     my ($ok) = 0;
     my $tempdir = tempfile();
