@@ -78,7 +78,10 @@ sub try_compile_and_link {
 
 	my $errornull = $VERBOSE ? '' : ">$null 2>$null";
 
-	my $out_opt = "-o";
+	# Darwin g++ 4.2.1 is fussy and demands a space.
+	# FreeBSD g++ 4.2.1 does not.
+	# We do not know the reaction of either to the presence of brown M&Ms.
+	my $out_opt = "-o ";
 	if ($^O eq "MSWin32" && $Config{cc} =~ /\bcl\b/i) {
 	    $out_opt = "/Fe";
 	}
