@@ -264,6 +264,42 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 }
 
 /*
+=for apidoc uvchr_to_utf8
+
+Adds the UTF-8 representation of the Native code point C<uv> to the end
+of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8(d, uv);
+
+is the recommended wide native character-aware way of saying
+
+    *(d++) = uv;
+
+=cut
+*/
+
+/* On ASCII machines this is normally a macro but we want a
+   real function in case XS code wants it
+*/
+U8 *
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    PERL_ARGS_ASSERT_UVCHR_TO_UTF8;
+
+    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
+}
+
+U8 *
+Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
+{
+    PERL_ARGS_ASSERT_UVCHR_TO_UTF8_FLAGS;
+
+    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
+}
+
+/*
 
 Tests if the first C<len> bytes of string C<s> form a valid UTF-8
 character.  Note that an INVARIANT (i.e. ASCII) character is a valid
@@ -4213,42 +4249,6 @@ Perl__get_swash_invlist(pTHX_ SV* const swash)
     }
 
     return *ptr;
-}
-
-/*
-=for apidoc uvchr_to_utf8
-
-Adds the UTF-8 representation of the Native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
-
-    d = uvchr_to_utf8(d, uv);
-
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-=cut
-*/
-
-/* On ASCII machines this is normally a macro but we want a
-   real function in case XS code wants it
-*/
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    PERL_ARGS_ASSERT_UVCHR_TO_UTF8;
-
-    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
-}
-
-U8 *
-Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
-{
-    PERL_ARGS_ASSERT_UVCHR_TO_UTF8_FLAGS;
-
-    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
 }
 
 /*
