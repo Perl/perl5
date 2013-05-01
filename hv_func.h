@@ -392,8 +392,8 @@ S_perl_hash_murmur3(const unsigned char * const seed, const unsigned char *ptr, 
     /* This CPU does not handle unaligned word access */
 
     /* Consume enough so that the next data byte is word aligned */
-    int i = -(IV)ptr & 3;
-    if(i && (STRLEN)i <= len) {
+    STRLEN i = -PTR2IV(ptr) & 3;
+    if(i && i <= len) {
       MURMUR_DOBYTES(i, h1, carry, bytes_in_carry, ptr, len);
     }
 
