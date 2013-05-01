@@ -24,7 +24,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -256,7 +256,8 @@ sub long_error_loc {
     {
         ++$i;
         my $cgc = _cgc();
-        my $pkg = $cgc ? $cgc->($i) : caller($i);
+        my @caller = $cgc ? $cgc->($i) : caller($i);
+        my $pkg = $caller[0];
         unless ( defined($pkg) ) {
 
             # This *shouldn't* happen.
@@ -265,7 +266,7 @@ sub long_error_loc {
                 $i = long_error_loc();
                 last;
             }
-            else {
+            elsif (defined $caller[2]) {
                 # this can happen when the stash has been deleted
                 # in that case, just assume that it's a reasonable place to
                 # stop (the file and line data will still be intact in any
@@ -274,6 +275,9 @@ sub long_error_loc {
                 # -doy
                 redo unless 0 > --$lvl;
                 last;
+            }
+            else {
+                return 2;
             }
         }
         redo if $CarpInternal{$pkg};
