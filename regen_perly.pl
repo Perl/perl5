@@ -73,15 +73,20 @@ unless ($version) { die <<EOF; }
 Could not find a version of bison in your path. Please install bison.
 EOF
 
+# Don't change this to add new bison versions without testing that the generated
+# files actually work :-) Win32 in particular may not like them. :-(
 unless ($version =~ /\b(1\.875[a-z]?|2\.[0134567])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
-2.0, 2.1, 2.3-2.7 is required.  Try installing
-    http://ftp.gnu.org/gnu/bison/bison-2.7.tar.gz
+2.0, 2.1, 2.3, 2.4, 2.5, 2.6 or 2.7 is required.  Try installing
+    http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz
 or similar.  Your bison identifies itself as:
 
 $version
 EOF
+
+# bison's version number, not the entire string, is most useful later on.
+$version = $1;
 
 # creates $tmpc_file and $tmph_file
 my_system("$bison -d -o $tmpc_file $y_file");
@@ -116,7 +121,7 @@ open my $tmph_fh, '<', $tmph_file or die "Can't open $tmph_file: $!\n";
 
 my $endcore_done = 0;
 # Token macros need to be generated manually from bison 2.4 on
-my $gather_tokens = ($version =~ /\b2\.[456]\b/ ? undef : 0);
+my $gather_tokens = $version >= 2.4 ? undef : 0;
 my $tokens;
 while (<$tmph_fh>) {
     # bison 2.6 adds header guards, which break things because of where we
