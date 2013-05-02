@@ -278,7 +278,7 @@ foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
     my $warning_type = ($ref == \@warning)
                        ? 'regexp'
                        : ($ref == \@deprecated)
-                         ? 'deprecated'
+                         ? 'regexp, deprecated'
                          : 'experimental::regex_sets';
     while (my ($regex, $expect) = splice @$ref, 0, 2) {
         my @expect = fixup_expect($expect);
