@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 466;  # Update this when adding/deleting tests.
+plan tests => 467;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1340,6 +1340,13 @@ EOP
 
 	my $text = "Perl";
 	ok("Perl" =~ /P.*$/i, '#116148');
+    }
+
+    { # 117327: Sequence (?#...) not recognized in regex
+      # The space between the '(' and '?' is now deprecated; this test should
+      # be removed when the deprecation is made fatal.
+        no warnings;
+        like("ab", qr/a( ?#foo)b/x);
     }
 
 
