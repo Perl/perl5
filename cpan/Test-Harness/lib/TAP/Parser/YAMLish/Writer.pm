@@ -6,7 +6,7 @@ use vars qw($VERSION @ISA);
 use TAP::Object ();
 
 @ISA     = 'TAP::Object';
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 my $ESCAPE_CHAR = qr{ [ \x00-\x1f \" ] }x;
 my $ESCAPE_KEY  = qr{ (?: ^\W ) | $ESCAPE_CHAR }x;
@@ -147,7 +147,7 @@ TAP::Parser::YAMLish::Writer - Write YAMLish data
 
 =head1 VERSION
 
-Version 3.26
+Version 3.28
 
 =head1 SYNOPSIS
 

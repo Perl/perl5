@@ -46,11 +46,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.26
+Version 3.28
 
 =cut
 
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -73,7 +73,7 @@ END {
 
 $Verbose = $ENV{HARNESS_VERBOSE} || 0;
 $Debug   = $ENV{HARNESS_DEBUG}   || 0;
-$Switches = '';
+$Switches = '-w';
 $Columns = $ENV{HARNESS_COLUMNS} || $ENV{COLUMNS} || 80;
 $Columns--;    # Some shells have trouble with a full line of text.
 $Timer      = $ENV{HARNESS_TIMER}       || 0;
@@ -518,6 +518,17 @@ This is the version of C<Test::Harness>.
 =head1 ENVIRONMENT VARIABLES THAT AFFECT TEST::HARNESS
 
 =over 4
+
+=item C<HARNESS_PERL_SWITCHES>
+
+Setting this adds perl command line switches to each test file run.
+
+For example, C<HARNESS_PERL_SWITCHES=-T> will turn on taint mode.
+C<HARNESS_PERL_SWITCHES=-MDevel::Cover> will run C<Devel::Cover> for
+each test.
+
+C<-w> is always set.  You can turn this off in the test with C<BEGIN {
+$^W = 0 }>.
 
 =item C<HARNESS_TIMER>
 

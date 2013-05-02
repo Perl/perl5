@@ -19,11 +19,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.26
+Version 3.28
 
 =cut
 
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -330,20 +330,37 @@ run only one test at a time.
 
 =item * C<rules>
 
-A reference to a hash of rules that control which tests may be
-executed in parallel. This is an experimental feature and the
-interface may change.
+A reference to a hash of rules that control which tests may be executed in
+parallel. If no rules are declared, all tests are eligible for being run in
+parallel. Here some simple examples. For the full details of the data structure
+and the related glob-style pattern matching, see
+L<TAP::Parser::Scheduler/"Rules data structure">.
 
-    $harness->rules(
-        {   par => [
-                { seq => '../ext/DB_File/t/*' },
-                { seq => '../ext/IO_Compress_Zlib/t/*' },
-                { seq => '../lib/CPANPLUS/*' },
-                { seq => '../lib/ExtUtils/t/*' },
-                '*'
-            ]
-        }
-    );
+    # Run all tests in sequence, except those starting with "p"
+    $harness->rules({
+        par => 't/p*.t'
+    });
+
+    # Run all tests in parallel, except those starting with "p"
+    $harness->rules({
+        seq => [
+                  { seq => 't/p*.t' },
+                  { par => '**'     },
+               ],
+    });
+
+    # Run some  startup tests in sequence, then some parallel tests than some
+    # teardown tests in sequence.
+    $harness->rules({
+        seq => [
+            { seq => 't/startup/*.t' },
+            { par => ['t/a/*.t','t/b/*.t','t/c/*.t'], }
+            { seq => 't/shutdown/*.t' },
+        ],
+
+    });
+
+This is an experimental feature and the interface may change.
 
 =item * C<stdout>
 

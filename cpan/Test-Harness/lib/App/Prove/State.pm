@@ -26,11 +26,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.26
+Version 3.28
 
 =cut
 
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 =head1 DESCRIPTION
 
@@ -41,7 +41,7 @@ and the operations that may be performed on it.
 =head1 SYNOPSIS
 
     # Re-run failed tests
-    $ prove --state=fail,save -rbv
+    $ prove --state=failed,save -rbv
 
 =cut
 

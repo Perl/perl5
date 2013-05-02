@@ -22,11 +22,11 @@ TAP::Parser::SourceHandler::Perl - Stream TAP from a Perl executable
 
 =head1 VERSION
 
-Version 3.26
+Version 3.28
 
 =cut
 
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 =head1 SYNOPSIS
 
@@ -152,17 +152,26 @@ sub make_iterator {
     $class->_run( $source, $libs, $switches );
 }
 
+
+sub _has_taint_switch {
+    my( $class, $switches ) = @_;
+
+    my $has_taint = grep { $_ eq "-T" || $_ eq "-t" } @{$switches};
+    return $has_taint ? 1 : 0;
+}
+
 sub _mangle_switches {
     my ( $class, $libs, $switches ) = @_;
 
     # Taint mode ignores environment variables so we must retranslate
     # PERL5LIB as -I switches and place PERL5OPT on the command line
     # in order that it be seen.
-    if ( grep { $_ eq "-T" || $_ eq "-t" } @{$switches} ) {
+    if ( $class->_has_taint_switch($switches) ) {
+        my @perl5lib = split /$Config{path_sep}/, $ENV{PERL5LIB};
         return (
             $libs,
             [   @{$switches},
-                $class->_libs2switches($libs),
+                $class->_libs2switches([@$libs, @perl5lib]),
                 split_shell( $ENV{PERL5OPT} )
             ],
         );
@@ -200,10 +209,10 @@ sub _filter_libs {
 }
 
 sub _iterator_hooks {
-    my ( $class, $source, $libs ) = @_;
+    my ( $class, $source, $libs, $switches ) = @_;
 
     my $setup = sub {
-        if ( @{$libs} ) {
+        if ( @{$libs} and !$class->_has_taint_switch($switches) ) {
             $ENV{PERL5LIB} = join(
                 $Config{path_sep}, grep {defined} @{$libs},
                 $ENV{PERL5LIB}
@@ -211,8 +220,8 @@ sub _iterator_hooks {
         }
     };
 
-    # Cargo culted from comments seen elsewhere about VMS / environment
-    # variables. I don't know if this is actually necessary.
+    # VMS environment variables aren't guaranteed to reset at the end of
+    # the process, so we need to put PERL5LIB back.
     my $previous = $ENV{PERL5LIB};
     my $teardown = sub {
         if ( defined $previous ) {
@@ -232,7 +241,7 @@ sub _run {
     my @command = $class->_get_command_for_switches( $source, $switches )
       or $class->_croak("No command found!");
 
-    my ( $setup, $teardown ) = $class->_iterator_hooks( $source, $libs );
+    my ( $setup, $teardown ) = $class->_iterator_hooks( $source, $libs, $switches );
 
     return $class->_create_iterator( $source, \@command, $setup, $teardown );
 }

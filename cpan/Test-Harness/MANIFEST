@@ -126,7 +126,6 @@ t/multiplexer.t
 t/nested.t
 t/nofork-mux.t
 t/nofork.t
-t/nowarn.t
 t/object.t
 t/parse.t
 t/parser-config.t
