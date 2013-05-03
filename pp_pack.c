@@ -83,7 +83,6 @@ typedef union {
 #endif
 
 #if PERL_VERSION >= 9
-# define PERL_PACK_CAN_BYTEORDER
 # define PERL_PACK_CAN_SHRIEKSIGN
 #endif
 
@@ -243,26 +242,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # define SHRIEKING_ALLOWED_TYPES "sSiIlLxX"
 #endif
 
-#ifndef PERL_PACK_CAN_BYTEORDER
-/* Put "can't" first because it is shorter  */
-# define TYPE_ENDIANNESS(t)	0
-# define TYPE_NO_ENDIANNESS(t)	(t)
-
-# define ENDIANNESS_ALLOWED_TYPES   ""
-
-# define DO_BO_UNPACK(var, type)
-# define DO_BO_PACK(var, type)
-# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)
-# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)
-# define DO_BO_UNPACK_N(var, type)
-# define DO_BO_PACK_N(var, type)
-# define DO_BO_UNPACK_P(var)
-# define DO_BO_PACK_P(var)
-# define DO_BO_UNPACK_PC(var)
-# define DO_BO_PACK_PC(var)
-
-#else /* PERL_PACK_CAN_BYTEORDER */
-
 # define TYPE_ENDIANNESS(t)	((t) & TYPE_ENDIANNESS_MASK)
 # define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
 
@@ -382,8 +361,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #  define DO_BO_UNPACK_N(var, type)	BO_CANT_DOIT(unpack, type)
 #  define DO_BO_PACK_N(var, type)	BO_CANT_DOIT(pack, type)
 # endif
-
-#endif /* PERL_PACK_CAN_BYTEORDER */
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
 #define PACK_SIZE_UNPREDICTABLE		0x40	/* Not a fixed size element */
@@ -781,7 +758,6 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
             modifier = TYPE_IS_SHRIEKING;
             allowed = SHRIEKING_ALLOWED_TYPES;
             break;
-#ifdef PERL_PACK_CAN_BYTEORDER
           case '>':
             modifier = TYPE_IS_BIG_ENDIAN;
             allowed = ENDIANNESS_ALLOWED_TYPES;
@@ -790,7 +766,6 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
             modifier = TYPE_IS_LITTLE_ENDIAN;
             allowed = ENDIANNESS_ALLOWED_TYPES;
             break;
-#endif /* PERL_PACK_CAN_BYTEORDER */
           default:
             allowed = "";
             modifier = 0;
