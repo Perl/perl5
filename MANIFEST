@@ -5482,6 +5482,7 @@ t/porting/customized.t		Check all CUSTOMIZED files are as they should be
 t/porting/diag.t		Test completeness of perldiag.pod
 t/porting/dual-life.t		Check that dual-life bins are in utils/
 t/porting/exec-bit.t		Check that exec-bit bins are identified
+t/porting/extrefs.t		Check perl headers don't make extern refs
 t/porting/filenames.t		Check the MANIFEST for filename portability.
 t/porting/FindExt.t		Test win32/FindExt.pm
 t/porting/globvar.t		Check that globvar.sym is sane

@@ -142,7 +142,7 @@ Intel*) ;; # # Is that you, Intel C++?
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
        *) rm -f _cflags$_exe
-          case "`$cc $cflags $warn $stdflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
+          case "`$cc -DPERL_NO_INLINE_FUNCTIONS $cflags $warn $stdflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
           *"unrecognized"*) ;;
           *"implicit declaration"*) ;; # Was something useful hidden?
           *"Invalid"*) ;;
