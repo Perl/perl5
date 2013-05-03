@@ -300,30 +300,20 @@ S_mul128(pTHX_ SV *sv, U8 m)
          } STMT_END
 
 # if PTRSIZE == INTSIZE
-#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, i, int, void)
-#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, i, int, void)
 #  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, i, int, char)
 #  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, i, int, char)
 # elif PTRSIZE == LONGSIZE
 #  if LONGSIZE < IVSIZE && IVSIZE == 8
-#   define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, 64, IV, void)
-#   define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, 64, IV, void)
 #   define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, 64, IV, char)
 #   define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, 64, IV, char)
 #  else
-#   define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, IV, void)
-#   define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, IV, void)
 #   define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, IV, char)
 #   define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, IV, char)
 #  endif
 # elif PTRSIZE == IVSIZE
-#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, IV, void)
-#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, IV, void)
 #  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, IV, char)
 #  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, IV, char)
 # else
-#  define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
-#  define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
 #  define DO_BO_UNPACK_PC(var)	BO_CANT_DOIT(unpack, pointer)
 #  define DO_BO_PACK_PC(var)	BO_CANT_DOIT(pack, pointer)
 # endif
