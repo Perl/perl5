@@ -82,10 +82,6 @@ typedef union {
 } ld_bytes;
 #endif
 
-#if PERL_VERSION >= 9
-# define PERL_PACK_CAN_SHRIEKSIGN
-#endif
-
 #ifndef CHAR_BIT
 # define CHAR_BIT	8
 #endif
@@ -235,12 +231,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #define TYPE_ENDIANNESS_MASK	(TYPE_IS_BIG_ENDIAN|TYPE_IS_LITTLE_ENDIAN)
 #define TYPE_MODIFIERS(t)	((t) & ~0xFF)
 #define TYPE_NO_MODIFIERS(t)	((t) & 0xFF)
-
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
-# define SHRIEKING_ALLOWED_TYPES "sSiIlLxXnNvV@."
-#else
-# define SHRIEKING_ALLOWED_TYPES "sSiIlLxX"
-#endif
 
 # define TYPE_ENDIANNESS(t)	((t) & TYPE_ENDIANNESS_MASK)
 # define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
@@ -566,10 +556,8 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 		Perl_croak(aTHX_ "Invalid type '%c' in %s",
 			   (int)TYPE_NO_MODIFIERS(symptr->code),
                            _action( symptr ) );
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	    case '.' | TYPE_IS_SHRIEKING:
 	    case '@' | TYPE_IS_SHRIEKING:
-#endif
 	    case '@':
 	    case '.':
 	    case '/':
@@ -756,7 +744,7 @@ S_next_symbol(pTHX_ tempsym_t* symptr )
         switch (*patptr) {
           case '!':
             modifier = TYPE_IS_SHRIEKING;
-            allowed = SHRIEKING_ALLOWED_TYPES;
+            allowed = "sSiIlLxXnNvV@.";
             break;
           case '>':
             modifier = TYPE_IS_BIG_ENDIAN;
@@ -1056,17 +1044,11 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             *symptr = savsym;
 	    break;
 	}
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case '.' | TYPE_IS_SHRIEKING:
-#endif
 	case '.': {
 	    const char *from;
 	    SV *sv;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	    const bool u8 = utf8 && !(datumtype & TYPE_IS_SHRIEKING);
-#else /* PERL_PACK_CAN_SHRIEKSIGN */
-	    const bool u8 = utf8;
-#endif
 	    if (howlen == e_star) from = strbeg;
 	    else if (len <= 0) from = s;
 	    else {
@@ -1081,16 +1063,10 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    mXPUSHs(sv);
 	    break;
 	}
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case '@' | TYPE_IS_SHRIEKING:
-#endif
 	case '@':
 	    s = strbeg + symptr->strbeg;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	    if (utf8  && !(datumtype & TYPE_IS_SHRIEKING))
-#else /* PERL_PACK_CAN_SHRIEKSIGN */
-	    if (utf8)
-#endif
 	    {
 		while (len > 0) {
 		    if (s >= strend)
@@ -1526,7 +1502,6 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    cuv += au16;
 	    }
 	    break;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'v' | TYPE_IS_SHRIEKING:
 	case 'n' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
@@ -1551,7 +1526,6 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    cuv += ai16;
 	    }
 	    break;
-#endif /* PERL_PACK_CAN_SHRIEKSIGN */
 	case 'i':
 	case 'i' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
@@ -1701,23 +1675,22 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    cuv += au32;
 	    }
 	    break;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'V' | TYPE_IS_SHRIEKING:
 	case 'N' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
 		I32 ai32;
-# if U32SIZE > SIZE32
+#if U32SIZE > SIZE32
 		ai32 = 0;
-# endif
+#endif
 		SHIFT32(utf8, s, strend, &ai32, datumtype);
-# ifdef HAS_NTOHL
+#ifdef HAS_NTOHL
 		if (datumtype == ('N' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)PerlSock_ntohl((U32)ai32);
-# endif
-# ifdef HAS_VTOHL
+#endif
+#ifdef HAS_VTOHL
 		if (datumtype == ('V' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)vtohl((U32)ai32);
-# endif
+#endif
 		if (!checksum)
 		    mPUSHi(ai32);
 		else if (checksum > bits_in_uv)
@@ -1726,7 +1699,6 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    cuv += ai32;
 	    }
 	    break;
-#endif /* PERL_PACK_CAN_SHRIEKSIGN */
 	case 'p':
 	    while (len-- > 0) {
 		const char *aptr;
@@ -2323,9 +2295,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    Perl_croak(aTHX_ "'%%' may not be used in pack");
 	{
 	    char *from;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case '.' | TYPE_IS_SHRIEKING:
-#endif
 	case '.':
 	    if (howlen == e_star) from = start;
 	    else if (len == 0) from = cur;
@@ -2338,17 +2308,11 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    fromstr = NEXTFROM;
 	    len = SvIV(fromstr);
 	    goto resize;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case '@' | TYPE_IS_SHRIEKING:
-#endif
 	case '@':
 	    from = start + symptr->strbeg;
 	  resize:
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	    if (utf8  && !(datumtype & TYPE_IS_SHRIEKING))
-#else /* PERL_PACK_CAN_SHRIEKSIGN */
-	    if (utf8)
-#endif
 		if (len >= 0) {
 		    while (len && from < cur) {
 			from += UTF8SKIP(from);
@@ -2911,9 +2875,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    break;
 	}
 #endif
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'n' | TYPE_IS_SHRIEKING:
-#endif
 	case 'n':
 	    while (len-- > 0) {
 		I16 ai16;
@@ -2925,9 +2887,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		PUSH16(utf8, cur, &ai16);
 	    }
 	    break;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'v' | TYPE_IS_SHRIEKING:
-#endif
 	case 'v':
 	    while (len-- > 0) {
 		I16 ai16;
@@ -3124,9 +3084,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		PUSH_VAR(utf8, cur, aint);
 	    }
 	    break;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'N' | TYPE_IS_SHRIEKING:
-#endif
 	case 'N':
 	    while (len-- > 0) {
 		U32 au32;
@@ -3138,9 +3096,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		PUSH32(utf8, cur, &au32);
 	    }
 	    break;
-#ifdef PERL_PACK_CAN_SHRIEKSIGN
 	case 'V' | TYPE_IS_SHRIEKING:
-#endif
 	case 'V':
 	    while (len-- > 0) {
 		U32 au32;

@@ -99,8 +99,8 @@ S!			unsigned short
 v			=SIZE16
 n			=SIZE16
 S			=SIZE16
-v!			=SIZE16	PERL_PACK_CAN_SHRIEKSIGN
-n!			=SIZE16	PERL_PACK_CAN_SHRIEKSIGN
+v!			=SIZE16
+n!			=SIZE16
 i			int
 i!			int
 I			unsigned int
@@ -112,8 +112,8 @@ l			=SIZE32
 L!			unsigned long
 V			=SIZE32
 N			=SIZE32
-V!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
-N!			=SIZE32	PERL_PACK_CAN_SHRIEKSIGN
+V!			=SIZE32
+N!			=SIZE32
 L			=SIZE32
 p		*	char *
 w	*	*	char
