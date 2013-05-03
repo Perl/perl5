@@ -1957,7 +1957,8 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 #   else
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
-            (void)unsetenv(nam);
+            if (environ) /* old glibc can crash with null environ */
+                (void)unsetenv(nam);
         } else {
 	    const int nlen = strlen(nam);
 	    const int vlen = strlen(val);
@@ -6124,6 +6125,7 @@ Perl_my_clearenv(pTHX)
       if (bsiz < l + 1) {
         (void)safesysfree(buf);
         bsiz = l + 1; /* + 1 for the \0. */
+        bufsiz = bsiz * sizeof(char); /* keep bsiz and bufsiz in sync */
         buf = (char*)safesysmalloc(bufsiz);
       } 
       memcpy(buf, *environ, l);
