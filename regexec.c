@@ -3434,7 +3434,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             SV** listp;
             if (! PL_utf8_foldclosures) {
                 if (! PL_utf8_tofold) {
-                    U8 dummy[UTF8_MAXBYTES+1];
+                    U8 dummy[UTF8_MAXBYTES_CASE+1];
 
                     /* Force loading this by folding an above-Latin1 char */
                     to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);

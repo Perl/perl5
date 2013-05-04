@@ -13489,7 +13489,7 @@ parseit:
                     /* If the folds haven't been read in, call a fold function
                      * to force that */
                     if (! PL_utf8_tofold) {
-                        U8 dummy[UTF8_MAXBYTES+1];
+                        U8 dummy[UTF8_MAXBYTES_CASE+1];
 
                         /* This string is just a short named one above \xff */
                         to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);
