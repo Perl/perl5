@@ -106,7 +106,7 @@ in core.
 Available in version 2.66 and above.
 
 Given two perl versions, this returns a list of pairs describing the changes in
-core module content betweent hem.  The list is suitable for storing in a hash.
+core module content between them.  The list is suitable for storing in a hash.
 The keys are library names and the values are hashrefs.  Each hashref has an
 entry for one or both of C<left> and C<right>, giving the versions of the
 library in each of the left and right perl distributions.
