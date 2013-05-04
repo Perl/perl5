@@ -3561,7 +3561,9 @@ struct ptr_tbl {
  * Little-endian byte order functions - 'v' for 'VAX', or 'reVerse'.
  * -DWS
  */
-#if BYTEORDER != 0x1234
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+/* Little endian system, so vtohl, vtohs, htovl and htovs are all no-ops.  */
+#else
 # define HAS_VTOHL
 # define HAS_VTOHS
 # define HAS_HTOVL
