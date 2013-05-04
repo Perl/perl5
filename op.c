@@ -3229,6 +3229,7 @@ S_fold_constants(pTHX_ OP *o)
     case OP_LCFIRST:
     case OP_UC:
     case OP_LC:
+    case OP_FC:
     case OP_SLT:
     case OP_SGT:
     case OP_SLE:
