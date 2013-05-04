@@ -3549,7 +3549,31 @@ struct ptr_tbl {
 #    define htonl(x)    ntohl(x)
 #    define ntohs(x)    ((x)&0xFFFF)
 #    define htons(x)    ntohs(x)
+#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+
+/* Note that we can't straight out declare our own htonl and htons because
+   the Win32 build process forcibly undefines HAS_HTONL etc for its miniperl,
+   to avoid the overhead of initialising the socket subsystem, but the headers
+   that *declare* the various functions are still seen. If we declare our own
+   htonl etc they will clash with the declarations in the Win32 headers.  */
+
+PERL_STATIC_INLINE U32
+my_swap32(const U32 x) {
+    return ((x & 0xFF) << 24) | ((x >> 24) & 0xFF)	
+        | ((x & 0x0000FF00) << 8) | ((x & 0x00FF0000) >> 8);
+}
+
+PERL_STATIC_INLINE U16
+my_swap16(const U16 x) {
+    return ((x & 0xFF) << 8) | ((x >> 8) & 0xFF);
+}
+
+#    define htonl(x)    my_swap32(x)
+#    define ntohl(x)    my_swap32(x)
+#    define ntohs(x)    my_swap16(x)
+#    define htons(x)    my_swap16(x)
 #  else
+/* Assumed to be mixed endian.  */
 #define MYSWAP
 #define htons my_swap
 #define htonl my_htonl
