@@ -2334,16 +2334,16 @@ Perl_my_ntohl(pTHX_ long l)
         }
 
 
-#if defined(HAS_HTOVS) && !defined(htovs)
+#if !defined(htovs)
 HTOLE(htovs,short)
 #endif
-#if defined(HAS_HTOVL) && !defined(htovl)
+#if !defined(htovl)
 HTOLE(htovl,long)
 #endif
-#if defined(HAS_VTOHS) && !defined(vtohs)
+#if !defined(vtohs)
 LETOH(vtohs,short)
 #endif
-#if defined(HAS_VTOHL) && !defined(vtohl)
+#if !defined(vtohl)
 LETOH(vtohl,long)
 #endif
 

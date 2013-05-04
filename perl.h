@@ -3562,12 +3562,14 @@ struct ptr_tbl {
  * -DWS
  */
 #if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-/* Little endian system, so vtohl, vtohs, htovl and htovs are all no-ops.  */
+/* Little endian system, so vtohl, vtohs, htovl and htovs do not need to
+   re-order their values. However, to behave identically to the alternative
+   implementations, they should truncate to the correct size.  */
+#  define vtohl(x)      ((x)&0xFFFFFFFF)
+#  define vtohs(x)      ((x)&0xFFFF)
+#  define htovl(x)      vtohl(x)
+#  define htovs(x)      vtohs(x)
 #else
-# define HAS_VTOHL
-# define HAS_VTOHS
-# define HAS_HTOVL
-# define HAS_HTOVS
 # if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 #  define vtohl(x)	((((x)&0xFF)<<24)	\
 			+(((x)>>24)&0xFF)	\
