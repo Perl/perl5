@@ -3537,23 +3537,24 @@ struct ptr_tbl {
 #define HAS_NTOHS
 #endif
 #ifndef HAS_HTONL
-#if (BYTEORDER & 0xffff) != 0x4321
 #define HAS_HTONS
 #define HAS_HTONL
 #define HAS_NTOHS
 #define HAS_NTOHL
+#  if (BYTEORDER & 0xffff) == 0x4321
+/* Big endian system, so ntohl, ntohs, htonl and htons do not need to
+   re-order their values. However, to behave identically to the alternative
+   implementations, they should truncate to the correct size.  */
+#    define ntohl(x)    ((x)&0xFFFFFFFF)
+#    define htonl(x)    ntohl(x)
+#    define ntohs(x)    ((x)&0xFFFF)
+#    define htons(x)    ntohs(x)
+#  else
 #define MYSWAP
 #define htons my_swap
 #define htonl my_htonl
 #define ntohs my_swap
 #define ntohl my_ntohl
-#endif
-#else
-#if (BYTEORDER & 0xffff) == 0x4321
-#undef HAS_HTONS
-#undef HAS_HTONL
-#undef HAS_NTOHS
-#undef HAS_NTOHL
 #endif
 #endif
 

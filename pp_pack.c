@@ -1476,10 +1476,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #endif
 		SHIFT16(utf8, s, strend, &au16, datumtype);
 		DO_BO_UNPACK(au16, 16);
-#ifdef HAS_NTOHS
 		if (datumtype == 'n')
 		    au16 = PerlSock_ntohs(au16);
-#endif
 		if (datumtype == 'v')
 		    au16 = vtohs(au16);
 		if (!checksum)
@@ -1498,10 +1496,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ai16 = 0;
 # endif
 		SHIFT16(utf8, s, strend, &ai16, datumtype);
-# ifdef HAS_NTOHS
 		if (datumtype == ('n' | TYPE_IS_SHRIEKING))
 		    ai16 = (I16) PerlSock_ntohs((U16) ai16);
-# endif /* HAS_NTOHS */
 		if (datumtype == ('v' | TYPE_IS_SHRIEKING))
 		    ai16 = (I16) vtohs((U16) ai16);
 		if (!checksum)
@@ -1645,10 +1641,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #endif
 		SHIFT32(utf8, s, strend, &au32, datumtype);
 		DO_BO_UNPACK(au32, 32);
-#ifdef HAS_NTOHL
 		if (datumtype == 'N')
 		    au32 = PerlSock_ntohl(au32);
-#endif
 		if (datumtype == 'V')
 		    au32 = vtohl(au32);
 		if (!checksum)
@@ -1667,10 +1661,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ai32 = 0;
 #endif
 		SHIFT32(utf8, s, strend, &ai32, datumtype);
-#ifdef HAS_NTOHL
 		if (datumtype == ('N' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)PerlSock_ntohl((U32)ai32);
-#endif
 		if (datumtype == ('V' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)vtohl((U32)ai32);
 		if (!checksum)
@@ -2863,9 +2855,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		I16 ai16;
 		fromstr = NEXTFROM;
 		ai16 = (I16)SvIV(fromstr);
-#ifdef HAS_HTONS
 		ai16 = PerlSock_htons(ai16);
-#endif
 		PUSH16(utf8, cur, &ai16);
 	    }
 	    break;
@@ -3070,9 +3060,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		U32 au32;
 		fromstr = NEXTFROM;
 		au32 = SvUV(fromstr);
-#ifdef HAS_HTONL
 		au32 = PerlSock_htonl(au32);
-#endif
 		PUSH32(utf8, cur, &au32);
 	    }
 	    break;
