@@ -47,6 +47,9 @@ extern Pid_t getpid (void);
     _LIB_VERSION_TYPE _LIB_VERSION = _IEEE_;
 #endif
 
+static const STRLEN small_mu_len = sizeof(GREEK_SMALL_LETTER_MU_UTF8) - 1;
+static const STRLEN capital_iota_len = sizeof(GREEK_CAPITAL_LETTER_IOTA_UTF8) - 1;
+
 /* variations on pp_null */
 
 PP(pp_stub)
@@ -3430,15 +3433,6 @@ PP(pp_crypt)
 /* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
 
-/* Generates code to store a unicode codepoint c that is known to occupy
- * exactly two UTF-8 and UTF-EBCDIC bytes; it is stored into p and p+1,
- * and p is advanced to point to the next available byte after the two bytes */
-#define CAT_UNI_TO_UTF8_TWO_BYTE(p, c)					    \
-    STMT_START {							    \
-	*(p)++ = UTF8_TWO_BYTE_HI(c);					    \
-	*((p)++) = UTF8_TWO_BYTE_LO(c);					    \
-    } STMT_END
-
 PP(pp_ucfirst)
 {
     /* Actually is both lcfirst() and ucfirst().  Only the first character
@@ -3762,10 +3756,8 @@ PP(pp_uc)
 	    if (in_iota_subscript && ! _is_utf8_mark(s)) {
 
 		/* A non-mark.  Time to output the iota subscript */
-#define GREEK_CAPITAL_LETTER_IOTA 0x0399
-#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
-
-		CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
+		Copy(GREEK_CAPITAL_LETTER_IOTA_UTF8, d, capital_iota_len, U8);
+                d += capital_iota_len;
 		in_iota_subscript = FALSE;
             }
 
@@ -3775,6 +3767,8 @@ PP(pp_uc)
             u = UTF8SKIP(s);
             uv = _to_utf8_upper_flags(s, tmpbuf, &ulen,
 				      cBOOL(IN_LOCALE_RUNTIME), &tainted);
+#define GREEK_CAPITAL_LETTER_IOTA 0x0399
+#define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
                 && utf8_to_uvchr_buf(s, send, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
             {
@@ -3800,7 +3794,8 @@ PP(pp_uc)
             s += u;
 	}
 	if (in_iota_subscript) {
-	    CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
+            Copy(GREEK_CAPITAL_LETTER_IOTA_UTF8, d, capital_iota_len, U8);
+            d += capital_iota_len;
 	}
 	SvUTF8_on(dest);
 	*d = '\0';
@@ -4231,7 +4226,8 @@ PP(pp_fc)
                                                 (send -s) * 2 + 1);
                     d = (U8*)SvPVX(dest) + len;
 
-                    CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_SMALL_LETTER_MU);
+                    Copy(GREEK_SMALL_LETTER_MU_UTF8, d, small_mu_len, U8);
+                    d += small_mu_len;
                     s++;
                     for (; s < send; s++) {
                         STRLEN ulen;

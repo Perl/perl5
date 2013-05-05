@@ -145,6 +145,9 @@ U+0300 string
 U+0301 string
 U+0308 string
 
+U+0399 string
+U+03BC string
+
 U+03B9 string
 
 U+03C5 string
