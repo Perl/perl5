@@ -8,6 +8,22 @@
  *
  */
 
+/* These control hash traversal randomization and the environment variable PERL_PERTURB_KEYS.
+ * Currently disabling this functionality will break a few tests, but should otherwise work fine.
+ * See perlrun for more details. */
+#define PERL_HASH_RANDOMIZE_KEYS 1
+#define USE_PERL_PERTURB_KEYS 1
+
+
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+#   if defined(DEBUGGING) || defined(USE_PERL_PERTURB_KEYS)
+#       define PL_HASH_RAND_BITS_ENABLED PL_hash_rand_bits_enabled
+#   endif
+#   define PERL_HASH_ITER_BUCKET(iter) (((iter)->xhv_riter) ^ ((iter)->xhv_rand))
+#else
+#   define PERL_HASH_ITER_BUCKET(iter) ((iter)->xhv_riter)
+#endif
+
 /* entry in hash value chain */
 struct he {
     /* Keep hent_next first in this structure, because sv_free_arenas take
@@ -92,9 +108,11 @@ struct xpvhv_aux {
     I32		xhv_name_count;
     struct mro_meta *xhv_mro_meta;
     HV *	xhv_super;	/* SUPER method cache */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
     U32         xhv_rand;       /* random value for hash traversal */
     U32         xhv_last_rand;  /* last random value for hash traversal,
                                    used to detect each() after insert for warnings */
+#endif
 };
 
 /* hash structure: */

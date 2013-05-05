@@ -787,20 +787,29 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HeKEY_hek(entry) = save_hek_flags(key, klen, hash, flags);
     HeVAL(entry) = val;
 
+#ifdef PERL_HASH_RANDOMIZE_KEYS
     /* This logic semi-randomizes the insert order in a bucket.
      * Either we insert into the top, or the slot below the top,
      * making it harder to see if there is a collision. We also
      * reset the iterator randomizer if there is one.
      */
-    PL_hash_rand_bits += (PTRV)entry ^ hash; /* we don't bother to use ptr_hash here */
-    if ( !*oentry || (PL_hash_rand_bits & 1) ) {
+    if ( *oentry && PL_HASH_RAND_BITS_ENABLED) {
+        PL_hash_rand_bits++;
+        PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+        if ( PL_hash_rand_bits & 1 ) {
+            HeNEXT(entry) = HeNEXT(*oentry);
+            HeNEXT(*oentry) = entry;
+        } else {
+            HeNEXT(entry) = *oentry;
+            *oentry = entry;
+        }
+    } else
+#endif
+    {
         HeNEXT(entry) = *oentry;
         *oentry = entry;
-    } else {
-        HeNEXT(entry) = HeNEXT(*oentry);
-        HeNEXT(*oentry) = entry;
     }
-    PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+#ifdef PERL_HASH_RANDOMIZE_KEYS
     if (SvOOK(hv)) {
         /* Currently this makes various tests warn in annoying ways.
          * So Silenced for now. - Yves | bogus end of comment =>* /
@@ -811,8 +820,14 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                              pTHX__VALUE);
         }
         */
+        if (PL_HASH_RAND_BITS_ENABLED) {
+            if (PL_HASH_RAND_BITS_ENABLED == 1)
+                PL_hash_rand_bits += (PTRV)entry + 1;  /* we don't bother to use ptr_hash here */
+            PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+        }
         HvAUX(hv)->xhv_rand= (U32)PL_hash_rand_bits;
     }
+#endif
 
     if (val == &PL_sv_placeholder)
 	HvPLACEHOLDERS(hv)++;
@@ -1148,20 +1163,27 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
       PL_nomemok = FALSE;
       return;
     }
+#ifdef PERL_HASH_RANDOMIZE_KEYS
     /* the idea of this is that we create a "random" value by hashing the address of
      * the array, we then use the low bit to decide if we insert at the top, or insert
      * second from top. After each such insert we rotate the hashed value. So we can
      * use the same hashed value over and over, and in normal build environments use
      * very few ops to do so. ROTL32() should produce a single machine operation. */
-    PL_hash_rand_bits += ptr_hash((PTRV)a);
-    PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
+    if (PL_HASH_RAND_BITS_ENABLED) {
+        if (PL_HASH_RAND_BITS_ENABLED == 1)
+            PL_hash_rand_bits += ptr_hash((PTRV)a);
+        PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
+    }
+#endif
 
     if (SvOOK(hv)) {
         struct xpvhv_aux *const dest
             = (struct xpvhv_aux*) &a[newsize * sizeof(HE*)];
         Move(&a[oldsize * sizeof(HE*)], dest, 1, struct xpvhv_aux);
         /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
         dest->xhv_rand = (U32)PL_hash_rand_bits;
+#endif
     }
 
     PL_nomemok = FALSE;
@@ -1183,17 +1205,30 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
             U32 j = (HeHASH(entry) & newsize);
 	    if (j != (U32)i) {
 		*oentry = HeNEXT(entry);
-                /* if the target cell is empty insert to top, otherwise
-                 * rotate the bucket rand 1 bit, and use the new low bit
-                 * to decide if we insert at top, or next from top.
-                 * IOW, we rotate only if we are dealing with colliding
-                 * elements. */
-                if (!aep[j] || ((PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1)) & 1)) {
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+                /* if the target cell is empty or PL_HASH_RAND_BITS_ENABLED is false
+                 * insert to top, otherwise rotate the bucket rand 1 bit,
+                 * and use the new low bit to decide if we insert at top,
+                 * or next from top. IOW, we only rotate on a collision.*/
+                if (aep[j] && PL_HASH_RAND_BITS_ENABLED) {
+                    PL_hash_rand_bits+= ROTL_UV(HeHASH(entry), 17);
+                    PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
+                    if (PL_hash_rand_bits & 1) {
+                        HeNEXT(entry)= HeNEXT(aep[j]);
+                        HeNEXT(aep[j])= entry;
+                    } else {
+                        /* Note, this is structured in such a way as the optimizer
+                        * should eliminate the duplicated code here and below without
+                        * us needing to explicitly use a goto. */
+                        HeNEXT(entry) = aep[j];
+                        aep[j] = entry;
+                    }
+                } else
+#endif
+                {
+                    /* see comment above about duplicated code */
                     HeNEXT(entry) = aep[j];
                     aep[j] = entry;
-                } else {
-                    HeNEXT(entry)= HeNEXT(aep[j]);
-                    HeNEXT(aep[j])= entry;
                 }
 	    }
 	    else {
@@ -1632,7 +1667,9 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 	}
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
         iter->xhv_last_rand = iter->xhv_rand;
+#endif
     }
 
     if (!((XPVHV*)SvANY(hv))->xhv_keys)
@@ -1868,17 +1905,25 @@ S_hv_auxinit(pTHX_ HV *hv) {
         }
         HvARRAY(hv) = (HE**)array;
         SvOOK_on(hv);
-        PL_hash_rand_bits += ptr_hash((PTRV)array);
-        PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
         iter = HvAUX(hv);
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+        if (PL_HASH_RAND_BITS_ENABLED) {
+            /* mix in some new state to PL_hash_rand_bits to "randomize" the traversal order*/
+            if (PL_HASH_RAND_BITS_ENABLED == 1)
+                PL_hash_rand_bits += ptr_hash((PTRV)array);
+            PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
+        }
         iter->xhv_rand = (U32)PL_hash_rand_bits;
+#endif
     } else {
         iter = HvAUX(hv);
     }
 
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
     iter->xhv_last_rand = iter->xhv_rand;
+#endif
     iter->xhv_name_u.xhvnameu_name = 0;
     iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
@@ -1921,7 +1966,9 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	}
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
         iter->xhv_last_rand = iter->xhv_rand;
+#endif
     } else {
 	hv_auxinit(hv);
     }
@@ -1974,6 +2021,27 @@ Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
 	iter = hv_auxinit(hv);
     }
     iter->xhv_riter = riter;
+}
+
+void
+Perl_hv_rand_set(pTHX_ HV *hv, U32 new_xhv_rand) {
+    struct xpvhv_aux *iter;
+
+    PERL_ARGS_ASSERT_HV_RAND_SET;
+
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+    if (!hv)
+        Perl_croak(aTHX_ "Bad hash");
+
+    if (SvOOK(hv)) {
+        iter = HvAUX(hv);
+    } else {
+        iter = hv_auxinit(hv);
+    }
+    iter->xhv_rand = new_xhv_rand;
+#else
+    Perl_croak(aTHX_ "This Perl has not been built with support for randomized hash key traversal but something called Perl_hv_rand_set().");
+#endif
 }
 
 void
@@ -2381,6 +2449,8 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             }
 	}
     }
+
+#ifdef PERL_HASH_RANDOMIZE_KEYS
     if (iter->xhv_last_rand != iter->xhv_rand) {
         if (iter->xhv_riter != -1) {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
@@ -2390,6 +2460,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
         }
         iter->xhv_last_rand = iter->xhv_rand;
     }
+#endif
 
     /* Skip the entire loop if the hash is empty.   */
     if ((flags & HV_ITERNEXT_WANTPLACEHOLDERS)
@@ -2401,10 +2472,12 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    if (iter->xhv_riter > (I32)xhv->xhv_max /* HvRITER(hv) > HvMAX(hv) */) {
 		/* There is no next one.  End of the hash.  */
 		iter->xhv_riter = -1; /* HvRITER(hv) = -1 */
-                iter->xhv_last_rand = iter->xhv_rand;
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+                iter->xhv_last_rand = iter->xhv_rand; /* reset xhv_last_rand so we can detect inserts during traversal */
+#endif
 		break;
 	    }
-            entry = (HvARRAY(hv))[(iter->xhv_riter ^ iter->xhv_rand) & xhv->xhv_max];
+            entry = (HvARRAY(hv))[ PERL_HASH_ITER_BUCKET(iter) & xhv->xhv_max ];
 
 	    if (!(flags & HV_ITERNEXT_WANTPLACEHOLDERS)) {
 		/* If we have an entry, but it's a placeholder, don't count it.
@@ -2419,7 +2492,9 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     }
     else {
         iter->xhv_riter = -1;
+#ifdef PERL_HASH_RANDOMIZE_KEYS
         iter->xhv_last_rand = iter->xhv_rand;
+#endif
     }
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */

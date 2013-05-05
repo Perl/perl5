@@ -32,7 +32,7 @@ our @EXPORT_OK  = qw(
                      bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
                     );
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 require XSLoader;
 XSLoader::load();
 

@@ -68,6 +68,7 @@ hash_seed()
     mXPUSHs(newSVpvn((char *)PERL_HASH_SEED,PERL_HASH_SEED_BYTES));
     XSRETURN(1);
 
+
 void
 hash_value(string)
         SV* string
@@ -81,6 +82,27 @@ hash_value(string)
     PERL_HASH(uv,pv,len);
     XSRETURN_UV(uv);
 
+void
+hash_traversal_mask(rhv, ...)
+        SV* rhv
+    PPCODE:
+{
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+    if (SvROK(rhv) && SvTYPE(SvRV(rhv))==SVt_PVHV && !SvMAGICAL(SvRV(rhv))) {
+        const HV * const hv = (const HV *) SvRV(rhv);
+        if (items>1) {
+            hv_rand_set(hv, SvUV(ST(1)));
+        }
+        if (SvOOK(hv)) {
+            XSRETURN_UV(HvRAND_get(hv));
+        } else {
+            XSRETURN_UNDEF;
+        }
+    }
+#else
+    Perl_croak(aTHX_ "Perl has not been compiled with support for randomized hash key traversal");
+#endif
+}
 
 void
 bucket_info(rhv)

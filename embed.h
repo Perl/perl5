@@ -220,6 +220,7 @@
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
 #define hv_name_set(a,b,c,d)	Perl_hv_name_set(aTHX_ a,b,c,d)
+#define hv_rand_set(a,b)	Perl_hv_rand_set(aTHX_ a,b)
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define init_i18nl10n(a)	Perl_init_i18nl10n(aTHX_ a)
 #define init_i18nl14n(a)	Perl_init_i18nl14n(aTHX_ a)

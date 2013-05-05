@@ -5676,6 +5676,13 @@ Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
     {
         while (isSPACE(*s))
 	    s++;
+#ifdef USE_PERL_PERTURB_KEYS
+        if (s[0] == '0' && s[1] == 0) {
+            PL_hash_rand_bits_enabled= 0;
+        } else {
+            PL_hash_rand_bits_enabled= 2;
+        }
+#endif
         if (s[0] == '0' && s[1] == 'x')
             s += 2;
 
@@ -5703,16 +5710,31 @@ Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
             *ptr++ = (unsigned char)(Drand01() * (U8_MAX+1));
         }
     }
+#ifdef USE_PERL_PERTURB_KEYS
     {   /* initialize PL_hash_rand_bits from the hash seed.
          * This value is highly volatile, it is updated every
          * hash insert, and is used as part of hash bucket chain
          * randomization and hash iterator randomization. */
         unsigned long i;
-        PL_hash_rand_bits= 0;
+        PL_hash_rand_bits= 0xee49d17f;
         for( i = 0; i < sizeof(UV) ; i++ ) {
-            PL_hash_rand_bits = (PL_hash_rand_bits << 8) | seed_buffer[i % PERL_HASH_SEED_BYTES];
+            PL_hash_rand_bits += seed_buffer[i % PERL_HASH_SEED_BYTES];
+            PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,8);
         }
     }
+    s= PerlEnv_getenv("PERL_PERTURB_KEYS");
+    if (s) {
+        if (strEQ(s,"0") || strEQ(s,"NO")) {
+            PL_hash_rand_bits_enabled= 0;
+        } else if (strEQ(s,"1") || strEQ(s,"RANDOM")) {
+            PL_hash_rand_bits_enabled= 1;
+        } else if (strEQ(s,"2") || strEQ(s,"DETERMINISTIC")) {
+            PL_hash_rand_bits_enabled= 2;
+        } else {
+            Perl_warn(aTHX_ "perl: warning: strange setting in '$ENV{PERL_PERTURB_KEYS}': '%s'\n",s);
+        }
+    }
+#endif
 }
 
 #ifdef PERL_GLOBAL_STRUCT

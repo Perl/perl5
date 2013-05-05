@@ -4047,6 +4047,7 @@ on the version of Perl you are using because it is too new.
 Maybe the code needs to be updated, or maybe it is simply
 wrong and the version check should just be removed.
 
+
 =item perl: warning: Setting locale failed.
 
 (S) The whole warning message will look something like:
@@ -4069,12 +4070,26 @@ fix the problem, however, you will get the same error message each
 time you run Perl.  How to really fix the problem can be found in
 L<perllocale> section B<LOCALE PROBLEMS>.
 
-=item perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only 
-partially set
+=item perl: warning: Non hex character in '$ENV{PERL_HASH_SEED}', seed only partially set
 
 (W) PERL_HASH_SEED should match /^\s*(?:0x)?[0-9a-fA-F]+\s*\z/ but it
-contained a non hex character. This could mean your hash randomization
-is not being set correctly.
+contained a non hex character. This could mean you are not using the hash
+seed you think you are.
+
+=item perl: warning: strange setting in '$ENV{PERL_PERTURB_KEYS}': '%s'
+
+(W) Perl was run with the environment variable PERL_PERTURB_KEYS defined
+but containing an unexpected value. The legal values of this setting
+are as follows.
+
+  Numeric | String        | Result
+  --------+---------------+-----------------------------------------
+  0       | NO            | Disables key traversal randomization
+  1       | RANDOM        | Enables full key traversal randomization
+  2       | DETERMINISTIC | Enables repeatable key traversal randomization
+
+Both numeric and string values are accepted, but note that string values are
+case sensitive. The default for this setting is "RANDOM" or 1.
 
 =item pid %x not a child
 
@@ -5089,6 +5104,14 @@ need to rebuild Perl with a CRTL that does, or redefine
 F<PERL_ENV_TABLES> (see L<perlvms>) so that the environ array isn't the
 target of the change to
 %ENV which produced the warning.
+
+=item This Perl has not been built with support for randomized hash key traversal but something called Perl_hv_rand_set().
+
+(F) Something has attempted to use an internal API call which
+depends on Perl being compiled with the default support for randomized hash
+key traversal, but this Perl has been compiled without it. You should
+report this warning to the relevant upstream party, or recompile perl
+with default options.
 
 =item thread failed to start: %s
 

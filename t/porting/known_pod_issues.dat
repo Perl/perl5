@@ -105,6 +105,8 @@ PerlIO::via::Base64
 PerlIO::via::StripHTML
 perllexwarn(1)
 perlthanks
+pod/perldiag.pod        Verbatim line length including indents exceeds 79 by        1
+pod/perlrun.pod        Verbatim line length including indents exceeds 79 by        3
 POD2::FR
 POD2::IT
 pod2ipf(1)
@@ -223,6 +225,7 @@ pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	34
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perldiag.pod	=item type mismatch	1
+pod/perldiag.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	26
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	13
@@ -261,7 +264,7 @@ pod/perlpodstyle.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlref.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlrequick.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlretut.pod	Verbatim line length including indents exceeds 79 by	13
-pod/perlrun.pod	Verbatim line length including indents exceeds 79 by	2
+pod/perlrun.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perlsolaris.pod	Verbatim line length including indents exceeds 79 by	14
 pod/perlsource.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlsub.pod	? Should you be using F<...> or maybe L<...> instead of	3
