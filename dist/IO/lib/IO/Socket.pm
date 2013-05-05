@@ -24,7 +24,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.35";
+$VERSION = "1.36";
 
 @EXPORT_OK = qw(sockatmark);
 
@@ -167,7 +167,7 @@ sub blocking {
     my $sock = shift;
 
     return $sock->SUPER::blocking(@_)
-        if $^O ne 'MSWin32';
+        if $^O ne 'MSWin32' && $^O ne 'VMS';
 
     # Windows handles blocking differently
     #
