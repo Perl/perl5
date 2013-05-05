@@ -666,9 +666,9 @@ setting, characters like "E<aelig>", "E<eth>", "E<szlig>", and
 
 The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
-functions--lc(), lcfirst, uc(), and ucfirst(); case-mapping
-interpolation with C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted strings
-and C<s///> substitutions; and case-independent regular expression
+functions--fc(), lc(), lcfirst(), uc(), and ucfirst(); case-mapping
+interpolation with C<\F>, C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted
+strings and C<s///> substitutions; and case-independent regular expression
 pattern matching using the C<i> modifier.
 
 Finally, C<LC_CTYPE> affects the POSIX character-class test
