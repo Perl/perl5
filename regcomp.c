@@ -13027,17 +13027,17 @@ parseit:
                         /* <multi_char_matches> is actually an array of arrays.
                          * There will be one or two top-level elements: [2],
                          * and/or [3].  The [2] element is an array, each
-                         * element thereof is a character which folds to two
-                         * characters; likewise for [3].  (Unicode guarantees a
-                         * maximum of 3 characters in any fold.)  When we
-                         * rewrite the character class below, we will do so
-                         * such that the longest folds are written first, so
-                         * that it prefers the longest matching strings first.
-                         * This is done even if it turns out that any
-                         * quantifier is non-greedy, out of programmer
-                         * laziness.  Tom Christiansen has agreed that this is
-                         * ok.  This makes the test for the ligature 'ffi' come
-                         * before the test for 'ff' */
+                         * element thereof is a character which folds to TWO
+                         * characters; [3] is for folds to THREE characters.
+                         * (Unicode guarantees a maximum of 3 characters in any
+                         * fold.)  When we rewrite the character class below,
+                         * we will do so such that the longest folds are
+                         * written first, so that it prefers the longest
+                         * matching strings first.  This is done even if it
+                         * turns out that any quantifier is non-greedy, out of
+                         * programmer laziness.  Tom Christiansen has agreed
+                         * that this is ok.  This makes the test for the
+                         * ligature 'ffi' come before the test for 'ff' */
                         if (av_exists(multi_char_matches, cp_count)) {
                             this_array_ptr = (AV**) av_fetch(multi_char_matches,
                                                              cp_count, FALSE);
