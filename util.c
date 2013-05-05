@@ -6143,16 +6143,14 @@ Perl_my_clearenv(pTHX)
     (void)clearenv();
 #        elif defined(HAS_UNSETENV)
     int bsiz = 80; /* Most envvar names will be shorter than this. */
-    int bufsiz = bsiz * sizeof(char); /* sizeof(char) paranoid? */
-    char *buf = (char*)safesysmalloc(bufsiz);
+    char *buf = (char*)safesysmalloc(bsiz);
     while (*environ != NULL) {
       char *e = strchr(*environ, '=');
       int l = e ? e - *environ : (int)strlen(*environ);
       if (bsiz < l + 1) {
         (void)safesysfree(buf);
         bsiz = l + 1; /* + 1 for the \0. */
-        bufsiz = bsiz * sizeof(char); /* keep bsiz and bufsiz in sync */
-        buf = (char*)safesysmalloc(bufsiz);
+        buf = (char*)safesysmalloc(bsiz);
       } 
       memcpy(buf, *environ, l);
       buf[l] = '\0';
