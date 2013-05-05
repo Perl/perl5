@@ -11029,14 +11029,36 @@ tryagain:
                     goto loopdone;
                 }
 
-		if (FOLD) {
-                    if (UTF
+                if (! FOLD) {
+                    if (UTF) {
+                        const STRLEN unilen = reguni(pRExC_state, ender, s);
+                        if (unilen > 0) {
+                           s   += unilen;
+                           len += unilen;
+                        }
+
+                        /* The loop increments <len> each time, as all but this
+                         * path (and one other) through it add a single byte to
+                         * the EXACTish node.  But this one has changed len to
+                         * be the correct final value, so subtract one to
+                         * cancel out the increment that follows */
+                        len--;
+                    }
+                    else {
+                        REGC((char)ender, s++);
+                    }
+                }
+                else { /* FOLD */
+                    if (! ( UTF
                             /* See comments for join_exact() as to why we fold
                              * this non-UTF at compile time */
-                        || (node_type == EXACTFU
-                            && ender == LATIN_SMALL_LETTER_SHARP_S))
+                            || (node_type == EXACTFU
+                                && ender == LATIN_SMALL_LETTER_SHARP_S)))
                     {
-
+                        *(s++) = (char) ender;
+                        maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
+                    }
+                    else {
 
                         /* Prime the casefolded buffer.  Locale rules, which
                          * apply only to code points < 256, aren't known until
@@ -11095,32 +11117,14 @@ tryagain:
                         }
 			s += foldlen;
 
-			/* The loop increments <len> each time, as all but this
-			 * path (and the one just below for UTF) through it add
-			 * a single byte to the EXACTish node.  But this one
-			 * has changed len to be the correct final value, so
-			 * subtract one to cancel out the increment that
-			 * follows */
+                        /* The loop increments <len> each time, as all but this
+                         * path (and one other) through it add a single byte to
+                         * the EXACTish node.  But this one has changed len to
+                         * be the correct final value, so subtract one to
+                         * cancel out the increment that follows */
 			len += foldlen - 1;
                     }
-                    else {
-                        *(s++) = (char) ender;
-                        maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
-                    }
 		}
-		else if (UTF) {
-                    const STRLEN unilen = reguni(pRExC_state, ender, s);
-                    if (unilen > 0) {
-                       s   += unilen;
-                       len += unilen;
-                    }
-
-		    /* See comment just above for - 1 */
-		    len--;
-		}
-		else {
-		    REGC((char)ender, s++);
-                }
 
 		if (next_is_quantifier) {
 
