@@ -1461,15 +1461,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		IV aiv;
 		SHIFT_VAR(utf8, s, strend, aiv, datumtype);
-#if IVSIZE == INTSIZE
-		DO_BO_UNPACK(aiv, i);
-#elif IVSIZE == LONGSIZE
-		DO_BO_UNPACK(aiv, l);
-#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
-		DO_BO_UNPACK(aiv, 64);
-#else
-		Perl_croak(aTHX_ "'j' not supported on this platform");
-#endif
+                DO_BO_UNPACK(aiv, IV);
 		if (!checksum)
 		    mPUSHi(aiv);
 		else if (checksum > bits_in_uv)
@@ -1482,15 +1474,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		UV auv;
 		SHIFT_VAR(utf8, s, strend, auv, datumtype);
-#if IVSIZE == INTSIZE
-		DO_BO_UNPACK(auv, i);
-#elif IVSIZE == LONGSIZE
-		DO_BO_UNPACK(auv, l);
-#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
-		DO_BO_UNPACK(auv, 64);
-#else
-		Perl_croak(aTHX_ "'J' not supported on this platform");
-#endif
+                DO_BO_UNPACK(auv, UV);
 		if (!checksum)
 		    mPUSHu(auv);
 		else if (checksum > bits_in_uv)
@@ -2852,15 +2836,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		IV aiv;
 		fromstr = NEXTFROM;
 		aiv = SvIV(fromstr);
-#if IVSIZE == INTSIZE
-		DO_BO_PACK(aiv, i);
-#elif IVSIZE == LONGSIZE
-		DO_BO_PACK(aiv, l);
-#elif defined(HAS_QUAD) && IVSIZE == U64SIZE
-		DO_BO_PACK(aiv, 64);
-#else
-		Perl_croak(aTHX_ "'j' not supported on this platform");
-#endif
+                DO_BO_PACK(aiv, IV);
 		PUSH_VAR(utf8, cur, aiv);
 	    }
 	    break;
@@ -2869,15 +2845,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		UV auv;
 		fromstr = NEXTFROM;
 		auv = SvUV(fromstr);
-#if UVSIZE == INTSIZE
-		DO_BO_PACK(auv, i);
-#elif UVSIZE == LONGSIZE
-		DO_BO_PACK(auv, l);
-#elif defined(HAS_QUAD) && UVSIZE == U64SIZE
-		DO_BO_PACK(auv, 64);
-#else
-		Perl_croak(aTHX_ "'J' not supported on this platform");
-#endif
+                DO_BO_PACK(auv, UV);
 		PUSH_VAR(utf8, cur, auv);
 	    }
 	    break;
