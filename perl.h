@@ -798,74 +798,6 @@ EXTERN_C int usleep(unsigned int);
 /*----------------------------------------------------------------------------*/
 # if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678  /*     little-endian     */
 /*----------------------------------------------------------------------------*/
-#  define my_htole16(x)		(x)
-#  define my_letoh16(x)		(x)
-#  define my_htole32(x)		(x)
-#  define my_letoh32(x)		(x)
-#  define my_htobe16(x)		_swab_16_(x)
-#  define my_betoh16(x)		_swab_16_(x)
-#  define my_htobe32(x)		_swab_32_(x)
-#  define my_betoh32(x)		_swab_32_(x)
-#  ifdef HAS_QUAD
-#   define my_htole64(x)	(x)
-#   define my_letoh64(x)	(x)
-#   define my_htobe64(x)	_swab_64_(x)
-#   define my_betoh64(x)	_swab_64_(x)
-#  endif
-#  define my_htoles(x)		(x)
-#  define my_letohs(x)		(x)
-#  define my_htolei(x)		(x)
-#  define my_letohi(x)		(x)
-#  define my_htolel(x)		(x)
-#  define my_letohl(x)		(x)
-#  if SHORTSIZE == 1
-#   define my_htobes(x)		(x)
-#   define my_betohs(x)		(x)
-#  elif SHORTSIZE == 2
-#   define my_htobes(x)		_swab_16_(x)
-#   define my_betohs(x)		_swab_16_(x)
-#  elif SHORTSIZE == 4
-#   define my_htobes(x)		_swab_32_(x)
-#   define my_betohs(x)		_swab_32_(x)
-#  elif SHORTSIZE == 8
-#   define my_htobes(x)		_swab_64_(x)
-#   define my_betohs(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOBES
-#   define PERL_NEED_MY_BETOHS
-#  endif
-#  if INTSIZE == 1
-#   define my_htobei(x)		(x)
-#   define my_betohi(x)		(x)
-#  elif INTSIZE == 2
-#   define my_htobei(x)		_swab_16_(x)
-#   define my_betohi(x)		_swab_16_(x)
-#  elif INTSIZE == 4
-#   define my_htobei(x)		_swab_32_(x)
-#   define my_betohi(x)		_swab_32_(x)
-#  elif INTSIZE == 8
-#   define my_htobei(x)		_swab_64_(x)
-#   define my_betohi(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOBEI
-#   define PERL_NEED_MY_BETOHI
-#  endif
-#  if LONGSIZE == 1
-#   define my_htobel(x)		(x)
-#   define my_betohl(x)		(x)
-#  elif LONGSIZE == 2
-#   define my_htobel(x)		_swab_16_(x)
-#   define my_betohl(x)		_swab_16_(x)
-#  elif LONGSIZE == 4
-#   define my_htobel(x)		_swab_32_(x)
-#   define my_betohl(x)		_swab_32_(x)
-#  elif LONGSIZE == 8
-#   define my_htobel(x)		_swab_64_(x)
-#   define my_betohl(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOBEL
-#   define PERL_NEED_MY_BETOHL
-#  endif
 #  define my_htolen(p,n)	NOOP
 #  define my_letohn(p,n)	NOOP
 #  define my_htoben(p,n)	my_swabn(p,n)
@@ -873,74 +805,6 @@ EXTERN_C int usleep(unsigned int);
 /*----------------------------------------------------------------------------*/
 # elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /*     big-endian      */
 /*----------------------------------------------------------------------------*/
-#  define my_htobe16(x)		(x)
-#  define my_betoh16(x)		(x)
-#  define my_htobe32(x)		(x)
-#  define my_betoh32(x)		(x)
-#  define my_htole16(x)		_swab_16_(x)
-#  define my_letoh16(x)		_swab_16_(x)
-#  define my_htole32(x)		_swab_32_(x)
-#  define my_letoh32(x)		_swab_32_(x)
-#  ifdef HAS_QUAD
-#   define my_htobe64(x)	(x)
-#   define my_betoh64(x)	(x)
-#   define my_htole64(x)	_swab_64_(x)
-#   define my_letoh64(x)	_swab_64_(x)
-#  endif
-#  define my_htobes(x)		(x)
-#  define my_betohs(x)		(x)
-#  define my_htobei(x)		(x)
-#  define my_betohi(x)		(x)
-#  define my_htobel(x)		(x)
-#  define my_betohl(x)		(x)
-#  if SHORTSIZE == 1
-#   define my_htoles(x)		(x)
-#   define my_letohs(x)		(x)
-#  elif SHORTSIZE == 2
-#   define my_htoles(x)		_swab_16_(x)
-#   define my_letohs(x)		_swab_16_(x)
-#  elif SHORTSIZE == 4
-#   define my_htoles(x)		_swab_32_(x)
-#   define my_letohs(x)		_swab_32_(x)
-#  elif SHORTSIZE == 8
-#   define my_htoles(x)		_swab_64_(x)
-#   define my_letohs(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOLES
-#   define PERL_NEED_MY_LETOHS
-#  endif
-#  if INTSIZE == 1
-#   define my_htolei(x)		(x)
-#   define my_letohi(x)		(x)
-#  elif INTSIZE == 2
-#   define my_htolei(x)		_swab_16_(x)
-#   define my_letohi(x)		_swab_16_(x)
-#  elif INTSIZE == 4
-#   define my_htolei(x)		_swab_32_(x)
-#   define my_letohi(x)		_swab_32_(x)
-#  elif INTSIZE == 8
-#   define my_htolei(x)		_swab_64_(x)
-#   define my_letohi(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOLEI
-#   define PERL_NEED_MY_LETOHI
-#  endif
-#  if LONGSIZE == 1
-#   define my_htolel(x)		(x)
-#   define my_letohl(x)		(x)
-#  elif LONGSIZE == 2
-#   define my_htolel(x)		_swab_16_(x)
-#   define my_letohl(x)		_swab_16_(x)
-#  elif LONGSIZE == 4
-#   define my_htolel(x)		_swab_32_(x)
-#   define my_letohl(x)		_swab_32_(x)
-#  elif LONGSIZE == 8
-#   define my_htolel(x)		_swab_64_(x)
-#   define my_letohl(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOLEL
-#   define PERL_NEED_MY_LETOHL
-#  endif
 #  define my_htolen(p,n)	my_swabn(p,n)
 #  define my_letohn(p,n)	my_swabn(p,n)
 #  define my_htoben(p,n)	NOOP
@@ -948,32 +812,6 @@ EXTERN_C int usleep(unsigned int);
 /*----------------------------------------------------------------------------*/
 # else /*                       all other byte-orders                         */
 /*----------------------------------------------------------------------------*/
-#  define PERL_NEED_MY_HTOLE16
-#  define PERL_NEED_MY_LETOH16
-#  define PERL_NEED_MY_HTOBE16
-#  define PERL_NEED_MY_BETOH16
-#  define PERL_NEED_MY_HTOLE32
-#  define PERL_NEED_MY_LETOH32
-#  define PERL_NEED_MY_HTOBE32
-#  define PERL_NEED_MY_BETOH32
-#  ifdef HAS_QUAD
-#   define PERL_NEED_MY_HTOLE64
-#   define PERL_NEED_MY_LETOH64
-#   define PERL_NEED_MY_HTOBE64
-#   define PERL_NEED_MY_BETOH64
-#  endif
-#  define PERL_NEED_MY_HTOLES
-#  define PERL_NEED_MY_LETOHS
-#  define PERL_NEED_MY_HTOBES
-#  define PERL_NEED_MY_BETOHS
-#  define PERL_NEED_MY_HTOLEI
-#  define PERL_NEED_MY_LETOHI
-#  define PERL_NEED_MY_HTOBEI
-#  define PERL_NEED_MY_BETOHI
-#  define PERL_NEED_MY_HTOLEL
-#  define PERL_NEED_MY_LETOHL
-#  define PERL_NEED_MY_HTOBEL
-#  define PERL_NEED_MY_BETOHL
 /*----------------------------------------------------------------------------*/
 # endif /*                     end of byte-order macros                       */
 /*----------------------------------------------------------------------------*/
