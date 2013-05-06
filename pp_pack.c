@@ -246,8 +246,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
 
-#if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
-
 # define DO_BO_UNPACK(var, type)                                              \
         STMT_START {                                                          \
           if (needs_swap) {                                                   \
@@ -261,43 +259,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
             my_swabn(&var, sizeof(var));                                      \
           }                                                                   \
         } STMT_END
-
-#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
-
-# define DO_BO_UNPACK(var, type)                                              \
-        STMT_START {                                                          \
-          if (needs_swap) {                                                   \
-            my_swabn(&var, sizeof(var));                                      \
-          }                                                                   \
-        } STMT_END
-
-# define DO_BO_PACK(var, type)                                                \
-        STMT_START {                                                          \
-          if (needs_swap) {                                                   \
-            my_swabn(&var, sizeof(var));                                      \
-          }                                                                   \
-        } STMT_END
-
-#else
-# define DO_BO_UNPACK(var, type)    BO_CANT_DOIT(unpack, type)
-# define DO_BO_PACK(var, type)      BO_CANT_DOIT(pack, type)
-#endif
-
-# define BO_CANT_DOIT(action, type)                                           \
-        STMT_START {                                                          \
-          switch (TYPE_ENDIANNESS(datumtype)) {                               \
-             case TYPE_IS_BIG_ENDIAN:                                         \
-               Perl_croak(aTHX_ "Can't %s big-endian %ss on this "            \
-                                "platform", #action, #type);                  \
-               break;                                                         \
-             case TYPE_IS_LITTLE_ENDIAN:                                      \
-               Perl_croak(aTHX_ "Can't %s little-endian %ss on this "         \
-                                "platform", #action, #type);                  \
-               break;                                                         \
-             default:                                                         \
-               break;                                                         \
-           }                                                                  \
-         } STMT_END
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
 #define PACK_SIZE_UNPREDICTABLE		0x40	/* Not a fixed size element */
