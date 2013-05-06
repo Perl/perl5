@@ -743,15 +743,6 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
-/* Funky places that do not have socket stuff. */
-#if defined(__LIBCATAMOUNT__)
-#  define MYSWAP
-#endif
-
-#ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
-#  define MYSWAP
-#endif
-
 #ifdef PERL_CORE
 
 /* macros for correct constant construction */
@@ -3573,13 +3564,19 @@ my_swap16(const U16 x) {
 #    define ntohs(x)    my_swap16(x)
 #    define htons(x)    my_swap16(x)
 #  else
-/* Assumed to be mixed endian.  */
-#define MYSWAP
-#define htons my_swap
-#define htonl my_htonl
-#define ntohs my_swap
-#define ntohl my_ntohl
-#endif
+#    error "Unsupported byteorder"
+/* The C pre-processor doesn't let us return the value of BYTEORDER as part of
+   the error message. Please check the value of the macro BYTEORDER, as defined
+   in config.h. The values of BYTEORDER we expect are
+
+	    big endian  little endian
+   32 bit       0x4321  0x1234
+   64 bit   0x87654321  0x12345678
+
+   If you have a system with a different byte order, please see
+   pod/perlhack.pod for how to submit a patch to add supporting code.
+*/
+#  endif
 #endif
 
 /*

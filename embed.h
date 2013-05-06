@@ -774,11 +774,6 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(MYSWAP)
-#define my_htonl(a)		Perl_my_htonl(aTHX_ a)
-#define my_ntohl(a)		Perl_my_ntohl(aTHX_ a)
-#define my_swap(a)		Perl_my_swap(aTHX_ a)
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
 #define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)

@@ -5345,20 +5345,6 @@ PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
 	assert(p)
 
 #endif
-#if defined(MYSWAP)
-PERL_CALLCONV long	Perl_my_htonl(pTHX_ long l)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
-PERL_CALLCONV long	Perl_my_ntohl(pTHX_ long l)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
-PERL_CALLCONV short	Perl_my_swap(pTHX_ short s)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
-#endif
 #if defined(NO_MATHOMS)
 /* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
 #endif

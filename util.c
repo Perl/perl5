@@ -2160,55 +2160,6 @@ vsprintf(char *dest, const char *pat, void *args)
 
 #endif /* HAS_VPRINTF */
 
-#ifdef MYSWAP
-#if BYTEORDER != 0x4321
-short
-Perl_my_swap(pTHX_ short s)
-{
-#if (BYTEORDER & 1) == 0
-    short result;
-
-    result = ((s & 255) << 8) + ((s >> 8) & 255);
-    return result;
-#else
-    return s;
-#endif
-}
-
-long
-Perl_my_htonl(pTHX_ long l)
-{
-    union {
-	long result;
-	char c[sizeof(long)];
-    } u;
-
-#if BYTEORDER > 0xFFFF
-    u.result = 0; 
-#endif 
-    u.c[0] = (l >> 24) & 255;
-    u.c[1] = (l >> 16) & 255;
-    u.c[2] = (l >> 8) & 255;
-    u.c[3] = l & 255;
-    return u.result;
-}
-
-long
-Perl_my_ntohl(pTHX_ long l)
-{
-    union {
-	long l;
-	char c[sizeof(long)];
-    } u;
-
-    u.l = l;
-    return ((u.c[0] & 255) << 24) | ((u.c[1] & 255) << 16)
-	| ((u.c[2] & 255) << 8) | (u.c[3] & 255);
-}
-
-#endif /* BYTEORDER != 0x4321 */
-#endif /* MYSWAP */
-
 /*
  * Little-endian byte order functions - 'v' for 'VAX', or 'reVerse'.
  * If these functions are defined,

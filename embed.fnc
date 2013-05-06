@@ -888,11 +888,6 @@ Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 Apmb	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Ap	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
-#if defined(MYSWAP)
-ApPR	|short	|my_swap	|short s
-ApPR	|long	|my_htonl	|long l
-ApPR	|long	|my_ntohl	|long l
-#endif
 : Used in pp_ctl.c
 p	|void	|my_unexec
 Apa	|OP*	|newANONLIST	|NULLOK OP* o
