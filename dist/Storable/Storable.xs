@@ -515,11 +515,9 @@ static stcxt_t *Context_ptr = NULL;
 
 
 
-
 static const char *
-read_key(pTHX_ stcxt_t *cxt, STRLEN size) {
-	SV *key = cxt->keybuf;
-	char *pv = SvGROW(key, size + 1);
+read_string(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
+	char *pv = SvGROW(out, size + 1);
 	if (size) {
 		if (cxt->fio) {
 			if (PerlIO_read(cxt->fio, pv, size) != size)
@@ -533,8 +531,16 @@ read_key(pTHX_ stcxt_t *cxt, STRLEN size) {
 		}
 	}
 	pv[size] = '\0';
+	SvPOK_only(out);
+	SvCUR_set(out, size);
 	return pv;
 }
+
+#define READ_KEY(kbuf, size)						\
+	STMT_START {							\
+		kbuf = read_string(aTHX_ cxt, size, cxt->keybuf);	\
+		if (!kbuf) return (SV*)NULL;				\
+	} STMT_END
 
 /*
  * Use SvPOKp(), because SvPOK() fails on tainted scalars.
@@ -5244,9 +5250,8 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Hence the key comes after the value.
 		 */
 
-		RLEN(size);						/* Get key size */
-		kbuf = read_key(aTHX_ cxt, size);
-		if (!kbuf) return NULL;
+		RLEN(size); /* Get key size */
+		READ_KEY(kbuf, size);
 		TRACEME(("(#%d) key '%s'", i, kbuf));
 		
 		/*
@@ -5376,8 +5381,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
 
             RLEN(size);						/* Get key size */
-	    kbuf = read_key(aTHX_ cxt, size);
-	    if (!kbuf) return NULL;
+	    READ_KEY(kbuf, size);
             TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
 		     flags, store_flags));
 
@@ -5667,8 +5671,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		if (c != SX_KEY)
 			(void) retrieve_other(aTHX_ (stcxt_t *) 0, 0);	/* Will croak out */
 		RLEN(size);						/* Get key size */
-		kbuf = read_key(aTHX_ cxt, size);
-		if (!kbuf) return NULL;
+		READ_KEY(kbuf, size);
 		TRACEME(("(#%d) key '%s'", i, kbuf));
 
 		/*
@@ -6026,8 +6029,7 @@ first_time:		/* Will disappear when support for old format is dropped */
 			default:
 				return (SV *) 0;		/* Failed */
 			}
-			kbuf = read_key(aTHX_ cxt, len);
-			if (!kbuf) return NULL;
+			READ_KEY(kbuf, len);
 			BLESS(sv, kbuf);
 		}
 	}
