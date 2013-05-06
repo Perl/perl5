@@ -1189,11 +1189,21 @@ first_symbol(const char *pat, const char *patend) {
 /*
 =for apidoc unpackstring
 
-The engine implementing unpack() Perl function. C<unpackstring> puts the
-extracted list items on the @_ stack and returns the number of elements.
-Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
-Unlike L</call_pv>, do not do a C<PUSHMARK>. This function takes no parameters
-on the @_ stack.
+The engine implementing the unpack() Perl function.
+
+Using the template pat..patend, this function unpacks the string
+s..strend into a number of mortal SVs, which it pushes onto the perl
+argument (@_) stack (so you will need to issue a C<PUTBACK> before and
+C<SPAGAIN> after the call to this function). It returns the number of
+pushed elements.
+
+The strend and patend pointers should point to the byte following the last
+character of each string.
+
+Although this function returns its values on the perl argument stack, it
+doesn't take any parameters from that stack (and thus in particular
+there's no need to do a PUSHMARK before calling it, unlike L</call_pv> for
+example).
 
 =cut */
 
