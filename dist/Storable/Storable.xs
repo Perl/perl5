@@ -4815,20 +4815,21 @@ static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname)
 {
 #ifdef SvVOK
 	MAGIC *mg;
-	char s[256];
+	SV *s;
 	int len;
 	SV *sv;
 
 	GETMARK(len);
 	TRACEME(("retrieve_vstring (#%d), len = %d", cxt->tagnum, len));
 
-	READ(s, len);
-
+	READ_STRING(s, len);
 	sv = retrieve(aTHX_ cxt, cname);
-
-	sv_magic(sv,NULL,PERL_MAGIC_vstring,s,len);
-	/* 5.10.0 and earlier seem to need this */
-	SvRMAGICAL_on(sv);
+	if (sv) {
+		sv_magic(sv,NULL,PERL_MAGIC_vstring,SvPV_nolen(s),len);
+		/* 5.10.0 and earlier seem to need this */
+		SvRMAGICAL_on(sv);
+	}
+	sv_free(s);
 
 	TRACEME(("ok (retrieve_vstring at 0x%"UVxf")", PTR2UV(sv)));
 	return sv;
