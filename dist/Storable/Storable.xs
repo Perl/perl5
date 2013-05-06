@@ -546,12 +546,12 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 /*
  * key buffer handling
  */
-#define KBUFINIT()							\
-	STMT_START {                                                    \
-		if (!cxt->keybuf) {					\
-			TRACEME(("** allocating kbuf of 128 bytes"));	\
-			cxt->keybuf = newSV(0);				\
-		}							\
+#define KBUFINIT()					 \
+	STMT_START {					 \
+		if (!cxt->keybuf) {			 \
+			TRACEME(("** allocating kbuf")); \
+			cxt->keybuf = newSV(0);		 \
+		}					 \
 	} STMT_END
 
 #define READ_KEY(kbuf, size)						\
@@ -6001,39 +6001,9 @@ static SV *do_retrieve(
 	if (!f && in) {
 #ifdef SvUTF8_on
 		if (SvUTF8(in)) {
-			STRLEN length;
-			const char *orig = SvPV(in, length);
-			char *asbytes;
-			/* This is quite deliberate. I want the UTF8 routines
-			   to encounter the '\0' which perl adds at the end
-			   of all scalars, so that any new string also has
-			   this.
-			*/
-			STRLEN klen_tmp = length + 1;
-			bool is_utf8 = TRUE;
-
-			/* Just casting the &klen to (STRLEN) won't work
-			   well if STRLEN and I32 are of different widths.
-			   --jhi */
-			asbytes = (char*)bytes_from_utf8((U8*)orig,
-							 &klen_tmp,
-							 &is_utf8);
-			if (is_utf8) {
+			in = sv_mortalcopy(in);
+			if (!sv_utf8_downgrade(in, 1))
 				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
-			}
-			if (asbytes != orig) {
-				/* String has been converted.
-				   There is no need to keep any reference to
-				   the old string.  */
-				in = sv_newmortal();
-				/* We donate the SV the malloc()ed string
-				   bytes_from_utf8 returned us.  */
-				SvUPGRADE(in, SVt_PV);
-				SvPOK_on(in);
-				SvPV_set(in, asbytes);
-				SvLEN_set(in, klen_tmp);
-				SvCUR_set(in, klen_tmp - 1);
-			}
 		}
 #endif
 		MBUF_SAVE_AND_LOAD(in);
