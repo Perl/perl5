@@ -237,51 +237,104 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
 
+#if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
+
 # define DO_BO_UNPACK(var, type)                                              \
         STMT_START {                                                          \
-          switch (TYPE_ENDIANNESS(datumtype)) {                               \
-            case TYPE_IS_BIG_ENDIAN:    var = my_betoh ## type (var); break;  \
-            case TYPE_IS_LITTLE_ENDIAN: var = my_letoh ## type (var); break;  \
-            default: break;                                                   \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
+            var = my_letoh ## type (var);                                     \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_PACK(var, type)                                                \
         STMT_START {                                                          \
-          switch (TYPE_ENDIANNESS(datumtype)) {                               \
-            case TYPE_IS_BIG_ENDIAN:    var = my_htobe ## type (var); break;  \
-            case TYPE_IS_LITTLE_ENDIAN: var = my_htole ## type (var); break;  \
-            default: break;                                                   \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
+            var = my_htole ## type (var);                                     \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
         STMT_START {                                                          \
-          switch (TYPE_ENDIANNESS(datumtype)) {                               \
-            case TYPE_IS_BIG_ENDIAN:                                          \
-              var = (post_cast*) my_betoh ## type ((pre_cast) var);           \
-              break;                                                          \
-            case TYPE_IS_LITTLE_ENDIAN:                                       \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
               var = (post_cast *) my_letoh ## type ((pre_cast) var);          \
-              break;                                                          \
-            default:                                                          \
-              break;                                                          \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
         STMT_START {                                                          \
-          switch (TYPE_ENDIANNESS(datumtype)) {                               \
-            case TYPE_IS_BIG_ENDIAN:                                          \
-              var = (post_cast *) my_htobe ## type ((pre_cast) var);          \
-              break;                                                          \
-            case TYPE_IS_LITTLE_ENDIAN:                                       \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
               var = (post_cast *) my_htole ## type ((pre_cast) var);          \
-              break;                                                          \
-            default:                                                          \
-              break;                                                          \
           }                                                                   \
         } STMT_END
+
+# define DO_BO_UNPACK_N(var, type)                                            \
+         STMT_START {                                                         \
+           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {         \
+              my_letohn(&var, sizeof(type));                                  \
+           }                                                                  \
+         } STMT_END
+
+# define DO_BO_PACK_N(var, type)                                              \
+         STMT_START {                                                         \
+           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {         \
+             my_htolen(&var, sizeof(type));                                   \
+           }                                                                  \
+         } STMT_END
+
+#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
+
+# define DO_BO_UNPACK(var, type)                                              \
+        STMT_START {                                                          \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
+            var = my_betoh ## type (var);                                     \
+          }                                                                   \
+        } STMT_END
+
+# define DO_BO_PACK(var, type)                                                \
+        STMT_START {                                                          \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
+            var = my_htobe ## type (var);                                     \
+          }                                                                   \
+        } STMT_END
+
+# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
+        STMT_START {                                                          \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
+              var = (post_cast *) my_betoh ## type ((pre_cast) var);          \
+          }                                                                   \
+        } STMT_END
+
+# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
+        STMT_START {                                                          \
+          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
+              var = (post_cast *) my_htobe ## type ((pre_cast) var);          \
+          }                                                                   \
+        } STMT_END
+
+# define DO_BO_UNPACK_N(var, type)                                            \
+         STMT_START {                                                         \
+           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {            \
+              my_betohn(&var, sizeof(type));                                  \
+           }                                                                  \
+         } STMT_END
+
+# define DO_BO_PACK_N(var, type)                                              \
+         STMT_START {                                                         \
+           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {            \
+             my_htoben(&var, sizeof(type));                                   \
+           }                                                                  \
+         } STMT_END
+
+#else
+# define DO_BO_UNPACK(var, type)    BO_CANT_DOIT(unpack, type)
+# define DO_BO_PACK(var, type)      BO_CANT_DOIT(pack, type)
+# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                    \
+    BO_CANT_DOIT(unpack, type)
+# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                      \
+    BO_CANT_DOIT(pack, type)
+# define DO_BO_UNPACK_N(var, type)  BO_CANT_DOIT(unpack, type)
+# define DO_BO_PACK_N(var, type)    BO_CANT_DOIT(pack, type)
+#endif
 
 # define BO_CANT_DOIT(action, type)                                           \
         STMT_START {                                                          \
@@ -316,30 +369,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # else
 #  define DO_BO_UNPACK_PC(var)	BO_CANT_DOIT(unpack, pointer)
 #  define DO_BO_PACK_PC(var)	BO_CANT_DOIT(pack, pointer)
-# endif
-
-# if defined(my_htolen) && defined(my_letohn) && \
-    defined(my_htoben) && defined(my_betohn)
-#  define DO_BO_UNPACK_N(var, type)                                           \
-         STMT_START {                                                         \
-           switch (TYPE_ENDIANNESS(datumtype)) {                              \
-             case TYPE_IS_BIG_ENDIAN:    my_betohn(&var, sizeof(type)); break;\
-             case TYPE_IS_LITTLE_ENDIAN: my_letohn(&var, sizeof(type)); break;\
-             default: break;                                                  \
-           }                                                                  \
-         } STMT_END
-
-#  define DO_BO_PACK_N(var, type)                                             \
-         STMT_START {                                                         \
-           switch (TYPE_ENDIANNESS(datumtype)) {                              \
-             case TYPE_IS_BIG_ENDIAN:    my_htoben(&var, sizeof(type)); break;\
-             case TYPE_IS_LITTLE_ENDIAN: my_htolen(&var, sizeof(type)); break;\
-             default: break;                                                  \
-           }                                                                  \
-         } STMT_END
-# else
-#  define DO_BO_UNPACK_N(var, type)	BO_CANT_DOIT(unpack, type)
-#  define DO_BO_PACK_N(var, type)	BO_CANT_DOIT(pack, type)
 # endif
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
