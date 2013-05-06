@@ -13,11 +13,12 @@ our @tests = (
     # /p      Pattern   PRE     MATCH   POST
     [ '/p',   "345",    "12-", "345",  "-6789"],
     [ '(?p)', "345",    "12-", "345",  "-6789"],
+    [ '(?p:)',"345",    "12-", "345",  "-6789"],
     [ '',     "(345)",  undef,  undef,  undef ],
     [ '',     "345",    undef,  undef,  undef ],
 );
 
-plan tests => 14 * @tests + 2;
+plan tests => 14 * @tests + 4;
 my $W = "";
 
 $SIG{__WARN__} = sub { $W.=join("",@_); };
@@ -28,6 +29,7 @@ foreach my $test (@tests) {
     for my $sub (0,1) {
 	my $test_name = $p eq '/p'   ? "/$pat/p"
 		      : $p eq '(?p)' ? "/(?p)$pat/"
+		      : $p eq '(?p:)'? "/(?p:$pat)/"
 		      :                "/$pat/";
 	$test_name = "s$test_name" if $sub;
 
@@ -39,11 +41,13 @@ foreach my $test (@tests) {
 		$sub ?
 			(   $p eq '/p'   ? s/$pat/abc/p
 			  : $p eq '(?p)' ? s/(?p)$pat/abc/
+			  : $p eq '(?p:)'? s/(?p:$pat)/abc/
 			  :                s/$pat/abc/
 			)
 		     :
 			(   $p eq '/p'   ? /$pat/p
 			  : $p eq '(?p)' ? /(?p)$pat/
+			  : $p eq '(?p:)'? /(?p:$pat)/
 			  :                /$pat/
 			);
 	ok $ok, $test_name;
@@ -61,3 +65,11 @@ foreach my $test (@tests) {
 }
 is($W,"","No warnings should be produced");
 ok(!defined ${^MATCH}, "No /p in scope so ^MATCH is undef");
+
+#RT 117135
+
+{
+    my $m;
+    ok("a"=~ /(?p:a(?{ $m = ${^MATCH} }))/, '(?{})');
+    is($m, 'a', '(?{}) ^MATCH');
+}

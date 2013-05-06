@@ -9456,7 +9456,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
     /* Check for proper termination. */
     if (paren) {
-	RExC_flags = oregflags;
+        /* restore original flags, but keep (?p) */
+	RExC_flags = oregflags | (RExC_flags & RXf_PMf_KEEPCOPY);
 	if (RExC_parse >= RExC_end || *nextchar(pRExC_state) != ')') {
 	    RExC_parse = oregcomp_parse;
 	    vFAIL("Unmatched (");
