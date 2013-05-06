@@ -516,8 +516,10 @@ static stcxt_t *Context_ptr = NULL;
 
 
 static const char *
-read_string(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
-	char *pv = SvGROW(out, size + 1);
+read_into_sv(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
+	char *pv;
+	SvUPGRADE(out, SVt_PV);
+	pv = SvGROW(out, size + 1);
 	if (size) {
 		if (cxt->fio) {
 			if (PerlIO_read(cxt->fio, pv, size) != size)
@@ -536,11 +538,29 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
 	return pv;
 }
 
+static SV *
+read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
+	SV *sv = newSV(0);
+	if (read_into_sv(aTHX_ cxt, size, sv))
+		return sv;
+	else {
+		sv_free(sv);
+		return NULL;
+	}
+}
+
 #define READ_KEY(kbuf, size)						\
 	STMT_START {							\
-		kbuf = read_string(aTHX_ cxt, size, cxt->keybuf);	\
+		kbuf = read_into_sv(aTHX_ cxt, size, cxt->keybuf);	\
 		if (!kbuf) return (SV*)NULL;				\
 	} STMT_END
+
+#define READ_STRING(sv, size)				\
+	STMT_START {					\
+		sv = read_string(aTHX_ cxt, size);	\
+		if (!sv) return (SV*)NULL;		\
+	} STMT_END
+
 
 /*
  * Use SvPOKp(), because SvPOK() fails on tainted scalars.
@@ -613,17 +633,6 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
 		mptr += s;					\
 	} else							\
 		return (SV *) 0;			\
-  } STMT_END
-
-#define MBUF_SAFEREAD(x,s,z) 		\
-  STMT_START {						\
-	if ((mptr + (s)) <= mend) {		\
-		memcpy(x, mptr, s);			\
-		mptr += s;					\
-	} else {						\
-		sv_free(z);					\
-		return (SV *) 0;			\
-	}								\
   } STMT_END
 
 #define MBUF_SAFEPVREAD(x,s,z)			\
@@ -957,16 +966,6 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 		MBUF_READ(x, y);					\
 	else if (PerlIO_read(cxt->fio, x, y) != y)	\
 		return (SV *) 0;					\
-  } STMT_END
-
-#define SAFEREAD(x,y,z)		 					\
-  STMT_START {									\
-	if (!cxt->fio)								\
-		MBUF_SAFEREAD(x,y,z);					\
-	else if (PerlIO_read(cxt->fio, x, y) != y)	 {	\
-		sv_free(z);								\
-		return (SV *) 0;						\
-	}											\
   } STMT_END
 
 #define SAFEPVREAD(x,y,z)					\
@@ -4178,13 +4177,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	else
 		GETMARK(len2);
 
-	frozen = NEWSV(10002, len2);
-	if (len2) {
-		SAFEREAD(SvPVX(frozen), len2, frozen);
-		SvCUR_set(frozen, len2);
-		*SvEND(frozen) = '\0';
-	}
-	(void) SvPOK_only(frozen);		/* Validates string pointer */
+	READ_STRING(frozen, len2);
 	if (cxt->s_tainted)				/* Is input source tainted? */
 		SvTAINT(frozen);
 
@@ -4756,27 +4749,8 @@ static SV *retrieve_lscalar(pTHX_ stcxt_t *cxt, const char *cname)
 	 * Allocate an empty scalar of the suitable length.
 	 */
 
-	sv = NEWSV(10002, len);
+	READ_STRING(sv, len);
 	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
-
-	if (len ==  0) {
-	    sv_setpvn(sv, "", 0);
-	    return sv;
-	}
-
-	/*
-	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
-	 *
-	 * Now, for efficiency reasons, read data directly inside the SV buffer,
-	 * and perform the SV final settings directly by duplicating the final
-	 * work done by sv_setpv. Since we're going to allocate lots of scalars
-	 * this way, it's worth the hassle and risk.
-	 */
-
-	SAFEREAD(SvPVX(sv), len, sv);
-	SvCUR_set(sv, len);				/* Record C string length */
-	*SvEND(sv) = '\0';				/* Ensure it's null terminated anyway */
-	(void) SvPOK_only(sv);			/* Validate string pointer */
 	if (cxt->s_tainted)				/* Is input source tainted? */
 		SvTAINT(sv);				/* External data cannot be trusted */
 
@@ -4807,40 +4781,8 @@ static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 	 * Allocate an empty scalar of the suitable length.
 	 */
 
-	sv = NEWSV(10002, len);
+	READ_STRING(sv, len);
 	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
-
-	/*
-	 * WARNING: duplicates parts of sv_setpv and breaks SV data encapsulation.
-	 */
-
-	if (len == 0) {
-		/*
-		 * newSV did not upgrade to SVt_PV so the scalar is undefined.
-		 * To make it defined with an empty length, upgrade it now...
-		 * Don't upgrade to a PV if the original type contains more
-		 * information than a scalar.
-		 */
-		if (SvTYPE(sv) <= SVt_PV) {
-			sv_upgrade(sv, SVt_PV);
-		}
-		SvGROW(sv, 1);
-		*SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
-		TRACEME(("ok (retrieve_scalar empty at 0x%"UVxf")", PTR2UV(sv)));
-	} else {
-		/*
-		 * Now, for efficiency reasons, read data directly inside the SV buffer,
-		 * and perform the SV final settings directly by duplicating the final
-		 * work done by sv_setpv. Since we're going to allocate lots of scalars
-		 * this way, it's worth the hassle and risk.
-		 */
-		SAFEREAD(SvPVX(sv), len, sv);
-		SvCUR_set(sv, len);			/* Record C string length */
-		*SvEND(sv) = '\0';			/* Ensure it's null terminated anyway */
-		TRACEME(("small scalar len %d '%s'", len, SvPVX(sv)));
-	}
-
-	(void) SvPOK_only(sv);			/* Validate string pointer */
 	if (cxt->s_tainted)				/* Is input source tainted? */
 		SvTAINT(sv);				/* External data cannot be trusted */
 
