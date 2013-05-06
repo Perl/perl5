@@ -11343,12 +11343,6 @@ tryagain:
 	loopdone:   /* Jumped to when encounters something that shouldn't be in
 		       the node */
 
-            /* If 'maybe_exact' is still set here, means there are no
-             * code points in the node that participate in folds */
-            if (FOLD && maybe_exact) {
-                OP(ret) = EXACT;
-            }
-
             /* I (khw) don't know if you can get here with zero length, but the
              * old code handled this situation by creating a zero-length EXACT
              * node.  Might as well be NOTHING instead */
@@ -11356,6 +11350,12 @@ tryagain:
                 OP(ret) = NOTHING;
             }
             else{
+
+                /* If 'maybe_exact' is still set here, means there are no
+                 * code points in the node that participate in folds */
+                if (FOLD && maybe_exact) {
+                    OP(ret) = EXACT;
+                }
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender);
             }
 
