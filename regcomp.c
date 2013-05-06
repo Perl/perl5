@@ -11048,82 +11048,80 @@ tryagain:
                         REGC((char)ender, s++);
                     }
                 }
-                else { /* FOLD */
-                    if (! ( UTF
-                            /* See comments for join_exact() as to why we fold
-                             * this non-UTF at compile time */
-                            || (node_type == EXACTFU
-                                && ender == LATIN_SMALL_LETTER_SHARP_S)))
-                    {
-                        *(s++) = (char) ender;
-                        maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
+                else /* FOLD */
+                     if (! ( UTF
+                        /* See comments for join_exact() as to why we fold this
+                         * non-UTF at compile time */
+                        || (node_type == EXACTFU
+                            && ender == LATIN_SMALL_LETTER_SHARP_S)))
+                {
+                    *(s++) = (char) ender;
+                    maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
+                }
+                else {
+
+                    /* Prime the casefolded buffer.  Locale rules, which apply
+                     * only to code points < 256, aren't known until execution,
+                     * so for them, just output the original character using
+                     * utf8.  If we start to fold non-UTF patterns, be sure to
+                     * update join_exact() */
+                    if (LOC && ender < 256) {
+                        if (UNI_IS_INVARIANT(ender)) {
+                            *s = (U8) ender;
+                            foldlen = 1;
+                        } else {
+                            *s = UTF8_TWO_BYTE_HI(ender);
+                            *(s + 1) = UTF8_TWO_BYTE_LO(ender);
+                            foldlen = 2;
+                        }
                     }
                     else {
+                        UV folded = _to_uni_fold_flags(
+                                       ender,
+                                       (U8 *) s,
+                                       &foldlen,
+                                       FOLD_FLAGS_FULL
+                                       | ((LOC) ?  FOLD_FLAGS_LOCALE
+                                                : (ASCII_FOLD_RESTRICTED)
+                                                  ? FOLD_FLAGS_NOMIX_ASCII
+                                                  : 0)
+                                        );
 
-                        /* Prime the casefolded buffer.  Locale rules, which
-                         * apply only to code points < 256, aren't known until
-                         * execution, so for them, just output the original
-                         * character using utf8.  If we start to fold non-UTF
-                         * patterns, be sure to update join_exact() */
-                        if (LOC && ender < 256) {
-                            if (UNI_IS_INVARIANT(ender)) {
-                                *s = (U8) ender;
-                                foldlen = 1;
-                            } else {
-                                *s = UTF8_TWO_BYTE_HI(ender);
-                                *(s + 1) = UTF8_TWO_BYTE_LO(ender);
-                                foldlen = 2;
+                        /* If this node only contains non-folding code points
+                         * so far, see if this new one is also non-folding */
+                        if (maybe_exact) {
+                            if (folded != ender) {
+                                maybe_exact = FALSE;
                             }
-                        }
-                        else {
-                            UV folded = _to_uni_fold_flags(
-                                           ender,
-                                           (U8 *) s,
-                                           &foldlen,
-                                           FOLD_FLAGS_FULL
-                                           | ((LOC) ?  FOLD_FLAGS_LOCALE
-                                                    : (ASCII_FOLD_RESTRICTED)
-                                                      ? FOLD_FLAGS_NOMIX_ASCII
-                                                      : 0)
-                                            );
-
-                            /* If this node only contains non-folding code
-                             * points so far, see if this new one is also
-                             * non-folding */
-                            if (maybe_exact) {
-                                if (folded != ender) {
+                            else {
+                                /* Here the fold is the original; we have
+                                 * to check further to see if anything
+                                 * folds to it */
+                                if (! PL_utf8_foldable) {
+                                    SV* swash = swash_init("utf8",
+                                                       "_Perl_Any_Folds",
+                                                       &PL_sv_undef, 1, 0);
+                                    PL_utf8_foldable =
+                                                _get_swash_invlist(swash);
+                                    SvREFCNT_dec_NN(swash);
+                                }
+                                if (_invlist_contains_cp(PL_utf8_foldable,
+                                                         ender))
+                                {
                                     maybe_exact = FALSE;
                                 }
-                                else {
-                                    /* Here the fold is the original; we have
-                                     * to check further to see if anything
-                                     * folds to it */
-                                    if (! PL_utf8_foldable) {
-                                        SV* swash = swash_init("utf8",
-                                                           "_Perl_Any_Folds",
-                                                           &PL_sv_undef, 1, 0);
-                                        PL_utf8_foldable =
-                                                    _get_swash_invlist(swash);
-                                        SvREFCNT_dec_NN(swash);
-                                    }
-                                    if (_invlist_contains_cp(PL_utf8_foldable,
-                                                             ender))
-                                    {
-                                        maybe_exact = FALSE;
-                                    }
-                                }
                             }
-                            ender = folded;
                         }
-			s += foldlen;
-
-                        /* The loop increments <len> each time, as all but this
-                         * path (and one other) through it add a single byte to
-                         * the EXACTish node.  But this one has changed len to
-                         * be the correct final value, so subtract one to
-                         * cancel out the increment that follows */
-			len += foldlen - 1;
+                        ender = folded;
                     }
+                    s += foldlen;
+
+                    /* The loop increments <len> each time, as all but this
+                     * path (and one other) through it add a single byte to the
+                     * EXACTish node.  But this one has changed len to be the
+                     * correct final value, so subtract one to cancel out the
+                     * increment that follows */
+                    len += foldlen - 1;
 		}
 
 		if (next_is_quantifier) {
