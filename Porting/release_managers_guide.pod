@@ -465,7 +465,7 @@ If necessary update the list and the indicated version number.
 =head2 Building a release - on the day
 
 This section describes the actions required to make a release
-that are performed on the actual day.
+that are performed near to, or on the actual release day.
 
 
 =head3 re-check earlier actions
@@ -525,10 +525,26 @@ For example, for RC0 of 5.16.0:
     $ cd pod
     $ git rm perldelta515*.pod
 
-All mention to them should also be removed.  Edit F<pod/perl.pod> to remove
-them from its table of contents, then run F<Porting/pod_rules.pl> to
-propagate your changes there into all the other files that mention them
-(including F<MANIFEST>). You'll need to C<git add> the files that it changes.
+=for checklist skip BLEAD BLEAD-POINT
+
+=head3 add recent perldeltas
+
+For the first RC for a MAINT release, copy in any recent perldeltas from
+blead that have been added since the last release on this branch. This
+should include any recent maint releases on branches older than your one,
+but not newer. For example if you're producing a 5.14.x release, copy any
+perldeltas from recent 5.10.x, 5.12.x etc maint releases, but not from
+5.16.x or higher. Remember to
+
+    $ git add <file1> <file2> ...
+
+=head3 update and commit perldelta files
+
+If you have added or removed any perldelta files via the previous two
+steps, then edit F<pod/perl.pod> to add/remove them from its table of
+contents, then run F<Porting/pod_rules.pl> to propagate your changes there
+into all the other files that mention them (including F<MANIFEST>). You'll
+need to C<git add> the files that it changes.
 
 Then build a clean perl and do a full test
 
@@ -542,7 +558,7 @@ Once all tests pass, commit your changes.
 
 =head3 build a clean perl
 
-If you skipped the previous step (removing the stale perldeltas)
+If you skipped the previous step (adding/removing perldeltas)
 make sure you have a gitwise-clean perl directory (no modified files,
 unpushed commits etc):
 
@@ -1175,13 +1191,13 @@ And nag the sysadmins to make this directory available via rsync.
 
 =for checklist skip BLEAD-POINT RC
 
-=head3 copy perldelta.pod to other branches
+=head3 copy perldelta.pod to blead
 
 I<You MUST SKIP this step for RC, BLEAD-POINT>
 
-Copy the perldelta.pod for this release into the other branches; for
-example:
+Copy the perldelta.pod for this release into blead; for example:
 
+    $ cd ..../blead
     $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod    # for example
     $ git add pod/perl5101delta.pod
 
