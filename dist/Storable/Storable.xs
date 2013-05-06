@@ -442,18 +442,6 @@ static stcxt_t *Context_ptr = NULL;
 #endif
 
 /*
- * key buffer handling
- */
-#define KBUFINIT()							\
-	STMT_START {							\
-		if (!cxt->keybuf) {					\
-			TRACEME(("** allocating kbuf of 128 bytes"));	\
-			cxt->keybuf = newSV(128);			\
-			SvPOK_only(cxt->keybuf);			\
-		}							\
-	} STMT_END
-
-/*
  * memory buffer handling
  */
 #define mbase	(cxt->membuf).arena
@@ -549,16 +537,27 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 	}
 }
 
-#define READ_KEY(kbuf, size)						\
-	STMT_START {							\
-		kbuf = read_into_sv(aTHX_ cxt, size, cxt->keybuf);	\
-		if (!kbuf) return (SV*)NULL;				\
-	} STMT_END
-
 #define READ_STRING(sv, size)				\
 	STMT_START {					\
 		sv = read_string(aTHX_ cxt, size);	\
 		if (!sv) return (SV*)NULL;		\
+	} STMT_END
+
+/*
+ * key buffer handling
+ */
+#define KBUFINIT()							\
+	STMT_START {                                                    \
+		if (!cxt->keybuf) {					\
+			TRACEME(("** allocating kbuf of 128 bytes"));	\
+			cxt->keybuf = newSV(0);				\
+		}							\
+	} STMT_END
+
+#define READ_KEY(kbuf, size)						\
+	STMT_START {							\
+		kbuf = read_into_sv(aTHX_ cxt, size, cxt->keybuf);	\
+		if (!kbuf) return (SV*)NULL;				\
 	} STMT_END
 
 
