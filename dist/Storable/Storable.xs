@@ -635,17 +635,6 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 		return (SV *) 0;			\
   } STMT_END
 
-#define MBUF_SAFEPVREAD(x,s,z)			\
-  STMT_START {					\
-	if ((mptr + (s)) <= mend) {		\
-		memcpy(x, mptr, s);		\
-		mptr += s;			\
-	} else {				\
-		Safefree(z);			\
-		return (SV *) 0;		\
-	}					\
-  } STMT_END
-
 #define MBUF_PUTC(c) 				\
   STMT_START {						\
 	if (mptr < mend)				\
@@ -966,16 +955,6 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 		MBUF_READ(x, y);					\
 	else if (PerlIO_read(cxt->fio, x, y) != y)	\
 		return (SV *) 0;					\
-  } STMT_END
-
-#define SAFEPVREAD(x,y,z)					\
-  STMT_START {							\
-	if (!cxt->fio)						\
-		MBUF_SAFEPVREAD(x,y,z);				\
-	else if (PerlIO_read(cxt->fio, x, y) != y)	 {	\
-		Safefree(z);					\
-		return (SV *) 0;				\
-	}							\
   } STMT_END
 
 /*
@@ -3941,10 +3920,8 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
-	SV *sv;
-	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
-	char *classname = buf;
-	char *malloced_classname = NULL;
+	SV *classname;
+
 
 	PERL_UNUSED_ARG(cname);
 	TRACEME(("retrieve_blessed (#%d)", cxt->tagnum));
@@ -3958,23 +3935,17 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	GETMARK(len);			/* Length coded on a single char? */
-	if (len & 0x80) {
-		RLEN(len);
-		TRACEME(("** allocating %d bytes for class name", len+1));
-		New(10003, classname, len+1, char);
-		malloced_classname = classname;
-	}
-	SAFEPVREAD(classname, len, malloced_classname);
-	classname[len] = '\0';		/* Mark string end */
+	if (len & 0x80) RLEN(len);
+	READ_STRING(classname, len);
 
 	/*
 	 * It's a new classname, otherwise it would have been an SX_IX_BLESS.
 	 */
 
-	TRACEME(("new class name \"%s\" will bear ID = %d", classname, cxt->classnum));
+	TRACEME(("new class name \"%s\" will bear ID = %d", SvPV_nolen(classname), cxt->classnum));
 
-	if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len))) {
-		Safefree(malloced_classname);
+	if (!av_store(cxt->aclass, cxt->classnum++, classname)) {
+		sv_free(classname);
 		return (SV *) 0;
 	}
 
@@ -3982,11 +3953,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	 * Retrieve object and bless it.
 	 */
 
-	sv = retrieve(aTHX_ cxt, classname);	/* First SV which is SEEN will be blessed */
-	if (malloced_classname)
-		Safefree(malloced_classname);
-
-	return sv;
+	return retrieve(aTHX_ cxt, SvPV_nolen(classname));	/* First SV which is SEEN will be blessed */
 }
 
 /*
@@ -4012,8 +3979,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	I32 len;
-	char buf[LG_BLESS + 1];		/* Avoid malloc() if possible */
-	char *classname = buf;
+	char *classname;
 	unsigned int flags;
 	I32 len2;
 	SV *frozen;
@@ -4130,37 +4096,26 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		TRACEME(("class ID %d => %s", idx, classname));
 
 	} else {
-		/*
-		 * Decode class name length and read that name.
-		 *
-		 * NOTA BENE: even if the length is stored on one byte, we don't read
-		 * on the stack.  Just like retrieve_blessed(), we limit the name to
-		 * LG_BLESS bytes.  This is an arbitrary decision.
-		 */
-		char *malloced_classname = NULL;
+		SV *class_sv;
+
 
 		if (flags & SHF_LARGE_CLASSLEN)
 			RLEN(len);
 		else
 			GETMARK(len);
 
-		if (len > LG_BLESS) {
-			TRACEME(("** allocating %d bytes for class name", len+1));
-			New(10003, classname, len+1, char);
-			malloced_classname = classname;
-		}
-
-		SAFEPVREAD(classname, len, malloced_classname);
-		classname[len] = '\0';		/* Mark string end */
+		READ_STRING(class_sv, len);
 
 		/*
 		 * Record new classname.
 		 */
 
-		if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len))) {
-			Safefree(malloced_classname);
+		if (!av_store(cxt->aclass, cxt->classnum++, class_sv)) {
+			sv_free(class_sv);
 			return (SV *) 0;
 		}
+
+		classname = SvPV_nolen(class_sv);
 	}
 
 	TRACEME(("class name: %s", classname));
@@ -4339,8 +4294,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	SvREFCNT_dec(frozen);
 	av_undef(av);
 	sv_free((SV *) av);
-	if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
-		Safefree(classname);
+
 
 	/*
 	 * If we had an <extra> type, then the object was not as simple, and
@@ -4893,7 +4847,7 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
 {
 #ifdef SvVOK
 	MAGIC *mg;
-	char *s;
+	SV *s;
 	I32 len;
 	SV *sv;
 
@@ -4901,16 +4855,15 @@ static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
 	TRACEME(("retrieve_lvstring (#%d), len = %"IVdf,
 		  cxt->tagnum, (IV)len));
 
-	New(10003, s, len+1, char);
-	SAFEPVREAD(s, len, s);
+	READ_STRING(s, len);
 
 	sv = retrieve(aTHX_ cxt, cname);
-
-	sv_magic(sv,NULL,PERL_MAGIC_vstring,s,len);
-	/* 5.10.0 and earlier seem to need this */
-	SvRMAGICAL_on(sv);
-
-	Safefree(s);
+	if (sv) {
+		sv_magic(sv,NULL,PERL_MAGIC_vstring,SvPV_nolen(s),len);
+		/* 5.10.0 and earlier seem to need this */
+		SvRMAGICAL_on(sv);
+	}
+	sv_free(s);
 
 	TRACEME(("ok (retrieve_lvstring at 0x%"UVxf")", PTR2UV(sv)));
 	return sv;
