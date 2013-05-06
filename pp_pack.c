@@ -256,14 +256,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
         STMT_START {                                                          \
           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
-              var = (post_cast *) my_letoh ## type ((pre_cast) var);          \
+              my_letohn(&var, sizeof(var));                                   \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
         STMT_START {                                                          \
           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
-              var = (post_cast *) my_htole ## type ((pre_cast) var);          \
+              my_htolen(&var, sizeof(var));                                   \
           }                                                                   \
         } STMT_END
 
@@ -300,14 +300,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
         STMT_START {                                                          \
           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
-              var = (post_cast *) my_betoh ## type ((pre_cast) var);          \
+              my_betohn(&var, sizeof(var));                                   \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
         STMT_START {                                                          \
           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
-              var = (post_cast *) my_htobe ## type ((pre_cast) var);          \
+              my_htoben(&var, sizeof(var));                                   \
           }                                                                   \
         } STMT_END
 
