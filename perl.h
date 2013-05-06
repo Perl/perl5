@@ -795,27 +795,6 @@ EXTERN_C int usleep(unsigned int);
           (((U64)(x) & U64_CONST(0xff00000000000000)) >> 56) ))
 # endif
 
-/*----------------------------------------------------------------------------*/
-# if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678  /*     little-endian     */
-/*----------------------------------------------------------------------------*/
-#  define my_htolen(p,n)	NOOP
-#  define my_letohn(p,n)	NOOP
-#  define my_htoben(p,n)	my_swabn(p,n)
-#  define my_betohn(p,n)	my_swabn(p,n)
-/*----------------------------------------------------------------------------*/
-# elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /*     big-endian      */
-/*----------------------------------------------------------------------------*/
-#  define my_htolen(p,n)	my_swabn(p,n)
-#  define my_letohn(p,n)	my_swabn(p,n)
-#  define my_htoben(p,n)	NOOP
-#  define my_betohn(p,n)	NOOP
-/*----------------------------------------------------------------------------*/
-# else /*                       all other byte-orders                         */
-/*----------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------*/
-# endif /*                     end of byte-order macros                       */
-/*----------------------------------------------------------------------------*/
-
 /* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
    at least on FreeBSD.  YMMV, so experiment.  */
 #ifndef PERL_ARENA_SIZE
