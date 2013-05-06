@@ -453,16 +453,6 @@ static stcxt_t *Context_ptr = NULL;
 		}							\
 	} STMT_END
 
-static char *
-key_buffer(pTHX_ stcxt_t *cxt, STRLEN size) {
-	SV *key = cxt->keybuf;
-	char *pv = SvGROW(key, size + 1);
-	// SvCUR_set(key, size);
-	pv[size] = '\0';
-	return pv;
-}
-
-
 /*
  * memory buffer handling
  */
@@ -522,6 +512,29 @@ key_buffer(pTHX_ stcxt_t *cxt, STRLEN size) {
 	TRACEME(("restoring mbuf"));		\
 	StructCopy(&cxt->msaved, &cxt->membuf, struct extendable); \
   } STMT_END
+
+
+
+
+static const char *
+read_key(pTHX_ stcxt_t *cxt, STRLEN size) {
+	SV *key = cxt->keybuf;
+	char *pv = SvGROW(key, size + 1);
+	if (size) {
+		if (cxt->fio) {
+			if (PerlIO_read(cxt->fio, pv, size) != size)
+				return NULL;
+		}
+		else {
+			if (mend < (mptr + size))
+				return NULL;
+			Move(mptr, pv, size, char);
+			mptr += size;
+		}
+	}
+	pv[size] = '\0';
+	return pv;
+}
 
 /*
  * Use SvPOKp(), because SvPOK() fails on tainted scalars.
@@ -5214,7 +5227,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	for (i = 0; i < len; i++) {
-		char *kbuf;
+		const char *kbuf;
 		/*
 		 * Get value first.
 		 */
@@ -5232,9 +5245,8 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		 */
 
 		RLEN(size);						/* Get key size */
-		kbuf = key_buffer(aTHX_ cxt, size);
-		if (size)
-			READ(kbuf, size);
+		kbuf = read_key(aTHX_ cxt, size);
+		if (!kbuf) return NULL;
 		TRACEME(("(#%d) key '%s'", i, kbuf));
 		
 		/*
@@ -5339,7 +5351,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
              * Hence the key comes after the value.
              */
 
-	     char *kbuf;
+	     const char *kbuf;
 
             if (flags & SHV_K_PLACEHOLDER) {
                 SvREFCNT_dec (sv);
@@ -5364,9 +5376,8 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
 
             RLEN(size);						/* Get key size */
-	    kbuf = key_buffer(aTHX_ cxt, size);
-            if (size)
-                READ(kbuf, size);
+	    kbuf = read_key(aTHX_ cxt, size);
+	    if (!kbuf) return NULL;
             TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
 		     flags, store_flags));
 
@@ -5621,7 +5632,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	for (i = 0; i < len; i++) {
-		char *kbuf;
+		const char *kbuf;
 		/*
 		 * Get value first.
 		 */
@@ -5656,9 +5667,8 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		if (c != SX_KEY)
 			(void) retrieve_other(aTHX_ (stcxt_t *) 0, 0);	/* Will croak out */
 		RLEN(size);						/* Get key size */
-		kbuf = key_buffer(aTHX_ cxt, size);
-		if (size)
-			READ(kbuf, size);
+		kbuf = read_key(aTHX_ cxt, size);
+		if (!kbuf) return NULL;
 		TRACEME(("(#%d) key '%s'", i, kbuf));
 
 		/*
@@ -6004,7 +6014,7 @@ first_time:		/* Will disappear when support for old format is dropped */
 	if (cxt->ver_major < 2) {
 		while ((type = GETCHAR()) != SX_STORED) {
 			I32 len;
-			char *kbuf;
+			const char *kbuf;
 			switch (type) {
 			case SX_CLASS:
 				GETMARK(len);			/* Length coded on a single char */
@@ -6016,9 +6026,8 @@ first_time:		/* Will disappear when support for old format is dropped */
 			default:
 				return (SV *) 0;		/* Failed */
 			}
-			kbuf = key_buffer(aTHX_ cxt, len);
-			if (len)
-				READ(kbuf, len);
+			kbuf = read_key(aTHX_ cxt, len);
+			if (!kbuf) return NULL;
 			BLESS(sv, kbuf);
 		}
 	}
