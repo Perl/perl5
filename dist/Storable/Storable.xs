@@ -323,7 +323,7 @@ typedef struct stcxt {
         int accept_future_minor; /* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	int membuf_ro;		/* true means membuf is read-only and msaved is rw */
-	struct extendable keybuf;	/* for hash key retrieval */
+	SV *keybuf;	        /* for hash key retrieval */
 	struct extendable membuf;	/* for memory store/retrieve operations */
 	struct extendable msaved;	/* where potentially valid mbuf is saved */
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
@@ -444,24 +444,24 @@ static stcxt_t *Context_ptr = NULL;
 /*
  * key buffer handling
  */
-#define kbuf	(cxt->keybuf).arena
-#define ksiz	(cxt->keybuf).asiz
-#define KBUFINIT()						\
-  STMT_START {							\
-	if (!kbuf) {						\
-		TRACEME(("** allocating kbuf of 128 bytes")); \
-		New(10003, kbuf, 128, char);	\
-		ksiz = 128;						\
-	}									\
-  } STMT_END
-#define KBUFCHK(x)				\
-  STMT_START {					\
-	if (x >= ksiz) {			\
-		TRACEME(("** extending kbuf to %d bytes (had %d)", x+1, ksiz)); \
-		Renew(kbuf, x+1, char);	\
-		ksiz = x+1;				\
-	}							\
-  } STMT_END
+#define KBUFINIT()							\
+	STMT_START {							\
+		if (!cxt->keybuf) {					\
+			TRACEME(("** allocating kbuf of 128 bytes"));	\
+			cxt->keybuf = newSV(128);			\
+			SvPOK_only(cxt->keybuf);			\
+		}							\
+	} STMT_END
+
+static char *
+key_buffer(pTHX_ stcxt_t *cxt, STRLEN size) {
+	SV *key = cxt->keybuf;
+	char *pv = SvGROW(key, size + 1);
+	// SvCUR_set(key, size);
+	pv[size] = '\0';
+	return pv;
+}
+
 
 /*
  * memory buffer handling
@@ -5214,6 +5214,7 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	for (i = 0; i < len; i++) {
+		char *kbuf;
 		/*
 		 * Get value first.
 		 */
@@ -5231,12 +5232,11 @@ static SV *retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		 */
 
 		RLEN(size);						/* Get key size */
-		KBUFCHK((STRLEN)size);					/* Grow hash key read pool if needed */
+		kbuf = key_buffer(aTHX_ cxt, size);
 		if (size)
 			READ(kbuf, size);
-		kbuf[size] = '\0';				/* Mark string end, just in case */
 		TRACEME(("(#%d) key '%s'", i, kbuf));
-
+		
 		/*
 		 * Enter key/value pair into hash table.
 		 */
@@ -5339,6 +5339,8 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
              * Hence the key comes after the value.
              */
 
+	     char *kbuf;
+
             if (flags & SHV_K_PLACEHOLDER) {
                 SvREFCNT_dec (sv);
                 sv = &PL_sv_placeholder;
@@ -5362,10 +5364,9 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
 #endif
 
             RLEN(size);						/* Get key size */
-            KBUFCHK((STRLEN)size);				/* Grow hash key read pool if needed */
+	    kbuf = key_buffer(aTHX_ cxt, size);
             if (size)
                 READ(kbuf, size);
-            kbuf[size] = '\0';				/* Mark string end, just in case */
             TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
 		     flags, store_flags));
 
@@ -5620,6 +5621,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	for (i = 0; i < len; i++) {
+		char *kbuf;
 		/*
 		 * Get value first.
 		 */
@@ -5654,10 +5656,9 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		if (c != SX_KEY)
 			(void) retrieve_other(aTHX_ (stcxt_t *) 0, 0);	/* Will croak out */
 		RLEN(size);						/* Get key size */
-		KBUFCHK((STRLEN)size);					/* Grow hash key read pool if needed */
+		kbuf = key_buffer(aTHX_ cxt, size);
 		if (size)
 			READ(kbuf, size);
-		kbuf[size] = '\0';				/* Mark string end, just in case */
 		TRACEME(("(#%d) key '%s'", i, kbuf));
 
 		/*
@@ -6003,6 +6004,7 @@ first_time:		/* Will disappear when support for old format is dropped */
 	if (cxt->ver_major < 2) {
 		while ((type = GETCHAR()) != SX_STORED) {
 			I32 len;
+			char *kbuf;
 			switch (type) {
 			case SX_CLASS:
 				GETMARK(len);			/* Length coded on a single char */
@@ -6014,10 +6016,9 @@ first_time:		/* Will disappear when support for old format is dropped */
 			default:
 				return (SV *) 0;		/* Failed */
 			}
-			KBUFCHK((STRLEN)len);			/* Grow buffer as necessary */
+			kbuf = key_buffer(aTHX_ cxt, len);
 			if (len)
 				READ(kbuf, len);
-			kbuf[len] = '\0';			/* Mark string end */
 			BLESS(sv, kbuf);
 		}
 	}
@@ -6396,8 +6397,10 @@ DESTROY(self)
 PREINIT:
 	stcxt_t *cxt = (stcxt_t *)SvPVX(SvRV(self));
 PPCODE:
-	if (kbuf)
-		Safefree(kbuf);
+        if (cxt->keybuf) {
+		SvREFCNT_dec(cxt->keybuf);
+		cxt->keybuf = NULL;
+	}
 	if (!cxt->membuf_ro && mbase)
 		Safefree(mbase);
 	if (cxt->membuf_ro && (cxt->msaved).arena)
