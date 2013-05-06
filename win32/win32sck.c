@@ -81,15 +81,13 @@ start_sockets(void)
     wsock_started = 1;
 }
 
-/* in no sockets Win32 builds, this fowards to replacements in util.c, dTHX
- * is required
+/* in no sockets Win32 builds, these use the inline functions defined in
+ * perl.h
  */
 u_long
 win32_htonl(u_long hostlong)
 {
-#ifdef MYSWAP
-    dTHX;
-#else
+#ifndef WIN32_NO_SOCKETS
     StartSockets();
 #endif
     return htonl(hostlong);
@@ -98,9 +96,7 @@ win32_htonl(u_long hostlong)
 u_short
 win32_htons(u_short hostshort)
 {
-#ifdef MYSWAP
-    dTHX;
-#else
+#ifndef WIN32_NO_SOCKETS
     StartSockets();
 #endif
     return htons(hostshort);
@@ -109,9 +105,7 @@ win32_htons(u_short hostshort)
 u_long
 win32_ntohl(u_long netlong)
 {
-#ifdef MYSWAP
-    dTHX;
-#else
+#ifndef WIN32_NO_SOCKETS
     StartSockets();
 #endif
     return ntohl(netlong);
@@ -120,9 +114,7 @@ win32_ntohl(u_long netlong)
 u_short
 win32_ntohs(u_short netshort)
 {
-#ifdef MYSWAP
-    dTHX;
-#else
+#ifndef WIN32_NO_SOCKETS
     StartSockets();
 #endif
     return ntohs(netshort);
