@@ -2183,8 +2183,7 @@ Perl_my_htonl(pTHX_ long l)
 	char c[sizeof(long)];
     } u;
 
-#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
-#if BYTEORDER == 0x12345678
+#if BYTEORDER > 0xFFFF
     u.result = 0; 
 #endif 
     u.c[0] = (l >> 24) & 255;
@@ -2192,19 +2191,6 @@ Perl_my_htonl(pTHX_ long l)
     u.c[2] = (l >> 8) & 255;
     u.c[3] = l & 255;
     return u.result;
-#else
-#if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
-    Perl_croak(aTHX_ "Unknown BYTEORDER\n");
-#else
-    I32 o;
-    I32 s;
-
-    for (o = BYTEORDER - 0x1111, s = 0; s < (sizeof(long)*8); o >>= 4, s += 8) {
-	u.c[o & 0xf] = (l >> s) & 255;
-    }
-    return u.result;
-#endif
-#endif
 }
 
 long
@@ -2215,27 +2201,9 @@ Perl_my_ntohl(pTHX_ long l)
 	char c[sizeof(long)];
     } u;
 
-#if BYTEORDER == 0x1234
-    u.c[0] = (l >> 24) & 255;
-    u.c[1] = (l >> 16) & 255;
-    u.c[2] = (l >> 8) & 255;
-    u.c[3] = l & 255;
-    return u.l;
-#else
-#if ((BYTEORDER - 0x1111) & 0x444) || !(BYTEORDER & 0xf)
-    Perl_croak(aTHX_ "Unknown BYTEORDER\n");
-#else
-    I32 o;
-    I32 s;
-
     u.l = l;
-    l = 0;
-    for (o = BYTEORDER - 0x1111, s = 0; s < (sizeof(long)*8); o >>= 4, s += 8) {
-	l |= (u.c[o & 0xf] & 255) << s;
-    }
-    return l;
-#endif
-#endif
+    return ((u.c[0] & 255) << 24) | ((u.c[1] & 255) << 16)
+	| ((u.c[2] & 255) << 8) | (u.c[3] & 255);
 }
 
 #endif /* BYTEORDER != 0x4321 */
