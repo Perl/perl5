@@ -900,10 +900,7 @@ of the string after the match.  An example:
 
 In the second match, C<$`> equals C<''> because the regexp matched at the
 first character position in the string and stopped; it never saw the
-second 'the'.
-
-If your code is to run on Perl versions earlier than
-5.18, it is worthwhile to note that using C<$`> and C<$'>
+second 'the'.  It is important to note that using C<$`> and C<$'>
 slows down regexp matching quite a bit, while C<$&> slows it down to a
 lesser extent, because if they are used in one regexp in a program,
 they are generated for I<all> regexps in the program.  So if raw
@@ -916,11 +913,8 @@ C<@+> instead:
     $' is the same as substr( $x, $+[0] )
 
 As of Perl 5.10, the C<${^PREMATCH}>, C<${^MATCH}> and C<${^POSTMATCH}>
-variables may be used.  These are only set if the C</p> modifier is
-present.  Consequently they do not penalize the rest of the program.  In
-Perl 5.18, C<${^PREMATCH}>, C<${^MATCH}> and C<${^POSTMATCH}> are available
-whether the C</p> has been used or not (the modifier is ignored), and
-C<$`>, C<$'> and C<$&> do not cause any speed difference.
+variables may be used. These are only set if the C</p> modifier is present.
+Consequently they do not penalize the rest of the program.
 
 =head2 Non-capturing groupings
 

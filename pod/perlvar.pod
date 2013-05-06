@@ -783,7 +783,7 @@ we have not made another match:
     $1 is Mutt; $2 is Jeff
     $1 is Wallace; $2 is Grommit
 
-If you are using Perl v5.16 or earlier, note that C<use
+Due to an unfortunate accident of Perl's implementation, C<use
 English> imposes a considerable performance penalty on all regular
 expression matches in a program because it uses the C<$`>, C<$&>, and
 C<$'>, regardless of whether they occur in the scope of C<use
@@ -799,9 +799,6 @@ problematic match variables in your code.
 Since Perl v5.10.0, you can use the C</p> match operator flag and the
 C<${^PREMATCH}>, C<${^MATCH}>, and C<${^POSTMATCH}> variables instead
 so you only suffer the performance penalties.
-
-If you are using Perl v5.18.0 or higher, you do not need to worry about
-this, as the three naughty variables are no longer naughty.
 
 =over 8
 
@@ -825,8 +822,7 @@ The string matched by the last successful pattern match (not counting
 any matches hidden within a BLOCK or C<eval()> enclosed by the current
 BLOCK).
 
-In Perl v5.16 and earlier, the use of this variable
-anywhere in a program imposes a considerable
+The use of this variable anywhere in a program imposes a considerable
 performance penalty on all regular expression matches.  To avoid this
 penalty, you can extract the same substring by using L</@->.  Starting
 with Perl v5.10.0, you can use the C</p> match flag and the C<${^MATCH}>
@@ -840,11 +836,9 @@ Mnemonic: like C<&> in some editors.
 X<${^MATCH}>
 
 This is similar to C<$&> (C<$MATCH>) except that it does not incur the
-performance penalty associated with that variable.
-In Perl v5.16 and earlier, it is only guaranteed
+performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
-the C</p> modifier.  In Perl v5.18, the C</p> modifier does nothing, so
-C<${^MATCH}> does the same thing as C<$MATCH>.
+the C</p> modifier.
 
 This variable was added in Perl v5.10.0.
 
@@ -859,8 +853,7 @@ The string preceding whatever was matched by the last successful
 pattern match, not counting any matches hidden within a BLOCK or C<eval>
 enclosed by the current BLOCK.
 
-In Perl v5.16 and earlier, the use of this variable
-anywhere in a program imposes a considerable
+The use of this variable anywhere in a program imposes a considerable
 performance penalty on all regular expression matches.  To avoid this
 penalty, you can extract the same substring by using L</@->.  Starting
 with Perl v5.10.0, you can use the C</p> match flag and the
@@ -875,11 +868,9 @@ Mnemonic: C<`> often precedes a quoted string.
 X<$`> X<${^PREMATCH}>
 
 This is similar to C<$`> ($PREMATCH) except that it does not incur the
-performance penalty associated with that variable. 
-In Perl v5.16 and earlier, it is only guaranteed
+performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
-the C</p> modifier.  In Perl v5.18, the C</p> modifier does nothing, so
-C<${^PREMATCH}> does the same thing as C<$PREMATCH>.
+the C</p> modifier.
 
 This variable was added in Perl v5.10.0
 
@@ -898,8 +889,7 @@ enclosed by the current BLOCK).  Example:
     /def/;
     print "$`:$&:$'\n";  	# prints abc:def:ghi
 
-In Perl v5.16 and earlier, the use of this variable
-anywhere in a program imposes a considerable
+The use of this variable anywhere in a program imposes a considerable
 performance penalty on all regular expression matches.
 To avoid this penalty, you can extract the same substring by
 using L</@->.  Starting with Perl v5.10.0, you can use the C</p> match flag
@@ -914,11 +904,9 @@ Mnemonic: C<'> often follows a quoted string.
 X<${^POSTMATCH}> X<$'> X<$POSTMATCH>
 
 This is similar to C<$'> (C<$POSTMATCH>) except that it does not incur the
-performance penalty associated with that variable.
-In Perl v5.16 and earlier, it is only guaranteed
+performance penalty associated with that variable, and is only guaranteed
 to return a defined value when the pattern was compiled or executed with
-the C</p> modifier.  In Perl v5.18, the C</p> modifier does nothing, so
-C<${^POSTMATCH}> does the same thing as C<$POSTMATCH>.
+the C</p> modifier.
 
 This variable was added in Perl v5.10.0.
 
