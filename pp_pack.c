@@ -152,6 +152,15 @@ typedef union {
 #define PUSH16(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF16(p), SIZE16)
 #define PUSH32(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF32(p), SIZE32)
 
+#if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
+#  define NEEDS_SWAP(d)     (TYPE_ENDIANNESS(d) == TYPE_IS_LITTLE_ENDIAN)
+#elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678  /* little-endian */
+#  define NEEDS_SWAP(d)     (TYPE_ENDIANNESS(d) == TYPE_IS_BIG_ENDIAN)
+#else
+#  error "Unsupported byteorder"
+        /* Need to add code here to re-instate mixed endian support.  */
+#endif
+
 /* Only to be used inside a loop (see the break) */
 #define SHIFT_BYTES(utf8, s, strend, buf, len, datumtype)	\
 STMT_START {						\
@@ -241,14 +250,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define DO_BO_UNPACK(var, type)                                              \
         STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
+          if (needs_swap) {                                                   \
             my_swabn(&var, sizeof(var));                                      \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_PACK(var, type)                                                \
         STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
+          if (needs_swap) {                                                   \
             my_swabn(&var, sizeof(var));                                      \
           }                                                                   \
         } STMT_END
@@ -257,14 +266,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define DO_BO_UNPACK(var, type)                                              \
         STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
+          if (needs_swap) {                                                   \
             my_swabn(&var, sizeof(var));                                      \
           }                                                                   \
         } STMT_END
 
 # define DO_BO_PACK(var, type)                                                \
         STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
+          if (needs_swap) {                                                   \
             my_swabn(&var, sizeof(var));                                      \
           }                                                                   \
         } STMT_END
@@ -910,6 +919,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	packprops_t props;
 	I32 len;
         I32 datumtype = symptr->code;
+        bool needs_swap;
 	/* do first one only unless in list context
 	   / is implemented by unpacking the count, then popping it from the
 	   stack, so must check that we're not in the middle of a /  */
@@ -946,6 +956,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		EXTEND_MORTAL(len);
 	    }
 	}
+
+        needs_swap = NEEDS_SWAP(datumtype);
 
 	switch(TYPE_NO_ENDIANNESS(datumtype)) {
 	default:
@@ -2157,6 +2169,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         howlen_t howlen = symptr->howlen;
 	char *start = SvPVX(cat);
 	char *cur   = start + SvCUR(cat);
+        bool needs_swap;
 
 #define NEXTFROM (lengthcode ? lengthcode : items-- > 0 ? *beglist++ : &PL_sv_no)
 
@@ -2205,6 +2218,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    lookahead.length = count;
 	    lengthcode = sv_2mortal(newSViv(count));
 	}
+
+        needs_swap = NEEDS_SWAP(datumtype);
 
 	/* Code inside the switch must take care to properly update
 	   cat (CUR length and '\0' termination) if it updated *cur and
