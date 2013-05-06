@@ -8044,11 +8044,12 @@ X<tie>
 This function binds a variable to a package class that will provide the
 implementation for the variable.  VARIABLE is the name of the variable
 to be enchanted.  CLASSNAME is the name of a class implementing objects
-of correct type.  Any additional arguments are passed to the C<new>
+of correct type.  Any additional arguments are passed to the
+appropriate constructor
 method of the class (meaning C<TIESCALAR>, C<TIEHANDLE>, C<TIEARRAY>,
 or C<TIEHASH>).  Typically these are arguments such as might be passed
-to the C<dbm_open()> function of C.  The object returned by the C<new>
-method is also returned by the C<tie> function, which would be useful
+to the C<dbm_open()> function of C.  The object returned by the
+constructor is also returned by the C<tie> function, which would be useful
 if you want to access other methods in CLASSNAME.
 
 Note that functions such as C<keys> and C<values> may return huge lists
