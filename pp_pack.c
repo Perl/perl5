@@ -253,34 +253,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
-        STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
-              my_letohn(&var, sizeof(var));                                   \
-          }                                                                   \
-        } STMT_END
-
-# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
-        STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {          \
-              my_htolen(&var, sizeof(var));                                   \
-          }                                                                   \
-        } STMT_END
-
-# define DO_BO_UNPACK_N(var, type)                                            \
-         STMT_START {                                                         \
-           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {         \
-              my_letohn(&var, sizeof(var));                                   \
-           }                                                                  \
-         } STMT_END
-
-# define DO_BO_PACK_N(var, type)                                              \
-         STMT_START {                                                         \
-           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_LITTLE_ENDIAN) {         \
-             my_htolen(&var, sizeof(var));                                    \
-           }                                                                  \
-         } STMT_END
-
 #  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    /* little-endian */
 
 # define DO_BO_UNPACK(var, type)                                              \
@@ -297,43 +269,9 @@ S_mul128(pTHX_ SV *sv, U8 m)
           }                                                                   \
         } STMT_END
 
-# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                     \
-        STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
-              my_betohn(&var, sizeof(var));                                   \
-          }                                                                   \
-        } STMT_END
-
-# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                       \
-        STMT_START {                                                          \
-          if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {             \
-              my_htoben(&var, sizeof(var));                                   \
-          }                                                                   \
-        } STMT_END
-
-# define DO_BO_UNPACK_N(var, type)                                            \
-         STMT_START {                                                         \
-           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {            \
-              my_betohn(&var, sizeof(var));                                   \
-           }                                                                  \
-         } STMT_END
-
-# define DO_BO_PACK_N(var, type)                                              \
-         STMT_START {                                                         \
-           if (TYPE_ENDIANNESS(datumtype) == TYPE_IS_BIG_ENDIAN) {            \
-             my_htoben(&var, sizeof(var));                                    \
-           }                                                                  \
-         } STMT_END
-
 #else
 # define DO_BO_UNPACK(var, type)    BO_CANT_DOIT(unpack, type)
 # define DO_BO_PACK(var, type)      BO_CANT_DOIT(pack, type)
-# define DO_BO_UNPACK_PTR(var, type, pre_cast, post_cast)                    \
-    BO_CANT_DOIT(unpack, type)
-# define DO_BO_PACK_PTR(var, type, pre_cast, post_cast)                      \
-    BO_CANT_DOIT(pack, type)
-# define DO_BO_UNPACK_N(var, type)  BO_CANT_DOIT(unpack, type)
-# define DO_BO_PACK_N(var, type)    BO_CANT_DOIT(pack, type)
 #endif
 
 # define BO_CANT_DOIT(action, type)                                           \
@@ -351,25 +289,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
                break;                                                         \
            }                                                                  \
          } STMT_END
-
-# if PTRSIZE == INTSIZE
-#  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, i, int, char)
-#  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, i, int, char)
-# elif PTRSIZE == LONGSIZE
-#  if LONGSIZE < IVSIZE && IVSIZE == 8
-#   define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, 64, IV, char)
-#   define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, 64, IV, char)
-#  else
-#   define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, IV, char)
-#   define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, IV, char)
-#  endif
-# elif PTRSIZE == IVSIZE
-#  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, IV, char)
-#  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, IV, char)
-# else
-#  define DO_BO_UNPACK_PC(var)	BO_CANT_DOIT(unpack, pointer)
-#  define DO_BO_PACK_PC(var)	BO_CANT_DOIT(pack, pointer)
-# endif
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
 #define PACK_SIZE_UNPREDICTABLE		0x40	/* Not a fixed size element */
@@ -1706,7 +1625,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		const char *aptr;
 		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
-		DO_BO_UNPACK_PC(aptr);
+                DO_BO_UNPACK(aptr, pointer);
 		/* newSVpv generates undef if aptr is NULL */
 		mPUSHs(newSVpv(aptr, 0));
 	    }
@@ -1760,7 +1679,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (s + sizeof(char*) <= strend) {
 		char *aptr;
 		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
-		DO_BO_UNPACK_PC(aptr);
+                DO_BO_UNPACK(aptr, pointer);
 		/* newSVpvn generates undef if aptr is NULL */
 		PUSHs(newSVpvn_flags(aptr, len, SVs_TEMP));
 	    }
@@ -1800,7 +1719,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		float afloat;
 		SHIFT_VAR(utf8, s, strend, afloat, datumtype);
-		DO_BO_UNPACK_N(afloat, float);
+                DO_BO_UNPACK(afloat, float);
 		if (!checksum)
 		    mPUSHn(afloat);
 		else
@@ -1811,7 +1730,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		double adouble;
 		SHIFT_VAR(utf8, s, strend, adouble, datumtype);
-		DO_BO_UNPACK_N(adouble, double);
+                DO_BO_UNPACK(adouble, double);
 		if (!checksum)
 		    mPUSHn(adouble);
 		else
@@ -1822,7 +1741,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		NV_bytes anv;
 		SHIFT_BYTES(utf8, s, strend, anv.bytes, sizeof(anv.bytes), datumtype);
-		DO_BO_UNPACK_N(anv.nv, NV);
+                DO_BO_UNPACK(anv.nv, NV);
 		if (!checksum)
 		    mPUSHn(anv.nv);
 		else
@@ -1834,7 +1753,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		ld_bytes aldouble;
 		SHIFT_BYTES(utf8, s, strend, aldouble.bytes, sizeof(aldouble.bytes), datumtype);
-		DO_BO_UNPACK_N(aldouble.ld, long double);
+                DO_BO_UNPACK(aldouble.ld, long double);
 		if (!checksum)
 		    mPUSHn(aldouble.ld);
 		else
@@ -2817,7 +2736,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 # else
 		afloat = (float)anv;
 # endif
-		DO_BO_PACK_N(afloat, float);
+                DO_BO_PACK(afloat, float);
 		PUSH_VAR(utf8, cur, afloat);
 	    }
 	    break;
@@ -2839,7 +2758,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 # else
 		adouble = (double)anv;
 # endif
-		DO_BO_PACK_N(adouble, double);
+                DO_BO_PACK(adouble, double);
 		PUSH_VAR(utf8, cur, adouble);
 	    }
 	    break;
@@ -2854,7 +2773,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #else
 		anv.nv = SvNV(fromstr);
 #endif
-		DO_BO_PACK_N(anv, NV);
+                DO_BO_PACK(anv, NV);
 		PUSH_BYTES(utf8, cur, anv.bytes, sizeof(anv.bytes));
 	    }
 	    break;
@@ -2872,7 +2791,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #  else
 		aldouble.ld = (long double)SvNV(fromstr);
 #  endif
-		DO_BO_PACK_N(aldouble, long double);
+                DO_BO_PACK(aldouble, long double);
 		PUSH_BYTES(utf8, cur, aldouble.bytes, sizeof(aldouble.bytes));
 	    }
 	    break;
@@ -3194,7 +3113,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    else
 			aptr = SvPV_force_flags_nolen(fromstr, 0);
 		}
-		DO_BO_PACK_PC(aptr);
+                DO_BO_PACK(aptr, pointer);
 		PUSH_VAR(utf8, cur, aptr);
 	    }
 	    break;
