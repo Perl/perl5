@@ -178,8 +178,8 @@ future release of Perl.  Do not use it for new code; remove it from
 existing code.\n\n$docs";
     }
     else {
-        $docs .= "NOTE: this function is experimental and may change or be
-removed without notice.\n\n" if $flags =~ /x/;
+        $docs = "\n\nNOTE: this function is experimental and may change or be
+removed without notice.\n\n$docs" if $flags =~ /x/;
     }
     $docs .= "NOTE: the perl_ form of this function is deprecated.\n\n"
 	if $flags =~ /p/;
