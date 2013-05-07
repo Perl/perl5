@@ -138,7 +138,11 @@ typedef union {
 #  define NEEDS_SWAP(d)     (TYPE_ENDIANNESS(d) == TYPE_IS_BIG_ENDIAN)
 #else
 #  error "Unsupported byteorder"
-        /* Need to add code here to re-instate mixed endian support.  */
+        /* Need to add code here to re-instate mixed endian support.
+           NEEDS_SWAP would need to hold a flag indicating which action to
+           take, and S_reverse_copy and the code in uni_to_bytes would need
+           logic adding to deal with any mixed-endian transformations needed.
+        */
 #endif
 
 /* Only to be used inside a loop (see the break) */
@@ -148,12 +152,12 @@ STMT_START {						\
         if (!uni_to_bytes(aTHX_ &s, strend,		\
 	  (char *) (buf), len, datumtype)) break;	\
     } else {						\
-        Copy(s, (char *) (buf), len, char);		\
+        if (needs_swap)                                 \
+            S_reverse_copy(s, (char *) (buf), len);     \
+        else                                            \
+            Copy(s, (char *) (buf), len, char);		\
         s += len;					\
     }							\
-    if (needs_swap) {                                   \
-        my_swabn((buf), len);                           \
-    }                                                   \
 } STMT_END
 
 #define SHIFT16(utf8, s, strend, p, datumtype)                          \
@@ -248,6 +252,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 #include "packsizetables.c"
 
+static void
+S_reverse_copy(const char *src, char *dest, STRLEN len)
+{
+    dest += len;
+    while (len--)
+        *--dest = *src++;
+}
+
 STATIC U8
 uni_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
 {
@@ -283,6 +295,11 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
     int bad = 0;
     const U32 flags = ckWARN(WARN_UTF8) ?
 	UTF8_CHECK_ONLY : (UTF8_CHECK_ONLY | UTF8_ALLOW_ANY);
+    const bool needs_swap = NEEDS_SWAP(datumtype);
+
+    if (needs_swap)
+        buf += buf_len;
+
     for (;buf_len > 0; buf_len--) {
 	if (from >= end) return FALSE;
 	val = utf8n_to_uvchr((U8 *) from, end-from, &retlen, flags);
@@ -294,7 +311,10 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 	    bad |= 2;
 	    val &= 0xff;
 	}
-	*(U8 *)buf++ = (U8)val;
+        if (needs_swap)
+            *(U8 *)--buf = (U8)val;
+        else
+            *(U8 *)buf++ = (U8)val;
     }
     /* We have enough characters for the buffer. Did we have problems ? */
     if (bad) {
