@@ -1417,6 +1417,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ai16 = 0;
 # endif
 		SHIFT16(utf8, s, strend, &ai16, datumtype);
+                DO_BO_UNPACK(ai16);
+                /* There should never be any byte-swapping here.  */
+                assert(!TYPE_ENDIANNESS(datumtype));
 		if (datumtype == ('n' | TYPE_IS_SHRIEKING))
 		    ai16 = (I16) PerlSock_ntohs((U16) ai16);
 		if (datumtype == ('v' | TYPE_IS_SHRIEKING))
@@ -1566,6 +1569,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ai32 = 0;
 #endif
 		SHIFT32(utf8, s, strend, &ai32, datumtype);
+                DO_BO_UNPACK(ai32);
+                /* There should never be any byte swapping here.  */
+                assert(!TYPE_ENDIANNESS(datumtype));
 		if (datumtype == ('N' | TYPE_IS_SHRIEKING))
 		    ai32 = (I32)PerlSock_ntohl((U32)ai32);
 		if (datumtype == ('V' | TYPE_IS_SHRIEKING))
