@@ -350,6 +350,10 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)
 .ENDIF
 .ENDIF
 
+.IF "$(USE_PERLIO)" == "define"
+BUILDOPT       += -DUSE_PERLIO
+.ENDIF
+
 .IF "$(USE_ITHREADS)" == "define"
 ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
