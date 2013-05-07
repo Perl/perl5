@@ -246,14 +246,14 @@ S_mul128(pTHX_ SV *sv, U8 m)
 
 # define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
 
-# define DO_BO_UNPACK(var, type)                                              \
+# define DO_BO_UNPACK(var)                                                    \
         STMT_START {                                                          \
           if (needs_swap) {                                                   \
             my_swabn(&var, sizeof(var));                                      \
           }                                                                   \
         } STMT_END
 
-# define DO_BO_PACK(var, type)                                                \
+# define DO_BO_PACK(var)                                                      \
         STMT_START {                                                          \
           if (needs_swap) {                                                   \
             my_swabn(&var, sizeof(var));                                      \
@@ -1337,7 +1337,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		short ashort;
 		SHIFT_VAR(utf8, s, strend, ashort, datumtype);
-		DO_BO_UNPACK(ashort, s);
+                DO_BO_UNPACK(ashort);
 		if (!checksum)
 		    mPUSHi(ashort);
 		else if (checksum > bits_in_uv)
@@ -1357,7 +1357,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ai16 = 0;
 #endif
 		SHIFT16(utf8, s, strend, &ai16, datumtype);
-		DO_BO_UNPACK(ai16, 16);
+                DO_BO_UNPACK(ai16);
 #if U16SIZE > SIZE16
 		if (ai16 > 32767)
 		    ai16 -= 65536;
@@ -1375,7 +1375,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		unsigned short aushort;
 		SHIFT_VAR(utf8, s, strend, aushort, datumtype);
-		DO_BO_UNPACK(aushort, s);
+                DO_BO_UNPACK(aushort);
 		if (!checksum)
 		    mPUSHu(aushort);
 		else if (checksum > bits_in_uv)
@@ -1396,7 +1396,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		au16 = 0;
 #endif
 		SHIFT16(utf8, s, strend, &au16, datumtype);
-		DO_BO_UNPACK(au16, 16);
+                DO_BO_UNPACK(au16);
 		if (datumtype == 'n')
 		    au16 = PerlSock_ntohs(au16);
 		if (datumtype == 'v')
@@ -1434,7 +1434,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		int aint;
 		SHIFT_VAR(utf8, s, strend, aint, datumtype);
-		DO_BO_UNPACK(aint, i);
+                DO_BO_UNPACK(aint);
 		if (!checksum)
 		    mPUSHi(aint);
 		else if (checksum > bits_in_uv)
@@ -1448,7 +1448,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		unsigned int auint;
 		SHIFT_VAR(utf8, s, strend, auint, datumtype);
-		DO_BO_UNPACK(auint, i);
+                DO_BO_UNPACK(auint);
 		if (!checksum)
 		    mPUSHu(auint);
 		else if (checksum > bits_in_uv)
@@ -1461,7 +1461,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		IV aiv;
 		SHIFT_VAR(utf8, s, strend, aiv, datumtype);
-                DO_BO_UNPACK(aiv, IV);
+                DO_BO_UNPACK(aiv);
 		if (!checksum)
 		    mPUSHi(aiv);
 		else if (checksum > bits_in_uv)
@@ -1474,7 +1474,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		UV auv;
 		SHIFT_VAR(utf8, s, strend, auv, datumtype);
-                DO_BO_UNPACK(auv, UV);
+                DO_BO_UNPACK(auv);
 		if (!checksum)
 		    mPUSHu(auv);
 		else if (checksum > bits_in_uv)
@@ -1488,7 +1488,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		long along;
 		SHIFT_VAR(utf8, s, strend, along, datumtype);
-		DO_BO_UNPACK(along, l);
+                DO_BO_UNPACK(along);
 		if (!checksum)
 		    mPUSHi(along);
 		else if (checksum > bits_in_uv)
@@ -1507,7 +1507,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		ai32 = 0;
 #endif
 		SHIFT32(utf8, s, strend, &ai32, datumtype);
-		DO_BO_UNPACK(ai32, 32);
+                DO_BO_UNPACK(ai32);
 #if U32SIZE > SIZE32
 		if (ai32 > 2147483647) ai32 -= 4294967296;
 #endif
@@ -1524,7 +1524,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		unsigned long aulong;
 		SHIFT_VAR(utf8, s, strend, aulong, datumtype);
-		DO_BO_UNPACK(aulong, l);
+                DO_BO_UNPACK(aulong);
 		if (!checksum)
 		    mPUSHu(aulong);
 		else if (checksum > bits_in_uv)
@@ -1545,7 +1545,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		au32 = 0;
 #endif
 		SHIFT32(utf8, s, strend, &au32, datumtype);
-		DO_BO_UNPACK(au32, 32);
+                DO_BO_UNPACK(au32);
 		if (datumtype == 'N')
 		    au32 = PerlSock_ntohl(au32);
 		if (datumtype == 'V')
@@ -1582,7 +1582,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		const char *aptr;
 		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
-                DO_BO_UNPACK(aptr, pointer);
+                DO_BO_UNPACK(aptr);
 		/* newSVpv generates undef if aptr is NULL */
 		mPUSHs(newSVpv(aptr, 0));
 	    }
@@ -1636,7 +1636,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (s + sizeof(char*) <= strend) {
 		char *aptr;
 		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
-                DO_BO_UNPACK(aptr, pointer);
+                DO_BO_UNPACK(aptr);
 		/* newSVpvn generates undef if aptr is NULL */
 		PUSHs(newSVpvn_flags(aptr, len, SVs_TEMP));
 	    }
@@ -1646,7 +1646,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		Quad_t aquad;
 		SHIFT_VAR(utf8, s, strend, aquad, datumtype);
-		DO_BO_UNPACK(aquad, 64);
+                DO_BO_UNPACK(aquad);
 		if (!checksum)
                     mPUSHs(aquad >= IV_MIN && aquad <= IV_MAX ?
 			   newSViv((IV)aquad) : newSVnv((NV)aquad));
@@ -1660,7 +1660,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		Uquad_t auquad;
 		SHIFT_VAR(utf8, s, strend, auquad, datumtype);
-		DO_BO_UNPACK(auquad, 64);
+                DO_BO_UNPACK(auquad);
 		if (!checksum)
 		    mPUSHs(auquad <= UV_MAX ?
 			   newSVuv((UV)auquad) : newSVnv((NV)auquad));
@@ -1676,7 +1676,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		float afloat;
 		SHIFT_VAR(utf8, s, strend, afloat, datumtype);
-                DO_BO_UNPACK(afloat, float);
+                DO_BO_UNPACK(afloat);
 		if (!checksum)
 		    mPUSHn(afloat);
 		else
@@ -1687,7 +1687,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		double adouble;
 		SHIFT_VAR(utf8, s, strend, adouble, datumtype);
-                DO_BO_UNPACK(adouble, double);
+                DO_BO_UNPACK(adouble);
 		if (!checksum)
 		    mPUSHn(adouble);
 		else
@@ -1698,7 +1698,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		NV_bytes anv;
 		SHIFT_BYTES(utf8, s, strend, anv.bytes, sizeof(anv.bytes), datumtype);
-                DO_BO_UNPACK(anv.nv, NV);
+                DO_BO_UNPACK(anv.nv);
 		if (!checksum)
 		    mPUSHn(anv.nv);
 		else
@@ -1710,7 +1710,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    while (len-- > 0) {
 		ld_bytes aldouble;
 		SHIFT_BYTES(utf8, s, strend, aldouble.bytes, sizeof(aldouble.bytes), datumtype);
-                DO_BO_UNPACK(aldouble.ld, long double);
+                DO_BO_UNPACK(aldouble.ld);
 		if (!checksum)
 		    mPUSHn(aldouble.ld);
 		else
@@ -2696,7 +2696,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 # else
 		afloat = (float)anv;
 # endif
-                DO_BO_PACK(afloat, float);
+                DO_BO_PACK(afloat);
 		PUSH_VAR(utf8, cur, afloat);
 	    }
 	    break;
@@ -2718,7 +2718,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 # else
 		adouble = (double)anv;
 # endif
-                DO_BO_PACK(adouble, double);
+                DO_BO_PACK(adouble);
 		PUSH_VAR(utf8, cur, adouble);
 	    }
 	    break;
@@ -2733,7 +2733,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #else
 		anv.nv = SvNV(fromstr);
 #endif
-                DO_BO_PACK(anv, NV);
+                DO_BO_PACK(anv);
 		PUSH_BYTES(utf8, cur, anv.bytes, sizeof(anv.bytes));
 	    }
 	    break;
@@ -2751,7 +2751,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #  else
 		aldouble.ld = (long double)SvNV(fromstr);
 #  endif
-                DO_BO_PACK(aldouble, long double);
+                DO_BO_PACK(aldouble);
 		PUSH_BYTES(utf8, cur, aldouble.bytes, sizeof(aldouble.bytes));
 	    }
 	    break;
@@ -2783,7 +2783,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		unsigned short aushort;
 		fromstr = NEXTFROM;
 		aushort = SvUV(fromstr);
-		DO_BO_PACK(aushort, s);
+                DO_BO_PACK(aushort);
 		PUSH_VAR(utf8, cur, aushort);
 	    }
             break;
@@ -2795,7 +2795,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		U16 au16;
 		fromstr = NEXTFROM;
 		au16 = (U16)SvUV(fromstr);
-		DO_BO_PACK(au16, 16);
+                DO_BO_PACK(au16);
 		PUSH16(utf8, cur, &au16);
 	    }
 	    break;
@@ -2805,7 +2805,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		short ashort;
 		fromstr = NEXTFROM;
 		ashort = SvIV(fromstr);
-		DO_BO_PACK(ashort, s);
+                DO_BO_PACK(ashort);
 		PUSH_VAR(utf8, cur, ashort);
 	    }
             break;
@@ -2817,7 +2817,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		I16 ai16;
 		fromstr = NEXTFROM;
 		ai16 = (I16)SvIV(fromstr);
-		DO_BO_PACK(ai16, 16);
+                DO_BO_PACK(ai16);
 		PUSH16(utf8, cur, &ai16);
 	    }
 	    break;
@@ -2827,7 +2827,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		unsigned int auint;
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
-		DO_BO_PACK(auint, i);
+                DO_BO_PACK(auint);
 		PUSH_VAR(utf8, cur, auint);
 	    }
 	    break;
@@ -2836,7 +2836,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		IV aiv;
 		fromstr = NEXTFROM;
 		aiv = SvIV(fromstr);
-                DO_BO_PACK(aiv, IV);
+                DO_BO_PACK(aiv);
 		PUSH_VAR(utf8, cur, aiv);
 	    }
 	    break;
@@ -2845,7 +2845,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		UV auv;
 		fromstr = NEXTFROM;
 		auv = SvUV(fromstr);
-                DO_BO_PACK(auv, UV);
+                DO_BO_PACK(auv);
 		PUSH_VAR(utf8, cur, auv);
 	    }
 	    break;
@@ -2942,7 +2942,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		int aint;
 		fromstr = NEXTFROM;
 		aint = SvIV(fromstr);
-		DO_BO_PACK(aint, i);
+                DO_BO_PACK(aint);
 		PUSH_VAR(utf8, cur, aint);
 	    }
 	    break;
@@ -2972,7 +2972,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		unsigned long aulong;
 		fromstr = NEXTFROM;
 		aulong = SvUV(fromstr);
-		DO_BO_PACK(aulong, l);
+                DO_BO_PACK(aulong);
 		PUSH_VAR(utf8, cur, aulong);
 	    }
 	    break;
@@ -2984,7 +2984,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		U32 au32;
 		fromstr = NEXTFROM;
 		au32 = SvUV(fromstr);
-		DO_BO_PACK(au32, 32);
+                DO_BO_PACK(au32);
 		PUSH32(utf8, cur, &au32);
 	    }
 	    break;
@@ -2994,7 +2994,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		long along;
 		fromstr = NEXTFROM;
 		along = SvIV(fromstr);
-		DO_BO_PACK(along, l);
+                DO_BO_PACK(along);
 		PUSH_VAR(utf8, cur, along);
 	    }
 	    break;
@@ -3006,7 +3006,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		I32 ai32;
 		fromstr = NEXTFROM;
 		ai32 = SvIV(fromstr);
-		DO_BO_PACK(ai32, 32);
+                DO_BO_PACK(ai32);
 		PUSH32(utf8, cur, &ai32);
 	    }
 	    break;
@@ -3016,7 +3016,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		Uquad_t auquad;
 		fromstr = NEXTFROM;
 		auquad = (Uquad_t) SvUV(fromstr);
-		DO_BO_PACK(auquad, 64);
+                DO_BO_PACK(auquad);
 		PUSH_VAR(utf8, cur, auquad);
 	    }
 	    break;
@@ -3025,7 +3025,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		Quad_t aquad;
 		fromstr = NEXTFROM;
 		aquad = (Quad_t)SvIV(fromstr);
-		DO_BO_PACK(aquad, 64);
+                DO_BO_PACK(aquad);
 		PUSH_VAR(utf8, cur, aquad);
 	    }
 	    break;
@@ -3057,7 +3057,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    else
 			aptr = SvPV_force_flags_nolen(fromstr, 0);
 		}
-                DO_BO_PACK(aptr, pointer);
+                DO_BO_PACK(aptr);
 		PUSH_VAR(utf8, cur, aptr);
 	    }
 	    break;
