@@ -3408,8 +3408,7 @@ my_swap16(const U16 x) {
 #  define vtohs(x)      ((x)&0xFFFF)
 #  define htovl(x)      vtohl(x)
 #  define htovs(x)      vtohs(x)
-#else
-# if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+#elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 #  define vtohl(x)	((((x)&0xFF)<<24)	\
 			+(((x)>>24)&0xFF)	\
 			+(((x)&0x0000FF00)<<8)	\
@@ -3417,14 +3416,11 @@ my_swap16(const U16 x) {
 #  define vtohs(x)	((((x)&0xFF)<<8) + (((x)>>8)&0xFF))
 #  define htovl(x)	vtohl(x)
 #  define htovs(x)	vtohs(x)
-# endif
-	/* otherwise default to functions in util.c */
-#ifndef htovs
-short htovs(short n);
-short vtohs(short n);
-long htovl(long n);
-long vtohl(long n);
-#endif
+#else
+#  error "Unsupported byteorder"
+/* If you have need for current perl on PDP-11 or similar, and can help test
+   that blead keeps working on a mixed-endian system, then see
+   pod/perlhack.pod for how to submit patches to things working again.  */
 #endif
 
 /* *MAX Plus 1. A floating point value.
