@@ -9,7 +9,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 49 + 27*14);
+plan(tests => 50 + 27*14);
 
 # Tests presume we are in t/op directory and that file 'TEST' is found
 # therein.
@@ -98,9 +98,9 @@ like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 # t/TEST can be a symlink under -Dmksymlinks, so use our temporary file.
 SKIP: {
  use Perl::OSType 'os_type';
- if (os_type ne 'Unix') { skip "Not Unix", 2 }
+ if (os_type ne 'Unix') { skip "Not Unix", 3 }
  chomp(my $ln = `which ln`);
- if ( ! -e $ln ) { skip "No ln"   , 2 }
+ if ( ! -e $ln ) { skip "No ln"   , 3 }
  lstat $ro_empty_file;
  `ln -s $ro_empty_file 1`;
  isnt(-l -e _, 1, 'stacked -l uses previous stat, not previous retval');
@@ -111,7 +111,10 @@ SKIP: {
  # -l always treats a non-bareword argument as a file name
  system 'ln', '-s', $ro_empty_file, \*foo;
  local $^W = 1;
+ my @warnings;
+ local $SIG{__WARN__} = sub { push @warnings, @_ };
  is(-l \*foo, 1, '-l \*foo is a file name');
+ ok($warnings[0] =~ /-l on filehandle foo/, 'warning for -l $handle');
  unlink \*foo;
 }
 
