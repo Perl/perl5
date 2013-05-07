@@ -4316,6 +4316,11 @@ is true for "LATIN SMALL LETTER Y WITH DIAERESIS", but since the upper
 case of that character is not in Latin1, in that locale it doesn't
 change when upper cased.
 
+=item Quantifier {n,m} with n > m can't match in regex
+
+(W regexp) Minima should be less than or equal to maxima.  If you really
+want your regexp to match something 0 times, just put {0}.
+
 =item Quantifier follows nothing in regex; marked by <-- HERE in m/%s/
 
 (F) You started a regular expression with a quantifier.  Backslash it if
@@ -5076,6 +5081,17 @@ change in a future Perl version, you can do this to silence the
 warning:
 
     no warnings "experimental::regex_sets";
+
+=item The %s feature is experimental
+
+(S experimental) This warning is emitted if you enable an experimental
+feature via C<use feature>.  Simply suppress the warning if you want
+to use the feature, but know that in doing so you are taking the risk
+of using an experimental feature which may change or be removed in a
+future Perl version:
+
+    no warnings "experimental::lexical_subs";
+    use feature "lexical_subs";
 
 =item The %s function is unimplemented
 
