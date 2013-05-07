@@ -6000,12 +6000,18 @@ static SV *do_retrieve(
 
 	if (!f && in) {
 #ifdef SvUTF8_on
-		if (SvUTF8(in)) {
+		if (SvMAGICAL(in) || SvUTF8(in))
+#else
+		if (SvMAGICAL(in))
+#endif
+		{
 			in = sv_mortalcopy(in);
+#ifdef SvUTF8_on
 			if (!sv_utf8_downgrade(in, 1))
 				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
-		}
 #endif
+		}
+
 		MBUF_SAVE_AND_LOAD(in);
 	}
 
