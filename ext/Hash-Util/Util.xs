@@ -89,7 +89,7 @@ hash_traversal_mask(rhv, ...)
 {
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     if (SvROK(rhv) && SvTYPE(SvRV(rhv))==SVt_PVHV && !SvMAGICAL(SvRV(rhv))) {
-        HV *hv = SvRV(rhv);
+        HV *hv = (HV *)SvRV(rhv);
         if (items>1) {
             hv_rand_set(hv, SvUV(ST(1)));
         }
