@@ -4721,17 +4721,6 @@ pod/perl5160delta.pod		Perl changes in version 5.16.0
 pod/perl5161delta.pod		Perl changes in version 5.16.1
 pod/perl5162delta.pod		Perl changes in version 5.16.2
 pod/perl5163delta.pod		Perl changes in version 5.16.3
-pod/perl5170delta.pod		Perl changes in version 5.17.0
-pod/perl51710delta.pod		Perl changes in version 5.17.10
-pod/perl5171delta.pod		Perl changes in version 5.17.1
-pod/perl5172delta.pod		Perl changes in version 5.17.2
-pod/perl5173delta.pod		Perl changes in version 5.17.3
-pod/perl5174delta.pod		Perl changes in version 5.17.4
-pod/perl5175delta.pod		Perl changes in version 5.17.5
-pod/perl5176delta.pod		Perl changes in version 5.17.6
-pod/perl5177delta.pod		Perl changes in version 5.17.7
-pod/perl5178delta.pod		Perl changes in version 5.17.8
-pod/perl5179delta.pod		Perl changes in version 5.17.9
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -4885,7 +4874,6 @@ Porting/manicheck		Check against MANIFEST
 Porting/manisort		Sort the MANIFEST
 Porting/new-perldelta.pl	Generate a new perldelta
 Porting/newtests-perldelta.pl	Generate Perldelta stub for newly added tests
-Porting/perl5180delta.pod	Perl changes in version 5.16.0
 Porting/perldelta_template.pod	Template for creating new perldelta.pod files
 Porting/perlhist_calculate.pl		Perform calculations to update perlhist
 Porting/pod_lib.pl		Code for handling generated pods
