@@ -13543,8 +13543,7 @@ parseit:
                          * doesn't allow them between above and below 256 */
                         if ((ASCII_FOLD_RESTRICTED
                                   && (isASCII(c) != isASCII(j)))
-                            || (LOC && ((c < 256) != (j < 256))))
-                        {
+                            || (LOC && c < 256)) {
                             continue;
                         }
 
