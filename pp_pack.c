@@ -129,26 +129,6 @@ typedef union {
 #  define OFF32(p)     ((char *) (p))
 #endif
 
-/* Only to be used inside a loop (see the break) */
-#define SHIFT16(utf8, s, strend, p, datumtype) STMT_START {		\
-    if (utf8) {								\
-	if (!uni_to_bytes(aTHX_ &(s), strend, OFF16(p), SIZE16, datumtype)) break;	\
-    } else {								\
-	Copy(s, OFF16(p), SIZE16, char);				\
-	(s) += SIZE16;							\
-    }									\
-} STMT_END
-
-/* Only to be used inside a loop (see the break) */
-#define SHIFT32(utf8, s, strend, p, datumtype) STMT_START {		\
-    if (utf8) {								\
-	if (!uni_to_bytes(aTHX_ &(s), strend, OFF32(p), SIZE32, datumtype)) break;	\
-    } else {								\
-	Copy(s, OFF32(p), SIZE32, char);				\
-	(s) += SIZE32;							\
-    }									\
-} STMT_END
-
 #define PUSH16(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF16(p), SIZE16)
 #define PUSH32(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF32(p), SIZE32)
 
@@ -172,6 +152,12 @@ STMT_START {						\
         s += len;					\
     }							\
 } STMT_END
+
+#define SHIFT16(utf8, s, strend, p, datumtype)                          \
+       SHIFT_BYTES(utf8, s, strend, OFF16(p), SIZE16, datumtype)
+
+#define SHIFT32(utf8, s, strend, p, datumtype)                          \
+       SHIFT_BYTES(utf8, s, strend, OFF32(p), SIZE32, datumtype)
 
 #define SHIFT_VAR(utf8, s, strend, var, datumtype)	\
        SHIFT_BYTES(utf8, s, strend, &(var), sizeof(var), datumtype)
