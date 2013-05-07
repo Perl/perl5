@@ -1704,6 +1704,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_MEM_LOG_NOIMPL
 			     " PERL_MEM_LOG_NOIMPL"
 #  endif
+#  ifdef PERL_NEW_COPY_ON_WRITE
+			     " PERL_NEW_COPY_ON_WRITE"
+#  endif
 #  ifdef PERL_PRESERVE_IVUV
 			     " PERL_PRESERVE_IVUV"
 #  endif
