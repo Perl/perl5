@@ -81,6 +81,7 @@
 #  define HvTOTALKEYS(hv)	HvKEYS(hv)
 #endif
 
+#define DEBUGME 1
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -243,7 +244,7 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
  *
  */
 #ifdef SvUTF8_on
-#define STORE_UTF8STR(pv, len)	STORE_PV_LEN(pv, len, SX_UTF8STR, SX_LUTF8STR)
+#define WRITE_UTF8STR(pv, len)	WRITE_PV_WITH_LEN_AND_TYPE(pv, len, SX_UTF8STR)
 #define HAS_UTF8_SCALARS
 #ifdef HeKUTF8
 #define HAS_UTF8_HASHES
@@ -253,7 +254,7 @@ typedef unsigned long stag_t;	/* Used by pre-0.6 binary format */
 #endif
 #else
 #define SvUTF8(sv) 0
-#define STORE_UTF8STR(pv, len) CROAK(("panic: storing UTF8 in non-UTF8 perl"))
+#define WRITE_UTF8STR(pv, len) CROAK(("panic: storing UTF8 in non-UTF8 perl"))
 #endif
 #ifndef HAS_UTF8_ALL
 #define UTF8_CROAK() CROAK(("Cannot retrieve UTF8 data in non-UTF8 perl"))
@@ -326,6 +327,7 @@ typedef struct stcxt {
 	SV *keybuf;	        /* for hash key retrieval */
 	struct extendable membuf;	/* for memory store/retrieve operations */
 	struct extendable msaved;	/* where potentially valid mbuf is saved */
+        SV *output;
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
@@ -427,16 +429,16 @@ static stcxt_t *Context_ptr = NULL;
  * oI, oS, oC
  *
  * Hack for Crays, where sizeof(I32) == 8, and which are big-endians.
- * Used in the WLEN and RLEN macros.
+ * Used in the RLEN macros.
  */
 
 #if INTSIZE > 4
-#define oI(x)	((I32 *) ((char *) (x) + 4))
+#define oI(x)	((char *) (x) + 4))
 #define oS(x)	((x) - 4)
 #define oC(x)	(x = 0)
 #define CRAY_HACK
 #else
-#define oI(x)	(x)
+#define oI(x)	((char *)(x))
 #define oS(x)	(x)
 #define oC(x)
 #endif
@@ -459,49 +461,19 @@ static stcxt_t *Context_ptr = NULL;
 #define int_aligned(x)	\
 	((unsigned long) (x) == trunc_int(x))
 
-#define MBUF_INIT(x)					\
-  STMT_START {							\
-	if (!mbase) {						\
-		TRACEME(("** allocating mbase of %d bytes", MGROW)); \
-		New(10003, mbase, MGROW, char);	\
-		msiz = (STRLEN)MGROW;					\
-	}									\
-	mptr = mbase;						\
-	if (x)								\
-		mend = mbase + x;				\
-	else								\
-		mend = mbase + msiz;			\
-  } STMT_END
+#define OUTPUT_INIT(x)                                       \
+        STMT_START {                                         \
+                if (!cxt->output) {                          \
+                        cxt->output = newSV(512);            \
+                        SvPOK_only(cxt->output);             \
+                }                                            \
+                else {                                       \
+                        SvCUR_set(cxt->output, 0);           \
+                }                                            \
+        } STMT_END
 
-#define MBUF_TRUNC(x)	mptr = mbase + x
+
 #define MBUF_SIZE()		(mptr - mbase)
-
-/*
- * MBUF_SAVE_AND_LOAD
- * MBUF_RESTORE
- *
- * Those macros are used in do_retrieve() to save the current memory
- * buffer into cxt->msaved, before MBUF_LOAD() can be used to retrieve
- * data from a string.
- */
-#define MBUF_SAVE_AND_LOAD(in)			\
-  STMT_START {							\
-	ASSERT(!cxt->membuf_ro, ("mbase not already saved")); \
-	cxt->membuf_ro = 1;					\
-	TRACEME(("saving mbuf"));			\
-	StructCopy(&cxt->membuf, &cxt->msaved, struct extendable); \
-	MBUF_LOAD(in);						\
-  } STMT_END
-
-#define MBUF_RESTORE() 					\
-  STMT_START {							\
-	ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
-	cxt->membuf_ro = 0;					\
-	TRACEME(("restoring mbuf"));		\
-	StructCopy(&cxt->msaved, &cxt->membuf, struct extendable); \
-  } STMT_END
-
-
 
 static const char *
 read_into_sv(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
@@ -560,39 +532,6 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 		if (!kbuf) return (SV*)NULL;				\
 	} STMT_END
 
-
-/*
- * Use SvPOKp(), because SvPOK() fails on tainted scalars.
- * See store_scalar() for other usage of this workaround.
- */
-#define MBUF_LOAD(v) 					\
-  STMT_START {							\
-	ASSERT(cxt->membuf_ro, ("mbase is read-only")); \
-	if (!SvPOKp(v))						\
-		CROAK(("Not a scalar string"));	\
-	mptr = mbase = SvPV(v, msiz);		\
-	mend = mbase + msiz;				\
-  } STMT_END
-
-#define MBUF_XTEND(x) 				\
-  STMT_START {						\
-	int nsz = (int) round_mgrow((x)+msiz);	\
-	int offset = mptr - mbase;		\
-	ASSERT(!cxt->membuf_ro, ("mbase is not read-only")); \
-	TRACEME(("** extending mbase from %d to %d bytes (wants %d new)", \
-		msiz, nsz, (x)));			\
-	Renew(mbase, nsz, char);		\
-	msiz = nsz;						\
-	mptr = mbase + offset;			\
-	mend = mbase + nsz;				\
-  } STMT_END
-
-#define MBUF_CHK(x) 				\
-  STMT_START {						\
-	if ((mptr + (x)) > mend)		\
-		MBUF_XTEND(x);				\
-  } STMT_END
-
 #define MBUF_GETC(x) 				\
   STMT_START {						\
 	if (mptr < mend)				\
@@ -634,41 +573,131 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 		return (SV *) 0;			\
   } STMT_END
 
-#define MBUF_PUTC(c) 				\
-  STMT_START {						\
-	if (mptr < mend)				\
-		*mptr++ = (char) c;			\
-	else {							\
-		MBUF_XTEND(1);				\
-		*mptr++ = (char) c;			\
-	}								\
-  } STMT_END
+#define WRITE_ERROR(msg)                        \
+        STMT_START {                            \
+                TRACEME(("%s failed", msg));    \
+                return -1;                      \
+        } STMT_END
+        
 
-#ifdef CRAY_HACK
-#define MBUF_PUTINT(i) 				\
-  STMT_START {						\
-	MBUF_CHK(4);					\
-	memcpy(mptr, oI(&i), 4);		\
-	mptr += 4;						\
-  } STMT_END
-#else
-#define MBUF_PUTINT(i) 				\
-  STMT_START {						\
-	MBUF_CHK(sizeof(int));			\
-	if (int_aligned(mptr))			\
-		*(int *) mptr = i;			\
-	else							\
-		memcpy(mptr, &i, sizeof(int));	\
-	mptr += sizeof(int);			\
-  } STMT_END
-#endif
+static int
+write_bytes(pTHX_ stcxt_t *cxt, const char *str, STRLEN len) {
+        if (len) {
+                if (cxt->fio) {
+                        STRLEN bytes = PerlIO_write(cxt->fio, str, len);
+                        if (bytes != len) {
+                                TRACEME(("PerlIO_write failed, requested bytes: %d, written: %d",
+                                         len, bytes));
+                                WRITE_ERROR("write_bytes");
+                        }
+                }
+                else {
+                        sv_catpvn(cxt->output, str, len);
+                }
+        }
+        return 0;
+}
 
-#define MBUF_WRITE(x,s) 			\
-  STMT_START {						\
-	MBUF_CHK(s);					\
-	memcpy(mptr, x, s);				\
-	mptr += s;						\
-  } STMT_END
+#define WRITE_BYTES(x,y)                                                \
+        STMT_START {                                                    \
+                if (write_bytes(aTHX_ cxt, (x), (y)))                   \
+                        WRITE_ERROR("WRITE_BYTES");                     \
+        } STMT_END
+
+static int
+write_i32n(pTHX_ stcxt_t *cxt, I32 i32) {
+        char b[4];
+        b[0] = i32 >> 24;
+        b[1] = i32 >> 16;
+        b[2] = i32 >>  8;
+        b[3] = i32;
+        return write_bytes(aTHX_ cxt, b, 4);
+}
+
+#define WRITE_I32N(x)                                   \
+        STMT_START {                                    \
+                if (write_i32n(aTHX_ cxt, (x)))         \
+                        WRITE_ERROR("WRITE_I32N");      \
+        } STMT_END
+
+static int
+write_i32(pTHX_ stcxt_t *cxt, I32 i32) {
+        if (cxt->netorder)
+                return write_i32n(aTHX_ cxt, i32);
+        else
+                return write_bytes(aTHX_ cxt, oI(&i32), 4);
+}
+
+#define WRITE_MARK(c)                                    \
+        STMT_START {                                     \
+                char str = c;                            \
+                if (write_bytes(aTHX_ cxt, &str, 1))     \
+                        WRITE_ERROR("WRITE_MARK");       \
+        } STMT_END
+
+#define WRITE_I32(x)                                                    \
+        STMT_START {                                                    \
+                ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));   \
+                if (write_i32(aTHX_ cxt, (x)))                          \
+                        WRITE_ERROR("WRITE_I32");                       \
+        } STMT_END
+
+#define WRITE_LEN(len)                                                  \
+        STMT_START {                                                    \
+                if (len > I32_MAX)                                      \
+                        Perl_croak(aTHX_ "data length too big: %"UVuf , \
+                                   (UV)len);                            \
+                if (write_i32(aTHX_ cxt, len))                          \
+                        WRITE_ERROR("WRITE_LEN");                       \
+        } STMT_END
+
+static int
+write_pv_with_len(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len) {
+        WRITE_LEN(len);
+        WRITE_BYTES(pv, len);
+        return 0;
+}
+
+#define WRITE_PV_WITH_LEN(pv, len)                                      \
+        STMT_START {                                                    \
+                if (write_pv_with_len(aTHX_ cxt, pv, len))              \
+                        WRITE_ERROR("WRITE_PV_WITH_LEN");               \
+        } STMT_END
+
+static int
+write_pv_with_len_and_type(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len, char type) {
+        if (len < LG_SCALAR) {
+                WRITE_MARK(type);
+                WRITE_MARK(len);
+                WRITE_BYTES(pv, len);
+        }
+        else {
+                switch (type) {
+                case SX_SCALAR:
+                        type = SX_LSCALAR;
+                        break;
+                case SX_UTF8STR:
+                        type = SX_LUTF8STR;
+                        break;
+                case SX_VSTRING:
+                        type = SX_LVSTRING;
+                        break;
+                default:
+                        Perl_croak(aTHX_ "unexpected type %i passed to write_pv_with_len_and_type", (int)type);
+                }
+                WRITE_MARK(type);
+                WRITE_PV_WITH_LEN(pv, len);
+        }
+        return 0;
+}
+
+#define WRITE_PV_WITH_LEN_AND_TYPE(pv, len, type)                       \
+        STMT_START {                                                    \
+                if (write_pv_with_len_and_type(aTHX_ cxt,               \
+                                               (pv), (len), (type)))    \
+                        WRITE_ERROR("WRITE_PV_WITH_LEN_AND_TYPE");      \
+        } STMT_END
+
 
 /*
  * Possible return values for sv_type().
@@ -837,76 +866,17 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * tagnum with cxt->tagnum++ along with this macro!
  *     - samv 20Jan04
  */
-#define PUTMARK(x) 							\
-  STMT_START {								\
-	if (!cxt->fio)							\
-		MBUF_PUTC(x);						\
-	else if (PerlIO_putc(cxt->fio, x) == EOF)	\
-		return -1;							\
-  } STMT_END
 
-#define WRITE_I32(x)					\
-  STMT_START {							\
-	ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));	\
-	if (!cxt->fio)						\
-		MBUF_PUTINT(x);					\
-	else if (PerlIO_write(cxt->fio, oI(&x), oS(sizeof(x))) != oS(sizeof(x))) \
-		return -1;					\
-  } STMT_END
-
-#ifdef HAS_HTONL
-#define WLEN(x)						\
-  STMT_START {						\
-	if (cxt->netorder) {			\
-		int y = (int) htonl(x);		\
-		if (!cxt->fio)				\
-			MBUF_PUTINT(y);			\
-		else if (PerlIO_write(cxt->fio,oI(&y),oS(sizeof(y))) != oS(sizeof(y))) \
-			return -1;				\
-	} else {						\
-		if (!cxt->fio)				\
-			MBUF_PUTINT(x);			\
-		else if (PerlIO_write(cxt->fio,oI(&x),oS(sizeof(x))) != oS(sizeof(x))) \
-			return -1;				\
-	}								\
-  } STMT_END
-#else
-#define WLEN(x)	WRITE_I32(x)
-#endif
-
-#define WRITE(x,y) 							\
-  STMT_START {								\
-	if (!cxt->fio)							\
-		MBUF_WRITE(x,y);					\
-	else if (PerlIO_write(cxt->fio, x, y) != y)	\
-		return -1;							\
-  } STMT_END
-
-#define STORE_PV_LEN(pv, len, small, large)			\
-  STMT_START {							\
-	if (len <= LG_SCALAR) {				\
-		unsigned char clen = (unsigned char) len;	\
-		PUTMARK(small);					\
-		PUTMARK(clen);					\
-		if (len)						\
-			WRITE(pv, len);				\
-	} else {							\
-		PUTMARK(large);					\
-		WLEN(len);						\
-		WRITE(pv, len);					\
-	}									\
-  } STMT_END
-
-#define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
+#define WRITE_SCALAR(pv, len)	WRITE_PV_WITH_LEN_AND_TYPE(pv, len, SX_SCALAR)
 
 /*
  * Store &PL_sv_undef in arrays without recursing through store().
  */
-#define STORE_SV_UNDEF() 					\
-  STMT_START {							\
-	cxt->tagnum++;						\
-	PUTMARK(SX_SV_UNDEF);					\
-  } STMT_END
+#define WRITE_SV_UNDEF()                        \
+        STMT_START {                            \
+                cxt->tagnum++;                  \
+                WRITE_MARK(SX_SV_UNDEF);        \
+        } STMT_END
 
 /*
  * Useful retrieve shortcuts...
@@ -1191,7 +1161,7 @@ static const sv_retrieve_t sv_retrieve[] = {
 
 #define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_ERROR ? SX_ERROR : (x)])
 
-static SV *mbuf2sv(pTHX);
+static SV *output2sv(pTHX);
 
 /***
  *** Context management.
@@ -1529,9 +1499,6 @@ static void clean_context(pTHX_ stcxt_t *cxt)
 	TRACEME(("clean_context"));
 
 	ASSERT(cxt->s_dirty, ("dirty context"));
-
-	if (cxt->membuf_ro)
-		MBUF_RESTORE();
 
 	ASSERT(!cxt->membuf_ro, ("mbase is not read-only"));
 
@@ -1932,11 +1899,11 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 		HV *stash = (HV *) SvSTASH(sv);
 		if (stash && Gv_AMG(stash)) {
 			TRACEME(("ref (0x%"UVxf") is overloaded", PTR2UV(sv)));
-			PUTMARK(is_weak ? SX_WEAKOVERLOAD : SX_OVERLOAD);
+			WRITE_MARK(is_weak ? SX_WEAKOVERLOAD : SX_OVERLOAD);
 		} else
-			PUTMARK(is_weak ? SX_WEAKREF : SX_REF);
+			WRITE_MARK(is_weak ? SX_WEAKREF : SX_REF);
 	} else
-		PUTMARK(is_weak ? SX_WEAKREF : SX_REF);
+		WRITE_MARK(is_weak ? SX_WEAKREF : SX_REF);
 
 	return store(aTHX_ cxt, sv);
 }
@@ -1975,10 +1942,10 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 	if (!(flags & SVf_OK)) {			/* !SvOK(sv) */
 		if (sv == &PL_sv_undef) {
 			TRACEME(("immortal undef"));
-			PUTMARK(SX_SV_UNDEF);
+			WRITE_MARK(SX_SV_UNDEF);
 		} else {
 			TRACEME(("undef at 0x%"UVxf, PTR2UV(sv)));
-			PUTMARK(SX_UNDEF);
+			WRITE_MARK(SX_UNDEF);
 		}
 		return 0;
 	}
@@ -2017,10 +1984,10 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 	if ((flags & SV_MAYBE_IMMORTAL) == SV_MAYBE_IMMORTAL) {
 		if (sv == &PL_sv_yes) {
 			TRACEME(("immortal yes"));
-			PUTMARK(SX_SV_YES);
+			WRITE_MARK(SX_SV_YES);
 		} else if (sv == &PL_sv_no) {
 			TRACEME(("immortal no"));
-			PUTMARK(SX_SV_NO);
+			WRITE_MARK(SX_SV_NO);
 		} else {
 			pv = SvPV(sv, len);			/* We know it's SvPOK */
 			goto string;				/* Share code below */
@@ -2063,17 +2030,10 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 
             if (iv >= -128 && iv <= 127) {
                 unsigned char siv = (unsigned char) (iv + 128);	/* [0,255] */
-                PUTMARK(SX_BYTE);
-                PUTMARK(siv);
+                WRITE_MARK(SX_BYTE);
+                WRITE_MARK(siv);
                 TRACEME(("small integer stored as %d", siv));
             } else if (cxt->netorder) {
-#ifndef HAS_HTONL
-                TRACEME(("no htonl, fall back to string for integer"));
-                goto string_readlen;
-#else
-                I32 niv;
-
-
 #if IVSIZE > 4
                 if (
 #ifdef SVf_IVisUV
@@ -2086,15 +2046,12 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
                     goto string_readlen;
                 }
 #endif
-
-                niv = (I32) htonl((I32) iv);
                 TRACEME(("using network order"));
-                PUTMARK(SX_NETINT);
-                WRITE_I32(niv);
-#endif
+                WRITE_MARK(SX_NETINT);
+                WRITE_I32(iv);
             } else {
-                PUTMARK(SX_INTEGER);
-                WRITE(&iv, sizeof(iv));
+                WRITE_MARK(SX_INTEGER);
+                WRITE_BYTES((char *)&iv, sizeof(iv));
             }
             
             TRACEME(("ok (integer 0x%"UVxf", value = %"IVdf")", PTR2UV(sv), iv));
@@ -2124,8 +2081,8 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
                 goto string_readlen;		/* Share code below */
             }
 
-            PUTMARK(SX_DOUBLE);
-            WRITE(&nv, sizeof(nv));
+            WRITE_MARK(SX_DOUBLE);
+            WRITE_BYTES((char *)&nv, sizeof(nv));
 
             TRACEME(("ok (double 0x%"UVxf", value = %"NVff")", PTR2UV(sv), nv));
 
@@ -2133,7 +2090,6 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 #ifdef SvVOK
 	    MAGIC *mg;
 #endif
-            I32 wlen; /* For 64-bit machines */
 
           string_readlen:
             pv = SvPV(sv, len);
@@ -2146,15 +2102,13 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 
 #ifdef SvVOK
             if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V')))
-                STORE_PV_LEN((const char *)mg->mg_ptr,
-                             mg->mg_len, SX_VSTRING, SX_LVSTRING);
+                WRITE_PV_WITH_LEN_AND_TYPE((const char *)mg->mg_ptr, mg->mg_len, SX_VSTRING);
 #endif
 
-            wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
             if (SvUTF8 (sv))
-                STORE_UTF8STR(pv, wlen);
+                    WRITE_UTF8STR(pv, len);
             else
-                STORE_SCALAR(pv, wlen);
+                    WRITE_SCALAR(pv, len);
             TRACEME(("ok (scalar 0x%"UVxf" '%s', length = %"IVdf")",
                      PTR2UV(sv), SvPVX(sv), (IV)len));
 	} else
@@ -2185,8 +2139,8 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 	 * Signal array by emitting SX_ARRAY, followed by the array length.
 	 */
 
-	PUTMARK(SX_ARRAY);
-	WLEN(len);
+	WRITE_MARK(SX_ARRAY);
+        WRITE_LEN(len);
 	TRACEME(("size = %d", len));
 
 	/*
@@ -2197,7 +2151,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 		sav = av_fetch(av, i, 0);
 		if (!sav) {
 			TRACEME(("(#%d) undef item", i));
-			STORE_SV_UNDEF();
+			WRITE_SV_UNDEF();
 			continue;
 		}
 		TRACEME(("(#%d) item", i));
@@ -2280,12 +2234,12 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	 */
 
         if (flagged_hash) {
-            PUTMARK(SX_FLAG_HASH);
-            PUTMARK(hash_flags);
+            WRITE_MARK(SX_FLAG_HASH);
+            WRITE_MARK(hash_flags);
         } else {
-            PUTMARK(SX_HASH);
+            WRITE_MARK(SX_HASH);
         }
-	WLEN(len);
+	WRITE_LEN(len);
 	TRACEME(("size = %d", len));
 
 	/*
@@ -2319,6 +2273,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 		 * array.  
 		 */
 
+                /* FIXME: memory leaked here when something fails! */
 		AV *av = newAV();
 
                 /*av_extend (av, len);*/
@@ -2347,8 +2302,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 #endif
                         unsigned char flags = 0;
 			char *keyval;
-			STRLEN keylen_tmp;
-                        I32 keylen;
+			STRLEN keylen;
 			SV *key = av_shift(av);
 			/* This will fail if key is a placeholder.
 			   Track how many placeholders we have, and error if we
@@ -2398,65 +2352,48 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			 * See retrieve_hash() for details.
 			 */
 			 
-                        /* Implementation of restricted hashes isn't nicely
-                           abstracted:  */
-			if ((hash_flags & SHV_RESTRICTED)
-			 && SvREADONLY(val) && !SvIsCOW(val)) {
-				flags |= SHV_K_LOCKED;
-			}
-
-			keyval = SvPV(key, keylen_tmp);
-                        keylen = keylen_tmp;
-#ifdef HAS_UTF8_HASHES
-                        /* If you build without optimisation on pre 5.6
-                           then nothing spots that SvUTF8(key) is always 0,
-                           so the block isn't optimised away, at which point
-                           the linker dislikes the reference to
-                           bytes_from_utf8.  */
-			if (SvUTF8(key)) {
-                            const char *keysave = keyval;
-                            bool is_utf8 = TRUE;
-
-                            /* Just casting the &klen to (STRLEN) won't work
-                               well if STRLEN and I32 are of different widths.
-                               --jhi */
-                            keyval = (char*)bytes_from_utf8((U8*)keyval,
-                                                            &keylen_tmp,
-                                                            &is_utf8);
-
-                            /* If we were able to downgrade here, then than
-                               means that we have  a key which only had chars
-                               0-255, but was utf8 encoded.  */
-
-                            if (keyval != keysave) {
-                                keylen = keylen_tmp;
-                                flags |= SHV_K_WASUTF8;
-                            } else {
-                                /* keylen_tmp can't have changed, so no need
-                                   to assign back to keylen.  */
-                                flags |= SHV_K_UTF8;
-                            }
-                        }
-#endif
 
                         if (flagged_hash) {
-                            PUTMARK(flags);
-                            TRACEME(("(#%d) key '%s' flags %x %u", i, keyval, flags, *keyval));
+                                /* Implementation of restricted hashes isn't nicely
+                                   abstracted:  */
+                                if ((hash_flags & SHV_RESTRICTED)
+                                    && SvREADONLY(val) && !SvIsCOW(val)) {
+                                        flags |= SHV_K_LOCKED;
+                                }
+
+
+#ifdef HAS_UTF8_HASHES
+                                /* If you build without optimisation on pre 5.6
+                                   then nothing spots that SvUTF8(key) is always 0,
+                                   so the block isn't optimised away, at which point
+                                   the linker dislikes the reference to
+                                   bytes_from_utf8.  */
+                                if (SvUTF8(key)) {
+                                        if (sv_utf8_downgrade(key, 1)) {
+                                                /* If we were able to downgrade here, then than
+                                                   means that we have  a key which only had chars
+                                                   0-255, but was utf8 encoded.  */
+                                                
+                                                flags |= SHV_K_WASUTF8;
+                                                keyval = SvPVbyte(key, keylen);
+                                        }                                        
+                                        else {
+                                                flags |= SHV_K_UTF8;
+                                                keyval = SvPVutf8(key, keylen);
+                                        }
+                                }
+                                else
+#endif
+                                        keyval = SvPV(key, keylen);
+                                
+                                WRITE_MARK(flags);
+                                TRACEME(("(#%d) key '%s' flags %x %u", i, keyval, flags, *keyval));
                         } else {
-                            /* This is a workaround for a bug in 5.8.0
-                               that causes the HEK_WASUTF8 flag to be
-                               set on an HEK without the hash being
-                               marked as having key flags. We just
-                               cross our fingers and drop the flag.
-                               AMS 20030901 */
-                            assert (flags == 0 || flags == SHV_K_WASUTF8);
-                            TRACEME(("(#%d) key '%s'", i, keyval));
+                                keyval = SvPV(key, keylen);
+                                TRACEME(("(#%d) key '%s'", i, keyval));
                         }
-			WLEN(keylen);
-			if (keylen)
-				WRITE(keyval, keylen);
-                        if (flags & SHV_K_WASUTF8)
-                            Safefree (keyval);
+
+                        WRITE_PV_WITH_LEN(keyval, keylen);
 		}
 
 		/* 
@@ -2541,7 +2478,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			 */
 
                         if (flagged_hash) {
-                            PUTMARK(flags);
+                            WRITE_MARK(flags);
                             TRACEME(("(#%d) key '%s' flags %x", i, key, flags));
                         } else {
                             /* This is a workaround for a bug in 5.8.0
@@ -2554,11 +2491,9 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                             TRACEME(("(#%d) key '%s'", i, key));
                         }
                         if (flags & SHV_K_ISSV) {
-                            store(aTHX_ cxt, key_sv);
+                                store(aTHX_ cxt, key_sv);
                         } else {
-                            WLEN(len);
-                            if (len)
-				WRITE(key, len);
+                                WRITE_PV_WITH_LEN(key, len);
                         }
 		}
     }
@@ -2657,7 +2592,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 * Signal code by emitting SX_CODE.
 	 */
 
-	PUTMARK(SX_CODE);
+	WRITE_MARK(SX_CODE);
 	cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
 	TRACEME(("size = %d", len));
 	TRACEME(("code = %s", SvPV_nolen(text)));
@@ -2667,9 +2602,9 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 */
 
 	if(SvUTF8 (text))
-		STORE_UTF8STR(SvPV_nolen(text), len);
+		WRITE_UTF8STR(SvPV_nolen(text), len);
 	else
-		STORE_SCALAR(SvPV_nolen(text), len);
+		WRITE_SCALAR(SvPV_nolen(text), len);
 
 	FREETMPS;
 	LEAVE;
@@ -2710,13 +2645,13 @@ static int store_tied(pTHX_ stcxt_t *cxt, SV *sv)
 
 	if (svt == SVt_PVHV) {
 		TRACEME(("tied hash"));
-		PUTMARK(SX_TIED_HASH);			/* Introduces tied hash */
+		WRITE_MARK(SX_TIED_HASH);			/* Introduces tied hash */
 	} else if (svt == SVt_PVAV) {
 		TRACEME(("tied array"));
-		PUTMARK(SX_TIED_ARRAY);			/* Introduces tied array */
+		WRITE_MARK(SX_TIED_ARRAY);			/* Introduces tied array */
 	} else {
 		TRACEME(("tied scalar"));
-		PUTMARK(SX_TIED_SCALAR);		/* Introduces tied scalar */
+		WRITE_MARK(SX_TIED_SCALAR);		/* Introduces tied scalar */
 		mtype = 'q';
 	}
 
@@ -2775,7 +2710,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 
 	if (mg->mg_ptr) {
 		TRACEME(("store_tied_item: storing a ref to a tied hash item"));
-		PUTMARK(SX_TIED_KEY);
+		WRITE_MARK(SX_TIED_KEY);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
 		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Extra () for -Wall, grr... */
@@ -2789,7 +2724,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 		I32 idx = mg->mg_len;
 
 		TRACEME(("store_tied_item: storing a ref to a tied array item "));
-		PUTMARK(SX_TIED_IDX);
+		WRITE_MARK(SX_TIED_IDX);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
 		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Idem, for -Wall */
@@ -2797,7 +2732,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 
 		TRACEME(("store_tied_item: storing IDX %d", idx));
 
-		WLEN(idx);
+		WRITE_LEN(idx);
 	}
 
 	TRACEME(("ok (tied item)"));
@@ -3057,12 +2992,12 @@ static int store_hook(
 
 		/* [SX_HOOK] <flags> [<extra>] <object>*/
 		if (!recursed++) {
-			PUTMARK(SX_HOOK);
-			PUTMARK(flags);
+			WRITE_MARK(SX_HOOK);
+			WRITE_MARK(flags);
 			if (obj_type == SHT_EXTRA)
-				PUTMARK(eflags);
+				WRITE_MARK(eflags);
 		} else
-			PUTMARK(flags);
+			WRITE_MARK(flags);
 
 		if ((ret = store(aTHX_ cxt, xsv)))	/* Given by hook for us to store */
 			return ret;
@@ -3163,50 +3098,46 @@ check_done:
 
 	/* SX_HOOK <flags> [<extra>] */
 	if (!recursed) {
-		PUTMARK(SX_HOOK);
-		PUTMARK(flags);
+		WRITE_MARK(SX_HOOK);
+		WRITE_MARK(flags);
 		if (obj_type == SHT_EXTRA)
-			PUTMARK(eflags);
+			WRITE_MARK(eflags);
 	} else
-		PUTMARK(flags);
+		WRITE_MARK(flags);
 
 	/* <len> <classname> or <index> */
 	if (flags & SHF_IDX_CLASSNAME) {
 		if (flags & SHF_LARGE_CLASSLEN)
-			WLEN(classnum);
+			WRITE_LEN(classnum);
 		else {
 			unsigned char cnum = (unsigned char) classnum;
-			PUTMARK(cnum);
+			WRITE_MARK(cnum);
 		}
 	} else {
 		if (flags & SHF_LARGE_CLASSLEN)
-			WLEN(len);
+			WRITE_LEN(len);
 		else {
 			unsigned char clen = (unsigned char) len;
-			PUTMARK(clen);
+			WRITE_MARK(clen);
 		}
-		WRITE(classname, len);		/* Final \0 is omitted */
+		WRITE_BYTES(classname, len);		/* Final \0 is omitted */
 	}
 
 	/* <len2> <frozen-str> */
 	if (flags & SHF_LARGE_STRLEN) {
-		I32 wlen2 = len2;		/* STRLEN might be 8 bytes */
-		WLEN(wlen2);			/* Must write an I32 for 64-bit machines */
+                WRITE_LEN(len2);
 	} else {
-		unsigned char clen = (unsigned char) len2;
-		PUTMARK(clen);
+		WRITE_MARK(len2);
 	}
-	if (len2)
-		WRITE(pv, (SSize_t)len2);	/* Final \0 is omitted */
+        WRITE_BYTES(pv, len2);	/* Final \0 is omitted */
 
 	/* [<len3> <object-IDs>] */
 	if (flags & SHF_HAS_LIST) {
 		int len3 = count - 1;
 		if (flags & SHF_LARGE_LISTLEN)
-			WLEN(len3);
+			WRITE_LEN(len3);
 		else {
-			unsigned char clen = (unsigned char) len3;
-			PUTMARK(clen);
+			WRITE_MARK(len3);
 		}
 
 		/*
@@ -3215,9 +3146,9 @@ check_done:
 		 */
 
 		for (i = 1; i < count; i++) {
-			I32 tagval = htonl(LOW_32BITS(ary[i]));
-			WRITE_I32(tagval);
-			TRACEME(("object %d, tag #%d", i-1, ntohl(tagval)));
+			I32 tagval = LOW_32BITS(ary[i]);
+			WRITE_I32N(tagval);
+			TRACEME(("object %d, tag #%d", i-1, tagval));
 		}
 	}
 
@@ -3325,27 +3256,23 @@ static int store_blessed(
 
 	if (known_class(aTHX_ cxt, classname, len, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
-		PUTMARK(SX_IX_BLESS);
+		WRITE_MARK(SX_IX_BLESS);
 		if (classnum <= LG_BLESS) {
-			unsigned char cnum = (unsigned char) classnum;
-			PUTMARK(cnum);
+			WRITE_MARK(classnum);
 		} else {
-			unsigned char flag = (unsigned char) 0x80;
-			PUTMARK(flag);
-			WLEN(classnum);
+			WRITE_MARK(0x80);
+			WRITE_LEN(classnum);
 		}
 	} else {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
-		PUTMARK(SX_BLESS);
+		WRITE_MARK(SX_BLESS);
 		if (len <= LG_BLESS) {
-			unsigned char clen = (unsigned char) len;
-			PUTMARK(clen);
+			WRITE_MARK(len);
 		} else {
-			unsigned char flag = (unsigned char) 0x80;
-			PUTMARK(flag);
-			WLEN(len);					/* Don't BER-encode, this should be rare */
+			WRITE_MARK(0x80);
+			WRITE_LEN(len);					/* Don't BER-encode, this should be rare */
 		}
-		WRITE(classname, len);				/* Final \0 is omitted */
+		WRITE_BYTES(classname, len);				/* Final \0 is omitted */
 	}
 
 	/*
@@ -3394,7 +3321,7 @@ static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
 		       PTR2UV(sv), (char) 0);
 
 	len = strlen(buf);
-	STORE_SCALAR(buf, len);
+	WRITE_SCALAR(buf, len);
 	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, (IV) len));
 
 	return 0;
@@ -3547,15 +3474,15 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 		}
 		
 #ifdef USE_PTR_TABLE
-		tagval = htonl(LOW_32BITS(((char *)svh)-1));
+		tagval = LOW_32BITS(((char *)svh)-1);
 #else
-		tagval = htonl(LOW_32BITS(*svh));
+		tagval = LOW_32BITS(*svh);
 #endif
 
-		TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), ntohl(tagval)));
+		TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), tagval));
 
-		PUTMARK(SX_OBJECT);
-		WRITE_I32(tagval);
+		WRITE_MARK(SX_OBJECT);
+		WRITE_I32N(tagval);
 		return 0;
 	}
 
@@ -3595,11 +3522,17 @@ undef_special_case:
 		ret = store_blessed(aTHX_ cxt, sv, type, pkg);
 	} else
 		ret = SV_STORE(type)(aTHX_ cxt, sv);
-
-	TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
-		ret ? "FAILED" : "ok", PTR2UV(sv),
-		SvREFCNT(sv), sv_reftype(sv, FALSE)));
-
+        
+        if (ret) {
+                TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
+                         "FAILED", PTR2UV(sv),
+                         SvREFCNT(sv), sv_reftype(sv, FALSE)));
+        }
+        else {
+                TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
+                         "ok", PTR2UV(sv),
+                         SvREFCNT(sv), sv_reftype(sv, FALSE)));
+        }
 	return ret;
 }
 
@@ -3688,7 +3621,7 @@ static int magic_write(pTHX_ stcxt_t *cxt)
         length -= sizeof (magicstr) - 1;
     }        
 
-    WRITE( (unsigned char*) header, length);
+    WRITE_BYTES((unsigned char*) header, length);
 
     if (!cxt->netorder) {
 	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
@@ -3766,7 +3699,7 @@ static int do_store(
 	 */
 
 	if (!f)
-		MBUF_INIT(0);
+                OUTPUT_INIT(0);
 
 	/*
 	 * Prepare context and emit headers.
@@ -3795,7 +3728,7 @@ static int do_store(
 	 */
 
 	if (!cxt->fio && res)
-		*res = mbuf2sv(aTHX);
+		*res = newSVsv(cxt->output);
 
 	/*
 	 * Final cleanup.
@@ -3827,15 +3760,14 @@ static int do_store(
  ***/
 
 /*
- * mbuf2sv
+ * output2sv
  *
  * Build a new SV out of the content of the internal memory buffer.
  */
-static SV *mbuf2sv(pTHX)
+static SV *output2sv(pTHX)
 {
 	dSTCXT;
-
-	return newSVpv(mbase, MBUF_SIZE());
+	return newSVsv(cxt->output);
 }
 
 /***
@@ -4183,8 +4115,8 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 					xsv = &PL_sv_undef;
 					svh = &xsv;
 				} else {
-					CROAK(("Object #%"IVdf" should have been retrieved already",
-					       (IV) tag));
+					CROAK(("Object #0x%"UVxf" should have been retrieved already [1]",
+					       (UV) tag));
 				}
 			}
 			xsv = *svh;
@@ -5826,8 +5758,8 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 
 			svh = av_fetch(cxt->aseen, tagn, FALSE);
 			if (!svh)
-				CROAK(("Object #%"IVdf" should have been retrieved already",
-					(IV) tagn));
+				CROAK(("Object #0x%"UVxf" should have been retrieved already [2]",
+					(UV) tagn));
 			sv = *svh;
 			TRACEME(("has retrieved #%d at 0x%"UVxf, tagn, PTR2UV(sv)));
 			SvREFCNT_inc(sv);	/* One more reference to this same sv */
@@ -5867,8 +5799,8 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 		tag = ntohl(tag);
 		svh = av_fetch(cxt->aseen, tag, FALSE);
 		if (!svh)
-			CROAK(("Object #%"IVdf" should have been retrieved already",
-				(IV) tag));
+			CROAK(("Object #0x%"UVxf" should have been retrieved already [3]",
+				(UV) tag));
 		sv = *svh;
 		TRACEME(("had retrieved #%d at 0x%"UVxf, tag, PTR2UV(sv)));
 		SvREFCNT_inc(sv);	/* One more reference to this same sv */
@@ -5999,6 +5931,7 @@ static SV *do_retrieve(
 	KBUFINIT();			 		/* Allocate hash key reading pool once */
 
 	if (!f && in) {
+                STRLEN size;
 #ifdef SvUTF8_on
 		if (SvMAGICAL(in) || SvUTF8(in))
 #else
@@ -6011,8 +5944,8 @@ static SV *do_retrieve(
 				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
 #endif
 		}
-
-		MBUF_SAVE_AND_LOAD(in);
+		mptr = mbase = SvPV(in, size);
+                mend = mbase + size;
 	}
 
 	/*
@@ -6053,9 +5986,6 @@ static SV *do_retrieve(
 	/*
 	 * Final cleanup.
 	 */
-
-	if (!f && in)
-		MBUF_RESTORE();
 
 	pre_06_fmt = cxt->hseen != NULL;	/* Before we clean context */
 
@@ -6183,7 +6113,7 @@ static SV *mretrieve(pTHX_ SV *sv)
 static SV *dclone(pTHX_ SV *sv)
 {
 	dSTCXT;
-	int size;
+	STRLEN size;
 	stcxt_t *real_context;
 	SV *out;
 
@@ -6232,10 +6162,10 @@ static SV *dclone(pTHX_ SV *sv)
 	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(!cxt->entry, ("entry will not cause new context allocation"));
 
-	size = MBUF_SIZE();
+        mptr = mbase = SvPV(cxt->output, size);
+        mend = mbase + size;
 	TRACEME(("dclone stored %d bytes", size));
-	MBUF_INIT(size);
-
+        
 	/*
 	 * Since we're passing do_retrieve() both a NULL file and sv, we need
 	 * to pre-compute the taintedness of the input by setting cxt->tainted
@@ -6283,10 +6213,6 @@ PPCODE:
 		SvREFCNT_dec(cxt->keybuf);
 		cxt->keybuf = NULL;
 	}
-	if (!cxt->membuf_ro && mbase)
-		Safefree(mbase);
-	if (cxt->membuf_ro && (cxt->msaved).arena)
-		Safefree((cxt->msaved).arena);
 
 
 MODULE = Storable	PACKAGE = Storable
