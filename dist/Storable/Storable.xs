@@ -579,7 +579,6 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
                 return -1;                      \
         } STMT_END
         
-
 static int
 write_bytes(pTHX_ stcxt_t *cxt, const char *str, STRLEN len) {
         if (len) {
@@ -602,6 +601,13 @@ write_bytes(pTHX_ stcxt_t *cxt, const char *str, STRLEN len) {
         STMT_START {                                                    \
                 if (write_bytes(aTHX_ cxt, (x), (y)))                   \
                         WRITE_ERROR("WRITE_BYTES");                     \
+        } STMT_END
+
+#define WRITE_MARK(c)                                    \
+        STMT_START {                                     \
+                char str = c;                            \
+                if (write_bytes(aTHX_ cxt, &str, 1))     \
+                        WRITE_ERROR("WRITE_MARK");       \
         } STMT_END
 
 static int
@@ -627,13 +633,6 @@ write_i32(pTHX_ stcxt_t *cxt, I32 i32) {
         else
                 return write_bytes(aTHX_ cxt, oI(&i32), 4);
 }
-
-#define WRITE_MARK(c)                                    \
-        STMT_START {                                     \
-                char str = c;                            \
-                if (write_bytes(aTHX_ cxt, &str, 1))     \
-                        WRITE_ERROR("WRITE_MARK");       \
-        } STMT_END
 
 #define WRITE_I32(x)                                                    \
         STMT_START {                                                    \
