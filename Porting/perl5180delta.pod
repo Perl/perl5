@@ -2902,7 +2902,7 @@ XXX: the imperfect behavior of the ** deprecation
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.17.12..HEAD
+  perl Porting/acknowledgements.pl v5.18.0..HEAD
 
 =head1 Reporting Bugs
 
