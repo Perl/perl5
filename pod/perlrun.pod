@@ -1272,19 +1272,19 @@ L</PERL_HASH_SEED_DEBUG> for more information.
 X<PERL_PERTURB_KEYS>
 
 (Since Perl 5.18.0)  Set to C<"0"> or C<"NO"> then traversing keys
-will be repeatedable from run to run for the same PERL_HASH_SEED.
+will be repeatable from run to run for the same PERL_HASH_SEED.
 Insertion into a hash will not change the order, except to provide
 for more space in the hash. When combined with setting PERL_HASH_SEED
 this mode is as close to pre 5.18 behavior as you can get.
 
 When set to C<"1"> or C<"RANDOM"> then traversing keys will be randomized.
 Every time a hash is inserted into the key order will change in a random
-fashion. The order may not be repeatedable in a following program run
+fashion. The order may not be repeatable in a following program run
 even if the PERL_HASH_SEED has been specified. This is the default
 mode for perl.
 
 When set to C<"2"> or C<"DETERMINISTIC"> then inserting keys into a hash
-will cause the key order to change, but in a way that is repeatedable
+will cause the key order to change, but in a way that is repeatable
 from program run to program run.
 
 B<NOTE:> Use of this option is considered insecure, and is intended only
