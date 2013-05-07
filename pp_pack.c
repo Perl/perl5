@@ -129,8 +129,10 @@ typedef union {
 #  define OFF32(p)     ((char *) (p))
 #endif
 
-#define PUSH16(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF16(p), SIZE16)
-#define PUSH32(utf8, cur, p) PUSH_BYTES(utf8, cur, OFF32(p), SIZE32)
+#define PUSH16(utf8, cur, p, needs_swap)                        \
+       PUSH_BYTES(utf8, cur, OFF16(p), SIZE16, needs_swap)
+#define PUSH32(utf8, cur, p, needs_swap)                        \
+       PUSH_BYTES(utf8, cur, OFF32(p), SIZE32, needs_swap)
 
 #if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /* big-endian */
 #  define NEEDS_SWAP(d)     (TYPE_ENDIANNESS(d) == TYPE_IS_LITTLE_ENDIAN)
@@ -169,8 +171,8 @@ STMT_START {						\
 #define SHIFT_VAR(utf8, s, strend, var, datumtype, needs_swap)          \
        SHIFT_BYTES(utf8, s, strend, &(var), sizeof(var), datumtype, needs_swap)
 
-#define PUSH_VAR(utf8, aptr, var)	\
-	PUSH_BYTES(utf8, aptr, &(var), sizeof(var))
+#define PUSH_VAR(utf8, aptr, var, needs_swap)           \
+       PUSH_BYTES(utf8, aptr, &(var), sizeof(var), needs_swap)
 
 /* Avoid stack overflow due to pathological templates. 100 should be plenty. */
 #define MAX_SUB_TEMPLATE_LEVEL 100
@@ -238,13 +240,6 @@ S_mul128(pTHX_ SV *sv, U8 m)
 # define TYPE_NO_ENDIANNESS(t)	((t) & ~TYPE_ENDIANNESS_MASK)
 
 # define ENDIANNESS_ALLOWED_TYPES   "sSiIlLqQjJfFdDpP("
-
-# define DO_BO_PACK(var)                                                      \
-        STMT_START {                                                          \
-          if (needs_swap) {                                                   \
-            my_swabn(&var, sizeof(var));                                      \
-          }                                                                   \
-        } STMT_END
 
 #define PACK_SIZE_CANNOT_CSUM		0x80
 #define PACK_SIZE_UNPREDICTABLE		0x40	/* Not a fixed size element */
@@ -356,30 +351,45 @@ next_uni_uu(pTHX_ const char **s, const char *end, I32 *out)
 }
 
 STATIC char *
-S_bytes_to_uni(const U8 *start, STRLEN len, char *dest) {
-    const U8 * const end = start + len;
-
+S_bytes_to_uni(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
     PERL_ARGS_ASSERT_BYTES_TO_UNI;
 
-    while (start < end) {
-	const UV uv = NATIVE_TO_ASCII(*start);
-	if (UNI_IS_INVARIANT(uv))
-	    *dest++ = (char)(U8)UTF_TO_NATIVE(uv);
-	else {
-	    *dest++ = (char)(U8)UTF8_EIGHT_BIT_HI(uv);
-	    *dest++ = (char)(U8)UTF8_EIGHT_BIT_LO(uv);
-	}
-	start++;
+    if (needs_swap) {
+        const U8 *p = start + len;
+        while (p-- > start) {
+            const UV uv = NATIVE_TO_ASCII(*p);
+            if (UNI_IS_INVARIANT(uv))
+                *dest++ = (char)(U8)UTF_TO_NATIVE(uv);
+            else {
+                *dest++ = (char)(U8)UTF8_EIGHT_BIT_HI(uv);
+                *dest++ = (char)(U8)UTF8_EIGHT_BIT_LO(uv);
+            }
+        }
+    } else {
+        const U8 * const end = start + len;
+        while (start < end) {
+            const UV uv = NATIVE_TO_ASCII(*start);
+            if (UNI_IS_INVARIANT(uv))
+                *dest++ = (char)(U8)UTF_TO_NATIVE(uv);
+            else {
+                *dest++ = (char)(U8)UTF8_EIGHT_BIT_HI(uv);
+                *dest++ = (char)(U8)UTF8_EIGHT_BIT_LO(uv);
+            }
+            start++;
+        }
     }
     return dest;
 }
 
-#define PUSH_BYTES(utf8, cur, buf, len)				\
+#define PUSH_BYTES(utf8, cur, buf, len, needs_swap)             \
 STMT_START {							\
     if (utf8)							\
-	(cur) = bytes_to_uni((U8 *) buf, len, (cur));		\
+	(cur) = S_bytes_to_uni((U8 *) buf, len, (cur), needs_swap);       \
     else {							\
-	Copy(buf, cur, len, char);				\
+        if (needs_swap)                                         \
+            S_reverse_copy((char *)(buf), cur, len);            \
+        else                                                    \
+            Copy(buf, cur, len, char);				\
 	(cur) += (len);						\
     }								\
 } STMT_END
@@ -405,14 +415,14 @@ STMT_START {					\
 	(start) = sv_exp_grow(cat, gl);		\
 	(cur) = (start) + SvCUR(cat);		\
     }						\
-    PUSH_BYTES(utf8, cur, buf, glen);		\
+    PUSH_BYTES(utf8, cur, buf, glen, 0);        \
 } STMT_END
 
 #define PUSH_BYTE(utf8, s, byte)		\
 STMT_START {					\
     if (utf8) {					\
 	const U8 au8 = (byte);			\
-	(s) = bytes_to_uni(&au8, 1, (s));	\
+	(s) = S_bytes_to_uni(&au8, 1, (s), 0);	\
     } else *(U8 *)(s)++ = (byte);		\
 } STMT_END
 
@@ -2651,7 +2661,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 				len+(endb-buffer)*UTF8_EXPAND);
 			end = start+SvLEN(cat);
 		    }
-		    cur = bytes_to_uni(buffer, endb-buffer, cur);
+                    cur = S_bytes_to_uni(buffer, endb-buffer, cur, 0);
 		} else {
 		    if (cur >= end) {
 			*cur = '\0';
@@ -2685,8 +2695,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 # else
 		afloat = (float)anv;
 # endif
-                DO_BO_PACK(afloat);
-		PUSH_VAR(utf8, cur, afloat);
+                PUSH_VAR(utf8, cur, afloat, needs_swap);
 	    }
 	    break;
 	case 'd':
@@ -2707,8 +2716,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 # else
 		adouble = (double)anv;
 # endif
-                DO_BO_PACK(adouble);
-		PUSH_VAR(utf8, cur, adouble);
+                PUSH_VAR(utf8, cur, adouble, needs_swap);
 	    }
 	    break;
 	case 'F': {
@@ -2722,8 +2730,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #else
 		anv.nv = SvNV(fromstr);
 #endif
-                DO_BO_PACK(anv);
-		PUSH_BYTES(utf8, cur, anv.bytes, sizeof(anv.bytes));
+                PUSH_BYTES(utf8, cur, anv.bytes, sizeof(anv.bytes), needs_swap);
 	    }
 	    break;
 	}
@@ -2740,8 +2747,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 #  else
 		aldouble.ld = (long double)SvNV(fromstr);
 #  endif
-                DO_BO_PACK(aldouble);
-		PUSH_BYTES(utf8, cur, aldouble.bytes, sizeof(aldouble.bytes));
+                PUSH_BYTES(utf8, cur, aldouble.bytes, sizeof(aldouble.bytes),
+                           needs_swap);
 	    }
 	    break;
 	}
@@ -2753,7 +2760,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		ai16 = (I16)SvIV(fromstr);
 		ai16 = PerlSock_htons(ai16);
-		PUSH16(utf8, cur, &ai16);
+                PUSH16(utf8, cur, &ai16, FALSE);
 	    }
 	    break;
 	case 'v' | TYPE_IS_SHRIEKING:
@@ -2763,7 +2770,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		ai16 = (I16)SvIV(fromstr);
 		ai16 = htovs(ai16);
-		PUSH16(utf8, cur, &ai16);
+                PUSH16(utf8, cur, &ai16, FALSE);
 	    }
 	    break;
         case 'S' | TYPE_IS_SHRIEKING:
@@ -2772,8 +2779,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		unsigned short aushort;
 		fromstr = NEXTFROM;
 		aushort = SvUV(fromstr);
-                DO_BO_PACK(aushort);
-		PUSH_VAR(utf8, cur, aushort);
+                PUSH_VAR(utf8, cur, aushort, needs_swap);
 	    }
             break;
 #else
@@ -2784,8 +2790,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		U16 au16;
 		fromstr = NEXTFROM;
 		au16 = (U16)SvUV(fromstr);
-                DO_BO_PACK(au16);
-		PUSH16(utf8, cur, &au16);
+                PUSH16(utf8, cur, &au16, needs_swap);
 	    }
 	    break;
 	case 's' | TYPE_IS_SHRIEKING:
@@ -2794,8 +2799,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		short ashort;
 		fromstr = NEXTFROM;
 		ashort = SvIV(fromstr);
-                DO_BO_PACK(ashort);
-		PUSH_VAR(utf8, cur, ashort);
+                PUSH_VAR(utf8, cur, ashort, needs_swap);
 	    }
             break;
 #else
@@ -2806,8 +2810,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		I16 ai16;
 		fromstr = NEXTFROM;
 		ai16 = (I16)SvIV(fromstr);
-                DO_BO_PACK(ai16);
-		PUSH16(utf8, cur, &ai16);
+                PUSH16(utf8, cur, &ai16, needs_swap);
 	    }
 	    break;
 	case 'I':
@@ -2816,8 +2819,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		unsigned int auint;
 		fromstr = NEXTFROM;
 		auint = SvUV(fromstr);
-                DO_BO_PACK(auint);
-		PUSH_VAR(utf8, cur, auint);
+                PUSH_VAR(utf8, cur, auint, needs_swap);
 	    }
 	    break;
 	case 'j':
@@ -2825,8 +2827,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		IV aiv;
 		fromstr = NEXTFROM;
 		aiv = SvIV(fromstr);
-                DO_BO_PACK(aiv);
-		PUSH_VAR(utf8, cur, aiv);
+                PUSH_VAR(utf8, cur, aiv, needs_swap);
 	    }
 	    break;
 	case 'J':
@@ -2834,8 +2835,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		UV auv;
 		fromstr = NEXTFROM;
 		auv = SvUV(fromstr);
-                DO_BO_PACK(auv);
-		PUSH_VAR(utf8, cur, auv);
+                PUSH_VAR(utf8, cur, auv, needs_swap);
 	    }
 	    break;
 	case 'w':
@@ -2931,8 +2931,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		int aint;
 		fromstr = NEXTFROM;
 		aint = SvIV(fromstr);
-                DO_BO_PACK(aint);
-		PUSH_VAR(utf8, cur, aint);
+                PUSH_VAR(utf8, cur, aint, needs_swap);
 	    }
 	    break;
 	case 'N' | TYPE_IS_SHRIEKING:
@@ -2942,7 +2941,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		au32 = SvUV(fromstr);
 		au32 = PerlSock_htonl(au32);
-		PUSH32(utf8, cur, &au32);
+                PUSH32(utf8, cur, &au32, FALSE);
 	    }
 	    break;
 	case 'V' | TYPE_IS_SHRIEKING:
@@ -2952,7 +2951,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		fromstr = NEXTFROM;
 		au32 = SvUV(fromstr);
 		au32 = htovl(au32);
-		PUSH32(utf8, cur, &au32);
+                PUSH32(utf8, cur, &au32, FALSE);
 	    }
 	    break;
 	case 'L' | TYPE_IS_SHRIEKING:
@@ -2961,8 +2960,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		unsigned long aulong;
 		fromstr = NEXTFROM;
 		aulong = SvUV(fromstr);
-                DO_BO_PACK(aulong);
-		PUSH_VAR(utf8, cur, aulong);
+                PUSH_VAR(utf8, cur, aulong, needs_swap);
 	    }
 	    break;
 #else
@@ -2973,8 +2971,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		U32 au32;
 		fromstr = NEXTFROM;
 		au32 = SvUV(fromstr);
-                DO_BO_PACK(au32);
-		PUSH32(utf8, cur, &au32);
+                PUSH32(utf8, cur, &au32, needs_swap);
 	    }
 	    break;
 	case 'l' | TYPE_IS_SHRIEKING:
@@ -2983,8 +2980,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		long along;
 		fromstr = NEXTFROM;
 		along = SvIV(fromstr);
-                DO_BO_PACK(along);
-		PUSH_VAR(utf8, cur, along);
+                PUSH_VAR(utf8, cur, along, needs_swap);
 	    }
 	    break;
 #else
@@ -2995,8 +2991,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		I32 ai32;
 		fromstr = NEXTFROM;
 		ai32 = SvIV(fromstr);
-                DO_BO_PACK(ai32);
-		PUSH32(utf8, cur, &ai32);
+                PUSH32(utf8, cur, &ai32, needs_swap);
 	    }
 	    break;
 #ifdef HAS_QUAD
@@ -3005,8 +3000,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		Uquad_t auquad;
 		fromstr = NEXTFROM;
 		auquad = (Uquad_t) SvUV(fromstr);
-                DO_BO_PACK(auquad);
-		PUSH_VAR(utf8, cur, auquad);
+                PUSH_VAR(utf8, cur, auquad, needs_swap);
 	    }
 	    break;
 	case 'q':
@@ -3014,8 +3008,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		Quad_t aquad;
 		fromstr = NEXTFROM;
 		aquad = (Quad_t)SvIV(fromstr);
-                DO_BO_PACK(aquad);
-		PUSH_VAR(utf8, cur, aquad);
+                PUSH_VAR(utf8, cur, aquad, needs_swap);
 	    }
 	    break;
 #endif /* HAS_QUAD */
@@ -3046,8 +3039,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    else
 			aptr = SvPV_force_flags_nolen(fromstr, 0);
 		}
-                DO_BO_PACK(aptr);
-		PUSH_VAR(utf8, cur, aptr);
+                PUSH_VAR(utf8, cur, aptr, needs_swap);
 	    }
 	    break;
 	case 'u': {
@@ -3093,7 +3085,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    end = doencodes(hunk, aptr, todo);
 		    aptr += todo;
 		}
-		PUSH_BYTES(utf8, cur, hunk, end-hunk);
+		PUSH_BYTES(utf8, cur, hunk, end-hunk, 0);
 		fromlen -= todo;
 	    }
 	    break;
