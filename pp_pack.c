@@ -146,7 +146,7 @@ typedef union {
 #endif
 
 /* Only to be used inside a loop (see the break) */
-#define SHIFT_BYTES(utf8, s, strend, buf, len, datumtype)	\
+#define SHIFT_BYTES(utf8, s, strend, buf, len, datumtype, needs_swap)	\
 STMT_START {						\
     if (utf8) {						\
         if (!uni_to_bytes(aTHX_ &s, strend,		\
@@ -160,14 +160,14 @@ STMT_START {						\
     }							\
 } STMT_END
 
-#define SHIFT16(utf8, s, strend, p, datumtype)                          \
-       SHIFT_BYTES(utf8, s, strend, OFF16(p), SIZE16, datumtype)
+#define SHIFT16(utf8, s, strend, p, datumtype, needs_swap)              \
+       SHIFT_BYTES(utf8, s, strend, OFF16(p), SIZE16, datumtype, needs_swap)
 
-#define SHIFT32(utf8, s, strend, p, datumtype)                          \
-       SHIFT_BYTES(utf8, s, strend, OFF32(p), SIZE32, datumtype)
+#define SHIFT32(utf8, s, strend, p, datumtype, needs_swap)              \
+       SHIFT_BYTES(utf8, s, strend, OFF32(p), SIZE32, datumtype, needs_swap)
 
-#define SHIFT_VAR(utf8, s, strend, var, datumtype)	\
-       SHIFT_BYTES(utf8, s, strend, &(var), sizeof(var), datumtype)
+#define SHIFT_VAR(utf8, s, strend, var, datumtype, needs_swap)          \
+       SHIFT_BYTES(utf8, s, strend, &(var), sizeof(var), datumtype, needs_swap)
 
 #define PUSH_VAR(utf8, aptr, var)	\
 	PUSH_BYTES(utf8, aptr, &(var), sizeof(var))
@@ -1338,7 +1338,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if SHORTSIZE != SIZE16
 	    while (len-- > 0) {
 		short ashort;
-		SHIFT_VAR(utf8, s, strend, ashort, datumtype);
+                SHIFT_VAR(utf8, s, strend, ashort, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHi(ashort);
 		else if (checksum > bits_in_uv)
@@ -1357,7 +1357,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if U16SIZE > SIZE16
 		ai16 = 0;
 #endif
-		SHIFT16(utf8, s, strend, &ai16, datumtype);
+                SHIFT16(utf8, s, strend, &ai16, datumtype, needs_swap);
 #if U16SIZE > SIZE16
 		if (ai16 > 32767)
 		    ai16 -= 65536;
@@ -1374,7 +1374,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if SHORTSIZE != SIZE16
 	    while (len-- > 0) {
 		unsigned short aushort;
-		SHIFT_VAR(utf8, s, strend, aushort, datumtype);
+                SHIFT_VAR(utf8, s, strend, aushort, datumtype, needs_swap,
+                          needs_swap);
 		if (!checksum)
 		    mPUSHu(aushort);
 		else if (checksum > bits_in_uv)
@@ -1394,7 +1395,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if U16SIZE > SIZE16
 		au16 = 0;
 #endif
-		SHIFT16(utf8, s, strend, &au16, datumtype);
+                SHIFT16(utf8, s, strend, &au16, datumtype, needs_swap);
 		if (datumtype == 'n')
 		    au16 = PerlSock_ntohs(au16);
 		if (datumtype == 'v')
@@ -1414,7 +1415,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 # if U16SIZE > SIZE16
 		ai16 = 0;
 # endif
-		SHIFT16(utf8, s, strend, &ai16, datumtype);
+                SHIFT16(utf8, s, strend, &ai16, datumtype, needs_swap);
                 /* There should never be any byte-swapping here.  */
                 assert(!TYPE_ENDIANNESS(datumtype));
 		if (datumtype == ('n' | TYPE_IS_SHRIEKING))
@@ -1433,7 +1434,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'i' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
 		int aint;
-		SHIFT_VAR(utf8, s, strend, aint, datumtype);
+                SHIFT_VAR(utf8, s, strend, aint, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHi(aint);
 		else if (checksum > bits_in_uv)
@@ -1446,7 +1447,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'I' | TYPE_IS_SHRIEKING:
 	    while (len-- > 0) {
 		unsigned int auint;
-		SHIFT_VAR(utf8, s, strend, auint, datumtype);
+                SHIFT_VAR(utf8, s, strend, auint, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHu(auint);
 		else if (checksum > bits_in_uv)
@@ -1458,7 +1459,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'j':
 	    while (len-- > 0) {
 		IV aiv;
-		SHIFT_VAR(utf8, s, strend, aiv, datumtype);
+                SHIFT_VAR(utf8, s, strend, aiv, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHi(aiv);
 		else if (checksum > bits_in_uv)
@@ -1470,7 +1471,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'J':
 	    while (len-- > 0) {
 		UV auv;
-		SHIFT_VAR(utf8, s, strend, auv, datumtype);
+                SHIFT_VAR(utf8, s, strend, auv, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHu(auv);
 		else if (checksum > bits_in_uv)
@@ -1483,7 +1484,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if LONGSIZE != SIZE32
 	    while (len-- > 0) {
 		long along;
-		SHIFT_VAR(utf8, s, strend, along, datumtype);
+                SHIFT_VAR(utf8, s, strend, along, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHi(along);
 		else if (checksum > bits_in_uv)
@@ -1501,7 +1502,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if U32SIZE > SIZE32
 		ai32 = 0;
 #endif
-		SHIFT32(utf8, s, strend, &ai32, datumtype);
+                SHIFT32(utf8, s, strend, &ai32, datumtype, needs_swap);
 #if U32SIZE > SIZE32
 		if (ai32 > 2147483647) ai32 -= 4294967296;
 #endif
@@ -1517,7 +1518,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if LONGSIZE != SIZE32
 	    while (len-- > 0) {
 		unsigned long aulong;
-		SHIFT_VAR(utf8, s, strend, aulong, datumtype);
+                SHIFT_VAR(utf8, s, strend, aulong, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHu(aulong);
 		else if (checksum > bits_in_uv)
@@ -1537,7 +1538,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if U32SIZE > SIZE32
 		au32 = 0;
 #endif
-		SHIFT32(utf8, s, strend, &au32, datumtype);
+                SHIFT32(utf8, s, strend, &au32, datumtype, needs_swap);
 		if (datumtype == 'N')
 		    au32 = PerlSock_ntohl(au32);
 		if (datumtype == 'V')
@@ -1557,7 +1558,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 #if U32SIZE > SIZE32
 		ai32 = 0;
 #endif
-		SHIFT32(utf8, s, strend, &ai32, datumtype);
+                SHIFT32(utf8, s, strend, &ai32, datumtype, needs_swap);
                 /* There should never be any byte swapping here.  */
                 assert(!TYPE_ENDIANNESS(datumtype));
 		if (datumtype == ('N' | TYPE_IS_SHRIEKING))
@@ -1575,7 +1576,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'p':
 	    while (len-- > 0) {
 		const char *aptr;
-		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
+                SHIFT_VAR(utf8, s, strend, aptr, datumtype, needs_swap);
 		/* newSVpv generates undef if aptr is NULL */
 		mPUSHs(newSVpv(aptr, 0));
 	    }
@@ -1628,7 +1629,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    EXTEND(SP, 1);
 	    if (s + sizeof(char*) <= strend) {
 		char *aptr;
-		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
+                SHIFT_VAR(utf8, s, strend, aptr, datumtype, needs_swap);
 		/* newSVpvn generates undef if aptr is NULL */
 		PUSHs(newSVpvn_flags(aptr, len, SVs_TEMP));
 	    }
@@ -1637,7 +1638,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'q':
 	    while (len-- > 0) {
 		Quad_t aquad;
-		SHIFT_VAR(utf8, s, strend, aquad, datumtype);
+                SHIFT_VAR(utf8, s, strend, aquad, datumtype, needs_swap);
 		if (!checksum)
                     mPUSHs(aquad >= IV_MIN && aquad <= IV_MAX ?
 			   newSViv((IV)aquad) : newSVnv((NV)aquad));
@@ -1650,7 +1651,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'Q':
 	    while (len-- > 0) {
 		Uquad_t auquad;
-		SHIFT_VAR(utf8, s, strend, auquad, datumtype);
+                SHIFT_VAR(utf8, s, strend, auquad, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHs(auquad <= UV_MAX ?
 			   newSVuv((UV)auquad) : newSVnv((NV)auquad));
@@ -1665,7 +1666,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'f':
 	    while (len-- > 0) {
 		float afloat;
-		SHIFT_VAR(utf8, s, strend, afloat, datumtype);
+                SHIFT_VAR(utf8, s, strend, afloat, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHn(afloat);
 		else
@@ -1675,7 +1676,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'd':
 	    while (len-- > 0) {
 		double adouble;
-		SHIFT_VAR(utf8, s, strend, adouble, datumtype);
+                SHIFT_VAR(utf8, s, strend, adouble, datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHn(adouble);
 		else
@@ -1685,7 +1686,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'F':
 	    while (len-- > 0) {
 		NV_bytes anv;
-		SHIFT_BYTES(utf8, s, strend, anv.bytes, sizeof(anv.bytes), datumtype);
+                SHIFT_BYTES(utf8, s, strend, anv.bytes, sizeof(anv.bytes),
+                            datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHn(anv.nv);
 		else
@@ -1696,7 +1698,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	case 'D':
 	    while (len-- > 0) {
 		ld_bytes aldouble;
-		SHIFT_BYTES(utf8, s, strend, aldouble.bytes, sizeof(aldouble.bytes), datumtype);
+                SHIFT_BYTES(utf8, s, strend, aldouble.bytes,
+                            sizeof(aldouble.bytes), datumtype, needs_swap);
 		if (!checksum)
 		    mPUSHn(aldouble.ld);
 		else
