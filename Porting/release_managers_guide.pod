@@ -96,6 +96,13 @@ changes since.
 It's essentially the same procedure as for making a release candidate, but
 with a whole bunch of extra post-release steps.
 
+Note that for a maint release there are two versions of this guide to
+consider: the one in the maint branch, and the one in blead. Which one to
+use is a fine judgement. The blead one will be most up-to-date, while
+it might describe some steps or new tools that aren't applicable to older
+maint branches. It is probably best to review both versions of this
+document, but to most closely follow the steps in the maint version.
+
 =item A blead point release (BLEAD-POINT)
 
 A release with an odd version number, such as 5.15.0 or 5.15.1.
