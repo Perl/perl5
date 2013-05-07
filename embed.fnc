@@ -2459,10 +2459,6 @@ sMd	|SV*	|find_uninit_var|NULLOK const OP *const obase \
 		|NULLOK const SV *const uninit_sv|bool top
 #endif
 
-: I think that these are only used by the above, which are macros, and in turn
-: currently they are only used in pp_pack.c, but this is in util.c
-np	|void	|my_swabn	|NN void* ptr|int n
-
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|const svtype sv_type
 

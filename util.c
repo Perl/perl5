@@ -2253,22 +2253,6 @@ LETOH(vtohs,short)
 LETOH(vtohl,long)
 #endif
 
-void
-Perl_my_swabn(void *ptr, int n)
-{
-    char *s = (char *)ptr;
-    char *e = s + (n-1);
-    char tc;
-
-    PERL_ARGS_ASSERT_MY_SWABN;
-
-    for (n /= 2; n > 0; s++, e--, n--) {
-      tc = *s;
-      *s = *e;
-      *e = tc;
-    }
-}
-
 PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
