@@ -9,7 +9,7 @@ perldelta - what is new for perl v5.18.0
 This document describes differences between the 5.16.0 release and the 5.18.0
 release.
 
-If you are upgrading from an earlier release such as 5.16.0, first read
+If you are upgrading from an earlier release such as 5.14.0, first read
 L<perl5160delta>, which describes differences between 5.14.0 and 5.16.0.
 
 =head1 Core Enhancements
@@ -651,6 +651,13 @@ allow us to change the behavior in future Perl versions so that the
 backslashes do have an effect, and without fear that we are silently
 breaking any existing code.
 
+=head2 Splitting the tokens C<(?> and C<(*> in regular expressions
+
+A deprecation warning is now raised if the C<(> and C<?> are separated
+by white space or comments in C<(?...)> regular expression constructs.
+Similarly, if the C<(> and C<*> are separated in C<(*VERB...)>
+constructs.
+
 =head1 Future Deprecations
 
 =over
@@ -710,6 +717,15 @@ There are several bugs and inconsistencies involving combinations
 of C<\Q> and escapes like C<\x>, C<\L>, etc., within a C<\Q...\E> pair.
 These need to be fixed, and doing so will necessarily change current
 behavior.  The changes have not yet been settled.
+
+=item *
+
+Use of C<$^>, where C<^> stands for any actual (non-printing) C0 control
+character will be disallowed in a future Perl version.  Use C<${^}>
+instead (where again C<^> stands for a control character),
+or better, C<$^A> , where C<^> this time is a caret (CIRCUMFLEX ACCENT),
+and C<A> stands for any of the characters listed at the end of
+L<perlebcdic/OPERATOR DIFFERENCES>.
 
 =back
 
