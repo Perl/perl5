@@ -1169,7 +1169,7 @@ PERL_CALLCONV void	Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 #define PERL_ARGS_ASSERT_GET_DB_SUB	\
 	assert(cv)
 
-PERL_CALLCONV void	Perl_get_hash_seed(pTHX_ unsigned char *seed_buffer)
+PERL_CALLCONV void	Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_HASH_SEED	\
 	assert(seed_buffer)
