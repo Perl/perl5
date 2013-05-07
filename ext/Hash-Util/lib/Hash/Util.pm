@@ -31,6 +31,8 @@ our @EXPORT_OK  = qw(
                      hash_seed hash_value hv_store
                      bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
+
+                     hash_traversal_mask
                     );
 our $VERSION = '0.16';
 require XSLoader;
@@ -76,6 +78,8 @@ Hash::Util - A selection of general-utility hash subroutines
                      hash_seed hash_value hv_store
                      bucket_stats bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
+
+                     hash_traversal_mask
                    );
 
   %hash = (foo => 42, bar => 23);
@@ -104,6 +108,10 @@ Hash::Util - A selection of general-utility hash subroutines
   my $hashes_are_randomised = hash_seed() != 0;
 
   my $int_hash_value = hash_value( 'string' );
+
+  my $mask= hash_traversal_mask(%hash);
+
+  hash_traversal_mask(%hash,1234);
 
 =head1 DESCRIPTION
 
@@ -596,6 +604,20 @@ sub bucket_stats {
   print $sv; # prints 1
 
 Stores an alias to a variable in a hash instead of copying the value.
+
+=item B<hash_traversal_mask>
+
+As of Perl 5.18 every hash its own hash traversal order, and this order
+changes every time a new element is inserted in the hash. This functionality
+is provided by maintaining an unsigned integer mask (U32) which is xor'ed
+with the actual bucket id during a traverse of the hash buckets using keys(),
+values() or each().
+
+You can use this subroutine to get and set the traversal mask for a specific
+hash. Setting the mask ensures that a given hash will produce the same key
+order. B<Note> that this does B<not> guarantee that *two* hashes will produce
+the same key order for the same hash seed and traversal mask, items that
+collide into one bucket may have different orders regardless of this setting.
 
 =back
 
