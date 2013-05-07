@@ -578,6 +578,21 @@ from the maint branch, but commit the C<CoreList.pm> changes in
 I<blead> and subsequently cherry-pick any releases since the last
 maint release and then your recent commit.  XXX need a better example
 
+[ Note that the procedure for handling Module::CoreList in maint branches
+is a bit complex, and the RMG currently don't describe a full and
+workable approach. The main issue is keeping Module::CoreList
+and its version number synchronised across all maint branches, blead and
+CPAN, while having to bump its version number for every RC release.
+See this brief p5p thread:
+
+    Message-ID: <20130311174402.GZ2294@iabyn.com>
+
+If you can devise a workable system, feel free to try it out, and to
+update the SMG accordingly!
+
+DAPM May 2013 ]
+
+
 F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
 modules on CPAN. It can use a full, local CPAN mirror and/or fall back
 on HTTP::Tiny to fetch package metadata remotely.
