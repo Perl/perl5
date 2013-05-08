@@ -323,10 +323,8 @@ typedef struct stcxt {
 #endif
         int accept_future_minor; /* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
-	int membuf_ro;		/* true means membuf is read-only and msaved is rw */
 	SV *keybuf;	        /* for hash key retrieval */
 	struct extendable membuf;	/* for memory store/retrieve operations */
-	struct extendable msaved;	/* where potentially valid mbuf is saved */
         SV *output;
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
@@ -1467,8 +1465,6 @@ static void clean_context(pTHX_ stcxt_t *cxt)
 	TRACEME(("clean_context"));
 
 	ASSERT(cxt->s_dirty, ("dirty context"));
-
-	ASSERT(!cxt->membuf_ro, ("mbase is not read-only"));
 
 	if (cxt->optype & ST_RETRIEVE)
 		clean_retrieve_context(aTHX_ cxt);
