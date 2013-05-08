@@ -378,7 +378,7 @@ key traversal randomization to be used by defining one of these:
     PERL_PERTURB_KEYS_DETERMINISTIC
 
 In Perl 5.18 the seed used for the hash function is randomly selected
-at process start which can be overriden by specifing a seed by setting
+at process start which can be overridden by specifying a seed by setting
 the PERL_HASH_SEED environment variable.
 
 You can change this behavior by building perl with the
