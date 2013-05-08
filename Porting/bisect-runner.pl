@@ -321,17 +321,23 @@ revision. The bisect run will find the first commit where it passes.
 
 =item *
 
--Dnoextensions=Encode
+-D I<config_arg=value>
 
 =item *
 
--Uusedevel
+-U I<config_arg>
 
 =item *
 
--Accflags=-DNO_MATHOMS
+-A I<config_arg=value>
 
-Arguments to pass to F<Configure>. Repeated C<-A> arguments are passed
+Arguments (C<-A>, C<-D>, C<-U>) to pass to F<Configure>. For example,
+
+    -Dnoextensions=Encode
+    -Uusedevel
+    -Accflags=-DNO_MATHOMS
+
+Repeated C<-A> arguments are passed
 through as is. C<-D> and C<-U> are processed in order, and override
 previous settings for the same parameter. F<bisect-runner.pl> emulates
 C<-Dnoextensions> when F<Configure> itself does not provide it, as it's
