@@ -1233,6 +1233,15 @@ INSTALL_BASE.
 
 =item *
 
+Add a C<PERL_NO_INLINE_FUNCTIONS> option
+
+If PERL_NO_INLINE_FUNCTIONS is defined, don't include "inline.h"
+
+This permits test code to include the perl headers for definitions without
+creating a link dependency on the perl library (which may not exist yet).
+
+=item *
+
 Configure will honour the external C<MAILDOMAIN> environment variable, if set.
 
 =item *
