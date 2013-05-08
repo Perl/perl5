@@ -150,11 +150,11 @@ typedef union {
 /* Only to be used inside a loop (see the break) */
 #define SHIFT_BYTES(utf8, s, strend, buf, len, datumtype, needs_swap)	\
 STMT_START {						\
-    if (utf8) {						\
+    if (UNLIKELY(utf8)) {                               \
         if (!uni_to_bytes(aTHX_ &s, strend,		\
 	  (char *) (buf), len, datumtype)) break;	\
     } else {						\
-        if (needs_swap)                                 \
+        if (UNLIKELY(needs_swap))                       \
             S_reverse_copy(s, (char *) (buf), len);     \
         else                                            \
             Copy(s, (char *) (buf), len, char);		\
@@ -292,7 +292,7 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 	UTF8_CHECK_ONLY : (UTF8_CHECK_ONLY | UTF8_ALLOW_ANY);
     const bool needs_swap = NEEDS_SWAP(datumtype);
 
-    if (needs_swap)
+    if (UNLIKELY(needs_swap))
         buf += buf_len;
 
     for (;buf_len > 0; buf_len--) {
@@ -306,7 +306,7 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 	    bad |= 2;
 	    val &= 0xff;
 	}
-        if (needs_swap)
+        if (UNLIKELY(needs_swap))
             *(U8 *)--buf = (U8)val;
         else
             *(U8 *)buf++ = (U8)val;
@@ -354,7 +354,7 @@ STATIC char *
 S_bytes_to_uni(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
     PERL_ARGS_ASSERT_BYTES_TO_UNI;
 
-    if (needs_swap) {
+    if (UNLIKELY(needs_swap)) {
         const U8 *p = start + len;
         while (p-- > start) {
             const UV uv = NATIVE_TO_ASCII(*p);
@@ -383,10 +383,10 @@ S_bytes_to_uni(const U8 *start, STRLEN len, char *dest, const bool needs_swap) {
 
 #define PUSH_BYTES(utf8, cur, buf, len, needs_swap)             \
 STMT_START {							\
-    if (utf8)							\
+    if (UNLIKELY(utf8))	                                        \
 	(cur) = S_bytes_to_uni((U8 *) buf, len, (cur), needs_swap);       \
     else {							\
-        if (needs_swap)                                         \
+        if (UNLIKELY(needs_swap))                               \
             S_reverse_copy((char *)(buf), cur, len);            \
         else                                                    \
             Copy(buf, cur, len, char);				\
