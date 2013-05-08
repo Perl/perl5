@@ -2274,6 +2274,10 @@ thread-safe on VMS.
 
 =item *
 
+Non-blocking sockets have been fixed on VMS.
+
+=item *
+
 A bug in the compilation of a C</(?{})/> expression which affected the TryCatch
 test suite has been fixed [perl #114242].
 
