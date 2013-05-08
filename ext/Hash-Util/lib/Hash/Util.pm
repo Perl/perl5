@@ -607,15 +607,15 @@ Stores an alias to a variable in a hash instead of copying the value.
 
 =item B<hash_traversal_mask>
 
-As of Perl 5.18 every hash its own hash traversal order, and this order
-changes every time a new element is inserted in the hash. This functionality
+As of Perl 5.18 every hash has its own hash traversal order, and this order
+changes every time a new element is inserted into the hash. This functionality
 is provided by maintaining an unsigned integer mask (U32) which is xor'ed
-with the actual bucket id during a traverse of the hash buckets using keys(),
+with the actual bucket id during a traversal of the hash buckets using keys(),
 values() or each().
 
 You can use this subroutine to get and set the traversal mask for a specific
 hash. Setting the mask ensures that a given hash will produce the same key
-order. B<Note> that this does B<not> guarantee that *two* hashes will produce
+order. B<Note> that this does B<not> guarantee that B<two> hashes will produce
 the same key order for the same hash seed and traversal mask, items that
 collide into one bucket may have different orders regardless of this setting.
 
