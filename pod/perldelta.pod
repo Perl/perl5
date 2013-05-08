@@ -1228,7 +1228,7 @@ it difficult to use a common INSTALL_BASE library path with
 multiple versions of perl.
 
 By setting -Duseversionedarchname, the $archname will be
-distinct for architecture *and* API version, allowing mixed use of
+distinct for architecture I<and> API version, allowing mixed use of
 INSTALL_BASE.
 
 =item *
