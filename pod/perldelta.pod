@@ -125,10 +125,7 @@ the new format.  Example of the new format:
 
 =head2 Upgrade to Unicode 6.2
 
-Perl now supports the final version of Unicode 6.2.  Earlier releases in
-the 5.17 series supported Unicode 6.2 beta versions.  There were no
-substantive changes in the final Unicode 6.2 version from the most
-recent beta, included in Perl 5.17.4.  A list of changes from Unicode
+Perl now supports Unicode 6.2.  A list of changes from Unicode
 6.1 is at L<http://www.unicode.org/versions/Unicode6.2.0>.
 
 =head2 Character name aliases may now include non-Latin1-range characters
@@ -622,8 +619,7 @@ future version of Perl, and should not be used.  With participating C
 compilers (e.g., gcc), compiling any file that uses any of these will
 generate a warning.  These were not intended for public use; there are
 equivalent, faster, macros for most of them.
-See L<perlapi/Character classes>.  The complete list (including some
-that were deprecated in 5.17.7) is:
+See L<perlapi/Character classes>.  The complete list is:
 C<is_uni_alnum>, C<is_uni_alnumc>, C<is_uni_alnumc_lc>,
 C<is_uni_alnum_lc>, C<is_uni_alpha>, C<is_uni_alpha_lc>,
 C<is_uni_ascii>, C<is_uni_ascii_lc>, C<is_uni_blank>,
@@ -2501,10 +2497,9 @@ and now gives:
 
 =item *
 
-Perl now works as well as can be expected on all releases of Unicode so
-far.  In v5.16, it worked on Unicodes 6.0 and 6.1, but there were
-various bugs for earlier releases; the older the release the more
-problems.
+Perl now can be recompiled to use any Unicode version.  In v5.16, it
+worked on Unicodes 6.0 and 6.1, but there were various bugs if earlier
+releases were used; the older the release the more problems.
 
 =item *
 
