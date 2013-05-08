@@ -595,7 +595,7 @@ See this brief p5p thread:
     Message-ID: <20130311174402.GZ2294@iabyn.com>
 
 If you can devise a workable system, feel free to try it out, and to
-update the SMG accordingly!
+update the RMG accordingly!
 
 DAPM May 2013 ]
 
