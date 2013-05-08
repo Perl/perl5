@@ -1683,6 +1683,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef NO_MATHOMS
 			     " NO_MATHOMS"
 #  endif
+#  ifdef NO_HASH_SEED
+			     " NO_HASH_SEED"
+#  endif
 #  ifdef PERL_DISABLE_PMC
 			     " PERL_DISABLE_PMC"
 #  endif
@@ -1691,6 +1694,30 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef PERL_EXTERNAL_GLOB
 			     " PERL_EXTERNAL_GLOB"
+#  endif
+#  ifdef PERL_HASH_FUNC_SIPHASH
+			     " PERL_HASH_FUNC_SIPHASH"
+#  endif
+#  ifdef PERL_HASH_FUNC_SDBM
+			     " PERL_HASH_FUNC_SDBM"
+#  endif
+#  ifdef PERL_HASH_FUNC_DJB2
+			     " PERL_HASH_FUNC_DJB2"
+#  endif
+#  ifdef PERL_HASH_FUNC_SUPERFAST
+			     " PERL_HASH_FUNC_SUPERFAST"
+#  endif
+#  ifdef PERL_HASH_FUNC_MURMUR3
+			     " PERL_HASH_FUNC_MURMUR3"
+#  endif
+#  ifdef PERL_HASH_FUNC_ONE_AT_A_TIME
+			     " PERL_HASH_FUNC_ONE_AT_A_TIME"
+#  endif
+#  ifdef PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
+			     " PERL_HASH_FUNC_ONE_AT_A_TIME_HARD"
+#  endif
+#  ifdef PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
+			     " PERL_HASH_FUNC_ONE_AT_A_TIME_OLD"
 #  endif
 #  ifdef PERL_IS_MINIPERL
 			     " PERL_IS_MINIPERL"
@@ -1706,6 +1733,15 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef PERL_NEW_COPY_ON_WRITE
 			     " PERL_NEW_COPY_ON_WRITE"
+#  endif
+#  ifdef PERL_PERTURB_KEYS_DETERMINISTIC
+			     " PERL_PERTURB_KEYS_DETERMINISTIC"
+#  endif
+#  ifdef PERL_PERTURB_KEYS_DISABLED
+			     " PERL_PERTURB_KEYS_DISABLED"
+#  endif
+#  ifdef PERL_PERTURB_KEYS_RANDOM
+			     " PERL_PERTURB_KEYS_RANDOM"
 #  endif
 #  ifdef PERL_PRESERVE_IVUV
 			     " PERL_PRESERVE_IVUV"
@@ -1728,6 +1764,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
 #  endif	       
+#  ifdef USE_HASH_SEED_EXPLICIT
+			     " USE_HASH_SEED_EXPLICIT"
+#  endif
 #  ifdef USE_LOCALE
 			     " USE_LOCALE"
 #  endif
