@@ -473,8 +473,6 @@ static stcxt_t *Context_ptr = NULL;
         } STMT_END
 
 
-#define MBUF_SIZE()		(mptr - mbase)
-
 static const char *
 read_into_sv(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
 	char *pv;
@@ -573,72 +571,52 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 		return (SV *) 0;			\
   } STMT_END
 
-#define WRITE_ERROR(msg)                        \
-        STMT_START {                            \
-                TRACEME(("%s failed", msg));    \
-                return -1;                      \
-        } STMT_END
-        
-static int
+static void
 write_bytes(pTHX_ stcxt_t *cxt, const char *str, STRLEN len) {
         if (len) {
                 if (cxt->fio) {
                         STRLEN bytes = PerlIO_write(cxt->fio, str, len);
                         if (bytes != len) {
-                                TRACEME(("PerlIO_write failed, requested bytes: %d, written: %d",
-                                         len, bytes));
-                                WRITE_ERROR("write_bytes");
+                                SV *ioe = GvSV(gv_fetchpvs("!", GV_ADDMULTI, SVt_PV));
+                                Perl_croak(aTHX "write failed: %s", SvPV_nolen(ioe));
                         }
                 }
-                else {
-                        sv_catpvn(cxt->output, str, len);
-                }
+                else sv_catpvn(cxt->output, str, len);
         }
-        return 0;
 }
 
-#define WRITE_BYTES(x,y)                                                \
-        STMT_START {                                                    \
-                if (write_bytes(aTHX_ cxt, (x), (y)))                   \
-                        WRITE_ERROR("WRITE_BYTES");                     \
-        } STMT_END
+#define WRITE_BYTES(x,y)                        \
+        (write_bytes(aTHX_ cxt, (x), (y)))
 
 #define WRITE_MARK(c)                                    \
         STMT_START {                                     \
                 char str = c;                            \
-                if (write_bytes(aTHX_ cxt, &str, 1))     \
-                        WRITE_ERROR("WRITE_MARK");       \
+                write_bytes(aTHX_ cxt, &str, 1);         \
         } STMT_END
 
-static int
+static void
 write_i32n(pTHX_ stcxt_t *cxt, I32 i32) {
         char b[4];
-        b[0] = i32 >> 24;
-        b[1] = i32 >> 16;
-        b[2] = i32 >>  8;
-        b[3] = i32;
-        return write_bytes(aTHX_ cxt, b, 4);
+        b[0] = (i32 >> 24) & 255;
+        b[1] = (i32 >> 16) & 255;
+        b[2] = (i32 >>  8) & 255;
+        b[3] =  i32        & 255;
+        write_bytes(aTHX_ cxt, b, 4);
 }
 
-#define WRITE_I32N(x)                                   \
-        STMT_START {                                    \
-                if (write_i32n(aTHX_ cxt, (x)))         \
-                        WRITE_ERROR("WRITE_I32N");      \
-        } STMT_END
+#define WRITE_I32N(x)                           \
+        (write_i32n(aTHX_ cxt, (x)))
 
-static int
+static void
 write_i32(pTHX_ stcxt_t *cxt, I32 i32) {
-        if (cxt->netorder)
-                return write_i32n(aTHX_ cxt, i32);
-        else
-                return write_bytes(aTHX_ cxt, oI(&i32), 4);
+        if (cxt->netorder) write_i32n(aTHX_ cxt, i32);
+        else               write_bytes(aTHX_ cxt, oI(&i32), 4);
 }
 
 #define WRITE_I32(x)                                                    \
         STMT_START {                                                    \
                 ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));   \
-                if (write_i32(aTHX_ cxt, (x)))                          \
-                        WRITE_ERROR("WRITE_I32");                       \
+                write_i32(aTHX_ cxt, (x));                              \
         } STMT_END
 
 #define WRITE_LEN(len)                                                  \
@@ -646,22 +624,17 @@ write_i32(pTHX_ stcxt_t *cxt, I32 i32) {
                 if (len > I32_MAX)                                      \
                         Perl_croak(aTHX_ "data length too big: %"UVuf , \
                                    (UV)len);                            \
-                if (write_i32(aTHX_ cxt, len))                          \
-                        WRITE_ERROR("WRITE_LEN");                       \
+                write_i32(aTHX_ cxt, len);                              \
         } STMT_END
 
-static int
+static void
 write_pv_with_len(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len) {
         WRITE_LEN(len);
         WRITE_BYTES(pv, len);
-        return 0;
 }
 
-#define WRITE_PV_WITH_LEN(pv, len)                                      \
-        STMT_START {                                                    \
-                if (write_pv_with_len(aTHX_ cxt, pv, len))              \
-                        WRITE_ERROR("WRITE_PV_WITH_LEN");               \
-        } STMT_END
+#define WRITE_PV_WITH_LEN(pv, len)              \
+	(write_pv_with_len(aTHX_ cxt, pv, len))             
 
 static int
 write_pv_with_len_and_type(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len, char type) {
@@ -691,11 +664,7 @@ write_pv_with_len_and_type(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len, char 
 }
 
 #define WRITE_PV_WITH_LEN_AND_TYPE(pv, len, type)                       \
-        STMT_START {                                                    \
-                if (write_pv_with_len_and_type(aTHX_ cxt,               \
-                                               (pv), (len), (type)))    \
-                        WRITE_ERROR("WRITE_PV_WITH_LEN_AND_TYPE");      \
-        } STMT_END
+	(write_pv_with_len_and_type(aTHX_ cxt, (pv), (len), (type)))
 
 
 /*
