@@ -2673,12 +2673,14 @@
 #define DOUBLESIZE 8		/**/
 
 /* EBCDIC:
- *     This symbol, if defined, indicates that this system uses
+ *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
  */
 /* BOOTSTRAP_CHARSET:
- *     This symbol, if defined, indicates that this system uses
- *	BOOTSTRAP_CHARSET
+ *	This symbol, if defined, indicates that this system needs
+ *	converting various files to the native character set before
+ *	bringing up perl on a system that has a non-ASCII character
+ *	set and no working perl.
  */
 /*#define	EBCDIC 		/ **/
 /*#define	BOOTSTRAP_CHARSET	/ **/
@@ -3718,7 +3720,7 @@
 /*#define     HAS_INT64_T               / **/
 
 /* HAS_ISBLANK:
- *	This manifest constant lets the C program know that isblank 
+ *	This manifest constant lets the C program know that isblank
  *	is available.
  */
 /*#define HAS_ISBLANK		/ **/
@@ -4751,6 +4753,6 @@
 #endif
 
 /* Generated from:
- * b1b92e181a028e2513e7dbdbd34635c03c0fe82f5e8bbd12e21ed36fc88f91b3 config_h.SH
+ * 57a897e7541bd9d285c79ed44f59f50bbd7ded0dc51c3c7a1d23715267b12514 config_h.SH
  * 26ab9b4aa382d32761cb91084ba59e7e4b190799502a43366ccb3d2f584783ca uconfig.sh
  * ex: set ro: */

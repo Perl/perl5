@@ -1016,7 +1016,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	in a UV, i.e. 0x1234 or 0x4321 or 0x12345678, etc...
  *	If the compiler supports cross-compiling or multiple-architecture
- *	binaries (eg. on NeXT systems), use compiler-defined macros to
+ *	binaries (e.g. on NeXT systems), use compiler-defined macros to
  *	determine the byte order.
  *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
  *	Binaries (MAB) on either big endian or little endian machines.
@@ -2733,7 +2733,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	Gid_t_f		$gidformat		/**/
 
 /* Gid_t_sign:
- *	This symbol holds the signedess of a Gid_t.
+ *	This symbol holds the signedness of a Gid_t.
  *	1 for unsigned, -1 for signed.
  */
 #define Gid_t_sign	$gidsign		/* GID sign */
@@ -3292,7 +3292,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	Uid_t_f		$uidformat		/**/
 
 /* Uid_t_sign:
- *	This symbol holds the signedess of a Uid_t.
+ *	This symbol holds the signedness of a Uid_t.
  *	1 for unsigned, -1 for signed.
  */
 #define Uid_t_sign	$uidsign		/* UID sign */
@@ -4635,7 +4635,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This variable contains the size of struct stat's st_ino in bytes.
  */
 /* ST_INO_SIGN:
- *	This symbol holds the signedess of struct stat's st_ino.
+ *	This symbol holds the signedness of struct stat's st_ino.
  *	1 for unsigned, -1 for signed.
  */
 #define ST_INO_SIGN $st_ino_sign	/* st_ino sign */
