@@ -186,24 +186,6 @@
 #define ST_CLONE	0x4		/* Deep cloning operation */
 
 /*
- * The following structure is used for hash table key retrieval. Since, when
- * retrieving objects, we'll be facing blessed hash references, it's best
- * to pre-allocate that buffer once and resize it as the need arises, never
- * freeing it (keys will be saved away someplace else anyway, so even large
- * keys are not enough a motivation to reclaim that space).
- *
- * This structure is also used for memory store/retrieve operations which
- * happen in a fixed place before being malloc'ed elsewhere if persistence
- * is required. Hence the aptr pointer.
- */
-struct extendable {
-	char *arena;		/* Will hold hash key strings, resized as needed */
-	STRLEN asiz;		/* Size of aforementioned buffer */
-	char *aptr;			/* Arena pointer, for in-place read/write ops */
-	char *aend;			/* First invalid address */
-};
-
-/*
  * At store time:
  * A hash table records the objects which have already been stored.
  * Those are referred to as SX_OBJECT in the file, and their "tag" (i.e.
@@ -324,7 +306,8 @@ typedef struct stcxt {
         int accept_future_minor; /* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	SV *keybuf;	        /* for hash key retrieval */
-	struct extendable membuf;	/* for memory store/retrieve operations */
+        const char *input;
+        const char *input_end;
         SV *output;
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
@@ -444,10 +427,6 @@ static stcxt_t *Context_ptr = NULL;
 /*
  * memory buffer handling
  */
-#define mbase	(cxt->membuf).arena
-#define msiz	(cxt->membuf).asiz
-#define mptr	(cxt->membuf).aptr
-#define mend	(cxt->membuf).aend
 
 #define MGROW	(1 << 13)
 #define MMASK	(MGROW - 1)
@@ -482,10 +461,10 @@ read_into_sv(pTHX_ stcxt_t *cxt, STRLEN size, SV *out) {
 				return NULL;
 		}
 		else {
-			if (mend < (mptr + size))
+			if (cxt->input_end < (cxt->input + size))
 				return NULL;
-			Move(mptr, pv, size, char);
-			mptr += size;
+			Move(cxt->input, pv, size, char);
+			cxt->input += size;
 		}
 	}
 	pv[size] = '\0';
@@ -530,8 +509,8 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 
 #define MBUF_GETC(x) 				\
   STMT_START {						\
-	if (mptr < mend)				\
-		x = (int) (unsigned char) *mptr++;	\
+	if (cxt->input < cxt->input_end)				\
+		x = (int) (unsigned char) *cxt->input++;	\
 	else							\
 		return (SV *) 0;			\
   } STMT_END
@@ -540,21 +519,21 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 #define MBUF_GETINT(x) 					\
   STMT_START {							\
 	oC(x);								\
-	if ((mptr + 4) <= mend) {			\
-		memcpy(oI(&x), mptr, 4);		\
-		mptr += 4;						\
+	if ((cxt->input + 4) <= cxt->input_end) {			\
+		memcpy(oI(&x), cxt->input, 4);		\
+		cxt->input += 4;						\
 	} else								\
 		return (SV *) 0;				\
   } STMT_END
 #else
 #define MBUF_GETINT(x) 					\
   STMT_START {							\
-	if ((mptr + sizeof(int)) <= mend) {	\
-		if (int_aligned(mptr))			\
-			x = *(int *) mptr;			\
+	if ((cxt->input + sizeof(int)) <= cxt->input_end) {	\
+		if (int_aligned(cxt->input))			\
+			x = *(int *) cxt->input;			\
 		else							\
-			memcpy(&x, mptr, sizeof(int));	\
-		mptr += sizeof(int);			\
+			memcpy(&x, cxt->input, sizeof(int));	\
+		cxt->input += sizeof(int);			\
 	} else								\
 		return (SV *) 0;				\
   } STMT_END
@@ -562,9 +541,9 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
 
 #define MBUF_READ(x,s) 				\
   STMT_START {						\
-	if ((mptr + (s)) <= mend) {		\
-		memcpy(x, mptr, s);			\
-		mptr += s;					\
+	if ((cxt->input + (s)) <= cxt->input_end) {		\
+		memcpy(x, cxt->input, s);			\
+		cxt->input += s;					\
 	} else							\
 		return (SV *) 0;			\
   } STMT_END
@@ -849,7 +828,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  */
 
 #define GETCHAR() \
-	(cxt->fio ? PerlIO_getc(cxt->fio) : (mptr >= mend ? EOF : (int) *mptr++))
+	(cxt->fio ? PerlIO_getc(cxt->fio) : (cxt->input >= cxt->input_end ? EOF : (int) *cxt->input++))
 
 #define GETMARK(x) 								\
   STMT_START {									\
@@ -5908,8 +5887,8 @@ static SV *do_retrieve(
 				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
 #endif
 		}
-		mptr = mbase = SvPV(in, size);
-                mend = mbase + size;
+		cxt->input = SvPV(in, size);
+                cxt->input_end = cxt->input + size;
 	}
 
 	/*
@@ -6126,8 +6105,8 @@ static SV *dclone(pTHX_ SV *sv)
 	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(!cxt->entry, ("entry will not cause new context allocation"));
 
-        mptr = mbase = SvPV(cxt->output, size);
-        mend = mbase + size;
+        cxt->input = SvPV(cxt->output, size);
+        cxt->input_end = cxt->input + size;
 	TRACEME(("dclone stored %d bytes", size));
         
 	/*
