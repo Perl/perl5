@@ -76,35 +76,35 @@ support for several other hash functions.  This new function is expected to
 perform equivalently to the old one for shorter strings and is faster for
 hashing longer strings.
 
-=head3 PERL_HASH_SEED enviornment variable now takes a hex value
+=head3 PERL_HASH_SEED environment variable now takes a hex value
 
-PERL_HASH_SEED no longer accepts an integer as a parameter, instead the
+C<PERL_HASH_SEED> no longer accepts an integer as a parameter; instead the
 value is expected to be a binary string encoded in hex.  This is to make
 the infrastructure support hash seeds of arbitrary lengths which might
 exceed that of an integer.  (SipHash uses a 16 byte seed).
 
 =head3 PERL_PERTURB_KEYS environment variable added
 
-PERL_PERTURB_KEYS environment variable allows one to control the level of
+The C<PERL_PERTURB_KEYS> environment variable allows one to control the level of
 randomization applied to C<keys> and friends.
 
-When PERL_PERTURB_KEYS is 0, perl will not randomize key order at all. The
+When C<PERL_PERTURB_KEYS> is 0, perl will not randomize the key order at all. The
 chance that C<keys> changes due to an insert will be the same as in previous
 perls, basically only when the bucket size is changed.
 
-When PERL_PERTURB_KEYS is 1, perl will randomize keys in a non repeatedable
+When C<PERL_PERTURB_KEYS> is 1, perl will randomize keys in a non-repeatable
 way. The chance that C<keys> changes due to an insert will be very high.  This
 is the most secure and default mode.
 
-When PERL_PERTURB_KEYS is 2, perl will randomize keys in a repeatedable way.
-Repititive runs of the same program should produce the same output every time.
+When C<PERL_PERTURB_KEYS> is 2, perl will randomize keys in a repeatable way.
+Repeated runs of the same program should produce the same output every time.
 The chance that keys changes due to an insert will be very high.
 
-PERL_HASH_SEED implies a non-default PERL_PERTURB_KEYS setting. Setting
-PERL_HASH_SEED=0 (exactly one 0) implies PERL_PERTURB_KEYS=0 (hash key
-randomization disabled), settng PERL_HASH_SEED to any other value, implies
-PERL_PERTURB_KEYS=2 (deterministic/repeatable hash key randomization).
-Specifying PERL_PERTURB_KEYS explicitly to a different level overrides this
+C<PERL_HASH_SEED> implies a non-default C<PERL_PERTURB_KEYS> setting. Setting
+C<PERL_HASH_SEED=0> (exactly one 0) implies C<PERL_PERTURB_KEYS=0> (hash key
+randomization disabled); settng C<PERL_HASH_SEED> to any other value implies
+C<PERL_PERTURB_KEYS=2> (deterministic and repeatable hash key randomization).
+Specifying C<PERL_PERTURB_KEYS> explicitly to a different level overrides this
 behavior.
 
 =head3 Hash::Util::hash_seed() now returns a string
@@ -116,7 +116,7 @@ which might exceed that of an integer.  (SipHash uses a 16 byte seed).
 =head3 Output of PERL_HASH_SEED_DEBUG has been changed
 
 The environment variable PERL_HASH_SEED_DEBUG now makes perl show both the
-hash function perl was built with AND the seed, in hex, in use for that
+hash function perl was built with, I<and> the seed, in hex, in use for that
 process. Code parsing this output, should it exist, must change to accommodate
 the new format.  Example of the new format:
 
@@ -462,7 +462,7 @@ if lexical warnings were not already enabled:
     use warnings "void";
     $#; # void warning; no deprecation warning
 
-Now, the debugging, deprecated, glob, inplace and malloc warnings
+Now, the C<debugging>, C<deprecated>, C<glob>, C<inplace> and C<malloc> warnings
 categories are left on when turning on lexical warnings (unless they are
 turned off by C<no warnings>, of course).
 
@@ -470,8 +470,8 @@ This may cause deprecation warnings to occur in code that used to be free
 of warnings.
 
 Those are the only categories consisting only of default warnings.  Default
-warnings in other categories are still disabled by C<use warnings
-"category">, as we do not yet have the infrastructure for controlling
+warnings in other categories are still disabled by C<< use warnings "category" >>,
+as we do not yet have the infrastructure for controlling
 individual warnings.
 
 =head2 C<state sub> and C<our sub>
@@ -500,10 +500,10 @@ ignore the file and continue searching the directories in C<@INC>
 =head2 C<gv_fetchmeth_*> and SUPER
 
 The various C<gv_fetchmeth_*> XS functions used to treat a package whose
-named ended with ::SUPER specially.  A method lookup on the Foo::SUPER
-package would be treated as a SUPER method lookup on the Foo package.  This
-is no longer the case.  To do a SUPER lookup, pass the Foo stash and the
-GV_SUPER flag.
+named ended with C<::SUPER> specially.  A method lookup on the C<Foo::SUPER>
+package would be treated as a C<SUPER> method lookup on the C<Foo> package.  This
+is no longer the case.  To do a C<SUPER> lookup, pass the C<Foo> stash and the
+C<GV_SUPER> flag.
 
 =head2 C<split>'s first argument is more consistently interpreted
 
@@ -519,7 +519,7 @@ containing one space once was.
 The following modules will be removed from the core distribution in a
 future release, and should be installed from CPAN instead. Distributions
 on CPAN which require these should add them to their prerequisites.
-The core versions of these modules will issue "deprecated"-category
+The core versions of these modules will issue C<"deprecated">-category
 warnings.
 
 You can silence these deprecation warnings by installing the modules
@@ -599,12 +599,15 @@ Unicode recommends 11 characters be treated thusly.  We will conform
 with this in a future Perl version.  In the meantime, use of any of the
 missing characters will raise a deprecation warning, unless turned off.
 The five characters are:
-U+0085 NEXT LINE,
-U+200E LEFT-TO-RIGHT MARK,
-U+200F RIGHT-TO-LEFT MARK,
-U+2028 LINE SEPARATOR,
+
+    U+0085 NEXT LINE,
+    U+200E LEFT-TO-RIGHT MARK,
+    U+200F RIGHT-TO-LEFT MARK,
+    U+2028 LINE SEPARATOR,
+
 and
-U+2029 PARAGRAPH SEPARATOR.
+
+    U+2029 PARAGRAPH SEPARATOR.
 
 =head2 User-defined charnames with surprising whitespace
 
@@ -643,7 +646,7 @@ In addition these three functions that have never worked properly are
 deprecated:
 C<to_uni_lower_lc>, C<to_uni_title_lc>, and C<to_uni_upper_lc>.
 
-=head2 Certain rare uses of backslashes within regexes are now deprectated
+=head2 Certain rare uses of backslashes within regexes are now deprecated
 
 There are three pairs of characters that Perl recognizes as
 metacharacters in regular expression patterns: C<{}>, C<[]>, and C<()>.
@@ -655,7 +658,7 @@ These can be used as well to delimit patterns, as in:
 Since they are metacharacters, they have special meaning to regular
 expression patterns, and it turns out that you can't turn off that
 special meaning by the normal means of preceding them with a backslash,
-if you use them, paired, within a pattern delimitted by them.  For
+if you use them, paired, within a pattern delimited by them.  For
 example, in
 
   m{foo\{1,3\}}
@@ -797,12 +800,12 @@ C<%hash ? ... : ...>, and C<sub { %hash || ... }>.
 
 =item *
 
-Filetest ops manage the stack in a fractionally more efficient manner.
+Filetest operators manage the stack in a fractionally more efficient manner.
 
 =item *
 
 Globs used in a numeric context are now numified directly in most cases,
-rather than being numerified via stringification.
+rather than being numified via stringification.
 
 =item *
 
@@ -831,9 +834,9 @@ information only known to the C<perl> binary and not available via L<Config>.
 This is only an overview of selected module updates.  For a complete
 list of updates, run:
 
-  $ corelist --diff 5.14.0 5.16.0
+  $ corelist --diff 5.16.0 5.18.0
 
-You can substitute your favorite version in place of 5.14.0, too.
+You can substitute your favorite version in place of 5.16.0, too.
 
 =over 4
 
@@ -1215,21 +1218,21 @@ When set, it includes 'api_versionstring' in 'archname'. E.g.
 x86_64-linux-5.13.6-thread-multi.  It is unset by default.
 
 This feature was requested by Tim Bunce, who observed that
-INSTALL_BASE creates a library structure that does not
+C<INSTALL_BASE> creates a library structure that does not
 differentiate by perl version.  Instead, it places architecture
 specific files in "$install_base/lib/perl5/$archname".  This makes
-it difficult to use a common INSTALL_BASE library path with
+it difficult to use a common C<INSTALL_BASE> library path with
 multiple versions of perl.
 
-By setting -Duseversionedarchname, the $archname will be
+By setting C<-Duseversionedarchname>, the $archname will be
 distinct for architecture I<and> API version, allowing mixed use of
-INSTALL_BASE.
+C<INSTALL_BASE>.
 
 =item *
 
 Add a C<PERL_NO_INLINE_FUNCTIONS> option
 
-If PERL_NO_INLINE_FUNCTIONS is defined, don't include "inline.h"
+If C<PERL_NO_INLINE_FUNCTIONS> is defined, don't include "inline.h"
 
 This permits test code to include the perl headers for definitions without
 creating a link dependency on the perl library (which may not exist yet).
@@ -1414,7 +1417,7 @@ Windows Desktop) in F<win32/Makefile>.
 
 =item *
 
-The option to build without USE_SOCKETS_AS_HANDLES has been removed.
+The option to build without C<USE_SOCKETS_AS_HANDLES> has been removed.
 
 =item *
 
@@ -1447,7 +1450,7 @@ deleting the PATH environment variable [perl #113798].
 
 =item *
 
-A new makefile option, USE_64_BIT_INT, has been added to the Windows
+A new makefile option, C<USE_64_BIT_INT>, has been added to the Windows
 makefiles.  Set this to "define" when building a 32-bit perl if you want
 it to use 64-bit integers.
 
@@ -1519,7 +1522,7 @@ Use the SvIsCOW macro (as before) to identify a copy-on-write scalar.
 
 =item *
 
-PL_glob_index is gone.
+C<PL_glob_index> is gone.
 
 =item *
 
@@ -1539,7 +1542,7 @@ A new op type, C<OP_PADRANGE> has been introduced.  The perl peephole
 optimiser will, where possible, substitute a single padrange op for a
 pushmark followed by one or more pad ops, and possibly also skipping list
 and nextstate ops.  In addition, the op can carry out the tasks associated
-with the RHS of a my(...) = @_ assignment, so those ops may be optimised
+with the RHS of a C<< my(...) = @_ >> assignment, so those ops may be optimised
 away too.
 
 =item *
@@ -1667,7 +1670,7 @@ holds stash pointers.
 
 In the pluggable regex API, the C<regexp_engine> struct has acquired a new
 field C<op_comp>, which is currently just for perl's internal use, and
-should be initialised to NULL by other regex plugin modules.
+should be initialized to NULL by other regex plugin modules.
 
 =item *
 
@@ -1691,13 +1694,13 @@ compilation error is simpler and safer [perl #111462][perl #112312].
 
 =item *
 
-PERL_DEBUG_READONLY_OPS has been rewritten to work with the new slab
+C<PERL_DEBUG_READONLY_OPS> has been rewritten to work with the new slab
 allocator, allowing it to catch more violations than before.
 
 =item *
 
-The old slab allocator for ops, which was only enabled for PERL_IMPLICIT_SYS
-and PERL_DEBUG_READONLY_OPS, has been retired.
+The old slab allocator for ops, which was only enabled for C<PERL_IMPLICIT_SYS>
+and C<PERL_DEBUG_READONLY_OPS>, has been retired.
 
 =back
 
@@ -1713,7 +1716,7 @@ string eval [perl #65838].
 
 =item *
 
--DPERL_GLOBAL_STRUCT builds now free the global struct B<after>
+C<-DPERL_GLOBAL_STRUCT> builds now free the global struct B<after>
 they've finished using it.
 
 =item *
@@ -2117,7 +2120,7 @@ SUPER package had already been accessed by other means.
 
 =item *
 
-Stash aliasing (C<*foo:: = *bar::>) no longer causes SUPER calls to ignore
+Stash aliasing (C<< *foo:: = *bar:: >>) no longer causes SUPER calls to ignore
 changes to methods or @ISA or use the wrong package.
 
 =item *
@@ -2868,7 +2871,7 @@ debugging builds.
 =item *
 
 Assigning a regular expression to a scalar containing a number no longer
-causes subsequent nummification to produce random numbers.
+causes subsequent numification to produce random numbers.
 
 =item *
 
@@ -2887,7 +2890,7 @@ flattening into strings.
 
 =item *
 
-Nummifying a regular expression no longer results in an uninitialized
+Numifying a regular expression no longer results in an uninitialized
 warning.
 
 =item *
