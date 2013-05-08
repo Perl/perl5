@@ -8868,7 +8868,13 @@ EOM
 cont=x
 while test "$cont"; do
 	case "$MAILDOMAIN" in
-	'') maildomain="$myhostname$mydomain";;
+	'')
+		if $test -s /etc/mailname; then
+			maildomain=`$cat /etc/mailname`
+		else
+			maildomain="$myhostname$mydomain"
+		fi
+		;;
 	*)  maildomain="$MAILDOMAIN";;
 	esac
 	case "$cf_email" in
