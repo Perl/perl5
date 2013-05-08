@@ -81,7 +81,6 @@
 #  define HvTOTALKEYS(hv)	HvKEYS(hv)
 #endif
 
-#define DEBUGME 1
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -308,7 +307,6 @@ typedef struct stcxt {
 	SV *keybuf;	        /* for hash key retrieval */
         const unsigned char *input;
         const unsigned char *input_end;
-        SV *output;
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
@@ -317,6 +315,39 @@ typedef struct stcxt {
 	SV *my_sv;		/* the blessed scalar who's SvPVX() I am */
 	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
 } stcxt_t;
+
+struct st_store_cxt;
+typedef struct st_store_cxt {
+	int optype;			/* type of traversal operation */
+#ifdef USE_PTR_TABLE
+	/* use pseen if we have ptr_tables. We have to store tag+1, because
+	   tag numbers start at 0, and we can't store (SV *) 0 in a ptr_table
+	   without it being confused for a fetch lookup failure.  */
+	struct ptr_tbl *pseen;
+	/* Still need hseen for the 0.6 file format code. */
+#else
+	HV *hseen;			
+#endif
+	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
+	IV where_is_undef;		/* index in aseen of PL_sv_undef */
+	HV *hclass;			/* which classnames have been seen, store time */
+	HV *hook;			/* cache for hook methods per class name */
+	IV tagnum;			/* incremented at store time for each seen object */
+	IV classnum;		/* incremented at store time for each seen classname */
+	int netorder;		/* true if network order used */
+	int forgive_me;		/* whether to be forgiving... */
+	int deparse;        /* whether to deparse code refs */
+	int canonical;		/* whether to store hashes sorted by key */
+#ifndef HAS_RESTRICTED_HASHES
+        int derestrict;         /* whether to downgrade restricted hashes */
+#endif
+#ifndef HAS_UTF8_ALL
+        int use_bytes;         /* whether to bytes-ify utf8 */
+#endif
+	SV *keybuf;	        /* for hash key retrieval */
+        SV *output_sv;
+	PerlIO *output_f;		/* where I/O are performed, NULL for memory */
+} store_cxt_t;
 
 #define NEW_STORABLE_CXT_OBJ(cxt)					\
   STMT_START {										\
@@ -387,7 +418,7 @@ static stcxt_t *Context_ptr = NULL;
  * but the topmost context stacked.
  */
 
-#define CROAK(x)	STMT_START { cxt->s_dirty = 1; croak x; } STMT_END
+#define CROAK(x)	STMT_START { croak x; } STMT_END
 
 /*
  * End of "thread-safe" related definitions.
@@ -438,15 +469,15 @@ static stcxt_t *Context_ptr = NULL;
 #define int_aligned(x)	\
 	((unsigned long) (x) == trunc_int(x))
 
-#define OUTPUT_INIT(x)                                       \
-        STMT_START {                                         \
-                if (!cxt->output) {                          \
-                        cxt->output = newSV(512);            \
-                        SvPOK_only(cxt->output);             \
-                }                                            \
-                else {                                       \
-                        SvCUR_set(cxt->output, 0);           \
-                }                                            \
+#define OUTPUT_INIT(x)                                          \
+        STMT_START {                                            \
+                if (!cxt->output_sv) {                          \
+                        cxt->output_sv = newSV(512);            \
+                        SvPOK_only(cxt->output_sv);             \
+                }                                               \
+                else {                                          \
+                        SvCUR_set(cxt->output_sv, 0);           \
+                }                                               \
         } STMT_END
 
 
@@ -549,51 +580,51 @@ read_string(pTHX_ stcxt_t *cxt, STRLEN size) {
   } STMT_END
 
 static void
-write_bytes(pTHX_ stcxt_t *cxt, const char *str, STRLEN len) {
+write_bytes(pTHX_ store_cxt_t *store_cxt, const char *str, STRLEN len) {
         if (len) {
-                if (cxt->fio) {
-                        STRLEN bytes = PerlIO_write(cxt->fio, str, len);
+                if (store_cxt->output_f) {
+                        STRLEN bytes = PerlIO_write(store_cxt->output_f, str, len);
                         if (bytes != len) {
                                 SV *ioe = GvSV(gv_fetchpvs("!", GV_ADDMULTI, SVt_PV));
                                 Perl_croak(aTHX "write failed: %s", SvPV_nolen(ioe));
                         }
                 }
-                else sv_catpvn(cxt->output, str, len);
+                else sv_catpvn(store_cxt->output_sv, str, len);
         }
 }
 
 #define WRITE_BYTES(x,y)                        \
-        (write_bytes(aTHX_ cxt, (x), (y)))
+        (write_bytes(aTHX_ store_cxt, (x), (y)))
 
 #define WRITE_MARK(c)                                    \
         STMT_START {                                     \
                 char str = c;                            \
-                write_bytes(aTHX_ cxt, &str, 1);         \
+                write_bytes(aTHX_ store_cxt, &str, 1);         \
         } STMT_END
 
 static void
-write_i32n(pTHX_ stcxt_t *cxt, I32 i32) {
+write_i32n(pTHX_ store_cxt_t *store_cxt, I32 i32) {
         char b[4];
         b[0] = (i32 >> 24) & 255;
         b[1] = (i32 >> 16) & 255;
         b[2] = (i32 >>  8) & 255;
         b[3] =  i32        & 255;
-        write_bytes(aTHX_ cxt, b, 4);
+        write_bytes(aTHX_ store_cxt, b, 4);
 }
 
 #define WRITE_I32N(x)                           \
-        (write_i32n(aTHX_ cxt, (x)))
+        (write_i32n(aTHX_ store_cxt, (x)))
 
 static void
-write_i32(pTHX_ stcxt_t *cxt, I32 i32) {
-        if (cxt->netorder) write_i32n(aTHX_ cxt, i32);
-        else               write_bytes(aTHX_ cxt, oI(&i32), 4);
+write_i32(pTHX_ store_cxt_t *store_cxt, I32 i32) {
+        if (store_cxt->netorder) write_i32n (aTHX_ store_cxt, i32);
+        else                     write_bytes(aTHX_ store_cxt, oI(&i32), 4);
 }
 
 #define WRITE_I32(x)                                                    \
         STMT_START {                                                    \
                 ASSERT(sizeof(x) == sizeof(I32), ("writing an I32"));   \
-                write_i32(aTHX_ cxt, (x));                              \
+                write_i32(aTHX_ store_cxt, (x));                        \
         } STMT_END
 
 #define WRITE_LEN(len)                                                  \
@@ -601,20 +632,20 @@ write_i32(pTHX_ stcxt_t *cxt, I32 i32) {
                 if (len > I32_MAX)                                      \
                         Perl_croak(aTHX_ "data length too big: %"UVuf , \
                                    (UV)len);                            \
-                write_i32(aTHX_ cxt, len);                              \
+                write_i32(aTHX_ store_cxt, len);                        \
         } STMT_END
 
 static void
-write_pv_with_len(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len) {
+write_pv_with_len(pTHX_ store_cxt_t *store_cxt, const char *pv, STRLEN len) {
         WRITE_LEN(len);
         WRITE_BYTES(pv, len);
 }
 
 #define WRITE_PV_WITH_LEN(pv, len)              \
-	(write_pv_with_len(aTHX_ cxt, pv, len))             
+	(write_pv_with_len(aTHX_ store_cxt, pv, len))             
 
 static int
-write_pv_with_len_and_type(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len, char type) {
+write_pv_with_len_and_type(pTHX_ store_cxt_t *store_cxt, const char *pv, STRLEN len, char type) {
         if (len < LG_SCALAR) {
                 WRITE_MARK(type);
                 WRITE_MARK(len);
@@ -641,7 +672,7 @@ write_pv_with_len_and_type(pTHX_ stcxt_t *cxt, const char *pv, STRLEN len, char 
 }
 
 #define WRITE_PV_WITH_LEN_AND_TYPE(pv, len, type)                       \
-	(write_pv_with_len_and_type(aTHX_ cxt, (pv), (len), (type)))
+	(write_pv_with_len_and_type(aTHX_ store_cxt, (pv), (len), (type)))
 
 
 /*
@@ -819,7 +850,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  */
 #define WRITE_SV_UNDEF()                        \
         STMT_START {                            \
-                cxt->tagnum++;                  \
+                store_cxt->tagnum++;            \
                 WRITE_MARK(SX_SV_UNDEF);        \
         } STMT_END
 
@@ -902,16 +933,17 @@ read_char(pTHX_ stcxt_t *cxt) {
  * i should be true iff sv is immortal (ie PL_sv_yes, PL_sv_no or PL_sv_undef)
  */
 #define SEEN(y,c,i) 							\
-  STMT_START {								\
-	if (!y)									\
-		return (SV *) 0;					\
-	if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y) : SvREFCNT_inc(y)) == 0) \
-		return (SV *) 0;					\
-	TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)", cxt->tagnum-1, \
-		 PTR2UV(y), SvREFCNT(y)-1));		\
-	if (c)									\
-		BLESS((SV *) (y), c);				\
-  } STMT_END
+        STMT_START {                                                    \
+                if (!(y))                                               \
+                        return (SV *) 0;                                \
+                SvREFCNT_inc_NN((SV*)(y));                              \
+                if (av_store(cxt->aseen, cxt->tagnum++, (SV*)(y)) == 0) \
+                        return (SV *) 0;                                \
+                TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)",          \
+                         cxt->tagnum-1, PTR2UV(y), SvREFCNT(y)-1));     \
+                if (c)                                                  \
+                        BLESS((SV *) (y), c);				\
+        } STMT_END
 
 /*
  * Bless 's' in 'p', via a temporary reference, required by sv_bless().
@@ -965,7 +997,7 @@ read_char(pTHX_ stcxt_t *cxt) {
 
 #endif /* PATCHLEVEL <= 6 */
 
-static int store(pTHX_ stcxt_t *cxt, SV *sv);
+static int store(pTHX_ store_cxt_t *store_cxt, SV *sv);
 static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
 
 #define UNSEE()                             \
@@ -978,17 +1010,17 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
  * Dynamic dispatching table for SV store.
  */
 
-static int store_ref(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_array(pTHX_ stcxt_t *cxt, AV *av);
-static int store_hash(pTHX_ stcxt_t *cxt, HV *hv);
-static int store_tied(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_code(pTHX_ stcxt_t *cxt, CV *cv);
-static int store_other(pTHX_ stcxt_t *cxt, SV *sv);
-static int store_blessed(pTHX_ stcxt_t *cxt, SV *sv, int type, HV *pkg);
+static int store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static int store_array(pTHX_ store_cxt_t *store_cxt, AV *av);
+static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv);
+static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static int store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static int store_code(pTHX_ store_cxt_t *store_cxt, CV *cv);
+static int store_other(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static int store_blessed(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg);
 
-typedef int (*sv_store_t)(pTHX_ stcxt_t *cxt, SV *sv);
+typedef int (*sv_store_t)(pTHX_ store_cxt_t *store_cxt, SV *sv);
 
 static const sv_store_t sv_store[] = {
 	(sv_store_t)store_ref,		/* svis_REF */
@@ -1116,8 +1148,6 @@ static const sv_retrieve_t sv_retrieve[] = {
 
 #define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_ERROR ? SX_ERROR : (x)])
 
-static SV *output2sv(pTHX);
-
 /***
  *** Context management.
  ***/
@@ -1156,23 +1186,29 @@ static void reset_context(stcxt_t *cxt)
  */
 static void init_store_context(
         pTHX_
-	stcxt_t *cxt,
+	store_cxt_t *store_cxt,
 	PerlIO *f,
 	int optype,
 	int network_order)
 {
 	TRACEME(("init_store_context"));
 
-	cxt->netorder = network_order;
-	cxt->forgive_me = -1;			/* Fetched from perl if needed */
-	cxt->deparse = -1;				/* Idem */
-	cxt->eval = NULL;				/* Idem */
-	cxt->canonical = -1;			/* Idem */
-	cxt->tagnum = -1;				/* Reset tag numbers */
-	cxt->classnum = -1;				/* Reset class numbers */
-	cxt->fio = f;					/* Where I/O are performed */
-	cxt->optype = optype;			/* A store, or a deep clone */
-	cxt->entry = 1;					/* No recursion yet */
+        Zero(store_cxt, 1, store_cxt_t);
+
+        /* FIXME: make everything here a mortal so it gets released when done or croaked */
+	store_cxt->netorder = network_order;
+	store_cxt->forgive_me = -1;			/* Fetched from perl if needed */
+	store_cxt->deparse = -1;				/* Idem */
+	store_cxt->canonical = -1;			/* Idem */
+	store_cxt->tagnum = -1;				/* Reset tag numbers */
+	store_cxt->classnum = -1;				/* Reset class numbers */
+	store_cxt->output_f = f;					/* Where I/O are performed */
+	store_cxt->optype = optype;			/* A store, or a deep clone */
+
+	if (!f) {
+                store_cxt->output_sv = newSV(512);
+                SvPOK_only(store_cxt->output_sv);
+        }
 
 	/*
 	 * The 'hseen' table is used to keep track of each SV stored and their
@@ -1187,11 +1223,10 @@ static void init_store_context(
 	 */
 
 #ifdef USE_PTR_TABLE
-	cxt->pseen = ptr_table_new();
-	cxt->hseen = 0;
+	store_cxt->pseen = ptr_table_new();
 #else
-	cxt->hseen = newHV();			/* Table where seen objects are stored */
-	HvSHAREKEYS_off(cxt->hseen);
+	store_cxt->hseen = newHV();			/* Table where seen objects are stored */
+	HvSHAREKEYS_off(store_cxt->hseen);
 #endif
 	/*
 	 * The following does not work well with perl5.004_04, and causes
@@ -1212,7 +1247,7 @@ static void init_store_context(
 #if PERL_VERSION >= 5
 #define HBUCKETS	4096				/* Buckets for %hseen */
 #ifndef USE_PTR_TABLE
-	HvMAX(cxt->hseen) = HBUCKETS - 1;	/* keys %hseen = $HBUCKETS; */
+	HvMAX(store_cxt->hseen) = HBUCKETS - 1;	/* keys %hseen = $HBUCKETS; */
 #endif
 #endif
 
@@ -1224,10 +1259,10 @@ static void init_store_context(
 	 * We turn the shared key optimization on.
 	 */
 
-	cxt->hclass = newHV();			/* Where seen classnames are stored */
+	store_cxt->hclass = newHV();			/* Where seen classnames are stored */
 
 #if PERL_VERSION >= 5
-	HvMAX(cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
+	HvMAX(store_cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
 #endif
 
 	/*
@@ -1239,7 +1274,7 @@ static void init_store_context(
 	 * hooks.
 	 */
 
-	cxt->hook = newHV();			/* Table where hooks are cached */
+	store_cxt->hook = newHV();			/* Table where hooks are cached */
 
 	/*
 	 * The 'hook_seen' array keeps track of all the SVs returned by
@@ -1248,96 +1283,7 @@ static void init_store_context(
 	 * only stored once, the first time it is seen.
 	 */
 
-	cxt->hook_seen = newAV();		/* Lists SVs returned by STORABLE_freeze */
-}
-
-/*
- * clean_store_context
- *
- * Clean store context by
- */
-static void clean_store_context(pTHX_ stcxt_t *cxt)
-{
-	HE *he;
-
-	TRACEME(("clean_store_context"));
-
-	ASSERT(cxt->optype & ST_STORE, ("was performing a store()"));
-
-	/*
-	 * Insert real values into hashes where we stored faked pointers.
-	 */
-
-#ifndef USE_PTR_TABLE
-	if (cxt->hseen) {
-		hv_iterinit(cxt->hseen);
-		while ((he = hv_iternext(cxt->hseen)))	/* Extra () for -Wall, grr.. */
-			HeVAL(he) = &PL_sv_undef;
-	}
-#endif
-
-	if (cxt->hclass) {
-		hv_iterinit(cxt->hclass);
-		while ((he = hv_iternext(cxt->hclass)))	/* Extra () for -Wall, grr.. */
-			HeVAL(he) = &PL_sv_undef;
-	}
-
-	/*
-	 * And now dispose of them...
-	 *
-	 * The surrounding if() protection has been added because there might be
-	 * some cases where this routine is called more than once, during
-	 * exceptional events.  This was reported by Marc Lehmann when Storable
-	 * is executed from mod_perl, and the fix was suggested by him.
-	 * 		-- RAM, 20/12/2000
-	 */
-
-#ifdef USE_PTR_TABLE
-	if (cxt->pseen) {
-		struct ptr_tbl *pseen = cxt->pseen;
-		cxt->pseen = 0;
-		ptr_table_free(pseen);
-	}
-	assert(!cxt->hseen);
-#else
-	if (cxt->hseen) {
-		HV *hseen = cxt->hseen;
-		cxt->hseen = 0;
-		hv_undef(hseen);
-		sv_free((SV *) hseen);
-	}
-#endif
-
-	if (cxt->hclass) {
-		HV *hclass = cxt->hclass;
-		cxt->hclass = 0;
-		hv_undef(hclass);
-		sv_free((SV *) hclass);
-	}
-
-	if (cxt->hook) {
-		HV *hook = cxt->hook;
-		cxt->hook = 0;
-		hv_undef(hook);
-		sv_free((SV *) hook);
-	}
-
-	if (cxt->hook_seen) {
-		AV *hook_seen = cxt->hook_seen;
-		cxt->hook_seen = 0;
-		av_undef(hook_seen);
-		sv_free((SV *) hook_seen);
-	}
-
-	cxt->forgive_me = -1;			/* Fetched from perl if needed */
-	cxt->deparse = -1;				/* Idem */
-	if (cxt->eval) {
-	    SvREFCNT_dec(cxt->eval);
-	}
-	cxt->eval = NULL;				/* Idem */
-	cxt->canonical = -1;			/* Idem */
-
-	reset_context(cxt);
+	store_cxt->hook_seen = newAV();		/* Lists SVs returned by STORABLE_freeze */
 }
 
 /*
@@ -1457,13 +1403,15 @@ static void clean_context(pTHX_ stcxt_t *cxt)
 
 	if (cxt->optype & ST_RETRIEVE)
 		clean_retrieve_context(aTHX_ cxt);
-	else if (cxt->optype & ST_STORE)
-		clean_store_context(aTHX_ cxt);
 	else
 		reset_context(cxt);
 
 	ASSERT(!cxt->s_dirty, ("context is clean"));
 	ASSERT(cxt->entry == 0, ("context is reset"));
+}
+
+static void freeze_init(pTHX_ store_cxt_t *freeze) {
+
 }
 
 /*
@@ -1513,18 +1461,6 @@ static void free_context(pTHX_ stcxt_t *cxt)
 /***
  *** Predicates.
  ***/
-
-/*
- * is_storing
- *
- * Tells whether we're in the middle of a store operation.
- */
-static int is_storing(pTHX)
-{
-	dSTCXT;
-
-	return cxt->entry && (cxt->optype & ST_STORE);
-}
 
 /*
  * is_retrieving
@@ -1789,13 +1725,13 @@ static AV *array_call(
  */
 static int known_class(
         pTHX_
-	stcxt_t *cxt,
+	store_cxt_t *store_cxt,
 	char *name,		/* Class name */
 	int len,		/* Name length */
 	I32 *classnum)
 {
 	SV **svh;
-	HV *hclass = cxt->hclass;
+	HV *hclass = store_cxt->hclass;
 
 	TRACEME(("known_class (%s)", name));
 
@@ -1814,11 +1750,11 @@ static int known_class(
 	 * Unknown classname, we need to record it.
 	 */
 
-	cxt->classnum++;
-	if (!hv_store(hclass, name, len, INT2PTR(SV*, cxt->classnum), 0))
+	store_cxt->classnum++;
+	if (!hv_store(hclass, name, len, INT2PTR(SV*, store_cxt->classnum), 0))
 		CROAK(("Unable to record new classname"));
 
-	*classnum = cxt->classnum;
+	*classnum = store_cxt->classnum;
 	return FALSE;
 }
 
@@ -1832,7 +1768,7 @@ static int known_class(
  * Store a reference.
  * Layout is SX_REF <object> or SX_OVERLOAD <object>.
  */
-static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
+static int store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	int is_weak = 0;
 	TRACEME(("store_ref (0x%"UVxf")", PTR2UV(sv)));
@@ -1858,7 +1794,7 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
 	} else
 		WRITE_MARK(is_weak ? SX_WEAKREF : SX_REF);
 
-	return store(aTHX_ cxt, sv);
+	return store(aTHX_ store_cxt, sv);
 }
 
 /*
@@ -1877,7 +1813,7 @@ static int store_ref(pTHX_ stcxt_t *cxt, SV *sv)
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
  * Small integers (within [-127, +127]) are stored as SX_BYTE <byte>.
  */
-static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
+static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	IV iv;
 	char *pv;
@@ -1986,7 +1922,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
                 WRITE_MARK(SX_BYTE);
                 WRITE_MARK(siv);
                 TRACEME(("small integer stored as %d", siv));
-            } else if (cxt->netorder) {
+            } else if (store_cxt->netorder) {
 #if IVSIZE > 4
                 if (
 #ifdef SVf_IVisUV
@@ -2029,7 +1965,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
             nv = SvNV(sv);
 #endif
 
-            if (cxt->netorder) {
+            if (store_cxt->netorder) {
                 TRACEME(("double %"NVff" stored as string", nv));
                 goto string_readlen;		/* Share code below */
             }
@@ -2079,7 +2015,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
  * Layout is SX_ARRAY <size> followed by each item, in increasing index order.
  * Each item is stored as <object>.
  */
-static int store_array(pTHX_ stcxt_t *cxt, AV *av)
+static int store_array(pTHX_ store_cxt_t *store_cxt, AV *av)
 {
 	SV **sav;
 	I32 len = av_len(av) + 1;
@@ -2108,7 +2044,7 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 			continue;
 		}
 		TRACEME(("(#%d) item", i));
-		if ((ret = store(aTHX_ cxt, *sav)))	/* Extra () for -Wall, grr... */
+		if ((ret = store(aTHX_ store_cxt, *sav)))	/* Extra () for -Wall, grr... */
 			return ret;
 	}
 
@@ -2159,7 +2095,7 @@ sortcmp(const void *a, const void *b)
  * Currently the only hash flag is "restricted"
  * Key flags are as for hv.h
  */
-static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
+static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 {
 	dVAR;
 	I32 len = HvTOTALKEYS(hv);
@@ -2215,9 +2151,9 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 	 */
 
 	if (
-		!(cxt->optype & ST_CLONE) && (cxt->canonical == 1 ||
-		(cxt->canonical < 0 && (cxt->canonical =
-			(SvTRUE(perl_get_sv("Storable::canonical", GV_ADD)) ? 1 : 0))))
+		!(store_cxt->optype & ST_CLONE) && (store_cxt->canonical == 1 ||
+			(store_cxt->canonical < 0 && (store_cxt->canonical =
+				(SvTRUE(perl_get_sv("Storable::canonical", GV_ADD)) ? 1 : 0))))
 	) {
 		/*
 		 * Storing in order, sorted by key.
@@ -2294,7 +2230,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			
 			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
-			if ((ret = store(aTHX_ cxt, val)))	/* Extra () for -Wall, grr... */
+			if ((ret = store(aTHX_ store_cxt, val)))	/* Extra () for -Wall, grr... */
 				goto out;
 
 			/*
@@ -2397,7 +2333,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 
 			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
-			if ((ret = store(aTHX_ cxt, val)))	/* Extra () for -Wall, grr... */
+			if ((ret = store(aTHX_ store_cxt, val)))	/* Extra () for -Wall, grr... */
 				goto out;
 
 
@@ -2444,7 +2380,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                             TRACEME(("(#%d) key '%s'", i, key));
                         }
                         if (flags & SHV_K_ISSV) {
-                                store(aTHX_ cxt, key_sv);
+                                store(aTHX_ store_cxt, key_sv);
                         } else {
                                 WRITE_PV_WITH_LEN(key, len);
                         }
@@ -2468,7 +2404,7 @@ out:
  * Layout is SX_CODE <length> followed by a scalar containing the perl
  * source code of the code reference.
  */
-static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
+static int store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
 {
 #if PERL_VERSION < 6
     /*
@@ -2484,11 +2420,11 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	TRACEME(("store_code (0x%"UVxf")", PTR2UV(cv)));
 
 	if (
-		cxt->deparse == 0 ||
-		(cxt->deparse < 0 && !(cxt->deparse =
+		store_cxt->deparse == 0 ||
+		(store_cxt->deparse < 0 && !(store_cxt->deparse =
 			SvTRUE(perl_get_sv("Storable::Deparse", GV_ADD)) ? 1 : 0))
 	) {
-		return store_other(aTHX_ cxt, (SV*)cv);
+		return store_other(aTHX_ store_cxt, (SV*)cv);
 	}
 
 	/*
@@ -2546,7 +2482,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 */
 
 	WRITE_MARK(SX_CODE);
-	cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
+	store_cxt->tagnum++;   /* necessary, as SX_CODE is a SEEN() candidate */
 	TRACEME(("size = %d", len));
 	TRACEME(("code = %s", SvPV_nolen(text)));
 
@@ -2576,7 +2512,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
  * dealing with a tied hash, we store SX_TIED_HASH <hash object>, where
  * <hash object> stands for the serialization of the tied hash.
  */
-static int store_tied(pTHX_ stcxt_t *cxt, SV *sv)
+static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	MAGIC *mg;
 	SV *obj = NULL;
@@ -2627,7 +2563,7 @@ static int store_tied(pTHX_ stcxt_t *cxt, SV *sv)
 
 	/* [#17040] mg_obj is NULL for scalar self-ties. AMS 20030416 */
 	obj = mg->mg_obj ? mg->mg_obj : newSV(0);
-	if ((ret = store(aTHX_ cxt, obj)))
+	if ((ret = store(aTHX_ store_cxt, obj)))
 		return ret;
 
 	TRACEME(("ok (tied)"));
@@ -2647,7 +2583,7 @@ static int store_tied(pTHX_ stcxt_t *cxt, SV *sv)
  *     SX_TIED_KEY <object> <key>
  *     SX_TIED_IDX <object> <index>
  */
-static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
+static int store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	MAGIC *mg;
 	int ret;
@@ -2666,12 +2602,12 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 		WRITE_MARK(SX_TIED_KEY);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
-		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Extra () for -Wall, grr... */
+		if ((ret = store(aTHX_ store_cxt, mg->mg_obj)))		/* Extra () for -Wall, grr... */
 			return ret;
 
 		TRACEME(("store_tied_item: storing PTR 0x%"UVxf, PTR2UV(mg->mg_ptr)));
 
-		if ((ret = store(aTHX_ cxt, (SV *) mg->mg_ptr)))	/* Idem, for -Wall */
+		if ((ret = store(aTHX_ store_cxt, (SV *) mg->mg_ptr)))	/* Idem, for -Wall */
 			return ret;
 	} else {
 		I32 idx = mg->mg_len;
@@ -2680,7 +2616,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
 		WRITE_MARK(SX_TIED_IDX);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
-		if ((ret = store(aTHX_ cxt, mg->mg_obj)))		/* Idem, for -Wall */
+		if ((ret = store(aTHX_ store_cxt, mg->mg_obj)))		/* Idem, for -Wall */
 			return ret;
 
 		TRACEME(("store_tied_item: storing IDX %d", idx));
@@ -2740,7 +2676,7 @@ static int store_tied_item(pTHX_ stcxt_t *cxt, SV *sv)
  */
 static int store_hook(
         pTHX_
-	stcxt_t *cxt,
+	store_cxt_t *store_cxt,
 	SV *sv,
 	int type,
 	HV *pkg,
@@ -2760,7 +2696,7 @@ static int store_hook(
 	int obj_type;			/* object type, on 2 bits */
 	I32 classnum;
 	int ret;
-	int clone = cxt->optype & ST_CLONE;
+	int clone = store_cxt->optype & ST_CLONE;
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
 
@@ -2855,16 +2791,16 @@ static int store_hook(
 		 * They must not change their mind in the middle of a serialization.
 		 */
 
-		if (hv_fetch(cxt->hclass, classname, len, FALSE))
+		if (hv_fetch(store_cxt->hclass, classname, len, FALSE))
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
-				(cxt->optype & ST_CLONE) ? "cloning" : "storing", classname));
+				(store_cxt->optype & ST_CLONE) ? "cloning" : "storing", classname));
 	
-		pkg_hide(aTHX_ cxt->hook, pkg, "STORABLE_freeze");
+		pkg_hide(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze");
 
-		ASSERT(!pkg_can(aTHX_ cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
+		ASSERT(!pkg_can(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
 		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", classname));
 
-		return store_blessed(aTHX_ cxt, sv, type, pkg);
+		return store_blessed(aTHX_ store_cxt, sv, type, pkg);
 	}
 
 	/*
@@ -2906,7 +2842,7 @@ static int store_hook(
 		SV *rsv = ary[i];
 		SV *xsv;
 		SV *tag;
-		AV *av_hook = cxt->hook_seen;
+		AV *av_hook = store_cxt->hook_seen;
 
 		if (!SvROK(rsv))
 			CROAK(("Item #%d returned by STORABLE_freeze "
@@ -2923,10 +2859,10 @@ static int store_hook(
 		   failure, whereas the existing code assumes that it can
 		   safely store a tag zero. So for ptr_tables we store tag+1
 		*/
-		if ((fake_tag = (char *)ptr_table_fetch(cxt->pseen, xsv)))
+		if ((fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 #else
-		if ((svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE)))
+		if ((svh = hv_fetch(store_cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 #endif
 
@@ -2952,11 +2888,11 @@ static int store_hook(
 		} else
 			WRITE_MARK(flags);
 
-		if ((ret = store(aTHX_ cxt, xsv)))	/* Given by hook for us to store */
+		if ((ret = store(aTHX_ store_cxt, xsv)))	/* Given by hook for us to store */
 			return ret;
 
 #ifdef USE_PTR_TABLE
-		fake_tag = (char *)ptr_table_fetch(cxt->pseen, xsv);
+		fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
 		if (!sv)
 			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 #else
@@ -3013,7 +2949,7 @@ static int store_hook(
 	 */
 
 check_done:
-	if (!known_class(aTHX_ cxt, classname, len, &classnum)) {
+	if (!known_class(aTHX_ store_cxt, classname, len, &classnum)) {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		classnum = -1;				/* Mark: we must store classname */
 	} else {
@@ -3136,7 +3072,7 @@ check_done:
 		 * [<magic object>]
 		 */
 
-		if ((ret = store(aTHX_ cxt, mg->mg_obj)))	/* Extra () for -Wall, grr... */
+		if ((ret = store(aTHX_ store_cxt, mg->mg_obj)))	/* Extra () for -Wall, grr... */
 			return ret;
 	}
 
@@ -3169,7 +3105,7 @@ check_done:
  */
 static int store_blessed(
         pTHX_
-	stcxt_t *cxt,
+	store_cxt_t *store_cxt,
 	SV *sv,
 	int type,
 	HV *pkg)
@@ -3186,9 +3122,9 @@ static int store_blessed(
 	 * if needed.
 	 */
 
-	hook = pkg_can(aTHX_ cxt->hook, pkg, "STORABLE_freeze");
+	hook = pkg_can(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze");
 	if (hook)
-		return store_hook(aTHX_ cxt, sv, type, pkg, hook);
+		return store_hook(aTHX_ store_cxt, sv, type, pkg, hook);
 
 	/*
 	 * This is a blessed SV without any serialization hook.
@@ -3198,7 +3134,7 @@ static int store_blessed(
 	len = strlen(classname);
 
 	TRACEME(("blessed 0x%"UVxf" in %s, no hook: tagged #%d",
-		 PTR2UV(sv), classname, cxt->tagnum));
+		 PTR2UV(sv), classname, store_cxt->tagnum));
 
 	/*
 	 * Determine whether it is the first time we see that class name (in which
@@ -3207,7 +3143,7 @@ static int store_blessed(
 	 * used).
 	 */
 
-	if (known_class(aTHX_ cxt, classname, len, &classnum)) {
+	if (known_class(aTHX_ store_cxt, classname, len, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
 		WRITE_MARK(SX_IX_BLESS);
 		if (classnum <= LG_BLESS) {
@@ -3232,7 +3168,7 @@ static int store_blessed(
 	 * Now emit the <object> part.
 	 */
 
-	return SV_STORE(type)(aTHX_ cxt, sv);
+	return SV_STORE(type)(aTHX_ store_cxt, sv);
 }
 
 /*
@@ -3245,7 +3181,7 @@ static int store_blessed(
  * true value, then don't croak, just warn, and store a placeholder string
  * instead.
  */
-static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
+static int store_other(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	I32 len;
 	char buf[80];
@@ -3257,8 +3193,8 @@ static int store_other(pTHX_ stcxt_t *cxt, SV *sv)
 	 */
 
 	if (
-		cxt->forgive_me == 0 ||
-		(cxt->forgive_me < 0 && !(cxt->forgive_me =
+		store_cxt->forgive_me == 0 ||
+		(store_cxt->forgive_me < 0 && !(store_cxt->forgive_me =
 			SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
 	)
 		CROAK(("Can't store %s items", sv_reftype(sv, FALSE)));
@@ -3363,13 +3299,13 @@ static int sv_type(pTHX_ SV *sv)
  * object (one for which storage has started -- it may not be over if we have
  * a self-referenced structure). This data set forms a stored <object>.
  */
-static int store(pTHX_ stcxt_t *cxt, SV *sv)
+static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	SV **svh;
 	int ret;
 	int type;
 #ifdef USE_PTR_TABLE
-	struct ptr_tbl *pseen = cxt->pseen;
+	struct ptr_tbl *pseen = store_cxt->pseen;
 #else
 	HV *hseen = cxt->hseen;
 #endif
@@ -3421,7 +3357,7 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 			   because it's a key of &PL_sv_undef and a value
 			   which is a tag number, not a value which is
 			   PL_sv_undef.)  */
-			cxt->tagnum++;
+			store_cxt->tagnum++;
 			type = svis_SCALAR;
 			goto undef_special_case;
 		}
@@ -3450,12 +3386,12 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 	 *
 	 */
 
-	cxt->tagnum++;
+	store_cxt->tagnum++;
 #ifdef USE_PTR_TABLE
-	ptr_table_store(pseen, sv, INT2PTR(SV*, 1 + cxt->tagnum));
+	ptr_table_store(pseen, sv, INT2PTR(SV*, 1 + store_cxt->tagnum));
 #else
 	if (!hv_store(hseen,
-			(char *) &sv, sizeof(sv), INT2PTR(SV*, cxt->tagnum), 0))
+			(char *) &sv, sizeof(sv), INT2PTR(SV*, store_cxt->tagnum), 0))
 		return -1;
 #endif
 
@@ -3468,13 +3404,13 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 
 undef_special_case:
 	TRACEME(("storing 0x%"UVxf" tag #%d, type %d...",
-		 PTR2UV(sv), cxt->tagnum, type));
+		 PTR2UV(sv), store_cxt->tagnum, type));
 
 	if (SvOBJECT(sv)) {
 		HV *pkg = SvSTASH(sv);
-		ret = store_blessed(aTHX_ cxt, sv, type, pkg);
+		ret = store_blessed(aTHX_ store_cxt, sv, type, pkg);
 	} else
-		ret = SV_STORE(type)(aTHX_ cxt, sv);
+		ret = SV_STORE(type)(aTHX_ store_cxt, sv);
         
         if (ret) {
                 TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
@@ -3500,7 +3436,7 @@ undef_special_case:
  * Note that no byte ordering info is emitted when <network> is true, since
  * integers will be emitted in network order in that case.
  */
-static int magic_write(pTHX_ stcxt_t *cxt)
+static int magic_write(pTHX_ store_cxt_t *store_cxt)
 {
     /*
      * Starting with 0.6, the "use_network_order" byte flag is also used to
@@ -3550,9 +3486,9 @@ static int magic_write(pTHX_ stcxt_t *cxt)
     const unsigned char *header;
     SSize_t length;
 
-    TRACEME(("magic_write on fd=%d", cxt->fio ? PerlIO_fileno(cxt->fio) : -1));
+    TRACEME(("magic_write on fd=%d", store_cxt->fio ? PerlIO_fileno(store_cxt->fio) : -1));
 
-    if (cxt->netorder) {
+    if (store_cxt->netorder) {
         header = network_file_header;
         length = sizeof (network_file_header);
     } else {
@@ -3568,7 +3504,7 @@ static int magic_write(pTHX_ stcxt_t *cxt)
         }
     }        
 
-    if (!cxt->fio) {
+    if (!store_cxt->output_f) {
         /* sizeof the array includes the 0 byte at the end.  */
         header += sizeof (magicstr) - 1;
         length -= sizeof (magicstr) - 1;
@@ -3576,7 +3512,7 @@ static int magic_write(pTHX_ stcxt_t *cxt)
 
     WRITE_BYTES((unsigned char*) header, length);
 
-    if (!cxt->netorder) {
+    if (!store_cxt->netorder) {
 	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
 		 (unsigned long) BYTEORDER, (int) sizeof (byteorderstr) - 1,
 		 (int) sizeof(int), (int) sizeof(long),
@@ -3604,37 +3540,14 @@ static int do_store(
 	int network_order,
 	SV **res)
 {
-	dSTCXT;
+        store_cxt_t store_cxt;
 	int status;
 
 	ASSERT(!(f == 0 && !(optype & ST_CLONE)) || res,
 		("must supply result SV pointer for real recursion to memory"));
 
 	TRACEME(("do_store (optype=%d, netorder=%d)",
-		optype, network_order));
-
-	optype |= ST_STORE;
-
-	/*
-	 * Workaround for CROAK leak: if they enter with a "dirty" context,
-	 * free up memory for them now.
-	 */
-
-	if (cxt->s_dirty)
-		clean_context(aTHX_ cxt);
-
-	/*
-	 * Now that STORABLE_xxx hooks exist, it is possible that they try to
-	 * re-enter store() via the hooks.  We need to stack contexts.
-	 */
-
-	if (cxt->entry)
-		cxt = allocate_context(aTHX_ cxt);
-
-	cxt->entry++;
-
-	ASSERT(cxt->entry == 1, ("starting new recursion"));
-	ASSERT(!cxt->s_dirty, ("clean context"));
+                 optype, network_order));
 
 	/*
 	 * Ensure sv is actually a reference. From perl, we called something
@@ -3642,34 +3555,23 @@ static int do_store(
 	 *       pstore(aTHX_ FILE, \@array);
 	 * so we must get the scalar value behind that reference.
 	 */
-
 	if (!SvROK(sv))
 		CROAK(("Not a reference"));
 	sv = SvRV(sv);			/* So follow it to know what to store */
 
-	/* 
-	 * If we're going to store to memory, reset the buffer.
-	 */
-
-	if (!f)
-                OUTPUT_INIT(0);
 
 	/*
 	 * Prepare context and emit headers.
 	 */
+	init_store_context(aTHX_ &store_cxt, f, optype, network_order);
 
-	init_store_context(aTHX_ cxt, f, optype, network_order);
-
-	if (-1 == magic_write(aTHX_ cxt))		/* Emit magic and ILP info */
+	if (-1 == magic_write(aTHX_ &store_cxt))		/* Emit magic and ILP info */
 		return 0;					/* Error */
 
 	/*
 	 * Recursively store object...
 	 */
-
-	ASSERT(is_storing(aTHX), ("within store operation"));
-
-	status = store(aTHX_ cxt, sv);		/* Just do it! */
+	status = store(aTHX_ &store_cxt, sv);		/* Just do it! */
 
 	/*
 	 * If they asked for a memory store and they provided an SV pointer,
@@ -3680,8 +3582,8 @@ static int do_store(
 	 * (unless caller is dclone(), which is aware of that).
 	 */
 
-	if (!cxt->fio && res)
-		*res = newSVsv(cxt->output);
+	if (!f && res)
+		*res = newSVsv(store_cxt.output_sv);
 
 	/*
 	 * Final cleanup.
@@ -3699,28 +3601,9 @@ static int do_store(
 	 * about to enter do_retrieve...
 	 */
 
-	clean_store_context(aTHX_ cxt);
-	if (cxt->prev && !(cxt->optype & ST_CLONE))
-		free_context(aTHX_ cxt);
 
 	TRACEME(("do_store returns %d", status));
-
 	return status == 0;
-}
-
-/***
- *** Memory stores.
- ***/
-
-/*
- * output2sv
- *
- * Build a new SV out of the content of the internal memory buffer.
- */
-static SV *output2sv(pTHX)
-{
-	dSTCXT;
-	return newSVsv(cxt->output);
 }
 
 /***
@@ -6068,19 +5951,12 @@ static SV *mretrieve(pTHX_ SV *sv)
 static SV *dclone(pTHX_ SV *sv)
 {
 	dSTCXT;
+        store_cxt_t store_cxt;
 	STRLEN size;
 	stcxt_t *real_context;
 	SV *out;
 
 	TRACEME(("dclone"));
-
-	/*
-	 * Workaround for CROAK leak: if they enter with a "dirty" context,
-	 * free up memory for them now.
-	 */
-
-	if (cxt->s_dirty)
-		clean_context(aTHX_ cxt);
 
 	/*
 	 * Tied elements seem to need special handling.
@@ -6094,30 +5970,27 @@ static SV *dclone(pTHX_ SV *sv)
 		mg_get(sv);
 	}
 
-	/*
-	 * do_store() optimizes for dclone by not freeing its context, should
-	 * we need to allocate one because we're deep cloning from a hook.
-	 */
+        if (!SvROK(sv))
+		CROAK(("Not a reference"));
+	sv = SvRV(sv);			/* So follow it to know what to store */
 
-	if (!do_store(aTHX_ (PerlIO*) 0, sv, ST_CLONE, FALSE, (SV**) 0))
-		return &PL_sv_undef;				/* Error during store */
+        init_store_context(aTHX_ &store_cxt, NULL, ST_CLONE, 0);
+        if (!store(aTHX_ &store_cxt, sv))
+                return &PL_sv_undef;
 
-	/*
-	 * Because of the above optimization, we have to refresh the context,
-	 * since a new one could have been allocated and stacked by do_store().
-	 */
-
-	{ dSTCXT; real_context = cxt; }		/* Sub-block needed for macro */
-	cxt = real_context;					/* And we need this temporary... */
 
 	/*
-	 * Now, 'cxt' may refer to a new context.
+	 * Workaround for CROAK leak: if they enter with a "dirty" context,
+	 * free up memory for them now.
 	 */
+
+	if (cxt->s_dirty)
+		clean_context(aTHX_ cxt);
 
 	ASSERT(!cxt->s_dirty, ("clean context"));
 	ASSERT(!cxt->entry, ("entry will not cause new context allocation"));
 
-        cxt->input = SvPV(cxt->output, size);
+        cxt->input = SvPV(store_cxt.output_sv, size);
         cxt->input_end = cxt->input + size;
 	TRACEME(("dclone stored %d bytes", size));
         
