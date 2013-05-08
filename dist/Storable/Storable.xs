@@ -306,8 +306,8 @@ typedef struct stcxt {
         int accept_future_minor; /* croak immediately on future minor versions?  */
 	int s_dirty;		/* context is dirty due to CROAK() -- can be cleaned */
 	SV *keybuf;	        /* for hash key retrieval */
-        const char *input;
-        const char *input_end;
+        const unsigned char *input;
+        const unsigned char *input_end;
         SV *output;
 	PerlIO *fio;		/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
@@ -827,16 +827,26 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * Useful retrieve shortcuts...
  */
 
-#define GETCHAR() \
-	(cxt->fio ? PerlIO_getc(cxt->fio) : (cxt->input >= cxt->input_end ? EOF : (int) *cxt->input++))
+static int
+read_char(pTHX_ stcxt_t *cxt) {
+        int c;
+        if (cxt->fio)
+                return PerlIO_getc(cxt->fio);
+        else if (cxt->input < cxt->input_end)
+                return *(cxt->input++);
+        else
+                return EOF;
+}
 
-#define GETMARK(x) 								\
-  STMT_START {									\
-	if (!cxt->fio)								\
-		MBUF_GETC(x);							\
-	else if ((int) (x = PerlIO_getc(cxt->fio)) == EOF)	\
-		return (SV *) 0;						\
-  } STMT_END
+#define READ_CHAR()                      \
+        (read_char(aTHX_ cxt))
+
+
+#define READ_CHAR_OR_RETURN(x)                  \
+        STMT_START {                            \
+                x = READ_CHAR();         \
+                if (x == EOF) return (SV*)0;    \
+        } STMT_END
 
 #define READ_I32(x)						\
   STMT_START {							\
@@ -3760,7 +3770,7 @@ static SV *retrieve_idx_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	TRACEME(("retrieve_idx_blessed (#%d)", cxt->tagnum));
 	ASSERT(!cname, ("no bless-into class given here, got %s", cname));
 
-	GETMARK(idx);			/* Index coded on a single char? */
+        READ_CHAR_OR_RETURN(idx);			/* Index coded on a single char? */
 	if (idx & 0x80)
 		RLEN(idx);
 
@@ -3808,7 +3818,7 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 	 * single byte, and the string can be read on the stack.
 	 */
 
-	GETMARK(len);			/* Length coded on a single char? */
+	READ_CHAR_OR_RETURN(len);			/* Length coded on a single char? */
 	if (len & 0x80) RLEN(len);
 	READ_STRING(classname, len);
 
@@ -3876,7 +3886,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	 * Read flags, which tell us about the type, and whether we need to recurse.
 	 */
 
-	GETMARK(flags);
+        READ_CHAR_OR_RETURN(flags);
 
 	/*
 	 * Create the (empty) object, and mark it as seen.
@@ -3902,7 +3912,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Read <extra> flag to know the type of the object.
 		 * Record associated magic type for later.
 		 */
-		GETMARK(extra_type);
+		READ_CHAR_OR_RETURN(extra_type);
 		switch (extra_type) {
 		case SHT_TSCALAR:
 			sv = newSV(0);
@@ -3945,7 +3955,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		SvREFCNT_dec(rv);
 		TRACEME(("retrieve_hook back with rv=0x%"UVxf,
 			 PTR2UV(rv)));
-		GETMARK(flags);
+		READ_CHAR_OR_RETURN(flags);
 	}
 
 	if (flags & SHF_IDX_CLASSNAME) {
@@ -3959,7 +3969,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		if (flags & SHF_LARGE_CLASSLEN)
 			RLEN(idx);
 		else
-			GETMARK(idx);
+			READ_CHAR_OR_RETURN(idx);
 
 		sva = av_fetch(cxt->aclass, idx, FALSE);
 		if (!sva)
@@ -3976,7 +3986,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		if (flags & SHF_LARGE_CLASSLEN)
 			RLEN(len);
 		else
-			GETMARK(len);
+			READ_CHAR_OR_RETURN(len);
 
 		READ_STRING(class_sv, len);
 
@@ -4004,7 +4014,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	if (flags & SHF_LARGE_STRLEN)
 		RLEN(len2);
 	else
-		GETMARK(len2);
+		READ_CHAR_OR_RETURN(len2);
 
 	READ_STRING(frozen, len2);
 	if (cxt->s_tainted)				/* Is input source tainted? */
@@ -4020,7 +4030,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		if (flags & SHF_LARGE_LISTLEN)
 			RLEN(len3);
 		else
-			GETMARK(len3);
+			READ_CHAR_OR_RETURN(len3);
 		if (len3) {
 			av = newAV();
 			av_extend(av, len3 + 1);	/* Leave room for [0] */
@@ -4602,7 +4612,7 @@ static SV *retrieve_scalar(pTHX_ stcxt_t *cxt, const char *cname)
 	int len;
 	SV *sv;
 
-	GETMARK(len);
+	READ_CHAR_OR_RETURN(len);
 	TRACEME(("retrieve_scalar (#%d), len = %d", cxt->tagnum, len));
 
 	/*
@@ -4693,7 +4703,7 @@ static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname)
 	int len;
 	SV *sv;
 
-	GETMARK(len);
+	READ_CHAR_OR_RETURN(len);
 	TRACEME(("retrieve_vstring (#%d), len = %d", cxt->tagnum, len));
 
 	READ_STRING(s, len);
@@ -4836,7 +4846,7 @@ static SV *retrieve_byte(pTHX_ stcxt_t *cxt, const char *cname)
 
 	TRACEME(("retrieve_byte (#%d)", cxt->tagnum));
 
-	GETMARK(siv);
+	READ_CHAR_OR_RETURN(siv);
 	TRACEME(("small integer read as %d", (unsigned char) siv));
 	tmp = (unsigned char) siv - 128;
 	sv = newSViv(tmp);
@@ -5058,7 +5068,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
     SV *sv;
     int hash_flags;
 
-    GETMARK(hash_flags);
+    READ_CHAR_OR_RETURN(hash_flags);
     TRACEME(("retrieve_flag_hash (#%d)", cxt->tagnum));
     /*
      * Read length, allocate table.
@@ -5099,7 +5109,7 @@ static SV *retrieve_flag_hash(pTHX_ stcxt_t *cxt, const char *cname)
         if (!sv)
             return (SV *) 0;
 
-        GETMARK(flags);
+        READ_CHAR_OR_RETURN(flags);
 #ifdef HAS_RESTRICTED_HASHES
         if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
             SvREADONLY_on(sv);
@@ -5212,7 +5222,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	 * as a small or large scalar
 	 */
 
-	GETMARK(type);
+	READ_CHAR_OR_RETURN(type);
 	switch (type) {
 	case SX_SCALAR:
 		text = retrieve_scalar(aTHX_ cxt, cname);
@@ -5344,7 +5354,7 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	 */
 
 	for (i = 0; i < len; i++) {
-		GETMARK(c);
+		READ_CHAR_OR_RETURN(c);
 		if (c == SX_IT_UNDEF) {
 			TRACEME(("(#%d) undef item", i));
 			continue;			/* av_extend() already filled us with undef */
@@ -5411,7 +5421,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Get value first.
 		 */
 
-		GETMARK(c);
+		READ_CHAR_OR_RETURN(c);
 		if (c == SX_VL_UNDEF) {
 			TRACEME(("(#%d) undef value", i));
 			/*
@@ -5437,7 +5447,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Hence the key comes after the value.
 		 */
 
-		GETMARK(c);
+		READ_CHAR_OR_RETURN(c);
 		if (c != SX_KEY)
 			(void) retrieve_other(aTHX_ (stcxt_t *) 0, 0);	/* Will croak out */
 		RLEN(size);						/* Get key size */
@@ -5526,8 +5536,10 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
             current = buf + old_len;
         }
         use_network_order = *current;
-    } else
-	GETMARK(use_network_order);
+    } else {
+            READ_CHAR_OR_RETURN(use_network_order);
+    }
+    
         
     /*
      * Starting with 0.6, the "use_network_order" byte flag is also used to
@@ -5552,7 +5564,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
      */
 
     if (version_major > 1)
-        GETMARK(version_minor);
+            READ_CHAR_OR_RETURN(version_minor);
 
     cxt->ver_major = version_major;
     cxt->ver_minor = version_minor;
@@ -5605,7 +5617,7 @@ static SV *magic_check(pTHX_ stcxt_t *cxt)
     use_NV_size = version_major >= 2 && version_minor >= 2;
 
     if (version_major >= 0) {
-        GETMARK(c);
+            READ_CHAR_OR_RETURN(c);
     }
     else {
 	c = use_network_order;
@@ -5686,7 +5698,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 		} else
 			READ(&tag, sizeof(stag_t));		/* Original address of the SV */
 
-		GETMARK(type);
+		READ_CHAR_OR_RETURN(type);
 		if (type == SX_OBJECT) {
 			I32 tagn;
 			svh = hv_fetch(cxt->hseen, (char *) &tag, sizeof(tag), FALSE);
@@ -5728,7 +5740,7 @@ static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname)
 	 * Regular post-0.6 binary format.
 	 */
 
-	GETMARK(type);
+	READ_CHAR_OR_RETURN(type);
 
 	TRACEME(("retrieve type = %d", type));
 
@@ -5785,12 +5797,12 @@ first_time:		/* Will disappear when support for old format is dropped */
 	 */
 
 	if (cxt->ver_major < 2) {
-		while ((type = GETCHAR()) != SX_STORED) {
+		while ((type = READ_CHAR()) != SX_STORED) {
 			I32 len;
 			const char *kbuf;
 			switch (type) {
 			case SX_CLASS:
-				GETMARK(len);			/* Length coded on a single char */
+				READ_CHAR_OR_RETURN(len);			/* Length coded on a single char */
 				break;
 			case SX_LG_CLASS:			/* Length coded on a regular integer */
 				RLEN(len);
