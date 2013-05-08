@@ -44,11 +44,13 @@ experimental.
 =head2 Hash overhaul
 
 Changes to the implementation of hashes in perl 5.18.0 will be one of the most
-visible changes to the behavior of existing code.  For the most part, these
-changes will be visible as two distinct hash variables now providing their
-contents in a different order where it was previously identical.  When
-encountering these changes, the key to cleaning up from them is to accept that
-B<hashes are unordered collections> and to act accordingly.
+visible changes to the behavior of existing code.
+
+By default, two distinct hash variables with identical keys and values will now
+provide their contents in a different order where it was previously identical.
+
+When encountering these changes, the key to cleaning up from them is to accept
+that B<hashes are unordered collections> and to act accordingly.
 
 =head3 Hash randomization
 
@@ -78,9 +80,10 @@ hashing longer strings.
 
 =head3 PERL_HASH_SEED environment variable now takes a hex value
 
-C<PERL_HASH_SEED> no longer accepts an integer as a parameter; instead the
-value is expected to be a binary string encoded in hex.  This is to make
-the infrastructure support hash seeds of arbitrary lengths which might
+C<PERL_HASH_SEED> no longer accepts an integer as a parameter;
+instead the value is expected to be a binary value encoded in a hex
+string, such as "0xf5867c55039dc724".  This is to make the
+infrastructure support hash seeds of arbitrary lengths, which might
 exceed that of an integer.  (SipHash uses a 16 byte seed).
 
 =head3 PERL_PERTURB_KEYS environment variable added
@@ -98,7 +101,6 @@ is the most secure and default mode.
 
 When C<PERL_PERTURB_KEYS> is 2, perl will randomize keys in a repeatable way.
 Repeated runs of the same program should produce the same output every time.
-The chance that keys changes due to an insert will be very high.
 
 C<PERL_HASH_SEED> implies a non-default C<PERL_PERTURB_KEYS> setting. Setting
 C<PERL_HASH_SEED=0> (exactly one 0) implies C<PERL_PERTURB_KEYS=0> (hash key
