@@ -2708,12 +2708,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define DOUBLESIZE $doublesize		/**/
 
 /* EBCDIC:
- *     This symbol, if defined, indicates that this system uses
+ *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
  */
 /* BOOTSTRAP_CHARSET:
- *     This symbol, if defined, indicates that this system uses
- *	BOOTSTRAP_CHARSET
+ *	This symbol, if defined, indicates that this system needs
+ *	converting various files to the native character set before
+ *	bringing up perl on a system that has a non-ASCII character
+ *	set and no working perl.
  */
 #$ebcdic	EBCDIC 		/**/
 #$bootstrap_charset	BOOTSTRAP_CHARSET	/**/
@@ -3753,7 +3755,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_int64_t     HAS_INT64_T               /**/
 
 /* HAS_ISBLANK:
- *	This manifest constant lets the C program know that isblank 
+ *	This manifest constant lets the C program know that isblank
  *	is available.
  */
 #$d_isblank HAS_ISBLANK		/**/

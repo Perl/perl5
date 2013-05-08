@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Tue May  7 23:44:53 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Wed May  8 15:28:09 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1425,10 +1425,10 @@ esac
 
 case "$sh" in
 '')	cat >&2 <<EOM
-$me:  Fatal Error:  I can't find a Bourne Shell anywhere.  
+$me:  Fatal Error:  I can't find a Bourne Shell anywhere.
 
 Usually it's in /bin/sh.  How did you even get this far?
-Please contact me (Perl Maintainers) at perlbug@perl.org and 
+Please contact me (Perl Maintainers) at perlbug@perl.org and
 we'll try to straighten this all out.
 EOM
 	exit 1
@@ -2713,7 +2713,7 @@ case "$lns" in
 				;;
 			*)	issymlink='' ;;
 			esac
-		fi		
+		fi
 	fi
 	if $test "X$issymlink" = X; then
 		if $test -L sym 2>/dev/null; then
@@ -3103,7 +3103,7 @@ case "$config_sh" in
 myuname=`$uname -a 2>/dev/null`
 $test -z "$myuname" && myuname=`hostname 2>/dev/null`
 # Downcase everything to avoid ambiguity.
-# Remove slashes and single quotes so we can use parts of this in 
+# Remove slashes and single quotes so we can use parts of this in
 # directory and file names.
 # Remove newlines so myuname is sane to use elsewhere.
 # tr '[A-Z]' '[a-z]' would not work in EBCDIC
@@ -3993,7 +3993,7 @@ else
 fi
 
 : determine installation prefix for where package is to be installed.
-if $afs; then 
+if $afs; then
 $cat <<EOM
 
 Since you are running AFS, I need to distinguish the directory in which
@@ -5263,10 +5263,10 @@ case "$ldflags" in
 esac
 # See note above about -fstack-protector
 case "$ccflags" in
-*-fstack-protector*) 
+*-fstack-protector*)
 	case "$dflt" in
 	*-fstack-protector*) ;; # Don't add it again
-	*) dflt="$dflt -fstack-protector" ;; 
+	*) dflt="$dflt -fstack-protector" ;;
 	esac
 	;;
 esac
@@ -6024,7 +6024,7 @@ rp='What is your architecture name'
 . ./myread
 archname="$ans"
 
-: optionally add api version to the architecture for versioned archlibs
+: optionally add API version to the architecture for versioned archlibs
 case "$useversionedarchname" in
 $define|true|[yY]*) dflt='y';;
 *)                  dflt='n';;
@@ -7040,9 +7040,9 @@ $cat <<EOM
 
 Lastly, you can have perl look in other directories for extensions and
 modules in addition to those already specified.
-These directories will be searched after 
-	$sitearch 
-	$sitelib 
+These directories will be searched after
+	$sitearch
+	$sitelib
 EOM
 test X"$vendorlib" != "X" && echo '	' $vendorlib
 test X"$vendorarch" != "X" && echo '	' $vendorarch
@@ -7060,7 +7060,7 @@ EOM
 rp='Colon-separated list of additional directories for perl to search?'
 . ./myread
 case "$ans" in
-' '|''|none)	otherlibdirs=' ' ;;     
+' '|''|none)	otherlibdirs=' ' ;;
 *)	otherlibdirs="$ans" ;;
 esac
 case "$otherlibdirs" in
@@ -7397,11 +7397,11 @@ case "$usenm" in
 		;;
 	esac
 	case "$dflt" in
-	'') 
+	'')
 		if $test "$osname" = aix -a "X$PASE" != "Xdefine" -a ! -f /lib/syscalls.exp; then
 			echo " "
 			echo "Whoops!  This is an AIX system without /lib/syscalls.exp!" >&4
-			echo "'nm' won't be sufficient on this sytem." >&4
+			echo "'nm' won't be sufficient on this system." >&4
 			dflt=n
 		fi
 		;;
@@ -8384,7 +8384,7 @@ esac
 : determine where manual pages are on this system
 echo " "
 case "$sysman" in
-'') 
+'')
 	syspath='/usr/share/man/man1 /usr/man/man1'
 	syspath="$syspath /usr/man/mann /usr/man/manl /usr/man/local/man1"
 	syspath="$syspath /usr/man/u_man/man1"
@@ -10837,7 +10837,7 @@ else
 	valstd="$undef"
 fi
 
-: see if varags is available
+: see if varargs is available
 echo " "
 if $test `./findhdr varargs.h`; then
 	echo "<varargs.h> found." >&4
@@ -11971,7 +11971,7 @@ $cat >dirfd.c <<EOM
 #endif
 #endif
 #endif
-#endif 
+#endif
 int main() {
 	DIR *dirp = opendir(".");
 	if (dirfd(dirp) >= 0)
@@ -12474,7 +12474,7 @@ $define)
 	$rm -f $$.h
 	;;
 *)
-	val="$undef"; 
+	val="$undef";
 	set d_pwquota; eval $setvar
 	set d_pwage; eval $setvar
 	set d_pwchange; eval $setvar
@@ -17645,7 +17645,7 @@ EOP
 	if eval $compile_ok; then
 		val="$define"
 	else
-		echo "But you don't seem to have a useable struct sigaction." >&4
+		echo "But you don't seem to have a usable struct sigaction." >&4
 		val="$undef"
 	fi
 else
@@ -18080,7 +18080,7 @@ EOCP
 # Respect a hint (or previous) value for perl_static_inline, if there is one.
 case "$perl_static_inline" in
 '')	# Check the various possibilities, and break out on success.
-	# For gcc, prefer __inline__, which will still permit 
+	# For gcc, prefer __inline__, which will still permit
 	# cflags.SH to add in -ansi.
 	case "$gccversion" in
 		'') xxx="inline __inline__ __inline _inline";;
@@ -18210,11 +18210,11 @@ if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
 		echo 'strerror() found.' >&4
 		d_strerror="$define"
 		d_strerrm='strerror(e)'
-		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
-			echo "(You also have sys_errlist[], so we could roll our own strerror.)" 
+		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
+			echo "(You also have sys_errlist[], so we could roll our own strerror.)"
 			d_syserrlst="$define"
 		else
-			echo "(Since you don't have sys_errlist[], sterror() is welcome.)"
+			echo "(Since you don't have sys_errlist[], strerror() is welcome.)"
 			d_syserrlst="$undef"
 		fi
     elif xxx=`./findhdr string.h`; test "$xxx" || xxx=`./findhdr strings.h`; \
@@ -18222,7 +18222,7 @@ if test "X$d_strerror" = X -o "X$d_syserrlst" = X; then
 		echo 'strerror() found in string header.' >&4
 		d_strerror="$define"
 		d_strerrm='strerror(e)'
-		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then	
+		if set sys_errlist val -a d_syserrlst; eval $csym; $val; then
 			echo "(Most probably, strerror() uses sys_errlist[] for descriptions.)"
 				d_syserrlst="$define"
 		else
@@ -19170,7 +19170,7 @@ $rm_try
 set ebcdic
 eval $setvar
 
-: length of character in bytes. Is always 1, otherwise it isnt C
+: length of character in bytes. Is always 1, otherwise it is not C
 : This used to be a test using sizeof
 charsize=1
 
@@ -19450,7 +19450,7 @@ case "$randfunc" in
 		echo "OK, found random()." >&4
 	else
 		dflt="rand"
-		echo "Yick, looks like I have to use rand()." >&4
+		echo "Yuck, looks like I have to use rand()." >&4
 	fi
 	echo " "
 	;;
@@ -19670,7 +19670,7 @@ if $test "X$fflushNULL" = X -o "X$fflushall" = X; then
 	;;
     esac
 fi
-: check for fflush NULL behaviour
+: check for fflush NULL behavior
 case "$fflushNULL" in
 '') 	set try -DTRY_FFLUSH_NULL $output
 	if eval $compile; then
@@ -21823,7 +21823,7 @@ case "$yacc" in
 	*-y*) ;;
 	*)
 		yacc="$yacc -y"
-		echo "(Adding -y option to bison to get yacc-compatible behaviour.)"
+		echo "(Adding -y option to bison to get yacc-compatible behavior.)"
 		;;
 	esac
 	;;
@@ -22058,7 +22058,7 @@ EOSH
 chmod +x Cppsym.try
 $eunicefix Cppsym.try
 ./Cppsym < Cppsym.know | $sort | $uniq > Cppsym.true
-: Add in any linux cpp "predefined macros":
+: Add in any Linux cpp "predefined macros":
 case "$osname::$gccversion" in
   *linux*::*.*|*gnukfreebsd*::*.*|gnu::*.*)
     tHdrH=_tmpHdr
@@ -22388,7 +22388,7 @@ find_extensions='
 		    n*|N*) ;;
 		    *) echo >&4;
 		       echo "Ok.  Stopping Configure." >&4;
-		       echo "Please remove the duplicate directory (eg using git clean) and then re-run Configure" >&4;
+		       echo "Please remove the duplicate directory (e.g. using git clean) and then re-run Configure" >&4;
 			exit 1;;
 		    esac;
 		    echo "Ok.  You will need to correct config.sh before running make." >&4;
@@ -22777,7 +22777,7 @@ sunos*X4*)
     ;;
 *) case "$usedl" in
     $define|true|[yY]*)
-	    set X `echo " $libs " | sed -e 's@ -lndbm @ @' -e 's@ -lgdbm @ @' -e 's@ -lgdbm_compat @ @' -e 's@ -ldbm @ @' -e 's@ -ldb @ @'` 
+	    set X `echo " $libs " | sed -e 's@ -lndbm @ @' -e 's@ -lgdbm @ @' -e 's@ -lgdbm_compat @ @' -e 's@ -ldbm @ @' -e 's@ -ldb @ @'`
 	    shift
 	    perllibs="$*"
 	    ;;
