@@ -1943,7 +1943,7 @@ calls STORE (it was already calling FETCH).
 
 C<$tied =~ s/$non_utf8/$utf8/> no longer loops infinitely if the tied
 variable returns a Latin-1 string, shared hash key scalar, or reference or
-typeglob that stringifies as ASCII or Latin-1.  This is a regression from
+typeglob that stringifies as ASCII or Latin-1.  This was a regression from
 5.12.x.
 
 =item *
@@ -2880,12 +2880,12 @@ causes subsequent nummification to produce random numbers.
 =item *
 
 Assigning a regular expression to a magic variable no longer wipes away the
-magic.  This is a regression from 5.10.
+magic.  This was a regression from 5.10.
 
 =item *
 
 Assigning a regular expression to a blessed scalar no longer results in
-crashes.  This is also a regression from 5.10.
+crashes.  This was also a regression from 5.10.
 
 =item *
 
@@ -2900,7 +2900,7 @@ warning.
 =item *
 
 Negative array indices no longer cause EXISTS methods of tied variables to
-be ignored.  This is a regression from 5.12.
+be ignored.  This was a regression from 5.12.
 
 =item *
 
