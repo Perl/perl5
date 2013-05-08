@@ -678,6 +678,15 @@ by white space or comments in C<(?...)> regular expression constructs.
 Similarly, if the C<(> and C<*> are separated in C<(*VERB...)>
 constructs.
 
+=head2 Pre-PerlIO IO implementations
+
+Perl supports being built without PerlIO proper, using a stdio or sfio
+wrapper instead.  A perl build like this will not support IO layers and
+thus Unicode IO, making it rather handicapped.
+
+PerlIO supports a C<stdio> layer if stdio use is desired, and similarly a
+sfio layer could be produced.
+
 =head1 Future Deprecations
 
 =over
@@ -712,17 +721,6 @@ Swapping of $< and $>
 
 For more information about this future deprecation, see L<the relevant RT
 ticket|https://rt.perl.org/rt3/Ticket/Display.html?id=96212>.
-
-=item *
-
-sfio, stdio
-
-Perl supports being built without PerlIO proper, using a stdio or sfio
-wrapper instead.  A perl build like this will not support IO layers and
-thus Unicode IO, making it rather handicapped.
-
-PerlIO supports a C<stdio> layer if stdio use is desired, and similarly a
-sfio layer could be produced.
 
 =item *
 
