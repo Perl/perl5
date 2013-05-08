@@ -684,7 +684,7 @@ constructs.
 
 =item *
 
-Platforms with out support infrastructure
+Platforms without support infrastructure
 
 Both Windows CE and z/OS have been historically under-maintained, and are
 currently neither successfully building nor regularly being smoke tested.
@@ -1472,7 +1472,7 @@ to fully restore a clean build.
 
 =item *
 
-Synonyms for the misleadingly named C<av_len()> has been created:
+Synonyms for the misleadingly named C<av_len()> have been created:
 C<av_top_index()> and C<av_tindex>.  All three of these return the
 number of the highest index in the array, not the number of elements it
 contains.
@@ -1679,7 +1679,7 @@ experimental.  See L<perlapi>.
 =item *
 
 Perl used to implement get magic in a way that would sometimes hide bugs in
-code could call mg_get() too many times on magical values.  This hiding of
+code that could call mg_get() too many times on magical values.  This hiding of
 errors no longer occurs, so long-standing bugs may become visible now.  If
 you see magic-related errors in XS code, check to make sure it, together
 with the Perl API functions it uses, calls mg_get() only once on SvGMAGICAL()
