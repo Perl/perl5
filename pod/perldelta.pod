@@ -83,6 +83,30 @@ value is expected to be a binary string encoded in hex.  This is to make
 the infrastructure support hash seeds of arbitrary lengths which might
 exceed that of an integer.  (SipHash uses a 16 byte seed).
 
+=head3 PERL_PERTURB_KEYS environment variable added
+
+PERL_PERTURB_KEYS environment variable allows one to control the level of
+randomization applied to C<keys> and friends.
+
+When PERL_PERTURB_KEYS is 0, perl will not randomize key order at all. The
+chance that C<keys> changes due to an insert will be the same as in previous
+perls, basically only when the bucket size is changed.
+
+When PERL_PERTURB_KEYS is 1, perl will randomize keys in a non repeatedable
+way. The chance that C<keys> changes due to an insert will be very high.  This
+is the most secure and default mode.
+
+When PERL_PERTURB_KEYS is 2, perl will randomize keys in a repeatedable way.
+Repititive runs of the same program should produce the same output every time.
+The chance that keys changes due to an insert will be very high.
+
+PERL_HASH_SEED implies a non-default PERL_PERTURB_KEYS setting. Setting
+PERL_HASH_SEED=0 (exactly one 0) implies PERL_PERTURB_KEYS=0 (hash key
+randomization disabled), settng PERL_HASH_SEED to any other value, implies
+PERL_PERTURB_KEYS=2 (deterministic/repeatable hash key randomization).
+Specifying PERL_PERTURB_KEYS explicitly to a different level overrides this
+behavior.
+
 =head3 Hash::Util::hash_seed() now returns a string
 
 Hash::Util::hash_seed() now returns a string instead of an integer.  This
