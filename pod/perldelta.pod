@@ -2251,10 +2251,6 @@ resolves the common problem of the F<t/op/fork.t> test hanging on Windows [perl
 
 =item *
 
-The microperl build, broken since Perl 5.15.7, has now been restored.
-
-=item *
-
 The code which generates errors from C<require()> could potentially read one or
 two bytes before the start of the filename for filenames less than three bytes
 long and ending C</\.p?\z/>.  This has now been fixed.  Note that it could
