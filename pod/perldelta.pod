@@ -6,11 +6,11 @@ perldelta - what is new for perl v5.18.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.16.0 release and the 5.18.0
+This document describes differences between the v5.16.0 release and the v5.18.0
 release.
 
-If you are upgrading from an earlier release such as 5.14.0, first read
-L<perl5160delta>, which describes differences between 5.14.0 and 5.16.0.
+If you are upgrading from an earlier release such as v5.14.0, first read
+L<perl5160delta>, which describes differences between v5.14.0 and v5.16.0.
 
 =head1 Core Enhancements
 
@@ -43,7 +43,7 @@ experimental.
 
 =head2 Hash overhaul
 
-Changes to the implementation of hashes in perl 5.18.0 will be one of the most
+Changes to the implementation of hashes in perl v5.18.0 will be one of the most
 visible changes to the behavior of existing code.
 
 By default, two distinct hash variables with identical keys and values may now
@@ -73,10 +73,10 @@ more difficult to determine what the current hash seed is.
 
 =head3 New hash functions
 
-Perl 5.18 includes support for multiple hash functions, and changed
+Perl v5.18 includes support for multiple hash functions, and changed
 the default (to ONE_AT_A_TIME_HARD), you can choose a different
 algorithm by defining a symbol at compile time.  For a current list,
-consult the F<INSTALL> document.  Note that as of Perl 5.18 we can
+consult the F<INSTALL> document.  Note that as of Perl v5.18 we can
 only recommend use of the default or SIPHASH. All the others are
 known to have security issues and are for research purposes only.
 
@@ -256,7 +256,7 @@ This vulnerability is documented in CVE-2012-6329.
 
 Poorly written perl code that allows an attacker to specify the count to perl's
 C<x> string repeat operator can already cause a memory exhaustion
-denial-of-service attack. A flaw in versions of perl before 5.15.5 can escalate
+denial-of-service attack. A flaw in versions of perl before v5.15.5 can escalate
 that into a heap buffer overrun; coupled with versions of glibc before 2.16, it
 possibly allows the execution of arbitrary code.
 
@@ -324,9 +324,9 @@ behavior from working fully.
 
 =head2 Explicit rules for variable names and identifiers
 
-Due to an oversight, length-one variable names in 5.16 were completely
+Due to an oversight, length-one variable names in v5.16 were completely
 unrestricted, and opened the door to several kinds of insanity.  As of
-5.18, these now follow the rules of other identifiers, in addition
+v5.18, these now follow the rules of other identifiers, in addition
 to accepting characters that match the C<\p{POSIX_Punct}> property.
 
 There are no longer any differences in the parsing of identifiers
@@ -366,7 +366,7 @@ C<foreach>) [perl #114020].
 
 =head2 Lexical C<$_> is now experimental
 
-Since it was introduced in Perl 5.10, it has caused much confusion with no
+Since it was introduced in Perl v5.10, it has caused much confusion with no
 obvious solution:
 
 =over
@@ -454,7 +454,7 @@ the wrong state, so they didn't fully work, and the similar C<foreach qw(a
 b c) {...}> that one might expect to be permitted never worked at all.
 
 This side effect of C<qw> has now been abolished.  It has been deprecated
-since Perl 5.13.11.  It is now necessary to use real parentheses
+since Perl v5.13.11.  It is now necessary to use real parentheses
 everywhere that the grammar calls for them.
 
 =head2 Interaction of lexical and default warnings
@@ -511,7 +511,7 @@ C<GV_SUPER> flag.
 
 =head2 C<split>'s first argument is more consistently interpreted
 
-After some changes earlier in 5.17, C<split>'s behavior has been
+After some changes earlier in v5.17, C<split>'s behavior has been
 simplified: if the PATTERN argument evaluates to a literal string
 containing one space, it is treated the way that a I<literal> string
 containing one space once was.
@@ -593,7 +593,7 @@ This item is part of the C<Pod::LaTeX> distribution.
 
 This interpreter-global variable used to track the total number of
 Perl objects in the interpreter. It is no longer maintained and will
-be removed altogether in Perl 5.20.
+be removed altogether in Perl v5.20.
 
 =head2 Five additional characters should be escaped in patterns with C</x>
 
@@ -626,7 +626,9 @@ future version of Perl, and should not be used.  With participating C
 compilers (e.g., gcc), compiling any file that uses any of these will
 generate a warning.  These were not intended for public use; there are
 equivalent, faster, macros for most of them.
+
 See L<perlapi/Character classes>.  The complete list is:
+
 C<is_uni_alnum>, C<is_uni_alnumc>, C<is_uni_alnumc_lc>,
 C<is_uni_alnum_lc>, C<is_uni_alpha>, C<is_uni_alpha_lc>,
 C<is_uni_ascii>, C<is_uni_ascii_lc>, C<is_uni_blank>,
@@ -712,7 +714,7 @@ your time, expertise, or hardware to help support these platforms, please let
 the perl development effort know by emailing C<perl5-porters@perl.org>.
 
 Some platforms that appear otherwise entirely dead are also on the short list
-for removal between now and 5.20.0:
+for removal between now and v5.20.0:
 
 =over
 
@@ -846,7 +848,7 @@ list of updates, run:
 
   $ corelist --diff 5.16.0 5.18.0
 
-You can substitute your favorite version in place of 5.16.0, too.
+You can substitute your favorite version in place of C<5.16.0>, too.
 
 =over 4
 
@@ -988,7 +990,7 @@ L<Can't use an undefined value as a subroutine reference|perldiag/"Can't use an 
 
 Calling an undefined value as a subroutine now produces this error message.
 It used to, but was accidentally disabled, first in Perl 5.004 for
-non-magical variables, and then in Perl 5.14 for magical (e.g., tied)
+non-magical variables, and then in Perl v5.14 for magical (e.g., tied)
 variables.  It has now been restored.  In the mean time, undef was treated
 as an empty string [perl #113576].
 
@@ -1303,7 +1305,7 @@ actively maintained.
 
 Support code relating to UTS global has been removed.  UTS was a mainframe
 version of System V created by Amdahl, subsequently sold to UTS Global.  The
-port has not been touched since before Perl 5.8.0, and UTS Global is now
+port has not been touched since before Perl v5.8.0, and UTS Global is now
 defunct.
 
 =item VM/ESA
@@ -1340,7 +1342,7 @@ that assume C99 [perl #113778].
 =head3 clang++
 
 There is now a workaround for a compiler bug that prevented compiling
-with clang++ since Perl 5.15.7 [perl #112786].
+with clang++ since Perl v5.15.7 [perl #112786].
 
 =head3 C++
 
@@ -1466,9 +1468,9 @@ makefiles.  Set this to "define" when building a 32-bit perl if you want
 it to use 64-bit integers.
 
 Machine code size reductions, already made to the DLLs of XS modules in
-Perl 5.17.2, have now been extended to the perl DLL itself.
+Perl v5.17.2, have now been extended to the perl DLL itself.
 
-Building with VC++ 6.0 was inadvertently broken in Perl 5.17.2 but has
+Building with VC++ 6.0 was inadvertently broken in Perl v5.17.2 but has
 now been fixed again.
 
 =back
@@ -1666,7 +1668,7 @@ should be operationally invisible.
 
 =item *
 
-The C<study> function was made a no-op in 5.16.  It was simply disabled via
+The C<study> function was made a no-op in v5.16.  It was simply disabled via
 a C<return> statement; the code was left in place.  Now the code supporting
 what C<study> used to do has been removed.
 
@@ -1764,13 +1766,13 @@ and exit nonzero. [perl #61362]
 =item *
 
 C<sort {undef} ...> under fatal warnings no longer crashes.  It had
-begun crashing in Perl 5.16.
+begun crashing in Perl v5.16.
 
 =item *
 
 Stashes blessed into each other
 (C<bless \%Foo::, 'Bar'; bless \%Bar::, 'Foo'>) no longer result in double
-frees.  This bug started happening in Perl 5.16.
+frees.  This bug started happening in Perl v5.16.
 
 =item *
 
@@ -1797,13 +1799,13 @@ MRO caches have been fixed.
 =item *
 
 Defining a subroutine when its typeglob has been aliased no longer results
-in stale method caches.  This bug was introduced in Perl 5.10.
+in stale method caches.  This bug was introduced in Perl v5.10.
 
 =item *
 
 Localising a typeglob containing a subroutine when the typeglob's package
 has been deleted from its parent stash no longer produces an error.  This
-bug was introduced in Perl 5.14.
+bug was introduced in Perl v5.14.
 
 =item *
 
@@ -1934,7 +1936,7 @@ C<--subname> no longer produces erroneous ambiguity warnings.
 =item *
 
 C<v10> is now allowed as a label or package name.  This was inadvertently
-broken when v-strings were added in Perl 5.6.  [perl #56880]
+broken when v-strings were added in Perl v5.6.  [perl #56880]
 
 =item *
 
@@ -1952,7 +1954,7 @@ calls STORE (it was already calling FETCH).
 C<$tied =~ s/$non_utf8/$utf8/> no longer loops infinitely if the tied
 variable returns a Latin-1 string, shared hash key scalar, or reference or
 typeglob that stringifies as ASCII or Latin-1.  This was a regression from
-5.12.x.
+v5.12.
 
 =item *
 
@@ -2021,9 +2023,9 @@ carried on working without it.
 
 =item *
 
-The error "Can't localize through a reference" had disappeared in 5.16.0
+The error "Can't localize through a reference" had disappeared in v5.16.0
 when C<local %$ref> appeared on the last line of an lvalue subroutine.
-This error disappeared for C<\local %$ref> in perl 5.8.1.  It has now
+This error disappeared for C<\local %$ref> in perl v5.8.1.  It has now
 been restored.
 
 =item *
@@ -2161,7 +2163,7 @@ arbitrary expression), rather than the handle "foo".
 =item *
 
 C<truncate FOO, $len> no longer falls back to treating "FOO" as a file name if
-the filehandle has been deleted.  This was broken in Perl 5.16.0.
+the filehandle has been deleted.  This was broken in Perl v5.16.0.
 
 =item *
 
@@ -2189,7 +2191,7 @@ C<undef> on a subroutine now clears call checkers.
 
 =item *
 
-The C<ref> operator started leaking memory on blessed objects in Perl 5.16.0.
+The C<ref> operator started leaking memory on blessed objects in Perl v5.16.0.
 This has been fixed [perl #114340].
 
 =item *
@@ -2255,7 +2257,7 @@ Formats are no longer created after compilation errors.
 =item *
 
 Under debugging builds, the B<-DA> command line option started crashing in Perl
-5.16.0.  It has been fixed [perl #114368].
+v5.16.0.  It has been fixed [perl #114368].
 
 =item *
 
@@ -2603,7 +2605,7 @@ C<-$x> returns "-dogs" even if C<$y=0+$x> has happened at some point.
 
 =item *
 
-In Perl 5.14, C<-'-10'> was fixed to return "10", not "+10".  But magical
+In Perl v5.14, C<-'-10'> was fixed to return "10", not "+10".  But magical
 variables (C<$1>, ties) were not fixed till now [perl #57706].
 
 =item *
@@ -2692,7 +2694,7 @@ freed when the outer sub is freed, even if the inner sub still exists
 =item *
 
 Duplication of in-memory filehandles by opening with a "<&=" or ">&=" mode
-stopped working properly in 5.16.0.  It was causing the new handle to
+stopped working properly in v5.16.0.  It was causing the new handle to
 reference a different scalar variable.  This has been fixed [perl #113764].
 
 =item *
@@ -2755,18 +2757,18 @@ was tied or a string internally.
 =item *
 
 Using a C<format> after its enclosing sub was freed could crash as of
-perl 5.12.0, if the format referenced lexical variables from the outer sub.
+perl v5.12.0, if the format referenced lexical variables from the outer sub.
 
 =item *
 
 Using a C<format> after its enclosing sub was undefined could crash as of
-perl 5.10.0, if the format referenced lexical variables from the outer sub.
+perl v5.10.0, if the format referenced lexical variables from the outer sub.
 
 =item *
 
 Using a C<format> defined inside a closure, which format references
 lexical variables from outside, never really worked unless the C<write>
-call was directly inside the closure.  In 5.10.0 it even started crashing.
+call was directly inside the closure.  In v5.10.0 it even started crashing.
 Now the copy of that closure nearest the top of the call stack is used to
 find those variables.
 
@@ -2818,7 +2820,7 @@ reference".
 Two bugs involving @ISA have been fixed.  C<*ISA = *glob_without_array> and
 C<undef *ISA; @{*ISA}> would prevent future modifications to @ISA from
 updating the internal caches used to look up methods.  The
-*glob_without_array case was a regression from Perl 5.12.
+*glob_without_array case was a regression from Perl v5.12.
 
 =item *
 
@@ -2883,12 +2885,12 @@ causes subsequent numification to produce random numbers.
 =item *
 
 Assigning a regular expression to a magic variable no longer wipes away the
-magic.  This was a regression from 5.10.
+magic.  This was a regression from v5.10.
 
 =item *
 
 Assigning a regular expression to a blessed scalar no longer results in
-crashes.  This was also a regression from 5.10.
+crashes.  This was also a regression from v5.10.
 
 =item *
 
@@ -2903,7 +2905,7 @@ warning.
 =item *
 
 Negative array indices no longer cause EXISTS methods of tied variables to
-be ignored.  This was a regression from 5.12.
+be ignored.  This was a regression from v5.12.
 
 =item *
 
