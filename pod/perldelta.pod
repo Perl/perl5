@@ -790,13 +790,8 @@ inline functions. This should speed things up slightly on non-GCC platforms.
 
 =item *
 
-Apply the optimisation of hashes in boolean context, such as in C<if> or
-C<and>, to constructs in non-void context.
-
-=item *
-
-Extend the optimisation of hashes in boolean context to C<scalar(%hash)>,
-C<%hash ? ... : ...>, and C<sub { %hash || ... }>.
+The optimisation of hashes in boolean context has been extended to
+affect C<scalar(%hash)>, C<%hash ? ... : ...>, and C<sub { %hash || ... }>.
 
 =item *
 
