@@ -46,7 +46,7 @@ experimental.
 Changes to the implementation of hashes in perl 5.18.0 will be one of the most
 visible changes to the behavior of existing code.
 
-By default, two distinct hash variables with identical keys and values will now
+By default, two distinct hash variables with identical keys and values may now
 provide their contents in a different order where it was previously identical.
 
 When encountering these changes, the key to cleaning up from them is to accept
