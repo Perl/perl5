@@ -324,10 +324,11 @@ behavior from working fully.
 
 =head2 Explicit rules for variable names and identifiers
 
-Due to an oversight, length-one variable names in v5.16 were completely
-unrestricted, and opened the door to several kinds of insanity.  As of
-v5.18, these now follow the rules of other identifiers, in addition
-to accepting characters that match the C<\p{POSIX_Punct}> property.
+Due to an oversight, single character variable names in v5.16 were
+completely unrestricted.  This opened the door to several kinds of
+insanity.  As of v5.18, these now follow the rules of other identifiers,
+in addition to accepting characters that match the C<\p{POSIX_Punct}>
+property.
 
 There are no longer any differences in the parsing of identifiers
 specified as C<$...> or C<${...}>; previously, they were dealt with in
