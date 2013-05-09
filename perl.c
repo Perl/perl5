@@ -1883,7 +1883,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if SILENT_NO_TAINT_SUPPORT
             /* silently ignore */
 #elif NO_TAINT_SUPPORT
-            Perl_croak("This perl was compiled without taint support. "
+            Perl_croak_nocontext("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
 	    CHECK_MALLOC_TOO_LATE_FOR('t');
@@ -1898,7 +1898,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if SILENT_NO_TAINT_SUPPORT
             /* silently ignore */
 #elif NO_TAINT_SUPPORT
-            Perl_croak("This perl was compiled without taint support. "
+            Perl_croak_nocontext("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
 	    CHECK_MALLOC_TOO_LATE_FOR('T');
@@ -2015,7 +2015,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if SILENT_NO_TAINT_SUPPORT
             /* silently ignore */
 #elif NO_TAINT_SUPPORT
-            Perl_croak("This perl was compiled without taint support. "
+            Perl_croak_nocontext("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
 	    CHECK_MALLOC_TOO_LATE_FOR('T');
@@ -2054,7 +2054,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if SILENT_NO_TAINT_SUPPORT
             /* silently ignore */
 #elif NO_TAINT_SUPPORT
-                    Perl_croak("This perl was compiled without taint support. "
+                    Perl_croak_nocontext("This perl was compiled without taint support. "
                                "Cowardly refusing to run with -t or -T flags");
 #else
 		    if( !TAINTING_get) {
@@ -3383,7 +3383,7 @@ Perl_moreswitches(pTHX_ const char *s)
 #if SILENT_NO_TAINT_SUPPORT
             /* silently ignore */
 #elif NO_TAINT_SUPPORT
-        Perl_croak("This perl was compiled without taint support. "
+        Perl_croak_nocontext("This perl was compiled without taint support. "
                    "Cowardly refusing to run with -t or -T flags");
 #else
         if (!TAINTING_get)
