@@ -1804,9 +1804,10 @@ foreach my $filename (@files) {
                 # subtract back this number we previously added in.
                 $total_known -= $problem_count;
 
-                $diagnostic .= $indent . $message;
+                $diagnostic .= $indent . qq{"$message"};
                 if ($problem_count > 2) {
-                    $diagnostic .= "  ($problem_count occurrences)";
+                    $diagnostic .= "  ($problem_count occurrences,"
+			. " expected $known_problems{$canonical}{$message})";
                 }
                 foreach my $problem (@{$problems{$filename}{$message}}) {
                     $diagnostic .= " " if $problem_count == 1;
