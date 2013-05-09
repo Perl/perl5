@@ -1340,7 +1340,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     if (PL_op->op_flags & OPf_REF) {
 	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
-		Perl_croak(aTHX_ no_prev_lstat);
+		Perl_croak(aTHX_ "%s", no_prev_lstat);
 	    return PL_laststatval;
 	}
 	PL_laststatval = -1;
@@ -1354,7 +1354,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
 	     == OPpFT_STACKED) {
       if (PL_laststype != OP_LSTAT)
-	Perl_croak(aTHX_ no_prev_lstat);
+	Perl_croak(aTHX_ "%s", no_prev_lstat);
       return PL_laststatval;
     }
 

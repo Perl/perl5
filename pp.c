@@ -1654,7 +1654,7 @@ PP(pp_repeat)
 	MEM_WRAP_CHECK_1(max, SV*, oom_list_extend);
 	/* Did the max computation overflow? */
 	if (items > 0 && max > 0 && (max < items || max < count))
-	   Perl_croak(aTHX_ oom_list_extend);
+	   Perl_croak(aTHX_ "%s", oom_list_extend);
 	MEXTEND(MARK, max);
 	if (count > 1) {
 	    while (SP > MARK) {
@@ -1712,7 +1712,7 @@ PP(pp_repeat)
 	    else {
 		const STRLEN max = (UV)count * len;
 		if (len > MEM_SIZE_MAX / count)
-		     Perl_croak(aTHX_ oom_string_extend);
+		     Perl_croak(aTHX_ "%s", oom_string_extend);
 	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
 		SvGROW(TARG, max + 1);
 		repeatcpy(SvPVX(TARG) + len, SvPVX(TARG), len, count - 1);

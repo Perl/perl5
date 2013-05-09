@@ -2724,7 +2724,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     PERL_ARGS_ASSERT_DOFINDLABEL;
 
     if (ops >= oplimit)
-	Perl_croak(aTHX_ too_deep);
+	Perl_croak(aTHX_ "%s", too_deep);
     if (o->op_type == OP_LEAVE ||
 	o->op_type == OP_SCOPE ||
 	o->op_type == OP_LEAVELOOP ||
@@ -2733,7 +2733,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     {
 	*ops++ = cUNOPo->op_first;
 	if (ops >= oplimit)
-	    Perl_croak(aTHX_ too_deep);
+	    Perl_croak(aTHX_ "%s", too_deep);
     }
     *ops = 0;
     if (o->op_flags & OPf_KIDS) {
@@ -2993,7 +2993,7 @@ PP(pp_goto)
         label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
         label_len   = strlen(label);
     }
-    if (!(do_dump || label_len)) DIE(aTHX_ must_have_label);
+    if (!(do_dump || label_len)) DIE(aTHX_ "%s", must_have_label);
 
     PERL_ASYNC_CHECK();
 
