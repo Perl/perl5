@@ -5975,6 +5975,9 @@ static SV *dclone(pTHX_ SV *sv)
 	sv = SvRV(sv);			/* So follow it to know what to store */
 
         init_store_context(aTHX_ &store_cxt, NULL, ST_CLONE, 0);
+        if (-1 == magic_write(aTHX_ &store_cxt))		/* Emit magic and ILP info */
+                return 0;					/* Error */
+
         if (store(aTHX_ &store_cxt, sv))
                 return &PL_sv_undef;
 
