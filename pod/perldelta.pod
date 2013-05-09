@@ -1373,16 +1373,17 @@ when extended parse is enabled in the process from which Perl is run.
 
 The character set for Extended Filename Syntax (EFS) is now enabled by default
 on VMS.  Among other things, this provides better handling of dots in directory
-names, multiple dots in filenames,and spaces in filenames.  To obtain the old
+names, multiple dots in filenames, and spaces in filenames.  To obtain the old
 behavior, set the logical name C<DECC$EFS_CHARSET> to C<DISABLE>.
 
 =item *
 
-Fix linking on builds configured with -Dusemymalloc=y.
+Fixed linking on builds configured with C<-Dusemymalloc=y>.
 
 =item *
 
-It should now be possible to compile Perl as C++ on VMS.
+Experimental support for building Perl with the HP C++ compiler is available
+by configuring with C<-Dusecxx>.
 
 =item *
 
