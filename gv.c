@@ -2125,8 +2125,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		 UTF8fARG(is_utf8, name_end-nambeg, nambeg));
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
-    if ( isIDFIRST_lazy_if(name, is_utf8)
-                && ! (isLEXWARN_on ? ckWARN(WARN_ONCE) : (PL_dowarn & G_WARN_ON ) ) )
+    if ( isIDFIRST_lazy_if(name, is_utf8) && !ckWARN(WARN_ONCE) )
         GvMULTI_on(gv) ;
 
     /* set up magic where warranted */
