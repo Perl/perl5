@@ -71,12 +71,14 @@ Perl's hashes to insecure audiences.
 Further, every hash has its own iteration order, which should make it much
 more difficult to determine what the current hash seed is.
 
-=head3 New hash function: Murmurhash-32
+=head3 New hash functions
 
-We have switched Perl's hash function to use Murmurhash-32, and added build
-support for several other hash functions.  This new function is expected to
-perform equivalently to the old one for shorter strings and is faster for
-hashing longer strings.
+Perl 5.18 includes support for multiple hash functions, and changed
+the default (to ONE_AT_A_TIME_HARD), you can choose a different
+algorithm by defining a symbol at compile time.  For a current list,
+consult the F<INSTALL> document.  Note that as of Perl 5.18 we can
+only recommend use of the default or SIPHASH. All the others are
+known to have security issues and are for research purposes only.
 
 =head3 PERL_HASH_SEED environment variable now takes a hex value
 
