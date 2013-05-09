@@ -5787,22 +5787,7 @@ static SV *do_retrieve(
                 cxt->input_end = cxt->input + size;
 	}
 
-	/*
-	 * Magic number verifications.
-	 *
-	 * This needs to be done before calling init_retrieve_context()
-	 * since the format indication in the file are necessary to conduct
-	 * some of the initializations.
-	 */
-
 	cxt->fio = f;				/* Where I/O are performed */
-
-	if (!magic_check(aTHX_ cxt))
-		CROAK(("Magic number checking on storable %s failed",
-			cxt->fio ? "file" : "string"));
-
-	TRACEME(("data stored in %s format",
-		cxt->netorder ? "net order" : "native"));
 
 	/*
 	 * Check whether input source is tainted, so that we don't wrongly
@@ -5817,6 +5802,21 @@ static SV *do_retrieve(
 	is_tainted = f ? 1 : (in ? SvTAINTED(in) : cxt->s_tainted);
 	TRACEME(("input source is %s", is_tainted ? "tainted" : "trusted"));
 	init_retrieve_context(aTHX_ cxt, optype, is_tainted);
+
+	/*
+	 * Magic number verifications.
+	 *
+	 * This needs to be done before calling init_retrieve_context()
+	 * since the format indication in the file are necessary to conduct
+	 * some of the initializations.
+	 */
+
+	if (!magic_check(aTHX_ cxt))
+		CROAK(("Magic number checking on storable %s failed",
+			cxt->fio ? "file" : "string"));
+
+	TRACEME(("data stored in %s format",
+		cxt->netorder ? "net order" : "native"));
 
 	ASSERT(is_retrieving(aTHX), ("within retrieve operation"));
 
