@@ -22,7 +22,6 @@ in the C<svtype> enum.  Test these flags with the C<SvTYPE> macro.
 The types are:
 
     SVt_NULL
-    SVt_BIND (unused)
     SVt_IV
     SVt_NV
     SVt_RV
@@ -120,7 +119,7 @@ Type flag for I/O objects.  See L</svtype>.
 
 typedef enum {
 	SVt_NULL,	/* 0 */
-	SVt_BIND,	/* 1 */
+	SVt_DUMMY,	/* 1 */
 	SVt_IV,		/* 2 */
 	SVt_NV,		/* 3 */
 	/* RV was here, before it was merged with IV.  */

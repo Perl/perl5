@@ -3469,7 +3469,7 @@ static int sv_type(pTHX_ SV *sv)
 	case SVt_PVCV:
 		return svis_CODE;
 #if PERL_VERSION > 8
-	/* case SVt_BIND: */
+	/* case SVt_DUMMY: */
 #endif
 	default:
 		break;

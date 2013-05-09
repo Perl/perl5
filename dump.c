@@ -30,7 +30,7 @@
 
 static const char* const svtypenames[SVt_LAST] = {
     "NULL",
-    "BIND",
+    "DUMMY",
     "IV",
     "NV",
     "PV",
@@ -50,7 +50,7 @@ static const char* const svtypenames[SVt_LAST] = {
 
 static const char* const svshorttypenames[SVt_LAST] = {
     "UNDEF",
-    "BIND",
+    "DUMMY",
     "IV",
     "NV",
     "PV",
@@ -2771,8 +2771,8 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     case SVt_PVGV:
 	sv_catpv(t, " GV=\"");
 	break;
-    case SVt_BIND:
-	sv_catpv(t, " BIND=\"");
+    case SVt_DUMMY:
+	sv_catpv(t, " DUMMY=\"");
 	break;
     case SVt_REGEXP:
 	sv_catpv(t, " REGEXP=\"");

@@ -884,7 +884,7 @@ static const struct body_details bodies_by_type[] = {
     /* The bind placeholder pretends to be an RV for now.
        Also it's marked as "can't upgrade" to stop anyone using it before it's
        implemented.  */
-    { 0, 0, 0, SVt_BIND, TRUE, NONV, NOARENA, 0 },
+    { 0, 0, 0, SVt_DUMMY, TRUE, NONV, NOARENA, 0 },
 
     /* IVs are in the head, so the allocation size is 0.  */
     { 0,
@@ -4073,7 +4073,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	}
 	break;
 
-	/* case SVt_BIND: */
+	/* case SVt_DUMMY: */
     case SVt_PVLV:
     case SVt_PVGV:
     case SVt_PVMG:
@@ -6136,7 +6136,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		SvREFCNT_dec(SvSTASH(sv));
 	}
 	switch (type) {
-	    /* case SVt_BIND: */
+	    /* case SVt_DUMMY: */
 	case SVt_PVIO:
 	    if (IoIFP(sv) &&
 		IoIFP(sv) != PerlIO_stdin() &&
@@ -9406,7 +9406,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 				    ? "GLOB" : "SCALAR");
 	case SVt_PVFM:		return "FORMAT";
 	case SVt_PVIO:		return "IO";
-	case SVt_BIND:		return "BIND";
+	case SVt_DUMMY:		return "DUMMY";
 	case SVt_REGEXP:	return "REGEXP";
 	default:		return "UNKNOWN";
 	}
@@ -12133,7 +12133,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	SvANY(dstr)	= new_XNV();
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
-	/* case SVt_BIND: */
+	/* case SVt_DUMMY: */
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
