@@ -1517,14 +1517,18 @@ or to to avoid compiler warnings with older perls, possibly
 
 Perl has a new copy-on-write mechanism that allows any SvPOK scalar to be
 upgraded to a copy-on-write scalar.  A reference count on the string buffer
-is stored in the string buffer itself.
+is stored in the string buffer itself.  This feature is B<not enabled by
+default>.
 
-This breaks a few XS modules by allowing copy-on-write scalars to go
+It can be enabled in a perl build by running F<Configure> with
+B<-Accflags=-DPERL_NEW_COPY_ON_WRITE>, and we would encourage XS authors
+to try their code with such an enabled perl, and provide feedback.
+Unfortunately, there is not yet a good guide to updating XS code to cope
+with COW.  Until such a document is available, consult the perl5-porters
+mailing list.
+
+It breaks a few XS modules by allowing copy-on-write scalars to go
 through code paths that never encountered them before.
-
-This behaviour can still be disabled by running F<Configure> with
-B<-Accflags=-DPERL_NO_COW>.  This option will probably be removed in Perl
-5.20.
 
 =item *
 
