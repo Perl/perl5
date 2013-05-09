@@ -526,7 +526,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    bool needs_store;
 	    hv_magic_check (hv, &needs_copy, &needs_store);
 	    if (needs_copy) {
-		const bool save_taint = TAINT_get; /* Unused var warning under NO_TAINT_SUPPORT */
+		const bool save_taint = TAINT_get;
 		if (keysv || is_utf8) {
 		    if (!keysv) {
 			keysv = newSVpvn_utf8(key, klen, TRUE);
@@ -540,6 +540,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 
 		TAINT_IF(save_taint);
+#ifdef NO_TAINT_SUPPORT
+                PERL_UNUSED_VAR(save_taint);
+#endif
 		if (!needs_store) {
 		    if (flags & HVhek_FREEKEY)
 			Safefree(key);

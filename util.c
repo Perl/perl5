@@ -6423,7 +6423,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     dVAR;
     SV * const dbsv = GvSVn(PL_DBsub);
-    const bool save_taint = TAINT_get; /* Accepted unused var warning under NO_TAINT_SUPPORT */
+    const bool save_taint = TAINT_get;
 
     /* When we are called from pp_goto (svp is null),
      * we do not care about using dbsv to call CV;
@@ -6474,6 +6474,9 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
     TAINT_IF(save_taint);
+#ifdef NO_TAINT_SUPPORT
+    PERL_UNUSED_VAR(save_taint);
+#endif
 }
 
 int

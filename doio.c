@@ -1589,6 +1589,8 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 
     PERL_ARGS_ASSERT_APPLY;
 
+    PERL_UNUSED_VAR(what); /* may not be used depending on compile options */
+
     /* Doing this ahead of the switch statement preserves the old behaviour,
        where attempting to use kill as a taint test test would fail on
        platforms where kill was not defined.  */

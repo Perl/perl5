@@ -110,6 +110,9 @@ Perl_taint_env(pTHX)
 	    taint_proper("%%ENV is aliased to %%%s%s", name);
 	/* this statement is reached under -t or -U */
 	TAINT_set(was_tainted);
+#ifdef NO_TAINT_SUPPORT
+        PERL_UNUSED_VAR(was_tainted);
+#endif
     }
 
 #ifdef VMS
@@ -157,7 +160,11 @@ Perl_taint_env(pTHX)
 	const bool was_tainted = TAINT_get;
 	const char *t = SvPV_const(*svp, len);
 	const char * const e = t + len;
+
 	TAINT_set(was_tainted);
+#ifdef NO_TAINT_SUPPORT
+        PERL_UNUSED_VAR(was_tainted);
+#endif
 	if (t < e && isWORDCHAR(*t))
 	    t++;
 	while (t < e && (isWORDCHAR(*t) || strchr("-_.+", *t)))

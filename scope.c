@@ -916,7 +916,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    *(bool*)ARG0_PTR = cBOOL(uv >> 8);
-#if !NO_TAINT_SUPPORT
+#ifdef NO_TAINT_SUPPORT
+            PERL_UNUSED_VAR(was);
+#else
 	    if (ARG0_PTR == &(TAINT_get)) {
 		/* If we don't update <was>, to reflect what was saved on the
 		 * stack for PL_tainted, then we will overwrite this attempt to

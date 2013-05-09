@@ -1243,6 +1243,12 @@ PP(pp_aassign)
 	    tmp_egid = PerlProc_getegid();
 	}
 	TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
+#ifdef NO_TAINT_SUPPORT
+        PERL_UNUSED_VAR(tmp_uid);
+        PERL_UNUSED_VAR(tmp_euid);
+        PERL_UNUSED_VAR(tmp_gid);
+        PERL_UNUSED_VAR(tmp_egid);
+#endif
     }
     PL_delaymagic = 0;
 

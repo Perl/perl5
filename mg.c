@@ -2220,6 +2220,9 @@ Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_GETTAINT;
     PERL_UNUSED_ARG(sv);
+#ifdef NO_TAINT_SUPPORT
+    PERL_UNUSED_ARG(mg);
+#endif
 
     TAINT_IF((PL_localizing != 1) && (mg->mg_len & 1));
     return 0;

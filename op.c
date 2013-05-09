@@ -9103,9 +9103,12 @@ Perl_ck_index(pTHX_ OP *o)
 	if (kid)
 	    kid = kid->op_sibling;			/* get past "big" */
 	if (kid && kid->op_type == OP_CONST) {
-	    const bool save_taint = TAINT_get; /* accepted unused var warning if NO_TAINT_SUPPORT */
+	    const bool save_taint = TAINT_get;
 	    fbm_compile(((SVOP*)kid)->op_sv, 0);
 	    TAINT_set(save_taint);
+#ifdef NO_TAINT_SUPPORT
+            PERL_UNUSED_VAR(save_taint);
+#endif
 	}
     }
     return ck_fun(o);
