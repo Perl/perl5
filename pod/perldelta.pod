@@ -2941,7 +2941,7 @@ becomes empty.
 
 =item *
 
-XXX: the imperfect behavior of the ** deprecation
+There are no known regressions.  Please report any bugs you find!
 
 =back
 
