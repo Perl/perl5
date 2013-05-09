@@ -722,6 +722,17 @@ for removal between now and 5.20.0:
 
 =back
 
+We also think it likely that current versions of Perl will no longer
+build AmigaOS, DJGPP, NetWare (natively), OS/2 and Plan 9. If you
+are using Perl on such a platform and have an interest in ensuring
+Perl's future on them, please contact us.
+
+We believe that Perl has long been unable to build on mixed endian
+architectures (such as PDP-11s), and intend to remove any remain
+support code. Similarly, code supporting the long umaintained GNU
+dld will be removed soon if no-one makes themselves known as an
+active user.
+
 =item *
 
 Swapping of $< and $>
