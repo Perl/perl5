@@ -156,6 +156,10 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
     for my $i (0 .. 1) {
 	$freezed = freeze $obj[$i];
+        use Data::Dumper;
+        open F, ">/tmp/freezed-$i.pl";
+        print F Dumper($freezed);
+        close F;
 	$@ = "";
 	eval { $thawed  = thaw $freezed };
 	like($@, qr/Can\'t eval/);

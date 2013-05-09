@@ -1305,7 +1305,8 @@ static void init_retrieve_context(pTHX_ stcxt_t *cxt, int optype, int is_tainted
 	 */
 
 	cxt->hook  = newHV();			/* Caches STORABLE_thaw */
-
+        cxt->eval  = NULL;
+        cxt->forgive_me = -1;
 #ifdef USE_PTR_TABLE
 	cxt->pseen = 0;
 #endif
