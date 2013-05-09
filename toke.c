@@ -8563,6 +8563,7 @@ Perl_yylex(pTHX)
 #ifdef PERL_MAD
 		    PL_thistoken = subtoken;
 		    s = d;
+                    PERL_UNUSED_VAR(tboffset);
 #else
 		    if (have_name)
 			(void) force_word(PL_oldbufptr + tboffset, WORD,
@@ -8685,6 +8686,7 @@ Perl_yylex(pTHX)
 		force_next(0);
 
 		PL_thistoken = subtoken;
+                PERL_UNUSED_VAR(have_proto);
 #else
 		if (have_proto) {
 		    NEXTVAL_NEXTTOKE.opval =
