@@ -5817,7 +5817,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                     pRExC_state->num_code_blocks);
             goto redo_first_pass;
         }
-        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#X", flags);
+        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for sizing pass, flags=%#"UVxf"", (UV) flags);
     }
     if (code_blocksv)
 	SvLEN_set(code_blocksv,0); /* no you can't have it, sv_clear */
@@ -5989,7 +5989,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	ReREFCNT_dec(rx);   
-        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#X", flags);
+        Perl_croak(aTHX_ "panic: reg returned NULL to re_op_compile for generation pass, flags=%#"UVxf"", (UV) flags);
     }
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
@@ -9176,8 +9176,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                             *flagp = RESTART_UTF8;
                             return NULL;
                         }
-                        FAIL2("panic: regbranch returned NULL, flags=%#X",
-                              flags);
+                        FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
+                              (UV) flags);
                     } else
                         REGTAIL(pRExC_state, br, reganode(pRExC_state, LONGJMP, 0));
 		    c = *nextchar(pRExC_state);
@@ -9192,8 +9192,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                                 *flagp = RESTART_UTF8;
                                 return NULL;
                             }
-                            FAIL2("panic: regbranch returned NULL, flags=%#X",
-                                  flags);
+                            FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"",
+                                  (UV) flags);
                         }
                         REGTAIL(pRExC_state, ret, lastbr);
 		 	if (flags&HASWIDTH)
@@ -9281,7 +9281,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             *flagp = RESTART_UTF8;
             return NULL;
         }
-        FAIL2("panic: regbranch returned NULL, flags=%#X", flags);
+        FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"", (UV) flags);
     }
     if (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
@@ -9326,7 +9326,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 *flagp = RESTART_UTF8;
                 return NULL;
             }
-            FAIL2("panic: regbranch returned NULL, flags=%#X", flags);
+            FAIL2("panic: regbranch returned NULL, flags=%#"UVxf"", (UV) flags);
         }
         REGTAIL(pRExC_state, lastbr, br);               /* BRANCH -> BRANCH. */
 	lastbr = br;
@@ -9531,7 +9531,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
                 *flagp = RESTART_UTF8;
                 return NULL;
             }
-            FAIL2("panic: regpiece returned NULL, flags=%#X", flags);
+            FAIL2("panic: regpiece returned NULL, flags=%#"UVxf"", (UV) flags);
 	}
 	else if (ret == NULL)
 	    ret = latest;
@@ -9601,7 +9601,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	if (flags & (TRYAGAIN|RESTART_UTF8))
 	    *flagp |= flags & (TRYAGAIN|RESTART_UTF8);
         else
-            FAIL2("panic: regatom returned NULL, flags=%#X", flags);
+            FAIL2("panic: regatom returned NULL, flags=%#"UVxf"", (UV) flags);
 	return(NULL);
     }
 
@@ -10043,8 +10043,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
                 *flagp = RESTART_UTF8;
                 return FALSE;
             }
-            FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#X",
-                  flags);
+            FAIL2("panic: reg returned NULL to grok_bslash_N, flags=%#"UVxf"",
+                  (UV) flags);
         } 
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 
@@ -10329,8 +10329,8 @@ tryagain:
         if (ret == NULL) {
             if (*flagp & RESTART_UTF8)
                 return NULL;
-            FAIL2("panic: regclass returned NULL to regatom, flags=%#X",
-                  *flagp);
+            FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
+                  (UV) *flagp);
         }
 	nextchar(pRExC_state);
         Set_Node_Length(ret, RExC_parse - oregcomp_parse + 1); /* MJD */
@@ -10352,7 +10352,7 @@ tryagain:
                     *flagp = RESTART_UTF8;
                     return NULL;
                 }
-                FAIL2("panic: reg returned NULL to regatom, flags=%#X", flags);
+                FAIL2("panic: reg returned NULL to regatom, flags=%#"UVxf"", (UV) flags);
 	}
 	*flagp |= flags&(HASWIDTH|SPSTART|SIMPLE|POSTPONED);
 	break;
@@ -10547,8 +10547,8 @@ tryagain:
                 /* regclass() can only return RESTART_UTF8 if multi-char folds
                    are allowed.  */
                 if (!ret)
-                    FAIL2("panic: regclass returned NULL to regatom, flags=%#X",
-                          *flagp);
+                    FAIL2("panic: regclass returned NULL to regatom, flags=%#"UVxf"",
+                          (UV) *flagp);
 
 		RExC_parse--;
 
@@ -11671,8 +11671,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                                   FALSE, /* don't allow multi-char folds */
                                   TRUE, /* silence non-portable warnings. */
                                   &current))
-                        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X",
-                              *flagp);
+                        FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf"",
+                              (UV) *flagp);
 
                     /* function call leaves parse pointing to the ']', except
                      * if we faked it */
@@ -11837,8 +11837,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                               FALSE, /* don't allow multi-char folds */
                               FALSE, /* don't silence non-portable warnings.  */
                               &current))
-                    FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X",
-                          *flagp);
+                    FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf"",
+                          (UV) *flagp);
                 /* regclass() will return with parsing just the \ sequence,
                  * leaving the parse pointer at the next thing to parse */
                 RExC_parse--;
@@ -11860,8 +11860,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                              FALSE, /* don't allow multi-char folds */
                              FALSE, /* don't silence non-portable warnings.  */
                              &current))
-                    FAIL2("panic: regclass returned NULL to handle_sets, flags=%#X",
-                          *flagp);
+                    FAIL2("panic: regclass returned NULL to handle_sets, flags=%#"UVxf"",
+                          (UV) *flagp);
                 /* function call leaves parse pointing to the ']', except if we
                  * faked it */
                 if (is_posix_class) {
