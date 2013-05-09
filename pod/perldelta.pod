@@ -1685,7 +1685,7 @@ should be initialized to NULL by other regex plugin modules.
 
 =item *
 
-A new function C<alloccoptash> has been added to the API, but is considered
+A new function C<alloccopstash> has been added to the API, but is considered
 experimental.  See L<perlapi>.
 
 =item *
