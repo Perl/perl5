@@ -666,6 +666,8 @@ foreach my $test (sort { numerically } keys %tests) {
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
             next if $bracketed && @pattern != 1;    # bracketed makes these
                                                     # or's instead of a sequence
+            foreach my $optimize_bracketed (0, 1) {
+                next if $optimize_bracketed && ! $bracketed;
             foreach my $inverted (0,1) {
                 next if $inverted && ! $bracketed;  # inversion only valid in [^...]
                 next if $inverted && @target != 1;  # [perl #89750] multi-char
@@ -687,8 +689,9 @@ foreach my $test (sort { numerically } keys %tests) {
                       $rhs .=  $rhs_char;
 
                       # Add a character to the class, so class doesn't get
-                      # optimized out
-                      $rhs .= '_]' if $bracketed;
+                      # optimized out, unless we are testing that optimization
+                      $rhs .= '_' if $optimize_bracketed;
+                      $rhs .= ']' if $bracketed;
                   }
 
                   # Add one of: no capturing parens
@@ -811,6 +814,7 @@ foreach my $test (sort { numerically } keys %tests) {
                 }
               }
             }
+          }
           }
         }
       }

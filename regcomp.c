@@ -10131,8 +10131,9 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
      * additionally will populate the node's STRING with <code_point>, if <len>
      * is 0.  In both cases <*flagp> is appropriately set
      *
-     * It knows that under FOLD, UTF characters and the Latin Sharp S must be
-     * folded (the latter only when the rules indicate it can match 'ss') */
+     * It knows that under FOLD, the Latin Sharp S and UTF characters above
+     * 255, must be folded (the former only when the rules indicate it can
+     * match 'ss') */
 
     bool len_passed_in = cBOOL(len != 0);
     U8 character[UTF8_MAXBYTES_CASE+1];
@@ -10141,8 +10142,15 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
 
     if (! len_passed_in) {
         if (UTF) {
-            if (FOLD) {
-                to_uni_fold(NATIVE_TO_UNI(code_point), character, &len);
+            if (FOLD && (! LOC || code_point > 255)) {
+                _to_uni_fold_flags(NATIVE_TO_UNI(code_point),
+                                   character,
+                                   &len,
+                                   FOLD_FLAGS_FULL | ((LOC)
+                                                     ? FOLD_FLAGS_LOCALE
+                                                     : (ASCII_FOLD_RESTRICTED)
+                                                       ? FOLD_FLAGS_NOMIX_ASCII
+                                                       : 0));
             }
             else {
                 uvchr_to_utf8( character, code_point);
