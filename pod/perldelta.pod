@@ -1587,7 +1587,7 @@ C<mg_length> has been deprecated.
 C<sv_len> now always returns a byte count and C<sv_len_utf8> a character
 count.  Previously, C<sv_len> and C<sv_len_utf8> were both buggy and would
 sometimes returns bytes and sometimes characters.  C<sv_len_utf8> no longer
-assumes that its argument is in UTF8.  Neither of these creates UTF8 caches
+assumes that its argument is in UTF-8.  Neither of these creates UTF-8 caches
 for tied or overloaded values or for non-PVs any more.
 
 =item *
@@ -1940,7 +1940,7 @@ broken when v-strings were added in Perl 5.6.  [perl #56880]
 
 C<length>, C<pos>, C<substr> and C<sprintf> could be confused by ties,
 overloading, references and typeglobs if the stringification of such
-changed the internal representation to or from UTF8.  [perl #114410]
+changed the internal representation to or from UTF-8.  [perl #114410]
 
 =item *
 
@@ -2073,14 +2073,14 @@ omitted.
 
 =item *
 
-Reset the utf8 position cache when accessing magical variables to avoid the
-string buffer and the utf8 position cache getting out of sync
+Reset the UTF-8 position cache when accessing magical variables to avoid the
+string buffer and the UTF-8 position cache getting out of sync
 [perl #114410].
 
 =item *
 
-Various cases of get magic being called twice for magical utf8 strings have been
-fixed.
+Various cases of get magic being called twice for magical UTF-8
+strings have been fixed.
 
 =item *
 
@@ -2912,8 +2912,8 @@ non-objects.
 
 =item *
 
-C<$byte_overload .= $utf8> no longer results in doubly-encoded UTF8 if the
-left-hand scalar happened to have produced a UTF8 string the last time
+C<$byte_overload .= $utf8> no longer results in doubly-encoded UTF-8 if the
+left-hand scalar happened to have produced a UTF-8 string the last time
 overloading was invoked.
 
 =item *
