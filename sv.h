@@ -852,8 +852,8 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 =for apidoc Am|U32|SvUTF8|SV* sv
 Returns a U32 value indicating the UTF-8 status of an SV.  If things are set-up
 properly, this indicates whether or not the SV contains UTF-8 encoded data.
-Call this after SvPV() in case any call to string overloading updates the
-internal flag.
+You should use this I<after> a call to SvPV() or one of its variants, in
+case any call to string overloading updates the internal flag.
 
 =for apidoc Am|void|SvUTF8_on|SV *sv
 Turn on the UTF-8 status of an SV (the data is not changed, just the flag).
@@ -1471,19 +1471,30 @@ attention to precisely which outputs are influenced by which inputs.
 /*
 =for apidoc Am|char*|SvPV_force|SV* sv|STRLEN len
 Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
-only a string (C<SvPOK_only>), by hook or by crook.  You want force if you are
+only a string (C<SvPOK_only>), by hook or by crook.  You need force if you are
 going to update the C<SvPVX> directly.  Processes get magic.
 
+Note that coercing an arbitrary scalar into a plain PV will potentially
+strip useful data from it. For example if the SV was C<SvROK>, then the
+referent will have its reference count decremented, and the SV itself may
+be converted to an C<SvPOK> scalar with a string buffer containing a value
+such as C<"ARRAY(0x1234)">.
+
 =for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
-Like C<SvPV> but will force the SV into containing a string (C<SvPOK>), and
-only a string (C<SvPOK_only>), by hook or by crook.  You want force if you are
-going to update the C<SvPVX> directly.  Doesn't process get magic.
+Like C<SvPV_force>, but doesn't process get magic.
 
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
 Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
 stringified version becoming C<SvPOK>.  Handles 'get' magic.  See also
 C<SvPVx> for a version which guarantees to evaluate sv only once.
+
+Note that there is no guarantee that the return value of C<SvPV()> is
+equal to C<SvPVX(sv)> (or even that C<SvPVX(sv)> contains valid data), due
+to the way that things like overloading and Copy-On-Write are handled.  In
+these cases, the return value may point to a temporary buffer or similar.
+If you absolutely need the SvPVX field to be valid (for example, if you
+intend to write to it), then see L</SvPV_force>.
 
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
 A version of C<SvPV> which guarantees to evaluate C<sv> only once.
@@ -1494,9 +1505,7 @@ more efficient C<SvPV>.
 Like C<SvPV> but doesn't process magic.
 
 =for apidoc Am|char*|SvPV_nolen|SV* sv
-Returns a pointer to the string in the SV, or a stringified form of
-the SV if the SV does not contain a string.  The SV may cache the
-stringified form becoming C<SvPOK>.  Handles 'get' magic.
+Like C<SvPV> but doesn't set a length variable.
 
 =for apidoc Am|char*|SvPV_nomg_nolen|SV* sv
 Like C<SvPV_nolen> but doesn't process magic.
