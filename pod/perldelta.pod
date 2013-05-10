@@ -844,20 +844,11 @@ information only known to the C<perl> binary and not available via L<Config>.
 
 =head2 Updated Modules and Pragmata
 
-This is only an overview of selected module updates.  For a complete
-list of updates, run:
+For a complete list of updates, run:
 
   $ corelist --diff 5.16.0 5.18.0
 
 You can substitute your favorite version in place of C<5.16.0>, too.
-
-=over 4
-
-=item *
-
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-=back
 
 =head2 Removed Modules and Pragmata
 
