@@ -37,6 +37,12 @@ By saying
 you are taking responsibility for any breakage that future changes to, or
 removal of, the feature may cause.
 
+Since some features (like C<~~> or C<my $_>) now emit experimental warnings,
+and you may want to disable them in code that is also run on perls that do not
+recognize these warning categories, consider using the C<if> pragma like this:
+
+    no if $] >= 5.018, "experimental::feature_name";
+
 Existing experimental features may begin emitting these warnings, too.  Please
 consult L<perlexperiment> for information on which features are considered
 experimental.
