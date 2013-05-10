@@ -1614,6 +1614,11 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
             if (is_utf8)
                 SvUTF8_on(err);
             qerror(err);
+            /* To maintain the output of errors after the strict exception
+             * above, and to keep compat with older releases, rather than
+             * placing the variables in the pad, we place
+             * them in the <none>:: stash.
+             */
             gv = gv_fetchpvs("<none>::", GV_ADDMULTI, SVt_PVHV);
             if (!gv) {
                 /* symbol table under destruction */
