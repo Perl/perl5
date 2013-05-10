@@ -294,7 +294,7 @@ such as in
 
  my $undraftable = "\N{4F}";    # Syntax error!
 
-or to have commas anywhere in the name.  See L<charnames/CUSTOM ALIASES>
+or to have commas anywhere in the name.  See L<charnames/CUSTOM ALIASES>.
 
 =head2 C<\N{BELL}> now refers to U+1F514 instead of U+0007
 
@@ -308,7 +308,7 @@ functions in L<charnames> have been correspondingly updated.
 
 Unicode has now withdrawn their previous recommendation for regular
 expressions to automatically handle cases where a single character can
-match multiple characters case-insensitively, for example the letter
+match multiple characters case-insensitively, for example, the letter
 LATIN SMALL LETTER SHARP S and the sequence C<ss>.  This is because
 it turns out to be impracticable to do this correctly in all
 circumstances.  Because Perl has tried to do this as best it can, it
@@ -1517,7 +1517,7 @@ If you have code like that, simply replace it with
 
     SvUPGRADE(sv);
 
-or to to avoid compiler warnings with older perls, possibly
+or to avoid compiler warnings with older perls, possibly
 
     (void)SvUPGRADE(sv);
 
@@ -2670,8 +2670,8 @@ documentation) always returns the correct result.
 =item *
 
 The array iterator used for the C<each @array> construct is now correctly
-reset when C<@array> is cleared (RT #75596). This happens for example when the
-array is globally assigned to, as in C<@array = (...)>, but not when its
+reset when C<@array> is cleared [perl #75596]. This happens, for example, when
+the array is globally assigned to, as in C<@array = (...)>, but not when its
 B<values> are assigned to. In terms of the XS API, it means that C<av_clear()>
 will now reset the iterator.
 
