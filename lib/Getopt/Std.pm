@@ -10,25 +10,27 @@ getopt, getopts - Process single-character switches with switch clustering
 
     use Getopt::Std;
 
-    getopt('oDI');    # -o, -D & -I take arg.  Sets $opt_* as a side effect.
-    getopt('oDI', \%opts);    # -o, -D & -I take arg.  Values in %opts
     getopts('oif:');  # -o & -i are boolean flags, -f takes an argument
 		      # Sets $opt_* as a side effect.
     getopts('oif:', \%opts);  # options as above. Values in %opts
+    getopt('oDI');    # -o, -D & -I take arg.  Sets $opt_* as a side effect.
+    getopt('oDI', \%opts);    # -o, -D & -I take arg.  Values in %opts
 
 =head1 DESCRIPTION
 
-The getopt() function processes single-character switches with switch
+The getopts() function processes single-character switches with switch
 clustering.  Pass one argument which is a string containing all switches
-that take an argument.  For each switch found, sets $opt_x (where x is the
+to be recognized.  For each switch found, sets $opt_x (where x is the
 switch name) to the value of the argument if an argument is expected,
 or 1 otherwise.  Switches which take an argument don't care whether
-there is a space between the switch and the argument.
+there is a space between the switch and the argument.  If unspecified switches
+are found on the command-line, the user will be warned that an unknown
+option was given.  The getopts() function returns true unless an invalid
+option was found.
 
-The getopts() function is similar, but you should pass to it the list of all
-switches to be recognized.  If unspecified switches are found on the
-command-line, the user will be warned that an unknown option was given.
-The getopts() function returns true unless an invalid option was found.
+The getopt() function is similar, but its argument is a string containing
+all switches that take an argument.  Unspecified switches are silently
+accepted.  Its use is not recommended.
 
 Note that, if your code is running under the recommended C<use strict
 'vars'> pragma, you will need to declare these package variables
