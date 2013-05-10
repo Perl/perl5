@@ -338,16 +338,41 @@ typedef struct st_store_cxt {
 	int forgive_me;		/* whether to be forgiving... */
 	int deparse;        /* whether to deparse code refs */
 	int canonical;		/* whether to store hashes sorted by key */
+        SV *output_sv;
+	PerlIO *output_f;		/* where I/O are performed, NULL for memory */
+} store_cxt_t;
+
+struct st_retrieve_cxt;
+typedef struct st_retrieve_cxt {
+	int optype;			/* type of traversal operation */
+	HV *hseen;			
+	AV *aseen;			/* which objects have been seen, retrieve time */
+	IV where_is_undef;		/* index in aseen of PL_sv_undef */
+	AV *aclass;			/* which classnames have been seen, retrieve time */
+	HV *hook;			/* cache for hook methods per class name */
+	IV tagnum;			/* incremented at store time for each seen object */
+	IV classnum;		/* incremented at store time for each seen classname */
+	int netorder;		/* true if network order used */
+	int s_tainted;		/* true if input source is tainted, at retrieve time */
+	int forgive_me;		/* whether to be forgiving... */
+	SV *eval;           /* whether to eval source code */
 #ifndef HAS_RESTRICTED_HASHES
         int derestrict;         /* whether to downgrade restricted hashes */
 #endif
 #ifndef HAS_UTF8_ALL
         int use_bytes;         /* whether to bytes-ify utf8 */
 #endif
+        int accept_future_minor; /* croak immediately on future minor versions?  */
 	SV *keybuf;	        /* for hash key retrieval */
-        SV *output_sv;
-	PerlIO *output_f;		/* where I/O are performed, NULL for memory */
-} store_cxt_t;
+        const unsigned char *input;
+        const unsigned char *input_end;
+	PerlIO *input_f;		/* where I/O are performed, NULL for memory */
+	int ver_major;		/* major of version for retrieved object */
+	int ver_minor;		/* minor of version for retrieved object */
+	SV *(**retrieve_vtbl)(pTHX_ struct stcxt *, const char *);	/* retrieve dispatch table */
+	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
+} retrieve_cxt_t;
+
 
 #define NEW_STORABLE_CXT_OBJ(cxt)					\
   STMT_START {										\
