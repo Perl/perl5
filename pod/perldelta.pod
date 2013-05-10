@@ -371,6 +371,24 @@ global C<$_> an alias for its argument, just like C<foreach>.  However, it
 still uses lexical C<$_> if there is lexical C<$_> in scope (again, just like
 C<foreach>) [perl #114020].
 
+=head2 The smartmatch family of features are now experimental
+
+Smart match, added in v5.10.0 and significantly revised in v5.10.1, has been
+a regular point of complaint.  Although there are a number of ways in which
+it is useful, it has also proven problematic and confusing for both users and
+implementors of Perl.  There have been a number of proposals on how to best
+address the problem.  It is clear that smartmatch is almost certainly either
+going to change or go away in the future.  Relying on its current behavior
+is not recommended.
+
+Warnings will now be issued when the parser sees C<~~>, C<given>, or C<when>.
+To disable these warnings, you can add this line to the appropriate scope:
+
+  no if $] >= 5.018, "experimental::smartmatch";
+
+Consider, though, replacing the use of these features, as they may change
+behavior again before becoming stable.
+
 =head2 Lexical C<$_> is now experimental
 
 Since it was introduced in Perl v5.10, it has caused much confusion with no
