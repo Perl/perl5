@@ -300,7 +300,7 @@ doesn't work, you should use -B/usr/ccs/bin/ instead.
 
 END
 		ccdlflags="$ccdlflags -Wl,-E"
-		lddlflags="$lddlflags -Wl,-E -G"
+		lddlflags="$lddlflags -Wl,-E -shared"
 	    fi
 	fi
 
@@ -588,7 +588,17 @@ EOM
 #		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
 #		fi
 		ldflags="$ldflags -m64"
-		lddlflags="$lddlflags -G -m64"
+
+		# See [perl #66604]:  On Solaris 11, gcc -m64 on amd64
+		# appears not to understand -G.  (gcc -G has not caused
+		# problems on other platforms in the past.)  gcc versions
+		# at least as old as 3.4.3 support -shared, so just
+		# use that with Solaris 11 and later, but keep
+		# the old behavior for older Solaris versions.
+		case "$osvers" in
+			2.?|2.10) lddlflags="$lddlflags -G -m64" ;;
+			*) lddlflags="$lddlflags -shared -m64" ;;
+		esac
 		;;
 	    *)
 		getconfccflags="`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
