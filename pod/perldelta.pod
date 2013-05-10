@@ -1007,8 +1007,6 @@ To use lexical subs, you must first enable them:
 
 =item *
 
-XXX: This needs more detail.
-
 Strings with code points over 0xFF may not be mapped into in-memory file
 handles
 
@@ -2948,9 +2946,50 @@ There are no known regressions.  Please report any bugs you find!
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl v5.18.0 represents approximately 12 months of development since
+Perl v5.16.0 and contains approximately 400,000 lines of changes across
+2,100 files from 113 authors.
 
-  perl Porting/acknowledgements.pl v5.18.0..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to
+have contributed the improvements that became Perl v5.18.0:
+
+Aaron Crane, Aaron Trevena, Abhijit Menon-Sen, Adrian M. Enache, Alan
+Haggai Alavi, Alexandr Ciornii, Andrew Tam, Andy Dougherty, Anton Nikishaev,
+Aristotle Pagaltzis, Augustina Blair, Bob Ernst, Brad Gilbert, Breno G. de
+Oliveira, Brian Carlson, Brian Fraser, Charlie Gonzalez, Chip Salzenberg, Chris
+'BinGOs' Williams, Christian Hansen, Colin Kuskie, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Daniel Dragan, Daniel Perrett, Darin McBride, Dave Rolsky,
+David Golden, David Leadbeater, David Mitchell, David Nicol, Dominic
+Hargreaves, E. Choroba, Eric Brine, Evan Miller, Father Chrysostomos, Florian
+Ragwitz, François Perrad, George Greer, Goro Fuji, H.Merijn Brand, Herbert
+Breunung, Hugo van der Sanden, Igor Zaytsev, James E Keenan, Jan Dubois,
+Jasmine Ahuja, Jerry D. Hedden, Jess Robinson, Jesse Luehrs, Joaquin Ferrero,
+Joel Berger, John Goodyear, John Peacock, Karen Etheridge, Karl Williamson,
+Karthik Rajagopalan, Kent Fredric, Leon Timmermans, Lucas Holt, Lukas Mai,
+Marcus Holland-Moritz, Markus Jansen, Martin Hasch, Matthew Horsfall, Max
+Maischein, Michael G Schwern, Michael Schroeder, Moritz Lenz, Nicholas Clark,
+Niko Tyni, Oleg Nesterov, Patrik Hägglund, Paul Green, Paul Johnson, Paul
+Marquess, Peter Martini, Rafael Garcia-Suarez, Reini Urban, Renee Baecker,
+Rhesa Rozendaal, Ricardo Signes, Robin Barker, Ronald J. Kimball, Ruslan
+Zakirov, Salvador Fandiño, Sawyer X, Scott Lanning, Sergey Alekseev, Shawn M
+Moore, Shirakata Kentaro, Shlomi Fish, Sisyphus, Smylers, Steffen Müller,
+Steve Hay, Steve Peters, Steven Schubiger, Sullivan Beck, Sven Strickroth,
+Sébastien Aperghis-Tramoni, Thomas Sibley, Tobias Leich, Tom Wyant, Tony Cook,
+Vadim Konovalov, Vincent Pit, Volker Schatz, Walt Mankowski, Yves Orton,
+Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
