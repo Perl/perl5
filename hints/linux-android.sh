@@ -70,7 +70,7 @@ foo=\`adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args) > $tar
 $from output.stdout
 result=\`cat output.stdout\`
 rm output.stdout
-result=\`echo \$result | sed -e 's|\r||g'\`
+result=\`echo "\$result" | sed -e 's|\r||g'\`
 foo=\`echo \$foo | sed -e 's|\r||g'\`
 # Also, adb doesn't exit with the commands exit code, like ssh does, double-grr
 echo "\$result"
