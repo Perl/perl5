@@ -31,6 +31,9 @@ SKIP: {
             print((() = fork) == 1 ? q[ok] : q[not ok])
         "'
     };
+    # perl #117141
+    skip "fork() didn't fail, maybe you're running as root", 1
+      if $out eq "okok";
     is($out, "ok", "bash/zsh-only test for 'fork' returning undef on failure");
 }
 
