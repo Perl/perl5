@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -80,6 +80,7 @@ __PACKAGE__->_accessorize(
   'bare_output',       # For some subclasses: whether to prepend
                        #  header-code and postpend footer-code
 
+  'keep_encoding_directive',  # whether to emit =encoding
   'nix_X_codes',       # whether to ignore X<...> codes
   'merge_text',        # whether to avoid breaking a single piece of
                        #  text up into several events
@@ -1064,6 +1065,12 @@ sub _treat_Ls {  # Process our dear dear friends, the L<...> sequences
         $treelet->[$i] = 'L<>';  # just make it a text node
         next;  # and move on
       }
+
+      if( (! ref $ell->[2]  && $ell->[2] =~ /\A\s/)
+        ||(! ref $ell->[-1] && $ell->[-1] =~ /\s\z/)
+      ) {
+        $self->whine( $start_line, "L<> starts or ends with whitespace" );
+      }
      
       # Catch URLs:
 
@@ -1178,6 +1185,13 @@ sub _treat_Ls {  # Process our dear dear friends, the L<...> sequences
 
           DEBUG > 3 and
            print "     FOUND a '|' in it.  Splitting into [$1] + [$2]\n";
+
+          if ($link_text[0] =~ m{[|/]}) {
+            $self->whine(
+              $start_line,
+              "alternative text '$link_text[0]' contains non-escaped | or /"
+            );
+          }
 
           unshift @link_text, splice @ell_content, 0, $j;
             # leaving only things at J and after

@@ -189,18 +189,22 @@ ok( $x->_out( join "\n\n", '', '',
 $d = 11;
 print "# Now checking that document-end closes things right...\n";
 
-ok( $x->_out( join "\n\n", '', '', 
-  '=over',
-    '=item *',
-    'Stuff',
-    '=cut',
-    'Stuff',
+ok( $x->_out(
+  # We know there'd be a warning about implicit =back; disable it!
+  sub { $_[0]->no_whining(1); },
+  join( "\n\n", '', '',
     '=over',
-      '=item 1.',
-        '=over 19',
-        'Gleiven',
-        'Squim F<.thingrc>!',
-  '', ''
+      '=item *',
+      'Stuff',
+      '=cut',
+      'Stuff',
+      '=over',
+        '=item 1.',
+          '=over 19',
+          'Gleiven',
+          'Squim F<.thingrc>!',
+    '', '',
+  ),
   ), join '',
    '<Document>',
    '<over-bullet indent="4">',

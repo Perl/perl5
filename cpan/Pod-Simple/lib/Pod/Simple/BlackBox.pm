@@ -23,7 +23,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.26';
+$VERSION = '3.28';
 #use constant DEBUG => 7;
 BEGIN {
   require Pod::Simple;
@@ -804,6 +804,7 @@ sub _ponder_paragraph_buffer {
       } elsif($para_type eq '=encoding') {
         # Not actually acted on here, but we catch errors here.
         $self->_handle_encoding_second_level($para);
+        next unless $self->keep_encoding_directive;
         $para_type = 'Plain';
       } elsif($para_type eq '~Verbatim') {
         $para->[0] = 'Verbatim';
@@ -1518,6 +1519,11 @@ sub _closers_for_all_curr_open {
     if($copy[0] eq '=for') {
       $copy[0] = '=end';
     } elsif($copy[0] eq '=over') {
+      $self->whine(
+        $still_open->[1]{start_line} ,
+        "=over without closing =back"
+      );
+
       $copy[0] = '=back';
     } else {
       die "I don't know how to auto-close an open $copy[0] region";

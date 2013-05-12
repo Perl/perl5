@@ -10,7 +10,7 @@ use vars qw(
   $Doctype_decl  $Content_decl
 );
 @ISA = ('Pod::Simple::PullParser');
-$VERSION = '3.26';
+$VERSION = '3.28';
 
 BEGIN {
   if(defined &DEBUG) { } # no-op

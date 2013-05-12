@@ -1,7 +1,7 @@
 
 require 5;
 package Pod::Simple::DumpAsText;
-$VERSION = '3.26';
+$VERSION = '3.28';
 use Pod::Simple ();
 BEGIN {@ISA = ('Pod::Simple')}
 
@@ -16,6 +16,7 @@ sub new {
   my $new = $self->SUPER::new(@_);
   $new->{'output_fh'} ||= *STDOUT{IO};
   $new->accept_codes('VerbatimFormatted');
+  $new->keep_encoding_directive(1);
   return $new;
 }
 

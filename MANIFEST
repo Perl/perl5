@@ -2230,6 +2230,7 @@ cpan/Pod-Simple/t/testlib3/squaa/Vliff.pm		Pod::Simple test file
 cpan/Pod-Simple/t/tiedfh.t				Pod::Simple test file
 cpan/Pod-Simple/t/verbatim.t				Pod::Simple test file
 cpan/Pod-Simple/t/verb_fmt.t				Pod::Simple test file
+cpan/Pod-Simple/t/whine.t
 cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file

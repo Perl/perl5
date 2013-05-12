@@ -1,6 +1,29 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2013-05-04   David E. Wheeler <david@justatheory.org>
+	* Release 3.28
+
+	Removed use of 'done_testing' in t/white.t, which was added in
+	v3.27. Thanks to Paul Howarth for the catch.
+
+	Fixed inproperly calculated number of skipped tests in t/xhtml01.t
+	when HTML::Entities is not intalled.
+
+2013-05-03   David E. Wheeler <david@justatheory.org>
+	* Release 3.27
+
+	Added new warnings as defined by Pod::Checker, thanks to RJBS:
+	+ "=over" without "=back"
+	+ "L<>" starts or ends with whitespace
+	+ raw "|" or "/" in "L<text|link>" text
+
+	Added ->keep_encoding_directive, which is false by default, to
+	prevent formatters from emitting a document's '=encoding'
+	directive in most cases. That they emitted the encoding was a bug
+	introduced in v3.26 (RT #84093). Now, only the DumpAsText and
+	DumpAsXML formats set it to true. Patch from Patrice Dumas.
+
 2013-02-27   David E. Wheeler <david@justatheory.org>
 	* Release 3.26
 
