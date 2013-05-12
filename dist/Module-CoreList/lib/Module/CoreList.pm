@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.89';
+$VERSION = '2.90';
 
 my $dumpinc = 0;
 sub import {
@@ -7986,6 +7986,33 @@ my %delta = (
             'IO::Socket'            => '1.36',
             'Module::CoreList'      => '2.89',
             'Module::CoreList::TieHashDelta'=> '2.89',
+            'Pod::Simple'           => '3.28',
+            'Pod::Simple::BlackBox' => '3.28',
+            'Pod::Simple::Checker'  => '3.28',
+            'Pod::Simple::Debug'    => '3.28',
+            'Pod::Simple::DumpAsText'=> '3.28',
+            'Pod::Simple::DumpAsXML'=> '3.28',
+            'Pod::Simple::HTML'     => '3.28',
+            'Pod::Simple::HTMLBatch'=> '3.28',
+            'Pod::Simple::LinkSection'=> '3.28',
+            'Pod::Simple::Methody'  => '3.28',
+            'Pod::Simple::Progress' => '3.28',
+            'Pod::Simple::PullParser'=> '3.28',
+            'Pod::Simple::PullParserEndToken'=> '3.28',
+            'Pod::Simple::PullParserStartToken'=> '3.28',
+            'Pod::Simple::PullParserTextToken'=> '3.28',
+            'Pod::Simple::PullParserToken'=> '3.28',
+            'Pod::Simple::RTF'      => '3.28',
+            'Pod::Simple::Search'   => '3.28',
+            'Pod::Simple::SimpleTree'=> '3.28',
+            'Pod::Simple::Text'     => '3.28',
+            'Pod::Simple::TextContent'=> '3.28',
+            'Pod::Simple::TiedOutFH'=> '3.28',
+            'Pod::Simple::Transcode'=> '3.28',
+            'Pod::Simple::TranscodeDumb'=> '3.28',
+            'Pod::Simple::TranscodeSmart'=> '3.28',
+            'Pod::Simple::XHTML'    => '3.28',
+            'Pod::Simple::XMLOutStream'=> '3.28',
         },
         removed => {
         }
