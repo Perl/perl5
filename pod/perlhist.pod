@@ -503,7 +503,8 @@ the strings?).
  BinGOs   5.17.9        2013-Feb-20
  Max M    5.17.10       2013-Mar-21
 
- Ricardo  5.18.8-RC1    2013-May-11
+ Ricardo  5.18.0-RC1    2013-May-11
+ Ricardo  5.18.0-RC2    2013-May-12
 
 =head2 SELECTED RELEASE SIZES
 
