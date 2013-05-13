@@ -1060,6 +1060,7 @@ static void init_store_cxt(
 	 * associated tag numbers is special.
          */
 	store_cxt->pseen = ptr_table_new();
+        SAVEDESTRUCTOR_X(&Perl_ptr_table_free, store_cxt->pseen);
 	/*
 	 * The following does not work well with perl5.004_04, and causes
 	 * a core dump later on, in a completely unrelated spot, which
