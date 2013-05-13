@@ -996,7 +996,7 @@ global override.
 
 =item *
 
-L<Carp> has been upgraded to 1.28.
+L<Carp> has been upgraded to 1.29.
 
 Carp is no longer confused when C<caller> returns undef for a package that
 has been deleted.
