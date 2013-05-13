@@ -435,8 +435,8 @@ sub trusts_directly {
     for my $var (qw/ CARP_NOT ISA /) {
         # Don't try using the variable until we know it exists,
         # to avoid polluting the caller's namespace.
-        if ( $stash->{$var} && @{"$class\::$var"} ) {
-           return @{"$class\::$var"}
+        if ( $stash->{$var} && *{$stash->{$var}}{ARRAY} && @{$stash->{$var}} ) {
+           return @{$stash->{$var}}
         }
     }
     return;

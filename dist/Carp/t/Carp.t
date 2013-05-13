@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 62;
+use Test::More tests => 63;
 
 sub runperl {
     my(%args) = @_;
@@ -470,6 +470,14 @@ SKIP:
         [ keys %Foo::No::CARP_NOT:: ],
         [],
         "Carp doesn't create CARP_NOT or ISA in the caller if they don't exist"
+    );
+
+    package Foo::No::Autovivify;
+    $CARP_NOT = 1;
+    eval { Carp::croak(1) };
+    ::ok(
+        !defined *{$Foo::No::Autovivify::{CARP_NOT}}{ARRAY},
+        "Carp doesn't autovivify the CARP_NOT or ISA arrays if the globs exists but they lack the ARRAY slot"
     );
 }
 
