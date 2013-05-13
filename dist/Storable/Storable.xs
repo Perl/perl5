@@ -319,28 +319,7 @@ struct st_retrieve_cxt {
 	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
 };
 
-/*
- * KNOWN BUG:
- *   Croaking implies a memory leak, since we don't use setjmp/longjmp
- *   to catch the exit and free memory used during store or retrieve
- *   operations.  This is not too difficult to fix, but I need to understand
- *   how Perl does it, and croaking is exceptional anyway, so I lack the
- *   motivation to do it.
- *
- * The current workaround is to mark the context as dirty when croaking,
- * so that data structures can be freed whenever we renter Storable code
- * (but only *then*: it's a workaround, not a fix).
- *
- * This is also imperfect, because we don't really know how far they trapped
- * the croak(), and when we were recursing, we won't be able to clean anything
- * but the topmost context stacked.
- */
-
 #define CROAK(x)	STMT_START { croak x; } STMT_END
-
-/*
- * End of "thread-safe" related definitions.
- */
 
 /*
  * LOW_32BITS
@@ -1129,9 +1108,7 @@ static void init_store_cxt(
 	 * We turn the shared key optimization on.
 	 */
 
-        /* FIXME: memory leak! */
-	/* store_cxt->hclass = (HV*)sv_2mortal((SV*)newHV()); */ /* Where seen classnames are stored */
-        store_cxt->hclass = newHV();
+        store_cxt->hclass = (HV*)sv_2mortal((SV*)newHV()); /* Where seen classnames are stored */
 
 #if PERL_VERSION >= 5
 	HvMAX(store_cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
@@ -1460,20 +1437,23 @@ static int known_class(
 
 	svh = hv_fetch(hclass, name, len, FALSE);
 	if (svh) {
-		*classnum = LOW_32BITS(*svh);
+		*classnum = SvIV(*svh);
 		return TRUE;
 	}
+        else {
+                /*
+                 * Unknown classname, we need to record it.
+                 */
 
-	/*
-	 * Unknown classname, we need to record it.
-	 */
+                SV *sv = newSViv(++(store_cxt->classnum));
+                if (!hv_store(hclass, name, len, sv, 0)) {
+                        SvREFCNT_dec(sv);
+                        CROAK(("Unable to record new classname"));
+                }
 
-	store_cxt->classnum++;
-	if (!hv_store(hclass, name, len, INT2PTR(SV*, store_cxt->classnum), 0))
-		CROAK(("Unable to record new classname"));
-
-	*classnum = store_cxt->classnum;
-	return FALSE;
+                *classnum = store_cxt->classnum;
+                return FALSE;
+        }
 }
 
 /***
