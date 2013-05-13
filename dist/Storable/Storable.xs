@@ -2511,10 +2511,9 @@ static int store_hook(
 	 */
 
 	for (i = 1; i < count; i++) {
-		char *fake_tag;
+                char *tag1;
 		SV *rsv = ary[i];
 		SV *xsv;
-		SV *tag;
 		AV *av_hook = store_cxt->hook_seen;
 
 		if (!SvROK(rsv))
@@ -2527,7 +2526,7 @@ static int store_hook(
 		 * Serialize entry if not done already, and get its tag.
 		 */
 	
-		if ((fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
+		if ((tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 
 		TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
@@ -2555,8 +2554,8 @@ static int store_hook(
 		if ((ret = store(aTHX_ store_cxt, xsv)))	/* Given by hook for us to store */
 			return ret;
 
-		fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
-		if (!fake_tag)
+		tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
+		if (!tag1)
 			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 		/*
 		 * It was the first time we serialized 'xsv'.
@@ -2587,10 +2586,9 @@ static int store_hook(
 		 * Replace entry with its tag (not a real SV, so no refcnt increment)
 		 */
 
-		tag = (SV *)--fake_tag;
-		ary[i] = tag;
+		ary[i] = newSViv(tag1 - 1)
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
-			 i-1, PTR2UV(xsv), PTR2UV(tag)));
+			 i-1, PTR2UV(xsv), PTR2UV(tag) - 1));
 	}
 
 	/*
@@ -2689,7 +2687,7 @@ check_done:
 		 */
 
 		for (i = 1; i < count; i++) {
-			I32 tagval = LOW_32BITS(ary[i]);
+			I32 tagval = SvIV(ary[i]);
 			WRITE_I32N(tagval);
 			TRACEME(("object %d, tag #%d", i-1, tagval));
 		}
