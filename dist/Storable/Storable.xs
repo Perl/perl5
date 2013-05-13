@@ -1839,8 +1839,7 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 		 * array.  
 		 */
 
-                /* FIXME: memory leaked here when something fails! */
-		AV *av = newAV();
+          AV *av = (AV*)sv_2mortal((SV*)newAV());
 
                 /*av_extend (av, len);*/
 
@@ -1961,13 +1960,6 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 
                         WRITE_PV_WITH_LEN(keyval, keylen);
 		}
-
-		/* 
-		 * Free up the temporary array
-		 */
-
-		av_undef(av);
-		sv_free((SV *) av);
 
 	} else {
 
