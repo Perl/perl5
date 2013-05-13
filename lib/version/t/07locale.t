@@ -7,7 +7,7 @@
 use File::Basename;
 use File::Temp qw/tempfile/;
 use POSIX qw/locale_h/;
-use Test::More tests => 7;
+use Test::More tests => 9;
 use Config;
 
 BEGIN {
@@ -15,10 +15,11 @@ BEGIN {
 }
 
 SKIP: {
-    	skip 'No locale testing for Perl < 5.6.0', 6 if $] < 5.006;
-        skip 'No locale testing without d_setlocale', 6 if(!$Config{d_setlocale});
+        skip 'No locale testing for Perl < 5.6.0', 8 if $] < 5.006;
+        skip 'No locale testing without d_setlocale', 8 if(!$Config{d_setlocale});
 	# test locale handling
 	my $warning;
+
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
 	my $ver = 1.23;  # has to be floating point number
@@ -30,18 +31,26 @@ SKIP: {
 	    $loc = setlocale( LC_ALL, $_);
 	    last if localeconv()->{decimal_point} eq ',';
 	}
-	skip 'Cannot test locale handling without a comma locale', 5
+	skip 'Cannot test locale handling without a comma locale', 7
 	    unless $loc and localeconv()->{decimal_point} eq ',';
 
 	diag ("Testing locale handling with $loc") unless $ENV{PERL_CORE};
 
-	setlocale(LC_NUMERIC, $loc);
-	is ($ver, '1,23', "Using locale: $loc");
+        setlocale(LC_NUMERIC, $loc);
+	ok ("$ver eq '1,23'", "Using locale: $loc");
 	$v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,
 	    "Process locale-dependent floating point");
-	is ($v, "1.23", "Locale doesn't apply to version objects");
+	ok ($v == "1.23", "Locale doesn't apply to version objects");
 	ok ($v == $ver, "Comparison to locale floating point");
+
+        {
+            no locale;
+            ok ("$ver eq '1.23'", "Outside of scope of use locale");
+        }
+
+        ok("\"$ver\"+1 gt 2.22" && \"$ver\"+1 lt 2.24",
+           "Can do math when radix is not a dot");  # [perl 115800]
 
 	setlocale( LC_ALL, $orig_loc); # reset this before possible skip
 	skip 'Cannot test RT#46921 with Perl < 5.008', 1

@@ -2903,6 +2903,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	Move(ptr, s, len, char);
 	s += len;
 	*s = '\0';
+        SvPOK_on(sv);
     }
     else if (SvNOK(sv)) {
 	if (SvTYPE(sv) < SVt_PVNV)
@@ -2916,7 +2917,15 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    /* The +20 is pure guesswork.  Configure test needed. --jhi */
 	    s = SvGROW_mutable(sv, NV_DIG + 20);
 	    /* some Xenix systems wipe out errno here */
-	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
+
+            Gconvert(SvNVX(sv), NV_DIG, 0, s);
+#ifndef USE_LOCALE_NUMERIC
+            /* We don't call SvPOK_on() if there are locales, because it may
+             * come to pass that the locale changes so that the stringification
+             * we just did is no longer correct.  We will have to re-stringify
+             * every time it is needed */
+            SvPOK_on(sv);
+#endif
 	    RESTORE_ERRNO;
 	    while (*s) s++;
 	}
@@ -2961,7 +2970,6 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    *lp = len;
 	SvCUR_set(sv, len);
     }
-    SvPOK_on(sv);
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2pv(%s)\n",
 			  PTR2UV(sv),SvPVX_const(sv)));
     if (flags & SV_CONST_RETURN)
