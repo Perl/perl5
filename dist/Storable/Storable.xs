@@ -2416,7 +2416,7 @@ static int store_hook(
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
 
-	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), retrieve_cxt->tagnum));
+	TRACEME(("store_hook, classname \"%s\", tagged #%d", HvNAME_get(pkg), store_cxt->tagnum));
 
 	/*
 	 * Determine object type on 2 bits.
@@ -3202,7 +3202,7 @@ static int magic_write(pTHX_ store_cxt_t *store_cxt)
     const unsigned char *header;
     SSize_t length;
 
-    TRACEME(("magic_write on fd=%d", store_cxt->fio ? PerlIO_fileno(store_cxt->fio) : -1));
+    TRACEME(("magic_write on fd=%d", store_cxt->output_fh ? PerlIO_fileno(store_cxt->output_fh) : -1));
 
     if (store_cxt->netorder) {
         header = network_file_header;
@@ -3235,6 +3235,16 @@ static int magic_write(pTHX_ store_cxt_t *store_cxt)
 		 (int) sizeof(char *), (int) sizeof(NV)));
     }
     return 0;
+}
+
+static SV *
+state_sv(pTHX) {
+        SV *sv;
+        GV *gv = gv_fetchpvs("Storable::state", GV_ADDMULTI, SVt_PV);
+        save_scalar(gv);
+        sv = GvSV(gv);
+        TRACEME(("state is: %s [gv: 0x%p, sv: 0x%p]", SvPV_nolen(sv), gv, sv));
+        return sv;
 }
 
 /*
@@ -3283,6 +3293,8 @@ static int do_store(
 
 	if (-1 == magic_write(aTHX_ &store_cxt))		/* Emit magic and ILP info */
 		return 0;					/* Error */
+
+        sv_setpvs(state_sv(aTHX), "storing");
 
 	/*
 	 * Recursively store object...
@@ -5587,8 +5599,9 @@ static SV *do_retrieve(
 				      : sv_old_retrieve);
 
 	TRACEME(("data stored in %s format",
-		retrieve_cxt->netorder ? "net order" : "native"));
+		retrieve_cxt.netorder ? "net order" : "native"));
 
+        sv_setpvs(state_sv(aTHX), "retrieving");
 	sv = retrieve(aTHX_ &retrieve_cxt, 0);		/* Recursively retrieve object, get root SV */
 
 	if ((retrieve_cxt.hseen != NULL) && sv) {
@@ -5652,6 +5665,7 @@ static SV *dclone(pTHX_ SV *in)
 	retrieve_cxt_t retrieve_cxt;
 	STRLEN size;
 	SV *sv;
+        SV *state;
 
 	TRACEME(("dclone"));
 
@@ -5672,10 +5686,12 @@ static SV *dclone(pTHX_ SV *in)
 	sv = SvRV(in);			/* So follow it to know what to store */
 
         init_store_cxt(aTHX_ &store_cxt, NULL, ST_CLONE, 0);
+        state = state_sv(aTHX);
+        sv_setpvs(state, "storing");
         if (store(aTHX_ &store_cxt, sv))
                 return &PL_sv_undef;
 
-	TRACEME(("dclone stored %d bytes", SvCUR(store_ctx.output_sv)));
+	TRACEME(("dclone stored %d bytes", SvCUR(store_cxt.output_sv)));
 
 	init_retrieve_cxt(aTHX_ &retrieve_cxt, ST_CLONE);
 	retrieve_cxt.ver_major = STORABLE_BIN_MAJOR;
@@ -5686,6 +5702,7 @@ static SV *dclone(pTHX_ SV *in)
         retrieve_cxt.input = SvPV(store_cxt.output_sv, size);
         retrieve_cxt.input_end = retrieve_cxt.input + size;
 
+        sv_setpvs(state, "retrieving");
 	sv = retrieve(aTHX_ &retrieve_cxt, 0);
 	return promote_root_sv_to_rv(aTHX_ sv);
 }

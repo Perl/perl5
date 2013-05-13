@@ -420,6 +420,9 @@ sub thaw {
 	return $self;
 }
 
+sub is_storing { $state eq 'storing' }
+sub is_retrieving { $state eq 'retrieving' }
+
 1;
 __END__
 
