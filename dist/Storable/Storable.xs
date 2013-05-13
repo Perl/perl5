@@ -3329,6 +3329,8 @@ static int do_store(
 	 * about to enter do_retrieve...
 	 */
 
+        sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
+                 (store_cxt.netorder > 0 ? 1 : 0));
 
 	TRACEME(("do_store returns %d", status));
 	return status == 0;
@@ -5604,6 +5606,9 @@ static SV *do_retrieve(
         sv_setpvs(state_sv(aTHX), "retrieving");
 	sv = retrieve(aTHX_ &retrieve_cxt, 0);		/* Recursively retrieve object, get root SV */
 
+        sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
+                 (retrieve_cxt.netorder > 0 ? 1 : 0));
+
 	if ((retrieve_cxt.hseen != NULL) && sv) {
 		/*
 		 * Backward compatibility with Storable-0.5@9 (which we know we
@@ -5814,10 +5819,3 @@ SV *	sv
   RETVAL = dclone(aTHX_ sv);
  OUTPUT:
   RETVAL
-
-int
-last_op_in_netorder()
-CODE:
-	RETVAL = -1;
-OUTPUT:
-	RETVAL

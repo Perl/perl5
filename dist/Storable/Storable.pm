@@ -420,8 +420,9 @@ sub thaw {
 	return $self;
 }
 
-sub is_storing { $state eq 'storing' }
-sub is_retrieving { $state eq 'retrieving' }
+sub is_storing          { $state eq 'storing'       }
+sub is_retrieving       { $state eq 'retrieving'    }
+sub last_op_in_netorder { $last_op_in_netorder == 1 }
 
 1;
 __END__
