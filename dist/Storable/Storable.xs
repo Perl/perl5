@@ -256,23 +256,19 @@
 #define HAS_HASH_KEY_FLAGS
 #endif
 
-#ifdef ptr_table_new
-#define USE_PTR_TABLE
+#ifndef ptr_table_new
+#error ptr_table support required
 #endif
 
 typedef struct st_store_cxt store_cxt_t;
 struct st_store_cxt {
 	int optype;			/* type of traversal operation */
-#ifdef USE_PTR_TABLE
-	/* use pseen if we have ptr_tables. We have to store tag+1, because
-	   tag numbers start at 0, and we can't store (SV *) 0 in a ptr_table
-	   without it being confused for a fetch lookup failure.  */
+	/* We have to store tag+1, because tag numbers start at 0, and
+	   we can't store (SV *) 0 in a ptr_table without it being
+	   confused for a fetch lookup failure.  */
 	struct ptr_tbl *pseen;
-	/* Still need hseen for the 0.6 file format code. */
-#else
-	HV *hseen;			
-#endif
-	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
+	HV *hseen; 			/* Still need hseen for the 0.6 file format code. */
+	AV *hook_seen;			/* which SVs were returned by STORABLE_freeze() */
 	IV where_is_undef;		/* index in aseen of PL_sv_undef */
 	HV *hclass;			/* which classnames have been seen, store time */
 	HV *hook;			/* cache for hook methods per class name */
@@ -1060,23 +1056,10 @@ static void init_store_cxt(
         }
 
 	/*
-	 * The 'hseen' table is used to keep track of each SV stored and their
-	 * associated tag numbers is special. It is "abused" because the
-	 * values stored are not real SV, just integers cast to (SV *),
-	 * which explains the freeing below.
-	 *
-	 * It is also one possible bottleneck to achieve good storing speed,
-	 * so the "shared keys" optimization is turned off (unlikely to be
-	 * of any use here), and the hash table is "pre-extended". Together,
-	 * those optimizations increase the throughput by 12%.
-	 */
-
-#ifdef USE_PTR_TABLE
+	 * The 'pseen' table is used to keep track of each SV stored and their
+	 * associated tag numbers is special.
+         */
 	store_cxt->pseen = ptr_table_new();
-#else
-	store_cxt->hseen = (HV*)sv_2mortal((SV*)newHV());	/* Table where seen objects are stored */
-	HvSHAREKEYS_off(store_cxt->hseen);
-#endif
 	/*
 	 * The following does not work well with perl5.004_04, and causes
 	 * a core dump later on, in a completely unrelated spot, which
@@ -1093,12 +1076,6 @@ static void init_store_cxt(
 	 *
 	 * It is reported fixed in 5.005, hence the #if.
 	 */
-#if PERL_VERSION >= 5
-#define HBUCKETS	4096				/* Buckets for %hseen */
-#ifndef USE_PTR_TABLE
-	HvMAX(store_cxt->hseen) = HBUCKETS - 1;	/* keys %hseen = $HBUCKETS; */
-#endif
-#endif
 
 	/*
 	 * The 'hclass' hash uses the same settings as 'hseen' above, but it is
@@ -1111,6 +1088,7 @@ static void init_store_cxt(
         store_cxt->hclass = (HV*)sv_2mortal((SV*)newHV()); /* Where seen classnames are stored */
 
 #if PERL_VERSION >= 5
+#define HBUCKETS	4096
 	HvMAX(store_cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
 #endif
 
@@ -2532,11 +2510,7 @@ static int store_hook(
 	 */
 
 	for (i = 1; i < count; i++) {
-#ifdef USE_PTR_TABLE
 		char *fake_tag;
-#else
-		SV **svh;
-#endif
 		SV *rsv = ary[i];
 		SV *xsv;
 		SV *tag;
@@ -2548,21 +2522,12 @@ static int store_hook(
 		xsv = SvRV(rsv);		/* Follow ref to know what to look for */
 
 		/*
-		 * Look in hseen and see if we have a tag already.
+		 * Look in pseen and see if we have a tag already.
 		 * Serialize entry if not done already, and get its tag.
 		 */
 	
-#ifdef USE_PTR_TABLE
-		/* Fakery needed because ptr_table_fetch returns zero for a
-		   failure, whereas the existing code assumes that it can
-		   safely store a tag zero. So for ptr_tables we store tag+1
-		*/
 		if ((fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
-#else
-		if ((svh = hv_fetch(store_cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE)))
-			goto sv_seen;		/* Avoid moving code too far to the right */
-#endif
 
 		TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
 
@@ -2589,15 +2554,9 @@ static int store_hook(
 		if ((ret = store(aTHX_ store_cxt, xsv)))	/* Given by hook for us to store */
 			return ret;
 
-#ifdef USE_PTR_TABLE
 		fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
 		if (!fake_tag)
 			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
-#else
-		svh = hv_fetch(retrieve_cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE);
-		if (!svh)
-			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
-#endif
 		/*
 		 * It was the first time we serialized 'xsv'.
 		 *
@@ -2627,11 +2586,7 @@ static int store_hook(
 		 * Replace entry with its tag (not a real SV, so no refcnt increment)
 		 */
 
-#ifdef USE_PTR_TABLE
 		tag = (SV *)--fake_tag;
-#else
-		tag = *svh;
-#endif
 		ary[i] = tag;
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
 			 i-1, PTR2UV(xsv), PTR2UV(tag)));
@@ -3002,11 +2957,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	SV **svh;
 	int ret;
 	int type;
-#ifdef USE_PTR_TABLE
 	struct ptr_tbl *pseen = store_cxt->pseen;
-#else
-	HV *hseen = retrieve_cxt->hseen;
-#endif
 
 	TRACEME(("store (0x%"UVxf")", PTR2UV(sv)));
 
@@ -3022,11 +2973,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	 *		-- RAM, 14/09/1999
 	 */
 
-#ifdef USE_PTR_TABLE
 	svh = (SV **)ptr_table_fetch(pseen, sv);
-#else
-	svh = hv_fetch(hseen, (char *) &sv, sizeof(sv), FALSE);
-#endif
 	if (svh) {
 		I32 tagval;
 
@@ -3060,11 +3007,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 			goto undef_special_case;
 		}
 		
-#ifdef USE_PTR_TABLE
 		tagval = LOW_32BITS(((char *)svh)-1);
-#else
-		tagval = LOW_32BITS(*svh);
-#endif
 
 		TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), tagval));
 
@@ -3085,13 +3028,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	 */
 
 	store_cxt->tagnum++;
-#ifdef USE_PTR_TABLE
 	ptr_table_store(pseen, sv, INT2PTR(SV*, 1 + store_cxt->tagnum));
-#else
-	if (!hv_store(hseen,
-			(char *) &sv, sizeof(sv), INT2PTR(SV*, store_cxt->tagnum), 0))
-		return -1;
-#endif
 
 	/*
 	 * Store 'sv' and everything beneath it, using appropriate routine.
