@@ -279,11 +279,13 @@ package Foo2;
 sub new {
 	my $self = bless {}, $_[0];
 	$self->{freezed} = "$self";
+        warn "new called: $self";
 	return $self;
 }
 
 sub DESTROY {
 	my $self = shift;
+        warn "DESTROY called: $self <=> $self->{freezed}";
 	$::refcount_ok = 1 unless "$self" eq $self->{freezed};
 }
 

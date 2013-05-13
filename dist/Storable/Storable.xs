@@ -1076,7 +1076,7 @@ static void init_store_cxt(
 	store_cxt->optype = optype;			/* A store, or a deep clone */
 
 	if (!f) {
-                store_cxt->output_sv = newSV(512);
+                store_cxt->output_sv = sv_2mortal(newSV(512));
                 SvPOK_only(store_cxt->output_sv);
         }
 
@@ -1095,7 +1095,7 @@ static void init_store_cxt(
 #ifdef USE_PTR_TABLE
 	store_cxt->pseen = ptr_table_new();
 #else
-	store_cxt->hseen = newHV();			/* Table where seen objects are stored */
+	store_cxt->hseen = (HV*)sv_2mortal((SV*)newHV());	/* Table where seen objects are stored */
 	HvSHAREKEYS_off(store_cxt->hseen);
 #endif
 	/*
@@ -1129,7 +1129,9 @@ static void init_store_cxt(
 	 * We turn the shared key optimization on.
 	 */
 
-	store_cxt->hclass = newHV();			/* Where seen classnames are stored */
+        /* FIXME: memory leak! */
+	/* store_cxt->hclass = (HV*)sv_2mortal((SV*)newHV()); */ /* Where seen classnames are stored */
+        store_cxt->hclass = newHV();
 
 #if PERL_VERSION >= 5
 	HvMAX(store_cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
@@ -1144,7 +1146,7 @@ static void init_store_cxt(
 	 * hooks.
 	 */
 
-	store_cxt->hook = newHV();			/* Table where hooks are cached */
+	store_cxt->hook = (HV*)sv_2mortal((SV*)newHV()); /* Table where hooks are cached */
 
 	/*
 	 * The 'hook_seen' array keeps track of all the SVs returned by
@@ -1153,7 +1155,7 @@ static void init_store_cxt(
 	 * only stored once, the first time it is seen.
 	 */
 
-	store_cxt->hook_seen = newAV();		/* Lists SVs returned by STORABLE_freeze */
+	store_cxt->hook_seen = (AV*)sv_2mortal((SV*)newAV());		/* Lists SVs returned by STORABLE_freeze */
 }
 
 /*
@@ -1175,7 +1177,7 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 	 * hooks.
 	 */
 
-	retrieve_cxt->hook  = newHV();			/* Caches STORABLE_thaw */
+	retrieve_cxt->hook  = (HV*)sv_2mortal((SV*)newHV()); /* Caches STORABLE_thaw */
         retrieve_cxt->forgive_me = -1;
 
 	/*
@@ -1185,9 +1187,9 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 	 * new retrieve routines.
 	 */
 
-	retrieve_cxt->aseen = newAV();			/* Where retrieved objects are kept */
+	retrieve_cxt->aseen = (AV*)sv_2mortal((SV*)newAV()); /* Where retrieved objects are kept */
 	retrieve_cxt->where_is_undef = -1;		/* Special case for PL_sv_undef */
-	retrieve_cxt->aclass = newAV();			/* Where seen classnames are kept */
+	retrieve_cxt->aclass = (AV*)sv_2mortal((SV*)newAV()); /* Where seen classnames are kept */
 	retrieve_cxt->tagnum = 0;				/* Have to count objects... */
 	retrieve_cxt->classnum = 0;				/* ...and class names as well */
 	retrieve_cxt->optype = optype;
@@ -1201,7 +1203,7 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
         retrieve_cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 	retrieve_cxt->in_retrieve_overloaded = 0;
 
-	retrieve_cxt->keybuf = newSV(0);
+	retrieve_cxt->keybuf = sv_2mortal(newSV(0));
 }
 
 
@@ -3310,24 +3312,10 @@ static int do_store(
 	 * (unless caller is dclone(), which is aware of that).
 	 */
 
-	if (!f && res)
-		*res = newSVsv(store_cxt.output_sv);
-
-	/*
-	 * Final cleanup.
-	 *
-	 * The "root" context is never freed, since it is meant to be always
-	 * handy for the common case where no recursion occurs at all (i.e.
-	 * we enter store() outside of any Storable code and leave it, period).
-	 * We know it's the "root" context because there's nothing stacked
-	 * underneath it.
-	 *
-	 * OPTIMIZATION:
-	 *
-	 * When deep cloning, we don't free the context: doing so would force
-	 * us to copy the data in the memory buffer.  Sicne we know we're
-	 * about to enter do_retrieve...
-	 */
+	if (res) {
+                ASSERT(!f, ("file handle is NULL"));
+                *res = SvREFCNT_inc(store_cxt.output_sv);
+        }
 
         sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
                  (store_cxt.netorder > 0 ? 1 : 0));
