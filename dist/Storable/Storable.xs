@@ -2488,7 +2488,7 @@ static int store_hook(
 	pv = SvPV(ary[0], len2);
 
         if (count > 1) {
-                /* We can't use pkg_can here because it only caches one method per
+                /* FIXME: We can't use pkg_can here because it only caches one method per
                  * package */
 
                 GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
