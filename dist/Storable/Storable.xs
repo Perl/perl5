@@ -2591,7 +2591,7 @@ static int store_hook(
 
 #ifdef USE_PTR_TABLE
 		fake_tag = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
-		if (!sv)
+		if (!fake_tag)
 			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 #else
 		svh = hv_fetch(retrieve_cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE);
