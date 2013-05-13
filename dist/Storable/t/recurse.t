@@ -17,7 +17,7 @@ sub BEGIN {
 }
 
 use Storable qw(freeze thaw dclone);
-use Test::More tests => 33;
+use Test::More tests => 34;
 
 package OBJ_REAL;
 
@@ -278,15 +278,13 @@ package Foo2;
 
 sub new {
 	my $self = bless {}, $_[0];
-	$self->{freezed} = "$self";
-        warn "new called: $self";
+        $::new_count++;
 	return $self;
 }
 
 sub DESTROY {
 	my $self = shift;
-        warn "DESTROY called: $self <=> $self->{freezed}";
-	$::refcount_ok = 1 unless "$self" eq $self->{freezed};
+	$::destroy_count++;
 }
 
 package Foo3;
@@ -311,4 +309,5 @@ my $so = thaw freeze $o;
 
 $refcount_ok = 0;
 thaw freeze(Foo3->new);
-is($refcount_ok, 1);
+is($new_count, 1);
+is($destroy_count, 2);
