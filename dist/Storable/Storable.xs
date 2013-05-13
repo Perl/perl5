@@ -2449,7 +2449,7 @@ static int store_hook(
 
         /* FIXME: this can leak too many mortals: */
 	ref = sv_2mortal(newRV_inc(sv));				/* Temporary reference */
-	av = array_call(aTHX_ ref, hook, clone);	/* @a = $object->STORABLE_freeze($c) */
+	av = (AV*)sv_2mortal((SV*)array_call(aTHX_ ref, hook, clone));	/* @a = $object->STORABLE_freeze($c) */
 
 	count = AvFILLp(av) + 1;
 	TRACEME(("store_hook, array holds %d items", count));
@@ -2586,7 +2586,7 @@ static int store_hook(
 		 * Replace entry with its tag (not a real SV, so no refcnt increment)
 		 */
 
-		ary[i] = newSViv(tag1 - 1)
+		ary[i] = newSViv(PTR2UV(tag1) - 1)
 		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
 			 i-1, PTR2UV(xsv), PTR2UV(tag) - 1));
 	}
@@ -2692,16 +2692,6 @@ check_done:
 			TRACEME(("object %d, tag #%d", i-1, tagval));
 		}
 	}
-
-	/*
-	 * Free the array.  We need extra care for indices after 0, since they
-	 * don't hold real SVs but integers cast.
-	 */
-
-	if (count > 1)
-		AvFILLp(av) = 0;	/* Cheat, nothing after 0 interests us */
-	av_undef(av);
-	sv_free((SV *) av);
 
 	/*
 	 * If object was tied, need to insert serialization of the magic object.
