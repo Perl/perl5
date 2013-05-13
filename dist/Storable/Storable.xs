@@ -2486,121 +2486,119 @@ static int store_hook(
 
 	ary = AvARRAY(av);
 	pv = SvPV(ary[0], len2);
-	/* We can't use pkg_can here because it only caches one method per
-	 * package */
-	{ 
-	    GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
-	    if (gv && isGV(gv)) {
-	        if (count > 1)
-	            CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
-	        goto check_done;
-	    }
-	}
 
-	/*
-	 * If they returned more than one item, we need to serialize some
-	 * extra references if not already done.
-	 *
-	 * Loop over the array, starting at position #1, and for each item,
-	 * ensure it is a reference, serialize it if not already done, and
-	 * replace the entry with the tag ID of the corresponding serialized
-	 * object.
-	 *
-	 * We CHEAT by not calling av_fetch() and read directly within the
-	 * array, for speed.
-	 */
+        if (count > 1) {
+                /* We can't use pkg_can here because it only caches one method per
+                 * package */
 
-	for (i = 1; i < count; i++) {
-                char *tag1;
-		SV *rsv = ary[i];
-		SV *xsv;
-		AV *av_hook = store_cxt->hook_seen;
+                GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
+                if (gv && isGV(gv))
+                        CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
+                
+                /*
+                 * If they returned more than one item, we need to serialize some
+                 * extra references if not already done.
+                 *
+                 * Loop over the array, starting at position #1, and for each item,
+                 * ensure it is a reference, serialize it if not already done, and
+                 * replace the entry with the tag ID of the corresponding serialized
+                 * object.
+                 *
+                 * We CHEAT by not calling av_fetch() and read directly within the
+                 * array, for speed.
+                 */
 
-		if (!SvROK(rsv))
-			CROAK(("Item #%d returned by STORABLE_freeze "
-				"for %s is not a reference", i, classname));
-		xsv = SvRV(rsv);		/* Follow ref to know what to look for */
+                for (i = 1; i < count; i++) {
+                        char *tag1;
+                        SV *rsv = ary[i];
+                        SV *xsv;
+                        AV *av_hook = store_cxt->hook_seen;
+                        
+                        if (!SvROK(rsv))
+                                CROAK(("Item #%d returned by STORABLE_freeze "
+                                       "for %s is not a reference", i, classname));
+                        xsv = SvRV(rsv);		/* Follow ref to know what to look for */
+                        
+                        /*
+                         * Look in pseen and see if we have a tag already.
+                         * Serialize entry if not done already, and get its tag.
+                         */
+                        
+                        if ((tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
+                                goto sv_seen;		/* Avoid moving code too far to the right */
+                        
+                        TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
 
-		/*
-		 * Look in pseen and see if we have a tag already.
-		 * Serialize entry if not done already, and get its tag.
-		 */
-	
-		if ((tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
-			goto sv_seen;		/* Avoid moving code too far to the right */
+                        /*
+                         * We need to recurse to store that object and get it to be known
+                         * so that we can resolve the list of object-IDs at retrieve time.
+                         *
+                         * The first time we do this, we need to emit the proper header
+                         * indicating that we recursed, and what the type of object is (the
+                         * object we're storing via a user-hook).  Indeed, during retrieval,
+                         * we'll have to create the object before recursing to retrieve the
+                         * others, in case those would point back at that object.
+                         */
 
-		TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
+                        /* [SX_HOOK] <flags> [<extra>] <object>*/
+                        if (!recursed++) {
+                                WRITE_MARK(SX_HOOK);
+                                WRITE_MARK(flags);
+                                if (obj_type == SHT_EXTRA)
+                                        WRITE_MARK(eflags);
+                        } else
+                                WRITE_MARK(flags);
 
-		/*
-		 * We need to recurse to store that object and get it to be known
-		 * so that we can resolve the list of object-IDs at retrieve time.
-		 *
-		 * The first time we do this, we need to emit the proper header
-		 * indicating that we recursed, and what the type of object is (the
-		 * object we're storing via a user-hook).  Indeed, during retrieval,
-		 * we'll have to create the object before recursing to retrieve the
-		 * others, in case those would point back at that object.
-		 */
+                        if ((ret = store(aTHX_ store_cxt, xsv)))	/* Given by hook for us to store */
+                                return ret;
+                        
+                        tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
+                        if (!tag1)
+                                CROAK(("Could not serialize item #%d from hook in %s", i, classname));
+                        /*
+                         * It was the first time we serialized 'xsv'.
+                         *
+                         * Keep this SV alive until the end of the serialization: if we
+                         * disposed of it right now by decrementing its refcount, and it was
+                         * a temporary value, some next temporary value allocated during
+                         * another STORABLE_freeze might take its place, and we'd wrongly
+                         * assume that new SV was already serialized, based on its presence
+                         * in retrieve_cxt->hseen.
+                         *
+                         * Therefore, push it away in retrieve_cxt->hook_seen.
+                         */
+                        
+                        av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc(xsv));
+                        
+                sv_seen:
+                        /*
+                         * Dispose of the REF they returned.  If we saved the 'xsv' away
+                         * in the array of returned SVs, that will not cause the underlying
+                         * referenced SV to be reclaimed.
+                         */
+                        
+                        ASSERT(SvREFCNT(xsv) > 1, ("SV will survive disposal of its REF"));
+                        SvREFCNT_dec(rsv);			/* Dispose of reference */
+                        
+                        /*
+                         * Replace entry with its tag (not a real SV, so no refcnt increment)
+                         */
+                        
+                        ary[i] = newSViv(PTR2UV(tag1) - 1)
+                                TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
+                                         i-1, PTR2UV(xsv), PTR2UV(tag) - 1));
+                }
+        }
 
-		/* [SX_HOOK] <flags> [<extra>] <object>*/
-		if (!recursed++) {
-			WRITE_MARK(SX_HOOK);
-			WRITE_MARK(flags);
-			if (obj_type == SHT_EXTRA)
-				WRITE_MARK(eflags);
-		} else
-			WRITE_MARK(flags);
-
-		if ((ret = store(aTHX_ store_cxt, xsv)))	/* Given by hook for us to store */
-			return ret;
-
-		tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
-		if (!tag1)
-			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
-		/*
-		 * It was the first time we serialized 'xsv'.
-		 *
-		 * Keep this SV alive until the end of the serialization: if we
-		 * disposed of it right now by decrementing its refcount, and it was
-		 * a temporary value, some next temporary value allocated during
-		 * another STORABLE_freeze might take its place, and we'd wrongly
-		 * assume that new SV was already serialized, based on its presence
-		 * in retrieve_cxt->hseen.
-		 *
-		 * Therefore, push it away in retrieve_cxt->hook_seen.
-		 */
-
-		av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc(xsv));
-
-	sv_seen:
-		/*
-		 * Dispose of the REF they returned.  If we saved the 'xsv' away
-		 * in the array of returned SVs, that will not cause the underlying
-		 * referenced SV to be reclaimed.
-		 */
-
-		ASSERT(SvREFCNT(xsv) > 1, ("SV will survive disposal of its REF"));
-		SvREFCNT_dec(rsv);			/* Dispose of reference */
-
-		/*
-		 * Replace entry with its tag (not a real SV, so no refcnt increment)
-		 */
-
-		ary[i] = newSViv(PTR2UV(tag1) - 1)
-		TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
-			 i-1, PTR2UV(xsv), PTR2UV(tag) - 1));
-	}
-
-	/*
-	 * Allocate a class ID if not already done.
-	 *
-	 * This needs to be done after the recursion above, since at retrieval
+        /*
+         * Allocate a class ID if not already done.
+         *
+         * This needs to be done after the recursion above, since at retrieval
 	 * time, we'll see the inner objects first.  Many thanks to
 	 * Salvador Ortiz Garcia <sog@msg.com.mx> who spot that bug and
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
 
-check_done:
 	if (!known_class(aTHX_ store_cxt, classname, len, &classnum)) {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		classnum = -1;				/* Mark: we must store classname */
