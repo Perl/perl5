@@ -24,7 +24,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -431,10 +431,15 @@ sub trusts {
 sub trusts_directly {
     my $class = shift;
     no strict 'refs';
-    no warnings 'once';
-    return @{"$class\::CARP_NOT"}
-        ? @{"$class\::CARP_NOT"}
-        : @{"$class\::ISA"};
+    my $stash = \%{"$class\::"};
+    for my $var (qw/ CARP_NOT ISA /) {
+        # Don't try using the variable until we know it exists,
+        # to avoid polluting the caller's namespace.
+        if ( $stash->{$var} && @{"$class\::$var"} ) {
+           return @{"$class\::$var"}
+        }
+    }
+    return;
 }
 
 if(!defined($warnings::VERSION) ||
