@@ -2462,7 +2462,7 @@ static int store_hook(
 
 		if (hv_fetch(store_cxt->hclass, classname, len, FALSE))
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
-				(store_cxt->optype & ST_CLONE) ? "cloning" : "storing", classname));
+                               (clone ? "cloning" : "storing"), classname));
 	
 		pkg_hide(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze");
 
