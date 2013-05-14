@@ -1568,7 +1568,7 @@ New APIs have been added for getting and setting the current code page.
 
 =head2 Removed Modules and Pragmata
 
-=over 
+=over
 
 =item *
 
@@ -3650,6 +3650,15 @@ becomes empty.
 There are no known regressions.  Please report any bugs you find!
 
 =back
+
+=head1 Obituary
+
+Hojung Yoon (AMORETTE), 24, of Seoul, South Korea, went to his long rest
+on May 8, 2013 with llama figurine and autographed TIMTOADY card.  He
+was a brilliant young Perl 5 & 6 hacker and a devoted member of
+Seoul.pm.  He programed Perl, talked Perl, ate Perl, and loved Perl.  We
+believe that he is still programming in Perl with his broken IBM laptop
+somewhere.  He will be missed.
 
 =head1 Acknowledgements
 
