@@ -92,7 +92,7 @@ C<PERL_HASH_SEED> no longer accepts an integer as a parameter;
 instead the value is expected to be a binary value encoded in a hex
 string, such as "0xf5867c55039dc724".  This is to make the
 infrastructure support hash seeds of arbitrary lengths, which might
-exceed that of an integer.  (SipHash uses a 16 byte seed).
+exceed that of an integer.  (SipHash uses a 16 byte seed.)
 
 =head3 PERL_PERTURB_KEYS environment variable added
 
@@ -121,7 +121,7 @@ behavior.
 
 Hash::Util::hash_seed() now returns a string instead of an integer.  This
 is to make the infrastructure support hash seeds of arbitrary lengths
-which might exceed that of an integer.  (SipHash uses a 16 byte seed).
+which might exceed that of an integer.  (SipHash uses a 16 byte seed.)
 
 =head3 Output of PERL_HASH_SEED_DEBUG has been changed
 
@@ -755,7 +755,7 @@ are using Perl on such a platform and have an interest in ensuring
 Perl's future on them, please contact us.
 
 We believe that Perl has long been unable to build on mixed endian
-architectures (such as PDP-11s), and intend to remove any remain
+architectures (such as PDP-11s), and intend to remove any remaining
 support code. Similarly, code supporting the long umaintained GNU
 dld will be removed soon if no-one makes themselves known as an
 active user.
