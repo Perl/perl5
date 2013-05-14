@@ -2578,7 +2578,7 @@ static int store_hook(
                         
                         ary[i] = newSViv(PTR2UV(tag1) - 1)
                                 TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
-                                         i-1, PTR2UV(xsv), PTR2UV(tag) - 1));
+                                         i-1, PTR2UV(xsv), PTR2UV(tag1) - 1));
                 }
         }
 
