@@ -74,6 +74,14 @@ sub try_compile_and_link {
 	    $ccflags .= " -I../win32 -I../win32/include";
 	}
 
+	my $libs = '';
+
+	# Include libs to be sure of linking against bufferoverflowU.lib for
+	# the SDK2003 compiler on Windows. See win32/Makefile for more details.
+	if ($^O eq "MSWin32" && $Config{cc} =~ /\bcl\b/i) {
+	    $libs = " /link $Config{'libs'}";
+	}
+
 	my $null = File::Spec->devnull;
 
 	my $errornull = $VERBOSE ? '' : ">$null 2>$null";
@@ -88,7 +96,7 @@ sub try_compile_and_link {
 
 	my $tmp_exe = "$tmp$ld_exeext";
 
-        my $cccmd = "$Config{'cc'} $out_opt$tmp_exe $ccflags $tmp.c $errornull";
+        my $cccmd = "$Config{'cc'} $out_opt$tmp_exe $ccflags $tmp.c $libs $errornull";
 
 	if ($^O eq 'VMS') {
             $cccmd = "$Config{'cc'} /include=($COREincdir) $tmp.c";
