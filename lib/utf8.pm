@@ -2,11 +2,10 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 sub import {
     $^H |= $utf8::hint_bits;
-    $enc{caller()} = $_[1] if $_[1];
 }
 
 sub unimport {
