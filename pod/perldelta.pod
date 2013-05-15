@@ -236,6 +236,11 @@ and treated the same way as -2 [perl #112990].
 
 =head1 Security
 
+=head2 See also: hash overhaul
+
+Some of the changes in the L<hash overhaul|/"Hash overhaul"> were made to
+enhance security.  Please read that section.
+
 =head2 C<Storable> security warning in documentation
 
 The documentation for C<Storable> now includes a section which warns readers
