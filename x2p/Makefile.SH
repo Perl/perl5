@@ -91,7 +91,6 @@ pl = find2perl.PL s2p.PL
 plextract = find2perl s2p
 plexe = find2perl.exe s2p.exe
 plc   = find2perl.c s2p.c
-plm   = a2p.loadmap
 
 addedbyconf = $(plextract)
 
@@ -146,7 +145,7 @@ a2p$(OBJ_EXT): a2p.c a2py.c a2p.h EXTERN.h util.h INTERN.h \
 	$(CCCMD) a2p.c
 
 clean:
-	rm -f a2p$(EXE_EXT) psed *$(OBJ_EXT) $(plexe) $(plc) $(plm)
+	rm -f a2p$(EXE_EXT) psed *$(OBJ_EXT) $(plexe) $(plc)
 
 distclean: veryclean
 
