@@ -1,6 +1,20 @@
 # set -x
 
+# Install the perl and its libraries anywhere:
 userelocatableinc='define'
+
+# The Android linker has some unusual behavior: No matter what
+# path is passed in to dlopen(), it'll only use the path's
+# basename when trying to find a cached library.
+# Unfortunately, this is quite problematic for us, since for example,
+# Hash::Util and List::Util both end up creating a Util.so --
+# So if you load List::Util and then Hash::Util, the dlopen() for
+# the latter will return the handle for the former.
+# See the implementation for details:
+# https://code.google.com/p/android-source-browsing/source/browse/linker/linker.c?repo=platform--bionic&r=9ec0f03a0d0b17bbb94ac0b9fef6add28a133c3a#1231
+# What d_libname_unique does is inform MakeMaker that, rather than
+# creating Hash/Util/Util.so, it needs to make Hash/Util/Perl_Hash_Util.so
+d_libname_unique='define'
 
 # On Android the shell is /system/bin/sh:
 targetsh='/system/bin/sh'
