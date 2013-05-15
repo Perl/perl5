@@ -537,7 +537,7 @@ C<GV_SUPER> flag.
 =head2 C<split>'s first argument is more consistently interpreted
 
 After some changes earlier in v5.17, C<split>'s behavior has been
-simplified: if the PATTERN argument evaluates to a literal string
+simplified: if the PATTERN argument evaluates to a string
 containing one space, it is treated the way that a I<literal> string
 containing one space once was.
 
