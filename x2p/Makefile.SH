@@ -77,7 +77,7 @@ PERL = $perl
 cat >>Makefile <<'!NO!SUBS!'
 
 REALPERL = ../perl
-CCCMD = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
+CCCMD = `sh $(shellflags) ../cflags "optimize='$(OPTIMIZE)'" $@`
 
 public = a2p$(EXE_EXT) s2p find2perl
 
@@ -87,8 +87,8 @@ manpages = a2p.man s2p.man
 
 util =
 
-sh = Makefile.SH cflags.SH
-shextract = Makefile cflags
+sh = Makefile.SH
+shextract = Makefile
 
 pl = find2perl.PL s2p.PL
 plextract = find2perl s2p
@@ -170,7 +170,7 @@ lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
 depend: ../makedepend
-	sh ../makedepend MAKE=$(MAKE) cflags
+	sh ../makedepend MAKE=$(MAKE) ../cflags
 
 clist:
 	echo $(c) | tr ' ' $(TRNL) >.clist

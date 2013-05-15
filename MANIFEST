@@ -5493,7 +5493,6 @@ x2p/a2p.h			Global declarations
 x2p/a2p.pod			Pod for awk to perl translator
 x2p/a2p.y			A yacc grammar for awk
 x2p/a2py.c			Awk compiler, sort of
-x2p/cflags.SH			A script that emits C compilation flags per file
 x2p/EXTERN.h			Same as above
 x2p/find2perl.PL		A find to perl translator
 x2p/hash.c			Hashes again
