@@ -629,14 +629,11 @@ with this in a future Perl version.  In the meantime, use of any of the
 missing characters will raise a deprecation warning, unless turned off.
 The five characters are:
 
-    U+0085 NEXT LINE,
-    U+200E LEFT-TO-RIGHT MARK,
-    U+200F RIGHT-TO-LEFT MARK,
-    U+2028 LINE SEPARATOR,
-
-and
-
-    U+2029 PARAGRAPH SEPARATOR.
+    U+0085 NEXT LINE
+    U+200E LEFT-TO-RIGHT MARK
+    U+200F RIGHT-TO-LEFT MARK
+    U+2028 LINE SEPARATOR
+    U+2029 PARAGRAPH SEPARATOR
 
 =head2 User-defined charnames with surprising whitespace
 
