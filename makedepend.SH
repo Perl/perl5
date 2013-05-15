@@ -211,30 +211,7 @@ done
 
 $sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'
 
-$MAKE shlist || ($echo "Searching for .SH files..."; \
-	$echo *.SH | $tr ' ' $trnl | $egrep -v '\*' >.shlist)
-
-# Now extract the dependencies on makedepend.SH and Makefile.SH
-# (they should reside in the main Makefile):
-rm -f .shlist.old
-mv .shlist .shlist.old
-$egrep -v '^makedepend\.SH' <.shlist.old >.shlist
-rm -f .shlist.old
-mv .shlist .shlist.old
-$egrep -v '^Makefile\.SH' <.shlist.old >.shlist
-rm -f .shlist.old
-mv .shlist .shlist.old
-$egrep -v '^perl_exp\.SH' <.shlist.old >.shlist
-rm -f .shlist.old
-mv .shlist .shlist.old
-$egrep -v '^config_h\.SH' <.shlist.old >.shlist
-rm .shlist.old
-
 if $test -s .deptmp; then
-    for file in `cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
-	    $sh $file >> .deptmp
-    done
     $echo "Updating $mf..."
     $echo "# If this runs make out of memory, delete /usr/include lines." \
 	>> $mf.new
@@ -262,10 +239,6 @@ else
        $sed -f .hsed >> $mf.new
     <.deptmp $sed -n 's|h:#include "\(.*\)".*$|h: \1|p' | \
        $sed -f .hsed >> $mf.new
-    for file in `$cat .shlist`; do
-	$echo `$expr X$file : 'X\(.*\).SH'`: $file $TOP/config.sh \; \
-	    $sh $file >> $mf.new
-    done
 fi
 $rm -f $mf.old
 $cp $mf $mf.old
@@ -273,7 +246,7 @@ $rm -f $mf
 $cp $mf.new $mf
 $rm $mf.new
 $echo "# WARNING: Put nothing here or make depend will gobble it up!" >> $mf
-$rm -rf .deptmp UU .shlist .clist .hlist .hsed .cout .cerr
+$rm -rf .deptmp UU .clist .hlist .hsed .cout .cerr
 rmdir .depending
 
 !NO!SUBS!

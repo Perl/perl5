@@ -443,9 +443,12 @@ xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
 	;;
 esac
 
-SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH'
-shextract=`echo $SH | sed -e s/\\\.SH//g -e s/_/./g`
+SH_to_target() {
+    echo $@ | sed -e s/\\\.SH//g -e s/_/./g
+}
 
+SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH'
+shextract=`SH_to_target $SH`
 
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<!GROK!THIS!
@@ -1400,17 +1403,22 @@ MAKEDEPEND = Makefile makedepend
 
 $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
+!NO!SUBS!
 
-config.h: config_h.SH config.sh
-	$(SHELL) config_h.SH
+for f in $SH; do
+    file=`SH_to_target $f`
+    $spitshell >>$Makefile <<!GROK!THIS!
+
+$file: $f config.sh
+	\$(SHELL) $f
+!GROK!THIS!
+done
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 .PHONY: depend
 depend: makedepend
 	sh ./makedepend MAKE=$(MAKE) cflags
-
-# Cannot postpone this until $firstmakefile is ready ;-)
-makedepend: makedepend.SH config.sh
-	sh ./makedepend.SH
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
@@ -1593,9 +1601,6 @@ hlist:  $(h)
 
 shlist: $(sh)
 	echo $(sh) | tr ' ' $(TRNL) >.shlist
-
-Makefile: Makefile.SH ./config.sh
-	$(SHELL) Makefile.SH
 
 .PHONY: distcheck
 distcheck: FORCE
