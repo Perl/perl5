@@ -87,16 +87,13 @@ manpages = a2p.man s2p.man
 
 util =
 
-sh = Makefile.SH
-shextract = Makefile
-
 pl = find2perl.PL s2p.PL
 plextract = find2perl s2p
 plexe = find2perl.exe s2p.exe
 plc   = find2perl.c s2p.c
 plm   = a2p.loadmap
 
-addedbyconf = $(shextract) $(plextract)
+addedbyconf = $(plextract)
 
 h = EXTERN.h INTERN.h ../config.h ../handy.h hash.h a2p.h str.h util.h
 

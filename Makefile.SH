@@ -447,7 +447,7 @@ SH_to_target() {
     echo $@ | sed -e s/\\\.SH//g -e s/_/./g
 }
 
-SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH'
+SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH x2p/Makefile.SH'
 shextract=`SH_to_target $SH`
 
 ## In the following dollars and backticks do not need the extra backslash.
