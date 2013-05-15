@@ -443,7 +443,7 @@ xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
 	;;
 esac
 
-SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH pod/Makefile.SH'
+SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH'
 shextract=`echo $SH | sed -e s/\\\.SH//g -e s/_/./g`
 
 
@@ -1288,7 +1288,7 @@ _mopup:
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
-	-rm -f config.arch config.over $(DTRACE_H) runtests
+	-rm -f config.arch config.over $(DTRACE_H)
 
 # Do not 'make _tidy' directly.
 _tidy:
@@ -1411,9 +1411,6 @@ depend: makedepend
 # Cannot postpone this until $firstmakefile is ready ;-)
 makedepend: makedepend.SH config.sh
 	sh ./makedepend.SH
-
-runtests: runtests.SH config.sh
-	sh ./runtests.SH
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
