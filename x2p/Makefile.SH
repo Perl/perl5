@@ -194,10 +194,4 @@ $(obj):
 makedepend: depend
 !NO!SUBS!
 $eunicefix Makefile
-case `pwd` in
-*SH)
-    $rm -f ../Makefile
-    $ln Makefile ../Makefile
-    ;;
-esac
 rm -f $firstmakefile

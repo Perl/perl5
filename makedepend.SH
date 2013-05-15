@@ -279,9 +279,3 @@ rmdir .depending
 !NO!SUBS!
 $eunicefix makedepend
 chmod +x makedepend
-case `pwd` in
-*SH)
-    $rm -f ../makedepend
-    ln makedepend ../makedepend
-    ;;
-esac
