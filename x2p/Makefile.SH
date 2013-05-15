@@ -170,7 +170,7 @@ lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
 depend: ../makedepend
-	sh ../makedepend MAKE=$(MAKE)
+	sh ../makedepend MAKE=$(MAKE) cflags
 
 clist:
 	echo $(c) | tr ' ' $(TRNL) >.clist

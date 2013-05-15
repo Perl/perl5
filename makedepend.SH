@@ -39,7 +39,7 @@ mkdir .depending
 # This script should be called with 
 #     sh ./makedepend MAKE=$(MAKE)
 case "$1" in 
-	MAKE=*) eval $1 ;;
+	MAKE=*) eval $1; shift ;;
 esac
 
 export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
@@ -206,7 +206,7 @@ for file in `$cat .clist`; do
            -e 's|\.c\.c|.c|' $uwinfix .cout .cerr| \
         $uniq | $sort | $uniq >> .deptmp
     fi
-    echo "$filebase\$(OBJ_EXT): cflags" >> .deptmp
+    echo "$filebase\$(OBJ_EXT): $@" >> .deptmp
 done
 
 $sed <$mf >$mf.new -e '1,/^# AUTOMATICALLY/!d'

@@ -1406,7 +1406,7 @@ config.h: config_h.SH config.sh
 
 .PHONY: depend
 depend: makedepend
-	sh ./makedepend MAKE=$(MAKE)
+	sh ./makedepend MAKE=$(MAKE) cflags
 
 # Cannot postpone this until $firstmakefile is ready ;-)
 makedepend: makedepend.SH config.sh
