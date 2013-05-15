@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.22';
+    $VERSION = '1.23';
 }
 
 use Config;
@@ -235,6 +235,32 @@ if ($ENV{PERL_BUILD_EXPAND_CONFIG_VARS} && $ENV{PERL_BUILD_EXPAND_ENV_VARS}) {
 EOT
 }
 
+if ( $Config::Config{d_libname_unique} ) {
+    print OUT <<'EOT';
+sub mod2fname {
+    my $parts = shift;
+    my $so_len = length($Config::Config{dlext})+1;
+    my $name_max = 255; # No easy way to get this here
+    
+    my $libname = "PL_" .  join("__", @$parts);
+    
+    return $libname if (length($libname)+$so_len) <= $name_max;
+    
+    # It's too darned big, so we need to go strip. We use the same
+    # algorithm as xsubpp does. First, strip out doubled __
+    $libname =~ s/__/_/g;
+    return $libname if (length($libname)+$so_len) <= $name_max;
+    
+    # Strip duplicate letters
+    1 while $libname =~ s/(.)\1/\U$1/i;
+    return $libname if (length($libname)+$so_len) <= $name_max;
+    
+    # Still too long. Truncate.
+    $libname = substr($libname, 0, $name_max - $so_len);
+    return $libname;
+}
+EOT
+}
 
 # following long string contains $^O-specific stuff, which is factored out
 print OUT expand_os_specific(<<'EOT');
@@ -314,7 +340,7 @@ sub bootstrap {
 	next unless -d $dir; # skip over uninteresting directories
 	
 	# check for common cases to avoid autoload of dl_findfile
-	my $try = "$dir/$modfname.$dl_dlext";
+        my $try = "$dir/$modfname.$dl_dlext";
 	last if $file = ($do_expand) ? dl_expandspec($try) : ((-f $try) && $try);
 	
 	# no luck here, save dir for possible later dl_findfile search

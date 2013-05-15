@@ -26,7 +26,7 @@ BEGIN {
     'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
 );
 
-plan tests => 22 + keys(%modules) * 3;
+plan tests => 26 + keys(%modules) * 3;
 
 
 # Try to load the module
@@ -154,4 +154,33 @@ for my $libref (reverse @DynaLoader::dl_librefs) {
             is( $r,  1, " - unload was successful" );
         }
     }
+}
+
+SKIP: {
+    skip "mod2fname not defined on this platform", 4
+        unless defined &DynaLoader::mod2fname && $Config{d_libname_unique};
+
+    is(
+        DynaLoader::mod2fname(["Hash", "Util"]),
+        "PL_Hash__Util",
+        "mod2fname + libname_unique works"
+    );
+
+    is(
+        DynaLoader::mod2fname([("Hash", "Util") x 25]),
+        "PL_" . join("_", ("Hash", "Util")x25),
+        "mod2fname + libname_unique collapses double __'s for long names"
+    );
+
+    is(
+        DynaLoader::mod2fname([("Haash", "Uttil") x 25]),
+        "PL_" . join("_", ("HAsh", "UTil")x25),
+        "mod2fname + libname_unique collapses repeated characters for long names"
+    );
+
+    is(
+        DynaLoader::mod2fname([("Hash", "Util")x30]),
+        substr(("PL_" . join("_", ("Hash", "Util")x30)), 0, 255 - (length($Config::Config{dlext})+1)),
+        "mod2fname + libname_unique correctly truncates long names"
+    );
 }
