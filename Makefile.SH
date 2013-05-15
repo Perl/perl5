@@ -1591,16 +1591,13 @@ noknack:	utilities
 nokfilenack:	utilities
 	$(RUN_PERL) -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok -A
 
-.PHONY: clist hlist shlist
+.PHONY: clist hlist
 
 clist:	$(c)
 	echo $(c) | tr ' ' $(TRNL) >.clist
 
 hlist:  $(h)
 	echo $(h) | tr ' ' $(TRNL) >.hlist
-
-shlist: $(sh)
-	echo $(sh) | tr ' ' $(TRNL) >.shlist
 
 .PHONY: distcheck
 distcheck: FORCE

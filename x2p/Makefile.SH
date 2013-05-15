@@ -178,9 +178,6 @@ clist:
 hlist:
 	echo $(h) | tr ' ' $(TRNL) >.hlist
 
-shlist:
-	echo $(sh) | tr ' ' $(TRNL) >.shlist
-
 $(plextract):
 	$(RUN) $(PERL) -I../lib $@.PL
 
