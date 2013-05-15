@@ -601,6 +601,9 @@ definedefine)
 esac
 
 $spitshell >>$Makefile <<!GROK!THIS!
+x2p/$firstmakefile:	makedepend
+	cd x2p; \$(MAKE) depend
+
 translators:	$x2p_deps
 	@echo " "; echo "	Making x2p stuff"; cd x2p; \$(LDLIBPTH) \$(MAKE) all
 
@@ -1396,7 +1399,6 @@ config.h: config_h.SH config.sh
 .PHONY: depend
 depend: makedepend
 	sh ./makedepend MAKE=$(MAKE)
-	cd x2p; $(MAKE) depend
 
 # Cannot postpone this until $firstmakefile is ready ;-)
 makedepend: makedepend.SH config.sh
