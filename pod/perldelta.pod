@@ -1713,8 +1713,7 @@ To use lexical subs, you must first enable them:
 
 =item *
 
-Strings with code points over 0xFF may not be mapped into in-memory file
-handles
+L<'Strings with code points over 0xFF may not be mapped into in-memory file handles'|perldiag/"Strings with code points over 0xFF may not be mapped into in-memory file handles">
 
 =item *
 
@@ -2490,12 +2489,6 @@ it, too, when invoked a second time [perl #23180].
 
 =item *
 
-Accessing C<$&> after a pattern match now works if it had not been seen
-before the match.  I.e., this applies to C<${'&'}> (under C<no strict>) and
-C<eval '$&'>.  The same applies to C<$'> and C<$`> [perl #4289].
-
-=item *
-
 Several bugs involving C<local *ISA> and C<local *Foo::> causing stale
 MRO caches have been fixed.
 
@@ -2778,8 +2771,8 @@ omitted.
 
 =item *
 
-Reset the UTF-8 position cache when accessing magical variables to avoid the
-string buffer and the UTF-8 position cache getting out of sync
+The UTF-8 position cache is now reset when accessing magical variables, to
+avoid the string buffer and the UTF-8 position cache getting out of sync
 [perl #114410].
 
 =item *
@@ -2984,11 +2977,6 @@ thread-safe on VMS.
 =item *
 
 Non-blocking sockets have been fixed on VMS.
-
-=item *
-
-A bug in the compilation of a C</(?{})/> expression which affected the TryCatch
-test suite has been fixed [perl #114242].
 
 =item *
 
