@@ -443,16 +443,24 @@ xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
 	;;
 esac
 
-## In the following dollars and backticks do not need the extra backslash.
-$spitshell >>$Makefile <<'!NO!SUBS!'
+SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH pod/Makefile.SH'
+shextract=`echo $SH | sed -e s/\\\.SH//g -e s/_/./g`
 
-private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h lib/buildcustomize.pl
+
+## In the following dollars and backticks do not need the extra backslash.
+$spitshell >>$Makefile <<!GROK!THIS!
+
+private = preplibrary \$(CONFIGPM) \$(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h lib/buildcustomize.pl
 
 # Files to be built with variable substitution before miniperl
 # is available.
-sh = Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH pod/Makefile.SH
+sh = $SH
 
-shextract = Makefile cflags config.h makedepend makedir myconfig pod/Makefile
+shextract = $shextract
+!GROK!THIS!
+
+## In the following dollars and backticks do not need the extra backslash.
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 addedbyconf = UU $(shextract) pstruct
 
