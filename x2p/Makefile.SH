@@ -79,20 +79,8 @@ cat >>Makefile <<'!NO!SUBS!'
 REALPERL = ../perl
 CCCMD = `sh $(shellflags) ../cflags "optimize='$(OPTIMIZE)'" $@`
 
-public = a2p$(EXE_EXT) s2p find2perl
-
-private = 
-
-manpages = a2p.man s2p.man
-
-util =
-
 pl = find2perl.PL s2p.PL
 plextract = find2perl s2p
-plexe = find2perl.exe s2p.exe
-plc   = find2perl.c s2p.c
-
-addedbyconf = $(plextract)
 
 h = EXTERN.h INTERN.h ../config.h ../handy.h hash.h a2p.h str.h util.h
 
@@ -106,7 +94,7 @@ lintflags = -phbvxac
 .c$(OBJ_EXT):
 	$(CCCMD) -DPERL_FOR_X2P $*.c
 
-all: $(public) $(private) $(util)
+all: a2p$(EXE_EXT) s2p find2perl
 	@echo " "
 
 a2p$(EXE_EXT): $(obj) a2p$(OBJ_EXT)
@@ -151,7 +139,7 @@ distclean: veryclean
 
 realclean: clean
 	-rmdir .depending
-	rm -f core $(addedbyconf) all
+	rm -f core $(plextract) all
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
 
 veryclean: realclean
