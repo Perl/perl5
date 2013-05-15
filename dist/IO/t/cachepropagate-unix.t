@@ -91,6 +91,8 @@ SKIP: {
       is($new->protocol(), $p, 'protocol match');
     }
     SKIP: {
+      skip "AIX: getsockopt(SO_TYPE) is badly broken on UDP/UNIX sockets", 1
+         if $^O eq "aix";
       skip "no Socket::SO_TYPE", 1 if !defined(eval { Socket::SO_TYPE });
       skip "SO_TYPE defined but not implemented", 1
          if !defined $new->sockopt(Socket::SO_TYPE);
