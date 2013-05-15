@@ -763,8 +763,21 @@ active user.
 
 Swapping of $< and $>
 
-For more information about this future deprecation, see L<the relevant RT
-ticket|https://rt.perl.org/rt3/Ticket/Display.html?id=96212>.
+Perl has supported the idiom of swapping $< and $> (and likewise $( and
+$)) to temporarily drop permissions since 5.0, like this:
+
+    ($<, $>) = ($>, $<);
+
+However, this idiom modifies the real user/group id, which can have
+undesirable side-effects, is no longer useful on any platform perl
+supports and complicates the implementation of these variables and list
+assignment in general.
+
+As an alternative, assignment only to C<< $> >> is recommended:
+
+    local $> = $<;
+
+See also: L<Setuid Demystified|http://www.cs.berkeley.edu/~daw/papers/setuid-usenix02.pdf>.
 
 =item *
 
