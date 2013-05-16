@@ -2510,7 +2510,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
 
     PERL_ARGS_ASSERT_CHECK_LOCALE_BOUNDARY_CROSSING;
 
-    assert(! UTF8_IS_INVARIANT(*p) && ! UTF8_IS_DOWNGRADEABLE_START(*p));
+    assert(UTF8_IS_ABOVE_LATIN1(*p));
 
     /* We know immediately if the first character in the string crosses the
      * boundary, so can skip */
@@ -2521,8 +2521,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
 	U8* s = ustrp + UTF8SKIP(ustrp);
 	U8* e = ustrp + *lenp;
 	while (s < e) {
-	    if (UTF8_IS_INVARIANT(*s) || UTF8_IS_DOWNGRADEABLE_START(*s))
-	    {
+	    if (! UTF8_IS_ABOVE_LATIN1(*s)) {
 		goto bad_crossing;
 	    }
 	    s += UTF8SKIP(s);
@@ -4545,13 +4544,10 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		 * on if the code point is above or below 255.  Here, we test
 		 * for and handle locale rules */
 		if ((flags & FOLDEQ_UTF8_LOCALE)
-		    && (! u1 || UTF8_IS_INVARIANT(*p1)
-			|| UTF8_IS_DOWNGRADEABLE_START(*p1)))
+		    && (! u1 || ! UTF8_IS_ABOVE_LATIN1(*p1)))
 		{
 		    /* There is no mixing of code points above and below 255. */
-		    if (u2 && (! UTF8_IS_INVARIANT(*p2)
-			&& ! UTF8_IS_DOWNGRADEABLE_START(*p2)))
-		    {
+		    if (u2 && UTF8_IS_ABOVE_LATIN1(*p2)) {
 			return 0;
 		    }
 
@@ -4593,13 +4589,11 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 	    }
 	    else {
 		if ((flags & FOLDEQ_UTF8_LOCALE)
-		    && (! u2 || UTF8_IS_INVARIANT(*p2) || UTF8_IS_DOWNGRADEABLE_START(*p2)))
+		    && (! u2 || ! UTF8_IS_ABOVE_LATIN1(*p2)))
 		{
 		    /* Here, the next char in s2 is < 256.  We've already
 		     * worked on s1, and if it isn't also < 256, can't match */
-		    if (u1 && (! UTF8_IS_INVARIANT(*p1)
-			&& ! UTF8_IS_DOWNGRADEABLE_START(*p1)))
-		    {
+		    if (u1 && UTF8_IS_ABOVE_LATIN1(*p1)) {
 			return 0;
 		    }
 		    if (! u2 || UTF8_IS_INVARIANT(*p2)) {
