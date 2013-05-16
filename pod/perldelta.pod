@@ -347,11 +347,26 @@ different parts of the core, and so had slightly different behavior. For
 instance, C<${foo:bar}> was a legal variable name.  Since they are now
 both parsed by the same code, that is no longer the case.
 
-=head2 C<\s> in regular expressions now matches a Vertical Tab
+=head2 Vertical tabs are now whitespace
 
 No one could recall why C<\s> didn't match C<\cK>, the vertical tab.
 Now it does.  Given the extreme rarity of that character, very little
-breakage is expected.
+breakage is expected.  That said, here's what it means:
+
+C<\s> in a regex now matches a vertical tab in all circumstances.
+
+Literal vertical tabs in a regex literal are ignored when the C</x>
+modifier is used.
+
+Leading vertical tabs, alone or mixed with other whitespace, are now
+ignored when interpreting a string as a number.  For example:
+
+  $dec = " \cK \t 123";
+  $hex = " \cK \t 0xF";
+
+  say 0 + $dec;   # was 0 with warning, now 123
+  say int $dec;   # was 0, now 123
+  say oct $hex;   # was 0, now  15
 
 =head2 C</(?{})/> and C</(??{})/> have been heavily reworked
 
