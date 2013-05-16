@@ -3680,7 +3680,12 @@ becomes empty.
 
 =item *
 
-There are no known regressions.  Please report any bugs you find!
+UTF8-flagged strings in C<%ENV> on HP-UX 11.00 are buggy
+
+The interaction of UTF8-flagged strings and C<%ENV> on HP-UX 11.00 is
+currently dodgy in some not-yet-fully-diagnosed way.  Expect test
+failures in F<t/op/magic.t>, followed by unknown behavior when storing
+wide characters in the environment.
 
 =back
 
