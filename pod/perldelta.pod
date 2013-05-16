@@ -467,9 +467,9 @@ that identified the caller.  Nothing on CPAN was using this, and it got in
 the way of a bug fix, so it was removed.  If you really need to identify
 the caller, see L<Devel::Callsite> on CPAN.
 
-=head2 Here-doc parsing
+=head2 Here doc parsing
 
-The body of a here-document inside a quote-like operator now always begins
+The body of a here document inside a quote-like operator now always begins
 on the line after the "<<foo" marker.  Previously, it was documented to
 begin on the line following the containing quote-like operator, but that
 was only sometimes the case [perl #114040].
@@ -2458,7 +2458,7 @@ and C<PERL_DEBUG_READONLY_OPS>, has been retired.
 
 =item *
 
-Here-doc terminators no longer require a terminating newline character when
+Here document terminators no longer require a terminating newline character when
 they occur at the end of a file.  This was already the case at the end of a
 string eval [perl #65838].
 
