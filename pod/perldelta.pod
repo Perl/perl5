@@ -3563,7 +3563,7 @@ some subtleties when regular expressions are matched against
 above-Unicode code points.  There is a warning generated to draw your
 attention to this.  However, this warning was being generated
 inappropriately in some cases, such as when a program was being parsed.
-Non-Unicode matches such as C<\w> and C<[:word;]> should not generate the
+Non-Unicode matches such as C<\w> and C<[:word:]> should not generate the
 warning, as their definitions don't limit them to apply to only Unicode
 code points.  Now the message is only generated when matching against
 C<\p{}> and C<\P{}>.  There remains a bug, [perl #114148], for the very
