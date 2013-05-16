@@ -815,10 +815,10 @@ behavior.  The changes have not yet been settled.
 
 =item *
 
-Use of C<$^>, where C<^> stands for any actual (non-printing) C0 control
-character will be disallowed in a future Perl version.  Use C<${^}>
-instead (where again C<^> stands for a control character),
-or better, C<$^A> , where C<^> this time is a caret (CIRCUMFLEX ACCENT),
+Use of C<$x>, where C<x> stands for any actual (non-printing) C0 control
+character will be disallowed in a future Perl version.  Use C<${x}>
+instead (where again C<x> stands for a control character),
+or better, C<$^A> , where C<^> is a caret (CIRCUMFLEX ACCENT),
 and C<A> stands for any of the characters listed at the end of
 L<perlebcdic/OPERATOR DIFFERENCES>.
 
