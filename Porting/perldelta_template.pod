@@ -47,11 +47,33 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.  In
-particular, deprecated modules should be listed here even if they are listed as
-an updated module in the L</Modules and Pragmata> section.
+XXX Any deprecated features, syntax, modules etc. should be listed here.
 
-[ List each deprecation as a =head2 entry ]
+=head2 Module removals
+
+XXX Remove this section if inapplicable.
+
+The following modules will be removed from the core distribution in a future
+release, and will at that time need to be installed from CPAN. Distributions
+on CPAN which require these modules will need to list them as prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact. To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use. Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
 
