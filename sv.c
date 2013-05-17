@@ -12903,8 +12903,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
 		new_state->re_state_bostr
 		    = pv_dup(old_state->re_state_bostr);
-		new_state->re_state_regeol
-		    = pv_dup(old_state->re_state_regeol);
 #ifdef PERL_ANY_COW
 		new_state->re_state_nrs
 		    = sv_dup(old_state->re_state_nrs, param);

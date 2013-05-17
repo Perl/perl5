@@ -577,6 +577,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 typedef struct {
     REGEXP *prog;
     char *bol;
+    char *strend;   /* one byte beyond last char of match string */
     char *till;
     SV *sv;
     char *ganch;
@@ -757,7 +758,6 @@ typedef struct regmatch_slab {
 } regmatch_slab;
 
 #define PL_bostr		PL_reg_state.re_state_bostr
-#define PL_regeol		PL_reg_state.re_state_regeol
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
 #define PL_reg_magic		PL_reg_state.re_state_reg_magic
 #define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
@@ -782,7 +782,6 @@ struct re_save_state {
     I32 re_state_reg_maxiter;		/* max wait until caching pos */
     I32 re_state_reg_leftiter;		/* wait until caching pos */
     char *re_state_bostr;
-    char *re_state_regeol;		/* End of input, for $ check. */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
     PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
     PMOP *re_state_reg_curpm;		/* from regexec.c */
