@@ -264,7 +264,7 @@ sub _store {
 	if (!(close(FILE) or undef $ret) || $@) {
 		unlink($file) or warn "Can't unlink $file: $!\n";
 	}
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
+	logcroak $@ if $@ and $@ =~ s/\.?\n$/,/;
 	$@ = $da;
 	return $ret;
 }
@@ -302,7 +302,7 @@ sub _store_fd {
 	my $ret;
 	# Call C routine nstore or pstore, depending on network order
 	eval { $ret = &$xsptr($file, $self) };
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
+        logcroak $@ if $@ and $@ =~  s/\.?\n$/,/;
 	local $\; print $file '';	# Autoflush the file if wanted
 	$@ = $da;
 	return $ret;
@@ -337,7 +337,7 @@ sub _freeze {
 	my $ret;
 	# Call C routine mstore or net_mstore, depending on network order
 	eval { $ret = &$xsptr($self) };
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
+	logcroak $@ if $@ and $@ =~ s/\.?\n$/,/;
 	$@ = $da;
 	return $ret ? $ret : undef;
 }
@@ -379,7 +379,9 @@ sub _retrieve {
 	}
 	eval { $self = pretrieve(*FILE) };		# Call C routine
 	close(FILE);
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
+	logcroak $@ if ($@                                     and
+                        $@ !~ /^Read error: unexpected EOF\b/ and
+                        $@ =~ s/\.?\n$/,/);
 	$@ = $da;
 	return $self;
 }
@@ -396,7 +398,9 @@ sub fd_retrieve {
 	my $self;
 	my $da = $@;							# Could be from exception handler
 	eval { $self = pretrieve($file) };		# Call C routine
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
+	logcroak $@ if ($@                                     and
+                        $@ !~ /^Read error: unexpected EOF\b/ and
+                        $@ =~ s/\.?\n$/,/);
 	$@ = $da;
 	return $self;
 }
@@ -415,7 +419,9 @@ sub thaw {
 	my $self;
 	my $da = $@;							# Could be from exception handler
 	eval { $self = mretrieve($frozen) };	# Call C routine
-	logcroak $@ if $@ =~ s/\.?\n$/,/;
+	logcroak $@ if ($@                                     and
+                        $@ !~ /^Read error: unexpected EOF\b/ and
+                        $@ =~  s/\.?\n$/,/);
 	$@ = $da;
 	return $self;
 }
