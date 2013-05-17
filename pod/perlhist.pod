@@ -507,6 +507,7 @@ the strings?).
  Ricardo  5.18.0-RC2    2013-May-12
  Ricardo  5.18.0-RC3    2013-May-13
  Ricardo  5.18.0-RC4    2013-May-15
+ Ricardo  5.18.0        2013-May-18
 
 =head2 SELECTED RELEASE SIZES
 
