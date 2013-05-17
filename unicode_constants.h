@@ -20,6 +20,7 @@
  *  "_TAIL"       if instead it represents all but the first byte.  This, and
  *                with no additional suffix are both string constants */
 
+#define LATIN_SMALL_LETTER_LONG_S_UTF8  "\xC5\xBF"    /* U+017F */
 
 #define COMBINING_GRAVE_ACCENT_UTF8  "\xCC\x80"    /* U+0300 */
 #define COMBINING_ACUTE_ACCENT_UTF8  "\xCC\x81"    /* U+0301 */
@@ -31,6 +32,8 @@
 #define GREEK_SMALL_LETTER_IOTA_UTF8  "\xCE\xB9"    /* U+03B9 */
 
 #define GREEK_SMALL_LETTER_UPSILON_UTF8  "\xCF\x85"    /* U+03C5 */
+
+#define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xE1\xBA\x9E"    /* U+1E9E */
 
 #define HYPHEN_UTF8  "\xE2\x80\x90"    /* U+2010 */
 #define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xED    /* U+D800 */

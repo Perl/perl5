@@ -140,6 +140,7 @@ print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
 read_only_bottom_close_and_rename($out_fh);
 
 __DATA__
+U+017F string
 
 U+0300 string
 U+0301 string
@@ -151,6 +152,8 @@ U+03BC string
 U+03B9 string
 
 U+03C5 string
+
+U+1E9E string
 
 U+2010 string
 U+D800 first FIRST_SURROGATE
