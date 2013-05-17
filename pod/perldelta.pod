@@ -976,7 +976,7 @@ This adds support for the new C<OpMAYBE_TRUEBOOL> and C<OPpTRUEBOOL> flags.
 
 L<B::Debug> has been upgraded to 1.18.
 
-This adds support (experimentally) for C<B::PADLIST>, which will be
+This adds support (experimentally) for C<B::PADLIST>, which was
 added in Perl 5.17.4.
 
 =item *
