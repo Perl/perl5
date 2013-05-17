@@ -986,7 +986,7 @@
 #define reghopmaybe3		S_reghopmaybe3
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #define regmatch(a,b,c)		S_regmatch(aTHX_ a,b,c)
-#define regrepeat(a,b,c,d,e,f)	S_regrepeat(aTHX_ a,b,c,d,e,f)
+#define regrepeat(a,b,c,d,e,f,g)	S_regrepeat(aTHX_ a,b,c,d,e,f,g)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)

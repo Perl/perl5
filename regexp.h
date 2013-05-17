@@ -581,6 +581,7 @@ typedef struct {
     SV *sv;
     char *ganch;
     char *cutpoint;
+    bool intuit;    /* re_intuit_start() is the top-level caller */
     bool is_utf8_pat;
     bool warned; /* we have issued a recursion warning; no need for more */
 } regmatch_info;

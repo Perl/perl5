@@ -2069,7 +2069,10 @@ ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 ERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
-				|NN const regnode *p|I32 max|int depth \
+				|NN const regnode *p \
+				|NN regmatch_info *const reginfo \
+				|I32 max \
+				|int depth \
 				|bool is_utf8_pat
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK regexp * const prog|NN const regnode * const n|NN const U8 * const p\
