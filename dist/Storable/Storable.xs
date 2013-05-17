@@ -772,17 +772,20 @@ read_string(pTHX_ retrieve_cxt_t *retrieve_cxt, STRLEN size) {
  * i should be true iff sv is immortal (ie PL_sv_yes, PL_sv_no or PL_sv_undef)
  */
 #define SEEN(y,c,i) 							\
-        STMT_START {                                                    \
-                if (!(y))                                               \
-                        return (SV *) 0;                                \
-                SvREFCNT_inc_NN((SV*)(y));                              \
-                if (av_store(retrieve_cxt->aseen, retrieve_cxt->tagnum++, (SV*)(y)) == 0) \
-                        return (SV *) 0;                                \
-                TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)",          \
-                         retrieve_cxt->tagnum-1, PTR2UV(y), SvREFCNT(y)-1));     \
-                if (c)                                                  \
-                        BLESS((SV *) (y), c);				\
-        } STMT_END
+    STMT_START {                                                        \
+        if (!(y))                                                       \
+            Perl_croak(aTHX_                                            \
+                       "Internal error: NULL passed to SEEN macro");    \
+        SvREFCNT_inc_NN((SV*)(y));                                      \
+        if (!av_store(retrieve_cxt->aseen,                              \
+                      retrieve_cxt->tagnum++,                           \
+                      (SV*)(y)))                                        \
+            Perl_croak(aTHX_ "Internal error: av_store failed");        \
+        TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)",                  \
+                 retrieve_cxt->tagnum-1, PTR2UV(y), SvREFCNT(y)-1));    \
+        if (c)                                                          \
+            BLESS((SV *) (y), c);                                       \
+    } STMT_END
 
 /*
  * Bless 's' in 'p', via a temporary reference, required by sv_bless().
@@ -3292,7 +3295,7 @@ static SV *retrieve_blessed(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 
 	if (!av_store(retrieve_cxt->aclass, retrieve_cxt->classnum++, classname)) {
 		sv_free(classname);
-		return (SV *) 0;
+                Perl_croak(aTHX_ "Internal error: unable to store reference in array");
 	}
 
 	/*
@@ -3412,8 +3415,8 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	while (flags & SHF_NEED_RECURSE) {
 		TRACEME(("retrieve_hook recursing..."));
 		rv = retrieve(aTHX_ retrieve_cxt, 0);
-		if (!rv)
-			return (SV *) 0;
+                if (!rv)
+                    Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 		SvREFCNT_dec(rv);
 		TRACEME(("retrieve_hook back with rv=0x%"UVxf,
 			 PTR2UV(rv)));
@@ -3458,7 +3461,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
 		if (!av_store(retrieve_cxt->aclass, retrieve_cxt->classnum++, class_sv)) {
 			sv_free(class_sv);
-			return (SV *) 0;
+                        Perl_croak(aTHX_ "Internal error: av_store failed");
 		}
 
 		classname = SvPV_nolen(class_sv);
@@ -3726,7 +3729,7 @@ static SV *retrieve_ref(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	SEEN(rv, cname, 0);		/* Will return if rv is null */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
 	if (!sv)
-		return (SV *) 0;	/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 	/*
 	 * WARNING: breaks RV encapsulation.
@@ -3807,7 +3810,7 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
 	retrieve_cxt->in_retrieve_overloaded = 0;
 	if (!sv)
-		return (SV *) 0;	/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieved returned NULL");
 
 	/*
 	 * WARNING: breaks RV encapsulation.
@@ -3889,7 +3892,7 @@ static SV *retrieve_tied_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
 	if (!sv)
-		return (SV *) 0;		/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 	sv_upgrade(tv, SVt_PVAV);
 	AvREAL_off((AV *)tv);
@@ -3918,7 +3921,7 @@ static SV *retrieve_tied_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
 	if (!sv)
-		return (SV *) 0;		/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 	sv_upgrade(tv, SVt_PVHV);
 	sv_magic(tv, sv, 'P', (char *)NULL, 0);
@@ -3945,12 +3948,11 @@ static SV *retrieve_tied_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *
 	tv = NEWSV(10002, 0);
 	SEEN(tv, cname, 0);			/* Will return if rv is null */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
-	if (!sv) {
-		return (SV *) 0;		/* Failed */
-	}
-	else if (SvTYPE(sv) != SVt_NULL) {
-		obj = sv;
-	}
+	if (!sv)
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
+
+        if (SvTYPE(sv) != SVt_NULL)
+            obj = sv;
 
 	sv_upgrade(tv, SVt_PVMG);
 	sv_magic(tv, obj, 'q', (char *)NULL, 0);
@@ -3983,11 +3985,11 @@ static SV *retrieve_tied_key(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
 	if (!sv)
-		return (SV *) 0;		/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 	key = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <key> */
 	if (!key)
-		return (SV *) 0;		/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 	sv_upgrade(tv, SVt_PVMG);
 	sv_magic(tv, sv, 'p', (char *)key, HEf_SVKEY);
@@ -4015,7 +4017,7 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	SEEN(tv, cname, 0);			/* Will return if tv is null */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
 	if (!sv)
-		return (SV *) 0;		/* Failed */
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 	READ_I32(idx);					/* Retrieve <idx> */
 
@@ -4421,9 +4423,9 @@ static SV *retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 		TRACEME(("(#%d) item", i));
 		sv = retrieve(aTHX_ retrieve_cxt, 0);			/* Retrieve item */
 		if (!sv)
-			return (SV *) 0;
+                    Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 		if (av_store(av, i, sv) == 0)
-			return (SV *) 0;
+                    Perl_croak(aTHX_ "Internal error: av_store failed");
 	}
 
 	TRACEME(("ok (retrieve_array at 0x%"UVxf")", PTR2UV(av)));
@@ -4477,7 +4479,7 @@ static SV *retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 		TRACEME(("(#%d) value", i));
 		sv = retrieve(aTHX_ retrieve_cxt, 0);
 		if (!sv)
-			return (SV *) 0;
+                    Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
 		/*
 		 * Get key.
@@ -4494,8 +4496,9 @@ static SV *retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 		 * Enter key/value pair into hash table.
 		 */
 
-		if (hv_store(hv, kbuf, (U32) size, sv, 0) == 0)
-			return (SV *) 0;
+		if (!hv_store(hv, kbuf, (U32) size, sv, 0))
+                    Perl_croak(aTHX_ "Internal error: hv_store failed");
+                
 	}
 
 	TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
@@ -4563,7 +4566,7 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
         TRACEME(("(#%d) value", i));
         sv = retrieve(aTHX_ retrieve_cxt, 0);
         if (!sv)
-            return (SV *) 0;
+            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
         READ_UCHAR(flags);
 #ifdef HAS_RESTRICTED_HASHES
@@ -4580,10 +4583,11 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
             TRACEME(("(#%d) keysv, flags=%d", i, flags));
             keysv = retrieve(aTHX_ retrieve_cxt, 0);
             if (!keysv)
-                return (SV *) 0;
+                Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 
             if (!hv_store_ent(hv, keysv, sv, 0))
-                return (SV *) 0;
+                Perl_croak(aTHX_ "Internal error: hv_store_ent failed");
+
         } else {
             /*
              * Get key.
@@ -4627,11 +4631,11 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 
 #ifdef HAS_RESTRICTED_HASHES
             if (hv_store_flags(hv, kbuf, size, sv, 0, store_flags) == 0)
-                return (SV *) 0;
+                Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 #else
             if (!(store_flags & HVhek_PLACEHOLD))
-                if (hv_store(hv, kbuf, size, sv, 0) == 0)
-                    return (SV *) 0;
+                if (!hv_store(hv, kbuf, size, sv, 0))
+                    Perl_croak(aTHX_ "Internal error: hv_store failed");
 #endif
 	}
     }
@@ -4820,9 +4824,9 @@ static SV *old_retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 		TRACEME(("(#%d) item", i));
 		sv = retrieve(aTHX_ retrieve_cxt, 0);						/* Retrieve item */
 		if (!sv)
-			return (SV *) 0;
-		if (av_store(av, i, sv) == 0)
-			return (SV *) 0;
+                    Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
+		if (av_store(av, i, sv))
+                    Perl_croak(aTHX_ "Internal error: av_store failed");
 	}
 
 	TRACEME(("ok (old_retrieve_array at 0x%"UVxf")", PTR2UV(av)));
@@ -4892,7 +4896,7 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 			TRACEME(("(#%d) value", i));
 			sv = retrieve(aTHX_ retrieve_cxt, 0);
 			if (!sv)
-				return (SV *) 0;
+                            Perl_croak(aTHX_ "Internal error: retrieve returned NULL");
 		} else
 			(void) retrieve_other(aTHX_ retrieve_cxt, 0);	/* Will croak out */
 
@@ -4915,7 +4919,7 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 		 */
 
 		if (hv_store(hv, kbuf, (U32) size, sv, 0) == 0)
-			return (SV *) 0;
+                    Perl_croak(aTHX_ "Internal error: hv_store failed");
 	}
 
 	TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
@@ -5189,7 +5193,7 @@ static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
 		if (!hv_store(retrieve_cxt->hseen, (char *) &tag, sizeof(tag),
 				newSViv(retrieve_cxt->tagnum), 0))
-			return (SV *) 0;
+                    Perl_croak(aTHX_ "Internal error: hv_store failed");
 
 		goto first_time;
 	}
@@ -5239,7 +5243,7 @@ first_time:		/* Will disappear when support for old format is dropped */
 
 	sv = RETRIEVE(retrieve_cxt, type)(aTHX_ retrieve_cxt, cname);
 	if (!sv)
-		return (SV *) 0;			/* Failed */
+                    Perl_croak(aTHX_ "Internal error: hv_store failed");
 
 	/*
 	 * Old binary formats (pre-0.7).
