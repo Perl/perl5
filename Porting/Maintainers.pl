@@ -484,20 +484,6 @@ use File::Glob qw(:case);
         'DEPRECATED' => '5.017009',
     },
 
-    'CPANPLUS::Dist::Build' => {
-        'MAINTAINER'   => 'bingos',
-        'DISTRIBUTION' => 'BINGOS/CPANPLUS-Dist-Build-0.70.tar.gz',
-        'FILES'        => q[cpan/CPANPLUS-Dist-Build],
-        'EXCLUDED'     => [
-            qr{^inc/},
-            qw( t/99_pod.t
-                t/99_pod_coverage.t
-                ),
-        ],
-        'UPSTREAM' => 'cpan',
-        'DEPRECATED' => '5.017009',
-    },
-
     'CPAN::Meta' => {
         'MAINTAINER'   => 'dagolden',
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.120921.tar.gz',

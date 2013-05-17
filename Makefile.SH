@@ -1335,7 +1335,7 @@ _cleaner2:
 	rm -fr lib/ExtUtils/CBuilder
 	rm -f pod2htmd.tmp
 	rm -rf pod/perlfunc pod/perlipc
-	-rmdir cpan/CPANPLUS-Dist-Build/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-localmirror
+	-rmdir cpan/CPANPLUS/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-localmirror
 	-rmdir ext/B/lib
 	-rmdir lib/Archive/Tar lib/Archive lib/Attribute
 	-rmdir lib/CGI lib/Carp

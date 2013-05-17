@@ -65,8 +65,6 @@
 /CPANPLUS/Dist.pm
 /CPANPLUS/Dist/Autobundle.pm
 /CPANPLUS/Dist/Base.pm
-/CPANPLUS/Dist/Build.pm
-/CPANPLUS/Dist/Build/Constants.pm
 /CPANPLUS/Dist/MM.pm
 /CPANPLUS/Dist/Sample.pm
 /CPANPLUS/Error.pm
