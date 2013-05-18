@@ -217,6 +217,8 @@ $? = 0;
 # check that child is reaped if the piped program can't be executed
 SKIP: {
   skip "/no_such_process exists", 1 if -e "/no_such_process";
+  skip "Child always succeeds under -DUSE_SHELL_ALWAYS", 1
+    if $Config{d_useshellcmds};
   open NIL, '/no_such_process |';
   close NIL;
 
