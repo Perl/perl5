@@ -12,4 +12,3 @@ Test::Harness cpan/Test-Harness/t/source.t 884890970fb850874213159df263ba483bac6
 libnet cpan/libnet/Makefile.PL 5554b71464b45f5cc002e55f2464f7ff4abd05b6
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
-Module::Pluggable cpan/Module-Pluggable/Makefile.PL 72062c1a01ed7c62d16c55122c163b2d89f0d739

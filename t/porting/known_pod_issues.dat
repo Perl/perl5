@@ -49,6 +49,7 @@ DBIx::Profile
 Devel::Callsite
 Devel::DProf
 Devel::DTrace::Provider
+Devel::InnerPackage
 Devel::NYTProf
 Devel::PPPort
 Devel::SawAmpersand
@@ -88,6 +89,8 @@ md5sum(1)
 Module::CPANTS::Analyse
 Module::Find
 Module::Info
+Module::Pluggable
+Module::Pluggable::Object
 Module::Starter
 Moo
 Moose

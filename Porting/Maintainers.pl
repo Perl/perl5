@@ -1260,15 +1260,6 @@ use File::Glob qw(:case);
         'UPSTREAM' => 'cpan',
     },
 
-    'Module::Pluggable' => {
-        'MAINTAINER'   => 'simonw',
-        'DISTRIBUTION' => 'SIMONW/Module-Pluggable-4.7.tar.gz',
-        'FILES'        => q[cpan/Module-Pluggable],
-        'UPSTREAM'     => 'cpan',
-        'CUSTOMIZED'   => ['Makefile.PL'],
-        'DEPRECATED'   => '5.017009',
-    },
-
     'mro' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/mro],
