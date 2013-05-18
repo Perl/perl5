@@ -246,7 +246,8 @@ static const char* const non_utf8_target_but_utf8_required
 #define SCount 11172    /* Length of block */
 #define TCount 28
 
-static void restore_pos(pTHX_ void *arg);
+static void S_setup_eval_state(pTHX_ regmatch_info *const reginfo);
+static void S_restore_eval_state(pTHX_ void *arg);
 
 #define REGCP_PAREN_ELEMS 3
 #define REGCP_OTHER_ELEMS 3
@@ -2602,7 +2603,7 @@ got_it:
     Safefree(swap);
 
     if (PL_reg_state.re_state_eval_setup_done)
-	restore_pos(aTHX_ prog);
+	S_restore_eval_state(aTHX_ prog);
     if (RXp_PAREN_NAMES(prog)) 
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
 
@@ -2731,7 +2732,7 @@ phooey:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4], PL_colors[5]));
     if (PL_reg_state.re_state_eval_setup_done)
-	restore_pos(aTHX_ prog);
+	S_restore_eval_state(aTHX_ prog);
     if (swap) {
         /* we failed :-( roll it back */
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
@@ -2776,70 +2777,9 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     reginfo->cutpoint=NULL;
 
     if ((prog->extflags & RXf_EVAL_SEEN)
-	&& !PL_reg_state.re_state_eval_setup_done)
-    {
-	MAGIC *mg;
+            && !PL_reg_state.re_state_eval_setup_done)
+        S_setup_eval_state(aTHX_ reginfo);
 
-	PL_reg_state.re_state_eval_setup_done = TRUE;
-	if (reginfo->sv) {
-	    /* Make $_ available to executed code. */
-	    if (reginfo->sv != DEFSV) {
-		SAVE_DEFSV;
-		DEFSV_set(reginfo->sv);
-	    }
-	
-	    if (!(SvTYPE(reginfo->sv) >= SVt_PVMG && SvMAGIC(reginfo->sv)
-		  && (mg = mg_find(reginfo->sv, PERL_MAGIC_regex_global)))) {
-		/* prepare for quick setting of pos */
-#ifdef PERL_OLD_COPY_ON_WRITE
-		if (SvIsCOW(reginfo->sv))
-		    sv_force_normal_flags(reginfo->sv, 0);
-#endif
-		mg = sv_magicext(reginfo->sv, NULL, PERL_MAGIC_regex_global,
-				 &PL_vtbl_mglob, NULL, 0);
-		mg->mg_len = -1;
-	    }
-	    PL_reg_magic    = mg;
-	    PL_reg_oldpos   = mg->mg_len;
-	    SAVEDESTRUCTOR_X(restore_pos, prog);
-        }
-        if (!PL_reg_curpm) {
-	    Newxz(PL_reg_curpm, 1, PMOP);
-#ifdef USE_ITHREADS
-            {
-		SV* const repointer = &PL_sv_undef;
-                /* this regexp is also owned by the new PL_reg_curpm, which
-		   will try to free it.  */
-                av_push(PL_regex_padav, repointer);
-                PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
-                PL_regex_pad = AvARRAY(PL_regex_padav);
-            }
-#endif      
-        }
-	SET_reg_curpm(rx);
-	PL_reg_oldcurpm = PL_curpm;
-	PL_curpm = PL_reg_curpm;
-	if (RXp_MATCH_COPIED(prog)) {
-	    /*  Here is a serious problem: we cannot rewrite subbeg,
-		since it may be needed if this match fails.  Thus
-		$` inside (?{}) could fail... */
-	    PL_reg_oldsaved = prog->subbeg;
-	    PL_reg_oldsavedlen = prog->sublen;
-	    PL_reg_oldsavedoffset = prog->suboffset;
-	    PL_reg_oldsavedcoffset = prog->suboffset;
-#ifdef PERL_ANY_COW
-	    PL_nrs = prog->saved_copy;
-#endif
-	    RXp_MATCH_COPIED_off(prog);
-	}
-	else
-	    PL_reg_oldsaved = NULL;
-	prog->subbeg = (char *)reginfo->strbeg;
-	prog->suboffset = 0;
-	prog->subcoffset = 0;
-        /* use reginfo->strend, as strend may have been modified */
-	prog->sublen = reginfo->strend - reginfo->strbeg;
-    }
 #ifdef DEBUGGING
     PL_reg_starttry = *startposp;
 #endif
@@ -7517,8 +7457,96 @@ S_reghopmaybe3(U8* s, I32 off, const U8* lim)
     return s;
 }
 
+
+/* when executing a regex that may have (?{}), extra stuff needs setting
+   up that will be visible to the called code, even before the current
+   match has finished. In particular:
+
+   * $_ is localised to the SV currently being matched;
+   * pos($_) is created if necessary, ready to be updated on each call-out
+     to code;
+   * a fake PMOP is created that can be set to PL_curpm (normally PL_curpm
+     isn't set until the current pattern is successfully finished), so that
+     $1 etc of the match-so-far can be seen;
+   * save the old values of subbeg etc of the current regex, and  set then
+     to the current string (again, this is normally only done at the end
+     of execution)
+
+    It also sets up a destructor so that all this will be cleared up if
+    we die.
+*/
+
 static void
-restore_pos(pTHX_ void *arg)
+S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
+{
+    MAGIC *mg;
+    regexp *const rex = ReANY(reginfo->prog);
+
+    PL_reg_state.re_state_eval_setup_done = TRUE;
+    if (reginfo->sv) {
+        /* Make $_ available to executed code. */
+        if (reginfo->sv != DEFSV) {
+            SAVE_DEFSV;
+            DEFSV_set(reginfo->sv);
+        }
+
+        if (!(SvTYPE(reginfo->sv) >= SVt_PVMG && SvMAGIC(reginfo->sv)
+              && (mg = mg_find(reginfo->sv, PERL_MAGIC_regex_global)))) {
+            /* prepare for quick setting of pos */
+#ifdef PERL_OLD_COPY_ON_WRITE
+            if (SvIsCOW(reginfo->sv))
+                sv_force_normal_flags(reginfo->sv, 0);
+#endif
+            mg = sv_magicext(reginfo->sv, NULL, PERL_MAGIC_regex_global,
+                             &PL_vtbl_mglob, NULL, 0);
+            mg->mg_len = -1;
+        }
+        PL_reg_magic    = mg;
+        PL_reg_oldpos   = mg->mg_len;
+        SAVEDESTRUCTOR_X(S_restore_eval_state, rex);
+    }
+    if (!PL_reg_curpm) {
+        Newxz(PL_reg_curpm, 1, PMOP);
+#ifdef USE_ITHREADS
+        {
+            SV* const repointer = &PL_sv_undef;
+            /* this regexp is also owned by the new PL_reg_curpm, which
+               will try to free it.  */
+            av_push(PL_regex_padav, repointer);
+            PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
+            PL_regex_pad = AvARRAY(PL_regex_padav);
+        }
+#endif
+    }
+    SET_reg_curpm(reginfo->prog);
+    PL_reg_oldcurpm = PL_curpm;
+    PL_curpm = PL_reg_curpm;
+    if (RXp_MATCH_COPIED(rex)) {
+        /*  Here is a serious problem: we cannot rewrite subbeg,
+            since it may be needed if this match fails.  Thus
+            $` inside (?{}) could fail... */
+        PL_reg_oldsaved = rex->subbeg;
+        PL_reg_oldsavedlen = rex->sublen;
+        PL_reg_oldsavedoffset = rex->suboffset;
+        PL_reg_oldsavedcoffset = rex->suboffset;
+#ifdef PERL_ANY_COW
+        PL_nrs = rex->saved_copy;
+#endif
+        RXp_MATCH_COPIED_off(rex);
+    }
+    else
+        PL_reg_oldsaved = NULL;
+    rex->subbeg = (char *)reginfo->strbeg;
+    rex->suboffset = 0;
+    rex->subcoffset = 0;
+    rex->sublen = reginfo->strend - reginfo->strbeg;
+}
+
+/* undo the effects of S_setup_eval_state() - can either be called
+ * directly, or via a destructor */
+
+static void
+S_restore_eval_state(pTHX_ void *arg)
 {
     dVAR;
     regexp * const rex = (regexp *)arg;
