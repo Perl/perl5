@@ -109,10 +109,6 @@ cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/B-Debug/Debug.pm	Compiler Debug backend
 cpan/B-Debug/t/debug.t	See if B::Debug works
-cpan/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
-cpan/B-Lint/lib/B/Lint.pm			Compiler Lint backend
-cpan/B-Lint/t/lint.t				See if B::Lint works
-cpan/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 cpan/CGI/Changes			Changelog for CGI.pm
 cpan/CGI/examples/caution.xbm		CGI example
 cpan/CGI/examples/clickable_image.cgi	CGI example

@@ -293,15 +293,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'B::Lint' => {
-        'MAINTAINER'   => 'jjore',
-        'DISTRIBUTION' => 'RJBS/B-Lint-1.17.tar.gz',
-        'FILES'        => q[cpan/B-Lint],
-        'EXCLUDED'     => ['t/test.pl'],
-        'UPSTREAM'     => 'cpan',
-        'DEPRECATED'   => '5.017009',
-    },
-
     'base' => {
         'MAINTAINER'   => 'rgarcia',
         'DISTRIBUTION' => 'RGARCIA/base-2.18.tar.gz',
