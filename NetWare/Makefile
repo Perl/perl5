@@ -666,7 +666,6 @@ UTILS		=			\
 		..\utils\h2xs		\
 		..\utils\perldoc	\
 		..\pod\pod2html		\
-		..\pod\pod2latex	\
 		..\pod\pod2man		\
 		..\pod\pod2text		\
 		..\pod\pod2usage	\
@@ -850,7 +849,6 @@ EXTENSION_NPM =	\
 
 POD2HTML	= $(PODDIR)\pod2html
 POD2MAN		= $(PODDIR)\pod2man
-POD2LATEX	= $(PODDIR)\pod2latex
 POD2TEXT	= $(PODDIR)\pod2text
 
 #

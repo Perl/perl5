@@ -1813,10 +1813,6 @@ cpan/Pod-Escapes/README			README for Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
-cpan/Pod-LaTeX/lib/Pod/LaTeX.pm		Convert POD data to LaTeX
-cpan/Pod-LaTeX/pod2latex.PL	Precursor for translator to turn pod into LaTeX
-cpan/Pod-LaTeX/t/pod2latex.t	See if Pod::LaTeX works
-cpan/Pod-LaTeX/t/user.t		See if Pod::LaTeX works
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text/Color.pm		Convert POD data to color ASCII text

@@ -2151,7 +2151,6 @@ make install will install the following:
 			utility iconv.
 	pl2pm		Convert Perl 4 .pl files to Perl 5 .pm modules.
 	pod2html,	Converters from perl's pod documentation format
-	pod2latex, 	to other useful formats.
 	pod2man,
 	pod2text,
 	pod2usage

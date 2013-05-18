@@ -1488,15 +1488,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'Pod::LaTeX' => {
-        'MAINTAINER'   => 'tjenness',
-        'DISTRIBUTION' => 'TJENNESS/Pod-LaTeX-0.61.tar.gz',
-        'FILES'        => q[cpan/Pod-LaTeX],
-        'EXCLUDED'     => ['t/require.t'],
-        'UPSTREAM'     => undef,
-        'DEPRECATED'   => '5.017008',
-    },
-
     'Pod::Parser' => {
         'MAINTAINER' => 'marekr',
         'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.60.tar.gz',

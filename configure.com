@@ -7293,7 +7293,6 @@ $ WRITE CONFIG "$ perlivp    == """ + perl_setup_perl + " ''vms_prefix':[utils]p
 $ WRITE CONFIG "$ piconv     == """ + perl_setup_perl + " ''vms_prefix':[utils]piconv.com"""
 $ WRITE CONFIG "$ pl2pm      == """ + perl_setup_perl + " ''vms_prefix':[utils]pl2pm.com"""
 $ WRITE CONFIG "$ pod2html   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2html.com"""
-$ WRITE CONFIG "$ pod2latex  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2latex.com"""
 $ WRITE CONFIG "$ pod2text   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2text.com"""
 $ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2man.com"""
 $ WRITE CONFIG "$ pod2usage  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2usage.com"""

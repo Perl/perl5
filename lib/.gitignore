@@ -273,7 +273,6 @@
 /Pod/Find.pm
 /Pod/Html.pm
 /Pod/InputObjects.pm
-/Pod/LaTeX.pm
 /Pod/Man.pm
 /Pod/ParseLink.pm
 /Pod/ParseUtils.pm

@@ -3,7 +3,6 @@ POD2HTML_ARGS = --htmlroot=$(HTMLROOT) --podroot=.. --podpath=pod:lib:ext:vms
 POD2HTML = ../ext/Pod-Html/pod2html
 POD2MAN = ../cpan/podlators/pod2man
 POD2TEXT = ../cpan/podlators/pod2text
-POD2LATEX = ../cpan/Pod-LaTeX/pod2latex
 PODCHECKER = ../cpan/Pod-Parser/podchecker
 
 all: html
@@ -521,8 +520,6 @@ man:	$(POD2MAN) $(MAN)
 
 html:	$(POD2HTML) $(HTML)
 
-tex:	$(POD2LATEX) $(TEX)
-
 toc:
 	$(PERL) -I../lib buildtoc >perltoc.pod
 
@@ -543,14 +540,6 @@ toc:
 
 .pod.html:
 	$(PERL) -I../lib $(POD2HTML) $(POD2HTML_ARGS) --infile=$*.pod --outfile=$*.html
-
-.SUFFIXES: .tex
-
-.pm.tex:
-	$(PERL) -I../lib $(POD2LATEX) $*.pm
-
-.pod.tex:
-	$(PERL) -I../lib $(POD2LATEX) $*.pod
 
 clean:
 	rm -f $(MAN)

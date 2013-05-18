@@ -35,11 +35,10 @@ explanation) into a manpage, and then run F<man> to display it; if
 F<man> isn't available, F<pod2text> will be used instead and the output
 piped through your favourite pager.
 
-=item L<pod2html|pod2html> and L<pod2latex|pod2latex>
+=item L<pod2html|pod2html>
 
-As well as these two, there are two other converters: F<pod2html> will
-produce HTML pages from POD, and F<pod2latex>, which produces LaTeX
-files.
+As well as these two, there is another converter: F<pod2html> will
+produce HTML pages from POD.
 
 =item L<pod2usage|pod2usage>
 

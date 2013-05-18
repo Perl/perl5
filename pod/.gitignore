@@ -44,8 +44,6 @@
 # scripts etc
 /pod2html
 /pod2html.bat
-/pod2latex
-/pod2latex.bat
 /pod2man
 /pod2man.bat
 /pod2text
