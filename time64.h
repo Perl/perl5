@@ -28,11 +28,13 @@ struct TM64 {
 #endif
 
 #ifdef HAS_TM_TM_ZONE
-#  ifdef __GLIBC__
-        const char    *tm_zone;
-#  else
-        char    *tm_zone;
+/* If glibc is defined, use const. Otherwise,
+ * if we are on android, use const but not with g++
+ */
+#  if defined(__GLIBC__) || (defined(__ANDROID__) && !defined(__cplusplus))
+        const
 #  endif
+        char    *tm_zone;
 #endif
 };
 
