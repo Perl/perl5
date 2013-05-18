@@ -29,6 +29,9 @@ i_locale='undef'
 # Default to USE_SHELL_ALWAYS
 d_useshellcmds='define'
 
+# https://code.google.com/p/android-source-browsing/source/browse/libc/netbsd/net/getservent_r.c?repo=platform--bionic&r=ca6fe7bebe3cc6ed7e2db5a3ede2de0fcddf411d#95
+d_getservent_r='undef'
+
 # Bionic defines several stubs that just warn and return NULL
 # https://gitorious.org/0xdroid/bionic/blobs/70b2ef0ec89a9c9d4c2d4bcab728a0e72bafb18e/libc/bionic/stubs.c
 # https://android.googlesource.com/platform/bionic/+/master/libc/bionic/stubs.cpp
