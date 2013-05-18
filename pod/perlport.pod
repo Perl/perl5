@@ -1611,6 +1611,9 @@ Does not automatically flush output handles on some platforms.
 
 Not supported. (Symbian OS)
 
+Won't return if the executable does not exist on Perls compiled with
+-DUSE_SHELL_ALWAYS.
+
 =item exit
 
 Emulates Unix exit() (which considers C<exit 1> to indicate an error) by
