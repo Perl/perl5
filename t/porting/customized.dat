@@ -9,7 +9,6 @@ Text::Balanced cpan/Text-Balanced/t/08_extvar.t 0776ef2cbdad5b1fbefb300541d07921
 Text::Balanced cpan/Text-Balanced/t/09_gentag.t 42361b5dfb3bb728bce20f4fb0d92ccfb27c2ba7
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 2f3f07fd889077ebd51791ad6e195d9164b4baf3
 Test::Harness cpan/Test-Harness/t/source.t 884890970fb850874213159df263ba483bac62e9
-CPANPLUS cpan/CPANPLUS/Makefile.PL 5d533f6722af6aae73204755beb8d6c008fc0d4a
 libnet cpan/libnet/Makefile.PL 5554b71464b45f5cc002e55f2464f7ff4abd05b6
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69

@@ -691,7 +691,7 @@ sub installlib {
     # lib/Archive/Tar/bin, the config_data script in lib/Module/Build/scripts
     # and zipdetails in cpan/IO-Compress/bin
     # (they're installed later with other utils)
-    return if $name =~ /^(?:cpan|instmodsh|prove|corelist|ptar|cpan2dist|cpanp|cpanp-run-perl|ptardiff|ptargrep|config_data|zipdetails)\z/;
+    return if $name =~ /^(?:cpan|instmodsh|prove|corelist|ptar|ptardiff|ptargrep|config_data|zipdetails)\z/;
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;
     # ignore the test extensions

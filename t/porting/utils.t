@@ -77,11 +77,6 @@ printf "1..%d\n", scalar @victims;
 
 foreach my $victim (@victims) {
  SKIP: {
-        # Not clear to me *why* it needs the BEGIN block, given what it
-        # does, but not in an easy position to change it.
-        skip("$victim executes code in a BEGIN block which fails for empty \@ARGV")
-            if $victim =~ m{^utils/cpanp-run-perl};
-
         skip ("$victim uses $excuses{$victim}, so can't test with just core modules")
             if $excuses{$victim};
 

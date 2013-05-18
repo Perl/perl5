@@ -461,29 +461,6 @@ use File::Glob qw(:case);
         'UPSTREAM' => 'cpan',
     },
 
-    'CPANPLUS' => {
-        'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/CPANPLUS-0.9134.tar.gz',
-        'FILES'        => q[cpan/CPANPLUS],
-        'EXCLUDED'     => [
-            qr{^inc/},
-            qr{^t/dummy-.*\.hidden$},
-            qr{^t/dummy-(cpanplus|perl|localmirror)/},
-            'bin/cpanp-boxed',
-
-            # SQLite tests would be skipped in core, and
-            # the filenames are too long for VMS!
-            qw( t/031_CPANPLUS-Internals-Source-SQLite.t
-                t/032_CPANPLUS-Internals-Source-via-sqlite.t
-                ),
-            'Makefile.PL',
-        ],
-        'CUSTOMIZED' => ['Makefile.PL'],
-        'UPSTREAM'   => 'cpan',
-        'BUGS'       => 'bug-cpanplus@rt.cpan.org',
-        'DEPRECATED' => '5.017009',
-    },
-
     'CPAN::Meta' => {
         'MAINTAINER'   => 'dagolden',
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.120921.tar.gz',

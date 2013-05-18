@@ -930,19 +930,6 @@ Check that your perl can run this:
     42
     $
 
-=head4 Bootstrap the CPANPLUS client
-
-Bootstrap the CPANPLUS client on the clean install:
-
-    $ bin/cpanp
-
-=head4 Install the DBI module with CPANPLUS
-
-    CPAN Terminal> i DBI
-    CPAN Terminal> quit
-    $ bin/perl -MDBI -e 1
-    $
-
 =head4 Make sure that perlbug works
 
 Test L<perlbug> with the following:

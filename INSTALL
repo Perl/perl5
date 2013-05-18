@@ -2137,9 +2137,6 @@ make install will install the following:
                         different
 			versions of perl.
 	cpan		The CPAN shell.
-	cpan2dist	The CPANPLUS distribution creator.
-	cpanp		The CPANPLUS shell.
-	cpanp-run-perl	A helper for cpanp.
 	enc2xs		Encoding module generator.
 	find2perl	find-to-perl translator.
 	h2ph		Extract constants and simple macros from C

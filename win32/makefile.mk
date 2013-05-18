@@ -699,9 +699,6 @@ UTILS		=			\
 		..\utils\ptardiff	\
 		..\utils\ptargrep	\
 		..\utils\zipdetails	\
-		..\utils\cpanp-run-perl	\
-		..\utils\cpanp	\
-		..\utils\cpan2dist	\
 		..\utils\shasum		\
 		..\utils\instmodsh	\
 		..\utils\json_pp	\
@@ -1380,7 +1377,6 @@ distclean: realclean
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\CGI rmdir /s /q $(LIBDIR)\CGI
 	-if exist $(LIBDIR)\CPAN rmdir /s /q $(LIBDIR)\CPAN
-	-if exist $(LIBDIR)\CPANPLUS rmdir /s /q $(LIBDIR)\CPANPLUS
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Devel rmdir /s /q $(LIBDIR)\Devel
@@ -1442,7 +1438,7 @@ distclean: realclean
 	    perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp libnetcfg enc2xs piconv cpan *.bat \
-	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep cpanp-run-perl cpanp cpan2dist shasum corelist config_data zipdetails
+	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep shasum corelist config_data zipdetails
 	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh perlmain.c dlutils.c config.h.new \
 	    perlmainst.c
