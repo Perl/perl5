@@ -976,7 +976,7 @@
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define core_regclass_swash(a,b,c,d)	S_core_regclass_swash(aTHX_ a,b,c,d)
-#define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
+#define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
@@ -986,7 +986,7 @@
 #define reghopmaybe3		S_reghopmaybe3
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #define regmatch(a,b,c)		S_regmatch(aTHX_ a,b,c)
-#define regrepeat(a,b,c,d,e,f,g)	S_regrepeat(aTHX_ a,b,c,d,e,f,g)
+#define regrepeat(a,b,c,d,e,f)	S_regrepeat(aTHX_ a,b,c,d,e,f)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
