@@ -15,6 +15,7 @@ _control87(3)
 Algorithm::C3
 AnyEvent
 Apache::MP3
+Archive::Extract
 Array::Base
 Attribute::Constant
 basename(1)

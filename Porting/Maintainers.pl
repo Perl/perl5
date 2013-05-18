@@ -199,15 +199,6 @@ use File::Glob qw(:case);
         'UPSTREAM'    => 'blead',
     },
 
-    'Archive::Extract' => {
-        'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Archive-Extract-0.68.tar.gz',
-        'FILES'        => q[cpan/Archive-Extract],
-        'UPSTREAM'     => 'cpan',
-        'BUGS'         => 'bug-archive-extract@rt.cpan.org',
-        'DEPRECATED'   => '5.017009',
-    },
-
     'Archive::Tar' => {
         'MAINTAINER'   => 'kane',
         'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.90.tar.gz',

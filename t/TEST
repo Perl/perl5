@@ -28,7 +28,6 @@ my %dir_to_switch =
 # any of these, to figure out how to remove them from this list, considered
 # "a good thing".
 my %abs = (
-	   '../cpan/Archive-Extract' => 1,
 	   '../cpan/Archive-Tar' => 1,
 	   '../cpan/AutoLoader' => 1,
 	   '../cpan/CPAN' => 1,
