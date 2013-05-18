@@ -12901,8 +12901,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		Copy(old_state, new_state, 1, struct re_save_state);
 		ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
 
-		new_state->re_state_bostr
-		    = pv_dup(old_state->re_state_bostr);
 #ifdef PERL_ANY_COW
 		new_state->re_state_nrs
 		    = sv_dup(old_state->re_state_nrs, param);

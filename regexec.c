@@ -115,12 +115,12 @@ static const char* const non_utf8_target_but_utf8_required
 #define HOPc(pos,off) \
 	(char *)(PL_reg_match_utf8 \
 	    ? reghop3((U8*)pos, off, \
-                    (U8*)(off >= 0 ? reginfo->strend : PL_bostr)) \
+                    (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg)) \
 	    : (U8*)(pos + off))
 #define HOPBACKc(pos, off) \
 	(char*)(PL_reg_match_utf8\
-	    ? reghopmaybe3((U8*)pos, -off, (U8*)PL_bostr) \
-	    : (pos - off >= PL_bostr)		\
+	    ? reghopmaybe3((U8*)pos, -off, (U8*)(reginfo->strbeg)) \
+	    : (pos - off >= reginfo->strbeg)	\
 		? (U8*)pos - off		\
 		: NULL)
 
@@ -650,8 +650,7 @@ Perl_re_intuit_start(pTHX_
 	goto fail;
     }
 
-    PL_bostr = (char *)strbeg;
-
+    reginfo->strbeg = strbeg;
     reginfo->strend = strend;
     reginfo->is_utf8_pat = is_utf8_pat;
     reginfo->intuit = 1;
@@ -1346,11 +1345,12 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
     }
     
 #define DUMP_EXEC_POS(li,s,doutf8) \
-    dump_exec_pos(li,s,(reginfo->strend),(PL_bostr),(PL_reg_starttry),doutf8)
+    dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
+                (PL_reg_starttry),doutf8)
 
 
 #define UTF8_NOLOAD(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL) \
-	tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';                         \
+	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
 	tmp = TEST_NON_UTF8(tmp);                                              \
 	REXEC_FBC_UTF8_SCAN(                                                   \
 	    if (tmp == ! TEST_NON_UTF8((U8) *s)) { \
@@ -1363,11 +1363,11 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	);                                                                     \
 
 #define UTF8_LOAD(TeSt1_UtF8, TeSt2_UtF8, IF_SUCCESS, IF_FAIL) \
-	if (s == PL_bostr) {                                                   \
+	if (s == reginfo->strbeg) {                                            \
 	    tmp = '\n';                                                        \
 	}                                                                      \
 	else {                                                                 \
-	    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);                 \
+	    U8 * const r = reghop3((U8*)s, -1, (U8*)reginfo->strbeg);          \
 	    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);       \
 	}                                                                      \
 	tmp = TeSt1_UtF8;                                                      \
@@ -1413,7 +1413,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 		UTF8_CODE \
     }                                                                          \
     else {  /* Not utf8 */                                                     \
-	tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';                         \
+	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
 	tmp = TEST_NON_UTF8(tmp);                                              \
 	REXEC_FBC_SCAN(                                                        \
 	    if (tmp == ! TEST_NON_UTF8((U8) *s)) {                             \
@@ -2121,7 +2121,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->warned = FALSE;
     /* Mark beginning of line for ^ and lookbehind. */
     reginfo->bol = startpos; /* XXX not used ??? */
-    PL_bostr  = strbeg;
+    reginfo->strbeg  = strbeg;
     reginfo->sv = sv;
 
     /* Mark end of string for $ (and such) */
@@ -2392,7 +2392,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         	  -(I32)(CHR_SVLEN(must)
         		 - (SvTAIL(must) != 0) + back_min), strbeg);
         }
-	if (s > PL_bostr)
+	if (s > reginfo->strbeg)
 	    last1 = HOPc(s, -1);
 	else
 	    last1 = s - 1;	/* bogus */
@@ -2412,7 +2412,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 		s = HOPc(s, -back_max);
 	    }
 	    else {
-		char * const t = (last1 >= PL_bostr) ? HOPc(last1, 1) : last1 + 1;
+		char * const t = (last1 >= reginfo->strbeg)
+                                    ? HOPc(last1, 1) : last1 + 1;
 
 		last1 = HOPc(s, -back_min);
 		s = t;
@@ -2835,16 +2836,16 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 	}
 	else
 	    PL_reg_oldsaved = NULL;
-	prog->subbeg = PL_bostr;
+	prog->subbeg = (char *)reginfo->strbeg;
 	prog->suboffset = 0;
 	prog->subcoffset = 0;
         /* use reginfo->strend, as strend may have been modified */
-	prog->sublen = reginfo->strend - PL_bostr;
+	prog->sublen = reginfo->strend - reginfo->strbeg;
     }
 #ifdef DEBUGGING
     PL_reg_starttry = *startposp;
 #endif
-    prog->offs[0].start = *startposp - PL_bostr;
+    prog->offs[0].start = *startposp - reginfo->strbeg;
     prog->lastparen = 0;
     prog->lastcloseparen = 0;
 
@@ -3640,7 +3641,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	switch (state_num) {
 	case BOL: /*  /^../  */
-	    if (locinput == PL_bostr)
+	    if (locinput == reginfo->strbeg)
 	    {
 		/* reginfo->till = reginfo->bol; */
 		break;
@@ -3648,7 +3649,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sayNO;
 
 	case MBOL: /*  /^../m  */
-	    if (locinput == PL_bostr ||
+	    if (locinput == reginfo->strbeg ||
 		(!NEXTCHR_IS_EOS && locinput[-1] == '\n'))
 	    {
 		break;
@@ -3656,7 +3657,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sayNO;
 
 	case SBOL: /*  /^../s  */
-	    if (locinput == PL_bostr)
+	    if (locinput == reginfo->strbeg)
 		break;
 	    sayNO;
 
@@ -3668,7 +3669,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case KEEPS: /*   \K  */
 	    /* update the startpoint */
 	    st->u.keeper.val = rex->offs[0].start;
-	    rex->offs[0].start = locinput - PL_bostr;
+	    rex->offs[0].start = locinput - reginfo->strbeg;
 	    PUSH_STATE_GOTO(KEEPS_next, next, locinput);
 	    assert(0); /*NOTREACHED*/
 	case KEEPS_next_fail:
@@ -4218,10 +4219,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		&& FLAGS(scan) != REGEX_ASCII_RESTRICTED_CHARSET
 		&& FLAGS(scan) != REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 	    {
-		if (locinput == PL_bostr)
+		if (locinput == reginfo->strbeg)
 		    ln = '\n';
 		else {
-		    const U8 * const r = reghop3((U8*)locinput, -1, (U8*)PL_bostr);
+		    const U8 * const r =
+                            reghop3((U8*)locinput, -1, (U8*)(reginfo->strbeg));
 
 		    ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, uniflags);
 		}
@@ -4253,7 +4255,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 *	byte is never mistakable for ASCII, and so the test
 		 *	will say it is not a word character, which is the
 		 *	correct answer. */
-		ln = (locinput != PL_bostr) ?
+		ln = (locinput != reginfo->strbeg) ?
 		    UCHARAT(locinput - 1) : '\n';
 		switch (FLAGS(scan)) {
 		    case REGEX_UNICODE_CHARSET:
@@ -4681,7 +4683,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	       op.  */
 	    /* don't initialize these in the declaration, it makes C++
 	       unhappy */
-	    char *s;
+	    const char *s;
 	    char type;
 	    re_fold_t folder;
 	    const U8 *fold_array;
@@ -4773,7 +4775,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    if (ln == rex->offs[n].end)
 		break;
 
-	    s = PL_bostr + ln;
+	    s = reginfo->strbeg + ln;
 	    if (type != REF	/* REF can do byte comparison */
 		&& (utf8_target || type == REFFU))
 	    { /* XXX handle REFFL better */
@@ -4977,7 +4979,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
 		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(nop)) );
 
-		rex->offs[0].end = PL_reg_magic->mg_len = locinput - PL_bostr;
+		rex->offs[0].end = PL_reg_magic->mg_len =
+                                                locinput - reginfo->strbeg;
 
                 if (sv_yes_mark) {
                     SV *sv_mrk = get_sv("REGMARK", 1);
@@ -5183,7 +5186,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case OPEN: /*  (  */
 	    n = ARG(scan);  /* which paren pair */
-	    rex->offs[n].start_tmp = locinput - PL_bostr;
+	    rex->offs[n].start_tmp = locinput - reginfo->strbeg;
 	    if (n > maxopenparen)
 		maxopenparen = n;
 	    DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
@@ -5200,7 +5203,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 /* XXX really need to log other places start/end are set too */
 #define CLOSE_CAPTURE \
     rex->offs[n].start = rex->offs[n].start_tmp; \
-    rex->offs[n].end = locinput - PL_bostr; \
+    rex->offs[n].end = locinput - reginfo->strbeg; \
     DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log, \
 	"rex=0x%"UVxf" offs=0x%"UVxf": \\%"UVuf": set %"IVdf"..%"IVdf"\n", \
 	PTR2UV(rex), \
@@ -5461,7 +5464,8 @@ NULL
 		    /* start the countdown: Postpone detection until we
 		     * know the match is not *that* much linear. */
 		    PL_reg_maxiter
-                        = (reginfo->strend - PL_bostr + 1) * (scan->flags>>4);
+                        =    (reginfo->strend - reginfo->strbeg + 1)
+                           * (scan->flags>>4);
 		    /* possible overflow for long strings and many CURLYX's */
 		    if (PL_reg_maxiter < 0)
 			PL_reg_maxiter = I32_MAX;
@@ -5492,7 +5496,8 @@ NULL
 		    /* have we already failed at this position? */
 		    I32 offset, mask;
 		    offset  = (scan->flags & 0xf) - 1
-		  		+ (locinput - PL_bostr)  * (scan->flags>>4);
+                                +   (locinput - reginfo->strbeg)
+                                  * (scan->flags>>4);
 		    mask    = 1 << (offset % 8);
 		    offset /= 8;
 		    if (PL_reg_poscache[offset] & mask) {
@@ -5840,8 +5845,8 @@ NULL
 		I32 paren = ST.me->flags;
 		if (ST.count) {
 		    rex->offs[paren].start
-			= HOPc(locinput, -ST.alen) - PL_bostr;
-		    rex->offs[paren].end = locinput - PL_bostr;
+			= HOPc(locinput, -ST.alen) - reginfo->strbeg;
+		    rex->offs[paren].end = locinput - reginfo->strbeg;
 		    if ((U32)paren > rex->lastparen)
 			rex->lastparen = paren;
 		    rex->lastcloseparen = paren;
@@ -5883,8 +5888,8 @@ NULL
 #define CURLY_SETPAREN(paren, success) \
     if (paren) { \
 	if (success) { \
-	    rex->offs[paren].start = HOPc(locinput, -1) - PL_bostr; \
-	    rex->offs[paren].end = locinput - PL_bostr; \
+	    rex->offs[paren].start = HOPc(locinput, -1) - reginfo->strbeg; \
+	    rex->offs[paren].end = locinput - reginfo->strbeg; \
 	    if (paren > rex->lastparen) \
 		rex->lastparen = paren; \
 	    rex->lastcloseparen = paren; \
@@ -6635,8 +6640,8 @@ no_silent:
     /* clean up; in particular, free all slabs above current one */
     LEAVE_SCOPE(oldsave);
 
-    assert(!result ||  locinput - PL_bostr >= 0);
-    return result ?  locinput - PL_bostr : -1;
+    assert(!result ||  locinput - reginfo->strbeg >= 0);
+    return result ?  locinput - reginfo->strbeg : -1;
 }
 
 /*
