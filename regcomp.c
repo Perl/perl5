@@ -11083,7 +11083,7 @@ tryagain:
                     *(s++) = (char) ender;
                     maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
                 }
-                else {
+                else {  /* UTF */
 
                     /* Prime the casefolded buffer.  Locale rules, which apply
                      * only to code points < 256, aren't known until execution,
