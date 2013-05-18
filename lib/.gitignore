@@ -192,10 +192,6 @@
 /Locale/Maketext/TPJ13.pod
 /Locale/Script.pm
 /Locale/Script.pod
-/Log/Message.pm
-/Log/Message/Config.pm
-/Log/Message/Handlers.pm
-/Log/Message/Item.pm
 /MIME
 /Math
 /Math/BigFloat

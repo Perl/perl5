@@ -1486,14 +1486,6 @@ cpan/Locale-Maketext-Simple/t/po_with_i_default/fr.po		Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/po_with_i_default/i_default.po	Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
-cpan/Log-Message/lib/Log/Message/Config.pm	Log::Message
-cpan/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
-cpan/Log-Message/lib/Log/Message/Item.pm	Log::Message
-cpan/Log-Message/lib/Log/Message.pm		Log::Message
-cpan/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
-cpan/Log-Message/t/02_Log-Message.t		Log::Message tests
-cpan/Log-Message/t/conf/config_file		Log::Message tests
-cpan/Log-Message/t/conf/LoadMe.pl		Log::Message tests
 cpan/Math-Complex/ChangeLog		Math-Complex change log
 cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
 cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry

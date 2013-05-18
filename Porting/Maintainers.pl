@@ -1095,14 +1095,6 @@ use File::Glob qw(:case);
         'UPSTREAM'     => 'cpan',
     },
 
-    'Log::Message' => {
-        'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Log-Message-0.06.tar.gz',
-        'FILES'        => q[cpan/Log-Message],
-        'UPSTREAM'     => 'cpan',
-        'DEPRECATED'   => '5.017009',
-    },
-
     'mad' => {
         'MAINTAINER' => 'lwall',
         'FILES'      => q[mad],

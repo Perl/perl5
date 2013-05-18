@@ -74,6 +74,10 @@ IPC::Signal
 kill(3)
 langinfo(3)
 Lingua::KO::Hangul::Util
+Log::Message
+Log::Message::Config
+Log::Message::Handlers
+Log::Message::Item
 Log::Message::Simple
 local::lib
 Mail::Send
