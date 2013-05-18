@@ -1810,10 +1810,10 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
             return LATIN_SMALL_LETTER_LONG_S;
         }
         else {
-	*(p)++ = 's';
-	*p = 's';
-	*lenp = 2;
-	return 's';
+            *(p)++ = 's';
+            *p = 's';
+            *lenp = 2;
+            return 's';
         }
     }
     else { /* In this range the fold of all other characters is their lower
