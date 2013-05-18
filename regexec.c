@@ -1252,7 +1252,7 @@ STMT_START {                               \
             len=0;                                                                  \
         } else {                                                                    \
             len = 1;                                                                \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, 1);                 \
+            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, FOLD_FLAGS_FULL);   \
             skiplen = UNISKIP( uvc );                                               \
             foldlen -= skiplen;                                                     \
             uscan = foldbuf + skiplen;                                              \

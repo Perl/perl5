@@ -1780,10 +1780,11 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const bool flags)
+Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 {
-    /* Corresponds to to_lower_latin1(), <flags> is TRUE if to use full case
-     * folding */
+    /* Corresponds to to_lower_latin1(); <flags> bits meanings:
+     *	    FOLD_FLAGS_FULL  iff full folding is to be used;
+     */
 
     UV converted;
 
@@ -1792,7 +1793,7 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const bool flags)
     if (c == MICRO_SIGN) {
 	converted = GREEK_SMALL_LETTER_MU;
     }
-    else if (flags && c == LATIN_SMALL_LETTER_SHARP_S) {
+    else if ((flags & FOLD_FLAGS_FULL) && c == LATIN_SMALL_LETTER_SHARP_S) {
 	*(p)++ = 's';
 	*p = 's';
 	*lenp = 2;
@@ -1831,12 +1832,11 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const U8 flags)
 
     if (c < 256) {
 	UV result = _to_fold_latin1((U8) c, p, lenp,
-			       cBOOL(((flags & FOLD_FLAGS_FULL)
 				   /* If ASCII-safe, don't allow full folding,
 				    * as that could include SHARP S => ss;
 				    * otherwise there is no crossing of
 				    * ascii/non-ascii in the latin1 range */
-				   && ! (flags & FOLD_FLAGS_NOMIX_ASCII))));
+			       (flags & FOLD_FLAGS_NOMIX_ASCII) ? 0 : flags & FOLD_FLAGS_FULL);
 	/* It is illegal for the fold to cross the 255/256 boundary under
 	 * locale; in this case return the original */
 	return (result > 256 && flags & FOLD_FLAGS_LOCALE)
@@ -2773,7 +2773,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	}
 	else {
 	    return _to_fold_latin1(*p, ustrp, lenp,
-		                   cBOOL(flags & FOLD_FLAGS_FULL));
+                            flags & FOLD_FLAGS_FULL);
 	}
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
@@ -2782,14 +2782,13 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	}
 	else {
 	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
-		                   ustrp, lenp,
-				   cBOOL((flags & FOLD_FLAGS_FULL
+                            ustrp, lenp,
 				       /* If ASCII safe, don't allow full
 					* folding, as that could include SHARP
 					* S => ss; otherwise there is no
 					* crossing of ascii/non-ascii in the
 					* latin1 range */
-				       && ! (flags & FOLD_FLAGS_NOMIX_ASCII))));
+			       (flags & FOLD_FLAGS_NOMIX_ASCII) ? 0 : flags & FOLD_FLAGS_FULL);
 	}
     }
     else {  /* utf8, ord above 255 */
