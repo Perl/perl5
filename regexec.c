@@ -7503,7 +7503,6 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         }
         PL_reg_magic    = mg;
         PL_reg_oldpos   = mg->mg_len;
-        SAVEDESTRUCTOR_X(S_restore_eval_state, rex);
     }
     if (!PL_reg_curpm) {
         Newxz(PL_reg_curpm, 1, PMOP);
@@ -7540,6 +7539,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     rex->suboffset = 0;
     rex->subcoffset = 0;
     rex->sublen = reginfo->strend - reginfo->strbeg;
+    SAVEDESTRUCTOR_X(S_restore_eval_state, rex);
 }
 
 /* undo the effects of S_setup_eval_state() - can either be called
