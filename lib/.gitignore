@@ -196,7 +196,6 @@
 /Log/Message/Config.pm
 /Log/Message/Handlers.pm
 /Log/Message/Item.pm
-/Log/Message/Simple.pm
 /MIME
 /Math
 /Math/BigFloat

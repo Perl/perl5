@@ -1490,10 +1490,6 @@ cpan/Log-Message/lib/Log/Message/Config.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Handlers.pm	Log::Message
 cpan/Log-Message/lib/Log/Message/Item.pm	Log::Message
 cpan/Log-Message/lib/Log/Message.pm		Log::Message
-cpan/Log-Message-Simple/lib/Log/Message/Simple.pm	Log::Simple
-cpan/Log-Message-Simple/t/01_use.t			Log::Simple tests
-cpan/Log-Message-Simple/t/02_imports.t			Log::Simple tests
-cpan/Log-Message-Simple/t/03_functions.t		Log::Simple tests
 cpan/Log-Message/t/01_Log-Message-Config.t	Log::Message tests
 cpan/Log-Message/t/02_Log-Message.t		Log::Message tests
 cpan/Log-Message/t/conf/config_file		Log::Message tests

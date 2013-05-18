@@ -1103,14 +1103,6 @@ use File::Glob qw(:case);
         'DEPRECATED'   => '5.017009',
     },
 
-    'Log::Message::Simple' => {
-        'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Log-Message-Simple-0.10.tar.gz',
-        'FILES'        => q[cpan/Log-Message-Simple],
-        'UPSTREAM'     => 'cpan',
-        'DEPRECATED'   => '5.017009',
-    },
-
     'mad' => {
         'MAINTAINER' => 'lwall',
         'FILES'      => q[mad],
