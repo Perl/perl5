@@ -151,6 +151,8 @@ $TB->current_test($test);
 {
     local $::TODO = "$^O returns a pid and doesn't throw an exception"
 	if $^O eq 'MSWin32';
+	local $::TODO = "perls compiled with -DUSE_SHELL_ALWAYS return a pid and "
+	              . "spew warnings on STDERR" if $Config{d_useshellcmds};
     $pid = eval { open3 'WRITE', 'READ', 'ERROR', '/non/existent/program'; };
     isnt($@, '',
 	 'open3 of a non existent program fails with an exception in the parent')
