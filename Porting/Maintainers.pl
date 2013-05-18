@@ -754,14 +754,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'File::CheckTree' => {
-        'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'RJBS/File-CheckTree-4.42.tar.gz',
-        'FILES'        => q[cpan/File-CheckTree],
-        'EXCLUDED'     => [qr{^t/release-.*\.t}],
-        'UPSTREAM'     => 'cpan',
-    },
-
     'File::DosGlob' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/File-DosGlob],
