@@ -6,6 +6,8 @@ BEGIN {
     require './test.pl';
 }
 
+use Config;
+
 my $vms_exit_mode = 0;
 
 if ($^O eq 'VMS') {
@@ -149,8 +151,12 @@ TODO: {
         last TODO;
     }
 
-    ok( !exec("lskdjfalksdjfdjfkls"), 
-        "exec failure doesn't terminate process");
+    SKIP: {
+        skip "under -DUSE_SHELL_ALWAYS, perl won't return from a failed exec", 1
+            if $Config{d_useshellcmds};
+        ok( !exec("lskdjfalksdjfdjfkls"),
+            "exec failure doesn't terminate process");
+    }
 }
 
 my $test = curr_test();
