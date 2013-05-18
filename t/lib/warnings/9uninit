@@ -1586,11 +1586,11 @@ use warnings 'uninitialized';
 # *** getlogin not tested
 EXPECT
 ########
-use warnings 'uninitialized';
-if ($^O eq 'MSWin32') {
+use Config; use warnings 'uninitialized';
+if ($^O eq 'MSWin32' || $Config{d_useshellcmds}) {
     print <<'EOM';
 SKIPPED
-# `` produces an error on STDERR on Win32
+# `` produces an error on STDERR on Win32, or if compiled with -DUSE_SHELL_ALWAYS
 EOM
     exit;
 } 
@@ -1600,11 +1600,11 @@ $v = 1 + `$nocmd`;
 EXPECT
 Use of uninitialized value in addition (+) at - line 11.
 ########
-use warnings 'uninitialized';
-if ($^O eq 'MSWin32') {
+use Config; use warnings 'uninitialized';
+if ($^O eq 'MSWin32' || $Config{d_useshellcmds}) {
     print <<'EOM';
 SKIPPED
-# qx produces an error on STDERR on Win32
+# qx produces an error on STDERR on Win32, or if compiled with -DUSE_SHELL_ALWAYS
 EOM
     exit;
 } 
