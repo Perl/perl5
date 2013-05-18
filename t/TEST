@@ -48,7 +48,6 @@ my %abs = (
 	   '../cpan/Package-Constants' => 1,
 	   '../cpan/Parse-CPAN-Meta' => 1,
 	   '../cpan/Pod-Simple' => 1,
-	   '../cpan/Term-UI' => 1,
 	   '../cpan/Test-Simple' => 1,
 	   '../cpan/podlators' => 1,
 	   '../dist/Cwd' => 1,

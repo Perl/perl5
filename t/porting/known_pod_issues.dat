@@ -154,6 +154,8 @@ String::Base
 String::Scanf
 Switch
 tar(1)
+Term::UI
+Term::UI::History
 Test::Harness::TAP
 Test::Inline
 Test::MockObject

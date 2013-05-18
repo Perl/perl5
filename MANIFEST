@@ -2081,11 +2081,6 @@ cpan/Term-ANSIColor/t/stringify.t		Tests for Term::ANSIColor
 cpan/Term-ANSIColor/t/taint.t
 cpan/Term-Cap/Cap.pm			Perl module supporting termcap usage
 cpan/Term-Cap/test.pl			See if Term::Cap works
-cpan/Term-UI/lib/Term/UI/History.pm	Term::UI
-cpan/Term-UI/lib/Term/UI.pm		Term::UI
-cpan/Term-UI/t/00_load.t		Term::UI tests
-cpan/Term-UI/t/01_history.t		Term::UI tests
-cpan/Term-UI/t/02_ui.t			Term::UI tests
 cpan/Test-Harness/bin/prove				The prove harness utility
 cpan/Test-Harness/Changes				Test::Harness change log
 cpan/Test-Harness/lib/App/Prove.pm			Gubbins for the prove utility

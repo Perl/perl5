@@ -1682,14 +1682,6 @@ use File::Glob qw(:case);
         'UPSTREAM'     => 'blead',
     },
 
-    'Term::UI' => {
-        'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Term-UI-0.34.tar.gz',
-        'FILES'        => q[cpan/Term-UI],
-        'UPSTREAM'     => 'cpan',
-        'DEPRECATED'   => '5.017009',
-    },
-
     'Test' => {
         'MAINTAINER'   => 'jesse',
         'DISTRIBUTION' => 'JESSE/Test-1.26.tar.gz',
