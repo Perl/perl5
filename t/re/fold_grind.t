@@ -131,6 +131,8 @@ my %tests; # The set of tests.
 #          7838 # LATIN_CAPITAL_LETTER_SHARP_S
 #        ],
 
+my %folds;          # keys are code points that fold;
+                    # values are each a list of code points the key folds to
 my %inverse_folds;  # keys are strings of the folded-to;
                     # values are lists of characters that fold to them
 
@@ -267,8 +269,11 @@ if (ord('A') == 65
         next if $fold_type eq 'S';  # If Unicode's tables are correct, the F
                                     # should be a superset of S
 
-        my $folded_str = pack ("U0U*", map { hex $_ } @hex_folded);
-        push @{$inverse_folds{$folded_str}}, chr hex $hex_from;
+        my $from = hex $hex_from;
+        my @to = map { hex $_ } @hex_folded;
+        @{$folds{$from}} = @to;
+        my $folded_str = pack ("U0U*", @to);
+        push @{$inverse_folds{$folded_str}}, chr $from;
     }
 }
 else {  # Here, can't use the .txt file: read the Unicode rules file and
@@ -287,8 +292,9 @@ else {  # Here, can't use the .txt file: read the Unicode rules file and
         my $adjust = -1;
         for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
             $adjust++;
-            my $folded_str
-                        = pack "U0U*", map { $_ + $adjust } @{$invmap_ref->[$i]};
+            my @to = map { $_ + $adjust } @{$invmap_ref->[$i]};
+            push @{$folds{$j}}, @to;
+            my $folded_str = pack "U0U*", @to;
             #note (sprintf "%d: %04X: %s", __LINE__, $j, join " ",
             #    map { sprintf "%04X", $_  + $adjust } @{$invmap_ref->[$i]});
             push @{$inverse_folds{$folded_str}}, chr $j;
@@ -502,6 +508,34 @@ foreach my $test (sort { numerically } keys %tests) {
         # it on one set in the other ranges just to make sure it doesn't break
         # them.
         if ($charset eq 'aa') {
+
+          # It may be that this $pair of code points to test are both
+          # non-ascii, but if either of them actually fold to ascii, that is
+          # suspect and should be tested.  So for /aa, use whether their folds
+          # are ascii or not
+          my $target_has_ascii = $target_has_ascii;
+          my $pattern_has_ascii = $pattern_has_ascii;
+          if (! $target_has_ascii) {
+            foreach my $cp (@target) {
+              if (exists $folds{$cp}
+                  && grep { ord_native_to_latin1($_) < 128 } @{$folds{$cp}} )
+              {
+                  $target_has_ascii = 1;
+                  last;
+              }
+            }
+          }
+          if (! $pattern_has_ascii) {
+            foreach my $cp (@pattern) {
+              if (exists $folds{$cp}
+                  && grep { ord_native_to_latin1($_) < 128 } @{$folds{$cp}} )
+              {
+                  $pattern_has_ascii = 1;
+                  last;
+              }
+            }
+          }
+
           if (! $target_has_ascii && ! $pattern_has_ascii) {
             if ($target_above_latin1 || $pattern_above_latin1) {
               next if defined $has_tested_aa_above_latin1
@@ -528,7 +562,31 @@ foreach my $test (sort { numerically } keys %tests) {
 
           # For l, don't need to test beyond one set those things that are
           # all above latin1, because unlikely to have different successes
-          # than /u
+          # than /u.  But, for the same reason as described in the /aa above,
+          # it is suspect and should be tested, if either of the folds are to
+          # latin1.
+          my $target_has_latin1 = $target_has_latin1;
+          my $pattern_has_latin1 = $pattern_has_latin1;
+          if (! $target_has_latin1) {
+            foreach my $cp (@target) {
+              if (exists $folds{$cp}
+                  && grep { $_ < 256 } @{$folds{$cp}} )
+              {
+                $target_has_latin1 = 1;
+                last;
+              }
+            }
+          }
+          if (! $pattern_has_latin1) {
+            foreach my $cp (@pattern) {
+              if (exists $folds{$cp}
+                  && grep { $_ < 256 } @{$folds{$cp}} )
+              {
+                $pattern_has_latin1 = 1;
+                last;
+              }
+            }
+          }
           if (! $target_has_latin1 && ! $pattern_has_latin1) {
             next if defined $has_tested_above_latin1_l
                     && $has_tested_above_latin1_l != $test;
