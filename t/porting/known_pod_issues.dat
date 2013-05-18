@@ -97,6 +97,7 @@ Moose
 MRO::Compat
 nl_langinfo(3)
 Number::Format
+Object::Accessor
 Object::InsideOut
 Object::Tiny
 open(2)

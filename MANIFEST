@@ -1671,14 +1671,6 @@ cpan/NEXT/t/dynamically_scoped_regex_vars.t	NEXT
 cpan/NEXT/t/next.t		NEXT
 cpan/NEXT/t/stringify.t		NEXT
 cpan/NEXT/t/unseen.t		NEXT
-cpan/Object-Accessor/lib/Object/Accessor.pm		Object::Accessor
-cpan/Object-Accessor/t/00_Object-Accessor.t		Object::Accessor tests
-cpan/Object-Accessor/t/01_Object-Accessor-Subclassed.t	Object::Accessor tests
-cpan/Object-Accessor/t/02_Object-Accessor-allow.t	Object::Accessor tests
-cpan/Object-Accessor/t/03_Object-Accessor-local.t	Object::Accessor tests
-cpan/Object-Accessor/t/04_Object-Accessor-lvalue.t	Object::Accessor tests
-cpan/Object-Accessor/t/05_Object-Accessor-callback.t	Object::Accessor tests
-cpan/Object-Accessor/t/06_Object-Accessor-alias.t	Object::Accessor tests
 cpan/Package-Constants/lib/Package/Constants.pm	Package::Constants
 cpan/Package-Constants/t/01_list.t		Package::Constants tests
 cpan/Params-Check/lib/Params/Check.pm	Params::Check

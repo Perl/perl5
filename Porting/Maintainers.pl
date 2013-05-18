@@ -1291,14 +1291,6 @@ use File::Glob qw(:case);
         'UPSTREAM'     => 'cpan',
     },
 
-    'Object::Accessor' => {
-        'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Object-Accessor-0.46.tar.gz',
-        'FILES'        => q[cpan/Object-Accessor],
-        'UPSTREAM'     => 'cpan',
-        'DEPRECATED'   => '5.017009',
-    },
-
     'ODBM_File' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/ODBM_File],
