@@ -2119,8 +2119,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->warned = FALSE;
-    /* Mark beginning of line for ^ and lookbehind. */
-    reginfo->bol = startpos; /* XXX not used ??? */
     reginfo->strbeg  = strbeg;
     reginfo->sv = sv;
 
@@ -3642,10 +3640,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	switch (state_num) {
 	case BOL: /*  /^../  */
 	    if (locinput == reginfo->strbeg)
-	    {
-		/* reginfo->till = reginfo->bol; */
 		break;
-	    }
 	    sayNO;
 
 	case MBOL: /*  /^../m  */

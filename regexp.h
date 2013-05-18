@@ -581,7 +581,6 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 
 typedef struct {
     REGEXP *prog;
-    char *bol;
     const char * strbeg; /* real start of string */
     char *strend;   /* one byte beyond last char of match string */
     char *till;
