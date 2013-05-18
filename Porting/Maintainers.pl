@@ -1749,21 +1749,6 @@ use File::Glob qw(:case);
         'UPSTREAM' => undef,
     },
 
-    'Text::Soundex' => {
-        'MAINTAINER'   => 'markm',
-        'DISTRIBUTION' => 'RJBS/Text-Soundex-3.04.tar.gz',
-        'FILES'        => q[cpan/Text-Soundex],
-        'MAP'          => {
-            '' => 'cpan/Text-Soundex/',
-
-            # XXX these two files are clearly related,
-            # but they appear to have diverged
-            # considerably over the years
-            'test.pl' => 'cpan/Text-Soundex/t/Soundex.t',
-        },
-        'UPSTREAM' => undef,
-    },
-
     'Text-Tabs+Wrap' => {
         'MAINTAINER'   => 'muir',
         'DISTRIBUTION' => 'MUIR/modules/Text-Tabs+Wrap-2012.0818.tar.gz',

@@ -2430,11 +2430,6 @@ cpan/Text-Balanced/t/09_gentag.t	See if Text::Balanced works
 cpan/Text-ParseWords/lib/Text/ParseWords.pm	Perl module to split words on arbitrary delimiter
 cpan/Text-ParseWords/t/ParseWords.t		See if Text::ParseWords works
 cpan/Text-ParseWords/t/taint.t			See if Text::ParseWords works with tainting
-cpan/Text-Soundex/Changes	Changelog for Text::Soundex
-cpan/Text-Soundex/README	README for Text::Soundex
-cpan/Text-Soundex/Soundex.pm	Text::Soundex extension Perl module
-cpan/Text-Soundex/Soundex.xs	Text::Soundex extension external subroutines
-cpan/Text-Soundex/t/Soundex.t	test for Text::Soundex
 cpan/Text-Tabs/CHANGELOG		ChangeLog for Tabs+Wrap
 cpan/Text-Tabs/lib/Text/Tabs.pm		Do expand and unexpand
 cpan/Text-Tabs/lib/Text/Wrap.pm		Paragraph formatter
