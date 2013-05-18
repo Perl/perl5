@@ -1168,19 +1168,19 @@ EXTCONST U32 PL_charclass[];
 
 /* Use table lookup for speed; return error character for input
  * out-of-range */
-#define toLOWER_LATIN1(c)    (FITS_IN_8_BITS(c)                            \
-                             ? UNI_TO_NATIVE(PL_latin1_lc[                 \
-                                               NATIVE_TO_UNI( (U8) (c)) ]) \
-                             : UNICODE_REPLACEMENT)
+#define toLOWER_LATIN1(c)    ((! FITS_IN_8_BITS(c))                        \
+                             ? (c)                                           \
+                             : UNI_TO_NATIVE(PL_latin1_lc[                 \
+                                               NATIVE_TO_UNI( (U8) (c)) ]))
 #define toLOWER_L1(c)    toLOWER_LATIN1(c)  /* Synonym for consistency */
 
 /* Modified uc.  Is correct uc except for three non-ascii chars which are
  * all mapped to one of them, and these need special handling; error
  * character for input out-of-range */
-#define toUPPER_LATIN1_MOD(c) (FITS_IN_8_BITS(c)                           \
-                              ? UNI_TO_NATIVE(PL_mod_latin1_uc[            \
-                                               NATIVE_TO_UNI( (U8) (c)) ]) \
-                              : UNICODE_REPLACEMENT)
+#define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
+                               ? (c)                                         \
+                               : UNI_TO_NATIVE(PL_mod_latin1_uc[           \
+                                               NATIVE_TO_UNI( (U8) (c)) ]))
 
 #ifdef USE_NEXT_CTYPE
 
