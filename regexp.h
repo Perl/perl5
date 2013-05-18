@@ -157,8 +157,13 @@ typedef struct regexp_engine {
     I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
                      char* strbeg, I32 minend, SV* screamer,
                      void* data, U32 flags);
-    char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
-                       char *strend, const U32 flags,
+    char*   (*intuit) (pTHX_
+                        REGEXP * const rx,
+                        SV *sv,
+                        const char * const strbeg,
+                        char *strpos,
+                        char *strend,
+                        const U32 flags,
                        re_scream_pos_data *data);
     SV*     (*checkstr) (pTHX_ REGEXP * const rx);
     void    (*free) (pTHX_ REGEXP * const rx);

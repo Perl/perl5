@@ -1438,9 +1438,8 @@ PP(pp_match)
     }
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT &&
 	DO_UTF8(TARG) == (RX_UTF8(rx) != 0)) {
-	/* FIXME - can PL_bostr be made const char *?  */
-	PL_bostr = (char *)truebase;
-	s = CALLREG_INTUIT_START(rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
+	s = CALLREG_INTUIT_START(rx, TARG, truebase,
+                        (char *)s, (char *)strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
@@ -2256,8 +2255,7 @@ PP(pp_subst)
 
     orig = m = s;
     if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
-	PL_bostr = orig;
-	s = CALLREG_INTUIT_START(rx, TARG, s, strend, r_flags, NULL);
+	s = CALLREG_INTUIT_START(rx, TARG, orig, s, strend, r_flags, NULL);
 
 	if (!s)
 	    goto ret_no;

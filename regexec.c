@@ -588,9 +588,29 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
    The nodes of the REx which we used for the search should have been
    deleted from the finite automaton. */
 
+/* args:
+ * rx:     the regex to match against
+ * sv:     the SV being matched: only used for utf8 flag; the string
+ *         itself is accessed via the pointers below. Note that on
+ *         something like an overloaded SV, SvPOK(sv) may be false
+ *         and the string pointers may point to something unrelated to
+ *         the SV itself.
+ * strbeg: real beginning of string
+ * strpos: the point in the string at which to begin matching
+ * strend: pointer to the byte following the last char of the string
+ * flags   currently unused; set to 0
+ * data:   currently unused; set to NULL
+ */
+
 char *
-Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
-		     char *strend, const U32 flags, re_scream_pos_data *data)
+Perl_re_intuit_start(pTHX_
+                    REGEXP * const rx,
+                    SV *sv,
+                    const char * const strbeg,
+                    char *strpos,
+                    char *strend,
+                    const U32 flags,
+                    re_scream_pos_data *data)
 {
     dVAR;
     struct regexp *const prog = ReANY(rx);
@@ -599,7 +619,6 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     I32 end_shift   = 0;
     char *s;
     SV *check;
-    char *strbeg;
     char *t;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
     I32 ml_anch;
@@ -624,12 +643,6 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 
     is_utf8_pat = cBOOL(RX_UTF8(rx));
 
-    DEBUG_EXECUTE_r( 
-        debug_start_match(rx, utf8_target, strpos, strend,
-            sv ? "Guessing start of match in sv for"
-               : "Guessing start of match in string for");
-	      );
-
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -637,20 +650,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	goto fail;
     }
 
-    /* XXX we need to pass strbeg as a separate arg: the following is
-     * guesswork and can be wrong... */
-    if (sv && SvPOK(sv)) {
-        char * p   = SvPVX(sv);
-        STRLEN cur = SvCUR(sv); 
-        if (p <= strpos && strpos < p + cur) {
-            strbeg = p;
-            assert(p <= strend && strend <= p + cur);
-        }
-        else
-            strbeg = strend - cur;
-    }
-    else 
-        strbeg = strpos;
+    PL_bostr = (char *)strbeg;
 
     reginfo->strend = strend;
     reginfo->is_utf8_pat = is_utf8_pat;
@@ -676,8 +676,6 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	if (!ml_anch) {
 	  if ( !(prog->extflags & RXf_ANCH_GPOS) /* Checked by the caller */
 		&& !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
-	       /* SvCUR is not set on references: SvRV and SvPVX_const overlap */
-	       && sv && !SvROK(sv)
 	       && (strpos != strbeg)) {
 	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;
@@ -1051,8 +1049,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
       try_at_start:
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
-	if (ml_anch && sv && !SvROK(sv)	/* See prev comment on SvROK */
-	    && (strpos != strbeg) && strpos[-1] != '\n'
+	if (ml_anch && (strpos != strbeg) && strpos[-1] != '\n'
 	    /* May be due to an implicit anchor of m{.*foo}  */
 	    && !(prog->intflags & PREGf_IMPLICIT))
 	{
@@ -2194,7 +2191,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
 	d.scream_olds = &scream_olds;
 	d.scream_pos = &scream_pos;
-	s = re_intuit_start(rx, sv, s, strend, flags, &d);
+	s = re_intuit_start(rx, sv, strbeg, s, strend, flags, &d);
 	if (!s) {
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not present...\n"));
 	    goto phooey;	/* not present */
@@ -2232,7 +2229,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                             goto phooey;
                         }
                         if (prog->extflags & RXf_USE_INTUIT) {
-                            s = re_intuit_start(rx, sv, s + UTF8SKIP(s), strend, flags, NULL);
+                            s = re_intuit_start(rx, sv, strbeg,
+                                    s + UTF8SKIP(s), strend, flags, NULL);
                             if (!s) {
                                 goto phooey;
                             }
@@ -2255,7 +2253,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                             goto phooey;
                         }
                         if (prog->extflags & RXf_USE_INTUIT) {
-                            s = re_intuit_start(rx, sv, s + 1, strend, flags, NULL);
+                            s = re_intuit_start(rx, sv, strbeg,
+                                        s + 1, strend, flags, NULL);
                             if (!s) {
                                 goto phooey;
                             }
