@@ -444,6 +444,12 @@ foreach my $test_ref (@CF) {
     }
 }
 
+{
+    use feature qw( fc );
+    use locale;
+    is(fc("\x{1E9E}"), fc("\x{17F}\x{17F}"), 'fc("\x{1E9E}") eq fc("\x{17F}\x{17F}")');
+}
+
 my $num_tests = curr_test() - 1;
 
 plan($num_tests);

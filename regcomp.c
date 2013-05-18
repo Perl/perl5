@@ -2686,29 +2686,37 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      this file makes sure that in EXACTFU nodes, the sharp s gets folded to
  *      'ss', even if the pattern isn't UTF-8.  This avoids the issues
  *      described in the next item.
- * 4)   A problem remains for the sharp s in EXACTF nodes.  Whether it matches
- *      'ss' or not is not knowable at compile time.  It will match iff the
- *      target string is in UTF-8, unlike the EXACTFU nodes, where it always
- *      matches; and the EXACTFL and EXACTFA nodes where it never does.  Thus
- *      it can't be folded to "ss" at compile time, unlike EXACTFU does (as
- *      described in item 3).  An assumption that the optimizer part of
- *      regexec.c (probably unwittingly) makes is that a character in the
- *      pattern corresponds to at most a single character in the target string.
- *      (And I do mean character, and not byte here, unlike other parts of the
- *      documentation that have never been updated to account for multibyte
- *      Unicode.)  This assumption is wrong only in this case, as all other
- *      cases are either 1-1 folds when no UTF-8 is involved; or is true by
- *      virtue of having this file pre-fold UTF-8 patterns.   I'm
- *      reluctant to try to change this assumption, so instead the code punts.
- *      This routine examines EXACTF nodes for the sharp s, and returns a
- *      boolean indicating whether or not the node is an EXACTF node that
- *      contains a sharp s.  When it is true, the caller sets a flag that later
- *      causes the optimizer in this file to not set values for the floating
- *      and fixed string lengths, and thus avoids the optimizer code in
- *      regexec.c that makes the invalid assumption.  Thus, there is no
- *      optimization based on string lengths for EXACTF nodes that contain the
- *      sharp s.  This only happens for /id rules (which means the pattern
- *      isn't in UTF-8).
+ * 4)   A problem remains for the sharp s in EXACTF and EXACTFA nodes when the
+ *      pattern isn't in UTF-8. (BTW, there cannot be an EXACTF node with a
+ *      UTF-8 pattern.)  An assumption that the optimizer part of regexec.c
+ *      (probably unwittingly, in Perl_regexec_flags()) makes is that a
+ *      character in the pattern corresponds to at most a single character in
+ *      the target string.  (And I do mean character, and not byte here, unlike
+ *      other parts of the documentation that have never been updated to
+ *      account for multibyte Unicode.)  sharp s in EXACTF nodes can match the
+ *      two character string 'ss'; in EXACTFA nodes it can match
+ *      "\x{17F}\x{17F}".  These violate the assumption, and they are the only
+ *      instances where it is violated.  I'm reluctant to try to change the
+ *      assumption, as the code involved is impenetrable to me (khw), so
+ *      instead the code here punts.  This routine examines (when the pattern
+ *      isn't UTF-8) EXACTF and EXACTFA nodes for the sharp s, and returns a
+ *      boolean indicating whether or not the node contains a sharp s.  When it
+ *      is true, the caller sets a flag that later causes the optimizer in this
+ *      file to not set values for the floating and fixed string lengths, and
+ *      thus avoids the optimizer code in regexec.c that makes the invalid
+ *      assumption.  Thus, there is no optimization based on string lengths for
+ *      non-UTF8-pattern EXACTF and EXACTFA nodes that contain the sharp s.
+ *      (The reason the assumption is wrong only in these two cases is that all
+ *      other non-UTF-8 folds are 1-1; and, for UTF-8 patterns, we pre-fold all
+ *      other folds to their expanded versions.  We can't prefold sharp s to
+ *      'ss' in EXACTF nodes because we don't know at compile time if it
+ *      actually matches 'ss' or not.  It will match iff the target string is
+ *      in UTF-8, unlike the EXACTFU nodes, where it always matches; and
+ *      EXACTFA and EXACTFL where it never does.  In an EXACTFA node in a UTF-8
+ *      pattern, sharp s is folded to "\x{17F}\x{17F}, avoiding the problem;
+ *      but in a non-UTF8 pattern, folding it to that above-Latin1 string would
+ *      require the pattern to be forced into UTF-8, the overhead of which we
+ *      want to avoid.)
  */
 
 #define JOIN_EXACT(scan,min_subtract,has_exactf_sharp_s, flags) \
@@ -2899,13 +2907,30 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
             next_iteration: ;
 	    }
 	}
-	else if (OP(scan) != EXACTFL && OP(scan) != EXACTFA) {
+	else if (OP(scan) == EXACTFA) {
 
-            /* Here, the pattern is not UTF-8.  Look for the multi-char folds
-             * that are all ASCII.  As in the above case, EXACTFL and EXACTFA
-             * nodes can't have multi-char folds to this range (and there are
-             * no existing ones in the upper latin1 range).  In the EXACTF
-             * case we look also for the sharp s, which can be in the final
+            /* Non-UTF-8 pattern, EXACTFA node.  There can't be a multi-char
+             * fold to the ASCII range (and there are no existing ones in the
+             * upper latin1 range).  But, as outlined in the comments preceding
+             * this function, we need to flag any occurrences of the sharp s */
+	    while (s < s_end) {
+                if (*s == LATIN_SMALL_LETTER_SHARP_S) {
+                    *has_exactf_sharp_s = TRUE;
+                    break;
+                }
+                s++;
+                continue;
+            }
+        }
+	else if (OP(scan) != EXACTFL) {
+
+            /* Non-UTF-8 pattern, not EXACTFA nor EXACTFL node.  Look for the
+             * multi-char folds that are all Latin1.  (This code knows that
+             * there are no current multi-char folds possible with EXACTFL,
+             * relying on fold_grind.t to catch any errors if the very unlikely
+             * event happens that some get added in future Unicode versions.)
+             * As explained in the comments preceding this function, we look
+             * also for the sharp s in EXACTF nodes; it can be in the final
              * position.  Otherwise we can stop looking 1 byte earlier because
              * have to find at least two characters for a multi-fold */
 	    const U8* upper = (OP(scan) == EXACTF) ? s_end : s_end -1;

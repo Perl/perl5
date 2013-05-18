@@ -104,6 +104,29 @@ sub multi_char_folds ($) {
         }
     }
 
+    # \x17F is the small LONG S, which folds to 's'.  Both Capital and small
+    # LATIN SHARP S fold to 'ss'.  Therefore, they should also match two 17F's
+    # in a row under regex /i matching.  But under /iaa regex matching, all
+    # three folds to 's' are prohibited, but the sharp S's should still match
+    # two 17F's.  This prohibition causes our regular regex algorithm that
+    # would ordinarily allow this match to fail.  This is the only instance in
+    # all Unicode of this kind of issue.  By adding a special case here, we
+    # can use the regular algorithm (with some other changes elsewhere as
+    # well).
+    #
+    # It would be possible to re-write the above code to automatically detect
+    # and handle this case, and any others that might eventually get added to
+    # the Unicode standard, but I (khw) don't think it's worth it.  I believe
+    # that it's extremely unlikely that more folds to ASCII characters are
+    # going to be added, and if I'm wrong, fold_grind.t has the intelligence
+    # to detect them, and test that they work, at which point another special
+    # case could be added here if necessary.
+    #
+    # No combinations of this with 's' need be added, as any of these
+    # containing 's' are prohibted under /iaa.
+    push @folds, "\"\x{17F}\x{17F}\"";
+
+
     return @folds;
 }
 

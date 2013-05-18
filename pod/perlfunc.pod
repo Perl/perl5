@@ -2174,8 +2174,16 @@ Case Charts available at L<http://www.unicode.org/charts/case/>.
 
 If EXPR is omitted, uses C<$_>.
 
-This function behaves the same way under various pragma, such as in a locale,
-as L</lc> does.
+This function behaves the same way under various pragma, such as within
+S<C<"use feature 'unicode_strings">>, as L</lc> does, with the single
+exception of C<fc> of LATIN CAPITAL LETTER SHARP S (U+1E9E) within the
+scope of S<C<use locale>>.  The foldcase of this character would
+normally be C<"ss">, but as explained in the L</lc> section, case
+changes that cross the 255/256 boundary are problematic under locales,
+and are hence prohibited.  Therefore, this function under locale returns
+instead the string C<"\x{17F}\x{17F}">, which is the LATIN SMALL LETTER
+LONG S.  Since that character itself folds to C<"s">, the string of two
+of them together should be equivalent to a single U+1E9E when foldcased.
 
 While the Unicode Standard defines two additional forms of casefolding,
 one for Turkic languages and one that never maps one character into multiple

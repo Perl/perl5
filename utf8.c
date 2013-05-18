@@ -1783,21 +1783,38 @@ UV
 Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int flags)
 {
     /* Corresponds to to_lower_latin1(); <flags> bits meanings:
+     *	    FOLD_FLAGS_NOMIX_ASCII iff non-ASCII to ASCII folds are prohibited
      *	    FOLD_FLAGS_FULL  iff full folding is to be used;
+     *
+     *	Not to be used for locale folds
      */
 
     UV converted;
 
     PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
 
+    assert (! (flags & FOLD_FLAGS_LOCALE));
+
     if (c == MICRO_SIGN) {
 	converted = GREEK_SMALL_LETTER_MU;
     }
     else if ((flags & FOLD_FLAGS_FULL) && c == LATIN_SMALL_LETTER_SHARP_S) {
+
+        /* If can't cross 127/128 boundary, can't return "ss"; instead return
+         * two U+017F characters, as fc("\df") should eq fc("\x{17f}\x{17f}")
+         * under those circumstances. */
+        if (flags & FOLD_FLAGS_NOMIX_ASCII) {
+            *lenp = 2 * sizeof(LATIN_SMALL_LETTER_LONG_S_UTF8) - 2;
+            Copy(LATIN_SMALL_LETTER_LONG_S_UTF8 LATIN_SMALL_LETTER_LONG_S_UTF8,
+                 p, *lenp, U8);
+            return LATIN_SMALL_LETTER_LONG_S;
+        }
+        else {
 	*(p)++ = 's';
 	*p = 's';
 	*lenp = 2;
 	return 's';
+        }
     }
     else { /* In this range the fold of all other characters is their lower
               case */
@@ -1832,11 +1849,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const U8 flags)
 
     if (c < 256) {
 	UV result = _to_fold_latin1((U8) c, p, lenp,
-				   /* If ASCII-safe, don't allow full folding,
-				    * as that could include SHARP S => ss;
-				    * otherwise there is no crossing of
-				    * ascii/non-ascii in the latin1 range */
-			       (flags & FOLD_FLAGS_NOMIX_ASCII) ? 0 : flags & FOLD_FLAGS_FULL);
+			      flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
 	/* It is illegal for the fold to cross the 255/256 boundary under
 	 * locale; in this case return the original */
 	return (result > 256 && flags & FOLD_FLAGS_LOCALE)
@@ -2773,7 +2786,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	}
 	else {
 	    return _to_fold_latin1(*p, ustrp, lenp,
-                            flags & FOLD_FLAGS_FULL);
+                            flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
 	}
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
@@ -2783,18 +2796,22 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	else {
 	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
                             ustrp, lenp,
-				       /* If ASCII safe, don't allow full
-					* folding, as that could include SHARP
-					* S => ss; otherwise there is no
-					* crossing of ascii/non-ascii in the
-					* latin1 range */
-			       (flags & FOLD_FLAGS_NOMIX_ASCII) ? 0 : flags & FOLD_FLAGS_FULL);
+                            flags & (FOLD_FLAGS_FULL | FOLD_FLAGS_NOMIX_ASCII));
 	}
     }
     else {  /* utf8, ord above 255 */
 	result = CALL_FOLD_CASE(p, ustrp, lenp, flags & FOLD_FLAGS_FULL);
 
-	if ((flags & FOLD_FLAGS_LOCALE)) {
+	if (flags & FOLD_FLAGS_LOCALE) {
+
+            /* Special case this character, as what normally gets returned
+             * under locale doesn't work */
+            if (UTF8SKIP(p) == sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1
+                && memEQ((char *) p, LATIN_CAPITAL_LETTER_SHARP_S_UTF8,
+                          sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1))
+            {
+                goto return_long_s;
+            }
 	    return check_locale_boundary_crossing(p, result, ustrp, lenp);
 	}
 	else if (! (flags & FOLD_FLAGS_NOMIX_ASCII)) {
@@ -2815,6 +2832,12 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 		if (isASCII(*s)) {
 		    /* Crossed, have to return the original */
 		    original = valid_utf8_to_uvchr(p, lenp);
+
+                    /* But in this one instance, there is an alternative we can
+                     * return that is valid */
+                    if (original == LATIN_CAPITAL_LETTER_SHARP_S) {
+                        goto return_long_s;
+                    }
 		    Copy(p, ustrp, *lenp, char);
 		    return original;
 		}
@@ -2841,6 +2864,18 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	*tainted_ptr = TRUE;
     }
     return result;
+
+  return_long_s:
+    /* Certain folds to 'ss' are prohibited by the options, but they do allow
+     * folds to a string of two of these characters.  By returning this
+     * instead, then, e.g.,
+     *      fc("\x{1E9E}") eq fc("\x{17F}\x{17F}")
+     * works. */
+
+    *lenp = 2 * sizeof(LATIN_SMALL_LETTER_LONG_S_UTF8) - 2;
+    Copy(LATIN_SMALL_LETTER_LONG_S_UTF8 LATIN_SMALL_LETTER_LONG_S_UTF8,
+        ustrp, *lenp, U8);
+    return LATIN_SMALL_LETTER_LONG_S;
 }
 
 /* Note:

@@ -1517,7 +1517,7 @@ setlocale(LC_ALL, "C");
             $above_latin1_case_change_delta = -1;
         }
         else {
-            @list = ("", "A", "\xC0", "\x{1E9E}", "\x{100}");
+            @list = ("", "A", "\xC0", "\x{17F}", "\x{100}");
             $ascii_case_change_delta = +32;
             $above_latin1_case_change_delta = +1;
         }
