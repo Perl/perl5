@@ -74,12 +74,12 @@ IPC::Signal
 kill(3)
 langinfo(3)
 Lingua::KO::Hangul::Util
+local::lib
 Log::Message
 Log::Message::Config
 Log::Message::Handlers
 Log::Message::Item
 Log::Message::Simple
-local::lib
 Mail::Send
 man(5)
 man(7)
@@ -243,7 +243,6 @@ pod/perldbmfilter.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	34
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
-pod/perldelta.pod	Apparent internal link is missing its forward slash	3
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
