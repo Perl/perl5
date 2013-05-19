@@ -15469,17 +15469,10 @@ Perl_save_re_context(pTHX)
 
     Copy(&PL_reg_state, state, 1, struct re_save_state);
 
-    PL_reg_oldsaved = NULL;
-    PL_reg_oldsavedlen = 0;
-    PL_reg_oldsavedoffset = 0;
-    PL_reg_oldsavedcoffset = 0;
     PL_reg_maxiter = 0;
     PL_reg_leftiter = 0;
     PL_reg_poscache = NULL;
     PL_reg_poscache_size = 0;
-#ifdef PERL_ANY_COW
-    PL_nrs = NULL;
-#endif
 
     /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
     if (PL_curpm) {

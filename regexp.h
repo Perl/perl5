@@ -576,6 +576,29 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 
 #define FBMrf_MULTILINE	1
 
+
+/* saved state when executing a regex that contains code blocks.
+ * These need restoring at the end of the match, or on croak().
+ * These fields can't be stored in regmatch_info since the latter is
+ * allocated directly on the stack in regexec_flags(), and they need to
+ * exist during a croak() after the stack has been unwound */
+
+typedef struct {
+    regexp *rex;
+    PMOP    *curpm;     /* saved PL_curpm */
+#ifdef PERL_ANY_COW
+    SV      *saved_copy; /* saved saved_copy field from rex */
+#endif
+    char    *subbeg;    /* saved subbeg     field from rex */
+    STRLEN  sublen;     /* saved sublen     field from rex */
+    STRLEN  suboffset;  /* saved suboffset  field from rex */
+    STRLEN  subcoffset; /* saved subcoffset field from rex */
+    MAGIC   *pos_magic; /* pos() magic attached to $_ */
+    I32     pos;        /* the original value of pos() in pos_magic */
+    bool    restored;   /* we have already undone the save */
+    bool    direct;     /* we are calling the destructor directly */
+} regmatch_eval_state;
+
 /* some basic information about the current match that is created by
  * Perl_regexec_flags and then passed to regtry(), regmatch() etc */
 
@@ -587,6 +610,7 @@ typedef struct {
     SV *sv;
     char *ganch;
     char *cutpoint;
+    regmatch_eval_state *eval_state; /* extra saved state for (?{}) */
     bool intuit;    /* re_intuit_start() is the top-level caller */
     bool is_utf8_pat;
     bool warned; /* we have issued a recursion warning; no need for more */
@@ -763,41 +787,22 @@ typedef struct regmatch_slab {
 } regmatch_slab;
 
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
-#define PL_reg_magic		PL_reg_state.re_state_reg_magic
-#define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
-#define PL_reg_oldcurpm		PL_reg_state.re_state_reg_oldcurpm
 #define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
-#define PL_reg_oldsaved		PL_reg_state.re_state_reg_oldsaved
-#define PL_reg_oldsavedlen	PL_reg_state.re_state_reg_oldsavedlen
-#define PL_reg_oldsavedoffset	PL_reg_state.re_state_reg_oldsavedoffset
-#define PL_reg_oldsavedcoffset	PL_reg_state.re_state_reg_oldsavedcoffset
 #define PL_reg_maxiter		PL_reg_state.re_state_reg_maxiter
 #define PL_reg_leftiter		PL_reg_state.re_state_reg_leftiter
 #define PL_reg_poscache		PL_reg_state.re_state_reg_poscache
 #define PL_reg_poscache_size	PL_reg_state.re_state_reg_poscache_size
 #define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
-#define PL_nrs			PL_reg_state.re_state_nrs
 
 struct re_save_state {
-    bool re_state_eval_setup_done;	/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
     /* Space for U8 */
-    I32 re_state_reg_oldpos;		/* from regexec.c */
     I32 re_state_reg_maxiter;		/* max wait until caching pos */
     I32 re_state_reg_leftiter;		/* wait until caching pos */
-    MAGIC *re_state_reg_magic;		/* from regexec.c */
-    PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
     PMOP *re_state_reg_curpm;		/* from regexec.c */
-    char *re_state_reg_oldsaved;	/* old saved substr during match */
-    STRLEN re_state_reg_oldsavedlen;	/* old length of saved substr during match */
-    STRLEN re_state_reg_oldsavedoffset;	/* old offset of saved substr during match */
-    STRLEN re_state_reg_oldsavedcoffset;/* old coffset of saved substr during match */
     STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
     char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     char *re_state_reg_starttry;	/* from regexec.c */
-#ifdef PERL_ANY_COW
-    SV *re_state_nrs;			/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
-#endif
 };
 
 #define SAVESTACK_ALLOC_FOR_RE_SAVE_STATE \

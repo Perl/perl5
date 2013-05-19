@@ -12901,21 +12901,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		Copy(old_state, new_state, 1, struct re_save_state);
 		ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
 
-#ifdef PERL_ANY_COW
-		new_state->re_state_nrs
-		    = sv_dup(old_state->re_state_nrs, param);
-#endif
-		new_state->re_state_reg_magic
-		    = (MAGIC*) any_dup(old_state->re_state_reg_magic, 
-			       proto_perl);
-		new_state->re_state_reg_oldcurpm
-		    = (PMOP*) any_dup(old_state->re_state_reg_oldcurpm, 
-			      proto_perl);
 		new_state->re_state_reg_curpm
 		    = (PMOP*)  any_dup(old_state->re_state_reg_curpm, 
 			       proto_perl);
-		new_state->re_state_reg_oldsaved
-		    = pv_dup(old_state->re_state_reg_oldsaved);
 		new_state->re_state_reg_poscache
 		    = pv_dup(old_state->re_state_reg_poscache);
 		new_state->re_state_reg_starttry

@@ -651,6 +651,7 @@ Perl_re_intuit_start(pTHX_
 	goto fail;
     }
 
+    reginfo->eval_state = NULL;
     reginfo->strbeg = strbeg;
     reginfo->strend = strend;
     reginfo->is_utf8_pat = is_utf8_pat;
@@ -2091,6 +2092,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     multiline = prog->extflags & RXf_PMf_MULTILINE;
+
+    reginfo->eval_state = NULL;
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
 
@@ -2115,7 +2118,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     RX_MATCH_TAINTED_off(rx);
-    PL_reg_state.re_state_eval_setup_done = FALSE;
     PL_reg_maxiter = 0;
 
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
@@ -2602,8 +2604,11 @@ got_it:
     );
     Safefree(swap);
 
-    if (PL_reg_state.re_state_eval_setup_done)
-	S_restore_eval_state(aTHX_ prog);
+    if (reginfo->eval_state) {
+        reginfo->eval_state->direct = TRUE;
+	S_restore_eval_state(aTHX_ reginfo->eval_state);
+    }
+
     if (RXp_PAREN_NAMES(prog)) 
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
 
@@ -2731,8 +2736,12 @@ got_it:
 phooey:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4], PL_colors[5]));
-    if (PL_reg_state.re_state_eval_setup_done)
-	S_restore_eval_state(aTHX_ prog);
+
+    if (reginfo->eval_state) {
+        reginfo->eval_state->direct = TRUE;
+	S_restore_eval_state(aTHX_ reginfo->eval_state);
+    }
+
     if (swap) {
         /* we failed :-( roll it back */
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
@@ -2751,7 +2760,7 @@ phooey:
 /* Set which rex is pointed to by PL_reg_state, handling ref counting.
  * Do inc before dec, in case old and new rex are the same */
 #define SET_reg_curpm(Re2) \
-    if (PL_reg_state.re_state_eval_setup_done) {    \
+    if (reginfo->eval_state) {                      \
 	(void)ReREFCNT_inc(Re2);		    \
 	ReREFCNT_dec(PM_GETRE(PL_reg_curpm));	    \
 	PM_SETRE((PL_reg_curpm), (Re2));	    \
@@ -2776,8 +2785,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 
     reginfo->cutpoint=NULL;
 
-    if ((prog->extflags & RXf_EVAL_SEEN)
-            && !PL_reg_state.re_state_eval_setup_done)
+    if ((prog->extflags & RXf_EVAL_SEEN) && !reginfo->eval_state)
         S_setup_eval_state(aTHX_ reginfo);
 
 #ifdef DEBUGGING
@@ -4914,8 +4922,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
 		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(nop)) );
 
-		rex->offs[0].end = PL_reg_magic->mg_len =
-                                                locinput - reginfo->strbeg;
+		rex->offs[0].end = locinput - reginfo->strbeg;
+                if (reginfo->eval_state->pos_magic)
+                        reginfo->eval_state->pos_magic->mg_len
+                                        = locinput - reginfo->strbeg;
 
                 if (sv_yes_mark) {
                     SV *sv_mrk = get_sv("REGMARK", 1);
@@ -6500,7 +6510,7 @@ yes:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
 			  PL_colors[4], PL_colors[5]));
 
-    if (PL_reg_state.re_state_eval_setup_done) {
+    if (reginfo->eval_state) {
 	/* each successfully executed (?{...}) block does the equivalent of
 	 *   local $^R = do {...}
 	 * When popping the save stack, all these locals would be undone;
@@ -7481,8 +7491,16 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
 {
     MAGIC *mg;
     regexp *const rex = ReANY(reginfo->prog);
+    regmatch_eval_state *eval_state;
 
-    PL_reg_state.re_state_eval_setup_done = TRUE;
+    Newx(eval_state, 1, regmatch_eval_state);
+    assert(!reginfo->eval_state);
+    reginfo->eval_state = eval_state;
+
+    eval_state->restored = FALSE;
+    eval_state->direct   = FALSE;
+    eval_state->rex = rex;
+
     if (reginfo->sv) {
         /* Make $_ available to executed code. */
         if (reginfo->sv != DEFSV) {
@@ -7501,9 +7519,12 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
                              &PL_vtbl_mglob, NULL, 0);
             mg->mg_len = -1;
         }
-        PL_reg_magic    = mg;
-        PL_reg_oldpos   = mg->mg_len;
+        eval_state->pos_magic = mg;
+        eval_state->pos       = mg->mg_len;
     }
+    else
+        eval_state->pos_magic = NULL;
+
     if (!PL_reg_curpm) {
         Newxz(PL_reg_curpm, 1, PMOP);
 #ifdef USE_ITHREADS
@@ -7518,54 +7539,64 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
 #endif
     }
     SET_reg_curpm(reginfo->prog);
-    PL_reg_oldcurpm = PL_curpm;
+    eval_state->curpm = PL_curpm;
     PL_curpm = PL_reg_curpm;
     if (RXp_MATCH_COPIED(rex)) {
         /*  Here is a serious problem: we cannot rewrite subbeg,
             since it may be needed if this match fails.  Thus
             $` inside (?{}) could fail... */
-        PL_reg_oldsaved = rex->subbeg;
-        PL_reg_oldsavedlen = rex->sublen;
-        PL_reg_oldsavedoffset = rex->suboffset;
-        PL_reg_oldsavedcoffset = rex->suboffset;
+        eval_state->subbeg     = rex->subbeg;
+        eval_state->sublen     = rex->sublen;
+        eval_state->suboffset  = rex->suboffset;
+        eval_state->subcoffset = rex->suboffset;
 #ifdef PERL_ANY_COW
-        PL_nrs = rex->saved_copy;
+        eval_state->saved_copy = rex->saved_copy;
 #endif
         RXp_MATCH_COPIED_off(rex);
     }
     else
-        PL_reg_oldsaved = NULL;
+        eval_state->subbeg = NULL;
     rex->subbeg = (char *)reginfo->strbeg;
     rex->suboffset = 0;
     rex->subcoffset = 0;
     rex->sublen = reginfo->strend - reginfo->strbeg;
-    SAVEDESTRUCTOR_X(S_restore_eval_state, rex);
+    SAVEDESTRUCTOR_X(S_restore_eval_state, eval_state);
 }
 
 /* undo the effects of S_setup_eval_state() - can either be called
- * directly, or via a destructor */
+ * directly, or via a destructor. If we get called directly, we'll still
+ * get called again later from the destructor */
 
 static void
 S_restore_eval_state(pTHX_ void *arg)
 {
     dVAR;
-    regexp * const rex = (regexp *)arg;
-    if (PL_reg_state.re_state_eval_setup_done) {
-	if (PL_reg_oldsaved) {
-	    rex->subbeg = PL_reg_oldsaved;
-	    rex->sublen = PL_reg_oldsavedlen;
-	    rex->suboffset = PL_reg_oldsavedoffset;
-	    rex->subcoffset = PL_reg_oldsavedcoffset;
+    regmatch_eval_state * const eval_state = (regmatch_eval_state *)arg;
+    regexp * const rex = eval_state->rex;
+
+    if (!eval_state->restored) {
+	if (eval_state->subbeg) {
+	    rex->subbeg     = eval_state->subbeg;
+	    rex->sublen     = eval_state->sublen;
+	    rex->suboffset  = eval_state->suboffset;
+	    rex->subcoffset = eval_state->subcoffset;
 #ifdef PERL_ANY_COW
-	    rex->saved_copy = PL_nrs;
+	    rex->saved_copy = eval_state->saved_copy;
 #endif
 	    RXp_MATCH_COPIED_on(rex);
 	}
-	PL_reg_magic->mg_len = PL_reg_oldpos;
-	PL_reg_state.re_state_eval_setup_done = FALSE;
-	PL_curpm = PL_reg_oldcurpm;
-    }	
+        if (eval_state->pos_magic)
+            eval_state->pos_magic->mg_len = eval_state->pos;
+	PL_curpm = eval_state->curpm;
+        eval_state->restored = TRUE;
+    }
+    if (eval_state->direct)
+        eval_state->direct = FALSE;
+    else
+        /* we're being called from a destructor rather than directly */
+        Safefree(eval_state);
 }
+
 
 STATIC void
 S_to_utf8_substr(pTHX_ regexp *prog)
