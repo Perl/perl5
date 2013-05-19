@@ -4,6 +4,8 @@ use File::Spec;
 use strict;
 use Config;
 
+use IPC::Cmd qw(can_run);
+
 require Exporter;
 our @ISA = qw(Exporter);
 
@@ -210,6 +212,7 @@ sub make {
     my $make = $Config{make};
     $make = $ENV{MAKE} if exists $ENV{MAKE};
 
+    return if !can_run($make);
     return $make;
 }
 
@@ -223,6 +226,7 @@ Returns the make to run as with make() plus any necessary switches.
 
 sub make_run {
     my $make = make;
+    return if !$make;
     $make .= ' -nologo' if $make eq 'nmake';
 
     return $make;
