@@ -13,6 +13,8 @@ use ExtUtils::Constant qw (C_constant autoload);
 use File::Spec;
 use Cwd;
 
+use IPC::Cmd qw(can_run);
+
 my $do_utf_tests = $] > 5.006;
 my $better_than_56 = $] > 5.007;
 # For debugging set this to 1.
@@ -37,6 +39,11 @@ $^X = $perl;
 my $make = $Config{make};
 $make = $ENV{MAKE} if exists $ENV{MAKE};
 if ($^O eq 'MSWin32' && $make eq 'nmake') { $make .= " -nologo"; }
+
+if ( $Config{usecrosscompile} && !can_run($make) ) {
+    print "1..0 # Cross-compiling and $make isn't available, skupping\n";
+    exit 0;
+}
 
 # VMS may be using something other than MMS/MMK
 my $mms_or_mmk = ($make =~ m/^MM(S|K)/i) ? 1 : 0;
