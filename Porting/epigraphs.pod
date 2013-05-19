@@ -17,6 +17,60 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.18.0 - Yevgeny Zamyatin
+
+L<Announced on 2013-05-18 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201940.html>
+
+It is an error to divide people into the living and the dead: there are people
+who are dead-alive, and people who are alive-alive. The dead-alive also write,
+walk, speak, act. But they make no mistakes; only machines make no mistakes,
+and they produce only dead things. The alive-alive are constantly in error, in
+search, in questions, in torment.
+
+=head2 v5.18.0-RC4 - Joseph Heller, Catch-22
+
+L<Announced on 2013-04-16 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201889.html>
+
+Clevinger was dead. That was the basic flaw in his philosophy.
+
+=head2 v5.18.0-RC3 - Tom Waits, "The Ocean Doesn't Want Me"
+
+L<Announced on 2013-04-14 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201823.html>
+
+  I'd love to go drowning
+  And to stay and to stay
+  But the ocean doesn't want me today
+  I'll go in up to here
+  It can't possibly hurt
+  All they will find is my beer
+  And my shirt
+
+=head2 v5.18.0-RC2 - Tom Waits, "Earth Died Screaming"
+
+L<Announced on 2013-05-12 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201723.html>
+
+  And the great day of wrath has come
+  And here's mud in your big red eye
+  The poker's in the fire
+  And the locusts take the sky
+  And the earth died screaming
+  While I lay dreaming of you
+
+=head2 v5.18.0-RC1 - Tom Waits, "What's He Building in There?"
+
+L<Announced on 2013-05-11 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201651.html>
+
+  What's he building in there?
+
+  We have a right to know…
+
+=head2 v5.17.11 - Nigel Tufnel, This is Spın̈al Tap
+
+L<Announced on 2013-04-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/04/msg201056.html>
+
+It's very special because, if you can see, the numbers all go to…
+eleven!  Look, right across the board: eleven, eleven, eleven, eleven!
+
 =head2 v5.17.10 - Vernor Vinge, A Fire Upon The Deep
 
 L<Announced on 2013-03-22 by Max Maischein|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-03/msg00908.html>
