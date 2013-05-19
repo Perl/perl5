@@ -801,6 +801,24 @@ my %delta = (
         removed => {
         }
     },
+    5.018000 => {
+        delta_from => 5.017011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.019000 => {
+        delta_from => 5.018000,
+        changed => {
+        },
+        removed => {
+            'cpan2dist'             => '1',
+            'cpanp'                 => '1',
+            'cpanp-run-perl'        => '1',
+            'pod2latex'             => '1',
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %delta) {
