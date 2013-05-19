@@ -1,6 +1,12 @@
 use strict;
 use Config qw(%Config);
 use Test;
+BEGIN {
+    if ( $^O ne 'MSWin32' ) {
+        print "1..0 # Skip: Not running on Windows\n";
+        exit 0;
+    }
+}
 use Win32;
 
 my $fork_emulation = $Config{ccflags} =~ /PERL_IMPLICIT_SYS/;

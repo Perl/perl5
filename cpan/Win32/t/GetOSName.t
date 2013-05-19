@@ -1,5 +1,10 @@
 use strict;
 use Test::More;
+BEGIN {
+    if ( $^O ne 'MSWin32' ) {
+        plan skip_all => "Not running on Windows";
+    }
+}
 use Win32;
 
 # The "description" value is extracted from the $pretty field:

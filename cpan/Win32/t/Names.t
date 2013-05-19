@@ -5,6 +5,12 @@ BEGIN {
     print "1..0 # Skip: Test requires Test::More module\n";
     exit 0;
 }
+BEGIN {
+    if ( $^O ne 'MSWin32' ) {
+        print "1..0 # Skip: Not running on Windows\n";
+        exit 0;
+    }
+}
 use Win32;
 
 my $tests = 14;
