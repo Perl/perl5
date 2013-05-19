@@ -46,7 +46,9 @@ ok( grep(/^Writing $makefile for Big::Dummy/,
          @mpl_out) == 1,
                                            'Makefile.PL output looks right');
 
+SKIP: {
 my $make = make_run();
+skip "make is not available", 14 if !$make;
 run("$make");   # this is necessary due to a dmake bug.
 my $install_out = run("$make install");
 is( $?, 0, '  make install exited normally' ) || diag $install_out;
@@ -78,3 +80,4 @@ is( $?, 0, 'realclean' ) || diag($realclean_out);
 
 open(STDERR, ">&SAVERR") or die $!;
 close SAVERR;
+}

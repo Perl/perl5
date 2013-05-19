@@ -11,11 +11,19 @@ use strict;
 use Config;
 use ExtUtils::MakeMaker;
 
-use Test::More
-    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
-    ? (skip_all => "no toolchain installed when cross-compiling")
-    : (tests => 171);
+use Test::More;
 use MakeMaker::Test::Utils;
+my $make;
+BEGIN {
+    $make = make_run();
+    if ( !$make ) {
+        plan skip_all => "make isn't available";
+    }
+    else {
+        plan tests => 171;
+    }
+}
+
 use MakeMaker::Test::Setup::BFD;
 use File::Find;
 use File::Spec;
@@ -65,8 +73,6 @@ my $mtime = (stat($makefile))[9];
 cmp_ok( $Touch_Time, '<=', $mtime,  '  its been touched' );
 
 END { unlink makefile_name(), makefile_backup() }
-
-my $make = make_run();
 
 {
     # Supress 'make manifest' noise

@@ -213,6 +213,7 @@ sub make {
     my $make = $Config{make};
     $make = $ENV{MAKE} if exists $ENV{MAKE};
 
+    return if !can_run($make);
     return $make;
 }
 
@@ -226,6 +227,7 @@ Returns the make to run as with make() plus any necessary switches.
 
 sub make_run {
     my $make = make;
+    return if !$make;
     $make .= ' -nologo' if $make eq 'nmake';
 
     return $make;
@@ -385,6 +387,46 @@ sub slurp {
     close $fh;
 
     return $text;
+}
+
+
+=item can_run
+
+  $exec = can_run($exec);
+
+Returns the executable, possibly with a full path attached, if it can be
+run. Basically IPC::Cmd::can_run.
+
+=cut
+
+sub can_run {
+    my $command = shift;
+
+    # a lot of VMS executables have a symbol defined
+    # check those first
+    if ( $^O eq 'VMS' ) {
+        require VMS::DCLsym;
+        my $syms = VMS::DCLsym->new;
+        return $command if scalar $syms->getsym( uc $command );
+    }
+
+    my @possibles;
+
+    if( File::Spec->file_name_is_absolute($command) ) {
+        return MM->maybe_command($command);
+
+    } else {
+        for my $dir (
+            File::Spec->path,
+            File::Spec->curdir
+        ) {
+            next if ! $dir || ! -d $dir;
+            my $abs = File::Spec->catfile( $^O eq 'MSWin32' ? Win32::GetShortPathName( $dir ) : $dir, $command);
+            push @possibles, $abs if $abs = MM->maybe_command($abs);
+        }
+    }
+
+    return shift @possibles;
 }
 
 =back

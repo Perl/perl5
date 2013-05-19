@@ -58,5 +58,8 @@ my $make     = make_run();
 # Run make once
 {
     run_ok(qq{$perl Makefile.PL});
-    run_ok($make);
+    SKIP: {
+        skip "make isn't available", 1 if !$make;
+        run_ok($make);
+    }
 }

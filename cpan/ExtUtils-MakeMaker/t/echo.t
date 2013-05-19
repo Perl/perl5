@@ -32,6 +32,8 @@ $mm->init_tools;  # need ECHO
 # Run Perl with the currently installing MakeMaker
 $mm->{$_} .= q[ "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"] for qw( PERLRUN FULLPERLRUN ABSPERLRUN );
 
+plan skip_all => "make isn't available" if !$make;
+
 #------------------- Testing functions
 
 sub test_for_echo {

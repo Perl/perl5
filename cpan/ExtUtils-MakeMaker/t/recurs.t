@@ -9,13 +9,17 @@ BEGIN {
 use strict;
 use Config;
 
-use Test::More
-    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
-    ? (skip_all => "no toolchain installed when cross-compiling")
-    : (tests => 26);
-use File::Temp qw[tempdir];
-
+use Test::More;
 use MakeMaker::Test::Utils;
+BEGIN {
+    if ( !make_run() ) {
+        plan(skip_all => "make isn't available");
+    }
+    else {
+        plan(tests => 26);
+    }
+}
+use File::Temp qw[tempdir];
 use MakeMaker::Test::Setup::Recurs;
 
 # 'make disttest' sets a bunch of environment variables which interfere

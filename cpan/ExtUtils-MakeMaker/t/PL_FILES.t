@@ -32,9 +32,12 @@ ok chdir('PL_FILES-Module');
 run(qq{$perl Makefile.PL});
 cmp_ok( $?, '==', 0 );
 
+SKIP: {
+    skip "make is not available", 5 if !$make;
 my $make_out = run("$make");
 is( $?, 0 ) || diag $make_out;
 
 foreach my $file (qw(single.out 1.out 2.out blib/lib/PL/Bar.pm)) {
     ok( -e $file, "$file was created" );
+}
 }

@@ -156,10 +156,11 @@ note "generated files verification"; {
 }
 
 
-note "ppd output"; {
+note "ppd output"; SKIP: {
+    skip "make isn't available", 3 if !$make;
     my $ppd_file = 'Min-PerlVers.ppd';
     my @make_out = run(qq{$make ppd});
-    END { unlink $ppd_file }
+    END { unlink $ppd_file if $ppd_file }
 
     cmp_ok( $?, '==', 0,    'Make ppd exiting normally' ) || diag(@make_out);
 
@@ -171,9 +172,10 @@ note "ppd output"; {
 }
 
 
-note "META.yml output"; {
+note "META.yml output"; SKIP: {
     my $distdir  = 'Min-PerlVers-0.05';
     $distdir =~ s{\.}{_}g if $Is_VMS;
+    skip "make isn't available", 4 if !$make;
 
     my $meta_yml = "$distdir/META.yml";
     my $meta_json = "$distdir/META.json";

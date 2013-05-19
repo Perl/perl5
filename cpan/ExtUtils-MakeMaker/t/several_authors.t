@@ -93,8 +93,9 @@ note "generated files verification"; {
 }
 
 
-note "ppd output"; {
+note "ppd output"; SKIP: {
     my $ppd_file = 'Multiple-Authors.ppd';
+    skip "make isn't available", 3 if !$make;
     my @make_out = run(qq{$make ppd});
     END { unlink $ppd_file }
 
@@ -108,9 +109,10 @@ note "ppd output"; {
 }
 
 
-note "META.yml output"; {
+note "META.yml output"; SKIP: {
     my $distdir  = 'Multiple-Authors-0.05';
     $distdir =~ s{\.}{_}g if $Is_VMS;
+    skip "make isn't available", 5 if !$make;
 
     my $meta_yml = "$distdir/META.yml";
     my $meta_json = "$distdir/META.json";

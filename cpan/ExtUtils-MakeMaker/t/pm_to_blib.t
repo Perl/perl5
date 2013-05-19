@@ -5,23 +5,22 @@
 use strict;
 use lib 't/lib';
 
-use Config;
-use Test::More
-    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
-    ? (skip_all => "no toolchain installed when cross-compiling")
-    : 'no_plan';
-use File::Temp qw[tempdir];
+use Test::More;
 
+use File::Temp qw[tempdir];
 use ExtUtils::MakeMaker;
 
 use MakeMaker::Test::Utils;
+my $make;
+BEGIN {
+    $make = make_run();
+    plan(skip_all => "make isn't available") if !$make;
+}
 use MakeMaker::Test::Setup::BFD;
 
 
 my $perl     = which_perl();
 my $makefile = makefile_name();
-my $make     = make_run();
-
 
 # Setup our test environment
 {
@@ -34,6 +33,7 @@ my $make     = make_run();
     END {
         ok( chdir File::Spec->updir );
         ok( teardown_recurs(), 'teardown' );
+        done_testing;
     }
 
     ok( chdir('Big-Dummy'), "chdir'd to Big-Dummy" ) ||
@@ -74,3 +74,4 @@ my $make     = make_run();
 
     ok( -e "blib/lib/Big/Dummy.pm", "blib copied pm file" );
 }
+
