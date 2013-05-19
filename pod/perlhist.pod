@@ -509,6 +509,8 @@ the strings?).
  Ricardo  5.18.0-RC4    2013-May-15
  Ricardo  5.18.0        2013-May-18
 
+ Ricardo  5.19.0        2013-May-20
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
