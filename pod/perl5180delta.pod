@@ -219,7 +219,7 @@ empty string.
 Several more built-in functions have been added as subroutines to the
 CORE:: namespace - namely, those non-overridable keywords that can be
 implemented without custom parsers: C<defined>, C<delete>, C<exists>,
-C<glob>, C<pos>, C<protoytpe>, C<scalar>, C<split>, C<study>, and C<undef>.
+C<glob>, C<pos>, C<prototype>, C<scalar>, C<split>, C<study>, and C<undef>.
 
 As some of these have prototypes, C<prototype('CORE::...')> has been
 changed to not make a distinction between overridable and non-overridable
