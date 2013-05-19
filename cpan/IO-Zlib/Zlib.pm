@@ -155,7 +155,7 @@ Not yet supported.
 
 If the external F<gzip> is used, the following C<open>s are used:
 
-    open(FH, "gzip -dc $filename |")  # for read opens
+    open(FH, "gzip -d -c $filename |")  # for read opens
     open(FH, " | gzip > $filename")   # for write opens
 
 You can modify the 'commands' for example to hardwire
@@ -307,7 +307,7 @@ use Symbol;
 use Tie::Handle;
 
 # These might use some $^O logic.
-my $gzip_read_open   = "gzip -dc %s |";
+my $gzip_read_open   = "gzip -d -c %s |";
 my $gzip_write_open  = "| gzip > %s";
 
 my $gzip_external;
