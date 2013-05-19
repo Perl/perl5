@@ -197,6 +197,7 @@ sub find_in_path {
 }
 
 sub check_compiler {
+  return if $Config{usecrosscompile} && !-e $Config{cc};
   return (1,1) if $ENV{PERL_CORE};
 
   local $SIG{__WARN__} = sub {};
