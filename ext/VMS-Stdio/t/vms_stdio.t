@@ -1,4 +1,10 @@
 # Tests for VMS::Stdio v2.2
+BEGIN {
+    if ( $^O ne 'VMS' ) {
+        print "1..0 # Skip: Not running on VMS\n";
+        exit 0;
+    }
+}
 use VMS::Stdio;
 import VMS::Stdio qw(&flush &getname &rewind &sync &tmpnam);
 

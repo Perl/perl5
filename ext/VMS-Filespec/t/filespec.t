@@ -11,6 +11,9 @@ foreach (<DATA>) {
 }
 
 require 'test.pl';
+if ( $^O ne 'VMS' ) {
+    skip_all("Not running on VMS");
+}
 plan(tests => scalar(2*@tests)+6);
 
 my $vms_unix_rpt;

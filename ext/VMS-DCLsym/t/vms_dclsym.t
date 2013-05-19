@@ -1,3 +1,9 @@
+BEGIN {
+    if ( $^O ne 'VMS' ) {
+        print "1..0 # Skip: Not running on VMS\n";
+        exit 0;
+    }
+}
 print "1..30\n";
 
 require VMS::DCLsym or die "not ok 1\n";
