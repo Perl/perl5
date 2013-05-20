@@ -743,15 +743,6 @@ EXTERN_C int syscall(int, ...);
 EXTERN_C int usleep(unsigned int);
 #endif
 
-/* Funky places that do not have socket stuff. */
-#if defined(__LIBCATAMOUNT__)
-#  define MYSWAP
-#endif
-
-#ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
-#  define MYSWAP
-#endif
-
 #ifdef PERL_CORE
 
 /* macros for correct constant construction */
@@ -803,189 +794,6 @@ EXTERN_C int usleep(unsigned int);
           (((U64)(x) & U64_CONST(0x00ff000000000000)) >> 40) | \
           (((U64)(x) & U64_CONST(0xff00000000000000)) >> 56) ))
 # endif
-
-/*----------------------------------------------------------------------------*/
-# if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678  /*     little-endian     */
-/*----------------------------------------------------------------------------*/
-#  define my_htole16(x)		(x)
-#  define my_letoh16(x)		(x)
-#  define my_htole32(x)		(x)
-#  define my_letoh32(x)		(x)
-#  define my_htobe16(x)		_swab_16_(x)
-#  define my_betoh16(x)		_swab_16_(x)
-#  define my_htobe32(x)		_swab_32_(x)
-#  define my_betoh32(x)		_swab_32_(x)
-#  ifdef HAS_QUAD
-#   define my_htole64(x)	(x)
-#   define my_letoh64(x)	(x)
-#   define my_htobe64(x)	_swab_64_(x)
-#   define my_betoh64(x)	_swab_64_(x)
-#  endif
-#  define my_htoles(x)		(x)
-#  define my_letohs(x)		(x)
-#  define my_htolei(x)		(x)
-#  define my_letohi(x)		(x)
-#  define my_htolel(x)		(x)
-#  define my_letohl(x)		(x)
-#  if SHORTSIZE == 1
-#   define my_htobes(x)		(x)
-#   define my_betohs(x)		(x)
-#  elif SHORTSIZE == 2
-#   define my_htobes(x)		_swab_16_(x)
-#   define my_betohs(x)		_swab_16_(x)
-#  elif SHORTSIZE == 4
-#   define my_htobes(x)		_swab_32_(x)
-#   define my_betohs(x)		_swab_32_(x)
-#  elif SHORTSIZE == 8
-#   define my_htobes(x)		_swab_64_(x)
-#   define my_betohs(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOBES
-#   define PERL_NEED_MY_BETOHS
-#  endif
-#  if INTSIZE == 1
-#   define my_htobei(x)		(x)
-#   define my_betohi(x)		(x)
-#  elif INTSIZE == 2
-#   define my_htobei(x)		_swab_16_(x)
-#   define my_betohi(x)		_swab_16_(x)
-#  elif INTSIZE == 4
-#   define my_htobei(x)		_swab_32_(x)
-#   define my_betohi(x)		_swab_32_(x)
-#  elif INTSIZE == 8
-#   define my_htobei(x)		_swab_64_(x)
-#   define my_betohi(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOBEI
-#   define PERL_NEED_MY_BETOHI
-#  endif
-#  if LONGSIZE == 1
-#   define my_htobel(x)		(x)
-#   define my_betohl(x)		(x)
-#  elif LONGSIZE == 2
-#   define my_htobel(x)		_swab_16_(x)
-#   define my_betohl(x)		_swab_16_(x)
-#  elif LONGSIZE == 4
-#   define my_htobel(x)		_swab_32_(x)
-#   define my_betohl(x)		_swab_32_(x)
-#  elif LONGSIZE == 8
-#   define my_htobel(x)		_swab_64_(x)
-#   define my_betohl(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOBEL
-#   define PERL_NEED_MY_BETOHL
-#  endif
-#  define my_htolen(p,n)	NOOP
-#  define my_letohn(p,n)	NOOP
-#  define my_htoben(p,n)	my_swabn(p,n)
-#  define my_betohn(p,n)	my_swabn(p,n)
-/*----------------------------------------------------------------------------*/
-# elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321  /*     big-endian      */
-/*----------------------------------------------------------------------------*/
-#  define my_htobe16(x)		(x)
-#  define my_betoh16(x)		(x)
-#  define my_htobe32(x)		(x)
-#  define my_betoh32(x)		(x)
-#  define my_htole16(x)		_swab_16_(x)
-#  define my_letoh16(x)		_swab_16_(x)
-#  define my_htole32(x)		_swab_32_(x)
-#  define my_letoh32(x)		_swab_32_(x)
-#  ifdef HAS_QUAD
-#   define my_htobe64(x)	(x)
-#   define my_betoh64(x)	(x)
-#   define my_htole64(x)	_swab_64_(x)
-#   define my_letoh64(x)	_swab_64_(x)
-#  endif
-#  define my_htobes(x)		(x)
-#  define my_betohs(x)		(x)
-#  define my_htobei(x)		(x)
-#  define my_betohi(x)		(x)
-#  define my_htobel(x)		(x)
-#  define my_betohl(x)		(x)
-#  if SHORTSIZE == 1
-#   define my_htoles(x)		(x)
-#   define my_letohs(x)		(x)
-#  elif SHORTSIZE == 2
-#   define my_htoles(x)		_swab_16_(x)
-#   define my_letohs(x)		_swab_16_(x)
-#  elif SHORTSIZE == 4
-#   define my_htoles(x)		_swab_32_(x)
-#   define my_letohs(x)		_swab_32_(x)
-#  elif SHORTSIZE == 8
-#   define my_htoles(x)		_swab_64_(x)
-#   define my_letohs(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOLES
-#   define PERL_NEED_MY_LETOHS
-#  endif
-#  if INTSIZE == 1
-#   define my_htolei(x)		(x)
-#   define my_letohi(x)		(x)
-#  elif INTSIZE == 2
-#   define my_htolei(x)		_swab_16_(x)
-#   define my_letohi(x)		_swab_16_(x)
-#  elif INTSIZE == 4
-#   define my_htolei(x)		_swab_32_(x)
-#   define my_letohi(x)		_swab_32_(x)
-#  elif INTSIZE == 8
-#   define my_htolei(x)		_swab_64_(x)
-#   define my_letohi(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOLEI
-#   define PERL_NEED_MY_LETOHI
-#  endif
-#  if LONGSIZE == 1
-#   define my_htolel(x)		(x)
-#   define my_letohl(x)		(x)
-#  elif LONGSIZE == 2
-#   define my_htolel(x)		_swab_16_(x)
-#   define my_letohl(x)		_swab_16_(x)
-#  elif LONGSIZE == 4
-#   define my_htolel(x)		_swab_32_(x)
-#   define my_letohl(x)		_swab_32_(x)
-#  elif LONGSIZE == 8
-#   define my_htolel(x)		_swab_64_(x)
-#   define my_letohl(x)		_swab_64_(x)
-#  else
-#   define PERL_NEED_MY_HTOLEL
-#   define PERL_NEED_MY_LETOHL
-#  endif
-#  define my_htolen(p,n)	my_swabn(p,n)
-#  define my_letohn(p,n)	my_swabn(p,n)
-#  define my_htoben(p,n)	NOOP
-#  define my_betohn(p,n)	NOOP
-/*----------------------------------------------------------------------------*/
-# else /*                       all other byte-orders                         */
-/*----------------------------------------------------------------------------*/
-#  define PERL_NEED_MY_HTOLE16
-#  define PERL_NEED_MY_LETOH16
-#  define PERL_NEED_MY_HTOBE16
-#  define PERL_NEED_MY_BETOH16
-#  define PERL_NEED_MY_HTOLE32
-#  define PERL_NEED_MY_LETOH32
-#  define PERL_NEED_MY_HTOBE32
-#  define PERL_NEED_MY_BETOH32
-#  ifdef HAS_QUAD
-#   define PERL_NEED_MY_HTOLE64
-#   define PERL_NEED_MY_LETOH64
-#   define PERL_NEED_MY_HTOBE64
-#   define PERL_NEED_MY_BETOH64
-#  endif
-#  define PERL_NEED_MY_HTOLES
-#  define PERL_NEED_MY_LETOHS
-#  define PERL_NEED_MY_HTOBES
-#  define PERL_NEED_MY_BETOHS
-#  define PERL_NEED_MY_HTOLEI
-#  define PERL_NEED_MY_LETOHI
-#  define PERL_NEED_MY_HTOBEI
-#  define PERL_NEED_MY_BETOHI
-#  define PERL_NEED_MY_HTOLEL
-#  define PERL_NEED_MY_LETOHL
-#  define PERL_NEED_MY_HTOBEL
-#  define PERL_NEED_MY_BETOHL
-/*----------------------------------------------------------------------------*/
-# endif /*                     end of byte-order macros                       */
-/*----------------------------------------------------------------------------*/
 
 /* The old value was hard coded at 1008. (4096-16) seems to be a bit faster,
    at least on FreeBSD.  YMMV, so experiment.  */
@@ -3537,36 +3345,70 @@ struct ptr_tbl {
 #define HAS_NTOHS
 #endif
 #ifndef HAS_HTONL
-#if (BYTEORDER & 0xffff) != 0x4321
 #define HAS_HTONS
 #define HAS_HTONL
 #define HAS_NTOHS
 #define HAS_NTOHL
-#define MYSWAP
-#define htons my_swap
-#define htonl my_htonl
-#define ntohs my_swap
-#define ntohl my_ntohl
-#endif
-#else
-#if (BYTEORDER & 0xffff) == 0x4321
-#undef HAS_HTONS
-#undef HAS_HTONL
-#undef HAS_NTOHS
-#undef HAS_NTOHL
-#endif
+#  if (BYTEORDER & 0xffff) == 0x4321
+/* Big endian system, so ntohl, ntohs, htonl and htons do not need to
+   re-order their values. However, to behave identically to the alternative
+   implementations, they should truncate to the correct size.  */
+#    define ntohl(x)    ((x)&0xFFFFFFFF)
+#    define htonl(x)    ntohl(x)
+#    define ntohs(x)    ((x)&0xFFFF)
+#    define htons(x)    ntohs(x)
+#  elif BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+
+/* Note that we can't straight out declare our own htonl and htons because
+   the Win32 build process forcibly undefines HAS_HTONL etc for its miniperl,
+   to avoid the overhead of initialising the socket subsystem, but the headers
+   that *declare* the various functions are still seen. If we declare our own
+   htonl etc they will clash with the declarations in the Win32 headers.  */
+
+PERL_STATIC_INLINE U32
+my_swap32(const U32 x) {
+    return ((x & 0xFF) << 24) | ((x >> 24) & 0xFF)	
+        | ((x & 0x0000FF00) << 8) | ((x & 0x00FF0000) >> 8);
+}
+
+PERL_STATIC_INLINE U16
+my_swap16(const U16 x) {
+    return ((x & 0xFF) << 8) | ((x >> 8) & 0xFF);
+}
+
+#    define htonl(x)    my_swap32(x)
+#    define ntohl(x)    my_swap32(x)
+#    define ntohs(x)    my_swap16(x)
+#    define htons(x)    my_swap16(x)
+#  else
+#    error "Unsupported byteorder"
+/* The C pre-processor doesn't let us return the value of BYTEORDER as part of
+   the error message. Please check the value of the macro BYTEORDER, as defined
+   in config.h. The values of BYTEORDER we expect are
+
+	    big endian  little endian
+   32 bit       0x4321  0x1234
+   64 bit   0x87654321  0x12345678
+
+   If you have a system with a different byte order, please see
+   pod/perlhack.pod for how to submit a patch to add supporting code.
+*/
+#  endif
 #endif
 
 /*
  * Little-endian byte order functions - 'v' for 'VAX', or 'reVerse'.
  * -DWS
  */
-#if BYTEORDER != 0x1234
-# define HAS_VTOHL
-# define HAS_VTOHS
-# define HAS_HTOVL
-# define HAS_HTOVS
-# if BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+#if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+/* Little endian system, so vtohl, vtohs, htovl and htovs do not need to
+   re-order their values. However, to behave identically to the alternative
+   implementations, they should truncate to the correct size.  */
+#  define vtohl(x)      ((x)&0xFFFFFFFF)
+#  define vtohs(x)      ((x)&0xFFFF)
+#  define htovl(x)      vtohl(x)
+#  define htovs(x)      vtohs(x)
+#elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 #  define vtohl(x)	((((x)&0xFF)<<24)	\
 			+(((x)>>24)&0xFF)	\
 			+(((x)&0x0000FF00)<<8)	\
@@ -3574,14 +3416,11 @@ struct ptr_tbl {
 #  define vtohs(x)	((((x)&0xFF)<<8) + (((x)>>8)&0xFF))
 #  define htovl(x)	vtohl(x)
 #  define htovs(x)	vtohs(x)
-# endif
-	/* otherwise default to functions in util.c */
-#ifndef htovs
-short htovs(short n);
-short vtohs(short n);
-long htovl(long n);
-long vtohl(long n);
-#endif
+#else
+#  error "Unsupported byteorder"
+/* If you have need for current perl on PDP-11 or similar, and can help test
+   that blead keeps working on a mixed-endian system, then see
+   pod/perlhack.pod for how to submit patches to things working again.  */
 #endif
 
 /* *MAX Plus 1. A floating point value.

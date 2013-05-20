@@ -2628,11 +2628,6 @@ PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, i
 #define PERL_ARGS_ASSERT_MY_STRFTIME	\
 	assert(fmt)
 
-PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_MY_SWABN	\
-	assert(ptr)
-
 PERL_CALLCONV void	Perl_my_unexec(pTHX);
 PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
 			__attribute__nonnull__(1)
@@ -5345,20 +5340,6 @@ PERL_CALLCONV MEM_SIZE	Perl_malloced_size(void *p)
 	assert(p)
 
 #endif
-#if defined(MYSWAP)
-PERL_CALLCONV long	Perl_my_htonl(pTHX_ long l)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
-PERL_CALLCONV long	Perl_my_ntohl(pTHX_ long l)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
-PERL_CALLCONV short	Perl_my_swap(pTHX_ short s)
-			__attribute__warn_unused_result__
-			__attribute__pure__;
-
-#endif
 #if defined(NO_MATHOMS)
 /* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
 #endif
@@ -6263,7 +6244,7 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 
 #endif
 #if defined(PERL_IN_PP_PACK_C)
-STATIC char *	S_bytes_to_uni(const U8 *start, STRLEN len, char *dest)
+STATIC char *	S_bytes_to_uni(const U8 *start, STRLEN len, char *dest, const bool needs_swap)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
@@ -7610,78 +7591,6 @@ PERL_CALLCONV void	Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const cha
 #define PERL_ARGS_ASSERT_XMLDUMP_VINDENT	\
 	assert(file); assert(pat)
 
-#endif
-#if defined(PERL_NEED_MY_BETOH16)
-PERL_CALLCONV U16	Perl_my_betoh16(U16 n);
-#endif
-#if defined(PERL_NEED_MY_BETOH32)
-PERL_CALLCONV U32	Perl_my_betoh32(U32 n);
-#endif
-#if defined(PERL_NEED_MY_BETOH64)
-PERL_CALLCONV U64	Perl_my_betoh64(U64 n);
-#endif
-#if defined(PERL_NEED_MY_BETOHI)
-PERL_CALLCONV int	Perl_my_betohi(int n);
-#endif
-#if defined(PERL_NEED_MY_BETOHL)
-PERL_CALLCONV long	Perl_my_betohl(long n);
-#endif
-#if defined(PERL_NEED_MY_BETOHS)
-PERL_CALLCONV short	Perl_my_betohs(short n);
-#endif
-#if defined(PERL_NEED_MY_HTOBE16)
-PERL_CALLCONV U16	Perl_my_htobe16(U16 n);
-#endif
-#if defined(PERL_NEED_MY_HTOBE32)
-PERL_CALLCONV U32	Perl_my_htobe32(U32 n);
-#endif
-#if defined(PERL_NEED_MY_HTOBE64)
-PERL_CALLCONV U64	Perl_my_htobe64(U64 n);
-#endif
-#if defined(PERL_NEED_MY_HTOBEI)
-PERL_CALLCONV int	Perl_my_htobei(int n);
-#endif
-#if defined(PERL_NEED_MY_HTOBEL)
-PERL_CALLCONV long	Perl_my_htobel(long n);
-#endif
-#if defined(PERL_NEED_MY_HTOBES)
-PERL_CALLCONV short	Perl_my_htobes(short n);
-#endif
-#if defined(PERL_NEED_MY_HTOLE16)
-PERL_CALLCONV U16	Perl_my_htole16(U16 n);
-#endif
-#if defined(PERL_NEED_MY_HTOLE32)
-PERL_CALLCONV U32	Perl_my_htole32(U32 n);
-#endif
-#if defined(PERL_NEED_MY_HTOLE64)
-PERL_CALLCONV U64	Perl_my_htole64(U64 n);
-#endif
-#if defined(PERL_NEED_MY_HTOLEI)
-PERL_CALLCONV int	Perl_my_htolei(int n);
-#endif
-#if defined(PERL_NEED_MY_HTOLEL)
-PERL_CALLCONV long	Perl_my_htolel(long n);
-#endif
-#if defined(PERL_NEED_MY_HTOLES)
-PERL_CALLCONV short	Perl_my_htoles(short n);
-#endif
-#if defined(PERL_NEED_MY_LETOH16)
-PERL_CALLCONV U16	Perl_my_letoh16(U16 n);
-#endif
-#if defined(PERL_NEED_MY_LETOH32)
-PERL_CALLCONV U32	Perl_my_letoh32(U32 n);
-#endif
-#if defined(PERL_NEED_MY_LETOH64)
-PERL_CALLCONV U64	Perl_my_letoh64(U64 n);
-#endif
-#if defined(PERL_NEED_MY_LETOHI)
-PERL_CALLCONV int	Perl_my_letohi(int n);
-#endif
-#if defined(PERL_NEED_MY_LETOHL)
-PERL_CALLCONV long	Perl_my_letohl(long n);
-#endif
-#if defined(PERL_NEED_MY_LETOHS)
-PERL_CALLCONV short	Perl_my_letohs(short n);
 #endif
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);

@@ -88,38 +88,22 @@ STATIC const packprops_t packprops[512] = {
     0, 0,
     /* L */ sizeof(unsigned long),
     0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* N */ SIZE32,
-#else
-    0,
-#endif
     0, 0, 0, 0,
     /* S */ sizeof(unsigned short),
     0, 0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* V */ SIZE32,
-#else
-    0,
-#endif
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0,
     /* i */ sizeof(int),
     0, 0,
     /* l */ sizeof(long),
     0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* n */ SIZE16,
-#else
-    0,
-#endif
     0, 0, 0, 0,
     /* s */ sizeof(short),
     0, 0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* v */ SIZE16,
-#else
-    0,
-#endif
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -213,19 +197,11 @@ STATIC const packprops_t packprops[512] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* l */ sizeof(long),
     0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* n */ SIZE16,
-#else
-    0,
-#endif
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* s */ sizeof(short),
     0, 0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* v */ SIZE16,
-#else
-    0,
-#endif
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0,
@@ -233,19 +209,11 @@ STATIC const packprops_t packprops[512] = {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* L */ sizeof(unsigned long),
     0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* N */ SIZE32,
-#else
-    0,
-#endif
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     /* S */ sizeof(unsigned short),
     0, 0,
-#if defined(PERL_PACK_CAN_SHRIEKSIGN)
     /* V */ SIZE32,
-#else
-    0,
-#endif
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };

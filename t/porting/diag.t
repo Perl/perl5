@@ -533,8 +533,6 @@ Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
 ioctlsocket not implemented!
-'j' not supported on this platform
-'J' not supported on this platform
 killpg not implemented!
 length() used on %s (did you mean "scalar(%s)"?)
 length() used on %hash (did you mean "scalar(keys %hash)"?)

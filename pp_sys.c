@@ -4942,9 +4942,7 @@ PP(pp_gservent)
 #ifdef HAS_GETSERVBYPORT
 	const char * const proto = POPpbytex;
 	unsigned short port = (unsigned short)POPu;
-#ifdef HAS_HTONS
 	port = PerlSock_htons(port);
-#endif
 	sent = PerlSock_getservbyport(port, (proto && !*proto) ? NULL : proto);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getservbyport");
@@ -4962,11 +4960,7 @@ PP(pp_gservent)
 	PUSHs(sv = sv_newmortal());
 	if (sent) {
 	    if (which == OP_GSBYNAME) {
-#ifdef HAS_NTOHS
 		sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
-#else
-		sv_setiv(sv, (IV)(sent->s_port));
-#endif
 	    }
 	    else
 		sv_setpv(sv, sent->s_name);
@@ -4977,11 +4971,7 @@ PP(pp_gservent)
     if (sent) {
 	mPUSHs(newSVpv(sent->s_name, 0));
 	PUSHs(space_join_names_mortal(sent->s_aliases));
-#ifdef HAS_NTOHS
 	mPUSHi(PerlSock_ntohs(sent->s_port));
-#else
-	mPUSHi(sent->s_port);
-#endif
 	mPUSHs(newSVpv(sent->s_proto, 0));
     }
 

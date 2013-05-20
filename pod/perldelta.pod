@@ -310,9 +310,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Mixed-endian platforms
 
-XXX
+The code supporting C<pack> and C<unpack> operations on mixed endian
+platforms has been removed. We believe that Perl has long been unable to
+build on mixed endian architectures (such as PDP-11s), so we don't think
+that this change will affect any platforms which are able to build v5.18.0.
 
 =back
 
@@ -328,7 +331,10 @@ well.
 
 =item *
 
-XXX
+The functions C<my_swap>, C<my_htonl> and C<my_ntohl> have been removed.
+It is unclear why these functions were ever marked as I<A>, part of the
+API. XS code can't call them directly, as it can't rely on them being
+compiled. Unsurprisingly, no code on CPAN references them.
 
 =back
 

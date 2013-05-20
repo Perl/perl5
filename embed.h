@@ -774,11 +774,6 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(MYSWAP)
-#define my_htonl(a)		Perl_my_htonl(aTHX_ a)
-#define my_ntohl(a)		Perl_my_ntohl(aTHX_ a)
-#define my_swap(a)		Perl_my_swap(aTHX_ a)
-#endif
 #if defined(PERL_GLOBAL_STRUCT)
 #define GetVars()		Perl_GetVars(aTHX)
 #define free_global_struct(a)	Perl_free_global_struct(aTHX_ a)
@@ -1174,7 +1169,6 @@
 #define my_clearenv()		Perl_my_clearenv(aTHX)
 #define my_lstat_flags(a)	Perl_my_lstat_flags(aTHX_ a)
 #define my_stat_flags(a)	Perl_my_stat_flags(aTHX_ a)
-#define my_swabn		Perl_my_swabn
 #define my_unexec()		Perl_my_unexec(aTHX)
 #define newATTRSUB_flags(a,b,c,d,e,f)	Perl_newATTRSUB_flags(aTHX_ a,b,c,d,e,f)
 #define newSTUB(a,b)		Perl_newSTUB(aTHX_ a,b)
@@ -1700,78 +1694,6 @@
 #define xmldump_sub(a)		Perl_xmldump_sub(aTHX_ a)
 #define xmldump_sub_perl(a,b)	Perl_xmldump_sub_perl(aTHX_ a,b)
 #define xmldump_vindent(a,b,c,d)	Perl_xmldump_vindent(aTHX_ a,b,c,d)
-#  endif
-#  if defined(PERL_NEED_MY_BETOH16)
-#define my_betoh16		Perl_my_betoh16
-#  endif
-#  if defined(PERL_NEED_MY_BETOH32)
-#define my_betoh32		Perl_my_betoh32
-#  endif
-#  if defined(PERL_NEED_MY_BETOH64)
-#define my_betoh64		Perl_my_betoh64
-#  endif
-#  if defined(PERL_NEED_MY_BETOHI)
-#define my_betohi		Perl_my_betohi
-#  endif
-#  if defined(PERL_NEED_MY_BETOHL)
-#define my_betohl		Perl_my_betohl
-#  endif
-#  if defined(PERL_NEED_MY_BETOHS)
-#define my_betohs		Perl_my_betohs
-#  endif
-#  if defined(PERL_NEED_MY_HTOBE16)
-#define my_htobe16		Perl_my_htobe16
-#  endif
-#  if defined(PERL_NEED_MY_HTOBE32)
-#define my_htobe32		Perl_my_htobe32
-#  endif
-#  if defined(PERL_NEED_MY_HTOBE64)
-#define my_htobe64		Perl_my_htobe64
-#  endif
-#  if defined(PERL_NEED_MY_HTOBEI)
-#define my_htobei		Perl_my_htobei
-#  endif
-#  if defined(PERL_NEED_MY_HTOBEL)
-#define my_htobel		Perl_my_htobel
-#  endif
-#  if defined(PERL_NEED_MY_HTOBES)
-#define my_htobes		Perl_my_htobes
-#  endif
-#  if defined(PERL_NEED_MY_HTOLE16)
-#define my_htole16		Perl_my_htole16
-#  endif
-#  if defined(PERL_NEED_MY_HTOLE32)
-#define my_htole32		Perl_my_htole32
-#  endif
-#  if defined(PERL_NEED_MY_HTOLE64)
-#define my_htole64		Perl_my_htole64
-#  endif
-#  if defined(PERL_NEED_MY_HTOLEI)
-#define my_htolei		Perl_my_htolei
-#  endif
-#  if defined(PERL_NEED_MY_HTOLEL)
-#define my_htolel		Perl_my_htolel
-#  endif
-#  if defined(PERL_NEED_MY_HTOLES)
-#define my_htoles		Perl_my_htoles
-#  endif
-#  if defined(PERL_NEED_MY_LETOH16)
-#define my_letoh16		Perl_my_letoh16
-#  endif
-#  if defined(PERL_NEED_MY_LETOH32)
-#define my_letoh32		Perl_my_letoh32
-#  endif
-#  if defined(PERL_NEED_MY_LETOH64)
-#define my_letoh64		Perl_my_letoh64
-#  endif
-#  if defined(PERL_NEED_MY_LETOHI)
-#define my_letohi		Perl_my_letohi
-#  endif
-#  if defined(PERL_NEED_MY_LETOHL)
-#define my_letohl		Perl_my_letohl
-#  endif
-#  if defined(PERL_NEED_MY_LETOHS)
-#define my_letohs		Perl_my_letohs
 #  endif
 #  if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)

@@ -888,11 +888,6 @@ Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 Apmb	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Ap	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
-#if defined(MYSWAP)
-ApPR	|short	|my_swap	|short s
-ApPR	|long	|my_htonl	|long l
-ApPR	|long	|my_ntohl	|long l
-#endif
 : Used in pp_ctl.c
 p	|void	|my_unexec
 Apa	|OP*	|newANONLIST	|NULLOK OP* o
@@ -1902,7 +1897,8 @@ sR	|const char *|get_num	|NN const char *patptr|NN I32 *lenptr
 ns	|bool	|need_utf8	|NN const char *pat|NN const char *patend
 ns	|char	|first_symbol	|NN const char *pat|NN const char *patend
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
-snR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
+snR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest \
+	      			|const bool needs_swap
 #endif
 
 #if defined(PERL_IN_PP_CTL_C)
@@ -2462,84 +2458,6 @@ s	|I32	|find_array_subscript|NULLOK const AV *const av \
 sMd	|SV*	|find_uninit_var|NULLOK const OP *const obase \
 		|NULLOK const SV *const uninit_sv|bool top
 #endif
-
-#ifdef PERL_NEED_MY_HTOLE16
-np	|U16	|my_htole16	|U16 n
-#endif
-#ifdef PERL_NEED_MY_LETOH16
-np	|U16	|my_letoh16	|U16 n
-#endif
-#ifdef PERL_NEED_MY_HTOBE16
-np	|U16	|my_htobe16	|U16 n
-#endif
-#ifdef PERL_NEED_MY_BETOH16
-np	|U16	|my_betoh16	|U16 n
-#endif
-#ifdef PERL_NEED_MY_HTOLE32
-np	|U32	|my_htole32	|U32 n
-#endif
-#ifdef PERL_NEED_MY_LETOH32
-np	|U32	|my_letoh32	|U32 n
-#endif
-#ifdef PERL_NEED_MY_HTOBE32
-np	|U32	|my_htobe32	|U32 n
-#endif
-#ifdef PERL_NEED_MY_BETOH32
-np	|U32	|my_betoh32	|U32 n
-#endif
-#ifdef PERL_NEED_MY_HTOLE64
-np	|U64	|my_htole64	|U64 n
-#endif
-#ifdef PERL_NEED_MY_LETOH64
-np	|U64	|my_letoh64	|U64 n
-#endif
-#ifdef PERL_NEED_MY_HTOBE64
-np	|U64	|my_htobe64	|U64 n
-#endif
-#ifdef PERL_NEED_MY_BETOH64
-np	|U64	|my_betoh64	|U64 n
-#endif
-
-#ifdef PERL_NEED_MY_HTOLES
-np	|short	|my_htoles	|short n
-#endif
-#ifdef PERL_NEED_MY_LETOHS
-np	|short	|my_letohs	|short n
-#endif
-#ifdef PERL_NEED_MY_HTOBES
-np	|short	|my_htobes	|short n
-#endif
-#ifdef PERL_NEED_MY_BETOHS
-np	|short	|my_betohs	|short n
-#endif
-#ifdef PERL_NEED_MY_HTOLEI
-np	|int	|my_htolei	|int n
-#endif
-#ifdef PERL_NEED_MY_LETOHI
-np	|int	|my_letohi	|int n
-#endif
-#ifdef PERL_NEED_MY_HTOBEI
-np	|int	|my_htobei	|int n
-#endif
-#ifdef PERL_NEED_MY_BETOHI
-np	|int	|my_betohi	|int n
-#endif
-#ifdef PERL_NEED_MY_HTOLEL
-np	|long	|my_htolel	|long n
-#endif
-#ifdef PERL_NEED_MY_LETOHL
-np	|long	|my_letohl	|long n
-#endif
-#ifdef PERL_NEED_MY_HTOBEL
-np	|long	|my_htobel	|long n
-#endif
-#ifdef PERL_NEED_MY_BETOHL
-np	|long	|my_betohl	|long n
-#endif
-
-: I think that these are only used by the above, which are macros, and in turn
-: currently they are only used in pp_pack.c, but this is in util.c
-np	|void	|my_swabn	|NN void* ptr|int n
 
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|const svtype sv_type
