@@ -4647,8 +4647,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 #if PERL_VERSION < 6
     CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
 #else
-	dSP;
-	int type, count, tagnum;
+	int type, tagnum;
 	SV *cv;
 	SV *sv, *text, *sub, *errsv;
 
@@ -4703,51 +4702,55 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 */
 
         ASSERT(retrieve_cxt->eval, ("retrieve_cxt->eval is not NULL"));
-	if (!SvTRUE(retrieve_cxt->eval)) {
-                if (forgive_me(aTHX))
-                        return SvREFCNT_inc(sub);                        
+	if (SvTRUE(retrieve_cxt->eval)) {
+                int count;
+                dSP;
 
+                ENTER;
+                SAVETMPS;
+
+                /* FIXME: why this? */
+                errsv = get_sv("@", GV_ADD);
+                sv_setpvn(errsv, "", 0);	/* clear $@ */
+
+                if (SvROK(retrieve_cxt->eval) && SvTYPE(SvRV(retrieve_cxt->eval)) == SVt_PVCV) {
+                        PUSHMARK(sp);
+                        XPUSHs(sv_2mortal(newSVsv(sub)));
+                        PUTBACK;
+                        count = call_sv(retrieve_cxt->eval, G_SCALAR);
+                        if (count != 1)
+                                CROAK(("Unexpected return value from $Storable::Eval callback\n"));
+                } else {
+                        eval_sv(sub, G_SCALAR);
+                }
+                SPAGAIN;
+                cv = POPs;
+                PUTBACK;
+
+                if (SvTRUE(errsv)) {
+                        CROAK(("code %s caused an error: %s",
+                               SvPV_nolen(sub), SvPV_nolen(errsv)));
+                }
+                
+                if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
+                        sv = SvRV(cv);
+                } else {
+                        CROAK(("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub)));
+                }
+                
+                SvREFCNT_inc(sv); /* XXX seems to be necessary */
+
+                FREETMPS;
+                LEAVE;
+                /* fix up the dummy entry... */
+                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sv));
+                
+        }
+        else if (!forgive_me(aTHX))
                 CROAK(("Can't eval, please set $Storable::Eval to a true value"));
-	}
+        else
+                return SvREFCNT_inc(sub);                        
 
-	ENTER;
-	SAVETMPS;
-
-        /* FIXME: why this? */
-	errsv = get_sv("@", GV_ADD);
-        sv_setpvn(errsv, "", 0);	/* clear $@ */
-
-	if (SvROK(retrieve_cxt->eval) && SvTYPE(SvRV(retrieve_cxt->eval)) == SVt_PVCV) {
-		PUSHMARK(sp);
-		XPUSHs(sv_2mortal(newSVsv(sub)));
-		PUTBACK;
-		count = call_sv(retrieve_cxt->eval, G_SCALAR);
-		if (count != 1)
-			CROAK(("Unexpected return value from $Storable::Eval callback\n"));
-	} else {
-		eval_sv(sub, G_SCALAR);
-	}
-	SPAGAIN;
-	cv = POPs;
-	PUTBACK;
-
-	if (SvTRUE(errsv)) {
-		CROAK(("code %s caused an error: %s",
-			SvPV_nolen(sub), SvPV_nolen(errsv)));
-	}
-
-	if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
-	    sv = SvRV(cv);
-	} else {
-	    CROAK(("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub)));
-	}
-
-	SvREFCNT_inc(sv); /* XXX seems to be necessary */
-
-	FREETMPS;
-	LEAVE;
-	/* fix up the dummy entry... */
-	av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sv));
 
 	return sv;
 #endif
