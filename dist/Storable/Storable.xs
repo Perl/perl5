@@ -5311,7 +5311,7 @@ static SV *do_retrieve(
 
 	init_retrieve_cxt(aTHX_ &retrieve_cxt, optype);
 
-	retrieve_cxt.is_tainted = f ? 1 : (in ? SvTAINTED(in) : 0);
+	retrieve_cxt.is_tainted = f ? 1 : SvTAINTED(in);
 	TRACEME(("input source is %s", retrieve_cxt.is_tainted ? "tainted" : "trusted"));
 
 	if (!f) {
