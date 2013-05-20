@@ -4443,3 +4443,227 @@ test_isQUOTEMETA(UV ord)
         RETVAL = _isQUOTEMETA(ord);
     OUTPUT:
         RETVAL
+
+UV
+test_toLOWER(UV ord)
+    CODE:
+        RETVAL = toLOWER(ord);
+    OUTPUT:
+        RETVAL
+
+UV
+test_toLOWER_L1(UV ord)
+    CODE:
+        RETVAL = toLOWER_L1(ord);
+    OUTPUT:
+        RETVAL
+
+UV
+test_toLOWER_LC(UV ord)
+    CODE:
+        RETVAL = toLOWER_LC(ord);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toLOWER_uni(UV ord)
+    PREINIT:
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        av = newAV();
+        av_push(av, newSVuv(toLOWER_uni(ord, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toLOWER_utf8(SV * p)
+    PREINIT:
+        U8 *input;
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        input = (U8 *) SvPV(p, len);
+        av = newAV();
+        av_push(av, newSVuv(toLOWER_utf8(input, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+UV
+test_toFOLD(UV ord)
+    CODE:
+        RETVAL = toFOLD(ord);
+    OUTPUT:
+        RETVAL
+
+UV
+test_toFOLD_LC(UV ord)
+    CODE:
+        RETVAL = toFOLD_LC(ord);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toFOLD_uni(UV ord)
+    PREINIT:
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        av = newAV();
+        av_push(av, newSVuv(toFOLD_uni(ord, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toFOLD_utf8(SV * p)
+    PREINIT:
+        U8 *input;
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        input = (U8 *) SvPV(p, len);
+        av = newAV();
+        av_push(av, newSVuv(toFOLD_utf8(input, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+UV
+test_toUPPER(UV ord)
+    CODE:
+        RETVAL = toUPPER(ord);
+    OUTPUT:
+        RETVAL
+
+UV
+test_toUPPER_LC(UV ord)
+    CODE:
+        RETVAL = toUPPER_LC(ord);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toUPPER_uni(UV ord)
+    PREINIT:
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        av = newAV();
+        av_push(av, newSVuv(toUPPER_uni(ord, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toUPPER_utf8(SV * p)
+    PREINIT:
+        U8 *input;
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        input = (U8 *) SvPV(p, len);
+        av = newAV();
+        av_push(av, newSVuv(toUPPER_utf8(input, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+UV
+test_toTITLE(UV ord)
+    CODE:
+        RETVAL = toTITLE(ord);
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toTITLE_uni(UV ord)
+    PREINIT:
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        av = newAV();
+        av_push(av, newSVuv(toTITLE_uni(ord, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
+
+AV *
+test_toTITLE_utf8(SV * p)
+    PREINIT:
+        U8 *input;
+        U8 s[UTF8_MAXBYTES_CASE + 1];
+        STRLEN len;
+        AV *av;
+        SV *utf8;
+    CODE:
+        input = (U8 *) SvPV(p, len);
+        av = newAV();
+        av_push(av, newSVuv(toTITLE_utf8(input, s, &len)));
+
+        utf8 = newSVpvn((char *) s, len);
+        SvUTF8_on(utf8);
+        av_push(av, utf8);
+
+        av_push(av, newSVuv(len));
+        RETVAL = av;
+    OUTPUT:
+        RETVAL
