@@ -628,7 +628,6 @@ Perl_re_intuit_start(pTHX_
     char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
-    bool is_utf8_pat;
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
     regmatch_info *const reginfo = &reginfo_buf;
 #ifdef DEBUGGING
@@ -643,8 +642,6 @@ Perl_re_intuit_start(pTHX_
     RX_MATCH_UTF8_set(rx,utf8_target);
     PL_reg_match_utf8 = cBOOL(utf8_target);
 
-    is_utf8_pat = cBOOL(RX_UTF8(rx));
-
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -655,7 +652,7 @@ Perl_re_intuit_start(pTHX_
     reginfo->eval_state = NULL;
     reginfo->strbeg = strbeg;
     reginfo->strend = strend;
-    reginfo->is_utf8_pat = is_utf8_pat;
+    reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->intuit = 1;
 
     if (utf8_target) {
@@ -3195,7 +3192,7 @@ S_clear_backtrack_stack(pTHX_ void *p)
 }
 static bool
 S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
-        U8* c1_utf8, int *c2p, U8* c2_utf8, bool is_utf8_pat)
+        U8* c1_utf8, int *c2p, U8* c2_utf8, regmatch_info *reginfo)
 {
     /* This function determines if there are one or two characters that match
      * the first character of the passed-in EXACTish node <text_node>, and if
@@ -3252,6 +3249,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     UV c1 = CHRTEST_NOT_A_CP_1;
     UV c2 = CHRTEST_NOT_A_CP_2;
     bool use_chrtest_void = FALSE;
+    const bool is_utf8_pat = reginfo->is_utf8_pat;
 
     /* Used when we have both utf8 input and utf8 output, to avoid converting
      * to/from code points */
@@ -5077,8 +5075,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		/* XXXX This is too dramatic a measure... */
 		PL_reg_maxiter = 0;
 
-		ST.saved_utf8_pat = is_utf8_pat;
-		is_utf8_pat = cBOOL(RX_UTF8(re_sv));
+                is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
 
 		ST.prev_rex = rex_sv;
 		ST.prev_curlyx = cur_curlyx;
@@ -5097,8 +5094,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
-            is_utf8_pat = ST.saved_utf8_pat;
 	    rex_sv = ST.prev_rex;
+            is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 	    SET_reg_curpm(rex_sv);
 	    rex = ReANY(rex_sv);
 	    rexi = RXi_GET(rex);
@@ -5115,8 +5112,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
 	    /* note: this is called twice; first after popping B, then A */
-            is_utf8_pat = ST.saved_utf8_pat;
 	    rex_sv = ST.prev_rex;
+            is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 	    SET_reg_curpm(rex_sv);
 	    rex = ReANY(rex_sv);
 	    rexi = RXi_GET(rex); 
@@ -5743,7 +5740,7 @@ NULL
 		    if (PL_regkind[OP(text_node)] == EXACT) {
                         if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
                            text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
-                           is_utf8_pat))
+                           reginfo))
                         {
                             sayNO;
                         }
@@ -5920,7 +5917,7 @@ NULL
                         friends need to change. */
                         if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
                            text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
-                           is_utf8_pat))
+                           reginfo))
                         {
                             sayNO;
                         }
@@ -6154,14 +6151,13 @@ NULL
 	    fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
-                st->u.eval.saved_utf8_pat = is_utf8_pat;
-		is_utf8_pat = cur_eval->u.eval.saved_utf8_pat;
 
 		st->u.eval.prev_rex = rex_sv;		/* inner */
 
                 /* Save *all* the positions. */
 		st->u.eval.cp = regcppush(rex, 0, maxopenparen);
 		rex_sv = cur_eval->u.eval.prev_rex;
+		is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 		SET_reg_curpm(rex_sv);
 		rex = ReANY(rex_sv);
 		rexi = RXi_GET(rex);
@@ -6776,7 +6772,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         assert(STR_LEN(p) == reginfo->is_utf8_pat ? UTF8SKIP(STRING(p)) : 1);
 
         if (S_setup_EXACTISH_ST_c1_c2(aTHX_ p, &c1, c1_utf8, &c2, c2_utf8,
-                                        reginfo->is_utf8_pat))
+                                        reginfo))
         {
             if (c1 == CHRTEST_VOID) {
                 /* Use full Unicode fold matching */

@@ -685,7 +685,6 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_eval;
 	    struct regmatch_state *prev_curlyx;
 	    REGEXP	*prev_rex;
-	    bool	saved_utf8_pat; /* saved copy of is_utf8_pat */
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
 	    U32        close_paren; /* which close bracket is our end */

@@ -1736,4 +1736,8 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 /(?l:a?\w)/	b	y	$&	b
 m?^xy\?$?	xy?	y	$&	xy?
 
+# check we have the right utf8ness as we switch back and forth between
+# patterns
+^(\x{100}|a)(??{ qr/.?\xF7/d})	a_\xF7	y	-	-
+
 # vim: softtabstop=0 noexpandtab
