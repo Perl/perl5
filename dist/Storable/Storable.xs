@@ -717,7 +717,7 @@ read_i32(pTHX_ retrieve_cxt_t *retrieve_cxt) {
                 if (l)                          \
                         READ_I32(x);            \
                 else                            \
-                        READ_UBYTE(x);          \
+                        READ_UCHAR(x);          \
         } STMT_END
 
 static const char *
