@@ -275,7 +275,6 @@ struct st_store_cxt {
 	IV tagnum;			/* incremented at store time for each seen object */
 	IV classnum;		/* incremented at store time for each seen classname */
 	int netorder;		/* true if network order used */
-	int forgive_me;		/* whether to be forgiving... */
 	int deparse;        /* whether to deparse code refs */
 	int canonical;		/* whether to store hashes sorted by key */
         SV *output_sv;
@@ -296,7 +295,6 @@ struct st_retrieve_cxt {
 	IV classnum;		/* incremented at store time for each seen classname */
 	int netorder;		/* true if network order used */
 	int is_tainted;		/* true if input source is tainted, at retrieve time */
-	int forgive_me;		/* whether to be forgiving... */
 	SV *eval;           /* whether to eval source code */
 #ifndef HAS_RESTRICTED_HASHES
         int derestrict;         /* whether to downgrade restricted hashes */
@@ -1044,7 +1042,6 @@ static void init_store_cxt(
 
         /* FIXME: make everything here a mortal so it gets released when done or croaked */
 	store_cxt->netorder = network_order;
-	store_cxt->forgive_me = -1;			/* Fetched from perl if needed */
 	store_cxt->deparse = -1;				/* Idem */
 	store_cxt->canonical = -1;			/* Idem */
 	store_cxt->tagnum = -1;				/* Reset tag numbers */
@@ -1136,7 +1133,6 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 	 */
 
 	retrieve_cxt->hook  = (HV*)sv_2mortal((SV*)newHV()); /* Caches STORABLE_thaw */
-        retrieve_cxt->forgive_me = -1;
 
 	/*
 	 * If retrieving an old binary version, the retrieve_cxt->retrieve_vtbl variable
@@ -1168,16 +1164,10 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 }
 
 static int
-is_forgiving_retrieve(aTHX_ retrieve_cxt_t *retrieve_cxt) {
-        if (retrieve_cxt->forgive_me < 0)
-                retrieve_cxt->forgive_me = SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD));
-        return retrieve_cxt->forgive_me;
+forgive_me(pTHX) {
+        return SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD));
 }
 
-static int
-is_forgiving_store(aTHX_ store_cxt_t *store_cxt) {
-        SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD));
-}
 
 /***
  *** Predicates.
@@ -2837,15 +2827,11 @@ static int store_other(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	 * Fetch the value from perl only once per store() operation.
 	 */
 
-	if (
-		store_cxt->forgive_me == 0 ||
-		(store_cxt->forgive_me < 0 && !(store_cxt->forgive_me =
-			SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD)) ? 1 : 0))
-	)
+	if (!forgive_me(aTHX))
 		CROAK(("Can't store %s items", sv_reftype(sv, FALSE)));
 
 	warn("Can't store item %s(0x%"UVxf")",
-		sv_reftype(sv, FALSE), PTR2UV(sv));
+             sv_reftype(sv, FALSE), PTR2UV(sv));
 
 	/*
 	 * Store placeholder string as a scalar instead...
@@ -4718,8 +4704,9 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
         ASSERT(retrieve_cxt->eval, ("retrieve_cxt->eval is not NULL"));
 	if (!SvTRUE(retrieve_cxt->eval)) {
-                if (is_forgiving_retrieve(aTHX_ retrieve_cxt))
-			return SvREFCNT_inc(sub);                        
+                if (forgive_me(aTHX))
+                        return SvREFCNT_inc(sub);                        
+
                 CROAK(("Can't eval, please set $Storable::Eval to a true value"));
 	}
 
