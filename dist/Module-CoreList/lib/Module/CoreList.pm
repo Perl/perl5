@@ -8021,10 +8021,12 @@ my %delta = (
     5.019000 => {
         delta_from => 5.018000,
         changed => {
+            'Getopt::Std'           => '1.08',
             'Module::CoreList'      => '2.91',
             'Module::CoreList::TieHashDelta'=> '2.91',
             'Storable'              => '2.42',
             'feature'               => '1.33',
+            'utf8'                  => '1.11',
         },
         removed => {
            'Archive::Extract'      => 1,
