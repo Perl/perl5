@@ -3886,7 +3886,6 @@ fakethr.h			Fake threads header
 feature.h			Feature header
 form.h				Public declarations for formats
 generate_uudmap.c		Generate uudmap.h, the uuencode decoding map
-genpacksizetables.pl		Generate the size tables for pack/unpack
 globals.c			File to declare global symbols (for shared library)
 globvar.sym			Global variables that need hiding when embedded
 gv.c				Glob value code
@@ -4424,6 +4423,7 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.c			generated overload enum (public)
 overload.h			generated overload name table (implementation)
+packsizetables.c		The generated packprops array used in pp_pack.c
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 parser.h			parser object header
@@ -4712,6 +4712,7 @@ regcomp.sym			Data for regnodes.h
 regen/embed_lib.pl		Reads embed.fnc and regen/opcodes
 regen/embed.pl			Produces {embed,embedvar,proto}.h
 regen/feature.pl		Generates feature.pm
+regen/genpacksizetables.pl	Generate the size tables for pack/unpack
 regen/keywords.pl		Program to write keywords.h
 regen/mg_vtable.pl		generate mg_vtable.h
 regen/mk_invlists.pl		Generates charclass_invlists.h
