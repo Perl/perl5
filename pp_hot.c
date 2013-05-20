@@ -1358,8 +1358,6 @@ PP(pp_match)
 		 (TAINT_get && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
 
-    RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
-
     /* We need to know this in case we fail out early - pos() must be reset */
     global = dynpm->op_pmflags & PMf_GLOBAL;
 
@@ -2224,14 +2222,12 @@ PP(pp_subst)
 	TAINT_NOT;
     }
 
-    RX_MATCH_UTF8_set(rx, DO_UTF8(TARG));
-
   force_it:
     if (!pm || !s)
 	DIE(aTHX_ "panic: pp_subst, pm=%p, s=%p", pm, s);
 
     strend = s + len;
-    slen = RX_MATCH_UTF8(rx) ? utf8_length((U8*)s, (U8*)strend) : len;
+    slen = DO_UTF8(TARG) ? utf8_length((U8*)s, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */

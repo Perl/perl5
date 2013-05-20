@@ -641,6 +641,7 @@ Perl_re_intuit_start(pTHX_
     PERL_UNUSED_ARG(data);
 
     RX_MATCH_UTF8_set(rx,utf8_target);
+    PL_reg_match_utf8 = cBOOL(utf8_target);
 
     is_utf8_pat = cBOOL(RX_UTF8(rx));
 
@@ -2098,6 +2099,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->intuit = 0;
 
     RX_MATCH_UTF8_set(rx, utf8_target);
+    PL_reg_match_utf8 = cBOOL(utf8_target);
+
     DEBUG_EXECUTE_r( 
         debug_start_match(rx, utf8_target, startpos, strend,
         "Matching");

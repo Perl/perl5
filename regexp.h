@@ -406,7 +406,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+11))
+#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+11)) /* $1 etc are utf8 */
 
 /* Intuit related */
 #define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+12))
@@ -528,8 +528,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_MATCH_UTF8_on(prog)		(RX_EXTFLAGS(prog) |= RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_off(prog)		(RX_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
-			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
-			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))
+			? RX_MATCH_UTF8_on(prog) \
+			: RX_MATCH_UTF8_off(prog))
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
 #define RX_UTF8(prog)			SvUTF8(prog)
