@@ -7547,7 +7547,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         eval_state->subbeg     = rex->subbeg;
         eval_state->sublen     = rex->sublen;
         eval_state->suboffset  = rex->suboffset;
-        eval_state->subcoffset = rex->suboffset;
+        eval_state->subcoffset = rex->subcoffset;
 #ifdef PERL_ANY_COW
         eval_state->saved_copy = rex->saved_copy;
 #endif
