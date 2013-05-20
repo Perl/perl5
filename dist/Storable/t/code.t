@@ -208,7 +208,9 @@ is(prototype($thawed->[4]), prototype($obj[0]->[4]));
 
 {
     my $safe = new Safe;
-    local $Storable::Eval = sub { $safe->reval(shift) };
+    local $Storable::Eval = sub {
+        $safe->reval(shift) or die $@;
+    };
 
     $freezed = freeze $obj[0]->[0];
     $@ = "";

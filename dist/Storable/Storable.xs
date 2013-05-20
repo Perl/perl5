@@ -4644,11 +4644,8 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
  */
 static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-#if PERL_VERSION < 6
-    CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
-#else
 	int type, tagnum;
-	SV *text, *sub, *errsv;
+	SV *text, *sub;
 
 	TRACEME(("retrieve_code (#%d)", retrieve_cxt->tagnum));
 
@@ -4696,12 +4693,15 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
 	SvREFCNT_dec(text);
 
-	/*
-	 * evaluate the source to a code reference and use the CV value
-	 */
-
         ASSERT(retrieve_cxt->eval, ("retrieve_cxt->eval is not NULL"));
 	if (SvTRUE(retrieve_cxt->eval)) {
+#if PERL_VERSION < 6
+                CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
+#else
+                /*
+                 * evaluate the source to a code reference and use the CV value
+                 */
+
                 int count;
                 SV *cv;
                 dSP;
@@ -4709,29 +4709,25 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
                 ENTER;
                 SAVETMPS;
 
-                /* FIXME: why this? */
-                errsv = get_sv("@", GV_ADD);
-                sv_setpvn(errsv, "", 0);	/* clear $@ */
-
                 if (SvROK(retrieve_cxt->eval) && SvTYPE(SvRV(retrieve_cxt->eval)) == SVt_PVCV) {
                         PUSHMARK(sp);
                         XPUSHs(sv_2mortal(newSVsv(sub)));
                         PUTBACK;
                         count = call_sv(retrieve_cxt->eval, G_SCALAR);
-                        if (count != 1)
-                                CROAK(("Unexpected return value from $Storable::Eval callback\n"));
                 } else {
-                        eval_sv(sub, G_SCALAR);
+                        SV *old_errsv = sv_mortalcopy(ERRSV);
+                        count = eval_sv(sub, G_SCALAR);
+                        if (SvTRUE_NN(ERRSV))
+                                croak_sv(ERRSV);
+                        sv_setsv(ERRSV, old_errsv);
                 }
+                if (count != 1)
+                        CROAK(("Unexpected return value from $Storable::Eval callback\n"));
+
                 SPAGAIN;
                 cv = POPs;
                 PUTBACK;
 
-                if (SvTRUE(errsv)) {
-                        CROAK(("code %s caused an error: %s",
-                               SvPV_nolen(sub), SvPV_nolen(errsv)));
-                }
-                
                 if (!(cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV))
                         CROAK(("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub)));
                 
@@ -4743,9 +4739,8 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
         }
         else if (!forgive_me(aTHX))
                 CROAK(("Can't eval, please set $Storable::Eval to a true value"));
-
-        return SvREFCNT_inc(sub);                        
 #endif
+        return SvREFCNT_inc(sub);
 }
 
 /*
