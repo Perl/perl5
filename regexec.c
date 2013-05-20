@@ -639,7 +639,6 @@ Perl_re_intuit_start(pTHX_
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(data);
 
-    RX_MATCH_UTF8_set(rx,utf8_target);
     reginfo->is_utf8_target = cBOOL(utf8_target);
 
     /* CHR_DIST() would be more correct here but it makes things slow. */
@@ -2096,8 +2095,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->intuit = 0;
     reginfo->is_utf8_target = cBOOL(utf8_target);
 
-    RX_MATCH_UTF8_set(rx, utf8_target);
-
     DEBUG_EXECUTE_r( 
         debug_start_match(rx, utf8_target, startpos, strend,
         "Matching");
@@ -2611,6 +2608,8 @@ got_it:
 
     if (RXp_PAREN_NAMES(prog)) 
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
+
+    RX_MATCH_UTF8_set(rx, utf8_target);
 
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) ) {
