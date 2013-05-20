@@ -4771,11 +4771,7 @@ static SV *old_retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN(av, 0, 0);				/* Will return if array not allocated nicely */
-	if (len)
-		av_extend(av, len);
-	else
-		return (SV *) av;		/* No data follow if array is empty */
+	SEEN_no_inc(av, 0, 0);				/* Will return if array not allocated nicely */
 
 	/*
 	 * Now get each item in turn...
@@ -4797,7 +4793,7 @@ static SV *old_retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 
 	TRACEME(("ok (old_retrieve_array at 0x%"UVxf")", PTR2UV(av)));
 
-	return (SV *) av;
+	return SvREFCNT_inc((SV *)av);
 }
 
 /*
