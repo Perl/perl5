@@ -5293,6 +5293,8 @@ static SV *do_retrieve(
 		("SX_ERROR entry correctly initialized in old dispatch table"));
 	ASSERT(sv_retrieve[SX_ERROR] == retrieve_other,
 		("SX_ERROR entry correctly initialized in new dispatch table"));
+        ASSERT(((f || in) && !(f && in)),
+                ("f xor in must be not null"));
 
 	/*
 	 * Now that STORABLE_xxx hooks exist, it is possible that they try to
@@ -5312,7 +5314,7 @@ static SV *do_retrieve(
 	retrieve_cxt.is_tainted = f ? 1 : (in ? SvTAINTED(in) : 0);
 	TRACEME(("input source is %s", retrieve_cxt.is_tainted ? "tainted" : "trusted"));
 
-	if (!f && in) {
+	if (!f) {
                 STRLEN size;
 #ifdef SvUTF8_on
 		if (SvMAGICAL(in) || SvUTF8(in))
