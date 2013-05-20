@@ -66,6 +66,7 @@ File::ShareDir
 flock(3)
 fsync(3c)
 gcc(1)
+Getopt::Std
 getpriority(2)
 HTTP::Lite
 inetd(8)
