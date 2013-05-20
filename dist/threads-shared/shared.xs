@@ -612,7 +612,7 @@ S_abs_2_rel_milli(double abs)
 bool
 Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
 {
-#if defined(NETWARE) || defined(FAKE_THREADS) || defined(I_MACH_CTHREADS)
+#if defined(NETWARE) || defined(I_MACH_CTHREADS)
     Perl_croak_nocontext("cond_timedwait not supported on this platform");
 #else
 #  ifdef WIN32
@@ -671,7 +671,7 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
     return (got_it);
 #    endif /* OS2 */
 #  endif /* WIN32 */
-#endif /* NETWARE || FAKE_THREADS || I_MACH_CTHREADS */
+#endif /* NETWARE || I_MACH_CTHREADS */
 }
 
 

@@ -2670,9 +2670,6 @@ freeing any remaining Perl interpreters.
 #  ifdef NETWARE
 #   include <nw5thread.h>
 #  else
-#  ifdef FAKE_THREADS
-#    include "fakethr.h"
-#  else
 #    ifdef WIN32
 #      include <win32thread.h>
 #    else
@@ -2699,8 +2696,7 @@ typedef pthread_key_t	perl_key;
 #        endif /* I_MACH_CTHREADS */
 #      endif /* OS2 */
 #    endif /* WIN32 */
-#  endif /* FAKE_THREADS */
-#endif	/* NETWARE */
+#  endif /* NETWARE */
 #endif /* USE_ITHREADS */
 
 #if defined(WIN32)
@@ -4512,9 +4508,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
-#  endif
-#  ifdef FAKE_THREADS
-			     " FAKE_THREADS"
 #  endif
 #  ifdef FCRYPT
 			     " FCRYPT"

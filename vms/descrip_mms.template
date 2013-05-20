@@ -151,14 +151,6 @@ THRLIBS2 = sys$share:cma$open_lib_shr/share|sys$share:cma$open_rtl/share
 .endif
 .endif
 
-.ifdef FAKETHREADED
-THREADDEF = 
-THREADH = fakethr.h
-THREAD = THREAD
-.else
-THREADH =
-.endif
-
 .ifdef MTU
 .ifdef MTK
 MTHREADLINKFLAGS = /THREADS=(MULTIPLE_KERNEL,UPCALLS)
@@ -255,9 +247,8 @@ h2 = iperlsys.h keywords.h mydtrace.h mg.h mg_vtable.h nostdio.h op.h
 h3 = op_reg_common.h opcode.h opnames.h overload.h pad.h parser.h patchlevel.h 
 h4 = perl.h perlapi.h perlio.h perlsdio.h perlvars.h perly.h
 h5 = pp.h pp_proto.h proto.h regcomp.h regexp.h regnodes.h scope.h
-h6 = sv.h thread.h utf8.h util.h vmsish.h warnings.h
-h7 = xsub.h $(THREADH)
-h = $(h0) $(h1) $(h2) $(h3) $(h4) $(h5) $(h6) $(h7)
+h6 = sv.h thread.h utf8.h util.h vmsish.h warnings.h xsub.h
+h = $(h0) $(h1) $(h2) $(h3) $(h4) $(h5) $(h6)
 
 acopt = $(ARCHCORE)perlshr_attr.opt $(ARCHCORE)$(DBG)perlshr_bld.opt
 ac = archcore_includes.ts $(acopt)

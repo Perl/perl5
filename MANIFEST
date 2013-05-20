@@ -3882,7 +3882,6 @@ ext/XS-Typemap/t/Typemap.t	test that typemaps work
 ext/XS-Typemap/Typemap.pm	XS::Typemap extension
 ext/XS-Typemap/Typemap.xs	XS::Typemap extension
 fakesdio.h			stdio in terms of PerlIO
-fakethr.h			Fake threads header
 feature.h			Feature header
 form.h				Public declarations for formats
 generate_uudmap.c		Generate uudmap.h, the uuencode decoding map
