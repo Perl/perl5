@@ -612,7 +612,8 @@ typedef struct {
     char *cutpoint;
     regmatch_eval_state *eval_state; /* extra saved state for (?{}) */
     bool intuit;    /* re_intuit_start() is the top-level caller */
-    bool is_utf8_pat;
+    bool is_utf8_pat;    /* regex is utf8 */
+    bool is_utf8_target; /* string being matched is utf8 */
     bool warned; /* we have issued a recursion warning; no need for more */
 } regmatch_info;
  
@@ -785,7 +786,6 @@ typedef struct regmatch_slab {
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
 
-#define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
 #define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
 #define PL_reg_maxiter		PL_reg_state.re_state_reg_maxiter
 #define PL_reg_leftiter		PL_reg_state.re_state_reg_leftiter
@@ -794,8 +794,6 @@ typedef struct regmatch_slab {
 #define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
 
 struct re_save_state {
-    bool re_state_reg_match_utf8;	/* from regexec.c */
-    /* Space for U8 */
     I32 re_state_reg_maxiter;		/* max wait until caching pos */
     I32 re_state_reg_leftiter;		/* wait until caching pos */
     PMOP *re_state_reg_curpm;		/* from regexec.c */

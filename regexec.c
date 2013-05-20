@@ -110,21 +110,21 @@ static const char* const non_utf8_target_but_utf8_required
  */
 
 #define CHR_SVLEN(sv) (utf8_target ? sv_len_utf8(sv) : SvCUR(sv))
-#define CHR_DIST(a,b) (PL_reg_match_utf8 ? utf8_distance(a,b) : a - b)
+#define CHR_DIST(a,b) (reginfo->is_utf8_target ? utf8_distance(a,b) : a - b)
 
 #define HOPc(pos,off) \
-	(char *)(PL_reg_match_utf8 \
+	(char *)(reginfo->is_utf8_target \
 	    ? reghop3((U8*)pos, off, \
                     (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg)) \
 	    : (U8*)(pos + off))
 #define HOPBACKc(pos, off) \
-	(char*)(PL_reg_match_utf8\
+	(char*)(reginfo->is_utf8_target \
 	    ? reghopmaybe3((U8*)pos, -off, (U8*)(reginfo->strbeg)) \
 	    : (pos - off >= reginfo->strbeg)	\
 		? (U8*)pos - off		\
 		: NULL)
 
-#define HOP3(pos,off,lim) (PL_reg_match_utf8 ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
+#define HOP3(pos,off,lim) (reginfo->is_utf8_target  ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 
 
@@ -640,7 +640,7 @@ Perl_re_intuit_start(pTHX_
     PERL_UNUSED_ARG(data);
 
     RX_MATCH_UTF8_set(rx,utf8_target);
-    PL_reg_match_utf8 = cBOOL(utf8_target);
+    reginfo->is_utf8_target = cBOOL(utf8_target);
 
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
@@ -1449,7 +1449,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     U8 c2;
     char *e;
     I32 tmp = 1;	/* Scratch variable? */
-    const bool utf8_target = PL_reg_match_utf8;
+    const bool utf8_target = reginfo->is_utf8_target;
     UV utf8_fold_flags = 0;
     const bool is_utf8_pat = reginfo->is_utf8_pat;
     bool to_complement = FALSE; /* Invert the result?  Taking the xor of this
@@ -2094,9 +2094,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->eval_state = NULL;
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
+    reginfo->is_utf8_target = cBOOL(utf8_target);
 
     RX_MATCH_UTF8_set(rx, utf8_target);
-    PL_reg_match_utf8 = cBOOL(utf8_target);
 
     DEBUG_EXECUTE_r( 
         debug_start_match(rx, utf8_target, startpos, strend,
@@ -3244,7 +3244,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
      * point (unless inappropriately coerced to unsigned).   *<c1p> will equal
      * *<c2p> if and only if <c1_utf8> and <c2_utf8> are the same. */
 
-    const bool utf8_target = PL_reg_match_utf8;
+    const bool utf8_target = reginfo->is_utf8_target;
 
     UV c1 = CHRTEST_NOT_A_CP_1;
     UV c2 = CHRTEST_NOT_A_CP_2;
@@ -3455,7 +3455,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     dMY_CXT;
 #endif
     dVAR;
-    const bool utf8_target = PL_reg_match_utf8;
+    const bool utf8_target = reginfo->is_utf8_target;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
     REGEXP *rex_sv = reginfo->prog;
     regexp *rex = ReANY(rex_sv);
@@ -5680,7 +5680,7 @@ NULL
 	    ST.count++;
 	    /* after first match, determine A's length: u.curlym.alen */
 	    if (ST.count == 1) {
-		if (PL_reg_match_utf8) {
+		if (reginfo->is_utf8_target) {
 		    char *s = st->locinput;
 		    while (s < locinput) {
 			ST.alen++;
@@ -6611,7 +6611,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     I32 c;
     char *loceol = reginfo->strend;   /* local version */
     I32 hardcount = 0;  /* How many matches so far */
-    bool utf8_target = PL_reg_match_utf8;
+    bool utf8_target = reginfo->is_utf8_target;
     int to_complement = 0;  /* Invert the result? */
     UV utf8_flags;
     _char_class_number classnum;
