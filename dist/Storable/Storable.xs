@@ -347,20 +347,6 @@ struct st_retrieve_cxt {
 #define oC(x)
 #endif
 
-/*
- * memory buffer handling
- */
-
-#define MGROW	(1 << 13)
-#define MMASK	(MGROW - 1)
-
-#define round_mgrow(x)	\
-	((unsigned long) (((unsigned long) (x) + MMASK) & ~MMASK))
-#define trunc_int(x)	\
-	((unsigned long) ((unsigned long) (x) & ~(sizeof(int)-1)))
-#define int_aligned(x)	\
-	((unsigned long) (x) == trunc_int(x))
-
 static void
 croak_io_error(pTHX_ SSize_t rc, retrieve_cxt_t *retrieve_cxt, char *str) {
         char *error;
