@@ -5294,7 +5294,7 @@ static SV *do_retrieve(
 	ASSERT(sv_retrieve[SX_ERROR] == retrieve_other,
 		("SX_ERROR entry correctly initialized in new dispatch table"));
         ASSERT(((f || in) && !(f && in)),
-                ("f xor in must be not null"));
+                ("one and only one of f and in must be not null"));
 
 	/*
 	 * Now that STORABLE_xxx hooks exist, it is possible that they try to
