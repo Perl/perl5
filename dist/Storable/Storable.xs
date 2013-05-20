@@ -1014,7 +1014,7 @@ static sv_retrieve_t sv_retrieve[] = {
 /*
  * init_store_cxt
  *
- * Initialize a new store context for real recursion.
+ * Initialize a new store context.
  */
 static void init_store_cxt(
         pTHX_
@@ -1103,7 +1103,7 @@ static void init_store_cxt(
 /*
  * init_retrieve_cxt
  *
- * Initialize a new retrieve context for real recursion.
+ * Initialize a new retrieve context.
  */
 static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 {
@@ -1216,8 +1216,7 @@ static void pkg_hide(
 {
 	const char *hvname = HvNAME_get(pkg);
 	PERL_UNUSED_ARG(method);
-	(void) hv_store(cache,
-		hvname, strlen(hvname), newSVsv(&PL_sv_undef), 0);
+	(void) hv_store(cache, hvname, strlen(hvname), newSV(0), 0);
 }
 
 /*
@@ -1251,7 +1250,6 @@ static SV *pkg_can(
 	const char *method)
 {
 	SV **svh;
-	SV *sv;
 	const char *hvname = HvNAME_get(pkg);
 
 	TRACEME(("pkg_can for %s->%s", hvname, method));
@@ -1266,15 +1264,16 @@ static SV *pkg_can(
 
 	svh = hv_fetch(cache, hvname, strlen(hvname), FALSE);
 	if (svh) {
-		sv = *svh;
-		if (!SvOK(sv)) {
-			TRACEME(("cached %s->%s: not found", hvname, method));
-			return (SV *) 0;
-		} else {
+		SV *sv = *svh;
+		if (SvOK(sv)) {
 			TRACEME(("cached %s->%s: 0x%"UVxf,
-				hvname, method, PTR2UV(sv)));
+                                 hvname, method, PTR2UV(sv)));
 			return sv;
-		}
+                }
+                else {
+                        TRACEME(("cached %s->%s: not found", hvname, method));
+                        return (SV *) 0;
+                }
 	}
 
 	TRACEME(("not cached yet"));
