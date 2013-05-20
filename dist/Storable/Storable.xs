@@ -665,18 +665,18 @@ read_bytes(pTHX_ retrieve_cxt_t *retrieve_cxt, char *buf, STRLEN size) {
         }
 }
 
-#define READ_BYTES(x,y)                         \
+#define READ_BYTES(x,y)                                         \
         (read_bytes(aTHX_ retrieve_cxt, (char *)(x), y))
 
 static unsigned char
 read_uchar(pTHX_ retrieve_cxt_t *retrieve_cxt) {
-        char b[2];
-        READ_BYTES(b, 1);
-        return b[0];
+        unsigned char b;
+        READ_BYTES(&b, 1);
+        return b;
 }
 
 #define READ_UCHAR(x)                                    \
-        STMT_START {                                    \
+        STMT_START {                                     \
                 x = read_uchar(aTHX_ retrieve_cxt);      \
         } STMT_END
 
