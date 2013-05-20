@@ -712,6 +712,14 @@ read_i32(pTHX_ retrieve_cxt_t *retrieve_cxt) {
         } STMT_END
 
 
+#define READ_VARINT(l, x)                          \
+        STMT_START {                            \
+                if (l)                          \
+                        READ_I32(x);            \
+                else                            \
+                        READ_UBYTE(x);          \
+        } STMT_END
+
 static const char *
 read_into_sv(pTHX_ retrieve_cxt_t *retrieve_cxt, STRLEN size, SV *out) {
 	char *pv;
@@ -3404,7 +3412,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 			mtype = 'P';
 			break;
 		default:
-			return retrieve_other(aTHX_ retrieve_cxt, 0);	/* Let it croak */
+                        return retrieve_other(aTHX_ retrieve_cxt, 0);	/* Let it croak */
 		}
 		break;
 	default:
@@ -3441,12 +3449,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 		/*
 		 * Fetch index from 'aclass'
 		 */
-
-		if (flags & SHF_LARGE_CLASSLEN)
-			READ_I32(idx);
-		else
-			READ_UCHAR(idx);
-
+		READ_VARINT(flags & SHF_LARGE_CLASSLEN, idx);
 		sva = av_fetch(retrieve_cxt->aclass, idx, FALSE);
 		if (!sva)
 			CROAK(("Class name #%"IVdf" should have been seen already",
@@ -3456,14 +3459,8 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 		TRACEME(("class ID %d => %s", idx, classname));
 
 	} else {
-		SV *class_sv;
-
-
-		if (flags & SHF_LARGE_CLASSLEN)
-			READ_I32(len);
-		else
-			READ_UCHAR(len);
-
+		SV *class_sv;                
+		READ_VARINT(flags & SHF_LARGE_CLASSLEN, len);
 		READ_SVPV(class_sv, len);
 
 		/*
@@ -3484,11 +3481,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 * To understand that code, read retrieve_scalar()
 	 */
 
-	if (flags & SHF_LARGE_STRLEN)
-		READ_I32(len2);
-	else
-		READ_UCHAR(len2);
-
+        READ_VARINT(flags & SHF_LARGE_STRLEN, len2);
 	READ_SVPV(frozen, len2);
 	if (retrieve_cxt->is_tainted)				/* Is input source tainted? */
 		SvTAINT(frozen);
@@ -3500,10 +3493,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 */
 
 	if (flags & SHF_HAS_LIST) {
-		if (flags & SHF_LARGE_LISTLEN)
-			READ_I32(len3);
-		else
-			READ_UCHAR(len3);
+		READ_VARINT(flags & SHF_LARGE_LISTLEN, len3);
 		if (len3) {
 			av = newAV();
 			av_extend(av, len3 + 1);	/* Leave room for [0] */
