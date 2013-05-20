@@ -4648,8 +4648,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
     CROAK(("retrieve_code does not work with perl 5.005 or less\n"));
 #else
 	int type, tagnum;
-	SV *cv;
-	SV *sv, *text, *sub, *errsv;
+	SV *text, *sub, *errsv;
 
 	TRACEME(("retrieve_code (#%d)", retrieve_cxt->tagnum));
 
@@ -4704,6 +4703,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
         ASSERT(retrieve_cxt->eval, ("retrieve_cxt->eval is not NULL"));
 	if (SvTRUE(retrieve_cxt->eval)) {
                 int count;
+                SV *cv;
                 dSP;
 
                 ENTER;
@@ -4732,27 +4732,19 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
                                SvPV_nolen(sub), SvPV_nolen(errsv)));
                 }
                 
-                if (cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV) {
-                        sv = SvRV(cv);
-                } else {
+                if (!(cv && SvROK(cv) && SvTYPE(SvRV(cv)) == SVt_PVCV))
                         CROAK(("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub)));
-                }
                 
-                SvREFCNT_inc(sv); /* XXX seems to be necessary */
-
+                sub = SvRV(cv);
+                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sub)); /* fix up the dummy entry... */
                 FREETMPS;
                 LEAVE;
-                /* fix up the dummy entry... */
-                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sv));
                 
         }
         else if (!forgive_me(aTHX))
                 CROAK(("Can't eval, please set $Storable::Eval to a true value"));
-        else
-                return SvREFCNT_inc(sub);                        
 
-
-	return sv;
+        return SvREFCNT_inc(sub);                        
 #endif
 }
 
