@@ -750,10 +750,10 @@ read_svpv(pTHX_ retrieve_cxt_t *retrieve_cxt, STRLEN size) {
 
 static void
 av_store_safe(pTHX_ AV *av, I32 key, SV *val) {
-    if (!av_store(av, key, val)) {
-        SvREFCNT_dec(val);
-        Perl_croak("Internal error: av_store failed");
-    }
+        if (!av_store(av, key, val)) {
+                SvREFCNT_dec(val);
+                Perl_croak("Internal error: av_store failed");
+        }
 }
 
 static void
