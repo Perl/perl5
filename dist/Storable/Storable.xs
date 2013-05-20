@@ -784,7 +784,7 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
  *
  * i should be true iff sv is immortal (ie PL_sv_yes, PL_sv_no or PL_sv_undef)
  */
-#define SEEN_no_inc(y, c, i)                                            \
+#define SEEN_no_inc(y, c)                                               \
     STMT_START {                                                        \
         ASSERT(y, ("SEEN argument is not NULL"));                       \
         av_store_safe(aTHX_                                             \
@@ -797,11 +797,11 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
             BLESS((SV *) (y), c);                                       \
     } STMT_END
 
-#define SEEN(y,c,i) 							\
+#define SEEN(y,c) 							\
     STMT_START {                                                        \
         ASSERT(y, ("SEEN argument is not NULL"));                       \
         SvREFCNT_inc_NN((SV*)(y));                                      \
-        SEEN_no_inc(y, c, i);                                           \
+        SEEN_no_inc(y, c);                                              \
     } STMT_END
 
 
@@ -3410,7 +3410,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	default:
 		return retrieve_other(aTHX_ retrieve_cxt, 0);		/* Let it croak */
 	}
-	SEEN(sv, 0, 0);							/* Don't bless yet */
+	SEEN(sv, 0);							/* Don't bless yet */
 
 	/*
 	 * Whilst flags tell us to recurse, do so.
@@ -3575,7 +3575,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	        sv_derived_from(attached, classname)
         ) {
 	        UNSEE();
-	        SEEN(SvRV(attached), 0, 0);
+	        SEEN(SvRV(attached), 0);
 	        return SvRV(attached);
         }
 	    CROAK(("STORABLE_attach did not return a %s object", classname));
@@ -3734,7 +3734,7 @@ static SV *retrieve_ref(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 */
 
 	rv = newSV(0);
-	SEEN(rv, cname, 0);
+	SEEN(rv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -3810,7 +3810,7 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	 */
 
 	rv = newSV(0);
-	SEEN(rv, cname, 0);
+	SEEN(rv, cname);
 	retrieve_cxt->in_retrieve_overloaded = 1; /* so sv_bless doesn't call S_reset_amagic */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
@@ -3891,7 +3891,7 @@ static SV *retrieve_tied_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	TRACEME(("retrieve_tied_array (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname, 0);
+	SEEN(tv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -3919,7 +3919,7 @@ static SV *retrieve_tied_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 	TRACEME(("retrieve_tied_hash (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname, 0);
+	SEEN(tv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -3946,7 +3946,7 @@ static SV *retrieve_tied_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *
 	TRACEME(("retrieve_tied_scalar (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname, 0);
+	SEEN(tv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -3981,7 +3981,7 @@ static SV *retrieve_tied_key(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	TRACEME(("retrieve_tied_key (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname, 0);
+	SEEN(tv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -4011,7 +4011,7 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	TRACEME(("retrieve_tied_idx (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname, 0);
+	SEEN(tv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -4047,7 +4047,7 @@ static SV *retrieve_lscalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 	 */
 
 	READ_SVPV(sv, len);
-	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 	if (retrieve_cxt->is_tainted)				/* Is input source tainted? */
 		SvTAINT(sv);				/* External data cannot be trusted */
 
@@ -4079,7 +4079,7 @@ static SV *retrieve_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
 	 */
 
 	READ_SVPV(sv, len);
-	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 	if (retrieve_cxt->is_tainted)				/* Is input source tainted? */
 		SvTAINT(sv);				/* External data cannot be trusted */
 
@@ -4229,7 +4229,7 @@ static SV *retrieve_integer(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 
 	READ_BYTES(&iv, sizeof(iv));
 	sv = newSViv(iv);
-	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("integer %"IVdf, iv));
 	TRACEME(("ok (retrieve_integer at 0x%"UVxf")", PTR2UV(sv)));
@@ -4253,7 +4253,7 @@ static SV *retrieve_netint(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
 	READ_I32N(iv);
 	sv = newSViv(iv);
 	TRACEME(("network integer %d", iv));
-	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("ok (retrieve_netint at 0x%"UVxf")", PTR2UV(sv)));
 
@@ -4275,7 +4275,7 @@ static SV *retrieve_double(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
 
 	READ_BYTES(&nv, sizeof(nv));
 	sv = newSVnv(nv);
-	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("double %"NVff, nv));
 	TRACEME(("ok (retrieve_double at 0x%"UVxf")", PTR2UV(sv)));
@@ -4301,7 +4301,7 @@ static SV *retrieve_byte(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	TRACEME(("small integer read as %d", (unsigned char) siv));
 	tmp = (unsigned char) siv - 128;
 	sv = newSViv(tmp);
-	SEEN(sv, cname, 0);	/* Associate this new scalar with tag "tagnum" */
+	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("byte %d", tmp));
 	TRACEME(("ok (retrieve_byte at 0x%"UVxf")", PTR2UV(sv)));
@@ -4321,7 +4321,7 @@ static SV *retrieve_undef(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	TRACEME(("retrieve_undef"));
 
 	sv = newSV(0);
-	SEEN(sv, cname, 0);
+	SEEN(sv, cname);
 
 	return sv;
 }
@@ -4343,7 +4343,7 @@ static SV *retrieve_sv_undef(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	if (retrieve_cxt->where_is_undef == -1) {
 		retrieve_cxt->where_is_undef = retrieve_cxt->tagnum;
 	}
-	SEEN(sv, cname, 1);
+	SEEN(sv, cname);
 	return sv;
 }
 
@@ -4358,7 +4358,7 @@ static SV *retrieve_sv_yes(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
 
 	TRACEME(("retrieve_sv_yes"));
 
-	SEEN(sv, cname, 1);
+	SEEN(sv, cname);
 	return sv;
 }
 
@@ -4373,7 +4373,7 @@ static SV *retrieve_sv_no(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
 	TRACEME(("retrieve_sv_no"));
 
-	SEEN(sv, cname, 1);
+	SEEN(sv, cname);
 	return sv;
 }
 
@@ -4402,7 +4402,7 @@ static SV *retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN_no_inc(av, cname, 0);
+	SEEN_no_inc(av, cname);
         av_extend(av, len);
 	for (i = 0; i < len; i++) {
 		TRACEME(("(#%d) item", i));
@@ -4441,7 +4441,7 @@ static SV *retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN_no_inc(hv, cname, 0);
+	SEEN_no_inc(hv, cname);
 	if (len) {
                 hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
 
@@ -4526,7 +4526,7 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
     READ_I32(len);
     TRACEME(("size = %d, flags = %d", len, hash_flags));
     hv = newHV();
-    SEEN_no_inc(hv, cname, 0);
+    SEEN_no_inc(hv, cname);
     if (len) {
             hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
 
@@ -4644,7 +4644,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 */
 	tagnum = retrieve_cxt->tagnum;
 	sub = newSV(0);
-	SEEN_no_inc(sub, cname, 0);
+	SEEN_no_inc(sub, cname);
 
 	/*
 	 * Retrieve the source of the code reference
@@ -4757,7 +4757,7 @@ static SV *old_retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN_no_inc(av, 0, 0);				/* Will return if array not allocated nicely */
+	SEEN_no_inc(av, 0);				/* Will return if array not allocated nicely */
 
 	/*
 	 * Now get each item in turn...
@@ -4814,7 +4814,7 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN(hv, 0, 0);			/* Will return if table not allocated properly */
+	SEEN(hv, 0);			/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
 	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
