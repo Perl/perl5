@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 
 require Exporter;
 
@@ -2352,8 +2352,11 @@ It is a fatal error to call this function except in list context.
 
 In addition to the the two arrays that form the inversion map, C<prop_invmap>
 returns two other values; one is a scalar that gives some details as to the
-format of the entries of the map array; the other is used for specialized
-purposes, described at the end of this section.
+format of the entries of the map array; the other is a default value, useful
+in maps whose format name begins with the letter C<"a">, as described
+L<below in its subsection|/a>; and for specialized purposes, such as
+converting to another data structure, described at the end of this main
+section.
 
 This means that C<prop_invmap> returns a 4 element list.  For example,
 
@@ -2508,7 +2511,7 @@ is like C<"s"> in that all the map array elements are scalars, but here they are
 restricted to all being integers, and some have to be adjusted (hence the name
 C<"a">) to get the correct result.  For example, in:
 
- my ($uppers_ranges_ref, $uppers_maps_ref, $format)
+ my ($uppers_ranges_ref, $uppers_maps_ref, $format, $default)
                           = prop_invmap("Simple_Uppercase_Mapping");
 
 the returned arrays look like this:
@@ -2521,22 +2524,24 @@ the returned arrays look like this:
      182                      0
      ...
 
+and C<$default> is 0.
+
 Let's start with the second line.  It says that the uppercase of code point 97
 is 65; or C<uc("a")> == "A".  But the line is for the entire range of code
-points 97 through 122.  To get the mapping for any code point in a range, you
-take the offset it has from the beginning code point of the range, and add
+points 97 through 122.  To get the mapping for any code point in this range,
+you take the offset it has from the beginning code point of the range, and add
 that to the mapping for that first code point.  So, the mapping for 122 ("z")
 is derived by taking the offset of 122 from 97 (=25) and adding that to 65,
 yielding 90 ("z").  Likewise for everything in between.
 
-The first line works the same way.  The first map in a range is always the
-correct value for its code point (because the adjustment is 0).  Thus the
-C<uc(chr(0))> is just itself.  Also, C<uc(chr(1))> is also itself, as the
-adjustment is 0+1-0 .. C<uc(chr(96))> is 96.
-
 Requiring this simple adjustment allows the returned arrays to be
 significantly smaller than otherwise, up to a factor of 10, speeding up
 searching through them.
+
+Ranges that map to C<$default>, C<"0">, behave somewhat differently.  For
+these, each code point maps to itself.  So, in the first line in the example,
+S<C<ord(uc(chr(0)))>> is 0, S<C<ord(uc(chr(1)))>> is 1, ..
+S<C<ord(uc(chr(96)))>> is 96.
 
 =item B<C<al>>
 
@@ -2544,7 +2549,7 @@ means that some of the map array elements have the form given by C<"a">, and
 the rest are ordered lists of code points.
 For example, in:
 
- my ($uppers_ranges_ref, $uppers_maps_ref, $format)
+ my ($uppers_ranges_ref, $uppers_maps_ref, $format, $default)
                                  = prop_invmap("Uppercase_Mapping");
 
 the returned arrays look like this:
@@ -2570,6 +2575,9 @@ CAPITAL LETTER N).
 
 No adjustments are needed to entries that are references to arrays; each such
 entry will have exactly one element in its range, so the offset is always 0.
+
+The fourth (index [3]) element (C<$default>) in the list returned for this
+format is 0.
 
 =item B<C<ae>>
 
@@ -2600,6 +2608,9 @@ represents 0+1-0 = 1; ... code point 0x39, (DIGIT NINE), represents 0+9-0 = 9;
 (ARABIC-INDIC DIGIT ZERO), represents 0; ... 0x07C1 (NKO DIGIT ONE),
 represents 0+1-0 = 1 ...
 
+The fourth (index [3]) element (C<$default>) in the list returned for this
+format is the empty string.
+
 =item B<C<ale>>
 
 is a combination of the C<"al"> type and the C<"ae"> type.  Some of
@@ -2616,6 +2627,9 @@ An example slice is:
    0x00AF     [ 0x0020, 0x0304 ]  MACRON => SPACE . COMBINING MACRON
    0x00B0        0
    ...
+
+The fourth (index [3]) element (C<$default>) in the list returned for this
+format is 0.
 
 =item B<C<ar>>
 
@@ -2655,6 +2669,9 @@ C<"ar">.
         0xBF           "NaN"
         0x660            0           ARABIC-INDIC DIGIT ZERO .. NINE
         0x66A          "NaN"
+
+The fourth (index [3]) element (C<$default>) in the list returned for this
+format is C<"NaN">.
 
 =item B<C<n>>
 
@@ -2701,6 +2718,9 @@ L<Unicode::Normalize::NFD()|Unicode::Normalize>.
 Note that the mapping is the one that is specified in the Unicode data files,
 and to get the final decomposition, it may need to be applied recursively.
 
+The fourth (index [3]) element (C<$default>) in the list returned for this
+format is 0.
+
 =back
 
 Note that a format begins with the letter "a" if and only the property it is
@@ -2716,15 +2736,16 @@ adjustment would be just adding 0.
 A binary search can be used to quickly find a code point in the inversion
 list, and hence its corresponding mapping.
 
-The final element (index [3], assigned to C<$default> in the "block" example) in
-the four element list returned by this function may be useful for applications
+The final, fourth element (index [3], assigned to C<$default> in the "block"
+example) in the four element list returned by this function is used with the
+C<"a"> format types; it may also be useful for applications
 that wish to convert the returned inversion map data structure into some
 other, such as a hash.  It gives the mapping that most code points map to
 under the property.  If you establish the convention that any code point not
 explicitly listed in your data structure maps to this value, you can
 potentially make your data structure much smaller.  As you construct your data
 structure from the one returned by this function, simply ignore those ranges
-that map to this value, generally called the "default" value.  For example, to
+that map to this value.  For example, to
 convert to the data structure searchable by L</charinrange()>, you can follow
 this recipe for properties that don't require adjustments:
 
