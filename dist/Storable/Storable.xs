@@ -811,21 +811,22 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
  * an expensive call to S_reset_amagic in sv_bless.
  */
 #define BLESS(s,p) 							\
-  STMT_START {								\
-	SV *ref;								\
-	HV *stash;								\
-	TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (p))); \
-	stash = gv_stashpv((p), GV_ADD);			\
-	ref = newRV_noinc(s);					\
-	if (retrieve_cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
-	{ \
-	    retrieve_cxt->in_retrieve_overloaded = 0; \
-		SvAMAGIC_on(ref);                            \
-	} \
-	(void) sv_bless(ref, stash);			\
-	SvRV_set(ref, NULL);						\
-	SvREFCNT_dec(ref);						\
-  } STMT_END
+        STMT_START {                                                    \
+                SV *ref;                                                \
+                HV *stash;                                              \
+                TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (p)));  \
+                stash = gv_stashpv((p), GV_ADD);			\
+                ref = newRV_noinc(s);					\
+                if (retrieve_cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
+                {                                                       \
+                        retrieve_cxt->in_retrieve_overloaded = 0;       \
+                        SvAMAGIC_on(ref);                               \
+                }                                                       \
+                (void) sv_bless(ref, stash);                            \
+                SvRV_set(ref, NULL);                                    \
+                SvREFCNT_dec(ref);                                      \
+        } STMT_END
+
 /*
  * sort (used in store_hash) - conditionally use qsort when
  * sortsv is not available ( <= 5.6.1 ).
@@ -835,24 +836,24 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
 
 #if defined(USE_ITHREADS)
 
-#define STORE_HASH_SORT \
-        ENTER; { \
-        PerlInterpreter *orig_perl = PERL_GET_CONTEXT; \
-        SAVESPTR(orig_perl); \
-        PERL_SET_CONTEXT(aTHX); \
-        qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp); \
+#define STORE_HASH_SORT                                                 \
+        ENTER; {                                                        \
+                PerlInterpreter *orig_perl = PERL_GET_CONTEXT;          \
+                SAVESPTR(orig_perl);                                    \
+                PERL_SET_CONTEXT(aTHX);                                 \
+                qsort((char *)AvARRAY(av), len, sizeof(SV *), sortcmp); \
         } LEAVE;
 
 #else /* ! USE_ITHREADS */
 
-#define STORE_HASH_SORT \
+#define STORE_HASH_SORT                                                 \
         qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
 
 #endif  /* USE_ITHREADS */
 
 #else /* PATCHLEVEL > 6 */
 
-#define STORE_HASH_SORT \
+#define STORE_HASH_SORT                         \
         sortsv(AvARRAY(av), len, Perl_sv_cmp);  
 
 #endif /* PATCHLEVEL <= 6 */
@@ -860,11 +861,11 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
 static int store(pTHX_ store_cxt_t *store_cxt, SV *sv);
 static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname);
 
-#define UNSEE()                             \
-  STMT_START {                              \
-    av_pop(retrieve_cxt->aseen);                     \
-    retrieve_cxt->tagnum--;                          \
-  } STMT_END
+#define UNSEE()                                      \
+        STMT_START {                                 \
+                av_pop(retrieve_cxt->aseen);         \
+                retrieve_cxt->tagnum--;              \
+        } STMT_END
 
 /*
  * Dynamic dispatching table for SV store.
