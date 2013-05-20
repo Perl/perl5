@@ -736,6 +736,8 @@ static SV *
 read_svpv(pTHX_ retrieve_cxt_t *retrieve_cxt, STRLEN size) {
 	SV *sv = sv_newmortal();
 	read_into_sv(aTHX_ retrieve_cxt, size, sv);
+        if (retrieve_cxt->is_tainted)
+                SvTAINT(sv);
         SvREFCNT_inc(sv);
         return sv;
 }
@@ -3483,8 +3485,6 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
         READ_VARINT(flags & SHF_LARGE_STRLEN, len2);
 	READ_SVPV(frozen, len2);
-	if (retrieve_cxt->is_tainted)				/* Is input source tainted? */
-		SvTAINT(frozen);
 
 	TRACEME(("frozen string: %d bytes", len2));
 
@@ -4038,8 +4038,6 @@ static SV *retrieve_lscalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 
 	READ_SVPV(sv, len);
 	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
-	if (retrieve_cxt->is_tainted)				/* Is input source tainted? */
-		SvTAINT(sv);				/* External data cannot be trusted */
 
 	TRACEME(("large scalar len %"IVdf" '%s'", (IV) len, SvPVX(sv)));
 	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
@@ -4070,8 +4068,6 @@ static SV *retrieve_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
 
 	READ_SVPV(sv, len);
 	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
-	if (retrieve_cxt->is_tainted)				/* Is input source tainted? */
-		SvTAINT(sv);				/* External data cannot be trusted */
 
 	TRACEME(("ok (retrieve_scalar at 0x%"UVxf")", PTR2UV(sv)));
 	return sv;
