@@ -2261,65 +2261,6 @@ sub prop_invlist ($;$) {
     return @invlist;
 }
 
-sub _search_invlist {
-    # Find the range in the inversion list which contains a code point; that
-    # is, find i such that l[i] <= code_point < l[i+1].  Returns undef if no
-    # such i.
-
-    # If this is ever made public, could use to speed up .t specials.  Would
-    # need to use code point argument, as in other functions in this pm
-
-    my $list_ref = shift;
-    my $code_point = shift;
-    # Verify non-neg numeric  XXX
-
-    my $max_element = @$list_ref - 1;
-
-    # Return undef if list is empty or requested item is before the first element.
-    return if $max_element < 0;
-    return if $code_point < $list_ref->[0];
-
-    # Short cut something at the far-end of the table.  This also allows us to
-    # refer to element [$i+1] without fear of being out-of-bounds in the loop
-    # below.
-    return $max_element if $code_point >= $list_ref->[$max_element];
-
-    use integer;        # want integer division
-
-    my $i = $max_element / 2;
-
-    my $lower = 0;
-    my $upper = $max_element;
-    while (1) {
-
-        if ($code_point >= $list_ref->[$i]) {
-
-            # Here we have met the lower constraint.  We can quit if we
-            # also meet the upper one.
-            last if $code_point < $list_ref->[$i+1];
-
-            $lower = $i;        # Still too low.
-
-        }
-        else {
-
-            # Here, $code_point < $list_ref[$i], so look lower down.
-            $upper = $i;
-        }
-
-        # Split search domain in half to try again.
-        my $temp = ($upper + $lower) / 2;
-
-        # No point in continuing unless $i changes for next time
-        # in the loop.
-        return $i if $temp == $i;
-        $i = $temp;
-    } # End of while loop
-
-    # Here we have found the offset
-    return $i;
-}
-
 =pod
 
 =head2 B<prop_invmap()>
@@ -3539,6 +3480,65 @@ RETRY:
     }
 
     return (\@invlist, \@invmap, $format, $missing);
+}
+
+sub _search_invlist {
+    # Find the range in the inversion list which contains a code point; that
+    # is, find i such that l[i] <= code_point < l[i+1].  Returns undef if no
+    # such i.
+
+    # If this is ever made public, could use to speed up .t specials.  Would
+    # need to use code point argument, as in other functions in this pm
+
+    my $list_ref = shift;
+    my $code_point = shift;
+    # Verify non-neg numeric  XXX
+
+    my $max_element = @$list_ref - 1;
+
+    # Return undef if list is empty or requested item is before the first element.
+    return if $max_element < 0;
+    return if $code_point < $list_ref->[0];
+
+    # Short cut something at the far-end of the table.  This also allows us to
+    # refer to element [$i+1] without fear of being out-of-bounds in the loop
+    # below.
+    return $max_element if $code_point >= $list_ref->[$max_element];
+
+    use integer;        # want integer division
+
+    my $i = $max_element / 2;
+
+    my $lower = 0;
+    my $upper = $max_element;
+    while (1) {
+
+        if ($code_point >= $list_ref->[$i]) {
+
+            # Here we have met the lower constraint.  We can quit if we
+            # also meet the upper one.
+            last if $code_point < $list_ref->[$i+1];
+
+            $lower = $i;        # Still too low.
+
+        }
+        else {
+
+            # Here, $code_point < $list_ref[$i], so look lower down.
+            $upper = $i;
+        }
+
+        # Split search domain in half to try again.
+        my $temp = ($upper + $lower) / 2;
+
+        # No point in continuing unless $i changes for next time
+        # in the loop.
+        return $i if $temp == $i;
+        $i = $temp;
+    } # End of while loop
+
+    # Here we have found the offset
+    return $i;
 }
 
 =head2 Unicode::UCD::UnicodeVersion
