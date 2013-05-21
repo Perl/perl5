@@ -37,7 +37,7 @@ Benchmark - benchmark running times of Perl code
     });
 
     # ...or in two stages
-    $results = timethese($count, 
+    $results = timethese($count,
         {
 	    'Name1' => sub { ...code1... },
 	    'Name2' => sub { ...code2... },
@@ -339,7 +339,7 @@ outputs something like this:
    a 4152037/s 166%   --
 
 
-while 
+while
 
     use Benchmark qw( timethese cmpthese ) ;
     $x = 3;
@@ -402,8 +402,8 @@ documentation.
 April 04-07th, 1997: by Jarkko Hietaniemi, added the run-for-some-time
 functionality.
 
-September, 1999; by Barrie Slaymaker: math fixes and accuracy and 
-efficiency tweaks.  Added cmpthese().  A result is now returned from 
+September, 1999; by Barrie Slaymaker: math fixes and accuracy and
+efficiency tweaks.  Added cmpthese().  A result is now returned from
 timethese().  Exposed countit() (was runfor()).
 
 December, 2001; by Nicholas Clark: make timestr() recognise the style 'none'
@@ -440,7 +440,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.15;
+$VERSION = 1.16;
 
 # --- ':hireswallclock' special handling
 
@@ -485,7 +485,7 @@ sub init {
 
 sub debug { $Debug = ($_[1] != 0); }
 
-sub usage { 
+sub usage {
     my $calling_sub = (caller(1))[3];
     $calling_sub =~ s/^Benchmark:://;
     return $_Usage{$calling_sub} || '';
@@ -498,18 +498,18 @@ $_Usage{clearcache} = <<'USAGE';
 usage: clearcache($count);
 USAGE
 
-sub clearcache    { 
+sub clearcache    {
     die usage unless @_ == 1;
-    delete $Cache{"$_[0]c"}; delete $Cache{"$_[0]s"}; 
+    delete $Cache{"$_[0]c"}; delete $Cache{"$_[0]s"};
 }
 
 $_Usage{clearallcache} = <<'USAGE';
 usage: clearallcache();
 USAGE
 
-sub clearallcache { 
+sub clearallcache {
     die usage if @_;
-    %Cache = (); 
+    %Cache = ();
 }
 
 $_Usage{enablecache} = <<'USAGE';
@@ -518,7 +518,7 @@ USAGE
 
 sub enablecache   {
     die usage if @_;
-    $Do_Cache = 1; 
+    $Do_Cache = 1;
 }
 
 $_Usage{disablecache} = <<'USAGE';
@@ -527,7 +527,7 @@ USAGE
 
 sub disablecache  {
     die usage if @_;
-    $Do_Cache = 0; 
+    $Do_Cache = 0;
 }
 
 
@@ -652,7 +652,7 @@ sub runloop {
     croak "runloop unable to compile '$c': $@\ncode: $subcode\n" if $@;
     print STDERR "runloop $n '$subcode'\n" if $Debug;
 
-    # Wait for the user timer to tick.  This makes the error range more like 
+    # Wait for the user timer to tick.  This makes the error range more like
     # -0.01, +0.  If we don't wait, then it's more like -0.01, +0.01.  This
     # may not seem important, but it significantly reduces the chances of
     # getting a too low initial $n in the initial, 'find the minimum' loop
@@ -748,7 +748,7 @@ sub countit {
     while ( $tc < $tpra ) {
 	# The 5% fudge is to keep us from iterating again all
 	# that often (this speeds overall responsiveness when $tmax is big
-	# and we guess a little low).  This does not noticably affect 
+	# and we guess a little low).  This does not noticeably affect
 	# accuracy since we're not counting these times.
 	$n = int( $tpra * 1.05 * $n / $tc ); # Linear approximation.
 	my $td = timeit($n, $code);
@@ -929,10 +929,10 @@ sub cmpthese{
     my @rows;
     my @col_widths;
 
-    my @top_row = ( 
-        '', 
-	$display_as_rate ? 'Rate' : 's/iter', 
-	map { $_->[0] } @vals 
+    my @top_row = (
+        '',
+	$display_as_rate ? 'Rate' : 's/iter',
+	map { $_->[0] } @vals
     );
 
     push @rows, \@top_row;
@@ -958,9 +958,9 @@ sub cmpthese{
 
 	# Only give a few decimal places before switching to sci. notation,
 	# since the results aren't usually that accurate anyway.
-	my $format = 
-	   $rate >= 100 ? 
-	       "%0.0f" : 
+	my $format =
+	   $rate >= 100 ?
+	       "%0.0f" :
 	   $rate >= 10 ?
 	       "%0.1f" :
 	   $rate >= 1 ?
@@ -997,7 +997,7 @@ sub cmpthese{
 	    $col_widths[$col_num+2] = length( $out )
 		if length( $out ) > $col_widths[$col_num+2];
 
-	    # A little wierdness to set the first column width properly
+	    # A little weirdness to set the first column width properly
 	    $col_widths[$col_num+2] = length( $col_val->[0] )
 		if length( $col_val->[0] ) > $col_widths[$col_num+2];
 	}
@@ -1008,7 +1008,7 @@ sub cmpthese{
 
     # Equalize column widths in the chart as much as possible without
     # exceeding 80 characters.  This does not use or affect cols 0 or 1.
-    my @sorted_width_refs = 
+    my @sorted_width_refs =
        sort { $$a <=> $$b } map { \$_ } @col_widths[2..$#col_widths];
     my $max_width = ${$sorted_width_refs[-1]};
 
@@ -1021,7 +1021,7 @@ sub cmpthese{
 	last
 	   if $min_width == $max_width;
 	for ( @sorted_width_refs ) {
-	    last 
+	    last
 		if $$_ > $min_width;
 	    ++$$_;
 	    ++$total;
