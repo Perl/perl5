@@ -323,7 +323,7 @@ certain characters like the German "sharp s" there is a difference.
 =head3 Foldcase
 
 Unicode form that is useful when comparing strings regardless of case,
-as certain characters have compex one-to-many case mappings. Primarily a
+as certain characters have complex one-to-many case mappings. Primarily a
 variant of lowercase.
 
 =head1 AUTHOR
