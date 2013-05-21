@@ -384,7 +384,7 @@ $fetch_string .= <<'EOT';
 EOT
 
 } else {
-    # We only have ' delimted.
+    # We only have ' delimited.
 
 $fetch_string .= <<'EOT';
     return undef unless $Config_SH_expanded =~ /\n$key=\'(.*?)\'\n/s;

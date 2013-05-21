@@ -34,7 +34,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()
 push @toolchain, 'cpan/Text-ParseWords/lib' if $^O eq 'MSWin32';
 
-# lib must be last, as the the toolchain modules write themselves into it
+# lib must be last, as the toolchain modules write themselves into it
 # as they build, and it's important that @INC order ensures that the partially
 # written files are always masked by the complete versions.
 

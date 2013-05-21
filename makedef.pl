@@ -627,7 +627,7 @@ if ($ARGS{PLATFORM} eq 'netware') {
 }
 
 if ($define{'USE_PERLIO'}) {
-    # Export the symols that make up the PerlIO abstraction, regardless
+    # Export the symbols that make up the PerlIO abstraction, regardless
     # of its implementation - read from a file
     push @syms, 'perlio.sym';
 

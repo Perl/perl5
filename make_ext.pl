@@ -43,7 +43,7 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # Mostly because they still not ported to specified platform.
 # 
 # If any extensions are listed with a '+' char then only those
-# extensions will be built, but only if they arent countermanded
+# extensions will be built, but only if they aren't countermanded
 # by an '!ext' and are appropriate to the type of building being done.
 
 # It may be deleted in a later release of perl so try to

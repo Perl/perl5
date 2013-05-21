@@ -16,7 +16,7 @@ BEGIN {
 	# prefixes.
 	#
 	# So we set $^X to pretend that we're the already installed perl, so
-	# Config.pm doesits ... expansion off that location.
+	# Config.pm does its ... expansion off that location.
 
 	my $location = $Config{initialinstalllocation};
 	die <<'OS' unless defined $location;

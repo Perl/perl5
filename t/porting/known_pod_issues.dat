@@ -296,6 +296,7 @@ pod/perltru64.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perlunifaq.pod	empty section in previous paragraph	1
 pod/perluniprops.pod	=item type mismatch	6
+pod/perlutil.pod	Apparent internal link is missing its forward slash	2
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlvms.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	12
@@ -310,6 +311,10 @@ porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 utils/pod2html	Pod NAME already used	1
+utils/prove	Apparent broken link	2
+utils/prove	Pod NAME already used	1
+utils/prove	There is more than one target	1
+utils/prove	Verbatim line length including indents exceeds 79 by	3
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	4

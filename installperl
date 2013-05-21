@@ -671,7 +671,7 @@ sub installlib {
     # this, as $_ becomes a pathname, and so still works. However, it's not
     # obvious that $_ is needed later, and hence $_ must not be modified.
 
-    # Also, many of the regex exlusion tests below are now superfluous, as the
+    # Also, many of the regex exclusion tests below are now superfluous, as the
     # files in question are either no longer in blead, or now in ext/, dist/ or
     # cpan/ and not copied into lib/
 
