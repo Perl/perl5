@@ -993,7 +993,7 @@ respect the C<E<sol>a> (and C<E<sol>aa>) modifiers.
 C<< (?[ ]) >> is a regex-compile-time construct.  Any attempt to use
 something which isn't knowable at the time the containing regular
 expression is compiled is a fatal error.  In practice, this means
-just three limitiations:
+just three limitations:
 
 =over 4
 
@@ -1034,7 +1034,7 @@ construct.  There must not be any space between any of the characters
 that form the initial C<(?[>.  Nor may there be space between the
 closing C<])> characters.
 
-Just as in all regular expressions, the pattern can can be built up by
+Just as in all regular expressions, the pattern can be built up by
 including variables that are interpolated at regex compilation time.
 Care must be taken to ensure that you are getting what you expect.  For
 example:
