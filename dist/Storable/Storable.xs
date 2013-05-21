@@ -4340,7 +4340,7 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
                     TRACEME(("(#%d) value", i));
                     sv = retrieve(aTHX_ retrieve_cxt, 0);
                     ASSERT(sv, ("retrieve returns non NULL"));
-                    SvREFCNT_dec(sv); /* key retrieveing may fail */
+                    SvREFCNT_dec(sv); /* key retrieving may fail */
                     READ_UCHAR(flags);
 #ifdef HAS_RESTRICTED_HASHES
                     if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
