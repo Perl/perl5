@@ -653,6 +653,8 @@ Perl_re_intuit_start(pTHX_
     reginfo->strend = strend;
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->intuit = 1;
+    /* not actually used within intuit, but zero for safety anyway */
+    reginfo->poscache_maxiter = 0;
 
     if (utf8_target) {
 	if (!prog->check_utf8 && prog->check_substr)
@@ -2115,12 +2117,12 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     RX_MATCH_TAINTED_off(rx);
-    PL_reg_maxiter = 0;
 
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->warned = FALSE;
     reginfo->strbeg  = strbeg;
     reginfo->sv = sv;
+    reginfo->poscache_maxiter = 0; /* not yet started a countdown */
 
     /* Mark end of string for $ (and such) */
     reginfo->strend = strend;
@@ -4712,7 +4714,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	  do_nref_ref_common:
 	    ln = rex->offs[n].start;
-	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
+	    reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
 	    if (rex->lastparen < n || ln == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (ln == rex->offs[n].end)
@@ -5072,7 +5074,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		maxopenparen = 0;
 
 		/* XXXX This is too dramatic a measure... */
-		PL_reg_maxiter = 0;
+		reginfo->poscache_maxiter = 0;
 
                 is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
 
@@ -5103,7 +5105,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    cur_curlyx = ST.prev_curlyx;
 
 	    /* XXXX This is too dramatic a measure... */
-	    PL_reg_maxiter = 0;
+	    reginfo->poscache_maxiter = 0;
             if ( nochange_depth )
 	        nochange_depth--;
 	    sayYES;
@@ -5122,7 +5124,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
-	    PL_reg_maxiter = 0;
+	    reginfo->poscache_maxiter = 0;
 	    if ( nochange_depth )
 	        nochange_depth--;
 	    sayNO_SILENT;
@@ -5212,7 +5214,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
 	case IFTHEN:   /*  (?(cond)A|B)  */
-	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
+	    reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
 	    if (sw)
 		next = NEXTOPER(NEXTOPER(scan));
 	    else {
@@ -5404,21 +5406,21 @@ NULL
 
 	    if (scan->flags) {
 
-		if (!PL_reg_maxiter) {
+		if (!reginfo->poscache_maxiter) {
 		    /* start the countdown: Postpone detection until we
 		     * know the match is not *that* much linear. */
-		    PL_reg_maxiter
+		    reginfo->poscache_maxiter
                         =    (reginfo->strend - reginfo->strbeg + 1)
                            * (scan->flags>>4);
 		    /* possible overflow for long strings and many CURLYX's */
-		    if (PL_reg_maxiter < 0)
-			PL_reg_maxiter = I32_MAX;
-		    PL_reg_leftiter = PL_reg_maxiter;
+		    if (reginfo->poscache_maxiter < 0)
+			reginfo->poscache_maxiter = I32_MAX;
+		    reginfo->poscache_iter = reginfo->poscache_maxiter;
 		}
 
-		if (PL_reg_leftiter-- == 0) {
+		if (reginfo->poscache_iter-- == 0) {
 		    /* initialise cache */
-		    const I32 size = (PL_reg_maxiter + 7)/8;
+		    const I32 size = (reginfo->poscache_maxiter + 7)/8;
 		    if (PL_reg_poscache) {
 			if ((I32)PL_reg_poscache_size < size) {
 			    Renew(PL_reg_poscache, size, char);
@@ -5436,7 +5438,7 @@ NULL
 		    );
 		}
 
-		if (PL_reg_leftiter < 0) {
+		if (reginfo->poscache_iter < 0) {
 		    /* have we already failed at this position? */
 		    I32 offset, mask;
 		    offset  = (scan->flags & 0xf) - 1

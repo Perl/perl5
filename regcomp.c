@@ -15469,8 +15469,6 @@ Perl_save_re_context(pTHX)
 
     Copy(&PL_reg_state, state, 1, struct re_save_state);
 
-    PL_reg_maxiter = 0;
-    PL_reg_leftiter = 0;
     PL_reg_poscache = NULL;
     PL_reg_poscache_size = 0;
 
