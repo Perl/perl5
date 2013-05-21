@@ -3961,6 +3961,32 @@ static SV *retrieve_lutf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
         return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 1);
 }
 
+static SV *retrieve_vstring_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, int l) {
+#ifdef SvVOK
+	SV *sv, *s;
+        MAGIC *mg;
+        I32 len;
+        READ_VARINT(l, len);
+        READ_SVPV(s, len);
+        sv_2mortal(s);
+
+	TRACEME(("retrieve_vstring (#%d), len = %d", retrieve_cxt->tagnum, len));
+
+	sv = retrieve(aTHX_ retrieve_cxt, cname);
+        ASSERT(sv, ("retrieve returns non NULL"));
+        sv_magic(sv, NULL, PERL_MAGIC_vstring, SvPV_nolen(s), len);
+
+        /* 5.10.0 and earlier seem to need this */
+        SvRMAGICAL_on(sv);
+
+	TRACEME(("ok (retrieve_vstring_any at 0x%"UVxf")", PTR2UV(sv)));
+	return sv;
+#else
+	VSTRING_CROAK();
+	return Nullsv;
+#endif
+}
+
 /*
  * retrieve_vstring
  *
@@ -3971,31 +3997,8 @@ static SV *retrieve_lutf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
  * The vstring layout mirrors an SX_SCALAR string:
  * SX_VSTRING <length> <data> with SX_VSTRING already read.
  */
-static SV *retrieve_vstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
-{
-#ifdef SvVOK
-	MAGIC *mg;
-	SV *s;
-	int len;
-	SV *sv;
-
-	READ_UCHAR(len);
-	TRACEME(("retrieve_vstring (#%d), len = %d", retrieve_cxt->tagnum, len));
-
-	READ_SVPV(s, len);
-        sv_2mortal(s);
-	sv = retrieve(aTHX_ retrieve_cxt, cname);
-        ASSERT(sv, ("retrieve returns non NULL"));
-        sv_magic(sv,NULL,PERL_MAGIC_vstring,SvPV_nolen(s),len);
-        /* 5.10.0 and earlier seem to need this */
-        SvRMAGICAL_on(sv);
-
-	TRACEME(("ok (retrieve_vstring at 0x%"UVxf")", PTR2UV(sv)));
-	return sv;
-#else
-	VSTRING_CROAK();
-	return Nullsv;
-#endif
+static SV *retrieve_vstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname) {
+        retrieve_vstring_any(aTHX_ retrieve_cxt, cname, 0);
 }
 
 /*
@@ -4003,33 +4006,8 @@ static SV *retrieve_vstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
  *
  * Like retrieve_vstring, but for longer vstrings.
  */
-static SV *retrieve_lvstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
-{
-#ifdef SvVOK
-	MAGIC *mg;
-	SV *s;
-	I32 len;
-	SV *sv;
-
-	READ_I32(len);
-	TRACEME(("retrieve_lvstring (#%d), len = %"IVdf,
-		  retrieve_cxt->tagnum, (IV)len));
-
-	READ_SVPV(s, len);
-        sv_2mortal(s);
-
-	sv = retrieve(aTHX_ retrieve_cxt, cname);
-        ASSERT(sv, ("retrieve returns non NULL"));
-        sv_magic(sv,NULL,PERL_MAGIC_vstring,SvPV_nolen(s),len);
-        /* 5.10.0 and earlier seem to need this */
-        SvRMAGICAL_on(sv);
-
-	TRACEME(("ok (retrieve_lvstring at 0x%"UVxf")", PTR2UV(sv)));
-	return sv;
-#else
-	VSTRING_CROAK();
-	return Nullsv;
-#endif
+static SV *retrieve_lvstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname) {
+        retrieve_vstring_any(aTHX_ retrieve_cxt, cname, 1);
 }
 
 /*
@@ -4064,13 +4042,13 @@ static SV *retrieve_integer(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 static SV *retrieve_netint(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
 	SV *sv;
-	I32 iv;
+	I32 i32;
 
 	TRACEME(("retrieve_netint (#%d)", retrieve_cxt->tagnum));
 
-	READ_I32N(iv);
-	sv = newSViv(iv);
-	TRACEME(("network integer %d", iv));
+	READ_I32N(i32);
+	sv = newSViv(i32);
+	TRACEME(("network integer %d", i32));
 	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
 
 	TRACEME(("ok (retrieve_netint at 0x%"UVxf")", PTR2UV(sv)));
