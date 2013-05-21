@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= '1.13';
+$VERSION	= '1.14';
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -98,7 +98,7 @@ C<cat -v> and continually read and write a line from it.
 
 =item L<IPC::Open2>
 
-Like Open3 but without STDERR catpure.
+Like Open3 but without STDERR capture.
 
 =item L<IPC::Run>
 
