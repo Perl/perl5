@@ -292,6 +292,7 @@ struct st_retrieve_cxt {
 	HV *hook;			/* cache for hook methods per class name */
 	IV tagnum;			/* incremented at store time for each seen object */
 	IV classnum;		/* incremented at store time for each seen classname */
+        SV *rv;                 /* used for calling sv_bless */
 	int netorder;		/* true if network order used */
 	int is_tainted;		/* true if input source is tainted, at retrieve time */
 	SV *eval;           /* whether to eval source code */
@@ -306,7 +307,6 @@ struct st_retrieve_cxt {
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
 	sv_retrieve_t *retrieve_vtbl;	/* retrieve dispatch table */
-	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
         int on_magic_check; /* forces a particular error while we read the magic header, for backward comp. */
 };
 
@@ -811,27 +811,20 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
     } STMT_END
 
 
+static void bless_retrieved(pTHX_ retrieve_cxt_t *retrieve_cxt, SV *sv, const char *class_pv) {
+        SV *rv = retrieve_cxt->rv;
+        HV *stash = gv_stashpv(class_pv, GV_ADD);
+        SvRV_set(rv, sv);
+        sv_bless(rv, stash);
+        SvRV_set(rv, &PL_sv_undef);
+}
+
 /*
- * Bless 's' in 'p', via a temporary reference, required by sv_bless().
- * "A" magic is added before the sv_bless for overloaded classes, this avoids
- * an expensive call to S_reset_amagic in sv_bless.
+ * Bless 's' in 'p', via the temporary reference (cached on the
+ * context), required by sv_bless().
  */
-#define BLESS(s,p) 							\
-        STMT_START {                                                    \
-                SV *ref;                                                \
-                HV *stash;                                              \
-                TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (p)));  \
-                stash = gv_stashpv((p), GV_ADD);			\
-                ref = newRV_noinc(s);					\
-                if (retrieve_cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
-                {                                                       \
-                        retrieve_cxt->in_retrieve_overloaded = 0;       \
-                        SvAMAGIC_on(ref);                               \
-                }                                                       \
-                (void) sv_bless(ref, stash);                            \
-                SvRV_set(ref, NULL);                                    \
-                SvREFCNT_dec(ref);                                      \
-        } STMT_END
+#define BLESS(s,p)                                      \
+        (bless_retrieved(aTHX_ retrieve_cxt, s, p))
 
 /*
  * sort (used in store_hash) - conditionally use qsort when
@@ -1140,12 +1133,12 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 #endif
 
         retrieve_cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
-	retrieve_cxt->in_retrieve_overloaded = 0;
 
 	retrieve_cxt->keybuf = sv_2mortal(newSV(0));
 
         retrieve_cxt->eval = sv_mortalcopy(perl_get_sv("Storable::Eval", GV_ADD));
 
+        retrieve_cxt->rv = sv_2mortal(newRV(&PL_sv_undef));
 }
 
 static int
@@ -3700,10 +3693,8 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 
 	rv = newSV(0);
 	SEEN_no_inc(rv, cname);
-	retrieve_cxt->in_retrieve_overloaded = 1; /* so sv_bless doesn't call S_reset_amagic */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
-	retrieve_cxt->in_retrieve_overloaded = 0;
 
 	/*
 	 * WARNING: breaks RV encapsulation.
