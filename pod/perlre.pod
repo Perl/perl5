@@ -387,7 +387,7 @@ gives added protection.
 
 This modifier may be specified to be the default by C<use re '/a'>
 or C<use re '/aa'>.  If you do so, you may actually have occasion to use
-the C</u> modifier explictly if there are a few regular expressions
+the C</u> modifier explicitly if there are a few regular expressions
 where you do want full Unicode rules (but even here, it's best if
 everything were under feature C<"unicode_strings">, along with the
 C<use re '/aa'>).  Also see L</Which character set modifier is in
@@ -1591,7 +1591,7 @@ It is recommended that for this usage you put the DEFINE block at the
 end of the pattern, and that you name any subpatterns defined within it.
 
 Also, it's worth noting that patterns defined this way probably will
-not be as efficient, as the optimiser is not very clever about
+not be as efficient, as the optimizer is not very clever about
 handling them.
 
 An example of how this might be used is as follows:
