@@ -4642,7 +4642,7 @@ static SV *old_retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN_no_inc(av, 0);				/* Will return if array not allocated nicely */
+	SEEN_no_inc(av, 0);
 
 	/*
 	 * Now get each item in turn...
@@ -4699,7 +4699,7 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN(hv, 0);			/* Will return if table not allocated properly */
+	SEEN(hv, 0);
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
 	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
