@@ -203,7 +203,7 @@ use strict;
 package Term::ReadLine::Stub;
 our @ISA = qw'Term::ReadLine::Tk Term::ReadLine::TermCap';
 
-$DB::emacs = $DB::emacs;	# To peacify -w
+$DB::emacs = $DB::emacs;	# To pacify -w
 our @rl_term_set;
 *rl_term_set = \@Term::ReadLine::TermCap::rl_term_set;
 
@@ -223,7 +223,7 @@ sub readline {
       if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
          utf8::valid($str);
   print $out $rl_term_set[3]; 
-  # bug in 5.000: chomping empty string creats length -1:
+  # bug in 5.000: chomping empty string creates length -1:
   chomp $str if defined $str;
   $str;
 }
@@ -320,7 +320,7 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {
@@ -469,7 +469,7 @@ sub get_line {
       if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
          utf8::valid($str);
   print $out $rl_term_set[3];
-  # bug in 5.000: chomping empty string creats length -1:
+  # bug in 5.000: chomping empty string creates length -1:
   chomp $str if defined $str;
 
   $str;
