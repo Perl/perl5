@@ -26,7 +26,7 @@
 #include "ppport.h"             /* handle old perls */
 #endif
 
-#if 1
+#if 0
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
@@ -91,24 +91,24 @@
  * TRACEME() will only output things when the $Storable::DEBUGME is true.
  */
 
-#define TRACEME(x)										\
-  STMT_START {											\
-	if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))	\
+#define TRACEME(x)                                                      \
+        STMT_START {                                                    \
+                if (SvTRUE(perl_get_sv("Storable::DEBUGME", GV_ADD)))	\
 		{ PerlIO_stdoutf x; PerlIO_stdoutf("\n"); }		\
-  } STMT_END
+        } STMT_END
 #else
 #define TRACEME(x)
 #endif	/* DEBUGME */
 
 #ifdef DASSERT
-#define ASSERT(x,y)										\
-  STMT_START {											\
-	if (!(x)) {												\
-		PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ",	\
-			__FILE__, __LINE__);							\
-		PerlIO_stdoutf y; PerlIO_stdoutf("\n");				\
-	}														\
-  } STMT_END
+#define ASSERT(x,y)                                                     \
+        STMT_START {                                                    \
+                if (!(x)) {                                             \
+                        PerlIO_stdoutf("ASSERT FAILED (\"%s\", line %d): ", \
+                                       __FILE__, __LINE__);             \
+                        PerlIO_stdoutf y; PerlIO_stdoutf("\n");         \
+                }                                                       \
+        } STMT_END
 #else
 #define ASSERT(x,y)
 #endif
@@ -186,7 +186,7 @@
 
 /*
  * At store time:
- * A hash table records the objects which have already been stored.
+ * A ptr table records the objects which have already been stored.
  * Those are referred to as SX_OBJECT in the file, and their "tag" (i.e.
  * an arbitrary sequence number) is used to identify them.
  *
