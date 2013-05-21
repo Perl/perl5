@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 require Exporter;
 require Cwd;
 
@@ -488,7 +488,7 @@ sub _find_opt {
 	$cwd = VMS::Filespec::unixpath($cwd);
 
 	# Apparently this is not expected to have a trailing space.
-	# To attempt to make VMS/UNIX conversions mostly reversable,
+	# To attempt to make VMS/UNIX conversions mostly reversible,
 	# a trailing slash is needed.  The run-time functions ignore the
 	# resulting double slash, but it causes the perl tests to fail.
         $cwd =~ s#/\z##;
