@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.40';
+$VERSION = '3.41';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -343,7 +343,7 @@ foreach my $try ('/bin/pwd',
 }
 my $found_pwd_cmd = defined($pwd_cmd);
 unless ($pwd_cmd) {
-    # Isn't this wrong?  _backtick_pwd() will fail if somenone has
+    # Isn't this wrong?  _backtick_pwd() will fail if someone has
     # pwd in their path but it is not /bin/pwd or /usr/bin/pwd?
     # See [perl #16774]. --jhi
     $pwd_cmd = 'pwd';

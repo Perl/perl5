@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.40';
+$VERSION = '3.41';
 $VERSION =~ tr/_//;
 
 @ISA = qw(File::Spec::Unix);
@@ -27,7 +27,7 @@ there. This package overrides the implementation of these methods, not
 the semantics.
 
 The default behavior is to allow either VMS or Unix syntax on input and to 
-return VMS syntax on output unless Unix syntax has been explicity requested
+return VMS syntax on output unless Unix syntax has been explicitly requested
 via the C<DECC$FILENAME_UNIX_REPORT> CRTL feature.
 
 =over 4
