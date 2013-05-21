@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.20';
+$VERSION = '1.21';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -401,7 +401,7 @@ sub _pessimise_walk_exe {
     }
 }
 
-# Go through an optree and and "remove" some optimisations by using an
+# Go through an optree and "remove" some optimisations by using an
 # overlay to selectively modify or un-null some ops. Deparsing in the
 # absence of those optimisations is then easier.
 #
@@ -3934,7 +3934,7 @@ sub re_uninterp_extended {
 }
 }
 
-my %unctrl = # portable to to EBCDIC
+my %unctrl = # portable to EBCDIC
     (
      "\c@" => '\c@',	# unused
      "\cA" => '\cA',
