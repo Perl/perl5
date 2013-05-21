@@ -127,6 +127,7 @@ use 5.010;
 use strict;
 use warnings;
 use Getopt::Long;
+use Archive::Tar;
 
 $| = 1;
 
@@ -229,8 +230,8 @@ say "Cleaning out old directory";
 system git => 'clean', '-dfxq', $pkg_dir;
 
 say "Unpacking $new_file";
+Archive::Tar->extract_archive( $newfile );
 
-system tar => 'xfz', $new_file;
 (my $new_dir = $new_file) =~ s/\.tar\.gz//;
 # ensure 'make' will update all files
 system('find', $new_dir, '-exec', 'touch', '{}', ';');
