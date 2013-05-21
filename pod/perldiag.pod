@@ -553,7 +553,7 @@ if the pattern delimiters are C<{}>.
 =item Bizarre copy of %s
 
 (P) Perl detected an attempt to copy an internal value that is not
-copiable.
+copyable.
 
 =item Buffer overflow in prime_env_iter: %s
 
@@ -5810,7 +5810,7 @@ metacharacters even though they are backslashed; instead write:
  s[foo[a-z]bar][baz]
 
 The backslashes have no effect when a regular expression pattern is
-delimitted by C<{}>, C<[]>, or C<()>, which ordinarily are
+delimited by C<{}>, C<[]>, or C<()>, which ordinarily are
 metacharacters, and the delimiters are also used, paired, within the
 interior of the pattern.  It is planned that a future Perl release will
 change the meaning of constructs like these so that the backslashes
@@ -6083,7 +6083,7 @@ To help you figure out what was undefined, perl will try to tell you
 the name of the variable (if any) that was undefined.  In some cases
 it cannot do this, so it also tells you what operation you used the
 undefined value in.  Note, however, that perl optimizes your program
-anid the operation displayed in the warning may not necessarily appear
+and the operation displayed in the warning may not necessarily appear
 literally in your program.  For example, C<"that $foo"> is usually
 optimized into C<"that " . $foo>, and the warning will refer to the
 C<concatenation (.)> operator, even though there is no C<.> in
@@ -6344,7 +6344,7 @@ what you want, put an & in front.)
 
 =item Your random numbers are not that random
 
-(F) When trying to initialise the random seed for hashes, Perl could
+(F) When trying to initialize the random seed for hashes, Perl could
 not get any randomness out of your system.  This usually indicates
 Something Very Wrong.
 
