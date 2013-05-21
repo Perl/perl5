@@ -111,7 +111,7 @@ The keys are library names and the values are hashrefs.  Each hashref has an
 entry for one or both of C<left> and C<right>, giving the versions of the
 library in each of the left and right perl distributions.
 
-For example, it might return these data (among others) for the the difference
+For example, it might return these data (among others) for the difference
 between 5.008000 and 5.008001:
 
   'Pod::ParseLink'  => { left => '1.05', right => '1.06' },
