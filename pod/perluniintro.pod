@@ -109,7 +109,7 @@ C<block> of consecutive unallocated code points for its characters.  So
 far, the number of code points in these blocks has always been evenly
 divisible by 16.  Extras in a block, not currently needed, are left
 unallocated, for future growth.  But there have been occasions when
-a later relase needed more code points than the available extras, and a
+a later release needed more code points than the available extras, and a
 new block had to allocated somewhere else, not contiguous to the initial
 one, to handle the overflow.  Thus, it became apparent early on that
 "block" wasn't an adequate organizing principal, and so the C<Script>
@@ -806,14 +806,14 @@ Starting in Perl 5.16, you can specify
 
     use locale ':not_characters';
 
-to get Perl to work well with tradtional locales.  The catch is that you
+to get Perl to work well with traditional locales.  The catch is that you
 have to translate from the locale character set to/from Unicode
 yourself.  See L</Unicode IE<sol>O> above for how to
 
     use open ':locale';
 
 to accomplish this, but full details are in L<perllocale/Unicode and
-UTF-8>, including gotchas that happen if you don't specifiy
+UTF-8>, including gotchas that happen if you don't specify
 C<:not_characters>.
 
 =back
