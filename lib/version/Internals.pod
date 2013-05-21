@@ -251,7 +251,7 @@ when using version.pm methods, as this will ensure that what you type is
 what is used.
 
 Additionally, if you quote your initializer, then the quoted value that goes
-B<in> will be be exactly what comes B<out> when your $VERSION is printed
+B<in> will be exactly what comes B<out> when your $VERSION is printed
 (stringified).  If you do not quote your value, Perl's normal numeric handling
 comes into play and you may not get back what you were expecting.
 
@@ -343,7 +343,7 @@ See L<version/is_qv()>.
 =item alpha
 
 A boolean that denotes whether this is an alpha version.  NOTE: that the
-underscore can can only appear in the last position.  See L<version/is_alpha()>.
+underscore can only appear in the last position.  See L<version/is_alpha()>.
 
 =item version
 
