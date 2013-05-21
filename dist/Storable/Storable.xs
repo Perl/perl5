@@ -249,7 +249,6 @@
 #define HAS_RESTRICTED_HASHES
 #else
 #define HVhek_PLACEHOLD	0x200
-#define RESTRICTED_HASH_CROAK() CROAK(("Cannot retrieve restricted hash"))
 #endif
 
 #ifdef HvHASKFLAGS
@@ -296,9 +295,6 @@ struct st_retrieve_cxt {
 	int netorder;		/* true if network order used */
 	int is_tainted;		/* true if input source is tainted, at retrieve time */
 	SV *eval;           /* whether to eval source code */
-#ifndef HAS_RESTRICTED_HASHES
-        int derestrict;         /* whether to downgrade restricted hashes */
-#endif
 #ifndef HAS_UTF8_ALL
         int use_bytes;         /* whether to bytes-ify utf8 */
 #endif
@@ -1139,12 +1135,10 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 	retrieve_cxt->classnum = 0;				/* ...and class names as well */
 	retrieve_cxt->optype = optype;
 
-#ifndef HAS_RESTRICTED_HASHES
-        retrieve_cxt->derestrict = -1;		/* Fetched from perl if needed */
-#endif
 #ifndef HAS_UTF8_ALL
         retrieve_cxt->use_bytes = -1;		/* Fetched from perl if needed */
 #endif
+
         retrieve_cxt->accept_future_minor = -1;	/* Fetched from perl if needed */
 	retrieve_cxt->in_retrieve_overloaded = 0;
 
@@ -1159,6 +1153,10 @@ forgive_me(pTHX) {
         return SvTRUE(perl_get_sv("Storable::forgive_me", GV_ADD));
 }
 
+static int
+downgrade_restricted(pTHX) {
+        return SvTRUE(perl_get_sv("Storable::downgrade_restricted", GV_ADD));
+}
 
 /***
  *** Predicates.
@@ -4303,21 +4301,15 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 
     READ_UCHAR(hash_flags);
     TRACEME(("retrieve_flag_hash (#%d)", retrieve_cxt->tagnum));
+
+#ifndef HAS_RESTRICTED_HASHES
+    if ((hash_flags & SHV_RESTRICTED) && !downgrade_restricted(aTHX))
+            CROAK(("Cannot retrieve restricted hash"))
+#endif
+
     /*
      * Read length, allocate table.
      */
-
-#ifndef HAS_RESTRICTED_HASHES
-    if (hash_flags & SHV_RESTRICTED) {
-        if (retrieve_cxt->derestrict < 0)
-            retrieve_cxt->derestrict
-                = (SvTRUE(perl_get_sv("Storable::downgrade_restricted", GV_ADD))
-                   ? 1 : 0);
-        if (retrieve_cxt->derestrict == 0)
-            RESTRICTED_HASH_CROAK();
-    }
-#endif
-
     READ_I32(len);
     TRACEME(("size = %d, flags = %d", len, hash_flags));
     hv = newHV();
@@ -4358,54 +4350,55 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 
                             hv_store_ent(hv, keysv, SvREFCNT_inc(sv), 0);
 
-                    } else {
-                            /*
-                             * Get key.
-                             * Since we're reading into kbuf, we must ensure we're not
-                             * recursing between the read and the hv_store() where it's used.
-                             * Hence the key comes after the value.
-                             */
+                            continue;
+                    }
 
-                            const char *kbuf;
+                    /*
+                     * Get key.
+                     * Since we're reading into kbuf, we must ensure we're not
+                     * recursing between the read and the hv_store() where it's used.
+                     * Hence the key comes after the value.
+                     */
 
-                            if (flags & SHV_K_PLACEHOLDER) {
-                                    sv = &PL_sv_placeholder;
-                                    store_flags |= HVhek_PLACEHOLD;
-                            }
-                            if (flags & SHV_K_UTF8) {
+                    const char *kbuf;
+
+                    if (flags & SHV_K_PLACEHOLDER) {
+                            sv = &PL_sv_placeholder;
+                            store_flags |= HVhek_PLACEHOLD;
+                    }
+                    if (flags & SHV_K_UTF8) {
 #ifdef HAS_UTF8_HASHES
-                                    store_flags |= HVhek_UTF8;
+                            store_flags |= HVhek_UTF8;
 #else
-                                    if (retrieve_cxt->use_bytes < 0)
-                                            retrieve_cxt->use_bytes
-                                                    = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                                                       ? 1 : 0);
-                                    if (retrieve_cxt->use_bytes == 0)
-                                            UTF8_CROAK();
-#endif
-                            }
-#ifdef HAS_UTF8_HASHES
-                            if (flags & SHV_K_WASUTF8)
-                                    store_flags |= HVhek_WASUTF8;
-#endif
-                            READ_I32(size);						/* Get key size */
-                            READ_KEY(kbuf, size);
-                            TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
-                                     flags, store_flags));
-
-                            /*
-                             * Enter key/value pair into hash table.
-                             */
-
-#ifdef HAS_RESTRICTED_HASHES
-                            if (!hv_store_flags(hv, kbuf, size, sv, 0, store_flags) )
-                                    Perl_croak(aTHX_ "Internal error: hv_store_flags failed");
-                            SvREFCNT_inc(sv);
-#else
-                            if (!(store_flags & HVhek_PLACEHOLD))
-                                    hv_store_safe(aTHX_ hv, kbuf, size, SvREFCNT_inc(sv));
+                            if (retrieve_cxt->use_bytes < 0)
+                                    retrieve_cxt->use_bytes
+                                            = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+                                               ? 1 : 0);
+                            if (retrieve_cxt->use_bytes == 0)
+                                    UTF8_CROAK();
 #endif
                     }
+#ifdef HAS_UTF8_HASHES
+                    if (flags & SHV_K_WASUTF8)
+                            store_flags |= HVhek_WASUTF8;
+#endif
+                    READ_I32(size);						/* Get key size */
+                    READ_KEY(kbuf, size);
+                    TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
+                             flags, store_flags));
+
+                    /*
+                     * Enter key/value pair into hash table.
+                     */
+
+#ifdef HAS_RESTRICTED_HASHES
+                    if (!hv_store_flags(hv, kbuf, size, sv, 0, store_flags) )
+                            Perl_croak(aTHX_ "Internal error: hv_store_flags failed");
+                    SvREFCNT_inc(sv);
+#else
+                    if (!(store_flags & HVhek_PLACEHOLD))
+                            hv_store_safe(aTHX_ hv, kbuf, size, SvREFCNT_inc(sv));
+#endif
             }
     }
 #ifdef HAS_RESTRICTED_HASHES
