@@ -871,12 +871,6 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
 static int store(pTHX_ store_cxt_t *store_cxt, SV *sv);
 static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname);
 
-#define UNSEE()                                      \
-        STMT_START {                                 \
-                av_pop(retrieve_cxt->aseen);         \
-                retrieve_cxt->tagnum--;              \
-        } STMT_END
-
 /*
  * Dynamic dispatching table for SV store.
  */
@@ -1288,63 +1282,6 @@ static SV *pkg_can(
 
 	TRACEME(("not cached yet"));
 	return pkg_fetchmeth(aTHX_ cache, pkg, method);		/* Fetch and cache */
-}
-
-/*
- * scalar_call
- *
- * Call routine as obj->hook(av) in scalar context.
- * Propagates the single returned value if not called in void context.
- */
-static SV *scalar_call(
-        pTHX_
-	SV *obj,
-	SV *hook,
-	int cloning,
-	AV *av,
-	I32 flags)
-{
-	dSP;
-	int count;
-	SV *sv = 0;
-
-	TRACEME(("scalar_call (cloning=%d)", cloning));
-
-	ENTER;
-	SAVETMPS;
-
-	PUSHMARK(sp);
-	XPUSHs(obj);
-	XPUSHs(sv_2mortal(newSViv(cloning)));		/* Cloning flag */
-	if (av) {
-		SV **ary = AvARRAY(av);
-		int cnt = AvFILLp(av) + 1;
-		int i;
-		XPUSHs(ary[0]);							/* Frozen string */
-		for (i = 1; i < cnt; i++) {
-			TRACEME(("pushing arg #%d (0x%"UVxf")...",
-				 i, PTR2UV(ary[i])));
-			XPUSHs(sv_2mortal(newRV(ary[i])));
-		}
-	}
-	PUTBACK;
-
-	TRACEME(("calling..."));
-	count = perl_call_sv(hook, flags);		/* Go back to Perl code */
-	TRACEME(("count = %d", count));
-
-	SPAGAIN;
-
-	if (count) {
-		sv = POPs;
-		SvREFCNT_inc(sv);		/* We're returning it, must stay alive! */
-	}
-
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-
-	return sv;
 }
 
 /*
