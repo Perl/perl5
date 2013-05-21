@@ -54,7 +54,7 @@ my $patch_tags = join "", map /(\S+)/ ? "+$1 " : (), @patches;
 
 close(PATCH_LEVEL) or die "Error closing patchlevel.h: $!";
 
-# TO DO (prehaps): store/embed $Config::config_sh into perlbug. When perlbug is
+# TO DO (perhaps): store/embed $Config::config_sh into perlbug. When perlbug is
 # used, compare $Config::config_sh with the stored version. If they differ then
 # append a list of individual differences to the bug report.
 
