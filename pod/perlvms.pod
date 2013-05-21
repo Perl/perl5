@@ -1064,7 +1064,7 @@ You do need to be careful with the logical names representing
 process-permanent files, such as C<SYS$INPUT> and C<SYS$OUTPUT>.
 The translations for these logical names are prepended with a
 two-byte binary value (0x1B 0x00) that needs to be stripped off
-if you wantto use it. (In previous versions of Perl it wasn't
+if you want to use it. (In previous versions of Perl it wasn't
 possible to get the values of these logical names, as the null
 byte acted as an end-of-string marker)
 
