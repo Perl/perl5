@@ -107,9 +107,10 @@ b
 ########
 # Implicit unicode_string feature
 use v5.14;
-print 'ss' =~ /\xdf/i ? "ok\n" : "nok\n";
+my $sharp_s = chr utf8::unicode_to_native(0xdf);
+print 'ss' =~ /$sharp_s/i ? "ok\n" : "nok\n";
 use v5.8.8;
-print 'ss' =~ /\xdf/i ? "ok\n" : "nok\n";
+print 'ss' =~ /$sharp_s/i ? "ok\n" : "nok\n";
 EXPECT
 ok
 nok
