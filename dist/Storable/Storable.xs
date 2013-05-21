@@ -734,7 +734,7 @@ read_svpv(pTHX_ retrieve_cxt_t *retrieve_cxt, STRLEN size) {
 	read_into_sv(aTHX_ retrieve_cxt, size, sv);
         if (retrieve_cxt->is_tainted)
                 SvTAINT(sv);
-        SvREFCNT_inc(sv);
+        SvREFCNT_inc_NN(sv);
         return sv;
 }
 
@@ -1309,7 +1309,7 @@ static AV *array_call(
 	av = newAV();
 	for (i = count - 1; i >= 0; i--) {
 		SV *sv = POPs;
-		av_store(av, i, SvREFCNT_inc(sv));
+		av_store(av, i, SvREFCNT_inc_NN(sv));
 	}
 
 	PUTBACK;
@@ -2487,7 +2487,7 @@ static int store_hook(
                          * Therefore, push it away in retrieve_cxt->hook_seen.
                          */
                         
-                        av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc(xsv));
+                        av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc_NN(xsv));
                         
                 sv_seen:
                         /*
@@ -3129,7 +3129,7 @@ static int do_store(
 
 	if (res) {
                 ASSERT(!f, ("file handle is NULL"));
-                *res = SvREFCNT_inc(store_cxt.output_sv);
+                *res = SvREFCNT_inc_NN(store_cxt.output_sv);
         }
 
         sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
@@ -3527,7 +3527,7 @@ hook_found:
                 if (!(SvROK(rv) && sv_derived_from_sv(rv, class_sv, 0)))
                         CROAK(("STORABLE_attach did not return a %s object", class_pv));
                 sv = SvRV(rv);
-                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sv));
+                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc_NN(sv));
         }
 
         PUTBACK;
@@ -3535,7 +3535,7 @@ hook_found:
         LEAVE;
 
 	if (!extra_type)
-                return SvREFCNT_inc(sv);
+                return SvREFCNT_inc_NN(sv);
 
 	/*
 	 * If we had an <extra> type, then the object was not as simple, and
@@ -3590,7 +3590,7 @@ hook_found:
 	 */
 
 	sv_magic(sv, mg_obj, mtype, (char *)NULL, 0);
-	return SvREFCNT_inc(sv);
+	return SvREFCNT_inc_NN(sv);
 }
 
 /*
@@ -3626,15 +3626,6 @@ static SV *retrieve_ref(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 * Now for the tricky part. We have to upgrade our existing SV, so that
 	 * it is now an RV on sv... Again, we cheat by duplicating the code
 	 * held in newSVrv(), since we already got our SV from retrieve().
-	 *
-	 * We don't say:
-	 *
-	 *		SvRV(rv) = SvREFCNT_inc(sv);
-	 *
-	 * here because the reference count we got from retrieve() above is
-	 * already correct: if the object was retrieved from the file, then
-	 * its reference count is one. Otherwise, if it was retrieved via
-	 * an SX_OBJECT indication, a ref count increment was done.
 	 */
 
 	if (cname) {
@@ -3649,7 +3640,7 @@ static SV *retrieve_ref(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
 	TRACEME(("ok (retrieve_ref at 0x%"UVxf")", PTR2UV(rv)));
 
-	return SvREFCNT_inc(rv);
+	return SvREFCNT_inc_NN(rv);
 }
 
 /*
@@ -3731,7 +3722,7 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 
 	TRACEME(("ok (retrieve_overloaded at 0x%"UVxf")", PTR2UV(rv)));
 
-	return SvREFCNT_inc(rv);
+	return SvREFCNT_inc_NN(rv);
 }
 
 /*
@@ -3768,7 +3759,7 @@ static SV *retrieve_tied_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
         
 	TRACEME(("ok (retrieve tied hash, array or scalar at 0x%"UVxf")", PTR2UV(tv)));
 
-	return SvREFCNT_inc(tv);
+	return SvREFCNT_inc_NN(tv);
 }
 
 /*
@@ -3834,7 +3825,7 @@ static SV *retrieve_tied_key(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	sv_magic(tv, sv, 'p', (char *)key, HEf_SVKEY);
 	SvREFCNT_dec(key);			/* Undo refcnt inc from sv_magic() */
 
-	return SvREFCNT_inc(tv);
+	return SvREFCNT_inc_NN(tv);
 }
 
 /*
@@ -3863,7 +3854,7 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 
 	sv_magic(tv, sv, 'p', (char *)NULL, idx);
 
-	return SvREFCNT_inc(tv);
+	return SvREFCNT_inc_NN(tv);
 }
 
 static SV *retrieve_scalar_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, IV len, int utf8) {
@@ -3888,7 +3879,7 @@ static SV *retrieve_scalar_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
                         UTF8_CROAK();
 #endif
         }
-	return SvREFCNT_inc(sv);
+	return SvREFCNT_inc_NN(sv);
 }
 
 /*
@@ -4196,7 +4187,7 @@ static SV *retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	}
 
 	TRACEME(("ok (retrieve_array at 0x%"UVxf")", PTR2UV(av)));
-	return SvREFCNT_inc((SV*)av);
+	return SvREFCNT_inc_NN((SV*)av);
 }
 
 static SV *retrieve_hash_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, int with_flags) {
@@ -4265,7 +4256,7 @@ static SV *retrieve_hash_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
                                     keysv = retrieve(aTHX_ retrieve_cxt, 0);
                                     ASSERT(keysv, ("retrieve returns non NULL"));
 
-                                    hv_store_ent(hv, keysv, SvREFCNT_inc(sv), 0);
+                                    hv_store_ent(hv, keysv, SvREFCNT_inc_NN(sv), 0);
 
                                     continue;
                             }
@@ -4309,10 +4300,10 @@ static SV *retrieve_hash_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 #ifdef HAS_RESTRICTED_HASHES
                     if (!hv_store_flags(hv, kbuf, size, sv, 0, store_flags) )
                             Perl_croak(aTHX_ "Internal error: hv_store_flags failed");
-                    SvREFCNT_inc(sv);
+                    SvREFCNT_inc_NN(sv);
 #else
                     if (!(store_flags & HVhek_PLACEHOLD))
-                            hv_store_safe(aTHX_ hv, kbuf, size, SvREFCNT_inc(sv));
+                            hv_store_safe(aTHX_ hv, kbuf, size, SvREFCNT_inc_NN(sv));
 #endif
             }
     }
@@ -4323,7 +4314,7 @@ static SV *retrieve_hash_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 
     TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
 
-    return SvREFCNT_inc((SV *) hv);
+    return SvREFCNT_inc_NN((SV *) hv);
 }
 
 /*
@@ -4452,7 +4443,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
                         CROAK(("code %s did not evaluate to a subroutine reference\n", SvPV_nolen(sub)));
                 
                 sub = SvRV(cv);
-                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sub)); /* fix up the dummy entry... */
+                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc_NN(sub)); /* fix up the dummy entry... */
                 FREETMPS;
                 LEAVE;
                 
@@ -4460,7 +4451,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
         else if (!forgive_me(aTHX))
                 CROAK(("Can't eval, please set $Storable::Eval to a true value"));
 #endif
-        return SvREFCNT_inc(sub);
+        return SvREFCNT_inc_NN(sub);
 }
 
 /*
@@ -4513,7 +4504,7 @@ static SV *old_retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
 
 	TRACEME(("ok (old_retrieve_array at 0x%"UVxf")", PTR2UV(av)));
 
-	return SvREFCNT_inc((SV *)av);
+	return SvREFCNT_inc_NN((SV *)av);
 }
 
 /*
@@ -4599,13 +4590,13 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
                          * Enter key/value pair into hash table.
                          */
 
-                        hv_store_safe(aTHX_ hv, kbuf, (U32) size, SvREFCNT_inc(sv));
+                        hv_store_safe(aTHX_ hv, kbuf, (U32) size, SvREFCNT_inc_NN(sv));
                 }
 
                 TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
         }
 
-	return SvREFCNT_inc((SV *)hv);
+	return SvREFCNT_inc_NN((SV *)hv);
 }
 
 /***
@@ -4859,7 +4850,7 @@ static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 					(UV) tagn));
 			sv = *svh;
 			TRACEME(("has retrieved #%d at 0x%"UVxf, tagn, PTR2UV(sv)));
-			SvREFCNT_inc(sv);	/* One more reference to this same sv */
+			SvREFCNT_inc_NN(sv);	/* One more reference to this same sv */
 			return sv;			/* The SV pointer where object was retrieved */
 		}
 
@@ -4898,7 +4889,7 @@ static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 				(UV) tag));
 		sv = *svh;
 		TRACEME(("had retrieved #%d at 0x%"UVxf, tag, PTR2UV(sv)));
-		SvREFCNT_inc(sv);	/* One more reference to this same sv */
+		SvREFCNT_inc_NN(sv);	/* One more reference to this same sv */
 		return sv;			/* The SV pointer where object was retrieved */
 	} else if (type >= SX_ERROR && retrieve_cxt->ver_minor > STORABLE_BIN_MINOR) {
             if (retrieve_cxt->accept_future_minor < 0)
