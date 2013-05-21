@@ -443,16 +443,27 @@ xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
 	;;
 esac
 
-## In the following dollars and backticks do not need the extra backslash.
-$spitshell >>$Makefile <<'!NO!SUBS!'
+SH_to_target() {
+    echo $@ | sed -e s/\\\.SH//g -e s/_/./g
+}
 
-private = preplibrary $(CONFIGPM) $(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h lib/buildcustomize.pl
+SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH x2p/Makefile.SH'
+shextract=`SH_to_target $SH`
+
+## In the following dollars and backticks do not need the extra backslash.
+$spitshell >>$Makefile <<!GROK!THIS!
+
+private = preplibrary \$(CONFIGPM) \$(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h lib/buildcustomize.pl
 
 # Files to be built with variable substitution before miniperl
 # is available.
-sh = Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH pod/Makefile.SH
+sh = $SH
 
-shextract = Makefile cflags config.h makedepend makedir myconfig pod/Makefile
+shextract = $shextract
+!GROK!THIS!
+
+## In the following dollars and backticks do not need the extra backslash.
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 addedbyconf = UU $(shextract) pstruct
 
@@ -589,18 +600,21 @@ perl$(OBJ_EXT): git_version.h
 case "$usedl$static_cwd" in
 defineundef)
     util_deps='$(MINIPERL_EXE) $(CONFIGPM) lib/auto/Cwd/Cwd$(DLSUFFIX) FORCE'
-     x2p_deps='$(MINIPERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE'
+     x2p_deps="\$(MINIPERL_EXE) \$(CONFIGPM) \$(dynamic_ext) x2p/$firstmakefile FORCE"
     ;;
 definedefine)
     util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
-     x2p_deps='$(PERL_EXE) $(CONFIGPM) $(dynamic_ext) FORCE'
+     x2p_deps="\$(PERL_EXE) \$(CONFIGPM) \$(dynamic_ext) x2p/$firstmakefile FORCE"
     ;;
 *)  util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
-     x2p_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
+     x2p_deps="\$(PERL_EXE) \$(CONFIGPM) x2p/$firstmakefile FORCE"
     ;;
 esac
 
 $spitshell >>$Makefile <<!GROK!THIS!
+x2p/$firstmakefile:	makedepend
+	cd x2p; \$(MAKE) depend
+
 translators:	$x2p_deps
 	@echo " "; echo "	Making x2p stuff"; cd x2p; \$(LDLIBPTH) \$(MAKE) all
 
@@ -1271,13 +1285,12 @@ _mopup:
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs $(generated_pods) uni.data opmini.o perlmini.o pod/roffitall
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
-	-rm -f perl.loadmap miniperl.loadmap perl.prelmap miniperl.prelmap
 	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
-	-rm -f config.arch config.over $(DTRACE_H) runtests
+	-rm -f config.arch config.over $(DTRACE_H)
 
 # Do not 'make _tidy' directly.
 _tidy:
@@ -1389,21 +1402,22 @@ MAKEDEPEND = Makefile makedepend
 
 $(FIRSTMAKEFILE):	README $(MAKEDEPEND)
 	$(MAKE) depend MAKEDEPEND=
+!NO!SUBS!
 
-config.h: config_h.SH config.sh
-	$(SHELL) config_h.SH
+for f in $SH; do
+    file=`SH_to_target $f`
+    $spitshell >>$Makefile <<!GROK!THIS!
+
+$file: $f config.sh
+	\$(SHELL) $f
+!GROK!THIS!
+done
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
 
 .PHONY: depend
 depend: makedepend
-	sh ./makedepend MAKE=$(MAKE)
-	cd x2p; $(MAKE) depend
-
-# Cannot postpone this until $firstmakefile is ready ;-)
-makedepend: makedepend.SH config.sh
-	sh ./makedepend.SH
-
-runtests: runtests.SH config.sh
-	sh ./runtests.SH
+	sh ./makedepend MAKE=$(MAKE) cflags
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
@@ -1576,19 +1590,13 @@ noknack:	utilities
 nokfilenack:	utilities
 	$(RUN_PERL) -Ilib utils/perlbug -nok -s '(UNINSTALLED)' -F perl.nok -A
 
-.PHONY: clist hlist shlist
+.PHONY: clist hlist
 
 clist:	$(c)
 	echo $(c) | tr ' ' $(TRNL) >.clist
 
 hlist:  $(h)
 	echo $(h) | tr ' ' $(TRNL) >.hlist
-
-shlist: $(sh)
-	echo $(sh) | tr ' ' $(TRNL) >.shlist
-
-Makefile: Makefile.SH ./config.sh
-	$(SHELL) Makefile.SH
 
 .PHONY: distcheck
 distcheck: FORCE
@@ -1604,12 +1612,6 @@ ctags:
 !NO!SUBS!
 
 $eunicefix Makefile
-case `pwd` in
-*SH)
-    $rm -f ../Makefile
-    $ln Makefile ../Makefile
-    ;;
-esac
 $rm -f $firstmakefile
 
 # Now do any special processing required before building.

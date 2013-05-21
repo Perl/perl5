@@ -27,7 +27,6 @@ runtests.SH
 t/TEST
 vms/ext/filespec.t
 x2p/Makefile.SH
-x2p/cflags.SH
 Porting/Maintainers.pl
 Porting/add-package.pl
 Porting/bisect.pl
