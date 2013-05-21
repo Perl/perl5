@@ -26,7 +26,7 @@
 #include "ppport.h"             /* handle old perls */
 #endif
 
-#if 0
+#if 1
 #define DEBUGME /* Debug mode, turns assertions on as well */
 #define DASSERT /* Assertion mode */
 #endif
@@ -2571,13 +2571,9 @@ static int store_hook(
                         ASSERT(SvREFCNT(xsv) > 1, ("SV will survive disposal of its REF"));
                         SvREFCNT_dec(rsv);			/* Dispose of reference */
                         
-                        /*
-                         * Replace entry with its tag (not a real SV, so no refcnt increment)
-                         */
-                        
-                        ary[i] = newSViv(PTR2UV(tag1) - 1)
-                                TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
-                                         i-1, PTR2UV(xsv), PTR2UV(tag1) - 1));
+                        ary[i] = newSViv(PTR2UV(tag1) - 1);
+                        TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
+                                 i-1, PTR2UV(xsv), PTR2UV(tag1) - 1));
                 }
         }
 
@@ -3349,21 +3345,16 @@ static SV *retrieve_blessed(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
  */
 static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-	I32 len;
-	char *classname;
+	I32 len, frozen_len, refs_len, i;
+        SV *sv, *class_sv, *frozen, *hook, **hookp, *mg_obj;
 	unsigned int flags;
-	I32 len2;
-	SV *frozen;
-	I32 len3 = 0;
-	AV *av = 0;
-	SV *hook;
-	SV *sv;
-	SV *rv;
-	GV *attach;
-	int obj_type;
-	int clone = retrieve_cxt->optype & ST_CLONE;
+	int obj_type, is_thaw, tagnum;
 	char mtype = '\0';
 	unsigned int extra_type = 0;
+        const char *class_pv;
+        STRLEN class_len;
+        int count;
+        dSP;
 
 	PERL_UNUSED_ARG(cname);
 	TRACEME(("retrieve_hook (#%d)", retrieve_cxt->tagnum));
@@ -3420,7 +3411,9 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	default:
 		return retrieve_other(aTHX_ retrieve_cxt, 0);		/* Let it croak */
 	}
-	SEEN(sv, 0);							/* Don't bless yet */
+
+        tagnum = retrieve_cxt->tagnum;
+	SEEN_no_inc(sv, 0); /* Don't bless as we don't know the class yet */
 
 	/*
 	 * Whilst flags tell us to recurse, do so.
@@ -3435,6 +3428,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 */
 
 	while (flags & SHF_NEED_RECURSE) {
+                SV *rv;
 		TRACEME(("retrieve_hook recursing..."));
 		rv = retrieve(aTHX_ retrieve_cxt, 0);
                 ASSERT(rv, ("retrieve returns non NULL"));
@@ -3457,11 +3451,10 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 			CROAK(("Class name #%"IVdf" should have been seen already",
 				(IV) idx));
 
-		classname = SvPVX(*sva);	/* We know it's a PV, by construction */
-		TRACEME(("class ID %d => %s", idx, classname));
+                class_sv = *sva;
+		TRACEME(("class ID %d => %s", idx, class_pv));
 
 	} else {
-		SV *class_sv;                
 		READ_VARINT(flags & SHF_LARGE_CLASSLEN, len);
 		READ_SVPV(class_sv, len);
 
@@ -3470,192 +3463,165 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 		 */
 
 		av_store_safe(aTHX_ retrieve_cxt->aclass, retrieve_cxt->classnum++, class_sv);
-
-		classname = SvPV_nolen(class_sv);
 	}
+        ASSERT((class_sv && SvPOK(class_sv)), ("class_sv has a PV"));
+        class_pv = SvPV(class_sv, class_len);
 
-	TRACEME(("class name: %s", classname));
+	/*
+	 * Bless the object and look up the STORABLE_attach and STORABLE_thaw hooks.
+	 */
+
+        BLESS(sv, class_pv);
+
+        hookp = hv_fetch(retrieve_cxt->hook, class_pv, class_len, FALSE);
+        if (hookp) {
+                hook = *hookp;
+                ASSERT((hook && SvROK(hook) && (SvTYPE(SvRV(hook)) == SVt_PVCV)), ("hook is a CV"));
+                is_thaw = (SvMAGICAL(hook) && mg_find(hook, PERL_MAGIC_ext) ? 0 : 1);
+        }
+        else {
+                int load;
+                for (load = 0; load < 2; load++) {
+                        if (load) {
+                                TRACEME(("Going to load module '%s'", class_pv));
+                                load_module(PERL_LOADMOD_NOIMPORT, newSVsv(class_sv), Nullsv);
+                        }
+                        for (is_thaw = 0; is_thaw < 2; is_thaw++) {
+                                char *method = (is_thaw ? "STORABLE_thaw" : "STORABLE_attach");
+                                GV *gv = gv_fetchmethod_autoload(gv_stashsv(class_sv, GV_ADD),
+                                                                 method, FALSE);
+                                if (gv && isGV(gv)) {
+                                        hook = newRV((SV *)GvCV(gv));
+                                        /* we use a magic entry as a marker to distinguish between
+                                         * STORABLE_thaw and STORABLE_attach */ 
+                                        if (!is_thaw)
+                                                sv_magic(hook, NULL, PERL_MAGIC_ext, method, 0);
+                                        hv_store_ent(retrieve_cxt->hook, class_sv, hook, 0);
+                                        TRACEME(("%s::STORABLE_%s method found", class_pv,
+                                                 (is_thaw ? "thaw": "attach")));
+                                        goto hook_found;
+                                }
+                                TRACEME(("No %s defined for objects of class %s", method, class_pv));
+                        }
+                }
+                CROAK(("No STORABLE_attach or STORABLE_thaw method defined for objects of class %s "
+                       "(even after requiring it)", class_pv));
+        }
+hook_found:
+
+	TRACEME(("class name: %s", class_pv));
 
 	/*
 	 * Decode user-frozen string length and read it in an SV.
-	 *
-	 * For efficiency reasons, we read data directly into the SV buffer.
-	 * To understand that code, read retrieve_scalar()
 	 */
+        READ_VARINT(flags & SHF_LARGE_STRLEN, frozen_len);
+	READ_SVPV(frozen, frozen_len);
+        sv_2mortal(frozen);
 
-        READ_VARINT(flags & SHF_LARGE_STRLEN, len2);
-	READ_SVPV(frozen, len2);
-
-	TRACEME(("frozen string: %d bytes", len2));
+	TRACEME(("frozen string: %d bytes", frozen_len));
 
 	/*
 	 * Decode object-ID list length, if present.
 	 */
+	if (flags & SHF_HAS_LIST)
+		READ_VARINT(flags & SHF_LARGE_LISTLEN, refs_len);
+        else
+                refs_len = 0;
 
-	if (flags & SHF_HAS_LIST) {
-		READ_VARINT(flags & SHF_LARGE_LISTLEN, len3);
-		if (len3) {
-			av = newAV();
-			av_extend(av, len3 + 1);	/* Leave room for [0] */
-			AvFILLp(av) = len3;			/* About to be filled anyway */
-		}
-	}
 
-	TRACEME(("has %d object IDs to link", len3));
+	TRACEME(("has %d object IDs to link", refs_len));
 
-	/*
-	 * Read object-ID list into array.
-	 * Because we pre-extended it, we can cheat and fill it manually.
-	 *
-	 * We read object tags and we can convert them into SV* on the fly
-	 * because we know all the references listed in there (as tags)
-	 * have been already serialized, hence we have a valid correspondence
-	 * between each of those tags and the recreated SV.
-	 */
+        ASSERT((SvROK(hook) && (SvTYPE(SvRV(hook)) == SVt_PVCV)), ("hook is a CV"));
 
-	if (av) {
-		SV **ary = AvARRAY(av);
-		int i;
-		for (i = 1; i <= len3; i++) {	/* We leave [0] alone */
-			I32 tag;
-			SV **svh;
-			SV *xsv;
+        /*
+         * Call the hook as:
+         *
+         *   $class->STORABLE_attach($clonning, $frozen);
+         *
+         * or
+         *
+         *   $object->STORABLE_thaw($cloning, $frozen, @refs);
+         * 
+         * where $object is our blessed (empty) object, $cloning is a boolean
+         * telling whether we're running a deep clone, $frozen is the frozen
+         * string the user gave us in his serializing hook, and @refs, which may
+         * be empty, is the list of extra references he returned along for us
+         * to serialize.
+         *
+         * In effect, the hook is an alternate creation routine for the class,
+         * the object itself being already created by the runtime.
+         */
 
-			READ_I32N(tag);
-			svh = av_fetch(retrieve_cxt->aseen, tag, FALSE);
-			if (!svh) {
-				if (tag == retrieve_cxt->where_is_undef) {
-					/* av_fetch uses PL_sv_undef internally, hence this
-					   somewhat gruesome hack. */
-					xsv = &PL_sv_undef;
-					svh = &xsv;
-				} else {
-					CROAK(("Object #0x%"UVxf" should have been retrieved already [1]",
-					       (UV) tag));
-				}
-			}
-			xsv = *svh;
-			ary[i] = SvREFCNT_inc(xsv);
-		}
-	}
+        TRACEME(("calling %s::STORABLE_%s (%"IVdf" args)",
+                 class_pv, (is_thaw ? "thaw" : "attach"), refs_len));
 
-	/*
-	 * Bless the object and look up the STORABLE_thaw hook.
-	 */
-
-	BLESS(sv, classname);
-
-	/* Handle attach case; again can't use pkg_can because it only
-	 * caches one method */
-	attach = gv_fetchmethod_autoload(SvSTASH(sv), "STORABLE_attach", FALSE);
-	if (attach && isGV(attach)) {
-	    SV* attached;
-	    SV* attach_hook = newRV((SV*) GvCV(attach));
-
-	    if (av)
-	        CROAK(("STORABLE_attach called with unexpected references"));
-	    av = newAV();
-	    av_extend(av, 1);
-	    AvFILLp(av) = 0;
-	    AvARRAY(av)[0] = SvREFCNT_inc(frozen);
-	    rv = newSVpv(classname, 0);
-	    attached = scalar_call(aTHX_ rv, attach_hook, clone, av, G_SCALAR);
-	    if (attached &&
-	        SvROK(attached) && 
-	        sv_derived_from(attached, classname)
-        ) {
-	        UNSEE();
-	        SEEN(SvRV(attached), 0);
-	        return SvRV(attached);
+        ENTER;
+        SAVETMPS;
+        PUSHMARK(sp);
+        EXTEND(sp, refs_len + 3);
+        if (is_thaw)
+                PUSHs(sv_2mortal(newRV(sv)));
+        else {
+                if (refs_len)
+                        CROAK(("STORABLE_attach called with unexpected references"));
+                PUSHs(sv_mortalcopy(class_sv));
         }
-	    CROAK(("STORABLE_attach did not return a %s object", classname));
-	}
 
-	hook = pkg_can(aTHX_ retrieve_cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-	if (!hook) {
-		/*
-		 * Hook not found.  Maybe they did not require the module where this
-		 * hook is defined yet?
-		 *
-		 * If the load below succeeds, we'll be able to find the hook.
-		 * Still, it only works reliably when each class is defined in a
-		 * file of its own.
-		 */
+        PUSHs(retrieve_cxt->optype & ST_CLONE ? &PL_sv_yes : &PL_sv_no); /* clonning arg */
+        PUSHs(frozen);
+        for (i = 0; i < refs_len; i++) {
+                /*
+                 * We read object tags and we can convert them into SV* on the fly
+                 * because we know all the references listed in there (as tags)
+                 * have been already serialized, hence we have a valid correspondence
+                 * between each of those tags and the recreated SV.
+                 */
+                I32 tag;
+                SV **argp, *arg;
+                READ_I32N(tag);
+                argp = av_fetch(retrieve_cxt->aseen, tag, FALSE);
+                if (argp)
+                        arg = *argp;
+                else if (tag == retrieve_cxt->where_is_undef)
+                        arg = &PL_sv_undef;
+                else
+                        CROAK(("Object #0x%"UVxf" should have been retrieved already [1]",
+                               (UV) tag));
+                PUSHs(sv_2mortal(newRV(arg)));
+        }
+        PUTBACK;
+        count = call_sv(hook, G_SCALAR);
+        ASSERT(count == 1, ("call_sv(..., G_SCALAR) = %d == 1", count));
+        
+        SPAGAIN;
+        if (!is_thaw) {
+                SV *rv = POPs;
+                if (!(SvROK(rv) && sv_derived_from_sv(rv, class_sv, 0)))
+                        CROAK(("STORABLE_attach did not return a %s object", class_pv));
+                sv = SvRV(rv);
+                av_store(retrieve_cxt->aseen, tagnum, SvREFCNT_inc(sv));
+        }
 
-		TRACEME(("No STORABLE_thaw defined for objects of class %s", classname));
-		TRACEME(("Going to load module '%s'", classname));
-	        load_module(PERL_LOADMOD_NOIMPORT, newSVpv(classname, 0), Nullsv);
+        PUTBACK;
+        FREETMPS;
+        LEAVE;
 
-		/*
-		 * We cache results of pkg_can, so we need to uncache before attempting
-		 * the lookup again.
-		 */
-
-		pkg_uncache(aTHX_ retrieve_cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-		hook = pkg_can(aTHX_ retrieve_cxt->hook, SvSTASH(sv), "STORABLE_thaw");
-
-		if (!hook)
-			CROAK(("No STORABLE_thaw defined for objects of class %s "
-					"(even after a \"require %s;\")", classname, classname));
-	}
-
-	/*
-	 * If we don't have an 'av' yet, prepare one.
-	 * Then insert the frozen string as item [0].
-	 */
-
-	if (!av) {
-		av = newAV();
-		av_extend(av, 1);
-		AvFILLp(av) = 0;
-	}
-	AvARRAY(av)[0] = SvREFCNT_inc(frozen);
-
-	/*
-	 * Call the hook as:
-	 *
-	 *   $object->STORABLE_thaw($cloning, $frozen, @refs);
-	 * 
-	 * where $object is our blessed (empty) object, $cloning is a boolean
-	 * telling whether we're running a deep clone, $frozen is the frozen
-	 * string the user gave us in his serializing hook, and @refs, which may
-	 * be empty, is the list of extra references he returned along for us
-	 * to serialize.
-	 *
-	 * In effect, the hook is an alternate creation routine for the class,
-	 * the object itself being already created by the runtime.
-	 */
-
-	TRACEME(("calling STORABLE_thaw on %s at 0x%"UVxf" (%"IVdf" args)",
-		 classname, PTR2UV(sv), (IV) AvFILLp(av) + 1));
-
-	rv = newRV(sv);
-	(void) scalar_call(aTHX_ rv, hook, clone, av, G_SCALAR|G_DISCARD);
-	SvREFCNT_dec(rv);
-
-	/*
-	 * Final cleanup.
-	 */
-
-	SvREFCNT_dec(frozen);
-	av_undef(av);
-	sv_free((SV *) av);
-
+	if (!extra_type)
+                return SvREFCNT_inc(sv);
 
 	/*
 	 * If we had an <extra> type, then the object was not as simple, and
 	 * we need to restore extra magic now.
 	 */
 
-	if (!extra_type)
-		return sv;
-
 	TRACEME(("retrieving magic object for 0x%"UVxf"...", PTR2UV(sv)));
 
-	rv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <magic object> */
+	mg_obj = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <magic object> */
+        ASSERT(mg_obj, ("retrieve returns non NULL"));
+        sv_2mortal(mg_obj);
 
 	TRACEME(("restoring the magic object 0x%"UVxf" part of 0x%"UVxf,
-		PTR2UV(rv), PTR2UV(sv)));
+		PTR2UV(mg_obj), PTR2UV(sv)));
 
 	switch (extra_type) {
 	case SHT_TSCALAR:
@@ -3695,10 +3661,8 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 * into the existing design.  -- RAM, 17/02/2001
 	 */
 
-	sv_magic(sv, rv, mtype, (char *)NULL, 0);
-	SvREFCNT_dec(rv);			/* Undo refcnt inc from sv_magic() */
-
-	return sv;
+	sv_magic(sv, mg_obj, mtype, (char *)NULL, 0);
+	return SvREFCNT_inc(sv);
 }
 
 /*
@@ -4829,7 +4793,7 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 		} else if (c == SX_VALUE) {
 			TRACEME(("(#%d) value", i));
 			sv = retrieve(aTHX_ retrieve_cxt, 0);
-                        ASSERT(sv, "retrieve returns not NULL");
+                        ASSERT(sv, ("retrieve returns not NULL"));
 		} else
                         (void) retrieve_other(aTHX_ retrieve_cxt, 0);	/* Will croak out */
 
@@ -5354,7 +5318,7 @@ static SV *do_retrieve(
 
         sv_setpvs(state_sv(aTHX), "retrieving");
 	sv = retrieve(aTHX_ &retrieve_cxt, 0);		/* Recursively retrieve object, get root SV */
-        ASSERT(sv, "retrive returns non NULL");
+        ASSERT(sv, ("retrive returns non NULL"));
 
         sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
                  (retrieve_cxt.netorder > 0 ? 1 : 0));
