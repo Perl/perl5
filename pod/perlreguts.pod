@@ -396,7 +396,7 @@ routines return a pointer to a C<regnode>, which is usually the last regnode
 added to the program. However, one complication is that reg() returns NULL
 for parsing C<(?:)> syntax for embedded modifiers, setting the flag
 C<TRYAGAIN>. The C<TRYAGAIN> propagates upwards until it is captured, in
-some cases by by C<regatom()>, but otherwise unconditionally by
+some cases by C<regatom()>, but otherwise unconditionally by
 C<regbranch()>. Hence it will never be returned by C<regbranch()> to
 C<reg()>. This flag permits patterns such as C<(?i)+> to be detected as
 errors (I<Quantifier follows nothing in regex; marked by <-- HERE in m/(?i)+
