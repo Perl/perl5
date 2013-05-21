@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.18';
+  $VERSION = '3.19';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -1638,7 +1638,7 @@ sub PopFile {
   close $self->{FH};
 
   $self->{FH}         = $data->{Handle};
-  # $filename is the leafname, which for some reason isused for diagnostic
+  # $filename is the leafname, which for some reason is used for diagnostic
   # messages, whereas $filepathname is the full pathname, and is used for
   # #line directives.
   $self->{filename}   = $data->{Filename};
