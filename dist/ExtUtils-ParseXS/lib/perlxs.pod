@@ -556,7 +556,7 @@ not care about its initial contents.
 Starting with Perl 5.16, you can embed typemaps into your XS code
 instead of or in addition to typemaps in a separate file.  Multiple
 such embedded typemaps will be processed in order of appearance in
-the XS code and like local typemap files take precendence over the
+the XS code and like local typemap files take precedence over the
 default typemap, the embedded typemaps may overwrite previous
 definitions of TYPEMAP, INPUT, and OUTPUT stanzas.  The syntax for
 embedded typemaps is
@@ -1958,7 +1958,7 @@ of C<my_cxt_t>.
 
 =item MY_CXT_INIT
 
-The MY_CXT_INIT macro initialises storage for the C<my_cxt_t> struct.
+The MY_CXT_INIT macro initializes storage for the C<my_cxt_t> struct.
 
 It I<must> be called exactly once, typically in a BOOT: section. If you
 are maintaining multiple interpreters, it should be called once in each

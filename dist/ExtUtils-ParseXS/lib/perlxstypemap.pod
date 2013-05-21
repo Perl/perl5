@@ -159,7 +159,7 @@ has default XS types for a large number of C types.  For example, if
 you simply return a C<char *> from your XSUB, the core typemap will
 have this C type associated with the T_PV XS type.  That means your
 C string will be copied into the PV (pointer value) slot of a new scalar
-that will be returned from your XSUB to to Perl.
+that will be returned from your XSUB to Perl.
 
 If you're developing a CPAN distribution using XS, you may add your own
 file called F<typemap> to the distribution.  That file may contain
@@ -595,7 +595,7 @@ C<XS_unpack_foo_tPtr>.
 =item T_PACKEDARRAY
 
 T_PACKEDARRAY is similar to T_PACKED. In fact, the C<INPUT> (Perl
-to XSUB) typemap is indentical, but the C<OUTPUT> typemap passes
+to XSUB) typemap is identical, but the C<OUTPUT> typemap passes
 an additional argument to the C<XS_pack_$ntype> function. This
 third parameter indicates the number of elements in the output
 so that the function can handle C arrays sanely. The variable
@@ -612,7 +612,7 @@ is concerned. It just has to be in line with the declared variable.
 
 Of course, unless you know the number of elements in the
 C<sometype **> C array, within your XSUB, the return value from
-C<foo_t ** XS_unpack_foo_tPtrPtr(...)> will be hard to decypher.
+C<foo_t ** XS_unpack_foo_tPtrPtr(...)> will be hard to decipher.
 Since the details are all up to the XS author (the typemap user),
 there are several solutions, none of which particularly elegant.
 The most commonly seen solution has been to allocate memory for
@@ -620,7 +620,7 @@ N+1 pointers and assign C<NULL> to the (N+1)th to facilitate
 iteration.
 
 Alternatively, using a customized typemap for your purposes in
-the first place is probably preferrable.
+the first place is probably preferable.
 
 =item T_DATAUNIT
 
