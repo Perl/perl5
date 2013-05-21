@@ -3625,7 +3625,7 @@ static SV *retrieve_ref(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	 */
 
 	rv = newSV(0);
-	SEEN(rv, cname);
+	SEEN_no_inc(rv, cname);
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
 
@@ -3658,7 +3658,7 @@ static SV *retrieve_ref(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 
 	TRACEME(("ok (retrieve_ref at 0x%"UVxf")", PTR2UV(rv)));
 
-	return rv;
+	return SvREFCNT_inc(rv);
 }
 
 /*
