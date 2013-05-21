@@ -240,7 +240,7 @@ extensions to ASCII have been labelled with character names roughly
 corresponding to I<The Unicode Standard, Version 6.1> albeit with
 substitutions such as s/LATIN// and s/VULGAR// in all cases, s/CAPITAL
 LETTER// in some cases, and s/SMALL LETTER ([A-Z])/\l$1/ in some other
-cases.  Controls are listed using their Unicode 6.1 abbreviatons.
+cases.  Controls are listed using their Unicode 6.2 abbreviations.
 The differences between the 0037 and 1047 sets are
 flagged with **.  The differences between the 1047 and POSIX-BC sets
 are flagged with ##.  All ord() numbers listed are decimal.  If you
