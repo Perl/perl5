@@ -475,7 +475,7 @@ sub lookup_name ($$$) {
                                   /xs)
           {
               # Even in non-loose matching, the script traditionally has been
-              # case insensitve
+              # case insensitive
               $scripts_trie = "\U$1";
               $lookup_name = $2;
 
