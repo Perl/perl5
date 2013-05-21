@@ -3209,6 +3209,7 @@ dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
 dist/Module-CoreList/lib/Module/CoreList.pm	Module::CoreList
 dist/Module-CoreList/lib/Module/CoreList.pod	Module::CoreList
 dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm	Module::CoreList guts
+dist/Module-CoreList/lib/Module/CoreList/Utils.pm	Module::CoreList guts
 dist/Module-CoreList/Makefile.PL		Module::CoreList
 dist/Module-CoreList/MANIFEST			Module::CoreList
 dist/Module-CoreList/README			Module::CoreList
@@ -3216,6 +3217,7 @@ dist/Module-CoreList/t/corelist.t		Module::CoreList tests
 dist/Module-CoreList/t/deprecated.t		Module::CoreList tests
 dist/Module-CoreList/t/find_modules.t		Module::CoreList tests
 dist/Module-CoreList/t/pod.t			Module::CoreList tests
+dist/Module-CoreList/t/utils.t			Module::CoreList tests
 dist/Net-Ping/Changes			Net::Ping
 dist/Net-Ping/lib/Net/Ping.pm		Hello, anybody home?
 dist/Net-Ping/t/100_load.t		Ping Net::Ping
