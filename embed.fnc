@@ -1787,6 +1787,7 @@ s  |bool|find_default_stash|NN HV **stash|NN const char *name \
 s  |GV*|magicalize_gv|NN GV *gv|NN HV *stash|NN const char *name \
                      |STRLEN len|bool addmg \
                      |svtype sv_type
+s  |void|maybe_multimagic_gv|NN GV *gv|NN const char *name|const svtype sv_type
 s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
 				|NN const char *methpv|const U32 flags
 #endif

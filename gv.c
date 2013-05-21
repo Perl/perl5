@@ -2008,6 +2008,53 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
     return gv;
 }
 
+/* This function is called when the stash already holds the GV of the magic
+ * variable we're looking for, but we need to check that it has the correct
+ * kind of magic.  For example, if someone first uses $! and then %!, the
+ * latter would end up here, and we add the Errno tie to the HASH slot of
+ * the *! glob.
+ */
+PERL_STATIC_INLINE void
+S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
+{
+    PERL_ARGS_ASSERT_MAYBE_MULTIMAGIC_GV;
+
+    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV) {
+        if (*name == '!')
+            require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
+        else if (*name == '-' || *name == '+')
+            require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
+    } else if (sv_type == SVt_PV) {
+        if (*name == '*' || *name == '#') {
+            /* diag_listed_as: $* is no longer supported */
+            Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
+                                             WARN_SYNTAX),
+                             "$%c is no longer supported", *name);
+        }
+    }
+    if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
+      switch (*name) {
+      case '[':
+          require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
+          break;
+#ifdef PERL_SAWAMPERSAND
+      case '`':
+          PL_sawampersand |= SAWAMPERSAND_LEFT;
+          (void)GvSVn(gv);
+          break;
+      case '&':
+          PL_sawampersand |= SAWAMPERSAND_MIDDLE;
+          (void)GvSVn(gv);
+          break;
+      case '\'':
+          PL_sawampersand |= SAWAMPERSAND_RIGHT;
+          (void)GvSVn(gv);
+          break;
+#endif
+      }
+    }
+}
+
 GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
@@ -2077,40 +2124,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                exist, then (say) referencing $! first, and %! second would
                mean that %! was not handled correctly.  */
 	    if (len == 1 && stash == PL_defstash) {
-	      if (sv_type == SVt_PVHV || sv_type == SVt_PVGV) {
-	        if (*name == '!')
-		    require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
-		else if (*name == '-' || *name == '+')
-		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
-              } else if (sv_type == SVt_PV) {
-                  if (*name == '*' || *name == '#') {
-                      /* diag_listed_as: $* is no longer supported */
-                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,
-                                                       WARN_SYNTAX),
-                                       "$%c is no longer supported", *name);
-                  }
-              }
-	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
-                switch (*name) {
-	        case '[':
-		    require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
-                    break;
-#ifdef PERL_SAWAMPERSAND
-	        case '`':
-		    PL_sawampersand |= SAWAMPERSAND_LEFT;
-                    (void)GvSVn(gv);
-                    break;
-	        case '&':
-		    PL_sawampersand |= SAWAMPERSAND_MIDDLE;
-                    (void)GvSVn(gv);
-                    break;
-	        case '\'':
-		    PL_sawampersand |= SAWAMPERSAND_RIGHT;
-                    (void)GvSVn(gv);
-                    break;
-#endif
-                }
-	      }
+                maybe_multimagic_gv(gv, name, sv_type);
 	    }
 	    else if (len == 3 && sv_type == SVt_PVAV
 	          && strnEQ(name, "ISA", 3)

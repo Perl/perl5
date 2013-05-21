@@ -5741,6 +5741,12 @@ STATIC GV*	S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len
 #define PERL_ARGS_ASSERT_MAGICALIZE_GV	\
 	assert(gv); assert(stash); assert(name)
 
+STATIC void	S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MAYBE_MULTIMAGIC_GV	\
+	assert(gv); assert(name)
+
 STATIC bool	S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name, STRLEN *len, const char *nambeg, STRLEN full_len, const U32 is_utf8, const I32 add)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
