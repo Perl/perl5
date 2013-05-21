@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Scalar::Util qw( reftype);
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -323,7 +323,7 @@ make things work, but the functions or methods used by the hooks
 must be provided by each inside-out class.
 
 A general solution to the serialization problem would require another
-level of registry, one that that associates I<classes> and fields.
+level of registry, one that associates I<classes> and fields.
 So far, the functions of C<Hash::Util::FieldHash> are unaware of
 any classes, which I consider a feature.  Therefore C<Hash::Util::FieldHash>
 doesn't address the serialization problems.
