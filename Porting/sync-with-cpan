@@ -402,7 +402,7 @@ print "done\n";
 
 #
 # Must clean up, or else t/porting/FindExt.t will fail.
-# Note that we can always retrieve the orginal directory with a git checkout.
+# Note that we can always retrieve the original directory with a git checkout.
 #
 print "About to clean up; hit return or abort (^C) "; <STDIN>;
 

@@ -519,7 +519,7 @@ sub do_crosscheck {
 }
 
 # get the EXCLUDED and MAP entries for this module, or
-# make up defauts if they don't exist
+# make up defaults if they don't exist
 
 sub get_map {
     my ( $m, $module_name, $perl_files ) = @_;

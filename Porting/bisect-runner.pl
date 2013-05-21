@@ -1228,8 +1228,8 @@ EOPATCH
         my $mips = extract_from_file('Configure',
                                      qr!(''\) if (?:\./)?mips; then)!);
         # This is part of perl-5.001n. It's needed, to add -L/usr/local/lib to
-        # theld flags if libraries are found there. It shifts the code to set up
-        # libpth earlier, and then adds the code to add libpth entries to
+        # the ld flags if libraries are found there. It shifts the code to set
+        # up libpth earlier, and then adds the code to add libpth entries to
         # ldflags
         # mips was changed to ./mips in ecfc54246c2a6f42, perl5.000 patch.0g
         apply_patch(sprintf <<'EOPATCH', $mips);

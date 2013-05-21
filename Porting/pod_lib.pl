@@ -403,7 +403,7 @@ List of one or more arguments.
 
 =item * Boolean true or false
 
-=item * Reference to a suboutine.
+=item * Reference to a subroutine.
 
 =item * Various other arguments.
 
