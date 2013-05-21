@@ -15,7 +15,7 @@ my %opts = (
     'cross-name' => 'wince',
     'strip-pod' => 0, # strip POD from perl modules
     'adaptation' => 1, # do some adaptation, such as stripping such
-                       # occurences as "if ($^O eq 'VMS'){...}" for Dynaloader.pm
+                       # occurrences as "if ($^O eq 'VMS'){...}" for Dynaloader.pm
     'zip' => 0,     # perform zip
     'clean-exts' => 0,
   #options itself
