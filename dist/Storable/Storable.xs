@@ -4208,89 +4208,7 @@ static SV *retrieve_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 	return SvREFCNT_inc((SV*)av);
 }
 
-/*
- * retrieve_hash
- *
- * Retrieve a whole hash table.
- * Layout is SX_HASH <size> followed by each key/value pair, in random order.
- * Keys are stored as <length> <data>, the <data> section being omitted
- * if length is 0.
- * Values are stored as <object>.
- *
- * When we come here, SX_HASH has been read already.
- */
-static SV *retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
-{
-	I32 len;
-	I32 i;
-	HV *hv;
-
-	TRACEME(("retrieve_hash (#%d)", retrieve_cxt->tagnum));
-
-	/*
-	 * Read length, allocate table.
-	 */
-
-	READ_I32(len);
-	TRACEME(("size = %d", len));
-	hv = newHV();
-	SEEN_no_inc(hv, cname);
-	if (len) {
-                hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
-
-                /*
-                 * Now get each key/value pair in turn...
-                 */
-
-                for (i = 0; i < len; i++) {
-                        SV *sv;
-                        I32 size;
-                        const char *kbuf;
-                        /*
-                         * Get value first.
-                         */
-
-                        TRACEME(("(#%d) value", i));
-                        sv = retrieve(aTHX_ retrieve_cxt, 0);
-                        ASSERT(sv, ("retrieve returns non NULL"));
-                        SvREFCNT_dec(sv); /* key retrieving may fail */
-
-                        /*
-                         * Get key.
-                         * Since we're reading into kbuf, we must ensure we're not
-                         * recursing between the read and the hv_store() where it's used.
-                         * Hence the key comes after the value.
-                         */
-
-                        READ_I32(size); /* Get key size */
-                        READ_KEY(kbuf, size);
-                        TRACEME(("(#%d) key '%s'", i, kbuf));
-		
-                        /*
-                         * Enter key/value pair into hash table.
-                         */
-                        
-                        hv_store_safe(aTHX_ hv, kbuf, (U32) size, SvREFCNT_inc(sv));
-                }
-        }
-        TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
-
-	return SvREFCNT_inc((SV *)hv);
-}
-
-/*
- * retrieve_hash
- *
- * Retrieve a whole hash table.
- * Layout is SX_HASH <size> followed by each key/value pair, in random order.
- * Keys are stored as <length> <data>, the <data> section being omitted
- * if length is 0.
- * Values are stored as <object>.
- *
- * When we come here, SX_HASH has been read already.
- */
-static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
-{
+static SV *retrieve_hash_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, int with_flags) {
     dVAR;
     I32 len;
     I32 size;
@@ -4299,13 +4217,19 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
     SV *sv;
     int hash_flags;
 
-    READ_UCHAR(hash_flags);
     TRACEME(("retrieve_flag_hash (#%d)", retrieve_cxt->tagnum));
-
+    if (with_flags) {
+            READ_UCHAR(hash_flags);
 #ifndef HAS_RESTRICTED_HASHES
-    if ((hash_flags & SHV_RESTRICTED) && !downgrade_restricted(aTHX))
-            CROAK(("Cannot retrieve restricted hash"))
+            if ((hash_flags & SHV_RESTRICTED) && !downgrade_restricted(aTHX))
+                    CROAK(("Cannot retrieve restricted hash"));
 #endif
+    }
+    else
+            hash_flags = 0;
+
+
+
 
     /*
      * Read length, allocate table.
@@ -4322,8 +4246,8 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
              */
 
             for (i = 0; i < len; i++) {
-                    int flags;
                     int store_flags = 0;
+                    const char *kbuf;
                     /*
                      * Get value first.
                      */
@@ -4332,60 +4256,60 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
                     sv = retrieve(aTHX_ retrieve_cxt, 0);
                     ASSERT(sv, ("retrieve returns non NULL"));
                     SvREFCNT_dec(sv); /* key retrieving may fail */
-                    READ_UCHAR(flags);
+
+                    if (with_flags) {
+                            int flags;
+                            READ_UCHAR(flags);
 #ifdef HAS_RESTRICTED_HASHES
-                    if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
-                            SvREADONLY_on(sv);
+                            if ((hash_flags & SHV_RESTRICTED) && (flags & SHV_K_LOCKED))
+                                    SvREADONLY_on(sv);
 #endif
+                            if (flags & SHV_K_ISSV) {
+                                    /* XXX you can't set a placeholder with an SV key.
+                                       Then again, you can't get an SV key.
+                                       Without messing around beyond what the API is supposed to do.
+                                    */
+                                    SV *keysv;
+                                    TRACEME(("(#%d) keysv, flags=%d", i, flags));
+                                    keysv = retrieve(aTHX_ retrieve_cxt, 0);
+                                    ASSERT(keysv, ("retrieve returns non NULL"));
 
-                    if (flags & SHV_K_ISSV) {
-                            /* XXX you can't set a placeholder with an SV key.
-                               Then again, you can't get an SV key.
-                               Without messing around beyond what the API is supposed to do.
-                            */
-                            SV *keysv;
-                            TRACEME(("(#%d) keysv, flags=%d", i, flags));
-                            keysv = retrieve(aTHX_ retrieve_cxt, 0);
-                            ASSERT(keysv, ("retrieve returns non NULL"));
+                                    hv_store_ent(hv, keysv, SvREFCNT_inc(sv), 0);
 
-                            hv_store_ent(hv, keysv, SvREFCNT_inc(sv), 0);
+                                    continue;
+                            }
 
-                            continue;
-                    }
+                            /*
+                             * Get key.
+                             * Since we're reading into kbuf, we must ensure we're not
+                             * recursing between the read and the hv_store() where it's used.
+                             * Hence the key comes after the value.
+                             */
 
-                    /*
-                     * Get key.
-                     * Since we're reading into kbuf, we must ensure we're not
-                     * recursing between the read and the hv_store() where it's used.
-                     * Hence the key comes after the value.
-                     */
-
-                    const char *kbuf;
-
-                    if (flags & SHV_K_PLACEHOLDER) {
-                            sv = &PL_sv_placeholder;
-                            store_flags |= HVhek_PLACEHOLD;
-                    }
-                    if (flags & SHV_K_UTF8) {
+                            if (flags & SHV_K_PLACEHOLDER) {
+                                    sv = &PL_sv_placeholder;
+                                    store_flags |= HVhek_PLACEHOLD;
+                            }
+                            if (flags & SHV_K_UTF8) {
 #ifdef HAS_UTF8_HASHES
-                            store_flags |= HVhek_UTF8;
+                                    store_flags |= HVhek_UTF8;
 #else
-                            if (retrieve_cxt->use_bytes < 0)
-                                    retrieve_cxt->use_bytes
-                                            = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                                               ? 1 : 0);
-                            if (retrieve_cxt->use_bytes == 0)
-                                    UTF8_CROAK();
+                                    if (retrieve_cxt->use_bytes < 0)
+                                            retrieve_cxt->use_bytes
+                                                    = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+                                                       ? 1 : 0);
+                                    if (retrieve_cxt->use_bytes == 0)
+                                            UTF8_CROAK();
+#endif
+                            }
+#ifdef HAS_UTF8_HASHES
+                            if (flags & SHV_K_WASUTF8)
+                                    store_flags |= HVhek_WASUTF8;
 #endif
                     }
-#ifdef HAS_UTF8_HASHES
-                    if (flags & SHV_K_WASUTF8)
-                            store_flags |= HVhek_WASUTF8;
-#endif
                     READ_I32(size);						/* Get key size */
                     READ_KEY(kbuf, size);
-                    TRACEME(("(#%d) key '%s' flags %X store_flags %X", i, kbuf,
-                             flags, store_flags));
+                    TRACEME(("(#%d) key '%s' store_flags %X", i, kbuf, store_flags));
 
                     /*
                      * Enter key/value pair into hash table.
@@ -4409,6 +4333,37 @@ static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
     TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
 
     return SvREFCNT_inc((SV *) hv);
+}
+
+/*
+ * retrieve_hash
+ *
+ * Retrieve a whole hash table.
+ * Layout is SX_HASH <size> followed by each key/value pair, in random order.
+ * Keys are stored as <length> <data>, the <data> section being omitted
+ * if length is 0.
+ * Values are stored as <object>.
+ *
+ * When we come here, SX_HASH has been read already.
+ */
+static SV *retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname) {
+        return retrieve_hash_any(aTHX_ retrieve_cxt, cname, 0);
+}
+
+/*
+ * retrieve_flag_hash
+ *
+ * Retrieve a whole hash table with flags.
+ * Layout is SX_HASH <flags> <size> followed by each flags+key+value trio, in random order.
+ * Keys are stored as <length> <data>, the <data> section being omitted
+ * if length is 0.
+ * Values are stored as <object>.
+ *
+ * When we come here, SX_FLAG_HASH has been read already.
+ */
+
+static SV *retrieve_flag_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname) {
+        return retrieve_hash_any(aTHX_ retrieve_cxt, cname, 1);
 }
 
 /*
