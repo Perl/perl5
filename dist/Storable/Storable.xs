@@ -2167,7 +2167,7 @@ static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	 */
 
 	/* [#17040] mg_obj is NULL for scalar self-ties. AMS 20030416 */
-	obj = mg->mg_obj ? mg->mg_obj : newSV(0);
+	obj = mg->mg_obj ? mg->mg_obj : sv_newmortal();
 	if ((ret = store(aTHX_ store_cxt, obj)))
 		return ret;
 
@@ -3766,6 +3766,22 @@ static SV *retrieve_weakoverloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const cha
 #endif
 }
 
+static SV *retrieve_tied_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, SV *tv, int how) {
+        SV *sv;
+	TRACEME(("retrieve_tied_any (#%d, SV type %d)", retrieve_cxt->tagnum, SvTYPE(tv)));
+
+	SEEN_no_inc((SV*)tv, cname);
+
+        sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
+        ASSERT(sv, ("retrieve returns non NULL"));
+	sv_magic(tv, (SvTYPE(sv) == SVt_NULL ? Nullsv : sv), how, (char *)NULL, 0);
+	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
+        
+	TRACEME(("ok (retrieve tied hash, array or scalar at 0x%"UVxf")", PTR2UV(tv)));
+
+	return SvREFCNT_inc(tv);
+}
+
 /*
  * retrieve_tied_array
  *
@@ -3774,24 +3790,9 @@ static SV *retrieve_weakoverloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const cha
  */
 static SV *retrieve_tied_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-	SV *tv;
-	SV *sv;
-
-	TRACEME(("retrieve_tied_array (#%d)", retrieve_cxt->tagnum));
-
-	tv = newSV(0);
-	SEEN(tv, cname);
-	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
-        ASSERT(sv, ("retrieve returns non NULL"));
-
-	sv_upgrade(tv, SVt_PVAV);
-	AvREAL_off((AV *)tv);
-	sv_magic(tv, sv, 'P', (char *)NULL, 0);
-	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
-
-	TRACEME(("ok (retrieve_tied_array at 0x%"UVxf")", PTR2UV(tv)));
-
-	return tv;
+	AV *av = newAV();
+	AvREAL_off(av);
+        return retrieve_tied_any(aTHX_ retrieve_cxt, cname, (SV*)av, PERL_MAGIC_tied);
 }
 
 /*
@@ -3802,23 +3803,7 @@ static SV *retrieve_tied_array(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
  */
 static SV *retrieve_tied_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-	SV *tv;
-	SV *sv;
-
-	TRACEME(("retrieve_tied_hash (#%d)", retrieve_cxt->tagnum));
-
-	tv = newSV(0);
-	SEEN(tv, cname);
-	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
-        ASSERT(sv, ("retrieve returns non NULL"));
-
-	sv_upgrade(tv, SVt_PVHV);
-	sv_magic(tv, sv, 'P', (char *)NULL, 0);
-	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
-
-	TRACEME(("ok (retrieve_tied_hash at 0x%"UVxf")", PTR2UV(tv)));
-
-	return tv;
+        return retrieve_tied_any(aTHX_ retrieve_cxt, cname, (SV*)newHV(), PERL_MAGIC_tied);
 }
 
 /*
@@ -3829,30 +3814,7 @@ static SV *retrieve_tied_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cn
  */
 static SV *retrieve_tied_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-	SV *tv;
-	SV *sv, *obj = NULL;
-
-	TRACEME(("retrieve_tied_scalar (#%d)", retrieve_cxt->tagnum));
-
-	tv = newSV(0);
-	SEEN(tv, cname);
-	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
-        ASSERT(sv, ("retrieve returns non NULL"));
-
-        if (SvTYPE(sv) != SVt_NULL)
-            obj = sv;
-
-	sv_upgrade(tv, SVt_PVMG);
-	sv_magic(tv, obj, 'q', (char *)NULL, 0);
-
-	if (obj) {
-		/* Undo refcnt inc from sv_magic() */
-		SvREFCNT_dec(obj);
-	}
-
-	TRACEME(("ok (retrieve_tied_scalar at 0x%"UVxf")", PTR2UV(tv)));
-
-	return tv;
+        return retrieve_tied_any(aTHX_ retrieve_cxt, cname, newSV(0), PERL_MAGIC_tiedscalar);
 }
 
 /*
