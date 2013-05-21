@@ -3832,19 +3832,20 @@ static SV *retrieve_tied_key(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	TRACEME(("retrieve_tied_key (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname);
-	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
-        ASSERT(sv, ("retrieve returns non NULL"));
+	SEEN_no_inc(tv, cname);
 
+        /* Retrieve <object>, mortalize it because retrieving the key
+         * may croak */
+	sv = sv_2mortal(retrieve(aTHX_ retrieve_cxt, 0));
+        ASSERT(sv, ("retrieve returns non NULL"));
+        
 	key = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <key> */
         ASSERT(key, ("retrieve returns non NULL"));
 
-	sv_upgrade(tv, SVt_PVMG);
 	sv_magic(tv, sv, 'p', (char *)key, HEf_SVKEY);
 	SvREFCNT_dec(key);			/* Undo refcnt inc from sv_magic() */
-	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
 
-	return tv;
+	return SvREFCNT_inc(tv);
 }
 
 /*
@@ -3862,17 +3863,18 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	TRACEME(("retrieve_tied_idx (#%d)", retrieve_cxt->tagnum));
 
 	tv = newSV(0);
-	SEEN(tv, cname);
-	sv = retrieve(aTHX_ retrieve_cxt, 0);		/* Retrieve <object> */
+	SEEN_no_inc(tv, cname);
+
+        /* Retrieve <object>, mortalize it because retrieving the index
+         * may croak */
+	sv = sv_2mortal(retrieve(aTHX_ retrieve_cxt, 0));
         ASSERT(sv, ("retrieve returns non NULL"));
 
 	READ_I32(idx);					/* Retrieve <idx> */
 
-	sv_upgrade(tv, SVt_PVMG);
 	sv_magic(tv, sv, 'p', (char *)NULL, idx);
-	SvREFCNT_dec(sv);			/* Undo refcnt inc from sv_magic() */
 
-	return tv;
+	return SvREFCNT_inc(tv);
 }
 
 
