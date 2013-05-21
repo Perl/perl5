@@ -3878,6 +3878,31 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 }
 
 
+static SV *retrieve_any_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, IV len, int utf8) {
+        SV *sv;
+	TRACEME(("retrieve_any_scalar (#%d), len = %"IVdf, retrieve_cxt->tagnum, (IV) len));
+
+	READ_SVPV(sv, len);
+	SEEN_no_inc(sv, cname);	/* Associate this new scalar with tag "tagnum" */
+        
+	TRACEME(("scalar len %"IVdf" utf8 %d '%s'", (IV) len, utf8, SvPVX(sv)));
+	TRACEME(("ok (retrieve_scalar_any at 0x%"UVxf")", PTR2UV(sv)));
+
+        if (utf8) {
+#ifdef HAS_UTF8_SCALARS
+                SvUTF8_on(sv);
+#else
+                if (retrieve_cxt->use_bytes < 0)
+                        retrieve_cxt->use_bytes
+                                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
+                                   ? 1 : 0);
+                if (retrieve_cxt->use_bytes == 0)
+                        UTF8_CROAK();
+#endif
+        }
+	return SvREFCNT_inc(sv);
+}
+
 /*
  * retrieve_lscalar
  *
@@ -3890,22 +3915,8 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 static SV *retrieve_lscalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
 	I32 len;
-	SV *sv;
-
 	READ_I32(len);
-	TRACEME(("retrieve_lscalar (#%d), len = %"IVdf, retrieve_cxt->tagnum, (IV) len));
-
-	/*
-	 * Allocate an empty scalar of the suitable length.
-	 */
-
-	READ_SVPV(sv, len);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
-
-	TRACEME(("large scalar len %"IVdf" '%s'", (IV) len, SvPVX(sv)));
-	TRACEME(("ok (retrieve_lscalar at 0x%"UVxf")", PTR2UV(sv)));
-
-	return sv;
+        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 0);
 }
 
 /*
@@ -3920,20 +3931,8 @@ static SV *retrieve_lscalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 static SV *retrieve_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
 	int len;
-	SV *sv;
-
 	READ_UCHAR(len);
-	TRACEME(("retrieve_scalar (#%d), len = %d", retrieve_cxt->tagnum, len));
-
-	/*
-	 * Allocate an empty scalar of the suitable length.
-	 */
-
-	READ_SVPV(sv, len);
-	SEEN(sv, cname);	/* Associate this new scalar with tag "tagnum" */
-
-	TRACEME(("ok (retrieve_scalar at 0x%"UVxf")", PTR2UV(sv)));
-	return sv;
+        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 0);
 }
 
 /*
@@ -3944,24 +3943,9 @@ static SV *retrieve_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
  */
 static SV *retrieve_utf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-    SV *sv;
-
-    TRACEME(("retrieve_utf8str"));
-
-    sv = retrieve_scalar(aTHX_ retrieve_cxt, cname);
-    ASSERT(sv, ("retrieve_scalar returns non NULL"));
-#ifdef HAS_UTF8_SCALARS
-    SvUTF8_on(sv);
-#else
-    if (retrieve_cxt->use_bytes < 0)
-            retrieve_cxt->use_bytes
-                    = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                       ? 1 : 0);
-    if (retrieve_cxt->use_bytes == 0)
-            UTF8_CROAK();
-#endif
-
-    return sv;
+        int len;
+        READ_UCHAR(len);
+        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 1);
 }
 
 /*
@@ -3972,24 +3956,9 @@ static SV *retrieve_utf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
  */
 static SV *retrieve_lutf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
 {
-    SV *sv;
-
-    TRACEME(("retrieve_lutf8str"));
-
-    sv = retrieve_lscalar(aTHX_ retrieve_cxt, cname);
-    if (sv) {
-#ifdef HAS_UTF8_SCALARS
-        SvUTF8_on(sv);
-#else
-        if (retrieve_cxt->use_bytes < 0)
-            retrieve_cxt->use_bytes
-                = (SvTRUE(perl_get_sv("Storable::drop_utf8", GV_ADD))
-                   ? 1 : 0);
-        if (retrieve_cxt->use_bytes == 0)
-            UTF8_CROAK();
-#endif
-    }
-    return sv;
+        I32 len;
+	READ_I32(len);
+        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 1);
 }
 
 /*
