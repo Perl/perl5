@@ -61,7 +61,7 @@ C<STRLEN> is an integer type (Size_t, usually defined as size_t in
 F<config.h>) guaranteed to be large enough to represent the size of
 any string that perl can handle.
 
-In the unlikely case of a SV requiring more complex initialisation, you
+In the unlikely case of a SV requiring more complex initialization, you
 can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
 type NULL is returned, else an SV of type PV is returned with len + 1 (for
 the NUL) bytes of storage allocated, accessible via SvPVX.  In both cases
@@ -2094,7 +2094,7 @@ struct perl_vars, accessible as (globals) &PL_Vars or PL_VarsPtr or
 the function  Perl_GetVars().  The PERL_GLOBAL_STRUCT_PRIVATE goes
 one step further, there is still a single struct (allocated in main()
 either from heap or from stack) but there are no global data symbols
-pointing to it.  In either case the global struct should be initialised
+pointing to it.  In either case the global struct should be initialized
 as the very first thing in main() using Perl_init_global_struct() and
 correspondingly tear it down after perl_free() using Perl_free_global_struct(),
 please see F<miniperlmain.c> for usage details.  You may also need
