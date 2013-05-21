@@ -222,7 +222,7 @@ what it might be medifying).
 =item B<call_sv>, B<call_pv>, B<call_method>
 
 These exercise the C calls of the same names. Everything after the flags
-arg is passed as the the args to the called function. They return whatever
+arg is passed as the args to the called function. They return whatever
 the C function itself pushed onto the stack, plus the return value from
 the function; for example
 
