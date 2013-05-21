@@ -21,7 +21,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.42';
+$VERSION = '2.43';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -311,7 +311,7 @@ sub _store_fd {
 #
 # freeze
 #
-# Store oject and its hierarchy in memory and return a scalar
+# Store object and its hierarchy in memory and return a scalar
 # containing the result.
 #
 sub freeze {
@@ -1048,7 +1048,7 @@ untrusted sources!>
 
 If your application requires accepting data from untrusted sources, you
 are best off with a less powerful and more-likely safe serialization format
-and implementation. If your data is sufficently simple, JSON is a good
+and implementation. If your data is sufficiently simple, JSON is a good
 choice and offers maximum interoperability.
 
 =head1 WARNING
@@ -1162,7 +1162,7 @@ correct behaviour.
 What this means is that if you have data written by Storable 1.x running
 on perl 5.6.0 or 5.6.1 configured with 64 bit integers on Unix or Linux
 then by default this Storable will refuse to read it, giving the error
-I<Byte order is not compatible>.  If you have such data then you you
+I<Byte order is not compatible>.  If you have such data then you
 should set C<$Storable::interwork_56_64bit> to a true value to make this
 Storable read and write files with the old header.  You should also
 migrate your data, or any older perl you are communicating with, to this
