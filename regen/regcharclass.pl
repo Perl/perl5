@@ -71,7 +71,7 @@ that C<s> contains at least one character.
 =item C<is_WHATEVER_cp(cp)>
 
 Check to see if the string matches a given codepoint (hypothetically a
-U32). The condition is constructed as as to "break out" as early as
+U32). The condition is constructed as to "break out" as early as
 possible if the codepoint is out of range of the condition.
 
 IOW:
@@ -307,7 +307,7 @@ sub __cond_join {
 # Each string is then stored in the 'strs' subhash as a hash record
 # made up of the results of __uni_latin1, using the keynames
 # 'low','latin1','utf8', as well as the synthesized 'LATIN1', 'high', and
-# 'UTF8' which hold a merge of 'low' and their lowercase equivelents.
+# 'UTF8' which hold a merge of 'low' and their lowercase equivalents.
 #
 # Size data is tracked per type in the 'size' subhash.
 #
@@ -470,7 +470,7 @@ sub _optree {
     $else= 0  unless defined $else;
     $depth= 0 unless defined $depth;
 
-    # if we have an emptry string as a key it means we are in an
+    # if we have an empty string as a key it means we are in an
     # accepting state and unless we can match further on should
     # return the value of the '' key.
     if (exists $trie->{''} ) {
@@ -491,7 +491,7 @@ sub _optree {
     # it means we are an accepting state (end of sequence).
     my @conds= sort { $a <=> $b } grep { length $_ } keys %$trie;
 
-    # if we havent any keys there is no further we can match and we
+    # if we haven't any keys there is no further we can match and we
     # can return the "else" value.
     return $else if !@conds;
 
@@ -935,7 +935,7 @@ sub _cond_as_str {
     my @masks;
     if (@ranges > 1) {
 
-        # See if the entire set shares optimizable characterstics, and if so,
+        # See if the entire set shares optimizable characteristics, and if so,
         # return the optimization.  We delay checking for this on sets with
         # just a single range, as there may be better optimizations available
         # in that case.
@@ -1198,7 +1198,7 @@ sub make_macro {
     return $self->render( $optree, ($type =~ /^cp/) ? 1 : 0, \%opts, $def_fmt );
 }
 
-# if we arent being used as a module (highly likely) then process
+# if we aren't being used as a module (highly likely) then process
 # the __DATA__ below and produce macros in regcharclass.h
 # if an argument is provided to the script then it is assumed to
 # be the path of the file to output to, if the arg is '-' outputs

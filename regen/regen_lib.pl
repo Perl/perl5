@@ -76,7 +76,7 @@ sub close_and_rename {
     warn "changed '$name' to '$final_name'\n" if $Verbose > 0;
     push @Changed, $final_name unless $Verbose < 0;
 
-    # Some dosish systems can't rename over an existing file:
+    # Some DOSish systems can't rename over an existing file:
     safer_unlink $final_name;
     chmod 0600, $name if $Needs_Write;
     rename $name, $final_name or die "renaming $name to $final_name: $!";

@@ -118,7 +118,7 @@ for my $i (0 .. @$folds_ref - 1) {
     next unless ref $folds_ref->[$i];   # Skip single-char folds
     push @has_multi_char_fold, $cp_ref->[$i];
 
-    # Add to the the non-finals list each code point that is in a non-final
+    # Add to the non-finals list each code point that is in a non-final
     # position
     for my $j (0 .. @{$folds_ref->[$i]} - 2) {
         push @is_non_final_fold, $folds_ref->[$i][$j]
@@ -204,7 +204,7 @@ for my $prop (qw(
     # that crosses the 255/256 boundary if it is one that matches the
     # property.  For example, in the Word property, there is a range of code
     # points that start at U+00F8 and goes through U+02C1.  Instead of
-    # artifically cutting that off at 256 because 256 is the first code point
+    # artificially cutting that off at 256 because 256 is the first code point
     # above Latin1, we let the range go to its natural ending.  That gives us
     # extra information with no added space taken.  But if the range that
     # crosses the boundary is one that doesn't match the property, we don't

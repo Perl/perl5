@@ -177,7 +177,7 @@ my %seend; # the type of this function's "D"
 my %seenm; # all the types
 my %seenu; # the length of the argument list of this function
 
-while (<DATA>) { # Read in the protypes.
+while (<DATA>) { # Read in the protoypes.
     next if /^\s+$/;
     chomp;
     my ($func, $hdr, $type, @p) = split(/\s*\|\s*/, $_, -1);
@@ -587,7 +587,7 @@ EOF
 	    my $GENFUNC = uc $genfunc;
 	    my $D = ifprotomatch($FUNC, grep {/D/} @p);
 	    my $d = $seend{$func};
-	    $d =~ s/\*$//; # snip: we need need the base type.
+	    $d =~ s/\*$//; # snip: we need the base type.
 	    push @struct, <<EOF;
 	$seent{$func}	_${genfunc}_struct;
 #   if $D
