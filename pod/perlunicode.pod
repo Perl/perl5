@@ -589,7 +589,7 @@ Hebrew.  But would you remember that 6 months from now?
 
 =item 2
 
-It is unstable.  A new version of Unicode may pre-empt the current meaning by
+It is unstable.  A new version of Unicode may preempt the current meaning by
 creating a property with the same name.  There was a time in very early Unicode
 releases when C<\p{Hebrew}> would have matched the I<block> Hebrew; now it
 doesn't.
