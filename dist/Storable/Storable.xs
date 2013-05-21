@@ -3877,10 +3877,9 @@ static SV *retrieve_tied_idx(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	return SvREFCNT_inc(tv);
 }
 
-
-static SV *retrieve_any_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, IV len, int utf8) {
+static SV *retrieve_scalar_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, IV len, int utf8) {
         SV *sv;
-	TRACEME(("retrieve_any_scalar (#%d), len = %"IVdf, retrieve_cxt->tagnum, (IV) len));
+	TRACEME(("retrieve_scalar_any (#%d), len = %"IVdf, retrieve_cxt->tagnum, (IV) len));
 
 	READ_SVPV(sv, len);
 	SEEN_no_inc(sv, cname);	/* Associate this new scalar with tag "tagnum" */
@@ -3916,7 +3915,7 @@ static SV *retrieve_lscalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 {
 	I32 len;
 	READ_I32(len);
-        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 0);
+        return retrieve_scalar_any(aTHX_ retrieve_cxt, cname, len, 0);
 }
 
 /*
@@ -3932,7 +3931,7 @@ static SV *retrieve_scalar(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname
 {
 	int len;
 	READ_UCHAR(len);
-        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 0);
+        return retrieve_scalar_any(aTHX_ retrieve_cxt, cname, len, 0);
 }
 
 /*
@@ -3945,7 +3944,7 @@ static SV *retrieve_utf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
 {
         int len;
         READ_UCHAR(len);
-        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 1);
+        return retrieve_scalar_any(aTHX_ retrieve_cxt, cname, len, 1);
 }
 
 /*
@@ -3958,7 +3957,7 @@ static SV *retrieve_lutf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 {
         I32 len;
 	READ_I32(len);
-        return retrieve_any_scalar(aTHX_ retrieve_cxt, cname, len, 1);
+        return retrieve_scalar_any(aTHX_ retrieve_cxt, cname, len, 1);
 }
 
 static SV *retrieve_vstring_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, int l) {
