@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.145'; # Don't forget to set version and release
+    $VERSION = '2.146'; # Don't forget to set version and release
 }               # date in POD below!
 
 #$| = 1;
@@ -87,7 +87,7 @@ sub new {
         terse      => $Terse,      # avoid name output (where feasible)
         freezer    => $Freezer,    # name of Freezer method for objects
         toaster    => $Toaster,    # name of method to revive objects
-        deepcopy   => $Deepcopy,   # dont cross-ref, except to stop recursion
+        deepcopy   => $Deepcopy,   # do not cross-ref, except to stop recursion
         quotekeys  => $Quotekeys,  # quote hash keys
         'bless'    => $Bless,    # keyword to use for "bless"
 #        expdepth   => $Expdepth,   # cutoff depth for explicit dumping
@@ -300,7 +300,7 @@ sub _dump {
     $id = format_refaddr($val);
 
     # Note: By this point $name is always defined and of non-zero length.
-    # Keep a tab on it so that we dont fall into recursive pit.
+    # Keep a tab on it so that we do not fall into recursive pit.
     if (exists $s->{seen}{$id}) {
       if ($s->{purity} and $s->{level} > 0) {
         $out = ($realtype eq 'HASH')  ? '{}' :
@@ -927,9 +927,9 @@ called with any other type of argument, dies.
 Queries or replaces the internal array of user supplied names for the values
 that will be dumped.  When called without arguments, returns the names.  When
 called with an array of replacement names, returns the object itself.  If the
-number of replacment names exceeds the number of values to be named, the
+number of replacement names exceeds the number of values to be named, the
 excess names will not be used.  If the number of replacement names falls short
-of the number of values to be named, the list of replacment names will be
+of the number of values to be named, the list of replacement names will be
 exhausted and remaining values will not be renamed.  When
 called with any other type of argument, dies.
 
