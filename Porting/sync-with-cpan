@@ -199,7 +199,12 @@ unless ($tarball) {
     # Poor man's cache
     #
     unless (-f $package_file && -M $package_file < 1) {
-        system wget => $package_url, '-qO', $package_file;
+        eval {
+            require HTTP::Tiny;
+            my $http= HTTP::Tiny->new();
+            $http->mirror( $package_url => $package_file );
+            1
+        } or system wget => $package_url, '-qO', $package_file;
     }
 
     my  $new_line = `grep '^$cpan_mod ' $package_file`
@@ -217,7 +222,12 @@ unless ($tarball) {
     #
     # Fetch the new distro
     #
-    system wget => $url, '-qO', $new_file;
+    eval {
+        require HTTP::Tiny;
+        my $http= HTTP::Tiny->new();
+        $http->mirror( $url => $new_file );
+        1
+    } or system wget => $url, '-qO', $new_file;
 }
 else {
     $new_file     = $tarball;
