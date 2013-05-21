@@ -2058,7 +2058,18 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
        symtab yet. */
 
     if (SvTYPE(gv) == SVt_PVGV) {
+        /* The GV already exists, so return it, but check if we need to do
+         * anything else with it before that.
+         */
 	if (add) {
+            /* This is the heuristic that handles if a variable triggers the
+             * 'used only once' warning.  If there's already a GV in the stash
+             * with this name, then we assume that the variable has been used
+             * before and turn its MULTI flag on.
+             * It's a heuristic because it can easily be "tricked", like with
+             * BEGIN { $a = 1; $::{foo} = *a }; () = $foo
+             * not warning about $main::foo being used just once
+             */
 	    GvMULTI_on(gv);
 	    gv_init_svtype(gv, sv_type);
             /* You reach this path once the typeglob has already been created,
@@ -2110,7 +2121,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     } else if (no_init) {
 	assert(!addmg);
 	return gv;
-    } else if (no_expand && SvROK(gv)) {
+    }
+    /* If GV_NOEXPAND is true and what we got off the stash is a ref,
+     * don't expand it to a glob. This is an optimization so that things
+     * copying constants over, like Exporter, don't have to be rewritten
+     * to take into account that you can store more than just globs in
+     * stashes.
+     */
+    else if (no_expand && SvROK(gv)) {
 	assert(!addmg);
 	return gv;
     }
