@@ -4557,63 +4557,64 @@ static SV *old_retrieve_hash(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 	READ_I32(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN(hv, 0);
-	if (len == 0)
-		return (SV *) hv;	/* No data follow if table empty */
-	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
+	SEEN_no_inc(hv, 0);
+	if (len) {
+                hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
 
-	/*
-	 * Now get each key/value pair in turn...
-	 */
+                /*
+                 * Now get each key/value pair in turn...
+                 */
 
-	for (i = 0; i < len; i++) {
-		const char *kbuf;
-		/*
-		 * Get value first.
-		 */
+                for (i = 0; i < len; i++) {
+                        const char *kbuf;
+                        /*
+                         * Get value first.
+                         */
 
-		READ_UCHAR(c);
-		if (c == SX_VL_UNDEF) {
-			TRACEME(("(#%d) undef value", i));
-			/*
-			 * Due to a bug in hv_store(), it's not possible to pass
-			 * &PL_sv_undef to hv_store() as a value, otherwise the
-			 * associated key will not be creatable any more. -- RAM, 14/01/97
-			 */
-			if (!sv_h_undef)
-				sv_h_undef = sv_newmortal();
-			sv = SvREFCNT_inc(sv_h_undef);
-		} else if (c == SX_VALUE) {
-			TRACEME(("(#%d) value", i));
-			sv = retrieve(aTHX_ retrieve_cxt, 0);
-                        ASSERT(sv, ("retrieve returns not NULL"));
-		} else
-                        (void) retrieve_other(aTHX_ retrieve_cxt, 0);	/* Will croak out */
+                        READ_UCHAR(c);
+                        if (c == SX_VL_UNDEF) {
+                                TRACEME(("(#%d) undef value", i));
+                                /*
+                                 * Due to a bug in hv_store(), it's not possible to pass
+                                 * &PL_sv_undef to hv_store() as a value, otherwise the
+                                 * associated key will not be creatable any more. -- RAM, 14/01/97
+                                 */
+                                if (!sv_h_undef)
+                                        sv_h_undef = sv_newmortal();
+                                sv = sv_h_undef;
+                        } else if (c == SX_VALUE) {
+                                TRACEME(("(#%d) value", i));
+                                sv = retrieve(aTHX_ retrieve_cxt, 0);
+                                ASSERT(sv, ("retrieve returns not NULL"));
+                                SvREFCNT_dec(sv);
+                        } else
+                                (void) retrieve_other(aTHX_ retrieve_cxt, 0);	/* Will croak out */
 
-		/*
-		 * Get key.
-		 * Since we're reading into kbuf, we must ensure we're not
-		 * recursing between the read and the hv_store() where it's used.
-		 * Hence the key comes after the value.
-		 */
+                        /*
+                         * Get key.
+                         * Since we're reading into kbuf, we must ensure we're not
+                         * recursing between the read and the hv_store() where it's used.
+                         * Hence the key comes after the value.
+                         */
 
-		READ_UCHAR(c);
-		if (c != SX_KEY)
-			(void) retrieve_other(aTHX_ retrieve_cxt, 0);	/* Will croak out */
-		READ_I32(size);						/* Get key size */
-		READ_KEY(kbuf, size);
-		TRACEME(("(#%d) key '%s'", i, kbuf));
+                        READ_UCHAR(c);
+                        if (c != SX_KEY)
+                                (void) retrieve_other(aTHX_ retrieve_cxt, 0);	/* Will croak out */
+                        READ_I32(size);						/* Get key size */
+                        READ_KEY(kbuf, size);
+                        TRACEME(("(#%d) key '%s'", i, kbuf));
 
-		/*
-		 * Enter key/value pair into hash table.
-		 */
+                        /*
+                         * Enter key/value pair into hash table.
+                         */
 
-		hv_store_safe(aTHX_ hv, kbuf, (U32) size, sv);
-	}
+                        hv_store_safe(aTHX_ hv, kbuf, (U32) size, SvREFCNT_inc(sv));
+                }
 
-	TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
+                TRACEME(("ok (retrieve_hash at 0x%"UVxf")", PTR2UV(hv)));
+        }
 
-	return (SV *) hv;
+	return SvREFCNT_inc((SV *)hv);
 }
 
 /***
