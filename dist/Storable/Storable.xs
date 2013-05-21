@@ -3701,7 +3701,7 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	 */
 
 	rv = newSV(0);
-	SEEN(rv, cname);
+	SEEN_no_inc(rv, cname);
 	retrieve_cxt->in_retrieve_overloaded = 1; /* so sv_bless doesn't call S_reset_amagic */
 	sv = retrieve(aTHX_ retrieve_cxt, 0);	/* Retrieve <object> */
         ASSERT(sv, ("retrieve returns non NULL"));
@@ -3710,7 +3710,6 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	/*
 	 * WARNING: breaks RV encapsulation.
 	 */
-
 	SvUPGRADE(rv, SVt_RV);
 	SvRV_set(rv, sv);				/* $rv = \$sv */
 	SvROK_on(rv);
@@ -3718,7 +3717,6 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 	/*
 	 * Restore overloading magic.
 	 */
-
 	stash = SvTYPE(sv) ? (HV *) SvSTASH (sv) : 0;
 	if (!stash) {
 		CROAK(("Cannot restore overloading on %s(0x%"UVxf
@@ -3744,7 +3742,7 @@ static SV *retrieve_overloaded(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *c
 
 	TRACEME(("ok (retrieve_overloaded at 0x%"UVxf")", PTR2UV(rv)));
 
-	return rv;
+	return SvREFCNT_inc(rv);
 }
 
 /*
