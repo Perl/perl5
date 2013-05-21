@@ -230,7 +230,7 @@ say "Cleaning out old directory";
 system git => 'clean', '-dfxq', $pkg_dir;
 
 say "Unpacking $new_file";
-Archive::Tar->extract_archive( $newfile );
+Archive::Tar->extract_archive( $new_file );
 
 (my $new_dir = $new_file) =~ s/\.tar\.gz//;
 # ensure 'make' will update all files
