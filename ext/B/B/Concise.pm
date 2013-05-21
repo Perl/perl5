@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.95";
+our $VERSION   = "0.96";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -1636,7 +1636,7 @@ your program is).
 
 =item B<#opt>
 
-Whether or not the op has been optimised by the peephole optimiser.
+Whether or not the op has been optimized by the peephole optimizer.
 
 Only available in 5.9 and later.
 

@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.42';
+    $B::VERSION = '1.43';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -1063,7 +1063,7 @@ underlying C "inheritance":
             /     \
         B::LOOP B::PMOP
 
-Access methods correspond to the underlying C structre field names,
+Access methods correspond to the underlying C structure field names,
 with the leading "class indication" prefix (C<"op_">) removed.
 
 =head2 B::OP Methods
