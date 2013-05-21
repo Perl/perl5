@@ -249,7 +249,7 @@ hash.
 Restore any files mentioned in the C<CUSTOMIZED> section, using
 C<git checkout>. Make any new customizations if necessary. Also,
 restore any files that are mentioned in C<@IGNORE>, but were checked
-in in the repository anyway.
+into the repository anyway.
 
 =item *
 
@@ -363,7 +363,7 @@ Increase the version number (e.g. from 5.12.0 to 5.12.1).
 For a release candidate for a stable perl, this should happen a week or two
 before the first release candidate to allow sufficient time for testing and
 smoking with the target version built into the perl executable. For
-subsequent release candidates and the final release, it it not necessary to
+subsequent release candidates and the final release, it is not necessary to
 bump the version further.
 
 There is a tool to semi-automate this process:
@@ -776,7 +776,7 @@ Build perl, then make sure it passes its own test suite, and installs:
 Check that the output of C</tmp/perl-5.x.y-pretest/bin/perl -v> and
 C</tmp/perl-5.x.y-pretest/bin/perl -V> are as expected,
 especially as regards version numbers, patch and/or RC levels, and @INC
-paths. Note that as they have been been built from a git working
+paths. Note that as they have been built from a git working
 directory, they will still identify themselves using git tags and
 commits. (Note that for an odd-numbered version, perl will install
 itself as C<perl5.x.y>). C<perl -v> will identify itself as:

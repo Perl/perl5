@@ -288,7 +288,7 @@ L<http://y2038.googlecode.com/>.
 
 =head2 F<release_announcement_template.txt>
 
-Release announcment for minor releasements of the 5.17 development series.
+Release announcement for minor releasements of the 5.19 development series.
 
 =head2 F<release_managers_guide.pod>
 

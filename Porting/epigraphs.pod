@@ -1874,7 +1874,7 @@ L<Announced on 2004-04-05 by Nicholas Clark|http://groups.google.com/group/perl.
   Then Skimble will appear and he'll saunter to the rear:
   He's been busy in the luggage van!
   He gives one flash of his glass-green eyes
-  And the the signal goes 'All Clear!'
+  And the signal goes 'All Clear!'
   And we're off at last of the northern part
   Of the Northern Hemisphere!
 
