@@ -38,10 +38,10 @@ BEGIN {
 
   $DB::package = '';    # current package space
   $DB::filename = '';   # current filename
-  $DB::subname = '';    # currently executing sub (fullly qualified name)
+  $DB::subname = '';    # currently executing sub (fully qualified name)
   $DB::lineno = '';     # current line number
 
-  $DB::VERSION = $DB::VERSION = '1.04';
+  $DB::VERSION = $DB::VERSION = '1.05';
 
   # initialize private globals to avoid warnings
 
