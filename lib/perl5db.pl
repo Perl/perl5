@@ -318,7 +318,7 @@ is entered or exited.
 
 =item * 8 - Adds parameter information to messages, and overloaded stringify and tied FETCH is enabled on the printed arguments. Ignored if C<4> is not on.
 
-=item * 16 - Adds C<I<context> return from I<subname>: I<value>> messages on subroutine/eval exit. Ignored if C<4> is is not on.
+=item * 16 - Adds C<I<context> return from I<subname>: I<value>> messages on subroutine/eval exit. Ignored if C<4> is not on.
 
 =back
 
@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_09';
+$VERSION = '1.39_10';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1821,7 +1821,7 @@ sub _DB__read_next_cmd
         setterm();
     }
 
-    # ... and it belogs to this PID or we get one for this PID ...
+    # ... and it belongs to this PID or we get one for this PID ...
     if ($term_pid != $$) {
         resetterm(1);
     }
@@ -2097,7 +2097,7 @@ sub _DB__handle_forward_slash_command {
         # If the pattern isn't null ...
         if ( $inpat ne "" ) {
 
-            # Turn of warn and die procesing for a bit.
+            # Turn off warn and die processing for a bit.
             local $SIG{__DIE__};
             local $SIG{__WARN__};
 
@@ -2965,7 +2965,7 @@ Same as for C</>, except the loop runs backwards.
 =head4 C<$rc> - Recall command
 
 Manages the commands in C<@hist> (which is created if C<Term::ReadLine> reports
-that the terminal supports history). It find the the command required, puts it
+that the terminal supports history). It finds the command required, puts it
 into C<$cmd>, and redoes the loop to execute it.
 
 =cut
@@ -3141,7 +3141,7 @@ again.
 #
 #   my $obj = DB::Obj->new(
 #
-# The following package declaraton must come before that,
+# The following package declaration must come before that,
 # or else runtime errors will occur with
 #
 #   PERLDB_OPTS="autotrace nonstop"
@@ -6083,7 +6083,7 @@ sub cmd_W {
         } ## end foreach (@to_watch)
 
         # We don't bother to turn watching off because
-        #  a) we don't want to stop calling watchfunction() it it exists
+        #  a) we don't want to stop calling watchfunction() if it exists
         #  b) foreach over a null list doesn't do anything anyway
 
     } ## end elsif ($expr =~ /^(\S.*)/)
@@ -6418,7 +6418,7 @@ sub print_trace {
         # Drop out if the user has lost interest and hit control-C.
         last if $signal;
 
-        # Set the separator so arrys print nice.
+        # Set the separator so arrays print nice.
         local $" = ', ';
 
         # Grab and stringify the arguments if they are there.
@@ -10303,7 +10303,7 @@ sub cmd_prepost {
     my $which = '';
 
     # Make sure we have some array or another to address later.
-    # This means that if ssome reason the tests fail, we won't be
+    # This means that if for some reason the tests fail, we won't be
     # trying to stash actions or delete them from the wrong place.
     my $aref = [];
 
