@@ -812,15 +812,15 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
 
 
 static void bless_retrieved(pTHX_ retrieve_cxt_t *retrieve_cxt, SV *sv, const char *class_pv) {
-        SV *rv = retrieve_cxt->rv;
         HV *stash = gv_stashpv(class_pv, GV_ADD);
+        SV *rv = retrieve_cxt->rv;
         SvRV_set(rv, sv);
         sv_bless(rv, stash);
         SvRV_set(rv, &PL_sv_undef);
 }
 
 /*
- * Bless 's' in 'p', via the temporary reference (cached on the
+ * Bless 's' in 'p', via a temporary reference (cached on the
  * context), required by sv_bless().
  */
 #define BLESS(s,p)                                      \
