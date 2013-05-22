@@ -60,11 +60,6 @@ BEGIN {
 	}
 }
 
-sub CLONE {
-    # clone context under threads
-    Storable::init_perinterp();
-}
-
 # By default restricted hashes are downgraded on earlier perls.
 
 $Storable::downgrade_restricted = 1;
@@ -425,6 +420,9 @@ sub thaw {
 	$@ = $da;
 	return $self;
 }
+
+our $state = '';
+our $last_op_in_netorder = 0;
 
 sub is_storing          { $state eq 'storing'       }
 sub is_retrieving       { $state eq 'retrieving'    }

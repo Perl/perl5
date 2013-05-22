@@ -30,7 +30,7 @@ use Storable qw(freeze thaw store retrieve);
     %::weird_refs = (
         REF     => \(my $aref    = []),
         VSTRING => \(my $vstring = v1.2.3),
-       'long VSTRING' => \(my $vstring = eval "v" . 0 x 300),
+       'long VSTRING' => \(my $lvstring = eval "v" . 0 x 300),
         LVALUE  => \(my $substr  = substr((my $str = "foo"), 0, 3)),
     );
 }

@@ -17,7 +17,9 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #endif
 
-#if !defined(PERL_VERSION) || PERL_VERSION < 10 || (PERL_VERSION == 10 && PERL_SUBVERSION < 1)
+#if !defined(PERL_VERSION) || PERL_VERSION < 18
+#define NEED_sv_derived_from_pvn
+#define NEED_sv_derived_from_sv
 #define NEED_load_module
 #define NEED_vload_module
 #define NEED_newCONSTSUB
@@ -359,7 +361,7 @@ croak_io_error(pTHX_ SSize_t rc, retrieve_cxt_t *retrieve_cxt, char *str) {
                            (retrieve_cxt->input_fh ? "file" : "string"),
                            error);
         else
-                Perl_croak(aTHX "%s: %s", str, error);
+                Perl_croak(aTHX_ "%s: %s", str, error);
 }
 
 #define READ_ERROR(bytes)                                          \
@@ -758,7 +760,7 @@ static void
 av_store_safe(pTHX_ AV *av, I32 key, SV *val) {
         if (!av_store(av, key, val)) {
                 SvREFCNT_dec(val);
-                Perl_croak("Internal error: av_store failed");
+                Perl_croak(aTHX_ "Internal error: av_store failed");
         }
 }
 
@@ -766,7 +768,7 @@ static void
 hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
     if (!hv_store(hv, key, klen, val, 0)) {
         SvREFCNT_dec(val);
-        Perl_croak("Internal error: hv_store failed");
+        Perl_croak(aTHX_ "Internal error: hv_store failed");
     }
 }
 
