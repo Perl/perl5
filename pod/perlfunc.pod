@@ -9197,7 +9197,7 @@ These flow-control keywords are documented in L<perlsyn/"Compound Statements">.
 =item when
 
 These flow-control keywords related to the experimental switch feature are
-documented in L<perlsyn/"Switch Statements"> .
+documented in L<perlsyn/"Switch Statements">.
 
 =back
 
