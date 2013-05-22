@@ -3294,10 +3294,6 @@ dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 dist/SelfLoader/t/03taint.t		See if SelfLoader works under taint
 dist/Storable/ChangeLog			Storable extension
-dist/Storable/hints/gnukfreebsd.pl	Hint for Storable for named architecture
-dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
-dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
-dist/Storable/hints/linux.pl		Hint for Storable for named architecture
 dist/Storable/Makefile.PL		Storable extension
 dist/Storable/ptr_table.h		ptr_table implementation for older perls
 dist/Storable/README			Storable extension
@@ -3344,6 +3340,10 @@ dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/utf8hash.t		See if Storable works
 dist/Storable/t/utf8.t			See if Storable works
 dist/Storable/t/weak.t			Can Storable store weakrefs
+dist/Storable/was_hints/gnukfreebsd.pl	Hint for Storable for named architecture
+dist/Storable/was_hints/gnuknetbsd.pl	Hint for Storable for named architecture
+dist/Storable/was_hints/hpux.pl		Hint for Storable for named architecture
+dist/Storable/was_hints/linux.pl	Hint for Storable for named architecture
 dist/Term-Complete/lib/Term/Complete.pm	A command completion subroutine
 dist/Term-Complete/t/Complete.t		See if Term::Complete works
 dist/Term-ReadLine/lib/Term/ReadLine.pm		Stub readline library
