@@ -482,7 +482,7 @@ Example:
 
 As of Perl 5.10.0, as a form of purely syntactic sugar, you can stack file
 test operators, in a way that C<-f -w -x $file> is equivalent to
-C<-x $file && -w _ && -f _>.  (This is only fancy fancy: if you use
+C<-x $file && -w _ && -f _>.  (This is only fancy syntax: if you use
 the return value of C<-f $file> as an argument to another filetest
 operator, no special magic will happen.)
 
