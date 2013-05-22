@@ -1,5 +1,10 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.18_03 - Fri Apr 19 18:40:00 CET 2013
+  - Heuristic (and flawed) type canonicalization for templated
+    C++ types.
+  - More tests ported from core.
+
 3.18_02 - Mon Apr 15 07:30:00 CET 2013
   - ExtUtils::ParseXS no longer uses global state (if using OO
     interface).
