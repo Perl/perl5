@@ -17,10 +17,7 @@
 #include <patchlevel.h>		/* Perl's one, needed since 5.6 */
 #endif
 
-#if !defined(PERL_VERSION) || PERL_VERSION < 18
-#define NEED_croak_sv
-#define NEED_sv_derived_from_pvn
-#define NEED_sv_derived_from_sv
+#if !defined(PERL_VERSION) || PERL_VERSION < 10 || (PERL_VERSION == 10 && PERL_SUBVERSION < 1)
 #define NEED_load_module
 #define NEED_vload_module
 #define NEED_newCONSTSUB
@@ -258,8 +255,16 @@
 #define HAS_HASH_KEY_FLAGS
 #endif
 
+#ifndef SvTRUE_NN
+#define SvTRUE_NN SvTRUE
+#endif
+
+#ifndef sv_derived_from_sv
+#define sv_derived_from_sv(sv, klass, flags) (sv_derived_from((sv), SvPV_nolen(klass)))
+#endif
+
 #ifndef ptr_table_new
-#error ptr_table support required
+#include "ptr_table.h"
 #endif
 
 typedef struct st_store_cxt store_cxt_t;
@@ -4432,7 +4437,7 @@ static SV *retrieve_code(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
                         SV *old_errsv = sv_mortalcopy(ERRSV);
                         count = eval_sv(sub, G_SCALAR);
                         if (SvTRUE_NN(ERRSV))
-                                croak_sv(ERRSV);
+                                Perl_croak(aTHX_ NULL);
                         sv_setsv(ERRSV, old_errsv);
                 }
                 if (count != 1)
