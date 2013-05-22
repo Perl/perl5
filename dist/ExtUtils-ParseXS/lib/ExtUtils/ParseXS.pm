@@ -25,7 +25,6 @@ use ExtUtils::ParseXS::Utilities qw(
   C_string
   valid_proto_string
   process_typemaps
-  make_targetable
   map_type
   standard_XS_defs
   assign_func_args

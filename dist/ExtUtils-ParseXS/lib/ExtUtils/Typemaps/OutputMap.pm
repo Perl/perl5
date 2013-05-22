@@ -128,7 +128,7 @@ sub targetable {
       |
       \( (??{ $bal }) \)
     )*
-  ]x;
+  ]xo;
 
   # matches variations on (SV*)
   my $sv_cast = qr[
@@ -139,7 +139,7 @@ sub targetable {
 
   my $size = qr[ # Third arg (to setpvn)
     , \s* (??{ $bal })
-  ]x;
+  ]xo;
 
   my $code = $self->code;
 
@@ -158,7 +158,7 @@ sub targetable {
           ( (??{ $bal }) )    # Set from
         ( (??{ $size }) )?    # Possible sizeof set-from
         \) \s* ; \s* $
-      ]x
+      ]xo
   );
 
   my $rv = undef;
