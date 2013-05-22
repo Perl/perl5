@@ -4553,9 +4553,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
-#  ifdef PERL_NEW_COPY_ON_WRITE
-			     " PERL_NEW_COPY_ON_WRITE"
-#  endif
 #  ifdef PERL_POISON
 			     " PERL_POISON"
 #  endif
