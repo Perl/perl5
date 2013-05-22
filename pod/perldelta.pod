@@ -87,7 +87,21 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Perl has a new copy-on-write mechanism that avoids the need to copy the
+internal string buffer when assigning from one scalar to another. This
+makes copying large strings appear much faster.  Modifying one of the two
+(or more) strings after an assignment will force a copy internally. This
+makes it unnecessary to pass strings by reference for efficiency.
+
+This feature was already available in 5.18.0, but wasn't enabled by
+default. It is the default now, and so you no longer need build perl with
+the F<Configure> argument:
+
+    -Accflags=PERL_NEW_COPY_ON_WRITE
+
+It can be disabled (for now) in a perl build with:
+
+    -Accflags=PERL_NO_COW
 
 =back
 
@@ -335,6 +349,57 @@ well.
 [ List each change as a =item entry ]
 
 =over 4
+
+=item *
+
+Perl's new copy-on-write mechanism  (which is now enabled by default),
+allows any C<SvPOK> scalar to be automatically upgraded to a copy-on-write
+scalar when copied. A reference count on the string buffer is stored in
+the string buffer itself.
+
+For example:
+
+    $ perl -MDevel::Peek -e'$a="abc"; $b = $a; Dump $a; Dump $b'
+    SV = PV(0x260cd80) at 0x2620ad8
+      REFCNT = 1
+      FLAGS = (POK,IsCOW,pPOK)
+      PV = 0x2619bc0 "abc"\0
+      CUR = 3
+      LEN = 16
+      COW_REFCNT = 1
+    SV = PV(0x260ce30) at 0x2620b20
+      REFCNT = 1
+      FLAGS = (POK,IsCOW,pPOK)
+      PV = 0x2619bc0 "abc"\0
+      CUR = 3
+      LEN = 16
+      COW_REFCNT = 1
+
+Note that both scalars share the same PV buffer and have a COW_REFCNT
+greater than zero.
+
+This means that XS code which wishes to modify the C<SvPVX()> buffer of an
+SV should call C<SvPV_force()> or similar first, to ensure a valid (and
+unshared) buffer, and to call C<SvSETMAGIC()> afterwards. This in fact has
+always been the case (for example hash keys were already copy-on-write);
+this change just spreads the COW behaviour to a wider variety of SVs.
+
+One important difference is that before 5.18.0, shared hash-key scalars
+used to have the C<SvREADONLY> flag set; this is no longer the case.
+
+This new behaviour can still be disabled by running F<Configure> with
+B<-Accflags=-DPERL_NO_COW>.  This option will probably be removed in Perl
+5.22.
+
+=item *
+
+C<PL_sawampersand> is now a constant.  The switch this variable provided
+(to enable/disable the pre-match copy depending on whether C<$&> had been
+seen) has been removed and replaced with copy-on-write, eliminating a few
+bugs.
+
+The previous behaviour can still be enabled by running F<Configure> with
+B<-Accflags=-DPERL_SAWAMPERSAND>.
 
 =item *
 
