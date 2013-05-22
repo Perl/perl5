@@ -18,6 +18,7 @@
 #endif
 
 #if !defined(PERL_VERSION) || PERL_VERSION < 18
+#define NEED_croak_sv
 #define NEED_sv_derived_from_pvn
 #define NEED_sv_derived_from_sv
 #define NEED_load_module
