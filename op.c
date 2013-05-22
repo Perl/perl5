@@ -165,11 +165,23 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     OP *o;
     size_t opsz, space;
 
+    /* We only allocate ops from the slab during subroutine compilation.
+       We find the slab via PL_compcv, hence that must be non-NULL. It could
+       also be pointing to a subroutine which is now fully set up (CvROOT()
+       pointing to the top of the optree for that sub), or a subroutine
+       which isn't using the slab allocator. If our sanity checks aren't met,
+       don't use a slab, but allocate the OP directly from the heap.  */
     if (!PL_compcv || CvROOT(PL_compcv)
      || (CvSTART(PL_compcv) && !CvSLABBED(PL_compcv)))
 	return PerlMemShared_calloc(1, sz);
 
-    if (!CvSTART(PL_compcv)) { /* sneak it in here */
+    /* While the subroutine is under construction, the slabs are accessed via
+       CvSTART(), to avoid needing to expand PVCV by one pointer for something
+       unneeded at runtime. Once a subroutine is constructed, the slabs are
+       accessed via CvROOT(). So if CvSTART() is NULL, no slab has been
+       allocated yet.  See the commit message for 8be227ab5eaa23f2 for more
+       details.  */
+    if (!CvSTART(PL_compcv)) {
 	CvSTART(PL_compcv) =
 	    (OP *)(slab = S_new_slab(aTHX_ PERL_SLAB_SIZE));
 	CvSLABBED_on(PL_compcv);
@@ -180,6 +192,9 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
     opsz = SIZE_TO_PSIZE(sz);
     sz = opsz + OPSLOT_HEADER_P;
 
+    /* The slabs maintain a free list of OPs. In particular, constant folding
+       will free up OPs, so it makes sense to re-use them where possible. A
+       freed up slot is used in preference to a new allocation.  */
     if (slab->opslab_freed) {
 	OP **too = &slab->opslab_freed;
 	o = *too;
