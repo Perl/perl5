@@ -709,30 +709,26 @@ EOF
         my $var = 'RETVAL';
         my $type = $self->{ret_type};
 
-        if ($trgt and not $trgt->{with_size} and $trgt->{type} eq 'p') {
-          # PUSHp corresponds to setpvn.  Treat setpv directly
+        if ($trgt) {
           my $what = $self->eval_output_typemap_code(
             qq("$trgt->{what}"),
             {var => $var, type => $self->{ret_type}}
           );
-
-          print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
-          $prepush_done = 1;
-        }
-        elsif ($trgt) {
-          my $what = $self->eval_output_typemap_code(
-            qq("$trgt->{what}"),
-            {var => $var, type => $self->{ret_type}}
-          );
-
-          my $tsize = $trgt->{what_size};
-          $tsize = '' unless defined $tsize;
-          $tsize = $self->eval_output_typemap_code(
-            qq("$tsize"),
-            {var => $var, type => $self->{ret_type}}
-          );
-          print "\tXSprePUSH; PUSH$trgt->{type}($what$tsize);\n";
-          $prepush_done = 1;
+          if (not $trgt->{with_size} and $trgt->{type} eq 'p') { # sv_setpv
+            # PUSHp corresponds to sv_setpvn.  Treat sv_setpv directly
+            print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
+            $prepush_done = 1;
+          }
+          else {
+            my $tsize = $trgt->{what_size};
+            $tsize = '' unless defined $tsize;
+            $tsize = $self->eval_output_typemap_code(
+              qq("$tsize"),
+              {var => $var, type => $self->{ret_type}}
+            );
+            print "\tXSprePUSH; PUSH$trgt->{type}($what$tsize);\n";
+            $prepush_done = 1;
+          }
         }
         else {
           # RETVAL almost never needs SvSETMAGIC()
