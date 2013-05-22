@@ -23,11 +23,14 @@ use Storable qw(store retrieve);
 use Test::More;
 
 # problems with 5.00404 when in an BEGIN block, so this is defined here
-if (!eval { require File::Spec; 1 } || $File::Spec::VERSION < 0.8) {
-    plan(skip_all => "File::Spec 0.8 needed");
-    # Mention $File::Spec::VERSION again, as 5.00503's harness seems to have
-    # warnings on.
-    exit $File::Spec::VERSION;
+{
+    no warnings;
+    if (!eval { require File::Spec; 1 } || $File::Spec::VERSION < 0.8) {
+        plan(skip_all => "File::Spec 0.8 needed");
+        # Mention $File::Spec::VERSION again, as 5.00503's harness seems to have
+        # warnings on.
+        exit $File::Spec::VERSION;
+    }
 }
 
 plan(tests => 8);

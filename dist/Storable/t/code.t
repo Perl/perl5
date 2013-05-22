@@ -28,6 +28,7 @@ BEGIN {
 	exit;
     }
     require File::Spec;
+    no warnings;
     if ($File::Spec::VERSION < 0.8) {
 	print "1..0 # Skip: newer File::Spec needed\n";
 	exit 0;
