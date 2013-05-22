@@ -39,4 +39,6 @@ our @XSKeywords      = qw(
   EXPORT_XSUB_SYMBOLS
 );
 
+our $XSKeywordsAlternation = join('|', @XSKeywords);
+
 1;
