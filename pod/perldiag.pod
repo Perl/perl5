@@ -5677,8 +5677,10 @@ instead of:
 
 =item Unterminated \g{...} pattern in regex; marked by <-- HERE in m/%s/
 
-(F) You missed a close brace on a \g{..} pattern (group reference) in
-a regular expression.  Fix the pattern and retry.
+(F) In a regular expression, you had a C<\g> that wasn't followed by a
+proper group reference.  In the case of C<\g{>, the closing brace is
+missing; otherwise the C<\g> must be followed by an integer.  Fix the
+pattern and retry.
 
 =item Unterminated <> operator
 
