@@ -2266,7 +2266,7 @@ sub prop_invlist ($;$) {
 =head2 B<prop_invmap()>
 
  use Unicode::UCD 'prop_invmap';
- my ($list_ref, $map_ref, $format, $missing)
+ my ($list_ref, $map_ref, $format, $default)
                                       = prop_invmap("General Category");
 
 C<prop_invmap> is used to get the complete mapping definition for a property,
@@ -2357,7 +2357,8 @@ that, instead of treating these as unassigned Unicode code points, the value
 for this range should be C<undef>.  If you wish, you can change the returned
 arrays accordingly.
 
-The maps are almost always simple scalars that should be interpreted as-is.
+The maps for almost all properties are simple scalars that should be
+interpreted as-is.
 These values are those given in the Unicode-supplied data files, which may be
 inconsistent as to capitalization and as to which synonym for a property-value
 is given.  The results may be normalized by using the L</prop_value_aliases()>
@@ -2690,14 +2691,14 @@ that map to this value.  For example, to
 convert to the data structure searchable by L</charinrange()>, you can follow
 this recipe for properties that don't require adjustments:
 
- my ($list_ref, $map_ref, $format, $missing) = prop_invmap($property);
+ my ($list_ref, $map_ref, $format, $default) = prop_invmap($property);
  my @range_list;
 
  # Look at each element in the list, but the -2 is needed because we
  # look at $i+1 in the loop, and the final element is guaranteed to map
- # to $missing by prop_invmap(), so we would skip it anyway.
+ # to $default by prop_invmap(), so we would skip it anyway.
  for my $i (0 .. @$list_ref - 2) {
-    next if $map_ref->[$i] eq $missing;
+    next if $map_ref->[$i] eq $default;
     push @range_list, [ $list_ref->[$i],
                         $list_ref->[$i+1],
                         $map_ref->[$i]
@@ -2707,13 +2708,13 @@ this recipe for properties that don't require adjustments:
  print charinrange(\@range_list, $code_point), "\n";
 
 With this, C<charinrange()> will return C<undef> if its input code point maps
-to C<$missing>.  You can avoid this by omitting the C<next> statement, and adding
+to C<$default>.  You can avoid this by omitting the C<next> statement, and adding
 a line after the loop to handle the final element of the inversion map.
 
 Similarly, this recipe can be used for properties that do require adjustments:
 
  for my $i (0 .. @$list_ref - 2) {
-    next if $map_ref->[$i] eq $missing;
+    next if $map_ref->[$i] eq $default;
 
     # prop_invmap() guarantees that if the mapping is to an array, the
     # range has just one element, so no need to worry about adjustments.
