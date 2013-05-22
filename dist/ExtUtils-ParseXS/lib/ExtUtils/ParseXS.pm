@@ -22,7 +22,6 @@ $VERSION = eval $VERSION if $VERSION =~ /_/;
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
   trim_whitespace
-  tidy_type
   C_string
   valid_proto_string
   process_typemaps
@@ -334,7 +333,7 @@ EOM
     }
 
     # extract return type, function name and arguments
-    ($self->{ret_type}) = tidy_type($_);
+    ($self->{ret_type}) = ExtUtils::Typemaps::tidy_type($_);
     my $RETVAL_no_return = 1 if $self->{ret_type} =~ s/^NO_OUTPUT\s+//;
 
     # Allow one-line ANSI-like declaration
@@ -1827,7 +1826,7 @@ sub generate_init {
 
   my $typemaps = $self->{typemap};
 
-  $type = tidy_type($type);
+  $type = ExtUtils::Typemaps::tidy_type($type);
   $self->report_typemap_failure($typemaps, $type), return
     unless $typemaps->get_typemap(ctype => $type);
 
@@ -1936,7 +1935,7 @@ sub generate_output {
 
   my $typemaps = $self->{typemap};
 
-  $type = tidy_type($type);
+  $type = ExtUtils::Typemaps::tidy_type($type);
   local $argsref->{type} = $type;
 
   if ($type =~ /^array\(([^,]*),(.*)\)/) {

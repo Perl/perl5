@@ -13,7 +13,6 @@ our (@ISA, @EXPORT_OK);
 @EXPORT_OK = qw(
   standard_typemap_locations
   trim_whitespace
-  tidy_type
   C_string
   valid_proto_string
   process_typemaps
@@ -41,7 +40,6 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
   use ExtUtils::ParseXS::Utilities qw(
     standard_typemap_locations
     trim_whitespace
-    tidy_type
     C_string
     valid_proto_string
     process_typemaps
@@ -173,45 +171,6 @@ None.  Remember:  this is an I<in-place> modification of the argument.
 
 sub trim_whitespace {
   $_[0] =~ s/^\s+|\s+$//go;
-}
-
-=head2 C<tidy_type()>
-
-=over 4
-
-=item * Purpose
-
-Rationalize any asterisks (C<*>) by joining them into bunches, removing
-interior whitespace, then trimming leading and trailing whitespace.
-
-=item * Arguments
-
-    ($ret_type) = tidy_type($_);
-
-String to be cleaned up.
-
-=item * Return Value
-
-String cleaned up.
-
-=back
-
-=cut
-
-sub tidy_type {
-  local ($_) = @_;
-
-  # rationalise any '*' by joining them into bunches and removing whitespace
-  s#\s*(\*+)\s*#$1#g;
-  s#(\*+)# $1 #g;
-
-  # change multiple whitespace into a single space
-  s/\s+/ /g;
-
-  # trim leading & trailing whitespace
-  trim_whitespace($_);
-
-  $_;
 }
 
 =head2 C<C_string()>

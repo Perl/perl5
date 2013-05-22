@@ -345,7 +345,7 @@ sub remove_typemap {
     my %args = @_;
     $ctype = $args{ctype};
     die("Need ctype argument") if not defined $ctype;
-    $ctype = _tidy_type($ctype);
+    $ctype = tidy_type($ctype);
   }
   else {
     $ctype = $_[0]->tidy_ctype;
@@ -444,7 +444,7 @@ sub get_typemap {
   my %args = @_;
   my $ctype = $args{ctype};
   die("Need ctype argument") if not defined $ctype;
-  $ctype = _tidy_type($ctype);
+  $ctype = tidy_type($ctype);
 
   my $index = $self->{typemap_lookup}{$ctype};
   return() if not defined $index;
@@ -861,7 +861,7 @@ sub validate {
   my %args = @_;
 
   if ( exists $args{ctype}
-       and exists $self->{typemap_lookup}{_tidy_type($args{ctype})} )
+       and exists $self->{typemap_lookup}{tidy_type($args{ctype})} )
   {
     die("Multiple definition of ctype '$args{ctype}' in TYPEMAP section");
   }
@@ -922,6 +922,42 @@ sub clone {
 
   return $self;
 }
+
+=head2 tidy_type
+
+Function to (heuristically) canonicalize a C type. Works to some
+degree with C++ types.
+
+    $halfway_canonical_type = tidy_type($ctype);
+
+Moved from C<ExtUtils::ParseXS>.
+
+=cut
+
+sub tidy_type {
+  local $_ = shift;
+
+  # for templated C++ types, do some bit of flawed canonicalization
+  # wrt. templates at least
+  if (/[<>]/) {
+    s/\s*([<>])\s*/$1/g;
+    s/>>/> >/g;
+  }
+
+  # rationalise any '*' by joining them into bunches and removing whitespace
+  s#\s*(\*+)\s*#$1#g;
+  s#(\*+)# $1 #g ;
+
+  # trim leading & trailing whitespace
+  s/^\s+//; s/\s+$//;
+
+  # change multiple whitespace into a single space
+  s/\s+/ /g;
+
+  $_;
+}
+
+
 
 sub _parse {
   my $self = shift;
@@ -1011,24 +1047,6 @@ sub _parse {
 
   return 1;
 }
-
-# taken from ExtUtils::ParseXS
-sub _tidy_type {
-  local $_ = shift;
-
-  # rationalise any '*' by joining them into bunches and removing whitespace
-  s#\s*(\*+)\s*#$1#g;
-  s#(\*+)# $1 #g ;
-
-  # trim leading & trailing whitespace
-  s/^\s+//; s/\s+$//;
-
-  # change multiple whitespace into a single space
-  s/\s+/ /g;
-
-  $_;
-}
-
 
 # taken from ExtUtils::ParseXS
 sub _valid_proto_string {
