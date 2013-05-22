@@ -98,7 +98,7 @@ foreach my $name (sort keys %properties) {
         my $i = utf8::native_to_unicode($j);
         my $function = uc($name);
 
-        my $matches = Unicode::UCD::_search_invlist(\@invlist, $i);
+        my $matches = Unicode::UCD::search_invlist(\@invlist, $i);
         if (! defined $matches) {
             $matches = 0;
         }
@@ -260,7 +260,7 @@ foreach my $name (sort keys %to_properties) {
         my $i = utf8::native_to_unicode($j);
         my $function = $name;
 
-        my $index = Unicode::UCD::_search_invlist(\@{$list_ref}, $j);
+        my $index = Unicode::UCD::search_invlist(\@{$list_ref}, $j);
 
         my $ret;
         my $char_name = charnames::viacode($j) // "No name";

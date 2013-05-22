@@ -2026,5 +2026,14 @@ foreach my $prop (keys %props) {
     pass("prop_invmap('$mod_prop')");
 }
 
+# A few tests of search_invlist
+use Unicode::UCD qw(search_invlist);
+
+my ($scripts_ranges_ref, $scripts_map_ref) = prop_invmap("Script");
+my $index = search_invlist($scripts_ranges_ref, 0x390);
+is($scripts_map_ref->[$index], "Greek", "U+0390 is Greek");
+my @alpha_invlist = prop_invlist("Alpha");
+is(search_invlist(\@alpha_invlist, ord("\t")), undef, "search_invlist returns undef for code points before first one on the list");
+
 ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
 done_testing();

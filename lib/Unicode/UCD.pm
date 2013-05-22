@@ -24,6 +24,7 @@ our @EXPORT_OK = qw(charinfo
                     prop_value_aliases
                     prop_invlist
                     prop_invmap
+                    search_invlist
                     MAX_CP
                 );
 
@@ -79,6 +80,9 @@ Unicode::UCD - Unicode character database
     use Unicode::UCD 'prop_invmap';
     my ($list_ref, $map_ref, $format, $missing)
                                       = prop_invmap("General Category");
+
+    use Unicode::UCD 'search_invlist';
+    my $index = search_invlist(\@invlist, $code_point);
 
     use Unicode::UCD 'compexcl';
     my $compexcl = compexcl($codepoint);
@@ -2124,6 +2128,9 @@ code points that have the property-value:
 C<prop_invlist> does not know about any user-defined nor Perl internal-only
 properties, and will return C<undef> if called with one of those.
 
+The L</search_invlist()> function is provided for finding a code point within
+an inversion list.
+
 =cut
 
 # User-defined properties could be handled with some changes to utf8_heavy.pl;
@@ -2675,8 +2682,9 @@ which is an integer.  That is, it must match the regular expression:
 Further, the first element in a range never needs adjustment, as the
 adjustment would be just adding 0.
 
-A binary search can be used to quickly find a code point in the inversion
-list, and hence its corresponding mapping.
+A binary search such as that provided by L</search_invlist()>, can be used to
+quickly find a code point in the inversion list, and hence its corresponding
+mapping.
 
 The final, fourth element (index [3], assigned to C<$default> in the "block"
 example) in the four element list returned by this function is used with the
@@ -3374,7 +3382,7 @@ RETRY:
                 }
 
                 # Find the range that the override applies to.
-                my $i = _search_invlist(\@invlist, $cp);
+                my $i = search_invlist(\@invlist, $cp);
                 if ($cp < $invlist[$i] || $cp >= $invlist[$i + 1]) {
                     croak __PACKAGE__, "::prop_invmap: wrong_range, cp=$cp; i=$i, current=$invlist[$i]; next=$invlist[$i + 1]"
                 }
@@ -3483,17 +3491,52 @@ RETRY:
     return (\@invlist, \@invmap, $format, $missing);
 }
 
-sub _search_invlist {
-    # Find the range in the inversion list which contains a code point; that
-    # is, find i such that l[i] <= code_point < l[i+1].  Returns undef if no
-    # such i.
+sub search_invlist {
 
-    # If this is ever made public, could use to speed up .t specials.  Would
-    # need to use code point argument, as in other functions in this pm
+=pod
+
+=head2 B<search_invlist()>
+
+ use Unicode::UCD qw(prop_invmap prop_invlist);
+ use Unicode::UCD 'search_invlist';
+
+ my @invlist = prop_invlist($property_name);
+ print $code_point, ((search_invlist(\@invlist, $code_point) // -1) % 2)
+                     ? " isn't"
+                     : " is",
+     " in $property_name\n";
+
+ my ($blocks_ranges_ref, $blocks_map_ref) = prop_invmap("Block");
+ my $index = search_invlist($blocks_ranges_ref, $code_point);
+ print "$code_point is in block ", $blocks_map_ref->[$index], "\n";
+
+C<search_invlist> is used to search an inversion list returned by
+C<prop_invlist> or C<prop_invmap> for a particular L</code point argument>.
+C<undef> is returned if the code point is not found in the inversion list
+(this happens only when it is not a legal L<code point argument>, or is less
+than the list's first element).  A warning is raised in the first instance.
+
+Otherwise, it returns the index into the list of the range that contains the
+code point.; that is, find C<i> such that
+
+    list[i]<= code_point < list[i+1].
+
+As explained in L</prop_invlist()>, whether a code point is in the list or not
+depends on if the index is even (in) or odd (not in).  And as explained in
+L</prop_invmap()>, the index is used with the returned parallel array to find
+the mapping.
+
+=cut
+
 
     my $list_ref = shift;
-    my $code_point = shift;
-    # Verify non-neg numeric  XXX
+    my $input_code_point = shift;
+    my $code_point = _getcode($input_code_point);
+
+    if (! defined $code_point) {
+        carp __PACKAGE__, "::search_invlist: unknown code '$input_code_point'";
+        return;
+    }
 
     my $max_element = @$list_ref - 1;
 

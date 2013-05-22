@@ -126,6 +126,13 @@ memory used by 3.26 and earlier.
 
 C<PERL5LIB> is always propagated to a test's C<@INC>, even under C<-T>.
 
+=item *
+
+Unicode::UCD has been upgraded from version 0.51 to 0.52.
+
+A function, L<Unicode::UCD/search_invlist()> is now available to do
+search an inversion list or map for a code point.
+
 =back
 
 =head2 Removed Modules and Pragmata
