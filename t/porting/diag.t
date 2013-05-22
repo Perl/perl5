@@ -401,24 +401,24 @@ sub check_message {
         # We found an actual valid entry in perldiag.pod for this error.
         pass($key);
 
-        # Now check the category and severity
-
-        # Cache our severity qr thingies
-        use 5.01;
-        state %qrs;
-        my $qr = $qrs{$severity} ||= qr/$severity/;
-
         return $ret
           if $entries{$key}{cattodo};
 
-        like $entries{$key}{severity}, $qr,
+        # Now check the category and severity
+
+        # Cache our severity qr thingies
+        use feature 'state';
+        state %qrs;
+        my $qr = $qrs{$severity} ||= qr/$severity/;
+
+        like($entries{$key}{severity}, $qr,
           $severity =~ /\[/
             ? "severity is one of $severity for $key"
-            : "severity is $severity for $key";
+            : "severity is $severity for $key");
 
-        is $entries{$key}{category}, $categories,
+        is($entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
-             . " for $key";
+             . " for $key");
       }
       # Later, should start checking that the severity is correct, too.
     } elsif ($partial) {
