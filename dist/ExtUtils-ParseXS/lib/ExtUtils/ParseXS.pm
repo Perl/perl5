@@ -705,33 +705,33 @@ EOF
       }
       elsif ($self->{gotRETVAL} || $wantRETVAL) {
         my $outputmap = $self->{typemap}->get_outputmap( ctype => $self->{ret_type} );
-        my $t = $self->{optimize} && $outputmap && $outputmap->targetable;
+        my $trgt = $self->{optimize} && $outputmap && $outputmap->targetable;
         my $var = 'RETVAL';
         my $type = $self->{ret_type};
 
-        if ($t and not $t->{with_size} and $t->{type} eq 'p') {
+        if ($trgt and not $trgt->{with_size} and $trgt->{type} eq 'p') {
           # PUSHp corresponds to setpvn.  Treat setpv directly
           my $what = $self->eval_output_typemap_code(
-            qq("$t->{what}"),
+            qq("$trgt->{what}"),
             {var => $var, type => $self->{ret_type}}
           );
 
           print "\tsv_setpv(TARG, $what); XSprePUSH; PUSHTARG;\n";
           $prepush_done = 1;
         }
-        elsif ($t) {
+        elsif ($trgt) {
           my $what = $self->eval_output_typemap_code(
-            qq("$t->{what}"),
+            qq("$trgt->{what}"),
             {var => $var, type => $self->{ret_type}}
           );
 
-          my $tsize = $t->{what_size};
+          my $tsize = $trgt->{what_size};
           $tsize = '' unless defined $tsize;
           $tsize = $self->eval_output_typemap_code(
             qq("$tsize"),
             {var => $var, type => $self->{ret_type}}
           );
-          print "\tXSprePUSH; PUSH$t->{type}($what$tsize);\n";
+          print "\tXSprePUSH; PUSH$trgt->{type}($what$tsize);\n";
           $prepush_done = 1;
         }
         else {
