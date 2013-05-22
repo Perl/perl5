@@ -265,6 +265,9 @@
 
 #ifndef ptr_table_new
 #include "ptr_table.h"
+#define PTR_TABLE_DESTRUCTOR &my_ptr_table_free
+#else
+#define PTR_TABLE_DESTRUCTOR &Perl_ptr_table_free
 #endif
 
 typedef struct st_store_cxt store_cxt_t;
@@ -273,7 +276,7 @@ struct st_store_cxt {
 	/* We have to store tag+1, because tag numbers start at 0, and
 	   we can't store (SV *) 0 in a ptr_table without it being
 	   confused for a fetch lookup failure.  */
-	struct ptr_tbl *pseen;
+	PTR_TBL_t *pseen;
 	HV *hseen; 			/* Still need hseen for the 0.6 file format code. */
 	AV *hook_seen;			/* which SVs were returned by STORABLE_freeze() */
 	IV where_is_undef;		/* index in aseen of PL_sv_undef */
@@ -1047,7 +1050,7 @@ static void init_store_cxt(
 	 * associated tag numbers is special.
          */
 	store_cxt->pseen = ptr_table_new();
-        SAVEDESTRUCTOR_X(&Perl_ptr_table_free, store_cxt->pseen);
+        SAVEDESTRUCTOR_X(PTR_TABLE_DESTRUCTOR, store_cxt->pseen);
 	/*
 	 * The following does not work well with perl5.004_04, and causes
 	 * a core dump later on, in a completely unrelated spot, which
@@ -2863,7 +2866,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	SV **svh;
 	int ret;
 	int type;
-	struct ptr_tbl *pseen = store_cxt->pseen;
+	PTR_TBL_t *pseen = store_cxt->pseen;
 
 	TRACEME(("store (0x%"UVxf")", PTR2UV(sv)));
 

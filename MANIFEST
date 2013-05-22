@@ -3299,6 +3299,7 @@ dist/Storable/hints/gnuknetbsd.pl	Hint for Storable for named architecture
 dist/Storable/hints/hpux.pl		Hint for Storable for named architecture
 dist/Storable/hints/linux.pl		Hint for Storable for named architecture
 dist/Storable/Makefile.PL		Storable extension
+dist/Storable/ptr_table.h		ptr_table implementation for older perls
 dist/Storable/README			Storable extension
 dist/Storable/Storable.pm		Storable extension
 dist/Storable/Storable.xs		Storable extension
