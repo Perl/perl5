@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use Test::More;
-use lib qw( lib );
 use ExtUtils::Typemaps;
 
 my @tests = (

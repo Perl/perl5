@@ -2,12 +2,9 @@
 use strict;
 use warnings;
 $| = 1;
-use Carp;
-use Cwd;
-use File::Spec;
-use File::Temp qw( tempdir );
 use Test::More tests =>  7;
-use lib qw( lib t/lib );
+use File::Spec;
+use lib (-d 't' ? File::Spec->catdir(qw(t lib)) : 'lib');
 use ExtUtils::ParseXS;
 use ExtUtils::ParseXS::Utilities qw(
     Warn

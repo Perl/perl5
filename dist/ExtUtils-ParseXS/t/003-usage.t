@@ -17,7 +17,7 @@ my ($source_file, $obj_file, $lib_file, $module);
 
 require_ok( 'ExtUtils::ParseXS' );
 
-chdir 't' or die "Can't chdir to t/, $!";
+chdir('t') if -d 't';
 
 use Carp; $SIG{__WARN__} = \&Carp::cluck;
 

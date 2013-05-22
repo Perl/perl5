@@ -4,7 +4,6 @@ use warnings;
 use Carp;
 use Cwd;
 use File::Spec;
-use File::Temp qw( tempdir );
 use Test::More;
 use lib qw( lib );
 use ExtUtils::Typemaps;
