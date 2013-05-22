@@ -1337,13 +1337,14 @@ sub OVERLOAD_handler {
 }
 
 sub FALLBACK_handler {
-  my $self = shift;
-  $_ = shift;
+  my ($self, $setting) = @_;
 
   # the rest of the current line should contain either TRUE,
   # FALSE or UNDEF
 
-  trim_whitespace($_);
+  trim_whitespace($setting);
+  $setting = uc($setting);
+
   my %map = (
     TRUE => "&PL_sv_yes", 1 => "&PL_sv_yes",
     FALSE => "&PL_sv_no", 0 => "&PL_sv_no",
@@ -1351,42 +1352,39 @@ sub FALLBACK_handler {
   );
 
   # check for valid FALLBACK value
-  $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF") unless exists $map{uc $_};
+  $self->death("Error: FALLBACK: TRUE/FALSE/UNDEF") unless exists $map{$setting};
 
-  $self->{Fallback} = $map{uc $_};
+  $self->{Fallback} = $map{$setting};
 }
 
 
 sub REQUIRE_handler {
-  my $self = shift;
   # the rest of the current line should contain a version number
-  my $Ver = shift;
+  my ($self, $ver) = @_;
 
-  trim_whitespace($Ver);
+  trim_whitespace($ver);
 
   $self->death("Error: REQUIRE expects a version number")
-    unless $Ver;
+    unless $ver;
 
   # check that the version number is of the form n.n
-  $self->death("Error: REQUIRE: expected a number, got '$Ver'")
-    unless $Ver =~ /^\d+(\.\d*)?/;
+  $self->death("Error: REQUIRE: expected a number, got '$ver'")
+    unless $ver =~ /^\d+(\.\d*)?/;
 
-  $self->death("Error: xsubpp $Ver (or better) required--this is only $VERSION.")
-    unless $VERSION >= $Ver;
+  $self->death("Error: xsubpp $ver (or better) required--this is only $VERSION.")
+    unless $VERSION >= $ver;
 }
 
 sub VERSIONCHECK_handler {
-  my $self = shift;
-  $_ = shift;
-
   # the rest of the current line should contain either ENABLE or
   # DISABLE
+  my ($self, $setting) = @_;
 
-  trim_whitespace($_);
+  trim_whitespace($setting);
 
   # check for ENABLE/DISABLE
   $self->death("Error: VERSIONCHECK: ENABLE/DISABLE")
-    unless /^(ENABLE|DISABLE)/i;
+    unless $setting =~ /^(ENABLE|DISABLE)/i;
 
   $self->{WantVersionChk} = 1 if $1 eq 'ENABLE';
   $self->{WantVersionChk} = 0 if $1 eq 'DISABLE';
@@ -1428,30 +1426,28 @@ sub PROTOTYPE_handler {
 }
 
 sub SCOPE_handler {
-  my $self = shift;
-  $_ = shift;
+  # Rest of line should be either ENABLE or DISABLE
+  my ($self, $setting) = @_;
 
   $self->death("Error: Only 1 SCOPE declaration allowed per xsub")
     if $self->{scope_in_this_xsub}++;
 
-  trim_whitespace($_);
+  trim_whitespace($setting);
   $self->death("Error: SCOPE: ENABLE/DISABLE")
-      unless /^(ENABLE|DISABLE)\b/i;
+      unless $setting =~ /^(ENABLE|DISABLE)\b/i;
   $self->{ScopeThisXSUB} = ( uc($1) eq 'ENABLE' );
 }
 
 sub PROTOTYPES_handler {
-  my $self = shift;
-  $_ = shift;
-
   # the rest of the current line should contain either ENABLE or
   # DISABLE
+  my ($self, $setting) = @_;
 
-  trim_whitespace($_);
+  trim_whitespace($setting);
 
   # check for ENABLE/DISABLE
   $self->death("Error: PROTOTYPES: ENABLE/DISABLE")
-    unless /^(ENABLE|DISABLE)/i;
+    unless $setting =~ /^(ENABLE|DISABLE)/i;
 
   $self->{WantPrototypes} = 1 if $1 eq 'ENABLE';
   $self->{WantPrototypes} = 0 if $1 eq 'DISABLE';
@@ -1459,17 +1455,15 @@ sub PROTOTYPES_handler {
 }
 
 sub EXPORT_XSUB_SYMBOLS_handler {
-  my $self = shift;
-  $_ = shift;
-
   # the rest of the current line should contain either ENABLE or
   # DISABLE
+  my ($self, $setting) = @_;
 
-  trim_whitespace($_);
+  trim_whitespace($setting);
 
   # check for ENABLE/DISABLE
   $self->death("Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE")
-    unless /^(ENABLE|DISABLE)/i;
+    unless $setting =~ /^(ENABLE|DISABLE)/i;
 
   my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
