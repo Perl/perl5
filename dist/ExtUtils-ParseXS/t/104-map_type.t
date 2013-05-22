@@ -3,12 +3,15 @@ use strict;
 use warnings;
 use Test::More tests =>  7;
 use lib qw( lib );
+use ExtUtils::ParseXS;
 use ExtUtils::ParseXS::Utilities qw(
   map_type
 );
 
 my ($self, $type, $varname);
 my ($result, $expected);
+
+$self = ExtUtils::ParseXS->new;
 
 $type = 'struct DATA *';
 $varname = 'RETVAL';
