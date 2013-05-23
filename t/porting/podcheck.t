@@ -329,7 +329,7 @@ my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
 my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_dir), 'MANIFEST');
 my $copy_fh;
 
-my $MAX_LINE_LENGTH = 79;   # 79 columns
+my $MAX_LINE_LENGTH = 100;   # 79 columns
 my $INDENT = 7;             # default nroff indent
 
 # Our warning messages.  Better not have [('"] in them, as those are used as
@@ -337,8 +337,6 @@ my $INDENT = 7;             # default nroff indent
 my $line_length = "Verbatim line length including indents exceeds $MAX_LINE_LENGTH by";
 my $broken_link = "Apparent broken link";
 my $broken_internal_link = "Apparent internal link is missing its forward slash";
-my $see_not_linked = "? Should you be using L<...> instead of";
-my $C_with_slash = "? Should you be using F<...> or maybe L<...> instead of";
 my $multiple_targets = "There is more than one target";
 my $duplicate_name = "Pod NAME already used";
 my $need_encoding = "Should have =encoding statement because have non-ASCII";
@@ -811,95 +809,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
                 }
             }
         }
-        $paragraph = join " ", split /^/, $paragraph;
 
-        # Matches something that looks like a file name, but is enclosed in
-        # C<...>
-        my $C_path_re = qr{ \b ( C<
-                                # exclude various things that have slashes
-                                # in them but aren't paths
-                                (?!
-                                    (?: (?: s | qr | m) / ) # regexes
-                                    | \d+/\d+>       # probable fractions
-                                    | OS/2>
-                                    | Perl/Tk>
-                                    | origin/blead>
-                                    | origin/maint
-                                    | -    # File names don't begin with "-"
-                                 )
-                                 [-\w]+ (?: / [-\w]+ )+ (?: \. \w+ )? > )
-                          }x;
-
-        # If looks like a reference to other documentation by containing the
-        # word 'See' and then a likely pod directive, warn.
-        while ($paragraph =~ m{
-                                ( (?: \w+ \s+ )* )  # The phrase before, if any
-                                \b [Ss]ee \s+
-                                ( ( [^L] )
-                                  <
-                                  ( [^<]*? )  # The not < excludes nested C<L<...
-                                  >
-                                )
-                                ( \s+ (?: under | in ) \s+ L< )?
-                            }xg) {
-            my $prefix = $1 // "";
-            my $construct = $2;     # The whole thing, like C<...>
-            my $type = $3;
-            my $interior = $4;
-            my $trailing = $5;      # After the whole thing ending in "L<"
-
-            # If the full phrase is something like, "you might see C<", or
-            # similar, it really isn't a reference to a link.  The ones I saw
-            # all had the word "you" in them; and the "you" wasn't the
-            # beginning of a sentence.
-            if ($prefix !~ / \b you \b /x) {
-
-                # Now, find what the module or man page name within the
-                # construct would be if it actually has L<> syntax.  If it
-                # doesn't have that syntax, will set the module to the entire
-                # interior.
-                $interior =~ m/ ^
-                                (?: [^|]+ \| )? # Optional arbitrary text ending
-                                                # in "|"
-                                ( .+? )         # module, etc. name
-                                (?: \/ .+ )?    # target within module
-                                $
-                            /xs;
-                my $module = $1;
-                if (! defined $trailing # not referring to something in another
-                                        # section
-                    && $interior !~ /$non_pods/
-
-                    # C<> that look like files have their own message below, so
-                    # exclude them
-                    && $construct !~ /$C_path_re/g
-
-                    # There can't be spaces (I think) in module names or man
-                    # pages
-                    && $module !~ / \s /x
-
-                    # F<> that end in eg \.pl are almost certainly ok, as are
-                    # those that look like a path with multiple "/" chars
-                    && ($type ne "F"
-                        || (! -e $interior
-                            && $interior !~ /\.\w+$/
-                            && $interior !~ /\/.+\//)
-                    )
-                ) {
-                    $self->poderror({ -line => $line, -file => $file,
-                        -msg => $see_not_linked,
-                        parameter => $construct
-                    });
-                }
-            }
-        }
-        while ($paragraph =~ m/$C_path_re/g) {
-            my $construct = $1;
-            $self->poderror({ -line => $line, -file => $file,
-                -msg => $C_with_slash,
-                parameter => $construct
-            });
-        }
         return;
     }
 
