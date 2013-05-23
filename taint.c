@@ -31,25 +31,14 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
 
     PERL_ARGS_ASSERT_TAINT_PROPER;
 
-#   if Uid_t_size == 1
     {
-	const UV  uid = PerlProc_getuid();
-	const UV euid = PerlProc_geteuid();
+	const Uid_t  uid = PerlProc_getuid();
+	const Uid_t euid = PerlProc_geteuid();
 
 	DEBUG_u(PerlIO_printf(Perl_debug_log,
-			       "%s %d %"UVuf" %"UVuf"\n",
+			       "%s %d %"Uid_t_f" %"Uid_t_f"\n",
 			       s, TAINT_get, uid, euid));
     }
-#   else
-    {
-	const IV  uid = PerlProc_getuid();
-	const IV euid = PerlProc_geteuid();
-
-	DEBUG_u(PerlIO_printf(Perl_debug_log,
-			       "%s %d %"IVdf" %"IVdf"\n",
-			       s, TAINT_get, uid, euid));
-    }
-#   endif
 #endif
 
     if (TAINT_get) {

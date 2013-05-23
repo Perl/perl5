@@ -1782,6 +1782,37 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #  define deprecate(s) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED), "Use of " s " is deprecated")
 #endif
 
+/* Internal macros to deal with gids and uids */
+#ifdef PERL_CORE
+
+#  if Uid_t_size > IVSIZE
+#    define sv_setuid(sv, uid)       sv_setnv((sv), (NV)(uid))
+#    define SvUID(sv)                SvNV(sv)
+#  else
+#    if Uid_t_sign <= 0
+#      define sv_setuid(sv, uid)       sv_setiv((sv), (IV)(uid))
+#      define SvUID(sv)                SvIV(sv)
+#    else
+#      define sv_setuid(sv, uid)       sv_setuv((sv), (UV)(uid))
+#      define SvUID(sv)                SvUV(sv)
+#    endif
+#  endif /* Uid_t_size */
+
+#  if Gid_t_size > IVSIZE
+#    define sv_setgid(sv, gid)       sv_setnv((sv), (NV)(gid))
+#    define SvGID(sv)                SvNV(sv)
+#  else
+#    if Gid_t_sign <= 0
+#      define sv_setgid(sv, gid)       sv_setiv((sv), (IV)(gid))
+#      define SvGID(sv)                SvIV(sv)
+#    else
+#      define sv_setgid(sv, gid)       sv_setuv((sv), (UV)(gid))
+#      define SvGID(sv)                SvUV(sv)
+#    endif
+#  endif /* Gid_t_size */
+
+#endif
+
 #endif  /* HANDY_H */
 
 /*

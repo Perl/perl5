@@ -1173,10 +1173,10 @@ PP(pp_aassign)
     }
     if (PL_delaymagic & ~DM_DELAY) {
 	/* Will be used to set PL_tainting below */
-	UV tmp_uid  = PerlProc_getuid();
-	UV tmp_euid = PerlProc_geteuid();
-	UV tmp_gid  = PerlProc_getgid();
-	UV tmp_egid = PerlProc_getegid();
+	Uid_t tmp_uid  = PerlProc_getuid();
+	Uid_t tmp_euid = PerlProc_geteuid();
+	Gid_t tmp_gid  = PerlProc_getgid();
+	Gid_t tmp_egid = PerlProc_getegid();
 
 	if (PL_delaymagic & DM_UID) {
 #ifdef HAS_SETRESUID

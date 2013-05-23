@@ -3812,10 +3812,10 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 STATIC void
 S_validate_suid(pTHX_ PerlIO *rsfp)
 {
-    const UV  my_uid = PerlProc_getuid();
-    const UV my_euid = PerlProc_geteuid();
-    const UV  my_gid = PerlProc_getgid();
-    const UV my_egid = PerlProc_getegid();
+    const Uid_t  my_uid = PerlProc_getuid();
+    const Uid_t my_euid = PerlProc_geteuid();
+    const Gid_t  my_gid = PerlProc_getgid();
+    const Gid_t my_egid = PerlProc_getegid();
 
     PERL_ARGS_ASSERT_VALIDATE_SUID;
 
@@ -3872,10 +3872,10 @@ S_init_ids(pTHX)
      * do tainting. */
 #if !NO_TAINT_SUPPORT
     dVAR;
-    const UV my_uid = PerlProc_getuid();
-    const UV my_euid = PerlProc_geteuid();
-    const UV my_gid = PerlProc_getgid();
-    const UV my_egid = PerlProc_getegid();
+    const Uid_t my_uid = PerlProc_getuid();
+    const Uid_t my_euid = PerlProc_geteuid();
+    const Gid_t my_gid = PerlProc_getgid();
+    const Gid_t my_egid = PerlProc_getegid();
 
     /* Should not happen: */
     CHECK_MALLOC_TAINT(my_uid && (my_euid != my_uid || my_egid != my_gid));
@@ -3907,10 +3907,10 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
      * have to add your own checks somewhere in here.  The two most
      * known samples of 'implicitness' are Win32 and NetWare, neither
      * of which has much of concept of 'uids'. */
-    int uid  = PerlProc_getuid();
-    int euid = PerlProc_geteuid();
-    int gid  = PerlProc_getgid();
-    int egid = PerlProc_getegid();
+    Uid_t uid  = PerlProc_getuid();
+    Uid_t euid = PerlProc_geteuid();
+    Gid_t gid  = PerlProc_getgid();
+    Gid_t egid = PerlProc_getegid();
     (void)envp;
 
 #ifdef VMS

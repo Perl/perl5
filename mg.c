@@ -1051,16 +1051,16 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
-	sv_setiv(sv, (IV)PerlProc_getuid());
+        sv_setuid(sv, PerlProc_getuid());
 	break;
     case '>':
-	sv_setiv(sv, (IV)PerlProc_geteuid());
+        sv_setuid(sv, PerlProc_geteuid());
 	break;
     case '(':
-	sv_setiv(sv, (IV)PerlProc_getgid());
+        sv_setgid(sv, PerlProc_getgid());
 	goto add_groups;
     case ')':
-	sv_setiv(sv, (IV)PerlProc_getegid());
+        sv_setgid(sv, PerlProc_getegid());
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
@@ -2761,20 +2761,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '<':
 	{
-	const IV new_uid = SvIV(sv);
+	const Uid_t new_uid = SvUID(sv);
 	PL_delaymagic_uid = new_uid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_RUID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRUID
-	(void)setruid((Uid_t)new_uid);
+	(void)setruid(new_uid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((Uid_t)new_uid, (Uid_t)-1);
+	(void)setreuid(new_uid, (Uid_t)-1);
 #else
 #ifdef HAS_SETRESUID
-      (void)setresuid((Uid_t)new_uid, (Uid_t)-1, (Uid_t)-1);
+      (void)setresuid(new_uid, (Uid_t)-1, (Uid_t)-1);
 #else
 	if (new_uid == PerlProc_geteuid()) {		/* special case $< = $> */
 #ifdef PERL_DARWIN
@@ -2793,20 +2793,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
     case '>':
 	{
-	const UV new_euid = SvIV(sv);
+	const Uid_t new_euid = SvUID(sv);
 	PL_delaymagic_euid = new_euid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_EUID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEUID
-	(void)seteuid((Uid_t)new_euid);
+	(void)seteuid(new_euid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((Uid_t)-1, (Uid_t)new_euid);
+	(void)setreuid((Uid_t)-1, new_euid);
 #else
 #ifdef HAS_SETRESUID
-	(void)setresuid((Uid_t)-1, (Uid_t)new_euid, (Uid_t)-1);
+	(void)setresuid((Uid_t)-1, new_euid, (Uid_t)-1);
 #else
 	if (new_euid == PerlProc_getuid())		/* special case $> = $< */
 	    PerlProc_setuid(new_euid);
@@ -2820,20 +2820,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
     case '(':
 	{
-	const UV new_gid = SvIV(sv);
+	const Gid_t new_gid = SvGID(sv);
 	PL_delaymagic_gid = new_gid;
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_RGID;
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRGID
-	(void)setrgid((Gid_t)new_gid);
+	(void)setrgid(new_gid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((Gid_t)new_gid, (Gid_t)-1);
+	(void)setregid(new_gid, (Gid_t)-1);
 #else
 #ifdef HAS_SETRESGID
-      (void)setresgid((Gid_t)new_gid, (Gid_t)-1, (Gid_t) -1);
+      (void)setresgid(new_gid, (Gid_t)-1, (Gid_t) -1);
 #else
 	if (new_gid == PerlProc_getegid())			/* special case $( = $) */
 	    (void)PerlProc_setgid(new_gid);
@@ -2847,7 +2847,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
     case ')':
 	{
-	UV new_egid;
+	Gid_t new_egid;
 #ifdef HAS_SETGROUPS
 	{
 	    const char *p = SvPV_const(sv, len);
@@ -2863,7 +2863,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
             while (isSPACE(*p))
                 ++p;
-            new_egid = Atol(p);
+            new_egid = (Gid_t)Atol(p);
             for (i = 0; i < maxgrp; ++i) {
                 while (*p && !isSPACE(*p))
                     ++p;
@@ -2875,14 +2875,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                     Newx(gary, i + 1, Groups_t);
                 else
                     Renew(gary, i + 1, Groups_t);
-                gary[i] = Atol(p);
+                gary[i] = (Groups_t)Atol(p);
             }
             if (i)
                 (void)setgroups(i, gary);
 	    Safefree(gary);
 	}
 #else  /* HAS_SETGROUPS */
-	new_egid = SvIV(sv);
+        new_egid = SvGID(sv);
 #endif /* HAS_SETGROUPS */
 	PL_delaymagic_egid = new_egid;
 	if (PL_delaymagic) {
@@ -2890,13 +2890,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEGID
-	(void)setegid((Gid_t)new_egid);
+	(void)setegid(new_egid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((Gid_t)-1, (Gid_t)new_egid);
+	(void)setregid((Gid_t)-1, new_egid);
 #else
 #ifdef HAS_SETRESGID
-	(void)setresgid((Gid_t)-1, (Gid_t)new_egid, (Gid_t)-1);
+	(void)setresgid((Gid_t)-1, new_egid, (Gid_t)-1);
 #else
 	if (new_egid == PerlProc_getgid())			/* special case $) = $( */
 	    (void)PerlProc_setgid(new_egid);
