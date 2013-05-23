@@ -1019,7 +1019,7 @@ EOF
   s{([\'\"])([^\'\"\s]+)\1}(C<$2>)g; # "date" command
   s{\'([A-Za-z_\- *=/]+)\'}(C<$1>)g; # 'ln -s'
   s{
-     (?<! [\w./<\'\"] )		# Only standalone file names
+     (?<! [\w./<\'\"\$] )		# Only standalone file names
      (?! e \. g \. )		# Not e.g.
      (?! \. \. \. )		# Not ...
      (?! \d )			# Not 5.004
