@@ -438,6 +438,7 @@ my @suppressed_messages = (
     "unescaped <>",
     "Entity number out of range",   # Checker outputs this for anything above
                                     # 255, but in fact all Unicode is valid
+    "No items in =over",            # ie a blockquote
 );
 
 sub suppressed {
