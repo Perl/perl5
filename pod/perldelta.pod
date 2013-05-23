@@ -356,7 +356,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The OP allocation code now returns correctly aligned memory in all cases
+for C<struct pmop>. Previously it could return memory only aligned to a
+4-byte boundary, which is not correct for an ithreads build with 64 bit IVs
+on some 32 bit platforms. Notably, this caused the build to fail completely
+on sparc GNU/Linux. [RT #118055]
 
 =back
 

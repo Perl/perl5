@@ -175,6 +175,19 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
      || (CvSTART(PL_compcv) && !CvSLABBED(PL_compcv)))
 	return PerlMemShared_calloc(1, sz);
 
+#if defined(USE_ITHREADS) && IVSIZE > U32SIZE
+    /* Work around a goof with alignment on our part. For sparc32 (and
+       possibly other architectures), if built with -Duse64bitint, the IV
+       op_pmoffset in struct pmop should be 8 byte aligned, but the slab
+       allocator is only providing 4 byte alignment. The real fix is to change
+       the IV to a type the same size as a pointer, such as size_t, but we
+       can't do that without breaking the ABI, which is a no-no in a maint
+       release. So instead, simply allocate struct pmop directly, which will be
+       suitably aligned:  */
+    if (sz == sizeof(struct pmop))
+	return PerlMemShared_calloc(1, sz);
+#endif
+
     /* While the subroutine is under construction, the slabs are accessed via
        CvSTART(), to avoid needing to expand PVCV by one pointer for something
        unneeded at runtime. Once a subroutine is constructed, the slabs are
