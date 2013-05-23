@@ -1498,6 +1498,8 @@ foreach my $filename (@files) {
                      && $prior_filename =~ /^cpan/)
             {
                 $checker->set_skip("CPAN is upstream for $filename");
+            } elsif ( $filename =~ /^utils/ or $prior_filename =~ /^utils/ ) {
+                $checker->set_skip("$filename copy is in utils/");
             } else { # Here have two pods with identical names that differ
                 $prior_checker->poderror(
                         { -msg => $duplicate_name,
