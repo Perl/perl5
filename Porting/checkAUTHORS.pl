@@ -659,6 +659,8 @@ jhannah\100mutationgrid.com             jay\100jays.net
 +                                       jhannah\100omnihotels.com
 jidanni\100jidanni.org                  jidanni\100hoffa.dreamhost.com
 jjore\100cpan.org                       twists\100gmail.com
+jkeenan\100cpan.org                     jkeen\100verizon.net
++                                       jkeenan\100dromedary-001.ams6.corp.booking.com
 jns\100integration-house.com            jns\100gellyfish.com
 +                                       gellyfish\100gellyfish.com
 john\100atlantech.com                   john\100titanic.atlantech.com
@@ -919,4 +921,3 @@ wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at
 wolfsage\100gmail.com                   mhorsfall\100darmstadtium.(none)
 yath\100yath.de                         yath-perlbug\100yath.de
 
-jkeen@verizon.net                       jkeenan@cpan.org
