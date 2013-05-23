@@ -120,8 +120,10 @@ has proper "MACHINE" parameter set, to, say, C<wince-mips-pocket-wce300>.
 
   compile.bat
   compile.bat dist
-  compile.bat CROSS_NAME=mips-wce300-thr "USE_ITHREADS=define" "USE_IMP_SYS=define" "USE_MULTI=define"
-  compile.bat CROSS_NAME=mips-wce300-thr "USE_ITHREADS=define" "USE_IMP_SYS=define" "USE_MULTI=define" dist
+  compile.bat CROSS_NAME=mips-wce300-thr "USE_ITHREADS=define" ^
+    "USE_IMP_SYS=define" "USE_MULTI=define"
+  compile.bat CROSS_NAME=mips-wce300-thr "USE_ITHREADS=define" ^
+    "USE_IMP_SYS=define" "USE_MULTI=define" dist
 
 If all goes okay and no errors during a build, you'll get two independent
 distributions: C<wince-mips-pocket-wce300> and C<mips-wce300-thr>.

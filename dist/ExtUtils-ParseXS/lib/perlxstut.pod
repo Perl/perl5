@@ -265,7 +265,8 @@ We will be calling the test script through the command "C<make test>".  You
 should see output that looks something like this:
 
     %make test
-    PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e" "test_harness(0, 'blib/lib', 'blib/arch')" t/*.t
+    PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e"
+    "test_harness(0, 'blib/lib', 'blib/arch')" t/*.t
     t/Mytest....ok
     All tests successful.
     Files=1, Tests=4,  0 wallclock secs ( 0.03 cusr +  0.00 csys =  0.03 CPU)

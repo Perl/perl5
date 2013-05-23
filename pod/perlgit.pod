@@ -889,7 +889,8 @@ Finally, you should then delete the remote smoke-me branch:
 
 (which is likely to produce a warning like this, which can be ignored:
 
-  remote: fatal: ambiguous argument 'refs/heads/smoke-me/tonyc/win32stat': unknown revision or path not in the working tree.
+  remote: fatal: ambiguous argument 'refs/heads/smoke-me/tonyc/win32stat':
+  unknown revision or path not in the working tree.
   remote: Use '--' to separate paths from revisions
 
 ) and then delete your local branch:

@@ -592,8 +592,9 @@ If, for a given file, Perl is unable to create the backup file as
 specified in the extension then it will skip that file and continue on
 with the next one (if it exists).
 
-For a discussion of issues surrounding file permissions and B<-i>,
-see L<perlfaq5/Why does Perl let me delete read-only files?  Why does -i clobber protected files?  Isn't this a bug in Perl?>.
+For a discussion of issues surrounding file permissions and B<-i>, see
+L<perlfaq5/Why does Perl let me delete read-only files?  Why does -i clobber
+protected files?  Isn't this a bug in Perl?>.
 
 You cannot use B<-i> to create directories or to strip extensions from
 files.
@@ -738,9 +739,10 @@ if it is invoked with B<-xyz=abc>.
     #!/usr/bin/perl -s
     if ($xyz) { print "$xyz\n" }
 
-Do note that a switch like B<--help> creates the variable C<${-help}>, which is not compliant
-with C<use strict "refs">.  Also, when using this option on a script with
-warnings enabled you may get a lot of spurious "used only once" warnings.
+Do note that a switch like B<--help> creates the variable C<${-help}>, which is
+not compliant with C<use strict "refs">.  Also, when using this option on a
+script with warnings enabled you may get a lot of spurious "used only once"
+warnings.
 
 =item B<-S>
 X<-S>
