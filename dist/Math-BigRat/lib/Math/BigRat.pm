@@ -24,7 +24,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.2604';
+$VERSION = '0.2605';
 $VERSION = eval $VERSION;
 
 # inherit overload from Math::BigFloat, but disable the bitwise ops that don't
@@ -1925,7 +1925,7 @@ Euler's number.
 
 This method was added in v0.20 of Math::BigRat (May 2007).
 
-See also L</blog()>.
+See also C<blog()>.
 
 =head2 bnok()
 

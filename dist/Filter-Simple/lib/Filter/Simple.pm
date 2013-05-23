@@ -4,7 +4,7 @@ use Text::Balanced ':ALL';
 
 use vars qw{ $VERSION @EXPORT };
 
-$VERSION = '0.89';
+$VERSION = '0.90';
 
 use Filter::Util::Call;
 use Carp;
@@ -242,7 +242,6 @@ __END__
 =head1 NAME
 
 Filter::Simple - Simplified source filtering
-
 
 =head1 SYNOPSIS
 

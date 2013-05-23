@@ -4969,7 +4969,7 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 Constructs, checks, and returns an op of any type that involves an
 embedded C-level pointer (PV).  I<type> is the opcode.  I<flags> gives
 the eight bits of C<op_flags>.  I<pv> supplies the C-level pointer, which
-must have been allocated using L</PerlMemShared_malloc>; the memory will
+must have been allocated using C<PerlMemShared_malloc>; the memory will
 be freed when the op is destroyed.
 
 =cut
@@ -5664,7 +5664,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
 Constructs a state op (COP).  The state op is normally a C<nextstate> op,
 but will be a C<dbstate> op if debugging is enabled for currently-compiled
-code.  The state op is populated from L</PL_curcop> (or L</PL_compiling>).
+code.  The state op is populated from C<PL_curcop> (or C<PL_compiling>).
 If I<label> is non-null, it supplies the name of a label to attach to
 the state op; this function takes ownership of the memory pointed at by
 I<label>, and will free it.  I<flags> gives the eight bits of C<op_flags>

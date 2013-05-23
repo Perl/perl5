@@ -1,4 +1,8 @@
-=head1 How to write a perldelta
+=head1 NAME
+
+how_to_write_a_perldelta - How to write a perldelta
+
+=head2 Description
 
 This is intended as a guide for how to write a perldelta. There has never
 been a formal specification - the working rule is "fake up a document that

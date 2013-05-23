@@ -43,7 +43,7 @@ seek STDERR, 0,0;
 $warning = '';
 warn
  'Lexing code attempted to stuff non-Latin-1 character into Latin-1 input';
-like $warning, qr/using lex_stuff_pvn or similar/, 'L<foo|bar/baz>';
+like $warning, qr/lex_stuff_pvn or similar/, 'L<foo|bar/baz>';
 
 # Multiple messages with the same description
 seek STDERR, 0,0;

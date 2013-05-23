@@ -4662,11 +4662,7 @@ L<perlre>.
 (F) The end of the perl code contained within the {...} must be
 followed immediately by a ')'.
 
-=item Z<>500 Server error
-
-See Server error.
-
-=item Server error
+=item Server error (a.k.a. "500 Server error")
 
 (A) This is the error message generally seen in a browser window
 when trying to run a CGI program (including SSI) over the web.  The

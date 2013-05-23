@@ -2471,8 +2471,7 @@ is left as an exercise to the reader.
 
 The C<POSIX::getattr> function can do this more portably on
 systems purporting POSIX compliance.  See also the C<Term::ReadKey>
-module from your nearest CPAN site; details on CPAN can be found under
-L<perlmodlib/CPAN>.
+module from your nearest L<CPAN|http://www.cpan.org> site.
 
 =item getlogin
 X<getlogin> X<login>

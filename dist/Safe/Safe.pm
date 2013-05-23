@@ -3,7 +3,7 @@ package Safe;
 use 5.003_11;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.35";
+$Safe::VERSION = "2.36";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -590,9 +590,7 @@ Deny I<only> the listed operators from being used when compiling code
 in the compartment (I<all> other operators will be permitted, so you probably
 don't want to use this method).
 
-=head2 trap (OP, ...)
-
-=head2 untrap (OP, ...)
+=head2 trap (OP, ...), untrap (OP, ...)
 
 The trap and untrap methods are synonyms for deny and permit
 respectfully.

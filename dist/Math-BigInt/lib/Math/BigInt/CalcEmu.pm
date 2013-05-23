@@ -5,7 +5,7 @@ use strict;
 # use warnings;	# dont use warnings for older Perls
 use vars qw/$VERSION/;
 
-$VERSION = '1.998';
+$VERSION = '1.999';
 
 package Math::BigInt;
 
@@ -305,11 +305,15 @@ using a call to the native lib.
 
 =head1 METHODS
 
-=head2 __emu_bxor
+=over
 
-=head2 __emu_band
+=item __emu_bxor
 
-=head2 __emu_bior
+=item __emu_band
+
+=item __emu_bior
+
+=back
 
 =head1 LICENSE
 

@@ -184,34 +184,18 @@ Win32::Locale
 YAML
 YAML::Syck
 YAML::Tiny
-dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
-dist/locale-maketext/lib/locale/maketext/tpj13.pod	No items in =over / =back list	3
-dist/math-bigint/lib/math/bigint/calcemu.pm	empty section in previous paragraph	3
-dist/math-bigrat/lib/math/bigrat.pm	unresolved internal link	1
 dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 100 by	1
-dist/safe/safe.pm	empty section in previous paragraph	1
-ext/pod-html/bin/pod2html	Pod NAME already used	1
 ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 100 by	2
-pod/perlapi.pod	unresolved internal link	3
 pod/perlbook.pod	Verbatim line length including indents exceeds 100 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 100 by	2
-pod/perldiag.pod	=item type mismatch	1
 pod/perldtrace.pod	Verbatim line length including indents exceeds 100 by	4
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 100 by	10
-pod/perlfunc.pod	There is more than one target	1
 pod/perlmacosx.pod	Verbatim line length including indents exceeds 100 by	3
 pod/perlos2.pod	Verbatim line length including indents exceeds 100 by	4
 pod/perlperf.pod	Verbatim line length including indents exceeds 100 by	32
 pod/perlrun.pod	Verbatim line length including indents exceeds 100 by	1
 pod/perlthrtut.pod	Verbatim line length including indents exceeds 100 by	1
 pod/perltru64.pod	Verbatim line length including indents exceeds 100 by	1
-pod/perlunifaq.pod	empty section in previous paragraph	1
-pod/perluniprops.pod	=item type mismatch	6
 pod/perlwin32.pod	Verbatim line length including indents exceeds 100 by	6
-porting/how_to_write_a_perldelta.pod	There is no NAME	1
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 100 by	1
-porting/release_schedule.pod	There is no NAME	1
-utils/pod2html	Pod NAME already used	1
-x2p/a2p.pod	empty section in previous paragraph	2
 lib/benchmark.pm	Verbatim line length including indents exceeds 100 by	2
-lib/config.pod	nested commands F<...F<...>...>	3

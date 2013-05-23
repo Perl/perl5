@@ -15493,20 +15493,34 @@ B<Legend summary:>
 
 =over 4
 
-=item Z<>B<*> is a wild-card
+=item *
 
-=item B<(\\d+)> in the info column gives the number of code points matched by
+B<*> is a wild-card
+
+=item *
+
+B<(\\d+)> in the info column gives the number of code points matched by
 this property.
 
-=item B<$DEPRECATED> means this is deprecated.
+=item *
 
-=item B<$OBSOLETE> means this is obsolete.
+B<$DEPRECATED> means this is deprecated.
 
-=item B<$STABILIZED> means this is stabilized.
+=item *
 
-=item B<$STRICTER> means tighter (stricter) name matching applies.
+B<$OBSOLETE> means this is obsolete.
 
-=item B<$DISCOURAGED> means use of this form is discouraged, and may not be
+=item *
+
+B<$STABILIZED> means this is stabilized.
+
+=item *
+
+B<$STRICTER> means tighter (stricter) name matching applies.
+
+=item *
+
+B<$DISCOURAGED> means use of this form is discouraged, and may not be
 stable.
 
 =back
