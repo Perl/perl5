@@ -1480,7 +1480,7 @@ use File::Glob qw(:case);
 
     'Pod::Usage' => {
         'MAINTAINER' => 'marekr',
-        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.61.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Usage-1.62.tar.gz',
         'FILES'        => q[cpan/Pod-Usage],
         'UPSTREAM'     => 'cpan',
     },

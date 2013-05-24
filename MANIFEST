@@ -2019,10 +2019,7 @@ cpan/Pod-Usage/lib/Pod/Usage.pm
 cpan/Pod-Usage/scripts/pod2usage.PL
 cpan/Pod-Usage/t/pod/p2u_data.pl
 cpan/Pod-Usage/t/pod/pod2usage2.t
-cpan/Pod-Usage/t/pod/pod2usage.t
-cpan/Pod-Usage/t/pod/pod2usage.xr
 cpan/Pod-Usage/t/pod/testcmp.pl
-cpan/Pod-Usage/t/pod/testp2pt.pl
 cpan/Pod-Usage/t/pod/usage2.pod
 cpan/Pod-Usage/t/pod/usage.pod
 cpan/Socket/Makefile.PL			Socket extension makefile writer
