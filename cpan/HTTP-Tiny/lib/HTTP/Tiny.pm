@@ -3,14 +3,14 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.025'; # VERSION
+our $VERSION = '0.029'; # VERSION
 
 use Carp ();
 
 
 my @attributes;
 BEGIN {
-    @attributes = qw(agent default_headers local_address max_redirect max_size proxy timeout SSL_options verify_SSL);
+    @attributes = qw(agent cookie_jar default_headers local_address max_redirect max_size proxy timeout SSL_options verify_SSL);
     no strict 'refs';
     for my $accessor ( @attributes ) {
         *{$accessor} = sub {
@@ -34,6 +34,8 @@ sub new {
 
     $args{agent} .= $default_agent
         if defined $args{agent} && $args{agent} =~ / $/;
+
+    $class->_validate_cookie_jar( $args{cookie_jar} ) if $args{cookie_jar};
 
     for my $key ( @attributes ) {
         $self->{$key} = $args{$key} if exists $args{$key}
@@ -157,7 +159,7 @@ sub www_form_urlencode {
     (@_ == 2 && ref $data)
         or Carp::croak(q/Usage: $http->www_form_urlencode(DATAREF)/ . "\n");
     (ref $data eq 'HASH' || ref $data eq 'ARRAY')
-        or Carp::croak("form data must be a hash or array reference");
+        or Carp::croak("form data must be a hash or array reference\n");
 
     my @params = ref $data eq 'HASH' ? %$data : @$data;
     @params % 2 == 0
@@ -216,12 +218,14 @@ sub _request {
         $handle->connect($scheme, $host, $port);
     }
 
-    $self->_prepare_headers_and_cb($request, $args);
+    $self->_prepare_headers_and_cb($request, $args, $url);
     $handle->write_request($request);
 
     my $response;
     do { $response = $handle->read_response_header }
         until (substr($response->{status},0,1) ne '1');
+
+    $self->_update_cookie_jar( $url, $response ) if $self->{cookie_jar};
 
     if ( my @redir_args = $self->_maybe_redirect($request, $response, $args) ) {
         $handle->close;
@@ -243,7 +247,7 @@ sub _request {
 }
 
 sub _prepare_headers_and_cb {
-    my ($self, $request, $args) = @_;
+    my ($self, $request, $args, $url) = @_;
 
     for ($self->{default_headers}, $args->{headers}) {
         next unless defined;
@@ -277,6 +281,13 @@ sub _prepare_headers_and_cb {
         $request->{trailer_cb} = $args->{trailer_callback}
             if ref $args->{trailer_callback} eq 'CODE';
     }
+
+    ### If we have a cookie jar, then maybe add relevant cookies
+    if ( $self->{cookie_jar} ) {
+        my $cookies = $self->cookie_jar->cookie_header( $url );
+        $request->{headers}{cookie} = $cookies if length $cookies;
+    }
+
     return;
 }
 
@@ -298,6 +309,31 @@ sub _prepare_data_cb {
         }
     }
     return $data_cb;
+}
+
+sub _update_cookie_jar {
+    my ($self, $url, $response) = @_;
+
+    my $cookies = $response->{headers}->{'set-cookie'};
+    return unless defined $cookies;
+
+    my @cookies = ref $cookies ? @$cookies : $cookies;
+
+    $self->cookie_jar->add( $url, $_ ) for @cookies;
+
+    return;
+}
+
+sub _validate_cookie_jar {
+    my ($class, $jar) = @_;
+
+    # duck typing
+    for my $method ( qw/add cookie_header/ ) {
+        Carp::croak(qq/Cookie jar must provide the '$method' method\n/)
+            unless ref($jar) && ref($jar)->can($method);
+    }
+
+    return;
 }
 
 sub _maybe_redirect {
@@ -428,8 +464,10 @@ sub connect {
     my ($self, $scheme, $host, $port) = @_;
 
     if ( $scheme eq 'https' ) {
-        die(qq/IO::Socket::SSL 1.56 must be installed for https support\n/)
-            unless eval {require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.56)};
+        # Need IO::Socket::SSL 1.42 for SSL_create_ctx_callback
+        die(qq/IO::Socket::SSL 1.42 must be installed for https support\n/)
+            unless eval {require IO::Socket::SSL; IO::Socket::SSL->VERSION(1.42)};
+        # Need Net::SSLeay 1.49 for MODE_AUTO_RETRY
         die(qq/Net::SSLeay 1.49 must be installed for https support\n/)
             unless eval {require Net::SSLeay; Net::SSLeay->VERSION(1.49)};
     }
@@ -894,9 +932,13 @@ sub _find_CA_file {
 sub _ssl_args {
     my ($self, $host) = @_;
 
-    my %ssl_args = (
-        SSL_hostname        => $host,  # SNI
-    );
+    my %ssl_args;
+    
+    # This test reimplements IO::Socket::SSL::can_client_sni(), which wasn't
+    # added until IO::Socket::SSL 1.84
+    if ( Net::SSLeay::OPENSSL_VERSION_NUMBER() >= 0x01000000 ) {
+        $ssl_args{SSL_hostname} = $host,          # Sane SNI support
+    }
 
     if ($self->{verify_SSL}) {
         $ssl_args{SSL_verifycn_scheme}  = 'http'; # enable CN validation
@@ -923,13 +965,15 @@ __END__
 
 =pod
 
+=encoding utf-8
+
 =head1 NAME
 
 HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.025
+version 0.029
 
 =head1 SYNOPSIS
 
@@ -973,6 +1017,12 @@ This constructor returns a new HTTP::Tiny object.  Valid attributes include:
 C<agent>
 
 A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> ends in a space character, the default user-agent string is appended.
+
+=item *
+
+C<cookie_jar>
+
+An instance of L<HTTP::CookieJar> or equivalent class that supports the C<add> and C<cookie_header> methods
 
 =item *
 
@@ -1202,6 +1252,7 @@ reference.  The key/value pairs in the resulting string will be sorted by key
 and value.
 
 =for Pod::Coverage agent
+cookie_jar
 default_headers
 local_address
 max_redirect
@@ -1332,9 +1383,7 @@ always be set to C<close>.
 
 =item *
 
-Cookies are not directly supported.  Users that set a C<Cookie> header
-should also set C<max_redirect> to zero to ensure cookies are not
-inappropriately re-transmitted.
+Cookie support requires L<HTTP::CookieJar> or an equivalent class.
 
 =item *
 
@@ -1390,7 +1439,7 @@ L<Net::SSLeay>
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://rt.cpan.org/Public/Dist/Display.html?Name=HTTP-Tiny>.
+at L<https://github.com/chansen/p5-http-tiny/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -1398,9 +1447,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/http-tiny>
+L<https://github.com/chansen/p5-http-tiny>
 
-  git clone git://github.com/dagolden/http-tiny.git
+  git clone git://github.com/chansen/p5-http-tiny.git
 
 =head1 AUTHORS
 
@@ -1414,15 +1463,69 @@ Christian Hansen <chansen@cpan.org>
 
 David Golden <dagolden@cpan.org>
 
+=back
+
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Alan Gardner <gardner@pythian.com>
+
+=item *
+
+Alessandro Ghedini <al3xbio@gmail.com>
+
+=item *
+
+Chris Nehren <apeiron@cpan.org>
+
+=item *
+
+Chris Weyl <cweyl@alumni.drew.edu>
+
+=item *
+
+Claes Jakobsson <claes@surfar.nu>
+
+=item *
+
+Craig Berry <cberry@cpan.org>
+
+=item *
+
+David Mitchell <davem@iabyn.com>
+
+=item *
+
+Edward Zborowski <ed@rubensteintech.com>
+
+=item *
+
+Jess Robinson <castaway@desert-island.me.uk>
+
+=item *
+
+Lukas Eklund <leklund@gmail.com>
+
 =item *
 
 Mike Doherty <doherty@cpan.org>
+
+=item *
+
+Serguei Trouchelle <stro@cpan.org>
+
+=item *
+
+Tony Cook <tony@develop-help.com>
 
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Christian Hansen.
+This software is copyright (c) 2013 by Christian Hansen.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

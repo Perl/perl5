@@ -1058,6 +1058,7 @@ cpan/HTTP-Tiny/t/030_response.t
 cpan/HTTP-Tiny/t/040_content.t
 cpan/HTTP-Tiny/t/050_chunked_body.t
 cpan/HTTP-Tiny/t/060_http_date.t
+cpan/HTTP-Tiny/t/070_cookie_jar.t
 cpan/HTTP-Tiny/t/100_get.t
 cpan/HTTP-Tiny/t/101_head.t
 cpan/HTTP-Tiny/t/102_put.t
@@ -1067,6 +1068,15 @@ cpan/HTTP-Tiny/t/110_mirror.t
 cpan/HTTP-Tiny/t/130_redirect.t
 cpan/HTTP-Tiny/t/140_proxy.t
 cpan/HTTP-Tiny/t/150_post_form.t
+cpan/HTTP-Tiny/t/160_cookies.t
+cpan/HTTP-Tiny/t/BrokenCookieJar.pm
+cpan/HTTP-Tiny/t/cases/cookies-01.txt
+cpan/HTTP-Tiny/t/cases/cookies-02.txt
+cpan/HTTP-Tiny/t/cases/cookies-03.txt
+cpan/HTTP-Tiny/t/cases/cookies-04.txt
+cpan/HTTP-Tiny/t/cases/cookies-05.txt
+cpan/HTTP-Tiny/t/cases/cookies-06.txt
+cpan/HTTP-Tiny/t/cases/cookies-07.txt
 cpan/HTTP-Tiny/t/cases/delete-01.txt
 cpan/HTTP-Tiny/t/cases/form-01.txt
 cpan/HTTP-Tiny/t/cases/form-02.txt
@@ -1114,6 +1124,7 @@ cpan/HTTP-Tiny/t/cases/redirect-06.txt
 cpan/HTTP-Tiny/t/cases/redirect-07.txt
 cpan/HTTP-Tiny/t/cases/redirect-08.txt
 cpan/HTTP-Tiny/t/cases/redirect-09.txt
+cpan/HTTP-Tiny/t/SimpleCookieJar.pm
 cpan/HTTP-Tiny/t/Util.pm
 cpan/IO-Compress/bin/zipdetails				IO::Compress
 cpan/IO-Compress/Changes				IO::Compress
