@@ -3695,7 +3695,7 @@ sub _handle_doc_command {
     # man, perldoc, doc - show manual pages.
     if (my ($man_page)
         = $DB::cmd =~ /\A(?:man|(?:perl)?doc)\b(?:\s+([^(]*))?\z/) {
-        runman($man_page);
+        DB::runman($man_page);
         next CMD;
     }
 

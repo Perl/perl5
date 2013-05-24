@@ -343,6 +343,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+The debugger's C<man> command been fixed. It was broken in the v5.18.0
+release. The C<man> command is aliased to the names C<doc> and C<perldoc> -
+all now work again.
+
 =back
 
 =head1 Known Problems

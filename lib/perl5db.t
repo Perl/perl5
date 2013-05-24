@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(113);
+plan(114);
 
 my $rc_filename = '.perldb';
 
@@ -2632,6 +2632,26 @@ sub _calc_trace_wrapper
 \s+new\ value:\s+'2'\n
         /msx,
         "Test w for lexical values.",
+    );
+}
+
+# Test the perldoc command
+# We don't actually run the program, but we need to provide one to the wrapper.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'perldoc perlrules',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/fact',
+        }
+    );
+
+    $wrapper->output_like(
+        qr/No manual entry for perlrules/,
+        'perldoc command works fine',
     );
 }
 
