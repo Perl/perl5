@@ -804,7 +804,6 @@ are a few of the more popular Unix flavors:
     AIX           aix        aix
     BSD/OS        bsdos      i386-bsdos
     Darwin        darwin     darwin
-    dgux          dgux       AViiON-dgux
     DYNIX/ptx     dynixptx   i386-dynixptx
     FreeBSD       freebsd    freebsd-i386    
     Haiku         haiku      BePC-haiku
@@ -2309,7 +2308,7 @@ L<http://www.cpan.org/ports/index.html> for binary distributions.
 =head1 SEE ALSO
 
 L<perlaix>, L<perlamiga>, L<perlbs2000>,
-L<perlce>, L<perlcygwin>, L<perldgux>, L<perldos>,
+L<perlce>, L<perlcygwin>, L<perldos>,
 L<perlebcdic>, L<perlfreebsd>, L<perlhurd>, L<perlhpux>, L<perlirix>,
 L<perlmacos>, L<perlmacosx>,
 L<perlnetware>, L<perlos2>, L<perlos390>, L<perlos400>,

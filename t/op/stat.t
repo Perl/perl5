@@ -36,7 +36,6 @@ $Is_NetWare = $^O eq 'NetWare';
 $Is_OS2     = $^O eq 'os2';
 $Is_Solaris = $^O eq 'solaris';
 $Is_VMS     = $^O eq 'VMS';
-$Is_DGUX    = $^O eq 'dgux';
 $Is_MPRAS   = $^O =~ /svr4/ && -f '/etc/.relid';
 
 $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare;
@@ -294,13 +293,10 @@ SKIP: {
 	is($c1, $c2, "ls and $_[1] agreeing on /dev ($c1 $c2)");
     };
 
-SKIP: {
-    skip("DG/UX ls -L broken", 3) if $Is_DGUX;
-
+{
     $try->('b', '-b');
     $try->('c', '-c');
     $try->('s', '-S');
-
 }
 
 ok(! -b $Curdir,    '!-b cwd');
@@ -377,12 +373,7 @@ SKIP: {
 my $statfile = './op/stat.t';
 ok(  -T $statfile,    '-T');
 ok(! -B $statfile,    '!-B');
-
-SKIP: {
-     skip("DG/UX", 1) if $Is_DGUX;
 ok(-B $Perl,      '-B');
-}
-
 ok(! -T $Perl,    '!-T');
 
 open(FOO,$statfile);

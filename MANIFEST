@@ -3952,7 +3952,6 @@ hints/cygwin.sh			Hints for named architecture
 hints/darwin.sh			Hints for named architecture
 hints/dcosx.sh			Hints for named architecture
 hints/dec_osf.sh		Hints for named architecture
-hints/dgux.sh			Hints for named architecture
 hints/dos_djgpp.sh		Hints for named architecture
 hints/dragonfly.sh		Hints for named architecture
 hints/dynixptx.sh		Hints for named architecture
@@ -4702,7 +4701,6 @@ README.bs2000			Perl notes for POSIX-BC BS2000
 README.ce			Perl notes for WinCE
 README.cn			Perl for Simplified Chinese (in EUC-CN)
 README.cygwin			Perl notes for Cygwin
-README.dgux			Perl notes for DG/UX
 README.dos			Perl notes for DOS
 README.freebsd			Perl notes for FreeBSD
 README.haiku			Perl notes for Haiku

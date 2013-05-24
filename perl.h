@@ -22,10 +22,6 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
-#if defined(DGUX)
-#include <sys/fcntl.h>
-#endif
-
 #ifdef VOIDUSED
 #   undef VOIDUSED
 #endif
@@ -520,7 +516,7 @@ struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 # define STANDARD_C 1
 #endif
 
-#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__DGUX) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
+#if defined(__cplusplus) || defined(WIN32) || defined(__sgi) || defined(__EMX__) || defined(__QNX__) || defined(NETWARE) || defined(PERL_MICRO)
 # define DONT_DECLARE_STD 1
 #endif
 
@@ -4063,8 +4059,7 @@ EXT char *** environ_pointer;
 #  ifdef USE_ENVIRON_ARRAY
 #    if !defined(DONT_DECLARE_STD) || \
         (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
-        defined(__sgi) || \
-        defined(__DGUX)
+        defined(__sgi)
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
 #  endif

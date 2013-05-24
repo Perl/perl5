@@ -3464,7 +3464,6 @@ S_minus_v(pTHX)
 	PerlIO * PIO_stdout;
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    upg_version(PL_patchlevel, TRUE);
-#if !defined(DGUX)
 	{
 	    SV* level= vstringify(PL_patchlevel);
 #ifdef PERL_PATCHNUM
@@ -3496,19 +3495,6 @@ S_minus_v(pTHX)
 		);
 	    SvREFCNT_dec(level);
 	}
-#else /* DGUX */
-	PIO_stdout =  PerlIO_stdout();
-/* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
-	PerlIO_printf(PIO_stdout,
-		Perl_form(aTHX_ "\nThis is perl, %"SVf"\n",
-		    SVfARG(vstringify(PL_patchlevel))));
-	PerlIO_printf(PIO_stdout,
-			Perl_form(aTHX_ "        built under %s at %s %s\n",
-					OSNAME, __DATE__, __TIME__));
-	PerlIO_printf(PIO_stdout,
-			Perl_form(aTHX_ "        OS Specific Release: %s\n",
-					OSVERS));
-#endif /* !DGUX */
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
 	    PerlIO_printf(PIO_stdout,
