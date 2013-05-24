@@ -1,5 +1,18 @@
 Revision history for CPAN-Meta
 
+2.130880  2013-03-29 09:51:00 America/New_York
+
+  [BUGFIX]
+
+  - Fix provides 'version' bug introduced in the 2.130870 fix
+
+2.130870  2013-03-28 11:08:50 America/New_York
+
+  [BUGFIX]
+
+  - Don't add 'version' to 'provides' during conversion if one didn't
+    exist in the original [Reported by Miyagawa; fixed by David Golden]
+
 2.120921  2012-04-01 15:20:24 Europe/Paris
 
   [REMOVED]

@@ -342,6 +342,7 @@ cpan/CPAN-Meta/t/data/META-1_2.yml
 cpan/CPAN-Meta/t/data/META-1_3.yml
 cpan/CPAN-Meta/t/data/META-1_4.yml
 cpan/CPAN-Meta/t/data/META-2.json
+cpan/CPAN-Meta/t/data/provides-version-missing.json
 cpan/CPAN-Meta/t/data/resources.yml
 cpan/CPAN-Meta/t/data/restricted-2.json
 cpan/CPAN-Meta/t/data/restrictive-1_4.yml

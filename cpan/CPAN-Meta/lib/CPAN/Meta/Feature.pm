@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Feature;
-our $VERSION = '2.120921'; # VERSION
+our $VERSION = '2.130880'; # VERSION
 
 use CPAN::Meta::Prereqs;
 
@@ -32,9 +32,11 @@ sub prereqs     { $_[0]{prereqs} }
 
 # ABSTRACT: an optional feature provided by a CPAN distribution
 
-
+__END__
 
 =pod
+
+=encoding utf-8
 
 =head1 NAME
 
@@ -42,7 +44,7 @@ CPAN::Meta::Feature - an optional feature provided by a CPAN distribution
 
 =head1 VERSION
 
-version 2.120921
+version 2.130880
 
 =head1 DESCRIPTION
 
@@ -99,6 +101,64 @@ Ricardo Signes <rjbs@cpan.org>
 
 =back
 
+=head1 CONTRIBUTORS
+
+=over 4
+
+=item *
+
+Ansgar Burchardt <ansgar@cpan.org>
+
+=item *
+
+Michael G. Schwern <mschwern@cpan.org>
+
+=item *
+
+Randy Sims <randys@thepierianspring.org>
+
+=item *
+
+Ævar Arnfjörð Bjarmason <avar@cpan.org>
+
+=item *
+
+Christopher J. Madsen <cjm@cpan.org>
+
+=item *
+
+Cory G Watson <gphat@cpan.org>
+
+=item *
+
+Damyan Ivanov <dam@cpan.org>
+
+=item *
+
+Eric Wilhelm <ewilhelm@cpan.org>
+
+=item *
+
+Gregor Hermann <gregoa@debian.org>
+
+=item *
+
+Ken Williams <kwilliams@cpan.org>
+
+=item *
+
+Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯 <daxim@cpan.org>
+
+=item *
+
+Leon Timmermans <leont@cpan.org>
+
+=item *
+
+Mark Fowler <markf@cpan.org>
+
+=back
+
 =head1 COPYRIGHT AND LICENSE
 
 This software is copyright (c) 2010 by David Golden and Ricardo Signes.
@@ -107,9 +167,3 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-
-
-__END__
-
-
-
