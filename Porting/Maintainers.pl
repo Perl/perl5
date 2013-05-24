@@ -373,7 +373,7 @@ use File::Glob qw(:case);
 
     'Config::Perl::V' => {
         'MAINTAINER'   => 'hmbrand',
-        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.17.tgz',
+        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.18.tgz',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => ['examples/show-v.pl'],
         'UPSTREAM'     => 'cpan',
