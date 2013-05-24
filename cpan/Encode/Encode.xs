@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.21 2013/03/05 03:12:49 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.23 2013/04/29 22:19:11 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -101,7 +101,6 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src,
     STRLEN tlen  = slen;
     STRLEN ddone = 0;
     STRLEN sdone = 0;
-
     /* We allocate slen+1.
        PerlIO dumps core if this value is smaller than this. */
     SV *dst = sv_2mortal(newSV(slen+1));
@@ -110,6 +109,8 @@ encode_method(pTHX_ const encode_t * enc, const encpage_t * dir, SV * src,
     int code = 0;
     STRLEN trmlen = 0;
     U8 *trm = term ? (U8*) SvPV(term, trmlen) : NULL;
+
+    if (SvTAINTED(src)) SvTAINTED_on(dst); /* propagate taintedness */
 
     if (offset) {
       s += *offset;
@@ -482,6 +483,7 @@ CODE:
     SvCUR_set(src, slen);
     }
     SvUTF8_on(dst);
+    if (SvTAINTED(src)) SvTAINTED_on(dst); /* propagate taintedness */
     ST(0) = dst;
     XSRETURN(1);
 }
@@ -543,6 +545,7 @@ CODE:
     }
     SvPOK_only(dst);
     SvUTF8_off(dst);
+    if (SvTAINTED(src)) SvTAINTED_on(dst); /* propagate taintedness */
     ST(0) = dst;
     XSRETURN(1);
 }

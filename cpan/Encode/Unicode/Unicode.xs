@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.9 2012/08/05 23:08:49 dankogai Exp $
+ $Id: Unicode.xs,v 2.10 2013/04/26 18:30:46 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -299,9 +299,8 @@ CODE:
 	*SvEND(str) = '\0';
     }
 
-    if (!temp_result)
-	shrink_buffer(result);
-
+    if (!temp_result) shrink_buffer(result);
+    if (SvTAINTED(str)) SvTAINTED_on(result); /* propagate taintedness */
     XSRETURN(1);
 }
 
@@ -400,8 +399,8 @@ CODE:
 	*SvEND(utf8) = '\0';
     }
 
-    if (!temp_result)
-	shrink_buffer(result);
+    if (!temp_result) shrink_buffer(result);
+    if (SvTAINTED(utf8)) SvTAINTED_on(result); /* propagate taintedness */
 
     SvSETMAGIC(utf8);
 

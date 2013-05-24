@@ -779,6 +779,7 @@ cpan/Encode/t/Mod_EUCJP.pm		module that t/enc_module.enc uses
 cpan/Encode/t/perlio.t			test script
 cpan/Encode/t/piconv.t			Test for piconv.t
 cpan/Encode/t/rt.pl			test script
+cpan/Encode/t/taint.t
 cpan/Encode/t/unibench.pl		benchmark script
 cpan/Encode/t/Unicode.t			test script
 cpan/Encode/t/utf8ref.t			test script

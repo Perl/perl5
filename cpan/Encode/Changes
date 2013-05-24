@@ -1,8 +1,31 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.49 2013/03/05 03:12:49 dankogai Exp dankogai $
+# $Id: Changes,v 2.51 2013/04/29 22:19:11 dankogai Exp dankogai $
 #
-$Revision: 2.49 $ $Date: 2013/03/05 03:12:49 $
+$Revision: 2.51 $ $Date: 2013/04/29 22:19:11 $
+! Encode.xs
+  Addressed: Encode.xs doesn't compile with Microsoft C compiler
+  https://rt.cpan.org/Public/Bug/Display.html?id=84920
+! MANIFEST
+  Addressed: t/taint.t missing
+  https://rt.cpan.org/Public/Bug/Display.html?id=84919
+
+2.50 2013/04/26 18:30:46
+! Encode.xs Unicode/Unicode.xs
+  lib/Encode/Unicode/UTF7.pm lib/CN/HZ.pm lib/Encode/GSM0338.pm
+  t/taint.t
+  Addressed: Encode::encode and Encode::decode 
+             gratuitously launders tainted data
+  Taintedness now propagates as it should.
+  https://rt.cpan.org/Ticket/Display.html?id=84879
+! encoding.pm
+  Addressed: 5.18 deprecation
+  https://rt.cpan.org/Ticket/Display.html?id=84709
+! bin/piconv
+  Applied: Update piconv documentation
+  https://rt.cpan.org/Ticket/Display.html?id=84695
+
+2.49 2013/03/05 03:12:49
 ! Encode.xs
   Addressed: Encoding objects leak memory if decoding fails
   https://github.com/dankogai/p5-encode/issues/8

@@ -1,5 +1,5 @@
 #
-# $Id: UTF7.pm,v 2.6 2012/08/05 23:08:49 dankogai Exp $
+# $Id: UTF7.pm,v 2.7 2013/04/26 18:30:46 dankogai Exp $
 #
 package Encode::Unicode::UTF7;
 use strict;
@@ -7,7 +7,7 @@ use warnings;
 no warnings 'redefine';
 use base qw(Encode::Encoding);
 __PACKAGE__->Define('UTF-7');
-our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use MIME::Base64;
 use Encode;
 
@@ -32,7 +32,7 @@ sub encode($$;$) {
     my ( $obj, $str, $chk ) = @_;
     my $len = length($str);
     pos($str) = 0;
-    my $bytes = '';
+    my $bytes = substr($str, 0, 0); # to propagate taintedness
     while ( pos($str) < $len ) {
         if ( $str =~ /\G($re_asis+)/ogc ) {
 	    my $octets = $1;
@@ -59,9 +59,10 @@ sub encode($$;$) {
 }
 
 sub decode($$;$) {
+    use re 'taint';
     my ( $obj, $bytes, $chk ) = @_;
     my $len = length($bytes);
-    my $str = "";
+    my $str = substr($bytes, 0, 0); # to propagate taintedness;
     pos($bytes) = 0;
     no warnings 'uninitialized';
     while ( pos($bytes) < $len ) {
