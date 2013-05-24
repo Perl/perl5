@@ -5,7 +5,7 @@ use Config;
 use vars qw($VERSION);
 use IO::File;
 
-$VERSION = '0.4003';
+$VERSION = '0.4005';
 $VERSION = eval $VERSION;
 
 # This code is mostly borrowed from ExtUtils::MM_Unix 6.10_03, with a

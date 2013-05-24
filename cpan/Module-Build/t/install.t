@@ -209,14 +209,6 @@ Simple Man <simple@example.com>
   is keys %$pods, 1;
   my $expect = $mb->localize_file_path('lib/Simple/Docs.pod');
 
-  # TODO:
-  # True for traditional VMS, but will need to be changed when ODS-5 support
-  # for case preserved filenames is active.
-  # The issue is that the keys to the $pods hash are currently being set to
-  # lowercase on VMS so can not be found in exact case.
-
-  $expect = lc($expect) if $^O eq 'VMS';
-
   is $pods->{$expect}, $expect;
 
   my $pms = $mb->_find_file_by_type('awefawef', 'lib');

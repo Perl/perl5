@@ -183,6 +183,10 @@ ways to use this distribution without having them installed.  You
 might also think of this as "can use" or "is aware of" or "changes
 behavior in the presence of".
 
+=item test_requires
+
+Items that are necessary for testing.
+
 =item conflicts
 
 Items that can cause problems with this distribution when installed.

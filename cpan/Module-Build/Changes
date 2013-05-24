@@ -1,5 +1,27 @@
 Revision history for Perl extension Module::Build.
 
+0.4005 - Thu Apr 25 15:10:14 CEST 2013
+
+  [ENHANCEMENTS]
+
+  - Added --pureperl-only support
+
+  [BUG FIXES]
+
+  - #72176: pod2html will fail with an empty podpath in some cases. [Phillip Moore]
+
+  - Fix links between modules in HTML docs output [Michael Wild, Leon Timmermans]
+
+0.4004 - Fri Mar 29 15:05:00 CET 2013
+
+  [BUG FIXES]
+
+  - Minor VMS fix for @INC [Craig Berry]
+
+  [ENHANCEMENTS]
+
+  - test_requires support has been added [Matsuno Tokuhiro]
+
 0.4003 - Sat Aug 18 11:17:49 CEST 2012
 
   [BUG FIXES]
