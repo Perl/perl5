@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.17";
+$VERSION     = "0.18";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -22,14 +22,25 @@ $VERSION     = "0.17";
 
 # The list are as the perl binary has stored it in PL_bincompat_options
 #  search for it in
-#   perl.c line 1661 S_Internals_V ()
-#   perl.h line 4664 (second block),
+#   perl.c line 1669 S_Internals_V ()
+#   perl.h line 4505 PL_bincompat_options
 my %BTD = map { $_ => 0 } qw(
 
     DEBUGGING
     NO_MATHOMS
+    NO_HASH_SEED
+    NO_TAINT_SUPPORT
     PERL_DISABLE_PMC
     PERL_DONT_CREATE_GVSV
+    PERL_EXTERNAL_GLOB
+    PERL_HASH_FUNC_SIPHASH
+    PERL_HASH_FUNC_SDBM
+    PERL_HASH_FUNC_DJB2
+    PERL_HASH_FUNC_SUPERFAST
+    PERL_HASH_FUNC_MURMUR3
+    PERL_HASH_FUNC_ONE_AT_A_TIME
+    PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
+    PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
     PERL_IS_MINIPERL
     PERL_MALLOC_WRAP
     PERL_MEM_LOG
@@ -38,6 +49,10 @@ my %BTD = map { $_ => 0 } qw(
     PERL_MEM_LOG_NOIMPL
     PERL_MEM_LOG_STDERR
     PERL_MEM_LOG_TIMESTAMP
+    PERL_NEW_COPY_ON_WRITE
+    PERL_PERTURB_KEYS_DETERMINISTIC
+    PERL_PERTURB_KEYS_DISABLED
+    PERL_PERTURB_KEYS_RANDOM
     PERL_PRESERVE_IVUV
     PERL_RELOCATABLE_INCPUSH
     PERL_USE_DEVEL
@@ -45,7 +60,9 @@ my %BTD = map { $_ => 0 } qw(
     UNLINK_ALL_VERSIONS
     USE_ATTRIBUTES_FOR_PERLIO
     USE_FAST_STDIO
+    USE_HASH_SEED_EXPLICIT
     USE_LOCALE
+    USE_LOCALE_CTYPE
     USE_PERL_ATOF
     USE_SITECUSTOMIZE
 
@@ -55,6 +72,7 @@ my %BTD = map { $_ => 0 } qw(
     FAKE_THREADS
     FCRYPT
     HAS_TIMES
+    HAVE_INTERP_INTERN
     MULTIPLICITY
     MYMALLOC
     PERLIO_LAYERS
@@ -92,7 +110,7 @@ my %BTD = map { $_ => 0 } qw(
     );
 
 # These are all the keys that are
-# 1. Always present in %Config (first block)
+# 1. Always present in %Config - lib/Config.pm #87 tie %Config
 # 2. Reported by 'perl -V' (the rest)
 my @config_vars = qw(
 

@@ -18,9 +18,8 @@ BEGIN {
 use Config::Perl::V;
 
 ok (my $conf = Config::Perl::V::plv2hash (<DATA>), "Read perl -v block");
-for (qw( build environment config inc )) {
-    ok (exists $conf->{build},			"Has build entry");
-    }
+ok (exists $conf->{$_}, "Has $_ entry") for qw( build environment config inc );
+
 is ($conf->{build}{osname}, $conf->{config}{osname}, "osname");
 is ($conf->{build}{stamp}, 0, "No build time known");
 is ($conf->{config}{version}, "5.10.0", "reconstructed \%Config{version}");
