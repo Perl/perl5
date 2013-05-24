@@ -362,6 +362,12 @@ for C<struct pmop>. Previously it could return memory only aligned to a
 on some 32 bit platforms. Notably, this caused the build to fail completely
 on sparc GNU/Linux. [RT #118055]
 
+=item *
+
+The debugger's C<man> command been fixed. It was broken in the v5.18.0
+release. The C<man> command is aliased to the names C<doc> and C<perldoc> -
+all now work again.
+
 =back
 
 =head1 Known Problems
