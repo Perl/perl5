@@ -1803,7 +1803,6 @@ cpan/Pod-Parser/t/pod/twice.t			Test Pod::Parser
 cpan/Pod-Perldoc/corpus/no-head.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/corpus/perlfunc.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/corpus/utf8.pod		test file for Pod-Perldoc
-cpan/Pod-Perldoc/lib/perldoc.pod		Look up Perl documentation in Pod format
 cpan/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 cpan/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 cpan/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
@@ -1817,6 +1816,7 @@ cpan/Pod-Perldoc/lib/Pod/Perldoc/ToTerm.pm	convert POD to terminal output
 cpan/Pod-Perldoc/lib/Pod/Perldoc/ToText.pm	convert POD to plain text
 cpan/Pod-Perldoc/lib/Pod/Perldoc/ToTk.pm	convert POD via Tk::Pod
 cpan/Pod-Perldoc/lib/Pod/Perldoc/ToXml.pm	convert POD to XML
+cpan/Pod-Perldoc/perldoc.pod
 cpan/Pod-Perldoc/t/load.t			test file for Pod-Perldoc
 cpan/Pod-Perldoc/t/man/_get_columns.t		test file for Pod-Perldoc
 cpan/Pod-Perldoc/t/pod.t			test file for Pod-Perldoc

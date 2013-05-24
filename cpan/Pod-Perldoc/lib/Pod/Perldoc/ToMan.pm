@@ -5,7 +5,7 @@ use warnings;
 use parent qw(Pod::Perldoc::BaseTo);
 
 use vars qw($VERSION);
-$VERSION = '3.19';
+$VERSION = '3.20';
 
 use File::Spec::Functions qw(catfile);
 use Pod::Man 2.18;
@@ -136,7 +136,7 @@ sub _get_columns {
 sub _get_podman_switches {
 	my( $self ) = @_;
 
-	my @switches = grep !m/^_/s, keys %$self;
+	my @switches = map { $_, $self->{$_} } grep !m/^_/s, keys %$self;
 
     # There needs to be a cleaner way to handle setting
     # the UTF-8 flag, but for now, comment out this
@@ -242,7 +242,7 @@ sub _collect_nroff_switches {
 	push @render_switches, $self->_get_device_switches;
 
 	# Thanks to Brendan O'Dea for contributing the following block
-	if( $self->_is_roff and $self->is_linux and -t STDOUT and my ($cols) = $self->_get_columns ) {
+	if( $self->_is_roff and -t STDOUT and my ($cols) = $self->_get_columns ) {
 		my $c = $cols * 39 / 40;
 		$cols = $c > $cols - 2 ? $c : $cols -2;
 		push @render_switches, '-rLL=' . (int $c) . 'n' if $cols > 80;
