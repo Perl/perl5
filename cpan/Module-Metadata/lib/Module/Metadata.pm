@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000011';
+$VERSION = '1.000014';
 $VERSION = eval $VERSION;
 
 use Carp qw/croak/;
@@ -29,11 +29,39 @@ use File::Find qw(find);
 
 my $V_NUM_REGEXP = qr{v?[0-9._]+};  # crudely, a v-string or decimal
 
+my $PKG_FIRST_WORD_REGEXP = qr{ # the FIRST word in a package name
+  [a-zA-Z_]                     # the first word CANNOT start with a digit
+    (?:
+      [\w']?                    # can contain letters, digits, _, or ticks
+      \w                        # But, NO multi-ticks or trailing ticks
+    )*
+}x;
+
+my $PKG_ADDL_WORD_REGEXP = qr{ # the 2nd+ word in a package name
+  \w                           # the 2nd+ word CAN start with digits
+    (?:
+      [\w']?                   # and can contain letters or ticks
+      \w                       # But, NO multi-ticks or trailing ticks
+    )*
+}x;
+
+my $PKG_NAME_REGEXP = qr{ # match a package name
+  (?: :: )?               # a pkg name can start with aristotle
+  $PKG_FIRST_WORD_REGEXP  # a package word
+  (?:
+    (?: :: )+             ### aristotle (allow one or many times)
+    $PKG_ADDL_WORD_REGEXP ### a package word
+  )*                      # ^ zero, one or many times
+  (?:
+    ::                    # allow trailing aristotle
+  )?
+}x;
+
 my $PKG_REGEXP  = qr{   # match a package declaration
   ^[\s\{;]*             # intro chars on a line
   package               # the word 'package'
   \s+                   # whitespace
-  ([\w:]+)              # a package name
+  ($PKG_NAME_REGEXP)    # a package name
   \s*                   # optional whitespace
   ($V_NUM_REGEXP)?        # optional version number
   \s*                   # optional whitesapce
@@ -93,16 +121,16 @@ sub new_from_module {
 }
 
 {
-  
+
   my $compare_versions = sub {
     my ($v1, $op, $v2) = @_;
     $v1 = version->new($v1)
       unless UNIVERSAL::isa($v1,'version');
-  
+
     my $eval_str = "\$v1 $op \$v2";
     my $result   = eval $eval_str;
     log_info { "error comparing versions: '$eval_str' $@" } if $@;
-  
+
     return $result;
   };
 
@@ -128,7 +156,7 @@ sub new_from_module {
 
   my $resolve_module_versions = sub {
     my $packages = shift;
-  
+
     my( $file, $version );
     my $err = '';
       foreach my $p ( @$packages ) {
@@ -146,17 +174,17 @@ sub new_from_module {
         }
         $file ||= $p->{file} if defined( $p->{file} );
       }
-  
+
     if ( $err ) {
       $err = "  $file ($version)\n" . $err;
     }
-  
+
     my %result = (
       file    => $file,
       version => $version,
       err     => $err
     );
-  
+
     return \%result;
   };
 
@@ -221,16 +249,16 @@ sub new_from_module {
       my $mapped_filename = File::Spec::Unix->abs2rel( $file, $dir );
       my @path = split( /\//, $mapped_filename );
       (my $prime_package = join( '::', @path )) =~ s/\.pm$//;
-  
+
       my $pm_info = $class->new_from_file( $file );
-  
+
       foreach my $package ( $pm_info->packages_inside ) {
         next if $package eq 'main';  # main can appear numerous times, ignore
         next if $package eq 'DB';    # special debugging package, ignore
         next if grep /^_/, split( /::/, $package ); # private package, ignore
-  
+
         my $version = $pm_info->version( $package );
-  
+
         $prime_package = $package if lc($prime_package) eq lc($package);
         if ( $package eq $prime_package ) {
           if ( exists( $prime{$package} ) ) {
@@ -248,15 +276,15 @@ sub new_from_module {
         }
       }
     }
-  
+
     # Then we iterate over all the packages found above, identifying conflicts
     # and selecting the "best" candidate for recording the file & version
     # for each package.
     foreach my $package ( keys( %alt ) ) {
       my $result = $resolve_module_versions->( $alt{$package} );
-  
+
       if ( exists( $prime{$package} ) ) { # primary package selected
-  
+
         if ( $result->{err} ) {
   	# Use the selected primary package, but there are conflicting
   	# errors among multiple alternative packages that need to be
@@ -266,11 +294,11 @@ sub new_from_module {
   	    "  $prime{$package}{file} ($prime{$package}{version})\n" .
   	    $result->{err}
           };
-  
+
         } elsif ( defined( $result->{version} ) ) {
   	# There is a primary package selected, and exactly one
   	# alternative package
-  
+
   	if ( exists( $prime{$package}{version} ) &&
   	     defined( $prime{$package}{version} ) ) {
   	  # Unless the version of the primary package agrees with the
@@ -286,28 +314,28 @@ sub new_from_module {
   	      "  $result->{file} ($result->{version})\n"
             };
   	  }
-  
+
   	} else {
   	  # The prime package selected has no version so, we choose to
   	  # use any alternative package that does have a version
   	  $prime{$package}{file}    = $result->{file};
   	  $prime{$package}{version} = $result->{version};
   	}
-  
+
         } else {
   	# no alt package found with a version, but we have a prime
   	# package so we use it whether it has a version or not
         }
-  
+
       } else { # No primary package was selected, use the best alternative
-  
+
         if ( $result->{err} ) {
           log_info {
             "Found conflicting versions for package '$package'\n" .
   	    $result->{err}
           };
         }
-  
+
         # Despite possible conflicting versions, we choose to record
         # something rather than nothing
         $prime{$package}{file}    = $result->{file};
@@ -315,17 +343,17 @@ sub new_from_module {
   	  if defined( $result->{version} );
       }
     }
-  
+
     # Normalize versions.  Can't use exists() here because of bug in YAML::Node.
     # XXX "bug in YAML::Node" comment seems irrelvant -- dagolden, 2009-05-18
     for (grep defined $_->{version}, values %prime) {
       $_->{version} = $normalize_version->( $_->{version} );
     }
-  
+
     return \%prime;
   }
-} 
-  
+}
+
 
 sub _init {
   my $class    = shift;
@@ -490,6 +518,7 @@ sub _parse_fh {
   my $pkg = 'main';
   my $pod_sect = '';
   my $pod_data = '';
+  my $in_end = 0;
 
   while (defined( my $line = <$fh> )) {
     my $line_num = $.;
@@ -532,11 +561,18 @@ sub _parse_fh {
 
     } else {
 
+      # Skip after __END__
+      next if $in_end;
+
       # Skip comments in code
       next if $line =~ /^\s*#/;
 
       # Would be nice if we could also check $in_string or something too
-      last if $line =~ /^__(?:DATA|END)__$/;
+      if ($line eq '__END__') {
+        $in_end++;
+        next;
+      }
+      last if $line eq '__DATA__';
 
       # parse $line to see if it's a $VERSION declaration
       my( $vers_sig, $vers_fullname, $vers_pkg ) =
@@ -583,7 +619,7 @@ sub _parse_fh {
 
 	unless ( defined $vers{$pkg} && length $vers{$pkg} ) {
 	  $vers{$pkg} = $v;
-	} 
+	}
 
       }
 
@@ -713,12 +749,12 @@ sub _evaluate_version_line {
 ############################################################
 
 # accessors
-sub name            { $_[0]->{module}           }
+sub name            { $_[0]->{module}            }
 
-sub filename        { $_[0]->{filename}         }
-sub packages_inside { @{$_[0]->{packages}}      }
-sub pod_inside      { @{$_[0]->{pod_headings}}  }
-sub contains_pod    { $#{$_[0]->{pod_headings}} }
+sub filename        { $_[0]->{filename}          }
+sub packages_inside { @{$_[0]->{packages}}       }
+sub pod_inside      { @{$_[0]->{pod_headings}}   }
+sub contains_pod    { 0+@{$_[0]->{pod_headings}} }
 
 sub version {
     my $self = shift;
@@ -934,7 +970,10 @@ Returns the absolute path to the file.
 Returns a list of packages. Note: this is a raw list of packages
 discovered (or assumed, in the case of C<main>).  It is not
 filtered for C<DB>, C<main> or private packages the way the
-C<provides> method does.
+C<provides> method does.  Invalid package names are not returned,
+for example "Foo:Bar".  Strange but valid package names are
+returned, for example "Foo::Bar::", and are left up to the caller
+on how to handle.
 
 =item C<< pod_inside() >>
 

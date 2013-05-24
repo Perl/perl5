@@ -1227,7 +1227,7 @@ use File::Glob qw(:case);
 
     'Module::Metadata' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'APEIRON/Module-Metadata-1.000011.tar.gz',
+        'DISTRIBUTION' => 'BOBTFISH/Module-Metadata-1.000014.tar.gz',
         'FILES'        => q[cpan/Module-Metadata],
         'EXCLUDED'     => [
             qr{^maint},

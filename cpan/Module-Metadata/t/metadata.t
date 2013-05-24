@@ -212,7 +212,47 @@ package Simple v1.2.3_4 {
 );
 my %modules = reverse @modules;
 
-plan tests => 54 + 2 * keys( %modules );
+my @pkg_names = (
+  [ 'Simple' ] => <<'---', # package NAME
+package Simple;
+---
+  [ 'Simple::Edward' ] => <<'---', # package NAME::SUBNAME
+package Simple::Edward;
+---
+  [ 'Simple::Edward::' ] => <<'---', # package NAME::SUBNAME::
+package Simple::Edward::;
+---
+  [ "Simple'Edward" ] => <<'---', # package NAME'SUBNAME
+package Simple'Edward;
+---
+  [ "Simple'Edward::" ] => <<'---', # package NAME'SUBNAME::
+package Simple'Edward::;
+---
+  [ 'Simple::::Edward' ] => <<'---', # package NAME::::SUBNAME
+package Simple::::Edward;
+---
+  [ '::Simple::Edward' ] => <<'---', # package ::NAME::SUBNAME
+package ::Simple::Edward;
+---
+  [ 'main' ] => <<'---', # package NAME:SUBNAME (fail)
+package Simple:Edward;
+---
+  [ 'main' ] => <<'---', # package NAME' (fail)
+package Simple';
+---
+  [ 'main' ] => <<'---', # package NAME::SUBNAME' (fail)
+package Simple::Edward';
+---
+  [ 'main' ] => <<'---', # package NAME''SUBNAME (fail)
+package Simple''Edward;
+---
+  [ 'main' ] => <<'---', # package NAME-SUBNAME (fail)
+package Simple-Edward;
+---
+);
+my %pkg_names = reverse @pkg_names;
+
+plan tests => 54 + (2 * keys( %modules )) + (2 * keys( %pkg_names ));
 
 require_ok('Module::Metadata');
 
@@ -293,6 +333,29 @@ foreach my $module ( sort keys %modules ) {
     is( $warnings, '', 'no warnings from parsing' ) or $errs++;
     diag "Got: '$got'\nModule contents:\n$module" if $errs;
   }
+}
+
+# revert to pristine state
+$dist->regen( clean => 1 );
+
+foreach my $pkg_name ( sort keys %pkg_names ) {
+    my $expected = $pkg_names{$pkg_name};
+
+    $dist->change_file( 'lib/Simple.pm', $pkg_name );
+    $dist->regen;
+
+    my $warnings = '';
+    local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
+    my $pm_info = Module::Metadata->new_from_file( $file );
+
+    # Test::Builder will prematurely numify objects, so use this form
+    my $errs;
+    my @got = $pm_info->packages_inside();
+    is_deeply( \@got, $expected,
+               "correct package names (expected '" . join(', ', @$expected) . "')" )
+            or $errs++;
+    is( $warnings, '', 'no warnings from parsing' ) or $errs++;
+    diag "Got: '" . join(', ', @got) . "'\nModule contents:\n$pkg_name" if $errs;
 }
 
 # revert to pristine state
