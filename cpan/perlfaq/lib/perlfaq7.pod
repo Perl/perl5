@@ -201,7 +201,7 @@ transfer the module to you.
 
 If you can not reach the author for some reason contact
 the PAUSE admins at modules@perl.org who may be able to help,
-but each case it treated seperatly.
+but each case it treated separately.
 
 =over 4
 

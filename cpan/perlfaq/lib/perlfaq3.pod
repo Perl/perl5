@@ -371,7 +371,7 @@ the tool runs on Windows 9x/NT/2000/XP or later.
 L<http://kephra.sf.net>
 
 GUI Editor written in Perl using wxWidgets and Scintilla with lots of smaller features.
-Aims for an UI based on Perls principles like TIMTWTDI and "easy thinkd should be ..".
+Aims for an UI based on Perls principles like TIMTWTDI and "easy things should be ..".
 
 =item Komodo
 
@@ -452,7 +452,7 @@ among others.
 
 If you are using MacOS, the same concerns apply. MacPerl (for Classic
 environments) comes with a simple editor. Popular external editors are
-BBEdit ( L<http://www.bbedit.com/> ) or Alpha (
+BBEdit ( L<http://www.barebones.com/products/bbedit/> ) or Alpha (
 L<http://www.his.com/~jguyer/Alpha/Alpha8.html> ). MacOS X users can use
 Unix editors as well.
 
@@ -572,10 +572,10 @@ is an editor, written and extensible in Tcl, that nonetheless has
 built-in support for several popular markup and programming languages,
 including Perl and HTML ( L<http://www.his.com/~jguyer/Alpha/Alpha8.html> ).
 
-=item BBEdit and BBEdit Lite
+=item BBEdit and TextWrangler
 
 are text editors for Mac OS that have a Perl sensitivity mode
-( L<http://web.barebones.com/> ).
+( L<http://www.barebones.com/> ).
 
 =back
 

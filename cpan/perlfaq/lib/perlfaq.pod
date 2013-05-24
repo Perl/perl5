@@ -1358,7 +1358,7 @@ How can I do RPC in Perl?
 =head1 CREDITS
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
-help of Nat Torkington. brian d foy substantialy edited and expanded
+help of Nat Torkington. brian d foy substantially edited and expanded
 the perlfaq. perlfaq-workers and others have also supplied feedback,
 patches and corrections over the years.
 
