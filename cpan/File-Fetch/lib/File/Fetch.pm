@@ -22,7 +22,7 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.38';
+$VERSION        = '0.42';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -39,7 +39,8 @@ $METHODS = {
     http    => [ qw|lwp httptiny wget curl lftp fetch httplite lynx iosock| ],
     ftp     => [ qw|lwp netftp wget curl lftp fetch ncftp ftp| ],
     file    => [ qw|lwp lftp file| ],
-    rsync   => [ qw|rsync| ]
+    rsync   => [ qw|rsync| ],
+    git     => [ qw|git| ],
 };
 
 ### silly warnings ###
@@ -87,7 +88,7 @@ File::Fetch - A generic file fetching mechanism
 File::Fetch is a generic file fetching mechanism.
 
 It allows you to fetch any file pointed to by a C<ftp>, C<http>,
-C<file>, or C<rsync> uri by a number of different means.
+C<file>, C<git> or C<rsync> uri by a number of different means.
 
 See the C<HOW IT WORKS> section further down for details.
 
@@ -1402,6 +1403,52 @@ sub _rsync_fetch {
 
 }
 
+### use git to fetch files
+sub _git_fetch {
+    my $self = shift;
+    my %hash = @_;
+
+    my ($to);
+    my $tmpl = {
+        to  => { required => 1, store => \$to }
+    };
+    check( $tmpl, \%hash ) or return;
+    my $git;
+    unless ( $git = can_run('git') ) {
+        $METHOD_FAIL->{'git'} = 1;
+        return;
+    }
+
+    my $cmd = [ $git, 'clone' ];
+
+    #push(@$cmd, '--timeout=' . $TIMEOUT) if $TIMEOUT;
+
+    push(@$cmd, '--quiet') unless $DEBUG;
+
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    push @$cmd, $self->uri, $to;
+
+    ### with IPC::Cmd > 0.41, this is fixed in teh library,
+    ### and there's no need for special casing any more.
+    ### DO NOT quote things for IPC::Run, it breaks stuff.
+    # $IPC::Cmd::USE_IPC_RUN
+    #    ? ($to, $self->uri)
+    #    : (QUOTE. $to .QUOTE, QUOTE. $self->uri .QUOTE);
+
+    my $captured;
+    unless(run( command => $cmd,
+                buffer  => \$captured,
+                verbose => $DEBUG )
+    ) {
+
+        return $self->_error(loc("Command %1 failed: %2",
+            "@$cmd" || '', $captured || ''));
+    }
+
+    return $to;
+
+}
+
 #################################
 #
 # Error code
@@ -1454,6 +1501,7 @@ for what schemes, if available:
     http    => LWP, HTTP::Lite, wget, curl, lftp, fetch, lynx, iosock
     ftp     => LWP, Net::FTP, wget, curl, lftp, fetch, ncftp, ftp
     rsync   => rsync
+    git     => git
 
 If you'd like to disable the use of one or more of these utilities
 and/or modules, see the C<$BLACKLIST> variable further down.
@@ -1469,6 +1517,8 @@ three platforms.
 
 C<iosock> is a very limited L<IO::Socket::INET> based mechanism for
 retrieving C<http> schemed urls. It doesn't follow redirects for instance.
+
+C<git> only supports C<git://> style urls.
 
 A special note about fetching files from an ftp uri:
 
