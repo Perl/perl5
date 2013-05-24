@@ -804,12 +804,15 @@ use File::Glob qw(:case);
 
     'File::Temp' => {
         'MAINTAINER'   => 'tjenness',
-        'DISTRIBUTION' => 'TJENNESS/File-Temp-0.23.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/File-Temp-0.2301.tar.gz',
         'FILES'        => q[cpan/File-Temp],
         'EXCLUDED'     => [
             qw( misc/benchmark.pl
                 misc/results.txt
                 ),
+            qw(t/00-compile.t),
+            qw[t/00-report-prereqs.t],
+            qr{^xt},
         ],
         'UPSTREAM' => 'cpan',
     },
