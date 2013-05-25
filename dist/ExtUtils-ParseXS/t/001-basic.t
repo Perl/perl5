@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 14;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -72,8 +72,48 @@ open my $IN, '<', $source_file
 while (my $l = <$IN>) {
   $seen++ if $l =~ m/#line\s1\s/;
 }
+is( $seen, 1, "Line numbers created in output file, as intended" );
+{
+    #rewind .c file and regexp it to look for code generation problems
+    local $/ = undef;
+    seek($IN, 0, 0);
+    my $filecontents = <$IN>;
+    my $good_T_BOOL_re =
+qr|\QXS_EUPXS(XS_XSTest_T_BOOL)\E
+.+?
+#line \d+\Q "XSTest.c"
+	ST(0) = boolSV(RETVAL);
+    }
+    XSRETURN(1);
+}
+\E|s;
+    like($filecontents, $good_T_BOOL_re, "T_BOOL doesn\'t have an extra sv_newmortal or sv_2mortal");
+
+    my $good_T_BOOL_2_re =
+qr|\QXS_EUPXS(XS_XSTest_T_BOOL_2)\E
+.+?
+#line \d+\Q "XSTest.c"
+	sv_setsv(ST(0), boolSV(in));
+	SvSETMAGIC(ST(0));
+    }
+    XSRETURN(1);
+}
+\E|s;
+    like($filecontents, $good_T_BOOL_2_re, 'T_BOOL_2 doesn\'t have an extra sv_newmortal or sv_2mortal');
+    my $good_T_BOOL_OUT_re =
+qr|\QXS_EUPXS(XS_XSTest_T_BOOL_OUT)\E
+.+?
+#line \d+\Q "XSTest.c"
+	sv_setsv(ST(0), boolSV(out));
+	SvSETMAGIC(ST(0));
+    }
+    XSRETURN_EMPTY;
+}
+\E|s;
+    like($filecontents, $good_T_BOOL_OUT_re, 'T_BOOL_OUT doesn\'t have an extra sv_newmortal or sv_2mortal');
+
+}
 close $IN or die "Unable to close $source_file: $!";
-is( $seen, 1, "Linenumbers created in output file, as intended" ); 
 
 unless ($ENV{PERL_NO_CLEANUP}) {
   for ( $obj_file, $lib_file, $source_file) {

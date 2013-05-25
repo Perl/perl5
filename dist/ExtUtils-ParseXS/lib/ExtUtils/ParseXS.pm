@@ -1963,17 +1963,24 @@ sub generate_output {
       print "\t\tSvSETMAGIC(ST(ix_$var));\n" if $do_setmagic;
     }
     elsif ($var eq 'RETVAL') {
-      if ($expr =~ /^\t\$arg = new/) {
+      my $evalexpr = $self->eval_output_typemap_code("qq\a$expr\a", $eval_vars);
+      if ($expr =~ /^\t\Q$arg\E = new/) {
         # We expect that $arg has refcnt 1, so we need to
         # mortalize it.
-        $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+        print $evalexpr;
         print "\tsv_2mortal(ST($num));\n";
         print "\tSvSETMAGIC(ST($num));\n" if $do_setmagic;
       }
-      elsif ($expr =~ /^\s*\$arg\s*=/) {
+      # If RETVAL is immortal, don't mortalize it. This code is not perfect:
+      # It won't detect a func or expression that only returns immortals, for
+      # example, this RE must be tried before next elsif.
+      elsif ($evalexpr =~ /^\t\Q$arg\E\s*=\s*(boolSV\(|(&PL_sv_yes|&PL_sv_no|&PL_sv_undef)\s*;)/) {
+        print $evalexpr;
+      }
+      elsif ($evalexpr =~ /^\s*\Q$arg\E\s*=/) {
         # We expect that $arg has refcnt >=1, so we need
         # to mortalize it!
-        $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+        print $evalexpr;
         print "\tsv_2mortal(ST(0));\n";
         print "\tSvSETMAGIC(ST(0));\n" if $do_setmagic;
       }
@@ -1981,9 +1988,9 @@ sub generate_output {
         # Just hope that the entry would safely write it
         # over an already mortalized value. By
         # coincidence, something like $arg = &sv_undef
-        # works too.
+        # works too, but should be caught above.
         print "\tST(0) = sv_newmortal();\n";
-        $self->eval_output_typemap_code("print qq\a$expr\a", $eval_vars);
+        print $evalexpr;
         # new mortals don't have set magic
       }
     }
