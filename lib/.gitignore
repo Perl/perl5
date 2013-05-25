@@ -285,6 +285,7 @@
 /Pod/Text.pm
 /Pod/Text/
 /Pod/Usage.pm
+/Pod/perldoc.pod
 /SDBM_File.pm
 /Safe.pm
 /Scalar
