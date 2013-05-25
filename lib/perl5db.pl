@@ -9040,8 +9040,8 @@ sub runman {
     $page = 'perl' if lc($page) eq 'help';
 
     require Config;
-    my $man1dir = $Config::Config{'man1dir'};
-    my $man3dir = $Config::Config{'man3dir'};
+    my $man1dir = $Config::Config{man1direxp};
+    my $man3dir = $Config::Config{man3direxp};
     for ( $man1dir, $man3dir ) { s#/[^/]*\z## if /\S/ }
     my $manpath = '';
     $manpath .= "$man1dir:" if $man1dir =~ /\S/;
