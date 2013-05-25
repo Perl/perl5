@@ -8890,139 +8890,6 @@ program's STDIN and STDOUT.
 
 =cut
 
-my %_is_in_pods = (map { $_ => 1 }
-    qw(
-    5004delta
-    5005delta
-    561delta
-    56delta
-    570delta
-    571delta
-    572delta
-    573delta
-    58delta
-    581delta
-    582delta
-    583delta
-    584delta
-    590delta
-    591delta
-    592delta
-    aix
-    amiga
-    apio
-    api
-    artistic
-    book
-    boot
-    bot
-    bs2000
-    call
-    ce
-    cheat
-    clib
-    cn
-    compile
-    cygwin
-    data
-    dbmfilter
-    debguts
-    debtut
-    debug
-    delta
-    dgux
-    diag
-    doc
-    dos
-    dsc
-    ebcdic
-    embed
-    faq1
-    faq2
-    faq3
-    faq4
-    faq5
-    faq6
-    faq7
-    faq8
-    faq9
-    faq
-    filter
-    fork
-    form
-    freebsd
-    func
-    gpl
-    guts
-    hack
-    hist
-    hpux
-    hurd
-    intern
-    intro
-    iol
-    ipc
-    irix
-    jp
-    ko
-    lexwarn
-    locale
-    lol
-    macos
-    macosx
-    modinstall
-    modlib
-    mod
-    modstyle
-    netware
-    newmod
-    number
-    obj
-    opentut
-    op
-    os2
-    os390
-    os400
-    packtut
-    plan9
-    pod
-    podspec
-    port
-    qnx
-    ref
-    reftut
-    re
-    requick
-    reref
-    retut
-    run
-    sec
-    solaris
-    style
-    sub
-    syn
-    thrtut
-    tie
-    toc
-    todo
-    tooc
-    toot
-    trap
-    tru64
-    tw
-    unicode
-    uniintro
-    util
-    uts
-    var
-    vms
-    vos
-    win32
-    xs
-    xstut
-    )
-);
-
 sub runman {
     my $page = shift;
     unless ($page) {
@@ -9063,8 +8930,21 @@ sub runman {
       )
     {
         unless ( $page =~ /^perl\w/ ) {
-# do it this way because its easier to slurp in to keep up to date - clunky though.
-            if (exists($_is_in_pods{$page})) {
+            # Previously the debugger contained a list which it slurped in,
+            # listing the known "perl" manpages. However, it was out of date,
+            # with errors both of omission and inclusion. This approach is
+            # considerably less complex. The failure mode on a butchered
+            # install is simply that the user has to run man or perldoc
+            # "manually" with the full manpage name.
+
+            # There is a list of $^O values in installperl to determine whether
+            # the directory is 'pods' or 'pod'. However, we can avoid tight
+            # coupling to that by simply checking the "non-standard" 'pods'
+            # first.
+            my $pods = "$Config::Config{privlibexp}/pods";
+            $pods = "$Config::Config{privlibexp}/pod"
+                unless -d $pods;
+            if (-f "$pods/perl$page.pod") {
                 CORE::system( $doccmd,
                     ( ( $manpath && !$nopathopt ) ? ( "-M", $manpath ) : () ),
                     "perl$page" );
