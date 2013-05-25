@@ -8916,8 +8916,7 @@ sub runman {
     chop $manpath if $manpath;
 
     # harmless if missing, I figure
-    my $oldpath = $ENV{MANPATH};
-    $ENV{MANPATH} = $manpath if $manpath;
+    local $ENV{MANPATH} = $manpath if $manpath;
     my $nopathopt = $^O =~ /dunno what goes here/;
     if (
         CORE::system(
@@ -8951,12 +8950,6 @@ sub runman {
             }
         }
     } ## end if (CORE::system($doccmd...
-    if ( defined $oldpath ) {
-        $ENV{MANPATH} = $manpath;
-    }
-    else {
-        delete $ENV{MANPATH};
-    }
 } ## end sub runman
 
 #use Carp;                          # This did break, left for debugging
