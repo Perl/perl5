@@ -342,7 +342,6 @@
 /lib.pm
 /ops.pm
 /parent.pm
-/perldoc.pod
 /perlfaq*
 /perlglossary.pod
 /perlxs.pod
