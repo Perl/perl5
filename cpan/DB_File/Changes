@@ -1,3 +1,7 @@
+1.828 7 May 2013
+
+   * Minor change to build with Berkeley DB 6.x
+
 1.827 25 Jan 2012
 
    * DB_File.pm - Don't use "@_" construct

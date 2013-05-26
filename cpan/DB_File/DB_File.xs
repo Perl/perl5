@@ -2,13 +2,11 @@
 
  DB_File.xs -- Perl 5 interface to Berkeley DB 
 
- written by Paul Marquess <pmqs@cpan.org>
- last modified 4th February 2007
- version 1.818
+ Written by Paul Marquess <pmqs@cpan.org>
 
  All comments/suggestions/problems are welcome
 
-     Copyright (c) 1995-2012 Paul Marquess. All rights reserved.
+     Copyright (c) 1995-2013 Paul Marquess. All rights reserved.
      This program is free software; you can redistribute it and/or
      modify it under the same terms as Perl itself.
 
@@ -206,6 +204,10 @@
 
 #if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 3)
 #    define AT_LEAST_DB_4_3
+#endif
+
+#if DB_VERSION_MAJOR >= 6 
+#    define AT_LEAST_DB_6_0
 #endif
 
 #ifdef AT_LEAST_DB_3_3
@@ -536,6 +538,19 @@ tidyUp(DB_File db)
 
 
 static int
+
+#ifdef AT_LEAST_DB_6_0
+#ifdef CAN_PROTOTYPE
+btree_compare(DB * db, const DBT *key1, const DBT *key2, size_t* locp)
+#else
+btree_compare(db, key1, key2, locp)
+DB * db ;
+const DBT * key1 ;
+const DBT * key2 ;
+size_t* locp;
+#endif /* CAN_PROTOTYPE */
+
+#else /* Berkeley DB < 6.0 */
 #ifdef AT_LEAST_DB_3_2
 
 #ifdef CAN_PROTOTYPE
@@ -557,6 +572,7 @@ const DBT * key1 ;
 const DBT * key2 ;
 #endif
 
+#endif
 #endif
 
 {
