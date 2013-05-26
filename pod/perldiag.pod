@@ -553,7 +553,7 @@ if the pattern delimiters are C<{}>.
 =item Bizarre copy of %s
 
 (P) Perl detected an attempt to copy an internal value that is not
-copyable.
+copiable.
 
 =item Buffer overflow in prime_env_iter: %s
 
