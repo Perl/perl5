@@ -1,4 +1,10 @@
-2.89
+...
+  - Make switches case-sensitive (keep -d and -D distinct)
+
+2.91 Mon May 20 2013
+  - Updated for v5.19.0
+
+2.90 Mon May 18 2013
   - Updated for v5.18.0
 
 2.88 Tue Apr 23 2013
