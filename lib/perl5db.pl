@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_09';
+$VERSION = '1.39_10';
 
 $header = "perl5db.pl version $VERSION";
 
