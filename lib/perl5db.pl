@@ -744,7 +744,7 @@ sub eval {
     # Since we're only saving $@, we only have to localize the array element
     # that it will be stored in.
     local $saved[0];    # Preserve the old value of $@
-    eval { DB::save() };
+    eval { &DB::save };
 
     # Now see whether we need to report an error back to the user.
     if ($at) {
@@ -1793,7 +1793,7 @@ sub _DB__determine_if_we_should_break
         # see if we should stop. If so, remove the one-time sigil.
         elsif ($stop) {
             $evalarg = "\$DB::signal |= 1 if do {$stop}";
-            DB::eval();
+            DB::eval(@_);
             # If the breakpoint is temporary, then delete its enabled status.
             if ($dbline{$line} =~ s/;9($|\0)/$1/) {
                 _cancel_breakpoint_temp_enabled_status($filename, $line);
@@ -2655,7 +2655,7 @@ If there are any preprompt actions, execute those as well.
     # If there's an action, do it now.
     if ($action) {
         $evalarg = $action;
-        DB::eval();
+        DB::eval(@_);
     }
 
     # Are we nested another level (e.g., did we evaluate a function
@@ -2667,7 +2667,7 @@ If there are any preprompt actions, execute those as well.
 
         # Do any pre-prompt actions.
         foreach $evalarg (@$pre) {
-            DB::eval();
+            DB::eval(@_);
         }
 
         # Complain about too much recursion if we passed the limit.
@@ -3082,7 +3082,7 @@ any variables we might want to address in the C<DB> package.
             $evalarg = "\$^D = \$^D | \$DB::db_stop;\n$cmd";
 
             # Run *our* eval that executes in the caller's context.
-            DB::eval();
+            DB::eval(@_);
 
             # Turn off the one-time-dump stuff now.
             if ($onetimeDump) {
@@ -3128,7 +3128,7 @@ again.
 
         # Evaluate post-prompt commands.
         foreach $evalarg (@$post) {
-            DB::eval();
+            DB::eval(@_);
         }
     }    # if ($single || $signal)
 
@@ -5431,7 +5431,7 @@ sub cmd_i {
     my $line = shift;
     foreach my $isa ( split( /\s+/, $line ) ) {
         $evalarg = $isa;
-        ($isa) = DB::eval();
+        ($isa) = DB::eval(@_);
         no strict 'refs';
         print join(
             ', ',
@@ -6000,7 +6000,7 @@ sub _add_watch_expr {
     # in the user's context. This version can handle expressions which
     # return a list value.
     $evalarg = $expr;
-    my ($val) = join( ' ', DB::eval() );
+    my ($val) = join( ' ', DB::eval(@_) );
     $val = ( defined $val ) ? "'$val'" : 'undef';
 
     # Save the current value of the expression.
@@ -10122,7 +10122,7 @@ sub cmd_pre580_W {
         # Get the current value of the expression.
         # Doesn't handle expressions returning list values!
         $evalarg = $1;
-        my ($val) = DB::eval();
+        my ($val) = DB::eval(@_);
         $val = ( defined $val ) ? "'$val'" : 'undef';
 
         # Save it.
