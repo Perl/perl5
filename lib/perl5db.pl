@@ -1793,7 +1793,8 @@ sub _DB__determine_if_we_should_break
         # see if we should stop. If so, remove the one-time sigil.
         elsif ($stop) {
             $evalarg = "\$DB::signal |= 1 if do {$stop}";
-            DB::eval(@_);
+            # The &-call is here to ascertain the mutability of @_.
+            &DB::eval;
             # If the breakpoint is temporary, then delete its enabled status.
             if ($dbline{$line} =~ s/;9($|\0)/$1/) {
                 _cancel_breakpoint_temp_enabled_status($filename, $line);
@@ -2562,7 +2563,8 @@ sub DB {
     # Last line in the program.
     $max = $#dbline;
 
-    _DB__determine_if_we_should_break(@_);
+    # The &-call is here to ascertain the mutability of @_.
+    &_DB__determine_if_we_should_break;
 
     # Preserve the current stop-or-not, and see if any of the W
     # (watch expressions) has changed.
@@ -2655,7 +2657,8 @@ If there are any preprompt actions, execute those as well.
     # If there's an action, do it now.
     if ($action) {
         $evalarg = $action;
-        DB::eval(@_);
+        # The &-call is here to ascertain the mutability of @_.
+        &DB::eval;
     }
 
     # Are we nested another level (e.g., did we evaluate a function
@@ -2667,7 +2670,8 @@ If there are any preprompt actions, execute those as well.
 
         # Do any pre-prompt actions.
         foreach $evalarg (@$pre) {
-            DB::eval(@_);
+            # The &-call is here to ascertain the mutability of @_.
+            &DB::eval;
         }
 
         # Complain about too much recursion if we passed the limit.
@@ -3082,7 +3086,8 @@ any variables we might want to address in the C<DB> package.
             $evalarg = "\$^D = \$^D | \$DB::db_stop;\n$cmd";
 
             # Run *our* eval that executes in the caller's context.
-            DB::eval(@_);
+            # The &-call is here to ascertain the mutability of @_.
+            &DB::eval;
 
             # Turn off the one-time-dump stuff now.
             if ($onetimeDump) {
@@ -3128,7 +3133,8 @@ again.
 
         # Evaluate post-prompt commands.
         foreach $evalarg (@$post) {
-            DB::eval(@_);
+            # The &-call is here to ascertain the mutability of @_.
+            &DB::eval;
         }
     }    # if ($single || $signal)
 
@@ -5431,7 +5437,8 @@ sub cmd_i {
     my $line = shift;
     foreach my $isa ( split( /\s+/, $line ) ) {
         $evalarg = $isa;
-        ($isa) = DB::eval(@_);
+        # The &-call is here to ascertain the mutability of @_.
+        ($isa) = &DB::eval;
         no strict 'refs';
         print join(
             ', ',
@@ -6000,7 +6007,8 @@ sub _add_watch_expr {
     # in the user's context. This version can handle expressions which
     # return a list value.
     $evalarg = $expr;
-    my ($val) = join( ' ', DB::eval(@_) );
+    # The &-call is here to ascertain the mutability of @_.
+    my ($val) = join( ' ', &DB::eval);
     $val = ( defined $val ) ? "'$val'" : 'undef';
 
     # Save the current value of the expression.
@@ -10122,7 +10130,8 @@ sub cmd_pre580_W {
         # Get the current value of the expression.
         # Doesn't handle expressions returning list values!
         $evalarg = $1;
-        my ($val) = DB::eval(@_);
+        # The &-call is here to ascertain the mutability of @_.
+        my ($val) = &DB::eval;
         $val = ( defined $val ) ? "'$val'" : 'undef';
 
         # Save it.
