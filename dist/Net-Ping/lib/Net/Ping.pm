@@ -1472,7 +1472,8 @@ Net::Ping - check a remote host for reachability
     $p = Net::Ping->new();
     $p->hires();
     ($ret, $duration, $ip) = $p->ping($host, 5.5);
-    printf("$host [ip: $ip] is alive (packet return time: %.2f ms)\n", 1000 * $duration)
+    printf("$host [ip: $ip] is alive (packet return time: %.2f ms)\n",
+            1000 * $duration)
       if $ret;
     $p->close();
 
@@ -1736,7 +1737,9 @@ kinds of ICMP packets.
 
 The latest source tree is available via cvs:
 
-  cvs -z3 -q -d :pserver:anonymous@cvs.roobik.com.:/usr/local/cvsroot/freeware checkout Net-Ping
+  cvs -z3 -q -d \
+    :pserver:anonymous@cvs.roobik.com.:/usr/local/cvsroot/freeware \
+    checkout Net-Ping
   cd Net-Ping
 
 The tarball can be created as follows:
