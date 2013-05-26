@@ -42,8 +42,10 @@ cpan/autodie/lib/autodie/exception.pm		Exception class for autodie
 cpan/autodie/lib/autodie/exception/system.pm	Exception class for autodying system()
 cpan/autodie/lib/autodie/hints.pm	Hinting interface for autodie
 cpan/autodie/lib/autodie.pm		Functions succeed or die with lexical scope
+cpan/autodie/lib/autodie/skip.pm
 cpan/autodie/lib/Fatal.pm		Make errors in functions/builtins fatal
 cpan/autodie/t/00-load.t		autodie - basic load
+cpan/autodie/t/autodie_skippy.pm
 cpan/autodie/t/autodie.t		autodie - Basic functionality
 cpan/autodie/t/autodie_test_module.pm	autodie - test helper
 cpan/autodie/t/backcompat.t		autodie - More Fatal backcompat
@@ -51,8 +53,11 @@ cpan/autodie/t/basic_exceptions.t	autodie - Basic exception tests
 cpan/autodie/t/binmode.t		autodie - Binmode testing
 cpan/autodie/t/blog_hints.t		autodie - Tests fro PJF's blog
 cpan/autodie/t/caller.t			autodie - Caller diagnostics
+cpan/autodie/t/chmod.t
+cpan/autodie/t/chown.t
 cpan/autodie/t/context_lexical.t	autodie - Context clobbering lexically
 cpan/autodie/t/context.t		autodie - Context clobbering tests
+cpan/autodie/t/core-trampoline-slurp.t
 cpan/autodie/t/crickey.t		autodie - Like an Australian
 cpan/autodie/t/dbmopen.t		autodie - dbm tests
 cpan/autodie/t/eval_error.t
@@ -72,6 +77,7 @@ cpan/autodie/t/hints_provider_isa.t	autodie - Test hints/inheritance
 cpan/autodie/t/hints.t			autodie - Test hints interface
 cpan/autodie/t/internal-backcompat.t	autodie - Back-compatibility tests
 cpan/autodie/t/internal.t		autodie - internal interface tests
+cpan/autodie/t/kill.t
 cpan/autodie/t/lethal.t			autodie - lethal is the one true name
 cpan/autodie/t/lib/autodie/test/au/exception.pm	autodie - Australian helper
 cpan/autodie/t/lib/autodie/test/au.pm		autodie - Australian helper
@@ -90,17 +96,23 @@ cpan/autodie/t/lib/pujHa/ghach/Dotlh.pm	autodie - With Klingon honour
 cpan/autodie/t/lib/pujHa/ghach.pm	autodie - Like a Klingon
 cpan/autodie/t/lib/Some/Module.pm	autodie - blog_hints.t helper
 cpan/autodie/t/mkdir.t			autodie - filesystem tests
+cpan/autodie/t/no_carp.t
 cpan/autodie/t/open.t			autodie - Testing open
 cpan/autodie/t/recv.t			autodie - send/recv tests
 cpan/autodie/t/repeat.t			autodie - repeat autodie leak tests
 cpan/autodie/t/scope_leak.t		autodie - file scope leak tests
+cpan/autodie/t/skip.t
 cpan/autodie/t/string-eval-basic.t	autodie - Basic string eval test
 cpan/autodie/t/string-eval-leak.t	autodie - String eval leak test
 cpan/autodie/t/sysopen.t		autodie - sysopen tests
+cpan/autodie/t/touch_me
+cpan/autodie/t/truncate_me
 cpan/autodie/t/truncate.t		autodie - File truncation tests
 cpan/autodie/t/unlink.t			autodie - Unlink system tests.
 cpan/autodie/t/user-context.t		autodie - Context changes for usersubs
 cpan/autodie/t/usersub.t		autodie - user subroutine tests
+cpan/autodie/t/utf8_open.t
+cpan/autodie/t/utime.t
 cpan/autodie/t/version.t		autodie - versioning tests
 cpan/autodie/t/version_tag.t
 cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class

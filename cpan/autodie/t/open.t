@@ -76,3 +76,16 @@ SKIP: {
 
     is $@, '', "multi arg piped open does not fail";
 }
+
+# Github 6
+# Non-vanilla modes (such as <:utf8) would cause the formatter in
+# autodie::exception to fail.
+
+eval {
+    use autodie;
+    open(my $fh, '<:utf8', NO_SUCH_FILE);
+};
+
+ok(    $@,                                        "Error thrown.");
+unlike($@, qr/Don't know how to format mode/,     "No error on exotic open.");
+like(  $@, qr/Can't open .*? with mode '<:utf8'/, "Nicer looking error.");

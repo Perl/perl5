@@ -223,22 +223,25 @@ use File::Glob qw(:case);
 
     'autodie' => {
         'MAINTAINER'   => 'pjf',
-        'DISTRIBUTION' => 'PJF/autodie-2.13.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.19.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{^inc/Module/},
-
+            qr{benchmarks},
             # All these tests depend upon external
             # modules that don't exist when we're
             # building the core.  Hence, they can
             # never run, and should not be merged.
             qw( t/boilerplate.t
+                t/author-critic.t
                 t/critic.t
                 t/fork.t
                 t/kwalitee.t
                 t/lex58.t
                 t/pod-coverage.t
                 t/pod.t
+                t/release-pod-coverage.t
+                t/release-pod-syntax.t
                 t/socket.t
                 t/system.t
                 )
