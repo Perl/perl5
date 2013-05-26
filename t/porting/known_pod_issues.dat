@@ -184,8 +184,6 @@ Win32::Locale
 YAML
 YAML::Syck
 YAML::Tiny
-dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 100 by	1
-ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 100 by	2
 pod/perlbook.pod	Verbatim line length including indents exceeds 100 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 100 by	2
 pod/perldtrace.pod	Verbatim line length including indents exceeds 100 by	4
