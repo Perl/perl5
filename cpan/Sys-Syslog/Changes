@@ -1,5 +1,14 @@
 Revision history for Sys-Syslog
 
+0.33 -- 2013.05.24 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] CPAN-RT#82531: Invalid usage of POSIX::_exit (Alexander Berger).
+        [OPTIM] No longer inherit from Exporter.
+        [OPTIM] Load Fcntl only when necessary.
+        [DOC] Add links to other logging modules.
+        [DOC] CPAN-RT#80398: Typo spotted by alfirth@gmail.com
+        [DOC] Typo spotted by David Steinbrunner.
+        [TEST] CPAN-RT#79683: Added delays in t/facilities-routing.t
+
 0.32 -- 2012.09.14 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] CPAN-RT#69040: Don't modify @_ in syslog().
         [BUGFIX] Restore compatibility with Perl 5.6.0.
