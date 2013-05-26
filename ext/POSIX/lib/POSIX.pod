@@ -116,8 +116,8 @@ a string of the form
 
 and it is called thusly
 
-	$asctime = asctime($sec, $min, $hour, $mday, $mon, $year,
-			   $wday, $yday, $isdst);
+	$asctime = asctime($sec, $min, $hour, $mday, $mon,
+			   $year, $wday, $yday, $isdst);
 
 The C<$mon> is zero-based: January equals C<0>.  The C<$year> is
 1900-based: 2001 equals C<101>.  C<$wday> and C<$yday> default to zero
@@ -415,7 +415,7 @@ The following will determine the maximum length of the longest allowable
 pathname on the filesystem which holds F</var/foo>.
 
 	$fd = POSIX::open( "/var/foo", &POSIX::O_RDONLY );
-	$path_max = POSIX::fpathconf( $fd, &POSIX::_PC_PATH_MAX );
+	$path_max = POSIX::fpathconf($fd, &POSIX::_PC_PATH_MAX);
 
 Returns C<undef> on failure.
 
@@ -754,7 +754,8 @@ Here is how to query the database for the B<de> (Deutsch or German) locale.
 		n_sign_posn
 	))
 	{
-		printf qq(%s: "%s",\n), $property, $lconv->{$property};
+		printf qq(%s: "%s",\n),
+			$property, $lconv->{$property};
 	}
 
 =item localtime
@@ -865,7 +866,8 @@ Convert date/time info to a calendar time.
 
 Synopsis:
 
-	mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
+	mktime(sec, min, hour, mday, mon, year, wday = 0,
+	       yday = 0, isdst = -1)
 
 The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero.
 I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
@@ -914,11 +916,15 @@ Open a file for read and write.
 
 Open a file for write, with truncation.
 
-	$fd = POSIX::open( "foo", &POSIX::O_WRONLY | &POSIX::O_TRUNC );
+	$fd = POSIX::open(
+		"foo", &POSIX::O_WRONLY | &POSIX::O_TRUNC
+	);
 
 Create a new file with mode 0640.  Set up the file for writing.
 
-	$fd = POSIX::open( "foo", &POSIX::O_CREAT | &POSIX::O_WRONLY, 0640 );
+	$fd = POSIX::open(
+		"foo", &POSIX::O_CREAT | &POSIX::O_WRONLY, 0640
+	);
 
 Returns C<undef> on failure.
 
@@ -941,7 +947,8 @@ Retrieves the value of a configurable limit on a file or directory.
 The following will determine the maximum length of the longest allowable
 pathname on the filesystem which holds C</var>.
 
-	$path_max = POSIX::pathconf( "/var", &POSIX::_PC_PATH_MAX );
+	$path_max = POSIX::pathconf( "/var",
+				      &POSIX::_PC_PATH_MAX );
 
 Returns C<undef> on failure.
 
@@ -1303,7 +1310,8 @@ Convert date and time information to string.  Returns the string.
 
 Synopsis:
 
-	strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
+	strftime(fmt, sec, min, hour, mday, mon, year,
+		 wday = -1, yday = -1, isdst = -1)
 
 The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero.
 I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
@@ -1330,7 +1338,8 @@ except that the C<isdst> value is not affected.
 
 The string for Tuesday, December 12, 1995.
 
-	$str = POSIX::strftime( "%A, %B %d, %Y", 0, 0, 0, 12, 11, 95, 2 );
+	$str = POSIX::strftime( "%A, %B %d, %Y",
+				 0, 0, 0, 12, 11, 95, 2 );
 	print "$str\n";
 
 =item strlen
@@ -1526,7 +1535,8 @@ The times() function returns elapsed realtime since some point in the past
 and system times used by child processes.  All times are returned in clock
 ticks.
 
-    ($realtime, $user, $system, $cuser, $csystem) = POSIX::times();
+    ($realtime, $user, $system, $cuser, $csystem) 
+	= POSIX::times();
 
 Note: Perl's builtin C<times()> function returns four values, measured in
 seconds.
@@ -1588,7 +1598,8 @@ see L<perlfunc/umask>.
 
 Get name of current operating system.
 
-	($sysname, $nodename, $release, $version, $machine) = POSIX::uname();
+	($sysname, $nodename, $release, $version, $machine)
+		= POSIX::uname();
 
 Note that the actual meanings of the various fields are not
 that well standardized, do not expect any great portability.
@@ -1684,7 +1695,9 @@ defaults to the empty set.  The third parameter contains the
 C<sa_flags>, it defaults to 0.
 
 	$sigset = POSIX::SigSet->new(SIGINT, SIGQUIT);
-	$sigaction = POSIX::SigAction->new( \&handler, $sigset, &POSIX::SA_NOCLDSTOP );
+	$sigaction = POSIX::SigAction->new(
+			\&handler, $sigset, &POSIX::SA_NOCLDSTOP
+		     );
 
 This C<POSIX::SigAction> object is intended for use with the C<POSIX::sigaction()>
 function.
@@ -1745,7 +1758,7 @@ Setting the %SIGRT elements is equivalent to calling this:
   sub new {
     my ($rtsig, $handler, $flags) = @_;
     my $sigset = POSIX::SigSet($rtsig);
-    my $sigact = POSIX::SigAction->new($handler, $sigset, $flags);
+    my $sigact = POSIX::SigAction->new($handler,$sigset,$flags);
     sigaction($rtsig, $sigact);
   }
 
