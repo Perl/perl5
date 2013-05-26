@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 16;
+plan tests => 19;
 
 # not() tests
 pass("logical negation of empty list") if not();
@@ -61,4 +61,18 @@ is(! (0, 0), not(0, 0),
         "logical negation (low-precedence) of true value is false in numeric context");
     ok($not0 == 1,
         "logical negation (low-precedence) of false value is true in numeric context");
+}
+
+# test truth of dualvars
+SKIP:
+{
+    my $got_dualvar;
+    eval 'use Scalar::Util "dualvar"; $got_dualvar++';
+    skip "No Scalar::Util::dualvar", 3 unless $got_dualvar;
+    my $a = Scalar::Util::dualvar(3, "");
+    is not($a), 1, 'not(dualvar) ignores int when string is false';
+    my $b = Scalar::Util::dualvar(3.3,"");
+    is not($b), 1, 'not(dualvar) ignores float when string is false';
+    my $c = Scalar::Util::dualvar(0,"1");
+    is not($c), "", 'not(dualvar) ignores false int when string is true';
 }

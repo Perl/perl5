@@ -1739,9 +1739,10 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SvTRUE_common(sv,fallback) (			\
       !SvOK(sv)						\
 	? 0						\
-    : (SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK))		\
-	? (   (SvPOK(sv) && SvPVXtrue(sv))		\
-	   || (SvIOK(sv) && SvIVX(sv) != 0)		\
+    : SvPOK(sv)						\
+	? SvPVXtrue(sv)					\
+    : (SvFLAGS(sv) & (SVf_IOK|SVf_NOK))			\
+	? (   (SvIOK(sv) && SvIVX(sv) != 0)		\
 	   || (SvNOK(sv) && SvNVX(sv) != 0.0))		\
     : (fallback))
 
