@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.9991';
+$VERSION = '1.9992';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -149,7 +149,7 @@ use overload
   },
 
 # the original qw() does not work with the TIESCALAR below, why?
-# Order of arguments unsignificant
+# Order of arguments insignificant
 '""' => sub { $_[0]->bstr(); },
 '0+' => sub { $_[0]->numify(); }
 ;
@@ -1036,7 +1036,7 @@ sub bneg
   
   return $x if $x->modify('bneg');
 
-  # for +0 dont negate (to have always normalized +0). Does nothing for 'NaN'
+  # for +0 do not negate (to have always normalized +0). Does nothing for 'NaN'
   $x->{sign} =~ tr/+-/-+/ unless ($x->{sign} eq '+' && $CALC->_is_zero($x->{value}));
   $x;
   }
@@ -1073,7 +1073,7 @@ sub bcmp
   return -1 if $x->{sign} eq '-' && $y->{sign} eq '+';  # does also -x <=> 0 
 
   # have same sign, so compare absolute values. Don't make tests for zero here
-  # because it's actually slower than testin in Calc (especially w/ Pari et al)
+  # because it's actually slower than testing in Calc (especially w/ Pari et al)
 
   # post-normalized compare for internal use (honors signs)
   if ($x->{sign} eq '+') 
@@ -1083,7 +1083,7 @@ sub bcmp
     }
 
   # $x && $y both < 0
-  $CALC->_acmp($y->{value},$x->{value});	# swaped acmp (lib returns 0,1,-1)
+  $CALC->_acmp($y->{value},$x->{value});	# swapped acmp (lib returns 0,1,-1)
   }
 
 sub bacmp 
@@ -1740,7 +1740,7 @@ sub bdiv
       }
     else
       {
-      $rem->{sign} = '+';			# dont leave -0
+      $rem->{sign} = '+';			# do not leave -0
       }
     $rem->round(@r);
     return ($x,$rem);
@@ -1788,7 +1788,7 @@ sub bmod
     }
    else
     {
-    $x->{sign} = '+';				# dont leave -0
+    $x->{sign} = '+';				# do not leave -0
     }
   $x->round(@r);
   }
@@ -3869,7 +3869,7 @@ numbers.
 	$x->bsgn();
 
 Signum function. Set the number to -1, 0, or 1, depending on whether the
-number is negative, zero, or positive, respectivly. Does not modify NaNs.
+number is negative, zero, or positive, respectively. Does not modify NaNs.
 
 =head2 bnorm()
 

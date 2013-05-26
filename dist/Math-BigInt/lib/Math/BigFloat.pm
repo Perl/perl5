@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.998';
+$VERSION = '1.999';
 require 5.006002;
 
 require Exporter;
@@ -454,7 +454,7 @@ sub bneg
 
   return $x if $x->modify('bneg');
 
-  # for +0 dont negate (to have always normalized +0). Does nothing for 'NaN'
+  # for +0 do not negate (to have always normalized +0). Does nothing for 'NaN'
   $x->{sign} =~ tr/+-/-+/ unless ($x->{sign} eq '+' && $MBI->_is_zero($x->{_m}));
   $x;
   }
@@ -1872,7 +1872,7 @@ sub bdiv
       ($x->{_e},$x->{_es}) = _e_sub($x->{_e}, $MBI->_new($scale), $x->{_es}, '+');
       $x->bnorm();		# remove trailing 0's
       }
-    } # ende else $x != $y
+    } # end else $x != $y
 
   # shortcut to not run through _find_round_parameters again
   if (defined $params[0])
@@ -2037,7 +2037,7 @@ sub broot
     # simulate old behaviour
     $params[0] = $self->div_scale();	# and round to it as accuracy
     $scale = $params[0]+4; 		# at least four more for proper round
-    $params[2] = $r;			# iound mode by caller or undef
+    $params[2] = $r;			# round mode by caller or undef
     $fallback = 1;			# to clear a/p afterwards
     }
   else
@@ -3289,7 +3289,7 @@ sub bfround
     my $zad = 0;				# zeros after dot
     $zad = $dad - $len if (-$dad < -$len);	# for 0.00..00xxx style
    
-    # p rint "scale $scale dad $dad zad $zad len $len\n";
+    # print "scale $scale dad $dad zad $zad len $len\n";
     # number  bsstr   len zad dad	
     # 0.123   123e-3	3   0 3
     # 0.0123  123e-4	3   1 4
@@ -3695,7 +3695,7 @@ sub bnorm
      if $MBI->_is_zero($x->{_m});
     }
 
-  $x;					# MBI bnorm is no-op, so dont call it
+  $x;					# MBI bnorm is no-op, so do not call it
   } 
  
 ##############################################################################
