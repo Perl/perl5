@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(114);
+plan(115);
 
 my $rc_filename = '.perldb';
 
@@ -809,6 +809,28 @@ sub _calc_trace_wrapper
         # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
         qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/ms,
         "x command test."
+    );
+}
+
+# Tests for x with @_
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 10',
+                'c',
+                'x @_',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/test-passing-at-underscore-to-x-etc',
+        }
+    );
+
+    $wrapper->contents_like(
+        # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
+        qr/Arg1.*?Capsula.*GreekHumor.*Socrates/ms,
+        q/x command test with '@_'./,
     );
 }
 
