@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 
 require Exporter;
 
@@ -1691,7 +1691,7 @@ Those discouraged forms are accepted as input to C<prop_aliases>, but are not
 returned in the lists.  C<prop_aliases('isL&')> and C<prop_aliases('isL_')>,
 which are old synonyms for C<"Is_LC"> and should not be used in new code, are
 examples of this.  These both return C<(Is_LC, Cased_Letter)>.  Thus this
-function allows you to take a discourarged form, and find its acceptable
+function allows you to take a discouraged form, and find its acceptable
 alternatives.  The same goes with single-form Block property equivalences.
 Only the forms that begin with C<"In_"> are not discouraged; if you pass
 C<prop_aliases> a discouraged form, you will get back the equivalent ones that
@@ -2091,7 +2091,7 @@ the same result:
 And both raise a warning that a Unicode property is being used on a
 non-Unicode code point.  It is arguable as to which is the correct thing to do
 here.  This function has chosen the way opposite to the Perl regular
-expression behavior.  This allows you to easily flip to to the Perl regular
+expression behavior.  This allows you to easily flip to the Perl regular
 expression way (for you to go in the other direction would be far harder).
 Simply add 0x110000 at the end of the non-empty returned list if it isn't
 already that value; and pop that value if it is; like:
@@ -2298,7 +2298,7 @@ properties acceptable as inputs to this function.
 
 It is a fatal error to call this function except in list context.
 
-In addition to the the two arrays that form the inversion map, C<prop_invmap>
+In addition to the two arrays that form the inversion map, C<prop_invmap>
 returns two other values; one is a scalar that gives some details as to the
 format of the entries of the map array; the other is a default value, useful
 in maps whose format name begins with the letter C<"a">, as described
@@ -2659,7 +2659,7 @@ properties, except that one of the scalar elements is of the form:
 
 This signifies that this entry should be replaced by the decompositions for
 all the code points whose decomposition is algorithmically calculated.  (All
-of them are currently in one range and no others outisde the range are likely
+of them are currently in one range and no others outside the range are likely
 to ever be added to Unicode; the C<"n"> format
 has this same entry.)  These can be generated via the function
 L<Unicode::Normalize::NFD()|Unicode::Normalize>.
@@ -2788,7 +2788,7 @@ sub prop_invmap ($) {
 
     # The swash has two components we look at, the base list, and a hash,
     # named 'SPECIALS', containing any additional members whose mappings don't
-    # fit into the the base list scheme of things.  These generally 'override'
+    # fit into the base list scheme of things.  These generally 'override'
     # any value in the base list for the same code point.
     my $overrides;
 
@@ -3132,7 +3132,7 @@ RETRY:
                         $list .= "$hex_begin\t$hex_end\t$decimal_map\n";
                     } else {
 
-                        # Here, no combining done.  Just appen the initial
+                        # Here, no combining done.  Just append the initial
                         # (and current) values.
                         $list .= "$hex_begin\t\t$decimal_map\n";
                     }
