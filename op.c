@@ -169,7 +169,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
      || (CvSTART(PL_compcv) && !CvSLABBED(PL_compcv)))
 	return PerlMemShared_calloc(1, sz);
 
-#if defined(USE_ITHREADS) && IVSIZE > U32SIZE
+#if defined(USE_ITHREADS) && IVSIZE > U32SIZE && IVSIZE > PTRSIZE
     /* Work around a goof with alignment on our part. For sparc32 (and
        possibly other architectures), if built with -Duse64bitint, the IV
        op_pmoffset in struct pmop should be 8 byte aligned, but the slab
