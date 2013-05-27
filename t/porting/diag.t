@@ -439,7 +439,10 @@ sub check_message {
 # don't have to go from "meh" to perfect all at once.
 # 
 # PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in
-# pod/perldiag.pod for your new (warning|error).
+# pod/perldiag.pod for your new (warning|error).  Nevertheless,
+# listing exceptions here when this script is not smart enough
+# to recognize the messages is not so bad, as long as there are
+# entries in perldiag.
 
 # Entries after __CATEGORIES__ are those that are in perldiag but fail the
 # severity/category test.

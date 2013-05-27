@@ -8542,6 +8542,7 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
                     const I32 wflagbit = *RExC_parse == 'o' ? WASTED_O : WASTED_G;
                     if (! (wastedflags & wflagbit) ) {
                         wastedflags |= wflagbit;
+			/* diag_listed_as: Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/ */
                         vWARN5(
                             RExC_parse + 1,
                             "Useless (%s%c) - %suse /%c modifier",
@@ -8558,6 +8559,7 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
                 if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
                     if (! (wastedflags & WASTED_C) ) {
                         wastedflags |= WASTED_GC;
+			/* diag_listed_as: Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/ */
                         vWARN3(
                             RExC_parse + 1,
                             "Useless (%sc) - %suse /gc modifier",
