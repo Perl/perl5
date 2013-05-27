@@ -221,11 +221,11 @@ spots.  This is now heavily deprecated.
 
 =item A sequence of multiple spaces in a charnames alias definition is deprecated
 
-(D) You defined a character name which had multiple space characters in
-a row.  Change them to single spaces.  Usually these names are defined
-in the C<:alias> import argument to C<use charnames>, but they could be
-defined by a translator installed into C<$^H{charnames}>.  See
-L<charnames/CUSTOM ALIASES>.
+(D deprecated) You defined a character name which had multiple space
+characters in a row.  Change them to single spaces.  Usually these
+names are defined in the C<:alias> import argument to C<use charnames>, but
+they could be defined by a translator installed into C<$^H{charnames}>.
+See L<charnames/CUSTOM ALIASES>.
 
 =item assertion botched: %s
 
@@ -5187,10 +5187,10 @@ Backslash it.   See L<perlre>.
 
 =item Trailing white-space in a charnames alias definition is deprecated
 
-(D) You defined a character name which ended in a space character.
-Remove the trailing space(s).  Usually these names are defined in the
-C<:alias> import argument to C<use charnames>, but they could be defined
-by a translator installed into C<$^H{charnames}>.
+(D deprecated) You defined a character name which ended in a space
+character.  Remove the trailing space(s).  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.
 See L<charnames/CUSTOM ALIASES>.
 
 =item Transliteration pattern not terminated

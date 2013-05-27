@@ -2729,12 +2729,16 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 goto bad_charname;
             }
 	    if (*s == ' ' && *(s-1) == ' ' && ckWARN_d(WARN_DEPRECATED)) {
-                Perl_warn(aTHX_ "A sequence of multiple spaces in a charnames alias definition is deprecated");
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                           "A sequence of multiple spaces in a charnames "
+                           "alias definition is deprecated");
             }
             s++;
         }
         if (*(s-1) == ' ' && ckWARN_d(WARN_DEPRECATED)) {
-            Perl_warn(aTHX_ "Trailing white-space in a charnames alias definition is deprecated");
+            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                        "Trailing white-space in a charnames alias "
+                        "definition is deprecated");
         }
     }
     else {
@@ -2773,7 +2777,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 }
                 if (*s == ' ' && *(s-1) == ' '
                  && ckWARN_d(WARN_DEPRECATED)) {
-                    Perl_warn(aTHX_ "A sequence of multiple spaces in a charnames alias definition is deprecated");
+                    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                               "A sequence of multiple spaces in a charnam"
+                               "es alias definition is deprecated");
                 }
                 s++;
             }
@@ -2800,7 +2806,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
             }
         }
         if (*(s-1) == ' ' && ckWARN_d(WARN_DEPRECATED)) {
-            Perl_warn(aTHX_ "Trailing white-space in a charnames alias definition is deprecated");
+            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                       "Trailing white-space in a charnames alias "
+                       "definition is deprecated");
         }
     }
 
