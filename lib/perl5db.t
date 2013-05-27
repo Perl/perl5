@@ -2637,7 +2637,12 @@ sub _calc_trace_wrapper
 
 # Test the perldoc command
 # We don't actually run the program, but we need to provide one to the wrapper.
+SKIP:
 {
+    $^O eq "linux"
+        or skip "man errors aren't especially portable", 1;
+    local $ENV{LANG} = "C";
+    local $ENV{LC_MESSAGE} = "C";
     my $wrapper = DebugWrap->new(
         {
             cmds =>
