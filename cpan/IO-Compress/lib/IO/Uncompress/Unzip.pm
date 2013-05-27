@@ -9,14 +9,14 @@ use warnings;
 #use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.060 ;
-use IO::Compress::Base::Common  2.060 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.060 ;
-use IO::Uncompress::Adapter::Identity 2.060 ;
-use IO::Compress::Zlib::Extra 2.060 ;
-use IO::Compress::Zip::Constants 2.060 ;
+use IO::Uncompress::RawInflate  2.061 ;
+use IO::Compress::Base::Common  2.061 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.061 ;
+use IO::Uncompress::Adapter::Identity 2.061 ;
+use IO::Compress::Zlib::Extra 2.061 ;
+use IO::Compress::Zip::Constants 2.061 ;
 
-use Compress::Raw::Zlib  2.060 () ;
+use Compress::Raw::Zlib  2.061 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -1101,7 +1101,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 unzip $input => $output [, OPTS]
+=head2 unzip $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<unzip> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.
@@ -1820,6 +1820,13 @@ start of the next compressed data stream and clear the end-of-file flag.
 It is also worth noting that C<nextStream> can be called at any time -- you
 don't have to wait until you have exhausted a compressed data stream before
 skipping to the next one.
+
+=head2 Unzipping a complete zip file to disk
+
+Daniel S. Sterling has written a script that uses C<IO::Uncompress::UnZip>
+to read a zip file and unzip its contents to disk.
+
+The script is available from L<https://gist.github.com/eqhmcow/5389877>
 
 =head1 SEE ALSO
 

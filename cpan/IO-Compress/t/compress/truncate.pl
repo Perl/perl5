@@ -189,14 +189,17 @@ sub run
             {
                 next if $i == 0 ;
 
-                my $lex = new LexFile my $name ;
-                my $input;
-            
+#                my $lex = new LexFile my $name ;
+#                my $input;
+#            
                 for my $mode (qw(block line))
                 {
 
                     title "Compressed Data Truncation - length $i, MOde $mode, Source $fb, Transparent $trans";
 
+                    my $lex = new LexFile my $name ;
+                    my $input;
+                
                     my $part = substr($compressed, 0, $i);
                     if ($fb eq 'filehandle')
                     {

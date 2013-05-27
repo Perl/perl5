@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 #use bytes;
 
-use Compress::Raw::Zlib  2.060 ;
-use IO::Compress::Base::Common  2.060 qw(:Status );
+use Compress::Raw::Zlib  2.061 ;
+use IO::Compress::Base::Common  2.061 qw(:Status );
 
-use IO::Uncompress::Base  2.060 ;
-use IO::Uncompress::Adapter::Inflate  2.060 ;
+use IO::Uncompress::Base  2.061 ;
+use IO::Uncompress::Adapter::Inflate  2.061 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -415,7 +415,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 rawinflate $input => $output [, OPTS]
+=head2 rawinflate $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<rawinflate> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.

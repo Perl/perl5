@@ -8,16 +8,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.060 ();
-use IO::Compress::Adapter::Deflate 2.060 ;
+use IO::Compress::RawDeflate 2.061 ();
+use IO::Compress::Adapter::Deflate 2.061 ;
 
-use IO::Compress::Zlib::Constants 2.060 ;
-use IO::Compress::Base::Common  2.060 qw();
+use IO::Compress::Zlib::Constants 2.061 ;
+use IO::Compress::Base::Common  2.061 qw();
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -238,7 +238,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 deflate $input => $output [, OPTS]
+=head2 deflate $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<deflate> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.

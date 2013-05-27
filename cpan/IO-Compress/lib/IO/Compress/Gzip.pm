@@ -8,12 +8,12 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.060 () ; 
-use IO::Compress::Adapter::Deflate 2.060 ;
+use IO::Compress::RawDeflate 2.061 () ; 
+use IO::Compress::Adapter::Deflate 2.061 ;
 
-use IO::Compress::Base::Common  2.060 qw(:Status );
-use IO::Compress::Gzip::Constants 2.060 ;
-use IO::Compress::Zlib::Extra 2.060 ;
+use IO::Compress::Base::Common  2.061 qw(:Status );
+use IO::Compress::Gzip::Constants 2.061 ;
+use IO::Compress::Zlib::Extra 2.061 ;
 
 BEGIN
 {
@@ -25,7 +25,7 @@ BEGIN
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $GzipError);
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -347,7 +347,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 gzip $input => $output [, OPTS]
+=head2 gzip $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<gzip> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.

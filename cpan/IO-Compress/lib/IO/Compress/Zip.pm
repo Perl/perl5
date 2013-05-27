@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.060 qw(:Status );
-use IO::Compress::RawDeflate 2.060 ();
-use IO::Compress::Adapter::Deflate 2.060 ;
-use IO::Compress::Adapter::Identity 2.060 ;
-use IO::Compress::Zlib::Extra 2.060 ;
-use IO::Compress::Zip::Constants 2.060 ;
+use IO::Compress::Base::Common  2.061 qw(:Status );
+use IO::Compress::RawDeflate 2.061 ();
+use IO::Compress::Adapter::Deflate 2.061 ;
+use IO::Compress::Adapter::Identity 2.061 ;
+use IO::Compress::Zlib::Extra 2.061 ;
+use IO::Compress::Zip::Constants 2.061 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.060 (); 
+use Compress::Raw::Zlib  2.061 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.060 ; 
+           import  IO::Compress::Adapter::Bzip2 2.061 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.060 ; 
+           import  IO::Compress::Bzip2 2.061 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.060 ; 
+           import  IO::Compress::Adapter::Lzma 2.061 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.060 ; 
+           import  IO::Compress::Lzma 2.061 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -939,7 +939,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 zip $input => $output [, OPTS]
+=head2 zip $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<zip> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.

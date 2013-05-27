@@ -6,15 +6,15 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base 2.060 ;
-use IO::Compress::Base::Common  2.060 qw(:Status );
-use IO::Compress::Adapter::Deflate 2.060 ;
+use IO::Compress::Base 2.061 ;
+use IO::Compress::Base::Common  2.061 qw(:Status );
+use IO::Compress::Adapter::Deflate 2.061 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -116,8 +116,8 @@ sub getExtraParams
     return getZlibParams();
 }
 
-use IO::Compress::Base::Common  2.060 qw(:Parse);
-use Compress::Raw::Zlib  2.060 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+use IO::Compress::Base::Common  2.061 qw(:Parse);
+use Compress::Raw::Zlib  2.061 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 our %PARAMS = (
             #'method'   => [IO::Compress::Base::Common::Parse_unsigned,  Z_DEFLATED],
             'level'     => [IO::Compress::Base::Common::Parse_signed,    Z_DEFAULT_COMPRESSION],
@@ -294,7 +294,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 rawdeflate $input => $output [, OPTS]
+=head2 rawdeflate $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<rawdeflate> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.

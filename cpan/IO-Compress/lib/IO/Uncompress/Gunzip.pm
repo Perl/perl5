@@ -9,12 +9,12 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate 2.060 ;
+use IO::Uncompress::RawInflate 2.061 ;
 
-use Compress::Raw::Zlib 2.060 () ;
-use IO::Compress::Base::Common 2.060 qw(:Status );
-use IO::Compress::Gzip::Constants 2.060 ;
-use IO::Compress::Zlib::Extra 2.060 ;
+use Compress::Raw::Zlib 2.061 () ;
+use IO::Compress::Base::Common 2.061 qw(:Status );
+use IO::Compress::Gzip::Constants 2.061 ;
+use IO::Compress::Zlib::Extra 2.061 ;
 
 require Exporter ;
 
@@ -28,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.060';
+$VERSION = '2.061';
 
 sub new
 {
@@ -345,7 +345,7 @@ section.
 
 The functional interface needs Perl5.005 or better.
 
-=head2 gunzip $input => $output [, OPTS]
+=head2 gunzip $input_filename_or_reference => $output_filename_or_reference [, OPTS]
 
 C<gunzip> expects at least two parameters,
 C<$input_filename_or_reference> and C<$output_filename_or_reference>.
