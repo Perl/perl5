@@ -166,11 +166,11 @@ DispHex(ptr, length)
 
 static void
 #ifdef CAN_PROTOTYPE
-DispStream(di_stream * s, char * message)
+DispStream(di_stream * s, const char * message)
 #else
 DispStream(s, message)
     di_stream * s;
-    char * message;
+    const char * message;
 #endif
 {
 
@@ -474,7 +474,7 @@ MODULE = Compress::Raw::Bzip2 PACKAGE = Compress::Raw::Bzip2
 void
 DispStream(s, message=NULL)
     Compress::Raw::Bzip2   s
-    char *  message
+    const char *  message
 
 DualType 
 bzdeflate (s, buf, output)
@@ -713,7 +713,7 @@ MODULE = Compress::Raw::Bunzip2 PACKAGE = Compress::Raw::Bunzip2
 void
 DispStream(s, message=NULL)
     Compress::Raw::Bunzip2   s
-    char *  message
+    const char *  message
 
 DualType 
 bzinflate (s, buf, output)

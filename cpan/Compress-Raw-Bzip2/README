@@ -1,9 +1,9 @@
 
                             Compress-Raw-Bzip2
 
-                         Version 2.060
+                         Version 2.061
 
-                             7th January 2013
+                               19th May 2013
 
        Copyright (c) 2005-2013 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
@@ -164,7 +164,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Raw-Bzip2 then search Compress::Raw::Bzip2.pm
         for a line like this:
 
-          $VERSION = "2.060" ;
+          $VERSION = "2.061" ;
 
      c. The version of bzip2 you have used.
         If you have successfully installed Compress-Raw-Bzip2, this one-liner
