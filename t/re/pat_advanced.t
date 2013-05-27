@@ -1020,6 +1020,7 @@ sub run_tests {
         undef $w;
         eval q [is("\N{TOO  MANY SPACES}", "TOO  MANY SPACES", "Multiple spaces in character name works")];
         like ($w, qr/A sequence of multiple spaces in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
+        undef $w;
         eval q [use utf8; is("\N{TOO  MANY SPACES}", "TOO  MANY SPACES", "Same under 'use utf8': they work")];
         like ($w, qr/A sequence of multiple spaces in a charnames alias definition is deprecated/, "... but return a deprecation warning");
         {
@@ -1051,6 +1052,7 @@ sub run_tests {
         undef $w;
         eval q [is("\N{TRAILING SPACE }", "TRAILING SPACE ", "Trailing space in character name works")];
         like ($w, qr/Trailing white-space in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
+        undef $w;
         eval q [use utf8; is("\N{TRAILING SPACE }", "TRAILING SPACE ", "Same under 'use utf8': they work")];
         like ($w, qr/Trailing white-space in a charnames alias definition is deprecated/, "... but returns a deprecation warning");
         {
