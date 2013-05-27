@@ -555,16 +555,16 @@ if the pattern delimiters are C<{}>.
 (P) Perl detected an attempt to copy an internal value that is not
 copiable.
 
+=item Bizarre SvTYPE [%d]
+
+(P) When starting a new thread or return values from a thread, Perl
+encountered an invalid data type.
+
 =item Buffer overflow in prime_env_iter: %s
 
 (W internal) A warning peculiar to VMS.  While Perl was preparing to
 iterate over %ENV, it encountered a logical name or symbol definition
 which was too long, so it was truncated to the string shown.
-
-=item Bizarre SvTYPE [%d]
-
-(P) When starting a new thread or return values from a thread, Perl
-encountered an invalid data type.
 
 =item Callback called exit
 
@@ -882,16 +882,16 @@ a block, except that it isn't a proper block.  This usually occurs if
 you tried to jump out of a sort() block or subroutine, which is a no-no.
 See L<perlfunc/goto>.
 
+=item Can't goto subroutine from an eval-%s
+
+(F) The "goto subroutine" call can't be used to jump out of an eval
+"string" or block.
+
 =item Can't goto subroutine from a sort sub (or similar callback)
 
 (F) The "goto subroutine" call can't be used to jump out of the
 comparison sub for a sort(), or from a similar callback (such
 as the reduce() function in List::Util).
-
-=item Can't goto subroutine from an eval-%s
-
-(F) The "goto subroutine" call can't be used to jump out of an eval
-"string" or block.
 
 =item Can't goto subroutine outside a subroutine
 
@@ -1333,18 +1333,6 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
 
-=item Character in 'W' format wrapped in pack
-
-(W pack) You said
-
-    pack("U0W", $x)
-
-where $x is either less than 0 or more than 255.  However, C<U0>-mode
-expects all values to fall in the interval [0, 255], so Perl behaved
-as if you meant:
-
-    pack("U0W", $x & 255)
-
 =item Character in 'c' format wrapped in pack
 
 (W pack) You said
@@ -1371,6 +1359,18 @@ below 256), but a higher value was provided instead.  Perl uses the
 value modulus 256 instead, as if you had provided:
 
    unpack("H", "\x{a1}")
+
+=item Character in 'W' format wrapped in pack
+
+(W pack) You said
+
+    pack("U0W", $x)
+
+where $x is either less than 0 or more than 255.  However, C<U0>-mode
+expects all values to fall in the interval [0, 255], so Perl behaved
+as if you meant:
+
+    pack("U0W", $x & 255)
 
 =item Character(s) in '%c' format wrapped in pack
 
@@ -1415,14 +1415,14 @@ characters.
 
 (F) Creating a new thread inside the C<s///> operator is not supported.
 
-=item close() on unopened filehandle %s
-
-(W unopened) You tried to close a filehandle that was never opened.
-
 =item closedir() attempted on invalid dirhandle %s
 
 (W io) The dirhandle you tried to close is either closed or not really
 a dirhandle.  Check your control flow.
+
+=item close() on unopened filehandle %s
+
+(W unopened) You tried to close a filehandle that was never opened.
 
 =item Closure prototype called
 
@@ -1435,10 +1435,10 @@ This subroutine cannot be called.
 (F) You had a (sub-)template that ends with a '/'.  There must be
 another template code following the slash.  See L<perlfunc/pack>.
 
-=item Code point 0x%X is not Unicode, may not be portable
-
 =item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches 
 succeed
+
+=item Code point 0x%X is not Unicode, may not be portable
 
 (S utf8, non_unicode) You had a code point above the Unicode maximum
 of U+10FFFF.
@@ -1537,13 +1537,6 @@ L<charnames/CUSTOM TRANSLATORS>) returned an undefined value.
 overloaded constant.  Perhaps you forgot to load the corresponding
 L<overload> pragma?.
 
-=item Constant(%s) unknown
-
-(F) The parser found inconsistencies either while attempting to define
-an overloaded constant, or when trying to find the character name
-specified in the C<\N{...}> escape.  Perhaps you forgot to load the
-corresponding L<overload> pragma?.
-
 =item Constant is not %s reference
 
 (F) A constant value (perhaps declared using the C<use constant> pragma)
@@ -1563,6 +1556,13 @@ for commentary and workarounds.
 (W misc) You undefined a subroutine which had previously been eligible
 for inlining.  See L<perlsub/"Constant Functions"> for commentary and
 workarounds.
+
+=item Constant(%s) unknown
+
+(F) The parser found inconsistencies either while attempting
+to define an overloaded constant, or when trying to find the
+character name specified in the C<\N{...}> escape.  Perhaps you
+forgot to load the corresponding L<overload> pragma?.
 
 =item Copy method did not return a reference
 
@@ -2136,17 +2136,17 @@ unspecified destination.  See L<perlfunc/goto>.
 the indicated subroutine hasn't been defined, or if it was, it
 has since been undefined.
 
-=item ()-group starts with a count
-
-(F) A ()-group started with a count.  A count is supposed to follow
-something: a template character or a ()-group.  See L<perlfunc/pack>.
-
 =item Group name must start with a non-digit word character in regex; marked by 
 <-- HERE in m/%s/
 
 (F) Group names must follow the rules for perl identifiers, meaning
 they must start with a non-digit word character. A common cause of
 this error is using (?&0) instead of (?0). See L<perlre>.
+
+=item ()-group starts with a count
+
+(F) A ()-group started with a count.  A count is supposed to follow
+something: a template character or a ()-group.  See L<perlfunc/pack>.
 
 =item %s had compilation errors.
 
@@ -2173,16 +2173,6 @@ Further error messages would likely be uninformative.
 (W portable) The hexadecimal number you specified is larger than 2**32-1
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
-
-=item -i used with no filenames on the command line, reading from STDIN
-
-(S inplace) The C<-i> option was passed on the command line, indicating
-that the script is intended to edit files inplace, but no files were
-given.  This is usually a mistake, since editing STDIN inplace doesn't
-make sense, and can be confusing because it can make perl look like
-it is hanging when it is really just trying to read from STDIN.  You
-should either pass a filename to edit, or remove C<-i> from the command
-line.  See L<perlrun> for more details.
 
 =item Identifier too long
 
@@ -2459,16 +2449,16 @@ by Perl or by a user-supplied handler.  See L<attributes>.
 (F) The indicated attributes for a subroutine or variable were not
 recognized by Perl or by a user-supplied handler.  See L<attributes>.
 
-=item Invalid character in \N{...}; marked by <-- HERE in \N{%s}
-
-(F) Only certain characters are valid for character names.  The
-indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
-
 =item Invalid character in charnames alias definition; marked by <-- HERE in '%s
 
 (F) You tried to create a custom alias for a character name, with
 the C<:alias> option to C<use charnames> and the specified character in
 the indicated name isn't valid.  See L<charnames/CUSTOM ALIASES>.
+
+=item Invalid character in \N{...}; marked by <-- HERE in \N{%s}
+
+(F) Only certain characters are valid for character names.  The
+indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
 
 =item Invalid conversion in %s: "%s"
 
@@ -2642,6 +2632,16 @@ an anonymous subroutine, or a reference to a subroutine.
 
 (W overload) You tried to overload a constant type the overload package is
 unaware of.
+
+=item -i used with no filenames on the command line, reading from STDIN
+
+(S inplace) The C<-i> option was passed on the command line, indicating
+that the script is intended to edit files in place, but no files were
+given.  This is usually a mistake, since editing STDIN in place doesn't
+make sense, and can be confusing because it can make perl look like
+it is hanging when it is really just trying to read from STDIN.  You
+should either pass a filename to edit, or remove C<-i> from the command
+line.  See L<perlrun> for more details.
 
 =item Junk on end of regexp in regex m/%s/
 
@@ -3057,6 +3057,14 @@ See L<perlfunc/pack>.
 (F) Lexically scoped subroutines are not yet implemented.  Don't try
 that yet.
 
+=item "my %s" used in sort comparison
+
+(W syntax) The package variables $a and $b are used for sort comparisons.
+You used $a or $b in as an operand to the C<< <=> >> or C<cmp> operator inside a
+sort comparison block, and the variable had earlier been declared as a
+lexical variable.  Either qualify the sort variable with the package
+name, or rename the lexical variable.
+
 =item "my" variable %s can't be in a package
 
 (F) Lexically scoped variables aren't in a package, so it doesn't make
@@ -3074,45 +3082,6 @@ NOTE: This warning detects symbols that have been used only once so $c, @c,
 %c, *c, &c, sub c{}, c(), and c (the filehandle or format) are considered
 the same; if a program uses $c only once but also uses any of the others it
 will not trigger this warning.
-
-=item \N in a character class must be a named character: \N{...} in regex; 
-marked by <-- HERE in m/%s/
-
-(F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in a bracketed
-character class, for the same reason that C<.> in a character class loses
-its specialness: it matches almost everything, which is probably not
-what you want.
-
-=item \N{NAME} must be resolved by the lexer in regex; marked by <-- HERE in m/%s/
-
-(F) When compiling a regex pattern, an unresolved named character or
-sequence was encountered.  This can happen in any of several ways that
-bypass the lexer, such as using single-quotish context, or an extra
-backslash in double-quotish:
-
-    $re = '\N{SPACE}';	# Wrong!
-    $re = "\\N{SPACE}";	# Wrong!
-    /$re/;
-
-Instead, use double-quotes with a single backslash:
-
-    $re = "\N{SPACE}";	# ok
-    /$re/;
-
-The lexer can be bypassed as well by creating the pattern from smaller
-components:
-
-    $re = '\N';
-    /${re}{SPACE}/;	# Wrong!
-
-It's not a good idea to split a construct in the middle like this, and it
-doesn't work here.  Instead use the solution above.
-
-Finally, the message also can happen under the C</x> regex modifier when the
-C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
-
-    /\N {SPACE}/x;	# Wrong!
-    /\N{SPACE}/x;	# ok
 
 =item Need exactly 3 octal digits in regex; marked by <-- HERE in m/%s/
 
@@ -3167,6 +3136,45 @@ scope before it could possibly have been used.
 (F) C<next::method> needs to be called within the context of a
 real method in a real package, and it could not find such a context.
 See L<mro>.
+
+=item \N in a character class must be a named character: \N{...} in regex; 
+marked by <-- HERE in m/%s/
+
+(F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in
+a bracketed character class, for the same reason that C<.> in
+a character class loses its specialness: it matches almost
+everything, which is probably not what you want.
+
+=item \N{NAME} must be resolved by the lexer in regex; marked by <-- HERE in m/%s/
+
+(F) When compiling a regex pattern, an unresolved named character or
+sequence was encountered.  This can happen in any of several ways that
+bypass the lexer, such as using single-quotish context, or an extra
+backslash in double-quotish:
+
+    $re = '\N{SPACE}';	# Wrong!
+    $re = "\\N{SPACE}";	# Wrong!
+    /$re/;
+
+Instead, use double-quotes with a single backslash:
+
+    $re = "\N{SPACE}";	# ok
+    /$re/;
+
+The lexer can be bypassed as well by creating the pattern from smaller
+components:
+
+    $re = '\N';
+    /${re}{SPACE}/;	# Wrong!
+
+It's not a good idea to split a construct in the middle like this, and
+it doesn't work here.  Instead use the solution above.
+
+Finally, the message also can happen under the C</x> regex modifier when the
+C<\N> is separated by spaces from the C<{>, in which case, remove the spaces.
+
+    /\N {SPACE}/x;	# Wrong!
+    /\N{SPACE}/x;	# ok
 
 =item No %s allowed while running setuid
 
@@ -3322,17 +3330,17 @@ your system.
 (F) Configure didn't find anything resembling the setreuid() call for
 your system.
 
+=item No such class %s
+
+(F) You provided a class qualifier in a "my", "our" or "state"
+declaration, but this class doesn't exist at this point in your program.
+
 =item No such class field "%s" in variable %s of type %s
 
 (F) You tried to access a key from a hash through the indicated typed
 variable but that key is not allowed by the package of the same type.
 The indicated package has restricted the set of allowed keys using the
 L<fields> pragma.
-
-=item No such class %s
-
-(F) You provided a class qualifier in a "my", "our" or "state"
-declaration, but this class doesn't exist at this point in your program.
 
 =item No such hook: %s
 
@@ -3473,14 +3481,6 @@ the meantime, try using scientific notation (e.g. "1e6" instead of
 a number.  This happens, for example with C<\o{}>, with no number between
 the braces.
 
-=item "my %s" used in sort comparison
-
-(W syntax) The package variables $a and $b are used for sort comparisons.
-You used $a or $b in as an operand to the C<< <=> >> or C<cmp> operator inside a
-sort comparison block, and the variable had earlier been declared as a
-lexical variable.  Either qualify the sort variable with the package
-name, or rename the lexical variable.
-
 =item Octal number > 037777777777 non-portable
 
 (W portable) The octal number you specified is larger than 2**32-1
@@ -3522,12 +3522,6 @@ call, or call a constructor from the FileHandle package.
 
 (W unopened) You tried to invoke a file test operator on a filehandle
 that isn't open.  Check your control flow.  See also L<perlfunc/-X>.
-
-=item Strings with code points over 0xFF may not be mapped into in-memory file handles
-
-(W utf8) You tried to open a reference to a scalar for read or append
-where the scalar contained code points over 0xFF.  In-memory files
-model on-disk files and can only contain bytes.
 
 =item oops: oopsAV
 
@@ -3890,6 +3884,12 @@ then discovered it wasn't a subroutine or eval context.
 blocks, perl couldn't locate the code block that should have already been
 seen and compiled by perl before control passed to the regex compiler.
 
+=item panic: strxfrm() gets absurd - a => %u, ab => %u
+
+(P) The interpreter's sanity check of the C function strxfrm() failed.
+In your current locale the returned transformation of the string "ab"
+is shorter than that of the string "a", which makes no sense.
+
 =item panic: sv_chop %s
 
 (P) The sv_chop() routine was passed a position that is not within the
@@ -3899,12 +3899,6 @@ scalar's string buffer.
 
 (P) The sv_insert() routine was told to remove more string than there
 was string.
-
-=item panic: strxfrm() gets absurd - a => %u, ab => %u
-
-(P) The interpreter's sanity check of the C function strxfrm() failed.
-In your current locale the returned transformation of the string "ab" is
-shorter than that of the string "a", which makes no sense.
 
 =item panic: top_env
 
@@ -4621,16 +4615,16 @@ Perl to use the default regular expression modifiers, and you
 redundantly specify a default modifier.  For other
 causes, see L<perlre>.
 
-=item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/
-
-(F) The regular expression expects a mandatory argument following the escape
-sequence and this has been omitted or incorrectly written.
-
 =item Sequence (?#... not terminated in regex m/%s/
 
 (F) A regular expression comment must be terminated by a closing
 parenthesis.  Embedded parentheses aren't allowed.  See
 L<perlre>.
+
+=item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/
+
+(F) The regular expression expects a mandatory argument following the escape
+sequence and this has been omitted or incorrectly written.
 
 =item Sequence (?{...}) not terminated with ')'
 
@@ -4795,12 +4789,6 @@ unless there was a failure.  You probably wanted to use system()
 instead, which does return.  To suppress this warning, put the exec() in
 a block by itself.
 
-=item "state" variable %s can't be in a package
-
-(F) Lexically scoped variables aren't in a package, so it doesn't make
-sense to try to declare one with a package qualifier on the front.  Use
-local() if you want to localize a package variable.
-
 =item "state %s" used in sort comparison
 
 (W syntax) The package variables $a and $b are used for sort comparisons.
@@ -4809,10 +4797,22 @@ sort comparison block, and the variable had earlier been declared as a
 lexical variable.  Either qualify the sort variable with the package
 name, or rename the lexical variable.
 
+=item "state" variable %s can't be in a package
+
+(F) Lexically scoped variables aren't in a package, so it doesn't make
+sense to try to declare one with a package qualifier on the front.  Use
+local() if you want to localize a package variable.
+
 =item stat() on unopened filehandle %s
 
 (W unopened) You tried to use the stat() function on a filehandle that
 was either never opened or has since been closed.
+
+=item Strings with code points over 0xFF may not be mapped into in-memory file handles
+
+(W utf8) You tried to open a reference to a scalar for read or append
+where the scalar contained code points over 0xFF.  In-memory files
+model on-disk files and can only contain bytes.
 
 =item Stub found while resolving method "%s" overloading "%s" in package "%s"
 
@@ -5414,10 +5414,6 @@ iterating over it, and someone else stuck a message in the stream of
 data Perl expected.  Someone's very confused, or perhaps trying to
 subvert Perl's population of %ENV for nefarious purposes.
 
-=item Unknown "re" subpragma '%s' (known ones are: %s)
-
-(W) You tried to use an unknown subpragma of the "re" pragma.
-
 =item Unknown regex modifier "%s"
 
 (F) Alphanumerics immediately following the closing delimiter
@@ -5432,6 +5428,10 @@ The C<"a"> is a valid modifier flag, but the C<"n"> is not, and raises
 this error.  Likely what was meant instead was:
 
  if ($a =~ /foo/ and $bar == 3) { ... }
+
+=item Unknown "re" subpragma '%s' (known ones are: %s)
+
+(W) You tried to use an unknown subpragma of the "re" pragma.
 
 =item Unknown switch condition (?(%s in regex; marked by <-- HERE in m/%s/
 
