@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Wed May  8 15:28:09 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Mon May 27 09:27:16 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -99,7 +99,7 @@ if test -d c:/. || ( uname -a | grep -i 'os\(/\|\)2' ) 2>&1 >/dev/null ; then
 		is_os2=yes
 	elif test -n "$DJGPP"; then
 		case "X${MACHTYPE:-nonesuchmach}" in
-		*cygwin) ;;
+		*cygwin|*msys) ;;
 		*) p_=\; ;;
 		esac
 	fi
@@ -6948,7 +6948,7 @@ case "$ans" in
 [yY]*)	fn=d~+
 	rp='Installation prefix to use for vendor-supplied add-ons?'
 	case "$vendorprefix" in
-	'') dflt='' ;;
+	'') dflt="$prefix" ;;
 	*)  dflt=$vendorprefix ;;
 	esac
 	. ./getfile
@@ -8048,7 +8048,8 @@ EOM
 			      ;;
 			linux|irix*|gnu*)  dflt="-shared $optimize" ;;
 			next)  dflt='none' ;;
-			solaris) # See [perl #66604].  On Solaris 11, gcc -m64 on amd64
+			solaris) # See [perl #66604].
+				# On Solaris 11, gcc -m64 on amd64 
 				# appears not to understand -G.  gcc versions at
 				# least as old as 3.4.3 support -shared, so just
 				# use that with Solaris 11 and later, but keep
