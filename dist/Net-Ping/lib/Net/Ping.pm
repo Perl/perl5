@@ -17,7 +17,7 @@ use Time::HiRes;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.41";
+$VERSION = "2.42";
 
 # Constants
 
