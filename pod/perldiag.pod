@@ -2183,9 +2183,9 @@ of Perl are likely to eliminate these arbitrary limitations.
 
 =item Ignoring zero length \N{} in character class in regex; marked by <-- HERE in m/%s/
 
-(W regexp) Named Unicode character escapes C<(\N{...})> may return a zero-length
-sequence.  When such an escape is used in a character class its
-behaviour is not well defined.  Check that the correct escape has
+(W regexp) Named Unicode character escapes C<(\N{...})> may return a
+zero-length sequence.  When such an escape is used in a character class
+its behaviour is not well defined.  Check that the correct escape has
 been used, and the correct charname handler is in scope.
 
 =item Illegal binary digit %s
