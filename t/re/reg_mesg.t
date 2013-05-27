@@ -313,6 +313,16 @@ foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
                                     eval "no warnings '$warning_type'; $regex;" }
                                 ),
                     "... and turning off '$warning_type' warnings suppressed it");
+                    # Test that whether the warning is on by default is
+                    # correct.  Experimental and deprecated warnings are;
+                    # others are not.  This test relies on the fact that we
+                    # are outside the scope of any ‘use warnings’.
+                    local $^W;
+                    my $on = 'on' x ($warning_type ne 'regexp');
+                    ok !!$on ==
+                        capture_warnings(sub { $_ = "x"; eval $regex }),
+                      "... and the warning is " . ($on||'off')
+                       . " by default";
                 }
             }
         }

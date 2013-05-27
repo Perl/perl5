@@ -11021,7 +11021,7 @@ tryagain:
 
                     if (! SIZE_ONLY
                         && RExC_flags & RXf_PMf_EXTENDED
-                        && ckWARN(WARN_DEPRECATED)
+                        && ckWARN_d(WARN_DEPRECATED)
                         && is_PATWS_non_low(p, UTF))
                     {
                         vWARN_dep(p + ((UTF) ? UTF8SKIP(p) : 1),
