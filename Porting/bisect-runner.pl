@@ -1042,7 +1042,7 @@ sub clean {
     if ($options{clean}) {
         # Needed, because files that are build products in this checked out
         # version might be in git in the next desired version.
-        system 'git clean -dxf </dev/null';
+        system 'git clean -qdxf </dev/null';
         # Needed, because at some revisions the build alters checked out files.
         # (eg pod/perlapi.pod). Also undoes any changes to makedepend.SH
         system 'git reset --hard HEAD </dev/null';
