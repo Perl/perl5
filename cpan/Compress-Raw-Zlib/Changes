@@ -1,6 +1,16 @@
 CHANGES
 -------
 
+  2.061 19 May 2013
+
+      * Include zlib 1.2.8 source.
+
+      * typo fix
+        [#85431]
+
+      * silence compiler warning by making 2nd parameter to 
+        DispStream a const char*
+
   2.060 7 January 2013
 
       * Mention SimpleZip in POD

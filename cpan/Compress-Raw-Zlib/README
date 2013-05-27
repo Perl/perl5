@@ -1,16 +1,16 @@
 
                             Compress-Raw-Zlib
 
-                         Version 2.060
+                         Version 2.061
 
-                             7th January 2013
+                               19th May 2013
 
        Copyright (c) 2005-2013 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
            and/or modify it under the same terms as Perl itself.
 
               The directory zlib-src contains a subset of the 
-             source files copied directly from zlib version 1.2.7.
+             source files copied directly from zlib version 1.2.8.
                   These files are Copyright(C) 1995-2012
                      Jean-loup Gailly and Mark Adler.
              Full source for the zlib library is available at
@@ -99,16 +99,16 @@ before building this module.
   
   For option 2, fetch a copy of the zlib source distribution from
   http://www.zlib.org and unpack it into the Compress-Raw-Zlib source 
-  directory. Assuming you have fetched zlib 1.2.7, 
-  it will create a directory called zlib-1.2.7. 
+  directory. Assuming you have fetched zlib 1.2.8, 
+  it will create a directory called zlib-1.2.8. 
   
   Now set the variables in the file config.in as follows (if the version
-  you have fetched isn't 1.2.7, change the INCLUDE and LIB
+  you have fetched isn't 1.2.8, change the INCLUDE and LIB
   variables appropriately):
   
       BUILD_ZLIB   = True
-      INCLUDE      = ./zlib-1.2.7
-      LIB          = ./zlib-1.2.7
+      INCLUDE      = ./zlib-1.2.8
+      LIB          = ./zlib-1.2.8
       OLD_ZLIB     = False
       GZIP_OS_CODE = AUTO_DETECT
   
@@ -355,7 +355,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Raw-Zlib then search Compress::Raw::Zlib.pm
         for a line like this:
 
-          $VERSION = "2.060" ;
+          $VERSION = "2.061" ;
 
      c. The version of zlib you have used.
         If you have successfully installed Compress-Raw-Zlib, this one-liner

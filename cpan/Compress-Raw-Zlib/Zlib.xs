@@ -70,6 +70,10 @@
 #  define AT_LEAST_ZLIB_1_2_5_2
 #endif
 
+#if  defined(ZLIB_VERNUM) && ZLIB_VERNUM >= 0x1280
+#  define AT_LEAST_ZLIB_1_2_8
+#endif
+
 #ifdef USE_PPPORT_H
 #  define NEED_sv_2pvbyte
 #  define NEED_sv_2pv_nolen
@@ -417,11 +421,11 @@ DispHex(ptr, length)
 
 static void
 #ifdef CAN_PROTOTYPE
-DispStream(di_stream * s, char * message)
+DispStream(di_stream * s, const char * message)
 #else
 DispStream(s, message)
     di_stream * s;
-    char * message;
+    const char * message;
 #endif
 {
 
@@ -911,7 +915,7 @@ MODULE = Compress::Raw::Zlib PACKAGE = Compress::Raw::Zlib::deflateStream
 void
 DispStream(s, message=NULL)
     Compress::Raw::Zlib::deflateStream   s
-    char *  message
+    const char *  message
 
 DualType
 deflateReset(s)
@@ -1333,7 +1337,7 @@ MODULE = Compress::Raw::Zlib PACKAGE = Compress::Raw::Zlib::inflateStream
 void
 DispStream(s, message=NULL)
     Compress::Raw::Zlib::inflateStream   s
-    char *  message
+    const char *  message
 
 DualType
 inflateReset(s)
@@ -1707,7 +1711,7 @@ DESTROY(s)
 void
 DispStream(s, message=NULL)
     Compress::Raw::Zlib::inflateScanStream   s
-    char *  message
+    const char *  message
 
 DualType
 inflateReset(s)
