@@ -1226,12 +1226,12 @@ sub padname_sv {
 
 sub maybe_my {
     my $self = shift;
-    my($op, $cx, $text) = @_;
+    my($op, $cx, $text, $forbid_parens) = @_;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
 	my $my = $op->private & OPpPAD_STATE
 	    ? $self->keyword("state")
 	    : "my";
-	if (want_scalar($op)) {
+	if ($forbid_parens || want_scalar($op)) {
 	    return "$my $text";
 	} else {
 	    return $self->maybe_parens_func($my, $text, $cx, 16);
@@ -3111,7 +3111,7 @@ sub loop_common {
 		# thread special var, under 5005threads
 		$var = $self->pp_threadsv($enter, 1);
 	    } else { # regular my() variable
-		$var = $self->pp_padsv($enter, 1);
+		$var = $self->pp_padsv($enter, 1, 1);
 	    }
 	} elsif ($var->name eq "rv2gv") {
 	    $var = $self->pp_rv2sv($var, 1);
@@ -3267,8 +3267,9 @@ sub padany {
 
 sub pp_padsv {
     my $self = shift;
-    my($op, $cx) = @_;
-    return $self->maybe_my($op, $cx, $self->padname($op->targ));
+    my($op, $cx, $forbid_parens) = @_;
+    return $self->maybe_my($op, $cx, $self->padname($op->targ),
+			   $forbid_parens);
 }
 
 sub pp_padav { pp_padsv(@_) }
