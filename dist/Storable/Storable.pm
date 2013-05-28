@@ -1,5 +1,6 @@
 #
-#  Copyright (c) 1995-2000, Raphael Manfredi
+#  Copyright (c) 1995-2001, Raphael Manfredi
+#  Copyright (c) 2002-2013 by the Perl 5 Porters
 #  
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
@@ -1192,7 +1193,8 @@ Thank you to (in chronological order):
 	Salvador Ortiz Garcia <sog@msg.com.mx>
 	Dominic Dunlop <domo@computer.org>
 	Erik Haugan <erik@solbors.no>
-    Benjamin A. Holzman <ben.holzman@grantstreet.com>
+	Benjamin A. Holzman <ben.holzman@grantstreet.com>
+	Reini Urban <rurban@cpanel.net>
 
 for their bug reports, suggestions and contributions.
 
