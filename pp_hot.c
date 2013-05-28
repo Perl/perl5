@@ -2847,6 +2847,12 @@ try_autoload:
 
 	PUTBACK;
 
+	if (((PL_op->op_private
+	       & PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
+             ) & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
+	    !CvLVALUE(cv))
+	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
+
 	if (!hasargs) {
 	    /* Need to copy @_ to stack. Alternative may be to
 	     * switch stack to @_, and copy return values

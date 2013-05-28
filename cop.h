@@ -596,16 +596,19 @@ struct block_format {
 	    SAVEFREESV(cv);						\
 	}
 
-
-#define PUSHSUB(cx)							\
-    {									\
+#define PUSHSUB_GET_LVALUE_MASK(func) \
 	/* If the context is indeterminate, then only the lvalue */	\
 	/* flags that the caller also has are applicable.        */	\
-	U8 phlags =							\
+	(								\
 	   (PL_op->op_flags & OPf_WANT)					\
 	       ? OPpENTERSUB_LVAL_MASK					\
 	       : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)		\
-	           ? 0 : (U8)Perl_was_lvalue_sub(aTHX);			\
+	           ? 0 : (U8)func(aTHX)					\
+	)
+
+#define PUSHSUB(cx)							\
+    {									\
+	U8 phlags = PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);	\
 	PUSHSUB_BASE(cx)						\
 	cx->blk_u16 = PL_op->op_private &				\
 	                  (phlags|OPpDEREF);				\
