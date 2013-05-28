@@ -38,8 +38,6 @@
 #ifndef USE_PERLIO
 #ifndef PERLIO_IS_STDIO
 #define PerlIO FILE
-#define PerlIO_getc(x) getc(x)
-#define PerlIO_putc(f,x) putc(x,f)
 #define PerlIO_read(x,y,z) fread(y,1,z,x)
 #define PerlIO_write(x,y,z) fwrite(y,1,z,x)
 #define PerlIO_stdoutf printf
@@ -1927,7 +1925,7 @@ static void store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
                                 Perl_croak(aTHX_ "Number of entries on hash changed while storing it");
                         
                         val = hv_iterval(hv, he);
-                        ASSERT(val, "hv_iterval returns non NULL");
+                        ASSERT(val, ("hv_iterval returns non NULL"));
 
                         /* Implementation of restricted hashes isn't nicely
                            abstracted:  */
