@@ -178,10 +178,6 @@
  * Operation types
  */
 
-#define ST_STORE	0x1		/* Store operation */
-#define ST_RETRIEVE	0x2		/* Retrieval operation */
-#define ST_CLONE	0x4		/* Deep cloning operation */
-
 /*
  * At store time:
  * A ptr table records the objects which have already been stored.
@@ -270,53 +266,56 @@
 
 typedef struct st_store_cxt store_cxt_t;
 struct st_store_cxt {
-	int optype;			/* type of traversal operation */
-	/* We have to store tag+1, because tag numbers start at 0, and
-	   we can't store (SV *) 0 in a ptr_table without it being
-	   confused for a fetch lookup failure.  */
-	PTR_TBL_t *pseen;
-	HV *hseen; 			/* Still need hseen for the 0.6 file format code. */
-	AV *hook_seen;			/* which SVs were returned by STORABLE_freeze() */
-	IV where_is_undef;		/* index in aseen of PL_sv_undef */
-	HV *hclass;			/* which classnames have been seen, store time */
-	HV *hook;			/* cache for hook methods per class name */
-	IV tagnum;			/* incremented at store time for each seen object */
+	int cloning;		/* type of traversal operation */
+
+	PTR_TBL_t *pseen;	/* We have to store tag+1, because tag
+                                   numbers start at 0, and we can't
+                                   store (SV *) 0 in a ptr_table
+                                   without it being confused for a
+                                   fetch lookup failure.  */
+
+	HV *hseen;		/* Still need hseen for the 0.6 file format code. */
+	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
+	IV where_is_undef;	/* index in aseen of PL_sv_undef */
+	HV *hclass;		/* which classnames have been seen, store time */
+	HV *hook;		/* cache for hook methods per class name */
+	IV tagnum;		/* incremented at store time for each seen object */
 	IV classnum;		/* incremented at store time for each seen classname */
 	int netorder;		/* true if network order used */
-	int deparse;        /* whether to deparse code refs */
+	int deparse;		/* whether to deparse code refs */
 	int canonical;		/* whether to store hashes sorted by key */
         SV *output_sv;
-	PerlIO *output_fh;		/* where I/O are performed, NULL for memory */
+	PerlIO *output_fh;	/* where I/O are performed, NULL for memory */
 };
 
 typedef struct st_retrieve_cxt retrieve_cxt_t;
 typedef SV* (*sv_retrieve_t)(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *name);
 
 struct st_retrieve_cxt {
-	int optype;			/* type of traversal operation */
+	int cloning;		/* type of traversal operation */
 	HV *hseen;			
-	AV *aseen;			/* which objects have been seen, retrieve time */
-	IV where_is_undef;		/* index in aseen of PL_sv_undef */
-	AV *aclass;			/* which classnames have been seen, retrieve time */
-	HV *hook;			/* cache for hook methods per class name */
-	IV tagnum;			/* incremented at store time for each seen object */
+	AV *aseen;		/* which objects have been seen, retrieve time */
+	IV where_is_undef;	/* index in aseen of PL_sv_undef */
+	AV *aclass;		/* which classnames have been seen, retrieve time */
+	HV *hook;		/* cache for hook methods per class name */
+	IV tagnum;		/* incremented at store time for each seen object */
 	IV classnum;		/* incremented at store time for each seen classname */
         SV *rv;                 /* used for calling sv_bless */
 	int netorder;		/* true if network order used */
 	int is_tainted;		/* true if input source is tainted, at retrieve time */
-	SV *eval;           /* whether to eval source code */
+	SV *eval;		/* whether to eval source code */
 #ifndef HAS_UTF8_ALL
-        int use_bytes;         /* whether to bytes-ify utf8 */
+        int use_bytes;		/* whether to bytes-ify utf8 */
 #endif
-        int accept_future_minor; /* croak immediately on future minor versions?  */
+        int accept_future_minor;/* croak immediately on future minor versions?  */
 	SV *keybuf;	        /* for hash key retrieval */
         const unsigned char *input;
         const unsigned char *input_end;
-	PerlIO *input_fh;		/* where I/O are performed, NULL for memory */
+	PerlIO *input_fh;	/* where I/O are performed, NULL for memory */
 	int ver_major;		/* major of version for retrieved object */
 	int ver_minor;		/* minor of version for retrieved object */
 	sv_retrieve_t *retrieve_vtbl;	/* retrieve dispatch table */
-        int on_magic_check; /* forces a particular error while we read the magic header, for backward comp. */
+        int on_magic_check;	/* forces a particular error while we read the magic header, for backward comp. */
 };
 
 #define CROAK(x)	STMT_START { croak x; } STMT_END
@@ -1027,7 +1026,6 @@ static void init_store_cxt(
         pTHX_
 	store_cxt_t *store_cxt,
 	PerlIO *f,
-	int optype,
 	int network_order)
 {
 	TRACEME(("init_store_cxt"));
@@ -1040,7 +1038,6 @@ static void init_store_cxt(
 	store_cxt->tagnum = -1;				/* Reset tag numbers */
 	store_cxt->classnum = -1;				/* Reset class numbers */
 	store_cxt->output_fh = f;					/* Where I/O are performed */
-	store_cxt->optype = optype;			/* A store, or a deep clone */
 
 	if (!f) {
                 store_cxt->output_sv = sv_2mortal(newSV(512));
@@ -1111,7 +1108,7 @@ static void init_store_cxt(
  *
  * Initialize a new retrieve context.
  */
-static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
+static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt)
 {
 	TRACEME(("init_retrieve_cxt"));
 	Zero(retrieve_cxt, 1, retrieve_cxt_t);
@@ -1139,7 +1136,6 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt, int optype)
 	retrieve_cxt->aclass = (AV*)sv_2mortal((SV*)newAV()); /* Where seen classnames are kept */
 	retrieve_cxt->tagnum = 0;				/* Have to count objects... */
 	retrieve_cxt->classnum = 0;				/* ...and class names as well */
-	retrieve_cxt->optype = optype;
 
 #ifndef HAS_UTF8_ALL
         retrieve_cxt->use_bytes = -1;		/* Fetched from perl if needed */
@@ -1777,7 +1773,7 @@ static void store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 
 	if (
                 /* FIXME: simplify this: */
-		!(store_cxt->optype & ST_CLONE) && (store_cxt->canonical == 1 ||
+		!(store_cxt->cloning) && (store_cxt->canonical == 1 ||
 			(store_cxt->canonical < 0 && (store_cxt->canonical =
 				(SvTRUE(perl_get_sv("Storable::canonical", GV_ADD)) ? 1 : 0))))
 	) {
@@ -2285,7 +2281,6 @@ static void store_hook(
 	int recursed = 0;		/* counts recursion */
 	int obj_type;			/* object type, on 2 bits */
 	I32 classnum;
-	int clone = store_cxt->optype & ST_CLONE;
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
 
@@ -2361,7 +2356,7 @@ static void store_hook(
 
         /* FIXME: this can leak too many mortals: */
 	ref = sv_2mortal(newRV_inc(sv));				/* Temporary reference */
-	av = (AV*)sv_2mortal((SV*)array_call(aTHX_ ref, hook, clone));	/* @a = $object->STORABLE_freeze($c) */
+	av = (AV*)sv_2mortal((SV*)array_call(aTHX_ ref, hook, store_cxt->cloning));	/* @a = $object->STORABLE_freeze($c) */
 
 	count = AvFILLp(av) + 1;
 	TRACEME(("store_hook, array holds %d items", count));
@@ -2382,7 +2377,7 @@ static void store_hook(
 
 		if (hv_fetch(store_cxt->hclass, classname, len, FALSE))
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
-                               (clone ? "cloning" : "storing"), classname));
+                               (store_cxt->cloning ? "cloning" : "storing"), classname));
 	
 		pkg_hide(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze");
 
@@ -3014,29 +3009,15 @@ state_sv(pTHX) {
 /*
  * do_store
  *
- * Common code for store operations.
- *
- * When memory store is requested (f = NULL) and a non null SV* is given in
- * 'res', it is filled with a new SV created out of the memory buffer.
- *
- * It is required to provide a non-null 'res' when the operation type is not
- * dclone() and store() is performed to memory.
+ * One and only one of f and res must be non NULL
  */
-static void do_store(
-        pTHX_
-	PerlIO *f,
-	SV *sv,
-	int optype,
-	int network_order,
-	SV **res)
+static void do_store(pTHX_ PerlIO *f, SV *sv, int network_order, SV **res)
 {
         store_cxt_t store_cxt;
 
-	ASSERT(!(f == 0 && !(optype & ST_CLONE)) || res,
-		("must supply result SV pointer for real recursion to memory"));
+	ASSERT(((f || res) && !(f && res)), ("f xor res must be non NULL"));
 
-	TRACEME(("do_store (optype=%d, netorder=%d)",
-                 optype, network_order));
+	TRACEME(("do_store (netorder=%d)", network_order));
 
 	/*
 	 * Ensure sv is actually a reference. From perl, we called something
@@ -3052,7 +3033,7 @@ static void do_store(
 	/*
 	 * Prepare context and emit headers.
 	 */
-	init_store_cxt(aTHX_ &store_cxt, f, optype, network_order);
+	init_store_cxt(aTHX_ &store_cxt, f, network_order);
 	magic_write(aTHX_ &store_cxt);		/* Emit magic and ILP info */
 
         sv_setpvs(state_sv(aTHX), "storing");
@@ -3071,10 +3052,8 @@ static void do_store(
 	 * (unless caller is dclone(), which is aware of that).
 	 */
 
-	if (res) {
-                ASSERT(!f, ("file handle is NULL"));
+	if (res)
                 *res = SvREFCNT_inc_NN(store_cxt.output_sv);
-        }
 
         sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
                  (store_cxt.netorder > 0 ? 1 : 0));
@@ -3437,7 +3416,7 @@ hook_found:
                 PUSHs(sv_mortalcopy(class_sv));
         }
 
-        PUSHs(retrieve_cxt->optype & ST_CLONE ? &PL_sv_yes : &PL_sv_no); /* clonning arg */
+        PUSHs(retrieve_cxt->cloning ? &PL_sv_yes : &PL_sv_no); /* clonning arg */
         PUSHs(frozen);
         for (i = 0; i < refs_len; i++) {
                 /*
@@ -4947,19 +4926,12 @@ promote_root_sv_to_rv(pTHX_ SV *sv) {
  * Retrieve data held in file and return the root object.
  * Common routine for pretrieve and mretrieve.
  */
-static SV *do_retrieve(
-        pTHX_
-	PerlIO *f,
-	SV *in,
-	int optype)
-{
+static SV *do_retrieve(pTHX_ PerlIO *f, SV *in) {
 	retrieve_cxt_t retrieve_cxt;
 	SV *sv;
 	int pre_06_fmt = 0;			/* True with pre Storable 0.6 formats */
 
-	TRACEME(("do_retrieve (optype = 0x%x)", optype));
-
-	optype |= ST_RETRIEVE;
+	TRACEME(("do_retrieve"));
 
 	/*
 	 * Sanity assertions for retrieve dispatch tables.
@@ -4987,7 +4959,7 @@ static SV *do_retrieve(
 	 * in the buffer (dclone case).
 	 */
 
-	init_retrieve_cxt(aTHX_ &retrieve_cxt, optype);
+	init_retrieve_cxt(aTHX_ &retrieve_cxt);
 
 	retrieve_cxt.is_tainted = f ? 1 : SvTAINTED(in);
 	TRACEME(("input source is %s", retrieve_cxt.is_tainted ? "tainted" : "trusted"));
@@ -5069,7 +5041,7 @@ static SV *do_retrieve(
 static SV *pretrieve(pTHX_ PerlIO *f)
 {
 	TRACEME(("pretrieve"));
-	return do_retrieve(aTHX_ f, Nullsv, 0);
+	return do_retrieve(aTHX_ f, Nullsv);
 }
 
 /*
@@ -5080,7 +5052,7 @@ static SV *pretrieve(pTHX_ PerlIO *f)
 static SV *mretrieve(pTHX_ SV *sv)
 {
 	TRACEME(("mretrieve"));
-	return do_retrieve(aTHX_ (PerlIO*) 0, sv, 0);
+	return do_retrieve(aTHX_ (PerlIO*) 0, sv);
 }
 
 /***
@@ -5122,14 +5094,16 @@ static SV *dclone(pTHX_ SV *in)
 		CROAK(("Not a reference"));
 	sv = SvRV(in);			/* So follow it to know what to store */
 
-        init_store_cxt(aTHX_ &store_cxt, NULL, ST_CLONE, 0);
+        init_store_cxt(aTHX_ &store_cxt, NULL, 0);
+        store_cxt.cloning = 1;
         state = state_sv(aTHX);
         sv_setpvs(state, "storing");
         store(aTHX_ &store_cxt, sv);
 
 	TRACEME(("dclone stored %d bytes", SvCUR(store_cxt.output_sv)));
 
-	init_retrieve_cxt(aTHX_ &retrieve_cxt, ST_CLONE);
+	init_retrieve_cxt(aTHX_ &retrieve_cxt);
+        retrieve_cxt.cloning = 1;
 	retrieve_cxt.ver_major = STORABLE_BIN_MAJOR;
 	retrieve_cxt.ver_minor = STORABLE_BIN_MINOR;
        	retrieve_cxt.is_tainted = SvTAINTED(in);
@@ -5200,7 +5174,7 @@ SV *	obj
  ALIAS:
    net_pstore = 1
  CODE:
-  do_store(aTHX_ f, obj, 0, ix, (SV **)0);
+  do_store(aTHX_ f, obj, ix, (SV **)0);
   RETVAL = &PL_sv_yes;
  OUTPUT:
   RETVAL
@@ -5221,7 +5195,7 @@ SV *	obj
  ALIAS:
   net_mstore = 1
  CODE:
-  do_store(aTHX_ (PerlIO*) 0, obj, 0, ix, &RETVAL);
+  do_store(aTHX_ (PerlIO*) 0, obj, ix, &RETVAL);
  OUTPUT:
   RETVAL
 
