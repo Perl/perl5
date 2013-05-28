@@ -873,24 +873,24 @@ static void bless_retrieved(pTHX_ retrieve_cxt_t *retrieve_cxt, SV *sv, const ch
 
 #endif /* PATCHLEVEL <= 6 */
 
-static int store(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static void store(pTHX_ store_cxt_t *store_cxt, SV *sv);
 static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname);
 
 /*
  * Dynamic dispatching table for SV store.
  */
 
-static int store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv);
-static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv);
-static int store_array(pTHX_ store_cxt_t *store_cxt, AV *av);
-static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv);
-static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv);
-static int store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv);
-static int store_code(pTHX_ store_cxt_t *store_cxt, CV *cv);
-static int store_other(pTHX_ store_cxt_t *store_cxt, SV *sv);
-static int store_blessed(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg);
+static void store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static void store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static void store_array(pTHX_ store_cxt_t *store_cxt, AV *av);
+static void store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv);
+static void store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static void store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static void store_code(pTHX_ store_cxt_t *store_cxt, CV *cv);
+static void store_other(pTHX_ store_cxt_t *store_cxt, SV *sv);
+static void store_blessed(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg);
 
-typedef int (*sv_store_t)(pTHX_ store_cxt_t *store_cxt, SV *sv);
+typedef void (*sv_store_t)(pTHX_ store_cxt_t *store_cxt, SV *sv);
 
 static const sv_store_t sv_store[] = {
 	(sv_store_t)store_ref,		/* svis_REF */
@@ -1387,7 +1387,7 @@ static int known_class(
  * Store a reference.
  * Layout is SX_REF <object> or SX_OVERLOAD <object>.
  */
-static int store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv)
+static void store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	int is_weak = 0;
 	TRACEME(("store_ref (0x%"UVxf")", PTR2UV(sv)));
@@ -1432,7 +1432,7 @@ static int store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv)
  * If integer or double, the layout is SX_INTEGER <data> or SX_DOUBLE <data>.
  * Small integers (within [-127, +127]) are stored as SX_BYTE <byte>.
  */
-static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv)
+static void store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	IV iv;
 	char *pv;
@@ -1455,7 +1455,7 @@ static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv)
 			TRACEME(("undef at 0x%"UVxf, PTR2UV(sv)));
 			WRITE_MARK(SX_UNDEF);
 		}
-		return 0;
+		return;
 	}
 
 	/*
@@ -1623,7 +1623,7 @@ static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv)
             CROAK(("Can't determine type of %s(0x%"UVxf")",
                    sv_reftype(sv, FALSE),
                    PTR2UV(sv)));
-        return 0;		/* Ok, no recursion on scalars */
+        return;		/* Ok, no recursion on scalars */
 }
 
 /*
@@ -1634,7 +1634,7 @@ static int store_scalar(pTHX_ store_cxt_t *store_cxt, SV *sv)
  * Layout is SX_ARRAY <size> followed by each item, in increasing index order.
  * Each item is stored as <object>.
  */
-static int store_array(pTHX_ store_cxt_t *store_cxt, AV *av)
+static void store_array(pTHX_ store_cxt_t *store_cxt, AV *av)
 {
 	SV **sav;
 	I32 len = av_len(av) + 1;
@@ -1657,19 +1657,17 @@ static int store_array(pTHX_ store_cxt_t *store_cxt, AV *av)
 
 	for (i = 0; i < len; i++) {
 		sav = av_fetch(av, i, 0);
-		if (!sav) {
+		if (sav) {
+                        TRACEME(("(#%d) item", i));
+                        store(aTHX_ store_cxt, *sav);
+                }
+                else {
 			TRACEME(("(#%d) undef item", i));
 			WRITE_SV_UNDEF();
-			continue;
 		}
-		TRACEME(("(#%d) item", i));
-		if ((ret = store(aTHX_ store_cxt, *sav)))	/* Extra () for -Wall, grr... */
-			return ret;
 	}
 
 	TRACEME(("ok (array)"));
-
-	return 0;
 }
 
 
@@ -1704,6 +1702,7 @@ sortcmp(const void *a, const void *b)
  * Keys are stored as <length> <data>, the <data> section being omitted
  * if length is 0.
  *
+ *
  * For a "fancy" hash (restricted or utf8 keys):
  *
  * Layout is SX_FLAG_HASH <size> <hash flags> followed by each key/value pair,
@@ -1714,7 +1713,7 @@ sortcmp(const void *a, const void *b)
  * Currently the only hash flag is "restricted"
  * Key flags are as for hv.h
  */
-static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
+static void store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 {
 	dVAR;
 	I32 len = HvTOTALKEYS(hv);
@@ -1722,38 +1721,47 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 	int ret = 0;
 	I32 riter;
 	HE *eiter;
-        int flagged_hash = ((SvREADONLY(hv)
-#ifdef HAS_HASH_KEY_FLAGS
-                             || HvHASKFLAGS(hv)
-#endif
-                                ) ? 1 : 0);
-        unsigned char hash_flags = (SvREADONLY(hv) ? SHV_RESTRICTED : 0);
+        int flagged_hash;
+        int restricted;
 
-        if (flagged_hash) {
-            /* needs int cast for C++ compilers, doesn't it?  */
-            TRACEME(("store_hash (0x%"UVxf") (flags %x)", PTR2UV(hv),
-                     (int) hash_flags));
-        } else {
-            TRACEME(("store_hash (0x%"UVxf")", PTR2UV(hv)));
-        }
+#ifdef HAS_RESTRICTED_HASHES
+        restricted = SvREADONLY(hv);
+#else
+        restricted = 0;
+#endif
+
+#ifdef HAS_HASH_KEY_FLAGS
+        flagged_hash = (HvHASKFLAGS(hv) || restricted);
+#else
+        flagged_hash = restricted;
+#endif
+
+#if ((PERL_VERSION == 8) && (PERL_SUBVERSION == 0))
+        /* This is a workaround for a bug in 5.8.0 that causes the
+           HEK_WASUTF8 flag to be set on an HEK without the hash being
+           marked as having key flags. */
+        flagged_hash = 1;
+#endif
 
 	/* 
-	 * Signal hash by emitting SX_HASH, followed by the table length.
+	 * Signal hash by emitting SX_HASH or SX_FLAG_HASH, the flags
+	 * (when required) and the number of entries.
 	 */
-
         if (flagged_hash) {
-            WRITE_MARK(SX_FLAG_HASH);
-            WRITE_MARK(hash_flags);
+                TRACEME(("store_hash (0x%"UVxf"), restricted = %d, size = %d", PTR2UV(hv),
+                         restricted, len));
+                WRITE_MARK(SX_FLAG_HASH);
+                WRITE_MARK(restricted ? SHV_RESTRICTED : 0);
         } else {
-            WRITE_MARK(SX_HASH);
+                TRACEME(("store_hash (0x%"UVxf"), size = %d", PTR2UV(hv), len));
+                WRITE_MARK(SX_HASH);
         }
+
 	WRITE_LEN(len);
-	TRACEME(("size = %d", len));
 
 	/*
 	 * Save possible iteration state via each() on that table.
 	 */
-
 	riter = HvRITER_get(hv);
 	eiter = HvEITER_get(hv);
 	hv_iterinit(hv);
@@ -1761,8 +1769,8 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 	/*
 	 * Now store each item recursively.
 	 *
-     * If canonical is defined to some true value then store each
-     * key/value pair in sorted order otherwise the order is random.
+         * If canonical is defined to some true value then store each
+         * key/value pair in sorted order otherwise the order is random.
 	 * Canonical order is irrelevant when a deep clone operation is performed.
 	 *
 	 * Fetch the value from perl only once per store() operation, and only
@@ -1770,6 +1778,7 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 	 */
 
 	if (
+                /* FIXME: simplify this: */
 		!(store_cxt->optype & ST_CLONE) && (store_cxt->canonical == 1 ||
 			(store_cxt->canonical < 0 && (store_cxt->canonical =
 				(SvTRUE(perl_get_sv("Storable::canonical", GV_ADD)) ? 1 : 0))))
@@ -1781,17 +1790,16 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 		 * array.  
 		 */
 
-          AV *av = (AV*)sv_2mortal((SV*)newAV());
-
-                /*av_extend (av, len);*/
+                AV *av = (AV*)sv_2mortal((SV*)newAV());
 
 		TRACEME(("using canonical order"));
 
 		for (i = 0; i < len; i++) {
+                        HE *he;
 #ifdef HAS_RESTRICTED_HASHES
-			HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
+			he = hv_iternext_flags(hv, restricted ? HV_ITERNEXT_WANTPLACEHOLDERS : 0);
 #else
-			HE *he = hv_iternext(hv);
+			he = hv_iternext(hv);
 #endif
 			SV *key;
 
@@ -1804,52 +1812,46 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 		STORE_HASH_SORT;
 
 		for (i = 0; i < len; i++) {
+                        unsigned char flags = 0;
+			char *key_pv;
+			STRLEN keylen;
+			SV *key = av_shift(av);
+			SV *val;
+			HE *he;
+
 #ifdef HAS_RESTRICTED_HASHES
 			int placeholders = (int)HvPLACEHOLDERS_get(hv);
 #endif
-                        unsigned char flags = 0;
-			char *keyval;
-			STRLEN keylen;
-			SV *key = av_shift(av);
+
 			/* This will fail if key is a placeholder.
 			   Track how many placeholders we have, and error if we
 			   "see" too many.  */
-			HE *he  = hv_fetch_ent(hv, key, 0, 0);
-			SV *val;
-
+                        he  = hv_fetch_ent(hv, key, 0, 0);
 			if (he) {
-				if (!(val =  HeVAL(he))) {
-					/* Internal error, not I/O error */
-					return 1;
-				}
+				val =  HeVAL(he);
+                                ASSERT(val, ("HeVAL(he) returns non NULL"));
 			} else {
 #ifdef HAS_RESTRICTED_HASHES
 				/* Should be a placeholder.  */
-				if (placeholders-- < 0) {
-					/* This should not happen - number of
-					   retrieves should be identical to
-					   number of placeholders.  */
-			  		return 1;
-				}
-				/* Value is never needed, and PL_sv_undef is
-				   more space efficient to store.  */
-				val = &PL_sv_undef;
-				ASSERT (flags == 0,
-					("Flags not 0 but %d", flags));
-				flags = SHV_K_PLACEHOLDER;
-#else
-				return 1;
+                                if (restricted && (placeholders > 0)) {
+                                        placeholders--;
+                                        /* Value is never needed, and PL_sv_undef is
+                                           more space efficient to store.  */
+                                        val = &PL_sv_undef;
+                                        flags = SHV_K_PLACEHOLDER;
+                                }
+                                else
 #endif
-			}
-			
+                                        Perl_croak(aTHX_ "Hash changed while storing");
+                        }
+
 			/*
 			 * Store value first.
 			 */
 			
 			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
 
-			if ((ret = store(aTHX_ store_cxt, val)))	/* Extra () for -Wall, grr... */
-				goto out;
+			store(aTHX_ store_cxt, val);
 
 			/*
 			 * Write key string.
@@ -1863,11 +1865,8 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
                         if (flagged_hash) {
                                 /* Implementation of restricted hashes isn't nicely
                                    abstracted:  */
-                                if ((hash_flags & SHV_RESTRICTED)
-                                    && SvREADONLY(val) && !SvIsCOW(val)) {
+                                if (restricted && SvREADONLY(val) && !SvIsCOW(val))
                                         flags |= SHV_K_LOCKED;
-                                }
-
 
 #ifdef HAS_UTF8_HASHES
                                 /* If you build without optimisation on pre 5.6
@@ -1882,25 +1881,25 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
                                                    0-255, but was utf8 encoded.  */
                                                 
                                                 flags |= SHV_K_WASUTF8;
-                                                keyval = SvPVbyte(key, keylen);
+                                                key_pv = SvPVbyte(key, keylen);
                                         }                                        
                                         else {
                                                 flags |= SHV_K_UTF8;
-                                                keyval = SvPVutf8(key, keylen);
+                                                key_pv = SvPVutf8(key, keylen);
                                         }
                                 }
                                 else
 #endif
-                                        keyval = SvPV(key, keylen);
+                                        key_pv = SvPV(key, keylen);
                                 
                                 WRITE_MARK(flags);
-                                TRACEME(("(#%d) key '%s' flags %x %u", i, keyval, flags, *keyval));
+                                TRACEME(("(#%d) key '%s' flags %x %u", i, key_pv, flags, *key_pv));
                         } else {
-                                keyval = SvPV(key, keylen);
-                                TRACEME(("(#%d) key '%s'", i, keyval));
+                                key_pv = SvPV(key, keylen);
+                                TRACEME(("(#%d) key '%s'", i, key_pv));
                         }
 
-                        WRITE_PV_WITH_LEN(keyval, keylen);
+                        WRITE_PV_WITH_LEN(key_pv, keylen);
 		}
 
 	} else {
@@ -1912,30 +1911,35 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
   
 		for (i = 0; i < len; i++) {
 			char *key = 0;
-			I32 len;
-                        unsigned char flags;
-#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
-                        HE *he = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS);
-#else
-                        HE *he = hv_iternext(hv);
-#endif
-			SV *val = (he ? hv_iterval(hv, he) : 0);
+			I32 key_len;
+                        unsigned char flags = 0;
+                        HE *he;
+			SV *val;
                         SV *key_sv = NULL;
                         HEK *hek;
 
-			if (val == 0)
-				return 1;		/* Internal error, not I/O error */
+#ifdef HV_ITERNEXT_WANTPLACEHOLDERS
+                        he = hv_iternext_flags(hv, restricted ? HV_ITERNEXT_WANTPLACEHOLDERS : 0);
+#else
+                        he = hv_iternext(hv);
+#endif
+                        if (!he)
+                                Perl_croak(aTHX_ "Number of entries on hash changed while storing it");
+                        
+                        val = hv_iterval(hv, he);
+                        ASSERT(val, "hv_iterval returns non NULL");
 
                         /* Implementation of restricted hashes isn't nicely
                            abstracted:  */
-                        flags
-                            = (((hash_flags & SHV_RESTRICTED)
-                                && SvREADONLY(val) && !SvIsCOW(val))
-                                             ? SHV_K_LOCKED : 0);
 
-                        if (val == &PL_sv_placeholder) {
-                            flags |= SHV_K_PLACEHOLDER;
-			    val = &PL_sv_undef;
+                        if (restricted) {
+                                if (val == &PL_sv_placeholder) {
+                                        flags = SHV_K_PLACEHOLDER;
+                                        val = &PL_sv_undef;
+                                }
+                                else if (SvREADONLY(val) && !SvIsCOW(val)) {
+                                        flags = SHV_K_LOCKED;
+                                }
 			}
 
 			/*
@@ -1943,31 +1947,26 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 			 */
 
 			TRACEME(("(#%d) value 0x%"UVxf, i, PTR2UV(val)));
-
-			if ((ret = store(aTHX_ store_cxt, val)))	/* Extra () for -Wall, grr... */
-				goto out;
-
+			store(aTHX_ store_cxt, val);
 
                         hek = HeKEY_hek(he);
-                        len = HEK_LEN(hek);
-                        if (len == HEf_SVKEY) {
-                            /* This is somewhat sick, but the internal APIs are
-                             * such that XS code could put one of these in in
-                             * a regular hash.
-                             * Maybe we should be capable of storing one if
-                             * found.
-                             */
-                            key_sv = HeKEY_sv(he);
-                            flags |= SHV_K_ISSV;
+                        key_len = HEK_LEN(hek);
+                        if (key_len == HEf_SVKEY) {
+                                /* This is somewhat sick, but the internal APIs are
+                                 * such that XS code could put one of these in in
+                                 * a regular hash.
+                                 */
+                                key_sv = HeKEY_sv(he);
+                                flags |= SHV_K_ISSV;
                         } else {
-                            /* Regular string key. */
+                                /* Regular string key. */
 #ifdef HAS_HASH_KEY_FLAGS
-                            if (HEK_UTF8(hek))
-                                flags |= SHV_K_UTF8;
-                            if (HEK_WASUTF8(hek))
-                                flags |= SHV_K_WASUTF8;
+                                if (HEK_UTF8(hek))
+                                        flags |= SHV_K_UTF8;
+                                if (HEK_WASUTF8(hek))
+                                        flags |= SHV_K_WASUTF8;
 #endif
-                            key = HEK_KEY(hek);
+                                key = HEK_KEY(hek);
                         }
 			/*
 			 * Write key string.
@@ -1978,33 +1977,27 @@ static int store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 			 */
 
                         if (flagged_hash) {
-                            WRITE_MARK(flags);
-                            TRACEME(("(#%d) key '%s' flags %x", i, key, flags));
-                        } else {
-                            /* This is a workaround for a bug in 5.8.0
-                               that causes the HEK_WASUTF8 flag to be
-                               set on an HEK without the hash being
-                               marked as having key flags. We just
-                               cross our fingers and drop the flag.
-                               AMS 20030901 */
-                            assert (flags == 0 || flags == SHV_K_WASUTF8);
-                            TRACEME(("(#%d) key '%s'", i, key));
+                                WRITE_MARK(flags);
+                                TRACEME(("(#%d) key '%s' flags %x", i, key, flags));
                         }
-                        if (flags & SHV_K_ISSV) {
+                        else {
+                                ASSERT (flags == 0, ("flags are 0 for non flagged hashes"));
+                                TRACEME(("(#%d) key '%s'", i, key));
+                        }
+                        if (flags & SHV_K_ISSV)
                                 store(aTHX_ store_cxt, key_sv);
-                        } else {
-                                WRITE_PV_WITH_LEN(key, len);
-                        }
+                        else
+                                WRITE_PV_WITH_LEN(key, key_len);
 		}
-    }
+        }
 
 	TRACEME(("ok (hash 0x%"UVxf")", PTR2UV(hv)));
 
-out:
+        /* FIXME: Is this always safe? the hash may have changed
+         * because of some callback. -- Salva */
 	HvRITER_set(hv, riter);		/* Restore hash iterator state */
 	HvEITER_set(hv, eiter);
 
-	return ret;
 }
 
 /*
@@ -2015,7 +2008,7 @@ out:
  * Layout is SX_CODE <length> followed by a scalar containing the perl
  * source code of the code reference.
  */
-static int store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
+static void store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
 {
 #if PERL_VERSION < 6
     /*
@@ -2111,7 +2104,6 @@ static int store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
 
 	TRACEME(("ok (code)"));
 
-	return 0;
 #endif
 }
 
@@ -2123,7 +2115,7 @@ static int store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
  * dealing with a tied hash, we store SX_TIED_HASH <hash object>, where
  * <hash object> stands for the serialization of the tied hash.
  */
-static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv)
+static void store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	MAGIC *mg;
 	SV *obj = NULL;
@@ -2173,13 +2165,9 @@ static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	 */
 
 	/* [#17040] mg_obj is NULL for scalar self-ties. AMS 20030416 */
-	obj = mg->mg_obj ? mg->mg_obj : sv_newmortal();
-	if ((ret = store(aTHX_ store_cxt, obj)))
-		return ret;
 
+	store(aTHX_ store_cxt, (mg->mg_obj ? mg->mg_obj : sv_newmortal()));
 	TRACEME(("ok (tied)"));
-
-	return 0;
 }
 
 /*
@@ -2194,41 +2182,36 @@ static int store_tied(pTHX_ store_cxt_t *store_cxt, SV *sv)
  *     SX_TIED_KEY <object> <key>
  *     SX_TIED_IDX <object> <index>
  */
-static int store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv)
+static void store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	MAGIC *mg;
-	int ret;
 
 	TRACEME(("store_tied_item (0x%"UVxf")", PTR2UV(sv)));
 
-	if (!(mg = mg_find(sv, 'p')))
+        mg = mg_find(sv, 'p');
+	if (!mg)
 		CROAK(("No magic 'p' found while storing reference to tied item"));
 
 	/*
 	 * We discriminate between \$h{key} and \$a[idx] via mg_ptr.
 	 */
-
 	if (mg->mg_ptr) {
 		TRACEME(("store_tied_item: storing a ref to a tied hash item"));
 		WRITE_MARK(SX_TIED_KEY);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
 
-		if ((ret = store(aTHX_ store_cxt, mg->mg_obj)))		/* Extra () for -Wall, grr... */
-			return ret;
-
+		store(aTHX_ store_cxt, mg->mg_obj);
 		TRACEME(("store_tied_item: storing PTR 0x%"UVxf, PTR2UV(mg->mg_ptr)));
 
-		if ((ret = store(aTHX_ store_cxt, (SV *) mg->mg_ptr)))	/* Idem, for -Wall */
-			return ret;
+		store(aTHX_ store_cxt, (SV *) mg->mg_ptr);
 	} else {
 		I32 idx = mg->mg_len;
 
 		TRACEME(("store_tied_item: storing a ref to a tied array item "));
 		WRITE_MARK(SX_TIED_IDX);
 		TRACEME(("store_tied_item: storing OBJ 0x%"UVxf, PTR2UV(mg->mg_obj)));
-
-		if ((ret = store(aTHX_ store_cxt, mg->mg_obj)))		/* Idem, for -Wall */
-			return ret;
+                
+		store(aTHX_ store_cxt, mg->mg_obj);
 
 		TRACEME(("store_tied_item: storing IDX %d", idx));
 
@@ -2236,8 +2219,6 @@ static int store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	}
 
 	TRACEME(("ok (tied item)"));
-
-	return 0;
 }
 
 /*
@@ -2285,7 +2266,7 @@ static int store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv)
  * serialization stream, the underlying magic object is serialized, just like
  * any other tied variable.
  */
-static int store_hook(
+static void store_hook(
         pTHX_
 	store_cxt_t *store_cxt,
 	SV *sv,
@@ -2306,7 +2287,6 @@ static int store_hook(
 	int recursed = 0;		/* counts recursion */
 	int obj_type;			/* object type, on 2 bits */
 	I32 classnum;
-	int ret;
 	int clone = store_cxt->optype & ST_CLONE;
 	char mtype = '\0';				/* for blessed ref to tied structures */
 	unsigned char eflags = '\0';	/* used when object type is SHT_EXTRA */
@@ -2483,8 +2463,7 @@ static int store_hook(
                         } else
                                 WRITE_MARK(flags);
 
-                        if ((ret = store(aTHX_ store_cxt, xsv)))	/* Given by hook for us to store */
-                                return ret;
+                        store(aTHX_ store_cxt, xsv);
                         
                         tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
                         if (!tag1)
@@ -2642,11 +2621,8 @@ static int store_hook(
 		 * [<magic object>]
 		 */
 
-		if ((ret = store(aTHX_ store_cxt, mg->mg_obj)))	/* Extra () for -Wall, grr... */
-			return ret;
+		store(aTHX_ store_cxt, mg->mg_obj);
 	}
-
-	return 0;
 }
 
 /*
@@ -2673,7 +2649,7 @@ static int store_hook(
  * where <index> is the classname index, stored on 0 or 4 bytes depending
  * on the high-order bit in flag (same encoding as above for <len>).
  */
-static int store_blessed(
+static void store_blessed(
         pTHX_
 	store_cxt_t *store_cxt,
 	SV *sv,
@@ -2751,7 +2727,7 @@ static int store_blessed(
  * true value, then don't croak, just warn, and store a placeholder string
  * instead.
  */
-static int store_other(pTHX_ store_cxt_t *store_cxt, SV *sv)
+static void store_other(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	I32 len;
 	char buf[80];
@@ -2778,8 +2754,6 @@ static int store_other(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	len = strlen(buf);
 	WRITE_SCALAR(buf, len);
 	TRACEME(("ok (dummy \"%s\", length = %"IVdf")", buf, (IV) len));
-
-	return 0;
 }
 
 /***
@@ -2865,7 +2839,7 @@ static int sv_type(pTHX_ SV *sv)
  * object (one for which storage has started -- it may not be over if we have
  * a self-referenced structure). This data set forms a stored <object>.
  */
-static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
+static void store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	void *tag1;
 	int ret;
@@ -2895,7 +2869,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 
                         WRITE_MARK(SX_OBJECT);
                         WRITE_I32N(tag);
-                        return 0;
+                        return;
                 }
 
                 /* We have seen PL_sv_undef before, but fake it as if
@@ -2928,17 +2902,10 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	TRACEME(("storing 0x%"UVxf" tag #%d, type %d...",
 		 PTR2UV(sv), store_cxt->tagnum, type));
 
-        ret = ( SvOBJECT(sv) 
-                ? store_blessed(aTHX_ store_cxt, sv, type, SvSTASH(sv))
-                : SV_STORE(type)(aTHX_ store_cxt, sv) );
-        
-        ASSERT(ret, ("store_blessed or SV_STORE returned non NULL"));
-
-        TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
-                 "FAILED", PTR2UV(sv),
-                 SvREFCNT(sv), sv_reftype(sv, FALSE)));
-
-	return ret;
+        if (SvOBJECT(sv))
+                store_blessed(aTHX_ store_cxt, sv, type, SvSTASH(sv));
+        else 
+                SV_STORE(type)(aTHX_ store_cxt, sv);
 }
 
 /*
@@ -2952,7 +2919,7 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
  * Note that no byte ordering info is emitted when <network> is true, since
  * integers will be emitted in network order in that case.
  */
-static int magic_write(pTHX_ store_cxt_t *store_cxt)
+static void magic_write(pTHX_ store_cxt_t *store_cxt)
 {
     /*
      * Starting with 0.6, the "use_network_order" byte flag is also used to
@@ -3034,7 +3001,6 @@ static int magic_write(pTHX_ store_cxt_t *store_cxt)
 		 (int) sizeof(int), (int) sizeof(long),
 		 (int) sizeof(char *), (int) sizeof(NV)));
     }
-    return 0;
 }
 
 static SV *
@@ -3058,7 +3024,7 @@ state_sv(pTHX) {
  * It is required to provide a non-null 'res' when the operation type is not
  * dclone() and store() is performed to memory.
  */
-static int do_store(
+static void do_store(
         pTHX_
 	PerlIO *f,
 	SV *sv,
@@ -3067,7 +3033,6 @@ static int do_store(
 	SV **res)
 {
         store_cxt_t store_cxt;
-	int status;
 
 	ASSERT(!(f == 0 && !(optype & ST_CLONE)) || res,
 		("must supply result SV pointer for real recursion to memory"));
@@ -3090,16 +3055,14 @@ static int do_store(
 	 * Prepare context and emit headers.
 	 */
 	init_store_cxt(aTHX_ &store_cxt, f, optype, network_order);
-
-	if (-1 == magic_write(aTHX_ &store_cxt))		/* Emit magic and ILP info */
-		return 0;					/* Error */
+	magic_write(aTHX_ &store_cxt);		/* Emit magic and ILP info */
 
         sv_setpvs(state_sv(aTHX), "storing");
 
 	/*
 	 * Recursively store object...
 	 */
-	status = store(aTHX_ &store_cxt, sv);		/* Just do it! */
+	store(aTHX_ &store_cxt, sv);		/* Just do it! */
 
 	/*
 	 * If they asked for a memory store and they provided an SV pointer,
@@ -3118,8 +3081,6 @@ static int do_store(
         sv_setiv(GvSV(gv_fetchpvs("Storable::last_op_in_netorder",  GV_ADDMULTI, SVt_PV)),
                  (store_cxt.netorder > 0 ? 1 : 0));
 
-	TRACEME(("do_store returns %d", status));
-	return status == 0;
 }
 
 /***
@@ -5166,8 +5127,7 @@ static SV *dclone(pTHX_ SV *in)
         init_store_cxt(aTHX_ &store_cxt, NULL, ST_CLONE, 0);
         state = state_sv(aTHX);
         sv_setpvs(state, "storing");
-        if (store(aTHX_ &store_cxt, sv))
-                return &PL_sv_undef;
+        store(aTHX_ &store_cxt, sv);
 
 	TRACEME(("dclone stored %d bytes", SvCUR(store_cxt.output_sv)));
 
@@ -5241,12 +5201,11 @@ OutputStream	f
 SV *	obj
  ALIAS:
    net_pstore = 1
- PPCODE:
-  RETVAL = do_store(aTHX_ f, obj, 0, ix, (SV **)0) ? &PL_sv_yes : &PL_sv_undef;
-  /* do_store() can reallocate the stack, so need a sequence point to ensure
-     that ST(0) knows about it. Hence using two statements.  */
-  ST(0) = RETVAL;
-  XSRETURN(1);
+ CODE:
+  do_store(aTHX_ f, obj, 0, ix, (SV **)0);
+  RETVAL = &PL_sv_yes;
+ OUTPUT:
+  RETVAL
 
 # mstore
 #
@@ -5264,8 +5223,7 @@ SV *	obj
  ALIAS:
   net_mstore = 1
  CODE:
-  if (!do_store(aTHX_ (PerlIO*) 0, obj, 0, ix, &RETVAL))
-    RETVAL = &PL_sv_undef;
+  do_store(aTHX_ (PerlIO*) 0, obj, 0, ix, &RETVAL);
  OUTPUT:
   RETVAL
 
